@@ -1,0 +1,57 @@
+@import "tailwindcss";
+
+@theme {
+  --color-void: #050505;
+  --color-obsidian: #111111;
+  --color-neon: #00ffff;
+
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@keyframes pulseGlow {
+  0% {
+    opacity: 0.05;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.1;
+    transform: scale(1.1);
+  }
+
+  100% {
+    opacity: 0.05;
+    transform: scale(1);
+  }
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  /* Subtle deep purple/blue nebula glow */
+  background: radial-gradient(circle at 15% 85%, rgba(0, 50, 255, 0.04) 0%, transparent 40%),
+    radial-gradient(circle at 85% 15%, rgba(120, 0, 255, 0.04) 0%, transparent 40%);
+  pointer-events: none;
+  z-index: 1;
+  /* Just above background but below content */
+  animation: pulseGlow 15s infinite alternate ease-in-out;
+  mix-blend-mode: screen;
+}
+
+/* Global Reset & Defaults */
+body {
+  background-color: var(--color-void);
+  color: #ffffff;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Ensure Canvas takes full interaction */
+canvas {
+  touch-action: none;
+}
