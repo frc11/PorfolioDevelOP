@@ -12,7 +12,12 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-    const [theme, setTheme] = useState<Theme>('light');
+    // Hardcoded to light mode permanently
+    const theme: Theme = 'light';
+    const setTheme = (theme: Theme) => {
+        // No-op: theme is permanently light
+        console.log('Theme change ignored: Force Light Mode active');
+    };
 
     return (
         <ThemeContext.Provider value={{ theme, setTheme }}>

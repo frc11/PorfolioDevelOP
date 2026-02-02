@@ -72,15 +72,15 @@ function HomeContent() {
                 Exclusive_Digital_Partnership
               </div>
 
-              <h1 className="text-7xl md:text-9xl font-extrabold tracking-tighter leading-[0.85] uppercase">
-                ELITE<br />
+              <h1 className="text-7xl md:text-9xl font-extrabold tracking-tighter leading-[0.85]">
+                devel
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-zinc-700 to-zinc-400">
-                  SYSTEMS
+                  OP
                 </span>
               </h1>
 
               <p className="text-zinc-600 text-lg md:text-xl max-w-lg leading-relaxed font-light">
-                No solo creamos software. Construimos el <strong className="text-zinc-900 font-bold">estatus digital</strong> de tu negocio con ingeniería de vanguardia y diseño de lujo.
+                No solo desarrollamos soluciones a medida. Construimos la <strong className="text-zinc-900 font-bold">presencia digital</strong> de tu negocio con ingeniería de vanguardia y diseño de lujo.
               </p>
 
               <div className="flex flex-wrap gap-4 pt-4">
