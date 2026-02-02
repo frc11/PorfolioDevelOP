@@ -1,56 +1,87 @@
-"use client"
-import { motion } from 'framer-motion'
-import { Github, Linkedin, Mail, ShieldCheck } from 'lucide-react'
+'use client';
+import { useRef, useState } from 'react';
+import { motion, useSpring, useMotionValue } from 'framer-motion';
 
-export function Footer() {
+const MagneticButton = ({ children }: { children: React.ReactNode }) => {
+    const ref = useRef<HTMLDivElement>(null);
+    const x = useMotionValue(0);
+    const y = useMotionValue(0);
+
+    // Magnetic Physics
+    const springConfig = { damping: 15, stiffness: 150, mass: 0.1 };
+    const mouseX = useSpring(x, springConfig);
+    const mouseY = useSpring(y, springConfig);
+
+    const handleMouseMove = (e: React.MouseEvent) => {
+        const { clientX, clientY } = e;
+        const { height, width, left, top } = ref.current!.getBoundingClientRect();
+        const middleX = clientX - (left + width / 2);
+        const middleY = clientY - (top + height / 2);
+
+        // Attraction strength
+        x.set(middleX * 0.5);
+        y.set(middleY * 0.5);
+    };
+
+    const reset = () => {
+        x.set(0);
+        y.set(0);
+    };
+
     return (
-        <footer className="py-20 px-8 md:px-24 bg-void border-t border-white/5 relative z-10 w-full">
-            <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-12">
+        <motion.div
+            ref={ref}
+            onMouseMove={handleMouseMove}
+            onMouseLeave={reset}
+            style={{ x: mouseX, y: mouseY }}
+            className="group relative flex items-center justify-center cursor-pointer"
+        >
+            <div className="relative w-48 h-48 md:w-64 md:h-64 rounded-full bg-white flex items-center justify-center transition-transform duration-500 group-hover:scale-110">
+                {/* Text inside */}
+                <span className="relative z-10 text-xl font-bold text-black group-hover:scale-110 transition-transform">{children}</span>
 
-                {/* LEFT: SYSTEM STATUS */}
-                <div className="order-2 md:order-1 w-full md:w-auto">
-                    <div className="grid grid-cols-2 gap-x-8 gap-y-2 font-mono text-[10px] text-gray-600">
-                        <div className="flex items-center gap-2">
-                            <div className="w-1 h-1 bg-green-500 rounded-full animate-pulse" />
-                            SERVER: STABLE
-                        </div>
-                        <div>ENCRYPTION: AES_256</div>
-                        <div>LOCATION: REMOTE_NODE</div>
-                        <div>RUNTIME: 1.0.2_V3</div>
-                    </div>
-                    <p className="mt-8 text-[10px] text-gray-500 font-mono">
-                        © 2026 LOGIC_CORE. ALL_RIGHTS_RESERVED_//_BY_DEVEL_OP
-                    </p>
+                {/* Hover ripple visual filler (optional) */}
+                <div className="absolute inset-0 rounded-full bg-blue-500/10 scale-0 group-hover:scale-150 transition-transform duration-700 ease-out" />
+            </div>
+        </motion.div>
+    );
+};
+
+export const Footer = () => {
+    return (
+        <footer className="relative min-h-[90vh] bg-zinc-950 flex flex-col items-center justify-center overflow-hidden">
+
+            {/* Massive Text CTA */}
+            <div className="text-center z-10 mb-12 mix-blend-difference">
+                <h2 className="text-[12vw] leading-none font-black text-white tracking-tighter uppercase">
+                    READY TO
+                </h2>
+                <h2 className="text-[12vw] leading-none font-black text-zinc-800 tracking-tighter uppercase">
+                    SCALE?
+                </h2>
+            </div>
+
+            {/* Magnetic Button - Absolute Center if possible or just below */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 mix-blend-normal">
+                <MagneticButton>START</MagneticButton>
+            </div>
+
+            {/* Footprint */}
+            <div className="absolute bottom-10 w-full px-12 flex justify-between items-end text-zinc-500 text-sm font-mono uppercase tracking-widest">
+                <div className="flex flex-col gap-2">
+                    <span>© 2026 DEVEL_OP™</span>
+                    <span>ALL RIGHTS RESERVED</span>
                 </div>
 
-                {/* RIGHT: THE INTERACTIVE ID CHIP */}
-                <motion.div
-                    layout
-                    initial={{ width: 180, borderRadius: 12 }}
-                    whileHover={{ width: 320 }}
-                    transition={{ type: "spring", stiffness: 300, damping: 25 }}
-                    className="order-1 md:order-2 h-16 bg-white text-black p-4 flex items-center justify-between cursor-pointer overflow-hidden relative shadow-[0_0_20px_rgba(255,255,255,0.1)] group"
-                >
-                    {/* Default State: ID Label */}
-                    <div className="flex items-center gap-3 shrink-0">
-                        <div className="p-2 bg-black rounded-lg text-white">
-                            <ShieldCheck className="w-5 h-5" />
-                        </div>
-                        <span className="font-bold tracking-widest text-sm whitespace-nowrap">ID: DEVEL_OP</span>
-                    </div>
-
-                    {/* Hover State: Revealed Links */}
-                    <div className="flex gap-4 ml-6 opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-100">
-                        <motion.a href="#" whileHover={{ scale: 1.2 }} className="text-black"><Github className="w-5 h-5" /></motion.a>
-                        <motion.a href="#" whileHover={{ scale: 1.2 }} className="text-black"><Linkedin className="w-5 h-5" /></motion.a>
-                        <motion.a href="#" whileHover={{ scale: 1.2 }} className="text-black"><Mail className="w-5 h-5" /></motion.a>
-                    </div>
-
-                    {/* Decorative Scan Line */}
-                    <div className="absolute top-0 bottom-0 w-[2px] bg-cyan-500/50 opacity-0 group-hover:opacity-100 group-hover:animate-scan transition-opacity" />
-
-                </motion.div>
+                <div className="flex gap-8">
+                    <a href="#" className="hover:text-white transition-colors">LinkedIn</a>
+                    <a href="#" className="hover:text-white transition-colors">Instagram</a>
+                    <a href="#" className="hover:text-white transition-colors">Twitter_X</a>
+                </div>
             </div>
+
+            {/* Subtle decorative grid */}
+            <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-5 pointer-events-none" />
         </footer>
-    )
-}
+    );
+};

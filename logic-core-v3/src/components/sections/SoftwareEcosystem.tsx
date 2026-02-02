@@ -1,82 +1,83 @@
-"use client"
-import { motion } from 'framer-motion'
-import { Smartphone, BrainCircuit, Cog, Binary } from 'lucide-react'
-
-const SYSTEMS = [
-    {
-        title: 'AI_INTEGRATION',
-        desc: 'Neural networks and custom language models.',
-        icon: <BrainCircuit />,
-        size: 'col-span-1 md:col-span-2',
-        color: 'text-purple-500'
-    },
-    {
-        title: 'MOBILE_OS',
-        desc: 'Native iOS/Android ecosystems.',
-        icon: <Smartphone />,
-        size: 'col-span-1',
-        color: 'text-neon'
-    },
-    {
-        title: 'AUTOMATION',
-        desc: 'High-level scripts and CI/CD pipelines.',
-        icon: <Cog />,
-        size: 'col-span-1',
-        color: 'text-blue-500'
-    },
-    {
-        title: 'CYBER_SEC',
-        desc: 'System auditing and hardening.',
-        icon: <Binary />,
-        size: 'col-span-1 md:col-span-2',
-        color: 'text-green-500'
-    }
-]
+import { useRef, Suspense } from 'react'
+import { motion, useInView } from 'framer-motion'
+import { useThemeSection } from '@/hooks/useThemeObserver'
+import { Canvas } from '@react-three/fiber'
+import { NeuralNetwork } from '@/components/canvas/NeuralNetwork'
+import { Environment } from '@react-three/drei'
+import { HyperText } from '@/components/ui/HyperText'
 
 export function SoftwareEcosystem() {
+    const ref = useRef<HTMLElement>(null);
+    const isInView = useInView(ref, {
+        once: false,
+        margin: '-20%'
+    });
+
+    // Trigger dark mode
+    useThemeSection(isInView, 'dark');
+
     return (
-        <section className="py-32 px-8 md:px-24 bg-[#030303] border-t border-white/5 relative z-10 w-full">
-            <div className="max-w-7xl mx-auto">
-                <div className="mb-16 space-y-2">
-                    <span className="text-neon font-mono text-[10px] tracking-[0.4em] uppercase">Multi_Platform_Deployment</span>
-                    <h3 className="text-5xl font-bold tracking-tighter uppercase">Core_Capabilities</h3>
-                </div>
+        <section ref={ref} className="relative min-h-screen w-full bg-black overflow-hidden flex flex-col items-center justify-center">
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {SYSTEMS.map((sys, i) => (
+            {/* 3D Background - Absolute */}
+            <div className="absolute inset-0 z-0">
+                <Canvas camera={{ position: [0, 0, 10], fov: 45 }}>
+                    <Suspense fallback={null}>
+                        <NeuralNetwork />
+                        <ambientLight intensity={0.5} />
+                        <Environment preset="city" />
+                    </Suspense>
+                </Canvas>
+                {/* Gradient vignette for aesthetic interaction with dark mode */}
+                <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black pointer-events-none" />
+                <div className="absolute inset-0 bg-gradient-to-t from-transparent via-transparent to-black pointer-events-none" />
+            </div>
+
+            {/* Content Overlay - Z-10 */}
+            <div className="relative z-10 w-full max-w-7xl mx-auto px-8 md:px-24 pointer-events-none">
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    whileInView={{ opacity: 1 }}
+                    transition={{ duration: 1 }}
+                    className="flex flex-col gap-12"
+                >
+                    {/* Floating Terminal Text 1 */}
+                    <div className="self-start">
                         <motion.div
-                            key={i}
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            whileInView={{ opacity: 1, scale: 1 }}
-                            whileHover={{ borderColor: 'rgba(255,255,255,0.2)' }}
-                            className={`${sys.size} group relative bg-black border border-white/10 p-8 rounded-xl overflow-hidden flex flex-col justify-between`}
+                            initial={{ x: -50, opacity: 0 }}
+                            whileInView={{ x: 0, opacity: 1 }}
+                            transition={{ delay: 0.2 }}
+                            className="bg-zinc-900/80 backdrop-blur border border-zinc-800 p-4 rounded-sm inline-block"
                         >
-                            <div className="flex justify-between items-start mb-12">
-                                <div className={`p-4 bg-white/5 rounded-xl ${sys.color} transition-transform group-hover:scale-110 duration-500`}>
-                                    {sys.icon}
-                                </div>
-                                <div className="flex gap-1">
-                                    {[1, 2, 3].map(d => (
-                                        <motion.div
-                                            key={d}
-                                            animate={{ opacity: [0.2, 1, 0.2] }}
-                                            transition={{ duration: 1, repeat: Infinity, delay: d * 0.2 }}
-                                            className="w-1 h-3 bg-neon/20 rounded-full"
-                                        />
-                                    ))}
-                                </div>
-                            </div>
-
-                            <div className="space-y-2">
-                                <h4 className="text-xl font-bold font-mono tracking-tight">{sys.title}</h4>
-                                <p className="text-gray-500 text-sm leading-relaxed">{sys.desc}</p>
-                            </div>
-
-                            {/* Subtle background glow */}
-                            <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-white/5 blur-[80px] group-hover:bg-white/10 transition-all" />
+                            <p className="text-xs text-zinc-500 font-mono mb-1">// ARCHITECTURE</p>
+                            <h3 className="text-2xl md:text-4xl font-mono text-white tracking-tighter">
+                                <HyperText text="SCALABLE SYSTEMS" delay={500} />
+                            </h3>
                         </motion.div>
-                    ))}
-                </div>
+                    </div>
+
+                    {/* Center Title */}
+                    <div className="self-center text-center my-12 mix-blend-difference">
+                        <h2 className="text-6xl md:text-9xl font-black text-transparent bg-clip-text bg-gradient-to-b from-white to-zinc-600 tracking-tighter uppercase opacity-90">
+                            <HyperText text="NEURAL ARCHITECTURE" className="text-white" delay={200} duration={1500} />
+                        </h2>
+                    </div>
+
+                    {/* Floating Terminal Text 2 */}
+                    <div className="self-end text-right">
+                        <motion.div
+                            initial={{ x: 50, opacity: 0 }}
+                            whileInView={{ x: 0, opacity: 1 }}
+                            transition={{ delay: 0.4 }}
+                            className="bg-zinc-900/80 backdrop-blur border border-zinc-800 p-4 rounded-sm inline-block"
+                        >
+                            <p className="text-xs text-zinc-500 font-mono mb-1">// INTELLIGENCE</p>
+                            <h3 className="text-2xl md:text-4xl font-mono text-white tracking-tighter">
+                                <HyperText text="AI INTEGRATION" delay={800} />
+                            </h3>
+                        </motion.div>
+                    </div>
+                </motion.div>
             </div>
         </section>
     )
