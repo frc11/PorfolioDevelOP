@@ -5,7 +5,7 @@ import { useLoader, useFrame } from '@react-three/fiber';
 import { SVGLoader } from 'three-stdlib';
 import * as THREE from 'three';
 
-export function HeroArtifact({ active = true }: { active?: boolean }) {
+export function HeroArtifact() {
     const groupRef = useRef<THREE.Group>(null);
     const svgData = useLoader(SVGLoader, '/logodevelOP.svg');
 
@@ -18,18 +18,22 @@ export function HeroArtifact({ active = true }: { active?: boolean }) {
     useFrame((state) => {
         if (!groupRef.current) return;
 
-        // Si no está activo, volver lentamente al centro
-        const targetX = active ? -state.pointer.y * 1.2 : 0;
-        const targetY = active ? state.pointer.x * 1.2 : 0;
+        // INTERACTIVIDAD: Seguimiento del mouse suave y elegante
+        const { x, y } = state.pointer;
 
-        groupRef.current.rotation.x = THREE.MathUtils.lerp(groupRef.current.rotation.x, targetX, 0.05);
-        groupRef.current.rotation.y = THREE.MathUtils.lerp(groupRef.current.rotation.y, targetY, 0.05);
+        // Ajusta los multiplicadores (0.8) para controlar cuánto gira
+        const targetX = -y * 0.8;
+        const targetY = x * 0.8;
+
+        groupRef.current.rotation.x = THREE.MathUtils.lerp(groupRef.current.rotation.x, targetX, 0.1);
+        groupRef.current.rotation.y = THREE.MathUtils.lerp(groupRef.current.rotation.y, targetY, 0.1);
     });
 
     return (
         <group ref={groupRef}>
-            {/* CONFIGURACIÓN ORIGINAL V1 */}
+            {/* Ajuste de escala y rotación para SVG invertido */}
             <group scale={0.007} rotation={[Math.PI, 0, 0]}>
+                {/* Ajuste de centro (asumiendo viewBox 1024x1024) */}
                 <group position={[-512, -512, 0]}>
                     {shapes.map((item, i) => (
                         <mesh key={i} castShadow receiveShadow>
@@ -37,7 +41,7 @@ export function HeroArtifact({ active = true }: { active?: boolean }) {
                                 args={[
                                     item.shape,
                                     {
-                                        depth: 10,
+                                        depth: 15, // Un poco más grueso para que se vea imponente
                                         bevelEnabled: true,
                                         bevelThickness: 1,
                                         bevelSize: 1,
@@ -45,14 +49,15 @@ export function HeroArtifact({ active = true }: { active?: boolean }) {
                                     },
                                 ]}
                             />
-                            {/* MATERIAL OBSIDIAN ORIGINAL */}
+                            {/* MATERIAL BRILLANTE DEFINITIVO */}
                             <meshPhysicalMaterial
-                                color="#050505"
+                                color="#000000"
                                 emissive="#000000"
-                                roughness={0.1}
-                                metalness={0.9}
-                                clearcoat={1.0}
-                                clearcoatRoughness={0.1}
+                                roughness={0.0}   // Espejo
+                                metalness={1.0}   // Metal
+                                clearcoat={1.0}   // Barniz
+                                clearcoatRoughness={0.0}
+                                reflectivity={1.0}
                                 side={THREE.DoubleSide}
                             />
                         </mesh>
