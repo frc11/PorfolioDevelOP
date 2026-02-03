@@ -5,7 +5,7 @@ import { Suspense, ReactNode, useState } from 'react'
 import { HeroArtifact } from '@/components/3d/HeroArtifact'
 import { Preloader } from '@/components/ui/Preloader'
 import { AboutUs } from '@/components/sections/AboutUs'
-import { ProjectLab } from '@/components/sections/ProjectLab'
+import { Portfolio } from '@/components/sections/Portfolio'
 import { BusinessAccelerators } from '@/components/sections/BusinessAccelerators'
 import { WebDesigns } from '@/components/sections/WebDesigns'
 import { SoftwareEcosystem } from '@/components/sections/SoftwareEcosystem'
@@ -78,7 +78,7 @@ function HomeContent() {
 
               <h1 className="text-7xl md:text-9xl font-extrabold tracking-tighter leading-[0.85]">
                 devel
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-zinc-700 to-zinc-400">
+                <span className="text-transparent bg-clip-text bg-gradient-to-r pr-2 from-zinc-700 to-zinc-400">
                   OP
                 </span>
               </h1>
@@ -138,7 +138,7 @@ function HomeContent() {
         <AboutUs />
 
         <Section>
-          <ProjectLab />
+          <Portfolio />
         </Section>
 
         <Section>
