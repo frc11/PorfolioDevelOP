@@ -12,12 +12,13 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-    // Hardcoded to light mode permanently
-    const theme: Theme = 'light';
-    const setTheme = (theme: Theme) => {
-        // No-op: theme is permanently light
-        console.log('Theme change ignored: Force Light Mode active');
-    };
+    const [theme, setTheme] = useState<Theme>('light');
+
+    // Sync with DOM for CSS variable interpolation
+    useEffect(() => {
+        const root = document.documentElement;
+        root.setAttribute('data-theme', theme);
+    }, [theme]);
 
     return (
         <ThemeContext.Provider value={{ theme, setTheme }}>
@@ -34,15 +35,9 @@ export function useTheme() {
     return context;
 }
 
-/**
- * Hook to observe a section and update theme when it enters viewport
- * @param isInView - Boolean from useInView hook
- * @param themeToSet - Theme to set when section is in view
- */
 export function useThemeSection(isInView: boolean, themeToSet: Theme) {
     const { setTheme } = useTheme();
 
-    // Update theme when section enters viewport - wrapped in useEffect to avoid render-phase updates
     useEffect(() => {
         if (isInView) {
             setTheme(themeToSet);

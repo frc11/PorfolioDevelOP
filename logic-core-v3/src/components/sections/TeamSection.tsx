@@ -19,7 +19,7 @@ const TEAM = [
 
 export function TeamSection() {
     return (
-        <section className="py-32 px-8 md:px-24 relative z-10 w-full">
+        <section className="py-32 px-8 md:px-24 bg-white text-black relative z-10 w-full">
             <div className="max-w-7xl mx-auto">
                 <div className="mb-16">
                     <h2 className="text-3xl font-bold tracking-tighter flex items-center gap-4">
@@ -35,7 +35,7 @@ export function TeamSection() {
                             key={i}
                             whileHover={{ scale: 1.02, rotateY: 5, rotateX: -5 }}
                             transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                            className="group relative p-8 rounded-2xl bg-white/[0.03] border border-white/10 overflow-hidden cursor-default"
+                            className="group relative p-8 rounded-2xl bg-black/[0.03] border border-black/10 overflow-hidden"
                         >
                             {/* Glow Effect */}
                             <div className="absolute -inset-1 bg-gradient-to-r from-neon/20 to-purple-500/20 rounded-2xl blur opacity-0 group-hover:opacity-100 transition-opacity duration-500" />

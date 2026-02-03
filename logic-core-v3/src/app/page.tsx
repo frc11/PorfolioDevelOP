@@ -17,6 +17,9 @@ import { Environment, ContactShadows } from '@react-three/drei'
 import { EffectComposer, ChromaticAberration, Noise, Vignette } from '@react-three/postprocessing'
 import { DotMatrix } from '@/components/canvas/DotMatrix'
 import { ThemeProvider, useTheme } from '@/hooks/useThemeObserver'
+import { TemplateWarehouse } from '@/components/sections/TemplateWarehouse'
+import { TeamSection } from '@/components/sections/TeamSection'
+import { FeedbackLoop } from '@/components/sections/FeedbackLoop'
 // import { ReactiveBackground } from '@/components/canvas/ReactiveBackground'
 
 // Reusable Section Wrapper for unifying animations
@@ -103,7 +106,7 @@ function HomeContent() {
             <Canvas camera={{ position: [0, 0, 15], fov: 35 }} gl={{ alpha: true }}>
               <Suspense fallback={null}>
                 {/* Background Dot Matrix */}
-                <DotMatrix active={heroActive} />
+                <DotMatrix />
 
                 {/* Lighting Setup for Light Mode */}
                 <ambientLight intensity={1.5} />
@@ -130,29 +133,33 @@ function HomeContent() {
             </Canvas>
           </div>
         </section>
-
-        {/* SECTIONS WITH FADE-IN */}
-        <Section>
-          <AboutUs />
-        </Section>
+        {/* Light Mode Return - Horizontal Scroll */}
+        <TheStudio />
 
         <Section>
           <ProjectLab />
         </Section>
 
         <Section>
+          <InfiniteReviews />
+        </Section>
+
+
+        <Section>
+          <BusinessAccelerators />
+        </Section>
+
+
+        <Section>
           <WebDesigns />
         </Section>
 
-        {/* Dark Mode Section - This triggers theme transition */}
         <SoftwareEcosystem />
 
-        {/* Light Mode Return - Horizontal Scroll */}
-        <TheStudio />
-
         <Section>
-          <InfiniteReviews />
+          <TeamSection />
         </Section>
+        {/* Dark Mode Section - This triggers theme transition */}
 
         {/* Final CTA - Dark Mode */}
         <Footer />

@@ -4,79 +4,81 @@ import { useRef, useMemo, useLayoutEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 
-interface DotMatrixProps {
-    active?: boolean;
-}
-
-export function DotMatrix({ active }: DotMatrixProps) {
+export function DotMatrix() {
     const meshRef = useRef<THREE.InstancedMesh>(null);
-    const count = 40 * 40; // 1600 points
+    const rows = 50;
+    const cols = 50;
+    const count = rows * cols;
 
-    // Use useMemo for stable objects to avoid GC
+    // Objetos reusables para optimización (Garbage Collection friendly)
     const dummy = useMemo(() => new THREE.Object3D(), []);
     const color = useMemo(() => new THREE.Color(), []);
-    const targetColor = useMemo(() => new THREE.Color('#00aaff'), []); // Cyan/Blue
-    const baseColor = useMemo(() => new THREE.Color('#cccccc'), []); // Medium Grey for Light Mode
 
-    const particles = useMemo(() => {
+    // Generar la Grilla Base centrada
+    const basePositions = useMemo(() => {
         const temp = [];
-        for (let x = 0; x < 40; x++) {
-            for (let y = 0; y < 40; y++) {
-                // Center grid: (x - 20) * 0.8
-                const px = (x - 20) * 0.8;
-                const py = (y - 20) * 0.8;
-                temp.push({ x: px, y: py, z: -3 }); // Positioned at Z = -3 (behind logo)
+        for (let i = 0; i < rows; i++) {
+            for (let j = 0; j < cols; j++) {
+                const x = (i - rows / 2) * 0.6; // Espaciado 0.6
+                const y = (j - cols / 2) * 0.6;
+                temp.push({ x, y, z: -3 }); // Z base detrás del logo
             }
         }
         return temp;
-    }, []);
+    }, [rows, cols]);
 
     useLayoutEffect(() => {
-        // Ensure instanceColor attribute exists
-        if (meshRef.current && !meshRef.current.instanceColor) {
+        if (meshRef.current) {
+            // Inicializar matriz de colores
             meshRef.current.instanceColor = new THREE.InstancedBufferAttribute(new Float32Array(count * 3), 3);
         }
     }, [count]);
 
     useFrame((state) => {
         if (!meshRef.current) return;
+
+        const time = state.clock.getElapsedTime() * 0.5; // Velocidad de la onda
         const { pointer, viewport } = state;
 
-        // Map mouse (-1 to 1) to rough world coords at z=0 plane sizing
-        // Note: dots are at z=-3 so they span a wider area, but interaction is relative
+        // Mouse en coordenadas de mundo aproximadas
         const mx = (pointer.x * viewport.width) / 2;
         const my = (pointer.y * viewport.height) / 2;
 
-        particles.forEach((p, i) => {
-            const { x, y, z } = p;
+        basePositions.forEach((pos, i) => {
+            let { x, y, z } = pos;
 
-            // Calculate distance
+            // 1. ONDA ARMÓNICA (Movimiento Principal)
+            // Crea un oleaje suave diagonal
+            const waveZ = Math.sin(x * 0.3 + time) * Math.cos(y * 0.3 + time) * 1.5;
+
+            // 2. INTERACCIÓN SUTIL
             const dx = mx - x;
             const dy = my - y;
             const dist = Math.sqrt(dx * dx + dy * dy);
+            let mouseInfluence = 0;
 
-            // Interactive Effect
-            let scale = 1;
-            let zOffset = 0;
-            let force = 0;
-
-            if (dist < 5) {
-                force = (5 - dist) / 5; // 0 to 1
-                scale = 1 + force; // Scale x2 max when mouse is very close
-                zOffset = force * 2; // Move closer to camera (Z+)
+            if (dist < 4) {
+                // Suave elevación cerca del mouse
+                mouseInfluence = (4 - dist) / 4;
+                z += mouseInfluence * 1.5;
             }
 
-            dummy.position.set(x, y, z + zOffset);
-            dummy.scale.setScalar(scale);
+            // Posición final combinada
+            dummy.position.set(x, y, z + waveZ);
+
+            // Escala dinámica: Los puntos más altos son un poco más grandes
+            const scaleFactor = 1 + (waveZ * 0.2);
+            dummy.scale.setScalar(scaleFactor);
+
             dummy.updateMatrix();
             meshRef.current!.setMatrixAt(i, dummy.matrix);
 
-            // Color Interactive
-            // Base medium grey, lerp to Cyan/Blue based on force
-            if (meshRef.current!.instanceColor) {
-                color.copy(baseColor).lerp(targetColor, force * 0.8);
-                meshRef.current!.setColorAt(i, color);
-            }
+            // COLOR DINÁMICO
+            // Oscuro en el fondo, Claro en la cresta de la ola
+            const intensity = (waveZ + 1.5) / 3; // Normalizar aprox 0 a 1
+            color.setHex(0x333333).lerp(new THREE.Color('#dddddd'), intensity + mouseInfluence * 0.5);
+
+            meshRef.current!.setColorAt(i, color);
         });
 
         meshRef.current.instanceMatrix.needsUpdate = true;
@@ -85,9 +87,13 @@ export function DotMatrix({ active }: DotMatrixProps) {
 
     return (
         <instancedMesh ref={meshRef} args={[undefined, undefined, count]}>
-            <sphereGeometry args={[0.06, 16, 16]} />
-            {/* White material so instance colors (grey/cyan) are true */}
-            <meshStandardMaterial color="#ffffff" roughness={0.5} />
+            {/* Esferas más pequeñas y finas */}
+            <sphereGeometry args={[0.025, 16, 16]} />
+            <meshStandardMaterial
+                color="#ffffff"
+                roughness={0.4}
+                metalness={0.8}
+            />
         </instancedMesh>
     );
 }

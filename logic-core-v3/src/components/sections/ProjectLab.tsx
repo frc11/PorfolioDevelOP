@@ -25,7 +25,7 @@ const PROJECTS = [
 
 export function ProjectLab() {
     return (
-        <section className="py-40 px-8 md:px-24 bg-black text-white">
+        <section className="py-40 px-8 md:px-24 bg-white text-black">
             <motion.div
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
