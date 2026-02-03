@@ -1,68 +1,71 @@
-"use client"
-import { motion } from 'framer-motion'
-import { Target, CheckCircle2, Rocket } from 'lucide-react'
-import { AuroraBackground } from '@/components/canvas/AuroraBackground'
+'use client';
+import { useRef } from 'react';
+import { motion, useScroll, useTransform, useInView } from 'framer-motion';
+import { useThemeSection } from '@/hooks/useThemeObserver';
+import { KineticText } from '@/components/ui/KineticText';
 
-const PILLARS = [
-    {
-        icon: <Target className="w-8 h-8 text-white" />,
-        title: "Diagnóstico",
-        desc: "Auditoría profunda de infraestructura y procesos para identificar cuellos de botella."
-    },
-    {
-        icon: <CheckCircle2 className="w-8 h-8 text-white" />,
-        title: "Desarrollo",
-        desc: "Ingeniería de software de precisión con estándares militares de seguridad y rendimiento."
-    },
-    {
-        icon: <Rocket className="w-8 h-8 text-white" />,
-        title: "Escalabilidad",
-        desc: "Arquitectura diseñada para soportar crecimiento exponencial sin deuda técnica."
-    }
-]
+interface TeamMemberProps {
+    name: string;
+    role: string;
+    img: string;
+}
 
-export function AboutUs() {
+const TeamMember = ({ name, role, img }: TeamMemberProps) => (
+    <div className="group relative w-[400px] h-[450px] bg-zinc-900 overflow-hidden rounded-sm flex-shrink-0 border border-zinc-800">
+        <div
+            className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110 grayscale group-hover:grayscale-0 opacity-80 group-hover:opacity-100"
+            style={{ backgroundImage: `url(${img})` }}
+        />
+        <div className="absolute bottom-0 left-0 p-6 bg-zinc-950/95 backdrop-blur-sm w-full translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out border-t border-zinc-800">
+            <h3 className="font-bold text-xl text-zinc-50">{name}</h3>
+            <p className="text-xs text-zinc-500 tracking-widest uppercase mt-1">{role}</p>
+        </div>
+    </div>
+);
+
+export const AboutUs = () => {
+    const targetRef = useRef<HTMLDivElement>(null);
+    const { scrollYProgress } = useScroll({ target: targetRef });
+    const x = useTransform(scrollYProgress, [0, 1], ["2%", "-50%"]);
+    const inViewRef = useRef(null);
+    const isInView = useInView(inViewRef, { margin: "-20%" });
+    useThemeSection(isInView, 'light');
+
     return (
-        <section className="relative py-40 px-8 md:px-24 overflow-hidden">
-
-
-            <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: '-100px' }}
-                transition={{ duration: 0.8, ease: 'easeOut' }}
-                className="relative z-10 max-w-7xl mx-auto"
-            >
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-20 items-start">
-                    <div className="space-y-8">
-                        <h2 className="text-5xl md:text-7xl font-bold tracking-tighter uppercase leading-[0.9] text-zinc-900">
-                            The<br />Methodology
-                        </h2>
-                        <p className="text-zinc-600 font-light text-lg leading-relaxed max-w-md">
-                            No improvisamos. Ejecutamos un protocolo probado para convertir capital en activos digitales de alto rendimiento.
+        <section ref={targetRef} className="relative h-[300vh] bg-zinc-950">
+            <div ref={inViewRef} className="absolute top-0 h-[20vh] w-full pointer-events-none" />
+            <div className="sticky top-0 flex h-screen items-center overflow-hidden">
+                <motion.div style={{ x }} className="flex gap-20 px-20 items-center">
+                    {/* SLIDE 1 */}
+                    <div className="flex-shrink-0 min-w-[80vw] flex items-center">
+                        <div className="text-[10rem] md:text-[14rem] leading-[0.8] font-black tracking-tighter text-zinc-50">
+                            <KineticText>
+                                <span className="pl-50">
+                                    WE ARE
+                                </span><br />
+                                <span className="text-transparent pl-50 bg-clip-text bg-gradient-to-r from-zinc-600 pr-50 to-zinc-300">
+                                    ARCHITECTS
+                                </span>
+                            </KineticText>
+                        </div>
+                    </div>
+                    {/* SLIDE 2 */}
+                    <div className="flex-shrink-0 w-[60vw] max-w-4xl flex flex-col justify-center gap-8 pl-20 border-l border-zinc-800">
+                        <p className="text-3xl md:text-5xl font-light text-zinc-400 leading-tight">
+                            No somos solo programadores. <br />
+                            <span className="font-bold text-zinc-50">Somos estrategas digitales.</span>
+                        </p>
+                        <p className="text-xl text-zinc-500 leading-relaxed max-w-2xl">
+                            Fusionamos la lógica matemática con la emoción humana para crear productos que no solo funcionan, sino que se sienten. Diseñamos sistemas que escalan y experiencias que perduran.
                         </p>
                     </div>
-
-                    <div className="space-y-12">
-                        {PILLARS.map((pillar, i) => (
-                            <div key={i} className="group flex gap-8 items-start border-t border-zinc-200 pt-8 transition-colors hover:border-zinc-400">
-                                <span className="font-mono text-xs text-zinc-400 mt-2">0{i + 1}</span>
-                                <div className="space-y-4">
-                                    <div className="flex items-center gap-4">
-                                        <div className="text-zinc-900">
-                                            {pillar.icon}
-                                        </div>
-                                        <h3 className="text-2xl font-bold uppercase tracking-tight text-zinc-900">{pillar.title}</h3>
-                                    </div>
-                                    <p className="text-zinc-500 font-light text-lg leading-relaxed">
-                                        {pillar.desc}
-                                    </p>
-                                </div>
-                            </div>
-                        ))}
+                    {/* SLIDE 3 */}
+                    <div className="flex-shrink-0 flex gap-8 items-center pl-20">
+                        <TeamMember name="Alex Dev" role="Lead Architect" img="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=1000&auto=format&fit=crop" />
+                        <TeamMember name="Mike Ops" role="Full Stack" img="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=1000&auto=format&fit=crop" />
                     </div>
-                </div>
-            </motion.div>
+                </motion.div>
+            </div>
         </section>
-    )
-}
+    );
+};

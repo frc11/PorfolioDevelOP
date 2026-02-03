@@ -9,7 +9,7 @@ import { ProjectLab } from '@/components/sections/ProjectLab'
 import { BusinessAccelerators } from '@/components/sections/BusinessAccelerators'
 import { WebDesigns } from '@/components/sections/WebDesigns'
 import { SoftwareEcosystem } from '@/components/sections/SoftwareEcosystem'
-import { TheStudio } from '@/components/sections/TheStudio'
+
 import { InfiniteReviews } from '@/components/sections/InfiniteReviews'
 import { Footer } from '@/components/sections/Footer'
 import { motion } from 'framer-motion'
@@ -20,6 +20,7 @@ import { ThemeProvider, useTheme } from '@/hooks/useThemeObserver'
 import { TemplateWarehouse } from '@/components/sections/TemplateWarehouse'
 import { TeamSection } from '@/components/sections/TeamSection'
 import { FeedbackLoop } from '@/components/sections/FeedbackLoop'
+
 // import { ReactiveBackground } from '@/components/canvas/ReactiveBackground'
 
 // Reusable Section Wrapper for unifying animations
@@ -134,7 +135,7 @@ function HomeContent() {
           </div>
         </section>
         {/* Light Mode Return - Horizontal Scroll */}
-        <TheStudio />
+        <AboutUs />
 
         <Section>
           <ProjectLab />
