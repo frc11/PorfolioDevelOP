@@ -3,7 +3,7 @@
 import { Canvas } from '@react-three/fiber'
 import { Suspense, ReactNode, useState } from 'react'
 import { HeroArtifact } from '@/components/3d/HeroArtifact'
-import { Preloader } from '@/components/ui/Preloader'
+// import { Preloader } from '@/components/ui/Preloader'
 import { AboutUs } from '@/components/sections/AboutUs'
 import { Portfolio } from '@/components/sections/Portfolio'
 import { BusinessAccelerators } from '@/components/sections/BusinessAccelerators'
@@ -53,7 +53,8 @@ function HomeContent() {
       }}
       transition={{ duration: 0.8, ease: 'easeInOut' }}
     >
-      <Preloader onTransitionStart={() => setTimeout(() => setHeroActive(true), 500)} />
+      {/* <Preloader /> Removed and moved to layout */}
+
 
       {/* GLOBAL BACKGROUND - Removed ReactiveBackground for Light Mode */}
       {/* <ReactiveBackground /> */}
@@ -114,7 +115,7 @@ function HomeContent() {
                 <Environment preset="studio" />
 
                 {/* 3D Logo (Front) */}
-                <HeroArtifact active={heroActive} />
+                <HeroArtifact />
 
                 {/* Contact Shadows for depth */}
                 <ContactShadows position={[0, -2.5, 0]} opacity={0.4} scale={15} blur={2} far={4} color="#000000" />
