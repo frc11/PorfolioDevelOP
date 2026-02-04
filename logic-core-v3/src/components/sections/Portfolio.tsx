@@ -6,42 +6,42 @@ import { ArrowLeft, ArrowRight, ExternalLink } from "lucide-react";
 // Project Data - 12 High-Fidelity Items
 const PROJECTS = [
     {
-        id: 2,
+        id: 1,
         title: "VOID WALKER",
         category: "SPATIAL AUDIO",
         img: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1200",
         year: "2024"
     },
     {
-        id: 3,
+        id: 2,
         title: "DATA MESH",
         category: "ANALYTICS",
         img: "https://images.unsplash.com/photo-1558591710-4b4a1ae0f04d?q=80&w=1200",
         year: "2023"
     },
     {
-        id: 5,
+        id: 3,
         title: "CYBER CORE",
         category: "SECURITY",
         img: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=1200",
         year: "2024"
     },
     {
-        id: 6,
+        id: 4,
         title: "HYPER LOOP",
         category: "LOGISTICS",
         img: "https://images.unsplash.com/photo-1519608487953-e999c86e7455?q=80&w=1200",
         year: "2023"
     },
     {
-        id: 11,
+        id: 5,
         title: "ORBITAL",
         category: "AEROSPACE",
         img: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=1200",
         year: "2024"
     },
     {
-        id: 12,
+        id: 6,
         title: "SYNTH WAVE",
         category: "DIGITAL ART",
         img: "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=1200",

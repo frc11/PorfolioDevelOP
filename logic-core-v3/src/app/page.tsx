@@ -6,7 +6,7 @@ import { HeroArtifact } from '@/components/3d/HeroArtifact'
 // import { Preloader } from '@/components/ui/Preloader'
 import { AboutUs } from '@/components/sections/AboutUs'
 import { Portfolio } from '@/components/sections/Portfolio'
-import { BusinessAccelerators } from '@/components/sections/BusinessAccelerators'
+import { OurServices } from '@/components/sections/OurServices';
 import { WebDesigns } from '@/components/sections/WebDesigns'
 import { SoftwareEcosystem } from '@/components/sections/SoftwareEcosystem'
 
@@ -148,19 +148,11 @@ function HomeContent() {
 
 
         <Section>
-          <BusinessAccelerators />
-        </Section>
-
-
-        <Section>
-          <WebDesigns />
+          <OurServices />
         </Section>
 
         <SoftwareEcosystem />
 
-        <Section>
-          <TeamSection />
-        </Section>
         {/* Dark Mode Section - This triggers theme transition */}
 
         {/* Final CTA - Dark Mode */}
