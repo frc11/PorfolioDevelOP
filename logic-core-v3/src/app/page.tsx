@@ -63,7 +63,7 @@ function HomeContent() {
       <div className="relative z-10 w-full">
 
         {/* HERO SECTION (First Fold) */}
-        <section className="min-h-screen grid grid-cols-1 md:grid-cols-2 relative overflow-hidden">
+        <section className="min-h-screen grid grid-cols-1 md:grid-cols-2 relative overflow-hidden" id="hero">
           {/* COLUMN LEFT: TEXT */}
           <div className="flex flex-col justify-center px-8 md:px-24 order-2 md:order-1 text-zinc-900 z-10">
             <motion.div

@@ -1,5 +1,5 @@
 'use client';
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import {
     motion,
     useScroll,
@@ -28,11 +28,16 @@ function ParallaxText({ children, baseVelocity = 100 }: ParallaxProps) {
     const smoothVelocity = useSpring(scrollVelocity, { damping: 50, stiffness: 400 });
     const velocityFactor = useTransform(smoothVelocity, [0, 1000], [0, 5], { clamp: false });
 
+    const [isHovered, setIsHovered] = useState(false);
+
     // Wrap range for seamless looping (-20% to -45% usually works for 4 items, adjust if needed)
     const x = useTransform(baseX, (v) => `${wrap(-20, -45, v)}%`);
 
     const directionFactor = useRef<number>(1);
     useAnimationFrame((t, delta) => {
+        // Pause if hovered
+        if (isHovered) return;
+
         let moveBy = directionFactor.current * baseVelocity * (delta / 1000); // delta is in ms
 
         // Flip direction if scroll velocity changes sign
@@ -49,7 +54,11 @@ function ParallaxText({ children, baseVelocity = 100 }: ParallaxProps) {
     });
 
     return (
-        <div className="overflow-hidden m-0 whitespace-nowrap flex flex-nowrap mb-8 last:mb-0">
+        <div
+            className="overflow-hidden m-0 whitespace-nowrap flex flex-nowrap mb-8 last:mb-0"
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+        >
             <motion.div className="flex whitespace-nowrap gap-10 items-center" style={{ x }}>
                 {children}
                 {children}
@@ -60,12 +69,59 @@ function ParallaxText({ children, baseVelocity = 100 }: ParallaxProps) {
     );
 }
 
+// Active Word Component
+// Variants: 'solid' (Black -> Transparent w/ Border), 'outline' (Transparent w/ Border -> Black)
+const ActiveWord = ({ text, variant = 'solid' }: { text: string, variant?: 'solid' | 'outline' }) => {
+    const isSolid = variant === 'solid';
+
+    return (
+        <motion.span
+            data-cursor="expand"
+            initial="idle"
+            whileHover="hover"
+            className="text-6xl md:text-8xl font-black uppercase mr-16 cursor-none inline-block transition-colors duration-300"
+            variants={{
+                idle: {
+                    scale: 1,
+                    color: isSolid ? "#18181b" : "transparent", // zinc-900 vs transparent
+                    WebkitTextStroke: isSolid ? "0px transparent" : "1px #18181b" // none vs black border
+                },
+                hover: {
+                    scale: 1.1,
+                    color: isSolid ? "transparent" : "#18181b", // transparent vs zinc-900
+                    WebkitTextStroke: isSolid ? "1px #18181b" : "0px transparent" // black border vs none
+                }
+            }}
+        >
+            {text}
+        </motion.span>
+    );
+};
+
 // Review Card Component
 const ReviewCard = ({ name, text }: { name: string; text: string }) => (
-    <div className="flex flex-col gap-2 p-8 bg-white border border-zinc-100 shadow-sm rounded-none w-[400px] h-[200px] whitespace-normal shrink-0 justify-center">
-        <p className="text-xl font-medium text-zinc-800 leading-snug">"{text}"</p>
-        <span className="text-sm font-bold text-zinc-400 uppercase tracking-widest mt-4">{name}</span>
-    </div>
+    <motion.div
+        data-cursor="expand"
+        whileHover={{
+            scale: 1.05,
+            backgroundColor: "#18181b", // zinc-900
+            boxShadow: "0px 20px 40px rgba(0,0,0,0.2)",
+            borderColor: "#18181b"
+        }}
+        transition={{ type: "spring", stiffness: 400, damping: 25 }}
+        className="group flex flex-col gap-2 p-8 bg-white border border-zinc-100 shadow-sm rounded-none w-[400px] h-[200px] whitespace-normal shrink-0 justify-center cursor-none"
+    >
+        <motion.p
+            className="text-xl font-medium text-zinc-800 leading-snug group-hover:text-zinc-50 transition-colors duration-300"
+        >
+            "{text}"
+        </motion.p>
+        <motion.span
+            className="text-sm font-bold text-zinc-400 uppercase tracking-widest mt-4 group-hover:text-zinc-500 transition-colors duration-300"
+        >
+            {name}
+        </motion.span>
+    </motion.div>
 );
 
 export const InfiniteReviews = () => {
@@ -80,20 +136,20 @@ export const InfiniteReviews = () => {
                 <ReviewCard name="Wired" text="Where brutalist aesthetics meet sophisticated neural architecture." />
             </ParallaxText>
 
-            {/* Marquee 2 - Right direction (faster) */}
+            {/* Marquee 2 - Right direction (faster) - Mixed Variants */}
             <ParallaxText baseVelocity={1.5}>
-                <span className="text-8xl font-black uppercase text-zinc-200 mr-20">RESULTS</span>
-                <span className="text-8xl font-black uppercase text-zinc-900 mr-20">PRECISION</span>
-                <span className="text-8xl font-black uppercase text-zinc-200 mr-20">SCALE</span>
-                <span className="text-8xl font-black uppercase text-zinc-900 mr-20">IMPACT</span>
+                <ActiveWord text="RESULTS" variant="solid" />
+                <ActiveWord text="PRECISION" variant="outline" />
+                <ActiveWord text="SCALE" variant="solid" />
+                <ActiveWord text="IMPACT" variant="outline" />
             </ParallaxText>
 
-            {/* Marquee 3 - Left direction */}
+            {/* Marquee 3 - Left direction - Mixed Variants */}
             <ParallaxText baseVelocity={-2}>
-                <span className="text-6xl font-outline text-transparent stroke-black uppercase mr-16 stroke-1">ENGINEERING</span>
-                <span className="text-6xl font-black text-zinc-900 uppercase mr-16">CREATIVITY</span>
-                <span className="text-6xl font-outline text-transparent stroke-black uppercase mr-16 stroke-1">INNOVATION</span>
-                <span className="text-6xl font-black text-zinc-900 uppercase mr-16">LOGIC</span>
+                <ActiveWord text="ENGINEERING" variant="outline" />
+                <ActiveWord text="CREATIVITY" variant="solid" />
+                <ActiveWord text="INNOVATION" variant="outline" />
+                <ActiveWord text="LOGIC" variant="solid" />
             </ParallaxText>
 
         </section>

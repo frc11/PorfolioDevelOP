@@ -17,18 +17,18 @@ export const DynamicDock = () => {
     const icons = [
         {
             icon: <Home className="w-full h-full" />,
-            href: "#top",
+            href: "#hero",
             label: "Home",
         },
         {
-            icon: <Briefcase className="w-full h-full" />,
-            href: "#web-designs",
-            label: "Work",
+            icon: <Terminal className="w-full h-full" />,
+            href: "#about",
+            label: "Nosotros",
         },
         {
-            icon: <Terminal className="w-full h-full" />,
-            href: "#software-ecosystem",
-            label: "System",
+            icon: <Briefcase className="w-full h-full" />,
+            href: "#portfolio",
+            label: "Portfolio",
         },
         {
             icon: <Layers className="w-full h-full" />,
