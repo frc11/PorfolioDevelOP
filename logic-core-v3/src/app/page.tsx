@@ -8,7 +8,7 @@ import { AboutUs } from '@/components/sections/AboutUs'
 import { Portfolio } from '@/components/sections/Portfolio'
 import { OurServices } from '@/components/sections/OurServices';
 import { WebDesigns } from '@/components/sections/WebDesigns'
-import { SoftwareEcosystem } from '@/components/sections/SoftwareEcosystem'
+import { WhyDevelOP } from '@/components/sections/WhyDevelOP'
 
 import { InfiniteReviews } from '@/components/sections/InfiniteReviews'
 import { Footer } from '@/components/sections/Footer'
@@ -151,7 +151,7 @@ function HomeContent() {
           <OurServices />
         </Section>
 
-        <SoftwareEcosystem />
+        <WhyDevelOP />
 
         {/* Dark Mode Section - This triggers theme transition */}
 

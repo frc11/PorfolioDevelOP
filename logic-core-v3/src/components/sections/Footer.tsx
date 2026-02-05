@@ -34,7 +34,7 @@ const MagneticButton = ({ children }: { children: React.ReactNode }) => {
             onMouseMove={handleMouseMove}
             onMouseLeave={reset}
             style={{ x: mouseX, y: mouseY }}
-            className="group relative flex items-center justify-center cursor-pointer"
+            className="group relative flex items-center justify-center"
         >
             <div className="relative w-48 h-48 md:w-64 md:h-64 rounded-full bg-white flex items-center justify-center transition-transform duration-500 group-hover:scale-110">
                 {/* Text inside */}
