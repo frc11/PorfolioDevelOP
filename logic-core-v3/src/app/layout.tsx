@@ -22,6 +22,7 @@ export const metadata: Metadata = {
 import { SmoothScroll } from "@/components/layout/SmoothScroll";
 import { DynamicDock } from "@/components/layout/DynamicDock";
 import Preloader from "@/components/ui/Preloader";
+import { LogicCompanion } from "@/modules/ai-companion";
 
 export default function RootLayout({
   children,
@@ -40,6 +41,7 @@ export default function RootLayout({
         </SmoothScroll>
         <Preloader />
         <DynamicDock />
+        <LogicCompanion />
       </body>
     </html>
   );
