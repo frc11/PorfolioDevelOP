@@ -1,14 +1,11 @@
 'use client';
 
 import { Canvas, useFrame } from '@react-three/fiber';
-import { MeshTransmissionMaterial, Sparkles, Float } from '@react-three/drei';
+import { MeshDistortMaterial, Sphere, Float, Environment } from '@react-three/drei';
+import { EffectComposer, Bloom } from '@react-three/postprocessing';
+import { EnergyField } from './EnergyField';
 import { useRef, useState } from 'react';
 import * as THREE from 'three';
-
-/**
- * The Tesseract - A Neural Avatar
- * Reactive 3D visualization that represents AI thinking state
- */
 
 interface NeuroAvatarProps {
     isThinking?: boolean;
@@ -22,18 +19,15 @@ function TesseractCore({ isThinking }: { isThinking: boolean }) {
     useFrame((state, delta) => {
         if (!meshRef.current) return;
 
-        // Rotation speed based on thinking state
         const rotationSpeed = isThinking ? 0.05 : 0.01;
         meshRef.current.rotation.x += rotationSpeed * delta * 60;
         meshRef.current.rotation.y += rotationSpeed * delta * 40;
         meshRef.current.rotation.z += rotationSpeed * delta * 30;
 
-        // Breathing/pulsing effect when thinking
         if (isThinking) {
             const pulseScale = 1 + Math.sin(state.clock.elapsedTime * 4) * 0.15;
             meshRef.current.scale.setScalar(pulseScale);
         } else {
-            // Smoothly return to normal scale
             const currentScale = meshRef.current.scale.x;
             const targetScale = hovered ? 1.1 : 1;
             meshRef.current.scale.setScalar(
@@ -41,14 +35,11 @@ function TesseractCore({ isThinking }: { isThinking: boolean }) {
             );
         }
 
-        // Inner core pulsing animation
         if (innerCoreRef.current) {
             const corePulse = isThinking
                 ? 0.3 + Math.sin(state.clock.elapsedTime * 5) * 0.15
                 : 0.2;
             innerCoreRef.current.scale.setScalar(corePulse);
-
-            // Rotate inner core faster when thinking
             innerCoreRef.current.rotation.x += (isThinking ? 0.08 : 0.02) * delta * 60;
             innerCoreRef.current.rotation.y += (isThinking ? 0.06 : 0.015) * delta * 60;
         }
@@ -56,37 +47,30 @@ function TesseractCore({ isThinking }: { isThinking: boolean }) {
 
     return (
         <group>
-            {/* Outer Glass Shell - High Detail Icosahedron */}
-            <mesh
+            <Sphere
                 ref={meshRef}
+                args={[1, 64, 64]}
                 onPointerEnter={() => setHovered(true)}
                 onPointerLeave={() => setHovered(false)}
             >
-                <icosahedronGeometry args={[1, 15]} />
-                <MeshTransmissionMaterial
-                    backside
-                    backsideThickness={5}
-                    thickness={2.5}
-                    chromaticAberration={isThinking ? 1 : 0.4}
-                    anisotropy={0.5}
-                    distortion={isThinking ? 0.7 : 0.3}
-                    distortionScale={0.5}
-                    temporalDistortion={isThinking ? 0.8 : 0.3}
-                    color="#101010"
-                    resolution={1024}
-                    transmission={0.9}
+                <MeshDistortMaterial
+                    color={isThinking ? "#1e293b" : "#09090b"}
+                    attach="material"
+                    distort={isThinking ? 0.7 : 0.3}
+                    speed={isThinking ? 4 : 1.5}
                     roughness={0}
-                    metalness={0.05}
-                    ior={2.4}
-                    reflectivity={0.8}
+                    metalness={0.9}
+                    bumpScale={0.005}
+                    clearcoat={1}
+                    clearcoatRoughness={0.1}
+                    radius={1}
                 />
-            </mesh>
+            </Sphere>
 
-            {/* Inner Pulsing Energy Core */}
-            <mesh ref={innerCoreRef}>
+            <mesh ref={innerCoreRef} visible={isThinking}>
                 <sphereGeometry args={[0.3, 32, 32]} />
                 <meshBasicMaterial
-                    color={isThinking ? '#00ffff' : '#ffffff'}
+                    color="#00ffff"
                     toneMapped={false}
                 />
             </mesh>
@@ -96,71 +80,64 @@ function TesseractCore({ isThinking }: { isThinking: boolean }) {
 
 export function NeuroAvatar({ isThinking = false }: NeuroAvatarProps) {
     return (
-        <div className="fixed bottom-8 right-8 z-[100] w-32 h-32 cursor-pointer group transition-transform hover:scale-105">
-            {/* Quantum Glow Effect */}
-            <div
-                className={`absolute inset-0 rounded-full blur-2xl transition-all duration-500 ${isThinking
-                        ? 'bg-violet-500/50 scale-150'
-                        : 'bg-cyan-400/20 scale-100'
-                    }`}
-            />
-
+        /* 
+         * FIX: Added overflow-hidden and rounded-full to the main container.
+         * This physically forces any square artifacts into a circular shape, 
+         * making them invisible against the background.
+         */
+        <div className="fixed bottom-0 right-0 z-[100] w-72 h-72 pointer-events-none flex items-center justify-center translate-x-12 translate-y-12 overflow-hidden rounded-full">
             {/* 3D Canvas */}
             <Canvas
-                camera={{ position: [0, 0, 4], fov: 50 }}
+                className="pointer-events-auto cursor-pointer"
+                style={{ background: 'transparent' }}
+                camera={{ position: [0, 0, 6], fov: 45 }}
                 gl={{
                     alpha: true,
                     antialias: true,
-                    powerPreference: 'high-performance'
+                    stencil: false,
+                    depth: true,
+                    premultipliedAlpha: false,
+                    powerPreference: 'high-performance',
+                }}
+                onCreated={({ gl }) => {
+                    gl.setClearColor(0x000000, 0);
                 }}
             >
-                {/* Lighting setup */}
-                <ambientLight intensity={isThinking ? 3 : 1.5} />
+                <ambientLight intensity={0.5} />
+                <Environment preset="city" />
+
                 <pointLight
-                    position={[10, 10, 10]}
-                    intensity={isThinking ? 2 : 0.8}
+                    position={[5, 5, 5]}
+                    intensity={isThinking ? 15 : 5}
                     color="#22d3ee"
                 />
-                <pointLight
-                    position={[-10, -10, -10]}
-                    intensity={0.5}
-                    color="#8b5cf6"
-                />
 
-                {/* Main floating effect wrapper */}
                 <Float
-                    speed={isThinking ? 8 : 2}
-                    rotationIntensity={isThinking ? 2 : 0.5}
-                    floatIntensity={isThinking ? 1.5 : 0.5}
+                    speed={isThinking ? 6 : 1.5}
+                    rotationIntensity={isThinking ? 2 : 0.8}
+                    floatIntensity={isThinking ? 2 : 1}
                 >
                     <TesseractCore isThinking={isThinking} />
+                    <EnergyField isThinking={isThinking} />
                 </Float>
 
-                {/* Primary Data Particles - Reactive Colors */}
-                <Sparkles
-                    count={isThinking ? 150 : 50}
-                    scale={3.5}
-                    size={isThinking ? 5 : 2}
-                    speed={isThinking ? 3 : 0.5}
-                    opacity={isThinking ? 1 : 0.5}
-                    color={isThinking ? '#c026d3' : '#22d3ee'}
-                    noise={2}
-                />
-
-                {/* Secondary Particle Layer - Violet/Orange Glow */}
-                <Sparkles
-                    count={isThinking ? 80 : 25}
-                    scale={5}
-                    size={isThinking ? 3 : 1}
-                    speed={isThinking ? 2 : 0.4}
-                    opacity={isThinking ? 0.7 : 0.3}
-                    color={isThinking ? '#fb923c' : '#8b5cf6'}
-                    noise={1.5}
-                />
+                {/* 
+                 * FIX: multisampling={0} is critical for post-processing transparency.
+                 * Also ensured only one EffectComposer exists.
+                 */
+                }
+                <EffectComposer multisampling={0} disableNormalPass>
+                    <Bloom
+                        luminanceThreshold={1}
+                        mipmapBlur
+                        intensity={0.5}
+                        radius={0.4}
+                    />
+                </EffectComposer>
             </Canvas>
 
             {/* Status indicator dot */}
-            <div className="absolute -top-1 -right-1 z-10">
+            <div className="absolute top-1/4 right-1/4 z-10 pointer-events-none">
                 <div
                     className={`w-3 h-3 rounded-full transition-all duration-300 ${isThinking
                         ? 'bg-cyan-400 animate-pulse shadow-lg shadow-cyan-400/50'

@@ -3,6 +3,7 @@
 import { usePathname, useRouter } from 'next/navigation';
 import { useChat } from 'ai/react';
 import { useEffect, useRef } from 'react';
+import { INITIAL_GREETING } from '../lib/constants';
 
 /**
  * Custom hook for Logic AI with dynamic context awareness
@@ -23,6 +24,13 @@ export function useLogicAI() {
         error,
     } = useChat({
         api: '/api/chat',
+        initialMessages: [
+            {
+                id: 'intro-msg',
+                role: 'assistant',
+                content: INITIAL_GREETING,
+            },
+        ],
         // Inject current path into every request
         body: {
             currentPath: pathname,
