@@ -47,11 +47,17 @@ export function WhyDevelOP() {
 
     return (
         // Pure Container - Height and Background only
-        <section ref={ref} className="relative min-h-[150vh] w-full bg-[#030712] overflow-hidden flex flex-col items-center justify-center select-none">
+        <section ref={ref} className="relative min-h-[150vh] w-full bg-[#030712] overflow-hidden flex flex-col items-center justify-center select-none pt-48 pb-32">
+
+            {/* Top Blur Transition */}
+            <div className="absolute top-0 left-0 w-full h-24 bg-gradient-to-b from-[#030712] via-[#030712]/80 to-transparent backdrop-blur-xl z-20 pointer-events-none" />
+
+            {/* Bottom Transition to Footer - Matches Footer bg color zinc-950 */}
+            <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-zinc-950 via-zinc-950/80 to-transparent backdrop-blur-sm z-20 pointer-events-none" />
 
             {/* 3D Interactive Network - Z-0 - Absolute Inset */}
             {/* Now contains the Title internally for correct stacking */}
-            <div className="absolute inset-0 z-0 w-full h-full flex items-center justify-center">
+            <div className="absolute inset-0 z-0 w-full h-full flex items-center justify-center pt-20">
                 {/* Expanded to h-full to match the [150vh] parent and prevent clipping */}
                 <div className="w-full md:w-[90vw] h-full">
                     <Interactive3DNetwork qualities={QUALITIES} />

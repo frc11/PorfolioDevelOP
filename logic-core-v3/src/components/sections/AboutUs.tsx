@@ -61,6 +61,9 @@ export const AboutUs = () => {
 
     return (
         <section ref={targetRef} className="relative h-[400vh] bg-zinc-950" id="about">
+            {/* Top Fade (Integration with Hero) */}
+            <div className="absolute top-0 left-0 w-full h-64 bg-gradient-to-b from-zinc-950 to-transparent z-20 pointer-events-none" />
+
             <div ref={inViewRef} className="absolute top-0 h-[20vh] w-full pointer-events-none" />
             <div className="sticky top-0 flex h-screen items-center overflow-hidden">
                 <motion.div style={{ x }} className="flex gap-20 px-20 items-center">

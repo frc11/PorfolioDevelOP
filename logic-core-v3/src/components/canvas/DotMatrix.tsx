@@ -74,9 +74,9 @@ export function DotMatrix() {
             meshRef.current!.setMatrixAt(i, dummy.matrix);
 
             // COLOR DINÁMICO
-            // Oscuro en el fondo, Claro en la cresta de la ola
+            // Claro en el fondo, Oscuro en la cresta de la ola (Para Light Mode)
             const intensity = (waveZ + 1.5) / 3; // Normalizar aprox 0 a 1
-            color.setHex(0x333333).lerp(new THREE.Color('#dddddd'), intensity + mouseInfluence * 0.5);
+            color.setHex(0xd4d4d8).lerp(new THREE.Color('#52525b'), intensity + mouseInfluence * 0.5);
 
             meshRef.current!.setColorAt(i, color);
         });

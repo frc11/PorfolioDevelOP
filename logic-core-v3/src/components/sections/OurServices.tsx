@@ -181,7 +181,10 @@ const ServiceCard = ({ title, tagline, icon: Icon, features, duration, theme }: 
 
 export const OurServices = () => {
     return (
-        <section className="relative min-h-screen py-32 bg-zinc-950 flex flex-col items-center justify-center overflow-hidden" id="services">
+        <section className="relative min-h-screen py-75 bg-zinc-950 flex flex-col items-center justify-center overflow-hidden" id="services">
+
+            {/* Bottom Blur Transition - Matches next section bg color #030712 */}
+            <div className="absolute bottom-0 left-0 w-full h-48 bg-gradient-to-t from-[#030712] via-[#030712]/80 to-transparent backdrop-blur-xl z-20 pointer-events-none" />
 
             {/* Layered Digital Aurora Background */}
             <div className="absolute inset-0 pointer-events-none">

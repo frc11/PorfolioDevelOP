@@ -24,7 +24,13 @@ const ParticleStream = ({ side }: { side: 'left' | 'right' }) => {
     const isLeft = side === 'left';
 
     return (
-        <div className={`absolute w-[20vw] h-full pointer-events-none overflow-hidden z-0 ${isLeft ? 'left-0 top-0' : 'right-0 top-0'}`}>
+        <div
+            className={`absolute w-[20vw] h-full pointer-events-none overflow-hidden z-0 ${isLeft ? 'left-0 top-0' : 'right-0 top-0'}`}
+            style={{
+                maskImage: 'linear-gradient(to bottom, transparent, black 20%)',
+                WebkitMaskImage: 'linear-gradient(to bottom, transparent, black 20%)'
+            }}
+        >
             {particles.map((p) => (
                 <motion.div
                     key={p.id}
@@ -265,6 +271,9 @@ export const Footer = () => {
             {/* Streams (Behind Overlay) */}
             <ParticleStream side="left" />
             <ParticleStream side="right" />
+
+            {/* Top Transition - Catches the Fade from WhyDevelOP */}
+            <div className="absolute top-0 w-full h-32 bg-gradient-to-b from-zinc-950 via-zinc-950/50 to-transparent backdrop-blur-sm pointer-events-none z-10" />
 
             {/* Main Content */}
             {/* Removed z-10 from parent to avoid trapping stacking context. Used pointer-events-none to let clicks pass through gaps. */}

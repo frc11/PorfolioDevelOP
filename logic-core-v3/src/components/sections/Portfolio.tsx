@@ -78,10 +78,16 @@ export const Portfolio = () => {
                 className="absolute inset-0 pointer-events-none z-0"
                 style={{
                     backgroundImage: 'radial-gradient(circle at 1px 1px, #27272a 3px, transparent 0)',
-                    backgroundSize: '10px 10px',
-                    opacity: 0.2
+                    backgroundSize: '32px 32px', // Increased spacing for elegance
+                    opacity: 0.25
                 }}
             />
+
+            {/* Top Fade (Integration with About) */}
+            <div className="absolute top-0 left-0 w-full h-64 bg-gradient-to-b from-zinc-950 to-transparent z-0 pointer-events-none" />
+
+            {/* Bottom Fade (Integration with Next Section) */}
+            <div className="absolute bottom-0 left-0 w-full h-64 bg-gradient-to-t from-zinc-950 to-transparent z-0 pointer-events-none" />
 
             <div className="container mx-auto px-6 md:px-12 relative z-10 h-[60vh]">
                 <div className="flex justify-between items-end mb-12 border-b border-zinc-800 pb-8">

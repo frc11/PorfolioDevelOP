@@ -126,7 +126,9 @@ const ReviewCard = ({ name, text }: { name: string; text: string }) => (
 
 export const InfiniteReviews = () => {
     return (
-        <section className="py-32 bg-zinc-50 overflow-hidden text-zinc-900 border-t border-zinc-200">
+        <section className="pt-50 pb-25 bg-zinc-50 overflow-hidden text-zinc-900 relative">
+            {/* Top Fade (Integration with Portfolio) */}
+            <div className="absolute top-0 left-0 w-full h-64 bg-gradient-to-b from-zinc-950 to-transparent z-20 pointer-events-none" />
 
             {/* Marquee 1 - Left direction */}
             <ParallaxText baseVelocity={-1}>

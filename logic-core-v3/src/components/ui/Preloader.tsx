@@ -1,29 +1,49 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from "framer-motion";
 
 export default function Preloader() {
     const [isLoading, setIsLoading] = useState(true);
 
+    // 1. Motion value for progress
+    const progress = useMotionValue(0);
+    // 2. Spring animation for smooth progress
+    const smoothProgress = useSpring(progress, {
+        damping: 50,
+        stiffness: 400,
+        mass: 1,
+    });
+
+    // 3. Transform spring value to visual properties
+    const pathLength = useTransform(smoothProgress, [0, 1], [0, 1]); // Map 0-1
+    const fillOpacity = useTransform(smoothProgress, [0.85, 1], [0, 1]); // Fade in fill near end
+    const scale = useTransform(smoothProgress, [0.95, 1], [1, 1.1]); // Subtle pulse at 100%
+
     useEffect(() => {
-        // Bloquear scroll
+        // Lock scroll
         document.body.style.overflow = "hidden";
 
-        // Tiempo total de la animación antes de desbloquear
-        // Fase 1 (Draw 1.5s) + Fase 2 (Fill 0.5s) + Fase 3 (Pulse 0.5s) = 2.5s
-        // + un pequeño buffer antes del exit
-        const timer = setTimeout(() => {
+        // Step 1: Wait for page hydration spike to settle (800ms)
+        // This prevents the animation from stuttering during the heaviest CPU load
+        const startTimer = setTimeout(() => {
+            progress.set(1);
+        }, 800);
+
+        // Step 2: Exit Strategy
+        // 800ms (Delay) + ~1500ms (Spring Settle) + 500ms (Buffer) = ~2800ms
+        const exitTimer = setTimeout(() => {
             setIsLoading(false);
             document.body.style.overflow = "auto";
             window.scrollTo(0, 0);
-        }, 2800);
+        }, 3000); // Enforce minimum duration
 
         return () => {
-            clearTimeout(timer);
+            clearTimeout(startTimer);
+            clearTimeout(exitTimer);
             document.body.style.overflow = "auto";
         };
-    }, []);
+    }, [progress]);
 
     return (
         <AnimatePresence mode="wait">

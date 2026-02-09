@@ -313,7 +313,7 @@ export const Interactive3DNetwork = ({ qualities }: { qualities: QualityNode[] }
     return (
         <div className="w-full h-full cursor-grab active:cursor-grabbing relative z-0">
             {/* Zoomed out camera: Z = 24 to ensure full sphere visibility AND space for stars */}
-            <Canvas camera={{ position: [0, 0, 24], fov: 40 }} gl={{ alpha: true, antialias: true }}>
+            <Canvas camera={{ position: [0, 0, 24], fov: 40 }} gl={{ alpha: true, antialias: false, powerPreference: "high-performance", stencil: false, depth: false }} dpr={[1, 1.5]}>
                 {/* Deep Space Background */}
                 <color attach="background" args={['#030712']} />
 
