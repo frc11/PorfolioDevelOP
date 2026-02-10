@@ -273,7 +273,7 @@ export const Footer = () => {
             <ParticleStream side="right" />
 
             {/* Top Transition - Catches the Fade from WhyDevelOP */}
-            <div className="absolute top-0 w-full h-32 bg-gradient-to-b from-zinc-950 via-zinc-950/50 to-transparent backdrop-blur-sm pointer-events-none z-10" />
+            <div className="absolute top-0 w-full h-64 bg-gradient-to-b from-zinc-950 via-zinc-950/0 to-transparent backdrop-blur-[2px] [mask-image:linear-gradient(to_bottom,black,transparent)] pointer-events-none z-10" />
 
             {/* Main Content */}
             {/* Removed z-10 from parent to avoid trapping stacking context. Used pointer-events-none to let clicks pass through gaps. */}

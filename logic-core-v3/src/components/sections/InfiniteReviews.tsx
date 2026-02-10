@@ -130,29 +130,36 @@ export const InfiniteReviews = () => {
             {/* Top Fade (Integration with Portfolio) */}
             <div className="absolute top-0 left-0 w-full h-64 bg-gradient-to-b from-zinc-950 to-transparent z-20 pointer-events-none" />
 
-            {/* Marquee 1 - Left direction */}
-            <ParallaxText baseVelocity={-1}>
-                <ReviewCard name="TechCrunch" text="Redefining what a digital agency can deliver through sheer engineering excellence." />
-                <ReviewCard name="Awwwards" text="A masterclass in user experience, combining 3D depth with seamless interactions." />
-                <ReviewCard name="Forbes" text="The team behind the most scalable visual systems of 2024." />
-                <ReviewCard name="Wired" text="Where brutalist aesthetics meet sophisticated neural architecture." />
-            </ParallaxText>
+            <motion.div
+                initial={{ opacity: 0, y: 40 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-15%" }}
+                transition={{ duration: 0.8, ease: "easeOut" }}
+            >
+                {/* Marquee 1 - Left direction */}
+                <ParallaxText baseVelocity={-1}>
+                    <ReviewCard name="TechCrunch" text="Redefining what a digital agency can deliver through sheer engineering excellence." />
+                    <ReviewCard name="Awwwards" text="A masterclass in user experience, combining 3D depth with seamless interactions." />
+                    <ReviewCard name="Forbes" text="The team behind the most scalable visual systems of 2024." />
+                    <ReviewCard name="Wired" text="Where brutalist aesthetics meet sophisticated neural architecture." />
+                </ParallaxText>
 
-            {/* Marquee 2 - Right direction (faster) - Mixed Variants */}
-            <ParallaxText baseVelocity={1.5}>
-                <ActiveWord text="RESULTS" variant="solid" />
-                <ActiveWord text="PRECISION" variant="outline" />
-                <ActiveWord text="SCALE" variant="solid" />
-                <ActiveWord text="IMPACT" variant="outline" />
-            </ParallaxText>
+                {/* Marquee 2 - Right direction (faster) - Mixed Variants */}
+                <ParallaxText baseVelocity={1.5}>
+                    <ActiveWord text="RESULTS" variant="solid" />
+                    <ActiveWord text="PRECISION" variant="outline" />
+                    <ActiveWord text="SCALE" variant="solid" />
+                    <ActiveWord text="IMPACT" variant="outline" />
+                </ParallaxText>
 
-            {/* Marquee 3 - Left direction - Mixed Variants */}
-            <ParallaxText baseVelocity={-2}>
-                <ActiveWord text="ENGINEERING" variant="outline" />
-                <ActiveWord text="CREATIVITY" variant="solid" />
-                <ActiveWord text="INNOVATION" variant="outline" />
-                <ActiveWord text="LOGIC" variant="solid" />
-            </ParallaxText>
+                {/* Marquee 3 - Left direction - Mixed Variants */}
+                <ParallaxText baseVelocity={-2}>
+                    <ActiveWord text="ENGINEERING" variant="outline" />
+                    <ActiveWord text="CREATIVITY" variant="solid" />
+                    <ActiveWord text="INNOVATION" variant="outline" />
+                    <ActiveWord text="LOGIC" variant="solid" />
+                </ParallaxText>
+            </motion.div>
 
         </section>
     );

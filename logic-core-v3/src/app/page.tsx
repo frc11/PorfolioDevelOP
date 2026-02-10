@@ -35,7 +35,7 @@ const Section = ({ children, className = "" }: { children: React.ReactNode, clas
 )
 
 import { SectionTransition } from '@/components/layout/SectionTransition'
-import { ServicesTransition } from '@/components/layout/ServicesTransition'
+
 
 // ... (existing imports)
 
@@ -71,15 +71,9 @@ function HomeContent() {
 
 
 
-        <Section>
-          <Portfolio />
-        </Section>
+        <Portfolio />
 
-
-
-        <Section>
-          <InfiniteReviews />
-        </Section>
+        <InfiniteReviews />
 
         {/* BLUR TRANSITION: Frosted lens effect */}
         <div className="relative z-20 -mb-32 pointer-events-none">

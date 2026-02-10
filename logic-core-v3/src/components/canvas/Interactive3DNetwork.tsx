@@ -4,7 +4,7 @@ import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, Line, Sphere, Environment, Float, Html } from '@react-three/drei';
 import * as THREE from 'three';
 import { motion, AnimatePresence } from 'framer-motion';
-import { PersistentGlitchText } from '@/components/ui/PersistentGlitchText';
+import { HyperText } from '@/components/ui/HyperText';
 
 // --- Types ---
 interface QualityNode {
@@ -325,7 +325,13 @@ export const Interactive3DNetwork = ({ qualities }: { qualities: QualityNode[] }
                 <Html fullscreen className="pointer-events-none flex flex-col items-center justify-center select-none" style={{ zIndex: 200 }}>
                     <div className="relative z-10 flex flex-col items-center">
                         <h2 className="text-5xl md:text-8xl font-black text-white tracking-tighter uppercase text-center">
-                            <PersistentGlitchText text="¿POR QUÉ DEVELOP?" />
+                            <HyperText
+                                text="¿POR QUÉ DEVELOP?"
+                                className="text-white"
+                                delay={200}
+                                duration={1500}
+                                persist={true}
+                            />
                         </h2>
                         <div className="flex gap-4 mt-6 opacity-80">
                             <p className="text-xs text-zinc-500 font-mono tracking-[0.5em]">[ NEURAL CORE ONLINE ]</p>

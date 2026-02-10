@@ -89,7 +89,13 @@ export const Portfolio = () => {
             {/* Bottom Fade (Integration with Next Section) */}
             <div className="absolute bottom-0 left-0 w-full h-64 bg-gradient-to-t from-zinc-950 to-transparent z-0 pointer-events-none" />
 
-            <div className="container mx-auto px-6 md:px-12 relative z-10 h-[60vh]">
+            <motion.div
+                initial={{ opacity: 0, y: 40 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-15%" }}
+                transition={{ duration: 0.8, ease: "easeOut" }}
+                className="container mx-auto px-6 md:px-12 relative z-10 h-[60vh]"
+            >
                 <div className="flex justify-between items-end mb-12 border-b border-zinc-800 pb-8">
                     <div>
                         <h2 className="text-5xl md:text-8xl font-black text-zinc-100 tracking-tighter">
@@ -145,7 +151,7 @@ export const Portfolio = () => {
                         })}
                     </AnimatePresence>
                 </div>
-            </div>
+            </motion.div>
         </section>
     );
 };
