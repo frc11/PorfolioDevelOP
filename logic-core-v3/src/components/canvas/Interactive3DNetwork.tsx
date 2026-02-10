@@ -307,7 +307,7 @@ const Scene = ({ qualities, onHoverChange }: { qualities: QualityNode[], onHover
 
 // --- Main Export ---
 
-export const Interactive3DNetwork = ({ qualities }: { qualities: QualityNode[] }) => {
+export const Interactive3DNetwork = ({ qualities, titleVisible }: { qualities: QualityNode[], titleVisible?: boolean }) => {
     const [isHoveringNode, setIsHoveringNode] = useState(false);
 
     return (
@@ -325,13 +325,7 @@ export const Interactive3DNetwork = ({ qualities }: { qualities: QualityNode[] }
                 <Html fullscreen className="pointer-events-none flex flex-col items-center justify-center select-none" style={{ zIndex: 200 }}>
                     <div className="relative z-10 flex flex-col items-center">
                         <h2 className="text-5xl md:text-8xl font-black text-white tracking-tighter uppercase text-center">
-                            <HyperText
-                                text="¿POR QUÉ DEVELOP?"
-                                className="text-white"
-                                delay={200}
-                                duration={1500}
-                                persist={true}
-                            />
+                            <HyperText text="¿POR QUÉ DEVELOP?" persist={true} trigger={titleVisible} />
                         </h2>
                         <div className="flex gap-4 mt-6 opacity-80">
                             <p className="text-xs text-zinc-500 font-mono tracking-[0.5em]">[ NEURAL CORE ONLINE ]</p>

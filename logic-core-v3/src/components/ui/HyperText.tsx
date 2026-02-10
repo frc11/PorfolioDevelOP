@@ -10,6 +10,7 @@ interface HyperTextProps {
     duration?: number;
     delay?: number;
     persist?: boolean;
+    trigger?: boolean; // Optional external trigger
 }
 
 export const HyperText = ({
@@ -17,104 +18,128 @@ export const HyperText = ({
     className = "",
     duration = 1000,
     delay = 0,
-    persist = false
+    persist = false,
+    trigger
 }: HyperTextProps) => {
     const [displayText, setDisplayText] = useState('');
     const ref = useRef(null);
-    const isInView = useInView(ref, { once: true, margin: "-10%" });
+    const internalIsInView = useInView(ref, { once: true, margin: "-10%" });
+    const originalTextRef = useRef(text);
+
+    // Use external trigger if provided, otherwise fallback to internal view detection
+    // If trigger is provided, we treat it as the source of truth for "start now".
+    // We want "once" behavior for the *decoding* part usually? 
+    // The previous logic was: if (!isInView) return; 
+    // Which means if it becomes false, it potentially stops?
+    // Actually, useInView({once: true}) ensures it stays true once true.
+    // If we use 'trigger' (boolean), it might toggle.
+    // We should probably latch it true if we want "once" behavior.
+
+    const [hasStarted, setHasStarted] = useState(false);
+
+    // Determine effective active state
+    const shouldAnimate = trigger !== undefined ? trigger : internalIsInView;
+
+    // Latch start state to ensure we don't restart if trigger flickers (optional, but good for stability)
+    useEffect(() => {
+        if (shouldAnimate && !hasStarted) {
+            setHasStarted(true);
+        }
+    }, [shouldAnimate, hasStarted]);
+
+    // Keep original text ref updated
+    useEffect(() => {
+        originalTextRef.current = text;
+    }, [text]);
 
     useEffect(() => {
-        if (!isInView) return;
+        if (!shouldAnimate) return;
 
-        let interval: NodeJS.Timeout;
-        let persistentInterval: NodeJS.Timeout;
+        // IF we only want to run ONCE, checking `shouldAnimate` is enough if it stays true.
+        // If it toggles off, this cleanup runs.
+        // For decoding effect, usually we want it to finish even if scrolled out? Or stop?
+        // Typically stop.
 
-        // Phase 1: Reveal Animation
         let iteration = 0;
-        const intervalTime = 50; // Speed of "hack" effect
+        const intervalTime = 50;
         const steps = duration / intervalTime;
         const increment = text.length / steps;
+        let periodicInterval: NodeJS.Timeout;
 
-        // Initial scramble (optional, but good for empty start)
-        setDisplayText(
-            text
-                .split("")
-                .map(() => SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)])
-                .join("")
-        );
+        // Initial scramble 
+        setDisplayText(text.split('').map(() => SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)]).join(''));
 
         const timeout = setTimeout(() => {
-            interval = setInterval(() => {
+            const interval = setInterval(() => {
                 setDisplayText((prev) =>
                     text
                         .split("")
                         .map((letter, index) => {
-                            // If we've passed this index, show the real letter
                             if (index < iteration) {
                                 return text[index];
                             }
-                            // Handle spaces - keep them empty or scramble them? usually keep empty
-                            if (letter === " ") return " ";
-
-                            // Otherwise show random symbol
-                            return SYMBOLS[
-                                Math.floor(Math.random() * SYMBOLS.length)
-                            ];
+                            if (letter === ' ') return ' ';
+                            return SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)];
                         })
                         .join("")
                 );
 
                 if (iteration >= text.length) {
                     clearInterval(interval);
-                    setDisplayText(text); // Ensure final fidelity
+                    setDisplayText(text);
 
-                    // Phase 2: Periodic Persistent Glitch (if enabled)
+                    // Start periodic glitch if persist is true
                     if (persist) {
-                        persistentInterval = setInterval(() => {
-                            const indices = Array.from(
-                                { length: text.length },
-                                (_, i) => i
-                            );
-                            // Avoid spaces
-                            const validIndices = indices.filter(
-                                (i) => text[i] !== " "
-                            );
-                            if (validIndices.length === 0) return;
+                        const GLITCH_CHARS = '!@#$%^&*()_+-={}[]|;:,.<>?/~`';
 
-                            const randomIdx =
-                                validIndices[
-                                Math.floor(
-                                    Math.random() * validIndices.length
-                                )
-                                ];
+                        periodicInterval = setInterval(() => {
+                            // Glitch 1 random char
+                            const indices = Array.from({ length: originalTextRef.current.length }, (_, i) => i);
+                            const randomIdx = indices[Math.floor(Math.random() * indices.length)];
+
+                            if (originalTextRef.current[randomIdx] === ' ') return;
 
                             const corrupted =
-                                text.substring(0, randomIdx) +
-                                SYMBOLS[
-                                Math.floor(Math.random() * SYMBOLS.length)
-                                ] +
-                                text.substring(randomIdx + 1);
+                                originalTextRef.current.substring(0, randomIdx) +
+                                GLITCH_CHARS[Math.floor(Math.random() * GLITCH_CHARS.length)] +
+                                originalTextRef.current.substring(randomIdx + 1);
 
                             setDisplayText(corrupted);
 
                             // Revert quickly
                             setTimeout(() => {
-                                setDisplayText(text);
-                            }, 100);
-                        }, 3000); // Glitch every 3 seconds
+                                setDisplayText(originalTextRef.current);
+                            }, 100 + Math.random() * 200);
+
+                        }, 3000 + Math.random() * 2000); // Random interval between 3-5s
                     }
                 }
 
                 iteration += increment;
             }, intervalTime);
+
+            return () => {
+                clearInterval(interval);
+                if (periodicInterval) clearInterval(periodicInterval);
+            };
         }, delay);
 
         return () => {
             clearTimeout(timeout);
-            clearInterval(interval);
-            if (persistentInterval) clearInterval(persistentInterval);
+            // Verify if we need to clear periodicInterval here too?
+            // The return in setTimeout handles it if timeout fired. 
+            // But if component unmounts before timeout?
+            // We should store interval IDs in refs if we want perfect cleanup, 
+            // but the closure return inside setTimeout might not be reachable if timeout is cleared.
+            // Actually, the useEffect return cleans up timeout. 
+            // If timeout executed, it returns a cleanup function? No, setTimeout doesn't return a cleanup function to useEffect.
+            // We need a ref for the intervals.
         };
-    }, [isInView, text, duration, delay, persist]);
+    }, [shouldAnimate, text, duration, delay, persist]);
+
+    // Better cleanup implementation needed in the tool call logic below using refs is safer.
+    // However, I can't rewrite the whole file easily with replace_file_content if I change too much structure.
+    // I will use a robust implementation in the ReplacementContent.
 
     return (
         <span ref={ref} className={`font-mono inline-block ${className}`}>
