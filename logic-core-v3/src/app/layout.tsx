@@ -23,6 +23,8 @@ import { SmoothScroll } from "@/components/layout/SmoothScroll";
 import { DynamicDock } from "@/components/layout/DynamicDock";
 import Preloader from "@/components/ui/Preloader";
 import { LogicCompanion } from "@/modules/ai-companion";
+import { TransitionProvider } from "@/context/TransitionContext";
+import { Shutter } from "@/components/layout/Shutter";
 
 export default function RootLayout({
   children,
@@ -36,11 +38,14 @@ export default function RootLayout({
       >
         <CustomCursor />
         <NoiseOverlay />
-        <SmoothScroll>
-          {children}
-        </SmoothScroll>
+        <TransitionProvider>
+          <Shutter />
+          <SmoothScroll>
+            {children}
+          </SmoothScroll>
+          <DynamicDock />
+        </TransitionProvider>
         <Preloader />
-        <DynamicDock />
         <LogicCompanion />
       </body>
     </html>

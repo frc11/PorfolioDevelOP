@@ -7,9 +7,10 @@ import {
     useTransform,
     AnimatePresence,
 } from "framer-motion";
-import { Home, Briefcase, Terminal, Layers, Mail } from "lucide-react";
+import { Home, Briefcase, Terminal, Layers, Mail, Lightbulb } from "lucide-react";
 import Link from "next/link";
 import { useRef, useState } from "react";
+import { useTransitionContext } from "@/context/TransitionContext";
 
 export const DynamicDock = () => {
     const mouseX = useMotionValue(Infinity);
@@ -17,28 +18,33 @@ export const DynamicDock = () => {
     const icons = [
         {
             icon: <Home className="w-full h-full" />,
-            href: "#hero",
-            label: "Home",
+            href: "inicio", // Removed # for ID usage in context
+            label: "Inicio",
         },
         {
             icon: <Terminal className="w-full h-full" />,
-            href: "#about",
+            href: "nosotros",
             label: "Nosotros",
         },
         {
             icon: <Briefcase className="w-full h-full" />,
-            href: "#portfolio",
+            href: "portfolio",
             label: "Portfolio",
         },
         {
             icon: <Layers className="w-full h-full" />,
-            href: "#the-studio",
-            label: "Studio",
+            href: "servicios",
+            label: "Servicios",
+        },
+        {
+            icon: <Lightbulb className="w-full h-full" />,
+            href: "porque-develop",
+            label: "Características",
         },
         {
             icon: <Mail className="w-full h-full" />,
-            href: "#footer",
-            label: "Contact",
+            href: "pie",
+            label: "Fin",
         },
     ];
 
@@ -70,6 +76,7 @@ function DockIcon({
 }) {
     const ref = useRef<HTMLDivElement>(null);
     const [hovered, setHovered] = useState(false);
+    const { triggerTransition } = useTransitionContext();
 
     const distance = useTransform(mouseX, (val: number) => {
         const bounds = ref.current?.getBoundingClientRect() ?? { x: 0, width: 0 };
@@ -83,8 +90,13 @@ function DockIcon({
         damping: 15,
     });
 
+    const handleClick = (e: React.MouseEvent) => {
+        e.preventDefault();
+        triggerTransition(href);
+    };
+
     return (
-        <Link href={href}>
+        <a href={`#${href}`} onClick={handleClick}>
             <motion.div
                 ref={ref}
                 style={{ width }}
@@ -108,6 +120,6 @@ function DockIcon({
                     {icon}
                 </span>
             </motion.div>
-        </Link>
+        </a>
     );
 }

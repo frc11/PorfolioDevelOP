@@ -10,7 +10,7 @@ import { DotMatrix } from '@/components/canvas/DotMatrix'
 
 export function Hero() {
     return (
-        <section className="min-h-screen grid grid-cols-1 md:grid-cols-2 relative overflow-hidden bg-zinc-50" id="hero">
+        <section className="min-h-screen grid grid-cols-1 md:grid-cols-2 relative overflow-hidden bg-zinc-50" id="inicio">
 
             {/* COLUMN LEFT: TEXT */}
             <div className="flex flex-col justify-center px-8 md:px-24 order-2 md:order-1 text-zinc-900 z-10 relative">

@@ -60,7 +60,7 @@ export const AboutUs = () => {
     useThemeSection(isInView, 'light');
 
     return (
-        <section ref={targetRef} className="relative h-[400vh] bg-zinc-950" id="about">
+        <section ref={targetRef} className="relative h-[400vh] bg-zinc-950" id="nosotros">
             {/* Top Fade (Integration with Hero) */}
             <div className="absolute top-0 left-0 w-full h-64 bg-gradient-to-b from-zinc-950 to-transparent z-20 pointer-events-none" />
 

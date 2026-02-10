@@ -254,7 +254,7 @@ export const Footer = () => {
     const opacityText = useTransform(scrollYProgress, [0, 0.5], [0, 1]);
 
     return (
-        <footer ref={containerRef} className="relative min-h-screen bg-zinc-950 flex flex-col items-center justify-center overflow-hidden">
+        <footer ref={containerRef} className="relative min-h-screen bg-zinc-950 flex flex-col items-center justify-center overflow-hidden" id='pie'>
 
             {/* CINEMA MODE OVERLAY - Reduced Opacity to 40% */}
             {/* z-20: Sits above background and particles, but BELOW Content with z-50 */}
