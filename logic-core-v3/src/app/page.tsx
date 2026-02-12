@@ -9,7 +9,7 @@ const Hero = dynamic(() => import('@/components/layout/Hero').then(mod => mod.He
 const Footer = dynamic(() => import('@/components/sections/Footer').then(mod => mod.Footer), { ssr: true })
 const WhyDevelOP = dynamic(() => import('@/components/sections/WhyDevelOP').then(mod => mod.WhyDevelOP), { ssr: true })
 
-import { AboutUs } from '@/components/sections/AboutUs'
+import { About } from '@/components/sections/About'
 import { Portfolio } from '@/components/sections/Portfolio'
 import { OurServices } from '@/components/sections/OurServices';
 import { WebDesigns } from '@/components/sections/WebDesigns'
@@ -67,7 +67,7 @@ function HomeContent() {
         <Hero />
 
         {/* Light Mode Return - Horizontal Scroll */}
-        <AboutUs />
+        <About />
 
 
 

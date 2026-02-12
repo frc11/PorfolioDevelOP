@@ -179,8 +179,7 @@ const MagneticButton = ({ onHoverStart, onHoverEnd, href }: MagneticButtonProps)
                     <div className="absolute inset-0 rounded-full border border-zinc-300 scale-95 opacity-50 group-hover:border-zinc-400 transition-colors duration-500" />
 
                     {/* 4. CONTENT (Text -> Rocket) */}
-                    <motion.div style={{ x: textX, y: textY }} className="relative z-10 flex flex-col items-center justify-center">
-
+                    <motion.div style={{ x: textX, y: textY }} className="relative z-10 flex flex-col items-center gap-12">
                         {/* Default State: TEXT */}
                         <span className="text-xl md:text-2xl font-black text-black tracking-tighter group-hover:opacity-0 transition-opacity duration-300 absolute">
                             START
@@ -264,6 +263,16 @@ export const Footer = () => {
 
     const yText = useTransform(scrollYProgress, [0, 1], [100, 0]);
     const opacityText = useTransform(scrollYProgress, [0, 0.5], [0, 1]);
+
+    const [isNavigating, setIsNavigating] = useState(false);
+    const { triggerTransition } = useTransitionContext(); // Moved here
+
+    const handleNavigate = async (path: string) => {
+        setIsNavigating(true);
+        // Wait for the button scale animation (handled via isNavigating state in motion)
+        await new Promise(resolve => setTimeout(resolve, 800));
+        triggerTransition(path);
+    };
 
     return (
         <footer ref={containerRef} className="relative min-h-screen bg-zinc-950 flex flex-col items-center justify-center overflow-hidden">
