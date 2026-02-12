@@ -38,13 +38,13 @@ export default function RootLayout({
       >
         <CustomCursor />
         <NoiseOverlay />
-        <TransitionProvider>
-          <Shutter />
-          <SmoothScroll>
+        <SmoothScroll>
+          <TransitionProvider>
+            <Shutter />
             {children}
-          </SmoothScroll>
-          <DynamicDock />
-        </TransitionProvider>
+            <DynamicDock />
+          </TransitionProvider>
+        </SmoothScroll>
         <Preloader />
         <LogicCompanion />
       </body>

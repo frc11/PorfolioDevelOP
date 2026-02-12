@@ -1,6 +1,7 @@
 'use client';
 
 import { createContext, useContext, useState, ReactNode } from 'react';
+import { useLenis } from '@/components/layout/SmoothScroll'; // Asegúrate que la ruta sea correcta
 
 interface TransitionContextType {
     isAnimating: boolean;
@@ -11,34 +12,77 @@ const TransitionContext = createContext<TransitionContextType | undefined>(undef
 
 export function TransitionProvider({ children }: { children: ReactNode }) {
     const [isAnimating, setIsAnimating] = useState(false);
+    const lenis = useLenis();
 
     const triggerTransition = (targetId: string) => {
-        if (isAnimating) return; // Prevent double triggers
+        if (isAnimating) return;
 
-        // 1. Start Close Animation
         setIsAnimating(true);
 
-        // 2. Wait for panels to close completely (assuming 500ms duration)
-        // We give it slightly less than total animation to start scrolling while covered?
-        // Or exactly match? User said: "Wait 500ms (Panels close)."
+        // FASE 1: MATAR LA INERCIA (Inmediato)
+        if (lenis) {
+            // .stop() congela el scroll y evita que el usuario interactúe
+            lenis.stop();
+        }
+
+        // Timer de seguridad por si algo falla
+        const safetyTimer = setTimeout(() => {
+            setIsAnimating(false);
+            if (lenis) lenis.start();
+        }, 2000);
+
+        // FASE 2: EL TELETRANSPORTE (500ms - cuando la animación cubre la pantalla)
         setTimeout(() => {
-            // 3. Teleport (Scroll)
             const element = document.getElementById(targetId);
-            if (element) {
-                element.scrollIntoView({ behavior: 'auto', block: 'start' });
-            } else {
-                console.warn(`Target element "${targetId}" not found.`);
-                // Fallback or handle error? If not found, maybe just stop animating?
-                // But we need to open the panels anyway.
+
+            if (element && lenis) {
+                // AQUÍ ESTÁ LA SOLUCIÓN:
+                // Usamos lenis.scrollTo con 'immediate: true'.
+                // Esto hace dos cosas:
+                // 1. Mueve el scroll instantáneamente sin animación suavizada.
+                // 2. Resetea la velocidad interna de Lenis a 0 (mata la inercia residual).
+
+                // Calcular offset para centrar secciones específicas
+                let offset = 0;
+                if (targetId === 'servicios' || targetId === 'porque-develop') {
+                    // Centrar el elemento en el viewport
+                    // Offset negativo mueve el scroll hacia arriba (mostrando más arriba del elemento)
+                    // Offset positivo mueve el scroll hacia abajo (entrando en el elemento)
+                    // lenis.scrollTo(element) lleva el top del elemento al top del viewport.
+                    // Queremos: (TopElement + ElementHeight/2) - (WindowHeight/2)
+                    // Lenis va a TopElement.
+                    // Adjustment = (ElementHeight/2) - (WindowHeight/2)
+
+                    const windowHeight = window.innerHeight;
+                    const elementHeight = element.offsetHeight;
+                    offset = (elementHeight - windowHeight) / 2;
+                }
+
+                lenis.scrollTo(element, {
+                    offset: offset,
+                    immediate: true,
+                    force: true,
+                    lock: true // Bloquea el scroll durante el frame (seguridad extra)
+                });
+            } else if (element) {
+                // Fallback por si Lenis no está cargado (raro, pero posible)
+                const shouldCenter = targetId === 'servicios' || targetId === 'porque-develop';
+                element.scrollIntoView({
+                    behavior: 'auto',
+                    block: shouldCenter ? 'center' : 'start'
+                });
             }
 
-            // 4. Wait for scroll stabilization / "Teleport" feeling
+            // FASE 3: EL REVEAL (Limpieza)
+            // Esperamos un poco más para que la animación de "salida" ocurra
+            // mientras ya estamos en la nueva posición estática.
             setTimeout(() => {
-                // 5. Start Open Animation
                 setIsAnimating(false);
-            }, 100);
+                if (lenis) lenis.start(); // Reactivamos Lenis desde velocidad 0
+                clearTimeout(safetyTimer);
+            }, 600); // Ajusta este tiempo según la duración de tu animación de salida
 
-        }, 500);
+        }, 500); // Tiempo que tarda tu animación en cubrir la pantalla
     };
 
     return (

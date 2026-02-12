@@ -131,6 +131,7 @@ const Starfield = () => {
                     count={points.length / 3}
                     array={points}
                     itemSize={3}
+                    args={[points, 3]}
                 />
             </bufferGeometry>
             <pointsMaterial
@@ -309,39 +310,71 @@ const Scene = ({ qualities, onHoverChange }: { qualities: QualityNode[], onHover
 
 export const Interactive3DNetwork = ({ qualities, titleVisible }: { qualities: QualityNode[], titleVisible?: boolean }) => {
     const [isHoveringNode, setIsHoveringNode] = useState(false);
+    const [isInteracting, setIsInteracting] = useState(false);
+    const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+    const handleInteractionStart = () => {
+        setIsInteracting(true);
+        if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
+
+    const handleInteractionEnd = () => {
+        // Debounce the return to normal state
+        timeoutRef.current = setTimeout(() => {
+            setIsInteracting(false);
+        }, 3000); // 3 seconds wait time before returning
+    };
+
+    const active = isInteracting || isHoveringNode;
 
     return (
-        <div className="w-full h-full cursor-grab active:cursor-grabbing relative z-0">
+        <div className="w-full h-full cursor-grab active:cursor-grabbing relative z-0 bg-[#030712]">
+            {/* 
+                TITLE INJECTION - MOVED OUTSIDE CANVAS
+                Fixed Layer: Z-Index 50 (Highest Priority in DOM)
+                This ensures it is visually on top of EVERYTHING, including other HTML-in-Canvas elements.
+            */}
+            <motion.div
+                className="absolute inset-0 pointer-events-none flex flex-col items-center justify-center select-none"
+                animate={{
+                    y: active ? 250 : 0, // Moves down significantly
+                    opacity: active ? 0.3 : 1,
+                    scale: active ? 0.9 : 1,
+                    zIndex: active ? 0 : 100 // Dynamically switch layering
+                }}
+                transition={{
+                    type: "spring",
+                    stiffness: 100,
+                    damping: 20
+                }}
+            >
+                {/* Removed the dark radial gradient to keep elements bright */}
+
+                <div className="relative z-10 flex flex-col items-center">
+                    <h2 className="text-5xl md:text-8xl font-black text-white tracking-tighter uppercase text-center drop-shadow-[0_0_25px_rgba(255,255,255,0.3)]">
+                        <HyperText text="¿POR QUÉ DEVELOP?" persist={true} trigger={titleVisible} />
+                    </h2>
+                    <div className="flex gap-4 mt-6 opacity-80">
+                        <p className="text-xs text-zinc-500 font-mono tracking-[0.5em] backdrop-blur-sm">[ NEURAL CORE ONLINE ]</p>
+                        <p className="text-xs text-cyan-500 font-mono tracking-[0.5em] animate-pulse drop-shadow-[0_0_10px_cyan]">_ACTIVE</p>
+                    </div>
+                </div>
+            </motion.div>
+
             {/* Zoomed out camera: Z = 24 to ensure full sphere visibility AND space for stars */}
             <Canvas camera={{ position: [0, 0, 24], fov: 40 }} gl={{ alpha: true, antialias: false, powerPreference: "high-performance", stencil: false, depth: false }} dpr={[1, 1.5]}>
-                {/* Deep Space Background */}
-                <color attach="background" args={['#030712']} />
-
-                {/* 
-                    TITLE INJECTION 
-                    Fixed Layer: Z-Index 200 (Highest Priority)
-                    This responds to "Nothing is fronter than the title".
-                */}
-                <Html fullscreen className="pointer-events-none flex flex-col items-center justify-center select-none" style={{ zIndex: 200 }}>
-                    <div className="relative z-10 flex flex-col items-center">
-                        <h2 className="text-5xl md:text-8xl font-black text-white tracking-tighter uppercase text-center">
-                            <HyperText text="¿POR QUÉ DEVELOP?" persist={true} trigger={titleVisible} />
-                        </h2>
-                        <div className="flex gap-4 mt-6 opacity-80">
-                            <p className="text-xs text-zinc-500 font-mono tracking-[0.5em]">[ NEURAL CORE ONLINE ]</p>
-                            <p className="text-xs text-cyan-500 font-mono tracking-[0.5em] animate-pulse">_ACTIVE</p>
-                        </div>
-                    </div>
-                </Html>
+                {/* Transparent Background to allow z-index layering trick */}
 
                 <OrbitControls
                     enableZoom={false}
                     enablePan={false}
                     rotateSpeed={0.5}
-                    autoRotate={!isHoveringNode}
+                    autoRotate={!isInteracting && !isHoveringNode}
                     autoRotateSpeed={0.5}
                     minPolarAngle={0}
                     maxPolarAngle={Math.PI}
+                    onStart={handleInteractionStart}
+                    onEnd={handleInteractionEnd}
                 />
 
                 <Starfield />
