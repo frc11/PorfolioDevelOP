@@ -105,14 +105,14 @@ export const Portfolio = () => {
                     {/* Navigation Arrows */}
                     <div className="flex gap-4">
                         <button
-                            data-cursor="expand"
+                            data-cursor="hover"
                             onClick={prevProject}
                             className="w-16 h-16 rounded-full border border-zinc-700 flex items-center justify-center text-zinc-400 hover:bg-zinc-800 hover:text-white transition-colors cursor-none"
                         >
                             <ArrowLeft className="w-6 h-6" />
                         </button>
                         <button
-                            data-cursor="expand"
+                            data-cursor="hover"
                             onClick={nextProject}
                             className="w-16 h-16 rounded-full border border-zinc-700 flex items-center justify-center text-zinc-400 hover:bg-zinc-800 hover:text-white transition-colors cursor-none"
                         >
@@ -183,7 +183,7 @@ const ProjectCard = ({ project }: { project: typeof PROJECTS[0] }) => {
 
     return (
         <motion.div
-            data-cursor="expand"
+            data-cursor="hover"
             onMouseMove={handleMouseMove}
             onMouseLeave={handleMouseLeave}
             style={{ perspective: 1000 }}

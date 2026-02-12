@@ -29,7 +29,34 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Ghost Mode: Scrollbar Exterminated */
+@layer base {
+
+  html,
+  body {
+    scrollbar-width: none;
+    /* Firefox */
+    -ms-overflow-style: none;
+    /* IE/Edge */
+  }
+
+  ::-webkit-scrollbar {
+    display: none;
+    /* Chrome, Safari, Opera */
+  }
+}
+
 /* Ensure Canvas takes full interaction */
 canvas {
   touch-action: none;
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+
+  100% {
+    transform: translateX(100%);
+  }
 }

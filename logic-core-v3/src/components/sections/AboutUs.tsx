@@ -12,7 +12,7 @@ interface TeamMemberProps {
 
 const TeamMember = ({ name, role, img }: TeamMemberProps) => (
     <div
-        data-cursor="block"
+        data-cursor="hover"
         className="group relative w-[400px] h-[450px] bg-zinc-900 overflow-hidden rounded-sm flex-shrink-0 border border-zinc-800 cursor-none"
     >
         <div
@@ -31,7 +31,7 @@ const DigitalHighlight = ({ children }: { children: React.ReactNode }) => {
     return (
         <span
             className="relative inline-block font-bold text-zinc-50 cursor-none"
-            data-cursor="block"
+            data-cursor="hover"
         >
             {/* The Text Layer */}
             <span className="relative z-10">{children}</span>

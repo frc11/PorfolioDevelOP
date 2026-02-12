@@ -61,7 +61,7 @@ export function WhyDevelOP() {
 
             {/* 3D Interactive Network - Z-0 - Absolute Inset */}
             {/* Now contains the Title internally for correct stacking */}
-            <div className="absolute inset-0 z-0 w-full h-full flex items-center justify-center pt-20" id='porque-develop'>
+            <div className="absolute inset-0 z-0 w-full h-full flex items-center justify-center pt-20" id='caracteristicas'>
                 {/* Expanded to h-full to match the [150vh] parent and prevent clipping */}
                 <div className="w-full md:w-[90vw] h-full">
                     <Interactive3DNetwork qualities={QUALITIES} titleVisible={isInView} />

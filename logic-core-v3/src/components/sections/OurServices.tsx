@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Cpu, Globe, ArrowRight } from "lucide-react";
+import { useTransitionContext } from "@/context/TransitionContext";
 
 // --- Particle Field Component (Overclocked) ---
 interface ParticleFieldProps {
@@ -73,9 +74,10 @@ interface ServiceCardProps {
     features: string[];
     duration: string;
     theme: 'cyan' | 'purple';
+    onClick?: () => void;
 }
 
-const ServiceCard = ({ title, tagline, icon: Icon, features, duration, theme }: ServiceCardProps) => {
+const ServiceCard = ({ title, tagline, icon: Icon, features, duration, theme, onClick }: ServiceCardProps) => {
     const [isHovered, setIsHovered] = useState(false);
 
     const isCyan = theme === 'cyan';
@@ -91,10 +93,11 @@ const ServiceCard = ({ title, tagline, icon: Icon, features, duration, theme }: 
 
     return (
         <div
-            className="group perspective-1000 w-full max-w-md h-[500px] cursor-pointer"
+            className="group perspective-1000 w-full max-w-md h-[500px] cursor-none"
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
-            data-cursor="block"
+            onClick={onClick}
+            data-cursor="hover"
         >
             <motion.div
                 className="w-full h-full relative transition-all duration-500"
@@ -180,6 +183,8 @@ const ServiceCard = ({ title, tagline, icon: Icon, features, duration, theme }: 
 };
 
 export const OurServices = () => {
+    const { triggerTransition } = useTransitionContext();
+
     return (
         <section className="relative min-h-screen py-75 bg-zinc-950 flex flex-col items-center justify-center overflow-hidden" id="servicios">
 
@@ -209,7 +214,7 @@ export const OurServices = () => {
                 </div>
 
                 {/* Cards Grid */}
-                <div className="flex flex-col md:flex-row gap-12 justify-center items-center perspective-origin-center">
+                <div className="flex flex-col md:flex-row gap-12 justify-center items-center perspective-origin-center ">
 
                     <ServiceCard
                         title="Web Development"
@@ -223,6 +228,7 @@ export const OurServices = () => {
                             "Headless CMS Integration",
                             "Atomic Design Systems"
                         ]}
+                        onClick={() => triggerTransition('/web-development')}
                     />
 
                     <ServiceCard
@@ -237,6 +243,7 @@ export const OurServices = () => {
                             "API Design & Integration",
                             "High-Load System Optimization"
                         ]}
+                        onClick={() => triggerTransition('/software-development')}
                     />
 
                 </div>

@@ -1,6 +1,8 @@
 'use client';
 import { useRef, useEffect, useState } from 'react';
+import Link from 'next/link';
 import { motion, useSpring, useMotionValue, useTransform, useScroll } from 'framer-motion';
+import { useTransitionContext } from '@/context/TransitionContext';
 
 // --- 1. COMPONENTE: STREAM DE PARTÍCULAS (PRESERVED) ---
 const ParticleStream = ({ side }: { side: 'left' | 'right' }) => {
@@ -105,9 +107,10 @@ const FlipLink = ({ children, href }: { children: string; href: string }) => {
 interface MagneticButtonProps {
     onHoverStart: () => void;
     onHoverEnd: () => void;
+    href: string;
 }
 
-const MagneticButton = ({ onHoverStart, onHoverEnd }: MagneticButtonProps) => {
+const MagneticButton = ({ onHoverStart, onHoverEnd, href }: MagneticButtonProps) => {
     const ref = useRef<HTMLDivElement>(null);
     const x = useMotionValue(0);
     const y = useMotionValue(0);
@@ -134,76 +137,85 @@ const MagneticButton = ({ onHoverStart, onHoverEnd }: MagneticButtonProps) => {
         onHoverEnd();
     };
 
+    const { triggerTransition } = useTransitionContext();
+
+    const handleClick = (e: React.MouseEvent) => {
+        e.preventDefault();
+        triggerTransition(href);
+    };
+
     return (
-        <motion.div
-            ref={ref}
-            onMouseMove={handleMouseMove}
-            onMouseLeave={reset}
-            onMouseEnter={onHoverStart}
-            style={{ x: mouseX, y: mouseY }}
-            className="group relative flex items-center justify-center z-40"
-            whileHover={{ scale: 1.8 }}
-            transition={{ type: "tween", ease: "circOut", duration: 2.5 }}
-        >
-            {/* JITTER LAYER */}
+        <div onClick={handleClick} className="cursor-none" data-cursor="hover">
             <motion.div
-                // Increased brightness with stronger shadow on hover
-                className="relative w-40 h-40 md:w-56 md:h-56 bg-white rounded-full flex items-center justify-center cursor-pointer overflow-hidden shadow-[0_0_50px_-10px_rgba(255,255,255,0.3)] group-hover:shadow-[0_0_100px_0px_rgba(255,255,255,0.6)] transition-shadow duration-500"
-                whileHover={{
-                    x: [0, -1, 1, -1, 1, 0],
-                    y: [0, 1, -1, 1, -1, 0],
-                }}
-                transition={{
-                    x: { repeat: Infinity, duration: 0.2, ease: "linear" },
-                    y: { repeat: Infinity, duration: 0.2, ease: "linear", delay: 0.1 }
-                }}
+                ref={ref}
+                onMouseMove={handleMouseMove}
+                onMouseLeave={reset}
+                onMouseEnter={onHoverStart}
+                style={{ x: mouseX, y: mouseY }}
+                className="group relative flex items-center justify-center z-40 block"
+                whileHover={{ scale: 1.8 }}
+                transition={{ type: "tween", ease: "circOut", duration: 2.5 }}
             >
-                {/* 1. Base Gradient - Kept bright */}
-                <div className="absolute inset-0 bg-gradient-to-tr from-white via-zinc-200 to-zinc-100 opacity-100" />
+                {/* JITTER LAYER */}
+                <motion.div
+                    // Increased brightness with stronger shadow on hover
+                    className="relative w-40 h-40 md:w-56 md:h-56 bg-white rounded-full flex items-center justify-center overflow-hidden shadow-[0_0_50px_-10px_rgba(255,255,255,0.3)] group-hover:shadow-[0_0_100px_0px_rgba(255,255,255,0.6)] transition-shadow duration-500"
+                    whileHover={{
+                        x: [0, -1, 1, -1, 1, 0],
+                        y: [0, 1, -1, 1, -1, 0],
+                    }}
+                    transition={{
+                        x: { repeat: Infinity, duration: 0.2, ease: "linear" },
+                        y: { repeat: Infinity, duration: 0.2, ease: "linear", delay: 0.1 }
+                    }}
+                >
+                    {/* 1. Base Gradient - Kept bright */}
+                    <div className="absolute inset-0 bg-gradient-to-tr from-white via-zinc-200 to-zinc-100 opacity-100" />
 
-                {/* 2. REMOVED BLURRY FLARE. Added subtle gradient shift on hover instead. */}
-                <div className="absolute inset-0 bg-gradient-to-tr from-cyan-50 via-white to-zinc-100 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+                    {/* 2. REMOVED BLURRY FLARE. Added subtle gradient shift on hover instead. */}
+                    <div className="absolute inset-0 bg-gradient-to-tr from-cyan-50 via-white to-zinc-100 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
 
-                {/* 3. Inner Border Ring */}
-                <div className="absolute inset-0 rounded-full border border-zinc-300 scale-95 opacity-50 group-hover:border-zinc-400 transition-colors duration-500" />
+                    {/* 3. Inner Border Ring */}
+                    <div className="absolute inset-0 rounded-full border border-zinc-300 scale-95 opacity-50 group-hover:border-zinc-400 transition-colors duration-500" />
 
-                {/* 4. CONTENT (Text -> Rocket) */}
-                <motion.div style={{ x: textX, y: textY }} className="relative z-10 flex flex-col items-center justify-center">
+                    {/* 4. CONTENT (Text -> Rocket) */}
+                    <motion.div style={{ x: textX, y: textY }} className="relative z-10 flex flex-col items-center justify-center">
 
-                    {/* Default State: TEXT */}
-                    <span className="text-xl md:text-2xl font-black text-black tracking-tighter group-hover:opacity-0 transition-opacity duration-300 absolute">
-                        START
-                    </span>
+                        {/* Default State: TEXT */}
+                        <span className="text-xl md:text-2xl font-black text-black tracking-tighter group-hover:opacity-0 transition-opacity duration-300 absolute">
+                            START
+                        </span>
 
-                    {/* Hover State: ROCKET ICON - CHANGED TO GROUP HOVER LOGIC */}
-                    {/* Now triggers on any hover of the button, not just center */}
-                    <div className="opacity-0 scale-50 rotate-45 group-hover:opacity-100 group-hover:scale-110 group-hover:rotate-45 transition-all duration-500 delay-100 transform origin-center">
-                        {/* Rocket Icon - Black Stroke */}
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="64" height="64"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="black"
-                            strokeWidth="1.5"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            className="drop-shadow-sm"
-                            style={{ transform: "rotate(-45deg)" }}
-                        >
-                            <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z" />
-                            <path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z" />
-                            <path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0" />
-                            <path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5" />
-                        </svg>
-                    </div>
+                        {/* Hover State: ROCKET ICON - CHANGED TO GROUP HOVER LOGIC */}
+                        {/* Now triggers on any hover of the button, not just center */}
+                        <div className="opacity-0 scale-50 rotate-45 group-hover:opacity-100 group-hover:scale-110 group-hover:rotate-45 transition-all duration-500 delay-100 transform origin-center">
+                            {/* Rocket Icon - Black Stroke */}
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="64" height="64"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="black"
+                                strokeWidth="1.5"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                className="drop-shadow-sm"
+                                style={{ transform: "rotate(-45deg)" }}
+                            >
+                                <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z" />
+                                <path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z" />
+                                <path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0" />
+                                <path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5" />
+                            </svg>
+                        </div>
 
+                    </motion.div>
                 </motion.div>
-            </motion.div>
 
-            {/* Shockwaves */}
-            <div className="absolute inset-0 -z-10 rounded-full border border-white/20 scale-100 animate-[ping_3s_cubic-bezier(0,0,0.2,1)_infinite] opacity-30 group-hover:opacity-0 transition-opacity duration-1000" />
-        </motion.div>
+                {/* Shockwaves */}
+                <div className="absolute inset-0 -z-10 rounded-full border border-white/20 scale-100 animate-[ping_3s_cubic-bezier(0,0,0.2,1)_infinite] opacity-30 group-hover:opacity-0 transition-opacity duration-1000" />
+            </motion.div>
+        </div>
     );
 };
 
@@ -254,7 +266,7 @@ export const Footer = () => {
     const opacityText = useTransform(scrollYProgress, [0, 0.5], [0, 1]);
 
     return (
-        <footer ref={containerRef} className="relative min-h-screen bg-zinc-950 flex flex-col items-center justify-center overflow-hidden" id='pie'>
+        <footer ref={containerRef} className="relative min-h-screen bg-zinc-950 flex flex-col items-center justify-center overflow-hidden">
 
             {/* CINEMA MODE OVERLAY - Reduced Opacity to 40% */}
             {/* z-20: Sits above background and particles, but BELOW Content with z-50 */}
@@ -292,6 +304,7 @@ export const Footer = () => {
                     <MagneticButton
                         onHoverStart={() => setIsButtonHovered(true)}
                         onHoverEnd={() => setIsButtonHovered(false)}
+                        href="/contact"
                     />
                 </div>
 

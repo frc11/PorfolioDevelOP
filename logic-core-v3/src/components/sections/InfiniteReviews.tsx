@@ -76,7 +76,7 @@ const ActiveWord = ({ text, variant = 'solid' }: { text: string, variant?: 'soli
 
     return (
         <motion.span
-            data-cursor="block"
+            data-cursor="hover"
             initial="idle"
             whileHover="hover"
             className="text-6xl md:text-8xl font-black uppercase mr-16 cursor-none inline-block transition-colors duration-300"
@@ -101,7 +101,7 @@ const ActiveWord = ({ text, variant = 'solid' }: { text: string, variant?: 'soli
 // Review Card Component
 const ReviewCard = ({ name, text }: { name: string; text: string }) => (
     <motion.div
-        data-cursor="block"
+        data-cursor="hover"
         whileHover={{
             scale: 1.05,
             backgroundColor: "#18181b", // zinc-900
