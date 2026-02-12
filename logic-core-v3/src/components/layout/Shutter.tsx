@@ -18,7 +18,7 @@ export const Shutter = () => {
                 initial={{ x: '-100%' }}
                 animate={{ x: isAnimating ? '0%' : '-100%' }}
                 transition={transition}
-                className="w-[50vw] h-full bg-zinc-950 relative flex items-center justify-end overflow-hidden border-r border-zinc-800/50"
+                className="w-[50vw] h-full bg-zinc-950 relative flex items-center justify-end overflow-hidden "
             >
                 {/* Left Half Container - 30vw width (Half of 60vw total logo) */}
                 <div className="w-[30vw] h-auto overflow-hidden flex justify-start">
@@ -34,7 +34,7 @@ export const Shutter = () => {
                 initial={{ x: '100%' }}
                 animate={{ x: isAnimating ? '0%' : '100%' }}
                 transition={transition}
-                className="w-[50vw] h-full bg-zinc-950 relative flex items-center justify-start overflow-hidden border-l border-zinc-800/50"
+                className="w-[50vw] h-full bg-zinc-950 relative flex items-center justify-start overflow-hidden"
             >
                 {/* Right Half Container - 30vw width */}
                 <div className="w-[30vw] h-auto overflow-hidden flex justify-start">

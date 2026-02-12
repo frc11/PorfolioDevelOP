@@ -15,7 +15,7 @@ type LiquidImageProps = {
 };
 
 export const LiquidImage = ({ url, ...props }: LiquidImageProps) => {
-    const ref = useRef<any>();
+    const ref = useRef<any>(null);
     const [hovered, setHover] = useState(false);
     useCursor(hovered);
 

@@ -2,7 +2,8 @@
 
 import { Canvas, useFrame } from '@react-three/fiber';
 import { MeshDistortMaterial, Sphere, Float, Environment } from '@react-three/drei';
-import { EffectComposer, Bloom } from '@react-three/postprocessing';
+import { EffectComposer as EffectComposerOriginal, Bloom } from '@react-three/postprocessing';
+const EffectComposer = EffectComposerOriginal as any;
 import { EnergyField } from './EnergyField';
 import { useRef, useState } from 'react';
 import * as THREE from 'three';

@@ -155,7 +155,7 @@ export const WebDesigns = () => {
             >
 
                 {/* --- CARD A: ELITE SHOWROOM (Con Efecto Líquido) --- */}
-                <motion.div variants={cardVariants}>
+                <motion.div variants={cardVariants as any}>
                     <TiltCard
                         colSpan="md:col-span-2"
                         rowSpan="md:row-span-2"
@@ -202,7 +202,7 @@ export const WebDesigns = () => {
                 </motion.div>
 
                 {/* --- CARD B: CLIENTES (Ticker encapsulado) --- */}
-                <motion.div variants={cardVariants}>
+                <motion.div variants={cardVariants as any}>
                     <TiltCard colSpan="md:col-span-1" rowSpan="md:row-span-2" className="bg-zinc-100 isolate flex flex-col">
                         <div className="relative z-20 px-6 pt-6 pb-2 pointer-events-none">
                             <h3 className="text-xs font-bold uppercase tracking-widest text-zinc-400 mb-1">Trusted By</h3>
@@ -217,7 +217,7 @@ export const WebDesigns = () => {
                 </motion.div>
 
                 {/* --- CARD C: ESTADÍSTICAS --- */}
-                <motion.div variants={cardVariants}>
+                <motion.div variants={cardVariants as any}>
                     <TiltCard className="bg-gradient-to-br from-cyan-50 to-blue-50">
                         <div className="h-full p-8 flex flex-col justify-center items-center text-center">
                             <CountUpStat end={100} suffix="%" />
@@ -227,7 +227,7 @@ export const WebDesigns = () => {
                 </motion.div>
 
                 {/* --- CARD D: LATEST LAUNCH (Con Efecto Líquido) --- */}
-                <motion.div variants={cardVariants}>
+                <motion.div variants={cardVariants as any}>
                     <TiltCard colSpan="md:col-span-2" rowSpan="md:row-span-1" clickable className="group">
                         <div className="absolute inset-0 z-0">
                             {/* Usa otra imagen aquí */}
@@ -254,7 +254,7 @@ export const WebDesigns = () => {
                 </motion.div>
 
                 {/* --- CARD E: AWARDS --- */}
-                <motion.div variants={cardVariants}>
+                <motion.div variants={cardVariants as any}>
                     <TiltCard className="bg-zinc-900 text-white">
                         <div className="h-full p-8 flex flex-col justify-center">
                             <div className="text-6xl mb-4">🏆</div>
@@ -265,7 +265,7 @@ export const WebDesigns = () => {
                 </motion.div>
 
                 {/* --- CARD F: TECH STACK --- */}
-                <motion.div variants={cardVariants}>
+                <motion.div variants={cardVariants as any}>
                     <TiltCard>
                         <div className="h-full p-8 flex flex-col justify-center items-center">
                             <div className="grid grid-cols-2 gap-4 mb-4">
@@ -281,7 +281,7 @@ export const WebDesigns = () => {
                 </motion.div>
 
                 {/* --- CARD G: CTA --- */}
-                <motion.div variants={cardVariants}>
+                <motion.div variants={cardVariants as any}>
                     <TiltCard colSpan="md:col-span-2" clickable className="bg-gradient-to-r from-blue-600 to-cyan-500 text-white">
                         <div className="h-full p-8 flex items-center justify-between">
                             <div>

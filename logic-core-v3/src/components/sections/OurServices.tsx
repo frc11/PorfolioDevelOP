@@ -91,6 +91,8 @@ const ServiceCard = ({ title, tagline, icon: Icon, features, duration, theme, on
     const accentBg = isCyan ? "bg-cyan-500" : "bg-fuchsia-500";
     const accentBorder = isCyan ? "border-cyan-500/30" : "border-fuchsia-500/30";
 
+    const IconComponent = Icon as any;
+
     return (
         <div
             className="group perspective-1000 w-full max-w-md h-[500px] cursor-none"
@@ -118,7 +120,7 @@ const ServiceCard = ({ title, tagline, icon: Icon, features, duration, theme, on
 
                     {/* Icon */}
                     <div className={`relative z-10 p-6 rounded-full bg-zinc-950/50 border border-zinc-700/50 ${accentBorder} transition-colors duration-500`}>
-                        <Icon className={`w-12 h-12 ${isCyan ? "text-cyan-300" : "text-fuchsia-300"}`} />
+                        <IconComponent className={`w-12 h-12 ${isCyan ? "text-cyan-300" : "text-fuchsia-300"}`} />
                     </div>
 
                     {/* Text */}
@@ -153,7 +155,7 @@ const ServiceCard = ({ title, tagline, icon: Icon, features, duration, theme, on
 
                         {/* Header: Icon + Badge */}
                         <div className="flex justify-between items-start mb-8">
-                            <Icon className={`w-8 h-8 ${accentText}`} />
+                            <IconComponent className={`w-8 h-8 ${accentText}`} />
                             <span className={`text-[10px] font-bold px-3 py-1 rounded-full border ${accentBorder} ${accentText} bg-white/5 uppercase tracking-wider`}>
                                 {duration}
                             </span>
