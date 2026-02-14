@@ -11,7 +11,7 @@ import { useLogicAI } from '../hooks/useLogicAI';
  */
 export function LogicCompanion() {
     const [isOpen, setIsOpen] = useState(false);
-    const { messages, input, handleInputChange, handleSubmit, isThinking } = useLogicAI();
+    const { messages, input, handleInputChange, handleSubmit, isThinking, leadContext, updateLeadContext } = useLogicAI();
 
     const toggleChat = () => {
         setIsOpen(!isOpen);
@@ -33,6 +33,7 @@ export function LogicCompanion() {
                 isOpen={isOpen}
                 isThinking={isThinking}
                 onClose={() => setIsOpen(false)}
+                leadContext={leadContext}
             />
         </>
     );

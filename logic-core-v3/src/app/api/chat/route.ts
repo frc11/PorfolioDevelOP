@@ -36,7 +36,7 @@ export async function POST(req: Request) {
             model: google(modelUsed),
             system: systemPrompt,
             messages: recentMessages, // Usamos la lista recortada
-            maxTokens: 400, // OPTIMIZACIÓN 2: Limitar longitud de respuesta
+            maxTokens: 1000, // Enough for consultative responses with qualification questions
             temperature: 0.7,
             onFinish: () => {
                 logger.ai('success', { requestId, model: modelUsed });
