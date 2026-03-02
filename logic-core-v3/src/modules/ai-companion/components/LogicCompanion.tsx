@@ -98,7 +98,8 @@ export function LogicCompanion() {
                         transition={{ type: 'spring', stiffness: 280, damping: 26 }}
                         style={{ transformOrigin: 'bottom right' }}
                         onClick={openFromPrompt}
-                        className="fixed bottom-44 right-8 z-[101] hidden md:block cursor-pointer group"
+                        // Pushed to bottom-48 right-32 to make room for scaling up Avatar to 1.1
+                        className="fixed bottom-48 right-32 z-[101] hidden md:block cursor-pointer group"
                     >
                         {/* Animated gradient border wrapper */}
                         <div className="relative rounded-2xl p-[1px] overflow-hidden">
@@ -198,7 +199,7 @@ export function LogicCompanion() {
 
             {/* ── NeuroAvatar ──────────────────────────────── */}
             <div onClick={toggleChat} role="button" aria-label="Toggle AI Chat">
-                <NeuroAvatar isThinking={isThinking} />
+                <NeuroAvatar isThinking={isThinking} messages={messages} />
             </div>
 
             {/* ── Chat Window ─────────────────────────────── */}
@@ -210,7 +211,6 @@ export function LogicCompanion() {
                 isOpen={isOpen}
                 isThinking={isThinking}
                 onClose={() => setIsOpen(false)}
-                leadContext={leadContext}
             />
         </>
     );
