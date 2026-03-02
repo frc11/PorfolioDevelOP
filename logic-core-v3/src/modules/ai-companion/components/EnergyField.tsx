@@ -135,7 +135,7 @@ export const EnergyField = memo(function EnergyField({ isThinking }: EnergyField
                     <meshPhysicalMaterial
                         color="#22d3ee"
                         emissive="#22d3ee"
-                        emissiveIntensity={isThinking ? 4 : 1}
+                        emissiveIntensity={isThinking ? 4 : 2}
                         roughness={0}
                         metalness={0.2}
                         transmission={1}
@@ -150,7 +150,7 @@ export const EnergyField = memo(function EnergyField({ isThinking }: EnergyField
             <mesh ref={secondaryStreamRef} rotation={[Math.PI / 4, 0, Math.PI / 3]}>
                 <torusKnotGeometry args={[1.5, 0.008, 100, 16, 3, 4]} />
                 <meshBasicMaterial
-                    color={isThinking ? "#c026d3" : "#52525b"}
+                    color={isThinking ? "#c026d3" : "#164e63"}
                     transparent
                     opacity={0.4}
                 />
