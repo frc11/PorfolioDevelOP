@@ -306,9 +306,9 @@ const Scene = ({ qualities, onHoverChange }: { qualities: QualityNode[], onHover
     );
 };
 
-// --- Main Export ---
+// --- DESKTOP COMPONENT ---
 
-export const Interactive3DNetwork = ({ qualities, titleVisible }: { qualities: QualityNode[], titleVisible?: boolean }) => {
+const Interactive3DNetworkDesktop = ({ qualities, titleVisible }: { qualities: QualityNode[], titleVisible?: boolean }) => {
     const [isHoveringNode, setIsHoveringNode] = useState(false);
     const [isInteracting, setIsInteracting] = useState(false);
     const timeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -319,37 +319,25 @@ export const Interactive3DNetwork = ({ qualities, titleVisible }: { qualities: Q
     };
 
     const handleInteractionEnd = () => {
-        // Debounce the return to normal state
         timeoutRef.current = setTimeout(() => {
             setIsInteracting(false);
-        }, 3000); // 3 seconds wait time before returning
+        }, 3000);
     };
 
     const active = isInteracting || isHoveringNode;
 
     return (
         <div className="w-full h-full cursor-grab active:cursor-grabbing relative z-0 bg-[#030712]">
-            {/* 
-                TITLE INJECTION - MOVED OUTSIDE CANVAS
-                Fixed Layer: Z-Index 50 (Highest Priority in DOM)
-                This ensures it is visually on top of EVERYTHING, including other HTML-in-Canvas elements.
-            */}
             <motion.div
                 className="absolute inset-0 pointer-events-none flex flex-col items-center justify-center select-none"
                 animate={{
-                    y: active ? 250 : 0, // Moves down significantly
+                    y: active ? 250 : 0,
                     opacity: active ? 0.3 : 1,
                     scale: active ? 0.9 : 1,
-                    zIndex: active ? 0 : 100 // Dynamically switch layering
+                    zIndex: active ? 0 : 100
                 }}
-                transition={{
-                    type: "spring",
-                    stiffness: 100,
-                    damping: 20
-                }}
+                transition={{ type: "spring", stiffness: 100, damping: 20 }}
             >
-                {/* Removed the dark radial gradient to keep elements bright */}
-
                 <div className="relative z-10 flex flex-col items-center">
                     <h2 className="text-5xl md:text-8xl font-black text-white tracking-tighter uppercase text-center drop-shadow-[0_0_25px_rgba(255,255,255,0.3)]">
                         <HyperText text="¿POR QUÉ DEVELOP?" persist={true} trigger={titleVisible} />
@@ -361,10 +349,7 @@ export const Interactive3DNetwork = ({ qualities, titleVisible }: { qualities: Q
                 </div>
             </motion.div>
 
-            {/* Zoomed out camera: Z = 24 to ensure full sphere visibility AND space for stars */}
             <Canvas camera={{ position: [0, 0, 24], fov: 40 }} gl={{ alpha: true, antialias: false, powerPreference: "high-performance", stencil: false, depth: false }} dpr={[1, 1.5]}>
-                {/* Transparent Background to allow z-index layering trick */}
-
                 <OrbitControls
                     enableZoom={false}
                     enablePan={false}
@@ -376,18 +361,227 @@ export const Interactive3DNetwork = ({ qualities, titleVisible }: { qualities: Q
                     onStart={handleInteractionStart}
                     onEnd={handleInteractionEnd}
                 />
-
                 <Starfield />
-
-                {/* INJECTED SHOOTING STARS SYSTEM */}
                 <ShootingStarSystem />
-
                 <ambientLight intensity={0.5} />
                 <pointLight position={[10, 10, 10]} intensity={2} color="#ffffff" />
                 <Environment preset="city" />
-
                 <Scene qualities={qualities} onHoverChange={setIsHoveringNode} />
             </Canvas>
+        </div>
+    );
+};
+
+
+// --- MOBILE COMPONENTS ---
+
+const CoreNodesMobile = ({ points, qualities, activeNode, setActiveNode }: { points: THREE.Vector3[], qualities: QualityNode[], activeNode: number | null, setActiveNode: (i: number | null) => void }) => {
+    const defaultQualities = ["Innovation", "Security", "Cloud Native", "AI Core", "Logic"];
+    const nodeColors = useMemo(() => points.map((_, i) => PALETTE[i % PALETTE.length]), [points]);
+
+    return (
+        <group>
+            {points.map((point, i) => {
+                const quality = qualities[i] || {
+                    id: 100 + i,
+                    label: defaultQualities[i % defaultQualities.length],
+                    desc: "System Architecture Node"
+                };
+                const color = nodeColors[i];
+
+                return (
+                    <group key={i} position={point}>
+                        {/* Visible Sphere - NO HITBOX SO FINGERS PASS THROUGH */}
+                        <Sphere
+                            args={[0.25, 32, 32]}
+                        >
+                            <meshStandardMaterial
+                                color="#ffffff"
+                                emissive={color}
+                                emissiveIntensity={1.2}
+                                roughness={0.2}
+                                metalness={0.8}
+                            />
+                        </Sphere>
+
+                        <Html
+                            as="div"
+                            distanceFactor={15}
+                            zIndexRange={[10, 0]}
+                            style={{
+                                pointerEvents: 'none',
+                                transform: 'translate3d(0,0,0)',
+                                zIndex: 10,
+                                position: 'relative'
+                            }}
+                        >
+                            <div className="flex flex-col items-center w-[150px] pointer-events-none select-none">
+                                <motion.span
+                                    animate={{ opacity: 0.8, y: 0 }}
+                                    className="bg-black/80 px-2 py-1 rounded-full text-[8px] font-mono text-white backdrop-blur-md mt-1 border border-white/10 uppercase tracking-widest whitespace-nowrap"
+                                    style={{ borderColor: `${color}40`, textShadow: `0 0 10px ${color}` }}
+                                >
+                                    {quality.label}
+                                </motion.span>
+                                {/* Removed the interactive QualityCard for mobile entirely as requested */}
+                            </div>
+                        </Html>
+                    </group>
+                );
+            })}
+        </group>
+    );
+};
+
+const SceneMobile = ({ qualities }: { qualities: QualityNode[] }) => {
+    // Smaller spheres for mobile
+    const corePoints = useMemo(() => getSpherePoints(10, 3.2), []);
+    const dustPoints = useMemo(() => getSpherePoints(150, 5), []);
+
+    return (
+        <Float speed={1} rotationIntensity={0.2} floatIntensity={0.5}>
+            {/* Disabled activeNode logic for mobile */}
+            <CoreNodesMobile points={corePoints} qualities={qualities} activeNode={null} setActiveNode={() => { }} />
+            <DustNodes points={dustPoints} />
+            <Connections points={[...corePoints, ...dustPoints.slice(0, 30)]} />
+        </Float>
+    );
+};
+
+const Interactive3DNetworkMobile = ({ qualities, titleVisible }: { qualities: QualityNode[], titleVisible?: boolean }) => {
+    const [isActivated, setIsActivated] = useState(false);
+    const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+    const resetInactivityTimer = () => {
+        if (timeoutRef.current) clearTimeout(timeoutRef.current);
+        timeoutRef.current = setTimeout(() => {
+            setIsActivated(false);
+        }, 5000); // 5s timeout
+    };
+
+    const activate = () => {
+        setIsActivated(true);
+        resetInactivityTimer();
+    };
+
+    const deactivate = () => {
+        setIsActivated(false);
+        if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    }
+
+    // Effect to handle inactivity cleanup
+    useEffect(() => {
+        if (isActivated) {
+            resetInactivityTimer();
+        }
+        return () => {
+            if (timeoutRef.current) clearTimeout(timeoutRef.current);
+        };
+    }, [isActivated]);
+
+    return (
+        <div className="w-full h-full relative z-0 bg-[#030712] overflow-hidden">
+            {/* INACTIVE OVERLAY - Blocks scroll issues, requires tap to interact */}
+            {!isActivated && (
+                <div
+                    className="absolute inset-0 z-50 flex flex-col items-center justify-center cursor-pointer touch-pan-y"
+                    onClick={activate}
+                >
+                    <div className="translate-y-24 bg-black/40 border border-cyan-500/20 px-6 py-2 rounded-full backdrop-blur-sm animate-pulse">
+                        <p className="text-cyan-400 text-xs font-mono tracking-widest uppercase">
+                            (TAP TO INTERACT)
+                        </p>
+                    </div>
+                </div>
+            )}
+
+            {/* ACTIVE BG HINT */}
+            {isActivated && (
+                <div className="absolute inset-0 z-0 flex flex-col items-center justify-center pointer-events-none">
+                    <p className="text-zinc-700/50 text-[10px] uppercase tracking-widest translate-y-32">
+                        (click de vuelta para parar la animación)
+                    </p>
+                </div>
+            )}
+
+            {/* Title / Info */}
+            <motion.div
+                className="absolute inset-0 pointer-events-none flex flex-col items-center justify-center select-none"
+                animate={{
+                    y: isActivated ? 180 : 0, // Lowered title
+                    opacity: isActivated ? 0.15 : 1,
+                    scale: isActivated ? 0.8 : 1,
+                    zIndex: isActivated ? 0 : 40
+                }}
+                transition={{ type: "spring", stiffness: 100, damping: 20 }}
+            >
+                <div className="relative z-10 flex flex-col items-center">
+                    <h2 className="text-4xl md:text-5xl font-black text-white tracking-tighter uppercase text-center drop-shadow-[0_0_25px_rgba(255,255,255,0.3)] px-4">
+                        <HyperText text="¿POR QUÉ DEVELOP?" persist={true} trigger={titleVisible} />
+                    </h2>
+                    <div className="flex gap-4 mt-6 opacity-80">
+                        <p className="text-[10px] text-zinc-500 font-mono tracking-[0.3em] backdrop-blur-sm">[ NEURAL CORE ONLINE ]</p>
+                        <p className="text-[10px] text-cyan-500 font-mono tracking-[0.3em] animate-pulse">_ACTIVE</p>
+                    </div>
+                </div>
+            </motion.div>
+
+            {/* Canvas Container */}
+            <div
+                className={`w-full h-full relative z-10 ${isActivated ? 'pointer-events-auto' : 'pointer-events-none'}`}
+                onPointerDown={isActivated ? resetInactivityTimer : undefined}
+                onTouchStart={isActivated ? resetInactivityTimer : undefined}
+            >
+                <Canvas
+                    camera={{ position: [0, 0, 24], fov: 40 }}
+                    gl={{ alpha: true, antialias: false, powerPreference: "high-performance", stencil: false, depth: false }}
+                    dpr={[1, 1]}
+                    onPointerMissed={() => {
+                        if (isActivated) {
+                            deactivate();
+                        }
+                    }}
+                >
+                    <OrbitControls
+                        enableZoom={false}
+                        enablePan={false}
+                        rotateSpeed={0.6}
+                        autoRotate={true}
+                        autoRotateSpeed={0.5}
+                        minPolarAngle={1}
+                        maxPolarAngle={Math.PI - 1}
+                        enabled={isActivated}
+                        onStart={isActivated ? resetInactivityTimer : undefined}
+                    />
+                    <Starfield />
+                    <ShootingStarSystem />
+                    <ambientLight intensity={0.5} />
+                    <pointLight position={[10, 10, 10]} intensity={2} color="#ffffff" />
+                    <Environment preset="city" />
+
+                    <SceneMobile
+                        qualities={qualities}
+                    />
+                </Canvas>
+            </div>
+        </div>
+    );
+};
+
+// --- MAIN TWIN EXPORT ---
+
+export const Interactive3DNetwork = (props: { qualities: QualityNode[], titleVisible?: boolean }) => {
+    return (
+        <div className="w-full h-full">
+            {/* MOBILE VIEW */}
+            <div className="block md:hidden w-full h-full">
+                <Interactive3DNetworkMobile {...props} />
+            </div>
+
+            {/* DESKTOP VIEW */}
+            <div className="hidden md:block w-full h-full">
+                <Interactive3DNetworkDesktop {...props} />
+            </div>
         </div>
     );
 };

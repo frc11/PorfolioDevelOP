@@ -76,7 +76,7 @@ const AboutMobile = () => {
     useThemeSection(isInView, 'light');
 
     return (
-        <div ref={targetRef} className="relative h-[400vh] bg-zinc-950 block md:hidden">
+        <div ref={targetRef} className="relative h-[400vh] bg-zinc-950 block md:hidden" id='nosotros'>
             {/* Trigger for theme observer */}
             <div ref={inViewRef} className="absolute top-0 h-[20vh] w-full pointer-events-none" />
 
@@ -151,7 +151,7 @@ const AboutDesktop = () => {
     useThemeSection(isInView, 'light');
 
     return (
-        <div ref={targetRef} className="relative h-[400vh] bg-zinc-950 hidden md:block">
+        <div ref={targetRef} className="relative h-[400vh] bg-zinc-950 hidden md:block" id='nosotros'>
             {/* Top Fade (Integration with Hero) */}
             <div className="absolute top-0 left-0 w-full h-64 bg-gradient-to-b from-zinc-950 to-transparent z-20 pointer-events-none" />
 

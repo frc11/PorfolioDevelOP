@@ -50,6 +50,25 @@ const PROJECTS = [
 ];
 
 export const Portfolio = () => {
+    return (
+        <section id="portfolio" className="relative w-full bg-zinc-950 overflow-hidden">
+            {/* MOBILE VIEW */}
+            <div className="block md:hidden">
+                <PortfolioMobile />
+            </div>
+
+            {/* DESKTOP VIEW */}
+            <div className="hidden md:block">
+                <PortfolioDesktop />
+            </div>
+        </section>
+    );
+};
+
+// --------------------------------------------------------
+// DESKTOP VIEW: ORIGINAL HORIZONTAL SCROLL / TILT CARDS
+// --------------------------------------------------------
+const PortfolioDesktop = () => {
     // Cyclic Navigation Logic
     const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -72,7 +91,7 @@ export const Portfolio = () => {
     ];
 
     return (
-        <section className="relative h-screen bg-zinc-950 flex flex-col justify-center overflow-hidden" id='portfolio'>
+        <div className="relative h-screen bg-zinc-950 flex flex-col justify-center overflow-hidden">
             {/* Background Pattern */}
             <div
                 className="absolute inset-0 pointer-events-none z-0"
@@ -152,11 +171,11 @@ export const Portfolio = () => {
                     </AnimatePresence>
                 </div>
             </motion.div>
-        </section>
+        </div>
     );
 };
 
-// 3D Tilt Card Component
+// 3D Tilt Card Component (Desktop)
 const ProjectCard = ({ project }: { project: typeof PROJECTS[0] }) => {
     const x = useMotionValue(0);
     const y = useMotionValue(0);
@@ -223,5 +242,114 @@ const ProjectCard = ({ project }: { project: typeof PROJECTS[0] }) => {
                 </div>
             </motion.div>
         </motion.div>
+    );
+};
+
+// --------------------------------------------------------
+// MOBILE VIEW: VERTICAL PAGINATED LIST (3 ITEMS)
+// --------------------------------------------------------
+const PortfolioMobile = () => {
+    const [currentPage, setCurrentPage] = useState(0);
+    const itemsPerPage = 3;
+    const totalPages = Math.ceil(PROJECTS.length / itemsPerPage);
+
+    const visibleProjects = PROJECTS.slice(currentPage * itemsPerPage, (currentPage + 1) * itemsPerPage);
+
+    const nextProject = () => {
+        if (currentPage < totalPages - 1) {
+            setCurrentPage(prev => prev + 1);
+        }
+    };
+
+    const prevProject = () => {
+        if (currentPage > 0) {
+            setCurrentPage(prev => prev - 1);
+        }
+    };
+
+    return (
+        <div className="relative bg-zinc-950 flex flex-col pt-24 pb-12 px-6 overflow-hidden">
+            {/* Background Pattern */}
+            <div
+                className="absolute inset-0 pointer-events-none z-0"
+                style={{
+                    backgroundImage: 'radial-gradient(circle at 1px 1px, #27272a 3px, transparent 0)',
+                    backgroundSize: '32px 32px',
+                    opacity: 0.25
+                }}
+            />
+
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.8, ease: "easeOut" }}
+                className="mb-8 border-b border-zinc-800 pb-6 relative z-10"
+            >
+                <h2 className="text-5xl font-black text-zinc-100 tracking-tighter">
+                    PORT<span className="text-transparent bg-clip-text bg-gradient-to-r pr-2 from-zinc-400 to-zinc-700">FOLIO</span>
+                </h2>
+            </motion.div>
+
+            <div className="flex flex-col gap-6 relative z-10 w-full">
+                <AnimatePresence mode="popLayout">
+                    {visibleProjects.map((project, i) => (
+                        <motion.div
+                            key={project.id}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -20 }}
+                            transition={{ delay: i * 0.1 }}
+                            className="w-full"
+                        >
+                            <MobileProjectCard project={project} />
+                        </motion.div>
+                    ))}
+                </AnimatePresence>
+            </div>
+
+            {/* Controls */}
+            <div className="flex gap-4 mt-8 pt-6 border-t border-zinc-900 justify-center relative z-10">
+                <button
+                    onClick={prevProject}
+                    disabled={currentPage === 0}
+                    className="flex-1 max-w-[160px] h-14 rounded-full border border-zinc-700 flex items-center justify-center text-zinc-400 active:bg-zinc-800 active:text-white transition-colors disabled:opacity-30 disabled:active:bg-transparent disabled:active:text-zinc-600 disabled:border-zinc-800"
+                >
+                    <ArrowLeft className="w-6 h-6" />
+                </button>
+                <button
+                    onClick={nextProject}
+                    disabled={currentPage >= totalPages - 1}
+                    className="flex-1 max-w-[160px] h-14 rounded-full border border-zinc-700 flex items-center justify-center text-zinc-400 active:bg-zinc-800 active:text-white transition-colors disabled:opacity-30 disabled:active:bg-transparent disabled:active:text-zinc-600 disabled:border-zinc-800"
+                >
+                    <ArrowRight className="w-6 h-6" />
+                </button>
+            </div>
+        </div>
+    );
+};
+
+const MobileProjectCard = ({ project }: { project: typeof PROJECTS[0] }) => {
+    return (
+        <div className="w-full relative rounded-md overflow-hidden bg-zinc-900 border border-zinc-800 shadow-xl">
+            {/* Image Layer */}
+            <div
+                className="w-full h-64 bg-cover bg-center"
+                style={{ backgroundImage: `url(${project.img})` }}
+            >
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-black/10" />
+            </div>
+
+            {/* Content Layer */}
+            <div className="absolute bottom-6 left-6 right-6">
+                <p className="text-zinc-400 text-xs font-mono tracking-widest mb-1 drop-shadow-md shadow-black">{project.category}</p>
+                <h3 className="text-2xl font-bold text-white uppercase leading-none drop-shadow-md shadow-black">{project.title}</h3>
+            </div>
+
+            {/* Year Layer */}
+            <div className="absolute top-4 right-4">
+                <span className="text-zinc-300 font-mono text-xs border border-zinc-700 bg-black/60 backdrop-blur-md px-2 py-1 rounded-full">{project.year}</span>
+            </div>
+        </div>
     );
 };

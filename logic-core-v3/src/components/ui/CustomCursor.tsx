@@ -56,15 +56,17 @@ export const CustomCursor = () => {
     return (
         <>
             <style jsx global>{`
-        /* Hide default cursor */
-        body, a, button {
-          cursor: none;
+        /* Hide default cursor on desktop only */
+        @media (min-width: 768px) {
+          body, a, button {
+            cursor: none;
+          }
         }
       `}</style>
 
             {/* Primary Cursor (Fast Dot) */}
             <motion.div
-                className="fixed top-0 left-0 w-2 h-2 bg-white rounded-full pointer-events-none z-[9999] mix-blend-difference"
+                className="hidden md:block fixed top-0 left-0 w-2 h-2 bg-white rounded-full pointer-events-none z-[9999] mix-blend-difference"
                 style={{
                     x: cursorX,
                     y: cursorY,
@@ -75,7 +77,7 @@ export const CustomCursor = () => {
 
             {/* Aura Cursor (Slow/Fluid) */}
             <motion.div
-                className="fixed top-0 left-0 w-8 h-8 border border-white rounded-full pointer-events-none z-[9998] mix-blend-difference"
+                className="hidden md:block fixed top-0 left-0 w-8 h-8 border border-white rounded-full pointer-events-none z-[9998] mix-blend-difference"
                 style={{
                     x: cursorXSpring,
                     y: cursorYSpring,

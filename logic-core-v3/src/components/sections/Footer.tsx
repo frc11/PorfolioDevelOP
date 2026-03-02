@@ -105,12 +105,13 @@ const FlipLink = ({ children, href }: { children: string; href: string }) => {
 
 // --- 3. COMPONENTE: BOTÓN MAGNÉTICO AVANZADO (BRIGHT FOCUS) ---
 interface MagneticButtonProps {
-    onHoverStart: () => void;
-    onHoverEnd: () => void;
+    onHoverStart?: () => void;
+    onHoverEnd?: () => void;
     href: string;
+    isMobile?: boolean;
 }
 
-const MagneticButton = ({ onHoverStart, onHoverEnd, href }: MagneticButtonProps) => {
+const MagneticButton = ({ onHoverStart, onHoverEnd, href, isMobile }: MagneticButtonProps) => {
     const ref = useRef<HTMLDivElement>(null);
     const x = useMotionValue(0);
     const y = useMotionValue(0);
@@ -123,6 +124,7 @@ const MagneticButton = ({ onHoverStart, onHoverEnd, href }: MagneticButtonProps)
     const textY = useTransform(mouseY, (val) => val * 0.3);
 
     const handleMouseMove = (e: React.MouseEvent) => {
+        if (isMobile) return; // Disable physics on mobile
         const { clientX, clientY } = e;
         const { height, width, left, top } = ref.current!.getBoundingClientRect();
         const middleX = clientX - (left + width / 2);
@@ -132,34 +134,65 @@ const MagneticButton = ({ onHoverStart, onHoverEnd, href }: MagneticButtonProps)
     };
 
     const reset = () => {
+        if (isMobile) return;
         x.set(0);
         y.set(0);
-        onHoverEnd();
+        if (onHoverEnd) onHoverEnd();
+    };
+
+    const handleMouseEnter = () => {
+        if (isMobile) return;
+        if (onHoverStart) onHoverStart();
     };
 
     const { triggerTransition } = useTransitionContext();
+    const [isSimulatingHover, setIsSimulatingHover] = useState(false);
 
     const handleClick = (e: React.MouseEvent) => {
         e.preventDefault();
-        triggerTransition(href);
+
+        if (isMobile) {
+            // Mobile Animation Sequence
+            setIsSimulatingHover(true);
+            if (onHoverStart) onHoverStart();
+
+            setTimeout(() => {
+                triggerTransition(href);
+                // Clean up state just in case
+                setTimeout(() => {
+                    setIsSimulatingHover(false);
+                    if (onHoverEnd) onHoverEnd();
+                }, 1000);
+            }, 1500); // Wait 1.5s for the user to see the rocket before transitioning
+        } else {
+            // Desktop Instant Transition (Hover is already active via mouse)
+            triggerTransition(href);
+        }
     };
 
     return (
-        <div onClick={handleClick} className="cursor-none" data-cursor="hover">
+        <div onClick={handleClick} className={isMobile ? "cursor-pointer" : "cursor-none"} data-cursor={isMobile ? "" : "hover"}>
             <motion.div
                 ref={ref}
                 onMouseMove={handleMouseMove}
                 onMouseLeave={reset}
-                onMouseEnter={onHoverStart}
+                onMouseEnter={handleMouseEnter}
                 style={{ x: mouseX, y: mouseY }}
-                className="group relative flex items-center justify-center z-40 block"
-                whileHover={{ scale: 1.8 }}
-                transition={{ type: "tween", ease: "circOut", duration: 2.5 }}
+                className={`relative flex items-center justify-center z-40 block ${isSimulatingHover ? 'group-active-simulated' : 'group'}`}
+                whileHover={!isMobile ? { scale: 1.8 } : {}}
+                animate={isSimulatingHover ? { scale: 1.5 } : { scale: 1 }}
+                transition={{ type: "tween", ease: "circOut", duration: isMobile ? 0.8 : 2.5 }}
             >
                 {/* JITTER LAYER */}
                 <motion.div
-                    // Increased brightness with stronger shadow on hover
-                    className="relative w-40 h-40 md:w-56 md:h-56 bg-white rounded-full flex items-center justify-center overflow-hidden shadow-[0_0_50px_-10px_rgba(255,255,255,0.3)] group-hover:shadow-[0_0_100px_0px_rgba(255,255,255,0.6)] transition-shadow duration-500"
+                    // Using arbitrary classes via tailwind arbitrarily grouping or simulating the hover manually
+                    className={`relative bg-white rounded-full flex items-center justify-center overflow-hidden transition-shadow duration-500
+                        ${isMobile ? "w-56 h-56" : "w-40 h-40 md:w-56 md:h-56"}
+                        ${isSimulatingHover
+                            ? "shadow-[0_0_100px_0px_rgba(255,255,255,0.6)]"
+                            : "shadow-[0_0_50px_-10px_rgba(255,255,255,0.3)] group-hover:shadow-[0_0_100px_0px_rgba(255,255,255,0.6)]"
+                        }
+                    `}
                     whileHover={{
                         x: [0, -1, 1, -1, 1, 0],
                         y: [0, 1, -1, 1, -1, 0],
@@ -172,26 +205,29 @@ const MagneticButton = ({ onHoverStart, onHoverEnd, href }: MagneticButtonProps)
                     {/* 1. Base Gradient - Kept bright */}
                     <div className="absolute inset-0 bg-gradient-to-tr from-white via-zinc-200 to-zinc-100 opacity-100" />
 
-                    {/* 2. REMOVED BLURRY FLARE. Added subtle gradient shift on hover instead. */}
-                    <div className="absolute inset-0 bg-gradient-to-tr from-cyan-50 via-white to-zinc-100 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+                    {/* 2. REMOVED BLURRY FLARE. Added subtle gradient shift on hover/simulated hover instead. */}
+                    <div className={`absolute inset-0 bg-gradient-to-tr from-cyan-50 via-white to-zinc-100 transition-opacity duration-700 ${isSimulatingHover ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`} />
 
                     {/* 3. Inner Border Ring */}
-                    <div className="absolute inset-0 rounded-full border border-zinc-300 scale-95 opacity-50 group-hover:border-zinc-400 transition-colors duration-500" />
+                    <div className={`absolute inset-0 rounded-full border scale-95 transition-colors duration-500 ${isSimulatingHover ? 'border-zinc-400 opacity-50' : 'border-zinc-300 opacity-50 group-hover:border-zinc-400'}`} />
 
                     {/* 4. CONTENT (Text -> Rocket) */}
                     <motion.div style={{ x: textX, y: textY }} className="relative z-10 flex flex-col items-center gap-12">
                         {/* Default State: TEXT */}
-                        <span className="text-xl md:text-2xl font-black text-black tracking-tighter group-hover:opacity-0 transition-opacity duration-300 absolute">
+                        <span className={`text-xl md:text-2xl font-black text-black tracking-tighter transition-opacity duration-300 absolute ${isSimulatingHover ? 'opacity-0' : 'group-hover:opacity-0'}`}>
                             START
                         </span>
 
-                        {/* Hover State: ROCKET ICON - CHANGED TO GROUP HOVER LOGIC */}
-                        {/* Now triggers on any hover of the button, not just center */}
-                        <div className="opacity-0 scale-50 rotate-45 group-hover:opacity-100 group-hover:scale-110 group-hover:rotate-45 transition-all duration-500 delay-100 transform origin-center">
+                        {/* Hover State: ROCKET ICON - CHANGED TO GROUP HOVER LOGIC AND SIMULATED HOVER */}
+                        <div className={`transform origin-center transition-all duration-500 delay-100 ${isSimulatingHover
+                                ? 'opacity-100 scale-110 rotate-45'
+                                : 'opacity-0 scale-50 rotate-45 group-hover:opacity-100 group-hover:scale-110'
+                            }`}>
                             {/* Rocket Icon - Black Stroke */}
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
-                                width="64" height="64"
+                                width={isMobile ? "80" : "64"}
+                                height={isMobile ? "80" : "64"}
                                 viewBox="0 0 24 24"
                                 fill="none"
                                 stroke="black"
@@ -212,7 +248,7 @@ const MagneticButton = ({ onHoverStart, onHoverEnd, href }: MagneticButtonProps)
                 </motion.div>
 
                 {/* Shockwaves */}
-                <div className="absolute inset-0 -z-10 rounded-full border border-white/20 scale-100 animate-[ping_3s_cubic-bezier(0,0,0.2,1)_infinite] opacity-30 group-hover:opacity-0 transition-opacity duration-1000" />
+                <div className={`absolute inset-0 -z-10 rounded-full border border-white/20 scale-100 animate-[ping_3s_cubic-bezier(0,0,0.2,1)_infinite] transition-opacity duration-1000 ${isSimulatingHover ? 'opacity-0' : 'opacity-30 group-hover:opacity-0'}`} />
             </motion.div>
         </div>
     );
@@ -250,83 +286,56 @@ const AuroraBackground = () => {
     )
 }
 
-// --- 5. COMPONENTE PRINCIPAL: FOOTER (GLOBAL FOCUS STATE) ---
-export const Footer = () => {
+// --- 5. COMPONENTE TWIN: DESKTOP ---
+const FooterDesktop = () => {
     const containerRef = useRef(null);
     const { scrollYProgress } = useScroll({
         target: containerRef,
         offset: ["start end", "end end"]
     });
 
-    // Global Focus State
     const [isButtonHovered, setIsButtonHovered] = useState(false);
-
     const yText = useTransform(scrollYProgress, [0, 1], [100, 0]);
     const opacityText = useTransform(scrollYProgress, [0, 0.5], [0, 1]);
 
-    const [isNavigating, setIsNavigating] = useState(false);
-    const { triggerTransition } = useTransitionContext(); // Moved here
-
-    const handleNavigate = async (path: string) => {
-        setIsNavigating(true);
-        // Wait for the button scale animation (handled via isNavigating state in motion)
-        await new Promise(resolve => setTimeout(resolve, 800));
-        triggerTransition(path);
-    };
-
     return (
-        <footer ref={containerRef} className="relative min-h-screen bg-zinc-950 flex flex-col items-center justify-center overflow-hidden">
-
-            {/* CINEMA MODE OVERLAY - Reduced Opacity to 40% */}
-            {/* z-20: Sits above background and particles, but BELOW Content with z-50 */}
+        <div ref={containerRef} className="relative min-h-screen bg-zinc-950 flex flex-col items-center justify-center overflow-hidden w-full">
             <motion.div
                 className="absolute inset-0 z-20 bg-black/40 backdrop-blur-[2px] pointer-events-none"
                 animate={{ opacity: isButtonHovered ? 1 : 0 }}
                 transition={{ duration: 0.5, ease: "easeInOut" }}
             />
 
-            {/* Background Layers (Behind Overlay) */}
             <AuroraBackground />
             <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 pointer-events-none mix-blend-soft-light" />
-
-            {/* Streams (Behind Overlay) */}
             <ParticleStream side="left" />
             <ParticleStream side="right" />
-
-            {/* Top Transition - Catches the Fade from WhyDevelOP */}
             <div className="absolute top-0 w-full h-64 bg-gradient-to-b from-zinc-950 via-zinc-950/0 to-transparent backdrop-blur-[2px] [mask-image:linear-gradient(to_bottom,black,transparent)] pointer-events-none z-10" />
 
-            {/* Main Content */}
-            {/* Removed z-10 from parent to avoid trapping stacking context. Used pointer-events-none to let clicks pass through gaps. */}
+            {/* Desktop Horizontal Layout */}
             <div className="relative w-full max-w-[90vw] flex flex-col items-center justify-center pointer-events-none">
-
-                {/* Text 1 - TITANIUM ALLOY GRADIENT */}
-                <motion.div style={{ y: yText, opacity: opacityText }} className="relative z-10">
-                    <h2 className="text-[13vw] leading-[0.85] font-black text-transparent bg-clip-text bg-gradient-to-b from-white via-zinc-200 to-zinc-400 tracking-tighter text-center select-none pl-2 pr-2 drop-shadow-[0_0_15px_rgba(255,255,255,0.25)]">
+                <motion.div style={{ y: yText, opacity: opacityText }} className="relative z-10 w-full flex justify-center">
+                    <h2 className="text-[13vw] leading-[0.85] font-black text-transparent bg-clip-text bg-gradient-to-b from-white via-zinc-200 to-zinc-400 tracking-tighter text-center select-none pl-2 pr-2 drop-shadow-[0_0_15px_rgba(255,255,255,0.25)] flex gap-4">
                         READY TO
                     </h2>
                 </motion.div>
 
-                {/* BUTTON - z-50: Intentionally kept ABOVE the z-20 overlay so it stays bright */}
-                {/* Pointer events auto re-enabled for button interaction */}
                 <div className="my-[-2vw] z-50 pointer-events-auto">
                     <MagneticButton
                         onHoverStart={() => setIsButtonHovered(true)}
                         onHoverEnd={() => setIsButtonHovered(false)}
                         href="/contact"
+                        isMobile={false}
                     />
                 </div>
 
-                {/* Text 2 - TITANIUM ALLOY GRADIENT */}
-                <motion.div style={{ y: useTransform(yText, (v) => v * -0.5), opacity: opacityText }} className="relative z-10">
-                    <h2 className="text-[13vw] leading-[0.85] font-black text-transparent bg-clip-text bg-gradient-to-b from-white via-zinc-200 to-zinc-400 tracking-tighter text-center select-none pl-5 pr-5 drop-shadow-[0_0_15px_rgba(255,255,255,0.25)]">
+                <motion.div style={{ y: useTransform(yText, (v) => v * -0.5), opacity: opacityText }} className="relative z-10 w-full flex justify-center">
+                    <h2 className="text-[13vw] leading-[0.85] font-black text-transparent bg-clip-text bg-gradient-to-b from-white via-zinc-200 to-zinc-400 tracking-tighter text-center select-none pl-5 pr-5 drop-shadow-[0_0_15px_rgba(255,255,255,0.25)] flex">
                         SCALE?
                     </h2>
                 </motion.div>
-
             </div>
 
-            {/* Bottom Bar (Behind Overlay) */}
             <div className="absolute bottom-12 w-full px-8 md:px-16 flex flex-col md:flex-row justify-between items-end gap-8 z-30">
                 <div className="flex flex-col gap-2 text-zinc-500 text-xs font-mono tracking-widest uppercase">
                     <div className="flex items-center gap-2">
@@ -335,7 +344,6 @@ export const Footer = () => {
                     </div>
                     <span>© 2026 DEVEL_OP™ — V.3.0</span>
                 </div>
-
                 <div className="flex gap-8 md:gap-12 pointer-events-auto">
                     <FlipLink href="#">LinkedIn</FlipLink>
                     <FlipLink href="#">Instagram</FlipLink>
@@ -343,8 +351,105 @@ export const Footer = () => {
                     <FlipLink href="#">Email</FlipLink>
                 </div>
             </div>
-
             <div className="absolute bottom-0 w-full h-32 bg-gradient-to-t from-black/50 to-transparent pointer-events-none" />
+        </div>
+    );
+};
+
+// --- 6. COMPONENTE TWIN: MOBILE ---
+const FooterMobile = () => {
+    const containerRef = useRef(null);
+    const { scrollYProgress } = useScroll({
+        target: containerRef,
+        offset: ["start end", "end end"]
+    });
+
+    const [isButtonHovered, setIsButtonHovered] = useState(false);
+    const yText = useTransform(scrollYProgress, [0, 1], [100, 0]);
+    const opacityText = useTransform(scrollYProgress, [0, 0.5], [0, 1]);
+
+    return (
+        <div ref={containerRef} className="relative min-h-[120vh] bg-zinc-950 flex flex-col items-center justify-center overflow-hidden w-full pb-32">
+            <motion.div
+                className="absolute inset-0 z-20 bg-black/50 backdrop-blur-[2px] pointer-events-none"
+                animate={{ opacity: isButtonHovered ? 1 : 0 }}
+                transition={{ duration: 0.5, ease: "easeInOut" }}
+            />
+
+            <AuroraBackground />
+            <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 pointer-events-none mix-blend-soft-light" />
+            <ParticleStream side="left" />
+            <ParticleStream side="right" />
+            <div className="absolute top-0 w-full h-64 bg-gradient-to-b from-zinc-950 via-zinc-950/0 to-transparent backdrop-blur-[2px] [mask-image:linear-gradient(to_bottom,black,transparent)] pointer-events-none z-10" />
+
+            {/* Mobile Vertical Layout stack */}
+            <div className="relative w-full flex flex-col items-center justify-center pointer-events-none gap-6 pt-10">
+
+                {/* Text: READY */}
+                <motion.div style={{ y: yText, opacity: opacityText }} className="relative z-10">
+                    <h2 className="text-[25vw] leading-[0.8] font-black text-transparent bg-clip-text bg-gradient-to-b from-white via-zinc-200 to-zinc-400 tracking-tighter text-center select-none drop-shadow-[0_0_15px_rgba(255,255,255,0.25)]">
+                        READY
+                    </h2>
+                </motion.div>
+
+                {/* Text: TO */}
+                <motion.div style={{ y: yText, opacity: opacityText }} className="relative z-10">
+                    <h2 className="text-[25vw] leading-[0.8] font-black text-transparent bg-clip-text bg-gradient-to-b from-white via-zinc-200 to-zinc-400 tracking-tighter text-center select-none drop-shadow-[0_0_15px_rgba(255,255,255,0.25)]">
+                        TO
+                    </h2>
+                </motion.div>
+
+                {/* BUTTON MASSIVE FOR MOBILE */}
+                <div className="z-50 pointer-events-auto py-4">
+                    <MagneticButton
+                        onHoverStart={() => setIsButtonHovered(true)}
+                        onHoverEnd={() => setIsButtonHovered(false)}
+                        href="/contact"
+                        isMobile={true}
+                    />
+                </div>
+
+                {/* Text: SCALE? */}
+                <motion.div style={{ y: useTransform(yText, (v) => v * -0.5), opacity: opacityText }} className="relative z-10">
+                    <h2 className="text-[25vw] leading-[0.8] font-black text-transparent bg-clip-text bg-gradient-to-b from-white via-zinc-200 to-zinc-400 tracking-tighter text-center select-none drop-shadow-[0_0_15px_rgba(255,255,255,0.25)]">
+                        SCALE?
+                    </h2>
+                </motion.div>
+            </div>
+
+            {/* Bottom Bar Mobile */}
+            <div className="absolute bottom-8 w-full flex flex-col items-center justify-center gap-8 z-30 pointer-events-auto">
+                <div className="flex flex-col items-center gap-2 text-zinc-500 text-[10px] font-mono tracking-widest uppercase">
+                    <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                        <span>Systems Operational</span>
+                    </div>
+                </div>
+                <div className="flex gap-6 pointer-events-auto opacity-70">
+                    <FlipLink href="#">IN</FlipLink>
+                    <FlipLink href="#">IG</FlipLink>
+                    <FlipLink href="#">X</FlipLink>
+                    <FlipLink href="#">MAIL</FlipLink>
+                </div>
+            </div>
+            <div className="absolute bottom-0 w-full h-40 bg-gradient-to-t from-black/80 to-transparent pointer-events-none" />
+        </div>
+    );
+};
+
+// --- 7. EXPORT PRINCIPAL (CONDICIONAL) ---
+export const Footer = () => {
+    return (
+        <footer className="w-full">
+            {/* Desktop View */}
+            <div className="hidden md:block">
+                <FooterDesktop />
+            </div>
+
+            {/* Mobile View */}
+            <div className="block md:hidden">
+                <FooterMobile />
+            </div>
         </footer>
     );
 };
