@@ -17,6 +17,7 @@ const IDLE_TIMEOUT = 15000;   // Re-show after 15s of inactivity
 export function LogicCompanion() {
     const [isOpen, setIsOpen] = useState(false);
     const [showPrompt, setShowPrompt] = useState(false);
+    const [isBooped, setIsBooped] = useState(false);
     const { messages, input, handleInputChange, handleSubmit, isThinking, leadContext, updateLeadContext } = useLogicAI();
 
     const idleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -72,7 +73,11 @@ export function LogicCompanion() {
     }, [isOpen, startIdleTimer]);
 
     // ─── Handlers ────────────────────────────────────────────
-    const toggleChat = () => setIsOpen(!isOpen);
+    const handleAvatarClick = () => {
+        setIsBooped(true);
+        setTimeout(() => setIsBooped(false), 400); // 400ms squash
+        setIsOpen((prev) => !prev);
+    };
 
     const dismissPrompt = () => {
         setShowPrompt(false);
@@ -115,12 +120,13 @@ export function LogicCompanion() {
                             {/* Static subtle border fallback */}
                             <div className="absolute inset-0 rounded-2xl border border-white/[0.06]" />
 
-                            {/* Inner card */}
+                            {/* Inner card — premium glassmorphism */}
                             <div
-                                className="relative rounded-2xl px-5 py-4 flex items-center gap-4"
+                                className="relative rounded-2xl px-5 py-4 flex items-center gap-4 border border-white/10 shadow-2xl ring-1 ring-inset ring-white/[0.05]"
                                 style={{
-                                    background: 'linear-gradient(135deg, rgba(9,9,11,0.95) 0%, rgba(15,15,20,0.95) 100%)',
-                                    backdropFilter: 'blur(24px)',
+                                    background: 'linear-gradient(135deg, rgba(9,9,11,0.80) 0%, rgba(15,15,20,0.85) 100%)',
+                                    backdropFilter: 'blur(32px) saturate(1.4)',
+                                    WebkitBackdropFilter: 'blur(32px) saturate(1.4)',
                                 }}
                             >
                                 {/* Inner glow layer */}
@@ -183,14 +189,19 @@ export function LogicCompanion() {
                             </div>
                         </div>
 
-                        {/* Connector glow line — visual link to avatar below */}
+                        {/* Connector triangle — elegant tail pointing toward avatar */}
                         <motion.div
-                            initial={{ scaleY: 0 }}
-                            animate={{ scaleY: 1 }}
+                            initial={{ opacity: 0, scaleY: 0 }}
+                            animate={{ opacity: 1, scaleY: 1 }}
                             transition={{ delay: 0.3, duration: 0.4 }}
-                            className="absolute -bottom-6 right-10 w-[1px] h-6 origin-top"
+                            className="absolute -bottom-[10px] right-10 origin-top"
                             style={{
-                                background: 'linear-gradient(to bottom, rgba(6,182,212,0.3), transparent)',
+                                width: 0,
+                                height: 0,
+                                borderLeft: '8px solid transparent',
+                                borderRight: '8px solid transparent',
+                                borderTop: '10px solid rgba(9,9,11,0.85)',
+                                filter: 'drop-shadow(0 2px 6px rgba(6,182,212,0.25))',
                             }}
                         />
                     </motion.div>
@@ -198,9 +209,47 @@ export function LogicCompanion() {
             </AnimatePresence>
 
             {/* ── NeuroAvatar ──────────────────────────────── */}
-            <div onClick={toggleChat} role="button" aria-label="Toggle AI Chat">
-                <NeuroAvatar isThinking={isThinking} messages={messages} />
+            <div onClick={handleAvatarClick} role="button" aria-label="Toggle AI Chat">
+                <NeuroAvatar isThinking={isThinking} messages={messages} showPrompt={showPrompt && !isOpen} isBooped={isBooped} />
             </div>
+
+            {/* ── Sleeping Zzz Particles ──────────────────── */}
+            <AnimatePresence>
+                {showPrompt && !isOpen && (
+                    <motion.div
+                        key="zzz-particles"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.6 }}
+                        className="fixed bottom-[130px] right-[100px] z-[105] pointer-events-none"
+                    >
+                        {[0, 1, 2].map((i) => (
+                            <motion.div
+                                key={i}
+                                initial={{ opacity: 0, y: 0, x: 0, scale: 0.3, rotate: -10 }}
+                                animate={{
+                                    opacity: [0, 1, 0.8, 0],
+                                    y: -50 - i * 15,
+                                    x: [0, 15, -10, 20],
+                                    scale: [0.3, 1, 1.2, 1],
+                                    rotate: [-10, 10, -5, 15],
+                                }}
+                                transition={{
+                                    duration: 3.5,
+                                    repeat: Infinity,
+                                    delay: i * 1.2,
+                                    ease: 'easeInOut',
+                                }}
+                                className="absolute text-cyan-300 font-bold text-lg drop-shadow-[0_0_10px_rgba(6,182,212,0.9)]"
+                                style={{ left: `${i * 10}px` }}
+                            >
+                                Z
+                            </motion.div>
+                        ))}
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
             {/* ── Chat Window ─────────────────────────────── */}
             <ChatWindow

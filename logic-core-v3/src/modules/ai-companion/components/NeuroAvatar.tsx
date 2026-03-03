@@ -15,6 +15,8 @@ import * as THREE from 'three';
 interface NeuroAvatarProps {
     isThinking?: boolean;
     messages?: any[];
+    showPrompt?: boolean;
+    isBooped?: boolean;
 }
 
 // ─────────────────────────────────────────────────────────
@@ -126,7 +128,7 @@ float fbm(vec3 p) {
 // Uses MeshPhysicalMaterial + onBeforeCompile for GLSL injection
 // ─────────────────────────────────────────────────────────
 
-function LiquidBlob({ isThinking }: { isThinking: boolean }) {
+function LiquidBlob({ isThinking, isBooped = false }: { isThinking: boolean; isBooped?: boolean }) {
     const meshRef = useRef<THREE.Mesh>(null);
     const shaderRef = useRef<any>(null);
 
@@ -245,10 +247,16 @@ function LiquidBlob({ isThinking }: { isThinking: boolean }) {
     useFrame((state, delta) => {
         const targets = targetsRef.current;
 
-        // Lerp physical scale target
+        // Lerp physical scale target — with boop squash
         if (meshRef.current) {
             const trgScale = targets.scale;
-            meshRef.current.scale.lerp(new THREE.Vector3(trgScale, trgScale, trgScale), delta * 15);
+            const boopScaleX = isBooped ? trgScale * 1.15 : trgScale;
+            const boopScaleY = isBooped ? trgScale * 0.7 : trgScale;
+            const boopScaleZ = isBooped ? trgScale * 1.15 : trgScale;
+            const boopLerp = isBooped ? 0.25 : delta * 15;
+            meshRef.current.scale.x = THREE.MathUtils.lerp(meshRef.current.scale.x, boopScaleX, boopLerp);
+            meshRef.current.scale.y = THREE.MathUtils.lerp(meshRef.current.scale.y, boopScaleY, boopLerp);
+            meshRef.current.scale.z = THREE.MathUtils.lerp(meshRef.current.scale.z, boopScaleZ, boopLerp);
         }
 
         // Animate shader uniforms
@@ -281,7 +289,7 @@ function LiquidBlob({ isThinking }: { isThinking: boolean }) {
 // Their light refracts through the glass body
 // ─────────────────────────────────────────────────────────
 
-function AnatomicalEye({ isThinking }: { isThinking: boolean }) {
+function AnatomicalEye({ isThinking, showPrompt = false, isBooped = false }: { isThinking: boolean; showPrompt?: boolean; isBooped?: boolean }) {
     const groupRef = useRef<THREE.Group>(null);
     const leftGlowRef = useRef<THREE.Mesh>(null);
     const rightGlowRef = useRef<THREE.Mesh>(null);
@@ -294,6 +302,13 @@ function AnatomicalEye({ isThinking }: { isThinking: boolean }) {
 
     const leftOrbRef = useRef<THREE.Mesh>(null);
     const rightOrbRef = useRef<THREE.Mesh>(null);
+    const leftBrowRef = useRef<THREE.Mesh>(null);
+    const rightBrowRef = useRef<THREE.Mesh>(null);
+    const leftBrowMatRef = useRef<THREE.MeshBasicMaterial>(null);
+    const rightBrowMatRef = useRef<THREE.MeshBasicMaterial>(null);
+    const sleepMouthRef = useRef<THREE.Mesh>(null);
+    const happyMouthRef = useRef<THREE.Group>(null);
+    const sleepMouthMatRef = useRef<THREE.MeshBasicMaterial>(null);
     const [isBlinking, setIsBlinking] = useState(false);
 
     // Lógica estocástica de parpadeo orgánico
@@ -319,23 +334,28 @@ function AnatomicalEye({ isThinking }: { isThinking: boolean }) {
         if (!groupRef.current) return;
         const time = state.clock.elapsedTime;
 
-        // ── 1. Seguimiento de Cursor con Inercia (Lerp) ──
-        const targetRotY = state.pointer.x * 0.15;
-        const targetRotX = -state.pointer.y * 0.15;
+        // ── 1. Seguimiento de Cursor / Modo Sueño ──
+        // Sleep mode: head nods down, ignoring cursor. Awake: follows pointer.
+        const targetRotY = showPrompt ? 0 : (state.pointer.x * 0.15);
+        const targetRotX = showPrompt ? 0.3 : (-state.pointer.y * 0.15);
 
-        // Lerp mega suave (factor 0.04) para dar sensación de deslizamiento lento y viscoso
-        groupRef.current.rotation.y = THREE.MathUtils.lerp(groupRef.current.rotation.y, targetRotY, 0.04);
-        groupRef.current.rotation.x = THREE.MathUtils.lerp(groupRef.current.rotation.x, targetRotX, 0.04);
+        // Lerp suave — uses slower factor when sleeping for a gentle nod
+        const gazeLerp = showPrompt ? 0.03 : 0.04;
+        groupRef.current.rotation.y = THREE.MathUtils.lerp(groupRef.current.rotation.y, targetRotY, gazeLerp);
+        groupRef.current.rotation.x = THREE.MathUtils.lerp(groupRef.current.rotation.x, targetRotX, gazeLerp);
 
-        // Slow look-around background motion (agrega micro-vida constante)
-        const wanderSpeed = isThinking ? 1.5 : 0.3;
+        // Slow look-around background motion (disabled while sleeping)
+        const wanderSpeed = showPrompt ? 0 : (isThinking ? 1.5 : 0.3);
         const wanderX = Math.sin(time * wanderSpeed) * 0.03;
         const wanderY = Math.sin(time * wanderSpeed * 1.3 + 0.8) * 0.02;
-        groupRef.current.position.x = THREE.MathUtils.lerp(groupRef.current.position.x, wanderX, 0.1);
-        groupRef.current.position.y = THREE.MathUtils.lerp(groupRef.current.position.y, wanderY, 0.1);
+        groupRef.current.position.x = THREE.MathUtils.lerp(groupRef.current.position.x, showPrompt ? 0 : wanderX, 0.1);
+        groupRef.current.position.y = THREE.MathUtils.lerp(groupRef.current.position.y, showPrompt ? 0 : wanderY, 0.1);
 
         // ── 2. Respiración + Parpadeo en la Escala ──
-        const breathe = Math.sin(time * 2.5) * 0.1 + 0.9;
+        // Sleep mode: 50% slower breathing (time * 1.25 vs 2.5), deeper amplitude
+        const breatheSpeed = showPrompt ? 1.25 : 2.5;
+        const breatheAmplitude = showPrompt ? 0.15 : 0.1;
+        const breathe = Math.sin(time * breatheSpeed) * breatheAmplitude + 0.9;
         const isStreaming = streamPulseRef.current > 0.05;
         const isLoading = isThinking && !isStreaming;
 
@@ -345,18 +365,20 @@ function AnatomicalEye({ isThinking }: { isThinking: boolean }) {
                 ? breathe + (streamPulseRef.current * 0.15) // Pulse on text stream
                 : breathe;
 
-        // Si está pensando, hace un squint natural. Si parpadea, colapso cuántico a 0.05.
-        const targetScaleY = isBlinking ? 0.05 : (isThinking ? 0.6 : thinkPulse);
+        // Sleep mode: anime-style line eyes (— —). Blink: quantum collapse. Thinking: squint.
+        const targetScaleY = showPrompt ? 0.02 : (isBlinking ? 0.05 : (isThinking ? 0.6 : thinkPulse));
+        const targetScaleX = showPrompt ? 1.3 : thinkPulse; // Stretch horizontally when sleeping
 
         // Aplicamos lerp a la escala de los orbes
+        const eyeLerpY = showPrompt ? 0.08 : (isBlinking ? 0.6 : 0.15);
         if (leftOrbRef.current) {
-            leftOrbRef.current.scale.y = THREE.MathUtils.lerp(leftOrbRef.current.scale.y, targetScaleY, isBlinking ? 0.6 : 0.15);
-            leftOrbRef.current.scale.x = THREE.MathUtils.lerp(leftOrbRef.current.scale.x, thinkPulse, 0.1);
+            leftOrbRef.current.scale.y = THREE.MathUtils.lerp(leftOrbRef.current.scale.y, targetScaleY, eyeLerpY);
+            leftOrbRef.current.scale.x = THREE.MathUtils.lerp(leftOrbRef.current.scale.x, targetScaleX, 0.1);
             leftOrbRef.current.scale.z = THREE.MathUtils.lerp(leftOrbRef.current.scale.z, thinkPulse, 0.1);
         }
         if (rightOrbRef.current) {
-            rightOrbRef.current.scale.y = THREE.MathUtils.lerp(rightOrbRef.current.scale.y, targetScaleY, isBlinking ? 0.6 : 0.15);
-            rightOrbRef.current.scale.x = THREE.MathUtils.lerp(rightOrbRef.current.scale.x, thinkPulse, 0.1);
+            rightOrbRef.current.scale.y = THREE.MathUtils.lerp(rightOrbRef.current.scale.y, targetScaleY, eyeLerpY);
+            rightOrbRef.current.scale.x = THREE.MathUtils.lerp(rightOrbRef.current.scale.x, targetScaleX, 0.1);
             rightOrbRef.current.scale.z = THREE.MathUtils.lerp(rightOrbRef.current.scale.z, thinkPulse, 0.1);
         }
 
@@ -385,6 +407,68 @@ function AnatomicalEye({ isThinking }: { isThinking: boolean }) {
         // Apply to Glow Halos
         if (leftGlowMatRef.current) leftGlowMatRef.current.color.lerp(targetColor, 0.1);
         if (rightGlowMatRef.current) rightGlowMatRef.current.color.lerp(targetColor, 0.1);
+
+        // Apply to Brows (same color sync as eyes)
+        if (leftBrowMatRef.current) leftBrowMatRef.current.color.lerp(targetColor, 0.1);
+        if (rightBrowMatRef.current) rightBrowMatRef.current.color.lerp(targetColor, 0.1);
+
+        // ── 3. Cejas Magnéticas (Expressive Brows) ──
+        // Priority: isBooped > showPrompt (sleep) > isThinking > idle
+        if (leftBrowRef.current && rightBrowRef.current) {
+            let targetBrowY = BROW_BASE_Y;
+            let targetLeftRotZ = 0;
+            let targetRightRotZ = 0;
+
+            if (isBooped) {
+                targetBrowY = BROW_BASE_Y + 0.08;  // Surprise/joy — brows raise
+                targetLeftRotZ = 0.25;              // /  \
+                targetRightRotZ = -0.25;
+            } else if (showPrompt) {
+                targetBrowY = BROW_BASE_Y - 0.03;   // Sleep — brows droop
+                targetLeftRotZ = -0.15;              // \  /
+                targetRightRotZ = 0.15;
+            } else if (isThinking) {
+                targetBrowY = BROW_BASE_Y - 0.02;   // Concentration — slight furrow
+                targetLeftRotZ = -0.25;              // \  / (frown inward)
+                targetRightRotZ = 0.25;
+            } else {
+                // Subtle idle float
+                const browFloat = Math.sin(time * 1.5) * 0.008;
+                targetBrowY = BROW_BASE_Y + browFloat;
+            }
+
+            const browLerp = isBooped ? 0.3 : 0.08;
+            leftBrowRef.current.position.y = THREE.MathUtils.lerp(leftBrowRef.current.position.y, targetBrowY, browLerp);
+            rightBrowRef.current.position.y = THREE.MathUtils.lerp(rightBrowRef.current.position.y, targetBrowY, browLerp);
+
+            leftBrowRef.current.rotation.z = THREE.MathUtils.lerp(leftBrowRef.current.rotation.z, targetLeftRotZ, browLerp);
+            rightBrowRef.current.rotation.z = THREE.MathUtils.lerp(rightBrowRef.current.rotation.z, targetRightRotZ, browLerp);
+        }
+
+        // ── 4. Boca Contextual (Contextual Mouth) ──
+        // Mouth hidden during thinking and idle; only visible for boop and sleep
+        if (sleepMouthRef.current && happyMouthRef.current) {
+            let targetSleepScale = 0;
+            let targetHappyScale = 0;
+
+            if (isBooped) {
+                targetHappyScale = 1;
+            } else if (showPrompt) {
+                // Oscillating scale to simulate snoring
+                targetSleepScale = 1.0 + Math.sin(time * 3) * 0.2;
+            }
+            // isThinking and idle: both mouths stay at 0
+
+            sleepMouthRef.current.scale.setScalar(
+                THREE.MathUtils.lerp(sleepMouthRef.current.scale.x, targetSleepScale, 0.2)
+            );
+            happyMouthRef.current.scale.setScalar(
+                THREE.MathUtils.lerp(happyMouthRef.current.scale.x, targetHappyScale, 0.2)
+            );
+
+            // Color sync mouth with eyes
+            if (sleepMouthMatRef.current) sleepMouthMatRef.current.color.lerp(targetColor, 0.1);
+        }
     });
 
     // Eyes positioned INSIDE the body
@@ -393,6 +477,13 @@ function AnatomicalEye({ isThinking }: { isThinking: boolean }) {
     const eyeY = 0.18;
     const eyeZ = 1.15; // Much closer to the surface of the 1.1 body
     const eyeRadius = 0.07; // Iris radius
+
+    // ─── CALIBRACIÓN DE CEJAS ───
+    const BROW_Z = 0.08;        // Profundidad (aumentar si se hunden en el cristal)
+    const BROW_BASE_Y = 0.12;   // Altura normal
+    const BROW_SPACING = 0.12;  // Separación desde el centro
+    const BROW_THICKNESS = 0.015; // Grosor de la línea
+    const BROW_LENGTH = 0.05;   // Largo de la ceja
 
     return (
         <group ref={groupRef}>
@@ -486,6 +577,41 @@ function AnatomicalEye({ isThinking }: { isThinking: boolean }) {
                         toneMapped={false}
                     />
                 </mesh>
+            </group>
+
+            {/* ── Magnetic Eyebrows ── */}
+            <group position={[0, eyeY, eyeZ + BROW_Z]}>
+                {/* Left Brow */}
+                <mesh ref={leftBrowRef} position={[-BROW_SPACING, BROW_BASE_Y, 0]} rotation={[0, 0, 0.1]} renderOrder={999}>
+                    <capsuleGeometry args={[BROW_THICKNESS, BROW_LENGTH, 4, 16]} />
+                    <meshBasicMaterial ref={leftBrowMatRef} color="#06b6d4" toneMapped={false} depthTest={false} />
+                </mesh>
+                {/* Right Brow */}
+                <mesh ref={rightBrowRef} position={[BROW_SPACING, BROW_BASE_Y, 0]} rotation={[0, 0, -0.1]} renderOrder={999}>
+                    <capsuleGeometry args={[BROW_THICKNESS, BROW_LENGTH, 4, 16]} />
+                    <meshBasicMaterial ref={rightBrowMatRef} color="#06b6d4" toneMapped={false} depthTest={false} />
+                </mesh>
+            </group>
+
+            {/* ── Contextual Mouth ── */}
+            <group position={[0, eyeY - 0.08, eyeZ + BROW_Z]}>
+                {/* Boca Dormida "o" */}
+                <mesh ref={sleepMouthRef} scale={0} renderOrder={999}>
+                    <torusGeometry args={[0.015, 0.006, 16, 32]} />
+                    <meshBasicMaterial ref={sleepMouthMatRef} color="#06b6d4" toneMapped={false} depthTest={false} />
+                </mesh>
+
+                {/* Boca Feliz "w" */}
+                <group ref={happyMouthRef} scale={0}>
+                    <mesh position={[-0.015, 0, 0]} rotation={[Math.PI, 0, 0]} renderOrder={999}>
+                        <torusGeometry args={[0.015, 0.006, 16, 32, Math.PI]} />
+                        <meshBasicMaterial color="#06b6d4" toneMapped={false} depthTest={false} />
+                    </mesh>
+                    <mesh position={[0.015, 0, 0]} rotation={[Math.PI, 0, 0]} renderOrder={999}>
+                        <torusGeometry args={[0.015, 0.006, 16, 32, Math.PI]} />
+                        <meshBasicMaterial color="#06b6d4" toneMapped={false} depthTest={false} />
+                    </mesh>
+                </group>
             </group>
         </group>
     );
@@ -592,10 +718,30 @@ function useVisibility(threshold = 0.1) {
 }
 
 // ─────────────────────────────────────────────────────────
+// ParallaxRig — Inverse mouse tracking for depth immersion
+// Moves the entire body slightly OPPOSITE to cursor for parallax effect
+// ─────────────────────────────────────────────────────────
+
+function ParallaxRig({ children }: { children: React.ReactNode }) {
+    const groupRef = useRef<THREE.Group>(null);
+
+    useFrame((state) => {
+        if (!groupRef.current) return;
+        // Inverse parallax: body moves OPPOSITE to cursor
+        const targetX = -state.pointer.x * 0.15;
+        const targetY = -state.pointer.y * 0.08;
+        groupRef.current.position.x = THREE.MathUtils.lerp(groupRef.current.position.x, targetX, 0.03);
+        groupRef.current.position.y = THREE.MathUtils.lerp(groupRef.current.position.y, targetY, 0.03);
+    });
+
+    return <group ref={groupRef}>{children}</group>;
+}
+
+// ─────────────────────────────────────────────────────────
 // Exported NeuroAvatar
 // ─────────────────────────────────────────────────────────
 
-export function NeuroAvatar({ isThinking = false, messages = [] }: NeuroAvatarProps) {
+export function NeuroAvatar({ isThinking = false, messages = [], showPrompt = false, isBooped = false }: NeuroAvatarProps) {
     const { ref: containerRef, isVisible } = useVisibility(0.1);
 
     return (
@@ -622,15 +768,17 @@ export function NeuroAvatar({ isThinking = false, messages = [] }: NeuroAvatarPr
                 <Environment preset="city" />
                 <StreamController messages={messages} />
 
-                <Float
-                    speed={isThinking ? 1.2 : 0.6}
-                    rotationIntensity={isThinking ? 1.0 : 0.5}
-                    floatIntensity={isThinking ? 1.5 : 1}
-                >
-                    {/* Order matters: eyes first, then glass body on top for refraction */}
-                    <AnatomicalEye isThinking={isThinking} />
-                    <LiquidBlob isThinking={isThinking} />
-                </Float>
+                <ParallaxRig>
+                    <Float
+                        speed={isThinking ? 1.2 : 0.6}
+                        rotationIntensity={isThinking ? 1.0 : 0.5}
+                        floatIntensity={isThinking ? 1.5 : 1}
+                    >
+                        {/* Order matters: eyes first, then glass body on top for refraction */}
+                        <AnatomicalEye isThinking={isThinking} showPrompt={showPrompt} isBooped={isBooped} />
+                        <LiquidBlob isThinking={isThinking} isBooped={isBooped} />
+                    </Float>
+                </ParallaxRig>
 
                 <EffectComposer multisampling={0} disableNormalPass>
                     <SMAA />
