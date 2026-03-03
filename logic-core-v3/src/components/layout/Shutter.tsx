@@ -23,7 +23,7 @@ export const Shutter = () => {
                 {/* Left Half Container - 30vw width (Half of 60vw total logo) */}
                 <div className="w-[30vw] h-auto overflow-hidden flex justify-start">
                     {/* Full Logo - 60vw width */}
-                    <div className="w-[60vw] mr-[-30vw] text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.8)] filter">
+                    <div className="w-[60vw] mr-[-30vw] px-8 md:px-4 text-white py-8 md:py-4 drop-shadow-[0_0_15px_rgba(255,255,255,0.8)] filter">
                         <LogoSVG />
                     </div>
                 </div>
@@ -39,7 +39,7 @@ export const Shutter = () => {
                 {/* Right Half Container - 30vw width */}
                 <div className="w-[30vw] h-auto overflow-hidden flex justify-start">
                     {/* Full Logo - 60vw width - Shifted Left by 30vw to show right half */}
-                    <div className="w-[60vw] ml-[-30vw] text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.8)] filter">
+                    <div className="w-[60vw] ml-[-30vw] px-8 md:px-4 py-8 md:py-4 text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.8)] filter">
                         <LogoSVG />
                     </div>
                 </div>

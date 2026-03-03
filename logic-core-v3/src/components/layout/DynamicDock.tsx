@@ -7,7 +7,7 @@ import {
     useTransform,
     AnimatePresence,
 } from "framer-motion";
-import { Home, Briefcase, Terminal, Layers, Mail, Lightbulb } from "lucide-react";
+import { Home, Briefcase, Terminal, Layers, Mail, Lightbulb, Menu, X } from "lucide-react";
 import Link from "next/link";
 import { useRef, useState } from "react";
 import { useTransitionContext } from "@/context/TransitionContext";
@@ -57,6 +57,7 @@ const Synapse = ({ label, href, direction, delay }: { label: string; href: strin
 
 export const DynamicDock = () => {
     const mouseX = useMotionValue(Infinity);
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
     const icons = [
         {
@@ -92,17 +93,74 @@ export const DynamicDock = () => {
     ];
 
     return (
-        <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[9990] pointer-events-auto">
-            <motion.div
-                onMouseMove={(e) => mouseX.set(e.pageX)}
-                onMouseLeave={() => mouseX.set(Infinity)}
-                className="flex h-16 items-end gap-4 rounded-full border border-white/10 bg-zinc-950/20 px-4 pb-3 backdrop-blur-2xl shadow-2xl"
-            >
-                {icons.map((item, i) => (
-                    <DockIcon key={i} mouseX={mouseX} {...item} />
-                ))}
-            </motion.div>
-        </div>
+        <>
+            {/* Desktop Dock */}
+            <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[9990] pointer-events-auto hidden md:block">
+                <motion.div
+                    onMouseMove={(e) => mouseX.set(e.pageX)}
+                    onMouseLeave={() => mouseX.set(Infinity)}
+                    className="flex h-16 items-end gap-4 rounded-full border border-white/10 bg-zinc-950/20 px-4 pb-3 backdrop-blur-2xl shadow-2xl"
+                >
+                    {icons.map((item, i) => (
+                        <DockIcon key={i} mouseX={mouseX} {...item} />
+                    ))}
+                </motion.div>
+            </div>
+
+            {/* Mobile Dock */}
+            <div className="fixed bottom-6 left-6 z-[9990] pointer-events-auto md:hidden flex flex-col-reverse items-center gap-4">
+                {/* Toggle Button */}
+                <button
+                    onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                    className="w-14 h-14 rounded-full bg-zinc-900 border border-white/10 flex items-center justify-center shadow-[0_0_20px_rgba(0,0,0,0.5)] backdrop-blur-xl relative z-50 transition-colors active:bg-zinc-800"
+                >
+                    {isMobileMenuOpen ? <X className="text-white w-6 h-6" /> : <Menu className="text-white w-6 h-6" />}
+                </button>
+
+                {/* Expandable Vertical Menu */}
+                <AnimatePresence>
+                    {isMobileMenuOpen && (
+                        <motion.div
+                            variants={{
+                                hidden: { opacity: 0, scale: 0.9, y: 20, transformOrigin: 'bottom' },
+                                show: {
+                                    opacity: 1, scale: 1, y: 0,
+                                    transition: {
+                                        type: "spring", stiffness: 300, damping: 25,
+                                        staggerChildren: 0.05,
+                                        delayChildren: 0.1
+                                    }
+                                },
+                                exit: {
+                                    opacity: 0, scale: 0.9, y: -20,
+                                    transition: { staggerChildren: 0.05, staggerDirection: -1 }
+                                }
+                            }}
+                            initial="hidden"
+                            animate="show"
+                            exit="exit"
+                            className="flex flex-col w-[72px] items-center gap-3 rounded-[36px] border border-white/10 bg-zinc-950/90 py-4 backdrop-blur-2xl shadow-2xl overflow-visible whitespace-nowrap"
+                        >
+                            {/* We keep the original array order or reverse it? Let's just map normally, first icon (Inicio) is on top */}
+                            {icons.map((item, i) => (
+                                <motion.div key={i} variants={{
+                                    hidden: { opacity: 0, y: 10, scale: 0.8 },
+                                    show: { opacity: 1, y: 0, scale: 1, transition: { type: "spring", stiffness: 300 } },
+                                    exit: { opacity: 0, scale: 0.8 }
+                                }}>
+                                    <MobileDockIcon
+                                        icon={item.icon}
+                                        href={item.href}
+                                        label={item.label}
+                                        onClick={() => setIsMobileMenuOpen(false)}
+                                    />
+                                </motion.div>
+                            ))}
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+            </div>
+        </>
     );
 };
 
@@ -203,5 +261,110 @@ function DockIcon({
                 {icon}
             </Link>
         </motion.div>
+    );
+}
+
+// --- Mobile specific icon rendering without the physics width scaling ---
+function MobileDockIcon({
+    icon,
+    href,
+    label,
+    onClick
+}: {
+    icon: React.ReactNode;
+    href: string;
+    label: string;
+    onClick: () => void;
+}) {
+    const { triggerTransition } = useTransitionContext();
+    const isServices = label === "Servicios";
+
+    const handleClick = (e: React.MouseEvent) => {
+        e.preventDefault();
+
+        triggerTransition(href);
+        onClick(); // close menu on mobile tap
+    };
+
+    return (
+        <div className="relative flex flex-col items-center justify-center gap-1 my-2">
+            <AnimatePresence>
+                {/* Horizontal Popup Menu for Services (Mobile Version) */}
+                {isServices && (
+                    <>
+                        {/* Connecting Horizontal Axon Lines */}
+                        <motion.div
+                            initial={{ width: 0, opacity: 0 }}
+                            animate={{ width: 30, opacity: 1 }}
+                            exit={{ width: 0, opacity: 0 }}
+                            transition={{ duration: 0.3, ease: "easeOut", delay: 0.1 }}
+                            className="absolute top-[20px] left-[50px] h-[2px] bg-gradient-to-r from-transparent via-cyan-400 to-white shadow-[0_0_15px_cyan] origin-left -rotate-12 z-0 pointer-events-none"
+                        >
+                            <div className="absolute top-1/2 right-0 -translate-y-1/2 w-1 h-1 bg-white rounded-full shadow-[0_0_10px_white]" />
+                        </motion.div>
+
+                        <motion.div
+                            initial={{ width: 0, opacity: 0 }}
+                            animate={{ width: 30, opacity: 1 }}
+                            exit={{ width: 0, opacity: 0 }}
+                            transition={{ duration: 0.3, ease: "easeOut", delay: 0.2 }}
+                            className="absolute top-[30px] left-[50px] h-[2px] bg-gradient-to-r from-transparent via-fuchsia-400 to-white shadow-[0_0_15px_fuchsia] origin-left rotate-12 z-0 pointer-events-none"
+                        >
+                            <div className="absolute top-1/2 right-0 -translate-y-1/2 w-1 h-1 bg-white rounded-full shadow-[0_0_10px_white]" />
+                        </motion.div>
+
+                        {/* Dropdown Container */}
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.8, x: -10, transformOrigin: 'left center' }}
+                            animate={{ opacity: 1, scale: 1, x: 0 }}
+                            exit={{ opacity: 0, scale: 0.8, x: -10 }}
+                            transition={{ type: "spring", stiffness: 300, damping: 20, delay: 0.3 }}
+                            className="absolute top-1/2 -translate-y-1/2 left-[75px] flex flex-col gap-2 z-50"
+                        >
+                            <button
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    triggerTransition("/web-development");
+                                    onClick();
+                                }}
+                                className="whitespace-nowrap px-3 py-2 rounded-full bg-zinc-900/90 border border-white/10 backdrop-blur-xl shadow-xl flex items-center gap-2"
+                            >
+                                <div className="w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_10px_currentColor]" />
+                                <span className="text-[10px] font-semibold text-zinc-300 uppercase tracking-wider">Web Dev</span>
+                            </button>
+
+                            <button
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    triggerTransition("/software-development");
+                                    onClick();
+                                }}
+                                className="whitespace-nowrap px-3 py-2 rounded-full bg-zinc-900/90 border border-white/10 backdrop-blur-xl shadow-xl flex items-center gap-2"
+                            >
+                                <div className="w-2 h-2 rounded-full bg-fuchsia-400 shadow-[0_0_10px_currentColor]" />
+                                <span className="text-[10px] font-semibold text-zinc-300 uppercase tracking-wider">Software</span>
+                            </button>
+                        </motion.div>
+                    </>
+                )}
+            </AnimatePresence>
+
+            <Link
+                href={href}
+                onClick={handleClick}
+                className={`flex items-center justify-center w-10 h-10 rounded-full border text-zinc-400 transition-colors z-10 ${isServices ? 'bg-zinc-800 border-cyan-500/30 text-white shadow-[0_0_20px_rgba(34,211,238,0.2)]' : 'bg-zinc-900/50 border-white/5 active:bg-zinc-800 active:text-white'}`}
+            >
+                <div className="w-5 h-5 pointer-events-none">
+                    {icon}
+                </div>
+            </Link>
+
+            {/* Persistent Mobile Label */}
+            <span className="text-[9px] font-semibold text-zinc-400 uppercase tracking-wider">
+                {label}
+            </span>
+        </div>
     );
 }
