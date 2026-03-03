@@ -180,8 +180,8 @@ const MagneticButton = ({ onHoverStart, onHoverEnd, href, isMobile }: MagneticBu
                 style={{ x: mouseX, y: mouseY }}
                 className={`relative flex items-center justify-center z-40 block ${isSimulatingHover ? 'group-active-simulated' : 'group'}`}
                 whileHover={!isMobile ? { scale: 1.8 } : {}}
-                animate={isSimulatingHover ? { scale: 1.5 } : { scale: 1 }}
-                transition={{ type: "tween", ease: "circOut", duration: isMobile ? 0.8 : 2.5 }}
+                animate={isSimulatingHover ? { scale: 1.8 } : { scale: 1 }}
+                transition={{ type: "tween", ease: "circOut", duration: isMobile ? 1.5 : 2.5 }}
             >
                 {/* JITTER LAYER */}
                 <motion.div
@@ -193,10 +193,14 @@ const MagneticButton = ({ onHoverStart, onHoverEnd, href, isMobile }: MagneticBu
                             : "shadow-[0_0_50px_-10px_rgba(255,255,255,0.3)] group-hover:shadow-[0_0_100px_0px_rgba(255,255,255,0.6)]"
                         }
                     `}
-                    whileHover={{
+                    whileHover={!isMobile ? {
                         x: [0, -1, 1, -1, 1, 0],
                         y: [0, 1, -1, 1, -1, 0],
-                    }}
+                    } : {}}
+                    animate={isSimulatingHover ? {
+                        x: [0, -1, 1, -1, 1, 0],
+                        y: [0, 1, -1, 1, -1, 0],
+                    } : { x: 0, y: 0 }}
                     transition={{
                         x: { repeat: Infinity, duration: 0.2, ease: "linear" },
                         y: { repeat: Infinity, duration: 0.2, ease: "linear", delay: 0.1 }
@@ -214,14 +218,15 @@ const MagneticButton = ({ onHoverStart, onHoverEnd, href, isMobile }: MagneticBu
                     {/* 4. CONTENT (Text -> Rocket) */}
                     <motion.div style={{ x: textX, y: textY }} className="relative z-10 flex flex-col items-center gap-12">
                         {/* Default State: TEXT */}
-                        <span className={`text-xl md:text-2xl font-black text-black tracking-tighter transition-opacity duration-300 absolute ${isSimulatingHover ? 'opacity-0' : 'group-hover:opacity-0'}`}>
+                        {/* pt-8 for mobile, md:pt-3 for desktop to correct vertical alignment within the circle */}
+                        <span className={`text-xl md:text-2xl pt-6 md:pt-3 font-black text-black tracking-tighter transition-opacity duration-300 absolute ${isSimulatingHover ? 'opacity-0' : 'group-hover:opacity-0'}`}>
                             START
                         </span>
 
                         {/* Hover State: ROCKET ICON - CHANGED TO GROUP HOVER LOGIC AND SIMULATED HOVER */}
                         <div className={`transform origin-center transition-all duration-500 delay-100 ${isSimulatingHover
-                                ? 'opacity-100 scale-110 rotate-45'
-                                : 'opacity-0 scale-50 rotate-45 group-hover:opacity-100 group-hover:scale-110'
+                            ? 'opacity-100 scale-110 rotate-45'
+                            : 'opacity-0 scale-50 rotate-45 group-hover:opacity-100 group-hover:scale-110'
                             }`}>
                             {/* Rocket Icon - Black Stroke */}
                             <svg
@@ -258,6 +263,7 @@ const MagneticButton = ({ onHoverStart, onHoverEnd, href, isMobile }: MagneticBu
 const AuroraBackground = () => {
     return (
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            {/* Indigo Aura */}
             <motion.div
                 animate={{
                     scale: [1, 1.2, 1],
@@ -266,8 +272,9 @@ const AuroraBackground = () => {
                     opacity: [0.3, 0.5, 0.3]
                 }}
                 transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-                className="absolute -top-[20%] left-[20%] w-[50vw] h-[50vw] bg-indigo-600/30 rounded-full blur-[100px] mix-blend-screen"
+                className="absolute -top-[10%] md:-top-[20%] left-[10%] md:left-[20%] w-[100vw] h-[100vw] md:w-[50vw] md:h-[50vw] bg-indigo-600/40 md:bg-indigo-600/30 rounded-full blur-[100px] md:blur-[100px] mix-blend-screen"
             />
+            {/* Cyan Aura */}
             <motion.div
                 animate={{
                     scale: [1, 1.3, 1],
@@ -275,12 +282,13 @@ const AuroraBackground = () => {
                     opacity: [0.2, 0.4, 0.2]
                 }}
                 transition={{ duration: 15, repeat: Infinity, ease: "easeInOut", delay: 2 }}
-                className="absolute top-[10%] right-[10%] w-[40vw] h-[40vw] bg-cyan-500/20 rounded-full blur-[120px] mix-blend-screen"
+                className="absolute top-[20%] md:top-[10%] right-[-20%] md:right-[10%] w-[120vw] h-[120vw] md:w-[40vw] md:h-[40vw] bg-cyan-500/30 md:bg-cyan-500/20 rounded-full blur-[120px] mix-blend-screen"
             />
+            {/* Violet Aura */}
             <motion.div
-                animate={{ opacity: [0.1, 0.3, 0.1] }}
+                animate={{ opacity: [0.3, 0.5, 0.3] }}
                 transition={{ duration: 8, repeat: Infinity }}
-                className="absolute -bottom-[20%] left-[30%] w-[60vw] h-[40vw] bg-violet-800/20 rounded-full blur-[100px] mix-blend-screen"
+                className="absolute bottom-[20%] md:-bottom-[20%] left-[-10%] md:left-[30%] w-[150vw] h-[100vw] md:w-[60vw] md:h-[40vw] bg-violet-800/60 md:bg-violet-800/20 rounded-full blur-[120px] md:blur-[100px] mix-blend-screen"
             />
         </div>
     )
@@ -387,14 +395,14 @@ const FooterMobile = () => {
 
                 {/* Text: READY */}
                 <motion.div style={{ y: yText, opacity: opacityText }} className="relative z-10">
-                    <h2 className="text-[25vw] leading-[0.8] font-black text-transparent bg-clip-text bg-gradient-to-b from-white via-zinc-200 to-zinc-400 tracking-tighter text-center select-none drop-shadow-[0_0_15px_rgba(255,255,255,0.25)]">
+                    <h2 className="text-[25vw] leading-[0.8] font-black text-transparent pl-2 pr-2 bg-clip-text bg-gradient-to-b from-white via-zinc-200 to-zinc-400 tracking-tighter text-center select-none drop-shadow-[0_0_15px_rgba(255,255,255,0.25)]">
                         READY
                     </h2>
                 </motion.div>
 
                 {/* Text: TO */}
                 <motion.div style={{ y: yText, opacity: opacityText }} className="relative z-10">
-                    <h2 className="text-[25vw] leading-[0.8] font-black text-transparent bg-clip-text bg-gradient-to-b from-white via-zinc-200 to-zinc-400 tracking-tighter text-center select-none drop-shadow-[0_0_15px_rgba(255,255,255,0.25)]">
+                    <h2 className="text-[25vw] leading-[0.8] font-black pl-2 pr-2 pb-1 text-transparent bg-clip-text bg-gradient-to-b from-white via-zinc-200 to-zinc-400 tracking-tighter text-center select-none drop-shadow-[0_0_15px_rgba(255,255,255,0.25)]">
                         TO
                     </h2>
                 </motion.div>
@@ -411,7 +419,7 @@ const FooterMobile = () => {
 
                 {/* Text: SCALE? */}
                 <motion.div style={{ y: useTransform(yText, (v) => v * -0.5), opacity: opacityText }} className="relative z-10">
-                    <h2 className="text-[25vw] leading-[0.8] font-black text-transparent bg-clip-text bg-gradient-to-b from-white via-zinc-200 to-zinc-400 tracking-tighter text-center select-none drop-shadow-[0_0_15px_rgba(255,255,255,0.25)]">
+                    <h2 className="text-[25vw] pl-2 pr-2 pb-1 leading-[0.8] font-black text-transparent bg-clip-text bg-gradient-to-b from-white via-zinc-200 to-zinc-400 tracking-tighter text-center select-none drop-shadow-[0_0_15px_rgba(255,255,255,0.25)]">
                         SCALE?
                     </h2>
                 </motion.div>

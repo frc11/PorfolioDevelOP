@@ -87,10 +87,12 @@ const AboutMobile = () => {
                     <div className="w-[100vw] h-screen flex items-center justify-center bg-zinc-950 flex-shrink-0">
                         <div className="flex flex-col items-center">
                             <h2 className="text-5xl font-black text-white tracking-tighter text-center leading-none">
-                                WE ARE<br />
-                                <span className="text-transparent bg-clip-text bg-gradient-to-r from-zinc-300 to-zinc-600">
-                                    ARCHITECTS
-                                </span>
+                                <KineticText>
+                                    WE ARE<br />
+                                    <span className="text-transparent bg-clip-text bg-gradient-to-r pl-4 pr-5 from-zinc-300 to-zinc-600">
+                                        ARCHITECTS
+                                    </span>
+                                </KineticText>
                             </h2>
                         </div>
                     </div>

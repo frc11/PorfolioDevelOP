@@ -210,8 +210,8 @@ function MobileParallaxText({ children, baseVelocity = 100 }: ParallaxProps) {
                 onPanEnd={() => setIsDragging(false)}
                 onPan={(event, info) => {
                     // Smooth unconstrained panning via MotionValue updates directly
-                    // This resolves jitter from drag vs useTransform collisions
-                    const factor = 0.15;
+                    // Reduced factor significantly per user feedback to prevent overly fast scrolling
+                    const factor = 0.05;
                     baseX.set(baseX.get() + info.delta.x * factor);
                 }}
             >

@@ -334,8 +334,8 @@ const OurServicesMobile = () => {
 
             <div className="container mx-auto px-6 relative z-10 flex flex-col items-center">
                 <div className="mb-12 text-center">
-                    <h2 className="text-4xl font-black text-white tracking-tighter mb-4 relative inline-block">
-                        OUR <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-fuchsia-500">SERVICES</span>
+                    <h2 className="text-4xl font-black text-white tracking-tighter mb-4 relative inline-block pl-1">
+                        OUR <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-fuchsia-500 pr-1">SERVICES</span>
                     </h2>
                     <p className="text-zinc-400 max-w-2xl mx-auto text-base font-light">
                         Deploying scalar architecture and neural interfaces for the next generation of web presence.
