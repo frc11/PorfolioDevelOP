@@ -21,10 +21,10 @@ export const Shutter = () => {
                 initial={{ x: '-100%' }}
                 animate={{ x: isAnimating ? '0%' : '-100%' }}
                 transition={transition}
-                className="w-full h-full bg-zinc-950 relative flex items-center justify-end overflow-hidden z-20 -mr-[1px]"
+                className="w-[calc(100%+1px)] md:w-full h-full bg-zinc-950 relative flex items-center justify-end overflow-hidden z-20 md:z-10"
             >
                 {/* Left Half Container - 30vw width (Half of 60vw total logo) */}
-                <div className="w-[30vw] h-auto overflow-hidden flex justify-start -translate-x-[1px]">
+                <div className="w-[30vw] h-auto overflow-hidden flex justify-start -translate-x-[1px] md:translate-x-0">
                     {/* Full Logo - 60vw width */}
                     <div className="w-[60vw] mr-[-30vw] px-8 md:px-4 text-white py-8 md:py-4 drop-shadow-[0_0_15px_rgba(255,255,255,0.8)] filter">
                         <LogoSVG />
@@ -37,7 +37,7 @@ export const Shutter = () => {
                 initial={{ x: '100%' }}
                 animate={{ x: isAnimating ? '0%' : '100%' }}
                 transition={transition}
-                className="w-full h-full bg-zinc-950 relative flex items-center justify-start overflow-hidden z-10 -translate-x-[1px]"
+                className="w-full h-full bg-zinc-950 relative flex items-center justify-start overflow-hidden"
             >
                 {/* Right Half Container - 30vw width */}
                 <div className="w-[30vw] h-auto overflow-hidden flex justify-start">
