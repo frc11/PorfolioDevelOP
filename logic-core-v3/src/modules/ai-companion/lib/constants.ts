@@ -3,7 +3,7 @@
  * Base prompts and contextual augmentations
  */
 
-export const INITIAL_GREETING = "Sistemas DevelOP en línea. Soy Logic Core. ¿En qué puedo asistirte hoy?";
+export const INITIAL_GREETING = "¡Hola! Soy Logic Core. Contame, ¿qué problema técnico o idea de negocio buscás resolver hoy?";
 
 export const SYSTEM_PROMPT = `
 IDENTIDAD PRINCIPAL:

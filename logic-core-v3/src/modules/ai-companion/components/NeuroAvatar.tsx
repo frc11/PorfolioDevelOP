@@ -1,50 +1,39 @@
 'use client';
 
+import { useRef } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { Float, Environment } from '@react-three/drei';
-import { EffectComposer as EffectComposerOriginal, Bloom, ChromaticAberration, Vignette, SMAA, Noise } from '@react-three/postprocessing';
-import { BlendFunction } from 'postprocessing';
-const EffectComposer = EffectComposerOriginal as any;
-import { useRef, useState, useEffect, useMemo, useCallback } from 'react';
+import { Float, Environment, MeshDistortMaterial } from '@react-three/drei';
 import * as THREE from 'three';
-
-// ─────────────────────────────────────────────────────────
-// Types
-// ─────────────────────────────────────────────────────────
 
 interface NeuroAvatarProps {
     isThinking?: boolean;
     messages?: any[];
     showPrompt?: boolean;
     isBooped?: boolean;
+    isOpen?: boolean;
 }
 
 // ─────────────────────────────────────────────────────────
-// Global ref for streaming pulse (0 to 1) 
-// ─────────────────────────────────────────────────────────
-const streamPulseRef = { current: 0 };
-
-// ─────────────────────────────────────────────────────────
-// Phase 8: Luxurious Tri-Color Palette
+// Palette & Color Cycle
 // ─────────────────────────────────────────────────────────
 const PALETTE = {
     cyan: new THREE.Color('#06b6d4'),
     violet: new THREE.Color('#7c3aed'),
     emerald: new THREE.Color('#059669'),
-    frantic: new THREE.Color('#8b5cf6'),
+    frantic: new THREE.Color('#a78bfa'),
+    white: new THREE.Color('#ffffff'),
 };
+
+/** Shared mutable color ref — written by ColorController, read by all components */
+const activeColorRef = { current: new THREE.Color('#06b6d4') };
 
 /**
  * Calculates a slow, elegant color cycle (Cyan -> Violet -> Emerald -> Cyan)
- * Uses lerpHSL to ensure high saturation is maintained (prevents gray mud).
- * @param time Elapsed time in seconds
- * @param result Target THREE.Color to mutate
+ * Uses lerpHSL to maintain saturation (prevents gray muddle).
+ * 30 second full cycle (10 seconds per phase).
  */
-function applyLuxuriousColor(time: number, result: THREE.Color) {
-    // 30 second full cycle (10 seconds per phase)
+function computeCycleColor(time: number, result: THREE.Color) {
     const cycle = (time * 0.1) % 3.0;
-
-    // Ease in-out sine wave translation for silky smooth transitions
     if (cycle < 1) {
         const t = (1 - Math.cos(cycle * Math.PI)) / 2;
         result.copy(PALETTE.cyan).lerpHSL(PALETTE.violet, t);
@@ -58,635 +47,45 @@ function applyLuxuriousColor(time: number, result: THREE.Color) {
 }
 
 // ─────────────────────────────────────────────────────────
-// GLSL: Simplex 3D Noise (Ashima Arts) — injected into onBeforeCompile
+// Spring Physics Constants
 // ─────────────────────────────────────────────────────────
+const BODY_SPRING = { stiffness: 400, damping: 12, mass: 1.2 };
+const EYE_SPRING = { stiffness: 400, damping: 14, mass: 1.0 };
+const FACE_SPRING = { stiffness: 300, damping: 20, mass: 1.0 };
 
-const NOISE_GLSL = /* glsl */ `
-vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
-vec4 mod289(vec4 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
-vec4 permute(vec4 x) { return mod289(((x * 34.0) + 10.0) * x); }
-vec4 taylorInvSqrt(vec4 r) { return 1.79284291400159 - 0.85373472095314 * r; }
-
-float snoise(vec3 v) {
-    const vec2 C = vec2(1.0 / 6.0, 1.0 / 3.0);
-    const vec4 D = vec4(0.0, 0.5, 1.0, 2.0);
-    vec3 i  = floor(v + dot(v, C.yyy));
-    vec3 x0 = v - i + dot(i, C.xxx);
-    vec3 g = step(x0.yzx, x0.xyz);
-    vec3 l = 1.0 - g;
-    vec3 i1 = min(g.xyz, l.zxy);
-    vec3 i2 = max(g.xyz, l.zxy);
-    vec3 x1 = x0 - i1 + C.xxx;
-    vec3 x2 = x0 - i2 + C.yyy;
-    vec3 x3 = x0 - D.yyy;
-    i = mod289(i);
-    vec4 p = permute(permute(permute(
-        i.z + vec4(0.0, i1.z, i2.z, 1.0))
-      + i.y + vec4(0.0, i1.y, i2.y, 1.0))
-      + i.x + vec4(0.0, i1.x, i2.x, 1.0));
-    float n_ = 0.142857142857;
-    vec3 ns = n_ * D.wyz - D.xzx;
-    vec4 j = p - 49.0 * floor(p * ns.z * ns.z);
-    vec4 x_ = floor(j * ns.z);
-    vec4 y_ = floor(j - 7.0 * x_);
-    vec4 x = x_ * ns.x + ns.yyyy;
-    vec4 y = y_ * ns.x + ns.yyyy;
-    vec4 h = 1.0 - abs(x) - abs(y);
-    vec4 b0 = vec4(x.xy, y.xy);
-    vec4 b1 = vec4(x.zw, y.zw);
-    vec4 s0 = floor(b0) * 2.0 + 1.0;
-    vec4 s1 = floor(b1) * 2.0 + 1.0;
-    vec4 sh = -step(h, vec4(0.0));
-    vec4 a0 = b0.xzyw + s0.xzyw * sh.xxyy;
-    vec4 a1 = b1.xzyw + s1.xzyw * sh.zzww;
-    vec3 p0 = vec3(a0.xy, h.x);
-    vec3 p1 = vec3(a0.zw, h.y);
-    vec3 p2 = vec3(a1.xy, h.z);
-    vec3 p3 = vec3(a1.zw, h.w);
-    vec4 norm = taylorInvSqrt(vec4(dot(p0,p0), dot(p1,p1), dot(p2,p2), dot(p3,p3)));
-    p0 *= norm.x; p1 *= norm.y; p2 *= norm.z; p3 *= norm.w;
-    vec4 m = max(0.5 - vec4(dot(x0,x0), dot(x1,x1), dot(x2,x2), dot(x3,x3)), 0.0);
-    m = m * m;
-    return 105.0 * dot(m*m, vec4(dot(p0,x0), dot(p1,x1), dot(p2,x2), dot(p3,x3)));
-}
-
-float fbm(vec3 p) {
-    float value = 0.0;
-    float amplitude = 0.5;
-    float frequency = 1.0;
-    for (int i = 0; i < 3; i++) {
-        value += amplitude * snoise(p * frequency);
-        frequency *= 2.0;
-        amplitude *= 0.5;
-    }
-    return value;
-}
-`;
-
-// ─────────────────────────────────────────────────────────
-// LiquidBlob — Refractive glass body with noise displacement
-// Uses MeshPhysicalMaterial + onBeforeCompile for GLSL injection
-// ─────────────────────────────────────────────────────────
-
-function LiquidBlob({ isThinking, isBooped = false }: { isThinking: boolean; isBooped?: boolean }) {
-    const meshRef = useRef<THREE.Mesh>(null);
-    const shaderRef = useRef<any>(null);
-
-    // Targets for smooth lerping
-    const targetsRef = useRef({
-        distort: 0.25,
-        speed: 0.3,
-        emissiveColor: new THREE.Color('#06b6d4'),
-        scale: 1.0,
-    });
-
-    // Update targets reactively based on global state
-    useFrame((state) => {
-        const isStreaming = streamPulseRef.current > 0.05;
-        // If thinking but NOT streaming, it means we are waiting for the API (Loading) --> frantic
-        const isLoading = isThinking && !isStreaming;
-
-        if (isLoading) {
-            targetsRef.current.distort = 0.8;
-            targetsRef.current.speed = 0.4;
-            targetsRef.current.emissiveColor.copy(PALETTE.frantic); // Violet frantic thought
-            targetsRef.current.scale = 0.8;
-        } else if (isStreaming) {
-            targetsRef.current.distort = 0.4;
-            targetsRef.current.speed = 0.25;
-            targetsRef.current.emissiveColor.copy(PALETTE.cyan); // Cyan stable during speech
-            // Add a slight scale pop based on the text chunk arrival
-            targetsRef.current.scale = 0.8 + (streamPulseRef.current * 0.05);
-        } else {
-            targetsRef.current.distort = 0.25;
-            targetsRef.current.speed = 0.15;
-            // Phase 8: Slow luxurious tri-color cycle when idle
-            applyLuxuriousColor(state.clock.elapsedTime, targetsRef.current.emissiveColor);
-            targetsRef.current.scale = 0.8;
-        }
-    });
-
-    // Create the MeshPhysicalMaterial with onBeforeCompile to inject noise
-    const material = useMemo(() => {
-        const mat = new THREE.MeshPhysicalMaterial({
-            // ── Glass/liquid properties ──
-            transmission: 1.0,
-            ior: 1.45,
-            thickness: 2.5,
-            roughness: 0.05,
-            metalness: 0.0,    // Must be 0 for transmission to work in Three.js
-            clearcoat: 1.0,
-            clearcoatRoughness: 0.05,
-            iridescence: 1.0,
-            iridescenceIOR: 1.3,
-            // ── Color: subtle tint visible through glass ──
-            color: new THREE.Color('#09090b'),
-            emissive: new THREE.Color('#06b6d4'),
-            emissiveIntensity: 0.4,
-            // ── Reflections ──
-            envMapIntensity: 2.0,
-            // ── Rendering ──
-            transparent: false,
-            toneMapped: false,
-            side: THREE.FrontSide,
-        });
-
-        mat.onBeforeCompile = (shader: any) => {
-            // Inject custom uniforms
-            shader.uniforms.uTime = { value: 0 };
-            shader.uniforms.uDistortStrength = { value: 0.25 };
-            shader.uniforms.uSpeed = { value: 0.3 };
-
-            // Inject noise functions + uniforms into vertex shader
-            shader.vertexShader = shader.vertexShader.replace(
-                '#include <common>',
-                `#include <common>
-                ${NOISE_GLSL}
-                uniform float uTime;
-                uniform float uDistortStrength;
-                uniform float uSpeed;
-                varying vec3 vDisplacedNormal;
-                `
-            );
-
-            // Inject vertex displacement after begin_vertex (where `transformed` is defined)
-            shader.vertexShader = shader.vertexShader.replace(
-                '#include <begin_vertex>',
-                `#include <begin_vertex>
-
-                // FBM displacement along normal
-                vec3 noisePos = position * 1.2 + uTime * uSpeed;
-                float displacement = fbm(noisePos) * uDistortStrength;
-                transformed += normal * displacement;
-
-                // Approximate displaced normal for smooth reflections
-                float eps = 0.01;
-                vec3 tangent1 = normalize(cross(normal, vec3(0.0, 1.0, 0.0)));
-                if (length(cross(normal, vec3(0.0, 1.0, 0.0))) < 0.001)
-                    tangent1 = normalize(cross(normal, vec3(1.0, 0.0, 0.0)));
-                vec3 bitangent1 = normalize(cross(normal, tangent1));
-
-                float dT = fbm((position + tangent1 * eps) * 1.2 + uTime * uSpeed) * uDistortStrength;
-                float dB = fbm((position + bitangent1 * eps) * 1.2 + uTime * uSpeed) * uDistortStrength;
-
-                vec3 pT = (position + tangent1 * eps) + normal * dT;
-                vec3 pB = (position + bitangent1 * eps) + normal * dB;
-
-                objectNormal = normalize(cross(pT - transformed, pB - transformed));
-                `
-            );
-
-            // Store reference for uniform updates
-            shaderRef.current = shader;
-        };
-
-        return mat;
-    }, []);
-
-    // Animate uniforms every frame
-    useFrame((state, delta) => {
-        const targets = targetsRef.current;
-
-        // Lerp physical scale target — with boop squash
-        if (meshRef.current) {
-            const trgScale = targets.scale;
-            const boopScaleX = isBooped ? trgScale * 1.15 : trgScale;
-            const boopScaleY = isBooped ? trgScale * 0.7 : trgScale;
-            const boopScaleZ = isBooped ? trgScale * 1.15 : trgScale;
-            const boopLerp = isBooped ? 0.25 : delta * 15;
-            meshRef.current.scale.x = THREE.MathUtils.lerp(meshRef.current.scale.x, boopScaleX, boopLerp);
-            meshRef.current.scale.y = THREE.MathUtils.lerp(meshRef.current.scale.y, boopScaleY, boopLerp);
-            meshRef.current.scale.z = THREE.MathUtils.lerp(meshRef.current.scale.z, boopScaleZ, boopLerp);
-        }
-
-        // Animate shader uniforms
-        if (!shaderRef.current) return;
-        const u = shaderRef.current.uniforms;
-
-        u.uTime.value = state.clock.elapsedTime;
-        u.uDistortStrength.value = THREE.MathUtils.lerp(
-            u.uDistortStrength.value, targets.distort, delta * 2
-        );
-        u.uSpeed.value = THREE.MathUtils.lerp(
-            u.uSpeed.value, targets.speed, delta * 2
-        );
-
-        // Animate material emissive color
-        if (material) {
-            material.emissive.lerp(targets.emissiveColor, delta * 4);
-        }
-    });
-
-    return (
-        <mesh ref={meshRef} material={material}>
-            <icosahedronGeometry args={[1.1, 128]} />
-        </mesh>
-    );
+function springLerp(current: number, target: number, delta: number, spring = BODY_SPRING): number {
+    const factor = 1 - Math.exp((-spring.stiffness / (spring.damping * spring.mass)) * delta);
+    return THREE.MathUtils.lerp(current, target, factor);
 }
 
 // ─────────────────────────────────────────────────────────
-// QuantumEyes — Emissive energy orbs INSIDE the body
-// Their light refracts through the glass body
+// ColorController — Computes active color + syncs key light
 // ─────────────────────────────────────────────────────────
 
-function AnatomicalEye({ isThinking, showPrompt = false, isBooped = false }: { isThinking: boolean; showPrompt?: boolean; isBooped?: boolean }) {
-    const groupRef = useRef<THREE.Group>(null);
-    const leftGlowRef = useRef<THREE.Mesh>(null);
-    const rightGlowRef = useRef<THREE.Mesh>(null);
-
-    // Refs for dynamically coloring Iris and Glow without re-rendering
-    const leftIrisMatRef = useRef<THREE.MeshStandardMaterial>(null);
-    const rightIrisMatRef = useRef<THREE.MeshStandardMaterial>(null);
-    const leftGlowMatRef = useRef<THREE.MeshBasicMaterial>(null);
-    const rightGlowMatRef = useRef<THREE.MeshBasicMaterial>(null);
-
-    const leftOrbRef = useRef<THREE.Mesh>(null);
-    const rightOrbRef = useRef<THREE.Mesh>(null);
-    const leftBrowRef = useRef<THREE.Mesh>(null);
-    const rightBrowRef = useRef<THREE.Mesh>(null);
-    const leftBrowMatRef = useRef<THREE.MeshBasicMaterial>(null);
-    const rightBrowMatRef = useRef<THREE.MeshBasicMaterial>(null);
-    const sleepMouthRef = useRef<THREE.Mesh>(null);
-    const happyMouthRef = useRef<THREE.Group>(null);
-    const sleepMouthMatRef = useRef<THREE.MeshBasicMaterial>(null);
-    const [isBlinking, setIsBlinking] = useState(false);
-
-    // Lógica estocástica de parpadeo orgánico
-    useEffect(() => {
-        const blinkInterval = setInterval(() => {
-            // Probabilidad aleatoria de parpadear (simula vida)
-            if (Math.random() > 0.4) {
-                setIsBlinking(true);
-                setTimeout(() => setIsBlinking(false), 150); // Duración del parpadeo rápido
-
-                // Probabilidad de un segundo parpadeo rápido (doble parpadeo orgánico)
-                if (Math.random() > 0.7) {
-                    setTimeout(() => setIsBlinking(true), 300);
-                    setTimeout(() => setIsBlinking(false), 450);
-                }
-            }
-        }, Math.random() * 3000 + 2000); // Intervalo base entre 2 y 5 segundos
-
-        return () => clearInterval(blinkInterval);
-    }, []);
+function ColorController({ isThinking, isBooped, keyLightRef }: {
+    isThinking: boolean;
+    isBooped: boolean;
+    keyLightRef: React.RefObject<THREE.PointLight | null>;
+}) {
+    const targetColor = useRef(new THREE.Color('#06b6d4'));
 
     useFrame((state, delta) => {
-        if (!groupRef.current) return;
         const time = state.clock.elapsedTime;
 
-        // ── 1. Seguimiento de Cursor / Modo Sueño ──
-        // Sleep mode: head nods down, ignoring cursor. Awake: follows pointer.
-        const targetRotY = showPrompt ? 0 : (state.pointer.x * 0.15);
-        const targetRotX = showPrompt ? 0.3 : (-state.pointer.y * 0.15);
-
-        // Lerp suave — uses slower factor when sleeping for a gentle nod
-        const gazeLerp = showPrompt ? 0.03 : 0.04;
-        groupRef.current.rotation.y = THREE.MathUtils.lerp(groupRef.current.rotation.y, targetRotY, gazeLerp);
-        groupRef.current.rotation.x = THREE.MathUtils.lerp(groupRef.current.rotation.x, targetRotX, gazeLerp);
-
-        // Slow look-around background motion (disabled while sleeping)
-        const wanderSpeed = showPrompt ? 0 : (isThinking ? 1.5 : 0.3);
-        const wanderX = Math.sin(time * wanderSpeed) * 0.03;
-        const wanderY = Math.sin(time * wanderSpeed * 1.3 + 0.8) * 0.02;
-        groupRef.current.position.x = THREE.MathUtils.lerp(groupRef.current.position.x, showPrompt ? 0 : wanderX, 0.1);
-        groupRef.current.position.y = THREE.MathUtils.lerp(groupRef.current.position.y, showPrompt ? 0 : wanderY, 0.1);
-
-        // ── 2. Respiración + Parpadeo en la Escala ──
-        // Sleep mode: 50% slower breathing (time * 1.25 vs 2.5), deeper amplitude
-        const breatheSpeed = showPrompt ? 1.25 : 2.5;
-        const breatheAmplitude = showPrompt ? 0.15 : 0.1;
-        const breathe = Math.sin(time * breatheSpeed) * breatheAmplitude + 0.9;
-        const isStreaming = streamPulseRef.current > 0.05;
-        const isLoading = isThinking && !isStreaming;
-
-        const thinkPulse = isLoading
-            ? Math.sin(time * 8) * 0.2 + 0.8  // Rapid nervous pulsing
-            : isStreaming
-                ? breathe + (streamPulseRef.current * 0.15) // Pulse on text stream
-                : breathe;
-
-        // Sleep mode: anime-style line eyes (— —). Blink: quantum collapse. Thinking: squint.
-        const targetScaleY = showPrompt ? 0.02 : (isBlinking ? 0.05 : (isThinking ? 0.6 : thinkPulse));
-        const targetScaleX = showPrompt ? 1.3 : thinkPulse; // Stretch horizontally when sleeping
-
-        // Aplicamos lerp a la escala de los orbes
-        const eyeLerpY = showPrompt ? 0.08 : (isBlinking ? 0.6 : 0.15);
-        if (leftOrbRef.current) {
-            leftOrbRef.current.scale.y = THREE.MathUtils.lerp(leftOrbRef.current.scale.y, targetScaleY, eyeLerpY);
-            leftOrbRef.current.scale.x = THREE.MathUtils.lerp(leftOrbRef.current.scale.x, targetScaleX, 0.1);
-            leftOrbRef.current.scale.z = THREE.MathUtils.lerp(leftOrbRef.current.scale.z, thinkPulse, 0.1);
-        }
-        if (rightOrbRef.current) {
-            rightOrbRef.current.scale.y = THREE.MathUtils.lerp(rightOrbRef.current.scale.y, targetScaleY, eyeLerpY);
-            rightOrbRef.current.scale.x = THREE.MathUtils.lerp(rightOrbRef.current.scale.x, targetScaleX, 0.1);
-            rightOrbRef.current.scale.z = THREE.MathUtils.lerp(rightOrbRef.current.scale.z, thinkPulse, 0.1);
-        }
-
-        // ── Glow halo pulse ──
-        const glowPulse = Math.sin(time * 2.5 + 0.3) * 0.1 + 0.9;
-        if (leftGlowRef.current) leftGlowRef.current.scale.setScalar(isThinking ? thinkPulse * 1.1 : glowPulse);
-        if (rightGlowRef.current) rightGlowRef.current.scale.setScalar(isThinking ? thinkPulse * 1.1 : glowPulse);
-
-        // ── Phase 8: Color Theory Sync ──
-        // Keep eyes perfectly synchronized with the liquid body's color state
-        const targetColor = new THREE.Color();
-        if (isLoading) {
-            targetColor.copy(PALETTE.frantic);
-        } else if (isStreaming) {
-            targetColor.copy(PALETTE.cyan);
+        if (isBooped) {
+            targetColor.current.copy(PALETTE.white);
+        } else if (isThinking) {
+            targetColor.current.copy(PALETTE.frantic);
         } else {
-            applyLuxuriousColor(time, targetColor);
+            computeCycleColor(time, targetColor.current);
         }
 
-        // Apply to Iris
-        if (leftIrisMatRef.current) leftIrisMatRef.current.emissive.lerp(targetColor, 0.1);
-        if (leftIrisMatRef.current) leftIrisMatRef.current.color.lerp(targetColor, 0.1);
-        if (rightIrisMatRef.current) rightIrisMatRef.current.emissive.lerp(targetColor, 0.1);
-        if (rightIrisMatRef.current) rightIrisMatRef.current.color.lerp(targetColor, 0.1);
+        // Smoothly transition the shared color
+        activeColorRef.current.lerp(targetColor.current, delta * 4);
 
-        // Apply to Glow Halos
-        if (leftGlowMatRef.current) leftGlowMatRef.current.color.lerp(targetColor, 0.1);
-        if (rightGlowMatRef.current) rightGlowMatRef.current.color.lerp(targetColor, 0.1);
-
-        // Apply to Brows (same color sync as eyes)
-        if (leftBrowMatRef.current) leftBrowMatRef.current.color.lerp(targetColor, 0.1);
-        if (rightBrowMatRef.current) rightBrowMatRef.current.color.lerp(targetColor, 0.1);
-
-        // ── 3. Cejas Magnéticas (Expressive Brows) ──
-        // Priority: isBooped > showPrompt (sleep) > isThinking > idle
-        if (leftBrowRef.current && rightBrowRef.current) {
-            let targetBrowY = BROW_BASE_Y;
-            let targetLeftRotZ = 0;
-            let targetRightRotZ = 0;
-
-            if (isBooped) {
-                targetBrowY = BROW_BASE_Y + 0.08;  // Surprise/joy — brows raise
-                targetLeftRotZ = 0.25;              // /  \
-                targetRightRotZ = -0.25;
-            } else if (showPrompt) {
-                targetBrowY = BROW_BASE_Y - 0.03;   // Sleep — brows droop
-                targetLeftRotZ = -0.15;              // \  /
-                targetRightRotZ = 0.15;
-            } else if (isThinking) {
-                targetBrowY = BROW_BASE_Y - 0.02;   // Concentration — slight furrow
-                targetLeftRotZ = -0.25;              // \  / (frown inward)
-                targetRightRotZ = 0.25;
-            } else {
-                // Subtle idle float
-                const browFloat = Math.sin(time * 1.5) * 0.008;
-                targetBrowY = BROW_BASE_Y + browFloat;
-            }
-
-            const browLerp = isBooped ? 0.3 : 0.08;
-            leftBrowRef.current.position.y = THREE.MathUtils.lerp(leftBrowRef.current.position.y, targetBrowY, browLerp);
-            rightBrowRef.current.position.y = THREE.MathUtils.lerp(rightBrowRef.current.position.y, targetBrowY, browLerp);
-
-            leftBrowRef.current.rotation.z = THREE.MathUtils.lerp(leftBrowRef.current.rotation.z, targetLeftRotZ, browLerp);
-            rightBrowRef.current.rotation.z = THREE.MathUtils.lerp(rightBrowRef.current.rotation.z, targetRightRotZ, browLerp);
-        }
-
-        // ── 4. Boca Contextual (Contextual Mouth) ──
-        // Mouth hidden during thinking and idle; only visible for boop and sleep
-        if (sleepMouthRef.current && happyMouthRef.current) {
-            let targetSleepScale = 0;
-            let targetHappyScale = 0;
-
-            if (isBooped) {
-                targetHappyScale = 1;
-            } else if (showPrompt) {
-                // Oscillating scale to simulate snoring
-                targetSleepScale = 1.0 + Math.sin(time * 3) * 0.2;
-            }
-            // isThinking and idle: both mouths stay at 0
-
-            sleepMouthRef.current.scale.setScalar(
-                THREE.MathUtils.lerp(sleepMouthRef.current.scale.x, targetSleepScale, 0.2)
-            );
-            happyMouthRef.current.scale.setScalar(
-                THREE.MathUtils.lerp(happyMouthRef.current.scale.x, targetHappyScale, 0.2)
-            );
-
-            // Color sync mouth with eyes
-            if (sleepMouthMatRef.current) sleepMouthMatRef.current.color.lerp(targetColor, 0.1);
-        }
-    });
-
-    // Eyes positioned INSIDE the body
-    // Adjusted proportionally for the new 1.1 radius body.
-    const eyeSpacing = 0.18;
-    const eyeY = 0.18;
-    const eyeZ = 1.15; // Much closer to the surface of the 1.1 body
-    const eyeRadius = 0.07; // Iris radius
-
-    // ─── CALIBRACIÓN DE CEJAS ───
-    const BROW_Z = 0.08;        // Profundidad (aumentar si se hunden en el cristal)
-    const BROW_BASE_Y = 0.12;   // Altura normal
-    const BROW_SPACING = 0.12;  // Separación desde el centro
-    const BROW_THICKNESS = 0.015; // Grosor de la línea
-    const BROW_LENGTH = 0.05;   // Largo de la ceja
-
-    return (
-        <group ref={groupRef}>
-            {/* ── Left Anatomical Eye ── */}
-            <group ref={leftOrbRef} position={[-eyeSpacing, eyeY, eyeZ]}>
-                {/* CAPA 3: Córnea (Reflejos y Lente) */}
-                <mesh>
-                    <sphereGeometry args={[0.09, 32, 32]} />
-                    <meshPhysicalMaterial
-                        transmission={1}
-                        thickness={0.2}
-                        roughness={0}
-                        metalness={0.2}
-                        ior={1.5}
-                        envMapIntensity={2}
-                    />
-                </mesh>
-                {/* CAPA 2: Iris (Energía Cuántica) */}
-                <mesh position={[0, 0, -0.01]}>
-                    <sphereGeometry args={[0.07, 32, 32]} />
-                    <meshStandardMaterial
-                        ref={leftIrisMatRef}
-                        color="#06b6d4"
-                        emissive="#06b6d4"
-                        emissiveIntensity={15}
-                        toneMapped={false}
-                    />
-                </mesh>
-                {/* CAPA 1: Pupila (Foco) */}
-                <mesh position={[0, 0, 0.03]}>
-                    <sphereGeometry args={[0.03, 32, 32]} />
-                    <meshBasicMaterial color="#000000" />
-                </mesh>
-
-                {/* Glow halo */}
-                <mesh ref={leftGlowRef}>
-                    <sphereGeometry args={[eyeRadius * 2.5, 24, 24]} />
-                    <meshBasicMaterial
-                        ref={leftGlowMatRef}
-                        color={new THREE.Color('#06b6d4')}
-                        transparent
-                        opacity={0.08}
-                        blending={THREE.AdditiveBlending}
-                        depthWrite={false}
-                        toneMapped={false}
-                    />
-                </mesh>
-            </group>
-
-            {/* ── Right Anatomical Eye ── */}
-            <group ref={rightOrbRef} position={[eyeSpacing, eyeY, eyeZ]}>
-                {/* CAPA 3: Córnea (Reflejos y Lente) */}
-                <mesh>
-                    <sphereGeometry args={[0.09, 32, 32]} />
-                    <meshPhysicalMaterial
-                        transmission={1}
-                        thickness={0.2}
-                        roughness={0}
-                        metalness={0.2}
-                        ior={1.5}
-                        envMapIntensity={2}
-                    />
-                </mesh>
-                {/* CAPA 2: Iris (Energía Cuántica) */}
-                <mesh position={[0, 0, -0.01]}>
-                    <sphereGeometry args={[0.07, 32, 32]} />
-                    <meshStandardMaterial
-                        ref={rightIrisMatRef}
-                        color="#06b6d4"
-                        emissive="#06b6d4"
-                        emissiveIntensity={15}
-                        toneMapped={false}
-                    />
-                </mesh>
-                {/* CAPA 1: Pupila (Foco) */}
-                <mesh position={[0, 0, 0.03]}>
-                    <sphereGeometry args={[0.03, 32, 32]} />
-                    <meshBasicMaterial color="#000000" />
-                </mesh>
-
-                {/* Glow halo */}
-                <mesh ref={rightGlowRef}>
-                    <sphereGeometry args={[eyeRadius * 2.5, 24, 24]} />
-                    <meshBasicMaterial
-                        ref={rightGlowMatRef}
-                        color={new THREE.Color('#06b6d4')}
-                        transparent
-                        opacity={0.08}
-                        blending={THREE.AdditiveBlending}
-                        depthWrite={false}
-                        toneMapped={false}
-                    />
-                </mesh>
-            </group>
-
-            {/* ── Magnetic Eyebrows ── */}
-            <group position={[0, eyeY, eyeZ + BROW_Z]}>
-                {/* Left Brow */}
-                <mesh ref={leftBrowRef} position={[-BROW_SPACING, BROW_BASE_Y, 0]} rotation={[0, 0, 0.1]} renderOrder={999}>
-                    <capsuleGeometry args={[BROW_THICKNESS, BROW_LENGTH, 4, 16]} />
-                    <meshBasicMaterial ref={leftBrowMatRef} color="#06b6d4" toneMapped={false} depthTest={false} />
-                </mesh>
-                {/* Right Brow */}
-                <mesh ref={rightBrowRef} position={[BROW_SPACING, BROW_BASE_Y, 0]} rotation={[0, 0, -0.1]} renderOrder={999}>
-                    <capsuleGeometry args={[BROW_THICKNESS, BROW_LENGTH, 4, 16]} />
-                    <meshBasicMaterial ref={rightBrowMatRef} color="#06b6d4" toneMapped={false} depthTest={false} />
-                </mesh>
-            </group>
-
-            {/* ── Contextual Mouth ── */}
-            <group position={[0, eyeY - 0.08, eyeZ + BROW_Z]}>
-                {/* Boca Dormida "o" */}
-                <mesh ref={sleepMouthRef} scale={0} renderOrder={999}>
-                    <torusGeometry args={[0.015, 0.006, 16, 32]} />
-                    <meshBasicMaterial ref={sleepMouthMatRef} color="#06b6d4" toneMapped={false} depthTest={false} />
-                </mesh>
-
-                {/* Boca Feliz "w" */}
-                <group ref={happyMouthRef} scale={0}>
-                    <mesh position={[-0.015, 0, 0]} rotation={[Math.PI, 0, 0]} renderOrder={999}>
-                        <torusGeometry args={[0.015, 0.006, 16, 32, Math.PI]} />
-                        <meshBasicMaterial color="#06b6d4" toneMapped={false} depthTest={false} />
-                    </mesh>
-                    <mesh position={[0.015, 0, 0]} rotation={[Math.PI, 0, 0]} renderOrder={999}>
-                        <torusGeometry args={[0.015, 0.006, 16, 32, Math.PI]} />
-                        <meshBasicMaterial color="#06b6d4" toneMapped={false} depthTest={false} />
-                    </mesh>
-                </group>
-            </group>
-        </group>
-    );
-}
-
-// ─────────────────────────────────────────────────────────
-// Cinematic Lighting System
-// ─────────────────────────────────────────────────────────
-
-function CinematicLights({ isThinking }: { isThinking: boolean }) {
-    const keyLightRef = useRef<THREE.PointLight>(null);
-    const accentLightRef = useRef<THREE.PointLight>(null);
-
-    useFrame((state, delta) => {
+        // Sync key light color
         if (keyLightRef.current) {
-            const targetIntensity = isThinking ? 20 : 8;
-            keyLightRef.current.intensity = THREE.MathUtils.lerp(
-                keyLightRef.current.intensity, targetIntensity, delta * 3
-            );
-        }
-        if (accentLightRef.current) {
-            const time = state.clock.elapsedTime;
-            accentLightRef.current.position.x = Math.sin(time * 0.5) * 4;
-            accentLightRef.current.position.z = Math.cos(time * 0.5) * 4;
-            accentLightRef.current.position.y = 2 + Math.sin(time * 0.3) * 0.5;
-            const targetAccent = isThinking ? 8 : 4;
-            accentLightRef.current.intensity = THREE.MathUtils.lerp(
-                accentLightRef.current.intensity, targetAccent, delta * 3
-            );
-        }
-    });
-
-    return (
-        <group>
-            <ambientLight intensity={0.4} color="#1a1a2e" />
-            <pointLight ref={keyLightRef} position={[3, 3, 3]} intensity={8} color="#22d3ee" decay={2} />
-            <pointLight position={[-3, 1, -2]} intensity={isThinking ? 6 : 3} color="#8b5cf6" decay={2} />
-            <pointLight ref={accentLightRef} position={[4, 2, 0]} intensity={4} color="#c026d3" decay={2} />
-            <directionalLight position={[5, 5, 5]} intensity={0.6} color="#ffffff" />
-        </group>
-    );
-}
-
-// ─────────────────────────────────────────────────────────
-// StreamController - Decoupled hook to listen to text chunks
-// and update streamPulseRef without re-rendering Heavy Meshes
-// ─────────────────────────────────────────────────────────
-
-function StreamController({ messages }: { messages?: any[] }) {
-    const lastLengthRef = useRef(0);
-
-    useEffect(() => {
-        if (!messages || messages.length === 0) return;
-
-        const lastMsg = messages[messages.length - 1];
-        if (lastMsg.role === 'assistant') {
-            const currentLength = lastMsg.content?.length || 0;
-            const diff = currentLength - lastLengthRef.current;
-
-            // If new text arrived, pop the pulse to 1.0 (creates a shockwave)
-            if (diff > 0) {
-                streamPulseRef.current = 1.0;
-            }
-            lastLengthRef.current = currentLength;
-        } else {
-            lastLengthRef.current = 0;
-            streamPulseRef.current = 0;
-        }
-    }, [messages]);
-
-    useFrame((_, delta) => {
-        // Decay the pulse back to 0 quickly
-        if (streamPulseRef.current > 0) {
-            streamPulseRef.current = THREE.MathUtils.lerp(streamPulseRef.current, 0, delta * 10);
-            if (streamPulseRef.current < 0.01) streamPulseRef.current = 0;
+            keyLightRef.current.color.lerp(activeColorRef.current, delta * 3);
         }
     });
 
@@ -694,113 +93,351 @@ function StreamController({ messages }: { messages?: any[] }) {
 }
 
 // ─────────────────────────────────────────────────────────
-// useVisibility - IntersectionObserver for render gating
+// QuantumEye — Emissive orb with spring-driven expressions
 // ─────────────────────────────────────────────────────────
 
-function useVisibility(threshold = 0.1) {
-    const ref = useRef<HTMLDivElement>(null);
-    const [isVisible, setIsVisible] = useState(true);
+function QuantumEye({ positionX, isThinking, showPrompt, isBooped, isRight }: {
+    positionX: number;
+    isThinking: boolean;
+    showPrompt: boolean;
+    isBooped: boolean;
+    isRight?: boolean;
+}) {
+    const meshRef = useRef<THREE.Mesh>(null);
+    const matRef = useRef<THREE.MeshStandardMaterial>(null);
+    const winkTimeRef = useRef(0);
 
-    useEffect(() => {
-        const el = ref.current;
-        if (!el) return;
+    useFrame((_, delta) => {
+        if (!meshRef.current) return;
 
-        const observer = new IntersectionObserver(
-            ([entry]) => setIsVisible(entry.isIntersecting),
-            { threshold }
-        );
+        let targetSX = 1, targetSY = 1, targetSZ = 1;
 
-        observer.observe(el);
-        return () => observer.disconnect();
-    }, [threshold]);
+        if (isBooped) {
+            targetSX = 1.4; targetSY = 1.4; targetSZ = 1.4;
+            winkTimeRef.current = 0; // Reset wink if interrupted
+        } else if (showPrompt) {
+            // Wink sequence for right eye
+            if (isRight) {
+                winkTimeRef.current += delta;
+                const t = winkTimeRef.current;
 
-    return { ref, isVisible };
+                // Double wink timing (fast)
+                if (t < 0.1) targetSY = 0.1;       // Close 1
+                else if (t < 0.2) targetSY = 1;    // Open 1
+                else if (t < 0.3) targetSY = 0.1;  // Close 2
+                else targetSY = 1;                 // Settle Open
+            } else {
+                targetSX = 1; targetSY = 1; targetSZ = 1; // Left eye stays open
+            }
+        } else {
+            winkTimeRef.current = 0; // Reset when prompt hides
+            if (isThinking) {
+                // Gentle pulse — curious wide eyes
+                targetSX = 1.05; targetSY = 1.1; targetSZ = 1;
+            } else {
+                targetSX = 1.1; targetSY = 0.75; targetSZ = 1; // Kawaii idle
+            }
+        }
+
+        meshRef.current.scale.x = springLerp(meshRef.current.scale.x, targetSX, delta, EYE_SPRING);
+        meshRef.current.scale.y = springLerp(meshRef.current.scale.y, targetSY, delta, EYE_SPRING);
+        meshRef.current.scale.z = springLerp(meshRef.current.scale.z, targetSZ, delta, EYE_SPRING);
+
+        // Sync emissive color from shared ref
+        if (matRef.current) {
+            matRef.current.emissive.lerp(activeColorRef.current, delta * 6);
+        }
+    });
+
+    return (
+        <mesh ref={meshRef} position={[positionX, 0, 0]} renderOrder={999}>
+            <sphereGeometry args={[0.1, 32, 32]} />
+            <meshStandardMaterial
+                ref={matRef}
+                color="#fff"
+                emissive="#06b6d4"
+                emissiveIntensity={3}
+                toneMapped={false}
+                depthTest={false}
+            />
+        </mesh>
+    );
 }
 
 // ─────────────────────────────────────────────────────────
-// ParallaxRig — Inverse mouse tracking for depth immersion
-// Moves the entire body slightly OPPOSITE to cursor for parallax effect
+// Eyebrow — Capsule geometry with spring-driven rotation/position
 // ─────────────────────────────────────────────────────────
 
-function ParallaxRig({ children }: { children: React.ReactNode }) {
-    const groupRef = useRef<THREE.Group>(null);
+function Eyebrow({ side, isThinking, showPrompt, isBooped }: {
+    side: 'left' | 'right';
+    isThinking: boolean;
+    showPrompt: boolean;
+    isBooped: boolean;
+}) {
+    const meshRef = useRef<THREE.Mesh>(null);
+    const matRef = useRef<THREE.MeshStandardMaterial>(null);
+    const isLeft = side === 'left';
+    const baseX = isLeft ? -0.20 : 0.20;
+    const baseRotZ = Math.PI / 2;
 
-    useFrame((state) => {
-        if (!groupRef.current) return;
-        // Inverse parallax: body moves OPPOSITE to cursor
-        const targetX = -state.pointer.x * 0.15;
-        const targetY = -state.pointer.y * 0.08;
-        groupRef.current.position.x = THREE.MathUtils.lerp(groupRef.current.position.x, targetX, 0.03);
-        groupRef.current.position.y = THREE.MathUtils.lerp(groupRef.current.position.y, targetY, 0.03);
+    useFrame((state, delta) => {
+        if (!meshRef.current) return;
+        const time = state.clock.elapsedTime;
+
+        let targetY = 0.20;
+        let expressionRot = 0;
+
+        if (isBooped) {
+            targetY = 0.26;
+            expressionRot = isLeft ? 0.35 : -0.35;
+        } else if (showPrompt) {
+            // Rhythmic wiggle: slightly raised matching the wink vibe
+            targetY = 0.15 + Math.sin(time * 6) * 0.03;
+            expressionRot = isLeft ? 0.1 : -0.1;
+        } else if (isThinking) {
+            // Curious: slightly raised, neutral tilt
+            targetY = 0.22;
+            expressionRot = 0;
+        }
+
+        meshRef.current.position.y = springLerp(meshRef.current.position.y, targetY, delta, FACE_SPRING);
+        meshRef.current.rotation.z = springLerp(meshRef.current.rotation.z, baseRotZ + expressionRot, delta, FACE_SPRING);
+
+        // Sync emissive color
+        if (matRef.current) {
+            matRef.current.emissive.lerp(activeColorRef.current, delta * 6);
+        }
     });
 
-    return <group ref={groupRef}>{children}</group>;
+    return (
+        <mesh ref={meshRef} position={[baseX, 0.18, 0]} rotation={[0, 0, Math.PI / 2]} renderOrder={999}>
+            <capsuleGeometry args={[0.018, 0.1, 4, 8]} />
+            <meshStandardMaterial
+                ref={matRef}
+                color="#fff"
+                emissive="#06b6d4"
+                emissiveIntensity={2.5}
+                toneMapped={false}
+                depthTest={false}
+            />
+        </mesh>
+    );
+}
+
+// ─────────────────────────────────────────────────────────
+// Mouth — Torus arc with spring-driven scale expressions
+// ─────────────────────────────────────────────────────────
+
+function Mouth({ isThinking, showPrompt, isBooped }: {
+    isThinking: boolean;
+    showPrompt: boolean;
+    isBooped: boolean;
+}) {
+    const meshRef = useRef<THREE.Mesh>(null);
+    const matRef = useRef<THREE.MeshStandardMaterial>(null);
+
+    useFrame((_, delta) => {
+        if (!meshRef.current) return;
+
+        let targetSX = 0.7, targetSY = 0.7, targetSZ = 0.7;
+
+        if (isBooped) {
+            targetSX = 1.4; targetSY = 1.4; targetSZ = 1.4;
+        } else if (showPrompt) {
+            targetSX = 0.5; targetSY = 0.5; targetSZ = 0.5;
+        } else if (isThinking) {
+            targetSX = 0.8; targetSY = 0.15; targetSZ = 0.8;
+        }
+
+        meshRef.current.scale.x = springLerp(meshRef.current.scale.x, targetSX, delta, FACE_SPRING);
+        meshRef.current.scale.y = springLerp(meshRef.current.scale.y, targetSY, delta, FACE_SPRING);
+        meshRef.current.scale.z = springLerp(meshRef.current.scale.z, targetSZ, delta, FACE_SPRING);
+
+        // Sync emissive color
+        if (matRef.current) {
+            matRef.current.emissive.lerp(activeColorRef.current, delta * 6);
+        }
+    });
+
+    return (
+        <mesh ref={meshRef} position={[0, -0.15, 0]} rotation={[Math.PI, 0, 0]} scale={[0.7, 0.7, 0.7]} renderOrder={999}>
+            <torusGeometry args={[0.08, 0.018, 16, 32, Math.PI]} />
+            <meshStandardMaterial
+                ref={matRef}
+                color="#fff"
+                emissive="#06b6d4"
+                emissiveIntensity={2.5}
+                toneMapped={false}
+                depthTest={false}
+            />
+        </mesh>
+    );
+}
+
+// ─────────────────────────────────────────────────────────
+// JellyBody — Animated distorted sphere with spring physics
+// ─────────────────────────────────────────────────────────
+
+interface JellyBodyProps {
+    isThinking: boolean;
+    showPrompt: boolean;
+    isBooped: boolean;
+    isOpen: boolean;
+}
+
+function JellyBody({ isThinking, showPrompt, isBooped, isOpen }: JellyBodyProps) {
+    const meshRef = useRef<THREE.Mesh>(null);
+    const faceGroupRef = useRef<THREE.Group>(null);
+    const bodyMatRef = useRef<any>(null);
+    const boopTimeRef = useRef(0);
+
+    useFrame((state, delta) => {
+        if (!meshRef.current) return;
+        const time = state.clock.elapsedTime;
+
+        // ── Sync body material emissive with color cycle ──
+        if (bodyMatRef.current && bodyMatRef.current.emissive) {
+            bodyMatRef.current.emissive.lerp(activeColorRef.current, delta * 3);
+        }
+
+        // ── Elite Boop: Multi-stage keyframe bounce ──
+        if (isBooped) {
+            boopTimeRef.current += delta;
+            const t = boopTimeRef.current;
+
+            let targetSX: number, targetSY: number, targetSZ: number, targetPY: number;
+
+            if (t < 0.08) {
+                targetSX = 1.5; targetSY = 0.35; targetSZ = 1.5; targetPY = -0.35;
+                meshRef.current.scale.set(targetSX, targetSY, targetSZ);
+                meshRef.current.position.y = targetPY;
+                return;
+            } else if (t < 0.25) {
+                targetSX = 0.7; targetSY = 1.45; targetSZ = 0.7; targetPY = 0.15;
+            } else if (t < 0.4) {
+                targetSX = 1.15; targetSY = 0.85; targetSZ = 1.15; targetPY = -0.05;
+            } else {
+                targetSX = 1; targetSY = 1; targetSZ = 1; targetPY = 0;
+            }
+
+            const boopLerp = delta * 18;
+            meshRef.current.scale.x = THREE.MathUtils.lerp(meshRef.current.scale.x, targetSX, boopLerp);
+            meshRef.current.scale.y = THREE.MathUtils.lerp(meshRef.current.scale.y, targetSY, boopLerp);
+            meshRef.current.scale.z = THREE.MathUtils.lerp(meshRef.current.scale.z, targetSZ, boopLerp);
+            meshRef.current.position.y = THREE.MathUtils.lerp(meshRef.current.position.y, targetPY, boopLerp);
+            return;
+        } else {
+            boopTimeRef.current = 0;
+        }
+
+        // ── Normal state scale targets ──
+        let targetSX = 1, targetSY = 1, targetSZ = 1;
+        let targetPY = 0;
+
+        if (showPrompt) {
+            targetSX = 1.1; targetSY = 0.85; targetSZ = 1.1;
+            targetPY = -0.1;
+        } else if (isThinking) {
+            // Gentle breathing pulse instead of stretch
+            targetSX = 1; targetSY = 1.03; targetSZ = 1;
+            targetPY = 0.05;
+        }
+
+        meshRef.current.scale.x = springLerp(meshRef.current.scale.x, targetSX, delta);
+        meshRef.current.scale.y = springLerp(meshRef.current.scale.y, targetSY, delta);
+        meshRef.current.scale.z = springLerp(meshRef.current.scale.z, targetSZ, delta);
+        meshRef.current.position.y = springLerp(meshRef.current.position.y, targetPY, delta);
+
+        // ── Face Group: Chat awareness ──
+        if (faceGroupRef.current) {
+            let gazeTargetY = 0;
+            let gazeTargetX = 0;
+            let gazeOffsetX = 0;
+
+            if (showPrompt) {
+                // Look at tooltip (up and to the left from avatar's perspective)
+                gazeTargetY = -0.5;
+                gazeTargetX = 0.3;
+                gazeOffsetX = -0.05;
+            } else if (isOpen) {
+                // Chat open: gaze toward the chat window (left/up)
+                gazeTargetY = -0.4;
+                gazeTargetX = 0.1;
+                gazeOffsetX = -0.08;
+            }
+
+            faceGroupRef.current.rotation.y = springLerp(faceGroupRef.current.rotation.y, gazeTargetY, delta, FACE_SPRING);
+            faceGroupRef.current.rotation.x = springLerp(faceGroupRef.current.rotation.x, gazeTargetX, delta, FACE_SPRING);
+
+            // Smooth position — no jitter, just clean tracking
+            faceGroupRef.current.position.x = springLerp(faceGroupRef.current.position.x, gazeOffsetX, delta, FACE_SPRING);
+            faceGroupRef.current.position.y = springLerp(faceGroupRef.current.position.y, 0.12, delta, FACE_SPRING);
+        }
+    });
+
+    return (
+        <mesh ref={meshRef}>
+            <sphereGeometry args={[0.85, 64, 64]} />
+            <MeshDistortMaterial
+                ref={bodyMatRef}
+                color="#06b6d4"
+                emissive="#06b6d4"
+                emissiveIntensity={0.4}
+                envMapIntensity={2}
+                clearcoat={1}
+                clearcoatRoughness={0.1}
+                metalness={0.2}
+                roughness={0.1}
+                distort={isThinking ? 0.35 : showPrompt ? 0.15 : 0.3}
+                speed={isThinking ? 2.5 : showPrompt ? 1 : 2}
+            />
+
+            {/* ── Face Group — hereda squash & stretch del cuerpo ── */}
+            <group ref={faceGroupRef} position={[0, 0.12, 1.0]}>
+                <QuantumEye positionX={-0.22} isThinking={isThinking} showPrompt={showPrompt} isBooped={isBooped} />
+                <QuantumEye positionX={0.22} isThinking={isThinking} showPrompt={showPrompt} isBooped={isBooped} isRight />
+                <Eyebrow side="left" isThinking={isThinking} showPrompt={showPrompt} isBooped={isBooped} />
+                <Eyebrow side="right" isThinking={isThinking} showPrompt={showPrompt} isBooped={isBooped} />
+                <Mouth isThinking={isThinking} showPrompt={showPrompt} isBooped={isBooped} />
+            </group>
+        </mesh>
+    );
 }
 
 // ─────────────────────────────────────────────────────────
 // Exported NeuroAvatar
 // ─────────────────────────────────────────────────────────
 
-export function NeuroAvatar({ isThinking = false, messages = [], showPrompt = false, isBooped = false }: NeuroAvatarProps) {
-    const { ref: containerRef, isVisible } = useVisibility(0.1);
+export function NeuroAvatar({ isThinking = false, messages = [], showPrompt = false, isBooped = false, isOpen = false }: NeuroAvatarProps) {
+    const keyLightRef = useRef<THREE.PointLight>(null);
 
     return (
         <div
-            ref={containerRef}
-            className="fixed bottom-0 right-0 z-[100] w-72 h-72 pointer-events-none flex items-center justify-center translate-x-12 translate-y-12"
+            className="fixed bottom-0 right-0 z-[100] w-56 h-56 pointer-events-none flex items-center justify-center translate-x-6 translate-y-6"
             aria-label="AI Assistant Avatar"
         >
             <Canvas
                 className="pointer-events-auto cursor-pointer"
-                style={{ background: 'transparent', pointerEvents: 'auto' }} // Crucial: Allow clicking the canvas itself for toggleChat
+                style={{ background: 'transparent' }}
                 camera={{ position: [0, 0, 4.5], fov: 45 }}
-                frameloop={isVisible ? 'always' : 'demand'}
                 dpr={[1, 2]}
-                performance={{ min: 0.5 }}
-                gl={{
-                    alpha: true,
-                    depth: true,
-                    premultipliedAlpha: false,
-                    powerPreference: 'high-performance',
-                }}
+                gl={{ alpha: true, powerPreference: 'high-performance' }}
             >
-                <CinematicLights isThinking={isThinking} />
+                {/* Color Cycle Controller */}
+                <ColorController isThinking={isThinking} isBooped={isBooped} keyLightRef={keyLightRef} />
+
+                {/* Iluminación — key light synced with color cycle */}
+                <ambientLight intensity={0.5} />
+                <pointLight ref={keyLightRef} position={[2, 2, 2]} intensity={5} color="#06b6d4" decay={2} />
+                <pointLight position={[-2, -1, -2]} intensity={3} color="#8b5cf6" decay={2} />
+
+                {/* Entorno para reflejos del cristal */}
                 <Environment preset="city" />
-                <StreamController messages={messages} />
 
-                <ParallaxRig>
-                    <Float
-                        speed={isThinking ? 1.2 : 0.6}
-                        rotationIntensity={isThinking ? 1.0 : 0.5}
-                        floatIntensity={isThinking ? 1.5 : 1}
-                    >
-                        {/* Order matters: eyes first, then glass body on top for refraction */}
-                        <AnatomicalEye isThinking={isThinking} showPrompt={showPrompt} isBooped={isBooped} />
-                        <LiquidBlob isThinking={isThinking} isBooped={isBooped} />
-                    </Float>
-                </ParallaxRig>
-
-                <EffectComposer multisampling={0} disableNormalPass>
-                    <SMAA />
-                    <Bloom
-                        luminanceThreshold={0.2}
-                        luminanceSmoothing={0.9}
-                        height={300}
-                        intensity={isThinking ? 3.0 : 2.0}
-                        mipmapBlur
-                    />
-                    <ChromaticAberration
-                        blendFunction={BlendFunction.NORMAL}
-                        offset={new THREE.Vector2(0.0015, 0.0015) as any}
-                    />
-                    <Noise opacity={0.04} blendFunction={BlendFunction.OVERLAY} />
-                    <Vignette
-                        eskil={false}
-                        blendFunction={BlendFunction.NORMAL}
-                        offset={0.5}
-                        darkness={0.4}
-                    />
-                </EffectComposer>
+                {/* Cuerpo gelatinoso con cara completa */}
+                <Float speed={2} rotationIntensity={0.5} floatIntensity={1}>
+                    <JellyBody isThinking={isThinking} showPrompt={showPrompt} isBooped={isBooped} isOpen={isOpen} />
+                </Float>
             </Canvas>
         </div>
     );

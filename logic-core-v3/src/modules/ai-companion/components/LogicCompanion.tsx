@@ -9,6 +9,24 @@ import { useLogicAI } from '../hooks/useLogicAI';
 const INITIAL_DELAY = 3000;   // Show prompt 3s after page load
 const IDLE_TIMEOUT = 15000;   // Re-show after 15s of inactivity
 
+const PROMPTS = [
+    {
+        badge: "AI_ASSISTANT // V1.0",
+        title: "> MEJORA_TU_NEGOCIO...",
+        body: "¿Estás listo para escalar tu servicio e implementar Inteligencia Artificial?"
+    },
+    {
+        badge: "INNOVACIÓN // ACTIVA",
+        title: "> AUTOMATIZACIÓN...",
+        body: "He detectado oportunidades para automatizar tus procesos. ¿Te explico cómo?"
+    },
+    {
+        badge: "SISTEMA // LISTO",
+        title: "> OPTIMIZANDO_RUTINAS...",
+        body: "Tengo varias propuestas para ahorrarte horas de trabajo semanal. ¿Las vemos?"
+    }
+];
+
 /**
  * Main AI Companion Wrapper
  * Combines NeuroAvatar with ChatWindow, manages state,
@@ -17,6 +35,7 @@ const IDLE_TIMEOUT = 15000;   // Re-show after 15s of inactivity
 export function LogicCompanion() {
     const [isOpen, setIsOpen] = useState(false);
     const [showPrompt, setShowPrompt] = useState(false);
+    const [promptIndex, setPromptIndex] = useState(0);
     const [isBooped, setIsBooped] = useState(false);
     const { messages, input, handleInputChange, handleSubmit, isThinking, leadContext, updateLeadContext } = useLogicAI();
 
@@ -75,18 +94,20 @@ export function LogicCompanion() {
     // ─── Handlers ────────────────────────────────────────────
     const handleAvatarClick = () => {
         setIsBooped(true);
-        setTimeout(() => setIsBooped(false), 400); // 400ms squash
+        setTimeout(() => setIsBooped(false), 600);
         setIsOpen((prev) => !prev);
     };
 
     const dismissPrompt = () => {
         setShowPrompt(false);
         hasShownOnceRef.current = true;
+        setPromptIndex(prev => (prev + 1) % PROMPTS.length);
         startIdleTimer();
     };
 
     const openFromPrompt = () => {
         setShowPrompt(false);
+        setPromptIndex(prev => (prev + 1) % PROMPTS.length);
         setIsOpen(true);
     };
 
@@ -97,79 +118,115 @@ export function LogicCompanion() {
                 {showPrompt && !isOpen && (
                     <motion.div
                         key="holo-notification"
-                        initial={{ opacity: 0, scale: 0.85, y: 10, filter: 'blur(8px)' }}
-                        animate={{ opacity: 1, scale: 1, y: 0, filter: 'blur(0px)' }}
-                        exit={{ opacity: 0, scale: 0.9, y: 8, filter: 'blur(4px)' }}
+                        initial={{ opacity: 0, scale: 0.8, x: 20, filter: 'blur(10px)' }}
+                        animate={{ opacity: 1, scale: 1, x: 0, filter: 'blur(0px)' }}
+                        exit={{ opacity: 0, scale: 0.9, x: 10, filter: 'blur(4px)' }}
                         transition={{ type: 'spring', stiffness: 280, damping: 26 }}
                         style={{ transformOrigin: 'bottom right' }}
                         onClick={openFromPrompt}
-                        // Pushed to bottom-48 right-32 to make room for scaling up Avatar to 1.1
-                        className="fixed bottom-48 right-32 z-[101] hidden md:block cursor-pointer group"
+                        className="fixed bottom-[8.5rem] right-24 z-[101] hidden md:block cursor-pointer group"
                     >
-                        {/* Animated gradient border wrapper */}
-                        <div className="relative rounded-2xl p-[1px] overflow-hidden">
-                            {/* Rotating gradient border */}
+                        {/* Neural Link (Connector Ray) */}
+                        <div className="absolute top-[100%] right-[-1rem] w-20 h-20 pointer-events-none -z-10">
+                            <svg className="w-full h-full overflow-visible" preserveAspectRatio="none">
+                                <motion.line
+                                    x1="10%" y1="0%"
+                                    x2="100%" y2="100%"
+                                    stroke="url(#cyan-glow)"
+                                    strokeWidth="1.5"
+                                    className="animate-pulse"
+                                    strokeDasharray="4 2"
+                                />
+                                <defs>
+                                    <linearGradient id="cyan-glow" x1="0" y1="0" x2="1" y2="1">
+                                        <stop offset="0%" stopColor="#22d3ee" stopOpacity="0.8" />
+                                        <stop offset="100%" stopColor="#22d3ee" stopOpacity="0" />
+                                    </linearGradient>
+                                </defs>
+                            </svg>
+                        </div>
+
+                        {/* Animated gradient border wrapper with Clip Path */}
+                        <div
+                            className="relative p-[1px] overflow-visible"
+                            style={{ clipPath: 'polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px)' }}
+                        >
+                            {/* Rotating gradient border (simulating energetic outline) */}
                             <motion.div
                                 className="absolute inset-0"
                                 style={{
-                                    background: 'conic-gradient(from 0deg, transparent 0%, rgba(6,182,212,0.4) 25%, transparent 50%, rgba(139,92,246,0.3) 75%, transparent 100%)',
+                                    background: 'conic-gradient(from 0deg, transparent 0%, rgba(6,182,212,0.8) 25%, transparent 50%, rgba(139,92,246,0.6) 75%, transparent 100%)',
                                 }}
                                 animate={{ rotate: 360 }}
-                                transition={{ duration: 8, repeat: Infinity, ease: 'linear' }}
+                                transition={{ duration: 4, repeat: Infinity, ease: 'linear' }}
                             />
-                            {/* Static subtle border fallback */}
-                            <div className="absolute inset-0 rounded-2xl border border-white/[0.06]" />
 
-                            {/* Inner card — premium glassmorphism */}
-                            <div
-                                className="relative rounded-2xl px-5 py-4 flex items-center gap-4 border border-white/10 shadow-2xl ring-1 ring-inset ring-white/[0.05]"
+                            {/* Inner card — HUD style */}
+                            <motion.div
+                                animate={{
+                                    scale: [1, 1.02, 1],
+                                    boxShadow: [
+                                        '0 0 0px rgba(6,182,212,0)',
+                                        '0 0 25px rgba(6,182,212,0.4)',
+                                        '0 0 0px rgba(6,182,212,0)'
+                                    ]
+                                }}
+                                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }} // Smooth attention pulse
+                                className="relative px-5 py-4 flex flex-col gap-3 font-mono border-white/10"
                                 style={{
-                                    background: 'linear-gradient(135deg, rgba(9,9,11,0.80) 0%, rgba(15,15,20,0.85) 100%)',
-                                    backdropFilter: 'blur(32px) saturate(1.4)',
-                                    WebkitBackdropFilter: 'blur(32px) saturate(1.4)',
+                                    background: 'rgba(9, 9, 11, 0.85)',
+                                    backgroundImage: 'radial-gradient(rgba(6,182,212,0.15) 1px, transparent 1px)',
+                                    backgroundSize: '6px 6px',
+                                    backdropFilter: 'blur(20px)',
+                                    WebkitBackdropFilter: 'blur(20px)',
+                                    clipPath: 'polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px)'
                                 }}
                             >
-                                {/* Inner glow layer */}
-                                <div className="absolute inset-0 rounded-2xl pointer-events-none bg-gradient-to-br from-cyan-500/[0.04] via-transparent to-violet-500/[0.04]" />
-
-                                {/* Shimmer sweep */}
-                                <div className="absolute top-0 left-0 w-full h-[1px] overflow-hidden rounded-t-2xl">
+                                {/* Shimmer sweep (repeats every 5s) */}
+                                <div className="absolute top-0 left-0 w-full h-[1px] overflow-hidden pointer-events-none">
                                     <motion.div
-                                        className="h-full w-1/4 bg-gradient-to-r from-transparent via-cyan-400/50 to-transparent"
-                                        animate={{ x: ['-100%', '500%'] }}
-                                        transition={{ duration: 4, repeat: Infinity, ease: 'linear', repeatDelay: 3 }}
+                                        className="h-full w-1/4 bg-gradient-to-r from-transparent via-cyan-400/80 to-transparent"
+                                        animate={{ x: ['-200%', '600%'] }}
+                                        transition={{ duration: 2, repeat: Infinity, ease: 'linear', repeatDelay: 5 }}
                                     />
                                 </div>
 
-                                {/* Animated status ring */}
-                                <div className="relative flex items-center justify-center shrink-0 w-9 h-9">
-                                    <motion.div
-                                        className="absolute inset-0 rounded-full border border-cyan-500/30"
-                                        animate={{ scale: [1, 1.3, 1], opacity: [0.5, 0, 0.5] }}
-                                        transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
-                                    />
-                                    <div className="w-9 h-9 rounded-full bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center">
-                                        <div className="w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_10px_rgba(6,182,212,0.8)]" />
-                                    </div>
-                                </div>
-
-                                {/* Text */}
+                                {/* Text & Copys */}
                                 <motion.div
-                                    initial={{ opacity: 0, x: 10 }}
+                                    initial={{ opacity: 0, x: -10 }}
                                     animate={{ opacity: 1, x: 0 }}
                                     transition={{ delay: 0.15, duration: 0.5, ease: 'easeOut' }}
-                                    className="flex flex-col gap-1 pr-6"
+                                    className="flex flex-col gap-2 pr-6 w-64"
                                 >
-                                    <span className="text-[10px] uppercase bg-gradient-to-r from-cyan-400 to-violet-400 bg-clip-text text-transparent font-semibold tracking-[0.2em] font-mono">
-                                        Logic Core — Online
-                                    </span>
-                                    <motion.span
-                                        initial={{ opacity: 0 }}
-                                        animate={{ opacity: 1 }}
-                                        transition={{ delay: 0.3, duration: 0.4 }}
-                                        className="text-sm text-zinc-300 leading-snug"
+                                    {/* Badge */}
+                                    <div className="flex items-center gap-2">
+                                        <span className="bg-cyan-400 text-zinc-950 px-1.5 py-0.5 text-[9px] uppercase font-bold tracking-widest shadow-[0_0_8px_rgba(6,182,212,0.6)] animate-pulse">
+                                            [ {PROMPTS[promptIndex].badge} ]
+                                        </span>
+                                    </div>
+
+                                    {/* Título tipo máquina de escribir */}
+                                    <motion.div
+                                        key={`title-${promptIndex}`}
+                                        initial={{ width: 0 }}
+                                        animate={{ width: "100%" }}
+                                        transition={{ delay: 0.3, duration: 1.2, ease: 'linear' }}
+                                        className="overflow-hidden whitespace-nowrap border-r-2 border-cyan-400 pr-1"
                                     >
-                                        Sistemas en línea. Habla con Logic Core.
+                                        <span className="text-[11px] text-cyan-400/80 uppercase font-bold tracking-wider">
+                                            {PROMPTS[promptIndex].title}
+                                        </span>
+                                    </motion.div>
+
+                                    {/* Cuerpo (Pregunta) */}
+                                    <motion.span
+                                        key={`body-${promptIndex}`}
+                                        initial={{ opacity: 0, y: 5 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ delay: 1.6, duration: 0.5, ease: 'easeOut' }}
+                                        className="text-xs text-zinc-200 w-[95%] font-medium leading-relaxed drop-shadow-[0_0_2px_rgba(255,255,255,0.4)]"
+                                    >
+                                        {PROMPTS[promptIndex].body}
                                     </motion.span>
                                 </motion.div>
 
@@ -179,77 +236,25 @@ export function LogicCompanion() {
                                         e.stopPropagation();
                                         dismissPrompt();
                                     }}
-                                    className="absolute top-3 right-3 p-1.5 rounded-full text-zinc-600 hover:text-zinc-300 hover:bg-white/[0.06] transition-all duration-200"
+                                    className="absolute top-2.5 right-2.5 p-1 text-zinc-500 hover:text-cyan-400 hover:bg-cyan-400/10 transition-colors duration-200"
                                     aria-label="Dismiss"
                                 >
-                                    <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+                                    <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.5">
                                         <path d="M1 1l8 8M9 1l-8 8" />
                                     </svg>
                                 </button>
-                            </div>
+                            </motion.div>
                         </div>
-
-                        {/* Connector triangle — elegant tail pointing toward avatar */}
-                        <motion.div
-                            initial={{ opacity: 0, scaleY: 0 }}
-                            animate={{ opacity: 1, scaleY: 1 }}
-                            transition={{ delay: 0.3, duration: 0.4 }}
-                            className="absolute -bottom-[10px] right-10 origin-top"
-                            style={{
-                                width: 0,
-                                height: 0,
-                                borderLeft: '8px solid transparent',
-                                borderRight: '8px solid transparent',
-                                borderTop: '10px solid rgba(9,9,11,0.85)',
-                                filter: 'drop-shadow(0 2px 6px rgba(6,182,212,0.25))',
-                            }}
-                        />
                     </motion.div>
                 )}
             </AnimatePresence>
 
             {/* ── NeuroAvatar ──────────────────────────────── */}
             <div onClick={handleAvatarClick} role="button" aria-label="Toggle AI Chat">
-                <NeuroAvatar isThinking={isThinking} messages={messages} showPrompt={showPrompt && !isOpen} isBooped={isBooped} />
+                <NeuroAvatar isThinking={isThinking} messages={messages} showPrompt={showPrompt && !isOpen} isBooped={isBooped} isOpen={isOpen} />
             </div>
 
-            {/* ── Sleeping Zzz Particles ──────────────────── */}
-            <AnimatePresence>
-                {showPrompt && !isOpen && (
-                    <motion.div
-                        key="zzz-particles"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        transition={{ duration: 0.6 }}
-                        className="fixed bottom-[130px] right-[100px] z-[105] pointer-events-none"
-                    >
-                        {[0, 1, 2].map((i) => (
-                            <motion.div
-                                key={i}
-                                initial={{ opacity: 0, y: 0, x: 0, scale: 0.3, rotate: -10 }}
-                                animate={{
-                                    opacity: [0, 1, 0.8, 0],
-                                    y: -50 - i * 15,
-                                    x: [0, 15, -10, 20],
-                                    scale: [0.3, 1, 1.2, 1],
-                                    rotate: [-10, 10, -5, 15],
-                                }}
-                                transition={{
-                                    duration: 3.5,
-                                    repeat: Infinity,
-                                    delay: i * 1.2,
-                                    ease: 'easeInOut',
-                                }}
-                                className="absolute text-cyan-300 font-bold text-lg drop-shadow-[0_0_10px_rgba(6,182,212,0.9)]"
-                                style={{ left: `${i * 10}px` }}
-                            >
-                                Z
-                            </motion.div>
-                        ))}
-                    </motion.div>
-                )}
-            </AnimatePresence>
+
 
             {/* ── Chat Window ─────────────────────────────── */}
             <ChatWindow

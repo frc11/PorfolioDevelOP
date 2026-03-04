@@ -40,7 +40,7 @@ export function ChatWindow({
     isThinking,
     onClose,
 }: ChatWindowProps) {
-    const scrollRef = useRef<HTMLDivElement>(null);
+    const messagesEndRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
     const [showCursor, setShowCursor] = useState(true);
     const prefersReducedMotion = useReducedMotion();
@@ -52,17 +52,13 @@ export function ChatWindow({
         }
     }, [isOpen]);
 
-    // Auto-scroll to bottom when new messages arrive, content streams, or typing indicator appears
-    const lastMessageContent = messages.length > 0 ? getTextContent(messages[messages.length - 1]) : '';
+    const scrollToBottom = () => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    };
+
     useEffect(() => {
-        if (messages.length || isThinking) {
-            // Small delay to let DOM update with new content
-            const timer = setTimeout(() => {
-                scrollRef.current?.scrollIntoView({ behavior: 'smooth' });
-            }, 50);
-            return () => clearTimeout(timer);
-        }
-    }, [messages.length, lastMessageContent, isThinking]);
+        scrollToBottom();
+    }, [messages, isThinking]);
 
     // Blinking cursor effect for AI responses
     useEffect(() => {
@@ -108,7 +104,7 @@ export function ChatWindow({
                             stiffness: 300,
                             damping: 30,
                         }}
-                        className="fixed bottom-24 right-56 w-[440px] h-[650px] rounded-3xl flex flex-col z-[100]"
+                        className="fixed bottom-28 right-32 w-[440px] h-[650px] rounded-3xl flex flex-col z-[100]"
                         style={{
                             pointerEvents: 'auto',
                             background: 'rgba(9, 9, 11, 0.8)', /* bg-zinc-950/80 */
@@ -178,14 +174,9 @@ export function ChatWindow({
                                     messages.map((m, idx) => (
                                         <motion.div
                                             key={m.id}
-                                            initial={{ opacity: 0, y: 10, filter: 'blur(4px)' }}
-                                            animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-                                            transition={{
-                                                type: 'spring',
-                                                stiffness: 250,
-                                                damping: 25,
-                                                delay: idx * 0.03,
-                                            }}
+                                            initial={{ opacity: 0, y: 15, scale: 0.95 }}
+                                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                                            transition={{ type: "spring", stiffness: 300, damping: 24 }}
                                             className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}
                                         >
                                             <div className={`relative max-w-[85%] rounded-2xl p-4 border ${m.role === 'user'
@@ -314,7 +305,8 @@ export function ChatWindow({
                                 )}
                             </AnimatePresence>
 
-                            <div ref={scrollRef} />
+                            {/* Ancla para el Auto-Scroll */}
+                            <div ref={messagesEndRef} className="h-1" />
                         </div>
 
                         {/* Input Area */}
