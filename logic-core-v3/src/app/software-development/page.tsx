@@ -29,7 +29,7 @@ const BentoGridItem = ({ title, description, icon, delay }: { title: string; des
     );
 };
 
-export default function SoftwareDevelopmentPage() {
+function SoftwareDesktop() {
     return (
         <main className="min-h-screen bg-zinc-950 text-white pt-32 pb-20 selection:bg-violet-500/30 selection:text-violet-200">
 
@@ -114,5 +114,98 @@ export default function SoftwareDevelopmentPage() {
 
             </div>
         </main>
+    );
+}
+
+function SoftwareMobile() {
+    return (
+        <main className="min-h-screen bg-zinc-950 text-white pt-24 pb-32 overflow-x-hidden selection:bg-violet-500/30 selection:text-violet-200">
+            {/* Ambient Base */}
+            <div className="fixed inset-0 bg-gradient-to-b from-violet-900/5 to-zinc-950 pointer-events-none" />
+            <div className="fixed inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 pointer-events-none mix-blend-soft-light" />
+
+            <div className="container mx-auto px-6 relative z-10 flex flex-col gap-12">
+                {/* Mobile Hero */}
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.8 }}
+                    className="flex flex-col gap-4"
+                >
+                    <h1 className="text-4xl font-black tracking-tighter bg-clip-text text-transparent bg-gradient-to-b from-white via-violet-100 to-violet-900/50 break-words">
+                        SYSTEM
+                        <br />
+                        ENGINEERING
+                    </h1>
+                    <p className="text-lg text-violet-400/80 font-mono border-l-2 border-violet-500/30 pl-4">
+                        Robust algorithms. AI integration. Enterprise logic.
+                    </p>
+                </motion.div>
+
+                {/* Mobile Stacked Items */}
+                <div className="flex flex-col gap-6">
+                    <BentoGridItem
+                        title="SaaS Architecture"
+                        description="Scalable multi-tenant systems designed for growth. We build resilient backends that handle thousands of concurrent users with zero downtime."
+                        icon={<Server className="w-6 h-6" />}
+                        delay={0.1}
+                    />
+
+                    <BentoGridItem
+                        title="AI & ML Integration"
+                        description="Smart logic for data-driven decisions. Integrate LLMs, predictive models, and automated reasoning into your core business logic."
+                        icon={<Cpu className="w-6 h-6" />}
+                        delay={0.2}
+                    />
+
+                    <BentoGridItem
+                        title="Cloud Infrastructure"
+                        description="AWS/Azure serverless deployments. Auto-scaling clusters, managed databases, and global CDNs for minimal latency."
+                        icon={<Cloud className="w-6 h-6" />}
+                        delay={0.3}
+                    />
+
+                    <BentoGridItem
+                        title="API Design & Security"
+                        description="Secure, documented, and fast endpoints. GraphQL or REST architectures with JWT authentication, rate limiting, and automated testing pipelines."
+                        icon={<Code2 className="w-6 h-6" />}
+                        delay={0.4}
+                    />
+                </div>
+
+                {/* Mobile CTA */}
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    whileInView={{ opacity: 1 }}
+                    viewport={{ once: true }}
+                    className="mt-8 pb-10 flex justify-center w-full"
+                >
+                    <Link
+                        href="/contact"
+                        className="group flex flex-col items-center gap-4 text-violet-400 focus:text-white transition-colors duration-300 w-full"
+                    >
+                        <span className="text-2xl font-black tracking-tighter uppercase border-b border-violet-500/30 pb-2 text-center w-full">
+                            Engineer Solution
+                        </span>
+                        <div className="bg-violet-500/10 p-4 rounded-full active:bg-violet-500 active:text-black transition-all">
+                            <ArrowRight className="w-6 h-6" />
+                        </div>
+                    </Link>
+                </motion.div>
+            </div>
+        </main>
+    );
+}
+
+export default function SoftwareDevelopmentPage() {
+    return (
+        <>
+            <div className="hidden md:block">
+                <SoftwareDesktop />
+            </div>
+            <div className="block md:hidden">
+                <SoftwareMobile />
+            </div>
+        </>
     );
 }

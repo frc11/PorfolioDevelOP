@@ -29,7 +29,7 @@ const BentoGridItem = ({ title, description, icon, delay }: { title: string; des
     );
 };
 
-export default function WebDevelopmentPage() {
+function WebDesktop() {
     return (
         <main className="min-h-screen bg-zinc-950 text-white pt-32 pb-20 selection:bg-cyan-500/30 selection:text-cyan-200">
 
@@ -114,5 +114,98 @@ export default function WebDevelopmentPage() {
 
             </div>
         </main>
+    );
+}
+
+function WebMobile() {
+    return (
+        <main className="min-h-screen bg-zinc-950 text-white pt-24 pb-32 overflow-x-hidden selection:bg-cyan-500/30 selection:text-cyan-200">
+            {/* Ambient Base */}
+            <div className="fixed inset-0 bg-gradient-to-b from-cyan-900/5 to-zinc-950 pointer-events-none" />
+            <div className="fixed inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 pointer-events-none mix-blend-soft-light" />
+
+            <div className="container mx-auto px-6 relative z-10 flex flex-col gap-12">
+                {/* Mobile Hero */}
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.8 }}
+                    className="flex flex-col gap-4"
+                >
+                    <h1 className="text-4xl font-black tracking-tighter bg-clip-text text-transparent bg-gradient-to-b from-white via-cyan-100 to-cyan-900/50 break-words">
+                        WEB
+                        <br />
+                        ARCHITECTURE
+                    </h1>
+                    <p className="text-lg text-cyan-400/80 font-mono border-l-2 border-cyan-500/30 pl-4">
+                        Immersive interfaces. Scalable backends. Pure performance.
+                    </p>
+                </motion.div>
+
+                {/* Mobile Stacked Items */}
+                <div className="flex flex-col gap-6">
+                    <BentoGridItem
+                        title="Next.js & React"
+                        description="State-of-the-art frontend engineering. We build lightning-fast, SEO-optimized applications using the latest Next.js 14+ features, Server Actions, and React Server Components."
+                        icon={<Layers className="w-6 h-6" />}
+                        delay={0.1}
+                    />
+
+                    <BentoGridItem
+                        title="3D WebGL Experiences"
+                        description="Pushing browser limits with Three.js and React Three Fiber. Create immersive 3D worlds that captive users instantly."
+                        icon={<Network className="w-6 h-6" />}
+                        delay={0.2}
+                    />
+
+                    <BentoGridItem
+                        title="High-Perf SEO"
+                        description="Google-dominating speed scores. Core Web Vitals optimized from day one for maximum visibility."
+                        icon={<Database className="w-6 h-6" />}
+                        delay={0.3}
+                    />
+
+                    <BentoGridItem
+                        title="E-Commerce Solutions"
+                        description="High-conversion checkout flows. Integrated with Stripe, Shopify, or custom headless architectures for complete control over your sales funnel."
+                        icon={<ShoppingBag className="w-6 h-6" />}
+                        delay={0.4}
+                    />
+                </div>
+
+                {/* Mobile CTA */}
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    whileInView={{ opacity: 1 }}
+                    viewport={{ once: true }}
+                    className="mt-8 pb-10 flex justify-center w-full"
+                >
+                    <Link
+                        href="/contact"
+                        className="group flex flex-col items-center gap-4 text-cyan-400 focus:text-white transition-colors duration-300 w-full"
+                    >
+                        <span className="text-2xl font-black tracking-tighter uppercase border-b border-cyan-500/30 pb-2 text-center w-full">
+                            Start Priority Project
+                        </span>
+                        <div className="bg-cyan-500/10 p-4 rounded-full active:bg-cyan-500 active:text-black transition-all">
+                            <ArrowRight className="w-6 h-6" />
+                        </div>
+                    </Link>
+                </motion.div>
+            </div>
+        </main>
+    );
+}
+
+export default function WebDevelopmentPage() {
+    return (
+        <>
+            <div className="hidden md:block">
+                <WebDesktop />
+            </div>
+            <div className="block md:hidden">
+                <WebMobile />
+            </div>
+        </>
     );
 }

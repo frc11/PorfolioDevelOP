@@ -9,8 +9,9 @@ import {
 } from "framer-motion";
 import { Home, Briefcase, Terminal, Layers, Mail, Lightbulb, Menu, X } from "lucide-react";
 import Link from "next/link";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { useTransitionContext } from "@/context/TransitionContext";
+import { usePathname } from "next/navigation";
 
 // --- Neuronal Components ---
 
@@ -58,6 +59,12 @@ const Synapse = ({ label, href, direction, delay }: { label: string; href: strin
 export const DynamicDock = () => {
     const mouseX = useMotionValue(Infinity);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const pathname = usePathname();
+
+    // Ensure menu closes securely on any route change
+    useEffect(() => {
+        setIsMobileMenuOpen(false);
+    }, [pathname]);
 
     const icons = [
         {
@@ -283,7 +290,9 @@ function MobileDockIcon({
         e.preventDefault();
 
         triggerTransition(href);
-        onClick(); // close menu on mobile tap
+        setTimeout(() => {
+            onClick(); // gracefully close menu under the shutter
+        }, 400);
     };
 
     return (
@@ -326,7 +335,7 @@ function MobileDockIcon({
                                     e.preventDefault();
                                     e.stopPropagation();
                                     triggerTransition("/web-development");
-                                    onClick();
+                                    setTimeout(() => onClick(), 400);
                                 }}
                                 className="whitespace-nowrap px-3 py-2 rounded-full bg-zinc-900/90 border border-white/10 backdrop-blur-xl shadow-xl flex items-center gap-2"
                             >
@@ -339,7 +348,7 @@ function MobileDockIcon({
                                     e.preventDefault();
                                     e.stopPropagation();
                                     triggerTransition("/software-development");
-                                    onClick();
+                                    setTimeout(() => onClick(), 400);
                                 }}
                                 className="whitespace-nowrap px-3 py-2 rounded-full bg-zinc-900/90 border border-white/10 backdrop-blur-xl shadow-xl flex items-center gap-2"
                             >
