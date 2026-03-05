@@ -6,7 +6,6 @@ import { useEffect, useRef, useState } from 'react';
 import { INITIAL_GREETING } from '../lib/constants';
 import {
     detectIntent,
-    generateWhatsAppLink,
     type LeadContext,
     type ServiceType,
 } from '../lib/sales-strategy';
@@ -82,17 +81,7 @@ export function useLogicAI() {
         ) {
             const content = getTextContent(lastMessage);
 
-            // Detect WhatsApp connection command
-            const whatsappMatch = content.match(/\[CONNECT_WHATSAPP\]/);
-            if (whatsappMatch) {
-                const whatsappLink = generateWhatsAppLink(leadContext);
-                processedMessageIds.current.add(lastMessage.id);
-
-                // Open WhatsApp in new tab
-                if (typeof window !== 'undefined') {
-                    window.open(whatsappLink, '_blank');
-                }
-            }
+            // WhatsApp connection command was removed as part of tech debt cleanup
 
             // Detect navigation command
             const navMatch = content.match(/\[NAVIGATE:\s*(.*?)\]/);

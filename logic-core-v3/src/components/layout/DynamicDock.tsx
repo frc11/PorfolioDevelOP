@@ -15,22 +15,41 @@ import { usePathname } from "next/navigation";
 
 // --- Neuronal Components ---
 
-const Axon = ({ direction, delay }: { direction: 'left' | 'right'; delay: number }) => {
+const Axon = ({ direction, delay }: { direction: 'left-1' | 'left-2' | 'right-1' | 'right-2'; delay: number }) => {
+    let rotation = '';
+    let height = 60;
+
+    if (direction === 'left-1') { rotation = '-rotate-[50deg]'; height = 65; }
+    if (direction === 'left-2') { rotation = '-rotate-[15deg]'; height = 85; }
+    if (direction === 'right-1') { rotation = 'rotate-[15deg]'; height = 85; }
+    if (direction === 'right-2') { rotation = 'rotate-[50deg]'; height = 65; }
+
+    const isCyan = direction.startsWith('left');
+    const colorClass = isCyan ? 'via-cyan-400 shadow-[0_0_15px_cyan]' : 'via-fuchsia-400 shadow-[0_0_15px_fuchsia]';
+
     return (
         <motion.div
             initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 60, opacity: 1 }} // Grows upwards
+            animate={{ height, opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.3, delay, ease: "easeOut" }}
-            className={`absolute bottom-1/2 ${direction === 'left' ? 'left-1/2 -ml-[1px] origin-bottom -rotate-[45deg]' : 'right-1/2 -mr-[1px] origin-bottom rotate-[45deg]'} w-[2px] bg-gradient-to-t from-transparent via-cyan-400 to-white shadow-[0_0_15px_cyan] -z-10`}
+            className={`absolute bottom-1/2 left-1/2 -translate-x-1/2 origin-bottom ${rotation} w-[2px] bg-gradient-to-t from-transparent ${colorClass} to-white -z-10`}
         >
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1 h-1 bg-white rounded-full shadow-[0_0_10px_white]" />
         </motion.div>
     );
 };
 
-const Synapse = ({ label, href, direction, delay }: { label: string; href: string; direction: 'left' | 'right'; delay: number }) => {
+const Synapse = ({ label, href, direction, delay }: { label: string; href: string; direction: 'left-1' | 'left-2' | 'right-1' | 'right-2'; delay: number }) => {
     const { triggerTransition } = useTransitionContext();
+
+    let posClass = '';
+    if (direction === 'left-1') posClass = 'bottom-[60px] right-[calc(50%+40px)]';
+    if (direction === 'left-2') posClass = 'bottom-[100px] right-[calc(50%+10px)]';
+    if (direction === 'right-1') posClass = 'bottom-[100px] left-[calc(50%+10px)]';
+    if (direction === 'right-2') posClass = 'bottom-[60px] left-[calc(50%+40px)]';
+
+    const isCyan = direction.startsWith('left');
 
     return (
         <motion.div
@@ -38,7 +57,7 @@ const Synapse = ({ label, href, direction, delay }: { label: string; href: strin
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0 }}
             transition={{ type: "spring", stiffness: 300, damping: 20, delay: delay + 0.2 }}
-            className={`absolute bottom-[70px] ${direction === 'left' ? '-left-[80px]' : '-right-[80px]'} z-50`}
+            className={`absolute ${posClass} z-50`}
         >
             <Link
                 href={href}
@@ -47,10 +66,10 @@ const Synapse = ({ label, href, direction, delay }: { label: string; href: strin
                     e.stopPropagation();
                     triggerTransition(href);
                 }}
-                className="whitespace-nowrap px-4 py-2 rounded-full bg-zinc-900/90 border border-white/10 backdrop-blur-xl shadow-xl flex items-center gap-2 group hover:bg-zinc-800 hover:border-cyan-500/50 transition-colors"
+                className={`whitespace-nowrap px-4 py-2 rounded-full bg-zinc-900/90 border border-white/10 backdrop-blur-xl shadow-xl flex items-center gap-2 group hover:bg-zinc-800 ${isCyan ? 'hover:border-cyan-500/50' : 'hover:border-fuchsia-500/50'} transition-colors`}
             >
-                <div className={`w-2 h-2 rounded-full ${direction === 'left' ? 'bg-cyan-400' : 'bg-fuchsia-400'} shadow-[0_0_10px_currentColor] group-hover:scale-125 transition-transform`} />
-                <span className="text-xs font-semibold text-zinc-300 group-hover:text-white uppercase tracking-wider">{label}</span>
+                <div className={`w-2 h-2 rounded-full ${isCyan ? 'bg-cyan-400' : 'bg-fuchsia-400'} shadow-[0_0_10px_currentColor] group-hover:scale-125 transition-transform`} />
+                <span className="text-[10px] font-semibold text-zinc-300 group-hover:text-white uppercase tracking-wider">{label}</span>
             </Link>
         </motion.div>
     );
@@ -253,13 +272,19 @@ function DockIcon({
                             {label}
                         </motion.div>
 
-                        {/* Left Axon & Synapse */}
-                        <Axon direction="left" delay={0} />
-                        <Synapse label="Web Dev" href="/web-development" direction="left" delay={0.1} />
+                        {/* Left Axons & Synapses */}
+                        <Axon direction="left-1" delay={0} />
+                        <Synapse label="Web Dev" href="/web-development" direction="left-1" delay={0.1} />
 
-                        {/* Right Axon & Synapse */}
-                        <Axon direction="right" delay={0.1} />
-                        <Synapse label="Software" href="/software-development" direction="right" delay={0.2} />
+                        <Axon direction="left-2" delay={0.1} />
+                        <Synapse label="Agentes IA" href="/ai-implementations" direction="left-2" delay={0.2} />
+
+                        {/* Right Axons & Synapses */}
+                        <Axon direction="right-1" delay={0.2} />
+                        <Synapse label="Software" href="/software-development" direction="right-1" delay={0.3} />
+
+                        <Axon direction="right-2" delay={0.3} />
+                        <Synapse label="n8n" href="/process-automation" direction="right-2" delay={0.4} />
                     </>
                 )}
             </AnimatePresence>
@@ -339,8 +364,21 @@ function MobileDockIcon({
                                 }}
                                 className="whitespace-nowrap px-3 py-2 rounded-full bg-zinc-900/90 border border-white/10 backdrop-blur-xl shadow-xl flex items-center gap-2"
                             >
-                                <div className="w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_10px_currentColor]" />
+                                <div className="w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_10px_cyan]" />
                                 <span className="text-[10px] font-semibold text-zinc-300 uppercase tracking-wider">Web Dev</span>
+                            </button>
+
+                            <button
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    triggerTransition("/ai-implementations");
+                                    setTimeout(() => onClick(), 400);
+                                }}
+                                className="whitespace-nowrap px-3 py-2 rounded-full bg-zinc-900/90 border border-white/10 backdrop-blur-xl shadow-xl flex items-center gap-2"
+                            >
+                                <div className="w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_10px_cyan]" />
+                                <span className="text-[10px] font-semibold text-zinc-300 uppercase tracking-wider">Agentes IA</span>
                             </button>
 
                             <button
@@ -352,8 +390,21 @@ function MobileDockIcon({
                                 }}
                                 className="whitespace-nowrap px-3 py-2 rounded-full bg-zinc-900/90 border border-white/10 backdrop-blur-xl shadow-xl flex items-center gap-2"
                             >
-                                <div className="w-2 h-2 rounded-full bg-fuchsia-400 shadow-[0_0_10px_currentColor]" />
+                                <div className="w-2 h-2 rounded-full bg-fuchsia-400 shadow-[0_0_10px_fuchsia]" />
                                 <span className="text-[10px] font-semibold text-zinc-300 uppercase tracking-wider">Software</span>
+                            </button>
+
+                            <button
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    triggerTransition("/process-automation");
+                                    setTimeout(() => onClick(), 400);
+                                }}
+                                className="whitespace-nowrap px-3 py-2 rounded-full bg-zinc-900/90 border border-white/10 backdrop-blur-xl shadow-xl flex items-center gap-2"
+                            >
+                                <div className="w-2 h-2 rounded-full bg-fuchsia-400 shadow-[0_0_10px_fuchsia]" />
+                                <span className="text-[10px] font-semibold text-zinc-300 uppercase tracking-wider">n8n</span>
                             </button>
                         </motion.div>
                     </>

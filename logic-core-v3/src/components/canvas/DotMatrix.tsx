@@ -1,11 +1,12 @@
 'use client';
 
-import { useRef, useMemo, useLayoutEffect } from 'react';
+import { useRef, useMemo, useLayoutEffect, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 
 export function DotMatrix() {
     const meshRef = useRef<THREE.InstancedMesh>(null);
+    const isVisibleRef = useRef(true);
     const rows = 50;
     const cols = 50;
     const count = rows * cols;
@@ -34,8 +35,21 @@ export function DotMatrix() {
         }
     }, [count]);
 
+    useEffect(() => {
+        const handleScroll = () => {
+            if (window.scrollY > window.innerHeight + 200) {
+                isVisibleRef.current = false;
+            } else {
+                isVisibleRef.current = true;
+            }
+        };
+
+        window.addEventListener('scroll', handleScroll, { passive: true });
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
+
     useFrame((state) => {
-        if (!meshRef.current) return;
+        if (!meshRef.current || !isVisibleRef.current) return;
 
         const time = state.clock.getElapsedTime() * 0.5; // Velocidad de la onda
         const { pointer, viewport } = state;

@@ -71,11 +71,13 @@ export const MagneticCta = ({
             onMouseMove={handleMouseMove}
             onMouseLeave={handleMouseLeave}
             style={{ x, y }}
+            whileHover={variant === 'primary' ? { scale: 1.05 } : undefined}
+            transition={{ type: 'spring', stiffness: 300, damping: 20 }}
             className={cn(
-                "relative overflow-hidden rounded-full px-8 py-4 text-sm font-medium transition-colors duration-300 group",
-                "cursor-pointer focus:outline-none focus:ring-2 focus:ring-zinc-500 focus:ring-offset-2",
-                variant === 'primary' && "bg-zinc-900/80 text-white backdrop-blur-md border border-white/10 hover:bg-zinc-800/80",
-                variant === 'ghost' && "bg-transparent text-zinc-900 dark:text-white border border-transparent hover:bg-zinc-100/10",
+                "relative overflow-hidden rounded-full px-8 py-4 text-sm font-medium transition-all duration-300 group",
+                "cursor-pointer focus:outline-none focus:ring-2 focus:ring-cyan-500/40 focus:ring-offset-2",
+                variant === 'primary' && "bg-zinc-100 text-zinc-900 border border-zinc-200 hover:border-cyan-400/50 hover:shadow-[0_0_25px_rgba(6,182,212,0.4),0_0_60px_rgba(6,182,212,0.15)]",
+                variant === 'ghost' && "bg-transparent text-zinc-600 border border-zinc-300 hover:text-zinc-900 hover:border-zinc-400 hover:[text-shadow:0_0_15px_rgba(6,182,212,0.35)]",
                 className
             )}
         >

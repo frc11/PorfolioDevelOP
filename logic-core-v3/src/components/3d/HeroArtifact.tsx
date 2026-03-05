@@ -1,12 +1,13 @@
 'use client';
 
-import React, { useRef, useMemo } from 'react';
+import React, { useRef, useMemo, useEffect } from 'react';
 import { useLoader, useFrame } from '@react-three/fiber';
 import { SVGLoader } from 'three-stdlib';
 import * as THREE from 'three';
 
 export function HeroArtifact() {
     const groupRef = useRef<THREE.Group>(null);
+    const isVisibleRef = useRef(true);
     const svgData = useLoader(SVGLoader, '/logodevelOP.svg');
 
     const shapes = useMemo(() => {
@@ -15,8 +16,21 @@ export function HeroArtifact() {
         );
     }, [svgData]);
 
+    useEffect(() => {
+        const handleScroll = () => {
+            if (window.scrollY > window.innerHeight + 200) {
+                isVisibleRef.current = false;
+            } else {
+                isVisibleRef.current = true;
+            }
+        };
+
+        window.addEventListener('scroll', handleScroll, { passive: true });
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
+
     useFrame((state) => {
-        if (!groupRef.current) return;
+        if (!groupRef.current || !isVisibleRef.current) return;
 
         // INTERACTIVIDAD: Seguimiento del mouse suave y elegante
         const { x, y } = state.pointer;

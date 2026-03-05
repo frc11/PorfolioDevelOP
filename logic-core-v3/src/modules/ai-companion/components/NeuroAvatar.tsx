@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef } from 'react';
+import { useRef, Suspense } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { Float, Environment, MeshDistortMaterial } from '@react-three/drei';
 import * as THREE from 'three';
@@ -57,6 +57,14 @@ function springLerp(current: number, target: number, delta: number, spring = BOD
     const factor = 1 - Math.exp((-spring.stiffness / (spring.damping * spring.mass)) * delta);
     return THREE.MathUtils.lerp(current, target, factor);
 }
+
+// ─────────────────────────────────────────────────────────
+// Global Shared Geometries (Optimization)
+// ─────────────────────────────────────────────────────────
+const eyeGeometry = new THREE.SphereGeometry(0.1, 16, 16); // Optimized from 32
+const eyebrowGeometry = new THREE.CapsuleGeometry(0.018, 0.1, 4, 8);
+const mouthGeometry = new THREE.TorusGeometry(0.08, 0.018, 16, 32, Math.PI);
+const bodyGeometry = new THREE.SphereGeometry(0.85, 32, 32); // Optimized from 64
 
 // ─────────────────────────────────────────────────────────
 // ColorController — Computes active color + syncs key light
@@ -145,8 +153,7 @@ function QuantumEye({ positionX, isThinking, showPrompt, isBooped, isRight }: {
     });
 
     return (
-        <mesh ref={meshRef} position={[positionX, 0, 0]} renderOrder={999}>
-            <sphereGeometry args={[0.1, 32, 32]} />
+        <mesh ref={meshRef} position={[positionX, 0, 0]} renderOrder={999} geometry={eyeGeometry}>
             <meshStandardMaterial
                 ref={matRef}
                 color="#fff"
@@ -200,8 +207,7 @@ function Eyebrow({ side, isThinking, showPrompt, isBooped }: {
     });
 
     return (
-        <mesh ref={meshRef} position={[baseX, 0.18, 0]} rotation={[0, 0, Math.PI / 2]} renderOrder={999}>
-            <capsuleGeometry args={[0.018, 0.1, 4, 8]} />
+        <mesh ref={meshRef} position={[baseX, 0.18, 0]} rotation={[0, 0, Math.PI / 2]} renderOrder={999} geometry={eyebrowGeometry}>
             <meshStandardMaterial
                 ref={matRef}
                 color="#fff"
@@ -245,8 +251,7 @@ function Mouth({ isThinking, showPrompt, isBooped }: {
     });
 
     return (
-        <mesh ref={meshRef} position={[0, -0.15, 0]} rotation={[Math.PI, 0, 0]} scale={[0.7, 0.7, 0.7]} renderOrder={999}>
-            <torusGeometry args={[0.08, 0.018, 16, 32, Math.PI]} />
+        <mesh ref={meshRef} position={[0, -0.15, 0]} rotation={[Math.PI, 0, 0]} scale={[0.7, 0.7, 0.7]} renderOrder={999} geometry={mouthGeometry}>
             <meshStandardMaterial
                 ref={matRef}
                 color="#fff"
@@ -356,20 +361,28 @@ function JellyBody({ isThinking, showPrompt, isBooped, isOpen }: JellyBodyProps)
                     gazeTargetX = 0.1;
                     gazeOffsetX = -0.08;
                 }
+            } else {
+                // Idle tracking target
+                gazeTargetY = state.pointer.x * 0.3;
+                gazeTargetX = -state.pointer.y * 0.3;
+                gazeOffsetX = state.pointer.x * 0.1;
             }
 
-            faceGroupRef.current.rotation.y = springLerp(faceGroupRef.current.rotation.y, gazeTargetY, delta, FACE_SPRING);
-            faceGroupRef.current.rotation.x = springLerp(faceGroupRef.current.rotation.x, gazeTargetX, delta, FACE_SPRING);
+            const diffY = Math.abs(faceGroupRef.current.rotation.y - gazeTargetY);
+            const diffX = Math.abs(faceGroupRef.current.rotation.x - gazeTargetX);
+            const diffPos = Math.abs(faceGroupRef.current.position.x - gazeOffsetX);
 
-            // Smooth position — no jitter, just clean tracking
-            faceGroupRef.current.position.x = springLerp(faceGroupRef.current.position.x, gazeOffsetX, delta, FACE_SPRING);
-            faceGroupRef.current.position.y = springLerp(faceGroupRef.current.position.y, 0.12, delta, FACE_SPRING);
+            if (diffY > 0.001 || diffX > 0.001 || diffPos > 0.001) {
+                faceGroupRef.current.rotation.y = springLerp(faceGroupRef.current.rotation.y, gazeTargetY, delta, FACE_SPRING);
+                faceGroupRef.current.rotation.x = springLerp(faceGroupRef.current.rotation.x, gazeTargetX, delta, FACE_SPRING);
+                faceGroupRef.current.position.x = springLerp(faceGroupRef.current.position.x, gazeOffsetX, delta, FACE_SPRING);
+                faceGroupRef.current.position.y = springLerp(faceGroupRef.current.position.y, 0.12, delta, FACE_SPRING);
+            }
         }
     });
 
     return (
-        <mesh ref={meshRef}>
-            <sphereGeometry args={[0.85, 64, 64]} />
+        <mesh ref={meshRef} geometry={bodyGeometry}>
             <MeshDistortMaterial
                 ref={bodyMatRef}
                 color="#06b6d4"
@@ -412,24 +425,26 @@ export function NeuroAvatar({ isThinking = false, messages = [], showPrompt = fa
                 className="pointer-events-auto cursor-pointer"
                 style={{ background: 'transparent' }}
                 camera={{ position: [0, 0, 4.5], fov: 45 }}
-                dpr={[1, 2]}
+                dpr={[1, 1.5]}
                 gl={{ alpha: true, powerPreference: 'high-performance' }}
             >
                 {/* Color Cycle Controller */}
                 <ColorController isThinking={isThinking} isBooped={isBooped} keyLightRef={keyLightRef} />
 
-                {/* Iluminación — key light synced with color cycle */}
-                <ambientLight intensity={0.5} />
-                <pointLight ref={keyLightRef} position={[2, 2, 2]} intensity={5} color="#06b6d4" decay={2} />
-                <pointLight position={[-2, -1, -2]} intensity={3} color="#8b5cf6" decay={2} />
+                <Suspense fallback={null}>
+                    {/* Iluminación — key light synced with color cycle */}
+                    <ambientLight intensity={0.5} />
+                    <pointLight ref={keyLightRef} position={[2, 2, 2]} intensity={5} color="#06b6d4" decay={2} />
+                    <pointLight position={[-2, -1, -2]} intensity={3} color="#8b5cf6" decay={2} />
 
-                {/* Entorno para reflejos del cristal */}
-                <Environment preset="city" />
+                    {/* Entorno para reflejos del cristal */}
+                    <Environment preset="city" />
 
-                {/* Cuerpo gelatinoso con cara completa */}
-                <Float speed={2} rotationIntensity={0.5} floatIntensity={1}>
-                    <JellyBody isThinking={isThinking} showPrompt={showPrompt} isBooped={isBooped} isOpen={isOpen} />
-                </Float>
+                    {/* Cuerpo gelatinoso con cara completa */}
+                    <Float speed={2} rotationIntensity={0.5} floatIntensity={1}>
+                        <JellyBody isThinking={isThinking} showPrompt={showPrompt} isBooped={isBooped} isOpen={isOpen} />
+                    </Float>
+                </Suspense>
             </Canvas>
         </div>
     );

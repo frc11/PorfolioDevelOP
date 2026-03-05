@@ -1,5 +1,5 @@
 'use client';
-import { useMemo, useState, useRef, useEffect } from 'react';
+import { useMemo, useState, useRef, useEffect, Suspense } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, Line, Sphere, Environment, Float, Html } from '@react-three/drei';
 import * as THREE from 'three';
@@ -308,7 +308,7 @@ const Scene = ({ qualities, onHoverChange }: { qualities: QualityNode[], onHover
 
 // --- DESKTOP COMPONENT ---
 
-const Interactive3DNetworkDesktop = ({ qualities, titleVisible }: { qualities: QualityNode[], titleVisible?: boolean }) => {
+const Interactive3DNetworkDesktop = ({ qualities, titleVisible, renderCanvas = true }: { qualities: QualityNode[], titleVisible?: boolean, renderCanvas?: boolean }) => {
     const [isHoveringNode, setIsHoveringNode] = useState(false);
     const [isInteracting, setIsInteracting] = useState(false);
     const timeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -349,25 +349,36 @@ const Interactive3DNetworkDesktop = ({ qualities, titleVisible }: { qualities: Q
                 </div>
             </motion.div>
 
-            <Canvas camera={{ position: [0, 0, 24], fov: 40 }} gl={{ alpha: true, antialias: false, powerPreference: "high-performance", stencil: false, depth: false }} dpr={[1, 1.5]}>
-                <OrbitControls
-                    enableZoom={false}
-                    enablePan={false}
-                    rotateSpeed={0.5}
-                    autoRotate={!isInteracting && !isHoveringNode}
-                    autoRotateSpeed={0.5}
-                    minPolarAngle={0}
-                    maxPolarAngle={Math.PI}
-                    onStart={handleInteractionStart}
-                    onEnd={handleInteractionEnd}
-                />
-                <Starfield />
-                <ShootingStarSystem />
-                <ambientLight intensity={0.5} />
-                <pointLight position={[10, 10, 10]} intensity={2} color="#ffffff" />
-                <Environment preset="city" />
-                <Scene qualities={qualities} onHoverChange={setIsHoveringNode} />
-            </Canvas>
+            {renderCanvas && (
+                <Canvas camera={{ position: [0, 0, 24], fov: 40 }} gl={{ alpha: true, antialias: false, powerPreference: "high-performance", stencil: false, depth: false }} dpr={[1, 1.5]}>
+                    <OrbitControls
+                        enableZoom={false}
+                        enablePan={false}
+                        rotateSpeed={0.5}
+                        autoRotate={!isInteracting && !isHoveringNode}
+                        autoRotateSpeed={0.5}
+                        minPolarAngle={0}
+                        maxPolarAngle={Math.PI}
+                        onStart={handleInteractionStart}
+                        onEnd={handleInteractionEnd}
+                    />
+                    <Suspense fallback={
+                        <Html center>
+                            <div className="flex flex-col items-center justify-center opacity-50">
+                                <div className="w-8 h-8 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin"></div>
+                                <p className="text-cyan-500 text-[10px] font-mono mt-2 tracking-widest">INITIALIZING...</p>
+                            </div>
+                        </Html>
+                    }>
+                        <Starfield />
+                        <ShootingStarSystem />
+                        <ambientLight intensity={0.5} />
+                        <pointLight position={[10, 10, 10]} intensity={2} color="#ffffff" />
+                        <Environment preset="city" />
+                        <Scene qualities={qualities} onHoverChange={setIsHoveringNode} />
+                    </Suspense>
+                </Canvas>
+            )}
         </div>
     );
 };
@@ -448,7 +459,7 @@ const SceneMobile = ({ qualities }: { qualities: QualityNode[] }) => {
     );
 };
 
-const Interactive3DNetworkMobile = ({ qualities, titleVisible }: { qualities: QualityNode[], titleVisible?: boolean }) => {
+const Interactive3DNetworkMobile = ({ qualities, titleVisible, renderCanvas = true }: { qualities: QualityNode[], titleVisible?: boolean, renderCanvas?: boolean }) => {
     const [isActivated, setIsActivated] = useState(false);
     const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -532,37 +543,48 @@ const Interactive3DNetworkMobile = ({ qualities, titleVisible }: { qualities: Qu
                 onPointerDown={isActivated ? resetInactivityTimer : undefined}
                 onTouchStart={isActivated ? resetInactivityTimer : undefined}
             >
-                <Canvas
-                    camera={{ position: [0, 0, 24], fov: 40 }}
-                    gl={{ alpha: true, antialias: false, powerPreference: "high-performance", stencil: false, depth: false }}
-                    dpr={[1, 1]}
-                    onPointerMissed={() => {
-                        if (isActivated) {
-                            deactivate();
-                        }
-                    }}
-                >
-                    <OrbitControls
-                        enableZoom={false}
-                        enablePan={false}
-                        rotateSpeed={0.6}
-                        autoRotate={true}
-                        autoRotateSpeed={0.5}
-                        minPolarAngle={1}
-                        maxPolarAngle={Math.PI - 1}
-                        enabled={isActivated}
-                        onStart={isActivated ? resetInactivityTimer : undefined}
-                    />
-                    <Starfield />
-                    <ShootingStarSystem />
-                    <ambientLight intensity={0.5} />
-                    <pointLight position={[10, 10, 10]} intensity={2} color="#ffffff" />
-                    <Environment preset="city" />
+                {renderCanvas && (
+                    <Canvas
+                        camera={{ position: [0, 0, 24], fov: 40 }}
+                        gl={{ alpha: true, antialias: false, powerPreference: "high-performance", stencil: false, depth: false }}
+                        dpr={[1, 1.5]}
+                        onPointerMissed={() => {
+                            if (isActivated) {
+                                deactivate();
+                            }
+                        }}
+                    >
+                        <OrbitControls
+                            enableZoom={false}
+                            enablePan={false}
+                            rotateSpeed={0.6}
+                            autoRotate={true}
+                            autoRotateSpeed={0.5}
+                            minPolarAngle={1}
+                            maxPolarAngle={Math.PI - 1}
+                            enabled={isActivated}
+                            onStart={isActivated ? resetInactivityTimer : undefined}
+                        />
+                        <Suspense fallback={
+                            <Html center>
+                                <div className="flex flex-col items-center justify-center opacity-50">
+                                    <div className="w-8 h-8 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin"></div>
+                                    <p className="text-cyan-500 text-[10px] font-mono mt-2 tracking-widest">INITIALIZING...</p>
+                                </div>
+                            </Html>
+                        }>
+                            <Starfield />
+                            <ShootingStarSystem />
+                            <ambientLight intensity={0.5} />
+                            <pointLight position={[10, 10, 10]} intensity={2} color="#ffffff" />
+                            <Environment preset="city" />
 
-                    <SceneMobile
-                        qualities={qualities}
-                    />
-                </Canvas>
+                            <SceneMobile
+                                qualities={qualities}
+                            />
+                        </Suspense>
+                    </Canvas>
+                )}
             </div>
         </div>
     );
@@ -570,7 +592,7 @@ const Interactive3DNetworkMobile = ({ qualities, titleVisible }: { qualities: Qu
 
 // --- MAIN TWIN EXPORT ---
 
-export const Interactive3DNetwork = (props: { qualities: QualityNode[], titleVisible?: boolean }) => {
+export const Interactive3DNetwork = (props: { qualities: QualityNode[], titleVisible?: boolean, renderCanvas?: boolean }) => {
     return (
         <div className="w-full h-full">
             {/* MOBILE VIEW */}

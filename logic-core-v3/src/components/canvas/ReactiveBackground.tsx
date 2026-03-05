@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useMemo } from 'react';
+import { useRef, useMemo, useEffect } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { Plane } from '@react-three/drei';
 import * as THREE from 'three';
@@ -80,6 +80,21 @@ const BackgroundEffect = () => {
     const materialRef = useRef<THREE.ShaderMaterial>(null);
     const { viewport } = useThree();
     const mouse = useThree((state) => state.pointer);
+    const isVisibleRef = useRef(true);
+
+    useEffect(() => {
+        const handleScroll = () => {
+            // Background is behind hero, usually innerHeight is enough. Let's add safely + 200 padding
+            if (window.scrollY > window.innerHeight + 200) {
+                isVisibleRef.current = false;
+            } else {
+                isVisibleRef.current = true;
+            }
+        };
+
+        window.addEventListener('scroll', handleScroll, { passive: true });
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
 
     const uniforms = useMemo(() => ({
         uTime: { value: 0 },
@@ -88,7 +103,7 @@ const BackgroundEffect = () => {
     }), [viewport]);
 
     useFrame((state) => {
-        if (!materialRef.current) return;
+        if (!materialRef.current || !isVisibleRef.current) return;
         materialRef.current.uniforms.uTime.value = state.clock.getElapsedTime();
 
         // Mouse is -1 to 1 in R3F, map to 0 to 1 for shader if needed, but here we can pass it directly
@@ -121,7 +136,7 @@ export const ReactiveBackground = () => {
         <div className="absolute inset-0 z-[-1] pointer-events-none w-full h-full">
             <Canvas
                 gl={{ alpha: true, antialias: false }}
-                dpr={[1, 2]} // Handle high DPI
+                dpr={[1, 1.5]} // Optimized for retina displays
             >
                 <BackgroundEffect />
             </Canvas>

@@ -12,6 +12,7 @@ const WhyDevelOP = dynamic(() => import('@/components/sections/WhyDevelOP').then
 import { About } from '@/components/sections/About'
 import { Portfolio } from '@/components/sections/Portfolio'
 import { OurServices } from '@/components/sections/OurServices';
+import { ROICalculator } from '@/components/sections/ROICalculator';
 import { WebDesigns } from '@/components/sections/WebDesigns'
 
 import { InfiniteReviews } from '@/components/sections/InfiniteReviews'
@@ -85,6 +86,10 @@ function HomeContent() {
 
         <Section>
           <OurServices />
+        </Section>
+
+        <Section>
+          <ROICalculator />
         </Section>
 
 

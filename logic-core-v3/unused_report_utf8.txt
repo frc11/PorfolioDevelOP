@@ -1,0 +1,12 @@
+﻿=== POTENTIALLY UNUSED FILES ===
+\components\3d\LiquidImage.tsx
+\components\canvas\NeuralNetwork.tsx
+\components\ui\PersistentGlitchText.tsx
+\modules\ai-companion\components\LeadCaptureForm.tsx
+\modules\ai-companion\lib\design-tokens.ts
+
+=== POTENTIALLY UNUSED DEPENDENCIES ===
+@splinetool/react-spline
+@splinetool/runtime
+react-dom
+use-sound

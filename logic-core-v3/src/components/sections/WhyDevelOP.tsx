@@ -42,6 +42,11 @@ export function WhyDevelOP() {
         margin: '-20%'
     });
 
+    const isCanvasInView = useInView(ref, {
+        once: false,
+        margin: '1500px 0px' // Pre-load way before user sees it
+    });
+
     // Trigger dark mode
     useThemeSection(isInView, 'dark');
 
@@ -64,7 +69,7 @@ export function WhyDevelOP() {
             <div className="absolute inset-0 z-0 w-full h-full flex items-center justify-center pt-20" id='caracteristicas'>
                 {/* Expanded to h-full to match the [150vh] parent and prevent clipping */}
                 <div className="w-full md:w-[90vw] h-full">
-                    <Interactive3DNetwork qualities={QUALITIES} titleVisible={isInView} />
+                    <Interactive3DNetwork qualities={QUALITIES} titleVisible={isInView} renderCanvas={isCanvasInView} />
                 </div>
             </div>
 

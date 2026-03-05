@@ -128,16 +128,16 @@ export function LogicCompanion() {
                     >
                         {/* Neural Link (Connector Ray) */}
                         <div
-                            className="absolute top-[100%] right-[-1rem] w-20 h-20 pointer-events-none -z-10 translate-y-3"
+                            className="absolute top-[100%] right-[-2.5rem] w-28 h-16 pointer-events-none -z-10"
                             style={{
-                                maskImage: 'linear-gradient(to bottom, transparent, black 15px)',
-                                WebkitMaskImage: 'linear-gradient(to bottom, transparent, black 15px)'
+                                maskImage: 'linear-gradient(to bottom, transparent 2px, black 12px)',
+                                WebkitMaskImage: 'linear-gradient(to bottom, transparent 2px, black 12px)'
                             }}
                         >
                             <svg className="w-full h-full overflow-visible" preserveAspectRatio="none">
                                 <motion.line
-                                    x1="20%" y1="0%"
-                                    x2="100%" y2="100%"
+                                    x1="10%" y1="0%"
+                                    x2="85%" y2="100%"
                                     stroke="url(#cyan-glow)"
                                     strokeWidth="1.5"
                                     className="animate-pulse"

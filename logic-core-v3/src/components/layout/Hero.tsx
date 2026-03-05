@@ -7,6 +7,15 @@ import { Environment, ContactShadows } from '@react-three/drei'
 import { EffectComposer, ChromaticAberration, Noise, Vignette } from '@react-three/postprocessing'
 import { HeroArtifact } from '@/components/3d/HeroArtifact'
 import { DotMatrix } from '@/components/canvas/DotMatrix'
+import { TypewriterText } from '@/components/ui/TypewriterText'
+import { MagneticCta } from '@/components/ui/buttons/MagneticCta'
+
+const HERO_KEYWORDS = [
+    "Software a Medida",
+    "Inteligencia Artificial",
+    "Automatizaciones n8n",
+    "Sistemas Escalables",
+]
 
 /**
  * MobileTouchHandler
@@ -18,9 +27,6 @@ function MobileTouchHandler() {
 
     useEffect(() => {
         const handleTouchMove = (e: TouchEvent) => {
-            // We don't preventDefault here by default to allow scrolling,
-            // unless the user intends to lock it. 
-            // Given the request "touch drag listener", update pointer is priority.
             if (e.touches.length > 0) {
                 const touch = e.touches[0]
                 pointer.x = (touch.clientX / window.innerWidth) * 2 - 1
@@ -28,7 +34,7 @@ function MobileTouchHandler() {
             }
         }
 
-        window.addEventListener('touchmove', handleTouchMove)
+        window.addEventListener('touchmove', handleTouchMove, { passive: true })
 
         return () => {
             window.removeEventListener('touchmove', handleTouchMove)
@@ -50,30 +56,62 @@ export function Hero() {
                     transition={{ duration: 1, delay: 0.2 }}
                     className="space-y-8"
                 >
+                    {/* Badge */}
                     <div className="flex items-center gap-2 text-cyan-600 font-mono text-[10px] tracking-[0.5em] uppercase">
                         <span className="w-1 h-1 bg-cyan-600 rounded-full shadow-[0_0_8px_#0891b2]" />
                         Exclusive_Digital_Partnership
                     </div>
 
-                    <h1 className="text-7xl md:text-9xl font-extrabold tracking-tighter leading-[0.85] text-zinc-900">
-                        devel
-                        <span className="text-transparent bg-clip-text bg-gradient-to-r pr-2 from-zinc-600 to-zinc-900">
-                            OP
+                    {/* H1 with Typewriter */}
+                    <h1 className="text-5xl md:text-[3.5rem] lg:text-6xl font-extrabold tracking-tight leading-[1.15] text-zinc-900">
+                        <span className="block">Transformamos tu empresa</span>
+                        <span className="block">
+                            con{' '}
+                            <TypewriterText
+                                words={HERO_KEYWORDS}
+                                typingSpeed={70}
+                                deletingSpeed={40}
+                                pauseDuration={2000}
+                                className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-cyan-600"
+                            />
                         </span>
                     </h1>
 
-                    <p className="text-zinc-600 text-lg md:text-xl max-w-lg leading-relaxed font-light">
-                        No solo desarrollamos soluciones a medida. Construimos la <strong className="text-zinc-900 font-bold">presencia digital</strong> de tu negocio con ingeniería de vanguardia y diseño de lujo.
-                    </p>
+                    {/* Impact Paragraph */}
+                    <motion.p
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.8, delay: 0.6 }}
+                        className="text-zinc-600 text-lg md:text-xl max-w-lg leading-relaxed font-light"
+                    >
+                        Desarrollamos <strong className="text-zinc-900 font-semibold">ecosistemas digitales de alto rendimiento</strong>.
+                        Desde plataformas web hasta agentes de IA y automatización de flujos de trabajo.
+                    </motion.p>
 
-                    <div className="flex flex-col w-full md:flex-row md:w-auto gap-4 pt-4">
-                        <button className="w-full md:w-auto bg-zinc-900 text-white px-10 py-5 text-xs font-bold uppercase tracking-widest hover:bg-cyan-600 transition-colors duration-500 cursor-pointer">
-                            Empezar Proyecto
-                        </button>
-                        <button className="w-full md:w-auto border border-zinc-300 px-10 py-5 text-[10px] font-bold uppercase tracking-widest hover:bg-zinc-200 transition-colors cursor-pointer text-zinc-600 hover:text-zinc-900 hover:border-zinc-400">
-                            Nuestra Metodología
-                        </button>
-                    </div>
+                    {/* CTA Buttons */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.8, delay: 0.9 }}
+                        className="flex flex-col w-full md:flex-row md:w-auto gap-4 pt-4"
+                    >
+                        <MagneticCta variant="primary" className="px-10 py-5 text-xs font-bold uppercase tracking-widest">
+                            Iniciar Proyecto
+                        </MagneticCta>
+                        <MagneticCta variant="ghost" className="px-10 py-5 text-[10px] font-bold uppercase tracking-widest">
+                            Explorar Servicios
+                        </MagneticCta>
+                    </motion.div>
+
+                    {/* Micro-copy */}
+                    <motion.p
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 1, delay: 1.3 }}
+                        className="text-zinc-500 text-xs tracking-wide"
+                    >
+                        ✦ Auditoría de viabilidad gratuita
+                    </motion.p>
                 </motion.div>
             </div>
 
