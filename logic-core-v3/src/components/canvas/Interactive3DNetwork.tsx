@@ -592,18 +592,29 @@ const Interactive3DNetworkMobile = ({ qualities, titleVisible, renderCanvas = tr
 
 // --- MAIN TWIN EXPORT ---
 
-export const Interactive3DNetwork = (props: { qualities: QualityNode[], titleVisible?: boolean, renderCanvas?: boolean }) => {
+const DEFAULT_QUALITIES: QualityNode[] = [
+    { id: 1, label: "Workflow Engine", desc: "Automate complex API connections" },
+    { id: 2, label: "Data Pipeline", desc: "Secure transformation layers" },
+    { id: 3, label: "AI Integration", desc: "Native LLM and RAG support" },
+    { id: 4, label: "Event Driven", desc: "React to webhooks instantly" },
+    { id: 5, label: "Enterprise Ready", desc: "Scale without bottlenecks" }
+];
+
+export const Interactive3DNetwork = (props: { qualities?: QualityNode[], titleVisible?: boolean, renderCanvas?: boolean }) => {
+    const qualities = props.qualities || DEFAULT_QUALITIES;
     return (
         <div className="w-full h-full">
             {/* MOBILE VIEW */}
             <div className="block md:hidden w-full h-full">
-                <Interactive3DNetworkMobile {...props} />
+                <Interactive3DNetworkMobile {...props} qualities={qualities} />
             </div>
 
             {/* DESKTOP VIEW */}
             <div className="hidden md:block w-full h-full">
-                <Interactive3DNetworkDesktop {...props} />
+                <Interactive3DNetworkDesktop {...props} qualities={qualities} />
             </div>
         </div>
     );
 };
+
+export default Interactive3DNetwork;

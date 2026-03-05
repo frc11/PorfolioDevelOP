@@ -1,11 +1,11 @@
 'use client';
 
 import { useMemo, useRef } from 'react';
-import { useFrame } from '@react-three/fiber';
+import { useFrame, Canvas } from '@react-three/fiber';
 import { Instances, Instance, Line } from '@react-three/drei';
 import * as THREE from 'three';
 
-export const NeuralNetwork = () => {
+const NeuralNetworkScene = () => {
     const groupRef = useRef<THREE.Group>(null);
 
     // 1. Generate random node positions
@@ -82,3 +82,17 @@ export const NeuralNetwork = () => {
         </group>
     );
 };
+
+export const NeuralNetwork = ({ renderCanvas = false }: { renderCanvas?: boolean }) => {
+    if (renderCanvas) {
+        return (
+            <Canvas camera={{ position: [0, 0, 8] }} gl={{ alpha: true }}>
+                <ambientLight intensity={0.5} />
+                <NeuralNetworkScene />
+            </Canvas>
+        );
+    }
+    return <NeuralNetworkScene />;
+};
+
+export default NeuralNetwork;

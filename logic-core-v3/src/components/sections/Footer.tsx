@@ -36,7 +36,7 @@ const ParticleStream = ({ side }: { side: 'left' | 'right' }) => {
             {particles.map((p) => (
                 <motion.div
                     key={p.id}
-                    className={`absolute rounded-full ${isLeft ? 'bg-gradient-to-t' : 'bg-gradient-to-b'} from-white via-cyan-400 to-transparent`}
+                    className={`absolute rounded-full ${isLeft ? 'bg-gradient-to-t' : 'bg-gradient-to-b'} from-white via-cyan-400 to-transparent will-change-transform`}
                     style={{
                         left: p.left,
                         height: p.height,
@@ -272,7 +272,7 @@ const AuroraBackground = () => {
                     opacity: [0.3, 0.5, 0.3]
                 }}
                 transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-                className="absolute -top-[10%] md:-top-[20%] left-[10%] md:left-[20%] w-[100vw] h-[100vw] md:w-[50vw] md:h-[50vw] bg-indigo-600/40 md:bg-indigo-600/30 rounded-full blur-[100px] md:blur-[100px] mix-blend-screen"
+                className="absolute -top-[10%] md:-top-[20%] left-[10%] md:left-[20%] w-[100vw] h-[100vw] md:w-[50vw] md:h-[50vw] bg-indigo-600/40 md:bg-indigo-600/30 rounded-full blur-[100px] md:blur-[100px] mix-blend-screen will-change-transform"
             />
             {/* Cyan Aura */}
             <motion.div
@@ -282,13 +282,13 @@ const AuroraBackground = () => {
                     opacity: [0.2, 0.4, 0.2]
                 }}
                 transition={{ duration: 15, repeat: Infinity, ease: "easeInOut", delay: 2 }}
-                className="absolute top-[20%] md:top-[10%] right-[-20%] md:right-[10%] w-[120vw] h-[120vw] md:w-[40vw] md:h-[40vw] bg-cyan-500/30 md:bg-cyan-500/20 rounded-full blur-[120px] mix-blend-screen"
+                className="absolute top-[20%] md:top-[10%] right-[-20%] md:right-[10%] w-[120vw] h-[120vw] md:w-[40vw] md:h-[40vw] bg-cyan-500/30 md:bg-cyan-500/20 rounded-full blur-[120px] mix-blend-screen will-change-transform"
             />
             {/* Violet Aura */}
             <motion.div
                 animate={{ opacity: [0.3, 0.5, 0.3] }}
                 transition={{ duration: 8, repeat: Infinity }}
-                className="absolute bottom-[20%] md:-bottom-[20%] left-[-10%] md:left-[30%] w-[150vw] h-[100vw] md:w-[60vw] md:h-[40vw] bg-violet-800/60 md:bg-violet-800/20 rounded-full blur-[120px] md:blur-[100px] mix-blend-screen"
+                className="absolute bottom-[20%] md:-bottom-[20%] left-[-10%] md:left-[30%] w-[150vw] h-[100vw] md:w-[60vw] md:h-[40vw] bg-violet-800/60 md:bg-violet-800/20 rounded-full blur-[120px] md:blur-[100px] mix-blend-screen will-change-transform"
             />
         </div>
     )

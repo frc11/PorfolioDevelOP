@@ -1,211 +1,155 @@
-'use client';
+"use client"
+import React from 'react'
+import dynamic from 'next/dynamic'
+import { motion, Variants } from 'framer-motion'
+import { MagneticCta } from '@/components/ui/buttons/MagneticCta'
+import { WebDevelopmentBento } from '@/components/sections/WebDevelopmentBento'
+import { WebDevelopmentScrollReveal } from '@/components/sections/WebDevelopmentScrollReveal'
+import { WebDevelopmentCta } from '@/components/sections/WebDevelopmentCta'
 
-import { motion } from 'framer-motion';
-import { Network, Database, Layers, ShoppingBag, ArrowRight } from 'lucide-react';
-import Link from 'next/link';
+// Dynamically import Aurora with high priority but no SSR
+const AuroraBackground = dynamic(
+    () => import('@/components/canvas/AuroraBackground').then(mod => mod.AuroraBackground),
+    { ssr: false }
+)
 
-const BentoGridItem = ({ title, description, icon, delay }: { title: string; description: string; icon: React.ReactNode; delay: number }) => {
-    return (
-        <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay, ease: "easeOut" }}
-            className="group relative overflow-hidden bg-zinc-900/50 border border-white/10 p-8 rounded-xl hover:border-cyan-500/30 transition-colors h-full flex flex-col justify-between"
-        >
-            {/* Laser Scan Effect */}
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-cyan-400/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out pointer-events-none" />
-
-            <div className="mb-4 text-cyan-400 group-hover:text-cyan-300 transition-colors group-hover:scale-110 duration-300 origin-left">
-                {icon}
-            </div>
-
-            <div>
-                <h3 className="text-xl font-bold text-white mb-2 font-mono uppercase tracking-wider">{title}</h3>
-                <p className="text-zinc-400 text-sm leading-relaxed group-hover:text-zinc-300 transition-colors">
-                    {description}
-                </p>
-            </div>
-        </motion.div>
-    );
-};
-
-function WebDesktop() {
-    return (
-        <main className="min-h-screen bg-zinc-950 text-white pt-32 pb-20 selection:bg-cyan-500/30 selection:text-cyan-200">
-
-            {/* Ambient Background */}
-            <div className="fixed top-0 left-0 right-0 h-[50vh] bg-gradient-to-b from-cyan-900/10 to-transparent pointer-events-none" />
-            <div className="fixed inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 pointer-events-none mix-blend-soft-light" />
-
-            <div className="container mx-auto px-6 max-w-7xl relative z-10">
-
-                {/* Hero Header */}
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.8 }}
-                    className="mb-20"
-                >
-                    <h1 className="text-5xl md:text-8xl font-black tracking-tighter mb-6 bg-clip-text text-transparent bg-gradient-to-b from-white via-cyan-100 to-cyan-900/50">
-                        WEB_ARCHITECTURE
-                    </h1>
-                    <p className="text-xl md:text-2xl text-cyan-400/80 font-mono border-l-2 border-cyan-500/30 pl-6 max-w-2xl">
-                        Immersive interfaces. Scalable backends. Pure performance.
-                    </p>
-                </motion.div>
-
-                {/* Bento Grid Layout */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-20 auto-rows-fr">
-
-                    {/* Tall Item */}
-                    <div className="lg:row-span-2">
-                        <BentoGridItem
-                            title="Next.js & React"
-                            description="State-of-the-art frontend engineering. We build lightning-fast, SEO-optimized applications using the latest Next.js 14+ features, Server Actions, and React Server Components."
-                            icon={<Layers className="w-8 h-8" />}
-                            delay={0.1}
-                        />
-                    </div>
-
-                    <BentoGridItem
-                        title="3D WebGL Experiences"
-                        description="Pushing browser limits with Three.js and React Three Fiber. Create immersive 3D worlds that captive users instantly."
-                        icon={<Network className="w-8 h-8" />}
-                        delay={0.2}
-                    />
-
-                    <BentoGridItem
-                        title="High-Perf SEO"
-                        description="Google-dominating speed scores. Core Web Vitals optimized from day one for maximum visibility."
-                        icon={<Database className="w-8 h-8" />}
-                        delay={0.3}
-                    />
-
-                    {/* Wide Span Item */}
-                    <div className="md:col-span-2 lg:col-span-2">
-                        <BentoGridItem
-                            title="E-Commerce Solutions"
-                            description="High-conversion checkout flows. Integrated with Stripe, Shopify, or custom headless architectures for complete control over your sales funnel."
-                            icon={<ShoppingBag className="w-8 h-8" />}
-                            delay={0.4}
-                        />
-                    </div>
-                </div>
-
-                {/* CTA Section */}
-                <motion.div
-                    initial={{ opacity: 0 }}
-                    whileInView={{ opacity: 1 }}
-                    viewport={{ once: true }}
-                    className="flex justify-start"
-                >
-                    <Link
-                        href="/contact"
-                        className="group flex items-center gap-4 text-cyan-400 hover:text-white transition-colors duration-300"
-                    >
-                        <span className="text-2xl md:text-4xl font-black tracking-tighter uppercase border-b border-cyan-500/30 pb-1 group-hover:border-white transition-all">
-                            Start Priority Project
-                        </span>
-                        <div className="bg-cyan-500/10 p-3 rounded-full group-hover:bg-cyan-500 group-hover:text-black transition-all">
-                            <ArrowRight className="w-6 h-6 transform group-hover:-rotate-45 transition-transform duration-300" />
-                        </div>
-                    </Link>
-                </motion.div>
-
-            </div>
-        </main>
-    );
-}
-
-function WebMobile() {
-    return (
-        <main className="min-h-screen bg-zinc-950 text-white pt-24 pb-32 overflow-x-hidden selection:bg-cyan-500/30 selection:text-cyan-200">
-            {/* Ambient Base */}
-            <div className="fixed inset-0 bg-gradient-to-b from-cyan-900/5 to-zinc-950 pointer-events-none" />
-            <div className="fixed inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 pointer-events-none mix-blend-soft-light" />
-
-            <div className="container mx-auto px-6 relative z-10 flex flex-col gap-12">
-                {/* Mobile Hero */}
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.8 }}
-                    className="flex flex-col gap-4"
-                >
-                    <h1 className="text-4xl font-black tracking-tighter bg-clip-text text-transparent bg-gradient-to-b from-white via-cyan-100 to-cyan-900/50 break-words">
-                        WEB
-                        <br />
-                        ARCHITECTURE
-                    </h1>
-                    <p className="text-lg text-cyan-400/80 font-mono border-l-2 border-cyan-500/30 pl-4">
-                        Immersive interfaces. Scalable backends. Pure performance.
-                    </p>
-                </motion.div>
-
-                {/* Mobile Stacked Items */}
-                <div className="flex flex-col gap-6">
-                    <BentoGridItem
-                        title="Next.js & React"
-                        description="State-of-the-art frontend engineering. We build lightning-fast, SEO-optimized applications using the latest Next.js 14+ features, Server Actions, and React Server Components."
-                        icon={<Layers className="w-6 h-6" />}
-                        delay={0.1}
-                    />
-
-                    <BentoGridItem
-                        title="3D WebGL Experiences"
-                        description="Pushing browser limits with Three.js and React Three Fiber. Create immersive 3D worlds that captive users instantly."
-                        icon={<Network className="w-6 h-6" />}
-                        delay={0.2}
-                    />
-
-                    <BentoGridItem
-                        title="High-Perf SEO"
-                        description="Google-dominating speed scores. Core Web Vitals optimized from day one for maximum visibility."
-                        icon={<Database className="w-6 h-6" />}
-                        delay={0.3}
-                    />
-
-                    <BentoGridItem
-                        title="E-Commerce Solutions"
-                        description="High-conversion checkout flows. Integrated with Stripe, Shopify, or custom headless architectures for complete control over your sales funnel."
-                        icon={<ShoppingBag className="w-6 h-6" />}
-                        delay={0.4}
-                    />
-                </div>
-
-                {/* Mobile CTA */}
-                <motion.div
-                    initial={{ opacity: 0 }}
-                    whileInView={{ opacity: 1 }}
-                    viewport={{ once: true }}
-                    className="mt-8 pb-10 flex justify-center w-full"
-                >
-                    <Link
-                        href="/contact"
-                        className="group flex flex-col items-center gap-4 text-cyan-400 focus:text-white transition-colors duration-300 w-full"
-                    >
-                        <span className="text-2xl font-black tracking-tighter uppercase border-b border-cyan-500/30 pb-2 text-center w-full">
-                            Start Priority Project
-                        </span>
-                        <div className="bg-cyan-500/10 p-4 rounded-full active:bg-cyan-500 active:text-black transition-all">
-                            <ArrowRight className="w-6 h-6" />
-                        </div>
-                    </Link>
-                </motion.div>
-            </div>
-        </main>
-    );
+// Variants for animated words
+const wordVariants: Variants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+        opacity: 1,
+        y: 0,
+        transition: { type: "spring", stiffness: 100, damping: 10 }
+    }
 }
 
 export default function WebDevelopmentPage() {
+
+    const textPart1 = "Tu web no debería ser un folleto.".split(" ")
+    const textPart2 = "Debería ser una".split(" ")
+
     return (
-        <>
-            <div className="hidden md:block">
-                <WebDesktop />
+        <main className="relative min-h-screen w-full bg-void overflow-hidden text-white">
+            {/* The Aurora Background (Dark Premium Mode) */}
+            <div className="absolute inset-0 z-0 opacity-60">
+                {/* 
+                    We are wrapping or using AuroraBackground here, but since the original 
+                    AuroraBackground has hardcoded bg-zinc-50 and pastel colors, 
+                    we will overlay CSS dark blend modes to force it into dark/premium mode.
+                */}
+                <div className="absolute inset-0 saturate-200 hue-rotate-15 mix-blend-screen opacity-50">
+                    <AuroraBackground />
+                </div>
+                {/* Dark overlay to consume the white background from the original Aurora */}
+                <div className="absolute inset-0 bg-void mix-blend-multiply" />
+                <div className="absolute inset-0 bg-gradient-to-t from-void via-void/80 to-transparent" />
+                <div className="absolute inset-0 bg-void/50 backdrop-blur-[100px]" />
+
+                {/* Additional floating dark neon blobs for that specific requirement */}
+                <div className="absolute top-1/4 -left-1/4 w-[50vw] h-[50vw] bg-cyan-900/40 rounded-full blur-[120px] mix-blend-screen" />
+                <div className="absolute bottom-1/4 -right-1/4 w-[50vw] h-[50vw] bg-purple-900/40 rounded-full blur-[120px] mix-blend-screen" />
             </div>
-            <div className="block md:hidden">
-                <WebMobile />
+
+            {/* Main Content Overlay */}
+            <div className="relative z-10 flex flex-col justify-center items-center text-center !h-screen px-4 max-w-5xl mx-auto">
+                {/* Top Badge */}
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.6, delay: 0.2 }}
+                    className="mb-8 px-5 py-2 rounded-full border border-white/20 bg-white/5 backdrop-blur-md shadow-[0_0_15px_rgba(255,255,255,0.05)]"
+                >
+                    <span className="text-xs md:text-sm font-mono text-zinc-300 tracking-[0.2em] uppercase">
+                        [ DIGITAL_EXPERIENCES ]
+                    </span>
+                </motion.div>
+
+                {/* Hero Title with Kinetic Typography */}
+                <motion.h1
+                    initial="hidden"
+                    animate="visible"
+                    transition={{ staggerChildren: 0.08 }}
+                    className="text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter leading-[1.1] mb-6 flex flex-col items-center gap-2"
+                >
+                    <div className="flex flex-wrap justify-center gap-[0.3em]">
+                        {textPart1.map((word, i) => (
+                            <motion.span key={`p1-${i}`} variants={wordVariants} className="inline-block text-white drop-shadow-md">
+                                {word}
+                            </motion.span>
+                        ))}
+                    </div>
+                    <div className="flex flex-wrap justify-center gap-[0.3em] items-center">
+                        {textPart2.map((word, i) => (
+                            <motion.span key={`p2-${i}`} variants={wordVariants} className="inline-block text-white drop-shadow-md">
+                                {word}
+                            </motion.span>
+                        ))}
+                        <motion.span
+                            variants={wordVariants}
+                            className="inline-block relative"
+                        >
+                            <span className="italic font-serif font-medium text-transparent bg-clip-text bg-gradient-to-r from-violet-400 via-fuchsia-400 to-cyan-400 drop-shadow-[0_0_25px_rgba(192,132,252,0.5)]">
+                                experiencia.
+                            </span>
+                            {/* Decorative sparkle */}
+                            <motion.span
+                                initial={{ opacity: 0, scale: 0, rotate: -45 }}
+                                animate={{ opacity: 1, scale: 1, rotate: 0 }}
+                                transition={{ delay: 1.5, duration: 0.8, type: "spring" }}
+                                className="absolute -top-6 -right-8 text-fuchsia-400 opacity-60 pointer-events-none"
+                            >
+                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M12 2L14.4 9.6L22 12L14.4 14.4L12 22L9.6 14.4L2 12L9.6 9.6L12 2Z" fill="currentColor" />
+                                </svg>
+                            </motion.span>
+                        </motion.span>
+                    </div>
+                </motion.h1>
+
+                {/* Subtitle */}
+                <motion.p
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.8, delay: 0.8, ease: "easeOut" }}
+                    className="text-lg md:text-2xl text-zinc-400 font-light max-w-3xl mb-12 mt-4 leading-relaxed mix-blend-plus-lighter"
+                >
+                    Diseñamos y desarrollamos plataformas web inmersivas con <span className="text-cyan-400 font-medium">React</span> y <span className="text-white font-medium">Next.js</span> que capturan la atención y multiplican tus conversiones.
+                </motion.p>
+
+                {/* Magnetic CTA */}
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.6, delay: 1, ease: "easeOut" }}
+                >
+                    <MagneticCta variant="primary" className="px-10 py-5 text-sm md:text-base font-bold uppercase tracking-widest group bg-white/5 backdrop-blur-xl border border-white/20 hover:bg-white/10 hover:border-violet-400 text-white transition-all duration-300 shadow-[0_0_30px_rgba(167,139,250,0.1)] hover:shadow-[0_0_40px_rgba(167,139,250,0.3)]">
+                        <span className="relative z-10 flex items-center gap-3">
+                            Crear mi Experiencia Web
+                            <div className="w-2 h-2 rounded-full bg-violet-400 animate-pulse group-hover:scale-150 transition-transform" />
+                        </span>
+                    </MagneticCta>
+                </motion.div>
             </div>
-        </>
-    );
+
+            {/* Scroll Indicator */}
+            <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 1, delay: 1.5 }}
+                className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 z-10 pointer-events-none"
+            >
+                <div className="w-[1px] h-12 bg-gradient-to-b from-transparent via-violet-500 to-transparent animate-pulse" />
+            </motion.div>
+
+            {/* The Bento Grid Section */}
+            <WebDevelopmentBento />
+
+            {/* Scroll Reveal Phrase */}
+            <WebDevelopmentScrollReveal />
+
+            {/* Final Heavy CTA */}
+            <WebDevelopmentCta />
+
+        </main>
+    )
 }

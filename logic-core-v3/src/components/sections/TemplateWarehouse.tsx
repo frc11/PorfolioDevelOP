@@ -22,6 +22,10 @@ export function TemplateWarehouse() {
                     {TEMPLATES.map((tpl, i) => (
                         <motion.div
                             key={i}
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true, margin: "50px" }}
+                            transition={{ duration: 0.5, delay: i * 0.1, ease: 'easeOut' }}
                             whileHover={{ y: -5 }}
                             className="group relative bg-white/[0.02] border border-white/5 p-1 rounded-sm overflow-hidden"
                         >
