@@ -127,10 +127,16 @@ export function LogicCompanion() {
                         className="fixed bottom-[8.5rem] right-24 z-[101] hidden md:block cursor-pointer group"
                     >
                         {/* Neural Link (Connector Ray) */}
-                        <div className="absolute top-[100%] right-[-1rem] w-20 h-20 pointer-events-none -z-10">
+                        <div
+                            className="absolute top-[100%] right-[-1rem] w-20 h-20 pointer-events-none -z-10 translate-y-3"
+                            style={{
+                                maskImage: 'linear-gradient(to bottom, transparent, black 15px)',
+                                WebkitMaskImage: 'linear-gradient(to bottom, transparent, black 15px)'
+                            }}
+                        >
                             <svg className="w-full h-full overflow-visible" preserveAspectRatio="none">
                                 <motion.line
-                                    x1="10%" y1="0%"
+                                    x1="20%" y1="0%"
                                     x2="100%" y2="100%"
                                     stroke="url(#cyan-glow)"
                                     strokeWidth="1.5"

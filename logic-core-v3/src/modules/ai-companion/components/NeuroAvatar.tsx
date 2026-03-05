@@ -142,11 +142,6 @@ function QuantumEye({ positionX, isThinking, showPrompt, isBooped, isRight }: {
         meshRef.current.scale.x = springLerp(meshRef.current.scale.x, targetSX, delta, EYE_SPRING);
         meshRef.current.scale.y = springLerp(meshRef.current.scale.y, targetSY, delta, EYE_SPRING);
         meshRef.current.scale.z = springLerp(meshRef.current.scale.z, targetSZ, delta, EYE_SPRING);
-
-        // Sync emissive color from shared ref
-        if (matRef.current) {
-            matRef.current.emissive.lerp(activeColorRef.current, delta * 6);
-        }
     });
 
     return (
@@ -202,11 +197,6 @@ function Eyebrow({ side, isThinking, showPrompt, isBooped }: {
 
         meshRef.current.position.y = springLerp(meshRef.current.position.y, targetY, delta, FACE_SPRING);
         meshRef.current.rotation.z = springLerp(meshRef.current.rotation.z, baseRotZ + expressionRot, delta, FACE_SPRING);
-
-        // Sync emissive color
-        if (matRef.current) {
-            matRef.current.emissive.lerp(activeColorRef.current, delta * 6);
-        }
     });
 
     return (
@@ -252,11 +242,6 @@ function Mouth({ isThinking, showPrompt, isBooped }: {
         meshRef.current.scale.x = springLerp(meshRef.current.scale.x, targetSX, delta, FACE_SPRING);
         meshRef.current.scale.y = springLerp(meshRef.current.scale.y, targetSY, delta, FACE_SPRING);
         meshRef.current.scale.z = springLerp(meshRef.current.scale.z, targetSZ, delta, FACE_SPRING);
-
-        // Sync emissive color
-        if (matRef.current) {
-            matRef.current.emissive.lerp(activeColorRef.current, delta * 6);
-        }
     });
 
     return (
@@ -360,10 +345,17 @@ function JellyBody({ isThinking, showPrompt, isBooped, isOpen }: JellyBodyProps)
                 gazeTargetX = 0.3;
                 gazeOffsetX = -0.05;
             } else if (isOpen) {
-                // Chat open: gaze toward the chat window (left/up)
-                gazeTargetY = -0.4;
-                gazeTargetX = 0.1;
-                gazeOffsetX = -0.08;
+                if (isThinking) {
+                    // Look deep into the chat while processing
+                    gazeTargetY = -0.65;
+                    gazeTargetX = 0.15;
+                    gazeOffsetX = -0.15;
+                } else {
+                    // Chat open: gaze toward the chat window (left/up)
+                    gazeTargetY = -0.4;
+                    gazeTargetX = 0.1;
+                    gazeOffsetX = -0.08;
+                }
             }
 
             faceGroupRef.current.rotation.y = springLerp(faceGroupRef.current.rotation.y, gazeTargetY, delta, FACE_SPRING);
