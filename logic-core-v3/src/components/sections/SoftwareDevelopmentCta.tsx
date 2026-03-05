@@ -30,25 +30,45 @@ export const SoftwareDevelopmentCta = () => {
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true, margin: "-100px" }}
                     transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
-                    className="text-xl md:text-3xl text-zinc-400 font-light mb-16 max-w-4xl leading-relaxed"
+                    className="text-xl md:text-3xl text-zinc-400 font-light mb-12 max-w-4xl leading-relaxed"
                 >
                     Desarrollamos una sola vez, para que dure años. ¿Hablamos de tu próximo SaaS o plataforma corporativa?
                 </motion.p>
 
+                <motion.p
+                    initial={{ opacity: 0, y: 10 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, margin: "-100px" }}
+                    transition={{ duration: 0.8, delay: 0.3, ease: "easeOut" }}
+                    className="text-sm md:text-base font-mono text-blue-400 tracking-widest uppercase mb-6"
+                >
+                    Ready to scale your infrastructure?
+                </motion.p>
+
                 <motion.div
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    whileInView={{ opacity: 1, scale: 1 }}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true, margin: "-50px" }}
                     transition={{ duration: 0.6, delay: 0.4, ease: "easeOut" }}
+                    className="relative"
                 >
-                    <MagneticCta variant="primary" className="group relative px-10 md:px-16 py-5 md:py-7 rounded-full overflow-hidden bg-black/40 backdrop-blur-md border border-white/10 hover:border-blue-400/80 transition-all duration-500 hover:shadow-[0_0_50px_rgba(59,130,246,0.3)] !text-white !font-bold">
-                        {/* Hover internal glow */}
-                        <div className="absolute inset-0 bg-gradient-to-r from-blue-500/0 via-blue-500/10 to-indigo-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+                    <MagneticCta variant="primary" className="group relative px-12 md:px-20 py-6 md:py-8 rounded-full overflow-hidden bg-white/5 backdrop-blur-xl border border-violet-500/50 hover:bg-white/10 transition-all duration-500 hover:shadow-[0_0_60px_rgba(139,92,246,0.4)] !text-white !font-bold">
 
-                        <span className="relative z-10 text-white uppercase tracking-widest text-base md:text-lg flex items-center gap-4">
-                            Cotizar Proyecto a Medida
-                            <div className="w-8 h-8 rounded-full bg-blue-500/10 flex items-center justify-center group-hover:bg-blue-500/20 transition-colors duration-300">
-                                <svg className="w-5 h-5 transform group-hover:translate-x-1 transition-transform text-zinc-300 group-hover:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        {/* Sweeping Light Effect (Premium Glass Reflection) */}
+                        <motion.div
+                            className="absolute top-0 -left-[100%] w-1/2 h-full bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-[-30deg]"
+                            animate={{ left: ["-100%", "200%"] }}
+                            transition={{ duration: 2.5, repeat: Infinity, repeatDelay: 4, ease: "easeInOut" }}
+                        />
+
+                        {/* Persistent inner violet glow */}
+                        <div className="absolute inset-0 bg-gradient-to-r from-violet-500/0 via-violet-500/10 to-indigo-500/0 opacity-50 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+
+                        <span className="relative z-10 text-white uppercase tracking-widest text-lg md:text-xl flex items-center justify-center gap-4 w-full">
+                            Engineer Solution
+
+                            <div className="w-10 h-10 rounded-full bg-violet-500/20 flex items-center justify-center group-hover:bg-violet-500/40 transition-colors duration-300 border border-violet-400/30">
+                                <svg className="w-5 h-5 transform group-hover:translate-x-1.5 transition-transform text-zinc-100" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 8l4 4m0 0l-4 4m4-4H3" />
                                 </svg>
                             </div>

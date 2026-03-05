@@ -41,19 +41,35 @@ export const WebDevelopmentCta = () => {
                     viewport={{ once: true, margin: "-50px" }}
                     transition={{ duration: 0.6, delay: 0.4, ease: "easeOut" }}
                 >
-                    <MagneticCta variant="primary" className="group relative px-10 md:px-16 py-5 md:py-7 rounded-full overflow-hidden bg-white/5 backdrop-blur-md border border-white/10 hover:border-violet-400/80 transition-all duration-500 hover:shadow-[0_0_50px_rgba(167,139,250,0.3)] !text-white !font-bold">
-                        {/* Hover internal glow */}
-                        <div className="absolute inset-0 bg-gradient-to-r from-violet-500/0 via-violet-500/10 to-fuchsia-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+                    {/* Liquid Neon Wrapper */}
+                    <div className="relative p-[2px] rounded-full overflow-hidden group/btn shadow-[0_0_50px_rgba(34,211,238,0.2)] hover:shadow-[0_0_80px_rgba(34,211,238,0.5)] transition-shadow duration-700">
 
-                        <span className="relative z-10 text-white uppercase tracking-widest text-base md:text-lg flex items-center gap-4">
-                            Comenzar Proyecto Web
-                            <div className="w-8 h-8 rounded-full bg-violet-500/10 flex items-center justify-center group-hover:bg-violet-500/20 transition-colors duration-300">
-                                <svg className="w-5 h-5 transform group-hover:translate-x-1 transition-transform text-white group-hover:text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                                </svg>
-                            </div>
-                        </span>
-                    </MagneticCta>
+                        {/* Rotating conic gradient */}
+                        <motion.div
+                            className="absolute inset-0 bg-[conic-gradient(from_0deg_at_50%_50%,rgba(34,211,238,0.1)_0%,rgba(167,139,250,0.9)_50%,rgba(34,211,238,0.1)_100%)]"
+                            animate={{ rotate: 360 }}
+                            transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+                        />
+
+                        <MagneticCta variant="primary" className="group relative px-12 md:px-20 py-6 md:py-8 rounded-full overflow-hidden bg-black/90 backdrop-blur-xl hover:bg-black/70 transition-colors duration-500 !text-white !font-bold w-full h-full">
+
+                            {/* Shine sweeping effect */}
+                            <motion.div
+                                className="absolute top-0 -left-[100%] w-1/2 h-full bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-[-30deg]"
+                                animate={{ left: ["-100%", "200%"] }}
+                                transition={{ duration: 3, repeat: Infinity, repeatDelay: 1, ease: "easeInOut" }}
+                            />
+
+                            <span className="relative z-10 text-white uppercase tracking-widest text-lg md:text-xl flex items-center gap-4">
+                                Start Priority Project
+                                <div className="w-10 h-10 rounded-full bg-cyan-500/20 flex items-center justify-center group-hover/btn:bg-cyan-500/40 transition-colors duration-300">
+                                    <svg className="w-5 h-5 transform group-hover/btn:translate-x-1.5 transition-transform text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                                    </svg>
+                                </div>
+                            </span>
+                        </MagneticCta>
+                    </div>
                 </motion.div>
             </div>
         </section>

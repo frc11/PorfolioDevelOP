@@ -1,7 +1,48 @@
 "use client"
-import React, { useEffect, useState } from 'react'
-import { motion, useInView } from 'framer-motion'
-import { useRef } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
+import { motion, useInView, useMotionValue, useMotionTemplate } from 'framer-motion'
+
+// Reusable wrapper for Glassmorphism & Magnetic Border
+const BentoCard = ({ className, children, delay = 0 }: { className: string, children: React.ReactNode, delay?: number }) => {
+    const mouseX = useMotionValue(-1000)
+    const mouseY = useMotionValue(-1000)
+
+    function handleMouseMove(event: React.MouseEvent<HTMLDivElement, MouseEvent>) {
+        const { left, top } = event.currentTarget.getBoundingClientRect()
+        mouseX.set(event.clientX - left)
+        mouseY.set(event.clientY - top)
+    }
+
+    function handleMouseLeave() {
+        mouseX.set(-1000)
+        mouseY.set(-1000)
+    }
+
+    // A large radial gradient mask following the mouse
+    const maskImage = useMotionTemplate`radial-gradient(350px circle at ${mouseX}px ${mouseY}px, black 0%, transparent 100%)`
+
+    return (
+        <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay }}
+            onMouseMove={handleMouseMove}
+            onMouseLeave={handleMouseLeave}
+            className={`bg-white/[0.03] backdrop-blur-3xl border border-white/10 shadow-[0_8px_32px_0_rgba(6,182,212,0.1)] rounded-[2.5rem] hover:bg-white/[0.05] hover:shadow-[0_8px_32px_0_rgba(6,182,212,0.2)] transition-all duration-500 overflow-hidden relative group ${className}`}
+        >
+            {/* Dynamic magnetic border */}
+            <motion.div
+                className="absolute inset-0 pointer-events-none rounded-[2.5rem] z-50 transition-opacity duration-300"
+                style={{ maskImage, WebkitMaskImage: maskImage }}
+            >
+                <div className="absolute inset-0 rounded-[2.5rem] border-2 border-cyan-400" />
+            </motion.div>
+
+            {children}
+        </motion.div>
+    )
+}
 
 export const WebDevelopmentBento = () => {
 
@@ -56,13 +97,7 @@ export const WebDevelopmentBento = () => {
             <div className="grid grid-cols-1 md:grid-cols-12 gap-6 auto-rows-[400px] md:auto-rows-[350px]">
 
                 {/* --- Tarjeta 1: UI/UX (Ocupa 8 col en desktop) --- */}
-                <motion.div
-                    initial={{ opacity: 0, y: 30 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.6 }}
-                    className="md:col-span-8 bg-white/[0.02] backdrop-blur-2xl border border-white/10 rounded-[2.5rem] p-8 hover:bg-white/[0.04] transition-all duration-500 overflow-hidden relative group flex flex-col justify-between"
-                >
+                <BentoCard className="md:col-span-8 p-8 flex flex-col justify-between" delay={0}>
                     <div className="absolute top-0 right-0 w-64 h-64 bg-violet-500/10 rounded-full blur-[80px] group-hover:bg-violet-500/20 transition-all duration-700 pointer-events-none" />
 
                     <div className="relative z-10">
@@ -72,10 +107,14 @@ export const WebDevelopmentBento = () => {
                         </p>
                     </div>
 
-                    <div className="relative z-10 w-full h-full mt-8 bg-black/40 rounded-2xl border border-white/5 overflow-hidden flex items-center justify-center pointer-events-none">
+                    <motion.div
+                        className="relative z-10 w-full h-full mt-8 bg-black/40 rounded-2xl border border-white/5 overflow-hidden flex items-center justify-center pointer-events-none"
+                        animate={{ y: [0, -5, 0] }}
+                        transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                    >
                         {/* Fake UI Button */}
                         <motion.div
-                            className="px-6 py-3 rounded-full bg-white text-black font-semibold text-sm relative"
+                            className="px-6 py-3 rounded-full bg-white text-black font-semibold text-sm relative shadow-lg"
                             whileHover={{ scale: 1.05 }}
                         >
                             Completar Compra
@@ -105,18 +144,12 @@ export const WebDevelopmentBento = () => {
                         {/* Decoration lines */}
                         <div className="absolute bottom-4 left-4 right-4 h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
                         <div className="absolute -left-10 w-20 h-20 bg-white/5 rounded-full blur-xl" />
-                    </div>
-                </motion.div>
+                    </motion.div>
+                </BentoCard>
 
                 {/* --- Tarjeta 2: Performance (Ocupa 4 col en desktop) --- */}
-                <motion.div
-                    initial={{ opacity: 0, y: 30 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.6, delay: 0.1 }}
-                    className="md:col-span-4 bg-white/[0.02] backdrop-blur-2xl border border-white/10 rounded-[2.5rem] p-8 hover:bg-white/[0.04] transition-all duration-500 overflow-hidden relative group flex flex-col justify-between items-center text-center"
-                >
-                    <div className="absolute bottom-0 left-0 w-full h-1/2 bg-cyan-500/10 blur-[60px] group-hover:bg-cyan-500/20 transition-all duration-700 pointer-events-none" />
+                <BentoCard className="md:col-span-4 p-8 flex flex-col justify-between items-center text-center" delay={0.1}>
+                    <div className="absolute bottom-0 left-0 w-full h-1/2 bg-cyan-500/10 blur-[60px] group-hover:bg-cyan-500/30 transition-all duration-700 pointer-events-none" />
 
                     <div className="relative z-10 w-full">
                         <h3 className="text-xl font-bold text-white mb-2">Lighthouse Premium</h3>
@@ -125,7 +158,12 @@ export const WebDevelopmentBento = () => {
                         </p>
                     </div>
 
-                    <div className="relative z-10 w-48 h-48 flex items-center justify-center" ref={countRef}>
+                    <motion.div
+                        className="relative z-10 w-48 h-48 flex items-center justify-center"
+                        ref={countRef}
+                        animate={{ y: [0, -8, 0] }}
+                        transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+                    >
                         {/* Circular Progress SVG */}
                         <svg className="absolute inset-0 w-full h-full transform -rotate-90">
                             <circle
@@ -155,17 +193,11 @@ export const WebDevelopmentBento = () => {
                                 Score
                             </span>
                         </div>
-                    </div>
-                </motion.div>
+                    </motion.div>
+                </BentoCard>
 
                 {/* --- Tarjeta 3: Motion & 3D (Ocupa 12 col en desktop horizontales) --- */}
-                <motion.div
-                    initial={{ opacity: 0, y: 30 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.6, delay: 0.2 }}
-                    className="md:col-span-12 md:row-span-1 bg-white/[0.02] backdrop-blur-2xl border border-white/10 rounded-[2.5rem] p-8 hover:bg-white/[0.04] hover:border-white/20 transition-all duration-500 overflow-hidden relative group flex flex-col md:flex-row items-center justify-between"
-                >
+                <BentoCard className="md:col-span-12 md:row-span-1 p-8 flex flex-col md:flex-row items-center justify-between" delay={0.2}>
                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[300px] bg-indigo-500/10 rounded-full blur-[100px] group-hover:bg-indigo-500/20 transition-all duration-700 pointer-events-none" />
 
                     <div className="relative z-10 md:w-1/2 mb-8 md:mb-0 md:pr-12 pointer-events-none">
@@ -175,73 +207,43 @@ export const WebDevelopmentBento = () => {
                         </p>
                     </div>
 
-                    <div className="relative z-10 md:w-1/2 h-full min-h-[200px] flex items-center justify-center w-full pointer-events-none perspective-1000">
+                    <motion.div
+                        className="relative z-10 md:w-1/2 h-full min-h-[200px] flex items-center justify-center w-full pointer-events-none perspective-1000"
+                        animate={{ y: [0, -6, 0] }}
+                        transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
+                    >
                         {/* Interactive floating geometric layout */}
-                        <div className="relative w-full max-w-sm h-full flex items-center justify-center transform-style-3d">
+                        <div className="relative w-full max-w-sm h-full flex items-center justify-center transform-style-3d group">
 
                             {/* Layer 1 - Background Card */}
                             <motion.div
-                                className="absolute w-40 h-40 bg-gradient-to-br from-violet-600/40 to-cyan-600/40 rounded-2xl border border-white/10 backdrop-blur-md"
-                                transition={{ type: "spring", stiffness: 50, damping: 20 }}
-                                variants={{
-                                    rest: { rotateX: 0, rotateY: 0, z: 0 },
-                                    hover: { rotateX: 15, rotateY: -15, z: -50 }
-                                }}
-                                initial="rest"
-                                animate="rest"
-                                whileHover="hover"
+                                className="absolute w-40 h-40 bg-gradient-to-br from-violet-600/40 to-cyan-600/40 rounded-2xl border border-white/10 backdrop-blur-md transition-transform duration-700 group-hover:rotate-x-12 group-hover:-rotate-y-12"
                             />
 
                             {/* Layer 2 - Mid Card */}
                             <motion.div
-                                className="absolute w-32 h-32 bg-white/10 rounded-full border border-white/20 backdrop-blur-xl shadow-xl flex items-center justify-center"
-                                transition={{ type: "spring", stiffness: 50, damping: 20 }}
-                                variants={{
-                                    rest: { rotateX: 0, rotateY: 0, z: 20 },
-                                    hover: { rotateX: 25, rotateY: -25, z: 50 }
-                                }}
-                                initial="rest"
-                                animate="rest"
-                                whileHover="hover"
+                                className="absolute w-32 h-32 bg-white/10 rounded-full border border-white/20 backdrop-blur-xl shadow-xl flex items-center justify-center transition-transform duration-700 translate-z-10 group-hover:translate-z-30 group-hover:-translate-x-4 group-hover:-translate-y-4"
                             >
                                 <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-cyan-400 to-indigo-400 animate-pulse mix-blend-screen" />
                             </motion.div>
 
                             {/* Layer 3 - Foreground floating elements */}
                             <motion.div
-                                className="absolute -right-4 -top-4 w-12 h-12 bg-fuchsia-500/80 rounded-lg rotate-12 backdrop-blur-md shadow-2xl border border-white/20"
-                                transition={{ type: "spring", stiffness: 50, damping: 20 }}
-                                variants={{
-                                    rest: { rotateX: 0, rotateY: 0, z: 40, x: 0, y: 0 },
-                                    hover: { rotateX: 45, rotateY: -45, z: 100, x: 30, y: -20 }
-                                }}
-                                initial="rest"
-                                animate="rest"
-                                whileHover="hover"
+                                className="absolute -right-4 -top-4 w-12 h-12 bg-fuchsia-500/80 rounded-lg rotate-12 backdrop-blur-md shadow-2xl border border-white/20 transition-transform duration-700 translate-z-20 group-hover:translate-z-40 group-hover:rotate-45 group-hover:scale-125"
                             />
                         </div>
                         <style jsx>{`
                             .perspective-1000 { perspective: 1000px; }
                             .transform-style-3d { transform-style: preserve-3d; }
-                            
-                            /* Ensure elements inside the third card group react to hover on the parent */
-                            .group:hover .absolute {
-                                animation-play-state: paused;
-                            }
+                            .translate-z-10 { transform: translateZ(20px); }
+                            .translate-z-20 { transform: translateZ(40px); }
+                            .translate-z-30 { transform: translateZ(60px); }
+                            .translate-z-40 { transform: translateZ(80px); }
+                            .rotate-x-12 { transform: rotateX(15deg); }
+                            .-rotate-y-12 { transform: rotateY(-15deg); }
                         `}</style>
-
-                        {/* We use standard motion values mapped to the group hover instead of variants logic for simplicity in Tailwind/Framer */}
-                        <div className="absolute inset-0 flex items-center justify-center perspective-1000">
-                            <div className="relative w-64 h-64 transform-style-3d transition-transform duration-700 group-hover:-rotate-y-12 group-hover:rotate-x-12">
-                                <div className="absolute inset-4 bg-gradient-to-br from-violet-600/30 to-cyan-600/30 rounded-3xl border border-white/10 backdrop-blur-sm -translate-z-10 transition-transform duration-700 group-hover:-translate-z-20 group-hover:translate-x-8 group-hover:translate-y-8" />
-                                <div className="absolute inset-8 bg-white/10 rounded-full border border-white/20 backdrop-blur-xl shadow-2xl flex items-center justify-center translate-z-10 transition-transform duration-700 group-hover:translate-z-30 group-hover:-translate-x-4 group-hover:-translate-y-4">
-                                    <div className="w-1/2 h-1/2 rounded-full bg-gradient-to-tr from-cyan-400 to-indigo-400 animate-spin-slow mix-blend-screen" />
-                                </div>
-                                <div className="absolute -right-4 -top-4 w-16 h-16 bg-fuchsia-500/80 rounded-xl rotate-12 backdrop-blur-md shadow-2xl border border-white/20 translate-z-20 transition-transform duration-700 group-hover:translate-z-40 group-hover:scale-125 group-hover:rotate-45" />
-                            </div>
-                        </div>
-                    </div>
-                </motion.div>
+                    </motion.div>
+                </BentoCard>
 
             </div>
         </section>

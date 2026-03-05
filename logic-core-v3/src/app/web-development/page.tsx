@@ -13,25 +13,24 @@ const AuroraBackground = dynamic(
     { ssr: false }
 )
 
-// Variants for animated words
-const wordVariants: Variants = {
-    hidden: { opacity: 0, y: 20 },
+// Variants for animated letters
+const letterVariants: Variants = {
+    hidden: { opacity: 0, y: 40, filter: 'blur(10px)' },
     visible: {
         opacity: 1,
         y: 0,
-        transition: { type: "spring", stiffness: 100, damping: 10 }
+        filter: 'blur(0px)',
+        transition: { type: "spring", stiffness: 120, damping: 14 }
     }
 }
 
 export default function WebDevelopmentPage() {
-
-    const textPart1 = "Tu web no debería ser un folleto.".split(" ")
-    const textPart2 = "Debería ser una".split(" ")
+    const textTitle = "WEB_ARCHITECTURE".split("")
 
     return (
         <main className="relative min-h-screen w-full bg-void overflow-hidden text-white">
             {/* The Aurora Background (Dark Premium Mode) */}
-            <div className="absolute inset-0 z-0 opacity-60">
+            <div className="fixed inset-0 z-0 opacity-50 pointer-events-none">
                 {/* 
                     We are wrapping or using AuroraBackground here, but since the original 
                     AuroraBackground has hardcoded bg-zinc-50 and pastel colors, 
@@ -68,40 +67,43 @@ export default function WebDevelopmentPage() {
                 <motion.h1
                     initial="hidden"
                     animate="visible"
-                    transition={{ staggerChildren: 0.08 }}
-                    className="text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter leading-[1.1] mb-6 flex flex-col items-center gap-2"
+                    transition={{ staggerChildren: 0.08, delayChildren: 0.2 }}
+                    className="text-5xl md:text-7xl lg:text-[7rem] font-black tracking-tighter leading-[1.1] mb-6 flex items-center justify-center font-mono"
                 >
-                    <div className="flex flex-wrap justify-center gap-[0.3em]">
-                        {textPart1.map((word, i) => (
-                            <motion.span key={`p1-${i}`} variants={wordVariants} className="inline-block text-white drop-shadow-md">
-                                {word}
-                            </motion.span>
-                        ))}
-                    </div>
-                    <div className="flex flex-wrap justify-center gap-[0.3em] items-center">
-                        {textPart2.map((word, i) => (
-                            <motion.span key={`p2-${i}`} variants={wordVariants} className="inline-block text-white drop-shadow-md">
-                                {word}
-                            </motion.span>
-                        ))}
-                        <motion.span
-                            variants={wordVariants}
-                            className="inline-block relative"
-                        >
-                            <span className="italic font-serif font-medium text-transparent bg-clip-text bg-gradient-to-r from-violet-400 via-fuchsia-400 to-cyan-400 drop-shadow-[0_0_25px_rgba(192,132,252,0.5)]">
-                                experiencia.
-                            </span>
-                            {/* Decorative sparkle */}
+                    <div className="flex flex-wrap justify-center relative">
+                        {textTitle.map((letter, i) => (
                             <motion.span
-                                initial={{ opacity: 0, scale: 0, rotate: -45 }}
-                                animate={{ opacity: 1, scale: 1, rotate: 0 }}
-                                transition={{ delay: 1.5, duration: 0.8, type: "spring" }}
-                                className="absolute -top-6 -right-8 text-fuchsia-400 opacity-60 pointer-events-none"
+                                key={i}
+                                variants={letterVariants}
+                                className={`inline-block text-transparent bg-clip-text bg-gradient-to-b from-white to-white/70 drop-shadow-[0_0_15px_rgba(255,255,255,0.2)] ${letter === '_' ? 'opacity-50' : ''}`}
                             >
-                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M12 2L14.4 9.6L22 12L14.4 14.4L12 22L9.6 14.4L2 12L9.6 9.6L12 2Z" fill="currentColor" />
-                                </svg>
+                                {letter}
                             </motion.span>
+                        ))}
+
+                        {/* Decorative floating sparkle */}
+                        <motion.span
+                            initial={{ opacity: 0, scale: 0, rotate: -90 }}
+                            animate={{ opacity: 1, scale: 1, rotate: 0 }}
+                            transition={{
+                                delay: 1.5,
+                                duration: 1.2,
+                                type: "spring",
+                                stiffness: 200
+                            }}
+                            className="absolute -top-8 -right-12 md:-right-16 text-cyan-400 opacity-80"
+                        >
+                            <motion.svg
+                                width="48"
+                                height="48"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                xmlns="http://www.w3.org/2000/svg"
+                                animate={{ rotate: 360 }}
+                                transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                            >
+                                <path d="M12 2L14.4 9.6L22 12L14.4 14.4L12 22L9.6 14.4L2 12L9.6 9.6L12 2Z" fill="currentColor" />
+                            </motion.svg>
                         </motion.span>
                     </div>
                 </motion.h1>

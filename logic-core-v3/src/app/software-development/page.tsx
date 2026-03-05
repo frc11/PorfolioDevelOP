@@ -1,93 +1,94 @@
 "use client"
 import React from 'react'
+import dynamic from 'next/dynamic'
 import { motion } from 'framer-motion'
 import { MagneticCta } from '@/components/ui/buttons/MagneticCta'
+
+// Dynamically import DotMatrix with No SSR to prevent hydration errors with Canvas
+const DotMatrix = dynamic(
+    () => import('@/components/canvas/DotMatrix').then((mod: any) => mod.DotMatrix),
+    { ssr: false }
+)
 import { EnterpriseStandards } from '@/components/sections/EnterpriseStandards'
 import { SoftwareDevelopmentCta } from '@/components/sections/SoftwareDevelopmentCta'
 
 export default function SoftwareDevelopmentPage() {
     return (
         <main className="relative min-h-screen w-full bg-void overflow-hidden text-white">
-            {/* The Blueprint Background (Perspective Grid) */}
-            <div className="absolute inset-0 z-0 flex items-center justify-center [perspective:1000px] pointer-events-none opacity-40">
-                <motion.div
-                    initial={{ opacity: 0, rotateX: 60, translateY: -100 }}
-                    animate={{ opacity: 1, rotateX: 70, translateY: 0 }}
-                    transition={{ duration: 1.5, ease: "easeOut" }}
-                    className="absolute w-[200vw] h-[200vh] origin-top"
-                    style={{
-                        backgroundSize: '100px 100px',
-                        backgroundImage: `
-                            linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
-                            linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px)
-                        `,
-                        boxShadow: 'inset 0 0 150px #030712'
-                    }}
-                >
-                    {/* Animated moving lines imitating data/scans */}
-                    <div className="absolute top-0 bottom-0 left-1/4 w-[1px] bg-gradient-to-b from-transparent via-cyan-500/50 to-transparent blur-[1px] -translate-x-1/2 animate-pulse" />
-                    <div className="absolute top-0 bottom-0 right-1/4 w-[1px] bg-gradient-to-b from-transparent via-violet-500/50 to-transparent blur-[1px] translate-x-1/2 animate-pulse" style={{ animationDelay: '1s' }} />
-                </motion.div>
-
-                {/* Fade to bottom gradient */}
-                <div className="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-void to-transparent z-10" />
-                {/* Fade to top gradient */}
-                <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-void to-transparent z-10" />
+            {/* The 3D Interactive Background */}
+            <div className="absolute inset-0 z-0 opacity-40 mix-blend-screen pointer-events-none fixed">
+                <DotMatrix />
             </div>
+
+            {/* Subtle Gradient Overlays for readability */}
+            <div className="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-void via-void/80 to-transparent z-10 pointer-events-none" />
+            <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-void to-transparent z-10 pointer-events-none" />
 
             {/* Main Content Overlay */}
             <div className="relative z-10 flex flex-col justify-center items-center text-center !h-screen px-4 max-w-5xl mx-auto">
-                {/* Top Badge */}
+                {/* Top Badge (Terminal Style) */}
                 <motion.div
                     initial={{ opacity: 0, y: -20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6, delay: 0.2 }}
-                    className="mb-8 px-4 py-1.5 rounded-full border border-zinc-800 bg-zinc-900/50 backdrop-blur-sm"
+                    className="mb-8 px-4 py-1.5 rounded-full border border-white/10 bg-black/50 backdrop-blur-md flex items-center gap-3"
                 >
-                    <span className="text-xs md:text-sm font-mono text-zinc-400 tracking-[0.2em] uppercase">
-                        [ ENTERPRISE_GRADE_SOFTWARE ]
+                    <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
+                    <span className="text-xs md:text-sm font-mono text-zinc-300 tracking-[0.2em] uppercase">
+                        [ STATUS: ONLINE // ENTERPRISE_GRADE ]
                     </span>
                 </motion.div>
 
-                {/* Hero Title */}
+                {/* Hero Title with Tech/Glitch Effect */}
                 <motion.h1
-                    initial={{ opacity: 0, y: 30 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.8, ease: "easeOut" }}
-                    className="text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter leading-[1.1] mb-6"
+                    variants={{
+                        hidden: { opacity: 0 },
+                        visible: {
+                            opacity: 1,
+                            transition: { staggerChildren: 0.08, delayChildren: 0.3 }
+                        }
+                    }}
+                    initial="hidden"
+                    animate="visible"
+                    className="text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter font-mono leading-[1.1] mb-6 flex flex-wrap justify-center"
                 >
-                    <span className="text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.1)]">
-                        Construimos software que
-                    </span>
-                    <br />
-                    <span className="relative inline-block mt-2">
-                        <span className="relative z-10 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-indigo-400 drop-shadow-[0_0_20px_rgba(59,130,246,0.3)]">
-                            no se rompe cuando escalas.
-                        </span>
-                        {/* Subrayado Brillante */}
+                    {"SYSTEM_ENGINEERING".split('').map((letter, index) => (
                         <motion.span
-                            initial={{ scaleX: 0 }}
-                            animate={{ scaleX: 1 }}
-                            transition={{ duration: 1, delay: 0.5, ease: "easeOut" }}
-                            className="absolute -bottom-2 md:-bottom-4 left-0 w-full h-1 md:h-2 bg-gradient-to-r from-blue-500/0 via-blue-500 to-indigo-500/0 rounded-full blur-[2px] origin-left"
-                        />
-                        <motion.span
-                            initial={{ scaleX: 0 }}
-                            animate={{ scaleX: 1 }}
-                            transition={{ duration: 1, delay: 0.5, ease: "easeOut" }}
-                            className="absolute -bottom-2 md:-bottom-4 left-0 w-full h-[1px] md:h-1 bg-gradient-to-r from-transparent via-blue-300 to-transparent rounded-full origin-left opacity-80"
-                        />
-                    </span>
+                            key={index}
+                            variants={{
+                                hidden: { opacity: 0, y: -40, filter: 'blur(10px)', color: '#a855f7', scale: 1.5 },
+                                visible: {
+                                    opacity: 1,
+                                    y: 0,
+                                    filter: 'blur(0px)',
+                                    color: '#ffffff',
+                                    scale: 1,
+                                    transition: { type: "spring", stiffness: 300, damping: 15 }
+                                }
+                            }}
+                            className="inline-block relative drop-shadow-[0_0_20px_rgba(255,255,255,0.2)]"
+                        >
+                            {letter}
+                            {/* Micro glitch ghost letter behind */}
+                            <motion.span
+                                className="absolute inset-0 text-cyan-400 mix-blend-screen opacity-0"
+                                animate={{ opacity: [0, 0.5, 0], x: [-2, 2, -2] }}
+                                transition={{ duration: 0.2, delay: 2 + index * 0.1, repeat: Infinity, repeatDelay: 5 }}
+                            >
+                                {letter}
+                            </motion.span>
+                        </motion.span>
+                    ))}
                 </motion.h1>
 
                 {/* Subtitle */}
                 <motion.p
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.8, delay: 0.3, ease: "easeOut" }}
+                    transition={{ duration: 0.8, delay: 1.5, ease: "easeOut" }}
                     className="text-lg md:text-2xl text-zinc-400 font-light max-w-3xl mb-12 mt-4 leading-relaxed"
                 >
-                    Desarrollo <span className="text-white font-medium">Full-Stack</span>, arquitecturas <span className="text-white font-medium">serverless</span> y bases de datos distribuidas. Tu visión, convertida en un ecosistema digital sólido.
+                    <span className="text-white font-medium">Construimos software que no se rompe cuando escalas.</span> Desarrollo Full-Stack, arquitecturas serverless y ecosistemas digitales sólidos.
                 </motion.p>
 
                 {/* Magnetic CTA */}
@@ -117,6 +118,31 @@ export default function SoftwareDevelopmentPage() {
                 <span className="text-[10px] md:text-xs uppercase tracking-[0.3em] text-zinc-500 font-mono">Arquitectura</span>
                 <div className="w-[1px] h-12 bg-gradient-to-b from-zinc-500 to-transparent" />
             </motion.div>
+
+            {/* Tech Stack Marquee */}
+            <div className="relative z-10 w-full py-16 overflow-hidden border-y border-white/5 bg-void/50 mt-10 md:mt-20">
+                <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(3,7,18,1)_0%,transparent_10%,transparent_90%,rgba(3,7,18,1)_100%)] z-10 pointer-events-none" />
+                <motion.div
+                    className="flex whitespace-nowrap"
+                    animate={{ x: ["0%", "-50%"] }}
+                    transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
+                >
+                    {/* Render text twice for seamless infinite loop */}
+                    {[1, 2].map((i) => (
+                        <div key={i} className="flex gap-8 px-4 items-center font-mono text-zinc-600 font-bold tracking-[0.3em] text-sm md:text-base lg:text-lg">
+                            <span>AWS // </span>
+                            <span>DOCKER // </span>
+                            <span>KUBERNETES // </span>
+                            <span>POSTGRESQL // </span>
+                            <span>PYTHON // </span>
+                            <span>NODE.JS // </span>
+                            <span>GRAPHQL // </span>
+                            <span>REDIS // </span>
+                            <span>GO // </span>
+                        </div>
+                    ))}
+                </motion.div>
+            </div>
 
             {/* Enterprise Standards Grid */}
             <EnterpriseStandards />
