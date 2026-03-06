@@ -6,7 +6,7 @@ import { motion } from 'framer-motion'
 import { Environment, ContactShadows } from '@react-three/drei'
 import { EffectComposer, ChromaticAberration, Noise, Vignette } from '@react-three/postprocessing'
 import { HeroArtifact } from '@/components/3d/HeroArtifact'
-import { DotMatrix } from '@/components/canvas/DotMatrix'
+import { DotMatrixMesh } from '@/components/canvas/DotMatrix'
 import { TypewriterText } from '@/components/ui/TypewriterText'
 import { MagneticCta } from '@/components/ui/buttons/MagneticCta'
 
@@ -123,7 +123,7 @@ export function Hero() {
                     <MobileTouchHandler />
                     <Suspense fallback={null}>
                         {/* Background Dot Matrix */}
-                        <DotMatrix />
+                        <DotMatrixMesh />
 
                         {/* Lighting Setup */}
                         <ambientLight intensity={1.5} />
