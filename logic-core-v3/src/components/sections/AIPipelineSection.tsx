@@ -1,21 +1,22 @@
 "use client"
 import React from 'react'
 import { motion } from 'framer-motion'
+import { Webhook, BrainCircuit, Cloud, Bell } from 'lucide-react'
 
 export const AIPipelineSection = () => {
     return (
-        <section className="max-w-7xl mx-auto py-32 px-4 relative z-10 w-full">
+        <section className="max-w-5xl mx-auto py-20 px-4 relative z-10 w-full">
             {/* Section Header */}
-            <div className="mb-20 text-center">
+            <div className="mb-16 text-center">
                 <motion.div
                     initial={{ opacity: 0, y: -10 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.03] border border-white/10 mb-6"
                 >
-                    <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                    <div className="w-2 h-2 rounded-full bg-orange-500 animate-[pulse_2s_ease-in-out_infinite]" />
                     <span className="text-xs font-mono text-zinc-400 uppercase tracking-widest">
-                        // WORKFLOW_ENGINE
+                        // DATA_PIPELINE
                     </span>
                 </motion.div>
                 <motion.h2
@@ -23,105 +24,126 @@ export const AIPipelineSection = () => {
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.6 }}
-                    className="text-4xl md:text-5xl font-bold tracking-tight text-white mb-4"
+                    className="text-3xl md:text-5xl font-bold tracking-tight text-white mb-4"
                 >
-                    Un sistema. <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-500">Infinitas conexiones.</span>
+                    Un cerebro central. <br className="md:hidden" /><span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-amber-500">Conexión total.</span>
                 </motion.h2>
                 <motion.p
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.6, delay: 0.1 }}
-                    className="text-zinc-400 max-w-2xl mx-auto text-lg"
+                    className="text-zinc-400 max-w-2xl mx-auto text-base md:text-lg"
                 >
-                    Visualiza cómo un lead nuevo detona una cadena inteligente de eventos, calificando y notificando en milisegundos.
+                    Observa cómo fluye la información: de un evento inicial a una respuesta procesada, categorizada y notificada en tiempo real.
                 </motion.p>
             </div>
 
             {/* Pipeline Visualizer Container */}
-            <div className="relative w-full max-w-5xl mx-auto h-[500px] md:h-[300px] flex flex-col md:flex-row items-center justify-between p-8 md:p-12 rounded-[2.5rem] bg-white/[0.02] border border-white/10 backdrop-blur-xl overflow-hidden shadow-2xl">
+            <div className="relative w-full flex flex-col md:flex-row items-center justify-between p-8 md:p-12 bg-white/[0.02] border border-white/10 backdrop-blur-2xl rounded-[2rem] overflow-hidden relative shadow-2xl h-[600px] md:h-auto">
 
                 {/* Background Grid & Glows for the Glass Box */}
                 <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:40px_40px] opacity-20 pointer-events-none" />
-                <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-500/10 rounded-full blur-[80px] pointer-events-none" />
-                <div className="absolute bottom-0 left-0 w-96 h-96 bg-cyan-500/10 rounded-full blur-[80px] pointer-events-none" />
 
-                {/* Connecting Line Path (Background Track) */}
-                <div className="absolute top-1/2 left-12 right-12 h-[2px] -translate-y-1/2 bg-white/[0.05] hidden md:block rounded-full" />
-                <div className="absolute top-12 bottom-12 left-1/2 w-[2px] -translate-x-1/2 bg-white/[0.05] md:hidden rounded-full" />
+                {/* Connecting Line Track */}
+                <div className="absolute top-1/2 left-0 right-0 h-[2px] -translate-y-1/2 bg-white/10 hidden md:block rounded-full z-0" />
+                <div className="absolute top-0 bottom-0 left-1/2 w-[2px] -translate-x-1/2 bg-white/10 md:hidden rounded-full z-0" />
 
-                {/* The "Data Packet" Ray of Light Animation */}
-                {/* Desktop horizontal ray */}
+                {/* The "Data Packets" - Glowing moving dots */}
+                {/* Desktop Data Packet */}
                 <motion.div
-                    className="absolute top-1/2 left-12 h-[2px] w-32 -translate-y-1/2 bg-gradient-to-r from-transparent via-emerald-400 to-cyan-400 hidden md:block z-0 blur-[1px]"
-                    animate={{
-                        x: ['0%', '800%'], // Travels across the width
-                        opacity: [0, 1, 1, 0]
-                    }}
+                    className="absolute top-1/2 left-0 h-1 w-24 -translate-y-1/2 bg-gradient-to-r from-transparent via-amber-500 to-orange-400 hidden md:block z-0 blur-[1px] rounded-full drop-shadow-[0_0_10px_rgba(249,115,22,0.8)]"
+                    animate={{ left: ["0%", "100%"] }}
                     transition={{
                         duration: 3,
                         repeat: Infinity,
                         ease: "linear",
-                        times: [0, 0.2, 0.8, 1]
                     }}
                 />
-                {/* Mobile vertical ray */}
                 <motion.div
-                    className="absolute top-12 left-1/2 w-[2px] h-32 -translate-x-1/2 bg-gradient-to-b from-transparent via-emerald-400 to-cyan-400 md:hidden z-0 blur-[1px]"
-                    animate={{
-                        y: ['0%', '800%'], // Travels across the height
-                        opacity: [0, 1, 1, 0]
-                    }}
+                    className="absolute top-1/2 left-0 h-[4px] w-[4px] -translate-y-1/2 bg-white hidden md:block z-0 rounded-full shadow-[0_0_15px_rgba(255,255,255,1)]"
+                    animate={{ left: ["0%", "100%"] }}
                     transition={{
                         duration: 3,
                         repeat: Infinity,
                         ease: "linear",
-                        times: [0, 0.2, 0.8, 1]
                     }}
                 />
 
-                {/* --- Box 1: Web Lead --- */}
-                <div className="relative z-10 flex flex-col items-center gap-3 w-full md:w-auto">
-                    <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center backdrop-blur-md shadow-lg">
-                        <svg className="w-8 h-8 text-zinc-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
-                        </svg>
+                {/* Mobile Data Packet */}
+                <motion.div
+                    className="absolute top-0 left-1/2 w-1 h-24 -translate-x-1/2 bg-gradient-to-b from-transparent via-amber-500 to-orange-400 md:hidden z-0 blur-[1px] drop-shadow-[0_0_10px_rgba(249,115,22,0.8)] rounded-full"
+                    animate={{ top: ["0%", "100%"] }}
+                    transition={{
+                        duration: 3,
+                        repeat: Infinity,
+                        ease: "linear",
+                    }}
+                />
+                <motion.div
+                    className="absolute top-0 left-1/2 w-[4px] h-[4px] -translate-x-1/2 bg-white md:hidden z-0 rounded-full shadow-[0_0_15px_rgba(255,255,255,1)]"
+                    animate={{ top: ["0%", "100%"] }}
+                    transition={{
+                        duration: 3,
+                        repeat: Infinity,
+                        ease: "linear",
+                    }}
+                />
+
+
+                {/* --- Box 1: Webhook / Typeform --- */}
+                <div className="relative z-10 flex flex-col items-center gap-3 w-full md:w-1/4">
+                    <div className="w-16 h-16 rounded-2xl bg-[#111] border border-white/10 flex items-center justify-center backdrop-blur-md shadow-lg relative overflow-hidden group">
+                        <div className="absolute inset-0 bg-white/5 group-hover:bg-white/10 transition-colors" />
+                        <Webhook className="w-7 h-7 text-zinc-300" />
                     </div>
-                    <span className="text-sm font-medium text-zinc-300">Nuevo Lead (Web)</span>
+                    <div className="text-center">
+                        <span className="text-sm font-semibold text-white block">Webhook / Lead</span>
+                        <span className="text-[10px] text-zinc-500 font-mono">TRIGGER_EVENT</span>
+                    </div>
                 </div>
 
-                {/* --- Box 2: n8n + OpenAI (The Brain) --- */}
-                <div className="relative z-10 flex flex-col items-center gap-3 w-full md:w-auto">
-                    {/* Pulsing container for the brain */}
+                {/* --- Box 2: n8n Core + ChatGPT --- */}
+                <div className="relative z-10 flex flex-col items-center gap-3 w-full md:w-1/4">
                     <div className="relative">
-                        <div className="absolute inset-0 bg-emerald-500/30 rounded-2xl blur-xl animate-pulse" />
-                        <div className="relative w-24 h-24 rounded-2xl bg-emerald-500/10 border border-emerald-500/40 flex items-center justify-center backdrop-blur-md shadow-[0_0_30px_rgba(16,185,129,0.2)]">
-                            <svg className="w-10 h-10 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                            </svg>
+                        {/* Glow effect */}
+                        <div className="absolute inset-0 bg-orange-500/20 rounded-2xl blur-xl animate-pulse" />
+                        <div className="relative w-20 h-20 md:w-24 md:h-24 rounded-2xl bg-orange-500/10 border border-orange-500 flex items-center justify-center backdrop-blur-xl shadow-[0_0_30px_rgba(249,115,22,0.2)] group overflow-hidden">
+                            {/* Inner rotating gradient for extra tech feel */}
+                            <div className="absolute inset-[-50%] bg-[conic-gradient(from_0deg,transparent_0_340deg,rgba(249,115,22,0.4)_360deg)] animate-[spin_4s_linear_infinite]" />
+                            <div className="absolute inset-[2px] rounded-[14px] bg-[#0a0a0a] flex items-center justify-center">
+                                <BrainCircuit className="w-8 h-8 md:w-10 md:h-10 text-orange-400 drop-shadow-[0_0_8px_rgba(249,115,22,0.8)]" />
+                            </div>
                         </div>
                     </div>
-                    <span className="text-sm font-bold text-emerald-400 drop-shadow-[0_0_8px_rgba(52,211,153,0.5)]">Cerebro n8n + OpenAI</span>
+                    <div className="text-center">
+                        <span className="text-sm md:text-base font-bold text-orange-400 drop-shadow-[0_0_8px_rgba(249,115,22,0.5)] block">n8n Core + OpenAI</span>
+                        <span className="text-[10px] text-orange-500/70 font-mono">PROCESSING_LOGIC</span>
+                    </div>
                 </div>
 
-                {/* --- Box 3: CRM --- */}
-                <div className="relative z-10 flex flex-col items-center gap-3 w-full md:w-auto">
-                    <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center backdrop-blur-md shadow-lg">
-                        <svg className="w-8 h-8 text-cyan-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" />
-                        </svg>
+                {/* --- Box 3: Salesforce / CRM --- */}
+                <div className="relative z-10 flex flex-col items-center gap-3 w-full md:w-1/4">
+                    <div className="w-16 h-16 rounded-2xl bg-[#111] border border-white/10 flex items-center justify-center backdrop-blur-md shadow-lg relative overflow-hidden group">
+                        <div className="absolute inset-0 bg-white/5 group-hover:bg-white/10 transition-colors" />
+                        <Cloud className="w-7 h-7 text-blue-400" />
                     </div>
-                    <span className="text-sm font-medium text-zinc-300">Añadir a CRM</span>
+                    <div className="text-center">
+                        <span className="text-sm font-semibold text-white block">Salesforce</span>
+                        <span className="text-[10px] text-zinc-500 font-mono">DATA_SYNC</span>
+                    </div>
                 </div>
 
-                {/* --- Box 4: Slack --- */}
-                <div className="relative z-10 flex flex-col items-center gap-3 w-full md:w-auto">
-                    <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center backdrop-blur-md shadow-lg">
-                        <svg className="w-8 h-8 text-zinc-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                        </svg>
+                {/* --- Box 4: Slack Alert --- */}
+                <div className="relative z-10 flex flex-col items-center gap-3 w-full md:w-1/4">
+                    <div className="w-16 h-16 rounded-2xl bg-[#111] border border-white/10 flex items-center justify-center backdrop-blur-md shadow-lg relative overflow-hidden group">
+                        <div className="absolute inset-0 bg-white/5 group-hover:bg-white/10 transition-colors" />
+                        <Bell className="w-7 h-7 text-zinc-300" />
                     </div>
-                    <span className="text-sm font-medium text-zinc-300">Alerta en Slack</span>
+                    <div className="text-center">
+                        <span className="text-sm font-semibold text-white block">Team Alerts</span>
+                        <span className="text-[10px] text-zinc-500 font-mono">ACTION_COMPLETE</span>
+                    </div>
                 </div>
             </div>
         </section>

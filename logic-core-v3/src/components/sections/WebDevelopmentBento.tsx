@@ -80,7 +80,7 @@ export const WebDevelopmentBento = () => {
                     transition={{ duration: 0.6 }}
                     className="text-4xl md:text-5xl font-bold tracking-tight text-white mb-4"
                 >
-                    El estándar <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-cyan-400">DevelOP.</span>
+                    El estándar <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-cyan-500">DevelOP.</span>
                 </motion.h2>
                 <motion.p
                     initial={{ opacity: 0, y: 20 }}
@@ -89,21 +89,21 @@ export const WebDevelopmentBento = () => {
                     transition={{ duration: 0.6, delay: 0.1 }}
                     className="text-zinc-400 max-w-2xl mx-auto text-lg"
                 >
-                    No ensamblamos plantillas. Codificamos experiencias desde cero enfocadas en rendimiento, retención de usuario y conversión visual.
+                    No ensamblamos plantillas. Codificamos plataformas web desde cero enfocadas en rendimiento, posicionamiento SEO y conversión de ventas.
                 </motion.p>
             </div>
 
             {/* The Bento Grid */}
             <div className="grid grid-cols-1 md:grid-cols-12 gap-6 auto-rows-[400px] md:auto-rows-[350px]">
 
-                {/* --- Tarjeta 1: UI/UX (Ocupa 8 col en desktop) --- */}
+                {/* --- Tarjeta 1: Desarrollo a Medida (Ocupa 8 col en desktop) --- */}
                 <BentoCard className="md:col-span-8 p-8 flex flex-col justify-between" delay={0}>
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-violet-500/10 rounded-full blur-[80px] group-hover:bg-violet-500/20 transition-all duration-700 pointer-events-none" />
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-500/10 rounded-full blur-[80px] group-hover:bg-cyan-500/20 transition-all duration-700 pointer-events-none" />
 
                     <div className="relative z-10">
-                        <h3 className="text-2xl font-bold text-white mb-2">Diseño Centrado en el Usuario</h3>
+                        <h3 className="text-2xl font-bold text-white mb-2">Desarrollo a Medida (Next.js)</h3>
                         <p className="text-zinc-400 text-sm max-w-sm">
-                            Interfaces que guían instintivamente al usuario hacia la conversión mediante micro-interacciones diseñadas milimétricamente.
+                            Adiós a las plantillas lentas y genéricas. Programamos tu web desde cero con la misma tecnología que usan las empresas más grandes del mundo, garantizando una carga instantánea que no frustra a tus clientes.
                         </p>
                     </div>
 
@@ -147,14 +147,14 @@ export const WebDevelopmentBento = () => {
                     </motion.div>
                 </BentoCard>
 
-                {/* --- Tarjeta 2: Performance (Ocupa 4 col en desktop) --- */}
+                {/* --- Tarjeta 2: Performance SEO (Ocupa 4 col en desktop) --- */}
                 <BentoCard className="md:col-span-4 p-8 flex flex-col justify-between items-center text-center" delay={0.1}>
                     <div className="absolute bottom-0 left-0 w-full h-1/2 bg-cyan-500/10 blur-[60px] group-hover:bg-cyan-500/30 transition-all duration-700 pointer-events-none" />
 
                     <div className="relative z-10 w-full">
-                        <h3 className="text-xl font-bold text-white mb-2">Lighthouse Premium</h3>
+                        <h3 className="text-xl font-bold text-white mb-2">Dominio en Google (SEO)</h3>
                         <p className="text-zinc-400 text-sm">
-                            Optimizadas para cargar en milisegundos y dominar el SEO.
+                            De nada sirve una web linda si nadie la visita. Optimizamos el código y la estructura desde el día uno para que tu empresa aparezca en las primeras posiciones de búsqueda local.
                         </p>
                     </div>
 
@@ -196,14 +196,34 @@ export const WebDevelopmentBento = () => {
                     </motion.div>
                 </BentoCard>
 
-                {/* --- Tarjeta 3: Motion & 3D (Ocupa 12 col en desktop horizontales) --- */}
-                <BentoCard className="md:col-span-12 md:row-span-1 p-8 flex flex-col md:flex-row items-center justify-between" delay={0.2}>
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[300px] bg-indigo-500/10 rounded-full blur-[100px] group-hover:bg-indigo-500/20 transition-all duration-700 pointer-events-none" />
+                {/* --- Tarjeta 3: E-Commerce (Ocupa 4 col en desktop) --- */}
+                <BentoCard className="md:col-span-4 p-8 flex flex-col justify-between items-start text-left" delay={0.15}>
+                    <div className="absolute top-0 left-0 w-full h-1/2 bg-cyan-500/10 blur-[60px] group-hover:bg-cyan-500/20 transition-all duration-700 pointer-events-none" />
+
+                    <div className="relative z-10 w-full h-full flex flex-col items-center justify-center pointer-events-none mb-6">
+                        <div className="w-24 h-24 rounded-full bg-white/5 border border-white/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-500">
+                            <svg fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-10 h-10 text-cyan-400">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                            </svg>
+                        </div>
+                    </div>
+
+                    <div className="relative z-10 w-full mt-auto">
+                        <h3 className="text-xl font-bold text-white mb-2">E-Commerce y Catálogos</h3>
+                        <p className="text-zinc-400 text-sm">
+                            Sistemas de venta online propios. Desde carritos de compra integrados con pasarelas de pago, hasta catálogos corporativos que envían cotizaciones directas a tu WhatsApp.
+                        </p>
+                    </div>
+                </BentoCard>
+
+                {/* --- Tarjeta 4: UI/UX (Ocupa 8 col en desktop) --- */}
+                <BentoCard className="md:col-span-8 md:row-span-1 p-8 flex flex-col md:flex-row items-center justify-between" delay={0.2}>
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[300px] bg-cyan-500/10 rounded-full blur-[100px] group-hover:bg-cyan-500/20 transition-all duration-700 pointer-events-none" />
 
                     <div className="relative z-10 md:w-1/2 mb-8 md:mb-0 md:pr-12 pointer-events-none">
-                        <h3 className="text-3xl font-bold text-white mb-3">Animaciones Fluidas y WebGL</h3>
+                        <h3 className="text-3xl font-bold text-white mb-3">Diseño UI/UX y Retención</h3>
                         <p className="text-zinc-400 text-base leading-relaxed">
-                            Integramos Framer Motion, GSAP y Three.js para crear experiencias inmersivas que no comprometen el rendimiento del dispositivo. La física al servicio del diseño.
+                            Interfaces limpias, modernas y fáciles de usar en cualquier celular. Hacemos que la experiencia de navegación sea tan fluida que el usuario confíe en la calidad de tu marca al instante.
                         </p>
                     </div>
 
@@ -217,19 +237,19 @@ export const WebDevelopmentBento = () => {
 
                             {/* Layer 1 - Background Card */}
                             <motion.div
-                                className="absolute w-40 h-40 bg-gradient-to-br from-violet-600/40 to-cyan-600/40 rounded-2xl border border-white/10 backdrop-blur-md transition-transform duration-700 group-hover:rotate-x-12 group-hover:-rotate-y-12"
+                                className="absolute w-40 h-40 bg-gradient-to-br from-cyan-600/40 to-teal-600/40 rounded-2xl border border-white/10 backdrop-blur-md transition-transform duration-700 group-hover:rotate-x-12 group-hover:-rotate-y-12"
                             />
 
                             {/* Layer 2 - Mid Card */}
                             <motion.div
                                 className="absolute w-32 h-32 bg-white/10 rounded-full border border-white/20 backdrop-blur-xl shadow-xl flex items-center justify-center transition-transform duration-700 translate-z-10 group-hover:translate-z-30 group-hover:-translate-x-4 group-hover:-translate-y-4"
                             >
-                                <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-cyan-400 to-indigo-400 animate-pulse mix-blend-screen" />
+                                <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-cyan-300 to-cyan-600 animate-pulse mix-blend-screen" />
                             </motion.div>
 
                             {/* Layer 3 - Foreground floating elements */}
                             <motion.div
-                                className="absolute -right-4 -top-4 w-12 h-12 bg-fuchsia-500/80 rounded-lg rotate-12 backdrop-blur-md shadow-2xl border border-white/20 transition-transform duration-700 translate-z-20 group-hover:translate-z-40 group-hover:rotate-45 group-hover:scale-125"
+                                className="absolute -right-4 -top-4 w-12 h-12 bg-cyan-500/80 rounded-lg rotate-12 backdrop-blur-md shadow-2xl border border-white/20 transition-transform duration-700 translate-z-20 group-hover:translate-z-40 group-hover:rotate-45 group-hover:scale-125"
                             />
                         </div>
                         <style jsx>{`

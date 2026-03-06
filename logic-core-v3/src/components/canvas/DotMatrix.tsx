@@ -4,7 +4,7 @@ import { useRef, useMemo, useLayoutEffect, useEffect } from 'react';
 import { useFrame, Canvas } from '@react-three/fiber';
 import * as THREE from 'three';
 
-const DotMatrixMesh = () => {
+export const DotMatrixMesh = () => {
     const meshRef = useRef<THREE.InstancedMesh>(null);
     const isVisibleRef = useRef(true);
     const rows = 50;

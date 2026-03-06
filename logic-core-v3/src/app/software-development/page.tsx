@@ -1,5 +1,5 @@
 "use client"
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import dynamic from 'next/dynamic'
 import { motion } from 'framer-motion'
 import { MagneticCta } from '@/components/ui/buttons/MagneticCta'
@@ -12,7 +12,43 @@ const DotMatrix = dynamic(
 import { EnterpriseStandards } from '@/components/sections/EnterpriseStandards'
 import { SoftwareDevelopmentCta } from '@/components/sections/SoftwareDevelopmentCta'
 
+const CHARS = "!<>-_\\/[]{}—=+*^?#________";
+const scrambleText = (text: string, progress: number) => {
+    return text.split('').map((char, index) => {
+        if (char === ' ') return ' ';
+        const charProgress = index / text.length;
+        if (progress >= charProgress) {
+            return char;
+        }
+        return CHARS[Math.floor(Math.random() * CHARS.length)];
+    }).join('');
+};
+
 export default function SoftwareDevelopmentPage() {
+    const finalHeroText = "SOFTWARE_A_MEDIDA";
+    const [scrambledHero, setScrambledHero] = useState("");
+
+    useEffect(() => {
+        let frame: number;
+        const duration = 2000; // 2 seconds to fully decode
+        const startTime = Date.now();
+
+        const animate = () => {
+            const now = Date.now();
+            const elapsed = now - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+
+            setScrambledHero(scrambleText(finalHeroText, progress));
+
+            if (progress < 1) {
+                frame = requestAnimationFrame(animate);
+            }
+        };
+
+        frame = requestAnimationFrame(animate);
+
+        return () => cancelAnimationFrame(frame);
+    }, []);
     return (
         <main className="relative min-h-screen w-full bg-void overflow-hidden text-white">
             {/* The 3D Interactive Background */}
@@ -31,54 +67,22 @@ export default function SoftwareDevelopmentPage() {
                     initial={{ opacity: 0, y: -20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6, delay: 0.2 }}
-                    className="mb-8 px-4 py-1.5 rounded-full border border-white/10 bg-black/50 backdrop-blur-md flex items-center gap-3"
+                    className="mb-8 px-5 py-2 rounded-full border border-violet-500/30 bg-black/50 backdrop-blur-md flex items-center gap-3"
                 >
-                    <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
+                    <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.8)]" />
                     <span className="text-xs md:text-sm font-mono text-zinc-300 tracking-[0.2em] uppercase">
-                        [ STATUS: ONLINE // ENTERPRISE_GRADE ]
+                        [ MODERNIZACIÓN_DIGITAL // ESTADO: ACTIVO ]
                     </span>
                 </motion.div>
 
                 {/* Hero Title with Tech/Glitch Effect */}
                 <motion.h1
-                    variants={{
-                        hidden: { opacity: 0 },
-                        visible: {
-                            opacity: 1,
-                            transition: { staggerChildren: 0.08, delayChildren: 0.3 }
-                        }
-                    }}
-                    initial="hidden"
-                    animate="visible"
-                    className="text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter font-mono leading-[1.1] mb-6 flex flex-wrap justify-center"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.3 }}
+                    className="text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter font-mono leading-[1.1] mb-6 flex flex-wrap justify-center text-white drop-shadow-[0_0_20px_rgba(255,255,255,0.2)]"
                 >
-                    {"SYSTEM_ENGINEERING".split('').map((letter, index) => (
-                        <motion.span
-                            key={index}
-                            variants={{
-                                hidden: { opacity: 0, y: -40, filter: 'blur(10px)', color: '#a855f7', scale: 1.5 },
-                                visible: {
-                                    opacity: 1,
-                                    y: 0,
-                                    filter: 'blur(0px)',
-                                    color: '#ffffff',
-                                    scale: 1,
-                                    transition: { type: "spring", stiffness: 300, damping: 15 }
-                                }
-                            }}
-                            className="inline-block relative drop-shadow-[0_0_20px_rgba(255,255,255,0.2)]"
-                        >
-                            {letter}
-                            {/* Micro glitch ghost letter behind */}
-                            <motion.span
-                                className="absolute inset-0 text-cyan-400 mix-blend-screen opacity-0"
-                                animate={{ opacity: [0, 0.5, 0], x: [-2, 2, -2] }}
-                                transition={{ duration: 0.2, delay: 2 + index * 0.1, repeat: Infinity, repeatDelay: 5 }}
-                            >
-                                {letter}
-                            </motion.span>
-                        </motion.span>
-                    ))}
+                    {scrambledHero || "___"}
                 </motion.h1>
 
                 {/* Subtitle */}
@@ -88,7 +92,7 @@ export default function SoftwareDevelopmentPage() {
                     transition={{ duration: 0.8, delay: 1.5, ease: "easeOut" }}
                     className="text-lg md:text-2xl text-zinc-400 font-light max-w-3xl mb-12 mt-4 leading-relaxed"
                 >
-                    <span className="text-white font-medium">Construimos software que no se rompe cuando escalas.</span> Desarrollo Full-Stack, arquitecturas serverless y ecosistemas digitales sólidos.
+                    <span className="text-white font-medium">Modernizamos tu empresa.</span> Desarrollamos sistemas de gestión a medida e integraciones inteligentes que eliminan el papel, los errores en Excel y conectan toda tu operación en un solo lugar.
                 </motion.p>
 
                 {/* Magnetic CTA */}
@@ -119,28 +123,36 @@ export default function SoftwareDevelopmentPage() {
                 <div className="w-[1px] h-12 bg-gradient-to-b from-zinc-500 to-transparent" />
             </motion.div>
 
-            {/* Tech Stack Marquee */}
-            <div className="relative z-10 w-full py-16 overflow-hidden border-y border-white/5 bg-void/50 mt-10 md:mt-20">
-                <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(3,7,18,1)_0%,transparent_10%,transparent_90%,rgba(3,7,18,1)_100%)] z-10 pointer-events-none" />
+            {/* Tech Stack Marquee (Infinite Scroll) */}
+            <div className="relative z-10 w-full py-10 mt-12 overflow-hidden" style={{ WebkitMaskImage: 'linear-gradient(to right, transparent, black 10%, black 90%, transparent)', maskImage: 'linear-gradient(to right, transparent, black 10%, black 90%, transparent)' }}>
                 <motion.div
                     className="flex whitespace-nowrap"
                     animate={{ x: ["0%", "-50%"] }}
-                    transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
+                    transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
                 >
-                    {/* Render text twice for seamless infinite loop */}
-                    {[1, 2].map((i) => (
-                        <div key={i} className="flex gap-8 px-4 items-center font-mono text-zinc-600 font-bold tracking-[0.3em] text-sm md:text-base lg:text-lg">
-                            <span>AWS // </span>
-                            <span>DOCKER // </span>
-                            <span>KUBERNETES // </span>
-                            <span>POSTGRESQL // </span>
-                            <span>PYTHON // </span>
-                            <span>NODE.JS // </span>
-                            <span>GRAPHQL // </span>
-                            <span>REDIS // </span>
-                            <span>GO // </span>
-                        </div>
-                    ))}
+                    <div className="flex gap-8 px-4 items-center font-mono text-violet-500/40 tracking-[0.2em] text-sm md:text-base">
+                        <span>NEXT.JS //</span>
+                        <span>NODE.JS //</span>
+                        <span>POSTGRESQL //</span>
+                        <span>PYTHON //</span>
+                        <span>C# .NET //</span>
+                        <span>REACT //</span>
+                        <span>TAILWIND //</span>
+                        <span>TYPESCRIPT //</span>
+                        <span>FASTAPI //</span>
+                        <span>NEXT.JS //</span>
+                        {/* Repeat for seamless loop */}
+                        <span>NEXT.JS //</span>
+                        <span>NODE.JS //</span>
+                        <span>POSTGRESQL //</span>
+                        <span>PYTHON //</span>
+                        <span>C# .NET //</span>
+                        <span>REACT //</span>
+                        <span>TAILWIND //</span>
+                        <span>TYPESCRIPT //</span>
+                        <span>FASTAPI //</span>
+                        <span>NEXT.JS //</span>
+                    </div>
                 </motion.div>
             </div>
 

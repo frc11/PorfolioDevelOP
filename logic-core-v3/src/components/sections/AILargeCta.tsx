@@ -1,13 +1,16 @@
 "use client"
-import React from 'react'
+import React, { useState } from 'react'
 import { motion } from 'framer-motion'
+import { ArrowRight, Sparkles } from 'lucide-react'
 
 export const AILargeCta = () => {
+    const [isHovered, setIsHovered] = useState(false);
+
     return (
-        <section className="relative z-10 w-full py-40 md:py-56 flex items-center justify-center overflow-hidden">
+        <section className="relative z-10 w-full py-40 md:py-48 flex items-center justify-center overflow-hidden">
             {/* Radial background glow */}
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <div className="w-[600px] h-[600px] md:w-[1000px] md:h-[1000px] bg-[radial-gradient(circle_at_center,rgba(6,182,212,0.06)_0%,transparent_60%)]" />
+                <div className="w-[600px] h-[600px] md:w-[1000px] md:h-[1000px] bg-[radial-gradient(circle_at_center,rgba(52,211,153,0.08)_0%,transparent_60%)]" />
             </div>
 
             <div className="relative z-10 max-w-6xl mx-auto px-4 text-center flex flex-col items-center">
@@ -18,9 +21,9 @@ export const AILargeCta = () => {
                     transition={{ duration: 0.8, ease: "easeOut" }}
                     className="text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter text-white mb-6 leading-[1.1]"
                 >
-                    Tu competencia ya está <br className="hidden md:block" />
-                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-violet-500 drop-shadow-[0_0_20px_rgba(6,182,212,0.2)]">
-                        automatizando.
+                    ¿Tu competencia ya <br className="hidden md:block" />
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400 drop-shadow-[0_0_20px_rgba(52,211,153,0.2)]">
+                        integró IA? ¿Y tú?
                     </span>
                 </motion.h2>
 
@@ -39,17 +42,16 @@ export const AILargeCta = () => {
                     whileInView={{ opacity: 1, scale: 1 }}
                     viewport={{ once: true, margin: "-50px" }}
                     transition={{ duration: 0.6, delay: 0.4, ease: "easeOut" }}
-                    className="group relative px-10 md:px-16 py-5 md:py-7 rounded-full overflow-hidden bg-black/40 backdrop-blur-md border border-white/10 hover:border-cyan-400/80 transition-all duration-500 hover:shadow-[0_0_50px_rgba(6,182,212,0.3)]"
+                    className="group relative px-8 py-4 md:px-12 md:py-6 bg-transparent border border-emerald-500 overflow-hidden"
                 >
-                    {/* Hover internal glow */}
-                    <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/0 via-cyan-500/10 to-violet-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                    {/* Ignition Fill Effect */}
+                    <div className="absolute inset-0 bg-emerald-500 origin-center scale-x-0 group-hover:scale-x-100 transition-transform duration-500 ease-out z-0" />
 
-                    <span className="relative z-10 text-white font-bold uppercase tracking-widest text-base md:text-lg flex items-center gap-4">
-                        Iniciar Integración IA
-                        <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center group-hover:bg-cyan-500/20 group-hover:text-cyan-400 transition-colors duration-300">
-                            <svg className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                            </svg>
+                    <span className="relative z-10 text-emerald-400 group-hover:text-black font-black tracking-[0.1em] lg:tracking-[0.2em] text-lg md:text-2xl flex items-center justify-center gap-4 transition-colors duration-300 uppercase">
+                        DEPLOY YOUR DIGITAL BRAIN
+
+                        <div className="relative w-10 h-10 flex items-center justify-center transition-colors duration-300 ml-2">
+                            <ArrowRight className="w-6 h-6 text-emerald-400 group-hover:text-black transition-colors duration-300" />
                         </div>
                     </span>
                 </motion.button>

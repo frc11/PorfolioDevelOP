@@ -6,26 +6,30 @@ import { NeuroAvatar } from './NeuroAvatar';
 import { ChatWindow } from './ChatWindow';
 import { useLogicAI } from '../hooks/useLogicAI';
 
+import { usePathname } from 'next/navigation';
+
 const INITIAL_DELAY = 3000;   // Show prompt 3s after page load
 const IDLE_TIMEOUT = 15000;   // Re-show after 15s of inactivity
 
-const PROMPTS = [
-    {
-        badge: "AI_ASSISTANT // V1.0",
-        title: "> MEJORA_TU_NEGOCIO...",
-        body: "¿Estás listo para escalar tu servicio e implementar Inteligencia Artificial?"
-    },
-    {
-        badge: "INNOVACIÓN // ACTIVA",
-        title: "> AUTOMATIZACIÓN...",
-        body: "He detectado oportunidades para automatizar tus procesos. ¿Te explico cómo?"
-    },
-    {
-        badge: "SISTEMA // LISTO",
-        title: "> OPTIMIZANDO_RUTINAS...",
-        body: "Tengo varias propuestas para ahorrarte horas de trabajo semanal. ¿Las vemos?"
+const getContextPrompts = (pathname: string) => {
+    if (pathname === '/') {
+        return [{ badge: "AI_ASSISTANT // V1.0", title: "> MEJORA_TU_NEGOCIO...", body: "He analizado tu perfil. ¿Impulsamos tu próximo proyecto hoy?" }];
     }
-];
+    if (pathname.includes('/ai-implementations')) {
+        return [{ badge: "INNOVACIÓN // ACTIVA", title: "> REDUCCIÓN_DE_COSTOS...", body: "Los Agentes de IA pueden reducir tus costos un 40%. ¿Te muestro cómo aplicarlo a tu empresa?" }];
+    }
+    if (pathname.includes('/process-automation')) {
+        return [{ badge: "SISTEMA // LISTO", title: "> OPTIMIZANDO_RUTINAS...", body: "Veo que te interesa n8n. ¿Calculamos cuántas horas de trabajo manual podemos automatizarte hoy?" }];
+    }
+    if (pathname.includes('/software-development')) {
+        return [{ badge: "ARQUITECTURA // ALTA", title: "> INGENIERÍA_SÓLIDA...", body: "El código barato sale caro. ¿Analizamos la arquitectura de tu próximo sistema a medida?" }];
+    }
+    if (pathname.includes('/web-development')) {
+        return [{ badge: "UX_UI // PREMIUM", title: "> CONVERSIÓN_ALTA...", body: "Tu competencia está mejorando su retención web. ¿Diseñamos una experiencia premium para tu marca?" }];
+    }
+    // Default
+    return [{ badge: "AI_ASSISTANT // V1.0", title: "> SISTEMAS_ONLINE...", body: "Sistemas en línea. ¿En qué te puedo ayudar hoy?" }];
+};
 
 /**
  * Main AI Companion Wrapper
@@ -33,6 +37,9 @@ const PROMPTS = [
  * and orchestrates the Smart Tooltip idle-detection system.
  */
 export function LogicCompanion() {
+    const pathname = usePathname();
+    const activePrompts = getContextPrompts(pathname || '/');
+
     const [isOpen, setIsOpen] = useState(false);
     const [showPrompt, setShowPrompt] = useState(false);
     const [promptIndex, setPromptIndex] = useState(0);
@@ -101,13 +108,13 @@ export function LogicCompanion() {
     const dismissPrompt = () => {
         setShowPrompt(false);
         hasShownOnceRef.current = true;
-        setPromptIndex(prev => (prev + 1) % PROMPTS.length);
+        setPromptIndex(prev => (prev + 1) % activePrompts.length);
         startIdleTimer();
     };
 
     const openFromPrompt = () => {
         setShowPrompt(false);
-        setPromptIndex(prev => (prev + 1) % PROMPTS.length);
+        setPromptIndex(prev => (prev + 1) % activePrompts.length);
         setIsOpen(true);
     };
 
@@ -207,32 +214,32 @@ export function LogicCompanion() {
                                     {/* Badge */}
                                     <div className="flex items-center gap-2">
                                         <span className="bg-cyan-400 text-zinc-950 px-1.5 py-0.5 text-[9px] uppercase font-bold tracking-widest shadow-[0_0_8px_rgba(6,182,212,0.6)] animate-pulse">
-                                            [ {PROMPTS[promptIndex].badge} ]
+                                            [ {activePrompts[promptIndex % activePrompts.length].badge} ]
                                         </span>
                                     </div>
 
                                     {/* Título tipo máquina de escribir */}
                                     <motion.div
-                                        key={`title-${promptIndex}`}
+                                        key={`title-${pathname}-${promptIndex}`}
                                         initial={{ width: 0 }}
                                         animate={{ width: "100%" }}
                                         transition={{ delay: 0.3, duration: 1.2, ease: 'linear' }}
                                         className="overflow-hidden whitespace-nowrap border-r-2 border-cyan-400 pr-1"
                                     >
                                         <span className="text-[11px] text-cyan-400/80 uppercase font-bold tracking-wider">
-                                            {PROMPTS[promptIndex].title}
+                                            {activePrompts[promptIndex % activePrompts.length].title}
                                         </span>
                                     </motion.div>
 
                                     {/* Cuerpo (Pregunta) */}
                                     <motion.span
-                                        key={`body-${promptIndex}`}
+                                        key={`body-${pathname}-${promptIndex}`}
                                         initial={{ opacity: 0, y: 5 }}
                                         animate={{ opacity: 1, y: 0 }}
                                         transition={{ delay: 1.6, duration: 0.5, ease: 'easeOut' }}
                                         className="text-xs text-zinc-200 w-[95%] font-medium leading-relaxed drop-shadow-[0_0_2px_rgba(255,255,255,0.4)]"
                                     >
-                                        {PROMPTS[promptIndex].body}
+                                        {activePrompts[promptIndex % activePrompts.length].body}
                                     </motion.span>
                                 </motion.div>
 

@@ -2,47 +2,49 @@
 import React, { useState } from 'react'
 import { motion, useMotionValue, useSpring, useTransform, useMotionTemplate } from 'framer-motion'
 
+import { LayoutDashboard, Cpu, Database, Network } from 'lucide-react'
+
 interface CardData {
     title: string
     description: string
     icon: React.ReactNode
     colorClass: string
     delay: number
+    className?: string
 }
 
 const cardsData: CardData[] = [
     {
-        title: "Código Limpio",
-        description: "Mantenibilidad absoluta. Tipado estricto con TypeScript, arquitecturas modulares y pipelines CI/CD automatizados para despliegues sin fricción.",
+        title: "Sistemas de Gestión (ERP/CRM)",
+        description: "Olvídate de los excels interminables. Construimos paneles de control a medida donde puedes gestionar ventas, inventario y clientes en tiempo real desde cualquier dispositivo.",
         colorClass: "blue",
         delay: 0,
-        icon: (
-            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
-            </svg>
-        )
+        icon: <LayoutDashboard className="w-6 h-6" />,
+        className: "md:col-span-8"
     },
     {
-        title: "Seguridad Bancaria",
-        description: "Protección por diseño. Encriptación End-to-End, flujos de autenticación robustos (OAuth/SAML) y cumplimiento estricto de normativas de datos.",
-        colorClass: "indigo",
-        delay: 0.1,
-        icon: (
-            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-            </svg>
-        )
-    },
-    {
-        title: "Escalabilidad Cloud",
-        description: "Infraestructura elástica. Preparado para absorber picos de tráfico masivos, escalando de 10k a 1 Millón de usuarios concurrentes de forma transparente.",
+        title: "Integración con IA",
+        description: "No hacemos software estático. Añadimos capacidades de Inteligencia Artificial para que tu sistema analice datos por ti y te ayude a tomar decisiones comerciales.",
         colorClass: "violet",
+        delay: 0.1,
+        icon: <Cpu className="w-6 h-6" />,
+        className: "md:col-span-4"
+    },
+    {
+        title: "Bases de Datos Robustas",
+        description: "Tu información empresarial segura y estructurada. Utilizamos PostgreSQL para garantizar que tus datos nunca se pierdan y sean accesibles al instante.",
+        colorClass: "indigo",
         delay: 0.2,
-        icon: (
-            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01" />
-            </svg>
-        )
+        icon: <Database className="w-6 h-6" />,
+        className: "md:col-span-4"
+    },
+    {
+        title: "Integración de Sistemas Modernos",
+        description: "¿Tienes software viejo que no se habla entre sí? Desarrollamos APIs y conexiones para unificar tus herramientas, logrando que la información fluya sin intervención manual.",
+        colorClass: "blue",
+        delay: 0.3,
+        icon: <Network className="w-6 h-6" />,
+        className: "md:col-span-8"
     }
 ]
 
@@ -55,9 +57,9 @@ const TiltCard = ({ data }: { data: CardData }) => {
     const mouseXSpring = useSpring(x, { stiffness: 400, damping: 30 })
     const mouseYSpring = useSpring(y, { stiffness: 400, damping: 30 })
 
-    // Map normalized coordinates to rotation degrees (-5deg to 5deg)
-    const rotateX = useTransform(mouseYSpring, [-1, 1], ["5deg", "-5deg"])
-    const rotateY = useTransform(mouseXSpring, [-1, 1], ["-5deg", "5deg"])
+    // Map normalized coordinates to rotation degrees (-7deg to 7deg for more extreme tilt)
+    const rotateX = useTransform(mouseYSpring, [-1, 1], ["7deg", "-7deg"])
+    const rotateY = useTransform(mouseXSpring, [-1, 1], ["-7deg", "7deg"])
 
     // Precise Mouse Coordinates for the Glow
     const mouseX = useMotionValue(-1000)
@@ -100,8 +102,8 @@ const TiltCard = ({ data }: { data: CardData }) => {
     }
 
     // Creating the radial gradient dynamically linked to motion values
-    // Using rgba(139,92,246,0.15) which is a soft violet glow
-    const backgroundGlow = useMotionTemplate`radial-gradient(400px circle at ${mouseX}px ${mouseY}px, rgba(139, 92, 246, 0.15), transparent 80%)`
+    // Using rgba(139,92,246,0.15) which is a soft violet glow centered at the exact mouse pixel
+    const backgroundGlow = useMotionTemplate`radial-gradient(250px circle at ${mouseX}px ${mouseY}px, rgba(139, 92, 246, 0.15), transparent 80%)`
 
     // Determine specific color classes based on the data.colorClass
     const colorLineMap: Record<string, string> = {
@@ -127,35 +129,38 @@ const TiltCard = ({ data }: { data: CardData }) => {
             style={{
                 rotateX,
                 rotateY,
-                transformPerspective: 1000,
+                transformStyle: "preserve-3d",
             }}
             onMouseMove={handleMouseMove}
             onMouseLeave={handleMouseLeave}
             onMouseEnter={handleMouseEnter}
-            className="group relative flex flex-col p-8 bg-zinc-900/50 hover:bg-zinc-800/80 rounded-2xl border border-white/5 transition-colors duration-300 overflow-hidden transform-gpu"
+            className={`group relative flex flex-col p-8 bg-zinc-900/50 hover:bg-zinc-800/80 rounded-2xl border border-white/5 transition-colors duration-300 overflow-hidden ${data.className || ''}`}
         >
-            {/* Dynamic Interactive Glow */}
+            {/* Dynamic Interactive Glow Spotlight */}
             <motion.div
                 className="absolute inset-0 z-0 pointer-events-none transition-opacity duration-300"
                 style={{ background: backgroundGlow, opacity: isHovered ? 1 : 0 }}
             />
 
-            {/* Subtle top glow line */}
-            <div className={`absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent to-transparent transition-all duration-300 z-10 ${lineClass}`} />
+            {/* Content wrapped in Z-translation for 3D physical depth */}
+            <div style={{ transform: "translateZ(30px)", transformStyle: "preserve-3d" }} className="w-full h-full flex flex-col pointer-events-none">
+                {/* Subtle top glow line */}
+                <div className={`absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent to-transparent transition-all duration-300 z-10 ${lineClass}`} />
 
-            <div className="relative z-10 w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                <div className={textClass}>
-                    {data.icon}
+                <div className="relative z-10 w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                    <div className={textClass}>
+                        {data.icon}
+                    </div>
                 </div>
+
+                <h3 className="relative z-10 text-xl font-bold text-white mb-3">
+                    {data.title}
+                </h3>
+
+                <p className="relative z-10 text-zinc-400 text-sm leading-relaxed">
+                    {data.description}
+                </p>
             </div>
-
-            <h3 className="relative z-10 text-xl font-bold text-white mb-3">
-                {data.title}
-            </h3>
-
-            <p className="relative z-10 text-zinc-400 text-sm leading-relaxed">
-                {data.description}
-            </p>
         </motion.div>
     )
 }
@@ -180,7 +185,7 @@ export const EnterpriseStandards = () => {
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6" style={{ perspective: "1000px" }}>
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-6" style={{ perspective: "1000px" }}>
                     {cardsData.map((data, index) => (
                         <TiltCard key={index} data={data} />
                     ))}

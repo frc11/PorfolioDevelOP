@@ -15,15 +15,15 @@ export const ProcessAutomationMetrics = () => {
                         viewport={{ once: true, margin: "-50px" }}
                         whileHover={{ scale: 1.02 }}
                         transition={{ duration: 0.5, ease: "easeOut" }}
-                        className="bg-white/[0.02] border border-white/10 backdrop-blur-xl rounded-3xl p-10 flex flex-col items-center justify-center text-center overflow-hidden relative group cursor-default"
+                        className="bg-white/[0.02] border border-white/10 hover:border-orange-500/30 backdrop-blur-xl rounded-3xl p-10 flex flex-col items-center justify-center text-center overflow-hidden relative group transition-colors duration-500"
                     >
-                        <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/0 via-transparent to-cyan-500/0 opacity-0 group-hover:opacity-10 transition-opacity duration-500 pointer-events-none" />
+                        <div className="absolute inset-0 bg-gradient-to-br from-orange-500/0 via-transparent to-amber-500/0 opacity-0 group-hover:opacity-10 transition-opacity duration-500 pointer-events-none" />
                         <div className="relative z-10">
-                            <h3 className="text-6xl lg:text-7xl font-mono font-black text-white mb-4 drop-shadow-[0_0_15px_rgba(255,255,255,0.2)] group-hover:drop-shadow-[0_0_20px_rgba(52,211,153,0.4)] transition-all duration-300">
-                                99.9<span className="text-emerald-400">%</span>
+                            <h3 className="text-6xl lg:text-7xl font-mono font-black text-orange-400 mb-4 drop-shadow-[0_0_15px_rgba(249,115,22,0.2)]">
+                                100%
                             </h3>
-                            <p className="text-zinc-400 text-sm md:text-base font-medium uppercase tracking-widest max-w-[200px] mx-auto leading-relaxed">
-                                Reducción de errores manuales en carga de datos
+                            <p className="text-zinc-400 text-sm md:text-base font-medium uppercase tracking-widest max-w-[250px] mx-auto leading-relaxed">
+                                Eliminación de tareas de Data Entry manual.
                             </p>
                         </div>
                     </motion.div>
@@ -35,15 +35,15 @@ export const ProcessAutomationMetrics = () => {
                         viewport={{ once: true, margin: "-50px" }}
                         whileHover={{ scale: 1.02 }}
                         transition={{ duration: 0.5, delay: 0.1, ease: "easeOut" }}
-                        className="bg-white/[0.02] border border-white/10 backdrop-blur-xl rounded-3xl p-10 flex flex-col items-center justify-center text-center overflow-hidden relative group cursor-default"
+                        className="bg-white/[0.02] border border-white/10 hover:border-orange-500/30 backdrop-blur-xl rounded-3xl p-10 flex flex-col items-center justify-center text-center overflow-hidden relative group transition-colors duration-500"
                     >
-                        <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/0 via-transparent to-emerald-500/0 opacity-0 group-hover:opacity-10 transition-opacity duration-500 pointer-events-none" />
+                        <div className="absolute inset-0 bg-gradient-to-br from-amber-500/0 via-transparent to-orange-500/0 opacity-0 group-hover:opacity-10 transition-opacity duration-500 pointer-events-none" />
                         <div className="relative z-10">
-                            <h3 className="text-6xl lg:text-7xl font-mono font-black text-white mb-4 drop-shadow-[0_0_15px_rgba(255,255,255,0.2)] group-hover:drop-shadow-[0_0_20px_rgba(6,182,212,0.4)] transition-all duration-300">
-                                40h<span className="text-cyan-400">+</span>
+                            <h3 className="text-6xl lg:text-7xl font-mono font-black text-orange-400 mb-4 drop-shadow-[0_0_15px_rgba(249,115,22,0.2)]">
+                                40h+
                             </h3>
-                            <p className="text-zinc-400 text-sm md:text-base font-medium uppercase tracking-widest max-w-[200px] mx-auto leading-relaxed">
-                                Horas promedio ahorradas por empleado al mes
+                            <p className="text-zinc-400 text-sm md:text-base font-medium uppercase tracking-widest max-w-[250px] mx-auto leading-relaxed">
+                                Tiempo promedio recuperado por empleado al mes.
                             </p>
                         </div>
                     </motion.div>
@@ -55,15 +55,15 @@ export const ProcessAutomationMetrics = () => {
                         viewport={{ once: true, margin: "-50px" }}
                         whileHover={{ scale: 1.02 }}
                         transition={{ duration: 0.5, delay: 0.2, ease: "easeOut" }}
-                        className="bg-white/[0.02] border border-white/10 backdrop-blur-xl rounded-3xl p-10 flex flex-col items-center justify-center text-center overflow-hidden relative group cursor-default"
+                        className="bg-white/[0.02] border border-white/10 hover:border-orange-500/30 backdrop-blur-xl rounded-3xl p-10 flex flex-col items-center justify-center text-center overflow-hidden relative group transition-colors duration-500"
                     >
-                        <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/0 via-transparent to-emerald-500/0 opacity-0 group-hover:opacity-10 transition-opacity duration-500 pointer-events-none" />
+                        <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/0 via-transparent to-orange-500/0 opacity-0 group-hover:opacity-10 transition-opacity duration-500 pointer-events-none" />
                         <div className="relative z-10">
-                            <h3 className="text-6xl lg:text-7xl font-mono font-black text-white mb-4 drop-shadow-[0_0_15px_rgba(255,255,255,0.2)] group-hover:drop-shadow-[0_0_20px_rgba(99,102,241,0.4)] transition-all duration-300">
+                            <h3 className="text-6xl lg:text-7xl font-mono font-black text-orange-400 mb-4 drop-shadow-[0_0_15px_rgba(249,115,22,0.2)]">
                                 24/7
                             </h3>
-                            <p className="text-zinc-400 text-sm md:text-base font-medium uppercase tracking-widest max-w-[200px] mx-auto leading-relaxed">
-                                Operación continua sin dependencias humanas
+                            <p className="text-zinc-400 text-sm md:text-base font-medium uppercase tracking-widest max-w-[250px] mx-auto leading-relaxed">
+                                Tus procesos ejecutándose de fondo, sin pausas ni errores.
                             </p>
                         </div>
                     </motion.div>

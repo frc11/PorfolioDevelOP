@@ -14,7 +14,7 @@ interface QualityNode {
 }
 
 // --- Configuration ---
-const PALETTE = ['#06b6d4', '#8b5cf6', '#10b981', '#f472b6', '#3b82f6'];
+const DEFAULT_PALETTE = ['#06b6d4', '#8b5cf6', '#10b981', '#f472b6', '#3b82f6'];
 
 // --- Geometry & Math ---
 const getSpherePoints = (count: number, radius: number) => {
@@ -174,7 +174,7 @@ const QualityCard = ({ node, isOpen, color }: { node: QualityNode, isOpen: boole
     </AnimatePresence>
 );
 
-const CoreNodes = ({ points, qualities, onHoverChange }: { points: THREE.Vector3[], qualities: QualityNode[], onHoverChange: (hovering: boolean) => void }) => {
+const CoreNodes = ({ points, qualities, onHoverChange, palette = DEFAULT_PALETTE }: { points: THREE.Vector3[], qualities: QualityNode[], onHoverChange: (hovering: boolean) => void, palette?: string[] }) => {
     const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
     const handlePointerOver = (i: number) => {
@@ -192,8 +192,8 @@ const CoreNodes = ({ points, qualities, onHoverChange }: { points: THREE.Vector3
     ];
 
     const nodeColors = useMemo(() => {
-        return points.map((_, i) => PALETTE[i % PALETTE.length]);
-    }, [points]);
+        return points.map((_, i) => palette[i % palette.length]);
+    }, [points, palette]);
 
     return (
         <group>
@@ -293,13 +293,13 @@ const Connections = ({ points }: { points: THREE.Vector3[] }) => {
     );
 };
 
-const Scene = ({ qualities, onHoverChange }: { qualities: QualityNode[], onHoverChange: (v: boolean) => void }) => {
+const Scene = ({ qualities, onHoverChange, palette }: { qualities: QualityNode[], onHoverChange: (v: boolean) => void, palette?: string[] }) => {
     const corePoints = useMemo(() => getSpherePoints(10, 5), []);
     const dustPoints = useMemo(() => getSpherePoints(200, 8), []);
 
     return (
         <Float speed={1} rotationIntensity={0.2} floatIntensity={0.5}>
-            <CoreNodes points={corePoints} qualities={qualities} onHoverChange={onHoverChange} />
+            <CoreNodes points={corePoints} qualities={qualities} onHoverChange={onHoverChange} palette={palette} />
             <DustNodes points={dustPoints} />
             <Connections points={[...corePoints, ...dustPoints.slice(0, 40)]} />
         </Float>
@@ -308,7 +308,7 @@ const Scene = ({ qualities, onHoverChange }: { qualities: QualityNode[], onHover
 
 // --- DESKTOP COMPONENT ---
 
-const Interactive3DNetworkDesktop = ({ qualities, titleVisible, renderCanvas = true }: { qualities: QualityNode[], titleVisible?: boolean, renderCanvas?: boolean }) => {
+const Interactive3DNetworkDesktop = ({ qualities, titleVisible, renderCanvas = true, showOverlayText = true, palette }: { qualities: QualityNode[], titleVisible?: boolean, renderCanvas?: boolean, showOverlayText?: boolean, palette?: string[] }) => {
     const [isHoveringNode, setIsHoveringNode] = useState(false);
     const [isInteracting, setIsInteracting] = useState(false);
     const timeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -328,26 +328,28 @@ const Interactive3DNetworkDesktop = ({ qualities, titleVisible, renderCanvas = t
 
     return (
         <div className="w-full h-full cursor-grab active:cursor-grabbing relative z-0 bg-[#030712]">
-            <motion.div
-                className="absolute inset-0 pointer-events-none flex flex-col items-center justify-center select-none"
-                animate={{
-                    y: active ? 250 : 0,
-                    opacity: active ? 0.3 : 1,
-                    scale: active ? 0.9 : 1,
-                    zIndex: active ? 0 : 100
-                }}
-                transition={{ type: "spring", stiffness: 100, damping: 20 }}
-            >
-                <div className="relative z-10 flex flex-col items-center">
-                    <h2 className="text-5xl md:text-8xl font-black text-white tracking-tighter uppercase text-center drop-shadow-[0_0_25px_rgba(255,255,255,0.3)]">
-                        <HyperText text="¿POR QUÉ DEVELOP?" persist={true} trigger={titleVisible} />
-                    </h2>
-                    <div className="flex gap-4 mt-6 opacity-80">
-                        <p className="text-xs text-zinc-500 font-mono tracking-[0.5em] backdrop-blur-sm">[ NEURAL CORE ONLINE ]</p>
-                        <p className="text-xs text-cyan-500 font-mono tracking-[0.5em] animate-pulse drop-shadow-[0_0_10px_cyan]">_ACTIVE</p>
+            {showOverlayText && (
+                <motion.div
+                    className="absolute inset-0 pointer-events-none flex flex-col items-center justify-center select-none"
+                    animate={{
+                        y: active ? 250 : 0,
+                        opacity: active ? 0.3 : 1,
+                        scale: active ? 0.9 : 1,
+                        zIndex: active ? 0 : 100
+                    }}
+                    transition={{ type: "spring", stiffness: 100, damping: 20 }}
+                >
+                    <div className="relative z-10 flex flex-col items-center">
+                        <h2 className="text-5xl md:text-8xl font-black text-white tracking-tighter uppercase text-center drop-shadow-[0_0_25px_rgba(255,255,255,0.3)]">
+                            <HyperText text="¿POR QUÉ DEVELOP?" persist={true} trigger={titleVisible} />
+                        </h2>
+                        <div className="flex gap-4 mt-6 opacity-80">
+                            <p className="text-xs text-zinc-500 font-mono tracking-[0.5em] backdrop-blur-sm">[ NEURAL CORE ONLINE ]</p>
+                            <p className="text-xs text-cyan-500 font-mono tracking-[0.5em] animate-pulse drop-shadow-[0_0_10px_cyan]">_ACTIVE</p>
+                        </div>
                     </div>
-                </div>
-            </motion.div>
+                </motion.div>
+            )}
 
             {renderCanvas && (
                 <Canvas camera={{ position: [0, 0, 24], fov: 40 }} gl={{ alpha: true, antialias: false, powerPreference: "high-performance", stencil: false, depth: false }} dpr={[1, 1.5]}>
@@ -375,7 +377,7 @@ const Interactive3DNetworkDesktop = ({ qualities, titleVisible, renderCanvas = t
                         <ambientLight intensity={0.5} />
                         <pointLight position={[10, 10, 10]} intensity={2} color="#ffffff" />
                         <Environment preset="city" />
-                        <Scene qualities={qualities} onHoverChange={setIsHoveringNode} />
+                        <Scene qualities={qualities} onHoverChange={setIsHoveringNode} palette={palette} />
                     </Suspense>
                 </Canvas>
             )}
@@ -386,9 +388,9 @@ const Interactive3DNetworkDesktop = ({ qualities, titleVisible, renderCanvas = t
 
 // --- MOBILE COMPONENTS ---
 
-const CoreNodesMobile = ({ points, qualities, activeNode, setActiveNode }: { points: THREE.Vector3[], qualities: QualityNode[], activeNode: number | null, setActiveNode: (i: number | null) => void }) => {
+const CoreNodesMobile = ({ points, qualities, activeNode, setActiveNode, palette = DEFAULT_PALETTE }: { points: THREE.Vector3[], qualities: QualityNode[], activeNode: number | null, setActiveNode: (i: number | null) => void, palette?: string[] }) => {
     const defaultQualities = ["Innovation", "Security", "Cloud Native", "AI Core", "Logic"];
-    const nodeColors = useMemo(() => points.map((_, i) => PALETTE[i % PALETTE.length]), [points]);
+    const nodeColors = useMemo(() => points.map((_, i) => palette[i % palette.length]), [points, palette]);
 
     return (
         <group>
@@ -444,7 +446,7 @@ const CoreNodesMobile = ({ points, qualities, activeNode, setActiveNode }: { poi
     );
 };
 
-const SceneMobile = ({ qualities }: { qualities: QualityNode[] }) => {
+const SceneMobile = ({ qualities, palette }: { qualities: QualityNode[], palette?: string[] }) => {
     // Smaller spheres for mobile
     const corePoints = useMemo(() => getSpherePoints(10, 3.2), []);
     const dustPoints = useMemo(() => getSpherePoints(150, 5), []);
@@ -452,14 +454,14 @@ const SceneMobile = ({ qualities }: { qualities: QualityNode[] }) => {
     return (
         <Float speed={1} rotationIntensity={0.2} floatIntensity={0.5}>
             {/* Disabled activeNode logic for mobile */}
-            <CoreNodesMobile points={corePoints} qualities={qualities} activeNode={null} setActiveNode={() => { }} />
+            <CoreNodesMobile points={corePoints} qualities={qualities} activeNode={null} setActiveNode={() => { }} palette={palette} />
             <DustNodes points={dustPoints} />
             <Connections points={[...corePoints, ...dustPoints.slice(0, 30)]} />
         </Float>
     );
 };
 
-const Interactive3DNetworkMobile = ({ qualities, titleVisible, renderCanvas = true }: { qualities: QualityNode[], titleVisible?: boolean, renderCanvas?: boolean }) => {
+const Interactive3DNetworkMobile = ({ qualities, titleVisible, renderCanvas = true, showOverlayText = true, palette }: { qualities: QualityNode[], titleVisible?: boolean, renderCanvas?: boolean, showOverlayText?: boolean, palette?: string[] }) => {
     const [isActivated, setIsActivated] = useState(false);
     const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -516,26 +518,28 @@ const Interactive3DNetworkMobile = ({ qualities, titleVisible, renderCanvas = tr
             )}
 
             {/* Title / Info */}
-            <motion.div
-                className="absolute inset-0 pointer-events-none flex flex-col items-center justify-center select-none"
-                animate={{
-                    y: isActivated ? 180 : 0, // Lowered title
-                    opacity: isActivated ? 0.15 : 1,
-                    scale: isActivated ? 0.8 : 1,
-                    zIndex: isActivated ? 0 : 40
-                }}
-                transition={{ type: "spring", stiffness: 100, damping: 20 }}
-            >
-                <div className="relative z-10 flex flex-col items-center">
-                    <h2 className="text-4xl md:text-5xl font-black text-white tracking-tighter uppercase text-center drop-shadow-[0_0_25px_rgba(255,255,255,0.3)] px-4">
-                        <HyperText text="¿POR QUÉ DEVELOP?" persist={true} trigger={titleVisible} />
-                    </h2>
-                    <div className="flex gap-4 mt-6 opacity-80">
-                        <p className="text-[10px] text-zinc-500 font-mono tracking-[0.3em] backdrop-blur-sm">[ NEURAL CORE ONLINE ]</p>
-                        <p className="text-[10px] text-cyan-500 font-mono tracking-[0.3em] animate-pulse">_ACTIVE</p>
+            {showOverlayText && (
+                <motion.div
+                    className="absolute inset-0 pointer-events-none flex flex-col items-center justify-center select-none"
+                    animate={{
+                        y: isActivated ? 180 : 0, // Lowered title
+                        opacity: isActivated ? 0.15 : 1,
+                        scale: isActivated ? 0.8 : 1,
+                        zIndex: isActivated ? 0 : 40
+                    }}
+                    transition={{ type: "spring", stiffness: 100, damping: 20 }}
+                >
+                    <div className="relative z-10 flex flex-col items-center">
+                        <h2 className="text-4xl md:text-5xl font-black text-white tracking-tighter uppercase text-center drop-shadow-[0_0_25px_rgba(255,255,255,0.3)] px-4">
+                            <HyperText text="¿POR QUÉ DEVELOP?" persist={true} trigger={titleVisible} />
+                        </h2>
+                        <div className="flex gap-4 mt-6 opacity-80">
+                            <p className="text-[10px] text-zinc-500 font-mono tracking-[0.3em] backdrop-blur-sm">[ NEURAL CORE ONLINE ]</p>
+                            <p className="text-[10px] text-cyan-500 font-mono tracking-[0.3em] animate-pulse">_ACTIVE</p>
+                        </div>
                     </div>
-                </div>
-            </motion.div>
+                </motion.div>
+            )}
 
             {/* Canvas Container */}
             <div
@@ -581,6 +585,7 @@ const Interactive3DNetworkMobile = ({ qualities, titleVisible, renderCanvas = tr
 
                             <SceneMobile
                                 qualities={qualities}
+                                palette={palette}
                             />
                         </Suspense>
                     </Canvas>
@@ -600,7 +605,7 @@ const DEFAULT_QUALITIES: QualityNode[] = [
     { id: 5, label: "Enterprise Ready", desc: "Scale without bottlenecks" }
 ];
 
-export const Interactive3DNetwork = (props: { qualities?: QualityNode[], titleVisible?: boolean, renderCanvas?: boolean }) => {
+export const Interactive3DNetwork = (props: { qualities?: QualityNode[], titleVisible?: boolean, renderCanvas?: boolean, showOverlayText?: boolean, palette?: string[] }) => {
     const qualities = props.qualities || DEFAULT_QUALITIES;
     return (
         <div className="w-full h-full">
