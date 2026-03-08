@@ -1,11 +1,14 @@
 "use client"
-import React from 'react'
-import { motion, Variants } from 'framer-motion'
+import React, { useRef } from 'react'
+import { motion, Variants, useScroll, useTransform } from 'framer-motion'
 import { MagneticCta } from '@/components/ui/buttons/MagneticCta'
 import { WebDevelopmentBento } from '@/components/sections/WebDevelopmentBento'
 import { WebDevelopmentSensory } from '@/components/sections/WebDevelopmentSensory'
 import { WebDevelopmentScrollReveal } from '@/components/sections/WebDevelopmentScrollReveal'
 import { WebDevelopmentCta } from '@/components/sections/WebDevelopmentCta'
+import { WebDevelopmentTimeline } from '@/components/sections/WebDevelopmentTimeline'
+import { WebDesigns } from '@/components/sections/WebDesigns'
+import { WebDevelopmentFaq } from '@/components/sections/WebDevelopmentFaq'
 
 // Variants for animated letters
 const letterVariants: Variants = {
@@ -21,22 +24,26 @@ const letterVariants: Variants = {
 export default function WebDevelopmentPage() {
     const textTitle = "DISEÑO_WEB_PREMIUM".split("")
 
+    // Add scroll sync for the hero video opacity
+    const heroRef = useRef<HTMLDivElement>(null)
+    const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] })
+    const videoOpacity = useTransform(scrollYProgress, [0, 1], [0.7, 0])
+
     return (
         <main className="relative min-h-screen w-full bg-[#030014] overflow-hidden text-white">
             {/* Colorful Hero Background */}
-            <div className="absolute top-0 left-0 w-full h-screen overflow-hidden z-0 pointer-events-none bg-[#030014]">
+            <div ref={heroRef} className="absolute top-0 left-0 w-full h-screen overflow-hidden z-0 pointer-events-none bg-[#030014]">
                 {/* Base radial gradient for rich color even before video loads */}
                 <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-cyan-900/30 via-[#030014] to-[#030014] z-0" />
 
-                {/* Video layer - with very specific human impact styling and mix-blend-luminosity */}
-                <video autoPlay loop muted playsInline preload="none" className="absolute inset-0 w-full h-full object-cover z-0 opacity-30 mix-blend-luminosity grayscale-[40%] pointer-events-none" src="/Man_sips_coffee_scrolls_phone_delpmaspu_.mp4" />
+                {/* Video layer - with very specific human impact styling (Full color rescue) */}
+                <motion.video autoPlay loop muted playsInline preload="none" className="absolute inset-0 w-full h-full object-cover z-0 opacity-70 pointer-events-none" style={{ opacity: videoOpacity }} src="/Man_sips_coffee_scrolls_phone_delpmaspu_.mp4" />
 
-                {/* Contrast gradient matching the new deep aesthetic to ensure text readability */}
-                <div className="absolute inset-0 bg-gradient-to-b from-zinc-950/80 via-[#030014]/60 to-[#030014] z-[1] pointer-events-none" />
+                {/* Cinematic Vignette Effect */}
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,#030014_85%)] z-[1] pointer-events-none" />
 
                 {/* Ambient Color Glows (Cyan specific to match reflections) */}
-                <div className="absolute top-[20%] left-[20%] w-[50vw] h-[50vw] bg-cyan-600/30 blur-[130px] rounded-full z-[2] pointer-events-none mix-blend-screen opacity-60" />
-                <div className="absolute bottom-[20%] right-[10%] w-[40vw] h-[40vw] bg-cyan-400/20 blur-[120px] rounded-full z-[2] pointer-events-none mix-blend-screen opacity-50" />
+                <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[60vw] h-[20vw] bg-cyan-500/15 blur-[120px] rounded-[100%] z-[1] pointer-events-none" />
             </div>
 
             {/* Noise Overlay */}
@@ -59,105 +66,71 @@ export default function WebDevelopmentPage() {
                     </div>
                 </motion.div>
 
-                {/* Hero Title with Kinetic Typography */}
+                {/* Hero Title Minimalist */}
                 <motion.h1
-                    initial="hidden"
-                    animate="visible"
-                    transition={{ staggerChildren: 0.05, delayChildren: 0.2 }}
-                    className="text-5xl md:text-7xl lg:text-[7rem] font-black tracking-tighter leading-[1.1] mb-6 flex items-center justify-center font-mono [text-shadow:0_4px_30px_rgba(0,0,0,0.8)]"
+                    initial={{ y: 40, opacity: 0, filter: "blur(10px)" }}
+                    animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
+                    transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+                    className="text-6xl md:text-[7rem] font-black tracking-tighter text-white leading-[0.9] text-center max-w-5xl mx-auto drop-shadow-2xl mb-6"
                 >
-                    <div className="flex flex-wrap justify-center relative">
-                        {textTitle.map((letter, i) => (
-                            <motion.span
-                                key={i}
-                                variants={letterVariants}
-                                className={`inline-block text-transparent bg-clip-text bg-gradient-to-b from-white to-white/70 drop-shadow-[0_0_15px_rgba(255,255,255,0.2)] ${letter === '_' ? 'opacity-50' : ''}`}
-                            >
-                                {letter}
-                            </motion.span>
-                        ))}
-
-                        {/* Decorative floating sparkle */}
-                        <motion.span
-                            initial={{ opacity: 0, scale: 0, rotate: -90 }}
-                            animate={{ opacity: 1, scale: 1, rotate: 0 }}
-                            transition={{
-                                delay: 1.5,
-                                duration: 1.2,
-                                type: "spring",
-                                stiffness: 200
-                            }}
-                            className="absolute -top-8 -right-12 md:-right-16 text-cyan-400 opacity-80"
-                        >
-                            <motion.svg
-                                width="48"
-                                height="48"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg"
-                                animate={{ rotate: 360 }}
-                                transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-                            >
-                                <path d="M12 2L14.4 9.6L22 12L14.4 14.4L12 22L9.6 14.4L2 12L9.6 9.6L12 2Z" fill="currentColor" />
-                            </motion.svg>
-                        </motion.span>
-                    </div>
+                    Tu nueva sucursal digital.
                 </motion.h1>
 
                 {/* Subtitle */}
-                <motion.div
-                    initial="hidden"
-                    animate="visible"
-                    transition={{ staggerChildren: 0.03, delayChildren: 0.8 }}
-                    className="text-lg md:text-2xl text-zinc-300/80 font-normal max-w-3xl mb-12 mt-4 leading-relaxed flex flex-wrap justify-start drop-shadow-md border-l-4 border-cyan-400 pl-6 text-left"
+                <motion.p
+                    initial={{ y: 40, opacity: 0, filter: "blur(10px)" }}
+                    animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
+                    transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
+                    className="text-lg md:text-2xl text-zinc-300 font-light max-w-3xl mx-auto text-center mt-8 tracking-wide mb-12"
                 >
-                    {"Tu página web no debería ser un folleto digital abandonado. Diseñamos plataformas ultra-rápidas que capturan clientes, posicionan tu marca en Google y venden por ti las 24 horas.".split(" ").map((word, i) => (
-                        <motion.span
-                            key={i}
-                            variants={{
-                                hidden: { opacity: 0, y: 10, filter: 'blur(4px)' },
-                                visible: { opacity: 1, y: 0, filter: 'blur(0px)', transition: { duration: 0.8, ease: "easeOut" } }
-                            }}
-                            className={`inline-block mr-2 ${word.includes('Google') || word.includes('ultra-rápidas') ? 'text-cyan-400 font-bold' : word.includes('venden') ? 'text-white font-bold' : ''}`}
-                        >
-                            {word}
-                        </motion.span>
-                    ))}
-                </motion.div>
+                    El usuario actual no tiene paciencia para páginas lentas. Diseñamos plataformas premium en Next.js que cargan al instante, dominan tu región en Google y convierten visitantes en clientes.
+                </motion.p>
 
                 {/* Magnetic CTA */}
                 <motion.div
-                    initial={{ opacity: 0, scale: 0.9 }}
+                    initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.6, delay: 1, ease: "easeOut" }}
+                    transition={{ duration: 0.8, delay: 0.4, ease: "easeOut" }}
                 >
-                    <MagneticCta variant="primary" className="px-10 py-5 text-sm md:text-base font-bold uppercase tracking-widest group bg-white/5 backdrop-blur-xl border border-white/20 hover:bg-white/10 hover:border-violet-400 text-white transition-all duration-300 shadow-[0_0_30px_rgba(167,139,250,0.1)] hover:shadow-[0_0_40px_rgba(167,139,250,0.3)]">
+                    <MagneticCta variant="primary" className="bg-white/5 backdrop-blur-2xl border border-white/10 hover:bg-white/10 text-white px-10 py-5 rounded-full font-bold tracking-[0.2em] text-sm md:text-base uppercase transition-all duration-500 shadow-[0_0_30px_rgba(6,182,212,0.15)] group mt-4">
                         <span className="relative z-10 flex items-center gap-3">
-                            Crear mi Experiencia Web
-                            <div className="w-2 h-2 rounded-full bg-violet-400 animate-pulse group-hover:scale-150 transition-transform" />
+                            AUDITAR MI WEB ACTUAL
+                            <div className="w-2 h-2 rounded-full bg-cyan-500 animate-pulse group-hover:scale-150 transition-transform" />
                         </span>
                     </MagneticCta>
                 </motion.div>
             </div>
 
-            {/* Scroll Indicator */}
+            {/* Trust Bar Anclada */}
             <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 1, delay: 1.5 }}
-                className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 z-10 pointer-events-none"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 1, delay: 0.8 }}
+                className="absolute bottom-10 w-full flex justify-center z-20"
             >
-                <div className="w-[1px] h-12 bg-gradient-to-b from-transparent via-cyan-500 to-transparent animate-pulse" />
+                <div className="backdrop-blur-md bg-white/[0.02] border border-white/10 px-8 py-4 rounded-2xl flex md:flex-row flex-col gap-4 md:gap-8 items-center max-w-[90%] md:max-w-fit text-center">
+                    <span className="text-[10px] md:text-xs font-mono tracking-widest text-zinc-400 uppercase">
+                        DESARROLLO NEXT.JS
+                    </span>
+                    <div className="hidden md:block w-1.5 h-1.5 rounded-full bg-white/10" />
+                    <span className="text-[10px] md:text-xs font-mono tracking-widest text-zinc-400 uppercase">
+                        LIGHTHOUSE 100/100
+                    </span>
+                    <div className="hidden md:block w-1.5 h-1.5 rounded-full bg-white/10" />
+                    <span className="text-[10px] md:text-xs font-mono tracking-widest text-zinc-400 uppercase">
+                        SOPORTE LOCAL
+                    </span>
+                </div>
             </motion.div>
 
             {/* Tech Stack Marquee (Infinite Scroll) */}
-            <div className="relative z-10 w-full pt-10 pb-20 mt-12 overflow-hidden" style={{ WebkitMaskImage: 'linear-gradient(to right, transparent, black 10%, black 90%, transparent)', maskImage: 'linear-gradient(to right, transparent, black 10%, black 90%, transparent)' }}>
+            <div className="relative z-10 w-full pt-20 pb-10 overflow-hidden" style={{ WebkitMaskImage: 'linear-gradient(to right, transparent, black 10%, black 90%, transparent)', maskImage: 'linear-gradient(to right, transparent, black 10%, black 90%, transparent)' }}>
                 <motion.div
                     className="flex whitespace-nowrap"
                     animate={{ x: ["0%", "-50%"] }}
                     transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
                 >
-                    <div className="flex gap-8 px-4 items-center font-mono text-cyan-500/40 tracking-[0.2em] text-sm md:text-base uppercase">
+                    <div className="flex gap-8 px-4 items-center font-mono text-zinc-600/50 tracking-[0.2em] text-sm md:text-base uppercase">
                         <span>NEXT.JS //</span>
                         <span>REACT //</span>
                         <span>TAILWIND CSS //</span>
@@ -187,12 +160,21 @@ export default function WebDevelopmentPage() {
             {/* Diseño que Cautiva Section */}
             <WebDevelopmentSensory />
 
+            {/* Timeline de Transformación */}
+            <WebDevelopmentTimeline />
+
+            {/* Web Designs Showcase */}
+            <WebDesigns />
+
             {/* Scroll Reveal Phrase */}
             <WebDevelopmentScrollReveal />
+
+            {/* FAQ Acordeon */}
+            <WebDevelopmentFaq />
 
             {/* Final Heavy CTA */}
             <WebDevelopmentCta />
 
-        </main>
+        </main >
     )
 }

@@ -1,8 +1,19 @@
 "use client"
-import React from 'react'
-import { motion } from 'framer-motion'
+import React, { useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 
 export const WebDevelopmentSensory = () => {
+    const [isHoveringVideo, setIsHoveringVideo] = useState(false)
+    const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
+
+    const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+        const rect = e.currentTarget.getBoundingClientRect()
+        setMousePosition({
+            x: e.clientX - rect.left,
+            y: e.clientY - rect.top,
+        })
+    }
+
     return (
         <section className="py-24 relative z-10 w-full bg-transparent overflow-hidden">
             <div className="max-w-7xl mx-auto px-4 relative z-10">
@@ -17,24 +28,18 @@ export const WebDevelopmentSensory = () => {
                         className="flex flex-col justify-center max-w-xl mx-auto lg:mx-0"
                     >
                         <h2 className="text-4xl md:text-5xl font-black tracking-tighter text-white mb-6 leading-tight">
-                            Diseño que <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-cyan-500 drop-shadow-[0_0_15px_rgba(34,211,238,0.4)]">Cautiva.</span>
+                            Como te ven, <span className="text-cyan-500">te compran.</span>
                         </h2>
 
-                        <div className="h-1 w-20 bg-cyan-500 mb-8 rounded-full shadow-[0_0_10px_rgba(34,211,238,0.8)]" />
+                        <div className="h-1 w-20 bg-cyan-500 mb-8 rounded-full" />
 
-                        <p className="text-lg md:text-xl text-zinc-300/90 leading-relaxed drop-shadow-md">
-                            No solo construimos sitios, creamos experiencias que atrapan. Optimizamos cada milisegundo y cada píxel para que tus usuarios no quieran irse.
+                        <p className="text-lg md:text-xl text-zinc-400 font-light leading-relaxed">
+                            En el mercado digital, el diseño de tu web es tu local comercial. Si tu página es genérica o lenta, el cliente asume que tu servicio también lo es. Diseñamos experiencias visuales de lujo que elevan el estatus de tu marca y generan confianza instantánea.
                         </p>
 
                         <div className="mt-10 flex items-center gap-4">
-                            <div className="w-12 h-12 rounded-full border border-cyan-500/30 bg-cyan-500/10 flex items-center justify-center animate-pulse">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" className="w-6 h-6 text-cyan-400">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                </svg>
-                            </div>
-                            <span className="text-sm font-bold text-cyan-400 uppercase tracking-widest font-mono">
-                                Retención Sensorial 98%
+                            <span className="text-xs font-bold text-zinc-500 uppercase tracking-widest font-mono">
+                                [ RETENCIÓN VISUAL & UI PREMIUM ]
                             </span>
                         </div>
                     </motion.div>
@@ -47,26 +52,43 @@ export const WebDevelopmentSensory = () => {
                         transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
                         className="relative w-full max-w-2xl mx-auto lg:mx-0 flex justify-center lg:justify-end"
                     >
-                        {/* Glow Ambiental de Fondo */}
-                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-cyan-500/20 rounded-full blur-[100px] z-0 pointer-events-none" />
+                        {/* Contenedor de Cristal Limpio (Smoked Glass Premium) */}
+                        <div
+                            className={`relative w-full bg-[#0A0A0A]/80 border border-white/[0.05] backdrop-blur-2xl p-2 md:p-3 rounded-[2rem] shadow-[0_20px_40px_rgba(0,0,0,0.8)] transition-all duration-300 ${isHoveringVideo ? 'cursor-none' : ''}`}
+                            onMouseEnter={() => setIsHoveringVideo(true)}
+                            onMouseLeave={() => setIsHoveringVideo(false)}
+                            onMouseMove={handleMouseMove}
+                        >
+                            {/* Default Cursor Override (Custom Crystal Circle) */}
+                            <AnimatePresence>
+                                {isHoveringVideo && (
+                                    <motion.div
+                                        initial={{ opacity: 0, scale: 0.5 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        exit={{ opacity: 0, scale: 0.5 }}
+                                        transition={{ duration: 0.15 }}
+                                        className="pointer-events-none absolute z-50 w-20 h-20 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white font-bold text-xs uppercase flex items-center justify-center shadow-lg"
+                                        style={{
+                                            left: mousePosition.x,
+                                            top: mousePosition.y,
+                                            x: "-50%",
+                                            y: "-50%"
+                                        }}
+                                    >
+                                        PLAY
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
 
-                        {/* Contenedor de Cristal */}
-                        <div className="relative z-10 w-full bg-white/[0.05] backdrop-blur-xl border border-white/10 p-4 rounded-[2.5rem] shadow-2xl shadow-cyan-500/10">
-                            {/* Reflexión superior del cristal */}
-                            <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-cyan-400/50 to-transparent z-20" />
-
-                            <div className="w-full relative rounded-[2rem] overflow-hidden bg-black shadow-[inset_0_0_20px_rgba(0,0,0,1)]">
+                            <div className="w-full relative rounded-[1.5rem] overflow-hidden bg-[#0A0A0A] pointer-events-none">
                                 <video
                                     autoPlay
                                     loop
                                     muted
                                     playsInline
-                                    className="w-full h-auto object-cover opacity-90 transition-opacity duration-1000 scale-[1.02]"
+                                    className="w-full h-auto object-cover opacity-90 transition-opacity duration-1000 scale-[1.02] mix-blend-luminosity"
                                     src="/Woman_engrossed_in_screen_delpmaspu_.mp4"
                                 />
-
-                                {/* Filtro Cyan muy sutil sobre el video para igualar estética */}
-                                <div className="absolute inset-0 bg-cyan-900/10 mix-blend-color pointer-events-none" />
                             </div>
                         </div>
                     </motion.div>
