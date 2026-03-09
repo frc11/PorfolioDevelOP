@@ -1,23 +1,17 @@
 "use client"
-import React, { useState, useRef } from 'react'
+import React, { useState, useEffect } from 'react'
 import { motion, useMotionValue, useSpring } from 'framer-motion'
-
-interface BentoCardProps {
-    children: React.ReactNode;
-    icon: React.ReactNode;
-    title: string;
-    description: string;
-    delay?: number;
-}
 
 const CounterTo100 = () => {
     const [count, setCount] = useState(0);
     const countValue = useMotionValue(0);
     const rounded = useSpring(countValue, { stiffness: 50, damping: 20 });
 
-    rounded.on("change", (latest) => {
-        setCount(Math.round(latest));
-    });
+    useEffect(() => {
+        rounded.on("change", (latest) => {
+            setCount(Math.round(latest));
+        });
+    }, [rounded]);
 
     return (
         <motion.span
@@ -31,191 +25,102 @@ const CounterTo100 = () => {
     );
 };
 
-const BentoCard = ({ children, icon, title, description, delay = 0 }: BentoCardProps) => {
-    const ref = useRef<HTMLDivElement>(null);
-    const mouseX = useMotionValue(0);
-    const mouseY = useMotionValue(0);
-
-    const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-        if (!ref.current) return;
-        const rect = ref.current.getBoundingClientRect();
-        mouseX.set(e.clientX - rect.left);
-        mouseY.set(e.clientY - rect.top);
-    };
-
-    return (
-        <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-50px" }}
-            transition={{ duration: 0.8, delay, ease: [0.16, 1, 0.3, 1] }}
-            className="group relative bg-[#050505] border border-white/[0.05] rounded-[2rem] p-10 md:p-12 overflow-hidden transition-all duration-500 hover:border-white/10"
-            onMouseMove={handleMouseMove}
-            ref={ref}
-        >
-            {/* Spotlight Effect */}
-            <motion.div
-                className="pointer-events-none absolute -inset-px rounded-[2rem] opacity-0 transition duration-500 group-hover:opacity-100 mix-blend-screen"
-                style={{
-                    background: useSpring(
-                        useMotionValue(0),
-                        { stiffness: 50, damping: 20 }
-                    ).get() === 0 ? `radial-gradient(600px circle at ${mouseX.get()}px ${mouseY.get()}px, rgba(255,255,255,0.03), transparent 40%)` : `radial-gradient(600px circle at var(--x) var(--y), rgba(255,255,255,0.03), transparent 40%)`,
-                }}
-                onUpdate={(latest) => {
-                    if (ref.current) {
-                        ref.current.style.setProperty('--x', `${mouseX.get()}px`);
-                        ref.current.style.setProperty('--y', `${mouseY.get()}px`);
-                    }
-                }}
-            />
-
-            {/* Glowing Icon Container */}
-            <div className="flex flex-col md:flex-row items-start md:items-center gap-8 md:gap-12 relative z-10">
-                <div className="w-16 h-16 rounded-2xl bg-white/[0.02] border border-white/[0.05] flex items-center justify-center shrink-0 group-hover:bg-white/[0.04] transition-colors duration-500 shadow-inner">
-                    {icon}
-                </div>
-
-                <div className="flex-1">
-                    <h3 className="text-2xl md:text-3xl font-bold text-white mb-3 tracking-tight leading-snug group-hover:text-cyan-50 transition-colors duration-300">
-                        {title}
-                    </h3>
-                    <p className="text-zinc-400 leading-relaxed font-light text-sm md:text-base group-hover:text-zinc-300 transition-colors duration-300">
-                        {description}
-                    </p>
-                </div>
-
-                {children}
-            </div>
-        </motion.div>
-    );
-};
-
 export const WebDevelopmentBento = () => {
+    const cardBaseStyle = "bg-white/[0.05] backdrop-blur-2xl border border-white/10 rounded-[2rem] overflow-hidden relative group hover:border-cyan-400/50 transition-colors duration-500 shadow-[0_10px_40px_rgba(0,0,0,0.5)]";
+
     return (
-        <section className="py-32 w-full bg-transparent relative z-10">
-            <div className="max-w-5xl mx-auto px-4">
-                {/* Section Header */}
-                <div className="mb-24 text-center">
-                    <motion.h2
-                        initial={{ opacity: 0, filter: "blur(10px)", y: 20 }}
-                        whileInView={{ opacity: 1, filter: "blur(0px)", y: 0 }}
-                        viewport={{ once: true, margin: "-100px" }}
-                        transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
-                        className="text-4xl md:text-6xl font-black text-white tracking-tighter mb-6 leading-tight"
-                    >
-                        Ingeniería diseñada para <span className="text-cyan-500">convertir.</span>
-                    </motion.h2>
-                    <motion.p
-                        initial={{ opacity: 0, filter: "blur(10px)", y: 20 }}
-                        whileInView={{ opacity: 1, filter: "blur(0px)", y: 0 }}
-                        viewport={{ once: true, margin: "-100px" }}
-                        transition={{ duration: 1, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
-                        className="text-zinc-400 max-w-2xl mx-auto text-lg md:text-xl font-light leading-relaxed"
-                    >
-                        No ensamblamos plantillas. Codificamos plataformas web desde cero enfocadas en rendimiento, posicionamiento SEO y conversión.
-                    </motion.p>
-                </div>
+        <section className="py-24 w-full bg-transparent relative z-10 px-4">
+            <div className="max-w-7xl mx-auto">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative z-10">
 
-                {/* The 3 Pillars of Conversion */}
-                {/* The 3 Pillars of Conversion */}
-                <div className="flex flex-col gap-6">
-                    {/* Pilar 1 (Velocidad) */}
-                    <BentoCard
-                        delay={0.1}
-                        title="El costo oculto de hacer esperar a tu cliente."
-                        description="Cada segundo que tu web tarda en cargar, perdés un 20% de ventas. Reemplazamos plantillas pesadas (WordPress/Wix) por arquitectura nativa en Next.js. El resultado: carga en milisegundos y una experiencia que retiene al usuario."
-                        icon={
-                            <svg className="w-7 h-7 text-zinc-300 group-hover:text-cyan-400 transition-colors duration-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                            </svg>
-                        }
+                    {/* Tarea 2: Tarjeta 1 (Retención UX - 2 Columnas) */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        className={`md:col-span-2 ${cardBaseStyle} p-8 md:p-12 flex flex-col md:flex-row gap-8 items-center`}
                     >
-                        <div className="hidden lg:flex w-48 shrink-0 flex-col items-end justify-center relative h-full min-h-[100px]">
-                            {/* Animated Chart Line */}
-                            <svg className="absolute inset-0 w-full h-full opacity-60" viewBox="0 0 100 50" preserveAspectRatio="none">
-                                <motion.path
-                                    d="M0 45 C 20 40, 40 10, 60 5 S 80 5, 100 5"
+                        <div className="flex-1 space-y-4">
+                            <h3 className="text-3xl md:text-5xl font-black text-white tracking-tighter">
+                                Interfaces que atrapan.
+                            </h3>
+                            <p className="text-zinc-400 leading-relaxed text-lg font-light max-w-md">
+                                Diseño UX/UI que genera confianza instantánea y retiene a tu cliente. Nivel Awwwards para conversiones sin fricción.
+                            </p>
+                        </div>
+
+                        {/* Video de Retención Full Color */}
+                        <div className="w-full md:w-[350px] aspect-video rounded-2xl overflow-hidden border border-white/10 shadow-2xl shadow-cyan-500/20">
+                            <video
+                                src="/video/Woman_engrossed_in_screen_delpmaspu_.mp4"
+                                autoPlay
+                                loop
+                                muted
+                                playsInline
+                                className="w-full h-full object-cover"
+                            />
+                        </div>
+                    </motion.div>
+
+                    {/* Tarea 3: Tarjeta 2 (Velocidad lighthouse - 1 Columna) */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ delay: 0.1 }}
+                        className={`${cardBaseStyle} p-10 flex flex-col items-center justify-center text-center space-y-6`}
+                    >
+                        <div className="relative w-40 h-40 flex items-center justify-center">
+                            <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
+                                <circle cx="50" cy="50" r="45" fill="none" className="stroke-white/5" strokeWidth="6" />
+                                <motion.circle
+                                    cx="50" cy="50" r="45"
                                     fill="none"
-                                    stroke="url(#cyan-gradient)"
-                                    strokeWidth="3"
+                                    className="stroke-emerald-400 drop-shadow-[0_0_15px_rgba(52,211,153,0.8)]"
+                                    strokeWidth="6"
                                     strokeLinecap="round"
-                                    initial={{ pathLength: 0 }}
-                                    whileInView={{ pathLength: 1 }}
-                                    transition={{ duration: 2, ease: "easeOut", repeat: Infinity, repeatDelay: 3 }}
-                                    style={{ filter: "drop-shadow(0px 4px 6px rgba(6,182,212,0.4))" }}
+                                    initial={{ strokeDasharray: "0 283" }}
+                                    whileInView={{ strokeDasharray: "283 283" }}
+                                    viewport={{ once: true }}
+                                    transition={{ duration: 2.5, ease: "easeOut", delay: 0.5 }}
                                 />
-                                <defs>
-                                    <linearGradient id="cyan-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                                        <stop offset="0%" stopColor="#22d3ee" stopOpacity="0" />
-                                        <stop offset="50%" stopColor="#22d3ee" stopOpacity="1" />
-                                        <stop offset="100%" stopColor="#0891b2" stopOpacity="1" />
-                                    </linearGradient>
-                                </defs>
                             </svg>
-
-                            <div className="relative z-10 flex flex-col items-end">
-                                <div className="text-4xl font-black text-white font-mono tracking-tighter">0.8<span className="text-cyan-500 text-2xl">s</span></div>
-                                <div className="text-[10px] text-zinc-500 font-mono tracking-widest uppercase mt-1">LCP Core Vital</div>
+                            <div className="absolute inset-0 flex items-center justify-center font-black text-5xl text-white">
+                                <CounterTo100 />
                             </div>
                         </div>
-                    </BentoCard>
-
-                    {/* Pilar 2 (Conversión y WhatsApp) */}
-                    <BentoCard
-                        delay={0.2}
-                        title="El síndrome del 'Folleto Digital'."
-                        description="Tu web no debe ser un adorno, debe ser un vendedor 24/7. Diseñamos embudos visuales que guían instintivamente al visitante hacia el botón de WhatsApp o cotización."
-                        icon={
-                            <svg className="w-7 h-7 text-zinc-300 group-hover:text-cyan-400 transition-colors duration-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                            </svg>
-                        }
-                    >
-                        <div className="hidden lg:flex w-48 shrink-0 flex-col items-end justify-center">
-                            <div className="h-10 px-6 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-xs font-bold text-white uppercase tracking-widest group-hover:bg-white/10 transition-colors">
-                                Contactar
-                            </div>
+                        <div>
+                            <h3 className="text-2xl font-black text-white mb-2">Rendimiento Absoluto</h3>
+                            <p className="text-zinc-500 text-sm font-light">Arquitectura Next.js. Cero tiempos de espera.</p>
                         </div>
-                    </BentoCard>
+                    </motion.div>
 
-                    {/* Pilar 3 (Posicionamiento SEO) */}
-                    <BentoCard
-                        delay={0.3}
-                        title="El cementerio de la página 2 de Google."
-                        description="Estructuramos tu código bajo los estándares más estrictos de Google (Lighthouse 100). Si alguien busca tu servicio en tu región, te va a encontrar a vos primero."
-                        icon={
-                            <svg className="w-7 h-7 text-zinc-300 group-hover:text-cyan-400 transition-colors duration-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                            </svg>
-                        }
+                    {/* Tarjeta 3 (Ancha Inferior - Conversión B2B) */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ delay: 0.2 }}
+                        className={`md:col-span-3 bg-gradient-to-br from-[#12002b] via-[#030014] to-[#12002b] ${cardBaseStyle} p-10 md:p-14 border-violet-500/20`}
                     >
-                        <div className="hidden lg:flex w-48 shrink-0 flex-col items-end justify-center relative">
-                            {/* SVG Performance Circle */}
-                            <div className="relative w-24 h-24 mb-2 flex items-center justify-center">
-                                <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
-                                    {/* Track */}
-                                    <circle cx="50" cy="50" r="45" fill="none" className="stroke-white/5" strokeWidth="4" />
-                                    {/* Progress */}
-                                    <motion.circle
-                                        cx="50" cy="50" r="45"
-                                        fill="none"
-                                        className="stroke-emerald-400"
-                                        strokeWidth="4"
-                                        strokeLinecap="round"
-                                        initial={{ strokeDasharray: "0 283" }}
-                                        whileInView={{ strokeDasharray: "283 283" }}
-                                        transition={{ duration: 2, ease: "easeOut", delay: 0.5 }}
-                                    />
-                                </svg>
-                                {/* Center number */}
-                                <div className="absolute inset-0 flex items-center justify-center font-mono text-3xl font-light tracking-tighter text-white">
-                                    <CounterTo100 />
+                        <div className="flex flex-col md:flex-row justify-between items-center gap-10">
+                            <div className="max-w-2xl space-y-6">
+                                <h3 className="text-4xl md:text-6xl font-black text-white leading-none tracking-tighter">
+                                    De un Folleto Abandonado a una <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-cyan-400">Máquina de Ventas.</span>
+                                </h3>
+                                <p className="text-zinc-400 text-xl font-light leading-relaxed">
+                                    Integramos flujos automáticos de WhatsApp y CRM. No solo te ven; te compran, agendan y consultan sin fricciones.
+                                </p>
+                            </div>
+
+                            <div className="flex gap-4">
+                                <div className="p-6 rounded-3xl bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 transition-all hover:scale-110">
+                                    <svg className="w-10 h-10 text-cyan-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766 0-3.18-2.587-5.771-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.311.045-.713.073-1.148-.069-.272-.088-.62-.238-1.061-.43-1.869-.812-3.11-2.822-3.203-2.947-.093-.125-.76-.999-.76-1.996 0-.996.52-1.487.705-1.696.186-.208.405-.261.541-.261.135 0 .27 0 .389.006.121.005.284-.046.444.338.165.394.567 1.385.617 1.485.05.1.083.216.017.349-.066.133-.1.216-.199.332-.1.117-.208.261-.298.35-.101.101-.205.21-.088.41.117.2.521.859 1.119 1.391.77.686 1.419.898 1.621.999.202.101.32.084.44-.055.12-.139.52-.61.659-.817.14-.208.28-.175.474-.101.192.074 1.218.574 1.428.682.21.107.349.161.405.253.056.095.056.541-.088.946z" /></svg>
                                 </div>
                             </div>
-                            <div className="text-[10px] text-emerald-400/80 font-mono tracking-widest uppercase text-center w-24">Lighthouse</div>
                         </div>
-                    </BentoCard>
+                    </motion.div>
+
                 </div>
             </div>
         </section>

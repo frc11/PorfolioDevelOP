@@ -1,27 +1,22 @@
 "use client"
 import React, { useRef } from 'react'
-import { motion, useScroll, useTransform } from 'framer-motion'
+import { motion, useScroll, useSpring, useTransform } from 'framer-motion'
 
 const MILESTONES = [
     {
         number: "Semana 01",
-        title: "Auditoría de Conversión Local.",
-        description: "Estudiamos a tu competencia local. Definimos la estructura exacta para que el usuario termine haciendo clic en el botón de WhatsApp."
+        title: "Auditoría UX",
+        description: "Mapeamos cómo compra tu cliente local para optimizar cada punto de contacto y maximizar la retención."
     },
     {
         number: "Semana 02",
-        title: "Diseño de Interfaces de Alta Gama.",
-        description: "Diseñamos la interfaz visual (como la que estás viendo) y te la presentamos. No programamos nada hasta que estés 100% orgulloso del diseño."
+        title: "Diseño UI",
+        description: "Creamos la interfaz visual en Figma con estética premium, enfocada en la identidad de tu marca."
     },
     {
         number: "Semana 03",
-        title: "Arquitectura y Código en Next.js.",
-        description: "Escribimos código limpio y a medida. Sin plantillas pesadas de WordPress, asegurando que Google te posicione primero por ser el más rápido."
-    },
-    {
-        number: "Semana 04",
-        title: "Despliegue y Conexión de Ventas.",
-        description: "Lanzamos tu web en servidores de alta disponibilidad y conectamos tus herramientas de venta (CRM, Analytics, WhatsApp)."
+        title: "Código Next.js",
+        description: "Desarrollamos el motor ultrarrápido con las mejores prácticas de SEO y rendimiento del mercado."
     }
 ]
 
@@ -29,74 +24,91 @@ export function WebDevelopmentTimeline() {
     const containerRef = useRef<HTMLDivElement>(null)
     const { scrollYProgress } = useScroll({
         target: containerRef,
-        offset: ["start end", "end start"]
+        offset: ["start center", "end center"]
     })
 
-    const yMove = useTransform(scrollYProgress, [0, 1], [50, -50])
+    const scaleY = useSpring(scrollYProgress, {
+        stiffness: 100,
+        damping: 30,
+        restDelta: 0.001
+    })
 
     return (
-        <section ref={containerRef} className="relative w-full py-24 md:py-32 px-4 bg-transparent md:bg-[#030014] z-10 overflow-hidden">
-            <div className="max-w-4xl mx-auto">
-                <div className="text-center mb-16 md:mb-24">
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.6 }}
-                    >
-                        <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-white mb-6">
-                            De la idea al código en 4 semanas.
-                        </h2>
-                    </motion.div>
-                </div>
+        <section ref={containerRef} className="relative w-full py-32 px-4 bg-[#030014] z-10 overflow-hidden">
+            <div className="max-w-6xl mx-auto">
+                {/* Tarea 1: La Línea Láser */}
+                <motion.h2
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    className="text-5xl md:text-6xl font-black text-white text-center mb-32 tracking-tighter"
+                >
+                    4 Semanas para tu <span className="text-cyan-500 text-glow-cyan">Evolución Digital</span>
+                </motion.h2>
 
                 <div className="relative">
-                    {/* The subtle vertical line connecting the steps */}
-                    <div className="absolute left-[27px] md:left-1/2 top-4 bottom-4 w-[1px] bg-white/[0.05] md:-translate-x-1/2" />
-                    {/* Animated Progress Line */}
+                    {/* Línea Base */}
+                    <div className="absolute left-1/2 top-0 bottom-0 w-[2px] bg-white/10 -translate-x-1/2 hidden md:block" />
+
+                    {/* Línea Láser Cyan Animada */}
                     <motion.div
-                        className="absolute left-[27px] md:left-1/2 top-4 w-[1px] bg-white md:-translate-x-1/2 origin-top shadow-[0_0_8px_rgba(255,255,255,0.5)]"
-                        style={{ height: "calc(100% - 2rem)", scaleY: scrollYProgress }}
+                        className="absolute left-1/2 top-0 w-[2px] bg-cyan-400 shadow-[0_0_15px_rgba(34,211,238,0.8)] -translate-x-1/2 hidden md:block origin-top"
+                        style={{ scaleY }}
                     />
 
-                    <div className="space-y-8 relative z-10">
-                        {MILESTONES.map((milestone, index) => {
-                            const isEven = index % 2 === 0
-
-                            return (
+                    <div className="space-y-24 relative z-10">
+                        {/* Tarea 2: Nodos 1, 2 y 3 (Tarjetas Glassmorphism) */}
+                        {MILESTONES.map((milestone, index) => (
+                            <div key={index} className={`flex flex-col md:flex-row items-center justify-between w-full ${index % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'}`}>
                                 <motion.div
-                                    key={milestone.number}
-                                    initial={{ opacity: 0, y: 30 }}
-                                    whileInView={{ opacity: 1, y: 0 }}
+                                    initial={{ opacity: 0, x: index % 2 === 0 ? -50 : 50 }}
+                                    whileInView={{ opacity: 1, x: 0 }}
                                     viewport={{ once: true, margin: "-100px" }}
-                                    transition={{ duration: 0.6, delay: 0.1 }}
-                                    className={`flex flex-col md:flex-row items-start md:items-center gap-6 md:gap-12 ${isEven ? 'md:flex-row-reverse' : ''}`}
+                                    className="w-full md:w-[45%] bg-white/[0.05] backdrop-blur-xl border border-white/10 p-8 rounded-3xl hover:bg-white/[0.08] transition-all hover:border-cyan-400/50 group"
                                 >
-                                    {/* Minimal Dot */}
-                                    <div className="absolute left-6 md:left-1/2 w-3 h-3 rounded-full bg-black border border-white/20 md:-translate-x-1/2 z-20 mt-6 md:mt-0" />
-
-                                    {/* Card Content */}
-                                    <div className={`w-full md:w-1/2 pl-12 md:pl-0 ${isEven ? 'md:pr-12 md:text-right' : 'md:pl-12 md:text-left'}`}>
-                                        <div className="p-8 rounded-2xl bg-[#050505] border border-white/[0.05] hover:border-white/[0.1] transition-colors duration-300">
-                                            <div className={`flex flex-col md:flex-row md:items-center gap-2 md:gap-3 mb-4 ${isEven ? 'md:justify-end' : 'justify-start'}`}>
-                                                <span className="text-[10px] text-zinc-500 font-mono tracking-widest uppercase">
-                                                    {milestone.number}
-                                                </span>
-                                            </div>
-                                            <h3 className="text-xl font-bold text-white tracking-tight mb-3">
-                                                {milestone.title}
-                                            </h3>
-                                            <p className="text-zinc-400 leading-relaxed font-light text-sm md:text-base">
-                                                {milestone.description}
-                                            </p>
-                                        </div>
-                                    </div>
-
-                                    {/* Empty space for the other side of the timeline to balance flex */}
-                                    <div className="hidden md:block md:w-1/2" />
+                                    <div className="text-cyan-500 font-mono text-xs tracking-[0.3em] mb-4 uppercase">{milestone.number}</div>
+                                    <h3 className="text-2xl font-bold text-white mb-4 group-hover:text-cyan-100 transition-colors">{milestone.title}</h3>
+                                    <p className="text-zinc-400 leading-relaxed font-light">{milestone.description}</p>
                                 </motion.div>
-                            )
-                        })}
+                                <div className="hidden md:block w-4 h-4 rounded-full bg-cyan-500 shadow-[0_0_15px_rgba(34,211,238,0.8)] z-20" />
+                                <div className="hidden md:block w-[45%]" />
+                            </div>
+                        ))}
+
+                        {/* Tarea 3: Nodo 4 - El Remate Audiovisual (INYECCIÓN DE VIDEO) */}
+                        <div className="flex flex-col items-center w-full">
+                            <motion.div
+                                initial={{ opacity: 0, y: 50 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                className="w-full max-w-4xl bg-white/[0.05] backdrop-blur-xl border border-white/10 p-8 md:p-12 rounded-[2.5rem] hover:border-cyan-400/30 transition-all shadow-2xl"
+                            >
+                                <div className="text-center space-y-6 mb-10">
+                                    <div className="text-cyan-500 font-mono text-xs tracking-[0.3em] uppercase">Semana 04</div>
+                                    <h3 className="text-3xl md:text-5xl font-black text-white tracking-tight">
+                                        Lanzamiento y Ventas Automáticas
+                                    </h3>
+                                    <p className="text-zinc-400 text-lg md:text-xl font-light max-w-2xl mx-auto">
+                                        Tu plataforma entra en órbita. Estabilidad total, conversiones fluidas y la tranquilidad de tener un activo digital que trabaja por vos.
+                                    </p>
+                                </div>
+
+                                <div className="rounded-2xl overflow-hidden border border-white/20 relative aspect-video group">
+                                    <video
+                                        src="/video/Man_sips_coffee_scrolls_phone_delpmaspu_.mp4"
+                                        autoPlay
+                                        loop
+                                        muted
+                                        playsInline
+                                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                                    />
+                                    {/* Sutil Overlay Cyan */}
+                                    <div className="absolute inset-0 bg-cyan-900/10 mix-blend-color pointer-events-none" />
+                                    {/* Vignette for depth */}
+                                    <div className="absolute inset-0 bg-gradient-to-t from-[#030014]/60 via-transparent to-transparent pointer-events-none" />
+                                </div>
+                            </motion.div>
+                        </div>
                     </div>
                 </div>
             </div>

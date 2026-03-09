@@ -87,7 +87,7 @@ export const WebDevelopmentSensory = () => {
                                     muted
                                     playsInline
                                     className="w-full h-auto object-cover opacity-90 transition-opacity duration-1000 scale-[1.02] mix-blend-luminosity"
-                                    src="/Woman_engrossed_in_screen_delpmaspu_.mp4"
+                                    src="/video/Woman_engrossed_in_screen_delpmaspu_.mp4"
                                 />
                             </div>
                         </div>
