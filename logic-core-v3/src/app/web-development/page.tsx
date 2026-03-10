@@ -2,13 +2,19 @@
 import React, { useRef } from 'react'
 import { motion, Variants, useScroll, useTransform } from 'framer-motion'
 import { MagneticCta } from '@/components/ui/buttons/MagneticCta'
+import HeroBackground from '@/components/canvas/HeroBackground'
+import HeroTitle from '@/components/ui/HeroTitle'
+import HeroMetrics from '@/components/ui/HeroMetrics'
 import { WebDevelopmentBento } from '@/components/sections/WebDevelopmentBento'
-import { WebDevelopmentComparison } from '@/components/sections/WebDevelopmentComparison'
+
 import { WebDevelopmentSeo } from '@/components/sections/WebDevelopmentSeo'
 import { WebDevelopmentSensory } from '@/components/sections/WebDevelopmentSensory'
 import { WebDevelopmentScrollReveal } from '@/components/sections/WebDevelopmentScrollReveal'
 import { WebDevelopmentCta } from '@/components/sections/WebDevelopmentCta'
 import { WebDevelopmentTimeline } from '@/components/sections/WebDevelopmentTimeline'
+import ShowcaseSection from '@/components/sections/ShowcaseSection'
+import ComparadorSection from '@/components/sections/ComparadorSection'
+import AiSection from '@/components/sections/AiSection'
 import { WebDesigns } from '@/components/sections/WebDesigns'
 import { WebDevelopmentFaq } from '@/components/sections/WebDevelopmentFaq'
 
@@ -21,84 +27,73 @@ export default function WebDevelopmentPage() {
 
     return (
         <main className="relative min-h-screen w-full bg-[#030014] overflow-hidden text-white">
-            {/* Tarea 1: Auroras Vibrantes y Profundas (Expansión) */}
+            {/* Tarea 1: Textura de Grano y Ruido (Film Grain) */}
+            <div className="absolute inset-0 z-[1] opacity-[0.03] pointer-events-none bg-[url('https://grainy-gradients.vercel.app/noise.svg')] brightness-100 contrast-150" />
+
+            {/* Construcción del Background Dinámico en R3F */}
             <div ref={heroRef} className="absolute top-0 left-0 w-full h-screen overflow-hidden z-0 pointer-events-none">
-                {/* Engineering Grid Texture */}
-                <div className="absolute inset-0 bg-[linear-gradient(to_right,#4f4f4f2e_1px,transparent_1px),linear-gradient(to_bottom,#4f4f4f2e_1px,transparent_1px)] bg-[size:14px_24px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] pointer-events-none z-0" />
-
-                {/* Aurora Superior Izquierda (Cyan) */}
-                <motion.div
-                    animate={{ scale: [1, 1.05, 1], opacity: [0.5, 0.8, 0.5] }}
-                    transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-                    className="w-[70vw] h-[60vw] bg-cyan-500/25 blur-[130px] absolute -top-[10%] -left-[10%]"
-                />
-
-                {/* Aurora Derecha (Violeta) */}
-                <motion.div
-                    animate={{ scale: [1, 1.05, 1], opacity: [0.4, 0.7, 0.4] }}
-                    transition={{ duration: 12, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-                    className="w-[70vw] h-[60vw] bg-violet-600/25 blur-[130px] absolute top-[10%] -right-[10%]"
-                />
-
-                {/* Cinematic Vignette */}
-                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,#030014_90%)] z-[1]" />
+                <HeroBackground />
             </div>
 
-            {/* Noise Overlay */}
-            <div className="fixed inset-0 z-[3] pointer-events-none opacity-[0.03] bg-[url('/noise.svg')] mix-blend-overlay" />
-
-            {/* Tarea 2: Tipografía Cinética Masiva + Contenido Principal */}
+            {/* Tarea 2: Tipografía Cinética Masiva + Contenido Principal (Refactor Asimétrico 60/40) */}
             <motion.div
                 style={{ opacity, scale }}
-                className="relative z-10 flex flex-col justify-center items-center text-center h-screen px-4 max-w-7xl mx-auto"
+                className="relative z-10 w-full h-screen max-w-[1920px] mx-auto flex flex-col lg:flex-row items-center justify-center lg:justify-between pt-24 lg:pt-0"
             >
-                {/* Tarea 3: Badge Corporativo (Lighthouse) */}
+                {/* COLUMNA IZQUIERDA (60%) */}
                 <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.8, delay: 0.2 }}
-                    className="mb-8 bg-white/[0.03] backdrop-blur-md border border-white/10 px-5 py-2 rounded-full"
+                    initial={{ x: -40, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    transition={{ delay: 0.2, duration: 1, ease: [0.16, 1, 0.3, 1] }}
+                    className="w-full lg:w-[var(--width-hero-left)] flex flex-col items-center lg:items-start text-center lg:text-left px-4 lg:pl-[clamp(48px,8vw,120px)] lg:pr-8 z-10"
                 >
-                    <span className="text-zinc-400 font-mono text-[10px] uppercase tracking-widest">
-                        [ ESTATUS: GOOGLE_LIGHTHOUSE_OPTIMIZED ]
-                    </span>
+                    {/* Badge Corporativo */}
+                    <div className="mb-6 lg:mb-8 bg-black/40 backdrop-blur-xl border border-white/20 px-5 py-2 rounded-full inline-flex shadow-[0_4px_20px_rgba(0,0,0,0.5)]">
+                        <span className="text-zinc-200 font-mono text-[9px] md:text-[10px] uppercase tracking-widest font-bold">
+                            [ ESTATUS: GOOGLE_LIGHTHOUSE_OPTIMIZED ]
+                        </span>
+                    </div>
+
+                    {/* H1 Backlight */}
+                    <div className="absolute top-[30%] left-1/2 lg:left-0 -translate-x-1/2 lg:translate-x-0 w-[60%] lg:w-[40%] h-[30%] bg-cyan-400/20 blur-[120px] pointer-events-none z-0" />
+
+                    {/* Hero Title (Forzando override a text-left en Desktop) */}
+                    <div className="w-full max-w-6xl relative z-10 [&_div]:lg:items-start [&_div]:lg:justify-start [&_h1]:lg:text-left [&_h1]:lg:justify-start">
+                        <HeroTitle text={["TU", "SUCURSAL", "DIGITAL."]} />
+                    </div>
+
+                    {/* Subtítulo B2B Autoritario */}
+                    <p className="text-base md:text-lg text-white font-medium max-w-[520px] mt-6 lg:mt-8 tracking-wide leading-relaxed drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)] px-4 lg:px-0">
+                        Tener solo Instagram ya no alcanza.<br className="hidden md:block" /> Construimos plataformas premium en <span className="text-cyan-400 font-bold drop-shadow-[0_0_8px_rgba(34,211,238,0.8)]">Next.js</span> que cargan al instante, dominan Google en tu ciudad y venden en automático.
+                    </p>
+
+                    {/* Botón de Cristal Sólido */}
+                    <div className="mt-10 lg:mt-12">
+                        <MagneticCta
+                            className="bg-white/[0.03] backdrop-blur-3xl border-t border-l border-white/20 border-b border-r border-white/5 text-white px-12 py-5 md:px-14 md:py-6 rounded-2xl font-bold uppercase tracking-[0.3em] text-[9px] md:text-[10px] transition-all duration-700 shadow-[20px_20px_50px_rgba(0,0,0,0.5),-10px_-10px_30px_rgba(255,255,255,0.02)] hover:shadow-cyan-500/20 hover:border-cyan-400/50 group relative overflow-hidden z-10"
+                        >
+                            <span className="drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]">INICIAR TRANSFORMACIÓN</span>
+                        </MagneticCta>
+                    </div>
                 </motion.div>
 
-                {/* H1 Backlight (Crea separación y profundidad) */}
-                <div className="absolute top-[30%] left-1/2 -translate-x-1/2 w-[60%] h-[30%] bg-cyan-400/15 blur-[120px] pointer-events-none z-0" />
-
-                {/* Tarea 2: El H1 Masivo (Cromo / Alto Impacto) */}
-                <motion.h1
-                    initial={{ opacity: 0, y: 30, filter: "blur(10px)" }}
-                    animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-                    transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
-                    className="text-6xl md:text-[7.5rem] lg:text-[9rem] font-black tracking-tighter leading-[0.9] text-transparent bg-clip-text bg-gradient-to-b from-white via-cyan-50 to-cyan-900 drop-shadow-[0_0_40px_rgba(255,255,255,0.15)] text-center max-w-6xl mx-auto relative z-10"
-                >
-                    TU SUCURSAL DIGITAL.
-                </motion.h1>
-
-                {/* Subtítulo B2B Autoritario */}
-                <motion.p
-                    initial={{ y: 40, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    transition={{ duration: 1.2, delay: 0.4, ease: "easeOut" }}
-                    className="text-lg md:text-xl text-zinc-400 font-light max-w-2xl mx-auto text-center mt-8 tracking-wide"
-                >
-                    Tener solo Instagram ya no alcanza. Construimos plataformas premium en <span className="text-white font-medium">Next.js</span> que cargan al instante, dominan Google en tu ciudad y venden en automático.
-                </motion.p>
-
-                {/* Tarea 3: Botón de Cristal Sólido */}
+                {/* LÍNEA DIVISORA VERTICAL (Desktop Only) */}
                 <motion.div
-                    initial={{ y: 30, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    transition={{ duration: 0.8, delay: 0.6 }}
-                    className="mt-12"
+                    initial={{ scaleY: 0 }}
+                    animate={{ scaleY: 1 }}
+                    transition={{ duration: 1.2, delay: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                    className="hidden lg:block absolute left-[var(--width-hero-left)] top-[20%] h-[60%] w-[1px] origin-top z-0"
+                    style={{ background: "linear-gradient(transparent, #00e5ff40, transparent)" }}
+                />
+
+                {/* COLUMNA DERECHA (40% - Metrics) */}
+                <motion.div
+                    initial={{ x: 40, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    transition={{ delay: 0.5, duration: 1, ease: [0.16, 1, 0.3, 1] }}
+                    className="w-full lg:w-[var(--width-hero-right)] flex flex-col justify-center items-center lg:items-end mt-16 lg:mt-0 lg:pr-[clamp(32px,6vw,80px)] z-10"
                 >
-                    <MagneticCta
-                        className="bg-gradient-to-r from-cyan-500/10 to-violet-500/10 backdrop-blur-2xl border border-cyan-400/40 text-white px-12 py-5 rounded-full font-black uppercase tracking-[0.2em] text-sm transition-all duration-500 shadow-[0_0_40px_rgba(34,211,238,0.2)] hover:shadow-[0_0_80px_rgba(34,211,238,0.6)] hover:bg-cyan-500 hover:text-black hover:scale-105 group relative overflow-hidden z-10"
-                    >
-                        INICIAR TRANSFORMACIÓN
-                    </MagneticCta>
+                    <HeroMetrics />
                 </motion.div>
             </motion.div>
 
@@ -149,11 +144,12 @@ export default function WebDevelopmentPage() {
                 </motion.div>
             </div>
 
+            {/* Comparativa: Caos vs Control */}
+            <ComparadorSection />
+
             {/* The Bento Grid Section */}
             <WebDevelopmentBento />
 
-            {/* Comparison Section */}
-            <WebDevelopmentComparison />
 
             {/* SEO Section */}
             <WebDevelopmentSeo />
@@ -161,8 +157,14 @@ export default function WebDevelopmentPage() {
             {/* Diseño que Cautiva Section */}
             <WebDevelopmentSensory />
 
+            {/* IA Section */}
+            <AiSection />
+
             {/* Timeline de Transformación */}
             <WebDevelopmentTimeline />
+
+            {/* Showcase de proyectos reales */}
+            <ShowcaseSection />
 
             {/* Web Designs Showcase */}
             <WebDesigns />

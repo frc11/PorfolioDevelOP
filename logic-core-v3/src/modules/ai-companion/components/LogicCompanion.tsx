@@ -86,6 +86,16 @@ export function LogicCompanion() {
         };
     }, [resetIdleTimer]);
 
+    // ─── Open chat from external trigger (AiSection demo badge) ──
+    useEffect(() => {
+        const handleOpenMascot = () => {
+            setShowPrompt(false);
+            setIsOpen(true);
+        };
+        window.addEventListener('open-mascot-chat', handleOpenMascot);
+        return () => window.removeEventListener('open-mascot-chat', handleOpenMascot);
+    }, []);
+
     // ─── When chat closes, restart idle timer ────────────────
     useEffect(() => {
         if (!isOpen && hasShownOnceRef.current) {

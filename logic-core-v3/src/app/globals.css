@@ -3,6 +3,9 @@
 @theme {
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --width-hero-left: 60%;
+  --width-hero-right: 40%;
+  --color-metric-bg: rgba(255, 255, 255, 0.03);
 }
 
 /* Logic Core V3: The Inversion System */
@@ -53,10 +56,36 @@ canvas {
 
 @keyframes shimmer {
   0% {
-    transform: translateX(-100%);
+    background-position: 200% 0;
   }
 
   100% {
-    transform: translateX(100%);
+    background-position: -200% 0;
+  }
+}
+
+@property --angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes rotate-border {
+  from {
+    --angle: 0deg;
+  }
+
+  to {
+    --angle: 360deg;
+  }
+}
+
+@layer utilities {
+  .animate-shimmer {
+    animation: shimmer 3s linear infinite;
+  }
+
+  .animate-border-spin {
+    animation: rotate-border 3s linear infinite;
   }
 }
