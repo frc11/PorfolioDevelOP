@@ -9,13 +9,13 @@ import { WebDevelopmentBento } from '@/components/sections/WebDevelopmentBento'
 
 import { WebDevelopmentSeo } from '@/components/sections/WebDevelopmentSeo'
 import { WebDevelopmentSensory } from '@/components/sections/WebDevelopmentSensory'
-import { WebDevelopmentScrollReveal } from '@/components/sections/WebDevelopmentScrollReveal'
+import StatementSection from '@/components/sections/StatementSection'
 import { WebDevelopmentCta } from '@/components/sections/WebDevelopmentCta'
 import { WebDevelopmentTimeline } from '@/components/sections/WebDevelopmentTimeline'
 import ShowcaseSection from '@/components/sections/ShowcaseSection'
 import ComparadorSection from '@/components/sections/ComparadorSection'
 import AiSection from '@/components/sections/AiSection'
-import { WebDesigns } from '@/components/sections/WebDesigns'
+
 import { WebDevelopmentFaq } from '@/components/sections/WebDevelopmentFaq'
 
 
@@ -26,7 +26,7 @@ export default function WebDevelopmentPage() {
     const scale = useTransform(scrollYProgress, [0, 1], [1, 0.9])
 
     return (
-        <main className="relative min-h-screen w-full bg-[#030014] overflow-hidden text-white">
+        <main className="relative min-h-screen w-full bg-[#030014] overflow-x-clip overflow-y-visible text-white">
             {/* Tarea 1: Textura de Grano y Ruido (Film Grain) */}
             <div className="absolute inset-0 z-[1] opacity-[0.03] pointer-events-none bg-[url('https://grainy-gradients.vercel.app/noise.svg')] brightness-100 contrast-150" />
 
@@ -166,11 +166,8 @@ export default function WebDevelopmentPage() {
             {/* Showcase de proyectos reales */}
             <ShowcaseSection />
 
-            {/* Web Designs Showcase */}
-            <WebDesigns />
-
-            {/* Scroll Reveal Phrase */}
-            <WebDevelopmentScrollReveal />
+            {/* Cinematic Statement Pause */}
+            <StatementSection />
 
             {/* FAQ Acordeon */}
             <WebDevelopmentFaq />

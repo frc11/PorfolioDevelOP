@@ -1,491 +1,489 @@
+/**
+ * SHOWCASE SECTION — DevelOP
+ * 
+ * IMÁGENES PENDIENTES DE SWAP:
+ * Cuando tengas las imágenes reales, reemplazar:
+ * 
+ * Hero:
+ *   src="https://placehold.co/1440x700/0d0d1f/00e5ff?text=." 
+ *   → src="/images/showcase/concesionaria-desktop.png"
+ * 
+ * Carrusel[0] (Restaurante):
+ *   → src="/images/showcase/restaurante-desktop.png"
+ * 
+ * Carrusel[1] (Inmobiliaria):
+ *   → src="/images/showcase/inmobiliaria-desktop.png"
+ * 
+ * Carrusel[2] (Servicios):
+ *   → src="/images/showcase/servicios-desktop.png"
+ * 
+ * Guardar todas las imágenes en /public/images/showcase/
+ * Dimensiones recomendadas:
+ *   Hero: 1440x700px
+ *   Carrusel: 800x500px
+ */
 'use client'
-import React, { useRef, useState, useEffect } from 'react'
+
+import React, { useState, useRef, useEffect } from 'react'
+import Image from 'next/image'
 import Link from 'next/link'
-import { motion, useInView, useReducedMotion } from 'motion/react'
+import { motion, useInView, useReducedMotion, useAnimationControls } from 'framer-motion'
 
 // ── Types ──────────────────────────────────────────────────────────
-interface Stat { value: string; label: string }
-interface StackTag { label: string }
+interface CarouselProject {
+    id: number
+    tag: string
+    client: string
+    description: string
+    stat: { value: string; label: string }
+    stack: string[]
+    accent: string
+    image: string
+}
 
-const ease = [0.16, 1, 0.3, 1] as const
+// ── Data ──────────────────────────────────────────────────────────
+const carouselProjects: CarouselProject[] = [
+    {
+        id: 1,
+        tag: "GASTRONOMÍA · YERBA BUENA",
+        client: "El Patio Restaurant",
+        description: "Reservas online, menú con QR y posicionamiento #1 en búsquedas gastronómicas locales.",
+        stat: { value: "3x", label: "Más reservas" },
+        stack: ["Next.js", "Reservas", "SEO Local"],
+        accent: "#00e5ff",
+        image: "https://placehold.co/600x400/0d1a1a/00e5ff?text=.",
+        /* TODO: /images/showcase/restaurante-desktop.png */
+    },
+    {
+        id: 2,
+        tag: "INMOBILIARIA · TUCUMÁN",
+        client: "Grupo Nórdico Propiedades",
+        description: "Portal con búsqueda avanzada, tours virtuales y captación de leads automática.",
+        stat: { value: "5x", label: "Más consultas" },
+        stack: ["Next.js", "Portal", "Lead Gen"],
+        accent: "#7b2fff",
+        image: "https://placehold.co/600x400/0d0a1a/7b2fff?text=.",
+        /* TODO: /images/showcase/inmobiliaria-desktop.png */
+    },
+    {
+        id: 3,
+        tag: "SERVICIOS PROFESIONALES · NOA",
+        client: "Estudio Ferreyra & Asociados",
+        description: "Plataforma de turnos automáticos y consultas online con credibilidad institucional.",
+        stat: { value: "24/7", label: "Consultas auto" },
+        stack: ["Next.js", "Turnos", "WhatsApp API"],
+        accent: "#00e5ff",
+        image: "https://placehold.co/600x400/0a0d1a/00e5ff?text=.",
+        /* TODO: /images/showcase/servicios-desktop.png */
+    },
+    {
+        id: 4,
+        tag: "COMERCIO · TUCUMÁN",
+        client: "Distribuidora Central NOA",
+        description: "Catálogo online con más de 500 productos, pedidos automáticos y logística integrada.",
+        stat: { value: "500+", label: "Productos" },
+        stack: ["Next.js", "E-Commerce", "CRM"],
+        accent: "#7b2fff",
+        image: "https://placehold.co/600x400/0a0a1a/7b2fff?text=.",
+        /* TODO: /images/showcase/comercio-desktop.png */
+    },
+    {
+        id: 5,
+        tag: "GASTRONOMÍA · SAN MIGUEL",
+        client: "Mercado del Norte",
+        description: "Delivery online, carta digital dinámica y gestión de mesas en tiempo real.",
+        stat: { value: "2x", label: "Pedidos online" },
+        stack: ["Next.js", "Delivery", "SEO Local"],
+        accent: "#00e5ff",
+        image: "https://placehold.co/600x400/0d1a1a/00e5ff?text=.",
+        /* TODO: /images/showcase/mercado-desktop.png */
+    },
+    {
+        id: 6,
+        tag: "OTRO RUBRO · NOA",
+        client: "Proyecto Personalizado",
+        description: "Solución a medida con arquitectura premium y resultados medibles desde el día uno.",
+        stat: { value: "100", label: "Lighthouse" },
+        stack: ["Next.js", "Custom", "Premium"],
+        accent: "#7b2fff",
+        image: "https://placehold.co/600x400/0d0a1a/7b2fff?text=.",
+        /* TODO: /images/showcase/custom-desktop.png */
+    },
+    {
+        id: 7,
+        tag: "COMERCIO · YERBA BUENA",
+        client: "El Almacén Digital",
+        description: "Tienda online con integración MercadoPago, WhatsApp automático y SEO local dominante.",
+        stat: { value: "#1", label: "Google local" },
+        stack: ["Next.js", "MercadoPago", "WhatsApp"],
+        accent: "#00e5ff",
+        image: "https://placehold.co/600x400/0a0d1a/00e5ff?text=.",
+        /* TODO: /images/showcase/almacen-desktop.png */
+    },
+    {
+        id: 8,
+        tag: "INMOBILIARIA · SAN MIGUEL",
+        client: "Construir Propiedades",
+        description: "Vitrina digital de propiedades con filtros avanzados y formularios de contacto inteligentes.",
+        stat: { value: "4x", label: "Leads captados" },
+        stack: ["Next.js", "Propiedades", "Lead Gen"],
+        accent: "#7b2fff",
+        image: "https://placehold.co/600x400/0d0a1a/7b2fff?text=.",
+        /* TODO: /images/showcase/propiedades-desktop.png */
+    },
+]
 
-// ── Shared atoms ───────────────────────────────────────────────────
-function BrowserDots() {
+const duplicatedProjects = [...carouselProjects, ...carouselProjects]
+
+// ── Components ─────────────────────────────────────────────────────
+
+function ProjectCard({ project }: { project: CarouselProject }) {
     return (
-        <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
-            <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'rgba(255,95,87,0.6)' }} />
-            <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'rgba(255,189,46,0.6)' }} />
-            <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'rgba(39,201,63,0.6)' }} />
+        <div
+            className="group"
+            style={{
+                minWidth: '320px',
+                maxWidth: '320px',
+                borderRadius: '14px',
+                overflow: 'hidden',
+                border: '1px solid rgba(255,255,255,0.07)',
+                background: 'rgba(255,255,255,0.02)',
+                flexShrink: 0,
+                transition: 'border-color 300ms, transform 300ms',
+                display: 'flex',
+                flexDirection: 'column',
+            }}
+            onMouseEnter={(e) => {
+                // Usamos un color con opacidad basado en el acento
+                // Asumiendo que project.accent es en formato hex #RRGGBB
+                e.currentTarget.style.borderColor = `${project.accent}40`
+                e.currentTarget.style.transform = 'translateY(-4px)'
+                e.currentTarget.style.boxShadow = '0 20px 40px rgba(0,0,0,0.4)'
+            }}
+            onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = 'rgba(255,255,255,0.07)'
+                e.currentTarget.style.transform = 'translateY(0)'
+                e.currentTarget.style.boxShadow = 'none'
+            }}
+        >
+            {/* IMAGEN SUPERIOR */}
+            <div style={{ height: '180px', position: 'relative', overflow: 'hidden' }}>
+                <Image
+                    src={project.image}
+                    alt={project.client}
+                    fill
+                    className="object-cover transition-transform duration-400 group-hover:scale-105"
+                    sizes="(max-width: 768px) 320px, 320px"
+                />
+
+                {/* Overlay Inferior */}
+                <div style={{
+                    position: 'absolute',
+                    bottom: 0, left: 0, right: 0, height: '60px',
+                    background: 'linear-gradient(to top, rgba(8,8,16,0.9), transparent)',
+                    zIndex: 1
+                }} />
+
+                {/* Tag Superior Izquierdo */}
+                <div style={{
+                    position: 'absolute',
+                    top: '10px', left: '10px',
+                    background: 'rgba(0,0,0,0.75)',
+                    backdropFilter: 'blur(8px)',
+                    WebkitBackdropFilter: 'blur(8px)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: '100px',
+                    padding: '3px 10px',
+                    fontSize: '8px',
+                    letterSpacing: '0.2em',
+                    color: 'rgba(255,255,255,0.7)',
+                    zIndex: 2,
+                    textTransform: 'uppercase'
+                }}>
+                    {project.tag}
+                </div>
+            </div>
+
+            {/* CONTENIDO INFERIOR */}
+            <div style={{ padding: '16px', flex: 1, display: 'flex', flexDirection: 'column' }}>
+                <h4 style={{ fontSize: '16px', fontWeight: 700, color: 'white', marginBottom: '6px' }}>
+                    {project.client}
+                </h4>
+                <p style={{
+                    fontSize: '12px',
+                    color: 'rgba(255,255,255,0.45)',
+                    lineHeight: 1.6,
+                    marginBottom: '12px',
+                    display: '-webkit-box',
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: 'vertical',
+                    overflow: 'hidden'
+                }}>
+                    {project.description}
+                </p>
+
+                {/* FILA INFERIOR (Stat + Stack) */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                        <span style={{ fontSize: '18px', fontWeight: 900, color: project.accent, lineHeight: 1 }}>
+                            {project.stat.value}
+                        </span>
+                        <span style={{ fontSize: '9px', color: 'rgba(255,255,255,0.35)', marginTop: '4px', textTransform: 'uppercase' }}>
+                            {project.stat.label}
+                        </span>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '4px' }}>
+                        {project.stack.slice(0, 2).map(tech => (
+                            <span key={tech} style={{
+                                padding: '2px 8px',
+                                fontSize: '9px',
+                                background: 'rgba(255,255,255,0.04)',
+                                border: '1px solid rgba(255,255,255,0.08)',
+                                borderRadius: '100px',
+                                color: 'rgba(255,255,255,0.4)'
+                            }}>
+                                {tech}
+                            </span>
+                        ))}
+                    </div>
+                </div>
+            </div>
+
+            {/* BORDE INFERIOR HIGHLIGHT */}
+            <div style={{
+                height: '2px',
+                marginTop: 'auto',
+                background: `linear-gradient(90deg, ${project.accent}, transparent)`
+            }} />
         </div>
     )
 }
 
-function BrowserBar({ url }: { url: string }) {
+function InfiniteCarousel() {
+    const [isPaused, setIsPaused] = useState(false)
+    const controls = useAnimationControls()
+
+    // Calcular ancho total: cardWidth(320px) + gap(20px) = 340px por la cantidad original
+    const totalWidth = carouselProjects.length * 340
+
+    useEffect(() => {
+        let duration = 40
+        if (typeof window !== 'undefined' && window.innerWidth < 768) {
+            duration = 25
+        }
+
+        if (!isPaused) {
+            controls.start({
+                x: [0, -totalWidth],
+                transition: {
+                    duration: duration,
+                    ease: "linear",
+                    repeat: Infinity,
+                    repeatType: "loop",
+                }
+            })
+        } else {
+            controls.stop()
+        }
+
+        return () => controls.stop()
+    }, [isPaused, controls, totalWidth])
+
     return (
-        <div style={{
-            height: '32px', background: 'rgba(255,255,255,0.05)',
-            borderBottom: '1px solid rgba(255,255,255,0.06)',
-            display: 'flex', alignItems: 'center', padding: '0 12px', gap: '8px',
-        }}>
-            <BrowserDots />
+        <div className="w-full relative flex flex-col">
+            {/* ── HEADER DEL CARRUSEL ── */}
             <div style={{
-                flex: 1, maxWidth: '200px', margin: '0 auto', height: '18px',
-                background: 'rgba(255,255,255,0.06)', borderRadius: '4px',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                height: '1px',
+                marginBottom: 'clamp(40px, 5vh, 64px)',
+                background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent)'
+            }} />
+
+            <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: '32px'
             }}>
-                <span style={{ fontSize: '9px', color: 'rgba(255,255,255,0.3)' }}>{url}</span>
+                {/* TÍTULO IZQUIERDA */}
+                <div className="flex flex-col items-start pt-[6px]">
+                    <span style={{ fontSize: '11px', letterSpacing: '0.25em', color: '#00e5ff', textTransform: 'uppercase', marginBottom: '8px' }}>
+                        OTROS PROYECTOS
+                    </span>
+                    <h3 style={{ fontSize: 'clamp(24px, 3vw, 40px)', fontWeight: 900, color: 'white', lineHeight: 1.15 }}>
+                        Más industrias,<br className="md:hidden" />
+                        <span style={{ color: '#00e5ff' }}> mismo estándar.</span>
+                    </h3>
+                </div>
+
+                {/* INDICADOR DERECHA (solo desktop) */}
+                <div className="hidden md:block">
+                    <span style={{
+                        fontSize: '11px',
+                        color: 'rgba(255,255,255,0.2)',
+                        letterSpacing: '0.1em',
+                        textTransform: 'uppercase'
+                    }}>
+                        Hover para pausar
+                    </span>
+                </div>
+            </div>
+
+            {/* ── CARRUSEL INTERNO ── */}
+            <div
+                onMouseEnter={() => setIsPaused(true)}
+                onMouseLeave={() => setIsPaused(false)}
+                style={{ overflow: 'hidden', position: 'relative' }}
+                role="region"
+                aria-label="Carrusel de proyectos"
+            >
+                {/* FADE IZQUIERDO */}
+                <div style={{
+                    position: 'absolute',
+                    left: 0, top: 0, bottom: 0,
+                    width: '120px',
+                    background: 'linear-gradient(to right, #080810, transparent)',
+                    zIndex: 2,
+                    pointerEvents: 'none'
+                }} />
+
+                {/* FADE DERECHO */}
+                <div style={{
+                    position: 'absolute',
+                    right: 0, top: 0, bottom: 0,
+                    width: '120px',
+                    background: 'linear-gradient(to left, #080810, transparent)',
+                    zIndex: 2,
+                    pointerEvents: 'none'
+                }} />
+
+                <motion.div
+                    animate={controls}
+                    style={{ display: 'flex', gap: '20px', width: 'max-content' }}
+                >
+                    {duplicatedProjects.map((project, index) => (
+                        <ProjectCard key={`${project.id}-${index}`} project={project} />
+                    ))}
+                </motion.div>
             </div>
         </div>
     )
 }
 
-function StatItem({ value, label }: Stat) {
-    return (
-        <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <span style={{ fontSize: '28px', fontWeight: 900, color: '#00e5ff', lineHeight: 1 }}>{value}</span>
-            <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', marginTop: '4px' }}>{label}</span>
-        </div>
-    )
-}
-
-function StackPill({ label }: StackTag) {
-    return (
-        <span style={{
-            background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
-            borderRadius: '100px', padding: '4px 12px', fontSize: '11px', color: 'rgba(255,255,255,0.5)',
-        }}>
-            {label}
-        </span>
-    )
-}
-
-// ── Browser mocks (accept inView + prefersReduced + isMobile) ──────
-function BrowserMockEcommerce({
-    inView, prefersReduced, isMobile,
-}: { inView: boolean; prefersReduced: boolean | null; isMobile: boolean }) {
-    const animate = inView && !prefersReduced && !isMobile
-
-    const item = (delay: number, children: React.ReactNode) => (
-        <motion.div
-            initial={animate ? { opacity: 0, y: 4 } : { opacity: 1, y: 0 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.35, delay, ease: 'easeOut' }}
-        >
-            {children}
-        </motion.div>
-    )
-
-    return (
-        <div style={{ height: '280px', background: '#0a0a14', position: 'relative', overflow: 'hidden' }}>
-            {item(0.3,
-                <div style={{
-                    height: '44px', background: 'rgba(0,229,255,0.08)',
-                    borderBottom: '1px solid rgba(0,229,255,0.1)',
-                    display: 'flex', alignItems: 'center', padding: '0 16px', gap: '12px',
-                }}>
-                    <div style={{ width: '40px', height: '16px', background: 'rgba(255,255,255,0.15)', borderRadius: '4px' }} />
-                    <div style={{ flex: 1, display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-                        {[0, 1, 2].map(i => (
-                            <div key={i} style={{ width: '40px', height: '10px', background: 'rgba(255,255,255,0.08)', borderRadius: '100px' }} />
-                        ))}
-                    </div>
-                </div>
-            )}
-            {item(0.38,
-                <div style={{ padding: '20px' }}>
-                    <div style={{ width: '60%', height: '20px', background: 'linear-gradient(90deg, white, rgba(0,229,255,0.8))', borderRadius: '4px', marginBottom: '8px' }} />
-                    <div style={{ width: '40%', height: '10px', background: 'rgba(255,255,255,0.15)', borderRadius: '4px' }} />
-                    <div style={{ display: 'flex', gap: '8px', marginTop: '16px' }}>
-                        {[0, 1, 2].map(i => (
-                            <div key={i} style={{
-                                flex: 1, height: '80px', background: 'rgba(255,255,255,0.04)',
-                                border: '1px solid rgba(255,255,255,0.07)', borderRadius: '8px',
-                                overflow: 'hidden', display: 'flex', flexDirection: 'column',
-                            }}>
-                                <div style={{ height: '50%', background: 'rgba(0,229,255,0.06)' }} />
-                                <div style={{ padding: '6px 8px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                                    <div style={{ height: '6px', background: 'rgba(255,255,255,0.1)', borderRadius: '4px' }} />
-                                    <div style={{ height: '6px', width: '60%', background: 'rgba(255,255,255,0.06)', borderRadius: '4px' }} />
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            )}
-            <div style={{
-                position: 'absolute', inset: 0, pointerEvents: 'none',
-                background: 'linear-gradient(to bottom, transparent 60%, #0a0a14 100%)',
-            }} />
-        </div>
-    )
-}
-
-function BrowserMockTemplates({
-    inView, prefersReduced, isMobile,
-}: { inView: boolean; prefersReduced: boolean | null; isMobile: boolean }) {
-    const animate = inView && !prefersReduced && !isMobile
-    const tileColors = [
-        'rgba(123,47,255,0.15)', 'rgba(0,229,255,0.1)',
-        'rgba(255,100,80,0.1)', 'rgba(0,200,120,0.1)',
-    ]
-
-    const item = (delay: number, children: React.ReactNode) => (
-        <motion.div
-            initial={animate ? { opacity: 0, y: 4 } : { opacity: 1, y: 0 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.35, delay, ease: 'easeOut' }}
-        >
-            {children}
-        </motion.div>
-    )
-
-    return (
-        <div style={{ height: '280px', background: '#0a0a14', position: 'relative', overflow: 'hidden' }}>
-            {item(0.3,
-                <div style={{
-                    height: '44px', background: 'rgba(123,47,255,0.08)',
-                    borderBottom: '1px solid rgba(123,47,255,0.12)',
-                    display: 'flex', alignItems: 'center', padding: '0 16px', gap: '12px',
-                }}>
-                    <div style={{ width: '40px', height: '16px', background: 'rgba(255,255,255,0.15)', borderRadius: '4px' }} />
-                    <div style={{ flex: 1, display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-                        {[0, 1, 2].map(i => (
-                            <div key={i} style={{ width: '40px', height: '10px', background: 'rgba(255,255,255,0.06)', borderRadius: '100px' }} />
-                        ))}
-                    </div>
-                </div>
-            )}
-            {item(0.38,
-                <div style={{ padding: '16px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-                    {tileColors.map((bg, i) => (
-                        <div key={i} style={{
-                            height: '88px', background: bg,
-                            border: '1px solid rgba(255,255,255,0.07)', borderRadius: '8px',
-                            overflow: 'hidden', display: 'flex', flexDirection: 'column', padding: '8px', gap: '6px',
-                        }}>
-                            <div style={{ height: '40px', background: 'rgba(255,255,255,0.05)', borderRadius: '4px' }} />
-                            <div style={{ height: '6px', background: 'rgba(255,255,255,0.12)', borderRadius: '4px' }} />
-                            <div style={{ height: '6px', width: '55%', background: 'rgba(255,255,255,0.06)', borderRadius: '4px' }} />
-                        </div>
-                    ))}
-                </div>
-            )}
-            <div style={{
-                position: 'absolute', inset: 0, pointerEvents: 'none',
-                background: 'linear-gradient(to bottom, transparent 55%, #0a0a14 100%)',
-            }} />
-        </div>
-    )
-}
-
-// ── Project rows ───────────────────────────────────────────────────
-function ProjectCorralon({
-    prefersReduced, isMobile,
-}: { prefersReduced: boolean | null; isMobile: boolean }) {
-    const rowRef = useRef<HTMLDivElement>(null)
-    const inView = useInView(rowRef, { once: true, amount: 0.2 })
-
-    const stats: Stat[] = [
-        { value: '#1', label: 'Google local' },
-        { value: '500+', label: 'Productos online' },
-        { value: '<1s', label: 'Tiempo de carga' },
-    ]
-    const tags: StackTag[] = [
-        { label: 'Next.js' }, { label: 'SEO Local' }, { label: 'E-Commerce' }, { label: 'WhatsApp API' },
-    ]
-
-    const skip = !!prefersReduced
-
-    return (
-        <motion.div
-            ref={rowRef}
-            whileHover={skip ? {} : { scale: 1.005 }}
-            transition={{ duration: 0.3 }}
-            style={{
-                display: 'grid',
-                gridTemplateColumns: 'var(--showcase-cols, 1fr)',
-                gap: 'clamp(32px, 4vw, 64px)',
-                alignItems: 'center',
-                marginBottom: 'clamp(60px, 8vh, 100px)',
-                padding: 'clamp(32px, 4vw, 52px)',
-                background: 'rgba(255,255,255,0.02)',
-                border: '1px solid rgba(255,255,255,0.07)',
-                borderRadius: '20px',
-                position: 'relative',
-                overflow: 'hidden',
-            }}
-        >
-            {/* Vertical accent */}
-            <div aria-hidden="true" style={{
-                position: 'absolute', left: 0, top: '10%', bottom: '10%', width: '2px',
-                background: 'linear-gradient(to bottom, transparent, #00e5ff, transparent)',
-            }} />
-
-            {/* TEXT column */}
-            <motion.div
-                initial={skip ? {} : { opacity: 0, x: -40 }}
-                animate={inView ? { opacity: 1, x: 0 } : {}}
-                transition={{ duration: 0.7, ease }}
-                style={{ paddingLeft: '16px' }}
-            >
-                <div style={{ fontSize: '10px', letterSpacing: '0.3em', color: '#00e5ff', marginBottom: '16px', fontFamily: 'monospace', textTransform: 'uppercase' }}>
-                    E-COMMERCE · MATERIALES
-                </div>
-                <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.2)', letterSpacing: '0.2em', marginBottom: '8px', fontFamily: 'monospace' }}>
-                    01
-                </div>
-                <h3 style={{ fontSize: 'clamp(28px, 3.5vw, 44px)', fontWeight: 900, color: 'white', lineHeight: 1.1, marginBottom: '16px' }}>
-                    Corralón El Amigo
-                </h3>
-                <p style={{ fontSize: '15px', color: 'rgba(255,255,255,0.55)', lineHeight: 1.7, maxWidth: '440px', marginBottom: '24px' }}>
-                    De vender por WhatsApp a un catálogo online con más de 500 productos, pedidos automáticos y posicionamiento #1 en Google Yerba Buena.
-                </p>
-                {/* Stats with stagger */}
-                <div style={{ display: 'flex', gap: '24px', marginBottom: '28px', flexWrap: 'wrap' }}>
-                    {stats.map((s, i) => (
-                        <motion.div
-                            key={s.label}
-                            initial={skip ? {} : { opacity: 0, y: 16 }}
-                            animate={inView ? { opacity: 1, y: 0 } : {}}
-                            transition={{ duration: 0.5, delay: 0.4 + i * 0.1, ease }}
-                        >
-                            <StatItem {...s} />
-                        </motion.div>
-                    ))}
-                </div>
-                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                    {tags.map(t => <StackPill key={t.label} {...t} />)}
-                </div>
-            </motion.div>
-
-            {/* VISUAL column */}
-            <motion.div
-                initial={skip ? {} : { opacity: 0, x: 40 }}
-                animate={inView ? { opacity: 1, x: 0 } : {}}
-                transition={{ duration: 0.7, delay: 0.1, ease }}
-                style={{ position: 'relative' }}
-            >
-                <motion.div
-                    whileHover={skip ? {} : { boxShadow: '0 24px 80px rgba(0,0,0,0.65), 0 0 60px rgba(0,229,255,0.12)' }}
-                    transition={{ duration: 0.3 }}
-                    style={{
-                        borderRadius: '12px', overflow: 'hidden',
-                        border: '1px solid rgba(255,255,255,0.1)',
-                        boxShadow: '0 20px 60px rgba(0,0,0,0.5), 0 0 40px rgba(0,229,255,0.06)',
-                    }}
-                >
-                    <BrowserBar url="corralonelam..." />
-                    <BrowserMockEcommerce inView={inView} prefersReduced={prefersReduced} isMobile={isMobile} />
-                </motion.div>
-                {/* LIVE badge */}
-                <div style={{
-                    position: 'absolute', top: '12px', right: '12px', zIndex: 10,
-                    background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)',
-                    border: '1px solid rgba(0,229,255,0.25)', borderRadius: '100px',
-                    padding: '4px 10px', fontSize: '9px', display: 'flex', alignItems: 'center', gap: '5px', letterSpacing: '0.08em',
-                }}>
-                    <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#00e5ff', animation: 'showcase-pulse 2s ease-in-out infinite' }} />
-                    <span style={{ color: 'rgba(255,255,255,0.7)' }}>EN PRODUCCIÓN</span>
-                </div>
-            </motion.div>
-        </motion.div>
-    )
-}
-
-function ProjectTemplates({
-    prefersReduced, isMobile,
-}: { prefersReduced: boolean | null; isMobile: boolean }) {
-    const rowRef = useRef<HTMLDivElement>(null)
-    const inView = useInView(rowRef, { once: true, amount: 0.2 })
-
-    const stats: Stat[] = [
-        { value: '5+', label: 'Industries' },
-        { value: '100', label: 'Lighthouse' },
-        { value: '72h', label: 'Deploy' },
-    ]
-    const tags: StackTag[] = [
-        { label: 'Next.js' }, { label: 'Tailwind v4' }, { label: 'TypeScript' }, { label: 'SEO Ready' },
-    ]
-
-    const skip = !!prefersReduced
-
-    return (
-        <motion.div
-            ref={rowRef}
-            whileHover={skip ? {} : { scale: 1.005 }}
-            transition={{ duration: 0.3 }}
-            style={{
-                display: 'grid',
-                gridTemplateColumns: 'var(--showcase-cols, 1fr)',
-                gap: 'clamp(32px, 4vw, 64px)',
-                alignItems: 'center',
-                marginBottom: 'clamp(60px, 8vh, 100px)',
-                padding: 'clamp(32px, 4vw, 52px)',
-                background: 'rgba(255,255,255,0.02)',
-                border: '1px solid rgba(123,47,255,0.12)',
-                borderRadius: '20px',
-                position: 'relative',
-                overflow: 'hidden',
-            }}
-        >
-            {/* Vertical accent — violet */}
-            <div aria-hidden="true" style={{
-                position: 'absolute', left: 0, top: '10%', bottom: '10%', width: '2px',
-                background: 'linear-gradient(to bottom, transparent, #7b2fff, transparent)',
-            }} />
-
-            {/* VISUAL column — first in DOM = left on desktop */}
-            <motion.div
-                initial={skip ? {} : { opacity: 0, x: -40 }}
-                animate={inView ? { opacity: 1, x: 0 } : {}}
-                transition={{ duration: 0.7, ease }}
-                style={{ position: 'relative' }}
-            >
-                <motion.div
-                    whileHover={skip ? {} : { boxShadow: '0 24px 80px rgba(0,0,0,0.65), 0 0 60px rgba(123,47,255,0.12)' }}
-                    transition={{ duration: 0.3 }}
-                    style={{
-                        borderRadius: '12px', overflow: 'hidden',
-                        border: '1px solid rgba(255,255,255,0.1)',
-                        boxShadow: '0 20px 60px rgba(0,0,0,0.5), 0 0 40px rgba(123,47,255,0.06)',
-                    }}
-                >
-                    <BrowserBar url="templates.dev..." />
-                    <BrowserMockTemplates inView={inView} prefersReduced={prefersReduced} isMobile={isMobile} />
-                </motion.div>
-                {/* Badge */}
-                <div style={{
-                    position: 'absolute', top: '12px', right: '12px', zIndex: 10,
-                    background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)',
-                    border: '1px solid rgba(123,47,255,0.35)', borderRadius: '100px',
-                    padding: '4px 10px', fontSize: '9px', display: 'flex', alignItems: 'center', gap: '5px', letterSpacing: '0.08em',
-                }}>
-                    <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#7b2fff', animation: 'showcase-pulse 2s ease-in-out infinite' }} />
-                    <span style={{ color: 'rgba(255,255,255,0.7)' }}>EN VIVO</span>
-                </div>
-            </motion.div>
-
-            {/* TEXT column — second in DOM = right on desktop */}
-            <motion.div
-                initial={skip ? {} : { opacity: 0, x: 40 }}
-                animate={inView ? { opacity: 1, x: 0 } : {}}
-                transition={{ duration: 0.7, delay: 0.1, ease }}
-                style={{ paddingLeft: '16px' }}
-            >
-                <div style={{ fontSize: '10px', letterSpacing: '0.3em', color: '#7b2fff', marginBottom: '16px', fontFamily: 'monospace', textTransform: 'uppercase' }}>
-                    TEMPLATES · MULTI-INDUSTRIA
-                </div>
-                <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.2)', letterSpacing: '0.2em', marginBottom: '8px', fontFamily: 'monospace' }}>
-                    02
-                </div>
-                <h3 style={{ fontSize: 'clamp(28px, 3.5vw, 44px)', fontWeight: 900, color: 'white', lineHeight: 1.1, marginBottom: '16px' }}>
-                    Templates de Clase Mundial
-                </h3>
-                <p style={{ fontSize: '15px', color: 'rgba(255,255,255,0.55)', lineHeight: 1.7, maxWidth: '440px', marginBottom: '24px' }}>
-                    Bases de proyecto optimizadas para los rubros más demandantes del NOA. Cada template viene con SEO local, velocidad Lighthouse 100 y diseño que convierte desde el primer día.
-                </p>
-                <div style={{ display: 'flex', gap: '24px', marginBottom: '28px', flexWrap: 'wrap' }}>
-                    {stats.map((s, i) => (
-                        <motion.div
-                            key={s.label}
-                            initial={skip ? {} : { opacity: 0, y: 16 }}
-                            animate={inView ? { opacity: 1, y: 0 } : {}}
-                            transition={{ duration: 0.5, delay: 0.4 + i * 0.1, ease }}
-                        >
-                            <StatItem {...s} />
-                        </motion.div>
-                    ))}
-                </div>
-                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                    {tags.map(t => <StackPill key={t.label} {...t} />)}
-                </div>
-            </motion.div>
-        </motion.div>
-    )
-}
-
-// ── Main export ────────────────────────────────────────────────────
+// ── ShowcaseSection ────────────────────────────────────────────────────────
 export default function ShowcaseSection() {
-    const prefersReduced = useReducedMotion()
+    const shouldReduceMotion = useReducedMotion()
 
-    // mobile detection (client-only, safe for 'use client')
-    const [isMobile, setIsMobile] = useState(false)
-    useEffect(() => {
-        const check = () => setIsMobile(window.innerWidth < 768)
-        check()
-        window.addEventListener('resize', check)
-        return () => window.removeEventListener('resize', check)
-    }, [])
-
-    const skip = !!prefersReduced
-
-    // Header
+    // Header Observer
     const headerRef = useRef<HTMLDivElement>(null)
     const headerInView = useInView(headerRef, { once: true, amount: 0.3 })
 
-    // CTA
-    const ctaRef = useRef<HTMLDivElement>(null)
-    const ctaInView = useInView(ctaRef, { once: true, amount: 0.4 })
+    // Hero Observer
+    const heroRef = useRef<HTMLDivElement>(null)
+    const heroInView = useInView(heroRef, { once: true, amount: 0.15 })
+
+    // Metrics Data
+    const metricsArr = [
+        { value: '100', label: 'Lighthouse Score' },
+        { value: '#1', label: 'Google Local' },
+        { value: 'Premium', label: 'Diseño UX/UI' }
+    ]
 
     return (
-        <section
-            id="showcase-section"
-            className="relative w-full py-32 px-4 bg-[#030014] overflow-hidden"
-        >
-            <style>{`
-                @keyframes showcase-pulse {
-                    0%, 100% { opacity: 1; transform: scale(1); }
-                    50% { opacity: 0.4; transform: scale(0.85); }
-                }
-                @media (min-width: 1024px) {
-                    .showcase-row-1 { --showcase-cols: 1fr 1fr; }
-                    .showcase-row-2 { --showcase-cols: 1fr 1fr; }
-                }
-            `}</style>
+        <section id="showcase-section" className="relative w-full bg-[#080810] py-32 px-4 overflow-hidden">
 
-            {/* Glows */}
-            <div aria-hidden="true" className="absolute pointer-events-none" style={{ top: '-80px', left: '50%', transform: 'translateX(-50%)', width: '700px', height: '400px', background: 'radial-gradient(ellipse at center top, rgba(0,229,255,0.07) 0%, transparent 65%)', filter: 'blur(100px)', zIndex: 0 }} />
-            <div aria-hidden="true" className="absolute pointer-events-none" style={{ bottom: '10%', left: '50%', transform: 'translateX(-50%)', width: '600px', height: '400px', background: 'radial-gradient(ellipse, rgba(123,47,255,0.06) 0%, transparent 60%)', filter: 'blur(100px)', zIndex: 0 }} />
+            {/* ── GLOWS AMBIENTALES ── */}
+            {/* GLOW 1: Violet header */}
+            <div
+                className="absolute pointer-events-none z-0"
+                style={{
+                    top: '-100px', left: '50%', transform: 'translateX(-50%)',
+                    width: '700px', height: '400px',
+                    background: 'radial-gradient(ellipse, rgba(123,47,255,0.08) 0%, transparent 60%)',
+                    filter: 'blur(120px)'
+                }}
+                aria-hidden="true"
+            />
+            {/* GLOW 2: Cyan hero (left) */}
+            <div
+                className="absolute pointer-events-none z-0"
+                style={{
+                    top: '20%', left: '-80px',
+                    width: '500px', height: '500px',
+                    background: 'radial-gradient(circle, rgba(0,229,255,0.06) 0%, transparent 65%)',
+                    filter: 'blur(100px)'
+                }}
+                aria-hidden="true"
+            />
+            {/* GLOW 3: Violet carrusel (right) */}
+            <div
+                className="absolute pointer-events-none z-0"
+                style={{
+                    bottom: '15%', right: '-80px',
+                    width: '450px', height: '450px',
+                    background: 'radial-gradient(circle, rgba(123,47,255,0.06) 0%, transparent 65%)',
+                    filter: 'blur(90px)'
+                }}
+                aria-hidden="true"
+            />
 
-            <div className="max-w-6xl mx-auto relative" style={{ zIndex: 1 }}>
+            {/* CONTENIDO BASE */}
+            <div className="max-w-[1440px] mx-auto relative z-10 w-full">
 
-                {/* ── Header ── */}
-                <div ref={headerRef} style={{ textAlign: 'center', marginBottom: 'clamp(60px, 8vh, 100px)' }}>
-                    {/* Badge */}
+                {/* ── HEADER DE SECCIÓN ── */}
+                <div
+                    ref={headerRef}
+                    style={{ marginBottom: 'clamp(60px, 8vh, 100px)' }}
+                    className="flex flex-col items-center justify-center text-center"
+                >
                     <motion.div
-                        initial={skip ? {} : { opacity: 0, y: -10 }}
-                        animate={headerInView ? { opacity: 1, y: 0 } : {}}
-                        transition={{ duration: 0.4, ease: 'easeOut' }}
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={(headerInView && !shouldReduceMotion) ? { opacity: 1, y: 0 } : { opacity: 1, y: 0 }}
+                        transition={{ duration: 0.4 }}
                         style={{
-                            display: 'inline-block', fontSize: '11px', letterSpacing: '0.35em', color: '#00e5ff',
-                            background: 'rgba(0,229,255,0.08)', border: '1px solid rgba(0,229,255,0.2)',
-                            borderRadius: '100px', padding: '5px 14px', marginBottom: '24px',
-                            fontFamily: 'monospace', textTransform: 'uppercase',
+                            display: 'inline-block',
+                            fontSize: '11px',
+                            letterSpacing: '0.35em',
+                            color: '#00e5ff',
+                            background: 'rgba(0,229,255,0.08)',
+                            border: '1px solid rgba(0,229,255,0.2)',
+                            borderRadius: '100px',
+                            padding: '5px 14px',
+                            marginBottom: '24px',
+                            fontFamily: 'monospace',
+                            textTransform: 'uppercase',
                         }}
                     >
                         [ TRABAJOS QUE LO DEMUESTRAN ]
                     </motion.div>
 
-                    <h2 style={{ lineHeight: 1.05, marginBottom: '20px', overflow: 'hidden' }}>
-                        {/* Line 1 — clip reveal */}
+                    <h2 style={{ lineHeight: 1.05, marginBottom: '24px' }}>
                         <motion.span
-                            initial={skip ? {} : { clipPath: 'inset(0 100% 0 0)' }}
-                            animate={headerInView ? { clipPath: 'inset(0 0% 0 0)' } : {}}
-                            transition={{ duration: 0.7, delay: 0.1, ease }}
-                            style={{ display: 'block', fontSize: 'clamp(42px, 6vw, 80px)', fontWeight: 900, color: '#ffffff' }}
+                            initial={{ clipPath: 'inset(0 0 100% 0)' }}
+                            animate={(headerInView && !shouldReduceMotion) ? { clipPath: 'inset(0 0 0% 0)' } : { clipPath: 'inset(0 0 0% 0)' }}
+                            transition={{ duration: 0.6, delay: 0.1 }}
+                            style={{
+                                display: 'block',
+                                fontSize: 'clamp(42px, 6vw, 80px)',
+                                fontWeight: 900,
+                                color: '#ffffff',
+                            }}
                         >
                             Lo que
                         </motion.span>
-                        {/* Line 2 — clip reveal */}
                         <motion.span
-                            initial={skip ? {} : { clipPath: 'inset(0 100% 0 0)' }}
-                            animate={headerInView ? { clipPath: 'inset(0 0% 0 0)' } : {}}
-                            transition={{ duration: 0.7, delay: 0.22, ease }}
+                            initial={{ clipPath: 'inset(0 0 100% 0)' }}
+                            animate={(headerInView && !shouldReduceMotion) ? { clipPath: 'inset(0 0 0% 0)' } : { clipPath: 'inset(0 0 0% 0)' }}
+                            transition={{ duration: 0.6, delay: 0.22 }}
                             style={{
-                                display: 'block', fontSize: 'clamp(42px, 6vw, 80px)', fontWeight: 900,
-                                background: 'linear-gradient(135deg, #ffffff 0%, #00e5ff 60%, #7b2fff 100%)',
-                                WebkitBackgroundClip: 'text', backgroundClip: 'text',
-                                WebkitTextFillColor: 'transparent', color: 'transparent',
+                                display: 'block',
+                                fontSize: 'clamp(42px, 6vw, 80px)',
+                                fontWeight: 900,
+                                background: 'linear-gradient(135deg, #ffffff 0%, #00e5ff 50%, #7b2fff 100%)',
+                                WebkitBackgroundClip: 'text',
+                                backgroundClip: 'text',
+                                WebkitTextFillColor: 'transparent',
+                                color: 'transparent',
                             }}
                         >
                             construimos.
@@ -493,100 +491,190 @@ export default function ShowcaseSection() {
                     </h2>
 
                     <motion.p
-                        initial={skip ? {} : { opacity: 0, y: 10 }}
-                        animate={headerInView ? { opacity: 1, y: 0 } : {}}
-                        transition={{ duration: 0.5, delay: 0.5, ease: 'easeOut' }}
-                        style={{ fontSize: '15px', color: 'rgba(255,255,255,0.45)', maxWidth: '520px', margin: '0 auto', lineHeight: 1.7 }}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={(headerInView && !shouldReduceMotion) ? { opacity: 1, y: 0 } : { opacity: 1, y: 0 }}
+                        transition={{ duration: 0.4, delay: 0.4 }}
+                        style={{
+                            fontSize: '15px',
+                            color: 'rgba(255,255,255,0.45)',
+                            maxWidth: '520px',
+                            lineHeight: 1.6,
+                        }}
                     >
-                        Cada proyecto es un activo de negocio diseñado para dominar su mercado local.
+                        Cada proyecto es un activo de negocio diseñado
+                        para dominar su mercado. Sin excusas.
                     </motion.p>
                 </div>
 
-                {/* ── Projects ── */}
-                <div className="showcase-row-1">
-                    <ProjectCorralon prefersReduced={prefersReduced} isMobile={isMobile} />
-                </div>
-                <div className="showcase-row-2">
-                    <ProjectTemplates prefersReduced={prefersReduced} isMobile={isMobile} />
-                </div>
+                {/* ── PROYECTO HERO — Concesionaria ── */}
+                <motion.div
+                    ref={heroRef}
+                    initial={{ opacity: 0, y: 30, scale: 0.98 }}
+                    animate={(heroInView && !shouldReduceMotion) ? { opacity: 1, y: 0, scale: 1 } : { opacity: 1, y: 0, scale: 1 }}
+                    transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                    className="relative w-full flex flex-col group overflow-hidden"
+                    style={{
+                        borderRadius: '20px',
+                        border: '1px solid rgba(255,255,255,0.08)',
+                        marginBottom: 'clamp(48px, 6vh, 80px)',
+                        background: '#0d0d1f',
+                    }}
+                >
+                    <div className="relative w-full" style={{ height: 'clamp(320px, 50vh, 600px)' }}>
+                        <Image
+                            src="https://placehold.co/1440x700/0d0d1f/00e5ff?text=."
+                            alt="Concesionaria — Proyecto Hero"
+                            fill
+                            className="object-cover"
+                            sizes="(max-width: 1440px) 100vw, 1440px"
+                            priority
+                        />
 
-                {/* ── CTA block ── */}
-                <div ref={ctaRef} style={{ marginTop: 'clamp(48px, 6vh, 80px)' }}>
-                    <div aria-hidden="true" style={{
-                        height: '1px',
-                        background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent)',
-                        marginBottom: 'clamp(40px, 5vh, 64px)',
-                    }} />
+                        <div
+                            aria-hidden="true"
+                            className="absolute inset-0 z-10 pointer-events-none"
+                            style={{
+                                background: 'linear-gradient(to bottom, rgba(8,8,16,0.1) 0%, rgba(8,8,16,0.2) 40%, rgba(8,8,16,0.85) 75%, rgba(8,8,16,1) 100%)'
+                            }}
+                        />
 
-                    <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px' }}>
-                        <span style={{ fontSize: '12px', letterSpacing: '0.3em', color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', fontFamily: 'monospace' }}>
-                            ¿LISTO PARA SER EL SIGUIENTE?
-                        </span>
+                        <div
+                            aria-hidden="true"
+                            className="hidden md:block absolute inset-0 z-10 pointer-events-none"
+                            style={{
+                                background: 'linear-gradient(to right, rgba(8,8,16,0.9) 0%, rgba(8,8,16,0.5) 35%, transparent 65%)'
+                            }}
+                        />
+                    </div>
 
-                        <motion.h3
-                            initial={skip ? {} : { opacity: 0, y: 20 }}
-                            animate={ctaInView ? { opacity: 1, y: 0 } : {}}
-                            transition={{ duration: 0.6, ease: 'easeOut' }}
-                            style={{ fontSize: 'clamp(28px, 4vw, 52px)', fontWeight: 900, lineHeight: 1.1, textAlign: 'center' }}
-                        >
-                            <span style={{ color: '#ffffff' }}>Tu negocio merece<br /></span>
-                            <span style={{
-                                background: 'linear-gradient(135deg, #00e5ff, #7b2fff)',
-                                WebkitBackgroundClip: 'text', backgroundClip: 'text',
-                                WebkitTextFillColor: 'transparent', color: 'transparent',
+                    <div
+                        className="absolute bottom-0 left-0 right-0 z-20 flex flex-col md:grid items-end gap-8"
+                        style={{
+                            padding: 'clamp(32px, 4vw, 52px)',
+                            gridTemplateColumns: 'minmax(0, 1fr) auto',
+                        }}
+                    >
+                        <div className="flex flex-col items-start w-full">
+                            <div style={{
+                                fontSize: '10px',
+                                letterSpacing: '0.3em',
+                                color: '#00e5ff',
+                                marginBottom: '12px',
+                                fontFamily: 'monospace',
+                                textTransform: 'uppercase'
                             }}>
-                                estar en este listado.
-                            </span>
-                        </motion.h3>
+                                CONCESIONARIA · E-COMMERCE · TUCUMÁN
+                            </div>
 
-                        <p style={{ fontSize: '15px', color: 'rgba(255,255,255,0.45)', maxWidth: '440px', lineHeight: 1.7, textAlign: 'center' }}>
-                            Agendá una consultoría gratuita y en 30 minutos te mostramos el potencial de tu Sucursal Digital.
-                        </p>
+                            <h3 style={{
+                                fontSize: 'clamp(28px, 4vw, 52px)',
+                                fontWeight: 900,
+                                color: 'white',
+                                lineHeight: 1.05,
+                                marginBottom: '12px'
+                            }}>
+                                Del salón físico<br />
+                                al showroom digital.
+                            </h3>
 
-                        <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap', marginTop: '8px' }}>
-                            {/* Primary CTA */}
+                            <p style={{
+                                fontSize: '15px',
+                                color: 'rgba(255,255,255,0.6)',
+                                lineHeight: 1.6,
+                                maxWidth: '480px',
+                                marginBottom: '24px'
+                            }}>
+                                Transformamos una concesionaria local en una
+                                plataforma de ventas premium. Catálogo online,
+                                consultas automáticas y presencia dominante en Google.
+                            </p>
+
+                            <div className="flex flex-col md:flex-row md:items-center gap-6 md:gap-8 mt-2 md:mt-0">
+                                {metricsArr.map((metric, i) => (
+                                    <React.Fragment key={i}>
+                                        <motion.div
+                                            initial={{ opacity: 0, y: 8 }}
+                                            animate={(heroInView && !shouldReduceMotion) ? { opacity: 1, y: 0 } : { opacity: 1, y: 0 }}
+                                            transition={{ duration: 0.4, delay: 0.5 + (i * 0.1) }}
+                                            className="flex flex-col"
+                                        >
+                                            <span style={{ fontSize: 'clamp(22px,3vw,32px)', fontWeight: 900, color: '#00e5ff', lineHeight: 1 }}>{metric.value}</span>
+                                            <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', marginTop: '4px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{metric.label}</span>
+                                        </motion.div>
+                                        {i < metricsArr.length - 1 && (
+                                            <div className="hidden md:block w-px h-[40px] bg-white/10" />
+                                        )}
+                                    </React.Fragment>
+                                ))}
+                            </div>
+
+                            <div className="flex flex-wrap gap-2 mt-8">
+                                {['Next.js', 'SEO Local', 'E-Commerce', 'Diseño Premium'].map((tag) => (
+                                    <span key={tag} style={{
+                                        fontSize: '11px',
+                                        color: 'rgba(255,255,255,0.6)',
+                                        background: 'rgba(255,255,255,0.03)',
+                                        border: '1px solid rgba(255,255,255,0.08)',
+                                        padding: '4px 12px',
+                                        borderRadius: '100px',
+                                    }}>
+                                        {tag}
+                                    </span>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="hidden md:flex justify-end items-end h-full">
                             <motion.div
-                                initial={skip ? {} : { opacity: 0, y: 12 }}
-                                animate={ctaInView ? { opacity: 1, y: 0 } : {}}
-                                transition={{
-                                    opacity: { duration: 0.5, delay: 0.3, ease: 'easeOut' },
-                                    y: { duration: 0.5, delay: 0.3, ease: 'easeOut' },
-                                    scale: { type: 'spring', stiffness: 300, damping: 15 },
-                                    boxShadow: { duration: 0.3 }
+                                style={{
+                                    background: 'rgba(0,0,0,0.7)',
+                                    backdropFilter: 'blur(12px)',
+                                    WebkitBackdropFilter: 'blur(12px)',
+                                    border: '1px solid rgba(0,229,255,0.2)',
+                                    borderRadius: '12px',
+                                    padding: '16px 20px',
+                                    textAlign: 'center',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    alignItems: 'center',
+                                    gap: '8px'
                                 }}
-                                whileHover={skip ? {} : { scale: 1.04, boxShadow: '0 0 50px rgba(0,229,255,0.45)' }}
+                                whileHover={{ scale: 1.05, borderColor: 'rgba(0,229,255,0.5)' }}
+                                transition={{ duration: 0.2 }}
                             >
-                                <Link href="/contacto" style={{
-                                    display: 'inline-flex', alignItems: 'center',
-                                    background: 'linear-gradient(135deg, #00e5ff, #0099cc)',
-                                    color: '#080810', fontWeight: 700, borderRadius: '100px',
-                                    padding: '16px 36px', fontSize: '14px', letterSpacing: '0.05em',
-                                    boxShadow: '0 0 30px rgba(0,229,255,0.25)',
-                                    textDecoration: 'none', whiteSpace: 'nowrap',
-                                }}>
-                                    Quiero mi Sucursal Digital →
-                                </Link>
-                            </motion.div>
-
-                            {/* Secondary CTA */}
-                            <motion.div
-                                initial={skip ? {} : { opacity: 0, y: 12 }}
-                                animate={ctaInView ? { opacity: 1, y: 0 } : {}}
-                                transition={{ duration: 0.5, delay: 0.4, ease: 'easeOut' }}
-                            >
-                                <Link href="/ai-implementations" style={{
-                                    display: 'inline-flex', alignItems: 'center',
-                                    background: 'transparent', border: '1px solid rgba(255,255,255,0.15)',
-                                    color: 'rgba(255,255,255,0.7)', borderRadius: '100px',
-                                    padding: '16px 36px', fontSize: '14px',
-                                    textDecoration: 'none', whiteSpace: 'nowrap',
-                                }}>
-                                    Ver todas las implementaciones IA
+                                <div className="flex items-center gap-2">
+                                    <span className="relative flex h-2 w-2">
+                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00e5ff] opacity-75"></span>
+                                        <span className="relative inline-flex rounded-full h-2 w-2 bg-[#00e5ff]"></span>
+                                    </span>
+                                    <span style={{
+                                        fontSize: '9px',
+                                        letterSpacing: '0.3em',
+                                        color: 'rgba(255,255,255,0.6)',
+                                        textTransform: 'uppercase'
+                                    }}>
+                                        EN PRODUCCIÓN
+                                    </span>
+                                </div>
+                                <Link
+                                    href="#"
+                                    className="transition-opacity hover:opacity-80"
+                                    style={{
+                                        fontSize: '13px',
+                                        fontWeight: 700,
+                                        color: '#00e5ff',
+                                        textDecoration: 'none',
+                                    }}
+                                >
+                                    Ver proyecto →
                                 </Link>
                             </motion.div>
                         </div>
                     </div>
-                </div>
+                </motion.div>
+
+                {/* ── PROJECTS CAROUSEL (Mobile / Desktop) ── */}
+                <InfiniteCarousel />
 
             </div>
         </section>
