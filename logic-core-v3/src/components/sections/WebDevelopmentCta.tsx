@@ -1,57 +1,222 @@
 "use client"
-import React from 'react'
-import { motion } from 'framer-motion'
-import { MagneticCta } from '@/components/ui/buttons/MagneticCta'
+import React, { useState } from 'react'
 
 export const WebDevelopmentCta = () => {
+    const [showForm, setShowForm] = useState(false)
+
     return (
-        <section className="relative z-10 w-full py-40 md:py-56 flex items-center justify-center overflow-hidden bg-transparent">
-            {/* Radial background glow (Cyan specific) */}
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <div className="w-[600px] h-[600px] md:w-[1000px] md:h-[1000px] bg-[radial-gradient(circle_at_center,rgba(34,211,238,0.1)_0%,transparent_60%)]" />
-            </div>
+        <section className="relative w-full z-10 pb-32">
+            {/* Separador antes del CTA */}
+            <div style={{
+                height: '1px',
+                margin: 'clamp(48px,7vh,80px) 0',
+                background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent)'
+            }} />
 
-            <div className="relative z-10 max-w-5xl mx-auto px-4 text-center flex flex-col items-center">
-                <motion.h2
-                    initial={{ opacity: 0, y: 30 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true, margin: "-100px" }}
-                    transition={{ duration: 0.8, ease: "easeOut" }}
-                    className="text-4xl md:text-6xl lg:text-7xl font-black tracking-tighter text-white mb-12 leading-[1.1] max-w-5xl"
-                >
-                    ¿Tu sitio web actual refleja la <br className="hidden md:block" />
-                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-cyan-500 drop-shadow-[0_0_20px_rgba(34,211,238,0.2)]">
-                        verdadera calidad de tu empresa?
-                    </span>
-                </motion.h2>
+            {/* WRAPPER CTA */}
+            <div className="max-w-4xl mx-auto px-4 w-full">
+                <div style={{
+                    textAlign: 'center',
+                    position: 'relative',
+                    overflow: 'hidden',
+                    padding: 'clamp(48px,7vh,80px) clamp(24px,5vw,80px)',
+                    borderRadius: '24px',
+                    background: 'linear-gradient(135deg, rgba(0,229,255,0.04) 0%, rgba(123,47,255,0.03) 100%)',
+                    border: '1px solid rgba(0,229,255,0.12)'
+                }}>
 
-                <motion.div
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    whileInView={{ opacity: 1, scale: 1 }}
-                    viewport={{ once: true, margin: "-50px" }}
-                    transition={{ duration: 0.6, delay: 0.4, ease: "easeOut" }}
-                    className="relative"
-                >
-                    {/* Pulsing Energy Rings */}
-                    <div className="absolute inset-0 bg-cyan-500/40 rounded-full blur-md animate-[ping_2.5s_cubic-bezier(0,0,0.2,1)_infinite]" />
-                    <div className="absolute inset-0 bg-cyan-400/20 rounded-full blur-xl animate-[ping_3s_cubic-bezier(0,0,0.2,1)_infinite]" style={{ animationDelay: '1s' }} />
+                    {/* Glow interno */}
+                    <div style={{
+                        position: 'absolute',
+                        inset: 0,
+                        pointerEvents: 'none',
+                        background: 'radial-gradient(ellipse at 50% 0%, rgba(0,229,255,0.08) 0%, transparent 60%)'
+                    }} />
 
-                    {/* The Button */}
-                    <MagneticCta variant="primary" className="group relative px-12 md:px-20 py-6 md:py-8 rounded-full overflow-hidden bg-cyan-500 hover:bg-cyan-400 transition-all duration-300 shadow-[0_0_40px_rgba(34,211,238,0.6)] hover:shadow-[0_0_60px_rgba(34,211,238,0.8)] !text-black !font-black !w-full !h-full border-2 border-cyan-300">
+                    {/* Shimmer superior */}
+                    <div style={{
+                        position: 'absolute',
+                        top: 0, left: 0, right: 0, height: '1px',
+                        background: 'linear-gradient(90deg, transparent, #00e5ff 30%, #7b2fff 70%, transparent)'
+                    }} />
 
-                        <span className="relative z-10 text-black uppercase tracking-widest text-lg md:text-xl flex items-center justify-center gap-4">
-                            CREAR MI WEB PREMIUM
-                            <div className="w-10 h-10 rounded-full bg-black/10 flex items-center justify-center group-hover:bg-black/20 transition-colors duration-300">
-                                <svg className="w-6 h-6 transform group-hover:translate-x-1.5 transition-transform text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                                </svg>
-                            </div>
-                        </span>
-                    </MagneticCta>
-                    <p className="absolute -bottom-10 z-10 text-[10px] md:text-xs text-zinc-500 font-mono uppercase tracking-widest w-full text-center">
-                        Diseño de vanguardia, carga en milisegundos y optimización total para celulares.
+                    {/* EYEBROW */}
+                    <div style={{
+                        fontSize: '11px',
+                        letterSpacing: '0.35em',
+                        color: 'rgba(255,255,255,0.3)',
+                        marginBottom: '20px',
+                        position: 'relative',
+                        zIndex: 2,
+                    }}>
+                        ¿SEGUÍS PERDIENDO CLIENTES A LAS 2AM?
+                    </div>
+
+                    {/* H2 */}
+                    <h2 style={{
+                        fontSize: 'clamp(36px, 5.5vw, 72px)',
+                        fontWeight: 900,
+                        lineHeight: 1.1,
+                        marginBottom: '16px',
+                        position: 'relative',
+                        zIndex: 2,
+                    }}>
+                        <span style={{ color: 'white', display: 'block' }}>Tu Sucursal Digital</span>
+                        <span style={{
+                            background: 'linear-gradient(135deg, #00e5ff, #7b2fff)',
+                            WebkitBackgroundClip: 'text',
+                            color: 'transparent'
+                        }}>te espera.</span>
+                    </h2>
+
+                    {/* Subtítulo */}
+                    <p style={{
+                        maxWidth: '480px',
+                        margin: '0 auto 40px',
+                        fontSize: '16px',
+                        color: 'rgba(255,255,255,0.5)',
+                        lineHeight: 1.6,
+                        position: 'relative',
+                        zIndex: 2,
+                    }}>
+                        Sin contrato largo. Sin sorpresas. Con un activo digital que trabaja por vos.
                     </p>
-                </motion.div>
+
+                    {/* GARANTÍA PILL */}
+                    <div style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        background: 'rgba(34,197,94,0.08)',
+                        border: '1px solid rgba(34,197,94,0.2)',
+                        borderRadius: '100px',
+                        padding: '6px 16px',
+                        marginBottom: '32px',
+                        position: 'relative',
+                        zIndex: 2,
+                    }}>
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#22c55e" strokeWidth="2">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                        </svg>
+                        <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.6)' }}>
+                            Consulta inicial gratuita · Sin compromiso
+                        </span>
+                    </div>
+
+                    {/* CTAs */}
+                    <style>{`
+                        .cta-whatsapp {
+                            display: inline-flex; align-items: center; gap: 10px;
+                            background: linear-gradient(135deg, #25d366, #128c7e);
+                            color: white; font-weight: 700; border-radius: 100px;
+                            padding: 16px 40px; font-size: 15px; letter-spacing: 0.05em;
+                            box-shadow: 0 0 30px rgba(37,211,102,0.25), 0 8px 24px rgba(0,0,0,0.3);
+                            cursor: pointer; width: fit-content; text-decoration: none;
+                            transition: all 200ms;
+                        }
+                        .cta-whatsapp:hover {
+                            filter: brightness(1.1);
+                            transform: scale(1.02);
+                            box-shadow: 0 0 40px rgba(37,211,102,0.4), 0 12px 30px rgba(0,0,0,0.4);
+                        }
+                        .cta-secondary {
+                            display: inline-flex; align-items: center; gap: 8px;
+                            background: transparent; border: 1px solid rgba(255,255,255,0.15);
+                            color: rgba(255,255,255,0.7); border-radius: 100px; padding: 14px 32px;
+                            font-size: 14px; cursor: pointer; width: fit-content;
+                            transition: all 200ms;
+                        }
+                        .cta-secondary:hover {
+                            border-color: rgba(255,255,255,0.3);
+                            color: white;
+                        }
+                        .contact-input {
+                            width: 100%; padding: 12px 16px; background: rgba(255,255,255,0.04);
+                            border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: white;
+                            font-size: 14px; outline: none; transition: border-color 200ms;
+                        }
+                        .contact-input:focus {
+                            border-color: rgba(0,229,255,0.4);
+                        }
+                    `}</style>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', position: 'relative', zIndex: 2 }}>
+
+                        <a href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '5493816223508'}?text=Hola%20DevelOP%2C%20quiero%20saber%20m%C3%A1s%20sobre%20la%20Sucursal%20Digital`}
+                            target="_blank" rel="noopener noreferrer"
+                            className="cta-whatsapp"
+                        >
+                            <svg viewBox="0 0 24 24" fill="#ffffff" width="20" height="20">
+                                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" />
+                                <path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.554 4.118 1.528 5.855L.057 23.547a.5.5 0 00.609.61l5.765-1.458A11.945 11.945 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.814 9.814 0 01-5.032-1.384l-.361-.214-3.718.941.972-3.634-.235-.374A9.818 9.818 0 012.182 12C2.182 6.57 6.57 2.182 12 2.182S21.818 6.57 21.818 12 17.43 21.818 12 21.818z" />
+                            </svg>
+                            Escribirnos por WhatsApp →
+                        </a>
+
+                        <button
+                            className="cta-secondary"
+                            onClick={() => {
+                                setShowForm(true)
+                                setTimeout(() => {
+                                    document.getElementById('contacto-form')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+                                }, 100)
+                            }}
+                        >
+                            Completar formulario de contacto
+                        </button>
+
+                        <div style={{ marginTop: '20px', fontSize: '11px', color: 'rgba(255,255,255,0.25)', letterSpacing: '0.05em' }}>
+                            Respondemos en menos de 2 horas en horario comercial
+                        </div>
+
+                        {/* FORMULARIO */}
+                        <div id="contacto-form" style={{
+                            width: '100%',
+                            maxWidth: '400px',
+                            maxHeight: showForm ? '600px' : '0',
+                            opacity: showForm ? 1 : 0,
+                            overflow: 'hidden',
+                            transition: 'all 500ms ease',
+                            marginTop: showForm ? '24px' : '0'
+                        }}>
+                            <form
+                                onSubmit={(e) => {
+                                    e.preventDefault()
+                                    console.log('Formulario enviado a procesar')
+                                }}
+                                style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}
+                            >
+                                <input type="text" placeholder="Tu nombre" className="contact-input" required />
+                                <input type="tel" placeholder="Tu WhatsApp" className="contact-input" required />
+                                <select className="contact-input" required style={{ appearance: 'none' }} defaultValue="">
+                                    <option value="" disabled hidden style={{ color: 'rgba(255,255,255,0.4)' }}>Mi rubro...</option>
+                                    <option value="gastronomia" style={{ color: '#080810' }}>Gastronomía</option>
+                                    <option value="comercio" style={{ color: '#080810' }}>Comercio</option>
+                                    <option value="servicios" style={{ color: '#080810' }}>Servicios</option>
+                                    <option value="salud" style={{ color: '#080810' }}>Salud</option>
+                                    <option value="inmobiliaria" style={{ color: '#080810' }}>Inmobiliaria</option>
+                                    <option value="otro" style={{ color: '#080810' }}>Otro</option>
+                                </select>
+                                <textarea placeholder="Contanos brevemente tu negocio (opcional)" rows={3} className="contact-input" style={{ resize: 'none' }}></textarea>
+
+                                <button type="submit" style={{
+                                    width: '100%',
+                                    background: 'linear-gradient(135deg, #00e5ff, #7b2fff)',
+                                    color: '#080810',
+                                    fontWeight: 700,
+                                    borderRadius: '10px',
+                                    padding: '14px',
+                                    fontSize: '14px',
+                                    cursor: 'pointer',
+                                    border: 'none',
+                                    marginTop: '8px'
+                                }}>
+                                    Enviar mensaje →
+                                </button>
+                            </form>
+                        </div>
+
+                    </div>
+                </div>
             </div>
         </section>
     )

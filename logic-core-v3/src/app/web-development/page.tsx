@@ -10,13 +10,11 @@ import { WebDevelopmentBento } from '@/components/sections/WebDevelopmentBento'
 import { WebDevelopmentSeo } from '@/components/sections/WebDevelopmentSeo'
 import { WebDevelopmentSensory } from '@/components/sections/WebDevelopmentSensory'
 import StatementSection from '@/components/sections/StatementSection'
-import { WebDevelopmentCta } from '@/components/sections/WebDevelopmentCta'
+import { VaultSection } from '@/components/sections/VaultSection'
 import { WebDevelopmentTimeline } from '@/components/sections/WebDevelopmentTimeline'
 import ShowcaseSection from '@/components/sections/ShowcaseSection'
 import ComparadorSection from '@/components/sections/ComparadorSection'
 import AiSection from '@/components/sections/AiSection'
-
-import { WebDevelopmentFaq } from '@/components/sections/WebDevelopmentFaq'
 
 
 export default function WebDevelopmentPage() {
@@ -169,11 +167,8 @@ export default function WebDevelopmentPage() {
             {/* Cinematic Statement Pause */}
             <StatementSection />
 
-            {/* FAQ Acordeon */}
-            <WebDevelopmentFaq />
-
-            {/* Final Heavy CTA */}
-            <WebDevelopmentCta />
+            {/* Vault: FAQ + CTA + Footer */}
+            <VaultSection />
 
         </main >
     )

@@ -1,18 +1,25 @@
 'use client'
 import React, { useRef, useState } from 'react'
-import { motion, useScroll, useTransform, useInView, useReducedMotion, useMotionValueEvent } from 'framer-motion'
+import { motion, useScroll, useTransform, useInView, useReducedMotion, useMotionValueEvent, type Variants } from 'framer-motion'
 import { VideoClimax } from './VideoClimax'
 
 // ── Data ──────────────────────────────────────────────────────────
+type GlowStyle = React.CSSProperties
+
 const MILESTONES = [
     {
         number: 'Semana 01',
         title: 'Auditoría UX',
         description: 'Mapeamos cómo compra tu cliente local para optimizar cada punto de contacto y maximizar la retención.',
         side: 'left' as const,
-        accentGradient: 'linear-gradient(90deg, #00e5ff, transparent)',
+        accentGradient: 'linear-gradient(90deg, #00e5ff 0%, rgba(0,229,255,0.3) 60%, transparent 100%)',
         decorNumber: '01',
         deliverable: 'Mapa de experiencia entregado',
+        glowStyle: { left: 0, top: 0, bottom: 0, width: '60px', background: 'linear-gradient(to right, rgba(0,229,255,0.06), transparent)' } as GlowStyle,
+        iconWrapperBg: 'rgba(0,229,255,0.12)',
+        iconWrapperBorder: '1px solid rgba(0,229,255,0.25)',
+        iconColor: '#00e5ff',
+        numberColor: 'rgba(0,229,255,0.04)',
         icon: (
             <svg className="group-hover:[filter:drop-shadow(0_0_8px_rgba(0,229,255,1))]" style={{ transition: 'filter 250ms' }} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#00e5ff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="11" cy="11" r="7" />
@@ -26,11 +33,16 @@ const MILESTONES = [
         title: 'Diseño UI',
         description: 'Creamos la interfaz visual en Figma con estética premium, enfocada en la identidad de tu marca.',
         side: 'right' as const,
-        accentGradient: 'linear-gradient(90deg, transparent, #00e5ff, transparent)',
+        accentGradient: 'linear-gradient(90deg, transparent 0%, #7b2fff 50%, transparent 100%)',
         decorNumber: '02',
         deliverable: 'Diseño en Figma aprobado',
+        glowStyle: { top: 0, left: '50%', transform: 'translateX(-50%)', height: '60px', width: '80%', background: 'linear-gradient(to bottom, rgba(123,47,255,0.08), transparent)' } as GlowStyle,
+        iconWrapperBg: 'rgba(123,47,255,0.12)',
+        iconWrapperBorder: '1px solid rgba(123,47,255,0.25)',
+        iconColor: '#7b2fff',
+        numberColor: 'rgba(123,47,255,0.04)',
         icon: (
-            <svg className="group-hover:[filter:drop-shadow(0_0_8px_rgba(0,229,255,1))]" style={{ transition: 'filter 250ms' }} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#00e5ff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <svg className="group-hover:[filter:drop-shadow(0_0_8px_rgba(123,47,255,1))]" style={{ transition: 'filter 250ms' }} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7b2fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M2.7 10.3a2.41 2.41 0 0 0 0 3.41l7.59 7.59a2.41 2.41 0 0 0 3.41 0l7.59-7.59a2.41 2.41 0 0 0 0-3.41L13.7 2.71a2.41 2.41 0 0 0-3.41 0z" />
             </svg>
         ),
@@ -41,9 +53,14 @@ const MILESTONES = [
         title: 'Código Next.js',
         description: 'Desarrollamos el motor ultrarrápido con las mejores prácticas de SEO y rendimiento del mercado.',
         side: 'left' as const,
-        accentGradient: 'linear-gradient(90deg, transparent, #7b2fff)',
+        accentGradient: 'linear-gradient(90deg, transparent 0%, rgba(0,229,255,0.3) 40%, #00e5ff 100%)',
         decorNumber: '03',
         deliverable: 'Plataforma en staging lista',
+        glowStyle: { right: 0, top: 0, bottom: 0, width: '60px', background: 'linear-gradient(to left, rgba(0,229,255,0.06), transparent)' } as GlowStyle,
+        iconWrapperBg: 'rgba(0,229,255,0.10)',
+        iconWrapperBorder: '1px solid rgba(0,229,255,0.2)',
+        iconColor: '#00e5ff',
+        numberColor: 'rgba(0,229,255,0.04)',
         icon: (
             <svg className="group-hover:[filter:drop-shadow(0_0_8px_rgba(0,229,255,1))]" style={{ transition: 'filter 250ms' }} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#00e5ff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                 <polyline points="16 18 22 12 16 6" />
@@ -83,16 +100,40 @@ function MilestoneCard({
     const initDesktop = fromLeft ? -50 : 50
 
     return (
-        <div className={`flex flex-col md:flex-row items-center justify-between w-full group ${fromLeft ? 'md:flex-row' : 'md:flex-row-reverse'}`}>
+        <div className={`flex flex-col md:flex-row items-center justify-between w-full group relative ${fromLeft ? 'md:flex-row' : 'md:flex-row-reverse'}`}
+            style={{ marginBottom: 'clamp(32px, 4vh, 52px)' }}>
+
+            {/* Horizontal Connector (Punto -> Card) */}
+            <div
+                aria-hidden="true"
+                className="hidden md:block"
+                style={{
+                    position: 'absolute',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    height: '1px',
+                    width: '8%',
+                    pointerEvents: 'none',
+                    zIndex: 0,
+                    ...(fromLeft ? {
+                        right: '46%', // Desde el borde derecho de la card (45%) hacia el centro (50%)
+                        background: 'linear-gradient(to right, transparent, rgba(0,229,255,0.35))'
+                    } : {
+                        left: '46%', // Desde el borde izquierdo de la card (45%) hacia el centro (50%)
+                        background: 'linear-gradient(to left, transparent, rgba(0,229,255,0.35))'
+                    })
+                }}
+            />
+
             {/* Card */}
             <motion.div
                 ref={cardRef}
+                layout="position"
                 initial={{ opacity: 0, x: prefersReduced ? 0 : initDesktop, y: 0 }}
                 animate={cardInView ? { opacity: 1, x: 0, y: 0 } : {}}
                 whileHover={prefersReduced ? {} : {
-                    scale: 1.02,
-                    borderColor: 'rgba(0,229,255,0.25)',
-                    boxShadow: '0 0 0 1px rgba(0,229,255,0.1), 0 8px 32px rgba(0,229,255,0.08), 0 20px 60px rgba(0,0,0,0.4)',
+                    y: -4,
+                    boxShadow: '0 16px 48px rgba(0,0,0,0.5), 0 0 0 1px rgba(0,229,255,0.15)',
                     transition: { duration: 0.25, ease: 'easeOut' }
                 }}
                 transition={{ duration: prefersReduced ? 0 : 0.7, ease }}
@@ -103,23 +144,24 @@ function MilestoneCard({
                     WebkitBackdropFilter: 'blur(16px)',
                     border: '1px solid rgba(255,255,255,0.09)',
                     borderRadius: '16px',
-                    boxShadow: '0 4px 24px rgba(0,0,0,0.3)',
-                    padding: 'clamp(24px, 3vw, 36px)',
+                    boxShadow: '0 1px 0 0 rgba(255,255,255,0.06) inset, 0 -1px 0 0 rgba(0,0,0,0.3) inset, 0 8px 32px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.3)',
+                    padding: 'clamp(24px, 3vw, 40px)',
                     cursor: 'default',
                     transition: 'border-color 200ms ease',
                     position: 'relative',
                     overflow: 'hidden',
                 }}
             >
-                <div aria-hidden="true" className="opacity-60 group-hover:opacity-100" style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '2px', borderRadius: '2px 2px 0 0', background: milestone.accentGradient, transition: 'opacity 250ms' }} />
-                <div aria-hidden="true" className="group-hover:opacity-[0.05]" style={{ position: 'absolute', bottom: '-20px', right: '12px', fontSize: '96px', fontWeight: 900, lineHeight: 1, color: 'rgba(255,255,255,0.025)', userSelect: 'none', pointerEvents: 'none', zIndex: 0, transition: 'opacity 300ms' }}>
+                <div aria-hidden="true" style={{ position: 'absolute', pointerEvents: 'none', zIndex: 0, ...milestone.glowStyle }} />
+                <div aria-hidden="true" className="opacity-70 group-hover:opacity-100" style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '2px', borderRadius: '2px 2px 0 0', background: milestone.accentGradient, transition: 'opacity 200ms', zIndex: 1 }} />
+                <div aria-hidden="true" className="group-hover:opacity-[0.05]" style={{ position: 'absolute', bottom: '-16px', right: '16px', fontSize: '88px', fontWeight: 900, lineHeight: 1, color: milestone.numberColor || 'rgba(255,255,255,0.025)', userSelect: 'none', pointerEvents: 'none', zIndex: 0, transition: 'opacity 300ms' }}>
                     {milestone.decorNumber}
                 </div>
                 <div style={{ position: 'relative', zIndex: 1 }}>
-                    <div className="group-hover:bg-[rgba(0,229,255,0.2)] group-hover:border-[rgba(0,229,255,0.4)]" style={{ width: '44px', height: '44px', borderRadius: '10px', background: 'rgba(0,229,255,0.1)', border: '1px solid rgba(0,229,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px', transition: 'all 250ms ease', }}>
+                    <div className="group-hover:scale-110 group-hover:brightness-125" style={{ width: '44px', height: '44px', borderRadius: '10px', background: milestone.iconWrapperBg, border: milestone.iconWrapperBorder, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px', transition: 'all 250ms', }}>
                         {milestone.icon}
                     </div>
-                    <div style={{ fontSize: '10px', letterSpacing: '0.35em', color: '#00e5ff', marginBottom: '8px', fontFamily: 'monospace', textTransform: 'uppercase' }}>
+                    <div style={{ fontSize: '10px', letterSpacing: '0.35em', color: milestone.iconColor, marginBottom: '8px', fontFamily: 'monospace', textTransform: 'uppercase' }}>
                         {milestone.number}
                     </div>
                     <h3 style={{ fontSize: 'clamp(18px, 2vw, 22px)', fontWeight: 700, color: 'white', marginBottom: '10px' }}>
@@ -129,7 +171,7 @@ function MilestoneCard({
                         {milestone.description}
                     </p>
                     <div style={{ marginTop: '20px', paddingTop: '16px', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-                        <div className="group-hover:border-[rgba(0,229,255,0.35)] group-hover:bg-[rgba(0,229,255,0.1)]" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'rgba(0,229,255,0.07)', border: '1px solid rgba(0,229,255,0.18)', borderRadius: '100px', padding: '6px 14px', fontSize: '11px', color: 'rgba(0,229,255,0.8)', transition: 'all 250ms' }}>
+                        <div className="group-hover:border-[rgba(0,229,255,0.4)] group-hover:bg-[rgba(0,229,255,0.12)]" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'rgba(0,229,255,0.08)', border: '1px solid rgba(0,229,255,0.2)', borderRadius: '100px', padding: '6px 14px', fontSize: '11px', color: '#00e5ff', fontWeight: 500, transition: 'all 200ms' }}>
                             <span style={{ fontSize: '10px', color: '#00e5ff' }}>✓</span>
                             {milestone.deliverable}
                         </div>
@@ -137,26 +179,8 @@ function MilestoneCard({
                 </div>
             </motion.div>
 
-            {/* Horizontal connector — animate from dot side */}
-            <motion.div
-                initial={{ transform: 'scaleX(0)' }}
-                animate={cardInView && !prefersReduced ? { transform: 'scaleX(1)' } : prefersReduced ? { transform: 'scaleX(1)' } : {}}
-                transition={{ duration: 0.5, delay: 0.3, ease: 'easeOut' }}
-                aria-hidden="true"
-                className="hidden md:block flex-1 self-center group-hover:opacity-100"
-                style={{
-                    height: '1px',
-                    opacity: 0.5,
-                    transition: 'opacity 250ms',
-                    background: fromLeft
-                        ? 'linear-gradient(90deg, rgba(0,229,255,0.7) 0%, transparent 100%)'
-                        : 'linear-gradient(270deg, rgba(0,229,255,0.7) 0%, transparent 100%)',
-                    transformOrigin: fromLeft ? 'right' : 'left',
-                }}
-            />
-
             {/* DOT COMPONENT - Upgraded */}
-            <div ref={dotRef} className="hidden md:flex flex-shrink-0 relative w-[28px] h-[28px] items-center justify-center">
+            <div ref={dotRef} className="hidden md:flex flex-shrink-0 relative w-[28px] h-[28px] items-center justify-center z-10">
                 {/* ANILLO EXTERIOR */}
                 <div
                     style={{
@@ -227,9 +251,6 @@ function MilestoneCard({
                 )}
             </div>
 
-            {/* Connector right side - spacer */}
-            <div className="hidden md:block flex-1 self-center" />
-
             {/* Empty balance card */}
             <div className="hidden md:block w-full md:w-[45%] flex-shrink-0" />
         </div>
@@ -295,13 +316,18 @@ export function WebDevelopmentTimeline() {
                     0%   { left: -100% }
                     100% { left: 200% }
                 }
+                @keyframes chevron {
+                    0%,100% { opacity:0.3; transform:rotate(45deg) translateY(0); }
+                    50% { opacity:1; transform:rotate(45deg) translateY(3px); }
+                }
                 .timeline-scroll-cue { animation: timeline-bounce 1.5s ease-in-out infinite; }
                 .timeline-card:hover { border-color: rgba(255,255,255,0.15) !important; }
                 .week4-shimmer { animation: shimmer 2.5s ease-in-out 1s infinite; }
                 .week4-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
                 @media (max-width: 767px) {
                     .week4-grid { grid-template-columns: 1fr; }
-                    .week4-video-col { height: 240px; position: relative; }
+                    .week4-video-col { height: 220px; position: relative; }
+                    .timeline-card:hover { transform: none !important; box-shadow: none !important; }
                 }
             `}</style>
 
@@ -326,11 +352,15 @@ export function WebDevelopmentTimeline() {
                         <span style={{ display: 'block', fontSize: 'clamp(38px, 5.5vw, 72px)', fontWeight: 900, color: '#ffffff', }}>
                             Tu web, lista
                         </span>
-                        <span style={{ display: 'block', fontSize: 'clamp(38px, 5.5vw, 72px)', fontWeight: 900, background: 'linear-gradient(135deg, #00e5ff 0%, #7b2fff 100%)', WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent', color: 'transparent', }}>
+                        <span style={{ display: 'block', fontSize: 'clamp(38px, 5.5vw, 72px)', fontWeight: 900, background: 'linear-gradient(135deg, #00e5ff 0%, #7b2fff 100%)', WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent', color: 'transparent', filter: 'drop-shadow(0 0 20px rgba(0,229,255,0.3))' }}>
                             en 4 semanas.
                         </span>
-                        <span style={{ display: 'block', fontSize: 'clamp(16px, 2vw, 22px)', fontWeight: 400, color: 'rgba(255,255,255,0.45)', marginTop: '12px', }}>
-                            Sin vueltas. Sin sorpresas. Con resultados.
+                        <span style={{ display: 'block', fontSize: 'clamp(16px, 2vw, 22px)', fontWeight: 400, marginTop: '12px', }}>
+                            <span style={{ color: 'rgba(255,255,255,0.45)' }}>Sin vueltas</span>
+                            <span style={{ color: 'rgba(0,229,255,0.3)' }}> · </span>
+                            <span style={{ color: 'rgba(255,255,255,0.45)' }}>Sin sorpresas</span>
+                            <span style={{ color: 'rgba(0,229,255,0.3)' }}> · </span>
+                            <span style={{ color: 'rgba(255,255,255,0.65)' }}>Con resultados.</span>
                         </span>
                     </h2>
                 </motion.div>
@@ -362,6 +392,7 @@ export function WebDevelopmentTimeline() {
                             height: prefersReduced ? '100%' : lineHeight,
                             background: 'linear-gradient(to bottom, #00e5ff 0%, #7b2fff 50%, #00e5ff 100%)',
                             boxShadow: '0 0 8px rgba(0,229,255,0.8), 0 0 20px rgba(0,229,255,0.3)',
+                            willChange: 'transform',
                         }} />
 
                         {/* CAPA 3 — Orbe viajero */}
@@ -377,6 +408,7 @@ export function WebDevelopmentTimeline() {
                                 background: 'radial-gradient(circle, #ffffff 0%, #00e5ff 60%)',
                                 boxShadow: '0 0 0 3px rgba(0,229,255,0.25), 0 0 14px rgba(0,229,255,1), 0 0 30px rgba(0,229,255,0.5)',
                                 zIndex: 3,
+                                willChange: 'transform',
                             }} />
                         )}
 
@@ -396,6 +428,11 @@ export function WebDevelopmentTimeline() {
                         )}
                     </div>
 
+                    {/* Intermediate Ambient Glows — filling the void */}
+                    <div aria-hidden="true" className="absolute pointer-events-none" style={{ top: '22%', right: '5%', width: '300px', height: '250px', background: 'radial-gradient(circle, rgba(0,229,255,0.03) 0%, transparent 70%)', filter: 'blur(60px)', zIndex: 0 }} />
+                    <div aria-hidden="true" className="absolute pointer-events-none" style={{ top: '46%', left: '5%', width: '300px', height: '250px', background: 'radial-gradient(circle, rgba(123,47,255,0.03) 0%, transparent 70%)', filter: 'blur(60px)', zIndex: 0 }} />
+                    <div aria-hidden="true" className="absolute pointer-events-none" style={{ top: '70%', left: '50%', transform: 'translateX(-50%)', width: '400px', height: '200px', background: 'radial-gradient(ellipse, rgba(0,229,255,0.04) 0%, transparent 65%)', filter: 'blur(70px)', zIndex: 0 }} />
+
                     <div className="space-y-24 relative z-10 py-12">
                         {MILESTONES.map((milestone, index) => (
                             <MilestoneCard
@@ -411,15 +448,11 @@ export function WebDevelopmentTimeline() {
                         <div className="w-full">
                             <motion.div
                                 ref={week4Ref}
-                                onHoverStart={() => setIsHoveredFinal(true)}
-                                onHoverEnd={() => setIsHoveredFinal(false)}
+                                layout="position"
                                 initial={{ opacity: 0, y: prefersReduced ? 0 : 60, scale: prefersReduced ? 1 : 0.95 }}
                                 animate={week4InView ? { opacity: 1, y: 0, scale: 1 } : {}}
                                 whileHover={prefersReduced ? {} : {
-                                    scale: 1.005,
-                                    boxShadow: '0 0 0 1px rgba(0,229,255,0.2), 0 0 60px rgba(0,229,255,0.1) inset, 0 30px 80px rgba(0,0,0,0.5)',
-                                    borderColor: 'rgba(0,229,255,0.3)',
-                                    transition: { duration: 0.3, ease: 'easeOut' }
+                                    boxShadow: '0 0 0 1px rgba(0,229,255,0.25), 0 24px 64px rgba(0,0,0,0.5)',
                                 }}
                                 transition={{ duration: prefersReduced ? 0 : 0.9, ease }}
                                 className="group"
@@ -434,7 +467,7 @@ export function WebDevelopmentTimeline() {
                                 }}
                             >
                                 <div aria-hidden="true" style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '2px', background: 'linear-gradient(90deg, transparent, #00e5ff 30%, #7b2fff 70%, transparent)', zIndex: 2, }} />
-                                <div aria-hidden="true" className="week4-shimmer" style={{ position: 'absolute', top: 0, width: '40%', height: '2px', background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.8), transparent)', zIndex: 3, animationDuration: isHoveredFinal ? '1.2s' : '2.5s', transition: 'animation-duration 0.3s' }} />
+                                <div aria-hidden="true" className="week4-shimmer" style={{ position: 'absolute', top: 0, width: '40%', height: '2px', background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.8), transparent)', zIndex: 3 }} />
 
                                 <div className="week4-grid">
                                     <div style={{ padding: 'clamp(32px, 4vw, 52px)', position: 'relative', zIndex: 1, }}>
@@ -469,13 +502,30 @@ export function WebDevelopmentTimeline() {
 
                                         <motion.button
                                             type="button"
-                                            whileHover={prefersReduced ? {} : { scale: 1.03, borderColor: 'rgba(0,229,255,0.6)' }}
+                                            initial="rest"
+                                            whileHover={prefersReduced ? {} : "hover"}
+                                            whileTap={prefersReduced ? {} : { scale: 0.98 }}
                                             onClick={() => document.getElementById('showcase-section')?.scrollIntoView({ behavior: 'smooth' })}
                                             style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', border: '1px solid rgba(0,229,255,0.35)', borderRadius: '100px', padding: '12px 28px', fontSize: '13px', letterSpacing: '0.05em', color: '#00e5ff', cursor: 'pointer', background: 'transparent', transition: 'all 250ms ease', }}
                                             onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(0,229,255,0.1)'; }}
                                             onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; }}
+                                            variants={{
+                                                rest: { scale: 1, borderColor: 'rgba(0,229,255,0.35)' },
+                                                hover: { scale: 1.03, borderColor: 'rgba(0,229,255,0.6)' }
+                                            } as Variants}
+                                            transition={{ type: 'spring', stiffness: 400, damping: 15 }}
                                         >
-                                            Iniciar mi transformación <motion.span whileHover={prefersReduced ? {} : { x: 4 }} transition={{ type: 'spring', stiffness: 300, damping: 20 }} style={{ display: 'inline-block' }}>→</motion.span>
+                                            Iniciar mi transformación
+                                            <motion.span
+                                                variants={{
+                                                    rest: { x: 0 },
+                                                    hover: { x: 4 }
+                                                } as Variants}
+                                                transition={{ duration: 0.2 }}
+                                                style={{ display: 'inline-block' }}
+                                            >
+                                                →
+                                            </motion.span>
                                         </motion.button>
                                     </div>
 
@@ -488,16 +538,36 @@ export function WebDevelopmentTimeline() {
                     </div>
                 </div>
 
-                <div style={{ marginTop: 'clamp(48px, 8vh, 80px)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0' }} >
-                    <div aria-hidden="true" style={{ width: '100%', height: '1px', background: 'linear-gradient(90deg, transparent, rgba(0,229,255,0.15), transparent)', marginBottom: '32px' }} />
-                    <button type="button" onClick={() => document.getElementById('showcase-section')?.scrollIntoView({ behavior: 'smooth' })} style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', }} aria-label="Ver trabajos" >
-                        <span style={{ fontSize: '12px', letterSpacing: '0.25em', color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase' }}>
-                            TRABAJOS QUE LO DEMUESTRAN
-                        </span>
-                        <span className="timeline-scroll-cue" style={{ color: '#00e5ff', opacity: 0.5, fontSize: '20px', lineHeight: 1 }} aria-hidden="true" >
-                            ⌄⌄
-                        </span>
-                    </button>
+                <div style={{
+                    display: 'flex', flexDirection: 'column',
+                    alignItems: 'center', gap: '12px',
+                    marginTop: 'clamp(48px,6vh,72px)',
+                    opacity: 0.4,
+                }}>
+                    <div style={{
+                        height: '1px', width: '100%', maxWidth: '600px',
+                        background: 'linear-gradient(90deg, transparent, rgba(0,229,255,0.15), transparent)',
+                    }} />
+                    <span style={{
+                        fontSize: '10px', letterSpacing: '0.35em',
+                        color: 'rgba(255,255,255,0.3)',
+                        textTransform: 'uppercase',
+                    }}>
+                        trabajos que lo demuestran
+                    </span>
+                    <div style={{
+                        display: 'flex', flexDirection: 'column', gap: '3px',
+                    }}>
+                        {[0, 1].map(i => (
+                            <div key={i} style={{
+                                width: '8px', height: '8px',
+                                borderRight: '1px solid rgba(0,229,255,0.4)',
+                                borderBottom: '1px solid rgba(0,229,255,0.4)',
+                                transform: 'rotate(45deg)',
+                                animation: `chevron 1.4s ease-in-out ${i * 0.15}s infinite`,
+                            }} />
+                        ))}
+                    </div>
                 </div>
             </div>
         </section>

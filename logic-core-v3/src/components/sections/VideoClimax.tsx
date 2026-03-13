@@ -5,9 +5,9 @@ export function VideoClimax() {
         <div
             style={{
                 position: 'relative',
-                height: '100%',
-                minHeight: '320px',
+                height: 'clamp(280px, 35vh, 380px)',
                 overflow: 'hidden',
+                borderRadius: '12px',
             }}
         >
             {/* Video */}
@@ -23,7 +23,7 @@ export function VideoClimax() {
                     width: '112%',
                     height: '112%',
                     objectFit: 'cover',
-                    objectPosition: 'center center',
+                    objectPosition: 'center 20%',
                     marginLeft: '-6%',
                     marginTop: '-6%',
                     display: 'block',

@@ -89,3 +89,7 @@ canvas {
     animation: rotate-border 3s linear infinite;
   }
 }
+@keyframes floatMetric {
+  0% { transform: translateY(0px); }
+  100% { transform: translateY(-10px); }
+}
