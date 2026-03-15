@@ -7,10 +7,17 @@ import { SoftwareDevelopmentCta } from '@/components/sections/SoftwareDevelopmen
 import HeroSoftware from '@/components/software/HeroSoftware'
 import PainBentoSoftware from '@/components/software/PainBentoSoftware'
 import DiagnosticoSoftware from '@/components/software/DiagnosticoSoftware'
+import ProcesoSoftware from '@/components/software/ProcesoSoftware'
+import ArchitectureSoftware from '@/components/software/ArchitectureSoftware'
+import PipelineSoftware from '@/components/software/PipelineSoftware'
+import ShowcaseSoftware from '@/components/software/ShowcaseSoftware'
+import StatementSoftware from '@/components/software/StatementSoftware'
+import SocialProofSoftware from '@/components/software/SocialProofSoftware'
+import VaultSoftware from '@/components/software/VaultSoftware'
 
 export default function SoftwareDevelopmentPage() {
     return (
-        <main className="relative min-h-screen w-full bg-[#06060f] overflow-hidden text-white">
+        <main className="relative min-h-screen w-full bg-[#06060f] overflow-x-clip overflow-y-visible text-white">
             {/* The Cinematic Hero Section */}
             <HeroSoftware />
 
@@ -19,6 +26,21 @@ export default function SoftwareDevelopmentPage() {
 
             {/* Personalized Diagnostic Tool */}
             <DiagnosticoSoftware />
+
+            {/* Detailed Workflow Process */}
+            <ProcesoSoftware />
+
+            {/* System Architecture Capabilities */}
+            <ArchitectureSoftware />
+
+            {/* Business Flow Pipeline */}
+            <PipelineSoftware />
+
+            {/* Success Cases / Projects Showcase */}
+            <ShowcaseSoftware />
+
+            {/* Strategic Emotional Statement */}
+            <StatementSoftware />
 
             {/* Tech Stack Marquee (Infinite Scroll) */}
             <div className="relative z-10 w-full py-10 mt-12 overflow-hidden" style={{ WebkitMaskImage: 'linear-gradient(to right, transparent, black 10%, black 90%, transparent)', maskImage: 'linear-gradient(to right, transparent, black 10%, black 90%, transparent)' }}>
@@ -58,6 +80,12 @@ export default function SoftwareDevelopmentPage() {
 
             {/* Secure Architecture Section */}
             <SoftwareArchitecture />
+
+            {/* Social Proof (NOA Testimonials) */}
+            <SocialProofSoftware />
+
+            {/* Final Conversion Vault (FAQ & ROI) */}
+            <VaultSoftware />
 
             {/* Final Heavy CTA */}
             <SoftwareDevelopmentCta />

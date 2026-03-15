@@ -1,0 +1,735 @@
+'use client'
+
+import React, { useRef, useEffect, useState } from 'react'
+import { motion, useReducedMotion, AnimatePresence } from 'motion/react'
+
+// ─── DATA & TYPES ───────────────────────────────────────────────────────────
+
+interface AppNode {
+  id: string
+  label: string
+  emoji: string
+  x: number // % of canvas
+  y: number
+  vx: number
+  vy: number
+  phase: number
+  size: number
+  color: string
+  colorRgb: string
+  glowIntensity: number
+}
+
+const APP_NODES_DATA: Omit<AppNode, 'vx' | 'vy' | 'glowIntensity'>[] = [
+  { id: 'whatsapp', label: 'WhatsApp', emoji: '💬', x: 0.15, y: 0.35, phase: 0, size: 36, color: '#25d366', colorRgb: '37,211,102' },
+  { id: 'gmail', label: 'Gmail', emoji: '📧', x: 0.82, y: 0.28, phase: 1.2, size: 34, color: '#ea4335', colorRgb: '234,67,53' },
+  { id: 'sheets', label: 'Sheets', emoji: '📊', x: 0.20, y: 0.72, phase: 2.4, size: 32, color: '#34a853', colorRgb: '52,168,83' },
+  { id: 'mercadopago', label: 'MercadoPago', emoji: '💳', x: 0.78, y: 0.70, phase: 3.6, size: 34, color: '#00b1ea', colorRgb: '0,177,234' },
+  { id: 'meta', label: 'Meta Ads', emoji: '📣', x: 0.50, y: 0.18, phase: 0.8, size: 32, color: '#1877f2', colorRgb: '24,119,242' },
+  { id: 'slack', label: 'Slack', emoji: '📨', x: 0.88, y: 0.52, phase: 2.0, size: 30, color: '#e01e5a', colorRgb: '224,30,90' },
+  { id: 'notion', label: 'Notion', emoji: '📋', x: 0.12, y: 0.55, phase: 3.0, size: 30, color: '#ffffff', colorRgb: '255,255,255' },
+  { id: 'afip', label: 'AFIP', emoji: '🧾', x: 0.50, y: 0.82, phase: 4.2, size: 32, color: '#f59e0b', colorRgb: '245,158,11' },
+  // CENTRAL ORCHESTRATOR
+  {
+    id: 'n8n',
+    label: 'n8n · Automatización',
+    emoji: '⚡',
+    x: 0.50, y: 0.50,
+    phase: 0,
+    size: 52,
+    color: '#f59e0b',
+    colorRgb: '245,158,11'
+  }
+]
+
+// ─── CANVAS SUB-COMPONENT ──────────────────────────────────────────────────
+
+function NodeCanvas({
+  mouseRef,
+}: {
+  mouseRef: React.MutableRefObject<{ x: number; y: number }>
+}) {
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const animRef = useRef<number>(0)
+  const nodesRef = useRef<AppNode[]>(
+    APP_NODES_DATA.map(n => ({ 
+      ...n, 
+      vx: 0, 
+      vy: 0, 
+      glowIntensity: n.id === 'n8n' ? 0.8 : 0 
+    }))
+  )
+  const frameRef = useRef(0)
+  const shouldReduceMotion = useReducedMotion()
+
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+
+    function resize() {
+      if (!canvas) return
+      canvas.width = window.innerWidth
+      canvas.height = window.innerHeight
+    }
+    resize()
+    window.addEventListener('resize', resize)
+
+    const CONNECTION_DIST = 0.38
+    const MOUSE_ATTRACT_DIST = 0.25
+
+    function draw() {
+      if (!canvas || !ctx) return
+      frameRef.current++
+      const f = frameRef.current
+      const W = canvas.width
+      const H = canvas.height
+      const mouse = mouseRef.current
+
+      ctx.clearRect(0, 0, W, H)
+
+      const nodes = nodesRef.current
+
+      // ── MOVER NODOS ────────────────────────
+      for (const n of nodes) {
+        if (n.id === 'n8n') {
+            // n8n is fixed at center but has subtle vibration
+            const v = f * 0.001
+            n.x = 0.5 + Math.sin(v) * 0.002
+            n.y = 0.5 + Math.cos(v * 0.8) * 0.002
+            continue
+        }
+
+        const t = f * 0.0008 + n.phase
+        // Float orbital lento
+        n.x += Math.sin(t) * 0.00015
+        n.y += Math.cos(t * 0.7) * 0.0001
+
+        // Clamp dentro del canvas
+        n.x = Math.max(0.08, Math.min(0.92, n.x))
+        n.y = Math.max(0.12, Math.min(0.88, n.y))
+
+        // Atracción sutil hacia el mouse
+        const mx = mouse.x / W
+        const my = mouse.y / (H || 1)
+        const dx = mx - n.x
+        const dy = my - n.y
+        const dist = Math.sqrt(dx * dx + dy * dy)
+
+        if (dist < MOUSE_ATTRACT_DIST) {
+          const force = ((MOUSE_ATTRACT_DIST - dist) / MOUSE_ATTRACT_DIST) * 0.00008
+          n.x += dx * force
+          n.y += dy * force
+          n.glowIntensity = Math.min(n.glowIntensity + 0.05, 1)
+        } else {
+          n.glowIntensity = Math.max(n.glowIntensity - 0.02, 0)
+        }
+      }
+
+      // ── CONEXIONES FORZADAS A n8n ───────────
+      const n8nNode = nodes.find(n => n.id === 'n8n')!
+      const cx1 = n8nNode.x * W
+      const cy1 = n8nNode.y * H
+
+      for (const app of nodes) {
+        if (app.id === 'n8n') continue
+        const cx2 = app.x * W
+        const cy2 = app.y * H
+
+        // Línea base tenue punteada
+        ctx.beginPath()
+        ctx.moveTo(cx1, cy1)
+        ctx.lineTo(cx2, cy2)
+        ctx.strokeStyle = 'rgba(245,158,11,0.06)'
+        ctx.lineWidth = 1
+        ctx.setLineDash([3, 8])
+        ctx.stroke()
+        ctx.setLineDash([])
+
+        // Partícula viajando desde app -> n8n
+        const particleSpeed = shouldReduceMotion ? 0.004 : 0.008
+        const tP = ((f * particleSpeed + app.phase * 0.2) % 1)
+        const px = cx2 + (cx1 - cx2) * tP
+        const py = cy2 + (cy1 - cy2) * tP
+        const pAlpha = Math.sin(tP * Math.PI) * 0.5
+
+        const pg = ctx.createRadialGradient(px, py, 0, px, py, 4)
+        pg.addColorStop(0, `rgba(245,158,11,${pAlpha})`)
+        pg.addColorStop(1, 'rgba(245,158,11,0)')
+        
+        ctx.beginPath()
+        ctx.arc(px, py, 4, 0, Math.PI * 2)
+        ctx.fillStyle = pg
+        ctx.fill()
+      }
+
+      // ── CONEXIONES DINÁMICAS (MOUSE) ────────
+      const mx = mouse.x / W
+      const my = mouse.y / (H || 1)
+
+      for (let i = 0; i < nodes.length; i++) {
+        for (let j = i + 1; j < nodes.length; j++) {
+          const a = nodes[i]
+          const b = nodes[j]
+          
+          // Skip if both are not central and far from mouse? No, logic as prompt:
+          const dx = a.x - b.x
+          const dy = a.y - b.y
+          const dist = Math.sqrt(dx * dx + dy * dy)
+
+          const midX = (a.x + b.x) / 2
+          const midY = (a.y + b.y) / 2
+          const mdx = mx - midX
+          const mdy = my - midY
+          const mouseDist = Math.sqrt(mdx * mdx + mdy * mdy)
+
+          const shouldConnect = dist < CONNECTION_DIST && mouseDist < 0.3
+
+          if (!shouldConnect) continue
+
+          const proximity = 1 - mouseDist / 0.3
+          const alpha = proximity * 0.7
+
+          // Base line
+          ctx.beginPath()
+          ctx.moveTo(a.x * W, a.y * H)
+          ctx.lineTo(b.x * W, b.y * H)
+          ctx.strokeStyle = `rgba(245,158,11,${alpha * 0.3})`
+          ctx.lineWidth = 1
+          ctx.stroke()
+
+          // Glow line
+          const grad = ctx.createLinearGradient(a.x * W, a.y * H, b.x * W, b.y * H)
+          grad.addColorStop(0, `rgba(245,158,11,${alpha})`)
+          grad.addColorStop(0.5, `rgba(255,200,50,${alpha * 1.2})`)
+          grad.addColorStop(1, `rgba(249,115,22,${alpha})`)
+
+          ctx.beginPath()
+          ctx.moveTo(a.x * W, a.y * H)
+          ctx.lineTo(b.x * W, b.y * H)
+          ctx.strokeStyle = grad
+          ctx.lineWidth = 1.5
+          ctx.stroke()
+
+          // Particles along dynamic line
+          if (!shouldReduceMotion && f % 4 === 0) {
+            const tProgress = (f * 0.02) % 1
+            const px = a.x * W + (b.x * W - a.x * W) * tProgress
+            const py = a.y * H + (b.y * H - a.y * H) * tProgress
+            const pg = ctx.createRadialGradient(px, py, 0, px, py, 6)
+            pg.addColorStop(0, `rgba(255,220,100,${alpha})`)
+            pg.addColorStop(1, 'rgba(245,158,11,0)')
+            ctx.beginPath()
+            ctx.arc(px, py, 6, 0, Math.PI * 2)
+            ctx.fillStyle = pg
+            ctx.fill()
+          }
+        }
+      }
+
+      // ── DIBUJAR NODOS ────────────────────────
+      // Sort to draw n8n last (on top)
+      const sortedNodes = [...nodes].sort((a,b) => a.id === 'n8n' ? 1 : b.id === 'n8n' ? -1 : 0)
+
+      for (const n of sortedNodes) {
+        const cx = n.x * W
+        const cy = n.y * H
+        const R = n.size
+        const glow = n.glowIntensity
+
+        if (n.id === 'n8n') {
+            // Anillos pulsantes (3 anillos)
+            for (let ring = 0; ring < 3; ring++) {
+              const ringPhase = (f * 0.015 + ring * 0.33) % 1
+              const ringR = R * (1 + ringPhase * 2.5)
+              const ringAlpha = (1 - ringPhase) * 0.25
+
+              ctx.beginPath()
+              ctx.arc(cx, cy, ringR, 0, Math.PI * 2)
+              ctx.strokeStyle = `rgba(245,158,11,${ringAlpha})`
+              ctx.lineWidth = 1.5
+              ctx.stroke()
+            }
+
+            // Glow grande permanente
+            const bigGlow = ctx.createRadialGradient(cx, cy, 0, cx, cy, R * 5)
+            bigGlow.addColorStop(0, 'rgba(245,158,11,0.25)')
+            bigGlow.addColorStop(0.4, 'rgba(249,115,22,0.08)')
+            bigGlow.addColorStop(1, 'rgba(245,158,11,0)')
+            ctx.beginPath()
+            ctx.arc(cx, cy, R * 5, 0, Math.PI * 2)
+            ctx.fillStyle = bigGlow
+            ctx.fill()
+
+            // Borde doble y nucleo
+            ctx.beginPath()
+            ctx.arc(cx, cy, R, 0, Math.PI * 2)
+            ctx.fillStyle = 'rgba(245,158,11,0.12)'
+            ctx.fill()
+            ctx.strokeStyle = 'rgba(245,158,11,0.8)'
+            ctx.lineWidth = 2
+            ctx.stroke()
+
+            ctx.beginPath()
+            ctx.arc(cx, cy, R + 6, 0, Math.PI * 2)
+            ctx.strokeStyle = 'rgba(245,158,11,0.25)'
+            ctx.lineWidth = 1
+            ctx.stroke()
+
+            // Emoji n8n
+            ctx.font = `${R * 0.65}px serif`
+            ctx.textAlign = 'center'
+            ctx.textBaseline = 'middle'
+            ctx.fillStyle = 'white'
+            ctx.fillText(n.emoji, cx, cy)
+
+            // Label n8n
+            ctx.font = '700 11px ui-monospace, monospace'
+            ctx.fillStyle = 'rgba(245,158,11,0.8)'
+            ctx.fillText(n.label, cx, cy + R + 18)
+            
+            continue
+        }
+
+        // --- NODO NORMAL ---
+        // Outer Glow
+        const outerGlow = ctx.createRadialGradient(cx, cy, 0, cx, cy, R * 3.5)
+        outerGlow.addColorStop(0, `rgba(245,158,11,${0.15 * glow})`)
+        outerGlow.addColorStop(1, 'rgba(245,158,11,0)')
+        ctx.beginPath()
+        ctx.arc(cx, cy, R * 3.5, 0, Math.PI * 2)
+        ctx.fillStyle = outerGlow
+        ctx.fill()
+
+        // Plate
+        ctx.beginPath()
+        ctx.arc(cx, cy, R, 0, Math.PI * 2)
+        ctx.fillStyle = `rgba(255,255,255,${0.06 + glow * 0.06})`
+        ctx.fill()
+
+        // Border
+        ctx.beginPath()
+        ctx.arc(cx, cy, R, 0, Math.PI * 2)
+        ctx.strokeStyle = `rgba(245,158,11,${0.3 + glow * 0.5})`
+        ctx.lineWidth = glow > 0.3 ? 2 : 1
+        ctx.stroke()
+
+        // Emoji
+        ctx.font = `${R * 0.9}px serif`
+        ctx.textAlign = 'center'
+        ctx.textBaseline = 'middle'
+        ctx.fillStyle = 'white'
+        ctx.fillText(n.emoji, cx, cy)
+
+        // Label
+        ctx.font = `600 11px ui-monospace, monospace`
+        ctx.textAlign = 'center'
+        ctx.fillStyle = `rgba(245,158,11,${0.4 + glow * 0.5})`
+        ctx.fillText(n.label, cx, cy + R + 14)
+      }
+
+      animRef.current = requestAnimationFrame(draw)
+    }
+
+    draw()
+
+    return () => {
+      cancelAnimationFrame(animRef.current)
+      window.removeEventListener('resize', resize)
+    }
+  }, [shouldReduceMotion])
+
+  return (
+    <canvas
+      ref={canvasRef}
+      aria-hidden="true"
+      style={{
+        position: 'absolute',
+        inset: 0,
+        width: '100%',
+        height: '100%',
+        zIndex: 1,
+        pointerEvents: 'none',
+      }}
+    />
+  )
+}
+
+// ─── MAIN HERO COMPONENT ────────────────────────────────────────────────────
+
+export default function HeroAutomation() {
+  const mouseRef = useRef({ x: 0, y: 0 })
+  const [showHint, setShowHint] = useState(false)
+  const [mouseMoved, setMouseMoved] = useState(false)
+  const shouldReduceMotion = useReducedMotion()
+
+  useEffect(() => {
+    if (shouldReduceMotion) return
+    const t = setTimeout(() => setShowHint(true), 2000)
+    return () => clearTimeout(t)
+  }, [shouldReduceMotion])
+
+  useEffect(() => {
+    function onMove(e: MouseEvent) {
+      mouseRef.current = { x: e.clientX, y: e.clientY }
+      if (!mouseMoved) {
+        setMouseMoved(true)
+        setShowHint(false)
+      }
+    }
+    window.addEventListener('mousemove', onMove)
+    return () => window.removeEventListener('mousemove', onMove)
+  }, [mouseMoved])
+
+  return (
+    <section
+      style={{
+        position: 'relative',
+        width: '100%',
+        minHeight: '100vh',
+        background: '#070709',
+        overflow: 'hidden',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 1,
+      }}
+    >
+      <style>{`
+        @keyframes moveHand {
+          0%, 100% { transform: translateX(0) }
+          50% { transform: translateX(6px) }
+        }
+      `}</style>
+
+      {/* Background Auroras */}
+      <div
+        aria-hidden="true"
+        style={{
+          position: 'absolute',
+          inset: 0,
+          zIndex: 0,
+          pointerEvents: 'none',
+        }}
+      >
+        {/* Aurora ámbar central */}
+        <div style={{
+          position: 'absolute',
+          top: '30%', left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: '700px', height: '500px',
+          background: 'radial-gradient(ellipse, rgba(245,158,11,0.08) 0%, rgba(249,115,22,0.04) 40%, transparent 70%)',
+          filter: 'blur(80px)',
+        }} />
+
+        {/* Aurora naranja izquierda */}
+        <div style={{
+          position: 'absolute',
+          top: '20%', left: '-10%',
+          width: '500px', height: '600px',
+          background: 'radial-gradient(ellipse, rgba(249,115,22,0.06) 0%, transparent 60%)',
+          filter: 'blur(100px)',
+        }} />
+
+        {/* Aurora ámbar derecha */}
+        <div style={{
+          position: 'absolute',
+          top: '40%', right: '-10%',
+          width: '500px', height: '500px',
+          background: 'radial-gradient(ellipse, rgba(245,158,11,0.06) 0%, transparent 60%)',
+          filter: 'blur(90px)',
+        }} />
+      </div>
+
+      <NodeCanvas mouseRef={mouseRef} />
+
+      {/* Vignette */}
+      <div
+        aria-hidden="true"
+        style={{
+          position: 'absolute',
+          inset: 0,
+          background: `radial-gradient(ellipse at center, transparent 20%, rgba(7,7,9,0.5) 60%, rgba(7,7,9,0.92) 100%)`,
+          zIndex: 2,
+          pointerEvents: 'none',
+        }}
+      />
+
+      {/* Content Slot */}
+      <div
+        style={{
+          position: 'relative',
+          zIndex: 10,
+          textAlign: 'center',
+          maxWidth: '860px',
+          padding: '0 clamp(20px, 5vw, 60px)',
+          pointerEvents: 'none',
+        }}
+      >
+        {/* BadgeAuto */}
+        <motion.div
+           initial={{ opacity: 0, y: -10 }}
+           animate={{ opacity: 1, y: 0 }}
+           transition={{ duration: 0.6, delay: 0.2 }}
+           style={{
+             display: 'inline-flex',
+             alignItems: 'center',
+             gap: '8px',
+             border: '1px solid rgba(245,158,11,0.3)',
+             borderRadius: '100px',
+             padding: '6px 18px',
+             marginBottom: '28px',
+             background: 'rgba(245,158,11,0.06)',
+             pointerEvents: 'none',
+           }}
+        >
+          <div style={{
+            width: '6px', height: '6px',
+            borderRadius: '50%',
+            background: '#f59e0b',
+            boxShadow: '0 0 8px rgba(245,158,11,0.9)',
+            animation: 'pulse 1.8s ease-in-out infinite',
+            flexShrink: 0,
+          }}/>
+          <span style={{
+            fontSize: '11px',
+            letterSpacing: '0.25em',
+            color: '#f59e0b',
+            fontWeight: 600,
+            fontFamily: 'ui-monospace, monospace',
+          }}>
+            AUTOMATIZACIÓN · N8N · NOA
+          </span>
+        </motion.div>
+
+        {/* TitleAuto */}
+        <motion.h1
+          initial={{ opacity: 0, y: 28 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.9, delay: 0.35, ease: [0.16, 1, 0.3, 1] }}
+          style={{
+            fontSize: 'clamp(40px, 7vw, 100px)',
+            fontWeight: 900,
+            lineHeight: 1.0,
+            letterSpacing: '-0.03em',
+            margin: '0 0 clamp(16px, 2.5vh, 24px)',
+            pointerEvents: 'none',
+          }}
+        >
+          <span style={{ color: 'white' }}>
+            Mientras dormís,
+          </span>
+          <br/>
+          <span style={{
+            background: shouldReduceMotion 
+                ? 'none' 
+                : 'linear-gradient(135deg, #f59e0b 0%, #fbbf24 40%, #f97316 70%, #f59e0b 100%)',
+            backgroundSize: '200% 100%',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: shouldReduceMotion ? '#f59e0b' : 'transparent',
+            backgroundClip: 'text',
+            animation: shouldReduceMotion ? 'none' : 'amberShift 4s ease-in-out infinite',
+            display: 'inline-block',
+            color: shouldReduceMotion ? '#f59e0b' : 'inherit',
+          }}>
+            tu negocio trabaja.
+          </span>
+        </motion.h1>
+
+        {/* SubtitleAuto */}
+        <motion.p
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.6, ease: [0.16, 1, 0.3, 1] }}
+          style={{
+            fontSize: 'clamp(15px, 1.8vw, 19px)',
+            color: 'rgba(255,255,255,0.42)',
+            lineHeight: 1.7,
+            maxWidth: '560px',
+            margin: '0 auto clamp(28px, 4vh, 44px)',
+            pointerEvents: 'none',
+          }}
+        >
+          Conectamos WhatsApp, Gmail, MercadoPago, AFIP y 400 apps más en flujos automáticos.
+          <br/>
+          <span style={{ color: 'rgba(245,158,11,0.75)' }}>
+            Tus tareas repetitivas desaparecen. Tu equipo se enfoca en lo que importa.
+          </span>
+        </motion.p>
+
+        {/* CTAAuto */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, delay: 0.8 }}
+          style={{
+            display: 'flex',
+            gap: '12px',
+            justifyContent: 'center',
+            flexWrap: 'wrap',
+            pointerEvents: 'auto',
+          }}
+        >
+          <motion.a
+            href="#calculadora"
+            whileHover={{ scale: 1.04 }}
+            whileTap={{ scale: 0.97 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 15 }}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '10px',
+              background: 'linear-gradient(135deg, #f59e0b, #f97316)',
+              color: '#070709',
+              fontWeight: 800,
+              fontSize: '14px',
+              letterSpacing: '0.05em',
+              padding: '14px 32px',
+              borderRadius: '100px',
+              textDecoration: 'none',
+              boxShadow: `0 0 40px rgba(245,158,11,0.4), 0 8px 24px rgba(0,0,0,0.4)`,
+            }}
+          >
+            Calculá tu ahorro →
+          </motion.a>
+
+          <motion.a
+            href="#flujo"
+            whileHover={{
+              scale: 1.02,
+              borderColor: 'rgba(245,158,11,0.5)',
+              color: '#f59e0b',
+            }}
+            whileTap={{ scale: 0.97 }}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              background: 'transparent',
+              border: '1px solid rgba(255,255,255,0.12)',
+              color: 'rgba(255,255,255,0.55)',
+              fontWeight: 600,
+              fontSize: '14px',
+              padding: '14px 28px',
+              borderRadius: '100px',
+              textDecoration: 'none',
+              transition: 'all 200ms',
+            }}
+          >
+            Ver cómo funciona
+          </motion.a>
+        </motion.div>
+
+        {/* AppLogosStrip */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.2, duration: 0.8 }}
+          style={{
+            marginTop: 'clamp(32px, 5vh, 52px)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0',
+            justifyContent: 'center',
+            overflow: 'hidden',
+            maskImage: 'linear-gradient(90deg, transparent 0%, black 15%, black 85%, transparent 100%)',
+            WebkitMaskImage: 'linear-gradient(90deg, transparent 0%, black 15%, black 85%, transparent 100%)',
+            pointerEvents: 'none',
+          }}
+        >
+          {['💬', '📧', '📊', '💳', '📣', '📨', '📋', '🧾', '🛒', '📱', '🔗', '⚙️'].map((emoji, i) => (
+            <div key={i} style={{
+              fontSize: '22px',
+              padding: '0 12px',
+              opacity: 0.35,
+              borderRight: i < 11 ? '1px solid rgba(255,255,255,0.06)' : 'none',
+            }}>
+              {emoji}
+            </div>
+          ))}
+        </motion.div>
+
+        <p style={{
+          fontSize: '11px',
+          color: 'rgba(255,255,255,0.18)',
+          letterSpacing: '0.15em',
+          textAlign: 'center',
+          marginTop: '12px',
+          pointerEvents: 'none',
+        }}>
+          +400 INTEGRACIONES DISPONIBLES
+        </p>
+      </div>
+
+      {/* Scroll Cue */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 1.6, duration: 0.8 }}
+        style={{
+          position: 'absolute',
+          bottom: 'clamp(24px, 4vh, 40px)',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: '8px',
+          zIndex: 10,
+          pointerEvents: 'none',
+        }}
+      >
+        <span style={{
+          fontSize: '9px',
+          letterSpacing: '0.35em',
+          color: 'rgba(245,158,11,0.4)',
+          textTransform: 'uppercase',
+          fontFamily: 'ui-monospace, monospace',
+        }}>
+          explorar
+        </span>
+        {[0, 1].map(i => (
+          <div key={i} style={{
+            width: '8px', height: '8px',
+            borderRight: '1px solid rgba(245,158,11,0.5)',
+            borderBottom: '1px solid rgba(245,158,11,0.5)',
+            transform: 'rotate(45deg)',
+            animation: `chevronAmber 1.4s ease-in-out ${i * 0.18}s infinite`,
+          }}/>
+        ))}
+      </motion.div>
+
+      {/* Mouse Interaction Hint */}
+      <AnimatePresence>
+        {showHint && !mouseMoved && !shouldReduceMotion && (
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            style={{
+              position: 'absolute',
+              bottom: 'clamp(60px, 10vh, 90px)',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              zIndex: 10,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              background: 'rgba(245,158,11,0.08)',
+              border: '1px solid rgba(245,158,11,0.2)',
+              borderRadius: '100px',
+              padding: '8px 18px',
+              pointerEvents: 'none',
+            }}
+          >
+            <span style={{ fontSize: '14px', animation: 'moveHand 1.2s ease-in-out infinite' }}>🖱</span>
+            <span style={{ fontSize: '12px', color: 'rgba(245,158,11,0.7)', letterSpacing: '0.1em' }}>
+              Mové el mouse para ver la magia
+            </span>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </section>
+  )
+}
