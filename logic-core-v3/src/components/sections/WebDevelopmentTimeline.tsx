@@ -9,12 +9,12 @@ type GlowStyle = React.CSSProperties
 const MILESTONES = [
     {
         number: 'Semana 01',
-        title: 'Auditoría UX',
-        description: 'Mapeamos cómo compra tu cliente local para optimizar cada punto de contacto y maximizar la retención.',
+        title: 'Estrategia & Diseño',
+        description: 'Entendemos tu negocio y diseñamos la experiencia que tus clientes van a ver.',
         side: 'left' as const,
         accentGradient: 'linear-gradient(90deg, #00e5ff 0%, rgba(0,229,255,0.3) 60%, transparent 100%)',
         decorNumber: '01',
-        deliverable: 'Mapa de experiencia entregado',
+        deliverable: 'Diseño aprobado antes de construir',
         glowStyle: { left: 0, top: 0, bottom: 0, width: '60px', background: 'linear-gradient(to right, rgba(0,229,255,0.06), transparent)' } as GlowStyle,
         iconWrapperBg: 'rgba(0,229,255,0.12)',
         iconWrapperBorder: '1px solid rgba(0,229,255,0.25)',
@@ -30,12 +30,12 @@ const MILESTONES = [
     },
     {
         number: 'Semana 02',
-        title: 'Diseño UI',
-        description: 'Creamos la interfaz visual en Figma con estética premium, enfocada en la identidad de tu marca.',
+        title: 'Construcción',
+        description: 'Construimos tu sucursal con tecnología de punta para que sea rápida y segura.',
         side: 'right' as const,
         accentGradient: 'linear-gradient(90deg, transparent 0%, #7b2fff 50%, transparent 100%)',
         decorNumber: '02',
-        deliverable: 'Diseño en Figma aprobado',
+        deliverable: 'Web funcional en prueba',
         glowStyle: { top: 0, left: '50%', transform: 'translateX(-50%)', height: '60px', width: '80%', background: 'linear-gradient(to bottom, rgba(123,47,255,0.08), transparent)' } as GlowStyle,
         iconWrapperBg: 'rgba(123,47,255,0.12)',
         iconWrapperBorder: '1px solid rgba(123,47,255,0.25)',
@@ -50,12 +50,12 @@ const MILESTONES = [
     },
     {
         number: 'Semana 03',
-        title: 'Código Next.js',
-        description: 'Desarrollamos el motor ultrarrápido con las mejores prácticas de SEO y rendimiento del mercado.',
+        title: 'Posicionamiento Google',
+        description: 'Configuramos todo para que Google te encuentre y te ponga primero desde el primer día.',
         side: 'left' as const,
         accentGradient: 'linear-gradient(90deg, transparent 0%, rgba(0,229,255,0.3) 40%, #00e5ff 100%)',
         decorNumber: '03',
-        deliverable: 'Plataforma en staging lista',
+        deliverable: 'Apareciendo en Google Search',
         glowStyle: { right: 0, top: 0, bottom: 0, width: '60px', background: 'linear-gradient(to left, rgba(0,229,255,0.06), transparent)' } as GlowStyle,
         iconWrapperBg: 'rgba(0,229,255,0.10)',
         iconWrapperBorder: '1px solid rgba(0,229,255,0.2)',
@@ -72,9 +72,9 @@ const MILESTONES = [
 ]
 
 const week4Checks = [
-    'Deploy con zero-downtime',
-    'Google Analytics + Search Console',
-    'Soporte técnico 30 días',
+    'Entrega de llaves (Tu web es tuya)',
+    'Posicionada en Google Search',
+    'Capacitación y Soporte 30 días',
 ]
 
 const ease = [0.16, 1, 0.3, 1] as const
@@ -346,17 +346,17 @@ export function WebDevelopmentTimeline() {
                     style={{ textAlign: 'center', marginBottom: 'clamp(48px,7vh,80px)' }}
                 >
                     <div style={{ display: 'inline-block', fontSize: '11px', letterSpacing: '0.35em', color: '#00e5ff', background: 'rgba(0,229,255,0.08)', border: '1px solid rgba(0,229,255,0.2)', borderRadius: '100px', padding: '5px 14px', marginBottom: '24px', fontFamily: 'monospace', textTransform: 'uppercase', }}>
-                        [ DE LA IDEA AL LANZAMIENTO ]
+                        [ DE CERO A LANZAMIENTO ]
                     </div>
                     <h2 style={{ lineHeight: 1.05 }}>
                         <span style={{ display: 'block', fontSize: 'clamp(38px, 5.5vw, 72px)', fontWeight: 900, color: '#ffffff', }}>
-                            Tu web, lista
+                            Cuatro semanas.
                         </span>
                         <span style={{ display: 'block', fontSize: 'clamp(38px, 5.5vw, 72px)', fontWeight: 900, background: 'linear-gradient(135deg, #00e5ff 0%, #7b2fff 100%)', WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent', color: 'transparent', filter: 'drop-shadow(0 0 20px rgba(0,229,255,0.3))' }}>
-                            en 4 semanas.
+                            Tu negocio, transformado.
                         </span>
                         <span style={{ display: 'block', fontSize: 'clamp(16px, 2vw, 22px)', fontWeight: 400, marginTop: '12px', }}>
-                            <span style={{ color: 'rgba(255,255,255,0.45)' }}>Sin vueltas</span>
+                            <span style={{ color: 'rgba(255,255,255,0.45)' }}>Sin tecnicismos</span>
                             <span style={{ color: 'rgba(0,229,255,0.3)' }}> · </span>
                             <span style={{ color: 'rgba(255,255,255,0.45)' }}>Sin sorpresas</span>
                             <span style={{ color: 'rgba(0,229,255,0.3)' }}> · </span>
@@ -482,16 +482,18 @@ export function WebDevelopmentTimeline() {
                                                 y Ventas
                                             </span>
                                             <span style={{ display: 'block', fontSize: 'clamp(28px, 3.5vw, 42px)', fontWeight: 900, background: 'linear-gradient(135deg, #00e5ff, #7b2fff)', WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent', color: 'transparent', }}>
-                                                Automáticas.
+                                                en producción.
                                             </span>
                                         </h3>
-                                        <p style={{ fontSize: '15px', color: 'rgba(255,255,255,0.55)', lineHeight: 1.7, maxWidth: '380px', marginBottom: '24px', }}>
-                                            Tu plataforma entra en órbita. Estabilidad total, conversiones fluidas y la tranquilidad de tener un activo digital que trabaja por vos.
-                                        </p>
-
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '28px' }}>
+                                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '28px' }}>
                                             {week4Checks.map((check, i) => (
-                                                <motion.div key={i} initial={{ opacity: 0, x: prefersReduced ? 0 : -10 }} animate={week4InView ? { opacity: 1, x: 0 } : {}} transition={{ delay: prefersReduced ? 0 : 0.3 + i * 0.1, duration: 0.4, ease: 'easeOut' }} style={{ display: 'flex', alignItems: 'center', gap: '10px' }} >
+                                                <motion.div 
+                                                    key={i} 
+                                                    initial={{ opacity: 0, x: prefersReduced ? 0 : -10 }} 
+                                                    animate={week4InView ? { opacity: 1, x: 0 } : {}} 
+                                                    transition={{ delay: prefersReduced ? 0 : 0.3 + i * 0.1, duration: 0.4, ease: 'easeOut' }} 
+                                                    style={{ display: 'flex', alignItems: 'center', gap: '10px' }} 
+                                                >
                                                     <div style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(0,229,255,0.1)', border: '1px solid rgba(0,229,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, }}>
                                                         <span style={{ fontSize: '9px', color: '#00e5ff' }}>✓</span>
                                                     </div>
@@ -500,33 +502,37 @@ export function WebDevelopmentTimeline() {
                                             ))}
                                         </div>
 
-                                        <motion.button
-                                            type="button"
+                                        <motion.a
+                                            href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER}?text=Hola%20DevelOP%2C%20quiero%20iniciar%20la%20transformaci%C3%B3n%20de%20mi%20negocio`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
                                             initial="rest"
                                             whileHover={prefersReduced ? {} : "hover"}
                                             whileTap={prefersReduced ? {} : { scale: 0.98 }}
-                                            onClick={() => document.getElementById('showcase-section')?.scrollIntoView({ behavior: 'smooth' })}
-                                            style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', border: '1px solid rgba(0,229,255,0.35)', borderRadius: '100px', padding: '12px 28px', fontSize: '13px', letterSpacing: '0.05em', color: '#00e5ff', cursor: 'pointer', background: 'transparent', transition: 'all 250ms ease', }}
-                                            onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(0,229,255,0.1)'; }}
-                                            onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; }}
+                                            style={{ 
+                                                display: 'inline-flex', 
+                                                alignItems: 'center', 
+                                                gap: '8px', 
+                                                background: 'linear-gradient(135deg, #25d366, #128c7e)',
+                                                borderRadius: '100px', 
+                                                padding: '12px 28px', 
+                                                fontSize: '13px', 
+                                                fontWeight: 800,
+                                                letterSpacing: '0.05em', 
+                                                color: 'white', 
+                                                cursor: 'pointer', 
+                                                transition: 'all 250ms ease',
+                                                textDecoration: 'none',
+                                                boxShadow: '0 0 20px rgba(37,211,102,0.2)'
+                                            }}
                                             variants={{
-                                                rest: { scale: 1, borderColor: 'rgba(0,229,255,0.35)' },
-                                                hover: { scale: 1.03, borderColor: 'rgba(0,229,255,0.6)' }
+                                                rest: { scale: 1 },
+                                                hover: { scale: 1.03 }
                                             } as Variants}
                                             transition={{ type: 'spring', stiffness: 400, damping: 15 }}
                                         >
-                                            Iniciar mi transformación
-                                            <motion.span
-                                                variants={{
-                                                    rest: { x: 0 },
-                                                    hover: { x: 4 }
-                                                } as Variants}
-                                                transition={{ duration: 0.2 }}
-                                                style={{ display: 'inline-block' }}
-                                            >
-                                                →
-                                            </motion.span>
-                                        </motion.button>
+                                            🚀 INICIAR TRANSFORMACIÓN →
+                                        </motion.a>
                                     </div>
 
                                     <div className="week4-video-col">

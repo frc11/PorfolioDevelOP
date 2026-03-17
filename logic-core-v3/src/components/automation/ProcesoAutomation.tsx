@@ -38,7 +38,7 @@ const pasos: ProcesoStep[] = [
     color: '#f59e0b',
     colorRgb: '245,158,11',
     icon: '🔍',
-    badge: 'DIAGNÓSTICO',
+    badge: 'DIAGNÓSTICO DEL CAOS',
     develop: [
       'Reunión de 1 hora para mapear tareas',
       'Identificar los 3 procesos que más duelen',
@@ -55,67 +55,67 @@ const pasos: ProcesoStep[] = [
     id: 1,
     phase: 'FASE 02',
     title: 'Diseño de Flujos',
-    summary: 'Construimos la lógica en n8n y conectamos todas tus herramientas.',
+    summary: 'Construimos la lógica central y conectamos todas tus herramientas.',
     duration: '3 a 5 días',
     color: '#f97316',
     colorRgb: '249,115,22',
     icon: '🗺',
-    badge: 'DISEÑO',
+    badge: 'MAPA DEL PILOTO AUTOMÁTICO',
     develop: [
-      'Diseño de cada flujo en n8n',
-      'Conexión con las apps del cliente',
-      'Pruebas en ambiente de staging',
-      'Revisión y ajustes con el cliente',
+      'Diseño de cada flujo de trabajo',
+      'Conexión con las apps que ya usás',
+      'Pruebas en ambiente controlado',
+      'Revisión y ajustes contigo',
     ],
     cliente: [
       'Acceso a las herramientas actuales',
       '1 revisión de los flujos diseñados',
     ],
-    deliverable: 'Flujos funcionando en staging, listos para aprobar',
+    deliverable: 'Flujos funcionando, listos para aprobación final',
   },
   {
     id: 2,
     phase: 'FASE 03',
     title: 'Activación & Testing',
-    summary: 'Pasamos a producción y monitoreamos que todo funcione perfecto.',
+    summary: 'Encendemos el sistema y monitoreamos que todo funcione perfecto.',
     duration: '2 a 3 días',
     color: '#f59e0b',
     colorRgb: '245,158,11',
     icon: '⚡',
-    badge: 'ACTIVACIÓN',
+    badge: 'ENCENDEMOS EL SISTEMA',
     develop: [
-      'Deploy en producción',
-      'Testing con datos reales',
+      'Lanzamiento en vivo',
+      'Monitoreo con datos reales',
       'Ajustes finos de lógica',
-      'Monitoreo de las primeras 48 horas',
+      'Vigilancia activa las primeras 48 horas',
     ],
     cliente: [
-      'Validar que los flujos funcionan bien',
-      'Reportar cualquier caso edge',
+      'Validar que los procesos corren bien',
+      'Reportar cualquier ajuste necesario',
     ],
-    deliverable: 'Sistema en producción, monitoreo activo 48 horas',
+    deliverable: 'Sistema operando solo, monitoreo activo',
   },
   {
     id: 3,
     phase: 'FASE 04',
     title: 'Capacitación & Soporte',
-    summary: 'Tu equipo aprende a usar el sistema y te acompañamos 30 días.',
+    summary: 'Tu equipo aprende a delegar en el sistema y te acompañamos 30 días.',
     duration: '1 día + soporte',
     color: '#f97316',
     colorRgb: '249,115,22',
     icon: '🚀',
-    badge: 'ENTREGA',
+    badge: 'EMPRESA LIBERADA',
     develop: [
-      'Capacitación del equipo (1-2 horas)',
-      'Dashboard de monitoreo accesible',
+      'Capacitación del equipo (1 hora)',
+      'Dashboard de control accesible',
       'Soporte por 30 días incluido',
       'Mantenimiento mensual disponible',
     ],
     cliente: [
-      'Asistir a la capacitación',
+      'Asistir a la capacitación corta',
       'Feedback de las primeras semanas',
     ],
-    deliverable: 'Equipo capacitado, flujos monitoreados, soporte activo',
+    deliverable: 'Equipo liberado de tareas robóticas, soporte activo',
   },
 ]
 
@@ -175,7 +175,7 @@ function Header({ isInView }: { isInView: boolean }) {
         style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', border: '1px solid rgba(245,158,11,0.4)', borderRadius: '100px', padding: '4px 14px', marginBottom: '20px', background: 'rgba(245,158,11,0.05)' }}
       >
         <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#f59e0b', boxShadow: '0 0 8px #f59e0b' }} />
-        <span style={{ fontSize: '10px', letterSpacing: '0.2em', color: '#f59e0b', fontWeight: 700 }}>[ NUESTRO PROCESO ]</span>
+        <span style={{ fontSize: '10px', letterSpacing: '0.2em', color: '#f59e0b', fontWeight: 700 }}>[ EL CAMINO AL ÉXITO ]</span>
       </motion.div>
 
       <motion.h2 
@@ -184,9 +184,9 @@ function Header({ isInView }: { isInView: boolean }) {
         transition={{ duration: 0.6, delay: 0.25 }}
         style={{ fontSize: 'clamp(28px, 4.5vw, 56px)', fontWeight: 900, color: 'white', lineHeight: 1.1, margin: '0 0 16px' }}
       >
-        Simple y rápido.<br />
+        Del caos al orden<br />
         <span style={{ background: 'linear-gradient(135deg, #f59e0b, #f97316)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
-          En una semana, automatizando.
+          en 15 días.
         </span>
       </motion.h2>
 
@@ -196,7 +196,7 @@ function Header({ isInView }: { isInView: boolean }) {
         transition={{ duration: 0.6, delay: 0.38 }}
         style={{ fontSize: '15px', color: 'rgba(255,255,255,0.4)', margin: 0, maxWidth: '600px' }}
       >
-        Eliminá la fricción operativa en tiempo récord. Hacé clic en cada fase para ver el paso a paso.
+        No necesitás meses de consultoría. Implementamos rápido para que veas el retorno hoy.
       </motion.p>
     </div>
   )
@@ -507,9 +507,9 @@ export default function ProcesoAutomation() {
 
           {/* Resumen */}
           <div style={{ textAlign: 'right', flexShrink: 0 }}>
-            <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.25)', margin: '0 0 4px', letterSpacing: '0.1em' }}>TIEMPO TOTAL ESTIMADO · SEGÚN CANTIDAD DE FLUJOS</p>
+            <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.25)', margin: '0 0 4px', letterSpacing: '0.1em' }}>TIEMPO TOTAL ESTIMADO · SEGÚN COMPLEJIDAD</p>
             <p style={{ fontSize: '22px', fontWeight: 900, color: 'white', margin: '0 0 4px', fontFamily: 'monospace' }}>1 a 2 SEMANAS</p>
-            <p style={{ fontSize: '12px', color: 'rgba(245,158,11,0.6)', margin: 0 }}>AUTOMATIZANDO EN PRODUCCIÓN</p>
+            <p style={{ fontSize: '12px', color: 'rgba(245,158,11,0.6)', margin: 0 }}>TU EMPRESA EN PILOTO AUTOMÁTICO</p>
           </div>
         </motion.div>
 

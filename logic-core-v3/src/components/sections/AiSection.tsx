@@ -254,12 +254,29 @@ export default function AiSection() {
                     ))}
                 </div>
 
+                {/* CTA - CONSTRUIR MI SUCURSAL */}
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                    viewport={{ once: true }}
+                    className="mt-12 w-full flex justify-center z-20"
+                >
+                    <a
+                        href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER}?text=Hola%20DevelOP%2C%20quiero%20construir%20mi%20sucursal%20digital`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2.5 px-10 py-5 bg-gradient-to-br from-[#25d366] to-[#128c7e] text-white rounded-full font-extrabold text-[14px] uppercase tracking-wider shadow-[0_0_28px_rgba(37,211,102,0.2)] hover:scale(1.04) transition-transform active:scale(0.97) no-underline"
+                    >
+                        🚀 CONSTRUIR MI SUCURSAL →
+                    </a>
+                </motion.div>
+
                 {/* 5. Ghost CTA */}
                 <motion.div
                     initial={{ opacity: 0, y: 8 }}
                     animate={shouldReveal ? { opacity: 1, y: 0 } : { opacity: 0, y: 8 }}
                     transition={{ duration: 0.4, delay: prefersReduced ? 0 : 0.9, ease: 'easeOut' }}
-                    className="flex justify-center mt-12"
+                    className="flex justify-center mt-8"
                 >
                     <Link
                         href="/ai-implementations"

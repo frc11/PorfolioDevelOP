@@ -55,7 +55,7 @@ const nodes: CapacidadNode[] = [
     id: 'seguridad',
     label: 'SEGURIDAD',
     title: 'Datos blindados',
-    description: 'Autenticación, roles de usuario, backups automáticos y encriptación de datos sensibles.',
+    description: 'Tus datos financieros y de clientes están protegidos. Solo accede quien vos autorizás. Backups automáticos diarios.',
     metric: '99.9%',
     metricLabel: 'uptime garantizado',
     icon: '🛡',
@@ -68,7 +68,7 @@ const nodes: CapacidadNode[] = [
     id: 'escalabilidad',
     label: 'ESCALABILIDAD',
     title: 'Crece con vos',
-    description: 'El sistema soporta 10 usuarios hoy y 1000 mañana. Sin migrar, sin rehacer.',
+    description: 'El sistema soporta tu empresa hoy y cuando crezcas x10. Sin migraciones, sin caídas, sin empezar de cero.',
     metric: '∞',
     metricLabel: 'usuarios simultáneos',
     icon: '📈',
@@ -81,7 +81,7 @@ const nodes: CapacidadNode[] = [
     id: 'integracion',
     label: 'INTEGRACIÓN',
     title: 'Todo conectado',
-    description: 'WhatsApp, email, AFIP, bancos, plataformas de envío — todos integrados en un flujo.',
+    description: 'WhatsApp, MercadoPago, AFIP, Gmail — todos integrados. Un dato actualizado en un lugar se refleja en todos.',
     metric: '+40',
     metricLabel: 'integraciones disponibles',
     icon: '🔗',
@@ -100,14 +100,14 @@ const nodes: CapacidadNode[] = [
     icon: '📊',
     color: '#6366f1',
     colorRgb: '99,102,241',
-    caseUse: 'A las 8AM recibís el resumen del día anterior sin pedirlo.',
+    caseUse: 'A las 8AM recibís el resumen del día anterior sin que nadie lo arme.',
     position: { x: 150, y: 350 }, // left bottom
   },
   {
     id: 'disponibilidad',
     label: 'DISPONIBILIDAD',
     title: 'Siempre online',
-    description: 'Sistema disponible 24/7 desde cualquier dispositivo. Celular, tablet, PC — todo sincronizado.',
+    description: '24/7 desde cualquier dispositivo. Tu vendedor en la calle consulta stock desde el celular en tiempo real. Sin instalaciones. Sin VPN.',
     metric: '24/7',
     metricLabel: 'disponibilidad garantizada',
     icon: '🌐',
@@ -186,7 +186,7 @@ function Header({ isInView }: { isInView: boolean }) {
         }}
       >
         <span style={{ fontSize: '10px', letterSpacing: '0.2em', color: '#6366f1', fontWeight: 700 }}>
-          [ CAPACIDADES DEL SISTEMA ]
+          [ TU SISTEMA, BLINDADO ]
         </span>
       </motion.div>
 
@@ -197,7 +197,7 @@ function Header({ isInView }: { isInView: boolean }) {
         style={{ fontSize: 'clamp(28px, 4vw, 52px)', fontWeight: 900, color: 'white', lineHeight: 1.1, margin: '0 0 16px' }}
       >
         Construido para<br />
-        <span style={{ color: '#6366f1' }}>"no fallar jamás."</span>
+        <span style={{ color: '#6366f1' }}>"no fallar."</span>
       </motion.h2>
 
       <motion.p
@@ -206,7 +206,7 @@ function Header({ isInView }: { isInView: boolean }) {
         transition={{ duration: 0.6, delay: 0.38 }}
         style={{ fontSize: '15px', color: 'rgba(255,255,255,0.4)', margin: 0, maxWidth: '600px' }}
       >
-        Hacé clic en cada capacidad para ver cómo impacta en tu operación diaria.
+        Hacé clic en cada pilar para ver cómo protege tu operación.
       </motion.p>
     </div>
   )

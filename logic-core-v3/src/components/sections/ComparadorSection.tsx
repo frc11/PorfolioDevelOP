@@ -64,19 +64,19 @@ export default function ComparadorSection() {
     const shouldReveal = prefersReduced || isInView;
 
     const caosItems = [
-        "Clientes que te preguntan el precio por WhatsApp a las 2AM",
-        "PDF de precios desactualizado que mandás a mano",
-        "Si no respondés, el cliente se va a la competencia",
-        "Invisible en Google — tu negocio no existe para quien busca",
-        "Dependencia total de Instagram: si cae la app, caen tus ventas"
+        "❌ Respondés precios 100 veces por día",
+        "❌ Si no contestás, el cliente se va",
+        "❌ Dependés del algoritmo de Instagram",
+        "❌ A las 2AM, el cliente no puede comprarte",
+        "❌ Google no sabe que existís"
     ];
-
+ 
     const controlItems = [
-        "Tu web vende y responde preguntas mientras dormís",
-        "Catálogo actualizable en segundos, desde el celular",
-        "El cliente agenda o compra solo, sin intervención tuya",
-        "Primero en Google cuando buscan tu rubro en Tucumán",
-        "Tu negocio existe en todos lados, las 24hs, los 365 días"
+        "✓ Tu web cotiza sola mientras dormís",
+        "✓ Google te trae clientes listos para comprar",
+        "✓ Tu catálogo actualizado sin llamarte",
+        "✓ Pedidos a las 3AM sin que estés presente",
+        "✓ Primero en Google en tu ciudad"
     ];
 
     const titleWords = [
@@ -151,7 +151,7 @@ export default function ComparadorSection() {
                         className="text-[#00e5ff] font-mono uppercase block relative z-10"
                         style={{ fontSize: '11px', letterSpacing: '0.4em', marginBottom: '16px' }}
                     >
-                        [ ELEGÍ TU REALIDAD ]
+                        [ EL ANTES Y EL DESPUÉS ]
                     </motion.span>
 
                     <h2 className="text-[clamp(36px,5.5vw,72px)] text-center leading-[1.05] tracking-tight flex flex-col items-center overflow-hidden">
@@ -161,7 +161,7 @@ export default function ComparadorSection() {
                             transition={{ duration: prefersReduced ? 0 : 0.6, ease: [0.16, 1, 0.3, 1], delay: prefersReduced ? 0 : 0 }}
                             className="font-black text-white"
                         >
-                            ¿Dónde está tu negocio
+                            Dos negocios iguales.
                         </motion.span>
                         <motion.span
                             initial={{ clipPath: "inset(0 100% 0 0)" }}
@@ -169,11 +169,11 @@ export default function ComparadorSection() {
                             transition={{ duration: prefersReduced ? 0 : 0.6, ease: [0.16, 1, 0.3, 1], delay: prefersReduced ? 0 : 0.2 }}
                             className="font-black text-transparent bg-clip-text"
                             style={{
-                                backgroundImage: 'linear-gradient(135deg, #ff4444 0%, #ff8844 100%)',
+                                backgroundImage: 'linear-gradient(135deg, #00e5ff 0%, #0891b2 100%)',
                                 WebkitBackgroundClip: 'text',
                             }}
                         >
-                            a las 2AM?
+                            Uno gana clientes 24/7.
                         </motion.span>
                     </h2>
 
@@ -181,11 +181,10 @@ export default function ComparadorSection() {
                         initial={{ opacity: 0, y: 10 }}
                         animate={shouldReveal ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
                         transition={{ duration: prefersReduced ? 0 : 0.5, delay: 0.4 }}
-                        className="text-[15px] text-center"
-                        style={{ color: 'rgba(255,255,255,0.5)', maxWidth: '480px', margin: '16px auto 0' }}
+                        className="text-[17px] text-center"
+                        style={{ color: 'rgba(255,255,255,0.55)', maxWidth: '480px', margin: '16px auto 0', fontWeight: 500 }}
                     >
-                        El 73% de los clientes busca en Google antes de comprar.<br />
-                        ¿Te encuentran a vos, o a tu competencia?
+                        ¿En cuál estás vos?
                     </motion.p>
                 </div>
 
@@ -226,7 +225,7 @@ export default function ComparadorSection() {
                                     <span className="text-[#ff4444] text-[12px] font-bold">✕</span>
                                 </div>
                                 <h3 className="text-[#ff4444] font-bold text-[13px]" style={{ letterSpacing: '0.12em', textShadow: '0 0 20px rgba(255,68,68,0.4)' }}>
-                                    HOY, SIN WEB
+                                    EL NEGOCIO DE INSTAGRAM
                                 </h3>
                             </div>
                             <div className="w-full shrink-0" style={{ height: '1px', margin: '16px 0', background: 'linear-gradient(90deg, rgba(255,68,68,0.4), transparent)' }} />
@@ -274,7 +273,7 @@ export default function ComparadorSection() {
                                     <span className="text-[#00e5ff] text-[12px] font-bold">✦</span>
                                 </div>
                                 <h3 className="text-[#00e5ff] font-bold text-[13px]" style={{ letterSpacing: '0.12em', textShadow: '0 0 20px rgba(0,229,255,0.4)' }}>
-                                    CON TU SUCURSAL DIGITAL
+                                    LA SUCURSAL DIGITAL
                                 </h3>
                             </div>
                             <div className="w-full h-[1px]" style={{ margin: '16px 0', background: 'linear-gradient(90deg, rgba(0,229,255,0.4), transparent)' }} />
@@ -330,6 +329,23 @@ export default function ComparadorSection() {
                             <strong className="text-[#00e5ff] font-bold ml-1">¿Y vos?</strong>
                         </span>
                     </motion.div>
+                </motion.div>
+
+                {/* CTA - QUIERO LA SUCURSAL DIGITAL */}
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                    viewport={{ once: true }}
+                    className="mt-10 z-20"
+                >
+                    <a
+                        href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER}?text=Hola%20DevelOP%2C%20quiero%20transformar%20mi%20negocio%20en%20una%20sucursal%20digital`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2.5 px-8 py-4 bg-gradient-to-br from-[#25d366] to-[#128c7e] text-white rounded-full font-extrabold text-[14px] uppercase tracking-wider shadow-[0_0_28px_rgba(37,211,102,0.2)] hover:scale(1.04) transition-transform active:scale(0.97)"
+                    >
+                        🚀 QUIERO LA SUCURSAL DIGITAL →
+                    </a>
                 </motion.div>
 
                 {/* TRANSICIÓN NARRATIVA AL BENTO */}

@@ -10,9 +10,9 @@ interface MetricType {
 }
 
 const METRICS: MetricType[] = [
-    { value: "47", label: "Proyectos entregados", suffix: "+" },
-    { value: "98", label: "Satisfacción de clientes", suffix: "%" },
-    { value: "2.1", label: "Tiempo de carga promedio", suffix: "s" },
+    { value: "24/7", label: "atendiendo clientes", suffix: "" },
+    { value: "2", label: "segundos de carga máximo", suffix: "s" },
+    { value: "1", label: "en Google local", suffix: "#" },
 ];
 
 const easeOutExpo = (t: number) => (t === 1 ? 1 : 1 - Math.pow(2, -10 * t));

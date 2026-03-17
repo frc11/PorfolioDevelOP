@@ -127,11 +127,11 @@ export const WebDevelopmentBento = () => {
                         style={{ marginBottom: 'clamp(32px, 5vh, 56px)' }}
                     >
                         <span className="text-[11px] tracking-widest text-[#00e5ff] font-mono uppercase mb-4">
-                            [ NUESTRO ARSENAL ]
+                            [ POR QUÉ LA WEB CAMBIA TODO ]
                         </span>
                         <h2 className="font-black text-white leading-tight tracking-tight" style={{ fontSize: 'clamp(32px, 5vw, 56px)' }}>
-                            Tecnología que<br />
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-white to-[#00e5ff]" style={{ textShadow: '0 0 80px rgba(0,229,255,0.15)' }}>convierte.</span>
+                            No es una página web.<br />
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-white to-[#00e5ff]" style={{ textShadow: '0 0 80px rgba(0,229,255,0.15)' }}>Es tu vendedor más eficiente.</span>
                         </h2>
                     </motion.div>
 
@@ -156,10 +156,10 @@ export const WebDevelopmentBento = () => {
                                 {/* Columna Texto */}
                                 <div className="flex-1 p-[32px] relative z-10 flex flex-col justify-center">
                                     <h3 className="text-3xl md:text-5xl font-black text-white tracking-tighter mb-4">
-                                        Interfaces que atrapan.
+                                        Confianza en 3 segundos.
                                     </h3>
                                     <p className="text-zinc-400 leading-relaxed text-lg font-light max-w-md">
-                                        Diseño UX/UI que genera confianza instantánea y retiene a tu cliente. Nivel Awwwards para conversiones sin fricción.
+                                        La primera impresión decide si el cliente se queda o se va. Un diseño que transmite profesionalismo vende antes de que lean una sola palabra.
                                     </p>
                                 </div>
 
@@ -233,16 +233,16 @@ export const WebDevelopmentBento = () => {
                             <LighthouseGauge />
 
                             <div className="relative z-10 flex flex-col items-center">
-                                <h3 className="text-2xl font-black text-white mb-2">Rendimiento Absoluto</h3>
-                                <p className="text-zinc-500 text-sm font-light mb-4">Arquitectura Next.js. Cero tiempos de espera.</p>
+                                <h3 className="text-2xl font-black text-white mb-2">El cliente que espera, se va</h3>
+                                <p className="text-zinc-500 text-sm font-light mb-4">Tu web carga antes de que el cliente se impaciente. En menos de 2 segundos, en cualquier celular.</p>
 
                                 {/* Mini Stats */}
                                 <div className="flex items-center gap-2 text-[11px] text-[#ffffff60]">
-                                    <span>⚡ &lt;1s carga</span>
+                                    <span>⚡ Rápido</span>
                                     <span>·</span>
-                                    <span>📱 100 Mobile</span>
+                                    <span>📱 Mobile</span>
                                     <span>·</span>
-                                    <span>✓ SEO 100</span>
+                                    <span>✓ Sin espera</span>
                                 </div>
                             </div>
                         </motion.div>
@@ -302,9 +302,9 @@ export const WebDevelopmentBento = () => {
                                 {/* BLOQUE MEDIO - Ícono + Título */}
                                 <div className="flex flex-col gap-2">
                                     <span className="text-[#00e5ff] text-2xl">📍</span>
-                                    <h3 className="text-[20px] font-bold text-white leading-tight">Primero en Google</h3>
+                                    <h3 className="text-[20px] font-bold text-white leading-tight">Primero en Google en tu ciudad</h3>
                                     <p className="text-[#ffffff80] text-[14px] leading-relaxed">
-                                        Tu negocio aparece cuando buscan tu rubro en Tucumán, Yerba Buena y el Norte.
+                                        Cuando alguien busca tu rubro en Tucumán, Salta o Jujuy, tu negocio aparece antes que el de tu competencia.
                                     </p>
                                 </div>
 
@@ -328,7 +328,7 @@ export const WebDevelopmentBento = () => {
 
                                 {/* TAG EXISTENTE */}
                                 <div className="mt-2 inline-flex" style={{ backgroundColor: 'rgba(0,229,255,0.08)', border: '1px solid rgba(0,229,255,0.2)', borderRadius: '100px', padding: '6px 14px' }}>
-                                    <span className="text-[11px] font-medium text-[#00e5ff] tracking-wide">SEO Local · GEO · Next.js</span>
+                                    <span className="text-[11px] font-medium text-[#00e5ff] tracking-wide">Google · Búsqueda local · NOA</span>
                                 </div>
                             </div>
                         </motion.div>
@@ -343,18 +343,35 @@ export const WebDevelopmentBento = () => {
                         >
                             <div className="max-w-2xl space-y-6">
                                 <h3 className="text-3xl md:text-5xl font-black text-white leading-none tracking-tighter">
-                                    De un Folleto Abandonado a una <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-cyan-400">Máquina de Ventas.</span>
+                                    Tu web <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-cyan-400">vende mientras dormís.</span>
                                 </h3>
                                 <p className="text-zinc-400 text-lg font-light leading-relaxed">
-                                    Integramos flujos automáticos de WhatsApp y CRM. No solo te ven; te compran, agendan y consultan sin fricciones.
+                                    Formularios, WhatsApp integrado y catálogo de productos. Todo diseñado para que el cliente tome acción sin necesitar que estés presente.
                                 </p>
                                 <div className="mt-2 inline-flex" style={{ backgroundColor: 'rgba(0,229,255,0.08)', border: '1px solid rgba(0,229,255,0.2)', borderRadius: '100px', padding: '6px 14px' }}>
-                                    <span className="text-[11px] font-medium text-[#00e5ff] tracking-wide">WhatsApp · CRM · Automatización</span>
+                                    <span className="text-[11px] font-medium text-[#00e5ff] tracking-wide">Venta 24/7 · WhatsApp · Catálogo</span>
                                 </div>
                             </div>
                         </motion.div>
 
                     </div>
+
+                    {/* CTA - CONSTRUIR MI SUCURSAL */}
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        whileInView={{ opacity: 1, scale: 1 }}
+                        viewport={{ once: true }}
+                        className="mt-12 w-full flex justify-center z-20"
+                    >
+                        <a
+                            href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER}?text=Hola%20DevelOP%2C%20quiero%20construir%20mi%20sucursal%20digital`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-2.5 px-10 py-5 bg-gradient-to-br from-[#25d366] to-[#128c7e] text-white rounded-full font-extrabold text-[14px] uppercase tracking-wider shadow-[0_0_28px_rgba(37,211,102,0.2)] hover:scale(1.04) transition-transform active:scale(0.97) no-underline"
+                        >
+                            🚀 CONSTRUIR MI SUCURSAL →
+                        </a>
+                    </motion.div>
 
                     {/* SCROLL CUE TRANSICIÓN */}
                     <ScrollCue />

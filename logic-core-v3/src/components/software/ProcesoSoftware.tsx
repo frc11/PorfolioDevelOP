@@ -45,7 +45,7 @@ const pasos: ProcesoStep[] = [
       'Acceso a herramientas actuales (Excel, sistemas existentes)',
       'Lista de procesos más problemáticos',
     ],
-    deliverable: 'Documento de arquitectura + presupuesto cerrado sin sorpresas',
+    deliverable: 'Documento de qué se va a construir + presupuesto cerrado sin sorpresas',
   },
   {
     id: 1,
@@ -62,51 +62,51 @@ const pasos: ProcesoStep[] = [
       'Prototipo navegable en Figma',
       'Flujos de usuario definidos',
       'Revisión y ajustes con el cliente',
-      'Aprobación final antes de desarrollar',
+      'Aprobación final antes de construir',
     ],
     cliente: [
       '1 revisión del prototipo (2hs)',
       'Feedback sobre flujos y pantallas',
-      'Aprobación para comenzar desarrollo',
+      'Aprobación para comenzar construcción',
     ],
-    deliverable: 'Prototipo navegable 100% aprobado. Lo que ves es lo que se construye.',
+    deliverable: 'Prototipo navegable aprobado. Lo que ves es lo que se construye.',
   },
   {
     id: 2,
     phase: 'FASE 03',
-    title: 'Desarrollo & Testing',
-    summary: 'Construimos el sistema. Reportes semanales de avance. Sin sorpresas.',
+    title: 'Construcción por etapas',
+    summary: 'Construimos por módulos. Cada semana ves el avance. Sin cajas negras.',
     duration: '4 a 12 semanas',
     color: '#6366f1',
     colorRgb: '99,102,241',
     icon: '⚙️',
-    badge: 'DESARROLLO',
+    badge: 'CONSTRUCCIÓN',
     develop: [
-      'Desarrollo iterativo por módulos',
+      'Construcción iterativa por módulos',
       'Reporte de avance cada viernes',
-      'Testing automatizado y manual',
-      'Ambiente de staging para revisión',
-      'Corrección de bugs en tiempo real',
+      'Control de calidad y pruebas',
+      'Ambiente de revisión para el cliente',
+      'Ajustes en tiempo real',
     ],
     cliente: [
       'Revisión de cada módulo completado',
       'Feedback en el ambiente de pruebas',
       'Aprobación por etapas — sin esperar al final',
     ],
-    deliverable: 'Sistema en staging, probado y aprobado módulo a módulo. Sin deuda técnica.',
+    deliverable: 'Sistema probado y aprobado módulo a módulo. Sin deuda técnica.',
   },
   {
     id: 3,
     phase: 'FASE 04',
-    title: 'Lanzamiento & Soporte',
-    summary: 'Deploy en producción, capacitación del equipo y soporte continuo.',
+    title: 'Lanzamiento & Capacitación',
+    summary: 'Tu equipo empieza a usar el sistema. Soporte activo incluido.',
     duration: '1 semana + soporte ongoing',
     color: '#7b2fff',
     colorRgb: '123,47,255',
     icon: '🚀',
     badge: 'LANZAMIENTO',
     develop: [
-      'Deploy en servidor de producción',
+      'Puesta en marcha del sistema',
       'Capacitación del equipo (presencial o remota)',
       'Documentación de uso',
       'Soporte por 30 días incluido',
@@ -117,7 +117,7 @@ const pasos: ProcesoStep[] = [
       'Pruebas finales en producción',
       'Feedback post-lanzamiento',
     ],
-    deliverable: 'Sistema en producción, equipo capacitado y canal de soporte activo.',
+    deliverable: 'Sistema en producción, equipo capacitado, canal de soporte activo por 30 días.',
   },
 ]
 
@@ -182,7 +182,7 @@ function Header({ isInView }: { isInView: boolean }) {
         style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', border: '1px solid rgba(99,102,241,0.4)', borderRadius: '100px', padding: '4px 14px', marginBottom: '20px', background: 'rgba(99,102,241,0.05)' }}
       >
         <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#6366f1', boxShadow: '0 0 8px #6366f1' }} />
-        <span style={{ fontSize: '10px', letterSpacing: '0.2em', color: '#6366f1', fontWeight: 700 }}>[ NUESTRO PROCESO ]</span>
+        <span style={{ fontSize: '10px', letterSpacing: '0.2em', color: 'rgba(99,102,241,0.4)', fontWeight: 700 }}>[ NUESTRO PROCESO ]</span>
       </motion.div>
 
       <motion.h2 
@@ -203,7 +203,7 @@ function Header({ isInView }: { isInView: boolean }) {
         transition={{ duration: 0.6, delay: 0.38 }}
         style={{ fontSize: '15px', color: 'rgba(255,255,255,0.4)', margin: 0, maxWidth: '600px' }}
       >
-        De la idea al sistema en producción. Hacé clic en cada fase para ver exactamente qué pasa y qué necesitamos.
+        De la primera reunión al sistema funcionando. Hacé clic en cada fase para ver qué pasa y cuánto tiempo toma.
       </motion.p>
     </div>
   )
@@ -532,8 +532,8 @@ return (
           {/* Resumen */}
           <div style={{ textAlign: 'right', flexShrink: 0 }}>
             <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.25)', margin: '0 0 4px', letterSpacing: '0.1em' }}>TIEMPO TOTAL ESTIMADO</p>
-            <p style={{ fontSize: '22px', fontWeight: 900, color: 'white', margin: '0 0 4px', fontFamily: 'monospace' }}>8 a 20 semanas</p>
-            <p style={{ fontSize: '12px', color: 'rgba(99,102,241,0.6)', margin: 0 }}>según la complejidad del sistema</p>
+            <p style={{ fontSize: '22px', fontWeight: 900, color: 'white', margin: '0 0 4px', fontFamily: 'monospace' }}>30 días al primer resultado.</p>
+            <p style={{ fontSize: '12px', color: 'rgba(99,102,241,0.6)', margin: 0 }}>8 a 20 semanas al sistema completo.</p>
           </div>
         </motion.div>
 

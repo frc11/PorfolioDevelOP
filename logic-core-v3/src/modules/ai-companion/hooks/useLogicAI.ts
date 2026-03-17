@@ -7,7 +7,7 @@ import { INITIAL_GREETING } from '../lib/constants';
 import {
     detectIntent,
     type LeadContext,
-    type ServiceType,
+    type IntentType,
 } from '../lib/sales-strategy';
 
 /** Safely extract text content from AI SDK messages */
@@ -106,7 +106,7 @@ export function useLogicAI() {
             const detectedIntent = detectIntent(content);
 
             if (detectedIntent !== 'unknown') {
-                setLeadContext(prev => ({
+                setLeadContext((prev: LeadContext) => ({
                     ...prev,
                     serviceType: detectedIntent,
                 }));

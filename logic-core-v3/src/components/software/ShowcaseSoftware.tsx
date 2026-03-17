@@ -1,7 +1,13 @@
 'use client'
 
-import React, { useState, useRef } from 'react'
-import { motion, useInView, useReducedMotion } from 'motion/react'
+import React, { useState, useRef, useEffect } from 'react'
+import { motion, AnimatePresence, useInView, useReducedMotion } from 'motion/react'
+import {
+  AreaChart, Area,
+  BarChart, Bar,
+  XAxis, YAxis,
+  Tooltip, ResponsiveContainer,
+} from 'recharts'
 
 // ─── TYPES ───────────────────────────────────────────────────────────────────
 
@@ -130,13 +136,46 @@ const projects: ShowcaseProject[] = [
   },
 ]
 
+// ─── DASHBOARD DATA ────────────────────────────────────────────────────────
+const ventasData = [
+  { mes:'Ene', ventas:42, objetivo:38 },
+  { mes:'Feb', ventas:38, objetivo:40 },
+  { mes:'Mar', ventas:55, objetivo:42 },
+  { mes:'Abr', ventas:61, objetivo:45 },
+  { mes:'May', ventas:58, objetivo:48 },
+  { mes:'Jun', ventas:74, objetivo:50 },
+  { mes:'Jul', ventas:82, objetivo:55 },
+]
+
+const stockData = [
+  { producto:'Producto A', stock:85 },
+  { producto:'Producto B', stock:62 },
+  { producto:'Producto C', stock:91 },
+  { producto:'Producto D', stock:44 },
+  { producto:'Producto E', stock:78 },
+]
+
+const ultimasVentas = [
+  { cliente:'García & Hijos', monto:'$145.000', estado:'Pagado', tiempo:'hace 2 min' },
+  { cliente:'Distribuidora Norte', monto:'$89.500', estado:'Pendiente', tiempo:'hace 15 min' },
+  { cliente:'Comercial Salta', monto:'$234.000', estado:'Pagado', tiempo:'hace 1 hora' },
+  { cliente:'Ferretería Paz', monto:'$67.200', estado:'Pagado', tiempo:'hace 2 horas' },
+]
+
+const kpis = [
+  { label:'Ventas del mes', value:1240800, prefix:'$', change:'+18%', up:true },
+  { label:'Clientes activos', value:847, prefix:'', change:'+34', up:true },
+  { label:'Pedidos pendientes', value:23, prefix:'', change:'−5', up:false },
+  { label:'Stock crítico', value:3, prefix:'', change:'−8', up:true },
+]
+
 // ─── SUB-COMPONENTS ──────────────────────────────────────────────────────────
 
 function Header({ isInView }: { isInView: boolean }) {
   const shouldReduceMotion = useReducedMotion()
 
   return (
-    <div style={{ marginBottom: 'clamp(40px, 6vh, 60px)' }}>
+    <div style={{ marginBottom: 'clamp(40px, 6vh, 60px)', marginTop: '52px' }}>
       <motion.div
         initial={shouldReduceMotion ? { opacity: 1 } : { opacity: 0, y: -10 }}
         animate={isInView ? { opacity: 1, y: 0 } : {}}
@@ -176,6 +215,274 @@ function Header({ isInView }: { isInView: boolean }) {
         Sistemas funcionando hoy en empresas del NOA.
       </motion.p>
     </div>
+  )
+}
+
+function MiniDashboard({ isInView }: { isInView: boolean }) {
+  const [hovered, setHovered] = useState(false)
+  const [kpiValues, setKpiValues] = useState(kpis.map(() => 0))
+  const [animated, setAnimated] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768)
+    check()
+    window.addEventListener('resize', check)
+    return () => window.removeEventListener('resize', check)
+  }, [])
+
+  useEffect(() => {
+    if (!isInView || animated) return
+    setAnimated(true)
+
+    kpis.forEach((kpi, i) => {
+      const duration = 1200 + i * 200
+      const start = performance.now()
+
+      function update(now: number) {
+        const t = Math.min((now - start) / duration, 1)
+        const eased = 1 - Math.pow(1 - t, 3)
+        setKpiValues(prev => {
+          const next = [...prev]
+          next[i] = Math.round(kpi.value * eased)
+          return next
+        })
+        if (t < 1) requestAnimationFrame(update)
+      }
+      requestAnimationFrame(update)
+    })
+  }, [isInView, animated])
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 32 }}
+      animate={isInView ? { opacity: 1, y: 0 } : {}}
+      transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        marginBottom: '48px',
+        borderRadius: '24px',
+        overflow: 'hidden',
+        position: 'relative',
+        border: '1px solid rgba(99,102,241,0.2)',
+        background: 'rgba(6,6,15,0.4)',
+        boxShadow: `
+          0 0 80px rgba(99,102,241,0.08),
+          0 32px 64px rgba(0,0,0,0.5),
+          inset 0 1px 0 rgba(255,255,255,0.06)
+        `,
+        transition: 'box-shadow 400ms',
+        ...(hovered && !isMobile && {
+          boxShadow: `
+            0 0 120px rgba(99,102,241,0.15),
+            0 40px 80px rgba(0,0,0,0.6),
+            inset 0 1px 0 rgba(255,255,255,0.08)
+          `,
+        }),
+      }}
+    >
+      <div style={{
+        position: 'absolute',
+        top: 0, left: 0, right: 0,
+        height: '2px',
+        background: 'linear-gradient(90deg, transparent, rgba(99,102,241,0.8) 30%, rgba(123,47,255,0.8) 70%, transparent)',
+        zIndex: 10,
+      }} />
+
+      <div style={{
+        position: 'absolute',
+        top: '-52px', left: 0, right: 0,
+        textAlign: 'center',
+        zIndex: 5,
+      }}>
+        <p style={{
+          fontSize: '12px',
+          letterSpacing: '0.2em',
+          color: 'rgba(99,102,241,0.6)',
+          fontWeight: 600,
+          fontFamily: 'ui-monospace, monospace',
+        }}>
+          ↓ ASÍ SE VE TENER EL CONTROL TOTAL
+        </p>
+      </div>
+
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: isMobile ? '1fr' : '200px 1fr',
+        minHeight: '480px',
+      }}>
+        {!isMobile && (
+          <div style={{
+            background: 'rgba(99,102,241,0.06)',
+            borderRight: '1px solid rgba(99,102,241,0.12)',
+            padding: '20px 0',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '4px',
+          }}>
+            <div style={{ padding: '0 16px 20px', borderBottom: '1px solid rgba(255,255,255,0.06)', marginBottom: '8px' }}>
+              <p style={{ fontSize: '14px', fontWeight: 900, color: 'white', margin: 0 }}>Panel Central</p>
+              <p style={{ fontSize: '10px', color: 'rgba(99,102,241,0.6)', margin: 0, fontFamily: 'monospace' }}>Tu empresa · En línea</p>
+            </div>
+            {[
+              { icon: '📊', label: 'Dashboard', active: true },
+              { icon: '🛒', label: 'Ventas', active: false },
+              { icon: '📦', label: 'Stock', active: false },
+              { icon: '👥', label: 'Clientes', active: false },
+              { icon: '💰', label: 'Finanzas', active: false },
+              { icon: '📋', label: 'Reportes', active: false },
+            ].map((item, i) => (
+              <div key={i} style={{
+                padding: '10px 16px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px',
+                borderRadius: '8px',
+                margin: '0 8px',
+                background: item.active ? 'rgba(99,102,241,0.15)' : 'transparent',
+                border: item.active ? '1px solid rgba(99,102,241,0.25)' : '1px solid transparent',
+              }}>
+                <span style={{ fontSize: '14px' }}>{item.icon}</span>
+                <span style={{ fontSize: '12px', fontWeight: item.active ? 700 : 400, color: item.active ? 'white' : 'rgba(255,255,255,0.35)' }}>{item.label}</span>
+                {item.active && (
+                  <div style={{ marginLeft: 'auto', width: '6px', height: '6px', borderRadius: '50%', background: '#6366f1', boxShadow: '0 0 6px rgba(99,102,241,0.8)' }} />
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+
+        <div style={{
+          background: 'rgba(6,6,15,0.8)',
+          padding: 'clamp(16px, 2vw, 24px)',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '16px',
+          overflow: 'hidden',
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div>
+              <h3 style={{ fontSize: '16px', fontWeight: 800, color: 'white', margin: 0 }}>Resumen del día</h3>
+              <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.3)', margin: 0, fontFamily: 'monospace' }}>Actualizado ahora mismo</p>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'rgba(74,222,128,0.08)', border: '1px solid rgba(74,222,128,0.2)', borderRadius: '100px', padding: '4px 12px' }}>
+              <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#4ade80', animation: 'pulseIA 2s ease-in-out infinite' }} />
+              <span style={{ fontSize: '10px', color: 'rgba(74,222,128,0.8)', fontWeight: 600 }}>EN VIVO</span>
+            </div>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)', gap: '10px' }}>
+            {kpis.map((kpi, i) => (
+              <div key={i} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '12px', padding: '12px' }}>
+                <p style={{ fontSize: '9px', color: 'rgba(255,255,255,0.3)', margin: '0 0 4px', letterSpacing: '0.1em', fontFamily: 'monospace' }}>{kpi.label.toUpperCase()}</p>
+                <p style={{ fontSize: '18px', fontWeight: 900, color: 'white', margin: '0 0 4px', fontFamily: 'monospace' }}>{kpi.prefix}{kpiValues[i].toLocaleString('es-AR')}</p>
+                <p style={{ fontSize: '10px', color: kpi.up ? '#4ade80' : '#f87171', margin: 0, fontWeight: 600 }}>{kpi.up ? '↑' : '↓'} {kpi.change}</p>
+              </div>
+            ))}
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1.4fr 1fr', gap: '12px' }}>
+            <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '12px', padding: '14px' }}>
+              <p style={{ fontSize: '11px', fontWeight: 600, color: 'rgba(255,255,255,0.5)', margin: '0 0 12px' }}>Ventas vs Objetivo</p>
+              <ResponsiveContainer width="100%" height={100}>
+                <AreaChart data={ventasData} margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
+                  <defs>
+                    <linearGradient id="ventasGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#6366f1" stopOpacity={0.4} />
+                      <stop offset="100%" stopColor="#6366f1" stopOpacity={0} />
+                    </linearGradient>
+                    <linearGradient id="objetivoGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#7b2fff" stopOpacity={0.3} />
+                      <stop offset="100%" stopColor="#7b2fff" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <XAxis dataKey="mes" tick={{ fill: 'rgba(255,255,255,0.3)', fontSize: 9 }} axisLine={false} tickLine={false} />
+                  <Tooltip contentStyle={{ background: 'rgba(6,6,15,0.95)', border: '1px solid rgba(99,102,241,0.3)', borderRadius: '8px', fontSize: '11px' }} labelStyle={{ color: 'white' }} />
+                  <Area type="monotone" dataKey="ventas" stroke="#6366f1" strokeWidth={2} fill="url(#ventasGrad)" name="Ventas" />
+                  <Area type="monotone" dataKey="objetivo" stroke="#7b2fff" strokeWidth={1.5} strokeDasharray="4 4" fill="url(#objetivoGrad)" name="Objetivo" />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+
+            <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '12px', padding: '14px' }}>
+              <p style={{ fontSize: '11px', fontWeight: 600, color: 'rgba(255,255,255,0.5)', margin: '0 0 12px' }}>Nivel de Stock %</p>
+              <ResponsiveContainer width="100%" height={100}>
+                <BarChart data={stockData} margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
+                  <XAxis dataKey="producto" tick={{ fill: 'rgba(255,255,255,0.3)', fontSize: 8 }} axisLine={false} tickLine={false} />
+                  <Tooltip contentStyle={{ background: 'rgba(6,6,15,0.95)', border: '1px solid rgba(99,102,241,0.3)', borderRadius: '8px', fontSize: '11px' }} />
+                  <Bar dataKey="stock" fill="rgba(99,102,241,0.6)" radius={[4, 4, 0, 0]} name="Stock %" />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+          <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '12px', overflow: 'hidden' }}>
+            <div style={{ padding: '10px 14px', borderBottom: '1px solid rgba(255,255,255,0.06)', display: 'flex', justifyContent: 'space-between' }}>
+              <p style={{ fontSize: '11px', fontWeight: 600, color: 'rgba(255,255,255,0.5)', margin: 0 }}>Últimas ventas</p>
+              <p style={{ fontSize: '10px', color: 'rgba(99,102,241,0.6)', margin: 0, fontFamily: 'monospace', cursor: 'default' }}>Ver todas →</p>
+            </div>
+            {ultimasVentas.map((venta, i) => (
+              <div key={i} style={{ padding: '8px 14px', display: 'grid', gridTemplateColumns: isMobile ? '1fr auto auto' : '1fr auto auto auto', gap: '12px', alignItems: 'center', borderBottom: i < 3 ? '1px solid rgba(255,255,255,0.04)' : 'none' }}>
+                <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.7)' }}>{venta.cliente}</span>
+                <span style={{ fontSize: '12px', fontWeight: 700, color: 'white', fontFamily: 'monospace' }}>{venta.monto}</span>
+                <span style={{ fontSize: '10px', padding: '2px 8px', borderRadius: '100px', background: venta.estado === 'Pagado' ? 'rgba(74,222,128,0.1)' : 'rgba(251,191,36,0.1)', color: venta.estado === 'Pagado' ? '#4ade80' : '#fbbf24', border: venta.estado === 'Pagado' ? '1px solid rgba(74,222,128,0.25)' : '1px solid rgba(251,191,36,0.25)' }}>{venta.estado}</span>
+                {!isMobile && <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.2)', fontFamily: 'monospace' }}>{venta.tiempo}</span>}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <AnimatePresence>
+        {(hovered || isMobile) && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            style={{
+              position: 'absolute',
+              inset: 0,
+              background: 'rgba(6,6,15,0.7)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backdropFilter: 'blur(2px)',
+              zIndex: 20,
+              pointerEvents: hovered || isMobile ? 'auto' : 'none',
+            }}
+          >
+            <div style={{ textAlign: 'center', padding: '32px' }}>
+              <p style={{ fontSize: 'clamp(20px, 3vw, 32px)', fontWeight: 900, color: 'white', margin: '0 0 8px', lineHeight: 1.2 }}>Tu empresa, en esta pantalla.</p>
+              <p style={{ fontSize: '15px', color: 'rgba(255,255,255,0.55)', margin: '0 0 24px' }}>Desde cualquier dispositivo, en cualquier parte del mundo.</p>
+              <motion.a
+                href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER}?text=${encodeURIComponent('Hola DevelOP, vi el dashboard y quiero un sistema así para mi empresa')}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.97 }}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                  background: 'linear-gradient(135deg, #6366f1, #4f46e5)',
+                  color: 'white',
+                  fontWeight: 800,
+                  fontSize: '15px',
+                  padding: '14px 32px',
+                  borderRadius: '100px',
+                  textDecoration: 'none',
+                  boxShadow: '0 0 40px rgba(99,102,241,0.4)',
+                }}
+              >
+                💬 QUIERO UN SISTEMA ASÍ →
+              </motion.a>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
   )
 }
 
@@ -388,6 +695,9 @@ export default function ShowcaseSoftware() {
 
       <div style={{ maxWidth: '1200px', margin: '0 auto', position: 'relative', zIndex: 1 }}>
         <Header isInView={isInView} />
+        
+        <MiniDashboard isInView={isInView} />
+
         <div 
           className="showcase-grid"
           style={{

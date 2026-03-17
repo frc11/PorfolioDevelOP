@@ -375,6 +375,7 @@ export default function VaultIA() {
 
   return (
     <section
+      id="vault"
       ref={sectionRef}
       style={{
         padding: 'clamp(80px, 12vh, 140px) clamp(20px, 5vw, 80px)',

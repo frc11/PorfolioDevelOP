@@ -30,14 +30,14 @@ interface FloatCard {
 // ─── DATA ────────────────────────────────────────────────────────────────────
 
 const tickerItems = [
+  { label: 'Empresas sin Excel', value: '47+' },
+  { label: 'Horas ahorradas al mes', value: '23.400' },
   { label: 'Sistemas en producción', value: '12+' },
   { label: 'Procesos automatizados', value: '847' },
-  { label: 'Horas ahorradas al mes', value: '23.400' },
-  { label: 'Uptime promedio', value: '99.9%' },
-  { label: 'Líneas de código en prod', value: '2.4M' },
-  { label: 'Errores en producción', value: '0' },
-  { label: 'Clientes del NOA', value: '47+' },
-  { label: 'Proyectos entregados', value: '38' },
+  { label: 'Errores operativos eliminados', value: '99.9%' },
+  { label: 'Datos en tiempo real', value: '100%' },
+  { label: 'Usuarios activos', value: '340+' },
+  { label: 'Años en el mercado NOA', value: '4+' },
 ]
 
 const floatCards: FloatCard[] = [
@@ -50,16 +50,16 @@ const floatCards: FloatCard[] = [
     floatDelay: 0,
   },
   {
-    value: '3x',
-    label: 'velocidad de operación',
+    value: '1',
+    label: 'sola pantalla',
     icon: '⚡',
     colorRgb: '123,47,255',
     position: { top: '20%', right: '-190px' },
     floatDelay: 1.2,
   },
   {
-    value: '100%',
-    label: 'datos en tiempo real',
+    value: '∞',
+    label: 'escalable',
     icon: '📊',
     colorRgb: '139,92,246',
     position: {
@@ -413,7 +413,7 @@ function CapsuleVideo({
               flexShrink: 0,
             }}/>
             <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.3)', fontFamily: 'monospace' }}>
-              sistema.develop.ar · Producción
+              panel.tuempresa.ar · En línea
             </span>
           </div>
 
@@ -627,7 +627,7 @@ export default function HeroSoftware() {
               color: '#6366f1',
               fontWeight: 600,
             }}>
-              SOFTWARE A MEDIDA · NOA
+              EL SISTEMA NERVIOSO DE TU EMPRESA
             </span>
           </motion.div>
 
@@ -653,7 +653,7 @@ export default function HeroSoftware() {
               margin: 0,
               color: 'white',
             }}>
-              Tu empresa,
+              Terminá con el caos
               <br/>
               <span style={{
                 background: 'linear-gradient(135deg, #6366f1 0%, #a855f7 40%, #7b2fff 70%, #6366f1 100%)',
@@ -663,7 +663,7 @@ export default function HeroSoftware() {
                 backgroundClip: 'text',
                 animation: isReduced ? 'none' : 'gradientShift 4s ease-in-out infinite',
               }}>
-                en modo sistema.
+                de los 5 Excels.
               </span>
             </h1>
 
@@ -707,10 +707,11 @@ export default function HeroSoftware() {
               margin: '0 auto clamp(28px,4vh,44px)',
             }}
           >
-            Software a medida que reemplaza el Excel, el WhatsApp y el papel.
+            Centralizamos toda la operación de tu empresa en una sola pantalla.
+            Stock, ventas, clientes y finanzas, en tiempo real.
             <br/>
             <span style={{ color:'rgba(99,102,241,0.8)' }}>
-              Tus procesos, automatizados. Tu equipo, enfocado en crecer.
+              Sin depender de Excel. Sin depender de nadie.
             </span>
           </motion.p>
 

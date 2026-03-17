@@ -356,6 +356,53 @@ function NodeCanvas({
   )
 }
 
+function FloatingStat({ 
+  label, 
+  value, 
+  pos, 
+  delay 
+}: { 
+  label: string; 
+  value: string; 
+  pos: React.CSSProperties; 
+  delay: number 
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.8, delay, ease: [0.16, 1, 0.3, 1] }}
+      style={{
+        position: 'absolute',
+        ...pos,
+        zIndex: 5,
+        pointerEvents: 'none',
+      }}
+    >
+      <motion.div
+        animate={{ y: [0, -10, 0] }}
+        transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut', delay: delay * 0.5 }}
+        style={{
+          background: 'rgba(245, 158, 11, 0.03)',
+          backdropFilter: 'blur(8px)',
+          WebkitBackdropFilter: 'blur(8px)',
+          border: '1px solid rgba(245, 158, 11, 0.15)',
+          borderRadius: '16px',
+          padding: '12px 20px',
+          boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
+        }}
+      >
+        <p style={{ fontSize: '9px', color: 'rgba(245, 158, 11, 0.6)', fontWeight: 700, letterSpacing: '0.1em', margin: '0 0 4px', textTransform: 'uppercase' }}>
+          {label}
+        </p>
+        <p style={{ fontSize: '16px', color: 'white', fontWeight: 900, margin: 0 }}>
+          {value}
+        </p>
+      </motion.div>
+    </motion.div>
+  )
+}
+
 // ─── MAIN HERO COMPONENT ────────────────────────────────────────────────────
 
 export default function HeroAutomation() {
@@ -499,7 +546,7 @@ export default function HeroAutomation() {
             fontWeight: 600,
             fontFamily: 'ui-monospace, monospace',
           }}>
-            AUTOMATIZACIÓN · N8N · NOA
+            TU EMPRESA, EN PILOTO AUTOMÁTICO
           </span>
         </motion.div>
 
@@ -518,7 +565,7 @@ export default function HeroAutomation() {
           }}
         >
           <span style={{ color: 'white' }}>
-            Mientras dormís,
+            Eliminá el trabajo
           </span>
           <br/>
           <span style={{
@@ -533,7 +580,7 @@ export default function HeroAutomation() {
             display: 'inline-block',
             color: shouldReduceMotion ? '#f59e0b' : 'inherit',
           }}>
-            tu negocio trabaja.
+            robótico para siempre.
           </span>
         </motion.h1>
 
@@ -551,10 +598,11 @@ export default function HeroAutomation() {
             pointerEvents: 'none',
           }}
         >
-          Conectamos WhatsApp, Gmail, MercadoPago, AFIP y 400 apps más en flujos automáticos.
+          Hacemos que WhatsApp, MercadoPago, AFIP y Excel se hablen solos.
           <br/>
+          Tu equipo deja de copiar y pegar datos 
           <span style={{ color: 'rgba(245,158,11,0.75)' }}>
-            Tus tareas repetitivas desaparecen. Tu equipo se enfoca en lo que importa.
+            y empieza a generar valor real.
           </span>
         </motion.p>
 
@@ -591,7 +639,7 @@ export default function HeroAutomation() {
               boxShadow: `0 0 40px rgba(245,158,11,0.4), 0 8px 24px rgba(0,0,0,0.4)`,
             }}
           >
-            Calculá tu ahorro →
+            ⚡ ENCENDER MI EMPRESA →
           </motion.a>
 
           <motion.a
@@ -621,46 +669,150 @@ export default function HeroAutomation() {
           </motion.a>
         </motion.div>
 
-        {/* AppLogosStrip */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1.2, duration: 0.8 }}
-          style={{
-            marginTop: 'clamp(32px, 5vh, 52px)',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0',
-            justifyContent: 'center',
-            overflow: 'hidden',
-            maskImage: 'linear-gradient(90deg, transparent 0%, black 15%, black 85%, transparent 100%)',
-            WebkitMaskImage: 'linear-gradient(90deg, transparent 0%, black 15%, black 85%, transparent 100%)',
-            pointerEvents: 'none',
-          }}
-        >
-          {['💬', '📧', '📊', '💳', '📣', '📨', '📋', '🧾', '🛒', '📱', '🔗', '⚙️'].map((emoji, i) => (
-            <div key={i} style={{
-              fontSize: '22px',
-              padding: '0 12px',
-              opacity: 0.35,
-              borderRight: i < 11 ? '1px solid rgba(255,255,255,0.06)' : 'none',
-            }}>
-              {emoji}
-            </div>
-          ))}
-        </motion.div>
+        {/* Corporate Marquee */}
+        <div style={{
+          marginTop: 'clamp(32px, 5vh, 52px)',
+          position: 'relative',
+          width: '100vw',
+          left: '50%',
+          right: '50%',
+          marginLeft: '-50vw',
+          marginRight: '-50vw',
+          overflow: 'hidden',
+          padding: '20px 0',
+          background: 'rgba(245,158,11,0.03)',
+          borderTop: '1px solid rgba(245,158,11,0.08)',
+          borderBottom: '1px solid rgba(245,158,11,0.08)',
+          maskImage: 'linear-gradient(90deg, transparent 0%, black 15%, black 85%, transparent 100%)',
+          WebkitMaskImage: 'linear-gradient(90deg, transparent 0%, black 15%, black 85%, transparent 100%)',
+        }}>
+          <motion.div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              whiteSpace: 'nowrap',
+              width: 'max-content',
+            }}
+            animate={{ x: ["0%", "-50%"] }}
+            transition={{
+              duration: 45,
+              ease: "linear",
+              repeat: Infinity,
+            }}
+          >
+            {[
+              { icon:'💬', label:'WHATSAPP API' },
+              { icon:'📣', label:'META ADS' },
+              { icon:'💳', label:'MERCADO PAGO' },
+              { icon:'🛍', label:'MERCADO LIBRE' },
+              { icon:'🧾', label:'AFIP' },
+              { icon:'📊', label:'GOOGLE SHEETS' },
+              { icon:'📧', label:'GMAIL' },
+              { icon:'📅', label:'GOOGLE CALENDAR' },
+              { icon:'☁️', label:'TIENDANUBE' },
+              { icon:'📋', label:'NOTION' },
+              { icon:'📨', label:'SLACK' },
+              { icon:'💼', label:'SALESFORCE' },
+            ].map((item, i) => (
+              <div 
+                key={i} 
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px',
+                  padding: '0 clamp(20px, 3vw, 40px)',
+                  borderRight: '1px solid rgba(255,255,255,0.06)',
+                }}
+              >
+                <span style={{ fontSize: '24px' }}>{item.icon}</span>
+                <span style={{
+                  fontSize: '11px',
+                  fontWeight: 800,
+                  color: 'rgba(255,255,255,0.3)',
+                  fontFamily: 'ui-monospace, monospace',
+                  letterSpacing: '0.15em',
+                }}>
+                  {item.label}
+                </span>
+              </div>
+            ))}
+            {/* Duplicado para loop infinito */}
+            {[
+              { icon:'💬', label:'WHATSAPP API' },
+              { icon:'📣', label:'META ADS' },
+              { icon:'💳', label:'MERCADO PAGO' },
+              { icon:'🛍', label:'MERCADO LIBRE' },
+              { icon:'🧾', label:'AFIP' },
+              { icon:'📊', label:'GOOGLE SHEETS' },
+              { icon:'📧', label:'GMAIL' },
+              { icon:'📅', label:'GOOGLE CALENDAR' },
+              { icon:'☁️', label:'TIENDANUBE' },
+              { icon:'📋', label:'NOTION' },
+              { icon:'📨', label:'SLACK' },
+              { icon:'💼', label:'SALESFORCE' },
+            ].map((item, i) => (
+              <div 
+                key={`dup-${i}`} 
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px',
+                  padding: '0 clamp(20px, 3vw, 40px)',
+                  borderRight: '1px solid rgba(255,255,255,0.06)',
+                }}
+              >
+                <span style={{ fontSize: '24px' }}>{item.icon}</span>
+                <span style={{
+                  fontSize: '11px',
+                  fontWeight: 800,
+                  color: 'rgba(255,255,255,0.3)',
+                  fontFamily: 'ui-monospace, monospace',
+                  letterSpacing: '0.15em',
+                }}>
+                  {item.label}
+                </span>
+              </div>
+            ))}
+          </motion.div>
+        </div>
 
         <p style={{
           fontSize: '11px',
-          color: 'rgba(255,255,255,0.18)',
-          letterSpacing: '0.15em',
+          color: 'rgba(245,158,11,0.5)',
+          fontWeight: 900,
+          letterSpacing: '0.25em',
           textAlign: 'center',
-          marginTop: '12px',
+          marginTop: '16px',
           pointerEvents: 'none',
+          textTransform: 'uppercase',
         }}>
-          +400 INTEGRACIONES DISPONIBLES
+          CONECTAMOS LO QUE YA USÁS
         </p>
       </div>
+
+      {/* Floating Stats */}
+      {!shouldReduceMotion && (
+        <>
+          <FloatingStat 
+            label="0% trabajo manual" 
+            value="Garantizado" 
+            pos={{ top: '22%', left: '12%' }} 
+            delay={1.4}
+          />
+          <FloatingStat 
+            label="24/7" 
+            value="Operando solo" 
+            pos={{ top: '65%', right: '10%' }} 
+            delay={1.6}
+          />
+          <FloatingStat 
+            label="<10%" 
+            value="del costo de un sueldo" 
+            pos={{ bottom: '20%', left: '15%' }} 
+            delay={1.8}
+          />
+        </>
+      )}
 
       {/* Scroll Cue */}
       <motion.div

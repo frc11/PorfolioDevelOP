@@ -19,28 +19,40 @@ interface FAQItem {
 
 const faqItems: FAQItem[] = [
   {
-    question: '¿Necesito saber de tecnología?',
-    answer: 'Cero. Vos nos contás qué tarea querés automatizar, nosotros la conectamos. Lo único que vas a ver es que las cosas empiezan a pasar solas. Sin tocar código ni configurar nada.',
+    question:
+      '¿Mis empleados tienen que aprender algo nuevo?',
+    answer:
+      'No. Las automatizaciones trabajan en el fondo — tus empleados siguen usando WhatsApp, Excel y las mismas herramientas de siempre. La diferencia es que el sistema mueve los datos solo entre ellas. Sin que nadie tenga que hacer nada distinto.',
   },
   {
-    question: '¿Qué pasa si una app que uso no está en la lista?',
-    answer: 'n8n tiene más de 400 integraciones nativas. Si tu app tiene API, la podemos conectar. Y si no tiene integración oficial, en el 90% de los casos igual encontramos la forma.',
+    question:
+      '¿Qué pasa si una automatización falla en producción?',
+    answer:
+      'Tenemos monitoreo activo en todos los flujos. Si algo falla, recibimos alerta antes que vos y lo resolvemos. Además, ninguna automatización remplaza un proceso crítico sin tener un respaldo manual — si el robot falla, el proceso sigue funcionando de la forma tradicional mientras lo arreglamos.',
   },
   {
-    question: '¿Cuánto tarda en estar funcionando?',
-    answer: 'En 1 a 2 semanas tenés los primeros flujos corriendo en producción. Empezamos por los que más duelen y sumamos más en el camino. No esperás meses para ver resultados.',
+    question:
+      '¿Cuánto tarda en estar funcionando?',
+    answer:
+      'En 1 semana tenés los primeros flujos corriendo en producción. Empezamos con la tarea que más tiempo le roba a tu equipo — y desde el primer lunes ya notás la diferencia. Sin esperar meses para ver resultados.',
   },
   {
-    question: '¿Qué pasa si el flujo falla?',
-    answer: 'Todos los flujos tienen monitoreo activo. Si algo falla, nos enteramos antes que vos. El soporte de 30 días post-lanzamiento está incluido y resolvemos cualquier error en menos de 4 horas hábiles.',
+    question:
+      '¿La automatización puede cobrar por MercadoPago?',
+    answer:
+      'Sí. El flujo puede generar el link de pago, enviárselo al cliente por WhatsApp, verificar que se acreditó y emitir la factura AFIP automáticamente. Todo eso sin que ninguna persona intervenga.',
   },
   {
-    question: '¿Puedo empezar con un solo flujo y agregar más?',
-    answer: 'Es la forma más inteligente. Empezamos con la automatización que más tiempo te roba, medimos el resultado y de ahí expandimos. Sin compromisos de escala forzada.',
+    question:
+      '¿Funciona si mi empresa es chica?',
+    answer:
+      'Especialmente para empresas chicas. Una pyme de 5 personas que automatiza las tareas repetitivas opera como si tuviera 10. El punto de partida ideal es cuando sentís que el equipo pasa más tiempo administrando que vendiendo o produciendo.',
   },
   {
-    question: '¿Mis datos están seguros?',
-    answer: 'Sí. Las credenciales de tus apps se almacenan encriptadas y nunca las compartimos. Los flujos corren en servidores con backups automáticos. Vos sos el único dueño de tus datos.',
+    question:
+      '¿Puedo empezar con un solo proceso y agregar más?',
+    answer:
+      'Es la forma más inteligente. Empezamos con el flujo que más duele — facturación, seguimiento de leads, reportes — medimos el resultado y de ahí sumamos más. Sin compromiso de escala forzada ni contratos largos.',
   },
 ]
 
@@ -526,7 +538,7 @@ export default function VaultAutomation() {
             textTransform: 'uppercase',
             margin: '0 0 20px',
           }}>
-            ¿SEGUÍS HACIENDO TODO A MANO?
+            ¿TU EQUIPO SIGUE COPIANDO DATOS A MANO?
           </p>
 
           {/* H2 de cierre */}
@@ -538,7 +550,7 @@ export default function VaultAutomation() {
             letterSpacing: '-0.02em',
           }}>
             <span style={{ color: 'white' }}>
-              Delegá las tareas repetitivas.
+              Delegá el trabajo robótico.
             </span>
             <br />
             <span style={{
@@ -559,7 +571,7 @@ export default function VaultAutomation() {
             margin: '0 auto clamp(28px, 4vh, 44px)',
             lineHeight: 1.65,
           }}>
-            En 1 semana, tus primeros flujos corriendo. Sin tecnicismos. Sin sorpresas. Con resultados.
+            En 1 semana, tus primeros flujos corriendo. Sin tecnicismos. Sin sorpresas. Con resultados medibles desde el primer mes.
           </p>
 
           {/* Garantía pill */}
@@ -567,20 +579,20 @@ export default function VaultAutomation() {
             display: 'inline-flex',
             alignItems: 'center',
             gap: '12px',
-            background: 'rgba(34,197,94,0.08)',
-            border: '1px solid rgba(34,197,94,0.2)',
+            background: 'rgba(245,158,11,0.06)',
+            border: '1px solid rgba(245,158,11,0.2)',
             borderRadius: '100px',
             padding: '8px 18px',
             marginBottom: '28px',
           }}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="2">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2">
               <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
             </svg>
             <span style={{
               fontSize: '12px',
               color: 'rgba(255,255,255,0.6)',
             }}>
-              Primera automatización gratis · Sin compromiso
+              Primera automatización sin costo · Sin compromiso
             </span>
           </div>
 
@@ -593,7 +605,7 @@ export default function VaultAutomation() {
             marginBottom: 'clamp(20px, 3vh, 32px)',
           }}>
             <motion.a
-              href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER}?text=Hola%20DevelOP%2C%20quiero%20automatizar%20mis%20procesos%20y%20empezar%20a%20recuperar%20tiempo`}
+              href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER}?text=Hola%20DevelOP%2C%20quiero%20encender%20las%20automatizaciones%20en%20mi%20empresa`}
               target="_blank"
               rel="noopener noreferrer"
               whileHover={shouldReduceMotion ? {} : { scale: 1.04 }}
@@ -614,7 +626,7 @@ export default function VaultAutomation() {
                 boxShadow: '0 0 40px rgba(245,158,11,0.4)',
               }}
             >
-              ⚡ DELEGÁ AL SISTEMA →
+              ⚡ ENCENDER MI EMPRESA →
             </motion.a>
 
             <motion.a
@@ -636,7 +648,7 @@ export default function VaultAutomation() {
                 transition: 'all 200ms',
               }}
             >
-              Ver cómo funciona primero
+              Ver cómo funciona primero →
             </motion.a>
           </div>
 

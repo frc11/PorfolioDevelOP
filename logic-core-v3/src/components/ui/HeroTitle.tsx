@@ -96,7 +96,11 @@ export default function HeroTitle({ text, className = "" }: HeroTitleProps) {
                                 animate="visible"
                                 variants={sweepVariants}
                                 style={{ WebkitTextStroke: "1px rgba(255,255,255,0.1)" }}
-                                className="text-[13vw] sm:text-[11vw] md:text-[8rem] lg:text-[7vw] xl:text-[7.5vw] 2xl:text-[8vw] font-black tracking-tighter leading-[0.85] text-transparent bg-clip-text bg-[linear-gradient(110deg,#fff,45%,#00e5ff,55%,#fff)] bg-[length:200%_100%] text-center lg:text-left uppercase flex items-baseline"
+                                className={`text-[13vw] sm:text-[11vw] md:text-[8rem] lg:text-[7vw] xl:text-[7.5vw] 2xl:text-[8vw] font-black tracking-tighter leading-[0.85] text-transparent bg-clip-text bg-[length:200%_100%] text-center lg:text-left uppercase flex items-baseline ${
+                                    lineIndex === 1 
+                                    ? "bg-[linear-gradient(110deg,#00e5ff,45%,#7b2fff,55%,#00e5ff)]" 
+                                    : "bg-[linear-gradient(110deg,#fff,45%,#00e5ff,55%,#fff)]"
+                                }`}
                             >
                                 {line.split("").map((char, charIndex) => {
                                     const isLastDot = char === "." && lineIndex === text.length - 1 && charIndex === line.length - 1;

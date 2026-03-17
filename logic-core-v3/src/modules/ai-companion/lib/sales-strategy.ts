@@ -7,18 +7,19 @@
 // TYPES & INTERFACES
 // ============================================================================
 
-export type ServiceType =
+export type IntentType =
     | 'template'
     | 'custom_web'
     | 'software'
     | 'ai_automation'
     | 'consultation'
+    | 'price'
+    | 'comparison'
+    | 'urgency'
     | 'unknown';
 
-export type LeadQuality = 'hot' | 'warm' | 'cold' | 'unqualified';
-
 export interface LeadContext {
-    serviceType: ServiceType;
+    serviceType: IntentType;
     projectDescription?: string;
     industry?: string;
     timeline?: string;
@@ -28,95 +29,63 @@ export interface LeadContext {
     technicalRequirements?: string[];
 }
 
-export interface QualificationResult {
-    quality: LeadQuality;
-    readyToConnect: boolean;
-    missingInfo: string[];
-    recommendation: string;
-}
-
-// ============================================================================
-// INTENT DETECTION
-// ============================================================================
-
 /**
- * Detecta el tipo de servicio que el usuario necesita basándose en su mensaje
+ * Detecta la intención del usuario basándose en su mensaje
  */
-export function detectIntent(userMessage: string): ServiceType {
+export function detectIntent(userMessage: string): IntentType {
     const message = userMessage.toLowerCase();
 
-    // Keywords por tipo de servicio
-    const patterns: Record<ServiceType, RegExp[]> = {
+    const patterns: Record<IntentType, RegExp[]> = {
+        price: [
+            /precio/i, /costo/i, /cuánto cuesta/i, /presupuesto/i, /cotiza/i, /valor/i, /invertir/i
+        ],
+        comparison: [
+            /competencia/i, /otros/i, /fiverr/i, /agencia/i, /diferencia/i, /por qué ustedes/i
+        ],
+        urgency: [
+            /urgente/i, /rápido/i, /cuánto tardan/i, /tiempos/i, /deadline/i, /para ayer/i
+        ],
         template: [
-            /template/i,
-            /plantilla/i,
-            /rápid[oa]/i,
-            /luxury|tech|cyber|dining/i,
-            /demo/i,
-            /muestra/i,
+            /template/i, /plantilla/i, /luxury|tech|cyber|dining/i, /demo/i
         ],
         custom_web: [
-            /web.*medida/i,
-            /personaliza/i,
-            /único/i,
-            /custom/i,
-            /desarrollo web/i,
-            /página web/i,
-            /sitio web/i,
-            /landing/i,
-            /portfolio/i,
-            /e-?commerce/i,
+            /web.*medida/i, /custom/i, /desarrollo web/i, /página web/i, /landing/i
         ],
         software: [
-            /sistema/i,
-            /software/i,
-            /aplicación/i,
-            /app\b/i,
-            /crm/i,
-            /erp/i,
-            /dashboard/i,
-            /herramienta/i,
-            /plataforma/i,
-            /saas/i,
+            /sistema/i, /software/i, /crm/i, /erp/i, /dashboard/i, /herramienta/i
         ],
         ai_automation: [
-            /\bia\b/i,
-            /inteligencia artificial/i,
-            /chatbot/i,
-            /bot\b/i,
-            /automatiza/i,
-            /n8n/i,
-            /workflow/i,
-            /gpt/i,
-            /claude/i,
-            /machine learning/i,
+            /\bia\b/i, /inteligencia artificial/i, /chatbot/i, /automatiza/i, /n8n/i
         ],
         consultation: [
-            /consult/i,
-            /asesor/i,
-            /presupuesto/i,
-            /cotiza/i,
-            /precio/i,
-            /costo/i,
-            /cuánto/i,
-            /hablar/i,
-            /reunión/i,
+            /hablar/i, /reunión/i, /contacto/i, /whatsapp/i
         ],
         unknown: [],
     };
 
-    // Chequea cada patrón
-    for (const [serviceType, regexps] of Object.entries(patterns)) {
-        if (serviceType === 'unknown') continue;
-
+    for (const [intent, regexps] of Object.entries(patterns)) {
+        if (intent === 'unknown') continue;
         for (const regex of regexps) {
-            if (regex.test(message)) {
-                return serviceType as ServiceType;
-            }
+            if (regex.test(message)) return intent as IntentType;
         }
     }
 
     return 'unknown';
 }
 
-// Qualification and Messaging helpers were removed as they were not in use.
+/**
+ * Retorna la respuesta estratégica sugerida según la intención detectada
+ * para ser inyectada en el flujo de la consultoría.
+ */
+export function getStrategicResponse(intent: IntentType): string | null {
+    switch (intent) {
+        case 'price':
+            return "Antes de hablar de inversión, tiene sentido entender qué resuelve. ¿Qué problema específico estás tratando de resolver con esto?";
+        case 'comparison':
+            return "La diferencia más importante no está en el precio. ¿Qué es lo que más te importa que quede bien hecho?";
+        case 'urgency':
+            return "Entiendo. Contame un poco más del contexto — eso me ayuda a darte un panorama más preciso del tiempo que manejaríamos.";
+        default:
+            return null;
+    }
+}

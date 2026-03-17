@@ -14,28 +14,34 @@ interface FAQItem {
 
 const faqItems: FAQItem[] = [
   {
-    question: '¿Cuánto tiempo me demanda el proceso?',
-    answer: 'Menos de lo que pensás. La reunión de relevamiento son 2 horas. Después solo necesitamos tu feedback cuando te mostramos avances — aproximadamente 1 hora por semana. El resto lo manejamos nosotros.',
+    question: '¿Cuánto tiempo lleva estar usando el sistema?',
+    answer:
+      'En 30 días ya estás usando el módulo principal. Arrancamos con lo que más duele — ventas, stock o gestión de clientes — y de ahí expandimos. No esperás 6 meses para ver resultados. El primer mes ya notás la diferencia.',
   },
   {
-    question: '¿Qué pasa si el sistema falla en producción?',
-    answer: 'Todos los sistemas que construimos tienen monitoreo activo 24/7. Si algo falla, nos enteramos antes que vos. El soporte post-lanzamiento de 30 días está incluido en el precio y resolvemos cualquier bug en menos de 4 horas hábiles.',
+    question: '¿Qué pasa si el sistema se cae?',
+    answer:
+      'Monitoreo activo las 24 horas. Si algo falla, nos enteramos antes que vos. Backups automáticos diarios para que nunca pierdas información. Los 30 días post-lanzamiento tienen soporte incluido con resolución en menos de 4 horas hábiles.',
   },
   {
-    question: '¿Puedo empezar con un módulo y agregar más después?',
-    answer: 'Sí, y es la forma más inteligente de hacerlo. Empezamos con el módulo que más duele (ventas, stock, turnos) y lo expandimos cuando el negocio lo justifica. Arquitectura modular desde el día uno.',
+    question: '¿Mis empleados van a poder usarlo sin capacitación?',
+    answer:
+      'Sí. Diseñamos interfaces para que cualquier persona las use desde el primer día — sin manuales técnicos. Igual incluimos una capacitación de 2-3 horas donde el equipo aprende todo lo necesario para operar solo.',
   },
   {
-    question: '¿El sistema funciona en el celular?',
-    answer: 'Sí. Todos nuestros sistemas son web-based y responsive — funcionan en PC, tablet y celular desde el primer día. No hace falta instalar nada. Solo un navegador y conexión.',
+    question: '¿Se puede conectar con lo que ya uso (WhatsApp, MercadoPago, AFIP)?',
+    answer:
+      'Sí. Las integraciones más pedidas son exactamente esas. Un pedido nuevo puede notificar por WhatsApp, facturar en AFIP y cobrar por MercadoPago en la misma secuencia automática. Sin que nadie lo haga a mano.',
   },
   {
-    question: '¿Qué tan seguros están mis datos?',
-    answer: 'Los datos viven en servidores con backups automáticos diarios. Control de roles y permisos por usuario. Encriptación en tránsito y en reposo. Nunca vendemos ni compartimos datos de nuestros clientes.',
+    question: '¿Qué pasa si necesito cambiar algo después del lanzamiento?',
+    answer:
+      'El mantenimiento mensual incluye ajustes y mejoras menores. Para funcionalidades nuevas importantes presupuestamos por separado. Tu sistema nunca queda congelado en la versión del lanzamiento.',
   },
   {
-    question: '¿Qué pasa si quiero cambiar algo del sistema después?',
-    answer: 'Es parte del servicio. Después del lanzamiento, el mantenimiento mensual incluye ajustes, nuevas funcionalidades menores y soporte continuo. Para desarrollos mayores presupuestamos por separado.',
+    question: '¿Es para empresas pequeñas o solo para las grandes?',
+    answer:
+      'Construimos sistemas para empresas de 3 a 200 personas. El punto de partida ideal es cuando los Excels ya no dan más y necesitás que la información esté centralizada. Si llegaste hasta acá, ya es el momento.',
   },
 ]
 

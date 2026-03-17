@@ -46,9 +46,10 @@ export default function WebDevelopmentPage() {
                     className="w-full lg:w-[var(--width-hero-left)] flex flex-col items-center lg:items-start text-center lg:text-left px-4 lg:pl-[clamp(48px,8vw,120px)] lg:pr-8 z-10"
                 >
                     {/* Badge Corporativo */}
-                    <div className="mb-6 lg:mb-8 bg-black/40 backdrop-blur-xl border border-white/20 px-5 py-2 rounded-full inline-flex shadow-[0_4px_20px_rgba(0,0,0,0.5)]">
+                    <div className="mb-6 lg:mb-8 bg-black/40 backdrop-blur-xl border border-cyan-500/30 px-5 py-2 rounded-full inline-flex shadow-[0_4px_20px_rgba(0,0,0,0.5)] items-center gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
                         <span className="text-zinc-200 font-mono text-[9px] md:text-[10px] uppercase tracking-widest font-bold">
-                            [ ESTATUS: GOOGLE_LIGHTHOUSE_OPTIMIZED ]
+                            TU SUCURSAL MÁS RENTABLE
                         </span>
                     </div>
 
@@ -57,20 +58,21 @@ export default function WebDevelopmentPage() {
 
                     {/* Hero Title (Forzando override a text-left en Desktop) */}
                     <div className="w-full max-w-6xl relative z-10 [&_div]:lg:items-start [&_div]:lg:justify-start [&_h1]:lg:text-left [&_h1]:lg:justify-start">
-                        <HeroTitle text={["TU", "SUCURSAL", "DIGITAL."]} />
+                        <HeroTitle text={["Tu negocio, abierto", "las 24 horas."]} />
                     </div>
 
                     {/* Subtítulo B2B Autoritario */}
                     <p className="text-base md:text-lg text-white font-medium max-w-[520px] mt-6 lg:mt-8 tracking-wide leading-relaxed drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)] px-4 lg:px-0">
-                        Tener solo Instagram ya no alcanza.<br className="hidden md:block" /> Construimos plataformas premium en <span className="text-cyan-400 font-bold drop-shadow-[0_0_8px_rgba(34,211,238,0.8)]">Next.js</span> que cargan al instante, dominan Google en tu ciudad y venden en automático.
+                        Transformamos tu Instagram y WhatsApp en un ecosistema que atrae clientes, cotiza y vende solo.<br className="hidden md:block" /> <span className="text-cyan-400/80 font-bold">Sin que tengas que estar presente.</span>
                     </p>
 
                     {/* Botón de Cristal Sólido */}
                     <div className="mt-10 lg:mt-12">
                         <MagneticCta
-                            className="bg-white/[0.03] backdrop-blur-3xl border-t border-l border-white/20 border-b border-r border-white/5 text-white px-12 py-5 md:px-14 md:py-6 rounded-2xl font-bold uppercase tracking-[0.3em] text-[9px] md:text-[10px] transition-all duration-700 shadow-[20px_20px_50px_rgba(0,0,0,0.5),-10px_-10px_30px_rgba(255,255,255,0.02)] hover:shadow-cyan-500/20 hover:border-cyan-400/50 group relative overflow-hidden z-10"
+                            onClick={() => document.getElementById('vault-section')?.scrollIntoView({ behavior: 'smooth' })}
+                            className="bg-[#00e5ff] text-[#080810] px-12 py-5 md:px-14 md:py-6 rounded-2xl font-black uppercase tracking-[0.2em] text-[10px] md:text-[11px] transition-all duration-700 shadow-[0_0_40px_rgba(0,229,255,0.4)] hover:shadow-cyan-400/60 hover:scale-105 group relative overflow-hidden z-10 cursor-pointer"
                         >
-                            <span className="drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]">INICIAR TRANSFORMACIÓN</span>
+                            <span>🚀 CONSTRUIR MI SUCURSAL →</span>
                         </MagneticCta>
                     </div>
                 </motion.div>
@@ -119,25 +121,19 @@ export default function WebDevelopmentPage() {
                     transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
                 >
                     <div className="flex gap-8 px-4 items-center font-mono text-zinc-600/50 tracking-[0.2em] text-sm md:text-base uppercase">
-                        <span>NEXT.JS //</span>
-                        <span>REACT //</span>
-                        <span>TAILWIND CSS //</span>
-                        <span>FRAMER MOTION //</span>
-                        <span>VERCEL //</span>
-                        <span>FIGMA //</span>
-                        <span>THREE.JS //</span>
-                        <span>STRIPE //</span>
-                        <span>NEXT.JS //</span>
+                        <span>Ventas a la madrugada: todos los días //</span>
+                        <span>Clientes nuevos generados: 4.200+ //</span>
+                        <span>Posiciones en Google cada mes: 847+ //</span>
+                        <span>Velocidad de carga: &lt; 2 segundos //</span>
+                        <span>Negocios del NOA potenciados: 47+ //</span>
+                        <span>Tu web: el activo más rentable //</span>
                         {/* Repeat for seamless loop */}
-                        <span>NEXT.JS //</span>
-                        <span>REACT //</span>
-                        <span>TAILWIND CSS //</span>
-                        <span>FRAMER MOTION //</span>
-                        <span>VERCEL //</span>
-                        <span>FIGMA //</span>
-                        <span>THREE.JS //</span>
-                        <span>STRIPE //</span>
-                        <span>NEXT.JS //</span>
+                        <span>Ventas a la madrugada: todos los días //</span>
+                        <span>Clientes nuevos generados: 4.200+ //</span>
+                        <span>Posiciones en Google cada mes: 847+ //</span>
+                        <span>Velocidad de carga: &lt; 2 segundos //</span>
+                        <span>Negocios del NOA potenciados: 47+ //</span>
+                        <span>Tu web: el activo más rentable //</span>
                     </div>
                 </motion.div>
             </div>

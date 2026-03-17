@@ -49,9 +49,9 @@ const flowNodes: FlowNode[] = [
   // TRIGGER
   { 
     id: 'lead', x: 80, y: 200,
-    label: 'Lead Nuevo',
-    sublabel: 'Meta Ads / WhatsApp',
-    icon: '📣',
+    label: 'Pago Recibido',
+    sublabel: 'MercadoPago',
+    icon: '💳',
     type: 'trigger',
     color: '#f59e0b', colorRgb: '245,158,11' 
   },
@@ -59,17 +59,17 @@ const flowNodes: FlowNode[] = [
   // PROCESOS
   { 
     id: 'calificar', x: 280, y: 140,
-    label: 'Calificar Lead',
-    sublabel: 'Scoring automático',
-    icon: '🎯',
+    label: 'Validar Pago',
+    sublabel: 'Proceso Automático',
+    icon: '⚙️',
     type: 'process',
     color: '#f97316', colorRgb: '249,115,22' 
   },
   { 
     id: 'registrar', x: 280, y: 280,
-    label: 'Registrar en CRM',
-    sublabel: 'Datos completos',
-    icon: '📊',
+    label: 'Emitir Factura',
+    sublabel: 'AFIP On-line',
+    icon: '🧾',
     type: 'process',
     color: '#f59e0b', colorRgb: '245,158,11' 
   },
@@ -78,7 +78,7 @@ const flowNodes: FlowNode[] = [
   { 
     id: 'dispatch', x: 500, y: 200,
     label: 'Orquestador',
-    sublabel: 'n8n en acción',
+    sublabel: 'El cerebro',
     icon: '⚡',
     type: 'process',
     color: '#fbbf24', colorRgb: '251,191,36' 
@@ -87,15 +87,15 @@ const flowNodes: FlowNode[] = [
   // OUTPUTS (3 simultáneos)
   { 
     id: 'whatsapp_out', x: 760, y: 100,
-    label: 'WhatsApp',
-    sublabel: 'Bienvenida automática',
+    label: 'Notificar Cliente',
+    sublabel: 'WhatsApp',
     icon: '💬',
     type: 'output',
     color: '#25d366', colorRgb: '37,211,102' 
   },
   { 
     id: 'vendedor_out', x: 760, y: 220,
-    label: 'Vendedor',
+    label: 'Aviso Logística',
     sublabel: 'Alerta en Slack',
     icon: '📨',
     type: 'output',
@@ -103,8 +103,8 @@ const flowNodes: FlowNode[] = [
   },
   { 
     id: 'sheets_out', x: 760, y: 340,
-    label: 'Planilla',
-    sublabel: 'Registro automático',
+    label: 'Libro Ventas',
+    sublabel: 'Registro en Excel',
     icon: '📊',
     type: 'output',
     color: '#34a853', colorRgb: '52,168,83' 
@@ -121,22 +121,24 @@ const flowEdges: FlowEdge[] = [
   { id: 'd-s', from: 'dispatch', to: 'sheets_out' },
 ]
 
+// ... (skipping connections)
+
 const performanceMetrics = [
   { 
-    value: '2.8s', 
-    label: 'Tiempo de ejecución del flujo completo', 
-    icon: '⚡', 
+    value: '100%', 
+    label: 'Efectividad en los datos', 
+    icon: '🎯', 
     colorRgb: '245,158,11' 
   },
   { 
-    value: '3', 
-    label: 'Acciones simultáneas sin intervención humana', 
-    icon: '🔀', 
+    value: '0ms', 
+    label: 'Error en transcripción', 
+    icon: '⌨️', 
     colorRgb: '249,115,22' 
   },
   { 
     value: '24/7', 
-    label: 'El workflow funciona sin que nadie lo active', 
+    label: 'Vigilancia constante', 
     icon: '🌙', 
     colorRgb: '245,158,11' 
   },
@@ -513,14 +515,14 @@ export default function FlujoAutomation() {
     ]
 
     const logMessages = [
-      { msg: '📣 Lead nuevo desde Meta Ads', delay: 100 },
-      { msg: '🎯 Calificación: Lead calificado', delay: 700 },
-      { msg: '📊 CRM actualizado con datos', delay: 900 },
-      { msg: '⚡ n8n procesando en paralelo...', delay: 1500 },
-      { msg: '💬 WhatsApp enviado al cliente', delay: 2300 },
-      { msg: '📨 Slack: Vendedor notificado', delay: 2500 },
-      { msg: '✅ Planilla actualizada', delay: 2700 },
-      { msg: '🎉 Flujo completado en 2.8s', delay: 3000 },
+      { msg: '💳 Pago detectado en MercadoPago', delay: 100 },
+      { msg: '⚙️ Validando datos del cliente...', delay: 700 },
+      { msg: '🧾 Factura AFIP generada con éxito', delay: 900 },
+      { msg: '⚡ Orquestador disparando acciones...', delay: 1500 },
+      { msg: '💬 WhatsApp de confirmación enviado', delay: 2300 },
+      { msg: '📨 Slack: Alerta de nuevo pedido', delay: 2500 },
+      { msg: '📊 Excel: Venta registrada', delay: 2700 },
+      { msg: '🚀 Ciclo completado sin errores', delay: 3000 },
     ]
 
     const timeouts: ReturnType<typeof setTimeout>[] = []
