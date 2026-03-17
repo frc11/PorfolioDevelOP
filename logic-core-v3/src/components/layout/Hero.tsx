@@ -95,10 +95,10 @@ export function Hero() {
                         transition={{ duration: 0.8, delay: 0.9 }}
                         className="flex flex-col w-full md:flex-row md:w-auto gap-4 pt-4"
                     >
-                        <MagneticCta variant="primary" className="px-10 py-5 text-xs font-bold uppercase tracking-widest">
+                        <MagneticCta>
                             Iniciar Proyecto
                         </MagneticCta>
-                        <MagneticCta variant="ghost" className="px-10 py-5 text-[10px] font-bold uppercase tracking-widest">
+                        <MagneticCta>
                             Explorar Servicios
                         </MagneticCta>
                     </motion.div>

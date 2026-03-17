@@ -1,43 +1,78 @@
 "use client"
 import React from 'react'
-import { motion } from 'framer-motion'
+import { motion } from 'motion/react'
 
-const techs = [
-    "GPT-4o",
-    "CLAUDE 3.5 SONNET",
-    "LLAMA 3",
-    "LANGCHAIN",
-    "PINECONE VECTOR DB",
-    "TENSORFLOW",
-    "VERCEL AI SDK"
+const marqueeItems = [
+  { icon:'💬', label:'WhatsApp API' },
+  { icon:'📸', label:'Instagram Direct' },
+  { icon:'💳', label:'MercadoPago' },
+  { icon:'📅', label:'Google Calendar' },
+  { icon:'🧾', label:'AFIP' },
+  { icon:'📊', label:'Google Sheets' },
+  { icon:'📧', label:'Gmail' },
+  { icon:'📋', label:'Notion' },
+  { icon:'🔗', label:'Zapier' },
+  { icon:'🏪', label:'Tiendanube' },
+  { icon:'🛍', label:'Mercado Libre' },
+  { icon:'📦', label:'WooCommerce' },
+  { icon:'💼', label:'Salesforce' },
+  { icon:'📣', label:'Meta Ads' },
 ]
 
-// Duplicate elements to create a seamless loop
-const duplicatedTechs = [...techs, ...techs, ...techs, ...techs]
+const allItems = [...marqueeItems, ...marqueeItems]
 
 export const AITechMarquee = () => {
     return (
-        <section className="w-full relative z-10 py-12 md:py-16 overflow-hidden border-y border-emerald-500/10 bg-black/20 backdrop-blur-md">
-            {/* Fade edges */}
-            <div className="absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-void to-transparent z-20 pointer-events-none" />
-            <div className="absolute inset-y-0 right-0 w-32 bg-gradient-to-l from-void to-transparent z-20 pointer-events-none" />
-
+        <section style={{
+            width: '100%',
+            position: 'relative',
+            zIndex: 10,
+            padding: '14px 0',
+            overflow: 'hidden',
+            background: 'rgba(0,255,136,0.03)',
+            borderTop: '1px solid rgba(0,255,136,0.08)',
+            borderBottom: '1px solid rgba(0,255,136,0.08)',
+            WebkitMaskImage: 'linear-gradient(90deg, transparent 0%, black 10%, black 90%, transparent 100%)',
+            maskImage: 'linear-gradient(90deg, transparent 0%, black 10%, black 90%, transparent 100%)',
+        }}>
             <motion.div
-                className="flex whitespace-nowrap items-center w-max"
+                style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    whiteSpace: 'nowrap',
+                    width: 'max-content',
+                }}
                 animate={{ x: ["0%", "-50%"] }}
                 transition={{
-                    duration: 35,
+                    duration: 40,
                     ease: "linear",
                     repeat: Infinity,
                 }}
             >
-                {duplicatedTechs.map((tech, index) => (
-                    <div key={index} className="flex items-center">
-                        <span className="text-emerald-500/30 font-mono text-sm tracking-widest uppercase px-6 md:px-10">
-                            {tech}
+                {allItems.map((item, index) => (
+                    <div 
+                        key={index} 
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            padding: '0 clamp(16px,2vw,28px)',
+                            borderRight: '1px solid rgba(0,255,136,0.1)',
+                            flexShrink: 0,
+                        }}
+                    >
+                        <span style={{ fontSize: '18px' }}>
+                            {item.icon}
                         </span>
-                        {/* the separator */}
-                        <span className="text-emerald-500/30 font-mono text-sm tracking-widest uppercase">{"//"}</span>
+                        <span style={{
+                            fontSize: '12px',
+                            fontWeight: 600,
+                            color: 'rgba(255,255,255,0.5)',
+                            whiteSpace: 'nowrap',
+                            letterSpacing: '0.08em',
+                        }}>
+                            {item.label}
+                        </span>
                     </div>
                 ))}
             </motion.div>

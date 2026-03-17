@@ -91,54 +91,54 @@ const cards: BentoCard[] = [
     {
         id: 0,
         size: 'large',
-        label: 'SUBSISTEMA 01',
-        title: 'Agentes IA',
-        description: 'Sistemas autónomos que razonan, planifican y ejecutan tareas complejas sin intervención humana. Trabajan mientras vos dormís.',
+        label: 'RESULTADO 01',
+        title: 'Tu mejor vendedor, 24/7',
+        description: 'Responde consultas de precio, stock y disponibilidad por WhatsApp e Instagram. Igual que tu mejor empleado — pero a las 3AM sin quejarse.',
         color: '#00ff88',
         colorRgb: '0,255,136',
         icon: <AgentIcon />,
-        stat: '10x',
-        statLabel: 'más rápido que un humano',
-        tags: ['Autónomo', 'Multi-paso', 'API calls'],
+        stat: '24/7',
+        statLabel: 'sin descanso, sin vacaciones',
+        tags: ['WhatsApp', 'Instagram', 'En vivo'],
     },
     {
         id: 1,
         size: 'medium',
-        label: 'SUBSISTEMA 02',
-        title: 'RAG — Memoria',
-        description: 'Tu IA sabe todo sobre tu negocio. Precios, políticas, historial de clientes. Respuestas precisas, sin inventar.',
+        label: 'RESULTADO 02',
+        title: 'Atención sin esperas',
+        description: 'Consultas respondidas en menos de 3 segundos. Precios, turnos, disponibilidad — todo al instante, sin que nadie toque el celular.',
         color: '#7b2fff',
         colorRgb: '123,47,255',
         icon: <MemoryIcon />,
-        stat: '99%',
-        statLabel: 'precisión en respuestas',
-        tags: ['Base de datos', 'Embeddings', 'Contexto'],
+        stat: '< 3s',
+        statLabel: 'por consulta respondida',
+        tags: ['Al instante', 'Automático', 'Preciso'],
     },
     {
         id: 2,
         size: 'medium',
-        label: 'SUBSISTEMA 03',
-        title: 'Visión IA',
-        description: 'Analiza imágenes, documentos y formularios en segundos. Facturas, fotos de productos, DNI — todo procesado automáticamente.',
-        color: '#00e5ff',
-        colorRgb: '0,229,255',
+        label: 'RESULTADO 03',
+        title: 'Tu empresa, organizada',
+        description: 'Toda la información de tu negocio en un solo lugar. Tu equipo pregunta, la IA responde con datos actualizados al segundo.',
+        color: '#7b2fff',
+        colorRgb: '123,47,255',
         icon: <VisionIcon />,
-        stat: '< 2s',
-        statLabel: 'por documento procesado',
-        tags: ['OCR', 'Análisis visual', 'Documentos'],
+        stat: '100%',
+        statLabel: 'datos en tiempo real',
+        tags: ['Control', 'Reportes', 'Gestión'],
     },
     {
         id: 3,
         size: 'small',
-        label: 'SUBSISTEMA 04',
-        title: 'Integraciones',
-        description: 'Se conecta con WhatsApp, Gmail, Notion, Sheets, CRM y más. Todo en un solo flujo.',
-        color: '#f59e0b',
-        colorRgb: '245,158,11',
+        label: 'RESULTADO 04',
+        title: 'Reservas mientras dormís',
+        description: 'Coordina turnos, manda recordatorios y gestiona cancelaciones por WhatsApp. Vos solo aparecés a trabajar.',
+        color: '#7b2fff',
+        colorRgb: '123,47,255',
         icon: <IntegrationIcon />,
-        stat: '+40',
-        statLabel: 'integraciones disponibles',
-        tags: ['WhatsApp', 'Gmail', 'Notion', 'Sheets'],
+        stat: '×3',
+        statLabel: 'más ventas cerradas',
+        tags: ['Turnos', 'Agenda', 'Ventas'],
     },
 ]
 
@@ -420,9 +420,9 @@ function BentoCardComponent({
                             gap: '6px',
                         }}>
                             {[
-                                { label: 'Analizando contexto', width: 92 },
-                                { label: 'Generando respuesta', width: 78 },
-                                { label: 'Ejecutando acción', width: 65 },
+                                { label: 'Analizando consulta', width: 92 },
+                                { label: 'Buscando en tu base', width: 78 },
+                                { label: 'Ejecutando respuesta', width: 65 },
                             ].map((bar, i) => (
                                 <div key={i}>
                                     <div style={{
@@ -592,7 +592,7 @@ function Header({ isInView, reducedMotion }: { isInView: boolean, reducedMotion:
                 marginBottom: '24px',
                 background: 'rgba(0,255,136,0.06)'
             }}>
-                [ SUBSISTEMAS COGNITIVOS ]
+                [ TU NEGOCIO A OTRO NIVEL ]
             </div>
             <h2 style={{
                 fontSize: 'clamp(30px,4vw,52px)',
@@ -620,8 +620,8 @@ function Header({ isInView, reducedMotion }: { isInView: boolean, reducedMotion:
 const atmosphericGlows = [
     { top: '10%', left: '20%', right: undefined, color: '0,255,136' },    // card 0
     { top: '60%', left: '12%', right: undefined, color: '123,47,255' },   // card 1
-    { top: '60%', left: '45%', right: undefined, color: '0,229,255' },    // card 2
-    { top: '30%', left: undefined, right: '8%', color: '245,158,11' },    // card 3
+    { top: '60%', left: '45%', right: undefined, color: '123,47,255' },    // card 2
+    { top: '30%', left: undefined, right: '8%', color: '123,47,255' },    // card 3
 ]
 
 // ─── MAIN EXPORT ─────────────────────────────────────────────────────────────

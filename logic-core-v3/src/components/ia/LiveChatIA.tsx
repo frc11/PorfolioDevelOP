@@ -108,10 +108,10 @@ function InfoPanel({ shouldReduceMotion }: { shouldReduceMotion: boolean }) {
 
       {/* Tech Stats */}
       {[
-        { icon: '⚡', label: 'Tiempo de respuesta', value: '< 800ms' },
-        { icon: '🔒', label: 'Conversación privada', value: 'No se guarda' },
-        { icon: '🧠', label: 'Modelo', value: 'Claude Haiku 3.5' },
-        { icon: '🌎', label: 'Disponibilidad', value: '24 / 7 / 365' },
+        { icon: '⚡', label: 'Atención inmediata', value: ' < 1 segundo' },
+        { icon: '🔒', label: 'Conversación privada', value: 'Encriptada' },
+        { icon: '🧠', label: 'Cerebro Digital', value: 'Entrenado por DevelOP' },
+        { icon: '🌎', label: 'Sin horarios', value: '24 / 7 / 365' },
       ].map((stat, i) => (
         <motion.div
           key={i}
@@ -133,7 +133,7 @@ function InfoPanel({ shouldReduceMotion }: { shouldReduceMotion: boolean }) {
 
       {/* CTA WhatsApp */}
       <motion.a
-        href={`https://wa.me/5493815674738?text=Hola%20DevelOP%2C%20probé%20la%20IA%20y%20quiero%20saber%20más`}
+        href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER}?text=${encodeURIComponent('Hola DevelOP, probé la IA en vivo y quiero implementarla en mi empresa')}`}
         target="_blank" rel="noopener noreferrer"
         whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
         transition={{ type: 'spring', stiffness: 400, damping: 15 }}
@@ -293,15 +293,27 @@ export default function LiveChatIA() {
             letterSpacing: '0.25em', fontWeight: 600, marginBottom: '24px',
             background: 'rgba(0,255,136,0.06)',
           }}>
-            <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#00ff88', animation: 'pulse 1.5s infinite' }} />
+            <div style={{
+              width: '6px', height: '6px', borderRadius: '50%',
+              background: '#00ff88',
+              boxShadow: '0 0 8px rgba(0,255,136,0.8)',
+              animation: 'pulse 1.5s ease-in-out infinite',
+            }} />
             [ EN VIVO · PROBALO AHORA ]
           </div>
-          <h2 style={{ fontSize: 'clamp(30px,4.5vw,58px)', fontWeight: 900, color: 'white', margin: '0 0 16px', lineHeight: 1.1 }}>
-            No te lo contamos.<br />
-            <span style={{ color: '#00ff88' }}>Te lo demostramos.</span>
+          <h2 style={{ fontSize: 'clamp(30px,4.5vw,58px)', fontWeight: 900, marginBottom: '16px', lineHeight: 1.1 }}>
+            <span style={{ color: 'white' }}>
+              No te lo contamos.
+            </span>
+            <br />
+            <span style={{ color: '#00ff88' }}>
+              Te lo demostramos.
+            </span>
           </h2>
           <p style={{ fontSize: '16px', color: 'rgba(255,255,255,0.4)', margin: 0 }}>
-            Hablá con nuestra IA ahora mismo. La misma que instalamos en tu negocio.
+            Hablá con nuestra IA ahora mismo.<br />
+            La misma que instalamos en tu negocio.<br />
+            Preguntá lo que quieras.
           </p>
         </motion.div>
 
@@ -363,7 +375,7 @@ export default function LiveChatIA() {
                   background: 'rgba(0,255,136,0.08)', border: '1px solid rgba(0,255,136,0.2)',
                   color: 'rgba(0,255,136,0.7)', borderRadius: '100px', padding: '4px 10px'
                 }}>
-                  claude-3-5-haiku
+                  ia-vendedor-pro
                 </span>
               </div>
 
@@ -441,7 +453,7 @@ export default function LiveChatIA() {
                 {messageCount >= MAX_MESSAGES ? (
                   <div style={{ flex: 1, textAlign: 'center', fontSize: '13px', color: 'rgba(255,255,255,0.35)' }}>
                     Para continuar la conversación,{' '}
-                    <a href="https://wa.me/5493815674738" style={{ color: '#00ff88', fontWeight: 600, textDecoration: 'none' }} target="_blank" rel="noopener noreferrer">
+                    <a href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER}?text=${encodeURIComponent('Hola DevelOP, probé la IA en vivo y quiero implementarla en mi empresa')}`} style={{ color: '#00ff88', fontWeight: 600, textDecoration: 'none' }} target="_blank" rel="noopener noreferrer">
                       escribinos por WhatsApp →
                     </a>
                   </div>

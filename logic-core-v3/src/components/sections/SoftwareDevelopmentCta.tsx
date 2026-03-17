@@ -34,8 +34,8 @@ export const SoftwareDevelopmentCta = () => {
                     </p>
 
                     <div className="relative z-10 flex justify-center mt-10">
-                        {/* Custom wrapper without Animated gradient to allow the Sweep effect inside MagneticCta properly */}
-                        <MagneticCta variant="primary" className="!p-0 !bg-transparent !border-none !rounded-full hover:!shadow-none flex items-center justify-center">
+                        {/* MagneticCta does not support variant/className for styling, so we use internal div for design */}
+                        <MagneticCta>
                             <div className="group relative inline-flex items-center justify-center gap-4 px-10 py-5 bg-violet-600 text-white font-black uppercase tracking-widest rounded-full overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-[0_0_40px_rgba(139,92,246,0.5)] cursor-pointer">
                                 {/* Liquid Neon Shine Effect */}
                                 <div className="absolute top-0 -left-[100%] w-12 h-24 bg-white/30 skew-x-[-20deg] group-hover:left-[200%] transition-all duration-1000 ease-in-out z-20" />

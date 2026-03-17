@@ -263,7 +263,8 @@ function ConectorCanvas({
     if (!parent) return
 
     function resize() {
-      const rect = parent!.getBoundingClientRect()
+      if (!canvas || !parent) return
+      const rect = parent.getBoundingClientRect()
       canvas.width = rect.width
       canvas.height = rect.height
     }
@@ -272,6 +273,7 @@ function ConectorCanvas({
     if (!hoveredApp) {
       // Fade out progresivo
       function fadeOut() {
+        if (!ctx || !canvas) return
         ctx.clearRect(0, 0, canvas.width, canvas.height)
         progressRef.current = Math.max(0, progressRef.current - 0.05)
         if (progressRef.current > 0) {
@@ -297,6 +299,7 @@ function ConectorCanvas({
     const endY = centerRect.top - parentRect.top + centerRect.height / 2
 
     function drawLine() {
+      if (!ctx || !canvas) return
       ctx.clearRect(0, 0, canvas.width, canvas.height)
 
       progressRef.current = Math.min(1, progressRef.current + 0.04)

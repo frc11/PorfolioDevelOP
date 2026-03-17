@@ -276,7 +276,7 @@ function ROISummary({ isInView }: { isInView: boolean }) {
             transition={{ duration: 0.8, delay: 0.9, ease: [0.16, 1, 0.3, 1] }}
             style={{
                 marginTop: 'clamp(32px,4vh,48px)',
-                background: 'linear-gradient(135deg, rgba(0,255,136,0.06) 0%, rgba(123,47,255,0.04) 100%)',
+                background: 'linear-gradient(135deg, rgba(0, 255, 136, 0.08) 0%, rgba(123, 47, 255, 0.06) 100%)',
                 border: '1px solid rgba(0,255,136,0.2)',
                 borderRadius: '20px',
                 padding: 'clamp(24px,3vw,40px)',

@@ -14,7 +14,8 @@ import ComparadorIA from '@/components/ia/ComparadorIA'
 import CalculadorIA from '@/components/ia/CalculadorIA'
 import LiveChatIA from '@/components/ia/LiveChatIA'
 import VaultIA from '@/components/ia/VaultIA'
-
+import TestimoniosIA from '@/components/ia/TestimoniosIA'
+import GarantiaIA from "@/components/ia/GarantiaIA"
 
 
 export default function AIImplementationsPage() {
@@ -25,33 +26,31 @@ export default function AIImplementationsPage() {
                 {/* 1. Hero Content */}
                 <HeroIA />
 
-                {/* 2. Bento Grid (The components of our IA) */}
+                {/* 2. Bento Grid */}
                 <BentoIA />
 
-                {/* 3. Demo IA (The glass capsule video demo) */}
-                <DemoIA />
+                {/* 3. Live Chat (Interactive Demo) */}
+                <LiveChatIA />
 
-                {/* 4. Pipeline (How data flows) */}
-                <PipelineIA />
+                {/* 4. Garantia (Trust & Assurance) */}
+                <GarantiaIA />
 
-                {/* 5. Tech Marquee (Logos and Stack) */}
-                <div className="bg-[#080810]/80 backdrop-blur-xl border-y border-white/5 py-12">
-                    <AITechMarquee />
-                </div>
-
-                {/* 6. Rubros (Vertical Focus) */}
+                {/* 5. Rubros (Vertical Focus) */}
                 <RubrosIA />
+
+                {/* 6. Pipeline (How data flows) */}
+                <PipelineIA />
 
                 {/* 7. Comparador (ROI & Human vs AI) */}
                 <ComparadorIA />
 
-                {/* 8. Calculador (Industry-preset ROI calculator) */}
+                {/* 7. Calculador (Industry-preset ROI calculator) */}
                 <CalculadorIA />
 
-                {/* 9. Live Chat (Interactive Demo) */}
-                <LiveChatIA />
+                {/* 8. Testimonios (Social Proof) */}
+                <TestimoniosIA />
 
-                {/* 10. Vault (FAQ & trust closure) */}
+                {/* 9. Vault (FAQ & trust closure) */}
                 <VaultIA />
             </div>
             

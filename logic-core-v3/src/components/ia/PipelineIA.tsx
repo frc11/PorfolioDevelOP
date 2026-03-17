@@ -314,7 +314,7 @@ export default function PipelineIA() {
     }, [activateNode, addEvent])
 
     // ─── Entry animation shorthands ─────────────────────────────────────────
-    const show = (props: object) => (isInView || reduced) ? props : {}
+    const show = (props: any) => (isInView || reduced ? props : undefined)
 
     return (
         <section
@@ -437,104 +437,270 @@ export default function PipelineIA() {
                     </motion.div>
 
                     {/* Event log panel */}
-                    <motion.div
-                        initial={{ opacity: reduced ? 1 : 0, x: reduced ? 0 : 20 }}
-                        animate={show({ opacity: 1, x: 0 })}
-                        transition={{ duration: 0.7, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
-                        style={{
-                            flex: '1 1 0',
-                            minWidth: '240px',
-                            maxWidth: '320px',
-                            background: 'rgba(255,255,255,0.02)',
-                            border: '1px solid rgba(255,255,255,0.07)',
-                            borderRadius: '16px',
+                    <div style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '24px',
+                        flex: '1 1 0',
+                        minWidth: '240px',
+                    }}>
+                        {/* ── WhatsApp Mockup (Visual Only) ── */}
+                        <div style={{
+                            background: 'rgba(0,0,0,0.4)',
+                            border: '1px solid rgba(0,255,136,0.2)',
+                            borderRadius: '20px',
                             overflow: 'hidden',
-                            maxHeight: '400px',
-                            display: 'flex',
-                            flexDirection: 'column',
-                        }}
-                    >
-                        {/* Panel header */}
-                        <div style={{
-                            padding: '14px 16px',
-                            borderBottom: '1px solid rgba(255,255,255,0.06)',
-                            display: 'flex', alignItems: 'center', gap: '10px',
-                            background: 'rgba(255,255,255,0.02)',
-                            flexShrink: 0,
+                            maxWidth: '300px',
+                            width: '100%',
+                            boxShadow: '0 0 40px rgba(0,255,136,0.08)',
+                            alignSelf: 'center',
                         }}>
+                            {/* Header del "teléfono" */}
                             <div style={{
-                                width: '8px', height: '8px', borderRadius: '50%',
-                                background: '#00ff88', flexShrink: 0,
-                                boxShadow: '0 0 8px rgba(0,255,136,0.8)',
-                                animation: 'blink 1.5s ease-in-out infinite',
-                            }} />
-                            <span style={{
-                                fontSize: '11px', fontWeight: 600,
-                                color: 'rgba(255,255,255,0.5)', letterSpacing: '0.15em',
+                                padding: '12px 16px',
+                                background: 'rgba(0,255,136,0.06)',
+                                borderBottom: '1px solid rgba(0,255,136,0.1)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '10px',
                             }}>
-                                EVENTOS EN VIVO
-                            </span>
-                            <span style={{ marginLeft: 'auto', fontSize: '10px', color: 'rgba(255,255,255,0.2)' }}>
-                                {eventLog.length} procesados
-                            </span>
-                        </div>
-
-                        {/* Events list */}
-                        <div style={{
-                            padding: '8px', display: 'flex', flexDirection: 'column',
-                            gap: '4px', overflowY: 'auto', flex: 1,
-                        }}>
-                            <AnimatePresence initial={false}>
-                                {eventLog.map(event => (
-                                    <motion.div
-                                        key={event.id}
-                                        initial={{ opacity: 0, x: -16, height: 0 }}
-                                        animate={{ opacity: 1, x: 0, height: 'auto' }}
-                                        exit={{ opacity: 0, height: 0 }}
-                                        transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-                                        style={{
-                                            display: 'flex', gap: '10px', alignItems: 'flex-start',
-                                            padding: '8px 10px', borderRadius: '8px',
-                                            background: 'rgba(255,255,255,0.02)',
-                                            border: '1px solid rgba(255,255,255,0.04)',
-                                        }}
-                                    >
-                                        <div style={{
-                                            width: '3px', borderRadius: '100px',
-                                            background: event.color, alignSelf: 'stretch',
-                                            flexShrink: 0, minHeight: '32px',
-                                            boxShadow: `0 0 6px ${event.color}`,
-                                        }} />
-                                        <div style={{ flex: 1, minWidth: 0 }}>
-                                            <p style={{
-                                                fontSize: '12px', fontWeight: 500,
-                                                color: 'rgba(255,255,255,0.75)',
-                                                margin: '0 0 2px',
-                                                whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-                                            }}>
-                                                {event.message}
-                                            </p>
-                                            <span style={{
-                                                fontSize: '10px', color: 'rgba(255,255,255,0.2)',
-                                                fontFamily: 'monospace',
-                                            }}>
-                                                {event.timestamp}
-                                            </span>
-                                        </div>
-                                    </motion.div>
-                                ))}
-                            </AnimatePresence>
-
-                            {eventLog.length === 0 && (
                                 <div style={{
-                                    padding: '32px 16px', textAlign: 'center',
-                                    color: 'rgba(255,255,255,0.15)', fontSize: '12px',
+                                    position: 'relative',
+                                    flexShrink: 0,
                                 }}>
-                                    Esperando datos...
+                                    <div style={{
+                                        width: '32px', height: '32px',
+                                        borderRadius: '50%',
+                                        background: 'linear-gradient(135deg, #00ff88, #7b2fff)',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        fontSize: '16px',
+                                    }}>
+                                        🤖
+                                    </div>
+                                    {/* Dot online */}
+                                    <div style={{
+                                        position: 'absolute',
+                                        bottom: '0px', right: '0px',
+                                        width: '8px', height: '8px',
+                                        borderRadius: '50%',
+                                        background: '#00ff88',
+                                        border: '2px solid rgba(0,0,0,0.4)',
+                                        boxShadow: '0 0 6px rgba(0,255,136,0.8)',
+                                        animation: 'blink 2s ease-in-out infinite',
+                                    }} />
                                 </div>
-                            )}
+                                <div>
+                                    <p style={{
+                                        fontSize: '12px', fontWeight: 700,
+                                        color: 'white', margin: 0,
+                                    }}>
+                                        IA DevelOP
+                                    </p>
+                                    <p style={{
+                                        fontSize: '10px', margin: 0,
+                                        color: '#00ff88',
+                                    }}>
+                                        ● En línea ahora
+                                    </p>
+                                </div>
+                            </div>
+
+                            {/* Conversación */}
+                            <div style={{
+                                padding: '14px 12px',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                gap: '10px',
+                            }}>
+                                {/* Mensaje del cliente */}
+                                <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                                    <div style={{
+                                        maxWidth: '80%', padding: '9px 13px',
+                                        borderRadius: '16px 16px 4px 16px',
+                                        background: 'rgba(255,255,255,0.08)',
+                                        border: '1px solid rgba(255,255,255,0.1)',
+                                        fontSize: '12px', color: 'rgba(255,255,255,0.85)',
+                                        lineHeight: 1.5,
+                                    }}>
+                                        ¿Tienen turno para el martes?
+                                    </div>
+                                </div>
+
+                                {/* Respuesta IA */}
+                                <div style={{ display: 'flex', justifyContent: 'flex-start', gap: '6px', alignItems: 'flex-end' }}>
+                                    <div style={{
+                                        width: '22px', height: '22px', borderRadius: '50%',
+                                        background: 'linear-gradient(135deg, #00ff88, #7b2fff)',
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                        fontSize: '11px', flexShrink: 0,
+                                    }}>🤖</div>
+                                    <div style={{
+                                        maxWidth: '80%', padding: '9px 13px',
+                                        borderRadius: '16px 16px 16px 4px',
+                                        background: 'rgba(0,255,136,0.1)',
+                                        border: '1px solid rgba(0,255,136,0.2)',
+                                        fontSize: '12px', color: 'white',
+                                        lineHeight: 1.5,
+                                    }}>
+                                        Sí, tengo el martes a las 15hs disponible. ¿Lo reservo a tu nombre?
+                                    </div>
+                                </div>
+
+                                {/* Mensaje 2 del cliente */}
+                                <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                                    <div style={{
+                                        maxWidth: '80%', padding: '9px 13px',
+                                        borderRadius: '16px 16px 4px 16px',
+                                        background: 'rgba(255,255,255,0.08)',
+                                        border: '1px solid rgba(255,255,255,0.1)',
+                                        fontSize: '12px', color: 'rgba(255,255,255,0.85)',
+                                        lineHeight: 1.5,
+                                    }}>
+                                        Sí, para González
+                                    </div>
+                                </div>
+
+                                {/* Respuesta IA 2 */}
+                                <div style={{ display: 'flex', justifyContent: 'flex-start', gap: '6px', alignItems: 'flex-end' }}>
+                                    <div style={{
+                                        width: '22px', height: '22px', borderRadius: '50%',
+                                        background: 'linear-gradient(135deg, #00ff88, #7b2fff)',
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                        fontSize: '11px', flexShrink: 0,
+                                    }}>🤖</div>
+                                    <div style={{
+                                        maxWidth: '80%', padding: '9px 13px',
+                                        borderRadius: '16px 16px 16px 4px',
+                                        background: 'rgba(0,255,136,0.1)',
+                                        border: '1px solid rgba(0,255,136,0.2)',
+                                        fontSize: '12px', color: 'white',
+                                        lineHeight: 1.5,
+                                    }}>
+                                        Turno confirmado ✓ González · Martes 15hs. Te mando recordatorio el lunes 📅
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Footer */}
+                            <div style={{
+                                padding: '10px 14px', borderTop: '1px solid rgba(0,255,136,0.08)',
+                                display: 'flex', gap: '8px', alignItems: 'center',
+                            }}>
+                                <div style={{
+                                    flex: 1, background: 'rgba(255,255,255,0.04)',
+                                    borderRadius: '100px', padding: '7px 12px',
+                                    fontSize: '11px', color: 'rgba(255,255,255,0.2)',
+                                }}>
+                                    Escribí tu mensaje...
+                                </div>
+                                <div style={{
+                                    width: '28px', height: '28px', borderRadius: '50%',
+                                    background: 'linear-gradient(135deg, #00ff88, #00cc6a)',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px',
+                                }}>↑</div>
+                            </div>
                         </div>
-                    </motion.div>
+
+                        {/* Event list panel ORIGINAL */}
+                        <motion.div
+                            initial={{ opacity: reduced ? 1 : 0, x: reduced ? 0 : 20 }}
+                            animate={show({ opacity: 1, x: 0 })}
+                            transition={{ duration: 0.7, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                            style={{
+                                background: 'rgba(255,255,255,0.02)',
+                                border: '1px solid rgba(255,255,255,0.07)',
+                                borderRadius: '16px',
+                                overflow: 'hidden',
+                                maxHeight: '400px',
+                                display: 'flex',
+                                flexDirection: 'column',
+                            }}
+                        >
+                            {/* Panel header */}
+                            <div style={{
+                                padding: '14px 16px',
+                                borderBottom: '1px solid rgba(255,255,255,0.06)',
+                                display: 'flex', alignItems: 'center', gap: '10px',
+                                background: 'rgba(255,255,255,0.02)',
+                                flexShrink: 0,
+                            }}>
+                                <div style={{
+                                    width: '8px', height: '8px', borderRadius: '50%',
+                                    background: '#00ff88', flexShrink: 0,
+                                    boxShadow: '0 0 8px rgba(0,255,136,0.8)',
+                                    animation: 'blink 1.5s ease-in-out infinite',
+                                }} />
+                                <span style={{
+                                    fontSize: '11px', fontWeight: 600,
+                                    color: 'rgba(255,255,255,0.5)', letterSpacing: '0.15em',
+                                }}>
+                                    EVENTOS EN VIVO
+                                </span>
+                                <span style={{ marginLeft: 'auto', fontSize: '10px', color: 'rgba(255,255,255,0.2)' }}>
+                                    {eventLog.length} procesados
+                                </span>
+                            </div>
+
+                            {/* Events list */}
+                            <div style={{
+                                padding: '8px', display: 'flex', flexDirection: 'column',
+                                gap: '4px', overflowY: 'auto', flex: 1,
+                                scrollbarWidth: 'thin', scrollbarColor: 'rgba(0,255,136,0.2) rgba(255,255,255,0.03)'
+                            }}>
+                                <AnimatePresence initial={false}>
+                                    {eventLog.map(event => (
+                                        <motion.div
+                                            key={event.id}
+                                            initial={{ opacity: 0, x: -16, height: 0 }}
+                                            animate={{ opacity: 1, x: 0, height: 'auto' }}
+                                            exit={{ opacity: 0, height: 0 }}
+                                            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                                            style={{
+                                                display: 'flex', gap: '10px', alignItems: 'flex-start',
+                                                padding: '8px 10px', borderRadius: '8px',
+                                                background: 'rgba(255,255,255,0.02)',
+                                                border: '1px solid rgba(255,255,255,0.04)',
+                                            }}
+                                        >
+                                            <div style={{
+                                                width: '3px', borderRadius: '100px',
+                                                background: event.color, alignSelf: 'stretch',
+                                                flexShrink: 0, minHeight: '32px',
+                                                boxShadow: `0 0 6px ${event.color}`,
+                                            }} />
+                                            <div style={{ flex: 1, minWidth: 0 }}>
+                                                <p style={{
+                                                    fontSize: '12px', fontWeight: 500,
+                                                    color: 'rgba(255,255,255,0.75)',
+                                                    margin: '0 0 2px',
+                                                    whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                                                }}>
+                                                    {event.message}
+                                                </p>
+                                                <span style={{
+                                                    fontSize: '10px', color: 'rgba(255,255,255,0.2)',
+                                                    fontFamily: 'monospace',
+                                                }}>
+                                                    {event.timestamp}
+                                                </span>
+                                            </div>
+                                        </motion.div>
+                                    ))}
+                                </AnimatePresence>
+
+                                {eventLog.length === 0 && (
+                                    <div style={{
+                                        padding: '32px 16px', textAlign: 'center',
+                                        color: 'rgba(255,255,255,0.15)', fontSize: '12px',
+                                    }}>
+                                        Esperando datos...
+                                    </div>
+                                )}
+                            </div>
+                        </motion.div>
+                    </div>
                 </div>
 
                 {/* Metrics row */}

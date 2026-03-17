@@ -1,0 +1,694 @@
+'use client'
+
+import React, { useState, useRef, useMemo } from 'react'
+import { motion, AnimatePresence, useInView, useReducedMotion } from 'motion/react'
+
+/**
+ * VAULT AUTOMATION: "Todo claro antes de arrancar."
+ * FAQ final que elimina objeciones + CTA final potente "DELEGÁ AL SISTEMA".
+ */
+
+// ─── TYPES ────────────────────────────────────────────────────────────────────
+
+interface FAQItem {
+  question: string
+  answer: string
+}
+
+// ─── DATA ────────────────────────────────────────────────────────────────────
+
+const faqItems: FAQItem[] = [
+  {
+    question: '¿Necesito saber de tecnología?',
+    answer: 'Cero. Vos nos contás qué tarea querés automatizar, nosotros la conectamos. Lo único que vas a ver es que las cosas empiezan a pasar solas. Sin tocar código ni configurar nada.',
+  },
+  {
+    question: '¿Qué pasa si una app que uso no está en la lista?',
+    answer: 'n8n tiene más de 400 integraciones nativas. Si tu app tiene API, la podemos conectar. Y si no tiene integración oficial, en el 90% de los casos igual encontramos la forma.',
+  },
+  {
+    question: '¿Cuánto tarda en estar funcionando?',
+    answer: 'En 1 a 2 semanas tenés los primeros flujos corriendo en producción. Empezamos por los que más duelen y sumamos más en el camino. No esperás meses para ver resultados.',
+  },
+  {
+    question: '¿Qué pasa si el flujo falla?',
+    answer: 'Todos los flujos tienen monitoreo activo. Si algo falla, nos enteramos antes que vos. El soporte de 30 días post-lanzamiento está incluido y resolvemos cualquier error en menos de 4 horas hábiles.',
+  },
+  {
+    question: '¿Puedo empezar con un solo flujo y agregar más?',
+    answer: 'Es la forma más inteligente. Empezamos con la automatización que más tiempo te roba, medimos el resultado y de ahí expandimos. Sin compromisos de escala forzada.',
+  },
+  {
+    question: '¿Mis datos están seguros?',
+    answer: 'Sí. Las credenciales de tus apps se almacenan encriptadas y nunca las compartimos. Los flujos corren en servidores con backups automáticos. Vos sos el único dueño de tus datos.',
+  },
+]
+
+// ─── SUB-COMPONENTS ──────────────────────────────────────────────────────────
+
+function SliderMini({
+  label,
+  value,
+  min,
+  max,
+  step,
+  unit,
+  onChange,
+  formatValue,
+}: {
+  label: string
+  value: number
+  min: number
+  max: number
+  step: number
+  unit: string
+  onChange: (val: number) => void
+  formatValue?: (val: number) => string
+}) {
+  const pct = ((value - min) / (max - min)) * 100
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px', fontFamily: 'monospace' }}>
+        <span style={{ color: 'rgba(255,255,255,0.4)' }}>{label}</span>
+        <span style={{ color: '#f59e0b', fontWeight: 'bold' }}>
+          {formatValue ? formatValue(value) : `${value} ${unit}`}
+        </span>
+      </div>
+      <div style={{ position: 'relative', height: '24px', display: 'flex', alignItems: 'center' }}>
+        <div style={{ position: 'absolute', height: '4px', width: '100%', background: 'rgba(255,255,255,0.05)', borderRadius: '100px', overflow: 'hidden' }}>
+          <div 
+            style={{ 
+              height: '100%', 
+              width: `${pct}%`, 
+              background: 'rgba(245,158,11,0.4)', 
+              borderRadius: '100px',
+              transition: 'width 100ms'
+            }}
+          />
+        </div>
+        <input
+          type="range"
+          min={min}
+          max={max}
+          step={step}
+          value={value}
+          onChange={(e) => onChange(Number(e.target.value))}
+          style={{
+            position: 'absolute',
+            inset: '0',
+            width: '100%',
+            opacity: 0,
+            cursor: 'pointer',
+            zIndex: 10
+          }}
+        />
+        <div
+          style={{
+            position: 'absolute',
+            width: '14px',
+            height: '14px',
+            background: '#f59e0b',
+            borderRadius: '50%',
+            border: '2px solid #030308',
+            boxShadow: '0 0 10px rgba(0,0,0,0.5)',
+            pointerEvents: 'none',
+            transition: 'left 100ms',
+            left: `calc(${pct}% - 7px)`
+          }}
+        />
+      </div>
+    </div>
+  )
+}
+
+function AtmosphereVault() {
+  return (
+    <>
+      <div aria-hidden="true" style={{
+        position: 'absolute',
+        top: '-80px', left: '50%',
+        transform: 'translateX(-50%)',
+        width: '800px', height: '500px',
+        background: 'radial-gradient(ellipse, rgba(249,115,22,0.08) 0%, rgba(245,158,11,0.04) 40%, transparent 65%)',
+        filter: 'blur(100px)',
+        pointerEvents: 'none',
+        zIndex: 0,
+      }} />
+
+      <div aria-hidden="true" style={{
+        position: 'absolute',
+        bottom: '-40px', left: '50%',
+        transform: 'translateX(-50%)',
+        width: '700px', height: '400px',
+        background: 'radial-gradient(ellipse, rgba(245,158,11,0.08) 0%, transparent 60%)',
+        filter: 'blur(90px)',
+        pointerEvents: 'none',
+        zIndex: 0,
+      }} />
+
+      {[20, 50, 80].map((top, i) => (
+        <div key={i} aria-hidden="true" style={{
+          position: 'absolute',
+          top: `${top}%`,
+          left: 0, right: 0,
+          height: '1px',
+          background: 'rgba(255,255,255,0.015)',
+          pointerEvents: 'none',
+          zIndex: 0,
+        }} />
+      ))}
+    </>
+  )
+}
+
+function Header({ isInView }: { isInView: boolean }) {
+  return (
+    <div style={{
+      textAlign: 'center',
+      marginBottom: '48px',
+    }}>
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={isInView ? { opacity: 1, y: 0 } : {}}
+        transition={{ duration: 0.5 }}
+        style={{
+          display: 'inline-block',
+          fontSize: '11px',
+          fontWeight: 800,
+          letterSpacing: '0.25em',
+          color: '#f59e0b',
+          marginBottom: '16px',
+          textTransform: 'uppercase',
+          background: 'rgba(245,158,11,0.1)',
+          padding: '4px 12px',
+          borderRadius: '4px',
+          border: '1px solid rgba(245,158,11,0.2)'
+        }}
+      >
+        [ LO QUE QUERÉS SABER ]
+      </motion.div>
+      <motion.h2
+        initial={{ opacity: 0, y: 20 }}
+        animate={isInView ? { opacity: 1, y: 0 } : {}}
+        transition={{ duration: 0.6, delay: 0.1 }}
+        style={{
+          fontSize: 'clamp(32px, 5vw, 56px)',
+          fontWeight: 900,
+          lineHeight: 1.1,
+          letterSpacing: '-0.02em',
+          margin: '0 0 16px',
+          color: 'white',
+        }}
+      >
+        Todo claro antes de arrancar.
+      </motion.h2>
+      <motion.p
+        initial={{ opacity: 0, y: 15 }}
+        animate={isInView ? { opacity: 1, y: 0 } : {}}
+        transition={{ duration: 0.6, delay: 0.2 }}
+        style={{
+          fontSize: 'clamp(15px, 1.8vw, 19px)',
+          color: 'rgba(255,255,255,0.42)',
+          maxWidth: '600px',
+          margin: '0 auto',
+        }}
+      >
+        Las preguntas que todos hacen — respondidas sin vueltas.
+      </motion.p>
+    </div>
+  )
+}
+
+function FAQItemComponent({ item, index, isOpen, onToggle, isInView }: {
+  item: FAQItem
+  index: number
+  isOpen: boolean
+  onToggle: () => void
+  isInView: boolean
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, x: -16 }}
+      animate={isInView ? { opacity: 1, x: 0 } : {}}
+      transition={{
+        duration: 0.5,
+        delay: 0.35 + index * 0.07,
+        ease: [0.16, 1, 0.3, 1],
+      }}
+      style={{
+        borderBottom: '1px solid rgba(255,255,255,0.06)',
+        position: 'relative',
+        ...(isOpen && {
+          borderLeft: '2px solid #f59e0b',
+          paddingLeft: '12px',
+        }),
+        transition: 'border 200ms, padding 200ms',
+      }}
+    >
+      <button
+        onClick={onToggle}
+        style={{
+          width: '100%',
+          padding: 'clamp(16px, 2.5vh, 22px) 0',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          gap: '16px',
+          background: 'transparent',
+          border: 'none',
+          cursor: 'pointer',
+          textAlign: 'left',
+        }}
+      >
+        <span style={{
+          fontSize: 'clamp(14px, 1.6vw, 17px)',
+          fontWeight: 600,
+          color: isOpen ? '#f59e0b' : 'rgba(255,255,255,0.75)',
+          transition: 'color 200ms',
+          lineHeight: 1.4,
+          flex: 1,
+        }}>
+          {item.question}
+        </span>
+
+        <motion.div
+          animate={{ rotate: isOpen ? 45 : 0 }}
+          transition={{ duration: 0.25 }}
+          style={{
+            width: '32px', height: '32px',
+            borderRadius: '50%',
+            border: isOpen ? '1px solid rgba(245,158,11,0.35)' : '1px solid rgba(255,255,255,0.1)',
+            background: isOpen ? 'rgba(245,158,11,0.1)' : 'rgba(255,255,255,0.04)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '18px',
+            color: isOpen ? '#f59e0b' : 'rgba(255,255,255,0.4)',
+            flexShrink: 0,
+            transition: 'background 200ms, border 200ms',
+          }}
+        >
+          +
+        </motion.div>
+      </button>
+
+      <AnimatePresence initial={false}>
+        {isOpen && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+            style={{ overflow: 'hidden' }}
+          >
+            <p style={{
+              fontSize: '14px',
+              lineHeight: 1.75,
+              color: 'rgba(255,255,255,0.5)',
+              margin: '0 48px 20px 0',
+            }}>
+              {item.answer}
+            </p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
+  )
+}
+
+function FAQSection({ items, openIndex, setOpenIndex, isInView }: {
+  items: FAQItem[]
+  openIndex: number | null
+  setOpenIndex: (i: number | null) => void
+  isInView: boolean
+}) {
+  return (
+    <div style={{
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 0,
+      marginBottom: 'clamp(48px, 7vh, 80px)',
+    }}>
+      {items.map((item, i) => (
+        <FAQItemComponent
+          key={i}
+          item={item}
+          index={i}
+          isOpen={openIndex === i}
+          onToggle={() => setOpenIndex(openIndex === i ? null : i)}
+          isInView={isInView}
+        />
+      ))}
+    </div>
+  )
+}
+
+// ─── MAIN COMPONENT ──────────────────────────────────────────────────────────
+
+export default function VaultAutomation() {
+  const sectionRef = useRef<HTMLElement>(null)
+  const [openIndex, setOpenIndex] = useState<number | null>(0)
+  const isInView = useInView(sectionRef, {
+    once: true, amount: 0.1,
+  })
+  const shouldReduceMotion = useReducedMotion()
+
+  // Mini Calculador ROI
+  const [tareasAlDia, setTareasAlDia] = useState(20)
+  const horasAhorradas = useMemo(() => 
+    Math.round(tareasAlDia * 22 * (8/60) * 0.85),
+    [tareasAlDia]
+  )
+
+  return (
+    <section
+      ref={sectionRef}
+      style={{
+        padding: 'clamp(80px, 12vh, 140px) clamp(20px, 5vw, 80px)',
+        background: '#030308',
+        position: 'relative',
+        overflow: 'hidden',
+      }}
+    >
+      <AtmosphereVault />
+      <div style={{
+        maxWidth: '900px',
+        margin: '0 auto',
+        position: 'relative',
+        zIndex: 1,
+      }}>
+        <Header isInView={isInView} />
+
+        {/* Mini Calculador */}
+        <motion.div
+          initial={shouldReduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 24 }}
+          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.7, delay: 0.5 }}
+          style={{
+            background: 'rgba(245,158,11,0.04)',
+            border: '1px solid rgba(245,158,11,0.15)',
+            borderRadius: '20px',
+            padding: 'clamp(24px, 3vw, 40px)',
+            marginBottom: 'clamp(40px, 6vh, 72px)',
+          }}
+        >
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+            marginBottom: '24px',
+          }}>
+            <span style={{ fontSize: '28px' }}>⏰</span>
+            <div>
+              <h3 style={{ fontSize: '18px', fontWeight: 900, color: 'white', margin: 0 }}>
+                Calculá tus horas recuperadas
+              </h3>
+              <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.35)', margin: 0, fontFamily: 'monospace' }}>
+                Mové el slider y mirá el resultado
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-8 items-center">
+            {/* Slider */}
+            <div>
+              <label style={{ fontSize: '13px', color: 'rgba(255,255,255,0.5)', display: 'block', marginBottom: '16px' }}>
+                Tareas manuales por día en tu empresa
+              </label>
+              
+              <SliderMini 
+                label="" 
+                value={tareasAlDia}
+                min={5}
+                max={100}
+                step={5}
+                unit="tareas/día"
+                onChange={setTareasAlDia}
+              />
+
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                marginTop: '8px',
+                fontSize: '11px',
+                color: 'rgba(255,255,255,0.2)',
+                fontFamily: 'monospace',
+              }}>
+                <span>5/día</span>
+                <span style={{ color: 'rgba(245,158,11,0.6)', fontWeight: 700 }}>
+                  {tareasAlDia} tareas/día
+                </span>
+                <span>100/día</span>
+              </div>
+            </div>
+
+            {/* Resultado */}
+            <div style={{
+              textAlign: 'center',
+              padding: '20px 28px',
+              background: 'rgba(245,158,11,0.08)',
+              border: '1px solid rgba(245,158,11,0.2)',
+              borderRadius: '16px',
+              minWidth: '160px',
+            }}>
+              <p style={{
+                fontSize: '10px',
+                letterSpacing: '0.2em',
+                color: 'rgba(245,158,11,0.6)',
+                margin: '0 0 6px',
+                fontFamily: 'monospace',
+              }}>
+                RECUPERÁS AL MES
+              </p>
+              <motion.p
+                key={horasAhorradas}
+                initial={shouldReduceMotion ? { scale: 1, color: '#f59e0b' } : { scale: 1.15, color: '#f59e0b' }}
+                animate={{ scale: 1, color: '#f59e0b' }}
+                transition={{ duration: 0.25 }}
+                style={{
+                  fontSize: '48px',
+                  fontWeight: 900,
+                  color: '#f59e0b',
+                  margin: 0,
+                  lineHeight: 1,
+                  fontFamily: 'monospace',
+                }}
+              >
+                {horasAhorradas}
+              </motion.p>
+              <p style={{
+                fontSize: '14px',
+                color: 'rgba(245,158,11,0.6)',
+                margin: '4px 0 0',
+                fontFamily: 'monospace',
+              }}>
+                horas/mes
+              </p>
+            </div>
+          </div>
+        </motion.div>
+
+        <FAQSection
+          items={faqItems}
+          openIndex={openIndex}
+          setOpenIndex={setOpenIndex}
+          isInView={isInView}
+        />
+
+        {/* CTA FINAL */}
+        <motion.div
+          initial={shouldReduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}
+          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.9, delay: 0.7, ease: [0.16, 1, 0.3, 1] }}
+          style={{
+            textAlign: 'center',
+            position: 'relative',
+          }}
+        >
+          <motion.div
+            initial={{ scaleX: 0 }}
+            animate={isInView ? { scaleX: 1 } : { scaleX: 0 }}
+            transition={shouldReduceMotion ? { duration: 0 } : { duration: 1.2, delay: 0.6 }}
+            style={{
+              height: '1px',
+              background: 'linear-gradient(90deg, transparent, rgba(245,158,11,0.3) 30%, rgba(249,115,22,0.3) 70%, transparent)',
+              transformOrigin: 'center',
+              marginBottom: 'clamp(48px, 7vh, 80px)',
+            }}
+          />
+
+          {/* Eyebrow */}
+          <p style={{
+            fontSize: '11px',
+            letterSpacing: '0.35em',
+            color: 'rgba(255,255,255,0.2)',
+            textTransform: 'uppercase',
+            margin: '0 0 20px',
+          }}>
+            ¿SEGUÍS HACIENDO TODO A MANO?
+          </p>
+
+          {/* H2 de cierre */}
+          <h2 style={{
+            fontSize: 'clamp(32px, 5vw, 68px)',
+            fontWeight: 900,
+            lineHeight: 1.1,
+            margin: '0 0 20px',
+            letterSpacing: '-0.02em',
+          }}>
+            <span style={{ color: 'white' }}>
+              Delegá las tareas repetitivas.
+            </span>
+            <br />
+            <span style={{
+              background: 'linear-gradient(135deg, #f59e0b, #f97316)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+            }}>
+              El sistema trabaja. Vos decidís.
+            </span>
+          </h2>
+
+          {/* Subtítulo */}
+          <p style={{
+            fontSize: '16px',
+            color: 'rgba(255,255,255,0.4)',
+            maxWidth: '480px',
+            margin: '0 auto clamp(28px, 4vh, 44px)',
+            lineHeight: 1.65,
+          }}>
+            En 1 semana, tus primeros flujos corriendo. Sin tecnicismos. Sin sorpresas. Con resultados.
+          </p>
+
+          {/* Garantía pill */}
+          <div style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '12px',
+            background: 'rgba(34,197,94,0.08)',
+            border: '1px solid rgba(34,197,94,0.2)',
+            borderRadius: '100px',
+            padding: '8px 18px',
+            marginBottom: '28px',
+          }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="2">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+            </svg>
+            <span style={{
+              fontSize: '12px',
+              color: 'rgba(255,255,255,0.6)',
+            }}>
+              Primera automatización gratis · Sin compromiso
+            </span>
+          </div>
+
+          {/* CTAs */}
+          <div style={{
+            display: 'flex',
+            gap: '12px',
+            justifyContent: 'center',
+            flexWrap: 'wrap',
+            marginBottom: 'clamp(20px, 3vh, 32px)',
+          }}>
+            <motion.a
+              href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER}?text=Hola%20DevelOP%2C%20quiero%20automatizar%20mis%20procesos%20y%20empezar%20a%20recuperar%20tiempo`}
+              target="_blank"
+              rel="noopener noreferrer"
+              whileHover={shouldReduceMotion ? {} : { scale: 1.04 }}
+              whileTap={shouldReduceMotion ? {} : { scale: 0.97 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 15 }}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '10px',
+                background: 'linear-gradient(135deg, #f59e0b, #f97316)',
+                color: '#070709',
+                fontWeight: 800,
+                fontSize: '15px',
+                letterSpacing: '0.04em',
+                padding: '16px 36px',
+                borderRadius: '100px',
+                textDecoration: 'none',
+                boxShadow: '0 0 40px rgba(245,158,11,0.4)',
+              }}
+            >
+              ⚡ DELEGÁ AL SISTEMA →
+            </motion.a>
+
+            <motion.a
+              href="#flujo"
+              whileHover={shouldReduceMotion ? {} : { scale: 1.02, borderColor: 'rgba(245,158,11,0.4)' }}
+              whileTap={shouldReduceMotion ? {} : { scale: 0.97 }}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                background: 'transparent',
+                border: '1px solid rgba(245,158,11,0.12)',
+                color: 'rgba(255,255,255,0.55)',
+                fontWeight: 600,
+                fontSize: '14px',
+                padding: '16px 28px',
+                borderRadius: '100px',
+                textDecoration: 'none',
+                transition: 'all 200ms',
+              }}
+            >
+              Ver cómo funciona primero
+            </motion.a>
+          </div>
+
+          <p style={{
+            fontSize: '11px',
+            color: 'rgba(255,255,255,0.15)',
+            letterSpacing: '0.08em',
+          }}>
+            Respondemos en menos de 2 horas en horario comercial
+          </p>
+
+          {/* Footer mínimo */}
+          <div style={{
+            marginTop: 'clamp(48px, 7vh, 80px)',
+            paddingTop: '32px',
+            borderTop: '1px solid rgba(255,255,255,0.05)',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            gap: '16px',
+          }}>
+            <div style={{ textAlign: 'left' }}>
+              <span style={{
+                fontSize: '18px',
+                fontWeight: 900,
+                background: 'linear-gradient(135deg, #f59e0b, #f97316)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
+                display: 'block',
+              }}>
+                DevelOP
+              </span>
+              <span style={{
+                fontSize: '11px',
+                color: 'rgba(255,255,255,0.15)',
+                letterSpacing: '0.1em',
+              }}>
+                TUCUMÁN · ARGENTINA
+              </span>
+            </div>
+            <p style={{
+              fontSize: '11px',
+              color: 'rgba(255,255,255,0.12)',
+              margin: 0,
+            }}>
+              © 2025 DevelOP. Todos los derechos reservados.
+            </p>
+          </div>
+        </motion.div>
+      </div>
+    </section>
+  )
+}

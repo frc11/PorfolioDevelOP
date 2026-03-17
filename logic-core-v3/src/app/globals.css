@@ -135,3 +135,13 @@ canvas {
   0%, 100% { opacity: 0.4; transform: scale(1) }
   50% { opacity: 0.8; transform: scale(1.05) }
 }
+
+@keyframes rotateSlow {
+  0%   { transform: rotate(0deg) }
+  100% { transform: rotate(360deg) }
+}
+
+@keyframes floatLabel {
+  0%   { transform: translateY(0px) }
+  100% { transform: translateY(-8px) }
+}

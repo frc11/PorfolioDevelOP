@@ -574,14 +574,13 @@ export default function VaultSoftware() {
           {/* Separador */}
           <motion.div
             initial={{ scaleX: 0 }}
-            animate={isInView ? { scaleX: 1 } : {}}
-            transition={{ duration: 1.2, delay: 0.5 }}
+            animate={isInView ? { scaleX: 1 } : { scaleX: 0 }}
+            transition={shouldReduceMotion ? { duration: 0 } : { duration: 1.2, delay: 0.5 }}
             style={{
               height: '1px',
-              background: 'linear-gradient(90deg, transparent, rgba(99,102,241,0.3) 30%, rgba(123,47,255,0.3) 70%, transparent)',
+              background: 'linear-gradient(90deg, transparent, rgba(99,102,241,0.3) 30%, rgba(139,92,246,0.3) 70%, transparent)',
               transformOrigin: 'center',
               marginBottom: 'clamp(48px, 7vh, 80px)',
-              ...(shouldReduceMotion && { scaleX: 1, transition: { duration: 0 } })
             }}
           />
 

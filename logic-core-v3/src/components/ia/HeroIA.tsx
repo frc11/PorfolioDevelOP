@@ -63,8 +63,8 @@ function NeuralCanvas() {
 
         // ── HUBS ────────────────────────────────
         const HUB_LABELS = [
-            'PROCESO', 'MEMORIA', 'VISIÓN',
-            'LENGUAJE', 'DECISIÓN', 'ACCIÓN'
+            'DATOS', 'HISTORIAL', 'VENTAS',
+            'TURNO', 'PRECIOS', 'STOCK'
         ]
 
         nodes.forEach((n, i) => {
@@ -333,28 +333,11 @@ function NeuralCanvas() {
 export default function HeroIA() {
     const prefersReduced = useReducedMotion()
 
-    const liquidTransitionStyle: React.CSSProperties = prefersReduced ? { color: '#00ff88' } : {
-        background: `linear-gradient(
-            90deg,
-            #ffffff 0%,
-            #00ff88 25%,
-            #ffffff 50%,
-            #7b2fff 75%,
-            #00ff88 90%,
-            #ffffff 100%
-        )`,
-        backgroundSize: '200% auto',
-        WebkitBackgroundClip: 'text',
-        WebkitTextFillColor: 'transparent',
-        backgroundClip: 'text',
-        animation: 'liquidMetalIA 6s linear infinite',
-        display: 'inline-block',
-    }
 
     const stats = [
-        { value: '10x', label: 'más rápido', pos: { left: '2%', top: '35%' } },
-        { value: '24/7', label: 'sin descanso', pos: { right: '2%', top: '35%' } },
-        { value: '−70%', label: 'carga operativa', pos: { left: '50%', bottom: '18%', transform: 'translateX(-50%)' } },
+        { value: '24/7', label: 'sin descanso', icon: '🌙', pos: { left: '2%', top: '35%' } },
+        { value: '< 3s', label: 'tiempo de respuesta', icon: '⚡', pos: { right: '2%', top: '35%' } },
+        { value: '−80%', label: 'consultas manuales', icon: '📉', pos: { left: '50%', bottom: '18%', transform: 'translateX(-50%)' } },
     ]
 
     return (
@@ -417,6 +400,7 @@ export default function HeroIA() {
                                     ease: "easeInOut"
                                 }}
                             >
+                                <div style={{ fontSize: '24px', marginBottom: '4px' }}>{stat.icon}</div>
                                 <div style={{ fontSize: '20px', fontWeight: 800, color: '#00ff88', lineHeight: 1 }}>
                                     {stat.value}
                                 </div>
@@ -458,7 +442,7 @@ export default function HeroIA() {
                         color: '#00ff88',
                         fontWeight: 600,
                     }}>
-                        INTELIGENCIA ARTIFICIAL APLICADA
+                        TU EMPRESA, EN PILOTO AUTOMÁTICO
                     </span>
                 </motion.div>
 
@@ -477,11 +461,18 @@ export default function HeroIA() {
                     }}
                 >
                     <span style={{ color: 'white', display: 'block' }}>
-                        EL CEREBRO
+                        Tu empresa trabaja
                     </span>
                     <span style={{ display: 'block' }}>
-                        <span style={liquidTransitionStyle}>
-                            DE TU EMPRESA.
+                        <span style={{
+                            background: 'linear-gradient(135deg, #00ff88 0%, #7b2fff 50%, #00ff88 100%)',
+                            backgroundSize: '200% 100%',
+                            WebkitBackgroundClip: 'text',
+                            WebkitTextFillColor: 'transparent',
+                            backgroundClip: 'text',
+                            animation: prefersReduced ? 'none' : 'gradientShift 4s ease-in-out infinite',
+                        }}>
+                            mientras dormís.
                         </span>
                     </span>
                 </motion.h1>
@@ -499,10 +490,12 @@ export default function HeroIA() {
                         margin: '0 auto clamp(32px,5vh,52px)',
                     }}
                 >
-                    Automatizamos los procesos que te roban tiempo.
+                    Sistemas de IA que responden consultas,
+                    cotizan y cierran ventas por WhatsApp.
                     <br />
-                    <span style={{ color: 'rgba(0,255,136,0.7)' }}>
-                        Tu negocio trabaja. Vos decidís.
+                    <span style={{ color: 'rgba(0,255,136,0.75)' }}>
+                        Sin empleados extra. Sin horarios.
+                        Sin que tengas que estar presente.
                     </span>
                 </motion.p>
 
@@ -620,6 +613,11 @@ export default function HeroIA() {
                     50% { opacity: 1; transform: rotate(45deg) translateY(4px); }
                 }
                 @keyframes liquidMetalIA {
+                    0% { background-position: 0% 50%; }
+                    50% { background-position: 100% 50%; }
+                    100% { background-position: 0% 50%; }
+                }
+                @keyframes gradientShift {
                     0% { background-position: 0% 50%; }
                     50% { background-position: 100% 50%; }
                     100% { background-position: 0% 50%; }

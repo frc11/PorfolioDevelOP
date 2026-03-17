@@ -14,28 +14,28 @@ interface FAQItem {
 
 const faqItems: FAQItem[] = [
   {
-    question: '¿Necesito tener conocimientos técnicos?',
-    answer: 'Para nada. Vos usás la IA como usás WhatsApp. Nosotros configuramos todo: el entrenamiento con los datos de tu negocio, las integraciones y el mantenimiento. Vos solo ves los resultados.',
+    question: '¿Tengo que cambiar mi número de WhatsApp?',
+    answer: 'No. Conectamos la IA a tu número de WhatsApp actual usando la API oficial de Meta. Tus clientes siguen escribiendo al mismo número de siempre — solo que ahora alguien responde al instante, las 24 horas.',
+  },
+  {
+    question: '¿La IA puede inventar precios o información incorrecta?',
+    answer: 'No puede. Los agentes que construimos tienen reglas estrictas: solo responden en base a tus datos reales (precios, stock, políticas). Si alguien pregunta algo que la IA no sabe, deriva la conversación a un humano de tu equipo automáticamente. Nada se inventa.',
+  },
+  {
+    question: '¿La IA puede cobrar por MercadoPago?',
+    answer: 'Sí. El agente puede generar el link de pago de MercadoPago, enviárselo al cliente por WhatsApp y verificar que el pago se acreditó. Todo en la misma conversación, sin que intervenga nadie de tu equipo.',
+  },
+  {
+    question: '¿Necesito saber programar para usarlo después?',
+    answer: 'Para nada. Te entregamos un panel simple donde podés ver todas las conversaciones, actualizar los datos de tu negocio y revisar el historial. No hace falta tocar código nunca.',
   },
   {
     question: '¿Cuánto tiempo lleva implementarlo?',
-    answer: 'La primera versión funcional está en 2 semanas. Empezamos con los procesos más repetitivos (atención al cliente, reservas, consultas de precios) y de ahí expandimos. No esperás meses para ver resultados.',
+    answer: 'La primera versión funcional está lista en 2 semanas. Empezamos con los casos más frecuentes (consultas de precio, turnos, stock) y de ahí expandimos. En el primer mes ya ves resultados medibles.',
   },
   {
-    question: '¿Qué pasa si la IA se equivoca?',
-    answer: 'Los agentes que construimos tienen límites claros — cuando no saben algo, lo reconocen y derivan a un humano. Además configuramos un panel donde ves todas las conversaciones y podés corregir en tiempo real.',
-  },
-  {
-    question: '¿Reemplaza a mis empleados?',
-    answer: 'No reemplaza personas — libera personas. Tu equipo deja de responder la misma pregunta 40 veces por día y se enfoca en lo que realmente importa: atender clientes complejos, crecer el negocio, innovar.',
-  },
-  {
-    question: '¿Se integra con WhatsApp Business?',
-    answer: 'Sí. WhatsApp Business API es una de las integraciones más pedidas. También Gmail, Google Sheets, Notion, sistemas de reservas y más. Si ya usás una herramienta, casi seguro nos podemos conectar.',
-  },
-  {
-    question: '¿Qué pasa si quiero cancelar?',
-    answer: 'Sin contrato largo. La suscripción mensual se puede cancelar en cualquier momento. El agente que construimos para vos queda documentado — no perdés nada de lo que se armó.',
+    question: '¿Qué pasa si quiero pausar o cancelar?',
+    answer: 'Sin contrato largo. La suscripción mensual se puede pausar o cancelar en cualquier momento. El agente que construimos para tu negocio queda documentado — no perdés nada de lo que se armó.',
   },
 ]
 
@@ -136,7 +136,7 @@ function SocialProof({ isInView }: { isInView: boolean }) {
       }}
     >
       <div style={{ display: 'flex' }}>
-        {['#00ff88', '#7b2fff', '#f59e0b', '#00e5ff', '#e01e5a'].map((c, i) => (
+        {['#00ff88', '#7b2fff', '#00ff88', '#7b2fff', '#00ff88'].map((c, i) => (
           <div key={i} style={{
             width: '32px', height: '32px', borderRadius: '50%',
             background: `linear-gradient(135deg, ${c}, rgba(0,0,0,0.5))`,
@@ -158,10 +158,10 @@ function SocialProof({ isInView }: { isInView: boolean }) {
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '3px' }}>
         <div style={{ display: 'flex', gap: '2px' }}>
           {'★★★★★'.split('').map((s, i) => (
-            <span key={i} style={{ fontSize: '16px', color: '#f59e0b' }}>{s}</span>
+            <span key={i} style={{ fontSize: '16px', color: '#00ff88' }}>{s}</span>
           ))}
         </div>
-        <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.3)' }}>5.0 · promedio de satisfacción</span>
+        <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.3)' }}>Excelencia en servicio</span>
       </div>
     </motion.div>
   )
@@ -305,7 +305,7 @@ function CTAFinal({ isInView }: { isInView: boolean }) {
 
       <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap', marginBottom: 'clamp(24px, 4vh, 40px)' }}>
         <motion.a
-          href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER}?text=Hola%20DevelOP%2C%20quiero%20implementar%20IA%20en%20mi%20negocio`}
+          href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER}?text=${encodeURIComponent('Hola DevelOP, vi la página de IA y quiero ver cómo funciona para mi negocio')}`}
           target="_blank" rel="noopener noreferrer"
           whileHover={reduced ? {} : { scale: 1.04 }}
           whileTap={reduced ? {} : { scale: 0.97 }}

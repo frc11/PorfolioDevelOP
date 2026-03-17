@@ -2,6 +2,11 @@
 import React, { useEffect, useRef, useState, useMemo } from "react"
 import { motion, useReducedMotion } from 'motion/react'
 
+/**
+ * STATEMENT SOFTWARE: "Tu empresa no necesita más Excel."
+ * Componente de alto impacto con scroll-reveal.
+ */
+
 // ─── TYPES ────────────────────────────────────────────────────────────────────
 
 interface Word {
@@ -42,7 +47,6 @@ const words: Word[] = [
 function PrimeAtmosphere({ progress }: { progress: number }) {
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
-      {/* 3D Perspective Grid */}
       <div 
         style={{
           position: 'absolute',
@@ -57,14 +61,10 @@ function PrimeAtmosphere({ progress }: { progress: number }) {
           transition: 'transform 800ms cubic-bezier(0.16, 1, 0.3, 1)'
         }} 
       />
-
-      {/* Scanline Overlay */}
       <div className="absolute inset-0 opacity-[0.03]" style={{
         background: 'repeating-linear-gradient(0deg, transparent, transparent 2px, #fff 2px, #fff 4px)',
         backgroundSize: '100% 4px',
       }} />
-
-      {/* Dynamic Spotlights */}
       <div style={{
         position: 'absolute',
         top: '50%', left: '50%',
@@ -84,7 +84,7 @@ function DataClusters({ progress }: { progress: number }) {
       x: Math.random() * 100,
       y: Math.random() * 100,
       z: Math.random() * 200,
-      type: Math.floor(Math.random() * 3), // 0: Hex, 1: Symbols, 2: Code
+      type: Math.floor(Math.random() * 3),
       speed: 0.1 + Math.random() * 0.4
     }))
   }, [])
@@ -119,48 +119,9 @@ function DataClusters({ progress }: { progress: number }) {
   )
 }
 
-// ─── MAIN COMPONENT ──────────────────────────────────────────────────────────
-
-export default function StatementSoftware() {
-  const sectionRef = useRef<HTMLDivElement>(null)
-  const [progress, setProgress] = useState(0)
-  const shouldReduceMotion = useReducedMotion()
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const section = sectionRef.current
-      if (!section) return
-      const rect = section.getBoundingClientRect()
-      const windowH = window.innerHeight
-      const total = section.offsetHeight - windowH
-      const scrolled = -rect.top
-      const p = Math.min(Math.max(scrolled / total, 0), 1)
-      setProgress(p)
-    }
-    window.addEventListener('scroll', handleScroll, { passive: true })
-    handleScroll()
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
-
-  return (
-    <section 
-      ref={sectionRef} 
-      className="relative h-[350vh] bg-[#06060f] z-0"
-    >
-      <div className="sticky top-0 h-screen flex items-center justify-center overflow-hidden bg-[#06060f]"
-        style={{
-          opacity: progress < 0.03 ? progress / 0.03 : progress > 0.96 ? 1 - ((progress - 0.96) / 0.04) : 1
-        }}
-      >
-        <PrimeAtmosphere progress={progress} />
-        <DataClusters progress={progress} />
-        <StatementContent progress={progress} shouldReduceMotion={shouldReduceMotion} />
-      </div>
-    </section>
-  )
-}
-
 function StatementContent({ progress, shouldReduceMotion }: { progress: number, shouldReduceMotion: boolean }) {
+  const isInView = progress > 0.01 && progress < 0.99
+  
   const getOpacity = (start: number, end: number) => {
     if (shouldReduceMotion) return 1
     if (progress <= start) return 0
@@ -170,9 +131,6 @@ function StatementContent({ progress, shouldReduceMotion }: { progress: number, 
 
   const renderWord = (w: Word, i: number) => {
     const op = getOpacity(w.s, w.e)
-    const isVisible = op > 0
-    
-    // Prime Reveal: spacing + scale + rotate + sweep
     const spacing = shouldReduceMotion ? 'normal' : `${(1 - op) * 0.4}em`
     const translate = shouldReduceMotion ? 0 : (1 - op) * 12
     const rotate = shouldReduceMotion ? 0 : (1 - op) * -5
@@ -209,7 +167,6 @@ function StatementContent({ progress, shouldReduceMotion }: { progress: number, 
         ) : (
           <>
             {w.text}
-            {/* Light Sweep Effect on active word */}
             {op > 0.3 && op < 0.9 && !shouldReduceMotion && (
               <span 
                 className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent z-1"
@@ -228,13 +185,6 @@ function StatementContent({ progress, shouldReduceMotion }: { progress: number, 
 
   return (
     <div className="relative z-10 text-center px-6 w-full max-w-7xl mx-auto">
-      <style>{`
-        @keyframes scanline { 0% { top: -100% } 100% { top: 100% } }
-        @keyframes orbital { 0% { transform: rotate(0deg) } 100% { transform: rotate(360deg) } }
-        @keyframes pulseBorder { 0%, 100% { border-color: rgba(99,102,241,0.2) } 50% { border-color: rgba(99,102,241,0.6) } }
-      `}</style>
-
-      {/* Main Text Structure */}
       <h2 className="font-black leading-[1.05] tracking-tighter cursor-default">
         <div className="text-[clamp(32px,5.5vw,84px)] mb-4">
           {words.slice(0, 6).map((w, i) => renderWord(w, i))}
@@ -247,7 +197,6 @@ function StatementContent({ progress, shouldReduceMotion }: { progress: number, 
         </div>
       </h2>
 
-      {/* Prime Brand Seal (Badge Reveal) */}
       <div 
         className="absolute left-1/2 -translate-x-1/2 mt-20 flex flex-col items-center gap-6"
         style={{
@@ -257,11 +206,10 @@ function StatementContent({ progress, shouldReduceMotion }: { progress: number, 
         }}
       >
         <div className="relative p-1">
-          {/* Orbital rings */}
-          <div className="absolute inset-0 border border-indigo-500/20 rounded-full animate-[orbital_10s_linear_infinite]" />
-          <div className="absolute inset-[-4px] border border-violet-500/10 rounded-full animate-[orbital_15s_linear_infinite_reverse]" />
+          <div className="absolute inset-0 border border-indigo-500/20 rounded-full animate-spin" style={{ animationDuration: '10s' }} />
+          <div className="absolute inset-[-4px] border border-violet-500/10 rounded-full animate-spin" style={{ animationDuration: '15s', animationDirection: 'reverse' }} />
           
-          <div className="relative px-8 py-3 bg-white/[0.03] backdrop-blur-2xl border border-white/10 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] flex items-center gap-4 animate-[pulseBorder_3s_infinite]">
+          <div className="relative px-8 py-3 bg-white/[0.03] backdrop-blur-2xl border border-white/10 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] flex items-center gap-4">
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center p-1.5 shadow-[0_0_20px_rgba(99,102,241,0.4)]">
               <svg viewBox="0 0 24 24" fill="white" className="w-full h-full">
                 <path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71L12 2z" />
@@ -281,5 +229,44 @@ function StatementContent({ progress, shouldReduceMotion }: { progress: number, 
         </div>
       </div>
     </div>
+  )
+}
+
+export default function StatementSoftware() {
+  const sectionRef = useRef<HTMLDivElement>(null)
+  const [progress, setProgress] = useState(0)
+  const shouldReduceMotion = useReducedMotion()
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const section = sectionRef.current
+      if (!section) return
+      const rect = section.getBoundingClientRect()
+      const windowH = window.innerHeight
+      const total = section.offsetHeight - windowH
+      const scrolled = -rect.top
+      const p = Math.max(0, Math.min(scrolled / total, 1))
+      setProgress(p)
+    }
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    handleScroll()
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
+  return (
+    <section ref={sectionRef} className="relative h-[350vh] bg-[#06060f] z-0">
+      <div className="sticky top-0 h-screen flex items-center justify-center overflow-hidden bg-[#06060f]"
+        style={{
+          opacity: progress < 0.03 ? progress / 0.03 : progress > 0.96 ? 1 - ((progress - 0.96) / 0.04) : 1
+        }}
+      >
+        <PrimeAtmosphere progress={progress} />
+        <DataClusters progress={progress} />
+        <StatementContent 
+          progress={progress} 
+          shouldReduceMotion={shouldReduceMotion ?? false} 
+        />
+      </div>
+    </section>
   )
 }
