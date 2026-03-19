@@ -185,31 +185,36 @@ function Header({ isInView }: { isInView: boolean }) {
         animate={isInView ? { opacity: 1, y: 0 } : {}}
         transition={{ duration: 0.5 }}
         style={{
-          display: 'inline-block',
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '8px',
           fontSize: '11px',
-          fontWeight: 800,
-          letterSpacing: '0.25em',
+          fontWeight: 700,
+          letterSpacing: '0.22em',
           color: '#f59e0b',
-          marginBottom: '16px',
+          marginBottom: '20px',
           textTransform: 'uppercase',
-          background: 'rgba(245,158,11,0.1)',
-          padding: '4px 12px',
-          borderRadius: '4px',
-          border: '1px solid rgba(245,158,11,0.2)'
+          background: 'rgba(245,158,11,0.07)',
+          padding: '6px 18px',
+          borderRadius: '100px',
+          border: '1px solid rgba(245,158,11,0.25)',
+          fontFamily: 'ui-monospace, monospace',
+          boxShadow: '0 0 20px rgba(245,158,11,0.06)',
         }}
       >
-        [ LO QUE QUERÉS SABER ]
+        <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#f59e0b', boxShadow: '0 0 6px rgba(245,158,11,0.9)', flexShrink: 0 }} />
+        LO QUE QUERÉS SABER
       </motion.div>
       <motion.h2
         initial={{ opacity: 0, y: 20 }}
         animate={isInView ? { opacity: 1, y: 0 } : {}}
         transition={{ duration: 0.6, delay: 0.1 }}
         style={{
-          fontSize: 'clamp(32px, 5vw, 56px)',
+          fontSize: 'clamp(34px, 5.5vw, 60px)',
           fontWeight: 900,
-          lineHeight: 1.1,
-          letterSpacing: '-0.02em',
-          margin: '0 0 16px',
+          lineHeight: 1.05,
+          letterSpacing: '-0.03em',
+          margin: '0 0 18px',
           color: 'white',
         }}
       >
@@ -251,13 +256,19 @@ function FAQItemComponent({ item, index, isOpen, onToggle, isInView }: {
       style={{
         borderBottom: '1px solid rgba(255,255,255,0.06)',
         position: 'relative',
-        ...(isOpen && {
-          borderLeft: '2px solid #f59e0b',
-          paddingLeft: '12px',
-        }),
-        transition: 'border 200ms, padding 200ms',
+        paddingLeft: isOpen ? '16px' : '0px',
+        transition: 'padding 250ms ease',
       }}
     >
+      {isOpen && (
+        <div style={{
+          position: 'absolute',
+          left: 0, top: '8px', bottom: '8px',
+          width: '2px',
+          borderRadius: '2px',
+          background: 'linear-gradient(to bottom, rgba(245,158,11,0.8), rgba(249,115,22,0.5))',
+        }} />
+      )}
       <button
         onClick={onToggle}
         style={{
@@ -277,9 +288,10 @@ function FAQItemComponent({ item, index, isOpen, onToggle, isInView }: {
           fontSize: 'clamp(14px, 1.6vw, 17px)',
           fontWeight: 600,
           color: isOpen ? '#f59e0b' : 'rgba(255,255,255,0.75)',
-          transition: 'color 200ms',
+          transition: 'color 200ms, text-shadow 200ms',
           lineHeight: 1.4,
           flex: 1,
+          textShadow: isOpen ? '0 0 20px rgba(245,158,11,0.3)' : 'none',
         }}>
           {item.question}
         </span>
@@ -398,25 +410,32 @@ export default function VaultAutomation() {
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.7, delay: 0.5 }}
           style={{
+            position: 'relative',
+            overflow: 'hidden',
             background: 'rgba(245,158,11,0.04)',
-            border: '1px solid rgba(245,158,11,0.15)',
-            borderRadius: '20px',
-            padding: 'clamp(24px, 3vw, 40px)',
+            border: '1px solid rgba(245,158,11,0.16)',
+            borderRadius: '22px',
+            padding: 'clamp(26px, 3.2vw, 44px)',
             marginBottom: 'clamp(40px, 6vh, 72px)',
+            boxShadow: '0 0 0 1px rgba(245,158,11,0.04), 0 12px 36px rgba(0,0,0,0.25)',
+            backgroundImage: `repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(255,255,255,0.02) 39px, rgba(255,255,255,0.02) 40px), repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(255,255,255,0.02) 39px, rgba(255,255,255,0.02) 40px)`,
           }}
         >
+          <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '1px', background: 'linear-gradient(90deg, transparent, rgba(245,158,11,0.5) 50%, transparent)' }} />
           <div style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '12px',
-            marginBottom: '24px',
+            gap: '14px',
+            marginBottom: '28px',
           }}>
-            <span style={{ fontSize: '28px' }}>⏰</span>
+            <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <span style={{ fontSize: '10px', fontWeight: 900, color: '#f59e0b', letterSpacing: '0.04em', fontFamily: 'ui-monospace, monospace', lineHeight: 1 }}>ROI</span>
+            </div>
             <div>
-              <h3 style={{ fontSize: '18px', fontWeight: 900, color: 'white', margin: 0 }}>
+              <h3 style={{ fontSize: '18px', fontWeight: 900, color: 'white', margin: '0 0 3px', letterSpacing: '-0.01em' }}>
                 Calculá tus horas recuperadas
               </h3>
-              <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.35)', margin: 0, fontFamily: 'monospace' }}>
+              <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.35)', margin: 0, fontFamily: 'ui-monospace, monospace', letterSpacing: '0.05em' }}>
                 Mové el slider y mirá el resultado
               </p>
             </div>
@@ -457,43 +476,51 @@ export default function VaultAutomation() {
 
             {/* Resultado */}
             <div style={{
+              position: 'relative',
+              overflow: 'hidden',
               textAlign: 'center',
-              padding: '20px 28px',
+              padding: '22px 32px',
               background: 'rgba(245,158,11,0.08)',
-              border: '1px solid rgba(245,158,11,0.2)',
-              borderRadius: '16px',
+              border: '1px solid rgba(245,158,11,0.22)',
+              borderRadius: '18px',
               minWidth: '160px',
+              boxShadow: '0 0 0 1px rgba(245,158,11,0.05), 0 8px 24px rgba(0,0,0,0.2)',
             }}>
+              <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '1px', background: 'linear-gradient(90deg, transparent, rgba(245,158,11,0.7) 50%, transparent)' }} />
               <p style={{
-                fontSize: '10px',
-                letterSpacing: '0.2em',
-                color: 'rgba(245,158,11,0.6)',
-                margin: '0 0 6px',
-                fontFamily: 'monospace',
+                fontSize: '9px',
+                letterSpacing: '0.22em',
+                color: 'rgba(245,158,11,0.65)',
+                margin: '0 0 8px',
+                fontFamily: 'ui-monospace, monospace',
+                textTransform: 'uppercase',
               }}>
                 RECUPERÁS AL MES
               </p>
               <motion.p
                 key={horasAhorradas}
-                initial={shouldReduceMotion ? { scale: 1, color: '#f59e0b' } : { scale: 1.15, color: '#f59e0b' }}
+                initial={shouldReduceMotion ? { scale: 1 } : { scale: 1.15, color: '#fbbf24' }}
                 animate={{ scale: 1, color: '#f59e0b' }}
                 transition={{ duration: 0.25 }}
                 style={{
-                  fontSize: '48px',
+                  fontSize: '52px',
                   fontWeight: 900,
                   color: '#f59e0b',
                   margin: 0,
                   lineHeight: 1,
-                  fontFamily: 'monospace',
+                  fontFamily: 'ui-monospace, monospace',
+                  letterSpacing: '-0.03em',
+                  fontVariantNumeric: 'tabular-nums',
                 }}
               >
                 {horasAhorradas}
               </motion.p>
               <p style={{
-                fontSize: '14px',
-                color: 'rgba(245,158,11,0.6)',
-                margin: '4px 0 0',
-                fontFamily: 'monospace',
+                fontSize: '13px',
+                fontWeight: 700,
+                color: 'rgba(245,158,11,0.55)',
+                margin: '6px 0 0',
+                fontFamily: 'ui-monospace, monospace',
               }}>
                 horas/mes
               </p>
@@ -543,11 +570,11 @@ export default function VaultAutomation() {
 
           {/* H2 de cierre */}
           <h2 style={{
-            fontSize: 'clamp(32px, 5vw, 68px)',
+            fontSize: 'clamp(34px, 5.5vw, 72px)',
             fontWeight: 900,
-            lineHeight: 1.1,
-            margin: '0 0 20px',
-            letterSpacing: '-0.02em',
+            lineHeight: 1.05,
+            margin: '0 0 22px',
+            letterSpacing: '-0.04em',
           }}>
             <span style={{ color: 'white' }}>
               Delegá el trabajo robótico.
@@ -578,19 +605,22 @@ export default function VaultAutomation() {
           <div style={{
             display: 'inline-flex',
             alignItems: 'center',
-            gap: '12px',
-            background: 'rgba(245,158,11,0.06)',
-            border: '1px solid rgba(245,158,11,0.2)',
+            gap: '10px',
+            background: 'rgba(245,158,11,0.07)',
+            border: '1px solid rgba(245,158,11,0.22)',
             borderRadius: '100px',
-            padding: '8px 18px',
-            marginBottom: '28px',
+            padding: '9px 20px',
+            marginBottom: '32px',
+            boxShadow: '0 0 20px rgba(245,158,11,0.06)',
           }}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2.2">
               <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
             </svg>
             <span style={{
               fontSize: '12px',
-              color: 'rgba(255,255,255,0.6)',
+              fontWeight: 600,
+              color: 'rgba(255,255,255,0.65)',
+              letterSpacing: '0.02em',
             }}>
               Primera automatización sin costo · Sin compromiso
             </span>
@@ -617,16 +647,16 @@ export default function VaultAutomation() {
                 gap: '10px',
                 background: 'linear-gradient(135deg, #f59e0b, #f97316)',
                 color: '#070709',
-                fontWeight: 800,
+                fontWeight: 900,
                 fontSize: '15px',
-                letterSpacing: '0.04em',
-                padding: '16px 36px',
+                letterSpacing: '0.05em',
+                padding: '16px 38px',
                 borderRadius: '100px',
                 textDecoration: 'none',
-                boxShadow: '0 0 40px rgba(245,158,11,0.4)',
+                boxShadow: '0 0 48px rgba(245,158,11,0.4), 0 8px 24px rgba(0,0,0,0.4)',
               }}
             >
-              ⚡ ENCENDER MI EMPRESA →
+              ENCENDER MI EMPRESA →
             </motion.a>
 
             <motion.a
@@ -660,44 +690,74 @@ export default function VaultAutomation() {
             Respondemos en menos de 2 horas en horario comercial
           </p>
 
-          {/* Footer mínimo */}
+          {/* Footer elegante */}
           <div style={{
             marginTop: 'clamp(48px, 7vh, 80px)',
-            paddingTop: '32px',
-            borderTop: '1px solid rgba(255,255,255,0.05)',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            flexWrap: 'wrap',
-            gap: '16px',
+            paddingTop: '28px',
+            position: 'relative',
           }}>
-            <div style={{ textAlign: 'left' }}>
-              <span style={{
-                fontSize: '18px',
-                fontWeight: 900,
-                background: 'linear-gradient(135deg, #f59e0b, #f97316)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
-                display: 'block',
-              }}>
-                DevelOP
-              </span>
-              <span style={{
-                fontSize: '11px',
-                color: 'rgba(255,255,255,0.15)',
-                letterSpacing: '0.1em',
-              }}>
-                TUCUMÁN · ARGENTINA
-              </span>
-            </div>
-            <p style={{
-              fontSize: '11px',
-              color: 'rgba(255,255,255,0.12)',
-              margin: 0,
+            {/* Línea separadora con gradiente */}
+            <div style={{
+              height: '1px',
+              background: 'linear-gradient(90deg, transparent, rgba(245,158,11,0.2) 20%, rgba(249,115,22,0.15) 50%, rgba(245,158,11,0.2) 80%, transparent)',
+              marginBottom: '28px',
+            }} />
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+              gap: '16px',
             }}>
-              © 2025 DevelOP. Todos los derechos reservados.
-            </p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{
+                  width: '32px', height: '32px',
+                  borderRadius: '10px',
+                  background: 'rgba(245,158,11,0.08)',
+                  border: '1px solid rgba(245,158,11,0.18)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                    <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" fill="rgba(245,158,11,0.8)" />
+                  </svg>
+                </div>
+                <div>
+                  <span style={{
+                    fontSize: '15px',
+                    fontWeight: 900,
+                    background: 'linear-gradient(135deg, #f59e0b, #f97316)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    backgroundClip: 'text',
+                    display: 'block',
+                    letterSpacing: '-0.01em',
+                  }}>
+                    DevelOP
+                  </span>
+                  <span style={{
+                    fontSize: '10px',
+                    color: 'rgba(255,255,255,0.18)',
+                    letterSpacing: '0.15em',
+                    fontFamily: 'ui-monospace, monospace',
+                    textTransform: 'uppercase',
+                  }}>
+                    Tucumán · Argentina
+                  </span>
+                </div>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+                <div style={{ width: '1px', height: '24px', background: 'rgba(255,255,255,0.06)' }} />
+                <p style={{
+                  fontSize: '11px',
+                  color: 'rgba(255,255,255,0.1)',
+                  margin: 0,
+                  letterSpacing: '0.04em',
+                  fontFamily: 'ui-monospace, monospace',
+                }}>
+                  © 2025 DevelOP
+                </p>
+              </div>
+            </div>
           </div>
         </motion.div>
       </div>

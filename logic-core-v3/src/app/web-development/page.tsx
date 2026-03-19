@@ -16,6 +16,43 @@ import ShowcaseSection from '@/components/sections/ShowcaseSection'
 import ComparadorSection from '@/components/sections/ComparadorSection'
 import AiSection from '@/components/sections/AiSection'
 
+// Reusable section reveal wrapper
+const SectionReveal = ({
+    children,
+    delay = 0,
+    className = "",
+}: {
+    children: React.ReactNode
+    delay?: number
+    className?: string
+}) => (
+    <motion.div
+        initial={{ opacity: 0, y: 48 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-10%" }}
+        transition={{ duration: 0.9, delay, ease: [0.16, 1, 0.3, 1] }}
+        className={className}
+    >
+        {children}
+    </motion.div>
+)
+
+// Thin gradient divider between sections
+const SectionDivider = ({ color = "cyan" }: { color?: "cyan" | "violet" }) => {
+    const gradient =
+        color === "violet"
+            ? "linear-gradient(90deg, transparent, rgba(139,92,246,0.25) 30%, rgba(99,102,241,0.35) 50%, rgba(139,92,246,0.25) 70%, transparent)"
+            : "linear-gradient(90deg, transparent, rgba(0,229,255,0.12) 30%, rgba(6,182,212,0.25) 50%, rgba(0,229,255,0.12) 70%, transparent)"
+    return (
+        <motion.div
+            initial={{ scaleX: 0, opacity: 0 }}
+            whileInView={{ scaleX: 1, opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 1.4, ease: [0.16, 1, 0.3, 1] }}
+            style={{ height: "1px", background: gradient, transformOrigin: "center", margin: "0 auto" }}
+        />
+    )
+}
 
 export default function WebDevelopmentPage() {
     const heroRef = useRef<HTMLDivElement>(null)
@@ -25,48 +62,62 @@ export default function WebDevelopmentPage() {
 
     return (
         <main className="relative min-h-screen w-full bg-[#030014] overflow-x-clip overflow-y-visible text-white">
-            {/* Tarea 1: Textura de Grano y Ruido (Film Grain) */}
+            {/* Film Grain Texture */}
             <div className="absolute inset-0 z-[1] opacity-[0.03] pointer-events-none bg-[url('https://grainy-gradients.vercel.app/noise.svg')] brightness-100 contrast-150" />
 
-            {/* Construcción del Background Dinámico en R3F */}
+            {/* Global subtle radial glow — top center */}
+            <div
+                aria-hidden="true"
+                className="pointer-events-none fixed top-0 left-1/2 -translate-x-1/2 w-[900px] h-[600px] opacity-30 z-0"
+                style={{ background: "radial-gradient(ellipse at 50% 0%, rgba(0,229,255,0.18) 0%, transparent 65%)" }}
+            />
+
+            {/* Dynamic Background in R3F */}
             <div ref={heroRef} className="absolute top-0 left-0 w-full h-screen overflow-hidden z-0 pointer-events-none">
                 <HeroBackground />
             </div>
 
-            {/* Tarea 2: Tipografía Cinética Masiva + Contenido Principal (Refactor Asimétrico 60/40) */}
+            {/* Hero — 60/40 Split */}
             <motion.div
                 style={{ opacity, scale }}
                 className="relative z-10 w-full h-screen max-w-[1920px] mx-auto flex flex-col lg:flex-row items-center justify-center lg:justify-between pt-24 lg:pt-0"
             >
-                {/* COLUMNA IZQUIERDA (60%) */}
+                {/* LEFT COL (60%) */}
                 <motion.div
                     initial={{ x: -40, opacity: 0 }}
                     animate={{ x: 0, opacity: 1 }}
                     transition={{ delay: 0.2, duration: 1, ease: [0.16, 1, 0.3, 1] }}
                     className="w-full lg:w-[var(--width-hero-left)] flex flex-col items-center lg:items-start text-center lg:text-left px-4 lg:pl-[clamp(48px,8vw,120px)] lg:pr-8 z-10"
                 >
-                    {/* Badge Corporativo */}
-                    <div className="mb-6 lg:mb-8 bg-black/40 backdrop-blur-xl border border-cyan-500/30 px-5 py-2 rounded-full inline-flex shadow-[0_4px_20px_rgba(0,0,0,0.5)] items-center gap-2">
+                    {/* Corporate Badge */}
+                    <motion.div
+                        initial={{ opacity: 0, y: -12 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.15, duration: 0.7 }}
+                        className="mb-6 lg:mb-8 bg-black/40 backdrop-blur-xl border border-cyan-500/30 px-5 py-2 rounded-full inline-flex shadow-[0_4px_20px_rgba(0,0,0,0.5)] items-center gap-2"
+                    >
                         <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
                         <span className="text-zinc-200 font-mono text-[9px] md:text-[10px] uppercase tracking-widest font-bold">
                             TU SUCURSAL MÁS RENTABLE
                         </span>
-                    </div>
+                    </motion.div>
 
                     {/* H1 Backlight */}
                     <div className="absolute top-[30%] left-1/2 lg:left-0 -translate-x-1/2 lg:translate-x-0 w-[60%] lg:w-[40%] h-[30%] bg-cyan-400/20 blur-[120px] pointer-events-none z-0" />
 
-                    {/* Hero Title (Forzando override a text-left en Desktop) */}
+                    {/* Hero Title */}
                     <div className="w-full max-w-6xl relative z-10 [&_div]:lg:items-start [&_div]:lg:justify-start [&_h1]:lg:text-left [&_h1]:lg:justify-start">
                         <HeroTitle text={["Tu negocio, abierto", "las 24 horas."]} />
                     </div>
 
-                    {/* Subtítulo B2B Autoritario */}
+                    {/* Subtitle */}
                     <p className="text-base md:text-lg text-white font-medium max-w-[520px] mt-6 lg:mt-8 tracking-wide leading-relaxed drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)] px-4 lg:px-0">
-                        Transformamos tu Instagram y WhatsApp en un ecosistema que atrae clientes, cotiza y vende solo.<br className="hidden md:block" /> <span className="text-cyan-400/80 font-bold">Sin que tengas que estar presente.</span>
+                        Transformamos tu Instagram y WhatsApp en un ecosistema que atrae clientes, cotiza y vende solo.
+                        <br className="hidden md:block" />
+                        <span className="text-cyan-400/80 font-bold"> Sin que tengas que estar presente.</span>
                     </p>
 
-                    {/* Botón de Cristal Sólido */}
+                    {/* CTA */}
                     <div className="mt-10 lg:mt-12">
                         <MagneticCta
                             onClick={() => document.getElementById('vault-section')?.scrollIntoView({ behavior: 'smooth' })}
@@ -77,7 +128,7 @@ export default function WebDevelopmentPage() {
                     </div>
                 </motion.div>
 
-                {/* LÍNEA DIVISORA VERTICAL (Desktop Only) */}
+                {/* VERTICAL DIVIDER (Desktop Only) */}
                 <motion.div
                     initial={{ scaleY: 0 }}
                     animate={{ scaleY: 1 }}
@@ -86,7 +137,7 @@ export default function WebDevelopmentPage() {
                     style={{ background: "linear-gradient(transparent, #00e5ff40, transparent)" }}
                 />
 
-                {/* COLUMNA DERECHA (40% - Metrics) */}
+                {/* RIGHT COL (40% — Metrics) */}
                 <motion.div
                     initial={{ x: 40, opacity: 0 }}
                     animate={{ x: 0, opacity: 1 }}
@@ -97,7 +148,7 @@ export default function WebDevelopmentPage() {
                 </motion.div>
             </motion.div>
 
-            {/* Trust Bar Compacta Anclada */}
+            {/* Anchored Trust Bar */}
             <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -113,8 +164,14 @@ export default function WebDevelopmentPage() {
                 </div>
             </motion.div>
 
-            {/* Tech Stack Marquee (Infinite Scroll) */}
-            <div className="relative z-10 w-full pt-20 pb-10 overflow-hidden" style={{ WebkitMaskImage: 'linear-gradient(to right, transparent, black 10%, black 90%, transparent)', maskImage: 'linear-gradient(to right, transparent, black 10%, black 90%, transparent)' }}>
+            {/* Tech Stack Marquee */}
+            <div
+                className="relative z-10 w-full pt-20 pb-10 overflow-hidden"
+                style={{
+                    WebkitMaskImage: 'linear-gradient(to right, transparent, black 10%, black 90%, transparent)',
+                    maskImage: 'linear-gradient(to right, transparent, black 10%, black 90%, transparent)',
+                }}
+            >
                 <motion.div
                     className="flex whitespace-nowrap"
                     animate={{ x: ["0%", "-50%"] }}
@@ -127,7 +184,6 @@ export default function WebDevelopmentPage() {
                         <span>Velocidad de carga: &lt; 2 segundos //</span>
                         <span>Negocios del NOA potenciados: 47+ //</span>
                         <span>Tu web: el activo más rentable //</span>
-                        {/* Repeat for seamless loop */}
                         <span>Ventas a la madrugada: todos los días //</span>
                         <span>Clientes nuevos generados: 4.200+ //</span>
                         <span>Posiciones en Google cada mes: 847+ //</span>
@@ -138,34 +194,53 @@ export default function WebDevelopmentPage() {
                 </motion.div>
             </div>
 
-            {/* Comparativa: Caos vs Control */}
-            <ComparadorSection />
+            {/* — SECTIONS — */}
 
-            {/* The Bento Grid Section */}
-            <WebDevelopmentBento />
+            <SectionReveal>
+                <ComparadorSection />
+            </SectionReveal>
 
+            <SectionDivider />
 
-            {/* SEO Section */}
-            <WebDevelopmentSeo />
+            <SectionReveal delay={0.05}>
+                <WebDevelopmentBento />
+            </SectionReveal>
 
-            {/* Diseño que Cautiva Section */}
-            <WebDevelopmentSensory />
+            <SectionDivider color="violet" />
 
-            {/* IA Section */}
-            <AiSection />
+            <SectionReveal delay={0.05}>
+                <WebDevelopmentSeo />
+            </SectionReveal>
 
-            {/* Timeline de Transformación */}
-            <WebDevelopmentTimeline />
+            <SectionDivider />
 
-            {/* Showcase de proyectos reales */}
-            <ShowcaseSection />
+            <SectionReveal delay={0.05}>
+                <WebDevelopmentSensory />
+            </SectionReveal>
 
-            {/* Cinematic Statement Pause */}
-            <StatementSection />
+            <SectionDivider color="violet" />
 
-            {/* Vault: FAQ + CTA + Footer */}
+            <SectionReveal delay={0.05}>
+                <AiSection />
+            </SectionReveal>
+
+            <SectionDivider />
+
+            <SectionReveal delay={0.05}>
+                <WebDevelopmentTimeline />
+            </SectionReveal>
+
+            <SectionDivider color="violet" />
+
+            <SectionReveal delay={0.05}>
+                <ShowcaseSection />
+            </SectionReveal>
+
+            <SectionReveal delay={0.05}>
+                <StatementSection />
+            </SectionReveal>
+
             <VaultSection />
-
-        </main >
+        </main>
     )
 }

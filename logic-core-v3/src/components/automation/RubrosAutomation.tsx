@@ -217,11 +217,12 @@ function Header({ isInView, reducedMotion }: { isInView: boolean, reducedMotion:
         </span>
       </motion.div>
       
-      <motion.h2 
+      <motion.h2
         initial={{ opacity: startOpacity, y: startY }}
         animate={isInView ? { opacity: 1, y: 0 } : {}}
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 0.12 }}
-        className="text-3xl md:text-5xl lg:text-6xl font-black text-white leading-tight mb-4"
+        className="text-3xl md:text-5xl lg:text-6xl font-black text-white leading-[1.05] mb-4"
+        style={{ letterSpacing: '-0.03em' }}
       >
         Tu negocio automatizado.
       </motion.h2>
@@ -296,8 +297,10 @@ function TabSelector({
                 : 'bg-white/[0.02] border-white/[0.05] hover:bg-white/[0.04]'}
               border
             `}
-            style={{ 
-              boxShadow: isActive ? `0 0 20px rgba(${r.colorRgb}, 0.15)` : 'none'
+            style={{
+              boxShadow: isActive
+                ? `0 0 20px rgba(${r.colorRgb}, 0.18), 0 8px 24px rgba(${r.colorRgb}, 0.1), 0 2px 8px rgba(0,0,0,0.2)`
+                : '0 2px 6px rgba(0,0,0,0.1)',
             }}
           >
             {/* Background pill animation for active state */}
@@ -309,9 +312,6 @@ function TabSelector({
               />
             )}
             
-            <span className={`relative z-10 text-2xl transition-transform duration-300 ${isActive ? 'scale-110' : 'group-hover:scale-110'}`}>
-              {r.icon}
-            </span>
             <span className={`
               relative z-10 font-bold tracking-wide transition-colors duration-300
               ${isActive ? 'text-white' : 'text-white/40 group-hover:text-white/60'}
@@ -322,7 +322,7 @@ function TabSelector({
             {/* Underline & Shimmer for active state */}
             {isActive && (
               <>
-                <div 
+                <div
                   className="absolute inset-0 pointer-events-none"
                   style={{
                     background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.06) 50%, transparent 100%)',
@@ -334,6 +334,17 @@ function TabSelector({
                   layoutId="activeTabUnderlineRubro"
                   className="absolute bottom-0 left-0 right-0 h-[2px] rounded-full"
                   style={{ background: r.gradient }}
+                />
+                {/* Ambient glow below tab */}
+                <div
+                  className="absolute pointer-events-none"
+                  style={{
+                    bottom: '-12px',
+                    left: '10%', right: '10%',
+                    height: '20px',
+                    background: `radial-gradient(ellipse, rgba(${r.colorRgb},0.35) 0%, transparent 70%)`,
+                    filter: 'blur(6px)',
+                  }}
                 />
               </>
             )}
@@ -358,11 +369,13 @@ function AutomationsPanel({ active, rubro }: { active: number, rubro: Rubro }) {
         className="flex flex-col gap-8"
       >
         <div>
-          <h3 className="text-3xl md:text-5xl lg:text-6xl font-black text-white leading-tight mb-4 pr-4">
+          <h3 className="text-3xl md:text-5xl lg:text-6xl font-black text-white leading-[1.05] mb-5 pr-4"
+            style={{ letterSpacing: '-0.03em' }}
+          >
             {content.headline}{' '}
             <span style={{ color: rubro.color }}>{content.headlineAccent}</span>
           </h3>
-          <p className="text-white/45 text-base md:text-lg max-w-lg leading-relaxed">
+          <p className="text-white/45 text-base md:text-lg max-w-lg leading-[1.75]">
             {content.subhead}
           </p>
         </div>
@@ -374,7 +387,7 @@ function AutomationsPanel({ active, rubro }: { active: number, rubro: Rubro }) {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 + idx * 0.09, duration: 0.5, ease: 'easeOut' }}
-              className="group relative flex items-start gap-5 p-5 rounded-2xl hover:bg-white/[0.02] transition-colors border-b border-white/[0.05] last:border-0"
+              className="group relative flex items-start gap-5 p-5 rounded-2xl transition-all duration-200 border-b border-white/[0.05] last:border-0 hover:bg-white/[0.025]"
             >
               <div 
                 className="flex items-center justify-center w-12 h-12 rounded-xl shrink-0 text-xl shadow-lg"
@@ -516,28 +529,47 @@ function ChatMockup({ rubro }: { rubro: Rubro }) {
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: -20 }}
           transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-          className="w-full max-w-[400px] h-[540px] mx-auto rounded-[24px] bg-white/[0.03] border border-white/[0.08] relative overflow-hidden flex flex-col backdrop-blur-md transition-shadow duration-500"
-          style={{ boxShadow: `0 0 60px rgba(${rubro.colorRgb}, 0.08), 0 24px 64px rgba(0,0,0,0.5)` }}
+          className="w-full max-w-[400px] h-[540px] mx-auto rounded-[24px] bg-white/[0.025] border border-white/[0.08] relative overflow-hidden flex flex-col backdrop-blur-md transition-all duration-500"
+          style={{ boxShadow: `0 0 0 1px rgba(${rubro.colorRgb}, 0.06), 0 0 60px rgba(${rubro.colorRgb}, 0.1), 0 24px 64px rgba(0,0,0,0.5)` }}
         >
           {/* Header del Chat */}
-          <div className="px-6 py-4 border-b border-white/[0.08] bg-white/[0.04] flex items-center justify-between">
+          <div className="px-6 py-4 border-b border-white/[0.08] flex items-center justify-between relative overflow-hidden"
+            style={{
+              background: `linear-gradient(135deg, rgba(${rubro.colorRgb},0.07) 0%, rgba(255,255,255,0.03) 100%)`,
+              boxShadow: `inset 0 -1px 0 rgba(${rubro.colorRgb},0.1), 0 4px 20px rgba(${rubro.colorRgb},0.06)`,
+            }}
+          >
+            {/* Subtle glow */}
+            <div style={{
+              position: 'absolute',
+              top: '-20px', left: '10%',
+              width: '80%', height: '60px',
+              background: `radial-gradient(ellipse, rgba(${rubro.colorRgb},0.15) 0%, transparent 70%)`,
+              filter: 'blur(12px)',
+              pointerEvents: 'none',
+              transition: 'background 600ms ease',
+            }} />
             <div className="flex items-center gap-3">
-              <div 
-                className="w-9 h-9 rounded-full flex items-center justify-center text-sm shadow-inner shrink-0"
+              <div
+                className="w-9 h-9 rounded-full flex items-center justify-center shadow-inner shrink-0"
                 style={{ background: `linear-gradient(135deg, rgba(${rubro.colorRgb},0.8), rgba(${rubro.colorRgb},0.4))` }}
               >
-                🤖
+                <span style={{ fontSize: '11px', fontWeight: 900, color: 'white', letterSpacing: '0.05em', fontFamily: 'ui-monospace, monospace' }}>AI</span>
               </div>
               <div>
                 <h4 className="text-white text-sm font-bold leading-none mb-1.5">
                   Asistente IA · DevelOP
                 </h4>
                 <div className="flex items-center gap-1.5">
-                  <span 
-                    className="w-1.5 h-1.5 rounded-full"
-                    style={{ background: rubro.color }}
-                  />
-                  <span className="text-[11px]" style={{ color: rubro.color }}>En línea ahora</span>
+                  <div className="relative flex h-1.5 w-1.5">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-60"
+                      style={{ background: rubro.color }}
+                    />
+                    <span className="relative inline-flex rounded-full h-1.5 w-1.5"
+                      style={{ background: rubro.color }}
+                    />
+                  </div>
+                  <span className="text-[11px] font-medium" style={{ color: rubro.color }}>En línea ahora</span>
                 </div>
               </div>
             </div>

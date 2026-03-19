@@ -25,6 +25,7 @@ import Preloader from "@/components/ui/Preloader";
 import { LogicCompanion } from "@/modules/ai-companion";
 import { TransitionProvider } from "@/context/TransitionContext";
 import { Shutter } from "@/components/layout/Shutter";
+import { PublicOnlyComponents } from "@/components/layout/PublicOnlyComponents";
 
 export default function RootLayout({
   children,
@@ -40,13 +41,19 @@ export default function RootLayout({
         <NoiseOverlay />
         <SmoothScroll>
           <TransitionProvider>
-            <Shutter />
+            <PublicOnlyComponents>
+              <Shutter />
+            </PublicOnlyComponents>
             {children}
-            <DynamicDock />
+            <PublicOnlyComponents>
+              <DynamicDock />
+            </PublicOnlyComponents>
           </TransitionProvider>
         </SmoothScroll>
-        <Preloader />
-        <LogicCompanion />
+        <PublicOnlyComponents>
+          <Preloader />
+          <LogicCompanion />
+        </PublicOnlyComponents>
       </body>
     </html>
   );

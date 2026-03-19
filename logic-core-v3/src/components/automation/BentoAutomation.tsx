@@ -261,7 +261,14 @@ function GearDecoration({
           transformOrigin: '40px 40px',
         }}
       >
-        <text x="40" y="40" fontSize="60" textAnchor="middle" dominantBaseline="central" fill={color}>⚙</text>
+        <circle cx="40" cy="40" r="36" fill="none" stroke={color} strokeWidth="1.5"/>
+        <circle cx="40" cy="40" r="27" fill="none" stroke={color} strokeWidth="1"/>
+        <circle cx="40" cy="40" r="18" fill="none" stroke={color} strokeWidth="1"/>
+        <circle cx="40" cy="40" r="7" fill={color} opacity="0.35"/>
+        {[0,45,90,135,180,225,270,315].map((a) => {
+          const r = (a * Math.PI) / 180
+          return <line key={a} x1={40+31*Math.cos(r)} y1={40+31*Math.sin(r)} x2={40+36*Math.cos(r)} y2={40+36*Math.sin(r)} stroke={color} strokeWidth="2"/>
+        })}
       </svg>
       <svg
         ref={gear2Ref}
@@ -273,7 +280,13 @@ function GearDecoration({
           transformOrigin: '20px 20px',
         }}
       >
-        <text x="20" y="20" fontSize="30" textAnchor="middle" dominantBaseline="central" fill={`rgba(${colorRgb}, 0.7)`}>⚙</text>
+        <circle cx="20" cy="20" r="17" fill="none" stroke={`rgba(${colorRgb},0.7)`} strokeWidth="1.5"/>
+        <circle cx="20" cy="20" r="11" fill="none" stroke={`rgba(${colorRgb},0.5)`} strokeWidth="1"/>
+        <circle cx="20" cy="20" r="5" fill={`rgba(${colorRgb},0.4)`}/>
+        {[0,60,120,180,240,300].map((a) => {
+          const r = (a * Math.PI) / 180
+          return <line key={a} x1={20+14*Math.cos(r)} y1={20+14*Math.sin(r)} x2={20+17*Math.cos(r)} y2={20+17*Math.sin(r)} stroke={`rgba(${colorRgb},0.7)`} strokeWidth="1.5"/>
+        })}
       </svg>
     </div>
   )
@@ -396,7 +409,7 @@ function BentoFlipCard({
             padding: 'clamp(18px, 2.5vw, 28px)',
             background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%)',
             border: '1px solid rgba(239, 68, 68, 0.15)',
-            boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 8px 32px rgba(0, 0, 0, 0.4)',
+            boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.07), inset 0 -1px 0 rgba(239,68,68,0.06), 0 0 0 1px rgba(239,68,68,0.05), 0 8px 32px rgba(0,0,0,0.45), 0 2px 8px rgba(0,0,0,0.3)',
           }}>
             {/* Dekor Line */}
             <div style={{
@@ -430,26 +443,35 @@ function BentoFlipCard({
             {workflow.id === 0 && counting && !flipped && (
               <div style={{
                 marginBottom: '10px',
-                padding: '8px 12px',
-                background: 'rgba(239, 68, 68, 0.08)',
-                border: '1px solid rgba(239, 68, 68, 0.2)',
-                borderRadius: '10px',
+                padding: '10px 14px',
+                background: 'rgba(239, 68, 68, 0.07)',
+                border: '1px solid rgba(239, 68, 68, 0.22)',
+                borderRadius: '12px',
+                position: 'relative',
+                overflow: 'hidden',
               }}>
+                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '1px', background: 'linear-gradient(90deg, transparent, rgba(239,68,68,0.5) 50%, transparent)' }} />
                 <p style={{
-                  fontSize: '9px',
-                  color: 'rgba(239, 68, 68, 0.6)',
-                  margin: '0 0 2px',
-                  letterSpacing: '0.1em',
-                  fontFamily: 'monospace',
+                  fontSize: '8px',
+                  color: 'rgba(239, 68, 68, 0.55)',
+                  margin: '0 0 4px',
+                  letterSpacing: '0.18em',
+                  fontFamily: 'ui-monospace, monospace',
+                  textTransform: 'uppercase',
+                  fontWeight: 700,
                 }}>
-                  COSTO DEL CAOS — HOY
+                  COSTO DEL CAOS — EN VIVO
                 </p>
                 <p style={{
-                  fontSize: '24px',
+                  fontSize: '28px',
                   fontWeight: 900,
                   color: '#ef4444',
                   margin: 0,
-                  fontFamily: 'monospace',
+                  fontFamily: 'ui-monospace, monospace',
+                  letterSpacing: '-0.04em',
+                  fontVariantNumeric: 'tabular-nums',
+                  lineHeight: 1,
+                  textShadow: '0 0 20px rgba(239,68,68,0.4)',
                 }}>
                   ${loss.toLocaleString('es-AR')}
                 </p>
@@ -457,11 +479,18 @@ function BentoFlipCard({
             )}
 
             <div className="inline-flex items-center gap-2 bg-red-500/10 border border-red-500/20 rounded-lg px-2.5 py-1.5">
-              <span className="text-xs">⚠</span>
               <span className="text-[11px] font-bold text-red-500/90">{workflow.antes.pain}</span>
             </div>
 
-            {!everFlipped && <div className="absolute bottom-3 right-4 text-[10px] text-white/10 font-mono">hover →</div>}
+            {!everFlipped && (
+              <div className="absolute bottom-4 right-4 flex items-center gap-1.5">
+                <div className="relative flex h-1.5 w-1.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500/50 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-red-500/40" />
+                </div>
+                <span className="text-[8px] font-mono text-white/20 tracking-[0.1em]">HOVER</span>
+              </div>
+            )}
           </div>
         )}
 
@@ -474,10 +503,10 @@ function BentoFlipCard({
           transform: shouldReduceMotion ? 'none' : 'rotateY(180deg)',
           borderRadius: '20px',
           overflow: 'hidden',
-          padding: 'clamp(18px, 2.5vw, 28px)',
-          background: `linear-gradient(135deg, rgba(${workflow.colorRgb}, 0.1) 0%, rgba(255, 255, 255, 0.02) 100%)`,
-          border: `1px solid rgba(${workflow.colorRgb}, 0.25)`,
-          boxShadow: `inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 0 40px rgba(${workflow.colorRgb}, 0.08), 0 8px 32px rgba(0, 0, 0, 0.5)`,
+          padding: 'clamp(20px, 2.5vw, 30px)',
+          background: `linear-gradient(145deg, rgba(${workflow.colorRgb}, 0.12) 0%, rgba(255, 255, 255, 0.02) 100%)`,
+          border: `1px solid rgba(${workflow.colorRgb}, 0.28)`,
+          boxShadow: `inset 0 1px 0 rgba(255,255,255,0.12), inset 0 -1px 0 rgba(${workflow.colorRgb},0.08), 0 0 0 1px rgba(${workflow.colorRgb},0.08), 0 0 60px rgba(${workflow.colorRgb},0.14), 0 4px 16px rgba(${workflow.colorRgb},0.1), 0 12px 40px rgba(0,0,0,0.55), 0 2px 6px rgba(0,0,0,0.4)`,
         }}>
           {/* Dekor Line */}
           <div style={{
@@ -511,7 +540,9 @@ function BentoFlipCard({
             </div>
 
             <div className="inline-flex items-center gap-2 rounded-lg px-2.5 py-1.5" style={{ background: `rgba(${workflow.colorRgb}, 0.1)`, border: `1px solid rgba(${workflow.colorRgb}, 0.3)` }}>
-              <span className="text-emerald-400 text-xs">✓</span>
+              <svg width="10" height="8" viewBox="0 0 10 8" fill="none" style={{ flexShrink: 0 }}>
+                <path d="M1 4L3.8 7 9 1" stroke="#10b981" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
               <span className="text-[11px] font-bold" style={{ color: workflow.color }}>{workflow.despues.gain}</span>
             </div>
           </div>
@@ -539,7 +570,8 @@ function Header({ isInView }: { isInView: boolean }) {
         initial={{ opacity: 0, y: 20 }}
         animate={isInView ? { opacity: 1, y: 0 } : {}}
         transition={{ duration: 0.6, delay: 0.25 }}
-        className="text-3xl md:text-5xl lg:text-6xl font-black text-white leading-tight mb-4"
+        className="text-3xl md:text-5xl lg:text-6xl font-black text-white leading-[1.05] mb-4"
+        style={{ letterSpacing: '-0.03em' }}
       >
         Tus procesos, en piloto automático.
       </motion.h2>
@@ -624,14 +656,17 @@ export default function BentoAutomation() {
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mt-12 text-center p-6 bg-amber-500/5 border border-amber-500/20 rounded-2xl max-w-2xl mx-auto"
+            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+            className="relative overflow-hidden mt-12 text-center p-7 bg-amber-500/[0.05] border border-amber-500/20 rounded-2xl max-w-2xl mx-auto"
+            style={{ boxShadow: '0 0 40px rgba(245,158,11,0.06), 0 8px 24px rgba(0,0,0,0.3)' }}
           >
-            <p className="text-white/60 text-sm md:text-base mb-2">
+            <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-amber-500/50 to-transparent" />
+            <p className="text-white/60 text-sm md:text-base mb-3 leading-relaxed">
               ¿Reconocés tu operación en estos casos?
             </p>
-            <a 
-              href="#calculadora" 
-              className="text-amber-500 font-bold hover:underline transition-all"
+            <a
+              href="#calculadora"
+              className="inline-flex items-center gap-2 text-amber-500 font-bold text-sm tracking-wide hover:text-amber-400 transition-colors"
             >
               Mirá cómo lo automatizamos →
             </a>

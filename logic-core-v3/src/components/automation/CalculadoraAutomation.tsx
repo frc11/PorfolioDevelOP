@@ -109,6 +109,7 @@ function Header({ isInView }: { isInView: boolean }) {
         animate={isInView ? { opacity: 1, y: 0 } : {}}
         transition={{ duration: 0.6, delay: 0.25 }}
         className="text-3xl md:text-5xl lg:text-6xl font-black text-white leading-tight mb-4"
+        style={{ letterSpacing: '-0.03em' }}
       >
         Automatizar no es un gasto.
         <br />
@@ -232,10 +233,10 @@ function SliderSide({
 
         <div className="relative h-10 flex items-center">
           {/* Rail */}
-          <div className="absolute h-2 w-full bg-white/10 rounded-full overflow-hidden">
+          <div className="absolute h-2 w-full rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.08)', boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.3)' }}>
             <div
-              className="h-full bg-gradient-to-r from-amber-500 to-orange-600 rounded-full shadow-[0_0_15px_rgba(245,158,11,0.4)] transition-[width] duration-100"
-              style={{ width: `${mainPct}%` }}
+              className="h-full rounded-full transition-[width] duration-100"
+              style={{ width: `${mainPct}%`, background: 'linear-gradient(90deg, #f59e0b, #f97316)', boxShadow: '0 0 18px rgba(245,158,11,0.5)' }}
             />
           </div>
           {/* Input Invisible */}
@@ -250,8 +251,8 @@ function SliderSide({
           />
           {/* Thumb Custom */}
           <div
-            className="absolute w-7 h-7 bg-gradient-to-br from-amber-500 to-orange-600 rounded-full border-[3px] border-[#070709] shadow-[0_0_20px_rgba(245,158,11,0.6),0_4px_10px_rgba(0,0,0,0.5)] pointer-events-none transition-[left] duration-100 z-20"
-            style={{ left: `calc(${mainPct}% - 14px)` }}
+            className="absolute w-7 h-7 rounded-full border-[3px] border-[#070709] pointer-events-none transition-[left] duration-100 z-20"
+            style={{ left: `calc(${mainPct}% - 14px)`, background: 'linear-gradient(135deg, #fbbf24, #f97316)', boxShadow: '0 0 24px rgba(245,158,11,0.7), 0 4px 12px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.3)' }}
           />
         </div>
 
@@ -262,19 +263,20 @@ function SliderSide({
       </div>
 
       {/* Ejemplos de Tareas */}
-      <div className="p-4 bg-amber-500/[0.03] border border-amber-500/10 rounded-2xl">
-        <p className="text-[10px] font-mono font-bold text-amber-500/60 tracking-[0.2em] mb-4 uppercase">
+      <div className="relative overflow-hidden p-5 bg-amber-500/[0.03] border border-amber-500/10 rounded-2xl">
+        <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-amber-500/30 to-transparent" />
+        <p className="text-[10px] font-mono font-bold text-amber-500/65 tracking-[0.22em] mb-4 uppercase">
           Ejemplos de tareas automatizables
         </p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2.5">
           {[
             '📧 Envíos de seguimiento',
             '🧾 Carga de facturas AFIP',
             '📊 Reportes de ventas',
             '💬 Respuesta a consultas',
           ].map((t, i) => (
-            <p key={i} className="text-xs text-white/30 flex items-center gap-2">
-              <span className="w-1 h-1 bg-amber-500/30 rounded-full" /> {t}
+            <p key={i} className="text-xs text-white/35 flex items-center gap-2.5">
+              <span className="w-1 h-1 bg-amber-500/40 rounded-full flex-shrink-0" />{t}
             </p>
           ))}
         </div>
@@ -405,32 +407,41 @@ function OdometerSide({ resultados, isInView }: { resultados: ROIResultados, isI
       className="flex flex-col gap-4"
     >
       {/* Card principal — HORAS */}
-      <div className="relative group overflow-hidden p-6 md:p-9 rounded-[20px] border border-amber-500/25 bg-gradient-to-br from-amber-500/10 to-orange-600/5">
+      <div className="relative group overflow-hidden p-7 md:p-10 rounded-[22px] border border-amber-500/25 bg-gradient-to-br from-amber-500/10 to-orange-600/5"
+        style={{ boxShadow: '0 0 0 1px rgba(245,158,11,0.08), 0 24px 56px rgba(0,0,0,0.4), 0 8px 20px rgba(245,158,11,0.08)' }}
+      >
         {/* Shimmer top */}
-        <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-amber-500/80 to-transparent" />
+        <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-amber-500 to-transparent" style={{ opacity: 0.7 }} />
 
-        <p className="text-[10px] md:text-[11px] font-mono font-bold text-amber-500/60 tracking-[0.2em] mb-2 uppercase">
+        <p className="text-[9px] md:text-[10px] font-mono font-bold tracking-[0.28em] mb-2 uppercase" style={{ color: 'rgba(245,158,11,0.55)' }}>
           HORAS QUE RECUPERA TU EQUIPO
         </p>
 
-        <div className="flex items-end gap-2">
+        <div className="flex items-end gap-3 mb-1">
           <OdometerDigit
             value={resultados.horasAhorradas}
-            fontSize="clamp(52px, 7vw, 80px)"
+            fontSize="clamp(64px, 8vw, 96px)"
             color="#f59e0b"
           />
-          <span className="text-xl md:text-2xl text-amber-500/60 font-mono mb-2">hs/mes</span>
+          <div className="flex flex-col mb-2 gap-0.5">
+            <span className="text-base text-amber-500/80 font-mono font-black leading-none">hs</span>
+            <span className="text-[10px] text-amber-500/40 font-mono font-bold leading-none tracking-wider">/MES</span>
+          </div>
         </div>
 
-        <p className="text-[13px] md:text-sm text-white/35 mt-2">
-          Equivalente a <strong className="text-white font-bold">{resultados.diasLibres} días laborales</strong> libres
+        <p className="text-[12px] text-white/35 mt-1 mb-6" style={{ fontVariantNumeric: 'tabular-nums' }}>
+          ≈ <strong className="text-white/75 font-bold">{resultados.diasLibres} días laborales</strong> devueltos a tu equipo
         </p>
 
-        <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden mt-6">
+        {/* Separador sutil */}
+        <div className="h-px w-full mb-5" style={{ background: 'linear-gradient(90deg, rgba(245,158,11,0.2), rgba(249,115,22,0.1), transparent)' }} />
+
+        <div className="h-1.5 w-full rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.05)' }}>
           <motion.div
             animate={{ width: `${Math.min((resultados.horasAhorradas / 200) * 100, 100)}%` }}
             transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-            className="h-full bg-gradient-to-r from-amber-500 to-orange-600 rounded-full shadow-[0_0_10px_rgba(245,158,11,0.5)]"
+            className="h-full rounded-full"
+            style={{ background: 'linear-gradient(90deg, #f59e0b, #f97316)', boxShadow: '0 0 14px rgba(245,158,11,0.7)' }}
           />
         </div>
       </div>
@@ -438,35 +449,39 @@ function OdometerSide({ resultados, isInView }: { resultados: ROIResultados, isI
       {/* Grid 2 cards secundarias */}
       <div className="grid grid-cols-2 gap-3">
         {/* USD */}
-        <div className="p-4 md:p-5 bg-white/[0.02] border border-amber-500/10 rounded-2xl">
-          <p className="text-[10px] font-mono font-bold text-amber-500/50 tracking-wider mb-2 uppercase">
+        <div className="relative overflow-hidden p-5 md:p-6 bg-white/[0.025] border border-amber-500/15 rounded-2xl"
+          style={{ boxShadow: '0 4px 24px rgba(0,0,0,0.25), 0 0 0 1px rgba(245,158,11,0.04)' }}
+        >
+          <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-amber-500/50 to-transparent" />
+          <p className="text-[10px] font-mono font-bold text-amber-500/55 tracking-[0.18em] mb-3 uppercase">
             AHORRO USD/MES
           </p>
           <div className="flex items-end gap-0.5">
-            <span className="text-sm text-amber-500/60 mb-1">$</span>
-            <OdometerDigit value={resultados.ahorroUSD} fontSize="24px" color="#f59e0b" />
-            <span className="text-[10px] text-white/20 mb-1 ml-1 font-mono">USD</span>
+            <span className="text-sm text-amber-500/60 mb-1 font-mono">$</span>
+            <OdometerDigit value={resultados.ahorroUSD} fontSize="26px" color="#f59e0b" />
+            <span className="text-[10px] text-white/25 mb-1 ml-1.5 font-mono font-bold">USD</span>
           </div>
         </div>
 
         {/* ROI */}
-        <div className={`p-4 md:p-5 border rounded-2xl transition-colors ${
-          resultados.roiPct > 0 
-            ? 'bg-emerald-500/5 border-emerald-500/20' 
+        <div className={`relative overflow-hidden p-5 md:p-6 border rounded-2xl transition-colors ${
+          resultados.roiPct > 0
+            ? 'bg-emerald-500/5 border-emerald-500/20'
             : 'bg-red-500/5 border-red-500/20'
-        }`}>
-          <p className={`text-[10px] font-mono font-bold tracking-wider mb-2 uppercase ${
-            resultados.roiPct > 0 ? 'text-emerald-500/50' : 'text-red-500/50'
+        }`} style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.2)' }}>
+          <div className={`absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent ${resultados.roiPct > 0 ? 'via-emerald-500/40' : 'via-red-500/40'} to-transparent`} />
+          <p className={`text-[10px] font-mono font-bold tracking-[0.18em] mb-3 uppercase ${
+            resultados.roiPct > 0 ? 'text-emerald-500/55' : 'text-red-500/55'
           }`}>
             ROI MENSUAL
           </p>
           <div className="flex items-end gap-0.5">
-            <OdometerDigit 
-              value={resultados.roiPct} 
-              fontSize="24px" 
-              color={resultados.roiPct > 0 ? '#10b981' : '#ef4444'} 
+            <OdometerDigit
+              value={resultados.roiPct}
+              fontSize="26px"
+              color={resultados.roiPct > 0 ? '#10b981' : '#ef4444'}
             />
-            <span className={`text-sm mb-1 ${
+            <span className={`text-sm mb-1 font-mono font-bold ${
               resultados.roiPct > 0 ? 'text-emerald-500/60' : 'text-red-500/60'
             }`}>%</span>
           </div>
@@ -478,9 +493,11 @@ function OdometerSide({ resultados, isInView }: { resultados: ROIResultados, isI
         href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER}?text=Hola%20DevelOP%2C%20calculé%20que%20puedo%20ahorrar%20${resultados.horasAhorradas}%20horas%20al%20mes`}
         target="_blank"
         rel="noopener noreferrer"
-        whileHover={{ scale: 1.02, y: -2 }}
-        whileTap={{ scale: 0.98 }}
-        className="flex items-center justify-center gap-2 py-4 px-6 bg-gradient-to-r from-amber-500 to-orange-600 text-[#070709] font-black text-sm rounded-full shadow-lg shadow-amber-500/20 hover:shadow-amber-500/30 transition-all uppercase tracking-tight"
+        whileHover={{ scale: 1.03, y: -2 }}
+        whileTap={{ scale: 0.97 }}
+        transition={{ type: 'spring', stiffness: 400, damping: 15 }}
+        className="flex items-center justify-center gap-2.5 py-4 px-8 bg-gradient-to-r from-amber-500 to-orange-600 text-[#070709] font-black text-sm rounded-full uppercase tracking-[0.06em]"
+        style={{ boxShadow: '0 0 32px rgba(245,158,11,0.35), 0 8px 24px rgba(0,0,0,0.3)' }}
       >
         💬 Quiero ahorrar estas horas →
       </motion.a>

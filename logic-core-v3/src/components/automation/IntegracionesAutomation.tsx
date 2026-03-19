@@ -164,7 +164,8 @@ function Header({ isInView }: { isInView: boolean }) {
         initial={shouldReduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
         animate={isInView ? { opacity: 1, y: 0 } : {}}
         transition={{ duration: 0.6, delay: 0.25 }}
-        className="text-3xl md:text-5xl lg:text-6xl font-black text-white leading-[1.1]"
+        className="text-3xl md:text-5xl lg:text-6xl font-black text-white leading-[1.05]"
+        style={{ letterSpacing: '-0.03em' }}
       >
         Todo lo que ya usás.
         <br />
@@ -206,14 +207,21 @@ function CategoryTabs({
     >
       <motion.button
         onClick={() => setActiveCategory(null)}
-        whileHover={{ scale: 1.03 }}
+        whileHover={{ scale: 1.03, y: -1 }}
         whileTap={{ scale: 0.97 }}
-        className={`px-4 py-2 rounded-full text-xs font-mono font-bold transition-all duration-300 border ${
+        className={`relative px-4 py-2 rounded-full text-xs font-mono font-bold transition-all duration-250 border overflow-hidden ${
           !activeCategory
-            ? 'bg-amber-500/15 border-amber-500/40 text-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.15)]'
+            ? 'border-amber-500/45 text-amber-500'
             : 'bg-white/5 border-white/10 text-white/40 hover:border-white/20 hover:text-white/60'
         }`}
+        style={!activeCategory ? {
+          background: 'rgba(245,158,11,0.12)',
+          boxShadow: '0 0 20px rgba(245,158,11,0.18), 0 4px 12px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.08)',
+        } : {}}
       >
+        {!activeCategory && (
+          <div style={{ position: 'absolute', bottom: '-4px', left: '10%', right: '10%', height: '8px', background: 'radial-gradient(ellipse, rgba(245,158,11,0.4) 0%, transparent 70%)', filter: 'blur(3px)' }} />
+        )}
         ✦ TODAS
       </motion.button>
 
@@ -221,14 +229,21 @@ function CategoryTabs({
         <motion.button
           key={cat.id}
           onClick={() => setActiveCategory(activeCategory === cat.id ? null : cat.id)}
-          whileHover={{ scale: 1.03 }}
+          whileHover={{ scale: 1.03, y: -1 }}
           whileTap={{ scale: 0.97 }}
-          className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold transition-all duration-300 border ${
+          className={`relative flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold transition-all duration-250 border overflow-hidden ${
             activeCategory === cat.id
-              ? 'bg-amber-500/15 border-amber-500/40 text-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.15)]'
+              ? 'border-amber-500/45 text-amber-500'
               : 'bg-white/5 border-white/10 text-white/40 hover:border-white/20 hover:text-white/60'
           }`}
+          style={activeCategory === cat.id ? {
+            background: 'rgba(245,158,11,0.12)',
+            boxShadow: '0 0 20px rgba(245,158,11,0.18), 0 4px 12px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.08)',
+          } : {}}
         >
+          {activeCategory === cat.id && (
+            <div style={{ position: 'absolute', bottom: '-4px', left: '10%', right: '10%', height: '8px', background: 'radial-gradient(ellipse, rgba(245,158,11,0.4) 0%, transparent 70%)', filter: 'blur(3px)' }} />
+          )}
           <span className="text-sm leading-none">{cat.icon}</span>
           {cat.label.toUpperCase()}
         </motion.button>
@@ -403,11 +418,20 @@ function AppsGrid({
             }}
             onMouseEnter={() => setHoveredApp(app.id)}
             onMouseLeave={() => setHoveredApp(null)}
-            className={`relative p-5 rounded-2xl border transition-all duration-500 flex flex-col items-center gap-3 overflow-hidden ${
-              hoveredApp === app.id
-                ? `border-[rgba(${app.colorRgb},0.4)] bg-[rgba(${app.colorRgb},0.08)] shadow-[0_10px_25px_rgba(${app.colorRgb},0.1)]`
-                : 'border-white/10 bg-white/[0.02]'
-            }`}
+            className={`relative p-5 md:p-6 rounded-2xl border flex flex-col items-center gap-3 overflow-hidden cursor-default`}
+            style={{
+              transition: 'all 250ms ease',
+              border: hoveredApp === app.id
+                ? `1px solid rgba(${app.colorRgb},0.45)`
+                : '1px solid rgba(255,255,255,0.07)',
+              background: hoveredApp === app.id
+                ? `rgba(${app.colorRgb},0.09)`
+                : 'rgba(255,255,255,0.02)',
+              boxShadow: hoveredApp === app.id
+                ? `0 0 0 1px rgba(${app.colorRgb},0.1), 0 12px 36px rgba(${app.colorRgb},0.16), 0 6px 16px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.08)`
+                : '0 2px 8px rgba(0,0,0,0.15)',
+              transform: hoveredApp === app.id ? 'translateY(-3px)' : 'none',
+            }}
           >
             {/* Pop Badge */}
             {app.popular && (
@@ -433,7 +457,7 @@ function AppsGrid({
               {app.emoji}
             </span>
 
-            <span className={`text-[11px] font-bold text-center leading-tight tracking-wide transition-colors duration-300 ${
+            <span className={`text-[11px] font-bold text-center leading-tight tracking-[0.08em] transition-colors duration-300 ${
               hoveredApp === app.id ? 'text-white' : 'text-white/30'
             }`}>
               {app.name.toUpperCase()}
@@ -503,7 +527,8 @@ export default function IntegracionesAutomation() {
               initial={shouldReduceMotion ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.8 }}
               animate={isInView ? { opacity: 1, scale: 1 } : {}}
               transition={{ duration: 0.7, delay: 0.55, ease: [0.16, 1, 0.3, 1] }}
-              className="relative w-28 h-28 md:w-32 md:h-32 rounded-full bg-amber-500/10 border-2 border-amber-500/40 flex flex-col items-center justify-center shadow-[0_0_80px_rgba(245,158,11,0.15)] overflow-visible"
+              className="relative w-28 h-28 md:w-32 md:h-32 rounded-full bg-amber-500/10 border-2 border-amber-500/45 flex flex-col items-center justify-center overflow-visible"
+            style={{ boxShadow: '0 0 0 1px rgba(245,158,11,0.12), 0 0 80px rgba(245,158,11,0.2), 0 0 30px rgba(249,115,22,0.12), 0 24px 48px rgba(0,0,0,0.4)' }}
             >
               {/* Anillos pulsantes */}
               {[1, 2, 3].map(ring => (
@@ -541,6 +566,13 @@ export default function IntegracionesAutomation() {
           }}
         />
       </div>
+
+      <style jsx global>{`
+        @keyframes ringPulseAmber {
+          0%, 100% { transform: scale(1); opacity: 0.15 }
+          50% { transform: scale(1.08); opacity: 0.05 }
+        }
+      `}</style>
     </section>
   )
 }

@@ -383,19 +383,27 @@ function FloatingStat({
         animate={{ y: [0, -10, 0] }}
         transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut', delay: delay * 0.5 }}
         style={{
-          background: 'rgba(245, 158, 11, 0.03)',
-          backdropFilter: 'blur(8px)',
-          WebkitBackdropFilter: 'blur(8px)',
-          border: '1px solid rgba(245, 158, 11, 0.15)',
+          background: 'rgba(7, 7, 9, 0.55)',
+          backdropFilter: 'blur(20px) saturate(160%)',
+          WebkitBackdropFilter: 'blur(20px) saturate(160%)',
+          border: '1px solid rgba(245, 158, 11, 0.2)',
           borderRadius: '16px',
-          padding: '12px 20px',
-          boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
+          padding: '14px 22px',
+          boxShadow: '0 0 0 1px rgba(245,158,11,0.08), 0 16px 40px rgba(0,0,0,0.5), 0 4px 12px rgba(245,158,11,0.1)',
+          position: 'relative',
+          overflow: 'hidden',
         }}
       >
-        <p style={{ fontSize: '9px', color: 'rgba(245, 158, 11, 0.6)', fontWeight: 700, letterSpacing: '0.1em', margin: '0 0 4px', textTransform: 'uppercase' }}>
+        <div style={{
+          position: 'absolute',
+          top: 0, left: 0, right: 0,
+          height: '1px',
+          background: 'linear-gradient(90deg, transparent, rgba(245,158,11,0.6) 50%, transparent)',
+        }}/>
+        <p style={{ fontSize: '9px', color: 'rgba(245, 158, 11, 0.65)', fontWeight: 700, letterSpacing: '0.18em', margin: '0 0 5px', textTransform: 'uppercase', fontFamily: 'ui-monospace, monospace' }}>
           {label}
         </p>
-        <p style={{ fontSize: '16px', color: 'white', fontWeight: 900, margin: 0 }}>
+        <p style={{ fontSize: '18px', color: 'white', fontWeight: 900, margin: 0, letterSpacing: '-0.01em' }}>
           {value}
         </p>
       </motion.div>
@@ -447,6 +455,22 @@ export default function HeroAutomation() {
         @keyframes moveHand {
           0%, 100% { transform: translateX(0) }
           50% { transform: translateX(6px) }
+        }
+        @keyframes amberShift {
+          0%, 100% { background-position: 0% 50% }
+          50% { background-position: 100% 50% }
+        }
+        @keyframes pulse {
+          0%, 100% { opacity: 1; box-shadow: 0 0 8px rgba(245,158,11,0.9), 0 0 16px rgba(245,158,11,0.4) }
+          50% { opacity: 0.75; box-shadow: 0 0 16px rgba(245,158,11,1), 0 0 32px rgba(245,158,11,0.6) }
+        }
+        @keyframes chevronAmber {
+          0%, 100% { opacity: 0.25; transform: rotate(45deg) }
+          50% { opacity: 0.7; transform: rotate(45deg) translateY(2px) }
+        }
+        @keyframes ringPulseAmber {
+          0%, 100% { transform: scale(1); opacity: 0.15 }
+          50% { transform: scale(1.08); opacity: 0.05 }
         }
       `}</style>
 
@@ -525,9 +549,10 @@ export default function HeroAutomation() {
              gap: '8px',
              border: '1px solid rgba(245,158,11,0.3)',
              borderRadius: '100px',
-             padding: '6px 18px',
-             marginBottom: '28px',
-             background: 'rgba(245,158,11,0.06)',
+             padding: '7px 20px',
+             marginBottom: '32px',
+             background: 'rgba(245,158,11,0.07)',
+             boxShadow: '0 0 20px rgba(245,158,11,0.08)',
              pointerEvents: 'none',
            }}
         >
@@ -541,9 +566,9 @@ export default function HeroAutomation() {
           }}/>
           <span style={{
             fontSize: '11px',
-            letterSpacing: '0.25em',
+            letterSpacing: '0.22em',
             color: '#f59e0b',
-            fontWeight: 600,
+            fontWeight: 700,
             fontFamily: 'ui-monospace, monospace',
           }}>
             TU EMPRESA, EN PILOTO AUTOMÁTICO
@@ -556,11 +581,11 @@ export default function HeroAutomation() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.9, delay: 0.35, ease: [0.16, 1, 0.3, 1] }}
           style={{
-            fontSize: 'clamp(40px, 7vw, 100px)',
+            fontSize: 'clamp(42px, 7.5vw, 104px)',
             fontWeight: 900,
-            lineHeight: 1.0,
-            letterSpacing: '-0.03em',
-            margin: '0 0 clamp(16px, 2.5vh, 24px)',
+            lineHeight: 0.97,
+            letterSpacing: '-0.04em',
+            margin: '0 0 clamp(18px, 2.5vh, 28px)',
             pointerEvents: 'none',
           }}
         >
@@ -569,14 +594,14 @@ export default function HeroAutomation() {
           </span>
           <br/>
           <span style={{
-            background: shouldReduceMotion 
-                ? 'none' 
-                : 'linear-gradient(135deg, #f59e0b 0%, #fbbf24 40%, #f97316 70%, #f59e0b 100%)',
-            backgroundSize: '200% 100%',
+            background: shouldReduceMotion
+                ? 'none'
+                : 'linear-gradient(135deg, #f59e0b 0%, #fbbf24 35%, #f97316 65%, #f59e0b 100%)',
+            backgroundSize: '300% 100%',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: shouldReduceMotion ? '#f59e0b' : 'transparent',
             backgroundClip: 'text',
-            animation: shouldReduceMotion ? 'none' : 'amberShift 4s ease-in-out infinite',
+            animation: shouldReduceMotion ? 'none' : 'amberShift 5s ease-in-out infinite',
             display: 'inline-block',
             color: shouldReduceMotion ? '#f59e0b' : 'inherit',
           }}>
@@ -639,7 +664,7 @@ export default function HeroAutomation() {
               boxShadow: `0 0 40px rgba(245,158,11,0.4), 0 8px 24px rgba(0,0,0,0.4)`,
             }}
           >
-            ⚡ ENCENDER MI EMPRESA →
+            ENCENDER MI EMPRESA →
           </motion.a>
 
           <motion.a
@@ -671,7 +696,7 @@ export default function HeroAutomation() {
 
         {/* Corporate Marquee */}
         <div style={{
-          marginTop: 'clamp(32px, 5vh, 52px)',
+          marginTop: 'clamp(40px, 6vh, 64px)',
           position: 'relative',
           width: '100vw',
           left: '50%',
@@ -679,12 +704,12 @@ export default function HeroAutomation() {
           marginLeft: '-50vw',
           marginRight: '-50vw',
           overflow: 'hidden',
-          padding: '20px 0',
-          background: 'rgba(245,158,11,0.03)',
-          borderTop: '1px solid rgba(245,158,11,0.08)',
-          borderBottom: '1px solid rgba(245,158,11,0.08)',
-          maskImage: 'linear-gradient(90deg, transparent 0%, black 15%, black 85%, transparent 100%)',
-          WebkitMaskImage: 'linear-gradient(90deg, transparent 0%, black 15%, black 85%, transparent 100%)',
+          padding: '18px 0',
+          background: 'rgba(245,158,11,0.025)',
+          borderTop: '1px solid rgba(245,158,11,0.12)',
+          borderBottom: '1px solid rgba(245,158,11,0.06)',
+          maskImage: 'linear-gradient(90deg, transparent 0%, black 12%, black 88%, transparent 100%)',
+          WebkitMaskImage: 'linear-gradient(90deg, transparent 0%, black 12%, black 88%, transparent 100%)',
         }}>
           <motion.div
             style={{
@@ -701,21 +726,21 @@ export default function HeroAutomation() {
             }}
           >
             {[
-              { icon:'💬', label:'WHATSAPP API' },
-              { icon:'📣', label:'META ADS' },
-              { icon:'💳', label:'MERCADO PAGO' },
-              { icon:'🛍', label:'MERCADO LIBRE' },
-              { icon:'🧾', label:'AFIP' },
-              { icon:'📊', label:'GOOGLE SHEETS' },
-              { icon:'📧', label:'GMAIL' },
-              { icon:'📅', label:'GOOGLE CALENDAR' },
-              { icon:'☁️', label:'TIENDANUBE' },
-              { icon:'📋', label:'NOTION' },
-              { icon:'📨', label:'SLACK' },
-              { icon:'💼', label:'SALESFORCE' },
+              { color:'#25d366', label:'WHATSAPP API' },
+              { color:'#1877f2', label:'META ADS' },
+              { color:'#00b1ea', label:'MERCADO PAGO' },
+              { color:'#ffe600', label:'MERCADO LIBRE' },
+              { color:'#f59e0b', label:'AFIP' },
+              { color:'#34a853', label:'GOOGLE SHEETS' },
+              { color:'#ea4335', label:'GMAIL' },
+              { color:'#4285f4', label:'GOOGLE CALENDAR' },
+              { color:'#7b2fff', label:'TIENDANUBE' },
+              { color:'#e8e8e8', label:'NOTION' },
+              { color:'#e01e5a', label:'SLACK' },
+              { color:'#1798c1', label:'SALESFORCE' },
             ].map((item, i) => (
-              <div 
-                key={i} 
+              <div
+                key={i}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -724,7 +749,7 @@ export default function HeroAutomation() {
                   borderRight: '1px solid rgba(255,255,255,0.06)',
                 }}
               >
-                <span style={{ fontSize: '24px' }}>{item.icon}</span>
+                <div style={{ width: '6px', height: '6px', borderRadius: '1px', background: item.color, flexShrink: 0 }} />
                 <span style={{
                   fontSize: '11px',
                   fontWeight: 800,
@@ -738,21 +763,21 @@ export default function HeroAutomation() {
             ))}
             {/* Duplicado para loop infinito */}
             {[
-              { icon:'💬', label:'WHATSAPP API' },
-              { icon:'📣', label:'META ADS' },
-              { icon:'💳', label:'MERCADO PAGO' },
-              { icon:'🛍', label:'MERCADO LIBRE' },
-              { icon:'🧾', label:'AFIP' },
-              { icon:'📊', label:'GOOGLE SHEETS' },
-              { icon:'📧', label:'GMAIL' },
-              { icon:'📅', label:'GOOGLE CALENDAR' },
-              { icon:'☁️', label:'TIENDANUBE' },
-              { icon:'📋', label:'NOTION' },
-              { icon:'📨', label:'SLACK' },
-              { icon:'💼', label:'SALESFORCE' },
+              { color:'#25d366', label:'WHATSAPP API' },
+              { color:'#1877f2', label:'META ADS' },
+              { color:'#00b1ea', label:'MERCADO PAGO' },
+              { color:'#ffe600', label:'MERCADO LIBRE' },
+              { color:'#f59e0b', label:'AFIP' },
+              { color:'#34a853', label:'GOOGLE SHEETS' },
+              { color:'#ea4335', label:'GMAIL' },
+              { color:'#4285f4', label:'GOOGLE CALENDAR' },
+              { color:'#7b2fff', label:'TIENDANUBE' },
+              { color:'#e8e8e8', label:'NOTION' },
+              { color:'#e01e5a', label:'SLACK' },
+              { color:'#1798c1', label:'SALESFORCE' },
             ].map((item, i) => (
-              <div 
-                key={`dup-${i}`} 
+              <div
+                key={`dup-${i}`}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -761,7 +786,7 @@ export default function HeroAutomation() {
                   borderRight: '1px solid rgba(255,255,255,0.06)',
                 }}
               >
-                <span style={{ fontSize: '24px' }}>{item.icon}</span>
+                <div style={{ width: '6px', height: '6px', borderRadius: '1px', background: item.color, flexShrink: 0 }} />
                 <span style={{
                   fontSize: '11px',
                   fontWeight: 800,
@@ -827,7 +852,7 @@ export default function HeroAutomation() {
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          gap: '8px',
+          gap: '6px',
           zIndex: 10,
           pointerEvents: 'none',
         }}
@@ -835,21 +860,26 @@ export default function HeroAutomation() {
         <span style={{
           fontSize: '9px',
           letterSpacing: '0.35em',
-          color: 'rgba(245,158,11,0.4)',
+          color: 'rgba(245,158,11,0.35)',
           textTransform: 'uppercase',
           fontFamily: 'ui-monospace, monospace',
         }}>
-          explorar
+          scroll
         </span>
-        {[0, 1].map(i => (
-          <div key={i} style={{
-            width: '8px', height: '8px',
-            borderRight: '1px solid rgba(245,158,11,0.5)',
-            borderBottom: '1px solid rgba(245,158,11,0.5)',
-            transform: 'rotate(45deg)',
-            animation: `chevronAmber 1.4s ease-in-out ${i * 0.18}s infinite`,
-          }}/>
-        ))}
+        {/* Chevrons con opacidad decreciente */}
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
+          {[0.7, 0.4, 0.15].map((opacity, i) => (
+            <motion.svg
+              key={i}
+              width="12" height="8" viewBox="0 0 12 8"
+              animate={{ y: [0, 3, 0] }}
+              transition={{ duration: 1.6, delay: i * 0.18, repeat: Infinity, ease: 'easeInOut' }}
+              style={{ opacity }}
+            >
+              <path d="M1 1.5L6 6.5L11 1.5" stroke="rgba(245,158,11,0.9)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+            </motion.svg>
+          ))}
+        </div>
       </motion.div>
 
       {/* Mouse Interaction Hint */}
@@ -875,7 +905,13 @@ export default function HeroAutomation() {
               pointerEvents: 'none',
             }}
           >
-            <span style={{ fontSize: '14px', animation: 'moveHand 1.2s ease-in-out infinite' }}>🖱</span>
+            <svg
+              width="12" height="18" viewBox="0 0 12 18" fill="none"
+              style={{ animation: 'moveHand 1.2s ease-in-out infinite', flexShrink: 0 }}
+            >
+              <rect x="1" y="1" width="10" height="16" rx="5" stroke="rgba(245,158,11,0.7)" strokeWidth="1.4"/>
+              <line x1="6" y1="4" x2="6" y2="7" stroke="rgba(245,158,11,0.7)" strokeWidth="1.4" strokeLinecap="round"/>
+            </svg>
             <span style={{ fontSize: '12px', color: 'rgba(245,158,11,0.7)', letterSpacing: '0.1em' }}>
               Mové el mouse para ver la magia
             </span>

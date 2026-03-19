@@ -178,11 +178,11 @@ function Header({ isInView }: { isInView: boolean }) {
         <span style={{ fontSize: '10px', letterSpacing: '0.2em', color: '#f59e0b', fontWeight: 700 }}>[ EL CAMINO AL ÉXITO ]</span>
       </motion.div>
 
-      <motion.h2 
-        initial={{ opacity: 0, y: 20 }} 
-        animate={isInView ? { opacity: 1, y: 0 } : {}} 
+      <motion.h2
+        initial={{ opacity: 0, y: 20 }}
+        animate={isInView ? { opacity: 1, y: 0 } : {}}
         transition={{ duration: 0.6, delay: 0.25 }}
-        style={{ fontSize: 'clamp(28px, 4.5vw, 56px)', fontWeight: 900, color: 'white', lineHeight: 1.1, margin: '0 0 16px' }}
+        style={{ fontSize: 'clamp(30px, 4.8vw, 60px)', fontWeight: 900, color: 'white', lineHeight: 1.05, margin: '0 0 18px', letterSpacing: '-0.03em' }}
       >
         Del caos al orden<br />
         <span style={{ background: 'linear-gradient(135deg, #f59e0b, #f97316)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
@@ -190,11 +190,11 @@ function Header({ isInView }: { isInView: boolean }) {
         </span>
       </motion.h2>
 
-      <motion.p 
-        initial={{ opacity: 0 }} 
-        animate={isInView ? { opacity: 1 } : {}} 
+      <motion.p
+        initial={{ opacity: 0 }}
+        animate={isInView ? { opacity: 1 } : {}}
         transition={{ duration: 0.6, delay: 0.38 }}
-        style={{ fontSize: '15px', color: 'rgba(255,255,255,0.4)', margin: 0, maxWidth: '600px' }}
+        style={{ fontSize: '16px', color: 'rgba(255,255,255,0.42)', margin: 0, maxWidth: '600px', lineHeight: 1.7 }}
       >
         No necesitás meses de consultoría. Implementamos rápido para que veas el retorno hoy.
       </motion.p>
@@ -239,19 +239,26 @@ function StepRow({ paso, index, isActive, isInView, onClick, shouldReduceMotion 
         </motion.div>
       </div>
 
-      <div 
+      <div
         style={{
           flex: 1,
-          background: isActive ? `rgba(${paso.colorRgb}, 0.05)` : 'rgba(255,255,255,0.02)',
-          border: `1px solid rgba(${paso.colorRgb}, ${isActive ? 0.2 : 0.08})`,
-          borderRadius: '16px',
+          background: isActive ? `rgba(${paso.colorRgb}, 0.08)` : 'rgba(255,255,255,0.015)',
+          border: `1px solid rgba(${paso.colorRgb}, ${isActive ? 0.3 : 0.08})`,
+          borderRadius: '18px',
           overflow: 'hidden',
           cursor: 'pointer',
-          transition: 'all 250ms',
+          transition: 'all 250ms ease',
+          boxShadow: isActive
+            ? `0 0 0 1px rgba(${paso.colorRgb}, 0.1), 0 0 30px rgba(${paso.colorRgb}, 0.08), 0 8px 28px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.07)`
+            : '0 4px 12px rgba(0,0,0,0.15)',
+          position: 'relative',
         }}
         onClick={onClick}
       >
-        <div style={{ padding: 'clamp(14px, 2vh, 20px) clamp(16px, 2vw, 24px)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px' }}>
+        {isActive && (
+          <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '2px', background: `linear-gradient(90deg, transparent, rgba(${paso.colorRgb}, 0.7) 50%, transparent)` }} />
+        )}
+        <div style={{ padding: 'clamp(16px, 2.2vh, 22px) clamp(18px, 2.2vw, 26px)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px' }}>
           <div style={{ flex: 1 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '5px' }}>
               <span style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.2em', color: `rgba(${paso.colorRgb}, 0.7)` }}>
@@ -304,7 +311,9 @@ function StepRow({ paso, index, isActive, isInView, onClick, shouldReduceMotion 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-5 mt-4">
                   <div>
                     <h4 style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.18em', color: `rgba(${paso.colorRgb}, 0.7)`, textTransform: 'uppercase', margin: '0 0 12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <span style={{ fontSize: '14px' }}>⚡</span>
+                      <svg width="9" height="13" viewBox="0 0 9 13" fill={paso.color} style={{ flexShrink: 0 }}>
+                        <path d="M5.5 0L0 7.5h3.5L2 13l7-8H5L5.5 0z"/>
+                      </svg>
                       Nosotros hacemos
                     </h4>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '7px' }}>
@@ -325,7 +334,10 @@ function StepRow({ paso, index, isActive, isInView, onClick, shouldReduceMotion 
 
                   <div>
                     <h4 style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.18em', color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', margin: '0 0 12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <span style={{ fontSize: '14px' }}>👤</span>
+                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" style={{ flexShrink: 0 }}>
+                        <circle cx="6" cy="4" r="2.5" stroke="rgba(255,255,255,0.35)" strokeWidth="1.2"/>
+                        <path d="M1 11c0-2.76 2.24-5 5-5s5 2.24 5 5" stroke="rgba(255,255,255,0.35)" strokeWidth="1.2" strokeLinecap="round"/>
+                      </svg>
                       Vos ponés
                     </h4>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '7px' }}>
@@ -349,14 +361,39 @@ function StepRow({ paso, index, isActive, isInView, onClick, shouldReduceMotion 
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.25, duration: 0.4 }}
-                  style={{ padding: '14px 16px', background: `rgba(${paso.colorRgb}, 0.06)`, border: `1px solid rgba(${paso.colorRgb}, 0.2)`, borderRadius: '12px', display: 'flex', gap: '12px', alignItems: 'flex-start' }}
+                  style={{
+                    position: 'relative',
+                    overflow: 'hidden',
+                    padding: '16px 18px',
+                    background: `rgba(${paso.colorRgb}, 0.07)`,
+                    border: `1px solid rgba(${paso.colorRgb}, 0.22)`,
+                    borderRadius: '14px',
+                    display: 'flex',
+                    gap: '14px',
+                    alignItems: 'flex-start',
+                    boxShadow: `0 4px 16px rgba(0,0,0,0.2)`,
+                  }}
                 >
-                  <span style={{ fontSize: '20px' }}>📦</span>
-                  <div>
-                    <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.15em', color: `rgba(${paso.colorRgb}, 0.7)`, textTransform: 'uppercase', margin: '0 0 4px' }}>
-                      Entregable de esta fase
-                    </p>
-                    <p style={{ fontSize: '14px', fontWeight: 600, color: 'white', margin: 0, lineHeight: 1.5 }}>
+                  <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '1px', background: `linear-gradient(90deg, transparent, rgba(${paso.colorRgb}, 0.5) 50%, transparent)` }} />
+                  <div style={{
+                    width: '36px', height: '36px', borderRadius: '10px',
+                    background: `linear-gradient(135deg, rgba(${paso.colorRgb}, 0.2), rgba(${paso.colorRgb}, 0.08))`,
+                    border: `1px solid rgba(${paso.colorRgb}, 0.35)`,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                    boxShadow: `0 0 12px rgba(${paso.colorRgb}, 0.2)`,
+                  }}>
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                      <path d="M2 8.5L6 12.5L14 4" stroke={paso.color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '5px' }}>
+                      <p style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '0.2em', color: `rgba(${paso.colorRgb}, 0.65)`, textTransform: 'uppercase', margin: 0, fontFamily: 'ui-monospace, monospace' }}>
+                        Entregable
+                      </p>
+                      <div style={{ height: '1px', flex: 1, background: `rgba(${paso.colorRgb}, 0.15)` }} />
+                    </div>
+                    <p style={{ fontSize: '14px', fontWeight: 600, color: 'rgba(255,255,255,0.92)', margin: 0, lineHeight: 1.55 }}>
                       {paso.deliverable}
                     </p>
                   </div>
@@ -375,12 +412,12 @@ function StepperTimeline({ pasos, activeStep, setActiveStep, isInView }: { pasos
   
   return (
     <div style={{ position: 'relative' }}>
-      <div style={{ position: 'absolute', left: '27px', top: '40px', bottom: '40px', width: '2px', background: 'rgba(255,255,255,0.06)', zIndex: 0 }}>
+      <div style={{ position: 'absolute', left: '27px', top: '40px', bottom: '40px', width: '2px', background: 'rgba(255,255,255,0.04)', zIndex: 0 }}>
         <motion.div
           initial={{ height: '0%' }}
           animate={isInView ? { height: '100%' } : {}}
           transition={{ duration: shouldReduceMotion ? 0 : 1.5, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
-          style={{ width: '100%', background: 'linear-gradient(to bottom, #f59e0b, #f97316)', boxShadow: '0 0 8px rgba(245,158,11,0.4)' }}
+          style={{ width: '100%', background: 'linear-gradient(to bottom, #f59e0b, #f97316)', boxShadow: '0 0 12px rgba(245,158,11,0.6), 0 0 4px rgba(245,158,11,0.9)' }}
         />
 
         <AnimatePresence>
@@ -472,15 +509,18 @@ export default function ProcesoAutomation() {
           transition={{ duration: 0.7, delay: 0.9, ease: [0.16, 1, 0.3, 1] }}
           style={{
             marginTop: 'clamp(32px, 4vh, 48px)',
-            padding: 'clamp(20px, 2.5vw, 32px)',
-            background: 'rgba(255,255,255,0.02)',
-            border: '1px solid rgba(255,255,255,0.07)',
+            padding: 'clamp(22px, 2.8vw, 36px)',
+            background: 'rgba(255,255,255,0.018)',
+            border: '1px solid rgba(255,255,255,0.08)',
             borderRadius: '20px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
             flexWrap: 'wrap',
             gap: '20px',
+            position: 'relative',
+            overflow: 'hidden',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.25)',
           }}
         >
           {/* Línea de tiempo visual */}
@@ -507,9 +547,9 @@ export default function ProcesoAutomation() {
 
           {/* Resumen */}
           <div style={{ textAlign: 'right', flexShrink: 0 }}>
-            <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.25)', margin: '0 0 4px', letterSpacing: '0.1em' }}>TIEMPO TOTAL ESTIMADO · SEGÚN COMPLEJIDAD</p>
-            <p style={{ fontSize: '22px', fontWeight: 900, color: 'white', margin: '0 0 4px', fontFamily: 'monospace' }}>1 a 2 SEMANAS</p>
-            <p style={{ fontSize: '12px', color: 'rgba(245,158,11,0.6)', margin: 0 }}>TU EMPRESA EN PILOTO AUTOMÁTICO</p>
+            <p style={{ fontSize: '10px', color: 'rgba(255,255,255,0.25)', margin: '0 0 5px', letterSpacing: '0.18em', fontFamily: 'ui-monospace, monospace', textTransform: 'uppercase' }}>Tiempo total · Según complejidad</p>
+            <p style={{ fontSize: '24px', fontWeight: 900, color: 'white', margin: '0 0 4px', fontFamily: 'ui-monospace, monospace', letterSpacing: '-0.02em', fontVariantNumeric: 'tabular-nums' }}>1 a 2 SEMANAS</p>
+            <p style={{ fontSize: '11px', color: 'rgba(245,158,11,0.65)', margin: 0, letterSpacing: '0.1em', textTransform: 'uppercase', fontFamily: 'ui-monospace, monospace' }}>Tu empresa en piloto automático</p>
           </div>
         </motion.div>
 

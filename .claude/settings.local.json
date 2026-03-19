@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls -lh /c/Users/franc/Desktop/PorfolioDevelOP/logic-core-v3/*.svg /c/Users/franc/Desktop/PorfolioDevelOP/logic-core-v3/*.png)",
+      "Bash(ls -la \"/c/Users/franc/Desktop/PorfolioDevelOP/logic-core-v3/src/app/\\(protected\\)\")",
+      "Bash(find \"/c/Users/franc/Desktop/PorfolioDevelOP/logic-core-v3/src/app/\\(protected\\)/admin\" -type f)",
+      "Bash(ls -la \"/c/Users/franc/Desktop/PorfolioDevelOP/logic-core-v3/src/app/\\(protected\\)/admin\")",
+      "Bash(find \"/c/Users/franc/Desktop/PorfolioDevelOP/logic-core-v3/src/app/\\(protected\\)/admin\" -type f -name \"*.tsx\" -o -name \"*.ts\")",
+      "Bash(ls -laR /c/Users/franc/Desktop/PorfolioDevelOP/logic-core-v3/src/app/\\\\\\(protected\\\\\\)/)",
+      "Bash(npm install:*)",
+      "Bash(ls \"c:/Users/franc/Desktop/PorfolioDevelOP/logic-core-v3/.env\"*)",
+      "Bash(npx prisma:*)"
+    ]
+  }
+}
