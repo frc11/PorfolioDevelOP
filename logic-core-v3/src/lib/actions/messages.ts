@@ -1,9 +1,10 @@
 'use server'
 
+import { auth } from '@/auth'
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 
-// ─── Send ─────────────────────────────────────────────────────────────────────
+// ─── Admin: Send ──────────────────────────────────────────────────────────────
 
 export async function sendMessageAction(
   _prevState: string | null,
@@ -42,3 +43,27 @@ export async function markMessagesAsReadAction(clientId: string): Promise<void> 
   revalidatePath('/admin/messages')
   revalidatePath('/admin')
 }
+
+// ─── Client: Send ─────────────────────────────────────────────────────────────
+
+export async function sendClientMessageAction(
+  _prevState: string | null,
+  formData: FormData
+): Promise<string | null> {
+  const session = await auth()
+  const clientId = session?.user?.clientId
+  if (!clientId) return 'Sesión inválida.'
+
+  const content = ((formData.get('content') as string | null) ?? '').trim()
+  if (!content) return 'El mensaje no puede estar vacío.'
+
+  await prisma.message.create({
+    data: { clientId, content, fromAdmin: false },
+  })
+
+  revalidatePath('/dashboard/messages')
+  revalidatePath(`/admin/messages/${clientId}`)
+  revalidatePath('/admin/messages')
+  return null
+}
+

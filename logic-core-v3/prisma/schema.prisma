@@ -105,11 +105,13 @@ model User {
 // ─── Modelos de Negocio ───────────────────────────────────────────────────────
 
 model Client {
-  id          String   @id @default(cuid())
-  companyName String
-  slug        String   @unique
-  logoUrl     String?
-  createdAt   DateTime @default(now())
+  id                   String   @id @default(cuid())
+  companyName          String
+  slug                 String   @unique
+  logoUrl              String?
+  analyticsPropertyId  String?
+  siteUrl              String?
+  createdAt            DateTime @default(now())
 
   userId String @unique
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)

@@ -12,6 +12,8 @@ interface ClientFormProps {
     name: string
     logoUrl?: string | null
     email: string
+    analyticsPropertyId?: string | null
+    siteUrl?: string | null
   }
   cancelHref: string
 }
@@ -128,6 +130,48 @@ export function ClientForm({ action, mode, initialValues, cancelHref }: ClientFo
           className="rounded-md border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 outline-none placeholder:text-zinc-600 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/30"
         />
       </div>
+
+      {/* Analytics Property ID — optional, edit mode only */}
+      {mode === 'edit' && (
+        <div className="flex flex-col gap-1.5">
+          <label htmlFor="analyticsPropertyId" className="text-xs font-medium uppercase tracking-wide text-zinc-400">
+            Google Analytics Property ID{' '}
+            <span className="normal-case text-zinc-600">(opcional)</span>
+          </label>
+          <input
+            id="analyticsPropertyId"
+            name="analyticsPropertyId"
+            type="text"
+            defaultValue={initialValues?.analyticsPropertyId ?? ''}
+            placeholder="Ej: 123456789 (ID numérico de la propiedad GA4)"
+            className="rounded-md border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 outline-none placeholder:text-zinc-600 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/30"
+          />
+          <p className="text-xs text-zinc-600">
+            El Property ID numérico se encuentra en Google Analytics → Configuración → Información de la propiedad.
+          </p>
+        </div>
+      )}
+
+      {/* Search Console site URL — optional, edit mode only */}
+      {mode === 'edit' && (
+        <div className="flex flex-col gap-1.5">
+          <label htmlFor="siteUrl" className="text-xs font-medium uppercase tracking-wide text-zinc-400">
+            URL del sitio (Search Console){' '}
+            <span className="normal-case text-zinc-600">(opcional)</span>
+          </label>
+          <input
+            id="siteUrl"
+            name="siteUrl"
+            type="url"
+            defaultValue={initialValues?.siteUrl ?? ''}
+            placeholder="https://tusitio.com"
+            className="rounded-md border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 outline-none placeholder:text-zinc-600 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/30"
+          />
+          <p className="text-xs text-zinc-600">
+            Debe coincidir exactamente con la URL verificada en Google Search Console (incluyendo https:// y sin barra final).
+          </p>
+        </div>
+      )}
 
       {/* Actions */}
       <div className="flex items-center gap-3 pt-2">

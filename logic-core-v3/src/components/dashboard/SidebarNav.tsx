@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, FolderOpen, Zap, MessageSquare, User } from 'lucide-react'
+import { Home, FolderOpen, Zap, MessageSquare, User, BarChart2, TrendingUp } from 'lucide-react'
 
 interface NavItem {
   href: string
@@ -16,6 +16,8 @@ const NAV_ITEMS: NavItem[] = [
   { href: '/dashboard/project', label: 'Mi proyecto', icon: FolderOpen, exact: false },
   { href: '/dashboard/services', label: 'Mis servicios', icon: Zap, exact: false },
   { href: '/dashboard/messages', label: 'Mensajes', icon: MessageSquare, exact: false },
+  { href: '/dashboard/analytics', label: 'Analíticas', icon: BarChart2, exact: false },
+  { href: '/dashboard/seo', label: 'SEO', icon: TrendingUp, exact: false },
   { href: '/dashboard/profile', label: 'Mi perfil', icon: User, exact: false },
 ]
 
