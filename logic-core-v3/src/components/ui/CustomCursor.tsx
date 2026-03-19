@@ -64,9 +64,9 @@ export const CustomCursor = () => {
         }
       `}</style>
 
-            {/* Primary Cursor (Fast Dot) */}
+            {/* Primary Cursor (Fast Dot) - Changed to dark for light mode visibility */}
             <motion.div
-                className="hidden md:block fixed top-0 left-0 w-2 h-2 bg-white rounded-full pointer-events-none z-[9999] shadow-[0_0_10px_rgba(255,255,255,0.8)]"
+                className="hidden md:block fixed top-0 left-0 w-2.5 h-2.5 bg-zinc-900 rounded-full pointer-events-none z-[9999] shadow-[0_0_10px_rgba(0,0,0,0.1)]"
                 style={{
                     x: cursorX,
                     y: cursorY,
@@ -75,9 +75,9 @@ export const CustomCursor = () => {
                 }}
             />
 
-            {/* Aura Cursor (Slow/Fluid) */}
+            {/* Aura Cursor (Slow/Fluid) - Adjusted border and shadow for light mode */}
             <motion.div
-                className="hidden md:block fixed top-0 left-0 w-8 h-8 border border-white/50 rounded-full pointer-events-none z-[9998] shadow-[0_0_20px_rgba(0,229,255,0.3)]"
+                className="hidden md:block fixed top-0 left-0 w-8 h-8 border border-zinc-900/30 rounded-full pointer-events-none z-[9998] shadow-[0_0_20px_rgba(0,0,0,0.05)]"
                 style={{
                     x: cursorXSpring,
                     y: cursorYSpring,
@@ -87,8 +87,8 @@ export const CustomCursor = () => {
                 animate={{
                     scale: isHovering ? 2.5 : 1,
                     opacity: isHovering ? 0.8 : 0.4,
-                    backgroundColor: isHovering ? 'rgba(0, 229, 255, 0.1)' : 'transparent',
-                    borderColor: isHovering ? 'rgba(0, 229, 255, 0.5)' : 'rgba(255, 255, 255, 0.5)'
+                    backgroundColor: isHovering ? 'rgba(0, 229, 255, 0.15)' : 'transparent',
+                    borderColor: isHovering ? 'rgba(0, 229, 255, 0.6)' : 'rgba(24, 24, 27, 0.2)'
                 }}
                 transition={{
                     duration: 0.3,

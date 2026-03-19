@@ -1,6 +1,7 @@
 'use client'
 
 import { useActionState } from 'react'
+import { motion } from 'framer-motion'
 import Link from 'next/link'
 
 interface ClientFormProps {
@@ -14,6 +15,7 @@ interface ClientFormProps {
     email: string
     analyticsPropertyId?: string | null
     siteUrl?: string | null
+    n8nWorkflowIds?: string[]
   }
   cancelHref: string
 }
@@ -30,14 +32,14 @@ export function ClientForm({ action, mode, initialValues, cancelHref }: ClientFo
 
       {/* Error */}
       {error && (
-        <div className="rounded-md border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-400">
+        <div className="rounded-xl border border-red-500/20 bg-red-500/[0.08] px-4 py-3 text-sm text-red-400">
           {error}
         </div>
       )}
 
       {/* Company name */}
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="companyName" className="text-xs font-medium uppercase tracking-wide text-zinc-400">
+        <label htmlFor="companyName" className="text-[10px] font-semibold tracking-[0.15em] uppercase text-zinc-500">
           Nombre de empresa <span className="text-red-400">*</span>
         </label>
         <input
@@ -47,13 +49,13 @@ export function ClientForm({ action, mode, initialValues, cancelHref }: ClientFo
           required
           defaultValue={initialValues?.companyName ?? ''}
           placeholder="Ej: Empresa S.A."
-          className="rounded-md border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 outline-none placeholder:text-zinc-600 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/30"
+          className="w-full rounded-xl border border-white/[0.07] bg-white/[0.04] px-3 py-2.5 text-sm text-zinc-100 outline-none placeholder:text-zinc-700 transition-all focus:border-cyan-500/60 focus:bg-white/[0.06] focus:ring-2 focus:ring-cyan-500/20"
         />
       </div>
 
       {/* Contact name */}
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="name" className="text-xs font-medium uppercase tracking-wide text-zinc-400">
+        <label htmlFor="name" className="text-[10px] font-semibold tracking-[0.15em] uppercase text-zinc-500">
           Nombre del contacto <span className="text-red-400">*</span>
         </label>
         <input
@@ -63,14 +65,14 @@ export function ClientForm({ action, mode, initialValues, cancelHref }: ClientFo
           required
           defaultValue={initialValues?.name ?? ''}
           placeholder="Ej: Juan García"
-          className="rounded-md border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 outline-none placeholder:text-zinc-600 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/30"
+          className="w-full rounded-xl border border-white/[0.07] bg-white/[0.04] px-3 py-2.5 text-sm text-zinc-100 outline-none placeholder:text-zinc-700 transition-all focus:border-cyan-500/60 focus:bg-white/[0.06] focus:ring-2 focus:ring-cyan-500/20"
         />
       </div>
 
       {/* Email — only in create mode */}
       {mode === 'create' && (
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="email" className="text-xs font-medium uppercase tracking-wide text-zinc-400">
+          <label htmlFor="email" className="text-[10px] font-semibold tracking-[0.15em] uppercase text-zinc-500">
             Email <span className="text-red-400">*</span>
           </label>
           <input
@@ -79,7 +81,7 @@ export function ClientForm({ action, mode, initialValues, cancelHref }: ClientFo
             type="email"
             required
             placeholder="contacto@empresa.com"
-            className="rounded-md border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 outline-none placeholder:text-zinc-600 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/30"
+            className="w-full rounded-xl border border-white/[0.07] bg-white/[0.04] px-3 py-2.5 text-sm text-zinc-100 outline-none placeholder:text-zinc-700 transition-all focus:border-cyan-500/60 focus:bg-white/[0.06] focus:ring-2 focus:ring-cyan-500/20"
           />
         </div>
       )}
@@ -87,12 +89,12 @@ export function ClientForm({ action, mode, initialValues, cancelHref }: ClientFo
       {/* Read-only email indicator in edit mode */}
       {mode === 'edit' && initialValues?.email && (
         <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-medium uppercase tracking-wide text-zinc-400">
+          <label className="text-[10px] font-semibold tracking-[0.15em] uppercase text-zinc-500">
             Email
           </label>
-          <div className="rounded-md border border-zinc-800 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-500">
+          <div className="rounded-xl border border-white/[0.05] bg-white/[0.02] px-3 py-2.5 text-sm text-zinc-600">
             {initialValues.email}
-            <span className="ml-2 text-xs text-zinc-600">(no editable)</span>
+            <span className="ml-2 text-xs text-zinc-700">(no editable)</span>
           </div>
         </div>
       )}
@@ -100,7 +102,7 @@ export function ClientForm({ action, mode, initialValues, cancelHref }: ClientFo
       {/* Temporary password — only in create mode */}
       {mode === 'create' && (
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="password" className="text-xs font-medium uppercase tracking-wide text-zinc-400">
+          <label htmlFor="password" className="text-[10px] font-semibold tracking-[0.15em] uppercase text-zinc-500">
             Contraseña temporal <span className="text-red-400">*</span>
           </label>
           <input
@@ -110,14 +112,14 @@ export function ClientForm({ action, mode, initialValues, cancelHref }: ClientFo
             required
             minLength={8}
             placeholder="Mínimo 8 caracteres"
-            className="rounded-md border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 outline-none placeholder:text-zinc-600 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/30"
+            className="w-full rounded-xl border border-white/[0.07] bg-white/[0.04] px-3 py-2.5 text-sm text-zinc-100 outline-none placeholder:text-zinc-700 transition-all focus:border-cyan-500/60 focus:bg-white/[0.06] focus:ring-2 focus:ring-cyan-500/20"
           />
         </div>
       )}
 
       {/* Logo URL — optional */}
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="logoUrl" className="text-xs font-medium uppercase tracking-wide text-zinc-400">
+        <label htmlFor="logoUrl" className="text-[10px] font-semibold tracking-[0.15em] uppercase text-zinc-500">
           URL del logo{' '}
           <span className="normal-case text-zinc-600">(opcional)</span>
         </label>
@@ -127,14 +129,14 @@ export function ClientForm({ action, mode, initialValues, cancelHref }: ClientFo
           type="url"
           defaultValue={initialValues?.logoUrl ?? ''}
           placeholder="https://..."
-          className="rounded-md border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 outline-none placeholder:text-zinc-600 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/30"
+          className="w-full rounded-xl border border-white/[0.07] bg-white/[0.04] px-3 py-2.5 text-sm text-zinc-100 outline-none placeholder:text-zinc-700 transition-all focus:border-cyan-500/60 focus:bg-white/[0.06] focus:ring-2 focus:ring-cyan-500/20"
         />
       </div>
 
       {/* Analytics Property ID — optional, edit mode only */}
       {mode === 'edit' && (
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="analyticsPropertyId" className="text-xs font-medium uppercase tracking-wide text-zinc-400">
+          <label htmlFor="analyticsPropertyId" className="text-[10px] font-semibold tracking-[0.15em] uppercase text-zinc-500">
             Google Analytics Property ID{' '}
             <span className="normal-case text-zinc-600">(opcional)</span>
           </label>
@@ -144,9 +146,9 @@ export function ClientForm({ action, mode, initialValues, cancelHref }: ClientFo
             type="text"
             defaultValue={initialValues?.analyticsPropertyId ?? ''}
             placeholder="Ej: 123456789 (ID numérico de la propiedad GA4)"
-            className="rounded-md border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 outline-none placeholder:text-zinc-600 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/30"
+            className="w-full rounded-xl border border-white/[0.07] bg-white/[0.04] px-3 py-2.5 text-sm text-zinc-100 outline-none placeholder:text-zinc-700 transition-all focus:border-cyan-500/60 focus:bg-white/[0.06] focus:ring-2 focus:ring-cyan-500/20"
           />
-          <p className="text-xs text-zinc-600">
+          <p className="text-xs text-zinc-700">
             El Property ID numérico se encuentra en Google Analytics → Configuración → Información de la propiedad.
           </p>
         </div>
@@ -155,7 +157,7 @@ export function ClientForm({ action, mode, initialValues, cancelHref }: ClientFo
       {/* Search Console site URL — optional, edit mode only */}
       {mode === 'edit' && (
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="siteUrl" className="text-xs font-medium uppercase tracking-wide text-zinc-400">
+          <label htmlFor="siteUrl" className="text-[10px] font-semibold tracking-[0.15em] uppercase text-zinc-500">
             URL del sitio (Search Console){' '}
             <span className="normal-case text-zinc-600">(opcional)</span>
           </label>
@@ -165,30 +167,55 @@ export function ClientForm({ action, mode, initialValues, cancelHref }: ClientFo
             type="url"
             defaultValue={initialValues?.siteUrl ?? ''}
             placeholder="https://tusitio.com"
-            className="rounded-md border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 outline-none placeholder:text-zinc-600 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/30"
+            className="w-full rounded-xl border border-white/[0.07] bg-white/[0.04] px-3 py-2.5 text-sm text-zinc-100 outline-none placeholder:text-zinc-700 transition-all focus:border-cyan-500/60 focus:bg-white/[0.06] focus:ring-2 focus:ring-cyan-500/20"
           />
-          <p className="text-xs text-zinc-600">
+          <p className="text-xs text-zinc-700">
             Debe coincidir exactamente con la URL verificada en Google Search Console (incluyendo https:// y sin barra final).
+          </p>
+        </div>
+      )}
+
+      {/* n8n Workflow IDs — optional, edit mode only */}
+      {mode === 'edit' && (
+        <div className="flex flex-col gap-1.5">
+          <label htmlFor="n8nWorkflowIds" className="text-[10px] font-semibold tracking-[0.15em] uppercase text-zinc-500">
+            Workflow IDs de n8n{' '}
+            <span className="normal-case text-zinc-600">(opcional)</span>
+          </label>
+          <input
+            id="n8nWorkflowIds"
+            name="n8nWorkflowIds"
+            type="text"
+            defaultValue={(initialValues?.n8nWorkflowIds ?? []).join(', ')}
+            placeholder="abc123, def456"
+            className="w-full rounded-xl border border-white/[0.07] bg-white/[0.04] px-3 py-2.5 text-sm text-zinc-100 outline-none placeholder:text-zinc-700 transition-all focus:border-cyan-500/60 focus:bg-white/[0.06] focus:ring-2 focus:ring-cyan-500/20"
+          />
+          <p className="text-xs text-zinc-700">
+            IDs separados por coma. Se encuentran en la URL de cada workflow en n8n.
           </p>
         </div>
       )}
 
       {/* Actions */}
       <div className="flex items-center gap-3 pt-2">
-        <button
+        <motion.button
           type="submit"
           disabled={isPending}
-          className="rounded-md bg-cyan-500 px-5 py-2 text-sm font-medium text-zinc-950 transition-colors hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
+          whileHover={!isPending ? { scale: 1.015, filter: 'brightness(1.1)' } : {}}
+          whileTap={!isPending ? { scale: 0.985 } : {}}
+          className="rounded-xl px-5 py-2.5 text-sm font-semibold text-zinc-950 transition-opacity disabled:cursor-not-allowed disabled:opacity-50"
+          style={{ background: 'linear-gradient(135deg, #06b6d4 0%, #10b981 100%)' }}
         >
           {isPending
             ? 'Guardando...'
             : mode === 'create'
             ? 'Crear cliente'
             : 'Guardar cambios'}
-        </button>
+        </motion.button>
         <Link
           href={cancelHref}
-          className="rounded-md px-5 py-2 text-sm text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-zinc-100"
+          className="rounded-xl px-5 py-2.5 text-sm text-zinc-500 transition-all hover:text-zinc-200"
+          style={{ border: '1px solid rgba(255,255,255,0.08)' }}
         >
           Cancelar
         </Link>

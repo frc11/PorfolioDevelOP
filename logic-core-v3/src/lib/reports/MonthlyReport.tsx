@@ -3,7 +3,7 @@ import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer'
 import type { AnalyticsData } from '@/lib/analytics'
 import type { SearchConsoleData } from '@/lib/searchconsole'
 
-// ─── Data types ───────────────────────────────────────────────────────────────
+// ─── Types ────────────────────────────────────────────────────────────────────
 
 export interface ReportProject {
   name: string
@@ -40,7 +40,7 @@ const MONTHS_ES = [
   'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre',
 ]
 
-const SERVICE_TYPE_LABEL: Record<string, string> = {
+const SERVICE_LABEL: Record<string, string> = {
   WEB_DEV: 'Desarrollo Web',
   AI: 'Inteligencia Artificial',
   AUTOMATION: 'Automatización',
@@ -56,7 +56,7 @@ const PROJECT_STATUS_LABEL: Record<string, string> = {
 
 function formatMonth(yyyyMM: string): string {
   const [year, month] = yyyyMM.split('-')
-  return `${MONTHS_ES[parseInt(month) - 1]} ${year}`
+  return `${MONTHS_ES[parseInt(month) - 1] ?? month} ${year}`
 }
 
 function formatDuration(seconds: number): string {
@@ -69,13 +69,10 @@ function formatDuration(seconds: number): string {
 // ─── Styles ───────────────────────────────────────────────────────────────────
 
 const s = StyleSheet.create({
-  // Page
   page: {
     fontFamily: 'Helvetica',
     backgroundColor: WHITE,
-    paddingTop: 0,
-    paddingBottom: 48,
-    paddingHorizontal: 0,
+    paddingBottom: 52,
     fontSize: 10,
     color: BLACK,
   },
@@ -84,55 +81,53 @@ const s = StyleSheet.create({
   cover: {
     backgroundColor: BLACK,
     padding: 48,
-    minHeight: 200,
+    paddingBottom: 52,
   },
   coverBrand: {
-    fontSize: 11,
+    fontSize: 9,
     color: CYAN,
-    letterSpacing: 3,
+    letterSpacing: 4,
     fontFamily: 'Helvetica-Bold',
     textTransform: 'uppercase',
-    marginBottom: 40,
+    marginBottom: 44,
   },
-  coverTitle: {
-    fontSize: 28,
+  coverCompany: {
+    fontSize: 26,
     color: WHITE,
     fontFamily: 'Helvetica-Bold',
-    lineHeight: 1.2,
-    marginBottom: 8,
+    lineHeight: 1.25,
+    marginBottom: 10,
   },
   coverSub: {
-    fontSize: 13,
+    fontSize: 12,
     color: '#a1a1aa',
     marginBottom: 4,
   },
   coverMonth: {
-    fontSize: 13,
+    fontSize: 14,
     color: CYAN,
     fontFamily: 'Helvetica-Bold',
   },
-  coverBar: {
-    marginTop: 40,
+  coverAccent: {
+    marginTop: 44,
     height: 3,
-    width: 48,
+    width: 40,
     backgroundColor: CYAN,
     borderRadius: 2,
   },
 
-  // Content wrapper
-  content: {
+  // Body
+  body: {
     paddingHorizontal: 48,
     paddingTop: 36,
   },
 
   // Section
-  section: {
-    marginBottom: 28,
-  },
-  sectionHeader: {
+  section: { marginBottom: 30 },
+  sectionHead: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 14,
     paddingBottom: 8,
     borderBottomWidth: 1,
     borderBottomColor: BORDER,
@@ -145,19 +140,15 @@ const s = StyleSheet.create({
     marginRight: 8,
   },
   sectionTitle: {
-    fontSize: 11,
+    fontSize: 9,
     fontFamily: 'Helvetica-Bold',
     color: BLACK,
-    letterSpacing: 0.5,
+    letterSpacing: 1,
     textTransform: 'uppercase',
   },
 
-  // Cards grid
-  cardRow: {
-    flexDirection: 'row',
-    gap: 8,
-    marginBottom: 12,
-  },
+  // Metric cards
+  cardRow: { flexDirection: 'row', gap: 8, marginBottom: 10 },
   card: {
     flex: 1,
     backgroundColor: LIGHT_BG,
@@ -165,23 +156,20 @@ const s = StyleSheet.create({
     padding: 12,
   },
   cardLabel: {
-    fontSize: 8,
+    fontSize: 7,
     color: GRAY,
     textTransform: 'uppercase',
-    letterSpacing: 0.5,
-    marginBottom: 4,
+    letterSpacing: 0.8,
+    marginBottom: 5,
   },
   cardValue: {
-    fontSize: 18,
+    fontSize: 20,
     fontFamily: 'Helvetica-Bold',
     color: CYAN,
     lineHeight: 1,
+    marginBottom: 2,
   },
-  cardSub: {
-    fontSize: 8,
-    color: GRAY,
-    marginTop: 2,
-  },
+  cardSub: { fontSize: 7.5, color: GRAY },
 
   // Table
   table: {
@@ -189,121 +177,91 @@ const s = StyleSheet.create({
     borderColor: BORDER,
     borderRadius: 6,
     overflow: 'hidden',
-  },
-  tableRow: {
-    flexDirection: 'row',
-    borderBottomWidth: 1,
-    borderBottomColor: BORDER,
-    paddingVertical: 6,
-    paddingHorizontal: 10,
-  },
-  tableRowLast: {
-    borderBottomWidth: 0,
-  },
-  tableRowAlt: {
-    backgroundColor: LIGHT_BG,
+    marginTop: 8,
   },
   tableHead: {
-    fontSize: 8,
+    flexDirection: 'row',
+    backgroundColor: LIGHT_BG,
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: BORDER,
+  },
+  tableHeadCell: {
+    fontSize: 7,
     fontFamily: 'Helvetica-Bold',
     color: GRAY,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
-  tableCell: {
-    fontSize: 9,
-    color: BLACK,
-  },
-  tableCellRight: {
-    fontSize: 9,
-    color: GRAY,
-    textAlign: 'right',
-  },
-
-  // Bullets
-  bullet: {
+  tableRow: {
     flexDirection: 'row',
-    marginBottom: 8,
-    alignItems: 'flex-start',
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: BORDER,
   },
+  tableRowLast: { borderBottomWidth: 0 },
+  tableRowAlt: { backgroundColor: '#fafafa' },
+  tableCell: { fontSize: 9, color: BLACK },
+  tableCellMuted: { fontSize: 9, color: GRAY, textAlign: 'right' },
+
+  // Bullet list
+  bullet: { flexDirection: 'row', marginBottom: 9, alignItems: 'flex-start' },
   bulletDot: {
     width: 4,
     height: 4,
     borderRadius: 2,
     backgroundColor: CYAN,
-    marginTop: 4,
+    marginTop: 4.5,
     marginRight: 10,
     flexShrink: 0,
   },
-  bulletText: {
-    fontSize: 10,
-    color: BLACK,
-    lineHeight: 1.5,
-    flex: 1,
-  },
+  bulletText: { fontSize: 10, color: BLACK, lineHeight: 1.55, flex: 1 },
 
-  // Progress bar
+  // Progress
   progressOuter: {
     height: 6,
     backgroundColor: BORDER,
     borderRadius: 3,
-    marginTop: 8,
-    marginBottom: 4,
+    marginTop: 10,
+    marginBottom: 3,
   },
-  progressInner: {
-    height: 6,
-    backgroundColor: CYAN,
-    borderRadius: 3,
-  },
-  progressLabel: {
-    fontSize: 8,
-    color: GRAY,
-    textAlign: 'right',
-  },
+  progressInner: { height: 6, backgroundColor: CYAN, borderRadius: 3 },
+  progressLabel: { fontSize: 8, color: GRAY, textAlign: 'right' },
 
-  // Service pill
+  // Service pills
+  pillRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
   pill: {
-    borderRadius: 12,
-    paddingVertical: 4,
-    paddingHorizontal: 10,
     backgroundColor: LIGHT_BG,
-    marginRight: 6,
-    marginBottom: 6,
+    borderRadius: 20,
+    paddingVertical: 4,
+    paddingHorizontal: 12,
   },
-  pillText: {
-    fontSize: 9,
-    color: BLACK,
-  },
+  pillText: { fontSize: 9, color: BLACK },
 
   // Footer
   footer: {
     position: 'absolute',
-    bottom: 20,
+    bottom: 18,
     left: 48,
     right: 48,
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
     borderTopWidth: 1,
     borderTopColor: BORDER,
     paddingTop: 8,
   },
-  footerText: {
-    fontSize: 8,
-    color: GRAY,
-  },
-  footerCyan: {
-    fontSize: 8,
-    color: CYAN,
-  },
+  footerLeft: { fontSize: 7.5, color: GRAY },
+  footerRight: { fontSize: 7.5, color: CYAN },
 })
 
-// ─── Helper components ────────────────────────────────────────────────────────
+// ─── Helpers ─────────────────────────────────────────────────────────────────
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <View style={s.section}>
-      <View style={s.sectionHeader}>
+      <View style={s.sectionHead}>
         <View style={s.sectionDot} />
         <Text style={s.sectionTitle}>{title}</Text>
       </View>
@@ -312,323 +270,252 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   )
 }
 
-function MetricCards({
+function CardRow({
   items,
 }: {
   items: Array<{ label: string; value: string; sub?: string }>
 }) {
-  // Split into rows of max 4
-  const rows: typeof items[] = []
-  for (let i = 0; i < items.length; i += 4) {
-    rows.push(items.slice(i, i + 4))
-  }
   return (
-    <>
-      {rows.map((row, ri) => (
-        <View style={s.cardRow} key={ri}>
-          {row.map(({ label, value, sub }) => (
-            <View style={s.card} key={label}>
-              <Text style={s.cardLabel}>{label}</Text>
-              <Text style={s.cardValue}>{value}</Text>
-              {sub && <Text style={s.cardSub}>{sub}</Text>}
-            </View>
-          ))}
+    <View style={s.cardRow}>
+      {items.map(({ label, value, sub }) => (
+        <View style={s.card} key={label}>
+          <Text style={s.cardLabel}>{label}</Text>
+          <Text style={s.cardValue}>{value}</Text>
+          {sub ? <Text style={s.cardSub}>{sub}</Text> : null}
         </View>
       ))}
-    </>
+    </View>
   )
 }
 
-// ─── Executive summary generator ─────────────────────────────────────────────
+// ─── Executive bullets ────────────────────────────────────────────────────────
 
-function buildSummaryBullets(data: MonthlyReportData): string[] {
-  const bullets: string[] = []
+function buildBullets(data: MonthlyReportData): string[] {
+  const out: string[] = []
 
   if (data.analytics) {
     const a = data.analytics
-    bullets.push(
-      `Tu sitio web recibió ${a.sessions.toLocaleString('es-AR')} visitas este mes, con ${a.activeUsers.toLocaleString('es-AR')} usuarios activos.`
+    out.push(
+      `Tu sitio recibió ${a.sessions.toLocaleString('es-AR')} visitas este mes con ${a.activeUsers.toLocaleString('es-AR')} usuarios activos. La duración promedio por sesión fue de ${formatDuration(a.avgSessionDurationSec)}.`
     )
   }
 
   if (data.searchConsole) {
     const sc = data.searchConsole
-    bullets.push(
-      `Tu sitio apareció ${sc.totalImpressions.toLocaleString('es-AR')} veces en los resultados de Google, generando ${sc.totalClicks.toLocaleString('es-AR')} visitas directas. Posición promedio: #${sc.avgPosition}.`
+    out.push(
+      `Tu sitio apareció ${sc.totalImpressions.toLocaleString('es-AR')} veces en los resultados de Google, generando ${sc.totalClicks.toLocaleString('es-AR')} visitas directas${sc.avgPosition > 0 ? ` con una posición promedio de #${sc.avgPosition}` : ''}.`
     )
   }
 
   if (data.project) {
     const p = data.project
-    const pct =
-      p.totalTasks > 0 ? Math.round((p.doneTasks / p.totalTasks) * 100) : 0
-    bullets.push(
-      `Tu proyecto "${p.name}" está en estado ${PROJECT_STATUS_LABEL[p.status] ?? p.status} con un ${pct}% de avance (${p.doneTasks} de ${p.totalTasks} tareas completadas).`
+    const pct = p.totalTasks > 0 ? Math.round((p.doneTasks / p.totalTasks) * 100) : 0
+    out.push(
+      `Tu proyecto "${p.name}" está ${pct > 0 ? `${pct}% completado` : 'iniciando'} (${p.doneTasks} de ${p.totalTasks} tareas finalizadas) y se encuentra en estado ${PROJECT_STATUS_LABEL[p.status] ?? p.status}.`
     )
   }
 
-  const activeServices = data.services.filter((s) => s.status === 'ACTIVE')
-  if (activeServices.length > 0) {
-    const names = activeServices.map((s) => SERVICE_TYPE_LABEL[s.type] ?? s.type)
-    bullets.push(
-      `Tenés ${activeServices.length} servicio${activeServices.length !== 1 ? 's' : ''} activo${activeServices.length !== 1 ? 's' : ''} con develOP: ${names.join(', ')}.`
+  const active = data.services.filter((s) => s.status === 'ACTIVE')
+  if (active.length > 0) {
+    const names = active.map((s) => SERVICE_LABEL[s.type] ?? s.type).join(', ')
+    out.push(
+      `Servicios activos con develOP: ${names}.`
     )
   }
 
-  if (bullets.length === 0) {
-    bullets.push('Este es tu reporte mensual de develOP. Próximamente encontrarás aquí métricas de tu sitio, posicionamiento y avance de tu proyecto.')
+  if (out.length === 0) {
+    out.push('Tu portal está en configuración. Pronto verás aquí un resumen completo del rendimiento de tu sitio, posicionamiento en Google y avance del proyecto.')
   }
 
-  return bullets
+  return out
 }
 
 // ─── PDF Document ─────────────────────────────────────────────────────────────
 
 export function MonthlyReport({ data }: { data: MonthlyReportData }) {
-  const bullets = buildSummaryBullets(data)
+  const bullets = buildBullets(data)
   const monthLabel = formatMonth(data.month)
   const activeServices = data.services.filter((s) => s.status === 'ACTIVE')
 
   return (
     <Document
-      title={`Reporte mensual ${monthLabel} — ${data.companyName}`}
+      title={`Reporte ${monthLabel} — ${data.companyName}`}
       author="develOP"
       creator="develOP"
     >
       <Page size="A4" style={s.page}>
-        {/* ── Cover ── */}
+
+        {/* Cover */}
         <View style={s.cover}>
           <Text style={s.coverBrand}>develOP</Text>
-          <Text style={s.coverTitle}>{data.companyName}</Text>
+          <Text style={s.coverCompany}>{data.companyName}</Text>
           <Text style={s.coverSub}>Reporte mensual</Text>
           <Text style={s.coverMonth}>{monthLabel}</Text>
-          <View style={s.coverBar} />
+          <View style={s.coverAccent} />
         </View>
 
-        <View style={s.content}>
-          {/* ── Executive Summary ── */}
+        <View style={s.body}>
+
+          {/* Executive summary */}
           <Section title="Resumen ejecutivo">
-            {bullets.map((bullet, i) => (
+            {bullets.map((b, i) => (
               <View style={s.bullet} key={i}>
                 <View style={s.bulletDot} />
-                <Text style={s.bulletText}>{bullet}</Text>
+                <Text style={s.bulletText}>{b}</Text>
               </View>
             ))}
           </Section>
 
-          {/* ── Analytics ── */}
-          {data.analytics && (
-            <Section title="Tu sitio web">
-              <MetricCards
-                items={[
-                  {
-                    label: 'Sesiones',
-                    value: data.analytics.sessions.toLocaleString('es-AR'),
-                    sub: 'visitas totales',
-                  },
-                  {
-                    label: 'Usuarios activos',
-                    value: data.analytics.activeUsers.toLocaleString('es-AR'),
-                  },
-                  {
-                    label: 'Rebote',
-                    value: `${data.analytics.bounceRate}%`,
-                    sub: 'tasa de rebote',
-                  },
-                  {
-                    label: 'Duración promedio',
-                    value: formatDuration(data.analytics.avgSessionDurationSec),
-                    sub: 'por sesión',
-                  },
-                ]}
-              />
+          {/* Analytics */}
+          {data.analytics && (() => {
+            const a = data.analytics!
+            return (
+              <Section title="Tu sitio web">
+                <CardRow items={[
+                  { label: 'Sesiones', value: a.sessions.toLocaleString('es-AR'), sub: 'visitas totales' },
+                  { label: 'Usuarios activos', value: a.activeUsers.toLocaleString('es-AR') },
+                  { label: 'Tasa de rebote', value: `${a.bounceRate}%` },
+                  { label: 'Duración promedio', value: formatDuration(a.avgSessionDurationSec), sub: 'por sesión' },
+                ]} />
 
-              {data.analytics.topPages.length > 0 && (
-                <>
-                  <Text style={[s.cardLabel, { marginBottom: 6, marginTop: 4 }]}>
-                    Páginas más visitadas
-                  </Text>
-                  <View style={s.table}>
-                    {data.analytics.topPages.slice(0, 3).map((page, i) => (
-                      <View
-                        key={i}
-                        style={[
-                          s.tableRow,
-                          i % 2 === 1 ? s.tableRowAlt : {},
-                          i === Math.min(2, data.analytics!.topPages.length - 1)
-                            ? s.tableRowLast
-                            : {},
-                        ]}
-                      >
-                        <Text style={[s.tableCell, { flex: 1 }]}>{page.page}</Text>
-                        <Text style={[s.tableCellRight, { width: 60 }]}>
-                          {page.sessions.toLocaleString('es-AR')} sesiones
-                        </Text>
-                      </View>
-                    ))}
-                  </View>
-                </>
-              )}
-            </Section>
-          )}
-
-          {/* ── Search Console ── */}
-          {data.searchConsole && (
-            <Section title="Posicionamiento en Google">
-              <MetricCards
-                items={[
-                  {
-                    label: 'Clicks',
-                    value: data.searchConsole.totalClicks.toLocaleString('es-AR'),
-                    sub: 'visitas desde Google',
-                  },
-                  {
-                    label: 'Impresiones',
-                    value: data.searchConsole.totalImpressions.toLocaleString('es-AR'),
-                    sub: 'veces mostrado',
-                  },
-                  {
-                    label: 'CTR',
-                    value: `${data.searchConsole.avgCtr}%`,
-                    sub: 'tasa de clic',
-                  },
-                  {
-                    label: 'Posición',
-                    value:
-                      data.searchConsole.avgPosition > 0
-                        ? `#${data.searchConsole.avgPosition}`
-                        : '—',
-                    sub: 'promedio en resultados',
-                  },
-                ]}
-              />
-
-              {data.searchConsole.topQueries.length > 0 && (
-                <>
-                  <Text style={[s.cardLabel, { marginBottom: 6, marginTop: 4 }]}>
-                    Top palabras clave
-                  </Text>
-                  <View style={s.table}>
-                    {/* Header */}
-                    <View style={[s.tableRow, { backgroundColor: LIGHT_BG }]}>
-                      <Text style={[s.tableHead, { flex: 1 }]}>Consulta</Text>
-                      <Text style={[s.tableHead, { width: 44, textAlign: 'right' }]}>
-                        Clicks
-                      </Text>
-                      <Text style={[s.tableHead, { width: 60, textAlign: 'right' }]}>
-                        Impr.
-                      </Text>
-                      <Text style={[s.tableHead, { width: 44, textAlign: 'right' }]}>
-                        Pos.
-                      </Text>
+                {a.topPages.length > 0 && (
+                  <>
+                    <Text style={[s.cardLabel, { marginTop: 6, marginBottom: 0 }]}>
+                      Páginas más visitadas
+                    </Text>
+                    <View style={s.table}>
+                      {a.topPages.slice(0, 3).map((p, i) => (
+                        <View
+                          key={i}
+                          style={[
+                            s.tableRow,
+                            i % 2 !== 0 ? s.tableRowAlt : {},
+                            i === Math.min(2, a.topPages.length - 1) ? s.tableRowLast : {},
+                          ]}
+                        >
+                          <Text style={[s.tableCell, { flex: 1 }]}>{p.page}</Text>
+                          <Text style={[s.tableCellMuted, { width: 72 }]}>
+                            {p.sessions.toLocaleString('es-AR')} sesiones
+                          </Text>
+                        </View>
+                      ))}
                     </View>
-                    {data.searchConsole.topQueries.slice(0, 5).map((q, i) => (
-                      <View
-                        key={i}
-                        style={[
-                          s.tableRow,
-                          i % 2 === 0 ? {} : s.tableRowAlt,
-                          i === Math.min(4, data.searchConsole!.topQueries.length - 1)
-                            ? s.tableRowLast
-                            : {},
-                        ]}
-                      >
-                        <Text style={[s.tableCell, { flex: 1 }]}>{q.query}</Text>
-                        <Text style={[s.tableCellRight, { width: 44 }]}>
-                          {q.clicks}
-                        </Text>
-                        <Text style={[s.tableCellRight, { width: 60 }]}>
-                          {q.impressions}
-                        </Text>
-                        <Text style={[s.tableCellRight, { width: 44 }]}>
-                          #{q.position}
-                        </Text>
+                  </>
+                )}
+              </Section>
+            )
+          })()}
+
+          {/* Search Console */}
+          {data.searchConsole && (() => {
+            const sc = data.searchConsole!
+            return (
+              <Section title="Posicionamiento en Google">
+                <CardRow items={[
+                  { label: 'Clicks', value: sc.totalClicks.toLocaleString('es-AR'), sub: 'desde Google' },
+                  { label: 'Impresiones', value: sc.totalImpressions.toLocaleString('es-AR'), sub: 'veces mostrado' },
+                  { label: 'CTR', value: `${sc.avgCtr}%`, sub: 'tasa de clic' },
+                  { label: 'Posición promedio', value: sc.avgPosition > 0 ? `#${sc.avgPosition}` : '—', sub: 'menor es mejor' },
+                ]} />
+
+                {sc.topQueries.length > 0 && (
+                  <>
+                    <Text style={[s.cardLabel, { marginTop: 6, marginBottom: 0 }]}>
+                      Top palabras clave
+                    </Text>
+                    <View style={s.table}>
+                      <View style={s.tableHead}>
+                        <Text style={[s.tableHeadCell, { flex: 1 }]}>Consulta</Text>
+                        <Text style={[s.tableHeadCell, { width: 44, textAlign: 'right' }]}>Clicks</Text>
+                        <Text style={[s.tableHeadCell, { width: 60, textAlign: 'right' }]}>Impr.</Text>
+                        <Text style={[s.tableHeadCell, { width: 44, textAlign: 'right' }]}>Pos.</Text>
                       </View>
-                    ))}
-                  </View>
-                </>
-              )}
-            </Section>
-          )}
+                      {sc.topQueries.slice(0, 5).map((q, i) => (
+                        <View
+                          key={i}
+                          style={[
+                            s.tableRow,
+                            i % 2 !== 0 ? s.tableRowAlt : {},
+                            i === Math.min(4, sc.topQueries.length - 1) ? s.tableRowLast : {},
+                          ]}
+                        >
+                          <Text style={[s.tableCell, { flex: 1 }]}>{q.query}</Text>
+                          <Text style={[s.tableCellMuted, { width: 44 }]}>{q.clicks}</Text>
+                          <Text style={[s.tableCellMuted, { width: 60 }]}>{q.impressions}</Text>
+                          <Text style={[s.tableCellMuted, { width: 44 }]}>#{q.position}</Text>
+                        </View>
+                      ))}
+                    </View>
+                  </>
+                )}
+              </Section>
+            )
+          })()}
 
-          {/* ── Project ── */}
-          {data.project && (
-            <Section title="Estado del proyecto">
-              <View style={s.cardRow}>
-                <View style={[s.card, { flex: 2 }]}>
-                  <Text style={s.cardLabel}>Proyecto</Text>
-                  <Text
-                    style={[
-                      s.tableCell,
-                      { fontSize: 12, fontFamily: 'Helvetica-Bold', marginBottom: 2 },
-                    ]}
-                  >
-                    {data.project.name}
-                  </Text>
-                  <Text style={s.cardSub}>
-                    {PROJECT_STATUS_LABEL[data.project.status] ?? data.project.status}
-                  </Text>
-                </View>
-                <View style={s.card}>
-                  <Text style={s.cardLabel}>Avance</Text>
-                  <Text style={s.cardValue}>
-                    {data.project.totalTasks > 0
-                      ? `${Math.round((data.project.doneTasks / data.project.totalTasks) * 100)}%`
-                      : '—'}
-                  </Text>
-                  <Text style={s.cardSub}>
-                    {data.project.doneTasks}/{data.project.totalTasks} tareas
-                  </Text>
-                </View>
-              </View>
-              {data.project.totalTasks > 0 && (
-                <>
-                  <View style={s.progressOuter}>
-                    <View
-                      style={[
-                        s.progressInner,
-                        {
-                          width: `${Math.round(
-                            (data.project.doneTasks / data.project.totalTasks) * 100
-                          )}%`,
-                        },
-                      ]}
-                    />
+          {/* Project */}
+          {data.project && (() => {
+            const p = data.project!
+            const pct = p.totalTasks > 0
+              ? Math.round((p.doneTasks / p.totalTasks) * 100)
+              : 0
+            return (
+              <Section title="Estado del proyecto">
+                <View style={s.cardRow}>
+                  <View style={[s.card, { flex: 2 }]}>
+                    <Text style={s.cardLabel}>Proyecto</Text>
+                    <Text style={[s.tableCell, { fontSize: 13, fontFamily: 'Helvetica-Bold', marginBottom: 3 }]}>
+                      {p.name}
+                    </Text>
+                    <Text style={s.cardSub}>
+                      {PROJECT_STATUS_LABEL[p.status] ?? p.status}
+                    </Text>
                   </View>
-                  <Text style={s.progressLabel}>
-                    {Math.round(
-                      (data.project.doneTasks / data.project.totalTasks) * 100
-                    )}
-                    % completado
-                  </Text>
-                </>
-              )}
-            </Section>
-          )}
+                  <View style={s.card}>
+                    <Text style={s.cardLabel}>Avance</Text>
+                    <Text style={s.cardValue}>
+                      {p.totalTasks > 0 ? `${pct}%` : '—'}
+                    </Text>
+                    <Text style={s.cardSub}>
+                      {p.doneTasks}/{p.totalTasks} tareas
+                    </Text>
+                  </View>
+                </View>
 
-          {/* ── Services ── */}
+                {p.totalTasks > 0 && (
+                  <>
+                    <View style={s.progressOuter}>
+                      <View style={[s.progressInner, { width: `${pct}%` }]} />
+                    </View>
+                    <Text style={s.progressLabel}>{pct}% completado</Text>
+                  </>
+                )}
+              </Section>
+            )
+          })()}
+
+          {/* Active services */}
           {activeServices.length > 0 && (
             <Section title="Servicios activos">
-              <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+              <View style={s.pillRow}>
                 {activeServices.map((svc, i) => (
                   <View style={s.pill} key={i}>
-                    <Text style={s.pillText}>
-                      {SERVICE_TYPE_LABEL[svc.type] ?? svc.type}
-                    </Text>
+                    <Text style={s.pillText}>{SERVICE_LABEL[svc.type] ?? svc.type}</Text>
                   </View>
                 ))}
               </View>
             </Section>
           )}
+
         </View>
 
-        {/* ── Footer ── */}
+        {/* Footer */}
         <View style={s.footer} fixed>
-          <Text style={s.footerText}>
+          <Text style={s.footerLeft}>
             Reporte generado por develOP • develop.com.ar
           </Text>
-          <Text style={s.footerCyan}>contacto@develop.com.ar</Text>
+          <Text style={s.footerRight}>contacto@develop.com.ar</Text>
         </View>
+
       </Page>
     </Document>
   )

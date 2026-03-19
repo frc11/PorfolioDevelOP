@@ -18,7 +18,12 @@ export function SendMessageForm({ clientId }: { clientId: string }) {
   }, [isPending, error])
 
   return (
-    <form ref={formRef} action={formAction} className="border-t border-zinc-800 bg-zinc-950 p-4">
+    <form
+      ref={formRef}
+      action={formAction}
+      className="p-4"
+      style={{ borderTop: '1px solid rgba(255,255,255,0.06)', background: 'rgba(8,10,12,0.8)' }}
+    >
       <input type="hidden" name="clientId" value={clientId} />
 
       {error && (
@@ -38,17 +43,18 @@ export function SendMessageForm({ clientId }: { clientId: string }) {
               formRef.current?.requestSubmit()
             }
           }}
-          className="flex-1 resize-none rounded-md border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 outline-none placeholder:text-zinc-600 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/30 disabled:opacity-50"
+          className="flex-1 resize-none rounded-xl border border-white/[0.07] bg-white/[0.04] px-3 py-2.5 text-sm text-zinc-100 outline-none placeholder:text-zinc-700 transition-all focus:border-cyan-500/60 focus:bg-white/[0.06] focus:ring-2 focus:ring-cyan-500/20 disabled:opacity-50"
         />
         <button
           type="submit"
           disabled={isPending}
-          className="flex h-[4.5rem] w-10 flex-shrink-0 items-center justify-center rounded-md bg-cyan-500 text-zinc-950 transition-colors hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
+          className="flex h-[4.5rem] w-10 flex-shrink-0 items-center justify-center rounded-xl text-zinc-950 transition-all hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+          style={{ background: 'linear-gradient(135deg, #06b6d4 0%, #10b981 100%)' }}
         >
           <Send size={15} />
         </button>
       </div>
-      <p className="mt-1.5 text-xs text-zinc-600">Enter para enviar · Shift+Enter para nueva línea</p>
+      <p className="mt-1.5 text-xs text-zinc-700">Enter para enviar · Shift+Enter para nueva línea</p>
     </form>
   )
 }

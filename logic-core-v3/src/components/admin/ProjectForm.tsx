@@ -1,6 +1,7 @@
 'use client'
 
 import { useActionState } from 'react'
+import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { ProjectStatus } from '@prisma/client'
 
@@ -47,14 +48,14 @@ export function ProjectForm({
 
       {/* Error */}
       {error && (
-        <div className="rounded-md border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-400">
+        <div className="rounded-xl border border-red-500/20 bg-red-500/[0.08] px-4 py-3 text-sm text-red-400">
           {error}
         </div>
       )}
 
       {/* Name */}
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="name" className="text-xs font-medium uppercase tracking-wide text-zinc-400">
+        <label htmlFor="name" className="text-[10px] font-semibold tracking-[0.15em] uppercase text-zinc-500">
           Nombre del proyecto <span className="text-red-400">*</span>
         </label>
         <input
@@ -64,13 +65,13 @@ export function ProjectForm({
           required
           defaultValue={initialValues?.name ?? ''}
           placeholder="Ej: Sitio web corporativo"
-          className="rounded-md border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 outline-none placeholder:text-zinc-600 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/30"
+          className="w-full rounded-xl border border-white/[0.07] bg-white/[0.04] px-3 py-2.5 text-sm text-zinc-100 outline-none placeholder:text-zinc-700 transition-all focus:border-cyan-500/60 focus:bg-white/[0.06] focus:ring-2 focus:ring-cyan-500/20"
         />
       </div>
 
       {/* Description */}
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="description" className="text-xs font-medium uppercase tracking-wide text-zinc-400">
+        <label htmlFor="description" className="text-[10px] font-semibold tracking-[0.15em] uppercase text-zinc-500">
           Descripción{' '}
           <span className="normal-case text-zinc-600">(opcional)</span>
         </label>
@@ -80,13 +81,13 @@ export function ProjectForm({
           rows={3}
           defaultValue={initialValues?.description ?? ''}
           placeholder="Descripción breve del proyecto..."
-          className="resize-none rounded-md border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 outline-none placeholder:text-zinc-600 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/30"
+          className="w-full resize-none rounded-xl border border-white/[0.07] bg-white/[0.04] px-3 py-2.5 text-sm text-zinc-100 outline-none placeholder:text-zinc-700 transition-all focus:border-cyan-500/60 focus:bg-white/[0.06] focus:ring-2 focus:ring-cyan-500/20"
         />
       </div>
 
       {/* Client */}
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="clientId" className="text-xs font-medium uppercase tracking-wide text-zinc-400">
+        <label htmlFor="clientId" className="text-[10px] font-semibold tracking-[0.15em] uppercase text-zinc-500">
           Cliente <span className="text-red-400">*</span>
         </label>
         {clients.length === 0 ? (
@@ -118,7 +119,7 @@ export function ProjectForm({
 
       {/* Status */}
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="status" className="text-xs font-medium uppercase tracking-wide text-zinc-400">
+        <label htmlFor="status" className="text-[10px] font-semibold tracking-[0.15em] uppercase text-zinc-500">
           Estado
         </label>
         <select
@@ -137,20 +138,24 @@ export function ProjectForm({
 
       {/* Actions */}
       <div className="flex items-center gap-3 pt-2">
-        <button
+        <motion.button
           type="submit"
           disabled={isPending || clients.length === 0}
-          className="rounded-md bg-cyan-500 px-5 py-2 text-sm font-medium text-zinc-950 transition-colors hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
+          whileHover={!isPending ? { scale: 1.015, filter: 'brightness(1.1)' } : {}}
+          whileTap={!isPending ? { scale: 0.985 } : {}}
+          className="rounded-xl px-5 py-2.5 text-sm font-semibold text-zinc-950 transition-opacity disabled:cursor-not-allowed disabled:opacity-50"
+          style={{ background: 'linear-gradient(135deg, #06b6d4 0%, #10b981 100%)' }}
         >
           {isPending
             ? 'Guardando...'
             : mode === 'create'
             ? 'Crear proyecto'
             : 'Guardar cambios'}
-        </button>
+        </motion.button>
         <Link
           href={cancelHref}
-          className="rounded-md px-5 py-2 text-sm text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-zinc-100"
+          className="rounded-xl px-5 py-2.5 text-sm text-zinc-500 transition-all hover:text-zinc-200"
+          style={{ border: '1px solid rgba(255,255,255,0.08)' }}
         >
           Cancelar
         </Link>

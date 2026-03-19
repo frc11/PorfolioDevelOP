@@ -46,7 +46,20 @@ function MobileTouchHandler() {
 
 export function Hero() {
     return (
-        <section className="min-h-screen grid grid-cols-1 md:grid-cols-2 relative overflow-hidden bg-zinc-50 pb-32 md:pb-0" id="inicio">
+        <section className="min-h-screen grid grid-cols-1 md:grid-cols-2 relative overflow-hidden bg-[radial-gradient(circle_at_50%_0%,#ffffff_0%,#f4f4f5_100%)] pb-32 md:pb-0" id="inicio">
+            {/* Task 1: Film Grain Layer */}
+            <div className="absolute inset-0 opacity-[0.03] pointer-events-none z-0"
+                 style={{ 
+                     backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")` 
+                 }} 
+            />
+
+            {/* Task 2: Technical Grid with Animation (Visibility Improved) */}
+            <motion.div 
+                animate={{ translateY: [0, 64] }}
+                transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
+                className="absolute inset-0 bg-[linear-gradient(to_right,#0000000c_1px,transparent_1px),linear-gradient(to_bottom,#0000000c_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] pointer-events-none z-0" 
+            />
 
             {/* COLUMN LEFT: TEXT */}
             <div className="flex flex-col justify-center px-8 md:px-24 order-2 md:order-1 text-zinc-900 z-10 relative">
@@ -62,30 +75,47 @@ export function Hero() {
                         Exclusive_Digital_Partnership
                     </div>
 
-                    {/* H1 with Typewriter */}
-                    <h1 className="text-5xl md:text-[3.5rem] lg:text-6xl font-extrabold tracking-tight leading-[1.15] text-zinc-900">
-                        <span className="block">Transformamos tu empresa</span>
-                        <span className="block">
-                            con{' '}
-                            <TypewriterText
-                                words={HERO_KEYWORDS}
-                                typingSpeed={70}
-                                deletingSpeed={40}
-                                pauseDuration={2000}
-                                className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-cyan-600"
-                            />
-                        </span>
+                    {/* H1 Metallic Upgrade with Reveal Animation */}
+                    <h1 className="text-5xl md:text-[4rem] lg:text-[4.5rem] font-black tracking-tighter leading-[0.9] text-transparent bg-clip-text bg-gradient-to-b from-zinc-400 via-zinc-600 to-zinc-900 drop-shadow-[0_2px_15px_rgba(255,255,255,0.2)] py-2">
+                        <div className="overflow-hidden">
+                            <motion.span
+                                initial={{ y: "100%" }}
+                                animate={{ y: 0 }}
+                                transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1], delay: 0.3 }}
+                                className="block"
+                            >
+                                Transformamos tu empresa
+                            </motion.span>
+                        </div>
+                        <div className="overflow-hidden">
+                            <motion.span
+                                initial={{ y: "100%" }}
+                                animate={{ y: 0 }}
+                                transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1], delay: 0.5 }}
+                                className="block h-[1.1em] md:h-[1em]"
+                            >
+                                con{' '}
+                                <TypewriterText
+                                    words={HERO_KEYWORDS}
+                                    typingSpeed={70}
+                                    deletingSpeed={40}
+                                    pauseDuration={2000}
+                                    className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-500 to-cyan-700"
+                                />
+                            </motion.span>
+                        </div>
                     </h1>
 
-                    {/* Impact Paragraph */}
+                    {/* Elite Consultative Subtitle with Keyword Glow */}
                     <motion.p
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.8, delay: 0.6 }}
-                        className="text-zinc-600 text-lg md:text-xl max-w-lg leading-relaxed font-light"
+                        transition={{ duration: 0.8, delay: 0.8 }}
+                        className="text-zinc-500 font-light text-lg md:text-xl max-w-2xl mt-6 tracking-wide leading-relaxed"
                     >
-                        Desarrollamos <strong className="text-zinc-900 font-semibold">ecosistemas digitales de alto rendimiento</strong>.
-                        Desde plataformas web hasta agentes de IA y automatización de flujos de trabajo.
+                        Diseñamos <strong className="text-zinc-900 font-semibold">ecosistemas digitales de alto impacto</strong>. 
+                        Desde arquitectura de <span className="text-cyan-600/90 font-medium drop-shadow-[0_0_10px_rgba(8,145,178,0.3)]">Software</span>{' '}
+                        hasta agentes de <span className="text-cyan-600/90 font-medium drop-shadow-[0_0_10px_rgba(8,145,178,0.3)]">IA Generativa</span> y automatización estratégica.
                     </motion.p>
 
                     {/* CTA Buttons */}

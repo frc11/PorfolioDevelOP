@@ -18,6 +18,7 @@ const NAV_ITEMS: NavItem[] = [
   { href: '/dashboard/messages', label: 'Mensajes', icon: MessageSquare, exact: false },
   { href: '/dashboard/analytics', label: 'Analíticas', icon: BarChart2, exact: false },
   { href: '/dashboard/seo', label: 'SEO', icon: TrendingUp, exact: false },
+  { href: '/dashboard/automations', label: 'Automatizaciones', icon: Zap, exact: false },
   { href: '/dashboard/profile', label: 'Mi perfil', icon: User, exact: false },
 ]
 

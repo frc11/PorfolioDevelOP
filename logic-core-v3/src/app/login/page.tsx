@@ -2,186 +2,212 @@
 
 import { useActionState } from 'react'
 import { motion } from 'framer-motion'
+import dynamic from 'next/dynamic'
 import { loginAction } from './actions'
 
-// ─── Login Form (Client Component) ───────────────────────────────────────────
+// Three.js canvas — no SSR (browser-only)
+const DotMatrix = dynamic(
+  () => import('@/components/canvas/DotMatrix').then((m) => m.DotMatrix),
+  { ssr: false }
+)
+
+// ─── Animation variants ───────────────────────────────────────────────────────
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.07, delayChildren: 0.1 },
+  },
+}
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 16 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] },
+  },
+}
+
+// ─── Input component ──────────────────────────────────────────────────────────
+
+function Field({
+  id,
+  label,
+  type,
+  placeholder,
+  autoComplete,
+}: {
+  id: string
+  label: string
+  type: string
+  placeholder: string
+  autoComplete: string
+}) {
+  return (
+    <motion.div variants={itemVariants} className="flex flex-col gap-2">
+      <label
+        htmlFor={id}
+        className="text-[10px] font-semibold tracking-[0.15em] uppercase text-zinc-500"
+      >
+        {label}
+      </label>
+      <input
+        id={id}
+        name={id}
+        type={type}
+        autoComplete={autoComplete}
+        required
+        placeholder={placeholder}
+        className="
+          w-full rounded-xl border border-white/[0.07] bg-white/[0.04]
+          px-4 py-3 text-sm text-zinc-100 placeholder-zinc-700
+          outline-none transition-all duration-200
+          focus:border-cyan-500/60 focus:bg-white/[0.06]
+          focus:ring-2 focus:ring-cyan-500/20
+        "
+      />
+    </motion.div>
+  )
+}
+
+// ─── Login form ───────────────────────────────────────────────────────────────
 
 function LoginForm() {
   const [error, formAction, isPending] = useActionState(loginAction, null)
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 24 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-      className="w-full max-w-sm"
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+      className="relative z-10 w-full max-w-[400px]"
     >
-      {/* Logo / Brand */}
-      <div className="mb-10 text-center">
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.2, duration: 0.5 }}
-          className="text-sm tracking-widest uppercase"
-          style={{ color: 'var(--color-accent)' }}
-        >
+      {/* Brand */}
+      <motion.div variants={itemVariants} className="mb-10 text-center">
+        <p className="mb-3 text-[10px] font-semibold tracking-[0.25em] uppercase text-cyan-500/70">
           Portal de clientes
-        </motion.p>
-        <motion.h1
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.3, duration: 0.5 }}
-          className="mt-2 text-3xl font-semibold tracking-tight"
-          style={{ color: 'var(--color-obsidian)' }}
-        >
-          DevelOP
-        </motion.h1>
-      </div>
+        </p>
 
-      {/* Form Card */}
-      <div
-        className="rounded-2xl border p-8"
+        <h1 className="text-4xl font-bold tracking-tight">
+          <span className="text-white">devel</span>
+          <span
+            className="text-cyan-400"
+            style={{ textShadow: '0 0 24px rgba(6,182,212,0.7)' }}
+          >
+            OP
+          </span>
+        </h1>
+
+        <p className="mt-3 text-sm text-zinc-600">
+          Acceso exclusivo para clientes develOP
+        </p>
+      </motion.div>
+
+      {/* Card */}
+      <motion.div
+        variants={itemVariants}
+        className="rounded-2xl border border-white/[0.07] p-8"
         style={{
-          background: 'rgba(255,255,255,0.03)',
-          borderColor: 'rgba(255,255,255,0.08)',
-          backdropFilter: 'blur(12px)',
+          background:
+            'linear-gradient(145deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%)',
+          backdropFilter: 'blur(24px)',
+          WebkitBackdropFilter: 'blur(24px)',
+          boxShadow:
+            '0 0 0 1px rgba(6,182,212,0.08), 0 24px 64px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.06)',
         }}
       >
         <form action={formAction} className="flex flex-col gap-5">
-          {/* Email */}
-          <div className="flex flex-col gap-1.5">
-            <label
-              htmlFor="email"
-              className="text-xs font-medium tracking-wide uppercase"
-              style={{ color: 'rgba(255,255,255,0.4)' }}
-            >
-              Email
-            </label>
-            <input
-              id="email"
-              name="email"
-              type="email"
-              autoComplete="email"
-              required
-              placeholder="tu@empresa.com"
-              className="w-full rounded-lg px-4 py-3 text-sm outline-none transition-all duration-200"
-              style={{
-                background: 'rgba(255,255,255,0.05)',
-                border: '1px solid rgba(255,255,255,0.1)',
-                color: 'var(--color-obsidian)',
-              }}
-              onFocus={(e) => {
-                e.currentTarget.style.borderColor = 'var(--color-accent)'
-                e.currentTarget.style.boxShadow =
-                  '0 0 0 2px rgba(0, 225, 255, 0.1)'
-              }}
-              onBlur={(e) => {
-                e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'
-                e.currentTarget.style.boxShadow = 'none'
-              }}
-            />
-          </div>
+          <Field
+            id="email"
+            label="Email"
+            type="email"
+            placeholder="tu@empresa.com"
+            autoComplete="email"
+          />
 
-          {/* Password */}
-          <div className="flex flex-col gap-1.5">
-            <label
-              htmlFor="password"
-              className="text-xs font-medium tracking-wide uppercase"
-              style={{ color: 'rgba(255,255,255,0.4)' }}
-            >
-              Contraseña
-            </label>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              autoComplete="current-password"
-              required
-              placeholder="••••••••"
-              className="w-full rounded-lg px-4 py-3 text-sm outline-none transition-all duration-200"
-              style={{
-                background: 'rgba(255,255,255,0.05)',
-                border: '1px solid rgba(255,255,255,0.1)',
-                color: 'var(--color-obsidian)',
-              }}
-              onFocus={(e) => {
-                e.currentTarget.style.borderColor = 'var(--color-accent)'
-                e.currentTarget.style.boxShadow =
-                  '0 0 0 2px rgba(0, 225, 255, 0.1)'
-              }}
-              onBlur={(e) => {
-                e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'
-                e.currentTarget.style.boxShadow = 'none'
-              }}
-            />
-          </div>
+          <Field
+            id="password"
+            label="Contraseña"
+            type="password"
+            placeholder="••••••••"
+            autoComplete="current-password"
+          />
 
-          {/* Error message */}
+          {/* Error */}
           {error && (
-            <motion.p
-              initial={{ opacity: 0, y: -4 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="rounded-lg px-4 py-2.5 text-sm"
-              style={{
-                background: 'rgba(239, 68, 68, 0.1)',
-                border: '1px solid rgba(239, 68, 68, 0.2)',
-                color: '#f87171',
-              }}
+            <motion.div
+              initial={{ opacity: 0, y: -6, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ duration: 0.25 }}
+              className="rounded-xl border border-red-500/20 bg-red-500/[0.08] px-4 py-3"
             >
-              {error}
-            </motion.p>
+              <p className="text-xs text-red-400">{error}</p>
+            </motion.div>
           )}
 
-          {/* Submit button */}
-          <button
-            type="submit"
-            disabled={isPending}
-            className="mt-1 flex w-full items-center justify-center rounded-lg py-3 text-sm font-medium tracking-wide transition-all duration-200"
-            style={{
-              background: isPending
-                ? 'rgba(0, 225, 255, 0.5)'
-                : 'var(--color-accent)',
-              color: '#09090b',
-              cursor: isPending ? 'not-allowed' : 'pointer',
-            }}
-          >
-            {isPending ? (
-              <span className="flex items-center gap-2">
-                <svg
-                  className="h-4 w-4 animate-spin"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                >
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                  />
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 00-8 8h4z"
-                  />
-                </svg>
-                Ingresando...
-              </span>
-            ) : (
-              'Ingresar'
-            )}
-          </button>
+          {/* Submit */}
+          <motion.div variants={itemVariants} className="mt-1">
+            <motion.button
+              type="submit"
+              disabled={isPending}
+              whileHover={!isPending ? { scale: 1.015, filter: 'brightness(1.1)' } : {}}
+              whileTap={!isPending ? { scale: 0.985 } : {}}
+              className="relative w-full overflow-hidden rounded-xl py-3 text-sm font-semibold tracking-wide text-zinc-950 transition-opacity disabled:opacity-60"
+              style={{
+                background: 'linear-gradient(135deg, #06b6d4 0%, #10b981 100%)',
+              }}
+            >
+              {/* Shimmer overlay */}
+              {!isPending && (
+                <span
+                  className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 hover:opacity-100"
+                  style={{
+                    background:
+                      'linear-gradient(105deg, transparent 30%, rgba(255,255,255,0.15) 50%, transparent 70%)',
+                  }}
+                />
+              )}
+
+              {isPending ? (
+                <span className="flex items-center justify-center gap-2">
+                  <svg
+                    className="h-4 w-4 animate-spin"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                  >
+                    <circle
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="3"
+                      className="opacity-25"
+                    />
+                    <path
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 00-8 8h4z"
+                      className="opacity-75"
+                    />
+                  </svg>
+                  Ingresando...
+                </span>
+              ) : (
+                'Ingresar'
+              )}
+            </motion.button>
+          </motion.div>
         </form>
-      </div>
+      </motion.div>
 
       {/* Footer */}
-      <p
-        className="mt-6 text-center text-xs"
-        style={{ color: 'rgba(255,255,255,0.2)' }}
+      <motion.p
+        variants={itemVariants}
+        className="mt-8 text-center text-[11px] text-zinc-700"
       >
-        Portal exclusivo para clientes DevelOP
-      </p>
+        develop.com.ar
+      </motion.p>
     </motion.div>
   )
 }
@@ -190,18 +216,36 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <main
-      className="flex min-h-screen flex-col items-center justify-center px-4"
-      style={{ background: 'var(--color-void)' }}
-    >
-      {/* Ambient glow */}
+    <main className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-[#080a0c] px-4">
+
+      {/* DotMatrix background */}
+      <div className="pointer-events-none fixed inset-0 opacity-20">
+        <DotMatrix />
+      </div>
+
+      {/* Ambient glows */}
       <div
         className="pointer-events-none fixed inset-0"
         style={{
-          background:
-            'radial-gradient(ellipse 60% 50% at 50% 0%, rgba(0,225,255,0.06) 0%, transparent 70%)',
+          background: [
+            'radial-gradient(ellipse 90% 50% at 50% -5%, rgba(6,182,212,0.12) 0%, transparent 60%)',
+            'radial-gradient(ellipse 50% 40% at 85% 80%, rgba(16,185,129,0.06) 0%, transparent 60%)',
+          ].join(', '),
         }}
       />
+
+      {/* Subtle grid overlay */}
+      <div
+        className="pointer-events-none fixed inset-0 opacity-[0.03]"
+        style={{
+          backgroundImage: `
+            linear-gradient(rgba(255,255,255,0.8) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,0.8) 1px, transparent 1px)
+          `,
+          backgroundSize: '48px 48px',
+        }}
+      />
+
       <LoginForm />
     </main>
   )

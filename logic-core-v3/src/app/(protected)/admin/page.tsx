@@ -16,70 +16,93 @@ export default async function AdminPage() {
       label: 'Clientes activos',
       value: clients,
       icon: Users,
-      color: 'text-cyan-400',
-      bg: 'bg-cyan-500/10',
-      border: 'border-cyan-500/20',
+      glow: 'rgba(6,182,212,0.15)',
+      iconColor: 'text-cyan-400',
+      numColor: 'text-cyan-300',
+      shadow: '0 0 24px rgba(6,182,212,0.08)',
     },
     {
       label: 'Proyectos en curso',
       value: projects,
       icon: FolderKanban,
-      color: 'text-blue-400',
-      bg: 'bg-blue-500/10',
-      border: 'border-blue-500/20',
+      glow: 'rgba(59,130,246,0.15)',
+      iconColor: 'text-blue-400',
+      numColor: 'text-blue-300',
+      shadow: '0 0 24px rgba(59,130,246,0.08)',
     },
     {
       label: 'Mensajes sin leer',
       value: unreadMessages,
       icon: MessageSquare,
-      color: 'text-amber-400',
-      bg: 'bg-amber-500/10',
-      border: 'border-amber-500/20',
+      glow: 'rgba(245,158,11,0.15)',
+      iconColor: 'text-amber-400',
+      numColor: 'text-amber-300',
+      shadow: '0 0 24px rgba(245,158,11,0.08)',
     },
     {
       label: 'Servicios activos',
       value: activeServices,
       icon: Zap,
-      color: 'text-green-400',
-      bg: 'bg-green-500/10',
-      border: 'border-green-500/20',
+      glow: 'rgba(16,185,129,0.15)',
+      iconColor: 'text-green-400',
+      numColor: 'text-green-300',
+      shadow: '0 0 24px rgba(16,185,129,0.08)',
     },
   ]
 
   return (
     <div>
       {/* Page title */}
-      <div className="mb-6">
-        <h1 className="text-xl font-semibold text-zinc-100">
+      <div className="mb-8">
+        <p className="mb-1 text-[10px] font-semibold tracking-[0.2em] uppercase text-cyan-500/70">
+          Panel de control
+        </p>
+        <h1 className="text-2xl font-bold text-zinc-100">
           Bienvenido, {session?.user?.name ?? 'Admin'}
         </h1>
-        <p className="mt-1 text-sm text-zinc-500">
-          Resumen general del portal
+        <p className="mt-1 text-sm text-zinc-600">
+          Resumen general del portal develOP
         </p>
       </div>
 
       {/* Summary cards */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {SUMMARY_CARDS.map(({ label, value, icon: Icon, color, bg, border }) => (
+        {SUMMARY_CARDS.map(({ label, value, icon: Icon, glow, iconColor, numColor, shadow }) => (
           <div
             key={label}
-            className={`rounded-lg border ${border} ${bg} p-5`}
+            className="rounded-xl p-5"
+            style={{
+              background: 'linear-gradient(145deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%)',
+              border: '1px solid rgba(255,255,255,0.07)',
+              boxShadow: shadow,
+            }}
           >
             <div className="flex items-center justify-between">
-              <p className="text-sm text-zinc-400">{label}</p>
-              <Icon size={16} className={color} />
+              <p className="text-xs font-medium tracking-wide text-zinc-500">{label}</p>
+              <div
+                className="rounded-lg p-1.5"
+                style={{ background: glow }}
+              >
+                <Icon size={14} className={iconColor} />
+              </div>
             </div>
-            <p className={`mt-3 text-3xl font-semibold ${color}`}>{value}</p>
+            <p className={`mt-4 text-4xl font-bold tabular-nums ${numColor}`}>{value}</p>
           </div>
         ))}
       </div>
 
-      {/* Placeholder recent activity */}
-      <div className="mt-8 rounded-lg border border-zinc-800 bg-zinc-900 p-5">
-        <h2 className="mb-4 text-sm font-medium text-zinc-300">
+      {/* Recent activity */}
+      <div
+        className="mt-8 rounded-xl p-6"
+        style={{
+          background: 'linear-gradient(145deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.02) 100%)',
+          border: '1px solid rgba(255,255,255,0.06)',
+        }}
+      >
+        <h2 className="mb-4 text-[10px] font-semibold tracking-[0.15em] uppercase text-zinc-500">
           Actividad reciente
         </h2>
-        <p className="text-sm text-zinc-600">Sin actividad registrada.</p>
+        <p className="text-sm text-zinc-700">Sin actividad registrada.</p>
       </div>
     </div>
   )

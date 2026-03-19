@@ -1,7 +1,8 @@
 import { auth } from '@/auth'
 import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
-import { Zap, CheckSquare, Clock, MessageSquare } from 'lucide-react'
+import { Zap, CheckSquare, Clock, MessageSquare, FileText } from 'lucide-react'
+import { DownloadReportButtons } from '@/components/dashboard/DownloadReportButton'
 
 const TASK_STATUS_STYLE = {
   TODO: 'bg-zinc-500/10 text-zinc-400 border-zinc-500/20',
@@ -113,6 +114,18 @@ export default async function DashboardPage() {
             <p className={`mt-3 text-3xl font-semibold ${color}`}>{value}</p>
           </div>
         ))}
+      </div>
+
+      {/* Reports */}
+      <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-5">
+        <div className="mb-4 flex items-center gap-2">
+          <FileText size={15} className="text-cyan-400" />
+          <h2 className="text-sm font-medium text-zinc-300">Reportes mensuales</h2>
+        </div>
+        <p className="mb-4 text-xs text-zinc-500">
+          Descargá el resumen ejecutivo en PDF con las métricas de tu sitio, posicionamiento y avance del proyecto.
+        </p>
+        <DownloadReportButtons />
       </div>
 
       {/* Recent tasks */}

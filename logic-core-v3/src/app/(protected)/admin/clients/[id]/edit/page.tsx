@@ -20,6 +20,7 @@ export default async function EditClientPage({
       logoUrl: true,
       analyticsPropertyId: true,
       siteUrl: true,
+      n8nWorkflowIds: true,
       user: { select: { name: true, email: true } },
     },
   })
@@ -58,6 +59,7 @@ export default async function EditClientPage({
             email: client.user.email,
             analyticsPropertyId: client.analyticsPropertyId,
             siteUrl: client.siteUrl,
+            n8nWorkflowIds: client.n8nWorkflowIds,
           }}
           cancelHref={`/admin/clients/${id}`}
         />

@@ -98,6 +98,10 @@ export async function updateClientAction(
   const analyticsPropertyId =
     (formData.get('analyticsPropertyId') as string | null)?.trim() || null
   const siteUrl = (formData.get('siteUrl') as string | null)?.trim() || null
+  const n8nWorkflowIds = ((formData.get('n8nWorkflowIds') as string | null) ?? '')
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean)
 
   if (!clientId) return 'ID de cliente inválido.'
   if (!companyName || !name) {
@@ -118,7 +122,7 @@ export async function updateClientAction(
   await prisma.$transaction([
     prisma.client.update({
       where: { id: clientId },
-      data: { companyName, logoUrl, analyticsPropertyId, siteUrl, ...(slug ? { slug } : {}) },
+      data: { companyName, logoUrl, analyticsPropertyId, siteUrl, n8nWorkflowIds, ...(slug ? { slug } : {}) },
     }),
     prisma.user.update({
       where: { id: client.userId },
