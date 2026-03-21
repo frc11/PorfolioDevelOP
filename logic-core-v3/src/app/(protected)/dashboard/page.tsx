@@ -1,6 +1,6 @@
-import { auth } from '@/auth'
 import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
+import { resolveOrgId } from '@/lib/preview'
 import { Zap, CheckSquare, Clock, MessageSquare, FileText } from 'lucide-react'
 import { DownloadReportButtons } from '@/components/dashboard/DownloadReportButton'
 
@@ -17,9 +17,7 @@ const TASK_STATUS_LABEL = {
 } as const
 
 export default async function DashboardPage() {
-  const session = await auth()
-  const organizationId = session?.user?.organizationId
-
+  const organizationId = await resolveOrgId()
   if (!organizationId) redirect('/login')
 
   const [

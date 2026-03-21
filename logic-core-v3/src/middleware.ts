@@ -27,9 +27,13 @@ export default auth((req) => {
       return NextResponse.redirect(new URL('/dashboard', nextUrl))
     }
 
-    // Admin intentando acceder al dashboard de cliente
-    if (isDashboardRoute && session.user.role !== 'ORG_MEMBER') {
-      return NextResponse.redirect(new URL('/admin', nextUrl))
+    // Admin intentando acceder al dashboard de cliente sin cookie de preview → redirigir al admin
+    // (Si tiene cookie de preview, el middleware lo deja pasar — resolveOrgId() se encarga del resto)
+    if (isDashboardRoute && session.user.role === 'SUPER_ADMIN') {
+      const previewOrg = req.cookies.get('dp-preview-org')?.value
+      if (!previewOrg) {
+        return NextResponse.redirect(new URL('/admin', nextUrl))
+      }
     }
   }
 

@@ -1,6 +1,6 @@
-import { auth } from '@/auth'
 import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
+import { resolveOrgId } from '@/lib/preview'
 import { getSearchConsoleData } from '@/lib/searchconsole'
 import { ClicksImpressionsChart } from '@/components/dashboard/ClicksImpressionsChart'
 import { FadeIn } from '@/components/dashboard/FadeIn'
@@ -61,8 +61,7 @@ function MetricCard({
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default async function SeoPage() {
-  const session = await auth()
-  const organizationId = session?.user?.organizationId
+  const organizationId = await resolveOrgId()
   if (!organizationId) redirect('/login')
 
   const client = await prisma.organization.findUnique({

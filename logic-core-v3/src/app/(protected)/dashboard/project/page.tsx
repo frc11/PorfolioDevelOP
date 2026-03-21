@@ -1,6 +1,6 @@
-import { auth } from '@/auth'
 import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
+import { resolveOrgId } from '@/lib/preview'
 import { TaskStatus, ProjectStatus } from '@prisma/client'
 import { Calendar, CheckCircle2, Circle, Loader2 } from 'lucide-react'
 import { FadeIn } from '@/components/dashboard/FadeIn'
@@ -46,8 +46,7 @@ const CARD =
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default async function ProjectPage() {
-  const session = await auth()
-  const organizationId = session?.user?.organizationId
+  const organizationId = await resolveOrgId()
   if (!organizationId) redirect('/login')
 
   const projects = await prisma.project.findMany({

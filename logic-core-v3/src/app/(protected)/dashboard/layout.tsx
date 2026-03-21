@@ -1,8 +1,11 @@
-import { auth, signOut } from '@/auth'
+import { auth } from '@/auth'
 import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
+import { resolveOrgId, isAdminPreview } from '@/lib/preview'
 import { SidebarNav } from '@/components/dashboard/SidebarNav'
+import { PreviewBanner } from '@/components/dashboard/PreviewBanner'
 import { LogOut } from 'lucide-react'
+import { signOut } from '@/auth'
 
 export default async function DashboardLayout({
   children,
@@ -10,7 +13,8 @@ export default async function DashboardLayout({
   children: React.ReactNode
 }) {
   const session = await auth()
-  const organizationId = session?.user?.organizationId
+  const organizationId = await resolveOrgId()
+  const preview = await isAdminPreview()
 
   if (!organizationId) redirect('/login')
 
@@ -47,6 +51,9 @@ export default async function DashboardLayout({
 
       {/* Main column */}
       <div className="relative z-10 flex flex-1 flex-col overflow-hidden">
+        {/* Preview banner (admin only) */}
+        {preview && <PreviewBanner companyName={client.companyName} />}
+
         {/* Header */}
         <header
           className="flex h-14 flex-shrink-0 items-center justify-between px-6"

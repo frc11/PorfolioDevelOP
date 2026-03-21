@@ -1,6 +1,6 @@
-import { auth } from '@/auth'
 import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
+import { resolveOrgId } from '@/lib/preview'
 import { getAnalyticsData } from '@/lib/analytics'
 import { SessionsChart } from '@/components/dashboard/SessionsChart'
 import { FadeIn } from '@/components/dashboard/FadeIn'
@@ -60,8 +60,7 @@ function MetricCard({
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default async function AnalyticsPage() {
-  const session = await auth()
-  const organizationId = session?.user?.organizationId
+  const organizationId = await resolveOrgId()
   if (!organizationId) redirect('/login')
 
   const client = await prisma.organization.findUnique({

@@ -1,11 +1,12 @@
 import { prisma } from '@/lib/prisma'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { ChevronLeft, Pencil, Plus } from 'lucide-react'
+import { ChevronLeft, Pencil, Plus, ExternalLink } from 'lucide-react'
 import { ServiceType, ProjectStatus } from '@prisma/client'
 import { ServiceStatusSelect } from '@/components/admin/ServiceStatusSelect'
 import { DeleteServiceButton } from '@/components/admin/DeleteServiceButton'
 import { FadeIn } from '@/components/dashboard/FadeIn'
+import { startClientPreview } from './actions'
 
 // ─── Label maps ───────────────────────────────────────────────────────────────
 
@@ -95,14 +96,26 @@ export default async function ClientDetailPage({
             <h1 className="text-xl font-bold text-zinc-100">{org.companyName}</h1>
             <p className="mt-0.5 text-sm text-zinc-600">slug: {org.slug}</p>
           </div>
-          <Link
-            href={`/admin/clients/${id}/edit`}
-            className="inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm text-zinc-400 transition-all hover:text-zinc-100"
-            style={actionBtnStyle}
-          >
-            <Pencil size={13} />
-            Editar
-          </Link>
+          <div className="flex items-center gap-2">
+            <form action={startClientPreview.bind(null, id)}>
+              <button
+                type="submit"
+                className="inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm text-cyan-400 transition-all hover:text-cyan-200"
+                style={{ border: '1px solid rgba(6,182,212,0.25)' }}
+              >
+                <ExternalLink size={13} />
+                Ver portal
+              </button>
+            </form>
+            <Link
+              href={`/admin/clients/${id}/edit`}
+              className="inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm text-zinc-400 transition-all hover:text-zinc-100"
+              style={actionBtnStyle}
+            >
+              <Pencil size={13} />
+              Editar
+            </Link>
+          </div>
         </div>
       </FadeIn>
 

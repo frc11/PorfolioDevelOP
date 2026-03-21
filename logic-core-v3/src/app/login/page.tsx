@@ -38,12 +38,14 @@ function Field({
   type,
   placeholder,
   autoComplete,
+  autoFocus,
 }: {
   id: string
   label: string
   type: string
   placeholder: string
   autoComplete: string
+  autoFocus?: boolean
 }) {
   return (
     <motion.div variants={itemVariants} className="flex flex-col gap-2">
@@ -58,6 +60,7 @@ function Field({
         name={id}
         type={type}
         autoComplete={autoComplete}
+        autoFocus={autoFocus}
         required
         placeholder={placeholder}
         className="
@@ -150,6 +153,7 @@ function MagicLinkForm() {
         type="email"
         placeholder="tu@empresa.com"
         autoComplete="email"
+        autoFocus
       />
 
       {state && state !== 'SUCCESS' && (
@@ -276,7 +280,7 @@ function LoginForm() {
               transition={{ duration: 0.18 }}
             >
               <form action={formAction} className="flex flex-col gap-5">
-                <Field id="email" label="Email" type="email" placeholder="tu@empresa.com" autoComplete="email" />
+                <Field id="email" label="Email" type="email" placeholder="tu@empresa.com" autoComplete="email" autoFocus />
                 <Field id="password" label="Contraseña" type="password" placeholder="••••••••" autoComplete="current-password" />
 
                 {error && (

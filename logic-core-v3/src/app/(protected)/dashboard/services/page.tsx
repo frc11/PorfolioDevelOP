@@ -1,7 +1,7 @@
-import { auth } from '@/auth'
 import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import { resolveOrgId } from '@/lib/preview'
 import { ServiceType, ServiceStatus } from '@prisma/client'
 import { Zap, ExternalLink } from 'lucide-react'
 import { FadeIn } from '@/components/dashboard/FadeIn'
@@ -93,8 +93,7 @@ function ServiceCard({
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default async function ServicesPage() {
-  const session = await auth()
-  const organizationId = session?.user?.organizationId
+  const organizationId = await resolveOrgId()
   if (!organizationId) redirect('/login')
 
   const services = await prisma.service.findMany({

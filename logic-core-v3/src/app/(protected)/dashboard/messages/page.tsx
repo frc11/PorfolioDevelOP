@@ -1,12 +1,11 @@
-import { auth } from '@/auth'
 import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
+import { resolveOrgId } from '@/lib/preview'
 import { MessageThread } from '@/components/dashboard/MessageThread'
 import { FadeIn } from '@/components/dashboard/FadeIn'
 
 export default async function ClientMessagesPage() {
-  const session = await auth()
-  const organizationId = session?.user?.organizationId
+  const organizationId = await resolveOrgId()
   if (!organizationId) redirect('/login')
 
   await prisma.message.updateMany({

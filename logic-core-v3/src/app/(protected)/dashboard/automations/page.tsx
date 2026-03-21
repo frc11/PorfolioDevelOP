@@ -1,7 +1,7 @@
-import { auth } from '@/auth'
 import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import { resolveOrgId } from '@/lib/preview'
 import { getN8nMetrics, ROI_PER_EXECUTION_USD } from '@/lib/n8n'
 import { AutomationsChart } from '@/components/dashboard/AutomationsChart'
 import { FadeIn } from '@/components/dashboard/FadeIn'
@@ -57,8 +57,7 @@ const CARD_STYLE = {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default async function AutomationsPage() {
-  const session = await auth()
-  const organizationId = session?.user?.organizationId
+  const organizationId = await resolveOrgId()
   if (!organizationId) redirect('/login')
 
   const client = await prisma.organization.findUnique({
