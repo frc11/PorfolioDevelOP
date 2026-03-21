@@ -4,13 +4,13 @@ import { deleteServiceAction } from '@/lib/actions/services'
 
 interface DeleteServiceButtonProps {
   serviceId: string
-  clientId: string
+  organizationId: string
   serviceLabel: string
 }
 
 export function DeleteServiceButton({
   serviceId,
-  clientId,
+  organizationId,
   serviceLabel,
 }: DeleteServiceButtonProps) {
   async function handleAction(formData: FormData) {
@@ -21,7 +21,7 @@ export function DeleteServiceButton({
   return (
     <form action={handleAction}>
       <input type="hidden" name="serviceId" value={serviceId} />
-      <input type="hidden" name="clientId" value={clientId} />
+      <input type="hidden" name="organizationId" value={organizationId} />
       <button
         type="submit"
         className="text-xs text-red-400 transition-colors hover:text-red-300"

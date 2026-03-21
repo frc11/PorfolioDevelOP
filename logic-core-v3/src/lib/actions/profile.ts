@@ -14,9 +14,9 @@ export async function updateProfileAction(
   formData: FormData
 ): Promise<ProfileActionState> {
   const session = await auth()
-  const clientId = session?.user?.clientId
+  const organizationId = session?.user?.organizationId
   const userId = session?.user?.id
-  if (!clientId || !userId) return { ok: false, error: 'Sesión inválida.' }
+  if (!organizationId || !userId) return { ok: false, error: 'Sesión inválida.' }
 
   const name = ((formData.get('name') as string | null) ?? '').trim()
   const companyName = ((formData.get('companyName') as string | null) ?? '').trim()
@@ -27,7 +27,7 @@ export async function updateProfileAction(
 
   await prisma.$transaction([
     prisma.user.update({ where: { id: userId }, data: { name } }),
-    prisma.client.update({ where: { id: clientId }, data: { companyName, logoUrl } }),
+    prisma.organization.update({ where: { id: organizationId }, data: { companyName, logoUrl } }),
   ])
 
   revalidatePath('/dashboard/profile')

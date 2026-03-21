@@ -40,6 +40,31 @@ export const WebDevelopmentCta = () => {
                         background: 'linear-gradient(90deg, transparent, #00e5ff 30%, #7b2fff 70%, transparent)'
                     }} />
 
+                    {/* Urgency badge */}
+                    <div style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        background: 'rgba(239,68,68,0.08)',
+                        border: '1px solid rgba(239,68,68,0.22)',
+                        borderRadius: '100px',
+                        padding: '6px 16px',
+                        marginBottom: '20px',
+                        position: 'relative',
+                        zIndex: 2,
+                    }}>
+                        <span style={{
+                            width: '7px', height: '7px', borderRadius: '50%',
+                            background: '#ef4444',
+                            boxShadow: '0 0 8px rgba(239,68,68,0.7)',
+                            animation: 'pulse-live 2s ease-in-out infinite',
+                            flexShrink: 0,
+                        }} />
+                        <span style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: '#fca5a5' }}>
+                            Cupos limitados — 2 disponibles en las próximas 2 semanas
+                        </span>
+                    </div>
+
                     {/* EYEBROW */}
                     <div style={{
                         fontSize: '11px',

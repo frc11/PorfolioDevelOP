@@ -66,9 +66,9 @@ const nodes: CapacidadNode[] = [
   },
   {
     id: 'escalabilidad',
-    label: 'ESCALABILIDAD',
+    label: 'CRECE',
     title: 'Crece con vos',
-    description: 'El sistema soporta tu empresa hoy y cuando crezcas x10. Sin migraciones, sin caídas, sin empezar de cero.',
+    description: 'Abrís nuevas sucursales, sumás vendedores, aumentás el volumen — el sistema absorbe todo sin que tengas que cambiar nada.',
     metric: '∞',
     metricLabel: 'usuarios simultáneos',
     icon: '📈',
@@ -93,8 +93,8 @@ const nodes: CapacidadNode[] = [
   {
     id: 'datos',
     label: 'DATOS',
-    title: 'Inteligencia de negocio',
-    description: 'Reportes en tiempo real. Tendencias, proyecciones y alertas automáticas cuando algo falla.',
+    title: 'Siempre sabés qué pasa',
+    description: 'A las 8AM ya tenés el resumen de ayer sin que nadie lo arme. Si algo falla, el sistema te avisa antes de que te enteres por los empleados.',
     metric: '100%',
     metricLabel: 'datos en tiempo real',
     icon: '📊',
@@ -105,9 +105,9 @@ const nodes: CapacidadNode[] = [
   },
   {
     id: 'disponibilidad',
-    label: 'DISPONIBILIDAD',
+    label: 'SIEMPRE ACTIVO',
     title: 'Siempre online',
-    description: '24/7 desde cualquier dispositivo. Tu vendedor en la calle consulta stock desde el celular en tiempo real. Sin instalaciones. Sin VPN.',
+    description: 'A las 2AM, desde el celular, sin instalar nada. Tu vendedor en la calle consulta stock en tiempo real. Sin cortes, sin excusas.',
     metric: '24/7',
     metricLabel: 'disponibilidad garantizada',
     icon: '🌐',
@@ -186,7 +186,7 @@ function Header({ isInView }: { isInView: boolean }) {
         }}
       >
         <span style={{ fontSize: '10px', letterSpacing: '0.2em', color: '#6366f1', fontWeight: 700 }}>
-          [ TU SISTEMA, BLINDADO ]
+          [ CONSTRUIDO PARA TU NEGOCIO ]
         </span>
       </motion.div>
 
@@ -196,8 +196,8 @@ function Header({ isInView }: { isInView: boolean }) {
         transition={{ duration: 0.6, delay: 0.25 }}
         style={{ fontSize: 'clamp(28px, 4vw, 52px)', fontWeight: 900, color: 'white', lineHeight: 1.1, margin: '0 0 16px' }}
       >
-        Construido para<br />
-        <span style={{ color: '#6366f1' }}>"no fallar."</span>
+        Tu sistema trabaja.<br />
+        <span style={{ color: '#6366f1' }}>Vos tomás decisiones.</span>
       </motion.h2>
 
       <motion.p
@@ -206,7 +206,7 @@ function Header({ isInView }: { isInView: boolean }) {
         transition={{ duration: 0.6, delay: 0.38 }}
         style={{ fontSize: '15px', color: 'rgba(255,255,255,0.4)', margin: 0, maxWidth: '600px' }}
       >
-        Hacé clic en cada pilar para ver cómo protege tu operación.
+        Hacé clic en cada punto para ver qué problema resuelve en tu negocio.
       </motion.p>
     </div>
   )

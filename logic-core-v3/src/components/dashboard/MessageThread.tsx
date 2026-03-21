@@ -42,7 +42,15 @@ export function MessageThread({ messages }: MessageThreadProps) {
   }, [isPending, error])
 
   return (
-    <div className="flex flex-1 flex-col gap-0 overflow-hidden rounded-lg border border-zinc-800 bg-zinc-900">
+    <div
+      className="flex flex-1 flex-col gap-0 overflow-hidden rounded-xl"
+      style={{
+        border: '1px solid rgba(6,182,212,0.2)',
+        background: 'rgba(255,255,255,0.05)',
+        backdropFilter: 'blur(24px)',
+        WebkitBackdropFilter: 'blur(24px)',
+      }}
+    >
       {/* Message list */}
       <div className="flex flex-1 flex-col gap-3 overflow-y-auto p-5">
         {messages.length === 0 && (
@@ -60,9 +68,21 @@ export function MessageThread({ messages }: MessageThreadProps) {
               className={[
                 'max-w-[75%] rounded-xl px-4 py-2.5',
                 msg.fromAdmin
-                  ? 'rounded-tl-sm bg-zinc-800 text-zinc-100'
-                  : 'rounded-tr-sm bg-cyan-600 text-white',
+                  ? 'rounded-tl-sm text-zinc-100'
+                  : 'rounded-tr-sm bg-cyan-500/20 text-white',
               ].join(' ')}
+            style={
+              msg.fromAdmin
+                ? {
+                    border: '1px solid rgba(255,255,255,0.08)',
+                    background: 'rgba(255,255,255,0.06)',
+                    backdropFilter: 'blur(4px)',
+                  }
+                : {
+                    border: '1px solid rgba(6,182,212,0.3)',
+                    background: 'rgba(6,182,212,0.15)',
+                  }
+            }
             >
               {msg.fromAdmin && (
                 <p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-cyan-400">
@@ -86,7 +106,7 @@ export function MessageThread({ messages }: MessageThreadProps) {
       </div>
 
       {/* Input */}
-      <div className="border-t border-zinc-800 p-4">
+      <div className="p-4" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
         {error && (
           <p className="mb-2 text-xs text-red-400">{error}</p>
         )}
@@ -96,7 +116,12 @@ export function MessageThread({ messages }: MessageThreadProps) {
             placeholder="Escribí tu mensaje..."
             rows={2}
             disabled={isPending}
-            className="flex-1 resize-none rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-zinc-100 placeholder-zinc-600 outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/30 disabled:opacity-50"
+            className="flex-1 resize-none rounded-lg px-3 py-2 text-sm text-zinc-100 placeholder-zinc-600 outline-none focus:ring-1 focus:ring-cyan-500/30 disabled:opacity-50"
+            style={{
+              border: '1px solid rgba(255,255,255,0.1)',
+              background: 'rgba(255,255,255,0.05)',
+              backdropFilter: 'blur(4px)',
+            }}
             onKeyDown={(e) => {
               if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault()
@@ -107,7 +132,12 @@ export function MessageThread({ messages }: MessageThreadProps) {
           <button
             type="submit"
             disabled={isPending}
-            className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-cyan-600 text-white transition-colors hover:bg-cyan-500 disabled:opacity-50"
+            className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg text-white transition-all hover:scale-105 disabled:opacity-50"
+            style={{
+              background: 'rgba(6,182,212,0.3)',
+              border: '1px solid rgba(6,182,212,0.4)',
+              backdropFilter: 'blur(4px)',
+            }}
           >
             {isPending ? (
               <Loader2 size={15} className="animate-spin" />

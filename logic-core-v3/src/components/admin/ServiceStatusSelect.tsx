@@ -11,20 +11,20 @@ const STATUS_LABELS: Record<ServiceStatus, string> = {
 }
 
 const STATUS_STYLE: Record<ServiceStatus, string> = {
-  ACTIVE: 'border-green-500/40 bg-green-500/10 text-green-400',
+  ACTIVE: 'border-cyan-500/40 bg-cyan-500/10 text-cyan-400',
   PAUSED: 'border-amber-500/40 bg-amber-500/10 text-amber-400',
   CANCELLED: 'border-red-500/40 bg-red-500/10 text-red-400',
 }
 
 interface ServiceStatusSelectProps {
   serviceId: string
-  clientId: string
+  organizationId: string
   currentStatus: ServiceStatus
 }
 
 export function ServiceStatusSelect({
   serviceId,
-  clientId,
+  organizationId,
   currentStatus,
 }: ServiceStatusSelectProps) {
   const formRef = useRef<HTMLFormElement>(null)
@@ -32,7 +32,7 @@ export function ServiceStatusSelect({
   return (
     <form ref={formRef} action={updateServiceStatusAction}>
       <input type="hidden" name="serviceId" value={serviceId} />
-      <input type="hidden" name="clientId" value={clientId} />
+      <input type="hidden" name="organizationId" value={organizationId} />
       <select
         name="status"
         defaultValue={currentStatus}
@@ -40,7 +40,7 @@ export function ServiceStatusSelect({
         className={`cursor-pointer rounded-md border px-2 py-1 text-xs font-medium outline-none transition-colors ${STATUS_STYLE[currentStatus]}`}
       >
         {(Object.keys(STATUS_LABELS) as ServiceStatus[]).map((s) => (
-          <option key={s} value={s} className="bg-zinc-900 text-zinc-100">
+          <option key={s} value={s} className="bg-[#0d0f10] text-zinc-100">
             {STATUS_LABELS[s]}
           </option>
         ))}

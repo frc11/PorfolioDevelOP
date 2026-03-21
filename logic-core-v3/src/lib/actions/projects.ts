@@ -23,20 +23,25 @@ export async function createProjectAction(
 ): Promise<string | null> {
   const name = (formData.get('name') as string | null)?.trim() ?? ''
   const description = (formData.get('description') as string | null)?.trim() || null
-  const clientId = (formData.get('clientId') as string | null) ?? ''
+  const organizationId = (formData.get('organizationId') as string | null) ?? ''
   const statusRaw = formData.get('status') as string | null
 
   if (!name) return 'El nombre del proyecto es obligatorio.'
-  if (!clientId) return 'Debés seleccionar un cliente.'
+  if (!organizationId) return 'Debés seleccionar un cliente.'
 
   const status: ProjectStatus = isProjectStatus(statusRaw) ? statusRaw : 'PLANNING'
 
-  const client = await prisma.client.findUnique({ where: { id: clientId } })
-  if (!client) return 'Cliente no encontrado.'
+  const org = await prisma.organization.findUnique({ where: { id: organizationId } })
+  if (!org) return 'Cliente no encontrado.'
 
-  const project = await prisma.project.create({
-    data: { name, description, status, clientId },
-  })
+  let project: { id: string }
+  try {
+    project = await prisma.project.create({
+      data: { name, description, status, organizationId },
+    })
+  } catch {
+    return 'Error al crear el proyecto. Intentá de nuevo.'
+  }
 
   revalidatePath('/admin/projects')
   redirect(`/admin/projects/${project.id}`)
@@ -51,22 +56,26 @@ export async function updateProjectAction(
   const projectId = (formData.get('projectId') as string | null) ?? ''
   const name = (formData.get('name') as string | null)?.trim() ?? ''
   const description = (formData.get('description') as string | null)?.trim() || null
-  const clientId = (formData.get('clientId') as string | null) ?? ''
+  const organizationId = (formData.get('organizationId') as string | null) ?? ''
   const statusRaw = formData.get('status') as string | null
 
   if (!projectId) return 'ID de proyecto inválido.'
   if (!name) return 'El nombre del proyecto es obligatorio.'
-  if (!clientId) return 'Debés seleccionar un cliente.'
+  if (!organizationId) return 'Debés seleccionar un cliente.'
 
   const status: ProjectStatus = isProjectStatus(statusRaw) ? statusRaw : 'PLANNING'
 
   const existing = await prisma.project.findUnique({ where: { id: projectId } })
   if (!existing) return 'Proyecto no encontrado.'
 
-  await prisma.project.update({
-    where: { id: projectId },
-    data: { name, description, status, clientId },
-  })
+  try {
+    await prisma.project.update({
+      where: { id: projectId },
+      data: { name, description, status, organizationId },
+    })
+  } catch {
+    return 'Error al actualizar el proyecto. Intentá de nuevo.'
+  }
 
   revalidatePath('/admin/projects')
   revalidatePath(`/admin/projects/${projectId}`)
@@ -106,9 +115,13 @@ export async function createTaskAction(
   const project = await prisma.project.findUnique({ where: { id: projectId } })
   if (!project) return 'Proyecto no encontrado.'
 
-  await prisma.task.create({
-    data: { title, description, status, dueDate, projectId },
-  })
+  try {
+    await prisma.task.create({
+      data: { title, description, status, dueDate, projectId },
+    })
+  } catch {
+    return 'Error al crear la tarea. Intentá de nuevo.'
+  }
 
   revalidatePath(`/admin/projects/${projectId}`)
   redirect(`/admin/projects/${projectId}`)

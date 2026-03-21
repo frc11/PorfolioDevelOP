@@ -2,9 +2,10 @@ import { prisma } from '@/lib/prisma'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { ChevronLeft, Pencil, Plus } from 'lucide-react'
-import { ServiceType, ServiceStatus, ProjectStatus } from '@prisma/client'
+import { ServiceType, ProjectStatus } from '@prisma/client'
 import { ServiceStatusSelect } from '@/components/admin/ServiceStatusSelect'
 import { DeleteServiceButton } from '@/components/admin/DeleteServiceButton'
+import { FadeIn } from '@/components/dashboard/FadeIn'
 
 // ─── Label maps ───────────────────────────────────────────────────────────────
 
@@ -17,7 +18,7 @@ const SERVICE_TYPE_LABEL: Record<ServiceType, string> = {
 
 const PROJECT_STATUS_STYLE: Record<ProjectStatus, string> = {
   PLANNING: 'bg-zinc-500/10 text-zinc-400 border-zinc-500/20',
-  IN_PROGRESS: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
+  IN_PROGRESS: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20',
   REVIEW: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
   COMPLETED: 'bg-green-500/10 text-green-400 border-green-500/20',
 }
@@ -29,6 +30,19 @@ const PROJECT_STATUS_LABEL: Record<ProjectStatus, string> = {
   COMPLETED: 'Completado',
 }
 
+// ─── Shared card style ────────────────────────────────────────────────────────
+
+const cardStyle = {
+  background: 'rgba(255,255,255,0.05)',
+  border: '1px solid rgba(6,182,212,0.2)',
+  backdropFilter: 'blur(24px)',
+  WebkitBackdropFilter: 'blur(24px)',
+}
+
+const actionBtnStyle = {
+  border: '1px solid rgba(255,255,255,0.09)',
+}
+
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default async function ClientDetailPage({
@@ -38,10 +52,14 @@ export default async function ClientDetailPage({
 }) {
   const { id } = await params
 
-  const client = await prisma.client.findUnique({
+  const org = await prisma.organization.findUnique({
     where: { id },
     include: {
-      user: { select: { name: true, email: true, createdAt: true } },
+      members: {
+        where: { role: 'ADMIN' },
+        select: { user: { select: { name: true, email: true, createdAt: true } } },
+        take: 1,
+      },
       services: { orderBy: { startDate: 'desc' } },
       projects: {
         orderBy: { status: 'asc' },
@@ -54,68 +72,73 @@ export default async function ClientDetailPage({
     },
   })
 
-  if (!client) notFound()
+  if (!org) notFound()
+
+  const adminUser = org.members[0]?.user
 
   return (
     <div className="flex flex-col gap-6">
       {/* Header */}
-      <div className="flex items-start justify-between">
-        <div>
+      <FadeIn>
+        <div className="flex items-start justify-between">
+          <div>
+            <Link
+              href="/admin/clients"
+              className="mb-3 inline-flex items-center gap-1 text-sm text-zinc-500 transition-colors hover:text-zinc-300"
+            >
+              <ChevronLeft size={14} />
+              Volver a clientes
+            </Link>
+            <p className="mb-0.5 text-[10px] font-semibold tracking-[0.2em] uppercase text-cyan-500/70">
+              Cliente
+            </p>
+            <h1 className="text-xl font-bold text-zinc-100">{org.companyName}</h1>
+            <p className="mt-0.5 text-sm text-zinc-600">slug: {org.slug}</p>
+          </div>
           <Link
-            href="/admin/clients"
-            className="mb-3 inline-flex items-center gap-1 text-sm text-zinc-500 transition-colors hover:text-zinc-300"
+            href={`/admin/clients/${id}/edit`}
+            className="inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm text-zinc-400 transition-all hover:text-zinc-100"
+            style={actionBtnStyle}
           >
-            <ChevronLeft size={14} />
-            Volver a clientes
+            <Pencil size={13} />
+            Editar
           </Link>
-          <h1 className="text-xl font-semibold text-zinc-100">
-            {client.companyName}
-          </h1>
-          <p className="mt-1 text-sm text-zinc-500">slug: {client.slug}</p>
         </div>
-        <Link
-          href={`/admin/clients/${id}/edit`}
-          className="inline-flex items-center gap-2 rounded-md border border-zinc-700 px-4 py-2 text-sm text-zinc-300 transition-colors hover:border-zinc-500 hover:text-zinc-100"
-        >
-          <Pencil size={13} />
-          Editar
-        </Link>
-      </div>
+      </FadeIn>
 
       {/* Info card */}
-      <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-5">
-        <h2 className="mb-4 text-sm font-medium text-zinc-300">
+      <FadeIn delay={0.1}>
+      <div className="rounded-xl p-5" style={cardStyle}>
+        <h2 className="mb-4 text-[10px] font-semibold tracking-[0.15em] uppercase text-zinc-500">
           Datos del cliente
         </h2>
-        <dl className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <dl className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
-            <dt className="text-xs text-zinc-500">Contacto</dt>
-            <dd className="mt-0.5 text-sm text-zinc-100">
-              {client.user.name ?? '—'}
-            </dd>
+            <dt className="text-[10px] font-semibold tracking-[0.1em] uppercase text-zinc-600">Contacto</dt>
+            <dd className="mt-1 text-sm text-zinc-200">{adminUser?.name ?? '—'}</dd>
           </div>
           <div>
-            <dt className="text-xs text-zinc-500">Email</dt>
-            <dd className="mt-0.5 text-sm text-zinc-100">{client.user.email}</dd>
+            <dt className="text-[10px] font-semibold tracking-[0.1em] uppercase text-zinc-600">Email</dt>
+            <dd className="mt-1 text-sm text-zinc-200">{adminUser?.email ?? '—'}</dd>
           </div>
           <div>
-            <dt className="text-xs text-zinc-500">Fecha de alta</dt>
-            <dd className="mt-0.5 text-sm text-zinc-100">
-              {new Date(client.createdAt).toLocaleDateString('es-AR', {
+            <dt className="text-[10px] font-semibold tracking-[0.1em] uppercase text-zinc-600">Fecha de alta</dt>
+            <dd className="mt-1 text-sm text-zinc-200">
+              {new Date(org.createdAt).toLocaleDateString('es-AR', {
                 day: '2-digit',
                 month: 'long',
                 year: 'numeric',
               })}
             </dd>
           </div>
-          {client.logoUrl && (
+          {org.logoUrl && (
             <div>
-              <dt className="text-xs text-zinc-500">Logo</dt>
-              <dd className="mt-0.5">
+              <dt className="text-[10px] font-semibold tracking-[0.1em] uppercase text-zinc-600">Logo</dt>
+              <dd className="mt-1">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src={client.logoUrl}
-                  alt={client.companyName}
+                  src={org.logoUrl}
+                  alt={org.companyName}
                   className="h-8 w-auto rounded object-contain"
                 />
               </dd>
@@ -123,23 +146,26 @@ export default async function ClientDetailPage({
           )}
         </dl>
       </div>
+      </FadeIn>
 
       {/* Services */}
-      <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-5">
+      <FadeIn delay={0.2}>
+      <div className="rounded-xl p-5" style={cardStyle}>
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-sm font-medium text-zinc-300">
-            Servicios contratados ({client.services.length})
+          <h2 className="text-[10px] font-semibold tracking-[0.15em] uppercase text-zinc-500">
+            Servicios contratados ({org.services.length})
           </h2>
           <Link
             href={`/admin/clients/${id}/services/new`}
-            className="inline-flex items-center gap-1.5 rounded-md border border-zinc-700 px-3 py-1.5 text-xs text-zinc-300 transition-colors hover:border-zinc-500 hover:text-zinc-100"
+            className="inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs text-zinc-400 transition-all hover:text-zinc-100"
+            style={actionBtnStyle}
           >
             <Plus size={12} />
             Agregar servicio
           </Link>
         </div>
 
-        {client.services.length === 0 ? (
+        {org.services.length === 0 ? (
           <p className="text-sm text-zinc-600">
             Sin servicios registrados.{' '}
             <Link
@@ -151,10 +177,11 @@ export default async function ClientDetailPage({
           </p>
         ) : (
           <ul className="flex flex-col gap-2">
-            {client.services.map((service) => (
+            {org.services.map((service) => (
               <li
                 key={service.id}
-                className="flex items-center justify-between gap-4 rounded-md border border-zinc-800 px-3 py-2.5"
+                className="flex items-center justify-between gap-4 rounded-xl px-3 py-2.5 transition-colors"
+                style={{ border: '1px solid rgba(255,255,255,0.05)' }}
               >
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-medium text-zinc-200">
@@ -172,12 +199,12 @@ export default async function ClientDetailPage({
                 <div className="flex flex-shrink-0 items-center gap-3">
                   <ServiceStatusSelect
                     serviceId={service.id}
-                    clientId={id}
+                    organizationId={id}
                     currentStatus={service.status}
                   />
                   <DeleteServiceButton
                     serviceId={service.id}
-                    clientId={id}
+                    organizationId={id}
                     serviceLabel={SERVICE_TYPE_LABEL[service.type]}
                   />
                 </div>
@@ -186,39 +213,47 @@ export default async function ClientDetailPage({
           </ul>
         )}
       </div>
+      </FadeIn>
 
       {/* Projects */}
-      <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-5">
-        <h2 className="mb-4 text-sm font-medium text-zinc-300">
-          Proyectos ({client.projects.length})
+      <FadeIn delay={0.3}>
+      <div className="rounded-xl p-5" style={cardStyle}>
+        <h2 className="mb-4 text-[10px] font-semibold tracking-[0.15em] uppercase text-zinc-500">
+          Proyectos ({org.projects.length})
         </h2>
-        {client.projects.length === 0 ? (
-          <p className="text-sm text-zinc-600">Sin proyectos registrados.</p>
+        {org.projects.length === 0 ? (
+          <p className="text-sm text-zinc-600">
+            Sin proyectos registrados.{' '}
+            <Link href="/admin/projects/new" className="text-cyan-400 hover:text-cyan-300">
+              Agregar el primero →
+            </Link>
+          </p>
         ) : (
           <ul className="flex flex-col gap-2">
-            {client.projects.map((project) => {
+            {org.projects.map((project) => {
               const done = project.tasks.filter((t) => t.status === 'DONE').length
               const total = project.tasks.length
               return (
                 <li
                   key={project.id}
-                  className="flex items-center justify-between rounded-md border border-zinc-800 px-3 py-2"
+                  className="flex items-center justify-between rounded-xl px-3 py-2.5 transition-colors"
+                  style={{ border: '1px solid rgba(255,255,255,0.05)' }}
                 >
                   <div>
                     <Link
                       href={`/admin/projects/${project.id}`}
-                      className="text-sm font-medium text-zinc-100 hover:text-cyan-400 transition-colors"
+                      className="text-sm font-medium text-zinc-200 hover:text-cyan-400 transition-colors"
                     >
                       {project.name}
                     </Link>
                     {total > 0 && (
-                      <p className="mt-0.5 text-xs text-zinc-500">
+                      <p className="mt-0.5 text-xs text-zinc-600">
                         {done}/{total} tareas completadas
                       </p>
                     )}
                   </div>
                   <span
-                    className={`rounded-full border px-2 py-0.5 text-xs font-medium ${PROJECT_STATUS_STYLE[project.status]}`}
+                    className={`rounded-full border px-2.5 py-0.5 text-xs font-medium ${PROJECT_STATUS_STYLE[project.status]}`}
                   >
                     {PROJECT_STATUS_LABEL[project.status]}
                   </span>
@@ -228,23 +263,35 @@ export default async function ClientDetailPage({
           </ul>
         )}
       </div>
+      </FadeIn>
 
       {/* Recent messages */}
-      <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-5">
-        <h2 className="mb-4 text-sm font-medium text-zinc-300">
-          Mensajes recientes
-        </h2>
-        {client.messages.length === 0 ? (
+      <FadeIn delay={0.4}>
+      <div className="rounded-xl p-5" style={cardStyle}>
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-[10px] font-semibold tracking-[0.15em] uppercase text-zinc-500">
+            Mensajes recientes
+          </h2>
+          <Link
+            href={`/admin/messages/${id}`}
+            className="inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs text-cyan-400 transition-all hover:text-cyan-300"
+            style={{ border: '1px solid rgba(6,182,212,0.2)' }}
+          >
+            Ver conversación →
+          </Link>
+        </div>
+        {org.messages.length === 0 ? (
           <p className="text-sm text-zinc-600">Sin mensajes.</p>
         ) : (
           <ul className="flex flex-col gap-2">
-            {client.messages.map((msg) => (
+            {org.messages.map((msg) => (
               <li
                 key={msg.id}
-                className="rounded-md border border-zinc-800 px-3 py-2"
+                className="rounded-xl px-3 py-2.5"
+                style={{ border: '1px solid rgba(255,255,255,0.05)' }}
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-medium text-zinc-500">
+                  <span className="text-[10px] font-semibold tracking-[0.1em] uppercase text-zinc-600">
                     {msg.fromAdmin ? 'Admin → Cliente' : 'Cliente → Admin'}
                   </span>
                   <div className="flex items-center gap-2">
@@ -256,7 +303,7 @@ export default async function ClientDetailPage({
                     </span>
                   </div>
                 </div>
-                <p className="mt-1 line-clamp-2 text-sm text-zinc-300">
+                <p className="mt-1 line-clamp-2 text-sm text-zinc-400">
                   {msg.content}
                 </p>
               </li>
@@ -264,6 +311,7 @@ export default async function ClientDetailPage({
           </ul>
         )}
       </div>
+      </FadeIn>
     </div>
   )
 }

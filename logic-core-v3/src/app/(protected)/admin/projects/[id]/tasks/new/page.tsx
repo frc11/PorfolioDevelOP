@@ -4,6 +4,7 @@ import { useActionState } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { ChevronLeft } from 'lucide-react'
+import { motion } from 'framer-motion'
 import { createTaskAction } from '@/lib/actions/projects'
 import { TaskStatus } from '@prisma/client'
 
@@ -13,13 +14,23 @@ const STATUS_LABELS: Record<TaskStatus, string> = {
   DONE: 'Completada',
 }
 
+const inputClass =
+  'w-full rounded-xl border border-white/[0.07] bg-white/[0.04] px-3 py-2.5 text-sm text-zinc-100 outline-none placeholder:text-zinc-700 transition-all focus:border-cyan-500/60 focus:bg-white/[0.06] focus:ring-2 focus:ring-cyan-500/20 [color-scheme:dark]'
+
+const labelClass =
+  'text-[10px] font-semibold tracking-[0.15em] uppercase text-zinc-500'
+
 export default function NewTaskPage() {
   const params = useParams()
   const projectId = params.id as string
   const [error, formAction, isPending] = useActionState(createTaskAction, null)
 
   return (
-    <div>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+    >
       <Link
         href={`/admin/projects/${projectId}`}
         className="mb-6 inline-flex items-center gap-1 text-sm text-zinc-500 transition-colors hover:text-zinc-300"
@@ -29,29 +40,36 @@ export default function NewTaskPage() {
       </Link>
 
       <div className="mb-6">
-        <h1 className="text-xl font-semibold text-zinc-100">Nueva tarea</h1>
-        <p className="mt-1 text-sm text-zinc-500">
+        <p className="mb-0.5 text-[10px] font-semibold tracking-[0.2em] uppercase text-cyan-500/70">
+          Tareas
+        </p>
+        <h1 className="text-xl font-bold text-zinc-100">Nueva tarea</h1>
+        <p className="mt-0.5 text-sm text-zinc-600">
           La tarea quedará asignada a este proyecto.
         </p>
       </div>
 
-      <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-6">
-        <form action={formAction} className="flex flex-col gap-5 max-w-lg">
+      <div
+        className="max-w-lg rounded-xl p-6"
+        style={{
+          background: 'rgba(255,255,255,0.05)',
+          border: '1px solid rgba(6,182,212,0.2)',
+          backdropFilter: 'blur(24px)',
+          WebkitBackdropFilter: 'blur(24px)',
+        }}
+      >
+        <form action={formAction} className="flex flex-col gap-5">
           <input type="hidden" name="projectId" value={projectId} />
 
-          {/* Error */}
           {error && (
-            <div className="rounded-md border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-400">
+            <div className="rounded-xl border border-red-500/20 bg-red-500/[0.08] px-4 py-3 text-sm text-red-400">
               {error}
             </div>
           )}
 
           {/* Title */}
           <div className="flex flex-col gap-1.5">
-            <label
-              htmlFor="title"
-              className="text-xs font-medium uppercase tracking-wide text-zinc-400"
-            >
+            <label htmlFor="title" className={labelClass}>
               Título <span className="text-red-400">*</span>
             </label>
             <input
@@ -60,16 +78,13 @@ export default function NewTaskPage() {
               type="text"
               required
               placeholder="Ej: Diseñar mockup de homepage"
-              className="rounded-md border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 outline-none placeholder:text-zinc-600 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/30"
+              className={inputClass}
             />
           </div>
 
           {/* Description */}
           <div className="flex flex-col gap-1.5">
-            <label
-              htmlFor="description"
-              className="text-xs font-medium uppercase tracking-wide text-zinc-400"
-            >
+            <label htmlFor="description" className={labelClass}>
               Descripción{' '}
               <span className="normal-case text-zinc-600">(opcional)</span>
             </label>
@@ -78,26 +93,18 @@ export default function NewTaskPage() {
               name="description"
               rows={3}
               placeholder="Detalles de la tarea..."
-              className="resize-none rounded-md border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 outline-none placeholder:text-zinc-600 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/30"
+              className={`resize-none ${inputClass}`}
             />
           </div>
 
           {/* Status */}
           <div className="flex flex-col gap-1.5">
-            <label
-              htmlFor="status"
-              className="text-xs font-medium uppercase tracking-wide text-zinc-400"
-            >
+            <label htmlFor="status" className={labelClass}>
               Estado
             </label>
-            <select
-              id="status"
-              name="status"
-              defaultValue="TODO"
-              className="rounded-md border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/30"
-            >
+            <select id="status" name="status" defaultValue="TODO" className={inputClass}>
               {(Object.keys(STATUS_LABELS) as TaskStatus[]).map((s) => (
-                <option key={s} value={s}>
+                <option key={s} value={s} className="bg-[#0d0f10] text-zinc-100">
                   {STATUS_LABELS[s]}
                 </option>
               ))}
@@ -106,10 +113,7 @@ export default function NewTaskPage() {
 
           {/* Due date */}
           <div className="flex flex-col gap-1.5">
-            <label
-              htmlFor="dueDate"
-              className="text-xs font-medium uppercase tracking-wide text-zinc-400"
-            >
+            <label htmlFor="dueDate" className={labelClass}>
               Fecha límite{' '}
               <span className="normal-case text-zinc-600">(opcional)</span>
             </label>
@@ -117,28 +121,32 @@ export default function NewTaskPage() {
               id="dueDate"
               name="dueDate"
               type="date"
-              className="rounded-md border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/30 [color-scheme:dark]"
+              className={inputClass}
             />
           </div>
 
           {/* Actions */}
           <div className="flex items-center gap-3 pt-2">
-            <button
+            <motion.button
               type="submit"
               disabled={isPending}
-              className="rounded-md bg-cyan-500 px-5 py-2 text-sm font-medium text-zinc-950 transition-colors hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
+              whileHover={!isPending ? { scale: 1.015, filter: 'brightness(1.1)' } : {}}
+              whileTap={!isPending ? { scale: 0.985 } : {}}
+              className="rounded-xl px-5 py-2.5 text-sm font-semibold text-zinc-950 transition-opacity disabled:cursor-not-allowed disabled:opacity-50"
+              style={{ background: 'linear-gradient(135deg, #06b6d4 0%, #10b981 100%)' }}
             >
               {isPending ? 'Guardando...' : 'Crear tarea'}
-            </button>
+            </motion.button>
             <Link
               href={`/admin/projects/${projectId}`}
-              className="rounded-md px-5 py-2 text-sm text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-zinc-100"
+              className="rounded-xl px-5 py-2.5 text-sm text-zinc-500 transition-all hover:text-zinc-200"
+              style={{ border: '1px solid rgba(255,255,255,0.08)' }}
             >
               Cancelar
             </Link>
           </div>
         </form>
       </div>
-    </div>
+    </motion.div>
   )
 }

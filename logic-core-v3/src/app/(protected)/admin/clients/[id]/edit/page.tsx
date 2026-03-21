@@ -12,7 +12,7 @@ export default async function EditClientPage({
 }) {
   const { id } = await params
 
-  const client = await prisma.client.findUnique({
+  const org = await prisma.organization.findUnique({
     where: { id },
     select: {
       id: true,
@@ -21,49 +21,54 @@ export default async function EditClientPage({
       analyticsPropertyId: true,
       siteUrl: true,
       n8nWorkflowIds: true,
-      user: { select: { name: true, email: true } },
+      members: {
+        where: { role: 'ADMIN' },
+        select: { user: { select: { name: true, email: true } } },
+        take: 1,
+      },
     },
   })
 
-  if (!client) notFound()
+  if (!org) notFound()
+
+  const adminUser = org.members[0]?.user
 
   return (
-    <div>
-      {/* Breadcrumb */}
-      <Link
-        href={`/admin/clients/${id}`}
-        className="mb-6 inline-flex items-center gap-1 text-sm text-zinc-500 transition-colors hover:text-zinc-300"
-      >
-        <ChevronLeft size={14} />
-        Volver al detalle
-      </Link>
-
-      <div className="mb-6">
-        <h1 className="text-xl font-semibold text-zinc-100">
-          Editar — {client.companyName}
+    <div className="flex flex-col gap-6">
+      <div>
+        <Link
+          href={`/admin/clients/${id}`}
+          className="mb-4 inline-flex items-center gap-1 text-sm text-zinc-500 transition-colors hover:text-zinc-300"
+        >
+          <ChevronLeft size={14} />
+          Volver al detalle
+        </Link>
+        <p className="mb-0.5 text-[10px] font-semibold tracking-[0.2em] uppercase text-cyan-500/70">
+          Clientes
+        </p>
+        <h1 className="text-xl font-bold text-zinc-100">
+          Editar — {org.companyName}
         </h1>
-        <p className="mt-1 text-sm text-zinc-500">
+        <p className="mt-0.5 text-sm text-zinc-600">
           El email no puede modificarse desde aquí.
         </p>
       </div>
 
-      <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-6">
-        <ClientForm
-          action={updateClientAction}
-          mode="edit"
-          initialValues={{
-            clientId: client.id,
-            companyName: client.companyName,
-            name: client.user.name ?? '',
-            logoUrl: client.logoUrl,
-            email: client.user.email,
-            analyticsPropertyId: client.analyticsPropertyId,
-            siteUrl: client.siteUrl,
-            n8nWorkflowIds: client.n8nWorkflowIds,
-          }}
-          cancelHref={`/admin/clients/${id}`}
-        />
-      </div>
+      <ClientForm
+        action={updateClientAction}
+        mode="edit"
+        initialValues={{
+          clientId: org.id,
+          companyName: org.companyName,
+          name: adminUser?.name ?? '',
+          logoUrl: org.logoUrl,
+          email: adminUser?.email ?? '',
+          analyticsPropertyId: org.analyticsPropertyId,
+          siteUrl: org.siteUrl,
+          n8nWorkflowIds: org.n8nWorkflowIds,
+        }}
+        cancelHref={`/admin/clients/${id}`}
+      />
     </div>
   )
 }

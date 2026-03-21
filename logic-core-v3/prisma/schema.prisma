@@ -11,7 +11,13 @@ datasource db {
 
 enum Role {
   SUPER_ADMIN
-  CLIENT
+  ORG_MEMBER
+}
+
+enum OrgRole {
+  ADMIN
+  MEMBER
+  VIEWER
 }
 
 enum ServiceType {
@@ -84,7 +90,7 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
-// ─── User (extendido con campos propios) ──────────────────────────────────────
+// ─── User ─────────────────────────────────────────────────────────────────────
 
 model User {
   id            String    @id @default(cuid())
@@ -93,34 +99,61 @@ model User {
   emailVerified DateTime?
   image         String?
   password      String?
-  role          Role      @default(CLIENT)
+  role          Role      @default(ORG_MEMBER)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  accounts Account[]
-  sessions Session[]
-  client   Client?
+  accounts       Account[]
+  sessions       Session[]
+  orgMemberships OrgMember[]
+  resetTokens    PasswordResetToken[]
+}
+
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  token     String    @unique
+  userId    String
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 
 // ─── Modelos de Negocio ───────────────────────────────────────────────────────
 
-model Client {
-  id                   String   @id @default(cuid())
-  companyName          String
-  slug                 String   @unique
-  logoUrl              String?
-  analyticsPropertyId  String?
-  siteUrl              String?
-  n8nWorkflowIds       String[]
-  createdAt            DateTime @default(now())
+model Organization {
+  id                  String   @id @default(cuid())
+  companyName         String
+  slug                String   @unique
+  logoUrl             String?
+  analyticsPropertyId String?
+  siteUrl             String?
+  n8nWorkflowIds      String[]
+  createdAt           DateTime @default(now())
 
-  userId String @unique
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
+  members  OrgMember[]
   services Service[]
   projects Project[]
   messages Message[]
   invoices Invoice[]
+}
+
+model OrgMember {
+  id             String   @id @default(cuid())
+  userId         String
+  organizationId String
+  role           OrgRole  @default(ADMIN)
+  joinedAt       DateTime @default(now())
+
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, organizationId])
+  @@index([userId])
+  @@index([organizationId])
 }
 
 model Service {
@@ -129,8 +162,8 @@ model Service {
   status    ServiceStatus @default(ACTIVE)
   startDate DateTime      @default(now())
 
-  clientId String
-  client   Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 }
 
 model Project {
@@ -139,9 +172,9 @@ model Project {
   description String?
   status      ProjectStatus @default(PLANNING)
 
-  clientId String
-  client   Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  tasks    Task[]
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  tasks          Task[]
 }
 
 model Task {
@@ -162,8 +195,8 @@ model Message {
   read      Boolean  @default(false)
   createdAt DateTime @default(now())
 
-  clientId String
-  client   Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 }
 
 model Invoice {
@@ -173,6 +206,18 @@ model Invoice {
   status   InvoiceStatus @default(PENDING)
   dueDate  DateTime
 
-  clientId String
-  client   Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+}
+
+model ContactSubmission {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  phone     String?
+  company   String?
+  service   String?
+  message   String   @db.Text
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
 }

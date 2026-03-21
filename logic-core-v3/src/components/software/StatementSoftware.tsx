@@ -182,6 +182,7 @@ function StatementContent({ progress, shouldReduceMotion }: { progress: number, 
   }
 
   const badgeOpacity = Math.min(Math.max((progress - 0.85) / 0.10, 0), 1)
+  const examplesOpacity = Math.min(Math.max((progress - 0.77) / 0.12, 0), 1)
 
   return (
     <div className="relative z-10 text-center px-6 w-full max-w-7xl mx-auto">
@@ -197,7 +198,31 @@ function StatementContent({ progress, shouldReduceMotion }: { progress: number, 
         </div>
       </h2>
 
-      <div 
+      {/* Owner examples */}
+      <p
+        style={{
+          fontSize: 'clamp(14px, 1.6vw, 18px)',
+          color: 'rgba(255,255,255,0.28)',
+          fontStyle: 'italic',
+          fontWeight: 400,
+          textAlign: 'center',
+          marginTop: '28px',
+          lineHeight: 1.7,
+          opacity: examplesOpacity,
+          transform: `translateY(${(1 - examplesOpacity) * 16}px)`,
+          transition: 'none',
+          pointerEvents: 'none',
+          maxWidth: '560px',
+          marginLeft: 'auto',
+          marginRight: 'auto',
+        }}
+      >
+        Restaurante que llena mesas sin contestar el teléfono.{' '}
+        Clínica que confirma turnos sola.{' '}
+        Ferretería con stock sin Excel.
+      </p>
+
+      <div
         className="absolute left-1/2 -translate-x-1/2 mt-20 flex flex-col items-center gap-6"
         style={{
           opacity: badgeOpacity,

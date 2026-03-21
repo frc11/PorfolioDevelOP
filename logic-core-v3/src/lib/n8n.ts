@@ -1,3 +1,39 @@
+// ─── Contact Lead Webhook ─────────────────────────────────────────────────────
+
+export interface ContactLeadPayload {
+  name: string
+  email: string
+  phone: string | null
+  company: string | null
+  service: string | null
+  message: string
+  submittedAt: string
+}
+
+/**
+ * Fires the contact lead to the N8N webhook asynchronously.
+ * Throws if the webhook URL is not configured or the request fails —
+ * callers must wrap in try/catch and decide whether to surface the error.
+ */
+export async function sendLeadToN8n(payload: ContactLeadPayload): Promise<void> {
+  const webhookUrl = process.env.N8N_CONTACT_WEBHOOK_URL
+
+  if (!webhookUrl) {
+    throw new Error('N8N_CONTACT_WEBHOOK_URL no está configurada en el servidor.')
+  }
+
+  const res = await fetch(webhookUrl, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+    signal: AbortSignal.timeout(8_000),
+  })
+
+  if (!res.ok) {
+    throw new Error(`N8N webhook respondió con ${res.status} ${res.statusText}`)
+  }
+}
+
 // ─── ROI config ───────────────────────────────────────────────────────────────
 
 const MINUTES_SAVED_PER_EXECUTION = 15

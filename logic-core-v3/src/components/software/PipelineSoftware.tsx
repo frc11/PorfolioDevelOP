@@ -170,7 +170,7 @@ function Header({ isInView }: { isInView: boolean }) {
         transition={{ duration: 0.6, delay: 0.38 }}
         style={{ fontSize: '15px', color: 'rgba(255,255,255,0.4)', margin: 0, maxWidth: '600px' }}
       >
-        Así fluye una venta por tu sistema. Activá el flujo y mirá cómo trabaja solo.
+        Cada venta se procesa sola. Sin que nadie tenga que escribir en el Excel, llamar al depósito ni acordarse de facturar.
       </motion.p>
     </div>
   )
@@ -759,7 +759,7 @@ export default function PipelineSoftware() {
           {[
             { value: '< 3s', label: 'De la venta a la factura', icon: '⚡', colorRgb: '99,102,241' },
             { value: '0', label: 'Intervenciones humanas requeridas', icon: '🤖', colorRgb: '123,47,255' },
-            { value: '100%', label: 'Procesos trazables y auditables', icon: '🔍', colorRgb: '99,102,241' },
+            { value: '0', label: 'Errores de carga manual', icon: '🔍', colorRgb: '99,102,241' },
           ].map((m, i) => (
             <motion.div
               key={i}

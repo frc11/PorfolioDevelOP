@@ -535,6 +535,85 @@ export default function VaultAutomation() {
           isInView={isInView}
         />
 
+        {/* PRICING TIERS */}
+        <motion.div
+          initial={shouldReduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 28 }}
+          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.8, delay: 0.55, ease: [0.16, 1, 0.3, 1] }}
+          style={{ marginBottom: 'clamp(48px, 7vh, 80px)' }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '28px' }}>
+            <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.05)' }} />
+            <span style={{ fontSize: '11px', letterSpacing: '0.2em', color: 'rgba(245,158,11,0.4)', fontFamily: 'monospace', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>PLANES</span>
+            <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.05)' }} />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-[14px]">
+            {[
+              {
+                name: 'Básico',
+                price: '$199',
+                unit: 'USD/mes',
+                desc: '1 automatización activa. Ideal para empezar con el flujo que más duele.',
+                items: ['WhatsApp + 1 app', 'Flujo configurado y lanzado', 'Monitoreo incluido', 'Soporte por WhatsApp'],
+                alpha: '0.12',
+              },
+              {
+                name: 'Crecimiento',
+                price: '$499',
+                unit: 'USD/mes',
+                desc: '3 o más integraciones activas. Para empresas que quieren automatizar en serio.',
+                items: ['3+ integraciones', 'Claude AI conversacional', 'Reportes automáticos', 'Soporte prioritario'],
+                alpha: '0.25',
+                highlight: true,
+              },
+              {
+                name: 'Escala',
+                price: 'A medida',
+                unit: '',
+                desc: 'Grandes volúmenes, múltiples equipos o flujos complejos. Presupuesto personalizado.',
+                items: ['Flujos ilimitados', 'SLA garantizado', 'Integración con ERP/CRM', 'Account manager dedicado'],
+                alpha: '0.1',
+              },
+            ].map((tier) => (
+              <div
+                key={tier.name}
+                style={{
+                  borderRadius: '18px',
+                  padding: 'clamp(18px, 2vw, 28px)',
+                  background: tier.highlight
+                    ? 'linear-gradient(135deg, rgba(245,158,11,0.1) 0%, rgba(249,115,22,0.06) 100%)'
+                    : 'rgba(245,158,11,0.04)',
+                  border: `1px solid rgba(245,158,11,${tier.alpha})`,
+                  boxShadow: tier.highlight ? '0 0 30px rgba(245,158,11,0.08)' : 'none',
+                  position: 'relative',
+                  overflow: 'hidden',
+                }}
+              >
+                {tier.highlight && (
+                  <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '2px', background: 'linear-gradient(90deg, transparent, rgba(245,158,11,0.9), transparent)' }} />
+                )}
+                <p style={{ fontSize: '11px', fontWeight: 700, color: 'rgba(245,158,11,0.7)', letterSpacing: '0.15em', margin: '0 0 10px', textTransform: 'uppercase', fontFamily: 'monospace' }}>{tier.name}</p>
+                <div style={{ marginBottom: '12px' }}>
+                  <span style={{ fontSize: 'clamp(22px, 3vw, 32px)', fontWeight: 900, color: 'white', letterSpacing: '-0.03em', fontFamily: 'monospace' }}>{tier.price}</span>
+                  {tier.unit && <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.3)', marginLeft: '6px' }}>{tier.unit}</span>}
+                </div>
+                <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', lineHeight: 1.6, margin: '0 0 14px' }}>{tier.desc}</p>
+                <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '7px' }}>
+                  {tier.items.map((item) => (
+                    <li key={item} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: 'rgba(255,255,255,0.5)' }}>
+                      <span style={{ color: 'rgba(245,158,11,0.8)', fontWeight: 700, fontSize: '10px' }}>✓</span>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+          <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.2)', textAlign: 'center', marginTop: '14px' }}>
+            Primera automatización sin costo · Sin contrato largo
+          </p>
+        </motion.div>
+
         {/* CTA FINAL */}
         <motion.div
           initial={shouldReduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}

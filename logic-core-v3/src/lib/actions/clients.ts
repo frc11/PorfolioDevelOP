@@ -19,15 +19,15 @@ function slugify(text: string): string {
     .replace(/-+/g, '-')
 }
 
-async function uniqueSlug(base: string, excludeClientId?: string): Promise<string> {
+async function uniqueSlug(base: string, excludeOrgId?: string): Promise<string> {
   let slug = slugify(base)
   let counter = 1
 
   while (true) {
-    const existing = await prisma.client.findFirst({
+    const existing = await prisma.organization.findFirst({
       where: {
         slug,
-        ...(excludeClientId ? { NOT: { id: excludeClientId } } : {}),
+        ...(excludeOrgId ? { NOT: { id: excludeOrgId } } : {}),
       },
     })
     if (!existing) return slug
@@ -69,17 +69,27 @@ export async function createClientAction(
   const slug = await uniqueSlug(companyName)
   const hashedPassword = await bcrypt.hash(password, 12)
 
-  await prisma.user.create({
-    data: {
-      email,
-      name,
-      password: hashedPassword,
-      role: Role.CLIENT,
-      client: {
-        create: { companyName, slug, logoUrl },
-      },
-    },
-  })
+  try {
+    await prisma.$transaction(async (tx) => {
+      const user = await tx.user.create({
+        data: {
+          email,
+          name,
+          password: hashedPassword,
+          role: Role.ORG_MEMBER,
+          emailVerified: new Date(),
+        },
+      })
+      const org = await tx.organization.create({
+        data: { companyName, slug, logoUrl },
+      })
+      await tx.orgMember.create({
+        data: { userId: user.id, organizationId: org.id, role: 'ADMIN' },
+      })
+    })
+  } catch {
+    return 'Error al crear el cliente. Intentá de nuevo.'
+  }
 
   revalidatePath('/admin/clients')
   redirect('/admin/clients')
@@ -108,27 +118,39 @@ export async function updateClientAction(
     return 'Nombre de empresa y contacto son obligatorios.'
   }
 
-  const client = await prisma.client.findUnique({
+  const org = await prisma.organization.findUnique({
     where: { id: clientId },
-    select: { userId: true, companyName: true },
+    select: {
+      companyName: true,
+      members: {
+        where: { role: 'ADMIN' },
+        select: { userId: true },
+        take: 1,
+      },
+    },
   })
-  if (!client) return 'Cliente no encontrado.'
+  if (!org) return 'Cliente no encontrado.'
 
   const slug =
-    companyName !== client.companyName
+    companyName !== org.companyName
       ? await uniqueSlug(companyName, clientId)
       : undefined
 
-  await prisma.$transaction([
-    prisma.client.update({
-      where: { id: clientId },
-      data: { companyName, logoUrl, analyticsPropertyId, siteUrl, n8nWorkflowIds, ...(slug ? { slug } : {}) },
-    }),
-    prisma.user.update({
-      where: { id: client.userId },
-      data: { name },
-    }),
-  ])
+  const adminUserId = org.members[0]?.userId
+
+  try {
+    await prisma.$transaction([
+      prisma.organization.update({
+        where: { id: clientId },
+        data: { companyName, logoUrl, analyticsPropertyId, siteUrl, n8nWorkflowIds, ...(slug ? { slug } : {}) },
+      }),
+      ...(adminUserId
+        ? [prisma.user.update({ where: { id: adminUserId }, data: { name } })]
+        : []),
+    ])
+  } catch {
+    return 'Error al actualizar el cliente. Intentá de nuevo.'
+  }
 
   revalidatePath('/admin/clients')
   revalidatePath(`/admin/clients/${clientId}`)
@@ -141,14 +163,11 @@ export async function deleteClientAction(formData: FormData): Promise<void> {
   const clientId = (formData.get('clientId') as string | null) ?? ''
   if (!clientId) return
 
-  const client = await prisma.client.findUnique({
-    where: { id: clientId },
-    select: { userId: true },
-  })
-  if (!client) return
+  const org = await prisma.organization.findUnique({ where: { id: clientId } })
+  if (!org) return
 
-  // Deleting User cascades → Client → Services, Projects, Messages, Invoices
-  await prisma.user.delete({ where: { id: client.userId } })
+  // Deleting Organization cascades → OrgMember, Service, Project, Message, Invoice
+  await prisma.organization.delete({ where: { id: clientId } })
 
   revalidatePath('/admin/clients')
   redirect('/admin/clients')

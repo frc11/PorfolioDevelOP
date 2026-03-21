@@ -13,29 +13,34 @@ const IDLE_TIMEOUT = 25000;   // Re-show after 25s of inactivity
 
 const IDLE_PROMPTS: Record<string, string[]> = {
     '/web-development': [
-        '¿Cuántas consultas perdés por semana porque tu web no existe?',
-        '¿Tu competencia aparece en Google antes que vos?',
-        'Una web bien hecha se paga sola en 90 días.',
+        '¿Cómo están encontrándote tus clientes hoy?',
+        'Si alguien busca lo que hacés en Google, ¿aparecés?',
+        '¿Qué estarías resolviendo si tu web trajera consultas sola?',
     ],
-    '/ia': [
-        '¿Cuántas veces por día responde tu equipo las mismas preguntas?',
-        'La IA no reemplaza a tu equipo. Libera su tiempo.',
-        '¿Qué harías con 80 horas más al mes?',
+    '/ai-implementations': [
+        '¿Qué tarea repetitiva le roba más tiempo a tu equipo?',
+        'La IA bien implementada resuelve un problema concreto.',
+        '¿Querés entender si esto aplica a tu operación?',
     ],
     '/software-development': [
-        '¿Cuántos Excels distintos maneja tu empresa hoy?',
-        'Cada error manual tiene un costo. ¿Sabés cuánto es el tuyo?',
-        'El caos operativo no se soluciona con más empleados.',
+        '¿Cuántos sistemas distintos usa tu equipo en un día?',
+        '¿Hay procesos que dependen de que alguien esté disponible?',
+        'Contame cómo opera tu negocio hoy.',
     ],
     '/process-automation': [
-        '¿Cuántas horas pierde tu equipo copiando datos entre apps?',
-        'Un flujo automatizado no se olvida, no se cansa, no falla.',
-        '¿Qué proceso de tu empresa todavía depende de una persona?',
+        '¿Qué tarea de tu empresa se repite más de 10 veces por semana?',
+        '¿Hay algo que siempre queda sin hacer por falta de tiempo?',
+        'Un flujo bien armado trabaja aunque nadie esté mirando.',
+    ],
+    '/contact': [
+        '¿Tenés en mente qué necesitás? Podemos charlar antes del formulario.',
+        '¿Alguna duda antes de escribirnos?',
+        'Si querés, adelantamos la conversación por acá.',
     ],
     default: [
-        'Contame cómo opera tu empresa hoy.',
-        '¿Cuál es el proceso que más tiempo te roba?',
-        'Antes de proponer algo, necesito entender tu operación.',
+        '¿Cuál es el principal desafío de tu negocio hoy?',
+        '¿Qué estarías mejorando si tuvieras más tiempo?',
+        'Contame sobre tu operación, sin apuro.',
     ],
 };
 

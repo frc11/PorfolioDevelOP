@@ -386,6 +386,89 @@ export const VaultSection = () => {
                     background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent)'
                 }} />
 
+                {/* PRICING */}
+                <motion.div
+                    initial={prefersReducedMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, amount: 0.3 }}
+                    transition={{ duration: 0.7 }}
+                    style={{ marginBottom: 'clamp(48px, 7vh, 80px)' }}
+                >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '24px' }}>
+                        <div style={{ flex: 1, height: '1px', background: 'rgba(0,229,255,0.1)' }} />
+                        <span style={{ fontSize: '11px', letterSpacing: '0.2em', color: 'rgba(0,229,255,0.35)', fontFamily: 'monospace', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>PLANES</span>
+                        <div style={{ flex: 1, height: '1px', background: 'rgba(0,229,255,0.1)' }} />
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        {[
+                            {
+                                name: 'Presencia Digital',
+                                price: '$800',
+                                unit: 'USD',
+                                desc: 'Landing page optimizada para Google. Diseño, desarrollo y lanzamiento en 4 semanas.',
+                                items: ['1 página completa', 'SEO local', 'Formulario de contacto', 'Mobile-first'],
+                                colorRgb: '0,229,255',
+                                color: '#00e5ff',
+                            },
+                            {
+                                name: 'Web Completa',
+                                price: '$1.800',
+                                unit: 'USD',
+                                desc: 'Multi-página con catálogo, blog y sistema de contacto. Ideal para empresas en crecimiento.',
+                                items: ['Hasta 8 páginas', 'Blog + SEO avanzado', 'Integraciones (WhatsApp, MP)', 'Panel de contenido'],
+                                colorRgb: '123,47,255',
+                                color: '#7b2fff',
+                                highlight: true,
+                            },
+                            {
+                                name: 'E-commerce',
+                                price: 'Desde $2.500',
+                                unit: 'USD',
+                                desc: 'Tienda online con carrito, pagos y gestión de stock. Vendés mientras dormís.',
+                                items: ['Tienda completa', 'MercadoPago + AFIP', 'Panel de pedidos', 'Recuperación de carritos'],
+                                colorRgb: '0,229,255',
+                                color: '#00e5ff',
+                            },
+                        ].map((tier) => (
+                            <div
+                                key={tier.name}
+                                style={{
+                                    borderRadius: '16px',
+                                    padding: '20px',
+                                    background: tier.highlight
+                                        ? `linear-gradient(135deg, rgba(${tier.colorRgb},0.08) 0%, rgba(255,255,255,0.02) 100%)`
+                                        : `rgba(${tier.colorRgb},0.03)`,
+                                    border: `1px solid rgba(${tier.colorRgb},${tier.highlight ? '0.25' : '0.12'})`,
+                                    boxShadow: tier.highlight ? `0 0 24px rgba(${tier.colorRgb},0.08)` : 'none',
+                                    position: 'relative',
+                                    overflow: 'hidden',
+                                }}
+                            >
+                                {tier.highlight && (
+                                    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '1px', background: `linear-gradient(90deg, transparent, rgba(${tier.colorRgb},0.7), transparent)` }} />
+                                )}
+                                <p style={{ fontSize: '11px', fontWeight: 700, color: `rgba(${tier.colorRgb},0.7)`, letterSpacing: '0.15em', margin: '0 0 8px', textTransform: 'uppercase', fontFamily: 'monospace' }}>{tier.name}</p>
+                                <div style={{ marginBottom: '10px' }}>
+                                    <span style={{ fontSize: '26px', fontWeight: 900, color: 'white', letterSpacing: '-0.02em', fontFamily: 'monospace' }}>{tier.price}</span>
+                                    <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.3)', marginLeft: '4px' }}>{tier.unit}</span>
+                                </div>
+                                <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', lineHeight: 1.6, margin: '0 0 12px' }}>{tier.desc}</p>
+                                <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                    {tier.items.map((item) => (
+                                        <li key={item} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: 'rgba(255,255,255,0.5)' }}>
+                                            <span style={{ color: tier.color, fontSize: '9px', fontWeight: 700 }}>✓</span>
+                                            {item}
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        ))}
+                    </div>
+                    <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.2)', textAlign: 'center', marginTop: '12px' }}>
+                        Primer diseño gratis · Mantenimiento mensual opcional
+                    </p>
+                </motion.div>
+
                 {/* WRAPPER CTA */}
                 <motion.div
                     ref={ctaRef}

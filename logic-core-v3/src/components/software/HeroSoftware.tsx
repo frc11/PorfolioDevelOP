@@ -59,7 +59,7 @@ const floatCards: FloatCard[] = [
   },
   {
     value: '∞',
-    label: 'escalable',
+    label: 'crece con vos',
     icon: '📊',
     colorRgb: '139,92,246',
     position: {
@@ -627,7 +627,7 @@ export default function HeroSoftware() {
               color: '#6366f1',
               fontWeight: 600,
             }}>
-              EL SISTEMA NERVIOSO DE TU EMPRESA
+              TU EMPRESA, ORDENADA Y EN CONTROL
             </span>
           </motion.div>
 

@@ -28,7 +28,7 @@ export const GAZE_INERTIA = 0.025; // 0.025 = ~40 frames to reach target
  * Base prompts and contextual augmentations
  */
 
-export const INITIAL_GREETING = "Contame sobre tu operación actual. Me ayuda a entender dónde podemos generar más impacto con tecnología.";
+export const INITIAL_GREETING = "Contame sobre tu negocio. ¿Qué hacés y cuál es el principal dolor que querés resolver?";
 
 export const SYSTEM_PROMPT = `
 Sos el asistente de DevelOP, una agencia de desarrollo digital boutique del NOA. Tu rol no es vender — es diagnosticar.
@@ -71,21 +71,29 @@ NUNCA:
  */
 export const CONTEXT_MAPPINGS: Record<string, string> = {
     '/web-development': `
-CONTEXTO: El visitante evalúa si una web vale la inversión. 
-ENFOQUE: Su mayor duda es si le va a traer clientes nuevos.
-ESTRATEGIA: Hablá de retorno. "Una web en Tucumán o Salta bien posicionada se paga sola en 90 días por el volumen de consultas orgánicas que captura."`,
+CONTEXTO: El visitante está evaluando si una página web realmente trae clientes o es solo un gasto.
+ENFOQUE: Su duda central es el retorno: ¿se paga sola?
+ESTRATEGIA: Empezá con empatía. "La pregunta correcta no es cuánto cuesta, sino cuánto te cuesta no tenerla hoy." Preguntá cómo están consiguiendo clientes ahora y si alguien los busca en Google. No menciones tecnologías. Hablá de consultas, ventas y presencia.`,
 
-    '/ia': `
-CONTEXTO: El visitante considera IA pero teme la complejidad o errores del sistema.
-ESTRATEGIA: Validar el miedo: "Ese es el punto más importante a entender antes de implementar cualquier agente. Los guardrails de negocio son más importantes que la tecnología misma." Explicá cómo la IA libera tiempo de tareas repetitivas.`,
+    '/ai-implementations': `
+CONTEXTO: El visitante escuchó hablar de IA y quiere entender si le sirve a su negocio o es solo moda.
+ENFOQUE: Tiene miedo de que sea complicado, caro o que no funcione para su rubro.
+ESTRATEGIA: Validá primero su escepticismo: "Ese miedo es completamente razonable. La mayoría de las implementaciones de IA fracasan porque arrancan por la tecnología en vez del problema." Preguntá qué tarea repetitiva le roba más tiempo a su equipo. Nunca menciones modelos, APIs ni código.`,
 
     '/software-development': `
-CONTEXTO: El visitante viene de una operación manual (Excel/WhatsApp) que ya no escala.
-ESTRATEGIA: Pregunta clave: "¿Cuántas personas en tu equipo dedican más de una hora al día a tareas que podrían hacerse solas?" El número que dé es nuestro punto de partida.`,
+CONTEXTO: El visitante opera con Excel, WhatsApp o sistemas que ya no le alcanzan.
+ENFOQUE: Siente que su operación creció pero sus herramientas no.
+ESTRATEGIA: Pregunta clave: "¿Cuántas veces por día alguien de tu equipo busca información en un Excel o un chat para poder hacer otra cosa?" Ese número es el problema. No menciones lenguajes de programación ni arquitecturas. Hablá de tiempo, errores y plata.`,
 
     '/process-automation': `
-CONTEXTO: El visitante quiere comprar tiempo y escala, no "tecnología".
-ESTRATEGIA: No hables de APIs. Hablá de flujos: "¿Cuántas veces por semana alguien de tu equipo copia datos de una app a otra? Eso es lo que vamos a eliminar para que puedan enfocarse en vender."`,
+CONTEXTO: El visitante quiere que las cosas "se hagan solas" pero no sabe bien cómo.
+ENFOQUE: Quiere comprar tiempo y reducir fricción, no "automatización".
+ESTRATEGIA: Bajá a tierra: "¿Hay algún proceso en tu empresa que depende de que una persona específica esté presente para que funcione?" Ese punto de falla es por donde empezamos. No hables de plataformas ni integraciones. Hablá de flujos de trabajo, errores y dependencias.`,
+
+    '/contact': `
+CONTEXTO: El visitante ya tiene intención de contactar. Está un paso antes de tomar acción.
+ENFOQUE: Puede necesitar un último empujón o tener una pregunta concreta.
+ESTRATEGIA: Sé directo y cálido: "Si ya tenés en mente qué necesitás, podemos adelantar camino acá antes de que completes el formulario." Preguntá de qué proyecto se trata y cuál es el urgente. Ayudalo a articular bien su necesidad.`,
 };
 
 /**

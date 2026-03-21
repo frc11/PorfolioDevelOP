@@ -98,6 +98,17 @@ const categories: AppCategory[] = [
   },
 ]
 
+// ─── CATEGORY DESCRIPTIONS ──────────────────────────────────────────────────
+
+const categoryDescriptions: Record<string, string> = {
+  comunicacion: 'Tus clientes reciben confirmaciones automáticas por WhatsApp. Pedidos, turnos y consultas respondidos solos, sin que toques el teléfono.',
+  pagos: 'Cobros que se registran automáticamente en tu contabilidad. MercadoPago y AFIP conectados directo a tu sistema.',
+  marketing: 'Campañas que se lanzan solas en el momento exacto. Seguimiento de leads automático, sin trabajo manual.',
+  productividad: 'Datos que se mueven solos entre tus planillas, agenda y sistema. Sin copiar y pegar nunca más.',
+  ecommerce: 'Pedidos de Tiendanube y Mercado Libre entran directo a tu sistema. Stock actualizado solo después de cada venta.',
+  gestion: 'Tareas, calendarios y seguimiento de tu equipo coordinados sin esfuerzo. Menos reuniones, más tiempo útil.',
+}
+
 // ─── COMPONENTS ─────────────────────────────────────────────────────────────
 
 function AtmosphereInteg() {
@@ -156,7 +167,7 @@ function Header({ isInView }: { isInView: boolean }) {
         className="flex items-center gap-2 mb-4"
       >
         <span className="text-amber-500 font-mono text-[11px] font-bold tracking-[0.2em]">
-          [ +400 INTEGRACIONES ]
+          [ TUS HERRAMIENTAS, CONECTADAS ]
         </span>
       </motion.div>
 
@@ -178,8 +189,8 @@ function Header({ isInView }: { isInView: boolean }) {
         transition={{ duration: 0.6, delay: 0.4 }}
         className="text-white/40 text-sm md:text-base mt-6 max-w-xl"
       >
-        n8n se conecta con más de 400 herramientas del mercado.
-        Buscá la tuya y visualizá cómo entra a tu nuevo ecosistema automatizado.
+        Conectamos WhatsApp, Mercado Pago, Google, AFIP y todo lo que ya usás en tu negocio.
+        Elegí una categoría para ver qué se automatiza.
       </motion.p>
     </div>
   )
@@ -249,6 +260,28 @@ function CategoryTabs({
         </motion.button>
       ))}
     </motion.div>
+  )
+}
+
+function CategoryDescription({ activeCategory }: { activeCategory: string | null }) {
+  if (!activeCategory) return null
+  const desc = categoryDescriptions[activeCategory]
+  if (!desc) return null
+  return (
+    <AnimatePresence mode="wait">
+      <motion.div
+        key={activeCategory}
+        initial={{ opacity: 0, y: -8 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: 8 }}
+        transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+        className="mb-10 flex items-start gap-3 px-4 py-3 rounded-xl"
+        style={{ background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.15)' }}
+      >
+        <span className="text-amber-400 mt-0.5 flex-shrink-0">→</span>
+        <p className="text-white/60 text-sm leading-relaxed">{desc}</p>
+      </motion.div>
+    </AnimatePresence>
   )
 }
 
@@ -502,6 +535,8 @@ export default function IntegracionesAutomation() {
           setActiveCategory={setActiveCategory}
           isInView={isInView}
         />
+
+        <CategoryDescription activeCategory={activeCategory} />
 
         <div className="relative">
           <ConectorCanvas 

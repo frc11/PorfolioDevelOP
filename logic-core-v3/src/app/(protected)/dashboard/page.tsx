@@ -18,9 +18,9 @@ const TASK_STATUS_LABEL = {
 
 export default async function DashboardPage() {
   const session = await auth()
-  const clientId = session?.user?.clientId
+  const organizationId = session?.user?.organizationId
 
-  if (!clientId) redirect('/login')
+  if (!organizationId) redirect('/login')
 
   const [
     client,
@@ -30,24 +30,24 @@ export default async function DashboardPage() {
     unreadMessages,
     recentTasks,
   ] = await Promise.all([
-    prisma.client.findUnique({
-      where: { id: clientId },
+    prisma.organization.findUnique({
+      where: { id: organizationId },
       select: { companyName: true },
     }),
     prisma.service.count({
-      where: { clientId, status: 'ACTIVE' },
+      where: { organizationId, status: 'ACTIVE' },
     }),
     prisma.task.count({
-      where: { project: { clientId }, status: 'TODO' },
+      where: { project: { organizationId }, status: 'TODO' },
     }),
     prisma.task.count({
-      where: { project: { clientId }, status: 'IN_PROGRESS' },
+      where: { project: { organizationId }, status: 'IN_PROGRESS' },
     }),
     prisma.message.count({
-      where: { clientId, fromAdmin: true, read: false },
+      where: { organizationId, fromAdmin: true, read: false },
     }),
     prisma.task.findMany({
-      where: { project: { clientId } },
+      where: { project: { organizationId } },
       orderBy: { id: 'desc' },
       take: 3,
       include: { project: { select: { name: true } } },

@@ -24,13 +24,13 @@ function currentYYYYMM(): string {
 }
 
 interface DownloadReportButtonProps {
-  /** Pass clientId only if the button is used in an admin context. In the client dashboard, omit it. */
-  clientId?: string
+  /** Pass organizationId only if the button is used in an admin context. In the client dashboard, omit it. */
+  organizationId?: string
   variant?: 'primary' | 'ghost'
   month?: string // "YYYY-MM", defaults to current month
 }
 
-function useDownload(month: string, clientId?: string) {
+function useDownload(month: string, organizationId?: string) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -40,7 +40,7 @@ function useDownload(month: string, clientId?: string) {
 
     try {
       const params = new URLSearchParams({ month })
-      if (clientId) params.set('clientId', clientId)
+      if (organizationId) params.set('organizationId', organizationId)
 
       const res = await fetch(`/api/reports/monthly?${params}`)
 
@@ -73,10 +73,10 @@ function useDownload(month: string, clientId?: string) {
 
 function ReportButton({
   month,
-  clientId,
+  organizationId,
   variant = 'primary',
 }: DownloadReportButtonProps & { month: string }) {
-  const { download, loading, error } = useDownload(month, clientId)
+  const { download, loading, error } = useDownload(month, organizationId)
 
   return (
     <div className="flex flex-col gap-1">
@@ -109,14 +109,14 @@ function ReportButton({
 }
 
 /** Renders buttons for current month + previous month */
-export function DownloadReportButtons({ clientId }: { clientId?: string }) {
+export function DownloadReportButtons({ organizationId }: { organizationId?: string }) {
   const current = currentYYYYMM()
   const previous = prevMonth(current)
 
   return (
     <div className="flex flex-wrap gap-3">
-      <ReportButton month={current} clientId={clientId} variant="primary" />
-      <ReportButton month={previous} clientId={clientId} variant="ghost" />
+      <ReportButton month={current} organizationId={organizationId} variant="primary" />
+      <ReportButton month={previous} organizationId={organizationId} variant="ghost" />
     </div>
   )
 }

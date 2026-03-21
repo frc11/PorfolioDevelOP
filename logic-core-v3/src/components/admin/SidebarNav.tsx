@@ -8,6 +8,7 @@ import {
   FolderKanban,
   MessageSquare,
   Settings,
+  Inbox,
 } from 'lucide-react'
 
 interface NavItem {
@@ -15,21 +16,24 @@ interface NavItem {
   label: string
   icon: React.ElementType
   exact: boolean
+  badgeKey?: 'messages' | 'leads'
 }
 
 const NAV_ITEMS: NavItem[] = [
   { href: '/admin', label: 'Dashboard', icon: LayoutDashboard, exact: true },
   { href: '/admin/clients', label: 'Clientes', icon: Users, exact: false },
   { href: '/admin/projects', label: 'Proyectos', icon: FolderKanban, exact: false },
-  { href: '/admin/messages', label: 'Mensajes', icon: MessageSquare, exact: false },
+  { href: '/admin/messages', label: 'Mensajes', icon: MessageSquare, exact: false, badgeKey: 'messages' },
+  { href: '/admin/leads', label: 'Leads', icon: Inbox, exact: false, badgeKey: 'leads' },
   { href: '/admin/settings', label: 'Configuración', icon: Settings, exact: false },
 ]
 
 interface SidebarNavProps {
   unreadMessages?: number
+  unreadLeads?: number
 }
 
-export function SidebarNav({ unreadMessages = 0 }: SidebarNavProps) {
+export function SidebarNav({ unreadMessages = 0, unreadLeads = 0 }: SidebarNavProps) {
   const pathname = usePathname()
 
   return (
@@ -61,9 +65,11 @@ export function SidebarNav({ unreadMessages = 0 }: SidebarNavProps) {
 
       {/* Nav links */}
       <ul className="flex flex-1 flex-col gap-0.5 p-2">
-        {NAV_ITEMS.map(({ href, label, icon: Icon, exact }) => {
+        {NAV_ITEMS.map(({ href, label, icon: Icon, exact, badgeKey }) => {
           const isActive = exact ? pathname === href : pathname.startsWith(href)
-          const isMessages = href === '/admin/messages'
+          const badgeCount =
+            badgeKey === 'messages' ? unreadMessages :
+            badgeKey === 'leads' ? unreadLeads : 0
 
           return (
             <li key={href}>
@@ -92,9 +98,9 @@ export function SidebarNav({ unreadMessages = 0 }: SidebarNavProps) {
               >
                 <Icon size={15} className={isActive ? 'text-cyan-400' : ''} />
                 <span className="flex-1">{label}</span>
-                {isMessages && unreadMessages > 0 && (
+                {badgeCount > 0 && (
                   <span className="flex min-w-[1.125rem] items-center justify-center rounded-full bg-cyan-500 px-1 text-[10px] font-semibold leading-[1.125rem] text-zinc-950">
-                    {unreadMessages > 99 ? '99+' : unreadMessages}
+                    {badgeCount > 99 ? '99+' : badgeCount}
                   </span>
                 )}
               </Link>

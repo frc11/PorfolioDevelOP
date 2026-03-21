@@ -28,7 +28,7 @@ export default auth((req) => {
     }
 
     // Admin intentando acceder al dashboard de cliente
-    if (isDashboardRoute && session.user.role !== 'CLIENT') {
+    if (isDashboardRoute && session.user.role !== 'ORG_MEMBER') {
       return NextResponse.redirect(new URL('/admin', nextUrl))
     }
   }
@@ -37,5 +37,13 @@ export default auth((req) => {
 })
 
 export const config = {
-  matcher: ['/admin/:path*', '/dashboard/:path*', '/login'],
+  matcher: [
+    // V-15: Rutas protegidas
+    '/admin/:path*',
+    '/dashboard/:path*',
+    '/login',
+    // API routes protegidas (no cubiertas antes)
+    '/api/admin/:path*',
+    '/api/client/:path*',
+  ],
 }

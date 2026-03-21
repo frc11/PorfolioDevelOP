@@ -20,10 +20,10 @@ export default async function EditProjectPage({
         name: true,
         description: true,
         status: true,
-        clientId: true,
+        organizationId: true,
       },
     }),
-    prisma.client.findMany({
+    prisma.organization.findMany({
       select: { id: true, companyName: true },
       orderBy: { companyName: 'asc' },
     }),
@@ -32,36 +32,36 @@ export default async function EditProjectPage({
   if (!project) notFound()
 
   return (
-    <div>
-      <Link
-        href={`/admin/projects/${id}`}
-        className="mb-6 inline-flex items-center gap-1 text-sm text-zinc-500 transition-colors hover:text-zinc-300"
-      >
-        <ChevronLeft size={14} />
-        Volver al detalle
-      </Link>
-
-      <div className="mb-6">
-        <h1 className="text-xl font-semibold text-zinc-100">
+    <div className="flex flex-col gap-6">
+      <div>
+        <Link
+          href={`/admin/projects/${id}`}
+          className="mb-4 inline-flex items-center gap-1 text-sm text-zinc-500 transition-colors hover:text-zinc-300"
+        >
+          <ChevronLeft size={14} />
+          Volver al detalle
+        </Link>
+        <p className="mb-0.5 text-[10px] font-semibold tracking-[0.2em] uppercase text-cyan-500/70">
+          Proyectos
+        </p>
+        <h1 className="text-xl font-bold text-zinc-100">
           Editar — {project.name}
         </h1>
       </div>
 
-      <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-6">
-        <ProjectForm
-          action={updateProjectAction}
-          mode="edit"
-          clients={clients}
-          initialValues={{
-            projectId: project.id,
-            name: project.name,
-            description: project.description,
-            status: project.status,
-            clientId: project.clientId,
-          }}
-          cancelHref={`/admin/projects/${id}`}
-        />
-      </div>
+      <ProjectForm
+        action={updateProjectAction}
+        mode="edit"
+        clients={clients}
+        initialValues={{
+          projectId: project.id,
+          name: project.name,
+          description: project.description,
+          status: project.status,
+          organizationId: project.organizationId,
+        }}
+        cancelHref={`/admin/projects/${id}`}
+      />
     </div>
   )
 }

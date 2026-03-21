@@ -26,38 +26,38 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'No autenticado' }, { status: 401 })
   }
 
-  const { role, clientId: sessionClientId } = session.user
+  const { role, organizationId: sessionOrganizationId } = session.user
 
   // ── Params ────────────────────────────────────────────────────────────────
   const { searchParams } = req.nextUrl
-  const requestedClientId = searchParams.get('clientId')
+  const requestedOrganizationId = searchParams.get('organizationId')
   const month = searchParams.get('month') ?? currentMonth()
 
   if (!isValidMonth(month)) {
     return NextResponse.json({ error: 'Formato de mes inválido. Use YYYY-MM.' }, { status: 400 })
   }
 
-  // Determine which clientId to use
-  let clientId: string
+  // Determine which organizationId to use
+  let organizationId: string
   if (role === 'SUPER_ADMIN') {
-    if (!requestedClientId) {
-      return NextResponse.json({ error: 'clientId requerido para admin.' }, { status: 400 })
+    if (!requestedOrganizationId) {
+      return NextResponse.json({ error: 'organizationId requerido para admin.' }, { status: 400 })
     }
-    clientId = requestedClientId
+    organizationId = requestedOrganizationId
   } else {
-    // CLIENT: can only access their own report
-    if (!sessionClientId) {
-      return NextResponse.json({ error: 'Sin cliente asociado.' }, { status: 403 })
+    // ORG_MEMBER: can only access their own report
+    if (!sessionOrganizationId) {
+      return NextResponse.json({ error: 'Sin organización asociada.' }, { status: 403 })
     }
-    if (requestedClientId && requestedClientId !== sessionClientId) {
+    if (requestedOrganizationId && requestedOrganizationId !== sessionOrganizationId) {
       return NextResponse.json({ error: 'Sin permisos.' }, { status: 403 })
     }
-    clientId = sessionClientId
+    organizationId = sessionOrganizationId
   }
 
-  // ── Fetch client ──────────────────────────────────────────────────────────
-  const client = await prisma.client.findUnique({
-    where: { id: clientId },
+  // ── Fetch organization ────────────────────────────────────────────────────
+  const client = await prisma.organization.findUnique({
+    where: { id: organizationId },
     select: {
       companyName: true,
       analyticsPropertyId: true,
@@ -80,13 +80,13 @@ export async function GET(req: NextRequest) {
       : Promise.resolve(null),
 
     prisma.project.findFirst({
-      where: { clientId },
+      where: { organizationId },
       orderBy: [{ status: 'asc' }, { id: 'desc' }],
       include: { tasks: { select: { status: true } } },
     }),
 
     prisma.service.findMany({
-      where: { clientId },
+      where: { organizationId },
       select: { type: true, status: true },
     }),
   ])

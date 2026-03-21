@@ -1,12 +1,14 @@
 "use client"
 import React, { useRef } from 'react'
-import { motion, Variants, useScroll, useTransform } from 'framer-motion'
+import dynamic from 'next/dynamic'
+import { motion, useScroll, useTransform } from 'framer-motion'
 import { MagneticCta } from '@/components/ui/buttons/MagneticCta'
-import HeroBackground from '@/components/canvas/HeroBackground'
+const HeroBackground = dynamic(() => import('@/components/canvas/HeroBackground'), { ssr: false })
 import HeroTitle from '@/components/ui/HeroTitle'
 import HeroMetrics from '@/components/ui/HeroMetrics'
 import { WebDevelopmentBento } from '@/components/sections/WebDevelopmentBento'
-
+import { WebDevelopmentFaq } from '@/components/sections/WebDevelopmentFaq'
+import { WebDevelopmentCta } from '@/components/sections/WebDevelopmentCta'
 import { WebDevelopmentSeo } from '@/components/sections/WebDevelopmentSeo'
 import { WebDevelopmentSensory } from '@/components/sections/WebDevelopmentSensory'
 import StatementSection from '@/components/sections/StatementSection'
@@ -15,6 +17,264 @@ import { WebDevelopmentTimeline } from '@/components/sections/WebDevelopmentTime
 import ShowcaseSection from '@/components/sections/ShowcaseSection'
 import ComparadorSection from '@/components/sections/ComparadorSection'
 import AiSection from '@/components/sections/AiSection'
+import PortfolioWebCases from '@/components/sections/PortfolioWebCases'
+import WebDevelopmentByRubro from '@/components/sections/WebDevelopmentByRubro'
+
+// ─── CASOS DE USO REALES — Web Development ───────────────────────────────────
+const CASOS_WEB = [
+    {
+        industry: "Gastronomía",
+        client: "Bar El Portal · San Miguel de Tucumán",
+        icon: "🍺",
+        color: "#00e5ff",
+        rgb: "0,229,255",
+        before: "Sólo Instagram para comunicarse. Sin web, sin reservas, sin menú online. Perdían clientes en Google.",
+        after: "Web en Next.js con carta digital, sistema de reservas y ficha completa en Google. Aparece en 847 búsquedas nuevas.",
+        m1: { v: "+120%", l: "reservas digitales" },
+        m2: { v: "Pos. #3", l: "en Google local" },
+    },
+    {
+        industry: "Servicios",
+        client: "Estudio Contable NOA · Salta",
+        icon: "📊",
+        color: "#7b2fff",
+        rgb: "123,47,255",
+        before: "Página web estática de 2018. Sin CTA, sin formulario, cargaba en 6 segundos. Cero leads por web.",
+        after: "Rediseño completo: landing con score Lighthouse 100, formulario WhatsApp integrado, blog de contenido SEO.",
+        m1: { v: "×4", l: "leads mensuales" },
+        m2: { v: "1.4s", l: "carga (antes: 6s)" },
+    },
+    {
+        industry: "Salud & Bienestar",
+        client: "Centro Médico Integral · Tucumán",
+        icon: "🏥",
+        color: "#22c55e",
+        rgb: "34,197,94",
+        before: "No aparecía en Google para búsquedas locales. Pacientes nuevos llegaban solo por referidos.",
+        after: "Web optimizada SEO local + Google My Business: 2.300 visitas/mes nuevas. Turno online integrado.",
+        m1: { v: "+2.3k", l: "visitas/mes nuevas" },
+        m2: { v: "+67%", l: "turnos nuevos en 90 días" },
+    },
+    {
+        industry: "E-commerce",
+        client: "Indumentaria Zona Norte · Tucumán",
+        icon: "👗",
+        color: "#f59e0b",
+        rgb: "245,158,11",
+        before: "Vendía solo por Instagram Stories. Pagos por transferencia manual. Sin historial de pedidos.",
+        after: "Tienda online con carrito, pasarela de pagos, stock sincronizado y panel de pedidos en tiempo real.",
+        m1: { v: "+340%", l: "ventas online en 3 meses" },
+        m2: { v: "24/7", l: "ventas sin atención humana" },
+    },
+]
+
+const CasosUsoWeb = () => (
+    <section className="relative py-24 px-4 lg:px-8 overflow-hidden bg-[#030014]">
+        <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 z-0"
+            style={{ background: "radial-gradient(ellipse at 50% 0%, rgba(0,229,255,0.05) 0%, transparent 60%)" }}
+        />
+        <div className="relative z-10 max-w-6xl mx-auto">
+            <motion.div
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+                className="mb-12 text-center"
+            >
+                <div
+                    className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-6"
+                    style={{ background: "rgba(0,229,255,0.07)", border: "1px solid rgba(0,229,255,0.22)" }}
+                >
+                    <span
+                        className="w-1.5 h-1.5 rounded-full"
+                        style={{ background: "#00e5ff", boxShadow: "0 0 6px rgba(0,229,255,0.8)" }}
+                    />
+                    <span
+                        className="text-[10px] font-mono font-bold uppercase tracking-[0.2em]"
+                        style={{ color: "rgba(0,229,255,0.85)" }}
+                    >
+                        CASOS REALES
+                    </span>
+                </div>
+                <h2
+                    className="font-black leading-[1.05] tracking-[-0.04em] mb-4"
+                    style={{ fontSize: "clamp(28px,4vw,48px)" }}
+                >
+                    <span className="text-white block">Negocios que convirtieron su web</span>
+                    <span style={{ color: "#00e5ff" }}>en su vendedor N°1.</span>
+                </h2>
+                <p
+                    className="text-sm max-w-lg mx-auto leading-relaxed"
+                    style={{ color: "rgba(255,255,255,0.4)" }}
+                >
+                    Resultados reales de los primeros 90 días. Sin retoque de marketing.
+                </p>
+            </motion.div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {CASOS_WEB.map((c, i) => (
+                    <motion.div
+                        key={i}
+                        initial={{ opacity: 0, y: 32 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.6, delay: i * 0.08, ease: [0.16, 1, 0.3, 1] }}
+                        whileHover={{
+                            y: -6,
+                            boxShadow: `0 20px 40px rgba(${c.rgb},0.2)`,
+                        }}
+                        style={{
+                            background: `linear-gradient(135deg, rgba(${c.rgb},0.07) 0%, rgba(255,255,255,0.02) 100%)`,
+                            border: `1px solid rgba(${c.rgb},0.2)`,
+                            borderRadius: "20px",
+                            padding: "clamp(18px,2vw,24px)",
+                            transition: "border-color 300ms",
+                            cursor: "default",
+                        }}
+                    >
+                        <div className="flex items-center gap-2 mb-4">
+                            <div
+                                style={{
+                                    width: "40px",
+                                    height: "40px",
+                                    borderRadius: "10px",
+                                    background: `rgba(${c.rgb},0.12)`,
+                                    border: `1px solid rgba(${c.rgb},0.25)`,
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    fontSize: "20px",
+                                    flexShrink: 0,
+                                }}
+                            >
+                                {c.icon}
+                            </div>
+                            <div>
+                                <p
+                                    style={{
+                                        fontSize: "9px",
+                                        color: c.color,
+                                        fontWeight: 700,
+                                        letterSpacing: "0.1em",
+                                        textTransform: "uppercase",
+                                        margin: "0 0 2px",
+                                    }}
+                                >
+                                    {c.industry}
+                                </p>
+                                <p style={{ fontSize: "11px", color: "white", fontWeight: 600, margin: 0, lineHeight: 1.3 }}>
+                                    {c.client}
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="space-y-2 mb-4">
+                            <div
+                                style={{
+                                    background: "rgba(239,68,68,0.05)",
+                                    border: "1px solid rgba(239,68,68,0.12)",
+                                    borderRadius: "8px",
+                                    padding: "8px 10px",
+                                }}
+                            >
+                                <p
+                                    style={{
+                                        fontSize: "8px",
+                                        color: "rgba(239,68,68,0.7)",
+                                        fontWeight: 700,
+                                        letterSpacing: "0.15em",
+                                        margin: "0 0 3px",
+                                    }}
+                                >
+                                    ANTES
+                                </p>
+                                <p
+                                    style={{
+                                        fontSize: "11px",
+                                        color: "rgba(255,255,255,0.42)",
+                                        lineHeight: 1.5,
+                                        margin: 0,
+                                    }}
+                                >
+                                    {c.before}
+                                </p>
+                            </div>
+                            <div
+                                style={{
+                                    background: `rgba(${c.rgb},0.05)`,
+                                    border: `1px solid rgba(${c.rgb},0.12)`,
+                                    borderRadius: "8px",
+                                    padding: "8px 10px",
+                                }}
+                            >
+                                <p
+                                    style={{
+                                        fontSize: "8px",
+                                        color: c.color,
+                                        fontWeight: 700,
+                                        letterSpacing: "0.15em",
+                                        margin: "0 0 3px",
+                                    }}
+                                >
+                                    DESPUÉS
+                                </p>
+                                <p
+                                    style={{
+                                        fontSize: "11px",
+                                        color: "rgba(255,255,255,0.52)",
+                                        lineHeight: 1.5,
+                                        margin: 0,
+                                    }}
+                                >
+                                    {c.after}
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-1.5">
+                            {[c.m1, c.m2].map((m, j) => (
+                                <div
+                                    key={j}
+                                    style={{
+                                        background: `rgba(${c.rgb},0.08)`,
+                                        border: `1px solid rgba(${c.rgb},0.18)`,
+                                        borderRadius: "8px",
+                                        padding: "8px 6px",
+                                        textAlign: "center",
+                                    }}
+                                >
+                                    <p
+                                        style={{
+                                            fontSize: "clamp(14px,1.8vw,18px)",
+                                            fontWeight: 900,
+                                            color: c.color,
+                                            margin: 0,
+                                            lineHeight: 1,
+                                        }}
+                                    >
+                                        {m.v}
+                                    </p>
+                                    <p
+                                        style={{
+                                            fontSize: "8px",
+                                            color: "rgba(255,255,255,0.38)",
+                                            margin: "3px 0 0",
+                                            lineHeight: 1.3,
+                                        }}
+                                    >
+                                        {m.l}
+                                    </p>
+                                </div>
+                            ))}
+                        </div>
+                    </motion.div>
+                ))}
+            </div>
+        </div>
+    </section>
+)
 
 // Reusable section reveal wrapper
 const SectionReveal = ({
@@ -100,6 +360,28 @@ export default function WebDevelopmentPage() {
                         <span className="text-zinc-200 font-mono text-[9px] md:text-[10px] uppercase tracking-widest font-bold">
                             TU SUCURSAL MÁS RENTABLE
                         </span>
+                    </motion.div>
+
+                    {/* Pricing / tech badge */}
+                    <motion.div
+                        initial={{ opacity: 0, y: -8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.25, duration: 0.7 }}
+                        className="mb-4 flex flex-wrap gap-1.5 justify-center lg:justify-start"
+                    >
+                        {['Next.js', 'TypeScript', 'Lighthouse 100', 'Desde $800 USD', '4–6 semanas'].map((item) => (
+                            <span
+                                key={item}
+                                className="text-[9px] font-mono font-bold tracking-widest uppercase px-2.5 py-1 rounded-full"
+                                style={{
+                                    background: 'rgba(0,229,255,0.06)',
+                                    border: '1px solid rgba(0,229,255,0.18)',
+                                    color: 'rgba(0,229,255,0.7)',
+                                }}
+                            >
+                                {item}
+                            </span>
+                        ))}
                     </motion.div>
 
                     {/* H1 Backlight */}
@@ -203,7 +485,25 @@ export default function WebDevelopmentPage() {
             <SectionDivider />
 
             <SectionReveal delay={0.05}>
+                <WebDevelopmentByRubro />
+            </SectionReveal>
+
+            <SectionDivider />
+
+            <SectionReveal delay={0.05}>
                 <WebDevelopmentBento />
+            </SectionReveal>
+
+            <SectionDivider />
+
+            <SectionReveal delay={0.05}>
+                <CasosUsoWeb />
+            </SectionReveal>
+
+            <SectionDivider />
+
+            <SectionReveal delay={0.05}>
+                <PortfolioWebCases />
             </SectionReveal>
 
             <SectionDivider color="violet" />
@@ -238,6 +538,16 @@ export default function WebDevelopmentPage() {
 
             <SectionReveal delay={0.05}>
                 <StatementSection />
+            </SectionReveal>
+
+            <SectionDivider />
+
+            <SectionReveal delay={0.05}>
+                <WebDevelopmentFaq />
+            </SectionReveal>
+
+            <SectionReveal delay={0.05}>
+                <WebDevelopmentCta />
             </SectionReveal>
 
             <VaultSection />

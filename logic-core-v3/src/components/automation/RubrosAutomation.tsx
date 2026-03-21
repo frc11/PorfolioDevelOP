@@ -34,12 +34,26 @@ interface MockupMessage {
   delay: number
 }
 
+interface N8nNode {
+  num: string
+  type: string
+  name: string
+  detail?: string
+}
+
+interface N8nFlow {
+  title: string
+  nodes: N8nNode[]
+  claudeNote: string
+}
+
 interface RubroContent {
   headline: string
   headlineAccent: string
   subhead: string
   automations: Automation[]
   mockupMessages: MockupMessage[]
+  n8nFlow: N8nFlow
 }
 
 // ─── DATA ───────────────────────────────────────────────────────────────────
@@ -102,6 +116,18 @@ const rubroContent: Record<number, RubroContent> = {
       { from: 'client', text: 'Sí', delay: 1500 },
       { from: 'ai', text: 'Reservada ✓ Te mando el link de pago 📦', delay: 2300 },
     ],
+    n8nFlow: {
+      title: 'Consulta & Venta — Comercio',
+      nodes: [
+        { num: '01', type: 'TRIGGER', name: 'WhatsApp Webhook', detail: 'mensaje entrante detectado' },
+        { num: '02', type: 'AI NODE', name: 'Claude Sonnet 4.6', detail: 'interpreta intención del cliente' },
+        { num: '03', type: 'HTTP', name: 'API de Stock', detail: 'consulta disponibilidad en tiempo real' },
+        { num: '04', type: 'IF', name: 'Hay stock?', detail: 'bifurcación según disponibilidad' },
+        { num: '05', type: 'MERCADOPAGO', name: 'Generar Link de Pago', detail: 'pago en 1 clic para el cliente' },
+        { num: '06', type: 'WHATSAPP', name: 'Enviar Respuesta', detail: 'mensaje + link automático' },
+      ],
+      claudeNote: 'Claude entiende lenguaje natural y adapta la respuesta al tono del cliente',
+    },
   },
   1: {
     headline: 'Tu restaurante llena mesas',
@@ -133,6 +159,18 @@ const rubroContent: Record<number, RubroContent> = {
       { from: 'client', text: 'García', delay: 1500 },
       { from: 'ai', text: 'Confirmado ✓ García · 4 personas · Sáb 21hs 🍽', delay: 2300 },
     ],
+    n8nFlow: {
+      title: 'Reservas Automáticas — Gastronomía',
+      nodes: [
+        { num: '01', type: 'TRIGGER', name: 'WhatsApp Webhook', detail: 'consulta de reserva entrante' },
+        { num: '02', type: 'AI NODE', name: 'Claude Sonnet 4.6', detail: 'extrae fecha, hora y cantidad de personas' },
+        { num: '03', type: 'GOOGLE SHEETS', name: 'Verificar Disponibilidad', detail: 'consulta agenda del restaurante' },
+        { num: '04', type: 'GOOGLE SHEETS', name: 'Registrar Reserva', detail: 'agrega nombre, fecha y contacto' },
+        { num: '05', type: 'WAIT', name: '24h antes del turno', detail: 'espera y envía recordatorio' },
+        { num: '06', type: 'WHATSAPP', name: 'Confirmación + Recordatorio', detail: 'mensaje automático al cliente' },
+      ],
+      claudeNote: 'Claude extrae fecha, personas y nombre del texto libre sin formularios',
+    },
   },
   2: {
     headline: 'Tu consultorio sin',
@@ -164,6 +202,18 @@ const rubroContent: Record<number, RubroContent> = {
       { from: 'client', text: 'Seguimiento', delay: 1500 },
       { from: 'ai', text: 'Perfecto. Miércoles 10hs o jueves 17hs ¿cuál te viene? 📋', delay: 2300 },
     ],
+    n8nFlow: {
+      title: 'Agenda Inteligente — Salud',
+      nodes: [
+        { num: '01', type: 'TRIGGER', name: 'WhatsApp Webhook', detail: 'solicitud de turno detectada' },
+        { num: '02', type: 'AI NODE', name: 'Claude Sonnet 4.6', detail: 'clasifica urgencia y tipo de consulta' },
+        { num: '03', type: 'GOOGLE CALENDAR', name: 'Buscar Disponibilidad', detail: 'horarios libres del profesional' },
+        { num: '04', type: 'WHATSAPP', name: 'Ofrecer Opciones', detail: 'envía 2-3 horarios disponibles' },
+        { num: '05', type: 'GOOGLE CALENDAR', name: 'Confirmar Turno', detail: 'crea el evento automáticamente' },
+        { num: '06', type: 'WAIT + WHATSAPP', name: 'Recordatorio 1h antes', detail: 'reduce el 60% de ausencias' },
+      ],
+      claudeNote: 'Claude detecta síntomas de urgencia y prioriza la atención automáticamente',
+    },
   },
   3: {
     headline: 'Tus servicios se venden',
@@ -195,6 +245,18 @@ const rubroContent: Record<number, RubroContent> = {
       { from: 'client', text: 'Una distribuidora', delay: 1500 },
       { from: 'ai', text: 'Perfecto, te mando 3 opciones adaptadas a tu rubro 📄', delay: 2300 },
     ],
+    n8nFlow: {
+      title: 'Calificación de Leads — Servicios',
+      nodes: [
+        { num: '01', type: 'TRIGGER', name: 'WhatsApp / Form Webhook', detail: 'lead entrante de cualquier canal' },
+        { num: '02', type: 'AI NODE', name: 'Claude Sonnet 4.6', detail: 'califica intención y presupuesto estimado' },
+        { num: '03', type: 'IF', name: 'Lead calificado?', detail: 'filtra antes de que llegue al equipo' },
+        { num: '04', type: 'HTTP', name: 'Generar Propuesta PDF', detail: 'documento personalizado por rubro' },
+        { num: '05', type: 'WHATSAPP', name: 'Enviar Propuesta', detail: 'en menos de 5 minutos automático' },
+        { num: '06', type: 'WAIT + WHATSAPP', name: 'Seguimiento automático', detail: '+35% tasa de cierre con recordatorios' },
+      ],
+      claudeNote: 'Claude redacta propuestas personalizadas según el rubro y tamaño del cliente',
+    },
   },
 }
 
@@ -611,10 +673,133 @@ function ChatMockup({ rubro }: { rubro: Rubro }) {
   )
 }
 
+function N8nFlowBlock({ rubro }: { rubro: Rubro }) {
+  const content = rubroContent[rubro.id]
+  const flow = content.n8nFlow
+
+  return (
+    <AnimatePresence mode="wait">
+      <motion.div
+        key={rubro.id}
+        initial={{ opacity: 0, x: 20 }}
+        animate={{ opacity: 1, x: 0 }}
+        exit={{ opacity: 0, x: -20 }}
+        transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+        className="w-full max-w-[400px] mx-auto"
+        style={{
+          borderRadius: '24px',
+          background: 'rgba(8,8,16,0.95)',
+          border: `1px solid rgba(${rubro.colorRgb}, 0.15)`,
+          boxShadow: `0 0 60px rgba(${rubro.colorRgb}, 0.08), 0 24px 64px rgba(0,0,0,0.5)`,
+          overflow: 'hidden',
+          fontFamily: 'ui-monospace, monospace',
+        }}
+      >
+        {/* Header */}
+        <div
+          style={{
+            padding: '14px 20px',
+            borderBottom: `1px solid rgba(${rubro.colorRgb}, 0.1)`,
+            background: `rgba(${rubro.colorRgb}, 0.05)`,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ fontSize: '10px', color: `rgba(${rubro.colorRgb},0.9)`, fontWeight: 700, letterSpacing: '0.1em' }}>
+              ⚡ n8n
+            </span>
+            <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.3)', letterSpacing: '0.05em' }}>
+              {flow.title}
+            </span>
+          </div>
+          <div style={{ display: 'flex', gap: '5px' }}>
+            {['rgba(239,68,68,0.6)', 'rgba(245,158,11,0.6)', 'rgba(34,197,94,0.6)'].map((c, i) => (
+              <div key={i} style={{ width: '8px', height: '8px', borderRadius: '50%', background: c }} />
+            ))}
+          </div>
+        </div>
+
+        {/* Nodes */}
+        <div style={{ padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+          {flow.nodes.map((node, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: i * 0.06, duration: 0.3 }}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px',
+                padding: '8px 12px',
+                borderRadius: '10px',
+                background: 'rgba(255,255,255,0.02)',
+                border: '1px solid rgba(255,255,255,0.04)',
+              }}
+            >
+              <span style={{ fontSize: '9px', color: 'rgba(255,255,255,0.15)', minWidth: '20px' }}>{node.num}</span>
+              <span
+                style={{
+                  fontSize: '8px',
+                  fontWeight: 700,
+                  letterSpacing: '0.12em',
+                  padding: '2px 6px',
+                  borderRadius: '4px',
+                  background: `rgba(${rubro.colorRgb}, 0.12)`,
+                  color: `rgba(${rubro.colorRgb}, 0.9)`,
+                  border: `1px solid rgba(${rubro.colorRgb}, 0.2)`,
+                  whiteSpace: 'nowrap',
+                  minWidth: '70px',
+                  textAlign: 'center',
+                }}
+              >
+                {node.type}
+              </span>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.8)', fontWeight: 600, lineHeight: 1.2 }}>{node.name}</div>
+                {node.detail && (
+                  <div style={{ fontSize: '9px', color: 'rgba(255,255,255,0.25)', marginTop: '2px', lineHeight: 1.2 }}>{node.detail}</div>
+                )}
+              </div>
+            </motion.div>
+          ))}
+
+          {/* Connector line visual */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '4px 12px' }}>
+            <div style={{ width: '1px', height: '20px', background: `linear-gradient(to bottom, rgba(${rubro.colorRgb},0.3), transparent)`, marginLeft: '19px' }} />
+          </div>
+
+          {/* Claude note */}
+          <div
+            style={{
+              padding: '10px 12px',
+              borderRadius: '10px',
+              background: 'rgba(100,60,255,0.06)',
+              border: '1px solid rgba(100,60,255,0.15)',
+              display: 'flex',
+              alignItems: 'flex-start',
+              gap: '8px',
+            }}
+          >
+            <span style={{ fontSize: '12px', flexShrink: 0 }}>🤖</span>
+            <div>
+              <span style={{ fontSize: '8px', fontWeight: 700, color: 'rgba(139,92,246,0.8)', letterSpacing: '0.1em', display: 'block', marginBottom: '2px' }}>CLAUDE AI</span>
+              <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)', lineHeight: 1.5 }}>{flow.claudeNote}</span>
+            </div>
+          </div>
+        </div>
+      </motion.div>
+    </AnimatePresence>
+  )
+}
+
 // ─── MAIN COMPONENT ─────────────────────────────────────────────────────────
 
 export default function RubrosAutomation() {
   const [active, setActive] = useState(0)
+  const [rightTab, setRightTab] = useState<'chat' | 'flow'>('chat')
   const rubro = rubros[active]
 
   const sectionRef = useRef<HTMLElement>(null)
@@ -678,7 +863,37 @@ export default function RubrosAutomation() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 mt-12 md:mt-16 items-start">
           <AutomationsPanel active={active} rubro={rubro} />
-          <ChatMockup rubro={rubro} />
+
+          {/* Right column: tab switcher + content */}
+          <div className="flex flex-col gap-4">
+            {/* Tab switcher */}
+            <div className="flex gap-2 justify-center lg:justify-start">
+              {(['chat', 'flow'] as const).map((tab) => {
+                const isActive = rightTab === tab
+                return (
+                  <button
+                    key={tab}
+                    onClick={() => setRightTab(tab)}
+                    className="relative px-4 py-2 rounded-xl text-xs font-bold tracking-wider transition-all duration-200 overflow-hidden"
+                    style={{
+                      background: isActive ? `rgba(${rubro.colorRgb}, 0.1)` : 'rgba(255,255,255,0.03)',
+                      border: isActive ? `1px solid rgba(${rubro.colorRgb}, 0.25)` : '1px solid rgba(255,255,255,0.06)',
+                      color: isActive ? rubro.color : 'rgba(255,255,255,0.35)',
+                    }}
+                  >
+                    {tab === 'chat' ? '💬 Chat Demo' : '⚡ Flujo n8n'}
+                  </button>
+                )
+              })}
+            </div>
+
+            {/* Content */}
+            {rightTab === 'chat' ? (
+              <ChatMockup rubro={rubro} />
+            ) : (
+              <N8nFlowBlock rubro={rubro} />
+            )}
+          </div>
         </div>
 
         {/* Separador Final Cinemático */}

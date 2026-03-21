@@ -567,6 +567,93 @@ export default function VaultSoftware() {
           </div>
         </motion.div>
 
+        {/* PRICING TIERS */}
+        <motion.div
+          initial={{ opacity: 0, y: 28 }}
+          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.8, delay: 0.6, ease: [0.16, 1, 0.3, 1] }}
+          style={{ marginBottom: 'clamp(48px, 7vh, 80px)' }}
+        >
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px',
+            marginBottom: '28px',
+          }}>
+            <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.05)' }} />
+            <span style={{ fontSize: '11px', letterSpacing: '0.2em', color: 'rgba(255,255,255,0.2)', fontFamily: 'monospace', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>INVERSIÓN</span>
+            <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.05)' }} />
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '14px' }} className="pricing-grid-software">
+            {[
+              {
+                name: 'Sistema Base',
+                price: '$2.500',
+                unit: 'USD · pago único',
+                desc: 'Módulo principal adaptado a tu proceso clave. Incluye capacitación y 30 días de soporte.',
+                items: ['1 módulo central', 'Panel administrativo', 'Capacitación incluida', '30 días de soporte'],
+                color: '#6366f1',
+                colorRgb: '99,102,241',
+              },
+              {
+                name: 'Integraciones',
+                price: '$500',
+                unit: 'USD c/u',
+                desc: 'Cada conexión con un sistema externo. WhatsApp, MercadoPago, AFIP, Google Sheets y más.',
+                items: ['API configurable', 'Flujos automáticos', 'Sincronización en tiempo real', 'Sin límite de transacciones'],
+                color: '#7b2fff',
+                colorRgb: '123,47,255',
+                highlight: true,
+              },
+              {
+                name: 'Hosting & Mantenimiento',
+                price: '$80',
+                unit: 'USD/mes',
+                desc: 'Servidor dedicado, backups diarios, actualizaciones de seguridad y soporte continuo.',
+                items: ['Uptime garantizado 99.8%', 'Backups automáticos', 'Actualizaciones de seguridad', 'Soporte por WhatsApp'],
+                color: '#818cf8',
+                colorRgb: '129,140,248',
+              },
+            ].map((tier) => (
+              <div
+                key={tier.name}
+                style={{
+                  borderRadius: '18px',
+                  padding: 'clamp(18px, 2vw, 28px)',
+                  background: tier.highlight
+                    ? `linear-gradient(135deg, rgba(${tier.colorRgb},0.1) 0%, rgba(255,255,255,0.03) 100%)`
+                    : `rgba(${tier.colorRgb},0.04)`,
+                  border: `1px solid rgba(${tier.colorRgb},${tier.highlight ? '0.3' : '0.15'})`,
+                  boxShadow: tier.highlight ? `0 0 30px rgba(${tier.colorRgb},0.1)` : 'none',
+                  position: 'relative',
+                  overflow: 'hidden',
+                }}
+              >
+                {tier.highlight && (
+                  <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '2px', background: `linear-gradient(90deg, transparent, rgba(${tier.colorRgb},0.9), transparent)` }} />
+                )}
+                <p style={{ fontSize: '11px', fontWeight: 700, color: `rgba(${tier.colorRgb},0.8)`, letterSpacing: '0.15em', margin: '0 0 10px', textTransform: 'uppercase', fontFamily: 'monospace' }}>{tier.name}</p>
+                <div style={{ marginBottom: '14px' }}>
+                  <span style={{ fontSize: 'clamp(24px, 3vw, 34px)', fontWeight: 900, color: 'white', letterSpacing: '-0.03em', fontFamily: 'monospace' }}>{tier.price}</span>
+                  <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.3)', marginLeft: '6px' }}>{tier.unit}</span>
+                </div>
+                <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', lineHeight: 1.6, margin: '0 0 16px' }}>{tier.desc}</p>
+                <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  {tier.items.map((item) => (
+                    <li key={item} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: 'rgba(255,255,255,0.5)' }}>
+                      <span style={{ color: `rgba(${tier.colorRgb},0.9)`, fontWeight: 700, fontSize: '10px' }}>✓</span>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+          <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.2)', textAlign: 'center', marginTop: '16px' }}>
+            Presupuesto personalizado después del diagnóstico · Sin compromiso
+          </p>
+        </motion.div>
+
         {/* CTA FINAL */}
         <motion.div
           initial={{ opacity: 0, y: 40 }}
@@ -770,6 +857,9 @@ export default function VaultSoftware() {
           .roi-sliders-column {
             border-right: none !important;
             border-bottom: 1px solid rgba(255,255,255,0.06) !important;
+          }
+          .pricing-grid-software {
+            grid-template-columns: 1fr !important;
           }
         }
       `}</style>
