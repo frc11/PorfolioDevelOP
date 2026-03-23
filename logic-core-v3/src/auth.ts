@@ -6,7 +6,7 @@ import Google from 'next-auth/providers/google'
 import Resend from 'next-auth/providers/resend'
 import bcrypt from 'bcryptjs'
 import { prisma } from '@/lib/prisma'
-import type { Role } from '@prisma/client'
+import type { Role, OrgRole } from '@prisma/client'
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   // Fase 2: Adapter reintroducido para que Google OAuth escriba en la tabla Account.
@@ -112,9 +112,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return token
     },
     session({ session, token }) {
+      if (token.sub) {
+        session.user.id = token.sub
+      }
       session.user.role = token.role as Role
       session.user.organizationId = token.organizationId as string | undefined
-      session.user.orgRole = token.orgRole as string | undefined
+      session.user.orgRole = token.orgRole as OrgRole | undefined
       session.user.provider = token.provider as string | undefined
       return session
     },

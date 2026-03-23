@@ -44,6 +44,7 @@ import { LogicCompanion } from "@/modules/ai-companion";
 import { TransitionProvider } from "@/context/TransitionContext";
 import { Shutter } from "@/components/layout/Shutter";
 import { PublicOnlyComponents } from "@/components/layout/PublicOnlyComponents";
+import { Toaster } from "sonner";
 
 export default function RootLayout({
   children,
@@ -72,6 +73,18 @@ export default function RootLayout({
           <Preloader />
           <LogicCompanion />
         </PublicOnlyComponents>
+        <Toaster 
+          theme="dark" 
+          position="bottom-right" 
+          toastOptions={{
+            style: {
+              background: '#090a0f',
+              border: '1px solid rgba(255,255,255,0.05)',
+              color: '#fff',
+            },
+            className: 'shadow-[0_4px_24px_rgba(0,0,0,0.4)] backdrop-blur-xl',
+          }} 
+        />
       </body>
     </html>
   );

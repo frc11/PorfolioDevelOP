@@ -2,7 +2,8 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, FolderOpen, Zap, MessageSquare, User, BarChart2, TrendingUp } from 'lucide-react'
+import { Home, FolderOpen, Zap, MessageSquare, User, BarChart2, TrendingUp, Archive, Headphones, CreditCard } from 'lucide-react'
+import { motion } from 'framer-motion'
 
 interface NavItem {
   href: string
@@ -14,8 +15,11 @@ interface NavItem {
 const NAV_ITEMS: NavItem[] = [
   { href: '/dashboard', label: 'Inicio', icon: Home, exact: true },
   { href: '/dashboard/project', label: 'Mi proyecto', icon: FolderOpen, exact: false },
+  { href: '/dashboard/vault', label: 'Bóveda', icon: Archive, exact: false },
   { href: '/dashboard/services', label: 'Mis servicios', icon: Zap, exact: false },
   { href: '/dashboard/messages', label: 'Mensajes', icon: MessageSquare, exact: false },
+  { href: '/dashboard/soporte', label: 'Soporte', icon: Headphones, exact: false },
+  { href: '/dashboard/facturacion', label: 'Facturación', icon: CreditCard, exact: false },
   { href: '/dashboard/analytics', label: 'Analíticas', icon: BarChart2, exact: false },
   { href: '/dashboard/seo', label: 'SEO', icon: TrendingUp, exact: false },
   { href: '/dashboard/automations', label: 'Automatizaciones', icon: Zap, exact: false },
@@ -31,34 +35,46 @@ export function SidebarNav({ companyName, unreadMessages = 0 }: SidebarNavProps)
   const pathname = usePathname()
 
   return (
-    <nav className="flex h-full w-56 flex-shrink-0 flex-col border-r border-zinc-800 bg-zinc-950">
+    <nav className="relative flex h-full w-60 flex-shrink-0 flex-col border-r border-white/5 bg-[#040506]">
+      {/* Subtle Noise Texture on Sidebar */}
+      <div 
+        className="pointer-events-none absolute inset-0 opacity-[0.015]"
+        style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E")' }}
+      />
+
       {/* Brand */}
-      <div className="flex h-14 flex-col justify-center border-b border-zinc-800 px-4">
-        <span className="text-xs text-zinc-500 uppercase tracking-widest">Portal cliente</span>
-        <span className="truncate text-sm font-semibold text-zinc-100">{companyName}</span>
+      <div className="relative z-10 flex h-16 flex-col justify-center border-b border-white/5 px-6 mt-2">
+        <span className="text-[10px] text-zinc-500 uppercase tracking-widest font-semibold mb-0.5">Portal B2B</span>
+        <span className="truncate text-sm font-bold text-zinc-100">{companyName}</span>
       </div>
 
       {/* Nav links */}
-      <ul className="flex flex-1 flex-col gap-0.5 p-2">
+      <ul className="relative z-10 flex flex-1 flex-col gap-1.5 p-3 overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
         {NAV_ITEMS.map(({ href, label, icon: Icon, exact }) => {
           const isActive = exact ? pathname === href : pathname.startsWith(href)
           const isMessages = href === '/dashboard/messages'
 
           return (
-            <li key={href}>
+            <li key={href} className="relative group">
+              {isActive && (
+                <motion.div
+                  layoutId="sidebar-active-pill"
+                  className="absolute inset-0 bg-cyan-500/10 rounded-lg shadow-[inset_2px_0_0_0_rgba(6,182,212,1),0_0_15px_rgba(6,182,212,0.15)]"
+                  transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                />
+              )}
               <Link
                 href={href}
-                className={[
-                  'flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors',
+                className={`relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-all duration-300 ease-out z-10 ${
                   isActive
-                    ? 'bg-cyan-500/10 font-medium text-cyan-400'
-                    : 'text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100',
-                ].join(' ')}
+                    ? 'font-medium text-cyan-400'
+                    : 'text-zinc-400 hover:text-zinc-100 hover:bg-white/[0.03]'
+                }`}
               >
-                <Icon size={15} />
-                <span className="flex-1">{label}</span>
+                <Icon size={16} className={isActive ? 'drop-shadow-[0_0_8px_rgba(6,182,212,0.5)]' : 'group-hover:scale-110 transition-transform duration-300'} />
+                <span className="flex-1 tracking-wide">{label}</span>
                 {isMessages && unreadMessages > 0 && (
-                  <span className="flex min-w-[1.125rem] items-center justify-center rounded-full bg-cyan-500 px-1 text-[10px] font-semibold leading-[1.125rem] text-zinc-950">
+                  <span className="flex min-w-[1.25rem] h-5 items-center justify-center rounded-full bg-cyan-500 px-1.5 text-[10px] font-bold text-black shadow-[0_0_10px_rgba(6,182,212,0.4)]">
                     {unreadMessages > 99 ? '99+' : unreadMessages}
                   </span>
                 )}
@@ -69,10 +85,10 @@ export function SidebarNav({ companyName, unreadMessages = 0 }: SidebarNavProps)
       </ul>
 
       {/* Footer branding */}
-      <div className="border-t border-zinc-800 px-4 py-3">
-        <span className="text-xs text-zinc-600">
+      <div className="relative z-10 border-t border-white/5 px-6 py-4 bg-gradient-to-t from-black/20 to-transparent">
+        <span className="text-xs font-medium text-zinc-600">
           Powered by{' '}
-          <span className="text-zinc-500">DevelOP</span>
+          <span className="text-zinc-400 font-bold tracking-tight">devel<span className="text-cyan-500">OP</span></span>
         </span>
       </div>
     </nav>

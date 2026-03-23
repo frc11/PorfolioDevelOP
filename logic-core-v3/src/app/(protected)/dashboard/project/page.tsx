@@ -4,6 +4,11 @@ import { resolveOrgId } from '@/lib/preview'
 import { TaskStatus, ProjectStatus } from '@prisma/client'
 import { Calendar, CheckCircle2, Circle, Loader2 } from 'lucide-react'
 import { FadeIn } from '@/components/dashboard/FadeIn'
+import { TaskApprovalButtons } from '@/components/dashboard/TaskApprovalButtons'
+import { AnimatedProgressBar } from '@/components/dashboard/AnimatedProgressBar'
+import { AnimatedTaskList, AnimatedTaskItem } from '@/components/dashboard/AnimatedTaskList'
+import { EmptyState } from '@/components/dashboard/EmptyState'
+import { CircleDashed } from 'lucide-react'
 
 // ─── Label / style maps ───────────────────────────────────────────────────────
 
@@ -142,12 +147,7 @@ export default async function ProjectPage() {
                   {done}/{total} tareas completadas · {progressPct}%
                 </span>
               </div>
-              <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/[0.06]">
-                <div
-                  className="h-full rounded-full bg-cyan-500 transition-all duration-500"
-                  style={{ width: `${progressPct}%` }}
-                />
-              </div>
+              <AnimatedProgressBar progressPct={progressPct} />
             </div>
           )}
         </div>
@@ -157,9 +157,11 @@ export default async function ProjectPage() {
       {total === 0 ? (
         <FadeIn delay={0.2}>
           <div className={CARD}>
-            <p className="text-sm text-zinc-600">
-              Todavía no hay tareas registradas en este proyecto.
-            </p>
+            <EmptyState 
+              icon={CircleDashed} 
+              title="Proyecto Naciente" 
+              description="El equipo de develOP aún no ha asignado entregables a tu línea de tiempo. Recibirás notificaciones al iniciar la actividad."
+            />
           </div>
         </FadeIn>
       ) : (
@@ -182,37 +184,38 @@ export default async function ProjectPage() {
                   </div>
 
                   {/* Tasks */}
-                  <ul className="flex flex-col gap-2">
+                  <AnimatedTaskList className="flex flex-col gap-3">
                     {group.map((task) => (
-                      <li
+                      <AnimatedTaskItem
                         key={task.id}
-                        className="rounded-lg border border-white/[0.06] bg-white/[0.02] px-3 py-2.5"
+                        id={task.id}
+                        className="rounded-xl border border-white/[0.06] bg-[#0c0e12]/40 px-4 py-3.5 backdrop-blur-md shadow-sm transition-all hover:bg-white/[0.03] hover:border-white/10"
                       >
-                        <div className="flex items-start gap-2.5">
+                        <div className="flex items-start gap-3">
                           <GroupIcon
-                            size={14}
+                            size={16}
                             className={`mt-0.5 flex-shrink-0 ${TASK_GROUP_STYLE[status].label} ${status === 'IN_PROGRESS' ? 'animate-spin' : ''}`}
                             style={status === 'IN_PROGRESS' ? { animationDuration: '3s' } : {}}
                           />
                           <div className="min-w-0 flex-1">
                             <p
                               className={[
-                                'text-sm',
+                                'text-[15px] font-medium transition-colors',
                                 status === 'DONE'
                                   ? 'text-zinc-500 line-through'
-                                  : 'text-zinc-100',
+                                  : 'text-zinc-200',
                               ].join(' ')}
                             >
                               {task.title}
                             </p>
                             {task.description && (
-                              <p className="mt-0.5 text-xs text-zinc-600">
+                              <p className="mt-1 text-xs text-zinc-500 leading-relaxed">
                                 {task.description}
                               </p>
                             )}
                             {task.dueDate && (
-                              <div className="mt-1 flex items-center gap-1 text-xs text-zinc-600">
-                                <Calendar size={10} />
+                              <div className="mt-2 flex items-center gap-1.5 text-[11px] font-semibold tracking-wide text-zinc-600 uppercase">
+                                <Calendar size={12} className="text-cyan-500/70" />
                                 <span>
                                   {new Date(task.dueDate).toLocaleDateString('es-AR', {
                                     day: '2-digit',
@@ -222,11 +225,17 @@ export default async function ProjectPage() {
                                 </span>
                               </div>
                             )}
+                            
+                            {task.approvalStatus === 'PENDING_APPROVAL' && (
+                              <div className="mt-3">
+                                <TaskApprovalButtons taskId={task.id} />
+                              </div>
+                            )}
                           </div>
                         </div>
-                      </li>
+                      </AnimatedTaskItem>
                     ))}
-                  </ul>
+                  </AnimatedTaskList>
                 </div>
               </FadeIn>
             )

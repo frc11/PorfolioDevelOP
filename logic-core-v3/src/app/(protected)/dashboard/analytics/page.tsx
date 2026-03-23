@@ -4,7 +4,7 @@ import { resolveOrgId } from '@/lib/preview'
 import { getAnalyticsData } from '@/lib/analytics'
 import { SessionsChart } from '@/components/dashboard/SessionsChart'
 import { FadeIn } from '@/components/dashboard/FadeIn'
-import { BarChart2, Users, TrendingDown, Clock, AlertTriangle, BarChart } from 'lucide-react'
+import { ArrowDownRight, ArrowUpRight, Target, Users, MousePointerClick, Clock, LucideIcon, BarChart, AlertTriangle, BarChart2, TrendingDown } from 'lucide-react'
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -31,28 +31,40 @@ function MetricCard({
   color,
   borderColor,
   bgColor,
+  trend,
 }: {
   label: string
   value: string
-  icon: React.ElementType
+  icon: LucideIcon
   color: string
   borderColor: string
   bgColor: string
+  trend?: { value: number; isPositive: boolean }
 }) {
   return (
     <div
-      className="rounded-xl p-5"
+      className="group relative overflow-hidden rounded-2xl p-6 transition-all duration-300 hover:scale-[1.02] hover:bg-white/[0.04] cursor-default"
       style={{
         border: `1px solid ${borderColor}`,
         background: bgColor,
-        backdropFilter: 'blur(8px)',
+        backdropFilter: 'blur(16px)',
       }}
     >
       <div className="flex items-center justify-between">
-        <p className="text-sm text-zinc-400">{label}</p>
-        <Icon size={16} className={color} />
+        <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500 group-hover:text-zinc-400 transition-colors">{label}</p>
+        <div className={`p-2 rounded-lg bg-black/20 border border-white/5 group-hover:scale-110 transition-transform duration-300 ${color}`}>
+          <Icon size={18} />
+        </div>
       </div>
-      <p className={`mt-3 text-2xl font-semibold ${color}`}>{value}</p>
+      <div className="mt-4 flex flex-col gap-1 sm:flex-row sm:items-end justify-between">
+        <p className={`text-4xl font-bold tracking-tight ${color}`}>{value}</p>
+        {trend && (
+          <div className={`mb-1.5 flex w-fit items-center gap-1 rounded-full px-2 py-0.5 text-xs font-bold border transition-colors duration-300 ${trend.isPositive ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20 group-hover:bg-emerald-500/20' : 'text-rose-400 bg-rose-500/10 border-rose-500/20 group-hover:bg-rose-500/20'}`}>
+            {trend.isPositive ? <ArrowUpRight size={14} className="group-hover:-translate-y-0.5 group-hover:translate-x-0.5 transition-transform" /> : <ArrowDownRight size={14} className="group-hover:translate-y-0.5 group-hover:translate-x-0.5 transition-transform" />}
+            {trend.value}%
+          </div>
+        )}
+      </div>
     </div>
   )
 }
@@ -145,6 +157,7 @@ async function AnalyticsContent({ propertyId }: { propertyId: string }) {
             color="text-cyan-400"
             borderColor="rgba(6,182,212,0.2)"
             bgColor="rgba(6,182,212,0.04)"
+            trend={{ value: 12.5, isPositive: true }}
           />
           <MetricCard
             label="Usuarios activos"
@@ -153,6 +166,7 @@ async function AnalyticsContent({ propertyId }: { propertyId: string }) {
             color="text-blue-400"
             borderColor="rgba(59,130,246,0.2)"
             bgColor="rgba(59,130,246,0.04)"
+            trend={{ value: 8.3, isPositive: true }}
           />
           <MetricCard
             label="Tasa de rebote"
@@ -161,6 +175,7 @@ async function AnalyticsContent({ propertyId }: { propertyId: string }) {
             color="text-amber-400"
             borderColor="rgba(245,158,11,0.2)"
             bgColor="rgba(245,158,11,0.04)"
+            trend={{ value: 2.1, isPositive: false }}
           />
           <MetricCard
             label="Duración promedio"
@@ -169,6 +184,7 @@ async function AnalyticsContent({ propertyId }: { propertyId: string }) {
             color="text-green-400"
             borderColor="rgba(34,197,94,0.2)"
             bgColor="rgba(34,197,94,0.04)"
+            trend={{ value: 15.0, isPositive: true }}
           />
         </div>
       </FadeIn>
@@ -198,20 +214,20 @@ async function AnalyticsContent({ propertyId }: { propertyId: string }) {
                 const pct = Math.round((page.sessions / maxSessions) * 100)
 
                 return (
-                  <li key={page.page} className="flex items-center gap-3">
-                    <span className="w-4 flex-shrink-0 text-right text-xs text-zinc-600">
+                  <li key={page.page} className="group flex items-center gap-4 rounded-xl p-2 transition-all duration-300 hover:bg-white/[0.03]">
+                    <span className="w-5 flex-shrink-0 text-center font-mono text-[10px] font-bold text-zinc-600">
                       {i + 1}
                     </span>
                     <div className="min-w-0 flex-1">
-                      <div className="mb-1 flex items-center justify-between gap-2">
-                        <span className="truncate text-xs text-zinc-300">{page.page}</span>
-                        <span className="flex-shrink-0 text-xs text-zinc-500">
+                      <div className="mb-2 flex items-center justify-between gap-3">
+                        <span className="truncate text-sm font-medium text-zinc-300 group-hover:text-white transition-colors">{page.page}</span>
+                        <span className="flex-shrink-0 text-xs font-semibold text-cyan-400/80 group-hover:text-cyan-400">
                           {page.sessions.toLocaleString('es-AR')}
                         </span>
                       </div>
-                      <div className="h-1 w-full overflow-hidden rounded-full bg-white/[0.06]">
+                      <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/[0.04]">
                         <div
-                          className="h-full rounded-full bg-cyan-500"
+                          className="h-full rounded-full bg-cyan-500 shadow-[0_0_10px_rgba(6,182,212,0.5)] transition-all duration-500"
                           style={{ width: `${pct}%` }}
                         />
                       </div>

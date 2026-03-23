@@ -1,0 +1,1219 @@
+﻿
+> logic-core-v3@0.1.0 lint
+> eslint
+
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\find_unused.js
+  1:12  error  A `require()` style import is forbidden  @typescript-eslint/no-require-imports
+  2:14  error  A `require()` style import is forbidden  @typescript-eslint/no-require-imports
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\app\(protected)\dashboard\analytics\page.tsx
+  38:27  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\app\(protected)\dashboard\page.tsx
+   57:85  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  151:88  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  211:31  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\app\error.tsx
+  35:21  error  Do not use an `<a>` element to navigate to `/`. Use `<Link />` from `next/link` instead. See: https://nextjs.org/docs/messages/no-html-link-for-pages  @next/next/no-html-link-for-pages
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\app\page.tsx
+   3:10  warning  'useState' is defined but never used           @typescript-eslint/no-unused-vars
+  21:10  warning  'TemplateWarehouse' is defined but never used  @typescript-eslint/no-unused-vars
+  22:10  warning  'TeamSection' is defined but never used        @typescript-eslint/no-unused-vars
+  23:10  warning  'FeedbackLoop' is defined but never used       @typescript-eslint/no-unused-vars
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\automation\BentoAutomation.tsx
+    4:18  warning  'AnimatePresence' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    @typescript-eslint/no-unused-vars
+  317:7   error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\automation\BentoAutomation.tsx:317:7
+  315 |   useEffect(() => {
+  316 |     if (flipped && !hasTriggeredFlip) {
+> 317 |       setHasTriggeredFlip(true)
+      |       ^^^^^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  318 |       onFirstFlip(workflow.id)
+  319 |     }
+  320 |   }, [flipped, hasTriggeredFlip, onFirstFlip, workflow.id])  react-hooks/set-state-in-effect
+  324:7   error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\automation\BentoAutomation.tsx:324:7
+  322 |   useEffect(() => {
+  323 |     if (flipped && !shouldReduceMotion) {
+> 324 |       setGearSpeed(1)
+      |       ^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  325 |       setEverFlipped(true)
+  326 |     } else {
+  327 |       const interval = setInterval(() => {                               react-hooks/set-state-in-effect
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\automation\CalculadoraAutomation.tsx
+  117:11  error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 react/no-unescaped-entities
+  117:38  error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 react/no-unescaped-entities
+  355:7   error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\automation\CalculadoraAutomation.tsx:355:7
+  353 |
+  354 |     if (shouldReduceMotion) {
+> 355 |       setDisplayValue(value)
+      |       ^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  356 |       prevRef.current = value
+  357 |       return
+  358 |     }  react-hooks/set-state-in-effect
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\automation\HeroAutomation.tsx
+  341:6  warning  React Hook useEffect has a missing dependency: 'mouseRef'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\automation\IntegracionesAutomation.tsx
+  304:3  error  React Hook "useEffect" is called conditionally. React Hooks must be called in the exact same order in every component render. Did you accidentally call a React Hook after an early return?  react-hooks/rules-of-hooks
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\automation\RubrosAutomation.tsx
+  502:9   error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\automation\RubrosAutomation.tsx:502:9
+  500 |
+  501 |     useEffect(() => {
+> 502 |         setVisible([])
+      |         ^^^^^^^^^^ Avoid calling setState() directly within an effect
+  503 |         setTyping(false)
+  504 |
+  505 |         const timers: ReturnType<typeof setTimeout>[] = []  react-hooks/set-state-in-effect
+  810:62  warning  '_' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                @typescript-eslint/no-unused-vars
+  810:65  warning  'i' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                @typescript-eslint/no-unused-vars
+  811:8   error    Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\automation\RubrosAutomation.tsx:811:8
+  809 |   // 8 Part├¡culas de fondo usando el color del rubro activo
+  810 |   const particles = useMemo(() => Array.from({ length: 8 }, (_, i) => ({
+> 811 |     x: Math.random() * 100,
+      |        ^^^^^^^^^^^^^ Cannot call impure function
+  812 |     y: Math.random() * 100,
+  813 |     size: 2 + Math.random() * 3,
+  814 |     duration: 4 + Math.random() * 4,                                                                                                                                                                                                                                                                      react-hooks/purity
+  812:8   error    Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\automation\RubrosAutomation.tsx:812:8
+  810 |   const particles = useMemo(() => Array.from({ length: 8 }, (_, i) => ({
+  811 |     x: Math.random() * 100,
+> 812 |     y: Math.random() * 100,
+      |        ^^^^^^^^^^^^^ Cannot call impure function
+  813 |     size: 2 + Math.random() * 3,
+  814 |     duration: 4 + Math.random() * 4,
+  815 |     delay: Math.random() * 3,                                                                                                                                                                                                                                                                                                    react-hooks/purity
+  813:15  error    Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\automation\RubrosAutomation.tsx:813:15
+  811 |     x: Math.random() * 100,
+  812 |     y: Math.random() * 100,
+> 813 |     size: 2 + Math.random() * 3,
+      |               ^^^^^^^^^^^^^ Cannot call impure function
+  814 |     duration: 4 + Math.random() * 4,
+  815 |     delay: Math.random() * 3,
+  816 |   })), [])                                                                                                                                                                                                                                                                                                                                                          react-hooks/purity
+  814:19  error    Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\automation\RubrosAutomation.tsx:814:19
+  812 |     y: Math.random() * 100,
+  813 |     size: 2 + Math.random() * 3,
+> 814 |     duration: 4 + Math.random() * 4,
+      |                   ^^^^^^^^^^^^^ Cannot call impure function
+  815 |     delay: Math.random() * 3,
+  816 |   })), [])
+  817 |                                                                                                                                                                                                                                                                                                                                                                                  react-hooks/purity
+  815:12  error    Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\automation\RubrosAutomation.tsx:815:12
+  813 |     size: 2 + Math.random() * 3,
+  814 |     duration: 4 + Math.random() * 4,
+> 815 |     delay: Math.random() * 3,
+      |            ^^^^^^^^^^^^^ Cannot call impure function
+  816 |   })), [])
+  817 |
+  818 |   return (                                                                                                                                                                                                                                                                                                                                                                                                          react-hooks/purity
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\automation\SocialProofAutomation.tsx
+  224:9   error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  224:19  error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\canvas\DotMatrix.tsx
+  62:19  error  'x' is never reassigned. Use 'const' instead  prefer-const
+  62:22  error  'y' is never reassigned. Use 'const' instead  prefer-const
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\canvas\HeroBackground.tsx
+  130:24  error  Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\canvas\HeroBackground.tsx:130:24
+  128 |
+  129 |         for (let i = 0; i < count; i++) {
+> 130 |             const x = (Math.random() - 0.5) * 15;
+      |                        ^^^^^^^^^^^^^ Cannot call impure function
+  131 |             const y = (Math.random() - 0.5) * 10;
+  132 |             const z = (Math.random() * 4) - 2; // z=[-2, 2]
+  133 |                                              react-hooks/purity
+  131:24  error  Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\canvas\HeroBackground.tsx:131:24
+  129 |         for (let i = 0; i < count; i++) {
+  130 |             const x = (Math.random() - 0.5) * 15;
+> 131 |             const y = (Math.random() - 0.5) * 10;
+      |                        ^^^^^^^^^^^^^ Cannot call impure function
+  132 |             const z = (Math.random() * 4) - 2; // z=[-2, 2]
+  133 |
+  134 |             siz[i] = Math.random() * 2 + 1;  react-hooks/purity
+  132:24  error  Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\canvas\HeroBackground.tsx:132:24
+  130 |             const x = (Math.random() - 0.5) * 15;
+  131 |             const y = (Math.random() - 0.5) * 10;
+> 132 |             const z = (Math.random() * 4) - 2; // z=[-2, 2]
+      |                        ^^^^^^^^^^^^^ Cannot call impure function
+  133 |
+  134 |             siz[i] = Math.random() * 2 + 1;
+  135 |                                            react-hooks/purity
+  134:22  error  Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\canvas\HeroBackground.tsx:134:22
+  132 |             const z = (Math.random() * 4) - 2; // z=[-2, 2]
+  133 |
+> 134 |             siz[i] = Math.random() * 2 + 1;
+      |                      ^^^^^^^^^^^^^ Cannot call impure function
+  135 |
+  136 |             const mixFactor = Math.max(0, Math.min(1, (y + 5) / 10));
+  137 |             const c = colorA.clone().lerp(colorB, mixFactor);              react-hooks/purity
+  149:24  error  Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\canvas\HeroBackground.tsx:149:24
+  147 |                 baseX: x,
+  148 |                 baseY: y,
+> 149 |                 speed: Math.random() * 0.5 + 0.1,
+      |                        ^^^^^^^^^^^^^ Cannot call impure function
+  150 |                 seed: Math.random() * Math.PI * 2,
+  151 |                 x, y, z
+  152 |             });                                                       react-hooks/purity
+  150:23  error  Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\canvas\HeroBackground.tsx:150:23
+  148 |                 baseY: y,
+  149 |                 speed: Math.random() * 0.5 + 0.1,
+> 150 |                 seed: Math.random() * Math.PI * 2,
+      |                       ^^^^^^^^^^^^^ Cannot call impure function
+  151 |                 x, y, z
+  152 |             });
+  153 |         }                                                                        react-hooks/purity
+  213:13  error  Error: This value cannot be modified
+
+Modifying a value previously passed as an argument to a hook is not allowed. Consider moving the modification before calling the hook.
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\canvas\HeroBackground.tsx:213:13
+  211 |             }
+  212 |
+> 213 |             p.x += (targetX + pushX - p.x) * 0.05;
+      |             ^ `particleData` cannot be modified
+  214 |             p.y += (targetY + pushY - p.y) * 0.05;
+  215 |
+  216 |             positionsArray[i * 3] = p.x;                                                                                                                                                                                                                                                                react-hooks/immutability
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\canvas\Interactive3DNetwork.tsx
+   45:13  error    Error: Cannot access variable before it is declared
+
+`resetPosition` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\canvas\Interactive3DNetwork.tsx:45:13
+  43 |         timeoutRef.current = setTimeout(() => {
+  44 |             setStarted(true);
+> 45 |             resetPosition();
+     |             ^^^^^^^^^^^^^ `resetPosition` accessed before it is declared
+  46 |         }, initialDelay);
+  47 |         return () => { if (timeoutRef.current) clearTimeout(timeoutRef.current); };
+  48 |     }, [initialDelay]);
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\canvas\Interactive3DNetwork.tsx:50:5
+  48 |     }, [initialDelay]);
+  49 |
+> 50 |     const resetPosition = () => {
+     |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 51 |         if (!mesh.current) return;
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 52 |         // Random start position far away
+     ÔÇª
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 67 |         mesh.current.rotateY((Math.random() - 0.5) * 0.5);
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 68 |     };
+     | ^^^^^^^ `resetPosition` is declared here
+  69 |
+  70 |     useFrame((state, delta) => {
+  71 |         if (!started || !mesh.current) return;  react-hooks/immutability
+  114:28  error    Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\canvas\Interactive3DNetwork.tsx:114:28
+  112 |         const count = 2000;
+  113 |         for (let i = 0; i < count; i++) {
+> 114 |             const r = 80 + Math.random() * 20;
+      |                            ^^^^^^^^^^^^^ Cannot call impure function
+  115 |             const theta = 2 * Math.PI * Math.random();
+  116 |             const phi = Math.acos(2 * Math.random() - 1);
+  117 |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          react-hooks/purity
+  115:41  error    Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\canvas\Interactive3DNetwork.tsx:115:41
+  113 |         for (let i = 0; i < count; i++) {
+  114 |             const r = 80 + Math.random() * 20;
+> 115 |             const theta = 2 * Math.PI * Math.random();
+      |                                         ^^^^^^^^^^^^^ Cannot call impure function
+  116 |             const phi = Math.acos(2 * Math.random() - 1);
+  117 |
+  118 |             const x = r * Math.sin(phi) * Math.cos(theta);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              react-hooks/purity
+  116:39  error    Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\canvas\Interactive3DNetwork.tsx:116:39
+  114 |             const r = 80 + Math.random() * 20;
+  115 |             const theta = 2 * Math.PI * Math.random();
+> 116 |             const phi = Math.acos(2 * Math.random() - 1);
+      |                                       ^^^^^^^^^^^^^ Cannot call impure function
+  117 |
+  118 |             const x = r * Math.sin(phi) * Math.cos(theta);
+  119 |             const y = r * Math.sin(phi) * Math.sin(theta);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               react-hooks/purity
+  391:47  warning  'activeNode' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   @typescript-eslint/no-unused-vars
+  391:59  warning  'setActiveNode' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                @typescript-eslint/no-unused-vars
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\canvas\LiquidProject.tsx
+   8:32  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  44:57  warning  'imageUrl' is defined but never used      @typescript-eslint/no-unused-vars
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\canvas\NeuralNetwork.tsx
+  17:37  error  Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\canvas\NeuralNetwork.tsx:17:37
+  15 |         for (let i = 0; i < count; i++) {
+  16 |             // Spherical distribution radius ~4
+> 17 |             const r = 4 * Math.cbrt(Math.random());
+     |                                     ^^^^^^^^^^^^^ Cannot call impure function
+  18 |             const theta = Math.random() * 2 * Math.PI;
+  19 |             const phi = Math.acos(2 * Math.random() - 1);
+  20 |                                react-hooks/purity
+  18:27  error  Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\canvas\NeuralNetwork.tsx:18:27
+  16 |             // Spherical distribution radius ~4
+  17 |             const r = 4 * Math.cbrt(Math.random());
+> 18 |             const theta = Math.random() * 2 * Math.PI;
+     |                           ^^^^^^^^^^^^^ Cannot call impure function
+  19 |             const phi = Math.acos(2 * Math.random() - 1);
+  20 |
+  21 |             const x = r * Math.sin(phi) * Math.cos(theta);                         react-hooks/purity
+  19:39  error  Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\canvas\NeuralNetwork.tsx:19:39
+  17 |             const r = 4 * Math.cbrt(Math.random());
+  18 |             const theta = Math.random() * 2 * Math.PI;
+> 19 |             const phi = Math.acos(2 * Math.random() - 1);
+     |                                       ^^^^^^^^^^^^^ Cannot call impure function
+  20 |
+  21 |             const x = r * Math.sin(phi) * Math.cos(theta);
+  22 |             const y = r * Math.sin(phi) * Math.sin(theta);  react-hooks/purity
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\ia\BentoIA.tsx
+    3:46  warning  'useMemo' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      @typescript-eslint/no-unused-vars
+  209:9   error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\ia\BentoIA.tsx:209:9
+  207 |             })
+  208 |         )
+> 209 |         setParticles(newParticles)
+      |         ^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  210 |
+  211 |         let raf: number
+  212 |         const start = performance.now()  react-hooks/set-state-in-effect
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\ia\CalculadorIA.tsx
+   4:47  warning  'AnimatePresence' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 @typescript-eslint/no-unused-vars
+  25:7   error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\ia\CalculadorIA.tsx:25:7
+  23 |   useEffect(() => {
+  24 |     if (reduced) {
+> 25 |       setDisplayed(value)
+     |       ^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  26 |       return
+  27 |     }
+  28 |  react-hooks/set-state-in-effect
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\ia\ComparadorIA.tsx
+  4:29  warning  'AnimatePresence' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\ia\HeroIA.tsx
+    3:36  warning  'useState' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      @typescript-eslint/no-unused-vars
+  381:55  error    Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\ia\HeroIA.tsx:381:55
+  379 |                         <motion.div
+  380 |                             key={i}
+> 381 |                             initial={{ opacity: 0, y: Math.random() > 0.5 ? 15 : -15 }}
+      |                                                       ^^^^^^^^^^^^^ Cannot call impure function
+  382 |                             animate={{ opacity: 1, y: 0 }}
+  383 |                             transition={{ duration: 0.8, delay: 1.0 + i * 0.1 }}
+  384 |                             style={{                       react-hooks/purity
+  398:51  error    Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\ia\HeroIA.tsx:398:51
+  396 |                                 animate={prefersReduced ? {} : { y: [0, -6, 0] }}
+  397 |                                 transition={prefersReduced ? {} : {
+> 398 |                                     duration: 3 + Math.random() * 2,
+      |                                                   ^^^^^^^^^^^^^ Cannot call impure function
+  399 |                                     repeat: Infinity,
+  400 |                                     ease: "easeInOut"
+  401 |                                 }}  react-hooks/purity
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\ia\LiveChatIA.tsx
+  240:20  warning  'e' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\ia\PipelineIA.tsx
+  317:26  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\ia\RubrosIA.tsx
+  382:9   warning  Unused eslint-disable directive (no problems were reported from 'react-hooks/exhaustive-deps')
+  464:64  warning  '_' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         @typescript-eslint/no-unused-vars
+  464:67  warning  'i' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         @typescript-eslint/no-unused-vars
+  465:12  error    Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\ia\RubrosIA.tsx:465:12
+  463 |
+  464 |     const particles = useMemo(() => Array.from({ length: 8 }, (_, i) => ({
+> 465 |         x: Math.random() * 100,
+      |            ^^^^^^^^^^^^^ Cannot call impure function
+  466 |         y: Math.random() * 100,
+  467 |         size: 2 + Math.random() * 3,
+  468 |         duration: 4 + Math.random() * 4,                                    react-hooks/purity
+  466:12  error    Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\ia\RubrosIA.tsx:466:12
+  464 |     const particles = useMemo(() => Array.from({ length: 8 }, (_, i) => ({
+  465 |         x: Math.random() * 100,
+> 466 |         y: Math.random() * 100,
+      |            ^^^^^^^^^^^^^ Cannot call impure function
+  467 |         size: 2 + Math.random() * 3,
+  468 |         duration: 4 + Math.random() * 4,
+  469 |         delay: Math.random() * 3,  react-hooks/purity
+  467:19  error    Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\ia\RubrosIA.tsx:467:19
+  465 |         x: Math.random() * 100,
+  466 |         y: Math.random() * 100,
+> 467 |         size: 2 + Math.random() * 3,
+      |                   ^^^^^^^^^^^^^ Cannot call impure function
+  468 |         duration: 4 + Math.random() * 4,
+  469 |         delay: Math.random() * 3,
+  470 |     })), [])                                                         react-hooks/purity
+  468:23  error    Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\ia\RubrosIA.tsx:468:23
+  466 |         y: Math.random() * 100,
+  467 |         size: 2 + Math.random() * 3,
+> 468 |         duration: 4 + Math.random() * 4,
+      |                       ^^^^^^^^^^^^^ Cannot call impure function
+  469 |         delay: Math.random() * 3,
+  470 |     })), [])
+  471 |                                                                                     react-hooks/purity
+  469:16  error    Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\ia\RubrosIA.tsx:469:16
+  467 |         size: 2 + Math.random() * 3,
+  468 |         duration: 4 + Math.random() * 4,
+> 469 |         delay: Math.random() * 3,
+      |                ^^^^^^^^^^^^^ Cannot call impure function
+  470 |     })), [])
+  471 |
+  472 |     return (                                                                                                               react-hooks/purity
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\ia\VaultIA.tsx
+  240:64  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\layout\DynamicDock.tsx
+   85:9   error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\layout\DynamicDock.tsx:85:9
+  83 |     // Ensure menu closes securely on any route change
+  84 |     useEffect(() => {
+> 85 |         setIsMobileMenuOpen(false);
+     |         ^^^^^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  86 |     }, [pathname]);
+  87 |
+  88 |     const icons = [  react-hooks/set-state-in-effect
+  199:13  error  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     @typescript-eslint/no-explicit-any
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\layout\Shutter.tsx
+  11:37  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\layout\SmoothScroll.tsx
+  32:9  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\layout\SmoothScroll.tsx:32:9
+  30 |         });
+  31 |
+> 32 |         setLenisInstance(lenis);
+     |         ^^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  33 |
+  34 |         function raf(time: number) {
+  35 |             lenis.raf(time);  react-hooks/set-state-in-effect
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\sections\AILargeCta.tsx
+  4:22  warning  'Sparkles' is defined but never used               @typescript-eslint/no-unused-vars
+  7:12  warning  'isHovered' is assigned a value but never used     @typescript-eslint/no-unused-vars
+  7:23  warning  'setIsHovered' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\sections\AIPipelineSection.tsx
+  18:97  error  Comments inside children section of tag should be placed inside braces  react/jsx-no-comment-textnodes
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\sections\ComparadorSection.tsx
+  82:11  warning  'titleWords' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\sections\FeedbackLoop.tsx
+  47:37  error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  47:51  error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\sections\Footer.tsx
+   3:8   warning  'Link' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 @typescript-eslint/no-unused-vars
+  10:48  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         @typescript-eslint/no-explicit-any
+  23:9   error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\sections\Footer.tsx:23:9
+  21 |             hue: Math.random() * 360,
+  22 |         }));
+> 23 |         setParticles(newParticles);
+     |         ^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  24 |     }, []);
+  25 |
+  26 |     const isLeft = side === 'left';  react-hooks/set-state-in-effect
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\sections\InfiniteReviews.tsx
+   94:18  error  Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+  117:13  error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  117:20  error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  248:13  error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  248:20  error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\sections\OurServices.tsx
+   82:15  error  Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\sections\OurServices.tsx:82:15
+  80 |     const particles = Array.from({ length: particleCount }).map((_, i) => ({
+  81 |         id: i,
+> 82 |         size: Math.random() * 4 + 1,
+     |               ^^^^^^^^^^^^^ Cannot call impure function
+  83 |         left: `${Math.random() * 100}%`,
+  84 |         top: `${Math.random() * 100}%`,
+  85 |         duration: Math.random() * 1.5 + 0.5,                                                                                                            react-hooks/purity
+   83:18  error  Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\sections\OurServices.tsx:83:18
+  81 |         id: i,
+  82 |         size: Math.random() * 4 + 1,
+> 83 |         left: `${Math.random() * 100}%`,
+     |                  ^^^^^^^^^^^^^ Cannot call impure function
+  84 |         top: `${Math.random() * 100}%`,
+  85 |         duration: Math.random() * 1.5 + 0.5,
+  86 |         delay: Math.random() * 0.2,                                                                                                                                                  react-hooks/purity
+   84:17  error  Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\sections\OurServices.tsx:84:17
+  82 |         size: Math.random() * 4 + 1,
+  83 |         left: `${Math.random() * 100}%`,
+> 84 |         top: `${Math.random() * 100}%`,
+     |                 ^^^^^^^^^^^^^ Cannot call impure function
+  85 |         duration: Math.random() * 1.5 + 0.5,
+  86 |         delay: Math.random() * 0.2,
+  87 |         depth: (Math.random() - 0.5) * 500,                                                                                                                      react-hooks/purity
+   85:19  error  Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\sections\OurServices.tsx:85:19
+  83 |         left: `${Math.random() * 100}%`,
+  84 |         top: `${Math.random() * 100}%`,
+> 85 |         duration: Math.random() * 1.5 + 0.5,
+     |                   ^^^^^^^^^^^^^ Cannot call impure function
+  86 |         delay: Math.random() * 0.2,
+  87 |         depth: (Math.random() - 0.5) * 500,
+  88 |     }));                                                                                                                                                react-hooks/purity
+   86:16  error  Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\sections\OurServices.tsx:86:16
+  84 |         top: `${Math.random() * 100}%`,
+  85 |         duration: Math.random() * 1.5 + 0.5,
+> 86 |         delay: Math.random() * 0.2,
+     |                ^^^^^^^^^^^^^ Cannot call impure function
+  87 |         depth: (Math.random() - 0.5) * 500,
+  88 |     }));
+  89 |                                                                                                                                                                                            react-hooks/purity
+   87:17  error  Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\sections\OurServices.tsx:87:17
+  85 |         duration: Math.random() * 1.5 + 0.5,
+  86 |         delay: Math.random() * 0.2,
+> 87 |         depth: (Math.random() - 0.5) * 500,
+     |                 ^^^^^^^^^^^^^ Cannot call impure function
+  88 |     }));
+  89 |
+  90 |     return (                                                                                                                                                                                                                      react-hooks/purity
+  109:29  error  Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\sections\OurServices.tsx:109:29
+  107 |                         scale: [0, 1.5, 0],
+  108 |                         z: [0, p.depth],
+> 109 |                         x: (Math.random() - 0.5) * 100,
+      |                             ^^^^^^^^^^^^^ Cannot call impure function
+  110 |                         y: (Math.random() - 0.5) * 100,
+  111 |                     }}
+  112 |                     exit={{ opacity: 0, scale: 0 }}                                                                     react-hooks/purity
+  110:29  error  Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\sections\OurServices.tsx:110:29
+  108 |                         z: [0, p.depth],
+  109 |                         x: (Math.random() - 0.5) * 100,
+> 110 |                         y: (Math.random() - 0.5) * 100,
+      |                             ^^^^^^^^^^^^^ Cannot call impure function
+  111 |                     }}
+  112 |                     exit={{ opacity: 0, scale: 0 }}
+  113 |                     transition={{ duration: p.duration, repeat: Infinity, ease: "easeInOut", delay: p.delay }}  react-hooks/purity
+  145:35  error  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                @typescript-eslint/no-explicit-any
+  265:35  error  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                @typescript-eslint/no-explicit-any
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\sections\Portfolio.tsx
+  2:10  warning  'useRef' is defined but never used        @typescript-eslint/no-unused-vars
+  2:28  warning  'useEffect' is defined but never used     @typescript-eslint/no-unused-vars
+  3:34  warning  'useSpring' is defined but never used     @typescript-eslint/no-unused-vars
+  4:33  warning  'ExternalLink' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\sections\ROICalculator.tsx
+    5:10  warning  'MagneticCta' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          @typescript-eslint/no-unused-vars
+  229:59  error    Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\sections\ROICalculator.tsx:229:59
+  227 |                                         animate={{ y: [-100, -600], opacity: [0, 1, 0] }}
+  228 |                                         transition={{
+> 229 |                                             duration: 3 + Math.random() * 2,
+      |                                                           ^^^^^^^^^^^^^ Cannot call impure function
+  230 |                                             repeat: Infinity,
+  231 |                                             delay: Math.random() * 2,
+  232 |                                             ease: "linear"  react-hooks/purity
+  231:52  error    Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\sections\ROICalculator.tsx:231:52
+  229 |                                             duration: 3 + Math.random() * 2,
+  230 |                                             repeat: Infinity,
+> 231 |                                             delay: Math.random() * 2,
+      |                                                    ^^^^^^^^^^^^^ Cannot call impure function
+  232 |                                             ease: "linear"
+  233 |                                         }}
+  234 |                                     />                                                                       react-hooks/purity
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\sections\TemplateWarehouse.tsx
+  17:87  error  Comments inside children section of tag should be placed inside braces  react/jsx-no-comment-textnodes
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\sections\VaultSection.tsx
+   4:10  warning  'Plus' is defined but never used                  @typescript-eslint/no-unused-vars
+   4:16  warning  'Minus' is defined but never used                 @typescript-eslint/no-unused-vars
+  36:12  warning  'showForm' is assigned a value but never used     @typescript-eslint/no-unused-vars
+  36:22  warning  'setShowForm' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  46:11  warning  'isCtaInView' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\sections\WebDevelopmentBento.tsx
+  15:13  error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\sections\WebDevelopmentBento.tsx:15:13
+  13 |         if (!isInView) return;
+  14 |         if (prefersReduced) {
+> 15 |             setCount(100);
+     |             ^^^^^^^^ Avoid calling setState() directly within an effect
+  16 |             return;
+  17 |         }
+  18 |  react-hooks/set-state-in-effect
+  19:13  error    'start' is never reassigned. Use 'const' instead                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              prefer-const
+  19:13  warning  'start' is assigned a value but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    @typescript-eslint/no-unused-vars
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\sections\WebDevelopmentTimeline.tsx
+   97:11  warning  'dotInView' is assigned a value but never used          @typescript-eslint/no-unused-vars
+  300:12  warning  'isHoveredFinal' is assigned a value but never used     @typescript-eslint/no-unused-vars
+  300:28  warning  'setIsHoveredFinal' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\sections\WhyDevelOP.tsx
+   3:10  warning  'motion' is defined but never used                  @typescript-eslint/no-unused-vars
+  55:11  warning  'isTitleInView' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\software\ArchitectureSoftware.tsx
+  621:15  error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             react/no-unescaped-entities
+  621:36  error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             react/no-unescaped-entities
+  647:37  error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\software\ArchitectureSoftware.tsx:647:37
+  645 |   useEffect(() => {
+  646 |     if (!isInView || shouldReduceMotion) {
+> 647 |       if (archParticles.length > 0) setArchParticles([])
+      |                                     ^^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  648 |       return
+  649 |     }
+  650 |  react-hooks/set-state-in-effect
+  686:6   warning  React Hook useEffect has a missing dependency: 'archParticles.length'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     react-hooks/exhaustive-deps
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\software\DashboardMockupSoftware.tsx
+  85:22  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\software\DashboardMockupSoftware.tsx:85:22
+  83 |
+  84 |   useEffect(() => {
+> 85 |     if (isReduced) { setVal(to); return }
+     |                      ^^^^^^ Avoid calling setState() directly within an effect
+  86 |     const timer = setTimeout(() => {
+  87 |       const dur = 900
+  88 |       const start = performance.now()  react-hooks/set-state-in-effect
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\software\DiagnosticoSoftware.tsx
+    3:35   warning  'useCallback' is defined but never used   @typescript-eslint/no-unused-vars
+  244:314  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  247:236  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  250:237  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  253:360  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  339:22   error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  418:22   error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\software\HeroSoftware.tsx
+  547:7  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\software\HeroSoftware.tsx:547:7
+  545 |   useEffect(() => {
+  546 |     if (isReduced) {
+> 547 |       setScanDone(true)
+      |       ^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  548 |       return
+  549 |     }
+  550 |     const timer = setTimeout(() => {  react-hooks/set-state-in-effect
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\software\PainBentoSoftware.tsx
+  362:266  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  363:269  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  364:303  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\software\PipelineSoftware.tsx
+  220:3  warning  'isRunning' is defined but never used                                                           @typescript-eslint/no-unused-vars
+  497:3  warning  Unused eslint-disable directive (no problems were reported from 'react-hooks/exhaustive-deps')
+  640:7  warning  Unused eslint-disable directive (no problems were reported from 'react-hooks/exhaustive-deps')
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\software\ProcesoSoftware.tsx
+  453:7  warning  'shouldReduceMotion' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\software\ShowcaseSoftware.tsx
+    8:10  warning  'YAxis' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           @typescript-eslint/no-unused-vars
+  236:5   error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\software\ShowcaseSoftware.tsx:236:5
+  234 |   useEffect(() => {
+  235 |     if (!isInView || animated) return
+> 236 |     setAnimated(true)
+      |     ^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  237 |
+  238 |     kpis.forEach((kpi, i) => {
+  239 |       const duration = 1200 + i * 200  react-hooks/set-state-in-effect
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\software\SocialProofSoftware.tsx
+  145:11  error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  145:34  error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  213:9   error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  226:9   error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  226:19  error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\software\StatementSoftware.tsx
+    3:10  warning  'motion' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       @typescript-eslint/no-unused-vars
+   84:10  error    Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\software\StatementSoftware.tsx:84:10
+  82 |     return Array.from({ length: 12 }).map((_, i) => ({
+  83 |       id: i,
+> 84 |       x: Math.random() * 100,
+     |          ^^^^^^^^^^^^^ Cannot call impure function
+  85 |       y: Math.random() * 100,
+  86 |       z: Math.random() * 200,
+  87 |       type: Math.floor(Math.random() * 3),  react-hooks/purity
+   85:10  error    Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\software\StatementSoftware.tsx:85:10
+  83 |       id: i,
+  84 |       x: Math.random() * 100,
+> 85 |       y: Math.random() * 100,
+     |          ^^^^^^^^^^^^^ Cannot call impure function
+  86 |       z: Math.random() * 200,
+  87 |       type: Math.floor(Math.random() * 3),
+  88 |       speed: 0.1 + Math.random() * 0.4                  react-hooks/purity
+   86:10  error    Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\software\StatementSoftware.tsx:86:10
+  84 |       x: Math.random() * 100,
+  85 |       y: Math.random() * 100,
+> 86 |       z: Math.random() * 200,
+     |          ^^^^^^^^^^^^^ Cannot call impure function
+  87 |       type: Math.floor(Math.random() * 3),
+  88 |       speed: 0.1 + Math.random() * 0.4
+  89 |     }))                       react-hooks/purity
+   87:24  error    Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\software\StatementSoftware.tsx:87:24
+  85 |       y: Math.random() * 100,
+  86 |       z: Math.random() * 200,
+> 87 |       type: Math.floor(Math.random() * 3),
+     |                        ^^^^^^^^^^^^^ Cannot call impure function
+  88 |       speed: 0.1 + Math.random() * 0.4
+  89 |     }))
+  90 |   }, [])                              react-hooks/purity
+   88:20  error    Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\software\StatementSoftware.tsx:88:20
+  86 |       z: Math.random() * 200,
+  87 |       type: Math.floor(Math.random() * 3),
+> 88 |       speed: 0.1 + Math.random() * 0.4
+     |                    ^^^^^^^^^^^^^ Cannot call impure function
+  89 |     }))
+  90 |   }, [])
+  91 |                                                                react-hooks/purity
+  123:9   warning  'isInView' is assigned a value but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            @typescript-eslint/no-unused-vars
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\software\VaultSoftware.tsx
+  50:123  error  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       @typescript-eslint/no-explicit-any
+  57:7    error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\software\VaultSoftware.tsx:57:7
+  55 |   useEffect(() => {
+  56 |     if (shouldReduceMotion) {
+> 57 |       setDisplayed(value)
+     |       ^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  58 |       return
+  59 |     }
+  60 |     const from = prevRef.current  react-hooks/set-state-in-effect
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\ui\HeroMetrics.tsx
+  28:13  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\ui\HeroMetrics.tsx:28:13
+  26 |     useEffect(() => {
+  27 |         if (isReducedMotion) {
+> 28 |             setCount(to);
+     |             ^^^^^^^^ Avoid calling setState() directly within an effect
+  29 |             return;
+  30 |         }
+  31 |  react-hooks/set-state-in-effect
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\ui\HeroTitle.tsx
+  20:13  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\ui\HeroTitle.tsx:20:13
+  18 |     useEffect(() => {
+  19 |         if (isReducedMotion || char === " ") {
+> 20 |             setCurrent(char);
+     |             ^^^^^^^^^^ Avoid calling setState() directly within an effect
+  21 |             return;
+  22 |         }
+  23 |  react-hooks/set-state-in-effect
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\ui\HyperText.tsx
+  46:13  error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\ui\HyperText.tsx:46:13
+  44 |     useEffect(() => {
+  45 |         if (shouldAnimate && !hasStarted) {
+> 46 |             setHasStarted(true);
+     |             ^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  47 |         }
+  48 |     }, [shouldAnimate, hasStarted]);
+  49 |                                                                                     react-hooks/set-state-in-effect
+  70:9   error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\ui\HyperText.tsx:70:9
+  68 |
+  69 |         // Initial scramble 
+> 70 |         setDisplayText(text.split('').map(() => SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)]).join(''));
+     |         ^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  71 |
+  72 |         const timeout = setTimeout(() => {
+  73 |             const interval = setInterval(() => {  react-hooks/set-state-in-effect
+  74:33  warning  'prev' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  @typescript-eslint/no-unused-vars
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\ui\Preloader.tsx
+  19:11  warning  'pathLength' is assigned a value but never used   @typescript-eslint/no-unused-vars
+  20:11  warning  'fillOpacity' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  21:11  warning  'scale' is assigned a value but never used        @typescript-eslint/no-unused-vars
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\ui\buttons\MagneticCta.tsx
+  72:13  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\ui\buttons\MagneticCta.tsx:72:13
+  70 |     useEffect(() => {
+  71 |         if (window.matchMedia("(pointer: coarse)").matches) {
+> 72 |             setIsTouchDevice(true);
+     |             ^^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  73 |         }
+  74 |     }, []);
+  75 |  react-hooks/set-state-in-effect
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\lib\logger.ts
+   6:61  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  39:30  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  40:30  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  41:31  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  42:31  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  45:84  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\modules\ai-companion\components\ChatWindow.tsx
+    7:10  warning  'Send' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     @typescript-eslint/no-unused-vars
+    7:26  warning  'Activity' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 @typescript-eslint/no-unused-vars
+   10:34  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             @typescript-eslint/no-explicit-any
+   15:28  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             @typescript-eslint/no-explicit-any
+   16:25  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             @typescript-eslint/no-explicit-any
+   46:11  warning  'prefersReducedMotion' is assigned a value but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            @typescript-eslint/no-unused-vars
+   71:13  error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\modules\ai-companion\components\ChatWindow.tsx:71:13
+  69 |             return () => clearInterval(interval);
+  70 |         } else {
+> 71 |             setShowCursor(false);
+     |             ^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  72 |         }
+  73 |     }, [isThinking]);
+  74 |  react-hooks/set-state-in-effect
+  454:54  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             @typescript-eslint/no-explicit-any
+  457:64  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             @typescript-eslint/no-explicit-any
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\modules\ai-companion\components\LogicCompanion.tsx
+   65:75  warning  'leadContext' is assigned a value but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    @typescript-eslint/no-unused-vars
+   65:88  warning  'updateLeadContext' is assigned a value but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              @typescript-eslint/no-unused-vars
+   73:11  warning  'avatarY' is assigned a value but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        @typescript-eslint/no-unused-vars
+  126:13  error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\modules\ai-companion\components\LogicCompanion.tsx:126:13
+  124 |
+  125 |         if (skipInit) {
+> 126 |             setPhase('active');
+      |             ^^^^^^^^ Avoid calling setState() directly within an effect
+  127 |             return;
+  128 |         }
+  129 |                                                                                                         react-hooks/set-state-in-effect
+  207:13  error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\modules\ai-companion\components\LogicCompanion.tsx:207:13
+  205 |         }
+  206 |         if (isOpen) {
+> 207 |             setShowPrompt(false);
+      |             ^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  208 |             if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
+  209 |         }
+  210 |     }, [isOpen, startIdleTimer]);  react-hooks/set-state-in-effect
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\modules\ai-companion\components\NeuroAvatar.tsx
+  140:29   error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    @typescript-eslint/no-explicit-any
+  141:29   error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    @typescript-eslint/no-explicit-any
+  142:35   error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    @typescript-eslint/no-explicit-any
+  322:28   error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    @typescript-eslint/no-explicit-any
+  322:74   error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    @typescript-eslint/no-explicit-any
+  323:28   error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    @typescript-eslint/no-explicit-any
+  325:28   error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    @typescript-eslint/no-explicit-any
+  348:174  error    Error: Cannot access refs during render
+
+React refs are values that are not needed for rendering. Refs should only be accessed outside of render, such as in event handlers or effects. Accessing a ref value (the `current` property) during render can cause your component not to update as expected (https://react.dev/reference/react/useRef).
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\modules\ai-companion\components\NeuroAvatar.tsx:348:174
+  346 |                         {/* Outer Shell */}
+  347 |                         <mesh ref={outerSphereRef} geometry={geometries.outer}>
+> 348 |                             <MeshTransmissionMaterial transmission={0.95} thickness={0.8} roughness={0.05} ior={1.5} chromaticAberration={0.08} anisotropy={0.3} distortion={distortionRef.current} distortionScale={0.3} temporalDistortion={0.15} color={isThinking ? '#e0f0ff' : '#f0f8ff'} emissive={currentEmissive} emissiveIntensity={isThinking ? 0.6 : 0.2} transparent opacity={opacityRef.current * 0.85} />
+      |                                                                                                                                                                              ^^^^^^^^^^^^^^^^^^^^^ Cannot access ref value during render
+  349 |                         </mesh>
+  350 |                         {/* Inner Core */}
+  351 |                         <mesh ref={innerCoreRef} geometry={geometries.inner} scale={0.45}>                                                                                                                                                                                                            react-hooks/refs
+  348:379  error    Error: Cannot access refs during render
+
+React refs are values that are not needed for rendering. Refs should only be accessed outside of render, such as in event handlers or effects. Accessing a ref value (the `current` property) during render can cause your component not to update as expected (https://react.dev/reference/react/useRef).
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\modules\ai-companion\components\NeuroAvatar.tsx:348:379
+  346 |                         {/* Outer Shell */}
+  347 |                         <mesh ref={outerSphereRef} geometry={geometries.outer}>
+> 348 |                             <MeshTransmissionMaterial transmission={0.95} thickness={0.8} roughness={0.05} ior={1.5} chromaticAberration={0.08} anisotropy={0.3} distortion={distortionRef.current} distortionScale={0.3} temporalDistortion={0.15} color={isThinking ? '#e0f0ff' : '#f0f8ff'} emissive={currentEmissive} emissiveIntensity={isThinking ? 0.6 : 0.2} transparent opacity={opacityRef.current * 0.85} />
+      |                                                                                                                                                                                                                                                                                                                                                                                           ^^^^^^^^^^^^^^^^^^ Cannot access ref value during render
+  349 |                         </mesh>
+  350 |                         {/* Inner Core */}
+  351 |                         <mesh ref={innerCoreRef} geometry={geometries.inner} scale={0.45}>  react-hooks/refs
+  352:229  error    Error: Cannot access refs during render
+
+React refs are values that are not needed for rendering. Refs should only be accessed outside of render, such as in event handlers or effects. Accessing a ref value (the `current` property) during render can cause your component not to update as expected (https://react.dev/reference/react/useRef).
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\modules\ai-companion\components\NeuroAvatar.tsx:352:229
+  350 |                         {/* Inner Core */}
+  351 |                         <mesh ref={innerCoreRef} geometry={geometries.inner} scale={0.45}>
+> 352 |                             <meshPhysicalMaterial color="#c8d8f0" metalness={0.95} roughness={0.05} reflectivity={1} envMapIntensity={3} emissive={currentEmissive} emissiveIntensity={isThinking ? 1.2 : 0.4} transparent opacity={opacityRef.current} />
+      |                                                                                                                                                                                                                                     ^^^^^^^^^^^^^^^^^^ Cannot access ref value during render
+  353 |                         </mesh>
+  354 |                         {/* Ring */}
+  355 |                         <mesh ref={ringRef} rotation={[Math.PI / 2, 0, 0]} geometry={geometries.ring}>                                                                                                                                                                                                                                                                                                     react-hooks/refs
+  356:184  error    Error: Cannot access refs during render
+
+React refs are values that are not needed for rendering. Refs should only be accessed outside of render, such as in event handlers or effects. Accessing a ref value (the `current` property) during render can cause your component not to update as expected (https://react.dev/reference/react/useRef).
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\modules\ai-companion\components\NeuroAvatar.tsx:356:184
+  354 |                         {/* Ring */}
+  355 |                         <mesh ref={ringRef} rotation={[Math.PI / 2, 0, 0]} geometry={geometries.ring}>
+> 356 |                             <meshPhysicalMaterial color="#a0c0e8" metalness={1} roughness={0} emissive={currentEmissive} emissiveIntensity={isThinking ? 2 : 0.8} transparent opacity={opacityRef.current * 0.7} />
+      |                                                                                                                                                                                        ^^^^^^^^^^^^^^^^^^ Cannot access ref value during render
+  357 |                         </mesh>
+  358 |                         {/* Particles */}
+  359 |                         <points ref={particlesRef}>                                                                                                                                                                                                                                                                                                                                                                                                                                 react-hooks/refs
+  361:170  error    Error: Cannot access refs during render
+
+React refs are values that are not needed for rendering. Refs should only be accessed outside of render, such as in event handlers or effects. Accessing a ref value (the `current` property) during render can cause your component not to update as expected (https://react.dev/reference/react/useRef).
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\modules\ai-companion\components\NeuroAvatar.tsx:361:170
+  359 |                         <points ref={particlesRef}>
+  360 |                             <bufferGeometry><bufferAttribute attach="attributes-position" args={[geometries.particles, 3]} /></bufferGeometry>
+> 361 |                             <pointsMaterial size={isThinking ? 0.025 : 0.015} color={isThinking ? '#9988ff' : '#88aacc'} transparent opacity={(isThinking ? 0.9 : 0.5) * opacityRef.current} sizeAttenuation depthWrite={false} blending={THREE.AdditiveBlending} />
+      |                                                                                                                                                                          ^^^^^^^^^^^^^^^^^^ Cannot access ref value during render
+  362 |                         </points>
+  363 |                     </group>
+  364 |                 </group>                                                                                                                                                                                                                                                                                                                                                                             react-hooks/refs
+  417:46   error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    @typescript-eslint/no-explicit-any
+  417:78   error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    @typescript-eslint/no-explicit-any
+  428:14   warning  'e' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               @typescript-eslint/no-unused-vars
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\modules\ai-companion\hooks\useLogicAI.ts
+   10:10  warning  'IntentType' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             @typescript-eslint/no-unused-vars
+   14:34  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           @typescript-eslint/no-explicit-any
+   19:28  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           @typescript-eslint/no-explicit-any
+   20:25  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           @typescript-eslint/no-explicit-any
+  109:17  error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\modules\ai-companion\hooks\useLogicAI.ts:109:17
+  107 |
+  108 |             if (detectedIntent !== 'unknown') {
+> 109 |                 setLeadContext((prev: LeadContext) => ({
+      |                 ^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  110 |                     ...prev,
+  111 |                     serviceType: detectedIntent,
+  112 |                 }));  react-hooks/set-state-in-effect
+
+Ô£û 203 problems (142 errors, 61 warnings)
+  1 error and 3 warnings potentially fixable with the `--fix` option.
+

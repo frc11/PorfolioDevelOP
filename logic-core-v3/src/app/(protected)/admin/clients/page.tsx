@@ -111,12 +111,8 @@ export default async function ClientsPage() {
                 return (
                   <tr
                     key={org.id}
-                    className="group transition-colors"
+                    className="group transition-colors hover:bg-white/[0.025]"
                     style={{ borderTop: '1px solid rgba(255,255,255,0.04)' }}
-                    onMouseEnter={(e) =>
-                      (e.currentTarget.style.background = 'rgba(255,255,255,0.025)')
-                    }
-                    onMouseLeave={(e) => (e.currentTarget.style.background = '')}
                   >
                     {/* Company */}
                     <td className="px-5 py-4">

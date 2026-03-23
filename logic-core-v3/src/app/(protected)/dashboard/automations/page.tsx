@@ -13,6 +13,7 @@ import {
   ExternalLink,
   Activity,
   Clock,
+  Calculator
 } from 'lucide-react'
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -139,8 +140,36 @@ async function AutomationsContent({ workflowIds }: { workflowIds: string[] }) {
   const { data } = result
   const { totals, workflows, dailyExecutions } = data
 
+  // Mock calculation for the requested ROI widget
+  const HORAS_AHORRADAS = Math.round(totals.successful * 0.25) // e.g. 15 mins per execution
+  const VALOR_HORA_USD = 25
+  const AHORRO_TOTAL_USD = HORAS_AHORRADAS * VALOR_HORA_USD
+
   return (
     <div className="flex flex-col gap-6">
+      {/* Calculadora de ROI Widget */}
+      {totals.successful > 0 && (
+        <FadeIn delay={0.05}>
+          <div className="flex flex-col items-center justify-between gap-4 rounded-xl border border-violet-500/30 bg-violet-500/10 p-6 shadow-lg shadow-violet-500/5 sm:flex-row">
+            <div className="flex items-center gap-4">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-violet-500/20 text-violet-400">
+                <Calculator size={24} />
+              </div>
+              <div>
+                <h2 className="text-lg font-semibold text-violet-400">Retorno de Inversión (Estimado mensual)</h2>
+                <p className="mt-1 pr-4 text-sm text-zinc-300">
+                  Tus workflows exitosos simulan un ahorro de <strong className="text-white">{HORAS_AHORRADAS} horas</strong> de trabajo manual.
+                </p>
+              </div>
+            </div>
+            <div className="shrink-0 text-left sm:text-right">
+              <p className="text-sm text-zinc-400">Ahorro ($25 USD / hora)</p>
+              <p className="text-3xl font-bold text-white">${AHORRO_TOTAL_USD.toLocaleString('es-AR')} <span className="text-lg font-normal text-zinc-500">USD</span></p>
+            </div>
+          </div>
+        </FadeIn>
+      )}
+
       {/* Summary cards */}
       <FadeIn delay={0.1}>
         <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">

@@ -50,7 +50,7 @@ export default async function ProjectsPage({
   const projects = await prisma.project.findMany({
     where: isValidStatus(activeStatus) ? { status: activeStatus } : undefined,
     include: {
-      client: { select: { companyName: true } },
+      organization: { select: { companyName: true } },
       tasks: { select: { status: true } },
     },
     orderBy: { status: 'asc' },
@@ -194,12 +194,8 @@ export default async function ProjectsPage({
                 return (
                   <tr
                     key={project.id}
-                    className="transition-colors"
+                    className="transition-colors hover:bg-white/[0.025]"
                     style={{ borderTop: '1px solid rgba(255,255,255,0.04)' }}
-                    onMouseEnter={(e) =>
-                      (e.currentTarget.style.background = 'rgba(255,255,255,0.025)')
-                    }
-                    onMouseLeave={(e) => (e.currentTarget.style.background = '')}
                   >
                     {/* Name */}
                     <td className="px-5 py-4 font-medium text-zinc-100">
@@ -208,7 +204,7 @@ export default async function ProjectsPage({
 
                     {/* Client */}
                     <td className="px-5 py-4 text-zinc-500">
-                      {project.client.companyName}
+                      {project.organization?.companyName}
                     </td>
 
                     {/* Status badge */}
