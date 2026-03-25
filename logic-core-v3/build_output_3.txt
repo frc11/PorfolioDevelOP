@@ -1,0 +1,142 @@
+﻿
+> logic-core-v3@0.1.0 build
+> next build
+
+Ôû▓ Next.js 16.1.1 (Turbopack)
+- Environments: .env.local, .env
+
+node.exe : ÔÜá The 
+"middleware" file 
+convention is 
+deprecated. Please use 
+"proxy" instead. Learn 
+more: https://nextjs.org/
+docs/messages/middleware-
+to-proxy
+En línea: 1 Carácter: 1
++ & "C:\Program 
+Files\nodejs/node.exe" 
+"C:\Program 
+Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo       
+       : NotSpecified:   
+  (ÔÜá The "middle...l   
+ eware-to-proxy:Strin    
+g) [], RemoteExcepti    
+on
+    + FullyQualifiedErro 
+   rId : NativeCommandE  
+  rror
+ 
+  Creating an optimized production build ...
+
+> Build error occurred
+Error: Turbopack build 
+failed with 1 errors:
+./src/app/accept-invite/p
+age.tsx:4:19
+Ecmascript file had an 
+error
+[0m [90m 2 |[39m 
+[36mimport[39m { [33mA
+cceptInviteForm[39m } 
+[36mfrom[39m [32m'./Ac
+ceptInviteForm'[39m
+ [90m 3 |[39m
+[31m[1m>[22m[39m[90m
+ 4 |[39m 
+[36mconst[39m 
+[33mDotMatrix[39m 
+[33m=[39m dynamic(() 
+[33m=>[39m [36mimport
+[39m([32m'@/components/c
+anvas/DotMatrix'[39m)[3
+3m,[39m { 
+ssr[33m:[39m 
+[36mfalse[39m })
+ [90m   |[39m          
+         [31m[1m^[22m
+[39m[31m[1m^[22m[39m
+[31m[1m^[22m[39m[31m
+[1m^[22m[39m[31m[1m^
+[22m[39m[31m[1m^[22m
+[39m[31m[1m^[22m[39m
+[31m[1m^[22m[39m[31m
+[1m^[22m[39m[31m[1m^
+[22m[39m[31m[1m^[22m
+[39m[31m[1m^[22m[39m
+[31m[1m^[22m[39m[31m
+[1m^[22m[39m[31m[1m^
+[22m[39m[31m[1m^[22m
+[39m[31m[1m^[22m[39m
+[31m[1m^[22m[39m[31m
+[1m^[22m[39m[31m[1m^
+[22m[39m[31m[1m^[22m
+[39m[31m[1m^[22m[39m
+[31m[1m^[22m[39m[31m
+[1m^[22m[39m[31m[1m^
+[22m[39m[31m[1m^[22m
+[39m[31m[1m^[22m[39m
+[31m[1m^[22m[39m[31m
+[1m^[22m[39m[31m[1m^
+[22m[39m[31m[1m^[22m
+[39m[31m[1m^[22m[39m
+[31m[1m^[22m[39m[31m
+[1m^[22m[39m[31m[1m^
+[22m[39m[31m[1m^[22m
+[39m[31m[1m^[22m[39m
+[31m[1m^[22m[39m[31m
+[1m^[22m[39m[31m[1m^
+[22m[39m[31m[1m^[22m
+[39m[31m[1m^[22m[39m
+[31m[1m^[22m[39m[31m
+[1m^[22m[39m[31m[1m^
+[22m[39m[31m[1m^[22m
+[39m[31m[1m^[22m[39m
+[31m[1m^[22m[39m[31m
+[1m^[22m[39m[31m[1m^
+[22m[39m[31m[1m^[22m
+[39m[31m[1m^[22m[39m
+[31m[1m^[22m[39m[31m
+[1m^[22m[39m[31m[1m^
+[22m[39m[31m[1m^[22m
+[39m[31m[1m^[22m[39m
+[31m[1m^[22m[39m[31m
+[1m^[22m[39m[31m[1m^
+[22m[39m[31m[1m^[22m
+[39m[31m[1m^[22m[39m
+[31m[1m^[22m[39m[31m
+[1m^[22m[39m[31m[1m^
+[22m[39m[31m[1m^[22m
+[39m[31m[1m^[22m[39m
+[31m[1m^[22m[39m[31m
+[1m^[22m[39m[31m[1m^
+[22m[39m
+ [90m 5 |[39m
+ [90m 6 |[39m [90m// 
+ÔöÇÔöÇÔöÇ Page ÔöÇÔöÇÔöÇÔ
+öÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö
+ÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔ
+öÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö
+ÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔ
+öÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö
+ÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ[3
+9m
+ [90m 7 |[39m[0m
+
+`ssr: false` is not 
+allowed with 
+`next/dynamic` in Server 
+Components. Please move 
+it into a Client 
+Component.
+
+
+    at <unknown> (./src/a
+pp/accept-invite/page.tsx
+:4:19)

@@ -15,11 +15,11 @@ const CARD_STYLE = {
 
 function Section({
   title,
-  icon: Icon,
+  icon,
   children,
 }: {
   title: string
-  icon: React.ElementType
+  icon: React.ReactNode
   children: React.ReactNode
 }) {
   return (
@@ -28,7 +28,7 @@ function Section({
         className="mb-4 flex items-center gap-2 pb-4"
         style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}
       >
-        <Icon size={15} className="text-cyan-400" />
+        {icon}
         <h2 className="text-sm font-semibold text-zinc-200">{title}</h2>
       </div>
       {children}
@@ -84,7 +84,7 @@ export default async function ProfilePage() {
         </FadeIn>
 
         <FadeIn delay={0.2}>
-          <Section title="Datos de empresa y contacto" icon={Building2}>
+          <Section title="Datos de empresa y contacto" icon={<Building2 size={15} className="text-cyan-400" />}>
             <dl className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
                 <dt className="text-[10px] font-semibold uppercase tracking-wide text-zinc-600">Empresa</dt>
@@ -134,7 +134,7 @@ export default async function ProfilePage() {
 
       {/* Company + contact data */}
       <FadeIn delay={0.1}>
-        <Section title="Datos de empresa y contacto" icon={Building2}>
+        <Section title="Datos de empresa y contacto" icon={<Building2 size={15} className="text-cyan-400" />}>
           <ProfileForm
             name={user.name ?? ''}
             email={user.email ?? ''}
@@ -146,7 +146,7 @@ export default async function ProfilePage() {
 
       {/* Password */}
       <FadeIn delay={0.2}>
-        <Section title="Seguridad" icon={Lock}>
+        <Section title="Seguridad" icon={<Lock size={15} className="text-cyan-400" />}>
           <PasswordForm />
         </Section>
       </FadeIn>

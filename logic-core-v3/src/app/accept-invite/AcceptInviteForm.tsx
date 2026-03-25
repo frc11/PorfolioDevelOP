@@ -1,13 +1,13 @@
 'use client'
 
 import { useActionState } from 'react'
-import { motion } from 'framer-motion'
+import { motion, type Variants } from 'framer-motion'
 import Link from 'next/link'
 import { acceptInviteAction } from './actions'
 
 // ─── Animation variants ───────────────────────────────────────────────────────
 
-const containerVariants = {
+const containerVariants: Variants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
@@ -15,12 +15,12 @@ const containerVariants = {
   },
 }
 
-const itemVariants = {
+const itemVariants: Variants = {
   hidden: { opacity: 0, y: 16 },
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] as [number, number, number, number] },
+    transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] },
   },
 }
 

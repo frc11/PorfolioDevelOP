@@ -25,20 +25,12 @@ const CARD_STYLE = {
 function MetricCard({
   label,
   value,
-  icon: Icon,
+  icon,
   color,
   borderColor,
   bgColor,
   hint,
-}: {
-  label: string
-  value: string
-  icon: React.ElementType
-  color: string
-  borderColor: string
-  bgColor: string
-  hint?: string
-}) {
+}: any) {
   return (
     <div
       className="rounded-xl p-5"
@@ -50,7 +42,7 @@ function MetricCard({
     >
       <div className="flex items-center justify-between">
         <p className="text-sm text-zinc-400">{label}</p>
-        <Icon size={16} className={color} />
+        {icon}
       </div>
       <p className={`mt-3 text-2xl font-semibold ${color}`}>{value}</p>
       {hint && <p className="mt-1 text-[10px] text-zinc-600">{hint}</p>}
@@ -140,7 +132,7 @@ async function SeoContent({ siteUrl }: { siteUrl: string }) {
           <MetricCard
             label="Clicks totales"
             value={data.totalClicks.toLocaleString('es-AR')}
-            icon={MousePointerClick}
+            icon={<MousePointerClick size={16} className="text-cyan-400" />}
             color="text-cyan-400"
             borderColor="rgba(6,182,212,0.2)"
             bgColor="rgba(6,182,212,0.04)"
@@ -148,7 +140,7 @@ async function SeoContent({ siteUrl }: { siteUrl: string }) {
           <MetricCard
             label="Impresiones"
             value={data.totalImpressions.toLocaleString('es-AR')}
-            icon={Eye}
+            icon={<Eye size={16} className="text-blue-400" />}
             color="text-blue-400"
             borderColor="rgba(59,130,246,0.2)"
             bgColor="rgba(59,130,246,0.04)"
@@ -156,7 +148,7 @@ async function SeoContent({ siteUrl }: { siteUrl: string }) {
           <MetricCard
             label="CTR promedio"
             value={`${data.avgCtr}%`}
-            icon={Percent}
+            icon={<Percent size={16} className="text-green-400" />}
             color="text-green-400"
             borderColor="rgba(34,197,94,0.2)"
             bgColor="rgba(34,197,94,0.04)"
@@ -165,7 +157,7 @@ async function SeoContent({ siteUrl }: { siteUrl: string }) {
           <MetricCard
             label="Posición promedio"
             value={data.avgPosition > 0 ? `#${data.avgPosition}` : '—'}
-            icon={Hash}
+            icon={<Hash size={16} className="text-amber-400" />}
             color="text-amber-400"
             borderColor="rgba(245,158,11,0.2)"
             bgColor="rgba(245,158,11,0.04)"

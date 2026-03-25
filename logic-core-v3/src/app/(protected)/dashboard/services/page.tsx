@@ -5,6 +5,7 @@ import { resolveOrgId } from '@/lib/preview'
 import { ServiceType, ServiceStatus } from '@prisma/client'
 import { Zap, ExternalLink, Sparkles, Bot, Lock, Unlock, Rocket } from 'lucide-react'
 import { FadeIn } from '@/components/dashboard/FadeIn'
+import { UpsellCard } from '@/components/dashboard/UpsellCard'
 
 // ─── Maps ─────────────────────────────────────────────────────────────────────
 
@@ -23,6 +24,19 @@ const SERVICE_TYPE_DESC: Record<ServiceType, string> = {
     'Automatización de flujos de trabajo, integraciones entre sistemas y eliminación de tareas repetitivas.',
   SOFTWARE:
     'Desarrollo de aplicaciones de escritorio, herramientas internas y soluciones de software específicas para tu operación.',
+}
+
+// Add shine animation keyframe
+if (typeof document !== 'undefined') {
+  const style = document.createElement('style')
+  style.textContent = `
+    @keyframes shine {
+      0% { transform: translateX(-150%) skewX(-35deg); }
+      20% { transform: translateX(200%) skewX(-35deg); }
+      100% { transform: translateX(200%) skewX(-35deg); }
+    }
+  `
+  document.head.appendChild(style)
 }
 
 const SERVICE_STATUS_STYLE: Record<ServiceStatus, string> = {
@@ -48,44 +62,61 @@ function ServiceCard({
   status: ServiceStatus
   startDate: Date
 }) {
+  const isWebDev = type === 'WEB_DEV' && status === 'ACTIVE'
+  
   return (
     <div
-      className="flex flex-col gap-3 rounded-xl p-5"
-      style={{
-        border: '1px solid rgba(6,182,212,0.2)',
-        background: 'rgba(255,255,255,0.05)',
-        backdropFilter: 'blur(24px)',
-        WebkitBackdropFilter: 'blur(24px)',
-      }}
+      className={`flex flex-col gap-3 rounded-2xl p-6 transition-all duration-300 ${
+        isWebDev 
+          ? 'bg-gradient-to-br from-black to-zinc-900 border-2 border-cyan-500/50 shadow-[0_0_20px_rgba(6,182,212,0.1)]' 
+          : 'bg-white/5 border border-white/10 backdrop-blur-3xl'
+      }`}
     >
       <div className="flex items-start justify-between gap-3">
-        <div className="flex items-center gap-2.5">
-          <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-md bg-cyan-500/10">
-            <Zap size={15} className="text-cyan-400" />
+        <div className="flex items-center gap-3">
+          <div className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl ${
+            isWebDev ? 'bg-cyan-500/20 text-cyan-400' : 'bg-white/5 text-zinc-400'
+          }`}>
+            <Zap size={18} className={isWebDev ? 'animate-pulse' : ''} />
           </div>
-          <h3 className="text-sm font-semibold text-white">
-            {SERVICE_TYPE_LABEL[type]}
-          </h3>
+          <div className="flex flex-col">
+            <h3 className="text-[15px] font-black tracking-tight text-white uppercase tracking-wider">
+              {SERVICE_TYPE_LABEL[type]}
+            </h3>
+            <span className="text-[9px] font-bold uppercase tracking-widest text-zinc-600">
+              Servicio Principal
+            </span>
+          </div>
         </div>
         <span
-          className={`flex-shrink-0 rounded-full border px-2.5 py-0.5 text-xs font-medium ${SERVICE_STATUS_STYLE[status]}`}
+          className={`flex-shrink-0 rounded-full border px-3 py-1 text-[10px] font-black uppercase tracking-widest ${SERVICE_STATUS_STYLE[status]}`}
         >
           {SERVICE_STATUS_LABEL[status]}
         </span>
       </div>
 
-      <p className="text-xs text-zinc-400 leading-relaxed">
+      <p className="mt-2 text-xs text-zinc-400 leading-relaxed font-medium">
         {SERVICE_TYPE_DESC[type]}
       </p>
 
-      <p className="text-xs text-zinc-600">
-        Inicio:{' '}
-        {new Date(startDate).toLocaleDateString('es-AR', {
-          day: '2-digit',
-          month: 'long',
-          year: 'numeric',
-        })}
-      </p>
+      <div className="mt-4 flex items-center justify-between border-t border-white/5 pt-4">
+        <div className="flex flex-col">
+          <span className="text-[9px] font-bold uppercase tracking-widest text-zinc-700">Desde</span>
+          <span className="text-[10px] text-zinc-500 font-bold tabular-nums">
+            {new Date(startDate).toLocaleDateString('es-AR', {
+              day: '2-digit',
+              month: 'short',
+              year: 'numeric',
+            })}
+          </span>
+        </div>
+        {isWebDev && (
+          <div className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-cyan-500/80">
+            <div className="h-1.5 w-1.5 rounded-full bg-cyan-500" />
+            Vigente
+          </div>
+        )}
+      </div>
     </div>
   )
 }
@@ -204,92 +235,26 @@ export default async function ServicesPage() {
               Potenciá tu negocio con nuestras soluciones premium exclusivas.
             </p>
           </div>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            {/* Upsell Card 1 */}
-            <div
-              className="group relative flex flex-col gap-4 overflow-hidden rounded-xl p-5 transition-all hover:scale-[1.01]"
-              style={{
-                border: '1px solid rgba(245,158,11,0.2)',
-                background: 'linear-gradient(145deg, rgba(255,255,255,0.03) 0%, rgba(245,158,11,0.05) 100%)',
-                backdropFilter: 'blur(24px)',
-                WebkitBackdropFilter: 'blur(24px)',
-              }}
-            >
-              <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-amber-500/10 blur-3xl transition-opacity group-hover:opacity-100 opacity-50"></div>
-              
-              <div className="flex items-start justify-between gap-3 relative z-10">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-amber-500/20 to-orange-600/20 text-amber-500">
-                    <Bot size={20} />
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="text-sm font-bold text-white">Recepcionista IA</span>
-                    <span className="text-[11px] font-medium uppercase text-amber-500/70">Automatización Premium</span>
-                  </div>
-                </div>
-                <span className="flex items-center gap-1 rounded-full border border-amber-500/20 bg-amber-500/10 px-2.5 py-0.5 text-[10px] font-semibold text-amber-400">
-                  <Lock size={10} />
-                  Bloqueado
-                </span>
-              </div>
-              
-              <p className="text-xs text-zinc-300 leading-relaxed relative z-10">
-                Atendé a tus clientes 24/7 de forma automática y agendá reuniones sin intervención humana. Aumentá tu conversión un 40%.
-              </p>
-              
-              <div className="mt-2 relative z-10">
-                <Link
-                  href="/contact?service=recepcionista-ia"
-                  className="flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-amber-500/20 to-orange-500/20 px-4 py-2 text-xs font-semibold text-amber-400 transition-all hover:bg-amber-500/30 border border-amber-500/20 hover:border-amber-500/40"
-                >
-                  <Unlock size={14} />
-                  Desbloquear Módulo
-                </Link>
-              </div>
-            </div>
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+            <UpsellCard
+              title="Recepcionista IA"
+              subtitle="Automatización Premium"
+              description="Atendé a tus clientes 24/7 de forma automática y agendá reuniones sin intervención humana. Aumentá tu conversión un 40%."
+              ROI={{ icon: '🔥', text: 'Ahorra +20 horas semanales en coordinación' }}
+              iconType="bot"
+              href="/contact?service=recepcionista-ia"
+              themeColor="amber"
+            />
 
-            {/* Upsell Card 2 */}
-            <div
-              className="group relative flex flex-col gap-4 overflow-hidden rounded-xl p-5 transition-all hover:scale-[1.01]"
-              style={{
-                border: '1px solid rgba(139,92,246,0.2)',
-                background: 'linear-gradient(145deg, rgba(255,255,255,0.03) 0%, rgba(139,92,246,0.05) 100%)',
-                backdropFilter: 'blur(24px)',
-                WebkitBackdropFilter: 'blur(24px)',
-              }}
-            >
-              <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-violet-500/10 blur-3xl transition-opacity group-hover:opacity-100 opacity-50"></div>
-              
-              <div className="flex items-start justify-between gap-3 relative z-10">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-violet-500/20 to-purple-600/20 text-violet-500">
-                    <Rocket size={20} />
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="text-sm font-bold text-white">SEO Avanzado</span>
-                    <span className="text-[11px] font-medium uppercase text-violet-500/70">Crecimiento Orgánico</span>
-                  </div>
-                </div>
-                <span className="flex items-center gap-1 rounded-full border border-violet-500/20 bg-violet-500/10 px-2.5 py-0.5 text-[10px] font-semibold text-violet-400">
-                  <Lock size={10} />
-                  Bloqueado
-                </span>
-              </div>
-              
-              <p className="text-xs text-zinc-300 leading-relaxed relative z-10">
-                Dominá los primeros resultados de búsqueda. Auditoría técnica, linkbuilding y optimización continua de contenidos.
-              </p>
-              
-              <div className="mt-2 relative z-10">
-                <Link
-                  href="/contact?service=seo-avanzado"
-                  className="flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-violet-500/20 to-purple-500/20 px-4 py-2 text-xs font-semibold text-violet-400 transition-all hover:bg-violet-500/30 border border-violet-500/20 hover:border-violet-500/40"
-                >
-                  <Unlock size={14} />
-                  Desbloquear Módulo
-                </Link>
-              </div>
-            </div>
+            <UpsellCard
+              title="SEO Avanzado"
+              subtitle="Crecimiento Orgánico"
+              description="Dominá los primeros resultados de búsqueda. Auditoría técnica, linkbuilding y optimización continua de contenidos."
+              ROI={{ icon: '🚀', text: 'Duplica tus consultas orgánicas' }}
+              iconType="rocket"
+              href="/contact?service=seo-avanzado"
+              themeColor="violet"
+            />
           </div>
         </div>
       </FadeIn>

@@ -50,7 +50,7 @@ export function AIExecutiveBrief({
             <div className="flex h-7 w-7 items-center justify-center rounded-md bg-gradient-to-br from-violet-500/20 to-fuchsia-500/20 text-violet-400">
               <Sparkles size={14} />
             </div>
-            <h2 className="text-sm font-semibold text-violet-300 uppercase tracking-wider">
+            <h2 className="text-[10px] font-medium uppercase tracking-[0.2em] text-violet-400">
               Resumen Ejecutivo IA (NeuroAvatar)
             </h2>
           </div>

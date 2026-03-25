@@ -2,10 +2,11 @@ import { prisma } from '@/lib/prisma'
 import { auth } from '@/auth'
 import { redirect } from 'next/navigation'
 import { resolveOrgId } from '@/lib/preview'
-import { Headphones, CheckCircle2, Clock, HelpCircle, ChevronRight } from 'lucide-react'
+import { Headphones, CheckCircle2, Clock, HelpCircle, ChevronRight, Book, Zap } from 'lucide-react'
 import Link from 'next/link'
 import { NewTicketModal } from '@/components/dashboard/NewTicketModal'
 import { EmptyState } from '@/components/dashboard/EmptyState'
+import { FadeIn } from '@/components/dashboard/FadeIn'
 
 export const metadata = { title: 'Soporte B2B | develOP Dashboard' }
 
@@ -49,10 +50,13 @@ export default async function SoportePage() {
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-white flex items-center gap-2">
             <Headphones className="text-cyan-500" />
-            Centro de Soporte Asíncrono
+            Centro de Soporte Profesional
           </h1>
-          <p className="text-sm text-zinc-400 mt-2">
-            Gestiona tus requerimientos técnicos de forma estructurada. Cero caos por WhatsApp.
+          <p className="text-sm text-zinc-400 mt-2 max-w-2xl leading-relaxed">
+            Tu requerimiento será asignado a un técnico experto y recibirás una notificación cuando esté resuelto. <br />
+            <span className="text-[10px] font-black uppercase tracking-widest text-cyan-500/60 mt-2 block">
+              Sin audios, sin esperas, 100% trazable
+            </span>
           </p>
         </div>
         <NewTicketModal />
@@ -71,10 +75,12 @@ export default async function SoportePage() {
           <div className="flex-1">
             {activeTickets.length === 0 ? (
               <EmptyState 
-                icon={CheckCircle2} 
+                icon={<CheckCircle2 size={32} />} 
                 title="Sistemas funcionando" 
-                description="No tienes tickets abiertos o en curso en este momento."
-                iconColor="text-cyan-500" 
+                description="Todo bajo control. Tus servicios de DevelOP operan con normalidad."
+                subtext="No hay tickets abiertos o en curso en este momento."
+                iconColor="text-emerald-500" 
+                showRadar={true}
               />
             ) : (
               <div className="divide-y divide-white/5">
@@ -117,7 +123,7 @@ export default async function SoportePage() {
           <div className="flex-1">
             {resolvedTickets.length === 0 ? (
               <EmptyState 
-                icon={Headphones} 
+                icon={<Headphones size={28} />} 
                 title="Historial limpio" 
                 description="Aún no tienes tickets resueltos archivados."
                 iconColor="text-zinc-600" 
@@ -143,6 +149,33 @@ export default async function SoportePage() {
         </div>
 
       </div>
+
+      {/* Quick Access to Solutions */}
+      <FadeIn delay={0.2}>
+        <div className="mt-8">
+          <h4 className="text-[10px] font-medium uppercase tracking-[0.2em] text-zinc-500 mb-6 px-2">Recursos de Autogestión</h4>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {[
+              { label: 'Guía del Usuario', icon: Book, color: 'text-blue-400', desc: 'Apendé a gestionar tu negocio.' },
+              { label: 'Preguntas Frecuentes', icon: HelpCircle, color: 'text-amber-400', desc: 'Respuestas rápidas a dudas comunes.' },
+              { label: 'Tips de Optimización', icon: Zap, color: 'text-emerald-400', desc: 'Mejorá tu conversión hoy.' },
+            ].map((item) => (
+              <button
+                key={item.label}
+                className="flex flex-col items-start gap-4 p-6 rounded-2xl border border-white/10 bg-[#0c0e12]/40 backdrop-blur-xl transition-all duration-300 hover:bg-white/[0.04] hover:border-white/20 group shadow-lg text-left"
+              >
+                <div className={`p-3 rounded-xl bg-black/20 border border-white/5 transition-transform group-hover:scale-110 ${item.color}`}>
+                  <item.icon size={20} />
+                </div>
+                <div>
+                  <span className="text-xs font-bold text-zinc-200 group-hover:text-white transition-colors block mb-1">{item.label}</span>
+                  <p className="text-[10px] text-zinc-500 leading-relaxed">{item.desc}</p>
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+      </FadeIn>
     </div>
   )
 }

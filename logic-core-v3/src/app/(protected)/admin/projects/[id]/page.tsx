@@ -60,7 +60,7 @@ export default async function ProjectDetailPage({
   const project = await prisma.project.findUnique({
     where: { id },
     include: {
-      client: { select: { id: true, companyName: true } },
+      organization: { select: { id: true, companyName: true } },
       tasks: { orderBy: { status: 'asc' } },
     },
   })
@@ -95,10 +95,10 @@ export default async function ProjectDetailPage({
                 {PROJECT_STATUS_LABEL[project.status]}
               </span>
               <Link
-                href={`/admin/clients/${project.client.id}`}
+                href={`/admin/clients/${project.organization.id}`}
                 className="text-sm text-zinc-500 hover:text-cyan-400 transition-colors"
               >
-                {project.client.companyName}
+                {project.organization.companyName}
               </Link>
             </div>
           </div>

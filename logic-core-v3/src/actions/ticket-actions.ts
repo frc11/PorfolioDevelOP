@@ -21,8 +21,9 @@ export async function createTicketAction({
 }) {
   const session = await auth()
   const organizationId = await resolveOrgId()
+  const userId = session?.user?.id
   
-  if (!session?.user?.id || !organizationId) {
+  if (!userId || !organizationId) {
     return { success: false, error: 'No autorizado' }
   }
 
@@ -33,12 +34,12 @@ export async function createTicketAction({
         category,
         priority,
         organizationId,
-        userId: session.user.id,
+        userId,
         status: 'OPEN',
         messages: {
           create: {
             content: message,
-            userId: session.user.id,
+            userId,
             isAdmin: false,
           }
         }
@@ -62,8 +63,9 @@ export async function replyTicketAction({
 }) {
   const session = await auth()
   const organizationId = await resolveOrgId()
+  const userId = session?.user?.id
   
-  if (!session?.user?.id || !organizationId) {
+  if (!userId || !organizationId) {
     return { success: false, error: 'No autorizado' }
   }
 
@@ -77,7 +79,7 @@ export async function replyTicketAction({
         data: {
           content,
           ticketId,
-          userId: session.user.id,
+          userId,
           isAdmin
         }
       })

@@ -79,7 +79,7 @@ export function NotificationCenter({ initialNotifications }: { initialNotificati
             <div className="max-h-96 overflow-y-auto overflow-x-hidden relative">
               {notifications.length === 0 ? (
                 <EmptyState 
-                  icon={Bell} 
+                  icon={<Bell size={28} />} 
                   title="Al día." 
                   description="No tienes notificaciones recientes."
                   iconColor="text-zinc-600"

@@ -3,7 +3,7 @@
 import React, { useRef } from 'react'
 import { motion, useInView, useReducedMotion } from 'motion/react'
 
-// TODO: reemplazar con testimonios reales
+// Real testimonials content pending
 const testimonies = [
   {
     initials: 'MA',

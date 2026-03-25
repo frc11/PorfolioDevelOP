@@ -52,7 +52,7 @@ const carouselProjects: CarouselProject[] = [
         stack: ["Next.js", "Reservas", "SEO Local"],
         accent: "#00e5ff",
         image: "https://placehold.co/600x400/0d1a1a/00e5ff?text=.",
-        /* TODO: /images/showcase/restaurante-desktop.png */
+        /* Image placeholder */
     },
     {
         id: 2,
@@ -63,7 +63,7 @@ const carouselProjects: CarouselProject[] = [
         stack: ["Next.js", "Portal", "Lead Gen"],
         accent: "#7b2fff",
         image: "https://placehold.co/600x400/0d0a1a/7b2fff?text=.",
-        /* TODO: /images/showcase/inmobiliaria-desktop.png */
+        /* Image placeholder */
     },
     {
         id: 3,
@@ -74,7 +74,7 @@ const carouselProjects: CarouselProject[] = [
         stack: ["Next.js", "Turnos", "WhatsApp API"],
         accent: "#00e5ff",
         image: "https://placehold.co/600x400/0a0d1a/00e5ff?text=.",
-        /* TODO: /images/showcase/servicios-desktop.png */
+        /* Image placeholder */
     },
     {
         id: 4,
@@ -85,7 +85,7 @@ const carouselProjects: CarouselProject[] = [
         stack: ["Next.js", "E-Commerce", "CRM"],
         accent: "#7b2fff",
         image: "https://placehold.co/600x400/0a0a1a/7b2fff?text=.",
-        /* TODO: /images/showcase/comercio-desktop.png */
+        /* Image placeholder */
     },
     {
         id: 5,
@@ -96,7 +96,7 @@ const carouselProjects: CarouselProject[] = [
         stack: ["Next.js", "Delivery", "SEO Local"],
         accent: "#00e5ff",
         image: "https://placehold.co/600x400/0d1a1a/00e5ff?text=.",
-        /* TODO: /images/showcase/mercado-desktop.png */
+        /* Image placeholder */
     },
     {
         id: 6,
@@ -107,7 +107,7 @@ const carouselProjects: CarouselProject[] = [
         stack: ["Next.js", "Custom", "Premium"],
         accent: "#7b2fff",
         image: "https://placehold.co/600x400/0d0a1a/7b2fff?text=.",
-        /* TODO: /images/showcase/custom-desktop.png */
+        /* Image placeholder */
     },
     {
         id: 7,
@@ -118,7 +118,7 @@ const carouselProjects: CarouselProject[] = [
         stack: ["Next.js", "MercadoPago", "WhatsApp"],
         accent: "#00e5ff",
         image: "https://placehold.co/600x400/0a0d1a/00e5ff?text=.",
-        /* TODO: /images/showcase/almacen-desktop.png */
+        /* Image placeholder */
     },
     {
         id: 8,
@@ -129,7 +129,7 @@ const carouselProjects: CarouselProject[] = [
         stack: ["Next.js", "Propiedades", "Lead Gen"],
         accent: "#7b2fff",
         image: "https://placehold.co/600x400/0d0a1a/7b2fff?text=.",
-        /* TODO: /images/showcase/propiedades-desktop.png */
+        /* Image placeholder */
     },
 ]
 

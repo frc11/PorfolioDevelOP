@@ -206,7 +206,6 @@ export const WebDevelopmentCta = () => {
                             <form
                                 onSubmit={(e) => {
                                     e.preventDefault()
-                                    console.log('Formulario enviado a procesar')
                                 }}
                                 style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}
                             >

@@ -141,23 +141,25 @@ model VerificationToken {
 // ─── User ─────────────────────────────────────────────────────────────────────
 
 model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String    @unique
-  emailVerified DateTime?
-  image         String?
-  password      String?
-  role          Role      @default(ORG_MEMBER)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id               String    @id @default(cuid())
+  name             String?
+  email            String    @unique
+  emailVerified    DateTime?
+  image            String?
+  password         String?
+  role             Role      @default(ORG_MEMBER)
+  unlockedFeatures String[]  @default([])
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
 
-  accounts       Account[]
-  sessions       Session[]
-  orgMemberships OrgMember[]
-  resetTokens    PasswordResetToken[]
-  notifications  Notification[]
-  tickets        Ticket[]
-  ticketMessages TicketMessage[]
+  accounts        Account[]
+  sessions        Session[]
+  orgMemberships  OrgMember[]
+  resetTokens     PasswordResetToken[]
+  notifications   Notification[]
+  tickets         Ticket[]
+  ticketMessages  TicketMessage[]
+  businessMetrics BusinessMetric[]
 }
 
 model PasswordResetToken {
@@ -281,7 +283,7 @@ model Invoice {
   paymentLink String?
   pdfUrl      String?
   createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt @default(now())
+  updatedAt   DateTime      @default(now()) @updatedAt
 
   organizationId String
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
@@ -377,4 +379,27 @@ model TicketMessage {
 
   @@index([ticketId])
   @@index([userId])
+}
+
+model BusinessMetric {
+  id              String   @id @default(cuid())
+  clientId        String
+  client          User     @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  month           String
+  monthlyVisitors Int
+  bounceRate      Float
+  avgTicketPrice  Float
+  createdAt       DateTime @default(now())
+
+  @@index([clientId])
+}
+
+model PageView {
+  id        String   @id @default(cuid())
+  clientId  String
+  url       String
+  duration  Int?
+  createdAt DateTime @default(now())
+
+  @@index([clientId])
 }

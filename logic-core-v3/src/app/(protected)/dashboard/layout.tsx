@@ -22,7 +22,7 @@ export default async function DashboardLayout({
 
   if (!organizationId) redirect('/login')
 
-  const [client, unreadMessages, notifications] = await Promise.all([
+  const [client, unreadMessages, notifications, currentUser] = await Promise.all([
     prisma.organization.findUnique({
       where: { id: organizationId },
       select: { companyName: true, onboardingCompleted: true },
@@ -35,6 +35,12 @@ export default async function DashboardLayout({
       orderBy: { createdAt: 'desc' },
       take: 10
     }),
+    session?.user?.id
+      ? prisma.user.findUnique({
+          where: { id: session.user.id },
+          select: { unlockedFeatures: true },
+        })
+      : Promise.resolve(null),
   ])
 
   if (!client) redirect('/login')
@@ -68,6 +74,7 @@ export default async function DashboardLayout({
       <SidebarNav
         companyName={client.companyName}
         unreadMessages={unreadMessages}
+        unlockedFeatures={currentUser?.unlockedFeatures ?? []}
       />
 
       {/* Main column */}

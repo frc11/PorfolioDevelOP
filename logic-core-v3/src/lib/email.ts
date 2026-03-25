@@ -13,10 +13,6 @@ export async function sendEmail({
   react: React.ReactElement
 }) {
   if (!resend) {
-    console.log('\n----------------------------------------------------')
-    console.log(`[DUMMY EMAIL] To: ${to} | Subject: ${subject}`)
-    console.log('--- Email sent in development mode. No API key found ---')
-    console.log('----------------------------------------------------\n')
     return { success: true }
   }
 

@@ -39,10 +39,5 @@ export async function forgotPasswordAction(
   const baseUrl = process.env.NEXTAUTH_URL ?? 'http://localhost:3000'
   const resetUrl = `${baseUrl}/reset-password?token=${token}`
 
-  // DEV: imprimir el link en consola en lugar de enviar email real
-  console.log('\n🔑 [DEV] Reset password link para:', email)
-  console.log(resetUrl)
-  console.log('\n')
-
   return { type: 'success', message: successMsg }
 }

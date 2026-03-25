@@ -6,6 +6,13 @@
   --width-hero-left: 60%;
   --width-hero-right: 40%;
   --color-metric-bg: rgba(255, 255, 255, 0.03);
+  --animate-shine: shine 2.5s ease-in-out infinite;
+  --animate-pulse-slow: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+
+  @keyframes shine {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+  }
 }
 
 /* Logic Core V3: The Inversion System */

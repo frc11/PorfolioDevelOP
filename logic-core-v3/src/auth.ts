@@ -21,11 +21,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     Resend({
       from: 'develOP <noreply@develop.com.ar>',
       sendVerificationRequest({ identifier: email, url }) {
-        console.log('─────────────────────────────────────────────')
-        console.log('[MAGIC LINK] Para:', email)
-        console.log('[MAGIC LINK] URL de verificación:')
-        console.log(url)
-        console.log('─────────────────────────────────────────────')
       },
     }),
     Google({

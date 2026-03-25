@@ -111,13 +111,13 @@ export async function GET(req: NextRequest) {
   // ── Generate PDF ──────────────────────────────────────────────────────────
   try {
     const buffer = await renderToBuffer(
-      React.createElement(MonthlyReport, { data: reportData })
+      React.createElement(MonthlyReport, { data: reportData }) as any
     )
 
     const [year, mon] = month.split('-')
     const filename = `reporte-${client.companyName.toLowerCase().replace(/\s+/g, '-')}-${year}-${mon}.pdf`
 
-    return new NextResponse(buffer, {
+    return new NextResponse(new Uint8Array(buffer), {
       status: 200,
       headers: {
         'Content-Type': 'application/pdf',

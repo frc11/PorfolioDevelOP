@@ -1,0 +1,1265 @@
+[0m[0m
+[0m[4mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\find_unused.js[24m[0m
+[0m  [2m1:12[22m  [31merror[39m  A `require()` style import is forbidden  [2m@typescript-eslint/no-require-imports[22m[0m
+[0m  [2m2:14[22m  [31merror[39m  A `require()` style import is forbidden  [2m@typescript-eslint/no-require-imports[22m[0m
+[0m[0m
+[0m[4mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\actions\onboarding-actions.ts[24m[0m
+[0m  [2m18:9[22m  [33mwarning[39m  'session' is assigned a value but never used  [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m[0m
+[0m[4mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\app\(protected)\dashboard\analytics\page.tsx[24m[0m
+[0m  [2m7:40[22m  [33mwarning[39m  'Target' is defined but never used             [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m  [2m7:55[22m  [33mwarning[39m  'MousePointerClick' is defined but never used  [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m[0m
+[0m[4mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\app\(protected)\dashboard\facturacion\page.tsx[24m[0m
+[0m  [2m5:8[22m  [33mwarning[39m  'Link' is defined but never used  [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m[0m
+[0m[4mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\app\(protected)\dashboard\soporte\[ticketId]\page.tsx[24m[0m
+[0m  [2m5:10[22m  [33mwarning[39m  'Headphones' is defined but never used  [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m  [2m5:33[22m  [33mwarning[39m  'Clock' is defined but never used       [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m[0m
+[0m[4mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\app\(protected)\dashboard\soporte\page.tsx[24m[0m
+[0m  [2m5:43[22m  [33mwarning[39m  'HelpCircle' is defined but never used  [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m[0m
+[0m[4mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\app\error.tsx[24m[0m
+[0m  [2m35:21[22m  [31merror[39m  Do not use an `<a>` element to navigate to `/`. Use `<Link />` from `next/link` instead. See: https://nextjs.org/docs/messages/no-html-link-for-pages  [2m@next/next/no-html-link-for-pages[22m[0m
+[0m[0m
+[0m[4mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\app\page.tsx[24m[0m
+[0m   [2m3:10[22m  [33mwarning[39m  'useState' is defined but never used           [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m  [2m21:10[22m  [33mwarning[39m  'TemplateWarehouse' is defined but never used  [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m  [2m22:10[22m  [33mwarning[39m  'TeamSection' is defined but never used        [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m  [2m23:10[22m  [33mwarning[39m  'FeedbackLoop' is defined but never used       [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m[0m
+[0m[4mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\admin\agency-dashboard\CommandCenterClient.tsx[24m[0m
+[0m   [2m10:19[22m  [31merror[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m126:76[22m  [31merror[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m[0m
+[0m[4mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\automation\BentoAutomation.tsx[24m[0m
+[0m    [2m4:18[22m  [33mwarning[39m  'AnimatePresence' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m  [2m317:7[22m   [31merror[39m    Error: Calling setState synchronously within an effect can trigger cascading renders[0m
+[0m[0m
+[0mEffects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:[0m
+[0m* Update external systems with the latest state from React.[0m
+[0m* Subscribe for updates from some external system, calling setState in a callback function when external state changes.[0m
+[0m[0m
+[0mCalling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).[0m
+[0m[0m
+[0mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\automation\BentoAutomation.tsx:317:7[0m
+[0m  315 |   useEffect(() => {[0m
+[0m  316 |     if (flipped && !hasTriggeredFlip) {[0m
+[0m> 317 |       setHasTriggeredFlip(true)[0m
+[0m      |       ^^^^^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect[0m
+[0m  318 |       onFirstFlip(workflow.id)[0m
+[0m  319 |     }[0m
+[0m  320 |   }, [flipped, hasTriggeredFlip, onFirstFlip, workflow.id])  [2mreact-hooks/set-state-in-effect[22m[0m
+[0m  [2m324:7[22m   [31merror[39m    Error: Calling setState synchronously within an effect can trigger cascading renders[0m
+[0m[0m
+[0mEffects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:[0m
+[0m* Update external systems with the latest state from React.[0m
+[0m* Subscribe for updates from some external system, calling setState in a callback function when external state changes.[0m
+[0m[0m
+[0mCalling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).[0m
+[0m[0m
+[0mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\automation\BentoAutomation.tsx:324:7[0m
+[0m  322 |   useEffect(() => {[0m
+[0m  323 |     if (flipped && !shouldReduceMotion) {[0m
+[0m> 324 |       setGearSpeed(1)[0m
+[0m      |       ^^^^^^^^^^^^ Avoid calling setState() directly within an effect[0m
+[0m  325 |       setEverFlipped(true)[0m
+[0m  326 |     } else {[0m
+[0m  327 |       const interval = setInterval(() => {                               [2mreact-hooks/set-state-in-effect[22m[0m
+[0m[0m
+[0m[4mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\automation\CalculadoraAutomation.tsx[24m[0m
+[0m  [2m117:11[22m  [31merror[39m  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 [2mreact/no-unescaped-entities[22m[0m
+[0m  [2m117:38[22m  [31merror[39m  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 [2mreact/no-unescaped-entities[22m[0m
+[0m  [2m355:7[22m   [31merror[39m  Error: Calling setState synchronously within an effect can trigger cascading renders[0m
+[0m[0m
+[0mEffects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:[0m
+[0m* Update external systems with the latest state from React.[0m
+[0m* Subscribe for updates from some external system, calling setState in a callback function when external state changes.[0m
+[0m[0m
+[0mCalling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).[0m
+[0m[0m
+[0mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\automation\CalculadoraAutomation.tsx:355:7[0m
+[0m  353 |[0m
+[0m  354 |     if (shouldReduceMotion) {[0m
+[0m> 355 |       setDisplayValue(value)[0m
+[0m      |       ^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect[0m
+[0m  356 |       prevRef.current = value[0m
+[0m  357 |       return[0m
+[0m  358 |     }  [2mreact-hooks/set-state-in-effect[22m[0m
+[0m[0m
+[0m[4mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\automation\HeroAutomation.tsx[24m[0m
+[0m  [2m341:6[22m  [33mwarning[39m  React Hook useEffect has a missing dependency: 'mouseRef'. Either include it or remove the dependency array  [2mreact-hooks/exhaustive-deps[22m[0m
+[0m[0m
+[0m[4mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\automation\IntegracionesAutomation.tsx[24m[0m
+[0m  [2m304:3[22m  [31merror[39m  React Hook "useEffect" is called conditionally. React Hooks must be called in the exact same order in every component render. Did you accidentally call a React Hook after an early return?  [2mreact-hooks/rules-of-hooks[22m[0m
+[0m[0m
+[0m[4mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\automation\RubrosAutomation.tsx[24m[0m
+[0m  [2m502:9[22m   [31merror[39m    Error: Calling setState synchronously within an effect can trigger cascading renders[0m
+[0m[0m
+[0mEffects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:[0m
+[0m* Update external systems with the latest state from React.[0m
+[0m* Subscribe for updates from some external system, calling setState in a callback function when external state changes.[0m
+[0m[0m
+[0mCalling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).[0m
+[0m[0m
+[0mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\automation\RubrosAutomation.tsx:502:9[0m
+[0m  500 |[0m
+[0m  501 |     useEffect(() => {[0m
+[0m> 502 |         setVisible([])[0m
+[0m      |         ^^^^^^^^^^ Avoid calling setState() directly within an effect[0m
+[0m  503 |         setTyping(false)[0m
+[0m  504 |[0m
+[0m  505 |         const timers: ReturnType<typeof setTimeout>[] = []  [2mreact-hooks/set-state-in-effect[22m[0m
+[0m  [2m810:62[22m  [33mwarning[39m  '_' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m  [2m810:65[22m  [33mwarning[39m  'i' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m  [2m811:8[22m   [31merror[39m    Error: Cannot call impure function during render[0m
+[0m[0m
+[0m`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).[0m
+[0m[0m
+[0mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\automation\RubrosAutomation.tsx:811:8[0m
+[0m  809 |   // 8 Partículas de fondo usando el color del rubro activo[0m
+[0m  810 |   const particles = useMemo(() => Array.from({ length: 8 }, (_, i) => ({[0m
+[0m> 811 |     x: Math.random() * 100,[0m
+[0m      |        ^^^^^^^^^^^^^ Cannot call impure function[0m
+[0m  812 |     y: Math.random() * 100,[0m
+[0m  813 |     size: 2 + Math.random() * 3,[0m
+[0m  814 |     duration: 4 + Math.random() * 4,                                                                                                                                                                                                                                                                      [2mreact-hooks/purity[22m[0m
+[0m  [2m812:8[22m   [31merror[39m    Error: Cannot call impure function during render[0m
+[0m[0m
+[0m`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).[0m
+[0m[0m
+[0mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\automation\RubrosAutomation.tsx:812:8[0m
+[0m  810 |   const particles = useMemo(() => Array.from({ length: 8 }, (_, i) => ({[0m
+[0m  811 |     x: Math.random() * 100,[0m
+[0m> 812 |     y: Math.random() * 100,[0m
+[0m      |        ^^^^^^^^^^^^^ Cannot call impure function[0m
+[0m  813 |     size: 2 + Math.random() * 3,[0m
+[0m  814 |     duration: 4 + Math.random() * 4,[0m
+[0m  815 |     delay: Math.random() * 3,                                                                                                                                                                                                                                                                                                    [2mreact-hooks/purity[22m[0m
+[0m  [2m813:15[22m  [31merror[39m    Error: Cannot call impure function during render[0m
+[0m[0m
+[0m`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).[0m
+[0m[0m
+[0mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\automation\RubrosAutomation.tsx:813:15[0m
+[0m  811 |     x: Math.random() * 100,[0m
+[0m  812 |     y: Math.random() * 100,[0m
+[0m> 813 |     size: 2 + Math.random() * 3,[0m
+[0m      |               ^^^^^^^^^^^^^ Cannot call impure function[0m
+[0m  814 |     duration: 4 + Math.random() * 4,[0m
+[0m  815 |     delay: Math.random() * 3,[0m
+[0m  816 |   })), [])                                                                                                                                                                                                                                                                                                                                                          [2mreact-hooks/purity[22m[0m
+[0m  [2m814:19[22m  [31merror[39m    Error: Cannot call impure function during render[0m
+[0m[0m
+[0m`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).[0m
+[0m[0m
+[0mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\automation\RubrosAutomation.tsx:814:19[0m
+[0m  812 |     y: Math.random() * 100,[0m
+[0m  813 |     size: 2 + Math.random() * 3,[0m
+[0m> 814 |     duration: 4 + Math.random() * 4,[0m
+[0m      |                   ^^^^^^^^^^^^^ Cannot call impure function[0m
+[0m  815 |     delay: Math.random() * 3,[0m
+[0m  816 |   })), [])[0m
+[0m  817 |                                                                                                                                                                                                                                                                                                                                                                                  [2mreact-hooks/purity[22m[0m
+[0m  [2m815:12[22m  [31merror[39m    Error: Cannot call impure function during render[0m
+[0m[0m
+[0m`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).[0m
+[0m[0m
+[0mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\automation\RubrosAutomation.tsx:815:12[0m
+[0m  813 |     size: 2 + Math.random() * 3,[0m
+[0m  814 |     duration: 4 + Math.random() * 4,[0m
+[0m> 815 |     delay: Math.random() * 3,[0m
+[0m      |            ^^^^^^^^^^^^^ Cannot call impure function[0m
+[0m  816 |   })), [])[0m
+[0m  817 |[0m
+[0m  818 |   return (                                                                                                                                                                                                                                                                                                                                                                                                          [2mreact-hooks/purity[22m[0m
+[0m[0m
+[0m[4mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\automation\SocialProofAutomation.tsx[24m[0m
+[0m  [2m224:9[22m   [31merror[39m  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  [2mreact/no-unescaped-entities[22m[0m
+[0m  [2m224:19[22m  [31merror[39m  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  [2mreact/no-unescaped-entities[22m[0m
+[0m[0m
+[0m[4mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\canvas\DotMatrix.tsx[24m[0m
+[0m  [2m62:19[22m  [31merror[39m  'x' is never reassigned. Use 'const' instead  [2mprefer-const[22m[0m
+[0m  [2m62:22[22m  [31merror[39m  'y' is never reassigned. Use 'const' instead  [2mprefer-const[22m[0m
+[0m[0m
+[0m[4mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\canvas\HeroBackground.tsx[24m[0m
+[0m  [2m130:24[22m  [31merror[39m  Error: Cannot call impure function during render[0m
+[0m[0m
+[0m`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).[0m
+[0m[0m
+[0mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\canvas\HeroBackground.tsx:130:24[0m
+[0m  128 |[0m
+[0m  129 |         for (let i = 0; i < count; i++) {[0m
+[0m> 130 |             const x = (Math.random() - 0.5) * 15;[0m
+[0m      |                        ^^^^^^^^^^^^^ Cannot call impure function[0m
+[0m  131 |             const y = (Math.random() - 0.5) * 10;[0m
+[0m  132 |             const z = (Math.random() * 4) - 2; // z=[-2, 2][0m
+[0m  133 |                                              [2mreact-hooks/purity[22m[0m
+[0m  [2m131:24[22m  [31merror[39m  Error: Cannot call impure function during render[0m
+[0m[0m
+[0m`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).[0m
+[0m[0m
+[0mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\canvas\HeroBackground.tsx:131:24[0m
+[0m  129 |         for (let i = 0; i < count; i++) {[0m
+[0m  130 |             const x = (Math.random() - 0.5) * 15;[0m
+[0m> 131 |             const y = (Math.random() - 0.5) * 10;[0m
+[0m      |                        ^^^^^^^^^^^^^ Cannot call impure function[0m
+[0m  132 |             const z = (Math.random() * 4) - 2; // z=[-2, 2][0m
+[0m  133 |[0m
+[0m  134 |             siz[i] = Math.random() * 2 + 1;  [2mreact-hooks/purity[22m[0m
+[0m  [2m132:24[22m  [31merror[39m  Error: Cannot call impure function during render[0m
+[0m[0m
+[0m`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).[0m
+[0m[0m
+[0mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\canvas\HeroBackground.tsx:132:24[0m
+[0m  130 |             const x = (Math.random() - 0.5) * 15;[0m
+[0m  131 |             const y = (Math.random() - 0.5) * 10;[0m
+[0m> 132 |             const z = (Math.random() * 4) - 2; // z=[-2, 2][0m
+[0m      |                        ^^^^^^^^^^^^^ Cannot call impure function[0m
+[0m  133 |[0m
+[0m  134 |             siz[i] = Math.random() * 2 + 1;[0m
+[0m  135 |                                            [2mreact-hooks/purity[22m[0m
+[0m  [2m134:22[22m  [31merror[39m  Error: Cannot call impure function during render[0m
+[0m[0m
+[0m`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).[0m
+[0m[0m
+[0mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\canvas\HeroBackground.tsx:134:22[0m
+[0m  132 |             const z = (Math.random() * 4) - 2; // z=[-2, 2][0m
+[0m  133 |[0m
+[0m> 134 |             siz[i] = Math.random() * 2 + 1;[0m
+[0m      |                      ^^^^^^^^^^^^^ Cannot call impure function[0m
+[0m  135 |[0m
+[0m  136 |             const mixFactor = Math.max(0, Math.min(1, (y + 5) / 10));[0m
+[0m  137 |             const c = colorA.clone().lerp(colorB, mixFactor);              [2mreact-hooks/purity[22m[0m
+[0m  [2m149:24[22m  [31merror[39m  Error: Cannot call impure function during render[0m
+[0m[0m
+[0m`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).[0m
+[0m[0m
+[0mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\canvas\HeroBackground.tsx:149:24[0m
+[0m  147 |                 baseX: x,[0m
+[0m  148 |                 baseY: y,[0m
+[0m> 149 |                 speed: Math.random() * 0.5 + 0.1,[0m
+[0m      |                        ^^^^^^^^^^^^^ Cannot call impure function[0m
+[0m  150 |                 seed: Math.random() * Math.PI * 2,[0m
+[0m  151 |                 x, y, z[0m
+[0m  152 |             });                                                       [2mreact-hooks/purity[22m[0m
+[0m  [2m150:23[22m  [31merror[39m  Error: Cannot call impure function during render[0m
+[0m[0m
+[0m`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).[0m
+[0m[0m
+[0mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\canvas\HeroBackground.tsx:150:23[0m
+[0m  148 |                 baseY: y,[0m
+[0m  149 |                 speed: Math.random() * 0.5 + 0.1,[0m
+[0m> 150 |                 seed: Math.random() * Math.PI * 2,[0m
+[0m      |                       ^^^^^^^^^^^^^ Cannot call impure function[0m
+[0m  151 |                 x, y, z[0m
+[0m  152 |             });[0m
+[0m  153 |         }                                                                        [2mreact-hooks/purity[22m[0m
+[0m  [2m213:13[22m  [31merror[39m  Error: This value cannot be modified[0m
+[0m[0m
+[0mModifying a value previously passed as an argument to a hook is not allowed. Consider moving the modification before calling the hook.[0m
+[0m[0m
+[0mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\canvas\HeroBackground.tsx:213:13[0m
+[0m  211 |             }[0m
+[0m  212 |[0m
+[0m> 213 |             p.x += (targetX + pushX - p.x) * 0.05;[0m
+[0m      |             ^ `particleData` cannot be modified[0m
+[0m  214 |             p.y += (targetY + pushY - p.y) * 0.05;[0m
+[0m  215 |[0m
+[0m  216 |             positionsArray[i * 3] = p.x;                                                                                                                                                                                                                                                                [2mreact-hooks/immutability[22m[0m
+[0m[0m
+[0m[4mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\canvas\Interactive3DNetwork.tsx[24m[0m
+[0m   [2m45:13[22m  [31merror[39m    Error: Cannot access variable before it is declared[0m
+[0m[0m
+[0m`resetPosition` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.[0m
+[0m[0m
+[0mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\canvas\Interactive3DNetwork.tsx:45:13[0m
+[0m  43 |         timeoutRef.current = setTimeout(() => {[0m
+[0m  44 |             setStarted(true);[0m
+[0m> 45 |             resetPosition();[0m
+[0m     |             ^^^^^^^^^^^^^ `resetPosition` accessed before it is declared[0m
+[0m  46 |         }, initialDelay);[0m
+[0m  47 |         return () => { if (timeoutRef.current) clearTimeout(timeoutRef.current); };[0m
+[0m  48 |     }, [initialDelay]);[0m
+[0m[0m
+[0mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\canvas\Interactive3DNetwork.tsx:50:5[0m
+[0m  48 |     }, [initialDelay]);[0m
+[0m  49 |[0m
+[0m> 50 |     const resetPosition = () => {[0m
+[0m     |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 51 |         if (!mesh.current) return;[0m
+[0m     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 52 |         // Random start position far away[0m
+[0m     …[0m
+[0m     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 67 |         mesh.current.rotateY((Math.random() - 0.5) * 0.5);[0m
+[0m     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 68 |     };[0m
+[0m     | ^^^^^^^ `resetPosition` is declared here[0m
+[0m  69 |[0m
+[0m  70 |     useFrame((state, delta) => {[0m
+[0m  71 |         if (!started || !mesh.current) return;  [2mreact-hooks/immutability[22m[0m
+[0m  [2m114:28[22m  [31merror[39m    Error: Cannot call impure function during render[0m
+[0m[0m
+[0m`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).[0m
+[0m[0m
+[0mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\canvas\Interactive3DNetwork.tsx:114:28[0m
+[0m  112 |         const count = 2000;[0m
+[0m  113 |         for (let i = 0; i < count; i++) {[0m
+[0m> 114 |             const r = 80 + Math.random() * 20;[0m
+[0m      |                            ^^^^^^^^^^^^^ Cannot call impure function[0m
+[0m  115 |             const theta = 2 * Math.PI * Math.random();[0m
+[0m  116 |             const phi = Math.acos(2 * Math.random() - 1);[0m
+[0m  117 |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          [2mreact-hooks/purity[22m[0m
+[0m  [2m115:41[22m  [31merror[39m    Error: Cannot call impure function during render[0m
+[0m[0m
+[0m`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).[0m
+[0m[0m
+[0mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\canvas\Interactive3DNetwork.tsx:115:41[0m
+[0m  113 |         for (let i = 0; i < count; i++) {[0m
+[0m  114 |             const r = 80 + Math.random() * 20;[0m
+[0m> 115 |             const theta = 2 * Math.PI * Math.random();[0m
+[0m      |                                         ^^^^^^^^^^^^^ Cannot call impure function[0m
+[0m  116 |             const phi = Math.acos(2 * Math.random() - 1);[0m
+[0m  117 |[0m
+[0m  118 |             const x = r * Math.sin(phi) * Math.cos(theta);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              [2mreact-hooks/purity[22m[0m
+[0m  [2m116:39[22m  [31merror[39m    Error: Cannot call impure function during render[0m
+[0m[0m
+[0m`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).[0m
+[0m[0m
+[0mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\canvas\Interactive3DNetwork.tsx:116:39[0m
+[0m  114 |             const r = 80 + Math.random() * 20;[0m
+[0m  115 |             const theta = 2 * Math.PI * Math.random();[0m
+[0m> 116 |             const phi = Math.acos(2 * Math.random() - 1);[0m
+[0m      |                                       ^^^^^^^^^^^^^ Cannot call impure function[0m
+[0m  117 |[0m
+[0m  118 |             const x = r * Math.sin(phi) * Math.cos(theta);[0m
+[0m  119 |             const y = r * Math.sin(phi) * Math.sin(theta);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               [2mreact-hooks/purity[22m[0m
+[0m  [2m391:47[22m  [33mwarning[39m  'activeNode' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m  [2m391:59[22m  [33mwarning[39m  'setActiveNode' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m[0m
+[0m[4mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\canvas\LiquidProject.tsx[24m[0m
+[0m   [2m8:32[22m  [31merror[39m    Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m44:57[22m  [33mwarning[39m  'imageUrl' is defined but never used      [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m[0m
+[0m[4mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\canvas\NeuralNetwork.tsx[24m[0m
+[0m  [2m17:37[22m  [31merror[39m  Error: Cannot call impure function during render[0m
+[0m[0m
+[0m`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).[0m
+[0m[0m
+[0mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\canvas\NeuralNetwork.tsx:17:37[0m
+[0m  15 |         for (let i = 0; i < count; i++) {[0m
+[0m  16 |             // Spherical distribution radius ~4[0m
+[0m> 17 |             const r = 4 * Math.cbrt(Math.random());[0m
+[0m     |                                     ^^^^^^^^^^^^^ Cannot call impure function[0m
+[0m  18 |             const theta = Math.random() * 2 * Math.PI;[0m
+[0m  19 |             const phi = Math.acos(2 * Math.random() - 1);[0m
+[0m  20 |                                [2mreact-hooks/purity[22m[0m
+[0m  [2m18:27[22m  [31merror[39m  Error: Cannot call impure function during render[0m
+[0m[0m
+[0m`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).[0m
+[0m[0m
+[0mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\canvas\NeuralNetwork.tsx:18:27[0m
+[0m  16 |             // Spherical distribution radius ~4[0m
+[0m  17 |             const r = 4 * Math.cbrt(Math.random());[0m
+[0m> 18 |             const theta = Math.random() * 2 * Math.PI;[0m
+[0m     |                           ^^^^^^^^^^^^^ Cannot call impure function[0m
+[0m  19 |             const phi = Math.acos(2 * Math.random() - 1);[0m
+[0m  20 |[0m
+[0m  21 |             const x = r * Math.sin(phi) * Math.cos(theta);                         [2mreact-hooks/purity[22m[0m
+[0m  [2m19:39[22m  [31merror[39m  Error: Cannot call impure function during render[0m
+[0m[0m
+[0m`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).[0m
+[0m[0m
+[0mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\canvas\NeuralNetwork.tsx:19:39[0m
+[0m  17 |             const r = 4 * Math.cbrt(Math.random());[0m
+[0m  18 |             const theta = Math.random() * 2 * Math.PI;[0m
+[0m> 19 |             const phi = Math.acos(2 * Math.random() - 1);[0m
+[0m     |                                       ^^^^^^^^^^^^^ Cannot call impure function[0m
+[0m  20 |[0m
+[0m  21 |             const x = r * Math.sin(phi) * Math.cos(theta);[0m
+[0m  22 |             const y = r * Math.sin(phi) * Math.sin(theta);  [2mreact-hooks/purity[22m[0m
+[0m[0m
+[0m[4mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\dashboard\AIExecutiveBrief.tsx[24m[0m
+[0m  [2m58:13[22m  [31merror[39m  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          [2mreact/no-unescaped-entities[22m[0m
+[0m  [2m58:27[22m  [31merror[39m  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          [2mreact/no-unescaped-entities[22m[0m
+[0m  [2m81:49[22m  [31merror[39m  Error: Cannot call impure function during render[0m
+[0m[0m
+[0m`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).[0m
+[0m[0m
+[0mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\dashboard\AIExecutiveBrief.tsx:81:49[0m
+[0m  79 |                   const baseHeight = 20 + Math.sin(i * 0.5) * 40 + Math.cos(i * 1.2) * 20[0m
+[0m  80 |                   const height = isPlaying[0m
+[0m> 81 |                     ? Math.max(15, baseHeight * Math.random()) // Animate randomly if playing[0m
+[0m     |                                                 ^^^^^^^^^^^^^ Cannot call impure function[0m
+[0m  82 |                     : baseHeight * 0.3 // static and low if stopped[0m
+[0m  83 |[0m
+[0m  84 |                   return (  [2mreact-hooks/purity[22m[0m
+[0m[0m
+[0m[4mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\dashboard\ExecutiveReportTemplate.tsx[24m[0m
+[0m  [2m103:15[22m  [31merror[39m  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  [2mreact/no-unescaped-entities[22m[0m
+[0m  [2m103:30[22m  [31merror[39m  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  [2mreact/no-unescaped-entities[22m[0m
+[0m[0m
+[0m[4mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\ia\BentoIA.tsx[24m[0m
+[0m    [2m3:46[22m  [33mwarning[39m  'useMemo' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m  [2m209:9[22m   [31merror[39m    Error: Calling setState synchronously within an effect can trigger cascading renders[0m
+[0m[0m
+[0mEffects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:[0m
+[0m* Update external systems with the latest state from React.[0m
+[0m* Subscribe for updates from some external system, calling setState in a callback function when external state changes.[0m
+[0m[0m
+[0mCalling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).[0m
+[0m[0m
+[0mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\ia\BentoIA.tsx:209:9[0m
+[0m  207 |             })[0m
+[0m  208 |         )[0m
+[0m> 209 |         setParticles(newParticles)[0m
+[0m      |         ^^^^^^^^^^^^ Avoid calling setState() directly within an effect[0m
+[0m  210 |[0m
+[0m  211 |         let raf: number[0m
+[0m  212 |         const start = performance.now()  [2mreact-hooks/set-state-in-effect[22m[0m
+[0m[0m
+[0m[4mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\ia\CalculadorIA.tsx[24m[0m
+[0m   [2m4:47[22m  [33mwarning[39m  'AnimatePresence' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m  [2m25:7[22m   [31merror[39m    Error: Calling setState synchronously within an effect can trigger cascading renders[0m
+[0m[0m
+[0mEffects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:[0m
+[0m* Update external systems with the latest state from React.[0m
+[0m* Subscribe for updates from some external system, calling setState in a callback function when external state changes.[0m
+[0m[0m
+[0mCalling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).[0m
+[0m[0m
+[0mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\ia\CalculadorIA.tsx:25:7[0m
+[0m  23 |   useEffect(() => {[0m
+[0m  24 |     if (reduced) {[0m
+[0m> 25 |       setDisplayed(value)[0m
+[0m     |       ^^^^^^^^^^^^ Avoid calling setState() directly within an effect[0m
+[0m  26 |       return[0m
+[0m  27 |     }[0m
+[0m  28 |  [2mreact-hooks/set-state-in-effect[22m[0m
+[0m[0m
+[0m[4mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\ia\ComparadorIA.tsx[24m[0m
+[0m  [2m4:29[22m  [33mwarning[39m  'AnimatePresence' is defined but never used  [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m[0m
+[0m[4mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\ia\HeroIA.tsx[24m[0m
+[0m    [2m3:36[22m  [33mwarning[39m  'useState' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m  [2m381:55[22m  [31merror[39m    Error: Cannot call impure function during render[0m
+[0m[0m
+[0m`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).[0m
+[0m[0m
+[0mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\ia\HeroIA.tsx:381:55[0m
+[0m  379 |                         <motion.div[0m
+[0m  380 |                             key={i}[0m
+[0m> 381 |                             initial={{ opacity: 0, y: Math.random() > 0.5 ? 15 : -15 }}[0m
+[0m      |                                                       ^^^^^^^^^^^^^ Cannot call impure function[0m
+[0m  382 |                             animate={{ opacity: 1, y: 0 }}[0m
+[0m  383 |                             transition={{ duration: 0.8, delay: 1.0 + i * 0.1 }}[0m
+[0m  384 |                             style={{                       [2mreact-hooks/purity[22m[0m
+[0m  [2m398:51[22m  [31merror[39m    Error: Cannot call impure function during render[0m
+[0m[0m
+[0m`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).[0m
+[0m[0m
+[0mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\ia\HeroIA.tsx:398:51[0m
+[0m  396 |                                 animate={prefersReduced ? {} : { y: [0, -6, 0] }}[0m
+[0m  397 |                                 transition={prefersReduced ? {} : {[0m
+[0m> 398 |                                     duration: 3 + Math.random() * 2,[0m
+[0m      |                                                   ^^^^^^^^^^^^^ Cannot call impure function[0m
+[0m  399 |                                     repeat: Infinity,[0m
+[0m  400 |                                     ease: "easeInOut"[0m
+[0m  401 |                                 }}  [2mreact-hooks/purity[22m[0m
+[0m[0m
+[0m[4mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\ia\LiveChatIA.tsx[24m[0m
+[0m  [2m240:20[22m  [33mwarning[39m  'e' is defined but never used  [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m[0m
+[0m[4mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\ia\PipelineIA.tsx[24m[0m
+[0m  [2m317:26[22m  [31merror[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m[0m
+[0m[4mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\ia\RubrosIA.tsx[24m[0m
+[0m  [2m382:9[22m   [33mwarning[39m  Unused eslint-disable directive (no problems were reported from 'react-hooks/exhaustive-deps')[0m
+[0m  [2m464:64[22m  [33mwarning[39m  '_' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m  [2m464:67[22m  [33mwarning[39m  'i' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m  [2m465:12[22m  [31merror[39m    Error: Cannot call impure function during render[0m
+[0m[0m
+[0m`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).[0m
+[0m[0m
+[0mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\ia\RubrosIA.tsx:465:12[0m
+[0m  463 |[0m
+[0m  464 |     const particles = useMemo(() => Array.from({ length: 8 }, (_, i) => ({[0m
+[0m> 465 |         x: Math.random() * 100,[0m
+[0m      |            ^^^^^^^^^^^^^ Cannot call impure function[0m
+[0m  466 |         y: Math.random() * 100,[0m
+[0m  467 |         size: 2 + Math.random() * 3,[0m
+[0m  468 |         duration: 4 + Math.random() * 4,                                    [2mreact-hooks/purity[22m[0m
+[0m  [2m466:12[22m  [31merror[39m    Error: Cannot call impure function during render[0m
+[0m[0m
+[0m`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).[0m
+[0m[0m
+[0mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\ia\RubrosIA.tsx:466:12[0m
+[0m  464 |     const particles = useMemo(() => Array.from({ length: 8 }, (_, i) => ({[0m
+[0m  465 |         x: Math.random() * 100,[0m
+[0m> 466 |         y: Math.random() * 100,[0m
+[0m      |            ^^^^^^^^^^^^^ Cannot call impure function[0m
+[0m  467 |         size: 2 + Math.random() * 3,[0m
+[0m  468 |         duration: 4 + Math.random() * 4,[0m
+[0m  469 |         delay: Math.random() * 3,  [2mreact-hooks/purity[22m[0m
+[0m  [2m467:19[22m  [31merror[39m    Error: Cannot call impure function during render[0m
+[0m[0m
+[0m`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).[0m
+[0m[0m
+[0mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\ia\RubrosIA.tsx:467:19[0m
+[0m  465 |         x: Math.random() * 100,[0m
+[0m  466 |         y: Math.random() * 100,[0m
+[0m> 467 |         size: 2 + Math.random() * 3,[0m
+[0m      |                   ^^^^^^^^^^^^^ Cannot call impure function[0m
+[0m  468 |         duration: 4 + Math.random() * 4,[0m
+[0m  469 |         delay: Math.random() * 3,[0m
+[0m  470 |     })), [])                                                         [2mreact-hooks/purity[22m[0m
+[0m  [2m468:23[22m  [31merror[39m    Error: Cannot call impure function during render[0m
+[0m[0m
+[0m`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).[0m
+[0m[0m
+[0mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\ia\RubrosIA.tsx:468:23[0m
+[0m  466 |         y: Math.random() * 100,[0m
+[0m  467 |         size: 2 + Math.random() * 3,[0m
+[0m> 468 |         duration: 4 + Math.random() * 4,[0m
+[0m      |                       ^^^^^^^^^^^^^ Cannot call impure function[0m
+[0m  469 |         delay: Math.random() * 3,[0m
+[0m  470 |     })), [])[0m
+[0m  471 |                                                                                     [2mreact-hooks/purity[22m[0m
+[0m  [2m469:16[22m  [31merror[39m    Error: Cannot call impure function during render[0m
+[0m[0m
+[0m`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).[0m
+[0m[0m
+[0mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\ia\RubrosIA.tsx:469:16[0m
+[0m  467 |         size: 2 + Math.random() * 3,[0m
+[0m  468 |         duration: 4 + Math.random() * 4,[0m
+[0m> 469 |         delay: Math.random() * 3,[0m
+[0m      |                ^^^^^^^^^^^^^ Cannot call impure function[0m
+[0m  470 |     })), [])[0m
+[0m  471 |[0m
+[0m  472 |     return (                                                                                                               [2mreact-hooks/purity[22m[0m
+[0m[0m
+[0m[4mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\ia\VaultIA.tsx[24m[0m
+[0m  [2m240:64[22m  [31merror[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m[0m
+[0m[4mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\layout\DynamicDock.tsx[24m[0m
+[0m   [2m85:9[22m   [31merror[39m  Error: Calling setState synchronously within an effect can trigger cascading renders[0m
+[0m[0m
+[0mEffects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:[0m
+[0m* Update external systems with the latest state from React.[0m
+[0m* Subscribe for updates from some external system, calling setState in a callback function when external state changes.[0m
+[0m[0m
+[0mCalling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).[0m
+[0m[0m
+[0mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\layout\DynamicDock.tsx:85:9[0m
+[0m  83 |     // Ensure menu closes securely on any route change[0m
+[0m  84 |     useEffect(() => {[0m
+[0m> 85 |         setIsMobileMenuOpen(false);[0m
+[0m     |         ^^^^^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect[0m
+[0m  86 |     }, [pathname]);[0m
+[0m  87 |[0m
+[0m  88 |     const icons = [  [2mreact-hooks/set-state-in-effect[22m[0m
+[0m  [2m199:13[22m  [31merror[39m  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m[0m
+[0m[4mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\layout\Shutter.tsx[24m[0m
+[0m  [2m11:37[22m  [31merror[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m[0m
+[0m[4mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\layout\SmoothScroll.tsx[24m[0m
+[0m  [2m32:9[22m  [31merror[39m  Error: Calling setState synchronously within an effect can trigger cascading renders[0m
+[0m[0m
+[0mEffects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:[0m
+[0m* Update external systems with the latest state from React.[0m
+[0m* Subscribe for updates from some external system, calling setState in a callback function when external state changes.[0m
+[0m[0m
+[0mCalling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).[0m
+[0m[0m
+[0mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\layout\SmoothScroll.tsx:32:9[0m
+[0m  30 |         });[0m
+[0m  31 |[0m
+[0m> 32 |         setLenisInstance(lenis);[0m
+[0m     |         ^^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect[0m
+[0m  33 |[0m
+[0m  34 |         function raf(time: number) {[0m
+[0m  35 |             lenis.raf(time);  [2mreact-hooks/set-state-in-effect[22m[0m
+[0m[0m
+[0m[4mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\onboarding\OnboardingWizard.tsx[24m[0m
+[0m  [2m29:9[22m  [33mwarning[39m  'router' is assigned a value but never used  [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m[0m
+[0m[4mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\sections\AILargeCta.tsx[24m[0m
+[0m  [2m4:22[22m  [33mwarning[39m  'Sparkles' is defined but never used               [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m  [2m7:12[22m  [33mwarning[39m  'isHovered' is assigned a value but never used     [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m  [2m7:23[22m  [33mwarning[39m  'setIsHovered' is assigned a value but never used  [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m[0m
+[0m[4mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\sections\AIPipelineSection.tsx[24m[0m
+[0m  [2m18:97[22m  [31merror[39m  Comments inside children section of tag should be placed inside braces  [2mreact/jsx-no-comment-textnodes[22m[0m
+[0m[0m
+[0m[4mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\sections\ComparadorSection.tsx[24m[0m
+[0m  [2m82:11[22m  [33mwarning[39m  'titleWords' is assigned a value but never used  [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m[0m
+[0m[4mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\sections\FeedbackLoop.tsx[24m[0m
+[0m  [2m47:37[22m  [31merror[39m  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  [2mreact/no-unescaped-entities[22m[0m
+[0m  [2m47:51[22m  [31merror[39m  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  [2mreact/no-unescaped-entities[22m[0m
+[0m[0m
+[0m[4mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\sections\Footer.tsx[24m[0m
+[0m   [2m3:8[22m   [33mwarning[39m  'Link' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m  [2m10:48[22m  [31merror[39m    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m23:9[22m   [31merror[39m    Error: Calling setState synchronously within an effect can trigger cascading renders[0m
+[0m[0m
+[0mEffects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:[0m
+[0m* Update external systems with the latest state from React.[0m
+[0m* Subscribe for updates from some external system, calling setState in a callback function when external state changes.[0m
+[0m[0m
+[0mCalling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).[0m
+[0m[0m
+[0mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\sections\Footer.tsx:23:9[0m
+[0m  21 |             hue: Math.random() * 360,[0m
+[0m  22 |         }));[0m
+[0m> 23 |         setParticles(newParticles);[0m
+[0m     |         ^^^^^^^^^^^^ Avoid calling setState() directly within an effect[0m
+[0m  24 |     }, []);[0m
+[0m  25 |[0m
+[0m  26 |     const isLeft = side === 'left';  [2mreact-hooks/set-state-in-effect[22m[0m
+[0m[0m
+[0m[4mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\sections\InfiniteReviews.tsx[24m[0m
+[0m   [2m94:18[22m  [31merror[39m  Unexpected any. Specify a different type                         [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m117:13[22m  [31merror[39m  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  [2mreact/no-unescaped-entities[22m[0m
+[0m  [2m117:20[22m  [31merror[39m  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  [2mreact/no-unescaped-entities[22m[0m
+[0m  [2m248:13[22m  [31merror[39m  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  [2mreact/no-unescaped-entities[22m[0m
+[0m  [2m248:20[22m  [31merror[39m  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  [2mreact/no-unescaped-entities[22m[0m
+[0m[0m
+[0m[4mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\sections\OurServices.tsx[24m[0m
+[0m   [2m82:15[22m  [31merror[39m  Error: Cannot call impure function during render[0m
+[0m[0m
+[0m`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).[0m
+[0m[0m
+[0mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\sections\OurServices.tsx:82:15[0m
+[0m  80 |     const particles = Array.from({ length: particleCount }).map((_, i) => ({[0m
+[0m  81 |         id: i,[0m
+[0m> 82 |         size: Math.random() * 4 + 1,[0m
+[0m     |               ^^^^^^^^^^^^^ Cannot call impure function[0m
+[0m  83 |         left: `${Math.random() * 100}%`,[0m
+[0m  84 |         top: `${Math.random() * 100}%`,[0m
+[0m  85 |         duration: Math.random() * 1.5 + 0.5,                                                                                                            [2mreact-hooks/purity[22m[0m
+[0m   [2m83:18[22m  [31merror[39m  Error: Cannot call impure function during render[0m
+[0m[0m
+[0m`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).[0m
+[0m[0m
+[0mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\sections\OurServices.tsx:83:18[0m
+[0m  81 |         id: i,[0m
+[0m  82 |         size: Math.random() * 4 + 1,[0m
+[0m> 83 |         left: `${Math.random() * 100}%`,[0m
+[0m     |                  ^^^^^^^^^^^^^ Cannot call impure function[0m
+[0m  84 |         top: `${Math.random() * 100}%`,[0m
+[0m  85 |         duration: Math.random() * 1.5 + 0.5,[0m
+[0m  86 |         delay: Math.random() * 0.2,                                                                                                                                                  [2mreact-hooks/purity[22m[0m
+[0m   [2m84:17[22m  [31merror[39m  Error: Cannot call impure function during render[0m
+[0m[0m
+[0m`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).[0m
+[0m[0m
+[0mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\sections\OurServices.tsx:84:17[0m
+[0m  82 |         size: Math.random() * 4 + 1,[0m
+[0m  83 |         left: `${Math.random() * 100}%`,[0m
+[0m> 84 |         top: `${Math.random() * 100}%`,[0m
+[0m     |                 ^^^^^^^^^^^^^ Cannot call impure function[0m
+[0m  85 |         duration: Math.random() * 1.5 + 0.5,[0m
+[0m  86 |         delay: Math.random() * 0.2,[0m
+[0m  87 |         depth: (Math.random() - 0.5) * 500,                                                                                                                      [2mreact-hooks/purity[22m[0m
+[0m   [2m85:19[22m  [31merror[39m  Error: Cannot call impure function during render[0m
+[0m[0m
+[0m`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).[0m
+[0m[0m
+[0mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\sections\OurServices.tsx:85:19[0m
+[0m  83 |         left: `${Math.random() * 100}%`,[0m
+[0m  84 |         top: `${Math.random() * 100}%`,[0m
+[0m> 85 |         duration: Math.random() * 1.5 + 0.5,[0m
+[0m     |                   ^^^^^^^^^^^^^ Cannot call impure function[0m
+[0m  86 |         delay: Math.random() * 0.2,[0m
+[0m  87 |         depth: (Math.random() - 0.5) * 500,[0m
+[0m  88 |     }));                                                                                                                                                [2mreact-hooks/purity[22m[0m
+[0m   [2m86:16[22m  [31merror[39m  Error: Cannot call impure function during render[0m
+[0m[0m
+[0m`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).[0m
+[0m[0m
+[0mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\sections\OurServices.tsx:86:16[0m
+[0m  84 |         top: `${Math.random() * 100}%`,[0m
+[0m  85 |         duration: Math.random() * 1.5 + 0.5,[0m
+[0m> 86 |         delay: Math.random() * 0.2,[0m
+[0m     |                ^^^^^^^^^^^^^ Cannot call impure function[0m
+[0m  87 |         depth: (Math.random() - 0.5) * 500,[0m
+[0m  88 |     }));[0m
+[0m  89 |                                                                                                                                                                                            [2mreact-hooks/purity[22m[0m
+[0m   [2m87:17[22m  [31merror[39m  Error: Cannot call impure function during render[0m
+[0m[0m
+[0m`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).[0m
+[0m[0m
+[0mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\sections\OurServices.tsx:87:17[0m
+[0m  85 |         duration: Math.random() * 1.5 + 0.5,[0m
+[0m  86 |         delay: Math.random() * 0.2,[0m
+[0m> 87 |         depth: (Math.random() - 0.5) * 500,[0m
+[0m     |                 ^^^^^^^^^^^^^ Cannot call impure function[0m
+[0m  88 |     }));[0m
+[0m  89 |[0m
+[0m  90 |     return (                                                                                                                                                                                                                      [2mreact-hooks/purity[22m[0m
+[0m  [2m109:29[22m  [31merror[39m  Error: Cannot call impure function during render[0m
+[0m[0m
+[0m`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).[0m
+[0m[0m
+[0mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\sections\OurServices.tsx:109:29[0m
+[0m  107 |                         scale: [0, 1.5, 0],[0m
+[0m  108 |                         z: [0, p.depth],[0m
+[0m> 109 |                         x: (Math.random() - 0.5) * 100,[0m
+[0m      |                             ^^^^^^^^^^^^^ Cannot call impure function[0m
+[0m  110 |                         y: (Math.random() - 0.5) * 100,[0m
+[0m  111 |                     }}[0m
+[0m  112 |                     exit={{ opacity: 0, scale: 0 }}                                                                     [2mreact-hooks/purity[22m[0m
+[0m  [2m110:29[22m  [31merror[39m  Error: Cannot call impure function during render[0m
+[0m[0m
+[0m`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).[0m
+[0m[0m
+[0mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\sections\OurServices.tsx:110:29[0m
+[0m  108 |                         z: [0, p.depth],[0m
+[0m  109 |                         x: (Math.random() - 0.5) * 100,[0m
+[0m> 110 |                         y: (Math.random() - 0.5) * 100,[0m
+[0m      |                             ^^^^^^^^^^^^^ Cannot call impure function[0m
+[0m  111 |                     }}[0m
+[0m  112 |                     exit={{ opacity: 0, scale: 0 }}[0m
+[0m  113 |                     transition={{ duration: p.duration, repeat: Infinity, ease: "easeInOut", delay: p.delay }}  [2mreact-hooks/purity[22m[0m
+[0m  [2m145:35[22m  [31merror[39m  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m265:35[22m  [31merror[39m  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m[0m
+[0m[4mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\sections\Portfolio.tsx[24m[0m
+[0m  [2m2:10[22m  [33mwarning[39m  'useRef' is defined but never used        [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m  [2m2:28[22m  [33mwarning[39m  'useEffect' is defined but never used     [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m  [2m3:34[22m  [33mwarning[39m  'useSpring' is defined but never used     [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m  [2m4:33[22m  [33mwarning[39m  'ExternalLink' is defined but never used  [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m[0m
+[0m[4mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\sections\ROICalculator.tsx[24m[0m
+[0m    [2m5:10[22m  [33mwarning[39m  'MagneticCta' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m  [2m229:59[22m  [31merror[39m    Error: Cannot call impure function during render[0m
+[0m[0m
+[0m`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).[0m
+[0m[0m
+[0mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\sections\ROICalculator.tsx:229:59[0m
+[0m  227 |                                         animate={{ y: [-100, -600], opacity: [0, 1, 0] }}[0m
+[0m  228 |                                         transition={{[0m
+[0m> 229 |                                             duration: 3 + Math.random() * 2,[0m
+[0m      |                                                           ^^^^^^^^^^^^^ Cannot call impure function[0m
+[0m  230 |                                             repeat: Infinity,[0m
+[0m  231 |                                             delay: Math.random() * 2,[0m
+[0m  232 |                                             ease: "linear"  [2mreact-hooks/purity[22m[0m
+[0m  [2m231:52[22m  [31merror[39m    Error: Cannot call impure function during render[0m
+[0m[0m
+[0m`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).[0m
+[0m[0m
+[0mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\sections\ROICalculator.tsx:231:52[0m
+[0m  229 |                                             duration: 3 + Math.random() * 2,[0m
+[0m  230 |                                             repeat: Infinity,[0m
+[0m> 231 |                                             delay: Math.random() * 2,[0m
+[0m      |                                                    ^^^^^^^^^^^^^ Cannot call impure function[0m
+[0m  232 |                                             ease: "linear"[0m
+[0m  233 |                                         }}[0m
+[0m  234 |                                     />                                                                       [2mreact-hooks/purity[22m[0m
+[0m[0m
+[0m[4mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\sections\TemplateWarehouse.tsx[24m[0m
+[0m  [2m17:87[22m  [31merror[39m  Comments inside children section of tag should be placed inside braces  [2mreact/jsx-no-comment-textnodes[22m[0m
+[0m[0m
+[0m[4mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\sections\VaultSection.tsx[24m[0m
+[0m   [2m4:10[22m  [33mwarning[39m  'Plus' is defined but never used                  [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m   [2m4:16[22m  [33mwarning[39m  'Minus' is defined but never used                 [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m  [2m36:12[22m  [33mwarning[39m  'showForm' is assigned a value but never used     [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m  [2m36:22[22m  [33mwarning[39m  'setShowForm' is assigned a value but never used  [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m  [2m46:11[22m  [33mwarning[39m  'isCtaInView' is assigned a value but never used  [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m[0m
+[0m[4mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\sections\WebDevelopmentBento.tsx[24m[0m
+[0m  [2m15:13[22m  [31merror[39m    Error: Calling setState synchronously within an effect can trigger cascading renders[0m
+[0m[0m
+[0mEffects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:[0m
+[0m* Update external systems with the latest state from React.[0m
+[0m* Subscribe for updates from some external system, calling setState in a callback function when external state changes.[0m
+[0m[0m
+[0mCalling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).[0m
+[0m[0m
+[0mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\sections\WebDevelopmentBento.tsx:15:13[0m
+[0m  13 |         if (!isInView) return;[0m
+[0m  14 |         if (prefersReduced) {[0m
+[0m> 15 |             setCount(100);[0m
+[0m     |             ^^^^^^^^ Avoid calling setState() directly within an effect[0m
+[0m  16 |             return;[0m
+[0m  17 |         }[0m
+[0m  18 |  [2mreact-hooks/set-state-in-effect[22m[0m
+[0m  [2m19:13[22m  [31merror[39m    'start' is never reassigned. Use 'const' instead                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              [2mprefer-const[22m[0m
+[0m  [2m19:13[22m  [33mwarning[39m  'start' is assigned a value but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m[0m
+[0m[4mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\sections\WebDevelopmentTimeline.tsx[24m[0m
+[0m   [2m97:11[22m  [33mwarning[39m  'dotInView' is assigned a value but never used          [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m  [2m300:12[22m  [33mwarning[39m  'isHoveredFinal' is assigned a value but never used     [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m  [2m300:28[22m  [33mwarning[39m  'setIsHoveredFinal' is assigned a value but never used  [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m[0m
+[0m[4mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\sections\WhyDevelOP.tsx[24m[0m
+[0m   [2m3:10[22m  [33mwarning[39m  'motion' is defined but never used                  [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m  [2m55:11[22m  [33mwarning[39m  'isTitleInView' is assigned a value but never used  [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m[0m
+[0m[4mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\software\ArchitectureSoftware.tsx[24m[0m
+[0m  [2m621:15[22m  [31merror[39m    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             [2mreact/no-unescaped-entities[22m[0m
+[0m  [2m621:36[22m  [31merror[39m    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             [2mreact/no-unescaped-entities[22m[0m
+[0m  [2m647:37[22m  [31merror[39m    Error: Calling setState synchronously within an effect can trigger cascading renders[0m
+[0m[0m
+[0mEffects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:[0m
+[0m* Update external systems with the latest state from React.[0m
+[0m* Subscribe for updates from some external system, calling setState in a callback function when external state changes.[0m
+[0m[0m
+[0mCalling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).[0m
+[0m[0m
+[0mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\software\ArchitectureSoftware.tsx:647:37[0m
+[0m  645 |   useEffect(() => {[0m
+[0m  646 |     if (!isInView || shouldReduceMotion) {[0m
+[0m> 647 |       if (archParticles.length > 0) setArchParticles([])[0m
+[0m      |                                     ^^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect[0m
+[0m  648 |       return[0m
+[0m  649 |     }[0m
+[0m  650 |  [2mreact-hooks/set-state-in-effect[22m[0m
+[0m  [2m686:6[22m   [33mwarning[39m  React Hook useEffect has a missing dependency: 'archParticles.length'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     [2mreact-hooks/exhaustive-deps[22m[0m
+[0m[0m
+[0m[4mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\software\DashboardMockupSoftware.tsx[24m[0m
+[0m  [2m85:22[22m  [31merror[39m  Error: Calling setState synchronously within an effect can trigger cascading renders[0m
+[0m[0m
+[0mEffects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:[0m
+[0m* Update external systems with the latest state from React.[0m
+[0m* Subscribe for updates from some external system, calling setState in a callback function when external state changes.[0m
+[0m[0m
+[0mCalling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).[0m
+[0m[0m
+[0mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\software\DashboardMockupSoftware.tsx:85:22[0m
+[0m  83 |[0m
+[0m  84 |   useEffect(() => {[0m
+[0m> 85 |     if (isReduced) { setVal(to); return }[0m
+[0m     |                      ^^^^^^ Avoid calling setState() directly within an effect[0m
+[0m  86 |     const timer = setTimeout(() => {[0m
+[0m  87 |       const dur = 900[0m
+[0m  88 |       const start = performance.now()  [2mreact-hooks/set-state-in-effect[22m[0m
+[0m[0m
+[0m[4mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\software\DiagnosticoSoftware.tsx[24m[0m
+[0m    [2m3:35[22m   [33mwarning[39m  'useCallback' is defined but never used   [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m  [2m244:314[22m  [31merror[39m    Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m247:236[22m  [31merror[39m    Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m250:237[22m  [31merror[39m    Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m253:360[22m  [31merror[39m    Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m339:22[22m   [31merror[39m    Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m418:22[22m   [31merror[39m    Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m[0m
+[0m[4mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\software\HeroSoftware.tsx[24m[0m
+[0m  [2m547:7[22m  [31merror[39m  Error: Calling setState synchronously within an effect can trigger cascading renders[0m
+[0m[0m
+[0mEffects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:[0m
+[0m* Update external systems with the latest state from React.[0m
+[0m* Subscribe for updates from some external system, calling setState in a callback function when external state changes.[0m
+[0m[0m
+[0mCalling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).[0m
+[0m[0m
+[0mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\software\HeroSoftware.tsx:547:7[0m
+[0m  545 |   useEffect(() => {[0m
+[0m  546 |     if (isReduced) {[0m
+[0m> 547 |       setScanDone(true)[0m
+[0m      |       ^^^^^^^^^^^ Avoid calling setState() directly within an effect[0m
+[0m  548 |       return[0m
+[0m  549 |     }[0m
+[0m  550 |     const timer = setTimeout(() => {  [2mreact-hooks/set-state-in-effect[22m[0m
+[0m[0m
+[0m[4mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\software\PainBentoSoftware.tsx[24m[0m
+[0m  [2m362:266[22m  [31merror[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m363:269[22m  [31merror[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m364:303[22m  [31merror[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m[0m
+[0m[4mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\software\PipelineSoftware.tsx[24m[0m
+[0m  [2m220:3[22m  [33mwarning[39m  'isRunning' is defined but never used                                                           [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m  [2m497:3[22m  [33mwarning[39m  Unused eslint-disable directive (no problems were reported from 'react-hooks/exhaustive-deps')[0m
+[0m  [2m640:7[22m  [33mwarning[39m  Unused eslint-disable directive (no problems were reported from 'react-hooks/exhaustive-deps')[0m
+[0m[0m
+[0m[4mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\software\ProcesoSoftware.tsx[24m[0m
+[0m  [2m453:7[22m  [33mwarning[39m  'shouldReduceMotion' is assigned a value but never used  [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m[0m
+[0m[4mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\software\ShowcaseSoftware.tsx[24m[0m
+[0m    [2m8:10[22m  [33mwarning[39m  'YAxis' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m  [2m236:5[22m   [31merror[39m    Error: Calling setState synchronously within an effect can trigger cascading renders[0m
+[0m[0m
+[0mEffects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:[0m
+[0m* Update external systems with the latest state from React.[0m
+[0m* Subscribe for updates from some external system, calling setState in a callback function when external state changes.[0m
+[0m[0m
+[0mCalling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).[0m
+[0m[0m
+[0mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\software\ShowcaseSoftware.tsx:236:5[0m
+[0m  234 |   useEffect(() => {[0m
+[0m  235 |     if (!isInView || animated) return[0m
+[0m> 236 |     setAnimated(true)[0m
+[0m      |     ^^^^^^^^^^^ Avoid calling setState() directly within an effect[0m
+[0m  237 |[0m
+[0m  238 |     kpis.forEach((kpi, i) => {[0m
+[0m  239 |       const duration = 1200 + i * 200  [2mreact-hooks/set-state-in-effect[22m[0m
+[0m[0m
+[0m[4mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\software\SocialProofSoftware.tsx[24m[0m
+[0m  [2m145:11[22m  [31merror[39m  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  [2mreact/no-unescaped-entities[22m[0m
+[0m  [2m145:34[22m  [31merror[39m  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  [2mreact/no-unescaped-entities[22m[0m
+[0m  [2m213:9[22m   [31merror[39m  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  [2mreact/no-unescaped-entities[22m[0m
+[0m  [2m226:9[22m   [31merror[39m  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  [2mreact/no-unescaped-entities[22m[0m
+[0m  [2m226:19[22m  [31merror[39m  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  [2mreact/no-unescaped-entities[22m[0m
+[0m[0m
+[0m[4mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\software\StatementSoftware.tsx[24m[0m
+[0m    [2m3:10[22m  [33mwarning[39m  'motion' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m   [2m84:10[22m  [31merror[39m    Error: Cannot call impure function during render[0m
+[0m[0m
+[0m`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).[0m
+[0m[0m
+[0mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\software\StatementSoftware.tsx:84:10[0m
+[0m  82 |     return Array.from({ length: 12 }).map((_, i) => ({[0m
+[0m  83 |       id: i,[0m
+[0m> 84 |       x: Math.random() * 100,[0m
+[0m     |          ^^^^^^^^^^^^^ Cannot call impure function[0m
+[0m  85 |       y: Math.random() * 100,[0m
+[0m  86 |       z: Math.random() * 200,[0m
+[0m  87 |       type: Math.floor(Math.random() * 3),  [2mreact-hooks/purity[22m[0m
+[0m   [2m85:10[22m  [31merror[39m    Error: Cannot call impure function during render[0m
+[0m[0m
+[0m`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).[0m
+[0m[0m
+[0mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\software\StatementSoftware.tsx:85:10[0m
+[0m  83 |       id: i,[0m
+[0m  84 |       x: Math.random() * 100,[0m
+[0m> 85 |       y: Math.random() * 100,[0m
+[0m     |          ^^^^^^^^^^^^^ Cannot call impure function[0m
+[0m  86 |       z: Math.random() * 200,[0m
+[0m  87 |       type: Math.floor(Math.random() * 3),[0m
+[0m  88 |       speed: 0.1 + Math.random() * 0.4                  [2mreact-hooks/purity[22m[0m
+[0m   [2m86:10[22m  [31merror[39m    Error: Cannot call impure function during render[0m
+[0m[0m
+[0m`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).[0m
+[0m[0m
+[0mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\software\StatementSoftware.tsx:86:10[0m
+[0m  84 |       x: Math.random() * 100,[0m
+[0m  85 |       y: Math.random() * 100,[0m
+[0m> 86 |       z: Math.random() * 200,[0m
+[0m     |          ^^^^^^^^^^^^^ Cannot call impure function[0m
+[0m  87 |       type: Math.floor(Math.random() * 3),[0m
+[0m  88 |       speed: 0.1 + Math.random() * 0.4[0m
+[0m  89 |     }))                       [2mreact-hooks/purity[22m[0m
+[0m   [2m87:24[22m  [31merror[39m    Error: Cannot call impure function during render[0m
+[0m[0m
+[0m`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).[0m
+[0m[0m
+[0mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\software\StatementSoftware.tsx:87:24[0m
+[0m  85 |       y: Math.random() * 100,[0m
+[0m  86 |       z: Math.random() * 200,[0m
+[0m> 87 |       type: Math.floor(Math.random() * 3),[0m
+[0m     |                        ^^^^^^^^^^^^^ Cannot call impure function[0m
+[0m  88 |       speed: 0.1 + Math.random() * 0.4[0m
+[0m  89 |     }))[0m
+[0m  90 |   }, [])                              [2mreact-hooks/purity[22m[0m
+[0m   [2m88:20[22m  [31merror[39m    Error: Cannot call impure function during render[0m
+[0m[0m
+[0m`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).[0m
+[0m[0m
+[0mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\software\StatementSoftware.tsx:88:20[0m
+[0m  86 |       z: Math.random() * 200,[0m
+[0m  87 |       type: Math.floor(Math.random() * 3),[0m
+[0m> 88 |       speed: 0.1 + Math.random() * 0.4[0m
+[0m     |                    ^^^^^^^^^^^^^ Cannot call impure function[0m
+[0m  89 |     }))[0m
+[0m  90 |   }, [])[0m
+[0m  91 |                                                                [2mreact-hooks/purity[22m[0m
+[0m  [2m123:9[22m   [33mwarning[39m  'isInView' is assigned a value but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m[0m
+[0m[4mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\software\VaultSoftware.tsx[24m[0m
+[0m  [2m50:123[22m  [31merror[39m  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m57:7[22m    [31merror[39m  Error: Calling setState synchronously within an effect can trigger cascading renders[0m
+[0m[0m
+[0mEffects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:[0m
+[0m* Update external systems with the latest state from React.[0m
+[0m* Subscribe for updates from some external system, calling setState in a callback function when external state changes.[0m
+[0m[0m
+[0mCalling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).[0m
+[0m[0m
+[0mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\software\VaultSoftware.tsx:57:7[0m
+[0m  55 |   useEffect(() => {[0m
+[0m  56 |     if (shouldReduceMotion) {[0m
+[0m> 57 |       setDisplayed(value)[0m
+[0m     |       ^^^^^^^^^^^^ Avoid calling setState() directly within an effect[0m
+[0m  58 |       return[0m
+[0m  59 |     }[0m
+[0m  60 |     const from = prevRef.current  [2mreact-hooks/set-state-in-effect[22m[0m
+[0m[0m
+[0m[4mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\ui\HeroMetrics.tsx[24m[0m
+[0m  [2m28:13[22m  [31merror[39m  Error: Calling setState synchronously within an effect can trigger cascading renders[0m
+[0m[0m
+[0mEffects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:[0m
+[0m* Update external systems with the latest state from React.[0m
+[0m* Subscribe for updates from some external system, calling setState in a callback function when external state changes.[0m
+[0m[0m
+[0mCalling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).[0m
+[0m[0m
+[0mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\ui\HeroMetrics.tsx:28:13[0m
+[0m  26 |     useEffect(() => {[0m
+[0m  27 |         if (isReducedMotion) {[0m
+[0m> 28 |             setCount(to);[0m
+[0m     |             ^^^^^^^^ Avoid calling setState() directly within an effect[0m
+[0m  29 |             return;[0m
+[0m  30 |         }[0m
+[0m  31 |  [2mreact-hooks/set-state-in-effect[22m[0m
+[0m[0m
+[0m[4mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\ui\HeroTitle.tsx[24m[0m
+[0m  [2m20:13[22m  [31merror[39m  Error: Calling setState synchronously within an effect can trigger cascading renders[0m
+[0m[0m
+[0mEffects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:[0m
+[0m* Update external systems with the latest state from React.[0m
+[0m* Subscribe for updates from some external system, calling setState in a callback function when external state changes.[0m
+[0m[0m
+[0mCalling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).[0m
+[0m[0m
+[0mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\ui\HeroTitle.tsx:20:13[0m
+[0m  18 |     useEffect(() => {[0m
+[0m  19 |         if (isReducedMotion || char === " ") {[0m
+[0m> 20 |             setCurrent(char);[0m
+[0m     |             ^^^^^^^^^^ Avoid calling setState() directly within an effect[0m
+[0m  21 |             return;[0m
+[0m  22 |         }[0m
+[0m  23 |  [2mreact-hooks/set-state-in-effect[22m[0m
+[0m[0m
+[0m[4mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\ui\HyperText.tsx[24m[0m
+[0m  [2m46:13[22m  [31merror[39m    Error: Calling setState synchronously within an effect can trigger cascading renders[0m
+[0m[0m
+[0mEffects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:[0m
+[0m* Update external systems with the latest state from React.[0m
+[0m* Subscribe for updates from some external system, calling setState in a callback function when external state changes.[0m
+[0m[0m
+[0mCalling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).[0m
+[0m[0m
+[0mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\ui\HyperText.tsx:46:13[0m
+[0m  44 |     useEffect(() => {[0m
+[0m  45 |         if (shouldAnimate && !hasStarted) {[0m
+[0m> 46 |             setHasStarted(true);[0m
+[0m     |             ^^^^^^^^^^^^^ Avoid calling setState() directly within an effect[0m
+[0m  47 |         }[0m
+[0m  48 |     }, [shouldAnimate, hasStarted]);[0m
+[0m  49 |                                                                                     [2mreact-hooks/set-state-in-effect[22m[0m
+[0m  [2m70:9[22m   [31merror[39m    Error: Calling setState synchronously within an effect can trigger cascading renders[0m
+[0m[0m
+[0mEffects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:[0m
+[0m* Update external systems with the latest state from React.[0m
+[0m* Subscribe for updates from some external system, calling setState in a callback function when external state changes.[0m
+[0m[0m
+[0mCalling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).[0m
+[0m[0m
+[0mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\ui\HyperText.tsx:70:9[0m
+[0m  68 |[0m
+[0m  69 |         // Initial scramble [0m
+[0m> 70 |         setDisplayText(text.split('').map(() => SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)]).join(''));[0m
+[0m     |         ^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect[0m
+[0m  71 |[0m
+[0m  72 |         const timeout = setTimeout(() => {[0m
+[0m  73 |             const interval = setInterval(() => {  [2mreact-hooks/set-state-in-effect[22m[0m
+[0m  [2m74:33[22m  [33mwarning[39m  'prev' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m[0m
+[0m[4mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\ui\Preloader.tsx[24m[0m
+[0m  [2m19:11[22m  [33mwarning[39m  'pathLength' is assigned a value but never used   [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m  [2m20:11[22m  [33mwarning[39m  'fillOpacity' is assigned a value but never used  [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m  [2m21:11[22m  [33mwarning[39m  'scale' is assigned a value but never used        [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m[0m
+[0m[4mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\ui\buttons\MagneticCta.tsx[24m[0m
+[0m  [2m72:13[22m  [31merror[39m  Error: Calling setState synchronously within an effect can trigger cascading renders[0m
+[0m[0m
+[0mEffects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:[0m
+[0m* Update external systems with the latest state from React.[0m
+[0m* Subscribe for updates from some external system, calling setState in a callback function when external state changes.[0m
+[0m[0m
+[0mCalling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).[0m
+[0m[0m
+[0mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\components\ui\buttons\MagneticCta.tsx:72:13[0m
+[0m  70 |     useEffect(() => {[0m
+[0m  71 |         if (window.matchMedia("(pointer: coarse)").matches) {[0m
+[0m> 72 |             setIsTouchDevice(true);[0m
+[0m     |             ^^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect[0m
+[0m  73 |         }[0m
+[0m  74 |     }, []);[0m
+[0m  75 |  [2mreact-hooks/set-state-in-effect[22m[0m
+[0m[0m
+[0m[4mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\emails\ActionRequiredEmail.tsx[24m[0m
+[0m  [2m41:109[22m  [31merror[39m  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  [2mreact/no-unescaped-entities[22m[0m
+[0m  [2m41:120[22m  [31merror[39m  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  [2mreact/no-unescaped-entities[22m[0m
+[0m[0m
+[0m[4mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\emails\TicketReplyEmail.tsx[24m[0m
+[0m  [2m44:84[22m  [31merror[39m  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  [2mreact/no-unescaped-entities[22m[0m
+[0m  [2m44:98[22m  [31merror[39m  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  [2mreact/no-unescaped-entities[22m[0m
+[0m[0m
+[0m[4mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\emails\WeeklyMetricsEmail.tsx[24m[0m
+[0m  [2m43:123[22m  [31merror[39m  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  [2mreact/no-unescaped-entities[22m[0m
+[0m  [2m43:142[22m  [31merror[39m  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  [2mreact/no-unescaped-entities[22m[0m
+[0m  [2m48:17[22m   [31merror[39m  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  [2mreact/no-unescaped-entities[22m[0m
+[0m  [2m48:27[22m   [31merror[39m  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  [2mreact/no-unescaped-entities[22m[0m
+[0m[0m
+[0m[4mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\lib\logger.ts[24m[0m
+[0m   [2m6:61[22m  [31merror[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m39:30[22m  [31merror[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m40:30[22m  [31merror[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m41:31[22m  [31merror[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m42:31[22m  [31merror[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m45:84[22m  [31merror[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m[0m
+[0m[4mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\modules\ai-companion\components\ChatWindow.tsx[24m[0m
+[0m    [2m7:10[22m  [33mwarning[39m  'Send' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m    [2m7:26[22m  [33mwarning[39m  'Activity' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m   [2m10:34[22m  [31merror[39m    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m   [2m15:28[22m  [31merror[39m    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m   [2m16:25[22m  [31merror[39m    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m   [2m46:11[22m  [33mwarning[39m  'prefersReducedMotion' is assigned a value but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m   [2m71:13[22m  [31merror[39m    Error: Calling setState synchronously within an effect can trigger cascading renders[0m
+[0m[0m
+[0mEffects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:[0m
+[0m* Update external systems with the latest state from React.[0m
+[0m* Subscribe for updates from some external system, calling setState in a callback function when external state changes.[0m
+[0m[0m
+[0mCalling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).[0m
+[0m[0m
+[0mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\modules\ai-companion\components\ChatWindow.tsx:71:13[0m
+[0m  69 |             return () => clearInterval(interval);[0m
+[0m  70 |         } else {[0m
+[0m> 71 |             setShowCursor(false);[0m
+[0m     |             ^^^^^^^^^^^^^ Avoid calling setState() directly within an effect[0m
+[0m  72 |         }[0m
+[0m  73 |     }, [isThinking]);[0m
+[0m  74 |  [2mreact-hooks/set-state-in-effect[22m[0m
+[0m  [2m454:54[22m  [31merror[39m    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m457:64[22m  [31merror[39m    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m[0m
+[0m[4mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\modules\ai-companion\components\LogicCompanion.tsx[24m[0m
+[0m   [2m65:75[22m  [33mwarning[39m  'leadContext' is assigned a value but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m   [2m65:88[22m  [33mwarning[39m  'updateLeadContext' is assigned a value but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m   [2m73:11[22m  [33mwarning[39m  'avatarY' is assigned a value but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m  [2m126:13[22m  [31merror[39m    Error: Calling setState synchronously within an effect can trigger cascading renders[0m
+[0m[0m
+[0mEffects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:[0m
+[0m* Update external systems with the latest state from React.[0m
+[0m* Subscribe for updates from some external system, calling setState in a callback function when external state changes.[0m
+[0m[0m
+[0mCalling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).[0m
+[0m[0m
+[0mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\modules\ai-companion\components\LogicCompanion.tsx:126:13[0m
+[0m  124 |[0m
+[0m  125 |         if (skipInit) {[0m
+[0m> 126 |             setPhase('active');[0m
+[0m      |             ^^^^^^^^ Avoid calling setState() directly within an effect[0m
+[0m  127 |             return;[0m
+[0m  128 |         }[0m
+[0m  129 |                                                                                                         [2mreact-hooks/set-state-in-effect[22m[0m
+[0m  [2m207:13[22m  [31merror[39m    Error: Calling setState synchronously within an effect can trigger cascading renders[0m
+[0m[0m
+[0mEffects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:[0m
+[0m* Update external systems with the latest state from React.[0m
+[0m* Subscribe for updates from some external system, calling setState in a callback function when external state changes.[0m
+[0m[0m
+[0mCalling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).[0m
+[0m[0m
+[0mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\modules\ai-companion\components\LogicCompanion.tsx:207:13[0m
+[0m  205 |         }[0m
+[0m  206 |         if (isOpen) {[0m
+[0m> 207 |             setShowPrompt(false);[0m
+[0m      |             ^^^^^^^^^^^^^ Avoid calling setState() directly within an effect[0m
+[0m  208 |             if (idleTimerRef.current) clearTimeout(idleTimerRef.current);[0m
+[0m  209 |         }[0m
+[0m  210 |     }, [isOpen, startIdleTimer]);  [2mreact-hooks/set-state-in-effect[22m[0m
+[0m[0m
+[0m[4mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\modules\ai-companion\components\NeuroAvatar.tsx[24m[0m
+[0m  [2m140:29[22m   [31merror[39m    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m141:29[22m   [31merror[39m    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m142:35[22m   [31merror[39m    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m322:28[22m   [31merror[39m    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m322:74[22m   [31merror[39m    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m323:28[22m   [31merror[39m    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m325:28[22m   [31merror[39m    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m348:174[22m  [31merror[39m    Error: Cannot access refs during render[0m
+[0m[0m
+[0mReact refs are values that are not needed for rendering. Refs should only be accessed outside of render, such as in event handlers or effects. Accessing a ref value (the `current` property) during render can cause your component not to update as expected (https://react.dev/reference/react/useRef).[0m
+[0m[0m
+[0mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\modules\ai-companion\components\NeuroAvatar.tsx:348:174[0m
+[0m  346 |                         {/* Outer Shell */}[0m
+[0m  347 |                         <mesh ref={outerSphereRef} geometry={geometries.outer}>[0m
+[0m> 348 |                             <MeshTransmissionMaterial transmission={0.95} thickness={0.8} roughness={0.05} ior={1.5} chromaticAberration={0.08} anisotropy={0.3} distortion={distortionRef.current} distortionScale={0.3} temporalDistortion={0.15} color={isThinking ? '#e0f0ff' : '#f0f8ff'} emissive={currentEmissive} emissiveIntensity={isThinking ? 0.6 : 0.2} transparent opacity={opacityRef.current * 0.85} />[0m
+[0m      |                                                                                                                                                                              ^^^^^^^^^^^^^^^^^^^^^ Cannot access ref value during render[0m
+[0m  349 |                         </mesh>[0m
+[0m  350 |                         {/* Inner Core */}[0m
+[0m  351 |                         <mesh ref={innerCoreRef} geometry={geometries.inner} scale={0.45}>                                                                                                                                                                                                            [2mreact-hooks/refs[22m[0m
+[0m  [2m348:379[22m  [31merror[39m    Error: Cannot access refs during render[0m
+[0m[0m
+[0mReact refs are values that are not needed for rendering. Refs should only be accessed outside of render, such as in event handlers or effects. Accessing a ref value (the `current` property) during render can cause your component not to update as expected (https://react.dev/reference/react/useRef).[0m
+[0m[0m
+[0mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\modules\ai-companion\components\NeuroAvatar.tsx:348:379[0m
+[0m  346 |                         {/* Outer Shell */}[0m
+[0m  347 |                         <mesh ref={outerSphereRef} geometry={geometries.outer}>[0m
+[0m> 348 |                             <MeshTransmissionMaterial transmission={0.95} thickness={0.8} roughness={0.05} ior={1.5} chromaticAberration={0.08} anisotropy={0.3} distortion={distortionRef.current} distortionScale={0.3} temporalDistortion={0.15} color={isThinking ? '#e0f0ff' : '#f0f8ff'} emissive={currentEmissive} emissiveIntensity={isThinking ? 0.6 : 0.2} transparent opacity={opacityRef.current * 0.85} />[0m
+[0m      |                                                                                                                                                                                                                                                                                                                                                                                           ^^^^^^^^^^^^^^^^^^ Cannot access ref value during render[0m
+[0m  349 |                         </mesh>[0m
+[0m  350 |                         {/* Inner Core */}[0m
+[0m  351 |                         <mesh ref={innerCoreRef} geometry={geometries.inner} scale={0.45}>  [2mreact-hooks/refs[22m[0m
+[0m  [2m352:229[22m  [31merror[39m    Error: Cannot access refs during render[0m
+[0m[0m
+[0mReact refs are values that are not needed for rendering. Refs should only be accessed outside of render, such as in event handlers or effects. Accessing a ref value (the `current` property) during render can cause your component not to update as expected (https://react.dev/reference/react/useRef).[0m
+[0m[0m
+[0mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\modules\ai-companion\components\NeuroAvatar.tsx:352:229[0m
+[0m  350 |                         {/* Inner Core */}[0m
+[0m  351 |                         <mesh ref={innerCoreRef} geometry={geometries.inner} scale={0.45}>[0m
+[0m> 352 |                             <meshPhysicalMaterial color="#c8d8f0" metalness={0.95} roughness={0.05} reflectivity={1} envMapIntensity={3} emissive={currentEmissive} emissiveIntensity={isThinking ? 1.2 : 0.4} transparent opacity={opacityRef.current} />[0m
+[0m      |                                                                                                                                                                                                                                     ^^^^^^^^^^^^^^^^^^ Cannot access ref value during render[0m
+[0m  353 |                         </mesh>[0m
+[0m  354 |                         {/* Ring */}[0m
+[0m  355 |                         <mesh ref={ringRef} rotation={[Math.PI / 2, 0, 0]} geometry={geometries.ring}>                                                                                                                                                                                                                                                                                                     [2mreact-hooks/refs[22m[0m
+[0m  [2m356:184[22m  [31merror[39m    Error: Cannot access refs during render[0m
+[0m[0m
+[0mReact refs are values that are not needed for rendering. Refs should only be accessed outside of render, such as in event handlers or effects. Accessing a ref value (the `current` property) during render can cause your component not to update as expected (https://react.dev/reference/react/useRef).[0m
+[0m[0m
+[0mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\modules\ai-companion\components\NeuroAvatar.tsx:356:184[0m
+[0m  354 |                         {/* Ring */}[0m
+[0m  355 |                         <mesh ref={ringRef} rotation={[Math.PI / 2, 0, 0]} geometry={geometries.ring}>[0m
+[0m> 356 |                             <meshPhysicalMaterial color="#a0c0e8" metalness={1} roughness={0} emissive={currentEmissive} emissiveIntensity={isThinking ? 2 : 0.8} transparent opacity={opacityRef.current * 0.7} />[0m
+[0m      |                                                                                                                                                                                        ^^^^^^^^^^^^^^^^^^ Cannot access ref value during render[0m
+[0m  357 |                         </mesh>[0m
+[0m  358 |                         {/* Particles */}[0m
+[0m  359 |                         <points ref={particlesRef}>                                                                                                                                                                                                                                                                                                                                                                                                                                 [2mreact-hooks/refs[22m[0m
+[0m  [2m361:170[22m  [31merror[39m    Error: Cannot access refs during render[0m
+[0m[0m
+[0mReact refs are values that are not needed for rendering. Refs should only be accessed outside of render, such as in event handlers or effects. Accessing a ref value (the `current` property) during render can cause your component not to update as expected (https://react.dev/reference/react/useRef).[0m
+[0m[0m
+[0mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\modules\ai-companion\components\NeuroAvatar.tsx:361:170[0m
+[0m  359 |                         <points ref={particlesRef}>[0m
+[0m  360 |                             <bufferGeometry><bufferAttribute attach="attributes-position" args={[geometries.particles, 3]} /></bufferGeometry>[0m
+[0m> 361 |                             <pointsMaterial size={isThinking ? 0.025 : 0.015} color={isThinking ? '#9988ff' : '#88aacc'} transparent opacity={(isThinking ? 0.9 : 0.5) * opacityRef.current} sizeAttenuation depthWrite={false} blending={THREE.AdditiveBlending} />[0m
+[0m      |                                                                                                                                                                          ^^^^^^^^^^^^^^^^^^ Cannot access ref value during render[0m
+[0m  362 |                         </points>[0m
+[0m  363 |                     </group>[0m
+[0m  364 |                 </group>                                                                                                                                                                                                                                                                                                                                                                             [2mreact-hooks/refs[22m[0m
+[0m  [2m417:46[22m   [31merror[39m    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m417:78[22m   [31merror[39m    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m428:14[22m   [33mwarning[39m  'e' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m[0m
+[0m[4mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\modules\ai-companion\hooks\useLogicAI.ts[24m[0m
+[0m   [2m10:10[22m  [33mwarning[39m  'IntentType' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m   [2m14:34[22m  [31merror[39m    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m   [2m19:28[22m  [31merror[39m    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m   [2m20:25[22m  [31merror[39m    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m109:17[22m  [31merror[39m    Error: Calling setState synchronously within an effect can trigger cascading renders[0m
+[0m[0m
+[0mEffects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:[0m
+[0m* Update external systems with the latest state from React.[0m
+[0m* Subscribe for updates from some external system, calling setState in a callback function when external state changes.[0m
+[0m[0m
+[0mCalling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).[0m
+[0m[0m
+[0mC:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\modules\ai-companion\hooks\useLogicAI.ts:109:17[0m
+[0m  107 |[0m
+[0m  108 |             if (detectedIntent !== 'unknown') {[0m
+[0m> 109 |                 setLeadContext((prev: LeadContext) => ({[0m
+[0m      |                 ^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect[0m
+[0m  110 |                     ...prev,[0m
+[0m  111 |                     serviceType: detectedIntent,[0m
+[0m  112 |                 }));  [2mreact-hooks/set-state-in-effect[22m[0m
+[0m[0m
+[0m[31m[1m✖ 222 problems (153 errors, 69 warnings)[22m[39m[0m
+[0m[31m[1m[22m[39m[31m[1m  1 error and 3 warnings potentially fixable with the `--fix` option.[22m[39m[0m
+[0m[31m[1m[22m[39m[0m

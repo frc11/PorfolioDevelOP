@@ -53,13 +53,28 @@ export function NewTicketModal() {
 
   return (
     <>
-      <button
+      <motion.button
         onClick={() => setIsOpen(true)}
-        className="flex items-center gap-2 bg-gradient-to-r from-cyan-600 to-cyan-500 hover:from-cyan-500 hover:to-cyan-400 text-white px-5 py-2.5 rounded-lg font-medium transition-all shadow-[0_0_20px_rgba(6,182,212,0.3)] hover:shadow-[0_0_30px_rgba(6,182,212,0.5)]"
+        whileHover="hover"
+        whileTap={{ scale: 0.98 }}
+        variants={{
+          hover: { scale: 1.05 }
+        }}
+        className="group relative flex items-center gap-2.5 overflow-hidden rounded-xl bg-gradient-to-br from-cyan-400 to-blue-600 px-6 py-3 text-[11px] font-black uppercase tracking-[0.2em] text-black shadow-[0_0_20px_rgba(6,182,212,0.4)] transition-all duration-300 hover:shadow-[0_0_35px_rgba(6,182,212,0.6)] hover:brightness-110"
       >
-        <MessageSquarePlus size={18} />
-        Abrir Nuevo Ticket
-      </button>
+        <motion.div
+          variants={{
+            hover: { rotate: 90 }
+          }}
+          transition={{ type: 'spring', stiffness: 200 }}
+        >
+          <MessageSquarePlus size={18} />
+        </motion.div>
+        <span>Abrir Nuevo Ticket</span>
+        
+        {/* Subtle Shine Reflection */}
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-[35deg] -translate-x-full group-hover:animate-[shine_1.5s_infinite]" />
+      </motion.button>
 
       <AnimatePresence>
         {isOpen && (

@@ -1,0 +1,102 @@
+﻿
+> logic-core-v3@0.1.0 build
+> next build
+
+Ôû▓ Next.js 16.1.1 (Turbopack)
+- Environments: .env.local, .env
+
+node.exe : ÔÜá The 
+"middleware" file 
+convention is 
+deprecated. Please use 
+"proxy" instead. Learn 
+more: https://nextjs.or
+g/docs/messages/middlew
+are-to-proxy
+En línea: 1 Carácter: 1
++ & "C:\Program 
+Files\nodejs/node.exe" 
+"C:\Program 
+Files\nodejs/node_mo 
+...
++ ~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~
+~~
+    + CategoryInfo     
+         : NotSpecifi  
+  ed: (ÔÜá The "midd   
+ le...leware-to-pro    
+xy:String) [], Rem    
+oteException
+    + FullyQualifiedEr 
+   rorId : NativeComm  
+  andError
+ 
+  Creating an optimized production build ...
+Ô£ô Compiled successfully in 16.3s
+  Running TypeScript ...
+Failed to compile.
+
+./src/app/(protected)/d
+ashboard/page.tsx:251:1
+40
+Type error: Element 
+implicitly has an 
+'any' type because 
+expression of type 
+'any' can't be used to 
+index type '{ readonly 
+TODO: "bg-zinc-500/10 
+text-zinc-400 
+border-zinc-500/20"; 
+readonly IN_PROGRESS: 
+"bg-blue-500/10 
+text-blue-400 
+border-blue-500/20"; 
+readonly DONE: 
+"bg-green-500/10 
+text-green-400 
+border-green-500/20"; 
+}'.
+
+[0m [90m 249 |[39m  
+               [33m<[
+39m[33m/[39m[33mdiv
+[39m[33m>[39m
+ [90m 250 |[39m      
+           [33m<[39m
+[33mspan[39m
+[31m[1m>[22m[39m[9
+0m 251 |[39m          
+         className[33m
+=[39m{[32m`flex-shrin
+k-0 w-fit rounded-full 
+border px-3 py-1 
+text-[10px] font-bold 
+uppercase 
+tracking-wider 
+shadow-sm ${TASK_STATUS
+_STYLE[task.status]}`[
+39m}
+ [90m     |[39m      
+                       
+                       
+                       
+                       
+                       
+                   
+[31m[1m^[22m[39m
+ [90m 252 |[39m      
+           [33m>[39m
+ [90m 253 |[39m      
+             {[33mTASK
+_STATUS_LABEL[39m[task
+[33m.[39mstatus]}
+ [90m 254 |[39m      
+           [33m<[39m
+[33m/[39m[33mspan[39
+m[33m>[39m[0m
+Next.js build worker 
+exited with code: 1 
+and signal: null

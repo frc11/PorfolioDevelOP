@@ -104,11 +104,6 @@ export async function inviteClientAction(
   const baseUrl = process.env.NEXTAUTH_URL ?? 'http://localhost:3000'
   const inviteUrl = `${baseUrl}/accept-invite?token=${token}`
 
-  // DEV: imprimir el link en consola en lugar de enviar email real
-  console.log('\n📧 [DEV] Invitation link para:', email)
-  console.log(inviteUrl)
-  console.log('\n')
-
   revalidatePath('/admin/clients')
 
   return {
