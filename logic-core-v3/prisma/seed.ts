@@ -1,4 +1,4 @@
-import { PrismaClient, Role, OrgRole, ServiceType, ServiceStatus, ProjectStatus, TaskStatus, InvoiceStatus } from '@prisma/client'
+import { PrismaClient, Role, OrgRole, ServiceType, ServiceStatus, ProjectStatus, TaskStatus, InvoiceStatus, SubscriptionStatus } from '@prisma/client'
 import bcrypt from 'bcryptjs'
 
 const prisma = new PrismaClient()
@@ -182,6 +182,25 @@ async function main() {
   } else {
     console.log(`✅ Mensajes ya existen (${existingMessages})`)
   }
+
+  // ─── Suscripción ──────────────────────────────────────────────────────────
+  await prisma.subscription.upsert({
+    where: { organizationId: org.id },
+    update: {
+      planName: 'Retainer Pro',
+      price: 800,
+      status: SubscriptionStatus.ACTIVE,
+      renewalDate: daysFromNow(30),
+    },
+    create: {
+      organizationId: org.id,
+      planName: 'Retainer Pro',
+      price: 800,
+      status: SubscriptionStatus.ACTIVE,
+      renewalDate: daysFromNow(30),
+    },
+  })
+  console.log(`✅ Suscripción: Retainer Pro $800 USD (renovación en 30 días)`)
 
   // ─── Factura ──────────────────────────────────────────────────────────────
   const existingInvoice = await prisma.invoice.findFirst({ where: { organizationId: org.id } })

@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/prisma'
-import { Inbox } from 'lucide-react'
+import { Inbox, Sparkles } from 'lucide-react'
 import { MarkLeadReadButton } from '@/components/admin/MarkLeadReadButton'
 
 const SERVICE_LABELS: Record<string, string> = {
@@ -8,6 +8,27 @@ const SERVICE_LABELS: Record<string, string> = {
     automation: 'Automatización',
     ai: 'IA',
     other: 'Otro',
+}
+
+// Feature keys emitted by requestUpsellAction
+const PREMIUM_FEATURE_KEYS = new Set([
+    'email-automation', 'client-portal', 'whatsapp-autopilot', 'agenda-inteligente',
+    'social-media-hub', 'seo-avanzado', 'ecommerce', 'pixel-retargeting',
+    'motor-resenias', 'mini-crm', 'email-nurturing',
+])
+
+function isUpsellLead(lead: { service: string | null; message: string }): boolean {
+    return (
+        lead.message.startsWith('Solicitud de módulo premium:') ||
+        (lead.service !== null && PREMIUM_FEATURE_KEYS.has(lead.service))
+    )
+}
+
+// Extract module name from message or fall back to the service key
+function upsellModuleName(lead: { service: string | null; message: string }): string {
+    const match = lead.message.match(/^Solicitud de módulo premium:\s*(.+)$/)
+    if (match) return match[1]
+    return lead.service ?? 'Módulo Premium'
 }
 
 export default async function LeadsPage() {
@@ -129,9 +150,26 @@ export default async function LeadsPage() {
                                     {/* Company */}
                                     <td className="px-5 py-4 text-zinc-500">{lead.company ?? '—'}</td>
 
-                                    {/* Service */}
+                                    {/* Service / Module */}
                                     <td className="px-5 py-4">
-                                        {lead.service ? (
+                                        {isUpsellLead(lead) ? (
+                                            <div className="flex flex-col gap-1.5">
+                                                <span
+                                                    className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-0.5 text-xs font-semibold"
+                                                    style={{
+                                                        background: 'rgba(139,92,246,0.12)',
+                                                        border: '1px solid rgba(139,92,246,0.3)',
+                                                        color: 'rgb(196,181,253)',
+                                                    }}
+                                                >
+                                                    <Sparkles size={10} />
+                                                    MÓDULO PREMIUM
+                                                </span>
+                                                <span className="text-[11px] text-zinc-500 leading-tight">
+                                                    {upsellModuleName(lead)}
+                                                </span>
+                                            </div>
+                                        ) : lead.service ? (
                                             <span
                                                 className="inline-flex items-center rounded-lg px-2.5 py-0.5 text-xs font-medium"
                                                 style={{

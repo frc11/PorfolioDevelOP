@@ -9,6 +9,7 @@ export interface AnalyticsData {
   avgSessionDurationSec: number
   topPages: Array<{ page: string; sessions: number }>
   dailySessions: Array<{ date: string; sessions: number }> // date: "YYYY-MM-DD"
+  isMockData: boolean
 }
 
 export type AnalyticsResult =
@@ -43,6 +44,7 @@ function getMockAnalyticsData(): AnalyticsData {
       { page: '/financiacion', sessions: 193 },
     ],
     dailySessions,
+    isMockData: true,
   }
 }
 
@@ -166,6 +168,7 @@ export async function getAnalyticsData(
         avgSessionDurationSec: Math.round(avgSessionDurationSec),
         topPages,
         dailySessions,
+        isMockData: false,
       },
     }
   } catch {

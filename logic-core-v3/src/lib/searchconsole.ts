@@ -16,6 +16,7 @@ export interface SearchConsoleData {
   }>
   topPages: Array<{ page: string; clicks: number }>
   dailyData: Array<{ date: string; clicks: number; impressions: number }>
+  isMockData: boolean
 }
 
 export type SearchConsoleResult =
@@ -57,6 +58,7 @@ function getMockSearchConsoleData(): SearchConsoleData {
       { page: 'https://sanmiguel.com.ar/financiacion', clicks: 19 },
     ],
     dailyData,
+    isMockData: true,
   }
 }
 
@@ -189,6 +191,7 @@ export async function getSearchConsoleData(
           clicks: r.clicks,
           impressions: r.impressions,
         })),
+        isMockData: false,
       },
     }
   } catch {

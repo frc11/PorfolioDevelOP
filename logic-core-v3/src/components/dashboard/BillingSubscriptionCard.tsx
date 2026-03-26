@@ -60,7 +60,7 @@ export function BillingSubscriptionCard({
               <div className="flex items-center justify-between text-[10px] font-medium tracking-wide">
                 <span className="text-zinc-500 uppercase">Próximo vencimiento</span>
                 <span className="text-zinc-300 font-mono">
-                  {nextDueDate?.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' })}
+                  {nextDueDate?.toLocaleDateString('es-AR', { day: 'numeric', month: 'long', year: 'numeric' })}
                 </span>
               </div>
               <div className="flex items-center justify-between text-[10px] font-medium tracking-wide">

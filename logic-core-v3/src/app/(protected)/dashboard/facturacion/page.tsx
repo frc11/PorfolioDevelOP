@@ -42,8 +42,10 @@ export default async function BillingPage() {
       ? 'Vencida' 
       : 'Cancelada'
 
-  // Derived / Mock Precision Data
-  const nextDueDate = subscription ? new Date(subscription.createdAt.getTime() + 30 * 24 * 60 * 60 * 1000) : null
+  // Use explicit renewalDate when set; fall back to createdAt + 30 days
+  const nextDueDate = subscription
+    ? (subscription.renewalDate ?? new Date(subscription.createdAt.getTime() + 30 * 24 * 60 * 60 * 1000))
+    : null
 
   return (
     <div className="flex flex-col gap-8 max-w-5xl mx-auto w-full">

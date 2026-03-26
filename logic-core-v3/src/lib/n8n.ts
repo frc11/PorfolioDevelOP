@@ -65,6 +65,7 @@ export interface N8nMetrics {
     totalRoi: number
   }
   dailyExecutions: Array<{ date: string; success: number; failed: number }>
+  isMockData: boolean
 }
 
 export type N8nResult =
@@ -172,6 +173,7 @@ function getMockN8nMetrics(): N8nMetrics {
       totalRoi: Math.round((wf1Success + wf2Success) * ROI_PER_EXECUTION_USD * 100) / 100,
     },
     dailyExecutions,
+    isMockData: true,
   }
 }
 
@@ -255,15 +257,13 @@ function mergeDailyMaps(
 // ─── Main function ────────────────────────────────────────────────────────────
 
 export async function getN8nMetrics(workflowIds: string[]): Promise<N8nResult> {
-  if (workflowIds.length === 0) {
-    return {
-      ok: false,
-      error: 'No hay workflows configurados para este cliente.',
-    }
-  }
-
-  // Return mock data for demo workflow IDs or missing credentials
-  if (isMockWorkflowIds(workflowIds) || !process.env.N8N_API_URL || !process.env.N8N_API_KEY) {
+  // Return mock data when no workflows are configured, using demo IDs, or credentials are missing
+  if (
+    workflowIds.length === 0 ||
+    isMockWorkflowIds(workflowIds) ||
+    !process.env.N8N_API_URL ||
+    !process.env.N8N_API_KEY
+  ) {
     return { ok: true, data: getMockN8nMetrics() }
   }
 
@@ -345,6 +345,7 @@ export async function getN8nMetrics(workflowIds: string[]): Promise<N8nResult> {
           totalRoi: Math.round(totalRoi * 100) / 100,
         },
         dailyExecutions: mergeDailyMaps(workflows.map((w) => w.dailyExecutions)),
+        isMockData: false,
       },
     }
   } catch {

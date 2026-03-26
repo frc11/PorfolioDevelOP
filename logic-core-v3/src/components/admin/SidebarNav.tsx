@@ -9,6 +9,7 @@ import {
   MessageSquare,
   Settings,
   Inbox,
+  Headphones,
 } from 'lucide-react'
 
 interface NavItem {
@@ -16,7 +17,7 @@ interface NavItem {
   label: string
   icon: React.ElementType
   exact: boolean
-  badgeKey?: 'messages' | 'leads'
+  badgeKey?: 'messages' | 'leads' | 'tickets'
 }
 
 const NAV_ITEMS: NavItem[] = [
@@ -25,15 +26,17 @@ const NAV_ITEMS: NavItem[] = [
   { href: '/admin/projects', label: 'Proyectos', icon: FolderKanban, exact: false },
   { href: '/admin/messages', label: 'Mensajes', icon: MessageSquare, exact: false, badgeKey: 'messages' },
   { href: '/admin/leads', label: 'Leads', icon: Inbox, exact: false, badgeKey: 'leads' },
+  { href: '/admin/tickets', label: 'Tickets', icon: Headphones, exact: false, badgeKey: 'tickets' },
   { href: '/admin/settings', label: 'Configuración', icon: Settings, exact: false },
 ]
 
 interface SidebarNavProps {
   unreadMessages?: number
   unreadLeads?: number
+  openTickets?: number
 }
 
-export function SidebarNav({ unreadMessages = 0, unreadLeads = 0 }: SidebarNavProps) {
+export function SidebarNav({ unreadMessages = 0, unreadLeads = 0, openTickets = 0 }: SidebarNavProps) {
   const pathname = usePathname()
 
   return (
@@ -69,7 +72,8 @@ export function SidebarNav({ unreadMessages = 0, unreadLeads = 0 }: SidebarNavPr
           const isActive = exact ? pathname === href : pathname.startsWith(href)
           const badgeCount =
             badgeKey === 'messages' ? unreadMessages :
-            badgeKey === 'leads' ? unreadLeads : 0
+            badgeKey === 'leads' ? unreadLeads :
+            badgeKey === 'tickets' ? openTickets : 0
 
           return (
             <li key={href}>

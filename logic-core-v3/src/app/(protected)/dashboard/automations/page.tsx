@@ -1,8 +1,7 @@
 import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
-import Link from 'next/link'
 import { resolveOrgId } from '@/lib/preview'
-import { getN8nMetrics, ROI_PER_EXECUTION_USD } from '@/lib/n8n'
+import { getN8nMetrics, ROI_PER_EXECUTION_USD, type N8nMetrics } from '@/lib/n8n'
 import { AutomationsChart } from '@/components/dashboard/AutomationsChart'
 import { FadeIn } from '@/components/dashboard/FadeIn'
 import {
@@ -10,7 +9,6 @@ import {
   CheckCircle2,
   XCircle,
   AlertTriangle,
-  ExternalLink,
   Activity,
   Clock,
   Calculator
@@ -78,45 +76,11 @@ export default async function AutomationsPage() {
         </div>
       </FadeIn>
 
-      {client.n8nWorkflowIds.length === 0 ? (
-        <FadeIn delay={0.1}>
-          <EmptyState />
-        </FadeIn>
-      ) : (
-        <AutomationsContent workflowIds={client.n8nWorkflowIds} />
-      )}
+      <AutomationsContent workflowIds={client.n8nWorkflowIds} />
     </div>
   )
 }
 
-function EmptyState() {
-  return (
-    <div
-      className="flex flex-col items-center gap-4 rounded-xl py-16 text-center"
-      style={CARD_STYLE}
-    >
-      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-zinc-800/60">
-        <Zap size={22} className="text-zinc-500" />
-      </div>
-      <div>
-        <p className="text-sm font-medium text-zinc-300">
-          Aún no tenés automatizaciones configuradas
-        </p>
-        <p className="mt-1 max-w-xs text-sm text-zinc-500">
-          Automatizá tus procesos de negocio y ahorrá tiempo. ¡Contactanos para empezar!
-        </p>
-      </div>
-      <Link
-        href="/contact"
-        className="mt-2 flex items-center gap-1.5 rounded-lg bg-cyan-500/10 px-4 py-2 text-sm font-medium text-cyan-400 transition-all hover:bg-cyan-500/20 hover:text-cyan-300"
-        style={{ border: '1px solid rgba(6,182,212,0.2)' }}
-      >
-        <ExternalLink size={14} />
-        Quiero automatizar mi negocio
-      </Link>
-    </div>
-  )
-}
 
 async function AutomationsContent({ workflowIds }: { workflowIds: string[] }) {
   const result = await getN8nMetrics(workflowIds)
@@ -140,6 +104,44 @@ async function AutomationsContent({ workflowIds }: { workflowIds: string[] }) {
   const { data } = result
   const { totals, workflows, dailyExecutions } = data
 
+  return (
+    <div className="flex flex-col gap-6">
+      {/* Demo data banner */}
+      {data.isMockData && (
+        <FadeIn delay={0.05}>
+          <div className="flex items-center justify-between gap-4 rounded-xl border border-yellow-500/10 bg-yellow-500/5 px-5 py-3.5">
+            <div className="flex items-center gap-3 min-w-0">
+              <AlertTriangle size={15} className="flex-shrink-0 text-yellow-400" />
+              <p className="text-sm text-yellow-400/90 truncate">
+                Estás viendo datos de demostración. Contactanos para activar tus automatizaciones reales.
+              </p>
+            </div>
+            <a
+              href="/dashboard/messages"
+              className="flex-shrink-0 text-xs font-semibold text-yellow-400 underline underline-offset-2 hover:text-yellow-300 transition-colors"
+            >
+              Activar métricas reales
+            </a>
+          </div>
+        </FadeIn>
+      )}
+      {/* inner content */}
+      <AutomationsInner totals={totals} workflows={workflows} dailyExecutions={dailyExecutions} />
+    </div>
+  )
+}
+
+// ─── Inner content (extracted to keep AutomationsContent lean) ────────────────
+
+function AutomationsInner({
+  totals,
+  workflows,
+  dailyExecutions,
+}: {
+  totals: N8nMetrics['totals']
+  workflows: N8nMetrics['workflows']
+  dailyExecutions: N8nMetrics['dailyExecutions']
+}) {
   // Mock calculation for the requested ROI widget
   const HORAS_AHORRADAS = Math.round(totals.successful * 0.25) // e.g. 15 mins per execution
   const VALOR_HORA_USD = 25

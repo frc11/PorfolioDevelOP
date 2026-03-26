@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, FolderOpen, Zap, MessageSquare, User, BarChart2, TrendingUp, Archive, Headphones, CreditCard, Mail, Users, Lock, type LucideIcon } from 'lucide-react'
+import { Home, FolderOpen, Zap, MessageSquare, User, BarChart2, TrendingUp, Archive, Headphones, CreditCard, Mail, Users, Lock, MessageCircle, Calendar, Share2, Search, ShoppingCart, Target, Star, type LucideIcon } from 'lucide-react'
 import { motion } from 'framer-motion'
 
 interface NavItem {
@@ -33,6 +33,15 @@ const NAV_ITEMS: NavItem[] = [
 const VIP_ITEMS: VipNavItem[] = [
   { href: '/dashboard/email-automation', label: 'Email Automation', icon: Mail, exact: false, featureId: 'email-automation' },
   { href: '/dashboard/client-portal', label: 'Portal de Clientes', icon: Users, exact: false, featureId: 'client-portal' },
+  { href: '/dashboard/whatsapp', label: 'WhatsApp Autopilot', icon: MessageCircle, exact: false, featureId: 'whatsapp-autopilot' },
+  { href: '/dashboard/agenda', label: 'Agenda Inteligente', icon: Calendar, exact: false, featureId: 'agenda-inteligente' },
+  { href: '/dashboard/social', label: 'Social Media Hub', icon: Share2, exact: false, featureId: 'social-media-hub' },
+  { href: '/dashboard/seo-avanzado', label: 'SEO Avanzado', icon: Search, exact: false, featureId: 'seo-avanzado' },
+  { href: '/dashboard/ecommerce', label: 'E-commerce', icon: ShoppingCart, exact: false, featureId: 'ecommerce' },
+  { href: '/dashboard/pixel', label: 'Recuperación de Ventas', icon: Target, exact: false, featureId: 'pixel-retargeting' },
+  { href: '/dashboard/resenias', label: 'Motor de Reseñas', icon: Star, exact: false, featureId: 'motor-resenias' },
+  { href: '/dashboard/crm', label: 'Mini-CRM', icon: Users, exact: false, featureId: 'mini-crm' },
+  { href: '/dashboard/email-nurturing', label: 'Email Nurturing', icon: Mail, exact: false, featureId: 'email-nurturing' },
 ]
 
 interface SidebarNavProps {

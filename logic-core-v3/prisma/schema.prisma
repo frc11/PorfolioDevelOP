@@ -269,6 +269,7 @@ model Subscription {
   status         SubscriptionStatus @default(ACTIVE)
   price          Float
   currency       String             @default("USD")
+  renewalDate    DateTime?
   createdAt      DateTime           @default(now())
   updatedAt      DateTime           @updatedAt
 }

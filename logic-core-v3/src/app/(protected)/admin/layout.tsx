@@ -8,10 +8,11 @@ export default async function AdminLayout({
 }: {
   children: React.ReactNode
 }) {
-  const [session, unreadMessages, unreadLeads] = await Promise.all([
+  const [session, unreadMessages, unreadLeads, openTickets] = await Promise.all([
     auth(),
     prisma.message.count({ where: { fromAdmin: false, read: false } }),
     prisma.contactSubmission.count({ where: { read: false } }),
+    prisma.ticket.count({ where: { status: { in: ['OPEN', 'IN_PROGRESS'] } } }),
   ])
 
   return (
@@ -28,7 +29,7 @@ export default async function AdminLayout({
       />
 
       {/* Sidebar */}
-      <SidebarNav unreadMessages={unreadMessages} unreadLeads={unreadLeads} />
+      <SidebarNav unreadMessages={unreadMessages} unreadLeads={unreadLeads} openTickets={openTickets} />
 
       {/* Main column */}
       <div className="relative z-10 flex flex-1 flex-col overflow-hidden">

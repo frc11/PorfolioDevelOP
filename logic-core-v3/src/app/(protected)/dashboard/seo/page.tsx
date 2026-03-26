@@ -126,6 +126,26 @@ async function SeoContent({ siteUrl }: { siteUrl: string }) {
 
   return (
     <div className="flex flex-col gap-6">
+      {/* Demo data banner */}
+      {data.isMockData && (
+        <FadeIn delay={0.05}>
+          <div className="flex items-center justify-between gap-4 rounded-xl border border-yellow-500/10 bg-yellow-500/5 px-5 py-3.5">
+            <div className="flex items-center gap-3 min-w-0">
+              <AlertTriangle size={15} className="flex-shrink-0 text-yellow-400" />
+              <p className="text-sm text-yellow-400/90 truncate">
+                Estás viendo datos de demostración. Contactanos para conectar tu Search Console real.
+              </p>
+            </div>
+            <a
+              href="/dashboard/messages"
+              className="flex-shrink-0 text-xs font-semibold text-yellow-400 underline underline-offset-2 hover:text-yellow-300 transition-colors"
+            >
+              Activar métricas reales
+            </a>
+          </div>
+        </FadeIn>
+      )}
+
       {/* Summary cards */}
       <FadeIn delay={0.1}>
         <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">

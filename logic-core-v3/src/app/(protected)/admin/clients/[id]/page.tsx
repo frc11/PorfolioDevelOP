@@ -6,7 +6,7 @@ import { ServiceType, ProjectStatus } from '@prisma/client'
 import { ServiceStatusSelect } from '@/components/admin/ServiceStatusSelect'
 import { DeleteServiceButton } from '@/components/admin/DeleteServiceButton'
 import { FadeIn } from '@/components/dashboard/FadeIn'
-import { startClientPreview } from './actions'
+import { startClientPreview, updateSubscriptionAction } from './actions'
 
 // ─── Label maps ───────────────────────────────────────────────────────────────
 
@@ -70,6 +70,7 @@ export default async function ClientDetailPage({
         orderBy: { createdAt: 'desc' },
         take: 5,
       },
+      subscription: true,
     },
   })
 
@@ -275,6 +276,75 @@ export default async function ClientDetailPage({
             })}
           </ul>
         )}
+      </div>
+      </FadeIn>
+
+      {/* Subscription */}
+      <FadeIn delay={0.35}>
+      <div className="rounded-xl p-5" style={cardStyle}>
+        <h2 className="mb-4 text-[10px] font-semibold tracking-[0.15em] uppercase text-zinc-500">
+          Suscripción
+        </h2>
+        <form action={updateSubscriptionAction.bind(null, id)} className="flex flex-col gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[10px] font-semibold tracking-[0.1em] uppercase text-zinc-600">
+                Plan
+              </label>
+              <input
+                name="planName"
+                defaultValue={org.subscription?.planName ?? ''}
+                placeholder="Ej: Retainer Pro"
+                className="rounded-lg border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-zinc-200 placeholder-zinc-600 focus:border-cyan-500/40 focus:outline-none focus:ring-1 focus:ring-cyan-500/20"
+              />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[10px] font-semibold tracking-[0.1em] uppercase text-zinc-600">
+                Precio (USD/mes)
+              </label>
+              <input
+                name="price"
+                type="number"
+                min="0"
+                step="0.01"
+                defaultValue={org.subscription?.price ?? ''}
+                placeholder="800"
+                className="rounded-lg border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-zinc-200 placeholder-zinc-600 focus:border-cyan-500/40 focus:outline-none focus:ring-1 focus:ring-cyan-500/20"
+              />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[10px] font-semibold tracking-[0.1em] uppercase text-zinc-600">
+                Próximo vencimiento
+              </label>
+              <input
+                name="renewalDate"
+                type="date"
+                defaultValue={
+                  org.subscription?.renewalDate
+                    ? org.subscription.renewalDate.toISOString().split('T')[0]
+                    : ''
+                }
+                className="rounded-lg border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-zinc-200 focus:border-cyan-500/40 focus:outline-none focus:ring-1 focus:ring-cyan-500/20"
+              />
+            </div>
+          </div>
+          <div className="flex items-center justify-between">
+            {org.subscription && (
+              <p className="text-xs text-zinc-600">
+                Estado actual:{' '}
+                <span className={org.subscription.status === 'ACTIVE' ? 'text-emerald-400' : 'text-amber-400'}>
+                  {org.subscription.status}
+                </span>
+              </p>
+            )}
+            <button
+              type="submit"
+              className="ml-auto rounded-xl bg-cyan-500/10 border border-cyan-500/20 px-4 py-2 text-xs font-semibold text-cyan-400 transition-all hover:bg-cyan-500/20 hover:text-cyan-300"
+            >
+              {org.subscription ? 'Actualizar suscripción' : 'Crear suscripción'}
+            </button>
+          </div>
+        </form>
       </div>
       </FadeIn>
 
