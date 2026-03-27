@@ -1,204 +1,498 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useEffect, useActionState, Fragment, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import * as z from 'zod'
-import { completeOnboardingAction } from '@/actions/onboarding-actions'
-import { useRouter } from 'next/navigation'
-import { ArrowRight, Lock, CheckCircle, Palette, KeyRound, Sparkles } from 'lucide-react'
+import Image from 'next/image'
+import { saveOnboardingProfile } from '@/actions/onboarding-actions'
 
-const brandSchema = z.object({
-  primaryColor: z.string().min(1, 'Requerido'),
-  secondaryColor: z.string().optional(),
-  toneOfVoice: z.string().min(10, 'Describe el tono de forma un poco más detallada.'),
-  targetAudience: z.string().min(10, 'Describe a tu cliente ideal un poco más.'),
-})
+// ─── Types ────────────────────────────────────────────────────────────────────
 
-const accessSchema = z.object({
-  domainCredentials: z.string().optional(),
-  socialCredentials: z.string().optional(),
-})
+interface ConfettiParticle {
+  x: number
+  y: number
+  size: number
+  speedY: number
+  drift: number
+  angle: number
+  spin: number
+  color: string
+}
 
-type BrandFormValues = z.infer<typeof brandSchema>
-type AccessFormValues = z.infer<typeof accessSchema>
+// ─── Confetti canvas ──────────────────────────────────────────────────────────
 
-export function OnboardingWizard({ companyName }: { companyName: string }) {
-  const [step, setStep] = useState(1)
-  const router = useRouter()
+function Confetti() {
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const [visible, setVisible] = useState(true)
 
-  const brandForm = useForm<BrandFormValues>({
-    resolver: zodResolver(brandSchema),
-    defaultValues: { primaryColor: '#06b6d4', secondaryColor: '#10b981', toneOfVoice: '', targetAudience: '' }
-  })
+  // Stable callback so the effect doesn't re-run
+  const startFade = useCallback(() => setVisible(false), [])
 
-  const accessForm = useForm<AccessFormValues>({
-    resolver: zodResolver(accessSchema),
-    defaultValues: { domainCredentials: '', socialCredentials: '' }
-  })
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
 
-  const proceedToBrand = () => setStep(2)
-  
-  const handleBrandSubmit = async () => {
-    const isValid = await brandForm.trigger()
-    if (isValid) setStep(3)
-  }
+    // Track dimensions separately — reassigning canvas.width resets context state
+    let w = window.innerWidth
+    let h = window.innerHeight
+    canvas.width = w
+    canvas.height = h
 
-  const handleFinalSubmit = async () => {
-    const isValid = await accessForm.trigger()
-    if (!isValid) return
-
-    setStep(4)
-
-    const data = {
-      ...brandForm.getValues(),
-      ...accessForm.getValues()
+    const onResize = () => {
+      const nw = window.innerWidth
+      const nh = window.innerHeight
+      if (nw !== w || nh !== h) {
+        w = nw
+        h = nh
+        canvas.width = w
+        canvas.height = h
+      }
     }
+    window.addEventListener('resize', onResize)
 
-    try {
-      const res = await completeOnboardingAction(data)
-      
-      if (!res.success) {
-        setStep(3)
-        alert(res.error || "Hubo un error al guardar los datos.")
+    const COLORS = [
+      'rgba(6,182,212,0.65)',
+      'rgba(16,185,129,0.65)',
+      'rgba(139,92,246,0.55)',
+      'rgba(245,158,11,0.55)',
+      'rgba(255,255,255,0.45)',
+    ]
+
+    const particles: ConfettiParticle[] = Array.from({ length: 55 }, () => ({
+      x: Math.random() * w,
+      y: -20 - Math.random() * 200,
+      size: 3 + Math.random() * 5,
+      speedY: 0.7 + Math.random() * 1.4,
+      drift: (Math.random() - 0.5) * 1,
+      angle: Math.random() * Math.PI * 2,
+      spin: (Math.random() - 0.5) * 0.06,
+      color: COLORS[Math.floor(Math.random() * COLORS.length)],
+    }))
+
+    let running = true
+    let raf: number
+
+    const tick = () => {
+      if (!running) {
+        // Clear on final frame so nothing is left painted
+        ctx.clearRect(0, 0, canvas.width, canvas.height)
         return
       }
 
-      setTimeout(() => {
-        window.location.href = '/dashboard'
-      }, 2500)
-    } catch {
-      setStep(3)
-      alert("Hubo un error de conexión al guardar los datos.")
-    }
-  }
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
 
-  const slideVariants = {
-    hidden: { opacity: 0, x: 20 },
-    visible: { opacity: 1, x: 0, transition: { duration: 0.5, ease: 'easeOut' as const } },
-    exit: { opacity: 0, x: -20, transition: { duration: 0.3 } }
-  }
+      for (const p of particles) {
+        p.y += p.speedY
+        p.x += p.drift
+        p.angle += p.spin
+
+        if (p.y > canvas.height + 20) {
+          p.y = -10
+          p.x = Math.random() * canvas.width
+        }
+
+        ctx.save()
+        ctx.translate(p.x, p.y)
+        ctx.rotate(p.angle)
+        ctx.fillStyle = p.color
+        ctx.fillRect(-p.size / 2, -p.size / 4, p.size, p.size / 2)
+        ctx.restore()
+      }
+
+      raf = requestAnimationFrame(tick)
+    }
+
+    tick()
+
+    // Fade out via CSS transition at 3.5s, stop drawing at 4.5s
+    const fadeTimer = setTimeout(startFade, 3500)
+    const stopTimer = setTimeout(() => { running = false }, 4500)
+
+    return () => {
+      running = false
+      cancelAnimationFrame(raf)
+      clearTimeout(fadeTimer)
+      clearTimeout(stopTimer)
+      window.removeEventListener('resize', onResize)
+    }
+  }, [startFade])
 
   return (
-    <div className="w-full max-w-xl mx-auto p-6 relative">
+    <canvas
+      ref={canvasRef}
+      className="pointer-events-none fixed inset-0 z-50"
+      style={{
+        opacity: visible ? 0.65 : 0,
+        transition: 'opacity 1s ease-out',
+      }}
+    />
+  )
+}
+
+// ─── Stepper ──────────────────────────────────────────────────────────────────
+
+const STEP_LABELS = ['Bienvenida', 'Tour', 'Tu perfil']
+
+function Stepper({ step }: { step: number }) {
+  return (
+    <div className="mb-10 flex items-start justify-center">
+      {STEP_LABELS.map((label, i) => {
+        const num = i + 1
+        const isActive = step === num
+        const isDone = step > num
+
+        return (
+          <Fragment key={num}>
+            {i > 0 && (
+              <div
+                className="mt-[13px] h-px w-10 transition-colors duration-500"
+                style={{
+                  backgroundColor: isDone
+                    ? 'rgba(6,182,212,0.45)'
+                    : 'rgba(255,255,255,0.07)',
+                }}
+              />
+            )}
+            <div className="flex flex-col items-center gap-1.5">
+              <motion.div
+                animate={{
+                  borderColor: isActive
+                    ? 'rgba(6,182,212,1)'
+                    : isDone
+                      ? 'rgba(6,182,212,0.4)'
+                      : 'rgba(255,255,255,0.1)',
+                  backgroundColor: isActive
+                    ? 'rgba(6,182,212,0.18)'
+                    : isDone
+                      ? 'rgba(6,182,212,0.09)'
+                      : 'rgba(255,255,255,0.025)',
+                  boxShadow: isActive
+                    ? '0 0 14px rgba(6,182,212,0.45)'
+                    : '0 0 0px rgba(0,0,0,0)',
+                }}
+                transition={{ duration: 0.4 }}
+                className="flex h-7 w-7 items-center justify-center rounded-full border text-xs font-bold"
+              >
+                <span
+                  className={
+                    isDone
+                      ? 'text-cyan-400'
+                      : isActive
+                        ? 'text-cyan-300'
+                        : 'text-zinc-600'
+                  }
+                >
+                  {isDone ? '✓' : num}
+                </span>
+              </motion.div>
+              <span
+                className={`text-[10px] font-medium transition-colors duration-300 ${
+                  isActive
+                    ? 'text-cyan-400'
+                    : isDone
+                      ? 'text-zinc-500'
+                      : 'text-zinc-700'
+                }`}
+              >
+                {label}
+              </span>
+            </div>
+          </Fragment>
+        )
+      })}
+    </div>
+  )
+}
+
+// ─── Slide variants ───────────────────────────────────────────────────────────
+
+const slide = {
+  hidden: { opacity: 0, x: 24 },
+  visible: {
+    opacity: 1,
+    x: 0,
+    transition: { duration: 0.42, ease: [0.16, 1, 0.3, 1] as const },
+  },
+  exit: { opacity: 0, x: -24, transition: { duration: 0.25 } },
+}
+
+// ─── Step 1 — Bienvenida ──────────────────────────────────────────────────────
+
+function Step1({ name, onNext }: { name: string; onNext: () => void }) {
+  return (
+    <motion.div
+      key="step1"
+      variants={slide}
+      initial="hidden"
+      animate="visible"
+      exit="exit"
+      className="flex flex-col items-center text-center"
+    >
+      <Confetti />
+
+      <motion.div
+        initial={{ opacity: 0, scale: 0.85, y: 10 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+        className="mb-8"
+      >
+        <div
+          className="flex h-28 w-28 items-center justify-center rounded-full bg-white p-5"
+          style={{ boxShadow: '0 0 0 1px rgba(255,255,255,0.12), 0 8px 32px rgba(0,0,0,0.4), 0 0 48px rgba(255,255,255,0.08)' }}
+        >
+          <Image
+            src="/logodevelOP.png"
+            alt="develOP"
+            width={80}
+            height={80}
+            className="h-full w-full object-contain"
+            priority
+          />
+        </div>
+      </motion.div>
+
+      <motion.h1
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.18, duration: 0.5 }}
+        className="mb-3 text-3xl font-bold tracking-tight text-white"
+      >
+        Bienvenido a tu portal,{' '}
+        <span className="text-cyan-400">{name || 'cliente'}</span>
+      </motion.h1>
+
+      <motion.p
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.28, duration: 0.5 }}
+        className="mb-10 max-w-sm text-sm leading-relaxed text-zinc-400"
+      >
+        Todo lo que necesitás para hacer crecer tu negocio, en un solo lugar.
+      </motion.p>
+
+      <motion.button
+        onClick={onNext}
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.4, duration: 0.5 }}
+        whileHover={{ scale: 1.04 }}
+        whileTap={{ scale: 0.97 }}
+        className="group flex items-center gap-2.5 rounded-full bg-gradient-to-r from-cyan-500 to-emerald-500 px-8 py-3.5 text-sm font-semibold text-zinc-950 shadow-[0_0_24px_rgba(6,182,212,0.3)] transition-shadow hover:shadow-[0_0_36px_rgba(6,182,212,0.45)]"
+      >
+        Empezar el tour
+        <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>
+      </motion.button>
+    </motion.div>
+  )
+}
+
+// ─── Step 2 — Tour de features ────────────────────────────────────────────────
+
+const TOUR_CARDS = [
+  {
+    emoji: '📊',
+    title: 'Medí tu crecimiento',
+    desc: 'Analíticas, SEO y automatizaciones en tiempo real',
+    border: 'border-cyan-500/20',
+    glow: 'rgba(6,182,212,0.10)',
+  },
+  {
+    emoji: '🤝',
+    title: 'Comunicación directa',
+    desc: 'Hablá con el equipo develOP cuando quieras',
+    border: 'border-emerald-500/20',
+    glow: 'rgba(16,185,129,0.10)',
+  },
+  {
+    emoji: '🚀',
+    title: 'Tu proyecto, en vivo',
+    desc: 'Seguí cada etapa del desarrollo en tiempo real',
+    border: 'border-violet-500/20',
+    glow: 'rgba(139,92,246,0.10)',
+  },
+] as const
+
+function Step2({ onNext }: { onNext: () => void }) {
+  return (
+    <motion.div
+      key="step2"
+      variants={slide}
+      initial="hidden"
+      animate="visible"
+      exit="exit"
+      className="w-full"
+    >
+      <h2 className="mb-6 text-center text-2xl font-bold text-white">
+        ¿Qué encontrás en tu portal?
+      </h2>
+
+      <div className="mb-8 flex flex-col gap-3">
+        {TOUR_CARDS.map((card, i) => (
+          <motion.div
+            key={card.title}
+            initial={{ opacity: 0, x: 24 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: i * 0.13, duration: 0.42, ease: [0.16, 1, 0.3, 1] }}
+            className={`flex items-start gap-4 rounded-xl border ${card.border} p-4`}
+            style={{
+              background: `radial-gradient(ellipse at 0% 50%, ${card.glow} 0%, rgba(255,255,255,0.02) 65%)`,
+            }}
+          >
+            <span className="mt-0.5 text-2xl">{card.emoji}</span>
+            <div>
+              <p className="mb-0.5 font-semibold text-zinc-100">{card.title}</p>
+              <p className="text-sm text-zinc-500">{card.desc}</p>
+            </div>
+          </motion.div>
+        ))}
+      </div>
+
+      <motion.button
+        onClick={onNext}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.5 }}
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
+        className="group flex w-full items-center justify-center gap-2.5 rounded-xl border border-white/[0.1] bg-white/[0.06] py-3 text-sm font-semibold text-zinc-200 transition-all hover:bg-white/[0.10] hover:text-white"
+      >
+        Continuar
+        <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>
+      </motion.button>
+    </motion.div>
+  )
+}
+
+// ─── Step 3 — Completar perfil ────────────────────────────────────────────────
+
+function Step3({ companyName }: { companyName: string }) {
+  const [error, formAction, isPending] = useActionState(saveOnboardingProfile, null)
+
+  return (
+    <motion.div
+      key="step3"
+      variants={slide}
+      initial="hidden"
+      animate="visible"
+      exit="exit"
+      className="w-full"
+    >
+      <h2 className="mb-2 text-2xl font-bold text-white">Completá tu perfil</h2>
+      <p className="mb-6 text-sm text-zinc-500">
+        Podés actualizar estos datos en cualquier momento desde el dashboard.
+      </p>
+
+      <form action={formAction} className="flex flex-col gap-4">
+        <div className="flex flex-col gap-1.5">
+          <label
+            htmlFor="companyName"
+            className="text-[11px] font-semibold uppercase tracking-widest text-zinc-500"
+          >
+            Nombre de empresa
+          </label>
+          <input
+            id="companyName"
+            name="companyName"
+            type="text"
+            required
+            defaultValue={companyName}
+            placeholder="Mi empresa"
+            className="w-full rounded-xl border border-white/[0.08] bg-white/[0.04] px-4 py-3 text-sm text-zinc-100 placeholder-zinc-700 outline-none transition-all focus:border-cyan-500/60 focus:ring-2 focus:ring-cyan-500/20"
+          />
+        </div>
+
+        <div className="flex flex-col gap-1.5">
+          <label
+            htmlFor="logoUrl"
+            className="text-[11px] font-semibold uppercase tracking-widest text-zinc-500"
+          >
+            URL del logo{' '}
+            <span className="font-normal normal-case tracking-normal text-zinc-700">
+              (opcional)
+            </span>
+          </label>
+          <input
+            id="logoUrl"
+            name="logoUrl"
+            type="url"
+            placeholder="https://tu-empresa.com/logo.png"
+            className="w-full rounded-xl border border-white/[0.08] bg-white/[0.04] px-4 py-3 text-sm text-zinc-100 placeholder-zinc-700 outline-none transition-all focus:border-cyan-500/60 focus:ring-2 focus:ring-cyan-500/20"
+          />
+        </div>
+
+        {error && (
+          <motion.div
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="rounded-xl border border-red-500/20 bg-red-500/[0.08] px-4 py-3"
+          >
+            <p className="text-xs text-red-400">{error}</p>
+          </motion.div>
+        )}
+
+        <motion.button
+          type="submit"
+          disabled={isPending}
+          whileHover={!isPending ? { scale: 1.015 } : {}}
+          whileTap={!isPending ? { scale: 0.985 } : {}}
+          className="group relative mt-2 w-full overflow-hidden rounded-xl py-3.5 text-sm font-semibold text-zinc-950 disabled:opacity-60"
+          style={{ background: 'linear-gradient(135deg, #06b6d4 0%, #10b981 100%)' }}
+        >
+          <span
+            className="pointer-events-none absolute inset-0 -translate-x-full transition-transform duration-700 ease-in-out group-hover:translate-x-full"
+            style={{
+              background:
+                'linear-gradient(105deg, transparent 30%, rgba(255,255,255,0.22) 50%, transparent 70%)',
+            }}
+          />
+          {isPending ? (
+            <span className="flex items-center justify-center gap-2">
+              <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                <circle
+                  cx="12" cy="12" r="10"
+                  stroke="currentColor" strokeWidth="3"
+                  className="opacity-25"
+                />
+                <path
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 00-8 8h4z"
+                  className="opacity-75"
+                />
+              </svg>
+              Guardando...
+            </span>
+          ) : (
+            <span className="flex items-center justify-center gap-2">
+              Ir a mi dashboard
+              <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>
+            </span>
+          )}
+        </motion.button>
+      </form>
+    </motion.div>
+  )
+}
+
+// ─── Main wizard ──────────────────────────────────────────────────────────────
+
+export function OnboardingWizard({ companyName }: { companyName: string }) {
+  const [step, setStep] = useState(1)
+
+  return (
+    <div className="w-full max-w-md mx-auto px-6 py-10">
+      <Stepper step={step} />
+
       <AnimatePresence mode="wait">
-        
-        {/* PASO 1: Bienvenida */}
         {step === 1 && (
-          <motion.div key="step1" variants={slideVariants} initial="hidden" animate="visible" exit="exit" className="flex flex-col items-center text-center">
-            <div className="w-16 h-16 rounded-full bg-cyan-500/10 flex items-center justify-center mb-6 border border-cyan-500/20 shadow-[0_0_30px_rgba(6,182,212,0.2)]">
-              <Sparkles className="text-cyan-400" size={32} />
-            </div>
-            <h1 className="text-3xl font-bold text-white mb-4 tracking-tight">
-              Bienvenido a develOP, <br/>
-              <span className="text-cyan-400">{companyName}</span>
-            </h1>
-            <p className="text-zinc-400 text-base leading-relaxed mb-10 max-w-md mx-auto">
-              Estamos emocionados de escalar tu ecosistema B2B. Para operar a la velocidad de la luz y sin correos interminables, hemos preparado esta rápida calibración de 2 minutos.
-            </p>
-            <button
-              onClick={proceedToBrand}
-              className="group flex items-center gap-2 bg-white text-black px-8 py-3.5 rounded-full font-semibold hover:bg-zinc-200 transition-all shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:shadow-[0_0_30px_rgba(255,255,255,0.2)]"
-            >
-              Comenzar Calibración
-              <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
-            </button>
-          </motion.div>
+          <Step1 name={companyName} onNext={() => setStep(2)} />
         )}
-
-        {/* PASO 2: Perfil de Marca */}
         {step === 2 && (
-          <motion.div key="step2" variants={slideVariants} initial="hidden" animate="visible" exit="exit" className="bg-[#111418] border border-white/10 rounded-2xl p-8 shadow-2xl">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="p-2 bg-indigo-500/10 rounded-lg text-indigo-400 border border-indigo-500/20"><Palette size={20} /></div>
-              <h2 className="text-xl font-bold text-white">Identidad de Marca</h2>
-            </div>
-            
-            <form className="space-y-5">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-2 block">Color Primario (Hex)</label>
-                  <input {...brandForm.register('primaryColor')} className="w-full bg-[#080a0c] border border-white/10 rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all font-mono" placeholder="#000000" />
-                  {brandForm.formState.errors.primaryColor && <p className="text-red-400 text-xs mt-1">{brandForm.formState.errors.primaryColor.message}</p>}
-                </div>
-                <div>
-                  <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-2 block">Secundario (Hex)</label>
-                  <input {...brandForm.register('secondaryColor')} className="w-full bg-[#080a0c] border border-white/10 rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all font-mono" placeholder="#10b981" />
-                </div>
-              </div>
-
-              <div>
-                <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-2 block">Tono de Voz</label>
-                <textarea {...brandForm.register('toneOfVoice')} className="w-full h-24 resize-none bg-[#080a0c] border border-white/10 rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all" placeholder="Ej: Corporativo pero cercano, sin lenguaje técnico excesivo..." />
-                {brandForm.formState.errors.toneOfVoice && <p className="text-red-400 text-xs mt-1">{brandForm.formState.errors.toneOfVoice.message}</p>}
-              </div>
-
-              <div>
-                <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-2 block">Cliente Ideal (Buyer Persona)</label>
-                <textarea {...brandForm.register('targetAudience')} className="w-full h-24 resize-none bg-[#080a0c] border border-white/10 rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all" placeholder="Ej: Directores de clínicas estéticas de Latam buscando automatizar citas..." />
-                {brandForm.formState.errors.targetAudience && <p className="text-red-400 text-xs mt-1">{brandForm.formState.errors.targetAudience.message}</p>}
-              </div>
-
-              <div className="pt-4 flex justify-between">
-                <button type="button" onClick={() => setStep(1)} className="text-zinc-500 hover:text-white px-4 py-2 text-sm transition-colors">Atrás</button>
-                <button type="button" onClick={handleBrandSubmit} className="bg-white text-black px-6 py-2.5 rounded-lg text-sm font-semibold hover:bg-zinc-200 transition-all">Continuar a Accesos</button>
-              </div>
-            </form>
-          </motion.div>
+          <Step2 onNext={() => setStep(3)} />
         )}
-
-        {/* PASO 3: Accesos Técnicos */}
         {step === 3 && (
-          <motion.div key="step3" variants={slideVariants} initial="hidden" animate="visible" exit="exit" className="bg-[#111418] border border-white/10 rounded-2xl p-8 shadow-2xl">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="p-2 bg-emerald-500/10 rounded-lg text-emerald-400 border border-emerald-500/20"><KeyRound size={20} /></div>
-              <h2 className="text-xl font-bold text-white">Delegación de Accesos</h2>
-            </div>
-            <p className="text-sm text-zinc-400 mb-6 flex items-center gap-1.5"><Lock size={12}/> Envío cifrado directo a tu Bóveda B2B (AES-256)</p>
-            
-            <form className="space-y-5">
-              <div>
-                <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-2 block">Dominio y Hosting (Opcional)</label>
-                <textarea {...accessForm.register('domainCredentials')} className="w-full h-20 resize-none bg-[#080a0c] border border-white/10 rounded-lg px-4 py-3 text-sm text-zinc-300 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all placeholder:text-zinc-700" placeholder="URL: ...&#10;Usuario: ...&#10;Contraseña: ..." />
-              </div>
-
-              <div>
-                <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-2 block">Redes Sociales (Opcional)</label>
-                <textarea {...accessForm.register('socialCredentials')} className="w-full h-20 resize-none bg-[#080a0c] border border-white/10 rounded-lg px-4 py-3 text-sm text-zinc-300 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all placeholder:text-zinc-700" placeholder="Instagram y LinkedIn manager..." />
-              </div>
-
-              <div className="p-3 bg-zinc-900/50 rounded-lg border border-white/5 text-xs text-zinc-500 leading-relaxed">
-                Puedes saltar este paso y proporcionarlos luego directamente desde el Dashboard o mediante 1Password.
-              </div>
-
-              <div className="pt-4 flex justify-between items-center">
-                <button type="button" onClick={() => setStep(2)} className="text-zinc-500 hover:text-white px-4 py-2 text-sm transition-colors">Atrás</button>
-                <button type="button" onClick={handleFinalSubmit} className="bg-emerald-500 text-black px-6 py-2.5 rounded-lg text-sm font-bold hover:bg-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.3)] transition-all">
-                  Finalizar Calibración
-                </button>
-              </div>
-            </form>
-          </motion.div>
+          <Step3 companyName={companyName} />
         )}
-
-        {/* PASO 4: Carga y Redirección */}
-        {step === 4 && (
-          <motion.div key="step4" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="flex flex-col items-center justify-center text-center py-10">
-            <motion.div
-              animate={{ rotate: 360 }}
-              transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
-              className="w-16 h-16 rounded-full border-t-2 border-r-2 border-emerald-500 mb-6"
-            />
-            <h2 className="text-2xl font-bold text-white mb-2">Construyendo tu ecosistema...</h2>
-            <p className="text-zinc-400 text-sm">Validando hashes criptográficos y aprovisionando tu Dashboard C-Level.</p>
-            
-            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1 }} className="mt-8 flex items-center gap-2 text-emerald-400 font-medium">
-              <CheckCircle size={18} /> Perfil completado con éxito
-            </motion.div>
-          </motion.div>
-        )}
-
       </AnimatePresence>
     </div>
   )

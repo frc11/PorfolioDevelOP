@@ -4,17 +4,19 @@ import { redirect } from 'next/navigation'
 import { resolveOrgId } from '@/lib/preview'
 import { LockedFeatureView } from '@/components/dashboard/LockedFeatureView'
 import { FadeIn } from '@/components/dashboard/FadeIn'
+import { TrendBadge } from '@/components/dashboard/TrendBadge'
 import { Users, CheckCircle2, TrendingUp, DollarSign } from 'lucide-react'
 
 export const metadata = { title: 'Mini-CRM | develOP Dashboard' }
 
-const CARD = 'rounded-2xl border border-white/[0.06] bg-white/[0.02] p-5'
+const CARD =
+  'rounded-2xl border border-white/[0.08] bg-white/[0.03] p-5 backdrop-blur-xl transition-all hover:border-white/[0.12] hover:bg-white/[0.05]'
 
 const STATS = [
-  { label: 'Leads activos', value: '34', icon: Users, color: 'text-indigo-400', bg: 'bg-indigo-500/10' },
-  { label: 'Cierres este mes', value: '8', icon: CheckCircle2, color: 'text-emerald-400', bg: 'bg-emerald-500/10' },
-  { label: 'Tasa de conversión', value: '23%', icon: TrendingUp, color: 'text-cyan-400', bg: 'bg-cyan-500/10' },
-  { label: 'Valor del pipeline', value: '$127K', icon: DollarSign, color: 'text-amber-400', bg: 'bg-amber-500/10' },
+  { label: 'Leads activos', value: '34', icon: Users, color: 'text-indigo-400', bg: 'bg-indigo-500/10', trend: 15 },
+  { label: 'Cierres este mes', value: '8', icon: CheckCircle2, color: 'text-emerald-400', bg: 'bg-emerald-500/10', trend: 33 },
+  { label: 'Tasa de conversión', value: '23%', icon: TrendingUp, color: 'text-cyan-400', bg: 'bg-cyan-500/10', trend: 5 },
+  { label: 'Valor del pipeline', value: '$127K', icon: DollarSign, color: 'text-amber-400', bg: 'bg-amber-500/10', trend: 28 },
 ]
 
 const COLUMNS: {
@@ -94,7 +96,16 @@ export default async function MiniCRMPage() {
             <Users size={18} className="text-indigo-400" />
           </div>
           <div>
-            <h1 className="text-xl font-semibold text-white">Mini-CRM & Gestión de Leads</h1>
+            <div className="flex items-center gap-2">
+              <h1 className="text-xl font-semibold text-white">Mini-CRM & Gestión de Leads</h1>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/25 bg-emerald-500/10 px-2.5 py-1 text-[9px] font-black uppercase tracking-widest text-emerald-400">
+                <span className="relative flex h-1.5 w-1.5">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                </span>
+                Activo
+              </span>
+            </div>
             <p className="text-sm text-zinc-400">Pipeline completo desde el primer contacto hasta el cierre</p>
           </div>
         </div>
@@ -109,7 +120,10 @@ export default async function MiniCRMPage() {
                 <div className={`flex h-8 w-8 items-center justify-center rounded-lg ${s.bg} border border-white/[0.06] mb-3`}>
                   <Icon size={14} className={s.color} />
                 </div>
-                <p className="text-2xl font-bold text-white mb-1">{s.value}</p>
+                <div className="flex items-baseline gap-2 mb-1">
+                  <p className="text-2xl font-bold text-white">{s.value}</p>
+                  <TrendBadge value={s.trend} />
+                </div>
                 <p className="text-xs text-zinc-500 leading-snug">{s.label}</p>
               </div>
             )

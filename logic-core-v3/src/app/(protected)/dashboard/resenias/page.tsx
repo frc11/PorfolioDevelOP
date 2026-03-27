@@ -4,18 +4,20 @@ import { redirect } from 'next/navigation'
 import { resolveOrgId } from '@/lib/preview'
 import { LockedFeatureView } from '@/components/dashboard/LockedFeatureView'
 import { FadeIn } from '@/components/dashboard/FadeIn'
+import { TrendBadge } from '@/components/dashboard/TrendBadge'
 import { Star, Send, TrendingUp, CheckCircle2 } from 'lucide-react'
 
 export const metadata = { title: 'Motor de Reseñas | develOP Dashboard' }
 
-const CARD = 'rounded-2xl border border-white/[0.06] bg-white/[0.02] p-5'
+const CARD =
+  'rounded-2xl border border-white/[0.08] bg-white/[0.03] p-5 backdrop-blur-xl transition-all hover:border-white/[0.12] hover:bg-white/[0.05]'
 const SECTION = 'rounded-2xl border border-white/[0.06] bg-white/[0.02] p-6'
 
 const STATS = [
-  { label: 'Reseñas este mes', value: '23', icon: Star, color: 'text-yellow-400', bg: 'bg-yellow-500/10' },
-  { label: 'Rating promedio', value: '4.8 ★', icon: TrendingUp, color: 'text-emerald-400', bg: 'bg-emerald-500/10' },
-  { label: 'Solicitudes enviadas', value: '67', icon: Send, color: 'text-cyan-400', bg: 'bg-cyan-500/10' },
-  { label: 'Tasa de conversión', value: '34%', icon: CheckCircle2, color: 'text-violet-400', bg: 'bg-violet-500/10' },
+  { label: 'Reseñas este mes', value: '23', icon: Star, color: 'text-yellow-400', bg: 'bg-yellow-500/10', trend: 35 },
+  { label: 'Rating promedio', value: '4.8 ★', icon: TrendingUp, color: 'text-emerald-400', bg: 'bg-emerald-500/10', trend: 4 },
+  { label: 'Solicitudes enviadas', value: '67', icon: Send, color: 'text-cyan-400', bg: 'bg-cyan-500/10', trend: 22 },
+  { label: 'Tasa de conversión', value: '34%', icon: CheckCircle2, color: 'text-violet-400', bg: 'bg-violet-500/10', trend: 4 },
 ]
 
 const REVIEWS = [
@@ -39,7 +41,6 @@ const REVIEWS = [
   },
 ]
 
-// Rating evolution: last 6 months (scale 0-5)
 const RATING_HISTORY = [
   { month: 'Oct', value: 3.4 },
   { month: 'Nov', value: 3.8 },
@@ -70,7 +71,16 @@ export default async function MotorReseniasPage() {
             <Star size={18} className="text-yellow-400" />
           </div>
           <div>
-            <h1 className="text-xl font-semibold text-white">Motor de Reseñas Automático</h1>
+            <div className="flex items-center gap-2">
+              <h1 className="text-xl font-semibold text-white">Motor de Reseñas Automático</h1>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/25 bg-emerald-500/10 px-2.5 py-1 text-[9px] font-black uppercase tracking-widest text-emerald-400">
+                <span className="relative flex h-1.5 w-1.5">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                </span>
+                Activo
+              </span>
+            </div>
             <p className="text-sm text-zinc-400">Solicitudes automáticas post-venta vía WhatsApp</p>
           </div>
         </div>
@@ -85,7 +95,10 @@ export default async function MotorReseniasPage() {
                 <div className={`flex h-8 w-8 items-center justify-center rounded-lg ${s.bg} border border-white/[0.06] mb-3`}>
                   <Icon size={14} className={s.color} />
                 </div>
-                <p className="text-2xl font-bold text-white mb-1">{s.value}</p>
+                <div className="flex items-baseline gap-2 mb-1">
+                  <p className="text-2xl font-bold text-white">{s.value}</p>
+                  <TrendBadge value={s.trend} />
+                </div>
                 <p className="text-xs text-zinc-500 leading-snug">{s.label}</p>
               </div>
             )

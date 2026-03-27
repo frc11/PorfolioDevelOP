@@ -4,18 +4,20 @@ import { redirect } from 'next/navigation'
 import { resolveOrgId } from '@/lib/preview'
 import { LockedFeatureView } from '@/components/dashboard/LockedFeatureView'
 import { FadeIn } from '@/components/dashboard/FadeIn'
+import { TrendBadge } from '@/components/dashboard/TrendBadge'
 import { Mail, Eye, MousePointerClick, TrendingUp, Zap } from 'lucide-react'
 
 export const metadata = { title: 'Email Nurturing | develOP Dashboard' }
 
-const CARD = 'rounded-2xl border border-white/[0.06] bg-white/[0.02] p-5'
+const CARD =
+  'rounded-2xl border border-white/[0.08] bg-white/[0.03] p-5 backdrop-blur-xl transition-all hover:border-white/[0.12] hover:bg-white/[0.05]'
 const SECTION = 'rounded-2xl border border-white/[0.06] bg-white/[0.02] p-6'
 
 const STATS = [
-  { label: 'Emails enviados', value: '1.847', icon: Mail, color: 'text-violet-400', bg: 'bg-violet-500/10' },
-  { label: 'Tasa de apertura', value: '34%', icon: Eye, color: 'text-cyan-400', bg: 'bg-cyan-500/10' },
-  { label: 'Tasa de click', value: '8.2%', icon: MousePointerClick, color: 'text-blue-400', bg: 'bg-blue-500/10' },
-  { label: 'Conversiones', value: '23', icon: TrendingUp, color: 'text-emerald-400', bg: 'bg-emerald-500/10' },
+  { label: 'Emails enviados', value: '1.847', icon: Mail, color: 'text-violet-400', bg: 'bg-violet-500/10', trend: 24 },
+  { label: 'Tasa de apertura', value: '34%', icon: Eye, color: 'text-cyan-400', bg: 'bg-cyan-500/10', trend: 4 },
+  { label: 'Tasa de click', value: '8.2%', icon: MousePointerClick, color: 'text-blue-400', bg: 'bg-blue-500/10', trend: 12 },
+  { label: 'Conversiones', value: '23', icon: TrendingUp, color: 'text-emerald-400', bg: 'bg-emerald-500/10', trend: 28 },
 ]
 
 const FLOWS = [
@@ -69,7 +71,16 @@ export default async function EmailNurturingPage() {
             <Mail size={18} className="text-violet-400" />
           </div>
           <div>
-            <h1 className="text-xl font-semibold text-white">Email Marketing & Nurturing</h1>
+            <div className="flex items-center gap-2">
+              <h1 className="text-xl font-semibold text-white">Email Marketing & Nurturing</h1>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/25 bg-emerald-500/10 px-2.5 py-1 text-[9px] font-black uppercase tracking-widest text-emerald-400">
+                <span className="relative flex h-1.5 w-1.5">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                </span>
+                Activo
+              </span>
+            </div>
             <p className="text-sm text-zinc-400">Secuencias automáticas que convierten leads en clientes</p>
           </div>
         </div>
@@ -84,7 +95,10 @@ export default async function EmailNurturingPage() {
                 <div className={`flex h-8 w-8 items-center justify-center rounded-lg ${s.bg} border border-white/[0.06] mb-3`}>
                   <Icon size={14} className={s.color} />
                 </div>
-                <p className="text-2xl font-bold text-white mb-1">{s.value}</p>
+                <div className="flex items-baseline gap-2 mb-1">
+                  <p className="text-2xl font-bold text-white">{s.value}</p>
+                  <TrendBadge value={s.trend} />
+                </div>
                 <p className="text-xs text-zinc-500 leading-snug">{s.label}</p>
               </div>
             )

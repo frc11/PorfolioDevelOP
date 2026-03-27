@@ -4,11 +4,11 @@ import { motion } from 'framer-motion'
 import { useEffect, useState } from 'react'
 
 const PROGRESS_MESSAGES = [
-  { threshold: 0, text: '¡Motor en marcha! Próximo hito: Definición' },
-  { threshold: 25, text: '¡Estamos en ritmo! Próximo hito: Integración' },
-  { threshold: 50, text: '¡Dominando el core! Próximo hito: Optimización' },
-  { threshold: 75, text: '¡Recta final! Próximo hito: Control de Calidad' },
-  { threshold: 100, text: '¡Proyecto completado con éxito! 🚀' },
+  { threshold: 0,   text: 'Estamos arrancando, lo mejor está por venir 🚀' },
+  { threshold: 26,  text: '¡Vamos bien! Superamos el primer cuarto 💪' },
+  { threshold: 51,  text: 'Más de la mitad del camino recorrido 🎯' },
+  { threshold: 76,  text: '¡Casi llegamos! La recta final 🏁' },
+  { threshold: 100, text: '¡Proyecto completado! 🎉' },
 ]
 
 export function AnimatedProgressBar({ progressPct }: { progressPct: number }) {

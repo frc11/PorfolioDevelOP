@@ -4,18 +4,20 @@ import { redirect } from 'next/navigation'
 import { resolveOrgId } from '@/lib/preview'
 import { LockedFeatureView } from '@/components/dashboard/LockedFeatureView'
 import { FadeIn } from '@/components/dashboard/FadeIn'
-import { Share2, Eye, Heart, Clock, CheckCircle2, XCircle, Instagram, Facebook } from 'lucide-react'
+import { TrendBadge } from '@/components/dashboard/TrendBadge'
+import { Share2, Eye, Heart, Clock, CheckCircle2, XCircle } from 'lucide-react'
 
 export const metadata = { title: 'Social Media Hub | develOP Dashboard' }
 
-const CARD = 'rounded-2xl border border-white/[0.06] bg-white/[0.02] p-5'
+const CARD =
+  'rounded-2xl border border-white/[0.08] bg-white/[0.03] p-5 backdrop-blur-xl transition-all hover:border-white/[0.12] hover:bg-white/[0.05]'
 const SECTION = 'rounded-2xl border border-white/[0.06] bg-white/[0.02] p-6'
 
 const STATS = [
-  { label: 'Posts publicados', value: '24', icon: Share2, color: 'text-pink-400', bg: 'bg-pink-500/10' },
-  { label: 'Alcance total', value: '12.4K', icon: Eye, color: 'text-cyan-400', bg: 'bg-cyan-500/10' },
-  { label: 'Engagement promedio', value: '4.2%', icon: Heart, color: 'text-rose-400', bg: 'bg-rose-500/10' },
-  { label: 'Pendientes de aprobación', value: '3', icon: Clock, color: 'text-amber-400', bg: 'bg-amber-500/10' },
+  { label: 'Posts publicados', value: '24', icon: Share2, color: 'text-pink-400', bg: 'bg-pink-500/10', trend: 20 },
+  { label: 'Alcance total', value: '12.4K', icon: Eye, color: 'text-cyan-400', bg: 'bg-cyan-500/10', trend: 31 },
+  { label: 'Engagement promedio', value: '4.2%', icon: Heart, color: 'text-rose-400', bg: 'bg-rose-500/10', trend: 10 },
+  { label: 'Pendientes de aprobación', value: '3', icon: Clock, color: 'text-amber-400', bg: 'bg-amber-500/10', trend: 0 },
 ]
 
 const QUEUE = [
@@ -66,7 +68,16 @@ export default async function SocialMediaHubPage() {
             <Share2 size={18} className="text-pink-400" />
           </div>
           <div>
-            <h1 className="text-xl font-semibold text-white">Social Media & Content Hub</h1>
+            <div className="flex items-center gap-2">
+              <h1 className="text-xl font-semibold text-white">Social Media & Content Hub</h1>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/25 bg-emerald-500/10 px-2.5 py-1 text-[9px] font-black uppercase tracking-widest text-emerald-400">
+                <span className="relative flex h-1.5 w-1.5">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                </span>
+                Activo
+              </span>
+            </div>
             <p className="text-sm text-zinc-400">Aprobá contenido y publicamos en todas tus redes</p>
           </div>
         </div>
@@ -81,7 +92,10 @@ export default async function SocialMediaHubPage() {
                 <div className={`flex h-8 w-8 items-center justify-center rounded-lg ${s.bg} border border-white/[0.06] mb-3`}>
                   <Icon size={14} className={s.color} />
                 </div>
-                <p className="text-2xl font-bold text-white mb-1">{s.value}</p>
+                <div className="flex items-baseline gap-2 mb-1">
+                  <p className="text-2xl font-bold text-white">{s.value}</p>
+                  <TrendBadge value={s.trend} />
+                </div>
                 <p className="text-xs text-zinc-500 leading-snug">{s.label}</p>
               </div>
             )

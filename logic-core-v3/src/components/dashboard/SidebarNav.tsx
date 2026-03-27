@@ -1,8 +1,9 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
-import { Home, FolderOpen, Zap, MessageSquare, User, BarChart2, TrendingUp, Archive, Headphones, CreditCard, Mail, Users, Lock, MessageCircle, Calendar, Share2, Search, ShoppingCart, Target, Star, type LucideIcon } from 'lucide-react'
+import { Home, FolderOpen, Zap, MessageSquare, User, BarChart2, TrendingUp, Archive, Headphones, CreditCard, Mail, Users, Lock, MessageCircle, Calendar, Share2, Search, ShoppingCart, Target, Star, X, type LucideIcon } from 'lucide-react'
 import { motion } from 'framer-motion'
 
 interface NavItem {
@@ -48,23 +49,47 @@ interface SidebarNavProps {
   companyName: string
   unreadMessages?: number
   unlockedFeatures?: string[]
+  showCloseButton?: boolean
+  onClose?: () => void
 }
 
-export function SidebarNav({ companyName, unreadMessages = 0, unlockedFeatures = [] }: SidebarNavProps) {
+export function SidebarNav({
+  companyName,
+  unreadMessages = 0,
+  unlockedFeatures = [],
+  showCloseButton = false,
+  onClose,
+}: SidebarNavProps) {
   const pathname = usePathname()
 
   return (
     <nav className="relative flex h-full w-60 flex-shrink-0 flex-col border-r border-white/5 bg-[#040506]">
       {/* Subtle Noise Texture on Sidebar */}
-      <div 
+      <div
         className="pointer-events-none absolute inset-0 opacity-[0.015]"
         style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E")' }}
       />
 
-      {/* Brand */}
-      <div className="relative z-10 flex h-16 flex-col justify-center border-b border-white/5 px-6 mt-2">
-        <span className="text-[10px] text-zinc-500 uppercase tracking-widest font-semibold mb-0.5">Portal B2B</span>
-        <span className="truncate text-sm font-bold text-zinc-100">{companyName}</span>
+      {/* Brand — develOP logo */}
+      <div className="relative z-10 flex h-16 flex-shrink-0 items-center justify-between border-b border-white/5 px-5">
+        <Image
+          src="/logodevelOP.svg"
+          alt="develOP"
+          width={96}
+          height={26}
+          className="opacity-90"
+          style={{ filter: 'brightness(0) invert(1)' }}
+          priority
+        />
+        {showCloseButton && (
+          <button
+            onClick={onClose}
+            className="flex h-7 w-7 items-center justify-center rounded-md text-zinc-500 hover:text-zinc-200 hover:bg-white/5 transition-colors"
+            aria-label="Cerrar menú"
+          >
+            <X size={15} />
+          </button>
+        )}
       </div>
 
       {/* Nav links */}
@@ -122,10 +147,14 @@ export function SidebarNav({ companyName, unreadMessages = 0, unlockedFeatures =
         })}
 
         {/* VIP Section separator */}
-        <li className="pt-3 pb-1 px-3">
-          <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-zinc-600">
-            Módulos Premium
-          </p>
+        <li className="pt-4 pb-2 px-3">
+          <div className="flex items-center gap-2 mb-1">
+            <div className="h-px flex-1 bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+            <p className="text-[9px] font-bold uppercase tracking-[0.22em] text-zinc-600 flex-shrink-0">
+              Módulos Premium
+            </p>
+            <div className="h-px flex-1 bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+          </div>
         </li>
 
         {VIP_ITEMS.map(({ href, label, icon: Icon, exact, featureId }) => {

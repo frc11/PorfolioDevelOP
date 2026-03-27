@@ -186,6 +186,8 @@ model Organization {
   siteUrl             String?
   n8nWorkflowIds      String[]
   onboardingCompleted Boolean  @default(false)
+  whatsapp            String?
+  notificationPrefs   Json?
   createdAt           DateTime @default(now())
 
   members       OrgMember[]
@@ -313,8 +315,8 @@ model Notification {
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  organizationId String
-  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  organizationId String?
+  organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
   taskId String?
   task   Task?   @relation(fields: [taskId], references: [id], onDelete: Cascade)

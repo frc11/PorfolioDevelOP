@@ -1,66 +1,59 @@
 import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import { resolveOrgId } from '@/lib/preview'
-import { TaskStatus, ProjectStatus } from '@prisma/client'
-import { Calendar, CheckCircle2, Circle, Loader2, CircleDashed } from 'lucide-react'
+import { ProjectStatus } from '@prisma/client'
+import { MessageSquare, FolderOpen } from 'lucide-react'
+import Link from 'next/link'
 import { FadeIn } from '@/components/dashboard/FadeIn'
-import { TaskApprovalButtons } from '@/components/dashboard/TaskApprovalButtons'
 import { AnimatedProgressBar } from '@/components/dashboard/AnimatedProgressBar'
-import { AnimatedTaskList, AnimatedTaskItem } from '@/components/dashboard/AnimatedTaskList'
-import { EmptyState } from '@/components/dashboard/EmptyState'
+import { AnimatedCounter } from '@/components/dashboard/AnimatedCounter'
 import { CurrentMilestone } from '@/components/dashboard/CurrentMilestone'
+import { ProjectTaskTabs } from '@/components/dashboard/ProjectTaskTabs'
+import type { SerializedTask } from '@/components/dashboard/ProjectTaskTabs'
 
-// ─── Label / style maps ───────────────────────────────────────────────────────
+// ─── Status badge config ───────────────────────────────────────────────────────
 
 const PROJECT_STATUS_STYLE: Record<ProjectStatus, string> = {
-  PLANNING: 'bg-zinc-500/10 text-zinc-400 border-zinc-500/20',
+  PLANNING:    'bg-zinc-500/10 text-zinc-400 border-zinc-500/20',
   IN_PROGRESS: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
-  REVIEW: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
-  COMPLETED: 'bg-green-500/10 text-green-400 border-green-500/20',
+  REVIEW:      'bg-amber-500/10 text-amber-400 border-amber-500/20',
+  COMPLETED:   'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
 }
 
 const PROJECT_STATUS_LABEL: Record<ProjectStatus, string> = {
-  PLANNING: 'Planificación',
-  IN_PROGRESS: 'En curso',
-  REVIEW: 'En revisión',
-  COMPLETED: 'Completado',
+  PLANNING:    'Planificación',
+  IN_PROGRESS: 'En Curso',
+  REVIEW:      'En Revisión',
+  COMPLETED:   'Completado',
 }
 
-const TASK_STATUS_ORDER: TaskStatus[] = ['IN_PROGRESS', 'TODO', 'DONE']
+// ─── Task serialization ────────────────────────────────────────────────────────
 
-const TASK_GROUP_LABEL: Record<TaskStatus, string> = {
-  IN_PROGRESS: 'En curso',
-  TODO: 'Pendientes',
-  DONE: 'Completadas',
-}
+function serializeTask(task: {
+  id: string
+  title: string
+  description: string | null
+  status: 'TODO' | 'IN_PROGRESS' | 'DONE'
+  dueDate: Date | null
+  approvalStatus: string | null
+}): SerializedTask {
+  const daysUntilDue = task.dueDate
+    ? Math.ceil((new Date(task.dueDate).getTime() - Date.now()) / 86_400_000)
+    : null
 
-const TASK_GROUP_STYLE: Record<
-  TaskStatus,
-  { dot: string; label: string; icon: typeof Circle }
-> = {
-  IN_PROGRESS: { dot: 'bg-blue-400', label: 'text-blue-400', icon: Loader2 },
-  TODO: { dot: 'bg-zinc-500', label: 'text-zinc-400', icon: Circle },
-  DONE: { dot: 'bg-emerald-400', label: 'text-emerald-400', icon: CheckCircle2 },
-}
-
-/**
- * Translates technical task titles into tangible business ROI descriptions.
- */
-function toBusinessImpact(title: string): string | null {
-  const mapping: Record<string, string> = {
-    'Integración CMS': 'Permitirá que cargues tus propios autos sin depender de nosotros.',
-    'Desarrollo frontend': 'Habilita la interfaz visual que tus clientes usarán para buscar y filtrar el inventario.',
-    'Optimización SEO': 'Aumenta la probabilidad de que aparezcas en los primeros resultados cuando alguien busque "autos en Tucumán".',
-    'Soporte técnico': 'Garantiza que el sistema esté operativo 24/7 sin interrupciones.',
-    'Configuración API': 'Asegura que los datos de tus vehículos se sincronicen instantáneamente en todas tus plataformas.',
-    'Maquetación': 'Mejora la retención de usuarios con una estética de alta gama que genera confianza inmediata.',
+  return {
+    id: task.id,
+    title: task.title,
+    description: task.description,
+    status: task.status,
+    dueDate: task.dueDate ? task.dueDate.toISOString() : null,
+    approvalStatus: task.approvalStatus ?? null,
+    daysUntilDue,
+    isUrgent: daysUntilDue !== null && daysUntilDue <= 3 && task.status !== 'DONE',
   }
-  return mapping[title] || null
 }
 
-const CARD = 'rounded-xl border border-cyan-500/20 bg-white/5 backdrop-blur-xl p-5'
-
-// ─── Page ─────────────────────────────────────────────────────────────────────
+// ─── Page ──────────────────────────────────────────────────────────────────────
 
 export default async function ProjectPage() {
   const organizationId = await resolveOrgId()
@@ -69,220 +62,202 @@ export default async function ProjectPage() {
   const projects = await prisma.project.findMany({
     where: { organizationId },
     orderBy: [{ status: 'asc' }, { id: 'desc' }],
-    include: {
-      tasks: { orderBy: { id: 'asc' } },
-    },
+    include: { tasks: { orderBy: { id: 'asc' } } },
   })
 
+  // ── Empty state ────────────────────────────────────────────────────────────
   if (projects.length === 0) {
     return (
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-6 max-w-4xl mx-auto">
         <FadeIn>
-          <h1 className="text-xl font-semibold text-white">Mi proyecto</h1>
-        </FadeIn>
-        <FadeIn delay={0.1}>
-          <div
-            className="flex flex-col items-center gap-3 rounded-xl py-16 text-center"
-            style={{
-              border: '1px solid rgba(255,255,255,0.08)',
-              background: 'rgba(255,255,255,0.03)',
-              backdropFilter: 'blur(8px)',
-            }}
-          >
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-zinc-800/60">
-              <Loader2 size={22} className="text-zinc-500" />
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
+            <div>
+              <h1 className="text-2xl font-black tracking-tight text-white uppercase sm:text-3xl">
+                Mi Proyecto
+              </h1>
+              <p className="mt-1 text-xs font-medium text-zinc-600 uppercase tracking-widest">
+                Estado actual y hoja de ruta estratégica
+              </p>
             </div>
-            <p className="text-sm font-medium text-zinc-300">Tu proyecto está siendo preparado</p>
-            <p className="max-w-xs text-sm text-zinc-500">
-              Pronto tendrás novedades. El equipo de DevelOP está trabajando en los detalles.
-            </p>
+          </div>
+        </FadeIn>
+
+        <FadeIn delay={0.08}>
+          <div className="relative flex flex-col items-center gap-6 rounded-[2rem] border border-white/8 bg-[#0a0c0f]/60 backdrop-blur-xl py-20 px-8 text-center overflow-hidden">
+            <div className="absolute -top-20 left-1/2 -translate-x-1/2 h-40 w-40 rounded-full bg-cyan-500/5 blur-3xl pointer-events-none" />
+
+            <div className="relative flex h-20 w-20 items-center justify-center rounded-2xl border border-white/8 bg-white/[0.03] shadow-2xl">
+              <div className="absolute inset-0 rounded-2xl bg-cyan-500/5 animate-pulse" />
+              <FolderOpen size={32} className="text-zinc-500 relative z-10" />
+            </div>
+
+            <div className="max-w-sm space-y-2">
+              <h2 className="text-lg font-black tracking-tight text-white uppercase italic">
+                Tu proyecto está siendo preparado
+              </h2>
+              <p className="text-sm font-medium text-zinc-400 leading-relaxed">
+                En breve verás toda la hoja de ruta acá. El equipo de develOP está trabajando en los detalles.
+              </p>
+            </div>
+
+            <Link
+              href="/dashboard/messages"
+              className="inline-flex items-center gap-2 rounded-xl border border-cyan-500/20 bg-cyan-500/10 px-6 py-3 text-sm font-semibold text-cyan-400 transition-all hover:bg-cyan-500/20 hover:border-cyan-500/30 active:scale-95"
+            >
+              <MessageSquare size={16} />
+              Hablar con el equipo
+            </Link>
           </div>
         </FadeIn>
       </div>
     )
   }
 
+  // ── Data prep ──────────────────────────────────────────────────────────────
   const project = projects.find((p) => p.status === 'IN_PROGRESS') ?? projects[0]
-  const tasks = project.tasks
-  const doneCount = tasks.filter((t) => t.status === 'DONE').length
-  const totalCount = tasks.length
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const tasks = project.tasks as any[]
+
+  const doneCount   = tasks.filter((t) => t.status === 'DONE').length
+  const totalCount  = tasks.length
   const progressPct = totalCount > 0 ? Math.round((doneCount / totalCount) * 100) : 0
 
-  const grouped = TASK_STATUS_ORDER.reduce<Record<TaskStatus, typeof tasks>>(
-    (acc, status) => {
-      acc[status] = tasks.filter((t) => t.status === status)
-      return acc
-    },
-    { IN_PROGRESS: [], TODO: [], DONE: [] }
+  const pendingApprovalCount = tasks.filter((t) => t.approvalStatus === 'PENDING_APPROVAL').length
+
+  // Serialize tasks for the client component
+  const serialized = {
+    inProgress: tasks.filter((t) => t.status === 'IN_PROGRESS').map(serializeTask),
+    todo:       tasks.filter((t) => t.status === 'TODO').map(serializeTask),
+    done:       tasks.filter((t) => t.status === 'DONE').map(serializeTask),
+  }
+
+  // Milestone countdown (hardcoded milestone: 15-Apr-2026)
+  const MILESTONE_DATE = new Date('2026-04-15T00:00:00')
+  const milestoneDaysUntil = Math.max(
+    0,
+    Math.ceil((MILESTONE_DATE.getTime() - Date.now()) / 86_400_000)
   )
 
   return (
-    <div className="flex flex-col gap-10">
-      {/* Header */}
-      <FadeIn>
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+    <div className="flex flex-col gap-8 max-w-5xl mx-auto pb-20">
+
+      {/* ── 1. HEADER ─────────────────────────────────────────────────────── */}
+      <FadeIn delay={0}>
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pt-2">
           <div>
             <h1 className="text-2xl font-black tracking-tight text-white uppercase sm:text-3xl">
               Mi Proyecto
             </h1>
-            <p className="mt-1 text-xs font-medium text-zinc-500 uppercase tracking-widest leading-relaxed">
+            <p className="mt-1 text-xs font-medium text-zinc-600 uppercase tracking-widest">
               Estado actual y hoja de ruta estratégica
             </p>
           </div>
-          <span className={`inline-flex rounded-full border px-4 py-1.5 text-[10px] font-black uppercase tracking-widest shadow-sm ${PROJECT_STATUS_STYLE[project.status]}`}>
+
+          {/* Animated status badge */}
+          <div
+            className={`inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-[10px] font-black uppercase tracking-widest ${PROJECT_STATUS_STYLE[project.status]}`}
+          >
+            {project.status === 'IN_PROGRESS' && (
+              <span className="relative flex h-2 w-2 flex-shrink-0">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-blue-400 opacity-60" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-blue-400" />
+              </span>
+            )}
+            {project.status === 'COMPLETED' && (
+              <span className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.8)]" />
+            )}
             {PROJECT_STATUS_LABEL[project.status]}
-          </span>
+          </div>
         </div>
       </FadeIn>
 
-      {/* Hero Card with Progress */}
-      <FadeIn delay={0.1}>
-        <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#0c0e12]/60 p-8 backdrop-blur-xl transition-all duration-500 hover:border-cyan-500/20 group">
+      {/* ── 2. HERO — progress card ────────────────────────────────────────── */}
+      <FadeIn delay={0.06}>
+        <div className="relative overflow-hidden rounded-[2rem] border-t border-l border-white/10 bg-[#07080a]/60 p-7 sm:p-8 shadow-2xl backdrop-blur-3xl group transition-all duration-500 hover:border-cyan-500/20">
+          <div className="absolute -right-16 -top-16 h-64 w-64 rounded-full bg-cyan-500/5 blur-[80px] pointer-events-none group-hover:bg-cyan-500/8 transition-colors" />
+          <div className="absolute left-0 bottom-0 h-32 w-32 rounded-full bg-cyan-500/5 blur-[60px] pointer-events-none" />
+
           <div className="relative z-10">
-            <h2 className="text-lg font-bold text-white mb-2">{project.name}</h2>
-            {project.description && (
-              <p className="text-sm text-zinc-400 mb-8 max-w-2xl leading-relaxed">
-                {project.description}
-              </p>
+            {/* Project name + description + big % */}
+            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-5 mb-8">
+              <div className="flex-1 min-w-0">
+                <h2 className="text-lg font-bold text-white truncate">{project.name}</h2>
+                {project.description && (
+                  <p className="mt-1 text-sm text-zinc-500 max-w-xl leading-relaxed">
+                    {project.description}
+                  </p>
+                )}
+              </div>
+
+              {totalCount > 0 && (
+                <div className="flex flex-col items-start sm:items-end gap-1 flex-shrink-0">
+                  <div className="flex items-baseline gap-1">
+                    <AnimatedCounter
+                      value={progressPct}
+                      className="text-5xl sm:text-6xl font-black tracking-tighter text-white drop-shadow-[0_0_20px_rgba(6,182,212,0.25)]"
+                    />
+                    <span className="text-2xl sm:text-3xl font-bold text-zinc-600">%</span>
+                  </div>
+                  <p className="text-[10px] font-semibold uppercase tracking-widest text-zinc-600">
+                    {doneCount}/{totalCount} tareas completadas
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Progress bar */}
+            {totalCount > 0 && (
+              <AnimatedProgressBar progressPct={progressPct} />
             )}
 
-            {totalCount > 0 && (
-              <div className="space-y-4">
-                <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-[0.15em] text-zinc-500">
-                  <span>Progreso de Implementación</span>
-                  <span className="text-white">
-                    {doneCount}/{totalCount} Tareas · {progressPct}%
-                  </span>
-                </div>
-                <AnimatedProgressBar progressPct={progressPct} />
-              </div>
+            {totalCount === 0 && (
+              <p className="text-sm text-zinc-600 italic">Sin tareas asignadas aún.</p>
             )}
           </div>
-          <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-cyan-500/5 blur-[80px] pointer-events-none group-hover:bg-cyan-500/10 transition-colors" />
         </div>
       </FadeIn>
 
-      {/* Current Milestone Highlight */}
-      <FadeIn delay={0.15}>
-        <CurrentMilestone 
+      {/* ── 3. MILESTONE ──────────────────────────────────────────────────── */}
+      <FadeIn delay={0.1}>
+        <CurrentMilestone
           title="Lanzamiento del Panel de Control"
           dueDate="15 de Abril, 2026"
+          daysUntil={milestoneDaysUntil}
           description="Fase final de integración donde habilitaremos el acceso total a tus métricas y gestión de inventario en tiempo real."
         />
       </FadeIn>
 
-      {/* Vertical Timeline Section */}
-      <div className="relative flex flex-col gap-16 pb-20">
-        {totalCount > 0 && (
-          <div className="absolute left-[11px] top-6 bottom-0 w-px bg-gradient-to-b from-cyan-500/40 via-zinc-800 to-transparent pointer-events-none" />
-        )}
-
+      {/* ── 4. TASK TABS ──────────────────────────────────────────────────── */}
+      <FadeIn delay={0.14}>
         {totalCount === 0 ? (
-          <FadeIn delay={0.2}>
-            <div className={CARD}>
-              <EmptyState 
-                icon={<CircleDashed size={28} />} 
-                title="Proyecto Naciente" 
-                description="El equipo de develOP aún no ha asignado entregables a tu línea de tiempo. Recibirás notificaciones al iniciar la actividad."
-              />
+          <div className="flex flex-col items-center gap-4 rounded-2xl border border-white/8 bg-white/[0.02] py-16 px-8 text-center">
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-white/8 bg-white/[0.03]">
+              <FolderOpen size={26} className="text-zinc-600" />
             </div>
-          </FadeIn>
+            <div className="max-w-xs">
+              <p className="text-sm font-semibold text-zinc-400">Proyecto Naciente</p>
+              <p className="mt-1 text-xs text-zinc-600 leading-relaxed">
+                El equipo de develOP aún no ha asignado entregables a tu línea de tiempo. Recibirás notificaciones al iniciar la actividad.
+              </p>
+            </div>
+            <Link
+              href="/dashboard/messages"
+              className="inline-flex items-center gap-2 rounded-lg border border-white/8 bg-white/[0.03] px-5 py-2.5 text-sm font-semibold text-zinc-400 transition-all hover:text-white hover:border-white/20 active:scale-95"
+            >
+              <MessageSquare size={15} />
+              Hablar con el equipo
+            </Link>
+          </div>
         ) : (
-          TASK_STATUS_ORDER.map((status, i) => {
-            const group = grouped[status]
-            if (group.length === 0) return null
-            const { dot, label } = TASK_GROUP_STYLE[status]
-
-            return (
-              <div key={status} className="relative pl-10">
-                <div className="absolute left-0 top-1 z-10 flex h-6 w-6 items-center justify-center rounded-full bg-[#040506] border border-white/10 shadow-lg ring-4 ring-[#040506]">
-                  <div className={`h-2.5 w-2.5 rounded-full ${dot} shadow-[0_0_10px_currentColor]`} />
-                </div>
-
-                <div className="mb-8 flex items-center justify-between">
-                  <h3 className={`text-[10px] font-black uppercase tracking-[0.25em] ${label} drop-shadow-[0_0_10px_rgba(255,255,255,0.05)]`}>
-                    {TASK_GROUP_LABEL[status]}
-                  </h3>
-                  <div className="h-px flex-1 mx-6 bg-gradient-to-r from-white/[0.03] to-transparent" />
-                  <span className="text-[10px] font-bold text-zinc-600 tabular-nums uppercase tracking-widest whitespace-nowrap">
-                    {group.length} {group.length === 1 ? 'Hito' : 'Hitos'}
-                  </span>
-                </div>
-
-                <AnimatedTaskList className="flex flex-col gap-4">
-                  {group.map((task) => (
-                    <AnimatedTaskItem
-                      key={task.id}
-                      id={task.id}
-                      className="group relative rounded-2xl border border-t-white/10 border-l-white/10 border-white/5 bg-white/[0.02] px-6 py-5 backdrop-blur-2xl shadow-xl transition-all duration-300 hover:bg-white/[0.06] hover:border-white/20 hover:translate-x-1"
-                    >
-                      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5">
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-center gap-3 mb-1">
-                            {status === 'DONE' && (
-                              <CheckCircle2 size={16} className="text-emerald-400 drop-shadow-[0_0_8px_rgba(52,211,153,0.5)] flex-shrink-0" />
-                            )}
-                            {status === 'IN_PROGRESS' && (
-                              <Loader2 size={16} className="animate-spin text-blue-400 flex-shrink-0" />
-                            )}
-                            <p
-                              className={[
-                                'text-base font-bold tracking-tight transition-all duration-300',
-                                status === 'DONE'
-                                  ? 'text-zinc-500 line-through decoration-zinc-700/80 shadow-none'
-                                  : 'text-zinc-100',
-                              ].join(' ')}
-                            >
-                              {task.title}
-                            </p>
-                          </div>
-                          
-                          {toBusinessImpact(task.title) && (
-                            <p className="mt-1 text-xs font-medium text-zinc-500 italic opacity-90 pl-7 leading-relaxed flex items-center gap-2">
-                              <span className="h-px w-3 bg-zinc-800" />
-                              {toBusinessImpact(task.title)}
-                            </p>
-                          )}
-                        </div>
-
-                        <div className="flex items-center gap-6 shrink-0 lg:pl-4">
-                          {task.dueDate && (
-                            <div className="flex items-center gap-2 text-[10px] font-black tracking-[0.2em] text-zinc-600 uppercase bg-black/20 px-3 py-1.5 rounded-lg border border-white/5">
-                              <Calendar size={12} className="text-zinc-700" />
-                              <span>
-                                {new Date(task.dueDate).toLocaleDateString('es-AR', {
-                                  day: '2-digit',
-                                  month: 'short',
-                                })}
-                              </span>
-                            </div>
-                          )}
-
-                          {task.approvalStatus === 'PENDING_APPROVAL' && (
-                            <div className="scale-90 origin-right transition-transform hover:scale-95">
-                              <TaskApprovalButtons taskId={task.id} />
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                      
-                      {task.description && (
-                        <div className="overflow-hidden max-h-0 transition-all duration-500 group-hover:max-h-40 group-hover:mt-4">
-                           <div className="relative pt-4 border-t border-white/5">
-                            <p className="text-[11px] leading-relaxed text-zinc-500 pl-7 max-w-2xl">
-                              {task.description}
-                            </p>
-                          </div>
-                        </div>
-                      )}
-                    </AnimatedTaskItem>
-                  ))}
-                </AnimatedTaskList>
-              </div>
-            )
-          })
+          <ProjectTaskTabs
+            inProgress={serialized.inProgress}
+            todo={serialized.todo}
+            done={serialized.done}
+            pendingApprovalCount={pendingApprovalCount}
+          />
         )}
-      </div>
+      </FadeIn>
+
     </div>
   )
 }

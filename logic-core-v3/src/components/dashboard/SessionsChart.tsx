@@ -53,8 +53,9 @@ export function SessionsChart({ data }: SessionsChartProps) {
       <AreaChart data={data} margin={{ top: 20, right: 4, left: -20, bottom: 0 }}>
         <defs>
           <linearGradient id="sessionsGradient" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="5%" stopColor="#06b6d4" stopOpacity={0.15} />
-            <stop offset="95%" stopColor="#06b6d4" stopOpacity={0} />
+            <stop offset="0%" stopColor="#06b6d4" stopOpacity={0.35} />
+            <stop offset="45%" stopColor="#06b6d4" stopOpacity={0.12} />
+            <stop offset="100%" stopColor="#06b6d4" stopOpacity={0} />
           </linearGradient>
           <filter id="cyanGlow" x="-20%" y="-20%" width="140%" height="140%">
             <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur" />

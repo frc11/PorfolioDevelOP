@@ -1,9 +1,14 @@
 import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import { resolveOrgId } from '@/lib/preview'
-import { getN8nMetrics, ROI_PER_EXECUTION_USD, type N8nMetrics } from '@/lib/n8n'
+import { getN8nMetrics, ROI_PER_EXECUTION_USD, type WorkflowMetrics } from '@/lib/n8n'
+import { requestUpsellAction } from '@/lib/actions/upsell'
 import { AutomationsChart } from '@/components/dashboard/AutomationsChart'
 import { FadeIn } from '@/components/dashboard/FadeIn'
+import { AutomationsAlertas } from '@/components/dashboard/AutomationsAlertas'
+import { RoiAnualizado } from '@/components/dashboard/RoiAnualizado'
+import { TiempoAhorrado } from '@/components/dashboard/TiempoAhorrado'
+import { AnalyticsMetricCard } from '@/components/dashboard/AnalyticsMetricCard'
 import {
   Zap,
   CheckCircle2,
@@ -11,19 +16,27 @@ import {
   AlertTriangle,
   Activity,
   Clock,
-  Calculator
+  TrendingUp,
 } from 'lucide-react'
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function formatDateTime(iso: string | null): string {
+function formatRelativeTime(iso: string | null): string {
   if (!iso) return '—'
-  return new Date(iso).toLocaleString('es-AR', {
-    day: '2-digit',
-    month: 'short',
-    hour: '2-digit',
-    minute: '2-digit',
-  })
+  const diffMs = Date.now() - new Date(iso).getTime()
+  const minutes = Math.floor(diffMs / 60_000)
+  if (minutes < 1) return 'hace un momento'
+  if (minutes < 60) return `hace ${minutes} min`
+  const hours = Math.floor(minutes / 60)
+  if (hours < 24) return `hace ${hours}h`
+  const days = Math.floor(hours / 24)
+  return `hace ${days}d`
+}
+
+function successBarColor(pct: number): string {
+  if (pct >= 95) return '#22c55e'
+  if (pct >= 80) return '#f59e0b'
+  return '#ef4444'
 }
 
 const STATUS_STYLE: Record<string, string> = {
@@ -44,18 +57,22 @@ const STATUS_LABEL: Record<string, string> = {
   canceled: 'Cancelada',
 }
 
-const CARD =
-  'rounded-xl p-5'
 const CARD_STYLE = {
-  border: '1px solid rgba(6,182,212,0.2)',
-  background: 'rgba(255,255,255,0.05)',
+  border: '1px solid rgba(255,255,255,0.07)',
+  background: 'rgba(255,255,255,0.025)',
   backdropFilter: 'blur(24px)',
   WebkitBackdropFilter: 'blur(24px)',
 }
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
-export default async function AutomationsPage() {
+export default async function AutomationsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ demo?: string }>
+}) {
+  const { demo } = await searchParams
+  const isDemo = demo === 'true'
   const organizationId = await resolveOrgId()
   if (!organizationId) redirect('/login')
 
@@ -65,51 +82,111 @@ export default async function AutomationsPage() {
   })
   if (!client) redirect('/login')
 
+  const hasWorkflows = client.n8nWorkflowIds.length > 0
+  const activarAutomatizaciones = requestUpsellAction.bind(null, 'automatizaciones', 'Automatizaciones n8n')
+
   return (
     <div className="flex flex-col gap-6">
-      <FadeIn>
-        <div>
-          <h1 className="text-xl font-semibold text-white">Automatizaciones</h1>
-          <p className="mt-1 text-sm text-zinc-400">
-            Métricas de tus workflows de n8n — mes actual
-          </p>
-        </div>
-      </FadeIn>
+      {!hasWorkflows && !isDemo ? (
+        <>
+          {/* ── Header ── */}
+          <FadeIn>
+            <AutomationsHeader isMockData={false} />
+          </FadeIn>
 
-      <AutomationsContent workflowIds={client.n8nWorkflowIds} />
+          {/* ── Empty state ── */}
+          <FadeIn delay={0.1}>
+            <div className="flex flex-col items-center gap-6 rounded-2xl py-24 text-center border border-white/[0.08] bg-white/[0.02] backdrop-blur-xl shadow-2xl relative overflow-hidden group">
+              <div className="absolute inset-0 bg-gradient-to-b from-cyan-500/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+
+              <div className="relative z-10 flex flex-col items-center gap-5">
+                {/* Icon with glow ring */}
+                <div className="relative">
+                  <div className="absolute inset-0 rounded-2xl bg-cyan-500/10 blur-xl scale-150 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+                  <div className="relative mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-[#0c0e12] border border-white/10 shadow-inner group-hover:border-cyan-500/25 transition-colors duration-500">
+                    <Zap size={28} className="text-zinc-600 group-hover:text-cyan-500 transition-colors duration-500" />
+                  </div>
+                </div>
+
+                {/* Text */}
+                <div className="space-y-2">
+                  <p className="text-base font-bold text-white tracking-tight">
+                    Activá la automatización de procesos
+                  </p>
+                  <p className="max-w-sm mx-auto text-sm text-zinc-500 font-medium leading-relaxed">
+                    Ahorrá horas de trabajo manual conectando tus herramientas y automatizando tareas recurrentes con n8n.
+                  </p>
+                </div>
+
+                {/* Actions */}
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+                  <form action={activarAutomatizaciones}>
+                    <button
+                      type="submit"
+                      className="rounded-xl bg-cyan-500 px-6 py-2.5 text-xs font-black uppercase tracking-widest text-black hover:bg-cyan-400 active:scale-95 transition-all shadow-lg shadow-cyan-500/20"
+                    >
+                      ACTIVAR AHORA
+                    </button>
+                  </form>
+                  <a
+                    href="?demo=true"
+                    className="rounded-xl bg-white/[0.04] border border-white/[0.08] px-6 py-2.5 text-xs font-black uppercase tracking-widest text-zinc-400 hover:bg-white/[0.08] hover:text-white active:scale-95 transition-all backdrop-blur-md"
+                  >
+                    VER DEMO VISUAL
+                  </a>
+                </div>
+              </div>
+            </div>
+          </FadeIn>
+        </>
+      ) : (
+        <AutomationsContent workflowIds={client.n8nWorkflowIds} />
+      )}
     </div>
   )
 }
 
+// ─── AutomationsContent ───────────────────────────────────────────────────────
 
 async function AutomationsContent({ workflowIds }: { workflowIds: string[] }) {
   const result = await getN8nMetrics(workflowIds)
 
   if (!result.ok) {
     return (
-      <FadeIn delay={0.1}>
-        <div className="flex items-start gap-3 rounded-xl border border-amber-500/20 bg-amber-500/[0.06] px-5 py-4 backdrop-blur-sm">
-          <AlertTriangle size={16} className="mt-0.5 flex-shrink-0 text-amber-400" />
-          <div>
-            <p className="text-sm font-medium text-amber-300">
-              No se pudieron cargar las métricas
-            </p>
-            <p className="mt-1 text-xs text-amber-400/70">{result.error}</p>
+      <>
+        <FadeIn>
+          <AutomationsHeader isMockData={false} />
+        </FadeIn>
+        <FadeIn delay={0.1}>
+          <div className="flex items-start gap-3 rounded-xl border border-amber-500/20 bg-amber-500/[0.06] px-5 py-4 backdrop-blur-sm">
+            <AlertTriangle size={16} className="mt-0.5 flex-shrink-0 text-amber-400" />
+            <div>
+              <p className="text-sm font-medium text-amber-300">
+                No se pudieron cargar las métricas
+              </p>
+              <p className="mt-1 text-xs text-amber-400/70">{result.error}</p>
+            </div>
           </div>
-        </div>
-      </FadeIn>
+        </FadeIn>
+      </>
     )
   }
 
   const { data } = result
   const { totals, workflows, dailyExecutions } = data
+  const activeCount = workflows.filter((w) => w.active).length
 
   return (
     <div className="flex flex-col gap-6">
-      {/* Demo data banner */}
+      {/* ── Header ── */}
+      <FadeIn>
+        <AutomationsHeader isMockData={data.isMockData} />
+      </FadeIn>
+
+      {/* ── Banner demo ── */}
       {data.isMockData && (
         <FadeIn delay={0.05}>
-          <div className="flex items-center justify-between gap-4 rounded-xl border border-yellow-500/10 bg-yellow-500/5 px-5 py-3.5">
+          <div className="flex items-center justify-between gap-4 rounded-xl border border-yellow-500/20 bg-yellow-500/5 px-5 py-3.5">
             <div className="flex items-center gap-3 min-w-0">
               <AlertTriangle size={15} className="flex-shrink-0 text-yellow-400" />
               <p className="text-sm text-yellow-400/90 truncate">
@@ -125,239 +202,316 @@ async function AutomationsContent({ workflowIds }: { workflowIds: string[] }) {
           </div>
         </FadeIn>
       )}
-      {/* inner content */}
-      <AutomationsInner totals={totals} workflows={workflows} dailyExecutions={dailyExecutions} />
-    </div>
-  )
-}
 
-// ─── Inner content (extracted to keep AutomationsContent lean) ────────────────
+      {/* ── Alertas automáticas ── */}
+      <FadeIn delay={0.08}>
+        <AutomationsAlertas totals={totals} workflows={workflows} />
+      </FadeIn>
 
-function AutomationsInner({
-  totals,
-  workflows,
-  dailyExecutions,
-}: {
-  totals: N8nMetrics['totals']
-  workflows: N8nMetrics['workflows']
-  dailyExecutions: N8nMetrics['dailyExecutions']
-}) {
-  // Mock calculation for the requested ROI widget
-  const HORAS_AHORRADAS = Math.round(totals.successful * 0.25) // e.g. 15 mins per execution
-  const VALOR_HORA_USD = 25
-  const AHORRO_TOTAL_USD = HORAS_AHORRADAS * VALOR_HORA_USD
-
-  return (
-    <div className="flex flex-col gap-6">
-      {/* Calculadora de ROI Widget */}
+      {/* ── ROI Anualizado ── */}
       {totals.successful > 0 && (
-        <FadeIn delay={0.05}>
-          <div className="flex flex-col items-center justify-between gap-4 rounded-xl border border-violet-500/30 bg-violet-500/10 p-6 shadow-lg shadow-violet-500/5 sm:flex-row">
-            <div className="flex items-center gap-4">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-violet-500/20 text-violet-400">
-                <Calculator size={24} />
-              </div>
-              <div>
-                <h2 className="text-lg font-semibold text-violet-400">Retorno de Inversión (Estimado mensual)</h2>
-                <p className="mt-1 pr-4 text-sm text-zinc-300">
-                  Tus workflows exitosos simulan un ahorro de <strong className="text-white">{HORAS_AHORRADAS} horas</strong> de trabajo manual.
-                </p>
-              </div>
-            </div>
-            <div className="shrink-0 text-left sm:text-right">
-              <p className="text-sm text-zinc-400">Ahorro ($25 USD / hora)</p>
-              <p className="text-3xl font-bold text-white">${AHORRO_TOTAL_USD.toLocaleString('es-AR')} <span className="text-lg font-normal text-zinc-500">USD</span></p>
-            </div>
-          </div>
+        <FadeIn delay={0.1}>
+          <RoiAnualizado
+            monthlyRoi={totals.totalRoi}
+            successfulExecutions={totals.successful}
+          />
         </FadeIn>
       )}
 
-      {/* Summary cards */}
-      <FadeIn delay={0.1}>
-        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-          <div className={CARD} style={{ ...CARD_STYLE, border: '1px solid rgba(6,182,212,0.2)', background: 'rgba(6,182,212,0.04)' }}>
-            <div className="flex items-center justify-between">
-              <p className="text-sm text-zinc-400">Ejecuciones</p>
-              <Activity size={16} className="text-cyan-400" />
-            </div>
-            <p className="mt-3 text-2xl font-semibold text-cyan-400">
-              {totals.executions.toLocaleString('es-AR')}
-            </p>
-            <p className="mt-1 text-xs text-zinc-600">en el mes actual</p>
-          </div>
+      {/* ── 4 Metric cards ── */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <AnalyticsMetricCard
+          label="Ejecuciones totales"
+          tooltip="Veces que tus workflows se ejecutaron este mes"
+          displayValue={totals.executions.toLocaleString('es-AR')}
+          rawValue={totals.executions}
+          icon={<Activity size={18} />}
+          color="cyan"
+          trend={{ value: 0 }}
+          delay={0.12}
+        />
+        <AnalyticsMetricCard
+          label="Tasa de éxito"
+          tooltip={`${totals.successful} exitosas · ${totals.failed} fallidas este mes`}
+          displayValue={`${totals.successRate}%`}
+          rawValue={totals.successRate}
+          suffix="%"
+          icon={<CheckCircle2 size={18} />}
+          color="green"
+          trend={{ value: 0 }}
+          delay={0.16}
+        />
+        <AnalyticsMetricCard
+          label="ROI del mes"
+          tooltip={`$${ROI_PER_EXECUTION_USD} de valor estimado por ejecución exitosa`}
+          displayValue={`$${Math.round(totals.totalRoi).toLocaleString('es-AR')}`}
+          icon={<Zap size={18} />}
+          color="amber"
+          trend={{ value: 0 }}
+          delay={0.2}
+        />
+        <AnalyticsMetricCard
+          label="Workflows activos"
+          tooltip={`${activeCount} de ${workflows.length} automatizaciones activas ahora mismo`}
+          displayValue={`${activeCount} / ${workflows.length}`}
+          rawValue={activeCount}
+          icon={<Zap size={18} />}
+          color="violet"
+          trend={{ value: 0 }}
+          delay={0.24}
+        />
+      </div>
 
-          <div className={CARD} style={{ ...CARD_STYLE, border: '1px solid rgba(34,197,94,0.2)', background: 'rgba(34,197,94,0.04)' }}>
-            <div className="flex items-center justify-between">
-              <p className="text-sm text-zinc-400">Tasa de éxito</p>
-              <CheckCircle2 size={16} className="text-green-400" />
-            </div>
-            <p className="mt-3 text-2xl font-semibold text-green-400">
-              {totals.successRate}%
-            </p>
-            <p className="mt-1 text-xs text-zinc-600">
-              {totals.successful} exitosas / {totals.failed} fallidas
-            </p>
-          </div>
+      {/* ── Tiempo ahorrado ── */}
+      {totals.successful > 0 && (
+        <FadeIn delay={0.28}>
+          <TiempoAhorrado successfulExecutions={totals.successful} />
+        </FadeIn>
+      )}
 
-          <div className={CARD} style={{ ...CARD_STYLE, border: '1px solid rgba(245,158,11,0.2)', background: 'rgba(245,158,11,0.04)' }}>
-            <div className="flex items-center justify-between">
-              <p className="text-sm text-zinc-400">ROI estimado</p>
-              <Zap size={16} className="text-amber-400" />
-            </div>
-            <p className="mt-3 text-2xl font-semibold text-amber-400">
-              ${totals.totalRoi.toFixed(2)}
-            </p>
-            <p className="mt-1 text-xs text-zinc-600">
-              ${ROI_PER_EXECUTION_USD} por ejecución exitosa
-            </p>
-          </div>
-
-          <div className={CARD} style={CARD_STYLE}>
-            <div className="flex items-center justify-between">
-              <p className="text-sm text-zinc-400">Workflows activos</p>
-              <Zap size={16} className="text-zinc-400" />
-            </div>
-            <p className="mt-3 text-2xl font-semibold text-zinc-300">
-              {workflows.filter((w) => w.active).length}
-              <span className="text-lg text-zinc-600"> / {workflows.length}</span>
-            </p>
-          </div>
-        </div>
-      </FadeIn>
-
-      {/* Daily chart */}
+      {/* ── Gráfico ejecuciones ── */}
       {dailyExecutions.length > 0 && (
-        <FadeIn delay={0.2}>
-          <div className={CARD} style={CARD_STYLE}>
-            <h2 className="mb-4 text-sm font-medium text-zinc-300">
-              Ejecuciones por día
-            </h2>
+        <FadeIn delay={0.32}>
+          <div className="rounded-2xl p-6" style={CARD_STYLE}>
+            <div className="mb-5 flex items-center gap-2.5">
+              <div className="rounded-lg border border-cyan-500/20 bg-cyan-500/10 p-1.5">
+                <TrendingUp size={13} className="text-cyan-400" />
+              </div>
+              <h2 className="text-sm font-semibold text-zinc-300">
+                Ejecuciones por día — mes actual
+              </h2>
+            </div>
             <AutomationsChart data={dailyExecutions} />
           </div>
         </FadeIn>
       )}
 
-      {/* Per-workflow cards */}
-      <FadeIn delay={0.3}>
-        <div className="flex flex-col gap-3">
-          <h2 className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
-            Detalle por workflow ({workflows.length})
-          </h2>
-
-          {workflows.map((wf) => {
-            const successPct =
-              wf.totalExecutions > 0
-                ? Math.round((wf.successfulExecutions / wf.totalExecutions) * 100)
-                : 0
-            const lastStatus = wf.lastExecutionStatus ?? null
-
-            return (
-              <div
-                key={wf.id}
-                className={CARD}
-                style={CARD_STYLE}
-              >
-                {/* Header */}
-                <div className="mb-4 flex items-start justify-between gap-3">
-                  <div className="flex items-center gap-2.5">
-                    <div
-                      className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-md ${
-                        wf.active ? 'bg-green-500/10' : 'bg-white/[0.04]'
-                      }`}
-                    >
-                      <Zap
-                        size={15}
-                        className={wf.active ? 'text-green-400' : 'text-zinc-600'}
-                      />
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-zinc-100">{wf.name}</p>
-                      <p
-                        className={`text-xs ${
-                          wf.active ? 'text-green-400' : 'text-zinc-600'
-                        }`}
-                      >
-                        {wf.active ? 'Activo' : 'Inactivo'}
-                      </p>
-                    </div>
-                  </div>
-
-                  {lastStatus && (
-                    <span
-                      className={`flex-shrink-0 rounded-full border px-2.5 py-0.5 text-xs font-medium ${
-                        STATUS_STYLE[lastStatus] ?? 'bg-zinc-500/10 text-zinc-400 border-zinc-500/20'
-                      }`}
-                    >
-                      Últ: {STATUS_LABEL[lastStatus] ?? lastStatus}
-                    </span>
-                  )}
-                </div>
-
-                {/* Metrics row */}
-                <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                  <div className="flex flex-col gap-0.5">
-                    <p className="text-xs text-zinc-500">Ejecuciones</p>
-                    <p className="text-sm font-semibold text-zinc-200">
-                      {wf.totalExecutions}
-                    </p>
-                  </div>
-
-                  <div className="flex flex-col gap-0.5">
-                    <p className="text-xs text-zinc-500">Exitosas</p>
-                    <div className="flex items-center gap-1">
-                      <CheckCircle2 size={12} className="text-green-400" />
-                      <p className="text-sm font-semibold text-green-400">
-                        {wf.successfulExecutions}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col gap-0.5">
-                    <p className="text-xs text-zinc-500">Fallidas</p>
-                    <div className="flex items-center gap-1">
-                      <XCircle size={12} className="text-red-400" />
-                      <p className="text-sm font-semibold text-red-400">
-                        {wf.failedExecutions}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col gap-0.5">
-                    <p className="text-xs text-zinc-500">ROI estimado</p>
-                    <p className="text-sm font-semibold text-amber-400">
-                      ${wf.roi.toFixed(2)}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Progress bar */}
-                {wf.totalExecutions > 0 && (
-                  <div className="mt-4">
-                    <div className="mb-1 flex items-center justify-between text-xs text-zinc-600">
-                      <span>Tasa de éxito</span>
-                      <span>{successPct}%</span>
-                    </div>
-                    <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/[0.06]">
-                      <div
-                        className="h-full rounded-full bg-green-500 transition-all"
-                        style={{ width: `${successPct}%` }}
-                      />
-                    </div>
-                  </div>
-                )}
-
-                {/* Last execution */}
-                {wf.lastExecutionAt && (
-                  <div className="mt-3 flex items-center gap-1.5 text-xs text-zinc-600">
-                    <Clock size={11} />
-                    <span>Última ejecución: {formatDateTime(wf.lastExecutionAt)}</span>
-                  </div>
-                )}
-              </div>
-            )
-          })}
-        </div>
+      {/* ── Detalle por workflow ── */}
+      <FadeIn delay={0.38}>
+        {workflows.length === 0 ? (
+          <WorkflowsEmptyState />
+        ) : (
+          <WorkflowCards workflows={workflows} />
+        )}
       </FadeIn>
     </div>
   )
 }
+
+// ─── WorkflowCards ────────────────────────────────────────────────────────────
+
+function WorkflowCards({ workflows }: { workflows: WorkflowMetrics[] }) {
+  return (
+    <div className="flex flex-col gap-3">
+      <div className="flex items-center gap-2.5">
+        <div className="rounded-lg border border-cyan-500/20 bg-cyan-500/10 p-1.5">
+          <Zap size={12} className="text-cyan-400" />
+        </div>
+        <h2 className="text-xs font-semibold uppercase tracking-widest text-zinc-500">
+          Detalle por workflow ({workflows.length})
+        </h2>
+      </div>
+
+      {workflows.map((wf) => {
+        const successPct =
+          wf.totalExecutions > 0
+            ? Math.round((wf.successfulExecutions / wf.totalExecutions) * 100)
+            : 0
+        const barColor = successBarColor(successPct)
+        const lastStatus = wf.lastExecutionStatus ?? null
+
+        return (
+          <div key={wf.id} className="rounded-xl p-5" style={CARD_STYLE}>
+            {/* Header */}
+            <div className="mb-4 flex items-start justify-between gap-3">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div
+                  className={`flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl border ${
+                    wf.active
+                      ? 'border-green-500/20 bg-green-500/10'
+                      : 'border-white/[0.08] bg-white/[0.04]'
+                  }`}
+                >
+                  <Zap
+                    size={15}
+                    className={wf.active ? 'text-green-400' : 'text-zinc-600'}
+                  />
+                </div>
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-semibold text-zinc-100">{wf.name}</p>
+                  <div className="mt-1.5 flex flex-wrap items-center gap-2">
+                    {wf.active ? (
+                      <span className="inline-flex items-center gap-1.5 rounded-full border border-green-500/30 bg-green-500/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-green-400">
+                        <span className="relative flex h-1.5 w-1.5">
+                          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75" />
+                          <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-green-500" />
+                        </span>
+                        Activo
+                      </span>
+                    ) : (
+                      <span className="text-xs text-zinc-600">Inactivo</span>
+                    )}
+                    {wf.failedExecutions > 3 && (
+                      <span className="inline-flex items-center gap-1 rounded-full border border-red-500/30 bg-red-500/10 px-2 py-0.5 text-[10px] font-bold text-red-400">
+                        <AlertTriangle size={9} />
+                        {wf.failedExecutions} fallos
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {lastStatus && (
+                <span
+                  className={`flex-shrink-0 rounded-full border px-2.5 py-0.5 text-xs font-medium ${
+                    STATUS_STYLE[lastStatus] ?? 'border-zinc-500/20 bg-zinc-500/10 text-zinc-400'
+                  }`}
+                >
+                  Últ: {STATUS_LABEL[lastStatus] ?? lastStatus}
+                </span>
+              )}
+            </div>
+
+            {/* Metrics grid */}
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+              <div>
+                <p className="text-xs text-zinc-500">Ejecuciones</p>
+                <p className="mt-0.5 text-sm font-semibold text-zinc-200">
+                  {wf.totalExecutions}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs text-zinc-500">Exitosas</p>
+                <div className="mt-0.5 flex items-center gap-1">
+                  <CheckCircle2 size={12} className="text-green-400" />
+                  <p className="text-sm font-semibold text-green-400">
+                    {wf.successfulExecutions}
+                  </p>
+                </div>
+              </div>
+              <div>
+                <p className="text-xs text-zinc-500">Fallidas</p>
+                <div className="mt-0.5 flex items-center gap-1">
+                  <XCircle
+                    size={12}
+                    className={wf.failedExecutions > 0 ? 'text-red-400' : 'text-zinc-700'}
+                  />
+                  <p
+                    className={`text-sm font-semibold ${
+                      wf.failedExecutions > 0 ? 'text-red-400' : 'text-zinc-700'
+                    }`}
+                  >
+                    {wf.failedExecutions}
+                  </p>
+                </div>
+              </div>
+              <div>
+                <p className="text-xs text-zinc-500">ROI estimado</p>
+                <p className="mt-0.5 text-sm font-semibold text-amber-400">
+                  ${Math.round(wf.roi).toLocaleString('es-AR')}
+                </p>
+              </div>
+            </div>
+
+            {/* Progress bar */}
+            {wf.totalExecutions > 0 && (
+              <div className="mt-4">
+                <div className="mb-1.5 flex items-center justify-between text-xs">
+                  <span className="text-zinc-500">Tasa de éxito</span>
+                  <span className="font-semibold" style={{ color: barColor }}>
+                    {successPct}%
+                  </span>
+                </div>
+                <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/[0.06]">
+                  <div
+                    className="h-full rounded-full transition-all duration-700"
+                    style={{
+                      width: `${successPct}%`,
+                      background: barColor,
+                      boxShadow: `0 0 8px ${barColor}55`,
+                    }}
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Last execution */}
+            {wf.lastExecutionAt && (
+              <div className="mt-3 flex items-center gap-1.5 text-xs text-zinc-600">
+                <Clock size={11} />
+                <span>Última ejecución: {formatRelativeTime(wf.lastExecutionAt)}</span>
+              </div>
+            )}
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+// ─── AutomationsHeader ────────────────────────────────────────────────────────
+
+function AutomationsHeader({ isMockData }: { isMockData: boolean }) {
+  return (
+    <div className="flex items-center gap-3">
+      <div className="rounded-xl border border-cyan-500/20 bg-cyan-500/10 p-2">
+        <Zap size={18} className="text-cyan-400" />
+      </div>
+      <div>
+        <div className="flex items-center gap-2">
+          <h1 className="text-xl font-semibold text-white">Automatizaciones</h1>
+          {isMockData && (
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-cyan-500/20 bg-cyan-500/10 px-2.5 py-0.5">
+              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-cyan-500" />
+              <span className="text-[8px] font-black uppercase tracking-widest text-cyan-400">
+                Preview Activo
+              </span>
+            </span>
+          )}
+        </div>
+        <p className="mt-0.5 text-sm text-zinc-500">
+          Métricas de tus workflows n8n — mes actual
+        </p>
+      </div>
+    </div>
+  )
+}
+
+// ─── WorkflowsEmptyState ──────────────────────────────────────────────────────
+
+function WorkflowsEmptyState() {
+  return (
+    <div className="group relative flex flex-col items-center gap-6 overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.02] py-24 text-center backdrop-blur-xl">
+      <div className="absolute inset-0 bg-gradient-to-b from-cyan-500/5 via-transparent to-transparent opacity-0 transition-opacity duration-700 group-hover:opacity-100" />
+
+      <div className="relative z-10 flex flex-col items-center gap-5">
+        <div className="relative">
+          <div className="absolute inset-0 scale-150 rounded-2xl bg-cyan-500/10 opacity-0 blur-xl transition-opacity duration-700 group-hover:opacity-100" />
+          <div className="relative mx-auto flex h-16 w-16 items-center justify-center rounded-2xl border border-white/10 bg-[#0c0e12] shadow-inner transition-colors duration-500 group-hover:border-cyan-500/25">
+            <Zap
+              size={28}
+              className="text-zinc-600 transition-colors duration-500 group-hover:text-cyan-500"
+            />
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <p className="text-base font-bold tracking-tight text-white">
+            Aún no tenés automatizaciones configuradas
+          </p>
+          <p className="mx-auto max-w-sm text-sm font-medium leading-relaxed text-zinc-500">
+            Automatizá tareas repetitivas y recuperá horas de trabajo cada mes.
+          </p>
+        </div>
+
+        <a
+          href="/contact"
+          className="rounded-xl bg-cyan-500 px-6 py-2.5 text-xs font-black uppercase tracking-widest text-black shadow-lg shadow-cyan-500/20 transition-all hover:bg-cyan-400 active:scale-95"
+        >
+          Quiero automatizar mi negocio
+        </a>
+      </div>
+    </div>
+  )
+}
+

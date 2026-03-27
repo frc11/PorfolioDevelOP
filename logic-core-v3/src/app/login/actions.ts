@@ -79,13 +79,26 @@ export async function loginAction(
     return 'Demasiados intentos fallidos. Esperá 5 minutos antes de volver a intentarlo.'
   }
 
-  // Pre-fetch del role para determinar el destino de redirect.
+  // Pre-fetch del role + estado de onboarding para determinar el destino de redirect.
   // No revela existencia del email: si no existe, signIn falla con CredentialsSignin igual.
   const userRecord = await prisma.user.findUnique({
     where: { email },
-    select: { role: true },
+    select: {
+      role: true,
+      orgMemberships: {
+        select: {
+          organization: {
+            select: { onboardingCompleted: true, companyName: true },
+          },
+        },
+        take: 1,
+      },
+    },
   })
-  const redirectTo = userRecord?.role === 'SUPER_ADMIN' ? '/admin' : '/dashboard'
+  const isSuperAdmin = userRecord?.role === 'SUPER_ADMIN'
+  const org = userRecord?.orgMemberships?.[0]?.organization
+  const needsOnboarding = !isSuperAdmin && (!org?.onboardingCompleted || !org?.companyName)
+  const redirectTo = isSuperAdmin ? '/admin' : (needsOnboarding ? '/bienvenida' : '/dashboard')
 
   try {
     await signIn('credentials', { email, password, redirectTo })

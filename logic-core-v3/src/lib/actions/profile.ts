@@ -7,7 +7,14 @@ import bcrypt from 'bcryptjs'
 
 export type ProfileActionState = { ok: true } | { ok: false; error: string } | null
 
-// ─── Update profile data ──────────────────────────────────────────────────────
+export interface NotificationPrefs {
+  projectUpdates: boolean
+  teamMessages: boolean
+  metricAlerts: boolean
+  developNews: boolean
+}
+
+// ─── Update company profile ───────────────────────────────────────────────────
 
 export async function updateProfileAction(
   _prevState: ProfileActionState,
@@ -32,6 +39,84 @@ export async function updateProfileAction(
 
   revalidatePath('/dashboard/profile')
   revalidatePath('/dashboard')
+  return { ok: true }
+}
+
+// ─── Update contact info (whatsapp) ──────────────────────────────────────────
+
+export async function updateContactAction(
+  _prevState: ProfileActionState,
+  formData: FormData
+): Promise<ProfileActionState> {
+  const session = await auth()
+  const organizationId = session?.user?.organizationId
+  if (!organizationId) return { ok: false, error: 'Sesión inválida.' }
+
+  const whatsapp = ((formData.get('whatsapp') as string | null) ?? '').trim() || null
+
+  await prisma.organization.update({
+    where: { id: organizationId },
+    data: { whatsapp },
+  })
+
+  revalidatePath('/dashboard/profile')
+  return { ok: true }
+}
+
+// ─── Update notification preferences ─────────────────────────────────────────
+
+export async function updateNotificationPrefsAction(
+  _prevState: ProfileActionState,
+  formData: FormData
+): Promise<ProfileActionState> {
+  const session = await auth()
+  const organizationId = session?.user?.organizationId
+  if (!organizationId) return { ok: false, error: 'Sesión inválida.' }
+
+  const prefs: NotificationPrefs = {
+    projectUpdates: formData.get('projectUpdates') === 'true',
+    teamMessages: formData.get('teamMessages') === 'true',
+    metricAlerts: formData.get('metricAlerts') === 'true',
+    developNews: formData.get('developNews') === 'true',
+  }
+
+  await prisma.organization.update({
+    where: { id: organizationId },
+    data: { notificationPrefs: prefs },
+  })
+
+  revalidatePath('/dashboard/profile')
+  return { ok: true }
+}
+
+// ─── Request account deletion ─────────────────────────────────────────────────
+
+export async function requestAccountDeletionAction(): Promise<ProfileActionState> {
+  const session = await auth()
+  const organizationId = session?.user?.organizationId
+  const userId = session?.user?.id
+  if (!organizationId || !userId) return { ok: false, error: 'Sesión inválida.' }
+
+  await prisma.ticket.create({
+    data: {
+      title: 'Solicitud de eliminación de cuenta',
+      category: 'OTHER',
+      priority: 'HIGH',
+      status: 'OPEN',
+      organizationId,
+      userId,
+      messages: {
+        create: {
+          content:
+            'El cliente solicita la eliminación de su cuenta y todos los datos asociados. Por favor procesar esta solicitud según los procedimientos vigentes.',
+          userId,
+          isAdmin: false,
+        },
+      },
+    },
+  })
+
+  revalidatePath('/dashboard/soporte')
   return { ok: true }
 }
 

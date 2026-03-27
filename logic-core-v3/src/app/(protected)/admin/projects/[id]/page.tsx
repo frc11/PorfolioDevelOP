@@ -5,6 +5,7 @@ import { ChevronLeft, Pencil, Plus } from 'lucide-react'
 import { ProjectStatus, TaskStatus } from '@prisma/client'
 import { TaskStatusSelect } from '@/components/admin/TaskStatusSelect'
 import { DeleteTaskButton } from '@/components/admin/DeleteTaskButton'
+import { SendForApprovalButton } from '@/components/admin/SendForApprovalButton'
 import { FadeIn } from '@/components/dashboard/FadeIn'
 
 // ─── Label maps ───────────────────────────────────────────────────────────────
@@ -201,7 +202,12 @@ export default async function ProjectDetailPage({
                     </p>
                   )}
                 </div>
-                <div className="flex flex-shrink-0 items-center gap-3">
+                <div className="flex flex-shrink-0 flex-wrap items-center gap-2">
+                  <SendForApprovalButton
+                    taskId={task.id}
+                    projectId={id}
+                    approvalStatus={(task as any).approvalStatus ?? null}
+                  />
                   <TaskStatusSelect
                     taskId={task.id}
                     projectId={id}

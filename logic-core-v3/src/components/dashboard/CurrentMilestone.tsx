@@ -1,15 +1,16 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { Calendar, ArrowRight, Target, Sparkles } from 'lucide-react'
+import { Calendar, ArrowRight, Target, Sparkles, Clock } from 'lucide-react'
 
 interface CurrentMilestoneProps {
   title: string
   dueDate: string
   description?: string
+  daysUntil?: number | null
 }
 
-export function CurrentMilestone({ title, dueDate, description }: CurrentMilestoneProps) {
+export function CurrentMilestone({ title, dueDate, description, daysUntil }: CurrentMilestoneProps) {
   return (
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
@@ -46,13 +47,19 @@ export function CurrentMilestone({ title, dueDate, description }: CurrentMilesto
             )}
           </div>
           
-          <div className="flex items-center gap-6 mt-2">
+          <div className="flex flex-wrap items-center gap-4 mt-2">
             <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-zinc-500">
-              <Calendar size={14} className="text-zinc-600" />
+              <Calendar size={13} className="text-zinc-600" />
               <span>Entrega estimada: <span className="text-zinc-200">{dueDate}</span></span>
             </div>
+            {daysUntil !== undefined && daysUntil !== null && (
+              <div className="flex items-center gap-1.5 rounded-full border border-cyan-500/20 bg-cyan-500/10 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-cyan-400 shadow-[0_0_10px_rgba(6,182,212,0.1)]">
+                <Clock size={11} />
+                <span>Faltan <strong>{daysUntil}</strong> días</span>
+              </div>
+            )}
             <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-emerald-400">
-              <Sparkles size={14} className="animate-pulse" />
+              <Sparkles size={13} className="animate-pulse" />
               <span className="drop-shadow-[0_0_8px_rgba(52,211,153,0.3)]">Prioridad Máxima</span>
             </div>
           </div>

@@ -32,19 +32,28 @@ export async function approveTaskAction(taskId: string) {
     await tx.notification.create({
       data: {
         type: 'SUCCESS',
-        title: 'Tarea Aprobada',
-        message: `El cliente ha aprobado la tarea: ${task.title}`,
+        title: `Entrega aprobada: ${task.title}`,
+        message: `Aprobaste la entrega "${task.title}". El equipo fue notificado.`,
         userId: session.user.id!,
         organizationId: session.user.organizationId!,
         taskId: task.id,
-        actionUrl: `/admin/projects/${task.projectId}`
+        actionUrl: `/dashboard/project`
+      }
+    })
+
+    await tx.message.create({
+      data: {
+        content: `✓ Aprobé la entrega de "${task.title}". ¡Todo perfecto!`,
+        fromAdmin: false,
+        organizationId: session.user.organizationId!,
       }
     })
   })
 
   revalidatePath('/dashboard')
   revalidatePath('/dashboard/project')
-  
+  revalidatePath('/admin/messages')
+
   return { success: true }
 }
 
@@ -83,19 +92,28 @@ export async function rejectTaskAction(taskId: string, reason: string) {
     await tx.notification.create({
       data: {
         type: 'WARNING',
-        title: 'Tarea Rechazada',
-        message: `El cliente requirió cambios en: ${task.title} - Motivo: ${reason}`,
+        title: `Cambios solicitados en: ${task.title}`,
+        message: `Solicitaste cambios en "${task.title}". Motivo: ${reason}`,
         userId: session.user.id!,
         organizationId: session.user.organizationId!,
         taskId: task.id,
-        actionUrl: `/admin/projects/${task.projectId}`
+        actionUrl: `/dashboard/project`
+      }
+    })
+
+    await tx.message.create({
+      data: {
+        content: `✗ Solicité cambios en "${task.title}": ${reason}`,
+        fromAdmin: false,
+        organizationId: session.user.organizationId!,
       }
     })
   })
 
   revalidatePath('/dashboard')
   revalidatePath('/dashboard/project')
-  
+  revalidatePath('/admin/messages')
+
   return { success: true }
 }
 

@@ -49,27 +49,41 @@ export async function requestUpsellAction(
     return { ok: false, error: 'Error al registrar la solicitud. Intentá de nuevo.' }
   }
 
-  // Notify SUPER_ADMIN — non-blocking, swallow errors
+  // Create client-facing confirmation + notify SUPER_ADMIN — non-blocking
   try {
     const superAdmin = await prisma.user.findFirst({
       where: { role: 'SUPER_ADMIN' },
       select: { id: true },
     })
 
-    if (superAdmin) {
-      await prisma.notification.create({
+    await prisma.$transaction([
+      // Client notification: confirmation
+      prisma.notification.create({
         data: {
-          userId: superAdmin.id,
-          type: 'ACTION_REQUIRED',
-          title: `Solicitud de módulo: ${featureName}`,
-          message: `${org.companyName} solicitó activar el módulo "${featureName}".`,
-          actionUrl: '/admin/leads',
-          read: false,
+          userId,
+          organizationId,
+          type: 'INFO',
+          title: `Solicitud enviada: ${featureName}`,
+          message: `Tu solicitud para activar "${featureName}" fue recibida. Te contactaremos pronto.`,
         },
-      })
-    }
+      }),
+      // Admin notification (organizationId optional — admin has no org)
+      ...(superAdmin
+        ? [
+            prisma.notification.create({
+              data: {
+                userId: superAdmin.id,
+                type: 'ACTION_REQUIRED',
+                title: `${org.companyName} está interesada en ${featureName}`,
+                message: `${org.companyName} solicitó activar el módulo "${featureName}".`,
+                actionUrl: '/admin/leads',
+              },
+            }),
+          ]
+        : []),
+    ])
   } catch (err) {
-    console.error('[upsell] Error al crear notificación para SUPER_ADMIN:', err)
+    console.error('[upsell] Error al crear notificaciones:', err)
   }
 
   revalidatePath('/admin/leads')

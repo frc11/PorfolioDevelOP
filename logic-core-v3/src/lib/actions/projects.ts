@@ -144,6 +144,39 @@ export async function updateTaskStatusAction(formData: FormData): Promise<void> 
   revalidatePath(`/admin/projects/${projectId}`)
 }
 
+// ─── Task: Send for client approval ───────────────────────────────────────────
+
+export async function sendTaskForApprovalAction(formData: FormData): Promise<void> {
+  const taskId = (formData.get('taskId') as string | null) ?? ''
+  const projectId = (formData.get('projectId') as string | null) ?? ''
+  if (!taskId) return
+
+  const task = await prisma.task.findUnique({
+    where: { id: taskId },
+    include: { project: true },
+  })
+  if (!task) return
+
+  await prisma.$transaction(async (tx) => {
+    await tx.task.update({
+      where: { id: taskId },
+      data: { approvalStatus: 'PENDING_APPROVAL' },
+    })
+
+    await tx.message.create({
+      data: {
+        content: `📋 Tu entrega "${task.title}" está lista para revisión. Por favor, revisá y aprobá o solicitá cambios desde tu panel de proyecto.`,
+        fromAdmin: true,
+        organizationId: task.project.organizationId,
+      },
+    })
+  })
+
+  revalidatePath(`/admin/projects/${projectId}`)
+  revalidatePath('/dashboard/project')
+  revalidatePath('/dashboard')
+}
+
 // ─── Task: Delete ─────────────────────────────────────────────────────────────
 
 export async function deleteTaskAction(formData: FormData): Promise<void> {

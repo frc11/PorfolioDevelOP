@@ -2,27 +2,106 @@ import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import { resolveOrgId } from '@/lib/preview'
 import { AssetType } from '@prisma/client'
-import { FileText, Image as ImageIcon, Book, Link as LinkIcon, Download, Archive, Lock, LockOpen, Globe, Server, Activity, User, ShieldCheck } from 'lucide-react'
+import {
+  FileText,
+  Image as ImageIcon,
+  BookOpen,
+  Layers,
+  KeyRound,
+  Archive,
+  Lock,
+  LockOpen,
+  ShieldCheck,
+  ShieldAlert,
+  User,
+  Clock,
+  Upload,
+} from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 import { FadeIn } from '@/components/dashboard/FadeIn'
 import { StaggerContainer, StaggerItem } from '@/components/dashboard/StaggerWrapper'
+import { VaultRevealButton } from '@/components/dashboard/VaultRevealButton'
+import { VaultRequestModal } from '@/components/dashboard/VaultRequestModal'
 
-const ASSET_TYPE_ICON: Record<AssetType, any> = {
-  DOCUMENT: FileText,
-  IMAGE: ImageIcon,
-  BRANDBOOK: Book,
-  LOGO: ImageIcon,
-  ACCESS: LinkIcon,
-  OTHER: FileText,
+// ─── Type config ───────────────────────────────────────────────────────────────
+
+interface TypeConfig {
+  icon: LucideIcon
+  label: string
+  color: string
+  bg: string
+  border: string
+  hoverBorder: string
+  glowRgb: string
 }
 
-const ASSET_TYPE_LABEL: Record<AssetType, string> = {
-  DOCUMENT: 'Documento',
-  IMAGE: 'Imagen',
-  BRANDBOOK: 'Brandbook',
-  LOGO: 'Logo',
-  ACCESS: 'Acceso',
-  OTHER: 'Otro',
+const TYPE_CONFIG: Record<AssetType, TypeConfig> = {
+  DOCUMENT: {
+    icon: FileText,
+    label: 'Documento',
+    color: 'text-cyan-400',
+    bg: 'bg-cyan-500/10',
+    border: 'border-cyan-500/20',
+    hoverBorder: 'group-hover:border-cyan-500/40',
+    glowRgb: '6,182,212',
+  },
+  IMAGE: {
+    icon: ImageIcon,
+    label: 'Imagen',
+    color: 'text-emerald-400',
+    bg: 'bg-emerald-500/10',
+    border: 'border-emerald-500/20',
+    hoverBorder: 'group-hover:border-emerald-500/40',
+    glowRgb: '52,211,153',
+  },
+  BRANDBOOK: {
+    icon: BookOpen,
+    label: 'Brandbook',
+    color: 'text-violet-400',
+    bg: 'bg-violet-500/10',
+    border: 'border-violet-500/20',
+    hoverBorder: 'group-hover:border-violet-500/40',
+    glowRgb: '167,139,250',
+  },
+  LOGO: {
+    icon: Layers,
+    label: 'Logo',
+    color: 'text-amber-400',
+    bg: 'bg-amber-500/10',
+    border: 'border-amber-500/20',
+    hoverBorder: 'group-hover:border-amber-500/40',
+    glowRgb: '251,191,36',
+  },
+  ACCESS: {
+    icon: KeyRound,
+    label: 'Acceso',
+    color: 'text-red-400',
+    bg: 'bg-red-500/10',
+    border: 'border-red-500/20',
+    hoverBorder: 'group-hover:border-red-500/40',
+    glowRgb: '239,68,68',
+  },
+  OTHER: {
+    icon: Archive,
+    label: 'Otro',
+    color: 'text-zinc-400',
+    bg: 'bg-zinc-500/10',
+    border: 'border-zinc-500/20',
+    hoverBorder: 'group-hover:border-zinc-500/30',
+    glowRgb: '113,113,122',
+  },
 }
+
+// ─── Demo activity log ─────────────────────────────────────────────────────────
+
+const ACTIVITY_LOG = [
+  { icon: User,   actor: 'Vos',          action: 'accediste a',  resource: 'Credenciales de Dominio', time: 'hace 2 h',    isAdmin: false },
+  { icon: Upload, actor: 'Admin develOP', action: 'subió',        resource: 'Guía de Estilo v2 (PDF)', time: 'hace 5 h',    isAdmin: true  },
+  { icon: User,   actor: 'Vos',          action: 'descargaste',  resource: 'Logotipo Principal (PNG)', time: 'ayer, 18:45', isAdmin: false },
+  { icon: Upload, actor: 'Admin develOP', action: 'actualizó',    resource: 'Brandbook Corporativo',    time: 'hace 3 días', isAdmin: true  },
+]
+
+// ─── Page ──────────────────────────────────────────────────────────────────────
 
 export default async function VaultPage() {
   const organizationId = await resolveOrgId()
@@ -33,203 +112,268 @@ export default async function VaultPage() {
     orderBy: { createdAt: 'desc' },
   })
 
+  const totalCount = assets.length
+
   return (
-    <div className="flex flex-col gap-6">
-      {/* Header */}
-      <FadeIn>
-        <div>
-          <h1 className="text-xl font-semibold text-white">Bóveda digital</h1>
-          <p className="mt-1 text-sm text-zinc-400">
-            Tus recursos y accesos centralizados de forma segura.
-          </p>
+    <div className="flex flex-col gap-8 max-w-6xl mx-auto pb-20">
+
+      {/* ── HEADER ──────────────────────────────────────────────────────────── */}
+      <FadeIn delay={0}>
+        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 pt-2">
+          <div className="flex flex-col gap-3">
+            <div className="flex items-center gap-3">
+              {/* Animated shield icon */}
+              <div
+                className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl border border-cyan-500/20 bg-cyan-500/10 text-cyan-400"
+                style={{ boxShadow: '0 0 20px rgba(6,182,212,0.15)' }}
+              >
+                <ShieldCheck size={20} className="drop-shadow-[0_0_8px_rgba(6,182,212,0.6)]" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-black tracking-tight text-white uppercase sm:text-3xl">
+                  Bóveda Digital
+                </h1>
+                <p className="text-xs font-medium text-zinc-500 mt-0.5">
+                  Tus recursos y accesos centralizados de forma segura
+                </p>
+              </div>
+            </div>
+
+            {/* Badges */}
+            <div className="flex items-center gap-2 flex-wrap pl-0">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/25 bg-emerald-500/8 px-3 py-1 text-[9px] font-black uppercase tracking-widest text-emerald-400">
+                <span className="relative flex h-1.5 w-1.5">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
+                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                </span>
+                AES-256 Safe
+              </span>
+              {totalCount > 0 && (
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-white/8 bg-white/5 px-3 py-1 text-[9px] font-bold uppercase tracking-widest text-zinc-500">
+                  {totalCount} {totalCount === 1 ? 'activo' : 'activos'} almacenados
+                </span>
+              )}
+            </div>
+          </div>
+
+          <VaultRequestModal />
         </div>
       </FadeIn>
 
-      {/* Empty state */}
-      {assets.length === 0 && (
+      {/* ── EMPTY STATE ─────────────────────────────────────────────────────── */}
+      {totalCount === 0 && (
         <FadeIn delay={0.1}>
-          <div
-            className="flex flex-col items-center gap-4 rounded-xl py-16 text-center"
-            style={{
-              border: '1px solid rgba(255,255,255,0.08)',
-              background: 'rgba(255,255,255,0.03)',
-              backdropFilter: 'blur(8px)',
-            }}
-          >
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-zinc-800/60">
-              <Archive size={22} className="text-zinc-500" />
+          <div className="relative flex flex-col items-center gap-6 rounded-[2rem] border border-white/8 bg-[#0a0c0f]/60 backdrop-blur-xl py-20 px-8 text-center overflow-hidden">
+            <div className="absolute -top-24 left-1/2 -translate-x-1/2 h-48 w-48 rounded-full bg-cyan-500/5 blur-3xl pointer-events-none" />
+
+            {/* Vault icon with pulse */}
+            <div className="relative">
+              <div className="absolute inset-0 rounded-2xl bg-cyan-500/10 animate-pulse blur-xl" />
+              <div className="relative flex h-20 w-20 items-center justify-center rounded-2xl border border-white/8 bg-white/[0.03] shadow-2xl">
+                <ShieldCheck size={34} className="text-zinc-600" />
+              </div>
             </div>
-            <div>
-              <p className="text-sm font-medium text-zinc-300">
-                Aún no hay archivos en tu bóveda
-              </p>
-              <p className="mt-1 text-sm text-zinc-500">
-                Pronto subiremos tus logos, brandbooks y otros recursos aquí.
+
+            <div className="max-w-sm space-y-2">
+              <h2 className="text-base font-black tracking-tight text-white uppercase italic">
+                Tu bóveda está vacía
+              </h2>
+              <p className="text-sm text-zinc-500 leading-relaxed">
+                El equipo develOP irá agregando tus recursos a medida que avance el proyecto.
               </p>
             </div>
+
+            <VaultRequestModal />
           </div>
         </FadeIn>
       )}
 
-      {/* Assets Grid */}
-      {assets.length > 0 && (
-        <FadeIn delay={0.1}>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {assets.map((asset) => {
-              const name = asset.name.toLowerCase()
-              let VisualIcon = ASSET_TYPE_ICON[asset.type] || FileText
-              let glowColor = 'bg-cyan-500/10'
-              let iconColor = 'text-cyan-400'
-              let borderColor = 'group-hover:border-cyan-500/30'
+      {/* ── ASSET GRID ─────────────────────────────────────────────────────── */}
+      {totalCount > 0 && (
+        <StaggerContainer className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {assets.map((asset) => {
+            const cfg = TYPE_CONFIG[asset.type]
+            const Icon = cfg.icon
+            const isAccess = asset.type === 'ACCESS'
 
-              if (name.includes('redes sociales')) {
-                VisualIcon = Globe
-                glowColor = 'bg-purple-500/20'
-                iconColor = 'text-purple-400'
-                borderColor = 'group-hover:border-purple-500/30'
-              } else if (name.includes('hosting')) {
-                VisualIcon = Server
-                glowColor = 'bg-blue-500/20'
-                iconColor = 'text-blue-400'
-                borderColor = 'group-hover:border-blue-500/30'
-              }
-
-              return (
+            return (
+              <StaggerItem key={asset.id}>
                 <div
-                  key={asset.id}
-                  className={`group relative flex flex-col justify-between gap-6 rounded-2xl p-6 transition-all duration-500 hover:scale-[1.02] hover:shadow-[0_0_40px_rgba(0,0,0,0.3)] border border-white/5 bg-[#07080a]/60 backdrop-blur-2xl overflow-hidden ${borderColor}`}
+                  className={`group relative flex flex-col gap-5 overflow-hidden rounded-2xl border border-white/8 bg-[#07080a]/60 p-6 backdrop-blur-2xl transition-all duration-400 hover:scale-[1.02] hover:shadow-[0_0_40px_rgba(0,0,0,0.4)] ${cfg.hoverBorder} ${
+                    isAccess ? 'border-red-500/15 bg-red-950/10' : ''
+                  }`}
                 >
-                  {/* Cybersecurity Dot Grid Pattern */}
-                  <div 
-                    className="absolute inset-0 opacity-[0.03] pointer-events-none" 
-                    style={{ 
-                      backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', 
-                      backgroundSize: '24px 24px' 
-                    }} 
+                  {/* Dot-grid background */}
+                  <div
+                    className="absolute inset-0 opacity-[0.025] pointer-events-none"
+                    style={{
+                      backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)',
+                      backgroundSize: '22px 22px',
+                    }}
                   />
 
-                  {/* Security Badge */}
-                  <div className="absolute top-4 right-4 z-20 flex items-center gap-2 rounded-full border border-white/5 bg-black/40 backdrop-blur-md px-2.5 py-1 text-[8px] font-black uppercase tracking-widest text-zinc-400">
-                    <span className="relative flex h-1.5 w-1.5">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
-                    </span>
-                    AES-256 SAFE
+                  {/* Ambient corner glow on hover */}
+                  <div
+                    className="absolute -right-8 -top-8 h-32 w-32 rounded-full opacity-0 blur-2xl transition-opacity duration-500 group-hover:opacity-100 pointer-events-none"
+                    style={{ background: `rgba(${cfg.glowRgb},0.15)` }}
+                  />
+
+                  {/* AES badge */}
+                  <div className="absolute right-4 top-4 z-10 flex items-center gap-1.5 rounded-full border border-white/5 bg-black/40 px-2 py-1 text-[8px] font-black uppercase tracking-widest text-zinc-600 backdrop-blur-sm">
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                    AES-256
                   </div>
 
-                  <div className="relative z-10 flex items-start gap-5">
-                    <div className={`relative flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-2xl bg-white/[0.02] border border-white/[0.05] ${iconColor} transition-all duration-500 group-hover:scale-110 shadow-2xl`}>
-                      {/* Ambient Icon Glow */}
-                      <div className={`absolute inset-0 rounded-2xl ${glowColor} blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
-                      <VisualIcon size={28} className="relative z-10 drop-shadow-[0_0_8px_currentColor]" />
+                  {/* Icon + title */}
+                  <div className="relative z-10 flex items-start gap-4 pr-14">
+                    <div
+                      className={`relative flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl border border-white/5 bg-white/[0.03] transition-all duration-400 group-hover:scale-105 ${cfg.color}`}
+                      style={{ boxShadow: `0 0 20px rgba(${cfg.glowRgb},0)`, transition: 'box-shadow 0.4s' }}
+                    >
+                      <div
+                        className="absolute inset-0 rounded-2xl opacity-0 blur-md transition-opacity duration-400 group-hover:opacity-100"
+                        style={{ background: `rgba(${cfg.glowRgb},0.2)` }}
+                      />
+                      <Icon size={24} className="relative z-10" />
                     </div>
-                    <div className="flex flex-col min-w-0 pt-1">
-                      <h3 className="text-base font-black tracking-tight text-white group-hover:text-white transition-colors truncate">
+
+                    <div className="min-w-0 flex-1 pt-1">
+                      <h3 className="truncate text-sm font-bold text-white group-hover:text-white transition-colors">
                         {asset.name}
                       </h3>
-                      <div className="flex items-center gap-2 mt-1">
-                        <span className={`h-1 w-1 rounded-full ${glowColor.replace('/20', '').replace('/10', '')}`} />
-                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-600">
-                          {ASSET_TYPE_LABEL[asset.type]}
-                        </span>
-                      </div>
+                      <span
+                        className={`mt-1 inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[9px] font-black uppercase tracking-widest ${cfg.bg} ${cfg.border} ${cfg.color}`}
+                      >
+                        {cfg.label}
+                      </span>
                     </div>
                   </div>
-                  
+
+                  {/* Description */}
                   {asset.description && (
-                    <p className="relative z-10 text-xs text-zinc-500 leading-relaxed line-clamp-2 px-1">
+                    <p className="relative z-10 text-xs text-zinc-500 leading-relaxed line-clamp-2">
                       {asset.description}
                     </p>
                   )}
 
-                  <div className="relative z-10 mt-2 flex items-center justify-between border-t border-white/[0.05] pt-4">
+                  {/* Footer: date + access button */}
+                  <div className="relative z-10 flex items-center justify-between border-t border-white/5 pt-4 mt-auto">
                     <div className="flex flex-col">
-                      <span className="text-[9px] font-bold uppercase tracking-widest text-zinc-700">Integridad</span>
-                      <span className="text-[10px] text-zinc-500 font-medium">
+                      <span className="text-[9px] font-bold uppercase tracking-widest text-zinc-700">Cargado</span>
+                      <span className="text-[10px] font-medium text-zinc-500">
                         {new Date(asset.createdAt).toLocaleDateString('es-AR', {
                           day: '2-digit',
                           month: 'short',
-                          year: 'numeric'
+                          year: 'numeric',
                         })}
                       </span>
                     </div>
 
-                    <a
-                      href={asset.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="group/btn relative flex items-center gap-2.5 overflow-hidden rounded-xl bg-white/5 border border-white/10 px-5 py-2.5 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-300 transition-all duration-300 hover:bg-blue-600 hover:text-white hover:border-blue-400 hover:shadow-[0_0_25px_rgba(37,99,235,0.6)] backdrop-blur-md"
-                    >
-                      <div className="relative h-4 w-4">
-                        <Lock size={14} className="absolute inset-0 transition-all duration-300 group-hover/btn:opacity-0 group-hover/btn:scale-50 group-hover/btn:rotate-12" />
-                        <LockOpen size={14} className="absolute inset-0 opacity-0 scale-50 -rotate-12 transition-all duration-300 group-hover/btn:opacity-100 group-hover/btn:scale-100 group-hover/btn:rotate-0" />
-                      </div>
-                      <span className="relative z-10 transition-transform duration-300 group-hover/btn:translate-x-0.5">
+                    {!isAccess && (
+                      <a
+                        href={asset.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={[
+                          'group/btn relative flex items-center gap-2 overflow-hidden rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-[10px] font-black uppercase tracking-wider text-zinc-300 transition-all duration-300 backdrop-blur-md',
+                          `hover:bg-[rgba(${cfg.glowRgb},0.15)] hover:border-[rgba(${cfg.glowRgb},0.4)] hover:text-white hover:shadow-[0_0_20px_rgba(${cfg.glowRgb},0.25)]`,
+                        ].join(' ')}
+                      >
+                        <span className="relative h-4 w-4">
+                          <Lock   size={13} className="absolute inset-0 transition-all duration-300 group-hover/btn:opacity-0 group-hover/btn:scale-50 group-hover/btn:rotate-12" />
+                          <LockOpen size={13} className="absolute inset-0 opacity-0 scale-50 -rotate-12 transition-all duration-300 group-hover/btn:opacity-100 group-hover/btn:scale-100 group-hover/btn:rotate-0" />
+                        </span>
                         Acceder
-                      </span>
-                      {/* Internal Glow Effect */}
-                      <div className="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent opacity-0 group-hover/btn:opacity-100 transition-opacity" />
-                    </a>
+                      </a>
+                    )}
+
+                    {isAccess && (
+                      <div className="flex items-center gap-1 text-[10px] text-red-400/60">
+                        <ShieldAlert size={11} />
+                        <span className="font-semibold">Sensible</span>
+                      </div>
+                    )}
                   </div>
 
-                  {/* Decorative Scanline Effect */}
-                  <div className="absolute bottom-0 left-4 right-4 h-px bg-gradient-to-r from-transparent via-cyan-500/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+                  {/* ACCESS reveal section */}
+                  {isAccess && (
+                    <div className="relative z-10">
+                      <VaultRevealButton url={asset.url} />
+                    </div>
+                  )}
+
+                  {/* Bottom scanline */}
+                  <div className="absolute bottom-0 left-4 right-4 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
                 </div>
-              )
-            })}
-          </div>
-        </FadeIn>
+              </StaggerItem>
+            )
+          })}
+        </StaggerContainer>
       )}
-      {/* Activity Feed - Peace of Mind Section */}
-      <FadeIn delay={0.2}>
-        <div className="mt-8 rounded-2xl border border-white/5 bg-black/20 p-6 backdrop-blur-md">
+
+      {/* ── ACTIVITY TIMELINE ───────────────────────────────────────────────── */}
+      <FadeIn delay={0.18}>
+        <div className="rounded-2xl border border-white/8 bg-black/20 p-6 backdrop-blur-md">
+          {/* Header */}
           <div className="mb-6 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-400">
-                <ShieldCheck size={16} />
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/10 border border-emerald-500/15 text-emerald-400">
+                <ShieldCheck size={15} />
               </div>
-              <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">
+              <h2 className="text-[10px] font-black uppercase tracking-[0.22em] text-zinc-500">
                 Registro de Integridad y Accesos
               </h2>
             </div>
-            <span className="flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-widest text-emerald-500/60">
-              <span className="h-1 w-1 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="flex items-center gap-1.5 rounded-full border border-emerald-500/15 bg-emerald-500/8 px-2.5 py-1 text-[9px] font-bold uppercase tracking-widest text-emerald-500/70">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
               Monitoreo Activo
             </span>
           </div>
 
-          <div className="flex flex-col gap-1">
-            {[
-              { user: 'Carlos (Tú)', action: 'accedió a', resource: 'Credenciales de Dominio', time: 'Hace 2 horas' },
-              { user: 'Admin (develOP)', action: 'subió', resource: 'Guía de Estilo v2 (PDF)', time: 'Hace 5 horas' },
-              { user: 'Carlos (Tú)', action: 'descargó', resource: 'Logotipo Principal (PNG)', time: 'Ayer, 18:45' },
-            ].map((log, i) => (
-              <div 
-                key={i} 
-                className="group flex items-center justify-between py-2.5 px-3 rounded-lg hover:bg-white/[0.02] transition-colors border-b border-white/[0.03] last:border-0"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="flex h-6 w-6 items-center justify-center rounded-full bg-zinc-900 border border-white/5 text-zinc-600 group-hover:text-zinc-400 transition-colors">
-                    <User size={12} />
-                  </div>
-                  <p className="text-[11px] text-zinc-500 leading-none">
-                    <span className="font-bold text-zinc-300">{log.user}</span>
-                    <span className="mx-1.5 opacity-60">{log.action}</span>
-                    <span className="font-bold text-zinc-400 group-hover:text-cyan-400 transition-colors cursor-default">{log.resource}</span>
-                  </p>
-                </div>
-                <span className="text-[9px] font-bold uppercase tracking-widest text-zinc-700 tabular-nums">
-                  {log.time}
-                </span>
-              </div>
-            ))}
+          {/* Timeline entries */}
+          <div className="relative pl-5">
+            {/* Vertical line */}
+            <div className="absolute left-[7px] top-2 bottom-2 w-px bg-gradient-to-b from-emerald-500/30 via-zinc-700/30 to-transparent" />
+
+            <ul className="flex flex-col gap-4">
+              {ACTIVITY_LOG.map((entry, i) => {
+                const EntryIcon = entry.icon
+                return (
+                  <li key={i} className="relative group/log flex items-start justify-between gap-4">
+                    {/* Timeline dot */}
+                    <div className={`absolute -left-5 top-1 h-2.5 w-2.5 rounded-full border-2 border-[#0a0b10] ${entry.isAdmin ? 'bg-cyan-500' : 'bg-zinc-600'}`} />
+
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className={`flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full border ${entry.isAdmin ? 'border-cyan-500/20 bg-cyan-500/10 text-cyan-400' : 'border-white/8 bg-zinc-900 text-zinc-500'}`}>
+                        <EntryIcon size={13} />
+                      </div>
+                      <p className="text-[11px] leading-snug text-zinc-500">
+                        <span className={`font-bold ${entry.isAdmin ? 'text-cyan-400' : 'text-zinc-300'}`}>
+                          {entry.actor}
+                        </span>
+                        <span className="mx-1.5 opacity-60">{entry.action}</span>
+                        <span className="font-semibold text-zinc-400 group-hover/log:text-zinc-200 transition-colors">
+                          {entry.resource}
+                        </span>
+                      </p>
+                    </div>
+
+                    <span className="flex-shrink-0 flex items-center gap-1 text-[9px] font-bold uppercase tracking-widest text-zinc-700">
+                      <Clock size={9} />
+                      {entry.time}
+                    </span>
+                  </li>
+                )
+              })}
+            </ul>
           </div>
-          
-          <p className="mt-4 text-center text-[9px] font-medium text-zinc-600 italic">
-            * Los registros de acceso se mantienen por 30 días para tu auditoría personal.
+
+          <p className="mt-5 text-center text-[9px] font-medium text-zinc-700 italic">
+            Los registros de acceso se mantienen por 30 días para tu auditoría personal.
           </p>
         </div>
       </FadeIn>
+
     </div>
   )
 }

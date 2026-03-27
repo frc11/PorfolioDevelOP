@@ -4,7 +4,7 @@ import { auth } from '@/auth'
 import { prisma } from '@/lib/prisma'
 import { resolveOrgId } from '@/lib/preview'
 import { revalidatePath } from 'next/cache'
-import { TicketCategory, TicketPriority } from '@prisma/client'
+import { TicketCategory, TicketPriority, TicketStatus } from '@prisma/client'
 import { sendEmail } from '@/lib/email'
 import { TicketReplyEmail } from '@/emails/TicketReplyEmail'
 
@@ -122,5 +122,46 @@ export async function replyTicketAction({
   } catch (error) {
     console.error('Error in replyTicketAction:', error)
     return { success: false, error: 'Ocurrió un error al enviar la respuesta.' }
+  }
+}
+
+export async function resolveTicketClientAction(ticketId: string): Promise<{ success: boolean; error?: string }> {
+  const session = await auth()
+  const organizationId = await resolveOrgId()
+  const userId = session?.user?.id
+
+  if (!userId || !organizationId) return { success: false, error: 'No autorizado' }
+
+  try {
+    await prisma.ticket.update({
+      where: { id: ticketId, organizationId },
+      data: { status: 'RESOLVED' },
+    })
+    revalidatePath(`/dashboard/soporte/${ticketId}`)
+    revalidatePath('/dashboard/soporte')
+    return { success: true }
+  } catch {
+    return { success: false, error: 'Error al marcar como resuelto.' }
+  }
+}
+
+export async function updateTicketStatusDashboardAction(
+  ticketId: string,
+  status: TicketStatus
+): Promise<{ success: boolean; error?: string }> {
+  const session = await auth()
+  if (session?.user?.role !== 'SUPER_ADMIN') return { success: false, error: 'No autorizado' }
+
+  if (!Object.values(TicketStatus).includes(status)) return { success: false, error: 'Estado inválido' }
+
+  try {
+    await prisma.ticket.update({ where: { id: ticketId }, data: { status } })
+    revalidatePath(`/dashboard/soporte/${ticketId}`)
+    revalidatePath('/dashboard/soporte')
+    revalidatePath(`/admin/tickets/${ticketId}`)
+    revalidatePath('/admin/tickets')
+    return { success: true }
+  } catch {
+    return { success: false, error: 'Error al actualizar el estado.' }
   }
 }

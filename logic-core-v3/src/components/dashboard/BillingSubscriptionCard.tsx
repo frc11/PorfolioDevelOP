@@ -1,118 +1,225 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { CheckCircle2, ShieldCheck, Sparkles, Phone } from 'lucide-react'
+import {
+  AlertTriangle,
+  CalendarClock,
+  CheckCircle2,
+  Phone,
+  ShieldAlert,
+  ShieldCheck,
+  ShieldOff,
+  Sparkles,
+} from 'lucide-react'
 import Link from 'next/link'
 
-interface BillingSubscriptionCardProps {
-  subscription: any
-  statusColor: string
-  statusText: string
-  nextDueDate: Date | null
+type SubscriptionStatus = 'ACTIVE' | 'PAST_DUE' | 'CANCELED'
+
+interface SubscriptionData {
+  planName: string
+  status: SubscriptionStatus
+  price: number
+  currency: string
 }
 
-export function BillingSubscriptionCard({ 
-  subscription, 
-  statusColor, 
-  statusText, 
-  nextDueDate 
+interface BillingSubscriptionCardProps {
+  subscription: SubscriptionData | null
+  daysUntilRenewal: number | null
+  renewalDateFormatted: string | null
+}
+
+type StatusCfg = {
+  label: string
+  pill: string
+  dot: string
+  pulse: boolean
+  Icon: typeof CheckCircle2
+}
+
+const STATUS_CONFIG: Record<SubscriptionStatus, StatusCfg> = {
+  ACTIVE: {
+    label: 'Activa',
+    pill: 'text-emerald-400 border-emerald-500/20 bg-emerald-500/10',
+    dot: 'bg-emerald-400',
+    pulse: true,
+    Icon: CheckCircle2,
+  },
+  PAST_DUE: {
+    label: 'Pago vencido',
+    pill: 'text-red-400 border-red-500/20 bg-red-500/10',
+    dot: 'bg-red-400',
+    pulse: false,
+    Icon: ShieldAlert,
+  },
+  CANCELED: {
+    label: 'Cancelada',
+    pill: 'text-zinc-500 border-zinc-700/60 bg-zinc-800/60',
+    dot: 'bg-zinc-500',
+    pulse: false,
+    Icon: ShieldOff,
+  },
+}
+
+export function BillingSubscriptionCard({
+  subscription,
+  daysUntilRenewal,
+  renewalDateFormatted,
 }: BillingSubscriptionCardProps) {
+  const status = subscription?.status ?? null
+  const cfg = status ? STATUS_CONFIG[status] : null
+  const isPastDue = status === 'PAST_DUE'
+
+  const countdownLabel =
+    daysUntilRenewal === null
+      ? null
+      : daysUntilRenewal > 0
+      ? `Vence en ${daysUntilRenewal} ${daysUntilRenewal === 1 ? 'día' : 'días'}`
+      : daysUntilRenewal === 0
+      ? 'Vence hoy'
+      : 'Vencida'
+
+  const countdownColor =
+    daysUntilRenewal !== null && daysUntilRenewal <= 3
+      ? 'text-red-400'
+      : daysUntilRenewal !== null && daysUntilRenewal <= 7
+      ? 'text-amber-400'
+      : 'text-zinc-300'
+
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0, x: -20 }}
       animate={{ opacity: 1, x: 0 }}
-      className="md:col-span-1 border border-white/10 bg-[#0c0e12]/80 backdrop-blur-xl rounded-2xl p-6 relative overflow-hidden shadow-2xl flex flex-col justify-between"
+      transition={{ type: 'spring', stiffness: 80, damping: 15 }}
+      className="lg:col-span-1 flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#0c0e12]/80 backdrop-blur-xl shadow-2xl"
     >
-      {/* Subtle glow / Decorative element */}
-      <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/10 rounded-full blur-3xl -mr-10 -mt-10" />
-      <div className="absolute bottom-0 left-0 w-24 h-24 bg-blue-600/5 rounded-full blur-2xl -ml-5 -mb-5" />
-      
-      <div className="relative z-10">
-        <div className="flex items-center justify-between mb-6">
-          <p className="text-[10px] font-black tracking-[0.2em] uppercase text-cyan-500 flex items-center gap-2">
-            <ShieldCheck size={12} />
-            Plan de Nivel
+      {/* ── PAST_DUE urgent banner ───────────────────────────────────────── */}
+      {isPastDue && (
+        <div className="flex items-start gap-2.5 border-b border-red-500/30 bg-red-500/[0.12] px-5 py-3.5">
+          <AlertTriangle size={14} className="mt-0.5 shrink-0 text-red-400" />
+          <p className="text-[11px] font-bold leading-snug text-red-300">
+            Tu pago está vencido.{' '}
+            <Link
+              href="/dashboard/messages"
+              className="underline underline-offset-2 transition-colors hover:text-red-200"
+            >
+              Contactanos para regularizar.
+            </Link>
           </p>
-          {subscription && (
-            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
-              <CheckCircle2 size={12} />
-            </div>
-          )}
         </div>
-        
-        {subscription ? (
-          <div className="space-y-6">
-            <div>
-              <h2 className="text-2xl font-black text-white tracking-tight uppercase italic">{subscription.planName}</h2>
-              <p className="text-[10px] text-zinc-500 font-medium mt-1">Suscripción B2B de Alto Rendimiento</p>
+      )}
+
+      {/* ── Card body ────────────────────────────────────────────────────── */}
+      <div className="relative flex flex-1 flex-col gap-5 overflow-hidden p-6">
+        {/* Ambient glows */}
+        <div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-cyan-500/10 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-5 -left-5 h-24 w-24 rounded-full bg-blue-600/5 blur-2xl" />
+
+        {subscription && cfg ? (
+          <>
+            {/* Label + status badge */}
+            <div className="relative z-10 flex items-center justify-between">
+              <p className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-cyan-500">
+                <ShieldCheck size={12} />
+                Plan Actual
+              </p>
+              <span
+                className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[9px] font-black uppercase tracking-wider ${cfg.pill}`}
+              >
+                <span className="relative flex h-1.5 w-1.5">
+                  {cfg.pulse && (
+                    <span
+                      className={`absolute inline-flex h-full w-full animate-ping rounded-full opacity-75 ${cfg.dot}`}
+                    />
+                  )}
+                  <span
+                    className={`relative inline-flex h-1.5 w-1.5 rounded-full ${cfg.dot}`}
+                  />
+                </span>
+                {cfg.label}
+              </span>
             </div>
-            
-            <div className="flex items-baseline gap-2 py-4 border-y border-white/5 font-mono">
-              <span className="text-4xl font-black text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.1)]">
+
+            {/* Plan name */}
+            <div className="relative z-10">
+              <h2 className="text-2xl font-black uppercase italic tracking-tight text-white">
+                {subscription.planName}
+              </h2>
+              <p className="mt-0.5 text-[10px] font-bold uppercase tracking-widest text-zinc-600">
+                Suscripción B2B
+              </p>
+            </div>
+
+            {/* Price */}
+            <div className="relative z-10 flex items-baseline gap-2 border-y border-white/5 py-4 font-mono">
+              <span className="text-4xl font-black text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.08)]">
                 ${subscription.price.toFixed(2)}
               </span>
               <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">
-                {subscription.currency} / MES
+                {subscription.currency} / mes
               </span>
             </div>
-            
-            <div className="space-y-3 pt-2">
-              <div className="flex items-center justify-between text-[10px] font-medium tracking-wide">
-                <span className="text-zinc-500 uppercase">Próximo vencimiento</span>
-                <span className="text-zinc-300 font-mono">
-                  {nextDueDate?.toLocaleDateString('es-AR', { day: 'numeric', month: 'long', year: 'numeric' })}
-                </span>
-              </div>
-              <div className="flex items-center justify-between text-[10px] font-medium tracking-wide">
-                <span className="text-zinc-500 uppercase">Método de pago</span>
-                <div className="flex items-center gap-1.5 text-zinc-300">
-                  <ShieldCheck size={12} className="text-cyan-500" />
-                  <span className="font-mono">Visa **** 4242</span>
+
+            {/* Renewal countdown */}
+            {countdownLabel && (
+              <div className="relative z-10 flex items-center gap-3 rounded-xl border border-white/5 bg-white/[0.03] px-4 py-3">
+                <CalendarClock
+                  size={16}
+                  className={
+                    daysUntilRenewal !== null && daysUntilRenewal <= 7
+                      ? 'text-amber-400'
+                      : 'text-cyan-500/60'
+                  }
+                />
+                <div>
+                  <p className="text-[9px] font-black uppercase tracking-widest text-zinc-600">
+                    Próximo vencimiento
+                  </p>
+                  <p className={`mt-0.5 text-xs font-bold ${countdownColor}`}>
+                    {countdownLabel}
+                  </p>
+                  {renewalDateFormatted && (
+                    <p className="font-mono text-[9px] text-zinc-600">
+                      {renewalDateFormatted}
+                    </p>
+                  )}
                 </div>
               </div>
-              <div className="flex items-center justify-between text-[10px] font-medium tracking-wide">
-                <span className="text-zinc-500 uppercase">Ciclo de facturación</span>
-                <span className="text-zinc-300">Mensual</span>
-              </div>
-            </div>
-
-            <div className={`inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-[9px] font-black uppercase tracking-wider border ${statusColor}`}>
-              <div className={`h-1.5 w-1.5 rounded-full ${subscription?.status === 'ACTIVE' ? 'bg-emerald-400 animate-pulse' : 'bg-red-400'}`} />
-              {statusText}
-            </div>
-          </div>
+            )}
+          </>
         ) : (
-          <div className="space-y-6 opacity-60">
-            {/* Skeleton Structure */}
-            <div className="space-y-3">
-              <div className="h-4 w-3/4 rounded bg-white/5 animate-pulse" />
-              <div className="h-6 w-1/2 rounded bg-white/5 animate-pulse" />
+          /* No subscription skeleton */
+          <div className="relative z-10 flex flex-col gap-6">
+            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-cyan-500">
+              Plan Actual
+            </p>
+            <div className="space-y-2 opacity-40">
+              <div className="h-5 w-3/4 animate-pulse rounded bg-white/5" />
+              <div className="h-8 w-1/2 animate-pulse rounded bg-white/5" />
+              <div className="h-12 w-full animate-pulse rounded-xl bg-white/5" />
             </div>
-            <div className="h-12 w-full rounded-xl bg-white/5 animate-pulse flex items-center px-4">
-              <div className="h-2 w-1/3 rounded bg-white/10" />
-            </div>
-            <p className="text-[11px] text-zinc-600 font-medium italic">
-              No hay un plan activo detectado. <br />
-              Asigná un contrato para comenzar.
+            <p className="text-[11px] italic text-zinc-600">
+              No hay un plan activo asignado.
             </p>
           </div>
         )}
       </div>
 
-      {/* CTA Section */}
-      <div className="relative z-10 mt-10 space-y-3">
-        <Link 
+      {/* ── CTAs ─────────────────────────────────────────────────────────── */}
+      <div className="flex flex-col gap-2 border-t border-white/5 p-6">
+        <Link
           href="/dashboard/services"
-          className="flex w-full items-center justify-center gap-2 rounded-xl bg-white/[0.03] border border-white/10 px-4 py-3 text-[10px] font-black uppercase tracking-widest text-zinc-300 transition-all hover:bg-white/[0.06] hover:text-white hover:border-white/20 group backdrop-blur-md"
+          className="flex w-full items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 text-[10px] font-black uppercase tracking-widest text-zinc-300 backdrop-blur-md transition-all hover:border-white/20 hover:bg-white/[0.06] hover:text-white active:scale-95"
         >
-          <Sparkles size={14} className="text-amber-400 transition-transform group-hover:rotate-12" />
-          Ver Catálogo
+          <Sparkles size={13} className="text-amber-400" />
+          Ver catálogo de planes
         </Link>
-        
-        <button className="flex w-full items-center justify-center gap-2 rounded-xl border border-cyan-500/20 bg-cyan-500/5 px-4 py-3 text-[10px] font-black uppercase tracking-widest text-cyan-400 transition-all hover:bg-cyan-500/10 hover:border-cyan-500/40 group">
-          <Phone size={14} className="transition-transform group-hover:-rotate-12" />
-          Account Manager
-        </button>
+        <Link
+          href="/dashboard/messages"
+          className="flex w-full items-center justify-center gap-2 rounded-xl border border-cyan-500/20 bg-cyan-500/5 px-4 py-3 text-[10px] font-black uppercase tracking-widest text-cyan-400 transition-all hover:border-cyan-500/40 hover:bg-cyan-500/10 active:scale-95"
+        >
+          <Phone size={13} />
+          Hablar con account manager
+        </Link>
       </div>
     </motion.div>
   )

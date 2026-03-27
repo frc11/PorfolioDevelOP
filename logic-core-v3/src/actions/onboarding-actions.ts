@@ -4,6 +4,7 @@ import { auth } from '@/auth'
 import { prisma } from '@/lib/prisma'
 import { resolveOrgId } from '@/lib/preview'
 import { revalidatePath } from 'next/cache'
+import { redirect } from 'next/navigation'
 
 interface OnboardingData {
   primaryColor?: string
@@ -13,6 +14,42 @@ interface OnboardingData {
   domainCredentials?: string
   socialCredentials?: string
 }
+
+// ─── Save profile from bienvenida wizard ──────────────────────────────────────
+
+export async function saveOnboardingProfile(
+  _prev: string | null,
+  formData: FormData
+): Promise<string | null> {
+  const organizationId = await resolveOrgId()
+
+  if (!organizationId) {
+    return 'Sesión inválida. Por favor ingresá de nuevo.'
+  }
+
+  const companyName = (formData.get('companyName') as string | null)?.trim() ?? ''
+  const logoUrl = (formData.get('logoUrl') as string | null)?.trim() ?? ''
+
+  if (!companyName) return 'El nombre de empresa es requerido.'
+
+  try {
+    await prisma.organization.update({
+      where: { id: organizationId },
+      data: {
+        companyName,
+        ...(logoUrl ? { logoUrl } : {}),
+        onboardingCompleted: true,
+      },
+    })
+  } catch {
+    return 'Error al guardar el perfil. Intentá de nuevo.'
+  }
+
+  revalidatePath('/', 'layout')
+  redirect('/dashboard')
+}
+
+// ─── Complete full onboarding (brand + access) ────────────────────────────────
 
 export async function completeOnboardingAction(data: OnboardingData) {
   const session = await auth()

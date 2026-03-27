@@ -56,7 +56,8 @@ export async function sendClientMessageAction(
 ): Promise<string | null> {
   const session = await auth()
   const organizationId = session?.user?.organizationId
-  if (!organizationId) return 'Sesión inválida.'
+  const userId = session?.user?.id
+  if (!organizationId || !userId) return 'Sesión inválida.'
 
   const content = ((formData.get('content') as string | null) ?? '').trim()
   if (!content) return 'El mensaje no puede estar vacío.'
@@ -64,6 +65,34 @@ export async function sendClientMessageAction(
   await prisma.message.create({
     data: { organizationId, content, fromAdmin: false },
   })
+
+  // Notify SUPER_ADMIN — non-blocking
+  try {
+    const [org, superAdmin] = await Promise.all([
+      prisma.organization.findUnique({
+        where: { id: organizationId },
+        select: { companyName: true },
+      }),
+      prisma.user.findFirst({
+        where: { role: 'SUPER_ADMIN' },
+        select: { id: true },
+      }),
+    ])
+
+    if (superAdmin && org) {
+      await prisma.notification.create({
+        data: {
+          type: 'INFO',
+          title: `Nuevo mensaje de ${org.companyName}`,
+          message: content.length > 80 ? content.slice(0, 80) + '…' : content,
+          userId: superAdmin.id,
+          actionUrl: `/admin/messages/${organizationId}`,
+        },
+      })
+    }
+  } catch {
+    // non-critical
+  }
 
   revalidatePath('/dashboard/messages')
   revalidatePath(`/admin/messages/${organizationId}`)
