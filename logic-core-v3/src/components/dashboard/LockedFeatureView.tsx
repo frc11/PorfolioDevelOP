@@ -322,13 +322,11 @@ export function LockedFeatureView({ featureId }: LockedFeatureViewProps) {
     if (sent || isPending) return
     startTransition(async () => {
       const result = await requestUpsellAction(config.id, config.name)
-      if (result.ok) {
+      if (result.success) {
         setSent(true)
-        toast.success('¡Solicitud enviada! Te contactamos en menos de 24hs.', {
-          description: `Módulo: ${config.name}`,
-        })
+        toast.success('\u00a1Solicitud enviada! Te contactamos en < 24hs \ud83d\ude80')
       } else {
-        toast.error(result.error)
+        toast.error(result.error || 'No se pudo enviar la solicitud.')
       }
     })
   }

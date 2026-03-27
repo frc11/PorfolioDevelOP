@@ -1,13 +1,19 @@
+import { auth } from '@/auth'
 import { resolveOrgId, isAdminPreview } from '@/lib/preview'
 import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import { OnboardingWizard } from '@/components/onboarding/OnboardingWizard'
 
 export default async function BienvenidaPage() {
-  const organizationId = await resolveOrgId()
-  const preview = await isAdminPreview()
+  const [session, organizationId, preview] = await Promise.all([
+    auth(),
+    resolveOrgId(),
+    isAdminPreview(),
+  ])
   
-  if (!organizationId) redirect('/login')
+  if (!organizationId) {
+    redirect(session?.user?.role === 'SUPER_ADMIN' ? '/admin/clients' : '/login')
+  }
 
   const client = await prisma.organization.findUnique({
     where: { id: organizationId },

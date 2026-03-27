@@ -8,11 +8,10 @@ import { getSearchConsoleData } from '@/lib/searchconsole'
 import { MonthlyReport } from '@/lib/reports/MonthlyReport'
 import type { MonthlyReportData } from '@/lib/reports/MonthlyReport'
 
-// Force Node.js runtime — @react-pdf/renderer requires it
 export const runtime = 'nodejs'
 
 function currentMonth(): string {
-  return new Date().toISOString().slice(0, 7) // "YYYY-MM"
+  return new Date().toISOString().slice(0, 7)
 }
 
 function isValidMonth(month: string): boolean {
@@ -20,24 +19,21 @@ function isValidMonth(month: string): boolean {
 }
 
 export async function GET(req: NextRequest) {
-  // ── Auth ──────────────────────────────────────────────────────────────────
   const session = await auth()
   if (!session?.user) {
     return NextResponse.json({ error: 'No autenticado' }, { status: 401 })
   }
 
   const { role, organizationId: sessionOrganizationId } = session.user
-
-  // ── Params ────────────────────────────────────────────────────────────────
   const { searchParams } = req.nextUrl
   const requestedOrganizationId = searchParams.get('organizationId')
+  const requestedClientId = searchParams.get('clientId')
   const month = searchParams.get('month') ?? currentMonth()
 
   if (!isValidMonth(month)) {
     return NextResponse.json({ error: 'Formato de mes inválido. Use YYYY-MM.' }, { status: 400 })
   }
 
-  // Determine which organizationId to use
   let organizationId: string
   if (role === 'SUPER_ADMIN') {
     if (!requestedOrganizationId) {
@@ -45,7 +41,6 @@ export async function GET(req: NextRequest) {
     }
     organizationId = requestedOrganizationId
   } else {
-    // ORG_MEMBER: can only access their own report
     if (!sessionOrganizationId) {
       return NextResponse.json({ error: 'Sin organización asociada.' }, { status: 403 })
     }
@@ -55,7 +50,27 @@ export async function GET(req: NextRequest) {
     organizationId = sessionOrganizationId
   }
 
-  // ── Fetch organization ────────────────────────────────────────────────────
+  if (requestedClientId) {
+    const matchingMembership = await prisma.orgMember.findFirst({
+      where: {
+        userId: requestedClientId,
+        organizationId,
+      },
+      select: { id: true },
+    })
+
+    if (!matchingMembership) {
+      return NextResponse.json(
+        { error: 'clientId no corresponde a la organización.' },
+        { status: 403 }
+      )
+    }
+
+    if (role !== 'SUPER_ADMIN' && requestedClientId !== session.user.id) {
+      return NextResponse.json({ error: 'Sin permisos.' }, { status: 403 })
+    }
+  }
+
   const client = await prisma.organization.findUnique({
     where: { id: organizationId },
     select: {
@@ -69,29 +84,22 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Cliente no encontrado.' }, { status: 404 })
   }
 
-  // ── Fetch all data in parallel ────────────────────────────────────────────
   const [analyticsResult, searchConsoleResult, project, services] = await Promise.all([
     client.analyticsPropertyId
       ? getAnalyticsData(client.analyticsPropertyId)
       : Promise.resolve(null),
-
-    client.siteUrl
-      ? getSearchConsoleData(client.siteUrl)
-      : Promise.resolve(null),
-
+    client.siteUrl ? getSearchConsoleData(client.siteUrl) : Promise.resolve(null),
     prisma.project.findFirst({
       where: { organizationId },
       orderBy: [{ status: 'asc' }, { id: 'desc' }],
       include: { tasks: { select: { status: true } } },
     }),
-
     prisma.service.findMany({
       where: { organizationId },
       select: { type: true, status: true },
     }),
   ])
 
-  // ── Build report data ─────────────────────────────────────────────────────
   const reportData: MonthlyReportData = {
     companyName: client.companyName,
     month,
@@ -102,16 +110,15 @@ export async function GET(req: NextRequest) {
           name: project.name,
           status: project.status,
           totalTasks: project.tasks.length,
-          doneTasks: project.tasks.filter((t) => t.status === 'DONE').length,
+          doneTasks: project.tasks.filter((task) => task.status === 'DONE').length,
         }
       : null,
-    services: services.map((s) => ({ type: s.type, status: s.status })),
+    services: services.map((service) => ({ type: service.type, status: service.status })),
   }
 
-  // ── Generate PDF ──────────────────────────────────────────────────────────
   try {
     const buffer = await renderToBuffer(
-      React.createElement(MonthlyReport, { data: reportData }) as any
+      React.createElement(MonthlyReport, { data: reportData }) as never
     )
 
     const [year, mon] = month.split('-')
@@ -126,8 +133,8 @@ export async function GET(req: NextRequest) {
         'Cache-Control': 'no-store',
       },
     })
-  } catch (err) {
-    console.error('[PDF generation error]', err)
+  } catch (error) {
+    console.error('[PDF generation error]', error)
     return NextResponse.json(
       { error: 'Error al generar el PDF. Intentá de nuevo.' },
       { status: 500 }

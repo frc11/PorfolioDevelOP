@@ -116,7 +116,10 @@ export default async function SeoPage({
     if (probe.ok) isMockData = probe.data.isMockData
   }
 
-  const activarSeo = requestUpsellAction.bind(null, 'seo-avanzado', 'SEO Avanzado')
+  const activarSeo = async () => {
+    'use server'
+    await requestUpsellAction('seo-avanzado', 'SEO Avanzado')
+  }
 
   return (
     <div className="flex flex-col gap-6">

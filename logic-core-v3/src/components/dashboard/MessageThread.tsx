@@ -4,6 +4,7 @@ import { useActionState, useEffect, useRef, useState } from 'react'
 import { sendClientMessageAction } from '@/lib/actions/messages'
 import { Send, Loader2, CheckCheck, ArrowUp } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
+import type { ActionResult } from '@/lib/actions/schemas'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -74,7 +75,7 @@ const WELCOME_MESSAGE =
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export function MessageThread({ messages }: MessageThreadProps) {
-  const [error, action, isPending] = useActionState(sendClientMessageAction, null)
+  const [state, action, isPending] = useActionState<ActionResult | null, FormData>(sendClientMessageAction, null)
   const [inputValue, setInputValue] = useState('')
   const bottomRef = useRef<HTMLDivElement>(null)
   const formRef = useRef<HTMLFormElement>(null)
@@ -86,11 +87,11 @@ export function MessageThread({ messages }: MessageThreadProps) {
   }, [messages])
 
   useEffect(() => {
-    if (!isPending && !error) {
+    if (!isPending && state?.success) {
       formRef.current?.reset()
       setInputValue('')
     }
-  }, [isPending, error])
+  }, [isPending, state])
 
   return (
     <div
@@ -234,7 +235,7 @@ export function MessageThread({ messages }: MessageThreadProps) {
 
       {/* ── Input area ──────────────────────────────────────────────────── */}
       <div className="p-4" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-        {error && <p className="mb-2 text-xs text-red-400">{error}</p>}
+        {state?.error && <p className="mb-2 text-xs text-red-400">{state.error}</p>}
 
         {/* Quick reply buttons */}
         <div className="mb-3 flex flex-wrap gap-2">

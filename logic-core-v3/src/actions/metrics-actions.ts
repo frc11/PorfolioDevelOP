@@ -86,5 +86,6 @@ export async function toggleClientFeature(
   })
 
   revalidatePath('/dashboard')
+  revalidatePath('/dashboard', 'layout')
   return { success: true }
 }

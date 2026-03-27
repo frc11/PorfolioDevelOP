@@ -4,15 +4,11 @@ import { useActionState } from 'react'
 import { motion, type Variants } from 'framer-motion'
 import Link from 'next/link'
 
-// ─── Shared field styles ──────────────────────────────────────────────────────
-
 const INPUT_CLASS =
   'w-full rounded-xl border border-white/[0.07] bg-white/[0.04] px-3 py-2.5 text-sm text-zinc-100 outline-none placeholder:text-zinc-700 transition-all focus:border-cyan-500/60 focus:bg-white/[0.06] focus:ring-2 focus:ring-cyan-500/20'
 
 const LABEL_CLASS =
   'text-[10px] font-semibold tracking-[0.15em] uppercase text-zinc-500'
-
-// ─── Animation variants ───────────────────────────────────────────────────────
 
 const containerVariants: Variants = {
   hidden: {},
@@ -23,8 +19,6 @@ const itemVariants: Variants = {
   hidden: { opacity: 0, y: 12 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] } },
 }
-
-// ─── Props ────────────────────────────────────────────────────────────────────
 
 interface ClientFormProps {
   action: (prevState: string | null, formData: FormData) => Promise<string | null>
@@ -38,11 +32,10 @@ interface ClientFormProps {
     analyticsPropertyId?: string | null
     siteUrl?: string | null
     n8nWorkflowIds?: string[]
+    unlockedFeatures?: string[]
   }
   cancelHref: string
 }
-
-// ─── Field wrapper ────────────────────────────────────────────────────────────
 
 function Field({ children }: { children: React.ReactNode }) {
   return (
@@ -51,8 +44,6 @@ function Field({ children }: { children: React.ReactNode }) {
     </motion.div>
   )
 }
-
-// ─── Component ────────────────────────────────────────────────────────────────
 
 export function ClientForm({ action, mode, initialValues, cancelHref }: ClientFormProps) {
   const [error, formAction, isPending] = useActionState(action, null)
@@ -71,12 +62,10 @@ export function ClientForm({ action, mode, initialValues, cancelHref }: ClientFo
       }}
     >
       <form action={formAction} className="flex flex-col gap-5">
-        {/* Hidden clientId for edit mode */}
         {mode === 'edit' && initialValues?.clientId && (
           <input type="hidden" name="clientId" value={initialValues.clientId} />
         )}
 
-        {/* Error */}
         {error && (
           <motion.div
             variants={itemVariants}
@@ -87,7 +76,6 @@ export function ClientForm({ action, mode, initialValues, cancelHref }: ClientFo
           </motion.div>
         )}
 
-        {/* Company name */}
         <Field>
           <label htmlFor="companyName" className={LABEL_CLASS}>
             Nombre de empresa <span className="text-red-400">*</span>
@@ -103,7 +91,6 @@ export function ClientForm({ action, mode, initialValues, cancelHref }: ClientFo
           />
         </Field>
 
-        {/* Contact name */}
         <Field>
           <label htmlFor="name" className={LABEL_CLASS}>
             Nombre del contacto <span className="text-red-400">*</span>
@@ -114,12 +101,11 @@ export function ClientForm({ action, mode, initialValues, cancelHref }: ClientFo
             type="text"
             required
             defaultValue={initialValues?.name ?? ''}
-            placeholder="Ej: Juan García"
+            placeholder="Ej: Juan Garcia"
             className={INPUT_CLASS}
           />
         </Field>
 
-        {/* Email — only in create mode */}
         {mode === 'create' && (
           <Field>
             <label htmlFor="email" className={LABEL_CLASS}>
@@ -130,13 +116,13 @@ export function ClientForm({ action, mode, initialValues, cancelHref }: ClientFo
               name="email"
               type="email"
               required
+              defaultValue={initialValues?.email ?? ''}
               placeholder="contacto@empresa.com"
               className={INPUT_CLASS}
             />
           </Field>
         )}
 
-        {/* Read-only email in edit mode */}
         {mode === 'edit' && initialValues?.email && (
           <Field>
             <label className={LABEL_CLASS}>Email</label>
@@ -150,7 +136,6 @@ export function ClientForm({ action, mode, initialValues, cancelHref }: ClientFo
           </Field>
         )}
 
-        {/* Temporary password — only in create mode */}
         {mode === 'create' && (
           <Field>
             <label htmlFor="password" className={LABEL_CLASS}>
@@ -162,17 +147,15 @@ export function ClientForm({ action, mode, initialValues, cancelHref }: ClientFo
               type="password"
               required
               minLength={8}
-              placeholder="Mínimo 8 caracteres"
+              placeholder="Minimo 8 caracteres"
               className={INPUT_CLASS}
             />
           </Field>
         )}
 
-        {/* Logo URL — optional */}
         <Field>
           <label htmlFor="logoUrl" className={LABEL_CLASS}>
-            URL del logo{' '}
-            <span className="normal-case text-zinc-600">(opcional)</span>
+            URL del logo <span className="normal-case text-zinc-600">(opcional)</span>
           </label>
           <input
             id="logoUrl"
@@ -184,10 +167,8 @@ export function ClientForm({ action, mode, initialValues, cancelHref }: ClientFo
           />
         </Field>
 
-        {/* ── Edit-only integrations ───────────────────────────── */}
         {mode === 'edit' && (
           <>
-            {/* Divider */}
             <motion.div variants={itemVariants} className="pt-1">
               <div
                 className="mb-4 flex items-center gap-3"
@@ -199,11 +180,9 @@ export function ClientForm({ action, mode, initialValues, cancelHref }: ClientFo
               </div>
             </motion.div>
 
-            {/* Analytics Property ID */}
             <Field>
               <label htmlFor="analyticsPropertyId" className={LABEL_CLASS}>
-                Google Analytics Property ID{' '}
-                <span className="normal-case text-zinc-600">(opcional)</span>
+                Google Analytics Property ID <span className="normal-case text-zinc-600">(opcional)</span>
               </label>
               <input
                 id="analyticsPropertyId"
@@ -218,11 +197,9 @@ export function ClientForm({ action, mode, initialValues, cancelHref }: ClientFo
               </p>
             </Field>
 
-            {/* Search Console site URL */}
             <Field>
               <label htmlFor="siteUrl" className={LABEL_CLASS}>
-                URL del sitio (Search Console){' '}
-                <span className="normal-case text-zinc-600">(opcional)</span>
+                URL del sitio (Search Console) <span className="normal-case text-zinc-600">(opcional)</span>
               </label>
               <input
                 id="siteUrl"
@@ -237,11 +214,9 @@ export function ClientForm({ action, mode, initialValues, cancelHref }: ClientFo
               </p>
             </Field>
 
-            {/* n8n Workflow IDs */}
             <Field>
               <label htmlFor="n8nWorkflowIds" className={LABEL_CLASS}>
-                Workflow IDs de n8n{' '}
-                <span className="normal-case text-zinc-600">(opcional)</span>
+                Workflow IDs de n8n <span className="normal-case text-zinc-600">(opcional)</span>
               </label>
               <input
                 id="n8nWorkflowIds"
@@ -258,7 +233,6 @@ export function ClientForm({ action, mode, initialValues, cancelHref }: ClientFo
           </>
         )}
 
-        {/* Actions */}
         <motion.div variants={itemVariants} className="flex items-center gap-3 pt-2">
           <motion.button
             type="submit"
@@ -268,11 +242,7 @@ export function ClientForm({ action, mode, initialValues, cancelHref }: ClientFo
             className="rounded-xl px-5 py-2.5 text-sm font-semibold text-zinc-950 transition-opacity disabled:cursor-not-allowed disabled:opacity-50"
             style={{ background: 'linear-gradient(135deg, #06b6d4 0%, #10b981 100%)' }}
           >
-            {isPending
-              ? 'Guardando...'
-              : mode === 'create'
-              ? 'Crear cliente'
-              : 'Guardar cambios'}
+            {isPending ? 'Guardando...' : mode === 'create' ? 'Crear cliente' : 'Guardar cambios'}
           </motion.button>
           <Link
             href={cancelHref}

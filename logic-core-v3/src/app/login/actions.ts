@@ -62,7 +62,7 @@ export async function loginAction(
   _prevState: string | null,
   formData: FormData
 ): Promise<string | null> {
-  const email = (formData.get('email') as string | null)?.trim() ?? ''
+  const email = (formData.get('email') as string | null)?.trim().toLowerCase() ?? ''
   const password = (formData.get('password') as string | null) ?? ''
 
   // Validación explícita (también corre en el servidor en caso de JS deshabilitado)
@@ -130,7 +130,7 @@ export async function magicLinkAction(
   formData: FormData
 ): Promise<string | null> {
   // El field se llama 'magic-email' para evitar colisión de id en el DOM
-  const email = (formData.get('magic-email') as string | null)?.trim() ?? ''
+  const email = (formData.get('magic-email') as string | null)?.trim().toLowerCase() ?? ''
 
   if (!email) return 'El email es requerido.'
   if (!email.includes('@') || email.length > 254) return 'Email inválido.'

@@ -112,7 +112,7 @@ export default async function ProfilePage() {
 
   if (!org) redirect('/login')
 
-  // ── Preview mode (read-only for SUPER_ADMIN) ──────────────────────────────
+  // ── Support impersonation mode (read-only for SUPER_ADMIN) ───────────────
   if (preview) {
     const member = await prisma.orgMember.findFirst({
       where: { organizationId },
@@ -136,9 +136,9 @@ export default async function ProfilePage() {
           >
             <Eye size={15} className="mt-0.5 flex-shrink-0 text-amber-400" />
             <div>
-              <p className="text-sm font-medium text-amber-300">Modo preview</p>
+              <p className="text-sm font-medium text-amber-300">Sesión de soporte activa</p>
               <p className="mt-0.5 text-xs text-amber-400/70">
-                Estás viendo el perfil del cliente. La edición no está disponible en modo preview.
+                Estás viendo el perfil del cliente en modo impersonado. La edición no está disponible durante la sesión de soporte.
               </p>
             </div>
           </div>

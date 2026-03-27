@@ -3,22 +3,33 @@ import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import { headers } from 'next/headers'
 import { resolveOrgId, isAdminPreview } from '@/lib/preview'
-import { PreviewBanner } from '@/components/dashboard/PreviewBanner'
+import { getImpersonationSession } from '@/lib/impersonation'
+import { ImpersonationBanner } from '@/components/dashboard/ImpersonationBanner'
 import { SubscriptionBanner } from '@/components/dashboard/SubscriptionBanner'
 import { DashboardLayoutClient } from '@/components/dashboard/DashboardLayoutClient'
+import { unstable_noStore as noStore } from 'next/cache'
+
+export const dynamic = 'force-dynamic'
 
 export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  const session = await auth()
-  const organizationId = await resolveOrgId()
-  const preview = await isAdminPreview()
+  noStore()
 
-  if (!organizationId) redirect('/login')
+  const [session, organizationId, preview, impersonation] = await Promise.all([
+    auth(),
+    resolveOrgId(),
+    isAdminPreview(),
+    getImpersonationSession(),
+  ])
 
-  const [client, unreadMessages, notifications, currentUser] = await Promise.all([
+  if (!organizationId) {
+    redirect(session?.user?.role === 'SUPER_ADMIN' ? '/admin/clients' : '/login')
+  }
+
+  const [client, unreadMessages, notifications, currentUser, targetAdmin] = await Promise.all([
     prisma.organization.findUnique({
       where: { id: organizationId },
       select: { companyName: true, onboardingCompleted: true },
@@ -37,6 +48,19 @@ export default async function DashboardLayout({
           select: { unlockedFeatures: true },
         })
       : Promise.resolve(null),
+    prisma.orgMember.findFirst({
+      where: { organizationId, role: 'ADMIN' },
+      select: {
+        user: {
+          select: {
+            id: true,
+            unlockedFeatures: true,
+            name: true,
+            email: true,
+          },
+        },
+      },
+    }),
   ])
 
   if (!client) redirect('/login')
@@ -45,7 +69,7 @@ export default async function DashboardLayout({
   const pathname = headersList.get('x-pathname') || ''
   const isBienvenida = pathname.startsWith('/bienvenida')
 
-  if (!client.onboardingCompleted && !preview && !isBienvenida) {
+  if ((!client.onboardingCompleted || !client.companyName?.trim()) && !preview && !isBienvenida) {
     redirect('/bienvenida')
   }
 
@@ -53,13 +77,26 @@ export default async function DashboardLayout({
     <DashboardLayoutClient
       companyName={client.companyName}
       unreadMessages={unreadMessages}
-      unlockedFeatures={currentUser?.unlockedFeatures ?? []}
+      unlockedFeatures={
+        preview
+          ? (targetAdmin?.user.unlockedFeatures ?? [])
+          : (currentUser?.unlockedFeatures ?? [])
+      }
       notifications={notifications}
-      userDisplayName={session?.user?.name ?? session?.user?.email ?? undefined}
+      userDisplayName={
+        preview
+          ? `${session?.user?.name ?? session?.user?.email ?? 'Admin'} · soporte`
+          : (session?.user?.name ?? session?.user?.email ?? undefined)
+      }
       banners={
         <>
           <SubscriptionBanner />
-          {preview && <PreviewBanner companyName={client.companyName} />}
+          {preview && impersonation && (
+            <ImpersonationBanner
+              companyName={client.companyName}
+              expiresAt={new Date(impersonation.expiresAt).toISOString()}
+            />
+          )}
         </>
       }
     >

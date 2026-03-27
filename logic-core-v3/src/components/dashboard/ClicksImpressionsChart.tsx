@@ -1,5 +1,7 @@
 'use client'
 
+import type { ReactNode } from 'react'
+
 import {
   ComposedChart,
   Line,
@@ -25,6 +27,10 @@ interface ClicksImpressionsChartProps {
 function formatDate(dateStr: string) {
   const [, month, day] = dateStr.split('-')
   return `${day}/${month}`
+}
+
+function formatTooltipLabel(label: string | number) {
+  return typeof label === 'string' ? formatDate(label) : String(label)
 }
 
 export function ClicksImpressionsChart({ data }: ClicksImpressionsChartProps) {
@@ -64,7 +70,11 @@ export function ClicksImpressionsChart({ data }: ClicksImpressionsChartProps) {
             fontSize: '12px',
             color: '#e4e4e7',
           }}
-          labelFormatter={formatDate}
+          labelFormatter={(label: ReactNode) =>
+            formatTooltipLabel(
+              typeof label === 'string' || typeof label === 'number' ? label : ''
+            )
+          }
         />
         <Legend
           wrapperStyle={{ fontSize: '11px', color: '#71717a', paddingTop: '8px' }}

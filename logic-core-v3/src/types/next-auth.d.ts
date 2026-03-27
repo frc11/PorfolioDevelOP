@@ -8,6 +8,7 @@ declare module 'next-auth' {
       organizationId?: string
       orgRole?: OrgRole
       provider?: string
+      onboardingCompleted?: boolean
     } & DefaultSession['user']
   }
 
@@ -24,5 +25,6 @@ declare module 'next-auth/jwt' {
     organizationId?: string
     orgRole?: string
     provider?: string
+    onboardingCompleted?: boolean
   }
 }

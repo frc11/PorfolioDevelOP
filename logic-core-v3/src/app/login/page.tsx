@@ -219,13 +219,14 @@ function LoginForm() {
           initial={{ opacity: 0, scale: 0.88 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+          className="flex h-28 w-28 items-center justify-center rounded-full border border-white/70 bg-white shadow-[0_0_40px_rgba(255,255,255,0.08)]"
         >
           <Image
             src="/logodevelOP.png"
             alt="develOP"
-            width={180}
-            height={48}
-            className="h-12 w-auto object-contain"
+            width={96}
+            height={96}
+            className="h-16 w-auto object-contain"
             priority
           />
         </motion.div>

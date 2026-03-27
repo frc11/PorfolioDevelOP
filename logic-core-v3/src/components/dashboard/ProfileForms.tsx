@@ -35,17 +35,17 @@ function Feedback({ state }: { state: ProfileActionState }) {
       initial={{ opacity: 0, y: -4 }}
       animate={{ opacity: 1, y: 0 }}
       className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-sm ${
-        state.ok
+        state.success
           ? 'border-green-500/20 bg-green-500/10 text-green-400'
           : 'border-red-500/20 bg-red-500/10 text-red-400'
       }`}
     >
-      {state.ok ? (
+      {state.success ? (
         <CheckCircle size={14} className="flex-shrink-0" />
       ) : (
         <AlertCircle size={14} className="flex-shrink-0" />
       )}
-      {state.ok ? 'Cambios guardados correctamente.' : state.error}
+      {state.success ? 'Cambios guardados correctamente.' : state.error}
     </motion.div>
   )
 }
@@ -687,10 +687,10 @@ export function DangerZone() {
   const handleRequest = () => {
     startTransition(async () => {
       const result = await requestAccountDeletionAction()
-      if (result?.ok) {
+      if (result?.success) {
         setStep('done')
       } else {
-        setError(result && !result.ok ? result.error : 'Ocurrió un error inesperado.')
+        setError(result && !result.success ? result.error ?? 'Ocurri? un error inesperado.' : 'Ocurri? un error inesperado.')
         setStep('idle')
       }
     })
@@ -782,3 +782,4 @@ export function DangerZone() {
     </div>
   )
 }
+

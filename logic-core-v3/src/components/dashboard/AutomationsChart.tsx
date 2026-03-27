@@ -22,7 +22,17 @@ function formatDate(dateStr: string) {
   return `${day}/${month}`
 }
 
-function CustomTooltip({ active, payload, label }: TooltipProps<number, string>) {
+type ChartTooltipProps = TooltipProps<number, string> & {
+  active?: boolean
+  payload?: Array<{
+    dataKey?: string
+    color?: string
+    value?: number | string
+  }>
+  label?: string
+}
+
+function CustomTooltip({ active, payload, label }: ChartTooltipProps) {
   if (!active || !payload?.length) return null
   return (
     <div
@@ -33,9 +43,11 @@ function CustomTooltip({ active, payload, label }: TooltipProps<number, string>)
         backdropFilter: 'blur(24px)',
       }}
     >
-      <p className="mb-2 text-[11px] font-bold text-zinc-400">{formatDate(label as string)}</p>
-      {payload.map((entry) => (
-        <div key={entry.dataKey} className="flex items-center gap-2">
+      <p className="mb-2 text-[11px] font-bold text-zinc-400">
+        {typeof label === 'string' ? formatDate(label) : ''}
+      </p>
+      {payload.map((entry, index: number) => (
+        <div key={`${entry.dataKey ?? 'series'}-${index}`} className="flex items-center gap-2">
           <span
             className="h-2 w-2 flex-shrink-0 rounded-full"
             style={{ background: entry.color }}

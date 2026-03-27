@@ -1,14 +1,12 @@
 export default function AdminLoading() {
-    return (
-        <div className="flex flex-1 items-center justify-center min-h-[60vh]">
-            <div className="flex flex-col items-center gap-4">
-                <div
-                    className="w-8 h-8 rounded-full border-2 border-cyan-500/30 border-t-cyan-500 animate-spin"
-                />
-                <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-zinc-600">
-                    Cargando
-                </span>
-            </div>
-        </div>
-    )
+  return (
+    <div className="grid gap-4">
+      <div className="admin-surface h-28 animate-pulse rounded-[28px]" />
+      <div className="grid gap-4 xl:grid-cols-3">
+        <div className="admin-surface h-40 animate-pulse rounded-[28px] xl:col-span-2" />
+        <div className="admin-surface h-40 animate-pulse rounded-[28px]" />
+      </div>
+      <div className="admin-surface h-80 animate-pulse rounded-[28px]" />
+    </div>
+  )
 }

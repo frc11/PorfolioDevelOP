@@ -50,9 +50,9 @@ export function VaultRequestModal() {
         'content',
         `📁 Solicitud de documento/recurso desde la Bóveda:\n\n${text.trim()}`
       )
-      const err = await sendClientMessageAction(null, formData)
-      if (err) {
-        setError(err)
+      const result = await sendClientMessageAction(null, formData)
+      if (!result.success) {
+        setError(result.error ?? 'Ocurrió un error.')
       } else {
         setSuccess(true)
         setTimeout(handleClose, 2800)

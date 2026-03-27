@@ -43,6 +43,7 @@ export interface PremiumModuleCardProps {
   category: string
   description: string
   priceFrom: number
+  billingLabel?: string
   roiBadge: string
   iconKey: string
   glowRgb: string
@@ -58,6 +59,7 @@ export function PremiumModuleCard({
   category,
   description,
   priceFrom,
+  billingLabel = 'USD/mes',
   roiBadge,
   iconKey,
   glowRgb,
@@ -75,13 +77,13 @@ export function PremiumModuleCard({
     setErrorMsg(null)
     startTransition(async () => {
       const result = await requestUpsellAction(moduleKey, name)
-      if (result.ok) {
+      if (result.success) {
         setReqStatus('success')
         setShowToast(true)
         setTimeout(() => setShowToast(false), 4500)
       } else {
         setReqStatus('error')
-        setErrorMsg(result.error)
+        setErrorMsg(result.error ?? 'No se pudo enviar la solicitud.')
         setTimeout(() => {
           setReqStatus('idle')
           setErrorMsg(null)
@@ -157,7 +159,7 @@ export function PremiumModuleCard({
             <p className="text-[9px] font-bold uppercase tracking-widest text-zinc-700">Desde</p>
             <p className="text-lg font-black leading-none text-white">
               ${priceFrom}{' '}
-              <span className="text-xs font-medium text-zinc-500">USD/mes</span>
+              <span className="text-xs font-medium text-zinc-500">{billingLabel}</span>
             </p>
           </div>
           <div
@@ -244,8 +246,8 @@ export function PremiumModuleCard({
               <CheckCircle2 size={15} className="text-emerald-400" />
             </div>
             <div>
-              <p className="text-[13px] font-bold text-white">¡Solicitud enviada!</p>
-              <p className="text-[11px] text-zinc-400">Te contactamos en menos de 24hs 🚀</p>
+              <p className="text-[13px] font-bold text-white">{'\u00a1Solicitud enviada!'}</p>
+              <p className="text-[11px] text-zinc-400">{'Te contactamos en < 24hs \ud83d\ude80'}</p>
             </div>
           </motion.div>
         )}

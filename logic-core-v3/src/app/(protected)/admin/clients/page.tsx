@@ -1,194 +1,187 @@
-import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
 import { Users } from 'lucide-react'
 import { DeleteClientButton } from '@/components/admin/DeleteClientButton'
+import { HealthScoreDots } from '@/components/admin/HealthScoreDots'
+import { AdminEmptyState, AdminPageHeader, AdminStatusBadge, AdminSurface } from '@/components/admin/admin-ui'
+import { prisma } from '@/lib/prisma'
+import { daysSince, estimateLastLoginAt, getHealthScore, getLastConnectionTone } from '@/lib/client-health'
+import { startImpersonationAction } from '@/lib/actions/impersonation'
+
+function connectionLabel(days: number | null) {
+  if (days === null) return 'Sin registro'
+  if (days === 0) return 'Hoy'
+  return `Hace ${days} días`
+}
+
+function connectionTone(days: number | null) {
+  const tone = getLastConnectionTone(days)
+  if (tone === 'success') return 'success' as const
+  if (tone === 'warning') return 'warning' as const
+  return 'danger' as const
+}
 
 export default async function ClientsPage() {
+  const now = new Date()
+  const recentApprovalThreshold = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
+
   const orgs = await prisma.organization.findMany({
     include: {
       members: {
         where: { role: 'ADMIN' },
-        select: { user: { select: { name: true, email: true } } },
+        select: {
+          userId: true,
+          user: {
+            select: {
+              name: true,
+              email: true,
+              sessions: {
+                orderBy: { expires: 'desc' },
+                take: 1,
+                select: { expires: true },
+              },
+            },
+          },
+        },
         take: 1,
       },
       services: { where: { status: 'ACTIVE' } },
       projects: true,
+      messages: {
+        where: { fromAdmin: false, read: false },
+        select: { id: true },
+      },
+      tickets: {
+        where: { status: { in: ['OPEN', 'IN_PROGRESS'] } },
+        select: { id: true },
+      },
+      subscription: {
+        select: {
+          price: true,
+          currency: true,
+          status: true,
+        },
+      },
+      notifications: {
+        where: {
+          taskId: { not: null },
+          createdAt: { gte: recentApprovalThreshold },
+          OR: [
+            { title: { contains: 'Aprobada' } },
+            { message: { contains: 'ha aprobado' } },
+            { message: { contains: 'aprobado' } },
+          ],
+        },
+        select: { id: true },
+        take: 1,
+      },
     },
     orderBy: { createdAt: 'desc' },
   })
 
   return (
     <div className="flex flex-col gap-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="mb-0.5 text-[10px] font-semibold tracking-[0.2em] uppercase text-cyan-500/70">
-            Gestión
-          </p>
-          <h1 className="text-xl font-bold text-zinc-100">Clientes</h1>
-          <p className="mt-0.5 text-sm text-zinc-600">
-            {orgs.length} {orgs.length === 1 ? 'registro' : 'registros'}
-          </p>
-        </div>
-        <Link
-          href="/admin/clients/new"
-          className="rounded-xl px-4 py-2 text-sm font-semibold text-zinc-950 transition-all hover:opacity-90 active:scale-95"
-          style={{ background: 'linear-gradient(135deg, #06b6d4 0%, #10b981 100%)' }}
-        >
-          + Agregar cliente
-        </Link>
-      </div>
+      <AdminPageHeader
+        eyebrow="Gestión"
+        title="Clientes"
+        description={`${orgs.length} ${orgs.length === 1 ? 'registro' : 'registros'} activos en la consola`}
+        action={
+          <Link href="/admin/clients/new" className="admin-btn-primary">
+            + Agregar cliente
+          </Link>
+        }
+      />
 
-      {/* Empty state */}
       {orgs.length === 0 ? (
-        <div
-          className="flex flex-col items-center gap-4 rounded-2xl py-20 text-center"
-          style={{
-            background: 'linear-gradient(145deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.02) 100%)',
-            border: '1px solid rgba(255,255,255,0.07)',
-          }}
-        >
-          <div
-            className="flex h-12 w-12 items-center justify-center rounded-2xl"
-            style={{ background: 'rgba(6,182,212,0.1)' }}
-          >
-            <Users size={20} className="text-cyan-400" />
-          </div>
-          <div>
-            <p className="text-sm text-zinc-400">No hay clientes registrados todavía.</p>
-            <Link
-              href="/admin/clients/new"
-              className="mt-2 inline-block text-sm text-cyan-400 transition-colors hover:text-cyan-300"
-            >
-              Crear el primero →
-            </Link>
-          </div>
-        </div>
+        <AdminEmptyState
+          icon={Users}
+          title="No hay clientes registrados todavía."
+          description="Creá el primer cliente para empezar a operar el panel multi-tenant."
+          ctaHref="/admin/clients/new"
+          ctaLabel="Crear el primero →"
+        />
       ) : (
-        <div
-          className="overflow-x-auto rounded-2xl"
-          style={{
-            background: 'linear-gradient(145deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.02) 100%)',
-            border: '1px solid rgba(255,255,255,0.07)',
-            backdropFilter: 'blur(12px)',
-            WebkitBackdropFilter: 'blur(12px)',
-          }}
-        >
-          <table className="w-full text-sm">
-            {/* Table head */}
+        <AdminSurface className="overflow-x-auto p-0">
+          <table className="admin-table min-w-[1180px]">
             <thead>
-              <tr
-                style={{
-                  borderBottom: '1px solid rgba(255,255,255,0.06)',
-                  background: 'rgba(255,255,255,0.02)',
-                }}
-              >
-                <th className="px-5 py-3.5 text-left text-[10px] font-semibold tracking-[0.14em] uppercase text-zinc-600">
-                  Empresa
-                </th>
-                <th className="px-5 py-3.5 text-left text-[10px] font-semibold tracking-[0.14em] uppercase text-zinc-600">
-                  Email
-                </th>
-                <th className="px-5 py-3.5 text-center text-[10px] font-semibold tracking-[0.14em] uppercase text-zinc-600">
-                  Servicios
-                </th>
-                <th className="px-5 py-3.5 text-center text-[10px] font-semibold tracking-[0.14em] uppercase text-zinc-600">
-                  Proyectos
-                </th>
-                <th className="px-5 py-3.5 text-left text-[10px] font-semibold tracking-[0.14em] uppercase text-zinc-600">
-                  Alta
-                </th>
-                <th className="px-5 py-3.5 text-right text-[10px] font-semibold tracking-[0.14em] uppercase text-zinc-600">
-                  Acciones
-                </th>
+              <tr>
+                <th>Empresa</th>
+                <th>Email</th>
+                <th className="text-center">Servicios</th>
+                <th className="text-center">Proyectos</th>
+                <th>Última conexión</th>
+                <th className="text-center">Health Score</th>
+                <th className="text-center">MRR</th>
+                <th>Alta</th>
+                <th className="text-right">Acciones</th>
               </tr>
             </thead>
-
-            {/* Table body */}
             <tbody>
               {orgs.map((org) => {
                 const adminUser = org.members[0]?.user
+                const lastSession = adminUser?.sessions[0]?.expires
+                const lastLoginAt = estimateLastLoginAt(lastSession)
+                const lastConnectionDays = daysSince(lastLoginAt)
+                const score = getHealthScore({
+                  recentLogin: lastConnectionDays !== null && lastConnectionDays < 7,
+                  unreadMessages: org.messages.length,
+                  openTickets: org.tickets.length,
+                  hasActiveSubscription: org.subscription?.status === 'ACTIVE',
+                  recentApproval: org.notifications.length > 0,
+                })
+
                 return (
-                  <tr
-                    key={org.id}
-                    className="group transition-colors hover:bg-white/[0.025]"
-                    style={{ borderTop: '1px solid rgba(255,255,255,0.04)' }}
-                  >
-                    {/* Company */}
-                    <td className="px-5 py-4">
+                  <tr key={org.id}>
+                    <td>
                       <div className="flex items-center gap-3">
-                        <div
-                          className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg text-xs font-semibold"
-                          style={{
-                            background: 'rgba(6,182,212,0.1)',
-                            color: 'rgb(34,211,238)',
-                          }}
-                        >
+                        <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-cyan-400/15 bg-cyan-400/10 text-sm font-semibold text-cyan-200">
                           {org.companyName[0].toUpperCase()}
                         </div>
                         <span className="font-medium text-zinc-100">{org.companyName}</span>
                       </div>
                     </td>
-
-                    {/* Email */}
-                    <td className="px-5 py-4 text-zinc-500">{adminUser?.email ?? '—'}</td>
-
-                    {/* Services */}
-                    <td className="px-5 py-4 text-center">
-                      <span
-                        className="inline-flex items-center justify-center rounded-lg px-2.5 py-0.5 text-xs font-medium"
-                        style={{
-                          background: 'rgba(6,182,212,0.1)',
-                          border: '1px solid rgba(6,182,212,0.2)',
-                          color: 'rgb(34,211,238)',
-                        }}
-                      >
-                        {org.services.length}
-                      </span>
+                    <td className="text-zinc-500">{adminUser?.email ?? '—'}</td>
+                    <td className="text-center">
+                      <AdminStatusBadge label={String(org.services.length)} tone="info" className="min-w-8 justify-center" />
                     </td>
-
-                    {/* Projects */}
-                    <td className="px-5 py-4 text-center">
-                      <span
-                        className="inline-flex items-center justify-center rounded-lg px-2.5 py-0.5 text-xs font-medium"
-                        style={{
-                          background: 'rgba(59,130,246,0.1)',
-                          border: '1px solid rgba(59,130,246,0.2)',
-                          color: 'rgb(147,197,253)',
-                        }}
-                      >
-                        {org.projects.length}
-                      </span>
+                    <td className="text-center">
+                      <AdminStatusBadge label={String(org.projects.length)} tone="muted" className="min-w-8 justify-center" />
                     </td>
-
-                    {/* Date */}
-                    <td className="px-5 py-4 tabular-nums text-zinc-600">
+                    <td>
+                      <AdminStatusBadge
+                        label={connectionLabel(lastConnectionDays)}
+                        tone={connectionTone(lastConnectionDays)}
+                      />
+                    </td>
+                    <td>
+                      <div className="flex items-center justify-center gap-3">
+                        <HealthScoreDots score={score} size="sm" />
+                        <span className="text-xs text-zinc-500">{score}/5</span>
+                      </div>
+                    </td>
+                    <td className="text-center font-medium text-zinc-200">
+                      {org.subscription?.price ? `$${org.subscription.price.toFixed(0)}` : '—'}
+                    </td>
+                    <td className="tabular-nums text-zinc-500">
                       {new Date(org.createdAt).toLocaleDateString('es-AR', {
                         day: '2-digit',
                         month: '2-digit',
                         year: 'numeric',
                       })}
                     </td>
-
-                    {/* Actions */}
-                    <td className="px-5 py-4">
+                    <td>
                       <div className="flex items-center justify-end gap-4">
-                        <Link
-                          href={`/admin/clients/${org.id}`}
-                          className="text-xs font-medium text-cyan-400 transition-colors hover:text-cyan-300"
-                        >
+                        <form action={startImpersonationAction.bind(null, org.id)}>
+                          <button type="submit" className="text-xs font-medium text-amber-300 transition-colors hover:text-amber-200">
+                            Ingresar como →
+                          </button>
+                        </form>
+                        <Link href={`/admin/clients/${org.id}`} className="text-xs font-medium text-cyan-300 transition-colors hover:text-cyan-200">
                           Ver
                         </Link>
-                        <Link
-                          href={`/admin/clients/${org.id}/edit`}
-                          className="text-xs text-zinc-500 transition-colors hover:text-zinc-200"
-                        >
+                        <Link href={`/admin/clients/${org.id}/edit`} className="text-xs text-zinc-500 transition-colors hover:text-zinc-200">
                           Editar
                         </Link>
-                        <DeleteClientButton
-                          clientId={org.id}
-                          companyName={org.companyName}
-                        />
+                        <DeleteClientButton clientId={org.id} companyName={org.companyName} />
                       </div>
                     </td>
                   </tr>
@@ -196,7 +189,7 @@ export default async function ClientsPage() {
               })}
             </tbody>
           </table>
-        </div>
+        </AdminSurface>
       )}
     </div>
   )

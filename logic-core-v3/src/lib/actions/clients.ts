@@ -1,12 +1,12 @@
 'use server'
 
-import { prisma } from '@/lib/prisma'
-import { revalidatePath } from 'next/cache'
-import { redirect } from 'next/navigation'
-import { Role } from '@prisma/client'
 import bcrypt from 'bcryptjs'
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+import { Role } from '@prisma/client'
+import { redirect } from 'next/navigation'
+import { revalidatePath } from 'next/cache'
+import { auth } from '@/auth'
+import { prisma } from '@/lib/prisma'
+import { PREMIUM_FEATURE_KEYS, PREMIUM_FEATURE_LABELS, type PremiumFeatureKey } from '@/lib/premium-features'
 
 function slugify(text: string): string {
   return text
@@ -30,13 +30,13 @@ async function uniqueSlug(base: string, excludeOrgId?: string): Promise<string> 
         ...(excludeOrgId ? { NOT: { id: excludeOrgId } } : {}),
       },
     })
+
     if (!existing) return slug
+
     slug = `${slugify(base)}-${counter}`
-    counter++
+    counter += 1
   }
 }
-
-// ─── Create ───────────────────────────────────────────────────────────────────
 
 export async function createClientAction(
   _prevState: string | null,
@@ -54,7 +54,7 @@ export async function createClientAction(
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
   if (!emailRegex.test(email)) {
-    return 'El email no tiene un formato válido.'
+    return 'El email no tiene un formato valido.'
   }
 
   if (password.length < 8) {
@@ -80,22 +80,22 @@ export async function createClientAction(
           emailVerified: new Date(),
         },
       })
+
       const org = await tx.organization.create({
         data: { companyName, slug, logoUrl },
       })
+
       await tx.orgMember.create({
         data: { userId: user.id, organizationId: org.id, role: 'ADMIN' },
       })
     })
   } catch {
-    return 'Error al crear el cliente. Intentá de nuevo.'
+    return 'Error al crear el cliente. Intenta de nuevo.'
   }
 
   revalidatePath('/admin/clients')
   redirect('/admin/clients')
 }
-
-// ─── Update ───────────────────────────────────────────────────────────────────
 
 export async function updateClientAction(
   _prevState: string | null,
@@ -110,10 +110,9 @@ export async function updateClientAction(
   const siteUrl = (formData.get('siteUrl') as string | null)?.trim() || null
   const n8nWorkflowIds = ((formData.get('n8nWorkflowIds') as string | null) ?? '')
     .split(',')
-    .map((s) => s.trim())
+    .map((value) => value.trim())
     .filter(Boolean)
-
-  if (!clientId) return 'ID de cliente inválido.'
+  if (!clientId) return 'ID de cliente invalido.'
   if (!companyName || !name) {
     return 'Nombre de empresa y contacto son obligatorios.'
   }
@@ -129,35 +128,46 @@ export async function updateClientAction(
       },
     },
   })
+
   if (!org) return 'Cliente no encontrado.'
 
-  const slug =
-    companyName !== org.companyName
-      ? await uniqueSlug(companyName, clientId)
-      : undefined
-
+  const slug = companyName !== org.companyName ? await uniqueSlug(companyName, clientId) : undefined
   const adminUserId = org.members[0]?.userId
 
   try {
     await prisma.$transaction([
       prisma.organization.update({
         where: { id: clientId },
-        data: { companyName, logoUrl, analyticsPropertyId, siteUrl, n8nWorkflowIds, ...(slug ? { slug } : {}) },
+        data: {
+          companyName,
+          logoUrl,
+          analyticsPropertyId,
+          siteUrl,
+          n8nWorkflowIds,
+          ...(slug ? { slug } : {}),
+        },
       }),
       ...(adminUserId
-        ? [prisma.user.update({ where: { id: adminUserId }, data: { name } })]
+        ? [
+            prisma.user.update({
+              where: { id: adminUserId },
+              data: {
+                name,
+              },
+            }),
+          ]
         : []),
     ])
   } catch {
-    return 'Error al actualizar el cliente. Intentá de nuevo.'
+    return 'Error al actualizar el cliente. Intenta de nuevo.'
   }
 
   revalidatePath('/admin/clients')
   revalidatePath(`/admin/clients/${clientId}`)
+  revalidatePath('/admin', 'layout')
+  revalidatePath('/dashboard', 'layout')
   redirect(`/admin/clients/${clientId}`)
 }
-
-// ─── Delete ───────────────────────────────────────────────────────────────────
 
 export async function deleteClientAction(formData: FormData): Promise<void> {
   const clientId = (formData.get('clientId') as string | null) ?? ''
@@ -166,9 +176,69 @@ export async function deleteClientAction(formData: FormData): Promise<void> {
   const org = await prisma.organization.findUnique({ where: { id: clientId } })
   if (!org) return
 
-  // Deleting Organization cascades → OrgMember, Service, Project, Message, Invoice
   await prisma.organization.delete({ where: { id: clientId } })
 
   revalidatePath('/admin/clients')
   redirect('/admin/clients')
+}
+
+export async function toggleClientFeatureAction(input: {
+  clientId: string
+  featureKey: PremiumFeatureKey
+  enabled: boolean
+}) {
+  const session = await auth()
+  if (session?.user?.role !== 'SUPER_ADMIN') {
+    return { success: false, error: 'No autorizado.' }
+  }
+
+  if (!PREMIUM_FEATURE_KEYS.includes(input.featureKey)) {
+    return { success: false, error: 'Módulo inválido.' }
+  }
+
+  const organization = await prisma.organization.findUnique({
+    where: { id: input.clientId },
+    select: {
+      companyName: true,
+      members: {
+        where: { role: 'ADMIN' },
+        select: {
+          userId: true,
+          user: {
+            select: {
+              unlockedFeatures: true,
+            },
+          },
+        },
+        take: 1,
+      },
+    },
+  })
+
+  const adminUser = organization?.members[0]
+
+  if (!organization || !adminUser) {
+    return { success: false, error: 'Cliente no encontrado.' }
+  }
+
+  const nextFeatures = input.enabled
+    ? Array.from(new Set([...adminUser.user.unlockedFeatures, input.featureKey]))
+    : adminUser.user.unlockedFeatures.filter((feature) => feature !== input.featureKey)
+
+  await prisma.user.update({
+    where: { id: adminUser.userId },
+    data: {
+      unlockedFeatures: nextFeatures,
+    },
+  })
+
+  revalidatePath(`/admin/clients/${input.clientId}/edit`)
+  revalidatePath(`/admin/clients/${input.clientId}`)
+  revalidatePath('/dashboard', 'layout')
+
+  return {
+    success: true,
+    features: nextFeatures,
+    message: `Módulo ${PREMIUM_FEATURE_LABELS[input.featureKey]} ${input.enabled ? 'activado' : 'desactivado'} para ${organization.companyName}`,
+  }
 }

@@ -4,6 +4,7 @@ import { useActionState, useState } from 'react'
 import { motion } from 'framer-motion'
 import { sendClientMessageAction } from '@/lib/actions/messages'
 import { ArrowRight, CheckCircle2, Loader2, AlertOctagon, TrendingUp, Target } from 'lucide-react'
+import type { ActionResult } from '@/lib/actions/schemas'
 
 export type ImpactoNivel = 'URGENTE' | 'ALTO' | 'MEDIO'
 
@@ -59,9 +60,9 @@ export function OportunidadSEO({
   index,
 }: OportunidadSEOProps) {
   const [submitted, setSubmitted] = useState(false)
-  const [state, formAction, pending] = useActionState(sendClientMessageAction, null)
+  const [state, formAction, pending] = useActionState<ActionResult | null, FormData>(sendClientMessageAction, null)
   const c = IMPACTO_CONFIG[impacto]
-  const isSuccess = submitted && !pending && state === null
+  const isSuccess = submitted && !pending && state?.success
 
   return (
     <motion.div

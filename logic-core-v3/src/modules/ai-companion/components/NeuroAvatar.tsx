@@ -10,11 +10,9 @@ import {
     Bloom,
     ChromaticAberration,
     Vignette,
-    ToneMapping,
 } from '@react-three/postprocessing';
 import {
     BlendFunction,
-    ToneMappingMode,
 } from 'postprocessing';
 
 // ─────────────────────────────────────────────────────────
@@ -367,11 +365,8 @@ function AvatarSceneContent({
             <EffectComposer multisampling={prefersReducedMotion ? 0 : 4} enableNormalPass={false}>
                 {/* mipmapBlur is disabled to prevent circular structure serialization in Next.js overlay */}
                 <Bloom ref={bloomRef} intensity={0.6} luminanceThreshold={0.3} luminanceSmoothing={0.9} radius={0.6} blendFunction={BlendFunction.ADD} />
-                {!isMobile && (
-                    <ChromaticAberration ref={chromRef} offset={[0.0008, 0.0008]} blendFunction={BlendFunction.NORMAL} radialModulation={true} modulationOffset={0.5} />
-                )}
+                <ChromaticAberration ref={chromRef} offset={isMobile ? [0, 0] : [0.0008, 0.0008]} blendFunction={BlendFunction.NORMAL} radialModulation={!isMobile} modulationOffset={0.5} />
                 <Vignette offset={0.35} darkness={0.7} blendFunction={BlendFunction.NORMAL} />
-                <ToneMapping mode={ToneMappingMode.ACES_FILMIC} />
             </EffectComposer>
         </>
     );

@@ -8,7 +8,11 @@ export function MarkLeadReadButton({ id }: { id: string }) {
 
     return (
         <button
-            onClick={() => startTransition(() => markLeadAsRead(id))}
+            onClick={() =>
+                startTransition(async () => {
+                    await markLeadAsRead(id)
+                })
+            }
             disabled={isPending}
             className="text-xs font-medium text-amber-400 hover:text-amber-300 transition-colors disabled:opacity-40"
         >

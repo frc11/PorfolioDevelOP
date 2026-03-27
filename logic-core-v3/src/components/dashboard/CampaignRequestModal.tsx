@@ -4,6 +4,7 @@ import { useActionState, useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { sendClientMessageAction } from '@/lib/actions/messages'
 import { X, Megaphone, Send, CheckCircle2 } from 'lucide-react'
+import type { ActionResult } from '@/lib/actions/schemas'
 
 const OVERLAY = {
   initial: { opacity: 0 },
@@ -22,10 +23,10 @@ const MODAL = {
 export function CampaignRequestModal() {
   const [open, setOpen] = useState(false)
   const [hasSubmittedOnce, setHasSubmittedOnce] = useState(false)
-  const [state, formAction, pending] = useActionState(sendClientMessageAction, null)
+  const [state, formAction, pending] = useActionState<ActionResult | null, FormData>(sendClientMessageAction, null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
-  const isSuccess = hasSubmittedOnce && !pending && state === null
+  const isSuccess = hasSubmittedOnce && !pending && state?.success
 
   // Auto-close after success
   useEffect(() => {
@@ -137,8 +138,8 @@ export function CampaignRequestModal() {
                     />
 
                     {/* Error */}
-                    {hasSubmittedOnce && state && (
-                      <p className="text-xs text-red-400">{state}</p>
+                    {hasSubmittedOnce && state?.error && (
+                      <p className="text-xs text-red-400">{state.error}</p>
                     )}
 
                     {/* Actions */}

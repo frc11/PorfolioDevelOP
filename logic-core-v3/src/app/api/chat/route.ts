@@ -1,5 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { NextRequest, NextResponse } from 'next/server'
+import { auth } from '@/auth'
 
 const client = new Anthropic()
 
@@ -73,6 +74,11 @@ un prototipo funcionando, y en un mes está en vivo.
 
 export async function POST(req: NextRequest) {
   try {
+    const session = await auth()
+    if (!session?.user) {
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 })
+    }
+
     const { messages } = await req.json()
 
     if (!messages || !Array.isArray(messages)) {

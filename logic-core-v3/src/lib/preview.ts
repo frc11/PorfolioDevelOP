@@ -1,13 +1,6 @@
 import { auth } from '@/auth'
-import { cookies } from 'next/headers'
+import { getImpersonationSession } from '@/lib/impersonation'
 
-export const PREVIEW_COOKIE = 'dp-preview-org'
-
-/**
- * Resolves the organizationId for the current request.
- * - ORG_MEMBER: reads from JWT session (normal flow)
- * - SUPER_ADMIN: reads from the preview cookie set via startClientPreview()
- */
 export async function resolveOrgId(): Promise<string | null> {
   const session = await auth()
   const role = session?.user?.role
@@ -17,17 +10,16 @@ export async function resolveOrgId(): Promise<string | null> {
   }
 
   if (role === 'SUPER_ADMIN') {
-    const jar = await cookies()
-    return jar.get(PREVIEW_COOKIE)?.value ?? null
+    const impersonation = await getImpersonationSession()
+    return impersonation?.orgId ?? null
   }
 
   return null
 }
 
-/** True when a SUPER_ADMIN is browsing the client portal in preview mode. */
 export async function isAdminPreview(): Promise<boolean> {
   const session = await auth()
   if (session?.user?.role !== 'SUPER_ADMIN') return false
-  const jar = await cookies()
-  return !!jar.get(PREVIEW_COOKIE)?.value
+
+  return Boolean(await getImpersonationSession())
 }

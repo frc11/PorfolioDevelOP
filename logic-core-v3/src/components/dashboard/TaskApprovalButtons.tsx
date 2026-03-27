@@ -13,12 +13,11 @@ export function TaskApprovalButtons({ taskId }: { taskId: string }) {
 
   const handleApprove = () => {
     startTransition(async () => {
-      try {
-        await approveTaskAction(taskId)
+      const result = await approveTaskAction(taskId)
+      if (result.success) {
         toast.success('Entregable aprobado correctamente')
-      } catch (error) {
-        toast.error('Error al aprobar el entregable')
-        console.error(error)
+      } else {
+        toast.error(result.error || 'Error al aprobar el entregable')
       }
     })
   }
@@ -27,13 +26,12 @@ export function TaskApprovalButtons({ taskId }: { taskId: string }) {
     if (!reason.trim()) return
 
     startTransition(async () => {
-      try {
-        await rejectTaskAction(taskId, reason)
+      const result = await rejectTaskAction(taskId, reason)
+      if (result.success) {
         setMode('idle')
         toast.success('Cambios solicitados enviados a develOP')
-      } catch (error) {
-        toast.error('Ocurrió un error al enviar tu solicitud')
-        console.error(error)
+      } else {
+        toast.error(result.error || 'Ocurrió un error al enviar tu solicitud')
       }
     })
   }

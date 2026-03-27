@@ -46,6 +46,7 @@ export async function saveOnboardingProfile(
   }
 
   revalidatePath('/', 'layout')
+  revalidatePath('/dashboard', 'layout')
   redirect('/dashboard')
 }
 
@@ -114,6 +115,7 @@ export async function completeOnboardingAction(data: OnboardingData) {
     })
 
     revalidatePath('/', 'layout')
+    revalidatePath('/dashboard', 'layout')
     return { success: true }
   } catch (error) {
     console.error('Error in completeOnboardingAction:', error)

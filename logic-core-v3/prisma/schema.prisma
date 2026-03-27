@@ -301,6 +301,8 @@ model ContactSubmission {
   service   String?
   message   String   @db.Text
   read      Boolean  @default(false)
+  leadStatus String? @default("NUEVO")
+  leadNotes  String? @db.Text
   createdAt DateTime @default(now())
 }
 
@@ -405,4 +407,29 @@ model PageView {
   createdAt DateTime @default(now())
 
   @@index([clientId])
+}
+
+model AgencySettings {
+  id                           String   @id @default(cuid())
+  agencyName                   String   @default("develOP")
+  contactEmail                 String?
+  contactWhatsapp              String?
+  websiteUrl                   String?
+  alertWebhookUrl              String?
+  alertOnTickets               Boolean  @default(true)
+  alertOnLeads                 Boolean  @default(true)
+  alertOnChurn                 Boolean  @default(true)
+  alertOnExpiringSubscriptions Boolean  @default(true)
+  alertOnClientMessages        Boolean  @default(false)
+  updatedAt                    DateTime @updatedAt
+}
+
+model ModulePricing {
+  id         String   @id @default(cuid())
+  featureKey String   @unique
+  name       String
+  price      Float
+  type       String   @default("monthly")
+  active     Boolean  @default(true)
+  updatedAt  DateTime @updatedAt
 }

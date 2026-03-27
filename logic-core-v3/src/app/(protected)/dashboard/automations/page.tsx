@@ -83,7 +83,10 @@ export default async function AutomationsPage({
   if (!client) redirect('/login')
 
   const hasWorkflows = client.n8nWorkflowIds.length > 0
-  const activarAutomatizaciones = requestUpsellAction.bind(null, 'automatizaciones', 'Automatizaciones n8n')
+  const activarAutomatizaciones = async () => {
+    'use server'
+    await requestUpsellAction('automatizaciones', 'Automatizaciones n8n')
+  }
 
   return (
     <div className="flex flex-col gap-6">

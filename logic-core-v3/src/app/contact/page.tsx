@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { Mail, Phone, MapPin, Send, CheckCircle } from 'lucide-react';
 import { useActionState } from 'react';
 import { submitContactForm } from '@/lib/actions/contact';
+import type { ActionResult } from '@/lib/actions/schemas';
 
 const SERVICE_OPTIONS = [
     { value: '', label: 'Seleccioná un servicio' },
@@ -15,7 +16,7 @@ const SERVICE_OPTIONS = [
 ]
 
 export default function ContactPage() {
-    const [state, action, isPending] = useActionState(submitContactForm, { success: false })
+    const [state, action, isPending] = useActionState<ActionResult | null, FormData>(submitContactForm, null)
 
     return (
         <main className="min-h-screen bg-[#070709] text-white overflow-hidden relative">
@@ -51,7 +52,7 @@ export default function ContactPage() {
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
                     >
-                        {state.success ? (
+                        {state?.success ? (
                             <motion.div
                                 initial={{ opacity: 0, scale: 0.96 }}
                                 animate={{ opacity: 1, scale: 1 }}
@@ -149,7 +150,7 @@ export default function ContactPage() {
                                     />
                                 </div>
 
-                                {state.error && (
+                                {state?.error && (
                                     <p className="text-sm text-red-400/80">{state.error}</p>
                                 )}
 

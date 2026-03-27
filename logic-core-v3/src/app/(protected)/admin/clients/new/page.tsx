@@ -4,7 +4,13 @@ import { ClientForm } from '@/components/admin/ClientForm'
 import { createClientAction } from '@/lib/actions/clients'
 import { FadeIn } from '@/components/dashboard/FadeIn'
 
-export default function NewClientPage() {
+export default async function NewClientPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ company?: string; name?: string; email?: string }>
+}) {
+  const params = await searchParams
+
   return (
     <div className="flex flex-col gap-6">
       <FadeIn>
@@ -30,6 +36,12 @@ export default function NewClientPage() {
         <ClientForm
           action={createClientAction}
           mode="create"
+          initialValues={{
+            clientId: '',
+            companyName: params.company ?? '',
+            name: params.name ?? '',
+            email: params.email ?? '',
+          }}
           cancelHref="/admin/clients"
         />
       </FadeIn>

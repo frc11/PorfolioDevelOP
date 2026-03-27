@@ -1,39 +1,42 @@
 import { NextResponse } from 'next/server'
+import { auth } from '@/auth'
 import { prisma } from '@/lib/prisma'
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Date, X-Api-Version'
-}
-
 export async function OPTIONS() {
-  return NextResponse.json({}, { headers: corsHeaders })
+  return new NextResponse(null, { status: 204 })
 }
 
 export async function POST(request: Request) {
   try {
+    const session = await auth()
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 })
+    }
+
     const data = await request.json()
-    const { clientId, url, duration } = data
-    
-    // Si no hay información mínima, abortamos pero retornamos éxito para no romper el cliente
+    const clientId = String(data?.clientId ?? '')
+    const url = String(data?.url ?? '')
+    const duration = data?.duration
+
     if (!clientId || !url) {
-      return NextResponse.json({ success: true, message: 'Missing required fields' }, { headers: corsHeaders })
+      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
+    }
+
+    if (session.user.role !== 'SUPER_ADMIN' && clientId !== session.user.id) {
+      return NextResponse.json({ error: 'Sin permisos' }, { status: 403 })
     }
 
     await prisma.pageView.create({
       data: {
-        clientId: String(clientId),
-        url: String(url),
-        duration: duration ? Number(duration) : null
-      }
+        clientId,
+        url,
+        duration: typeof duration === 'number' ? duration : Number(duration) || null,
+      },
     })
 
-    // Retornamos de forma muy rápida
-    return NextResponse.json({ success: true }, { headers: corsHeaders })
+    return NextResponse.json({ success: true })
   } catch (error) {
-    // Evitamos bloqueos si algo falla en la DB al trackear
     console.error('[TRACKING API ERROR]', error)
-    return NextResponse.json({ success: true }, { headers: corsHeaders })
+    return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 })
   }
 }

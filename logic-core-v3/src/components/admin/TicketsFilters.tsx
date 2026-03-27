@@ -35,25 +35,18 @@ export function TicketsFilters({ currentStatus, currentPriority }: TicketsFilter
 
   return (
     <div className="flex flex-wrap items-center gap-3">
-      {/* Status tabs */}
-      <div
-        className="flex items-center gap-0.5 rounded-xl p-1"
-        style={{
-          background: 'rgba(255,255,255,0.03)',
-          border: '1px solid rgba(255,255,255,0.06)',
-        }}
-      >
+      <div className="flex items-center gap-1 rounded-2xl border border-white/8 bg-white/[0.03] p-1">
         {STATUS_OPTIONS.map(({ value, label }) => {
           const isActive = (currentStatus ?? '') === value
           return (
             <button
               key={value || 'all'}
+              type="button"
               onClick={() => navigate(value || undefined, currentPriority)}
               className={[
-                'rounded-lg px-3 py-1.5 text-xs font-medium transition-all',
-                isActive ? 'text-zinc-100' : 'text-zinc-600 hover:text-zinc-400',
+                'rounded-xl px-3 py-2 text-xs font-medium transition-all',
+                isActive ? 'bg-cyan-400/10 text-cyan-200' : 'text-zinc-500 hover:text-zinc-200',
               ].join(' ')}
-              style={isActive ? { background: 'rgba(255,255,255,0.08)' } : {}}
             >
               {label}
             </button>
@@ -61,15 +54,10 @@ export function TicketsFilters({ currentStatus, currentPriority }: TicketsFilter
         })}
       </div>
 
-      {/* Priority dropdown */}
       <select
         value={currentPriority ?? ''}
         onChange={(e) => navigate(currentStatus, e.target.value || undefined)}
-        className="cursor-pointer rounded-xl px-3 py-[9px] text-xs font-medium text-zinc-500 outline-none transition-colors hover:text-zinc-300"
-        style={{
-          background: 'rgba(255,255,255,0.03)',
-          border: '1px solid rgba(255,255,255,0.06)',
-        }}
+        className="admin-input w-auto min-w-[180px] cursor-pointer pr-10 text-xs font-medium text-zinc-300"
       >
         {PRIORITY_OPTIONS.map(({ value, label }) => (
           <option key={value || 'all'} value={value} className="bg-[#0d0f10]">

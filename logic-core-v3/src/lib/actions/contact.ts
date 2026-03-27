@@ -3,75 +3,92 @@
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 import { sendLeadToN8n } from '@/lib/n8n'
+import { sendAgencyAlert } from '@/lib/alerts'
+import { ContactFormSchema, type ActionResult } from './schemas'
 
-export type ContactFormState = {
-    success: boolean
-    error?: string
-}
+export type ContactFormState = ActionResult | null
 
-export async function submitContactForm(
-    prevState: ContactFormState,
-    formData: FormData
-): Promise<ContactFormState> {
-    const name = formData.get('name') as string
-    const email = formData.get('email') as string
-    const phone = formData.get('phone') as string | null
-    const company = formData.get('company') as string | null
-    const service = formData.get('service') as string | null
-    const message = formData.get('message') as string
+export async function contactFormAction(
+  _prevState: ContactFormState,
+  formData: FormData
+): Promise<ActionResult> {
+  const parsed = ContactFormSchema.safeParse({
+    name: formData.get('name'),
+    email: formData.get('email'),
+    phone: formData.get('phone'),
+    company: formData.get('company'),
+    service: formData.get('service'),
+    message: formData.get('message'),
+  })
 
-    if (!name || !email || !message) {
-        return { success: false, error: 'Nombre, email y mensaje son requeridos.' }
-    }
+  if (!parsed.success) {
+    return { success: false, error: parsed.error.issues[0]?.message }
+  }
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    if (!emailRegex.test(email)) {
-        return { success: false, error: 'El email no es válido.' }
-    }
+  const payload = {
+    name: parsed.data.name,
+    email: parsed.data.email.toLowerCase(),
+    phone: parsed.data.phone?.trim() || null,
+    company: parsed.data.company?.trim() || null,
+    service: parsed.data.service?.trim() || null,
+    message: parsed.data.message,
+  }
 
-    const trimmedName = name.trim()
-    const trimmedEmail = email.trim().toLowerCase()
-    const trimmedPhone = phone?.trim() || null
-    const trimmedCompany = company?.trim() || null
-    const trimmedService = service?.trim() || null
-    const trimmedMessage = message.trim()
-
+  try {
     await prisma.contactSubmission.create({
-        data: {
-            name: trimmedName,
-            email: trimmedEmail,
-            phone: trimmedPhone,
-            company: trimmedCompany,
-            service: trimmedService,
-            message: trimmedMessage,
-        },
+      data: payload,
     })
+
+    sendAgencyAlert({
+      type: 'LEAD_EXTERNAL',
+      clientName: payload.company || payload.name,
+      detail: `Nuevo lead desde formulario. Contacto: ${payload.email}. Servicio: ${payload.service || 'General'}.`,
+      link: '/admin/leads',
+    }).catch(() => {})
 
     revalidatePath('/admin/leads')
 
-    // Fire-and-await webhook — failure never blocks the success response.
-    // The lead is already persisted in DB at this point.
     try {
-        await sendLeadToN8n({
-            name: trimmedName,
-            email: trimmedEmail,
-            phone: trimmedPhone,
-            company: trimmedCompany,
-            service: trimmedService,
-            message: trimmedMessage,
-            submittedAt: new Date().toISOString(),
-        })
-    } catch (err) {
-        console.error('[N8N webhook] Error al enviar lead:', err instanceof Error ? err.message : err)
+      await sendLeadToN8n({
+        ...payload,
+        submittedAt: new Date().toISOString(),
+      })
+    } catch (error) {
+      console.error(
+        '[N8N webhook] Error al enviar lead:',
+        error instanceof Error ? error.message : error
+      )
     }
 
     return { success: true }
+  } catch (error) {
+    console.error('contactFormAction error:', error)
+    return { success: false, error: 'No se pudo enviar el formulario. Intentá de nuevo.' }
+  }
 }
 
-export async function markLeadAsRead(id: string) {
+export async function submitContactForm(
+  prevState: ContactFormState,
+  formData: FormData
+): Promise<ActionResult> {
+  return contactFormAction(prevState, formData)
+}
+
+export async function markLeadAsRead(id: string): Promise<ActionResult> {
+  if (!id) {
+    return { success: false, error: 'Lead inválido.' }
+  }
+
+  try {
     await prisma.contactSubmission.update({
-        where: { id },
-        data: { read: true },
+      where: { id },
+      data: { read: true },
     })
+
     revalidatePath('/admin/leads')
+    return { success: true }
+  } catch (error) {
+    console.error('markLeadAsRead error:', error)
+    return { success: false, error: 'No se pudo actualizar el lead.' }
+  }
 }

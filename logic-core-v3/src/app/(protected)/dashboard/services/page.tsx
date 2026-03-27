@@ -17,6 +17,7 @@ import { FadeIn } from '@/components/dashboard/FadeIn'
 import { StaggerContainer, StaggerItem } from '@/components/dashboard/StaggerWrapper'
 import { PremiumModuleCard } from '@/components/dashboard/PremiumModuleCard'
 import type { PremiumModuleCardProps } from '@/components/dashboard/PremiumModuleCard'
+import { PREMIUM_FEATURE_DEFAULTS } from '@/lib/premium-features'
 
 // ─── Service type config ───────────────────────────────────────────────────────
 
@@ -94,101 +95,123 @@ type ModuleData = PremiumModuleCardProps
 
 const PREMIUM_MODULES: ModuleData[] = [
   {
-    moduleKey: 'motor-resenas',
-    name: 'Motor de Reseñas Automático',
-    category: 'Reputación Online',
+    moduleKey: 'motor-resenias',
+    name: 'Motor de Rese?as Autom?tico',
+    category: 'Reputaci?n Online',
     description:
-      'Generá reseñas positivas en Google y Tripadvisor en piloto automático y potenciá tu reputación.',
+      'Gener? rese?as positivas en Google y potenci? tu reputaci?n sin seguimiento manual.',
     priceFrom: 60,
-    roiBadge: 'Más confianza = más ventas',
+    roiBadge: 'M?s confianza = m?s ventas',
     iconKey: 'Star',
     glowRgb: '234,179,8',
   },
   {
     moduleKey: 'agenda-inteligente',
     name: 'Agenda Inteligente 24/7',
-    category: 'Gestión de Tiempo',
+    category: 'Gesti?n de Tiempo',
     description:
-      'Tus clientes agendan citas sin que vos intervengas, disponible las 24hs todos los días.',
+      'Tus clientes reservan turnos en cualquier momento sin idas y vueltas por WhatsApp.',
     priceFrom: 80,
-    roiBadge: 'Ahorrá 10hs/semana',
+    roiBadge: 'Ahorr? 10hs/semana',
     iconKey: 'Calendar',
     glowRgb: '6,182,212',
   },
   {
     moduleKey: 'mini-crm',
-    name: 'Mini-CRM & Gestión de Leads',
+    name: 'Mini-CRM & Gesti?n de Leads',
     category: 'Ventas',
     description:
-      'Organizá, calificá y hacé seguimiento de cada lead sin necesitar un CRM caro.',
+      'Organiz?, calific? y hac? seguimiento de cada lead desde un pipeline simple y accionable.',
     priceFrom: 80,
-    roiBadge: '3x más cierres de venta',
+    roiBadge: '3x m?s cierres',
     iconKey: 'Users',
     glowRgb: '59,130,246',
   },
   {
-    moduleKey: 'recuperacion-ventas',
-    name: 'Recuperación de Ventas',
-    category: 'Conversión',
+    moduleKey: 'pixel-retargeting',
+    name: 'Recuperaci?n de Ventas',
+    category: 'Conversi?n',
     description:
-      'Rescatá clientes perdidos con secuencias de follow-up automáticas e inteligentes.',
+      'Detect? visitantes perdidos y activ? campa?as autom?ticas para recuperarlos.',
     priceFrom: 100,
-    roiBadge: 'Recuperá el 25% de ventas',
+    roiBadge: 'Recuper? el 25%',
     iconKey: 'RefreshCw',
     glowRgb: '249,115,22',
   },
   {
-    moduleKey: 'email-marketing',
-    name: 'Email Marketing & Nurturing',
+    moduleKey: 'email-automation',
+    name: 'Email Automation',
     category: 'Marketing',
     description:
-      'Campañas de email personalizadas con IA que convierten prospectos en clientes fieles.',
+      'Automatiz? seguimientos, ofertas y reactivaciones con secuencias inteligentes.',
     priceFrom: 100,
-    roiBadge: '$42 retorno por $1 invertido',
+    roiBadge: '$42 retorno por $1',
     iconKey: 'Mail',
     glowRgb: '99,102,241',
   },
   {
-    moduleKey: 'dominio-busqueda-local',
-    name: 'Dominio de Búsqueda Local',
+    moduleKey: 'email-nurturing',
+    name: 'Email Marketing & Nurturing',
+    category: 'Marketing',
+    description:
+      'Convert? leads fr?os en oportunidades con campa?as personalizadas y timing autom?tico.',
+    priceFrom: 100,
+    roiBadge: 'Leads m?s calientes',
+    iconKey: 'Mail',
+    glowRgb: '129,140,248',
+  },
+  {
+    moduleKey: 'seo-avanzado',
+    name: 'SEO Avanzado',
     category: 'SEO Local',
     description:
-      'Dominá el ranking en Google Maps y búsquedas de tu zona para atraer clientes cercanos.',
+      'Domin? b?squedas locales y mejor? tu posicionamiento con optimizaci?n t?cnica y de contenido.',
     priceFrom: 120,
-    roiBadge: '+60% visibilidad local',
+    roiBadge: '+60% visibilidad',
     iconKey: 'MapPin',
     glowRgb: '167,139,250',
   },
   {
-    moduleKey: 'recepcionista-ia',
-    name: 'Recepcionista IA & WhatsApp Autopilot',
-    category: 'Automatización IA',
+    moduleKey: 'client-portal',
+    name: 'Portal de Clientes',
+    category: 'Experiencia',
     description:
-      'Respondé consultas y cerrá ventas en WhatsApp las 24hs sin intervención humana.',
-    priceFrom: 150,
-    roiBadge: 'Ahorrá 15hs/semana',
-    iconKey: 'Bot',
+      'Ofrec? un portal white-label para avances, archivos, propuestas y comunicaci?n.',
+    priceFrom: 120,
+    roiBadge: '+30% retenci?n',
+    iconKey: 'Users',
     glowRgb: '245,158,11',
+  },
+  {
+    moduleKey: 'whatsapp-autopilot',
+    name: 'Recepcionista IA & WhatsApp Autopilot',
+    category: 'Automatizaci?n IA',
+    description:
+      'Respond? consultas y calific? leads por WhatsApp las 24 horas con IA.',
+    priceFrom: 150,
+    roiBadge: 'Ahorr? 15hs/semana',
+    iconKey: 'Bot',
+    glowRgb: '34,197,94',
   },
   {
     moduleKey: 'social-media-hub',
     name: 'Social Media & Content Hub',
     category: 'Redes Sociales',
     description:
-      'Generá, programá y publicá contenido de alto impacto usando inteligencia artificial.',
+      'Gener?, aprob? y public? contenido con un flujo centralizado para tus redes.',
     priceFrom: 200,
-    roiBadge: '5x más engagement',
+    roiBadge: '5x m?s engagement',
     iconKey: 'Share2',
     glowRgb: '236,72,153',
   },
   {
-    moduleKey: 'vende-mientras-duermes',
-    name: 'Vendé Mientras Dormís',
-    category: 'E-commerce IA',
+    moduleKey: 'ecommerce',
+    name: 'E-commerce',
+    category: 'Ventas Online',
     description:
-      'Sistema de ventas automatizado que opera 24/7 y genera ingresos sin un equipo de ventas.',
+      'Vend? online con cat?logo, checkout e integraciones para cobrar y gestionar pedidos.',
     priceFrom: 300,
-    roiBadge: 'Ventas en piloto automático',
+    roiBadge: 'Ventas 24/7',
     iconKey: 'ShoppingCart',
     glowRgb: '52,211,153',
   },
@@ -295,12 +318,26 @@ export default async function ServicesPage() {
   const organizationId = await resolveOrgId()
   if (!organizationId) redirect('/login')
 
-  const services = await prisma.service.findMany({
-    where: { organizationId },
-    orderBy: { startDate: 'asc' },
-  })
+  const [services, modulePricing] = await Promise.all([
+    prisma.service.findMany({
+      where: { organizationId },
+      orderBy: { startDate: 'asc' },
+    }),
+    prisma.modulePricing.findMany(),
+  ])
 
   const activeCount = services.filter((s) => s.status === 'ACTIVE').length
+  const pricingMap = new Map(modulePricing.map((item) => [item.featureKey, item]))
+  const premiumModules = PREMIUM_MODULES
+    .map((module) => ({
+      ...module,
+      priceFrom: pricingMap.get(module.moduleKey)?.price ?? PREMIUM_FEATURE_DEFAULTS[module.moduleKey as keyof typeof PREMIUM_FEATURE_DEFAULTS]?.price ?? module.priceFrom,
+      billingLabel: (pricingMap.get(module.moduleKey)?.type ?? PREMIUM_FEATURE_DEFAULTS[module.moduleKey as keyof typeof PREMIUM_FEATURE_DEFAULTS]?.type) === 'one-time'
+        ? 'USD único'
+        : 'USD/mes',
+      isActive: pricingMap.get(module.moduleKey)?.active ?? true,
+    }))
+    .filter((module) => module.isActive)
 
   return (
     <div className="mx-auto flex max-w-5xl flex-col gap-8 pb-20">
@@ -408,7 +445,7 @@ export default async function ServicesPage() {
 
           {/* Modules grid */}
           <StaggerContainer className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {PREMIUM_MODULES.map((module) => (
+            {premiumModules.map((module) => (
               <StaggerItem key={module.moduleKey}>
                 <PremiumModuleCard {...module} />
               </StaggerItem>

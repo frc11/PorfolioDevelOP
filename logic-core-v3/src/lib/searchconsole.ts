@@ -1,4 +1,5 @@
 import { google } from 'googleapis'
+import type { webmasters_v3 } from 'googleapis'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -72,7 +73,17 @@ function dateNDaysAgo(n: number): string {
 
 // Search Console API returns dates as "YYYY-MM-DD" already
 function parseRows(
-  rows: Array<{ keys?: string[]; clicks?: number; impressions?: number; ctr?: number; position?: number }> | null | undefined
+  rows:
+    | webmasters_v3.Schema$ApiDataRow[]
+    | Array<{
+        keys?: string[] | null
+        clicks?: number | null
+        impressions?: number | null
+        ctr?: number | null
+        position?: number | null
+      }>
+    | null
+    | undefined
 ) {
   return (rows ?? []).map((r) => ({
     keys: r.keys ?? [],
@@ -120,8 +131,7 @@ export async function getSearchConsoleData(
           endDate,
           dimensions: ['query'],
           rowLimit: 10,
-          orderBy: [{ fieldName: 'clicks', sortOrder: 'DESCENDING' }],
-        },
+        } as webmasters_v3.Schema$SearchAnalyticsQueryRequest,
       }),
       // Top 5 pages by clicks
       searchconsole.searchanalytics.query({
@@ -131,8 +141,7 @@ export async function getSearchConsoleData(
           endDate,
           dimensions: ['page'],
           rowLimit: 5,
-          orderBy: [{ fieldName: 'clicks', sortOrder: 'DESCENDING' }],
-        },
+        } as webmasters_v3.Schema$SearchAnalyticsQueryRequest,
       }),
       // Daily totals (no dimension = site-wide summary per day)
       searchconsole.searchanalytics.query({
@@ -147,7 +156,11 @@ export async function getSearchConsoleData(
     ])
 
     const queryRows = parseRows(queriesRes.data.rows)
+      .sort((a, b) => b.clicks - a.clicks)
+      .slice(0, 10)
     const pageRows = parseRows(pagesRes.data.rows)
+      .sort((a, b) => b.clicks - a.clicks)
+      .slice(0, 5)
     const dailyRows = parseRows(dailyRes.data.rows)
 
     // Site-wide totals come from summing daily rows
