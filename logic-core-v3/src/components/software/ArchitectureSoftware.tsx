@@ -1,736 +1,426 @@
 'use client'
 
-import React, { useState, useRef, useEffect } from 'react'
-import { motion, useInView, AnimatePresence, useReducedMotion } from 'motion/react'
+import React, { useEffect, useRef, useState } from 'react'
+import {
+    motion,
+    useInView,
+    useMotionValue,
+    useReducedMotion,
+    useScroll,
+} from 'framer-motion'
 
-// ─── TYPES ───────────────────────────────────────────────────────────────────
+const ease = [0.16, 1, 0.3, 1] as const
 
-interface CapacidadNode {
-  id: string
-  label: string        // "VELOCIDAD"
-  title: string        // "Tu sistema, rápido"
-  description: string
-  metric: string       // "< 200ms"
-  metricLabel: string  // "tiempo de respuesta"
-  icon: string
-  color: string
-  colorRgb: string
-  caseUse: string      // caso de uso real
-  position: {          // % en el SVG
-    x: number
-    y: number
-  }
-}
-
-interface NodeEdge {
-  from: string
-  to: string
-}
-
-interface ArchParticle {
-  id: number
-  edgeIndex: number
-  progress: number  // 0→1
-  speed: number
-  colorRgb: string
-}
-
-// ─── DATA ────────────────────────────────────────────────────────────────────
-
-const nodes: CapacidadNode[] = [
-  {
-    id: 'velocidad',
-    label: 'VELOCIDAD',
-    title: 'Respuesta instantánea',
-    description: 'Tu sistema responde en milisegundos. Sin tiempos de carga que frustran al equipo.',
-    metric: '< 200ms',
-    metricLabel: 'tiempo de respuesta promedio',
-    icon: '⚡',
-    color: '#6366f1',
-    colorRgb: '99,102,241',
-    caseUse: 'Un vendedor busca el stock de 200 productos en 0.2 segundos.',
-    position: { x: 400, y: 100 },  // top center
-  },
-  {
-    id: 'seguridad',
-    label: 'SEGURIDAD',
-    title: 'Datos blindados',
-    description: 'Tus datos financieros y de clientes están protegidos. Solo accede quien vos autorizás. Backups automáticos diarios.',
-    metric: '99.9%',
-    metricLabel: 'uptime garantizado',
-    icon: '🛡',
-    color: '#7b2fff',
-    colorRgb: '123,47,255',
-    caseUse: 'Solo el gerente ve los costos. Solo ventas ve los clientes.',
-    position: { x: 650, y: 200 },  // right top
-  },
-  {
-    id: 'escalabilidad',
-    label: 'CRECE',
-    title: 'Crece con vos',
-    description: 'Abrís nuevas sucursales, sumás vendedores, aumentás el volumen — el sistema absorbe todo sin que tengas que cambiar nada.',
-    metric: '∞',
-    metricLabel: 'usuarios simultáneos',
-    icon: '📈',
-    color: '#6366f1',
-    colorRgb: '99,102,241',
-    caseUse: 'Abrís 3 sucursales nuevas. El sistema las absorbe sin tocar código.',
-    position: { x: 650, y: 350 }, // right bottom
-  },
-  {
-    id: 'integracion',
-    label: 'INTEGRACIÓN',
-    title: 'Todo conectado',
-    description: 'WhatsApp, MercadoPago, AFIP, Gmail — todos integrados. Un dato actualizado en un lugar se refleja en todos.',
-    metric: '+40',
-    metricLabel: 'integraciones disponibles',
-    icon: '🔗',
-    color: '#7b2fff',
-    colorRgb: '123,47,255',
-    caseUse: 'Un pedido nuevo notifica al depósito, factura en AFIP y avisa al cliente automáticamente.',
-    position: { x: 400, y: 420 }, // bottom center
-  },
-  {
-    id: 'datos',
-    label: 'DATOS',
-    title: 'Siempre sabés qué pasa',
-    description: 'A las 8AM ya tenés el resumen de ayer sin que nadie lo arme. Si algo falla, el sistema te avisa antes de que te enteres por los empleados.',
-    metric: '100%',
-    metricLabel: 'datos en tiempo real',
-    icon: '📊',
-    color: '#6366f1',
-    colorRgb: '99,102,241',
-    caseUse: 'A las 8AM recibís el resumen del día anterior sin que nadie lo arme.',
-    position: { x: 150, y: 350 }, // left bottom
-  },
-  {
-    id: 'disponibilidad',
-    label: 'SIEMPRE ACTIVO',
-    title: 'Siempre online',
-    description: 'A las 2AM, desde el celular, sin instalar nada. Tu vendedor en la calle consulta stock en tiempo real. Sin cortes, sin excusas.',
-    metric: '24/7',
-    metricLabel: 'disponibilidad garantizada',
-    icon: '🌐',
-    color: '#7b2fff',
-    colorRgb: '123,47,255',
-    caseUse: 'Tu vendedor en la calle consulta stock desde el celular en tiempo real.',
-    position: { x: 150, y: 200 }, // left top
-  },
+const copyLines = [
+    'Arquitectura pensada para operar sin fricción.',
+    'Cada módulo habla con el siguiente sin cuellos de botella,',
+    'sin duplicación de datos y con visibilidad real para dirección.',
 ]
 
-const edges: NodeEdge[] = [
-  { from: 'velocidad', to: 'seguridad' },
-  { from: 'seguridad', to: 'escalabilidad' },
-  { from: 'escalabilidad', to: 'integracion' },
-  { from: 'integracion', to: 'datos' },
-  { from: 'datos', to: 'disponibilidad' },
-  { from: 'disponibilidad', to: 'velocidad' },
-  // Conexiones cruzadas
-  { from: 'velocidad', to: 'integracion' },
-  { from: 'seguridad', to: 'datos' },
+const features = [
+    'Servicios desacoplados para crecer sin romper lo existente',
+    'Flujo de datos auditado y trazable entre áreas críticas',
+    'Seguridad, performance y observabilidad como base del sistema',
 ]
 
-// ─── SUB-COMPONENTS ──────────────────────────────────────────────────────────
+const nodes = {
+    client: { x: 90, y: 130, label: 'Cliente', tone: '#67e8f9', rgb: '103,232,249' },
+    api: { x: 280, y: 130, label: 'API Core', tone: '#818cf8', rgb: '129,140,248' },
+    auth: { x: 475, y: 70, label: 'Auth', tone: '#c084fc', rgb: '192,132,252' },
+    orchestrator: { x: 475, y: 190, label: 'Flows', tone: '#f97316', rgb: '249,115,22' },
+    database: { x: 665, y: 78, label: 'Data', tone: '#34d399', rgb: '52,211,153' },
+    analytics: { x: 665, y: 190, label: 'BI', tone: '#22d3ee', rgb: '34,211,238' },
+    alerts: { x: 845, y: 130, label: 'Alerts', tone: '#f472b6', rgb: '244,114,182' },
+} as const
 
-function AtmosphereArch() {
-  return (
-    <div aria-hidden="true" style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 0 }}>
-      {/* Glow central — detrás del SVG */}
-      <div style={{
-        position: 'absolute',
-        top: '20%', left: '15%',
-        width: '600px', height: '500px',
-        background: 'radial-gradient(ellipse, rgba(99,102,241,0.07) 0%, transparent 60%)',
-        filter: 'blur(100px)',
-      }} />
+const paths = [
+    {
+        id: 'client-api',
+        d: 'M 132 130 C 185 130, 215 130, 238 130',
+        color: '#67e8f9',
+        duration: 1.1,
+    },
+    {
+        id: 'api-auth',
+        d: 'M 322 118 C 370 96, 410 82, 433 78',
+        color: '#a78bfa',
+        duration: 1.15,
+    },
+    {
+        id: 'api-flows',
+        d: 'M 322 142 C 370 164, 410 178, 433 182',
+        color: '#f97316',
+        duration: 1.15,
+    },
+    {
+        id: 'auth-data',
+        d: 'M 517 70 C 566 70, 598 72, 623 76',
+        color: '#34d399',
+        duration: 1,
+    },
+    {
+        id: 'flows-bi',
+        d: 'M 517 190 C 566 190, 598 192, 623 190',
+        color: '#22d3ee',
+        duration: 1,
+    },
+    {
+        id: 'data-alerts',
+        d: 'M 707 88 C 766 102, 790 116, 803 126',
+        color: '#f472b6',
+        duration: 1.05,
+    },
+    {
+        id: 'bi-alerts',
+        d: 'M 707 180 C 766 166, 790 150, 803 136',
+        color: '#f59e0b',
+        duration: 1.05,
+    },
+] as const
 
-      {/* Glow InfoPanel — derecha */}
-      <div style={{
-        position: 'absolute',
-        top: '25%', right: '-5%',
-        width: '400px', height: '500px',
-        background: 'radial-gradient(ellipse, rgba(123,47,255,0.06) 0%, transparent 65%)',
-        filter: 'blur(90px)',
-      }} />
-
-      {/* Líneas decorativas horizontales */}
-      {[25, 50, 75].map((top, i) => (
-        <div key={i} style={{
-          position: 'absolute',
-          top: `${top}%`,
-          left: 0, right: 0,
-          height: '1px',
-          background: 'rgba(255,255,255,0.018)',
-        }} />
-      ))}
-    </div>
-  )
+const containerVariants = {
+    hidden: {},
+    visible: {
+        transition: {
+            staggerChildren: 0.12,
+        },
+    },
 }
 
-function Header({ isInView }: { isInView: boolean }) {
-  return (
-    <div style={{ marginBottom: 'clamp(40px, 5vh, 60px)' }}>
-      <motion.div
-        initial={{ opacity: 0, y: -10 }}
-        animate={isInView ? { opacity: 1, y: 0 } : {}}
-        transition={{ duration: 0.5, delay: 0.1 }}
-        style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: '8px',
-          border: '1px solid rgba(99,102,241,0.3)',
-          borderRadius: '100px',
-          padding: '4px 14px',
-          marginBottom: '20px',
-          background: 'rgba(99,102,241,0.05)',
-        }}
-      >
-        <span style={{ fontSize: '10px', letterSpacing: '0.2em', color: '#6366f1', fontWeight: 700 }}>
-          [ CONSTRUIDO PARA TU NEGOCIO ]
-        </span>
-      </motion.div>
-
-      <motion.h2
-        initial={{ opacity: 0, y: 20 }}
-        animate={isInView ? { opacity: 1, y: 0 } : {}}
-        transition={{ duration: 0.6, delay: 0.25 }}
-        style={{ fontSize: 'clamp(28px, 4vw, 52px)', fontWeight: 900, color: 'white', lineHeight: 1.1, margin: '0 0 16px' }}
-      >
-        Tu sistema trabaja.<br />
-        <span style={{ color: '#6366f1' }}>Vos tomás decisiones.</span>
-      </motion.h2>
-
-      <motion.p
-        initial={{ opacity: 0 }}
-        animate={isInView ? { opacity: 1 } : {}}
-        transition={{ duration: 0.6, delay: 0.38 }}
-        style={{ fontSize: '15px', color: 'rgba(255,255,255,0.4)', margin: 0, maxWidth: '600px' }}
-      >
-        Hacé clic en cada punto para ver qué problema resuelve en tu negocio.
-      </motion.p>
-    </div>
-  )
+const lineVariants = {
+    hidden: { opacity: 0, y: 28 },
+    visible: {
+        opacity: 1,
+        y: 0,
+        transition: { duration: 0.72, ease },
+    },
 }
 
-function NodeDiagram({
-  nodes,
-  edges,
-  activeNode,
-  hoveredNode,
-  setActiveNode,
-  setHoveredNode,
-  isInView,
-  particles
+function PathDots({
+    d,
+    color,
+    trigger,
+    reducedMotion,
 }: {
-  nodes: CapacidadNode[]
-  edges: NodeEdge[]
-  activeNode: string | null
-  hoveredNode: string | null
-  setActiveNode: (id: string | null) => void
-  setHoveredNode: (id: string | null) => void
-  isInView: boolean
-  particles: ArchParticle[]
+    d: string
+    color: string
+    trigger: boolean
+    reducedMotion: boolean | null
 }) {
-  // Función para obtener posición en edge:
-  function getEdgePoint(edgeIdx: number, progress: number): { x: number, y: number } {
-    const edge = edges[edgeIdx]
-    const from = nodes.find(n => n.id === edge.from)!
-    const to = nodes.find(n => n.id === edge.to)!
-    return {
-      x: from.position.x + (to.position.x - from.position.x) * progress,
-      y: from.position.y + (to.position.y - from.position.y) * progress,
-    }
-  }
+    const pathRef = useRef<SVGPathElement>(null)
+    const [length, setLength] = useState(0)
+    const [dotPositions, setDotPositions] = useState([0.18, 0.54, 0.82])
+    const [dotCoords, setDotCoords] = useState<{ x: number; y: number; id: string }[]>([])
 
-  return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={isInView ? { opacity: 1, scale: 1 } : {}}
-      transition={{ duration: 0.8, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-      style={{ position: 'relative' }}
-    >
-      <svg
-        viewBox="0 0 800 480"
-        style={{
-          width: '100%',
-          height: 'auto',
-          overflow: 'visible',
-        }}
-      >
-        <defs>
-          <filter id="nodeGlow">
-            <feGaussianBlur stdDeviation="4" result="blur" />
-            <feMerge>
-              <feMergeNode in="blur" />
-              <feMergeNode in="SourceGraphic" />
-            </feMerge>
-          </filter>
-        </defs>
+    useEffect(() => {
+        if (!pathRef.current) return
+        setLength(pathRef.current.getTotalLength())
+    }, [d])
 
-        {/* Edges */}
-        {edges.map((edge, i) => {
-          const fromNode = nodes.find(n => n.id === edge.from)!
-          const toNode = nodes.find(n => n.id === edge.to)!
-          const isHighlighted = activeNode === edge.from || activeNode === edge.to
+    useEffect(() => {
+        if (!trigger || reducedMotion || !length || !pathRef.current) return
 
-          return (
-            <line
-              key={i}
-              x1={fromNode.position.x}
-              y1={fromNode.position.y}
-              x2={toNode.position.x}
-              y2={toNode.position.y}
-              stroke={isHighlighted ? 'rgba(99,102,241,0.5)' : 'rgba(255,255,255,0.06)'}
-              strokeWidth={isHighlighted ? 1.5 : 1}
-              strokeDasharray="4 6"
-              style={{ transition: 'stroke 300ms, stroke-width 300ms' }}
-            />
-          )
-        })}
+        let raf = 0
 
-        {/* Nodos */}
-        {nodes.map((node) => {
-          const isActive = activeNode === node.id
-          const isHovered = hoveredNode === node.id
-          const R = 36
+        const tick = () => {
+            setDotPositions((prev) =>
+                prev.map((value, index) => {
+                    const speed = 0.0038 + index * 0.0016
+                    const next = value + speed
+                    return next > 1 ? next - 1 : next
+                })
+            )
+            raf = requestAnimationFrame(tick)
+        }
 
-          return (
-            <g
-              key={node.id}
-              transform={`translate(${node.position.x}, ${node.position.y})`}
-              onClick={() => setActiveNode(activeNode === node.id ? null : node.id)}
-              onMouseEnter={() => setHoveredNode(node.id)}
-              onMouseLeave={() => setHoveredNode(null)}
-              style={{ cursor: 'pointer' }}
-            >
-              {/* Glow exterior */}
-              <circle
-                r={R + 20}
-                fill={`rgba(${node.colorRgb}, ${isActive ? 0.15 : isHovered ? 0.08 : 0.03})`}
-                style={{ transition: 'fill 300ms' }}
-              />
+        raf = requestAnimationFrame(tick)
+        return () => cancelAnimationFrame(raf)
+    }, [trigger, reducedMotion, length])
 
-              {/* Anillo pulsante activo */}
-              {isActive && (
-                <circle
-                  r={R + 10}
-                  fill="none"
-                  stroke={`rgba(${node.colorRgb}, 0.4)`}
-                  strokeWidth="1.5"
-                  style={{ animation: 'ringPulse 2s ease-in-out infinite' }}
-                />
-              )}
+    useEffect(() => {
+        if (!pathRef.current || !length) return
 
-              {/* Círculo principal */}
-              <circle
-                r={R}
-                fill={`rgba(${node.colorRgb}, ${isActive ? 0.2 : isHovered ? 0.12 : 0.06})`}
-                stroke={`rgba(${node.colorRgb}, ${isActive ? 0.8 : isHovered ? 0.5 : 0.25})`}
-                strokeWidth={isActive ? 2 : 1}
-                filter={isActive ? "url(#nodeGlow)" : ""}
-                style={{ transition: 'fill 300ms, stroke 300ms' }}
-              />
+        const nextCoords = dotPositions
+            .map((progress, index) => {
+                const point = pathRef.current?.getPointAtLength(progress * length)
+                if (!point) return null
+                return { x: point.x, y: point.y, id: `${index}-${progress}` }
+            })
+            .filter((value): value is { x: number; y: number; id: string } => value !== null)
 
-              {/* Ícono */}
-              <text
-                textAnchor="middle"
-                dominantBaseline="central"
-                fontSize={isActive ? "22" : "18"}
-                style={{ userSelect: 'none', transition: 'font-size 200ms' }}
-              >
-                {node.icon}
-              </text>
+        setDotCoords(nextCoords)
+    }, [dotPositions, length])
 
-              {/* Label */}
-              <text
-                y={R + 18}
-                textAnchor="middle"
-                fill={isActive ? node.color : 'rgba(255,255,255,0.45)'}
-                fontSize="10"
-                fontWeight={isActive ? "700" : "500"}
-                letterSpacing="1"
-                style={{ transition: 'fill 300ms' }}
-              >
-                {node.label}
-              </text>
-            </g>
-          )
-        })}
-
-        {/* Partículas viajando por las edges */}
-        {particles.map(p => {
-          const pos = getEdgePoint(p.edgeIndex, p.progress)
-          const trailPos = getEdgePoint(p.edgeIndex, Math.max(0, p.progress - 0.08))
-
-          return (
-            <g key={p.id}>
-              {/* Estela */}
-              <line
-                x1={trailPos.x} y1={trailPos.y}
-                x2={pos.x} y2={pos.y}
-                stroke={`rgba(${p.colorRgb}, 0.5)`}
-                strokeWidth="1.5"
-                strokeLinecap="round"
-              />
-              {/* Núcleo */}
-              <circle
-                cx={pos.x} cy={pos.y}
-                r="3.5"
-                fill={`rgba(${p.colorRgb}, 1)`}
-                filter="url(#nodeGlow)"
-              />
-            </g>
-          )
-        })}
-      </svg>
-    </motion.div>
-  )
-}
-
-
-function MetricDisplay({
-  node,
-}: {
-  node: CapacidadNode
-}) {
-  // Detectar si la métrica es numérica
-  const isNumeric =
-    !isNaN(parseFloat(node.metric))
-      && node.metric !== '∞'
-      && node.metric !== '24/7'
-
-  const [displayed, setDisplayed] = useState<number | null>(isNumeric ? 0 : null)
-
-  useEffect(() => {
-    if (!isNumeric) return
-
-    const target = parseFloat(node.metric)
-    const duration = 800
-    const start = performance.now()
-
-    function update(now: number) {
-      const t = Math.min((now - start) / duration, 1)
-      const eased = 1 - Math.pow(1 - t, 3)
-      setDisplayed(Math.round(target * eased * 10) / 10)
-      if (t < 1) requestAnimationFrame(update)
+    if (!length) {
+        return <path ref={pathRef} d={d} fill="none" stroke="transparent" />
     }
 
-    const frameId = requestAnimationFrame(update)
-    return () => cancelAnimationFrame(frameId)
-  }, [node.id, isNumeric, node.metric])
-
-  const displayValue = isNumeric
-    ? `${displayed}${
-        node.metric.includes('%') ? '%'
-        : node.metric.includes('ms') ? 'ms'
-        : ''
-      }`
-    : node.metric
-
-  return (
-    <div style={{
-      display: 'flex',
-      alignItems: 'center',
-      gap: '16px',
-      padding: '16px',
-      background: 'rgba(255,255,255,0.03)',
-      border: '1px solid rgba(255,255,255,0.07)',
-      borderRadius: '14px',
-    }}>
-      <div style={{ flex: 1 }}>
-        <p style={{
-          fontSize: '10px',
-          letterSpacing: '0.15em',
-          color: 'rgba(255,255,255,0.25)',
-          textTransform: 'uppercase',
-          margin: '0 0 4px',
-        }}>
-          {node.metricLabel}
-        </p>
-        <p style={{
-          fontSize: 'clamp(28px, 4vw, 40px)',
-          fontWeight: 900,
-          color: node.color,
-          margin: 0,
-          lineHeight: 1,
-          fontFamily: 'monospace',
-        }}>
-          {displayValue}
-        </p>
-      </div>
-
-      {/* Mini gráfico de barra */}
-      <div style={{
-        width: '60px',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '4px',
-        alignItems: 'flex-end',
-      }}>
-        {[90, 75, 95, 85, 100].map((h, i) => (
-          <motion.div
-            key={i}
-            initial={{ width: 0 }}
-            animate={{ width: `${h}%` }}
-            transition={{
-              delay: 0.1 + i * 0.05,
-              duration: 0.4,
-            }}
-            style={{
-              height: '4px',
-              background: `rgba(${node.colorRgb}, ${0.3 + (h / 100) * 0.5})`,
-              borderRadius: '100px',
-            }}
-          />
-        ))}
-      </div>
-    </div>
-  )
-}
-
-function InfoPanel({ activeNode, isInView }: { activeNode: CapacidadNode | null, isInView: boolean }) {
-  if (!activeNode) {
     return (
-      <motion.div
-        initial={{ opacity: 0, x: 20 }}
-        animate={isInView ? { opacity: 1, x: 0 } : {}}
-        transition={{ duration: 0.6, delay: 0.5 }}
-        style={{
-          padding: 'clamp(28px, 3vw, 40px)',
-          background: 'rgba(255,255,255,0.02)',
-          border: '1px solid rgba(255,255,255,0.07)',
-          borderRadius: '20px',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          textAlign: 'center',
-          minHeight: '300px',
-          gap: '16px',
-        }}
-      >
-        <div style={{
-          width: '64px', height: '64px',
-          borderRadius: '20px',
-          background: 'rgba(99,102,241,0.08)',
-          border: '1px solid rgba(99,102,241,0.15)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontSize: '32px',
-        }}>
-          💡
-        </div>
-        <p style={{ fontSize: '15px', fontWeight: 600, color: 'rgba(255,255,255,0.4)', margin: 0, lineHeight: 1.5 }}>
-          Hacé clic en una capacidad para ver cómo impacta en tu negocio
-        </p>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', justifyContent: 'center' }}>
-          {nodes.map(n => (
-            <span key={n.id} style={{
-              fontSize: '10px',
-              padding: '3px 10px',
-              borderRadius: '100px',
-              background: `rgba(${n.colorRgb}, 0.06)`,
-              border: `1px solid rgba(${n.colorRgb}, 0.15)`,
-              color: `rgba(${n.colorRgb}, 0.6)`,
-            }}>
-              {n.label}
-            </span>
-          ))}
-        </div>
-      </motion.div>
+        <>
+            <path ref={pathRef} d={d} fill="none" stroke="transparent" />
+            {!reducedMotion &&
+                trigger &&
+                dotCoords.map((point) => (
+                        <g key={`${d}-${point.id}`}>
+                            <circle
+                                cx={point.x}
+                                cy={point.y}
+                                r="8"
+                                fill={color}
+                                opacity="0.14"
+                            />
+                            <circle
+                                cx={point.x}
+                                cy={point.y}
+                                r="3.2"
+                                fill={color}
+                            />
+                        </g>
+                ))}
+        </>
     )
-  }
-
-  return (
-    <AnimatePresence mode="wait">
-      <motion.div
-        key={activeNode.id}
-        initial={{ opacity: 0, x: 20, scale: 0.97 }}
-        animate={{ opacity: 1, x: 0, scale: 1 }}
-        exit={{ opacity: 0, x: -20, scale: 0.97 }}
-        transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-        style={{
-          padding: 'clamp(24px, 3vw, 36px)',
-          background: `linear-gradient(135deg, rgba(${activeNode.colorRgb}, 0.08) 0%, rgba(255,255,255, 0.02) 100%)`,
-          border: `1px solid rgba(${activeNode.colorRgb}, 0.25)`,
-          borderRadius: '20px',
-          position: 'relative',
-          overflow: 'hidden',
-        }}
-      >
-        {/* Borde superior */}
-        <div style={{
-          position: 'absolute',
-          top: 0, left: 0, right: 0,
-          height: '2px',
-          background: `linear-gradient(90deg, transparent, rgba(${activeNode.colorRgb}, 0.8) 40%, rgba(${activeNode.colorRgb}, 0.8) 60%, transparent)`,
-        }} />
-
-        {/* Header del panel */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '20px' }}>
-          <div style={{
-            width: '52px', height: '52px',
-            borderRadius: '14px',
-            background: `rgba(${activeNode.colorRgb}, 0.15)`,
-            border: `1px solid rgba(${activeNode.colorRgb}, 0.3)`,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: '26px',
-            flexShrink: 0,
-            boxShadow: `0 0 24px rgba(${activeNode.colorRgb}, 0.2)`,
-          }}>
-            {activeNode.icon}
-          </div>
-          <div>
-            <p style={{ fontSize: '10px', letterSpacing: '0.2em', color: `rgba(${activeNode.colorRgb}, 0.7)`, fontWeight: 700, margin: '0 0 4px' }}>
-              {activeNode.label}
-            </p>
-            <h3 style={{ fontSize: 'clamp(17px, 2vw, 22px)', fontWeight: 900, color: 'white', margin: 0 }}>
-              {activeNode.title}
-            </h3>
-          </div>
-        </div>
-
-        {/* Descripción */}
-        <p style={{ fontSize: '14px', color: 'rgba(255,255,255, 0.55)', lineHeight: 1.7, margin: '0 0 24px' }}>
-          {activeNode.description}
-        </p>
-
-        {/* Métrica animada */}
-        <MetricDisplay node={activeNode} />
-
-        {/* Caso de uso */}
-        <div style={{
-          marginTop: '20px',
-          padding: '14px 16px',
-          background: `rgba(${activeNode.colorRgb}, 0.06)`,
-          border: `1px solid rgba(${activeNode.colorRgb}, 0.15)`,
-          borderRadius: '12px',
-          display: 'flex',
-          gap: '10px',
-          alignItems: 'flex-start',
-        }}>
-          <span style={{ fontSize: '16px', flexShrink: 0 }}>💼</span>
-          <div>
-            <p style={{ fontSize: '10px', letterSpacing: '0.15em', color: `rgba(${activeNode.colorRgb}, 0.6)`, fontWeight: 700, margin: '0 0 4px', textTransform: 'uppercase' }}>
-              Caso real
-            </p>
-            <p style={{ fontSize: '13px', color: 'rgba(255,255,255, 0.6)', margin: 0, lineHeight: 1.55, fontStyle: 'italic' }}>
-              "{activeNode.caseUse}"
-            </p>
-          </div>
-        </div>
-      </motion.div>
-    </AnimatePresence>
-  )
 }
-
-// ─── MAIN COMPONENT ──────────────────────────────────────────────────────────
 
 export default function ArchitectureSoftware() {
-  const sectionRef = useRef<HTMLElement>(null)
-  const isInView = useInView(sectionRef, { once: true, amount: 0.15 })
-  const [activeNode, setActiveNode] = useState<string | null>(null)
-  const [hoveredNode, setHoveredNode] = useState<string | null>(null)
-  const shouldReduceMotion = useReducedMotion()
+    const sectionRef = useRef<HTMLElement>(null)
+    const diagramRef = useRef<HTMLDivElement>(null)
+    const isInView = useInView(sectionRef, { once: true, amount: 0.18 })
+    const reducedMotion = useReducedMotion()
+    const pulse = useMotionValue(0)
 
-  // ─── PARTICLE ENGINE ───────────────────────────────────────────────────────
-  const [archParticles, setArchParticles] = useState<ArchParticle[]>([])
-  const particlesRef = useRef<ArchParticle[]>([])
-  const animRef = useRef<number>(0)
-  const frameRef = useRef(0)
+    useScroll({
+        target: diagramRef,
+        offset: ['start 78%', 'end 30%'],
+    })
+    const shouldDraw = reducedMotion ? true : isInView
 
-  useEffect(() => {
-    if (!isInView || shouldReduceMotion) {
-      if (archParticles.length > 0) setArchParticles([])
-      return
-    }
+    useEffect(() => {
+        if (reducedMotion) return
 
-    function tick() {
-      frameRef.current++
-      const f = frameRef.current
+        let direction = 1
+        let value = 0
+        let raf = 0
 
-      // Spawn cada 20 frames
-      if (f % 20 === 0 && particlesRef.current.length < 12) {
-        const edgeIdx = Math.floor(Math.random() * edges.length)
-        const fromNode = nodes.find(n => n.id === edges[edgeIdx].from)!
-
-        particlesRef.current = [
-          ...particlesRef.current,
-          {
-            id: Date.now() + Math.random(),
-            edgeIndex: edgeIdx,
-            progress: 0,
-            speed: 0.008 + Math.random() * 0.006,
-            colorRgb: fromNode.colorRgb,
-          }
-        ]
-      }
-
-      // Mover partículas
-      particlesRef.current = particlesRef.current
-        .map(p => ({
-          ...p,
-          progress: p.progress + p.speed,
-        }))
-        .filter(p => p.progress < 1)
-
-      setArchParticles([...particlesRef.current])
-      animRef.current = requestAnimationFrame(tick)
-    }
-
-    animRef.current = requestAnimationFrame(tick)
-    return () => cancelAnimationFrame(animRef.current)
-  }, [isInView, shouldReduceMotion])
-
-  return (
-    <section 
-      ref={sectionRef} 
-      style={{ padding: 'clamp(80px, 12vh, 140px) clamp(20px, 5vw, 80px)', background: '#080810', position: 'relative', overflow: 'hidden' }}
-    >
-      <AtmosphereArch />
-      <div style={{ maxWidth: '1100px', margin: '0 auto', position: 'relative', zIndex: 1 }}>
-        <Header isInView={isInView} />
-        <div className="grid grid-cols-1 md:grid-cols-[1.2fr_1fr] gap-[clamp(24px,4vw,60px)] items-center">
-          <NodeDiagram
-            nodes={nodes}
-            edges={edges}
-            activeNode={activeNode}
-            hoveredNode={hoveredNode}
-            setActiveNode={setActiveNode}
-            setHoveredNode={setHoveredNode}
-            isInView={isInView}
-            particles={archParticles}
-          />
-          <InfoPanel
-            activeNode={activeNode ? nodes.find(n => n.id === activeNode)! : null}
-            isInView={isInView}
-          />
-        </div>
-
-        {/* Separador Final */}
-        <motion.div
-          initial={{ scaleX: 0 }}
-          animate={isInView ? { scaleX: 1 } : {}}
-          transition={{ duration: 1.2, delay: 0.8, ease: [0.16, 1, 0.3, 1] }}
-          style={{
-            height: '1px',
-            background: 'linear-gradient(90deg, transparent, rgba(99,102,241,0.3) 20%, rgba(123,47,255,0.4) 50%, rgba(99,102,241,0.3) 80%, transparent)',
-            transformOrigin: 'left center',
-            marginTop: 'clamp(48px, 7vh, 80px)',
-          }}
-        />
-      </div>
-
-      <style jsx global>{`
-        @keyframes ringPulse {
-          0% { transform: scale(0.8); opacity: 0; }
-          50% { opacity: 0.6; }
-          100% { transform: scale(1.3); opacity: 0; }
+        const loop = () => {
+            value += direction * 0.006
+            if (value >= 1) {
+                value = 1
+                direction = -1
+            }
+            if (value <= 0) {
+                value = 0
+                direction = 1
+            }
+            pulse.set(value)
+            raf = requestAnimationFrame(loop)
         }
-      `}</style>
-    </section>
-  )
+
+        raf = requestAnimationFrame(loop)
+        return () => cancelAnimationFrame(raf)
+    }, [pulse, reducedMotion])
+
+    const pulseScale = useTransform(pulse, [0, 1], [0.96, 1.08])
+    const pulseOpacity = useTransform(pulse, [0, 1], [0.48, 0.92])
+
+    return (
+        <section
+            ref={sectionRef}
+            className="relative overflow-hidden bg-[#080810] px-[clamp(20px,5vw,80px)] py-[clamp(80px,12vh,140px)]"
+        >
+            <style>{`
+                @keyframes float {
+                    0%, 100% { transform: translateY(0px); }
+                    50% { transform: translateY(-6px); }
+                }
+            `}</style>
+
+            <div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-0 opacity-[0.018]"
+                style={{
+                    backgroundImage:
+                        "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E\")",
+                    backgroundSize: '128px',
+                }}
+            />
+
+            <div
+                aria-hidden="true"
+                className="pointer-events-none absolute -left-28 top-[24%] h-[26rem] w-[26rem] rounded-full blur-[120px]"
+                style={{ background: 'radial-gradient(circle, rgba(99,102,241,0.09) 0%, transparent 72%)' }}
+            />
+
+            <div className="relative mx-auto max-w-7xl">
+                <div className="grid items-center gap-14 lg:grid-cols-[0.88fr_1.12fr] lg:gap-20">
+                    <motion.div
+                        variants={containerVariants}
+                        initial="hidden"
+                        whileInView="visible"
+                        viewport={{ once: true, amount: 0.4 }}
+                        className="relative z-10"
+                    >
+                        <motion.div
+                            variants={lineVariants}
+                            className="mb-6 inline-flex items-center gap-2 rounded-full border border-indigo-400/20 bg-indigo-400/[0.06] px-4 py-2"
+                        >
+                            <span className="h-1.5 w-1.5 rounded-full bg-indigo-300 shadow-[0_0_10px_rgba(129,140,248,0.9)]" />
+                            <span className="text-[11px] font-bold uppercase tracking-[0.24em] text-indigo-300">
+                                [ Arquitectura B2B ]
+                            </span>
+                        </motion.div>
+
+                        <div className="space-y-3">
+                            {copyLines.map((line, index) => (
+                                <div key={line} className="overflow-hidden">
+                                    <motion.h2
+                                        variants={lineVariants}
+                                        className={`text-[clamp(2.25rem,5vw,4.6rem)] font-black leading-[0.9] tracking-[-0.06em] ${
+                                            index === copyLines.length - 1
+                                                ? 'bg-gradient-to-r from-white via-indigo-200 to-cyan-200 bg-clip-text text-transparent'
+                                                : 'text-white'
+                                        }`}
+                                    >
+                                        {line}
+                                    </motion.h2>
+                                </div>
+                            ))}
+                        </div>
+
+                        <motion.p
+                            variants={lineVariants}
+                            className="mt-7 max-w-xl text-base leading-8 text-white/46 md:text-lg"
+                        >
+                            Diseñamos software que ordena el negocio desde adentro: entradas consistentes, procesamiento seguro y salidas listas para ejecutar, medir y escalar.
+                        </motion.p>
+
+                        <motion.div variants={lineVariants} className="mt-10 grid gap-3">
+                            {features.map((feature) => (
+                                <div
+                                    key={feature}
+                                    className="flex items-center gap-3 border-t border-white/10 pt-4 text-sm text-white/62 md:text-[15px]"
+                                >
+                                    <span className="inline-flex h-6 w-6 items-center justify-center rounded-full border border-indigo-300/20 bg-indigo-300/[0.08] text-[11px] text-indigo-200">
+                                        ✓
+                                    </span>
+                                    {feature}
+                                </div>
+                            ))}
+                        </motion.div>
+                    </motion.div>
+
+                    <div ref={diagramRef} className="relative z-10">
+                        <motion.div
+                            aria-hidden="true"
+                            style={{ scale: pulseScale, opacity: pulseOpacity }}
+                            className="pointer-events-none absolute left-1/2 top-1/2 h-[32rem] w-[32rem] -translate-x-1/2 -translate-y-1/2 rounded-full blur-[100px]"
+                        >
+                            <div className="h-full w-full rounded-full bg-[radial-gradient(circle,rgba(99,102,241,0.16)_0%,rgba(34,211,238,0.1)_34%,rgba(123,47,255,0.07)_56%,transparent_74%)]" />
+                        </motion.div>
+
+                        <motion.div
+                            initial={{ opacity: 0, y: 28, scale: 0.98 }}
+                            whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                            viewport={{ once: true, amount: 0.35 }}
+                            transition={{ duration: reducedMotion ? 0 : 0.9, ease }}
+                            className="relative overflow-hidden rounded-[2rem] border border-white/[0.06] bg-white/[0.02] p-4 shadow-[0_24px_80px_rgba(0,0,0,0.35)] backdrop-blur-xl md:p-6"
+                        >
+                            <div className="absolute inset-0 bg-[linear-gradient(145deg,rgba(255,255,255,0.06),transparent_30%,transparent_70%,rgba(34,211,238,0.06))]" />
+
+                            <svg viewBox="0 0 940 260" className="relative z-10 w-full overflow-visible">
+                                <defs>
+                                    <filter id="softGlow" x="-50%" y="-50%" width="200%" height="200%">
+                                        <feGaussianBlur stdDeviation="4" result="blur" />
+                                        <feMerge>
+                                            <feMergeNode in="blur" />
+                                            <feMergeNode in="SourceGraphic" />
+                                        </feMerge>
+                                    </filter>
+                                </defs>
+
+                                {paths.map((path) => (
+                                    <g key={path.id}>
+                                        <path
+                                            d={path.d}
+                                            fill="none"
+                                            stroke="rgba(255,255,255,0.08)"
+                                            strokeWidth="1.5"
+                                            strokeLinecap="round"
+                                            strokeDasharray="6 8"
+                                        />
+                                        <motion.path
+                                            d={path.d}
+                                            fill="none"
+                                            stroke={path.color}
+                                            strokeWidth="2"
+                                            strokeLinecap="round"
+                                            pathLength={1}
+                                            initial={{ pathLength: reducedMotion ? 1 : 0, opacity: reducedMotion ? 1 : 0.4 }}
+                                            whileInView={{ pathLength: 1, opacity: 1 }}
+                                            viewport={{ once: true, amount: 0.45 }}
+                                            transition={{ duration: reducedMotion ? 0 : path.duration, ease }}
+                                            filter="url(#softGlow)"
+                                        />
+                                        <PathDots
+                                            d={path.d}
+                                            color={path.color}
+                                            trigger={shouldDraw}
+                                            reducedMotion={reducedMotion}
+                                        />
+                                    </g>
+                                ))}
+
+                                {Object.values(nodes).map((node) => (
+                                    <g key={node.label} transform={`translate(${node.x} ${node.y})`}>
+                                        <circle
+                                            r="32"
+                                            fill={`rgba(${node.rgb},0.1)`}
+                                            stroke={`rgba(${node.rgb},0.28)`}
+                                            strokeWidth="1.5"
+                                        />
+                                        <circle
+                                            r="18"
+                                            fill={`rgba(${node.rgb},0.22)`}
+                                            filter="url(#softGlow)"
+                                        />
+                                        <circle r="5" fill={node.tone} />
+                                        <text
+                                            x="0"
+                                            y="56"
+                                            textAnchor="middle"
+                                            className="fill-white/55 text-[11px] uppercase tracking-[0.24em]"
+                                        >
+                                            {node.label}
+                                        </text>
+                                    </g>
+                                ))}
+                            </svg>
+
+                            <div className="relative z-10 mt-5 grid gap-3 border-t border-white/8 pt-5 md:grid-cols-3">
+                                <div className="rounded-[1.1rem] border border-white/[0.05] bg-white/[0.02] p-4">
+                                    <div className="text-[10px] uppercase tracking-[0.22em] text-white/28">Entrada</div>
+                                    <div className="mt-2 text-sm font-semibold text-white">Requests validadas</div>
+                                </div>
+                                <div className="rounded-[1.1rem] border border-white/[0.05] bg-white/[0.02] p-4">
+                                    <div className="text-[10px] uppercase tracking-[0.22em] text-white/28">Proceso</div>
+                                    <div className="mt-2 text-sm font-semibold text-white">Reglas, permisos y flujos</div>
+                                </div>
+                                <div className="rounded-[1.1rem] border border-white/[0.05] bg-white/[0.02] p-4">
+                                    <div className="text-[10px] uppercase tracking-[0.22em] text-white/28">Salida</div>
+                                    <div className="mt-2 text-sm font-semibold text-white">Datos, alertas y decisiones</div>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </div>
+                </div>
+
+                <motion.div
+                    initial={{ scaleX: 0 }}
+                    whileInView={{ scaleX: 1 }}
+                    viewport={{ once: true, amount: 0.2 }}
+                    transition={{ duration: reducedMotion ? 0 : 1.1, delay: 0.3, ease }}
+                    className="mt-[clamp(48px,7vh,80px)] h-px origin-left bg-[linear-gradient(90deg,transparent,rgba(99,102,241,0.28)_20%,rgba(123,47,255,0.4)_50%,rgba(34,211,238,0.28)_80%,transparent)]"
+                />
+            </div>
+        </section>
+    )
 }

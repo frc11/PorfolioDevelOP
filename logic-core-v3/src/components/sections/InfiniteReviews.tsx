@@ -146,18 +146,18 @@ export const InfiniteReviewsDesktop = () => {
 
                 {/* Marquee 2 - Right direction (faster) - Mixed Variants */}
                 <ParallaxText baseVelocity={1.5}>
-                    <ActiveWord text="RESULTS" variant="solid" />
-                    <ActiveWord text="PRECISION" variant="outline" />
-                    <ActiveWord text="SCALE" variant="solid" />
-                    <ActiveWord text="IMPACT" variant="outline" />
+                    <ActiveWord text="RESULTADOS" variant="solid" />
+                    <ActiveWord text="PRECISIÓN" variant="outline" />
+                    <ActiveWord text="ESCALA" variant="solid" />
+                    <ActiveWord text="IMPACTO" variant="outline" />
                 </ParallaxText>
 
                 {/* Marquee 3 - Left direction - Mixed Variants */}
                 <ParallaxText baseVelocity={-2}>
-                    <ActiveWord text="ENGINEERING" variant="outline" />
-                    <ActiveWord text="CREATIVITY" variant="solid" />
-                    <ActiveWord text="INNOVATION" variant="outline" />
-                    <ActiveWord text="LOGIC" variant="solid" />
+                    <ActiveWord text="INGENIERÍA" variant="outline" />
+                    <ActiveWord text="CREATIVIDAD" variant="solid" />
+                    <ActiveWord text="INNOVACIÓN" variant="outline" />
+                    <ActiveWord text="LÓGICA" variant="solid" />
                 </ParallaxText>
             </motion.div>
 
@@ -283,18 +283,18 @@ const InfiniteReviewsMobile = () => {
 
                 {/* Track 2: Move Right (Words) */}
                 <MobileParallaxText baseVelocity={1}>
-                    <MobileActiveWord text="RESULTS" variant="solid" />
-                    <MobileActiveWord text="PRECISION" variant="outline" />
-                    <MobileActiveWord text="SCALE" variant="solid" />
-                    <MobileActiveWord text="IMPACT" variant="outline" />
+                    <MobileActiveWord text="RESULTADOS" variant="solid" />
+                    <MobileActiveWord text="PRECISIÓN" variant="outline" />
+                    <MobileActiveWord text="ESCALA" variant="solid" />
+                    <MobileActiveWord text="IMPACTO" variant="outline" />
                 </MobileParallaxText>
 
                 {/* Track 3: Move Left (Words) */}
                 <MobileParallaxText baseVelocity={-1}>
-                    <MobileActiveWord text="ENGINEERING" variant="outline" />
-                    <MobileActiveWord text="CREATIVITY" variant="solid" />
-                    <MobileActiveWord text="INNOVATION" variant="outline" />
-                    <MobileActiveWord text="LOGIC" variant="solid" />
+                    <MobileActiveWord text="INGENIERÍA" variant="outline" />
+                    <MobileActiveWord text="CREATIVIDAD" variant="solid" />
+                    <MobileActiveWord text="INNOVACIÓN" variant="outline" />
+                    <MobileActiveWord text="LÓGICA" variant="solid" />
                 </MobileParallaxText>
             </motion.div>
         </div>

@@ -1,355 +1,550 @@
 'use client';
-import { useRef, useState, useEffect } from "react";
-import { motion, useMotionValue, useSpring, useTransform, AnimatePresence } from "framer-motion";
-import { ArrowLeft, ArrowRight, ExternalLink } from "lucide-react";
+import { useState } from "react";
+import { motion, useMotionValue, useTransform, AnimatePresence } from "framer-motion";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 
-// Project Data - 12 High-Fidelity Items
-const PROJECTS = [
+// ─── Types ───────────────────────────────────────────────────────────────────
+type BadgeColor = 'green' | 'cyan' | 'yellow' | 'violet';
+
+interface Project {
+    id: number;
+    title: string;
+    category: string;
+    description: string;
+    tags: string[];
+    badge: string;
+    badgeColor: BadgeColor;
+    gradient: string;
+    year?: string;
+}
+
+// ─── Data ────────────────────────────────────────────────────────────────────
+const REAL_PROJECTS: Project[] = [
     {
         id: 1,
-        title: "VOID WALKER",
-        category: "SPATIAL AUDIO",
-        img: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1200",
-        year: "2024"
+        title: "Concesionaria San Miguel",
+        category: "AUTOMOTIVE — TUCUMÁN",
+        description:
+            "Sitio web corporativo con catálogo de vehículos 0km y usados, formulario de consultas inteligente y panel de administración de leads para el equipo de ventas.",
+        tags: ["Next.js", "TypeScript", "Panel Admin", "CRM"],
+        badge: "CASO REAL ✓",
+        badgeColor: "green",
+        gradient: "linear-gradient(135deg, #052e16 0%, #064e3b 40%, #0f766e 80%, #134e4a 100%)",
+        year: "2026",
     },
-    {
-        id: 2,
-        title: "DATA MESH",
-        category: "ANALYTICS",
-        img: "https://images.unsplash.com/photo-1558591710-4b4a1ae0f04d?q=80&w=1200",
-        year: "2023"
-    },
-    {
-        id: 3,
-        title: "CYBER CORE",
-        category: "SECURITY",
-        img: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=1200",
-        year: "2024"
-    },
-    {
-        id: 4,
-        title: "HYPER LOOP",
-        category: "LOGISTICS",
-        img: "https://images.unsplash.com/photo-1519608487953-e999c86e7455?q=80&w=1200",
-        year: "2023"
-    },
-    {
-        id: 5,
-        title: "ORBITAL",
-        category: "AEROSPACE",
-        img: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=1200",
-        year: "2024"
-    },
-    {
-        id: 6,
-        title: "SYNTH WAVE",
-        category: "DIGITAL ART",
-        img: "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=1200",
-        year: "2023"
-    }
 ];
 
-export const Portfolio = () => {
-    return (
-        <section id="portfolio" className="relative w-full bg-zinc-950 overflow-hidden">
-            {/* MOBILE VIEW */}
-            <div className="block md:hidden">
-                <PortfolioMobile />
-            </div>
+const DEMO_PROJECTS: Project[] = [
+    {
+        id: 10,
+        title: "Clínica Médica",
+        category: "SALUD",
+        description: "Turnos online + recordatorios WhatsApp + panel del staff.",
+        tags: ["Automatización", "WhatsApp", "n8n"],
+        badge: "DEMO",
+        badgeColor: "cyan",
+        gradient: "linear-gradient(135deg, #0c0a1e 0%, #1e1b4b 50%, #312e81 80%, #1e1b4b 100%)",
+    },
+    {
+        id: 11,
+        title: "Gimnasio",
+        category: "FITNESS",
+        description: "Membresías, clases y bot de consultas 24/7.",
+        tags: ["IA", "WhatsApp Bot", "Web"],
+        badge: "DEMO",
+        badgeColor: "cyan",
+        gradient: "linear-gradient(135deg, #0a0a0a 0%, #052e16 50%, #14532d 100%)",
+    },
+    {
+        id: 12,
+        title: "Restaurante",
+        category: "GASTRONOMÍA",
+        description: "Menú QR, reservas y reseñas automáticas en Google.",
+        tags: ["QR Menu", "Reservas", "Automatización"],
+        badge: "DEMO",
+        badgeColor: "yellow",
+        gradient: "linear-gradient(135deg, #0c0400 0%, #431407 50%, #7c2d12 80%, #1c0a00 100%)",
+    },
+    {
+        id: 13,
+        title: "Inmobiliaria",
+        category: "REAL ESTATE",
+        description: "Portal de propiedades con CRM y seguimiento de leads.",
+        tags: ["Portal Web", "CRM", "IA"],
+        badge: "DEMO",
+        badgeColor: "cyan",
+        gradient: "linear-gradient(135deg, #09090b 0%, #18181b 50%, #27272a 80%, #09090b 100%)",
+    },
+    {
+        id: 14,
+        title: "Portal SaaS develOP",
+        category: "PRODUCTO PROPIO",
+        description: "Dashboard para clientes con métricas, proyectos y chat.",
+        tags: ["SaaS", "Dashboard", "Multi-tenant"],
+        badge: "PROPIO",
+        badgeColor: "violet",
+        gradient: "linear-gradient(135deg, #030712 0%, #0c1127 40%, #0e1a3d 70%, #020617 100%)",
+    },
+];
 
-            {/* DESKTOP VIEW */}
-            <div className="hidden md:block">
-                <PortfolioDesktop />
-            </div>
-        </section>
-    );
+// ─── Badge styles ─────────────────────────────────────────────────────────────
+const BADGE_STYLES: Record<BadgeColor, string> = {
+    green: "bg-emerald-950 text-emerald-400 border border-emerald-700",
+    cyan: "bg-cyan-950 text-cyan-400 border border-cyan-700",
+    yellow: "bg-amber-950 text-amber-400 border border-amber-700",
+    violet: "bg-violet-950 text-violet-400 border border-violet-700",
 };
 
-// --------------------------------------------------------
-// DESKTOP VIEW: ORIGINAL HORIZONTAL SCROLL / TILT CARDS
-// --------------------------------------------------------
-const PortfolioDesktop = () => {
-    // Cyclic Navigation Logic
-    const [currentIndex, setCurrentIndex] = useState(0);
+// ─── Background pattern shared ───────────────────────────────────────────────
+const BgPattern = () => (
+    <div
+        className="absolute inset-0 pointer-events-none z-0"
+        style={{
+            backgroundImage: 'radial-gradient(circle at 1px 1px, #27272a 3px, transparent 0)',
+            backgroundSize: '32px 32px',
+            opacity: 0.25,
+        }}
+    />
+);
 
-    // Focus Mode Logic: Track which of the VISIBLE cards (0, 1, 2) is hovered relative to the grid
-    const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
-
-    const nextProject = () => {
-        setCurrentIndex((prev) => (prev + 1) % PROJECTS.length);
-    };
-
-    const prevProject = () => {
-        setCurrentIndex((prev) => (prev - 1 + PROJECTS.length) % PROJECTS.length);
-    };
-
-    // Calculate visible projects (Current, +1, +2)
-    const visibleProjects = [
-        PROJECTS[currentIndex],
-        PROJECTS[(currentIndex + 1) % PROJECTS.length],
-        PROJECTS[(currentIndex + 2) % PROJECTS.length],
-    ];
-
-    return (
-        <div className="relative h-screen bg-zinc-950 flex flex-col justify-center overflow-hidden">
-            {/* Background Pattern */}
-            <div
-                className="absolute inset-0 pointer-events-none z-0"
-                style={{
-                    backgroundImage: 'radial-gradient(circle at 1px 1px, #27272a 3px, transparent 0)',
-                    backgroundSize: '32px 32px', // Increased spacing for elegance
-                    opacity: 0.25
-                }}
-            />
-
-            {/* Top Fade (Integration with About) */}
-            <div className="absolute top-0 left-0 w-full h-64 bg-gradient-to-b from-zinc-950 to-transparent z-0 pointer-events-none" />
-
-            {/* Bottom Fade (Integration with Next Section) */}
-            <div className="absolute bottom-0 left-0 w-full h-64 bg-gradient-to-t from-zinc-950 to-transparent z-0 pointer-events-none" />
-
-            <motion.div
-                initial={{ opacity: 0, y: 40 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-15%" }}
-                transition={{ duration: 0.8, ease: "easeOut" }}
-                className="container mx-auto px-6 md:px-12 relative z-10 h-[60vh]"
-            >
-                <div className="flex justify-between items-end mb-12 border-b border-zinc-800 pb-8">
-                    <div>
-                        <h2 className="text-5xl md:text-8xl font-black text-zinc-100 tracking-tighter">
-                            PORT<span className="text-transparent bg-clip-text bg-gradient-to-r pr-2 from-zinc-400 to-zinc-700">FOLIO</span>
-                        </h2>
-                    </div>
-                    {/* Navigation Arrows */}
-                    <div className="flex gap-4">
-                        <button
-                            data-cursor="hover"
-                            onClick={prevProject}
-                            className="w-16 h-16 rounded-full border border-zinc-700 flex items-center justify-center text-zinc-400 hover:bg-zinc-800 hover:text-white transition-colors cursor-none"
-                        >
-                            <ArrowLeft className="w-6 h-6" />
-                        </button>
-                        <button
-                            data-cursor="hover"
-                            onClick={nextProject}
-                            className="w-16 h-16 rounded-full border border-zinc-700 flex items-center justify-center text-zinc-400 hover:bg-zinc-800 hover:text-white transition-colors cursor-none"
-                        >
-                            <ArrowRight className="w-6 h-6" />
-                        </button>
-                    </div>
-                </div>
-
-                {/* Sliding Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 h-full">
-                    <AnimatePresence mode='popLayout'>
-                        {visibleProjects.map((project, i) => {
-                            // Determine dimmed state based on parent hoveredIndex
-                            const isDimmed = hoveredIndex !== null && hoveredIndex !== i;
-                            const isFocused = hoveredIndex === i;
-
-                            return (
-                                <motion.div
-                                    key={`${project.id}-${i}`} // Unique key for AnimatePresence
-                                    layout
-                                    initial={{ opacity: 0, x: 100 }}
-                                    animate={{
-                                        opacity: isDimmed ? 0.2 : 1,
-                                        x: 0,
-                                        scale: isFocused ? 1.1 : 1
-                                    }}
-                                    exit={{ opacity: 0, x: -100 }}
-                                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                                    className="h-full"
-                                    onMouseEnter={() => setHoveredIndex(i)}
-                                    onMouseLeave={() => setHoveredIndex(null)}
-                                >
-                                    <ProjectCard project={project} />
-                                </motion.div>
-                            );
-                        })}
-                    </AnimatePresence>
-                </div>
-            </motion.div>
-        </div>
-    );
-};
-
-// 3D Tilt Card Component (Desktop)
-const ProjectCard = ({ project }: { project: typeof PROJECTS[0] }) => {
+// ─── 3D Tilt Card (Desktop Real) ─────────────────────────────────────────────
+const RealProjectCard = ({ project }: { project: Project }) => {
     const x = useMotionValue(0);
     const y = useMotionValue(0);
-
-    const rotateX = useTransform(y, [-0.5, 0.5], [15, -15]);
-    const rotateY = useTransform(x, [-0.5, 0.5], [-15, 15]);
+    const rotateX = useTransform(y, [-0.5, 0.5], [10, -10]);
+    const rotateY = useTransform(x, [-0.5, 0.5], [-10, 10]);
 
     const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
         const rect = e.currentTarget.getBoundingClientRect();
-        const width = rect.width;
-        const height = rect.height;
-        const mouseX = e.clientX - rect.left;
-        const mouseY = e.clientY - rect.top;
-        const xPct = mouseX / width - 0.5;
-        const yPct = mouseY / height - 0.5;
-        x.set(xPct);
-        y.set(yPct);
-    };
-
-    const handleMouseLeave = () => {
-        x.set(0);
-        y.set(0);
+        x.set((e.clientX - rect.left) / rect.width - 0.5);
+        y.set((e.clientY - rect.top) / rect.height - 0.5);
     };
 
     return (
         <motion.div
             data-cursor="hover"
             onMouseMove={handleMouseMove}
-            onMouseLeave={handleMouseLeave}
-            style={{ perspective: 1000 }}
-            className="group relative w-full h-[45vh] cursor-none"
+            onMouseLeave={() => { x.set(0); y.set(0); }}
+            style={{ perspective: 1200 }}
+            className="group relative w-full h-[52vh] cursor-none"
         >
             <motion.div
-                style={{
-                    rotateX,
-                    rotateY,
-                    transformStyle: "preserve-3d",
-                }}
-                className="w-full h-full relative"
+                style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
+                className="w-full h-full relative rounded-sm overflow-hidden"
             >
-                {/* Image Layer */}
+                {/* Gradient background */}
                 <div
-                    className="absolute inset-0 bg-cover bg-center rounded-sm grayscale group-hover:grayscale-0 transition-all duration-500"
-                    style={{ backgroundImage: `url(${project.img})` }}
+                    className="absolute inset-0"
+                    style={{ background: project.gradient }}
+                />
+                {/* Overlay */}
+                <div className="absolute inset-0 bg-black/30 group-hover:bg-black/10 transition-colors duration-500" />
+
+                {/* Big title background watermark */}
+                <div
+                    className="absolute -bottom-4 -right-4 text-[10rem] font-black text-white/5 leading-none select-none pointer-events-none"
+                    style={{ transform: "translateZ(10px)" }}
                 >
-                    <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors" />
+                    {project.title.split(" ").pop()?.toUpperCase()}
                 </div>
 
-                {/* Content Layer (Floating) */}
+                {/* Badge */}
                 <div
-                    className="absolute bottom-8 left-8 transform translate-z-20"
+                    className="absolute top-6 left-6"
                     style={{ transform: "translateZ(50px)" }}
                 >
-                    <p className="text-zinc-400 text-xs font-mono tracking-widest mb-2">{project.category}</p>
-                    <h3 className="text-3xl font-bold text-white uppercase leading-none">{project.title}</h3>
+                    <span className={`text-xs font-mono font-bold tracking-widest px-3 py-1 rounded-full ${BADGE_STYLES[project.badgeColor]}`}>
+                        {project.badge}
+                    </span>
                 </div>
 
-                {/* Year Layer (Floating Background) */}
+                {/* Year */}
                 <div
-                    className="absolute top-4 right-4 transform translate-z-10"
-                    style={{ transform: "translateZ(30px)" }}
+                    className="absolute top-6 right-6"
+                    style={{ transform: "translateZ(40px)" }}
                 >
-                    <span className="text-zinc-500 font-mono text-sm border border-zinc-700 px-2 py-1 rounded-full">{project.year}</span>
+                    <span className="text-zinc-400 font-mono text-sm border border-zinc-700 px-2 py-1 rounded-full">
+                        {project.year}
+                    </span>
+                </div>
+
+                {/* Content */}
+                <div
+                    className="absolute bottom-8 left-8 right-8"
+                    style={{ transform: "translateZ(60px)" }}
+                >
+                    <p className="text-zinc-400 text-xs font-mono tracking-widest mb-2">{project.category}</p>
+                    <h3 className="text-4xl md:text-5xl font-black text-white uppercase leading-none mb-4">
+                        {project.title}
+                    </h3>
+                    <p className="text-zinc-300 text-sm leading-relaxed mb-4 max-w-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                        {project.description}
+                    </p>
+                    <div className="flex flex-wrap gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-500 delay-75">
+                        {project.tags.map((tag) => (
+                            <span key={tag} className="text-xs font-mono bg-white/10 text-zinc-300 px-2 py-0.5 rounded-full border border-white/10">
+                                {tag}
+                            </span>
+                        ))}
+                    </div>
                 </div>
             </motion.div>
         </motion.div>
     );
 };
 
-// --------------------------------------------------------
-// MOBILE VIEW: VERTICAL PAGINATED LIST (3 ITEMS)
-// --------------------------------------------------------
-const PortfolioMobile = () => {
-    const [currentPage, setCurrentPage] = useState(0);
-    const itemsPerPage = 3;
-    const totalPages = Math.ceil(PROJECTS.length / itemsPerPage);
+// ─── 3D Tilt Card (Desktop Demo, smaller) ────────────────────────────────────
+const DemoCard = ({ project, isDimmed, isFocused }: { project: Project; isDimmed: boolean; isFocused: boolean }) => {
+    const x = useMotionValue(0);
+    const y = useMotionValue(0);
+    const rotateX = useTransform(y, [-0.5, 0.5], [12, -12]);
+    const rotateY = useTransform(x, [-0.5, 0.5], [-12, 12]);
 
-    const visibleProjects = PROJECTS.slice(currentPage * itemsPerPage, (currentPage + 1) * itemsPerPage);
-
-    const nextProject = () => {
-        if (currentPage < totalPages - 1) {
-            setCurrentPage(prev => prev + 1);
-        }
-    };
-
-    const prevProject = () => {
-        if (currentPage > 0) {
-            setCurrentPage(prev => prev - 1);
-        }
+    const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+        const rect = e.currentTarget.getBoundingClientRect();
+        x.set((e.clientX - rect.left) / rect.width - 0.5);
+        y.set((e.clientY - rect.top) / rect.height - 0.5);
     };
 
     return (
-        <div className="relative bg-zinc-950 flex flex-col pt-24 pb-12 px-6 overflow-hidden">
-            {/* Background Pattern */}
-            <div
-                className="absolute inset-0 pointer-events-none z-0"
-                style={{
-                    backgroundImage: 'radial-gradient(circle at 1px 1px, #27272a 3px, transparent 0)',
-                    backgroundSize: '32px 32px',
-                    opacity: 0.25
-                }}
-            />
+        <motion.div
+            data-cursor="hover"
+            onMouseMove={handleMouseMove}
+            onMouseLeave={() => { x.set(0); y.set(0); }}
+            style={{ perspective: 1000 }}
+            animate={{ opacity: isDimmed ? 0.25 : 1, scale: isFocused ? 1.04 : 1 }}
+            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            className="group relative w-full h-[38vh] cursor-none"
+        >
+            <motion.div
+                style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
+                className="w-full h-full relative rounded-sm overflow-hidden"
+            >
+                <div className="absolute inset-0" style={{ background: project.gradient }} />
+                <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors duration-500" />
 
+                {/* Badge */}
+                <div className="absolute top-4 left-4" style={{ transform: "translateZ(40px)" }}>
+                    <span className={`text-xs font-mono font-bold tracking-widest px-2 py-0.5 rounded-full ${BADGE_STYLES[project.badgeColor]}`}>
+                        {project.badge}
+                    </span>
+                </div>
+
+                {/* Content */}
+                <div className="absolute bottom-6 left-6 right-6" style={{ transform: "translateZ(50px)" }}>
+                    <p className="text-zinc-500 text-xs font-mono tracking-widest mb-1">{project.category}</p>
+                    <h3 className="text-xl font-bold text-white uppercase leading-none mb-3">{project.title}</h3>
+                    <p className="text-zinc-400 text-xs leading-relaxed mb-3 opacity-0 group-hover:opacity-100 transition-opacity duration-400">
+                        {project.description}
+                    </p>
+                    <div className="flex flex-wrap gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-400 delay-75">
+                        {project.tags.map((tag) => (
+                            <span key={tag} className="text-xs font-mono bg-white/10 text-zinc-400 px-2 py-0.5 rounded-full border border-white/10">
+                                {tag}
+                            </span>
+                        ))}
+                    </div>
+                </div>
+            </motion.div>
+        </motion.div>
+    );
+};
+
+// ─── Separator ───────────────────────────────────────────────────────────────
+const SectionSeparator = () => (
+    <div className="relative z-10 flex flex-col items-center py-12 md:py-16">
+        <div className="flex items-center gap-4 w-full max-w-2xl">
+            <div className="flex-1 h-px bg-zinc-800" />
+            <span className="text-zinc-500 font-mono text-sm tracking-widest whitespace-nowrap">
+                — DEMOS Y CONCEPTOS —
+            </span>
+            <div className="flex-1 h-px bg-zinc-800" />
+        </div>
+        <p className="text-zinc-600 text-xs font-mono mt-3 text-center max-w-md leading-relaxed">
+            Propuestas desarrolladas para mostrar capacidades en diferentes rubros
+        </p>
+    </div>
+);
+
+// ─── Disclaimer ──────────────────────────────────────────────────────────────
+const Disclaimer = () => (
+    <p className="relative z-10 text-center text-zinc-600 text-xs font-mono max-w-xl mx-auto mt-8 leading-relaxed px-6">
+        Los demos son propuestas conceptuales desarrolladas por el equipo develOP para ilustrar capacidades.
+        No representan clientes reales.
+    </p>
+);
+
+// ─── Desktop View ─────────────────────────────────────────────────────────────
+const PortfolioDesktop = () => {
+    const [demoIndex, setDemoIndex] = useState(0);
+    const [hoveredDemo, setHoveredDemo] = useState<number | null>(null);
+
+    const visibleDemos = [
+        DEMO_PROJECTS[demoIndex % DEMO_PROJECTS.length],
+        DEMO_PROJECTS[(demoIndex + 1) % DEMO_PROJECTS.length],
+        DEMO_PROJECTS[(demoIndex + 2) % DEMO_PROJECTS.length],
+    ];
+
+    return (
+        <div className="relative bg-zinc-950 overflow-hidden">
+            <BgPattern />
+            <div className="absolute top-0 left-0 w-full h-64 bg-gradient-to-b from-zinc-950 to-transparent z-0 pointer-events-none" />
+            <div className="absolute bottom-0 left-0 w-full h-64 bg-gradient-to-t from-zinc-950 to-transparent z-0 pointer-events-none" />
+
+            <div className="container mx-auto px-6 md:px-12 relative z-10 pt-24 pb-20">
+
+                {/* ── BLOQUE 1: Trabajos Reales ── */}
+                <motion.div
+                    initial={{ opacity: 0, y: 40 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, margin: "-10%" }}
+                    transition={{ duration: 0.8, ease: "easeOut" }}
+                >
+                    <div className="flex justify-between items-end mb-10 border-b border-zinc-800 pb-8">
+                        <div>
+                            <p className="text-zinc-500 text-xs font-mono tracking-widest mb-2">develOP — PORTAFOLIO</p>
+                            <h2 className="text-5xl md:text-7xl font-black text-zinc-100 tracking-tighter">
+                                NUESTROS <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-500">TRABAJOS</span>
+                            </h2>
+                        </div>
+                        <span className="text-xs font-mono text-zinc-600 border border-zinc-800 px-3 py-1 rounded-full">
+                            CLIENTES REALES
+                        </span>
+                    </div>
+
+                    <div className="grid grid-cols-1 gap-8">
+                        {REAL_PROJECTS.map((project) => (
+                            <RealProjectCard key={project.id} project={project} />
+                        ))}
+                    </div>
+                </motion.div>
+
+                {/* ── Separator ── */}
+                <SectionSeparator />
+
+                {/* ── BLOQUE 2: Demos por Rubro ── */}
+                <motion.div
+                    initial={{ opacity: 0, y: 40 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, margin: "-10%" }}
+                    transition={{ duration: 0.8, ease: "easeOut" }}
+                >
+                    <div className="flex justify-between items-end mb-10 border-b border-zinc-800 pb-8">
+                        <div>
+                            <p className="text-zinc-500 text-xs font-mono tracking-widest mb-2">CAPACIDADES develOP</p>
+                            <h2 className="text-4xl md:text-6xl font-black text-zinc-100 tracking-tighter">
+                                DEMOS <span className="text-transparent bg-clip-text bg-gradient-to-r from-zinc-400 to-zinc-700">POR RUBRO</span>
+                            </h2>
+                        </div>
+                        <div className="flex gap-4 items-center">
+                            <span className="text-xs font-mono text-cyan-500 border border-cyan-900 bg-cyan-950/50 px-3 py-1 rounded-full">
+                                DEMO CONCEPTS
+                            </span>
+                            <button
+                                data-cursor="hover"
+                                onClick={() => setDemoIndex((prev) => (prev - 1 + DEMO_PROJECTS.length) % DEMO_PROJECTS.length)}
+                                className="w-12 h-12 rounded-full border border-zinc-700 flex items-center justify-center text-zinc-400 hover:bg-zinc-800 hover:text-white transition-colors cursor-none"
+                            >
+                                <ArrowLeft className="w-5 h-5" />
+                            </button>
+                            <button
+                                data-cursor="hover"
+                                onClick={() => setDemoIndex((prev) => (prev + 1) % DEMO_PROJECTS.length)}
+                                className="w-12 h-12 rounded-full border border-zinc-700 flex items-center justify-center text-zinc-400 hover:bg-zinc-800 hover:text-white transition-colors cursor-none"
+                            >
+                                <ArrowRight className="w-5 h-5" />
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-6">
+                        <AnimatePresence mode="popLayout">
+                            {visibleDemos.map((project, i) => (
+                                <motion.div
+                                    key={`${project.id}-${i}`}
+                                    layout
+                                    initial={{ opacity: 0, x: 80 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    exit={{ opacity: 0, x: -80 }}
+                                    transition={{ type: "spring", stiffness: 280, damping: 28 }}
+                                    onMouseEnter={() => setHoveredDemo(i)}
+                                    onMouseLeave={() => setHoveredDemo(null)}
+                                >
+                                    <DemoCard
+                                        project={project}
+                                        isDimmed={hoveredDemo !== null && hoveredDemo !== i}
+                                        isFocused={hoveredDemo === i}
+                                    />
+                                </motion.div>
+                            ))}
+                        </AnimatePresence>
+                    </div>
+
+                    {/* Dot indicators */}
+                    <div className="flex justify-center gap-2 mt-6">
+                        {DEMO_PROJECTS.map((_, i) => (
+                            <button
+                                key={i}
+                                onClick={() => setDemoIndex(i)}
+                                className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
+                                    i === demoIndex % DEMO_PROJECTS.length ? 'bg-zinc-400 w-4' : 'bg-zinc-700'
+                                }`}
+                            />
+                        ))}
+                    </div>
+                </motion.div>
+
+                <Disclaimer />
+            </div>
+        </div>
+    );
+};
+
+// ─── Mobile Card ──────────────────────────────────────────────────────────────
+const MobileCard = ({ project, size = 'normal' }: { project: Project; size?: 'large' | 'normal' }) => {
+    const height = size === 'large' ? 'h-72' : 'h-52';
+
+    return (
+        <div className={`relative w-full ${height} rounded-md overflow-hidden border border-zinc-800`}>
+            <div className="absolute inset-0" style={{ background: project.gradient }} />
+            <div className="absolute inset-0 bg-black/30" />
+
+            {/* Badge */}
+            <div className="absolute top-4 left-4 z-10">
+                <span className={`text-xs font-mono font-bold tracking-widest px-2 py-0.5 rounded-full ${BADGE_STYLES[project.badgeColor]}`}>
+                    {project.badge}
+                </span>
+            </div>
+
+            {project.year && (
+                <div className="absolute top-4 right-4 z-10">
+                    <span className="text-zinc-300 font-mono text-xs border border-zinc-700 bg-black/60 px-2 py-0.5 rounded-full">
+                        {project.year}
+                    </span>
+                </div>
+            )}
+
+            <div className="absolute bottom-5 left-5 right-5 z-10">
+                <p className="text-zinc-400 text-xs font-mono tracking-widest mb-1">{project.category}</p>
+                <h3 className={`font-black text-white uppercase leading-none mb-2 ${size === 'large' ? 'text-2xl' : 'text-lg'}`}>
+                    {project.title}
+                </h3>
+                <p className="text-zinc-400 text-xs leading-relaxed">{project.description}</p>
+                <div className="flex flex-wrap gap-1 mt-2">
+                    {project.tags.map((tag) => (
+                        <span key={tag} className="text-xs font-mono bg-white/10 text-zinc-400 px-2 py-0.5 rounded-full border border-white/10">
+                            {tag}
+                        </span>
+                    ))}
+                </div>
+            </div>
+        </div>
+    );
+};
+
+// ─── Mobile View ─────────────────────────────────────────────────────────────
+const PortfolioMobile = () => {
+    const [demoPage, setDemoPage] = useState(0);
+    const demosPerPage = 3;
+    const totalPages = Math.ceil(DEMO_PROJECTS.length / demosPerPage);
+    const visibleDemos = DEMO_PROJECTS.slice(demoPage * demosPerPage, (demoPage + 1) * demosPerPage);
+
+    return (
+        <div className="relative bg-zinc-950 flex flex-col pt-20 pb-12 px-5 overflow-hidden">
+            <BgPattern />
+
+            {/* ── BLOQUE 1 ── */}
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.8, ease: "easeOut" }}
-                className="mb-8 border-b border-zinc-800 pb-6 relative z-10"
+                transition={{ duration: 0.7 }}
+                className="relative z-10"
             >
-                <h2 className="text-5xl font-black text-zinc-100 tracking-tighter">
-                    PORT<span className="text-transparent bg-clip-text bg-gradient-to-r pr-2 from-zinc-400 to-zinc-700">FOLIO</span>
-                </h2>
+                <div className="mb-6 border-b border-zinc-800 pb-5">
+                    <p className="text-zinc-500 text-xs font-mono tracking-widest mb-1">develOP — PORTAFOLIO</p>
+                    <h2 className="text-4xl font-black text-zinc-100 tracking-tighter">
+                        NUESTROS <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-500">TRABAJOS</span>
+                    </h2>
+                </div>
+
+                <div className="flex flex-col gap-4">
+                    {REAL_PROJECTS.map((p) => (
+                        <MobileCard key={p.id} project={p} size="large" />
+                    ))}
+                </div>
             </motion.div>
 
-            <div className="flex flex-col gap-6 relative z-10 w-full">
-                <AnimatePresence mode="popLayout">
-                    {visibleProjects.map((project, i) => (
-                        <motion.div
-                            key={project.id}
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -20 }}
-                            transition={{ delay: i * 0.1 }}
-                            className="w-full"
-                        >
-                            <MobileProjectCard project={project} />
-                        </motion.div>
-                    ))}
-                </AnimatePresence>
-            </div>
+            {/* ── Separator ── */}
+            <SectionSeparator />
 
-            {/* Controls */}
-            <div className="flex gap-4 mt-8 pt-6 border-t border-zinc-900 justify-center relative z-10">
-                <button
-                    onClick={prevProject}
-                    disabled={currentPage === 0}
-                    className="flex-1 max-w-[160px] h-14 rounded-full border border-zinc-700 flex items-center justify-center text-zinc-400 active:bg-zinc-800 active:text-white transition-colors disabled:opacity-30 disabled:active:bg-transparent disabled:active:text-zinc-600 disabled:border-zinc-800"
-                >
-                    <ArrowLeft className="w-6 h-6" />
-                </button>
-                <button
-                    onClick={nextProject}
-                    disabled={currentPage >= totalPages - 1}
-                    className="flex-1 max-w-[160px] h-14 rounded-full border border-zinc-700 flex items-center justify-center text-zinc-400 active:bg-zinc-800 active:text-white transition-colors disabled:opacity-30 disabled:active:bg-transparent disabled:active:text-zinc-600 disabled:border-zinc-800"
-                >
-                    <ArrowRight className="w-6 h-6" />
-                </button>
-            </div>
-        </div>
-    );
-};
-
-const MobileProjectCard = ({ project }: { project: typeof PROJECTS[0] }) => {
-    return (
-        <div className="w-full relative rounded-md overflow-hidden bg-zinc-900 border border-zinc-800 shadow-xl">
-            {/* Image Layer */}
-            <div
-                className="w-full h-64 bg-cover bg-center"
-                style={{ backgroundImage: `url(${project.img})` }}
+            {/* ── BLOQUE 2 ── */}
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.7 }}
+                className="relative z-10"
             >
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-black/10" />
-            </div>
+                <div className="mb-5 border-b border-zinc-800 pb-5">
+                    <div className="flex justify-between items-center">
+                        <h2 className="text-3xl font-black text-zinc-100 tracking-tighter">
+                            DEMOS <span className="text-transparent bg-clip-text bg-gradient-to-r from-zinc-400 to-zinc-700">POR RUBRO</span>
+                        </h2>
+                        <span className="text-xs font-mono text-cyan-500 border border-cyan-900 bg-cyan-950/50 px-2 py-0.5 rounded-full">
+                            DEMO
+                        </span>
+                    </div>
+                </div>
 
-            {/* Content Layer */}
-            <div className="absolute bottom-6 left-6 right-6">
-                <p className="text-zinc-400 text-xs font-mono tracking-widest mb-1 drop-shadow-md shadow-black">{project.category}</p>
-                <h3 className="text-2xl font-bold text-white uppercase leading-none drop-shadow-md shadow-black">{project.title}</h3>
-            </div>
+                <div className="flex flex-col gap-4">
+                    <AnimatePresence mode="popLayout">
+                        {visibleDemos.map((p, i) => (
+                            <motion.div
+                                key={p.id}
+                                initial={{ opacity: 0, y: 16 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -16 }}
+                                transition={{ delay: i * 0.08 }}
+                            >
+                                <MobileCard project={p} />
+                            </motion.div>
+                        ))}
+                    </AnimatePresence>
+                </div>
 
-            {/* Year Layer */}
-            <div className="absolute top-4 right-4">
-                <span className="text-zinc-300 font-mono text-xs border border-zinc-700 bg-black/60 backdrop-blur-md px-2 py-1 rounded-full">{project.year}</span>
-            </div>
+                {/* Controls */}
+                <div className="flex gap-4 mt-6 justify-center">
+                    <button
+                        onClick={() => setDemoPage((p) => Math.max(0, p - 1))}
+                        disabled={demoPage === 0}
+                        className="flex-1 max-w-[140px] h-12 rounded-full border border-zinc-700 flex items-center justify-center text-zinc-400 active:bg-zinc-800 transition-colors disabled:opacity-30 disabled:border-zinc-800"
+                    >
+                        <ArrowLeft className="w-5 h-5" />
+                    </button>
+                    <button
+                        onClick={() => setDemoPage((p) => Math.min(totalPages - 1, p + 1))}
+                        disabled={demoPage >= totalPages - 1}
+                        className="flex-1 max-w-[140px] h-12 rounded-full border border-zinc-700 flex items-center justify-center text-zinc-400 active:bg-zinc-800 transition-colors disabled:opacity-30 disabled:border-zinc-800"
+                    >
+                        <ArrowRight className="w-5 h-5" />
+                    </button>
+                </div>
+            </motion.div>
+
+            <Disclaimer />
         </div>
     );
 };
+
+// ─── Main Export ─────────────────────────────────────────────────────────────
+export const Portfolio = () => (
+    <section id="portfolio" className="relative w-full bg-zinc-950 overflow-hidden">
+        <div className="block md:hidden">
+            <PortfolioMobile />
+        </div>
+        <div className="hidden md:block">
+            <PortfolioDesktop />
+        </div>
+    </section>
+);

@@ -1,23 +1,34 @@
 "use client"
-import React, { useRef, useEffect, useState } from 'react'
-import { motion, AnimatePresence, useInView, useReducedMotion } from 'motion/react'
-import { Check } from 'lucide-react'
+
+import React, { useEffect, useRef, useState } from "react"
+import { AnimatePresence, motion, useInView, useReducedMotion } from "framer-motion"
+import { ArrowUpRight, Check, Map, Search, Sparkles } from "lucide-react"
 
 interface Query {
-    text: string;
-    rubro: string;
+    text: string
+    rubro: string
 }
 
 const queries: Query[] = [
-    { text: 'Corralón en Yerba Buena', rubro: 'Corralón' },
-    { text: 'Estética en Barrio Norte Tucumán', rubro: 'Estética' },
-    { text: 'Clínica odontológica en Salta', rubro: 'Clínica' },
-    { text: 'Distribuidora de alimentos Tucumán', rubro: 'Distribuidora' },
-    { text: 'Restaurante en San Miguel Tucumán', rubro: 'Restaurante' },
+    { text: "Corralón en Yerba Buena", rubro: "Corralón" },
+    { text: "Estética en Barrio Norte Tucumán", rubro: "Estética" },
+    { text: "Clínica odontológica en Salta", rubro: "Clínica" },
+    { text: "Distribuidora de alimentos Tucumán", rubro: "Distribuidora" },
+    { text: "Restaurante en San Miguel Tucumán", rubro: "Restaurante" },
 ]
 
+const checks = [
+    "Google te encuentra primero con estructura optimizada.",
+    "Tu negocio aparece en mapa, ficha y búsqueda local.",
+    "La velocidad acompaña el ranking y la conversión.",
+]
+
+const ease = [0.16, 1, 0.3, 1] as const
+const floatingIconClass =
+    "animate-[float_3s_ease-in-out_infinite] text-white/80 drop-shadow-[0_0_24px_rgba(94,234,212,0.15)]"
+
 function GoogleSimulator() {
-    const [currentQuery, setCurrentQuery] = useState('')
+    const [currentQuery, setCurrentQuery] = useState("")
     const [activeRubro, setActiveRubro] = useState(0)
     const [showResults, setShowResults] = useState(false)
     const [typing, setTyping] = useState(false)
@@ -25,184 +36,160 @@ function GoogleSimulator() {
 
     useEffect(() => {
         if (prefersReduced) {
-            setCurrentQuery(queries[activeRubro].text)
-            setShowResults(true)
             const timer = setTimeout(() => {
-                setActiveRubro(prev => (prev + 1) % queries.length)
+                setActiveRubro((prev) => (prev + 1) % queries.length)
             }, 4000)
             return () => clearTimeout(timer)
         }
 
         const query = queries[activeRubro]
         let charIdx = 0
-        setCurrentQuery('')
-        setShowResults(false)
-        setTyping(true)
+        let typeInterval: ReturnType<typeof setInterval> | null = null
+        const kickoff = setTimeout(() => {
+            setCurrentQuery("")
+            setShowResults(false)
+            setTyping(true)
 
-        const typeInterval = setInterval(() => {
-            if (charIdx < query.text.length) {
-                setCurrentQuery(query.text.slice(0, charIdx + 1))
-                charIdx++
-            } else {
-                clearInterval(typeInterval)
-                setTyping(false)
-                setTimeout(() => {
-                    setShowResults(true)
+            typeInterval = setInterval(() => {
+                if (charIdx < query.text.length) {
+                    setCurrentQuery(query.text.slice(0, charIdx + 1))
+                    charIdx += 1
+                } else if (typeInterval) {
+                    clearInterval(typeInterval)
+                    setTyping(false)
                     setTimeout(() => {
-                        setActiveRubro(prev => (prev + 1) % queries.length)
-                    }, 3500)
-                }, 400)
-            }
-        }, 60)
+                        setShowResults(true)
+                        setTimeout(() => {
+                            setActiveRubro((prev) => (prev + 1) % queries.length)
+                        }, 3300)
+                    }, 350)
+                }
+            }, 55)
+        }, 0)
 
-        return () => clearInterval(typeInterval)
+        return () => {
+            clearTimeout(kickoff)
+            if (typeInterval) clearInterval(typeInterval)
+        }
     }, [activeRubro, prefersReduced])
 
+    const displayQuery = prefersReduced ? queries[activeRubro].text : currentQuery
+    const displayResults = prefersReduced || showResults
+
     return (
-        <div style={{ maxWidth: '680px', margin: '0 auto', position: 'relative', width: '100%' }}>
-            {/* Barra de búsqueda Google */}
-            <div style={{
-                background: 'rgba(255,255,255,0.04)',
-                border: '1px solid rgba(255,255,255,0.1)',
-                borderRadius: '28px',
-                padding: '14px 20px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px',
-                marginBottom: '16px',
-                boxShadow: '0 0 0 1px rgba(0,229,255,0.15), 0 4px 24px rgba(0,0,0,0.4)',
-            }}>
-                <span style={{ fontSize: '18px', flexShrink: 0 }}>🔍</span>
-                <div style={{
-                    flex: 1,
-                    fontSize: '15px',
-                    color: 'rgba(255,255,255,0.85)',
-                    fontFamily: 'ui-sans-serif, system-ui',
-                    minHeight: '22px',
-                    display: 'flex',
-                    alignItems: 'center',
-                }}>
-                    {currentQuery}
-                    {typing && (
-                        <span style={{
-                            display: 'inline-block',
-                            width: '2px',
-                            height: '18px',
-                            background: 'rgba(0,229,255,0.8)',
-                            marginLeft: '2px',
-                            animation: 'cursorBlink 0.7s ease-in-out infinite',
-                            verticalAlign: 'middle',
-                        }} />
-                    )}
-                </div>
-                <div style={{
-                    background: 'rgba(0,229,255,0.1)',
-                    border: '1px solid rgba(0,229,255,0.25)',
-                    borderRadius: '20px',
-                    padding: '6px 14px',
-                    fontSize: '12px',
-                    color: 'rgba(0,229,255,0.8)',
-                    fontWeight: 600,
-                    flexShrink: 0,
-                }}>
-                    Buscar
+        <div className="mx-auto w-full max-w-[860px]">
+            <div className="rounded-[2rem] border border-white/[0.05] bg-white/[0.02] p-4 backdrop-blur-xl shadow-[0_24px_80px_rgba(0,0,0,0.4)] md:p-6">
+                <div className="rounded-[1.7rem] border border-white/[0.05] bg-[#050816]/80 p-4 md:p-5">
+                    <div className="mb-4 flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                            <div className="grid size-11 place-items-center rounded-[1rem] border border-white/10 bg-white/[0.03]">
+                                <Search className={`size-5 text-cyan-200 ${floatingIconClass}`} />
+                            </div>
+                            <div>
+                                <div className="text-[11px] uppercase tracking-[0.32em] text-white/35">Búsqueda activa</div>
+                                <div className="mt-1 text-sm text-white/75">Así se ve una intención real de compra</div>
+                            </div>
+                        </div>
+                        <div className="hidden rounded-full border border-white/[0.06] bg-white/[0.03] px-4 py-2 text-[10px] uppercase tracking-[0.28em] text-cyan-200/70 md:inline-flex">
+                            SEO local en movimiento
+                        </div>
+                    </div>
+
+                    <div className="rounded-[1.35rem] border border-white/[0.05] bg-white/[0.03] px-4 py-4 md:px-5">
+                        <div className="flex items-center gap-3 rounded-full border border-white/[0.05] bg-white/[0.02] px-4 py-3">
+                            <Search className="size-4 shrink-0 text-white/40" />
+                            <div className="min-h-[22px] flex-1 text-sm text-white/80 md:text-[15px]">
+                                {displayQuery}
+                                {typing && (
+                                    <span className="ml-1 inline-block h-[18px] w-[2px] align-middle [animation:cursorBlink_0.7s_ease-in-out_infinite] bg-cyan-300" />
+                                )}
+                            </div>
+                            <div className="rounded-full border border-cyan-300/20 bg-cyan-300/10 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.24em] text-cyan-200/80">
+                                Buscar
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="mt-5 grid gap-4 lg:grid-cols-[1.6fr_0.8fr]">
+                        <AnimatePresence mode="wait">
+                            {displayResults && (
+                                <motion.div
+                                    key={activeRubro}
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: -6 }}
+                                    transition={{ duration: 0.35, ease }}
+                                    className="space-y-3"
+                                >
+                                    <div className="relative overflow-hidden rounded-[1.6rem] border border-cyan-300/20 bg-[linear-gradient(145deg,rgba(34,211,238,0.1),rgba(255,255,255,0.03)_38%,rgba(167,139,250,0.08))] p-5 shadow-[0_0_40px_rgba(34,211,238,0.08)]">
+                                        <div className="absolute inset-x-0 top-0 h-px bg-[linear-gradient(90deg,transparent,rgba(103,232,249,0.9),rgba(196,181,253,0.8),transparent)]" />
+                                        <div className="mb-3 flex items-center gap-2">
+                                            <span className="rounded-full border border-cyan-300/20 bg-cyan-300/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.24em] text-cyan-200">
+                                                #1
+                                            </span>
+                                            <span className="text-[11px] uppercase tracking-[0.2em] text-white/35">
+                                                {queries[activeRubro].rubro.toLowerCase()}.com.ar
+                                            </span>
+                                        </div>
+                                        <div className="pr-20 text-lg font-bold leading-tight text-cyan-100">
+                                            {queries[activeRubro].rubro} - Tu Empresa | DevelOP
+                                        </div>
+                                        <p className="mt-3 max-w-xl text-sm leading-6 text-white/55">
+                                            El mejor {queries[activeRubro].rubro.toLowerCase()} en tu zona. Consultá precios, pedí presupuesto online y aparecé con autoridad desde el primer resultado.
+                                        </p>
+                                        <div className="mt-4 flex items-center gap-2 text-[11px] uppercase tracking-[0.2em] text-white/35">
+                                            <Map className={`size-4 text-cyan-200 ${floatingIconClass}`} />
+                                            Ficha local optimizada
+                                        </div>
+                                        <div className="absolute right-4 top-4 rounded-full border border-cyan-300/20 bg-black/20 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.24em] text-cyan-100 backdrop-blur-xl">
+                                            Tu empresa
+                                        </div>
+                                    </div>
+
+                                    {["Negocios similares en tu zona", "Más resultados relevantes"].map((text, index) => (
+                                        <div
+                                            key={text}
+                                            className="rounded-[1.35rem] border border-white/[0.05] bg-white/[0.02] p-4"
+                                            style={{ opacity: 0.46 - index * 0.12 }}
+                                        >
+                                            <div className="mb-2 h-3 rounded-full bg-white/[0.13]" style={{ width: `${74 - index * 14}%` }} />
+                                            <div className="h-2.5 rounded-full bg-white/[0.08]" style={{ width: `${88 - index * 12}%` }} />
+                                            <div className="mt-3 text-[11px] uppercase tracking-[0.18em] text-white/25">{text}</div>
+                                        </div>
+                                    ))}
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+
+                        <div className="grid gap-3">
+                            <div className="rounded-[1.6rem] border border-white/[0.05] bg-white/[0.02] p-5">
+                                <div className="mb-3 flex items-center gap-3">
+                                    <Sparkles className={`size-5 text-violet-200 ${floatingIconClass}`} />
+                                    <span className="text-[11px] uppercase tracking-[0.28em] text-white/35">Señales que importan</span>
+                                </div>
+                                <div className="space-y-3">
+                                    {["Título relevante", "Ficha local completa", "Velocidad mobile"].map((item) => (
+                                        <div key={item} className="flex items-center justify-between rounded-2xl border border-white/[0.05] bg-white/[0.02] px-4 py-3">
+                                            <span className="text-sm text-white/65">{item}</span>
+                                            <ArrowUpRight className="size-4 text-cyan-200/70" />
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="rounded-[1.6rem] border border-white/[0.05] bg-white/[0.02] p-5">
+                                <div className="text-[11px] uppercase tracking-[0.28em] text-white/35">Lectura rápida</div>
+                                <p className="mt-3 text-sm leading-7 text-white/55">
+                                    Esto es lo que ven tus clientes cuando te buscan. Si no estás arriba, ese clic termina en otra marca.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-
-            {/* Resultados de búsqueda */}
-            <AnimatePresence mode="wait">
-                {showResults && (
-                    <motion.div
-                        key={activeRubro}
-                        initial={{ opacity: 0, y: 8 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0 }}
-                        transition={{ duration: 0.3 }}
-                        style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}
-                    >
-                        {/* RESULTADO 1 — TU NEGOCIO */}
-                        <div style={{
-                            background: 'rgba(0,229,255,0.07)',
-                            border: '1px solid rgba(0,229,255,0.3)',
-                            borderRadius: '12px',
-                            padding: '14px 18px',
-                            position: 'relative',
-                            overflow: 'hidden',
-                            boxShadow: '0 0 20px rgba(0,229,255,0.1)',
-                        }}>
-                            <div style={{
-                                position: 'absolute',
-                                top: 0, left: 0, right: 0,
-                                height: '2px',
-                                background: 'linear-gradient(90deg, transparent, #00e5ff 40%, #7b2fff 60%, transparent)',
-                            }} />
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-                                <span style={{
-                                    fontSize: '9px', fontWeight: 700,
-                                    background: 'rgba(0,229,255,0.15)',
-                                    border: '1px solid rgba(0,229,255,0.3)',
-                                    color: '#00e5ff',
-                                    borderRadius: '4px',
-                                    padding: '1px 6px',
-                                    letterSpacing: '0.1em',
-                                }}>#1</span>
-                                <span style={{ fontSize: '11px', color: 'rgba(0,229,255,0.5)', fontFamily: 'monospace' }}>
-                                    {queries[activeRubro].rubro.toLowerCase()}.com.ar
-                                </span>
-                            </div>
-                            <p style={{ fontSize: '16px', fontWeight: 700, color: '#00e5ff', margin: '0 0 4px' }}>
-                                {queries[activeRubro].rubro} — Tu Empresa · DevelOP
-                            </p>
-                            <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.45)', margin: 0, lineHeight: 1.5 }}>
-                                El mejor {queries[activeRubro].rubro.toLowerCase()} en tu zona. Consultá precios, pedí presupuesto online. ⭐⭐⭐⭐⭐
-                            </p>
-                            <div style={{
-                                position: 'absolute', top: '12px', right: '14px',
-                                background: 'rgba(0,229,255,0.12)',
-                                border: '1px solid rgba(0,229,255,0.3)',
-                                borderRadius: '100px',
-                                padding: '3px 10px',
-                                fontSize: '9px',
-                                fontWeight: 700,
-                                color: '#00e5ff',
-                                letterSpacing: '0.15em',
-                            }}>TU EMPRESA</div>
-                        </div>
-
-                        {/* RESULTADO 2 — Competencia */}
-                        {['Resultados de negocios similares...', 'Ver más resultados de tu zona'].map((text, i) => (
-                            <div key={i} style={{
-                                background: 'rgba(255,255,255,0.02)',
-                                border: '1px solid rgba(255,255,255,0.06)',
-                                borderRadius: '10px',
-                                padding: '12px 16px',
-                                opacity: 0.5 - i * 0.15,
-                            }}>
-                                <div style={{ height: '12px', width: `${70 - i * 15}%`, background: 'rgba(255,255,255,0.15)', borderRadius: '4px', marginBottom: '6px' }} />
-                                <div style={{ height: '10px', width: `${85 - i * 10}%`, background: 'rgba(255,255,255,0.08)', borderRadius: '4px' }} />
-                            </div>
-                        ))}
-                    </motion.div>
-                )}
-            </AnimatePresence>
-
-            <motion.p
-                initial={{ opacity: 0 }}
-                animate={showResults ? { opacity: 1 } : { opacity: 0 }}
-                transition={{ delay: 0.5 }}
-                style={{ textAlign: 'center', marginTop: '20px', fontSize: '13px', color: 'rgba(255,255,255,0.35)', lineHeight: 1.6 }}
-            >
-                Esto es lo que ven tus clientes cuando te buscan. ¿Aparecés o le regalás ese cliente a tu competencia?
-            </motion.p>
         </div>
     )
 }
-
-const checks = [
-    "Google te encuentra primero (Datos optimizados).",
-    "Tu negocio en el mapa real (Posicionamiento NOA).",
-    "Velocidad que Google premia (Prioridad en carga)."
-]
 
 export function WebDevelopmentSeo() {
     const sectionRef = useRef<HTMLElement>(null)
@@ -210,65 +197,76 @@ export function WebDevelopmentSeo() {
     const prefersReduced = useReducedMotion()
     const shouldReveal = prefersReduced || isInView
 
-    const ease = [0.16, 1, 0.3, 1] as const
-
     return (
-        <section ref={sectionRef} className="bg-[#030014] relative overflow-hidden py-24 px-4 border-y border-white/5">
-            <div aria-hidden="true" className="absolute pointer-events-none" style={{ top: 0, left: '50%', transform: 'translateX(-50%)', width: '800px', height: '100%', background: 'radial-gradient(ellipse at center, rgba(0,229,255,0.05) 0%, transparent 65%)', filter: 'blur(80px)', zIndex: 0 }} />
+        <section ref={sectionRef} className="relative overflow-hidden border-y border-white/5 bg-[#030014] px-4 py-24">
+            <style>{`
+                @keyframes float {
+                    0%, 100% { transform: translateY(0px); }
+                    50% { transform: translateY(-7px); }
+                }
+                @keyframes cursorBlink {
+                    0%, 49%, 100% { opacity: 1; }
+                    50%, 99% { opacity: 0; }
+                }
+            `}</style>
 
-            <div className="max-w-4xl mx-auto relative z-10">
-                <div className="text-center mb-16">
+            <div
+                aria-hidden="true"
+                className="pointer-events-none absolute left-1/2 top-0 h-full w-[60rem] -translate-x-1/2 blur-[100px]"
+                style={{ background: "radial-gradient(ellipse at center, rgba(34,211,238,0.08) 0%, transparent 65%)" }}
+            />
+            <div
+                aria-hidden="true"
+                className="pointer-events-none absolute right-[-8rem] top-20 h-[28rem] w-[28rem] rounded-full blur-[140px]"
+                style={{ background: "radial-gradient(circle, rgba(139,92,246,0.12) 0%, transparent 72%)" }}
+            />
+
+            <div className="relative z-10 mx-auto max-w-6xl">
+                <div className="mb-16 text-center">
                     <motion.div
                         initial={{ opacity: 0, y: -10 }}
                         animate={shouldReveal ? { opacity: 1, y: 0 } : { opacity: 0, y: -10 }}
-                        transition={{ duration: 0.4, delay: 0, ease: 'easeOut' }}
-                        className="inline-flex items-center gap-2 mb-6"
-                        style={{ background: 'rgba(0,229,255,0.08)', border: '1px solid rgba(0,229,255,0.2)', borderRadius: '100px', padding: '5px 14px' }}
+                        transition={{ duration: 0.45, ease: "easeOut" }}
+                        className="mb-6 inline-flex items-center gap-3 rounded-full border border-white/[0.05] bg-white/[0.02] px-4 py-2 backdrop-blur-xl"
                     >
-                        <span className="inline-block rounded-full" style={{ width: '6px', height: '6px', background: '#00e5ff', animation: 'pulse 2s ease-in-out infinite', flexShrink: 0 }} />
-                        <span className="text-[10px] font-mono tracking-widest text-[#00e5ff] uppercase">
-                            [ POSICIONAMIENTO LOCAL ]
-                        </span>
+                        <span className="inline-block h-2 w-2 rounded-full bg-cyan-300 shadow-[0_0_18px_rgba(103,232,249,0.85)]" />
+                        <span className="text-[11px] uppercase tracking-[0.34em] text-cyan-200/85">[ Posicionamiento local ]</span>
                     </motion.div>
 
-                    <h2 className="text-5xl md:text-7xl font-black text-white tracking-tighter leading-none mb-8 overflow-hidden">
-                        <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={shouldReveal ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-                            transition={{ duration: 0.6, delay: 0.1, ease }}
-                        >
-                            Si no estás en Google,
-                        </motion.div>
-                        <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={shouldReveal ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-                            transition={{ duration: 0.6, delay: 0.2, ease }}
-                        >
-                            <span className="text-[#00e5ff]">no existís.</span>
-                        </motion.div>
-                    </h2>
+                    <motion.h2
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={shouldReveal ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+                        transition={{ duration: 0.7, delay: 0.08, ease }}
+                        className="text-[clamp(2.5rem,7vw,5.5rem)] font-black leading-[0.92] tracking-[-0.06em] text-white"
+                    >
+                        Si no estás en Google,
+                        <br />
+                        <span className="bg-gradient-to-r from-cyan-200 via-white to-violet-200 bg-clip-text text-transparent">
+                            no existís.
+                        </span>
+                    </motion.h2>
 
                     <motion.p
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={shouldReveal ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
-                        transition={{ duration: 0.5, delay: 0.3 }}
-                        className="text-zinc-400 text-lg md:text-xl font-light leading-relaxed max-w-2xl mx-auto mb-10"
+                        initial={{ opacity: 0, y: 12 }}
+                        animate={shouldReveal ? { opacity: 1, y: 0 } : { opacity: 0, y: 12 }}
+                        transition={{ duration: 0.55, delay: 0.18, ease }}
+                        className="mx-auto mt-7 max-w-3xl text-base leading-8 text-white/52 md:text-xl"
                     >
-                        Cada día, cientos de personas en tu ciudad buscan tu rubro en Google. ¿Las estás captando o se las estás regalando a tu competencia?
+                        Cada día, cientos de personas buscan tu rubro en su ciudad. La diferencia entre vender o desaparecer empieza en esa pantalla.
                     </motion.p>
 
-                    <div className="flex flex-wrap justify-center gap-6 mb-12">
-                        {checks.map((check, i) => (
+                    <div className="mt-10 flex flex-wrap justify-center gap-4">
+                        {checks.map((check, index) => (
                             <motion.div
-                                key={i}
-                                initial={{ opacity: 0, x: -10 }}
-                                animate={shouldReveal ? { opacity: 1, x: 0 } : {}}
-                                transition={{ delay: 0.4 + i * 0.1 }}
-                                className="flex items-center gap-2 text-zinc-300 text-sm font-medium"
+                                key={check}
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={shouldReveal ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
+                                transition={{ duration: 0.45, delay: 0.26 + index * 0.08, ease }}
+                                className="inline-flex items-center gap-2 rounded-full border border-white/[0.05] bg-white/[0.02] px-4 py-2.5 text-sm text-white/62 backdrop-blur-xl"
                             >
-                                <div className="p-1 rounded-full bg-cyan-500/10 border border-cyan-500/20">
-                                    <Check size={12} className="text-cyan-400" />
-                                </div>
+                                <span className="grid size-6 place-items-center rounded-full border border-cyan-300/20 bg-cyan-300/10">
+                                    <Check className="size-3.5 text-cyan-200" />
+                                </span>
                                 {check}
                             </motion.div>
                         ))}
@@ -276,27 +274,27 @@ export function WebDevelopmentSeo() {
                 </div>
 
                 <motion.div
-                    initial={{ opacity: 0, y: 30 }}
-                    animate={shouldReveal ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
-                    transition={{ duration: 0.8, delay: 0.4, ease }}
+                    initial={{ opacity: 0, y: 26 }}
+                    animate={shouldReveal ? { opacity: 1, y: 0 } : { opacity: 0, y: 26 }}
+                    transition={{ duration: 0.8, delay: 0.3, ease }}
                 >
                     <GoogleSimulator />
                 </motion.div>
 
-                {/* CTA - QUIERO APARECER PRIMERO */}
                 <motion.div
-                    initial={{ opacity: 0, scale: 0.95 }}
+                    initial={{ opacity: 0, scale: 0.96 }}
                     whileInView={{ opacity: 1, scale: 1 }}
                     viewport={{ once: true }}
-                    className="mt-16 w-full flex justify-center z-20"
+                    className="mt-16 flex w-full justify-center"
                 >
                     <a
                         href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER}?text=Hola%20DevelOP%2C%20quiero%20aparecer%20primero%20en%20Google%20en%20mi%20ciudad`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2.5 px-10 py-5 bg-gradient-to-br from-[#25d366] to-[#128c7e] text-white rounded-full font-extrabold text-[14px] uppercase tracking-wider shadow-[0_0_28px_rgba(37,211,102,0.2)] hover:scale(1.04) transition-transform active:scale(0.97) no-underline"
+                        className="inline-flex items-center gap-3 rounded-full border border-white/10 bg-white/[0.04] px-8 py-4 text-[13px] font-extrabold uppercase tracking-[0.24em] text-white shadow-[0_18px_40px_rgba(37,211,102,0.16)] backdrop-blur-xl transition-transform duration-300 hover:scale-[1.03]"
                     >
-                        🚀 QUIERO APARECER PRIMERO →
+                        <Search className={`size-4 ${floatingIconClass}`} />
+                        Quiero aparecer primero
                     </a>
                 </motion.div>
             </div>

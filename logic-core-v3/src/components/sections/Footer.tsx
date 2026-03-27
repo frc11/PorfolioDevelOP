@@ -4,6 +4,14 @@ import Link from 'next/link';
 import { motion, useSpring, useMotionValue, useTransform, useScroll } from 'framer-motion';
 import { useTransitionContext } from '@/context/TransitionContext';
 
+// --- SOCIAL LINKS — actualizar según plataformas reales ---
+const socialLinks = {
+    linkedin:  "https://linkedin.com/company/develop-agency", // actualizar
+    instagram: "https://instagram.com/develop.agency",        // actualizar
+    twitter:   "https://twitter.com/develop_agency",          // actualizar
+    email:     "mailto:hola@develop.com.ar"                   // actualizar
+};
+
 // --- 1. COMPONENTE: STREAM DE PARTÍCULAS (PRESERVED) ---
 const ParticleStream = ({ side }: { side: 'left' | 'right' }) => {
     const particleCount = 50;
@@ -124,7 +132,7 @@ const MagneticButton = ({ onHoverStart, onHoverEnd, href, isMobile }: MagneticBu
     const textY = useTransform(mouseY, (val) => val * 0.3);
 
     const handleMouseMove = (e: React.MouseEvent) => {
-        if (isMobile) return; // Disable physics on mobile
+        if (isMobile) return;
         const { clientX, clientY } = e;
         const { height, width, left, top } = ref.current!.getBoundingClientRect();
         const middleX = clientX - (left + width / 2);
@@ -152,20 +160,17 @@ const MagneticButton = ({ onHoverStart, onHoverEnd, href, isMobile }: MagneticBu
         e.preventDefault();
 
         if (isMobile) {
-            // Mobile Animation Sequence
             setIsSimulatingHover(true);
             if (onHoverStart) onHoverStart();
 
             setTimeout(() => {
                 triggerTransition(href);
-                // Clean up state just in case
                 setTimeout(() => {
                     setIsSimulatingHover(false);
                     if (onHoverEnd) onHoverEnd();
                 }, 1000);
-            }, 1500); // Wait 1.5s for the user to see the rocket before transitioning
+            }, 1500);
         } else {
-            // Desktop Instant Transition (Hover is already active via mouse)
             triggerTransition(href);
         }
     };
@@ -185,12 +190,11 @@ const MagneticButton = ({ onHoverStart, onHoverEnd, href, isMobile }: MagneticBu
             >
                 {/* JITTER LAYER */}
                 <motion.div
-                    // Using arbitrary classes via tailwind arbitrarily grouping or simulating the hover manually
                     className={`relative bg-white rounded-full flex items-center justify-center overflow-hidden transition-shadow duration-500
                         ${isMobile ? "w-56 h-56" : "w-40 h-40 md:w-56 md:h-56"}
                         ${isSimulatingHover
-                            ? "shadow-[0_0_100px_0px_rgba(255,255,255,0.6)]"
-                            : "shadow-[0_0_50px_-10px_rgba(255,255,255,0.3)] group-hover:shadow-[0_0_100px_0px_rgba(255,255,255,0.6)]"
+                            ? "shadow-[0_0_100px_0px_rgba(34,211,238,0.5),0_0_60px_0px_rgba(255,255,255,0.4)]"
+                            : "shadow-[0_0_50px_-10px_rgba(255,255,255,0.3)] group-hover:shadow-[0_0_100px_0px_rgba(34,211,238,0.5),0_0_60px_0px_rgba(255,255,255,0.4)]"
                         }
                     `}
                     whileHover={!isMobile ? {
@@ -206,10 +210,10 @@ const MagneticButton = ({ onHoverStart, onHoverEnd, href, isMobile }: MagneticBu
                         y: { repeat: Infinity, duration: 0.2, ease: "linear", delay: 0.1 }
                     }}
                 >
-                    {/* 1. Base Gradient - Kept bright */}
+                    {/* 1. Base Gradient */}
                     <div className="absolute inset-0 bg-gradient-to-tr from-white via-zinc-200 to-zinc-100 opacity-100" />
 
-                    {/* 2. REMOVED BLURRY FLARE. Added subtle gradient shift on hover/simulated hover instead. */}
+                    {/* 2. Subtle gradient shift on hover */}
                     <div className={`absolute inset-0 bg-gradient-to-tr from-cyan-50 via-white to-zinc-100 transition-opacity duration-700 ${isSimulatingHover ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`} />
 
                     {/* 3. Inner Border Ring */}
@@ -218,17 +222,15 @@ const MagneticButton = ({ onHoverStart, onHoverEnd, href, isMobile }: MagneticBu
                     {/* 4. CONTENT (Text -> Rocket) */}
                     <motion.div style={{ x: textX, y: textY }} className="relative z-10 flex flex-col items-center gap-12">
                         {/* Default State: TEXT */}
-                        {/* pt-8 for mobile, md:pt-3 for desktop to correct vertical alignment within the circle */}
                         <span className={`text-xl md:text-2xl pt-6 md:pt-3 font-black text-black tracking-tighter transition-opacity duration-300 absolute ${isSimulatingHover ? 'opacity-0' : 'group-hover:opacity-0'}`}>
-                            START
+                            EMPEZAR
                         </span>
 
-                        {/* Hover State: ROCKET ICON - CHANGED TO GROUP HOVER LOGIC AND SIMULATED HOVER */}
+                        {/* Hover State: ROCKET ICON */}
                         <div className={`transform origin-center transition-all duration-500 delay-100 ${isSimulatingHover
                             ? 'opacity-100 scale-110 rotate-45'
                             : 'opacity-0 scale-50 rotate-45 group-hover:opacity-100 group-hover:scale-110'
                             }`}>
-                            {/* Rocket Icon - Black Stroke */}
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
                                 width={isMobile ? "80" : "64"}
@@ -248,12 +250,11 @@ const MagneticButton = ({ onHoverStart, onHoverEnd, href, isMobile }: MagneticBu
                                 <path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5" />
                             </svg>
                         </div>
-
                     </motion.div>
                 </motion.div>
 
-                {/* Shockwaves */}
-                <div className={`absolute inset-0 -z-10 rounded-full border border-white/20 scale-100 animate-[ping_3s_cubic-bezier(0,0,0.2,1)_infinite] transition-opacity duration-1000 ${isSimulatingHover ? 'opacity-0' : 'opacity-30 group-hover:opacity-0'}`} />
+                {/* Shockwaves — borde más visible */}
+                <div className={`absolute inset-0 -z-10 rounded-full border border-white/30 scale-100 animate-[ping_3s_cubic-bezier(0,0,0.2,1)_infinite] transition-opacity duration-1000 ${isSimulatingHover ? 'opacity-0' : 'opacity-30 group-hover:opacity-0'}`} />
             </motion.div>
         </div>
     );
@@ -324,7 +325,7 @@ const FooterDesktop = () => {
             <div className="relative w-full max-w-[90vw] flex flex-col items-center justify-center pointer-events-none">
                 <motion.div style={{ y: yText, opacity: opacityText }} className="relative z-10 w-full flex justify-center">
                     <h2 className="text-[13vw] leading-[0.85] font-black text-transparent bg-clip-text bg-gradient-to-b from-white via-zinc-200 to-zinc-400 tracking-tighter text-center select-none pl-2 pr-2 drop-shadow-[0_0_15px_rgba(255,255,255,0.25)] flex gap-4">
-                        READY TO
+                        ¿LISTO PARA
                     </h2>
                 </motion.div>
 
@@ -338,25 +339,30 @@ const FooterDesktop = () => {
                 </div>
 
                 <motion.div style={{ y: useTransform(yText, (v) => v * -0.5), opacity: opacityText }} className="relative z-10 w-full flex justify-center">
-                    <h2 className="text-[13vw] leading-[0.85] font-black text-transparent bg-clip-text bg-gradient-to-b from-white via-zinc-200 to-zinc-400 tracking-tighter text-center select-none pl-5 pr-5 drop-shadow-[0_0_15px_rgba(255,255,255,0.25)] flex">
-                        SCALE?
+                    <h2 className="text-[13vw] leading-[0.85] font-black text-transparent bg-clip-text bg-gradient-to-b from-cyan-300 via-cyan-400 to-cyan-600 tracking-tighter text-center select-none pl-5 pr-5 drop-shadow-[0_0_20px_rgba(34,211,238,0.3)] flex">
+                        CRECER?
                     </h2>
                 </motion.div>
             </div>
 
+            {/* Bottom Bar Desktop */}
             <div className="absolute bottom-12 w-full px-8 md:px-16 flex flex-col md:flex-row justify-between items-end gap-8 z-30">
                 <div className="flex flex-col gap-2 text-zinc-500 text-xs font-mono tracking-widest uppercase">
                     <div className="flex items-center gap-2">
                         <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
                         <span>Systems Operational</span>
                     </div>
-                    <span>© 2026 DEVEL_OP™ — V.3.0</span>
+                    {/* Info de contacto rápido */}
+                    <p className="normal-case tracking-normal font-sans" style={{ fontSize: '13px' }}>
+                        📍 Tucumán, Argentina &nbsp;·&nbsp; 📧 hola@develop.com.ar &nbsp;·&nbsp; ⚡ Respondemos en &lt; 24hs
+                    </p>
+                    <span>© 2026 develOP™ — Tucumán, Argentina</span>
                 </div>
-                <div className="flex gap-8 md:gap-12 pointer-events-auto">
-                    <FlipLink href="#">LinkedIn</FlipLink>
-                    <FlipLink href="#">Instagram</FlipLink>
-                    <FlipLink href="#">Twitter_X</FlipLink>
-                    <FlipLink href="#">Email</FlipLink>
+                <div className="flex gap-10 md:gap-14 pointer-events-auto">
+                    <FlipLink href={socialLinks.linkedin}>LinkedIn</FlipLink>
+                    <FlipLink href={socialLinks.instagram}>Instagram</FlipLink>
+                    <FlipLink href={socialLinks.twitter}>Twitter_X</FlipLink>
+                    <FlipLink href={socialLinks.email}>Email</FlipLink>
                 </div>
             </div>
             <div className="absolute bottom-0 w-full h-32 bg-gradient-to-t from-black/50 to-transparent pointer-events-none" />
@@ -393,17 +399,17 @@ const FooterMobile = () => {
             {/* Mobile Vertical Layout stack */}
             <div className="relative w-full flex flex-col items-center justify-center pointer-events-none gap-6 pt-10">
 
-                {/* Text: READY */}
+                {/* Text: ¿LISTO */}
                 <motion.div style={{ y: yText, opacity: opacityText }} className="relative z-10">
                     <h2 className="text-[25vw] leading-[0.8] font-black text-transparent pl-2 pr-2 bg-clip-text bg-gradient-to-b from-white via-zinc-200 to-zinc-400 tracking-tighter text-center select-none drop-shadow-[0_0_15px_rgba(255,255,255,0.25)]">
-                        READY
+                        ¿LISTO
                     </h2>
                 </motion.div>
 
-                {/* Text: TO */}
+                {/* Text: PARA */}
                 <motion.div style={{ y: yText, opacity: opacityText }} className="relative z-10">
                     <h2 className="text-[25vw] leading-[0.8] font-black pl-2 pr-2 pb-1 text-transparent bg-clip-text bg-gradient-to-b from-white via-zinc-200 to-zinc-400 tracking-tighter text-center select-none drop-shadow-[0_0_15px_rgba(255,255,255,0.25)]">
-                        TO
+                        PARA
                     </h2>
                 </motion.div>
 
@@ -417,28 +423,33 @@ const FooterMobile = () => {
                     />
                 </div>
 
-                {/* Text: SCALE? */}
+                {/* Text: CRECER? — en cyan */}
                 <motion.div style={{ y: useTransform(yText, (v) => v * -0.5), opacity: opacityText }} className="relative z-10">
-                    <h2 className="text-[25vw] pl-2 pr-2 pb-1 leading-[0.8] font-black text-transparent bg-clip-text bg-gradient-to-b from-white via-zinc-200 to-zinc-400 tracking-tighter text-center select-none drop-shadow-[0_0_15px_rgba(255,255,255,0.25)]">
-                        SCALE?
+                    <h2 className="text-[25vw] pl-2 pr-2 pb-1 leading-[0.8] font-black text-transparent bg-clip-text bg-gradient-to-b from-cyan-300 via-cyan-400 to-cyan-600 tracking-tighter text-center select-none drop-shadow-[0_0_20px_rgba(34,211,238,0.3)]">
+                        CRECER?
                     </h2>
                 </motion.div>
             </div>
 
             {/* Bottom Bar Mobile */}
-            <div className="absolute bottom-8 w-full flex flex-col items-center justify-center gap-8 z-30 pointer-events-auto">
+            <div className="absolute bottom-8 w-full flex flex-col items-center justify-center gap-6 z-30 pointer-events-auto">
                 <div className="flex flex-col items-center gap-2 text-zinc-500 text-[10px] font-mono tracking-widest uppercase">
                     <div className="flex items-center gap-2">
                         <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
                         <span>Systems Operational</span>
                     </div>
                 </div>
-                <div className="flex gap-6 pointer-events-auto opacity-70">
-                    <FlipLink href="#">IN</FlipLink>
-                    <FlipLink href="#">IG</FlipLink>
-                    <FlipLink href="#">X</FlipLink>
-                    <FlipLink href="#">MAIL</FlipLink>
+                {/* Info de contacto rápido */}
+                <p className="text-zinc-500 text-center font-sans normal-case tracking-normal" style={{ fontSize: '13px' }}>
+                    📍 Tucumán, Argentina &nbsp;·&nbsp; 📧 hola@develop.com.ar<br />⚡ Respondemos en &lt; 24hs
+                </p>
+                <div className="flex gap-8 pointer-events-auto opacity-70">
+                    <FlipLink href={socialLinks.linkedin}>IN</FlipLink>
+                    <FlipLink href={socialLinks.instagram}>IG</FlipLink>
+                    <FlipLink href={socialLinks.twitter}>X</FlipLink>
+                    <FlipLink href={socialLinks.email}>MAIL</FlipLink>
                 </div>
+                <p className="text-zinc-500 font-mono text-[10px] tracking-widest uppercase">© 2026 develOP™ — Tucumán, Argentina</p>
             </div>
             <div className="absolute bottom-0 w-full h-40 bg-gradient-to-t from-black/80 to-transparent pointer-events-none" />
         </div>

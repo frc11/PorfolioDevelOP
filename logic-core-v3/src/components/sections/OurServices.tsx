@@ -1,467 +1,556 @@
 'use client';
-import { useState, useRef, useEffect } from "react";
+
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Cpu, Globe, ArrowRight, Sparkles, Network } from "lucide-react";
-import { useTransitionContext } from "@/context/TransitionContext";
+import Link from "next/link";
 
-// --- Services Data Source ---
-export type ServiceTheme = 'cyan' | 'purple';
+// ─── Types ───────────────────────────────────────────────────────────────────
 
-export const SERVICES_DATA = [
-    {
-        title: "Web Development",
-        tagline: "High-Performance Frontend Architecture",
-        icon: Globe,
-        theme: "cyan" as ServiceTheme,
-        duration: "Short-term Sprint",
-        features: [
-            "React / Next.js Ecosystems",
-            "WebGL & 3D Interactions",
-            "Headless CMS Integration",
-            "Atomic Design Systems"
-        ],
-        path: '/web-development'
-    },
-    {
-        title: "Software Development",
-        tagline: "Scalable Backend & Logic Core",
-        icon: Cpu,
-        theme: "purple" as ServiceTheme,
-        duration: "Long-term Partnership",
-        features: [
-            "Microservices Architecture",
-            "Cloud Native Solutions",
-            "API Design & Integration",
-            "High-Load System Optimization"
-        ],
-        path: '/software-development'
-    },
-    {
-        title: "Agentes IA & LLMs",
-        tagline: "Modelos de Lenguaje y Agentes Autónomos",
-        icon: Sparkles,
-        theme: "cyan" as ServiceTheme,
-        duration: "Innovation Edge",
-        features: [
-            "RAG & Fine-tuning",
-            "Atención al Cliente Autónoma",
-            "Análisis Predictivo",
-            "Integración LLM"
-        ],
-        path: '/ai-implementations'
-    },
-    {
-        title: "Automatización de Flujos (n8n)",
-        tagline: "Eficiencia y Reducción de Costos Operativos",
-        icon: Network,
-        theme: "purple" as ServiceTheme,
-        duration: "Operational Efficiency",
-        features: [
-            "Workflows en n8n",
-            "Conexión de APIs",
-            "Sincronización de Datos",
-            "Eliminación de Tareas Manuales"
-        ],
-        path: '/process-automation'
-    }
+interface CaseCard {
+  icon: string;
+  title: string;
+  description: string;
+}
+
+interface ServiceTab {
+  id: string;
+  label: string;
+  icon: string;
+  href: string;
+  ctaText: string;
+  problem: string;
+  features: string[];
+  price: string;
+  time: string;
+  casesTitle: string;
+  cases: CaseCard[];
+}
+
+// ─── Data ─────────────────────────────────────────────────────────────────────
+
+const TABS: ServiceTab[] = [
+  {
+    id: "web",
+    label: "Sitio Web",
+    icon: "🌐",
+    href: "/web-development",
+    ctaText: "Quiero mi sitio web →",
+    problem:
+      "Si alguien busca tu negocio en Google y no te encuentra, ese cliente fue a la competencia. Un sitio web profesional te pone en el mapa las 24 horas.",
+    features: [
+      "Diseño profesional adaptado a tu rubro",
+      "Optimizado para aparecer en Google (SEO)",
+      "Funciona perfecto en celular",
+      "Formularios que capturan consultas",
+      "Carga rápida (Core Web Vitals)",
+      "Panel para que vos mismo actualices contenido",
+    ],
+    price: "desde $800 USD",
+    time: "Primeros resultados en 15 días",
+    casesTitle: "¿Para qué tipo de negocio?",
+    cases: [
+      {
+        icon: "🚗",
+        title: "Concesionaria",
+        description:
+          "Catálogo de vehículos online con formulario de consulta. Tus clientes ven los autos disponibles antes de venir al local.",
+      },
+      {
+        icon: "🏥",
+        title: "Clínica / Médico",
+        description:
+          "Turnos online 24/7. Tus pacientes sacan turno solos sin llamar a la secretaria.",
+      },
+      {
+        icon: "🏋️",
+        title: "Gimnasio",
+        description:
+          "Landing con membresías, horarios y clases. Captás socios nuevos aunque estés cerrado.",
+      },
+      {
+        icon: "🍕",
+        title: "Restaurante",
+        description:
+          "Menú digital, delivery y reservas. Más pedidos sin atender el teléfono.",
+      },
+    ],
+  },
+  {
+    id: "ai",
+    label: "Inteligencia Artificial",
+    icon: "🤖",
+    href: "/ai-implementations",
+    ctaText: "Quiero un agente de IA →",
+    problem:
+      "Cada consulta que llega a las 11pm y no se responde es un cliente que se va a la competencia. Un agente de IA responde, califica y agenda por vos, a cualquier hora.",
+    features: [
+      "Bot para WhatsApp y/o tu sitio web",
+      "Responde preguntas frecuentes automáticamente",
+      "Califica si el cliente está listo para comprar",
+      "Agenda reuniones o turnos solo",
+      "Aprende de tu negocio con el tiempo",
+      "Reportes de conversaciones cada semana",
+    ],
+    price: "desde $300 USD",
+    time: "Funcionando en 7 días",
+    casesTitle: "¿Para qué tipo de negocio?",
+    cases: [
+      {
+        icon: "🚗",
+        title: "Concesionaria",
+        description:
+          "El bot responde '¿tienen la Hilux disponible?' a las 2am y agenda el test drive para el día siguiente.",
+      },
+      {
+        icon: "🏥",
+        title: "Clínica",
+        description:
+          "El agente consulta síntomas, recomienda el especialista y agenda el turno sin que la recepcionista intervenga.",
+      },
+      {
+        icon: "🏋️",
+        title: "Gimnasio",
+        description:
+          "Responde preguntas sobre precios, horarios y planes. Convierte consultas en socios nuevos automáticamente.",
+      },
+      {
+        icon: "🏪",
+        title: "Comercio",
+        description:
+          "Atiende consultas de stock, precios y envíos. Tu local virtual abierto las 24 horas.",
+      },
+    ],
+  },
+  {
+    id: "automation",
+    label: "Automatizaciones",
+    icon: "⚡",
+    href: "/process-automation",
+    ctaText: "Quiero automatizar mi negocio →",
+    problem:
+      "Si tu equipo pierde horas copiando datos de un lado a otro, mandando mails repetitivos o haciendo seguimiento manual, eso tiene un costo. Las automatizaciones eliminan ese costo.",
+    features: [
+      "Conexión entre tus apps (WhatsApp, Gmail, Drive, etc.)",
+      "Notificaciones automáticas a tu equipo",
+      "Seguimiento de clientes sin intervención manual",
+      "Reportes automáticos cada semana o mes",
+      "Flujos de aprobación digitales",
+      "Backup automático de información importante",
+    ],
+    price: "desde $200 USD",
+    time: "Primer flujo activo en 5 días",
+    casesTitle: "¿Para qué tipo de negocio?",
+    cases: [
+      {
+        icon: "🚗",
+        title: "Concesionaria",
+        description:
+          "Cuando alguien llena el formulario web, automáticamente llega al vendedor por WhatsApp con todos los datos del cliente.",
+      },
+      {
+        icon: "🏥",
+        title: "Clínica",
+        description:
+          "Recordatorio automático de turno 24hs antes. Reducción de ausencias del 60%.",
+      },
+      {
+        icon: "📦",
+        title: "Distribuidora",
+        description:
+          "Cuando el stock baja de cierto nivel, el sistema genera la orden de compra automáticamente.",
+      },
+      {
+        icon: "🏪",
+        title: "Comercio",
+        description:
+          "Cada venta genera la factura, actualiza el stock y notifica al cliente. Sin tocar nada.",
+      },
+    ],
+  },
+  {
+    id: "software",
+    label: "Software a Medida",
+    icon: "💻",
+    href: "/software-development",
+    ctaText: "Quiero un sistema a medida →",
+    problem:
+      "A veces el negocio creció y las planillas de Excel ya no alcanzan. Necesitás un sistema hecho específicamente para cómo trabaja tu empresa.",
+    features: [
+      "Sistema de gestión para tu operación",
+      "CRM para seguimiento de clientes y ventas",
+      "Panel de reportes en tiempo real",
+      "Roles y permisos por usuario",
+      "Integrado con tus herramientas actuales",
+      "Tuyo para siempre, sin licencias mensuales",
+    ],
+    price: "desde $1.500 USD",
+    time: "Entrega en etapas desde la semana 3",
+    casesTitle: "¿Para qué tipo de negocio?",
+    cases: [
+      {
+        icon: "🚗",
+        title: "Concesionaria",
+        description:
+          "Sistema propio de gestión de inventario, ventas y seguimiento de clientes. Reemplaza 4 planillas de Excel.",
+      },
+      {
+        icon: "🏥",
+        title: "Clínica",
+        description:
+          "Historia clínica digital, turnos, facturación y reportes. Todo en un solo sistema.",
+      },
+      {
+        icon: "🏗️",
+        title: "Constructora",
+        description:
+          "Seguimiento de obras, materiales, subcontratistas y presupuestos en tiempo real.",
+      },
+      {
+        icon: "🏪",
+        title: "Comercio mayorista",
+        description:
+          "Gestión de pedidos, stock por depósito, lista de precios y vendedores con su propio acceso.",
+      },
+    ],
+  },
 ];
 
-// --- Particle Field Component (Overclocked) ---
-interface ParticleFieldProps {
-    color: ServiceTheme;
+// ─── Animation variants ───────────────────────────────────────────────────────
+
+const panelVariants = {
+  enter: (dir: number) => ({
+    x: dir > 0 ? 60 : -60,
+    opacity: 0,
+  }),
+  center: {
+    x: 0,
+    opacity: 1,
+    transition: { duration: 0.35, ease: [0.25, 0.1, 0.25, 1] },
+  },
+  exit: (dir: number) => ({
+    x: dir > 0 ? -60 : 60,
+    opacity: 0,
+    transition: { duration: 0.25, ease: [0.25, 0.1, 0.25, 1] },
+  }),
+};
+
+const featureVariants = {
+  hidden: { opacity: 0, x: -12 },
+  visible: (i: number) => ({
+    opacity: 1,
+    x: 0,
+    transition: { delay: i * 0.06, duration: 0.3 },
+  }),
+};
+
+const cardVariants = {
+  hidden: { opacity: 0, y: 16 },
+  visible: (i: number) => ({
+    opacity: 1,
+    y: 0,
+    transition: { delay: 0.15 + i * 0.07, duration: 0.3 },
+  }),
+};
+
+// ─── Sub-components ───────────────────────────────────────────────────────────
+
+function CaseCard({ card, index }: { card: CaseCard; index: number }) {
+  return (
+    <motion.div
+      variants={cardVariants}
+      initial="hidden"
+      animate="visible"
+      custom={index}
+      whileHover={{ y: -4, transition: { duration: 0.2 } }}
+      className="rounded-xl border border-white/[0.06] bg-white/[0.03] p-4 backdrop-blur-sm"
+    >
+      <div className="mb-2 flex items-center gap-2">
+        <span className="text-xl leading-none">{card.icon}</span>
+        <span className="text-sm font-semibold text-white">{card.title}</span>
+      </div>
+      <p className="text-sm leading-relaxed text-zinc-400">{card.description}</p>
+    </motion.div>
+  );
 }
 
-const ParticleField = ({ color }: ParticleFieldProps) => {
-    const isCyan = color === 'cyan';
-    const particleColor = isCyan ? "bg-cyan-400" : "bg-fuchsia-400";
-    const shadowColor = isCyan ? "rgba(34, 211, 238, 0.8)" : "rgba(232, 121, 249, 0.8)";
-    const particleCount = 75;
+function TabPanel({ tab, direction }: { tab: ServiceTab; direction: number }) {
+  return (
+    <motion.div
+      key={tab.id}
+      custom={direction}
+      variants={panelVariants}
+      initial="enter"
+      animate="center"
+      exit="exit"
+      className="grid grid-cols-1 gap-8 lg:grid-cols-2"
+    >
+      {/* LEFT — Info */}
+      <div className="flex flex-col gap-6">
+        {/* Problem */}
+        <div className="rounded-xl border border-white/[0.06] bg-white/[0.03] p-5 backdrop-blur-sm">
+          <p className="text-sm font-medium text-cyan-400 mb-2">El problema que resolvemos</p>
+          <p className="text-base leading-relaxed text-zinc-300">{tab.problem}</p>
+        </div>
 
-    const particles = Array.from({ length: particleCount }).map((_, i) => ({
-        id: i,
-        size: Math.random() * 4 + 1,
-        left: `${Math.random() * 100}%`,
-        top: `${Math.random() * 100}%`,
-        duration: Math.random() * 1.5 + 0.5,
-        delay: Math.random() * 0.2,
-        depth: (Math.random() - 0.5) * 500,
-    }));
-
-    return (
-        <div className="absolute inset-0 pointer-events-none z-0 overflow-visible" style={{ transformStyle: 'preserve-3d' }}>
-            {particles.map((p) => (
-                <motion.div
-                    key={p.id}
-                    className={`absolute rounded-full ${particleColor}`}
-                    style={{
-                        width: p.size,
-                        height: p.size,
-                        left: p.left,
-                        top: p.top,
-                        boxShadow: `0 0 ${p.size * 2}px ${shadowColor}`,
-                        transform: 'translate(-50%, -50%)',
-                    }}
-                    initial={{ opacity: 0, scale: 0, z: 0 }}
-                    animate={{
-                        opacity: [0, 0.8, 0],
-                        scale: [0, 1.5, 0],
-                        z: [0, p.depth],
-                        x: (Math.random() - 0.5) * 100,
-                        y: (Math.random() - 0.5) * 100,
-                    }}
-                    exit={{ opacity: 0, scale: 0 }}
-                    transition={{ duration: p.duration, repeat: Infinity, ease: "easeInOut", delay: p.delay }}
-                />
+        {/* Features */}
+        <div>
+          <p className="mb-3 text-sm font-semibold uppercase tracking-widest text-zinc-500">
+            Qué incluye
+          </p>
+          <ul className="flex flex-col gap-2">
+            {tab.features.map((f, i) => (
+              <motion.li
+                key={f}
+                variants={featureVariants}
+                initial="hidden"
+                animate="visible"
+                custom={i}
+                className="flex items-start gap-2.5 text-sm text-zinc-300"
+              >
+                <span className="mt-0.5 shrink-0 text-cyan-400">✓</span>
+                {f}
+              </motion.li>
             ))}
+          </ul>
         </div>
-    );
-};
 
-// --- Desktop Service Card ---
+        {/* Price + Time */}
+        <div className="flex flex-wrap items-center gap-4">
+          <div>
+            <span className="text-sm text-zinc-500">desde </span>
+            <span className="text-2xl font-bold text-white">
+              {tab.price.replace("desde ", "")}
+            </span>
+          </div>
+          <div className="flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1">
+            <span className="text-xs">⏱</span>
+            <span className="text-xs font-medium text-emerald-400">{tab.time}</span>
+          </div>
+        </div>
 
-interface ServiceCardProps {
-    title: string;
-    tagline: string;
-    icon: React.ElementType;
-    features: string[];
-    duration: string;
-    theme: ServiceTheme;
-    onClick?: () => void;
+        {/* CTA */}
+        <Link
+          href={tab.href}
+          className="inline-flex w-fit items-center gap-2 rounded-xl bg-gradient-to-r from-cyan-500 to-emerald-500 px-6 py-3 text-sm font-semibold text-black transition-opacity hover:opacity-90"
+        >
+          {tab.ctaText}
+        </Link>
+      </div>
+
+      {/* RIGHT — Cases */}
+      <div>
+        <p className="mb-4 text-sm font-semibold uppercase tracking-widest text-zinc-500">
+          {tab.casesTitle}
+        </p>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
+          {tab.cases.map((c, i) => (
+            <CaseCard key={c.title} card={c} index={i} />
+          ))}
+        </div>
+      </div>
+    </motion.div>
+  );
 }
 
-const ServiceCard = ({ title, tagline, icon: Icon, features, duration, theme, onClick }: ServiceCardProps) => {
-    const [isHovered, setIsHovered] = useState(false);
+// ─── Accordion (mobile) ───────────────────────────────────────────────────────
 
-    const isCyan = theme === 'cyan';
-    const bgGradient = isCyan ? "from-cyan-900/20 to-blue-900/20" : "from-fuchsia-900/20 to-purple-900/20";
-    const accentText = isCyan ? "text-cyan-400" : "text-fuchsia-400";
-    const accentBg = isCyan ? "bg-cyan-500" : "bg-fuchsia-500";
-    const accentBorder = isCyan ? "border-cyan-500/30" : "border-fuchsia-500/30";
-
-    const conicGradient = isCyan
-        ? "conic-gradient(from 0deg, transparent 0%, rgba(34,211,238,0.8) 25%, transparent 50%, rgba(34,211,238,0.2) 75%, transparent 100%)"
-        : "conic-gradient(from 0deg, transparent 0%, rgba(232,121,249,0.8) 25%, transparent 50%, rgba(232,121,249,0.2) 75%, transparent 100%)";
-
-    const IconComponent = Icon as any;
-
-    return (
-        <div
-            className="group perspective-1000 w-full max-w-md h-[500px] cursor-none"
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
-            onClick={onClick}
-            data-cursor="hover"
+function AccordionItem({ tab, isOpen, onToggle }: { tab: ServiceTab; isOpen: boolean; onToggle: () => void }) {
+  return (
+    <div className="rounded-xl border border-white/[0.08] overflow-hidden">
+      <button
+        onClick={onToggle}
+        className="flex w-full items-center justify-between gap-3 px-5 py-4 text-left"
+      >
+        <span className="flex items-center gap-2 text-sm font-semibold text-white">
+          <span>{tab.icon}</span>
+          {tab.label}
+        </span>
+        <motion.span
+          animate={{ rotate: isOpen ? 180 : 0 }}
+          transition={{ duration: 0.25 }}
+          className="shrink-0 text-zinc-400"
         >
-            <motion.div
-                className="w-full h-full relative transition-all duration-500"
-                style={{ transformStyle: "preserve-3d" }}
-                animate={{
-                    rotateY: isHovered ? 180 : 0,
-                    y: isHovered ? -20 : 0
-                }}
-                transition={{ type: "spring", stiffness: 200, damping: 20 }}
-            >
-                {/* --- FRONT FACE --- */}
-                <div
-                    className="absolute inset-0 backface-hidden rounded-2xl overflow-hidden p-[1px]"
-                    style={{ backfaceVisibility: "hidden" }}
-                >
-                    {/* Magic Energy Border */}
-                    <motion.div
-                        className="absolute w-[150%] h-[150%] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-700 z-0 pointer-events-none"
-                        style={{ background: conicGradient }}
-                        animate={{ rotate: 360 }}
-                        transition={{ duration: 4, repeat: Infinity, ease: 'linear' }}
-                    />
+          ▼
+        </motion.span>
+      </button>
 
-                    {/* Inner Front Content */}
-                    <div className="absolute inset-[1px] rounded-[15px] bg-zinc-950/60 backdrop-blur-xl border border-zinc-800/50 p-8 flex flex-col items-center justify-center gap-6 text-center shadow-xl z-10 overflow-hidden">
-                        <div className={`absolute inset-0 bg-gradient-to-br ${bgGradient} opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
+      <AnimatePresence initial={false}>
+        {isOpen && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1, transition: { duration: 0.3 } }}
+            exit={{ height: 0, opacity: 0, transition: { duration: 0.2 } }}
+            className="overflow-hidden"
+          >
+            <div className="flex flex-col gap-5 border-t border-white/[0.06] px-5 pb-5 pt-4">
+              {/* Problem */}
+              <div className="rounded-lg border border-white/[0.06] bg-white/[0.03] p-4">
+                <p className="mb-1.5 text-xs font-medium text-cyan-400">El problema que resolvemos</p>
+                <p className="text-sm leading-relaxed text-zinc-300">{tab.problem}</p>
+              </div>
 
-                        <div className={`relative z-10 p-6 rounded-full bg-zinc-950/80 border border-zinc-700/50 ${accentBorder} transition-colors duration-500`}>
-                            <IconComponent className={`w-12 h-12 ${isCyan ? "text-cyan-300" : "text-fuchsia-300"}`} />
-                        </div>
+              {/* Features */}
+              <ul className="flex flex-col gap-2">
+                {tab.features.map((f) => (
+                  <li key={f} className="flex items-start gap-2 text-sm text-zinc-300">
+                    <span className="mt-0.5 shrink-0 text-cyan-400">✓</span>
+                    {f}
+                  </li>
+                ))}
+              </ul>
 
-                        <div className="relative z-10">
-                            <h3 className="text-3xl font-black text-white mb-2 uppercase tracking-tighter">{title}</h3>
-                            <p className="text-zinc-400 font-light">{tagline}</p>
-                        </div>
-                        <div className="absolute bottom-6 text-xs font-mono text-zinc-600 uppercase tracking-widest">
-                            Initialize
-                        </div>
+              {/* Price + Time */}
+              <div className="flex flex-wrap items-center gap-3">
+                <span className="text-xl font-bold text-white">{tab.price}</span>
+                <div className="flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1">
+                  <span className="text-xs">⏱</span>
+                  <span className="text-xs font-medium text-emerald-400">{tab.time}</span>
+                </div>
+              </div>
+
+              {/* Cases — horizontal scroll */}
+              <div>
+                <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-zinc-500">
+                  {tab.casesTitle}
+                </p>
+                <div className="flex gap-3 overflow-x-auto pb-2">
+                  {tab.cases.map((c) => (
+                    <div
+                      key={c.title}
+                      className="min-w-[200px] shrink-0 rounded-xl border border-white/[0.06] bg-white/[0.03] p-4"
+                    >
+                      <div className="mb-1.5 flex items-center gap-2">
+                        <span className="text-lg">{c.icon}</span>
+                        <span className="text-xs font-semibold text-white">{c.title}</span>
+                      </div>
+                      <p className="text-xs leading-relaxed text-zinc-400">{c.description}</p>
                     </div>
+                  ))}
                 </div>
+              </div>
 
-                {/* --- BACK FACE --- */}
-                <div
-                    className="absolute inset-0 backface-hidden rounded-2xl overflow-hidden p-[1px]"
-                    style={{
-                        transform: "rotateY(180deg)",
-                        backfaceVisibility: "hidden"
-                    }}
+              {/* CTA */}
+              <Link
+                href={tab.href}
+                className="inline-flex w-fit items-center gap-2 rounded-xl bg-gradient-to-r from-cyan-500 to-emerald-500 px-5 py-2.5 text-sm font-semibold text-black"
+              >
+                {tab.ctaText}
+              </Link>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+// ─── Main Component ───────────────────────────────────────────────────────────
+
+export default function OurServices() {
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [direction, setDirection] = useState(1);
+  const [openAccordion, setOpenAccordion] = useState<number | null>(0);
+
+  function handleTabChange(index: number) {
+    setDirection(index > activeIndex ? 1 : -1);
+    setActiveIndex(index);
+  }
+
+  function handleAccordionToggle(index: number) {
+    setOpenAccordion(openAccordion === index ? null : index);
+  }
+
+  return (
+    <section
+      id="servicios"
+      style={{ backgroundColor: "#080a0c" }}
+      className="relative py-24 overflow-hidden"
+    >
+      {/* Subtle grid background */}
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{
+          backgroundImage:
+            "linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px)",
+          backgroundSize: "48px 48px",
+        }}
+      />
+
+      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        {/* Header */}
+        <div className="mb-12 text-center">
+          <div className="mb-4 inline-flex items-center rounded-full border border-cyan-500/30 bg-cyan-500/10 px-4 py-1.5">
+            <span className="text-xs font-semibold uppercase tracking-widest text-cyan-400">
+              Servicios
+            </span>
+          </div>
+          <h2 className="mb-4 text-4xl font-bold tracking-tight text-white sm:text-5xl">
+            ¿Qué problema tenés?
+          </h2>
+          <p className="mx-auto max-w-2xl text-base text-zinc-400">
+            Elegí lo que mejor describe tu situación y te contamos cómo lo resolvemos.
+          </p>
+        </div>
+
+        {/* ── DESKTOP: Tab bar ── */}
+        <div className="hidden lg:block">
+          <div
+            className="relative mb-8 flex gap-2 rounded-2xl p-2"
+            style={{ backgroundColor: "#111113" }}
+          >
+            {TABS.map((tab, i) => {
+              const isActive = i === activeIndex;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => handleTabChange(i)}
+                  className="relative flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold transition-colors duration-200"
+                  style={{
+                    color: isActive ? "#000" : "#71717a",
+                    border: isActive ? "none" : "1px solid rgba(255,255,255,0.08)",
+                  }}
                 >
-                    {/* Magic Energy Border (Back) */}
+                  {isActive && (
                     <motion.div
-                        className="absolute w-[150%] h-[150%] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-700 z-0 pointer-events-none"
-                        style={{ background: conicGradient }}
-                        animate={{ rotate: 360 }}
-                        transition={{ duration: 4, repeat: Infinity, ease: 'linear' }}
+                      layoutId="tab-bg"
+                      className="absolute inset-0 rounded-xl bg-cyan-400"
+                      transition={{ type: "spring", stiffness: 400, damping: 35 }}
                     />
+                  )}
+                  <span className="relative z-10">{tab.icon}</span>
+                  <span className="relative z-10">{tab.label}</span>
+                </button>
+              );
+            })}
+          </div>
 
-                    {/* Inner Back Content */}
-                    <div className="absolute inset-[1px] rounded-[15px] bg-zinc-950/80 backdrop-blur-xl border border-zinc-800 p-8 flex flex-col justify-between shadow-2xl z-10 overflow-hidden">
-                        {/* Particles Inside Content Wrapper to ensure they clip to rounded radius */}
-                        <div className="absolute inset-0 z-0 pointer-events-none" style={{ transform: "translateZ(-10px)" }}>
-                            <AnimatePresence>
-                                {isHovered && <ParticleField color={theme} />}
-                            </AnimatePresence>
-                        </div>
-
-                        <div className="relative z-10 h-full flex flex-col pt-4" style={{ transform: "translateZ(20px)" }}>
-                            <div className="flex justify-between items-start mb-8">
-                                <IconComponent className={`w-8 h-8 ${accentText}`} />
-                                <span className={`text-[10px] whitespace-nowrap font-bold px-3 py-1 rounded-full border ${accentBorder} ${accentText} bg-white/5 uppercase tracking-wider`}>
-                                    {duration}
-                                </span>
-                            </div>
-
-                            <ul className="space-y-4 mb-auto pt-2">
-                                {features.map((feature, i) => (
-                                    <li key={i} className="flex items-center gap-3 text-sm text-zinc-300 font-medium leading-snug">
-                                        <div className={`w-1.5 h-1.5 rounded-full ${accentBg} shrink-0`} />
-                                        {feature}
-                                    </li>
-                                ))}
-                            </ul>
-
-                            <button className={`w-full group/btn py-4 rounded-lg bg-white text-black font-bold uppercase tracking-wider flex items-center justify-center gap-2 hover:bg-zinc-200 transition-colors mt-6`}>
-                                Read More
-                                <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </motion.div>
+          {/* Tab panel */}
+          <div
+            className="overflow-hidden rounded-2xl border border-white/[0.06] p-8"
+            style={{ backgroundColor: "rgba(255,255,255,0.02)" }}
+          >
+            <AnimatePresence mode="wait" custom={direction}>
+              <TabPanel
+                key={activeIndex}
+                tab={TABS[activeIndex]}
+                direction={direction}
+              />
+            </AnimatePresence>
+          </div>
         </div>
-    );
-};
 
-// --- MOBILE COMPONENT: TAP-TO-FLIP WITH AUTO-RESET ---
-
-const MobileServiceCard = ({ title, tagline, icon: Icon, features, duration, theme, onClick }: ServiceCardProps) => {
-    const [isFlipped, setIsFlipped] = useState(false);
-    const cardRef = useRef<HTMLDivElement>(null);
-
-    const isCyan = theme === 'cyan';
-    const bgGradient = isCyan ? "from-cyan-900/20 to-blue-900/20" : "from-fuchsia-900/20 to-purple-900/20";
-    const accentText = isCyan ? "text-cyan-400" : "text-fuchsia-400";
-    const accentBg = isCyan ? "bg-cyan-500" : "bg-fuchsia-500";
-    const accentBorder = isCyan ? "border-cyan-500/30" : "border-fuchsia-500/30";
-
-    const conicGradient = isCyan
-        ? "conic-gradient(from 0deg, transparent 0%, rgba(34,211,238,0.8) 25%, transparent 50%, rgba(34,211,238,0.2) 75%, transparent 100%)"
-        : "conic-gradient(from 0deg, transparent 0%, rgba(232,121,249,0.8) 25%, transparent 50%, rgba(232,121,249,0.2) 75%, transparent 100%)";
-
-    const IconComponent = Icon as any;
-
-    useEffect(() => {
-        const observer = new IntersectionObserver(([entry]) => {
-            if (!entry.isIntersecting && isFlipped) {
-                setIsFlipped(false);
-            }
-        }, { threshold: 0 });
-
-        if (cardRef.current) observer.observe(cardRef.current);
-        return () => observer.disconnect();
-    }, [isFlipped]);
-
-    return (
-        <div
-            ref={cardRef}
-            className="perspective-1000 w-full max-w-md h-[500px] cursor-pointer group"
-            onClick={() => setIsFlipped(!isFlipped)}
-        >
-            <motion.div
-                className="w-full h-full relative transition-all duration-500"
-                style={{ transformStyle: "preserve-3d" }}
-                animate={{ rotateY: isFlipped ? 180 : 0 }}
-                transition={{ type: "spring", stiffness: 200, damping: 20 }}
-            >
-                {/* --- FRONT FACE --- */}
-                <div
-                    className="absolute inset-0 backface-hidden rounded-2xl overflow-hidden p-[1px]"
-                    style={{ backfaceVisibility: "hidden" }}
-                >
-                    <motion.div
-                        className={`absolute w-[150%] h-[150%] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 ${isFlipped ? 'opacity-100' : 'opacity-30'} transition-opacity duration-700 z-0 pointer-events-none`}
-                        style={{ background: conicGradient }}
-                        animate={{ rotate: 360 }}
-                        transition={{ duration: 4, repeat: Infinity, ease: 'linear' }}
-                    />
-
-                    <div className="absolute inset-[1px] rounded-[15px] bg-zinc-950/60 backdrop-blur-xl border border-zinc-800/50 p-8 flex flex-col items-center justify-center gap-6 text-center shadow-xl z-10 overflow-hidden">
-                        <div className={`absolute inset-0 bg-gradient-to-br ${bgGradient} opacity-100 transition-opacity duration-500`} />
-                        <p className="absolute top-6 left-0 w-full text-zinc-500 text-[10px] tracking-widest uppercase animate-pulse">
-                            (click to rotate)
-                        </p>
-                        <div className={`relative z-10 p-6 rounded-full bg-zinc-950/80 border border-zinc-700/50 ${accentBorder} transition-colors duration-500`}>
-                            <IconComponent className={`w-12 h-12 ${isCyan ? "text-cyan-300" : "text-fuchsia-300"}`} />
-                        </div>
-                        <div className="relative z-10">
-                            <h3 className="text-3xl font-black text-white mb-2 uppercase tracking-tighter">{title}</h3>
-                            <p className="text-zinc-400 font-light">{tagline}</p>
-                        </div>
-                        <div className="absolute bottom-6 text-xs font-mono text-zinc-600 uppercase tracking-widest">
-                            Tap To Initialize
-                        </div>
-                    </div>
-                </div>
-
-                {/* --- BACK FACE --- */}
-                <div
-                    className="absolute inset-0 backface-hidden rounded-2xl overflow-hidden p-[1px]"
-                    style={{ transform: "rotateY(180deg)", backfaceVisibility: "hidden" }}
-                >
-                    <motion.div
-                        className={`absolute w-[150%] h-[150%] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 ${isFlipped ? 'opacity-100' : 'opacity-0'} transition-opacity duration-700 z-0 pointer-events-none`}
-                        style={{ background: conicGradient }}
-                        animate={{ rotate: 360 }}
-                        transition={{ duration: 4, repeat: Infinity, ease: 'linear' }}
-                    />
-
-                    <div className="absolute inset-[1px] rounded-[15px] bg-zinc-950/80 backdrop-blur-xl border border-zinc-800 p-8 flex flex-col justify-between shadow-2xl z-10 overflow-hidden">
-                        <div className="absolute inset-0 z-0 pointer-events-none" style={{ transform: "translateZ(-10px)" }}>
-                            <AnimatePresence>
-                                {isFlipped && <ParticleField color={theme} />}
-                            </AnimatePresence>
-                        </div>
-                        <div className="relative z-10 h-full flex flex-col pt-4" style={{ transform: "translateZ(20px)" }}>
-                            <div className="flex justify-between items-start mb-8">
-                                <IconComponent className={`w-8 h-8 ${accentText}`} />
-                                <span className={`text-[10px] whitespace-nowrap font-bold px-3 py-1 rounded-full border ${accentBorder} ${accentText} bg-white/5 uppercase tracking-wider`}>
-                                    {duration}
-                                </span>
-                            </div>
-                            <ul className="space-y-4 mb-auto pt-2">
-                                {features.map((feature, i) => (
-                                    <li key={i} className="flex items-center gap-3 text-sm text-zinc-300 font-medium leading-snug">
-                                        <div className={`w-1.5 h-1.5 rounded-full ${accentBg} shrink-0`} />
-                                        {feature}
-                                    </li>
-                                ))}
-                            </ul>
-                            <button
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    if (onClick) onClick();
-                                }}
-                                className={`w-full group/btn py-4 rounded-lg bg-white text-black font-bold uppercase tracking-wider flex items-center justify-center gap-2 active:bg-zinc-200 transition-colors mt-6`}
-                            >
-                                Read More
-                                <ArrowRight className="w-4 h-4" />
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </motion.div>
+        {/* ── MOBILE: Accordion ── */}
+        <div className="flex flex-col gap-3 lg:hidden">
+          {TABS.map((tab, i) => (
+            <AccordionItem
+              key={tab.id}
+              tab={tab}
+              isOpen={openAccordion === i}
+              onToggle={() => handleAccordionToggle(i)}
+            />
+          ))}
         </div>
-    );
-};
-
-const OurServicesMobile = () => {
-    const { triggerTransition } = useTransitionContext();
-
-    return (
-        <div className="relative py-40 bg-zinc-950 flex flex-col items-center justify-center overflow-hidden">
-            <div className="absolute inset-0 pointer-events-none">
-                <div className="absolute top-[0%] left-[-10%] w-[60%] h-[60%] bg-cyan-900/20 rounded-full blur-[128px] mix-blend-screen animate-pulse duration-[10s]" />
-                <div className="absolute bottom-[20%] right-[-10%] w-[60%] h-[60%] bg-purple-900/20 rounded-full blur-[128px] mix-blend-screen animate-pulse duration-[12s]" />
-                <div className="absolute inset-0 opacity-[0.03]" style={{
-                    backgroundImage: 'linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px)',
-                    backgroundSize: '40px 40px'
-                }} />
-            </div>
-
-            <div className="container mx-auto px-6 relative z-10 flex flex-col items-center">
-                <div className="mb-12 text-center">
-                    <h2 className="text-4xl font-black text-white tracking-tighter mb-4 relative inline-block pl-1">
-                        SERVICES <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-fuchsia-500 pr-1">HUB</span>
-                    </h2>
-                    <p className="text-zinc-400 max-w-xl mx-auto text-base font-light">
-                        Deploying scalar architecture and neural interfaces for the next generation of web presence.
-                    </p>
-                </div>
-
-                <div className="flex flex-col gap-12 w-full max-w-xl justify-center items-center perspective-origin-center relative z-20">
-                    {SERVICES_DATA.map((service, idx) => (
-                        <MobileServiceCard
-                            key={idx}
-                            {...service}
-                            onClick={() => triggerTransition(service.path)}
-                        />
-                    ))}
-                </div>
-            </div>
-        </div>
-    );
-};
-
-// --- DESKTOP COMPONENT: ORIGINAL HOVER BEHAVIOR ---
-
-const OurServicesDesktop = () => {
-    const { triggerTransition } = useTransitionContext();
-
-    return (
-        <div className="relative min-h-screen py-40 bg-zinc-950 flex flex-col items-center justify-center overflow-hidden">
-            <div className="absolute inset-0 pointer-events-none">
-                <div className="absolute top-[0%] left-[10%] w-[40%] h-[60%] bg-cyan-900/10 rounded-full blur-[128px] mix-blend-screen animate-pulse duration-[10s]" />
-                <div className="absolute bottom-[0%] right-[10%] w-[40%] h-[60%] bg-fuchsia-900/10 rounded-full blur-[128px] mix-blend-screen animate-pulse duration-[12s]" />
-                <div className="absolute inset-0 opacity-[0.03]" style={{
-                    backgroundImage: 'linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px)',
-                    backgroundSize: '40px 40px'
-                }} />
-            </div>
-
-            <div className="container mx-auto px-6 max-w-6xl relative z-10 flex flex-col items-center">
-                <div className="mb-20 text-center">
-                    <h2 className="text-5xl md:text-7xl font-black text-white tracking-tighter mb-6 relative inline-block">
-                        SERVICES <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-fuchsia-500">HUB</span>
-                    </h2>
-                    <p className="text-zinc-400 max-w-2xl mx-auto text-lg md:text-xl font-light">
-                        Deploying scalar architecture and neural interfaces for the next generation of web presence.
-                    </p>
-                </div>
-
-                {/* 2x2 Grid Layout for 4 services */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-10 lg:gap-14 w-full justify-items-center perspective-origin-center">
-                    {SERVICES_DATA.map((service, idx) => (
-                        <ServiceCard
-                            key={idx}
-                            {...service}
-                            onClick={() => triggerTransition(service.path)}
-                        />
-                    ))}
-                </div>
-            </div>
-
-            {/* Bottom Blur Transition - Ensures smooth blend into next section */}
-            <div className="absolute bottom-0 left-0 w-full h-48 bg-gradient-to-t from-[rgb(3,7,18)] to-transparent pointer-events-none z-0" />
-        </div>
-    );
-};
-
-export const OurServices = () => {
-    return (
-        <section id="servicios" className="relative w-full bg-zinc-950 border-t border-white/5">
-            {/* MOBILE VIEW */}
-            <div className="block md:hidden">
-                <OurServicesMobile />
-            </div>
-
-            {/* DESKTOP VIEW */}
-            <div className="hidden md:block">
-                <OurServicesDesktop />
-            </div>
-        </section>
-    );
-};
+      </div>
+    </section>
+  );
+}

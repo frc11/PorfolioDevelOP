@@ -1,7 +1,8 @@
 "use client"
+
 import React, { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { Plus, Minus } from 'lucide-react'
+import { AnimatePresence, motion } from 'framer-motion'
+import { Minus, Plus } from 'lucide-react'
 
 interface FaqItem {
     question: string
@@ -15,7 +16,7 @@ const FAQ_ITEMS: FaqItem[] = [
     },
     {
         question: "¿Cuánto cuesta una página web profesional?",
-        answer: "Nuestros proyectos arrancan desde $800 USD para un sitio institucional o portfolio. Una tienda online con carrito y pagos está entre $1.200 y $2.500 USD. El pago es único — sin alquiler mensual obligatorio. La retención mensual es opcional e incluye actualizaciones, hosting y soporte.",
+        answer: "Nuestros proyectos arrancan desde $800 USD para un sitio institucional o portfolio. Una tienda online con carrito y pagos está entre $1.200 y $2.500 USD. El pago es único, sin alquiler mensual obligatorio. La retención mensual es opcional e incluye actualizaciones, hosting y soporte.",
     },
     {
         question: "¿En cuánto tiempo está lista mi web?",
@@ -23,7 +24,7 @@ const FAQ_ITEMS: FaqItem[] = [
     },
     {
         question: "¿Cómo esto se traduce en ventas reales para mi negocio?",
-        answer: "Tu web aparece cuando alguien busca tu rubro en Google — a las 2AM, un domingo, sin que atiendas el teléfono. Cada visita es un cliente potencial que ya te está evaluando. Con formularios de contacto automáticos y WhatsApp integrado, la web cierra la venta por vos.",
+        answer: "Tu web aparece cuando alguien busca tu rubro en Google, a las 2AM, un domingo, sin que atiendas el teléfono. Cada visita es un cliente potencial que ya te está evaluando. Con formularios automáticos y WhatsApp integrado, la web empuja la conversación incluso cuando vos no estás disponible.",
     },
     {
         question: "¿Posicionan en Google (SEO)?",
@@ -43,19 +44,25 @@ const FAQ_ITEMS: FaqItem[] = [
     },
 ]
 
+const springTransition = {
+    type: 'spring',
+    stiffness: 180,
+    damping: 24,
+    mass: 0.9,
+} as const
+
 export const WebDevelopmentFaq = () => {
     const [openIndex, setOpenIndex] = useState<number | null>(0)
 
     return (
-        <section className="py-32 w-full bg-[#030014] relative z-10 px-4">
-            <style>{`
-                @keyframes pulse-live {
-                    0%, 100% { opacity: 1; transform: scale(1); }
-                    50% { opacity: 0.6; transform: scale(0.85); }
-                }
-            `}</style>
-            <div className="max-w-4xl mx-auto">
-                {/* Header */}
+        <section className="relative z-10 w-full bg-[#030014] px-4 py-32">
+            <div
+                aria-hidden="true"
+                className="pointer-events-none absolute left-1/2 top-0 h-[30rem] w-[54rem] -translate-x-1/2 blur-[120px]"
+                style={{ background: 'radial-gradient(ellipse at center top, rgba(34,211,238,0.07) 0%, rgba(139,92,246,0.05) 42%, transparent 72%)' }}
+            />
+
+            <div className="relative mx-auto max-w-4xl">
                 <motion.div
                     initial={{ opacity: 0, y: 24 }}
                     whileInView={{ opacity: 1, y: 0 }}
@@ -63,197 +70,69 @@ export const WebDevelopmentFaq = () => {
                     transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
                     className="mb-16"
                 >
-                    <div
-                        style={{
-                            display: "inline-flex",
-                            padding: "4px 14px",
-                            borderRadius: "100px",
-                            background: "rgba(0,229,255,0.08)",
-                            border: "1px solid rgba(0,229,255,0.22)",
-                            color: "#00e5ff",
-                            fontSize: "10px",
-                            fontWeight: 700,
-                            letterSpacing: "0.22em",
-                            textTransform: "uppercase" as const,
-                            marginBottom: "24px",
-                            alignItems: "center",
-                            gap: "8px",
-                        }}
-                    >
-                        <span
-                            style={{
-                                width: "6px",
-                                height: "6px",
-                                borderRadius: "50%",
-                                background: "#00e5ff",
-                                boxShadow: "0 0 6px rgba(0,229,255,0.8)",
-                                flexShrink: 0,
-                            }}
-                        />
-                        PREGUNTAS FRECUENTES
+                    <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-cyan-300/20 bg-cyan-300/10 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.24em] text-cyan-300">
+                        <span className="h-1.5 w-1.5 rounded-full bg-cyan-300 shadow-[0_0_10px_rgba(34,211,238,0.9)]" />
+                        Preguntas frecuentes
                     </div>
 
-                    <h2
-                        style={{
-                            fontSize: "clamp(32px, 4.5vw, 56px)",
-                            fontWeight: 900,
-                            lineHeight: 1.05,
-                            letterSpacing: "-0.04em",
-                        }}
-                    >
-                        <span style={{ color: "white", display: "block" }}>Lo que todo dueño</span>
-                        <span style={{ color: "white" }}>de negocio </span>
-                        <span style={{ color: "#00e5ff" }}>pregunta.</span>
+                    <h2 className="text-[clamp(2rem,4.5vw,3.5rem)] font-black leading-[0.96] tracking-[-0.05em] text-white">
+                        Lo que todo dueño
+                        <br />
+                        <span className="bg-gradient-to-r from-white to-cyan-200 bg-clip-text text-transparent">de negocio pregunta.</span>
                     </h2>
 
-                    {/* Social proof pill */}
-                    <div
-                        style={{
-                            display: "inline-flex",
-                            alignItems: "center",
-                            gap: "12px",
-                            background: "rgba(0,229,255,0.05)",
-                            border: "1px solid rgba(0,229,255,0.15)",
-                            borderRadius: "100px",
-                            padding: "10px 20px",
-                            margin: "clamp(24px,4vh,40px) 0",
-                        }}
-                    >
-                        <div style={{ display: "flex" }}>
-                            {["#00e5ff", "#7b2fff", "#00b8cc"].map((color, i) => (
-                                <div
-                                    key={i}
-                                    style={{
-                                        width: "28px",
-                                        height: "28px",
-                                        borderRadius: "50%",
-                                        background: `linear-gradient(135deg, ${color}, rgba(0,0,0,0.3))`,
-                                        border: "2px solid #030014",
-                                        marginLeft: i === 0 ? 0 : "-8px",
-                                        zIndex: 3 - i,
-                                        position: "relative",
-                                    }}
-                                />
-                            ))}
-                        </div>
-                        <div style={{ display: "flex", flexDirection: "column", gap: "1px" }}>
-                            <span style={{ fontSize: "13px", fontWeight: 700, color: "white" }}>
-                                +47 negocios del NOA
-                            </span>
-                            <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.4)", letterSpacing: "0.05em" }}>
-                                ya tienen su Sucursal Digital activa
-                            </span>
-                        </div>
-                        <div
-                            style={{
-                                width: "7px",
-                                height: "7px",
-                                borderRadius: "50%",
-                                background: "#22c55e",
-                                boxShadow: "0 0 8px rgba(34,197,94,0.6)",
-                                animation: "pulse-live 2s ease-in-out infinite",
-                                flexShrink: 0,
-                            }}
-                        />
-                    </div>
+                    <p className="mt-6 max-w-2xl text-base leading-8 text-white/45 md:text-lg">
+                        Respuestas directas para entender tiempos, inversión, soporte y cómo esta web termina convirtiéndose en una herramienta real de ventas.
+                    </p>
                 </motion.div>
 
-                {/* FAQ Accordion */}
-                <div className="flex flex-col">
+                <div className="border-t border-white/10">
                     {FAQ_ITEMS.map((item, index) => {
                         const isOpen = openIndex === index
 
                         return (
                             <motion.div
-                                key={index}
-                                initial={{ opacity: 0, y: 20 }}
+                                key={item.question}
+                                initial={{ opacity: 0, y: 16 }}
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true }}
-                                transition={{ duration: 0.5, delay: index * 0.07, ease: [0.16, 1, 0.3, 1] }}
+                                transition={{ duration: 0.45, delay: index * 0.05, ease: [0.16, 1, 0.3, 1] }}
+                                className="border-t border-white/10 first:border-t-0"
                             >
                                 <button
                                     onClick={() => setOpenIndex(isOpen ? null : index)}
-                                    className="w-full text-left relative"
-                                    style={{
-                                        borderBottom: `1px solid ${isOpen ? "rgba(0,229,255,0.15)" : "rgba(255,255,255,0.07)"}`,
-                                        padding: "clamp(18px,2.5vh,28px) 0",
-                                        transition: "border-color 200ms",
-                                    }}
                                     aria-expanded={isOpen}
+                                    className="group w-full py-7 text-left"
                                 >
-                                    {/* Left accent line */}
-                                    <AnimatePresence>
-                                        {isOpen && (
-                                            <motion.div
-                                                initial={{ scaleY: 0 }}
-                                                animate={{ scaleY: 1 }}
-                                                exit={{ scaleY: 0 }}
-                                                style={{
-                                                    position: "absolute",
-                                                    left: "-1px",
-                                                    top: 0,
-                                                    bottom: 0,
-                                                    width: "2px",
-                                                    background: "linear-gradient(to bottom, rgba(0,229,255,0.6), rgba(123,47,255,0.3), transparent)",
-                                                    transformOrigin: "top",
-                                                }}
-                                            />
-                                        )}
-                                    </AnimatePresence>
-
-                                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "16px" }}>
-                                        <span
-                                            style={{
-                                                fontSize: "clamp(14px,1.6vw,17px)",
-                                                fontWeight: 600,
-                                                color: isOpen ? "#00e5ff" : "white",
-                                                transition: "color 250ms",
-                                            }}
-                                        >
+                                    <div className="flex items-start justify-between gap-5">
+                                        <span className="max-w-3xl text-[clamp(1rem,1.6vw,1.2rem)] font-semibold leading-relaxed text-white transition-all duration-300 group-hover:text-white group-hover:[text-shadow:0_0_18px_rgba(255,255,255,0.14)]">
                                             {item.question}
                                         </span>
 
-                                        <div
-                                            style={{
-                                                width: "30px",
-                                                height: "30px",
-                                                borderRadius: "50%",
-                                                border: `1px solid ${isOpen ? "rgba(0,229,255,0.3)" : "rgba(255,255,255,0.1)"}`,
-                                                background: isOpen ? "rgba(0,229,255,0.08)" : "rgba(255,255,255,0.04)",
-                                                color: isOpen ? "#00e5ff" : "rgba(255,255,255,0.5)",
-                                                display: "flex",
-                                                alignItems: "center",
-                                                justifyContent: "center",
-                                                flexShrink: 0,
-                                                transition: "all 250ms",
-                                            }}
-                                        >
-                                            {isOpen ? <Minus size={14} /> : <Plus size={14} />}
+                                        <div className="mt-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/[0.03] text-white/55 transition-all duration-300 group-hover:border-white/20 group-hover:text-white">
+                                            {isOpen ? <Minus size={15} /> : <Plus size={15} />}
                                         </div>
                                     </div>
 
-                                    <AnimatePresence>
+                                    <AnimatePresence initial={false}>
                                         {isOpen && (
                                             <motion.div
-                                                initial={{ height: 0, opacity: 0 }}
-                                                animate={{ height: "auto", opacity: 1 }}
-                                                exit={{ height: 0, opacity: 0 }}
-                                                transition={{ duration: 0.28, ease: "easeInOut" }}
+                                                initial={{ height: 0, opacity: 0, y: -8 }}
+                                                animate={{ height: 'auto', opacity: 1, y: 0 }}
+                                                exit={{ height: 0, opacity: 0, y: -6 }}
+                                                transition={{
+                                                    height: springTransition,
+                                                    opacity: { duration: 0.22, ease: [0.16, 1, 0.3, 1] },
+                                                    y: springTransition,
+                                                }}
                                                 className="overflow-hidden"
-                                                onClick={(e) => e.stopPropagation()}
+                                                onClick={(event) => event.stopPropagation()}
                                             >
-                                                <p
-                                                    style={{
-                                                        fontSize: "14px",
-                                                        lineHeight: 1.75,
-                                                        color: "rgba(255,255,255,0.52)",
-                                                        paddingTop: "14px",
-                                                        paddingRight: "48px",
-                                                        maxWidth: "680px",
-                                                    }}
-                                                >
-                                                    {item.answer}
-                                                </p>
+                                                <div className="max-w-3xl pt-4 pr-10">
+                                                    <p className="text-sm leading-8 text-white/52 md:text-[15px]">
+                                                        {item.answer}
+                                                    </p>
+                                                </div>
                                             </motion.div>
                                         )}
                                     </AnimatePresence>

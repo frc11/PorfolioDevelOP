@@ -7,32 +7,32 @@ import { Interactive3DNetwork } from '@/components/canvas/Interactive3DNetwork'
 const QUALITIES = [
     {
         id: 1,
-        label: "Modernidad",
-        desc: "Arquitectura Next.js 15 que supera los estándares actuales."
+        label: "Tecnología actual",
+        desc: "Las herramientas más modernas del mercado, aplicadas a tu negocio."
     },
     {
         id: 2,
-        label: "Escalabilidad",
-        desc: "Sistemas diseñados para crecer sin deuda técnica."
+        label: "Crece con vos",
+        desc: "Tu sistema se adapta cuando tu negocio crece. Sin empezar de cero."
     },
     {
         id: 3,
-        label: "Velocidad",
-        desc: "Optimización continua y tiempos de carga instantáneos."
+        label: "Entrega rápida",
+        desc: "Primeros resultados en 15 días. Sin esperar meses."
     },
     {
         id: 4,
-        label: "UI/UX Inmersiva",
-        desc: "Experiencias visuales que retienen y convierten."
+        label: "Fácil de usar",
+        desc: "Tus clientes y tu equipo lo usan sin capacitación."
     },
     {
         id: 5,
-        label: "Soporte 24/7",
-        desc: "Infraestructura monitoreada constantemente."
+        label: "Siempre disponibles",
+        desc: "Respondemos rápido. Tenés un equipo técnico en tu esquina."
     },
-    { id: 6, label: "Seguridad", desc: "Protocolos de encriptación de grado militar." },
-    { id: 7, label: "Cloud Native", desc: "Despliegue serverless optimizado." },
-    { id: 8, label: "AI Core", desc: "Integración de modelos neuronales predictivos." }
+    { id: 6, label: "Tu info, protegida", desc: "Datos seguros, backups automáticos, sin preocupaciones." },
+    { id: 7, label: "Funciona en cualquier lado", desc: "Desde el celular, la tablet o la computadora de tu negocio." },
+    { id: 8, label: "Con IA incluida", desc: "Inteligencia artificial integrada desde el primer día." }
 ];
 
 export function WhyDevelOP() {

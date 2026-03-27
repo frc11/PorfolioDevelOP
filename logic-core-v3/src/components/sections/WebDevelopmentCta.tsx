@@ -1,244 +1,220 @@
 "use client"
-import React, { useState } from 'react'
+
+import React, { useRef, useState } from 'react'
+import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion'
+
+function MagneticButton({
+    href,
+    children,
+}: {
+    href: string
+    children: React.ReactNode
+}) {
+    const buttonRef = useRef<HTMLAnchorElement>(null)
+    const x = useMotionValue(0)
+    const y = useMotionValue(0)
+    const springX = useSpring(x, { stiffness: 220, damping: 18, mass: 0.5 })
+    const springY = useSpring(y, { stiffness: 220, damping: 18, mass: 0.5 })
+    const rotate = useTransform(springX, [-18, 18], [-3, 3])
+
+    const handleMove = (event: React.MouseEvent<HTMLAnchorElement>) => {
+        const bounds = buttonRef.current?.getBoundingClientRect()
+        if (!bounds) return
+
+        const offsetX = event.clientX - (bounds.left + bounds.width / 2)
+        const offsetY = event.clientY - (bounds.top + bounds.height / 2)
+        const maxPull = 18
+
+        x.set(Math.max(Math.min(offsetX * 0.22, maxPull), -maxPull))
+        y.set(Math.max(Math.min(offsetY * 0.22, maxPull), -maxPull))
+    }
+
+    const reset = () => {
+        x.set(0)
+        y.set(0)
+    }
+
+    return (
+        <motion.a
+            ref={buttonRef}
+            href={href}
+            target="_blank"
+            rel="noopener noreferrer"
+            onMouseMove={handleMove}
+            onMouseLeave={reset}
+            onBlur={reset}
+            style={{ x: springX, y: springY, rotate }}
+            whileTap={{ scale: 0.98 }}
+            className="inline-flex items-center justify-center rounded-full border border-white/10 bg-[linear-gradient(135deg,#25d366,#128c7e)] px-8 py-4 text-[13px] font-extrabold uppercase tracking-[0.24em] text-white shadow-[0_18px_40px_rgba(37,211,102,0.18)]"
+        >
+            {children}
+        </motion.a>
+    )
+}
 
 export const WebDevelopmentCta = () => {
     const [showForm, setShowForm] = useState(false)
 
     return (
-        <section className="relative w-full z-10 pb-32">
-            {/* Separador antes del CTA */}
-            <div style={{
-                height: '1px',
-                margin: 'clamp(48px,7vh,80px) 0',
-                background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent)'
-            }} />
+        <section className="relative z-10 w-full pb-32">
+            <style>{`
+                @keyframes pulse-live {
+                    0%, 100% { opacity: 1; transform: scale(1); }
+                    50% { opacity: 0.55; transform: scale(0.88); }
+                }
+                @keyframes breathe-radial {
+                    0%, 100% {
+                        transform: translate(-50%, -50%) scale(1);
+                        opacity: 0.72;
+                    }
+                    50% {
+                        transform: translate(-50%, -50%) scale(1.16);
+                        opacity: 1;
+                    }
+                }
+            `}</style>
 
-            {/* WRAPPER CTA */}
-            <div className="max-w-4xl mx-auto px-4 w-full">
-                <div style={{
-                    textAlign: 'center',
-                    position: 'relative',
-                    overflow: 'hidden',
-                    padding: 'clamp(48px,7vh,80px) clamp(24px,5vw,80px)',
-                    borderRadius: '24px',
-                    background: 'linear-gradient(135deg, rgba(0,229,255,0.04) 0%, rgba(123,47,255,0.03) 100%)',
-                    border: '1px solid rgba(0,229,255,0.12)'
-                }}>
+            <div
+                className="mx-auto my-[clamp(48px,7vh,80px)] h-px max-w-6xl"
+                style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent)' }}
+            />
 
-                    {/* Glow interno */}
-                    <div style={{
-                        position: 'absolute',
-                        inset: 0,
-                        pointerEvents: 'none',
-                        background: 'radial-gradient(ellipse at 50% 0%, rgba(0,229,255,0.08) 0%, transparent 60%)'
-                    }} />
+            <div className="mx-auto w-full max-w-5xl px-4">
+                <div className="relative overflow-hidden rounded-[2rem] border border-cyan-300/10 bg-white/[0.02] px-[clamp(24px,5vw,80px)] py-[clamp(48px,7vh,92px)] text-center backdrop-blur-xl">
+                    <div
+                        aria-hidden="true"
+                        className="pointer-events-none absolute left-1/2 top-1/2 h-[44rem] w-[44rem]"
+                        style={{
+                            background: 'radial-gradient(circle, rgba(0,229,255,0.14) 0%, rgba(123,47,255,0.12) 34%, rgba(5,8,20,0.08) 58%, transparent 74%)',
+                            filter: 'blur(80px)',
+                            animation: 'breathe-radial 9s ease-in-out infinite',
+                        }}
+                    />
+                    <div
+                        aria-hidden="true"
+                        className="pointer-events-none absolute inset-0 bg-[linear-gradient(145deg,rgba(255,255,255,0.05),transparent_36%,transparent_72%,rgba(34,211,238,0.08))]"
+                    />
+                    <div
+                        aria-hidden="true"
+                        className="absolute inset-x-0 top-0 h-px bg-[linear-gradient(90deg,transparent,#00e5ff_30%,#7b2fff_70%,transparent)]"
+                    />
 
-                    {/* Shimmer superior */}
-                    <div style={{
-                        position: 'absolute',
-                        top: 0, left: 0, right: 0, height: '1px',
-                        background: 'linear-gradient(90deg, transparent, #00e5ff 30%, #7b2fff 70%, transparent)'
-                    }} />
+                    <div className="relative z-10">
+                        <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-red-400/20 bg-red-400/[0.08] px-4 py-2">
+                            <span
+                                className="h-1.5 w-1.5 rounded-full bg-red-400 shadow-[0_0_10px_rgba(248,113,113,0.8)]"
+                                style={{ animation: 'pulse-live 2s ease-in-out infinite' }}
+                            />
+                            <span className="text-[11px] font-bold uppercase tracking-[0.22em] text-red-200">
+                                Cupos limitados · 2 disponibles en las próximas 2 semanas
+                            </span>
+                        </div>
 
-                    {/* Urgency badge */}
-                    <div style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '8px',
-                        background: 'rgba(239,68,68,0.08)',
-                        border: '1px solid rgba(239,68,68,0.22)',
-                        borderRadius: '100px',
-                        padding: '6px 16px',
-                        marginBottom: '20px',
-                        position: 'relative',
-                        zIndex: 2,
-                    }}>
-                        <span style={{
-                            width: '7px', height: '7px', borderRadius: '50%',
-                            background: '#ef4444',
-                            boxShadow: '0 0 8px rgba(239,68,68,0.7)',
-                            animation: 'pulse-live 2s ease-in-out infinite',
-                            flexShrink: 0,
-                        }} />
-                        <span style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: '#fca5a5' }}>
-                            Cupos limitados — 2 disponibles en las próximas 2 semanas
-                        </span>
-                    </div>
+                        <div className="mb-5 text-[11px] uppercase tracking-[0.34em] text-white/28">
+                            ¿SEGUÍS PERDIENDO CLIENTES A LAS 2AM?
+                        </div>
 
-                    {/* EYEBROW */}
-                    <div style={{
-                        fontSize: '11px',
-                        letterSpacing: '0.35em',
-                        color: 'rgba(255,255,255,0.3)',
-                        marginBottom: '20px',
-                        position: 'relative',
-                        zIndex: 2,
-                    }}>
-                        ¿SEGUÍS PERDIENDO CLIENTES A LAS 2AM?
-                    </div>
+                        <h2 className="mx-auto max-w-4xl text-[clamp(3rem,9vw,7rem)] font-black leading-[0.88] tracking-[-0.07em] text-white">
+                            Tu competencia
+                            <br />
+                            <span className="bg-gradient-to-r from-white via-cyan-200 to-violet-200 bg-clip-text text-transparent">
+                                ya se está actualizando.
+                            </span>
+                        </h2>
 
-                    {/* H2 */}
-                    <h2 style={{
-                        fontSize: 'clamp(36px, 5.5vw, 72px)',
-                        fontWeight: 900,
-                        lineHeight: 1.1,
-                        marginBottom: '16px',
-                        position: 'relative',
-                        zIndex: 2,
-                    }}>
-                        <span style={{ color: 'white', display: 'block' }}>Tu Sucursal Digital</span>
-                        <span style={{
-                            background: 'linear-gradient(135deg, #00e5ff, #7b2fff)',
-                            WebkitBackgroundClip: 'text',
-                            color: 'transparent'
-                        }}>te espera.</span>
-                    </h2>
+                        <p className="mx-auto mt-6 max-w-2xl text-base leading-8 text-white/48 md:text-lg">
+                            Entrá ahora con una presencia digital que vende, posiciona y ordena la percepción de tu negocio antes de que el mercado lo haga por vos.
+                        </p>
 
-                    {/* Subtítulo */}
-                    <p style={{
-                        maxWidth: '480px',
-                        margin: '0 auto 40px',
-                        fontSize: '16px',
-                        color: 'rgba(255,255,255,0.5)',
-                        lineHeight: 1.6,
-                        position: 'relative',
-                        zIndex: 2,
-                    }}>
-                        Sin contrato largo. Sin sorpresas. Con un activo digital que trabaja por vos.
-                    </p>
-
-                    {/* GARANTÍA PILL */}
-                    <div style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '8px',
-                        background: 'rgba(34,197,94,0.08)',
-                        border: '1px solid rgba(34,197,94,0.2)',
-                        borderRadius: '100px',
-                        padding: '6px 16px',
-                        marginBottom: '32px',
-                        position: 'relative',
-                        zIndex: 2,
-                    }}>
-                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#22c55e" strokeWidth="2">
-                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-                        </svg>
-                        <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.6)' }}>
-                            Consulta inicial gratuita · Sin compromiso
-                        </span>
-                    </div>
-
-                    {/* CTAs */}
-                    <style>{`
-                        .cta-whatsapp {
-                            display: inline-flex; align-items: center; gap: 10px;
-                            background: linear-gradient(135deg, #25d366, #128c7e);
-                            color: white; font-weight: 700; border-radius: 100px;
-                            padding: 16px 40px; font-size: 15px; letter-spacing: 0.05em;
-                            box-shadow: 0 0 30px rgba(37,211,102,0.25), 0 8px 24px rgba(0,0,0,0.3);
-                            cursor: pointer; width: fit-content; text-decoration: none;
-                            transition: all 200ms;
-                        }
-                        .cta-whatsapp:hover {
-                            filter: brightness(1.1);
-                            transform: scale(1.02);
-                            box-shadow: 0 0 40px rgba(37,211,102,0.4), 0 12px 30px rgba(0,0,0,0.4);
-                        }
-                        .cta-secondary {
-                            display: inline-flex; align-items: center; gap: 8px;
-                            background: transparent; border: 1px solid rgba(255,255,255,0.15);
-                            color: rgba(255,255,255,0.7); border-radius: 100px; padding: 14px 32px;
-                            font-size: 14px; cursor: pointer; width: fit-content;
-                            transition: all 200ms;
-                        }
-                        .cta-secondary:hover {
-                            border-color: rgba(255,255,255,0.3);
-                            color: white;
-                        }
-                        .contact-input {
-                            width: 100%; padding: 12px 16px; background: rgba(255,255,255,0.04);
-                            border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: white;
-                            font-size: 14px; outline: none; transition: border-color 200ms;
-                        }
-                        .contact-input:focus {
-                            border-color: rgba(0,229,255,0.4);
-                        }
-                    `}</style>
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', position: 'relative', zIndex: 2 }}>
-
-                        <a href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '5493816223508'}?text=Hola%20DevelOP%2C%20quiero%20saber%20m%C3%A1s%20sobre%20la%20Sucursal%20Digital`}
-                            target="_blank" rel="noopener noreferrer"
-                            className="cta-whatsapp"
-                        >
-                            <svg viewBox="0 0 24 24" fill="#ffffff" width="20" height="20">
-                                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" />
-                                <path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.554 4.118 1.528 5.855L.057 23.547a.5.5 0 00.609.61l5.765-1.458A11.945 11.945 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.814 9.814 0 01-5.032-1.384l-.361-.214-3.718.941.972-3.634-.235-.374A9.818 9.818 0 012.182 12C2.182 6.57 6.57 2.182 12 2.182S21.818 6.57 21.818 12 17.43 21.818 12 21.818z" />
+                        <div className="mt-8 inline-flex items-center gap-2 rounded-full border border-emerald-400/20 bg-emerald-400/[0.08] px-4 py-2">
+                            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#22c55e" strokeWidth="2">
+                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
                             </svg>
-                            Escribirnos por WhatsApp →
-                        </a>
-
-                        <button
-                            className="cta-secondary"
-                            onClick={() => {
-                                setShowForm(true)
-                                setTimeout(() => {
-                                    document.getElementById('contacto-form')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
-                                }, 100)
-                            }}
-                        >
-                            Completar formulario de contacto
-                        </button>
-
-                        <div style={{ marginTop: '20px', fontSize: '11px', color: 'rgba(255,255,255,0.25)', letterSpacing: '0.05em' }}>
-                            Respondemos en menos de 2 horas en horario comercial
+                            <span className="text-[12px] text-white/62">
+                                Consulta inicial gratuita · Sin compromiso
+                            </span>
                         </div>
 
-                        {/* FORMULARIO */}
-                        <div id="contacto-form" style={{
-                            width: '100%',
-                            maxWidth: '400px',
-                            maxHeight: showForm ? '600px' : '0',
-                            opacity: showForm ? 1 : 0,
-                            overflow: 'hidden',
-                            transition: 'all 500ms ease',
-                            marginTop: showForm ? '24px' : '0'
-                        }}>
-                            <form
-                                onSubmit={(e) => {
-                                    e.preventDefault()
-                                }}
-                                style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}
+                        <div className="mt-10 flex flex-col items-center gap-4">
+                            <MagneticButton
+                                href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '5493816223508'}?text=Hola%20DevelOP%2C%20quiero%20agendar%20un%20diagn%C3%B3stico%20para%20mi%20negocio`}
                             >
-                                <input type="text" placeholder="Tu nombre" className="contact-input" required />
-                                <input type="tel" placeholder="Tu WhatsApp" className="contact-input" required />
-                                <select className="contact-input" required style={{ appearance: 'none' }} defaultValue="">
-                                    <option value="" disabled hidden style={{ color: 'rgba(255,255,255,0.4)' }}>Mi rubro...</option>
-                                    <option value="gastronomia" style={{ color: '#080810' }}>Gastronomía</option>
-                                    <option value="comercio" style={{ color: '#080810' }}>Comercio</option>
-                                    <option value="servicios" style={{ color: '#080810' }}>Servicios</option>
-                                    <option value="salud" style={{ color: '#080810' }}>Salud</option>
-                                    <option value="inmobiliaria" style={{ color: '#080810' }}>Inmobiliaria</option>
-                                    <option value="otro" style={{ color: '#080810' }}>Otro</option>
-                                </select>
-                                <textarea placeholder="Contanos brevemente tu negocio (opcional)" rows={3} className="contact-input" style={{ resize: 'none' }}></textarea>
+                                Agendar Diagnóstico →
+                            </MagneticButton>
 
-                                <button type="submit" style={{
-                                    width: '100%',
-                                    background: 'linear-gradient(135deg, #00e5ff, #7b2fff)',
-                                    color: '#080810',
-                                    fontWeight: 700,
-                                    borderRadius: '10px',
-                                    padding: '14px',
-                                    fontSize: '14px',
-                                    cursor: 'pointer',
-                                    border: 'none',
-                                    marginTop: '8px'
-                                }}>
-                                    Enviar mensaje →
-                                </button>
-                            </form>
+                            <button
+                                className="inline-flex items-center gap-2 rounded-full border border-white/12 bg-transparent px-6 py-3 text-sm text-white/68 transition-all duration-200 hover:border-white/25 hover:text-white"
+                                onClick={() => {
+                                    setShowForm(true)
+                                    setTimeout(() => {
+                                        document.getElementById('contacto-form')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+                                    }, 100)
+                                }}
+                            >
+                                Completar formulario de contacto
+                            </button>
+
+                            <div className="mt-2 text-[11px] tracking-[0.05em] text-white/25">
+                                Respondemos en menos de 2 horas en horario comercial
+                            </div>
+
+                            <div
+                                id="contacto-form"
+                                style={{
+                                    maxHeight: showForm ? 640 : 0,
+                                    opacity: showForm ? 1 : 0,
+                                    marginTop: showForm ? 24 : 0,
+                                }}
+                                className="w-full max-w-[420px] overflow-hidden transition-all duration-500 ease-out"
+                            >
+                                <form
+                                    onSubmit={(e) => {
+                                        e.preventDefault()
+                                    }}
+                                    className="flex flex-col gap-3"
+                                >
+                                    <input
+                                        type="text"
+                                        placeholder="Tu nombre"
+                                        required
+                                        className="w-full rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-white outline-none transition-colors focus:border-cyan-300/40"
+                                    />
+                                    <input
+                                        type="tel"
+                                        placeholder="Tu WhatsApp"
+                                        required
+                                        className="w-full rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-white outline-none transition-colors focus:border-cyan-300/40"
+                                    />
+                                    <select
+                                        required
+                                        defaultValue=""
+                                        className="w-full appearance-none rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-white outline-none transition-colors focus:border-cyan-300/40"
+                                    >
+                                        <option value="" disabled hidden style={{ color: '#080810' }}>
+                                            Mi rubro...
+                                        </option>
+                                        <option value="gastronomia" style={{ color: '#080810' }}>Gastronomía</option>
+                                        <option value="comercio" style={{ color: '#080810' }}>Comercio</option>
+                                        <option value="servicios" style={{ color: '#080810' }}>Servicios</option>
+                                        <option value="salud" style={{ color: '#080810' }}>Salud</option>
+                                        <option value="inmobiliaria" style={{ color: '#080810' }}>Inmobiliaria</option>
+                                        <option value="otro" style={{ color: '#080810' }}>Otro</option>
+                                    </select>
+                                    <textarea
+                                        rows={3}
+                                        placeholder="Contanos brevemente tu negocio (opcional)"
+                                        className="w-full resize-none rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-white outline-none transition-colors focus:border-cyan-300/40"
+                                    />
+
+                                    <button
+                                        type="submit"
+                                        className="mt-2 w-full rounded-xl border-0 bg-[linear-gradient(135deg,#00e5ff,#7b2fff)] px-4 py-3 text-sm font-bold text-[#080810]"
+                                    >
+                                        Enviar mensaje →
+                                    </button>
+                                </form>
+                            </div>
                         </div>
-
                     </div>
                 </div>
             </div>

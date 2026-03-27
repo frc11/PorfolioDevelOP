@@ -11,10 +11,10 @@ import { TypewriterText } from '@/components/ui/TypewriterText'
 import { MagneticCta } from '@/components/ui/buttons/MagneticCta'
 
 const HERO_KEYWORDS = [
-    "Software a Medida",
-    "Inteligencia Artificial",
-    "Automatizaciones n8n",
-    "Sistemas Escalables",
+    "las 24 horas",
+    "sin perder clientes",
+    "mientras dormís",
+    "en piloto automático",
 ]
 
 /**
@@ -72,7 +72,7 @@ export function Hero() {
                     {/* Badge */}
                     <div className="flex items-center gap-2 text-cyan-600 font-mono text-[10px] tracking-[0.5em] uppercase">
                         <span className="w-1 h-1 bg-cyan-600 rounded-full shadow-[0_0_8px_#0891b2]" />
-                        Exclusive_Digital_Partnership
+                        ✦ AGENCIA DIGITAL — TUCUMÁN, ARGENTINA
                     </div>
 
                     {/* H1 Metallic Upgrade with Reveal Animation */}
@@ -84,7 +84,7 @@ export function Hero() {
                                 transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1], delay: 0.3 }}
                                 className="block"
                             >
-                                Transformamos tu empresa
+                                Tu negocio abierto
                             </motion.span>
                         </div>
                         <div className="overflow-hidden">
@@ -94,7 +94,7 @@ export function Hero() {
                                 transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1], delay: 0.5 }}
                                 className="block h-[1.1em] md:h-[1em]"
                             >
-                                con{' '}
+                                {' '}
                                 <TypewriterText
                                     words={HERO_KEYWORDS}
                                     typingSpeed={70}
@@ -113,9 +113,9 @@ export function Hero() {
                         transition={{ duration: 0.8, delay: 0.8 }}
                         className="text-zinc-500 font-light text-lg md:text-xl max-w-2xl mt-6 tracking-wide leading-relaxed"
                     >
-                        Diseñamos <strong className="text-zinc-900 font-semibold">ecosistemas digitales de alto impacto</strong>. 
-                        Desde arquitectura de <span className="text-cyan-600/90 font-medium drop-shadow-[0_0_10px_rgba(8,145,178,0.3)]">Software</span>{' '}
-                        hasta agentes de <span className="text-cyan-600/90 font-medium drop-shadow-[0_0_10px_rgba(8,145,178,0.3)]">IA Generativa</span> y automatización estratégica.
+                        Hacemos que tu negocio <strong className="text-zinc-900 font-semibold">venda, atienda y crezca solo</strong>.
+                        Sitios web, <span className="text-cyan-600/90 font-medium drop-shadow-[0_0_10px_rgba(8,145,178,0.3)]">automatizaciones</span>{' '}
+                        e <span className="text-cyan-600/90 font-medium drop-shadow-[0_0_10px_rgba(8,145,178,0.3)]">inteligencia artificial</span> para empresas de cualquier rubro.
                     </motion.p>
 
                     {/* CTA Buttons */}
@@ -126,10 +126,10 @@ export function Hero() {
                         className="flex flex-col w-full md:flex-row md:w-auto gap-4 pt-4"
                     >
                         <MagneticCta>
-                            Iniciar Proyecto
+                            Quiero una demo gratis
                         </MagneticCta>
                         <MagneticCta>
-                            Explorar Servicios
+                            Ver nuestros trabajos
                         </MagneticCta>
                     </motion.div>
 
@@ -140,7 +140,7 @@ export function Hero() {
                         transition={{ duration: 1, delay: 1.3 }}
                         className="text-zinc-500 text-xs tracking-wide"
                     >
-                        ✦ Auditoría de viabilidad gratuita
+                        ✦ Primera consulta sin costo — respondemos en menos de 24hs
                     </motion.p>
                 </motion.div>
             </div>

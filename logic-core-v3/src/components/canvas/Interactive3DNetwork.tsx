@@ -154,20 +154,18 @@ const QualityCard = ({ node, isOpen, color }: { node: QualityNode, isOpen: boole
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.8, y: 5 }}
                 transition={{ type: "spring", stiffness: 300, damping: 25 }}
-                // Solid background (bg-zinc-950) to block content behind
-                className="w-[280px] bg-zinc-950 border border-zinc-800 p-6 rounded-xl shadow-[0_0_50px_rgba(0,0,0,0.8)] origin-top mt-1 pointer-events-auto select-none text-left relative z-50"
-                style={{ borderColor: `${color}60` }}
+                className="w-[280px] bg-black/60 backdrop-blur-xl border border-cyan-500/20 p-6 rounded-2xl shadow-[0_0_60px_rgba(6,182,212,0.10),0_25px_50px_rgba(0,0,0,0.9)] origin-top mt-1 pointer-events-auto select-none text-left relative z-50"
             >
-                <div className="absolute top-0 left-0 w-full h-1" style={{ background: `linear-gradient(to right, ${color}, transparent)` }} />
-                <h3 className="text-xl font-bold text-white mb-2" style={{ color }}>{node.label}</h3>
-                <p className="text-sm text-zinc-400 leading-relaxed font-light">
+                <div className="absolute top-0 left-0 w-full h-px rounded-t-2xl" style={{ background: `linear-gradient(to right, #06b6d4, transparent)` }} />
+                <h3 className="text-xl font-bold mb-2 text-cyan-400">{node.label}</h3>
+                <p className="text-sm text-zinc-200 leading-relaxed font-light">
                     {node.desc}
                 </p>
                 {/* Decorative Tech Elements */}
                 <div className="absolute bottom-2 right-2 flex gap-1">
                     <span className="w-1 h-1 rounded-full bg-zinc-700" />
                     <span className="w-1 h-1 rounded-full bg-zinc-700" />
-                    <span className="w-1 h-1 rounded-full" style={{ backgroundColor: color }} />
+                    <span className="w-1 h-1 rounded-full bg-cyan-500" />
                 </div>
             </motion.div>
         )}
@@ -217,9 +215,9 @@ const CoreNodes = ({ points, qualities, onHoverChange, palette = DEFAULT_PALETTE
                             onClick={() => handlePointerOver(i)} // Touch support
                         >
                             <meshStandardMaterial
-                                color={isHovered ? color : "#ffffff"}
-                                emissive={color}
-                                emissiveIntensity={isHovered ? 3 : 1.2}
+                                color={isHovered ? "#06b6d4" : "#ffffff"}
+                                emissive={isHovered ? "#06b6d4" : color}
+                                emissiveIntensity={isHovered ? 6 : 1.2}
                                 roughness={0.2}
                                 metalness={0.8}
                             />
@@ -287,7 +285,7 @@ const Connections = ({ points }: { points: THREE.Vector3[] }) => {
     return (
         <group>
             {lines.map((l, i) => (
-                <Line key={i} points={[l.start, l.end]} color="#ffffff" transparent opacity={l.opacity * 0.1} lineWidth={1} />
+                <Line key={i} points={[l.start, l.end]} color="#06b6d4" transparent opacity={l.opacity * 0.3} lineWidth={1} />
             ))}
         </group>
     );
@@ -341,7 +339,7 @@ const Interactive3DNetworkDesktop = ({ qualities, titleVisible, renderCanvas = t
                 >
                     <div className="relative z-10 flex flex-col items-center">
                         <h2 className="text-5xl md:text-8xl font-black text-white tracking-tighter uppercase text-center drop-shadow-[0_0_25px_rgba(255,255,255,0.3)]">
-                            <HyperText text="¿POR QUÉ DEVELOP?" persist={true} trigger={titleVisible} />
+                            <HyperText text="¿POR QUÉ ELEGIRNOS?" persist={true} trigger={titleVisible} />
                         </h2>
                         <div className="flex gap-4 mt-6 opacity-80">
                             <p className="text-xs text-zinc-500 font-mono tracking-[0.5em] backdrop-blur-sm">[ NEURAL CORE ONLINE ]</p>
@@ -531,7 +529,7 @@ const Interactive3DNetworkMobile = ({ qualities, titleVisible, renderCanvas = tr
                 >
                     <div className="relative z-10 flex flex-col items-center">
                         <h2 className="text-4xl md:text-5xl font-black text-white tracking-tighter uppercase text-center drop-shadow-[0_0_25px_rgba(255,255,255,0.3)] px-4">
-                            <HyperText text="¿POR QUÉ DEVELOP?" persist={true} trigger={titleVisible} />
+                            <HyperText text="¿POR QUÉ ELEGIRNOS?" persist={true} trigger={titleVisible} />
                         </h2>
                         <div className="flex gap-4 mt-6 opacity-80">
                             <p className="text-[10px] text-zinc-500 font-mono tracking-[0.3em] backdrop-blur-sm">[ NEURAL CORE ONLINE ]</p>
