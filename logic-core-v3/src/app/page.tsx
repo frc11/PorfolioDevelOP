@@ -1,6 +1,5 @@
 "use client"
 
-import { useState } from 'react'
 import dynamic from 'next/dynamic'
 // import { Preloader } from '@/components/ui/Preloader'
 
@@ -12,16 +11,12 @@ const WhyDevelOP = dynamic(() => import('@/components/sections/WhyDevelOP').then
 import { About } from '@/components/sections/About'
 import { Portfolio } from '@/components/sections/Portfolio'
 import OurServices from '@/components/sections/OurServices';
-import { ROICalculator } from '@/components/sections/ROICalculator';
 import { PortalDemo } from '@/components/sections/PortalDemo';
 
 
 import { InfiniteReviews } from '@/components/sections/InfiniteReviews'
 import { motion } from 'framer-motion'
 import { ThemeProvider, useTheme } from '@/hooks/useThemeObserver'
-import { TemplateWarehouse } from '@/components/sections/TemplateWarehouse'
-import { TeamSection } from '@/components/sections/TeamSection'
-import { FeedbackLoop } from '@/components/sections/FeedbackLoop'
 
 // Reusable Section Wrapper for unifying animations
 const Section = ({ children, className = "" }: { children: React.ReactNode, className?: string }) => (
@@ -92,12 +87,6 @@ function HomeContent() {
         <Section>
           <PortalDemo />
         </Section>
-
-        <Section>
-          <ROICalculator />
-        </Section>
-
-
 
         <WhyDevelOP />
 

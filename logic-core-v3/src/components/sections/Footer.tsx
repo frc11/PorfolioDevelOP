@@ -1,474 +1,482 @@
 'use client';
-import { useRef, useEffect, useState } from 'react';
+
+import { useRef, useState } from 'react';
 import Link from 'next/link';
-import { motion, useSpring, useMotionValue, useTransform, useScroll } from 'framer-motion';
+import type { MotionValue } from 'framer-motion';
+import { motion, useMotionValue, useReducedMotion, useScroll, useSpring, useTransform } from 'framer-motion';
+import { Globe, Layers3, MonitorSmartphone, Sparkles } from 'lucide-react';
 import { useTransitionContext } from '@/context/TransitionContext';
 
-// --- SOCIAL LINKS — actualizar según plataformas reales ---
 const socialLinks = {
-    linkedin:  "https://linkedin.com/company/develop-agency", // actualizar
-    instagram: "https://instagram.com/develop.agency",        // actualizar
-    twitter:   "https://twitter.com/develop_agency",          // actualizar
-    email:     "mailto:hola@develop.com.ar"                   // actualizar
+  linkedin: 'https://linkedin.com/company/develop-agency',
+  instagram: 'https://instagram.com/develop.agency',
+  twitter: 'https://twitter.com/develop_agency',
+  email: 'mailto:hola@develop.com.ar',
 };
 
-// --- 1. COMPONENTE: STREAM DE PARTÍCULAS (PRESERVED) ---
-const ParticleStream = ({ side }: { side: 'left' | 'right' }) => {
-    const particleCount = 50;
-    const [particles, setParticles] = useState<any[]>([]);
+const GALLERY_ITEMS = [
+  {
+    eyebrow: 'Portal privado',
+    title: 'Client Portal',
+    description: 'Metricas, entregas y mensajes dentro de una sola vista.',
+    accentFrom: '#22d3ee',
+    accentTo: '#0f172a',
+    glow: 'rgba(34,211,238,0.24)',
+    badge: 'Live',
+  },
+  {
+    eyebrow: 'Software B2B',
+    title: 'Agency Dashboard',
+    description: 'Operaciones, equipo y modulos con una UI sobria y precisa.',
+    accentFrom: '#8b5cf6',
+    accentTo: '#111827',
+    glow: 'rgba(139,92,246,0.22)',
+    badge: 'Suite',
+  },
+  {
+    eyebrow: 'Web premium',
+    title: 'Landing Commerce',
+    description: 'Estructura comercial, velocidad y presencia visual.',
+    accentFrom: '#38bdf8',
+    accentTo: '#0b1120',
+    glow: 'rgba(56,189,248,0.2)',
+    badge: 'Launch',
+  },
+  {
+    eyebrow: 'Automatizacion',
+    title: 'Ops Flow',
+    description: 'Flujos conectados, menos friccion y mas control operativo.',
+    accentFrom: '#a78bfa',
+    accentTo: '#111827',
+    glow: 'rgba(167,139,250,0.22)',
+    badge: 'Flow',
+  },
+];
 
-    useEffect(() => {
-        const newParticles = Array.from({ length: particleCount }).map((_, i) => ({
-            id: i,
-            left: `${Math.random() * 100}%`,
-            height: Math.random() * 200 + 50,
-            width: Math.random() > 0.5 ? 2 : 3,
-            duration: Math.random() * 2 + 1,
-            delay: Math.random() * 2,
-            opacity: Math.random() * 0.4 + 0.3,
-            hue: Math.random() * 360,
-        }));
-        setParticles(newParticles);
-    }, []);
+function PreviewChrome() {
+  return (
+    <div className="flex items-center gap-1.5 border-b border-white/10 px-3 py-2">
+      <span className="h-2.5 w-2.5 rounded-full bg-red-400/70" />
+      <span className="h-2.5 w-2.5 rounded-full bg-yellow-300/70" />
+      <span className="h-2.5 w-2.5 rounded-full bg-emerald-400/70" />
+      <div className="ml-2 h-5 flex-1 rounded-full bg-white/[0.06]" />
+    </div>
+  );
+}
 
-    const isLeft = side === 'left';
+function PreviewSurface({
+  item,
+  compact = false,
+}: {
+  item: (typeof GALLERY_ITEMS)[number];
+  compact?: boolean;
+}) {
+  return (
+    <div
+      className={`relative overflow-hidden rounded-[26px] border border-white/10 bg-[#07090d]/95 shadow-[0_28px_60px_rgba(0,0,0,0.35)] ${compact ? 'h-[170px]' : 'h-[285px]'
+        }`}
+      style={{ boxShadow: `0 24px 60px rgba(0,0,0,0.32), 0 0 40px ${item.glow}` }}
+    >
+      <div
+        className="absolute inset-0 opacity-80"
+        style={{
+          background: `radial-gradient(circle at top left, ${item.accentFrom}55 0%, transparent 45%), linear-gradient(180deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%)`,
+        }}
+      />
+      <PreviewChrome />
 
-    return (
+      <div className="relative z-10 flex h-full flex-col p-4">
+        <div className="flex items-start justify-between">
+          <div>
+            <div className="text-[10px] uppercase tracking-[0.24em] text-zinc-400">{item.eyebrow}</div>
+            <div className="mt-2 text-lg font-semibold tracking-tight text-white">{item.title}</div>
+          </div>
+          <div className="rounded-full border border-white/10 bg-white/[0.05] px-2.5 py-1 text-[10px] uppercase tracking-[0.22em] text-zinc-300">
+            {item.badge}
+          </div>
+        </div>
+
         <div
-            className={`absolute w-[20vw] h-full pointer-events-none overflow-hidden z-0 ${isLeft ? 'left-0 top-0' : 'right-0 top-0'}`}
-            style={{
-                maskImage: 'linear-gradient(to bottom, transparent, black 20%)',
-                WebkitMaskImage: 'linear-gradient(to bottom, transparent, black 20%)'
-            }}
+          className={`mt-4 rounded-[18px] border border-white/10 p-4 ${compact ? 'h-[88px]' : 'h-[118px]'
+            }`}
+          style={{
+            background: `linear-gradient(135deg, ${item.accentFrom}22 0%, ${item.accentTo} 100%)`,
+          }}
         >
-            {particles.map((p) => (
-                <motion.div
-                    key={p.id}
-                    className={`absolute rounded-full ${isLeft ? 'bg-gradient-to-t' : 'bg-gradient-to-b'} from-white via-cyan-400 to-transparent will-change-transform`}
-                    style={{
-                        left: p.left,
-                        height: p.height,
-                        width: p.width,
-                        opacity: p.opacity,
-                        boxShadow: '0 0 10px 2px rgba(255, 255, 255, 0.4)',
-                    }}
-                    animate={{
-                        top: isLeft ? ['-20%', '120%'] : ['120%', '-20%'],
-                        filter: [`hue-rotate(${p.hue}deg)`, `hue-rotate(${p.hue + 180}deg)`],
-                    }}
-                    transition={{
-                        top: {
-                            duration: p.duration,
-                            repeat: Infinity,
-                            ease: "linear",
-                            delay: p.delay,
-                        },
-                        filter: {
-                            duration: p.duration,
-                            repeat: Infinity,
-                            ease: "linear",
-                        }
-                    }}
-                />
-            ))}
-            <div className={`absolute inset-0 bg-gradient-to-r ${isLeft ? 'from-zinc-950 via-zinc-950/20 to-transparent' : 'from-transparent via-zinc-950/20 to-zinc-950'}`} />
-        </div>
-    );
-};
-
-// --- 2. COMPONENTE: ENLACE "ROLLING" ---
-const FlipLink = ({ children, href }: { children: string; href: string }) => {
-    return (
-        <motion.a
-            initial="initial"
-            whileHover="hovered"
-            href={href}
-            className="relative block overflow-hidden whitespace-nowrap text-sm font-mono uppercase tracking-widest text-zinc-500 hover:text-white transition-colors duration-300"
-        >
-            <div className="relative inline-block">
-                <motion.span
-                    variants={{
-                        initial: { y: 0 },
-                        hovered: { y: "-100%" },
-                    }}
-                    transition={{ duration: 0.25, ease: "easeInOut" }}
-                    className="inline-block"
-                >
-                    {children}
-                </motion.span>
-                <motion.span
-                    variants={{
-                        initial: { y: "100%" },
-                        hovered: { y: 0 },
-                    }}
-                    transition={{ duration: 0.25, ease: "easeInOut" }}
-                    className="absolute left-0 top-0 inline-block text-cyan-400 font-bold"
-                >
-                    {children}
-                </motion.span>
+          <div className="flex h-full flex-col justify-between">
+            <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.22em] text-white/75">
+              <Sparkles className="h-3.5 w-3.5" />
+              develOP
             </div>
-        </motion.a>
-    );
-};
+            <div className="max-w-[80%] text-sm font-medium leading-5 text-white/90">{item.description}</div>
+          </div>
+        </div>
 
-// --- 3. COMPONENTE: BOTÓN MAGNÉTICO AVANZADO (BRIGHT FOCUS) ---
-interface MagneticButtonProps {
-    onHoverStart?: () => void;
-    onHoverEnd?: () => void;
-    href: string;
-    isMobile?: boolean;
+        <div className="mt-4 grid grid-cols-3 gap-2">
+          <div className="rounded-xl bg-white/[0.05] p-3">
+            <div className="text-[9px] uppercase tracking-[0.22em] text-zinc-500">UI</div>
+            <div className="mt-2 h-2 rounded-full bg-white/70" />
+            <div className="mt-2 h-2 w-2/3 rounded-full bg-white/20" />
+          </div>
+          <div className="rounded-xl bg-white/[0.05] p-3">
+            <div className="text-[9px] uppercase tracking-[0.22em] text-zinc-500">Core</div>
+            <div className="mt-2 h-2 rounded-full bg-white/80" />
+            <div className="mt-2 h-2 w-1/2 rounded-full bg-white/20" />
+          </div>
+          <div className="rounded-xl bg-white/[0.05] p-3">
+            <div className="text-[9px] uppercase tracking-[0.22em] text-zinc-500">Data</div>
+            <div className="mt-2 h-2 rounded-full bg-white/65" />
+            <div className="mt-2 h-2 w-3/4 rounded-full bg-white/20" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }
 
-const MagneticButton = ({ onHoverStart, onHoverEnd, href, isMobile }: MagneticButtonProps) => {
-    const ref = useRef<HTMLDivElement>(null);
-    const x = useMotionValue(0);
-    const y = useMotionValue(0);
+function BackgroundPortalWall({
+  y,
+  scale,
+}: {
+  y: MotionValue<number>;
+  scale: MotionValue<number>;
+}) {
+  return (
+    <div className="pointer-events-none absolute inset-0 overflow-hidden">
+      <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(8,15,24,0.18)_0%,rgba(7,12,19,0.28)_50%,rgba(4,6,10,0.58)_100%)]" />
 
-    const springConfig = { damping: 20, stiffness: 300, mass: 0.5 };
-    const mouseX = useSpring(x, springConfig);
-    const mouseY = useSpring(y, springConfig);
+      <motion.div
+        className="absolute inset-[-10%]"
+        style={{ y, scale }}
+      >
+        <div
+          className="absolute inset-0 opacity-[0.74] blur-[7px] saturate-[1.18] brightness-[1.2]"
+          style={{
+            backgroundImage: "url('/footer-portal-wall.svg')",
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
+            backgroundSize: 'cover',
+          }}
+        />
+      </motion.div>
 
-    const textX = useTransform(mouseX, (val) => val * 0.3);
-    const textY = useTransform(mouseY, (val) => val * 0.3);
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(4,6,10,0.56)_0%,rgba(4,6,10,0.26)_20%,rgba(4,6,10,0.08)_36%,rgba(4,6,10,0.42)_72%,rgba(4,6,10,0.78)_100%)]" />
+      <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(4,6,10,0.34)_0%,rgba(4,6,10,0.08)_14%,rgba(4,6,10,0.01)_28%,rgba(4,6,10,0.01)_72%,rgba(4,6,10,0.08)_86%,rgba(4,6,10,0.34)_100%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_8%_20%,rgba(34,211,238,0.14)_0%,transparent_20%),radial-gradient(circle_at_12%_78%,rgba(34,211,238,0.12)_0%,transparent_22%),radial-gradient(circle_at_92%_18%,rgba(167,139,250,0.14)_0%,transparent_22%),radial-gradient(circle_at_90%_84%,rgba(34,211,238,0.12)_0%,transparent_20%)]" />
+    </div>
+  );
+}
 
-    const handleMouseMove = (e: React.MouseEvent) => {
-        if (isMobile) return;
-        const { clientX, clientY } = e;
-        const { height, width, left, top } = ref.current!.getBoundingClientRect();
-        const middleX = clientX - (left + width / 2);
-        const middleY = clientY - (top + height / 2);
-        x.set(middleX * 0.8);
-        y.set(middleY * 0.8);
-    };
+function TiltedGallery({
+  items,
+  side,
+}: {
+  items: (typeof GALLERY_ITEMS)[number][];
+  side: 'left' | 'right';
+}) {
+  const shouldReduceMotion = useReducedMotion();
 
-    const reset = () => {
-        if (isMobile) return;
-        x.set(0);
-        y.set(0);
-        if (onHoverEnd) onHoverEnd();
-    };
+  const positions =
+    side === 'left'
+      ? [
+        'left-6 top-2 -rotate-[8deg] z-20',
+        'left-0 top-[238px] rotate-[6deg] z-10',
+      ]
+      : [
+        'right-6 top-2 rotate-[8deg] z-20',
+        'right-0 top-[238px] -rotate-[6deg] z-10',
+      ];
 
-    const handleMouseEnter = () => {
-        if (isMobile) return;
-        if (onHoverStart) onHoverStart();
-    };
+  return (
+    <div className="relative hidden h-[650px] w-[390px] xl:block">
+      {items.map((item, index) => (
+        <motion.div
+          key={`${side}-${item.title}`}
+          initial={{
+            opacity: 0,
+            x: side === 'left' ? -32 : 32,
+            y: 22,
+            rotate: side === 'left' ? -4 : 4,
+          }}
+          whileInView={{
+            opacity: 1,
+            x: 0,
+            y: 0,
+            rotate: 0,
+          }}
+          viewport={{ once: true, margin: '-10%' }}
+          transition={{
+            duration: 0.55,
+            delay: index * 0.08,
+            ease: [0.23, 1, 0.32, 1],
+          }}
+          whileHover={shouldReduceMotion ? undefined : { y: -6, scale: 1.01 }}
+          className={`absolute w-[342px] ${positions[index]}`}
+        >
+          <PreviewSurface item={item} />
+        </motion.div>
+      ))}
+    </div>
+  );
+}
 
-    const { triggerTransition } = useTransitionContext();
-    const [isSimulatingHover, setIsSimulatingHover] = useState(false);
+function FooterLink({ href, children }: { href: string; children: string }) {
+  return (
+    <Link
+      href={href}
+      className="text-[11px] uppercase tracking-[0.28em] text-zinc-500 transition-colors duration-200 hover:text-zinc-200"
+      target={href.startsWith('http') ? '_blank' : undefined}
+      rel={href.startsWith('http') ? 'noreferrer' : undefined}
+    >
+      {children}
+    </Link>
+  );
+}
 
-    const handleClick = (e: React.MouseEvent) => {
-        e.preventDefault();
+function MagneticButton({ href, isMobile = false }: { href: string; isMobile?: boolean }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const { triggerTransition } = useTransitionContext();
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+  const [isSimulatingHover, setIsSimulatingHover] = useState(false);
 
-        if (isMobile) {
-            setIsSimulatingHover(true);
-            if (onHoverStart) onHoverStart();
+  const springConfig = { damping: 20, stiffness: 300, mass: 0.5 };
+  const mouseX = useSpring(x, springConfig);
+  const mouseY = useSpring(y, springConfig);
+  const textX = useTransform(mouseX, (value) => value * 0.3);
+  const textY = useTransform(mouseY, (value) => value * 0.3);
 
-            setTimeout(() => {
-                triggerTransition(href);
-                setTimeout(() => {
-                    setIsSimulatingHover(false);
-                    if (onHoverEnd) onHoverEnd();
-                }, 1000);
-            }, 1500);
-        } else {
-            triggerTransition(href);
-        }
-    };
+  const handleMouseMove = (event: React.MouseEvent) => {
+    if (isMobile || !ref.current) return;
 
-    return (
-        <div onClick={handleClick} className={isMobile ? "cursor-pointer" : "cursor-none"} data-cursor={isMobile ? "" : "hover"}>
-            <motion.div
-                ref={ref}
-                onMouseMove={handleMouseMove}
-                onMouseLeave={reset}
-                onMouseEnter={handleMouseEnter}
-                style={{ x: mouseX, y: mouseY }}
-                className={`relative flex items-center justify-center z-40 block ${isSimulatingHover ? 'group-active-simulated' : 'group'}`}
-                whileHover={!isMobile ? { scale: 1.8 } : {}}
-                animate={isSimulatingHover ? { scale: 1.8 } : { scale: 1 }}
-                transition={{ type: "tween", ease: "circOut", duration: isMobile ? 1.5 : 2.5 }}
+    const { clientX, clientY } = event;
+    const { width, height, left, top } = ref.current.getBoundingClientRect();
+    const middleX = clientX - (left + width / 2);
+    const middleY = clientY - (top + height / 2);
+
+    x.set(middleX * 0.8);
+    y.set(middleY * 0.8);
+  };
+
+  const reset = () => {
+    if (isMobile) return;
+    x.set(0);
+    y.set(0);
+  };
+
+  const handleClick = (event: React.MouseEvent) => {
+    event.preventDefault();
+
+    if (isMobile) {
+      setIsSimulatingHover(true);
+
+      setTimeout(() => {
+        triggerTransition(href);
+
+        setTimeout(() => {
+          setIsSimulatingHover(false);
+        }, 1000);
+      }, 1500);
+    } else {
+      triggerTransition(href);
+    }
+  };
+
+  return (
+    <div
+      onClick={handleClick}
+      className={isMobile ? 'cursor-pointer' : 'cursor-none'}
+      data-cursor={isMobile ? '' : 'hover'}
+    >
+      <motion.div
+        ref={ref}
+        onMouseMove={handleMouseMove}
+        onMouseLeave={reset}
+        style={{ x: mouseX, y: mouseY }}
+        className={`relative flex items-center justify-center ${isSimulatingHover ? 'group-active-simulated' : 'group'
+          }`}
+        whileHover={!isMobile ? { scale: 1.55 } : {}}
+        animate={isSimulatingHover ? { scale: 1.55 } : { scale: 1 }}
+        transition={{ type: 'tween', ease: 'circOut', duration: isMobile ? 1.5 : 2.2 }}
+      >
+        <motion.div
+          className={`relative overflow-hidden rounded-full bg-white transition-shadow duration-500 ${isMobile ? 'h-48 w-48' : 'h-40 w-40 md:h-56 md:w-56'
+            } ${isSimulatingHover
+              ? 'shadow-[0_0_100px_0px_rgba(34,211,238,0.45),0_0_60px_0px_rgba(255,255,255,0.35)]'
+              : 'shadow-[0_0_50px_-10px_rgba(255,255,255,0.3)] group-hover:shadow-[0_0_100px_0px_rgba(34,211,238,0.45),0_0_60px_0px_rgba(255,255,255,0.35)]'
+            }`}
+          whileHover={
+            !isMobile
+              ? {
+                x: [0, -1, 1, -1, 1, 0],
+                y: [0, 1, -1, 1, -1, 0],
+              }
+              : {}
+          }
+          animate={
+            isSimulatingHover
+              ? {
+                x: [0, -1, 1, -1, 1, 0],
+                y: [0, 1, -1, 1, -1, 0],
+              }
+              : { x: 0, y: 0 }
+          }
+          transition={{
+            x: { repeat: Infinity, duration: 0.2, ease: 'linear' },
+            y: { repeat: Infinity, duration: 0.2, ease: 'linear', delay: 0.1 },
+          }}
+        >
+          <div className="absolute inset-0 bg-gradient-to-tr from-white via-zinc-200 to-zinc-100 opacity-100" />
+          <div
+            className={`absolute inset-0 bg-gradient-to-tr from-cyan-50 via-white to-zinc-100 transition-opacity duration-700 ${isSimulatingHover ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+              }`}
+          />
+          <div
+            className={`absolute inset-0 scale-95 rounded-full border transition-colors duration-500 ${isSimulatingHover
+              ? 'border-zinc-400 opacity-50'
+              : 'border-zinc-300 opacity-50 group-hover:border-zinc-400'
+              }`}
+          />
+
+          <motion.div
+            style={{ x: textX, y: textY }}
+            className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center"
+          >
+            <span
+              className={`absolute inset-0 flex items-center justify-center text-center text-xl font-black tracking-tighter text-black transition-opacity duration-300 md:text-2xl ${isSimulatingHover ? 'opacity-0' : 'group-hover:opacity-0'
+                }`}
             >
-                {/* JITTER LAYER */}
-                <motion.div
-                    className={`relative bg-white rounded-full flex items-center justify-center overflow-hidden transition-shadow duration-500
-                        ${isMobile ? "w-56 h-56" : "w-40 h-40 md:w-56 md:h-56"}
-                        ${isSimulatingHover
-                            ? "shadow-[0_0_100px_0px_rgba(34,211,238,0.5),0_0_60px_0px_rgba(255,255,255,0.4)]"
-                            : "shadow-[0_0_50px_-10px_rgba(255,255,255,0.3)] group-hover:shadow-[0_0_100px_0px_rgba(34,211,238,0.5),0_0_60px_0px_rgba(255,255,255,0.4)]"
-                        }
-                    `}
-                    whileHover={!isMobile ? {
-                        x: [0, -1, 1, -1, 1, 0],
-                        y: [0, 1, -1, 1, -1, 0],
-                    } : {}}
-                    animate={isSimulatingHover ? {
-                        x: [0, -1, 1, -1, 1, 0],
-                        y: [0, 1, -1, 1, -1, 0],
-                    } : { x: 0, y: 0 }}
-                    transition={{
-                        x: { repeat: Infinity, duration: 0.2, ease: "linear" },
-                        y: { repeat: Infinity, duration: 0.2, ease: "linear", delay: 0.1 }
-                    }}
-                >
-                    {/* 1. Base Gradient */}
-                    <div className="absolute inset-0 bg-gradient-to-tr from-white via-zinc-200 to-zinc-100 opacity-100" />
+              EMPEZAR
+            </span>
 
-                    {/* 2. Subtle gradient shift on hover */}
-                    <div className={`absolute inset-0 bg-gradient-to-tr from-cyan-50 via-white to-zinc-100 transition-opacity duration-700 ${isSimulatingHover ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`} />
+            <div
+              className={`absolute inset-0 flex items-center justify-center origin-center transform transition-all duration-500 delay-100 ${isSimulatingHover
+                ? 'opacity-100 scale-110 rotate-45'
+                : 'opacity-0 scale-50 rotate-45 group-hover:opacity-100 group-hover:scale-110'
+                }`}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width={isMobile ? '74' : '62'}
+                height={isMobile ? '74' : '62'}
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="black"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="drop-shadow-sm"
+                style={{ transform: 'rotate(-45deg)' }}
+              >
+                <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z" />
+                <path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z" />
+                <path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0" />
+                <path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5" />
+              </svg>
+            </div>
+          </motion.div>
+        </motion.div>
 
-                    {/* 3. Inner Border Ring */}
-                    <div className={`absolute inset-0 rounded-full border scale-95 transition-colors duration-500 ${isSimulatingHover ? 'border-zinc-400 opacity-50' : 'border-zinc-300 opacity-50 group-hover:border-zinc-400'}`} />
-
-                    {/* 4. CONTENT (Text -> Rocket) */}
-                    <motion.div style={{ x: textX, y: textY }} className="relative z-10 flex flex-col items-center gap-12">
-                        {/* Default State: TEXT */}
-                        <span className={`text-xl md:text-2xl pt-6 md:pt-3 font-black text-black tracking-tighter transition-opacity duration-300 absolute ${isSimulatingHover ? 'opacity-0' : 'group-hover:opacity-0'}`}>
-                            EMPEZAR
-                        </span>
-
-                        {/* Hover State: ROCKET ICON */}
-                        <div className={`transform origin-center transition-all duration-500 delay-100 ${isSimulatingHover
-                            ? 'opacity-100 scale-110 rotate-45'
-                            : 'opacity-0 scale-50 rotate-45 group-hover:opacity-100 group-hover:scale-110'
-                            }`}>
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                width={isMobile ? "80" : "64"}
-                                height={isMobile ? "80" : "64"}
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="black"
-                                strokeWidth="1.5"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                className="drop-shadow-sm"
-                                style={{ transform: "rotate(-45deg)" }}
-                            >
-                                <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z" />
-                                <path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z" />
-                                <path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0" />
-                                <path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5" />
-                            </svg>
-                        </div>
-                    </motion.div>
-                </motion.div>
-
-                {/* Shockwaves — borde más visible */}
-                <div className={`absolute inset-0 -z-10 rounded-full border border-white/30 scale-100 animate-[ping_3s_cubic-bezier(0,0,0.2,1)_infinite] transition-opacity duration-1000 ${isSimulatingHover ? 'opacity-0' : 'opacity-30 group-hover:opacity-0'}`} />
-            </motion.div>
-        </div>
-    );
-};
-
-// --- 4. BACKGROUND DINÁMICO (AURORA) ---
-const AuroraBackground = () => {
-    return (
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            {/* Indigo Aura */}
-            <motion.div
-                animate={{
-                    scale: [1, 1.2, 1],
-                    x: [0, 50, -50, 0],
-                    y: [0, -30, 30, 0],
-                    opacity: [0.3, 0.5, 0.3]
-                }}
-                transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-                className="absolute -top-[10%] md:-top-[20%] left-[10%] md:left-[20%] w-[100vw] h-[100vw] md:w-[50vw] md:h-[50vw] bg-indigo-600/40 md:bg-indigo-600/30 rounded-full blur-[100px] md:blur-[100px] mix-blend-screen will-change-transform"
-            />
-            {/* Cyan Aura */}
-            <motion.div
-                animate={{
-                    scale: [1, 1.3, 1],
-                    x: [0, -30, 30, 0],
-                    opacity: [0.2, 0.4, 0.2]
-                }}
-                transition={{ duration: 15, repeat: Infinity, ease: "easeInOut", delay: 2 }}
-                className="absolute top-[20%] md:top-[10%] right-[-20%] md:right-[10%] w-[120vw] h-[120vw] md:w-[40vw] md:h-[40vw] bg-cyan-500/30 md:bg-cyan-500/20 rounded-full blur-[120px] mix-blend-screen will-change-transform"
-            />
-            {/* Violet Aura */}
-            <motion.div
-                animate={{ opacity: [0.3, 0.5, 0.3] }}
-                transition={{ duration: 8, repeat: Infinity }}
-                className="absolute bottom-[20%] md:-bottom-[20%] left-[-10%] md:left-[30%] w-[150vw] h-[100vw] md:w-[60vw] md:h-[40vw] bg-violet-800/60 md:bg-violet-800/20 rounded-full blur-[120px] md:blur-[100px] mix-blend-screen will-change-transform"
-            />
-        </div>
-    )
+        <div
+          className={`absolute inset-0 -z-10 scale-100 rounded-full border border-white/30 animate-[ping_3s_cubic-bezier(0,0,0.2,1)_infinite] transition-opacity duration-1000 ${isSimulatingHover ? 'opacity-0' : 'opacity-30 group-hover:opacity-0'
+            }`}
+        />
+      </motion.div>
+    </div>
+  );
 }
 
-// --- 5. COMPONENTE TWIN: DESKTOP ---
-const FooterDesktop = () => {
-    const containerRef = useRef(null);
-    const { scrollYProgress } = useScroll({
-        target: containerRef,
-        offset: ["start end", "end end"]
-    });
-
-    const [isButtonHovered, setIsButtonHovered] = useState(false);
-    const yText = useTransform(scrollYProgress, [0, 1], [100, 0]);
-    const opacityText = useTransform(scrollYProgress, [0, 0.5], [0, 1]);
-
-    return (
-        <div ref={containerRef} className="relative min-h-screen bg-zinc-950 flex flex-col items-center justify-center overflow-hidden w-full">
-            <motion.div
-                className="absolute inset-0 z-20 bg-black/40 backdrop-blur-[2px] pointer-events-none"
-                animate={{ opacity: isButtonHovered ? 1 : 0 }}
-                transition={{ duration: 0.5, ease: "easeInOut" }}
-            />
-
-            <AuroraBackground />
-            <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 pointer-events-none mix-blend-soft-light" />
-            <ParticleStream side="left" />
-            <ParticleStream side="right" />
-            <div className="absolute top-0 w-full h-64 bg-gradient-to-b from-zinc-950 via-zinc-950/0 to-transparent backdrop-blur-[2px] [mask-image:linear-gradient(to_bottom,black,transparent)] pointer-events-none z-10" />
-
-            {/* Desktop Horizontal Layout */}
-            <div className="relative w-full max-w-[90vw] flex flex-col items-center justify-center pointer-events-none">
-                <motion.div style={{ y: yText, opacity: opacityText }} className="relative z-10 w-full flex justify-center">
-                    <h2 className="text-[13vw] leading-[0.85] font-black text-transparent bg-clip-text bg-gradient-to-b from-white via-zinc-200 to-zinc-400 tracking-tighter text-center select-none pl-2 pr-2 drop-shadow-[0_0_15px_rgba(255,255,255,0.25)] flex gap-4">
-                        ¿LISTO PARA
-                    </h2>
-                </motion.div>
-
-                <div className="my-[-2vw] z-50 pointer-events-auto">
-                    <MagneticButton
-                        onHoverStart={() => setIsButtonHovered(true)}
-                        onHoverEnd={() => setIsButtonHovered(false)}
-                        href="/contact"
-                        isMobile={false}
-                    />
-                </div>
-
-                <motion.div style={{ y: useTransform(yText, (v) => v * -0.5), opacity: opacityText }} className="relative z-10 w-full flex justify-center">
-                    <h2 className="text-[13vw] leading-[0.85] font-black text-transparent bg-clip-text bg-gradient-to-b from-cyan-300 via-cyan-400 to-cyan-600 tracking-tighter text-center select-none pl-5 pr-5 drop-shadow-[0_0_20px_rgba(34,211,238,0.3)] flex">
-                        CRECER?
-                    </h2>
-                </motion.div>
-            </div>
-
-            {/* Bottom Bar Desktop */}
-            <div className="absolute bottom-12 w-full px-8 md:px-16 flex flex-col md:flex-row justify-between items-end gap-8 z-30">
-                <div className="flex flex-col gap-2 text-zinc-500 text-xs font-mono tracking-widest uppercase">
-                    <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                        <span>Systems Operational</span>
-                    </div>
-                    {/* Info de contacto rápido */}
-                    <p className="normal-case tracking-normal font-sans" style={{ fontSize: '13px' }}>
-                        📍 Tucumán, Argentina &nbsp;·&nbsp; 📧 hola@develop.com.ar &nbsp;·&nbsp; ⚡ Respondemos en &lt; 24hs
-                    </p>
-                    <span>© 2026 develOP™ — Tucumán, Argentina</span>
-                </div>
-                <div className="flex gap-10 md:gap-14 pointer-events-auto">
-                    <FlipLink href={socialLinks.linkedin}>LinkedIn</FlipLink>
-                    <FlipLink href={socialLinks.instagram}>Instagram</FlipLink>
-                    <FlipLink href={socialLinks.twitter}>Twitter_X</FlipLink>
-                    <FlipLink href={socialLinks.email}>Email</FlipLink>
-                </div>
-            </div>
-            <div className="absolute bottom-0 w-full h-32 bg-gradient-to-t from-black/50 to-transparent pointer-events-none" />
-        </div>
-    );
-};
-
-// --- 6. COMPONENTE TWIN: MOBILE ---
-const FooterMobile = () => {
-    const containerRef = useRef(null);
-    const { scrollYProgress } = useScroll({
-        target: containerRef,
-        offset: ["start end", "end end"]
-    });
-
-    const [isButtonHovered, setIsButtonHovered] = useState(false);
-    const yText = useTransform(scrollYProgress, [0, 1], [100, 0]);
-    const opacityText = useTransform(scrollYProgress, [0, 0.5], [0, 1]);
-
-    return (
-        <div ref={containerRef} className="relative min-h-[120vh] bg-zinc-950 flex flex-col items-center justify-center overflow-hidden w-full pb-32">
-            <motion.div
-                className="absolute inset-0 z-20 bg-black/50 backdrop-blur-[2px] pointer-events-none"
-                animate={{ opacity: isButtonHovered ? 1 : 0 }}
-                transition={{ duration: 0.5, ease: "easeInOut" }}
-            />
-
-            <AuroraBackground />
-            <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 pointer-events-none mix-blend-soft-light" />
-            <ParticleStream side="left" />
-            <ParticleStream side="right" />
-            <div className="absolute top-0 w-full h-64 bg-gradient-to-b from-zinc-950 via-zinc-950/0 to-transparent backdrop-blur-[2px] [mask-image:linear-gradient(to_bottom,black,transparent)] pointer-events-none z-10" />
-
-            {/* Mobile Vertical Layout stack */}
-            <div className="relative w-full flex flex-col items-center justify-center pointer-events-none gap-6 pt-10">
-
-                {/* Text: ¿LISTO */}
-                <motion.div style={{ y: yText, opacity: opacityText }} className="relative z-10">
-                    <h2 className="text-[25vw] leading-[0.8] font-black text-transparent pl-2 pr-2 bg-clip-text bg-gradient-to-b from-white via-zinc-200 to-zinc-400 tracking-tighter text-center select-none drop-shadow-[0_0_15px_rgba(255,255,255,0.25)]">
-                        ¿LISTO
-                    </h2>
-                </motion.div>
-
-                {/* Text: PARA */}
-                <motion.div style={{ y: yText, opacity: opacityText }} className="relative z-10">
-                    <h2 className="text-[25vw] leading-[0.8] font-black pl-2 pr-2 pb-1 text-transparent bg-clip-text bg-gradient-to-b from-white via-zinc-200 to-zinc-400 tracking-tighter text-center select-none drop-shadow-[0_0_15px_rgba(255,255,255,0.25)]">
-                        PARA
-                    </h2>
-                </motion.div>
-
-                {/* BUTTON MASSIVE FOR MOBILE */}
-                <div className="z-50 pointer-events-auto py-4">
-                    <MagneticButton
-                        onHoverStart={() => setIsButtonHovered(true)}
-                        onHoverEnd={() => setIsButtonHovered(false)}
-                        href="/contact"
-                        isMobile={true}
-                    />
-                </div>
-
-                {/* Text: CRECER? — en cyan */}
-                <motion.div style={{ y: useTransform(yText, (v) => v * -0.5), opacity: opacityText }} className="relative z-10">
-                    <h2 className="text-[25vw] pl-2 pr-2 pb-1 leading-[0.8] font-black text-transparent bg-clip-text bg-gradient-to-b from-cyan-300 via-cyan-400 to-cyan-600 tracking-tighter text-center select-none drop-shadow-[0_0_20px_rgba(34,211,238,0.3)]">
-                        CRECER?
-                    </h2>
-                </motion.div>
-            </div>
-
-            {/* Bottom Bar Mobile */}
-            <div className="absolute bottom-8 w-full flex flex-col items-center justify-center gap-6 z-30 pointer-events-auto">
-                <div className="flex flex-col items-center gap-2 text-zinc-500 text-[10px] font-mono tracking-widest uppercase">
-                    <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                        <span>Systems Operational</span>
-                    </div>
-                </div>
-                {/* Info de contacto rápido */}
-                <p className="text-zinc-500 text-center font-sans normal-case tracking-normal" style={{ fontSize: '13px' }}>
-                    📍 Tucumán, Argentina &nbsp;·&nbsp; 📧 hola@develop.com.ar<br />⚡ Respondemos en &lt; 24hs
-                </p>
-                <div className="flex gap-8 pointer-events-auto opacity-70">
-                    <FlipLink href={socialLinks.linkedin}>IN</FlipLink>
-                    <FlipLink href={socialLinks.instagram}>IG</FlipLink>
-                    <FlipLink href={socialLinks.twitter}>X</FlipLink>
-                    <FlipLink href={socialLinks.email}>MAIL</FlipLink>
-                </div>
-                <p className="text-zinc-500 font-mono text-[10px] tracking-widest uppercase">© 2026 develOP™ — Tucumán, Argentina</p>
-            </div>
-            <div className="absolute bottom-0 w-full h-40 bg-gradient-to-t from-black/80 to-transparent pointer-events-none" />
-        </div>
-    );
-};
-
-// --- 7. EXPORT PRINCIPAL (CONDICIONAL) ---
 export const Footer = () => {
-    return (
-        <footer className="w-full">
-            {/* Desktop View */}
-            <div className="hidden md:block">
-                <FooterDesktop />
+  const ref = useRef<HTMLElement>(null);
+  const shouldReduceMotion = useReducedMotion();
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ['start end', 'end start'],
+  });
+  const wallY = useTransform(scrollYProgress, [0, 1], shouldReduceMotion ? [0, 0] : [-48, 84]);
+  const wallScale = useTransform(scrollYProgress, [0, 1], shouldReduceMotion ? [1.12, 1.12] : [1.12, 1.2]);
+
+  return (
+    <footer ref={ref} className="relative overflow-hidden bg-[#04060a] py-24 md:py-32">
+      <BackgroundPortalWall y={wallY} scale={wallScale} />
+
+      <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_center,rgba(34,211,238,0.09)_0%,transparent_35%),radial-gradient(circle_at_bottom,rgba(139,92,246,0.08)_0%,transparent_32%)]" />
+
+      <div className="relative z-10 mx-auto max-w-[1760px] px-4 sm:px-6 lg:px-8">
+        <div className="grid items-center gap-8 xl:grid-cols-[390px_minmax(0,820px)_390px] xl:gap-10">
+          <TiltedGallery items={GALLERY_ITEMS.slice(0, 2)} side="left" />
+
+          <motion.div
+            initial={{ opacity: 0, y: 28 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: '-10%' }}
+            transition={{ duration: 0.6, ease: [0.23, 1, 0.32, 1] }}
+            className="relative mx-auto flex min-h-[760px] w-full max-w-[820px] flex-col items-center justify-center overflow-hidden rounded-[36px] border border-white/10 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.06)_0%,rgba(255,255,255,0.02)_30%,rgba(6,8,12,0.86)_100%)] px-6 py-16 text-center shadow-[0_40px_100px_rgba(0,0,0,0.35)] backdrop-blur-xl md:px-10"
+          >
+            <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.04)_0%,transparent_18%,transparent_82%,rgba(255,255,255,0.02)_100%)]" />
+
+            <div className="relative z-10 flex flex-col items-center">
+              <div className="inline-flex items-center gap-2 rounded-full border border-cyan-400/15 bg-cyan-400/8 px-4 py-1.5 text-[11px] uppercase tracking-[0.28em] text-cyan-300">
+                <Globe className="h-3.5 w-3.5" />
+                Build with develOP
+              </div>
+
+              <div className="mt-8 text-transparent bg-gradient-to-b from-white via-zinc-200 to-zinc-500 bg-clip-text">
+                <h2 className="text-[16.8vw] font-black leading-[0.9] tracking-[0.16em] md:text-[6.8vw] md:tracking-[0.1em]">
+                  {shouldReduceMotion ? 'LISTO' : <span >¿LISTO</span>}
+                </h2>
+                <h2 className="mt-1.5 text-[10.2vw] font-bold leading-[0.94] tracking-[0.14em] text-zinc-300 md:text-[5.35vw] md:tracking-[0.1em]">
+                  {shouldReduceMotion ? 'PARA' : <span className="block pl-[0.14em]">PARA</span>}
+                </h2>
+              </div>
+
+              <div className="my-8 md:my-10">
+                <MagneticButton href="/contact" isMobile={false} />
+              </div>
+
+              <h2 className="text-[16.8vw] font-black leading-[0.8] tracking-[0.1em] text-transparent bg-gradient-to-b from-cyan-300 via-cyan-400 to-cyan-600 bg-clip-text md:text-[8.5vw] md:tracking-[0.1em]">
+                <span className="block pl-[0.1em] pb-[0.1em]">CRECER?</span>
+              </h2>
+
+              <p className="mt-10 max-w-2xl text-sm leading-7 text-zinc-400 md:text-base">
+                Una experiencia mas sobria, un CTA mas claro y un cierre que sigue teniendo presencia
+                sin depender de efectos pesados.
+              </p>
+
+              <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
+                <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-xs tracking-[0.2em] text-zinc-300 uppercase">
+                  <Layers3 className="h-3.5 w-3.5 text-cyan-300" />
+                  Landing pages
+                </div>
+                <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-xs tracking-[0.2em] text-zinc-300 uppercase">
+                  <MonitorSmartphone className="h-3.5 w-3.5 text-violet-300" />
+                  Client portals
+                </div>
+              </div>
             </div>
 
-            {/* Mobile View */}
-            <div className="block md:hidden">
-                <FooterMobile />
+            <div className="relative z-10 mt-16 flex flex-col items-center gap-6">
+              <div className="text-[11px] uppercase tracking-[0.28em] text-zinc-500">Contacto</div>
+              <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-sm text-zinc-400">
+                <span>Tucuman, Argentina</span>
+                <span className="hidden text-zinc-700 md:inline">|</span>
+                <span>hola@develop.com.ar</span>
+                <span className="hidden text-zinc-700 md:inline">|</span>
+                <span>Respuesta &lt; 24hs</span>
+              </div>
+
+              <div className="flex flex-wrap justify-center gap-5 pt-2">
+                <FooterLink href={socialLinks.linkedin}>LinkedIn</FooterLink>
+                <FooterLink href={socialLinks.instagram}>Instagram</FooterLink>
+                <FooterLink href={socialLinks.twitter}>Twitter_X</FooterLink>
+                <FooterLink href={socialLinks.email}>Email</FooterLink>
+              </div>
             </div>
-        </footer>
-    );
+          </motion.div>
+
+          <TiltedGallery items={GALLERY_ITEMS.slice(2, 4)} side="right" />
+        </div>
+      </div>
+    </footer>
+  );
 };
