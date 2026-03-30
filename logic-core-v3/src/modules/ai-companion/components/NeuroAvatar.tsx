@@ -1,8 +1,9 @@
 'use client';
 
-import { type ComponentRef, useRef } from 'react';
+import { type ComponentRef, useEffect, useRef } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { Environment, Float, MeshDistortMaterial } from '@react-three/drei';
+import type { Message } from 'ai';
 import * as THREE from 'three';
 
 export type AvatarPhase = 'dormant' | 'initializing' | 'stabilizing' | 'active';
@@ -15,6 +16,9 @@ interface NeuroAvatarProps {
     isOpen?: boolean;
     phase?: AvatarPhase;
     scrollSection?: string;
+    messagePulse?: number;
+    lastMessageRole?: Message['role'];
+    hoverPulse?: number;
 }
 
 const PALETTE = {
@@ -106,17 +110,26 @@ function QuantumEye({
     isThinking,
     showPrompt,
     isBooped,
+    hoverPulse,
     isRight,
 }: {
     positionX: number;
     isThinking: boolean;
     showPrompt: boolean;
     isBooped: boolean;
+    hoverPulse: number;
     isRight?: boolean;
 }) {
     const meshRef = useRef<THREE.Mesh>(null);
     const matRef = useRef<THREE.MeshStandardMaterial>(null);
     const winkTimeRef = useRef(0);
+    const hoverTimeRef = useRef(1);
+
+    useEffect(() => {
+        if (hoverPulse > 0) {
+            hoverTimeRef.current = 0;
+        }
+    }, [hoverPulse]);
 
     useFrame((_, delta) => {
         if (!meshRef.current) {
@@ -126,6 +139,13 @@ function QuantumEye({
         let targetSX = 1;
         let targetSY = 1;
         let targetSZ = 1;
+
+        const idleBlinkCycle = ((_.clock.elapsedTime + (isRight ? 0.04 : 0)) % 4.8) / 4.8;
+        const idleBlink = !isBooped && !showPrompt && !isThinking && idleBlinkCycle > 0.94
+            ? Math.sin(((idleBlinkCycle - 0.94) / 0.06) * Math.PI)
+            : 0;
+        hoverTimeRef.current = Math.min(1, hoverTimeRef.current + delta * 1.9);
+        const hoverWave = Math.sin(hoverTimeRef.current * Math.PI) * (1 - hoverTimeRef.current);
 
         if (isBooped) {
             targetSX = 1.4;
@@ -152,12 +172,19 @@ function QuantumEye({
 
             if (isThinking) {
                 targetSX = 1.05;
-                targetSY = 1.1;
+                targetSY = 1.15;
             } else {
                 targetSX = 1.1;
                 targetSY = 0.75;
             }
         }
+
+        if (idleBlink > 0) {
+            targetSY = THREE.MathUtils.lerp(targetSY, 0.08, idleBlink);
+        }
+
+        targetSX += hoverWave * 0.22;
+        targetSY += hoverWave * 0.36;
 
         meshRef.current.scale.x = springLerp(meshRef.current.scale.x, targetSX, delta, EYE_SPRING);
         meshRef.current.scale.y = springLerp(meshRef.current.scale.y, targetSY, delta, EYE_SPRING);
@@ -188,17 +215,26 @@ function Eyebrow({
     isThinking,
     showPrompt,
     isBooped,
+    hoverPulse,
 }: {
     side: 'left' | 'right';
     isThinking: boolean;
     showPrompt: boolean;
     isBooped: boolean;
+    hoverPulse: number;
 }) {
     const meshRef = useRef<THREE.Mesh>(null);
     const matRef = useRef<THREE.MeshStandardMaterial>(null);
     const isLeft = side === 'left';
     const baseX = isLeft ? -0.2 : 0.2;
     const baseRotZ = Math.PI / 2;
+    const hoverTimeRef = useRef(1);
+
+    useEffect(() => {
+        if (hoverPulse > 0) {
+            hoverTimeRef.current = 0;
+        }
+    }, [hoverPulse]);
 
     useFrame((state, delta) => {
         if (!meshRef.current) {
@@ -208,6 +244,8 @@ function Eyebrow({
         const time = state.clock.elapsedTime;
         let targetY = 0.2;
         let expressionRot = 0;
+        hoverTimeRef.current = Math.min(1, hoverTimeRef.current + delta * 1.7);
+        const hoverWave = Math.sin(hoverTimeRef.current * Math.PI) * (1 - hoverTimeRef.current);
 
         if (isBooped) {
             targetY = 0.26;
@@ -218,6 +256,9 @@ function Eyebrow({
         } else if (isThinking) {
             targetY = 0.22;
         }
+
+        targetY += hoverWave * 0.12;
+        expressionRot += (isLeft ? 1 : -1) * hoverWave * 0.18;
 
         meshRef.current.position.y = springLerp(meshRef.current.position.y, targetY, delta, FACE_SPRING);
         meshRef.current.rotation.z = springLerp(
@@ -251,18 +292,49 @@ function Mouth({
     isThinking,
     showPrompt,
     isBooped,
+    messagePulse,
+    lastMessageRole,
+    hoverPulse,
 }: {
     isThinking: boolean;
     showPrompt: boolean;
     isBooped: boolean;
+    messagePulse: number;
+    lastMessageRole: Message['role'];
+    hoverPulse: number;
 }) {
     const meshRef = useRef<THREE.Mesh>(null);
     const matRef = useRef<THREE.MeshStandardMaterial>(null);
+    const reactionRef = useRef({ send: 0, receive: 0 });
+    const hoverTimeRef = useRef(1);
+
+    useEffect(() => {
+        if (messagePulse === 0) {
+            return;
+        }
+
+        if (lastMessageRole === 'user') {
+            reactionRef.current.send = 1;
+        } else if (lastMessageRole === 'assistant') {
+            reactionRef.current.receive = 1;
+        }
+    }, [lastMessageRole, messagePulse]);
+
+    useEffect(() => {
+        if (hoverPulse > 0) {
+            hoverTimeRef.current = 0;
+        }
+    }, [hoverPulse]);
 
     useFrame((_, delta) => {
         if (!meshRef.current) {
             return;
         }
+
+        reactionRef.current.send = Math.max(0, reactionRef.current.send - delta * 1.9);
+        reactionRef.current.receive = Math.max(0, reactionRef.current.receive - delta * 1.55);
+        hoverTimeRef.current = Math.min(1, hoverTimeRef.current + delta * 1.6);
+        const hoverWave = Math.sin(hoverTimeRef.current * Math.PI) * (1 - hoverTimeRef.current);
 
         let targetSX = 0.7;
         let targetSY = 0.7;
@@ -280,7 +352,15 @@ function Mouth({
             targetSX = 0.8;
             targetSY = 0.15;
             targetSZ = 0.8;
+        } else if (reactionRef.current.send > 0.01 || reactionRef.current.receive > 0.01) {
+            targetSX = 0.92 + reactionRef.current.receive * 0.2;
+            targetSY = 0.84 + reactionRef.current.send * 0.28;
+            targetSZ = 0.92;
         }
+
+        targetSX += hoverWave * 0.1;
+        targetSY += hoverWave * 0.24;
+        targetSZ += hoverWave * 0.08;
 
         meshRef.current.scale.x = springLerp(meshRef.current.scale.x, targetSX, delta, FACE_SPRING);
         meshRef.current.scale.y = springLerp(meshRef.current.scale.y, targetSY, delta, FACE_SPRING);
@@ -318,6 +398,9 @@ interface JellyBodyProps {
     isBooped: boolean;
     isHovered: boolean;
     isOpen: boolean;
+    messagePulse: number;
+    lastMessageRole: Message['role'];
+    hoverPulse: number;
 }
 
 type DistortMaterialHandle = ComponentRef<typeof MeshDistortMaterial>;
@@ -328,16 +411,46 @@ function JellyBody({
     isBooped,
     isHovered,
     isOpen,
+    messagePulse,
+    lastMessageRole,
+    hoverPulse,
 }: JellyBodyProps) {
     const meshRef = useRef<THREE.Mesh>(null);
     const faceGroupRef = useRef<THREE.Group>(null);
     const bodyMatRef = useRef<DistortMaterialHandle | null>(null);
     const boopTimeRef = useRef(0);
+    const messageReactionRef = useRef({ send: 0, receive: 0 });
+    const hoverTimeRef = useRef(1);
+
+    useEffect(() => {
+        if (messagePulse === 0) {
+            return;
+        }
+
+        if (lastMessageRole === 'user') {
+            messageReactionRef.current.send = 1;
+        } else if (lastMessageRole === 'assistant') {
+            messageReactionRef.current.receive = 1;
+        }
+    }, [lastMessageRole, messagePulse]);
+
+    useEffect(() => {
+        if (hoverPulse > 0) {
+            hoverTimeRef.current = 0;
+        }
+    }, [hoverPulse]);
 
     useFrame((state, delta) => {
         if (!meshRef.current) {
             return;
         }
+
+        messageReactionRef.current.send = Math.max(0, messageReactionRef.current.send - delta * 1.65);
+        messageReactionRef.current.receive = Math.max(0, messageReactionRef.current.receive - delta * 1.35);
+        const sendWave = Math.sin((1 - messageReactionRef.current.send) * Math.PI) * messageReactionRef.current.send;
+        const receiveWave = Math.sin((1 - messageReactionRef.current.receive) * Math.PI * 1.25) * messageReactionRef.current.receive;
+        hoverTimeRef.current = Math.min(1, hoverTimeRef.current + delta * 1.45);
+        const hoverWave = Math.sin(hoverTimeRef.current * Math.PI) * (1 - hoverTimeRef.current);
 
         if (bodyMatRef.current?.emissive) {
             bodyMatRef.current.emissive.lerp(activeColorRef.current, delta * 3);
@@ -393,6 +506,10 @@ function JellyBody({
         let targetSY = 1;
         let targetSZ = 1;
         let targetPY = 0;
+        const time = state.clock.elapsedTime;
+        const idleBreath = Math.sin(time * 1.15) * 0.035 + Math.sin(time * 0.42 + 1.4) * 0.018;
+        const idleSway = Math.sin(time * 0.7) * 0.055;
+        const idleNod = Math.cos(time * 0.58) * 0.025;
 
         if (showPrompt) {
             targetSX = 1.1;
@@ -400,14 +517,16 @@ function JellyBody({
             targetSZ = 1.1;
             targetPY = -0.1;
         } else if (isThinking) {
-            targetSY = 1.03;
+            targetSX = 1.05;
+            targetSY = 1.12;
+            targetSZ = 1.02;
             targetPY = 0.05;
-        } else if (isHovered) {
-            targetSX = 1.04;
-            targetSY = 0.98;
-            targetSZ = 1.04;
-            targetPY = -0.03;
         }
+
+        targetSX += idleBreath * 0.85 + receiveWave * 0.14 + hoverWave * 0.12;
+        targetSY += idleBreath * 1.1 + sendWave * 0.16 + hoverWave * 0.1;
+        targetSZ += idleBreath * 0.65 + receiveWave * 0.1 + hoverWave * 0.12;
+        targetPY += Math.sin(time * 1.35) * 0.03 + sendWave * 0.12 + receiveWave * 0.08;
 
         meshRef.current.scale.x = springLerp(meshRef.current.scale.x, targetSX, delta);
         meshRef.current.scale.y = springLerp(meshRef.current.scale.y, targetSY, delta);
@@ -423,14 +542,25 @@ function JellyBody({
                 gazeTargetY = -0.5;
                 gazeTargetX = 0.3;
                 gazeOffsetX = -0.05;
+            } else if (isThinking) {
+                gazeTargetY = Math.sin(time * 2.2) * 0.32;
+                gazeTargetX = 0.08 + Math.cos(time * 1.9) * 0.12;
+                gazeOffsetX = Math.sin(time * 1.6) * 0.035;
             } else if (isOpen) {
                 gazeTargetY = -0.4;
                 gazeTargetX = 0.1;
                 gazeOffsetX = -0.08;
             } else if (isHovered) {
-                gazeTargetY = -0.18;
-                gazeTargetX = 0.02;
+                gazeTargetY = 0;
+                gazeTargetX = 0;
+            } else {
+                gazeTargetY = Math.sin(time * 0.44) * 0.2 + sendWave * 0.06;
+                gazeTargetX = Math.cos(time * 0.38) * 0.08 + receiveWave * 0.04;
+                gazeOffsetX = Math.sin(time * 0.62) * 0.02;
             }
+
+            gazeTargetY += hoverWave * 0.12 * (isHovered ? 1 : 0.6);
+            gazeTargetX += hoverWave * 0.06;
 
             faceGroupRef.current.rotation.y = springLerp(
                 faceGroupRef.current.rotation.y,
@@ -453,11 +583,20 @@ function JellyBody({
             faceGroupRef.current.position.y = springLerp(faceGroupRef.current.position.y, 0.12, delta, FACE_SPRING);
         }
 
-        const time = state.clock.elapsedTime;
         meshRef.current.rotation.z = THREE.MathUtils.lerp(
             meshRef.current.rotation.z,
-            isThinking ? Math.sin(time * 1.8) * 0.02 : 0,
+            (isThinking ? Math.sin(time * 1.8) * 0.05 : idleSway) + receiveWave * 0.08 + hoverWave * 0.05,
             delta * 3,
+        );
+        meshRef.current.rotation.x = THREE.MathUtils.lerp(
+            meshRef.current.rotation.x,
+            (isThinking ? 0.06 + Math.cos(time * 2.1) * 0.03 : idleNod) + sendWave * 0.06 + hoverWave * 0.08,
+            delta * 3,
+        );
+        meshRef.current.rotation.y = THREE.MathUtils.lerp(
+            meshRef.current.rotation.y,
+            Math.sin(time * 0.5) * 0.08 - sendWave * 0.05 + hoverWave * 0.04,
+            delta * 2.5,
         );
     });
 
@@ -474,22 +613,30 @@ function JellyBody({
                 clearcoatRoughness={0.1}
                 metalness={0.2}
                 roughness={0.1}
-                distort={isThinking ? 0.35 : showPrompt ? 0.15 : isHovered ? 0.24 : 0.3}
-                speed={isThinking ? 2.5 : showPrompt ? 1 : isHovered ? 1.6 : 2}
+                distort={isThinking ? 0.35 : showPrompt ? 0.15 : 0.3}
+                speed={isThinking ? 2.5 : showPrompt ? 1 : 2}
             />
 
             <group ref={faceGroupRef} position={[0, 0.12, 1]}>
-                <QuantumEye positionX={-0.22} isThinking={isThinking} showPrompt={showPrompt} isBooped={isBooped} />
+                <QuantumEye positionX={-0.22} isThinking={isThinking} showPrompt={showPrompt} isBooped={isBooped} hoverPulse={hoverPulse} />
                 <QuantumEye
                     positionX={0.22}
                     isThinking={isThinking}
                     showPrompt={showPrompt}
                     isBooped={isBooped}
+                    hoverPulse={hoverPulse}
                     isRight
                 />
-                <Eyebrow side="left" isThinking={isThinking} showPrompt={showPrompt} isBooped={isBooped} />
-                <Eyebrow side="right" isThinking={isThinking} showPrompt={showPrompt} isBooped={isBooped} />
-                <Mouth isThinking={isThinking} showPrompt={showPrompt} isBooped={isBooped} />
+                <Eyebrow side="left" isThinking={isThinking} showPrompt={showPrompt} isBooped={isBooped} hoverPulse={hoverPulse} />
+                <Eyebrow side="right" isThinking={isThinking} showPrompt={showPrompt} isBooped={isBooped} hoverPulse={hoverPulse} />
+                <Mouth
+                    isThinking={isThinking}
+                    showPrompt={showPrompt}
+                    isBooped={isBooped}
+                    messagePulse={messagePulse}
+                    lastMessageRole={lastMessageRole}
+                    hoverPulse={hoverPulse}
+                />
             </group>
         </mesh>
     );
@@ -502,6 +649,9 @@ export function NeuroAvatar({
     isHovered = false,
     isOpen = false,
     phase = 'active',
+    messagePulse = 0,
+    lastMessageRole = 'assistant',
+    hoverPulse = 0,
 }: NeuroAvatarProps) {
     const keyLightRef = useRef<THREE.PointLight>(null);
     const isVisible = phase !== 'dormant';
@@ -509,7 +659,7 @@ export function NeuroAvatar({
 
     return (
         <div
-            className="fixed bottom-3 right-3 z-[110] flex h-56 w-56 items-center justify-center pointer-events-none transition-[opacity,transform] duration-700 ease-out"
+            className="fixed bottom-3 right-3 z-[96] flex h-44 w-44 items-center justify-center pointer-events-none transition-[opacity,transform] duration-700 ease-out md:h-56 md:w-56"
             style={{
                 opacity: isVisible ? 1 : 0,
                 transform: `scale(${wrapperScale})`,
@@ -537,13 +687,20 @@ export function NeuroAvatar({
                 <pointLight position={[-2, -1, -2]} intensity={3} color="#8b5cf6" decay={2} />
                 <Environment preset="city" />
 
-                <Float speed={2} rotationIntensity={0.5} floatIntensity={1}>
+                <Float
+                    speed={isThinking ? 3.4 : 2.35}
+                    rotationIntensity={0.65}
+                    floatIntensity={isOpen ? 0.85 : 1.35}
+                >
                     <JellyBody
                         isThinking={isThinking}
                         showPrompt={showPrompt}
                         isBooped={isBooped}
                         isHovered={isHovered}
                         isOpen={isOpen}
+                        messagePulse={messagePulse}
+                        lastMessageRole={lastMessageRole}
+                        hoverPulse={hoverPulse}
                     />
                 </Float>
             </Canvas>

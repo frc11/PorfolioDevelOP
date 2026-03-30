@@ -1,19 +1,21 @@
 'use client';
 
-import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useRef, useEffect, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import type { Message } from 'ai';
-import { Send, Sparkles, Activity } from 'lucide-react';
+import { Send, Sparkles } from 'lucide-react';
+
+type TextPart = { type?: string; text?: string };
 
 /** Safely extract text content from AI SDK messages (handles string, array, undefined) */
-function getTextContent(message: any): string {
+function getTextContent(message: { content?: unknown } | null | undefined): string {
     const content = message?.content;
     if (typeof content === 'string') return content;
     if (Array.isArray(content)) {
         return content
-            .filter((part: any) => part?.type === 'text')
-            .map((part: any) => part.text || '')
+            .filter((part: unknown): part is TextPart => !!part && typeof part === 'object' && (part as TextPart).type === 'text')
+            .map((part) => part.text || '')
             .join('');
     }
     return '';
@@ -24,7 +26,7 @@ function getTextContent(message: any): string {
 interface ChatWindowProps {
     messages: Message[];
     input: string;
-    handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    handleInputChange: (e: React.ChangeEvent<HTMLTextAreaElement> | React.ChangeEvent<HTMLInputElement>) => void;
     handleSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
     isOpen: boolean;
     isThinking: boolean;
@@ -41,9 +43,8 @@ export function ChatWindow({
     onClose,
 }: ChatWindowProps) {
     const messagesEndRef = useRef<HTMLDivElement>(null);
-    const inputRef = useRef<HTMLInputElement>(null);
+    const inputRef = useRef<HTMLTextAreaElement>(null);
     const [showCursor, setShowCursor] = useState(true);
-    const prefersReducedMotion = useReducedMotion();
 
     // Focus input when chat opens
     useEffect(() => {
@@ -62,14 +63,13 @@ export function ChatWindow({
 
     // Blinking cursor effect for AI responses
     useEffect(() => {
-        if (isThinking) {
-            const interval = setInterval(() => {
-                setShowCursor((prev) => !prev);
-            }, 530);
-            return () => clearInterval(interval);
-        } else {
-            setShowCursor(false);
-        }
+        if (!isThinking) return;
+
+        const interval = setInterval(() => {
+            setShowCursor((prev) => !prev);
+        }, 530);
+
+        return () => clearInterval(interval);
     }, [isThinking]);
 
     const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -100,10 +100,10 @@ export function ChatWindow({
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.98, y: 10 }}
                         transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-                        className="fixed bottom-28 right-32 z-[100] flex flex-col"
+                        className="fixed bottom-4 left-4 right-4 z-[100] flex flex-col md:bottom-[16rem] md:left-auto md:right-6 md:w-[420px]"
                         style={{
                             pointerEvents: 'auto',
-                            background: 'rgba(6, 8, 18, 0.85)',
+                            background: 'linear-gradient(180deg, rgba(11, 14, 28, 0.92) 0%, rgba(6, 8, 18, 0.9) 100%)',
                             backdropFilter: 'blur(32px)',
                             WebkitBackdropFilter: 'blur(32px)',
                             border: '1px solid rgba(255,255,255,0.09)',
@@ -116,7 +116,6 @@ export function ChatWindow({
                             `,
                             borderRadius: '24px',
                             overflow: 'hidden',
-                            width: 'clamp(320px, 90vw, 420px)',
                             maxHeight: '72vh',
                         }}
                         role="dialog"
@@ -146,20 +145,21 @@ export function ChatWindow({
 
                             {/* Avatar mini del asistente */}
                             <div style={{
-                                width: '32px', height: '32px',
+                                width: '36px', height: '36px',
                                 borderRadius: '50%',
-                                background: 'linear-gradient(135deg, rgba(60,100,255,0.3), rgba(120,60,255,0.3))',
-                                border: '1px solid rgba(100,150,255,0.25)',
+                                background: 'radial-gradient(circle at 35% 35%, rgba(118,165,255,0.95) 0%, rgba(84,120,255,0.38) 42%, rgba(120,85,255,0.16) 100%)',
+                                border: '1px solid rgba(130,165,255,0.28)',
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
                                 flexShrink: 0,
+                                boxShadow: '0 0 22px rgba(84,120,255,0.18)',
                             }}>
                                 <div style={{
-                                    width: '10px', height: '10px',
+                                    width: '18px', height: '18px',
                                     borderRadius: '50%',
-                                    background: 'radial-gradient(circle, rgba(100,160,255,1) 0%, rgba(80,100,255,0.4) 70%, transparent 100%)',
-                                    boxShadow: '0 0 8px rgba(80,140,255,0.8)',
+                                    background: 'radial-gradient(circle, rgba(215,232,255,0.98) 0%, rgba(143,176,255,0.55) 58%, rgba(80,100,255,0.1) 100%)',
+                                    boxShadow: '0 0 14px rgba(120,168,255,0.55)',
                                 }} />
                             </div>
 
@@ -207,22 +207,22 @@ export function ChatWindow({
                         </div>
 
                         {/* Messages Area */}
-                        <div className="flex-1 min-h-0 overflow-y-auto p-6 space-y-6 chat-messages-area"
+                        <div className="chat-messages-area flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto p-5 md:p-6"
                             data-lenis-prevent
                             onWheel={(e) => e.stopPropagation()}
                             style={{ 
                                 overscrollBehavior: 'contain', 
                                 WebkitOverflowScrolling: 'touch',
                                 scrollbarWidth: 'thin',
-                                scrollbarColor: 'rgba(255,255,255,0.1) transparent'
+                                scrollbarColor: 'rgba(255,255,255,0.12) transparent'
                             }}
                             role="log"
                             aria-live="polite"
                         >
                             <AnimatePresence initial={false}>
                                 {messages.length === 0 ? (
-                                    <div className="flex flex-col items-center justify-center h-full text-center space-y-4 opacity-70">
-                                        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-cyan-500/10 to-purple-500/10 border border-white/5 flex items-center justify-center shadow-[0_0_30px_rgba(6,182,212,0.1)]">
+                                    <div className="flex h-full flex-col items-center justify-center space-y-4 py-6 text-center opacity-75">
+                                        <div className="flex h-16 w-16 items-center justify-center rounded-[1.35rem] border border-white/6 bg-gradient-to-br from-cyan-500/10 to-purple-500/10 shadow-[0_0_30px_rgba(6,182,212,0.1)]">
                                             <Sparkles className="w-6 h-6 text-cyan-400/80" />
                                         </div>
                                         <div>
@@ -258,21 +258,24 @@ export function ChatWindow({
                                             className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}
                                         >
                                             <div style={{
-                                                maxWidth: '85%',
-                                                padding: '10px 14px',
+                                                maxWidth: '86%',
+                                                padding: m.role === 'user' ? '11px 15px' : '12px 15px',
                                                 fontSize: '13px',
-                                                lineHeight: 1.65,
+                                                lineHeight: 1.68,
                                                 fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+                                                boxShadow: m.role === 'user'
+                                                    ? '0 12px 28px rgba(39,56,126,0.18)'
+                                                    : '0 10px 24px rgba(0,0,0,0.18)',
                                                 ...(m.role === 'user' ? {
-                                                    background: 'linear-gradient(135deg, rgba(60,90,255,0.18), rgba(100,60,255,0.12))',
-                                                    border: '1px solid rgba(80,100,255,0.25)',
-                                                    borderRadius: '16px 4px 16px 16px',
-                                                    color: 'rgba(255,255,255,0.88)',
+                                                    background: 'linear-gradient(135deg, rgba(69,97,255,0.22), rgba(108,72,255,0.14))',
+                                                    border: '1px solid rgba(101,124,255,0.26)',
+                                                    borderRadius: '18px 6px 18px 18px',
+                                                    color: 'rgba(255,255,255,0.92)',
                                                 } : {
-                                                    background: 'rgba(255,255,255,0.04)',
+                                                    background: 'rgba(255,255,255,0.045)',
                                                     border: '1px solid rgba(255,255,255,0.07)',
-                                                    borderRadius: '4px 16px 16px 16px',
-                                                    color: 'rgba(255,255,255,0.82)',
+                                                    borderRadius: '8px 18px 18px 18px',
+                                                    color: 'rgba(255,255,255,0.84)',
                                                 })
                                             }}>
                                                 <div className="prose prose-invert prose-sm max-w-none">
@@ -433,28 +436,29 @@ export function ChatWindow({
                         <form
                             onSubmit={handleFormSubmit}
                             style={{ 
-                                padding: '12px 14px', 
+                                padding: '14px', 
                                 borderTop: '1px solid rgba(255,255,255,0.06)',
-                                background: 'rgba(255,255,255,0.015)',
+                                background: 'rgba(255,255,255,0.018)',
                                 display: 'flex',
-                                gap: '8px',
+                                gap: '10px',
                                 alignItems: 'flex-end',
                             }}
                         >
                             <div style={{
                                 flex: 1,
-                                background: 'rgba(255,255,255,0.04)',
-                                border: '1px solid rgba(255,255,255,0.09)',
-                                borderRadius: '14px',
-                                padding: '10px 14px',
+                                background: 'rgba(255,255,255,0.045)',
+                                border: '1px solid rgba(255,255,255,0.08)',
+                                borderRadius: '16px',
+                                padding: '11px 14px',
                                 position: 'relative',
                                 transition: 'all 200ms',
+                                boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.03)',
                             }}>
                                 <textarea
-                                    ref={inputRef as any}
+                                    ref={inputRef}
                                     value={input}
                                     onChange={(e) => {
-                                        handleInputChange(e as any);
+                                        handleInputChange(e);
                                         e.currentTarget.style.height = 'auto';
                                         e.currentTarget.style.height = e.currentTarget.scrollHeight + 'px';
                                     }}
@@ -490,7 +494,7 @@ export function ChatWindow({
                                 transition={{ type: 'spring', stiffness: 400, damping: 15 }}
                                 disabled={isThinking || !input.trim()}
                                 style={{
-                                    width: '36px', height: '36px',
+                                    width: '40px', height: '40px',
                                     borderRadius: '50%',
                                     border: 'none',
                                     cursor: isThinking || !input.trim() ? 'not-allowed' : 'pointer',
@@ -501,15 +505,13 @@ export function ChatWindow({
                                     alignItems: 'center',
                                     justifyContent: 'center',
                                     flexShrink: 0,
-                                    boxShadow: isThinking || !input.trim() ? 'none' : '0 0 16px rgba(80,100,255,0.3)',
+                                    boxShadow: isThinking || !input.trim() ? 'none' : '0 0 18px rgba(80,100,255,0.32)',
                                     transition: 'all 200ms',
+                                    color: 'white',
                                 }}
                                 aria-label="Send message"
                             >
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round">
-                                    <line x1="22" y1="2" x2="11" y2="13" />
-                                    <polygon points="22 2 15 22 11 13 2 9 22 2" />
-                                </svg>
+                                <Send size={15} strokeWidth={2.25} />
                             </motion.button>
                         </form>
                     </motion.div>

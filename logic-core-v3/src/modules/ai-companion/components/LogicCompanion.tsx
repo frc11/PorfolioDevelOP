@@ -60,6 +60,7 @@ export function LogicCompanion() {
     const [promptIndex, setPromptIndex] = useState(0);
     const [isBooped, setIsBooped] = useState(false);
     const [isHovered, setIsHovered] = useState(false);
+    const [hoverPulse, setHoverPulse] = useState(0);
     const [phase] = useState<AvatarPhase>('active');
     const [scrollSection, setScrollSection] = useState<string>('top');
     const { messages, input, handleInputChange, handleSubmit, isThinking } = useLogicAI();
@@ -67,6 +68,8 @@ export function LogicCompanion() {
     const idleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const rotationTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
     const hasShownOnceRef = useRef(false);
+    const messagePulse = Math.max(0, messages.length - 1);
+    const lastMessageRole = messages[messages.length - 1]?.role ?? 'assistant';
 
     // ─── Buoyancy / Scroll Linked Motion ──────────────────
     useEffect(() => {
@@ -296,7 +299,10 @@ export function LogicCompanion() {
             {/* ── NeuroAvatar ──────────────────────────────── */}
             <div 
                 onClick={handleAvatarClick} 
-                onMouseEnter={() => setIsHovered(true)}
+                onMouseEnter={() => {
+                    setIsHovered(true);
+                    setHoverPulse((prev) => prev + 1);
+                }}
                 onMouseLeave={() => setIsHovered(false)}
                 role="button" 
                 aria-label="Toggle AI Chat"
@@ -310,6 +316,9 @@ export function LogicCompanion() {
                     isOpen={isOpen} 
                     phase={phase}
                     scrollSection={scrollSection}
+                    messagePulse={messagePulse}
+                    lastMessageRole={lastMessageRole}
+                    hoverPulse={hoverPulse}
                 />
             </div>
 
