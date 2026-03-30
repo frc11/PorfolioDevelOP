@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { motion, AnimatePresence, useMotionValue, useSpring } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import { NeuroAvatar, AvatarPhase } from './NeuroAvatar';
 import { ChatWindow } from './ChatWindow';
 import { useLogicAI } from '../hooks/useLogicAI';
@@ -60,36 +60,20 @@ export function LogicCompanion() {
     const [promptIndex, setPromptIndex] = useState(0);
     const [isBooped, setIsBooped] = useState(false);
     const [isHovered, setIsHovered] = useState(false);
-    const [phase, setPhase] = useState<AvatarPhase>('dormant');
+    const [phase] = useState<AvatarPhase>('active');
     const [scrollSection, setScrollSection] = useState<string>('top');
-    const { messages, input, handleInputChange, handleSubmit, isThinking, leadContext, updateLeadContext } = useLogicAI();
+    const { messages, input, handleInputChange, handleSubmit, isThinking } = useLogicAI();
 
-    const scrollYRef = useRef(0);
     const idleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const rotationTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
     const hasShownOnceRef = useRef(false);
 
     // ─── Buoyancy / Scroll Linked Motion ──────────────────
-    const avatarY = useMotionValue(0);
-    const smoothScrollOffset = useSpring(0, { stiffness: 30, damping: 20 });
-
     useEffect(() => {
-        const checkMobile = () => window.innerWidth < 768;
-        
         function handleScroll() {
             const y = window.scrollY;
-            scrollYRef.current = y;
 
-            // 1. Update Buoyancy (Disabled on mobile)
-            if (!checkMobile()) {
-                // Move up slightly as we scroll down (max -20px)
-                const targetOffset = Math.max(-20, y * -0.015);
-                smoothScrollOffset.set(targetOffset);
-            } else {
-                smoothScrollOffset.set(0);
-            }
-
-            // 2. Detect Active Section
+            // 1. Detect Active Section
             const sections = document.querySelectorAll('section[id]');
             let current = 'top';
             sections.forEach(section => {
@@ -101,7 +85,7 @@ export function LogicCompanion() {
             });
             setScrollSection(current);
 
-            // 3. Auto-Trigger Tooltip (>80% height)
+            // 2. Auto-Trigger Tooltip (>80% height)
             const scrollPercent = (y + window.innerHeight) / document.documentElement.scrollHeight;
             if (scrollPercent > 0.82 && !isOpen && !showPrompt && !hasShownOnceRef.current) {
                 setShowPrompt(true);
@@ -112,35 +96,9 @@ export function LogicCompanion() {
 
         window.addEventListener('scroll', handleScroll, { passive: true });
         return () => window.removeEventListener('scroll', handleScroll);
-    }, [isOpen, showPrompt, smoothScrollOffset]);
+    }, [isOpen, showPrompt]);
 
     // ─── Cinematic Initialization Sequence ──────────────────
-    useEffect(() => {
-        // Skip for mobile/reduced motion or if already initialized in this session
-        const skipInit = typeof window !== 'undefined' && (
-            sessionStorage.getItem('avatarInit') === 'true' || 
-            window.matchMedia('(prefers-reduced-motion: reduce)').matches
-        );
-
-        if (skipInit) {
-            setPhase('active');
-            return;
-        }
-
-        const t1 = setTimeout(() => setPhase('initializing'), 800);
-        const t2 = setTimeout(() => {
-            setPhase('stabilizing');
-            sessionStorage.setItem('avatarInit', 'true');
-        }, 2800);
-        const t3 = setTimeout(() => setPhase('active'), 4000);
-
-        return () => {
-            clearTimeout(t1);
-            clearTimeout(t2);
-            clearTimeout(t3);
-        };
-    }, []);
-
     // ─── Start idle countdown (25s) ──────────────────────────
     const startIdleTimer = useCallback(() => {
         if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
@@ -204,7 +162,6 @@ export function LogicCompanion() {
             startIdleTimer();
         }
         if (isOpen) {
-            setShowPrompt(false);
             if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
         }
     }, [isOpen, startIdleTimer]);
@@ -337,16 +294,13 @@ export function LogicCompanion() {
             </AnimatePresence>
 
             {/* ── NeuroAvatar ──────────────────────────────── */}
-            <motion.div 
+            <div 
                 onClick={handleAvatarClick} 
                 onMouseEnter={() => setIsHovered(true)}
                 onMouseLeave={() => setIsHovered(false)}
                 role="button" 
                 aria-label="Toggle AI Chat"
-                style={{ 
-                    y: smoothScrollOffset,
-                    cursor: 'pointer' 
-                }}
+                style={{ cursor: 'pointer' }}
             >
                 <NeuroAvatar 
                     isThinking={isThinking} 
@@ -357,7 +311,7 @@ export function LogicCompanion() {
                     phase={phase}
                     scrollSection={scrollSection}
                 />
-            </motion.div>
+            </div>
 
 
 
