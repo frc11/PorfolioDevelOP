@@ -1,430 +1,594 @@
 "use client";
 
+import { AnimatePresence, motion, useMotionValue, useSpring } from "framer-motion";
 import {
-    motion,
-    useMotionValue,
-    useSpring,
-    useTransform,
-    AnimatePresence,
-} from "framer-motion";
-import { Home, Briefcase, Terminal, Layers, Mail, Lightbulb, Menu, X } from "lucide-react";
+    Bot,
+    Briefcase,
+    Code2,
+    Globe,
+    House,
+    Layers3,
+    LogIn,
+    Mail,
+    Sparkles,
+    Users,
+    Zap,
+    type LucideIcon,
+} from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
-import { useRef, useState, useEffect } from "react";
-import { useTransitionContext } from "@/context/TransitionContext";
 import { usePathname } from "next/navigation";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 
-// --- Neuronal Components ---
+import { useTransitionContext } from "@/context/TransitionContext";
 
-const Axon = ({ direction, delay }: { direction: 'left-1' | 'left-2' | 'right-1' | 'right-2'; delay: number }) => {
-    let rotation = '';
-    let height = 60;
-
-    if (direction === 'left-1') { rotation = '-rotate-[50deg]'; height = 65; }
-    if (direction === 'left-2') { rotation = '-rotate-[15deg]'; height = 85; }
-    if (direction === 'right-1') { rotation = 'rotate-[15deg]'; height = 85; }
-    if (direction === 'right-2') { rotation = 'rotate-[50deg]'; height = 65; }
-
-    const isCyan = direction.startsWith('left');
-    const colorClass = isCyan ? 'via-cyan-400 shadow-[0_0_15px_cyan]' : 'via-fuchsia-400 shadow-[0_0_15px_fuchsia]';
-
-    return (
-        <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height, opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.3, delay, ease: "easeOut" }}
-            className={`absolute bottom-1/2 left-1/2 -translate-x-1/2 origin-bottom ${rotation} w-[2px] bg-gradient-to-t from-transparent ${colorClass} to-white -z-10`}
-        >
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1 h-1 bg-white rounded-full shadow-[0_0_10px_white]" />
-        </motion.div>
-    );
-};
-
-const Synapse = ({ label, href, direction, delay }: { label: string; href: string; direction: 'left-1' | 'left-2' | 'right-1' | 'right-2'; delay: number }) => {
-    const { triggerTransition } = useTransitionContext();
-
-    let posClass = '';
-    if (direction === 'left-1') posClass = 'bottom-[60px] right-[calc(50%+40px)]';
-    if (direction === 'left-2') posClass = 'bottom-[100px] right-[calc(50%+10px)]';
-    if (direction === 'right-1') posClass = 'bottom-[100px] left-[calc(50%+10px)]';
-    if (direction === 'right-2') posClass = 'bottom-[60px] left-[calc(50%+40px)]';
-
-    const isCyan = direction.startsWith('left');
-
-    return (
-        <motion.div
-            initial={{ opacity: 0, scale: 0 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0 }}
-            transition={{ type: "spring", stiffness: 300, damping: 20, delay: delay + 0.2 }}
-            className={`absolute ${posClass} z-50`}
-        >
-            <Link
-                href={href}
-                onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    triggerTransition(href);
-                }}
-                className={`whitespace-nowrap px-4 py-2 rounded-full bg-zinc-900/90 border border-white/10 backdrop-blur-xl shadow-xl flex items-center gap-2 group hover:bg-zinc-800 ${isCyan ? 'hover:border-cyan-500/50' : 'hover:border-fuchsia-500/50'} transition-colors`}
-            >
-                <div className={`w-2 h-2 rounded-full ${isCyan ? 'bg-cyan-400' : 'bg-fuchsia-400'} shadow-[0_0_10px_currentColor] group-hover:scale-125 transition-transform`} />
-                <span className="text-[10px] font-semibold text-zinc-300 group-hover:text-white uppercase tracking-wider">{label}</span>
-            </Link>
-        </motion.div>
-    );
-};
-
-export const DynamicDock = () => {
-    const mouseX = useMotionValue(Infinity);
-    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-    const pathname = usePathname();
-
-    // Ensure menu closes securely on any route change
-    useEffect(() => {
-        setIsMobileMenuOpen(false);
-    }, [pathname]);
-
-    const icons = [
-        {
-            icon: <Home className="w-full h-full" />,
-            href: "/#inicio",
-            label: "Inicio",
-        },
-        {
-            icon: <Terminal className="w-full h-full" />,
-            href: "/#nosotros",
-            label: "Nosotros",
-        },
-        {
-            icon: <Briefcase className="w-full h-full" />,
-            href: "/#portfolio",
-            label: "Portfolio",
-        },
-        {
-            icon: <Layers className="w-full h-full" />,
-            href: "/#servicios",
-            label: "Servicios",
-        },
-        {
-            icon: <Lightbulb className="w-full h-full" />,
-            href: "/#caracteristicas",
-            label: "Características",
-        },
-        {
-            icon: <Mail className="w-full h-full" />,
-            href: "/contact",
-            label: "Contacto",
-        },
-    ];
-
-    return (
-        <>
-            {/* Desktop Dock */}
-            <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[9990] pointer-events-auto hidden md:block">
-                <motion.div
-                    onMouseMove={(e) => mouseX.set(e.pageX)}
-                    onMouseLeave={() => mouseX.set(Infinity)}
-                    className="flex h-16 items-end gap-4 rounded-full border border-white/10 bg-zinc-950/20 px-4 pb-3 backdrop-blur-2xl shadow-2xl"
-                >
-                    {icons.map((item, i) => (
-                        <DockIcon key={i} mouseX={mouseX} {...item} />
-                    ))}
-                </motion.div>
-            </div>
-
-            {/* Mobile Dock */}
-            <div className="fixed bottom-6 left-6 z-[9990] pointer-events-auto md:hidden flex flex-col-reverse items-center gap-4">
-                {/* Toggle Button */}
-                <button
-                    onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                    className="w-14 h-14 rounded-full bg-zinc-900 border border-white/10 flex items-center justify-center shadow-[0_0_20px_rgba(0,0,0,0.5)] backdrop-blur-xl relative z-50 transition-colors active:bg-zinc-800"
-                >
-                    {isMobileMenuOpen ? <X className="text-white w-6 h-6" /> : <Menu className="text-white w-6 h-6" />}
-                </button>
-
-                {/* Expandable Vertical Menu */}
-                <AnimatePresence>
-                    {isMobileMenuOpen && (
-                        <motion.div
-                            variants={{
-                                hidden: { opacity: 0, scale: 0.9, y: 20, transformOrigin: 'bottom' },
-                                show: {
-                                    opacity: 1, scale: 1, y: 0,
-                                    transition: {
-                                        type: "spring", stiffness: 300, damping: 25,
-                                        staggerChildren: 0.05,
-                                        delayChildren: 0.1
-                                    }
-                                },
-                                exit: {
-                                    opacity: 0, scale: 0.9, y: -20,
-                                    transition: { staggerChildren: 0.05, staggerDirection: -1 }
-                                }
-                            }}
-                            initial="hidden"
-                            animate="show"
-                            exit="exit"
-                            className="flex flex-col w-[72px] items-center gap-3 rounded-[36px] border border-white/10 bg-zinc-950/90 py-4 backdrop-blur-2xl shadow-2xl overflow-visible whitespace-nowrap"
-                        >
-                            {/* We keep the original array order or reverse it? Let's just map normally, first icon (Inicio) is on top */}
-                            {icons.map((item, i) => (
-                                <motion.div key={i} variants={{
-                                    hidden: { opacity: 0, y: 10, scale: 0.8 },
-                                    show: { opacity: 1, y: 0, scale: 1, transition: { type: "spring", stiffness: 300 } },
-                                    exit: { opacity: 0, scale: 0.8 }
-                                }}>
-                                    <MobileDockIcon
-                                        icon={item.icon}
-                                        href={item.href}
-                                        label={item.label}
-                                        onClick={() => setIsMobileMenuOpen(false)}
-                                    />
-                                </motion.div>
-                            ))}
-                        </motion.div>
-                    )}
-                </AnimatePresence>
-            </div>
-        </>
-    );
-};
-
-function DockIcon({
-    mouseX,
-    icon,
-    href,
-    label,
-}: {
-    mouseX: any;
-    icon: React.ReactNode;
+type NavItem = {
     href: string;
     label: string;
+    icon: LucideIcon;
+};
+
+type ServiceItem = {
+    href: string;
+    label: string;
+    subLabel: string;
+    price: string;
+    icon: LucideIcon;
+    color: string;
+};
+
+const NAV_ITEMS: readonly NavItem[] = [
+    { href: "/#inicio", label: "Inicio", icon: House },
+    { href: "/#nosotros", label: "Nosotros", icon: Users },
+    { href: "/#portfolio", label: "Portfolio", icon: Briefcase },
+    { href: "/#servicios", label: "Servicios", icon: Layers3 },
+    { href: "/#caracteristicas", label: "Caracteristicas", icon: Sparkles },
+    { href: "/contact", label: "Contacto", icon: Mail },
+] as const;
+
+const SERVICE_ITEMS: readonly ServiceItem[] = [
+    {
+        href: "/web-development",
+        label: "Sitio Web",
+        subLabel: "Presencia profesional",
+        price: "$800",
+        icon: Globe,
+        color: "#06b6d4",
+    },
+    {
+        href: "/ai-implementations",
+        label: "Agente IA",
+        subLabel: "Atencion 24/7",
+        price: "$300",
+        icon: Bot,
+        color: "#8b5cf6",
+    },
+    {
+        href: "/software-development",
+        label: "Software",
+        subLabel: "Sistema a medida",
+        price: "$1.500",
+        icon: Code2,
+        color: "#10b981",
+    },
+    {
+        href: "/process-automation",
+        label: "Automatizacion",
+        subLabel: "Tareas automaticas",
+        price: "$200",
+        icon: Zap,
+        color: "#f59e0b",
+    },
+] as const;
+
+const SERVICE_ROUTE_SET = new Set<string>(SERVICE_ITEMS.map((item) => item.href));
+const HASH_TO_LABEL: Readonly<Record<string, string>> = {
+    "#inicio": "Inicio",
+    "#nosotros": "Nosotros",
+    "#portfolio": "Portfolio",
+    "#servicios": "Servicios",
+    "#caracteristicas": "Caracteristicas",
+};
+
+function getActiveTab(pathname: string, hash: string): string {
+    if (pathname === "/contact") return "Contacto";
+    if (SERVICE_ROUTE_SET.has(pathname)) return "Servicios";
+    if (pathname !== "/") return "";
+
+    return HASH_TO_LABEL[hash] ?? "Inicio";
+}
+
+function getLightLevel(scrollPosition: number, viewportHeight: number): "light" | "dark" {
+    if (viewportHeight <= 0) return "dark";
+    if (scrollPosition < viewportHeight * 0.8) return "light";
+    if (scrollPosition < viewportHeight * 2.5) return "dark";
+    if (scrollPosition < viewportHeight * 5) return "dark";
+    return "dark";
+}
+
+function BrandLogo() {
+    return (
+        <motion.div
+            animate={{ opacity: [0.78, 1, 0.78], scale: [1, 1.02, 1] }}
+            transition={{ duration: 2.8, repeat: Infinity, ease: "easeInOut" }}
+            className="relative flex h-6 w-6 items-center justify-center overflow-hidden rounded-[8px] border border-white/[0.08] bg-white/[0.04] shadow-[0_10px_30px_rgba(0,0,0,0.2)]"
+        >
+            <Image
+                src="/logodevelOP.svg"
+                alt="develOP"
+                width={18}
+                height={18}
+                className="h-[18px] w-[18px] object-contain brightness-0 invert"
+            />
+        </motion.div>
+    );
+}
+
+function MagneticItem({
+    children,
+    className,
+    range = 5,
+}: {
+    children: ReactNode;
+    className?: string;
+    range?: number;
 }) {
-    const ref = useRef<HTMLDivElement>(null);
-    const [hovered, setHovered] = useState(false);
-    const { triggerTransition } = useTransitionContext();
+    const ref = useRef<HTMLSpanElement | null>(null);
+    const targetX = useMotionValue(0);
+    const targetY = useMotionValue(0);
+    const x = useSpring(targetX, { stiffness: 150, damping: 15 });
+    const y = useSpring(targetY, { stiffness: 150, damping: 15 });
 
-    const distance = useTransform(mouseX, (val: number) => {
-        const bounds = ref.current?.getBoundingClientRect() ?? { x: 0, width: 0 };
-        return val - bounds.x - bounds.width / 2;
-    });
+    const handleMouseMove = (event: React.MouseEvent<HTMLSpanElement>) => {
+        const rect = ref.current?.getBoundingClientRect();
+        if (!rect) return;
 
-    const widthSync = useTransform(distance, [-150, 0, 150], [40, 75, 40]);
-    const width = useSpring(widthSync, {
-        mass: 0.1,
-        stiffness: 150,
-        damping: 15,
-    });
+        const normalizedX = ((event.clientX - rect.left) / rect.width - 0.5) * 2;
+        const normalizedY = ((event.clientY - rect.top) / rect.height - 0.5) * 2;
 
-    const handleClick = (e: React.MouseEvent) => {
-        e.preventDefault();
-        triggerTransition(href);
-    };
-
-
-
-    const isServices = label === "Servicios";
-    const [isServicesHovered, setIsServicesHovered] = useState(false);
-
-    // Handling hover for Services specially to keep menu open
-    const handleMouseEnter = () => {
-        setHovered(true);
-        if (isServices) setIsServicesHovered(true);
+        targetX.set(Math.max(-range, Math.min(range, normalizedX * range)));
+        targetY.set(Math.max(-range, Math.min(range, normalizedY * range)));
     };
 
     const handleMouseLeave = () => {
-        setHovered(false);
-        if (isServices) setIsServicesHovered(false);
+        targetX.set(0);
+        targetY.set(0);
     };
 
     return (
-        <motion.div
+        <motion.span
             ref={ref}
-            style={{ width }}
-            className={`aspect-square flex items-center justify-center rounded-full bg-zinc-900/50 border border-white/5 text-zinc-400 relative transition-colors ${isServicesHovered ? 'bg-zinc-800 border-cyan-500/30 text-white shadow-[0_0_20px_rgba(34,211,238,0.2)]' : 'hover:text-white'}`}
-            onMouseEnter={handleMouseEnter}
+            style={{ x, y }}
+            onMouseMove={handleMouseMove}
             onMouseLeave={handleMouseLeave}
+            className={className}
         >
-            <AnimatePresence>
-                {/* Standard Tooltip */}
-                {hovered && !isServicesHovered && (
-                    <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: -15 }}
-                        exit={{ opacity: 0, y: 10 }}
-                        className="absolute -top-8 left-1/2 -translate-x-1/2 rounded-md border border-white/10 bg-zinc-950/90 px-2 py-1 text-xs text-zinc-200 whitespace-nowrap pointer-events-none"
+            {children}
+        </motion.span>
+    );
+}
+
+function ServicesMenu({ onActivate }: { onActivate: (href: string) => void }) {
+    return (
+        <motion.div
+            initial={{ opacity: 0, y: 10, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 8, scale: 0.98 }}
+            transition={{ type: "spring", stiffness: 420, damping: 34 }}
+            className="absolute bottom-[calc(100%+18px)] left-1/2 z-50 w-[336px] -translate-x-1/2 rounded-[1.25rem] border border-white/[0.08] bg-[#050507]/88 p-2 shadow-[0_24px_80px_rgba(0,0,0,0.56)]"
+            style={{ backdropFilter: "blur(42px) saturate(180%)" }}
+        >
+            <div className="space-y-1">
+                {SERVICE_ITEMS.map((item) => (
+                    <motion.button
+                        key={item.href}
+                        type="button"
+                        initial="rest"
+                        whileHover="hover"
+                        whileTap={{ scale: 0.985 }}
+                        variants={{
+                            rest: { backgroundColor: "rgba(255,255,255,0)" },
+                            hover: { backgroundColor: `${item.color}10` },
+                        }}
+                        onClick={(event) => {
+                            event.preventDefault();
+                            event.stopPropagation();
+                            onActivate(item.href);
+                        }}
+                        className="grid w-full grid-cols-[28px_minmax(0,1fr)_auto] items-center gap-2.5 rounded-[10px] px-3 py-2.5 text-left"
                     >
-                        {label}
-                    </motion.div>
-                )}
-
-                {/* Neuronal Menu for Services + Persistent Label */}
-                {isServices && isServicesHovered && (
-                    <>
-                        {/* Persistent Label Below */}
-                        <motion.div
-                            initial={{ opacity: 0, y: -10 }}
-                            animate={{ opacity: 1, y: 10 }} // Pushed down
-                            exit={{ opacity: 0, y: -10 }}
-                            className="absolute -bottom-8 left-1/2 -translate-x-1/2 rounded-md border border-white/10 bg-zinc-950/90 px-2 py-1 text-xs text-zinc-200 whitespace-nowrap pointer-events-none z-50 shadow-[0_0_15px_rgba(0,0,0,0.5)]"
+                        <div
+                            className="flex h-7 w-7 items-center justify-center rounded-lg"
+                            style={{
+                                background: `${item.color}18`,
+                                border: `1px solid ${item.color}30`,
+                            }}
                         >
-                            {label}
+                            <item.icon size={14} color={item.color} strokeWidth={1.5} />
+                        </div>
+
+                        <div className="min-w-0">
+                            <div className="text-[13px] font-medium text-white/85">
+                                {item.label}
+                            </div>
+                            <div className="mt-[1px] text-[10px] text-white/35">
+                                {item.subLabel}
+                            </div>
+                        </div>
+
+                        <motion.div
+                            variants={{
+                                rest: { opacity: 0.7, scale: 1 },
+                                hover: { opacity: 1, scale: 1.03 },
+                            }}
+                            transition={{ duration: 0.14 }}
+                            className="whitespace-nowrap text-[11px] font-medium"
+                            style={{ color: item.color }}
+                        >
+                            {item.price}
                         </motion.div>
+                    </motion.button>
+                ))}
+            </div>
 
-                        {/* Left Axons & Synapses */}
-                        <Axon direction="left-1" delay={0} />
-                        <Synapse label="Web Dev" href="/web-development" direction="left-1" delay={0.1} />
-
-                        <Axon direction="left-2" delay={0.1} />
-                        <Synapse label="Agentes IA" href="/ai-implementations" direction="left-2" delay={0.2} />
-
-                        {/* Right Axons & Synapses */}
-                        <Axon direction="right-1" delay={0.2} />
-                        <Synapse label="Software" href="/software-development" direction="right-1" delay={0.3} />
-
-                        <Axon direction="right-2" delay={0.3} />
-                        <Synapse label="n8n" href="/process-automation" direction="right-2" delay={0.4} />
-                    </>
-                )}
-            </AnimatePresence>
-
-            <Link href={href} onClick={handleClick} className="p-2 w-full h-full flex items-center justify-center z-10">
-                {icon}
-            </Link>
+            <motion.button
+                type="button"
+                whileTap={{ scale: 0.985 }}
+                onClick={(event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    onActivate("/#servicios");
+                }}
+                className="mt-2 flex w-full items-center justify-center rounded-[10px] border border-white/[0.06] px-3 py-2.5 text-[10px] font-semibold tracking-[0.18em] text-white/46 transition-colors duration-150 hover:text-white/74"
+            >
+                VER TODOS LOS SERVICIOS
+            </motion.button>
         </motion.div>
     );
 }
 
-// --- Mobile specific icon rendering without the physics width scaling ---
-function MobileDockIcon({
-    icon,
-    href,
-    label,
-    onClick
-}: {
-    icon: React.ReactNode;
-    href: string;
-    label: string;
-    onClick: () => void;
-}) {
+function DockCta({ isExpanded }: { isExpanded: boolean }) {
     const { triggerTransition } = useTransitionContext();
-    const isServices = label === "Servicios";
-
-    const handleClick = (e: React.MouseEvent) => {
-        e.preventDefault();
-
-        triggerTransition(href);
-        setTimeout(() => {
-            onClick(); // gracefully close menu under the shutter
-        }, 400);
-    };
 
     return (
-        <div className="relative flex flex-col items-center justify-center gap-1 my-2">
-            <AnimatePresence>
-                {/* Horizontal Popup Menu for Services (Mobile Version) */}
-                {isServices && (
-                    <>
-                        {/* Connecting Horizontal Axon Lines */}
-                        <motion.div
-                            initial={{ width: 0, opacity: 0 }}
-                            animate={{ width: 30, opacity: 1 }}
-                            exit={{ width: 0, opacity: 0 }}
-                            transition={{ duration: 0.3, ease: "easeOut", delay: 0.1 }}
-                            className="absolute top-[20px] left-[50px] h-[2px] bg-gradient-to-r from-transparent via-cyan-400 to-white shadow-[0_0_15px_cyan] origin-left -rotate-12 z-0 pointer-events-none"
-                        >
-                            <div className="absolute top-1/2 right-0 -translate-y-1/2 w-1 h-1 bg-white rounded-full shadow-[0_0_10px_white]" />
-                        </motion.div>
-
-                        <motion.div
-                            initial={{ width: 0, opacity: 0 }}
-                            animate={{ width: 30, opacity: 1 }}
-                            exit={{ width: 0, opacity: 0 }}
-                            transition={{ duration: 0.3, ease: "easeOut", delay: 0.2 }}
-                            className="absolute top-[30px] left-[50px] h-[2px] bg-gradient-to-r from-transparent via-fuchsia-400 to-white shadow-[0_0_15px_fuchsia] origin-left rotate-12 z-0 pointer-events-none"
-                        >
-                            <div className="absolute top-1/2 right-0 -translate-y-1/2 w-1 h-1 bg-white rounded-full shadow-[0_0_10px_white]" />
-                        </motion.div>
-
-                        {/* Dropdown Container */}
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.8, x: -10, transformOrigin: 'left center' }}
-                            animate={{ opacity: 1, scale: 1, x: 0 }}
-                            exit={{ opacity: 0, scale: 0.8, x: -10 }}
-                            transition={{ type: "spring", stiffness: 300, damping: 20, delay: 0.3 }}
-                            className="absolute top-1/2 -translate-y-1/2 left-[75px] flex flex-col gap-2 z-50"
-                        >
-                            <button
-                                onClick={(e) => {
-                                    e.preventDefault();
-                                    e.stopPropagation();
-                                    triggerTransition("/web-development");
-                                    setTimeout(() => onClick(), 400);
-                                }}
-                                className="whitespace-nowrap px-3 py-2 rounded-full bg-zinc-900/90 border border-white/10 backdrop-blur-xl shadow-xl flex items-center gap-2"
-                            >
-                                <div className="w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_10px_cyan]" />
-                                <span className="text-[10px] font-semibold text-zinc-300 uppercase tracking-wider">Web Dev</span>
-                            </button>
-
-                            <button
-                                onClick={(e) => {
-                                    e.preventDefault();
-                                    e.stopPropagation();
-                                    triggerTransition("/ai-implementations");
-                                    setTimeout(() => onClick(), 400);
-                                }}
-                                className="whitespace-nowrap px-3 py-2 rounded-full bg-zinc-900/90 border border-white/10 backdrop-blur-xl shadow-xl flex items-center gap-2"
-                            >
-                                <div className="w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_10px_cyan]" />
-                                <span className="text-[10px] font-semibold text-zinc-300 uppercase tracking-wider">Agentes IA</span>
-                            </button>
-
-                            <button
-                                onClick={(e) => {
-                                    e.preventDefault();
-                                    e.stopPropagation();
-                                    triggerTransition("/software-development");
-                                    setTimeout(() => onClick(), 400);
-                                }}
-                                className="whitespace-nowrap px-3 py-2 rounded-full bg-zinc-900/90 border border-white/10 backdrop-blur-xl shadow-xl flex items-center gap-2"
-                            >
-                                <div className="w-2 h-2 rounded-full bg-fuchsia-400 shadow-[0_0_10px_fuchsia]" />
-                                <span className="text-[10px] font-semibold text-zinc-300 uppercase tracking-wider">Software</span>
-                            </button>
-
-                            <button
-                                onClick={(e) => {
-                                    e.preventDefault();
-                                    e.stopPropagation();
-                                    triggerTransition("/process-automation");
-                                    setTimeout(() => onClick(), 400);
-                                }}
-                                className="whitespace-nowrap px-3 py-2 rounded-full bg-zinc-900/90 border border-white/10 backdrop-blur-xl shadow-xl flex items-center gap-2"
-                            >
-                                <div className="w-2 h-2 rounded-full bg-fuchsia-400 shadow-[0_0_10px_fuchsia]" />
-                                <span className="text-[10px] font-semibold text-zinc-300 uppercase tracking-wider">n8n</span>
-                            </button>
-                        </motion.div>
-                    </>
+        <motion.button
+            type="button"
+            onClick={() => triggerTransition("/login")}
+            whileHover={{ y: -1 }}
+            whileTap={{ scale: 0.98 }}
+            animate={{
+                width: isExpanded ? 114 : 38,
+                height: isExpanded ? 32 : 30,
+                paddingLeft: isExpanded ? 14 : 0,
+                paddingRight: isExpanded ? 14 : 0,
+                borderRadius: 9999,
+            }}
+            transition={{
+                width: { type: "spring", stiffness: 380, damping: 34, mass: 0.9 },
+                height: { type: "spring", stiffness: 380, damping: 34, mass: 0.9 },
+                paddingLeft: { type: "spring", stiffness: 380, damping: 34, mass: 0.9 },
+                paddingRight: { type: "spring", stiffness: 380, damping: 34, mass: 0.9 },
+                y: { type: "spring", stiffness: 360, damping: 28 },
+            }}
+            className="group relative isolate flex items-center justify-center overflow-hidden rounded-full bg-gradient-to-r from-cyan-600 to-cyan-800 text-white shadow-[0_14px_34px_rgba(8,145,178,0.28),inset_0_1px_0_rgba(255,255,255,0.14)]"
+        >
+            <AnimatePresence mode="wait" initial={false}>
+                {isExpanded ? (
+                    <motion.span
+                        key="full"
+                        initial={{ opacity: 0, y: 3 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -3 }}
+                        transition={{ duration: 0.16 }}
+                        className="relative z-10 flex items-center gap-1.5 whitespace-nowrap text-[13px] font-medium tracking-wide"
+                    >
+                        <span aria-hidden="true">→</span>
+                        <span>Acceder</span>
+                    </motion.span>
+                ) : (
+                    <motion.span
+                        key="icon"
+                        initial={{ opacity: 0, scale: 0.82 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.82 }}
+                        transition={{ duration: 0.16 }}
+                        className="relative z-10 flex items-center justify-center"
+                    >
+                        <LogIn size={13} strokeWidth={1.9} />
+                    </motion.span>
                 )}
             </AnimatePresence>
 
-            <Link
-                href={href}
-                onClick={handleClick}
-                className={`flex items-center justify-center w-10 h-10 rounded-full border text-zinc-400 transition-colors z-10 ${isServices ? 'bg-zinc-800 border-cyan-500/30 text-white shadow-[0_0_20px_rgba(34,211,238,0.2)]' : 'bg-zinc-900/50 border-white/5 active:bg-zinc-800 active:text-white'}`}
-            >
-                <div className="w-5 h-5 pointer-events-none">
-                    {icon}
-                </div>
-            </Link>
+            <motion.span
+                aria-hidden="true"
+                animate={{ x: ["-140%", "260%"] }}
+                transition={{ duration: 1.05, repeat: Infinity, repeatDelay: 3.95, ease: "easeInOut" }}
+                className="pointer-events-none absolute inset-y-[-30%] left-[-45%] z-0 w-[42%] rotate-[18deg] bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.48),transparent)] opacity-80"
+            />
+        </motion.button>
+    );
+}
 
-            {/* Persistent Mobile Label */}
-            <span className="text-[9px] font-semibold text-zinc-400 uppercase tracking-wider">
-                {label}
-            </span>
+function DockItem({
+    item,
+    isExpanded,
+    isHighlighted,
+    onActivate,
+    onHoverStart,
+    onHoverEnd,
+    children,
+}: {
+    item: NavItem;
+    isExpanded: boolean;
+    isHighlighted: boolean;
+    onActivate: (label: string) => void;
+    onHoverStart: () => void;
+    onHoverEnd: () => void;
+    children?: ReactNode;
+}) {
+    const { triggerTransition } = useTransitionContext();
+    const expandedMinWidth = item.label.length > 11 ? 84 : 75;
+
+    return (
+        <div
+            className="relative flex shrink-0 items-center"
+            onMouseEnter={onHoverStart}
+            onMouseLeave={onHoverEnd}
+        >
+            <AnimatePresence>{children}</AnimatePresence>
+
+            <Link
+                href={item.href}
+                onClick={(event) => {
+                    event.preventDefault();
+                    onActivate(item.label);
+                    triggerTransition(item.href);
+                }}
+                className="relative block rounded-[18px]"
+            >
+                {isHighlighted ? (
+                    <motion.div
+                        layoutId="navbar-pill"
+                        transition={{ type: "spring", stiffness: 420, damping: 34, mass: 0.72 }}
+                        className="absolute inset-0 rounded-[18px] border border-white/[0.08] bg-white/10"
+                    />
+                ) : null}
+
+                <motion.div
+                    animate={{
+                        minWidth: isExpanded ? expandedMinWidth : 60,
+                        height: isExpanded ? 40 : 36,
+                    }}
+                    transition={{
+                        minWidth: { type: "spring", stiffness: 380, damping: 38, mass: 0.9 },
+                        height: { type: "spring", stiffness: 380, damping: 38, mass: 0.9 },
+                    }}
+                    className="relative z-10 flex items-center justify-center px-2.5"
+                >
+                    <MagneticItem
+                        range={isExpanded ? 5 : 4}
+                        className="flex flex-col items-center justify-center gap-[1px]"
+                    >
+                        <motion.div
+                            key={`${item.label}-${isExpanded ? "expanded" : "compact"}`}
+                            initial={{ scale: isExpanded ? 0.9 : 1 }}
+                            animate={{ scale: isExpanded ? [0.9, 1.08, 1] : [1, 0.85, 1] }}
+                            transition={{ duration: 0.3, ease: "easeOut" }}
+                            className="flex items-center justify-center"
+                        >
+                            <item.icon
+                                size={isExpanded ? 16 : 15}
+                                strokeWidth={1.75}
+                                className={isHighlighted ? "text-white" : "text-white/72"}
+                            />
+                        </motion.div>
+
+                        <AnimatePresence initial={false}>
+                            {isExpanded ? (
+                                <motion.span
+                                    key={`label-${item.label}`}
+                                    initial={{ opacity: 0, y: 4, height: 0 }}
+                                    animate={{ opacity: 1, y: 0, height: "auto" }}
+                                    exit={{ opacity: 0, y: -4, height: 0 }}
+                                    transition={{ duration: 0.15 }}
+                                    className="overflow-hidden whitespace-nowrap font-medium"
+                                    style={{
+                                        fontSize: 9,
+                                        letterSpacing: "0.05em",
+                                        color: isHighlighted ? "rgba(255,255,255,0.58)" : "rgba(255,255,255,0.4)",
+                                    }}
+                                >
+                                    {item.label}
+                                </motion.span>
+                            ) : null}
+                        </AnimatePresence>
+                    </MagneticItem>
+                </motion.div>
+            </Link>
         </div>
     );
 }
+
+export function DynamicDock() {
+    const pathname = usePathname();
+    const { triggerTransition } = useTransitionContext();
+
+    const lastScrollY = useRef(0);
+    const collapseTimeoutRef = useRef<number | null>(null);
+
+    const [activeTab, setActiveTab] = useState("Inicio");
+    const [hoveredTab, setHoveredTab] = useState<string | null>(null);
+    const [scrollDirection, setScrollDirection] = useState<"up" | "down">("up");
+    const [scrollPosition, setScrollPosition] = useState(0);
+    const [viewportHeight, setViewportHeight] = useState(0);
+    const [hoverExpanded, setHoverExpanded] = useState(false);
+
+    const isExpanded = scrollDirection === "up" || hoverExpanded;
+    const highlightedTab = hoveredTab ?? activeTab;
+    const lightLevel = getLightLevel(scrollPosition, viewportHeight);
+
+    useEffect(() => {
+        if (typeof window === "undefined") return;
+
+        const handleResize = () => {
+            setViewportHeight(window.innerHeight);
+        };
+
+        const handleScroll = () => {
+            const current = window.scrollY;
+
+            if (current < 50) {
+                setScrollDirection("up");
+                setHoverExpanded(false);
+            } else if (current > lastScrollY.current + 5) {
+                setScrollDirection("down");
+            } else if (current < lastScrollY.current - 5) {
+                setScrollDirection("up");
+                setHoverExpanded(false);
+            }
+
+            lastScrollY.current = current;
+            setScrollPosition(current);
+        };
+
+        handleResize();
+        handleScroll();
+
+        window.addEventListener("scroll", handleScroll, { passive: true });
+        window.addEventListener("resize", handleResize);
+
+        return () => {
+            window.removeEventListener("scroll", handleScroll);
+            window.removeEventListener("resize", handleResize);
+
+            if (collapseTimeoutRef.current !== null) {
+                window.clearTimeout(collapseTimeoutRef.current);
+            }
+        };
+    }, []);
+
+    useEffect(() => {
+        if (typeof window === "undefined") return;
+
+        const syncActiveTab = () => {
+            setActiveTab(getActiveTab(pathname, window.location.hash));
+        };
+
+        syncActiveTab();
+        window.addEventListener("hashchange", syncActiveTab);
+
+        return () => {
+            window.removeEventListener("hashchange", syncActiveTab);
+        };
+    }, [pathname]);
+
+    const clearCollapseTimeout = () => {
+        if (collapseTimeoutRef.current !== null) {
+            window.clearTimeout(collapseTimeoutRef.current);
+            collapseTimeoutRef.current = null;
+        }
+    };
+
+    const handleDockMouseEnter = () => {
+        clearCollapseTimeout();
+
+        if (scrollDirection === "down") {
+            setHoverExpanded(true);
+        }
+    };
+
+    const handleDockMouseLeave = () => {
+        setHoveredTab(null);
+        clearCollapseTimeout();
+
+        if (scrollDirection === "down") {
+            collapseTimeoutRef.current = window.setTimeout(() => {
+                setHoverExpanded(false);
+            }, 400);
+        }
+    };
+
+    const handleTabActivate = (label: string) => {
+        setActiveTab(label);
+    };
+
+    return (
+        <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.28, ease: "easeOut" }}
+            className="fixed bottom-8 left-1/2 z-[9990] hidden -translate-x-1/2 md:block"
+        >
+            <motion.nav
+                onMouseEnter={handleDockMouseEnter}
+                onMouseLeave={handleDockMouseLeave}
+                animate={{
+                    height: isExpanded ? 52 : 40,
+                    borderRadius: isExpanded ? 20 : 9999,
+                    paddingLeft: isExpanded ? 20 : 16,
+                    paddingRight: isExpanded ? 20 : 16,
+                    backgroundColor: lightLevel === "light" ? "rgba(0,0,0,0.55)" : "rgba(15,15,15,0.50)",
+                    borderColor: lightLevel === "light" ? "rgba(0,0,0,0.12)" : "rgba(255,255,255,0.10)",
+                }}
+                transition={{
+                    height: { type: "spring", stiffness: 380, damping: 38, mass: 0.9 },
+                    borderRadius: { type: "spring", stiffness: 380, damping: 38, mass: 0.9 },
+                    paddingLeft: { type: "spring", stiffness: 380, damping: 38, mass: 0.9 },
+                    paddingRight: { type: "spring", stiffness: 380, damping: 38, mass: 0.9 },
+                    backgroundColor: { duration: 0.8, ease: "easeInOut" },
+                    borderColor: { duration: 0.8, ease: "easeInOut" },
+                }}
+                className="relative flex items-center gap-1.5 border shadow-2xl shadow-black/50"
+                style={{ backdropFilter: "blur(48px) saturate(180%)" }}
+            >
+                <div className="mr-1 flex items-center gap-2.5">
+                    <BrandLogo />
+
+                    <AnimatePresence initial={false}>
+                        {isExpanded ? (
+                            <motion.span
+                                key="ecosistema"
+                                initial={{ opacity: 0, x: -6 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                exit={{ opacity: 0, x: -6 }}
+                                transition={{ duration: 0.16 }}
+                                className="whitespace-nowrap text-[10px] font-semibold tracking-[0.22em] text-white/42"
+                            >
+                                develOP
+                            </motion.span>
+                        ) : null}
+                    </AnimatePresence>
+                </div>
+
+                <div className="flex items-center gap-1">
+                    {NAV_ITEMS.map((item) => (
+                        <DockItem
+                            key={item.label}
+                            item={item}
+                            isExpanded={isExpanded}
+                            isHighlighted={highlightedTab === item.label}
+                            onActivate={handleTabActivate}
+                            onHoverStart={() => setHoveredTab(item.label)}
+                            onHoverEnd={() => setHoveredTab(null)}
+                        >
+                            {item.label === "Servicios" && hoveredTab === "Servicios" ? (
+                                <ServicesMenu
+                                    onActivate={(href) => {
+                                        setActiveTab("Servicios");
+                                        triggerTransition(href);
+                                    }}
+                                />
+                            ) : null}
+                        </DockItem>
+                    ))}
+                </div>
+
+                <div className="pl-1.5">
+                    <DockCta isExpanded={isExpanded} />
+                </div>
+            </motion.nav>
+        </motion.div>
+    );
+}
+
+export default DynamicDock;

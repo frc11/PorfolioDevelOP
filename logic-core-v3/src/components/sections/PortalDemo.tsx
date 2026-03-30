@@ -1,10 +1,10 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { motion, type Variants } from 'framer-motion';
 import { BarChart2, MessageSquare, CheckSquare } from 'lucide-react';
 import Link from 'next/link';
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+// â”€â”€â”€ Types â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 interface Feature {
   icon: React.ReactNode;
@@ -14,24 +14,24 @@ interface Feature {
   description: string;
 }
 
-// ─── Data ─────────────────────────────────────────────────────────────────────
+// â”€â”€â”€ Data â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const FEATURES: Feature[] = [
   {
     icon: <BarChart2 size={22} />,
     color: 'text-cyan-400',
     glow: 'shadow-cyan-500/20',
-    title: 'Métricas de tu negocio',
+    title: 'MÃ©tricas de tu negocio',
     description:
-      'Visitantes, posicionamiento en Google y ROI. Todo actualizado automáticamente, sin pedirlo.',
+      'Visitantes, posicionamiento en Google y ROI. Todo actualizado automÃ¡ticamente, sin pedirlo.',
   },
   {
     icon: <MessageSquare size={22} />,
     color: 'text-emerald-400',
     glow: 'shadow-emerald-500/20',
-    title: 'Comunicación directa',
+    title: 'ComunicaciÃ³n directa',
     description:
-      'Hablá con el equipo develOP cuando quieras. Sin grupos de WhatsApp, sin mails perdidos.',
+      'HablÃ¡ con el equipo develOP cuando quieras. Sin grupos de WhatsApp, sin mails perdidos.',
   },
   {
     icon: <CheckSquare size={22} />,
@@ -39,25 +39,25 @@ const FEATURES: Feature[] = [
     glow: 'shadow-violet-500/20',
     title: 'Estado del proyecto',
     description:
-      'Cada tarea, cada entrega. Ves el avance en tiempo real y aprobás cuando estés listo.',
+      'Cada tarea, cada entrega. Ves el avance en tiempo real y aprobÃ¡s cuando estÃ©s listo.',
   },
 ];
 
-// ─── Stagger variants ─────────────────────────────────────────────────────────
+// â”€â”€â”€ Stagger variants â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-const containerVariants = {
+const containerVariants: Variants = {
   hidden: {},
   visible: {
     transition: { staggerChildren: 0.15 },
   },
 };
 
-const itemVariants = {
+const itemVariants: Variants = {
   hidden: { opacity: 0, y: 24 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: 'easeOut' } },
 };
 
-// ─── Dashboard Mockup ─────────────────────────────────────────────────────────
+// â”€â”€â”€ Dashboard Mockup â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function DashboardMockup() {
   return (
@@ -67,7 +67,6 @@ function DashboardMockup() {
       viewport={{ once: true }}
       transition={{ duration: 0.7, ease: 'easeOut' }}
       animate={{ y: [0, -8, 0] }}
-      // @ts-expect-error — framer-motion animate + transition coexistence
       style={{ animationPlayState: 'running' }}
       className="w-full max-w-2xl mx-auto"
     >
@@ -113,8 +112,7 @@ function FloatingMockup() {
 
       {/* Dashboard body */}
       <div className="p-5 space-y-4" style={{ background: '#080a0c' }}>
-
-        {/* Row 1 — metric cards */}
+        {/* Row 1 â€” metric cards */}
         <div className="grid grid-cols-3 gap-3">
           {[
             { label: 'Visitas', value: '1.842' },
@@ -132,7 +130,7 @@ function FloatingMockup() {
           ))}
         </div>
 
-        {/* Row 2 — progress bar */}
+        {/* Row 2 â€” progress bar */}
         <div
           className="rounded-lg p-4 border border-white/5 space-y-2"
           style={{ background: 'rgba(255,255,255,0.03)' }}
@@ -152,7 +150,7 @@ function FloatingMockup() {
           </div>
         </div>
 
-        {/* Row 3 — message preview */}
+        {/* Row 3 â€” message preview */}
         <div
           className="rounded-lg px-4 py-3 border border-white/5 flex items-start gap-3"
           style={{ background: 'rgba(255,255,255,0.03)' }}
@@ -162,18 +160,17 @@ function FloatingMockup() {
           </div>
           <div>
             <p className="text-[11px] text-white/50 mb-0.5">
-              <span className="text-white/70 font-semibold">Franco</span> · hace 2h
+              <span className="text-white/70 font-semibold">Franco</span> Â· hace 2h
             </p>
-            <p className="text-xs text-white/60">El catálogo está casi listo, revisalo cuando puedas ✅</p>
+            <p className="text-xs text-white/60">El catÃ¡logo estÃ¡ casi listo, revisalo cuando puedas âœ…</p>
           </div>
         </div>
-
       </div>
     </motion.div>
   );
 }
 
-// ─── Main Component ───────────────────────────────────────────────────────────
+// â”€â”€â”€ Main Component â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export function PortalDemo() {
   return (
@@ -191,8 +188,7 @@ export function PortalDemo() {
       />
 
       <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-
-        {/* ── Header ── */}
+        {/* â”€â”€ Header â”€â”€ */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -210,14 +206,13 @@ export function PortalDemo() {
             </span>
           </h2>
           <p className="max-w-2xl mx-auto text-base sm:text-lg text-white/50 leading-relaxed">
-            Sabés exactamente en qué estamos trabajando, cuándo termina y cómo está rindiendo tu
-            inversión. En tiempo real, desde tu celular.
+            SabÃ©s exactamente en quÃ© estamos trabajando, cuÃ¡ndo termina y cÃ³mo estÃ¡ rindiendo tu
+            inversiÃ³n. En tiempo real, desde tu celular.
           </p>
         </motion.div>
 
-        {/* ── Two-column layout: features + mockup ── */}
+        {/* â”€â”€ Two-column layout: features + mockup â”€â”€ */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-
           {/* Features */}
           <motion.div
             variants={containerVariants}
@@ -249,10 +244,9 @@ export function PortalDemo() {
 
           {/* Mockup */}
           <DashboardMockup />
-
         </div>
 
-        {/* ── CTA ── */}
+        {/* â”€â”€ CTA â”€â”€ */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -261,19 +255,18 @@ export function PortalDemo() {
           className="text-center mt-20"
         >
           <p className="text-white/50 text-sm mb-5">
-            ¿Querés ver cómo quedaría para tu negocio?
+            Â¿QuerÃ©s ver cÃ³mo quedarÃ­a para tu negocio?
           </p>
           <Link
             href="/login"
             className="inline-flex items-center gap-2 px-8 py-4 rounded-xl font-semibold text-base text-black bg-cyan-400 hover:bg-cyan-300 transition-colors shadow-lg shadow-cyan-500/20"
           >
-            Ver demo en vivo →
+            Ver demo en vivo â†’
           </Link>
           <p className="mt-4 text-xs text-white/30 tracking-wide">
-            Acceso inmediato · Sin registrarte · Sin costo
+            Acceso inmediato Â· Sin registrarte Â· Sin costo
           </p>
         </motion.div>
-
       </div>
     </section>
   );

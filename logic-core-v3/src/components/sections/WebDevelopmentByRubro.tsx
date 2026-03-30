@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useRef, useState } from 'react'
-import { AnimatePresence, motion, useInView, useReducedMotion } from 'framer-motion'
+import { AnimatePresence, motion, type Variants, useInView, useReducedMotion } from 'framer-motion'
 import { ArrowUpRight, Building2, Car, Dumbbell, HeartPulse, Sparkles, Utensils } from 'lucide-react'
 
 interface RubroData {
@@ -96,7 +96,7 @@ const panelVariants = {
         WebkitMaskPosition: '0% 0%',
         transition: {
             duration: 0.7,
-            ease: [0.16, 1, 0.3, 1],
+            ease: [0.16, 1, 0.3, 1] as const,
             when: 'beforeChildren',
             staggerChildren: 0.08,
         },
@@ -104,14 +104,14 @@ const panelVariants = {
     exit: {
         opacity: 0,
         y: -16,
-        transition: { duration: 0.28, ease: [0.4, 0, 1, 1] },
+        transition: { duration: 0.28, ease: [0.4, 0, 1, 1] as const },
     },
-}
+} as Variants
 
 const itemVariants = {
     initial: { opacity: 0, y: 22 },
-    animate: { opacity: 1, y: 0, transition: { duration: 0.55, ease: [0.16, 1, 0.3, 1] } },
-}
+    animate: { opacity: 1, y: 0, transition: { duration: 0.55, ease: [0.16, 1, 0.3, 1] as const } },
+} as Variants
 
 function RubroMockup({ rubro }: { rubro: RubroData }) {
     const Icon = rubro.icon
@@ -316,7 +316,9 @@ export default function WebDevelopmentByRubro() {
                                         background: `rgba(${rubro.colorRgb},0.1)`,
                                     }}
                                 >
-                                    <Icon className="size-4 animate-[float_3s_ease-in-out_infinite]" style={{ color: rubro.color }} />
+                                    <span style={{ color: rubro.color }}>
+                                        <Icon className="size-4 animate-[float_3s_ease-in-out_infinite]" />
+                                    </span>
                                     <span className="text-[11px] uppercase tracking-[0.28em]" style={{ color: rubro.color }}>
                                         {rubro.label}
                                     </span>

@@ -38,9 +38,10 @@ export const metadata: Metadata = {
 };
 
 import { SmoothScroll } from "@/components/layout/SmoothScroll";
-import { DynamicDock } from "@/components/layout/DynamicDock";
+import { Navbar } from "@/components/layout/Navbar";
 import Preloader from "@/components/ui/Preloader";
 import { LogicCompanion } from "@/modules/ai-companion";
+import { PreloaderProvider } from "@/context/PreloaderContext";
 import { TransitionProvider } from "@/context/TransitionContext";
 import { Shutter } from "@/components/layout/Shutter";
 import { PublicOnlyComponents } from "@/components/layout/PublicOnlyComponents";
@@ -56,35 +57,37 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <CustomCursor />
-        <NoiseOverlay />
-        <SmoothScroll>
-          <TransitionProvider>
-            <PublicOnlyComponents>
-              <Shutter />
-            </PublicOnlyComponents>
-            {children}
-            <PublicOnlyComponents>
-              <DynamicDock />
-            </PublicOnlyComponents>
-          </TransitionProvider>
-        </SmoothScroll>
-        <PublicOnlyComponents>
-          <Preloader />
-          <LogicCompanion />
-        </PublicOnlyComponents>
-        <Toaster 
-          theme="dark" 
-          position="bottom-right" 
-          toastOptions={{
-            style: {
-              background: '#090a0f',
-              border: '1px solid rgba(255,255,255,0.05)',
-              color: '#fff',
-            },
-            className: 'shadow-[0_4px_24px_rgba(0,0,0,0.4)] backdrop-blur-xl',
-          }} 
-        />
+        <PreloaderProvider>
+          <CustomCursor />
+          <NoiseOverlay />
+          <SmoothScroll>
+            <TransitionProvider>
+              <PublicOnlyComponents>
+                <Shutter />
+              </PublicOnlyComponents>
+              {children}
+              <PublicOnlyComponents>
+                <Navbar />
+              </PublicOnlyComponents>
+            </TransitionProvider>
+          </SmoothScroll>
+          <PublicOnlyComponents>
+            <Preloader />
+            <LogicCompanion />
+          </PublicOnlyComponents>
+          <Toaster 
+            theme="dark" 
+            position="bottom-right" 
+            toastOptions={{
+              style: {
+                background: '#090a0f',
+                border: '1px solid rgba(255,255,255,0.05)',
+                color: '#fff',
+              },
+              className: 'shadow-[0_4px_24px_rgba(0,0,0,0.4)] backdrop-blur-xl',
+            }} 
+          />
+        </PreloaderProvider>
       </body>
     </html>
   );
