@@ -42,16 +42,20 @@ function PreloaderLogoMesh({ phase, onLoaded }: PreloaderArtifactProps) {
 
         if (phase === 'hidden') {
             groupRef.current.scale.setScalar(0);
+            groupRef.current.position.x = -1.1;
             groupRef.current.position.y = 0;
-            groupRef.current.rotation.x = 0;
-            groupRef.current.rotation.y = -0.5;
+            groupRef.current.rotation.x = 0.08;
+            groupRef.current.rotation.y = -1.0;
+            groupRef.current.rotation.z = 0.06;
         }
 
         if (phase === 'appearing') {
             groupRef.current.scale.setScalar(0.007);
+            groupRef.current.position.x = -0.55;
             groupRef.current.position.y = 0;
-            groupRef.current.rotation.x = 0;
-            groupRef.current.rotation.y = -0.6;
+            groupRef.current.rotation.x = 0.06;
+            groupRef.current.rotation.y = -0.82;
+            groupRef.current.rotation.z = 0.04;
         }
     }, [phase]);
 
@@ -60,21 +64,36 @@ function PreloaderLogoMesh({ phase, onLoaded }: PreloaderArtifactProps) {
 
         if (phase === 'appearing') {
             groupRef.current.scale.setScalar(0.007);
+            groupRef.current.position.x = THREE.MathUtils.lerp(
+                groupRef.current.position.x,
+                0,
+                delta * 1.9
+            );
             groupRef.current.position.y = Math.sin(state.clock.elapsedTime * 0.8) * 0.04;
             groupRef.current.rotation.x = THREE.MathUtils.lerp(
                 groupRef.current.rotation.x,
-                0,
-                delta * 1.5
+                0.01,
+                delta * 1.8
             );
             groupRef.current.rotation.y = THREE.MathUtils.lerp(
                 groupRef.current.rotation.y,
+                -0.04,
+                delta * 1.7
+            );
+            groupRef.current.rotation.z = THREE.MathUtils.lerp(
+                groupRef.current.rotation.z,
                 0,
-                delta * 1.5
+                delta * 1.6
             );
         }
 
         if (phase === 'idle') {
             groupRef.current.scale.setScalar(0.007);
+            groupRef.current.position.x = THREE.MathUtils.lerp(
+                groupRef.current.position.x,
+                0,
+                delta * 2
+            );
             groupRef.current.position.y = Math.sin(state.clock.elapsedTime * 0.6) * 0.08;
 
             const targetX = -state.pointer.y * 0.8;
@@ -94,6 +113,11 @@ function PreloaderLogoMesh({ phase, onLoaded }: PreloaderArtifactProps) {
 
         if (phase === 'exiting') {
             groupRef.current.scale.setScalar(0.007);
+            groupRef.current.position.x = THREE.MathUtils.lerp(
+                groupRef.current.position.x,
+                0,
+                delta * 1.4
+            );
             groupRef.current.position.y = Math.sin(state.clock.elapsedTime * 0.6) * 0.08;
 
             const targetX = -state.pointer.y * 0.4;
@@ -107,6 +131,11 @@ function PreloaderLogoMesh({ phase, onLoaded }: PreloaderArtifactProps) {
             groupRef.current.rotation.y = THREE.MathUtils.lerp(
                 groupRef.current.rotation.y,
                 targetY,
+                0.05
+            );
+            groupRef.current.rotation.z = THREE.MathUtils.lerp(
+                groupRef.current.rotation.z,
+                0,
                 0.05
             );
         }

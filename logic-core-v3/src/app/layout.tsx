@@ -40,11 +40,11 @@ export const metadata: Metadata = {
 import { SmoothScroll } from "@/components/layout/SmoothScroll";
 import { Navbar } from "@/components/layout/Navbar";
 import Preloader from "@/components/ui/Preloader";
-import { LogicCompanion } from "@/modules/ai-companion";
 import { PreloaderProvider } from "@/context/PreloaderContext";
 import { TransitionProvider } from "@/context/TransitionContext";
 import { Shutter } from "@/components/layout/Shutter";
 import { PublicOnlyComponents } from "@/components/layout/PublicOnlyComponents";
+import { ClientLogicCompanion } from "@/components/layout/ClientLogicCompanion";
 import { Toaster } from "sonner";
 
 export default function RootLayout({
@@ -73,7 +73,7 @@ export default function RootLayout({
           </SmoothScroll>
           <PublicOnlyComponents>
             <Preloader />
-            <LogicCompanion />
+            <ClientLogicCompanion />
           </PublicOnlyComponents>
           <Toaster 
             theme="dark" 

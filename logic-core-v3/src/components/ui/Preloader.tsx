@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { Canvas } from "@react-three/fiber";
 import { AnimatePresence, motion, useAnimate } from "framer-motion";
@@ -51,6 +50,7 @@ const VIGNETTE_FADE_IN_DURATION_SECONDS = 0.8;
 const PARTICLES_FADE_IN_DURATION_SECONDS = 1;
 const DOT_FIELD_FADE_IN_DURATION_SECONDS = 0.6;
 const DOT_FIELD_FADE_OUT_DURATION_SECONDS = 0.4;
+const DOT_FIELD_ENTRY_DELAY_SECONDS = 0.18;
 const DOT_FIELD_COLUMNS = 16;
 const DOT_FIELD_ROWS = 10;
 const TYPEWRITER_CHARACTER_DELAY_MS = 55;
@@ -165,6 +165,7 @@ function DotField({ active }: { active: boolean }) {
                 duration: active
                     ? DOT_FIELD_FADE_IN_DURATION_SECONDS
                     : DOT_FIELD_FADE_OUT_DURATION_SECONDS,
+                delay: active ? DOT_FIELD_ENTRY_DELAY_SECONDS : 0,
                 ease: "easeOut",
             }}
         >
@@ -229,6 +230,7 @@ export default function Preloader({
     const [artifactPhase, setArtifactPhase] =
         useState<PreloaderArtifactProps["phase"]>("hidden");
     const [isArtifactReady, setIsArtifactReady] = useState(false);
+    const [hasStartedCanvasReveal, setHasStartedCanvasReveal] = useState(false);
 
     useEffect(() => {
         heroCanvasRectRef.current = heroCanvasRect;
@@ -260,11 +262,11 @@ export default function Preloader({
         artifactPhase === "appearing" ||
         artifactPhase === "idle" ||
         artifactPhase === "exiting";
+    const shouldShowArtifactDecorations =
+        isArtifactReady && hasStartedCanvasReveal && isBackdropAwake;
     const isDotFieldVisible =
         artifactPhase === "appearing" || artifactPhase === "idle";
     const shouldShowCornerCopy = artifactPhase === "idle";
-    const shouldShowWarmupPlate =
-        artifactPhase === "hidden" && !isArtifactReady;
     const bloomOpacity =
         artifactPhase === "appearing" || artifactPhase === "idle" ? 1 : 0;
     const particlesOpacity =
@@ -283,6 +285,8 @@ export default function Preloader({
         isCancelledRef.current = false;
         artifactLoadedRef.current = false;
         artifactLoadedResolveRef.current = null;
+        setIsArtifactReady(false);
+        setHasStartedCanvasReveal(false);
         document.body.style.overflow = "hidden";
 
         const wait = (delay: number) =>
@@ -357,7 +361,15 @@ export default function Preloader({
                   )
                 : null;
 
-            await wait(1200);
+            await wait(DOT_FIELD_ENTRY_DELAY_SECONDS * 1000);
+
+            if (isCancelledRef.current) {
+                return;
+            }
+
+            setHasStartedCanvasReveal(true);
+
+            await wait(1020);
 
             if (isCancelledRef.current) {
                 return;
@@ -552,6 +564,7 @@ export default function Preloader({
 
         return () => {
             isCancelledRef.current = true;
+            setHasStartedCanvasReveal(false);
 
             timeoutIdsRef.current.forEach((timeoutId) => {
                 window.clearTimeout(timeoutId);
@@ -593,7 +606,7 @@ export default function Preloader({
                         transformOrigin: "center center",
                     }}
                 >
-                    <DotField active={isDotFieldVisible} />
+                    <DotField active={shouldShowArtifactDecorations && isDotFieldVisible} />
 
                     {/* Edge shadows — top/bottom fade */}
                     <div
@@ -603,61 +616,10 @@ export default function Preloader({
                             background:
                                 "linear-gradient(180deg, rgba(0,0,0,0.055) 0%, transparent 18%, transparent 78%, rgba(0,0,0,0.055) 100%)",
                             zIndex: 0,
-                            opacity: isBackdropAwake ? 1 : 0,
+                            opacity: shouldShowArtifactDecorations ? 1 : 0,
                             transition: "opacity 280ms ease",
                         }}
                     />
-
-                    <motion.div
-                        aria-hidden="true"
-                        className="pointer-events-none absolute inset-0 flex items-center justify-center"
-                        animate={{
-                            opacity: shouldShowWarmupPlate ? 1 : 0,
-                            scale: shouldShowWarmupPlate ? 1 : 0.98,
-                        }}
-                        transition={{ duration: 0.32, ease: "easeOut" }}
-                        style={{ zIndex: 2 }}
-                    >
-                        <div
-                            style={{
-                                position: "relative",
-                                width: 168,
-                                height: 168,
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                            }}
-                        >
-                            <div
-                                style={{
-                                    position: "absolute",
-                                    inset: "14%",
-                                    borderRadius: "50%",
-                                    background:
-                                        "radial-gradient(circle, rgba(255,255,255,0.055) 0%, rgba(255,255,255,0.018) 42%, transparent 74%)",
-                                    filter: "blur(18px)",
-                                }}
-                            />
-                            <div
-                                style={{
-                                    position: "absolute",
-                                    inset: 0,
-                                    borderRadius: "50%",
-                                    border: "1px solid rgba(255,255,255,0.06)",
-                                    opacity: 0.45,
-                                }}
-                            />
-                            <Image
-                                src="/logodevelOP.svg"
-                                alt=""
-                                aria-hidden="true"
-                                width={58}
-                                height={58}
-                                className="h-[58px] w-[58px] object-contain opacity-72 brightness-0 invert"
-                                priority
-                            />
-                        </div>
-                    </motion.div>
 
                     {/* Decorative horizontal lines growing from center */}
                     <motion.div
@@ -665,10 +627,11 @@ export default function Preloader({
                         className="pointer-events-none absolute left-1/2 -translate-x-1/2"
                         initial={{ width: 0, opacity: 0 }}
                         animate={{
-                            width: isBackdropAwake && phase !== "done" ? "60vw" : 0,
+                            width: shouldShowArtifactDecorations && phase !== "done" ? "60vw" : 0,
                             opacity:
-                                artifactPhase === "appearing" ||
-                                artifactPhase === "idle"
+                                shouldShowArtifactDecorations &&
+                                (artifactPhase === "appearing" ||
+                                artifactPhase === "idle")
                                     ? 1
                                     : 0,
                         }}
@@ -690,10 +653,11 @@ export default function Preloader({
                         className="pointer-events-none absolute left-1/2 -translate-x-1/2"
                         initial={{ width: 0, opacity: 0 }}
                         animate={{
-                            width: isBackdropAwake && phase !== "done" ? "60vw" : 0,
+                            width: shouldShowArtifactDecorations && phase !== "done" ? "60vw" : 0,
                             opacity:
-                                artifactPhase === "appearing" ||
-                                artifactPhase === "idle"
+                                shouldShowArtifactDecorations &&
+                                (artifactPhase === "appearing" ||
+                                artifactPhase === "idle")
                                     ? 1
                                     : 0,
                         }}
@@ -713,7 +677,7 @@ export default function Preloader({
                     {/* Subtle center glow */}
                     <motion.div
                         className="pointer-events-none absolute inset-0"
-                        animate={{ opacity: bloomOpacity }}
+                        animate={{ opacity: shouldShowArtifactDecorations ? bloomOpacity : 0 }}
                         transition={{
                             duration:
                                 artifactPhase === "exiting"
@@ -794,7 +758,7 @@ export default function Preloader({
                     <motion.div
                         aria-hidden="true"
                         className="pointer-events-none absolute inset-0"
-                        animate={{ opacity: particlesOpacity }}
+                        animate={{ opacity: shouldShowArtifactDecorations ? particlesOpacity : 0 }}
                         transition={{
                             duration:
                                 artifactPhase === "idle"
@@ -845,7 +809,7 @@ export default function Preloader({
                         aria-hidden="true"
                         className="pointer-events-none absolute inset-0"
                         initial={{ opacity: 0 }}
-                        animate={{ opacity: isBackdropAwake ? 1 : 0 }}
+                        animate={{ opacity: shouldShowArtifactDecorations ? 1 : 0 }}
                         transition={{
                             duration: VIGNETTE_FADE_IN_DURATION_SECONDS,
                             ease: "easeOut",
@@ -862,11 +826,12 @@ export default function Preloader({
                         className="pointer-events-none absolute"
                         initial={{ opacity: 0 }}
                         animate={{
-                            opacity:
-                                artifactPhase === "appearing" ||
-                                artifactPhase === "idle"
+                            opacity: shouldShowArtifactDecorations
+                                ? artifactPhase === "appearing" ||
+                                  artifactPhase === "idle"
                                     ? 1
-                                    : 0,
+                                    : 0
+                                : 0,
                         }}
                         transition={{ duration: 0.4, delay: 0.2, ease: "easeOut" }}
                         style={{
@@ -889,7 +854,7 @@ export default function Preloader({
                     <motion.div
                         className="pointer-events-none absolute"
                         initial={{ opacity: 0 }}
-                        animate={{ opacity: shouldShowCornerCopy ? 1 : 0 }}
+                        animate={{ opacity: shouldShowArtifactDecorations && shouldShowCornerCopy ? 1 : 0 }}
                         transition={{ duration: 0.8, delay: 1.5, ease: "easeOut" }}
                         style={{
                             bottom: 28,
@@ -909,7 +874,7 @@ export default function Preloader({
                     <motion.div
                         className="pointer-events-none absolute"
                         initial={{ opacity: 0 }}
-                        animate={{ opacity: shouldShowCornerCopy ? 1 : 0 }}
+                        animate={{ opacity: shouldShowArtifactDecorations && shouldShowCornerCopy ? 1 : 0 }}
                         transition={{ duration: 0.8, delay: 1.8, ease: "easeOut" }}
                         style={{
                             bottom: 28,

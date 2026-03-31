@@ -18,6 +18,7 @@
     "@prisma/client": "^6.19.2",
     "@react-email/components": "^1.0.10",
     "@react-pdf/renderer": "^4.3.2",
+    "@react-spring/three": "^10.0.3",
     "@react-three/drei": "^10.7.7",
     "@react-three/fiber": "^9.5.0",
     "@react-three/postprocessing": "^3.0.4",
@@ -46,7 +47,8 @@
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.4.0",
     "three": "^0.182.0",
-    "zod": "^3.25.76"
+    "zod": "^3.25.76",
+    "zustand": "^5.0.12"
   },
   "prisma": {
     "seed": "npx tsx prisma/seed.ts"
