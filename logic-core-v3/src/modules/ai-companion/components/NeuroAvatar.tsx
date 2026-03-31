@@ -2,7 +2,7 @@
 
 import { type ComponentRef, useEffect, useRef } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { Environment, Float, MeshDistortMaterial } from '@react-three/drei';
+import { Float, MeshDistortMaterial } from '@react-three/drei';
 import type { Message } from 'ai';
 import * as THREE from 'three';
 
@@ -683,9 +683,11 @@ export function NeuroAvatar({
                 />
 
                 <ambientLight intensity={0.5} />
+                <hemisphereLight intensity={1.15} color="#dbeafe" groundColor="#0f172a" />
                 <pointLight ref={keyLightRef} position={[2, 2, 2]} intensity={5} color="#06b6d4" decay={2} />
                 <pointLight position={[-2, -1, -2]} intensity={3} color="#8b5cf6" decay={2} />
-                <Environment preset="city" />
+                <directionalLight position={[0, 2.5, 3]} intensity={1.1} color="#ffffff" />
+                <directionalLight position={[-2.5, -1.5, 1]} intensity={0.5} color="#60a5fa" />
 
                 <Float
                     speed={isThinking ? 3.4 : 2.35}

@@ -551,22 +551,38 @@ function WebScene({ service }: { service: Service }) {
                       : { duration: 0.3 }
                   }
                   style={{
-                    padding: '8px 10px',
+                    padding: result.isClient && highlightFirst ? '10px 12px' : '8px 10px',
                     borderRadius: 8,
                     border: result.isClient && highlightFirst
                       ? `1px solid ${color}50`
                       : '1px solid rgba(255,255,255,0.06)',
                     background: result.isClient && highlightFirst
-                      ? `${color}08`
+                      ? `linear-gradient(135deg, ${color}10, ${color}05)`
                       : 'rgba(255,255,255,0.02)',
                     position: 'relative',
                     overflow: 'hidden',
+                    opacity: !result.isClient && highlightFirst ? 0.4 : 1,
+                    filter: !result.isClient && highlightFirst ? 'grayscale(0.5)' : 'none',
                     transition: 'all 400ms ease',
                     boxShadow: result.isClient && highlightFirst
-                      ? `0 0 0 1px ${color}12 inset, 0 18px 32px ${color}14`
+                      ? `0 0 20px ${color}10`
                       : 'none',
                   }}
                 >
+                  {result.isClient && highlightFirst && (
+                    <div
+                      style={{
+                        position: 'absolute',
+                        left: 0,
+                        top: 0,
+                        bottom: 0,
+                        width: 3,
+                        background: color,
+                        borderRadius: '3px 0 0 3px',
+                      }}
+                    />
+                  )}
+
                   {result.isClient && highlightFirst && (
                     <motion.div
                       animate={isActive ? { opacity: [0.14, 0.28, 0.14] } : { opacity: 0.18 }}
@@ -625,6 +641,22 @@ function WebScene({ service }: { service: Service }) {
                       >
                         #{result.position}
                       </span>
+                      {result.isClient && (
+                        <div
+                          style={{
+                            width: 12,
+                            height: 12,
+                            borderRadius: '50%',
+                            background: color,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            flexShrink: 0,
+                          }}
+                        >
+                          <Check size={7} color="black" strokeWidth={3} />
+                        </div>
+                      )}
                       <span
                         style={{
                           fontSize: 9,
@@ -659,6 +691,41 @@ function WebScene({ service }: { service: Service }) {
                     >
                       {result.description}
                     </div>
+
+                    {result.isClient && highlightFirst && (
+                      <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.4 }}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 4,
+                          marginTop: 4,
+                        }}
+                      >
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <motion.span
+                            key={star}
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            transition={{ delay: 0.4 + star * 0.06, type: 'spring' }}
+                            style={{ fontSize: 9, color: '#f59e0b' }}
+                          >
+                            ★
+                          </motion.span>
+                        ))}
+                        <span
+                          style={{
+                            fontSize: 9,
+                            color: 'rgba(255,255,255,0.3)',
+                            marginLeft: 2,
+                          }}
+                        >
+                          4.9 · 47 reseñas
+                        </span>
+                      </motion.div>
+                    )}
                   </div>
                 </motion.div>
               )}
@@ -678,19 +745,20 @@ function WebScene({ service }: { service: Service }) {
     const showGraph = progress > 0.2;
     const showMap = progress > 0.35;
     const mapPoints = [
-      { name: 'Tucuman', x: '42%', y: '38%', size: 8, delay: 0.35 },
-      { name: 'Buenos Aires', x: '52%', y: '68%', size: 12, delay: 0.41 },
-      { name: 'Cordoba', x: '44%', y: '50%', size: 10, delay: 0.47 },
-      { name: 'Rosario', x: '48%', y: '58%', size: 8, delay: 0.53 },
-      { name: 'Mendoza', x: '32%', y: '52%', size: 7, delay: 0.59 },
-      { name: 'Salta', x: '38%', y: '22%', size: 6, delay: 0.65 },
+      { name: 'Tucum\u00e1n', x: '52%', y: '32%', size: 7, delay: 0.3 },
+      { name: 'Buenos Aires', x: '60%', y: '72%', size: 11, delay: 0.4 },
+      { name: 'C\u00f3rdoba', x: '54%', y: '52%', size: 9, delay: 0.5 },
+      { name: 'Rosario', x: '58%', y: '62%', size: 8, delay: 0.6 },
+      { name: 'Mendoza', x: '38%', y: '55%', size: 7, delay: 0.7 },
+      { name: 'Salta', x: '48%', y: '20%', size: 6, delay: 0.8 },
+      { name: 'Mar del Plata', x: '65%', y: '80%', size: 5, delay: 0.9 },
     ];
-    const chartGradientId = 'analyticsAreaGrad';
-    const chartPoints = baseData.slice(0, visiblePoints).map((value, index) => {
+    const chartGradientId = 'lineGrad';
+    const chartCoordinates = baseData.slice(0, visiblePoints).map((value, index) => {
       const x = (index / (baseData.length - 1)) * 120;
       const y = 60 - (value / 320) * 55;
 
-      return `${x},${y}`;
+      return { value, x, y };
     });
     const chartAreaPath =
       visiblePoints > 1
@@ -706,6 +774,7 @@ function WebScene({ service }: { service: Service }) {
             'Z',
           ].join(' ')
         : '';
+    const chartPoints = chartCoordinates.map(({ x, y }) => `${x},${y}`);
 
     return (
       <div
@@ -856,9 +925,9 @@ function WebScene({ service }: { service: Service }) {
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>
           {[
-            { label: 'VISITAS', value: visits.toLocaleString(), metricColor: color },
-            { label: 'SESIONES', value: sessions.toString(), metricColor: '#8b5cf6' },
-            { label: 'CONV.', value: `${conversion}%`, metricColor: '#f59e0b' },
+            { label: 'VISITAS', value: visits.toLocaleString(), metricColor: color, trend: '+12%' },
+            { label: 'SESIONES', value: sessions.toString(), metricColor: '#8b5cf6', trend: '+8%' },
+            { label: 'CONV.', value: `${conversion}%`, metricColor: '#f59e0b', trend: '+0.4%' },
           ].map((metric) => (
             <div
               key={metric.label}
@@ -872,22 +941,30 @@ function WebScene({ service }: { service: Service }) {
             >
               <div
                 style={{
-                  fontSize: 8,
+                  fontSize: 7,
                   color: 'rgba(255,255,255,0.3)',
                   marginBottom: 3,
-                  letterSpacing: '0.06em',
                 }}
               >
                 {metric.label}
               </div>
               <div
                 style={{
-                  fontSize: 14,
-                  fontWeight: 700,
-                  color: metric.metricColor,
+                  display: 'flex',
+                  alignItems: 'baseline',
+                  gap: 4,
                 }}
               >
-                {metric.value}
+                <div
+                  style={{
+                    fontSize: 14,
+                    fontWeight: 700,
+                    color: metric.metricColor,
+                  }}
+                >
+                  {metric.value}
+                </div>
+                <div style={{ fontSize: 8, color: '#10b981' }}>{`\u2191${metric.trend}`}</div>
               </div>
             </div>
           ))}
@@ -924,7 +1001,7 @@ function WebScene({ service }: { service: Service }) {
                     <>
                       <defs>
                         <linearGradient id={chartGradientId} x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor={color} stopOpacity="0.2" />
+                          <stop offset="0%" stopColor={color} stopOpacity="0.3" />
                           <stop offset="100%" stopColor={color} stopOpacity="0" />
                         </linearGradient>
                       </defs>
@@ -937,6 +1014,28 @@ function WebScene({ service }: { service: Service }) {
                         strokeLinecap="round"
                         strokeLinejoin="round"
                       />
+                      {chartCoordinates.map(({ x, y }, index) => {
+                        const isLast = index === chartCoordinates.length - 1;
+
+                        return (
+                          <g key={`${x}-${y}`}>
+                            <circle cx={x} cy={y} r={isLast ? 3 : 1.5} fill={isLast ? color : `${color}60`} />
+                            {isLast && (
+                              <motion.circle
+                                cx={x}
+                                cy={y}
+                                r={6}
+                                fill="none"
+                                stroke={color}
+                                strokeWidth="0.5"
+                                animate={isActive ? { opacity: [0.2, 0.45, 0.2], scale: [1, 1.18, 1] } : { opacity: 0.3, scale: 1 }}
+                                transition={{ duration: 1.6, repeat: isActive ? Infinity : 0, ease: 'easeInOut' }}
+                                style={{ transformOrigin: `${x}px ${y}px` }}
+                              />
+                            )}
+                          </g>
+                        );
+                      })}
                     </>
                   )}
                 </svg>
@@ -961,17 +1060,17 @@ function WebScene({ service }: { service: Service }) {
             </div>
 
             <svg
-              viewBox="0 0 100 140"
+              viewBox="0 0 160 280"
               style={{
                 width: '100%',
                 height: 'calc(100% - 16px)',
-                opacity: 0.15,
+                opacity: 0.12,
               }}
             >
               <path
-                d="M35,5 L55,5 L70,15 L75,30 L72,45 L65,55 L70,70 L65,85 L60,100 L55,115 L45,130 L38,135 L32,125 L28,110 L30,95 L25,80 L22,65 L25,50 L20,35 L25,20 Z"
-                fill="rgba(255,255,255,0.3)"
-                stroke="rgba(255,255,255,0.1)"
+                d="M80,8 L100,8 L115,18 L118,28 L120,40 L115,52 L118,65 L112,78 L115,92 L108,105 L110,118 L105,130 L108,142 L102,155 L98,168 L92,180 L88,192 L82,205 L78,218 L74,230 L68,242 L60,252 L54,260 L48,268 L44,275 L40,272 L38,265 L36,255 L38,245 L40,235 L36,225 L34,215 L36,205 L32,195 L30,183 L32,170 L28,158 L26,145 L28,132 L24,120 L22,108 L25,95 L22,82 L24,68 L28,55 L24,42 L28,30 L35,20 L45,12 L58,8 Z"
+                fill="rgba(255,255,255,0.4)"
+                stroke="rgba(255,255,255,0.15)"
                 strokeWidth="0.5"
               />
             </svg>
@@ -1322,7 +1421,14 @@ function WebScene({ service }: { service: Service }) {
               style={{
                 position: 'absolute',
                 inset: 0,
-                background: `radial-gradient(circle at 58% 42%, ${color}10 0%, transparent 34%), linear-gradient(180deg, rgba(7,11,16,0.88) 0%, rgba(5,8,12,0.94) 100%)`,
+                background: 'rgba(6,182,212,0.03)',
+                backgroundImage: `
+                  linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
+                  linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px),
+                  linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
+                  linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px)
+                `,
+                backgroundSize: '30px 30px, 30px 30px, 10px 10px, 10px 10px',
                 pointerEvents: 'none',
               }}
             />
@@ -1361,23 +1467,40 @@ function WebScene({ service }: { service: Service }) {
                 >
                   <div
                     style={{
-                      background: 'rgba(100,100,100,0.8)',
-                      border: '1px solid rgba(150,150,150,0.3)',
+                      width: 20,
+                      height: 20,
                       borderRadius: '50% 50% 50% 0',
                       transform: 'rotate(-45deg)',
-                      width: 16,
-                      height: 16,
+                      background: 'rgba(120,120,120,0.6)',
+                      border: '1px solid rgba(180,180,180,0.3)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
                     }}
-                  />
+                  >
+                    <div
+                      style={{
+                        transform: 'rotate(45deg)',
+                        width: 5,
+                        height: 5,
+                        borderRadius: '50%',
+                        background: 'rgba(180,180,180,0.5)',
+                      }}
+                    />
+                  </div>
                   <div
                     style={{
-                      fontSize: 7,
-                      color: 'rgba(255,255,255,0.3)',
-                      marginTop: 2,
+                      background: 'rgba(30,30,30,0.9)',
+                      border: '1px solid rgba(120,120,120,0.2)',
+                      borderRadius: 4,
+                      padding: '2px 5px',
+                      marginTop: 3,
+                      fontSize: 8,
+                      color: 'rgba(255,255,255,0.4)',
                       whiteSpace: 'nowrap',
                     }}
                   >
-                    {`${pin.stars}\u2b50`}
+                    {`${pin.stars} ⭐`}
                   </div>
                 </motion.div>
               ) : null
@@ -1399,48 +1522,73 @@ function WebScene({ service }: { service: Service }) {
                   zIndex: 10,
                 }}
               >
+                {[1, 2, 3].map((ring) => (
+                  <motion.div
+                    key={ring}
+                    animate={isActive ? { scale: [1, 2.5 + ring * 0.5], opacity: [0.4, 0] } : { scale: 1, opacity: 0 }}
+                    transition={{
+                      duration: 2,
+                      delay: ring * 0.4,
+                      repeat: isActive ? Infinity : 0,
+                      ease: 'easeOut',
+                    }}
+                    style={{
+                      position: 'absolute',
+                      width: 28,
+                      height: 28,
+                      borderRadius: '50%',
+                      border: `1px solid ${color}`,
+                      top: '50%',
+                      left: '50%',
+                      transform: 'translate(-50%, -50%)',
+                    }}
+                  />
+                ))}
+
                 <motion.div
-                  animate={isActive ? { y: [0, -4, 0] } : { y: 0 }}
-                  transition={{ duration: 1.5, repeat: isActive ? Infinity : 0 }}
+                  animate={isActive ? { y: [0, -6, 0] } : { y: 0 }}
+                  transition={{ duration: 2, repeat: isActive ? Infinity : 0, ease: 'easeInOut' }}
                   style={{
-                    background: color,
+                    width: 32,
+                    height: 32,
                     borderRadius: '50% 50% 50% 0',
                     transform: 'rotate(-45deg)',
-                    width: 24,
-                    height: 24,
-                    boxShadow: `0 0 16px ${color}60`,
+                    background: `linear-gradient(135deg, ${color}, ${color}cc)`,
+                    boxShadow: `0 0 24px ${color}60, 0 4px 12px rgba(0,0,0,0.4)`,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
+                    position: 'relative',
                   }}
                 >
-                  <div
+                  <span
                     style={{
                       transform: 'rotate(45deg)',
-                      fontSize: 8,
-                      color: 'black',
+                      fontSize: 12,
+                      filter: 'brightness(0)',
                     }}
                   >
-                    {'\u2605'}
-                  </div>
+                    {'★'}
+                  </span>
                 </motion.div>
 
                 <motion.div
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 0.3 }}
+                  initial={{ opacity: 0, scale: 0.8, y: 5 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  transition={{ delay: 0.4, type: 'spring' }}
                   style={{
                     background: color,
                     color: 'black',
-                    fontSize: 8,
+                    fontSize: 9,
                     fontWeight: 700,
-                    padding: '2px 6px',
-                    borderRadius: 4,
-                    marginTop: 4,
+                    padding: '3px 8px',
+                    borderRadius: 6,
+                    marginTop: 6,
                     whiteSpace: 'nowrap',
+                    boxShadow: `0 2px 8px ${color}40`,
                   }}
                 >
-                  {'TU EMPRESA \u00b7 5.0 \u2b50'}
+                  {'TU EMPRESA · 5.0 ★'}
                 </motion.div>
               </motion.div>
             )}
@@ -1480,7 +1628,7 @@ function WebScene({ service }: { service: Service }) {
                 </div>
               </div>
 
-              {[
+              {[ 
                 { label: 'Fotos', status: true },
                 { label: 'Horarios', status: true },
                 { label: 'Web', status: true },
@@ -1501,6 +1649,46 @@ function WebScene({ service }: { service: Service }) {
                   <span style={{ fontSize: 9, color }}>{'\u2713'}</span>
                 </motion.div>
               ))}
+
+              <div
+                style={{
+                  marginTop: 8,
+                  paddingTop: 8,
+                  borderTop: '1px solid rgba(255,255,255,0.06)',
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: 7,
+                    color: 'rgba(255,255,255,0.25)',
+                    marginBottom: 6,
+                    letterSpacing: '0.08em',
+                  }}
+                >
+                  VS COMPETENCIA
+                </div>
+                {[
+                  { label: 'Reseñas', you: '47', them: '8' },
+                  { label: 'Rating', you: '5.0', them: '3.2' },
+                ].map((item) => (
+                  <div
+                    key={item.label}
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      marginBottom: 4,
+                    }}
+                  >
+                    <span style={{ fontSize: 8, color: 'rgba(255,255,255,0.3)' }}>{item.label}</span>
+                    <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                      <span style={{ fontSize: 9, color, fontWeight: 600 }}>{item.you}</span>
+                      <span style={{ fontSize: 7, color: 'rgba(255,255,255,0.2)' }}>vs</span>
+                      <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.25)' }}>{item.them}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </motion.div>
           )}
         </div>
@@ -1834,75 +2022,121 @@ function WebScene({ service }: { service: Service }) {
               color: 'rgba(255,255,255,0.92)',
             }}
           >
-            Operacion digital en cuatro vistas
+            Lo que tu sitio hace por vos, en vivo
+          </span>
+          <span
+            style={{
+              fontSize: 10,
+              color: 'rgba(255,255,255,0.3)',
+            }}
+          >
+            Cada funci\u00f3n trabajando mientras dorm\u00eds
           </span>
         </div>
 
-        <div
+        <motion.div
+          animate={{
+            background: isInView ? 'rgba(16,185,129,0.12)' : 'rgba(255,255,255,0.04)',
+            borderColor: isInView ? 'rgba(16,185,129,0.3)' : 'rgba(255,255,255,0.08)',
+          }}
           style={{
-            padding: '6px 10px',
-            borderRadius: 999,
-            border: `1px solid ${activeSimulation.color}2f`,
-            background: `${activeSimulation.color}12`,
-            color: activeSimulation.color,
-            fontSize: 10,
-            fontWeight: 700,
-            letterSpacing: '0.12em',
-            textTransform: 'uppercase',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 5,
+            border: '1px solid',
+            borderRadius: 100,
+            padding: '3px 8px',
             whiteSpace: 'nowrap',
           }}
         >
-          {isInView ? 'Viewport on' : 'Viewport off'}
-        </div>
+          <motion.div
+            animate={{
+              background: isInView ? '#10b981' : 'rgba(255,255,255,0.2)',
+              boxShadow: isInView ? '0 0 6px #10b981' : 'none',
+            }}
+            style={{ width: 5, height: 5, borderRadius: '50%' }}
+          />
+          <span
+            style={{
+              fontSize: 8,
+              fontWeight: 600,
+              letterSpacing: '0.08em',
+              color: isInView ? '#10b981' : 'rgba(255,255,255,0.25)',
+            }}
+          >
+            {isInView ? 'ACTIVO' : 'PAUSADO'}
+          </span>
+        </motion.div>
       </div>
 
       <div
         style={{
-          display: 'flex',
+          display: 'grid',
+          gridTemplateColumns: 'repeat(4, 1fr)',
           gap: 4,
           padding: '0 0 8px',
+          borderBottom: '1px solid rgba(255,255,255,0.06)',
+          marginBottom: 12,
           flexShrink: 0,
         }}
       >
-        {webSimulations.map((simulation, index) => {
+        {webSimulations.map((sim, index) => {
           const isActive = index === activeTab;
 
           return (
             <button
-              key={simulation.id}
+              key={sim.id}
               type="button"
               onClick={() => handleTabClick(index)}
               style={{
-                flex: 1,
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
-                gap: 4,
-                padding: '8px 4px',
-                background: isActive ? `${simulation.color}12` : 'rgba(255,255,255,0.01)',
-                border: `1px solid ${isActive ? `${simulation.color}35` : 'rgba(255,255,255,0.06)'}`,
+                gap: 5,
+                padding: '10px 4px 8px',
+                background: isActive ? `${sim.color}10` : 'transparent',
+                border: `1px solid ${isActive ? `${sim.color}30` : 'transparent'}`,
                 borderRadius: 10,
                 cursor: 'pointer',
-                transition: 'all 200ms ease',
                 position: 'relative',
                 overflow: 'hidden',
-                backdropFilter: 'blur(10px)',
+                transition: 'all 200ms ease',
               }}
             >
-              <div style={{ color: isActive ? simulation.color : 'rgba(255,255,255,0.25)' }}>
-                {simulation.icon}
+              {isActive && (
+                <motion.div
+                  layoutId="tabGlow"
+                  style={{
+                    position: 'absolute',
+                    inset: 0,
+                    background: `radial-gradient(circle at 50% 0%, ${sim.color}15, transparent 70%)`,
+                    pointerEvents: 'none',
+                  }}
+                />
+              )}
+
+              <div
+                style={{
+                  color: isActive ? sim.color : 'rgba(255,255,255,0.2)',
+                  transition: 'color 200ms',
+                  position: 'relative',
+                }}
+              >
+                {sim.icon}
               </div>
 
               <span
                 style={{
-                  fontSize: 9,
-                  fontWeight: isActive ? 600 : 500,
-                  color: isActive ? simulation.color : 'rgba(255,255,255,0.25)',
-                  letterSpacing: '0.03em',
+                  fontSize: 8,
+                  fontWeight: isActive ? 600 : 400,
+                  color: isActive ? sim.color : 'rgba(255,255,255,0.2)',
+                  letterSpacing: '0.04em',
+                  position: 'relative',
+                  transition: 'color 200ms',
                   whiteSpace: 'nowrap',
                 }}
               >
-                {simulation.label}
+                {sim.label}
               </span>
 
               {isActive && (
@@ -1913,8 +2147,23 @@ function WebScene({ service }: { service: Service }) {
                     left: 0,
                     height: 2,
                     width: `${progress * 100}%`,
-                    background: simulation.color,
-                    transition: 'none',
+                    background: `linear-gradient(90deg, ${sim.color}80, ${sim.color})`,
+                    borderRadius: '0 2px 2px 0',
+                  }}
+                />
+              )}
+
+              {!isActive && index < activeTab && (
+                <div
+                  style={{
+                    position: 'absolute',
+                    bottom: 4,
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    width: 3,
+                    height: 3,
+                    borderRadius: '50%',
+                    background: 'rgba(255,255,255,0.15)',
                   }}
                 />
               )}
@@ -2837,14 +3086,32 @@ function ServiceCard({
   const visualX = useTransform(scrollYProgress, [0, 0.17], [16, 0]);
   const numberOpacity = useTransform(scrollYProgress, [0, 0.05, 0.15, 0.85, 0.95, 1], [0, 0.04, 0, 0, 0.04, 0]);
   const filter = useMotionTemplate`blur(${blur}px) brightness(${brightness})`;
-  const stickyTop = `calc(8vh + ${index * 18}px)`;
   const isWebDevelopmentService = service.id === 1;
 
   return (
     <div ref={cardRef} className="relative h-auto md:h-[100vh]" style={{ zIndex: index + 1 }}>
       <motion.article
-        style={{ scale, opacity, y, filter, top: stickyTop }}
-        className="relative mx-auto min-h-[78vh] overflow-hidden rounded-3xl border border-white/[0.05] bg-white/[0.02] shadow-[0_0_100px_rgba(0,0,0,0.8),0_40px_80px_rgba(0,0,0,0.5)] backdrop-blur-2xl md:sticky md:h-[80vh] md:max-h-[80vh]"
+        style={{
+          scale,
+          opacity,
+          y,
+          filter,
+          background: 'rgba(255,255,255,0.02)',
+          border: '1px solid rgba(255,255,255,0.07)',
+          borderRadius: 24,
+          overflow: 'hidden',
+          display: 'grid',
+          gridTemplateColumns: '1fr 1fr',
+          minHeight: 520,
+          position: 'sticky',
+          top: '10vh',
+          boxShadow: `
+            0 0 0 1px rgba(255,255,255,0.04),
+            0 24px 64px rgba(0,0,0,0.4),
+            inset 0 1px 0 rgba(255,255,255,0.05)
+          `,
+        }}
+        className="relative mx-auto w-full backdrop-blur-2xl md:h-[80vh] md:max-h-[80vh]"
       >
         <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.05),transparent_34%,transparent_74%,rgba(255,255,255,0.02))]" />
         <motion.div
@@ -2866,7 +3133,7 @@ function ServiceCard({
           0{service.id}
         </motion.div>
 
-        <div className="relative grid w-full items-stretch gap-6 p-4 sm:p-6 md:p-8 lg:grid-cols-[1.04fr_0.96fr] lg:gap-14 lg:p-10">
+        <div className="relative grid w-full items-stretch gap-6 p-4 sm:p-6 md:p-8 lg:grid-cols-[minmax(0,1fr)_1px_minmax(0,1fr)] lg:gap-0 lg:p-10">
           <motion.div
             style={{ x: textX }}
             className="order-2 flex min-h-0 flex-col justify-between overflow-hidden rounded-3xl border border-white/[0.05] bg-white/[0.02] p-5 backdrop-blur-2xl sm:p-6 lg:order-1 lg:p-8"
@@ -3236,9 +3503,19 @@ function ServiceCard({
             )}
           </motion.div>
 
+          <div
+            className="order-3 hidden lg:block"
+            style={{
+              width: 1,
+              background:
+                'linear-gradient(180deg, transparent, rgba(255,255,255,0.06) 20%, rgba(255,255,255,0.06) 80%, transparent)',
+              flexShrink: 0,
+            }}
+          />
+
           <motion.div
             style={{ x: visualX }}
-            className="order-1 min-h-[320px] overflow-hidden rounded-3xl lg:order-2"
+            className="order-1 min-h-[320px] overflow-hidden rounded-3xl lg:order-3"
           >
             <ServiceVisual service={service} />
           </motion.div>
@@ -3406,6 +3683,43 @@ export default function OurServices() {
       }}
     >
       <div className="pointer-events-none absolute inset-0 z-0">
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            backgroundImage:
+              `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E")`,
+            backgroundRepeat: 'repeat',
+            backgroundSize: '128px 128px',
+            pointerEvents: 'none',
+            zIndex: 0,
+            opacity: 0.4,
+          }}
+        />
+        <div
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            height: 200,
+            background: 'linear-gradient(180deg, rgba(0,0,0,0.3), transparent)',
+            pointerEvents: 'none',
+            zIndex: 0,
+          }}
+        />
+        <div
+          style={{
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: 200,
+            background: 'linear-gradient(0deg, rgba(0,0,0,0.3), transparent)',
+            pointerEvents: 'none',
+            zIndex: 0,
+          }}
+        />
         <motion.div
           animate={{
             background: `radial-gradient(
@@ -3503,8 +3817,14 @@ export default function OurServices() {
 
       <div className="relative z-10 mx-auto max-w-[1280px] px-5 pb-16 pt-20 sm:px-8 lg:px-10 lg:pt-28">
         <motion.div
-          style={{ y: headerY, scale: headerScale }}
-          className="mx-auto max-w-3xl text-center"
+          style={{
+            y: headerY,
+            scale: headerScale,
+            textAlign: 'left',
+            maxWidth: 1280,
+            margin: '0 auto',
+            paddingBottom: 64,
+          }}
         >
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -3515,27 +3835,16 @@ export default function OurServices() {
               display: 'inline-flex',
               alignItems: 'center',
               gap: 8,
-              border: '1px solid rgba(255,255,255,0.10)',
-              borderRadius: 100,
-              padding: '6px 16px',
-              marginBottom: 32,
+              marginBottom: 24,
             }}
           >
-            <div
-              style={{
-                width: 6,
-                height: 6,
-                borderRadius: '50%',
-                background: '#06b6d4',
-                boxShadow: '0 0 8px #06b6d4',
-              }}
-            />
+            <div style={{ width: 20, height: 1, background: '#06b6d4' }} />
             <span
               style={{
                 fontSize: 11,
-                fontWeight: 500,
-                letterSpacing: '0.15em',
-                color: 'rgba(255,255,255,0.5)',
+                fontWeight: 600,
+                letterSpacing: '0.2em',
+                color: 'rgba(255,255,255,0.4)',
               }}
             >
               STACK DEVELOP
@@ -3548,30 +3857,17 @@ export default function OurServices() {
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.1 }}
             style={{
-              fontSize: 'clamp(2.5rem, 5vw, 4rem)',
-              lineHeight: 1.1,
-              letterSpacing: '-0.02em',
-              margin: '0 0 24px',
+              fontSize: 'clamp(2.5rem, 5vw, 4.5rem)',
+              fontWeight: 800,
+              lineHeight: 1.05,
+              letterSpacing: '-0.025em',
+              margin: '0 0 20px',
             }}
           >
-            <span
-              style={{
-                display: 'block',
-                fontWeight: 300,
-                color: 'rgba(255,255,255,0.45)',
-              }}
-            >
-              Todo lo que tu negocio
+            <span style={{ color: 'rgba(255,255,255,0.35)', fontWeight: 300 }}>
+              {'Todo lo que tu negocio '}
             </span>
-            <span
-              style={{
-                display: 'block',
-                fontWeight: 800,
-                color: 'white',
-              }}
-            >
-              necesita para crecer.
-            </span>
+            <span style={{ color: 'white' }}>necesita para crecer.</span>
           </motion.h2>
 
           <motion.p
@@ -3581,77 +3877,14 @@ export default function OurServices() {
             transition={{ duration: 0.6, delay: 0.2 }}
             style={{
               fontSize: 16,
-              lineHeight: 1.7,
-              color: 'rgba(255,255,255,0.4)',
-              maxWidth: 520,
-              margin: '0 auto',
+              lineHeight: 1.65,
+              color: 'rgba(255,255,255,0.35)',
+              maxWidth: 480,
             }}
           >
-            Desde tu primera presencia digital hasta un ecosistema completo con IA y automatizaciones.
-            {' '}Cada solucion disenada para generar resultados reales, no solo tecnologia.
+            Desde tu primera presencia digital hasta automatizaciones con IA. Cada solución genera
+            resultados medibles desde el primer mes.
           </motion.p>
-
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.35 }}
-            style={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              justifyContent: 'center',
-              gap: 8,
-              marginTop: 32,
-            }}
-          >
-            {SERVICES.map((service, index) => (
-              <motion.div
-                key={service.id}
-                initial={{ opacity: 0, scale: 0.9 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ delay: 0.4 + index * 0.08, duration: 0.4 }}
-                whileHover={{ scale: 1.05, y: -2 }}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 8,
-                  padding: '8px 14px',
-                  borderRadius: 100,
-                  border: `1px solid ${service.accent}25`,
-                  background: `${service.accent}08`,
-                  cursor: 'default',
-                }}
-              >
-                <service.icon
-                  size={13}
-                  color={service.accent}
-                  strokeWidth={1.5}
-                />
-                <span
-                  style={{
-                    fontSize: 12,
-                    fontWeight: 500,
-                    color: 'rgba(255,255,255,0.65)',
-                    letterSpacing: '0.02em',
-                  }}
-                >
-                  {service.tag}
-                </span>
-                <span
-                  style={{
-                    fontSize: 11,
-                    color: service.accent,
-                    opacity: 0.7,
-                    borderLeft: `1px solid ${service.accent}30`,
-                    paddingLeft: 8,
-                  }}
-                >
-                  {service.price}
-                </span>
-              </motion.div>
-            ))}
-          </motion.div>
         </motion.div>
 
         <div
