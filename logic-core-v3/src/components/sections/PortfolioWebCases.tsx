@@ -51,7 +51,7 @@ const cases = [
         visualStats: ['Agenda 24/7', 'Confianza visual', 'SEO local'],
     },
     {
-        client: 'Distribuidora NOA Mayorista',
+        client: 'Distribuidora NOA',
         industry: 'Distribución',
         location: 'Jujuy',
         description:
@@ -86,15 +86,18 @@ function CaseVisual({
         target: visualRef,
         offset: ['start end', 'end start'],
     })
-    const y = useTransform(scrollYProgress, [0, 1], prefersReduced ? ['0%', '0%'] : ['-8%', '8%'])
+    const y = useTransform(scrollYProgress, [0, 1], prefersReduced ? ['0%', '0%'] : ['-2%', '2%'])
 
     return (
-        <div ref={visualRef} className="relative h-[20rem] overflow-hidden rounded-[1.8rem] border border-white/[0.05] bg-[#050816] md:h-[24rem]">
+        <div
+            ref={visualRef}
+            className="relative isolate w-full overflow-hidden rounded-[1.8rem] border border-white/[0.05] bg-[#050816] aspect-[4/3] sm:aspect-[16/9]"
+        >
             <motion.div
                 style={{ y }}
                 animate={isHovered && !prefersReduced ? { scale: 1.05 } : { scale: 1 }}
                 transition={{ duration: 0.7, ease: 'easeOut' }}
-                className="absolute inset-[-8%]"
+                className="absolute inset-0 rounded-[inherit]"
             >
                 <div
                     className="absolute inset-0"
@@ -111,54 +114,54 @@ function CaseVisual({
                     style={{ background: `radial-gradient(circle, rgba(${item.accentRgb},0.22) 0%, transparent 72%)` }}
                 />
 
-                <div className="absolute inset-0 p-5 md:p-7">
-                    <div className="h-full rounded-[1.6rem] border border-white/[0.06] bg-white/[0.03] p-4 backdrop-blur-xl">
-                        <div className="mb-4 flex items-center gap-2">
-                            {['#ff5f57', '#febc2e', '#28c840'].map((color) => (
-                                <div key={color} className="h-2.5 w-2.5 rounded-full" style={{ background: color, opacity: 0.85 }} />
-                            ))}
-                            <div className="ml-auto rounded-full border border-white/[0.06] bg-black/20 px-3 py-1 text-[10px] uppercase tracking-[0.24em] text-white/30">
-                                {item.visualTitle}
-                            </div>
-                        </div>
-
-                        <div className="grid h-[calc(100%-1.75rem)] gap-3 md:grid-cols-[1.1fr_0.9fr]">
-                            <div className="rounded-[1.25rem] border border-white/[0.05] bg-black/20 p-4">
-                                <div className="text-[11px] uppercase tracking-[0.24em] text-white/35">{item.industry}</div>
-                                <div className="mt-3 text-4xl">{item.icon}</div>
-                                <div className="mt-4 max-w-[12rem] text-2xl font-black leading-none tracking-[-0.04em] text-white">
-                                    {item.client}
+                <div className="absolute inset-0 p-4 md:p-6">
+                    <div className="h-full rounded-[1.45rem] border border-white/[0.06] bg-white/[0.03] p-3 md:p-4 backdrop-blur-xl">
+                        <div className="flex h-full min-h-0 flex-col">
+                            <div className="mb-3 flex shrink-0 items-center gap-2">
+                                {['#ff5f57', '#febc2e', '#28c840'].map((color) => (
+                                    <div key={color} className="h-2.5 w-2.5 rounded-full" style={{ background: color, opacity: 0.85 }} />
+                                ))}
+                                <div className="ml-auto rounded-full border border-white/[0.06] bg-black/20 px-3 py-1 text-[9px] uppercase tracking-[0.22em] text-white/30">
+                                    {item.visualTitle}
                                 </div>
-                                <div className="mt-6 flex flex-wrap gap-2">
-                                    {item.visualStats.map((stat) => (
-                                        <span
-                                            key={stat}
-                                            className="rounded-full border border-white/[0.06] bg-white/[0.04] px-3 py-1.5 text-[10px] uppercase tracking-[0.22em] text-white/45"
+                            </div>
+
+                            <div className="grid min-h-0 flex-1 grid-cols-[1.08fr_0.92fr] gap-3">
+                                <div className="flex min-h-0 flex-col rounded-[1.2rem] border border-white/[0.05] bg-black/20 p-3 md:p-4">
+                                    <div className="text-[10px] uppercase tracking-[0.22em] text-white/35">{item.industry}</div>
+                                    <div className="mt-2 text-3xl md:mt-3 md:text-4xl">{item.icon}</div>
+                                    <div className="mt-3 max-w-[13rem] text-[clamp(1.25rem,6vw,2rem)] font-black leading-[0.95] tracking-[-0.04em] text-white md:hidden">
+                                        {item.client}
+                                    </div>
+
+                                    <div className="mt-auto flex flex-wrap gap-1.5 pt-3 md:gap-2">
+                                        {item.visualStats.map((stat) => (
+                                            <span
+                                                key={stat}
+                                                className="rounded-full border border-white/[0.06] bg-white/[0.04] px-2.5 py-1 text-[9px] uppercase tracking-[0.18em] text-white/45 md:px-3 md:py-1.5 md:text-[10px] md:tracking-[0.22em]"
+                                            >
+                                                {stat}
+                                            </span>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div className="grid min-h-0 grid-rows-3 gap-2.5 md:gap-3">
+                                    {item.metrics.map((metric) => (
+                                        <div
+                                            key={metric.label}
+                                            className="min-h-0 overflow-hidden rounded-[1.05rem] border border-white/[0.05] bg-white/[0.03] p-2.5 md:p-3"
                                         >
-                                            {stat}
-                                        </span>
+                                            <div className="truncate text-[8px] uppercase tracking-[0.16em] text-white/30 md:text-[10px] md:tracking-[0.22em]">{metric.label}</div>
+                                            <div
+                                                className="break-words text-[clamp(0.95rem,4.8vw,1.9rem)] font-black leading-[0.92] tracking-[-0.04em] md:text-[clamp(1rem,2.2vw,1.9rem)] md:leading-none"
+                                                style={{ color: item.accentColor }}
+                                            >
+                                                {metric.value}
+                                            </div>
+                                        </div>
                                     ))}
                                 </div>
-                            </div>
-
-                            <div className="grid gap-3">
-                                {item.metrics.map((metric, index) => (
-                                    <div
-                                        key={metric.label}
-                                        className="rounded-[1.1rem] border border-white/[0.05] bg-white/[0.03] p-4"
-                                        style={{
-                                            transform: `translateY(${index * 10}px)`,
-                                        }}
-                                    >
-                                        <div className="text-[10px] uppercase tracking-[0.22em] text-white/30">{metric.label}</div>
-                                        <div
-                                            className="mt-2 text-2xl font-black leading-none tracking-[-0.04em]"
-                                            style={{ color: item.accentColor }}
-                                        >
-                                            {metric.value}
-                                        </div>
-                                    </div>
-                                ))}
                             </div>
                         </div>
                     </div>
@@ -168,7 +171,7 @@ function CaseVisual({
             <motion.div
                 animate={isHovered ? { opacity: 0.26 } : { opacity: 0.48 }}
                 transition={{ duration: 0.7, ease }}
-                className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(2,6,23,0.12)_0%,rgba(2,6,23,0.3)_38%,rgba(2,6,23,0.72)_100%)]"
+                className="pointer-events-none absolute inset-0 rounded-[inherit] bg-[linear-gradient(180deg,rgba(2,6,23,0.12)_0%,rgba(2,6,23,0.3)_38%,rgba(2,6,23,0.72)_100%)]"
             />
         </div>
     )
@@ -221,12 +224,12 @@ function CaseCard({
                 <div className="relative overflow-hidden rounded-[1.85rem]">
                     <CaseVisual item={item} isHovered={isHovered} />
 
-                    <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 p-6 md:p-7">
+                    <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 hidden p-6 md:block md:p-7">
                         <div className="overflow-hidden">
                             <motion.h3
-                                animate={isHovered && !reducedMotion ? { y: 0 } : { y: 10 }}
+                                animate={isHovered && !reducedMotion ? { y: -10 } : { y: 0 }}
                                 transition={{ duration: 0.55, ease }}
-                                className="text-[clamp(1.9rem,4vw,3rem)] font-black leading-[0.94] tracking-[-0.05em] text-white"
+                                className="pb-[0.08em] text-[clamp(1.6rem,3.6vw,3rem)] font-black leading-[0.98] tracking-[-0.05em] text-white"
                             >
                                 {item.client}
                             </motion.h3>

@@ -16,10 +16,7 @@ const ScrambledLetter = ({
     const [current, setCurrent] = useState(char);
 
     useEffect(() => {
-        if (isReducedMotion || char === " ") {
-            setCurrent(char);
-            return;
-        }
+        if (isReducedMotion || char === " ") return;
 
         // FASE 1 - SCRAMBLE: 0ms -> 600ms total baseline
         // Each letter resolves left-to-right with a 40ms stagger.
@@ -27,7 +24,9 @@ const ScrambledLetter = ({
         const startTime = Date.now();
 
         // Start scrambling immediately using random chars
-        setCurrent(SCRAMBLE_CHARS[Math.floor(Math.random() * SCRAMBLE_CHARS.length)]);
+        const primeTimeout = window.setTimeout(() => {
+            setCurrent(SCRAMBLE_CHARS[Math.floor(Math.random() * SCRAMBLE_CHARS.length)]);
+        }, 0);
 
         const interval = setInterval(() => {
             const elapsed = Date.now() - startTime;
@@ -39,7 +38,10 @@ const ScrambledLetter = ({
             }
         }, 40);
 
-        return () => clearInterval(interval);
+        return () => {
+            clearTimeout(primeTimeout);
+            clearInterval(interval);
+        };
     }, [char, index, isReducedMotion]);
 
     return (
@@ -95,8 +97,13 @@ export default function HeroTitle({ text, className = "" }: HeroTitleProps) {
                                 initial="hidden"
                                 animate="visible"
                                 variants={sweepVariants}
-                                style={{ WebkitTextStroke: "1px rgba(255,255,255,0.1)" }}
-                                className={`text-[13vw] sm:text-[11vw] md:text-[8rem] lg:text-[7vw] xl:text-[7.5vw] 2xl:text-[8vw] font-black tracking-tighter leading-[0.85] text-transparent bg-clip-text bg-[length:200%_100%] text-center lg:text-left uppercase flex items-baseline ${
+                                style={{
+                                    WebkitTextStroke: "1px rgba(255,255,255,0.16)",
+                                    textShadow: lineIndex === 1
+                                        ? "0 10px 40px rgba(0,0,0,0.38)"
+                                        : "0 12px 50px rgba(0,0,0,0.44)"
+                                }}
+                                className={`text-[13vw] sm:text-[11vw] md:text-[7rem] lg:text-[5.7vw] xl:text-[6.1vw] 2xl:text-[6.4vw] font-black tracking-[-0.06em] leading-[0.88] text-transparent bg-clip-text bg-[length:200%_100%] text-center lg:text-left uppercase flex items-baseline ${
                                     lineIndex === 1 
                                     ? "bg-[linear-gradient(110deg,#00e5ff,45%,#7b2fff,55%,#00e5ff)]" 
                                     : "bg-[linear-gradient(110deg,#fff,45%,#00e5ff,55%,#fff)]"
@@ -118,8 +125,10 @@ export default function HeroTitle({ text, className = "" }: HeroTitleProps) {
                                                     times: [0, 0.5, 1],
                                                     ease: "easeInOut"
                                                 }}
-                                                className="inline-block w-4 h-4 md:w-6 md:h-6 rounded-full bg-cyan-400 shadow-[0_0_20px_rgba(34,211,238,0.8)] ml-2 md:ml-3 shrink-0"
-                                            />
+                                                className="ml-[0.08em] inline-block text-cyan-300 [text-shadow:0_0_18px_rgba(34,211,238,0.78)]"
+                                            >
+                                                .
+                                            </motion.span>
                                         );
                                     }
 

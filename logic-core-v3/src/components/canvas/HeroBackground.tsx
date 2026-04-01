@@ -60,15 +60,14 @@ const fragmentShaderAurora = `
 
       float f = fbm(st + r);
 
-      // Colores: #0a0a2e -> #0d1b4b -> #00e5ff
-      vec3 color1 = vec3(0.039, 0.039, 0.180);
-      vec3 color2 = vec3(0.051, 0.106, 0.294);
-      vec3 color3 = vec3(0.0, 0.898, 1.0);
+      vec3 color1 = vec3(0.012, 0.024, 0.055);
+      vec3 color2 = vec3(0.024, 0.067, 0.145);
+      vec3 color3 = vec3(0.122, 0.482, 0.745);
 
       vec3 color = mix(color1, color2, clamp(length(q), 0.0, 1.0));
       color = mix(color, color3, clamp(length(r.x), 0.0, 1.0));
 
-      gl_FragColor = vec4((f * f * f + 0.6 * f * f + 0.5 * f) * color, 0.35);
+      gl_FragColor = vec4((f * f * f + 0.6 * f * f + 0.5 * f) * color, 0.16);
   }
 `;
 
@@ -87,7 +86,7 @@ const AuroraMesh = () => {
 
     return (
         <mesh position={[0, 0, -3]}>
-            <planeGeometry args={[20, 10]} />
+            <planeGeometry args={[48, 26]} />
             <shaderMaterial
                 ref={materialRef}
                 vertexShader={vertexShaderAurora}
@@ -102,7 +101,7 @@ const AuroraMesh = () => {
 
 // --- PARTICLES ---
 const Particles = () => {
-    const count = 120;
+    const count = 64;
     const pointsRef = useRef<THREE.Points>(null);
     const { camera } = useThree();
 
@@ -123,15 +122,15 @@ const Particles = () => {
         const siz = new Float32Array(count);
         const data = [];
 
-        const colorA = new THREE.Color("#00e5ff");
-        const colorB = new THREE.Color("#7b2fff");
+        const colorA = new THREE.Color("#3cb7ef");
+        const colorB = new THREE.Color("#6c63ff");
 
         for (let i = 0; i < count; i++) {
             const x = (Math.random() - 0.5) * 15;
             const y = (Math.random() - 0.5) * 10;
             const z = (Math.random() * 4) - 2; // z=[-2, 2]
 
-            siz[i] = Math.random() * 2 + 1;
+            siz[i] = Math.random() * 0.8 + 0.4;
 
             const mixFactor = Math.max(0, Math.min(1, (y + 5) / 10));
             const c = colorA.clone().lerp(colorB, mixFactor);
@@ -165,7 +164,7 @@ const Particles = () => {
         void main() {
             vColor = customColor;
             vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
-            gl_PointSize = size * (300.0 / -mvPosition.z);
+            gl_PointSize = size * (150.0 / -mvPosition.z);
             gl_Position = projectionMatrix * mvPosition;
         }
     `,
@@ -174,7 +173,7 @@ const Particles = () => {
         void main() {
             float dist = length(gl_PointCoord - vec2(0.5));
             if (dist > 0.5) discard;
-            gl_FragColor = vec4(vColor, 1.0);
+            gl_FragColor = vec4(vColor, 0.46);
         }
     `
     }), []);
@@ -240,7 +239,7 @@ import { motion } from "framer-motion";
 
 export default function HeroBackground() {
     return (
-        <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden bg-zinc-50">
+        <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden bg-[#040914]">
             {/* Task 1: Film Grain Layer */}
             <div className="absolute inset-0 opacity-[0.03] pointer-events-none z-0"
                  style={{ 
@@ -252,7 +251,7 @@ export default function HeroBackground() {
             <motion.div 
                 animate={{ translateY: [0, 64] }}
                 transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
-                className="absolute inset-0 bg-[linear-gradient(to_right,#00000008_1px,transparent_1px),linear-gradient(to_bottom,#00000008_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] pointer-events-none z-0" 
+                className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.025)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.025)_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] pointer-events-none z-0" 
             />
 
             <Canvas
@@ -264,7 +263,7 @@ export default function HeroBackground() {
                 <AuroraMesh />
                 <Particles />
                 <EffectComposer>
-                    <Bloom luminanceThreshold={0.2} intensity={0.4} />
+                    <Bloom luminanceThreshold={0.34} intensity={0.08} />
                 </EffectComposer>
             </Canvas>
         </div>

@@ -8,7 +8,7 @@ import {
     useMotionValue,
     useReducedMotion,
 } from "framer-motion"
-import { Bolt, MapPinned, MousePointerClick, Orbit, Rocket, ScanSearch } from "lucide-react"
+import { Bolt, MapPinned, MousePointerClick, Orbit, ScanSearch } from "lucide-react"
 import { VideoCard } from "../ui/VideoCard"
 
 const ease = [0.16, 1, 0.3, 1] as const
@@ -121,7 +121,7 @@ const LighthouseGauge = () => {
 
 const ScrollCue = () => {
     const handleClick = () => {
-        document.getElementById("sensory-section")?.scrollIntoView({ behavior: "smooth" })
+        document.getElementById("web-development-timeline")?.scrollIntoView({ behavior: "smooth" })
     }
 
     return (
@@ -387,23 +387,6 @@ export const WebDevelopmentBento = () => {
                         </motion.article>
                     </div>
                 </div>
-
-                <motion.div
-                    initial={{ opacity: 0, scale: 0.96 }}
-                    whileInView={{ opacity: 1, scale: 1 }}
-                    viewport={{ once: true }}
-                    className="mt-12 flex w-full justify-center"
-                >
-                    <a
-                        href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER}?text=Hola%20DevelOP%2C%20quiero%20construir%20mi%20sucursal%20digital`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-3 rounded-full border border-white/10 bg-white/[0.04] px-8 py-4 text-[13px] font-extrabold uppercase tracking-[0.24em] text-white shadow-[0_18px_40px_rgba(37,211,102,0.15)] backdrop-blur-xl transition-transform duration-300 hover:scale-[1.03]"
-                    >
-                        <Rocket className={`size-4 ${floatingIconClass}`} />
-                        Construir mi sucursal
-                    </a>
-                </motion.div>
 
                 <ScrollCue />
             </div>

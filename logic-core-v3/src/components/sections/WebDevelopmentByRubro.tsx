@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React, { useRef, useState } from 'react'
 import { AnimatePresence, motion, type Variants, useInView, useReducedMotion } from 'framer-motion'
@@ -9,10 +9,14 @@ interface RubroData {
     label: string
     color: string
     colorRgb: string
+    domain: string
     headline: string
     problema: string
     solucion: string
     resultado: string
+    mockSubtitle: string
+    mockItems: Array<{ title: string; description: string }>
+    mockResult: string
     icon: React.ComponentType<{ className?: string }>
 }
 
@@ -22,10 +26,18 @@ const rubros: RubroData[] = [
         label: 'Concesionaria',
         color: '#818cf8',
         colorRgb: '129,140,248',
+        domain: 'autonorte.com.ar',
         headline: 'Tu concesionaria sigue vendiendo incluso cuando el salón está cerrado.',
         problema: 'Clientes comparan modelos y precios fuera de horario y se van con quien sí muestra un catálogo ordenado.',
         solucion: 'Diseñamos una vitrina digital con filtros, fichas claras y consulta directa lista para pasar al equipo comercial.',
         resultado: 'Más contactos calientes sin depender del horario del showroom.',
+        mockSubtitle: 'Embudo de test drive activo',
+        mockItems: [
+            { title: 'Stock en vivo', description: 'Modelos, versiones y financiación actualizados' },
+            { title: 'Pre-calificación', description: 'Formulario de toma y simulador de cuota' },
+            { title: 'Prueba de manejo', description: 'Agenda automática con confirmación inmediata' },
+        ],
+        mockResult: 'Más consultas listas para cerrar en salón',
         icon: Car,
     },
     {
@@ -33,10 +45,18 @@ const rubros: RubroData[] = [
         label: 'Salud',
         color: '#4ade80',
         colorRgb: '74,222,128',
+        domain: 'tuclinica.com.ar',
         headline: 'Tu clínica consigue pacientes mientras vos seguís atendiendo.',
         problema: 'Quien necesita turno rápido no quiere buscar teléfonos perdidos ni esperar respuesta manual.',
         solucion: 'Mostramos especialidades, horarios y accesos clave en una experiencia que transmite orden y confianza.',
         resultado: 'Menos fricción para reservar, más pacientes confirmados.',
+        mockSubtitle: 'Flujo de turnos de alta conversión',
+        mockItems: [
+            { title: 'Especialidades clave', description: 'Prioridad visual para servicios más buscados' },
+            { title: 'Turnos en 1 paso', description: 'CTA directo a WhatsApp o agenda online' },
+            { title: 'Confianza médica', description: 'Equipo, ubicación y cobertura bien explicados' },
+        ],
+        mockResult: 'Más pacientes confirmados sin saturar recepción',
         icon: HeartPulse,
     },
     {
@@ -44,10 +64,18 @@ const rubros: RubroData[] = [
         label: 'Fitness',
         color: '#f59e0b',
         colorRgb: '245,158,11',
+        domain: 'studiofit.com.ar',
         headline: 'Tu gimnasio convierte interés en inscripción sin repetir siempre lo mismo.',
         problema: 'La gente pregunta precios, horarios y clases por todos lados y se enfría antes de decidir.',
         solucion: 'Centralizamos propuesta, beneficios y agenda para que la decisión ocurra en pocos clics.',
         resultado: 'Más alumnos llegan con intención real de empezar.',
+        mockSubtitle: 'Sistema de membresías que convierte',
+        mockItems: [
+            { title: 'Planes claros', description: 'Comparador simple de membresías y beneficios' },
+            { title: 'Clase de prueba', description: 'Reserva automática con recordatorio previo' },
+            { title: 'Prueba social', description: 'Resultados reales y comunidad visible' },
+        ],
+        mockResult: 'Más altas nuevas y menos consultas repetidas',
         icon: Dumbbell,
     },
     {
@@ -55,21 +83,37 @@ const rubros: RubroData[] = [
         label: 'Gastronomía',
         color: '#fb923c',
         colorRgb: '251,146,60',
+        domain: 'sazonurbana.com.ar',
         headline: 'Tu restaurante se reserva mejor cuando la experiencia ya abre el apetito antes de llegar.',
         problema: 'Si la carta está desordenada o vieja, la búsqueda termina en otro lugar más claro.',
         solucion: 'Creamos una presencia que ordena menú, reservas y ubicación para que todo se entienda al instante.',
         resultado: 'Más reservas y una marca más consistente en cada búsqueda.',
+        mockSubtitle: 'Motor de reservas y carta digital',
+        mockItems: [
+            { title: 'Menú optimizado', description: 'Platos estrella visibles y filtros por categoría' },
+            { title: 'Reserva rápida', description: 'Mesa en segundos con confirmación automática' },
+            { title: 'Ubicación directa', description: 'Mapa, horarios y contacto sin fricción' },
+        ],
+        mockResult: 'Más reservas directas y mejor ticket promedio',
         icon: Utensils,
     },
     {
         id: 'inmobiliaria',
-        label: 'Real Estate',
+        label: 'Inmobiliaria',
         color: '#38bdf8',
         colorRgb: '56,189,248',
+        domain: 'urbanprop.com.ar',
         headline: 'Tu inmobiliaria destaca propiedades con una lectura mucho más seria que un feed suelto.',
         problema: 'Publicar solo en redes diluye oportunidades y hace que cada propiedad pierda contexto.',
         solucion: 'Diseñamos un catálogo propio con jerarquía, filtros y consultas listas para convertir interés en visita.',
         resultado: 'Más descubrimiento, más autoridad y mejores consultas.',
+        mockSubtitle: 'Catálogo inteligente para visitas',
+        mockItems: [
+            { title: 'Filtros avanzados', description: 'Búsqueda por zona, rango y tipo de propiedad' },
+            { title: 'Ficha completa', description: 'Planos, amenities y costos en contexto' },
+            { title: 'Visita agendada', description: 'Formulario calificado para vender más rápido' },
+        ],
+        mockResult: 'Más consultas calificadas y visitas concretadas',
         icon: Building2,
     },
 ]
@@ -124,7 +168,7 @@ function RubroMockup({ rubro }: { rubro: RubroData }) {
                 ))}
                 <div className="mx-auto inline-flex max-w-[16rem] items-center gap-2 rounded-full border border-white/[0.05] bg-black/20 px-4 py-1.5 text-[10px] uppercase tracking-[0.24em] text-white/30">
                     <div className="h-2 w-2 rounded-full" style={{ background: rubro.color }} />
-                    tu{rubro.id}.com.ar
+                    {rubro.domain}
                 </div>
             </div>
 
@@ -142,7 +186,7 @@ function RubroMockup({ rubro }: { rubro: RubroData }) {
                             </div>
                             <div>
                                 <div className="text-[11px] uppercase tracking-[0.3em] text-white/35">{rubro.label}</div>
-                                <div className="mt-1 text-sm text-white/70">Landing enfocada en conversión</div>
+                                <div className="mt-1 text-sm text-white/70">{rubro.mockSubtitle}</div>
                             </div>
                         </div>
                         <div
@@ -158,11 +202,7 @@ function RubroMockup({ rubro }: { rubro: RubroData }) {
                     </div>
 
                     <div className="grid gap-3">
-                        {[
-                            ['Oferta principal', 'Mensaje claro arriba del fold'],
-                            ['Conversión', 'CTA directo a WhatsApp o turno'],
-                            ['Confianza', 'Prueba social, ubicación y contexto'],
-                        ].map(([title, description], index) => (
+                        {rubro.mockItems.map(({ title, description }, index) => (
                             <div key={title} className="flex items-center justify-between rounded-[1.15rem] border border-white/[0.05] bg-white/[0.02] px-4 py-4">
                                 <div>
                                     <div className="text-sm font-semibold text-white">{title}</div>
@@ -191,7 +231,7 @@ function RubroMockup({ rubro }: { rubro: RubroData }) {
                     >
                         <div>
                             <div className="text-[11px] uppercase tracking-[0.24em] text-white/35">Resultado esperado</div>
-                            <div className="mt-2 text-base font-semibold text-white">Más intención lista para convertir</div>
+                            <div className="mt-2 text-base font-semibold text-white">{rubro.mockResult}</div>
                         </div>
                         <ArrowUpRight className="size-5 text-white/70" />
                     </div>
@@ -290,6 +330,23 @@ export default function WebDevelopmentByRubro() {
                     })}
                 </motion.div>
 
+                <div className="relative mb-2 flex h-16 items-center overflow-visible md:h-0 md:mb-0">
+                    <AnimatePresence mode="wait">
+                        <motion.div
+                            key={`mobile-index-${activeRubro}`}
+                            initial={prefersReduced ? { opacity: 1 } : { opacity: 0, y: 10, scale: 0.92 }}
+                            animate={prefersReduced ? { opacity: 1 } : { opacity: 0.9, y: 0, scale: 1 }}
+                            exit={prefersReduced ? { opacity: 1 } : { opacity: 0, y: -8, scale: 1.04 }}
+                            transition={{ duration: prefersReduced ? 0 : 0.34, ease: [0.16, 1, 0.3, 1] }}
+                            className="pointer-events-none absolute left-2 top-0 text-[clamp(4.5rem,18vw,6.5rem)] font-black leading-none text-transparent opacity-90 md:hidden"
+                            style={{ WebkitTextStroke: `1.8px rgba(${rubro.colorRgb},0.2)` }}
+                            aria-hidden="true"
+                        >
+                            0{activeRubro + 1}
+                        </motion.div>
+                    </AnimatePresence>
+                </div>
+
                 <AnimatePresence mode="wait">
                     <motion.div
                         key={rubro.id}
@@ -297,16 +354,17 @@ export default function WebDevelopmentByRubro() {
                         initial={prefersReduced ? false : 'initial'}
                         animate={prefersReduced ? undefined : 'animate'}
                         exit={prefersReduced ? undefined : 'exit'}
-                        className="grid items-center gap-8 lg:grid-cols-[0.95fr_1.05fr] lg:gap-14"
+                        className="relative grid items-center gap-8 lg:grid-cols-[0.95fr_1.05fr] lg:gap-14"
                     >
-                        <motion.div variants={prefersReduced ? undefined : itemVariants} className="relative">
-                            <div
-                                className="pointer-events-none absolute -left-4 -top-8 text-[clamp(5rem,11vw,8rem)] font-black leading-none text-transparent opacity-90"
-                                style={{ WebkitTextStroke: '2px rgba(255,255,255,0.12)' }}
-                            >
-                                0{activeRubro + 1}
-                            </div>
+                        <div
+                            className="pointer-events-none absolute left-1/2 top-1/2 z-0 hidden -translate-x-1/2 -translate-y-1/2 text-[clamp(10rem,24vw,22rem)] font-black leading-none text-transparent opacity-80 md:block"
+                            style={{ WebkitTextStroke: `1px rgba(${rubro.colorRgb},0.16)` }}
+                            aria-hidden="true"
+                        >
+                            0{activeRubro + 1}
+                        </div>
 
+                        <motion.div variants={prefersReduced ? undefined : itemVariants} className="relative z-10">
                             <div className="relative z-10">
                                 <motion.div
                                     variants={prefersReduced ? undefined : itemVariants}
@@ -355,25 +413,10 @@ export default function WebDevelopmentByRubro() {
                                     </div>
                                 </motion.div>
 
-                                <motion.a
-                                    variants={prefersReduced ? undefined : itemVariants}
-                                    href="#vault-section"
-                                    whileHover={prefersReduced ? {} : { scale: 1.03 }}
-                                    whileTap={prefersReduced ? {} : { scale: 0.98 }}
-                                    className="mt-8 inline-flex items-center gap-3 rounded-full border px-6 py-4 text-[13px] font-extrabold uppercase tracking-[0.24em] text-white backdrop-blur-xl"
-                                    style={{
-                                        borderColor: `rgba(${rubro.colorRgb},0.28)`,
-                                        background: `rgba(${rubro.colorRgb},0.12)`,
-                                        boxShadow: `0 0 30px rgba(${rubro.colorRgb},0.12)`,
-                                    }}
-                                >
-                                    Quiero mi web de {rubro.label.toLowerCase()}
-                                    <ArrowUpRight className="size-4 animate-[float_3s_ease-in-out_infinite]" />
-                                </motion.a>
                             </div>
                         </motion.div>
 
-                        <motion.div variants={prefersReduced ? undefined : itemVariants}>
+                        <motion.div variants={prefersReduced ? undefined : itemVariants} className="relative z-10">
                             <RubroMockup rubro={rubro} />
                         </motion.div>
                     </motion.div>
@@ -389,3 +432,4 @@ export default function WebDevelopmentByRubro() {
         </section>
     )
 }
+

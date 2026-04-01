@@ -146,7 +146,7 @@ export function WebDevelopmentTimeline() {
     const lineOpacity = useTransform(scrollYProgress, [0, 0.08, 1], [0.35, 0.85, 1])
 
     return (
-        <section ref={sectionRef} className="relative z-10 w-full overflow-hidden bg-[#030014] px-4 py-32">
+        <section id="web-development-timeline" ref={sectionRef} className="relative z-10 w-full overflow-hidden bg-[#030014] px-4 py-32">
             <style>{`
                 @keyframes float {
                     0%, 100% { transform: translateY(0px); }
