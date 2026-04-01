@@ -128,13 +128,13 @@ function CaseVisual({
 
                             <div className="grid min-h-0 flex-1 grid-cols-[1.08fr_0.92fr] gap-3">
                                 <div className="flex min-h-0 flex-col rounded-[1.2rem] border border-white/[0.05] bg-black/20 p-3 md:p-4">
-                                    <div className="text-[10px] uppercase tracking-[0.22em] text-white/35">{item.industry}</div>
+                                    <div className="text-[9px] uppercase tracking-[0.2em] text-white/35 md:text-[10px] md:tracking-[0.22em]">{item.industry}</div>
                                     <div className="mt-2 text-3xl md:mt-3 md:text-4xl">{item.icon}</div>
-                                    <div className="mt-3 max-w-[13rem] text-[clamp(1.25rem,6vw,2rem)] font-black leading-[0.95] tracking-[-0.04em] text-white md:hidden">
+                                    <div className="mt-3 max-w-[13rem] text-[clamp(1.1rem,5.2vw,1.75rem)] font-black leading-[0.95] tracking-[-0.04em] text-white md:hidden">
                                         {item.client}
                                     </div>
 
-                                    <div className="mt-auto flex flex-wrap gap-1.5 pt-3 md:gap-2">
+                                    <div className="mt-auto hidden flex-wrap gap-1.5 pt-3 md:flex md:gap-2">
                                         {item.visualStats.map((stat) => (
                                             <span
                                                 key={stat}
@@ -147,20 +147,26 @@ function CaseVisual({
                                 </div>
 
                                 <div className="grid min-h-0 grid-rows-3 gap-2.5 md:gap-3">
-                                    {item.metrics.map((metric) => (
-                                        <div
-                                            key={metric.label}
-                                            className="min-h-0 overflow-hidden rounded-[1.05rem] border border-white/[0.05] bg-white/[0.03] p-2.5 md:p-3"
-                                        >
-                                            <div className="truncate text-[8px] uppercase tracking-[0.16em] text-white/30 md:text-[10px] md:tracking-[0.22em]">{metric.label}</div>
+                                    {item.metrics.map((metric) => {
+                                        const isLongValue = metric.value.includes('→') || metric.value.length > 10
+                                        return (
                                             <div
-                                                className="break-words text-[clamp(0.95rem,4.8vw,1.9rem)] font-black leading-[0.92] tracking-[-0.04em] md:text-[clamp(1rem,2.2vw,1.9rem)] md:leading-none"
-                                                style={{ color: item.accentColor }}
+                                                key={metric.label}
+                                                className="min-h-0 overflow-hidden rounded-[1.05rem] border border-white/[0.05] bg-white/[0.03] p-2.5 md:p-3"
                                             >
-                                                {metric.value}
+                                                <div className="truncate text-[7px] uppercase tracking-[0.14em] text-white/30 md:text-[10px] md:tracking-[0.22em]">{metric.label}</div>
+                                                <div
+                                                    className={`${isLongValue
+                                                        ? 'whitespace-nowrap text-[clamp(0.72rem,3.35vw,1.12rem)] tracking-[-0.03em]'
+                                                        : 'text-[clamp(0.82rem,4.2vw,1.65rem)] tracking-[-0.04em]'
+                                                        } font-black leading-[0.92] md:text-[clamp(1rem,2.2vw,1.8rem)] md:leading-none`}
+                                                    style={{ color: item.accentColor }}
+                                                >
+                                                    {metric.value}
+                                                </div>
                                             </div>
-                                        </div>
-                                    ))}
+                                        )
+                                    })}
                                 </div>
                             </div>
                         </div>
