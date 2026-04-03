@@ -2,7 +2,7 @@
 import React, { useRef } from 'react'
 import dynamic from 'next/dynamic'
 import { motion, useScroll, useTransform } from 'framer-motion'
-import { BriefcaseBusiness, HeartPulse, ShoppingBag, UtensilsCrossed } from 'lucide-react'
+import { BriefcaseBusiness, HeartPulse, ShoppingBag, UtensilsCrossed, type LucideIcon } from 'lucide-react'
 const HeroBackground = dynamic(() => import('@/components/canvas/HeroBackground'), { ssr: false })
 import HeroMetrics from '@/components/ui/HeroMetrics'
 import { WebDevelopmentBento } from '@/components/sections/WebDevelopmentBento'
@@ -24,7 +24,7 @@ import { ChargeTraceButton } from '@/components/ui/buttons/ChargeTraceButton'
 type CasoWeb = {
     industry: string
     client: string
-    icon: React.ComponentType<{ className?: string }>
+    icon: LucideIcon
     color: string
     rgb: string
     videoSrc: string

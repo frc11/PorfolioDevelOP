@@ -14,12 +14,15 @@ import {
 } from 'framer-motion';
 import {
   ArrowUpRight,
+  BarChart2,
   Bot,
+  Calendar,
   Check,
   Code2,
   Globe,
   MessageSquare,
   Phone,
+  Target,
   type LucideIcon,
   User,
   Zap,
@@ -737,954 +740,813 @@ function WebScene({ service }: { service: Service }) {
   };
 
   const renderAnalyticsScene = ({ isActive, progress, color }: SimProps) => {
-    const visits = Math.floor(progress * 1842);
-    const sessions = Math.floor(progress * 247);
-    const conversion = (progress * 3.2).toFixed(1);
-    const baseData = [120, 145, 132, 178, 165, 210, 195, 240, 228, 270, 255, 310];
-    const visiblePoints = Math.floor(progress * baseData.length);
-    const showGraph = progress > 0.2;
-    const showMap = progress > 0.35;
-    const mapPoints = [
-      { name: 'Tucum\u00e1n', x: '52%', y: '32%', size: 7, delay: 0.3 },
-      { name: 'Buenos Aires', x: '60%', y: '72%', size: 11, delay: 0.4 },
-      { name: 'C\u00f3rdoba', x: '54%', y: '52%', size: 9, delay: 0.5 },
-      { name: 'Rosario', x: '58%', y: '62%', size: 8, delay: 0.6 },
-      { name: 'Mendoza', x: '38%', y: '55%', size: 7, delay: 0.7 },
-      { name: 'Salta', x: '48%', y: '20%', size: 6, delay: 0.8 },
-      { name: 'Mar del Plata', x: '65%', y: '80%', size: 5, delay: 0.9 },
-    ];
-    const chartGradientId = 'lineGrad';
-    const chartCoordinates = baseData.slice(0, visiblePoints).map((value, index) => {
-      const x = (index / (baseData.length - 1)) * 120;
-      const y = 60 - (value / 320) * 55;
+    const visits = Math.floor(progress * 1842)
+    const sessions = Math.floor(progress * 247)
+    const conv = (progress * 3.2).toFixed(1)
 
-      return { value, x, y };
-    });
-    const chartAreaPath =
-      visiblePoints > 1
-        ? [
-            'M 0 60',
-            ...baseData.slice(0, visiblePoints).map((value, index) => {
-              const x = (index / (baseData.length - 1)) * 120;
-              const y = 60 - (value / 320) * 55;
+    const baseData = [45, 62, 58, 78, 71, 95, 88, 112, 98, 128, 115, 148]
+    const visiblePoints = Math.floor(progress * baseData.length)
+    const showGraph = progress > 0.20
+    const showMap = progress > 0.40
 
-              return `L ${x} ${y}`;
-            }),
-            `L ${((visiblePoints - 1) / (baseData.length - 1)) * 120} 60`,
-            'Z',
-          ].join(' ')
-        : '';
-    const chartPoints = chartCoordinates.map(({ x, y }) => `${x},${y}`);
+    // Silueta Argentina mejorada
+    const argentinaPath = "M80,8 C88,8 98,12 105,20 C112,28 115,38 114,50 C113,60 108,68 110,80 C112,90 108,100 105,112 C102,122 104,132 100,142 C96,152 92,162 88,172 C84,182 80,192 76,202 C72,212 68,222 62,232 C56,242 50,252 44,260 C40,266 36,268 34,264 C32,258 34,250 36,242 C38,234 36,226 34,216 C32,206 34,196 32,186 C30,176 28,166 30,156 C28,146 26,136 28,126 C26,116 24,106 26,96 C24,86 22,76 24,66 C26,56 28,46 26,36 C28,28 34,18 42,12 C52,6 66,6 80,8Z"
+
+    const mapCities = [
+      { name: 'Buenos Aires', cx: 65, cy: 175, r: 6 },
+      { name: 'Córdoba', cx: 58, cy: 130, r: 5 },
+      { name: 'Rosario', cx: 62, cy: 152, r: 4 },
+      { name: 'Tucumán', cx: 52, cy: 82, r: 4 },
+      { name: 'Mendoza', cx: 40, cy: 138, r: 4 },
+      { name: 'Salta', cx: 48, cy: 56, r: 3 },
+    ]
 
     return (
-      <div
-        style={{
-          height: '100%',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 6,
-          padding: '4px 2px',
-        }}
-      >
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-          }}
-        >
-          <span
-            style={{
-              fontSize: 8,
-              color: 'rgba(255,255,255,0.3)',
-              letterSpacing: '0.1em',
-            }}
-          >
-            PANEL EN TIEMPO REAL
-          </span>
+      <div style={{
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 10,
+        padding: '4px 2px',
+      }}>
 
-          <motion.span
-            animate={isActive ? { opacity: [0.6, 1, 0.6] } : { opacity: 0.8 }}
-            transition={{ duration: 1.5, repeat: isActive ? Infinity : 0 }}
+        {/* Header */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexShrink: 0,
+        }}>
+          <div>
+            <div style={{ fontSize: 9, letterSpacing: '0.15em', color: 'rgba(255,255,255,0.25)', marginBottom: 2 }}>
+              PANEL EN TIEMPO REAL
+            </div>
+            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>
+              Últimos 30 días · Tu sitio
+            </div>
+          </div>
+          <motion.div
+            animate={{ opacity: [0.5, 1, 0.5] }}
+            transition={{ duration: 1.5, repeat: Infinity }}
             style={{
-              fontSize: 8,
-              color,
               display: 'flex',
               alignItems: 'center',
-              gap: 4,
+              gap: 5,
+              fontSize: 9,
+              fontWeight: 600,
+              color: color,
             }}
           >
-            {/*
-              <div>
-                <div
-                  style={{
-                    borderTop: '1px solid rgba(255,255,255,0.06)',
-                    paddingTop: 20,
-                    marginBottom: 16,
-                    display: 'flex',
-                    alignItems: 'baseline',
-                    gap: 10,
-                    flexWrap: 'wrap',
-                  }}
-                >
-                  <span
-                    style={{
-                      fontSize: 11,
-                      color: 'rgba(255,255,255,0.3)',
-                      letterSpacing: '0.05em',
-                    }}
-                  >
-                    DESDE
-                  </span>
-                  <span
-                    style={{
-                      fontSize: 34,
-                      fontWeight: 800,
-                      color: 'white',
-                      letterSpacing: '-0.03em',
-                      lineHeight: 1,
-                    }}
-                  >
-                    {service.price}
-                  </span>
-                  <span
-                    style={{
-                      fontSize: 11,
-                      color: service.accent,
-                      background: `${service.accent}12`,
-                      border: `1px solid ${service.accent}25`,
-                      borderRadius: 100,
-                      padding: '4px 10px',
-                      fontWeight: 500,
-                    }}
-                  >
-                    {'⏱ '}
-                    {service.timeline}
-                  </span>
-                </div>
-
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 20 }}>
-                  {service.sectors.map((sector) => (
-                    <span
-                      key={sector}
-                      style={{
-                        fontSize: 11,
-                        color: 'rgba(255,255,255,0.3)',
-                        border: '1px solid rgba(255,255,255,0.08)',
-                        borderRadius: 4,
-                        padding: '3px 8px',
-                      }}
-                    >
-                      {sector}
-                    </span>
-                  ))}
-                </div>
-
-                <motion.button
-                  type="button"
-                  whileHover={{ x: 5 }}
-                  transition={{ type: 'spring', stiffness: 400, damping: 20 }}
-                  onClick={() => onNavigate(service.href)}
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: 8,
-                    background: 'none',
-                    border: 'none',
-                    cursor: 'pointer',
-                    padding: 0,
-                    fontSize: 12,
-                    fontWeight: 600,
-                    color: service.accent,
-                    letterSpacing: '0.08em',
-                    textTransform: 'uppercase',
-                  }}
-                >
-                  {service.cta}
-                  <motion.span
-                    animate={{ x: [0, 5, 0] }}
-                    transition={{ duration: 1.8, repeat: Infinity }}
-                  >
-                    {'↗'}
-                  </motion.span>
-                </motion.button>
-              </div>
-            */}
-              <div
-              style={{
-                width: 5,
-                height: 5,
-                borderRadius: '50%',
-                background: color,
-                boxShadow: `0 0 10px ${color}99`,
-              }}
-            />
+            <div style={{ width: 6, height: 6, borderRadius: '50%', background: color, boxShadow: `0 0 8px ${color}` }}/>
             LIVE
-          </motion.span>
+          </motion.div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>
+        {/* 3 métricas grandes */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(3, 1fr)',
+          gap: 6,
+          flexShrink: 0,
+        }}>
           {[
-            { label: 'VISITAS', value: visits.toLocaleString(), metricColor: color, trend: '+12%' },
-            { label: 'SESIONES', value: sessions.toString(), metricColor: '#8b5cf6', trend: '+8%' },
-            { label: 'CONV.', value: `${conversion}%`, metricColor: '#f59e0b', trend: '+0.4%' },
-          ].map((metric) => (
-            <div
-              key={metric.label}
-              style={{
-                background: 'rgba(255,255,255,0.03)',
-                border: `1px solid ${metric.metricColor}20`,
-                borderRadius: 8,
-                padding: '6px 8px',
-                boxShadow: progress > 0.7 ? `0 0 0 1px ${metric.metricColor}10 inset` : 'none',
-              }}
-            >
-              <div
-                style={{
-                  fontSize: 7,
-                  color: 'rgba(255,255,255,0.3)',
-                  marginBottom: 3,
-                }}
-              >
-                {metric.label}
+            { label: 'VISITAS', value: visits.toLocaleString(), trend: '+12%', color },
+            { label: 'SESIONES', value: sessions.toString(), trend: '+8%', color: '#8b5cf6' },
+            { label: 'CONV.', value: `${conv}%`, trend: '+0.4%', color: '#f59e0b' },
+          ].map((m, i) => (
+            <div key={i} style={{
+              background: 'rgba(255,255,255,0.04)',
+              backdropFilter: 'blur(20px)',
+              border: `1px solid ${m.color}18`,
+              borderRadius: 10,
+              padding: '8px 10px',
+            }}>
+              <div style={{
+                fontSize: 8,
+                color: 'rgba(255,255,255,0.25)',
+                letterSpacing: '0.08em',
+                marginBottom: 4,
+              }}>
+                {m.label}
               </div>
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'baseline',
-                  gap: 4,
-                }}
-              >
-                <div
-                  style={{
-                    fontSize: 14,
-                    fontWeight: 700,
-                    color: metric.metricColor,
-                  }}
-                >
-                  {metric.value}
-                </div>
-                <div style={{ fontSize: 8, color: '#10b981' }}>{`\u2191${metric.trend}`}</div>
+              <div style={{
+                fontSize: 18,
+                fontWeight: 800,
+                color: m.color,
+                letterSpacing: '-0.02em',
+                lineHeight: 1,
+                marginBottom: 3,
+              }}>
+                {m.value}
+              </div>
+              <div style={{
+                fontSize: 9,
+                color: '#10b981',
+                fontWeight: 500,
+              }}>
+                ↑ {m.trend}
               </div>
             </div>
           ))}
         </div>
 
-        <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
-          <div
-            style={{
-              background: 'rgba(255,255,255,0.02)',
-              border: '1px solid rgba(255,255,255,0.06)',
-              borderRadius: 8,
-              padding: 8,
-              overflow: 'hidden',
-              position: 'relative',
-            }}
-          >
-            <div style={{ fontSize: 8, color: 'rgba(255,255,255,0.25)', marginBottom: 6 }}>
-              ULTIMOS 12 DIAS
-            </div>
+        {/* Área principal: gráfico + mapa */}
+        <div style={{
+          flex: 1,
+          display: 'grid',
+          gridTemplateColumns: '3fr 2fr',
+          gap: 6,
+          minHeight: 0,
+        }}>
 
-            <div
+          {/* Gráfico */}
+          {showGraph && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5 }}
               style={{
-                position: 'absolute',
-                inset: 0,
-                background: `radial-gradient(circle at 18% 18%, ${color}12 0%, transparent 34%)`,
-                pointerEvents: 'none',
-              }}
-            />
-
-            {showGraph ? (
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.25 }}>
-                <svg width="100%" height="60" viewBox="0 0 120 60" preserveAspectRatio="none">
-                  {visiblePoints > 1 && (
-                    <>
-                      <defs>
-                        <linearGradient id={chartGradientId} x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor={color} stopOpacity="0.3" />
-                          <stop offset="100%" stopColor={color} stopOpacity="0" />
-                        </linearGradient>
-                      </defs>
-                      <path d={chartAreaPath} fill={`url(#${chartGradientId})`} />
-                      <polyline
-                        points={chartPoints.join(' ')}
-                        fill="none"
-                        stroke={color}
-                        strokeWidth="1.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                      {chartCoordinates.map(({ x, y }, index) => {
-                        const isLast = index === chartCoordinates.length - 1;
-
-                        return (
-                          <g key={`${x}-${y}`}>
-                            <circle cx={x} cy={y} r={isLast ? 3 : 1.5} fill={isLast ? color : `${color}60`} />
-                            {isLast && (
-                              <motion.circle
-                                cx={x}
-                                cy={y}
-                                r={6}
-                                fill="none"
-                                stroke={color}
-                                strokeWidth="0.5"
-                                animate={isActive ? { opacity: [0.2, 0.45, 0.2], scale: [1, 1.18, 1] } : { opacity: 0.3, scale: 1 }}
-                                transition={{ duration: 1.6, repeat: isActive ? Infinity : 0, ease: 'easeInOut' }}
-                                style={{ transformOrigin: `${x}px ${y}px` }}
-                              />
-                            )}
-                          </g>
-                        );
-                      })}
-                    </>
-                  )}
-                </svg>
-              </motion.div>
-            ) : (
-              <div style={{ height: 60, borderRadius: 6, background: 'rgba(255,255,255,0.03)' }} />
-            )}
-          </div>
-
-          <div
-            style={{
-              background: 'rgba(255,255,255,0.02)',
-              border: '1px solid rgba(255,255,255,0.06)',
-              borderRadius: 8,
-              padding: 8,
-              position: 'relative',
-              overflow: 'hidden',
-            }}
-          >
-            <div style={{ fontSize: 8, color: 'rgba(255,255,255,0.25)', marginBottom: 4 }}>
-              ORIGEN DEL TRAFICO
-            </div>
-
-            <svg
-              viewBox="0 0 160 280"
-              style={{
-                width: '100%',
-                height: 'calc(100% - 16px)',
-                opacity: 0.12,
+                background: 'rgba(255,255,255,0.03)',
+                backdropFilter: 'blur(20px)',
+                border: '1px solid rgba(255,255,255,0.06)',
+                borderRadius: 10,
+                padding: '10px 10px 8px',
+                display: 'flex',
+                flexDirection: 'column',
               }}
             >
-              <path
-                d="M80,8 L100,8 L115,18 L118,28 L120,40 L115,52 L118,65 L112,78 L115,92 L108,105 L110,118 L105,130 L108,142 L102,155 L98,168 L92,180 L88,192 L82,205 L78,218 L74,230 L68,242 L60,252 L54,260 L48,268 L44,275 L40,272 L38,265 L36,255 L38,245 L40,235 L36,225 L34,215 L36,205 L32,195 L30,183 L32,170 L28,158 L26,145 L28,132 L24,120 L22,108 L25,95 L22,82 L24,68 L28,55 L24,42 L28,30 L35,20 L45,12 L58,8 Z"
-                fill="rgba(255,255,255,0.4)"
-                stroke="rgba(255,255,255,0.15)"
-                strokeWidth="0.5"
-              />
-            </svg>
+              <div style={{
+                fontSize: 8,
+                color: 'rgba(255,255,255,0.2)',
+                letterSpacing: '0.08em',
+                marginBottom: 8,
+              }}>
+                ÚLTIMOS 12 DÍAS
+              </div>
+              <svg
+                viewBox="0 0 120 60"
+                style={{ flex: 1, width: '100%', overflow: 'visible' }}
+                preserveAspectRatio="none"
+              >
+                <defs>
+                  <linearGradient id={`grad-${color.replace('#','')}`} x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor={color} stopOpacity="0.25"/>
+                    <stop offset="100%" stopColor={color} stopOpacity="0"/>
+                  </linearGradient>
+                </defs>
+                {visiblePoints > 1 && (() => {
+                  const pts = baseData.slice(0, visiblePoints).map((v, i) => ({
+                    x: (i / (baseData.length - 1)) * 120,
+                    y: 55 - (v / 160) * 50,
+                  }))
+                  const areaD = [
+                    `M ${pts[0].x} 60`,
+                    ...pts.map(p => `L ${p.x} ${p.y}`),
+                    `L ${pts[pts.length-1].x} 60 Z`
+                  ].join(' ')
+                  const lineD = pts.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ')
+                  return (
+                    <>
+                      <path d={areaD} fill={`url(#grad-${color.replace('#','')})`}/>
+                      <path d={lineD} fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                      {/* Punto final con glow */}
+                      <circle
+                        cx={pts[pts.length-1].x}
+                        cy={pts[pts.length-1].y}
+                        r="3"
+                        fill={color}
+                      />
+                      <circle
+                        cx={pts[pts.length-1].x}
+                        cy={pts[pts.length-1].y}
+                        r="6"
+                        fill="none"
+                        stroke={color}
+                        strokeWidth="0.5"
+                        opacity="0.4"
+                      />
+                    </>
+                  )
+                })()}
+              </svg>
+            </motion.div>
+          )}
 
-            {showMap &&
-              mapPoints.map((point, index) =>
-                progress > point.delay ? (
-                  <motion.div
-                    key={point.name}
-                    initial={{ scale: 0, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    transition={{ type: 'spring', stiffness: 400, damping: 15 }}
-                    style={{
-                      position: 'absolute',
-                      left: point.x,
-                      top: point.y,
-                      transform: 'translate(-50%, -50%)',
-                    }}
-                  >
-                    <motion.div
-                      animate={isActive ? { scale: [1, 1.8, 1], opacity: [0.8, 0, 0.8] } : { opacity: 0.45, scale: 1 }}
-                      transition={{ duration: 2, repeat: isActive ? Infinity : 0, delay: index * 0.2 }}
-                      style={{
-                        position: 'absolute',
-                        width: point.size * 2,
-                        height: point.size * 2,
-                        borderRadius: '50%',
-                        background: color,
-                        opacity: 0.3,
-                        top: '50%',
-                        left: '50%',
-                        transform: 'translate(-50%, -50%)',
-                      }}
-                    />
-                    <div
-                      style={{
-                        width: point.size / 1.5,
-                        height: point.size / 1.5,
-                        borderRadius: '50%',
-                        background: color,
-                        boxShadow: `0 0 6px ${color}`,
-                      }}
-                    />
-                  </motion.div>
-                ) : null
-              )}
-          </div>
+          {/* Mapa Argentina */}
+          {showMap && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5 }}
+              style={{
+                background: 'rgba(255,255,255,0.03)',
+                backdropFilter: 'blur(20px)',
+                border: '1px solid rgba(255,255,255,0.06)',
+                borderRadius: 10,
+                padding: '10px 8px 8px',
+                display: 'flex',
+                flexDirection: 'column',
+                overflow: 'hidden',
+              }}
+            >
+              <div style={{
+                fontSize: 8,
+                color: 'rgba(255,255,255,0.2)',
+                letterSpacing: '0.08em',
+                marginBottom: 4,
+                flexShrink: 0,
+              }}>
+                ORIGEN
+              </div>
+              <div style={{ flex: 1, position: 'relative' }}>
+                <svg
+                  viewBox="20 5 100 270"
+                  style={{ width: '100%', height: '100%' }}
+                  preserveAspectRatio="xMidYMid meet"
+                >
+                  {/* Silueta Argentina */}
+                  <path
+                    d={argentinaPath}
+                    fill="rgba(255,255,255,0.06)"
+                    stroke="rgba(255,255,255,0.12)"
+                    strokeWidth="0.8"
+                  />
+                  {/* Ciudades */}
+                  {mapCities.map((city, i) => (
+                    progress > 0.42 + i * 0.07 && (
+                      <g key={city.name}>
+                        {/* Anillo pulsante */}
+                        <motion.circle
+                          cx={city.cx} cy={city.cy}
+                          r={city.r * 2}
+                          fill="none"
+                          stroke={color}
+                          strokeWidth="0.5"
+                          animate={{ r: [city.r * 1.5, city.r * 3, city.r * 1.5], opacity: [0.4, 0, 0.4] }}
+                          transition={{ duration: 2.5, repeat: Infinity, delay: i * 0.3 }}
+                        />
+                        {/* Punto */}
+                        <motion.circle
+                          cx={city.cx} cy={city.cy}
+                          r={city.r}
+                          fill={color}
+                          initial={{ r: 0, opacity: 0 }}
+                          animate={{ r: city.r, opacity: 0.85 }}
+                          transition={{ type: 'spring', stiffness: 300, delay: i * 0.08 }}
+                          style={{ filter: `drop-shadow(0 0 3px ${color})` }}
+                        />
+                      </g>
+                    )
+                  ))}
+                </svg>
+              </div>
+            </motion.div>
+          )}
         </div>
       </div>
-    );
+    )
   };
 
   const renderLeadsScene = ({ isActive, progress, color }: SimProps) => {
     const fields = [
-      { label: 'Nombre', value: 'Carlos Mendoza', icon: <User size={10} /> },
-      { label: 'WhatsApp', value: '+54 381 555-1234', icon: <Phone size={10} /> },
-      { label: 'Servicio', value: 'Consulta de precios', icon: <MessageSquare size={10} /> },
-    ];
-    const fieldProgress = [0, 0.13, 0.26];
-    const showSubmit = progress > 0.38;
-    const submitting = progress > 0.4 && progress < 0.55;
-    const showNotif = progress > 0.62;
-    const showResponse = progress > 0.82;
+      { label: 'Nombre', value: 'Carlos Mendoza', icon: User },
+      { label: 'WhatsApp', value: '+54 381 555-1234', icon: Phone },
+      { label: 'Servicio', value: 'Consulta de precios', icon: MessageSquare },
+    ]
+
+    const fieldThresholds = [0, 0.12, 0.24]
+    const showButton = progress > 0.38
+    const submitted = progress > 0.50
+    const showWhatsApp = progress > 0.62
+    const showIA = progress > 0.80
 
     return (
-      <div
-        style={{
-          height: '100%',
+      <div style={{
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 8,
+        padding: '4px 2px',
+      }}>
+
+        {/* Header */}
+        <div style={{
           display: 'flex',
-          flexDirection: 'column',
-          gap: 8,
-          padding: '4px 2px',
-        }}
-      >
-        <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
-          <span
-            style={{
-              fontSize: 8,
-              color: 'rgba(255,255,255,0.3)',
-              letterSpacing: '0.1em',
-            }}
-          >
-            FORMULARIO DE CONTACTO
-          </span>
-          <span style={{ fontSize: 8, color }}>{'CAPTACIÓN 24/7'}</span>
+          justifyContent: 'space-between',
+          alignItems: 'flex-start',
+          flexShrink: 0,
+        }}>
+          <div>
+            <div style={{ fontSize: 9, letterSpacing: '0.15em', color: 'rgba(255,255,255,0.25)', marginBottom: 2 }}>
+              FORMULARIO DE CONTACTO
+            </div>
+            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>
+              Captura automática · 24/7
+            </div>
+          </div>
+          <div style={{
+            fontSize: 9, color: color,
+            background: `${color}12`,
+            border: `1px solid ${color}25`,
+            borderRadius: 6,
+            padding: '4px 8px',
+            fontWeight: 600,
+          }}>
+            CAPTACIÓN
+          </div>
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-          {fields.map((field, index) => {
-            const fieldVisible = progress > fieldProgress[index];
-            const charCount = fieldVisible
-              ? Math.floor(((progress - fieldProgress[index]) / 0.13) * field.value.length)
-              : 0;
-            const displayValue = field.value.slice(0, Math.min(charCount, field.value.length));
-            const isCompleted = charCount >= field.value.length;
+        {/* Campos */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6, flexShrink: 0 }}>
+          {fields.map((field, i) => {
+            const visible = progress > fieldThresholds[i]
+            const charProgress = visible
+              ? Math.min((progress - fieldThresholds[i]) / 0.12, 1)
+              : 0
+            const charCount = Math.floor(charProgress * field.value.length)
+            const displayValue = field.value.slice(0, charCount)
+            const complete = charCount >= field.value.length
+            const IconComponent = field.icon
 
-            return (
-              <AnimatePresence key={field.label}>
-                {fieldVisible && (
+            return visible ? (
+              <motion.div
+                key={field.label}
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] }}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 10,
+                  background: complete
+                    ? `${color}08`
+                    : 'rgba(255,255,255,0.04)',
+                  backdropFilter: 'blur(20px)',
+                  border: `1px solid ${complete ? color + '30' : 'rgba(255,255,255,0.08)'}`,
+                  borderRadius: 10,
+                  padding: '9px 12px',
+                  transition: 'all 400ms cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+                }}
+              >
+                <div style={{ color: complete ? color : 'rgba(255,255,255,0.2)', transition: 'color 300ms', flexShrink: 0 }}>
+                  <IconComponent size={13} strokeWidth={1.5}/>
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div style={{
+                    fontSize: 8,
+                    color: 'rgba(255,255,255,0.25)',
+                    marginBottom: 2,
+                    letterSpacing: '0.06em',
+                  }}>
+                    {field.label.toUpperCase()}
+                  </div>
+                  <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.85)', fontWeight: 500 }}>
+                    {displayValue}
+                    {!complete && visible && (
+                      <motion.span
+                        animate={{ opacity: [1, 0] }}
+                        transition={{ duration: 0.4, repeat: Infinity }}
+                        style={{
+                          display: 'inline-block',
+                          width: 1.5,
+                          height: 12,
+                          background: color,
+                          marginLeft: 1,
+                          verticalAlign: 'middle',
+                        }}
+                      />
+                    )}
+                  </div>
+                </div>
+                {complete && (
                   <motion.div
-                    initial={{ opacity: 0, x: -8 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.25 }}
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ type: 'spring', stiffness: 500, damping: 15 }}
                     style={{
+                      width: 18, height: 18,
+                      borderRadius: '50%',
+                      background: color,
                       display: 'flex',
                       alignItems: 'center',
-                      gap: 8,
-                      background: 'rgba(255,255,255,0.04)',
-                      border: `1px solid ${isCompleted ? `${color}35` : 'rgba(255,255,255,0.08)'}`,
-                      borderRadius: 8,
-                      padding: '7px 10px',
-                      transition: 'border-color 300ms',
+                      justifyContent: 'center',
+                      flexShrink: 0,
                     }}
                   >
-                    <div style={{ color: isCompleted ? color : 'rgba(255,255,255,0.25)', flexShrink: 0 }}>
-                      {field.icon}
-                    </div>
-
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontSize: 8, color: 'rgba(255,255,255,0.3)', marginBottom: 2 }}>
-                        {field.label}
-                      </div>
-                      <div
-                        style={{
-                          fontSize: 11,
-                          color: 'rgba(255,255,255,0.8)',
-                          whiteSpace: 'nowrap',
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                        }}
-                      >
-                        {displayValue}
-                        {!isCompleted && (
-                          <motion.span
-                            animate={isActive ? { opacity: [1, 0, 1] } : { opacity: 1 }}
-                            transition={{ duration: 0.5, repeat: isActive ? Infinity : 0 }}
-                            style={{ borderRight: `1px solid ${color}`, marginLeft: 1 }}
-                          >
-                            &nbsp;
-                          </motion.span>
-                        )}
-                      </div>
-                    </div>
-
-                    {isCompleted && (
-                      <motion.div
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                        transition={{ type: 'spring', stiffness: 500 }}
-                        style={{ flexShrink: 0 }}
-                      >
-                        <Check size={10} color={color} />
-                      </motion.div>
-                    )}
+                    <Check size={10} color="black" strokeWidth={3}/>
                   </motion.div>
                 )}
-              </AnimatePresence>
-            );
+              </motion.div>
+            ) : null
           })}
         </div>
 
-        {showSubmit && (
-          <motion.div
-            initial={{ opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.25 }}
-            style={{
-              background: submitting ? `${color}40` : `${color}20`,
-              border: `1px solid ${color}50`,
-              borderRadius: 8,
-              padding: '9px',
-              textAlign: 'center',
-              fontSize: 10,
-              fontWeight: 600,
-              color,
-              letterSpacing: '0.08em',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 6,
-            }}
-          >
-            {submitting ? (
-              <>
-                <motion.div
-                  animate={isActive ? { rotate: 360 } : { rotate: 0 }}
-                  transition={{ duration: 0.8, repeat: isActive ? Infinity : 0, ease: 'linear' }}
-                  style={{
-                    width: 10,
-                    height: 10,
-                    border: `1.5px solid ${color}`,
-                    borderTopColor: 'transparent',
-                    borderRadius: '50%',
-                  }}
-                />
-                ENVIANDO...
-              </>
-            ) : (
-              'CONSULTA ENVIADA ✓'
-            )}
-          </motion.div>
-        )}
+        {/* Botón submit */}
+        <AnimatePresence>
+          {showButton && (
+            <motion.div
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              style={{
+                background: submitted
+                  ? `linear-gradient(135deg, ${color}30, ${color}15)`
+                  : `${color}15`,
+                backdropFilter: 'blur(20px)',
+                border: `1px solid ${submitted ? color + '50' : color + '25'}`,
+                borderRadius: 10,
+                padding: '11px',
+                textAlign: 'center',
+                fontSize: 11,
+                fontWeight: 700,
+                color: submitted ? color : `${color}80`,
+                letterSpacing: '0.1em',
+                flexShrink: 0,
+                boxShadow: submitted ? `0 0 20px ${color}15` : 'none',
+                transition: 'all 400ms ease',
+              }}
+            >
+              {submitted ? '✓ CONSULTA ENVIADA' : 'ENVIANDO...'}
+            </motion.div>
+          )}
+        </AnimatePresence>
 
+        {/* Notificaciones */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6, flex: 1 }}>
-          {showNotif && (
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-              style={{
-                background: 'rgba(37, 211, 102, 0.08)',
-                border: '1px solid rgba(37, 211, 102, 0.25)',
-                borderRadius: 8,
-                padding: '8px 10px',
-                display: 'flex',
-                alignItems: 'flex-start',
-                gap: 8,
-              }}
-            >
-              <div
+          <AnimatePresence>
+            {showWhatsApp && (
+              <motion.div
+                initial={{ opacity: 0, x: 16, scale: 0.96 }}
+                animate={{ opacity: 1, x: 0, scale: 1 }}
+                transition={{ type: 'spring', stiffness: 300, damping: 20 }}
                 style={{
-                  width: 24,
-                  height: 24,
+                  background: 'rgba(37,211,102,0.07)',
+                  backdropFilter: 'blur(20px)',
+                  border: '1px solid rgba(37,211,102,0.20)',
+                  borderRadius: 10,
+                  padding: '10px 12px',
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  gap: 10,
+                }}
+              >
+                <div style={{
+                  width: 28, height: 28,
                   background: 'rgba(37,211,102,0.15)',
-                  borderRadius: '50%',
+                  borderRadius: 8,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  flexShrink: 0,
+                }}>
+                  <MessageSquare size={13} color="#25D366"/>
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 10, fontWeight: 700, color: '#25D366', marginBottom: 3 }}>
+                    WhatsApp → Tu equipo
+                  </div>
+                  <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.45)', lineHeight: 1.4 }}>
+                    "Nueva consulta: Carlos Mendoza — Precios"
+                  </div>
+                </div>
+                <span style={{ fontSize: 8, color: 'rgba(255,255,255,0.2)', flexShrink: 0 }}>ahora</span>
+              </motion.div>
+            )}
+
+            {showIA && (
+              <motion.div
+                initial={{ opacity: 0, x: 16, scale: 0.96 }}
+                animate={{ opacity: 1, x: 0, scale: 1 }}
+                transition={{ type: 'spring', stiffness: 300, damping: 20, delay: 0.15 }}
+                style={{
+                  background: `${color}07`,
+                  backdropFilter: 'blur(20px)',
+                  border: `1px solid ${color}20`,
+                  borderRadius: 10,
+                  padding: '10px 12px',
                   display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  flexShrink: 0,
+                  alignItems: 'flex-start',
+                  gap: 10,
                 }}
               >
-                <MessageSquare size={11} color="#25D366" />
-              </div>
-
-              <div style={{ minWidth: 0 }}>
-                <div style={{ fontSize: 9, fontWeight: 600, color: '#25D366', marginBottom: 2 }}>
-                  {'WhatsApp → Tu equipo'}
-                </div>
-                <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.5)' }}>
-                  {'"Nueva consulta: Carlos Mendoza — Precios"'}
-                </div>
-              </div>
-
-              <div
-                style={{
-                  fontSize: 8,
-                  color: 'rgba(255,255,255,0.2)',
-                  marginLeft: 'auto',
-                  flexShrink: 0,
-                }}
-              >
-                ahora
-              </div>
-            </motion.div>
-          )}
-
-          {showResponse && (
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ type: 'spring', stiffness: 300, damping: 20, delay: 0.2 }}
-              style={{
-                background: `${color}08`,
-                border: `1px solid ${color}25`,
-                borderRadius: 8,
-                padding: '8px 10px',
-                display: 'flex',
-                alignItems: 'flex-start',
-                gap: 8,
-              }}
-            >
-              <div
-                style={{
-                  width: 24,
-                  height: 24,
+                <div style={{
+                  width: 28, height: 28,
                   background: `${color}15`,
-                  borderRadius: '50%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
+                  borderRadius: 8,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
                   flexShrink: 0,
-                }}
-              >
-                <Bot size={11} color={color} />
-              </div>
-
-              <div style={{ minWidth: 0 }}>
-                <div style={{ fontSize: 9, fontWeight: 600, color, marginBottom: 2 }}>
-                  {'IA → Carlos Mendoza'}
+                }}>
+                  <Bot size={13} color={color}/>
                 </div>
-                <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.5)' }}>
-                  {'"¡Hola Carlos! Recibimos tu consulta, te contactamos en minutos 🚀"'}
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 10, fontWeight: 700, color, marginBottom: 3 }}>
+                    IA → Carlos Mendoza
+                  </div>
+                  <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.45)', lineHeight: 1.4 }}>
+                    "¡Hola Carlos! Recibimos tu consulta, te contactamos en minutos 🚀"
+                  </div>
                 </div>
-              </div>
-            </motion.div>
-          )}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
-    );
+    )
   };
 
   const renderMapsScene = ({ isActive, progress, color }: SimProps) => {
-    const showMap = progress > 0.15;
-    const competitorPins = [
-      { x: '35%', y: '45%', name: 'Sin web', stars: 2.8, delay: 0.22 },
-      { x: '65%', y: '38%', name: 'Sin info', stars: 3.1, delay: 0.32 },
-      { x: '55%', y: '62%', name: 'Sin fotos', stars: 3.4, delay: 0.38 },
-    ];
-    const showClient = progress > 0.48;
-    const showPanel = progress > 0.78;
+    const showGrid = progress > 0.10
+    const showCompetitors = progress > 0.22
+    const showClient = progress > 0.50
+    const showPanel = progress > 0.72
+
+    const competitors = [
+      { x: '28%', y: '48%', rating: '2.8', delay: 0.22 },
+      { x: '68%', y: '36%', rating: '3.1', delay: 0.30 },
+      { x: '58%', y: '65%', rating: '3.4', delay: 0.38 },
+    ]
 
     return (
-      <div
-        style={{
-          height: '100%',
+      <div style={{
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 8,
+        padding: '4px 2px',
+      }}>
+
+        {/* Header */}
+        <div style={{
           display: 'flex',
-          flexDirection: 'column',
-          gap: 6,
-          padding: '4px 2px',
-        }}
-      >
-        <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
-          <span
-            style={{
-              fontSize: 8,
-              color: 'rgba(255,255,255,0.3)',
-              letterSpacing: '0.1em',
-            }}
-          >
-            {'GOOGLE MAPS \u00b7 LOCAL'}
-          </span>
-          <span style={{ fontSize: 8, color }}>{'PRIMERA POSICI\u00d3N'}</span>
+          justifyContent: 'space-between',
+          alignItems: 'flex-start',
+          flexShrink: 0,
+        }}>
+          <div>
+            <div style={{ fontSize: 9, letterSpacing: '0.15em', color: 'rgba(255,255,255,0.25)', marginBottom: 2 }}>
+              GOOGLE MAPS · LOCAL
+            </div>
+            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>
+              Tucumán, Argentina
+            </div>
+          </div>
+          <div style={{
+            fontSize: 9, color: color,
+            background: `${color}12`,
+            border: `1px solid ${color}25`,
+            borderRadius: 6,
+            padding: '4px 8px',
+            fontWeight: 600,
+          }}>
+            PRIMERA POSICIÓN
+          </div>
         </div>
 
-        <div style={{ flex: 1, display: 'flex', gap: 6, overflow: 'hidden' }}>
-          <div
-            style={{
-              flex: 1,
-              background: 'rgba(255,255,255,0.02)',
-              border: '1px solid rgba(255,255,255,0.06)',
-              borderRadius: 8,
-              position: 'relative',
-              overflow: 'hidden',
-              minHeight: 120,
-            }}
-          >
-            <div
-              style={{
-                position: 'absolute',
-                inset: 0,
-                background: 'rgba(6,182,212,0.03)',
-                backgroundImage: `
-                  linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
-                  linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px),
-                  linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
-                  linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px)
-                `,
-                backgroundSize: '30px 30px, 30px 30px, 10px 10px, 10px 10px',
-                pointerEvents: 'none',
-              }}
-            />
+        {/* Área mapa + panel lateral */}
+        <div style={{
+          flex: 1,
+          display: 'flex',
+          gap: 8,
+          minHeight: 0,
+        }}>
 
-            {showMap && (
+          {/* Mapa */}
+          <div style={{
+            flex: 1,
+            background: 'rgba(255,255,255,0.03)',
+            backdropFilter: 'blur(20px)',
+            border: '1px solid rgba(255,255,255,0.07)',
+            borderRadius: 12,
+            position: 'relative',
+            overflow: 'hidden',
+          }}>
+            {/* Grid del mapa */}
+            {showGrid && (
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ duration: 0.25 }}
+                transition={{ duration: 0.5 }}
                 style={{
                   position: 'absolute',
                   inset: 0,
-                  backgroundImage:
-                    'linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)',
-                  backgroundSize: '20px 20px',
+                  backgroundImage: `
+                    linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)
+                  `,
+                  backgroundSize: '24px 24px',
                 }}
               />
             )}
 
-            {competitorPins.map((pin) =>
-              progress > pin.delay ? (
+            {/* Pins competidores */}
+            {showCompetitors && competitors.map((comp, i) => (
+              progress > comp.delay && (
                 <motion.div
-                  key={pin.name}
-                  initial={{ scale: 0, y: -10 }}
-                  animate={{ scale: 1, y: 0 }}
+                  key={i}
+                  initial={{ scale: 0, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
                   transition={{ type: 'spring', stiffness: 400, damping: 15 }}
                   style={{
                     position: 'absolute',
-                    left: pin.x,
-                    top: pin.y,
+                    left: comp.x,
+                    top: comp.y,
                     transform: 'translate(-50%, -100%)',
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
+                    gap: 3,
                   }}
                 >
-                  <div
-                    style={{
-                      width: 20,
-                      height: 20,
-                      borderRadius: '50% 50% 50% 0',
-                      transform: 'rotate(-45deg)',
-                      background: 'rgba(120,120,120,0.6)',
-                      border: '1px solid rgba(180,180,180,0.3)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                    }}
-                  >
-                    <div
-                      style={{
-                        transform: 'rotate(45deg)',
-                        width: 5,
-                        height: 5,
-                        borderRadius: '50%',
-                        background: 'rgba(180,180,180,0.5)',
-                      }}
-                    />
-                  </div>
-                  <div
-                    style={{
-                      background: 'rgba(30,30,30,0.9)',
-                      border: '1px solid rgba(120,120,120,0.2)',
-                      borderRadius: 4,
-                      padding: '2px 5px',
-                      marginTop: 3,
-                      fontSize: 8,
-                      color: 'rgba(255,255,255,0.4)',
-                      whiteSpace: 'nowrap',
-                    }}
-                  >
-                    {`${pin.stars} ⭐`}
+                  <div style={{
+                    width: 18, height: 18,
+                    borderRadius: '50% 50% 50% 0',
+                    transform: 'rotate(-45deg)',
+                    background: 'rgba(120,120,120,0.5)',
+                    border: '1px solid rgba(160,160,160,0.25)',
+                    backdropFilter: 'blur(8px)',
+                  }}/>
+                  <div style={{
+                    background: 'rgba(20,20,20,0.85)',
+                    backdropFilter: 'blur(8px)',
+                    border: '1px solid rgba(255,255,255,0.08)',
+                    borderRadius: 5,
+                    padding: '2px 5px',
+                    fontSize: 8,
+                    color: 'rgba(255,255,255,0.35)',
+                    whiteSpace: 'nowrap',
+                  }}>
+                    {comp.rating} ⭐
                   </div>
                 </motion.div>
-              ) : null
-            )}
+              )
+            ))}
 
+            {/* Pin cliente DESTACADO */}
             {showClient && (
               <motion.div
-                initial={{ scale: 0, y: -20 }}
-                animate={{ scale: 1, y: 0 }}
-                transition={{ type: 'spring', stiffness: 300, damping: 12 }}
+                initial={{ scale: 0, opacity: 0, y: -20 }}
+                animate={{ scale: 1, opacity: 1, y: 0 }}
+                transition={{ type: 'spring', stiffness: 260, damping: 18 }}
                 style={{
                   position: 'absolute',
                   left: '50%',
-                  top: '40%',
+                  top: '42%',
                   transform: 'translate(-50%, -100%)',
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
+                  gap: 4,
                   zIndex: 10,
                 }}
               >
-                {[1, 2, 3].map((ring) => (
+                {/* Anillos */}
+                {[1, 2].map(ring => (
                   <motion.div
                     key={ring}
-                    animate={isActive ? { scale: [1, 2.5 + ring * 0.5], opacity: [0.4, 0] } : { scale: 1, opacity: 0 }}
+                    animate={{
+                      scale: [1, 2 + ring * 0.8],
+                      opacity: [0.5, 0],
+                    }}
                     transition={{
-                      duration: 2,
-                      delay: ring * 0.4,
-                      repeat: isActive ? Infinity : 0,
+                      duration: 2.2,
+                      delay: ring * 0.5,
+                      repeat: Infinity,
                       ease: 'easeOut',
                     }}
                     style={{
                       position: 'absolute',
-                      width: 28,
-                      height: 28,
+                      width: 30, height: 30,
                       borderRadius: '50%',
                       border: `1px solid ${color}`,
                       top: '50%',
                       left: '50%',
                       transform: 'translate(-50%, -50%)',
+                      pointerEvents: 'none',
                     }}
                   />
                 ))}
 
+                {/* Pin */}
                 <motion.div
-                  animate={isActive ? { y: [0, -6, 0] } : { y: 0 }}
-                  transition={{ duration: 2, repeat: isActive ? Infinity : 0, ease: 'easeInOut' }}
+                  animate={{ y: [0, -5, 0] }}
+                  transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
                   style={{
-                    width: 32,
-                    height: 32,
+                    width: 32, height: 32,
                     borderRadius: '50% 50% 50% 0',
                     transform: 'rotate(-45deg)',
                     background: `linear-gradient(135deg, ${color}, ${color}cc)`,
-                    boxShadow: `0 0 24px ${color}60, 0 4px 12px rgba(0,0,0,0.4)`,
+                    boxShadow: `0 0 24px ${color}50, 0 4px 16px rgba(0,0,0,0.5)`,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     position: 'relative',
                   }}
                 >
-                  <span
-                    style={{
-                      transform: 'rotate(45deg)',
-                      fontSize: 12,
-                      filter: 'brightness(0)',
-                    }}
-                  >
-                    {'★'}
-                  </span>
+                  <span style={{ transform: 'rotate(45deg)', fontSize: 13 }}>★</span>
                 </motion.div>
 
+                {/* Label */}
                 <motion.div
-                  initial={{ opacity: 0, scale: 0.8, y: 5 }}
-                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                  transition={{ delay: 0.4, type: 'spring' }}
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.35, type: 'spring' }}
                   style={{
                     background: color,
+                    backdropFilter: 'blur(8px)',
                     color: 'black',
                     fontSize: 9,
-                    fontWeight: 700,
+                    fontWeight: 800,
                     padding: '3px 8px',
                     borderRadius: 6,
-                    marginTop: 6,
                     whiteSpace: 'nowrap',
-                    boxShadow: `0 2px 8px ${color}40`,
+                    boxShadow: `0 2px 12px ${color}40`,
+                    letterSpacing: '0.03em',
                   }}
                 >
-                  {'TU EMPRESA · 5.0 ★'}
+                  TU EMPRESA · 5.0 ★
                 </motion.div>
               </motion.div>
             )}
           </div>
 
+          {/* Panel lateral */}
           {showPanel && (
             <motion.div
-              initial={{ opacity: 0, x: 16 }}
+              initial={{ opacity: 0, x: 12 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.4 }}
+              transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
               style={{
-                width: 110,
-                background: 'rgba(255,255,255,0.03)',
-                border: `1px solid ${color}25`,
-                borderRadius: 8,
-                padding: 8,
+                width: 108,
+                background: 'rgba(255,255,255,0.04)',
+                backdropFilter: 'blur(20px)',
+                border: `1px solid ${color}20`,
+                borderRadius: 12,
+                padding: '12px 10px',
                 display: 'flex',
                 flexDirection: 'column',
-                gap: 6,
+                gap: 8,
                 flexShrink: 0,
               }}
             >
+              {/* Rating principal */}
               <div>
-                <div style={{ fontSize: 8, color: 'rgba(255,255,255,0.3)', marginBottom: 3 }}>
+                <div style={{ fontSize: 8, color: 'rgba(255,255,255,0.25)', marginBottom: 4, letterSpacing: '0.06em' }}>
                   TU EMPRESA
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                  <span style={{ fontSize: 14, fontWeight: 700, color }}>5.0</span>
-                  <div>
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <span key={star} style={{ fontSize: 9, color: '#f59e0b' }}>
-                        {'\u2605'}
-                      </span>
-                    ))}
-                    <div style={{ fontSize: 8, color: 'rgba(255,255,255,0.3)' }}>47 rese\u00f1as</div>
-                  </div>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: 4, marginBottom: 3 }}>
+                  <span style={{ fontSize: 24, fontWeight: 800, color, lineHeight: 1 }}>5.0</span>
+                </div>
+                <div>
+                  {[1,2,3,4,5].map(s => (
+                    <span key={s} style={{ fontSize: 10, color: '#f59e0b' }}>★</span>
+                  ))}
+                </div>
+                <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.25)', marginTop: 2 }}>
+                  47 reseñas
                 </div>
               </div>
 
-              {[ 
-                { label: 'Fotos', status: true },
-                { label: 'Horarios', status: true },
-                { label: 'Web', status: true },
-                { label: 'WhatsApp', status: true },
-              ].map((item, index) => (
+              {/* Separador */}
+              <div style={{ height: 1, background: 'rgba(255,255,255,0.06)' }}/>
+
+              {/* Checkmarks */}
+              {['Fotos', 'Horarios', 'Web', 'WhatsApp'].map((item, i) => (
                 <motion.div
-                  key={item.label}
+                  key={item}
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  transition={{ delay: index * 0.1 }}
+                  transition={{ delay: i * 0.08 }}
                   style={{
                     display: 'flex',
-                    alignItems: 'center',
                     justifyContent: 'space-between',
+                    alignItems: 'center',
                   }}
                 >
-                  <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.4)' }}>{item.label}</span>
-                  <span style={{ fontSize: 9, color }}>{'\u2713'}</span>
+                  <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.35)' }}>{item}</span>
+                  <span style={{ fontSize: 10, color }}>✓</span>
                 </motion.div>
               ))}
 
-              <div
-                style={{
-                  marginTop: 8,
-                  paddingTop: 8,
-                  borderTop: '1px solid rgba(255,255,255,0.06)',
-                }}
-              >
-                <div
-                  style={{
-                    fontSize: 7,
-                    color: 'rgba(255,255,255,0.25)',
-                    marginBottom: 6,
-                    letterSpacing: '0.08em',
-                  }}
-                >
+              {/* Separador */}
+              <div style={{ height: 1, background: 'rgba(255,255,255,0.06)' }}/>
+
+              {/* VS competencia */}
+              <div>
+                <div style={{ fontSize: 7, color: 'rgba(255,255,255,0.2)', marginBottom: 5, letterSpacing: '0.08em' }}>
                   VS COMPETENCIA
                 </div>
                 {[
                   { label: 'Reseñas', you: '47', them: '8' },
-                  { label: 'Rating', you: '5.0', them: '3.2' },
-                ].map((item) => (
-                  <div
-                    key={item.label}
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      marginBottom: 4,
-                    }}
-                  >
-                    <span style={{ fontSize: 8, color: 'rgba(255,255,255,0.3)' }}>{item.label}</span>
-                    <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-                      <span style={{ fontSize: 9, color, fontWeight: 600 }}>{item.you}</span>
-                      <span style={{ fontSize: 7, color: 'rgba(255,255,255,0.2)' }}>vs</span>
-                      <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.25)' }}>{item.them}</span>
+                  { label: 'Rating', you: '5.0', them: '3.1' },
+                ].map((item, i) => (
+                  <div key={i} style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginBottom: 4,
+                  }}>
+                    <span style={{ fontSize: 8, color: 'rgba(255,255,255,0.25)' }}>{item.label}</span>
+                    <div style={{ display: 'flex', gap: 5, alignItems: 'center' }}>
+                      <span style={{ fontSize: 10, color, fontWeight: 700 }}>{item.you}</span>
+                      <span style={{ fontSize: 7, color: 'rgba(255,255,255,0.15)' }}>vs</span>
+                      <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.2)' }}>{item.them}</span>
                     </div>
                   </div>
                 ))}
@@ -1693,7 +1555,7 @@ function WebScene({ service }: { service: Service }) {
           )}
         </div>
       </div>
-    );
+    )
   };
 
   const renderPlaceholderScene = ({
@@ -2233,258 +2095,307 @@ function WebScene({ service }: { service: Service }) {
   );
 }
 
-const CHAT_MESSAGES = [
-  {
-    id: 1,
-    text: 'Hola! Tienen la Hilux 4x4 disponible?',
-    from: 'user',
-    time: '22:47',
-    delay: 0,
-  },
-  {
-    id: 2,
-    text: 'Hola! Si, tenemos 2 unidades disponibles. Te paso los precios ahora mismo 🚗',
-    from: 'bot',
-    time: '22:47',
-    delay: 1.4,
-  },
-  {
-    id: 3,
-    text: 'Hilux 4x4 AT: $45.000 USD\nHilux 4x4 MT: $42.500 USD\n¿Queres coordinar un test drive?',
-    from: 'bot',
-    time: '22:48',
-    delay: 2.4,
-  },
-  {
-    id: 4,
-    text: 'Si! Cuando tienen disponible?',
-    from: 'user',
-    time: '22:49',
-    delay: 3.8,
-  },
-  {
-    id: 5,
-    text: 'Tengo lugar manana a las 10hs o el jueves a las 16hs. ¿Cual te queda mejor?',
-    from: 'bot',
-    time: '22:49',
-    delay: 5.0,
-  },
-] as const;
+const AI_COLOR = '#8b5cf6';
 
-function AIScene({ service }: { service: Service }) {
-  const [visibleMessages, setVisibleMessages] = useState<number[]>([]);
-  const [isTyping, setIsTyping] = useState(false);
-  const [cycleKey, setCycleKey] = useState(0);
+type AISimulation = {
+  id: number;
+  label: string;
+  icon: LucideIcon;
+  duration: number;
+  color: string;
+};
+
+const AI_SIMULATIONS: AISimulation[] = [
+  { id: 1, label: 'Chat IA',  icon: MessageSquare, duration: 6000, color: AI_COLOR },
+  { id: 2, label: 'Leads',    icon: Target,        duration: 5500, color: AI_COLOR },
+  { id: 3, label: 'Agenda',   icon: Calendar,      duration: 5000, color: AI_COLOR },
+  { id: 4, label: 'Métricas', icon: BarChart2,     duration: 4500, color: AI_COLOR },
+];
+
+type AISimProps = { isActive: boolean; progress: number; color: string };
+
+function SimChat({ isActive: _isActive, progress: _progress, color: _color }: AISimProps) {
+  return <div style={{ color: 'rgba(255,255,255,0.2)', fontSize: 11, padding: 12 }}>Chat IA — próximo sprint</div>;
+}
+function SimLeadsIA({ isActive: _isActive, progress: _progress, color: _color }: AISimProps) {
+  return <div style={{ color: 'rgba(255,255,255,0.2)', fontSize: 11, padding: 12 }}>Leads IA — próximo sprint</div>;
+}
+function SimAgenda({ isActive: _isActive, progress: _progress, color: _color }: AISimProps) {
+  return <div style={{ color: 'rgba(255,255,255,0.2)', fontSize: 11, padding: 12 }}>Agenda — próximo sprint</div>;
+}
+function SimMetricas({ isActive: _isActive, progress: _progress, color: _color }: AISimProps) {
+  return <div style={{ color: 'rgba(255,255,255,0.2)', fontSize: 11, padding: 12 }}>Métricas — próximo sprint</div>;
+}
+
+function AIScene({ service: _service }: { service: Service }) {
+  const [activeTab, setActiveTab] = useState(0);
+  const [isInView, setIsInView] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [cycleSeed, setCycleSeed] = useState(0);
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const progressRef = useRef(0);
+  const animFrameRef = useRef(0);
+  const startTimeRef = useRef(0);
+  const isRunningRef = useRef(false);
+  const nextTabTimeoutRef = useRef<number | null>(null);
 
   useEffect(() => {
-    const cycle = () => {
-      setVisibleMessages([]);
-      setIsTyping(false);
-      setCycleKey((currentKey) => currentKey + 1);
-    };
-
-    const interval = setInterval(cycle, 8000);
-    return () => clearInterval(interval);
+    const observer = new IntersectionObserver(
+      ([entry]) => { setIsInView(entry.isIntersecting); },
+      { threshold: 0.3 }
+    );
+    const el = containerRef.current;
+    if (el) observer.observe(el);
+    return () => observer.disconnect();
   }, []);
 
   useEffect(() => {
-    const timers: ReturnType<typeof setTimeout>[] = [];
+    if (nextTabTimeoutRef.current) {
+      clearTimeout(nextTabTimeoutRef.current);
+      nextTabTimeoutRef.current = null;
+    }
 
-    CHAT_MESSAGES.forEach((message) => {
-      if (message.from === 'bot') {
-        timers.push(
-          setTimeout(() => {
-            setIsTyping(true);
-          }, message.delay * 1000 - 800)
-        );
+    if (!isInView) {
+      cancelAnimationFrame(animFrameRef.current);
+      isRunningRef.current = false;
+      return;
+    }
+
+    const duration = AI_SIMULATIONS[activeTab]?.duration ?? 5000;
+    progressRef.current = 0;
+    startTimeRef.current = performance.now();
+    isRunningRef.current = true;
+
+    const tick = (now: number) => {
+      if (!isRunningRef.current) return;
+      const elapsed = now - startTimeRef.current;
+      const next = Math.min(elapsed / duration, 1);
+      if (next !== progressRef.current) {
+        progressRef.current = next;
+        setProgress(next);
       }
+      if (next < 1) {
+        animFrameRef.current = requestAnimationFrame(tick);
+        return;
+      }
+      isRunningRef.current = false;
+      nextTabTimeoutRef.current = window.setTimeout(() => {
+        progressRef.current = 0;
+        setProgress(0);
+        setActiveTab(prev => (prev + 1) % AI_SIMULATIONS.length);
+      }, 300);
+    };
 
-      timers.push(
-        setTimeout(() => {
-          setIsTyping(false);
-          setVisibleMessages((previous) => [...previous, message.id]);
+    animFrameRef.current = requestAnimationFrame(tick);
 
-          requestAnimationFrame(() => {
-            if (containerRef.current) {
-              containerRef.current.scrollTop = containerRef.current.scrollHeight;
-            }
-          });
-        }, message.delay * 1000)
-      );
-    });
+    return () => {
+      cancelAnimationFrame(animFrameRef.current);
+      if (nextTabTimeoutRef.current) {
+        clearTimeout(nextTabTimeoutRef.current);
+        nextTabTimeoutRef.current = null;
+      }
+      isRunningRef.current = false;
+    };
+  }, [activeTab, cycleSeed, isInView]);
 
-    return () => timers.forEach(clearTimeout);
-  }, [cycleKey]);
+  const handleTabClick = (index: number) => {
+    cancelAnimationFrame(animFrameRef.current);
+    if (nextTabTimeoutRef.current) {
+      clearTimeout(nextTabTimeoutRef.current);
+      nextTabTimeoutRef.current = null;
+    }
+    isRunningRef.current = false;
+    progressRef.current = 0;
+    setProgress(0);
+    setActiveTab(index);
+    setCycleSeed(s => s + 1);
+  };
+
+  const activeSimulation = AI_SIMULATIONS[activeTab];
 
   return (
     <div
+      ref={containerRef}
       style={{
         width: '100%',
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
         padding: 8,
-        background:
-          'radial-gradient(circle at top, rgba(139,92,246,0.08) 0%, rgba(14,16,22,0.92) 52%, rgba(7,8,12,1) 100%)',
+        gap: 8,
       }}
     >
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 10,
-          padding: '8px 12px',
-          borderBottom: '1px solid rgba(255,255,255,0.06)',
-          marginBottom: 8,
-          flexShrink: 0,
-        }}
-      >
-        <div
-          style={{
-            width: 32,
-            height: 32,
-            borderRadius: '50%',
-            background: `${service.accent}20`,
-            border: `1px solid ${service.accent}4d`,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            flexShrink: 0,
-          }}
-        >
-          <Bot size={15} color={service.accent} />
+      {/* Título del panel */}
+      <div style={{ marginBottom: 8, flexShrink: 0 }}>
+        <div style={{
+          fontSize: 9,
+          fontWeight: 600,
+          letterSpacing: '0.12em',
+          color: `${AI_COLOR}80`,
+          marginBottom: 4,
+        }}>
+          AGENTE IA · EN VIVO
         </div>
-        <div style={{ flex: 1 }}>
-          <div style={{ fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.85)' }}>
-            Agente develOP
-          </div>
-          <div
-            style={{
-              fontSize: 10,
-              color: '#25D366',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 4,
-            }}
-          >
-            <div style={{ width: 5, height: 5, borderRadius: '50%', background: '#25D366' }} />
-            En linea · Responde al instante
-          </div>
-        </div>
-        <div
-          style={{
-            fontSize: 9,
-            color: 'rgba(255,255,255,0.25)',
-            letterSpacing: '0.05em',
-          }}
-        >
-          WhatsApp
+        <div style={{
+          fontSize: 13,
+          fontWeight: 600,
+          color: 'rgba(255,255,255,0.8)',
+          lineHeight: 1.3,
+        }}>
+          Tu sistema comercial trabajando ahora mismo
         </div>
       </div>
 
-      <div
-        ref={containerRef}
-        style={{
-          flex: 1,
-          overflowY: 'hidden',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 8,
-          padding: '4px 8px',
-        }}
-      >
-        <AnimatePresence>
-          {CHAT_MESSAGES.filter((message) => visibleMessages.includes(message.id)).map((message) => (
-            <motion.div
-              key={message.id}
-              initial={{ opacity: 0, y: 12, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              transition={{ duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
+      {/* Tabs */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: `repeat(${AI_SIMULATIONS.length}, 1fr)`,
+        gap: 4,
+        flexShrink: 0,
+      }}>
+        {AI_SIMULATIONS.map((sim, index) => {
+          const isActive = index === activeTab;
+          const IconComp = sim.icon;
+          return (
+            <button
+              key={sim.id}
+              type="button"
+              onClick={() => handleTabClick(index)}
               style={{
-                alignSelf: message.from === 'user' ? 'flex-end' : 'flex-start',
-                maxWidth: '80%',
-              }}
-            >
-              <div
-                style={{
-                  background: message.from === 'user' ? `${service.accent}20` : 'rgba(255,255,255,0.06)',
-                  border: `1px solid ${
-                    message.from === 'user' ? `${service.accent}4d` : 'rgba(255,255,255,0.08)'
-                  }`,
-                  borderRadius: message.from === 'user' ? '12px 12px 2px 12px' : '12px 12px 12px 2px',
-                  padding: '8px 12px',
-                  fontSize: 11,
-                  lineHeight: 1.5,
-                  color: 'rgba(255,255,255,0.85)',
-                  whiteSpace: 'pre-line',
-                }}
-              >
-                {message.text}
-              </div>
-              <div
-                style={{
-                  fontSize: 9,
-                  color: 'rgba(255,255,255,0.25)',
-                  marginTop: 3,
-                  textAlign: message.from === 'user' ? 'right' : 'left',
-                  paddingLeft: message.from === 'bot' ? 4 : 0,
-                  paddingRight: message.from === 'user' ? 4 : 0,
-                }}
-              >
-                {message.time}
-                {message.from === 'bot' && ' · IA'}
-              </div>
-            </motion.div>
-          ))}
-        </AnimatePresence>
-
-        <AnimatePresence>
-          {isTyping && (
-            <motion.div
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 4 }}
-              style={{
-                alignSelf: 'flex-start',
-                background: 'rgba(255,255,255,0.06)',
-                border: '1px solid rgba(255,255,255,0.08)',
-                borderRadius: '12px 12px 12px 2px',
-                padding: '8px 14px',
                 display: 'flex',
-                gap: 4,
+                flexDirection: 'column',
                 alignItems: 'center',
+                gap: 4,
+                padding: '7px 4px',
+                borderRadius: 8,
+                border: isActive ? `1px solid ${AI_COLOR}30` : '1px solid transparent',
+                background: isActive ? `${AI_COLOR}10` : 'transparent',
+                cursor: 'pointer',
+                position: 'relative',
+                overflow: 'hidden',
+                transition: 'all 200ms ease',
               }}
             >
-              {[0, 0.2, 0.4].map((delay, index) => (
+              {isActive && (
                 <motion.div
-                  key={index}
-                  animate={{ y: [0, -4, 0] }}
-                  transition={{ duration: 0.5, delay, repeat: Infinity }}
+                  layoutId="aiTabGlow"
                   style={{
-                    width: 4,
-                    height: 4,
-                    borderRadius: '50%',
-                    background: `${service.accent}99`,
+                    position: 'absolute',
+                    inset: 0,
+                    background: `radial-gradient(circle at 50% 0%, ${AI_COLOR}15, transparent 70%)`,
+                    pointerEvents: 'none',
                   }}
                 />
-              ))}
-            </motion.div>
-          )}
+              )}
+
+              <div style={{
+                color: isActive ? AI_COLOR : 'rgba(255,255,255,0.2)',
+                transition: 'color 200ms',
+                position: 'relative',
+              }}>
+                <IconComp size={12} strokeWidth={1.8}/>
+              </div>
+
+              <span style={{
+                fontSize: 8,
+                fontWeight: isActive ? 600 : 400,
+                color: isActive ? AI_COLOR : 'rgba(255,255,255,0.2)',
+                letterSpacing: '0.04em',
+                position: 'relative',
+                transition: 'color 200ms',
+                whiteSpace: 'nowrap',
+              }}>
+                {sim.label}
+              </span>
+
+              {isActive && (
+                <div style={{
+                  position: 'absolute',
+                  bottom: 0,
+                  left: 0,
+                  height: 2,
+                  width: `${progress * 100}%`,
+                  background: `linear-gradient(90deg, ${AI_COLOR}80, ${AI_COLOR})`,
+                  borderRadius: '0 2px 2px 0',
+                }}/>
+              )}
+
+              {!isActive && index < activeTab && (
+                <div style={{
+                  position: 'absolute',
+                  bottom: 4,
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  width: 3,
+                  height: 3,
+                  borderRadius: '50%',
+                  background: 'rgba(255,255,255,0.15)',
+                }}/>
+              )}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Simulation panel */}
+      <div style={{
+        flex: 1,
+        position: 'relative',
+        overflow: 'hidden',
+        borderRadius: 22,
+        border: '1px solid rgba(255,255,255,0.06)',
+        background: 'rgba(255,255,255,0.025)',
+        padding: 8,
+        minHeight: 0,
+      }}>
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeTab}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.25, ease: [0.25, 0.46, 0.45, 0.94] }}
+            style={{ height: '100%' }}
+          >
+            {activeTab === 0 ? (
+              <SimChat isActive={isInView} progress={progress} color={activeSimulation.color}/>
+            ) : activeTab === 1 ? (
+              <SimLeadsIA isActive={isInView} progress={progress} color={activeSimulation.color}/>
+            ) : activeTab === 2 ? (
+              <SimAgenda isActive={isInView} progress={progress} color={activeSimulation.color}/>
+            ) : (
+              <SimMetricas isActive={isInView} progress={progress} color={activeSimulation.color}/>
+            )}
+          </motion.div>
         </AnimatePresence>
       </div>
     </div>
   );
 }
 
+
 function useMagneticOffset() {
   const targetX = useMotionValue(0);
   const targetY = useMotionValue(0);
-  const x = useSpring(targetX, { stiffness: 150, damping: 10, mass: 0.55 });
-  const y = useSpring(targetY, { stiffness: 150, damping: 10, mass: 0.55 });
+
+  const springConfig = { stiffness: 190, damping: 20, mass: 0.35 };
+  const x = useSpring(targetX, springConfig);
+  const y = useSpring(targetY, springConfig);
 
   return { targetX, targetY, x, y };
 }
+
+type MagneticFlowPathProps = {
+  fromX: MotionValue<number>;
+  fromY: MotionValue<number>;
+  toX: MotionValue<number>;
+  toY: MotionValue<number>;
+  burstWidth: MotionValue<number>;
+  burstOpacity: MotionValue<number>;
+  burstFilter: MotionValue<string>;
+  color: string;
+  connectionIndex: number;
+};
 
 function MagneticFlowPath({
   fromX,
@@ -2496,53 +2407,47 @@ function MagneticFlowPath({
   burstFilter,
   color,
   connectionIndex,
-}: {
-  fromX: MotionValue<number>;
-  fromY: MotionValue<number>;
-  toX: MotionValue<number>;
-  toY: MotionValue<number>;
-  burstWidth: MotionValue<number>;
-  burstOpacity: MotionValue<number>;
-  burstFilter: MotionValue<string>;
-  color: string;
-  connectionIndex: number;
-}) {
-  const controlX1 = useTransform(() => fromX.get() + (toX.get() - fromX.get()) * 0.36);
-  const controlX2 = useTransform(() => toX.get() - (toX.get() - fromX.get()) * 0.36);
-  const pathD = useMotionTemplate`M ${fromX} ${fromY} C ${controlX1} ${fromY}, ${controlX2} ${toY}, ${toX} ${toY}`;
+}: MagneticFlowPathProps) {
+  const controlOffset = useTransform(() => (toX.get() - fromX.get()) * 0.28);
+  const controlStartX = useTransform(() => fromX.get() + controlOffset.get());
+  const controlEndX = useTransform(() => toX.get() - controlOffset.get());
+  const pulseX = useTransform(() => fromX.get() + (toX.get() - fromX.get()) * 0.5);
+  const pulseY = useTransform(() => fromY.get() + (toY.get() - fromY.get()) * 0.5);
+  const path = useMotionTemplate`M ${fromX} ${fromY} C ${controlStartX} ${fromY} ${controlEndX} ${toY} ${toX} ${toY}`;
 
   return (
     <>
-      <motion.path d={pathD} fill="none" stroke="rgba(255,255,255,0.14)" strokeWidth={1.2} strokeLinecap="round" />
       <motion.path
-        d={pathD}
-        fill="none"
-        stroke={`${color}60`}
-        strokeWidth={1}
-        strokeDasharray="4 8"
-        strokeLinecap="round"
-        animate={{ strokeDashoffset: [0, -24] }}
-        transition={{
-          duration: 0.8,
-          repeat: Infinity,
-          delay: connectionIndex * 0.12,
-          ease: 'linear',
-        }}
-      />
-      <motion.path
-        d={pathD}
+        d={path}
         fill="none"
         stroke={color}
+        strokeWidth={1.2}
+        strokeOpacity={0.18}
+      />
+      <motion.path
+        d={path}
+        fill="none"
+        stroke={color}
+        strokeWidth={burstWidth}
         strokeLinecap="round"
+        strokeOpacity={burstOpacity}
+        style={{ filter: burstFilter }}
+      />
+      <motion.circle
+        r={2.5}
+        fill={color}
+        animate={{ opacity: [0.12, 0.95, 0.12] }}
+        transition={{ duration: 2.2, repeat: Infinity, ease: 'easeInOut', delay: connectionIndex * 0.18 }}
         style={{
-          strokeWidth: burstWidth,
-          opacity: burstOpacity,
+          cx: pulseX,
+          cy: pulseY,
           filter: burstFilter,
         }}
       />
     </>
   );
 }
+
 
 function AutomationScene({ service }: { service: Service }) {
   const containerRef = useRef<HTMLDivElement | null>(null);
