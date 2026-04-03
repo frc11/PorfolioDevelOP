@@ -11,19 +11,29 @@ import {
   useReducedMotion,
 } from 'framer-motion';
 import {
+  AlertTriangle,
   BarChart3,
   Bot,
+  CheckCircle2,
   Clock3,
   Cpu,
-  Database,
   Layers3,
   LayoutDashboard,
+  Lock,
+  LockOpen,
   MessageCircle,
+  Server,
   Settings2,
-  Shield,
   Sparkles,
   TrendingUp,
   Zap,
+  FileStack,
+  Users,
+  Stamp,
+  Mail,
+  Rocket,
+  Code2,
+  XCircle,
   type LucideIcon,
 } from 'lucide-react';
 import { useThemeSection } from '@/hooks/useThemeObserver';
@@ -98,6 +108,8 @@ const SECONDARY_CARD_VARIANTS = {
     transition: { duration: 0.24, ease: EASE_OUT },
   },
 } as const;
+const GLASS_CARD_CLASS =
+  'rounded-3xl border border-white/[0.05] bg-[#ffffff]/[0.02] shadow-[0_8px_32px_0_rgba(0,0,0,0.3)] backdrop-blur-2xl';
 
 function useIsMobileViewport() {
   const [isMobile, setIsMobile] = useState(false);
@@ -131,7 +143,7 @@ const TABBED_DIMENSIONS: TabbedDimension[] = [
       title: 'Software de \u00e9lite. Sin la burocracia de las agencias.',
       supportTitle: 'Ejecuci\u00f3n sin fricci\u00f3n.',
       text:
-        'Eliminamos las reuniones in\u00fatiles y los presupuestos inflados. Construimos ecosistemas digitales de alto rendimiento directo al grano, para que empieces a vender en tiempo r\u00e9cord.',
+        'develOP opera como un equipo de ingenier\u00eda puro, eliminando burocracia para entregar software de \u00e9lite en tiempo r\u00e9cord.',
       accent: 'cyan',
       visual: 'timeline',
     },
@@ -309,125 +321,209 @@ function useCardSpotlight(enabled = true) {
   return { background, handleMouseMove, handleMouseLeave };
 }
 
-function AbstractTimeline() {
+function AgencyComparisonVisual() {
   const shouldReduceMotion = useReducedMotion();
   const isMobile = useIsMobileViewport();
   const shouldSimplify = shouldReduceMotion || isMobile;
 
-  const chaoticPath =
-    'M 10 58 L 62 18 L 44 18 L 98 64 L 132 64 L 132 40 L 164 40 L 148 72 L 212 72 L 248 72 L 234 46 L 286 46 L 314 14 L 296 30 L 344 30 L 328 58 L 376 58 L 412 24';
-  const directPath = 'M 10 12 L 412 12';
+  const containerRef = useRef<HTMLDivElement>(null);
+  const isInView = useInView(containerRef, { once: true, margin: '-10%' });
+
+  const count76Ref = useRef<HTMLSpanElement>(null);
+  const count15Ref = useRef<HTMLSpanElement>(null);
+
+  useEffect(() => {
+    if (shouldSimplify || !isInView) return;
+
+    const c76 = animate(0, 76, {
+      duration: 10,
+      ease: 'linear',
+      onUpdate: (val) => {
+        if (count76Ref.current) count76Ref.current.textContent = Math.round(val).toString();
+      }
+    });
+
+    const c15 = animate(0, 15, {
+      duration: 2,
+      ease: 'linear',
+      onUpdate: (val) => {
+        if (count15Ref.current) count15Ref.current.textContent = Math.round(val).toString();
+      }
+    });
+
+    return () => {
+      c76.stop();
+      c15.stop();
+    };
+  }, [shouldSimplify, isInView]);
+
+  const frictionIcons = [
+    { Icon: Mail, delay: 2.0, left: '20%', text: 'Ida y Vuelta' },
+    { Icon: Users, delay: 4.0, left: '40%', text: 'Reuniones' },
+    { Icon: FileStack, delay: 6.0, left: '60%', text: 'Cambios' },
+    { Icon: Stamp, delay: 8.0, left: '80%', text: 'Aprobación' },
+  ];
+
+  const velocityIcons = [
+    { Icon: Code2, delay: 0.6, left: '33%', text: 'Prototipo' },
+    { Icon: Rocket, delay: 1.2, left: '66%', text: 'Deploy' },
+    { Icon: Zap, delay: 1.8, left: '90%', text: 'Go Live' },
+  ];
 
   return (
-    <div className="flex min-h-[200px] items-center justify-center md:min-h-[240px]">
-      <div className="relative w-full overflow-hidden rounded-2xl border border-white/5 bg-white/[0.01] p-5 md:p-8">
-        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:24px_24px]" />
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(34,211,238,0.08),transparent_45%)]" />
-        <div className="relative flex flex-col gap-8 md:gap-10">
-          <div>
-            <div className="text-[10px] tracking-[0.28em] text-white/40">
-              AGENCIAS TRADICIONALES // MESES DE BUROCRACIA
+    <div ref={containerRef} className="mt-4 w-full rounded-3xl border border-white/[0.04] bg-[#0a0a0c]/80 p-2 backdrop-blur-2xl relative overflow-hidden">
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.015)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.015)_1px,transparent_1px)] bg-[size:16px_16px] opacity-60 [mask-image:radial-gradient(ellipse_at_center,black_50%,transparent_100%)]" />
+      
+      <div className="relative z-10 flex w-full flex-col gap-6 rounded-[24px] border border-white/[0.04] bg-white/[0.02] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] md:p-5">
+        
+        <div className="relative overflow-hidden rounded-[24px] border border-red-900/30 bg-[radial-gradient(ellipse_at_top_left,rgba(153,27,27,0.15),transparent_70%),linear-gradient(180deg,rgba(10,10,12,0.2),rgba(10,10,12,0.6))] p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.03),0_0_20px_rgba(220,38,38,0.04)] md:p-6 lg:p-7">
+          <div className="mb-6 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-end">
+            <div className="flex flex-col gap-1.5">
+              <span className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-red-500/80">
+                <AlertTriangle className="h-4 w-4 text-red-500 drop-shadow-[0_0_8px_rgba(239,68,68,0.4)]" />
+                AGENCIAS TRADICIONALES
+              </span>
+              <span className="pl-6 text-xs font-semibold tracking-wider text-red-400/50 md:text-sm">
+                MESES DE BUROCRACIA
+              </span>
             </div>
-            <svg viewBox="0 0 420 84" className="mt-4 h-16 w-full md:h-20" preserveAspectRatio="none" aria-hidden="true">
-              <path
-                d={chaoticPath}
-                fill="none"
-                className="stroke-red-500/30"
-                strokeWidth="2"
-                strokeLinecap="square"
-                strokeLinejoin="miter"
-              />
-              <motion.path
-                d={chaoticPath}
-                fill="none"
-                className="stroke-red-500"
-                strokeWidth="2"
-                strokeLinecap="square"
-                strokeLinejoin="miter"
-                strokeDasharray="72 560"
-                animate={shouldReduceMotion ? { strokeDashoffset: 0 } : { strokeDashoffset: [560, 0] }}
-                transition={{ duration: shouldReduceMotion ? 0.01 : 10, ease: 'linear', repeat: Infinity }}
-              />
-            </svg>
+            <div className="flex items-baseline gap-1.5 whitespace-nowrap pl-6 sm:pl-0">
+              <span ref={count76Ref} className="font-mono text-[2.75rem] font-black leading-none tracking-tighter text-red-500 drop-shadow-[0_0_15px_rgba(239,68,68,0.5)] md:text-[3.25rem]">
+                {shouldSimplify ? '76' : '0'}
+              </span>
+              <span className="text-sm font-bold tracking-widest text-red-500/50">DÍAS</span>
+            </div>
           </div>
 
-          <div className="pt-8 md:pt-[40px]">
-            <div className="text-[10px] tracking-[0.28em] text-cyan-400">
-              develOP // DIRECTO AL OBJETIVO
-            </div>
-            <svg viewBox="0 0 420 24" className="mt-4 h-8 w-full md:h-10" preserveAspectRatio="none" aria-hidden="true">
-              <defs>
-                <linearGradient id="comet-tail-mask" x1="0" y1="0" x2="1" y2="0">
-                  <stop offset="0%" stopColor="white" stopOpacity="0" />
-                  <stop offset="72%" stopColor="white" stopOpacity="0.5" />
-                  <stop offset="100%" stopColor="white" stopOpacity="1" />
-                </linearGradient>
-                <filter id="comet-glow">
-                  <feGaussianBlur stdDeviation="5" result="blur" />
-                  <feMerge>
-                    <feMergeNode in="blur" />
-                    <feMergeNode in="SourceGraphic" />
-                  </feMerge>
-                </filter>
-                <mask id="comet-mask">
-                  <rect width="420" height="24" fill="black" />
-                  <motion.rect
-                    y="0"
-                    width={shouldSimplify ? 402 : 120}
-                    height="24"
-                    fill="url(#comet-tail-mask)"
-                    initial={{ x: shouldSimplify ? 10 : -110 }}
-                    animate={{ x: shouldSimplify ? 10 : [-110, 292] }}
-                    transition={{
-                      duration: shouldSimplify ? 0.01 : 1.5,
-                      ease: shouldSimplify ? 'linear' : 'easeOut',
-                      repeat: Infinity,
-                      repeatDelay: shouldSimplify ? 0 : 0.22,
-                    }}
-                  />
-                </mask>
-              </defs>
+          <div className="relative z-10 h-2 w-full overflow-hidden rounded-full border border-red-900/50 bg-red-950/30">
+            <motion.div
+              className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-transparent via-red-500 to-red-400 shadow-[0_0_15px_#ef4444,0_0_20px_#dc2626]"
+              initial={{ width: shouldSimplify ? '100%' : '0%' }}
+              whileInView={{ width: '100%' }}
+              viewport={{ once: true }}
+              transition={{ duration: shouldSimplify ? 0.01 : 10, ease: 'linear' }}
+            />
+          </div>
 
-              <path
-                d={directPath}
-                fill="none"
-                stroke="rgba(8,145,178,0.4)"
-                strokeWidth="3"
-                strokeLinecap="round"
-              />
-
-              <path
-                d={directPath}
-                fill="none"
-                stroke="#22d3ee"
-                strokeWidth="3"
-                strokeLinecap="round"
-                mask="url(#comet-mask)"
-                filter="url(#comet-glow)"
-              />
-
-              <motion.circle
-                cy="12"
-                fill="#22d3ee"
-                r={shouldSimplify ? 3 : 5}
-                filter="url(#comet-glow)"
-                style={{ filter: 'drop-shadow(0 0 20px #22d3ee)' }}
-                initial={{ cx: shouldSimplify ? 412 : 10, opacity: 1 }}
-                animate={
-                  shouldSimplify
-                    ? { cx: 412, opacity: 1 }
-                    : { cx: [10, 412], opacity: [0.82, 1] }
-                }
+          <div className="relative mt-2 h-10 w-full px-1">
+            {frictionIcons.map((item, i) => (
+              <motion.div
+                key={i}
+                className="absolute flex flex-col items-center gap-1.5"
+                style={{ left: item.left }}
+                initial={{ opacity: 0, y: 15 }}
+                whileInView={{ opacity: [0, 1, 0], y: [15, 0, -10] }}
+                viewport={{ once: true }}
                 transition={{
-                  duration: shouldSimplify ? 0.01 : 1.5,
-                  ease: shouldSimplify ? 'linear' : 'easeOut',
-                  repeat: Infinity,
-                  repeatDelay: shouldSimplify ? 0 : 0.22,
+                  duration: 2.5,
+                  delay: shouldSimplify ? 0 : item.delay,
+                  times: [0, 0.2, 1],
+                  ease: 'easeOut',
                 }}
-              />
-            </svg>
+              >
+                <div className="whitespace-nowrap rounded-md border border-red-500/30 bg-red-950/80 px-2 py-1 text-[8px] font-bold uppercase tracking-[0.1em] text-red-300 backdrop-blur-md">
+                  {item.text}
+                </div>
+                <item.Icon className="h-4 w-4 text-red-500 drop-shadow-[0_0_8px_rgba(239,68,68,0.6)]" />
+              </motion.div>
+            ))}
+          </div>
+
+          <div className="relative mt-2 flex flex-wrap gap-2.5">
+            {[
+              'Procesos R\u00edgidos',
+              'Alta Dependencia',
+              'Costos Ocultos',
+            ].map((label, i) => (
+              <motion.div
+                key={label}
+                initial={{ opacity: 0, scale: 0.95 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4, delay: shouldSimplify ? 0 : 0.5 + i * 0.4, ease: 'easeOut' }}
+                className="flex items-center gap-2 rounded-full border border-red-500/20 bg-red-950/40 px-3 py-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.02),0_0_12px_rgba(239,68,68,0.1)] hover:border-red-500/40 transition-colors"
+               >
+                <XCircle className="h-3.5 w-3.5 text-red-500 drop-shadow-[0_0_6px_rgba(239,68,68,0.7)]" />
+                <span className="text-[9px] font-bold uppercase tracking-widest text-red-300">{label}</span>
+              </motion.div>
+            ))}
           </div>
         </div>
+
+        <div className="relative overflow-hidden rounded-[24px] border border-cyan-700/30 bg-[radial-gradient(ellipse_at_top_left,rgba(8,145,178,0.15),transparent_70%),linear-gradient(180deg,rgba(10,10,12,0.2),rgba(10,10,12,0.6))] p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_0_30px_rgba(34,211,238,0.08)] md:p-6 lg:p-7">
+          <div className="mb-6 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-end">
+            <div className="flex flex-col gap-1.5">
+              <span className="relative z-10 flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-cyan-400">
+                <Zap className="h-4 w-4 fill-cyan-400 drop-shadow-[0_0_10px_rgba(34,211,238,0.8)]" />
+                develOP
+              </span>
+              <span className="relative z-10 pl-6 text-xs font-semibold tracking-wider text-cyan-300/60 md:text-sm">
+                DIRECTO AL OBJETIVO
+              </span>
+            </div>
+            <div className="relative z-10 flex items-baseline gap-1.5 whitespace-nowrap pl-6 sm:pl-0">
+              <span ref={count15Ref} className="font-mono text-[2.75rem] font-black leading-none tracking-tighter text-cyan-300 drop-shadow-[0_0_20px_rgba(34,211,238,0.6)] md:text-[3.25rem]">
+                {shouldSimplify ? '15' : '0'}
+              </span>
+              <span className="text-sm font-bold tracking-widest text-cyan-400/60">DÍAS</span>
+            </div>
+          </div>
+
+          <div className="relative z-10 h-2 w-full overflow-hidden rounded-full border border-cyan-900/50 bg-cyan-950/30">
+            <motion.div
+              className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-transparent via-cyan-400 to-white shadow-[0_0_20px_#22d3ee,0_0_30px_#fff]"
+              initial={{ width: shouldSimplify ? '100%' : '0%' }}
+              whileInView={{ width: '100%' }}
+              viewport={{ once: true }}
+              transition={{ duration: shouldSimplify ? 0.01 : 2, ease: 'linear' }}
+            />
+          </div>
+
+          <div className="relative mt-2 h-10 w-full px-1">
+            {velocityIcons.map((item, i) => (
+              <motion.div
+                key={i}
+                className="absolute flex flex-col items-center gap-1.5"
+                style={{ left: item.left }}
+                initial={{ opacity: 0, y: 15, scale: 0.8 }}
+                whileInView={{ opacity: [0, 1, 0], y: [15, 0, -10], scale: [0.8, 1.1, 0.9] }}
+                viewport={{ once: true }}
+                transition={{
+                  duration: 2.2,
+                  delay: shouldSimplify ? 0 : item.delay,
+                  times: [0, 0.3, 1],
+                  ease: 'easeOut',
+                }}
+              >
+                <div className="whitespace-nowrap rounded-md border border-cyan-500/30 bg-cyan-950/80 px-2 py-1 text-[8px] font-bold uppercase tracking-[0.1em] text-cyan-200 drop-shadow-[0_0_8px_rgba(34,211,238,0.6)] backdrop-blur-md">
+                  {item.text}
+                </div>
+                <item.Icon className="h-4 w-4 text-cyan-300 drop-shadow-[0_0_10px_rgba(34,211,238,0.9)]" />
+              </motion.div>
+            ))}
+          </div>
+
+          <div className="relative z-10 mt-2 flex flex-wrap gap-2.5">
+            {[
+              'Iteraci\u00f3n R\u00e1pida',
+              'Sin intermediarios',
+              'Despliegue Continuo',
+            ].map((label, i) => (
+              <motion.div
+                key={label}
+                initial={{ opacity: 0, scale: 0.95 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4, delay: shouldSimplify ? 0 : 0.5 + i * 0.4, ease: 'easeOut' }}
+                className="flex items-center gap-2 rounded-full border border-cyan-500/30 bg-cyan-950/50 px-3 py-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_0_15px_rgba(34,211,238,0.15)] hover:border-cyan-400/50 transition-colors"
+              >
+                <CheckCircle2 className="h-3.5 w-3.5 text-cyan-400 drop-shadow-[0_0_8px_rgba(34,211,238,0.9)]" />
+                <span className="text-[9px] font-bold uppercase tracking-widest text-cyan-100">{label}</span>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+
       </div>
     </div>
   );
@@ -436,9 +532,9 @@ function AbstractTimeline() {
 function TabbedCardIcon({ visual }: { visual: TabVisualKey }) {
   const iconMap: Record<TabVisualKey, LucideIcon> = {
     progress: Zap,
-    lock: Shield,
+    lock: LockOpen,
     status: MessageCircle,
-    ownership: Database,
+    ownership: Server,
     roi: TrendingUp,
     clock: Clock3,
     layers: Layers3,
@@ -451,8 +547,8 @@ function TabbedCardIcon({ visual }: { visual: TabVisualKey }) {
   const Icon = iconMap[visual];
 
   return (
-    <div className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-lg border border-white/[0.05] bg-white/[0.03] text-white/70 transition-all duration-300 group-hover:border-cyan-500/30 group-hover:bg-cyan-500/10 group-hover:text-cyan-400 group-hover:shadow-[0_0_24px_rgba(34,211,238,0.18)]">
-      <Icon className="h-5 w-5 text-current" />
+    <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl border border-white/[0.08] bg-gradient-to-b from-white/[0.05] to-transparent text-white/60 shadow-inner transition-all duration-500 group-hover:-translate-y-1.5 group-hover:border-cyan-500/40 group-hover:bg-cyan-500/20 group-hover:text-cyan-400 group-hover:shadow-[0_0_30px_rgba(34,211,238,0.25)]">
+      <Icon className="h-6 w-6 text-current drop-shadow-sm" />
     </div>
   );
 }
@@ -462,29 +558,42 @@ function ProgressVisual({ accent, animationKey }: { accent: AccentKey; animation
   const tone = ACCENT_STYLES[accent];
 
   return (
-    <div className="space-y-3">
-      <div className="flex items-center justify-between text-[10px] uppercase tracking-[0.28em] text-zinc-500">
-        <span>Entrega</span>
-        <span className={tone.textClass}>100%</span>
+    <div className="-mx-5 -mt-5 mb-6 sm:-mx-6 sm:-mt-6 relative flex w-[calc(100%+40px)] sm:w-[calc(100%+48px)] h-[150px] flex-col justify-end overflow-hidden rounded-t-[24px] border-b border-cyan-500/10 bg-[radial-gradient(ellipse_at_top,rgba(8,145,178,0.15),transparent_70%)] px-6 pb-6">
+      <div className="flex items-end justify-between gap-3 relative z-10 w-full">
+        <div className="space-y-1">
+          <div className="text-[10px] font-bold uppercase tracking-[0.28em] text-cyan-400/80 drop-shadow-[0_0_5px_rgba(34,211,238,0.3)]">Entrega real</div>
+          <motion.div
+            key={`progress-value-${animationKey}`}
+            initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: shouldReduceMotion ? 0.01 : 0.45, ease: 'easeOut' }}
+            className="text-[3rem] font-black leading-none tracking-tighter text-cyan-300 drop-shadow-[0_0_20px_rgba(34,211,238,0.8)]"
+          >
+            100%
+          </motion.div>
+        </div>
+        <div className="rounded-full border border-cyan-400/30 bg-cyan-950/80 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.22em] text-cyan-200 shadow-[0_0_15px_rgba(34,211,238,0.4)] backdrop-blur-md">
+          live
+        </div>
       </div>
-      <div className="relative h-1.5 overflow-hidden rounded-full bg-white/8">
+      <div className="relative mt-4 h-2.5 w-full overflow-hidden rounded-full border border-cyan-700/50 bg-cyan-950/40 shadow-[inset_0_1px_3px_rgba(0,0,0,0.5)] z-10">
         <motion.div
           key={`progress-fill-${animationKey}`}
-          className="absolute inset-y-0 left-0 rounded-full"
+          className="absolute inset-y-0 left-0 rounded-full shadow-[0_0_15px_#22d3ee,0_0_30px_#fff]"
           style={{
-            background: `linear-gradient(90deg, ${tone.soft} 0%, ${tone.strong} 65%, rgba(255,255,255,0.95) 100%)`,
+            background: `linear-gradient(90deg, transparent 0%, ${tone.strong} 65%, #fff 100%)`,
           }}
           initial={{ width: '0%' }}
           animate={{ width: '100%' }}
-          transition={{ duration: shouldReduceMotion ? 0.01 : 1, ease: 'easeOut' }}
+          transition={{ duration: shouldReduceMotion ? 0.01 : 0.9, ease: 'easeOut' }}
         />
         {!shouldReduceMotion && (
           <motion.div
             key={`progress-glint-${animationKey}`}
-            className="absolute inset-y-0 w-14 rounded-full bg-gradient-to-r from-transparent via-white/60 to-transparent blur-[1px]"
-            initial={{ x: -56 }}
-            animate={{ x: 250 }}
-            transition={{ duration: 1, ease: 'easeOut', delay: 0.08 }}
+            className="absolute inset-y-0 w-20 rounded-full bg-gradient-to-r from-transparent via-white/80 to-transparent blur-[1px]"
+            initial={{ x: -80 }}
+            animate={{ x: 400 }}
+            transition={{ duration: 1.2, ease: 'easeOut', delay: 0.1 }}
           />
         )}
       </div>
@@ -493,67 +602,44 @@ function ProgressVisual({ accent, animationKey }: { accent: AccentKey; animation
 }
 
 function LockVisual({ accent }: { accent: AccentKey }) {
-  const shouldReduceMotion = useReducedMotion();
   const tone = ACCENT_STYLES[accent];
 
   return (
-    <div className="inline-flex rounded-[22px] border border-white/10 bg-black/20 p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
-      <svg viewBox="0 0 92 72" className="h-14 w-20" aria-hidden="true">
-        <motion.g
-          animate={shouldReduceMotion ? { rotate: 0, x: 0, y: 0 } : { rotate: -18, x: -4, y: -2 }}
-          transition={{ duration: 1.15, repeat: Infinity, repeatType: 'mirror', ease: 'easeInOut' }}
-          style={{ transformBox: 'fill-box', transformOrigin: '78% 62%' }}
-        >
-          <path
-            d="M34 30 V21 C34 13.3 39.8 8 46 8 C52.2 8 58 13.3 58 21 V30"
-            fill="none"
-            stroke={tone.strong}
-            strokeWidth="4"
-            strokeLinecap="round"
-          />
-        </motion.g>
-        <rect
-          x="24"
-          y="28"
-          width="44"
-          height="30"
-          rx="12"
-          fill="rgba(255,255,255,0.05)"
-          stroke={tone.border}
+    <div className="-mx-5 -mt-5 mb-6 sm:-mx-6 sm:-mt-6 relative flex w-[calc(100%+40px)] sm:w-[calc(100%+48px)] h-[150px] items-center justify-center overflow-hidden rounded-t-[24px] border-b border-white/5 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.03),transparent_70%)]">
+      <div className="relative flex h-24 w-24 items-center justify-center rounded-3xl border border-white/10 bg-gradient-to-b from-white/10 to-transparent shadow-[inset_0_1px_2px_rgba(255,255,255,0.1),0_0_30px_rgba(255,255,255,0.02)] transition-all duration-500 group-hover:border-emerald-500/30 group-hover:shadow-[0_0_40px_rgba(16,185,129,0.15)] group-hover:from-emerald-500/10">
+        <Lock className="absolute h-10 w-10 text-white/40 transition-all duration-500 group-hover:-rotate-12 group-hover:scale-75 group-hover:opacity-0" />
+        <LockOpen
+          className="absolute h-10 w-10 scale-75 text-emerald-400 opacity-0 transition-all duration-500 group-hover:scale-100 group-hover:opacity-100"
+          style={{ filter: `drop-shadow(0 0 20px rgba(52,211,153,0.9))` }}
         />
-        <circle cx="46" cy="43" r="4" fill={tone.strong} />
-        <path d="M46 43 V49" stroke={tone.strong} strokeWidth="3" strokeLinecap="round" />
-      </svg>
+        <div className="absolute inset-0 rounded-3xl bg-emerald-500/20 opacity-0 blur-2xl transition-opacity duration-500 group-hover:opacity-100" />
+      </div>
     </div>
   );
 }
 
 function StatusVisual({ accent, animationKey }: { accent: AccentKey; animationKey: number }) {
   const shouldReduceMotion = useReducedMotion();
-  const tone = ACCENT_STYLES[accent];
 
   return (
-    <div className="flex items-center gap-3">
-      <span className="relative flex h-5 w-5 items-center justify-center">
-        <span className="absolute h-5 w-5 rounded-full animate-ping" style={{ backgroundColor: tone.soft }} />
-        <span
-          className="absolute h-5 w-5 rounded-full border"
-          style={{ borderColor: tone.border, backgroundColor: 'rgba(9,12,16,0.72)' }}
-        />
-        <span
-          className="relative h-2.5 w-2.5 rounded-full animate-pulse"
-          style={{ backgroundColor: tone.strong, boxShadow: `0 0 18px ${tone.glow}` }}
-        />
-      </span>
-      <div className="h-px flex-1 overflow-hidden bg-white/10">
-        <motion.div
-          key={`status-line-${animationKey}`}
-          className="h-full bg-gradient-to-r to-transparent"
-          style={{ backgroundImage: `linear-gradient(90deg, ${tone.strong} 0%, transparent 100%)` }}
-          initial={{ width: '0%' }}
-          animate={{ width: '100%' }}
-          transition={{ duration: shouldReduceMotion ? 0.01 : 1, ease: 'easeOut', delay: 0.08 }}
-        />
+    <div className="-mx-5 -mt-5 mb-6 sm:-mx-6 sm:-mt-6 relative flex w-[calc(100%+40px)] sm:w-[calc(100%+48px)] h-[150px] flex-col justify-center overflow-hidden rounded-t-[24px] border-b border-emerald-900/10 bg-[radial-gradient(ellipse_at_left,rgba(16,185,129,0.1),transparent_70%)] px-8">
+      <div className="text-[10px] font-bold uppercase tracking-[0.28em] text-emerald-400/80 drop-shadow-[0_0_5px_rgba(52,211,153,0.3)] mb-4">Soporte directo</div>
+      <div className="flex items-center gap-6">
+        <span className="relative flex h-8 w-8 items-center justify-center">
+          <span className="absolute h-10 w-10 rounded-full animate-ping bg-emerald-500/50" />
+          <span className="absolute h-8 w-8 rounded-full border border-emerald-700/80 bg-[#090c10]" />
+          <span className="relative h-4 w-4 rounded-full animate-pulse bg-emerald-400 shadow-[0_0_20px_#34d399]" />
+        </span>
+        <div className="h-0.5 flex-1 overflow-hidden bg-emerald-950/40 rounded-full">
+          <motion.div
+            key={`status-line-${animationKey}`}
+            className="h-full bg-gradient-to-r to-transparent shadow-[0_0_8px_#34d399]"
+            style={{ backgroundImage: `linear-gradient(90deg, #34d399 0%, transparent 100%)` }}
+            initial={{ width: '0%' }}
+            animate={{ width: '100%' }}
+            transition={{ duration: shouldReduceMotion ? 0.01 : 1.2, ease: 'easeOut', delay: 0.1 }}
+          />
+        </div>
       </div>
     </div>
   );
@@ -564,42 +650,28 @@ function OwnershipVisual({ accent }: { accent: AccentKey }) {
   const tone = ACCENT_STYLES[accent];
 
   return (
-    <div className="inline-flex rounded-[22px] border border-white/10 bg-black/20 p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
-      <svg viewBox="0 0 96 72" className="h-14 w-20" aria-hidden="true">
-        <rect
-          x="28"
-          y="16"
-          width="40"
-          height="40"
-          rx="12"
-          fill="rgba(255,255,255,0.04)"
-          stroke={tone.border}
-        />
-        <rect x="35" y="25" width="26" height="5" rx="2.5" fill={tone.strong} opacity="0.9" />
-        <rect x="35" y="37" width="26" height="5" rx="2.5" fill={tone.strong} opacity="0.65" />
-        <rect x="35" y="49" width="18" height="3" rx="1.5" fill={tone.strong} opacity="0.45" />
-
-        <motion.path
-          d="M18 28 L12 36 L18 44"
-          fill="none"
-          stroke={tone.strong}
-          strokeWidth="3"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          animate={shouldReduceMotion ? { opacity: 0.8 } : { opacity: [0.5, 1, 0.5], x: [0, -1, 0] }}
-          transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}
-        />
-        <motion.path
-          d="M78 28 L84 36 L78 44"
-          fill="none"
-          stroke={tone.strong}
-          strokeWidth="3"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          animate={shouldReduceMotion ? { opacity: 0.8 } : { opacity: [0.5, 1, 0.5], x: [0, 1, 0] }}
-          transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut', delay: 0.1 }}
-        />
-      </svg>
+    <div className="-mx-5 -mt-5 mb-6 sm:-mx-6 sm:-mt-6 relative flex w-[calc(100%+40px)] sm:w-[calc(100%+48px)] h-[150px] items-center justify-center overflow-hidden rounded-t-[24px] border-b border-cyan-500/10 bg-[radial-gradient(ellipse_at_top,rgba(8,145,178,0.15),transparent_70%)]">
+      <motion.div
+        className="relative flex h-20 w-48 items-center gap-5 rounded-2xl border border-cyan-500/40 bg-cyan-950/50 px-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.1),0_10px_30px_rgba(0,0,0,0.5)] backdrop-blur-md"
+        animate={shouldReduceMotion ? { y: 0 } : { y: [-4, 4, -4], boxShadow: [`0 10px 30px rgba(0,0,0,0.5), 0 0 0px ${tone.glow}`, `0 10px 30px rgba(0,0,0,0.5), 0 0 25px ${tone.glow}`, `0 10px 30px rgba(0,0,0,0.5), 0 0 0px ${tone.glow}`] }}
+        transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+      >
+        <Server className="h-8 w-8 text-cyan-300 drop-shadow-[0_0_12px_rgba(34,211,238,0.8)]" />
+        <div className="flex w-full flex-col gap-2">
+          <div className="text-[10px] font-bold uppercase tracking-[0.25em] text-cyan-200">Infraestructura</div>
+          <div className="grid gap-2">
+            {[0.9, 0.6].map((opacity, index) => (
+              <motion.div
+                key={index}
+                className="h-1.5 w-full rounded-full"
+                style={{ backgroundColor: tone.strong, opacity }}
+                animate={shouldReduceMotion ? { opacity } : { opacity: [opacity * 0.4, opacity, opacity * 0.4] }}
+                transition={{ duration: 2, repeat: Infinity, delay: index * 0.15 }}
+              />
+            ))}
+          </div>
+        </div>
+      </motion.div>
     </div>
   );
 }
@@ -657,8 +729,8 @@ function MainNodesVisual() {
 
   return (
     <div className="flex min-h-[220px] items-center justify-center md:min-h-[260px]">
-      <div className="relative flex w-full items-center justify-center overflow-hidden rounded-2xl bg-[radial-gradient(circle_at_center,rgba(6,182,212,0.1)_0%,transparent_70%)] py-6 md:py-8">
-        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:24px_24px]" />
+      <div className="relative flex w-full items-center justify-center overflow-hidden rounded-[24px] border border-cyan-800/30 bg-[radial-gradient(ellipse_at_center,rgba(8,145,178,0.2),transparent_70%),linear-gradient(180deg,rgba(10,10,12,0.1),rgba(10,10,12,0.7))] py-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_0_30px_rgba(34,211,238,0.05)] md:py-8 lg:min-h-[300px]">
+        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(34,211,238,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(34,211,238,0.03)_1px,transparent_1px)] bg-[size:32px_32px]" />
         <svg
           viewBox="0 0 420 280"
           className="pointer-events-none absolute inset-0 h-full w-full"
@@ -670,25 +742,25 @@ function MainNodesVisual() {
               <path
                 d={satellite.path}
                 fill="none"
-                stroke="rgba(255,255,255,0.10)"
-                strokeWidth="1"
+                stroke="rgba(34,211,238,0.15)"
+                strokeWidth="1.5"
                 strokeLinecap="round"
               />
               <motion.path
                 d={satellite.path}
                 fill="none"
-                stroke="rgba(34,211,238,0.92)"
-                strokeWidth="2"
+                stroke="#22d3ee"
+                strokeWidth="3"
                 strokeLinecap="round"
-                strokeDasharray="12 26"
-                animate={shouldSimplify ? { strokeDashoffset: 0 } : { strokeDashoffset: [44, 0] }}
+                strokeDasharray="4 20"
+                animate={shouldSimplify ? { strokeDashoffset: 0 } : { strokeDashoffset: [24, 0] }}
                 transition={{
-                  duration: shouldSimplify ? 0.01 : 1.8,
+                  duration: shouldSimplify ? 0.01 : 1.2,
                   repeat: Infinity,
                   ease: 'linear',
                   delay: shouldSimplify ? 0 : satellite.delay,
                 }}
-                style={{ filter: `drop-shadow(0 0 ${shouldSimplify ? 5 : 8}px rgba(34,211,238,0.34))` }}
+                style={{ filter: `drop-shadow(0 0 ${shouldSimplify ? 5 : 8}px #22d3ee)` }}
               />
             </g>
           ))}
@@ -697,7 +769,7 @@ function MainNodesVisual() {
         {satellites.map((satellite) => (
           <motion.div
             key={satellite.label}
-            className={`pointer-events-none absolute z-0 rounded-full border border-cyan-500/20 bg-white/[0.03] px-3 py-1.5 text-[9px] tracking-[0.14em] text-white/70 shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_0_18px_rgba(34,211,238,0.08)] backdrop-blur-md md:px-4 md:py-2 md:text-[10px] md:tracking-[0.16em] ${satellite.position}`}
+            className={`pointer-events-none absolute z-0 rounded-full border border-cyan-400/30 bg-cyan-950/60 px-3 py-1.5 text-[9px] font-bold tracking-[0.18em] text-cyan-200 shadow-[inset_0_1px_0_rgba(255,255,255,0.1),0_0_20px_rgba(34,211,238,0.2)] backdrop-blur-xl md:px-5 md:py-2.5 md:text-[10px] md:tracking-[0.2em] ${satellite.position}`}
             animate={shouldSimplify ? { y: 0 } : { y: [-5, 5, -5] }}
             transition={{
               duration: shouldSimplify ? 0.01 : 4.8,
@@ -711,24 +783,24 @@ function MainNodesVisual() {
         ))}
 
         <motion.div
-          className="relative z-10 flex h-28 w-28 flex-col items-center justify-center rounded-full border border-cyan-500/30 bg-[#030305]/80 backdrop-blur-md shadow-[0_0_28px_rgba(6,182,212,0.12)] md:h-32 md:w-32 md:backdrop-blur-xl md:shadow-[0_0_40px_rgba(6,182,212,0.15)]"
-          animate={shouldSimplify ? { scale: 1 } : { scale: [1, 1.05, 1] }}
-          transition={{ duration: shouldSimplify ? 0.01 : 2, repeat: Infinity, ease: 'easeInOut' }}
+          className="relative z-10 flex h-32 w-32 flex-col items-center justify-center rounded-full border border-cyan-400/40 bg-[#020617]/90 backdrop-blur-2xl shadow-[0_0_50px_rgba(34,211,238,0.2)] md:h-40 md:w-40 md:shadow-[0_0_80px_rgba(34,211,238,0.25)]"
+          animate={shouldSimplify ? { scale: 1 } : { scale: [1, 1.05, 1], boxShadow: ['0 0 30px rgba(34,211,238,0.1)', '0 0 60px rgba(34,211,238,0.3)', '0 0 30px rgba(34,211,238,0.1)'] }}
+          transition={{ duration: shouldSimplify ? 0.01 : 3, repeat: Infinity, ease: 'easeInOut' }}
         >
           <motion.div
-            className="pointer-events-none absolute -inset-1.5 rounded-full border border-cyan-500/20 md:-inset-2"
-            animate={shouldSimplify ? { scale: 1, opacity: 0.22 } : { scale: [1, 1.5], opacity: [0.5, 0] }}
+            className="pointer-events-none absolute -inset-2 rounded-full border border-cyan-400/30 md:-inset-3"
+            animate={shouldSimplify ? { scale: 1, opacity: 0.22 } : { scale: [1, 1.4], opacity: [0.6, 0] }}
             transition={{ duration: shouldSimplify ? 0.01 : 2.6, repeat: Infinity, ease: 'easeOut' }}
           />
           <motion.div
-            className="pointer-events-none absolute -inset-3.5 rounded-full border border-cyan-500/20 md:-inset-5"
-            animate={shouldSimplify ? { scale: 1, opacity: 0.14 } : { scale: [1, 1.5], opacity: [0.35, 0] }}
+            className="pointer-events-none absolute -inset-5 rounded-full border border-cyan-400/20 md:-inset-7"
+            animate={shouldSimplify ? { scale: 1, opacity: 0.14 } : { scale: [1, 1.6], opacity: [0.4, 0] }}
             transition={{ duration: shouldSimplify ? 0.01 : 2.6, repeat: Infinity, ease: 'easeOut', delay: shouldSimplify ? 0 : 1.15 }}
           />
-          <div ref={countRef} className="text-2xl font-bold tracking-tighter text-white md:text-3xl">
+          <div ref={countRef} className="font-mono text-4xl font-black tracking-tighter text-cyan-300 drop-shadow-[0_0_15px_rgba(34,211,238,0.6)] md:text-5xl">
             +0
           </div>
-          <div className="mt-1 text-[9px] tracking-[0.28em] text-cyan-400">LEADS GENERADOS</div>
+          <div className="mt-1 text-[9px] font-bold uppercase tracking-[0.28em] text-cyan-400/80 drop-shadow-[0_0_8px_rgba(34,211,238,0.4)]">LEADS GENERADOS</div>
         </motion.div>
       </div>
     </div>
@@ -816,29 +888,33 @@ function MainAIVisual() {
 
 function RoiVisual({ accent }: { accent: AccentKey }) {
   const shouldReduceMotion = useReducedMotion();
-  const tone = ACCENT_STYLES[accent];
 
   return (
-    <div className="inline-flex rounded-[22px] border border-white/10 bg-black/20 p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
-      <svg viewBox="0 0 112 68" className="h-14 w-24" aria-hidden="true">
-        <path d="M8 56 H104 M12 10 V56" stroke="rgba(255,255,255,0.12)" strokeWidth="2" strokeLinecap="round" />
+    <div className="-mx-5 -mt-5 mb-6 sm:-mx-6 sm:-mt-6 relative flex w-[calc(100%+40px)] sm:w-[calc(100%+48px)] h-[150px] items-end justify-center overflow-hidden rounded-t-[24px] border-b border-cyan-500/10 bg-[radial-gradient(ellipse_at_bottom,rgba(34,211,238,0.12),transparent_70%)]">
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(34,211,238,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(34,211,238,0.04)_1px,transparent_1px)] bg-[size:20px_20px] [mask-image:linear-gradient(to_bottom,transparent,black)]" />
+      <svg viewBox="0 0 300 100" className="h-[90%] w-full relative z-10" aria-hidden="true" preserveAspectRatio="none">
+        <path d="M0 80 H300" stroke="rgba(34,211,238,0.15)" strokeWidth="1" strokeDasharray="4 4" />
+        <path d="M0 50 H300" stroke="rgba(34,211,238,0.1)" strokeWidth="1" strokeDasharray="4 4" />
+        <path d="M0 20 H300" stroke="rgba(34,211,238,0.05)" strokeWidth="1" strokeDasharray="4 4" />
         <motion.path
-          d="M16 48 C 28 46, 36 34, 50 34 S 78 18, 98 12"
+          d="M0 80 C 80 75, 120 40, 200 35 S 250 15, 300 10"
           fill="none"
-          stroke={tone.strong}
+          stroke="#22d3ee"
           strokeWidth="3.5"
+          style={{ filter: 'drop-shadow(0 0 12px rgba(34,211,238,0.8))' }}
           strokeLinecap="round"
           initial={{ pathLength: 0 }}
           animate={{ pathLength: 1 }}
-          transition={{ duration: shouldReduceMotion ? 0.01 : 0.92, ease: EASE_OUT }}
+          transition={{ duration: shouldReduceMotion ? 0.01 : 1.5, ease: 'easeOut' }}
         />
         <motion.circle
-          cx="98"
-          cy="12"
-          r="4.5"
-          fill={tone.strong}
-          animate={shouldReduceMotion ? { opacity: 1 } : { scale: [1, 1.2, 1], opacity: [0.65, 1, 0.65] }}
-          transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}
+          cx="300"
+          cy="10"
+          r="6"
+          fill="#22d3ee"
+          style={{ filter: 'drop-shadow(0 0 15px rgba(34,211,238,1))' }}
+          animate={shouldReduceMotion ? { opacity: 1 } : { scale: [1, 1.4, 1], opacity: [0.7, 1, 0.7] }}
+          transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
         />
       </svg>
     </div>
@@ -847,93 +923,94 @@ function RoiVisual({ accent }: { accent: AccentKey }) {
 
 function ClockVisual({ accent }: { accent: AccentKey }) {
   const shouldReduceMotion = useReducedMotion();
-  const tone = ACCENT_STYLES[accent];
 
   return (
-    <div className="inline-flex rounded-[22px] border border-white/10 bg-black/20 p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
-      <svg viewBox="0 0 84 84" className="h-14 w-14" aria-hidden="true">
-        <circle cx="42" cy="42" r="26" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.12)" />
-        <circle cx="42" cy="42" r="2.5" fill={tone.strong} />
-        <motion.g
-          animate={shouldReduceMotion ? { rotate: 0 } : { rotate: 360 }}
-          transition={{ duration: 4.5, repeat: Infinity, ease: 'linear' }}
-          style={{ transformOrigin: '42px 42px' }}
-        >
-          <path d="M42 42 L42 24" stroke={tone.strong} strokeWidth="3" strokeLinecap="round" />
-        </motion.g>
-        <motion.g
-          animate={shouldReduceMotion ? { rotate: 0 } : { rotate: 360 }}
-          transition={{ duration: 11, repeat: Infinity, ease: 'linear' }}
-          style={{ transformOrigin: '42px 42px' }}
-        >
-          <path d="M42 42 L56 42" stroke={tone.strong} strokeWidth="2.5" strokeLinecap="round" opacity="0.72" />
-        </motion.g>
-      </svg>
+    <div className="-mx-5 -mt-5 mb-6 sm:-mx-6 sm:-mt-6 relative flex w-[calc(100%+40px)] sm:w-[calc(100%+48px)] h-[150px] items-center justify-center overflow-hidden rounded-t-[24px] border-b border-cyan-500/10 bg-[radial-gradient(circle_at_center,rgba(8,145,178,0.15),transparent_60%)]">
+      {/* Sonar Radar Rings */}
+      <motion.div
+        className="absolute h-16 w-16 rounded-full border border-cyan-400"
+        style={{ filter: `drop-shadow(0 0 10px rgba(34,211,238,0.8))` }}
+        animate={shouldReduceMotion ? { opacity: 0.5 } : { scale: [1, 3.5], opacity: [0.8, 0] }}
+        transition={{ duration: 2.5, repeat: Infinity, ease: 'easeOut', delay: 0 }}
+      />
+      <motion.div
+        className="absolute h-16 w-16 rounded-full border border-cyan-400/80"
+        style={{ filter: `drop-shadow(0 0 10px rgba(34,211,238,0.5))` }}
+        animate={shouldReduceMotion ? { opacity: 0.5 } : { scale: [1, 3.5], opacity: [0.6, 0] }}
+        transition={{ duration: 2.5, repeat: Infinity, ease: 'easeOut', delay: 1.25 }}
+      />
+
+      <motion.div
+        className="absolute h-16 w-16 rounded-full border border-cyan-400/40 bg-cyan-950/60 backdrop-blur-md"
+        animate={{ scale: [1, 1.1, 1], boxShadow: [`0 0 15px rgba(34,211,238,0.2)`, `0 0 30px rgba(34,211,238,0.6)`, `0 0 15px rgba(34,211,238,0.2)`] }}
+        transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
+      />
+      <Clock3 className="relative z-10 h-8 w-8 text-cyan-200 drop-shadow-[0_0_12px_rgba(34,211,238,0.9)]" />
     </div>
   );
 }
 
 function LayersVisual({ accent }: { accent: AccentKey }) {
   const shouldReduceMotion = useReducedMotion();
-  const tone = ACCENT_STYLES[accent];
 
   return (
-    <div className="relative h-16 w-24 [perspective:600px]">
-      {[0, 1, 2].map((layer) => (
-        <motion.div
-          key={layer}
-          className="absolute left-1/2 h-10 w-16 -translate-x-1/2 rounded-xl border border-white/10 bg-white/[0.04]"
-          style={{ top: `${layer * 9}px`, transform: 'rotateX(70deg) skewX(-14deg)' }}
-          animate={shouldReduceMotion ? { opacity: 1, y: 0 } : { y: [0, -3, 0], opacity: [0.58, 1, 0.58] }}
-          transition={{ duration: 2.1, repeat: Infinity, ease: 'easeInOut', delay: layer * 0.12 }}
-        >
-          <div className="mx-auto mt-2 h-1.5 w-9 rounded-full" style={{ backgroundColor: tone.strong, opacity: 0.9 }} />
-        </motion.div>
-      ))}
+    <div className="-mx-5 -mt-5 mb-6 sm:-mx-6 sm:-mt-6 relative flex w-[calc(100%+40px)] sm:w-[calc(100%+48px)] h-[150px] items-center justify-center overflow-hidden rounded-t-[24px] border-b border-cyan-500/10 bg-[radial-gradient(ellipse_at_top,rgba(8,145,178,0.15),transparent_70%)] [perspective:800px]">
+      <div className="relative h-24 w-40 mt-4">
+        {[0, 1, 2].map((layer) => (
+          <motion.div
+            key={layer}
+            className="absolute left-1/2 h-16 w-32 -translate-x-1/2 rounded-2xl border border-cyan-400/30 bg-cyan-950/60 shadow-[inset_0_1px_0_rgba(255,255,255,0.1),0_5px_15px_rgba(0,0,0,0.5)] backdrop-blur-sm"
+            style={{ top: `${layer * 12}px`, transform: 'rotateX(65deg) skewX(-15deg)', zIndex: 3 - layer }}
+            animate={shouldReduceMotion ? { opacity: 1, y: 0 } : { y: [-3, 3, -3], opacity: [0.6, 1, 0.6], filter: [`drop-shadow(0 0 0px rgba(34,211,238,0))`, `drop-shadow(0 0 25px rgba(34,211,238,0.5))`, `drop-shadow(0 0 0px rgba(34,211,238,0))`] }}
+            transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut', delay: layer * 0.25 }}
+          >
+            <div className="mx-auto mt-4 h-1.5 w-14 rounded-full bg-cyan-400 shadow-[0_0_12px_rgba(34,211,238,0.9)]" />
+          </motion.div>
+        ))}
+      </div>
     </div>
   );
 }
 
 function DashboardVisual({ accent }: { accent: AccentKey }) {
   const shouldReduceMotion = useReducedMotion();
-  const tone = ACCENT_STYLES[accent];
 
   return (
-    <div className="grid w-24 gap-2">
-      <div className="grid grid-cols-[1.3fr_0.9fr] gap-2">
-        <div className="rounded-xl border border-white/10 bg-white/[0.04] p-2">
-          <div className="mb-2 h-1.5 w-10 rounded-full" style={{ backgroundColor: tone.strong, opacity: 0.9 }} />
-          <div className="flex items-end gap-1">
-            {[10, 16, 24].map((height, index) => (
-              <motion.div
-                key={height}
-                className="w-2 rounded-full"
-                style={{ backgroundColor: tone.strong }}
-                animate={shouldReduceMotion ? { height } : { height: [height - 4, height, height - 2] }}
-                transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut', delay: index * 0.12 }}
-              />
-            ))}
+    <div className="-mx-5 -mt-5 mb-6 sm:-mx-6 sm:-mt-6 relative flex w-[calc(100%+40px)] sm:w-[calc(100%+48px)] h-[150px] items-center justify-center overflow-hidden rounded-t-[24px] border-b border-cyan-500/10 bg-[radial-gradient(ellipse_at_left,rgba(8,145,178,0.15),transparent_70%)]">
+      <div className="grid w-full max-w-[200px] gap-3">
+        <div className="grid grid-cols-[1fr_0.6fr] gap-3">
+          <div className="rounded-xl border border-cyan-700/50 bg-cyan-950/50 p-3.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_0_15px_rgba(34,211,238,0.1)] backdrop-blur-md">
+            <div className="mb-4 h-2 w-16 rounded-full bg-cyan-400/80 shadow-[0_0_8px_rgba(34,211,238,0.5)]" />
+            <div className="flex items-end gap-2 h-10">
+              {[14, 26, 40, 20].map((height, index) => (
+                <div key={index} className="flex h-full items-end">
+                  <motion.div
+                    className="w-3 rounded-full bg-cyan-300 shadow-[0_0_10px_rgba(34,211,238,0.7)]"
+                    style={{ height }}
+                    animate={shouldReduceMotion ? { opacity: 1 } : { opacity: [0.5, 1, 0.5] }}
+                    transition={{ duration: 1.2, repeat: Infinity, ease: 'easeInOut', delay: Math.random() * 1.5 }}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-cyan-700/50 bg-cyan-950/50 p-3.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_0_15px_rgba(34,211,238,0.1)] backdrop-blur-md">
+            <motion.div
+              className="h-6 w-6 rounded-full bg-cyan-400 shadow-[0_0_25px_rgba(34,211,238,1)]"
+              animate={shouldReduceMotion ? { opacity: 1 } : { opacity: [0.3, 1, 0.3] }}
+              transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut', delay: 0.5 }}
+            />
+            <div className="h-1.5 w-8 rounded-full bg-cyan-800/80" />
           </div>
         </div>
-        <div className="rounded-xl border border-white/10 bg-white/[0.04] p-2">
-          <motion.div
-            className="h-2.5 w-2.5 rounded-full"
-            style={{ backgroundColor: tone.strong, boxShadow: `0 0 14px ${tone.glow}` }}
-            animate={shouldReduceMotion ? { opacity: 1 } : { opacity: [0.3, 1, 0.3], scale: [1, 1.18, 1] }}
-            transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
-          />
-        </div>
-      </div>
 
-      <div className="rounded-xl border border-white/10 bg-white/[0.04] px-2 py-1.5">
-        <div className="grid grid-cols-4 gap-1">
+        <div className="flex justify-between rounded-xl border border-cyan-700/50 bg-cyan-950/50 px-3.5 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_0_15px_rgba(34,211,238,0.1)] backdrop-blur-md">
           {Array.from({ length: 4 }).map((_, index) => (
             <motion.div
               key={index}
-              className="h-2 rounded-full"
-              style={{ backgroundColor: tone.strong }}
-              animate={shouldReduceMotion ? { opacity: 0.85 } : { opacity: [0.24, 1, 0.24] }}
-              transition={{ duration: 1.7, repeat: Infinity, ease: 'easeInOut', delay: index * 0.14 }}
+              className="h-3 w-8 rounded-full bg-cyan-500/80 shadow-[0_0_8px_rgba(34,211,238,0.5)]"
+              animate={shouldReduceMotion ? { opacity: 0.85 } : { opacity: [0.5, 1, 0.5] }}
+              transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: Math.random() * 1.2 }}
             />
           ))}
         </div>
@@ -1096,11 +1173,12 @@ function CardVisual({
   return <OwnershipVisual accent={accent} />;
 }
 
-function FeaturedCard({ feature }: { feature: TabbedFeature }) {
+function FeaturedCard({ feature, activeTab }: { feature: TabbedFeature; activeTab: number }) {
   const shouldReduceMotion = useReducedMotion();
   const isMobile = useIsMobileViewport();
   const tone = ACCENT_STYLES[feature.accent];
   const { background, handleMouseMove, handleMouseLeave } = useCardSpotlight(!isMobile);
+  const showAgencyComparison = activeTab === 0;
 
   return (
     <motion.article
@@ -1111,7 +1189,7 @@ function FeaturedCard({ feature }: { feature: TabbedFeature }) {
       whileHover={shouldReduceMotion || isMobile ? undefined : { y: -6 }}
       onMouseMove={isMobile ? undefined : handleMouseMove}
       onMouseLeave={isMobile ? undefined : handleMouseLeave}
-      className="group relative h-full min-h-[420px] overflow-hidden rounded-3xl border border-white/[0.05] bg-[#ffffff]/[0.02] p-5 shadow-[0_8px_32px_0_rgba(0,0,0,0.3)] backdrop-blur-2xl transition-colors duration-500 hover:border-white/15 sm:p-6 md:min-h-[520px] md:p-8"
+      className={`group relative h-full min-h-[420px] overflow-hidden ${GLASS_CARD_CLASS} p-5 transition-colors duration-500 hover:border-white/12 sm:p-6 md:min-h-[520px] md:p-8`}
     >
       <motion.div className="pointer-events-none absolute inset-0 rounded-3xl" style={{ background }} />
       <div
@@ -1125,34 +1203,40 @@ function FeaturedCard({ feature }: { feature: TabbedFeature }) {
         style={{ background: `linear-gradient(90deg, transparent 0%, ${tone.strong} 50%, transparent 100%)` }}
       />
 
-      <div className="relative z-10 flex h-full flex-col justify-between gap-6 md:gap-8">
+      <div className="relative z-10 flex h-full flex-col gap-6 md:gap-8">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-[11px] uppercase tracking-[0.28em] text-white">
-            <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 animate-pulse" />
+          <div className="inline-flex items-center gap-2 rounded-full border border-white/5 bg-white/[0.04] px-4 py-1.5 text-[11px] font-bold uppercase tracking-[0.28em] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_0_15px_rgba(255,255,255,0.02)] transition-colors group-hover:bg-white/[0.06] group-hover:border-white/10">
+            <span className="h-1.5 w-1.5 rounded-full animate-pulse" style={{ backgroundColor: tone.strong, boxShadow: `0 0 10px ${tone.glow}` }} />
             {feature.tag}
           </div>
-          <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.28em] text-zinc-500">
-            <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 animate-pulse" />
+          <div className="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.28em] text-zinc-500 transition-colors group-hover:text-zinc-300">
+            <span className="h-1.5 w-1.5 rounded-full bg-zinc-600 transition-all group-hover:animate-pulse" style={{ backgroundColor: tone.strong, boxShadow: `0 0 0px ${tone.glow}` }} />
             {feature.signal}
           </div>
         </div>
 
         <div className="max-w-2xl">
-          <h3 className="text-2xl font-semibold tracking-tight text-white/90 md:text-3xl">{feature.supportTitle}</h3>
-          <p className="mt-6 max-w-2xl text-sm leading-relaxed text-white/60 md:text-base">{feature.text}</p>
+          <h3 className="text-3xl font-black tracking-tighter text-white drop-shadow-sm md:text-4xl lg:text-5xl">
+            {feature.supportTitle}
+          </h3>
+          <p className="mt-5 max-w-2xl text-base leading-relaxed text-zinc-400 md:text-lg transition-colors group-hover:text-zinc-300">
+            {feature.text}
+          </p>
         </div>
 
-        <TabbedFeatureVisual visual={feature.visual} />
+        {showAgencyComparison ? <AgencyComparisonVisual /> : <div className="mt-auto"><TabbedFeatureVisual visual={feature.visual} /></div>}
       </div>
     </motion.article>
   );
 }
 
-function SecondaryCard({ card, activeTab }: { card: TabbedCard; activeTab: number }) {
+function SecondaryCard({ card, activeTab, cardIndex }: { card: TabbedCard; activeTab: number; cardIndex: number }) {
   const shouldReduceMotion = useReducedMotion();
   const isMobile = useIsMobileViewport();
   const tone = ACCENT_STYLES[card.accent];
   const { background, handleMouseMove, handleMouseLeave } = useCardSpotlight(!isMobile);
+  const focusCardIndex = Math.min(activeTab, 3);
+  const isFocusCard = cardIndex === focusCardIndex;
 
   return (
     <motion.article
@@ -1160,9 +1244,15 @@ function SecondaryCard({ card, activeTab }: { card: TabbedCard; activeTab: numbe
       whileHover={shouldReduceMotion || isMobile ? undefined : { y: -5 }}
       onMouseMove={isMobile ? undefined : handleMouseMove}
       onMouseLeave={isMobile ? undefined : handleMouseLeave}
-      className="group relative min-h-[220px] overflow-hidden rounded-3xl border border-white/[0.05] bg-[#ffffff]/[0.02] p-5 shadow-[0_8px_32px_0_rgba(0,0,0,0.3)] backdrop-blur-2xl transition-colors duration-500 hover:border-white/15 sm:min-h-[236px] sm:p-6 md:min-h-[252px]"
+      className={`group relative min-h-[220px] overflow-hidden ${GLASS_CARD_CLASS} p-5 transition-colors duration-500 hover:border-white/12 sm:min-h-[236px] sm:p-6 md:min-h-[252px]`}
     >
       <motion.div className="pointer-events-none absolute inset-0 rounded-3xl" style={{ background }} />
+      <motion.div
+        className="pointer-events-none absolute inset-0 rounded-3xl bg-[radial-gradient(circle_at_center,rgba(6,182,212,0.08)_0%,transparent_70%)]"
+        initial={false}
+        animate={{ opacity: isFocusCard ? 1 : 0, scale: isFocusCard ? 1 : 0.96 }}
+        transition={{ duration: shouldReduceMotion ? 0.01 : 0.55, ease: EASE_OUT }}
+      />
       <div
         className="absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
         style={{ background: `radial-gradient(circle at 82% 10%, ${tone.glow} 0%, transparent 42%)` }}
@@ -1179,8 +1269,8 @@ function SecondaryCard({ card, activeTab }: { card: TabbedCard; activeTab: numbe
 
         <div className="mt-auto max-w-[18rem]">
           <TabbedCardIcon visual={card.visual} />
-          <h3 className="text-xl font-medium tracking-tight text-white md:text-2xl">{card.title}</h3>
-          <p className="mt-3 text-sm leading-6 text-white/50">{card.text}</p>
+          <h3 className="text-xl font-bold tracking-tight text-white transition-all duration-300 md:text-2xl group-hover:text-cyan-300 group-hover:drop-shadow-[0_0_12px_rgba(34,211,238,0.5)]">{card.title}</h3>
+          <p className="mt-3 text-sm leading-6 text-zinc-400 transition-colors duration-300 group-hover:text-zinc-300">{card.text}</p>
         </div>
       </div>
     </motion.article>
@@ -1233,7 +1323,7 @@ function TabbedCardVisual({
 
 function TabbedFeatureVisual({ visual }: { visual: TabMainVisualKey }) {
   if (visual === 'timeline') {
-    return <AbstractTimeline />;
+    return <AgencyComparisonVisual />;
   }
 
   if (visual === 'nodes') {
@@ -1387,7 +1477,7 @@ export function WhyDevelOP() {
             transition={{ duration: 0.3, ease: EASE_OUT }}
             className="grid grid-cols-1 gap-4 md:grid-cols-[minmax(0,1.16fr)_minmax(0,1fr)]"
           >
-            <FeaturedCard feature={activeDimension.feature} />
+            <FeaturedCard feature={activeDimension.feature} activeTab={activeTab} />
 
             <motion.div
               variants={SECONDARY_GRID_VARIANTS}
@@ -1397,7 +1487,12 @@ export function WhyDevelOP() {
               className="grid gap-4 sm:grid-cols-2 xl:auto-rows-fr"
             >
               {activeDimension.cards.map((card, index) => (
-                <SecondaryCard key={`${activeDimension.label}-${card.title}-${index}`} card={card} activeTab={activeTab} />
+                <SecondaryCard
+                  key={`${activeDimension.label}-${card.title}-${index}`}
+                  card={card}
+                  activeTab={activeTab}
+                  cardIndex={index}
+                />
               ))}
             </motion.div>
           </motion.div>

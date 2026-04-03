@@ -160,6 +160,10 @@ model User {
   tickets         Ticket[]
   ticketMessages  TicketMessage[]
   businessMetrics BusinessMetric[]
+  osAssignedLeads OsLead[]         @relation("OsLeadAssignee")
+  osActivities    OsLeadActivity[] @relation("OsActivityPerformer")
+  osAssignedTasks OsTask[]         @relation("OsTaskAssignee")
+  osTimeEntries   OsTimeEntry[]    @relation("OsTimeEntryUser")
 }
 
 model PasswordResetToken {
@@ -432,4 +436,218 @@ model ModulePricing {
   type       String   @default("monthly")
   active     Boolean  @default(true)
   updatedAt  DateTime @updatedAt
+}
+
+model OsLead {
+  id            String         @id @default(cuid())
+  businessName  String
+  contactName   String?
+  phone         String?
+  email         String?
+  industry      String?
+  zone          String?
+  source        String?
+  instagramUrl  String?
+  currentWebUrl String?
+  googleMapsUrl String?
+  status        LeadStatus     @default(PROSPECTO)
+  serviceType   OsServiceType?
+  nextFollowUpAt DateTime?
+  reactivateAt   DateTime?
+  notes          String?
+  assignedToId   String?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  assignedTo User?            @relation("OsLeadAssignee", fields: [assignedToId], references: [id])
+  activities OsLeadActivity[]
+  demos      OsDemo[]
+  project    OsProject?
+
+  @@index([status])
+  @@index([nextFollowUpAt])
+  @@index([status, nextFollowUpAt])
+  @@index([assignedToId])
+}
+
+model OsLeadActivity {
+  id            String          @id @default(cuid())
+  leadId        String
+  channel       ActivityChannel
+  result        ActivityResult?
+  notes         String?
+  performedById String?
+  createdAt     DateTime        @default(now())
+
+  lead        OsLead @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  performedBy User?  @relation("OsActivityPerformer", fields: [performedById], references: [id])
+
+  @@index([leadId, createdAt])
+}
+
+model OsDemo {
+  id          String         @id @default(cuid())
+  leadId      String
+  serviceType OsServiceType?
+  demoUrl     String
+  loomUrl     String?
+  sentAt      DateTime       @default(now())
+  viewedAt    DateTime?
+  notes       String?
+  createdAt   DateTime       @default(now())
+
+  lead OsLead @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  @@index([leadId])
+}
+
+model OsProject {
+  id                   String          @id @default(cuid())
+  leadId               String?         @unique
+  businessName         String
+  contactName          String
+  contactPhone         String?
+  contactEmail         String?
+  organizationId       String?
+  name                 String
+  description          String?
+  serviceType          OsServiceType
+  status               OsProjectStatus @default(EN_DESARROLLO)
+  agreedAmount         Decimal         @db.Decimal(10,2)
+  monthlyRate          Decimal?        @db.Decimal(10,2)
+  maintenanceStartDate DateTime?
+  startDate            DateTime        @default(now())
+  estimatedEndDate     DateTime?
+  deliveredAt          DateTime?
+  createdAt            DateTime        @default(now())
+  updatedAt            DateTime        @updatedAt
+
+  lead                OsLead?                 @relation(fields: [leadId], references: [id])
+  tasks               OsTask[]
+  milestones          OsPaymentMilestone[]
+  maintenancePayments OsMaintenancePayment[]
+
+  @@index([status])
+  @@index([serviceType])
+}
+
+model OsPaymentMilestone {
+  id        String        @id @default(cuid())
+  projectId String
+  type      MilestoneType
+  amount    Decimal       @db.Decimal(10,2)
+  dueAt     DateTime?
+  paidAt    DateTime?
+  createdAt DateTime      @default(now())
+
+  project OsProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+}
+
+model OsMaintenancePayment {
+  id        String   @id @default(cuid())
+  projectId String
+  month     Int
+  year      Int
+  amount    Decimal  @db.Decimal(10,2)
+  paidAt    DateTime?
+  createdAt DateTime @default(now())
+
+  project OsProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, month, year])
+  @@index([projectId])
+}
+
+model OsTask {
+  id             String       @id @default(cuid())
+  projectId      String
+  title          String
+  description    String?
+  status         OsTaskStatus @default(PENDIENTE)
+  estimatedHours Float?
+  position       Int          @default(0)
+  assignedToId   String?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  project     OsProject     @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  assignedTo  User?         @relation("OsTaskAssignee", fields: [assignedToId], references: [id])
+  timeEntries OsTimeEntry[]
+
+  @@index([projectId, status])
+  @@index([assignedToId])
+}
+
+model OsTimeEntry {
+  id        String   @id @default(cuid())
+  taskId    String
+  userId    String
+  hours     Float
+  startedAt DateTime?
+  endedAt   DateTime?
+  date      DateTime
+  notes     String?
+  createdAt DateTime @default(now())
+
+  task OsTask @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user User   @relation("OsTimeEntryUser", fields: [userId], references: [id])
+
+  @@index([taskId])
+  @@index([userId, date])
+}
+
+enum LeadStatus {
+  PROSPECTO
+  DEMO_ENVIADA
+  VIO_VIDEO
+  RESPONDIO
+  CALL_AGENDADA
+  CERRADO
+  PERDIDO
+  POSTERGADO
+}
+
+enum OsServiceType {
+  WEB
+  AI_AGENT
+  AUTOMATION
+  CUSTOM_SOFTWARE
+}
+
+enum OsProjectStatus {
+  EN_DESARROLLO
+  EN_REVISION
+  ENTREGADO
+  EN_MANTENIMIENTO
+  CANCELADO
+}
+
+enum OsTaskStatus {
+  PENDIENTE
+  EN_PROGRESO
+  COMPLETADA
+}
+
+enum ActivityChannel {
+  INSTAGRAM_DM
+  WHATSAPP
+  EMAIL
+  LLAMADA
+  LOOM_VIDEO
+  OTRO
+}
+
+enum ActivityResult {
+  SIN_RESPUESTA
+  RESPONDIO
+  CALL_AGENDADA
+  RECHAZADO
+  POSTERGADO
+}
+
+enum MilestoneType {
+  INICIO
+  ENTREGA
 }
