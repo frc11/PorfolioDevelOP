@@ -452,9 +452,7 @@ export default function WebDevelopmentPage() {
                 <ShowcaseSection />
             </SectionReveal>
 
-            <SectionReveal delay={0.05}>
-                <StatementSection />
-            </SectionReveal>
+            <StatementSection />
 
             <SectionDivider />
 
@@ -470,4 +468,3 @@ export default function WebDevelopmentPage() {
         </main>
     )
 }
-

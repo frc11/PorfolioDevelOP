@@ -1,7 +1,7 @@
 'use client'
 
-import React, { useRef } from 'react'
-import { motion, useInView, useReducedMotion, useScroll, useTransform } from 'framer-motion'
+import React, { useRef, useState } from 'react'
+import { motion, useMotionValueEvent, useReducedMotion, useScroll, useTransform } from 'framer-motion'
 import { ArrowRight, CircleCheckBig, Search, Sparkles, Wrench } from 'lucide-react'
 import { VideoClimax } from './VideoClimax'
 
@@ -46,17 +46,18 @@ const launchChecks = [
 function TimelineCard({
     item,
     index,
-    active,
+    visible,
+    contentRef,
 }: {
     item: (typeof milestones)[number]
     index: number
-    active: boolean
+    visible: boolean
+    contentRef?: (node: HTMLElement | null) => void
 }) {
     const prefersReduced = useReducedMotion()
-    const cardRef = useRef<HTMLDivElement>(null)
-    const inView = useInView(cardRef, { once: true, amount: 0.35 })
     const fromLeft = item.side === 'left'
     const Icon = item.icon
+    const isVisible = prefersReduced || visible
 
     return (
         <div
@@ -70,26 +71,26 @@ function TimelineCard({
                     <div
                         className="absolute inset-0 rounded-full border transition-all duration-500"
                         style={{
-                            borderColor: active ? 'rgba(34,211,238,0.35)' : 'rgba(255,255,255,0.08)',
-                            background: active ? 'rgba(34,211,238,0.12)' : 'rgba(255,255,255,0.03)',
-                            boxShadow: active ? '0 0 28px rgba(34,211,238,0.18)' : 'none',
+                            borderColor: isVisible ? 'rgba(34,211,238,0.35)' : 'rgba(255,255,255,0.08)',
+                            background: isVisible ? 'rgba(34,211,238,0.12)' : 'rgba(255,255,255,0.03)',
+                            boxShadow: isVisible ? '0 0 28px rgba(34,211,238,0.18)' : 'none',
                         }}
                     />
                     <div
                         className="absolute h-3.5 w-3.5 rounded-full transition-all duration-500"
                         style={{
-                            background: active ? 'radial-gradient(circle, #ffffff 0%, #67e8f9 65%)' : 'rgba(255,255,255,0.22)',
-                            boxShadow: active ? '0 0 18px rgba(34,211,238,0.8)' : 'none',
+                            background: isVisible ? 'radial-gradient(circle, #ffffff 0%, #67e8f9 65%)' : 'rgba(255,255,255,0.22)',
+                            boxShadow: isVisible ? '0 0 18px rgba(34,211,238,0.8)' : 'none',
                         }}
                     />
                 </div>
             </div>
 
             <motion.article
-                ref={cardRef}
+                ref={contentRef}
                 initial={{ opacity: 0, x: prefersReduced ? 0 : fromLeft ? -36 : 36, y: prefersReduced ? 0 : 18 }}
-                animate={inView ? { opacity: 1, x: 0, y: 0 } : {}}
-                transition={{ duration: prefersReduced ? 0 : 0.75, delay: index * 0.08, ease }}
+                animate={isVisible ? { opacity: 1, x: 0, y: 0 } : { opacity: 0, x: prefersReduced ? 0 : fromLeft ? -36 : 36, y: prefersReduced ? 0 : 18 }}
+                transition={{ duration: prefersReduced ? 0 : 0.75, delay: isVisible ? 0.08 : 0, ease }}
                 whileHover={prefersReduced ? {} : { y: -4 }}
                 className="relative w-full md:w-[calc(50%-1.5rem)]"
             >
@@ -134,13 +135,64 @@ function TimelineCard({
 export function WebDevelopmentTimeline() {
     const prefersReduced = useReducedMotion()
     const sectionRef = useRef<HTMLElement>(null)
+    const stepRefs = useRef<Array<HTMLElement | null>>([])
     const launchRef = useRef<HTMLDivElement>(null)
-    const launchInView = useInView(launchRef, { once: true, amount: 0.25 })
+    const prevScrollYRef = useRef(typeof window === 'undefined' ? 0 : window.scrollY)
 
     const { scrollYProgress } = useScroll({
         target: sectionRef,
         offset: ['start 18%', 'end 82%'],
     })
+    const { scrollY } = useScroll()
+
+    const totalSteps = milestones.length + 1
+    const [visibleStepCount, setVisibleStepCount] = useState(() => (prefersReduced ? totalSteps : 0))
+
+    useMotionValueEvent(scrollY, 'change', (latest) => {
+        if (prefersReduced) return
+        if (typeof window === 'undefined') return
+
+        const viewportBottom = latest + window.innerHeight
+        const blocks = [...stepRefs.current, launchRef.current]
+        const prevScrollY = prevScrollYRef.current
+        const isScrollingDown = latest >= prevScrollY
+        prevScrollYRef.current = latest
+
+        setVisibleStepCount((prev) => {
+            let next = prev
+
+            if (isScrollingDown) {
+                while (next < blocks.length) {
+                    const block = blocks[next]
+                    if (!block) break
+                    const rect = block.getBoundingClientRect()
+                    const top = rect.top + latest
+                    if (viewportBottom >= top) {
+                        next += 1
+                        continue
+                    }
+                    break
+                }
+            } else {
+                while (next > 0) {
+                    const block = blocks[next - 1]
+                    if (!block) break
+                    const rect = block.getBoundingClientRect()
+                    const bottom = rect.bottom + latest
+                    if (viewportBottom <= bottom) {
+                        next -= 1
+                        continue
+                    }
+                    break
+                }
+            }
+
+            return next === prev ? prev : next
+        })
+    })
+
+    const effectiveVisibleStepCount = prefersReduced ? totalSteps : visibleStepCount
+    const launchVisible = effectiveVisibleStepCount >= totalSteps
 
     const lineScale = useTransform(scrollYProgress, [0, 1], [0, 1])
     const lineOpacity = useTransform(scrollYProgress, [0, 0.08, 1], [0.35, 0.85, 1])
@@ -210,13 +262,21 @@ export function WebDevelopmentTimeline() {
 
                     <div className="relative z-10">
                         {milestones.map((item, index) => (
-                            <TimelineCard key={item.step} item={item} index={index} active={prefersReduced ? true : true} />
+                            <TimelineCard
+                                key={item.step}
+                                item={item}
+                                index={index}
+                                visible={effectiveVisibleStepCount >= index + 1}
+                                contentRef={(node) => {
+                                    stepRefs.current[index] = node
+                                }}
+                            />
                         ))}
 
                         <motion.div
                             ref={launchRef}
                             initial={{ opacity: 0, y: prefersReduced ? 0 : 30 }}
-                            animate={launchInView ? { opacity: 1, y: 0 } : {}}
+                            animate={launchVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: prefersReduced ? 0 : 30 }}
                             transition={{ duration: prefersReduced ? 0 : 0.8, ease }}
                             className="relative mt-14"
                         >
@@ -247,8 +307,8 @@ export function WebDevelopmentTimeline() {
                                                     <motion.div
                                                         key={check}
                                                         initial={{ opacity: 0, x: prefersReduced ? 0 : -12 }}
-                                                        animate={launchInView ? { opacity: 1, x: 0 } : {}}
-                                                        transition={{ duration: prefersReduced ? 0 : 0.45, delay: 0.18 + index * 0.08, ease }}
+                                                        animate={launchVisible ? { opacity: 1, x: 0 } : { opacity: 0, x: prefersReduced ? 0 : -12 }}
+                                                        transition={{ duration: prefersReduced ? 0 : 0.45, delay: launchVisible ? 0.18 + index * 0.08 : 0, ease }}
                                                         className="flex items-center gap-3 rounded-full border border-white/[0.05] bg-white/[0.02] px-4 py-3 text-sm text-white/62"
                                                     >
                                                         <CircleCheckBig className="size-4 animate-[float_3s_ease-in-out_infinite] text-cyan-200" />

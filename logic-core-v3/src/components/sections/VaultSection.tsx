@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 import React, { useState, useRef } from 'react'
 import { motion, AnimatePresence, useReducedMotion, useInView } from 'framer-motion'
 import { Plus, Minus } from 'lucide-react'
@@ -6,7 +6,7 @@ import { Plus, Minus } from 'lucide-react'
 const FAQ_ITEMS = [
     {
         question: '¿Cuánto tarda en estar lista?',
-        answer: 'Cuatro semanas desde la primera reunión al lanzamiento. La semana 1 es diseño y estrategia — vos aprobás antes de que construyamos nada. Las semanas 2 y 3 son construcción y pruebas. La semana 4 es lanzamiento y posicionamiento en Google.',
+        answer: 'Cuatro semanas desde la primera reunión al lanzamiento. La semana 1 es diseño y estrategia: vos aprobás antes de que construyamos nada. Las semanas 2 y 3 son construcción y pruebas. La semana 4 es lanzamiento y posicionamiento en Google.',
     },
     {
         question: '¿Tengo que actualizar la web yo mismo?',
@@ -146,9 +146,9 @@ export const VaultSection = () => {
                 zIndex: 0
             }} />
 
-            <div style={{ maxWidth: '780px', margin: '0 auto', padding: '0 clamp(20px, 5vw, 40px)', position: 'relative', zIndex: 10 }}>
+            <div style={{ maxWidth: '1240px', margin: '0 auto', padding: '0 clamp(20px, 5vw, 40px)', position: 'relative', zIndex: 10 }}>
                 {/* Header FAQ */}
-                <div ref={headerRef} className="w-full">
+                <div ref={headerRef} className="w-full" style={{ maxWidth: '780px', margin: '0 auto' }}>
                     <motion.div
                         initial={prefersReducedMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: -6 }}
                         animate={isHeaderInView ? { opacity: 1, y: 0 } : {}}
@@ -283,7 +283,7 @@ export const VaultSection = () => {
                 </div>
 
                 {/* FAQ Accordion */}
-                <div className="flex flex-col mb-16">
+                <div className="flex flex-col mb-16" style={{ maxWidth: '780px', margin: '0 auto' }}>
                     {FAQ_ITEMS.map((item, index) => {
                         const isOpen = openIndex === index;
 
@@ -300,7 +300,7 @@ export const VaultSection = () => {
                                 {/* BARRA LATERAL izquierda */}
                                 <div style={{
                                     position: 'absolute',
-                                    left: '-clamp(20px,5vw,40px)',
+                                    left: 'clamp(-40px, -5vw, -20px)',
                                     top: 0, bottom: 0, width: '2px',
                                     background: 'linear-gradient(to bottom, #00e5ff, rgba(0,229,255,0.2))',
                                     opacity: isOpen ? 1 : 0,
@@ -381,8 +381,12 @@ export const VaultSection = () => {
 
                 {/* Separador antes del CTA */}
                 <div style={{
+                    maxWidth: '780px',
+                    marginLeft: 'auto',
+                    marginRight: 'auto',
                     height: '1px',
-                    margin: 'clamp(48px, 7vh, 80px) 0',
+                    marginTop: 'clamp(48px, 7vh, 80px)',
+                    marginBottom: 'clamp(48px, 7vh, 80px)',
                     background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent)'
                 }} />
 
@@ -392,83 +396,150 @@ export const VaultSection = () => {
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true, amount: 0.3 }}
                     transition={{ duration: 0.7 }}
-                    style={{ marginBottom: 'clamp(48px, 7vh, 80px)' }}
+                    style={{
+                        marginBottom: 'clamp(48px, 7vh, 80px)',
+                        width: '100%',
+                        maxWidth: '1240px',
+                        marginLeft: 'auto',
+                        marginRight: 'auto'
+                    }}
                 >
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '24px' }}>
                         <div style={{ flex: 1, height: '1px', background: 'rgba(0,229,255,0.1)' }} />
                         <span style={{ fontSize: '11px', letterSpacing: '0.2em', color: 'rgba(0,229,255,0.35)', fontFamily: 'monospace', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>PLANES</span>
                         <div style={{ flex: 1, height: '1px', background: 'rgba(0,229,255,0.1)' }} />
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         {[
                             {
-                                name: 'Presencia Digital',
-                                price: '$800',
+                                name: 'Base',
+                                subtitle: 'Para arrancar rapido',
+                                price: '$490',
                                 unit: 'USD',
-                                desc: 'Landing page optimizada para Google. Diseño, desarrollo y lanzamiento en 4 semanas.',
-                                items: ['1 página completa', 'SEO local', 'Formulario de contacto', 'Mobile-first'],
+                                desc: 'Landing profesional para validar oferta y empezar a captar desde Google.',
+                                items: ['1 pagina principal', 'SEO local inicial', 'Boton WhatsApp + formulario', 'Carga rapida mobile'],
                                 colorRgb: '0,229,255',
                                 color: '#00e5ff',
                             },
                             {
-                                name: 'Web Completa',
-                                price: '$1.800',
+                                name: 'Completa',
+                                subtitle: 'La opcion mas elegida',
+                                price: '$980',
                                 unit: 'USD',
-                                desc: 'Multi-página con catálogo, blog y sistema de contacto. Ideal para empresas en crecimiento.',
-                                items: ['Hasta 8 páginas', 'Blog + SEO avanzado', 'Integraciones (WhatsApp, MP)', 'Panel de contenido'],
+                                desc: 'La mejor relacion precio-resultado para vender mas sin complejidad innecesaria.',
+                                items: ['Hasta 6 paginas', 'SEO local + estructura avanzada', 'Integraciones (WhatsApp, pagos)', 'Panel editable + analitica'],
                                 colorRgb: '123,47,255',
                                 color: '#7b2fff',
                                 highlight: true,
+                                badge: 'MAS ELEGIDA',
                             },
                             {
-                                name: 'E-commerce',
-                                price: 'Desde $2.500',
+                                name: 'Escala',
+                                subtitle: 'Para operar mas grande',
+                                price: '$1.690',
                                 unit: 'USD',
-                                desc: 'Tienda online con carrito, pagos y gestión de stock. Vendés mientras dormís.',
-                                items: ['Tienda completa', 'MercadoPago + AFIP', 'Panel de pedidos', 'Recuperación de carritos'],
+                                desc: 'Sumamos automatizaciones y capas extra para equipos con mas volumen.',
+                                items: ['Todo lo de Completa', 'Automatizaciones de ventas', 'Embudo y seguimiento de leads', 'Soporte prioritario 30 dias'],
                                 colorRgb: '0,229,255',
                                 color: '#00e5ff',
                             },
                         ].map((tier) => (
-                            <div
+                            <motion.div
                                 key={tier.name}
+                                whileHover={prefersReducedMotion ? {} : {
+                                    y: -14,
+                                    scale: 1.022,
+                                    boxShadow: `0 28px 58px rgba(${tier.colorRgb},0.28)`,
+                                    borderColor: `rgba(${tier.colorRgb},0.52)`,
+                                }}
+                                transition={{ type: 'spring', stiffness: 280, damping: 24, mass: 0.9 }}
                                 style={{
-                                    borderRadius: '16px',
-                                    padding: '20px',
+                                    borderRadius: '20px',
+                                    padding: '36px 30px 30px',
                                     background: tier.highlight
-                                        ? `linear-gradient(135deg, rgba(${tier.colorRgb},0.08) 0%, rgba(255,255,255,0.02) 100%)`
+                                        ? `linear-gradient(150deg, rgba(${tier.colorRgb},0.12) 0%, rgba(255,255,255,0.02) 45%, rgba(0,229,255,0.03) 100%)`
                                         : `rgba(${tier.colorRgb},0.03)`,
-                                    border: `1px solid rgba(${tier.colorRgb},${tier.highlight ? '0.25' : '0.12'})`,
-                                    boxShadow: tier.highlight ? `0 0 24px rgba(${tier.colorRgb},0.08)` : 'none',
+                                    border: `1px solid rgba(${tier.colorRgb},${tier.highlight ? '0.32' : '0.12'})`,
+                                    boxShadow: tier.highlight ? `0 0 42px rgba(${tier.colorRgb},0.16)` : 'none',
                                     position: 'relative',
                                     overflow: 'hidden',
+                                    minHeight: '560px',
+                                    display: 'flex',
+                                    flexDirection: 'column',
                                 }}
                             >
+                                {tier.badge && (
+                                    <div style={{
+                                        position: 'absolute',
+                                        top: '14px',
+                                        left: '50%',
+                                        transform: 'translateX(-50%)',
+                                        padding: '5px 14px',
+                                        borderRadius: '999px',
+                                        fontSize: '10px',
+                                        fontWeight: 800,
+                                        letterSpacing: '0.16em',
+                                        color: '#e9f7ff',
+                                        background: 'linear-gradient(135deg, rgba(0,229,255,0.28), rgba(123,47,255,0.35))',
+                                        border: '1px solid rgba(255,255,255,0.25)',
+                                        textTransform: 'uppercase',
+                                        whiteSpace: 'nowrap'
+                                    }}>
+                                        {tier.badge}
+                                    </div>
+                                )}
                                 {tier.highlight && (
                                     <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '1px', background: `linear-gradient(90deg, transparent, rgba(${tier.colorRgb},0.7), transparent)` }} />
                                 )}
-                                <p style={{ fontSize: '11px', fontWeight: 700, color: `rgba(${tier.colorRgb},0.7)`, letterSpacing: '0.15em', margin: '0 0 8px', textTransform: 'uppercase', fontFamily: 'monospace' }}>{tier.name}</p>
-                                <div style={{ marginBottom: '10px' }}>
-                                    <span style={{ fontSize: '26px', fontWeight: 900, color: 'white', letterSpacing: '-0.02em', fontFamily: 'monospace' }}>{tier.price}</span>
-                                    <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.3)', marginLeft: '4px' }}>{tier.unit}</span>
+                                <p style={{ fontSize: '13px', fontWeight: 800, color: `rgba(${tier.colorRgb},0.88)`, letterSpacing: '0.18em', margin: tier.badge ? '24px 0 8px' : '0 0 8px', textTransform: 'uppercase', fontFamily: 'monospace' }}>{tier.name}</p>
+                                <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.58)', margin: '0 0 16px' }}>{tier.subtitle}</p>
+                                <div style={{ marginBottom: '12px' }}>
+                                    <span style={{ fontSize: '56px', fontWeight: 900, color: 'white', letterSpacing: '-0.03em', fontFamily: 'monospace', lineHeight: 1 }}>{tier.price}</span>
+                                    <span style={{ fontSize: '14px', color: 'rgba(255,255,255,0.35)', marginLeft: '6px' }}>{tier.unit}</span>
                                 </div>
-                                <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', lineHeight: 1.6, margin: '0 0 12px' }}>{tier.desc}</p>
-                                <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                <p style={{ fontSize: '16px', color: 'rgba(255,255,255,0.52)', lineHeight: 1.6, margin: '0 0 22px' }}>{tier.desc}</p>
+                                <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '11px' }}>
                                     {tier.items.map((item) => (
-                                        <li key={item} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: 'rgba(255,255,255,0.5)' }}>
-                                            <span style={{ color: tier.color, fontSize: '9px', fontWeight: 700 }}>✓</span>
+                                        <li key={item} style={{ display: 'flex', alignItems: 'center', gap: '9px', fontSize: '15px', color: 'rgba(255,255,255,0.62)' }}>
+                                            <span style={{ color: tier.color, fontSize: '12px', fontWeight: 700 }}>✓</span>
                                             {item}
                                         </li>
                                     ))}
                                 </ul>
-                            </div>
+                                <a
+                                    href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER}?text=Hola%20DevelOP%2C%20quiero%20el%20plan%20${encodeURIComponent(tier.name)}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    style={{
+                                        marginTop: 'auto',
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        width: '100%',
+                                        height: '54px',
+                                        borderRadius: '14px',
+                                        border: `1px solid rgba(${tier.colorRgb},${tier.highlight ? '0.48' : '0.24'})`,
+                                        background: tier.highlight
+                                            ? 'linear-gradient(135deg, rgba(0,229,255,0.24), rgba(123,47,255,0.28))'
+                                            : 'rgba(255,255,255,0.02)',
+                                        color: 'rgba(255,255,255,0.9)',
+                                        textDecoration: 'none',
+                                        fontSize: '13px',
+                                        fontWeight: 800,
+                                        letterSpacing: '0.12em',
+                                        textTransform: 'uppercase',
+                                        transition: 'all 220ms ease'
+                                    }}
+                                >
+                                    Elegir plan
+                                </a>
+                            </motion.div>
                         ))}
                     </div>
-                    <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.2)', textAlign: 'center', marginTop: '12px' }}>
-                        Primer diseño gratis · Mantenimiento mensual opcional
+                    <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.26)', textAlign: 'center', marginTop: '16px' }}>
+                        Sin letra chica. Podemos ajustar alcance y pagos segun tu negocio.
                     </p>
                 </motion.div>
-
                 {/* WRAPPER CTA */}
                 <motion.div
                     ref={ctaRef}
@@ -580,7 +651,7 @@ export const VaultSection = () => {
                                     <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" />
                                     <path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.554 4.118 1.528 5.855L.057 23.547a.5.5 0 00.609.61l5.765-1.458A11.945 11.945 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.814 9.814 0 01-5.032-1.384l-.361-.214-3.718.941.972-3.634-.235-.374A9.818 9.818 0 012.182 12C2.182 6.57 6.57 2.182 12 2.182S21.818 6.57 21.818 12 17.43 21.818 12 21.818z" />
                                 </svg>
-                                <span>🚀 CONSTRUIR MI SUCURSAL →</span>
+                                <span>CONSTRUIR MI SUCURSAL →</span>
                             </motion.a>
 
                             {/* CTA SECUNDARIO — Showcase */}
@@ -643,7 +714,8 @@ export const VaultSection = () => {
                         {[
                             { name: 'Inicio', href: '/' },
                             { name: 'IA', href: '/ai-implementations' },
-                            { name: 'Contacto', href: '#vault-section' }
+                            { name: 'Software', href: '/software' },
+                            { name: 'Automatización', href: '/automatizacion' }
                         ].map((link, i) => (
                             <a
                                 key={i} href={link.href}
@@ -661,7 +733,7 @@ export const VaultSection = () => {
 
                     {/* DERECHA — copyright */}
                     <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.15)' }}>
-                        © 2025 DevelOP.
+                        © 2026 DevelOP.
                     </div>
                 </motion.div>
             </div>

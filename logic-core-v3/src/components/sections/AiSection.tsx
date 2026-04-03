@@ -1,9 +1,10 @@
-'use client'
+﻿'use client'
+
 import React, { useRef, useState } from 'react'
 import Link from 'next/link'
 import { motion, useInView, useReducedMotion } from 'framer-motion'
 
-// ── Inline SVG Icons ──────────────────────────────────────────────
+// Inline SVG Icons
 function ChatIcon() {
     return (
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -33,7 +34,6 @@ function TrendIcon() {
     )
 }
 
-// ── Data ──────────────────────────────────────────────────────────
 interface AiCard {
     icon: React.ReactNode
     title: string
@@ -45,26 +45,25 @@ const cards: AiCard[] = [
     {
         icon: <ChatIcon />,
         title: 'Responde al instante',
-        copy: 'Un asistente IA contesta preguntas de tus clientes las 24hs. Precios, horarios, disponibilidad — sin que vos toques el teléfono.',
-        tag: 'ChatBot · IA Conversacional',
+        copy: 'Un asistente IA contesta preguntas de tus clientes las 24hs. Precios, horarios y disponibilidad, sin que vos toques el telefono.',
+        tag: 'ChatBot · IA conversacional',
     },
     {
         icon: <CalcIcon />,
         title: 'Cotiza y agenda solo',
-        copy: 'El cliente completa un formulario inteligente y recibe su presupuesto automático. Vos recibís el pedido listo para confirmar.',
-        tag: 'Automatización · WhatsApp API',
+        copy: 'El cliente completa un formulario inteligente y recibe su presupuesto automatico. Vos recibis el pedido listo para confirmar.',
+        tag: 'Automatizacion · WhatsApp API',
     },
     {
         icon: <TrendIcon />,
         title: 'Se posiciona solo',
-        copy: 'Contenido generado y optimizado por IA para que Google te encuentre en cada búsqueda local de tu rubro.',
-        tag: 'SEO Automático · Contenido IA',
+        copy: 'Contenido generado y optimizado por IA para que Google te encuentre en cada busqueda local de tu rubro.',
+        tag: 'SEO automatico · Contenido IA',
     },
 ]
 
 const ease = [0.16, 1, 0.3, 1] as const
 
-// ── Component ─────────────────────────────────────────────────────
 export default function AiSection() {
     const sectionRef = useRef<HTMLElement>(null)
     const isInView = useInView(sectionRef, { once: true, amount: 0.15 })
@@ -80,22 +79,14 @@ export default function AiSection() {
             className="w-full relative overflow-hidden"
             style={{ background: '#080810', padding: 'clamp(80px, 10vh, 120px) 24px' }}
         >
-            {/* GLOW 1 — Violet central */}
             <div aria-hidden="true" className="absolute pointer-events-none" style={{ top: 0, left: '50%', transform: 'translateX(-50%)', width: '800px', height: '500px', background: 'radial-gradient(ellipse at center top, rgba(123,47,255,0.09) 0%, transparent 60%)', filter: 'blur(100px)', zIndex: 0 }} />
-            {/* GLOW 2 — Cyan izquierda */}
             <div aria-hidden="true" className="absolute pointer-events-none" style={{ top: '40%', left: '-60px', width: '350px', height: '350px', background: 'radial-gradient(circle, rgba(0,229,255,0.05) 0%, transparent 65%)', filter: 'blur(80px)', zIndex: 0 }} />
-            {/* GLOW 3 — Cyan derecha */}
             <div aria-hidden="true" className="absolute pointer-events-none" style={{ top: '40%', right: '-60px', width: '350px', height: '350px', background: 'radial-gradient(circle, rgba(0,229,255,0.05) 0%, transparent 65%)', filter: 'blur(80px)', zIndex: 0 }} />
 
             <div className="max-w-7xl mx-auto relative z-10">
-
-                {/* Separador superior */}
                 <div aria-hidden="true" style={{ width: '100%', height: '1px', background: 'linear-gradient(90deg, transparent, rgba(0,229,255,0.15), transparent)', marginBottom: 'clamp(40px, 6vh, 80px)' }} />
 
-                {/* ── Bloque superior ── */}
                 <div className="flex flex-col items-center text-center mb-16">
-
-                    {/* 1. Label badge */}
                     <motion.span
                         initial={{ opacity: 0, y: -10 }}
                         animate={shouldReveal ? { opacity: 1, y: 0 } : { opacity: 0, y: -10 }}
@@ -110,7 +101,6 @@ export default function AiSection() {
                         [ INTELIGENCIA ARTIFICIAL APLICADA ]
                     </motion.span>
 
-                    {/* 2. H2 — clipPath por línea */}
                     <h2
                         className="font-black tracking-tight leading-[1.05] flex flex-col items-center overflow-hidden"
                         style={{ fontSize: 'clamp(40px, 5.5vw, 72px)' }}
@@ -130,11 +120,10 @@ export default function AiSection() {
                             className="text-transparent bg-clip-text"
                             style={{ backgroundImage: 'linear-gradient(135deg, #00e5ff 0%, #7b2fff 100%)', WebkitBackgroundClip: 'text' }}
                         >
-                            vende mientras dormís.
+                            vende mientras dormis.
                         </motion.span>
                     </h2>
 
-                    {/* 3. Subtítulo */}
                     <motion.p
                         initial={{ opacity: 0, y: 10 }}
                         animate={shouldReveal ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
@@ -142,11 +131,10 @@ export default function AiSection() {
                         className="mt-5 text-center"
                         style={{ fontSize: '16px', color: 'rgba(255,255,255,0.55)', maxWidth: '520px', lineHeight: 1.65 }}
                     >
-                        No es ciencia ficción. Es lo que hace tu Sucursal Digital con IA integrada.
+                        No es ciencia ficcion. Es lo que hace tu Sucursal Digital con IA integrada.
                     </motion.p>
                 </div>
 
-                {/* Demo Badge */}
                 <div className="flex justify-center" style={{ marginBottom: '48px' }}>
                     <style>{`
                         @keyframes mascot-pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.7;transform:scale(0.92)} }
@@ -170,7 +158,6 @@ export default function AiSection() {
                             cursor: 'pointer',
                         }}
                     >
-                        {/* Avatar mascot */}
                         <div
                             style={{
                                 width: '32px', height: '32px', borderRadius: '50%',
@@ -183,26 +170,23 @@ export default function AiSection() {
                         >
                             ✦
                         </div>
-                        {/* Text */}
                         <div style={{ textAlign: 'left' }}>
                             <div style={{ fontSize: '13px', fontWeight: 600, color: 'white', lineHeight: 1.3 }}>
-                                ¿Querés verlo en acción?
+                                Queres verlo en accion?
                             </div>
                             <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)', lineHeight: 1.4 }}>
-                                Probá el asistente IA → hablá con la mascota
+                                Proba el asistente IA {'->'} habla con la mascota
                             </div>
                         </div>
-                        {/* Animated arrow */}
                         <span
                             aria-hidden="true"
                             style={{ color: '#7b2fff', fontSize: '16px', animation: 'arrow-slide 1.2s ease-in-out infinite' }}
                         >
-                            →
+                            {'->'}
                         </span>
                     </button>
                 </div>
 
-                {/* 4. Grid de 3 cards con stagger */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
                     {cards.map((card, i) => (
                         <motion.div
@@ -226,7 +210,6 @@ export default function AiSection() {
                                 cursor: 'default',
                             }}
                         >
-                            {/* Icon */}
                             <div
                                 className="flex items-center justify-center shrink-0"
                                 style={{ width: '44px', height: '44px', borderRadius: '10px', background: 'rgba(0,229,255,0.1)', border: '1px solid rgba(0,229,255,0.2)', marginBottom: '16px', color: '#00e5ff' }}
@@ -234,17 +217,14 @@ export default function AiSection() {
                                 {card.icon}
                             </div>
 
-                            {/* Title */}
                             <h3 style={{ fontSize: '18px', fontWeight: 700, color: 'white', marginBottom: '8px' }}>
                                 {card.title}
                             </h3>
 
-                            {/* Copy */}
                             <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.55)', lineHeight: 1.6, flexGrow: 1 }}>
                                 {card.copy}
                             </p>
 
-                            {/* Tag chip */}
                             <div className="mt-5 inline-flex self-start" style={{ background: 'rgba(0,229,255,0.08)', border: '1px solid rgba(0,229,255,0.2)', borderRadius: '100px', padding: '5px 12px' }}>
                                 <span style={{ fontSize: '10px', color: '#00e5ff', fontWeight: 600, letterSpacing: '0.04em' }}>
                                     {card.tag}
@@ -254,24 +234,6 @@ export default function AiSection() {
                     ))}
                 </div>
 
-                {/* CTA - CONSTRUIR MI SUCURSAL */}
-                <motion.div
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    whileInView={{ opacity: 1, scale: 1 }}
-                    viewport={{ once: true }}
-                    className="mt-12 w-full flex justify-center z-20"
-                >
-                    <a
-                        href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER}?text=Hola%20DevelOP%2C%20quiero%20construir%20mi%20sucursal%20digital`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2.5 px-10 py-5 bg-gradient-to-br from-[#25d366] to-[#128c7e] text-white rounded-full font-extrabold text-[14px] uppercase tracking-wider shadow-[0_0_28px_rgba(37,211,102,0.2)] hover:scale(1.04) transition-transform active:scale(0.97) no-underline"
-                    >
-                        🚀 CONSTRUIR MI SUCURSAL →
-                    </a>
-                </motion.div>
-
-                {/* 5. Ghost CTA */}
                 <motion.div
                     initial={{ opacity: 0, y: 8 }}
                     animate={shouldReveal ? { opacity: 1, y: 0 } : { opacity: 0, y: 8 }}
@@ -292,21 +254,19 @@ export default function AiSection() {
                             transition: 'background 250ms ease, border-color 250ms ease',
                         }}
                         onMouseEnter={(e) => {
-                            (e.currentTarget as HTMLAnchorElement).style.background = 'rgba(0,229,255,0.08)';
-                            (e.currentTarget as HTMLAnchorElement).style.borderColor = 'rgba(0,229,255,0.6)'
+                            (e.currentTarget as HTMLAnchorElement).style.background = 'rgba(0,229,255,0.08)'
+                            ;(e.currentTarget as HTMLAnchorElement).style.borderColor = 'rgba(0,229,255,0.6)'
                         }}
                         onMouseLeave={(e) => {
-                            (e.currentTarget as HTMLAnchorElement).style.background = 'transparent';
-                            (e.currentTarget as HTMLAnchorElement).style.borderColor = 'rgba(0,229,255,0.3)'
+                            (e.currentTarget as HTMLAnchorElement).style.background = 'transparent'
+                            ;(e.currentTarget as HTMLAnchorElement).style.borderColor = 'rgba(0,229,255,0.3)'
                         }}
                     >
-                        Ver todas las implementaciones de IA →
+                        Ver todas las implementaciones de IA {'->'}
                     </Link>
                 </motion.div>
 
-                {/* Separador inferior */}
                 <div aria-hidden="true" style={{ width: '100%', height: '1px', background: 'linear-gradient(90deg, transparent, rgba(0,229,255,0.15), transparent)', marginTop: 'clamp(40px, 6vh, 80px)' }} />
-
             </div>
         </section>
     )

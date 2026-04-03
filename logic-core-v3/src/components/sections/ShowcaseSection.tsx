@@ -1,4 +1,4 @@
-/**
+﻿/**
  * SHOWCASE SECTION — DevelOP
  * 
  * IMÁGENES PENDIENTES DE SWAP:
@@ -24,10 +24,10 @@
  */
 'use client'
 
-import React, { useState, useRef, useEffect } from 'react'
+import React, { useState, useRef } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { motion, useInView, useReducedMotion, useAnimationControls } from 'framer-motion'
+import { motion, useAnimationFrame, useInView, useMotionValue, useReducedMotion } from 'framer-motion'
 
 // ── Types ──────────────────────────────────────────────────────────
 interface CarouselProject {
@@ -41,7 +41,7 @@ interface CarouselProject {
     image: string
 }
 
-// ── Data ──────────────────────────────────────────────────────────
+// ── Data ───────────────────────────────────────────────────────────
 const carouselProjects: CarouselProject[] = [
     {
         id: 1,
@@ -51,8 +51,7 @@ const carouselProjects: CarouselProject[] = [
         stat: { value: "3x", label: "Más reservas" },
         stack: ["Next.js", "Reservas", "SEO Local"],
         accent: "#00e5ff",
-        image: "https://placehold.co/600x400/0d1a1a/00e5ff?text=.",
-        /* Image placeholder */
+        image: "/images/showcase/case-gastronomia.svg",
     },
     {
         id: 2,
@@ -62,8 +61,7 @@ const carouselProjects: CarouselProject[] = [
         stat: { value: "5x", label: "Más consultas" },
         stack: ["Next.js", "Portal", "Lead Gen"],
         accent: "#7b2fff",
-        image: "https://placehold.co/600x400/0d0a1a/7b2fff?text=.",
-        /* Image placeholder */
+        image: "/images/showcase/case-inmobiliaria.svg",
     },
     {
         id: 3,
@@ -73,8 +71,7 @@ const carouselProjects: CarouselProject[] = [
         stat: { value: "24/7", label: "Consultas auto" },
         stack: ["Next.js", "Turnos", "WhatsApp API"],
         accent: "#00e5ff",
-        image: "https://placehold.co/600x400/0a0d1a/00e5ff?text=.",
-        /* Image placeholder */
+        image: "/images/showcase/case-servicios.svg",
     },
     {
         id: 4,
@@ -84,8 +81,7 @@ const carouselProjects: CarouselProject[] = [
         stat: { value: "500+", label: "Productos" },
         stack: ["Next.js", "E-Commerce", "CRM"],
         accent: "#7b2fff",
-        image: "https://placehold.co/600x400/0a0a1a/7b2fff?text=.",
-        /* Image placeholder */
+        image: "/images/showcase/case-comercio.svg",
     },
     {
         id: 5,
@@ -95,8 +91,7 @@ const carouselProjects: CarouselProject[] = [
         stat: { value: "2x", label: "Pedidos online" },
         stack: ["Next.js", "Delivery", "SEO Local"],
         accent: "#00e5ff",
-        image: "https://placehold.co/600x400/0d1a1a/00e5ff?text=.",
-        /* Image placeholder */
+        image: "/images/showcase/case-gastronomia.svg",
     },
     {
         id: 6,
@@ -106,8 +101,7 @@ const carouselProjects: CarouselProject[] = [
         stat: { value: "100", label: "Lighthouse" },
         stack: ["Next.js", "Custom", "Premium"],
         accent: "#7b2fff",
-        image: "https://placehold.co/600x400/0d0a1a/7b2fff?text=.",
-        /* Image placeholder */
+        image: "/images/showcase/case-default.svg",
     },
     {
         id: 7,
@@ -117,8 +111,7 @@ const carouselProjects: CarouselProject[] = [
         stat: { value: "#1", label: "Google local" },
         stack: ["Next.js", "MercadoPago", "WhatsApp"],
         accent: "#00e5ff",
-        image: "https://placehold.co/600x400/0a0d1a/00e5ff?text=.",
-        /* Image placeholder */
+        image: "/images/showcase/case-comercio.svg",
     },
     {
         id: 8,
@@ -128,8 +121,7 @@ const carouselProjects: CarouselProject[] = [
         stat: { value: "4x", label: "Leads captados" },
         stack: ["Next.js", "Propiedades", "Lead Gen"],
         accent: "#7b2fff",
-        image: "https://placehold.co/600x400/0d0a1a/7b2fff?text=.",
-        /* Image placeholder */
+        image: "/images/showcase/case-inmobiliaria.svg",
     },
 ]
 
@@ -262,33 +254,27 @@ function ProjectCard({ project }: { project: CarouselProject }) {
 
 function InfiniteCarousel() {
     const [isPaused, setIsPaused] = useState(false)
-    const controls = useAnimationControls()
+    const x = useMotionValue(0)
 
     // Calcular ancho total: cardWidth(320px) + gap(20px) = 340px por la cantidad original
     const totalWidth = carouselProjects.length * 340
 
-    useEffect(() => {
-        let duration = 40
-        if (typeof window !== 'undefined' && window.innerWidth < 768) {
-            duration = 25
-        }
+    useAnimationFrame((_, delta) => {
+        if (isPaused) return
 
-        if (!isPaused) {
-            controls.start({
-                x: [0, -totalWidth],
-                transition: {
-                    duration: duration,
-                    ease: "linear",
-                    repeat: Infinity,
-                    repeatType: "loop",
-                }
-            })
-        } else {
-            controls.stop()
-        }
+        // Velocidad equivalente a la implementación previa:
+        // desktop: totalWidth / 40 px/s, mobile: totalWidth / 25 px/s
+        const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
+        const duration = isMobile ? 25 : 40
+        const speedPxPerSecond = totalWidth / duration
+        const deltaPx = speedPxPerSecond * (delta / 1000)
 
-        return () => controls.stop()
-    }, [isPaused, controls, totalWidth])
+        let next = x.get() - deltaPx
+        if (next <= -totalWidth) {
+            next += totalWidth
+        }
+        x.set(next)
+    })
 
     return (
         <div className="w-full relative flex flex-col">
@@ -333,7 +319,7 @@ function InfiniteCarousel() {
             <div
                 onMouseEnter={() => setIsPaused(true)}
                 onMouseLeave={() => setIsPaused(false)}
-                style={{ overflow: 'hidden', position: 'relative' }}
+                style={{ overflow: 'hidden', position: 'relative', paddingTop: '8px', marginTop: '-8px' }}
                 role="region"
                 aria-label="Carrusel de proyectos"
             >
@@ -358,8 +344,7 @@ function InfiniteCarousel() {
                 }} />
 
                 <motion.div
-                    animate={controls}
-                    style={{ display: 'flex', gap: '20px', width: 'max-content' }}
+                    style={{ display: 'flex', gap: '20px', width: 'max-content', x }}
                 >
                     {duplicatedProjects.map((project, index) => (
                         <ProjectCard key={`${project.id}-${index}`} project={project} />
@@ -370,7 +355,7 @@ function InfiniteCarousel() {
     )
 }
 
-// ── ShowcaseSection ────────────────────────────────────────────────────────
+// ── ShowcaseSection ────────────────────────────────────────────────
 export default function ShowcaseSection() {
     const shouldReduceMotion = useReducedMotion()
 
@@ -522,7 +507,7 @@ export default function ShowcaseSection() {
                 >
                     <div className="relative w-full" style={{ height: 'clamp(320px, 50vh, 600px)' }}>
                         <Image
-                            src="https://placehold.co/1440x700/0d0d1f/00e5ff?text=."
+                            src="/images/showcase/hero-concesionaria.svg"
                             alt="Concesionaria — Proyecto Hero"
                             fill
                             className="object-cover"
@@ -676,22 +661,6 @@ export default function ShowcaseSection() {
                 {/* ── PROJECTS CAROUSEL (Mobile / Desktop) ── */}
                 <InfiniteCarousel />
 
-                {/* CTA - QUIERO UN SITIO ASÍ */}
-                <motion.div
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    whileInView={{ opacity: 1, scale: 1 }}
-                    viewport={{ once: true }}
-                    className="mt-20 w-full flex justify-center z-20"
-                >
-                    <a
-                        href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER}?text=Hola%20DevelOP%2C%20vi%20los%20proyectos%20y%20quiero%20algo%20as%C3%AD%20para%20mi%20negocio`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2.5 px-10 py-5 bg-gradient-to-br from-[#25d366] to-[#128c7e] text-white rounded-full font-extrabold text-[14px] uppercase tracking-wider shadow-[0_0_28px_rgba(37,211,102,0.2)] hover:scale(1.04) transition-transform active:scale(0.97) no-underline"
-                    >
-                        🚀 QUIERO UN SITIO ASÍ →
-                    </a>
-                </motion.div>
             </div>
         </section>
     )

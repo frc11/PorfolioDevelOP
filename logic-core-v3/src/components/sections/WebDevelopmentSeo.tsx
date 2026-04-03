@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useEffect, useRef, useState } from "react"
-import { AnimatePresence, motion, useInView, useReducedMotion } from "framer-motion"
+import { motion, useInView, useReducedMotion } from "framer-motion"
 import { ArrowUpRight, Check, Map, Search, Sparkles } from "lucide-react"
 
 interface Query {
@@ -111,16 +111,14 @@ function GoogleSimulator() {
                     </div>
 
                     <div className="mt-5 grid gap-4 lg:grid-cols-[1.6fr_0.8fr]">
-                        <AnimatePresence mode="wait">
-                            {displayResults && (
-                                <motion.div
-                                    key={activeRubro}
-                                    initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    exit={{ opacity: 0, y: -6 }}
-                                    transition={{ duration: 0.35, ease }}
-                                    className="space-y-3"
-                                >
+                        <motion.div
+                            initial={false}
+                            animate={{ opacity: displayResults ? 1 : 0, y: displayResults ? 0 : -6 }}
+                            transition={{ duration: 0.35, ease }}
+                            style={{ visibility: displayResults ? "visible" : "hidden" }}
+                            aria-hidden={!displayResults}
+                            className="space-y-3"
+                        >
                                     <div className="relative overflow-hidden rounded-[1.6rem] border border-cyan-300/20 bg-[linear-gradient(145deg,rgba(34,211,238,0.1),rgba(255,255,255,0.03)_38%,rgba(167,139,250,0.08))] p-5 shadow-[0_0_40px_rgba(34,211,238,0.08)]">
                                         <div className="absolute inset-x-0 top-0 h-px bg-[linear-gradient(90deg,transparent,rgba(103,232,249,0.9),rgba(196,181,253,0.8),transparent)]" />
                                         <div className="mb-3 flex items-center gap-2">
@@ -157,9 +155,7 @@ function GoogleSimulator() {
                                             <div className="mt-3 text-[11px] uppercase tracking-[0.18em] text-white/25">{text}</div>
                                         </div>
                                     ))}
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
+                        </motion.div>
 
                         <div className="grid gap-3">
                             <div className="rounded-[1.6rem] border border-white/[0.05] bg-white/[0.02] p-5">
@@ -281,22 +277,6 @@ export function WebDevelopmentSeo() {
                     <GoogleSimulator />
                 </motion.div>
 
-                <motion.div
-                    initial={{ opacity: 0, scale: 0.96 }}
-                    whileInView={{ opacity: 1, scale: 1 }}
-                    viewport={{ once: true }}
-                    className="mt-16 flex w-full justify-center"
-                >
-                    <a
-                        href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER}?text=Hola%20DevelOP%2C%20quiero%20aparecer%20primero%20en%20Google%20en%20mi%20ciudad`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-3 rounded-full border border-white/10 bg-white/[0.04] px-8 py-4 text-[13px] font-extrabold uppercase tracking-[0.24em] text-white shadow-[0_18px_40px_rgba(37,211,102,0.16)] backdrop-blur-xl transition-transform duration-300 hover:scale-[1.03]"
-                    >
-                        <Search className={`size-4 ${floatingIconClass}`} />
-                        Quiero aparecer primero
-                    </a>
-                </motion.div>
             </div>
         </section>
     )

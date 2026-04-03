@@ -232,7 +232,7 @@ export const WebDevelopmentSensory = () => {
                                         Primera impresión
                                     </div>
                                     <div style={{ fontSize: '16px', fontWeight: 900, color: 'white', lineHeight: 1.2 }}>
-                                        0.05 segundos
+                                        3 segundos
                                     </div>
                                 </motion.div>
                             </div>
