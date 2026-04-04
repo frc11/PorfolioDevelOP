@@ -149,7 +149,16 @@ function PathDots({
             })
             .filter((value): value is { x: number; y: number; id: string } => value !== null)
 
-        setDotCoords(nextCoords)
+        setDotCoords((prev) => {
+            if (prev.length !== nextCoords.length) return nextCoords
+
+            const changed = prev.some((value, index) => {
+                const next = nextCoords[index]
+                return !next || value.x !== next.x || value.y !== next.y || value.id !== next.id
+            })
+
+            return changed ? nextCoords : prev
+        })
     }, [dotPositions, length])
 
     if (!length) {

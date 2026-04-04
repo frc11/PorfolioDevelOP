@@ -5,19 +5,20 @@ import { motion, useScroll, useTransform } from 'framer-motion'
 import { BriefcaseBusiness, HeartPulse, ShoppingBag, UtensilsCrossed, type LucideIcon } from 'lucide-react'
 const HeroBackground = dynamic(() => import('@/components/canvas/HeroBackground'), { ssr: false })
 import HeroMetrics from '@/components/ui/HeroMetrics'
-import { WebDevelopmentBento } from '@/components/sections/WebDevelopmentBento'
-import { WebDevelopmentFaq } from '@/components/sections/WebDevelopmentFaq'
-import { WebDevelopmentCta } from '@/components/sections/WebDevelopmentCta'
-import { WebDevelopmentSeo } from '@/components/sections/WebDevelopmentSeo'
-import { WebDevelopmentSensory } from '@/components/sections/WebDevelopmentSensory'
-import StatementSection from '@/components/sections/StatementSection'
-import { VaultSection } from '@/components/sections/VaultSection'
-import { WebDevelopmentTimeline } from '@/components/sections/WebDevelopmentTimeline'
-import ShowcaseSection from '@/components/sections/ShowcaseSection'
-import ComparadorSection from '@/components/sections/ComparadorSection'
-import AiSection from '@/components/sections/AiSection'
-import PortfolioWebCases from '@/components/sections/PortfolioWebCases'
-import WebDevelopmentByRubro from '@/components/sections/WebDevelopmentByRubro'
+import { WebDevelopmentBento } from '@/components/sections/web-development/WebDevelopmentBento'
+import { WebDevelopmentFaq } from '@/components/sections/web-development/WebDevelopmentFaq'
+import { WebDevelopmentCta } from '@/components/sections/web-development/WebDevelopmentCta'
+import { WebDevelopmentSeo } from '@/components/sections/web-development/WebDevelopmentSeo'
+import { WebDevelopmentSensory } from '@/components/sections/web-development/WebDevelopmentSensory'
+import StatementSection from '@/components/sections/web-development/StatementSection'
+import { VaultSection } from '@/components/sections/web-development/VaultSection'
+import { WebDevelopmentTimeline } from '@/components/sections/web-development/WebDevelopmentTimeline'
+import ShowcaseSection from '@/components/sections/web-development/ShowcaseSection'
+import ComparadorSection from '@/components/sections/web-development/ComparadorSection'
+import AiSection from '@/components/sections/web-development/AiSection'
+import PortfolioWebCases from '@/components/sections/web-development/PortfolioWebCases'
+import WebDevelopmentByRubro from '@/components/sections/web-development/WebDevelopmentByRubro'
+import WebTemplatesImmersive from '@/components/sections/web-development/WebTemplatesImmersive'
 import { ChargeTraceButton } from '@/components/ui/buttons/ChargeTraceButton'
 
 // CASOS DE USO REALES - Web Development
@@ -452,9 +453,11 @@ export default function WebDevelopmentPage() {
                 <ShowcaseSection />
             </SectionReveal>
 
-            <SectionReveal delay={0.05}>
-                <StatementSection />
-            </SectionReveal>
+            <SectionDivider color="violet" />
+
+            <WebTemplatesImmersive />
+
+            <StatementSection />
 
             <SectionDivider />
 
@@ -470,4 +473,3 @@ export default function WebDevelopmentPage() {
         </main>
     )
 }
-

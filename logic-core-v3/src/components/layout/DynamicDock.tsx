@@ -438,17 +438,17 @@ export function DynamicDock() {
             const current = window.scrollY;
 
             if (current < 50) {
-                setScrollDirection("up");
-                setHoverExpanded(false);
+                setScrollDirection((prev) => (prev === "up" ? prev : "up"));
+                setHoverExpanded((prev) => (prev ? false : prev));
             } else if (current > lastScrollY.current + 5) {
-                setScrollDirection("down");
+                setScrollDirection((prev) => (prev === "down" ? prev : "down"));
             } else if (current < lastScrollY.current - 5) {
-                setScrollDirection("up");
-                setHoverExpanded(false);
+                setScrollDirection((prev) => (prev === "up" ? prev : "up"));
+                setHoverExpanded((prev) => (prev ? false : prev));
             }
 
             lastScrollY.current = current;
-            setScrollPosition(current);
+            setScrollPosition((prev) => (prev === current ? prev : current));
         };
 
         handleResize();

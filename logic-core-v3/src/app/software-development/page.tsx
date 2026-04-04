@@ -12,7 +12,7 @@ import ShowcaseSoftware from '@/components/software/ShowcaseSoftware'
 import StatementSoftware from '@/components/software/StatementSoftware'
 import SocialProofSoftware from '@/components/software/SocialProofSoftware'
 import FaqSoftware from '@/components/software/FaqSoftware'
-import { SoftwareDevelopmentCta } from '@/components/sections/SoftwareDevelopmentCta'
+import { SoftwareDevelopmentCta } from '@/components/sections/software-development/SoftwareDevelopmentCta'
 import VaultSoftware from '@/components/software/VaultSoftware'
 
 // ─── CASOS DE USO REALES — Software ──────────────────────────────────────────

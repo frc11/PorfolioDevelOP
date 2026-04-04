@@ -1,0 +1,22 @@
+﻿<svg width="800" height="500" viewBox="0 0 800 500" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#081023"/>
+      <stop offset="100%" stop-color="#10202D"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(640 380) rotate(-150) scale(280 180)">
+      <stop stop-color="#00E5FF" stop-opacity="0.28"/>
+      <stop offset="1" stop-color="#00E5FF" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="800" height="500" fill="url(#bg)"/>
+  <rect width="800" height="500" fill="url(#glow)"/>
+  <rect x="56" y="62" width="688" height="376" rx="24" fill="#10203D" stroke="#24446E"/>
+  <rect x="98" y="104" width="190" height="18" rx="9" fill="#67E8F9" fill-opacity="0.45"/>
+  <rect x="98" y="136" width="610" height="12" rx="6" fill="#2D4F72"/>
+  <rect x="98" y="160" width="560" height="12" rx="6" fill="#2D4F72"/>
+  <rect x="98" y="204" width="286" height="182" rx="16" fill="#132A4E" stroke="#2C5E90"/>
+  <rect x="404" y="204" width="304" height="54" rx="14" fill="#132A4E" stroke="#2C5E90"/>
+  <rect x="404" y="274" width="304" height="54" rx="14" fill="#132A4E" stroke="#2C5E90"/>
+  <rect x="404" y="344" width="304" height="42" rx="12" fill="#132A4E" stroke="#2C5E90"/>
+</svg>
