@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React, { useState, useEffect, useRef, useMemo } from 'react'
 import { motion, AnimatePresence, useInView, useReducedMotion } from 'motion/react'
@@ -23,11 +23,11 @@ interface Automation {
 interface MockupMessage {
     from: 'client' | 'ai'
     text: string
-    delay: number  // ms para la animación typewriter
+    delay: number  // ms para la animacion typewriter
 }
 
 interface RubroContent {
-    headline: string      // última palabra se colorea
+    headline: string      // ultima palabra se colorea
     headlineAccent: string
     subhead: string
     automations: Automation[]
@@ -37,27 +37,27 @@ interface RubroContent {
 const rubros: Rubro[] = [
     {
         id: 0, slug: 'restaurante',
-        icon: '🍽', label: 'Restaurante',
-        color: '#f97316', colorRgb: '249,115,22',
-        gradient: 'linear-gradient(135deg, #f97316, #ea580c)',
+        icon: '\u{1F37D}', label: 'Restaurante',
+        color: '#34a853', colorRgb: '52,168,83',
+        gradient: 'linear-gradient(135deg, #34a853, #2f9e57)',
     },
     {
         id: 1, slug: 'salud',
-        icon: '🏥', label: 'Salud',
+        icon: '\u{1F3E5}', label: 'Salud',
         color: '#22c55e', colorRgb: '34,197,94',
         gradient: 'linear-gradient(135deg, #22c55e, #16a34a)',
     },
     {
         id: 2, slug: 'comercio',
-        icon: '🏪', label: 'Comercio',
-        color: '#00e5ff', colorRgb: '0,229,255',
-        gradient: 'linear-gradient(135deg, #00e5ff, #0891b2)',
+        icon: '\u{1F3EA}', label: 'Comercio',
+        color: '#34f5c5', colorRgb: '52,245,197',
+        gradient: 'linear-gradient(135deg, #34f5c5, #128c7e)',
     },
     {
         id: 3, slug: 'inmobiliaria',
-        icon: '🏠', label: 'Inmobiliaria',
-        color: '#a855f7', colorRgb: '168,85,247',
-        gradient: 'linear-gradient(135deg, #a855f7, #7b2fff)',
+        icon: '\u{1F3E0}', label: 'Inmobiliaria',
+        color: '#2fbf7a', colorRgb: '22,163,74',
+        gradient: 'linear-gradient(135deg, #2fbf7a, #0fbf73)',
     },
 ]
 
@@ -65,113 +65,113 @@ const rubroContent: Record<number, RubroContent> = {
     0: {
         headline: 'Tu restaurante llena mesas',
         headlineAccent: 'solo.',
-        subhead: 'La IA gestiona reservas, responde WhatsApp y recuerda cumpleaños — sin que toques el celular a las 2AM.',
+        subhead: 'La IA gestiona reservas, responde WhatsApp y recuerda cumpleanos, sin que toques el celular a las 2AM.',
         automations: [
             {
-                icon: '📅', title: 'Reservas automáticas',
+                icon: '\u{1F4C5}', title: 'Reservas automaticas',
                 description: 'Recibe y confirma por WhatsApp 24/7',
-                metric: '↑ 40% ocupación'
+                metric: '\u2191 40% ocupacion'
             },
             {
-                icon: '⭐', title: 'Respuesta a reseñas',
+                icon: '\u2B50', title: 'Respuesta a resenas',
                 description: 'Google Reviews respondidas en 2 horas',
-                metric: '↑ 0.8 estrellas promedio'
+                metric: '\u2191 0.8 estrellas promedio'
             },
             {
-                icon: '🎂', title: 'Fidelización automática',
-                description: 'Descuentos en cumpleaños y fechas especiales',
-                metric: '× 2 retorno de clientes'
+                icon: '\u{1F382}', title: 'Fidelizacion automatica',
+                description: 'Descuentos en cumpleanos y fechas especiales',
+                metric: '\u00D7 2 retorno de clientes'
             },
         ],
         mockupMessages: [
-            { from: 'client', text: '¿Tienen mesa para 4 el sábado a las 21?', delay: 0 },
-            { from: 'ai', text: '¡Claro! Tenemos disponibilidad. ¿A qué nombre reservo?', delay: 800 },
-            { from: 'client', text: 'García', delay: 1600 },
-            { from: 'ai', text: 'Reserva confirmada ✓ García · 4 personas · Sáb 21hs. Te mando recordatorio el viernes 🍽', delay: 2400 },
+            { from: 'client', text: 'Tienen mesa para 4 el sabado a las 21?', delay: 0 },
+            { from: 'ai', text: 'Claro. Tenemos disponibilidad. A que nombre reservo?', delay: 800 },
+            { from: 'client', text: 'Garcia', delay: 1600 },
+            { from: 'ai', text: 'Reserva confirmada \u2713 Garcia \u00B7 4 personas \u00B7 Sab 21hs. Te mando recordatorio el viernes \u{1F37D}', delay: 2400 },
         ],
     },
     1: {
         headline: 'Tu consultorio sin',
         headlineAccent: 'caos.',
-        subhead: 'La IA agenda turnos, manda recordatorios y filtra urgencias — vos llegás a atender, no a administrar.',
+        subhead: 'La IA agenda turnos, manda recordatorios y filtra urgencias. Vos llegas a atender, no a administrar.',
         automations: [
             {
-                icon: '📋', title: 'Agenda inteligente',
+                icon: '\u{1F4CB}', title: 'Agenda inteligente',
                 description: 'Gestiona turnos por WhatsApp sin secretaria',
-                metric: '−60% ausencias'
+                metric: '\u221260% ausencias'
             },
             {
-                icon: '💊', title: 'Recordatorio de medicación',
-                description: 'Mensajes automáticos a pacientes crónicos',
-                metric: '↑ adherencia al tratamiento'
+                icon: '\u{1F48A}', title: 'Recordatorio de medicacion',
+                description: 'Mensajes automaticos a pacientes cronicos',
+                metric: '\u2191 adherencia al tratamiento'
             },
             {
-                icon: '🚨', title: 'Triaje de urgencias',
-                description: 'Detecta síntomas urgentes y prioriza',
+                icon: '\u{1F6A8}', title: 'Triaje de urgencias',
+                description: 'Detecta sintomas urgentes y prioriza',
                 metric: '0 urgencias perdidas'
             },
         ],
         mockupMessages: [
-            { from: 'client', text: 'Necesito turno con la Dra. López', delay: 0 },
-            { from: 'ai', text: '¿Es primera consulta o seguimiento?', delay: 800 },
+            { from: 'client', text: 'Necesito turno con la Dra. Lopez', delay: 0 },
+            { from: 'ai', text: 'Es primera consulta o seguimiento?', delay: 800 },
             { from: 'client', text: 'Seguimiento', delay: 1500 },
-            { from: 'ai', text: 'Perfecto. Hay lugar miércoles 10hs o jueves 17hs. ¿Cuál te viene mejor? 📋', delay: 2300 },
+            { from: 'ai', text: 'Perfecto. Hay lugar miercoles 10hs o jueves 17hs. Cual te viene mejor? \u{1F4CB}', delay: 2300 },
         ],
     },
     2: {
         headline: 'Tu local vende aunque',
         headlineAccent: 'cierre.',
-        subhead: 'La IA responde consultas de productos, toma pedidos y recupera carritos abandonados — a las 3AM si hace falta.',
+        subhead: 'La IA responde consultas de productos, toma pedidos y recupera carritos abandonados, a las 3AM si hace falta.',
         automations: [
             {
-                icon: '🛒', title: 'Catálogo interactivo',
+                icon: '\u{1F6D2}', title: 'Catalogo interactivo',
                 description: 'Stock, tallas y precios al instante',
-                metric: '−80% consultas sin respuesta'
+                metric: '\u221280% consultas sin respuesta'
             },
             {
-                icon: '📦', title: 'Seguimiento de pedidos',
-                description: 'El cliente sabe dónde está su compra',
-                metric: '−70% llamadas de seguimiento'
+                icon: '\u{1F4E6}', title: 'Seguimiento de pedidos',
+                description: 'El cliente sabe donde esta su compra',
+                metric: '\u221270% llamadas de seguimiento'
             },
             {
-                icon: '🔄', title: 'Recuperación de carritos',
-                description: 'Mensaje automático al comprador indeciso',
-                metric: '↑ 25% conversión'
+                icon: '\u{1F504}', title: 'Recuperacion de carritos',
+                description: 'Mensaje automatico al comprador indeciso',
+                metric: '\u2191 25% conversion'
             },
         ],
         mockupMessages: [
-            { from: 'client', text: '¿Tienen la campera negra en talle M?', delay: 0 },
-            { from: 'ai', text: '¡Sí! Stock disponible en M y L. Precio: $45.000. ¿Te reservo una?', delay: 800 },
-            { from: 'client', text: 'Sí, la reservo', delay: 1600 },
-            { from: 'ai', text: 'Reservada ✓ Te paso el link de pago o podés pasar hoy hasta las 20hs 📦', delay: 2400 },
+            { from: 'client', text: 'Tienen la campera negra en talle M?', delay: 0 },
+            { from: 'ai', text: 'Si. Stock disponible en M y L. Precio: $45.000. Te reservo una?', delay: 800 },
+            { from: 'client', text: 'Si, la reservo', delay: 1600 },
+            { from: 'ai', text: 'Reservada \u2713 Te paso el link de pago o podes pasar hoy hasta las 20hs \u{1F4E6}', delay: 2400 },
         ],
     },
     3: {
         headline: 'Tu inmobiliaria trabaja',
         headlineAccent: 'de noche.',
-        subhead: 'La IA califica leads, agenda visitas y matchea propiedades — filtrando curiosos de compradores reales.',
+        subhead: 'La IA califica leads, agenda visitas y matchea propiedades, filtrando curiosos de compradores reales.',
         automations: [
             {
-                icon: '🔍', title: 'Calificación de leads',
-                description: 'Filtra intención real antes de llegar a vos',
-                metric: '× 3 leads calificados'
+                icon: '\u{1F50D}', title: 'Calificacion de leads',
+                description: 'Filtra intencion real antes de llegar a vos',
+                metric: '\u00D7 3 leads calificados'
             },
             {
-                icon: '🏘', title: 'Match de propiedades',
+                icon: '\u{1F3D8}', title: 'Match de propiedades',
                 description: 'Cruza el pedido con tu cartera al instante',
-                metric: '−50% tiempo de búsqueda'
+                metric: '\u221250% tiempo de busqueda'
             },
             {
-                icon: '📅', title: 'Coordinación de visitas',
+                icon: '\u{1F4C5}', title: 'Coordinacion de visitas',
                 description: 'Agenda sin llamadas cruzadas',
-                metric: '↑ 35% visitas realizadas'
+                metric: '\u2191 35% visitas realizadas'
             },
         ],
         mockupMessages: [
             { from: 'client', text: 'Busco depto 2 amb en Yerba Buena hasta $120k', delay: 0 },
-            { from: 'ai', text: 'Tengo 3 opciones. ¿Preferís planta baja o piso alto?', delay: 800 },
-            { from: 'client', text: 'Piso alto con balcón', delay: 1500 },
-            { from: 'ai', text: 'Perfecto, este te va a encantar. ¿Podés visitar mañana o el jueves? 🏠', delay: 2300 },
+            { from: 'ai', text: 'Tengo 3 opciones. Preferis planta baja o piso alto?', delay: 800 },
+            { from: 'client', text: 'Piso alto con balcon', delay: 1500 },
+            { from: 'ai', text: 'Perfecto, este te va a encantar. Podes visitar manana o el jueves? \u{1F3E0}', delay: 2300 },
         ],
     },
 }
@@ -227,7 +227,7 @@ function Header({ isInView, reducedMotion }: { isInView: boolean, reducedMotion:
                     margin: 0
                 }}
             >
-                Elegí tu rubro y mirá qué hace la IA por vos.
+                Elegi tu rubro y mira que hace la IA por vos.
             </motion.p>
 
             <motion.div
@@ -246,7 +246,7 @@ function Header({ isInView, reducedMotion }: { isInView: boolean, reducedMotion:
                 }}
             >
                 <div style={{ display: 'flex' }}>
-                    {['#00ff88', '#7b2fff', '#f97316'].map((c, i) => (
+                    {['#00ff88', '#0fbf73', '#34a853'].map((c, i) => (
                         <div key={i} style={{
                             width: '24px', height: '24px',
                             borderRadius: '50%',
@@ -265,7 +265,7 @@ function Header({ isInView, reducedMotion }: { isInView: boolean, reducedMotion:
                     <strong style={{
                         color: 'white',
                         fontWeight: 700,
-                    }}>+47 negocios</strong> ya automatizados en Tucumán
+                    }}>+47 negocios</strong> ya automatizados en Tucuman
                 </span>
             </motion.div>
         </div>
@@ -290,9 +290,28 @@ function TabSelector({ rubros, active, setActive, isInView, reducedMotion }: { r
                         key={r.id}
                         initial={{ opacity: startOpacity, y: startY }}
                         animate={(isInView || reducedMotion) ? { opacity: 1, y: 0 } : {}}
-                        transition={{ duration: 0.7, delay: 0.25 + index * 0.07, ease: [0.16, 1, 0.3, 1] }}
+                        transition={{
+                            duration: 0.7,
+                            delay: 0.25 + index * 0.07,
+                            ease: [0.16, 1, 0.3, 1],
+                            y: { duration: 0.06, ease: 'linear' },
+                            backgroundColor: { duration: 0.06, ease: 'linear' },
+                            borderColor: { duration: 0.06, ease: 'linear' },
+                            boxShadow: { duration: 0.06, ease: 'linear' },
+                            color: { duration: 0.06, ease: 'linear' },
+                        }}
                         onClick={() => setActive(r.id)}
-                        whileHover={{ y: -2 }}
+                        whileHover={
+                            isActive
+                                ? { y: -2 }
+                                : {
+                                    y: -2,
+                                    backgroundColor: `rgba(${r.colorRgb}, 0.09)`,
+                                    borderColor: `rgba(${r.colorRgb}, 0.3)`,
+                                    boxShadow: `0 0 18px rgba(${r.colorRgb}, 0.12)`,
+                                    color: r.color,
+                                }
+                        }
                         whileTap={{ scale: 0.97 }}
                         className="relative overflow-hidden"
                         style={{
@@ -301,19 +320,20 @@ function TabSelector({ rubros, active, setActive, isInView, reducedMotion }: { r
                             boxShadow: shadow,
                             borderRadius: '14px',
                             padding: 'clamp(14px,2vh,20px) clamp(16px,2vw,24px)',
-                            cursor: 'pointer',
-                            transition: 'all 250ms ease',
+                            cursor: 'default',
+                            transition: 'background-color 60ms linear, border-color 60ms linear, box-shadow 60ms linear, transform 60ms linear, color 60ms linear',
                             display: 'flex',
                             alignItems: 'center',
-                            gap: '10px'
+                            gap: '10px',
+                            color: color,
                         }}
                     >
                         <span style={{ fontSize: '26px' }}>{r.icon}</span>
                         <span style={{
                             fontSize: '14px',
                             fontWeight: 700,
-                            color: color,
-                            transition: 'color 250ms'
+                            color: isActive ? r.color : 'inherit',
+                            transition: 'color 60ms linear'
                         }}>
                             {r.label}
                         </span>
@@ -480,7 +500,7 @@ export default function RubrosIA() {
                 overflow: 'hidden',
             }}
         >
-            {/* Partículas decorativas de fondo */}
+            {/* PartÃ­culas decorativas de fondo */}
             {particles.map((p, i) => (
                 <div key={i} style={{
                     position: 'absolute',
@@ -496,7 +516,7 @@ export default function RubrosIA() {
                 }} />
             ))}
 
-            {/* Glow ambiental — color del rubro activo */}
+            {/* Glow ambiental â€” color del rubro activo */}
             <div style={{
                 position: 'absolute',
                 top: '-100px', left: '50%',
@@ -523,7 +543,7 @@ export default function RubrosIA() {
                 />
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-[clamp(32px,4vw,60px)] mt-[clamp(32px,4vh,52px)] items-start">
-                    {/* ── COLUMNA IZQUIERDA ── */}
+                    {/* â”€â”€ COLUMNA IZQUIERDA â”€â”€ */}
                     <AnimatePresence mode="wait">
                         <motion.div
                             key={active}
@@ -578,7 +598,7 @@ export default function RubrosIA() {
                                             position: 'relative',
                                         }}
                                     >
-                                        {/* Ícono */}
+                                        {/* Ãcono */}
                                         <div style={{
                                             width: '42px',
                                             height: '42px',
@@ -642,7 +662,7 @@ export default function RubrosIA() {
                         </motion.div>
                     </AnimatePresence>
 
-                    {/* ── COLUMNA DERECHA (Prompt 3) ── */}
+                    {/* â”€â”€ COLUMNA DERECHA (Prompt 3) â”€â”€ */}
                     <AnimatePresence mode="wait">
                         <motion.div
                             key={active}
@@ -655,6 +675,7 @@ export default function RubrosIA() {
                                 border: '1px solid rgba(255,255,255,0.08)',
                                 borderRadius: '24px',
                                 overflow: 'hidden',
+                                width: '100%',
                                 maxWidth: '380px',
                                 margin: '0 auto',
                                 boxShadow: `0 0 60px rgba(${rubro.colorRgb}, 0.08), 0 24px 64px rgba(0,0,0,0.5)`,
@@ -680,7 +701,7 @@ export default function RubrosIA() {
                                     fontSize: '16px',
                                     flexShrink: 0,
                                 }}>
-                                    🤖
+                                    {'\u{1F916}'}
                                 </div>
                                 <div>
                                     <p style={{
@@ -693,18 +714,20 @@ export default function RubrosIA() {
                                         fontSize: '11px', margin: 0,
                                         color: rubro.color,
                                     }}>
-                                        ● En línea ahora
+                                        {'\u25CF'} En linea ahora
                                     </p>
                                 </div>
                             </div>
 
-                            {/* Área de mensajes */}
+                            {/* Area de mensajes */}
                             <div style={{
                                 padding: '16px',
-                                minHeight: '260px',
+                                height: '260px',
                                 display: 'flex',
                                 flexDirection: 'column',
+                                justifyContent: 'flex-end',
                                 gap: '10px',
+                                overflow: 'hidden',
                             }}>
                                 <VisibleMessages
                                     messages={rubroContent[active].mockupMessages}
@@ -729,7 +752,7 @@ export default function RubrosIA() {
                                     fontSize: '12px',
                                     color: 'rgba(255,255,255,0.2)',
                                 }}>
-                                    Escribí tu mensaje...
+                                    Escribi tu mensaje...
                                 </div>
                                 <div style={{
                                     width: '36px', height: '36px',
@@ -738,16 +761,16 @@ export default function RubrosIA() {
                                     display: 'flex',
                                     alignItems: 'center',
                                     justifyContent: 'center',
-                                    cursor: 'pointer',
+                                    cursor: 'default',
                                 }}>
-                                    ↑
+                                    {'\u2191'}
                                 </div>
                             </div>
                         </motion.div>
                     </AnimatePresence>
                 </div>
 
-                {/* LÍNEA DECORATIVA INFERIOR */}
+                {/* Linea decorativa inferior */}
                 <motion.div
                     initial={{ scaleX: reducedMotion ? 1 : 0 }}
                     animate={(isInView || reducedMotion) ? { scaleX: 1 } : {}}
@@ -779,3 +802,4 @@ export default function RubrosIA() {
         </section>
     )
 }
+
