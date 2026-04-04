@@ -464,25 +464,25 @@ function ResultHeader({ resultado }: { resultado: DiagnosticoResult }) {
       <div style={{ position:'absolute', top:0, left:0, right:0, height:'2px', background:`linear-gradient(90deg, transparent, rgba(${resultado.colorRgb},0.8) 30%, rgba(${resultado.colorRgb},0.8) 70%, transparent)` }}/>
       <div style={{ position:'absolute', top:'-20px', left:'-20px', width:'200px', height:'200px', background:`radial-gradient(circle, rgba(${resultado.colorRgb},0.12) 0%, transparent 65%)`, filter:'blur(30px)', pointerEvents:'none' }}/>
 
-      <div className="flex flex-wrap gap-5 justify-between items-start relative z-10">
-        <div style={{ display:'flex', alignItems:'flex-start', gap:'20px', flexWrap:'wrap' }}>
+      <div style={{ display:'grid', gridTemplateColumns:'minmax(0,1fr) auto', gap:'20px', alignItems:'start', position:'relative', zIndex:10 }}>
+        <div style={{ display:'flex', alignItems:'flex-start', gap:'20px', flexWrap:'nowrap', minWidth:0 }}>
           <div style={{ width:'72px', height:'72px', borderRadius:'20px', background:`rgba(${resultado.colorRgb},0.15)`, border:`1px solid rgba(${resultado.colorRgb},0.3)`, display:'flex', alignItems:'center', justifyContent:'center', fontSize:'36px', flexShrink:0, boxShadow:`0 0 30px rgba(${resultado.colorRgb},0.2)` }}>
             {resultado.icon}
           </div>
 
-          <div style={{ flex:1, minWidth:'180px' }}>
+          <div style={{ flex:1, minWidth:0 }}>
             <p style={{ fontSize:'11px', letterSpacing:'0.25em', color:`rgba(${resultado.colorRgb},0.7)`, fontWeight:600, margin:'0 0 8px', textTransform:'uppercase' }}>Tu diagnóstico</p>
             <h2 style={{ fontSize:'clamp(22px,3vw,36px)', fontWeight:900, color:'white', margin:'0 0 6px', lineHeight:1.15 }}>{resultado.title}</h2>
             <p style={{ fontSize:'16px', color:`rgba(${resultado.colorRgb},0.8)`, fontWeight:600, margin:0 }}>{resultado.subtitle}</p>
           </div>
         </div>
 
-        <div className="flex flex-row md:flex-col gap-3 w-full md:w-auto">
-          <div style={{ flex: 1, background:`rgba(${resultado.colorRgb},0.08)`, border:`1px solid rgba(${resultado.colorRgb},0.2)`, borderRadius:'10px', padding:'8px 14px', textAlign:'right' }}>
+        <div style={{ display:'flex', flexDirection:'column', gap:'10px', width:'176px', flexShrink:0, alignSelf:'start' }}>
+          <div style={{ background:`rgba(${resultado.colorRgb},0.08)`, border:`1px solid rgba(${resultado.colorRgb},0.2)`, borderRadius:'10px', padding:'8px 14px', textAlign:'right' }}>
             <p style={{ fontSize:'10px', color:'rgba(255,255,255,0.3)', margin:'0 0 2px', letterSpacing:'0.1em' }}>TIEMPO ESTIMADO</p>
             <p style={{ fontSize:'15px', fontWeight:800, color:'white', margin:0 }}>{resultado.timeEstimate}</p>
           </div>
-          <div style={{ flex: 1, background:`rgba(${resultado.colorRgb},0.08)`, border:`1px solid rgba(${resultado.colorRgb},0.2)`, borderRadius:'10px', padding:'8px 14px', textAlign:'right' }}>
+          <div style={{ background:`rgba(${resultado.colorRgb},0.08)`, border:`1px solid rgba(${resultado.colorRgb},0.2)`, borderRadius:'10px', padding:'8px 14px', textAlign:'right' }}>
             <p style={{ fontSize:'10px', color:'rgba(255,255,255,0.3)', margin:'0 0 2px', letterSpacing:'0.1em' }}>INVERSIÓN</p>
             <p style={{ fontSize:'15px', fontWeight:800, color:resultado.color, margin:0 }}>{resultado.priceRange}</p>
           </div>

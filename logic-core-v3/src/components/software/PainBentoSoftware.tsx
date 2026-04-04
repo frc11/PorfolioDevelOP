@@ -172,6 +172,7 @@ function BentoFlipCard({
   onFirstFlip: () => void
 }) {
   const { caos, orden } = pair
+  const violetRgb = '123,47,255'
   const isReduced = useReducedMotion()
   const [flipped, setFlipped] = useState(false)
   const [everHovered, setEverHovered] = useState(false)
@@ -232,19 +233,35 @@ function BentoFlipCard({
         ease: [0.16, 1, 0.3, 1],
       }}
     >
+      <div
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        onClick={handleToggle}
+        style={{
+          position: 'absolute',
+          inset: '-4px',
+          zIndex: 30,
+          cursor: 'none',
+        }}
+      />
+
       <motion.div
         animate={{ rotateY: isReduced ? 0 : (flipped ? 180 : 0) }}
         transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
-        onClick={handleToggle}
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
         style={{
           position: 'relative',
           width: '100%',
           height: '100%',
-          minHeight: pair.size === 'large' ? '220px' : pair.size === 'small' ? '100%' : '180px',
+          minHeight:
+            pair.id === 0 || pair.id === 5
+              ? '252px'
+              : pair.size === 'large'
+                ? '220px'
+                : pair.size === 'small'
+                  ? '100%'
+                  : '180px',
           transformStyle: 'preserve-3d',
-          cursor: 'pointer',
+          pointerEvents: 'none',
         }}
       >
         {/* CARA FRENTE — CAOS */}
@@ -272,7 +289,7 @@ function BentoFlipCard({
 
           <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '2px', background: `linear-gradient(90deg, transparent, rgba(${caos.colorRgb},0.6) 40%, rgba(${caos.colorRgb},0.6) 60%, transparent)` }}/>
 
-          <div style={{ position: 'relative', zIndex: 1 }}>
+          <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', height: '100%' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
               <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: `rgba(${caos.colorRgb},0.1)`, border: `1px solid rgba(${caos.colorRgb},0.2)`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px' }}>
                 {caos.icon}
@@ -290,8 +307,8 @@ function BentoFlipCard({
               </motion.div>
             )}
 
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: `rgba(${caos.colorRgb},0.08)`, border: `1px solid rgba(${caos.colorRgb},0.2)`, borderRadius: '8px', padding: '6px 12px' }}>
-              <span style={{ fontSize: '11px', color: `rgba(${caos.colorRgb},0.9)`, fontWeight: 600, lineHeight: 1.4 }}>{caos.detail}</span>
+            <div style={{ display: 'inline-block', maxWidth: '100%', marginTop: 'auto', background: `rgba(${caos.colorRgb},0.08)`, border: `1px solid rgba(${caos.colorRgb},0.2)`, borderRadius: '8px', padding: '6px 12px' }}>
+              <span style={{ display: 'block', fontSize: '11px', color: `rgba(${caos.colorRgb},0.9)`, fontWeight: 600, lineHeight: 1.4, whiteSpace: 'normal', wordBreak: 'break-word' }}>{caos.detail}</span>
             </div>
           </div>
 
@@ -310,31 +327,31 @@ function BentoFlipCard({
           backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden',
           transform: isReduced ? 'none' : 'rotateY(180deg)',
           borderRadius: '20px', overflow: 'hidden',
-          background: `linear-gradient(135deg, rgba(${orden.colorRgb},0.1) 0%, rgba(255,255,255,0.03) 100%)`,
-          border: `1px solid rgba(${orden.colorRgb},0.25)`,
-          boxShadow: `inset 0 1px 0 rgba(255,255,255,0.1), 0 0 40px rgba(${orden.colorRgb},0.1), 0 8px 32px rgba(0,0,0,0.5)`,
+          background: `linear-gradient(135deg, rgba(${violetRgb},0.1) 0%, rgba(255,255,255,0.03) 100%)`,
+          border: `1px solid rgba(${violetRgb},0.25)`,
+          boxShadow: `inset 0 1px 0 rgba(255,255,255,0.1), 0 0 40px rgba(${violetRgb},0.1), 0 8px 32px rgba(0,0,0,0.5)`,
           padding: 'clamp(18px,2.5vw,28px)',
           display: isReduced && !flipped ? 'none' : 'block',
           zIndex: isReduced && flipped ? 5 : undefined,
         }}>
-          <div style={{ position: 'absolute', bottom: '-8px', right: '12px', fontSize: '88px', fontWeight: 900, lineHeight: 1, color: `rgba(${orden.colorRgb},0.06)`, userSelect: 'none', pointerEvents: 'none' }}>
+          <div style={{ position: 'absolute', bottom: '-8px', right: '12px', fontSize: '88px', fontWeight: 900, lineHeight: 1, color: `rgba(${violetRgb},0.06)`, userSelect: 'none', pointerEvents: 'none' }}>
             {String(pair.id + 1).padStart(2,'0')}
           </div>
-          <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '2px', background: `linear-gradient(90deg, transparent, rgba(${orden.colorRgb},0.8) 40%, rgba(${orden.colorRgb},0.8) 60%, transparent)` }}/>
-          <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '60px', background: `linear-gradient(to bottom, rgba(${orden.colorRgb},0.08), transparent)`, pointerEvents: 'none' }}/>
+          <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '2px', background: `linear-gradient(90deg, transparent, rgba(${violetRgb},0.8) 40%, rgba(${violetRgb},0.8) 60%, transparent)` }}/>
+          <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '60px', background: `linear-gradient(to bottom, rgba(${violetRgb},0.08), transparent)`, pointerEvents: 'none' }}/>
 
-          <div style={{ position: 'relative', zIndex: 1 }}>
+          <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', height: '100%' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
-              <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: `rgba(${orden.colorRgb},0.15)`, border: `1px solid rgba(${orden.colorRgb},0.3)`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', boxShadow: `0 0 16px rgba(${orden.colorRgb},0.2)` }}>
+              <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: `rgba(${violetRgb},0.15)`, border: `1px solid rgba(${violetRgb},0.3)`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', boxShadow: `0 0 16px rgba(${violetRgb},0.2)` }}>
                 {orden.icon}
               </div>
-              <span style={{ fontSize: '9px', letterSpacing: '0.2em', color: `rgba(${orden.colorRgb},0.8)`, fontWeight: 700, border: `1px solid rgba(${orden.colorRgb},0.3)`, borderRadius: '100px', padding: '3px 8px', background: `rgba(${orden.colorRgb},0.08)` }}>CON DEVELOP</span>
+              <span style={{ fontSize: '9px', letterSpacing: '0.2em', color: `rgba(${violetRgb},0.8)`, fontWeight: 700, border: `1px solid rgba(${violetRgb},0.3)`, borderRadius: '100px', padding: '3px 8px', background: `rgba(${violetRgb},0.08)` }}>CON DEVELOP</span>
             </div>
             <h3 style={{ fontSize: pair.size === 'large' ? 'clamp(20px,2.5vw,28px)' : '18px', fontWeight: 900, color: 'white', margin: '0 0 8px' }}>{orden.title}</h3>
             <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.5)', lineHeight: 1.6, margin: '0 0 16px', maxWidth: pair.size === 'large' ? '440px' : '100%' }}>{orden.description}</p>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: `rgba(${orden.colorRgb},0.1)`, border: `1px solid rgba(${orden.colorRgb},0.3)`, borderRadius: '8px', padding: '6px 12px' }}>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', maxWidth: '100%', marginTop: 'auto', background: `rgba(${violetRgb},0.1)`, border: `1px solid rgba(${violetRgb},0.3)`, borderRadius: '8px', padding: '6px 12px' }}>
               <span style={{ color:'#4ade80', fontSize:'12px' }}>✓</span>
-              <span style={{ fontSize: '11px', color: `rgba(${orden.colorRgb},1)`, fontWeight: 700 }}>{orden.detail}</span>
+              <span style={{ fontSize: '11px', color: `rgba(${violetRgb},1)`, fontWeight: 700, whiteSpace: 'normal', wordBreak: 'break-word' }}>{orden.detail}</span>
             </div>
           </div>
         </div>

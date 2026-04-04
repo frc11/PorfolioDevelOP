@@ -171,21 +171,21 @@ function PathDots({
             {!reducedMotion &&
                 trigger &&
                 dotCoords.map((point) => (
-                        <g key={`${d}-${point.id}`}>
-                            <circle
-                                cx={point.x}
-                                cy={point.y}
-                                r="8"
-                                fill={color}
-                                opacity="0.14"
-                            />
-                            <circle
-                                cx={point.x}
-                                cy={point.y}
-                                r="3.2"
-                                fill={color}
-                            />
-                        </g>
+                    <g key={`${d}-${point.id}`}>
+                        <circle
+                            cx={point.x}
+                            cy={point.y}
+                            r="8"
+                            fill={color}
+                            opacity="0.14"
+                        />
+                        <circle
+                            cx={point.x}
+                            cy={point.y}
+                            r="3.2"
+                            fill={color}
+                        />
+                    </g>
                 ))}
         </>
     )
@@ -261,13 +261,13 @@ export default function ArchitectureSoftware() {
             />
 
             <div className="relative mx-auto max-w-7xl">
-                <div className="grid items-center gap-14 lg:grid-cols-[0.88fr_1.12fr] lg:gap-20">
+                <div className="grid items-start gap-12 lg:grid-cols-[1.02fr_0.98fr] lg:gap-14">
                     <motion.div
                         variants={containerVariants}
                         initial="hidden"
                         whileInView="visible"
                         viewport={{ once: true, amount: 0.4 }}
-                        className="relative z-10"
+                        className="relative z-10 max-w-3xl"
                     >
                         <motion.div
                             variants={lineVariants}
@@ -284,11 +284,10 @@ export default function ArchitectureSoftware() {
                                 <div key={line} className="overflow-hidden">
                                     <motion.h2
                                         variants={lineVariants}
-                                        className={`text-[clamp(2.25rem,5vw,4.6rem)] font-black leading-[0.9] tracking-[-0.06em] ${
-                                            index === copyLines.length - 1
-                                                ? 'bg-gradient-to-r from-white via-indigo-200 to-cyan-200 bg-clip-text text-transparent'
-                                                : 'text-white'
-                                        }`}
+                                        className={`text-[clamp(2rem,4.1vw,3.95rem)] font-black leading-[0.94] tracking-[-0.045em] ${index === copyLines.length - 1
+                                            ? 'bg-gradient-to-r from-white via-indigo-200 to-cyan-200 bg-clip-text text-transparent'
+                                            : 'text-white'
+                                            }`}
                                     >
                                         {line}
                                     </motion.h2>
@@ -318,7 +317,7 @@ export default function ArchitectureSoftware() {
                         </motion.div>
                     </motion.div>
 
-                    <div ref={diagramRef} className="relative z-10">
+                    <div ref={diagramRef} className="relative z-10 lg:pt-2">
                         <motion.div
                             aria-hidden="true"
                             style={{ scale: pulseScale, opacity: pulseOpacity }}

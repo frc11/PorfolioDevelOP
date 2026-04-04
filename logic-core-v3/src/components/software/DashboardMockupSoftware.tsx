@@ -168,7 +168,18 @@ export default function DashboardMockupSoftware() {
         <motion.div
           initial={reducedMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 32 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+          whileHover={{
+            y: -2,
+            boxShadow:
+              '0 0 0 1px rgba(123,47,255,0.18), 0 36px 88px rgba(0,0,0,0.52), 0 0 70px rgba(123,47,255,0.12)',
+          }}
+          transition={{
+            duration: 0.8,
+            delay: 0.2,
+            ease: [0.16, 1, 0.3, 1],
+            y: { duration: 0.08, ease: 'linear' },
+            boxShadow: { duration: 0.08, ease: 'linear' },
+          }}
           className="relative rounded-2xl overflow-hidden"
           style={{
             background: 'rgba(15,15,30,0.95)',
@@ -242,7 +253,22 @@ export default function DashboardMockupSoftware() {
                   key={w.label}
                   initial={reducedMotion ? { opacity: 1 } : { opacity: 0, scale: 0.95 }}
                   animate={isInView ? { opacity: 1, scale: 1 } : {}}
-                  transition={{ duration: 0.5, delay: 0.35 + idx * 0.08 }}
+                  whileHover={{
+                    y: -2,
+                    scale: 1.008,
+                    borderColor: `rgba(${w.colorRgb},0.38)`,
+                    boxShadow: `0 0 0 1px rgba(${w.colorRgb},0.24), 0 12px 26px rgba(${w.colorRgb},0.15)`,
+                    background: `linear-gradient(135deg, rgba(${w.colorRgb},0.13) 0%, rgba(255,255,255,0.03) 100%)`,
+                  }}
+                  transition={{
+                    duration: 0.5,
+                    delay: 0.35 + idx * 0.08,
+                    y: { duration: 0.07, ease: 'linear' },
+                    scale: { duration: 0.07, ease: 'linear' },
+                    borderColor: { duration: 0.07, ease: 'linear' },
+                    boxShadow: { duration: 0.08, ease: 'linear' },
+                    background: { duration: 0.08, ease: 'linear' },
+                  }}
                   className="rounded-xl p-4 relative overflow-hidden"
                   style={{
                     background: `linear-gradient(135deg, rgba(${w.colorRgb},0.08) 0%, rgba(255,255,255,0.02) 100%)`,
@@ -276,7 +302,18 @@ export default function DashboardMockupSoftware() {
               <motion.div
                 initial={reducedMotion ? { opacity: 1 } : { opacity: 0, y: 12 }}
                 animate={isInView ? { opacity: 1, y: 0 } : {}}
-                transition={{ duration: 0.6, delay: 0.55 }}
+                whileHover={{
+                  y: -2,
+                  borderColor: 'rgba(123,47,255,0.26)',
+                  boxShadow: '0 0 0 1px rgba(123,47,255,0.16), 0 12px 24px rgba(123,47,255,0.12)',
+                }}
+                transition={{
+                  duration: 0.6,
+                  delay: 0.55,
+                  y: { duration: 0.07, ease: 'linear' },
+                  borderColor: { duration: 0.07, ease: 'linear' },
+                  boxShadow: { duration: 0.08, ease: 'linear' },
+                }}
                 className="rounded-xl p-5"
                 style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }}
               >
@@ -294,11 +331,17 @@ export default function DashboardMockupSoftware() {
                       initial={reducedMotion ? {} : { height: 0 }}
                       animate={isInView ? { height: `${pct}%` } : { height: 0 }}
                       transition={{ duration: 0.6, delay: 0.6 + i * 0.04, ease: [0.16, 1, 0.3, 1] }}
+                      whileHover={{
+                        scaleY: 1.08,
+                        filter: 'brightness(1.16)',
+                      }}
                       style={{
+                        transformOrigin: 'bottom center',
                         background: i === 9
                           ? 'linear-gradient(to top, rgba(99,102,241,0.8), rgba(123,47,255,0.9))'
                           : `rgba(99,102,241,0.${Math.round(pct / 20 + 1)})`,
                         boxShadow: i === 9 ? '0 0 12px rgba(99,102,241,0.4)' : 'none',
+                        transition: 'transform 70ms linear, filter 70ms linear',
                       }}
                     />
                   ))}
@@ -314,7 +357,18 @@ export default function DashboardMockupSoftware() {
               <motion.div
                 initial={reducedMotion ? { opacity: 1 } : { opacity: 0, y: 12 }}
                 animate={isInView ? { opacity: 1, y: 0 } : {}}
-                transition={{ duration: 0.6, delay: 0.65 }}
+                whileHover={{
+                  y: -2,
+                  borderColor: 'rgba(123,47,255,0.24)',
+                  boxShadow: '0 0 0 1px rgba(123,47,255,0.14), 0 12px 24px rgba(123,47,255,0.1)',
+                }}
+                transition={{
+                  duration: 0.6,
+                  delay: 0.65,
+                  y: { duration: 0.07, ease: 'linear' },
+                  borderColor: { duration: 0.07, ease: 'linear' },
+                  boxShadow: { duration: 0.08, ease: 'linear' },
+                }}
                 className="rounded-xl p-5"
                 style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }}
               >
@@ -332,7 +386,19 @@ export default function DashboardMockupSoftware() {
                       initial={reducedMotion ? { opacity: 1 } : { opacity: 0, x: -8 }}
                       animate={isInView ? { opacity: 1, x: 0 } : {}}
                       transition={{ duration: 0.4, delay: 0.7 + i * 0.07 }}
+                      whileHover={{
+                        x: 2,
+                        background: 'rgba(123,47,255,0.08)',
+                        borderColor: 'rgba(123,47,255,0.26)',
+                      }}
                       className="flex items-start gap-3"
+                      style={{
+                        border: '1px solid transparent',
+                        borderRadius: '10px',
+                        padding: '6px 8px',
+                        margin: '-2px -4px',
+                        transition: 'all 70ms linear',
+                      }}
                     >
                       <div
                         className="w-1.5 h-1.5 rounded-full mt-1.5 shrink-0"
