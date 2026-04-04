@@ -359,9 +359,18 @@ export default function PainBentoSoftware() {
     <section ref={sectionRef} style={{ padding: 'clamp(80px,12vh,140px) clamp(20px,5vw,80px)', background: '#080810', position: 'relative', overflow: 'hidden' }}>
       
       {/* ATMÓSFERA — GLOWS */}
-      <div style={{ position: 'absolute', top: '15%', left: '-8%', width: '500px', height: '400px', background: 'radial-gradient(ellipse, rgba(239,68,68,0.04) 0%, transparent 60%)', filter: 'blur(90px)', pointerEvents: 'none', 'aria-hidden': 'true', zIndex: 0 } as any}/>
-      <div style={{ position: 'absolute', top: '15%', right: '-8%', width: '600px', height: '500px', background: 'radial-gradient(ellipse, rgba(99,102,241,0.06) 0%, transparent 60%)', filter: 'blur(100px)', pointerEvents: 'none', 'aria-hidden': 'true', zIndex: 0 } as any}/>
-      <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: '700px', height: '300px', background: 'radial-gradient(ellipse, rgba(123,47,255,0.03) 0%, transparent 65%)', filter: 'blur(120px)', pointerEvents: 'none', 'aria-hidden': 'true', zIndex: 0 } as any}/>
+      <div
+        aria-hidden="true"
+        style={{ position: 'absolute', top: '15%', left: '-8%', width: '500px', height: '400px', background: 'radial-gradient(ellipse, rgba(239,68,68,0.04) 0%, transparent 60%)', filter: 'blur(90px)', pointerEvents: 'none', zIndex: 0 }}
+      />
+      <div
+        aria-hidden="true"
+        style={{ position: 'absolute', top: '15%', right: '-8%', width: '600px', height: '500px', background: 'radial-gradient(ellipse, rgba(99,102,241,0.06) 0%, transparent 60%)', filter: 'blur(100px)', pointerEvents: 'none', zIndex: 0 }}
+      />
+      <div
+        aria-hidden="true"
+        style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: '700px', height: '300px', background: 'radial-gradient(ellipse, rgba(123,47,255,0.03) 0%, transparent 65%)', filter: 'blur(120px)', pointerEvents: 'none', zIndex: 0 }}
+      />
 
       <svg style={{ position: 'absolute', width: 0, height: 0 }}>
         <filter id="noise">

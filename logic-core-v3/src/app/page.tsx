@@ -5,16 +5,16 @@ import dynamic from 'next/dynamic'
 
 // Heavy Components Lazy Loaded
 const Hero = dynamic(() => import('@/components/layout/Hero').then(mod => mod.Hero), { ssr: true })
-const Footer = dynamic(() => import('@/components/sections/Footer').then(mod => mod.Footer), { ssr: true })
-const WhyDevelOP = dynamic(() => import('@/components/sections/WhyDevelOP').then(mod => mod.WhyDevelOP), { ssr: true })
+const Footer = dynamic(() => import('@/components/sections/home/Footer').then(mod => mod.Footer), { ssr: true })
+const WhyDevelOP = dynamic(() => import('@/components/sections/home/WhyDevelOP').then(mod => mod.WhyDevelOP), { ssr: true })
 
-import { About } from '@/components/sections/About'
-import { Portfolio } from '@/components/sections/Portfolio'
-import OurServices from '@/components/sections/OurServices';
-import { PortalDemo } from '@/components/sections/PortalDemo';
+import { About } from '@/components/sections/home/About'
+import { Portfolio } from '@/components/sections/home/Portfolio'
+import OurServices from '@/components/sections/home/OurServices';
+import { PortalDemo } from '@/components/sections/home/PortalDemo';
 
 
-import { InfiniteReviews } from '@/components/sections/InfiniteReviews'
+import { InfiniteReviews } from '@/components/sections/home/InfiniteReviews'
 import { motion } from 'framer-motion'
 import { ThemeProvider, useTheme } from '@/hooks/useThemeObserver'
 

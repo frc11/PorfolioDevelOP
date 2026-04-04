@@ -82,7 +82,9 @@ function CountUp({ to, formatDisplay, delay = 0 }: { to: number; formatDisplay: 
   const isReduced = useReducedMotion()
 
   useEffect(() => {
-    if (isReduced) { setVal(to); return }
+    if (isReduced) return
+
+    let rafId = 0
     const timer = setTimeout(() => {
       const dur = 900
       const start = performance.now()
@@ -90,15 +92,19 @@ function CountUp({ to, formatDisplay, delay = 0 }: { to: number; formatDisplay: 
         const t = Math.min((now - start) / dur, 1)
         const ease = 1 - Math.pow(1 - t, 3)
         setVal(to * ease)
-        if (t < 1) requestAnimationFrame(raf)
+        if (t < 1) rafId = requestAnimationFrame(raf)
         else setVal(to)
       }
-      requestAnimationFrame(raf)
+      rafId = requestAnimationFrame(raf)
     }, delay * 1000)
-    return () => clearTimeout(timer)
+
+    return () => {
+      clearTimeout(timer)
+      if (rafId) cancelAnimationFrame(rafId)
+    }
   }, [to, delay, isReduced])
 
-  return <span>{formatDisplay(val)}</span>
+  return <span>{formatDisplay(isReduced ? to : val)}</span>
 }
 
 export default function DashboardMockupSoftware() {
@@ -298,8 +304,8 @@ export default function DashboardMockupSoftware() {
                   ))}
                 </div>
                 <div className="flex gap-1.5 mt-2">
-                  {barLabels.map((l) => (
-                    <div key={l} className="flex-1 text-center text-[9px] text-white/20 font-mono">{l}</div>
+                  {barLabels.map((l, i) => (
+                    <div key={`${l}-${i}`} className="flex-1 text-center text-[9px] text-white/20 font-mono">{l}</div>
                   ))}
                 </div>
               </motion.div>
