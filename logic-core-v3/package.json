@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "seed:agency-os": "ts-node prisma/seed-agency-os.ts"
   },
   "dependencies": {
     "@ai-sdk/google": "^0.0.52",
@@ -53,6 +54,12 @@
   "prisma": {
     "seed": "npx tsx prisma/seed.ts"
   },
+  "ts-node": {
+    "compilerOptions": {
+      "module": "CommonJS",
+      "moduleResolution": "node"
+    }
+  },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@types/bcryptjs": "^2.4.6",
@@ -62,6 +69,7 @@
     "eslint": "^9",
     "eslint-config-next": "^16.2.1",
     "tailwindcss": "^4",
+    "ts-node": "^10.9.2",
     "typescript": "^5"
   }
 }
