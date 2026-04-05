@@ -131,7 +131,6 @@ function StatementContent({ progress, shouldReduceMotion }: { progress: number, 
 
   const renderWord = (w: Word, i: number) => {
     const op = getOpacity(w.s, w.e)
-    const spacing = shouldReduceMotion ? 'normal' : `${(1 - op) * 0.4}em`
     const translate = shouldReduceMotion ? 0 : (1 - op) * 12
     const rotate = shouldReduceMotion ? 0 : (1 - op) * -5
     const scale = shouldReduceMotion ? 1 : 0.9 + (op * 0.1)
@@ -140,43 +139,57 @@ function StatementContent({ progress, shouldReduceMotion }: { progress: number, 
       <span key={i} style={{
         display: 'inline-block',
         marginRight: '0.28em',
-        opacity: op,
-        filter: shouldReduceMotion ? 'none' : `blur(${(1 - op) * 10}px)`,
-        transform: `translateY(${translate}px) rotate(${rotate}deg) scale(${scale})`,
-        letterSpacing: spacing,
-        transition: 'none',
         position: 'relative',
-        willChange: 'opacity, transform, filter',
-        color: w.color === 'indigo' ? '#6366f1' : 'white',
+        whiteSpace: 'nowrap',
+        verticalAlign: 'top',
       }}>
-        {w.color === 'gradient' ? (
-          <span className="relative">
-            <span className="absolute inset-0 bg-indigo-500/20 blur-xl opacity-50 z-[-1]" />
-            <span style={{
-              background: 'linear-gradient(135deg, #fff 0%, #6366f1 40%, #7b2fff 60%, #fff 100%)',
-              backgroundSize: '200% auto',
-              backgroundPosition: `${-progress * 100}% center`,
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text',
-              fontWeight: 900
-            }}>
-              {w.text}
+        <span style={{ visibility: 'hidden', opacity: 0 }}>
+          {w.text}
+        </span>
+
+        <span
+          style={{
+            position: 'absolute',
+            inset: 0,
+            opacity: op,
+            filter: shouldReduceMotion ? 'none' : `blur(${(1 - op) * 10}px)`,
+            transform: `translateY(${translate}px) rotate(${rotate}deg) scale(${scale})`,
+            transformOrigin: 'left center',
+            transition: 'none',
+            willChange: 'opacity, transform, filter',
+            color: w.color === 'indigo' ? '#6366f1' : 'white',
+            letterSpacing: shouldReduceMotion ? 'normal' : `${(1 - op) * 0.4}em`,
+          }}
+        >
+          {w.color === 'gradient' ? (
+            <span className="relative">
+              <span className="absolute inset-0 bg-indigo-500/20 blur-xl opacity-50 z-[-1]" />
+              <span style={{
+                background: 'linear-gradient(135deg, #fff 0%, #6366f1 40%, #7b2fff 60%, #fff 100%)',
+                backgroundSize: '200% auto',
+                backgroundPosition: `${-progress * 100}% center`,
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
+                fontWeight: 900
+              }}>
+                {w.text}
+              </span>
             </span>
-          </span>
-        ) : (
-          <>
-            {w.text}
-            {op > 0.3 && op < 0.9 && !shouldReduceMotion && (
-              <span 
-                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent z-1"
-                style={{
-                  transform: `translateX(${(op - 0.5) * 200}%) skew(-20deg)`
-                }}
-              />
-            )}
-          </>
-        )}
+          ) : (
+            <>
+              {w.text}
+              {op > 0.3 && op < 0.9 && !shouldReduceMotion && (
+                <span
+                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent z-1"
+                  style={{
+                    transform: `translateX(${(op - 0.5) * 200}%) skew(-20deg)`
+                  }}
+                />
+              )}
+            </>
+          )}
+        </span>
       </span>
     )
   }
@@ -223,7 +236,7 @@ function StatementContent({ progress, shouldReduceMotion }: { progress: number, 
       </p>
 
       <div
-        className="absolute left-1/2 -translate-x-1/2 mt-20 flex flex-col items-center gap-6"
+        className="absolute left-1/2 -translate-x-1/2 mt-12 flex flex-col items-center gap-6"
         style={{
           opacity: badgeOpacity,
           transform: `translate(-50%, ${(1 - badgeOpacity) * 40}px)`,
@@ -282,7 +295,7 @@ export default function StatementSoftware() {
     <section ref={sectionRef} className="relative h-[350vh] bg-[#06060f] z-0">
       <div className="sticky top-0 h-screen flex items-center justify-center overflow-hidden bg-[#06060f]"
         style={{
-          opacity: progress < 0.03 ? progress / 0.03 : progress > 0.96 ? 1 - ((progress - 0.96) / 0.04) : 1
+          opacity: progress < 0.03 ? progress / 0.03 : 1
         }}
       >
         <PrimeAtmosphere progress={progress} />

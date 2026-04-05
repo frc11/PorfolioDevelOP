@@ -58,7 +58,7 @@ export default function FaqSoftware() {
                 }}
             />
 
-            <div className="relative z-10 max-w-4xl mx-auto px-4 lg:px-6">
+            <div className="relative z-10 max-w-4xl mx-auto px-6 lg:px-10">
                 {/* Header */}
                 <motion.div
                     initial={{ opacity: 0, y: 24 }}
@@ -133,7 +133,7 @@ export default function FaqSoftware() {
                                     className="w-full text-left relative"
                                     style={{
                                         borderBottom: `1px solid ${isOpen ? "rgba(99,102,241,0.2)" : "rgba(255,255,255,0.06)"}`,
-                                        padding: "clamp(18px, 2.5vh, 28px) 0",
+                                        padding: "clamp(18px, 2.5vh, 28px) clamp(8px, 1vw, 14px)",
                                         transition: "border-color 200ms",
                                     }}
                                     aria-expanded={isOpen}

@@ -138,11 +138,11 @@ export default function SoftwareDevelopmentPage() {
 
             <SectionDivider />
 
+            <VaultSoftware />
             <SectionReveal delay={0.05}>
                 <SoftwareDevelopmentCta />
             </SectionReveal>
 
-            <VaultSoftware />
         </main>
     )
 }
