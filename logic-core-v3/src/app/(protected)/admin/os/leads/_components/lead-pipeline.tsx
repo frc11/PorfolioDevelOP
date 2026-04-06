@@ -5,47 +5,14 @@ import { useRouter } from 'next/navigation'
 import { ChevronDown, Inbox } from 'lucide-react'
 import { EmptyState } from '@/app/(protected)/admin/os/_components/empty-state'
 import { deleteLead, updateLeadStatus } from '../_actions/lead.actions'
+import {
+  ACTIVE_PIPELINE_STATUSES,
+  ARCHIVED_PIPELINE_STATUSES,
+  type GroupedLeads,
+  type LeadPipelineLead,
+  type PipelineStatus,
+} from './lead-pipeline.shared'
 import { LeadCard } from './lead-card'
-
-export const ACTIVE_PIPELINE_STATUSES = [
-  'PROSPECTO',
-  'DEMO_ENVIADA',
-  'VIO_VIDEO',
-  'RESPONDIO',
-  'CALL_AGENDADA',
-  'CERRADO',
-] as const
-
-export const ARCHIVED_PIPELINE_STATUSES = ['PERDIDO', 'POSTERGADO'] as const
-
-export type PipelineStatus =
-  | (typeof ACTIVE_PIPELINE_STATUSES)[number]
-  | (typeof ARCHIVED_PIPELINE_STATUSES)[number]
-
-export type PipelineServiceType =
-  | 'WEB'
-  | 'AI_AGENT'
-  | 'AUTOMATION'
-  | 'CUSTOM_SOFTWARE'
-
-export type LeadPipelineLead = {
-  id: string
-  businessName: string
-  contactName: string | null
-  industry: string | null
-  zone: string | null
-  serviceType: PipelineServiceType | null
-  status: PipelineStatus
-  nextFollowUpAt: string | null
-  lastActivityAt: string | null
-  createdAt: string
-  _count: {
-    activities: number
-    demos: number
-  }
-}
-
-export type GroupedLeads = Record<PipelineStatus, LeadPipelineLead[]>
 
 const STATUS_LABELS: Record<PipelineStatus, string> = {
   PROSPECTO: 'Prospecto',
