@@ -19,8 +19,8 @@ const testimonies = [
   },
   {
     initials: 'CP',
-    color: '#7b2fff',
-    colorRgb: '123,47,255',
+    color: '#0fbf73',
+    colorRgb: '15,191,115',
     name: 'Carlos Pereyra',
     role: 'Gerente',
     company: 'Distribuidora Pereyra',
@@ -53,7 +53,39 @@ function TestimonialCard({ t, index }: { t: typeof testimonies[0]; index: number
       ref={cardRef}
       initial={reduced ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
       animate={isInView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.8, delay: 0.25 + index * 0.12, ease: [0.16, 1, 0.3, 1] }}
+      whileHover={
+        index % 3 === 0
+          ? {
+              y: -2,
+              backgroundColor: `rgba(${t.colorRgb}, 0.08)`,
+              borderColor: `rgba(${t.colorRgb}, 0.34)`,
+              boxShadow: `0 0 0 1px rgba(${t.colorRgb},0.26), 0 16px 30px rgba(${t.colorRgb},0.16)`,
+            }
+          : index % 3 === 1
+            ? {
+                y: -2,
+                scale: 1.006,
+                backgroundColor: `rgba(${t.colorRgb}, 0.075)`,
+                borderColor: `rgba(${t.colorRgb}, 0.32)`,
+                boxShadow: `inset 0 0 0 1px rgba(${t.colorRgb},0.2), 0 14px 26px rgba(${t.colorRgb},0.14)`,
+              }
+            : {
+                y: -1,
+                backgroundColor: `rgba(${t.colorRgb}, 0.085)`,
+                borderColor: `rgba(${t.colorRgb}, 0.36)`,
+                boxShadow: `0 0 28px rgba(${t.colorRgb},0.2), 0 12px 24px rgba(0,0,0,0.34)`,
+              }
+      }
+      transition={{
+        duration: 0.8,
+        delay: 0.25 + index * 0.12,
+        ease: [0.16, 1, 0.3, 1],
+        y: { duration: 0.07, ease: 'linear' },
+        scale: { duration: 0.07, ease: 'linear' },
+        backgroundColor: { duration: 0.07, ease: 'linear' },
+        borderColor: { duration: 0.07, ease: 'linear' },
+        boxShadow: { duration: 0.08, ease: 'linear' },
+      }}
       style={{
         background: `linear-gradient(135deg, rgba(${t.colorRgb}, 0.06), rgba(255, 255, 255, 0.02))`,
         border: `1px solid rgba(${t.colorRgb}, 0.15)`,
@@ -63,10 +95,26 @@ function TestimonialCard({ t, index }: { t: typeof testimonies[0]; index: number
         display: 'flex',
         flexDirection: 'column',
         gap: '24px',
+        height: '100%',
         overflow: 'hidden',
-        boxShadow: `0 20px 40px rgba(0,0,0,0.3), 0 0 20px rgba(${t.colorRgb},0.05)`
+        boxShadow: `0 20px 40px rgba(0,0,0,0.3), 0 0 20px rgba(${t.colorRgb},0.05)`,
+        cursor: 'default',
       }}
     >
+      <motion.div
+        aria-hidden="true"
+        style={{
+          position: 'absolute',
+          inset: 0,
+          background: `linear-gradient(115deg, transparent 0%, rgba(${t.colorRgb},0.18) 46%, rgba(255,255,255,0.08) 50%, rgba(${t.colorRgb},0.12) 54%, transparent 100%)`,
+          transform: 'translateX(-115%)',
+          pointerEvents: 'none',
+          zIndex: 0,
+        }}
+        whileHover={{ transform: 'translateX(115%)' }}
+        transition={{ duration: 0.45, ease: 'linear' }}
+      />
+
       {/* Decorative Quotes */}
       <span style={{
         position: 'absolute', top: '-10px', left: '10px',
@@ -77,7 +125,7 @@ function TestimonialCard({ t, index }: { t: typeof testimonies[0]; index: number
       {/* Quote */}
       <p style={{
         fontSize: '16px', fontStyle: 'italic', color: 'rgba(255, 255, 255, 0.65)',
-        lineHeight: 1.6, margin: 0, position: 'relative', zIndex: 1
+        lineHeight: 1.6, margin: 0, position: 'relative', zIndex: 1, minHeight: '150px'
       }}>
         {t.quote}
       </p>
@@ -92,6 +140,7 @@ function TestimonialCard({ t, index }: { t: typeof testimonies[0]; index: number
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
+        minHeight: '92px',
       }}>
         <span style={{ fontSize: '32px', fontWeight: 900, color: t.color, lineHeight: 1 }}>{t.resultValue}</span>
         <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.1em', marginTop: '4px' }}>{t.result}</span>
@@ -161,10 +210,10 @@ export default function TestimoniosIA() {
         >
           <div style={{
             display: 'inline-flex', alignItems: 'center', gap: '8px',
-            border: '1px solid rgba(123,47,255,0.4)', color: '#7b2fff',
+            border: '1px solid rgba(15,191,115,0.4)', color: '#0fbf73',
             padding: '6px 16px', borderRadius: '100px', fontSize: '11px',
             letterSpacing: '0.25em', fontWeight: 600, marginBottom: '24px',
-            background: 'rgba(123,47,255,0.06)',
+            background: 'rgba(15,191,115,0.06)',
           }}>
              [ CASOS DE ÉXITO ]
           </div>
@@ -175,7 +224,7 @@ export default function TestimoniosIA() {
         </motion.div>
 
         {/* Testimonials Grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '24px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '24px', alignItems: 'stretch' }}>
           {testimonies.map((t, i) => (
             <TestimonialCard key={i} t={t} index={i} />
           ))}

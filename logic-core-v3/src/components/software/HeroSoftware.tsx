@@ -435,7 +435,7 @@ function CapsuleVideo({
         <div style={{ position: 'relative', aspectRatio: '16/9', background: '#000', overflow: 'hidden' }}>
           <video
             ref={videoRef}
-            src="/videos/business-owner-dashboard.mp4"
+            src="/videos/software-development-hero-intro.mp4"
             loop
             muted
             playsInline

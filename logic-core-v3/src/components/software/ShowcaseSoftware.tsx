@@ -21,7 +21,7 @@ interface ShowcaseProject {
   color: string
   colorRgb: string
   icon: string
-  size: 'large' | 'medium'
+  size: 'large' | 'medium' | 'small'
   status: 'producción' | 'en desarrollo'
 }
 
@@ -120,7 +120,7 @@ const projects: ShowcaseProject[] = [
   },
   {
     id: 4,
-    size: 'medium',
+    size: 'small',
     rubro: 'Laboratorio',
     title: 'LIMS — Sistema de Gestión de Muestras',
     description: 'Sistema de trazabilidad de muestras, resultados y certificados. Integrado con equipos de análisis.',
@@ -513,8 +513,8 @@ function ShowcaseCard({
         background: `linear-gradient(135deg, rgba(${project.colorRgb}, 0.07) 0%, rgba(255,255,255,0.02) 100%)`,
         border: `1px solid rgba(${project.colorRgb}, ${hovered ? 0.3 : 0.12})`,
         padding: 'clamp(20px, 2.5vw, 32px)',
-        cursor: 'default',
-        minHeight: project.size === 'large' ? '260px' : '220px',
+        cursor: 'none',
+        minHeight: project.size === 'large' ? '260px' : project.size === 'small' ? '180px' : '220px',
         transition: 'border 250ms, box-shadow 250ms',
         boxShadow: hovered
           ? `0 0 40px rgba(${project.colorRgb}, 0.08), 0 20px 60px rgba(0,0,0,0.4)`
@@ -589,7 +589,7 @@ function ShowcaseCard({
                 {project.rubro.toUpperCase()}
               </p>
               <h3 style={{
-                fontSize: project.size === 'large' ? 'clamp(17px, 2vw, 22px)' : '16px',
+                fontSize: project.size === 'large' ? 'clamp(17px, 2vw, 22px)' : project.size === 'small' ? '15px' : '16px',
                 fontWeight: 900,
                 color: 'white',
                 margin: 0,
@@ -619,7 +619,7 @@ function ShowcaseCard({
 
         {/* Descripción */}
         <p style={{
-          fontSize: '13px',
+          fontSize: project.size === 'small' ? '12px' : '13px',
           color: 'rgba(255,255,255,0.42)',
           lineHeight: 1.65,
           margin: '0 0 20px',
@@ -637,9 +637,10 @@ function ShowcaseCard({
               borderRadius: '10px',
               padding: '8px 14px',
               textAlign: 'center',
+              cursor: 'none',
             }}>
               <p style={{
-                fontSize: '18px',
+                fontSize: project.size === 'small' ? '16px' : '18px',
                 fontWeight: 900,
                 color: project.color,
                 margin: '0 0 2px',
@@ -664,6 +665,7 @@ function ShowcaseCard({
               background: 'rgba(255,255,255,0.04)',
               border: '1px solid rgba(255,255,255,0.08)',
               color: 'rgba(255,255,255,0.4)',
+              cursor: 'none',
             }}>
               {tag}
             </span>
@@ -716,7 +718,7 @@ export default function ShowcaseSoftware() {
           {/* Card 3 (Medium) */}
           <ShowcaseCard
             project={projects[3]}
-            gridStyle={{ gridColumn: 'span 1', gridRow: 'span 2' }}
+            gridStyle={{ gridColumn: 'span 1', gridRow: 'span 1' }}
             isInView={isInView}
             delay={0.3}
           />
@@ -733,14 +735,12 @@ export default function ShowcaseSoftware() {
             isInView={isInView}
             delay={0.42}
           />
-          <div style={{ gridColumn: 'span 2' }}>
-            <ShowcaseCard
-              project={projects[4]}
-              gridStyle={{ width: '100%' }}
-              isInView={isInView}
-              delay={0.49}
-            />
-          </div>
+          <ShowcaseCard
+            project={projects[4]}
+            gridStyle={{ gridColumn: 'span 1', gridRow: 'span 1' }}
+            isInView={isInView}
+            delay={0.49}
+          />
         </div>
 
         {/* CTA Section */}

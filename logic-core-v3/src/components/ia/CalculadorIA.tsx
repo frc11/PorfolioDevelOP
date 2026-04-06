@@ -1,9 +1,9 @@
-'use client'
+﻿'use client'
 
 import React, { useState, useMemo, useRef, useEffect } from 'react'
 import { motion, useInView, useReducedMotion, AnimatePresence } from 'motion/react'
 
-// ─── COMPONENTS ──────────────────────────────────────────────────────────────
+// --- COMPONENTS ---
 
 function AnimatedNumber({
   value,
@@ -54,7 +54,7 @@ function AnimatedNumber({
   )
 }
 
-// ─── MAIN EXPORT ──────────────────────────────────────────────────────────────
+// --- MAIN EXPORT ---
 
 export default function CalculadorIA() {
   const [consultasDia, setConsultasDia] = useState(50)
@@ -62,8 +62,8 @@ export default function CalculadorIA() {
   const isInView = useInView(sectionRef, { once: true, amount: 0.15 })
   const reduced = useReducedMotion()
 
-  // Fórmulas según requerimiento
-  // consultas/día × días hábiles/mes (22) × 3 min promedio × 85% automatizable / 60 min
+  // Formulas segun requerimiento
+  // consultas/dia x dias habiles/mes (22) x 3 min promedio x 85% automatizable / 60 min
   const horasAhorradas = useMemo(() => 
     Math.round(consultasDia * 22 * 3 / 60 * 0.85), 
   [consultasDia])
@@ -76,7 +76,7 @@ export default function CalculadorIA() {
     Math.round(((ahorroUSD - costoIA) / costoIA) * 100), 
   [ahorroUSD])
 
-  const colorROI = roiPct > 0 ? '#00ff88' : '#ef4444'
+  const colorROI = roiPct > 0 ? '#00ff88' : '#34a853'
 
   return (
     <section
@@ -97,7 +97,7 @@ export default function CalculadorIA() {
       }} />
       <div aria-hidden="true" style={{
         position: 'absolute', bottom: '-10%', right: '-5%', width: '500px', height: '500px',
-        background: 'radial-gradient(ellipse, rgba(123, 47, 255, 0.05) 0%, transparent 60%)',
+        background: 'radial-gradient(ellipse, rgba(15, 191, 115, 0.05) 0%, transparent 60%)',
         filter: 'blur(100px)', pointerEvents: 'none', zIndex: 0
       }} />
 
@@ -117,13 +117,13 @@ export default function CalculadorIA() {
             letterSpacing: '0.25em', fontWeight: 600, marginBottom: '24px',
             background: 'rgba(0,255,136,0.06)',
           }}>
-            [ CALCULÁ TU ROI ]
+            [ CALCULA TU ROI ]
           </div>
           <h2 style={{ fontSize: 'clamp(32px,5vw,64px)', fontWeight: 900, color: 'white', margin: '0 0 16px', lineHeight: 1.1 }}>
-            ¿Cuánto vale tu tiempo?
+            Cuanto vale tu tiempo?
           </h2>
           <p style={{ fontSize: '18px', color: 'rgba(255,255,255,0.45)', margin: 0 }}>
-            Mové el slider y mirá cuánto recupera tu negocio cada mes.
+            Move el slider y mira cuanto recupera tu negocio cada mes.
           </p>
         </motion.div>
 
@@ -139,7 +139,7 @@ export default function CalculadorIA() {
            }}
         >
           <label style={{ display: 'block', fontSize: '15px', color: 'rgba(255,255,255,0.5)', marginBottom: '24px', letterSpacing: '0.02em' }}>
-            Consultas que recibe tu negocio por día (WhatsApp, Instagram, web)
+            Consultas que recibe tu negocio por dia (WhatsApp, Instagram, web)
           </label>
           
           <div style={{ padding: '0 20px', marginBottom: '32px' }}>
@@ -153,7 +153,7 @@ export default function CalculadorIA() {
             <div style={{ height: '6px', borderRadius: '100px', background: 'rgba(255,255,255,0.08)', position: 'relative' }}>
               <div style={{
                 height: '100%', width: `${((consultasDia - 10) / 490) * 100}%`,
-                background: 'linear-gradient(90deg, #00ff88, #7b2fff)',
+                background: 'linear-gradient(90deg, #00ff88, #0fbf73)',
                 borderRadius: '100px', boxShadow: '0 0 15px rgba(0,255,136,0.4)'
               }} />
             </div>
@@ -163,7 +163,7 @@ export default function CalculadorIA() {
               onChange={(e) => setConsultasDia(Number(e.target.value))}
               style={{
                 position: 'absolute', top: '-10px', left: 0, width: '100%', height: '30px',
-                opacity: 0, cursor: 'pointer'
+                opacity: 0, cursor: 'default'
               }}
             />
             {/* Custom Thumb */}
@@ -188,10 +188,25 @@ export default function CalculadorIA() {
           <motion.div
             initial={reduced ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
             animate={isInView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.6, delay: 0.5 }}
+            whileHover={{
+              y: -3,
+              scale: 1.01,
+              backgroundColor: 'rgba(0,255,136,0.07)',
+              borderColor: 'rgba(0,255,136,0.34)',
+              boxShadow: '0 0 0 1px rgba(0,255,136,0.24), 0 14px 30px rgba(0,255,136,0.16)'
+            }}
+            transition={{
+              duration: 0.6, delay: 0.5,
+              y: { duration: 0.07, ease: 'linear' },
+              scale: { duration: 0.07, ease: 'linear' },
+              backgroundColor: { duration: 0.07, ease: 'linear' },
+              borderColor: { duration: 0.07, ease: 'linear' },
+              boxShadow: { duration: 0.08, ease: 'linear' },
+            }}
             style={{
               background: 'rgba(0,255,136,0.04)', border: '1px solid rgba(0,255,136,0.15)',
-              borderRadius: '24px', padding: '32px', textAlign: 'center'
+              borderRadius: '24px', padding: '32px', textAlign: 'center',
+              cursor: 'default'
             }}
           >
             <p style={{ fontSize: '12px', fontWeight: 700, letterSpacing: '0.1em', color: 'rgba(0,255,136,0.6)', marginBottom: '16px', textTransform: 'uppercase' }}>
@@ -202,7 +217,7 @@ export default function CalculadorIA() {
               style={{ fontSize: 'clamp(40px,6vw,72px)', fontWeight: 900, color: '#00ff88', display: 'block', marginBottom: '8px' }}
             />
             <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.4)', margin: 0 }}>
-              Equivale a <strong style={{ color: 'white' }}>{Math.round(horasAhorradas / 8)}</strong> días laborales libres
+              Equivale a <strong style={{ color: 'white' }}>{Math.round(horasAhorradas / 8)}</strong> dias laborales libres
             </p>
           </motion.div>
 
@@ -210,18 +225,35 @@ export default function CalculadorIA() {
           <motion.div
             initial={reduced ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
             animate={isInView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.6, delay: 0.6 }}
+            whileHover={{
+              y: -2,
+              scale: 1.008,
+              filter: 'brightness(1.1)',
+              backgroundColor: 'rgba(15,191,115,0.08)',
+              borderColor: 'rgba(15,191,115,0.35)',
+              boxShadow: 'inset 0 0 0 1px rgba(15,191,115,0.18), 0 12px 24px rgba(15,191,115,0.14)'
+            }}
+            transition={{
+              duration: 0.6, delay: 0.6,
+              y: { duration: 0.07, ease: 'linear' },
+              scale: { duration: 0.07, ease: 'linear' },
+              filter: { duration: 0.07, ease: 'linear' },
+              backgroundColor: { duration: 0.07, ease: 'linear' },
+              borderColor: { duration: 0.07, ease: 'linear' },
+              boxShadow: { duration: 0.08, ease: 'linear' },
+            }}
             style={{
-              background: 'rgba(123,47,255,0.04)', border: '1px solid rgba(123,47,255,0.15)',
-              borderRadius: '24px', padding: '32px', textAlign: 'center'
+              background: 'rgba(15,191,115,0.04)', border: '1px solid rgba(15,191,115,0.15)',
+              borderRadius: '24px', padding: '32px', textAlign: 'center',
+              cursor: 'default'
             }}
           >
-            <p style={{ fontSize: '12px', fontWeight: 700, letterSpacing: '0.1em', color: 'rgba(123,47,255,0.6)', marginBottom: '16px', textTransform: 'uppercase' }}>
+            <p style={{ fontSize: '12px', fontWeight: 700, letterSpacing: '0.1em', color: 'rgba(15,191,115,0.6)', marginBottom: '16px', textTransform: 'uppercase' }}>
               AHORRO ESTIMADO
             </p>
             <AnimatedNumber
               value={ahorroUSD} prefix="$" suffix=" USD/mes"
-              style={{ fontSize: '28px', fontWeight: 900, color: '#7b2fff', display: 'block', marginBottom: '8px' }}
+              style={{ fontSize: '28px', fontWeight: 900, color: '#0fbf73', display: 'block', marginBottom: '8px' }}
             />
             <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.4)', margin: 0 }}>
               Valor de mercado de tu tiempo
@@ -232,10 +264,25 @@ export default function CalculadorIA() {
           <motion.div
             initial={reduced ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
             animate={isInView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.6, delay: 0.7 }}
+            whileHover={{
+              y: -1,
+              scale: 1.006,
+              backgroundColor: `${colorROI}12`,
+              borderColor: `${colorROI}66`,
+              boxShadow: `0 0 0 1px ${colorROI}40, 0 0 24px ${colorROI}2E`
+            }}
+            transition={{
+              duration: 0.6, delay: 0.7,
+              y: { duration: 0.07, ease: 'linear' },
+              scale: { duration: 0.07, ease: 'linear' },
+              backgroundColor: { duration: 0.07, ease: 'linear' },
+              borderColor: { duration: 0.07, ease: 'linear' },
+              boxShadow: { duration: 0.08, ease: 'linear' },
+            }}
             style={{
               background: `${colorROI}08`, border: `1px solid ${colorROI}26`,
-              borderRadius: '24px', padding: '32px', textAlign: 'center'
+              borderRadius: '24px', padding: '32px', textAlign: 'center',
+              cursor: 'default'
             }}
           >
             <p style={{ fontSize: '12px', fontWeight: 700, letterSpacing: '0.1em', color: `${colorROI}99`, marginBottom: '16px', textTransform: 'uppercase' }}>
@@ -246,7 +293,7 @@ export default function CalculadorIA() {
               style={{ fontSize: '28px', fontWeight: 900, color: colorROI, display: 'block', marginBottom: '8px' }}
             />
             <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.4)', margin: 0 }}>
-              Retorno sobre inversión de IA
+              Retorno sobre inversion de IA
             </p>
           </motion.div>
 
@@ -261,7 +308,7 @@ export default function CalculadorIA() {
         >
           <motion.a
             href={`https://wa.me/5493815674738?text=${encodeURIComponent(
-              `Hola DevelOP, calculé que puedo ahorrar ${horasAhorradas} horas al mes automatizando las consultas de mi negocio. Quiero implementar IA.`
+              `Hola DevelOP, calcule que puedo ahorrar ${horasAhorradas} horas al mes automatizando las consultas de mi negocio. Quiero implementar IA.`
             )}`}
             target="_blank" rel="noopener noreferrer"
             whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
@@ -271,13 +318,13 @@ export default function CalculadorIA() {
               background: 'linear-gradient(135deg, #00ff88, #128c7e)', color: 'white',
               fontWeight: 800, fontSize: '18px', padding: '20px 40px', borderRadius: '100px',
               textDecoration: 'none', boxShadow: '0 0 40px rgba(0,255,136,0.3)',
-              cursor: 'pointer'
+              cursor: 'default'
             }}
           >
-            💬 Quiero este ahorro →
+            {'\u{1F4AC}'} Quiero este ahorro {'\u2192'}
           </motion.a>
           <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.2)', marginTop: '20px', letterSpacing: '0.05em' }}>
-            CONSULTA GRATIS · SIN COMPROMISO
+            CONSULTA GRATIS - SIN COMPROMISO
           </p>
         </motion.div>
 
@@ -285,3 +332,4 @@ export default function CalculadorIA() {
     </section>
   )
 }
+

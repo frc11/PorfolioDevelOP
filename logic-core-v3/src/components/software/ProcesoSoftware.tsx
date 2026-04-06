@@ -209,24 +209,40 @@ function Header({ isInView }: { isInView: boolean }) {
   )
 }
 
-function StepRow({ paso, index, isActive, isInView, onClick, shouldReduceMotion }: { paso: ProcesoStep, index: number, isActive: boolean, isInView: boolean, onClick: () => void, shouldReduceMotion?: boolean }) {
+function StepRow({ paso, index, isActive, isInView, onClick, onHoverChange, shouldReduceMotion }: { paso: ProcesoStep, index: number, isActive: boolean, isInView: boolean, onClick: () => void, onHoverChange?: (index: number | null) => void, shouldReduceMotion?: boolean }) {
   return (
     <motion.div
       initial={{ opacity: 0, x: -24 }}
       animate={isInView ? { opacity: 1, x: 0 } : {}}
       transition={{ duration: 0.6, delay: shouldReduceMotion ? 0 : 0.3 + index * 0.12, ease: [0.16, 1, 0.3, 1] }}
+      onMouseEnter={() => onHoverChange?.(index)}
+      onMouseLeave={() => onHoverChange?.(null)}
       style={{ display: 'flex', gap: '20px', alignItems: 'flex-start' }}
     >
       {/* DOT + ÍCONO */}
-      <div style={{ position: 'relative', flexShrink: 0, zIndex: 1 }}>
+      <div style={{ position: 'relative', flexShrink: 0, zIndex: 3 }}>
+        <div
+          style={{
+            position: 'absolute',
+            inset: '-8px',
+            borderRadius: '20px',
+            background: '#080810',
+            zIndex: -1,
+          }}
+        />
         <motion.div
+          whileHover={shouldReduceMotion ? {} : { scale: 1.06 }}
           animate={{
             scale: isActive ? 1.15 : 1,
             boxShadow: isActive
               ? `0 0 0 3px rgba(${paso.colorRgb}, 0.25), 0 0 20px rgba(${paso.colorRgb}, 0.3)`
               : 'none',
           }}
-          transition={{ duration: 0.3 }}
+          transition={{
+            duration: 0.3,
+            scale: { duration: 0.07, ease: 'linear' },
+            boxShadow: { duration: 0.08, ease: 'linear' },
+          }}
           style={{
             width: '56px', height: '56px',
             borderRadius: '16px',
@@ -238,8 +254,8 @@ function StepRow({ paso, index, isActive, isInView, onClick, shouldReduceMotion 
             alignItems: 'center',
             justifyContent: 'center',
             fontSize: '24px',
-            cursor: 'pointer',
-            transition: 'background 300ms, border 300ms',
+            cursor: 'default',
+            transition: 'background 70ms linear, border 70ms linear',
           }}
           onClick={onClick}
         >
@@ -248,15 +264,27 @@ function StepRow({ paso, index, isActive, isInView, onClick, shouldReduceMotion 
       </div>
 
       {/* CONTENIDO */}
-      <div 
+      <motion.div
+        whileHover={shouldReduceMotion ? {} : {
+          y: -1,
+          background: `rgba(${paso.colorRgb}, 0.07)`,
+          borderColor: `rgba(${paso.colorRgb}, 0.24)`,
+          boxShadow: `0 0 0 1px rgba(${paso.colorRgb},0.18), 0 12px 24px rgba(${paso.colorRgb},0.12)`,
+        }}
+        transition={{
+          y: { duration: 0.07, ease: 'linear' },
+          background: { duration: 0.07, ease: 'linear' },
+          borderColor: { duration: 0.07, ease: 'linear' },
+          boxShadow: { duration: 0.08, ease: 'linear' },
+        }}
         style={{
           flex: 1,
           background: isActive ? `rgba(${paso.colorRgb}, 0.05)` : 'rgba(255,255,255,0.02)',
           border: `1px solid rgba(${paso.colorRgb}, ${isActive ? 0.2 : 0.08})`,
           borderRadius: '16px',
           overflow: 'hidden',
-          cursor: 'pointer',
-          transition: 'all 250ms',
+          cursor: 'default',
+          transition: 'all 70ms linear',
         }}
         onClick={onClick}
       >
@@ -382,24 +410,24 @@ function StepRow({ paso, index, isActive, isInView, onClick, shouldReduceMotion 
             </motion.div>
           )}
         </AnimatePresence>
-      </div>
+      </motion.div>
     </motion.div>
   )
 }
 
-function StepperTimeline({ pasos, activeStep, setActiveStep, isInView }: { pasos: ProcesoStep[], activeStep: number | null, setActiveStep: (i: number) => void, isInView: boolean }) {
+function StepperTimeline({ pasos, activeStep, setActiveStep, setHoveredStep, isInView }: { pasos: ProcesoStep[], activeStep: number | null, setActiveStep: (i: number) => void, setHoveredStep: (i: number | null) => void, isInView: boolean }) {
   const shouldReduceMotion = useReducedMotion()
   
   return (
     <div style={{ position: 'relative' }}>
       {/* Línea vertical conectora */}
-      <div style={{ position: 'absolute', left: '27px', top: '40px', bottom: '40px', width: '2px', background: 'rgba(255,255,255,0.06)', zIndex: 0 }}>
+      <div style={{ position: 'absolute', left: '27px', top: '40px', bottom: '40px', width: '2px', background: 'rgba(99,102,241,0.2)', filter: 'blur(1.2px)', zIndex: 0, pointerEvents: 'none' }}>
         {/* Fill de progreso */}
         <motion.div
           initial={{ height: '0%' }}
           animate={isInView ? { height: '100%' } : {}}
           transition={{ duration: shouldReduceMotion ? 0 : 1.5, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
-          style={{ width: '100%', background: 'linear-gradient(to bottom, #6366f1, #7b2fff)', boxShadow: '0 0 8px rgba(99,102,241,0.4)' }}
+          style={{ width: '100%', background: 'linear-gradient(to bottom, #6366f1, #7b2fff)', boxShadow: '0 0 8px rgba(99,102,241,0.35)', filter: 'blur(0.35px)' }}
         />
 
         {/* Glow en línea activa */}
@@ -435,6 +463,7 @@ function StepperTimeline({ pasos, activeStep, setActiveStep, isInView }: { pasos
         isActive={activeStep === i}
         isInView={isInView}
         onClick={() => setActiveStep(i)}
+        onHoverChange={setHoveredStep}
         shouldReduceMotion={shouldReduceMotion ?? undefined}
       />
     ))}
@@ -449,8 +478,8 @@ export default function ProcesoSoftware() {
 const sectionRef = useRef<HTMLElement>(null)
 const isInView = useInView(sectionRef, { once: true, amount: 0.1 })
 const [activeStep, setActiveStep] = useState<number | null>(null)
+const [hoveredStep, setHoveredStep] = useState<number | null>(null)
 const [everClicked, setEverClicked] = useState(false)
-const shouldReduceMotion = useReducedMotion()
 
 return (
 <section 
@@ -485,6 +514,7 @@ return (
             setActiveStep(activeStep === i ? null : i)
             setEverClicked(true)
           }}
+          setHoveredStep={setHoveredStep}
           isInView={isInView}
         />
 
@@ -513,17 +543,25 @@ return (
                 <div style={{
                   flex: 1,
                   height: '4px',
-                  background: `rgba(${paso.colorRgb}, 0.4)`,
+                  background:
+                    (hoveredStep ?? activeStep) !== null && i <= (hoveredStep ?? activeStep)!
+                      ? `rgba(${paso.colorRgb}, 0.95)`
+                      : `rgba(${paso.colorRgb}, 0.28)`,
                   borderRadius: i === 0 ? '100px 0 0 100px' : i === pasos.length - 1 ? '0 100px 100px 0' : '0',
                   position: 'relative',
+                  boxShadow:
+                    (hoveredStep ?? activeStep) !== null && i <= (hoveredStep ?? activeStep)!
+                      ? `0 0 10px rgba(${paso.colorRgb},0.45)`
+                      : 'none',
+                  transition: 'background 70ms linear, box-shadow 70ms linear',
                 }}>
                   {/* Tooltip con fase */}
-                  <div style={{ position: 'absolute', bottom: '10px', left: '50%', transform: 'translateX(-50%)', fontSize: '9px', color: `rgba(${paso.colorRgb}, 0.7)`, whiteSpace: 'nowrap', letterSpacing: '0.1em' }}>
+                  <div style={{ position: 'absolute', bottom: '10px', left: '50%', transform: 'translateX(-50%)', fontSize: '9px', color: (hoveredStep ?? activeStep) !== null && i <= (hoveredStep ?? activeStep)! ? `rgba(${paso.colorRgb}, 0.95)` : `rgba(${paso.colorRgb}, 0.5)`, whiteSpace: 'nowrap', letterSpacing: '0.1em', transition: 'color 70ms linear' }}>
                     {paso.badge}
                   </div>
                 </div>
                 {i < pasos.length - 1 && (
-                  <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'rgba(255,255,255,0.15)', flexShrink: 0 }} />
+                  <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: (hoveredStep ?? activeStep) !== null && i < (hoveredStep ?? activeStep)! ? `rgba(123,47,255,0.75)` : 'rgba(255,255,255,0.15)', boxShadow: (hoveredStep ?? activeStep) !== null && i < (hoveredStep ?? activeStep)! ? '0 0 8px rgba(123,47,255,0.45)' : 'none', flexShrink: 0, transition: 'background 70ms linear, box-shadow 70ms linear' }} />
                 )}
               </React.Fragment>
             ))}

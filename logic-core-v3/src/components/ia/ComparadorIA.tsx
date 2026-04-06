@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React, { useRef, useState, useEffect } from 'react'
 import { motion, useInView, AnimatePresence } from 'motion/react'
@@ -112,12 +112,39 @@ function CompareRowItem({
         <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={isInView ? { opacity: 1, x: 0 } : {}}
-            transition={{ duration: 0.5, delay: 0.3 + index * 0.07, ease: [0.16, 1, 0.3, 1] }}
+            whileHover={{
+                backgroundColor: 'rgba(0,255,136,0.055)',
+                boxShadow: 'inset 0 0 0 1px rgba(0,255,136,0.2), 0 10px 24px rgba(0,0,0,0.28)',
+                scale: 1.0015,
+            }}
+            transition={{
+                duration: 0.5,
+                delay: 0.3 + index * 0.07,
+                ease: [0.16, 1, 0.3, 1],
+                backgroundColor: { duration: 0.06, ease: 'linear' },
+                boxShadow: { duration: 0.06, ease: 'linear' },
+                scale: { duration: 0.06, ease: 'linear' },
+            }}
             style={{
                 borderBottom: '1px solid rgba(255,255,255,0.05)',
                 background: row.highlight ? 'rgba(0,255,136,0.03)' : 'transparent',
+                borderRadius: 0,
+                position: 'relative',
+                overflow: 'hidden',
             }}
         >
+            <motion.div
+                aria-hidden="true"
+                initial={{ x: '-120%' }}
+                whileHover={{ x: '120%' }}
+                transition={{ duration: 0.2, ease: 'linear' }}
+                style={{
+                    position: 'absolute',
+                    inset: 0,
+                    background: 'linear-gradient(100deg, transparent 35%, rgba(255,255,255,0.12) 50%, transparent 65%)',
+                    pointerEvents: 'none',
+                }}
+            />
             <div className="grid grid-cols-1 sm:grid-cols-[1fr_1.5fr_1.5fr]">
 
                 {/* Attribute */}
@@ -163,7 +190,7 @@ function CompareRowItem({
                 <div style={{
                     padding: 'clamp(12px,2vh,20px) 16px',
                     display: 'flex', alignItems: 'center', gap: '10px',
-                    background: 'rgba(0,255,136,0.02)',
+                    background: 'transparent',
                     borderLeft: row.highlight
                         ? '2px solid rgba(0,255,136,0.4)'
                         : '1px solid rgba(0,255,136,0.1)',
@@ -207,9 +234,9 @@ function TableHeader({ isInView }: { isInView: boolean }) {
             style={{
                 gridTemplateColumns: '1fr 1.5fr 1.5fr',
                 gap: '1px',
-                marginBottom: '8px',
-                paddingBottom: '16px',
-                borderBottom: '1px solid rgba(255,255,255,0.08)',
+                marginBottom: '0',
+                paddingBottom: '0',
+                borderBottom: 'none',
             }}
         >
             <div />
@@ -232,8 +259,9 @@ function TableHeader({ isInView }: { isInView: boolean }) {
             </div>
             <div style={{
                 display: 'flex', alignItems: 'center', gap: '10px', padding: '0 16px',
-                background: 'rgba(0,255,136,0.04)', borderRadius: '12px 12px 0 0',
-                border: '1px solid rgba(0,255,136,0.15)', borderBottom: 'none',
+                background: 'transparent',
+                borderRadius: 0,
+                border: 'none',
             }}>
                 <div style={{
                     width: '36px', height: '36px', borderRadius: '50%', flexShrink: 0,

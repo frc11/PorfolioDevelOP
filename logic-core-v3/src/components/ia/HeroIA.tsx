@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef } from 'react'
 import { motion, useReducedMotion } from 'motion/react'
 
 interface Node {
@@ -46,20 +46,57 @@ function NeuralCanvas() {
         resize()
         window.addEventListener('resize', resize)
 
+        // Mantiene libre la zona central para no tapar el texto principal.
+        function getTextSafeZone() {
+            const zoneWidth = Math.min(canvas.width * 0.66, 820)
+            const zoneHeight = Math.min(canvas.height * 0.5, 450)
+            const left = (canvas.width - zoneWidth) / 2
+            const top = (canvas.height - zoneHeight) / 2 - 8
+
+            return {
+                left,
+                right: left + zoneWidth,
+                top,
+                bottom: top + zoneHeight,
+            }
+        }
+
+        function isInsideSafeZone(x: number, y: number, padding = 0) {
+            const zone = getTextSafeZone()
+            return (
+                x >= zone.left - padding &&
+                x <= zone.right + padding &&
+                y >= zone.top - padding &&
+                y <= zone.bottom + padding
+            )
+        }
+
         // ── NODOS ───────────────────────────────
         const NODE_COUNT = 70
-        const nodes: Node[] = Array.from({ length: NODE_COUNT }, () => ({
-            x: Math.random() * canvas.width,
-            y: Math.random() * canvas.height,
-            vx: (Math.random() - 0.5) * 0.5,
-            vy: (Math.random() - 0.5) * 0.5,
-            radius: 2 + Math.random() * 2.5,
-            baseRadius: 2 + Math.random() * 2.5,
-            brightness: Math.random(),
-            pulseSpeed: 0.005 + Math.random() * 0.015,
-            pulseOffset: Math.random() * Math.PI * 2,
-            isHub: false,
-        }))
+        const nodes: Node[] = Array.from({ length: NODE_COUNT }, () => {
+            let x = Math.random() * canvas.width
+            let y = Math.random() * canvas.height
+            let attempts = 0
+
+            while (isInsideSafeZone(x, y, 28) && attempts < 30) {
+                x = Math.random() * canvas.width
+                y = Math.random() * canvas.height
+                attempts++
+            }
+
+            return {
+                x,
+                y,
+                vx: (Math.random() - 0.5) * 0.5,
+                vy: (Math.random() - 0.5) * 0.5,
+                radius: 2 + Math.random() * 2.5,
+                baseRadius: 2 + Math.random() * 2.5,
+                brightness: Math.random(),
+                pulseSpeed: 0.005 + Math.random() * 0.015,
+                pulseOffset: Math.random() * Math.PI * 2,
+                isHub: false,
+            }
+        })
 
         // ── HUBS ────────────────────────────────
         const HUB_LABELS = [
@@ -134,6 +171,20 @@ function NeuralCanvas() {
                 n.x += n.vx
                 n.y += n.vy
 
+                if (isInsideSafeZone(n.x, n.y, 36)) {
+                    const zone = getTextSafeZone()
+                    const centerX = (zone.left + zone.right) / 2
+                    const centerY = (zone.top + zone.bottom) / 2
+                    const offsetX = n.x - centerX
+                    const offsetY = n.y - centerY
+
+                    if (Math.abs(offsetX) > Math.abs(offsetY)) {
+                        n.vx += (offsetX >= 0 ? 1 : -1) * 0.22
+                    } else {
+                        n.vy += (offsetY >= 0 ? 1 : -1) * 0.22
+                    }
+                }
+
                 // Bounce
                 if (n.x < 0 || n.x > canvas.width) n.vx *= -1
                 if (n.y < 0 || n.y > canvas.height) n.vy *= -1
@@ -148,15 +199,17 @@ function NeuralCanvas() {
                     const dx = a.x - b.x
                     const dy = a.y - b.y
                     const dist = Math.sqrt(dx * dx + dy * dy)
+                    const midX = (a.x + b.x) / 2
+                    const midY = (a.y + b.y) / 2
 
-                    if (dist < CONNECTION_DIST) {
+                    if (dist < CONNECTION_DIST && !isInsideSafeZone(midX, midY, 24)) {
                         const alpha = (1 - dist / CONNECTION_DIST) * 0.35
                         const brightness = (a.brightness + b.brightness) / 2
 
                         // Degradado en la línea
                         const grad = ctx.createLinearGradient(a.x, a.y, b.x, b.y)
                         grad.addColorStop(0, `rgba(0, 255, 136, ${alpha * brightness})`)
-                        grad.addColorStop(0.5, `rgba(123, 47, 255, ${alpha * brightness * 0.6})`)
+                        grad.addColorStop(0.5, `rgba(15, 191, 115, ${alpha * brightness * 0.6})`)
                         grad.addColorStop(1, `rgba(0, 255, 136, ${alpha * brightness})`)
 
                         ctx.beginPath()
@@ -260,7 +313,7 @@ function NeuralCanvas() {
                 const trailY = from.y + (to.y - from.y) * trailProgress
 
                 const trailGrad = ctx.createLinearGradient(trailX, trailY, x, y)
-                const col = p.color === 'green' ? '0, 255, 136' : '123, 47, 255'
+                const col = p.color === 'green' ? '0, 255, 136' : '15, 191, 115'
                 trailGrad.addColorStop(0, `rgba(${col}, 0)`)
                 trailGrad.addColorStop(1, `rgba(${col}, 0.8)`)
 
@@ -337,7 +390,7 @@ export default function HeroIA() {
     const stats = [
         { value: '24/7', label: 'sin descanso', icon: '🌙', pos: { left: '2%', top: '35%' } },
         { value: '< 3s', label: 'tiempo de respuesta', icon: '⚡', pos: { right: '2%', top: '35%' } },
-        { value: '−80%', label: 'consultas manuales', icon: '📉', pos: { left: '50%', bottom: '18%', transform: 'translateX(-50%)' } },
+        { value: '−80%', label: 'consultas manuales', icon: '📉', pos: { right: '-6%', top: '48%' } },
     ]
 
     return (
@@ -378,7 +431,7 @@ export default function HeroIA() {
                     {stats.map((stat, i) => (
                         <motion.div
                             key={i}
-                            initial={{ opacity: 0, y: Math.random() > 0.5 ? 15 : -15 }}
+                            initial={{ opacity: 0, y: i % 2 === 0 ? 15 : -15 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.8, delay: 1.0 + i * 0.1 }}
                             style={{
@@ -388,6 +441,7 @@ export default function HeroIA() {
                                 border: '1px solid rgba(0,255,136,0.15)',
                                 borderRadius: '12px',
                                 padding: '10px 16px',
+                                minWidth: '132px',
                                 textAlign: 'center',
                                 ...stat.pos
                             }}
@@ -395,7 +449,7 @@ export default function HeroIA() {
                             <motion.div
                                 animate={prefersReduced ? {} : { y: [0, -6, 0] }}
                                 transition={prefersReduced ? {} : {
-                                    duration: 3 + Math.random() * 2,
+                                    duration: 3 + (i % 3) * 0.55,
                                     repeat: Infinity,
                                     ease: "easeInOut"
                                 }}
@@ -452,27 +506,41 @@ export default function HeroIA() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.9, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
                     style={{
-                        fontSize: 'clamp(44px, 7.5vw, 108px)',
+                        fontSize: 'clamp(44px, 7.2vw, 102px)',
                         fontWeight: 900,
-                        lineHeight: 1.0,
-                        letterSpacing: '-0.03em',
-                        margin: '0 0 clamp(16px,2.5vh,28px)',
+                        lineHeight: 0.97,
+                        letterSpacing: '-0.032em',
+                        margin: '0 0 clamp(18px,2.6vh,30px)',
                         pointerEvents: 'none',
+                        filter: 'drop-shadow(0 10px 34px rgba(0, 0, 0, 0.5))',
                     }}
                 >
-                    <span style={{ color: 'white', display: 'block' }}>
+                    <span
+                        style={{
+                            display: 'block',
+                            color: '#f2fbff',
+                            textShadow: '0 0 14px rgba(201, 255, 230, 0.22), 0 0 38px rgba(0, 255, 136, 0.16)',
+                        }}
+                    >
                         Tu empresa trabaja
                     </span>
-                    <span style={{ display: 'block' }}>
-                        <span style={{
-                            background: 'linear-gradient(135deg, #00ff88 0%, #7b2fff 50%, #00ff88 100%)',
-                            backgroundSize: '200% 100%',
-                            WebkitBackgroundClip: 'text',
-                            WebkitTextFillColor: 'transparent',
-                            backgroundClip: 'text',
-                            animation: prefersReduced ? 'none' : 'gradientShift 4s ease-in-out infinite',
-                        }}>
-                            mientras dormís.
+                    <span style={{ display: 'block', marginTop: '0.04em' }}>
+                        <span
+                            style={{
+                                color: '#7deee0',
+                                textShadow: '0 0 14px rgba(0, 255, 200, 0.22), 0 0 30px rgba(0, 205, 145, 0.12)',
+                            }}
+                        >
+                            mientras{' '}
+                        </span>
+                        <span
+                            style={{
+                                color: '#00f2a3',
+                                textShadow: '0 0 22px rgba(0, 255, 136, 0.45), 0 0 56px rgba(0, 255, 136, 0.24)',
+                                animation: prefersReduced ? 'none' : 'pulseTitleIA 3.2s ease-in-out infinite',
+                            }}
+                        >
+                            dormis.
                         </span>
                     </span>
                 </motion.h1>
@@ -530,6 +598,7 @@ export default function HeroIA() {
                             borderRadius: '100px',
                             textDecoration: 'none',
                             boxShadow: '0 0 40px rgba(0,255,136,0.3), 0 8px 24px rgba(0,0,0,0.4)',
+                            cursor: 'default',
                         }}
                     >
                         Probá la IA ahora →
@@ -556,6 +625,7 @@ export default function HeroIA() {
                             borderRadius: '100px',
                             textDecoration: 'none',
                             transition: 'all 200ms',
+                            cursor: 'default',
                         }}
                     >
                         Ver casos de uso
@@ -612,6 +682,10 @@ export default function HeroIA() {
                     0%, 100% { opacity: 0.3; transform: rotate(45deg) translateY(0); }
                     50% { opacity: 1; transform: rotate(45deg) translateY(4px); }
                 }
+                @keyframes pulseTitleIA {
+                    0%, 100% { opacity: 1; text-shadow: 0 0 18px rgba(0, 255, 136, 0.35), 0 0 42px rgba(0, 255, 136, 0.18); }
+                    50% { opacity: 0.9; text-shadow: 0 0 26px rgba(0, 255, 136, 0.6), 0 0 68px rgba(0, 255, 136, 0.3); }
+                }
                 @keyframes liquidMetalIA {
                     0% { background-position: 0% 50%; }
                     50% { background-position: 100% 50%; }
@@ -626,3 +700,4 @@ export default function HeroIA() {
         </section>
     )
 }
+

@@ -366,7 +366,7 @@ function StepContent({
               whileHover={{ scale: 1.02, y: -2 }} 
               whileTap={{ scale: 0.98 }} 
               transition={{ type: 'spring', stiffness: 400, damping: 20 }} 
-              style={{ padding: 'clamp(12px, 1.5vw, 18px)', borderRadius: '14px', border: isSelected ? '1px solid rgba(99,102,241,0.6)' : '1px solid rgba(255,255,255,0.08)', background: isSelected ? 'rgba(99,102,241,0.12)' : 'rgba(255,255,255,0.03)', cursor: 'pointer', textAlign: 'left', transition: 'background 200ms, border 200ms', boxShadow: isSelected ? '0 0 20px rgba(99,102,241,0.12)' : 'none', position: 'relative', overflow: 'hidden' }}
+              style={{ padding: 'clamp(12px, 1.5vw, 18px)', borderRadius: '14px', border: isSelected ? '1px solid rgba(99,102,241,0.6)' : '1px solid rgba(255,255,255,0.08)', background: isSelected ? 'rgba(99,102,241,0.12)' : 'rgba(255,255,255,0.03)', cursor: 'none', textAlign: 'left', transition: 'background 200ms, border 200ms', boxShadow: isSelected ? '0 0 20px rgba(99,102,241,0.12)' : 'none', position: 'relative', overflow: 'hidden' }}
             >
               {isSelected && (
                 <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} style={{ position: 'absolute', top: '8px', right: '8px', width: '18px', height: '18px', borderRadius: '50%', background: '#6366f1', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', color: 'white', fontWeight: 700 }}>✓</motion.div>
@@ -386,7 +386,7 @@ function StepNav({ canAdvance, isLast, onNext, onBack }: { canAdvance: boolean, 
   return (
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'clamp(24px, 3vh, 36px)' }}>
       {onBack ? (
-        <motion.button onClick={onBack} whileHover={{ x: -3 }} style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.35)', fontSize: '14px', cursor: 'pointer', padding: '10px 0', display: 'flex', alignItems: 'center', gap: '6px' }}>← Atrás</motion.button>
+        <motion.button onClick={onBack} whileHover={{ x: -3 }} style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.35)', fontSize: '14px', cursor: 'none', padding: '10px 0', display: 'flex', alignItems: 'center', gap: '6px' }}>← Atrás</motion.button>
       ) : <div />}
       <motion.button 
         onClick={onNext} 
@@ -396,7 +396,7 @@ function StepNav({ canAdvance, isLast, onNext, onBack }: { canAdvance: boolean, 
         whileHover={canAdvance ? { scale: 1.04 } : {}} 
         whileTap={canAdvance ? { scale: 0.97 } : {}} 
         transition={{ type: 'spring', stiffness: 400, damping: 15 }} 
-        style={{ background: canAdvance ? 'linear-gradient(135deg, #6366f1, #4f46e5)' : 'rgba(255,255,255,0.06)', color: canAdvance ? 'white' : 'rgba(255,255,255,0.2)', border: 'none', borderRadius: '100px', padding: '13px 28px', fontSize: '14px', fontWeight: 700, cursor: canAdvance ? 'pointer' : 'not-allowed', boxShadow: canAdvance ? '0 0 24px rgba(99,102,241,0.3)' : 'none', transition: 'background 200ms, box-shadow 200ms', letterSpacing: '0.04em' }}
+        style={{ background: canAdvance ? 'linear-gradient(135deg, #6366f1, #4f46e5)' : 'rgba(255,255,255,0.06)', color: canAdvance ? 'white' : 'rgba(255,255,255,0.2)', border: 'none', borderRadius: '100px', padding: '13px 28px', fontSize: '14px', fontWeight: 700, cursor: 'none', boxShadow: canAdvance ? '0 0 24px rgba(99,102,241,0.3)' : 'none', transition: 'background 200ms, box-shadow 200ms', letterSpacing: '0.04em' }}
       >
         {isLast ? 'Ver mi diagnóstico →' : 'Siguiente →'}
       </motion.button>
@@ -464,25 +464,25 @@ function ResultHeader({ resultado }: { resultado: DiagnosticoResult }) {
       <div style={{ position:'absolute', top:0, left:0, right:0, height:'2px', background:`linear-gradient(90deg, transparent, rgba(${resultado.colorRgb},0.8) 30%, rgba(${resultado.colorRgb},0.8) 70%, transparent)` }}/>
       <div style={{ position:'absolute', top:'-20px', left:'-20px', width:'200px', height:'200px', background:`radial-gradient(circle, rgba(${resultado.colorRgb},0.12) 0%, transparent 65%)`, filter:'blur(30px)', pointerEvents:'none' }}/>
 
-      <div className="flex flex-wrap gap-5 justify-between items-start relative z-10">
-        <div style={{ display:'flex', alignItems:'flex-start', gap:'20px', flexWrap:'wrap' }}>
+      <div style={{ display:'grid', gridTemplateColumns:'minmax(0,1fr) auto', gap:'20px', alignItems:'start', position:'relative', zIndex:10 }}>
+        <div style={{ display:'flex', alignItems:'flex-start', gap:'20px', flexWrap:'nowrap', minWidth:0 }}>
           <div style={{ width:'72px', height:'72px', borderRadius:'20px', background:`rgba(${resultado.colorRgb},0.15)`, border:`1px solid rgba(${resultado.colorRgb},0.3)`, display:'flex', alignItems:'center', justifyContent:'center', fontSize:'36px', flexShrink:0, boxShadow:`0 0 30px rgba(${resultado.colorRgb},0.2)` }}>
             {resultado.icon}
           </div>
 
-          <div style={{ flex:1, minWidth:'180px' }}>
+          <div style={{ flex:1, minWidth:0 }}>
             <p style={{ fontSize:'11px', letterSpacing:'0.25em', color:`rgba(${resultado.colorRgb},0.7)`, fontWeight:600, margin:'0 0 8px', textTransform:'uppercase' }}>Tu diagnóstico</p>
             <h2 style={{ fontSize:'clamp(22px,3vw,36px)', fontWeight:900, color:'white', margin:'0 0 6px', lineHeight:1.15 }}>{resultado.title}</h2>
             <p style={{ fontSize:'16px', color:`rgba(${resultado.colorRgb},0.8)`, fontWeight:600, margin:0 }}>{resultado.subtitle}</p>
           </div>
         </div>
 
-        <div className="flex flex-row md:flex-col gap-3 w-full md:w-auto">
-          <div style={{ flex: 1, background:`rgba(${resultado.colorRgb},0.08)`, border:`1px solid rgba(${resultado.colorRgb},0.2)`, borderRadius:'10px', padding:'8px 14px', textAlign:'right' }}>
+        <div style={{ display:'flex', flexDirection:'column', gap:'10px', width:'176px', flexShrink:0, alignSelf:'start' }}>
+          <div style={{ background:`rgba(${resultado.colorRgb},0.08)`, border:`1px solid rgba(${resultado.colorRgb},0.2)`, borderRadius:'10px', padding:'8px 14px', textAlign:'right' }}>
             <p style={{ fontSize:'10px', color:'rgba(255,255,255,0.3)', margin:'0 0 2px', letterSpacing:'0.1em' }}>TIEMPO ESTIMADO</p>
             <p style={{ fontSize:'15px', fontWeight:800, color:'white', margin:0 }}>{resultado.timeEstimate}</p>
           </div>
-          <div style={{ flex: 1, background:`rgba(${resultado.colorRgb},0.08)`, border:`1px solid rgba(${resultado.colorRgb},0.2)`, borderRadius:'10px', padding:'8px 14px', textAlign:'right' }}>
+          <div style={{ background:`rgba(${resultado.colorRgb},0.08)`, border:`1px solid rgba(${resultado.colorRgb},0.2)`, borderRadius:'10px', padding:'8px 14px', textAlign:'right' }}>
             <p style={{ fontSize:'10px', color:'rgba(255,255,255,0.3)', margin:'0 0 2px', letterSpacing:'0.1em' }}>INVERSIÓN</p>
             <p style={{ fontSize:'15px', fontWeight:800, color:resultado.color, margin:0 }}>{resultado.priceRange}</p>
           </div>
@@ -539,11 +539,11 @@ function ResultCTA({ resultado, onReset }: { resultado: DiagnosticoResult, onRes
       </div>
 
       <div style={{ display:'flex', gap:'10px', flexWrap:'wrap', alignItems:'center' }}>
-        <motion.button onClick={copyResult} whileHover={{ scale:1.02 }} whileTap={{ scale:0.97 }} style={{ background:'transparent', border:'1px solid rgba(255,255,255,0.08)', color:'rgba(255,255,255,0.3)', borderRadius:'100px', padding:'8px 14px', fontSize:'12px', cursor:'pointer', display:'flex', alignItems:'center', gap:'6px', transition:'all 200ms' }}>
+        <motion.button onClick={copyResult} whileHover={{ scale:1.02 }} whileTap={{ scale:0.97 }} style={{ background:'transparent', border:'1px solid rgba(255,255,255,0.08)', color:'rgba(255,255,255,0.3)', borderRadius:'100px', padding:'8px 14px', fontSize:'12px', cursor: 'none', display:'flex', alignItems:'center', gap:'6px', transition:'all 200ms' }}>
           {copied ? '✓ Copiado' : '⎘ Compartir'}
         </motion.button>
 
-        <motion.button onClick={onReset} whileHover={{ scale:1.02 }} whileTap={{ scale:0.97 }} style={{ background:'transparent', border:'1px solid rgba(255,255,255,0.12)', color:'rgba(255,255,255,0.45)', borderRadius:'100px', padding:'12px 20px', fontSize:'13px', fontWeight:600, cursor:'pointer', transition:'all 200ms' }}>
+        <motion.button onClick={onReset} whileHover={{ scale:1.02 }} whileTap={{ scale:0.97 }} style={{ background:'transparent', border:'1px solid rgba(255,255,255,0.12)', color:'rgba(255,255,255,0.45)', borderRadius:'100px', padding:'12px 20px', fontSize:'13px', fontWeight:600, cursor: 'none', transition:'all 200ms' }}>
           ← Repetir diagnóstico
         </motion.button>
 
@@ -625,3 +625,4 @@ export default function DiagnosticoSoftware() {
     </section>
   )
 }
+

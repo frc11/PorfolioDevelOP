@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useRef } from 'react'
+import React, { useRef, useState } from 'react'
 import { motion, useInView } from 'motion/react'
 
 // ─── TYPES ────────────────────────────────────────────────────────────────────
@@ -169,17 +169,23 @@ function TestimonialCard({
   isInView: boolean
   delay: number
 }) {
+  const [hovered, setHovered] = useState(false)
+
   return (
     <motion.div
       initial={{ opacity:0, y:24 }}
       animate={isInView
         ? { opacity:1, y:0 } : {}}
-      transition={{ duration:0.65,
-        delay, ease:[0.16,1,0.3,1] }}
-      whileHover={{ y: -5, transition: { duration: 0.2 } }}
+      transition={{
+        opacity: { duration: 0.65, delay, ease: [0.16, 1, 0.3, 1] },
+        y: { duration: 0 }
+      }}
+      onHoverStart={() => setHovered(true)}
+      onHoverEnd={() => setHovered(false)}
+      whileHover={{ y: -5, transition: { duration: 0 } }}
       style={{
         background:`linear-gradient(135deg, rgba(${t.colorRgb},0.06) 0%, rgba(255,255,255,0.02) 100%)`,
-        border: `1px solid rgba(${t.colorRgb},0.15)`,
+        border: `1px solid rgba(${t.colorRgb},${hovered ? 0.28 : 0.15})`,
         borderRadius:'20px',
         padding:'clamp(24px,3vw,36px)',
         position:'relative',
@@ -188,8 +194,27 @@ function TestimonialCard({
         flexDirection:'column',
         gap:'20px',
         backdropFilter: 'blur(10px)',
+        boxShadow: hovered
+          ? `inset 0 -100px 120px rgba(${t.colorRgb},0.12), 0 18px 44px rgba(0,0,0,0.45)`
+          : 'inset 0 -40px 60px rgba(0,0,0,0.14), 0 8px 24px rgba(0,0,0,0.28)',
+        transition: 'none',
       }}
     >
+      {/* Glow de fondo instantaneo */}
+      <div style={{
+        position:'absolute',
+        left:'-10%',
+        right:'-10%',
+        bottom:'-30%',
+        height:'65%',
+        background:`radial-gradient(ellipse at 50% 100%, rgba(${t.colorRgb},${hovered ? 0.24 : 0}) 0%, transparent 70%)`,
+        filter:'blur(26px)',
+        opacity: hovered ? 1 : 0,
+        transition:'none',
+        pointerEvents:'none',
+        zIndex:0,
+      }}/>
+
       {/* Borde superior acento */}
       <div style={{
         position:'absolute',
@@ -221,7 +246,7 @@ function TestimonialCard({
         margin:0,
         fontStyle:'italic',
         position:'relative',
-        zIndex:1,
+        zIndex:2,
       }}>
         "{t.quote}"
       </p>
@@ -236,6 +261,8 @@ function TestimonialCard({
         borderRadius:'12px',
         padding:'10px 16px',
         alignSelf:'flex-start',
+        position:'relative',
+        zIndex:2,
       }}>
         <span style={{
           fontSize:'24px',
@@ -261,6 +288,8 @@ function TestimonialCard({
         paddingTop:'16px',
         marginTop: 'auto',
         borderTop: `1px solid rgba(${t.colorRgb},0.1)`,
+        position:'relative',
+        zIndex:2,
       }}>
         {/* Avatar con iniciales */}
         <div style={{

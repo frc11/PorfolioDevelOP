@@ -107,8 +107,8 @@ const cards: BentoCard[] = [
         label: 'RESULTADO 02',
         title: 'Atención sin esperas',
         description: 'Consultas respondidas en menos de 3 segundos. Precios, turnos, disponibilidad — todo al instante, sin que nadie toque el celular.',
-        color: '#7b2fff',
-        colorRgb: '123,47,255',
+        color: '#0fbf73',
+        colorRgb: '15,191,115',
         icon: <MemoryIcon />,
         stat: '< 3s',
         statLabel: 'por consulta respondida',
@@ -120,8 +120,8 @@ const cards: BentoCard[] = [
         label: 'RESULTADO 03',
         title: 'Tu empresa, organizada',
         description: 'Toda la información de tu negocio en un solo lugar. Tu equipo pregunta, la IA responde con datos actualizados al segundo.',
-        color: '#7b2fff',
-        colorRgb: '123,47,255',
+        color: '#0fbf73',
+        colorRgb: '15,191,115',
         icon: <VisionIcon />,
         stat: '100%',
         statLabel: 'datos en tiempo real',
@@ -133,8 +133,8 @@ const cards: BentoCard[] = [
         label: 'RESULTADO 04',
         title: 'Reservas mientras dormís',
         description: 'Coordina turnos, manda recordatorios y gestiona cancelaciones por WhatsApp. Vos solo aparecés a trabajar.',
-        color: '#7b2fff',
-        colorRgb: '123,47,255',
+        color: '#0fbf73',
+        colorRgb: '15,191,115',
         icon: <IntegrationIcon />,
         stat: '×3',
         statLabel: 'más ventas cerradas',
@@ -460,7 +460,7 @@ function BentoCardComponent({
                                                 : { duration: 1.2, delay: 0.6 + i * 0.15, ease: [0.16, 1, 0.3, 1] }}
                                             style={{
                                                 height: '100%',
-                                                background: 'linear-gradient(90deg, #00ff88, #7b2fff)',
+                                                background: 'linear-gradient(90deg, #00ff88, #0fbf73)',
                                                 borderRadius: '100px',
                                                 boxShadow: '0 0 8px rgba(0,255,136,0.4)',
                                             }}
@@ -481,11 +481,11 @@ function BentoCardComponent({
                         }}>
                             {[
                                 { name: 'WhatsApp', color: '#25d366' },
-                                { name: 'Gmail', color: '#ea4335' },
+                                { name: 'Gmail', color: '#34a853' },
                                 { name: 'Notion', color: '#ffffff' },
                                 { name: 'Sheets', color: '#34a853' },
-                                { name: 'Slack', color: '#e01e5a' },
-                                { name: 'CRM', color: '#f59e0b' },
+                                { name: 'Slack', color: '#2dbf71' },
+                                { name: 'CRM', color: '#65d46e' },
                             ].map((app, i) => (
                                 <motion.div
                                     key={app.name}
@@ -619,9 +619,9 @@ function Header({ isInView, reducedMotion }: { isInView: boolean, reducedMotion:
 
 const atmosphericGlows = [
     { top: '10%', left: '20%', right: undefined, color: '0,255,136' },    // card 0
-    { top: '60%', left: '12%', right: undefined, color: '123,47,255' },   // card 1
-    { top: '60%', left: '45%', right: undefined, color: '123,47,255' },    // card 2
-    { top: '30%', left: undefined, right: '8%', color: '123,47,255' },    // card 3
+    { top: '60%', left: '12%', right: undefined, color: '15,191,115' },   // card 1
+    { top: '60%', left: '45%', right: undefined, color: '15,191,115' },    // card 2
+    { top: '30%', left: undefined, right: '8%', color: '15,191,115' },    // card 3
 ]
 
 // ─── MAIN EXPORT ─────────────────────────────────────────────────────────────

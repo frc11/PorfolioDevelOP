@@ -12,16 +12,22 @@ import {
 
 const ease = [0.16, 1, 0.3, 1] as const
 
-const copyLines = [
-    'Arquitectura pensada para operar sin fricción.',
-    'Cada módulo habla con el siguiente sin cuellos de botella,',
-    'sin duplicación de datos y con visibilidad real para dirección.',
-]
+const headlineMain = 'Arquitectura modular, sin friccion operativa.'
+const headlineSub = 'Todos los modulos conectados para decidir en tiempo real.'
 
-const features = [
-    'Servicios desacoplados para crecer sin romper lo existente',
-    'Flujo de datos auditado y trazable entre áreas críticas',
-    'Seguridad, performance y observabilidad como base del sistema',
+const architecturePillars = [
+    {
+        title: 'Escala por modulos',
+        description: 'Suma areas nuevas sin rehacer lo que ya funciona.',
+    },
+    {
+        title: 'Trazabilidad completa',
+        description: 'Cada dato mantiene origen, reglas y destino.',
+    },
+    {
+        title: 'Visibilidad de punta a punta',
+        description: 'Direccion ve el estado real del negocio sin demoras.',
+    },
 ]
 
 const nodes = {
@@ -97,21 +103,32 @@ const lineVariants = {
     },
 }
 
+const DOT_OFFSETS = [0.18, 0.54, 0.82] as const
+
 function PathDots({
     d,
     color,
     trigger,
     reducedMotion,
+    speedMultiplier,
 }: {
     d: string
     color: string
     trigger: boolean
     reducedMotion: boolean | null
+    speedMultiplier: number
 }) {
     const pathRef = useRef<SVGPathElement>(null)
+    const haloRefs = useRef<(SVGCircleElement | null)[]>([])
+    const coreRefs = useRef<(SVGCircleElement | null)[]>([])
+    const positionsRef = useRef<number[]>([...DOT_OFFSETS])
+    const lastFrameRef = useRef(0)
+    const speedMultiplierRef = useRef(speedMultiplier)
     const [length, setLength] = useState(0)
-    const [dotPositions, setDotPositions] = useState([0.18, 0.54, 0.82])
-    const [dotCoords, setDotCoords] = useState<{ x: number; y: number; id: string }[]>([])
+
+    useEffect(() => {
+        speedMultiplierRef.current = speedMultiplier
+    }, [speedMultiplier])
 
     useEffect(() => {
         if (!pathRef.current) return
@@ -123,43 +140,45 @@ function PathDots({
 
         let raf = 0
 
-        const tick = () => {
-            setDotPositions((prev) =>
-                prev.map((value, index) => {
-                    const speed = 0.0038 + index * 0.0016
-                    const next = value + speed
-                    return next > 1 ? next - 1 : next
-                })
-            )
+        const tick = (timestamp: number) => {
+            if (!pathRef.current) return
+            if (!lastFrameRef.current) lastFrameRef.current = timestamp
+
+            const delta = Math.min(64, timestamp - lastFrameRef.current)
+            lastFrameRef.current = timestamp
+            const multiplier = speedMultiplierRef.current
+
+            positionsRef.current = positionsRef.current.map((value, index) => {
+                const speedPerMs = 0.00021 + index * 0.00009
+                const next = value + speedPerMs * delta * multiplier
+                return next > 1 ? next - 1 : next
+            })
+
+            positionsRef.current.forEach((progress, index) => {
+                const point = pathRef.current?.getPointAtLength(progress * length)
+                if (!point) return
+
+                const halo = haloRefs.current[index]
+                const core = coreRefs.current[index]
+                if (!halo || !core) return
+
+                const x = String(point.x)
+                const y = String(point.y)
+                halo.setAttribute('cx', x)
+                halo.setAttribute('cy', y)
+                core.setAttribute('cx', x)
+                core.setAttribute('cy', y)
+            })
+
             raf = requestAnimationFrame(tick)
         }
 
         raf = requestAnimationFrame(tick)
-        return () => cancelAnimationFrame(raf)
-    }, [trigger, reducedMotion, length])
-
-    useEffect(() => {
-        if (!pathRef.current || !length) return
-
-        const nextCoords = dotPositions
-            .map((progress, index) => {
-                const point = pathRef.current?.getPointAtLength(progress * length)
-                if (!point) return null
-                return { x: point.x, y: point.y, id: `${index}-${progress}` }
-            })
-            .filter((value): value is { x: number; y: number; id: string } => value !== null)
-
-        setDotCoords((prev) => {
-            if (prev.length !== nextCoords.length) return nextCoords
-
-            const changed = prev.some((value, index) => {
-                const next = nextCoords[index]
-                return !next || value.x !== next.x || value.y !== next.y || value.id !== next.id
-            })
-
-            return changed ? nextCoords : prev
-        })
-    }, [dotPositions, length])
+        return () => {
+            cancelAnimationFrame(raf)
+            lastFrameRef.current = 0
+        }
+    }, [trigger, reducedMotion, length, d])
 
     if (!length) {
         return <path ref={pathRef} d={d} fill="none" stroke="transparent" />
@@ -170,22 +189,28 @@ function PathDots({
             <path ref={pathRef} d={d} fill="none" stroke="transparent" />
             {!reducedMotion &&
                 trigger &&
-                dotCoords.map((point) => (
-                        <g key={`${d}-${point.id}`}>
-                            <circle
-                                cx={point.x}
-                                cy={point.y}
-                                r="8"
-                                fill={color}
-                                opacity="0.14"
-                            />
-                            <circle
-                                cx={point.x}
-                                cy={point.y}
-                                r="3.2"
-                                fill={color}
-                            />
-                        </g>
+                DOT_OFFSETS.map((_, index) => (
+                    <g key={`${d}-${index}`}>
+                        <circle
+                            ref={(element) => {
+                                haloRefs.current[index] = element
+                            }}
+                            cx="0"
+                            cy="0"
+                            r="8"
+                            fill={color}
+                            opacity="0.14"
+                        />
+                        <circle
+                            ref={(element) => {
+                                coreRefs.current[index] = element
+                            }}
+                            cx="0"
+                            cy="0"
+                            r="3.2"
+                            fill={color}
+                        />
+                    </g>
                 ))}
         </>
     )
@@ -197,6 +222,7 @@ export default function ArchitectureSoftware() {
     const isInView = useInView(sectionRef, { once: true, amount: 0.18 })
     const reducedMotion = useReducedMotion()
     const pulse = useMotionValue(0)
+    const [diagramHovered, setDiagramHovered] = useState(false)
 
     useScroll({
         target: diagramRef,
@@ -261,13 +287,13 @@ export default function ArchitectureSoftware() {
             />
 
             <div className="relative mx-auto max-w-7xl">
-                <div className="grid items-center gap-14 lg:grid-cols-[0.88fr_1.12fr] lg:gap-20">
+                <div className="grid items-start gap-10 lg:grid-cols-[0.92fr_1.08fr] lg:gap-12 xl:gap-14">
                     <motion.div
                         variants={containerVariants}
                         initial="hidden"
                         whileInView="visible"
                         viewport={{ once: true, amount: 0.4 }}
-                        className="relative z-10"
+                        className="relative z-10 max-w-2xl lg:max-w-none"
                     >
                         <motion.div
                             variants={lineVariants}
@@ -279,46 +305,26 @@ export default function ArchitectureSoftware() {
                             </span>
                         </motion.div>
 
-                        <div className="space-y-3">
-                            {copyLines.map((line, index) => (
-                                <div key={line} className="overflow-hidden">
-                                    <motion.h2
-                                        variants={lineVariants}
-                                        className={`text-[clamp(2.25rem,5vw,4.6rem)] font-black leading-[0.9] tracking-[-0.06em] ${
-                                            index === copyLines.length - 1
-                                                ? 'bg-gradient-to-r from-white via-indigo-200 to-cyan-200 bg-clip-text text-transparent'
-                                                : 'text-white'
-                                        }`}
-                                    >
-                                        {line}
-                                    </motion.h2>
-                                </div>
-                            ))}
-                        </div>
-
-                        <motion.p
+                        <motion.h2
                             variants={lineVariants}
-                            className="mt-7 max-w-xl text-base leading-8 text-white/46 md:text-lg"
+                            className="text-[clamp(2rem,3.6vw,3.55rem)] font-black leading-[0.96] tracking-[-0.04em] text-white"
                         >
-                            Diseñamos software que ordena el negocio desde adentro: entradas consistentes, procesamiento seguro y salidas listas para ejecutar, medir y escalar.
-                        </motion.p>
+                            {headlineMain}
+                        </motion.h2>
 
-                        <motion.div variants={lineVariants} className="mt-10 grid gap-3">
-                            {features.map((feature) => (
-                                <div
-                                    key={feature}
-                                    className="flex items-center gap-3 border-t border-white/10 pt-4 text-sm text-white/62 md:text-[15px]"
-                                >
-                                    <span className="inline-flex h-6 w-6 items-center justify-center rounded-full border border-indigo-300/20 bg-indigo-300/[0.08] text-[11px] text-indigo-200">
-                                        ✓
-                                    </span>
-                                    {feature}
-                                </div>
-                            ))}
-                        </motion.div>
+                        <motion.h3
+                            variants={lineVariants}
+                            className="mt-2 bg-gradient-to-r from-indigo-100 via-indigo-200 to-cyan-200 bg-clip-text text-[clamp(1.2rem,2vw,1.6rem)] font-bold tracking-[-0.02em] text-transparent"
+                        >
+                            {headlineSub}
+                        </motion.h3>
+
+                        <motion.p variants={lineVariants} className="mt-6 max-w-xl text-base leading-8 text-white/46 md:text-lg">
+                            Disenamos software que ordena el negocio desde adentro: entradas consistentes, procesamiento seguro y salidas listas para ejecutar, medir y escalar.
+                        </motion.p>
                     </motion.div>
 
-                    <div ref={diagramRef} className="relative z-10">
+                    <div ref={diagramRef} className="relative z-10 lg:pt-2">
                         <motion.div
                             aria-hidden="true"
                             style={{ scale: pulseScale, opacity: pulseOpacity }}
@@ -332,7 +338,21 @@ export default function ArchitectureSoftware() {
                             whileInView={{ opacity: 1, y: 0, scale: 1 }}
                             viewport={{ once: true, amount: 0.35 }}
                             transition={{ duration: reducedMotion ? 0 : 0.9, ease }}
-                            className="relative overflow-hidden rounded-[2rem] border border-white/[0.06] bg-white/[0.02] p-4 shadow-[0_24px_80px_rgba(0,0,0,0.35)] backdrop-blur-xl md:p-6"
+                            onHoverStart={() => setDiagramHovered(true)}
+                            onHoverEnd={() => setDiagramHovered(false)}
+                            onFocus={() => setDiagramHovered(true)}
+                            onBlur={() => setDiagramHovered(false)}
+                            whileHover={
+                                reducedMotion
+                                    ? undefined
+                                    : {
+                                        y: -3,
+                                        scale: 1.008,
+                                        borderColor: 'rgba(167,139,250,0.34)',
+                                        boxShadow: '0 30px 90px rgba(56,189,248,0.18)',
+                                    }
+                            }
+                            className="relative overflow-hidden rounded-[2rem] border border-white/[0.06] bg-white/[0.02] p-4 shadow-[0_24px_80px_rgba(0,0,0,0.35)] backdrop-blur-xl transition-colors duration-300 md:p-6"
                         >
                             <div className="absolute inset-0 bg-[linear-gradient(145deg,rgba(255,255,255,0.06),transparent_30%,transparent_70%,rgba(34,211,238,0.06))]" />
 
@@ -375,6 +395,7 @@ export default function ArchitectureSoftware() {
                                             color={path.color}
                                             trigger={shouldDraw}
                                             reducedMotion={reducedMotion}
+                                            speedMultiplier={diagramHovered ? 2.6 : 1}
                                         />
                                     </g>
                                 ))}
@@ -406,21 +427,56 @@ export default function ArchitectureSoftware() {
                             </svg>
 
                             <div className="relative z-10 mt-5 grid gap-3 border-t border-white/8 pt-5 md:grid-cols-3">
-                                <div className="rounded-[1.1rem] border border-white/[0.05] bg-white/[0.02] p-4">
+                                <div className="rounded-[1.1rem] border border-white/[0.05] bg-white/[0.02] p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-cyan-300/25 hover:bg-white/[0.04]">
                                     <div className="text-[10px] uppercase tracking-[0.22em] text-white/28">Entrada</div>
                                     <div className="mt-2 text-sm font-semibold text-white">Requests validadas</div>
                                 </div>
-                                <div className="rounded-[1.1rem] border border-white/[0.05] bg-white/[0.02] p-4">
+                                <div className="rounded-[1.1rem] border border-white/[0.05] bg-white/[0.02] p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-cyan-300/25 hover:bg-white/[0.04]">
                                     <div className="text-[10px] uppercase tracking-[0.22em] text-white/28">Proceso</div>
                                     <div className="mt-2 text-sm font-semibold text-white">Reglas, permisos y flujos</div>
                                 </div>
-                                <div className="rounded-[1.1rem] border border-white/[0.05] bg-white/[0.02] p-4">
+                                <div className="rounded-[1.1rem] border border-white/[0.05] bg-white/[0.02] p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-cyan-300/25 hover:bg-white/[0.04]">
                                     <div className="text-[10px] uppercase tracking-[0.22em] text-white/28">Salida</div>
                                     <div className="mt-2 text-sm font-semibold text-white">Datos, alertas y decisiones</div>
                                 </div>
                             </div>
                         </motion.div>
                     </div>
+
+                    <motion.div
+                        initial="hidden"
+                        whileInView="visible"
+                        viewport={{ once: true, amount: 0.25 }}
+                        variants={containerVariants}
+                        className="mt-4 grid gap-4 md:grid-cols-3 lg:col-span-2"
+                    >
+                        {architecturePillars.map((pillar) => (
+                            <motion.div
+                                key={pillar.title}
+                                variants={lineVariants}
+                                whileHover={
+                                    reducedMotion
+                                        ? undefined
+                                        : {
+                                            y: -4,
+                                            scale: 1.012,
+                                            borderColor: 'rgba(129,140,248,0.34)',
+                                            backgroundColor: 'rgba(255,255,255,0.04)',
+                                            boxShadow: '0 18px 38px rgba(15,23,42,0.32)',
+                                        }
+                                }
+                                transition={{ duration: 0.24, ease }}
+                                className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-5 transition-colors duration-300"
+                            >
+                                <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-indigo-200/85">
+                                    {pillar.title}
+                                </p>
+                                <p className="mt-2 text-sm leading-7 text-white/62 md:text-[15px]">
+                                    {pillar.description}
+                                </p>
+                            </motion.div>
+                        ))}
+                    </motion.div>
                 </div>
 
                 <motion.div

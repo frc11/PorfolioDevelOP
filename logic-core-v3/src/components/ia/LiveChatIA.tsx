@@ -1,19 +1,19 @@
-'use client'
+﻿'use client'
 
 import React, { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence, useInView, useReducedMotion } from 'motion/react'
 
-// ─── CONSTANTS & TYPES ───────────────────────────────────────────────────────
+// â”€â”€â”€ CONSTANTS & TYPES â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const MAX_MESSAGES = 10
 
 const suggestions = [
-  '¿Cómo puede la IA ayudar a mi restaurante?',
-  '¿Cuánto cuesta implementar IA?',
-  '¿En cuánto tiempo está listo?',
-  '¿Qué es un agente IA?',
-  '¿Pueden automatizar mi WhatsApp?',
-  '¿Funciona para una clínica médica?',
+  'Como puede la IA ayudar a mi restaurante?',
+  'Cuanto cuesta implementar IA?',
+  'En cuanto tiempo esta listo?',
+  'Que es un agente IA?',
+  'Pueden automatizar mi WhatsApp?',
+  'Funciona para una clinica medica?',
 ]
 
 type MessageRole = 'user' | 'assistant'
@@ -26,7 +26,7 @@ interface ChatMessage {
   streaming?: boolean
 }
 
-// ─── COMPONENTS ──────────────────────────────────────────────────────────────
+// â”€â”€â”€ COMPONENTS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function MessageBubble({ message }: { message: ChatMessage }) {
   const isUser = message.role === 'user'
@@ -46,11 +46,11 @@ function MessageBubble({ message }: { message: ChatMessage }) {
       {!isUser && (
         <div style={{
           width: '28px', height: '28px', borderRadius: '50%',
-          background: 'linear-gradient(135deg, #00ff88, #7b2fff)',
+          background: 'linear-gradient(135deg, #00ff88, #0fbf73)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           fontSize: '14px', flexShrink: 0, marginBottom: '2px',
         }}>
-          🤖
+          {'\u{1F916}'}
         </div>
       )}
 
@@ -87,42 +87,107 @@ function InfoPanel({ shouldReduceMotion }: { shouldReduceMotion: boolean }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
       {/* Principal Card */}
-      <div style={{
-        background: 'rgba(0,255,136,0.04)',
-        border: '1px solid rgba(0,255,136,0.12)',
-        borderRadius: '16px',
-        padding: '24px',
-      }}>
+      <motion.div
+        whileHover={shouldReduceMotion ? {} : {
+          y: -4,
+          scale: 1.012,
+          borderColor: 'rgba(0,255,136,0.26)',
+          boxShadow: '0 18px 34px rgba(0,0,0,0.38), 0 0 32px rgba(0,255,136,0.12)',
+        }}
+        transition={{ type: 'spring', stiffness: 320, damping: 24 }}
+        style={{
+          background: 'rgba(0,255,136,0.04)',
+          border: '1px solid rgba(0,255,136,0.12)',
+          borderRadius: '16px',
+          padding: '24px',
+          position: 'relative',
+          overflow: 'hidden',
+          cursor: 'inherit',
+        }}
+      >
+        <motion.div
+          aria-hidden="true"
+          initial={{ x: '-120%' }}
+          whileHover={shouldReduceMotion ? {} : { x: '140%' }}
+          transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+          style={{
+            position: 'absolute',
+            inset: 0,
+            background: 'linear-gradient(110deg, transparent 35%, rgba(255,255,255,0.11) 50%, transparent 65%)',
+            pointerEvents: 'none',
+          }}
+        />
         <p style={{
-          fontSize: '11px', letterSpacing: '0.2em', color: 'rgba(0,255,136,0.6)',
-          margin: '0 0 12px', fontWeight: 600,
-        }}>¿QUÉ ESTÁS USANDO?</p>
+          fontSize: '11px',
+          letterSpacing: '0.2em',
+          color: 'rgba(0,255,136,0.6)',
+          margin: '0 0 12px',
+          fontWeight: 600,
+        }}>
+          QUE ESTAS USANDO?
+        </p>
         <h3 style={{ fontSize: '20px', fontWeight: 900, color: 'white', margin: '0 0 10px', lineHeight: 1.2 }}>
           La misma IA que instalamos en negocios.
         </h3>
         <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.45)', lineHeight: 1.65, margin: 0 }}>
           No es una demo. Es un agente real entrenado sobre DevelOP y sus servicios.
-          Exactamente así funciona en un restaurante, médico o comercio.
+          Exactamente asi funciona en un restaurante, medico o comercio.
         </p>
-      </div>
+      </motion.div>
 
       {/* Tech Stats */}
       {[
-        { icon: '⚡', label: 'Atención inmediata', value: ' < 1 segundo' },
-        { icon: '🔒', label: 'Conversación privada', value: 'Encriptada' },
-        { icon: '🧠', label: 'Cerebro Digital', value: 'Entrenado por DevelOP' },
-        { icon: '🌎', label: 'Sin horarios', value: '24 / 7 / 365' },
+        { icon: '\u26A1', label: 'Atencion inmediata', value: '< 1 segundo' },
+        { icon: '\uD83D\uDD12', label: 'Conversacion privada', value: 'Encriptada' },
+        { icon: '\uD83E\uDDE0', label: 'Cerebro digital', value: 'Entrenado por DevelOP' },
+        { icon: '\uD83C\uDF0E', label: 'Sin horarios', value: '24 / 7 / 365' },
       ].map((stat, i) => (
         <motion.div
           key={i}
           initial={shouldReduceMotion ? { opacity: 1, x: 0 } : { opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.3 + i * 0.08, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+          whileHover={shouldReduceMotion ? {} : {
+            y: -3,
+            scale: 1.01,
+            borderColor: 'rgba(0,255,136,0.26)',
+            boxShadow: '0 14px 28px rgba(0,0,0,0.32), 0 0 22px rgba(0,255,136,0.1)',
+            background: 'rgba(0,255,136,0.05)',
+          }}
+          transition={{
+            duration: 0.5,
+            ease: [0.16, 1, 0.3, 1],
+            opacity: { delay: 0.3 + i * 0.08, duration: 0.5 },
+            x: { delay: 0.3 + i * 0.08, duration: 0.5 },
+            y: { type: 'spring', stiffness: 380, damping: 26 },
+            scale: { type: 'spring', stiffness: 380, damping: 26 },
+            borderColor: { duration: 0.18 },
+            boxShadow: { duration: 0.18 },
+            background: { duration: 0.18 },
+          }}
           style={{
-            display: 'flex', alignItems: 'center', gap: '14px', padding: '14px 16px',
-            background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '12px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '14px',
+            padding: '14px 16px',
+            background: 'rgba(255,255,255,0.02)',
+            border: '1px solid rgba(255,255,255,0.06)',
+            borderRadius: '12px',
+            position: 'relative',
+            overflow: 'hidden',
+            cursor: 'inherit',
           }}
         >
+          <div
+            aria-hidden="true"
+            style={{
+              position: 'absolute',
+              left: 0,
+              top: 0,
+              bottom: 0,
+              width: '2px',
+              background: 'linear-gradient(180deg, rgba(0,255,136,0.7), rgba(15,191,115,0.2))',
+            }}
+          />
           <span style={{ fontSize: '20px' }}>{stat.icon}</span>
           <div style={{ flex: 1 }}>
             <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.3)', margin: '0 0 2px' }}>{stat.label}</p>
@@ -133,25 +198,40 @@ function InfoPanel({ shouldReduceMotion }: { shouldReduceMotion: boolean }) {
 
       {/* CTA WhatsApp */}
       <motion.a
-        href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER}?text=${encodeURIComponent('Hola DevelOP, probé la IA en vivo y quiero implementarla en mi empresa')}`}
-        target="_blank" rel="noopener noreferrer"
-        whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
+        href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER}?text=${encodeURIComponent('Hola DevelOP, probe la IA en vivo y quiero implementarla en mi empresa')}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        whileHover={shouldReduceMotion ? {} : {
+          scale: 1.025,
+          y: -2,
+          boxShadow: '0 14px 34px rgba(37,211,102,0.34), 0 0 42px rgba(0,255,136,0.22)',
+          filter: 'brightness(1.05)',
+        }}
+        whileTap={{ scale: 0.97 }}
         transition={{ type: 'spring', stiffness: 400, damping: 15 }}
         style={{
-          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
-          background: 'linear-gradient(135deg, #25d366, #128c7e)', color: 'white',
-          fontWeight: 700, fontSize: '14px', padding: '16px 24px', borderRadius: '100px',
-          textDecoration: 'none', boxShadow: '0 0 30px rgba(37,211,102,0.25)', marginTop: '4px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '10px',
+          background: 'linear-gradient(135deg, #25d366, #128c7e)',
+          color: 'white',
+          fontWeight: 700,
+          fontSize: '14px',
+          padding: '16px 24px',
+          borderRadius: '100px',
+          textDecoration: 'none',
+          boxShadow: '0 0 30px rgba(37,211,102,0.25)',
+          marginTop: '4px',
+          border: '1px solid rgba(255,255,255,0.16)',
+          cursor: 'default',
         }}
       >
-        💬 Quiero esto en mi negocio →
+        Quiero esto en mi negocio {'\u2192'}
       </motion.a>
     </div>
   )
 }
-
-// ─── MAIN EXPORT ──────────────────────────────────────────────────────────────
-
 export default function LiveChatIA() {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [input, setInput] = useState('')
@@ -244,7 +324,7 @@ export default function LiveChatIA() {
       console.error('Error sending message:', error)
       setMessages(prev => prev.map(m =>
         m.id === assistantId
-          ? { ...m, content: 'Hubo un error al procesar tu mensaje. Por favor intentá de nuevo.', streaming: false }
+          ? { ...m, content: 'Hubo un error al procesar tu mensaje. Por favor intenta de nuevo.', streaming: false }
           : m
       ))
     } finally {
@@ -268,7 +348,7 @@ export default function LiveChatIA() {
       }} />
       <div aria-hidden="true" style={{
         position: 'absolute', top: '20%', right: '0%', width: '400px', height: '400px',
-        background: 'radial-gradient(ellipse, rgba(123, 47, 255, 0.06) 0%, transparent 60%)',
+        background: 'radial-gradient(ellipse, rgba(15, 191, 115, 0.06) 0%, transparent 60%)',
         filter: 'blur(80px)', pointerEvents: 'none', zIndex: 0
       }} />
       <div aria-hidden="true" style={{
@@ -299,7 +379,7 @@ export default function LiveChatIA() {
               boxShadow: '0 0 8px rgba(0,255,136,0.8)',
               animation: 'pulse 1.5s ease-in-out infinite',
             }} />
-            [ EN VIVO · PROBALO AHORA ]
+            [ EN VIVO - PROBALO AHORA ]
           </div>
           <h2 style={{ fontSize: 'clamp(30px,4.5vw,58px)', fontWeight: 900, marginBottom: '16px', lineHeight: 1.1 }}>
             <span style={{ color: 'white' }}>
@@ -311,9 +391,9 @@ export default function LiveChatIA() {
             </span>
           </h2>
           <p style={{ fontSize: '16px', color: 'rgba(255,255,255,0.4)', margin: 0 }}>
-            Hablá con nuestra IA ahora mismo.<br />
+            Habla con nuestra IA ahora mismo.<br />
             La misma que instalamos en tu negocio.<br />
-            Preguntá lo que quieras.
+            Pregunta lo que quieras.
           </p>
         </motion.div>
 
@@ -355,9 +435,9 @@ export default function LiveChatIA() {
                 <div style={{ position: 'relative', flexShrink: 0 }}>
                   <div style={{
                     width: '40px', height: '40px', borderRadius: '50%',
-                    background: 'linear-gradient(135deg, #00ff88, #7b2fff)',
+                    background: 'linear-gradient(135deg, #00ff88, #0fbf73)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px'
-                  }}>🤖</div>
+                  }}>{'\u{1F916}'}</div>
                   <div style={{
                     position: 'absolute', bottom: '1px', right: '1px', width: '10px', height: '10px',
                     borderRadius: '50%', background: '#00ff88', border: '2px solid #080810',
@@ -365,9 +445,9 @@ export default function LiveChatIA() {
                   }} />
                 </div>
                 <div style={{ flex: 1 }}>
-                  <p style={{ fontSize: '14px', fontWeight: 700, color: 'white', margin: 0 }}>Asistente IA · DevelOP</p>
+                  <p style={{ fontSize: '14px', fontWeight: 700, color: 'white', margin: 0 }}>Asistente IA - DevelOP</p>
                   <p style={{ fontSize: '11px', color: '#00ff88', margin: 0 }}>
-                    {isLoading ? 'Escribiendo...' : '● En línea'}
+                    {isLoading ? 'Escribiendo...' : '\u25CF En linea'}
                   </p>
                 </div>
                 <span className="hidden sm:inline-block" style={{
@@ -398,13 +478,13 @@ export default function LiveChatIA() {
                         transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
                         style={{
                           width: '64px', height: '64px', borderRadius: '20px',
-                          background: 'linear-gradient(135deg, rgba(0,255,136,0.15), rgba(123,47,255,0.15))',
+                          background: 'linear-gradient(135deg, rgba(0,255,136,0.15), rgba(15,191,115,0.15))',
                           border: '1px solid rgba(0,255,136,0.2)', display: 'flex', alignItems: 'center',
                           justifyContent: 'center', fontSize: '32px'
                         }}
-                      >🧠</motion.div>
+                      >{'\u{1F9E0}'}</motion.div>
                       <div>
-                        <p style={{ fontSize: '15px', fontWeight: 600, color: 'rgba(255,255,255,0.7)', margin: '0 0 6px' }}>¿Qué querés automatizar?</p>
+                        <p style={{ fontSize: '15px', fontWeight: 600, color: 'rgba(255,255,255,0.7)', margin: '0 0 6px' }}>Que queres automatizar?</p>
                         <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.25)', margin: 0 }}>Preguntame lo que quieras sobre IA</p>
                       </div>
                       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', width: '100%', maxWidth: '380px' }}>
@@ -418,7 +498,7 @@ export default function LiveChatIA() {
                             style={{
                               background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)',
                               borderRadius: '10px', padding: '10px 12px', fontSize: '12px', color: 'rgba(255,255,255,0.55)',
-                              cursor: 'pointer', textAlign: 'left', lineHeight: 1.4, transition: 'all 200ms'
+                              cursor: 'default', textAlign: 'left', lineHeight: 1.4, transition: 'all 200ms'
                             }}
                           >
                             {s}
@@ -434,9 +514,9 @@ export default function LiveChatIA() {
                      <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} style={{ display: 'flex', gap: '8px', alignItems: 'flex-end' }}>
                        <div style={{
                          width: '28px', height: '28px', borderRadius: '50%',
-                         background: 'linear-gradient(135deg, #00ff88, #7b2fff)',
+                         background: 'linear-gradient(135deg, #00ff88, #0fbf73)',
                          display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px'
-                       }}>🤖</div>
+                       }}>{'\u{1F916}'}</div>
                        <div style={{ padding: '12px 16px', borderRadius: '18px 18px 18px 4px', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)', display: 'flex', gap: '4px', alignItems: 'center' }}>
                          {[0, 1, 2].map(i => (
                            <div key={i} style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'rgba(0,255,136,0.6)', animation: `pulse 1s infinite ${i * 0.2}s` }} />
@@ -452,9 +532,9 @@ export default function LiveChatIA() {
               <div style={{ padding: '16px', borderTop: '1px solid rgba(255,255,255,0.06)', display: 'flex', gap: '10px', alignItems: 'center', flexShrink: 0, background: 'rgba(255,255,255,0.01)' }}>
                 {messageCount >= MAX_MESSAGES ? (
                   <div style={{ flex: 1, textAlign: 'center', fontSize: '13px', color: 'rgba(255,255,255,0.35)' }}>
-                    Para continuar la conversación,{' '}
-                    <a href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER}?text=${encodeURIComponent('Hola DevelOP, probé la IA en vivo y quiero implementarla en mi empresa')}`} style={{ color: '#00ff88', fontWeight: 600, textDecoration: 'none' }} target="_blank" rel="noopener noreferrer">
-                      escribinos por WhatsApp →
+                    Para continuar la conversacion,{' '}
+                    <a href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER}?text=${encodeURIComponent('Hola DevelOP, probe la IA en vivo y quiero implementarla en mi empresa')}`} style={{ color: '#00ff88', fontWeight: 600, textDecoration: 'none' }} target="_blank" rel="noopener noreferrer">
+                      escribinos por WhatsApp {'\u2192'}
                     </a>
                   </div>
                 ) : (
@@ -463,7 +543,7 @@ export default function LiveChatIA() {
                       ref={inputRef} value={input}
                       onChange={e => setInput(e.target.value)}
                       onKeyDown={e => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), handleSend())}
-                      placeholder="Preguntá sobre automatización..."
+                      placeholder="Pregunta sobre automatizacion..."
                       disabled={isLoading}
                       style={{
                         flex: 1, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
@@ -475,9 +555,9 @@ export default function LiveChatIA() {
                       style={{
                         width: '42px', height: '42px', borderRadius: '50%', background: '#00ff88', color: '#080810',
                         display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', border: 'none',
-                        cursor: 'pointer', transition: 'transform 200ms, opacity 200ms', opacity: (isLoading || !input.trim()) ? 0.5 : 1
+                        cursor: 'default', transition: 'transform 200ms, opacity 200ms', opacity: (isLoading || !input.trim()) ? 0.5 : 1
                       }}
-                    >↑</button>
+                    >{'\u2191'}</button>
                   </>
                 )}
               </div>
@@ -502,3 +582,4 @@ export default function LiveChatIA() {
     </section>
   )
 }
+

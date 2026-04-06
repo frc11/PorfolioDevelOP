@@ -1,13 +1,13 @@
 'use client'
 
-import React, { useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import {
     motion,
     useInView,
+    useMotionValue,
     useMotionValueEvent,
     useReducedMotion,
     useScroll,
-    useTransform,
 } from 'framer-motion'
 
 type Stage = {
@@ -64,36 +64,147 @@ const stages: Stage[] = [
 ] as const
 
 const ease = [0.16, 1, 0.3, 1] as const
+const STAGE_SCROLL_WEIGHTS = [1.05, 1.45, 1.05] as const
+
+function clamp01(value: number) {
+    if (value < 0) return 0
+    if (value > 1) return 1
+    return value
+}
+
+function getInterpolatedTrackX(progress: number, anchors: number[]) {
+    if (!anchors.length) return 0
+    if (anchors.length === 1) return anchors[0]
+
+    const transitions = anchors.length - 1
+    const weights = Array.from({ length: transitions }, (_, index) => STAGE_SCROLL_WEIGHTS[index] ?? 1)
+    const totalWeight = weights.reduce((sum, weight) => sum + weight, 0)
+    let cursor = clamp01(progress) * totalWeight
+
+    for (let index = 0; index < transitions; index += 1) {
+        const segmentWeight = weights[index]
+        const from = anchors[index]
+        const to = anchors[index + 1]
+
+        if (cursor <= segmentWeight || index === transitions - 1) {
+            const local = segmentWeight <= 0 ? 0 : cursor / segmentWeight
+            return from + (to - from) * local
+        }
+
+        cursor -= segmentWeight
+    }
+
+    return anchors[anchors.length - 1]
+}
+
+function getNearestAnchorIndex(trackXValue: number, anchors: number[]) {
+    if (!anchors.length) return 0
+
+    let nearestIndex = 0
+    let nearestDistance = Math.abs(anchors[0] - trackXValue)
+
+    for (let index = 1; index < anchors.length; index += 1) {
+        const distance = Math.abs(anchors[index] - trackXValue)
+        if (distance < nearestDistance) {
+            nearestDistance = distance
+            nearestIndex = index
+        }
+    }
+
+    return nearestIndex
+}
 
 export default function PipelineSoftware() {
     const sectionRef = useRef<HTMLElement>(null)
     const stickyRef = useRef<HTMLDivElement>(null)
+    const viewportRef = useRef<HTMLDivElement>(null)
+    const trackRef = useRef<HTMLDivElement>(null)
+    const stageRefs = useRef<(HTMLElement | null)[]>([])
     const isInView = useInView(sectionRef, { once: true, amount: 0.08 })
     const reducedMotion = useReducedMotion()
     const [activeIndex, setActiveIndex] = useState(0)
+    const stageAnchorsRef = useRef<number[]>([])
+    const trackX = useMotionValue(0)
 
     const { scrollYProgress } = useScroll({
         target: sectionRef,
         offset: ['start start', 'end end'],
     })
 
-    const trackX = useTransform(
-        scrollYProgress,
-        [0, 1],
-        reducedMotion ? ['0%', '0%'] : ['0%', '-61.5%']
-    )
+    useEffect(() => {
+        const sectionElement = sectionRef.current
+        if (!sectionElement) return
+
+        if (reducedMotion) {
+            stageAnchorsRef.current = []
+            trackX.set(0)
+            sectionElement.style.height = 'auto'
+            return
+        }
+
+        const measure = () => {
+            const viewportWidth = viewportRef.current?.clientWidth ?? 0
+            if (!viewportWidth) return
+
+            const anchors = stageRefs.current
+                .map((stageElement) => {
+                    if (!stageElement) return null
+                    const centerX = stageElement.offsetLeft + stageElement.offsetWidth / 2
+                    return viewportWidth / 2 - centerX
+                })
+                .filter((value): value is number => value !== null)
+
+            if (!anchors.length) return
+
+            stageAnchorsRef.current = anchors
+
+            const travelDistance = Math.abs(anchors[anchors.length - 1] - anchors[0])
+            sectionElement.style.height = `calc(100svh + ${Math.ceil(travelDistance)}px)`
+
+            const nextTrackX = getInterpolatedTrackX(scrollYProgress.get(), anchors)
+            trackX.set(nextTrackX)
+        }
+
+        const firstMeasure = requestAnimationFrame(measure)
+
+        const resizeObserver = new ResizeObserver(measure)
+        if (viewportRef.current) resizeObserver.observe(viewportRef.current)
+        if (trackRef.current) resizeObserver.observe(trackRef.current)
+        stageRefs.current.forEach((stageElement) => {
+            if (stageElement) resizeObserver.observe(stageElement)
+        })
+
+        window.addEventListener('resize', measure)
+        return () => {
+            cancelAnimationFrame(firstMeasure)
+            resizeObserver.disconnect()
+            window.removeEventListener('resize', measure)
+        }
+    }, [reducedMotion, scrollYProgress, trackX])
 
     useMotionValueEvent(scrollYProgress, 'change', (value) => {
-        const next = Math.min(stages.length - 1, Math.max(0, Math.round(value * (stages.length - 1))))
-        setActiveIndex(next)
+        if (!reducedMotion) {
+            const anchors = stageAnchorsRef.current
+            if (!anchors.length) return
+
+            const nextTrackX = getInterpolatedTrackX(value, anchors)
+            trackX.set(nextTrackX)
+        }
+    })
+
+    useMotionValueEvent(trackX, 'change', (value) => {
+        const anchors = stageAnchorsRef.current
+        if (!anchors.length) return
+
+        const nextIndex = getNearestAnchorIndex(value, anchors)
+        setActiveIndex((previous) => (previous === nextIndex ? previous : nextIndex))
     })
 
     return (
         <section
             id="pipeline"
             ref={sectionRef}
-            className="relative overflow-hidden bg-[#080810]"
-            style={{ height: reducedMotion ? 'auto' : '420vh' }}
+            className="relative h-[100svh] bg-[#080810]"
         >
             <style>{`
                 @keyframes terminal-glow {
@@ -114,15 +225,15 @@ export default function PipelineSoftware() {
                 style={{
                     position: reducedMotion ? 'relative' : 'sticky',
                     top: 0,
-                    height: reducedMotion ? 'auto' : '100vh',
+                    height: reducedMotion ? 'auto' : '100svh',
                 }}
             >
-                <div className="mx-auto flex h-full max-w-[1600px] flex-col px-[clamp(20px,5vw,80px)] py-[clamp(32px,5vh,52px)]">
+                <div className="mx-auto grid h-full max-w-[1600px] grid-rows-[auto_minmax(0,1fr)_auto] gap-6 px-[clamp(20px,5vw,80px)] py-[clamp(28px,4.2vh,48px)]">
                     <motion.div
                         initial={{ opacity: 0, y: 18 }}
                         animate={isInView ? { opacity: 1, y: 0 } : {}}
                         transition={{ duration: reducedMotion ? 0 : 0.65, ease }}
-                        className="mb-10 max-w-3xl"
+                        className="max-w-3xl"
                     >
                         <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-indigo-400/20 bg-indigo-400/[0.06] px-4 py-2">
                             <span className="h-1.5 w-1.5 rounded-full bg-indigo-300 shadow-[0_0_10px_rgba(129,140,248,0.85)]" />
@@ -144,14 +255,18 @@ export default function PipelineSoftware() {
                         </p>
                     </motion.div>
 
-                    <div className="relative flex-1 overflow-hidden rounded-[2rem] border border-white/[0.06] bg-white/[0.02] backdrop-blur-xl">
+                    <div
+                        ref={viewportRef}
+                        className="relative min-h-[24rem] overflow-hidden rounded-[2rem] border border-white/[0.06] bg-white/[0.02] backdrop-blur-xl"
+                    >
                         <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-24 bg-[linear-gradient(90deg,#080810,rgba(8,8,16,0))]" />
                         <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-24 bg-[linear-gradient(270deg,#080810,rgba(8,8,16,0))]" />
                         <div className="pointer-events-none absolute left-1/2 top-0 z-10 h-full w-px -translate-x-1/2 bg-[linear-gradient(180deg,transparent,rgba(34,211,238,0.34)_20%,rgba(34,211,238,0.52)_50%,rgba(34,211,238,0.34)_80%,transparent)]" />
 
                         <motion.div
+                            ref={trackRef}
                             style={{ x: trackX }}
-                            className="relative flex h-full w-max items-center gap-8 px-[8vw] py-8"
+                            className="relative flex h-full w-max items-stretch gap-6 px-[clamp(18px,4vw,64px)] py-5 md:gap-7 md:py-6"
                         >
                             {stages.map((stage, index) => {
                                 const isActive = activeIndex === index
@@ -160,6 +275,9 @@ export default function PipelineSoftware() {
                                 return (
                                     <motion.article
                                         key={stage.id}
+                                        ref={(element) => {
+                                            stageRefs.current[index] = element
+                                        }}
                                         animate={{
                                             opacity: reducedMotion ? 1 : isActive ? 1 : 0.34,
                                             scale: reducedMotion ? 1 : isActive ? 1 : 0.94,
@@ -167,7 +285,7 @@ export default function PipelineSoftware() {
                                             y: reducedMotion ? 0 : isActive ? -6 : 12,
                                         }}
                                         transition={{ duration: 0.45, ease }}
-                                        className="relative flex h-[min(70vh,34rem)] w-[min(78vw,31rem)] shrink-0 flex-col justify-between overflow-hidden rounded-[1.9rem] border border-white/10 bg-black/40 p-7 shadow-[0_24px_80px_rgba(0,0,0,0.35)] md:w-[34rem] md:p-8"
+                                        className="relative flex h-full min-h-0 w-[min(84vw,30rem)] shrink-0 flex-col justify-between overflow-hidden rounded-[1.9rem] border border-white/10 bg-black/40 p-6 shadow-[0_24px_80px_rgba(0,0,0,0.35)] md:w-[32rem] md:p-7"
                                         style={{
                                             boxShadow: isActive
                                                 ? '0 0 0 1px rgba(34,211,238,0.18), 0 0 40px rgba(34,211,238,0.16), 0 24px 80px rgba(0,0,0,0.4)'
@@ -212,7 +330,7 @@ export default function PipelineSoftware() {
                                                 {stage.subtitle}
                                             </div>
 
-                                            <p className="mt-6 max-w-[26rem] text-sm leading-8 text-white/56 md:text-[15px]">
+                                            <p className="mt-5 max-w-[26rem] text-sm leading-7 text-white/56 md:text-[15px]">
                                                 {stage.description}
                                             </p>
                                         </div>
@@ -222,7 +340,7 @@ export default function PipelineSoftware() {
                                                 <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-white/28">
                                                     Output
                                                 </div>
-                                                <div className="mt-3 text-base font-semibold leading-relaxed text-white/82">
+                                                <div className="mt-3 text-sm font-semibold leading-relaxed text-white/82 md:text-base">
                                                     {stage.output}
                                                 </div>
                                             </div>
@@ -242,7 +360,7 @@ export default function PipelineSoftware() {
                         initial={{ opacity: 0, y: 14 }}
                         animate={isInView ? { opacity: 1, y: 0 } : {}}
                         transition={{ duration: reducedMotion ? 0 : 0.55, delay: 0.2, ease }}
-                        className="mt-8 flex items-center justify-between gap-4 text-[11px] uppercase tracking-[0.24em] text-white/26"
+                        className="mt-2 flex items-center justify-between gap-4 text-[11px] uppercase tracking-[0.24em] text-white/26"
                     >
                         <span>Scroll para recorrer el pipeline</span>
                         <span>{stages[activeIndex].stage} en foco</span>
