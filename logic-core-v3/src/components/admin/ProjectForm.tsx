@@ -50,7 +50,7 @@ interface ProjectFormProps {
     name: string
     description: string | null
     status: ProjectStatus
-    organizationId: string
+    organizationId: string | null
   }
   cancelHref: string
 }

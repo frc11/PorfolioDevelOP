@@ -16,7 +16,6 @@ export type ProjectCardData = {
   description: string | null
   serviceType: ServiceType | null
   status: ProjectStatus
-  legacyStatus?: string
   agreedAmount: string | null
   monthlyRate: string | null
   maintenanceStartDate: string | null

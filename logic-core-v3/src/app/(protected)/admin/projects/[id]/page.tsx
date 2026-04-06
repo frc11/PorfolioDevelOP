@@ -56,9 +56,13 @@ export default async function ProjectDetailPage({
             <h1 className="mt-2 text-3xl font-semibold tracking-tight text-white">{project.name}</h1>
             <div className="mt-3 flex flex-wrap items-center gap-3">
               <AdminStatusBadge label={PROJECT_STATUS_LABEL[project.status]} />
-              <Link href={`/admin/clients/${project.organization.id}`} className="text-sm text-zinc-500 transition-colors hover:text-cyan-300">
-                {project.organization.companyName}
-              </Link>
+              {project.organization ? (
+                <Link href={`/admin/clients/${project.organization.id}`} className="text-sm text-zinc-500 transition-colors hover:text-cyan-300">
+                  {project.organization.companyName}
+                </Link>
+              ) : (
+                <span className="text-sm text-zinc-500">Proyecto interno</span>
+              )}
             </div>
           </div>
           <Link href={`/admin/projects/${id}/edit`} className="admin-btn-secondary inline-flex items-center gap-2">

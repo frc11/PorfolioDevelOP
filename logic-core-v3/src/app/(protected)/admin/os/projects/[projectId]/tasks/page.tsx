@@ -5,8 +5,6 @@ import { listTasksByProject } from '@/app/(protected)/admin/os/team/_actions/tas
 import { TaskForm } from '../../_components/task-form'
 import { TaskList, type TaskAssignee, type TaskListItem } from '../../_components/task-list'
 
-const INTERNAL_ORGANIZATION_SLUG = 'agency-os-internal'
-
 type ProjectTasksPageProps = {
   params: Promise<{
     projectId: string
@@ -20,11 +18,7 @@ export default async function AgencyOsProjectTasksPage({ params }: ProjectTasksP
     where: { id: projectId },
     select: {
       id: true,
-      organization: {
-        select: {
-          slug: true,
-        },
-      },
+      organizationId: true,
     },
   })
 
@@ -56,7 +50,7 @@ export default async function AgencyOsProjectTasksPage({ params }: ProjectTasksP
 
   const tasks: TaskListItem[] = taskResult.success ? taskResult.data : []
   const assignees: TaskAssignee[] = superAdmins
-  const showApprovalFlow = project.organization.slug !== INTERNAL_ORGANIZATION_SLUG
+  const showApprovalFlow = project.organizationId !== null
 
   return (
     <section className="space-y-6">

@@ -10,14 +10,12 @@ import {
   ProjectIdSchema,
 } from './maintenance.schemas'
 
-const INTERNAL_ORGANIZATION_SLUG = 'agency-os-internal'
-
-function revalidateProjectPaths(projectId: string, organizationSlug?: string | null) {
+function revalidateProjectPaths(projectId: string, organizationId?: string | null) {
   revalidatePath('/admin/os/projects')
   revalidatePath(`/admin/os/projects/${projectId}`)
   revalidatePath(`/admin/os/projects/${projectId}/payments`)
 
-  if (organizationSlug && organizationSlug !== INTERNAL_ORGANIZATION_SLUG) {
+  if (organizationId) {
     revalidatePath('/dashboard/project')
   }
 }
@@ -44,17 +42,13 @@ export async function createMaintenancePayment(
         projectId: true,
         project: {
           select: {
-            organization: {
-              select: {
-                slug: true,
-              },
-            },
+            organizationId: true,
           },
         },
       },
     })
 
-    revalidateProjectPaths(payment.projectId, payment.project.organization.slug)
+    revalidateProjectPaths(payment.projectId, payment.project.organizationId)
     return ok({ id: payment.id })
   } catch (error) {
     return fail(
@@ -80,17 +74,13 @@ export async function markMaintenancePaid(
         projectId: true,
         project: {
           select: {
-            organization: {
-              select: {
-                slug: true,
-              },
-            },
+            organizationId: true,
           },
         },
       },
     })
 
-    revalidateProjectPaths(payment.projectId, payment.project.organization.slug)
+    revalidateProjectPaths(payment.projectId, payment.project.organizationId)
     return ok({ id: payment.id })
   } catch (error) {
     return fail(error instanceof Error ? error.message : 'Failed to mark payment as paid')
@@ -109,11 +99,7 @@ export async function generatePendingMaintenance(
         where: { id: parsedProjectId },
         select: {
           id: true,
-          organization: {
-            select: {
-              slug: true,
-            },
-          },
+          organizationId: true,
           monthlyRate: true,
           maintenanceStartDate: true,
         },
@@ -178,7 +164,7 @@ export async function generatePendingMaintenance(
       })
     }
 
-    revalidateProjectPaths(project.id, project.organization.slug)
+    revalidateProjectPaths(project.id, project.organizationId)
     return ok({ createdCount: missingPayments.length })
   } catch (error) {
     return fail(

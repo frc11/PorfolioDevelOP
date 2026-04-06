@@ -695,28 +695,32 @@ async function main() {
     })
   }
 
-  console.log('Seed demo listo:')
-  console.log(`- Admin: ${admin.email}`)
-  console.log(`- Cliente: ${client.email}`)
-  console.log(`- Organizacion: ${organization.companyName} (${organization.slug})`)
-  console.log(`- Servicios: 2`)
-  console.log(`- Proyecto: ${project.name}`)
-  console.log(`- Tareas: ${tasks.length}`)
-  console.log(`- Mensajes: ${messages.length}`)
-  console.log(`- Tickets: 2`)
-  console.log(`- Facturas: 2`)
-  console.log(`- Assets: ${assets.length}`)
-  console.log(`- Notificaciones: ${notifications.length}`)
-  console.log(`- Modulos premium: ${PREMIUM_FEATURE_CATALOG.length}`)
-  console.log('Credenciales:')
-  console.log('- admin@develop.com / Admin1234!')
-  console.log('- cliente@sanmiguel.com / Cliente1234!')
-  console.log('Notas de compatibilidad del schema:')
-  console.log('- service.name no existe; se sembraron 2 servicios por tipo.')
-  console.log('- project.deadline no existe; se agregó al description.')
-  console.log('- ticket.description no existe; se guardó como mensaje inicial del ticket.')
-  console.log('- invoice.description no existe; se guardó en paymentLink.')
-  console.log('- billingEmail, n8nApiUrl y n8nApiKey no existen; se documentaron en notificationPrefs.')
+  process.stdout.write(
+    [
+      'Seed demo listo:',
+      `- Admin: ${admin.email}`,
+      `- Cliente: ${client.email}`,
+      `- Organizacion: ${organization.companyName} (${organization.slug})`,
+      '- Servicios: 2',
+      `- Proyecto: ${project.name}`,
+      `- Tareas: ${tasks.length}`,
+      `- Mensajes: ${messages.length}`,
+      '- Tickets: 2',
+      '- Facturas: 2',
+      `- Assets: ${assets.length}`,
+      `- Notificaciones: ${notifications.length}`,
+      `- Modulos premium: ${PREMIUM_FEATURE_CATALOG.length}`,
+      'Credenciales:',
+      '- admin@develop.com / Admin1234!',
+      '- cliente@sanmiguel.com / Cliente1234!',
+      'Notas de compatibilidad del schema:',
+      '- service.name no existe; se sembraron 2 servicios por tipo.',
+      '- project.deadline no existe; se agregó al description.',
+      '- ticket.description no existe; se guardó como mensaje inicial del ticket.',
+      '- invoice.description no existe; se guardó en paymentLink.',
+      '- billingEmail, n8nApiUrl y n8nApiKey no existen; se documentaron en notificationPrefs.',
+    ].join('\n') + '\n'
+  )
 }
 
 main()

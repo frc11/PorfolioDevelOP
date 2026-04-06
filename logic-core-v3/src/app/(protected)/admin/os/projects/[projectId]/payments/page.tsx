@@ -1,7 +1,10 @@
-import { OsProjectStatus, Prisma } from '@prisma/client'
+import { Prisma, ProjectStatus } from '@prisma/client'
 import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
-import { markMaintenancePaid, generatePendingMaintenance } from '../../_actions/maintenance.actions'
+import {
+  generatePendingMaintenance,
+  markMaintenancePaid,
+} from '../../_actions/maintenance.actions'
 import { markMilestonePaid } from '../../_actions/milestone.actions'
 
 type ProjectPaymentsPageProps = {
@@ -12,7 +15,8 @@ type ProjectPaymentsPageProps = {
 
 type PaymentsPageData = {
   id: string
-  status: OsProjectStatus
+  status: ProjectStatus
+  maintenanceStartDate: Date | null
   milestones: Array<{
     id: string
     type: 'INICIO' | 'ENTREGA'
@@ -64,12 +68,13 @@ export default async function AgencyOsProjectPaymentsPage({
 }: ProjectPaymentsPageProps) {
   const { projectId } = await params
 
-  const [osProject, milestones, maintenancePayments] = await Promise.all([
-    prisma.osProject.findUnique({
+  const [projectRecord, milestones, maintenancePayments] = await Promise.all([
+    prisma.project.findUnique({
       where: { id: projectId },
       select: {
         id: true,
         status: true,
+        maintenanceStartDate: true,
       },
     }),
     prisma.osPaymentMilestone.findMany({
@@ -97,15 +102,16 @@ export default async function AgencyOsProjectPaymentsPage({
     }),
   ])
 
-  if (!osProject) {
+  if (!projectRecord) {
     redirect('/admin/os/projects')
   }
 
   const project: PaymentsPageData = {
-    ...osProject,
+    ...projectRecord,
     milestones,
     maintenancePayments,
   }
+  const isInMaintenance = Boolean(project.maintenanceStartDate)
 
   return (
     <section className="space-y-6">
@@ -173,7 +179,7 @@ export default async function AgencyOsProjectPaymentsPage({
             </p>
           </div>
 
-          {project.status === OsProjectStatus.EN_MANTENIMIENTO ? (
+          {isInMaintenance ? (
             <form
               action={async () => {
                 'use server'
@@ -190,9 +196,9 @@ export default async function AgencyOsProjectPaymentsPage({
           ) : null}
         </div>
 
-        {project.status !== OsProjectStatus.EN_MANTENIMIENTO ? (
+        {!isInMaintenance ? (
           <div className="mt-5 rounded-2xl border border-white/10 bg-black/20 p-4 text-sm text-zinc-400">
-            El proyecto pasara a mantenimiento despues de la entrega.
+            El proyecto pasara a mantenimiento cuando tenga una fecha de inicio de mantenimiento.
           </div>
         ) : (
           <div className="mt-5 overflow-hidden rounded-[24px] border border-white/10">

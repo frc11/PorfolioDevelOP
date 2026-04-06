@@ -163,7 +163,6 @@ model User {
   assignedTasks   Task[]               @relation("TaskAssignee")
   osAssignedLeads OsLead[]             @relation("OsLeadAssignee")
   osActivities    OsLeadActivity[]     @relation("OsActivityPerformer")
-  osAssignedTasks OsTask[]             @relation("OsTaskAssignee")
   osTimeEntries   OsTimeEntry[]        @relation("OsTimeEntryUser")
 }
 
@@ -244,8 +243,8 @@ model Project {
   estimatedEndDate     DateTime?
   osLeadId             String?       @unique
 
-  organizationId      String
-  organization        Organization           @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  organizationId      String?
+  organization        Organization?          @relation(fields: [organizationId], references: [id], onDelete: SetNull)
   tasks               Task[]
   osLead              OsLead?                @relation(fields: [osLeadId], references: [id])
   paymentMilestones   OsPaymentMilestone[]
@@ -445,6 +444,9 @@ model AgencySettings {
   alertOnChurn                 Boolean  @default(true)
   alertOnExpiringSubscriptions Boolean  @default(true)
   alertOnClientMessages        Boolean  @default(false)
+  osWeeklyDemoTarget           Int      @default(8)
+  osTelegramBotToken           String?
+  osTelegramChatId             String?
   updatedAt                    DateTime @updatedAt
 }
 
@@ -483,7 +485,6 @@ model OsLead {
   activities OsLeadActivity[]
   demos      OsDemo[]
   project    Project?
-  osProject  OsProject?
 
   @@index([status])
   @@index([nextFollowUpAt])
@@ -522,34 +523,6 @@ model OsDemo {
   @@index([leadId])
 }
 
-model OsProject {
-  id                   String          @id @default(cuid())
-  leadId               String?         @unique
-  businessName         String
-  contactName          String
-  contactPhone         String?
-  contactEmail         String?
-  organizationId       String?
-  name                 String
-  description          String?
-  serviceType          OsServiceType
-  status               OsProjectStatus @default(EN_DESARROLLO)
-  agreedAmount         Decimal         @db.Decimal(10, 2)
-  monthlyRate          Decimal?        @db.Decimal(10, 2)
-  maintenanceStartDate DateTime?
-  startDate            DateTime        @default(now())
-  estimatedEndDate     DateTime?
-  deliveredAt          DateTime?
-  createdAt            DateTime        @default(now())
-  updatedAt            DateTime        @updatedAt
-
-  lead  OsLead?  @relation(fields: [leadId], references: [id])
-  tasks OsTask[]
-
-  @@index([status])
-  @@index([serviceType])
-}
-
 model OsPaymentMilestone {
   id        String        @id @default(cuid())
   projectId String
@@ -577,25 +550,6 @@ model OsMaintenancePayment {
 
   @@unique([projectId, month, year])
   @@index([projectId])
-}
-
-model OsTask {
-  id             String       @id @default(cuid())
-  projectId      String
-  title          String
-  description    String?
-  status         OsTaskStatus @default(PENDIENTE)
-  estimatedHours Float?
-  position       Int          @default(0)
-  assignedToId   String?
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
-
-  project    OsProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  assignedTo User?     @relation("OsTaskAssignee", fields: [assignedToId], references: [id])
-
-  @@index([projectId, status])
-  @@index([assignedToId])
 }
 
 model OsTimeEntry {
@@ -635,20 +589,6 @@ enum OsServiceType {
   AI_AGENT
   AUTOMATION
   CUSTOM_SOFTWARE
-}
-
-enum OsProjectStatus {
-  EN_DESARROLLO
-  EN_REVISION
-  ENTREGADO
-  EN_MANTENIMIENTO
-  CANCELADO
-}
-
-enum OsTaskStatus {
-  PENDIENTE
-  EN_PROGRESO
-  COMPLETADA
 }
 
 enum ActivityChannel {

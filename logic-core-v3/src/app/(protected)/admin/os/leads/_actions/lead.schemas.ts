@@ -55,7 +55,7 @@ const leadFieldsSchema = {
   notes: optionalStringSchema,
 }
 
-export const LeadIdSchema = z.string().cuid('Invalid lead id')
+export const LeadIdSchema = z.string().trim().min(1, 'Invalid lead id')
 
 export const CreateLeadSchema = z.object(leadFieldsSchema)
 

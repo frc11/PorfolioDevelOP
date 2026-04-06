@@ -67,6 +67,7 @@ function getPostLoginPath(state: {
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma) as Adapter,
+  trustHost: true,
   session: {
     strategy: 'jwt',
     maxAge: 8 * 60 * 60,
@@ -123,7 +124,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           ),
         })
 
-        console.log(`[auth] Magic link para ${email}: ${url}`)
       },
     }),
     Google({

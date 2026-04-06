@@ -574,7 +574,11 @@ function NeuralFlowMini({
   const edgeBends = neuralEdgeBendsByRubro[rubro.id] ?? neuralEdgeBendsByRubro[0]
   const edgePaths = neuralEdges.map((edge, index) => {
     const from = points[edge.from]?.point
-    const to = edge.toOutput ? output : points[edge.to]?.point
+    const to = 'toOutput' in edge && edge.toOutput
+      ? output
+      : 'to' in edge
+        ? points[edge.to]?.point
+        : undefined
     if (!from || !to) return null
     const cx = (from.x + to.x) / 2
     const cy = (from.y + to.y) / 2 + edgeBends[index % edgeBends.length]

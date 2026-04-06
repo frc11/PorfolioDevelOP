@@ -17,6 +17,11 @@ import {
   startImpersonationAction as startImpersonationActionBase,
   stopImpersonationAction as stopImpersonationActionBase,
 } from '@/lib/actions/impersonation'
+import {
+  GetClientByIdSchema,
+  GetClientHealthScoreSchema,
+  ToggleModulePremiumSchema,
+} from './client.schemas'
 
 type ClientListRecord = Prisma.OrganizationGetPayload<{
   include: {
@@ -250,11 +255,7 @@ export async function getClientById(
 ): Promise<ActionResult<ClientDetailItem>> {
   try {
     await requireSuperAdmin()
-
-    const organizationId = id.trim()
-    if (!organizationId) {
-      return fail('ID de cliente invalido.')
-    }
+    const organizationId = GetClientByIdSchema.parse(id)
 
     const organization = await prisma.organization.findUnique({
       where: {
@@ -335,11 +336,7 @@ export async function getClientHealthScore(
 ): Promise<ActionResult<HealthScoreResult>> {
   try {
     await requireSuperAdmin()
-
-    const id = organizationId.trim()
-    if (!id) {
-      return fail('ID de cliente invalido.')
-    }
+    const id = GetClientHealthScoreSchema.parse(organizationId)
 
     const organization = await prisma.organization.findUnique({
       where: {
@@ -467,13 +464,9 @@ export async function toggleModulePremium(
 ): Promise<ActionResult<{ enabled: boolean; serviceType: ServiceType }>> {
   try {
     await requireSuperAdmin()
-
-    const id = organizationId.trim()
-    if (!id) {
-      return fail('ID de cliente invalido.')
-    }
-
-    const serviceType = resolveModuleServiceType(moduleKey)
+    const parsed = ToggleModulePremiumSchema.parse({ organizationId, moduleKey, enabled })
+    const id = parsed.organizationId
+    const serviceType = resolveModuleServiceType(parsed.moduleKey)
     if (!serviceType) {
       return fail('Modulo premium invalido.')
     }

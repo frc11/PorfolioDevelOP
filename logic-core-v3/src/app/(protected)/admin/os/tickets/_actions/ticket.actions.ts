@@ -5,6 +5,12 @@ import { revalidatePath } from 'next/cache'
 import { prisma } from '@/lib/prisma'
 import { requireSuperAdmin } from '@/lib/auth-guards'
 import { fail, ok, type ActionResult } from '@/lib/action-utils'
+import {
+  GetTicketByIdSchema,
+  ListTicketsSchema,
+  ReplyToTicketSchema,
+  UpdateTicketStatusSchema,
+} from './ticket.schemas'
 
 type TicketStatusFilter = TicketStatus | 'CLOSED' | null | undefined
 
@@ -59,12 +65,18 @@ export async function listTickets(filters?: {
 > {
   try {
     await requireSuperAdmin()
-    const status = normalizeTicketStatus(filters?.status)
+    const parsedFilters = ListTicketsSchema.parse({
+      status: filters?.status,
+      organizationId: filters?.organizationId ?? undefined,
+    })
+    const status = normalizeTicketStatus(parsedFilters.status)
 
     const tickets = await prisma.ticket.findMany({
       where: {
         ...(status ? { status } : {}),
-        ...(filters?.organizationId ? { organizationId: filters.organizationId } : {}),
+        ...(parsedFilters.organizationId
+          ? { organizationId: parsedFilters.organizationId }
+          : {}),
       },
       include: {
         organization: {
@@ -135,13 +147,10 @@ export async function getTicketById(
 > {
   try {
     await requireSuperAdmin()
-
-    if (!id.trim()) {
-      return fail('Invalid ticket id')
-    }
+    const ticketId = GetTicketByIdSchema.parse(id)
 
     const ticket = await prisma.ticket.findUnique({
-      where: { id },
+      where: { id: ticketId },
       include: {
         organization: true,
         messages: {
@@ -199,19 +208,11 @@ export async function replyToTicket(
 ): Promise<ActionResult<{ id: string }>> {
   try {
     const userId = await requireSuperAdmin()
-
-    if (!ticketId.trim()) {
-      return fail('Invalid ticket id')
-    }
-
-    const trimmedContent = content.trim()
-    if (!trimmedContent) {
-      return fail('La respuesta no puede estar vacia.')
-    }
+    const parsed = ReplyToTicketSchema.parse({ ticketId, content })
 
     const message = await prisma.$transaction(async (tx) => {
       const ticket = await tx.ticket.findUnique({
-        where: { id: ticketId },
+        where: { id: parsed.ticketId },
         select: { id: true },
       })
 
@@ -221,9 +222,9 @@ export async function replyToTicket(
 
       const createdMessage = await tx.ticketMessage.create({
         data: {
-          ticketId,
+          ticketId: parsed.ticketId,
           userId,
-          content: trimmedContent,
+          content: parsed.content.trim(),
           isAdmin: true,
         },
         select: {
@@ -232,7 +233,7 @@ export async function replyToTicket(
       })
 
       await tx.ticket.update({
-        where: { id: ticketId },
+        where: { id: parsed.ticketId },
         data: {
           updatedAt: new Date(),
         },
@@ -241,7 +242,7 @@ export async function replyToTicket(
       return createdMessage
     })
 
-    revalidateTicketPaths(ticketId)
+    revalidateTicketPaths(parsed.ticketId)
     return ok({ id: message.id })
   } catch (error) {
     return fail(error instanceof Error ? error.message : 'Failed to reply to ticket')
@@ -254,18 +255,14 @@ export async function updateTicketStatus(
 ): Promise<ActionResult<{ id: string }>> {
   try {
     await requireSuperAdmin()
-
-    if (!ticketId.trim()) {
-      return fail('Invalid ticket id')
-    }
-
-    const normalizedStatus = normalizeTicketStatus(status)
+    const parsed = UpdateTicketStatusSchema.parse({ ticketId, status })
+    const normalizedStatus = normalizeTicketStatus(parsed.status)
     if (!normalizedStatus) {
       return fail('Invalid ticket status')
     }
 
     const ticket = await prisma.ticket.update({
-      where: { id: ticketId },
+      where: { id: parsed.ticketId },
       data: {
         status: normalizedStatus,
       },
@@ -274,7 +271,7 @@ export async function updateTicketStatus(
       },
     })
 
-    revalidateTicketPaths(ticketId)
+    revalidateTicketPaths(parsed.ticketId)
     return ok({ id: ticket.id })
   } catch (error) {
     return fail(error instanceof Error ? error.message : 'Failed to update ticket status')

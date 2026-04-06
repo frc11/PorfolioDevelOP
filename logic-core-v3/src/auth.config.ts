@@ -6,6 +6,7 @@ type OrgRole = 'ADMIN' | 'MEMBER' | 'VIEWER'
 // Edge-compatible auth config — no Prisma or Node.js-only imports here.
 // Used by middleware to validate JWT sessions without touching the database.
 export const authConfig: NextAuthConfig = {
+  trustHost: true,
   pages: { signIn: '/login' },
   session: { strategy: 'jwt' },
   providers: [],

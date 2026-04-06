@@ -87,7 +87,5 @@ export async function forgotPasswordAction(
     ),
   })
 
-  console.log(`[auth] Reset password para ${user.email}: ${resetUrl}`)
-
   return { type: 'success', message: successMsg }
 }

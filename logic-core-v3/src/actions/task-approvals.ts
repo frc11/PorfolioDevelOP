@@ -71,7 +71,7 @@ export async function approveTask(taskId: string) {
         userId: session.user.id!, // A quien le llegó la notif o quien originó
         organizationId: session.user.organizationId!,
         taskId: task.id,
-        actionUrl: `/admin/projects/${task.projectId}`
+        actionUrl: `/admin/os/projects/${task.projectId}`
       }
     })
   })
@@ -124,7 +124,7 @@ export async function rejectTask(taskId: string, reason: string) {
         userId: session.user.id!,
         organizationId: session.user.organizationId!,
         taskId: task.id,
-        actionUrl: `/admin/projects/${task.projectId}`
+        actionUrl: `/admin/os/projects/${task.projectId}`
       }
     })
   })

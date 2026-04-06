@@ -8,8 +8,8 @@ const emptyValueToUndefined = (value: unknown) => {
   return value
 }
 
-export const ProjectIdSchema = z.string().cuid('Invalid project id')
-export const PaymentIdSchema = z.string().cuid('Invalid payment id')
+export const ProjectIdSchema = z.string().trim().min(1, 'Invalid project id')
+export const PaymentIdSchema = z.string().trim().min(1, 'Invalid payment id')
 
 const positiveNumberSchema = z.preprocess(
   emptyValueToUndefined,
