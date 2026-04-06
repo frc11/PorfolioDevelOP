@@ -134,26 +134,26 @@ export default function FaqAutomation() {
                                 <button
                                     onClick={() => setOpenIndex(isOpen ? null : index)}
                                     className="w-full text-left relative"
-                                    style={{
-                                        borderBottom: `1px solid ${isOpen ? "rgba(245,158,11,0.2)" : "rgba(255,255,255,0.06)"}`,
-                                        padding: "clamp(18px,2.5vh,28px) 0",
-                                        transition: "border-color 200ms",
-                                    }}
-                                    aria-expanded={isOpen}
-                                >
+                                     style={{
+                                         borderBottom: `1px solid ${isOpen ? "rgba(245,158,11,0.2)" : "rgba(255,255,255,0.06)"}`,
+                                         padding: "clamp(18px,2.5vh,28px) clamp(12px,1.8vw,20px)",
+                                         transition: "border-color 200ms",
+                                     }}
+                                     aria-expanded={isOpen}
+                                 >
                                     <AnimatePresence>
                                         {isOpen && (
                                             <motion.div
                                                 initial={{ scaleY: 0 }}
                                                 animate={{ scaleY: 1 }}
                                                 exit={{ scaleY: 0 }}
-                                                style={{
-                                                    position: "absolute",
-                                                    left: "-1px",
-                                                    top: 0,
-                                                    bottom: 0,
-                                                    width: "2px",
-                                                    background:
+                                                 style={{
+                                                     position: "absolute",
+                                                     left: "clamp(12px,1.8vw,20px)",
+                                                     top: 0,
+                                                     bottom: 0,
+                                                     width: "2px",
+                                                     background:
                                                         "linear-gradient(to bottom, rgba(245,158,11,0.8), rgba(249,115,22,0.4), transparent)",
                                                     transformOrigin: "top",
                                                 }}
@@ -161,7 +161,7 @@ export default function FaqAutomation() {
                                         )}
                                     </AnimatePresence>
 
-                                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "16px" }}>
+                                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "16px", paddingLeft: "clamp(18px,2.2vw,28px)" }}>
                                         <span
                                             style={{
                                                 fontSize: "clamp(14px,1.6vw,17px)",
@@ -202,16 +202,17 @@ export default function FaqAutomation() {
                                                 className="overflow-hidden"
                                                 onClick={(e) => e.stopPropagation()}
                                             >
-                                                <p
-                                                    style={{
-                                                        fontSize: "14px",
-                                                        lineHeight: 1.75,
-                                                        color: "rgba(255,255,255,0.52)",
-                                                        paddingTop: "14px",
-                                                        paddingRight: "48px",
-                                                        maxWidth: "680px",
-                                                    }}
-                                                >
+                                                 <p
+                                                     style={{
+                                                         fontSize: "14px",
+                                                         lineHeight: 1.75,
+                                                         color: "rgba(255,255,255,0.52)",
+                                                         paddingTop: "14px",
+                                                         paddingLeft: "clamp(18px,2.2vw,28px)",
+                                                         paddingRight: "48px",
+                                                         maxWidth: "680px",
+                                                     }}
+                                                 >
                                                     {item.answer}
                                                 </p>
                                             </motion.div>

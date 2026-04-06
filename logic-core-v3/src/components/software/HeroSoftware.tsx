@@ -539,19 +539,7 @@ function TickerSection() {
 export default function HeroSoftware() {
   const mouseRef = useRef({ x: 0.5, y: 0.5 })
   const videoRef = useRef<HTMLVideoElement>(null)
-  const [scanDone, setScanDone] = useState(false)
   const isReduced = useReducedMotion()
-
-  useEffect(() => {
-    if (isReduced) {
-      setScanDone(true)
-      return
-    }
-    const timer = setTimeout(() => {
-      setScanDone(true)
-    }, 1900)
-    return () => clearTimeout(timer)
-  }, [isReduced])
 
   useEffect(() => {
     function onMove(e: MouseEvent) {
@@ -667,28 +655,6 @@ export default function HeroSoftware() {
               </span>
             </h1>
 
-            {!scanDone && (
-              <>
-                <div style={{
-                  position: 'absolute',
-                  top: 0, bottom: 0,
-                  width: '3px',
-                  background: 'linear-gradient(to bottom, transparent, rgba(99,102,241,0.9) 20%, white 50%, rgba(99,102,241,0.9) 80%, transparent)',
-                  boxShadow: '0 0 8px rgba(99,102,241,0.8), 0 0 20px rgba(99,102,241,0.4)',
-                  animation: 'scanLine 1.4s 0.5s ease-in-out forwards',
-                  zIndex: 15, // Higher than reveal
-                  pointerEvents: 'none',
-                }}/>
-                <div style={{
-                  position: 'absolute',
-                  inset: 0,
-                  background: 'rgba(6,6,15,0.85)',
-                  pointerEvents: 'none',
-                  zIndex: 4,
-                  animation: 'scanReveal 1.4s 0.5s ease-in-out forwards',
-                }}/>
-              </>
-            )}
           </motion.div>
 
           {/* SubtitleSoftware */}
@@ -848,15 +814,6 @@ export default function HeroSoftware() {
         @keyframes floatCardCenter {
           0% { transform: translateX(-50%) translateY(80px); }
           100% { transform: translateX(-50%) translateY(70px); }
-        }
-        @keyframes scanLine {
-          0%   { left: -4px; opacity: 1 }
-          95%  { left: 100%; opacity: 1 }
-          100% { left: 100%; opacity: 0 }
-        }
-        @keyframes scanReveal {
-          0%   { clip-path: inset(0 100% 0 0) }
-          100% { clip-path: inset(0 0% 0 0) }
         }
         @keyframes gradientShift {
           0%,100% { background-position: 0% 50% }

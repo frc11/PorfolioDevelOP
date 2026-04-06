@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, useMemo, useRef } from 'react'
+import React, { useState, useMemo, useRef } from 'react'
 import { motion, AnimatePresence, useInView, useReducedMotion } from 'motion/react'
 
 /**
@@ -260,6 +260,73 @@ const rubroContent: Record<number, RubroContent> = {
   },
 }
 
+type GraphPoint = { x: number; y: number }
+
+const neuralLayouts: Record<number, GraphPoint[]> = {
+  0: [
+    { x: 8, y: 33 },
+    { x: 27, y: 16 },
+    { x: 32, y: 50 },
+    { x: 52, y: 30 },
+    { x: 74, y: 20 },
+    { x: 79, y: 46 },
+  ],
+  1: [
+    { x: 10, y: 35 },
+    { x: 24, y: 19 },
+    { x: 33, y: 49 },
+    { x: 50, y: 33 },
+    { x: 71, y: 15 },
+    { x: 72, y: 49 },
+  ],
+  2: [
+    { x: 9, y: 33 },
+    { x: 30, y: 15 },
+    { x: 27, y: 50 },
+    { x: 53, y: 33 },
+    { x: 69, y: 18 },
+    { x: 77, y: 47 },
+  ],
+  3: [
+    { x: 8, y: 36 },
+    { x: 25, y: 15 },
+    { x: 33, y: 51 },
+    { x: 54, y: 30 },
+    { x: 72, y: 14 },
+    { x: 70, y: 49 },
+  ],
+}
+
+const neuralOutputByRubro: Record<number, GraphPoint> = {
+  0: { x: 92, y: 34 },
+  1: { x: 91, y: 31 },
+  2: { x: 92, y: 36 },
+  3: { x: 91, y: 30 },
+}
+
+const neuralEdgeBendsByRubro: Record<number, number[]> = {
+  0: [-7, 5, -5, 7, -6, 6, -2, 4],
+  1: [-4, 9, -7, 5, -2, 7, -5, 3],
+  2: [-8, 4, -4, 8, -6, 5, -3, 6],
+  3: [-3, 8, -8, 4, -5, 7, -4, 3],
+}
+
+const neuralEdges = [
+  { from: 0, to: 1, delay: 0.1 },
+  { from: 0, to: 2, delay: 0.45 },
+  { from: 1, to: 3, delay: 0.9 },
+  { from: 2, to: 3, delay: 1.25 },
+  { from: 3, to: 4, delay: 1.7 },
+  { from: 3, to: 5, delay: 2.05 },
+  { from: 4, toOutput: true, delay: 2.4 },
+  { from: 5, toOutput: true, delay: 2.75 },
+] as const
+
+const seededUnit = (seed: number) => {
+  const raw = Math.sin(seed * 12.9898 + 78.233) * 43758.5453
+  return raw - Math.floor(raw)
+}
+
 // ─── COMPONENTS ─────────────────────────────────────────────────────────────
 
 function Header({ isInView, reducedMotion }: { isInView: boolean, reducedMotion: boolean | null }) {
@@ -488,192 +555,220 @@ function AutomationsPanel({ active, rubro }: { active: number, rubro: Rubro }) {
   )
 }
 
-function VisibleMessages({
-    messages,
-    rubro,
+function NeuralFlowMini({
+  flow,
+  rubro,
+  reducedMotion,
 }: {
-    messages: MockupMessage[]
-    rubro: Rubro
+  flow: N8nFlow
+  rubro: Rubro
+  reducedMotion: boolean | null
 }) {
-    const [visible, setVisible] = useState<number[]>([])
-    const [typing, setTyping] = useState(false)
+  const layout = neuralLayouts[rubro.id] ?? neuralLayouts[0]
+  const output = neuralOutputByRubro[rubro.id] ?? neuralOutputByRubro[0]
+  const points = flow.nodes.slice(0, 6).map((node, index) => ({
+    node,
+    point: layout[index] ?? { x: 8 + index * 13, y: 34 },
+  }))
 
-    useEffect(() => {
-        setVisible([])
-        setTyping(false)
+  const edgeBends = neuralEdgeBendsByRubro[rubro.id] ?? neuralEdgeBendsByRubro[0]
+  const edgePaths = neuralEdges.map((edge, index) => {
+    const from = points[edge.from]?.point
+    const to = edge.toOutput ? output : points[edge.to]?.point
+    if (!from || !to) return null
+    const cx = (from.x + to.x) / 2
+    const cy = (from.y + to.y) / 2 + edgeBends[index % edgeBends.length]
+    return {
+      key: `${rubro.id}-edge-${index}`,
+      from,
+      to,
+      delay: edge.delay,
+      path: `M ${from.x} ${from.y} Q ${cx} ${cy} ${to.x} ${to.y}`,
+    }
+  }).filter((edge): edge is NonNullable<typeof edge> => Boolean(edge))
 
-        const timers: ReturnType<typeof setTimeout>[] = []
-
-        messages.forEach((msg, i) => {
-            if (msg.from === 'ai') {
-                timers.push(setTimeout(() => {
-                    setTyping(true)
-                }, msg.delay - 400))
-            }
-
-            timers.push(setTimeout(() => {
-                setTyping(false)
-                setVisible(prev => [...prev, i])
-            }, msg.delay + 300))
-        })
-
-        return () => timers.forEach(clearTimeout)
-    }, [messages, rubro.id])
-
-    return (
-        <>
-            {messages.map((msg, i) => {
-                if (!visible.includes(i)) return null
-                const isAI = msg.from === 'ai'
-
-                return (
-                    <motion.div
-                        key={i}
-                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-                        className={`flex ${isAI ? 'justify-start' : 'justify-end'}`}
-                    >
-                        <div 
-                          className={`
-                            max-w-[78%] px-4 py-2.5 text-xs md:text-sm leading-relaxed
-                            ${isAI 
-                              ? 'rounded-tl-none rounded-2xl' 
-                              : 'rounded-tr-none rounded-2xl bg-amber-500 text-[#070709] font-bold shadow-lg'}
-                          `}
-                          style={{
-                            background: isAI ? `rgba(${rubro.colorRgb}, 0.12)` : undefined,
-                            border: isAI ? `1px solid rgba(${rubro.colorRgb}, 0.2)` : undefined,
-                            color: isAI ? 'white' : undefined,
-                          }}
-                        >
-                            {msg.text}
-                        </div>
-                    </motion.div>
-                )
-            })}
-
-            {/* Indicator typing... */}
-            {typing && (
-                <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="flex justify-start"
-                >
-                    <div 
-                      className="px-4 py-2.5 rounded-tl-none rounded-2xl flex gap-1.5 items-center"
-                      style={{
-                        background: `rgba(${rubro.colorRgb}, 0.08)`,
-                        border: `1px solid rgba(${rubro.colorRgb}, 0.15)`,
-                      }}
-                    >
-                        {[0, 1, 2].map(i => (
-                            <div key={i} className="w-1.5 h-1.5 rounded-full" style={{
-                                background: rubro.color,
-                                animation: `typingDotAmber 1.2s ${i * 0.2}s ease-in-out infinite`,
-                            }} />
-                        ))}
-                    </div>
-                </motion.div>
-            )}
-        </>
-    )
-}
-
-function ChatMockup({ rubro }: { rubro: Rubro }) {
-  const content = rubroContent[rubro.id]
+  const shortLabel = (text: string) => {
+    const compact = text.split(' ')[0] ?? text
+    return compact.length > 10 ? compact.slice(0, 10) : compact
+  }
 
   return (
-    <AnimatePresence mode="wait">
-        <motion.div 
-          key={rubro.id}
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -20 }}
-          transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-          className="w-full max-w-[400px] h-[540px] mx-auto rounded-[24px] bg-white/[0.025] border border-white/[0.08] relative overflow-hidden flex flex-col backdrop-blur-md transition-all duration-500"
-          style={{ boxShadow: `0 0 0 1px rgba(${rubro.colorRgb}, 0.06), 0 0 60px rgba(${rubro.colorRgb}, 0.1), 0 24px 64px rgba(0,0,0,0.5)` }}
-        >
-          {/* Header del Chat */}
-          <div className="px-6 py-4 border-b border-white/[0.08] flex items-center justify-between relative overflow-hidden"
-            style={{
-              background: `linear-gradient(135deg, rgba(${rubro.colorRgb},0.07) 0%, rgba(255,255,255,0.03) 100%)`,
-              boxShadow: `inset 0 -1px 0 rgba(${rubro.colorRgb},0.1), 0 4px 20px rgba(${rubro.colorRgb},0.06)`,
-            }}
-          >
-            {/* Subtle glow */}
-            <div style={{
-              position: 'absolute',
-              top: '-20px', left: '10%',
-              width: '80%', height: '60px',
-              background: `radial-gradient(ellipse, rgba(${rubro.colorRgb},0.15) 0%, transparent 70%)`,
-              filter: 'blur(12px)',
-              pointerEvents: 'none',
-              transition: 'background 600ms ease',
-            }} />
-            <div className="flex items-center gap-3">
-              <div
-                className="w-9 h-9 rounded-full flex items-center justify-center shadow-inner shrink-0"
-                style={{ background: `linear-gradient(135deg, rgba(${rubro.colorRgb},0.8), rgba(${rubro.colorRgb},0.4))` }}
-              >
-                <span style={{ fontSize: '11px', fontWeight: 900, color: 'white', letterSpacing: '0.05em', fontFamily: 'ui-monospace, monospace' }}>AI</span>
-              </div>
-              <div>
-                <h4 className="text-white text-sm font-bold leading-none mb-1.5">
-                  Asistente IA · DevelOP
-                </h4>
-                <div className="flex items-center gap-1.5">
-                  <div className="relative flex h-1.5 w-1.5">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-60"
-                      style={{ background: rubro.color }}
-                    />
-                    <span className="relative inline-flex rounded-full h-1.5 w-1.5"
-                      style={{ background: rubro.color }}
-                    />
-                  </div>
-                  <span className="text-[11px] font-medium" style={{ color: rubro.color }}>En línea ahora</span>
-                </div>
-              </div>
-            </div>
-            <div className="flex gap-2">
-               <div className="w-1.5 h-1.5 rounded-full bg-white/10" />
-               <div className="w-1.5 h-1.5 rounded-full bg-white/10" />
-            </div>
-          </div>
+    <div
+      style={{
+        margin: '6px 20px 12px',
+        borderRadius: '16px',
+        background: `radial-gradient(130% 120% at 10% 0%, rgba(${rubro.colorRgb},0.16), rgba(255,255,255,0.01) 45%, rgba(0,0,0,0.15) 100%)`,
+        border: `1px solid rgba(${rubro.colorRgb},0.24)`,
+        padding: '12px 10px 12px',
+        boxShadow: `inset 0 1px 0 rgba(255,255,255,0.05), 0 0 30px rgba(${rubro.colorRgb},0.12)`,
+      }}
+    >
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px', padding: '0 4px' }}>
+        <span style={{ fontSize: '8.8px', letterSpacing: '0.14em', color: `rgba(${rubro.colorRgb},0.96)`, fontWeight: 800 }}>
+          MAPA DE EJECUCION N8N
+        </span>
+        <span style={{ fontSize: '8.3px', letterSpacing: '0.09em', color: 'rgba(255,255,255,0.52)', fontWeight: 700 }}>
+          flujo neuronal en vivo
+        </span>
+      </div>
 
-          {/* Cuerpo del Chat */}
-          <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-3 min-h-[260px]">
-            <VisibleMessages
-              messages={content.mockupMessages}
-              rubro={rubro}
+      <svg viewBox="0 0 100 62" style={{ width: '100%', height: '170px', display: 'block' }} aria-hidden="true">
+        <defs>
+          <linearGradient id={`line-${rubro.id}`} x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor={`rgba(${rubro.colorRgb},0.08)`} />
+            <stop offset="35%" stopColor={`rgba(${rubro.colorRgb},0.36)`} />
+            <stop offset="60%" stopColor={`rgba(${rubro.colorRgb},0.8)`} />
+            <stop offset="100%" stopColor={`rgba(${rubro.colorRgb},0.1)`} />
+          </linearGradient>
+          <filter id={`glow-${rubro.id}`}>
+            <feGaussianBlur stdDeviation="1.4" result="blur" />
+            <feMerge>
+              <feMergeNode in="blur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+        </defs>
+
+        {edgePaths.map((edgePath) => (
+          <g key={edgePath.key}>
+            <path
+              d={edgePath.path}
+              stroke={`rgba(${rubro.colorRgb},0.18)`}
+              strokeWidth="0.9"
+              fill="none"
             />
-          </div>
+            <motion.path
+              d={edgePath.path}
+              stroke={`url(#line-${rubro.id})`}
+              strokeWidth="1.25"
+              fill="none"
+              strokeLinecap="round"
+              filter={`url(#glow-${rubro.id})`}
+              animate={reducedMotion ? { opacity: 0.7 } : { opacity: [0.35, 0.95, 0.5] }}
+              transition={reducedMotion ? { duration: 0 } : { duration: 1.6, ease: 'easeInOut', repeat: Infinity, delay: edgePath.delay * 0.5 }}
+            />
+            {!reducedMotion && (
+              <>
+                <circle r="1.15" fill={`rgba(${rubro.colorRgb},0.98)`} filter={`url(#glow-${rubro.id})`}>
+                  <animateMotion
+                    dur="2.4s"
+                    begin={`${edgePath.delay}s`}
+                    repeatCount="indefinite"
+                    path={edgePath.path}
+                  />
+                </circle>
+                <circle r="0.8" fill="rgba(255,255,255,0.9)">
+                  <animateMotion
+                    dur="2.4s"
+                    begin={`${edgePath.delay}s`}
+                    repeatCount="indefinite"
+                    path={edgePath.path}
+                  />
+                </circle>
+              </>
+            )}
+          </g>
+        ))}
 
-          {/* Input fake */}
-          <div className="p-4 bg-white/[0.02] border-t border-white/[0.06] flex gap-2.5 items-center">
-            <div className="flex-1 bg-white/[0.05] border border-white/[0.08] rounded-full px-4 py-2.5 text-xs text-white/20">
-              Escribí tu mensaje...
-            </div>
-            <div 
-              className="w-9 h-9 rounded-full flex items-center justify-center text-white shrink-0 cursor-pointer"
-              style={{ background: `linear-gradient(135deg, ${rubro.color}, rgba(${rubro.colorRgb},0.6))` }}
+        {points.map(({ node, point }, index) => (
+          <g key={`${rubro.id}-node-${index}`}>
+            <circle
+              cx={point.x}
+              cy={point.y}
+              r="6.3"
+              fill={`rgba(${rubro.colorRgb},0.08)`}
+            />
+            <circle
+              cx={point.x}
+              cy={point.y}
+              r="4.6"
+              fill="rgba(8,8,16,0.96)"
+              stroke={`rgba(${rubro.colorRgb},0.75)`}
+              strokeWidth="0.9"
+            />
+            <motion.circle
+              cx={point.x}
+              cy={point.y}
+              r="1.8"
+              fill={`rgba(${rubro.colorRgb},0.98)`}
+              filter={`url(#glow-${rubro.id})`}
+              animate={reducedMotion ? { opacity: 0.85 } : { opacity: [0.6, 1, 0.65] }}
+              transition={reducedMotion ? { duration: 0 } : { duration: 1.8, ease: 'easeInOut', repeat: Infinity, delay: index * 0.14 }}
+            />
+            <text
+              x={point.x}
+              y={point.y + 0.6}
+              textAnchor="middle"
+              style={{ fontSize: '2.45px', fill: 'rgba(255,255,255,0.97)', fontWeight: 900, letterSpacing: '0.04em', paintOrder: 'stroke fill', stroke: 'rgba(8,8,16,0.95)', strokeWidth: '0.3px' }}
             >
-              ↑
-            </div>
-          </div>
+              {node.num}
+            </text>
+            <rect
+              x={point.x - 6.8}
+              y={point.y + 6.2}
+              width="13.6"
+              height="4.1"
+              rx="1.8"
+              fill="rgba(8,8,16,0.86)"
+              stroke={`rgba(${rubro.colorRgb},0.4)`}
+              strokeWidth="0.36"
+            />
+            <text
+              x={point.x}
+              y={point.y + 9.02}
+              textAnchor="middle"
+              style={{ fontSize: '1.78px', fill: 'rgba(255,255,255,0.82)', letterSpacing: '0.09em', fontWeight: 800, paintOrder: 'stroke fill', stroke: 'rgba(8,8,16,0.9)', strokeWidth: '0.22px' }}
+            >
+              {shortLabel(node.type).toUpperCase()}
+            </text>
+          </g>
+        ))}
 
-          <style jsx global>{`
-            @keyframes typingDotAmber {
-              0%, 100% { transform: translateY(0); opacity: 0.3; }
-              50% { transform: translateY(-3px); opacity: 1; }
-            }
-          `}</style>
-        </motion.div>
-    </AnimatePresence>
+        <g>
+          <circle
+            cx={output.x}
+            cy={output.y}
+            r="7.2"
+            fill={`rgba(${rubro.colorRgb},0.18)`}
+          />
+          <circle
+            cx={output.x}
+            cy={output.y}
+            r="5.4"
+            fill="rgba(8,8,16,0.95)"
+            stroke={`rgba(${rubro.colorRgb},0.96)`}
+            strokeWidth="1.1"
+          />
+          <motion.circle
+            cx={output.x}
+            cy={output.y}
+            r="2.3"
+            fill={`rgba(${rubro.colorRgb},1)`}
+            filter={`url(#glow-${rubro.id})`}
+            animate={reducedMotion ? { opacity: 0.9 } : { opacity: [0.65, 1, 0.72], scale: [1, 1.08, 1] }}
+            transition={reducedMotion ? { duration: 0 } : { duration: 1.9, ease: 'easeInOut', repeat: Infinity }}
+          />
+          <text
+            x={output.x}
+            y={output.y + 10.2}
+            textAnchor="middle"
+            style={{ fontSize: '2.38px', fill: 'rgba(255,255,255,0.92)', letterSpacing: '0.12em', fontWeight: 900, paintOrder: 'stroke fill', stroke: 'rgba(8,8,16,0.95)', strokeWidth: '0.26px' }}
+          >
+            RESULTADO
+          </text>
+        </g>
+      </svg>
+    </div>
   )
 }
 
-function N8nFlowBlock({ rubro }: { rubro: Rubro }) {
+function N8nFlowBlock({
+  rubro,
+  reducedMotion,
+}: {
+  rubro: Rubro
+  reducedMotion: boolean | null
+}) {
   const content = rubroContent[rubro.id]
   const flow = content.n8nFlow
 
@@ -721,8 +816,10 @@ function N8nFlowBlock({ rubro }: { rubro: Rubro }) {
           </div>
         </div>
 
+        <NeuralFlowMini flow={flow} rubro={rubro} reducedMotion={reducedMotion} />
+
         {/* Nodes */}
-        <div style={{ padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+        <div style={{ padding: '8px 20px 16px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
           {flow.nodes.map((node, i) => (
             <motion.div
               key={i}
@@ -799,7 +896,6 @@ function N8nFlowBlock({ rubro }: { rubro: Rubro }) {
 
 export default function RubrosAutomation() {
   const [active, setActive] = useState(0)
-  const [rightTab, setRightTab] = useState<'chat' | 'flow'>('chat')
   const rubro = rubros[active]
 
   const sectionRef = useRef<HTMLElement>(null)
@@ -807,13 +903,24 @@ export default function RubrosAutomation() {
   const reducedMotion = useReducedMotion()
 
   // 8 Partículas de fondo usando el color del rubro activo
-  const particles = useMemo(() => Array.from({ length: 8 }, (_, i) => ({
-    x: Math.random() * 100,
-    y: Math.random() * 100,
-    size: 2 + Math.random() * 3,
-    duration: 4 + Math.random() * 4,
-    delay: Math.random() * 3,
-  })), [])
+  const particles = useMemo(
+    () =>
+      Array.from({ length: 8 }, (_, i) => {
+        const s1 = seededUnit(i + 1.17)
+        const s2 = seededUnit(i + 2.31)
+        const s3 = seededUnit(i + 3.49)
+        const s4 = seededUnit(i + 4.87)
+        const s5 = seededUnit(i + 6.11)
+        return {
+          x: 8 + s1 * 84,
+          y: 6 + s2 * 88,
+          size: 2 + s3 * 3,
+          duration: 4 + s4 * 4,
+          delay: s5 * 3,
+        }
+      }),
+    []
+  )
 
   return (
     <section 
@@ -864,35 +971,22 @@ export default function RubrosAutomation() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 mt-12 md:mt-16 items-start">
           <AutomationsPanel active={active} rubro={rubro} />
 
-          {/* Right column: tab switcher + content */}
+          {/* Right column: flujo n8n */}
           <div className="flex flex-col gap-4">
-            {/* Tab switcher */}
-            <div className="flex gap-2 justify-center lg:justify-start">
-              {(['chat', 'flow'] as const).map((tab) => {
-                const isActive = rightTab === tab
-                return (
-                  <button
-                    key={tab}
-                    onClick={() => setRightTab(tab)}
-                    className="relative px-4 py-2 rounded-xl text-xs font-bold tracking-wider transition-all duration-200 overflow-hidden"
-                    style={{
-                      background: isActive ? `rgba(${rubro.colorRgb}, 0.1)` : 'rgba(255,255,255,0.03)',
-                      border: isActive ? `1px solid rgba(${rubro.colorRgb}, 0.25)` : '1px solid rgba(255,255,255,0.06)',
-                      color: isActive ? rubro.color : 'rgba(255,255,255,0.35)',
-                    }}
-                  >
-                    {tab === 'chat' ? '💬 Chat Demo' : '⚡ Flujo n8n'}
-                  </button>
-                )
-              })}
+            <div className="flex justify-center lg:justify-start">
+              <div
+                className="relative px-4 py-2 rounded-xl text-xs font-bold tracking-wider"
+                style={{
+                  background: `rgba(${rubro.colorRgb}, 0.1)`,
+                  border: `1px solid rgba(${rubro.colorRgb}, 0.25)`,
+                  color: rubro.color,
+                }}
+              >
+                Flujo n8n
+              </div>
             </div>
 
-            {/* Content */}
-            {rightTab === 'chat' ? (
-              <ChatMockup rubro={rubro} />
-            ) : (
-              <N8nFlowBlock rubro={rubro} />
-            )}
+            <N8nFlowBlock rubro={rubro} reducedMotion={reducedMotion} />
           </div>
         </div>
 
@@ -923,3 +1017,4 @@ export default function RubrosAutomation() {
     </section>
   )
 }
+

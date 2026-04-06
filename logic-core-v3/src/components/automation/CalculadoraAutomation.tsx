@@ -114,7 +114,7 @@ function Header({ isInView }: { isInView: boolean }) {
         Automatizar no es un gasto.
         <br />
         <span className="bg-gradient-to-r from-[#f59e0b] to-[#f97316] bg-clip-text text-transparent">
-          "Es comprar tiempo de vida."
+          &ldquo;Es comprar tiempo de vida.&rdquo;
         </span>
       </motion.h2>
 
@@ -173,7 +173,7 @@ function SliderMini({
           step={step}
           value={value}
           onChange={(e) => onChange(Number(e.target.value))}
-          className="absolute inset-x-0 w-full opacity-0 cursor-pointer z-10"
+          className="absolute inset-x-0 w-full opacity-0 cursor-none z-10"
         />
         <div
           className="absolute w-3.5 h-3.5 bg-amber-500 rounded-full border-2 border-[#070709] shadow-lg pointer-events-none transition-[left] duration-100"
@@ -247,7 +247,7 @@ function SliderSide({
             step={5}
             value={tareasAlDia}
             onChange={(e) => setTareasAlDia(Number(e.target.value))}
-            className="absolute inset-x-0 w-full h-full opacity-0 cursor-pointer z-10"
+            className="absolute inset-x-0 w-full h-full opacity-0 cursor-none z-10"
           />
           {/* Thumb Custom */}
           <div
@@ -263,7 +263,17 @@ function SliderSide({
       </div>
 
       {/* Ejemplos de Tareas */}
-      <div className="relative overflow-hidden p-5 bg-amber-500/[0.03] border border-amber-500/10 rounded-2xl">
+      <motion.div
+        whileHover={shouldReduceMotion ? {} : {
+          y: -2,
+          borderColor: 'rgba(245,158,11,0.32)',
+          backgroundColor: 'rgba(245,158,11,0.07)',
+          boxShadow: '0 0 0 1px rgba(245,158,11,0.14), 0 0 22px rgba(245,158,11,0.14), 0 10px 22px rgba(0,0,0,0.28)',
+          transition: { duration: 0, ease: 'linear' },
+        }}
+        className="relative overflow-hidden p-5 bg-amber-500/[0.03] border border-amber-500/10 rounded-2xl"
+        style={{ transition: 'none' }}
+      >
         <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-amber-500/30 to-transparent" />
         <p className="text-[10px] font-mono font-bold text-amber-500/65 tracking-[0.22em] mb-4 uppercase">
           Ejemplos de tareas automatizables
@@ -275,18 +285,35 @@ function SliderSide({
             '📊 Reportes de ventas',
             '💬 Respuesta a consultas',
           ].map((t, i) => (
-            <p key={i} className="text-xs text-white/35 flex items-center gap-2.5">
+            <motion.p
+              key={i}
+              whileHover={shouldReduceMotion ? {} : {
+                x: 2,
+                color: 'rgba(255,255,255,0.78)',
+                textShadow: '0 0 10px rgba(245,158,11,0.22)',
+                transition: { duration: 0, ease: 'linear' },
+              }}
+              className="text-xs text-white/35 flex items-center gap-2.5"
+              style={{ transition: 'none' }}
+            >
               <span className="w-1 h-1 bg-amber-500/40 rounded-full flex-shrink-0" />{t}
-            </p>
+            </motion.p>
           ))}
         </div>
-      </div>
+      </motion.div>
 
       {/* Controles Avanzados */}
       <div className="pt-2">
-        <button
+        <motion.button
           onClick={() => setShowAdvanced(!showAdvanced)}
-          className="group flex items-center gap-2 text-xs font-mono text-amber-500/50 hover:text-amber-500 transition-colors"
+          whileHover={shouldReduceMotion ? {} : {
+            color: 'rgba(245,158,11,1)',
+            textShadow: '0 0 12px rgba(245,158,11,0.35)',
+            x: 1,
+            transition: { duration: 0, ease: 'linear' },
+          }}
+          className="group flex items-center gap-2 text-xs font-mono text-amber-500/50"
+          style={{ transition: 'none' }}
         >
           <motion.span
             animate={{ rotate: showAdvanced ? 90 : 0 }}
@@ -295,7 +322,7 @@ function SliderSide({
             ▶
           </motion.span>
           {showAdvanced ? 'OCULTAR PARÁMETROS' : 'PERSONALIZAR PARÁMETROS'}
-        </button>
+        </motion.button>
 
         <AnimatePresence>
           {showAdvanced && (
@@ -352,19 +379,26 @@ function OdometerDigit({
     if (value === prevRef.current) return
 
     if (shouldReduceMotion) {
-      setDisplayValue(value)
-      prevRef.current = value
-      return
+      const immediate = setTimeout(() => {
+        setDisplayValue(value)
+        prevRef.current = value
+      }, 0)
+      return () => clearTimeout(immediate)
     }
 
-    setIsRolling(true)
+    const startRolling = setTimeout(() => {
+      setIsRolling(true)
+    }, 0)
     const timer = setTimeout(() => {
       setDisplayValue(value)
       setIsRolling(false)
       prevRef.current = value
     }, 120)
 
-    return () => clearTimeout(timer)
+    return () => {
+      clearTimeout(startRolling)
+      clearTimeout(timer)
+    }
   }, [value, shouldReduceMotion])
 
   return (
@@ -398,6 +432,7 @@ function OdometerDigit({
 
 function OdometerSide({ resultados, isInView }: { resultados: ROIResultados, isInView: boolean }) {
   const shouldReduceMotion = useReducedMotion()
+  const [isHoursCardHovered, setIsHoursCardHovered] = useState(false)
 
   return (
     <motion.div 
@@ -407,8 +442,17 @@ function OdometerSide({ resultados, isInView }: { resultados: ROIResultados, isI
       className="flex flex-col gap-4"
     >
       {/* Card principal — HORAS */}
-      <div className="relative group overflow-hidden p-7 md:p-10 rounded-[22px] border border-amber-500/25 bg-gradient-to-br from-amber-500/10 to-orange-600/5"
-        style={{ boxShadow: '0 0 0 1px rgba(245,158,11,0.08), 0 24px 56px rgba(0,0,0,0.4), 0 8px 20px rgba(245,158,11,0.08)' }}
+      <div
+        onMouseEnter={() => setIsHoursCardHovered(true)}
+        onMouseLeave={() => setIsHoursCardHovered(false)}
+        className="relative group overflow-hidden p-7 md:p-10 rounded-[22px] border border-amber-500/25 bg-gradient-to-br from-amber-500/10 to-orange-600/5"
+        style={{
+          borderColor: isHoursCardHovered ? 'rgba(245,158,11,0.45)' : 'rgba(245,158,11,0.25)',
+          boxShadow: isHoursCardHovered
+            ? '0 0 0 1px rgba(245,158,11,0.22), 0 0 34px rgba(245,158,11,0.2), 0 18px 36px rgba(0,0,0,0.34)'
+            : '0 0 0 1px rgba(245,158,11,0.08), 0 24px 56px rgba(0,0,0,0.4), 0 8px 20px rgba(245,158,11,0.08)',
+          transition: 'none',
+        }}
       >
         {/* Shimmer top */}
         <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-amber-500 to-transparent" style={{ opacity: 0.7 }} />
@@ -449,7 +493,16 @@ function OdometerSide({ resultados, isInView }: { resultados: ROIResultados, isI
       {/* Grid 2 cards secundarias */}
       <div className="grid grid-cols-2 gap-3">
         {/* USD */}
-        <div className="relative overflow-hidden p-5 md:p-6 bg-white/[0.025] border border-amber-500/15 rounded-2xl"
+        <motion.div
+          whileHover={shouldReduceMotion ? {} : {
+            y: -3,
+            scale: 1.01,
+            borderColor: 'rgba(245,158,11,0.35)',
+            backgroundColor: 'rgba(245,158,11,0.08)',
+            boxShadow: '0 0 0 1px rgba(245,158,11,0.16), 0 0 22px rgba(245,158,11,0.14), 0 10px 24px rgba(0,0,0,0.3)',
+          }}
+          transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.11, ease: 'linear' }}
+          className="relative overflow-hidden p-5 md:p-6 bg-white/[0.025] border border-amber-500/15 rounded-2xl"
           style={{ boxShadow: '0 4px 24px rgba(0,0,0,0.25), 0 0 0 1px rgba(245,158,11,0.04)' }}
         >
           <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-amber-500/50 to-transparent" />
@@ -461,10 +514,19 @@ function OdometerSide({ resultados, isInView }: { resultados: ROIResultados, isI
             <OdometerDigit value={resultados.ahorroUSD} fontSize="26px" color="#f59e0b" />
             <span className="text-[10px] text-white/25 mb-1 ml-1.5 font-mono font-bold">USD</span>
           </div>
-        </div>
+        </motion.div>
 
         {/* ROI */}
-        <div className={`relative overflow-hidden p-5 md:p-6 border rounded-2xl transition-colors ${
+        <motion.div
+          whileHover={shouldReduceMotion ? {} : {
+            y: -3,
+            scale: 1.01,
+            boxShadow: resultados.roiPct > 0
+              ? '0 0 0 1px rgba(16,185,129,0.22), 0 0 24px rgba(16,185,129,0.14), 0 10px 24px rgba(0,0,0,0.3)'
+              : '0 0 0 1px rgba(239,68,68,0.22), 0 0 24px rgba(239,68,68,0.14), 0 10px 24px rgba(0,0,0,0.3)',
+          }}
+          transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.11, ease: 'linear' }}
+          className={`relative overflow-hidden p-5 md:p-6 border rounded-2xl transition-colors ${
           resultados.roiPct > 0
             ? 'bg-emerald-500/5 border-emerald-500/20'
             : 'bg-red-500/5 border-red-500/20'
@@ -485,7 +547,7 @@ function OdometerSide({ resultados, isInView }: { resultados: ROIResultados, isI
               resultados.roiPct > 0 ? 'text-emerald-500/60' : 'text-red-500/60'
             }`}>%</span>
           </div>
-        </div>
+        </motion.div>
       </div>
 
       {/* CTA Integrado */}

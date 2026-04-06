@@ -285,7 +285,7 @@ export default function IntegracionesAutomation() {
                     </p>
                 </motion.div>
 
-                <div className="relative overflow-hidden rounded-[2.2rem] border border-white/[0.06] bg-white/[0.02] px-0 py-10 backdrop-blur-xl">
+                <div className="relative overflow-hidden rounded-[2.2rem] border border-white/[0.06] bg-white/[0.02] px-0 pt-10 pb-14 backdrop-blur-xl">
                     <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-24 bg-[linear-gradient(90deg,#070709,rgba(7,7,9,0))]" />
                     <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-24 bg-[linear-gradient(270deg,#070709,rgba(7,7,9,0))]" />
 
