@@ -23,6 +23,13 @@ export const CustomCursor = () => {
         // Hover detection logic
         const handleMouseOver = (e: MouseEvent) => {
             const target = e.target as HTMLElement;
+            const isCursorSuppressed = !!target.closest('[data-cursor="off"]');
+
+            if (isCursorSuppressed) {
+                setIsHovering(false);
+                return;
+            }
+
             // Check for buttons, links, or elements with .magnetic class or data-cursor="hover"
             const isInteractive =
                 target.tagName === 'BUTTON' ||

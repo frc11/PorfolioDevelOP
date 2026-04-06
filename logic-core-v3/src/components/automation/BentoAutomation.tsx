@@ -167,6 +167,31 @@ const workflows: BentoWorkflow[] = [
     },
     color: '#f59e0b', colorRgb: '245,158,11',
   },
+  {
+    id: 5, size: 'medium',
+    category: 'COBRANZAS',
+    antes: {
+      title: 'Cobros vencidos sin seguimiento',
+      description: 'Las facturas se vencen y nadie hace seguimiento constante. Terminás cobrando tarde y con flujo de caja desordenado.',
+      steps: [
+        { icon: '📄', label: 'Factura emitida' },
+        { icon: '⏳', label: 'Vence sin aviso', arrow: true },
+        { icon: '📞', label: 'Seguimiento manual', arrow: true },
+      ],
+      pain: 'Caja inestable por cobranzas tardías',
+    },
+    despues: {
+      title: 'Recordatorios automáticos y cobro ágil',
+      description: 'El sistema detecta vencimientos, envía recordatorios por WhatsApp y email, y notifica al equipo solo si requiere intervención.',
+      steps: [
+        { icon: '📄', label: 'Factura emitida' },
+        { icon: '🤖', label: 'Recordatorio auto', arrow: true },
+        { icon: '✅', label: 'Cobro confirmado', arrow: true },
+      ],
+      gain: 'Menos mora y caja más predecible',
+    },
+    color: '#f97316', colorRgb: '249,115,22',
+  },
 ]
 
 // ─── COMPONENTS ─────────────────────────────────────────────────────────────
@@ -293,10 +318,11 @@ function GearDecoration({
 }
 
 function BentoFlipCard({
-  workflow, gridStyle, isInView, delay, onFirstFlip,
+  workflow, gridStyle, cardClass, isInView, delay, onFirstFlip,
 }: {
   workflow: BentoWorkflow
   gridStyle: React.CSSProperties
+  cardClass?: string
   isInView: boolean
   delay: number
   onFirstFlip: (id: number) => void
@@ -382,6 +408,7 @@ function BentoFlipCard({
         ...gridStyle,
         perspective: '1200px',
       }}
+      className={cardClass}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
@@ -392,9 +419,9 @@ function BentoFlipCard({
           position: 'relative',
           width: '100%',
           height: '100%',
-          minHeight: workflow.size === 'large' ? '260px' : workflow.size === 'small' ? '100%' : '220px',
+          minHeight: workflow.size === 'large' ? '300px' : workflow.size === 'small' ? '260px' : '260px',
           transformStyle: 'preserve-3d',
-          cursor: shouldReduceMotion ? 'default' : 'pointer',
+          cursor: 'none',
         }}
       >
         {/* CARA FRENTE — ANTES (No visible si Reduced Motion está activo) */}
@@ -432,7 +459,7 @@ function BentoFlipCard({
                 <React.Fragment key={i}>
                   <div className="flex flex-col items-center gap-1">
                     <div className="w-8 h-8 rounded-lg bg-red-500/10 border border-red-500/20 flex items-center justify-center text-sm">{step.icon}</div>
-                    <span className="text-[8px] text-white/30 text-center leading-none max-w-[40px]">{step.label}</span>
+                    <span className="text-[8px] text-white/30 text-center leading-none max-w-[56px]">{step.label}</span>
                   </div>
                   {step.arrow && <span className="text-red-500/30 text-xs mb-4">→</span>}
                 </React.Fragment>
@@ -478,7 +505,7 @@ function BentoFlipCard({
               </div>
             )}
 
-            <div className="inline-flex items-center gap-2 bg-red-500/10 border border-red-500/20 rounded-lg px-2.5 py-1.5">
+            <div className="inline-flex max-w-full items-center gap-2 bg-red-500/10 border border-red-500/20 rounded-lg px-2.5 py-1.5">
               <span className="text-[11px] font-bold text-red-500/90">{workflow.antes.pain}</span>
             </div>
 
@@ -532,14 +559,14 @@ function BentoFlipCard({
                 <React.Fragment key={i}>
                   <div className="flex flex-col items-center gap-1">
                     <div className="w-8 h-8 rounded-lg flex items-center justify-center text-sm" style={{ background: `rgba(${workflow.colorRgb}, 0.12)`, border: `1px solid rgba(${workflow.colorRgb}, 0.25)`, boxShadow: `0 0 8px rgba(${workflow.colorRgb}, 0.2)` }}>{step.icon}</div>
-                    <span className="text-[8px] text-white/40 text-center leading-none max-w-[40px]">{step.label}</span>
+                    <span className="text-[8px] text-white/40 text-center leading-none max-w-[56px]">{step.label}</span>
                   </div>
                   {step.arrow && <span className="text-xs mb-4" style={{ color: `rgba(${workflow.colorRgb}, 0.6)` }}>→</span>}
                 </React.Fragment>
               ))}
             </div>
 
-            <div className="inline-flex items-center gap-2 rounded-lg px-2.5 py-1.5" style={{ background: `rgba(${workflow.colorRgb}, 0.1)`, border: `1px solid rgba(${workflow.colorRgb}, 0.3)` }}>
+            <div className="inline-flex max-w-full items-center gap-2 rounded-lg px-2.5 py-1.5" style={{ background: `rgba(${workflow.colorRgb}, 0.1)`, border: `1px solid rgba(${workflow.colorRgb}, 0.3)` }}>
               <svg width="10" height="8" viewBox="0 0 10 8" fill="none" style={{ flexShrink: 0 }}>
                 <path d="M1 4L3.8 7 9 1" stroke="#10b981" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
@@ -606,6 +633,7 @@ export default function BentoAutomation() {
   return (
     <section
       ref={sectionRef}
+      data-cursor="off"
       className="relative w-full py-20 md:py-32 lg:py-40 px-6 sm:px-12 bg-[#080810] overflow-hidden z-[1]"
     >
       <AtmosphereBento />
@@ -617,13 +645,15 @@ export default function BentoAutomation() {
           {/* Fila 1 */}
           <BentoFlipCard
             workflow={workflows[0]}
-            gridStyle={{ gridColumn: 'md:span 2' }}
+            gridStyle={{}}
+            cardClass="md:col-span-2"
             isInView={isInView} delay={0.25}
             onFirstFlip={onFirstFlip}
           />
           <BentoFlipCard
             workflow={workflows[3]}
-            gridStyle={{ gridRow: 'md:span 2' }}
+            gridStyle={{}}
+            cardClass="md:col-span-1"
             isInView={isInView} delay={0.30}
             onFirstFlip={onFirstFlip}
           />
@@ -631,22 +661,32 @@ export default function BentoAutomation() {
           {/* Fila 2 */}
           <BentoFlipCard
             workflow={workflows[1]}
-            gridStyle={{ gridColumn: 'md:span 1' }}
+            gridStyle={{}}
+            cardClass="md:col-span-1"
             isInView={isInView} delay={0.35}
             onFirstFlip={onFirstFlip}
           />
           <BentoFlipCard
             workflow={workflows[2]}
-            gridStyle={{ gridColumn: 'md:span 1' }}
+            gridStyle={{}}
+            cardClass="md:col-span-1"
             isInView={isInView} delay={0.40}
+            onFirstFlip={onFirstFlip}
+          />
+          <BentoFlipCard
+            workflow={workflows[4]}
+            gridStyle={{}}
+            cardClass="md:col-span-1"
+            isInView={isInView} delay={0.45}
             onFirstFlip={onFirstFlip}
           />
 
           {/* Fila 3 */}
           <BentoFlipCard
-            workflow={workflows[4]}
-            gridStyle={{ gridColumn: 'md:span 3' }}
-            isInView={isInView} delay={0.45}
+            workflow={workflows[5]}
+            gridStyle={{}}
+            cardClass="md:col-span-3"
+            isInView={isInView} delay={0.5}
             onFirstFlip={onFirstFlip}
           />
         </div>

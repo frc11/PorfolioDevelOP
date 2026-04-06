@@ -420,7 +420,7 @@ function MiniDashboard({ isInView }: { isInView: boolean }) {
           <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '12px', overflow: 'hidden' }}>
             <div style={{ padding: '10px 14px', borderBottom: '1px solid rgba(255,255,255,0.06)', display: 'flex', justifyContent: 'space-between' }}>
               <p style={{ fontSize: '11px', fontWeight: 600, color: 'rgba(255,255,255,0.5)', margin: 0 }}>Últimas ventas</p>
-              <p style={{ fontSize: '10px', color: 'rgba(99,102,241,0.6)', margin: 0, fontFamily: 'monospace', cursor: 'default' }}>Ver todas →</p>
+              <p style={{ fontSize: '10px', color: 'rgba(99,102,241,0.6)', margin: 0, fontFamily: 'monospace', cursor: 'none' }}>Ver todas →</p>
             </div>
             {ultimasVentas.map((venta, i) => (
               <div key={i} style={{ padding: '8px 14px', display: 'grid', gridTemplateColumns: isMobile ? '1fr auto auto' : '1fr auto auto auto', gap: '12px', alignItems: 'center', borderBottom: i < 3 ? '1px solid rgba(255,255,255,0.04)' : 'none' }}>

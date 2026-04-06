@@ -616,17 +616,25 @@ export default function HeroAutomation() {
           transition={{ duration: 0.8, delay: 0.6, ease: [0.16, 1, 0.3, 1] }}
           style={{
             fontSize: 'clamp(15px, 1.8vw, 19px)',
-            color: 'rgba(255,255,255,0.42)',
+            color: 'rgba(255,255,255,0.74)',
             lineHeight: 1.7,
             maxWidth: '560px',
             margin: '0 auto clamp(28px, 4vh, 44px)',
+            background: 'linear-gradient(180deg, rgba(7,7,9,0.74) 0%, rgba(7,7,9,0.58) 100%)',
+            border: '1px solid rgba(245,158,11,0.12)',
+            borderRadius: '16px',
+            backdropFilter: 'blur(14px)',
+            WebkitBackdropFilter: 'blur(14px)',
+            boxShadow: '0 18px 48px rgba(0,0,0,0.34), inset 0 1px 0 rgba(255,255,255,0.04)',
+            padding: 'clamp(14px, 1.8vw, 20px) clamp(16px, 2.2vw, 24px)',
+            textShadow: '0 1px 10px rgba(0,0,0,0.45)',
             pointerEvents: 'none',
           }}
         >
           Hacemos que WhatsApp, MercadoPago, AFIP y Excel se hablen solos.
           <br/>
           Tu equipo deja de copiar y pegar datos 
-          <span style={{ color: 'rgba(245,158,11,0.75)' }}>
+          <span style={{ color: 'rgba(245,158,11,0.95)' }}>
             y empieza a generar valor real.
           </span>
         </motion.p>
@@ -838,49 +846,6 @@ export default function HeroAutomation() {
           />
         </>
       )}
-
-      {/* Scroll Cue */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1.6, duration: 0.8 }}
-        style={{
-          position: 'absolute',
-          bottom: 'clamp(24px, 4vh, 40px)',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          gap: '6px',
-          zIndex: 10,
-          pointerEvents: 'none',
-        }}
-      >
-        <span style={{
-          fontSize: '9px',
-          letterSpacing: '0.35em',
-          color: 'rgba(245,158,11,0.35)',
-          textTransform: 'uppercase',
-          fontFamily: 'ui-monospace, monospace',
-        }}>
-          scroll
-        </span>
-        {/* Chevrons con opacidad decreciente */}
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
-          {[0.7, 0.4, 0.15].map((opacity, i) => (
-            <motion.svg
-              key={i}
-              width="12" height="8" viewBox="0 0 12 8"
-              animate={{ y: [0, 3, 0] }}
-              transition={{ duration: 1.6, delay: i * 0.18, repeat: Infinity, ease: 'easeInOut' }}
-              style={{ opacity }}
-            >
-              <path d="M1 1.5L6 6.5L11 1.5" stroke="rgba(245,158,11,0.9)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-            </motion.svg>
-          ))}
-        </div>
-      </motion.div>
 
       {/* Mouse Interaction Hint */}
       <AnimatePresence>

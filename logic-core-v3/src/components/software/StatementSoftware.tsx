@@ -199,7 +199,7 @@ function StatementContent({ progress, shouldReduceMotion }: { progress: number, 
 
   return (
     <div className="relative z-10 text-center px-6 w-full max-w-7xl mx-auto">
-      <h2 className="font-black leading-[1.05] tracking-tighter cursor-default">
+      <h2 className="font-black leading-[1.05] tracking-tighter">
         <div className="text-[clamp(32px,5.5vw,84px)] mb-4">
           {words.slice(0, 6).map((w, i) => renderWord(w, i))}
         </div>

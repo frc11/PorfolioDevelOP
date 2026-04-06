@@ -1,6 +1,6 @@
-'use client'
+﻿'use client'
 
-import React, { useState, useRef, useMemo } from 'react'
+import React, { useState, useRef } from 'react'
 import { motion, AnimatePresence, useInView, useReducedMotion } from 'motion/react'
 
 /**
@@ -8,131 +8,43 @@ import { motion, AnimatePresence, useInView, useReducedMotion } from 'motion/rea
  * FAQ final que elimina objeciones + CTA final potente "DELEGÁ AL SISTEMA".
  */
 
-// ─── TYPES ────────────────────────────────────────────────────────────────────
+// â”€â”€â”€ TYPES â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 interface FAQItem {
   question: string
   answer: string
 }
 
-// ─── DATA ────────────────────────────────────────────────────────────────────
+// â”€â”€â”€ DATA â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const faqItems: FAQItem[] = [
   {
-    question:
-      '¿Mis empleados tienen que aprender algo nuevo?',
-    answer:
-      'No. Las automatizaciones trabajan en el fondo — tus empleados siguen usando WhatsApp, Excel y las mismas herramientas de siempre. La diferencia es que el sistema mueve los datos solo entre ellas. Sin que nadie tenga que hacer nada distinto.',
+    question: '¿Mis empleados tienen que aprender algo nuevo?',
+    answer: 'No. Las automatizaciones trabajan en el fondo — tus empleados siguen usando WhatsApp, Excel y las mismas herramientas de siempre. La diferencia es que el sistema mueve los datos solo entre ellas. Sin que nadie tenga que hacer nada distinto.',
   },
   {
-    question:
-      '¿Qué pasa si una automatización falla en producción?',
-    answer:
-      'Tenemos monitoreo activo en todos los flujos. Si algo falla, recibimos alerta antes que vos y lo resolvemos. Además, ninguna automatización remplaza un proceso crítico sin tener un respaldo manual — si el robot falla, el proceso sigue funcionando de la forma tradicional mientras lo arreglamos.',
+    question: '¿Qué pasa si una automatización falla en producción?',
+    answer: 'Tenemos monitoreo activo en todos los flujos. Si algo falla, recibimos alerta antes que vos y lo resolvemos. Además, ninguna automatización remplaza un proceso crítico sin tener un respaldo manual — si el robot falla, el proceso sigue funcionando de la forma tradicional mientras lo arreglamos.',
   },
   {
-    question:
-      '¿Cuánto tarda en estar funcionando?',
-    answer:
-      'En 1 semana tenés los primeros flujos corriendo en producción. Empezamos con la tarea que más tiempo le roba a tu equipo — y desde el primer lunes ya notás la diferencia. Sin esperar meses para ver resultados.',
+    question: '¿Cuánto tarda en estar funcionando?',
+    answer: 'En 1 semana tenés los primeros flujos corriendo en producción. Empezamos con la tarea que más tiempo le roba a tu equipo — y desde el primer lunes ya notás la diferencia. Sin esperar meses para ver resultados.',
   },
   {
-    question:
-      '¿La automatización puede cobrar por MercadoPago?',
-    answer:
-      'Sí. El flujo puede generar el link de pago, enviárselo al cliente por WhatsApp, verificar que se acreditó y emitir la factura AFIP automáticamente. Todo eso sin que ninguna persona intervenga.',
+    question: '¿La automatización puede cobrar por MercadoPago?',
+    answer: 'Sí. El flujo puede generar el link de pago, enviárselo al cliente por WhatsApp, verificar que se acreditó y emitir la factura AFIP automáticamente. Todo eso sin que ninguna persona intervenga.',
   },
   {
-    question:
-      '¿Funciona si mi empresa es chica?',
-    answer:
-      'Especialmente para empresas chicas. Una pyme de 5 personas que automatiza las tareas repetitivas opera como si tuviera 10. El punto de partida ideal es cuando sentís que el equipo pasa más tiempo administrando que vendiendo o produciendo.',
+    question: '¿Funciona si mi empresa es chica?',
+    answer: 'Especialmente para empresas chicas. Una pyme de 5 personas que automatiza las tareas repetitivas opera como si tuviera 10. El punto de partida ideal es cuando sentís que el equipo pasa más tiempo administrando que vendiendo o produciendo.',
   },
   {
-    question:
-      '¿Puedo empezar con un solo proceso y agregar más?',
-    answer:
-      'Es la forma más inteligente. Empezamos con el flujo que más duele — facturación, seguimiento de leads, reportes — medimos el resultado y de ahí sumamos más. Sin compromiso de escala forzada ni contratos largos.',
+    question: '¿Puedo empezar con un solo proceso y agregar más?',
+    answer: 'Es la forma más inteligente. Empezamos con el flujo que más duele — facturación, seguimiento de leads, reportes — medimos el resultado y de ahí sumamos más. Sin compromiso de escala forzada ni contratos largos.',
   },
 ]
 
-// ─── SUB-COMPONENTS ──────────────────────────────────────────────────────────
-
-function SliderMini({
-  label,
-  value,
-  min,
-  max,
-  step,
-  unit,
-  onChange,
-  formatValue,
-}: {
-  label: string
-  value: number
-  min: number
-  max: number
-  step: number
-  unit: string
-  onChange: (val: number) => void
-  formatValue?: (val: number) => string
-}) {
-  const pct = ((value - min) / (max - min)) * 100
-
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px', fontFamily: 'monospace' }}>
-        <span style={{ color: 'rgba(255,255,255,0.4)' }}>{label}</span>
-        <span style={{ color: '#f59e0b', fontWeight: 'bold' }}>
-          {formatValue ? formatValue(value) : `${value} ${unit}`}
-        </span>
-      </div>
-      <div style={{ position: 'relative', height: '24px', display: 'flex', alignItems: 'center' }}>
-        <div style={{ position: 'absolute', height: '4px', width: '100%', background: 'rgba(255,255,255,0.05)', borderRadius: '100px', overflow: 'hidden' }}>
-          <div 
-            style={{ 
-              height: '100%', 
-              width: `${pct}%`, 
-              background: 'rgba(245,158,11,0.4)', 
-              borderRadius: '100px',
-              transition: 'width 100ms'
-            }}
-          />
-        </div>
-        <input
-          type="range"
-          min={min}
-          max={max}
-          step={step}
-          value={value}
-          onChange={(e) => onChange(Number(e.target.value))}
-          style={{
-            position: 'absolute',
-            inset: '0',
-            width: '100%',
-            opacity: 0,
-            cursor: 'pointer',
-            zIndex: 10
-          }}
-        />
-        <div
-          style={{
-            position: 'absolute',
-            width: '14px',
-            height: '14px',
-            background: '#f59e0b',
-            borderRadius: '50%',
-            border: '2px solid #030308',
-            boxShadow: '0 0 10px rgba(0,0,0,0.5)',
-            pointerEvents: 'none',
-            transition: 'left 100ms',
-            left: `calc(${pct}% - 7px)`
-          }}
-        />
-      </div>
-    </div>
-  )
-}
+// â”€â”€â”€ SUB-COMPONENTS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function AtmosphereVault() {
   return (
@@ -280,7 +192,7 @@ function FAQItemComponent({ item, index, isOpen, onToggle, isInView }: {
           gap: '16px',
           background: 'transparent',
           border: 'none',
-          cursor: 'pointer',
+          cursor: 'none',
           textAlign: 'left',
         }}
       >
@@ -368,7 +280,7 @@ function FAQSection({ items, openIndex, setOpenIndex, isInView }: {
   )
 }
 
-// ─── MAIN COMPONENT ──────────────────────────────────────────────────────────
+// â”€â”€â”€ MAIN COMPONENT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export default function VaultAutomation() {
   const sectionRef = useRef<HTMLElement>(null)
@@ -377,13 +289,6 @@ export default function VaultAutomation() {
     once: true, amount: 0.1,
   })
   const shouldReduceMotion = useReducedMotion()
-
-  // Mini Calculador ROI
-  const [tareasAlDia, setTareasAlDia] = useState(20)
-  const horasAhorradas = useMemo(() => 
-    Math.round(tareasAlDia * 22 * (8/60) * 0.85),
-    [tareasAlDia]
-  )
 
   return (
     <section
@@ -404,130 +309,6 @@ export default function VaultAutomation() {
       }}>
         <Header isInView={isInView} />
 
-        {/* Mini Calculador */}
-        <motion.div
-          initial={shouldReduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 24 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.7, delay: 0.5 }}
-          style={{
-            position: 'relative',
-            overflow: 'hidden',
-            background: 'rgba(245,158,11,0.04)',
-            border: '1px solid rgba(245,158,11,0.16)',
-            borderRadius: '22px',
-            padding: 'clamp(26px, 3.2vw, 44px)',
-            marginBottom: 'clamp(40px, 6vh, 72px)',
-            boxShadow: '0 0 0 1px rgba(245,158,11,0.04), 0 12px 36px rgba(0,0,0,0.25)',
-            backgroundImage: `repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(255,255,255,0.02) 39px, rgba(255,255,255,0.02) 40px), repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(255,255,255,0.02) 39px, rgba(255,255,255,0.02) 40px)`,
-          }}
-        >
-          <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '1px', background: 'linear-gradient(90deg, transparent, rgba(245,158,11,0.5) 50%, transparent)' }} />
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '14px',
-            marginBottom: '28px',
-          }}>
-            <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-              <span style={{ fontSize: '10px', fontWeight: 900, color: '#f59e0b', letterSpacing: '0.04em', fontFamily: 'ui-monospace, monospace', lineHeight: 1 }}>ROI</span>
-            </div>
-            <div>
-              <h3 style={{ fontSize: '18px', fontWeight: 900, color: 'white', margin: '0 0 3px', letterSpacing: '-0.01em' }}>
-                Calculá tus horas recuperadas
-              </h3>
-              <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.35)', margin: 0, fontFamily: 'ui-monospace, monospace', letterSpacing: '0.05em' }}>
-                Mové el slider y mirá el resultado
-              </p>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-8 items-center">
-            {/* Slider */}
-            <div>
-              <label style={{ fontSize: '13px', color: 'rgba(255,255,255,0.5)', display: 'block', marginBottom: '16px' }}>
-                Tareas manuales por día en tu empresa
-              </label>
-              
-              <SliderMini 
-                label="" 
-                value={tareasAlDia}
-                min={5}
-                max={100}
-                step={5}
-                unit="tareas/día"
-                onChange={setTareasAlDia}
-              />
-
-              <div style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                marginTop: '8px',
-                fontSize: '11px',
-                color: 'rgba(255,255,255,0.2)',
-                fontFamily: 'monospace',
-              }}>
-                <span>5/día</span>
-                <span style={{ color: 'rgba(245,158,11,0.6)', fontWeight: 700 }}>
-                  {tareasAlDia} tareas/día
-                </span>
-                <span>100/día</span>
-              </div>
-            </div>
-
-            {/* Resultado */}
-            <div style={{
-              position: 'relative',
-              overflow: 'hidden',
-              textAlign: 'center',
-              padding: '22px 32px',
-              background: 'rgba(245,158,11,0.08)',
-              border: '1px solid rgba(245,158,11,0.22)',
-              borderRadius: '18px',
-              minWidth: '160px',
-              boxShadow: '0 0 0 1px rgba(245,158,11,0.05), 0 8px 24px rgba(0,0,0,0.2)',
-            }}>
-              <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '1px', background: 'linear-gradient(90deg, transparent, rgba(245,158,11,0.7) 50%, transparent)' }} />
-              <p style={{
-                fontSize: '9px',
-                letterSpacing: '0.22em',
-                color: 'rgba(245,158,11,0.65)',
-                margin: '0 0 8px',
-                fontFamily: 'ui-monospace, monospace',
-                textTransform: 'uppercase',
-              }}>
-                RECUPERÁS AL MES
-              </p>
-              <motion.p
-                key={horasAhorradas}
-                initial={shouldReduceMotion ? { scale: 1 } : { scale: 1.15, color: '#fbbf24' }}
-                animate={{ scale: 1, color: '#f59e0b' }}
-                transition={{ duration: 0.25 }}
-                style={{
-                  fontSize: '52px',
-                  fontWeight: 900,
-                  color: '#f59e0b',
-                  margin: 0,
-                  lineHeight: 1,
-                  fontFamily: 'ui-monospace, monospace',
-                  letterSpacing: '-0.03em',
-                  fontVariantNumeric: 'tabular-nums',
-                }}
-              >
-                {horasAhorradas}
-              </motion.p>
-              <p style={{
-                fontSize: '13px',
-                fontWeight: 700,
-                color: 'rgba(245,158,11,0.55)',
-                margin: '6px 0 0',
-                fontFamily: 'ui-monospace, monospace',
-              }}>
-                horas/mes
-              </p>
-            </div>
-          </div>
-        </motion.div>
-
         <FAQSection
           items={faqItems}
           openIndex={openIndex}
@@ -547,7 +328,7 @@ export default function VaultAutomation() {
             <span style={{ fontSize: '11px', letterSpacing: '0.2em', color: 'rgba(245,158,11,0.4)', fontFamily: 'monospace', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>PLANES</span>
             <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.05)' }} />
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-[14px]">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-[18px]">
             {[
               {
                 name: 'Básico',
@@ -555,7 +336,10 @@ export default function VaultAutomation() {
                 unit: 'USD/mes',
                 desc: '1 automatización activa. Ideal para empezar con el flujo que más duele.',
                 items: ['WhatsApp + 1 app', 'Flujo configurado y lanzado', 'Monitoreo incluido', 'Soporte por WhatsApp'],
-                alpha: '0.12',
+                audience: 'Pymes que quieren validar rápido',
+                setup: '4-7 días',
+                roi: '60-90 días',
+                accentRgb: '245,158,11',
               },
               {
                 name: 'Crecimiento',
@@ -563,7 +347,10 @@ export default function VaultAutomation() {
                 unit: 'USD/mes',
                 desc: '3 o más integraciones activas. Para empresas que quieren automatizar en serio.',
                 items: ['3+ integraciones', 'Claude AI conversacional', 'Reportes automáticos', 'Soporte prioritario'],
-                alpha: '0.25',
+                audience: 'Equipos con operaciones diarias intensas',
+                setup: '7-14 días',
+                roi: '45-75 días',
+                accentRgb: '249,115,22',
                 highlight: true,
               },
               {
@@ -572,41 +359,142 @@ export default function VaultAutomation() {
                 unit: '',
                 desc: 'Grandes volúmenes, múltiples equipos o flujos complejos. Presupuesto personalizado.',
                 items: ['Flujos ilimitados', 'SLA garantizado', 'Integración con ERP/CRM', 'Account manager dedicado'],
-                alpha: '0.1',
+                audience: 'Empresas multi-sede o alto volumen',
+                setup: '2-5 semanas',
+                roi: 'ROI proyectado por flujo',
+                accentRgb: '251,146,60',
               },
             ].map((tier) => (
-              <div
+              <motion.div
                 key={tier.name}
+                whileHover={shouldReduceMotion ? {} : { y: -6, scale: 1.012 }}
+                transition={{ duration: 0.1, ease: 'linear' }}
                 style={{
-                  borderRadius: '18px',
-                  padding: 'clamp(18px, 2vw, 28px)',
+                  borderRadius: '20px',
+                  padding: 'clamp(22px, 2.3vw, 32px)',
                   background: tier.highlight
-                    ? 'linear-gradient(135deg, rgba(245,158,11,0.1) 0%, rgba(249,115,22,0.06) 100%)'
-                    : 'rgba(245,158,11,0.04)',
-                  border: `1px solid rgba(245,158,11,${tier.alpha})`,
-                  boxShadow: tier.highlight ? '0 0 30px rgba(245,158,11,0.08)' : 'none',
+                    ? `linear-gradient(135deg, rgba(${tier.accentRgb},0.16) 0%, rgba(${tier.accentRgb},0.06) 48%, rgba(96,65,255,0.08) 100%)`
+                    : `linear-gradient(145deg, rgba(${tier.accentRgb},0.085) 0%, rgba(${tier.accentRgb},0.03) 55%, rgba(255,255,255,0.01) 100%)`,
+                  border: `1px solid rgba(${tier.accentRgb},${tier.highlight ? 0.34 : 0.22})`,
+                  boxShadow: tier.highlight
+                    ? `0 0 0 1px rgba(${tier.accentRgb},0.22), 0 0 42px rgba(${tier.accentRgb},0.18), 0 14px 32px rgba(0,0,0,0.36), inset 0 1px 0 rgba(255,255,255,0.11)`
+                    : `0 0 0 1px rgba(${tier.accentRgb},0.1), 0 0 26px rgba(${tier.accentRgb},0.1), 0 10px 26px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.08)`,
                   position: 'relative',
                   overflow: 'hidden',
+                  minHeight: '430px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '14px',
+                  cursor: 'none',
+                  transition: 'background 90ms linear, border-color 90ms linear, box-shadow 90ms linear',
                 }}
               >
+                <div
+                  aria-hidden="true"
+                  style={{
+                    position: 'absolute',
+                    inset: '-35%',
+                    background: `conic-gradient(from 240deg at 65% 30%, transparent 0deg, rgba(${tier.accentRgb},0.26) 70deg, transparent 145deg, rgba(114,84,255,0.24) 220deg, transparent 360deg)`,
+                    opacity: tier.highlight ? 0.88 : 0.58,
+                    filter: 'blur(34px)',
+                    pointerEvents: 'none',
+                  }}
+                />
+
                 {tier.highlight && (
-                  <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '2px', background: 'linear-gradient(90deg, transparent, rgba(245,158,11,0.9), transparent)' }} />
+                  <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '2px', background: `linear-gradient(90deg, transparent, rgba(${tier.accentRgb},1), transparent)` }} />
                 )}
-                <p style={{ fontSize: '11px', fontWeight: 700, color: 'rgba(245,158,11,0.7)', letterSpacing: '0.15em', margin: '0 0 10px', textTransform: 'uppercase', fontFamily: 'monospace' }}>{tier.name}</p>
-                <div style={{ marginBottom: '12px' }}>
-                  <span style={{ fontSize: 'clamp(22px, 3vw, 32px)', fontWeight: 900, color: 'white', letterSpacing: '-0.03em', fontFamily: 'monospace' }}>{tier.price}</span>
-                  {tier.unit && <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.3)', marginLeft: '6px' }}>{tier.unit}</span>}
+
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', position: 'relative', zIndex: 1 }}>
+                  <p style={{ fontSize: '11px', fontWeight: 700, color: `rgba(${tier.accentRgb},0.86)`, letterSpacing: '0.15em', margin: 0, textTransform: 'uppercase', fontFamily: 'monospace' }}>{tier.name}</p>
+                  <span style={{
+                    fontSize: '10px',
+                    fontWeight: 700,
+                    letterSpacing: '0.12em',
+                    color: tier.highlight ? '#ffd79a' : 'rgba(255,255,255,0.58)',
+                    border: `1px solid rgba(${tier.accentRgb},0.32)`,
+                    background: `rgba(${tier.accentRgb},0.12)`,
+                    borderRadius: '100px',
+                    padding: '3px 9px',
+                    textTransform: 'uppercase',
+                    fontFamily: 'monospace',
+                  }}>
+                    {tier.highlight ? 'Recomendado' : 'Plan estable'}
+                  </span>
                 </div>
-                <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', lineHeight: 1.6, margin: '0 0 14px' }}>{tier.desc}</p>
-                <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '7px' }}>
+
+                <div style={{ marginBottom: '2px', position: 'relative', zIndex: 1 }}>
+                  <span style={{ fontSize: 'clamp(30px, 3.6vw, 44px)', fontWeight: 900, color: 'white', letterSpacing: '-0.035em', fontFamily: 'monospace', lineHeight: 1 }}>{tier.price}</span>
+                  {tier.unit && <span style={{ fontSize: '13px', color: 'rgba(255,255,255,0.45)', marginLeft: '7px' }}>{tier.unit}</span>}
+                </div>
+
+                <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.58)', lineHeight: 1.65, margin: 0, position: 'relative', zIndex: 1 }}>{tier.desc}</p>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginTop: '2px', position: 'relative', zIndex: 1 }}>
+                  <div style={{ border: `1px solid rgba(${tier.accentRgb},0.28)`, background: `rgba(${tier.accentRgb},0.13)`, borderRadius: '10px', padding: '8px 10px' }}>
+                    <p style={{ margin: '0 0 3px', fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.32)', fontFamily: 'monospace' }}>Setup</p>
+                    <p style={{ margin: 0, fontSize: '12px', fontWeight: 700, color: `rgba(${tier.accentRgb},0.95)` }}>{tier.setup}</p>
+                  </div>
+                  <div style={{ border: `1px solid rgba(${tier.accentRgb},0.28)`, background: `rgba(${tier.accentRgb},0.13)`, borderRadius: '10px', padding: '8px 10px' }}>
+                    <p style={{ margin: '0 0 3px', fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.32)', fontFamily: 'monospace' }}>Retorno</p>
+                    <p style={{ margin: 0, fontSize: '12px', fontWeight: 700, color: `rgba(${tier.accentRgb},0.95)` }}>{tier.roi}</p>
+                  </div>
+                </div>
+
+                <p style={{ margin: '2px 0 0', fontSize: '11px', color: 'rgba(255,255,255,0.36)', fontFamily: 'monospace', position: 'relative', zIndex: 1 }}>
+                  Ideal para: <span style={{ color: `rgba(${tier.accentRgb},0.78)` }}>{tier.audience}</span>
+                </p>
+
+                <ul style={{ listStyle: 'none', padding: 0, margin: '2px 0 0', display: 'flex', flexDirection: 'column', gap: '8px', flex: 1, position: 'relative', zIndex: 1 }}>
                   {tier.items.map((item) => (
-                    <li key={item} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: 'rgba(255,255,255,0.5)' }}>
-                      <span style={{ color: 'rgba(245,158,11,0.8)', fontWeight: 700, fontSize: '10px' }}>✓</span>
+                    <li key={item} style={{ display: 'flex', alignItems: 'center', gap: '9px', fontSize: '13px', color: 'rgba(255,255,255,0.67)', lineHeight: 1.45 }}>
+                      <span style={{
+                        width: '16px',
+                        height: '16px',
+                        borderRadius: '50%',
+                        background: `radial-gradient(circle, rgba(${tier.accentRgb},0.9), rgba(${tier.accentRgb},0.25))`,
+                        boxShadow: `0 0 10px rgba(${tier.accentRgb},0.35)`,
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: '#070709',
+                        fontSize: '10px',
+                        fontWeight: 900,
+                        flexShrink: 0,
+                      }}>v</span>
                       {item}
                     </li>
                   ))}
                 </ul>
-              </div>
+
+                <div style={{ position: 'relative', zIndex: 1 }}>
+                  <a
+                    href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER}?text=Hola%20DevelOP%2C%20quiero%20consultar%20el%20plan%20${encodeURIComponent(tier.name)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      width: '100%',
+                      textDecoration: 'none',
+                      padding: '11px 14px',
+                      borderRadius: '11px',
+                      border: `1px solid rgba(${tier.accentRgb},0.36)`,
+                      background: `linear-gradient(135deg, rgba(${tier.accentRgb},0.2), rgba(${tier.accentRgb},0.08))`,
+                      color: tier.highlight ? '#ffd79a' : `rgba(${tier.accentRgb},0.95)`,
+                      fontSize: '11px',
+                      letterSpacing: '0.12em',
+                      textTransform: 'uppercase',
+                      fontWeight: 800,
+                      fontFamily: 'monospace',
+                      cursor: 'none',
+                    }}
+                  >
+                    Quiero este alcance
+                  </a>
+                </div>
+              </motion.div>
             ))}
           </div>
           <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.2)', textAlign: 'center', marginTop: '14px' }}>
@@ -843,3 +731,5 @@ export default function VaultAutomation() {
     </section>
   )
 }
+
+

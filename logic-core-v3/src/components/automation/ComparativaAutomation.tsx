@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useRef } from 'react'
+import React, { useRef, useState } from 'react'
 import { motion, useInView, useReducedMotion } from 'motion/react'
 
 /**
@@ -83,6 +83,15 @@ export default function ComparativaAutomation() {
   const sectionRef = useRef<HTMLElement>(null)
   const isInView = useInView(sectionRef, { once: true, amount: 0.15 })
   const reducedMotion = useReducedMotion()
+  const [hoveredTool, setHoveredTool] = useState<string | null>(null)
+
+  const handleCardMouseMove = (event: React.MouseEvent<HTMLDivElement>) => {
+    const rect = event.currentTarget.getBoundingClientRect()
+    const mx = ((event.clientX - rect.left) / rect.width) * 100
+    const my = ((event.clientY - rect.top) / rect.height) * 100
+    event.currentTarget.style.setProperty('--mx', `${mx}%`)
+    event.currentTarget.style.setProperty('--my', `${my}%`)
+  }
 
   return (
     <section
@@ -131,6 +140,10 @@ export default function ComparativaAutomation() {
               initial={reducedMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 24 }}
               animate={isInView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.65, delay: 0.1 + idx * 0.1, ease: [0.16, 1, 0.3, 1] }}
+              whileHover={reducedMotion ? undefined : { y: -6, scale: 1.008 }}
+              onMouseMove={handleCardMouseMove}
+              onHoverStart={() => setHoveredTool(tool.name)}
+              onHoverEnd={() => setHoveredTool((current) => (current === tool.name ? null : current))}
               className="relative flex flex-col rounded-2xl overflow-hidden"
               style={{
                 background: tool.highlight
@@ -142,8 +155,59 @@ export default function ComparativaAutomation() {
                 boxShadow: tool.highlight
                   ? `0 0 40px rgba(${tool.badgeRgb},0.1), 0 8px 32px rgba(0,0,0,0.3)`
                   : '0 4px 16px rgba(0,0,0,0.2)',
-              }}
+                cursor: 'none',
+                '--mx': '50%',
+                '--my': '50%',
+              } as React.CSSProperties & Record<'--mx' | '--my', string>}
             >
+              {/* Instant reactive spotlight */}
+              <motion.div
+                aria-hidden="true"
+                className="absolute inset-0 pointer-events-none z-[1]"
+                style={{
+                  background: `radial-gradient(220px circle at var(--mx,50%) var(--my,50%), rgba(${tool.badgeRgb},0.35), rgba(${tool.badgeRgb},0.12) 36%, transparent 68%)`,
+                  mixBlendMode: 'screen',
+                }}
+                animate={
+                  reducedMotion
+                    ? { opacity: 0.15 }
+                    : hoveredTool === tool.name
+                      ? { opacity: 1 }
+                      : { opacity: 0.12 }
+                }
+                transition={
+                  reducedMotion
+                    ? { duration: 0 }
+                    : { duration: 0.06, ease: 'linear' }
+                }
+              />
+
+              {/* Instant luminous neon border */}
+              <motion.div
+                aria-hidden="true"
+                className="absolute inset-0 rounded-2xl p-[1px] pointer-events-none z-[2]"
+                style={{
+                  background:
+                    `linear-gradient(130deg, rgba(${tool.badgeRgb},0.95), rgba(255,255,255,0.4), rgba(${tool.badgeRgb},0.75))`,
+                  WebkitMask: 'linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0)',
+                  WebkitMaskComposite: 'xor',
+                  maskComposite: 'exclude',
+                  filter: `drop-shadow(0 0 14px rgba(${tool.badgeRgb},0.45))`,
+                }}
+                animate={
+                  reducedMotion
+                    ? { opacity: 0.28 }
+                    : hoveredTool === tool.name
+                      ? { opacity: 1 }
+                      : { opacity: 0.18 }
+                }
+                transition={
+                  reducedMotion
+                    ? { duration: 0 }
+                    : { duration: 0.05, ease: 'linear' }
+                }
+              />
+
               {/* Top shimmer line */}
               {tool.highlight && (
                 <div

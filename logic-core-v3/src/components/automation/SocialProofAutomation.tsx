@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useRef } from 'react'
+import React, { useRef, useState } from 'react'
 import { motion, useInView } from 'motion/react'
 
 /**
@@ -176,16 +176,26 @@ function TestimonialCard({
   isInView: boolean
   delay: number
 }) {
+  const [isHovered, setIsHovered] = useState(false)
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 24 }}
-      animate={isInView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.65, delay, ease: [0.16, 1, 0.3, 1] }}
-      whileHover={{ y: -5, transition: { duration: 0.2 } }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      animate={{
+        opacity: isInView ? 1 : 0,
+        y: isInView ? (isHovered ? -3 : 0) : 24,
+      }}
+      transition={{ duration: isInView ? 0.1 : 0.65, delay: isInView ? 0 : delay, ease: isInView ? 'linear' : [0.16, 1, 0.3, 1] }}
       style={{
-        background: `linear-gradient(135deg, rgba(${t.colorRgb},0.06) 0%, rgba(255,255,255,0.02) 100%)`,
-        backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.018'/%3E%3C/svg%3E"), linear-gradient(135deg, rgba(${t.colorRgb},0.06) 0%, rgba(255,255,255,0.02) 100%)`,
-        border: `1px solid rgba(${t.colorRgb},0.15)`,
+        background: isHovered
+          ? `linear-gradient(135deg, rgba(${t.colorRgb},0.18) 0%, rgba(${t.colorRgb},0.08) 42%, rgba(120,90,255,0.09) 100%)`
+          : `linear-gradient(135deg, rgba(${t.colorRgb},0.06) 0%, rgba(255,255,255,0.02) 100%)`,
+        backgroundImage: isHovered
+          ? `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E"), linear-gradient(135deg, rgba(${t.colorRgb},0.18) 0%, rgba(${t.colorRgb},0.08) 42%, rgba(120,90,255,0.09) 100%)`
+          : `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.018'/%3E%3C/svg%3E"), linear-gradient(135deg, rgba(${t.colorRgb},0.06) 0%, rgba(255,255,255,0.02) 100%)`,
+        border: `1px solid rgba(${t.colorRgb},${isHovered ? 0.5 : 0.15})`,
         borderRadius: '20px',
         padding: 'clamp(24px, 3vw, 36px)',
         position: 'relative',
@@ -194,14 +204,33 @@ function TestimonialCard({
         flexDirection: 'column',
         gap: '20px',
         backdropFilter: 'blur(10px)',
+        boxShadow: isHovered
+          ? `0 0 0 1px rgba(${t.colorRgb},0.2), 0 0 30px rgba(${t.colorRgb},0.28), 0 0 60px rgba(120,90,255,0.12), 0 12px 34px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.12)`
+          : `0 8px 24px rgba(0,0,0,0.24), inset 0 1px 0 rgba(255,255,255,0.04)`,
+        transition: 'background 90ms linear, border 90ms linear, box-shadow 90ms linear',
       }}
     >
+      <div
+        aria-hidden="true"
+        style={{
+          position: 'absolute',
+          inset: '-28%',
+          background: `conic-gradient(from 210deg at 50% 50%, transparent 0deg, rgba(${t.colorRgb},0.28) 65deg, rgba(120,90,255,0.22) 125deg, transparent 190deg, rgba(${t.colorRgb},0.2) 250deg, transparent 360deg)`,
+          opacity: isHovered ? 1 : 0,
+          filter: 'blur(28px)',
+          transform: isHovered ? 'scale(1)' : 'scale(0.94)',
+          transition: 'opacity 90ms linear, transform 90ms linear',
+          pointerEvents: 'none',
+          zIndex: 0,
+        }}
+      />
       {/* Borde superior acento */}
       <div style={{
         position: 'absolute',
         top: 0, left: 0, right: 0,
         height: '2px',
-        background: `linear-gradient(90deg, transparent, rgba(${t.colorRgb},0.7) 40%, rgba(${t.colorRgb},0.7) 60%, transparent)`,
+        background: `linear-gradient(90deg, transparent, rgba(${t.colorRgb},${isHovered ? 1 : 0.7}) 40%, rgba(${t.colorRgb},${isHovered ? 1 : 0.7}) 60%, transparent)`,
+        transition: 'background 90ms linear',
       }}/>
 
       {/* Comillas decorativas SVG */}
@@ -220,34 +249,48 @@ function TestimonialCard({
         fontStyle: 'italic',
         position: 'relative',
         zIndex: 1,
+        minHeight: 'clamp(120px, 14vw, 152px)',
       }}>
-        "{t.quote}"
+        {'\u201C'}{t.quote}{'\u201D'}
       </p>
 
       {/* Resultado destacado */}
       <div style={{
-        display: 'inline-flex',
+        display: 'grid',
+        gridTemplateColumns: '96px minmax(0, 1fr)',
         alignItems: 'center',
-        gap: '10px',
-        background: `rgba(${t.colorRgb},0.08)`,
-        border: `1px solid rgba(${t.colorRgb},0.2)`,
+        columnGap: '10px',
+        background: `rgba(${t.colorRgb},${isHovered ? 0.14 : 0.08})`,
+        border: `1px solid rgba(${t.colorRgb},${isHovered ? 0.42 : 0.2})`,
         borderRadius: '12px',
-        padding: '10px 16px',
-        alignSelf: 'flex-start',
+        padding: '10px 14px',
+        alignSelf: 'stretch',
+        minHeight: '68px',
+        transition: 'background 90ms linear, border 90ms linear',
+        position: 'relative',
+        zIndex: 1,
       }}>
         <span style={{
-          fontSize: '26px',
+          fontSize: '38px',
           fontWeight: 900,
           color: t.color,
           fontFamily: 'ui-monospace, monospace',
           letterSpacing: '-0.02em',
           fontVariantNumeric: 'tabular-nums',
+          lineHeight: 1,
+          display: 'inline-flex',
+          justifyContent: 'center',
+          width: '100%',
         }}>
           {t.resultValue}
         </span>
         <span style={{
-          fontSize: '12px',
+          fontSize: '13px',
           color: 'rgba(255,255,255,0.45)',
+          lineHeight: 1.35,
+          display: 'inline-flex',
+          alignItems: 'center',
+          minHeight: '100%',
         }}>
           {t.result}
         </span>
@@ -278,7 +321,7 @@ function TestimonialCard({
             flexShrink: 0,
             letterSpacing: '0.05em',
             boxShadow: `0 0 0 2px rgba(${t.colorRgb},0.25)`,
-            cursor: 'default',
+            cursor: 'none',
           }}
         >
           {t.initials}

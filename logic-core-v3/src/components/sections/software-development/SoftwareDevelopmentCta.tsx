@@ -72,7 +72,7 @@ export const SoftwareDevelopmentCta = () => {
 
                     <div className="relative z-10 flex flex-col sm:flex-row items-center justify-center gap-4">
                         <MagneticCta>
-                            <div className="group relative inline-flex items-center justify-center gap-4 px-10 py-5 bg-violet-600 text-white font-black uppercase tracking-widest rounded-full overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-[0_0_40px_rgba(139,92,246,0.5)] cursor-pointer text-sm">
+                            <div className="group relative inline-flex items-center justify-center gap-4 px-10 py-5 bg-violet-600 text-white font-black uppercase tracking-widest rounded-full overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-[0_0_40px_rgba(139,92,246,0.5)] cursor-none text-sm">
                                 <div className="absolute top-0 -left-[100%] w-12 h-24 bg-white/30 skew-x-[-20deg] group-hover:left-[200%] transition-all duration-1000 ease-in-out z-20" />
                                 <span className="relative z-30 flex items-center gap-3">
                                     RESERVAR MI CUPO

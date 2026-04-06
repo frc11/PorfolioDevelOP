@@ -1,233 +1,338 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Mail, Phone, MapPin, Send, CheckCircle } from 'lucide-react';
-import { useActionState } from 'react';
+import { ArrowUpRight, CheckCircle, Mail, MapPin, MessageCircle, PhoneCall, Send, ShieldCheck, TimerReset } from 'lucide-react';
+import { useActionState, useEffect } from 'react';
 import { submitContactForm } from '@/lib/actions/contact';
 import type { ActionResult } from '@/lib/actions/schemas';
 
+const EMAIL = 'hola@develop.com.ar';
+const DEFAULT_PHONE_DIGITS = '543813165293';
+const LOCATION = 'Tucuman, Argentina';
 const SERVICE_OPTIONS = [
-    { value: '', label: 'Seleccioná un servicio' },
-    { value: 'web', label: 'Desarrollo Web' },
-    { value: 'software', label: 'Software a Medida' },
-    { value: 'automation', label: 'Automatización de Procesos' },
-    { value: 'ai', label: 'Implementaciones de IA' },
-    { value: 'other', label: 'Otro / No sé todavía' },
-]
+  { value: '', label: 'Selecciona un servicio' },
+  { value: 'automation', label: 'Automatizacion de procesos' },
+  { value: 'software', label: 'Software a medida' },
+  { value: 'web', label: 'Desarrollo web' },
+  { value: 'ai', label: 'Implementaciones IA' },
+  { value: 'other', label: 'Otro' },
+] as const;
+
+const CHANNELS = [
+  {
+    id: 'whatsapp',
+    title: 'WhatsApp',
+    subtitle: 'Respuesta rapida en horario comercial',
+    cta: 'Escribir ahora',
+    icon: MessageCircle,
+    accent: '#14b8a6',
+  },
+  {
+    id: 'call',
+    title: 'Llamar',
+    subtitle: 'Coordinamos una llamada de descubrimiento',
+    cta: 'Llamar ahora',
+    icon: PhoneCall,
+    accent: '#22d3ee',
+  },
+  {
+    id: 'mail',
+    title: 'Email',
+    subtitle: 'Dejanos contexto y te devolvemos plan de accion',
+    cta: 'Enviar email',
+    icon: Mail,
+    accent: '#5eead4',
+  },
+] as const;
+
+function getWhatsappHref() {
+  const rawNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? DEFAULT_PHONE_DIGITS;
+  const cleanNumber = rawNumber.replace(/\D/g, '');
+  return `https://wa.me/${cleanNumber}?text=Hola%20develOP%2C%20quiero%20hablar%20sobre%20mi%20proyecto.`;
+}
+
+function getPhoneContact() {
+  const rawNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? DEFAULT_PHONE_DIGITS;
+  const cleanNumber = rawNumber.replace(/\D/g, '');
+  const international = cleanNumber.startsWith('+') ? cleanNumber : `+${cleanNumber}`;
+
+  return {
+    href: `tel:${international}`,
+    display: international,
+  };
+}
 
 export default function ContactPage() {
-    const [state, action, isPending] = useActionState<ActionResult | null, FormData>(submitContactForm, null)
+  const [state, action, isPending] = useActionState<ActionResult | null, FormData>(submitContactForm, null);
 
-    return (
-        <main className="min-h-screen bg-[#070709] text-white overflow-hidden relative">
-            {/* Ambient glows */}
-            <div className="absolute top-[-15%] left-[-5%] w-[50vw] h-[50vw] bg-amber-500/5 rounded-full blur-[120px] pointer-events-none" />
-            <div className="absolute bottom-[-15%] right-[-5%] w-[40vw] h-[40vw] bg-orange-600/5 rounded-full blur-[120px] pointer-events-none" />
+  useEffect(() => {
+    const htmlOverflow = document.documentElement.style.overflow;
+    const bodyOverflow = document.body.style.overflow;
+    const htmlOverscroll = document.documentElement.style.overscrollBehavior;
+    const bodyOverscroll = document.body.style.overscrollBehavior;
 
-            <div className="relative z-10 container mx-auto px-6 py-24 min-h-screen flex flex-col justify-center">
+    document.documentElement.style.overflow = 'hidden';
+    document.body.style.overflow = 'hidden';
+    document.documentElement.style.overscrollBehavior = 'none';
+    document.body.style.overscrollBehavior = 'none';
 
-                {/* Header */}
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-                    className="max-w-4xl mb-16"
-                >
-                    <p className="text-[10px] font-mono uppercase tracking-[0.25em] text-amber-500/60 mb-4">
-                        develOP — Tucumán, Argentina
-                    </p>
-                    <h1 className="text-6xl md:text-8xl font-black tracking-tighter mb-6 text-white leading-none">
-                        Hablemos.
-                    </h1>
-                    <p className="text-lg text-zinc-400 max-w-2xl leading-relaxed">
-                        Contanos sobre tu proyecto. Respondemos en menos de 24 horas con un diagnóstico inicial sin cargo.
-                    </p>
-                </motion.div>
+    return () => {
+      document.documentElement.style.overflow = htmlOverflow;
+      document.body.style.overflow = bodyOverflow;
+      document.documentElement.style.overscrollBehavior = htmlOverscroll;
+      document.body.style.overscrollBehavior = bodyOverscroll;
+    };
+  }, []);
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24">
+  const whatsappHref = getWhatsappHref();
+  const phone = getPhoneContact();
 
-                    {/* Contact Form */}
-                    <motion.div
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-                    >
-                        {state?.success ? (
-                            <motion.div
-                                initial={{ opacity: 0, scale: 0.96 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-                                className="flex flex-col items-start gap-4 py-12"
-                            >
-                                <div className="w-12 h-12 rounded-full bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">
-                                    <CheckCircle className="w-5 h-5 text-amber-400" />
-                                </div>
-                                <h3 className="text-2xl font-black tracking-tight text-white">Mensaje recibido.</h3>
-                                <p className="text-zinc-400 leading-relaxed">
-                                    Te respondemos en las próximas 24 horas con un diagnóstico inicial. Si es urgente, podés escribirnos directamente por WhatsApp.
-                                </p>
-                            </motion.div>
-                        ) : (
-                            <form action={action} className="space-y-5">
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                                    <div className="group">
-                                        <label className="block text-[10px] font-mono uppercase tracking-[0.2em] text-zinc-500 mb-2 group-focus-within:text-amber-400 transition-colors">
-                                            Nombre *
-                                        </label>
-                                        <input
-                                            name="name"
-                                            type="text"
-                                            required
-                                            className="w-full bg-zinc-900/50 border border-zinc-800 focus:border-amber-500/40 rounded-xl p-4 outline-none text-zinc-200 transition-all focus:bg-zinc-900/80 text-sm"
-                                            placeholder="Tu nombre"
-                                        />
-                                    </div>
-                                    <div className="group">
-                                        <label className="block text-[10px] font-mono uppercase tracking-[0.2em] text-zinc-500 mb-2 group-focus-within:text-amber-400 transition-colors">
-                                            Email *
-                                        </label>
-                                        <input
-                                            name="email"
-                                            type="email"
-                                            required
-                                            className="w-full bg-zinc-900/50 border border-zinc-800 focus:border-amber-500/40 rounded-xl p-4 outline-none text-zinc-200 transition-all focus:bg-zinc-900/80 text-sm"
-                                            placeholder="tu@email.com"
-                                        />
-                                    </div>
-                                </div>
+  const channelHrefById: Record<string, string> = {
+    whatsapp: whatsappHref,
+    call: phone.href,
+    mail: `mailto:${EMAIL}`,
+  };
 
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                                    <div className="group">
-                                        <label className="block text-[10px] font-mono uppercase tracking-[0.2em] text-zinc-500 mb-2 group-focus-within:text-amber-400 transition-colors">
-                                            Teléfono
-                                        </label>
-                                        <input
-                                            name="phone"
-                                            type="tel"
-                                            className="w-full bg-zinc-900/50 border border-zinc-800 focus:border-amber-500/40 rounded-xl p-4 outline-none text-zinc-200 transition-all focus:bg-zinc-900/80 text-sm"
-                                            placeholder="+54 381..."
-                                        />
-                                    </div>
-                                    <div className="group">
-                                        <label className="block text-[10px] font-mono uppercase tracking-[0.2em] text-zinc-500 mb-2 group-focus-within:text-amber-400 transition-colors">
-                                            Empresa
-                                        </label>
-                                        <input
-                                            name="company"
-                                            type="text"
-                                            className="w-full bg-zinc-900/50 border border-zinc-800 focus:border-amber-500/40 rounded-xl p-4 outline-none text-zinc-200 transition-all focus:bg-zinc-900/80 text-sm"
-                                            placeholder="Nombre de tu empresa"
-                                        />
-                                    </div>
-                                </div>
+  return (
+    <main className="relative h-[100dvh] min-h-[100dvh] w-full overflow-hidden bg-[#040d11] text-white">
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute -left-[16%] top-[-30%] h-[58vh] w-[58vh] rounded-full bg-[#14b8a6]/20 blur-[120px]" />
+        <div className="absolute -right-[12%] bottom-[-35%] h-[62vh] w-[62vh] rounded-full bg-[#22d3ee]/20 blur-[130px]" />
+        <div className="absolute inset-0 opacity-[0.18] [background-image:radial-gradient(circle_at_1px_1px,rgba(94,234,212,0.35)_1px,transparent_0)] [background-size:24px_24px]" />
+      </div>
 
-                                <div className="group">
-                                    <label className="block text-[10px] font-mono uppercase tracking-[0.2em] text-zinc-500 mb-2 group-focus-within:text-amber-400 transition-colors">
-                                        Servicio de interés
-                                    </label>
-                                    <select
-                                        name="service"
-                                        className="w-full bg-zinc-900/50 border border-zinc-800 focus:border-amber-500/40 rounded-xl p-4 outline-none text-zinc-200 transition-all focus:bg-zinc-900/80 text-sm"
-                                    >
-                                        {SERVICE_OPTIONS.map(opt => (
-                                            <option key={opt.value} value={opt.value} className="bg-zinc-900">
-                                                {opt.label}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
-
-                                <div className="group">
-                                    <label className="block text-[10px] font-mono uppercase tracking-[0.2em] text-zinc-500 mb-2 group-focus-within:text-amber-400 transition-colors">
-                                        Mensaje *
-                                    </label>
-                                    <textarea
-                                        name="message"
-                                        rows={4}
-                                        required
-                                        className="w-full bg-zinc-900/50 border border-zinc-800 focus:border-amber-500/40 rounded-xl p-4 outline-none text-zinc-200 transition-all focus:bg-zinc-900/80 text-sm resize-none"
-                                        placeholder="Contanos sobre tu proyecto o el problema que querés resolver..."
-                                    />
-                                </div>
-
-                                {state?.error && (
-                                    <p className="text-sm text-red-400/80">{state.error}</p>
-                                )}
-
-                                <button
-                                    type="submit"
-                                    disabled={isPending}
-                                    className="relative overflow-hidden w-full py-4 rounded-xl font-bold text-sm tracking-wide flex items-center justify-center gap-2 transition-all duration-300 disabled:opacity-60"
-                                    style={{
-                                        background: isPending
-                                            ? 'rgba(245,158,11,0.08)'
-                                            : 'linear-gradient(135deg, rgba(245,158,11,0.15), rgba(249,115,22,0.1))',
-                                        border: '1px solid rgba(245,158,11,0.25)',
-                                        color: '#fbbf24',
-                                    }}
-                                >
-                                    <span>{isPending ? 'Enviando...' : 'Enviar mensaje'}</span>
-                                    {!isPending && <Send className="w-4 h-4" />}
-                                </button>
-                            </form>
-                        )}
-                    </motion.div>
-
-                    {/* Contact Info */}
-                    <motion.div
-                        initial={{ opacity: 0, x: 20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 0.8, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
-                        className="flex flex-col justify-between"
-                    >
-                        <div className="space-y-10">
-                            <div className="space-y-5">
-                                <h3 className="text-[10px] font-mono uppercase tracking-[0.2em] text-zinc-500">Datos de contacto</h3>
-                                <div className="space-y-4">
-                                    {[
-                                        { icon: Mail, label: 'hola@develop.com.ar' },
-                                        { icon: Phone, label: '+54 381 XXX XXXX' },
-                                        { icon: MapPin, label: 'Tucumán, Argentina' },
-                                    ].map(({ icon: Icon, label }) => (
-                                        <div key={label} className="flex items-center gap-4 text-zinc-400 group cursor-pointer">
-                                            <div
-                                                className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 transition-colors"
-                                                style={{ background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.12)' }}
-                                            >
-                                                <Icon className="w-4 h-4 text-amber-500/60" />
-                                            </div>
-                                            <span className="text-base group-hover:text-white transition-colors">{label}</span>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-
-                            <div
-                                className="p-6 rounded-2xl"
-                                style={{ background: 'rgba(245,158,11,0.03)', border: '1px solid rgba(245,158,11,0.08)' }}
-                            >
-                                <h4 className="text-white font-bold mb-1">Horario de atención</h4>
-                                <p className="text-zinc-500 text-xs mb-4">Respondemos consultas en horario extendido</p>
-                                <div className="space-y-2">
-                                    <div className="flex justify-between text-sm">
-                                        <span className="text-zinc-500">Lun – Vie</span>
-                                        <span className="text-zinc-300">09:00 – 19:00</span>
-                                    </div>
-                                    <div className="flex justify-between text-sm">
-                                        <span className="text-zinc-500">Sáb</span>
-                                        <span className="text-zinc-300">10:00 – 14:00</span>
-                                    </div>
-                                    <div className="flex justify-between text-sm">
-                                        <span className="text-zinc-500">Dom</span>
-                                        <span className="text-zinc-600">Cerrado</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </motion.div>
-
-                </div>
+      <div className="relative z-10 mx-auto h-full w-full max-w-7xl px-4 pt-3 pb-24 md:px-6 md:pt-4 md:pb-28 lg:px-8 lg:pt-5 lg:pb-24">
+        <div className="grid h-full grid-cols-1 gap-4 lg:grid-cols-[1.02fr_0.98fr] lg:gap-6">
+          <motion.section
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+            className="relative hidden h-full min-h-0 flex-col overflow-hidden rounded-[28px] border border-white/10 bg-[#031319]/84 p-5 md:p-6 lg:flex"
+            style={{ boxShadow: '0 0 0 1px rgba(20,184,166,0.12), inset 0 1px 0 rgba(255,255,255,0.06), 0 24px 60px rgba(2,12,18,0.55)' }}
+          >
+            <div>
+              <p className="text-[10px] font-mono uppercase tracking-[0.28em] text-[#5eead4]/70">
+                develOP - contacto directo
+              </p>
+              <h1 className="mt-3 text-[clamp(2.2rem,6.5vw,5.8rem)] font-black leading-[0.95] tracking-[-0.03em] text-white">
+                Hablemos
+                <span className="text-[#5eead4]"> hoy.</span>
+              </h1>
+              <p className="mt-3 max-w-[58ch] text-sm leading-relaxed text-[#c6e8e9]/76">
+                Esta pagina es solo para contacto. Sin scroll, sin distracciones, directo a la accion.
+                Elegi el canal que te quede comodo y te respondemos rapido.
+              </p>
             </div>
-        </main>
-    );
+
+            <div className="mt-auto pt-3">
+              {state?.success ? (
+                <div className="rounded-2xl border border-emerald-300/30 bg-emerald-400/10 p-4">
+                  <div className="flex items-center gap-2 text-emerald-200">
+                    <CheckCircle className="h-4 w-4" />
+                    <p className="text-sm font-semibold">Mensaje enviado</p>
+                  </div>
+                  <p className="mt-2 text-sm text-[#c6e8e9]/80">
+                    Te respondemos pronto. Si queres acelerar, tambien podes contactarnos por WhatsApp o llamada.
+                  </p>
+                </div>
+              ) : (
+                <form action={action} className="grid grid-cols-2 gap-2">
+                  <div className="col-span-1">
+                    <label className="mb-1 block text-[10px] font-mono uppercase tracking-[0.18em] text-[#8deef5]/60">Nombre *</label>
+                    <input
+                      name="name"
+                      type="text"
+                      required
+                      placeholder="Tu nombre"
+                      className="h-9 w-full rounded-xl border border-[#22d3ee]/25 bg-[#081a20]/70 px-3 text-sm text-white outline-none placeholder:text-white/35 focus:border-[#22d3ee]/50"
+                    />
+                  </div>
+                  <div className="col-span-1">
+                    <label className="mb-1 block text-[10px] font-mono uppercase tracking-[0.18em] text-[#8deef5]/60">Email *</label>
+                    <input
+                      name="email"
+                      type="email"
+                      required
+                      placeholder="tu@email.com"
+                      className="h-9 w-full rounded-xl border border-[#22d3ee]/25 bg-[#081a20]/70 px-3 text-sm text-white outline-none placeholder:text-white/35 focus:border-[#22d3ee]/50"
+                    />
+                  </div>
+                  <div className="col-span-1">
+                    <label className="mb-1 block text-[10px] font-mono uppercase tracking-[0.18em] text-[#8deef5]/60">Telefono</label>
+                    <input
+                      name="phone"
+                      type="tel"
+                      placeholder="+54..."
+                      className="h-9 w-full rounded-xl border border-[#22d3ee]/25 bg-[#081a20]/70 px-3 text-sm text-white outline-none placeholder:text-white/35 focus:border-[#22d3ee]/50"
+                    />
+                  </div>
+                  <div className="col-span-1">
+                    <label className="mb-1 block text-[10px] font-mono uppercase tracking-[0.18em] text-[#8deef5]/60">Empresa</label>
+                    <input
+                      name="company"
+                      type="text"
+                      placeholder="Nombre empresa"
+                      className="h-9 w-full rounded-xl border border-[#22d3ee]/25 bg-[#081a20]/70 px-3 text-sm text-white outline-none placeholder:text-white/35 focus:border-[#22d3ee]/50"
+                    />
+                  </div>
+                  <div className="col-span-2">
+                    <label className="mb-1 block text-[10px] font-mono uppercase tracking-[0.18em] text-[#8deef5]/60">Servicio</label>
+                    <select
+                      name="service"
+                      className="h-9 w-full rounded-xl border border-[#22d3ee]/25 bg-[#081a20]/70 px-3 text-sm text-white outline-none focus:border-[#22d3ee]/50"
+                      defaultValue=""
+                    >
+                      {SERVICE_OPTIONS.map((option) => (
+                        <option key={option.value} value={option.value} className="bg-[#081a20]">
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="col-span-2">
+                    <label className="mb-1 block text-[10px] font-mono uppercase tracking-[0.18em] text-[#8deef5]/60">Mensaje *</label>
+                    <textarea
+                      name="message"
+                      rows={2}
+                      required
+                      placeholder="Contanos brevemente que necesitas..."
+                      className="w-full rounded-xl border border-[#22d3ee]/25 bg-[#081a20]/70 px-3 py-2 text-sm text-white outline-none placeholder:text-white/35 focus:border-[#22d3ee]/50 resize-none"
+                    />
+                  </div>
+                  {state?.error ? (
+                    <p className="col-span-2 text-xs text-rose-300">{state.error}</p>
+                  ) : null}
+                  <button
+                    type="submit"
+                    disabled={isPending}
+                    className="col-span-2 inline-flex h-9 items-center justify-center gap-2 rounded-xl border border-[#5eead4]/35 bg-gradient-to-r from-[#14b8a6]/20 to-[#22d3ee]/20 text-sm font-semibold text-[#bff9f2] disabled:opacity-65"
+                    style={{ transition: 'none' }}
+                  >
+                    <span>{isPending ? 'Enviando...' : 'Enviar consulta'}</span>
+                    <Send className="h-4 w-4" />
+                  </button>
+                </form>
+              )}
+            </div>
+
+            <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-3">
+              <div className="rounded-2xl border border-[#14b8a6]/30 bg-[#14b8a6]/12 p-2.5">
+                <div className="mb-1 flex items-center gap-2 text-[#8ff8eb]">
+                  <TimerReset className="h-4 w-4" />
+                  <span className="text-[10px] font-mono uppercase tracking-[0.2em]">Tiempo de respuesta</span>
+                </div>
+                <p className="text-[13px] font-semibold text-white">Menos de 2 horas</p>
+              </div>
+
+              <div className="rounded-2xl border border-[#22d3ee]/30 bg-[#22d3ee]/12 p-2.5">
+                <div className="mb-1 flex items-center gap-2 text-[#9feeff]">
+                  <ShieldCheck className="h-4 w-4" />
+                  <span className="text-[10px] font-mono uppercase tracking-[0.2em]">Diagnostico inicial</span>
+                </div>
+                <p className="text-[13px] font-semibold text-white">Sin costo</p>
+              </div>
+
+              <div className="rounded-2xl border border-[#5eead4]/30 bg-[#5eead4]/12 p-2.5">
+                <div className="mb-1 flex items-center gap-2 text-[#b9fff5]">
+                  <MapPin className="h-4 w-4" />
+                  <span className="text-[10px] font-mono uppercase tracking-[0.2em]">Base operativa</span>
+                </div>
+                <p className="text-[13px] font-semibold text-white">{LOCATION}</p>
+              </div>
+            </div>
+          </motion.section>
+
+          <motion.section
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.08, ease: [0.16, 1, 0.3, 1] }}
+            className="relative flex h-full min-h-0 flex-col overflow-hidden rounded-[28px] border border-white/10 bg-[#02141a]/86 p-4 md:p-5"
+            style={{ boxShadow: '0 0 0 1px rgba(34,211,238,0.12), inset 0 1px 0 rgba(255,255,255,0.06), 0 24px 60px rgba(2,12,18,0.58)' }}
+          >
+            <div className="mb-4 rounded-2xl border border-white/10 bg-white/[0.03] p-4 lg:hidden">
+              <p className="text-[10px] font-mono uppercase tracking-[0.24em] text-[#86d4da]/70">develOP - contacto directo</p>
+              <h1 className="mt-2 text-[clamp(1.8rem,8.2vw,3.2rem)] font-black leading-[0.95] tracking-[-0.03em] text-white">
+                Hablemos <span className="text-[#5eead4]">hoy.</span>
+              </h1>
+              <p className="mt-2 text-sm leading-relaxed text-[#c6e8e9]/75">
+                WhatsApp, llamada o email. Elegi tu canal y arrancamos.
+              </p>
+            </div>
+
+            <div className="mb-3 flex items-end justify-between">
+              <div>
+                <p className="text-[10px] font-mono uppercase tracking-[0.28em] text-[#8deef5]/72">Canales</p>
+                <h2 className="mt-2 text-2xl font-extrabold tracking-tight text-white md:text-3xl">Elegi como hablar</h2>
+              </div>
+              <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-[#7cdce4]/60">Online ahora</p>
+            </div>
+
+            <div className="grid flex-1 min-h-0 grid-cols-1 gap-3">
+              {CHANNELS.map((channel, index) => {
+                const Icon = channel.icon;
+                return (
+                  <motion.a
+                    key={channel.id}
+                    href={channelHrefById[channel.id]}
+                    target={channel.id === 'mail' ? undefined : '_blank'}
+                    rel={channel.id === 'mail' ? undefined : 'noopener noreferrer'}
+                    initial={{ opacity: 0, x: 12 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.4, delay: 0.14 + index * 0.05, ease: [0.16, 1, 0.3, 1] }}
+                    className="group relative flex min-h-0 flex-1 items-center justify-between overflow-hidden rounded-2xl border px-4 py-3 md:px-5"
+                    style={{
+                      borderColor: `${channel.accent}4D`,
+                      background: `linear-gradient(130deg, ${channel.accent}1F, rgba(2,20,26,0.75))`,
+                      boxShadow: `inset 0 1px 0 rgba(255,255,255,0.08), 0 0 0 1px ${channel.accent}1A`,
+                      transition: 'none',
+                    }}
+                  >
+                    <div className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100"
+                      style={{
+                        background: `radial-gradient(circle at 78% 50%, ${channel.accent}33 0%, transparent 58%)`,
+                        transition: 'none',
+                      }}
+                    />
+
+                    <div className="relative z-10 flex min-w-0 items-center gap-3">
+                      <div
+                        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border"
+                        style={{
+                          borderColor: `${channel.accent}66`,
+                          background: `${channel.accent}24`,
+                          boxShadow: `0 0 0 1px ${channel.accent}1A, 0 0 18px ${channel.accent}2E`,
+                        }}
+                      >
+                        <Icon className="h-5 w-5" style={{ color: channel.accent }} />
+                      </div>
+
+                      <div className="min-w-0">
+                        <p className="text-lg font-bold leading-tight text-white">{channel.title}</p>
+                        <p className="mt-1 text-xs leading-relaxed text-[#c6e8e9]/74 md:text-sm">{channel.subtitle}</p>
+                      </div>
+                    </div>
+
+                    <div className="relative z-10 ml-3 flex shrink-0 items-center gap-2">
+                      <span className="text-[11px] font-mono uppercase tracking-[0.14em]" style={{ color: channel.accent }}>
+                        {channel.cta}
+                      </span>
+                      <ArrowUpRight className="h-4 w-4" style={{ color: channel.accent }} />
+                    </div>
+                  </motion.a>
+                );
+              })}
+            </div>
+
+            <div className="mt-3 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3">
+              <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-[#86d4da]/60">Datos directos</p>
+              <div className="mt-2 grid grid-cols-1 gap-2 text-sm text-[#d9f8fb]/82 sm:grid-cols-2">
+                <a href={`mailto:${EMAIL}`} className="truncate hover:text-white" style={{ transition: 'none' }}>{EMAIL}</a>
+                <a href={phone.href} className="truncate hover:text-white" style={{ transition: 'none' }}>{phone.display}</a>
+              </div>
+            </div>
+          </motion.section>
+        </div>
+      </div>
+    </main>
+  );
 }
