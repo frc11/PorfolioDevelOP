@@ -1,7 +1,9 @@
 import type { ReactNode } from 'react'
-import { OsProjectStatus, OsServiceType, Prisma } from '@prisma/client'
+import { Building2, LogIn } from 'lucide-react'
+import { ProjectStatus, ServiceStatus, ServiceType } from '@prisma/client'
 import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
+import { startImpersonationAction } from '@/lib/actions/impersonation'
 import { ProjectForm } from '../_components/project-form'
 import { updateProjectStatus } from '../_actions/project.actions'
 import { ProjectTabs } from './_components/project-tabs'
@@ -13,114 +15,153 @@ type ProjectLayoutProps = {
   }>
 }
 
-type ProjectRecord = Prisma.OsProjectGetPayload<{
-  include: {
-    lead: {
-      select: {
-        id: true
-      }
-    }
-  }
-}>
+const INTERNAL_ORGANIZATION_SLUG = 'agency-os-internal'
 
-const STATUS_OPTIONS: OsProjectStatus[] = [
-  'EN_DESARROLLO',
-  'EN_REVISION',
-  'ENTREGADO',
-  'EN_MANTENIMIENTO',
-  'CANCELADO',
+const STATUS_OPTIONS: ProjectStatus[] = [
+  'PLANNING',
+  'IN_PROGRESS',
+  'REVIEW',
+  'COMPLETED',
 ]
 
-function statusTone(status: OsProjectStatus): string {
+function statusTone(status: ProjectStatus): string {
   switch (status) {
-    case 'EN_DESARROLLO':
-      return 'border-cyan-400/20 bg-cyan-400/10 text-cyan-200'
-    case 'EN_REVISION':
-      return 'border-violet-400/20 bg-violet-400/10 text-violet-200'
-    case 'ENTREGADO':
-      return 'border-emerald-400/20 bg-emerald-400/10 text-emerald-200'
-    case 'EN_MANTENIMIENTO':
+    case 'PLANNING':
+      return 'border-zinc-400/20 bg-zinc-400/10 text-zinc-200'
+    case 'IN_PROGRESS':
+      return 'border-sky-400/20 bg-sky-400/10 text-sky-200'
+    case 'REVIEW':
       return 'border-amber-400/20 bg-amber-400/10 text-amber-200'
-    case 'CANCELADO':
-      return 'border-rose-400/20 bg-rose-500/10 text-rose-200'
+    case 'COMPLETED':
+      return 'border-emerald-400/20 bg-emerald-400/10 text-emerald-200'
   }
 }
 
-function statusLabel(status: OsProjectStatus): string {
+function statusLabel(status: ProjectStatus): string {
   switch (status) {
-    case 'EN_DESARROLLO':
-      return 'En desarrollo'
-    case 'EN_REVISION':
-      return 'En revisión'
-    case 'ENTREGADO':
-      return 'Entregado'
-    case 'EN_MANTENIMIENTO':
-      return 'En mantenimiento'
-    case 'CANCELADO':
-      return 'Cancelado'
+    case 'PLANNING':
+      return 'Planning'
+    case 'IN_PROGRESS':
+      return 'En progreso'
+    case 'REVIEW':
+      return 'Revision'
+    case 'COMPLETED':
+      return 'Completado'
   }
 }
 
-function serviceTone(serviceType: OsServiceType): string {
+function serviceTone(serviceType: ServiceType): string {
   switch (serviceType) {
-    case 'WEB':
+    case 'WEB_DEV':
       return 'border-cyan-400/20 bg-cyan-400/10 text-cyan-200'
-    case 'AI_AGENT':
+    case 'AI':
       return 'border-violet-400/20 bg-violet-400/10 text-violet-200'
     case 'AUTOMATION':
       return 'border-emerald-400/20 bg-emerald-400/10 text-emerald-200'
-    case 'CUSTOM_SOFTWARE':
+    case 'SOFTWARE':
       return 'border-amber-400/20 bg-amber-400/10 text-amber-200'
   }
 }
 
-function serviceLabel(serviceType: OsServiceType): string {
+function serviceLabel(serviceType: ServiceType): string {
   switch (serviceType) {
-    case 'WEB':
+    case 'WEB_DEV':
       return 'Web'
-    case 'AI_AGENT':
-      return 'AI Agent'
+    case 'AI':
+      return 'AI'
     case 'AUTOMATION':
       return 'Automation'
-    case 'CUSTOM_SOFTWARE':
-      return 'Custom Software'
+    case 'SOFTWARE':
+      return 'Software'
   }
 }
 
-function buildProjectFormData(project: ProjectRecord) {
-  return {
-    id: project.id,
-    businessName: project.businessName,
-    contactName: project.contactName,
-    contactPhone: project.contactPhone,
-    contactEmail: project.contactEmail,
-    name: project.name,
-    description: project.description,
-    serviceType: project.serviceType,
-    agreedAmount: project.agreedAmount.toString(),
-    monthlyRate: project.monthlyRate?.toString() ?? null,
-    estimatedEndDate: project.estimatedEndDate?.toISOString() ?? null,
-    leadId: project.leadId,
+function normalizeServiceType(
+  project: {
+    organization: {
+      services: Array<{
+        type: ServiceType
+      }>
+    }
+    osLead: {
+      serviceType: 'WEB' | 'AI_AGENT' | 'AUTOMATION' | 'CUSTOM_SOFTWARE' | null
+    } | null
+  }
+): ServiceType | null {
+  if (project.organization.services[0]?.type) {
+    return project.organization.services[0].type
+  }
+
+  switch (project.osLead?.serviceType) {
+    case 'WEB':
+      return 'WEB_DEV'
+    case 'AI_AGENT':
+      return 'AI'
+    case 'AUTOMATION':
+      return 'AUTOMATION'
+    case 'CUSTOM_SOFTWARE':
+      return 'SOFTWARE'
+    default:
+      return null
   }
 }
 
 export default async function AgencyOsProjectLayout({ children, params }: ProjectLayoutProps) {
   const { projectId } = await params
 
-  const project = await prisma.osProject.findUnique({
-    where: { id: projectId },
-    include: {
-      lead: {
-        select: {
-          id: true,
+  const [project, organizations] = await Promise.all([
+    prisma.project.findUnique({
+      where: { id: projectId },
+      include: {
+        organization: {
+          include: {
+            services: {
+              where: {
+                status: ServiceStatus.ACTIVE,
+              },
+              orderBy: {
+                startDate: 'desc',
+              },
+              take: 1,
+              select: {
+                type: true,
+              },
+            },
+          },
+        },
+        osLead: {
+          select: {
+            id: true,
+            serviceType: true,
+          },
         },
       },
-    },
-  })
+    }),
+    prisma.organization.findMany({
+      where: {
+        slug: {
+          not: INTERNAL_ORGANIZATION_SLUG,
+        },
+      },
+      select: {
+        id: true,
+        companyName: true,
+      },
+      orderBy: {
+        companyName: 'asc',
+      },
+    }),
+  ])
 
   if (!project) {
     redirect('/admin/os/projects')
   }
+
+  const isInternalProject = project.organization.slug === INTERNAL_ORGANIZATION_SLUG
+  const serviceType = normalizeServiceType(project)
+  const companyName = isInternalProject
+    ? 'Proyecto interno Agency OS'
+    : project.organization.companyName
 
   return (
     <section className="space-y-6">
@@ -131,7 +172,19 @@ export default async function AgencyOsProjectLayout({ children, params }: Projec
               Agency OS / Proyectos / Ficha
             </p>
             <h2 className="mt-2 text-3xl font-semibold tracking-tight text-white">{project.name}</h2>
-            <p className="mt-2 text-sm text-zinc-400">{project.businessName}</p>
+            <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-zinc-400">
+              <span>{companyName}</span>
+              {!isInternalProject ? (
+                <span className="inline-flex items-center gap-1 rounded-full border border-cyan-400/20 bg-cyan-400/10 px-2.5 py-1 text-[11px] font-medium text-cyan-100">
+                  <Building2 className="h-3.5 w-3.5" />
+                  Cliente portal
+                </span>
+              ) : (
+                <span className="inline-flex rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] font-medium text-zinc-300">
+                  Interno
+                </span>
+              )}
+            </div>
 
             <div className="mt-4 flex flex-wrap items-center gap-2">
               <span
@@ -142,18 +195,32 @@ export default async function AgencyOsProjectLayout({ children, params }: Projec
               >
                 {statusLabel(project.status)}
               </span>
-              <span
-                className={[
-                  'inline-flex rounded-full border px-3 py-1 text-xs font-medium',
-                  serviceTone(project.serviceType),
-                ].join(' ')}
-              >
-                {serviceLabel(project.serviceType)}
-              </span>
+              {serviceType ? (
+                <span
+                  className={[
+                    'inline-flex rounded-full border px-3 py-1 text-xs font-medium',
+                    serviceTone(serviceType),
+                  ].join(' ')}
+                >
+                  {serviceLabel(serviceType)}
+                </span>
+              ) : null}
             </div>
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
+            {!isInternalProject ? (
+              <form action={startImpersonationAction.bind(null, project.organization.id)}>
+                <button
+                  type="submit"
+                  className="inline-flex items-center gap-2 rounded-2xl border border-amber-400/20 bg-amber-400/10 px-4 py-3 text-sm font-medium text-amber-100 transition-colors hover:bg-amber-400/15"
+                >
+                  <LogIn className="h-4 w-4" />
+                  Ver como cliente
+                </button>
+              </form>
+            ) : null}
+
             <details className="relative">
               <summary className="list-none rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-zinc-200 transition-colors hover:bg-black/30">
                 Cambiar estado
@@ -182,7 +249,21 @@ export default async function AgencyOsProjectLayout({ children, params }: Projec
               </div>
             </details>
 
-            <ProjectForm project={buildProjectFormData(project)} triggerLabel="Editar" />
+            <ProjectForm
+              triggerLabel="Editar"
+              organizations={organizations}
+              project={{
+                id: project.id,
+                organizationId: isInternalProject ? null : project.organization.id,
+                name: project.name,
+                description: project.description,
+                serviceType,
+                agreedAmount: project.agreedAmount?.toString() ?? null,
+                monthlyRate: project.monthlyRate?.toString() ?? null,
+                estimatedEndDate: project.estimatedEndDate?.toISOString() ?? null,
+                leadId: project.osLeadId,
+              }}
+            />
           </div>
         </div>
 

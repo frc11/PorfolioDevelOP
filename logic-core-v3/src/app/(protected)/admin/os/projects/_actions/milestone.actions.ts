@@ -6,9 +6,16 @@ import { requireSuperAdmin } from '@/lib/auth-guards'
 import { fail, ok, type ActionResult } from '@/lib/action-utils'
 import { MilestoneIdSchema } from './milestone.schemas'
 
-function revalidateProjectPaths(projectId: string) {
+const INTERNAL_ORGANIZATION_SLUG = 'agency-os-internal'
+
+function revalidateProjectPaths(projectId: string, organizationSlug?: string | null) {
   revalidatePath('/admin/os/projects')
   revalidatePath(`/admin/os/projects/${projectId}`)
+  revalidatePath(`/admin/os/projects/${projectId}/payments`)
+
+  if (organizationSlug && organizationSlug !== INTERNAL_ORGANIZATION_SLUG) {
+    revalidatePath('/dashboard/project')
+  }
 }
 
 export async function markMilestonePaid(
@@ -26,10 +33,19 @@ export async function markMilestonePaid(
       select: {
         id: true,
         projectId: true,
+        project: {
+          select: {
+            organization: {
+              select: {
+                slug: true,
+              },
+            },
+          },
+        },
       },
     })
 
-    revalidateProjectPaths(milestone.projectId)
+    revalidateProjectPaths(milestone.projectId, milestone.project.organization.slug)
     return ok({ id: milestone.id })
   } catch (error) {
     return fail(error instanceof Error ? error.message : 'Failed to mark milestone as paid')
@@ -51,10 +67,19 @@ export async function unmarkMilestonePaid(
       select: {
         id: true,
         projectId: true,
+        project: {
+          select: {
+            organization: {
+              select: {
+                slug: true,
+              },
+            },
+          },
+        },
       },
     })
 
-    revalidateProjectPaths(milestone.projectId)
+    revalidateProjectPaths(milestone.projectId, milestone.project.organization.slug)
     return ok({ id: milestone.id })
   } catch (error) {
     return fail(error instanceof Error ? error.message : 'Failed to unmark milestone as paid')

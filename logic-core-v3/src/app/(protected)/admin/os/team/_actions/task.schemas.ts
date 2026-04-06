@@ -1,4 +1,4 @@
-import { OsTaskStatus } from '@prisma/client'
+import { TaskStatus } from '@prisma/client'
 import { z } from 'zod'
 
 const emptyStringToUndefined = (value: unknown) => {
@@ -10,9 +10,26 @@ const emptyStringToUndefined = (value: unknown) => {
   return trimmed === '' ? undefined : trimmed
 }
 
+const emptyStringToNull = (value: unknown) => {
+  if (typeof value !== 'string') {
+    return value
+  }
+
+  const trimmed = value.trim()
+  return trimmed === '' ? null : trimmed
+}
+
 const emptyValueToUndefined = (value: unknown) => {
   if (value === null || value === undefined || value === '') {
     return undefined
+  }
+
+  return value
+}
+
+const emptyValueToNull = (value: unknown) => {
+  if (value === null || value === undefined || value === '') {
+    return null
   }
 
   return value
@@ -22,18 +39,37 @@ export const ProjectIdSchema = z.string().cuid('Invalid project id')
 export const TaskIdSchema = z.string().cuid('Invalid task id')
 export const UserIdSchema = z.string().cuid('Invalid user id')
 
-const optionalStringSchema = z.preprocess(emptyStringToUndefined, z.string().optional())
-const optionalAssignedToSchema = z.preprocess(
+const optionalCreateStringSchema = z.preprocess(
+  emptyStringToUndefined,
+  z.string().optional()
+)
+const optionalUpdateStringSchema = z.preprocess(
+  emptyStringToNull,
+  z.string().nullable().optional()
+)
+const optionalCreateAssignedToSchema = z.preprocess(
   emptyStringToUndefined,
   UserIdSchema.optional()
 )
-const optionalStatusSchema = z.preprocess(
-  emptyStringToUndefined,
-  z.nativeEnum(OsTaskStatus).optional()
+const optionalUpdateAssignedToSchema = z.preprocess(
+  emptyStringToNull,
+  UserIdSchema.nullable().optional()
 )
-const optionalEstimatedHoursSchema = z.preprocess(
+const optionalCreateStatusSchema = z.preprocess(
+  emptyStringToUndefined,
+  z.nativeEnum(TaskStatus).optional()
+)
+const optionalUpdateStatusSchema = z.preprocess(
+  emptyStringToUndefined,
+  z.nativeEnum(TaskStatus).optional()
+)
+const optionalCreateEstimatedHoursSchema = z.preprocess(
   emptyValueToUndefined,
   z.coerce.number().nonnegative('Estimated hours must be zero or positive').optional()
+)
+const optionalUpdateEstimatedHoursSchema = z.preprocess(
+  emptyValueToNull,
+  z.coerce.number().nonnegative('Estimated hours must be zero or positive').nullable().optional()
 )
 const optionalPositionSchema = z.preprocess(
   emptyValueToUndefined,
@@ -45,19 +81,19 @@ const titleSchema = z.string().trim().min(1, 'Title is required')
 export const CreateTaskSchema = z.object({
   projectId: ProjectIdSchema,
   title: titleSchema,
-  description: optionalStringSchema,
-  status: optionalStatusSchema,
-  estimatedHours: optionalEstimatedHoursSchema,
-  assignedToId: optionalAssignedToSchema,
+  description: optionalCreateStringSchema,
+  status: optionalCreateStatusSchema,
+  estimatedHours: optionalCreateEstimatedHoursSchema,
+  assignedToId: optionalCreateAssignedToSchema,
 })
 
 export const UpdateTaskSchema = z.object({
   taskId: TaskIdSchema,
   title: z.preprocess(emptyStringToUndefined, titleSchema.optional()),
-  description: optionalStringSchema,
-  status: optionalStatusSchema,
-  estimatedHours: optionalEstimatedHoursSchema,
-  assignedToId: optionalAssignedToSchema,
+  description: optionalUpdateStringSchema,
+  status: optionalUpdateStatusSchema,
+  estimatedHours: optionalUpdateEstimatedHoursSchema,
+  assignedToId: optionalUpdateAssignedToSchema,
   position: optionalPositionSchema,
 })
 

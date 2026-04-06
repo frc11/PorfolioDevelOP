@@ -34,24 +34,24 @@ function NeuralCanvas() {
     useEffect(() => {
         const canvas = canvasRef.current
         if (!canvas) return
-        const ctx = canvas.getContext('2d')
+        const resolvedCanvas = canvas
+        const ctx = resolvedCanvas.getContext('2d')
         if (!ctx) return
 
         // ── RESIZE ──────────────────────────────
         function resize() {
-            if (!canvas) return
-            canvas.width = window.innerWidth
-            canvas.height = window.innerHeight
+            resolvedCanvas.width = window.innerWidth
+            resolvedCanvas.height = window.innerHeight
         }
         resize()
         window.addEventListener('resize', resize)
 
         // Mantiene libre la zona central para no tapar el texto principal.
         function getTextSafeZone() {
-            const zoneWidth = Math.min(canvas.width * 0.66, 820)
-            const zoneHeight = Math.min(canvas.height * 0.5, 450)
-            const left = (canvas.width - zoneWidth) / 2
-            const top = (canvas.height - zoneHeight) / 2 - 8
+            const zoneWidth = Math.min(resolvedCanvas.width * 0.66, 820)
+            const zoneHeight = Math.min(resolvedCanvas.height * 0.5, 450)
+            const left = (resolvedCanvas.width - zoneWidth) / 2
+            const top = (resolvedCanvas.height - zoneHeight) / 2 - 8
 
             return {
                 left,
@@ -74,13 +74,13 @@ function NeuralCanvas() {
         // ── NODOS ───────────────────────────────
         const NODE_COUNT = 70
         const nodes: Node[] = Array.from({ length: NODE_COUNT }, () => {
-            let x = Math.random() * canvas.width
-            let y = Math.random() * canvas.height
+            let x = Math.random() * resolvedCanvas.width
+            let y = Math.random() * resolvedCanvas.height
             let attempts = 0
 
             while (isInsideSafeZone(x, y, 28) && attempts < 30) {
-                x = Math.random() * canvas.width
-                y = Math.random() * canvas.height
+                x = Math.random() * resolvedCanvas.width
+                y = Math.random() * resolvedCanvas.height
                 attempts++
             }
 
@@ -114,8 +114,8 @@ function NeuralCanvas() {
                     [0.2, 0.3], [0.5, 0.2], [0.8, 0.3],
                     [0.2, 0.7], [0.5, 0.8], [0.8, 0.7]
                 ]
-                n.x = positions[i][0] * canvas.width
-                n.y = positions[i][1] * canvas.height
+                n.x = positions[i][0] * resolvedCanvas.width
+                n.y = positions[i][1] * resolvedCanvas.height
                 n.vx *= 0.3
                 n.vy *= 0.3
             }
@@ -129,13 +129,13 @@ function NeuralCanvas() {
         let frame = 0
 
         function draw() {
-            if (!canvas || !ctx) return
+            if (!ctx) return
             frame++
-            ctx.clearRect(0, 0, canvas.width, canvas.height)
+            ctx.clearRect(0, 0, resolvedCanvas.width, resolvedCanvas.height)
 
             // Fondo con trail effect
             ctx.fillStyle = 'rgba(3, 3, 8, 0.18)'
-            ctx.fillRect(0, 0, canvas.width, canvas.height)
+            ctx.fillRect(0, 0, resolvedCanvas.width, resolvedCanvas.height)
 
             const mouse = mouseRef.current
             const CONNECTION_DIST = 160
@@ -186,10 +186,10 @@ function NeuralCanvas() {
                 }
 
                 // Bounce
-                if (n.x < 0 || n.x > canvas.width) n.vx *= -1
-                if (n.y < 0 || n.y > canvas.height) n.vy *= -1
-                n.x = Math.max(0, Math.min(canvas.width, n.x))
-                n.y = Math.max(0, Math.min(canvas.height, n.y))
+                if (n.x < 0 || n.x > resolvedCanvas.width) n.vx *= -1
+                if (n.y < 0 || n.y > resolvedCanvas.height) n.vy *= -1
+                n.x = Math.max(0, Math.min(resolvedCanvas.width, n.x))
+                n.y = Math.max(0, Math.min(resolvedCanvas.height, n.y))
             }
 
             // ── DIBUJAR CONEXIONES ───────────────
@@ -337,8 +337,8 @@ function NeuralCanvas() {
             }
 
             // ── LÍNEAS DE ESCÁNER ────────────────
-            const scanY1 = ((frame * 0.4) % (canvas.height + 200)) - 100
-            const scanY2 = ((frame * 0.4 + canvas.height * 0.5) % (canvas.height + 200)) - 100
+            const scanY1 = ((frame * 0.4) % (resolvedCanvas.height + 200)) - 100
+            const scanY2 = ((frame * 0.4 + resolvedCanvas.height * 0.5) % (resolvedCanvas.height + 200)) - 100
 
             for (const scanY of [scanY1, scanY2]) {
                 const scanGrad = ctx.createLinearGradient(0, scanY - 2, 0, scanY + 2)
@@ -347,7 +347,7 @@ function NeuralCanvas() {
                 scanGrad.addColorStop(1, 'rgba(0, 255, 136, 0)')
 
                 ctx.fillStyle = scanGrad
-                ctx.fillRect(0, scanY - 2, canvas.width, 4)
+                ctx.fillRect(0, scanY - 2, resolvedCanvas.width, 4)
             }
 
             animRef.current = requestAnimationFrame(draw)

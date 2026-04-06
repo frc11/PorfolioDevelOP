@@ -1,6 +1,5 @@
 'use server'
 
-import { OsProjectStatus } from '@prisma/client'
 import { revalidatePath } from 'next/cache'
 import { prisma } from '@/lib/prisma'
 import { requireSuperAdmin } from '@/lib/auth-guards'
@@ -11,9 +10,16 @@ import {
   ProjectIdSchema,
 } from './maintenance.schemas'
 
-function revalidateProjectPaths(projectId: string) {
+const INTERNAL_ORGANIZATION_SLUG = 'agency-os-internal'
+
+function revalidateProjectPaths(projectId: string, organizationSlug?: string | null) {
   revalidatePath('/admin/os/projects')
   revalidatePath(`/admin/os/projects/${projectId}`)
+  revalidatePath(`/admin/os/projects/${projectId}/payments`)
+
+  if (organizationSlug && organizationSlug !== INTERNAL_ORGANIZATION_SLUG) {
+    revalidatePath('/dashboard/project')
+  }
 }
 
 function firstDayOfUtcMonth(date: Date): Date {
@@ -36,10 +42,19 @@ export async function createMaintenancePayment(
       select: {
         id: true,
         projectId: true,
+        project: {
+          select: {
+            organization: {
+              select: {
+                slug: true,
+              },
+            },
+          },
+        },
       },
     })
 
-    revalidateProjectPaths(payment.projectId)
+    revalidateProjectPaths(payment.projectId, payment.project.organization.slug)
     return ok({ id: payment.id })
   } catch (error) {
     return fail(
@@ -63,10 +78,19 @@ export async function markMaintenancePaid(
       select: {
         id: true,
         projectId: true,
+        project: {
+          select: {
+            organization: {
+              select: {
+                slug: true,
+              },
+            },
+          },
+        },
       },
     })
 
-    revalidateProjectPaths(payment.projectId)
+    revalidateProjectPaths(payment.projectId, payment.project.organization.slug)
     return ok({ id: payment.id })
   } catch (error) {
     return fail(error instanceof Error ? error.message : 'Failed to mark payment as paid')
@@ -80,28 +104,31 @@ export async function generatePendingMaintenance(
     await requireSuperAdmin()
     const parsedProjectId = ProjectIdSchema.parse(projectId)
 
-    const project = await prisma.osProject.findUnique({
-      where: { id: parsedProjectId },
-      select: {
-        id: true,
-        status: true,
-        monthlyRate: true,
-        maintenanceStartDate: true,
-        maintenancePayments: {
-          select: {
-            month: true,
-            year: true,
+    const [project, maintenancePayments] = await Promise.all([
+      prisma.project.findUnique({
+        where: { id: parsedProjectId },
+        select: {
+          id: true,
+          organization: {
+            select: {
+              slug: true,
+            },
           },
+          monthlyRate: true,
+          maintenanceStartDate: true,
         },
-      },
-    })
+      }),
+      prisma.osMaintenancePayment.findMany({
+        where: { projectId: parsedProjectId },
+        select: {
+          month: true,
+          year: true,
+        },
+      }),
+    ])
 
     if (!project) {
       return fail('Project not found')
-    }
-
-    if (project.status !== OsProjectStatus.EN_MANTENIMIENTO) {
-      return fail('Project is not in maintenance mode')
     }
 
     if (!project.maintenanceStartDate) {
@@ -113,7 +140,7 @@ export async function generatePendingMaintenance(
     }
 
     const existingPeriods = new Set(
-      project.maintenancePayments.map((payment) => `${payment.year}-${payment.month}`)
+      maintenancePayments.map((payment) => `${payment.year}-${payment.month}`)
     )
 
     const today = new Date()
@@ -151,7 +178,7 @@ export async function generatePendingMaintenance(
       })
     }
 
-    revalidateProjectPaths(project.id)
+    revalidateProjectPaths(project.id, project.organization.slug)
     return ok({ createdCount: missingPayments.length })
   } catch (error) {
     return fail(

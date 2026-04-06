@@ -24,7 +24,7 @@ function formatHours(value: number): string {
 export default async function AgencyOsProjectHoursPage({ params }: ProjectHoursPageProps) {
   const { projectId } = await params
 
-  const project = await prisma.osProject.findUnique({
+  const project = await prisma.project.findUnique({
     where: { id: projectId },
     select: {
       id: true,
@@ -60,8 +60,8 @@ export default async function AgencyOsProjectHoursPage({ params }: ProjectHoursP
   )
   const totalHours = groupedEntries.reduce((sum, group) => sum + group.totalHours, 0)
   const difference = totalHours - estimatedHours
-  const agreedAmount = Number(project.agreedAmount.toString())
-  const hourlyValue = totalHours > 0 ? agreedAmount / totalHours : null
+  const agreedAmount = project.agreedAmount ? Number(project.agreedAmount.toString()) : null
+  const hourlyValue = totalHours > 0 && agreedAmount !== null ? agreedAmount / totalHours : null
 
   return (
     <section className="space-y-6">

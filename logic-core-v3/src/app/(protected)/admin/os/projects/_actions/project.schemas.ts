@@ -1,4 +1,4 @@
-import { OsProjectStatus, OsServiceType } from '@prisma/client'
+import { OsProjectStatus, OsServiceType, ProjectStatus, ServiceType } from '@prisma/client'
 import { z } from 'zod'
 
 const emptyStringToUndefined = (value: unknown) => {
@@ -21,29 +21,48 @@ const emptyValueToUndefined = (value: unknown) => {
 const optionalStringSchema = z.preprocess(emptyStringToUndefined, z.string().optional())
 const optionalEmailSchema = z.preprocess(emptyStringToUndefined, z.string().email().optional())
 const optionalDateSchema = z.preprocess(emptyValueToUndefined, z.coerce.date().optional())
-const positiveNumberSchema = z.preprocess(
-  emptyValueToUndefined,
-  z.coerce.number().positive('Amount must be positive')
-)
 const optionalPositiveNumberSchema = z.preprocess(
   emptyValueToUndefined,
   z.coerce.number().positive('Amount must be positive').optional()
 )
 
+const serviceTypeSchema = z.preprocess(
+  emptyStringToUndefined,
+  z.union([z.nativeEnum(ServiceType), z.nativeEnum(OsServiceType)]).optional()
+)
+
+const projectStatusSchema = z.preprocess(
+  emptyStringToUndefined,
+  z.union([z.nativeEnum(ProjectStatus), z.nativeEnum(OsProjectStatus)])
+)
+
 export const ProjectIdSchema = z.string().cuid('Invalid project id')
 export const LeadIdSchema = z.string().cuid('Invalid lead id')
+export const OrganizationIdSchema = z.preprocess(
+  (value) => {
+    if (value === '') {
+      return null
+    }
+
+    return emptyStringToUndefined(value)
+  },
+  z.string().cuid('Invalid organization id').nullable().optional()
+)
 
 export const CreateProjectSchema = z.object({
-  businessName: z.string().trim().min(1, 'Business name is required'),
-  contactName: z.string().trim().min(1, 'Contact name is required'),
-  contactPhone: optionalStringSchema,
-  contactEmail: optionalEmailSchema,
   name: z.string().trim().min(1, 'Project name is required'),
   description: optionalStringSchema,
-  serviceType: z.nativeEnum(OsServiceType),
-  agreedAmount: positiveNumberSchema,
+  organizationId: OrganizationIdSchema,
+  serviceType: serviceTypeSchema,
+  agreedAmount: optionalPositiveNumberSchema,
   monthlyRate: optionalPositiveNumberSchema,
   estimatedEndDate: optionalDateSchema,
+
+  // Legacy transitional fields kept optional while the UI still migrates.
+  businessName: optionalStringSchema,
+  contactName: optionalStringSchema,
+  contactPhone: optionalStringSchema,
+  contactEmail: optionalEmailSchema,
   leadId: z.preprocess(emptyStringToUndefined, LeadIdSchema.optional()),
 })
 
@@ -53,14 +72,17 @@ export const UpdateProjectSchema = CreateProjectSchema.partial().extend({
 
 export const UpdateProjectStatusSchema = z.object({
   projectId: ProjectIdSchema,
-  status: z.nativeEnum(OsProjectStatus),
+  status: projectStatusSchema,
 })
 
 export const ConvertLeadToProjectSchema = z.object({
   leadId: LeadIdSchema,
   name: z.string().trim().min(1, 'Project name is required'),
-  description: optionalStringSchema,
-  agreedAmount: positiveNumberSchema,
+  agreedAmount: optionalPositiveNumberSchema,
   monthlyRate: optionalPositiveNumberSchema,
   estimatedEndDate: optionalDateSchema,
+  organizationId: OrganizationIdSchema,
+
+  // Transitional optional field to preserve the current dialog.
+  description: optionalStringSchema,
 })

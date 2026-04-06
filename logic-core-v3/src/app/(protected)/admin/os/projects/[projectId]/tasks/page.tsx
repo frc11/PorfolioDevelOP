@@ -5,6 +5,8 @@ import { listTasksByProject } from '@/app/(protected)/admin/os/team/_actions/tas
 import { TaskForm } from '../../_components/task-form'
 import { TaskList, type TaskAssignee, type TaskListItem } from '../../_components/task-list'
 
+const INTERNAL_ORGANIZATION_SLUG = 'agency-os-internal'
+
 type ProjectTasksPageProps = {
   params: Promise<{
     projectId: string
@@ -14,10 +16,15 @@ type ProjectTasksPageProps = {
 export default async function AgencyOsProjectTasksPage({ params }: ProjectTasksPageProps) {
   const { projectId } = await params
 
-  const project = await prisma.osProject.findUnique({
+  const project = await prisma.project.findUnique({
     where: { id: projectId },
     select: {
       id: true,
+      organization: {
+        select: {
+          slug: true,
+        },
+      },
     },
   })
 
@@ -49,6 +56,7 @@ export default async function AgencyOsProjectTasksPage({ params }: ProjectTasksP
 
   const tasks: TaskListItem[] = taskResult.success ? taskResult.data : []
   const assignees: TaskAssignee[] = superAdmins
+  const showApprovalFlow = project.organization.slug !== INTERNAL_ORGANIZATION_SLUG
 
   return (
     <section className="space-y-6">
@@ -71,7 +79,12 @@ export default async function AgencyOsProjectTasksPage({ params }: ProjectTasksP
         </div>
       ) : null}
 
-      <TaskList projectId={projectId} tasks={tasks} assignees={assignees} />
+      <TaskList
+        projectId={projectId}
+        tasks={tasks}
+        assignees={assignees}
+        showApprovalFlow={showApprovalFlow}
+      />
     </section>
   )
 }

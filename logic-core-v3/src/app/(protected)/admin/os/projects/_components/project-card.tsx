@@ -1,8 +1,8 @@
 'use client'
 
 import Link from 'next/link'
-import { CalendarDays, CheckCircle2, CircleDollarSign, FolderKanban } from 'lucide-react'
-import type { OsProjectStatus, OsServiceType } from '@prisma/client'
+import { Building2, CalendarDays, CheckCircle2, CircleDollarSign, FolderKanban } from 'lucide-react'
+import type { ProjectStatus, ServiceType } from '@prisma/client'
 
 export type ProjectCardData = {
   id: string
@@ -14,18 +14,18 @@ export type ProjectCardData = {
   organizationId: string | null
   name: string
   description: string | null
-  serviceType: OsServiceType
-  status: OsProjectStatus
-  agreedAmount: string
+  serviceType: ServiceType | null
+  status: ProjectStatus
+  legacyStatus?: string
+  agreedAmount: string | null
   monthlyRate: string | null
   maintenanceStartDate: string | null
-  startDate: string
+  startDate: string | null
   estimatedEndDate: string | null
   deliveredAt: string | null
-  createdAt: string
-  updatedAt: string
   _count: {
     tasks: number
+    timeEntries?: number
   }
   completedTasks: number
   totalTrackedHours: number
@@ -38,70 +38,72 @@ export type ProjectCardData = {
     id: string
     businessName: string
     status: string
+    serviceType?: ServiceType | null
   } | null
+  isInternal?: boolean
 }
 
 type ProjectCardProps = {
   project: ProjectCardData
 }
 
-function statusTone(status: OsProjectStatus): string {
+function statusTone(status: ProjectStatus): string {
   switch (status) {
-    case 'EN_DESARROLLO':
-      return 'border-cyan-400/20 bg-cyan-400/10 text-cyan-200'
-    case 'EN_REVISION':
-      return 'border-violet-400/20 bg-violet-400/10 text-violet-200'
-    case 'ENTREGADO':
-      return 'border-emerald-400/20 bg-emerald-400/10 text-emerald-200'
-    case 'EN_MANTENIMIENTO':
+    case 'PLANNING':
+      return 'border-zinc-400/20 bg-zinc-400/10 text-zinc-200'
+    case 'IN_PROGRESS':
+      return 'border-sky-400/20 bg-sky-400/10 text-sky-200'
+    case 'REVIEW':
       return 'border-amber-400/20 bg-amber-400/10 text-amber-200'
-    case 'CANCELADO':
-      return 'border-rose-400/20 bg-rose-500/10 text-rose-200'
+    case 'COMPLETED':
+      return 'border-emerald-400/20 bg-emerald-400/10 text-emerald-200'
   }
 }
 
-function statusLabel(status: OsProjectStatus): string {
+function statusLabel(status: ProjectStatus): string {
   switch (status) {
-    case 'EN_DESARROLLO':
-      return 'En desarrollo'
-    case 'EN_REVISION':
-      return 'En revisión'
-    case 'ENTREGADO':
-      return 'Entregado'
-    case 'EN_MANTENIMIENTO':
-      return 'En mantenimiento'
-    case 'CANCELADO':
-      return 'Cancelado'
+    case 'PLANNING':
+      return 'Planning'
+    case 'IN_PROGRESS':
+      return 'En progreso'
+    case 'REVIEW':
+      return 'Revision'
+    case 'COMPLETED':
+      return 'Completado'
   }
 }
 
-function serviceTone(serviceType: OsServiceType): string {
+function serviceTone(serviceType: ServiceType): string {
   switch (serviceType) {
-    case 'WEB':
+    case 'WEB_DEV':
       return 'border-cyan-400/20 bg-cyan-400/10 text-cyan-200'
-    case 'AI_AGENT':
+    case 'AI':
       return 'border-violet-400/20 bg-violet-400/10 text-violet-200'
     case 'AUTOMATION':
       return 'border-emerald-400/20 bg-emerald-400/10 text-emerald-200'
-    case 'CUSTOM_SOFTWARE':
+    case 'SOFTWARE':
       return 'border-amber-400/20 bg-amber-400/10 text-amber-200'
   }
 }
 
-function serviceLabel(serviceType: OsServiceType): string {
+function serviceLabel(serviceType: ServiceType): string {
   switch (serviceType) {
-    case 'WEB':
+    case 'WEB_DEV':
       return 'Web'
-    case 'AI_AGENT':
-      return 'AI Agent'
+    case 'AI':
+      return 'AI'
     case 'AUTOMATION':
       return 'Automation'
-    case 'CUSTOM_SOFTWARE':
-      return 'Custom Software'
+    case 'SOFTWARE':
+      return 'Software'
   }
 }
 
-function formatCurrency(value: string): string {
+function formatCurrency(value: string | null): string {
+  if (!value) {
+    return 'Sin definir'
+  }
+
   const amount = Number(value)
 
   return new Intl.NumberFormat('es-AR', {
@@ -111,7 +113,11 @@ function formatCurrency(value: string): string {
   }).format(Number.isFinite(amount) ? amount : 0)
 }
 
-function formatDate(value: string): string {
+function formatDate(value: string | null): string {
+  if (!value) {
+    return 'Sin fecha'
+  }
+
   return new Intl.DateTimeFormat('es-AR', {
     day: '2-digit',
     month: 'short',
@@ -124,6 +130,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
   const completedTasks = project.completedTasks
   const progressPercentage =
     totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0
+  const hasClientLinked = project.organizationId !== null
 
   return (
     <Link
@@ -133,7 +140,19 @@ export function ProjectCard({ project }: ProjectCardProps) {
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="truncate text-lg font-semibold text-white">{project.name}</p>
-          <p className="mt-1 truncate text-sm text-zinc-400">{project.businessName}</p>
+          <div className="mt-1 flex flex-wrap items-center gap-2">
+            <p className="truncate text-sm text-zinc-400">{project.businessName}</p>
+            {hasClientLinked ? (
+              <span className="inline-flex items-center gap-1 rounded-full border border-cyan-400/20 bg-cyan-400/10 px-2.5 py-1 text-[11px] font-medium text-cyan-100">
+                <Building2 className="h-3.5 w-3.5" />
+                Cliente portal
+              </span>
+            ) : (
+              <span className="inline-flex rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] font-medium text-zinc-300">
+                Interno
+              </span>
+            )}
+          </div>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
@@ -145,14 +164,16 @@ export function ProjectCard({ project }: ProjectCardProps) {
           >
             {statusLabel(project.status)}
           </span>
-          <span
-            className={[
-              'inline-flex rounded-full border px-2.5 py-1 text-[11px] font-medium',
-              serviceTone(project.serviceType),
-            ].join(' ')}
-          >
-            {serviceLabel(project.serviceType)}
-          </span>
+          {project.serviceType ? (
+            <span
+              className={[
+                'inline-flex rounded-full border px-2.5 py-1 text-[11px] font-medium',
+                serviceTone(project.serviceType),
+              ].join(' ')}
+            >
+              {serviceLabel(project.serviceType)}
+            </span>
+          ) : null}
         </div>
       </div>
 

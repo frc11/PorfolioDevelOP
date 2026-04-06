@@ -1,0 +1,23 @@
+﻿C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\actions\dashboard-actions.ts:26:     const task = await prisma.task.findUnique({
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\actions\dashboard-actions.ts:94:     const task = await prisma.task.findUnique({
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\actions\task-approvals.ts:11:   const task = await prisma.task.findUnique({
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\actions\task-approvals.ts:20:   await prisma.task.update({
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\actions\task-approvals.ts:43:   const task = await prisma.task.findUnique({
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\actions\task-approvals.ts:95:   const task = await prisma.task.findUnique({
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\app\(protected)\admin\page.tsx:111:     prisma.project.count({
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\app\(protected)\admin\projects\page.tsx:34:   const projects = await prisma.project.findMany({
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\app\(protected)\dashboard\page.tsx:110:     prisma.task.count({ where: { project: { organizationId }, status: 'TODO' } }),
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\app\(protected)\dashboard\page.tsx:111:     prisma.task.count({ where: { project: { organizationId }, status: 'IN_PROGRESS' } }),
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\app\(protected)\dashboard\page.tsx:113:     prisma.task.findMany({
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\app\(protected)\dashboard\page.tsx:119:     prisma.task.findFirst({
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\app\(protected)\dashboard\project\page.tsx:62:   const projects = await prisma.project.findMany({
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\app\api\reports\monthly\route.ts:92:     prisma.project.findFirst({
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\lib\actions\projects.ts:39:     project = await prisma.project.create({
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\lib\actions\projects.ts:68:   const existing = await prisma.project.findUnique({ where: { id: projectId } })
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\lib\actions\projects.ts:72:     await prisma.project.update({
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\lib\actions\projects.ts:91:   await prisma.project.delete({ where: { id: projectId } })
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\lib\actions\projects.ts:115:   const project = await prisma.project.findUnique({ where: { id: projectId } })
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\lib\actions\projects.ts:119:     await prisma.task.create({
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\lib\actions\projects.ts:139:   await prisma.task.update({
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\lib\actions\projects.ts:154:   const task = await prisma.task.findUnique({
+C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\src\lib\actions\projects.ts:187:   await prisma.task.delete({ where: { id: taskId } })

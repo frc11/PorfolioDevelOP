@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import {
+  AlertTriangle,
   CheckCircle2,
   ChevronDown,
   ChevronRight,
@@ -10,15 +11,17 @@ import {
   FolderKanban,
   LoaderCircle,
   MoreHorizontal,
+  Send,
   Trash2,
 } from 'lucide-react'
-import type { OsTaskStatus } from '@prisma/client'
+import type { ApprovalStatus, TaskStatus } from '@prisma/client'
 import {
   deleteTask,
   updateTask,
 } from '@/app/(protected)/admin/os/team/_actions/task.actions'
 import { ConfirmDialog } from '@/app/(protected)/admin/os/_components/confirm-dialog'
 import { EmptyState } from '@/app/(protected)/admin/os/_components/empty-state'
+import { sendTaskForApprovalAction } from '@/lib/actions/projects'
 import { TaskForm } from './task-form'
 
 export type TaskAssignee = {
@@ -45,13 +48,15 @@ export type TaskListItem = {
   projectId: string
   title: string
   description: string | null
-  status: OsTaskStatus
+  status: TaskStatus
   estimatedHours: number | null
   position: number
   assignedToId: string | null
   createdAt: string
   updatedAt: string
   assignedTo: TaskAssignee | null
+  approvalStatus: ApprovalStatus | null
+  rejectionReason: string | null
   _count: {
     timeEntries: number
   }
@@ -63,32 +68,33 @@ type TaskListProps = {
   projectId: string
   tasks: TaskListItem[]
   assignees: TaskAssignee[]
+  showApprovalFlow?: boolean
 }
 
-const GROUPS: Array<{ status: OsTaskStatus; label: string }> = [
-  { status: 'PENDIENTE', label: 'Pendiente' },
-  { status: 'EN_PROGRESO', label: 'En progreso' },
-  { status: 'COMPLETADA', label: 'Completada' },
+const GROUPS: Array<{ status: TaskStatus; label: string }> = [
+  { status: 'TODO', label: 'Pendiente' },
+  { status: 'IN_PROGRESS', label: 'En progreso' },
+  { status: 'DONE', label: 'Completada' },
 ]
 
-function statusTone(status: OsTaskStatus): string {
+function statusTone(status: TaskStatus): string {
   switch (status) {
-    case 'PENDIENTE':
+    case 'TODO':
       return 'border-zinc-400/20 bg-zinc-500/10 text-zinc-200'
-    case 'EN_PROGRESO':
+    case 'IN_PROGRESS':
       return 'border-cyan-400/20 bg-cyan-400/10 text-cyan-200'
-    case 'COMPLETADA':
+    case 'DONE':
       return 'border-emerald-400/20 bg-emerald-400/10 text-emerald-200'
   }
 }
 
-function statusLabel(status: OsTaskStatus): string {
+function statusLabel(status: TaskStatus): string {
   switch (status) {
-    case 'PENDIENTE':
+    case 'TODO':
       return 'Pendiente'
-    case 'EN_PROGRESO':
+    case 'IN_PROGRESS':
       return 'En progreso'
-    case 'COMPLETADA':
+    case 'DONE':
       return 'Completada'
   }
 }
@@ -128,7 +134,34 @@ function buildEditableTask(task: TaskListItem) {
   }
 }
 
-export function TaskList({ projectId, tasks, assignees }: TaskListProps) {
+function approvalTone(status: ApprovalStatus): string {
+  switch (status) {
+    case 'PENDING_APPROVAL':
+      return 'border-amber-400/20 bg-amber-500/10 text-amber-200'
+    case 'APPROVED':
+      return 'border-emerald-400/20 bg-emerald-500/10 text-emerald-200'
+    case 'REJECTED':
+      return 'border-rose-400/20 bg-rose-500/10 text-rose-200'
+  }
+}
+
+function approvalLabel(status: ApprovalStatus): string {
+  switch (status) {
+    case 'PENDING_APPROVAL':
+      return 'Esperando aprobacion del cliente'
+    case 'APPROVED':
+      return 'Aprobada por el cliente'
+    case 'REJECTED':
+      return 'Cambios solicitados'
+  }
+}
+
+export function TaskList({
+  projectId,
+  tasks,
+  assignees,
+  showApprovalFlow = false,
+}: TaskListProps) {
   const router = useRouter()
   const [expandedTaskId, setExpandedTaskId] = useState<string | null>(null)
   const [openMenuTaskId, setOpenMenuTaskId] = useState<string | null>(null)
@@ -151,7 +184,7 @@ export function TaskList({ projectId, tasks, assignees }: TaskListProps) {
     [localTasks]
   )
 
-  const handleQuickStatusChange = (taskId: string, status: OsTaskStatus) => {
+  const handleQuickStatusChange = (taskId: string, status: TaskStatus) => {
     const previousTasks = localTasks
     setError(null)
     setOpenMenuTaskId(null)
@@ -272,6 +305,16 @@ export function TaskList({ projectId, tasks, assignees }: TaskListProps) {
                               >
                                 {statusLabel(task.status)}
                               </span>
+                              {showApprovalFlow && task.approvalStatus ? (
+                                <span
+                                  className={[
+                                    'inline-flex rounded-full border px-2.5 py-1 text-[11px] font-medium',
+                                    approvalTone(task.approvalStatus),
+                                  ].join(' ')}
+                                >
+                                  {approvalLabel(task.approvalStatus)}
+                                </span>
+                              ) : null}
                               {isPending ? (
                                 <LoaderCircle className="h-4 w-4 animate-spin text-cyan-200" />
                               ) : null}
@@ -317,10 +360,30 @@ export function TaskList({ projectId, tasks, assignees }: TaskListProps) {
                                 </div>
                               </div>
                             </div>
+
+                            {showApprovalFlow && task.approvalStatus === 'REJECTED' && task.rejectionReason ? (
+                              <div className="mt-3 rounded-2xl border border-rose-400/15 bg-rose-500/10 px-3 py-2 text-sm text-rose-100">
+                                <div className="flex items-start gap-2">
+                                  <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-rose-300" />
+                                  <div>
+                                    <p className="text-[10px] uppercase tracking-[0.18em] text-rose-200/80">
+                                      Motivo del rechazo
+                                    </p>
+                                    <p className="mt-1 whitespace-pre-wrap text-sm leading-6 text-rose-100">
+                                      {task.rejectionReason}
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
+                            ) : null}
                           </div>
                         </button>
 
                         <div className="flex items-center gap-2">
+                          {showApprovalFlow ? (
+                            <TaskApprovalControl task={task} projectId={projectId} />
+                          ) : null}
+
                           <ProjectStatusQuickChange
                             task={task}
                             isPending={isPending}
@@ -462,10 +525,51 @@ export function TaskList({ projectId, tasks, assignees }: TaskListProps) {
   )
 }
 
+type TaskApprovalControlProps = {
+  task: TaskListItem
+  projectId: string
+}
+
+function TaskApprovalControl({ task, projectId }: TaskApprovalControlProps) {
+  const router = useRouter()
+  const [isPending, startTransition] = useTransition()
+
+  if (task.approvalStatus || task.status !== 'DONE') {
+    return null
+  }
+
+  const handleSendForApproval = () => {
+    const formData = new FormData()
+    formData.set('taskId', task.id)
+    formData.set('projectId', projectId)
+
+    startTransition(async () => {
+      await sendTaskForApprovalAction(formData)
+      router.refresh()
+    })
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={handleSendForApproval}
+      disabled={isPending}
+      className="inline-flex items-center gap-2 rounded-2xl border border-amber-400/20 bg-amber-500/10 px-3 py-2 text-sm font-medium text-amber-100 transition-colors hover:border-amber-300/35 hover:bg-amber-500/15 disabled:cursor-not-allowed disabled:opacity-60"
+    >
+      {isPending ? (
+        <LoaderCircle className="h-4 w-4 animate-spin" />
+      ) : (
+        <Send className="h-4 w-4" />
+      )}
+      Enviar a aprobacion
+    </button>
+  )
+}
+
 type ProjectStatusQuickChangeProps = {
   task: TaskListItem
   isPending: boolean
-  onSelect: (taskId: string, status: OsTaskStatus) => void
+  onSelect: (taskId: string, status: TaskStatus) => void
 }
 
 function ProjectStatusQuickChange({
@@ -477,12 +581,12 @@ function ProjectStatusQuickChange({
     <select
       value={task.status}
       disabled={isPending}
-      onChange={(event) => onSelect(task.id, event.target.value as OsTaskStatus)}
+      onChange={(event) => onSelect(task.id, event.target.value as TaskStatus)}
       className="rounded-2xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-zinc-100 outline-none transition-colors focus:border-cyan-400/35 disabled:cursor-not-allowed disabled:opacity-60"
     >
-      <option value="PENDIENTE">Pendiente</option>
-      <option value="EN_PROGRESO">En progreso</option>
-      <option value="COMPLETADA">Completada</option>
+      <option value="TODO">Pendiente</option>
+      <option value="IN_PROGRESS">En progreso</option>
+      <option value="DONE">Completada</option>
     </select>
   )
 }

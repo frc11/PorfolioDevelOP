@@ -160,10 +160,11 @@ model User {
   tickets         Ticket[]
   ticketMessages  TicketMessage[]
   businessMetrics BusinessMetric[]
-  osAssignedLeads OsLead[]         @relation("OsLeadAssignee")
-  osActivities    OsLeadActivity[] @relation("OsActivityPerformer")
-  osAssignedTasks OsTask[]         @relation("OsTaskAssignee")
-  osTimeEntries   OsTimeEntry[]    @relation("OsTimeEntryUser")
+  assignedTasks   Task[]               @relation("TaskAssignee")
+  osAssignedLeads OsLead[]             @relation("OsLeadAssignee")
+  osActivities    OsLeadActivity[]     @relation("OsActivityPerformer")
+  osAssignedTasks OsTask[]             @relation("OsTaskAssignee")
+  osTimeEntries   OsTimeEntry[]        @relation("OsTimeEntryUser")
 }
 
 model PasswordResetToken {
@@ -232,14 +233,24 @@ model Service {
 }
 
 model Project {
-  id          String        @id @default(cuid())
-  name        String
-  description String?
-  status      ProjectStatus @default(PLANNING)
+  id                   String        @id @default(cuid())
+  name                 String
+  description          String?
+  status               ProjectStatus @default(PLANNING)
+  agreedAmount         Decimal?      @db.Decimal(10, 2)
+  monthlyRate          Decimal?      @db.Decimal(10, 2)
+  maintenanceStartDate DateTime?
+  deliveredAt          DateTime?
+  estimatedEndDate     DateTime?
+  osLeadId             String?       @unique
 
-  organizationId String
-  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  tasks          Task[]
+  organizationId      String
+  organization        Organization           @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  tasks               Task[]
+  osLead              OsLead?                @relation(fields: [osLeadId], references: [id])
+  paymentMilestones   OsPaymentMilestone[]
+  maintenancePayments OsMaintenancePayment[]
+  timeEntries         OsTimeEntry[]
 }
 
 model Task {
@@ -250,10 +261,19 @@ model Task {
   dueDate         DateTime?
   approvalStatus  ApprovalStatus?
   rejectionReason String?         @db.Text
+  estimatedHours  Float?
+  position        Int?            @default(0)
+  assignedToId    String?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
 
-  projectId     String
-  project       Project        @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  notifications Notification[]
+  projectId      String
+  project        Project        @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  assignedTo     User?          @relation("TaskAssignee", fields: [assignedToId], references: [id], onDelete: SetNull)
+  notifications  Notification[]
+  osTimeEntries  OsTimeEntry[]
+
+  @@index([assignedToId])
 }
 
 model Message {
@@ -297,17 +317,17 @@ model Invoice {
 }
 
 model ContactSubmission {
-  id        String   @id @default(cuid())
-  name      String
-  email     String
-  phone     String?
-  company   String?
-  service   String?
-  message   String   @db.Text
-  read      Boolean  @default(false)
-  leadStatus String? @default("NUEVO")
-  leadNotes  String? @db.Text
-  createdAt DateTime @default(now())
+  id         String   @id @default(cuid())
+  name       String
+  email      String
+  phone      String?
+  company    String?
+  service    String?
+  message    String   @db.Text
+  read       Boolean  @default(false)
+  leadStatus String?  @default("NUEVO")
+  leadNotes  String?  @db.Text
+  createdAt  DateTime @default(now())
 }
 
 model Notification {
@@ -439,19 +459,19 @@ model ModulePricing {
 }
 
 model OsLead {
-  id            String         @id @default(cuid())
-  businessName  String
-  contactName   String?
-  phone         String?
-  email         String?
-  industry      String?
-  zone          String?
-  source        String?
-  instagramUrl  String?
-  currentWebUrl String?
-  googleMapsUrl String?
-  status        LeadStatus     @default(PROSPECTO)
-  serviceType   OsServiceType?
+  id             String         @id @default(cuid())
+  businessName   String
+  contactName    String?
+  phone          String?
+  email          String?
+  industry       String?
+  zone           String?
+  source         String?
+  instagramUrl   String?
+  currentWebUrl  String?
+  googleMapsUrl  String?
+  status         LeadStatus     @default(PROSPECTO)
+  serviceType    OsServiceType?
   nextFollowUpAt DateTime?
   reactivateAt   DateTime?
   notes          String?
@@ -462,7 +482,8 @@ model OsLead {
   assignedTo User?            @relation("OsLeadAssignee", fields: [assignedToId], references: [id])
   activities OsLeadActivity[]
   demos      OsDemo[]
-  project    OsProject?
+  project    Project?
+  osProject  OsProject?
 
   @@index([status])
   @@index([nextFollowUpAt])
@@ -513,8 +534,8 @@ model OsProject {
   description          String?
   serviceType          OsServiceType
   status               OsProjectStatus @default(EN_DESARROLLO)
-  agreedAmount         Decimal         @db.Decimal(10,2)
-  monthlyRate          Decimal?        @db.Decimal(10,2)
+  agreedAmount         Decimal         @db.Decimal(10, 2)
+  monthlyRate          Decimal?        @db.Decimal(10, 2)
   maintenanceStartDate DateTime?
   startDate            DateTime        @default(now())
   estimatedEndDate     DateTime?
@@ -522,10 +543,8 @@ model OsProject {
   createdAt            DateTime        @default(now())
   updatedAt            DateTime        @updatedAt
 
-  lead                OsLead?                 @relation(fields: [leadId], references: [id])
-  tasks               OsTask[]
-  milestones          OsPaymentMilestone[]
-  maintenancePayments OsMaintenancePayment[]
+  lead  OsLead?  @relation(fields: [leadId], references: [id])
+  tasks OsTask[]
 
   @@index([status])
   @@index([serviceType])
@@ -535,26 +554,26 @@ model OsPaymentMilestone {
   id        String        @id @default(cuid())
   projectId String
   type      MilestoneType
-  amount    Decimal       @db.Decimal(10,2)
+  amount    Decimal       @db.Decimal(10, 2)
   dueAt     DateTime?
   paidAt    DateTime?
   createdAt DateTime      @default(now())
 
-  project OsProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
   @@index([projectId])
 }
 
 model OsMaintenancePayment {
-  id        String   @id @default(cuid())
+  id        String    @id @default(cuid())
   projectId String
   month     Int
   year      Int
-  amount    Decimal  @db.Decimal(10,2)
+  amount    Decimal   @db.Decimal(10, 2)
   paidAt    DateTime?
-  createdAt DateTime @default(now())
+  createdAt DateTime  @default(now())
 
-  project OsProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
   @@unique([projectId, month, year])
   @@index([projectId])
@@ -572,29 +591,31 @@ model OsTask {
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
 
-  project     OsProject     @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  assignedTo  User?         @relation("OsTaskAssignee", fields: [assignedToId], references: [id])
-  timeEntries OsTimeEntry[]
+  project    OsProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  assignedTo User?     @relation("OsTaskAssignee", fields: [assignedToId], references: [id])
 
   @@index([projectId, status])
   @@index([assignedToId])
 }
 
 model OsTimeEntry {
-  id        String   @id @default(cuid())
+  id        String    @id @default(cuid())
   taskId    String
+  projectId String?
   userId    String
   hours     Float
   startedAt DateTime?
   endedAt   DateTime?
   date      DateTime
   notes     String?
-  createdAt DateTime @default(now())
+  createdAt DateTime  @default(now())
 
-  task OsTask @relation(fields: [taskId], references: [id], onDelete: Cascade)
-  user User   @relation("OsTimeEntryUser", fields: [userId], references: [id])
+  task    Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  project Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user    User     @relation("OsTimeEntryUser", fields: [userId], references: [id])
 
   @@index([taskId])
+  @@index([projectId])
   @@index([userId, date])
 }
 

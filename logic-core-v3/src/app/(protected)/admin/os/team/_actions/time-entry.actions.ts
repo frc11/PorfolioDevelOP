@@ -15,14 +15,7 @@ import {
 } from './time-entry.schemas'
 
 type ProjectEntryRecord = Prisma.OsTimeEntryGetPayload<{
-  select: {
-    id: true
-    taskId: true
-    userId: true
-    hours: true
-    date: true
-    notes: true
-    createdAt: true
+  include: {
     task: {
       select: {
         id: true
@@ -41,14 +34,7 @@ type ProjectEntryRecord = Prisma.OsTimeEntryGetPayload<{
 }>
 
 type UserEntryRecord = Prisma.OsTimeEntryGetPayload<{
-  select: {
-    id: true
-    taskId: true
-    userId: true
-    hours: true
-    date: true
-    notes: true
-    createdAt: true
+  include: {
     task: {
       select: {
         id: true
@@ -86,7 +72,11 @@ function serializeProjectEntry(entry: ProjectEntryRecord) {
     date: entry.date.toISOString(),
     notes: entry.notes,
     createdAt: entry.createdAt.toISOString(),
-    task: entry.task,
+    task: {
+      id: entry.task.id,
+      title: entry.task.title,
+      projectId: entry.task.projectId,
+    },
     user: entry.user,
   }
 }
@@ -150,9 +140,22 @@ export async function createTimeEntry(
     const userId = await requireSuperAdmin()
     const parsed = CreateTimeEntrySchema.parse(input)
 
+    const task = await prisma.task.findUnique({
+      where: { id: parsed.taskId },
+      select: {
+        id: true,
+        projectId: true,
+      },
+    })
+
+    if (!task) {
+      return fail('Task not found')
+    }
+
     const entry = await prisma.osTimeEntry.create({
       data: {
-        taskId: parsed.taskId,
+        taskId: task.id,
+        projectId: task.projectId,
         userId,
         hours: parsed.hours,
         date: parsed.date,
@@ -160,15 +163,11 @@ export async function createTimeEntry(
       },
       select: {
         id: true,
-        task: {
-          select: {
-            projectId: true,
-          },
-        },
+        projectId: true,
       },
     })
 
-    revalidateTimeEntryPaths(entry.task.projectId)
+    revalidateTimeEntryPaths(entry.projectId ?? task.projectId)
     return ok({ id: entry.id })
   } catch (error) {
     return fail(error instanceof Error ? error.message : 'Failed to create time entry')
@@ -183,9 +182,8 @@ export async function updateTimeEntry(
     const parsed = UpdateTimeEntrySchema.parse(input)
     const { entryId, ...data } = parsed
 
-    const entry = await prisma.osTimeEntry.update({
+    const existingEntry = await prisma.osTimeEntry.findUnique({
       where: { id: entryId },
-      data,
       select: {
         id: true,
         task: {
@@ -196,7 +194,28 @@ export async function updateTimeEntry(
       },
     })
 
-    revalidateTimeEntryPaths(entry.task.projectId)
+    if (!existingEntry) {
+      return fail('Time entry not found')
+    }
+
+    const entry = await prisma.osTimeEntry.update({
+      where: { id: entryId },
+      data: {
+        ...data,
+        projectId: existingEntry.task.projectId,
+      },
+      select: {
+        id: true,
+        projectId: true,
+        task: {
+          select: {
+            projectId: true,
+          },
+        },
+      },
+    })
+
+    revalidateTimeEntryPaths(entry.projectId ?? entry.task.projectId)
     return ok({ id: entry.id })
   } catch (error) {
     return fail(error instanceof Error ? error.message : 'Failed to update time entry')
@@ -214,6 +233,7 @@ export async function deleteTimeEntry(
       where: { id: parsedEntryId },
       select: {
         id: true,
+        projectId: true,
         task: {
           select: {
             projectId: true,
@@ -222,7 +242,7 @@ export async function deleteTimeEntry(
       },
     })
 
-    revalidateTimeEntryPaths(entry.task.projectId)
+    revalidateTimeEntryPaths(entry.projectId ?? entry.task.projectId)
     return ok<void>(undefined)
   } catch (error) {
     return fail(error instanceof Error ? error.message : 'Failed to delete time entry')
@@ -242,14 +262,7 @@ export async function listTimeEntriesByProject(
           projectId: parsedProjectId,
         },
       },
-      select: {
-        id: true,
-        taskId: true,
-        userId: true,
-        hours: true,
-        date: true,
-        notes: true,
-        createdAt: true,
+      include: {
         task: {
           select: {
             id: true,
@@ -303,14 +316,7 @@ export async function listTimeEntriesByUser(
         userId: parsedUserId,
         ...(parsedDateRange?.from || parsedDateRange?.to ? { date: dateFilter } : {}),
       },
-      select: {
-        id: true,
-        taskId: true,
-        userId: true,
-        hours: true,
-        date: true,
-        notes: true,
-        createdAt: true,
+      include: {
         task: {
           select: {
             id: true,

@@ -1,4 +1,4 @@
-import { Role, OsTaskStatus } from '@prisma/client'
+import { Role, TaskStatus } from '@prisma/client'
 import { prisma } from '@/lib/prisma'
 import { MemberWorkload } from './_components/member-workload'
 
@@ -41,7 +41,7 @@ export default async function AgencyOsTeamPage() {
   const userIds = users.map((user) => user.id)
 
   const [assignedTasks, weeklyHoursByUser, monthlyHoursByUser] = await Promise.all([
-    prisma.osTask.findMany({
+    prisma.task.findMany({
       where: {
         assignedToId: {
           in: userIds,
@@ -129,7 +129,7 @@ export default async function AgencyOsTeamPage() {
           id: string
           projectId: string
           title: string
-          status: OsTaskStatus
+          status: TaskStatus
           project: {
             id: string
             name: string
@@ -177,7 +177,7 @@ export default async function AgencyOsTeamPage() {
 
     return {
       user,
-      activeTasksCount: tasks.filter((task) => task.status !== OsTaskStatus.COMPLETADA).length,
+      activeTasksCount: tasks.filter((task) => task.status !== TaskStatus.DONE).length,
       weeklyHours: weeklyHoursMap.get(user.id) ?? 0,
       monthlyHours: monthlyHoursMap.get(user.id) ?? 0,
       groupedTasks,

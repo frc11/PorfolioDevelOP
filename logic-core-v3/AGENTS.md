@@ -1,23 +1,49 @@
-CONTEXTO DEL PROYECTO — Agency OS
+CONTEXTO DEL PROYECTO — Agency OS v2 (Migración a Admin Unificado)
 
-Este proyecto es la expansión del panel SUPER_ADMIN dentro de un portal Next.js existente.
-NO es una app nueva. Estamos agregando funcionalidad al proyecto que ya existe.
+La Agency OS v1 ya está construida y funcionando bajo src/app/(protected)/admin/os/.
+Un admin viejo existe en src/app/(protected)/admin/ con lógica conectada al portal de clientes.
+El objetivo de v2 es unificar ambos en un solo /admin/os con la estética de la OS.
 
-ESTRUCTURA DEL PROYECTO:
-- Raíz del proyecto Next.js: logic-core-v3/
-- Código fuente: src/ (la raíz de todo el código)
-- Alias @/ apunta a src/
-- Rutas protegidas: src/app/(protected)/
-- Admin existente: src/app/(protected)/admin/ ← NO TOCAR
-- Agency OS nueva: src/app/(protected)/admin/os/ ← TODO LO NUEVO VA ACÁ
-- Utilidades compartidas: src/lib/
-- Schema Prisma: prisma/schema.prisma
+═══════════════════════════════════════════════════════════════
+ESTRATEGIA DE MODELOS — 3 CAPAS (NO NEGOCIABLE)
+═══════════════════════════════════════════════════════════════
 
-COEXISTENCIA CON ADMIN EXISTENTE:
-Ya existe un admin funcional en src/app/(protected)/admin/ con estas rutas:
-  - leads/, projects/, clients/, tickets/, messages/, agency-dashboard/, settings/
-Estas rutas tienen lógica real en producción. La Agency OS se construye bajo /admin/os/
-para coexistir sin conflicto. NUNCA modificar, renombrar ni eliminar archivos del admin existente.
+CAPA 1 — Modelos del portal (INTOCABLES, solo leer/escribir):
+  organization, user, subscription, service, project, task, ticket,
+  ticketMessage, message, contactSubmission, clientAssets, notification,
+  agencySettings, modulePricing
+  → Estos modelos NO se renombran, NO se duplican, NO se eliminan.
+  → La OS v2 los consume directamente con prisma.project, prisma.task, etc.
+  → El portal de clientes (/dashboard) depende de ellos.
+
+CAPA 2 — Modelos exclusivos de la OS (se mantienen con prefijo Os):
+  OsLead, OsLeadActivity, OsDemo
+  → No tienen equivalente en el portal. El pipeline comercial es interno.
+  → Se siguen usando con prisma.osLead, prisma.osDemo, etc.
+
+CAPA 3 — Modelos que se fusionan (ELIMINAR tras migración de datos):
+  OsProject → sus campos financieros se agregan a project (Capa 1)
+  OsTask → se elimina, se usa task (Capa 1) + campos nuevos
+  OsPaymentMilestone → se mantiene pero referencia project (no OsProject)
+  OsMaintenancePayment → se mantiene pero referencia project (no OsProject)
+  OsTimeEntry → se mantiene pero referencia task (no OsTask)
+
+═══════════════════════════════════════════════════════════════
+3 PENDIENTES DE FASE 8 (recordatorio para no olvidar)
+═══════════════════════════════════════════════════════════════
+
+PENDIENTE 1: src/actions/task-approvals.ts líneas 73 y 107 generan
+  notification.actionUrl = `/admin/projects/${task.projectId}`
+  Debe apuntar a /admin/os/projects/ o tener redirect.
+
+PENDIENTE 2: src/lib/actions/projects.ts usa revalidatePath('/admin/projects/...')
+  en múltiples funciones. Debe actualizarse a /admin/os/projects/...
+
+PENDIENTE 3: sendTaskForApprovalAction crea un message para el cliente cuando
+  el admin envía tarea a aprobación. Este flujo DEBE sobrevivir intacto.
+  project.organizationId es el campo clave que lo conecta.
+
+═══════════════════════════════════════════════════════════════
 
 STACK:
 - Next.js 16 (App Router), TypeScript estricto (sin any)
@@ -31,57 +57,26 @@ STACK:
   - AUTOMATION: verde (#22c55e)
   - CUSTOM_SOFTWARE: amarillo (#eab308)
 
-CONVENCIÓN DE SERVER ACTIONS:
-- Un archivo por entidad: {entity}.actions.ts
-- Funciones: {verb}{Entity} (createLead, updateProjectStatus, deleteTask)
-- Schemas Zod: {Verb}{Entity}Schema, exportados para uso client-side
-- Secuencia interna: requireSuperAdmin() → Schema.parse(input) → Prisma query → revalidatePath() → return ok(data)
-- Return type: Promise<ActionResult<T>> usando ok()/fail() de src/lib/action-utils.ts
-- Try/catch envuelve todo, catch retorna fail(message)
-- Imports de actions entre módulos OS usan alias: @/app/(protected)/admin/os/{modulo}/_actions/{entity}.actions
+ESTRUCTURA ACTUAL:
+- src/app/(protected)/admin/ → admin viejo (se retira progresivamente)
+- src/app/(protected)/admin/os/ → Agency OS v1 (se expande a v2)
+- src/app/(protected)/dashboard/ → portal de clientes (NO TOCAR)
+- src/actions/ → server actions compartidas (task-approvals.ts)
+- src/lib/actions/ → server actions del admin viejo (projects.ts)
 
-CONVENCIÓN DE COMPONENTES:
-- Componentes específicos de módulo van en _components/ dentro de su ruta bajo os/
-- Componentes compartidos entre módulos OS van en src/app/(protected)/admin/os/_components/
-- Nombres en kebab-case: lead-card.tsx, stat-card.tsx
-- "use client" solo cuando sea necesario (interactividad, hooks)
+CONVENCIÓN DE SERVER ACTIONS (sin cambios respecto a v1):
+- Un archivo por entidad: {entity}.actions.ts
+- Funciones: {verb}{Entity} (createLead, updateProjectStatus)
+- Schemas Zod: {Verb}{Entity}Schema, exportados
+- Secuencia: requireSuperAdmin() → Schema.parse(input) → Prisma → revalidatePath() → ok/fail
+- Return type: Promise<ActionResult<T>>
+- revalidatePath SIEMPRE bajo /admin/os/
 
 ARCHIVOS QUE NO DEBES MODIFICAR (salvo que el prompt lo indique explícitamente):
-- src/app/(protected)/admin/leads/** — admin existente
-- src/app/(protected)/admin/projects/** — admin existente
-- src/app/(protected)/admin/clients/** — admin existente
-- src/app/(protected)/admin/tickets/** — admin existente
-- src/app/(protected)/admin/messages/** — admin existente
-- src/app/(protected)/admin/agency-dashboard/** — admin existente
-- src/app/(protected)/admin/settings/** — admin existente
-- src/app/(protected)/admin/layout.tsx — layout del admin existente
-- src/app/(protected)/admin/page.tsx — página del admin existente
-- src/app/(portal)/** — rutas del portal de clientes
+- src/app/(protected)/dashboard/** — portal de clientes
 - src/app/api/auth/** — configuración de NextAuth
-- src/components/ui/** — componentes UI base del portal
-- tailwind.config.ts — ya configurado
-- next.config.ts — ya configurado
+- src/components/ui/** — componentes UI base
+- tailwind.config.ts, next.config.ts
 
-ESTRUCTURA DE CARPETAS AGENCY OS:
-src/app/(protected)/admin/os/
-  layout.tsx, page.tsx
-  leads/ (page, [leadId]/page, _components/, _actions/)
-  projects/ (page, [projectId]/layout+page+tasks/+hours/+payments/, _components/, _actions/)
-  team/ (page, _components/, _actions/)
-  _components/ (compartidos dentro de OS)
-src/lib/
-  action-utils.ts, auth-guards.ts, follow-up.ts, prisma.ts (ya existe)
-
-MODELOS PRISMA — REGLA CRÍTICA:
-Todos los modelos nuevos de Agency OS llevan prefijo Os:
-OsLead, OsLeadActivity, OsDemo, OsProject, OsPaymentMilestone,
-OsMaintenancePayment, OsTask, OsTimeEntry.
-
-Las relaciones en User también llevan prefijo:
-osAssignedLeads, osActivities, osAssignedTasks, osTimeEntries.
-
-Los relation labels llevan prefijo: "OsLeadAssignee", "OsActivityPerformer",
-"OsTaskAssignee", "OsTimeEntryUser".
-
-En los server actions usar SIEMPRE prisma.osLead, prisma.osProject, etc.
-NUNCA prisma.lead ni prisma.project — esos son modelos existentes distintos.
+REGLA DE ORO: Después de cada cambio al schema, verificar que
+npm run build pasa Y que /dashboard + /dashboard/project cargan correctamente.

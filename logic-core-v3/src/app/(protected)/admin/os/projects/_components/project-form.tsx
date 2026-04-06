@@ -1,46 +1,38 @@
 'use client'
 
 import { useEffect, useMemo, useState, useTransition } from 'react'
-import { LoaderCircle, X } from 'lucide-react'
+import { AlertTriangle, LoaderCircle, X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import type { OsServiceType } from '@prisma/client'
+import type { ServiceType } from '@prisma/client'
 import { createProject, updateProject } from '../_actions/project.actions'
 import { CreateProjectSchema } from '../_actions/project.schemas'
 
+type OrganizationOption = {
+  id: string
+  companyName: string
+}
+
 type ProjectFormProps = {
   triggerLabel?: string
+  organizations: OrganizationOption[]
   project?: {
     id: string
-    businessName: string
-    contactName: string
-    contactPhone?: string | null
-    contactEmail?: string | null
+    organizationId?: string | null
     name: string
     description?: string | null
-    serviceType: OsServiceType
-    agreedAmount: string
+    serviceType?: ServiceType | null
+    agreedAmount?: string | null
     monthlyRate?: string | null
     estimatedEndDate?: string | null
     leadId?: string | null
   }
-  lead?: {
-    id: string
-    businessName: string
-    contactName?: string | null
-    phone?: string | null
-    email?: string | null
-    serviceType?: OsServiceType | null
-  }
 }
 
 type ProjectFormState = {
-  businessName: string
-  contactName: string
-  contactPhone: string
-  contactEmail: string
+  organizationId: string
   name: string
   description: string
-  serviceType: '' | OsServiceType
+  serviceType: '' | ServiceType
   agreedAmount: string
   monthlyRate: string
   estimatedEndDate: string
@@ -49,11 +41,11 @@ type ProjectFormState = {
 
 type FormErrors = Partial<Record<keyof ProjectFormState, string>>
 
-const SERVICE_OPTIONS: Array<{ label: string; value: OsServiceType }> = [
-  { label: 'Web', value: 'WEB' },
-  { label: 'AI Agent', value: 'AI_AGENT' },
+const SERVICE_OPTIONS: Array<{ label: string; value: ServiceType }> = [
+  { label: 'Web', value: 'WEB_DEV' },
+  { label: 'AI', value: 'AI' },
   { label: 'Automation', value: 'AUTOMATION' },
-  { label: 'Custom Software', value: 'CUSTOM_SOFTWARE' },
+  { label: 'Software', value: 'SOFTWARE' },
 ]
 
 const inputClassName =
@@ -78,20 +70,14 @@ function toDateInputValue(value?: string | null): string {
   return Number.isNaN(date.getTime()) ? '' : date.toISOString().slice(0, 10)
 }
 
-function createInitialState(
-  project?: ProjectFormProps['project'],
-  lead?: ProjectFormProps['lead']
-): ProjectFormState {
+function createInitialState(project?: ProjectFormProps['project']): ProjectFormState {
   if (project) {
     return {
-      businessName: project.businessName,
-      contactName: project.contactName,
-      contactPhone: project.contactPhone ?? '',
-      contactEmail: project.contactEmail ?? '',
+      organizationId: project.organizationId ?? '',
       name: project.name,
       description: project.description ?? '',
-      serviceType: project.serviceType,
-      agreedAmount: project.agreedAmount,
+      serviceType: project.serviceType ?? '',
+      agreedAmount: project.agreedAmount ?? '',
       monthlyRate: project.monthlyRate ?? '',
       estimatedEndDate: toDateInputValue(project.estimatedEndDate),
       leadId: project.leadId ?? '',
@@ -99,17 +85,14 @@ function createInitialState(
   }
 
   return {
-    businessName: lead?.businessName ?? '',
-    contactName: lead?.contactName ?? lead?.businessName ?? '',
-    contactPhone: lead?.phone ?? '',
-    contactEmail: lead?.email ?? '',
-    name: lead ? `${lead.businessName} - Implementación` : '',
+    organizationId: '',
+    name: '',
     description: '',
-    serviceType: lead?.serviceType ?? '',
+    serviceType: '',
     agreedAmount: '',
     monthlyRate: '',
     estimatedEndDate: '',
-    leadId: lead?.id ?? '',
+    leadId: '',
   }
 }
 
@@ -127,20 +110,27 @@ function collectErrors(
   }, {})
 }
 
-export function ProjectForm({ triggerLabel = 'Nuevo proyecto', project, lead }: ProjectFormProps) {
+export function ProjectForm({
+  triggerLabel = 'Nuevo proyecto',
+  organizations,
+  project,
+}: ProjectFormProps) {
   const router = useRouter()
   const [isOpen, setIsOpen] = useState(false)
   const [isPending, startTransition] = useTransition()
-  const [formState, setFormState] = useState<ProjectFormState>(() => createInitialState(project, lead))
+  const [formState, setFormState] = useState<ProjectFormState>(() => createInitialState(project))
   const [formErrors, setFormErrors] = useState<FormErrors>({})
   const [serverError, setServerError] = useState<string | null>(null)
 
   const isEditMode = Boolean(project)
   const title = useMemo(() => (isEditMode ? 'Editar proyecto' : 'Nuevo proyecto'), [isEditMode])
+  const selectedOrganization = organizations.find(
+    (organization) => organization.id === formState.organizationId
+  )
 
   useEffect(() => {
-    setFormState(createInitialState(project, lead))
-  }, [project, lead])
+    setFormState(createInitialState(project))
+  }, [project])
 
   const updateField = <Field extends keyof ProjectFormState>(
     field: Field,
@@ -154,7 +144,7 @@ export function ProjectForm({ triggerLabel = 'Nuevo proyecto', project, lead }: 
     setIsOpen(false)
     setServerError(null)
     setFormErrors({})
-    setFormState(createInitialState(project, lead))
+    setFormState(createInitialState(project))
   }
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -162,7 +152,10 @@ export function ProjectForm({ triggerLabel = 'Nuevo proyecto', project, lead }: 
     setServerError(null)
 
     const payload = {
-      ...formState,
+      organizationId: formState.organizationId || null,
+      name: formState.name,
+      description: formState.description,
+      serviceType: formState.serviceType,
       agreedAmount: formState.agreedAmount,
       monthlyRate: formState.monthlyRate,
       estimatedEndDate: formState.estimatedEndDate,
@@ -206,7 +199,7 @@ export function ProjectForm({ triggerLabel = 'Nuevo proyecto', project, lead }: 
 
       {isOpen ? (
         <div className="fixed inset-0 z-[130] flex items-center justify-center bg-[#05070a]/80 p-4 backdrop-blur-md">
-          <div className="relative max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-[28px] border border-white/10 bg-[#0c1016]/95 p-6 shadow-[0_30px_120px_rgba(0,0,0,0.55)] backdrop-blur-xl">
+          <div className="relative max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-[28px] border border-white/10 bg-[#0c1016]/95 p-6 shadow-[0_30px_120px_rgba(0,0,0,0.55)] backdrop-blur-xl">
             <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="text-[10px] uppercase tracking-[0.24em] text-zinc-500">
@@ -226,62 +219,47 @@ export function ProjectForm({ triggerLabel = 'Nuevo proyecto', project, lead }: 
 
             <form className="mt-6 space-y-5" onSubmit={handleSubmit}>
               <div className="grid gap-4 md:grid-cols-2">
-                <div>
-                  <label className="mb-2 block text-sm font-medium text-zinc-200">Business name</label>
-                  <input
-                    value={formState.businessName}
-                    onChange={(event) => updateField('businessName', event.target.value)}
+                <div className="md:col-span-2">
+                  <label className="mb-2 block text-sm font-medium text-zinc-200">
+                    Vincular a cliente del portal (opcional)
+                  </label>
+                  <select
+                    value={formState.organizationId}
+                    onChange={(event) => updateField('organizationId', event.target.value)}
                     className={inputClassName}
-                    placeholder="Nombre del negocio"
-                  />
-                  {formErrors.businessName ? (
-                    <p className="mt-2 text-xs text-rose-300">{formErrors.businessName}</p>
+                  >
+                    <option value="">Proyecto interno de Agency OS</option>
+                    {organizations.map((organization) => (
+                      <option key={organization.id} value={organization.id}>
+                        {organization.companyName}
+                      </option>
+                    ))}
+                  </select>
+                  {selectedOrganization ? (
+                    <div className="mt-3 flex items-start gap-3 rounded-2xl border border-amber-400/20 bg-amber-400/10 px-4 py-3 text-sm text-amber-100">
+                      <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+                      <div>
+                        <p className="font-medium">{selectedOrganization.companyName}</p>
+                        <p className="mt-1 text-amber-100/80">
+                          El cliente verá este proyecto en su dashboard.
+                        </p>
+                      </div>
+                    </div>
                   ) : null}
-                </div>
-
-                <div>
-                  <label className="mb-2 block text-sm font-medium text-zinc-200">Contacto</label>
-                  <input
-                    value={formState.contactName}
-                    onChange={(event) => updateField('contactName', event.target.value)}
-                    className={inputClassName}
-                    placeholder="Nombre del contacto"
-                  />
-                  {formErrors.contactName ? (
-                    <p className="mt-2 text-xs text-rose-300">{formErrors.contactName}</p>
-                  ) : null}
-                </div>
-
-                <div>
-                  <label className="mb-2 block text-sm font-medium text-zinc-200">Teléfono</label>
-                  <input
-                    value={formState.contactPhone}
-                    onChange={(event) => updateField('contactPhone', event.target.value)}
-                    className={inputClassName}
-                    placeholder="+54 9 ..."
-                  />
-                </div>
-
-                <div>
-                  <label className="mb-2 block text-sm font-medium text-zinc-200">Email</label>
-                  <input
-                    value={formState.contactEmail}
-                    onChange={(event) => updateField('contactEmail', event.target.value)}
-                    className={inputClassName}
-                    placeholder="contacto@empresa.com"
-                  />
-                  {formErrors.contactEmail ? (
-                    <p className="mt-2 text-xs text-rose-300">{formErrors.contactEmail}</p>
+                  {formErrors.organizationId ? (
+                    <p className="mt-2 text-xs text-rose-300">{formErrors.organizationId}</p>
                   ) : null}
                 </div>
 
                 <div className="md:col-span-2">
-                  <label className="mb-2 block text-sm font-medium text-zinc-200">Nombre del proyecto</label>
+                  <label className="mb-2 block text-sm font-medium text-zinc-200">
+                    Nombre del proyecto
+                  </label>
                   <input
                     value={formState.name}
                     onChange={(event) => updateField('name', event.target.value)}
                     className={inputClassName}
-                    placeholder="Landing, automatización, MVP..."
+                    placeholder="Landing, automatizacion, MVP..."
                   />
                   {formErrors.name ? (
                     <p className="mt-2 text-xs text-rose-300">{formErrors.name}</p>
@@ -289,12 +267,14 @@ export function ProjectForm({ triggerLabel = 'Nuevo proyecto', project, lead }: 
                 </div>
 
                 <div className="md:col-span-2">
-                  <label className="mb-2 block text-sm font-medium text-zinc-200">Descripción</label>
+                  <label className="mb-2 block text-sm font-medium text-zinc-200">
+                    Descripcion
+                  </label>
                   <textarea
                     value={formState.description}
                     onChange={(event) => updateField('description', event.target.value)}
                     className={`${inputClassName} min-h-28 resize-none`}
-                    placeholder="Alcance, objetivos, entregables..."
+                    placeholder="Alcance, objetivos y entregables..."
                   />
                 </div>
 
@@ -307,7 +287,7 @@ export function ProjectForm({ triggerLabel = 'Nuevo proyecto', project, lead }: 
                     }
                     className={inputClassName}
                   >
-                    <option value="">Seleccionar servicio</option>
+                    <option value="">Sin clasificar</option>
                     {SERVICE_OPTIONS.map((option) => (
                       <option key={option.value} value={option.value}>
                         {option.label}
@@ -320,7 +300,9 @@ export function ProjectForm({ triggerLabel = 'Nuevo proyecto', project, lead }: 
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-zinc-200">Entrega estimada</label>
+                  <label className="mb-2 block text-sm font-medium text-zinc-200">
+                    Entrega estimada
+                  </label>
                   <input
                     type="date"
                     value={formState.estimatedEndDate}
@@ -330,7 +312,9 @@ export function ProjectForm({ triggerLabel = 'Nuevo proyecto', project, lead }: 
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-zinc-200">Monto acordado</label>
+                  <label className="mb-2 block text-sm font-medium text-zinc-200">
+                    Monto acordado
+                  </label>
                   <input
                     inputMode="decimal"
                     value={formState.agreedAmount}
@@ -338,14 +322,18 @@ export function ProjectForm({ triggerLabel = 'Nuevo proyecto', project, lead }: 
                     className={inputClassName}
                     placeholder="2500"
                   />
-                  <p className="mt-2 text-xs text-zinc-500">{formatCurrencyPreview(formState.agreedAmount)}</p>
+                  <p className="mt-2 text-xs text-zinc-500">
+                    {formatCurrencyPreview(formState.agreedAmount)}
+                  </p>
                   {formErrors.agreedAmount ? (
                     <p className="mt-2 text-xs text-rose-300">{formErrors.agreedAmount}</p>
                   ) : null}
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-zinc-200">Monthly rate</label>
+                  <label className="mb-2 block text-sm font-medium text-zinc-200">
+                    Monthly rate
+                  </label>
                   <input
                     inputMode="decimal"
                     value={formState.monthlyRate}
@@ -354,7 +342,9 @@ export function ProjectForm({ triggerLabel = 'Nuevo proyecto', project, lead }: 
                     placeholder="Opcional"
                   />
                   {formState.monthlyRate ? (
-                    <p className="mt-2 text-xs text-zinc-500">{formatCurrencyPreview(formState.monthlyRate)}</p>
+                    <p className="mt-2 text-xs text-zinc-500">
+                      {formatCurrencyPreview(formState.monthlyRate)}
+                    </p>
                   ) : null}
                   {formErrors.monthlyRate ? (
                     <p className="mt-2 text-xs text-rose-300">{formErrors.monthlyRate}</p>

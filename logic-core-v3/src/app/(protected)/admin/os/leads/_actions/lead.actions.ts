@@ -183,7 +183,7 @@ export async function getLeadById(
       project: lead.project
         ? {
             ...lead.project,
-            agreedAmount: lead.project.agreedAmount.toString(),
+            agreedAmount: lead.project.agreedAmount?.toString() ?? '',
             monthlyRate: lead.project.monthlyRate?.toString() ?? null,
           }
         : null,

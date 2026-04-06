@@ -3,9 +3,13 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
+  Building2,
   FolderKanban,
   LayoutDashboard,
+  LifeBuoy,
   type LucideIcon,
+  MessageCircle,
+  Settings,
   UserCog,
   Users,
 } from 'lucide-react'
@@ -21,11 +25,33 @@ type NavItem = {
   icon: LucideIcon
 }
 
-const NAV_ITEMS: NavItem[] = [
-  { href: '/admin/os', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/admin/os/leads', label: 'Leads', icon: Users },
-  { href: '/admin/os/projects', label: 'Proyectos', icon: FolderKanban },
-  { href: '/admin/os/team', label: 'Equipo', icon: UserCog },
+type NavSection = {
+  label: string
+  items: NavItem[]
+}
+
+const NAV_SECTIONS: NavSection[] = [
+  {
+    label: 'OPERACIONES',
+    items: [
+      { href: '/admin/os', label: 'Dashboard', icon: LayoutDashboard },
+      { href: '/admin/os/leads', label: 'Leads', icon: Users },
+      { href: '/admin/os/projects', label: 'Proyectos', icon: FolderKanban },
+      { href: '/admin/os/team', label: 'Equipo', icon: UserCog },
+    ],
+  },
+  {
+    label: 'CLIENTES',
+    items: [
+      { href: '/admin/os/clients', label: 'Clientes', icon: Building2 },
+      { href: '/admin/os/tickets', label: 'Tickets', icon: LifeBuoy },
+      { href: '/admin/os/messages', label: 'Mensajes', icon: MessageCircle },
+    ],
+  },
+  {
+    label: 'CONFIG',
+    items: [{ href: '/admin/os/settings', label: 'Configuraci\u00f3n', icon: Settings }],
+  },
 ]
 
 export function AdminSidebar({ userName, userRole }: AdminSidebarProps) {
@@ -47,32 +73,42 @@ export function AdminSidebar({ userName, userRole }: AdminSidebarProps) {
         </Link>
       </div>
 
-      <div className="flex-1 px-3 py-4">
-        <nav className="space-y-1.5">
-          {NAV_ITEMS.map((item) => {
-            const isActive =
-              item.href === '/admin/os'
-                ? pathname === item.href
-                : pathname === item.href || pathname.startsWith(`${item.href}/`)
+      <div className="flex-1 overflow-y-auto px-3 py-4">
+        <nav className="space-y-5">
+          {NAV_SECTIONS.map((section) => (
+            <div key={section.label} className="space-y-1.5">
+              <div className="border-t border-white/5 px-4 pt-3">
+                <p className="text-[9px] uppercase tracking-widest text-zinc-700">
+                  {section.label}
+                </p>
+              </div>
 
-            const Icon = item.icon
+              {section.items.map((item) => {
+                const isActive =
+                  item.href === '/admin/os'
+                    ? pathname === item.href
+                    : pathname === item.href || pathname.startsWith(`${item.href}/`)
 
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={[
-                  'flex items-center gap-3 rounded-r-2xl border-l-2 px-4 py-3 text-sm transition-all duration-200',
-                  isActive
-                    ? 'border-cyan-400 bg-cyan-400/10 text-cyan-100'
-                    : 'border-transparent text-zinc-400 hover:bg-white/[0.04] hover:text-zinc-100',
-                ].join(' ')}
-              >
-                <Icon className="h-4 w-4 shrink-0" />
-                <span>{item.label}</span>
-              </Link>
-            )
-          })}
+                const Icon = item.icon
+
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={[
+                      'flex items-center gap-3 rounded-r-2xl border-l-2 px-4 py-3 text-sm transition-all duration-200',
+                      isActive
+                        ? 'border-cyan-400 bg-cyan-400/10 text-cyan-100'
+                        : 'border-transparent text-zinc-400 hover:bg-white/[0.04] hover:text-zinc-100',
+                    ].join(' ')}
+                  >
+                    <Icon className="h-4 w-4 shrink-0" />
+                    <span>{item.label}</span>
+                  </Link>
+                )
+              })}
+            </div>
+          ))}
         </nav>
       </div>
 
@@ -86,7 +122,7 @@ export function AdminSidebar({ userName, userRole }: AdminSidebarProps) {
           href="/admin"
           className="mt-3 inline-flex text-xs text-zinc-500 transition-colors hover:text-zinc-200"
         >
-          ← Admin clásico
+          {'\u2190'} {'Admin cl\u00e1sico'}
         </Link>
       </div>
     </aside>

@@ -10,6 +10,24 @@ type ProjectPaymentsPageProps = {
   }>
 }
 
+type PaymentsPageData = {
+  id: string
+  status: OsProjectStatus
+  milestones: Array<{
+    id: string
+    type: 'INICIO' | 'ENTREGA'
+    amount: Prisma.Decimal
+    paidAt: Date | null
+  }>
+  maintenancePayments: Array<{
+    id: string
+    month: number
+    year: number
+    amount: Prisma.Decimal
+    paidAt: Date | null
+  }>
+}
+
 function formatCurrency(value: Prisma.Decimal): string {
   return new Intl.NumberFormat('es-AR', {
     style: 'currency',
@@ -46,29 +64,47 @@ export default async function AgencyOsProjectPaymentsPage({
 }: ProjectPaymentsPageProps) {
   const { projectId } = await params
 
-  const project = await prisma.osProject.findUnique({
-    where: { id: projectId },
-    include: {
-      milestones: {
-        orderBy: {
-          createdAt: 'asc',
-        },
+  const [osProject, milestones, maintenancePayments] = await Promise.all([
+    prisma.osProject.findUnique({
+      where: { id: projectId },
+      select: {
+        id: true,
+        status: true,
       },
-      maintenancePayments: {
-        orderBy: [
-          {
-            year: 'desc',
-          },
-          {
-            month: 'desc',
-          },
-        ],
+    }),
+    prisma.osPaymentMilestone.findMany({
+      where: { projectId },
+      select: {
+        id: true,
+        type: true,
+        amount: true,
+        paidAt: true,
       },
-    },
-  })
+      orderBy: {
+        createdAt: 'asc',
+      },
+    }),
+    prisma.osMaintenancePayment.findMany({
+      where: { projectId },
+      select: {
+        id: true,
+        month: true,
+        year: true,
+        amount: true,
+        paidAt: true,
+      },
+      orderBy: [{ year: 'desc' }, { month: 'desc' }],
+    }),
+  ])
 
-  if (!project) {
+  if (!osProject) {
     redirect('/admin/os/projects')
+  }
+
+  const project: PaymentsPageData = {
+    ...osProject,
+    milestones,
+    maintenancePayments,
   }
 
   return (
@@ -156,7 +192,7 @@ export default async function AgencyOsProjectPaymentsPage({
 
         {project.status !== OsProjectStatus.EN_MANTENIMIENTO ? (
           <div className="mt-5 rounded-2xl border border-white/10 bg-black/20 p-4 text-sm text-zinc-400">
-            El proyecto pasará a mantenimiento después de la entrega.
+            El proyecto pasara a mantenimiento despues de la entrega.
           </div>
         ) : (
           <div className="mt-5 overflow-hidden rounded-[24px] border border-white/10">
@@ -167,7 +203,7 @@ export default async function AgencyOsProjectPaymentsPage({
                     <th className="px-4 py-3 font-medium">Mes</th>
                     <th className="px-4 py-3 font-medium">Monto</th>
                     <th className="px-4 py-3 font-medium">Estado</th>
-                    <th className="px-4 py-3 font-medium">Acción</th>
+                    <th className="px-4 py-3 font-medium">Accion</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-white/10 bg-white/[0.03]">
@@ -208,7 +244,7 @@ export default async function AgencyOsProjectPaymentsPage({
                               </button>
                             </form>
                           ) : (
-                            <span className="text-xs text-zinc-500">Sin acción</span>
+                            <span className="text-xs text-zinc-500">Sin accion</span>
                           )}
                         </td>
                       </tr>
@@ -216,7 +252,7 @@ export default async function AgencyOsProjectPaymentsPage({
                   ) : (
                     <tr>
                       <td className="px-4 py-6 text-zinc-500" colSpan={4}>
-                        Todavía no hay meses generados para el mantenimiento.
+                        Todavia no hay meses generados para el mantenimiento.
                       </td>
                     </tr>
                   )}

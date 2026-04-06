@@ -1,5 +1,7 @@
 import Link from 'next/link'
-import { OsProjectStatus, OsServiceType } from '@prisma/client'
+import { Building2 } from 'lucide-react'
+import { ProjectStatus, ServiceType } from '@prisma/client'
+import { prisma } from '@/lib/prisma'
 import { listProjects } from './_actions/project.actions'
 import { ProjectForm } from './_components/project-form'
 import { ProjectList, type ProjectListItem } from './_components/project-list'
@@ -8,25 +10,35 @@ type ProjectsPageProps = {
   searchParams?: Promise<{
     status?: string | string[]
     serviceType?: string | string[]
+    visibility?: string | string[]
   }>
 }
 
-const STATUS_OPTIONS: Array<{ value: 'ALL' | OsProjectStatus; label: string }> = [
+const INTERNAL_ORGANIZATION_SLUG = 'agency-os-internal'
+
+const STATUS_OPTIONS: Array<{ value: 'ALL' | ProjectStatus; label: string }> = [
   { value: 'ALL', label: 'Todos' },
-  { value: 'EN_DESARROLLO', label: 'En desarrollo' },
-  { value: 'EN_REVISION', label: 'En revisión' },
-  { value: 'ENTREGADO', label: 'Entregado' },
-  { value: 'EN_MANTENIMIENTO', label: 'En mantenimiento' },
-  { value: 'CANCELADO', label: 'Cancelado' },
+  { value: 'PLANNING', label: 'Planning' },
+  { value: 'IN_PROGRESS', label: 'En progreso' },
+  { value: 'REVIEW', label: 'Revision' },
+  { value: 'COMPLETED', label: 'Completado' },
 ]
 
-const SERVICE_OPTIONS: Array<{ value: 'ALL' | OsServiceType; label: string }> = [
+const SERVICE_OPTIONS: Array<{ value: 'ALL' | ServiceType; label: string }> = [
   { value: 'ALL', label: 'Todos los servicios' },
-  { value: 'WEB', label: 'Web' },
-  { value: 'AI_AGENT', label: 'AI Agent' },
+  { value: 'WEB_DEV', label: 'Web' },
+  { value: 'AI', label: 'AI' },
   { value: 'AUTOMATION', label: 'Automation' },
-  { value: 'CUSTOM_SOFTWARE', label: 'Custom Software' },
+  { value: 'SOFTWARE', label: 'Software' },
 ]
+
+const VISIBILITY_OPTIONS = [
+  { value: 'ALL', label: 'Todos' },
+  { value: 'CLIENT', label: 'Con cliente' },
+  { value: 'INTERNAL', label: 'Internos' },
+] as const
+
+type VisibilityFilter = (typeof VISIBILITY_OPTIONS)[number]['value']
 
 function getSingleValue(value?: string | string[]): string | undefined {
   if (Array.isArray(value)) {
@@ -36,23 +48,35 @@ function getSingleValue(value?: string | string[]): string | undefined {
   return value
 }
 
-function isProjectStatus(value: string | undefined): value is OsProjectStatus {
+function isProjectStatus(value: string | undefined): value is ProjectStatus {
   return STATUS_OPTIONS.some((option) => option.value === value && option.value !== 'ALL')
 }
 
-function isServiceType(value: string | undefined): value is OsServiceType {
+function isServiceType(value: string | undefined): value is ServiceType {
   return SERVICE_OPTIONS.some((option) => option.value === value && option.value !== 'ALL')
 }
 
-function buildStatusHref(status: 'ALL' | OsProjectStatus, serviceType?: OsServiceType): string {
+function isVisibilityFilter(value: string | undefined): value is VisibilityFilter {
+  return VISIBILITY_OPTIONS.some((option) => option.value === value)
+}
+
+function buildProjectsHref(input: {
+  status?: 'ALL' | ProjectStatus
+  serviceType?: 'ALL' | ServiceType
+  visibility?: VisibilityFilter
+}) {
   const params = new URLSearchParams()
 
-  if (status !== 'ALL') {
-    params.set('status', status)
+  if (input.status && input.status !== 'ALL') {
+    params.set('status', input.status)
   }
 
-  if (serviceType) {
-    params.set('serviceType', serviceType)
+  if (input.serviceType && input.serviceType !== 'ALL') {
+    params.set('serviceType', input.serviceType)
+  }
+
+  if (input.visibility && input.visibility !== 'ALL') {
+    params.set('visibility', input.visibility)
   }
 
   const query = params.toString()
@@ -63,11 +87,30 @@ export default async function AgencyOsProjectsPage({ searchParams }: ProjectsPag
   const resolvedSearchParams = searchParams ? await searchParams : undefined
   const rawStatus = getSingleValue(resolvedSearchParams?.status)
   const rawServiceType = getSingleValue(resolvedSearchParams?.serviceType)
+  const rawVisibility = getSingleValue(resolvedSearchParams?.visibility)
 
   const selectedStatus = isProjectStatus(rawStatus) ? rawStatus : undefined
   const selectedServiceType = isServiceType(rawServiceType) ? rawServiceType : undefined
+  const selectedVisibility = isVisibilityFilter(rawVisibility) ? rawVisibility : 'ALL'
 
-  const result = await listProjects()
+  const [result, organizations] = await Promise.all([
+    listProjects(),
+    prisma.organization.findMany({
+      where: {
+        slug: {
+          not: INTERNAL_ORGANIZATION_SLUG,
+        },
+      },
+      select: {
+        id: true,
+        companyName: true,
+      },
+      orderBy: {
+        companyName: 'asc',
+      },
+    }),
+  ])
+
   const projects: ProjectListItem[] = result.success ? result.data : []
 
   const filteredProjects = projects.filter((project) => {
@@ -75,8 +118,14 @@ export default async function AgencyOsProjectsPage({ searchParams }: ProjectsPag
     const matchesServiceType = selectedServiceType
       ? project.serviceType === selectedServiceType
       : true
+    const matchesVisibility =
+      selectedVisibility === 'ALL'
+        ? true
+        : selectedVisibility === 'CLIENT'
+          ? project.organizationId !== null
+          : project.organizationId === null
 
-    return matchesStatus && matchesServiceType
+    return matchesStatus && matchesServiceType && matchesVisibility
   })
 
   return (
@@ -91,15 +140,40 @@ export default async function AgencyOsProjectsPage({ searchParams }: ProjectsPag
               Entregas, mantenimiento y rentabilidad
             </h2>
             <p className="mt-3 max-w-2xl text-sm leading-6 text-zinc-400">
-              Seguimiento centralizado de proyectos activos, hitos cobrados y avance operativo del equipo.
+              Seguimiento centralizado de proyectos del portal y proyectos internos desde una sola vista.
             </p>
           </div>
 
-          <ProjectForm triggerLabel="Nuevo proyecto" />
+          <ProjectForm triggerLabel="Nuevo proyecto" organizations={organizations} />
         </div>
 
         <div className="mt-6 flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            {VISIBILITY_OPTIONS.map((option) => {
+              const isActive = selectedVisibility === option.value
+
+              return (
+                <Link
+                  key={option.value}
+                  href={buildProjectsHref({
+                    status: selectedStatus ?? 'ALL',
+                    serviceType: selectedServiceType ?? 'ALL',
+                    visibility: option.value,
+                  })}
+                  className={[
+                    'inline-flex rounded-full border px-3 py-2 text-xs font-medium transition-colors',
+                    isActive
+                      ? 'border-cyan-400/20 bg-cyan-400/10 text-cyan-100'
+                      : 'border-white/10 bg-black/20 text-zinc-300 hover:bg-white/5',
+                  ].join(' ')}
+                >
+                  {option.label}
+                </Link>
+              )
+            })}
+
+            <div className="mx-1 hidden h-6 w-px bg-white/10 xl:block" />
+
             {STATUS_OPTIONS.map((option) => {
               const isActive =
                 option.value === 'ALL' ? !selectedStatus : option.value === selectedStatus
@@ -107,7 +181,11 @@ export default async function AgencyOsProjectsPage({ searchParams }: ProjectsPag
               return (
                 <Link
                   key={option.value}
-                  href={buildStatusHref(option.value, selectedServiceType)}
+                  href={buildProjectsHref({
+                    status: option.value,
+                    serviceType: selectedServiceType ?? 'ALL',
+                    visibility: selectedVisibility,
+                  })}
                   className={[
                     'inline-flex rounded-full border px-3 py-2 text-xs font-medium transition-colors',
                     isActive
@@ -123,6 +201,9 @@ export default async function AgencyOsProjectsPage({ searchParams }: ProjectsPag
 
           <form className="flex flex-wrap items-center gap-3" action="/admin/os/projects">
             {selectedStatus ? <input type="hidden" name="status" value={selectedStatus} /> : null}
+            {selectedVisibility !== 'ALL' ? (
+              <input type="hidden" name="visibility" value={selectedVisibility} />
+            ) : null}
 
             <select
               name="serviceType"
@@ -150,6 +231,18 @@ export default async function AgencyOsProjectsPage({ searchParams }: ProjectsPag
               Limpiar
             </Link>
           </form>
+        </div>
+
+        <div className="mt-5 flex flex-wrap items-center gap-3 text-sm text-zinc-400">
+          <div className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-black/20 px-4 py-3">
+            <Building2 className="h-4 w-4 text-cyan-300" />
+            <span>
+              {projects.filter((project) => project.organizationId !== null).length} con cliente
+            </span>
+          </div>
+          <div className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3">
+            {projects.filter((project) => project.organizationId === null).length} internos
+          </div>
         </div>
       </div>
 

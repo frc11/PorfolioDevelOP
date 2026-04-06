@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState, useTransition } from 'react'
 import { LoaderCircle, X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import type { OsTaskStatus } from '@prisma/client'
+import type { TaskStatus } from '@prisma/client'
 import {
   createTask,
   updateTask,
@@ -20,7 +20,7 @@ type EditableTask = {
   projectId: string
   title: string
   description: string | null
-  status: OsTaskStatus
+  status: TaskStatus
   estimatedHours: number | null
   assignedToId: string | null
 }
@@ -37,7 +37,7 @@ type TaskFormState = {
   description: string
   assignedToId: string
   estimatedHours: string
-  status: '' | OsTaskStatus
+  status: '' | TaskStatus
 }
 
 type FormErrors = Partial<Record<keyof TaskFormState, string>>
@@ -257,9 +257,9 @@ export function TaskForm({
                       }
                       className={inputClassName}
                     >
-                      <option value="PENDIENTE">Pendiente</option>
-                      <option value="EN_PROGRESO">En progreso</option>
-                      <option value="COMPLETADA">Completada</option>
+                      <option value="TODO">Pendiente</option>
+                      <option value="IN_PROGRESS">En progreso</option>
+                      <option value="DONE">Completada</option>
                     </select>
                   </div>
                 ) : null}

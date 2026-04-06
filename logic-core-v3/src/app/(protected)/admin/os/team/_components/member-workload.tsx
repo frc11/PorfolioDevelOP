@@ -2,14 +2,14 @@
 
 import Link from 'next/link'
 import { AlertTriangle, Clock3, FolderKanban, Inbox, UserRound } from 'lucide-react'
-import type { OsTaskStatus } from '@prisma/client'
+import type { TaskStatus } from '@prisma/client'
 import { EmptyState } from '@/app/(protected)/admin/os/_components/empty-state'
 
 type WorkloadTask = {
   id: string
   projectId: string
   title: string
-  status: OsTaskStatus
+  status: TaskStatus
   project: {
     id: string
     name: string
@@ -35,24 +35,24 @@ type MemberWorkloadProps = {
   groupedTasks: GroupedProjectTasks[]
 }
 
-function statusTone(status: OsTaskStatus): string {
+function statusTone(status: TaskStatus): string {
   switch (status) {
-    case 'PENDIENTE':
+    case 'TODO':
       return 'border-zinc-400/20 bg-zinc-500/10 text-zinc-200'
-    case 'EN_PROGRESO':
+    case 'IN_PROGRESS':
       return 'border-cyan-400/20 bg-cyan-400/10 text-cyan-200'
-    case 'COMPLETADA':
+    case 'DONE':
       return 'border-emerald-400/20 bg-emerald-400/10 text-emerald-200'
   }
 }
 
-function statusLabel(status: OsTaskStatus): string {
+function statusLabel(status: TaskStatus): string {
   switch (status) {
-    case 'PENDIENTE':
+    case 'TODO':
       return 'Pendiente'
-    case 'EN_PROGRESO':
+    case 'IN_PROGRESS':
       return 'En progreso'
-    case 'COMPLETADA':
+    case 'DONE':
       return 'Completada'
   }
 }

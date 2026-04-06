@@ -1,6 +1,7 @@
 'use server'
 
 import type { Prisma } from '@prisma/client'
+import { TaskStatus } from '@prisma/client'
 import { revalidatePath } from 'next/cache'
 import { prisma } from '@/lib/prisma'
 import { requireSuperAdmin } from '@/lib/auth-guards'
@@ -14,7 +15,9 @@ import {
   UserIdSchema,
 } from './task.schemas'
 
-type ProjectTaskRecord = Prisma.OsTaskGetPayload<{
+const INTERNAL_ORGANIZATION_SLUG = 'agency-os-internal'
+
+type ProjectTaskRecord = Prisma.TaskGetPayload<{
   select: {
     id: true
     projectId: true
@@ -26,6 +29,8 @@ type ProjectTaskRecord = Prisma.OsTaskGetPayload<{
     assignedToId: true
     createdAt: true
     updatedAt: true
+    approvalStatus: true
+    rejectionReason: true
     assignedTo: {
       select: {
         id: true
@@ -33,12 +38,7 @@ type ProjectTaskRecord = Prisma.OsTaskGetPayload<{
         email: true
       }
     }
-    _count: {
-      select: {
-        timeEntries: true
-      }
-    }
-    timeEntries: {
+    osTimeEntries: {
       select: {
         id: true
         hours: true
@@ -57,7 +57,7 @@ type ProjectTaskRecord = Prisma.OsTaskGetPayload<{
   }
 }>
 
-type UserTaskRecord = Prisma.OsTaskGetPayload<{
+type UserTaskRecord = Prisma.TaskGetPayload<{
   select: {
     id: true
     projectId: true
@@ -69,12 +69,7 @@ type UserTaskRecord = Prisma.OsTaskGetPayload<{
     assignedToId: true
     createdAt: true
     updatedAt: true
-    _count: {
-      select: {
-        timeEntries: true
-      }
-    }
-    timeEntries: {
+    osTimeEntries: {
       select: {
         hours: true
       }
@@ -89,16 +84,24 @@ type UserTaskRecord = Prisma.OsTaskGetPayload<{
   }
 }>
 
-function revalidateTaskPaths(projectId: string) {
+function shouldRevalidateDashboard(organizationSlug: string | null | undefined) {
+  return Boolean(organizationSlug) && organizationSlug !== INTERNAL_ORGANIZATION_SLUG
+}
+
+function revalidateTaskPaths(projectId: string, organizationSlug?: string | null) {
   revalidatePath('/admin/os/projects')
   revalidatePath(`/admin/os/projects/${projectId}`)
   revalidatePath(`/admin/os/projects/${projectId}/tasks`)
   revalidatePath(`/admin/os/projects/${projectId}/hours`)
   revalidatePath('/admin/os/team')
+
+  if (shouldRevalidateDashboard(organizationSlug)) {
+    revalidatePath('/dashboard/project')
+  }
 }
 
 function serializeProjectTask(task: ProjectTaskRecord) {
-  const totalHours = task.timeEntries.reduce((sum, entry) => sum + entry.hours, 0)
+  const totalHours = task.osTimeEntries.reduce((sum, entry) => sum + entry.hours, 0)
 
   return {
     id: task.id,
@@ -107,16 +110,18 @@ function serializeProjectTask(task: ProjectTaskRecord) {
     description: task.description,
     status: task.status,
     estimatedHours: task.estimatedHours,
-    position: task.position,
+    position: task.position ?? 0,
     assignedToId: task.assignedToId,
     createdAt: task.createdAt.toISOString(),
     updatedAt: task.updatedAt.toISOString(),
     assignedTo: task.assignedTo,
+    approvalStatus: task.approvalStatus ?? null,
+    rejectionReason: task.rejectionReason ?? null,
     _count: {
-      timeEntries: task._count.timeEntries,
+      timeEntries: task.osTimeEntries.length,
     },
     totalHours,
-    timeEntries: task.timeEntries.map((entry) => ({
+    timeEntries: task.osTimeEntries.map((entry) => ({
       id: entry.id,
       hours: entry.hours,
       date: entry.date.toISOString(),
@@ -128,7 +133,7 @@ function serializeProjectTask(task: ProjectTaskRecord) {
 }
 
 function serializeUserTask(task: UserTaskRecord) {
-  const totalHours = task.timeEntries.reduce((sum, entry) => sum + entry.hours, 0)
+  const totalHours = task.osTimeEntries.reduce((sum, entry) => sum + entry.hours, 0)
 
   return {
     id: task.id,
@@ -137,12 +142,12 @@ function serializeUserTask(task: UserTaskRecord) {
     description: task.description,
     status: task.status,
     estimatedHours: task.estimatedHours,
-    position: task.position,
+    position: task.position ?? 0,
     assignedToId: task.assignedToId,
     createdAt: task.createdAt.toISOString(),
     updatedAt: task.updatedAt.toISOString(),
     _count: {
-      timeEntries: task._count.timeEntries,
+      timeEntries: task.osTimeEntries.length,
     },
     totalHours,
     project: task.project,
@@ -154,30 +159,41 @@ export async function createTask(input: unknown): Promise<ActionResult<{ id: str
     await requireSuperAdmin()
     const parsed = CreateTaskSchema.parse(input)
 
-    const positionAggregate = await prisma.osTask.aggregate({
-      where: { projectId: parsed.projectId },
-      _max: {
-        position: true,
-      },
+    const task = await prisma.$transaction(async (tx) => {
+      const positionAggregate = await tx.task.aggregate({
+        where: { projectId: parsed.projectId },
+        _max: {
+          position: true,
+        },
+      })
+
+      return tx.task.create({
+        data: {
+          projectId: parsed.projectId,
+          title: parsed.title,
+          description: parsed.description ?? null,
+          status: parsed.status ?? TaskStatus.TODO,
+          estimatedHours: parsed.estimatedHours,
+          assignedToId: parsed.assignedToId ?? null,
+          position: (positionAggregate._max.position ?? -1) + 1,
+        },
+        select: {
+          id: true,
+          projectId: true,
+          project: {
+            select: {
+              organization: {
+                select: {
+                  slug: true,
+                },
+              },
+            },
+          },
+        },
+      })
     })
 
-    const task = await prisma.osTask.create({
-      data: {
-        projectId: parsed.projectId,
-        title: parsed.title,
-        description: parsed.description,
-        status: parsed.status,
-        estimatedHours: parsed.estimatedHours,
-        assignedToId: parsed.assignedToId,
-        position: (positionAggregate._max.position ?? -1) + 1,
-      },
-      select: {
-        id: true,
-        projectId: true,
-      },
-    })
-
-    revalidateTaskPaths(task.projectId)
+    revalidateTaskPaths(task.projectId, task.project.organization.slug)
     return ok({ id: task.id })
   } catch (error) {
     return fail(error instanceof Error ? error.message : 'Failed to create task')
@@ -188,18 +204,34 @@ export async function updateTask(input: unknown): Promise<ActionResult<{ id: str
   try {
     await requireSuperAdmin()
     const parsed = UpdateTaskSchema.parse(input)
-    const { taskId, ...data } = parsed
+    const { taskId, title, description, status, estimatedHours, assignedToId, position } = parsed
 
-    const task = await prisma.osTask.update({
+    const task = await prisma.task.update({
       where: { id: taskId },
-      data,
+      data: {
+        ...(title !== undefined ? { title } : {}),
+        ...(description !== undefined ? { description } : {}),
+        ...(status !== undefined ? { status } : {}),
+        ...(estimatedHours !== undefined ? { estimatedHours } : {}),
+        ...(assignedToId !== undefined ? { assignedToId } : {}),
+        ...(position !== undefined ? { position } : {}),
+      },
       select: {
         id: true,
         projectId: true,
+        project: {
+          select: {
+            organization: {
+              select: {
+                slug: true,
+              },
+            },
+          },
+        },
       },
     })
 
-    revalidateTaskPaths(task.projectId)
+    revalidateTaskPaths(task.projectId, task.project.organization.slug)
     return ok({ id: task.id })
   } catch (error) {
     return fail(error instanceof Error ? error.message : 'Failed to update task')
@@ -211,15 +243,32 @@ export async function deleteTask(taskId: string): Promise<ActionResult<void>> {
     await requireSuperAdmin()
     const parsedTaskId = TaskIdSchema.parse(taskId)
 
-    const task = await prisma.osTask.delete({
+    const task = await prisma.task.findUnique({
       where: { id: parsedTaskId },
       select: {
         id: true,
         projectId: true,
+        project: {
+          select: {
+            organization: {
+              select: {
+                slug: true,
+              },
+            },
+          },
+        },
       },
     })
 
-    revalidateTaskPaths(task.projectId)
+    if (!task) {
+      return fail('Task not found')
+    }
+
+    await prisma.task.delete({
+      where: { id: parsedTaskId },
+    })
+
+    revalidateTaskPaths(task.projectId, task.project.organization.slug)
     return ok<void>(undefined)
   } catch (error) {
     return fail(error instanceof Error ? error.message : 'Failed to delete task')
@@ -234,7 +283,7 @@ export async function reorderTasks(
     const parsed = ReorderTasksSchema.parse(input)
     const taskIds = parsed.tasks.map((task) => task.id)
 
-    const existingTasks = await prisma.osTask.findMany({
+    const existingTasks = await prisma.task.findMany({
       where: {
         id: {
           in: taskIds,
@@ -243,6 +292,15 @@ export async function reorderTasks(
       select: {
         id: true,
         projectId: true,
+        project: {
+          select: {
+            organization: {
+              select: {
+                slug: true,
+              },
+            },
+          },
+        },
       },
     })
 
@@ -262,7 +320,7 @@ export async function reorderTasks(
 
     await prisma.$transaction(
       parsed.tasks.map((task) =>
-        prisma.osTask.update({
+        prisma.task.update({
           where: { id: task.id },
           data: {
             position: task.position,
@@ -271,7 +329,7 @@ export async function reorderTasks(
       )
     )
 
-    revalidateTaskPaths(projectId)
+    revalidateTaskPaths(projectId, existingTasks[0]?.project.organization.slug)
     return ok({ count: parsed.tasks.length })
   } catch (error) {
     return fail(error instanceof Error ? error.message : 'Failed to reorder tasks')
@@ -285,7 +343,7 @@ export async function listTasksByProject(
     await requireSuperAdmin()
     const parsedProjectId = ProjectIdSchema.parse(projectId)
 
-    const tasks = await prisma.osTask.findMany({
+    const tasks = await prisma.task.findMany({
       where: { projectId: parsedProjectId },
       select: {
         id: true,
@@ -298,6 +356,8 @@ export async function listTasksByProject(
         assignedToId: true,
         createdAt: true,
         updatedAt: true,
+        approvalStatus: true,
+        rejectionReason: true,
         assignedTo: {
           select: {
             id: true,
@@ -305,12 +365,7 @@ export async function listTasksByProject(
             email: true,
           },
         },
-        _count: {
-          select: {
-            timeEntries: true,
-          },
-        },
-        timeEntries: {
+        osTimeEntries: {
           select: {
             id: true,
             hours: true,
@@ -325,12 +380,13 @@ export async function listTasksByProject(
               },
             },
           },
+          orderBy: [{ date: 'desc' }, { createdAt: 'desc' }],
         },
       },
       orderBy: [{ position: 'asc' }, { createdAt: 'asc' }],
     })
 
-    return ok(tasks.map(serializeProjectTask))
+    return ok(tasks.map((task) => serializeProjectTask(task)))
   } catch (error) {
     return fail(error instanceof Error ? error.message : 'Failed to list tasks by project')
   }
@@ -343,7 +399,7 @@ export async function listTasksByUser(
     await requireSuperAdmin()
     const parsedUserId = UserIdSchema.parse(userId)
 
-    const tasks = await prisma.osTask.findMany({
+    const tasks = await prisma.task.findMany({
       where: { assignedToId: parsedUserId },
       select: {
         id: true,
@@ -356,12 +412,7 @@ export async function listTasksByUser(
         assignedToId: true,
         createdAt: true,
         updatedAt: true,
-        _count: {
-          select: {
-            timeEntries: true,
-          },
-        },
-        timeEntries: {
+        osTimeEntries: {
           select: {
             hours: true,
           },
@@ -377,7 +428,7 @@ export async function listTasksByUser(
       orderBy: [{ updatedAt: 'desc' }, { position: 'asc' }],
     })
 
-    return ok(tasks.map(serializeUserTask))
+    return ok(tasks.map((task) => serializeUserTask(task)))
   } catch (error) {
     return fail(error instanceof Error ? error.message : 'Failed to list tasks by user')
   }

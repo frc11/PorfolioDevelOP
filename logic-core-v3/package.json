@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "postinstall": "prisma generate",
-    "seed:agency-os": "ts-node prisma/seed-agency-os.ts"
+    "seed:agency-os": "ts-node prisma/seed-agency-os.ts",
+    "migrate:os-v2": "ts-node prisma/migrate-os-to-unified.ts"
   },
   "dependencies": {
     "@ai-sdk/google": "^0.0.52",

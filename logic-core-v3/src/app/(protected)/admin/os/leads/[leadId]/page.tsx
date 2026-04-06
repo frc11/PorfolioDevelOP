@@ -353,7 +353,9 @@ export default async function AgencyOsLeadDetailPage({ params }: LeadPageProps) 
                     <p className="text-zinc-100">{lead.project.name}</p>
                     <p className="text-zinc-400">{lead.project.status.replaceAll('_', ' ')}</p>
                     <p className="text-zinc-400">
-                      ${lead.project.agreedAmount.toString()}
+                      {lead.project.agreedAmount
+                        ? `$${lead.project.agreedAmount.toString()}`
+                        : 'Monto pendiente'}
                     </p>
                   </div>
                 ) : (
