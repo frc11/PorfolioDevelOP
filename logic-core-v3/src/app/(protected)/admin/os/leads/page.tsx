@@ -4,10 +4,12 @@ import { prisma } from '@/lib/prisma'
 import { LeadForm } from './_components/lead-form'
 import {
   ACTIVE_PIPELINE_STATUSES,
-  LeadPipeline,
   type GroupedLeads,
   type LeadPipelineLead,
   type PipelineStatus,
+} from './_components/lead-pipeline.shared'
+import {
+  LeadPipeline,
 } from './_components/lead-pipeline'
 
 export const dynamic = 'force-dynamic'

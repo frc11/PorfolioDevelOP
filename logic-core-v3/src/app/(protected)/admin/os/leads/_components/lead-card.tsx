@@ -12,7 +12,11 @@ import {
   UserRound,
 } from 'lucide-react'
 import { ConfirmDialog } from '@/app/(protected)/admin/os/_components/confirm-dialog'
-import type { LeadPipelineLead, PipelineServiceType, PipelineStatus } from './lead-pipeline'
+import type {
+  LeadPipelineLead,
+  PipelineServiceType,
+  PipelineStatus,
+} from './lead-pipeline.shared'
 
 type LeadCardProps = {
   lead: LeadPipelineLead

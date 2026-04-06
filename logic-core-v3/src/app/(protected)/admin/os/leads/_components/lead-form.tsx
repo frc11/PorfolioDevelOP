@@ -8,7 +8,7 @@ import {
   updateLead,
 } from '../_actions/lead.actions'
 import { CreateLeadSchema } from '../_actions/lead.schemas'
-import type { PipelineServiceType } from './lead-pipeline'
+import type { PipelineServiceType } from './lead-pipeline.shared'
 
 type LeadFormProps = {
   lead?: {
