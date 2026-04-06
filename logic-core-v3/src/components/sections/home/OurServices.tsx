@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import {
@@ -13,18 +13,28 @@ import {
   useVelocity,
 } from 'framer-motion';
 import {
-  ArrowUpRight,
   BarChart2,
   Bot,
   Calendar,
   Check,
+  CheckCircle,
+  Clock,
   Code2,
+  Database,
+  FileText,
+  GitBranch,
   Globe,
+  Layers,
+  Mail,
   MessageSquare,
+  Package,
   Phone,
+  RefreshCw,
+  Search,
   Target,
   type LucideIcon,
   User,
+  Users,
   Zap,
 } from 'lucide-react';
 import { useTransitionContext } from '@/context/TransitionContext';
@@ -52,12 +62,12 @@ const SERVICES: Service[] = [
     tag: 'SITIOS & LANDINGS',
     title: 'Una presencia digital que convierte visitas en consultas reales.',
     description:
-      'Diseñamos experiencias de alto impacto para que tu empresa se vea premium, aparezca bien posicionada y capture demanda sin depender de tu tiempo.',
+      'DiseÃ±amos experiencias de alto impacto para que tu empresa se vea premium, aparezca bien posicionada y capture demanda sin depender de tu tiempo.',
     price: '$800 USD',
     timeline: '15 dias',
     metric: '+340% consultas promedio',
     sectors: ['Concesionarias', 'Clinicas', 'Gimnasios', 'Restaurantes'],
-    outcomes: ['Más autoridad en Google', 'Carga impecable en mobile', 'Captación 24/7'],
+    outcomes: ['MÃ¡s autoridad en Google', 'Carga impecable en mobile', 'CaptaciÃ³n 24/7'],
     cta: 'Explorar sitios web',
     href: '/web-development',
     accent: '#06b6d4',
@@ -68,14 +78,14 @@ const SERVICES: Service[] = [
   {
     id: 2,
     tag: 'INTELIGENCIA ARTIFICIAL',
-    title: 'Un sistema comercial que responde, filtra y agenda aunque tu equipo no esté online.',
+    title: 'Un sistema comercial que responde, filtra y agenda aunque tu equipo no estÃ© online.',
     description:
       'Integramos agentes de IA en WhatsApp y web para responder consultas, calificar leads y liberar tiempo ejecutivo sin perder velocidad de respuesta.',
     price: '$300 USD',
     timeline: '7 dias',
     metric: '94% respuesta automatica',
     sectors: ['Concesionarias', 'Clinicas', 'Comercios', 'Inmobiliarias'],
-    outcomes: ['Atención inmediata', 'Mejor calidad de lead', 'Agenda operando sola'],
+    outcomes: ['AtenciÃ³n inmediata', 'Mejor calidad de lead', 'Agenda operando sola'],
     cta: 'Explorar IA aplicada',
     href: '/ai-implementations',
     accent: '#8b5cf6',
@@ -185,14 +195,6 @@ function WebScene({ service }: { service: Service }) {
     title: string;
     helper: string;
     values: Array<{ label: string; value: string }>;
-  };
-
-  type SEOResult = {
-    position: number;
-    url: string;
-    title: string;
-    description: string;
-    isClient: boolean;
   };
 
   const IconBase = ({ children }: { children: ReactNode }) => (
@@ -384,35 +386,392 @@ function WebScene({ service }: { service: Service }) {
   const activeSimulation = webSimulations[activeTab];
   const activePlaceholder = placeholderConfigs[activeTab];
 
-  const renderSEOScene = ({ isActive, progress, color }: SimProps) => {
-    const query = 'Cl\u00ednica odontol\u00f3gica en Tucum\u00e1n';
-    const typedLength = Math.floor(progress * 4 * query.length);
-    const typedQuery = query.slice(0, Math.min(typedLength, query.length));
-    const showResults = progress > 0.25;
+  function SimSEO({ isActive, progress, color }: SimProps) {
+    const query = 'ClÃ­nica odontolÃ³gica en TucumÃ¡n';
+    const typedLength = Math.floor(Math.min(progress / 0.25, 1) * query.length);
+    const typedQuery = query.slice(0, typedLength);
+    const showResults = progress > 0.28;
     const highlightFirst = progress > 0.55;
+    const showStars = progress > 0.7;
 
-    const results: SEOResult[] = [
-      {
-        position: 1,
-        url: 'tuempresa.com.ar',
-        title: 'Tu Empresa | develOP',
-        description: 'El mejor servicio en tu zona. Consulta precios y pedi presupuesto online.',
-        isClient: true,
-      },
-      {
-        position: 2,
-        url: 'competidor1.com',
-        title: 'Competidor Local - Servicios',
-        description: 'Informacion basica. Sin optimizacion.',
-        isClient: false,
-      },
-      {
-        position: 3,
-        url: 'directoriolocal.com',
-        title: 'Directorio de empresas',
-        description: 'Listado general sin diferenciacion.',
-        isClient: false,
-      },
+    return (
+      <div
+        style={{
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 10,
+          padding: '4px 2px',
+        }}
+      >
+        {/* Header del panel */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexShrink: 0,
+          }}
+        >
+          <div>
+            <div
+              style={{
+                fontSize: 9,
+                fontWeight: 600,
+                letterSpacing: '0.15em',
+                color: 'rgba(255,255,255,0.25)',
+                marginBottom: 2,
+              }}
+            >
+              BÃšSQUEDA ACTIVA
+            </div>
+            <div
+              style={{
+                fontSize: 11,
+                color: 'rgba(255,255,255,0.5)',
+              }}
+            >
+              Google Â· TucumÃ¡n, Argentina
+            </div>
+          </div>
+          <div
+            style={{
+              fontSize: 9,
+              color,
+              background: `${color}12`,
+              border: `1px solid ${color}25`,
+              borderRadius: 6,
+              padding: '4px 8px',
+              fontWeight: 600,
+              letterSpacing: '0.08em',
+            }}
+          >
+            SEO LOCAL
+          </div>
+        </div>
+
+        {/* Barra de bÃºsqueda glassmorphism */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 10,
+            background: 'rgba(255,255,255,0.05)',
+            backdropFilter: 'blur(20px)',
+            border: '1px solid rgba(255,255,255,0.10)',
+            borderRadius: 12,
+            padding: '10px 14px',
+            flexShrink: 0,
+          }}
+        >
+          <Search size={13} color="rgba(255,255,255,0.3)" strokeWidth={1.5} />
+          <span
+            style={{
+              fontSize: 12,
+              color: 'rgba(255,255,255,0.8)',
+              flex: 1,
+              fontWeight: 400,
+            }}
+          >
+            {typedQuery}
+            {progress < 0.25 && (
+              <motion.span
+                animate={isActive ? { opacity: [1, 0] } : { opacity: 1 }}
+                transition={{ duration: 0.5, repeat: isActive ? Infinity : 0 }}
+                style={{
+                  display: 'inline-block',
+                  width: 1,
+                  height: 12,
+                  background: color,
+                  marginLeft: 2,
+                  verticalAlign: 'middle',
+                }}
+              />
+            )}
+          </span>
+          {showResults && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              style={{
+                fontSize: 10,
+                color: 'black',
+                background: color,
+                borderRadius: 6,
+                padding: '4px 10px',
+                fontWeight: 700,
+                letterSpacing: '0.05em',
+              }}
+            >
+              BUSCAR
+            </motion.div>
+          )}
+        </div>
+
+        {/* Resultados */}
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 6,
+            flex: 1,
+          }}
+        >
+          {/* RESULTADO #1 â€” TU EMPRESA */}
+          {showResults && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
+              style={{
+                background: highlightFirst
+                  ? `linear-gradient(135deg, ${color}12, ${color}06)`
+                  : 'rgba(255,255,255,0.03)',
+                backdropFilter: 'blur(20px)',
+                border: `1px solid ${highlightFirst ? `${color}30` : 'rgba(255,255,255,0.07)'}`,
+                borderRadius: 12,
+                padding: '12px 14px',
+                position: 'relative',
+                overflow: 'hidden',
+                transition: 'all 600ms cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+                boxShadow: highlightFirst ? `0 0 30px ${color}12` : 'none',
+              }}
+            >
+              {/* Borde izquierdo de acento */}
+              <motion.div
+                animate={{ opacity: highlightFirst ? 1 : 0 }}
+                transition={{ duration: 0.4 }}
+                style={{
+                  position: 'absolute',
+                  left: 0,
+                  top: 0,
+                  bottom: 0,
+                  width: 3,
+                  background: `linear-gradient(180deg, ${color}, ${color}60)`,
+                  borderRadius: '3px 0 0 3px',
+                }}
+              />
+
+              {/* Badge TU EMPRESA */}
+              {highlightFirst && (
+                <motion.div
+                  initial={{ opacity: 0, y: -4 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  style={{
+                    position: 'absolute',
+                    top: -1,
+                    right: 10,
+                    background: color,
+                    color: 'black',
+                    fontSize: 8,
+                    fontWeight: 800,
+                    padding: '2px 8px',
+                    borderRadius: '0 0 6px 6px',
+                    letterSpacing: '0.08em',
+                  }}
+                >
+                  TU EMPRESA
+                </motion.div>
+              )}
+
+              {/* PosiciÃ³n + URL */}
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  marginBottom: 5,
+                }}
+              >
+                <span
+                  style={{
+                    fontSize: 10,
+                    fontWeight: 800,
+                    color: highlightFirst ? color : 'rgba(255,255,255,0.2)',
+                    transition: 'color 400ms',
+                  }}
+                >
+                  #1
+                </span>
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 4,
+                  }}
+                >
+                  {highlightFirst && (
+                    <div
+                      style={{
+                        width: 14,
+                        height: 14,
+                        borderRadius: '50%',
+                        background: color,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      <Check size={8} color="black" strokeWidth={3} />
+                    </div>
+                  )}
+                  <span
+                    style={{
+                      fontSize: 10,
+                      color: highlightFirst ? `${color}80` : 'rgba(255,255,255,0.25)',
+                      transition: 'color 400ms',
+                    }}
+                  >
+                    tuempresa.com.ar
+                  </span>
+                </div>
+              </div>
+
+              {/* TÃ­tulo del resultado */}
+              <div
+                style={{
+                  fontSize: 13,
+                  fontWeight: highlightFirst ? 700 : 400,
+                  color: highlightFirst ? 'white' : 'rgba(255,255,255,0.4)',
+                  marginBottom: 4,
+                  transition: 'all 400ms',
+                  lineHeight: 1.3,
+                }}
+              >
+                Tu Empresa | develOP
+              </div>
+
+              {/* DescripciÃ³n */}
+              <div
+                style={{
+                  fontSize: 10,
+                  color: highlightFirst ? 'rgba(255,255,255,0.45)' : 'rgba(255,255,255,0.2)',
+                  lineHeight: 1.5,
+                  transition: 'color 400ms',
+                }}
+              >
+                El mejor servicio en tu zona. ConsultÃ¡ precios, pedÃ­ presupuesto online.
+              </div>
+
+              {/* Stars */}
+              {showStars && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.4 }}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 4,
+                    marginTop: 8,
+                  }}
+                >
+                  {[1, 2, 3, 4, 5].map((s) => (
+                    <motion.span
+                      key={s}
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ delay: s * 0.05, type: 'spring', stiffness: 400 }}
+                      style={{ fontSize: 11, color: '#f59e0b' }}
+                    >
+                      â˜…
+                    </motion.span>
+                  ))}
+                  <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)', marginLeft: 4 }}>
+                    4.9 Â· 47 reseÃ±as
+                  </span>
+                </motion.div>
+              )}
+            </motion.div>
+          )}
+
+          {/* RESULTADOS 2 y 3 â€” competidores */}
+          {[
+            {
+              pos: 2,
+              url: 'competidor1.com',
+              title: 'Competidor Local â€” Servicios',
+              desc: 'InformaciÃ³n bÃ¡sica. Sin optimizaciÃ³n.',
+            },
+            {
+              pos: 3,
+              url: 'directoriolocal.com',
+              title: 'Directorio de empresas',
+              desc: 'Listado general sin diferenciaciÃ³n.',
+            },
+          ].map(
+            (result, i) =>
+              showResults &&
+              progress > 0.35 + i * 0.1 && (
+                <motion.div
+                  key={result.pos}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{
+                    opacity: highlightFirst ? 0.35 : 0.7,
+                    y: 0,
+                    filter: highlightFirst ? 'grayscale(0.6)' : 'none',
+                  }}
+                  transition={{ duration: 0.4, delay: i * 0.1 }}
+                  style={{
+                    background: 'rgba(255,255,255,0.02)',
+                    backdropFilter: 'blur(10px)',
+                    border: '1px solid rgba(255,255,255,0.05)',
+                    borderRadius: 10,
+                    padding: '10px 14px',
+                  }}
+                >
+                  <div
+                    style={{
+                      display: 'flex',
+                      gap: 8,
+                      alignItems: 'center',
+                      marginBottom: 3,
+                    }}
+                  >
+                    <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.2)', fontWeight: 600 }}>
+                      #{result.pos}
+                    </span>
+                    <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.2)' }}>{result.url}</span>
+                  </div>
+                  <div
+                    style={{
+                      fontSize: 12,
+                      color: 'rgba(255,255,255,0.35)',
+                      marginBottom: 3,
+                      fontWeight: 500,
+                    }}
+                  >
+                    {result.title}
+                  </div>
+                  <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.2)' }}>{result.desc}</div>
+                </motion.div>
+              )
+          )}
+        </div>
+      </div>
+    );
+  }
+  function SimAnalytics({ isActive, progress, color }: SimProps) {
+    const visits = Math.floor(progress * 1842);
+    const sessions = Math.floor(progress * 247);
+    const conv = (progress * 3.2).toFixed(1);
+
+    const baseData = [45, 62, 58, 78, 71, 95, 88, 112, 98, 128, 115, 148];
+    const visiblePoints = Math.floor(progress * baseData.length);
+    const showGraph = progress > 0.2;
+    const showMap = progress > 0.4;
+
+    // Silueta Argentina mejorada
+    const argentinaPath =
+      'M80,8 C88,8 98,12 105,20 C112,28 115,38 114,50 C113,60 108,68 110,80 C112,90 108,100 105,112 C102,122 104,132 100,142 C96,152 92,162 88,172 C84,182 80,192 76,202 C72,212 68,222 62,232 C56,242 50,252 44,260 C40,266 36,268 34,264 C32,258 34,250 36,242 C38,234 36,226 34,216 C32,206 34,196 32,186 C30,176 28,166 30,156 C28,146 26,136 28,126 C26,116 24,106 26,96 C24,86 22,76 24,66 C26,56 28,46 26,36 C28,28 34,18 42,12 C52,6 66,6 80,8Z';
+
+    const mapCities = [
+      { name: 'Buenos Aires', cx: 65, cy: 175, r: 6 },
+      { name: 'C\u00f3rdoba', cx: 58, cy: 130, r: 5 },
+      { name: 'Rosario', cx: 62, cy: 152, r: 4 },
+      { name: 'Tucum\u00e1n', cx: 52, cy: 82, r: 4 },
+      { name: 'Mendoza', cx: 40, cy: 138, r: 4 },
+      { name: 'Salta', cx: 48, cy: 56, r: 3 },
     ];
 
     return (
@@ -421,445 +780,128 @@ function WebScene({ service }: { service: Service }) {
           height: '100%',
           display: 'flex',
           flexDirection: 'column',
-          gap: 8,
+          gap: 10,
           padding: '4px 2px',
         }}
       >
+        {/* Header */}
         <div
           style={{
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            gap: 8,
+            flexShrink: 0,
           }}
         >
-          <span
-            style={{
-              fontSize: 8,
-              letterSpacing: '0.12em',
-              color: 'rgba(255,255,255,0.3)',
-            }}
-          >
-            BUSQUEDA ACTIVA
-          </span>
-          <span
-            style={{
-              fontSize: 8,
-              color,
-              background: `${color}12`,
-              border: `1px solid ${color}25`,
-              borderRadius: 4,
-              padding: '2px 6px',
-            }}
-          >
-            SEO LOCAL EN TIEMPO REAL
-          </span>
-        </div>
-
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 8,
-            background: 'rgba(255,255,255,0.05)',
-            border: '1px solid rgba(255,255,255,0.10)',
-            borderRadius: 8,
-            padding: '8px 12px',
-            boxShadow: showResults ? `0 0 0 1px ${color}10 inset` : 'none',
-          }}
-        >
-          <div style={{ display: 'inline-flex', color: 'rgba(255,255,255,0.3)', flexShrink: 0 }}>
-            <SearchGlyph />
-          </div>
-
-          <span
-            style={{
-              fontSize: 11,
-              color: 'rgba(255,255,255,0.75)',
-              flex: 1,
-              minWidth: 0,
-              whiteSpace: 'nowrap',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-            }}
-          >
-            {typedQuery}
-            {progress < 0.25 && (
-              <motion.span
-                animate={isActive ? { opacity: [1, 0, 1] } : { opacity: 1 }}
-                transition={{ duration: 0.6, repeat: isActive ? Infinity : 0 }}
-                style={{ borderRight: '1px solid rgba(255,255,255,0.6)', marginLeft: 1 }}
-              >
-                &nbsp;
-              </motion.span>
-            )}
-          </span>
-
-          {showResults && (
-            <motion.span
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.2 }}
+          <div>
+            <div
               style={{
                 fontSize: 9,
-                color,
-                background: `${color}15`,
-                borderRadius: 4,
-                padding: '2px 6px',
-                fontWeight: 600,
-                flexShrink: 0,
+                letterSpacing: '0.15em',
+                color: 'rgba(255,255,255,0.25)',
+                marginBottom: 2,
               }}
             >
-              BUSCAR
-            </motion.span>
-          )}
-        </div>
-
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 6,
-            flex: 1,
-            overflow: 'hidden',
-            position: 'relative',
-          }}
-        >
-          <div
-            style={{
-              position: 'absolute',
-              inset: 0,
-              background: `radial-gradient(circle at 12% 8%, ${color}12 0%, transparent 38%)`,
-              pointerEvents: 'none',
-            }}
-          />
-
-          {results.map((result, index) => (
-            <AnimatePresence key={result.position}>
-              {showResults && progress > 0.25 + index * 0.12 && (
-                <motion.div
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={
-                    result.isClient && highlightFirst && isActive
-                      ? { opacity: 1, y: 0, scale: [1, 1.012, 1] }
-                      : { opacity: 1, y: 0, scale: 1 }
-                  }
-                  transition={
-                    result.isClient && highlightFirst && isActive
-                      ? {
-                          opacity: { duration: 0.3 },
-                          y: { duration: 0.3 },
-                          scale: { duration: 1.8, repeat: Infinity, ease: 'easeInOut' },
-                        }
-                      : { duration: 0.3 }
-                  }
-                  style={{
-                    padding: result.isClient && highlightFirst ? '10px 12px' : '8px 10px',
-                    borderRadius: 8,
-                    border: result.isClient && highlightFirst
-                      ? `1px solid ${color}50`
-                      : '1px solid rgba(255,255,255,0.06)',
-                    background: result.isClient && highlightFirst
-                      ? `linear-gradient(135deg, ${color}10, ${color}05)`
-                      : 'rgba(255,255,255,0.02)',
-                    position: 'relative',
-                    overflow: 'hidden',
-                    opacity: !result.isClient && highlightFirst ? 0.4 : 1,
-                    filter: !result.isClient && highlightFirst ? 'grayscale(0.5)' : 'none',
-                    transition: 'all 400ms ease',
-                    boxShadow: result.isClient && highlightFirst
-                      ? `0 0 20px ${color}10`
-                      : 'none',
-                  }}
-                >
-                  {result.isClient && highlightFirst && (
-                    <div
-                      style={{
-                        position: 'absolute',
-                        left: 0,
-                        top: 0,
-                        bottom: 0,
-                        width: 3,
-                        background: color,
-                        borderRadius: '3px 0 0 3px',
-                      }}
-                    />
-                  )}
-
-                  {result.isClient && highlightFirst && (
-                    <motion.div
-                      animate={isActive ? { opacity: [0.14, 0.28, 0.14] } : { opacity: 0.18 }}
-                      transition={{ duration: 1.8, repeat: isActive ? Infinity : 0, ease: 'easeInOut' }}
-                      style={{
-                        position: 'absolute',
-                        inset: 0,
-                        borderRadius: 8,
-                        background: `linear-gradient(90deg, ${color}14 0%, transparent 72%)`,
-                        pointerEvents: 'none',
-                      }}
-                    />
-                  )}
-
-                  {result.isClient && highlightFirst && (
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ duration: 0.25 }}
-                      style={{
-                        position: 'absolute',
-                        top: -8,
-                        right: 8,
-                        background: color,
-                        color: 'black',
-                        fontSize: 8,
-                        fontWeight: 700,
-                        padding: '2px 6px',
-                        borderRadius: 100,
-                        letterSpacing: '0.05em',
-                        zIndex: 2,
-                      }}
-                    >
-                      TU EMPRESA
-                    </motion.div>
-                  )}
-
-                  <div style={{ position: 'relative', zIndex: 1 }}>
-                    <div
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 6,
-                        marginBottom: 3,
-                      }}
-                    >
-                      <span
-                        style={{
-                          fontSize: 9,
-                          fontWeight: 700,
-                          color: result.isClient && highlightFirst
-                            ? color
-                            : 'rgba(255,255,255,0.2)',
-                          minWidth: 12,
-                        }}
-                      >
-                        #{result.position}
-                      </span>
-                      {result.isClient && (
-                        <div
-                          style={{
-                            width: 12,
-                            height: 12,
-                            borderRadius: '50%',
-                            background: color,
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            flexShrink: 0,
-                          }}
-                        >
-                          <Check size={7} color="black" strokeWidth={3} />
-                        </div>
-                      )}
-                      <span
-                        style={{
-                          fontSize: 9,
-                          color: 'rgba(255,255,255,0.3)',
-                        }}
-                      >
-                        {result.url}
-                      </span>
-                    </div>
-
-                    <div
-                      style={{
-                        fontSize: 11,
-                        fontWeight: result.isClient && highlightFirst ? 600 : 400,
-                        color: result.isClient && highlightFirst
-                          ? 'rgba(255,255,255,0.9)'
-                          : 'rgba(255,255,255,0.45)',
-                        marginBottom: 2,
-                      }}
-                    >
-                      {result.title}
-                    </div>
-
-                    <div
-                      style={{
-                        fontSize: 9,
-                        color: result.isClient && highlightFirst
-                          ? 'rgba(255,255,255,0.45)'
-                          : 'rgba(255,255,255,0.2)',
-                        lineHeight: 1.4,
-                      }}
-                    >
-                      {result.description}
-                    </div>
-
-                    {result.isClient && highlightFirst && (
-                      <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: 0.4 }}
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: 4,
-                          marginTop: 4,
-                        }}
-                      >
-                        {[1, 2, 3, 4, 5].map((star) => (
-                          <motion.span
-                            key={star}
-                            initial={{ scale: 0 }}
-                            animate={{ scale: 1 }}
-                            transition={{ delay: 0.4 + star * 0.06, type: 'spring' }}
-                            style={{ fontSize: 9, color: '#f59e0b' }}
-                          >
-                            ★
-                          </motion.span>
-                        ))}
-                        <span
-                          style={{
-                            fontSize: 9,
-                            color: 'rgba(255,255,255,0.3)',
-                            marginLeft: 2,
-                          }}
-                        >
-                          4.9 · 47 reseñas
-                        </span>
-                      </motion.div>
-                    )}
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          ))}
-        </div>
-      </div>
-    );
-  };
-
-  const renderAnalyticsScene = ({ isActive, progress, color }: SimProps) => {
-    const visits = Math.floor(progress * 1842)
-    const sessions = Math.floor(progress * 247)
-    const conv = (progress * 3.2).toFixed(1)
-
-    const baseData = [45, 62, 58, 78, 71, 95, 88, 112, 98, 128, 115, 148]
-    const visiblePoints = Math.floor(progress * baseData.length)
-    const showGraph = progress > 0.20
-    const showMap = progress > 0.40
-
-    // Silueta Argentina mejorada
-    const argentinaPath = "M80,8 C88,8 98,12 105,20 C112,28 115,38 114,50 C113,60 108,68 110,80 C112,90 108,100 105,112 C102,122 104,132 100,142 C96,152 92,162 88,172 C84,182 80,192 76,202 C72,212 68,222 62,232 C56,242 50,252 44,260 C40,266 36,268 34,264 C32,258 34,250 36,242 C38,234 36,226 34,216 C32,206 34,196 32,186 C30,176 28,166 30,156 C28,146 26,136 28,126 C26,116 24,106 26,96 C24,86 22,76 24,66 C26,56 28,46 26,36 C28,28 34,18 42,12 C52,6 66,6 80,8Z"
-
-    const mapCities = [
-      { name: 'Buenos Aires', cx: 65, cy: 175, r: 6 },
-      { name: 'Córdoba', cx: 58, cy: 130, r: 5 },
-      { name: 'Rosario', cx: 62, cy: 152, r: 4 },
-      { name: 'Tucumán', cx: 52, cy: 82, r: 4 },
-      { name: 'Mendoza', cx: 40, cy: 138, r: 4 },
-      { name: 'Salta', cx: 48, cy: 56, r: 3 },
-    ]
-
-    return (
-      <div style={{
-        height: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 10,
-        padding: '4px 2px',
-      }}>
-
-        {/* Header */}
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          flexShrink: 0,
-        }}>
-          <div>
-            <div style={{ fontSize: 9, letterSpacing: '0.15em', color: 'rgba(255,255,255,0.25)', marginBottom: 2 }}>
               PANEL EN TIEMPO REAL
             </div>
-            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>
-              Últimos 30 días · Tu sitio
-            </div>
+            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>{'\u00daltimos 30 d\u00edas \u00b7 Tu sitio'}</div>
           </div>
           <motion.div
-            animate={{ opacity: [0.5, 1, 0.5] }}
-            transition={{ duration: 1.5, repeat: Infinity }}
+            animate={isActive ? { opacity: [0.5, 1, 0.5] } : { opacity: 0.5 }}
+            transition={{ duration: 1.5, repeat: isActive ? Infinity : 0 }}
             style={{
               display: 'flex',
               alignItems: 'center',
               gap: 5,
               fontSize: 9,
               fontWeight: 600,
-              color: color,
+              color,
             }}
           >
-            <div style={{ width: 6, height: 6, borderRadius: '50%', background: color, boxShadow: `0 0 8px ${color}` }}/>
+            <div
+              style={{
+                width: 6,
+                height: 6,
+                borderRadius: '50%',
+                background: color,
+                boxShadow: `0 0 8px ${color}`,
+              }}
+            />
             LIVE
           </motion.div>
         </div>
 
-        {/* 3 métricas grandes */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(3, 1fr)',
-          gap: 6,
-          flexShrink: 0,
-        }}>
+        {/* 3 metricas grandes */}
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(3, 1fr)',
+            gap: 6,
+            flexShrink: 0,
+          }}
+        >
           {[
             { label: 'VISITAS', value: visits.toLocaleString(), trend: '+12%', color },
             { label: 'SESIONES', value: sessions.toString(), trend: '+8%', color: '#8b5cf6' },
             { label: 'CONV.', value: `${conv}%`, trend: '+0.4%', color: '#f59e0b' },
           ].map((m, i) => (
-            <div key={i} style={{
-              background: 'rgba(255,255,255,0.04)',
-              backdropFilter: 'blur(20px)',
-              border: `1px solid ${m.color}18`,
-              borderRadius: 10,
-              padding: '8px 10px',
-            }}>
-              <div style={{
-                fontSize: 8,
-                color: 'rgba(255,255,255,0.25)',
-                letterSpacing: '0.08em',
-                marginBottom: 4,
-              }}>
+            <div
+              key={i}
+              style={{
+                background: 'rgba(255,255,255,0.04)',
+                backdropFilter: 'blur(20px)',
+                border: `1px solid ${m.color}18`,
+                borderRadius: 10,
+                padding: '8px 10px',
+              }}
+            >
+              <div
+                style={{
+                  fontSize: 8,
+                  color: 'rgba(255,255,255,0.25)',
+                  letterSpacing: '0.08em',
+                  marginBottom: 4,
+                }}
+              >
                 {m.label}
               </div>
-              <div style={{
-                fontSize: 18,
-                fontWeight: 800,
-                color: m.color,
-                letterSpacing: '-0.02em',
-                lineHeight: 1,
-                marginBottom: 3,
-              }}>
+              <div
+                style={{
+                  fontSize: 18,
+                  fontWeight: 800,
+                  color: m.color,
+                  letterSpacing: '-0.02em',
+                  lineHeight: 1,
+                  marginBottom: 3,
+                }}
+              >
                 {m.value}
               </div>
-              <div style={{
-                fontSize: 9,
-                color: '#10b981',
-                fontWeight: 500,
-              }}>
-                ↑ {m.trend}
+              <div
+                style={{
+                  fontSize: 9,
+                  color: '#10b981',
+                  fontWeight: 500,
+                }}
+              >
+                {'\u2191 '}
+                {m.trend}
               </div>
             </div>
           ))}
         </div>
 
-        {/* Área principal: gráfico + mapa */}
-        <div style={{
-          flex: 1,
-          display: 'grid',
-          gridTemplateColumns: '3fr 2fr',
-          gap: 6,
-          minHeight: 0,
-        }}>
-
-          {/* Gráfico */}
+        {/* Area principal: grafico + mapa */}
+        <div
+          style={{
+            flex: 1,
+            display: 'grid',
+            gridTemplateColumns: '3fr 2fr',
+            gap: 6,
+            minHeight: 0,
+          }}
+        >
+          {/* Grafico */}
           {showGraph && (
             <motion.div
               initial={{ opacity: 0 }}
@@ -875,13 +917,15 @@ function WebScene({ service }: { service: Service }) {
                 flexDirection: 'column',
               }}
             >
-              <div style={{
-                fontSize: 8,
-                color: 'rgba(255,255,255,0.2)',
-                letterSpacing: '0.08em',
-                marginBottom: 8,
-              }}>
-                ÚLTIMOS 12 DÍAS
+              <div
+                style={{
+                  fontSize: 8,
+                  color: 'rgba(255,255,255,0.2)',
+                  letterSpacing: '0.08em',
+                  marginBottom: 8,
+                }}
+              >
+                {'\u00daLTIMOS 12 D\u00cdAS'}
               </div>
               <svg
                 viewBox="0 0 120 60"
@@ -889,45 +933,48 @@ function WebScene({ service }: { service: Service }) {
                 preserveAspectRatio="none"
               >
                 <defs>
-                  <linearGradient id={`grad-${color.replace('#','')}`} x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor={color} stopOpacity="0.25"/>
-                    <stop offset="100%" stopColor={color} stopOpacity="0"/>
+                  <linearGradient id={`grad-${color.replace('#', '')}`} x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor={color} stopOpacity="0.25" />
+                    <stop offset="100%" stopColor={color} stopOpacity="0" />
                   </linearGradient>
                 </defs>
-                {visiblePoints > 1 && (() => {
-                  const pts = baseData.slice(0, visiblePoints).map((v, i) => ({
-                    x: (i / (baseData.length - 1)) * 120,
-                    y: 55 - (v / 160) * 50,
-                  }))
-                  const areaD = [
-                    `M ${pts[0].x} 60`,
-                    ...pts.map(p => `L ${p.x} ${p.y}`),
-                    `L ${pts[pts.length-1].x} 60 Z`
-                  ].join(' ')
-                  const lineD = pts.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ')
-                  return (
-                    <>
-                      <path d={areaD} fill={`url(#grad-${color.replace('#','')})`}/>
-                      <path d={lineD} fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                      {/* Punto final con glow */}
-                      <circle
-                        cx={pts[pts.length-1].x}
-                        cy={pts[pts.length-1].y}
-                        r="3"
-                        fill={color}
-                      />
-                      <circle
-                        cx={pts[pts.length-1].x}
-                        cy={pts[pts.length-1].y}
-                        r="6"
-                        fill="none"
-                        stroke={color}
-                        strokeWidth="0.5"
-                        opacity="0.4"
-                      />
-                    </>
-                  )
-                })()}
+                {visiblePoints > 1 &&
+                  (() => {
+                    const pts = baseData.slice(0, visiblePoints).map((v, i) => ({
+                      x: (i / (baseData.length - 1)) * 120,
+                      y: 55 - (v / 160) * 50,
+                    }));
+                    const areaD = [
+                      `M ${pts[0].x} 60`,
+                      ...pts.map((p) => `L ${p.x} ${p.y}`),
+                      `L ${pts[pts.length - 1].x} 60 Z`,
+                    ].join(' ');
+                    const lineD = pts.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
+                    return (
+                      <>
+                        <path d={areaD} fill={`url(#grad-${color.replace('#', '')})`} />
+                        <path
+                          d={lineD}
+                          fill="none"
+                          stroke={color}
+                          strokeWidth="1.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                        {/* Punto final con glow */}
+                        <circle cx={pts[pts.length - 1].x} cy={pts[pts.length - 1].y} r="3" fill={color} />
+                        <circle
+                          cx={pts[pts.length - 1].x}
+                          cy={pts[pts.length - 1].y}
+                          r="6"
+                          fill="none"
+                          stroke={color}
+                          strokeWidth="0.5"
+                          opacity="0.4"
+                        />
+                      </>
+                    );
+                  })()}
               </svg>
             </motion.div>
           )}
@@ -949,13 +996,15 @@ function WebScene({ service }: { service: Service }) {
                 overflow: 'hidden',
               }}
             >
-              <div style={{
-                fontSize: 8,
-                color: 'rgba(255,255,255,0.2)',
-                letterSpacing: '0.08em',
-                marginBottom: 4,
-                flexShrink: 0,
-              }}>
+              <div
+                style={{
+                  fontSize: 8,
+                  color: 'rgba(255,255,255,0.2)',
+                  letterSpacing: '0.08em',
+                  marginBottom: 4,
+                  flexShrink: 0,
+                }}
+              >
                 ORIGEN
               </div>
               <div style={{ flex: 1, position: 'relative' }}>
@@ -972,101 +1021,105 @@ function WebScene({ service }: { service: Service }) {
                     strokeWidth="0.8"
                   />
                   {/* Ciudades */}
-                  {mapCities.map((city, i) => (
-                    progress > 0.42 + i * 0.07 && (
-                      <g key={city.name}>
-                        {/* Anillo pulsante */}
-                        <motion.circle
-                          cx={city.cx} cy={city.cy}
-                          r={city.r * 2}
-                          fill="none"
-                          stroke={color}
-                          strokeWidth="0.5"
-                          animate={{ r: [city.r * 1.5, city.r * 3, city.r * 1.5], opacity: [0.4, 0, 0.4] }}
-                          transition={{ duration: 2.5, repeat: Infinity, delay: i * 0.3 }}
-                        />
-                        {/* Punto */}
-                        <motion.circle
-                          cx={city.cx} cy={city.cy}
-                          r={city.r}
-                          fill={color}
-                          initial={{ r: 0, opacity: 0 }}
-                          animate={{ r: city.r, opacity: 0.85 }}
-                          transition={{ type: 'spring', stiffness: 300, delay: i * 0.08 }}
-                          style={{ filter: `drop-shadow(0 0 3px ${color})` }}
-                        />
-                      </g>
-                    )
-                  ))}
+                  {mapCities.map(
+                    (city, i) =>
+                      progress > 0.42 + i * 0.07 && (
+                        <g key={city.name}>
+                          {/* Anillo pulsante */}
+                          <motion.circle
+                            cx={city.cx}
+                            cy={city.cy}
+                            r={city.r * 2}
+                            fill="none"
+                            stroke={color}
+                            strokeWidth="0.5"
+                            animate={{ r: [city.r * 1.5, city.r * 3, city.r * 1.5], opacity: [0.4, 0, 0.4] }}
+                            transition={{ duration: 2.5, repeat: Infinity, delay: i * 0.3 }}
+                          />
+                          {/* Punto */}
+                          <motion.circle
+                            cx={city.cx}
+                            cy={city.cy}
+                            r={city.r}
+                            fill={color}
+                            initial={{ r: 0, opacity: 0 }}
+                            animate={{ r: city.r, opacity: 0.85 }}
+                            transition={{ type: 'spring', stiffness: 300, delay: i * 0.08 }}
+                            style={{ filter: `drop-shadow(0 0 3px ${color})` }}
+                          />
+                        </g>
+                      )
+                  )}
                 </svg>
               </div>
             </motion.div>
           )}
         </div>
       </div>
-    )
-  };
-
-  const renderLeadsScene = ({ isActive, progress, color }: SimProps) => {
+    );
+  }
+  function SimLeads({ isActive, progress, color }: SimProps) {
     const fields = [
       { label: 'Nombre', value: 'Carlos Mendoza', icon: User },
       { label: 'WhatsApp', value: '+54 381 555-1234', icon: Phone },
       { label: 'Servicio', value: 'Consulta de precios', icon: MessageSquare },
-    ]
+    ];
 
-    const fieldThresholds = [0, 0.12, 0.24]
-    const showButton = progress > 0.38
-    const submitted = progress > 0.50
-    const showWhatsApp = progress > 0.62
-    const showIA = progress > 0.80
+    const fieldThresholds = [0, 0.12, 0.24];
+    const showButton = progress > 0.38;
+    const submitted = progress > 0.5;
+    const showWhatsApp = progress > 0.62;
+    const showIA = progress > 0.8;
 
     return (
-      <div style={{
-        height: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 8,
-        padding: '4px 2px',
-      }}>
-
-        {/* Header */}
-        <div style={{
+      <div
+        style={{
+          height: '100%',
           display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'flex-start',
-          flexShrink: 0,
-        }}>
+          flexDirection: 'column',
+          gap: 8,
+          padding: '4px 2px',
+        }}
+      >
+        {/* Header */}
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'flex-start',
+            flexShrink: 0,
+          }}
+        >
           <div>
             <div style={{ fontSize: 9, letterSpacing: '0.15em', color: 'rgba(255,255,255,0.25)', marginBottom: 2 }}>
               FORMULARIO DE CONTACTO
             </div>
-            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>
-              Captura automática · 24/7
-            </div>
+            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>{'Captura autom\u00e1tica \u00b7 24/7'}</div>
           </div>
-          <div style={{
-            fontSize: 9, color: color,
-            background: `${color}12`,
-            border: `1px solid ${color}25`,
-            borderRadius: 6,
-            padding: '4px 8px',
-            fontWeight: 600,
-          }}>
-            CAPTACIÓN
+          <div
+            style={{
+              fontSize: 9,
+              color,
+              background: `${color}12`,
+              border: `1px solid ${color}25`,
+              borderRadius: 6,
+              padding: '4px 8px',
+              fontWeight: 600,
+            }}
+          >
+            {'CAPTACI\u00d3N'}
           </div>
         </div>
 
         {/* Campos */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6, flexShrink: 0 }}>
           {fields.map((field, i) => {
-            const visible = progress > fieldThresholds[i]
-            const charProgress = visible
-              ? Math.min((progress - fieldThresholds[i]) / 0.12, 1)
-              : 0
-            const charCount = Math.floor(charProgress * field.value.length)
-            const displayValue = field.value.slice(0, charCount)
-            const complete = charCount >= field.value.length
-            const IconComponent = field.icon
+            const visible = progress > fieldThresholds[i];
+            const charProgress = visible ? Math.min((progress - fieldThresholds[i]) / 0.12, 1) : 0;
+            const charCount = Math.floor(charProgress * field.value.length);
+            const displayValue = field.value.slice(0, charCount);
+            const complete = charCount >= field.value.length;
+            const IconComponent = field.icon;
 
             return visible ? (
               <motion.div
@@ -1078,34 +1131,40 @@ function WebScene({ service }: { service: Service }) {
                   display: 'flex',
                   alignItems: 'center',
                   gap: 10,
-                  background: complete
-                    ? `${color}08`
-                    : 'rgba(255,255,255,0.04)',
+                  background: complete ? `${color}08` : 'rgba(255,255,255,0.04)',
                   backdropFilter: 'blur(20px)',
-                  border: `1px solid ${complete ? color + '30' : 'rgba(255,255,255,0.08)'}`,
+                  border: `1px solid ${complete ? `${color}30` : 'rgba(255,255,255,0.08)'}`,
                   borderRadius: 10,
                   padding: '9px 12px',
                   transition: 'all 400ms cubic-bezier(0.25, 0.46, 0.45, 0.94)',
                 }}
               >
-                <div style={{ color: complete ? color : 'rgba(255,255,255,0.2)', transition: 'color 300ms', flexShrink: 0 }}>
-                  <IconComponent size={13} strokeWidth={1.5}/>
+                <div
+                  style={{
+                    color: complete ? color : 'rgba(255,255,255,0.2)',
+                    transition: 'color 300ms',
+                    flexShrink: 0,
+                  }}
+                >
+                  <IconComponent size={13} strokeWidth={1.5} />
                 </div>
                 <div style={{ flex: 1 }}>
-                  <div style={{
-                    fontSize: 8,
-                    color: 'rgba(255,255,255,0.25)',
-                    marginBottom: 2,
-                    letterSpacing: '0.06em',
-                  }}>
+                  <div
+                    style={{
+                      fontSize: 8,
+                      color: 'rgba(255,255,255,0.25)',
+                      marginBottom: 2,
+                      letterSpacing: '0.06em',
+                    }}
+                  >
                     {field.label.toUpperCase()}
                   </div>
                   <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.85)', fontWeight: 500 }}>
                     {displayValue}
                     {!complete && visible && (
                       <motion.span
-                        animate={{ opacity: [1, 0] }}
-                        transition={{ duration: 0.4, repeat: Infinity }}
+                        animate={isActive ? { opacity: [1, 0] } : { opacity: 1 }}
+                        transition={{ duration: 0.4, repeat: isActive ? Infinity : 0 }}
                         style={{
                           display: 'inline-block',
                           width: 1.5,
@@ -1124,7 +1183,8 @@ function WebScene({ service }: { service: Service }) {
                     animate={{ scale: 1 }}
                     transition={{ type: 'spring', stiffness: 500, damping: 15 }}
                     style={{
-                      width: 18, height: 18,
+                      width: 18,
+                      height: 18,
                       borderRadius: '50%',
                       background: color,
                       display: 'flex',
@@ -1133,26 +1193,24 @@ function WebScene({ service }: { service: Service }) {
                       flexShrink: 0,
                     }}
                   >
-                    <Check size={10} color="black" strokeWidth={3}/>
+                    <Check size={10} color="black" strokeWidth={3} />
                   </motion.div>
                 )}
               </motion.div>
-            ) : null
+            ) : null;
           })}
         </div>
 
-        {/* Botón submit */}
+        {/* Boton submit */}
         <AnimatePresence>
           {showButton && (
             <motion.div
               initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
               style={{
-                background: submitted
-                  ? `linear-gradient(135deg, ${color}30, ${color}15)`
-                  : `${color}15`,
+                background: submitted ? `linear-gradient(135deg, ${color}30, ${color}15)` : `${color}15`,
                 backdropFilter: 'blur(20px)',
-                border: `1px solid ${submitted ? color + '50' : color + '25'}`,
+                border: `1px solid ${submitted ? `${color}50` : `${color}25`}`,
                 borderRadius: 10,
                 padding: '11px',
                 textAlign: 'center',
@@ -1165,7 +1223,7 @@ function WebScene({ service }: { service: Service }) {
                 transition: 'all 400ms ease',
               }}
             >
-              {submitted ? '✓ CONSULTA ENVIADA' : 'ENVIANDO...'}
+              {submitted ? '\u2713 CONSULTA ENVIADA' : 'ENVIANDO...'}
             </motion.div>
           )}
         </AnimatePresence>
@@ -1189,21 +1247,26 @@ function WebScene({ service }: { service: Service }) {
                   gap: 10,
                 }}
               >
-                <div style={{
-                  width: 28, height: 28,
-                  background: 'rgba(37,211,102,0.15)',
-                  borderRadius: 8,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  flexShrink: 0,
-                }}>
-                  <MessageSquare size={13} color="#25D366"/>
+                <div
+                  style={{
+                    width: 28,
+                    height: 28,
+                    background: 'rgba(37,211,102,0.15)',
+                    borderRadius: 8,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0,
+                  }}
+                >
+                  <MessageSquare size={13} color="#25D366" />
                 </div>
                 <div style={{ flex: 1 }}>
                   <div style={{ fontSize: 10, fontWeight: 700, color: '#25D366', marginBottom: 3 }}>
-                    WhatsApp → Tu equipo
+                    {'WhatsApp \u2192 Tu equipo'}
                   </div>
                   <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.45)', lineHeight: 1.4 }}>
-                    "Nueva consulta: Carlos Mendoza — Precios"
+                    {'"Nueva consulta: Carlos Mendoza \u2014 Precios"'}
                   </div>
                 </div>
                 <span style={{ fontSize: 8, color: 'rgba(255,255,255,0.2)', flexShrink: 0 }}>ahora</span>
@@ -1226,21 +1289,24 @@ function WebScene({ service }: { service: Service }) {
                   gap: 10,
                 }}
               >
-                <div style={{
-                  width: 28, height: 28,
-                  background: `${color}15`,
-                  borderRadius: 8,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  flexShrink: 0,
-                }}>
-                  <Bot size={13} color={color}/>
+                <div
+                  style={{
+                    width: 28,
+                    height: 28,
+                    background: `${color}15`,
+                    borderRadius: 8,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0,
+                  }}
+                >
+                  <Bot size={13} color={color} />
                 </div>
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: 10, fontWeight: 700, color, marginBottom: 3 }}>
-                    IA → Carlos Mendoza
-                  </div>
+                  <div style={{ fontSize: 10, fontWeight: 700, color, marginBottom: 3 }}>{'IA \u2192 Carlos Mendoza'}</div>
                   <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.45)', lineHeight: 1.4 }}>
-                    "¡Hola Carlos! Recibimos tu consulta, te contactamos en minutos 🚀"
+                    {'"\u00a1Hola Carlos! Recibimos tu consulta, te contactamos en minutos \ud83d\ude80"'}
                   </div>
                 </div>
               </motion.div>
@@ -1248,75 +1314,81 @@ function WebScene({ service }: { service: Service }) {
           </AnimatePresence>
         </div>
       </div>
-    )
-  };
-
-  const renderMapsScene = ({ isActive, progress, color }: SimProps) => {
-    const showGrid = progress > 0.10
-    const showCompetitors = progress > 0.22
-    const showClient = progress > 0.50
-    const showPanel = progress > 0.72
+    );
+  }
+  function SimMaps({ isActive, progress, color }: SimProps) {
+    const showGrid = progress > 0.1;
+    const showCompetitors = progress > 0.22;
+    const showClient = progress > 0.5;
+    const showPanel = progress > 0.72;
 
     const competitors = [
       { x: '28%', y: '48%', rating: '2.8', delay: 0.22 },
-      { x: '68%', y: '36%', rating: '3.1', delay: 0.30 },
+      { x: '68%', y: '36%', rating: '3.1', delay: 0.3 },
       { x: '58%', y: '65%', rating: '3.4', delay: 0.38 },
-    ]
+    ];
 
     return (
-      <div style={{
-        height: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 8,
-        padding: '4px 2px',
-      }}>
-
-        {/* Header */}
-        <div style={{
+      <div
+        style={{
+          height: '100%',
           display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'flex-start',
-          flexShrink: 0,
-        }}>
+          flexDirection: 'column',
+          gap: 8,
+          padding: '4px 2px',
+        }}
+      >
+        {/* Header */}
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'flex-start',
+            flexShrink: 0,
+          }}
+        >
           <div>
             <div style={{ fontSize: 9, letterSpacing: '0.15em', color: 'rgba(255,255,255,0.25)', marginBottom: 2 }}>
-              GOOGLE MAPS · LOCAL
+              GOOGLE MAPS Â· LOCAL
             </div>
-            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>
-              Tucumán, Argentina
-            </div>
+            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>TucumÃ¡n, Argentina</div>
           </div>
-          <div style={{
-            fontSize: 9, color: color,
-            background: `${color}12`,
-            border: `1px solid ${color}25`,
-            borderRadius: 6,
-            padding: '4px 8px',
-            fontWeight: 600,
-          }}>
-            PRIMERA POSICIÓN
+          <div
+            style={{
+              fontSize: 9,
+              color,
+              background: `${color}12`,
+              border: `1px solid ${color}25`,
+              borderRadius: 6,
+              padding: '4px 8px',
+              fontWeight: 600,
+            }}
+          >
+            PRIMERA POSICIÃ“N
           </div>
         </div>
 
-        {/* Área mapa + panel lateral */}
-        <div style={{
-          flex: 1,
-          display: 'flex',
-          gap: 8,
-          minHeight: 0,
-        }}>
-
-          {/* Mapa */}
-          <div style={{
+        {/* Ãrea mapa + panel lateral */}
+        <div
+          style={{
             flex: 1,
-            background: 'rgba(255,255,255,0.03)',
-            backdropFilter: 'blur(20px)',
-            border: '1px solid rgba(255,255,255,0.07)',
-            borderRadius: 12,
-            position: 'relative',
-            overflow: 'hidden',
-          }}>
+            display: 'flex',
+            gap: 8,
+            minHeight: 0,
+          }}
+        >
+          {/* Mapa */}
+          <div
+            style={{
+              flex: 1,
+              background: 'rgba(255,255,255,0.03)',
+              backdropFilter: 'blur(20px)',
+              border: '1px solid rgba(255,255,255,0.07)',
+              borderRadius: 12,
+              position: 'relative',
+              overflow: 'hidden',
+            }}
+          >
             {/* Grid del mapa */}
             {showGrid && (
               <motion.div
@@ -1327,56 +1399,63 @@ function WebScene({ service }: { service: Service }) {
                   position: 'absolute',
                   inset: 0,
                   backgroundImage: `
-                    linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
-                    linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)
-                  `,
+                  linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+                  linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)
+                `,
                   backgroundSize: '24px 24px',
                 }}
               />
             )}
 
             {/* Pins competidores */}
-            {showCompetitors && competitors.map((comp, i) => (
-              progress > comp.delay && (
-                <motion.div
-                  key={i}
-                  initial={{ scale: 0, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  transition={{ type: 'spring', stiffness: 400, damping: 15 }}
-                  style={{
-                    position: 'absolute',
-                    left: comp.x,
-                    top: comp.y,
-                    transform: 'translate(-50%, -100%)',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    gap: 3,
-                  }}
-                >
-                  <div style={{
-                    width: 18, height: 18,
-                    borderRadius: '50% 50% 50% 0',
-                    transform: 'rotate(-45deg)',
-                    background: 'rgba(120,120,120,0.5)',
-                    border: '1px solid rgba(160,160,160,0.25)',
-                    backdropFilter: 'blur(8px)',
-                  }}/>
-                  <div style={{
-                    background: 'rgba(20,20,20,0.85)',
-                    backdropFilter: 'blur(8px)',
-                    border: '1px solid rgba(255,255,255,0.08)',
-                    borderRadius: 5,
-                    padding: '2px 5px',
-                    fontSize: 8,
-                    color: 'rgba(255,255,255,0.35)',
-                    whiteSpace: 'nowrap',
-                  }}>
-                    {comp.rating} ⭐
-                  </div>
-                </motion.div>
-              )
-            ))}
+            {showCompetitors &&
+              competitors.map(
+                (comp, i) =>
+                  progress > comp.delay && (
+                    <motion.div
+                      key={i}
+                      initial={{ scale: 0, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      transition={{ type: 'spring', stiffness: 400, damping: 15 }}
+                      style={{
+                        position: 'absolute',
+                        left: comp.x,
+                        top: comp.y,
+                        transform: 'translate(-50%, -100%)',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        gap: 3,
+                      }}
+                    >
+                      <div
+                        style={{
+                          width: 18,
+                          height: 18,
+                          borderRadius: '50% 50% 50% 0',
+                          transform: 'rotate(-45deg)',
+                          background: 'rgba(120,120,120,0.5)',
+                          border: '1px solid rgba(160,160,160,0.25)',
+                          backdropFilter: 'blur(8px)',
+                        }}
+                      />
+                      <div
+                        style={{
+                          background: 'rgba(20,20,20,0.85)',
+                          backdropFilter: 'blur(8px)',
+                          border: '1px solid rgba(255,255,255,0.08)',
+                          borderRadius: 5,
+                          padding: '2px 5px',
+                          fontSize: 8,
+                          color: 'rgba(255,255,255,0.35)',
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
+                        {comp.rating} â­
+                      </div>
+                    </motion.div>
+                  )
+              )}
 
             {/* Pin cliente DESTACADO */}
             {showClient && (
@@ -1397,7 +1476,7 @@ function WebScene({ service }: { service: Service }) {
                 }}
               >
                 {/* Anillos */}
-                {[1, 2].map(ring => (
+                {[1, 2].map((ring) => (
                   <motion.div
                     key={ring}
                     animate={{
@@ -1407,12 +1486,13 @@ function WebScene({ service }: { service: Service }) {
                     transition={{
                       duration: 2.2,
                       delay: ring * 0.5,
-                      repeat: Infinity,
+                      repeat: isActive ? Infinity : 0,
                       ease: 'easeOut',
                     }}
                     style={{
                       position: 'absolute',
-                      width: 30, height: 30,
+                      width: 30,
+                      height: 30,
                       borderRadius: '50%',
                       border: `1px solid ${color}`,
                       top: '50%',
@@ -1425,10 +1505,11 @@ function WebScene({ service }: { service: Service }) {
 
                 {/* Pin */}
                 <motion.div
-                  animate={{ y: [0, -5, 0] }}
-                  transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+                  animate={isActive ? { y: [0, -5, 0] } : { y: 0 }}
+                  transition={{ duration: 2, repeat: isActive ? Infinity : 0, ease: 'easeInOut' }}
                   style={{
-                    width: 32, height: 32,
+                    width: 32,
+                    height: 32,
                     borderRadius: '50% 50% 50% 0',
                     transform: 'rotate(-45deg)',
                     background: `linear-gradient(135deg, ${color}, ${color}cc)`,
@@ -1439,7 +1520,7 @@ function WebScene({ service }: { service: Service }) {
                     position: 'relative',
                   }}
                 >
-                  <span style={{ transform: 'rotate(45deg)', fontSize: 13 }}>★</span>
+                  <span style={{ transform: 'rotate(45deg)', fontSize: 13 }}>â˜…</span>
                 </motion.div>
 
                 {/* Label */}
@@ -1460,7 +1541,7 @@ function WebScene({ service }: { service: Service }) {
                     letterSpacing: '0.03em',
                   }}
                 >
-                  TU EMPRESA · 5.0 ★
+                  TU EMPRESA Â· 5.0 â˜…
                 </motion.div>
               </motion.div>
             )}
@@ -1487,24 +1568,31 @@ function WebScene({ service }: { service: Service }) {
             >
               {/* Rating principal */}
               <div>
-                <div style={{ fontSize: 8, color: 'rgba(255,255,255,0.25)', marginBottom: 4, letterSpacing: '0.06em' }}>
+                <div
+                  style={{
+                    fontSize: 8,
+                    color: 'rgba(255,255,255,0.25)',
+                    marginBottom: 4,
+                    letterSpacing: '0.06em',
+                  }}
+                >
                   TU EMPRESA
                 </div>
                 <div style={{ display: 'flex', alignItems: 'baseline', gap: 4, marginBottom: 3 }}>
                   <span style={{ fontSize: 24, fontWeight: 800, color, lineHeight: 1 }}>5.0</span>
                 </div>
                 <div>
-                  {[1,2,3,4,5].map(s => (
-                    <span key={s} style={{ fontSize: 10, color: '#f59e0b' }}>★</span>
+                  {[1, 2, 3, 4, 5].map((s) => (
+                    <span key={s} style={{ fontSize: 10, color: '#f59e0b' }}>
+                      â˜…
+                    </span>
                   ))}
                 </div>
-                <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.25)', marginTop: 2 }}>
-                  47 reseñas
-                </div>
+                <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.25)', marginTop: 2 }}>47 reseÃ±as</div>
               </div>
 
               {/* Separador */}
-              <div style={{ height: 1, background: 'rgba(255,255,255,0.06)' }}/>
+              <div style={{ height: 1, background: 'rgba(255,255,255,0.06)' }} />
 
               {/* Checkmarks */}
               {['Fotos', 'Horarios', 'Web', 'WhatsApp'].map((item, i) => (
@@ -1520,28 +1608,38 @@ function WebScene({ service }: { service: Service }) {
                   }}
                 >
                   <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.35)' }}>{item}</span>
-                  <span style={{ fontSize: 10, color }}>✓</span>
+                  <span style={{ fontSize: 10, color }}>âœ“</span>
                 </motion.div>
               ))}
 
               {/* Separador */}
-              <div style={{ height: 1, background: 'rgba(255,255,255,0.06)' }}/>
+              <div style={{ height: 1, background: 'rgba(255,255,255,0.06)' }} />
 
               {/* VS competencia */}
               <div>
-                <div style={{ fontSize: 7, color: 'rgba(255,255,255,0.2)', marginBottom: 5, letterSpacing: '0.08em' }}>
+                <div
+                  style={{
+                    fontSize: 7,
+                    color: 'rgba(255,255,255,0.2)',
+                    marginBottom: 5,
+                    letterSpacing: '0.08em',
+                  }}
+                >
                   VS COMPETENCIA
                 </div>
                 {[
-                  { label: 'Reseñas', you: '47', them: '8' },
+                  { label: 'ReseÃ±as', you: '47', them: '8' },
                   { label: 'Rating', you: '5.0', them: '3.1' },
                 ].map((item, i) => (
-                  <div key={i} style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    marginBottom: 4,
-                  }}>
+                  <div
+                    key={i}
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      marginBottom: 4,
+                    }}
+                  >
                     <span style={{ fontSize: 8, color: 'rgba(255,255,255,0.25)' }}>{item.label}</span>
                     <div style={{ display: 'flex', gap: 5, alignItems: 'center' }}>
                       <span style={{ fontSize: 10, color, fontWeight: 700 }}>{item.you}</span>
@@ -1555,9 +1653,8 @@ function WebScene({ service }: { service: Service }) {
           )}
         </div>
       </div>
-    )
-  };
-
+    );
+  }
   const renderPlaceholderScene = ({
     color,
     helper,
@@ -2056,25 +2153,25 @@ function WebScene({ service }: { service: Service }) {
             style={{ height: '100%' }}
           >
             {activeTab === 0
-              ? renderSEOScene({
+              ? SimSEO({
                   isActive: isInView,
                   progress,
                   color: activeSimulation.color,
                 })
               : activeTab === 1
-                ? renderAnalyticsScene({
+                ? SimAnalytics({
                     isActive: isInView,
                     progress,
                     color: activeSimulation.color,
                   })
               : activeTab === 2
-                  ? renderLeadsScene({
+                  ? SimLeads({
                       isActive: isInView,
                       progress,
                       color: activeSimulation.color,
                     })
                 : activeTab === 3
-                  ? renderMapsScene({
+                  ? SimMaps({
                       isActive: isInView,
                       progress,
                       color: activeSimulation.color,
@@ -2109,43 +2206,1326 @@ const AI_SIMULATIONS: AISimulation[] = [
   { id: 1, label: 'Chat IA',  icon: MessageSquare, duration: 6000, color: AI_COLOR },
   { id: 2, label: 'Leads',    icon: Target,        duration: 5500, color: AI_COLOR },
   { id: 3, label: 'Agenda',   icon: Calendar,      duration: 5000, color: AI_COLOR },
-  { id: 4, label: 'Métricas', icon: BarChart2,     duration: 4500, color: AI_COLOR },
+  { id: 4, label: 'MÃ©tricas', icon: BarChart2,     duration: 4500, color: AI_COLOR },
 ];
 
 type AISimProps = { isActive: boolean; progress: number; color: string };
 
 function SimChat({ isActive: _isActive, progress: _progress, color: _color }: AISimProps) {
-  return <div style={{ color: 'rgba(255,255,255,0.2)', fontSize: 11, padding: 12 }}>Chat IA — próximo sprint</div>;
+  return <div style={{ color: 'rgba(255,255,255,0.2)', fontSize: 11, padding: 12 }}>Chat IA â€” prÃ³ximo sprint</div>;
 }
 function SimLeadsIA({ isActive: _isActive, progress: _progress, color: _color }: AISimProps) {
-  return <div style={{ color: 'rgba(255,255,255,0.2)', fontSize: 11, padding: 12 }}>Leads IA — próximo sprint</div>;
+  return <div style={{ color: 'rgba(255,255,255,0.2)', fontSize: 11, padding: 12 }}>Leads IA â€” prÃ³ximo sprint</div>;
 }
 function SimAgenda({ isActive: _isActive, progress: _progress, color: _color }: AISimProps) {
-  return <div style={{ color: 'rgba(255,255,255,0.2)', fontSize: 11, padding: 12 }}>Agenda — próximo sprint</div>;
+  return <div style={{ color: 'rgba(255,255,255,0.2)', fontSize: 11, padding: 12 }}>Agenda â€” prÃ³ximo sprint</div>;
 }
 function SimMetricas({ isActive: _isActive, progress: _progress, color: _color }: AISimProps) {
-  return <div style={{ color: 'rgba(255,255,255,0.2)', fontSize: 11, padding: 12 }}>Métricas — próximo sprint</div>;
+  return <div style={{ color: 'rgba(255,255,255,0.2)', fontSize: 11, padding: 12 }}>MÃ©tricas â€” prÃ³ximo sprint</div>;
 }
 
 function AIScene({ service: _service }: { service: Service }) {
+  type SimProps = { isActive: boolean; progress: number; color: string };
+
+  function SimChat({ isActive, progress, color }: SimProps) {
+    const clientMsg1 = 'Hola! Tienen la Toyota Hilux 4x4 disponible? CuÃ¡nto sale?';
+    const botMsg1 =
+      'Â¡Hola! ðŸ‘‹ SÃ­, tenemos 2 Hilux 4x4 disponibles ahora mismo:\n\nâ€¢ AT Full: $47.500 USD\nâ€¢ MT SR: $43.200 USD\n\nÂ¿QuerÃ©s que te cuente las diferencias o preferÃ­s ver las fotos?';
+    const clientMsg2 = 'Me interesa la AT Full. Tienen financiaciÃ³n?';
+    const botMsg2 =
+      'Â¡SÃ­! Tenemos 3 opciones de financiaciÃ³n disponibles. TambiÃ©n puedo agendarte un test drive esta semana. Â¿CuÃ¡ndo te queda mejor? ðŸš—';
+
+    const showHeader = progress > 0.1;
+    const client1Length =
+      progress > 0.15 ? Math.floor(Math.min((progress - 0.15) / 0.2, 1) * clientMsg1.length) : 0;
+    const showTyping = progress > 0.38 && progress < 0.52;
+    const bot1Length = progress > 0.52 ? Math.floor(Math.min((progress - 0.52) / 0.23, 1) * botMsg1.length) : 0;
+    const client2Length =
+      progress > 0.76 ? Math.floor(Math.min((progress - 0.76) / 0.09, 1) * clientMsg2.length) : 0;
+    const bot2Length = progress > 0.86 ? Math.floor(Math.min((progress - 0.86) / 0.14, 1) * botMsg2.length) : 0;
+    const showTimeBadge = progress > 0.92;
+
+    return (
+      <div
+        style={{
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 0,
+          padding: '4px 2px',
+        }}
+      >
+        {/* Header del chat */}
+        {showHeader && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 10,
+              padding: '8px 10px',
+              background: 'rgba(255,255,255,0.04)',
+              backdropFilter: 'blur(20px)',
+              border: '1px solid rgba(255,255,255,0.08)',
+              borderRadius: 10,
+              marginBottom: 8,
+              flexShrink: 0,
+            }}
+          >
+            <div
+              style={{
+                width: 32,
+                height: 32,
+                borderRadius: '50%',
+                background: `${color}20`,
+                border: `1px solid ${color}30`,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+              }}
+            >
+              <Bot size={15} color={color} />
+            </div>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.85)' }}>
+                Agente develOP
+              </div>
+              <div
+                style={{
+                  fontSize: 9,
+                  color: '#25D366',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 4,
+                }}
+              >
+                <motion.div
+                  animate={isActive ? { opacity: [1, 0.3, 1] } : { opacity: 1 }}
+                  transition={{ duration: 1.5, repeat: isActive ? Infinity : 0 }}
+                  style={{ width: 5, height: 5, borderRadius: '50%', background: '#25D366' }}
+                />
+                En lÃ­nea Â· Responde al instante
+              </div>
+            </div>
+            <div
+              style={{
+                fontSize: 8,
+                color: 'rgba(255,255,255,0.2)',
+                letterSpacing: '0.05em',
+              }}
+            >
+              WhatsApp
+            </div>
+          </motion.div>
+        )}
+
+        {/* Mensajes */}
+        <div
+          style={{
+            flex: 1,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 8,
+            overflowY: 'hidden',
+          }}
+        >
+          {/* Cliente msg 1 */}
+          {client1Length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, x: 10 }}
+              animate={{ opacity: 1, x: 0 }}
+              style={{ alignSelf: 'flex-end', maxWidth: '82%' }}
+            >
+              <div
+                style={{
+                  background: `${color}20`,
+                  backdropFilter: 'blur(20px)',
+                  border: `1px solid ${color}25`,
+                  borderRadius: '12px 12px 2px 12px',
+                  padding: '8px 11px',
+                  fontSize: 11,
+                  color: 'rgba(255,255,255,0.85)',
+                  lineHeight: 1.45,
+                }}
+              >
+                {clientMsg1.slice(0, client1Length)}
+                {client1Length < clientMsg1.length && (
+                  <motion.span
+                    animate={isActive ? { opacity: [1, 0] } : { opacity: 1 }}
+                    transition={{ duration: 0.4, repeat: isActive ? Infinity : 0 }}
+                    style={{
+                      display: 'inline-block',
+                      width: 1.5,
+                      height: 11,
+                      background: color,
+                      marginLeft: 2,
+                      verticalAlign: 'middle',
+                    }}
+                  />
+                )}
+              </div>
+              <div
+                style={{
+                  fontSize: 8,
+                  color: 'rgba(255,255,255,0.2)',
+                  textAlign: 'right',
+                  marginTop: 2,
+                  paddingRight: 4,
+                }}
+              >
+                22:47
+              </div>
+            </motion.div>
+          )}
+
+          {/* Typing indicator */}
+          <AnimatePresence>
+            {showTyping && (
+              <motion.div
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                style={{
+                  alignSelf: 'flex-start',
+                  background: 'rgba(255,255,255,0.06)',
+                  backdropFilter: 'blur(20px)',
+                  border: '1px solid rgba(255,255,255,0.08)',
+                  borderRadius: '12px 12px 12px 2px',
+                  padding: '9px 14px',
+                  display: 'flex',
+                  gap: 4,
+                  alignItems: 'center',
+                }}
+              >
+                {[0, 0.18, 0.36].map((delay, i) => (
+                  <motion.div
+                    key={i}
+                    animate={isActive ? { y: [0, -4, 0] } : { y: 0 }}
+                    transition={{ duration: 0.55, delay, repeat: isActive ? Infinity : 0 }}
+                    style={{
+                      width: 5,
+                      height: 5,
+                      borderRadius: '50%',
+                      background: color,
+                      opacity: 0.7,
+                    }}
+                  />
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Bot msg 1 */}
+          {bot1Length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              style={{ alignSelf: 'flex-start', maxWidth: '88%' }}
+            >
+              <div
+                style={{
+                  background: 'rgba(255,255,255,0.05)',
+                  backdropFilter: 'blur(20px)',
+                  border: '1px solid rgba(255,255,255,0.09)',
+                  borderRadius: '12px 12px 12px 2px',
+                  padding: '8px 11px',
+                  fontSize: 11,
+                  color: 'rgba(255,255,255,0.8)',
+                  lineHeight: 1.5,
+                  whiteSpace: 'pre-line',
+                }}
+              >
+                {botMsg1.slice(0, bot1Length)}
+                {bot1Length < botMsg1.length && (
+                  <motion.span
+                    animate={isActive ? { opacity: [1, 0] } : { opacity: 1 }}
+                    transition={{ duration: 0.4, repeat: isActive ? Infinity : 0 }}
+                    style={{
+                      display: 'inline-block',
+                      width: 1.5,
+                      height: 11,
+                      background: 'rgba(255,255,255,0.4)',
+                      marginLeft: 2,
+                      verticalAlign: 'middle',
+                    }}
+                  />
+                )}
+              </div>
+              <div
+                style={{
+                  fontSize: 8,
+                  color: 'rgba(255,255,255,0.2)',
+                  marginTop: 2,
+                  paddingLeft: 4,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 4,
+                }}
+              >
+                22:47 Â· IA
+                {showTimeBadge && (
+                  <motion.span
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    style={{
+                      background: `${color}20`,
+                      border: `1px solid ${color}30`,
+                      borderRadius: 100,
+                      padding: '1px 6px',
+                      color,
+                      fontWeight: 600,
+                    }}
+                  >
+                    âš¡ 1.8s
+                  </motion.span>
+                )}
+              </div>
+            </motion.div>
+          )}
+
+          {/* Cliente msg 2 */}
+          {client2Length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, x: 10 }}
+              animate={{ opacity: 1, x: 0 }}
+              style={{ alignSelf: 'flex-end', maxWidth: '82%' }}
+            >
+              <div
+                style={{
+                  background: `${color}20`,
+                  backdropFilter: 'blur(20px)',
+                  border: `1px solid ${color}25`,
+                  borderRadius: '12px 12px 2px 12px',
+                  padding: '8px 11px',
+                  fontSize: 11,
+                  color: 'rgba(255,255,255,0.85)',
+                  lineHeight: 1.45,
+                }}
+              >
+                {clientMsg2.slice(0, client2Length)}
+              </div>
+              <div
+                style={{
+                  fontSize: 8,
+                  color: 'rgba(255,255,255,0.2)',
+                  textAlign: 'right',
+                  marginTop: 2,
+                  paddingRight: 4,
+                }}
+              >
+                22:49
+              </div>
+            </motion.div>
+          )}
+
+          {/* Bot msg 2 */}
+          {bot2Length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              style={{ alignSelf: 'flex-start', maxWidth: '88%' }}
+            >
+              <div
+                style={{
+                  background: 'rgba(255,255,255,0.05)',
+                  backdropFilter: 'blur(20px)',
+                  border: '1px solid rgba(255,255,255,0.09)',
+                  borderRadius: '12px 12px 12px 2px',
+                  padding: '8px 11px',
+                  fontSize: 11,
+                  color: 'rgba(255,255,255,0.8)',
+                  lineHeight: 1.5,
+                }}
+              >
+                {botMsg2.slice(0, bot2Length)}
+              </div>
+            </motion.div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  function SimLeadsIA({ isActive, progress, color }: SimProps) {
+    void isActive;
+
+    const leads = [
+      {
+        name: 'Carlos M.',
+        msg: 'Quiero comprar una Hilux esta semana, tengo efectivo',
+        score: 94,
+        label: 'CALIENTE',
+        labelColor: '#10b981',
+        delay: 0.15,
+        analyzeAt: 0.42,
+        classifyAt: 0.67,
+      },
+      {
+        name: 'Ana Garc\u00eda',
+        msg: 'Me gustar\u00eda saber los precios de las camionetas',
+        score: 61,
+        label: 'TIBIO',
+        labelColor: '#f59e0b',
+        delay: 0.24,
+        analyzeAt: 0.5,
+        classifyAt: 0.73,
+      },
+      {
+        name: 'Juan P.',
+        msg: 'Solo estoy viendo opciones por ahora',
+        score: 22,
+        label: 'FR\u00cdO',
+        labelColor: '#6b7280',
+        delay: 0.33,
+        analyzeAt: 0.58,
+        classifyAt: 0.79,
+      },
+    ];
+
+    const showSummary = progress > 0.88;
+
+    return (
+      <div
+        style={{
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 8,
+          padding: '4px 2px',
+        }}
+      >
+        {/* Header */}
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'flex-start',
+            flexShrink: 0,
+          }}
+        >
+          <div>
+            <div
+              style={{
+                fontSize: 9,
+                letterSpacing: '0.15em',
+                color: 'rgba(255,255,255,0.25)',
+                marginBottom: 2,
+              }}
+            >
+              {'CALIFICACI\u00d3N AUTOM\u00c1TICA'}
+            </div>
+            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>
+              {'IA analizando intenci\u00f3n de compra'}
+            </div>
+          </div>
+          <motion.div
+            animate={{ opacity: [0.5, 1, 0.5] }}
+            transition={{ duration: 1.5, repeat: Infinity }}
+            style={{
+              fontSize: 9,
+              color,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 4,
+              fontWeight: 600,
+            }}
+          >
+            <div
+              style={{
+                width: 5,
+                height: 5,
+                borderRadius: '50%',
+                background: color,
+                boxShadow: `0 0 6px ${color}`,
+              }}
+            />
+            PROCESANDO
+          </motion.div>
+        </div>
+
+        {/* Lista de leads */}
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 6,
+            flex: 1,
+          }}
+        >
+          {leads.map((lead) => {
+            const visible = progress > lead.delay;
+            const analyzing = progress > lead.analyzeAt && progress < lead.classifyAt;
+            const analyzeProgress =
+              progress > lead.analyzeAt
+                ? Math.min((progress - lead.analyzeAt) / (lead.classifyAt - lead.analyzeAt), 1)
+                : 0;
+            const classified = progress > lead.classifyAt;
+
+            return visible ? (
+              <motion.div
+                key={lead.name}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] }}
+                style={{
+                  background: classified ? `${lead.labelColor}08` : 'rgba(255,255,255,0.03)',
+                  backdropFilter: 'blur(20px)',
+                  border: `1px solid ${classified ? `${lead.labelColor}25` : 'rgba(255,255,255,0.07)'}`,
+                  borderRadius: 10,
+                  padding: '10px 12px',
+                  transition: 'all 500ms ease',
+                }}
+              >
+                {/* Fila superior: nombre + badge */}
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginBottom: 6,
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <div
+                      style={{
+                        width: 24,
+                        height: 24,
+                        borderRadius: '50%',
+                        background: classified ? `${lead.labelColor}20` : 'rgba(255,255,255,0.06)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: 10,
+                        transition: 'background 400ms',
+                      }}
+                    >
+                      {lead.name.charAt(0)}
+                    </div>
+                    <span
+                      style={{
+                        fontSize: 12,
+                        fontWeight: 600,
+                        color: 'rgba(255,255,255,0.8)',
+                      }}
+                    >
+                      {lead.name}
+                    </span>
+                  </div>
+
+                  {/* Badge de clasificaciÃ³n */}
+                  <AnimatePresence>
+                    {classified && (
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.7 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ type: 'spring', stiffness: 400, damping: 15 }}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 4,
+                          background: `${lead.labelColor}15`,
+                          border: `1px solid ${lead.labelColor}30`,
+                          borderRadius: 100,
+                          padding: '3px 8px',
+                        }}
+                      >
+                        <div
+                          style={{
+                            width: 5,
+                            height: 5,
+                            borderRadius: '50%',
+                            background: lead.labelColor,
+                            boxShadow: `0 0 6px ${lead.labelColor}`,
+                          }}
+                        />
+                        <span
+                          style={{
+                            fontSize: 9,
+                            fontWeight: 700,
+                            color: lead.labelColor,
+                            letterSpacing: '0.08em',
+                          }}
+                        >
+                          {lead.label}
+                        </span>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+
+                {/* Mensaje del lead */}
+                <div
+                  style={{
+                    fontSize: 10,
+                    color: 'rgba(255,255,255,0.4)',
+                    lineHeight: 1.4,
+                    marginBottom: analyzing || classified ? 8 : 0,
+                    fontStyle: 'italic',
+                  }}
+                >
+                  {`"${lead.msg}"`}
+                </div>
+
+                {/* Barra de anÃ¡lisis */}
+                {(analyzing || classified) && (
+                  <div>
+                    <div
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        marginBottom: 4,
+                      }}
+                    >
+                      <span style={{ fontSize: 8, color: 'rgba(255,255,255,0.25)', letterSpacing: '0.06em' }}>
+                        {classified ? 'SCORE FINAL' : 'ANALIZANDO...'}
+                      </span>
+                      {classified && (
+                        <span
+                          style={{
+                            fontSize: 11,
+                            fontWeight: 700,
+                            color: lead.labelColor,
+                          }}
+                        >
+                          {lead.score}/100
+                        </span>
+                      )}
+                    </div>
+                    <div
+                      style={{
+                        height: 3,
+                        background: 'rgba(255,255,255,0.06)',
+                        borderRadius: 100,
+                        overflow: 'hidden',
+                      }}
+                    >
+                      <motion.div
+                        animate={{
+                          width: classified ? `${lead.score}%` : `${analyzeProgress * lead.score}%`,
+                        }}
+                        transition={{ duration: 0.3 }}
+                        style={{
+                          height: '100%',
+                          background: classified
+                            ? lead.labelColor
+                            : `linear-gradient(90deg, ${color}80, ${color})`,
+                          borderRadius: 100,
+                          boxShadow: classified ? `0 0 8px ${lead.labelColor}60` : 'none',
+                          transition: 'background 400ms, box-shadow 400ms',
+                        }}
+                      />
+                    </div>
+                  </div>
+                )}
+              </motion.div>
+            ) : null;
+          })}
+        </div>
+
+        {/* Resumen final */}
+        <AnimatePresence>
+          {showSummary && (
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(3, 1fr)',
+                gap: 6,
+                flexShrink: 0,
+              }}
+            >
+              {[
+                { label: 'CALIENTES', count: '1', color: '#10b981' },
+                { label: 'TIBIOS', count: '1', color: '#f59e0b' },
+                { label: 'FR\u00cdOS', count: '1', color: '#6b7280' },
+              ].map((item, index) => (
+                <motion.div
+                  key={item.label}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: index * 0.08, type: 'spring' }}
+                  style={{
+                    background: `${item.color}08`,
+                    backdropFilter: 'blur(20px)',
+                    border: `1px solid ${item.color}20`,
+                    borderRadius: 8,
+                    padding: '6px 8px',
+                    textAlign: 'center',
+                  }}
+                >
+                  <div style={{ fontSize: 16, fontWeight: 800, color: item.color, lineHeight: 1 }}>
+                    {item.count}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: 7,
+                      color: 'rgba(255,255,255,0.25)',
+                      marginTop: 2,
+                      letterSpacing: '0.06em',
+                    }}
+                  >
+                    {item.label}
+                  </div>
+                </motion.div>
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    );
+  }
+
+  function SimAgenda({ isActive, progress, color }: SimProps) {
+    void isActive;
+
+    const clientMsg = 'Hola! Quisiera sacar un turno para ver un auto esta semana';
+    const botMsg =
+      '\u00a1Perfecto! Tengo disponibilidad:\n\ud83d\udcc5 Martes 14hs\n\ud83d\udcc5 Jueves 11hs\n\ud83d\udcc5 Viernes 16hs\n\u00bfCu\u00e1l te queda mejor?';
+    const clientConfirm = 'El jueves a las 11hs perfecto';
+    const botConfirm =
+      '\u2705 \u00a1Listo! Turno confirmado para el Jueves a las 11hs. Te mando el recordatorio 24hs antes \ud83d\udcf2';
+
+    const showHeader = progress > 0.08;
+    const clientLength =
+      progress > 0.12 ? Math.floor(Math.min((progress - 0.12) / 0.18, 1) * clientMsg.length) : 0;
+    const botLength = progress > 0.32 ? Math.floor(Math.min((progress - 0.32) / 0.13, 1) * botMsg.length) : 0;
+    const confirmLength =
+      progress > 0.46 ? Math.floor(Math.min((progress - 0.46) / 0.13, 1) * clientConfirm.length) : 0;
+    const botConfirmLength =
+      progress > 0.6 ? Math.floor(Math.min((progress - 0.6) / 0.15, 1) * botConfirm.length) : 0;
+    const calendarFilled = progress > 0.64;
+    const showEventDetail = progress > 0.76;
+
+    const days = ['L', 'M', 'X', 'J', 'V'];
+    const bookedDay = 3;
+
+    return (
+      <div
+        style={{
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 8,
+          padding: '4px 2px',
+        }}
+      >
+        {/* Header */}
+        {showHeader && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              flexShrink: 0,
+            }}
+          >
+            <div>
+              <div
+                style={{
+                  fontSize: 9,
+                  letterSpacing: '0.15em',
+                  color: 'rgba(255,255,255,0.25)',
+                  marginBottom: 2,
+                }}
+              >
+                {'AGENDA AUTOM\u00c1TICA'}
+              </div>
+              <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>{'Sin intervenci\u00f3n humana'}</div>
+            </div>
+            <div
+              style={{
+                fontSize: 9,
+                color,
+                background: `${color}12`,
+                border: `1px solid ${color}25`,
+                borderRadius: 6,
+                padding: '4px 8px',
+                fontWeight: 600,
+              }}
+            >
+              IA ACTIVA
+            </div>
+          </motion.div>
+        )}
+
+        {/* Layout: chat izquierda + mini calendario derecha */}
+        <div
+          style={{
+            flex: 1,
+            display: 'grid',
+            gridTemplateColumns: '1fr auto',
+            gap: 8,
+            minHeight: 0,
+          }}
+        >
+          {/* Chat */}
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 6,
+              overflow: 'hidden',
+            }}
+          >
+            {/* Cliente */}
+            {clientLength > 0 && (
+              <motion.div
+                initial={{ opacity: 0, x: 8 }}
+                animate={{ opacity: 1, x: 0 }}
+                style={{ alignSelf: 'flex-end', maxWidth: '90%' }}
+              >
+                <div
+                  style={{
+                    background: `${color}18`,
+                    backdropFilter: 'blur(20px)',
+                    border: `1px solid ${color}25`,
+                    borderRadius: '10px 10px 2px 10px',
+                    padding: '7px 10px',
+                    fontSize: 10,
+                    color: 'rgba(255,255,255,0.85)',
+                    lineHeight: 1.45,
+                  }}
+                >
+                  {clientMsg.slice(0, clientLength)}
+                  {clientLength < clientMsg.length && (
+                    <motion.span
+                      animate={{ opacity: [1, 0] }}
+                      transition={{ duration: 0.4, repeat: Infinity }}
+                      style={{
+                        display: 'inline-block',
+                        width: 1.5,
+                        height: 10,
+                        background: color,
+                        marginLeft: 2,
+                        verticalAlign: 'middle',
+                      }}
+                    />
+                  )}
+                </div>
+              </motion.div>
+            )}
+
+            {/* Bot respuesta */}
+            {botLength > 0 && (
+              <motion.div
+                initial={{ opacity: 0, x: -8 }}
+                animate={{ opacity: 1, x: 0 }}
+                style={{ alignSelf: 'flex-start', maxWidth: '95%' }}
+              >
+                <div
+                  style={{
+                    background: 'rgba(255,255,255,0.05)',
+                    backdropFilter: 'blur(20px)',
+                    border: '1px solid rgba(255,255,255,0.09)',
+                    borderRadius: '10px 10px 10px 2px',
+                    padding: '7px 10px',
+                    fontSize: 10,
+                    color: 'rgba(255,255,255,0.75)',
+                    lineHeight: 1.6,
+                    whiteSpace: 'pre-line',
+                  }}
+                >
+                  {botMsg.slice(0, botLength)}
+                </div>
+              </motion.div>
+            )}
+
+            {/* Cliente confirma */}
+            {confirmLength > 0 && (
+              <motion.div
+                initial={{ opacity: 0, x: 8 }}
+                animate={{ opacity: 1, x: 0 }}
+                style={{ alignSelf: 'flex-end', maxWidth: '90%' }}
+              >
+                <div
+                  style={{
+                    background: `${color}18`,
+                    backdropFilter: 'blur(20px)',
+                    border: `1px solid ${color}25`,
+                    borderRadius: '10px 10px 2px 10px',
+                    padding: '7px 10px',
+                    fontSize: 10,
+                    color: 'rgba(255,255,255,0.85)',
+                  }}
+                >
+                  {clientConfirm.slice(0, confirmLength)}
+                </div>
+              </motion.div>
+            )}
+
+            {/* Bot confirma */}
+            {botConfirmLength > 0 && (
+              <motion.div
+                initial={{ opacity: 0, x: -8 }}
+                animate={{ opacity: 1, x: 0 }}
+                style={{ alignSelf: 'flex-start', maxWidth: '95%' }}
+              >
+                <div
+                  style={{
+                    background: `${color}10`,
+                    backdropFilter: 'blur(20px)',
+                    border: `1px solid ${color}25`,
+                    borderRadius: '10px 10px 10px 2px',
+                    padding: '7px 10px',
+                    fontSize: 10,
+                    color: 'rgba(255,255,255,0.8)',
+                    lineHeight: 1.45,
+                  }}
+                >
+                  {botConfirm.slice(0, botConfirmLength)}
+                </div>
+              </motion.div>
+            )}
+          </div>
+
+          {/* Mini calendario */}
+          <div
+            style={{
+              width: 90,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 6,
+              flexShrink: 0,
+            }}
+          >
+            <div
+              style={{
+                background: 'rgba(255,255,255,0.04)',
+                backdropFilter: 'blur(20px)',
+                border: '1px solid rgba(255,255,255,0.08)',
+                borderRadius: 10,
+                padding: '8px',
+              }}
+            >
+              {/* Mes */}
+              <div
+                style={{
+                  fontSize: 9,
+                  color: 'rgba(255,255,255,0.4)',
+                  textAlign: 'center',
+                  marginBottom: 8,
+                  letterSpacing: '0.06em',
+                }}
+              >
+                ESTA SEMANA
+              </div>
+
+              {/* DÃ­as */}
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(5, 1fr)',
+                  gap: 3,
+                }}
+              >
+                {days.map((day, index) => {
+                  const isBooked = index === bookedDay && calendarFilled;
+                  return (
+                    <div key={day} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
+                      <span style={{ fontSize: 7, color: 'rgba(255,255,255,0.25)' }}>{day}</span>
+                      <motion.div
+                        animate={{
+                          background: isBooked ? color : 'rgba(255,255,255,0.05)',
+                          border: isBooked ? `1px solid ${color}50` : '1px solid rgba(255,255,255,0.06)',
+                          boxShadow: isBooked ? `0 0 10px ${color}40` : 'none',
+                        }}
+                        transition={{ duration: 0.4, ease: 'easeOut' }}
+                        style={{
+                          width: 24,
+                          height: 24,
+                          borderRadius: 6,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}
+                      >
+                        {isBooked && (
+                          <motion.div
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            transition={{ type: 'spring', stiffness: 400 }}
+                          >
+                            <Check size={10} color="black" strokeWidth={3} />
+                          </motion.div>
+                        )}
+                      </motion.div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Detalle del evento */}
+            <AnimatePresence>
+              {showEventDetail && (
+                <motion.div
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  style={{
+                    background: `${color}10`,
+                    backdropFilter: 'blur(20px)',
+                    border: `1px solid ${color}25`,
+                    borderRadius: 10,
+                    padding: '8px',
+                  }}
+                >
+                  <div style={{ fontSize: 8, color, fontWeight: 600, marginBottom: 5, letterSpacing: '0.06em' }}>
+                    CONFIRMADO
+                  </div>
+                  <div
+                    style={{
+                      fontSize: 10,
+                      color: 'rgba(255,255,255,0.7)',
+                      fontWeight: 600,
+                      marginBottom: 3,
+                    }}
+                  >
+                    Jueves Â· 11:00hs
+                  </div>
+                  <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.35)' }}>Test Drive Â· Carlos M.</div>
+                  <div style={{ fontSize: 8, color: `${color}70`, marginTop: 4 }}>
+                    {'\ud83d\udcf2 Recordatorio programado'}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  function SimMetricas({ isActive, progress, color }: SimProps) {
+    void isActive;
+
+    const totalConsultas = Math.floor(Math.min((progress - 0.15) / 0.35, 1) * 147);
+    const respondidas = Math.floor(Math.min((progress - 0.15) / 0.35, 1) * 139);
+    const satisfaccion = (Math.min((progress - 0.15) / 0.35, 1) * 97).toFixed(0);
+
+    const showMetrics = progress > 0.15;
+    const showComparison = progress > 0.5;
+    const showChart = progress > 0.75;
+
+    const chartData = [
+      { hour: '8h', value: 0.3 },
+      { hour: '10h', value: 0.6 },
+      { hour: '12h', value: 0.9 },
+      { hour: '14h', value: 0.7 },
+      { hour: '16h', value: 1.0 },
+      { hour: '18h', value: 0.8 },
+      { hour: '20h', value: 0.5 },
+      { hour: '22h', value: 0.85 },
+    ];
+
+    return (
+      <div
+        style={{
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 8,
+          padding: '4px 2px',
+        }}
+      >
+        {/* Header */}
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'flex-start',
+            flexShrink: 0,
+          }}
+        >
+          <div>
+            <div
+              style={{
+                fontSize: 9,
+                letterSpacing: '0.15em',
+                color: 'rgba(255,255,255,0.25)',
+                marginBottom: 2,
+              }}
+            >
+              {'DASHBOARD DE ATENCI\u00d3N'}
+            </div>
+            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>Hoy Â· Tiempo real</div>
+          </div>
+          <motion.div
+            animate={{ opacity: [0.5, 1, 0.5] }}
+            transition={{ duration: 1.5, repeat: Infinity }}
+            style={{
+              fontSize: 9,
+              color,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 4,
+              fontWeight: 600,
+            }}
+          >
+            <div
+              style={{
+                width: 5,
+                height: 5,
+                borderRadius: '50%',
+                background: color,
+                boxShadow: `0 0 6px ${color}`,
+              }}
+            />
+            LIVE
+          </motion.div>
+        </div>
+
+        {/* MÃ©tricas principales */}
+        {showMetrics && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(3, 1fr)',
+              gap: 6,
+              flexShrink: 0,
+            }}
+          >
+            {[
+              { label: 'CONSULTAS', value: totalConsultas.toString(), color },
+              { label: 'RESPONDIDAS', value: respondidas.toString(), color: '#10b981' },
+              { label: 'SATISFACCI\u00d3N', value: `${satisfaccion}%`, color: '#f59e0b' },
+            ].map((metric, index) => (
+              <div
+                key={index}
+                style={{
+                  background: 'rgba(255,255,255,0.04)',
+                  backdropFilter: 'blur(20px)',
+                  border: `1px solid ${metric.color}18`,
+                  borderRadius: 10,
+                  padding: '8px 10px',
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: 7,
+                    color: 'rgba(255,255,255,0.25)',
+                    letterSpacing: '0.08em',
+                    marginBottom: 4,
+                  }}
+                >
+                  {metric.label}
+                </div>
+                <div
+                  style={{
+                    fontSize: 20,
+                    fontWeight: 800,
+                    color: metric.color,
+                    lineHeight: 1,
+                    letterSpacing: '-0.02em',
+                  }}
+                >
+                  {metric.value}
+                </div>
+              </div>
+            ))}
+          </motion.div>
+        )}
+
+        {/* COMPARATIVA IA VS HUMANO */}
+        {showComparison && (
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+            style={{
+              background: 'rgba(255,255,255,0.03)',
+              backdropFilter: 'blur(20px)',
+              border: '1px solid rgba(255,255,255,0.07)',
+              borderRadius: 10,
+              padding: '10px 12px',
+              flexShrink: 0,
+            }}
+          >
+            <div
+              style={{
+                fontSize: 8,
+                color: 'rgba(255,255,255,0.25)',
+                letterSpacing: '0.10em',
+                marginBottom: 10,
+              }}
+            >
+              TIEMPO DE RESPUESTA
+            </div>
+            <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end' }}>
+              {/* IA */}
+              <div style={{ flex: 1 }}>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: 4, marginBottom: 6 }}>
+                  <span style={{ fontSize: 26, fontWeight: 800, color, lineHeight: 1, letterSpacing: '-0.03em' }}>
+                    1.8s
+                  </span>
+                  <span style={{ fontSize: 9, color: `${color}80` }}>IA</span>
+                </div>
+                <div
+                  style={{
+                    height: 4,
+                    background: color,
+                    borderRadius: 100,
+                    width: '8%',
+                    boxShadow: `0 0 8px ${color}60`,
+                  }}
+                />
+              </div>
+
+              {/* VS */}
+              <div
+                style={{
+                  fontSize: 10,
+                  color: 'rgba(255,255,255,0.15)',
+                  fontWeight: 600,
+                  paddingBottom: 10,
+                }}
+              >
+                vs
+              </div>
+
+              {/* Humano */}
+              <div style={{ flex: 1 }}>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: 4, marginBottom: 6 }}>
+                  <span
+                    style={{
+                      fontSize: 26,
+                      fontWeight: 800,
+                      color: 'rgba(255,255,255,0.3)',
+                      lineHeight: 1,
+                      letterSpacing: '-0.03em',
+                    }}
+                  >
+                    4hs
+                  </span>
+                  <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.2)' }}>humano</span>
+                </div>
+                <div
+                  style={{
+                    height: 4,
+                    background: 'rgba(255,255,255,0.1)',
+                    borderRadius: 100,
+                    width: '100%',
+                  }}
+                />
+              </div>
+            </div>
+
+            <div
+              style={{
+                marginTop: 8,
+                fontSize: 9,
+                color,
+                background: `${color}10`,
+                border: `1px solid ${color}20`,
+                borderRadius: 6,
+                padding: '4px 8px',
+                textAlign: 'center',
+                fontWeight: 600,
+              }}
+            >
+              8.000Ã— m\u00e1s r\u00e1pido que un humano
+            </div>
+          </motion.div>
+        )}
+
+        {/* GrÃ¡fico de actividad */}
+        {showChart && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            style={{
+              background: 'rgba(255,255,255,0.03)',
+              backdropFilter: 'blur(20px)',
+              border: '1px solid rgba(255,255,255,0.07)',
+              borderRadius: 10,
+              padding: '8px 10px',
+              flex: 1,
+            }}
+          >
+            <div
+              style={{
+                fontSize: 8,
+                color: 'rgba(255,255,255,0.2)',
+                letterSpacing: '0.08em',
+                marginBottom: 8,
+              }}
+            >
+              ACTIVIDAD HOY
+            </div>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'flex-end',
+                gap: 4,
+                height: 36,
+              }}
+            >
+              {chartData.map((bar, index) => (
+                <div
+                  key={index}
+                  style={{
+                    flex: 1,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: 3,
+                    height: '100%',
+                    justifyContent: 'flex-end',
+                  }}
+                >
+                  <motion.div
+                    initial={{ height: 0 }}
+                    animate={{ height: `${bar.value * 100}%` }}
+                    transition={{ delay: index * 0.05, duration: 0.4, ease: 'easeOut' }}
+                    style={{
+                      width: '100%',
+                      background: bar.value > 0.7 ? color : `${color}50`,
+                      borderRadius: '3px 3px 0 0',
+                      boxShadow: bar.value > 0.7 ? `0 0 8px ${color}40` : 'none',
+                    }}
+                  />
+                  <span style={{ fontSize: 6, color: 'rgba(255,255,255,0.2)' }}>{bar.hour}</span>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </div>
+    );
+  }
+
   const [activeTab, setActiveTab] = useState(0);
   const [isInView, setIsInView] = useState(false);
   const [progress, setProgress] = useState(0);
   const [cycleSeed, setCycleSeed] = useState(0);
+
   const containerRef = useRef<HTMLDivElement | null>(null);
   const progressRef = useRef(0);
   const animFrameRef = useRef(0);
+  const nextTabTimeoutRef = useRef<number | null>(null);
   const startTimeRef = useRef(0);
   const isRunningRef = useRef(false);
-  const nextTabTimeoutRef = useRef<number | null>(null);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
-      ([entry]) => { setIsInView(entry.isIntersecting); },
+      ([entry]) => {
+        setIsInView(entry.isIntersecting);
+      },
       { threshold: 0.3 }
     );
-    const el = containerRef.current;
-    if (el) observer.observe(el);
+
+    const currentContainer = containerRef.current;
+    if (currentContainer) {
+      observer.observe(currentContainer);
+    }
+
     return () => observer.disconnect();
   }, []);
 
@@ -2161,28 +3541,35 @@ function AIScene({ service: _service }: { service: Service }) {
       return;
     }
 
-    const duration = AI_SIMULATIONS[activeTab]?.duration ?? 5000;
+    const duration = AI_SIMULATIONS[activeTab]?.duration ?? 1;
+
     progressRef.current = 0;
     startTimeRef.current = performance.now();
     isRunningRef.current = true;
 
     const tick = (now: number) => {
-      if (!isRunningRef.current) return;
-      const elapsed = now - startTimeRef.current;
-      const next = Math.min(elapsed / duration, 1);
-      if (next !== progressRef.current) {
-        progressRef.current = next;
-        setProgress(next);
+      if (!isRunningRef.current) {
+        return;
       }
-      if (next < 1) {
+
+      const elapsed = now - startTimeRef.current;
+      const nextProgress = Math.min(elapsed / duration, 1);
+
+      if (nextProgress !== progressRef.current) {
+        progressRef.current = nextProgress;
+        setProgress(nextProgress);
+      }
+
+      if (nextProgress < 1) {
         animFrameRef.current = requestAnimationFrame(tick);
         return;
       }
+
       isRunningRef.current = false;
       nextTabTimeoutRef.current = window.setTimeout(() => {
         progressRef.current = 0;
         setProgress(0);
-        setActiveTab(prev => (prev + 1) % AI_SIMULATIONS.length);
+        setActiveTab((previousTab) => (previousTab + 1) % AI_SIMULATIONS.length);
       }, 300);
     };
 
@@ -2208,7 +3595,7 @@ function AIScene({ service: _service }: { service: Service }) {
     progressRef.current = 0;
     setProgress(0);
     setActiveTab(index);
-    setCycleSeed(s => s + 1);
+    setCycleSeed((currentSeed) => currentSeed + 1);
   };
 
   const activeSimulation = AI_SIMULATIONS[activeTab];
@@ -2225,37 +3612,27 @@ function AIScene({ service: _service }: { service: Service }) {
         gap: 8,
       }}
     >
-      {/* Título del panel */}
       <div style={{ marginBottom: 8, flexShrink: 0 }}>
-        <div style={{
-          fontSize: 9,
-          fontWeight: 600,
-          letterSpacing: '0.12em',
-          color: `${AI_COLOR}80`,
-          marginBottom: 4,
-        }}>
-          AGENTE IA · EN VIVO
+        <div style={{ fontSize: 9, fontWeight: 600, letterSpacing: '0.12em', color: `${AI_COLOR}80`, marginBottom: 4 }}>
+          AGENTE IA Â· EN VIVO
         </div>
-        <div style={{
-          fontSize: 13,
-          fontWeight: 600,
-          color: 'rgba(255,255,255,0.8)',
-          lineHeight: 1.3,
-        }}>
+        <div style={{ fontSize: 13, fontWeight: 600, color: 'rgba(255,255,255,0.8)', lineHeight: 1.3 }}>
           Tu sistema comercial trabajando ahora mismo
         </div>
       </div>
 
-      {/* Tabs */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: `repeat(${AI_SIMULATIONS.length}, 1fr)`,
-        gap: 4,
-        flexShrink: 0,
-      }}>
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: `repeat(${AI_SIMULATIONS.length}, 1fr)`,
+          gap: 4,
+          flexShrink: 0,
+        }}
+      >
         {AI_SIMULATIONS.map((sim, index) => {
           const isActive = index === activeTab;
           const IconComp = sim.icon;
+
           return (
             <button
               key={sim.id}
@@ -2288,66 +3665,75 @@ function AIScene({ service: _service }: { service: Service }) {
                 />
               )}
 
-              <div style={{
-                color: isActive ? AI_COLOR : 'rgba(255,255,255,0.2)',
-                transition: 'color 200ms',
-                position: 'relative',
-              }}>
-                <IconComp size={12} strokeWidth={1.8}/>
+              <div
+                style={{
+                  color: isActive ? AI_COLOR : 'rgba(255,255,255,0.2)',
+                  transition: 'color 200ms',
+                  position: 'relative',
+                }}
+              >
+                <IconComp size={12} strokeWidth={1.8} />
               </div>
 
-              <span style={{
-                fontSize: 8,
-                fontWeight: isActive ? 600 : 400,
-                color: isActive ? AI_COLOR : 'rgba(255,255,255,0.2)',
-                letterSpacing: '0.04em',
-                position: 'relative',
-                transition: 'color 200ms',
-                whiteSpace: 'nowrap',
-              }}>
+              <span
+                style={{
+                  fontSize: 8,
+                  fontWeight: isActive ? 600 : 400,
+                  color: isActive ? AI_COLOR : 'rgba(255,255,255,0.2)',
+                  letterSpacing: '0.04em',
+                  position: 'relative',
+                  transition: 'color 200ms',
+                  whiteSpace: 'nowrap',
+                }}
+              >
                 {sim.label}
               </span>
 
               {isActive && (
-                <div style={{
-                  position: 'absolute',
-                  bottom: 0,
-                  left: 0,
-                  height: 2,
-                  width: `${progress * 100}%`,
-                  background: `linear-gradient(90deg, ${AI_COLOR}80, ${AI_COLOR})`,
-                  borderRadius: '0 2px 2px 0',
-                }}/>
+                <div
+                  style={{
+                    position: 'absolute',
+                    bottom: 0,
+                    left: 0,
+                    height: 2,
+                    width: `${progress * 100}%`,
+                    background: `linear-gradient(90deg, ${AI_COLOR}80, ${AI_COLOR})`,
+                    borderRadius: '0 2px 2px 0',
+                  }}
+                />
               )}
 
               {!isActive && index < activeTab && (
-                <div style={{
-                  position: 'absolute',
-                  bottom: 4,
-                  left: '50%',
-                  transform: 'translateX(-50%)',
-                  width: 3,
-                  height: 3,
-                  borderRadius: '50%',
-                  background: 'rgba(255,255,255,0.15)',
-                }}/>
+                <div
+                  style={{
+                    position: 'absolute',
+                    bottom: 4,
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    width: 3,
+                    height: 3,
+                    borderRadius: '50%',
+                    background: 'rgba(255,255,255,0.15)',
+                  }}
+                />
               )}
             </button>
           );
         })}
       </div>
 
-      {/* Simulation panel */}
-      <div style={{
-        flex: 1,
-        position: 'relative',
-        overflow: 'hidden',
-        borderRadius: 22,
-        border: '1px solid rgba(255,255,255,0.06)',
-        background: 'rgba(255,255,255,0.025)',
-        padding: 8,
-        minHeight: 0,
-      }}>
+      <div
+        style={{
+          flex: 1,
+          position: 'relative',
+          overflow: 'hidden',
+          borderRadius: 22,
+          border: '1px solid rgba(255,255,255,0.06)',
+          background: 'rgba(255,255,255,0.025)',
+          padding: 8,
+          minHeight: 0,
+        }}
+      >
         <AnimatePresence mode="wait">
           <motion.div
             key={activeTab}
@@ -2357,23 +3743,19 @@ function AIScene({ service: _service }: { service: Service }) {
             transition={{ duration: 0.25, ease: [0.25, 0.46, 0.45, 0.94] }}
             style={{ height: '100%' }}
           >
-            {activeTab === 0 ? (
-              <SimChat isActive={isInView} progress={progress} color={activeSimulation.color}/>
-            ) : activeTab === 1 ? (
-              <SimLeadsIA isActive={isInView} progress={progress} color={activeSimulation.color}/>
-            ) : activeTab === 2 ? (
-              <SimAgenda isActive={isInView} progress={progress} color={activeSimulation.color}/>
-            ) : (
-              <SimMetricas isActive={isInView} progress={progress} color={activeSimulation.color}/>
-            )}
+            {activeTab === 0
+              ? SimChat({ isActive: isInView, progress, color: activeSimulation.color })
+              : activeTab === 1
+                ? SimLeadsIA({ isActive: isInView, progress, color: activeSimulation.color })
+                : activeTab === 2
+                  ? SimAgenda({ isActive: isInView, progress, color: activeSimulation.color })
+                  : SimMetricas({ isActive: isInView, progress, color: activeSimulation.color })}
           </motion.div>
         </AnimatePresence>
       </div>
     </div>
   );
 }
-
-
 function useMagneticOffset() {
   const targetX = useMotionValue(0);
   const targetY = useMotionValue(0);
@@ -2450,507 +3832,2449 @@ function MagneticFlowPath({
 
 
 function AutomationScene({ service }: { service: Service }) {
-  const containerRef = useRef<HTMLDivElement | null>(null);
-  const { scrollY } = useScroll();
-  const scrollVelocity = useVelocity(scrollY);
-  const burstEnergyRaw = useTransform(scrollVelocity, (value) => Math.min(Math.abs(value) / 2200, 1));
-  const burstEnergy = useSpring(burstEnergyRaw, {
-    stiffness: 210,
-    damping: 24,
-    mass: 0.38,
-  });
+  void service;
 
-  const burstWidth = useTransform(burstEnergy, [0, 1], [0.8, 3.8]);
-  const burstOpacity = useTransform(burstEnergy, [0, 1], [0.05, 0.92]);
-  const burstBlur = useTransform(burstEnergy, [0, 1], [0, 16]);
-  const burstFilter = useMotionTemplate`drop-shadow(0 0 ${burstBlur}px rgba(34,211,238,0.92))`;
-
-  const stripe = useMagneticOffset();
-  const n8n = useMagneticOffset();
-  const whatsapp = useMagneticOffset();
-  const crm = useMagneticOffset();
-  const erp = useMagneticOffset();
-
-  const nodeDefs = [
-    { id: 'stripe', label: 'Stripe', color: '#635bff', x: 52, y: 54, magnet: stripe },
-    { id: 'n8n', label: 'N8N', color: '#10b981', x: 154, y: 110, magnet: n8n },
-    { id: 'whatsapp', label: 'WhatsApp', color: '#25D366', x: 266, y: 50, magnet: whatsapp },
-    { id: 'crm', label: 'CRM', color: service.accent, x: 262, y: 182, magnet: crm },
-    { id: 'erp', label: 'ERP', color: '#38bdf8', x: 86, y: 184, magnet: erp },
-  ] as const;
-
-  const stripeX = useTransform(stripe.x, (value) => 52 + value);
-  const stripeY = useTransform(stripe.y, (value) => 54 + value);
-  const n8nX = useTransform(n8n.x, (value) => 154 + value);
-  const n8nY = useTransform(n8n.y, (value) => 110 + value);
-  const whatsappX = useTransform(whatsapp.x, (value) => 266 + value);
-  const whatsappY = useTransform(whatsapp.y, (value) => 50 + value);
-  const crmX = useTransform(crm.x, (value) => 262 + value);
-  const crmY = useTransform(crm.y, (value) => 182 + value);
-  const erpX = useTransform(erp.x, (value) => 86 + value);
-  const erpY = useTransform(erp.y, (value) => 184 + value);
-
-  const connections = [
-    {
-      fromX: stripeX,
-      fromY: stripeY,
-      toX: n8nX,
-      toY: n8nY,
-      color: '#635bff',
-    },
-    {
-      fromX: n8nX,
-      fromY: n8nY,
-      toX: whatsappX,
-      toY: whatsappY,
-      color: '#25D366',
-    },
-    {
-      fromX: n8nX,
-      fromY: n8nY,
-      toX: crmX,
-      toY: crmY,
-      color: service.accent,
-    },
-    {
-      fromX: n8nX,
-      fromY: n8nY,
-      toX: erpX,
-      toY: erpY,
-      color: '#38bdf8',
-    },
-  ] as const;
-
-  const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
-    const rect = containerRef.current?.getBoundingClientRect();
-    if (!rect) return;
-
-    const cursorX = ((event.clientX - rect.left) / rect.width) * 320;
-    const cursorY = ((event.clientY - rect.top) / rect.height) * 240;
-
-    nodeDefs.forEach((node) => {
-      const dx = cursorX - node.x;
-      const dy = cursorY - node.y;
-      const distance = Math.hypot(dx, dy);
-
-      if (distance <= 100) {
-        const attraction = (1 - distance / 100) * 0.52;
-        node.magnet.targetX.set(dx * attraction);
-        node.magnet.targetY.set(dy * attraction);
-        return;
-      }
-
-      node.magnet.targetX.set(0);
-      node.magnet.targetY.set(0);
-    });
+  type AutomationSimulation = {
+    id: number;
+    label: string;
+    icon: LucideIcon;
+    duration: number;
+    color: string;
   };
 
-  const handlePointerLeave = () => {
-    nodeDefs.forEach((node) => {
-      node.magnet.targetX.set(0);
-      node.magnet.targetY.set(0);
-    });
-  };
+  type SimProps = { isActive: boolean; progress: number; color: string };
 
-  return (
-    <div
-      ref={containerRef}
-      onPointerMove={handlePointerMove}
-      onPointerLeave={handlePointerLeave}
-      className="relative h-full w-full overflow-hidden bg-[radial-gradient(circle_at_center,#11161d_0%,#0a0d11_58%,#07090c_100%)]"
-    >
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.06),transparent_58%)]" />
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.05),transparent_28%,transparent_72%,rgba(255,255,255,0.03))]" />
+  const AUTO_COLOR = '#10b981';
 
-      <svg
-        viewBox="0 0 320 240"
-        preserveAspectRatio="none"
-        className="pointer-events-none absolute inset-0 h-full w-full overflow-visible"
+  const [autoSimulations] = useState<AutomationSimulation[]>(() => [
+    { id: 1, label: 'Flujo', icon: GitBranch, duration: 6000, color: AUTO_COLOR },
+    { id: 2, label: 'Follow-up', icon: MessageSquare, duration: 5500, color: AUTO_COLOR },
+    { id: 3, label: 'Reportes', icon: FileText, duration: 5000, color: AUTO_COLOR },
+    { id: 4, label: 'Sync Apps', icon: RefreshCw, duration: 5500, color: AUTO_COLOR },
+  ]);
+
+  function SimFlujo({ isActive, progress, color }: SimProps) {
+    const nodes = [
+      { id: 'form', label: 'Formulario', sublabel: 'Web', icon: Globe, nodeColor: '#06b6d4', x: 10, y: 15 },
+      { id: 'n8n', label: 'n8n', sublabel: 'Orquesta', icon: Zap, nodeColor: color, x: 42, y: 45 },
+      { id: 'whatsapp', label: 'WhatsApp', sublabel: 'Notif.', icon: MessageSquare, nodeColor: '#25D366', x: 74, y: 15 },
+      { id: 'crm', label: 'CRM', sublabel: 'Registro', icon: Database, nodeColor: '#8b5cf6', x: 74, y: 72 },
+      { id: 'email', label: 'Email', sublabel: 'Trigger', icon: Mail, nodeColor: '#f59e0b', x: 10, y: 72 },
+    ] as const;
+
+    const connections = [
+      { fromX: 10, fromY: 15, toX: 42, toY: 45, showAt: 0.18, pulseAt: 0.38 },
+      { fromX: 10, fromY: 72, toX: 42, toY: 45, showAt: 0.24, pulseAt: 0.42 },
+      { fromX: 42, fromY: 45, toX: 74, toY: 15, showAt: 0.32, pulseAt: 0.58 },
+      { fromX: 42, fromY: 45, toX: 74, toY: 72, showAt: 0.36, pulseAt: 0.65 },
+    ] as const;
+
+    const execCount = Math.floor(Math.max(0, (progress - 0.75) / 0.25) * 23);
+    const showCounter = progress > 0.75;
+    const n8nActive = progress > 0.45 && progress < 0.78;
+
+    return (
+      <div
+        style={{
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 8,
+          padding: '4px 2px',
+        }}
       >
-        {connections.map((connection, index) => (
-          <MagneticFlowPath
-            key={`${index}-${connection.color}`}
-            fromX={connection.fromX}
-            fromY={connection.fromY}
-            toX={connection.toX}
-            toY={connection.toY}
-            burstWidth={burstWidth}
-            burstOpacity={burstOpacity}
-            burstFilter={burstFilter}
-            color={connection.color}
-            connectionIndex={index}
-          />
-        ))}
-      </svg>
-
-      {nodeDefs.map((node, nodeIndex) => (
-        <motion.div
-          key={node.id}
-          className="absolute -translate-x-1/2 -translate-y-1/2"
-          style={{
-            left: `${(node.x / 320) * 100}%`,
-            top: `${(node.y / 240) * 100}%`,
-            x: node.magnet.x,
-            y: node.magnet.y,
-            zIndex: node.id === 'n8n' ? 2 : 1,
-          }}
-        >
-          {node.id === 'n8n' ? (
+        {/* Header */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', flexShrink: 0 }}>
+          <div>
             <div
               style={{
-                width: 64,
-                height: 64,
-                borderRadius: '50%',
-                background:
-                  'radial-gradient(circle at 35% 35%, rgba(16,185,129,0.25), rgba(16,185,129,0.08))',
-                border: '1px solid rgba(16,185,129,0.4)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                boxShadow: '0 0 30px rgba(16,185,129,0.12)',
-                position: 'relative',
+                fontSize: 9,
+                letterSpacing: '0.15em',
+                color: 'rgba(255,255,255,0.25)',
+                marginBottom: 2,
               }}
             >
-              {[80, 96, 112].map((size, index) => (
-                <motion.div
-                  key={index}
-                  animate={{ scale: [1, 1.1, 1], opacity: [0.2, 0, 0.2] }}
-                  transition={{ duration: 2 + index * 0.5, repeat: Infinity, delay: index * 0.6 }}
-                  style={{
-                    position: 'absolute',
-                    width: size,
-                    height: size,
-                    borderRadius: '50%',
-                    border: '1px solid rgba(16,185,129,0.2)',
-                  }}
-                />
-              ))}
-              <span style={{ fontSize: 11, fontWeight: 700, color: '#10b981' }}>N8N</span>
+              FLUJO ACTIVO
             </div>
-          ) : (
-            <div
+            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>Formulario â†’ n8n â†’ Apps</div>
+          </div>
+          {showCounter && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
               style={{
-                position: 'relative',
-                width: 56,
-                height: 56,
+                fontSize: 9,
+                color,
+                background: `${color}12`,
+                border: `1px solid ${color}25`,
+                borderRadius: 6,
+                padding: '4px 8px',
+                fontWeight: 600,
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'center',
+                gap: 4,
               }}
             >
               <motion.div
-                animate={{ scale: [1, 1.3, 1], opacity: [0.3, 0, 0.3] }}
-                transition={{ duration: 2.5, repeat: Infinity, delay: nodeIndex * 0.4 }}
+                animate={{ opacity: [1, 0.3, 1] }}
+                transition={{ duration: 1, repeat: isActive ? Infinity : 0 }}
+                style={{ width: 5, height: 5, borderRadius: '50%', background: color }}
+              />
+              {execCount} hoy
+            </motion.div>
+          )}
+        </div>
+
+        {/* Canvas del flujo */}
+        <div
+          style={{
+            flex: 1,
+            background: 'rgba(255,255,255,0.03)',
+            backdropFilter: 'blur(20px)',
+            border: '1px solid rgba(255,255,255,0.07)',
+            borderRadius: 12,
+            position: 'relative',
+            overflow: 'hidden',
+          }}
+        >
+          {/* SVG de conexiones */}
+          <svg
+            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
+            viewBox="0 0 100 100"
+            preserveAspectRatio="none"
+          >
+            {connections.map((conn, index) => {
+              const visible = progress > conn.showAt;
+              const pulseProgress = progress > conn.pulseAt ? Math.min((progress - conn.pulseAt) / 0.15, 1) : 0;
+              const mx = (conn.fromX + conn.toX) / 2;
+              const my = (conn.fromY + conn.toY) / 2 - 10;
+
+              return visible ? (
+                <g key={index}>
+                  {/* LÃ­nea de conexiÃ³n */}
+                  <motion.path
+                    d={`M ${conn.fromX} ${conn.fromY} Q ${mx} ${my} ${conn.toX} ${conn.toY}`}
+                    stroke="rgba(255,255,255,0.08)"
+                    strokeWidth="0.8"
+                    fill="none"
+                    initial={{ pathLength: 0 }}
+                    animate={{ pathLength: 1 }}
+                    transition={{ duration: 0.5, ease: 'easeOut' }}
+                  />
+                  {/* Pulso de datos */}
+                  {pulseProgress > 0 && (
+                    <motion.circle
+                      r="1.2"
+                      fill={progress > conn.pulseAt + 0.08 ? color : '#06b6d4'}
+                      filter={`drop-shadow(0 0 2px ${color})`}
+                      animate={{
+                        cx: [conn.fromX, mx, conn.toX],
+                        cy: [conn.fromY, my, conn.toY],
+                        opacity: [0, 1, 0],
+                      }}
+                      transition={{
+                        duration: 0.8,
+                        repeat: isActive ? Infinity : 0,
+                        delay: index * 0.2,
+                        ease: 'easeInOut',
+                      }}
+                    />
+                  )}
+                </g>
+              ) : null;
+            })}
+          </svg>
+
+          {/* Nodos */}
+          {nodes.map((node, index) => {
+            const nodeVisible = progress > index * 0.06;
+            const nodeActive =
+              progress > 0.45 &&
+              (node.id === 'n8n'
+                ? n8nActive
+                : node.id === 'whatsapp'
+                  ? progress > 0.58
+                  : node.id === 'crm'
+                    ? progress > 0.65
+                    : progress > 0.35);
+            const IconComp = node.icon;
+
+            return nodeVisible ? (
+              <motion.div
+                key={node.id}
+                initial={{ scale: 0, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ type: 'spring', stiffness: 400, damping: 15, delay: index * 0.05 }}
                 style={{
                   position: 'absolute',
-                  inset: -8,
-                  borderRadius: '50%',
-                  border: `1px solid ${node.color}50`,
+                  left: `${node.x}%`,
+                  top: `${node.y}%`,
+                  transform: 'translate(-50%, -50%)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: 3,
                 }}
-              />
+              >
+                {/* Anillo pulsante en nodo activo */}
+                {nodeActive && (
+                  <motion.div
+                    animate={{ scale: [1, 1.8], opacity: [0.5, 0] }}
+                    transition={{ duration: 1.2, repeat: isActive ? Infinity : 0 }}
+                    style={{
+                      position: 'absolute',
+                      width: 32,
+                      height: 32,
+                      borderRadius: '50%',
+                      border: `1px solid ${node.nodeColor}`,
+                      top: '50%',
+                      left: '50%',
+                      transform: 'translate(-50%, -50%)',
+                    }}
+                  />
+                )}
 
+                {/* Nodo */}
+                <motion.div
+                  animate={{
+                    background: nodeActive ? `${node.nodeColor}25` : 'rgba(255,255,255,0.05)',
+                    borderColor: nodeActive ? `${node.nodeColor}50` : 'rgba(255,255,255,0.10)',
+                    boxShadow: nodeActive ? `0 0 16px ${node.nodeColor}30` : 'none',
+                  }}
+                  transition={{ duration: 0.4 }}
+                  style={{
+                    width: 32,
+                    height: 32,
+                    borderRadius: '50%',
+                    backdropFilter: 'blur(20px)',
+                    border: '1px solid',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <IconComp
+                    size={13}
+                    color={nodeActive ? node.nodeColor : 'rgba(255,255,255,0.3)'}
+                    strokeWidth={1.5}
+                  />
+                </motion.div>
+
+                {/* Label */}
+                <div style={{ textAlign: 'center' }}>
+                  <div
+                    style={{
+                      fontSize: 8,
+                      fontWeight: 600,
+                      color: nodeActive ? node.nodeColor : 'rgba(255,255,255,0.35)',
+                      transition: 'color 400ms',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {node.label}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: 7,
+                      color: 'rgba(255,255,255,0.2)',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {node.sublabel}
+                  </div>
+                </div>
+              </motion.div>
+            ) : null;
+          })}
+        </div>
+      </div>
+    );
+  }
+
+  function SimFollowUp({ isActive, progress, color }: SimProps) {
+    const events = [
+      {
+        time: 'Lun 10:32',
+        label: 'Consulta recibida',
+        detail: 'Maria pregunto por precios de servicio',
+        icon: MessageSquare,
+        iconColor: '#06b6d4',
+        showAt: 0.12,
+        type: 'client',
+      },
+      {
+        time: 'Mar 10:32',
+        label: '24hs sin respuesta',
+        detail: 'Sistema detecta silencio del lead',
+        icon: Clock,
+        iconColor: '#f59e0b',
+        showAt: 0.28,
+        type: 'system',
+      },
+      {
+        time: 'Mar 10:33',
+        label: 'Follow-up automatico',
+        detail: '"Â¡Hola Maria! Â¿Pudiste ver la info que te enviamos?"',
+        icon: Zap,
+        iconColor: color,
+        showAt: 0.45,
+        type: 'auto',
+      },
+      {
+        time: 'Mar 11:15',
+        label: 'Cliente responde',
+        detail: 'Maria: "Si! Me interesa, Â¿cuando podemos hablar?"',
+        icon: MessageSquare,
+        iconColor: '#10b981',
+        showAt: 0.62,
+        type: 'client',
+      },
+      {
+        time: 'Mar 11:47',
+        label: 'Deal cerrado',
+        detail: 'Turno agendado Â· Conversion: 94%',
+        icon: CheckCircle,
+        iconColor: '#10b981',
+        showAt: 0.78,
+        type: 'success',
+      },
+    ] as const;
+
+    const showStat = progress > 0.85;
+
+    return (
+      <div
+        style={{
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 8,
+          padding: '4px 2px',
+        }}
+      >
+        {/* Header */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', flexShrink: 0 }}>
+          <div>
+            <div
+              style={{
+                fontSize: 9,
+                letterSpacing: '0.15em',
+                color: 'rgba(255,255,255,0.25)',
+                marginBottom: 2,
+              }}
+            >
+              SEGUIMIENTO AUTOMATICO
+            </div>
+            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>Ningun lead se pierde</div>
+          </div>
+          <div
+            style={{
+              fontSize: 9,
+              color,
+              background: `${color}12`,
+              border: `1px solid ${color}25`,
+              borderRadius: 6,
+              padding: '4px 8px',
+              fontWeight: 600,
+            }}
+          >
+            AUTO
+          </div>
+        </div>
+
+        {/* Timeline */}
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 0, position: 'relative' }}>
+          {/* LÃ­nea vertical del timeline */}
+          <div
+            style={{
+              position: 'absolute',
+              left: 15,
+              top: 8,
+              bottom: 8,
+              width: 1,
+              background: 'linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02))',
+            }}
+          />
+
+          {events.map((event, index) => {
+            const visible = progress > event.showAt;
+            const IconComp = event.icon;
+            const isSuccess = event.type === 'success';
+            const isAuto = event.type === 'auto';
+
+            return visible ? (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, x: -8 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] }}
+                style={{
+                  display: 'flex',
+                  gap: 10,
+                  paddingBottom: index < events.length - 1 ? 10 : 0,
+                  position: 'relative',
+                }}
+              >
+                {/* Ãcono del nodo */}
+                <div
+                  style={{
+                    width: 30,
+                    height: 30,
+                    borderRadius: '50%',
+                    background: `${event.iconColor}15`,
+                    backdropFilter: 'blur(20px)',
+                    border: `1px solid ${event.iconColor}30`,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0,
+                    boxShadow: isSuccess || isAuto ? `0 0 12px ${event.iconColor}30` : 'none',
+                    zIndex: 1,
+                  }}
+                >
+                  <IconComp size={13} color={event.iconColor} strokeWidth={1.5} />
+                </div>
+
+                {/* Contenido */}
+                <div
+                  style={{
+                    flex: 1,
+                    background: isAuto
+                      ? `${color}08`
+                      : isSuccess
+                        ? 'rgba(16,185,129,0.06)'
+                        : 'rgba(255,255,255,0.03)',
+                    backdropFilter: 'blur(20px)',
+                    border: `1px solid ${
+                      isAuto ? `${color}20` : isSuccess ? 'rgba(16,185,129,0.15)' : 'rgba(255,255,255,0.06)'
+                    }`,
+                    borderRadius: 8,
+                    padding: '7px 10px',
+                  }}
+                >
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      marginBottom: 3,
+                    }}
+                  >
+                    <span
+                      style={{
+                        fontSize: 11,
+                        fontWeight: 600,
+                        color: isAuto ? color : isSuccess ? '#10b981' : 'rgba(255,255,255,0.75)',
+                      }}
+                    >
+                      {event.label}
+                    </span>
+                    <span style={{ fontSize: 8, color: 'rgba(255,255,255,0.2)' }}>{event.time}</span>
+                  </div>
+                  <div
+                    style={{
+                      fontSize: 10,
+                      color: 'rgba(255,255,255,0.4)',
+                      lineHeight: 1.4,
+                      fontStyle: event.type === 'client' ? 'italic' : 'normal',
+                    }}
+                  >
+                    {event.detail}
+                  </div>
+                </div>
+              </motion.div>
+            ) : null;
+          })}
+        </div>
+
+        {/* Stat final */}
+        {showStat && (
+          <motion.div
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] }}
+            style={{
+              background: `${color}10`,
+              backdropFilter: 'blur(20px)',
+              border: `1px solid ${color}25`,
+              borderRadius: 8,
+              padding: '8px 12px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              flexShrink: 0,
+            }}
+          >
+            <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.5)' }}>
+              Leads recuperados con follow-up automatico
+            </span>
+            <motion.span
+              animate={isActive ? { opacity: [0.85, 1, 0.85] } : { opacity: 1 }}
+              transition={{ duration: 1.2, repeat: isActive ? Infinity : 0 }}
+              style={{ fontSize: 16, fontWeight: 800, color }}
+            >
+              68%
+            </motion.span>
+          </motion.div>
+        )}
+      </div>
+    );
+  }
+
+  function SimReporte({ isActive, progress, color }: SimProps) {
+    void isActive;
+
+    const dataItems = [
+      { label: 'Ventas del mes', value: '$47.200', icon: 'ðŸ’°', readAt: 0.18 },
+      { label: 'Nuevos clientes', value: '23', icon: 'ðŸ‘¥', readAt: 0.23 },
+      { label: 'Consultas totales', value: '147', icon: 'ðŸ’¬', readAt: 0.28 },
+      { label: 'Tasa de cierre', value: '34%', icon: 'ðŸ“ˆ', readAt: 0.33 },
+    ] as const;
+
+    const showClock = progress > 0.05;
+    const showDataCollection = progress > 0.15;
+    const generateProgress = progress > 0.35 ? Math.min((progress - 0.35) / 0.2, 1) : 0;
+    const showReport = progress > 0.55;
+    const showSent = progress > 0.75;
+
+    return (
+      <div
+        style={{
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 8,
+          padding: '4px 2px',
+        }}
+      >
+        {/* Header con reloj */}
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'flex-start',
+            flexShrink: 0,
+          }}
+        >
+          <div>
+            <div
+              style={{
+                fontSize: 9,
+                letterSpacing: '0.15em',
+                color: 'rgba(255,255,255,0.25)',
+                marginBottom: 2,
+              }}
+            >
+              REPORTE AUTOMATICO
+            </div>
+            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>Cada lunes Â· 8:00 AM</div>
+          </div>
+          {showClock && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              style={{
+                fontSize: 12,
+                fontWeight: 700,
+                color,
+                background: `${color}12`,
+                border: `1px solid ${color}25`,
+                borderRadius: 6,
+                padding: '4px 10px',
+                fontVariantNumeric: 'tabular-nums',
+              }}
+            >
+              Lun 08:00
+            </motion.div>
+          )}
+        </div>
+
+        {/* RecolecciÃ³n de datos */}
+        {showDataCollection && !showReport && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            style={{
+              background: 'rgba(255,255,255,0.03)',
+              backdropFilter: 'blur(20px)',
+              border: '1px solid rgba(255,255,255,0.07)',
+              borderRadius: 10,
+              padding: '10px 12px',
+              flex: 1,
+            }}
+          >
+            <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.3)', letterSpacing: '0.08em', marginBottom: 10 }}>
+              RECOLECTANDO DATOS...
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
+              {dataItems.map((item) =>
+                progress > item.readAt ? (
+                  <motion.div
+                    key={item.label}
+                    initial={{ opacity: 0, x: -8 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      padding: '6px 10px',
+                      background: `${color}08`,
+                      border: `1px solid ${color}15`,
+                      borderRadius: 8,
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <span style={{ fontSize: 12 }}>{item.icon}</span>
+                      <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.6)' }}>{item.label}</span>
+                    </div>
+                    <span style={{ fontSize: 12, fontWeight: 700, color }}>{item.value}</span>
+                  </motion.div>
+                ) : null
+              )}
+            </div>
+
+            {/* Barra de generaciÃ³n */}
+            {generateProgress > 0 && (
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ marginTop: 12 }}>
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    marginBottom: 5,
+                  }}
+                >
+                  <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.3)', letterSpacing: '0.08em' }}>
+                    GENERANDO REPORTE...
+                  </span>
+                  <span style={{ fontSize: 9, color, fontWeight: 600 }}>{Math.floor(generateProgress * 100)}%</span>
+                </div>
+                <div
+                  style={{
+                    height: 3,
+                    background: 'rgba(255,255,255,0.06)',
+                    borderRadius: 100,
+                    overflow: 'hidden',
+                  }}
+                >
+                  <motion.div
+                    animate={{ width: `${generateProgress * 100}%` }}
+                    style={{
+                      height: '100%',
+                      background: `linear-gradient(90deg, ${color}80, ${color})`,
+                      borderRadius: 100,
+                      boxShadow: `0 0 8px ${color}60`,
+                    }}
+                  />
+                </div>
+              </motion.div>
+            )}
+          </motion.div>
+        )}
+
+        {/* Preview del reporte */}
+        {showReport && (
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            style={{
+              background: 'rgba(255,255,255,0.04)',
+              backdropFilter: 'blur(20px)',
+              border: `1px solid ${color}20`,
+              borderRadius: 10,
+              padding: '10px 12px',
+              flex: 1,
+            }}
+          >
+            {/* Header del reporte */}
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                marginBottom: 10,
+                paddingBottom: 8,
+                borderBottom: '1px solid rgba(255,255,255,0.06)',
+              }}
+            >
+              <div>
+                <div style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.85)' }}>Reporte Semanal</div>
+                <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.3)', marginTop: 1 }}>
+                  Semana del 14 al 20 de Abril
+                </div>
+              </div>
               <div
                 style={{
-                  width: 48,
-                  height: 48,
-                  borderRadius: '50%',
-                  background: `radial-gradient(circle at 35% 35%, ${node.color}30, ${node.color}10)`,
-                  border: `1px solid ${node.color}40`,
+                  width: 28,
+                  height: 28,
+                  background: `${color}15`,
+                  border: `1px solid ${color}25`,
+                  borderRadius: 8,
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  boxShadow: `0 0 20px ${node.color}15, inset 0 1px 0 ${node.color}20`,
+                }}
+              >
+                <FileText size={13} color={color} />
+              </div>
+            </div>
+
+            {/* MÃ©tricas del reporte */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
+              {dataItems.map((item, index) => (
+                <motion.div
+                  key={item.label}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: index * 0.08 }}
+                  style={{
+                    background: 'rgba(255,255,255,0.03)',
+                    borderRadius: 8,
+                    padding: '7px 8px',
+                    border: '1px solid rgba(255,255,255,0.05)',
+                  }}
+                >
+                  <div style={{ fontSize: 8, color: 'rgba(255,255,255,0.25)', marginBottom: 3 }}>
+                    {item.label.toUpperCase()}
+                  </div>
+                  <div style={{ fontSize: 16, fontWeight: 800, color, letterSpacing: '-0.02em' }}>{item.value}</div>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+        )}
+
+        {/* NotificaciÃ³n enviado */}
+        {showSent && (
+          <motion.div
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            style={{
+              background: 'rgba(37,211,102,0.07)',
+              backdropFilter: 'blur(20px)',
+              border: '1px solid rgba(37,211,102,0.20)',
+              borderRadius: 8,
+              padding: '8px 12px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 10,
+              flexShrink: 0,
+            }}
+          >
+            <div
+              style={{
+                width: 28,
+                height: 28,
+                background: 'rgba(37,211,102,0.15)',
+                border: '1px solid rgba(37,211,102,0.25)',
+                borderRadius: 8,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+              }}
+            >
+              <Mail size={13} color="#25D366" />
+            </div>
+            <div>
+              <div style={{ fontSize: 10, fontWeight: 700, color: '#25D366', marginBottom: 2 }}>
+                Enviado al equipo directivo
+              </div>
+              <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.4)' }}>3 destinatarios Â· hace un momento</div>
+            </div>
+          </motion.div>
+        )}
+      </div>
+    );
+  }
+
+  function SimSync({ isActive, progress, color }: SimProps) {
+    const showForm = progress > 0.05;
+    const syncing = progress > 0.2 && progress < 0.38;
+    const syncProgress = progress > 0.2 ? Math.min((progress - 0.2) / 0.15, 1) : 0;
+
+    const syncSteps = [
+      {
+        label: 'CRM actualizado',
+        detail: 'Contacto creado: Laura Sanchez',
+        icon: Database,
+        color: '#8b5cf6',
+        showAt: 0.35,
+      },
+      {
+        label: 'Follow-up agendado',
+        detail: 'Recordatorio para manana 10:00hs',
+        icon: Calendar,
+        color: '#06b6d4',
+        showAt: 0.55,
+      },
+      {
+        label: 'Vendedor notificado',
+        detail: 'WhatsApp enviado a Martin G.',
+        icon: MessageSquare,
+        color: '#25D366',
+        showAt: 0.7,
+      },
+    ] as const;
+
+    const showTime = progress > 0.86;
+
+    return (
+      <div
+        style={{
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 8,
+          padding: '4px 2px',
+        }}
+      >
+        {/* Header */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', flexShrink: 0 }}>
+          <div>
+            <div
+              style={{
+                fontSize: 9,
+                letterSpacing: '0.15em',
+                color: 'rgba(255,255,255,0.25)',
+                marginBottom: 2,
+              }}
+            >
+              SYNC AUTOMATICO
+            </div>
+            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>Formulario â†’ 3 apps en 2 segundos</div>
+          </div>
+          <div
+            style={{
+              fontSize: 9,
+              color,
+              background: `${color}12`,
+              border: `1px solid ${color}25`,
+              borderRadius: 6,
+              padding: '4px 8px',
+              fontWeight: 600,
+            }}
+          >
+            EN VIVO
+          </div>
+        </div>
+
+        {/* Formulario origen */}
+        {showForm && (
+          <motion.div
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            style={{
+              background: 'rgba(255,255,255,0.03)',
+              backdropFilter: 'blur(20px)',
+              border: '1px solid rgba(255,255,255,0.08)',
+              borderRadius: 10,
+              padding: '10px 12px',
+              flexShrink: 0,
+            }}
+          >
+            <div style={{ fontSize: 8, color: 'rgba(255,255,255,0.25)', letterSpacing: '0.08em', marginBottom: 8 }}>
+              FORMULARIO WEB Â· ORIGEN
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
+              {[
+                { label: 'Nombre', value: 'Laura Sanchez' },
+                { label: 'WhatsApp', value: '+54 381 444-5678' },
+                { label: 'Interes', value: 'Presupuesto web' },
+                { label: 'Empresa', value: 'Clinica Norte' },
+              ].map((field) => (
+                <div
+                  key={field.label}
+                  style={{
+                    background: 'rgba(255,255,255,0.04)',
+                    borderRadius: 6,
+                    padding: '5px 8px',
+                  }}
+                >
+                  <div style={{ fontSize: 7, color: 'rgba(255,255,255,0.25)', marginBottom: 2 }}>
+                    {field.label.toUpperCase()}
+                  </div>
+                  <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.7)', fontWeight: 500 }}>{field.value}</div>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        )}
+
+        {/* Barra de sync */}
+        {syncProgress > 0 && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ flexShrink: 0 }}>
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                marginBottom: 4,
+              }}
+            >
+              <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.3)', letterSpacing: '0.08em' }}>
+                {syncing ? 'SINCRONIZANDO...' : 'COMPLETADO'}
+              </span>
+              <span style={{ fontSize: 9, color, fontWeight: 600 }}>{Math.floor(syncProgress * 100)}%</span>
+            </div>
+            <div
+              style={{
+                height: 3,
+                background: 'rgba(255,255,255,0.06)',
+                borderRadius: 100,
+                overflow: 'hidden',
+              }}
+            >
+              <motion.div
+                animate={{ width: `${syncProgress * 100}%` }}
+                style={{
+                  height: '100%',
+                  background: `linear-gradient(90deg, ${color}80, ${color})`,
+                  borderRadius: 100,
+                  boxShadow: `0 0 8px ${color}50`,
+                }}
+              />
+            </div>
+          </motion.div>
+        )}
+
+        {/* Steps completados */}
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
+          {syncSteps.map((step) => {
+            const visible = progress > step.showAt;
+            const IconComp = step.icon;
+            return visible ? (
+              <motion.div
+                key={step.label}
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] }}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 10,
+                  background: `${step.color}08`,
+                  backdropFilter: 'blur(20px)',
+                  border: `1px solid ${step.color}20`,
+                  borderRadius: 10,
+                  padding: '9px 12px',
                 }}
               >
                 <div
                   style={{
-                    width: 8,
-                    height: 8,
+                    width: 28,
+                    height: 28,
+                    background: `${step.color}15`,
+                    border: `1px solid ${step.color}25`,
+                    borderRadius: 8,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0,
+                  }}
+                >
+                  <IconComp size={13} color={step.color} strokeWidth={1.5} />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 11, fontWeight: 600, color: step.color, marginBottom: 2 }}>{step.label}</div>
+                  <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.4)' }}>{step.detail}</div>
+                </div>
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ type: 'spring', stiffness: 400 }}
+                  style={{
+                    width: 18,
+                    height: 18,
                     borderRadius: '50%',
-                    background: node.color,
-                    boxShadow: `0 0 8px ${node.color}`,
+                    background: step.color,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0,
+                  }}
+                >
+                  <Check size={10} color="black" strokeWidth={3} />
+                </motion.div>
+              </motion.div>
+            ) : null;
+          })}
+        </div>
+
+        {/* Tiempo total */}
+        {showTime && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.3 }}
+            style={{
+              background: `${color}10`,
+              backdropFilter: 'blur(20px)',
+              border: `1px solid ${color}25`,
+              borderRadius: 8,
+              padding: '8px 12px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              flexShrink: 0,
+            }}
+          >
+            <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.5)' }}>3 apps sincronizadas en</span>
+            <motion.span
+              animate={isActive ? { opacity: [0.9, 1, 0.9] } : { opacity: 1 }}
+              transition={{ duration: 1.1, repeat: isActive ? Infinity : 0 }}
+              style={{ fontSize: 18, fontWeight: 800, color, letterSpacing: '-0.02em' }}
+            >
+              2.3s
+            </motion.span>
+          </motion.div>
+        )}
+      </div>
+    );
+  }
+
+  const [activeTab, setActiveTab] = useState(0);
+  const [isInView, setIsInView] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [cycleSeed, setCycleSeed] = useState(0);
+
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const progressRef = useRef(0);
+  const animFrameRef = useRef(0);
+  const nextTabTimeoutRef = useRef<number | null>(null);
+  const startTimeRef = useRef(0);
+  const isRunningRef = useRef(false);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsInView(entry.isIntersecting);
+      },
+      { threshold: 0.3 }
+    );
+
+    const currentContainer = containerRef.current;
+    if (currentContainer) {
+      observer.observe(currentContainer);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (nextTabTimeoutRef.current) {
+      clearTimeout(nextTabTimeoutRef.current);
+      nextTabTimeoutRef.current = null;
+    }
+
+    if (!isInView) {
+      cancelAnimationFrame(animFrameRef.current);
+      isRunningRef.current = false;
+      return;
+    }
+
+    const duration = autoSimulations[activeTab]?.duration ?? 1;
+
+    progressRef.current = 0;
+    startTimeRef.current = performance.now();
+    isRunningRef.current = true;
+
+    const tick = (now: number) => {
+      if (!isRunningRef.current) {
+        return;
+      }
+
+      const elapsed = now - startTimeRef.current;
+      const nextProgress = Math.min(elapsed / duration, 1);
+
+      if (nextProgress !== progressRef.current) {
+        progressRef.current = nextProgress;
+        setProgress(nextProgress);
+      }
+
+      if (nextProgress < 1) {
+        animFrameRef.current = requestAnimationFrame(tick);
+        return;
+      }
+
+      isRunningRef.current = false;
+      nextTabTimeoutRef.current = window.setTimeout(() => {
+        progressRef.current = 0;
+        setProgress(0);
+        setActiveTab((previousTab) => (previousTab + 1) % autoSimulations.length);
+      }, 300);
+    };
+
+    animFrameRef.current = requestAnimationFrame(tick);
+
+    return () => {
+      cancelAnimationFrame(animFrameRef.current);
+      if (nextTabTimeoutRef.current) {
+        clearTimeout(nextTabTimeoutRef.current);
+        nextTabTimeoutRef.current = null;
+      }
+      isRunningRef.current = false;
+    };
+  }, [activeTab, autoSimulations, cycleSeed, isInView]);
+
+  const handleTabClick = (index: number) => {
+    cancelAnimationFrame(animFrameRef.current);
+    if (nextTabTimeoutRef.current) {
+      clearTimeout(nextTabTimeoutRef.current);
+      nextTabTimeoutRef.current = null;
+    }
+    isRunningRef.current = false;
+    progressRef.current = 0;
+    setProgress(0);
+    setActiveTab(index);
+    setCycleSeed((currentSeed) => currentSeed + 1);
+  };
+
+  const activeSimulation = autoSimulations[activeTab];
+
+  return (
+    <div
+      ref={containerRef}
+      style={{
+        width: '100%',
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        padding: 8,
+        gap: 8,
+      }}
+    >
+      <div style={{ marginBottom: 8, flexShrink: 0 }}>
+        <div style={{ fontSize: 9, fontWeight: 600, letterSpacing: '0.12em', color: `${AUTO_COLOR}80`, marginBottom: 4 }}>
+          {'AUTOMATIZACIONES \u00b7 EN VIVO'}
+        </div>
+        <div style={{ fontSize: 13, fontWeight: 600, color: 'rgba(255,255,255,0.8)', lineHeight: 1.3 }}>
+          Tus procesos corriendo solos ahora mismo
+        </div>
+      </div>
+
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: `repeat(${autoSimulations.length}, 1fr)`,
+          gap: 4,
+          flexShrink: 0,
+        }}
+      >
+        {autoSimulations.map((sim, index) => {
+          const isActive = index === activeTab;
+          const IconComp = sim.icon;
+
+          return (
+            <button
+              key={sim.id}
+              type="button"
+              onClick={() => handleTabClick(index)}
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: 4,
+                padding: '7px 4px',
+                borderRadius: 8,
+                border: isActive ? `1px solid ${AUTO_COLOR}30` : '1px solid transparent',
+                background: isActive ? `${AUTO_COLOR}10` : 'transparent',
+                cursor: 'pointer',
+                position: 'relative',
+                overflow: 'hidden',
+                transition: 'all 200ms ease',
+              }}
+            >
+              {isActive && (
+                <motion.div
+                  layoutId="autoTabGlow"
+                  style={{
+                    position: 'absolute',
+                    inset: 0,
+                    background: `radial-gradient(circle at 50% 0%, ${AUTO_COLOR}15, transparent 70%)`,
+                    pointerEvents: 'none',
                   }}
                 />
-              </div>
+              )}
 
               <div
                 style={{
-                  position: 'absolute',
-                  bottom: -20,
-                  left: '50%',
-                  transform: 'translateX(-50%)',
-                  fontSize: 9,
-                  fontWeight: 600,
-                  color: 'rgba(255,255,255,0.5)',
-                  letterSpacing: '0.08em',
+                  color: isActive ? AUTO_COLOR : 'rgba(255,255,255,0.2)',
+                  transition: 'color 200ms',
+                  position: 'relative',
+                }}
+              >
+                <IconComp size={12} strokeWidth={1.8} />
+              </div>
+
+              <span
+                style={{
+                  fontSize: 8,
+                  fontWeight: isActive ? 600 : 400,
+                  color: isActive ? AUTO_COLOR : 'rgba(255,255,255,0.2)',
+                  letterSpacing: '0.04em',
+                  position: 'relative',
+                  transition: 'color 200ms',
                   whiteSpace: 'nowrap',
                 }}
               >
-                {node.label}
-              </div>
-            </div>
-          )}
-        </motion.div>
-      ))}
+                {sim.label}
+              </span>
 
-      <motion.div
+              {isActive && (
+                <div
+                  style={{
+                    position: 'absolute',
+                    bottom: 0,
+                    left: 0,
+                    height: 2,
+                    width: `${progress * 100}%`,
+                    background: `linear-gradient(90deg, ${AUTO_COLOR}80, ${AUTO_COLOR})`,
+                    borderRadius: '0 2px 2px 0',
+                  }}
+                />
+              )}
+
+              {!isActive && index < activeTab && (
+                <div
+                  style={{
+                    position: 'absolute',
+                    bottom: 4,
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    width: 3,
+                    height: 3,
+                    borderRadius: '50%',
+                    background: 'rgba(255,255,255,0.15)',
+                  }}
+                />
+              )}
+            </button>
+          );
+        })}
+      </div>
+
+      <div
         style={{
-          position: 'absolute',
-          bottom: 12,
-          left: 12,
-          background: 'rgba(16,185,129,0.1)',
-          border: '1px solid rgba(16,185,129,0.2)',
-          borderRadius: 8,
-          padding: '6px 10px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: 6,
+          flex: 1,
+          position: 'relative',
+          overflow: 'hidden',
+          borderRadius: 22,
+          border: '1px solid rgba(255,255,255,0.06)',
+          background: 'rgba(255,255,255,0.025)',
+          padding: 8,
+          minHeight: 0,
         }}
       >
-        <motion.div
-          animate={{ opacity: [1, 0.3, 1] }}
-          transition={{ duration: 1, repeat: Infinity }}
-          style={{ width: 5, height: 5, borderRadius: '50%', background: '#10b981' }}
-        />
-        <span style={{ fontSize: 9, color: 'rgba(16,185,129,0.8)', fontWeight: 500 }}>
-          23 ejecuciones hoy
-        </span>
-      </motion.div>
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeTab}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.25, ease: [0.25, 0.46, 0.45, 0.94] }}
+            style={{ height: '100%' }}
+          >
+            {activeTab === 0
+              ? SimFlujo({ isActive: isInView, progress, color: activeSimulation.color })
+              : activeTab === 1
+                ? SimFollowUp({ isActive: isInView, progress, color: activeSimulation.color })
+                : activeTab === 2
+                  ? SimReporte({ isActive: isInView, progress, color: activeSimulation.color })
+                  : SimSync({ isActive: isInView, progress, color: activeSimulation.color })}
+          </motion.div>
+        </AnimatePresence>
+      </div>
     </div>
   );
 }
 
 function SoftwareScene({ service }: { service: Service }) {
+  void service;
+
+  type SoftwareSimulation = {
+    id: number;
+    label: string;
+    icon: LucideIcon;
+    duration: number;
+    color: string;
+  };
+
+  type SimProps = { isActive: boolean; progress: number; color: string };
+
+  const SW_COLOR = '#f59e0b';
+
+  const [swSimulations] = useState<SoftwareSimulation[]>(() => [
+    { id: 1, label: 'CRM', icon: Users, duration: 5500, color: SW_COLOR },
+    { id: 2, label: 'Dashboard', icon: BarChart2, duration: 5000, color: SW_COLOR },
+    { id: 3, label: 'Stock', icon: Package, duration: 5500, color: SW_COLOR },
+    { id: 4, label: 'Equipo', icon: Layers, duration: 5000, color: SW_COLOR },
+  ]);
+
+  function SimCRM({ isActive, progress, color }: SimProps) {
+    void isActive;
+
+    const stages = [
+      { label: 'Nuevos', stageColor: '#06b6d4', total: '$12.400' },
+      { label: 'Propuesta', stageColor: '#8b5cf6', total: '$28.900' },
+      { label: 'Negoc.', stageColor: color, total: '$15.200' },
+      { label: 'Cerrado', stageColor: '#10b981', total: '$47.800' },
+    ] as const;
+
+    const movingDealStage = progress < 0.5 ? 1 : progress < 0.65 ? 2 : 3;
+
+    const showDeals = progress > 0.2;
+    const dealMoved = progress > 0.75;
+    const closedTotal = dealMoved ? '$56.300' : '$47.800';
+
+    const staticDeals = [
+      { name: 'Clinica Norte', value: '$3.200', stage: 0, avatar: 'CN', dealColor: '#06b6d4' },
+      { name: 'Gym Evolucion', value: '$1.800', stage: 2, avatar: 'GE', dealColor: color },
+      { name: 'Rest. El Patio', value: '$4.100', stage: 3, avatar: 'RE', dealColor: '#10b981' },
+    ] as const;
+
+    return (
+      <div
+        style={{
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 8,
+          padding: '4px 2px',
+        }}
+      >
+        {/* Header */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', flexShrink: 0 }}>
+          <div>
+            <div
+              style={{
+                fontSize: 9,
+                letterSpacing: '0.15em',
+                color: 'rgba(255,255,255,0.25)',
+                marginBottom: 2,
+              }}
+            >
+              CRM · PIPELINE
+            </div>
+            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>Estado actual de ventas</div>
+          </div>
+          <div
+            style={{
+              fontSize: 12,
+              fontWeight: 800,
+              color,
+              letterSpacing: '-0.02em',
+            }}
+          >
+            {closedTotal}
+          </div>
+        </div>
+
+        {/* Pipeline */}
+        <div
+          style={{
+            flex: 1,
+            display: 'grid',
+            gridTemplateColumns: 'repeat(4, 1fr)',
+            gap: 5,
+          }}
+        >
+          {stages.map((stage, stageIndex) => (
+            <div
+              key={stage.label}
+              style={{
+                background: 'rgba(255,255,255,0.03)',
+                backdropFilter: 'blur(20px)',
+                border: '1px solid rgba(255,255,255,0.07)',
+                borderRadius: 10,
+                padding: '8px 6px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 6,
+              }}
+            >
+              {/* Header de columna */}
+              <div style={{ textAlign: 'center' }}>
+                <div
+                  style={{
+                    width: '100%',
+                    height: 2,
+                    background: stage.stageColor,
+                    borderRadius: 100,
+                    marginBottom: 5,
+                    opacity: 0.6,
+                  }}
+                />
+                <div
+                  style={{
+                    fontSize: 8,
+                    fontWeight: 600,
+                    color: stage.stageColor,
+                    letterSpacing: '0.05em',
+                  }}
+                >
+                  {stage.label}
+                </div>
+                <div style={{ fontSize: 8, color: 'rgba(255,255,255,0.25)', marginTop: 1 }}>
+                  {stageIndex === 3 ? closedTotal : stage.total}
+                </div>
+              </div>
+
+              {/* Deals estáticos */}
+              {showDeals &&
+                staticDeals
+                  .filter((deal) => deal.stage === stageIndex)
+                  .map((deal, index) => (
+                    <motion.div
+                      key={deal.name}
+                      initial={{ opacity: 0, y: 6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.1 }}
+                      style={{
+                        background: `${deal.dealColor}10`,
+                        border: `1px solid ${deal.dealColor}20`,
+                        borderRadius: 6,
+                        padding: '5px 6px',
+                      }}
+                    >
+                      <div style={{ fontSize: 9, fontWeight: 600, color: 'rgba(255,255,255,0.7)', marginBottom: 2 }}>
+                        {deal.name}
+                      </div>
+                      <div style={{ fontSize: 10, fontWeight: 700, color: deal.dealColor }}>{deal.value}</div>
+                    </motion.div>
+                  ))}
+
+              {/* Deal que se mueve */}
+              {showDeals && movingDealStage === stageIndex && (
+                <motion.div
+                  layout
+                  layoutId="movingDeal"
+                  style={{
+                    background: `${color}15`,
+                    border: `1px solid ${color}35`,
+                    borderRadius: 6,
+                    padding: '5px 6px',
+                    boxShadow: `0 0 12px ${color}20`,
+                  }}
+                >
+                  <div style={{ fontSize: 9, fontWeight: 600, color: 'rgba(255,255,255,0.85)', marginBottom: 2 }}>
+                    Auto San Miguel
+                  </div>
+                  <div style={{ fontSize: 10, fontWeight: 700, color }}>$8.500</div>
+                  {movingDealStage === 3 && (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      style={{
+                        fontSize: 8,
+                        color: '#10b981',
+                        marginTop: 2,
+                        fontWeight: 600,
+                      }}
+                    >
+                      ✓ CERRADO
+                    </motion.div>
+                  )}
+                </motion.div>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  function SimDashboard({ isActive, progress, color }: SimProps) {
+    const metricProgress = Math.min(Math.max((progress - 0.15) / 0.4, 0), 1);
+
+    const kpis = [
+      { label: 'REVENUE', value: Math.floor(metricProgress * 47200), color },
+      { label: 'CLIENTES', value: Math.floor(metricProgress * 23), color: '#10b981' },
+      { label: 'RETENCION', value: Math.floor(metricProgress * 89), color: '#8b5cf6' },
+    ] as const;
+
+    const showGraph = progress > 0.55;
+    const showAlert = progress > 0.75;
+
+    const barData = [
+      { month: 'E', value: 0.55 },
+      { month: 'F', value: 0.7 },
+      { month: 'M', value: 0.62 },
+      { month: 'A', value: 0.85 },
+      { month: 'M', value: 0.78 },
+      { month: 'J', value: 0.94 },
+    ] as const;
+
+    return (
+      <div
+        style={{
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 8,
+          padding: '4px 2px',
+        }}
+      >
+        {/* Header */}
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'flex-start',
+            flexShrink: 0,
+          }}
+        >
+          <div>
+            <div
+              style={{
+                fontSize: 9,
+                letterSpacing: '0.15em',
+                color: 'rgba(255,255,255,0.25)',
+                marginBottom: 2,
+              }}
+            >
+              DASHBOARD EJECUTIVO
+            </div>
+            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>Junio 2025 · En tiempo real</div>
+          </div>
+          <motion.div
+            animate={{ opacity: [0.5, 1, 0.5] }}
+            transition={{ duration: 1.5, repeat: isActive ? Infinity : 0 }}
+            style={{ fontSize: 9, color, display: 'flex', alignItems: 'center', gap: 4, fontWeight: 600 }}
+          >
+            <div
+              style={{ width: 5, height: 5, borderRadius: '50%', background: color, boxShadow: `0 0 6px ${color}` }}
+            />
+            LIVE
+          </motion.div>
+        </div>
+
+        {/* KPIs */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6, flexShrink: 0 }}>
+          {/* Revenue */}
+          <div
+            style={{
+              gridColumn: 'span 2',
+              background: `${color}08`,
+              backdropFilter: 'blur(20px)',
+              border: `1px solid ${color}20`,
+              borderRadius: 10,
+              padding: '10px 12px',
+            }}
+          >
+            <div style={{ fontSize: 8, color: 'rgba(255,255,255,0.25)', letterSpacing: '0.08em', marginBottom: 4 }}>
+              {kpis[0].label}
+            </div>
+            <div style={{ fontSize: 24, fontWeight: 800, color, letterSpacing: '-0.03em', lineHeight: 1 }}>
+              ${kpis[0].value.toLocaleString()}
+            </div>
+            <div style={{ fontSize: 9, color: '#10b981', marginTop: 3 }}>↑ 18% vs mes anterior</div>
+          </div>
+
+          {/* Clientes */}
+          <div
+            style={{
+              background: 'rgba(16,185,129,0.06)',
+              backdropFilter: 'blur(20px)',
+              border: '1px solid rgba(16,185,129,0.15)',
+              borderRadius: 10,
+              padding: '10px 8px',
+            }}
+          >
+            <div style={{ fontSize: 7, color: 'rgba(255,255,255,0.25)', letterSpacing: '0.06em', marginBottom: 4 }}>
+              {kpis[1].label}
+            </div>
+            <div style={{ fontSize: 22, fontWeight: 800, color: '#10b981', lineHeight: 1 }}>{kpis[1].value}</div>
+            <div style={{ fontSize: 8, color: 'rgba(16,185,129,0.6)', marginTop: 3 }}>nuevos</div>
+          </div>
+
+          {/* Retencion */}
+          <div
+            style={{
+              background: 'rgba(139,92,246,0.06)',
+              backdropFilter: 'blur(20px)',
+              border: '1px solid rgba(139,92,246,0.15)',
+              borderRadius: 10,
+              padding: '10px 8px',
+            }}
+          >
+            <div style={{ fontSize: 7, color: 'rgba(255,255,255,0.25)', letterSpacing: '0.06em', marginBottom: 4 }}>
+              RETEN.
+            </div>
+            <div style={{ fontSize: 22, fontWeight: 800, color: '#8b5cf6', lineHeight: 1 }}>{kpis[2].value}%</div>
+            <div style={{ fontSize: 8, color: 'rgba(139,92,246,0.6)', marginTop: 3 }}>clientes</div>
+          </div>
+        </div>
+
+        {/* Grafico */}
+        {showGraph && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            style={{
+              flex: 1,
+              background: 'rgba(255,255,255,0.03)',
+              backdropFilter: 'blur(20px)',
+              border: '1px solid rgba(255,255,255,0.07)',
+              borderRadius: 10,
+              padding: '10px 12px',
+            }}
+          >
+            <div style={{ fontSize: 8, color: 'rgba(255,255,255,0.2)', letterSpacing: '0.08em', marginBottom: 8 }}>
+              REVENUE MENSUAL
+            </div>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'flex-end',
+                gap: 5,
+                height: 48,
+              }}
+            >
+              {barData.map((bar, index) => {
+                const barProgress = Math.min(Math.max((progress - 0.55 - index * 0.025) / 0.12, 0), 1);
+                const isLastBar = index === barData.length - 1;
+                return (
+                  <div
+                    key={`${bar.month}-${index}`}
+                    style={{
+                      flex: 1,
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      gap: 4,
+                      height: '100%',
+                      justifyContent: 'flex-end',
+                    }}
+                  >
+                    <motion.div
+                      animate={{ height: `${barProgress * bar.value * 100}%` }}
+                      transition={{ duration: 0.4, ease: 'easeOut' }}
+                      style={{
+                        width: '100%',
+                        background: isLastBar ? color : `${color}40`,
+                        borderRadius: '3px 3px 0 0',
+                        boxShadow: isLastBar ? `0 0 10px ${color}50` : 'none',
+                        minHeight: barProgress > 0 ? 2 : 0,
+                      }}
+                    />
+                    <span style={{ fontSize: 7, color: 'rgba(255,255,255,0.2)' }}>{bar.month}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </motion.div>
+        )}
+
+        {/* Alerta */}
+        {showAlert && (
+          <motion.div
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            style={{
+              background: `${color}10`,
+              backdropFilter: 'blur(20px)',
+              border: `1px solid ${color}25`,
+              borderRadius: 8,
+              padding: '8px 12px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              flexShrink: 0,
+            }}
+          >
+            <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.5)' }}>Meta del mes alcanzada</span>
+            <span style={{ fontSize: 16, fontWeight: 800, color }}>94%</span>
+          </motion.div>
+        )}
+      </div>
+    );
+  }
+
+  function SimStock({ isActive, progress, color }: SimProps) {
+    const products = [
+      { name: 'Filtro de Aire', stock: 45, min: 10, unit: 'un.', status: 'ok' },
+      {
+        name: 'Aceite Motor 5W30',
+        stock: progress > 0.2 ? 3 : 18,
+        min: 15,
+        unit: 'lt.',
+        status: progress > 0.2 ? 'critical' : 'ok',
+      },
+      { name: 'Bujias NGK', stock: 28, min: 8, unit: 'un.', status: 'ok' },
+      { name: 'Pastillas Freno', stock: 12, min: 10, unit: 'jgo.', status: 'warning' },
+    ] as const;
+
+    const showAlert = progress > 0.2;
+    const showOrder = progress > 0.4;
+    const orderProgress = progress > 0.4 ? Math.min((progress - 0.4) / 0.2, 1) : 0;
+    const showNotif = progress > 0.6;
+    const showUpdated = progress > 0.8;
+
+    return (
+      <div
+        style={{
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 8,
+          padding: '4px 2px',
+        }}
+      >
+        {/* Header */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', flexShrink: 0 }}>
+          <div>
+            <div
+              style={{
+                fontSize: 9,
+                letterSpacing: '0.15em',
+                color: 'rgba(255,255,255,0.25)',
+                marginBottom: 2,
+              }}
+            >
+              GESTION DE STOCK
+            </div>
+            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>Reposicion automatica activa</div>
+          </div>
+          {showAlert && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              style={{
+                fontSize: 9,
+                color: '#ef4444',
+                background: 'rgba(239,68,68,0.12)',
+                border: '1px solid rgba(239,68,68,0.25)',
+                borderRadius: 6,
+                padding: '4px 8px',
+                fontWeight: 600,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 4,
+              }}
+            >
+              <motion.div
+                animate={{ opacity: [1, 0.3, 1] }}
+                transition={{ duration: 0.8, repeat: isActive ? Infinity : 0 }}
+                style={{ width: 5, height: 5, borderRadius: '50%', background: '#ef4444' }}
+              />
+              ALERTA
+            </motion.div>
+          )}
+        </div>
+
+        {/* Tabla de productos */}
+        <div
+          style={{
+            background: 'rgba(255,255,255,0.03)',
+            backdropFilter: 'blur(20px)',
+            border: '1px solid rgba(255,255,255,0.07)',
+            borderRadius: 10,
+            overflow: 'hidden',
+            flexShrink: 0,
+          }}
+        >
+          {/* Header tabla */}
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: '1fr auto auto',
+              gap: 8,
+              padding: '7px 12px',
+              borderBottom: '1px solid rgba(255,255,255,0.05)',
+            }}
+          >
+            {['PRODUCTO', 'STOCK', 'MINIMO'].map((header) => (
+              <span key={header} style={{ fontSize: 7, color: 'rgba(255,255,255,0.2)', letterSpacing: '0.08em' }}>
+                {header}
+              </span>
+            ))}
+          </div>
+
+          {/* Filas */}
+          {products.map((product, index) => {
+            const isCritical = product.status === 'critical';
+            const isWarning = product.status === 'warning';
+            const rowColor = isCritical ? '#ef4444' : isWarning ? color : '#10b981';
+
+            return (
+              <motion.div
+                key={product.name}
+                animate={{
+                  background: isCritical ? 'rgba(239,68,68,0.06)' : 'transparent',
+                }}
+                transition={{ duration: 0.4 }}
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: '1fr auto auto',
+                  gap: 8,
+                  padding: '8px 12px',
+                  borderBottom: index < products.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none',
+                  alignItems: 'center',
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <div
+                    style={{
+                      width: 5,
+                      height: 5,
+                      borderRadius: '50%',
+                      background: rowColor,
+                      flexShrink: 0,
+                      boxShadow: isCritical ? `0 0 6px ${rowColor}` : 'none',
+                    }}
+                  />
+                  <span
+                    style={{
+                      fontSize: 10,
+                      color: isCritical ? 'rgba(255,255,255,0.85)' : 'rgba(255,255,255,0.55)',
+                      fontWeight: isCritical ? 600 : 400,
+                    }}
+                  >
+                    {product.name}
+                  </span>
+                </div>
+                <span
+                  style={{
+                    fontSize: 11,
+                    fontWeight: 700,
+                    color: rowColor,
+                    textAlign: 'right',
+                  }}
+                >
+                  {product.stock} {product.unit}
+                </span>
+                <span
+                  style={{
+                    fontSize: 10,
+                    color: 'rgba(255,255,255,0.25)',
+                    textAlign: 'right',
+                  }}
+                >
+                  {product.min}
+                </span>
+              </motion.div>
+            );
+          })}
+        </div>
+
+        {/* Flujo automatico */}
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
+          {/* Orden generada */}
+          {showOrder && (
+            <motion.div
+              initial={{ opacity: 0, x: -8 }}
+              animate={{ opacity: 1, x: 0 }}
+              style={{
+                background: `${color}08`,
+                backdropFilter: 'blur(20px)',
+                border: `1px solid ${color}20`,
+                borderRadius: 8,
+                padding: '8px 12px',
+              }}
+            >
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  marginBottom: 6,
+                }}
+              >
+                <span style={{ fontSize: 10, fontWeight: 600, color }}>Orden automatica generada</span>
+                <span style={{ fontSize: 9, color: `${color}70` }}>50 lt. Aceite 5W30</span>
+              </div>
+              <div style={{ height: 3, background: 'rgba(255,255,255,0.06)', borderRadius: 100, overflow: 'hidden' }}>
+                <motion.div
+                  animate={{ width: `${orderProgress * 100}%` }}
+                  style={{
+                    height: '100%',
+                    background: `linear-gradient(90deg, ${color}80, ${color})`,
+                    borderRadius: 100,
+                  }}
+                />
+              </div>
+            </motion.div>
+          )}
+
+          {/* Proveedor notificado */}
+          {showNotif && (
+            <motion.div
+              initial={{ opacity: 0, x: -8 }}
+              animate={{ opacity: 1, x: 0 }}
+              style={{
+                background: 'rgba(37,211,102,0.07)',
+                backdropFilter: 'blur(20px)',
+                border: '1px solid rgba(37,211,102,0.18)',
+                borderRadius: 8,
+                padding: '8px 12px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 10,
+              }}
+            >
+              <Mail size={13} color="#25D366" />
+              <div>
+                <div style={{ fontSize: 10, fontWeight: 600, color: '#25D366', marginBottom: 1 }}>Email → Proveedor</div>
+                <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.4)' }}>Orden #1847 enviada · Entrega: 48hs</div>
+              </div>
+            </motion.div>
+          )}
+
+          {/* Stock actualizado */}
+          {showUpdated && (
+            <motion.div
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              style={{
+                background: `${color}10`,
+                backdropFilter: 'blur(20px)',
+                border: `1px solid ${color}25`,
+                borderRadius: 8,
+                padding: '8px 12px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+              }}
+            >
+              <div>
+                <div style={{ fontSize: 10, fontWeight: 600, color, marginBottom: 1 }}>Stock repuesto en camino</div>
+                <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.4)' }}>Sin intervencion humana</div>
+              </div>
+              <div
+                style={{
+                  width: 32,
+                  height: 32,
+                  background: `${color}20`,
+                  border: `1px solid ${color}30`,
+                  borderRadius: 8,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <Check size={15} color={color} strokeWidth={2.5} />
+              </div>
+            </motion.div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  function SimEquipo({ isActive, progress, color }: SimProps) {
+    const team = [
+      { name: 'Martin G.', role: 'Ventas', avatar: 'MG', memberColor: '#06b6d4', activeAt: 0.08 },
+      { name: 'Laura S.', role: 'Operaciones', avatar: 'LS', memberColor: '#8b5cf6', activeAt: 0.14 },
+      { name: 'Carlos P.', role: 'Tecnico', avatar: 'CP', memberColor: '#10b981', activeAt: 0.2 },
+    ] as const;
+
+    const tasks = [
+      {
+        title: 'Follow-up: 5 leads calientes',
+        assignee: 'MG',
+        dueColor: '#06b6d4',
+        progressVal: progress > 0.22 ? Math.min((progress - 0.22) / 0.28, 1) : 0,
+        completedAt: 0.5,
+        showAt: 0.22,
+      },
+      {
+        title: 'Preparar propuesta Clinica Norte',
+        assignee: 'LS',
+        dueColor: '#8b5cf6',
+        progressVal: progress > 0.28 ? Math.min((progress - 0.28) / 0.4, 1) * 0.65 : 0,
+        completedAt: null,
+        showAt: 0.28,
+        urgent: progress > 0.7,
+      },
+      {
+        title: 'Instalacion sistema nuevo cliente',
+        assignee: 'CP',
+        dueColor: '#10b981',
+        progressVal: progress > 0.34 ? Math.min((progress - 0.34) / 0.35, 1) * 0.4 : 0,
+        completedAt: null,
+        showAt: 0.34,
+      },
+    ] as const;
+
+    const showSummary = progress > 0.85;
+
+    return (
+      <div
+        style={{
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 8,
+          padding: '4px 2px',
+        }}
+      >
+        {/* Header */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', flexShrink: 0 }}>
+          <div>
+            <div
+              style={{
+                fontSize: 9,
+                letterSpacing: '0.15em',
+                color: 'rgba(255,255,255,0.25)',
+                marginBottom: 2,
+              }}
+            >
+              CONTROL DE EQUIPO
+            </div>
+            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>Vista del director · Hoy</div>
+          </div>
+          <div
+            style={{
+              fontSize: 9,
+              color: '#10b981',
+              background: 'rgba(16,185,129,0.10)',
+              border: '1px solid rgba(16,185,129,0.20)',
+              borderRadius: 6,
+              padding: '4px 8px',
+              fontWeight: 600,
+            }}
+          >
+            3 activos
+          </div>
+        </div>
+
+        {/* Avatares del equipo */}
+        <div
+          style={{
+            display: 'flex',
+            gap: 8,
+            flexShrink: 0,
+          }}
+        >
+          {team.map((member) =>
+            progress > member.activeAt ? (
+              <motion.div
+                key={member.name}
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ type: 'spring', stiffness: 400 }}
+                style={{
+                  flex: 1,
+                  background: `${member.memberColor}08`,
+                  backdropFilter: 'blur(20px)',
+                  border: `1px solid ${member.memberColor}20`,
+                  borderRadius: 8,
+                  padding: '7px 8px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 7,
+                }}
+              >
+                <div
+                  style={{
+                    width: 24,
+                    height: 24,
+                    borderRadius: '50%',
+                    background: `${member.memberColor}20`,
+                    border: `1px solid ${member.memberColor}30`,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: 8,
+                    fontWeight: 700,
+                    color: member.memberColor,
+                    flexShrink: 0,
+                  }}
+                >
+                  {member.avatar}
+                </div>
+                <div>
+                  <div style={{ fontSize: 9, fontWeight: 600, color: 'rgba(255,255,255,0.75)' }}>{member.name}</div>
+                  <div style={{ fontSize: 7, color: 'rgba(255,255,255,0.3)' }}>{member.role}</div>
+                </div>
+              </motion.div>
+            ) : null
+          )}
+        </div>
+
+        {/* Tareas */}
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
+          {tasks.map((task) => {
+            const visible = progress > task.showAt;
+            const completed = task.completedAt !== null && progress > task.completedAt;
+            const isUrgent = task.urgent;
+
+            return visible ? (
+              <motion.div
+                key={task.title}
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                style={{
+                  background: completed
+                    ? 'rgba(16,185,129,0.06)'
+                    : isUrgent
+                      ? 'rgba(239,68,68,0.06)'
+                      : 'rgba(255,255,255,0.03)',
+                  backdropFilter: 'blur(20px)',
+                  border: `1px solid ${
+                    completed ? 'rgba(16,185,129,0.20)' : isUrgent ? 'rgba(239,68,68,0.20)' : 'rgba(255,255,255,0.07)'
+                  }`,
+                  borderRadius: 8,
+                  padding: '8px 10px',
+                  transition: 'all 400ms ease',
+                }}
+              >
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginBottom: 6,
+                  }}
+                >
+                  <span
+                    style={{
+                      fontSize: 10,
+                      fontWeight: 500,
+                      color: completed ? 'rgba(255,255,255,0.4)' : isUrgent ? '#ef4444' : 'rgba(255,255,255,0.7)',
+                      textDecoration: completed ? 'line-through' : 'none',
+                      flex: 1,
+                      marginRight: 8,
+                    }}
+                  >
+                    {task.title}
+                  </span>
+                  {completed && (
+                    <motion.div
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ type: 'spring', stiffness: 400 }}
+                      style={{
+                        width: 16,
+                        height: 16,
+                        borderRadius: '50%',
+                        background: '#10b981',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexShrink: 0,
+                      }}
+                    >
+                      <Check size={9} color="black" strokeWidth={3} />
+                    </motion.div>
+                  )}
+                  {isUrgent && !completed && (
+                    <motion.span
+                      animate={{ opacity: [1, 0.4, 1] }}
+                      transition={{ duration: 0.8, repeat: isActive ? Infinity : 0 }}
+                      style={{
+                        fontSize: 8,
+                        color: '#ef4444',
+                        fontWeight: 700,
+                        letterSpacing: '0.05em',
+                      }}
+                    >
+                      URGENTE
+                    </motion.span>
+                  )}
+                </div>
+                <div
+                  style={{
+                    height: 3,
+                    background: 'rgba(255,255,255,0.06)',
+                    borderRadius: 100,
+                    overflow: 'hidden',
+                  }}
+                >
+                  <div
+                    style={{
+                      height: '100%',
+                      width: `${(completed ? 1 : task.progressVal) * 100}%`,
+                      background: completed ? '#10b981' : isUrgent ? '#ef4444' : task.dueColor,
+                      borderRadius: 100,
+                      transition: 'width 300ms ease, background 400ms ease',
+                    }}
+                  />
+                </div>
+              </motion.div>
+            ) : null;
+          })}
+        </div>
+
+        {/* Resumen del director */}
+        {showSummary && (
+          <motion.div
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            style={{
+              background: `${color}10`,
+              backdropFilter: 'blur(20px)',
+              border: `1px solid ${color}25`,
+              borderRadius: 8,
+              padding: '8px 12px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              flexShrink: 0,
+            }}
+          >
+            <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.5)' }}>Productividad del equipo hoy</span>
+            <span style={{ fontSize: 16, fontWeight: 800, color }}>78%</span>
+          </motion.div>
+        )}
+      </div>
+    );
+  }
+
+  const [activeTab, setActiveTab] = useState(0);
+  const [isInView, setIsInView] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [cycleSeed, setCycleSeed] = useState(0);
+
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const pointerX = useMotionValue(0);
-  const pointerY = useMotionValue(0);
+  const progressRef = useRef(0);
+  const animFrameRef = useRef(0);
+  const nextTabTimeoutRef = useRef<number | null>(null);
+  const startTimeRef = useRef(0);
+  const isRunningRef = useRef(false);
 
-  const springConfig = { stiffness: 160, damping: 22, mass: 0.45 };
-  const smoothX = useSpring(pointerX, springConfig);
-  const smoothY = useSpring(pointerY, springConfig);
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsInView(entry.isIntersecting);
+      },
+      { threshold: 0.3 }
+    );
 
-  const rotateY = useTransform(smoothX, [-0.5, 0.5], [-15, 15]);
-  const rotateX = useTransform(smoothY, [-0.5, 0.5], [15, -15]);
+    const currentContainer = containerRef.current;
+    if (currentContainer) {
+      observer.observe(currentContainer);
+    }
 
-  const glareX = useTransform(smoothX, [-0.5, 0.5], [18, 82]);
-  const glareY = useTransform(smoothY, [-0.5, 0.5], [18, 82]);
-  const glareBackground = useMotionTemplate`radial-gradient(circle at ${glareX}% ${glareY}%, rgba(255,255,255,0.16), rgba(34,211,238,0.12) 18%, rgba(255,255,255,0.06) 34%, transparent 58%)`;
+    return () => observer.disconnect();
+  }, []);
 
-  const backX = useTransform(smoothX, [-0.5, 0.5], [-12, 12]);
-  const backY = useTransform(smoothY, [-0.5, 0.5], [-10, 10]);
-  const midX = useTransform(smoothX, [-0.5, 0.5], [-22, 22]);
-  const midY = useTransform(smoothY, [-0.5, 0.5], [-18, 18]);
-  const frontX = useTransform(smoothX, [-0.5, 0.5], [-34, 34]);
-  const frontY = useTransform(smoothY, [-0.5, 0.5], [-28, 28]);
-  const coreX = useTransform(smoothX, [-0.5, 0.5], [-42, 42]);
-  const coreY = useTransform(smoothY, [-0.5, 0.5], [-36, 36]);
+  useEffect(() => {
+    if (nextTabTimeoutRef.current) {
+      clearTimeout(nextTabTimeoutRef.current);
+      nextTabTimeoutRef.current = null;
+    }
 
-  const codeLines = [
-    { code: 'const pipeline = {', indent: 0, color: 'rgba(255,255,255,0.5)' },
-    { code: '  leads: "captured",', indent: 1, color: '#06b6d4' },
-    { code: '  sync: "crm.live",', indent: 1, color: '#10b981' },
-    { code: '  revenue: "$47.200",', indent: 1, color: '#f59e0b' },
-    { code: '  state: "stable"', indent: 1, color: '#8b5cf6' },
-    { code: '};', indent: 0, color: 'rgba(255,255,255,0.5)' },
-  ] as const;
+    if (!isInView) {
+      cancelAnimationFrame(animFrameRef.current);
+      isRunningRef.current = false;
+      return;
+    }
 
-  const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
-    const rect = containerRef.current?.getBoundingClientRect();
-    if (!rect) return;
+    const duration = swSimulations[activeTab]?.duration ?? 1;
 
-    const relativeX = (event.clientX - rect.left) / rect.width - 0.5;
-    const relativeY = (event.clientY - rect.top) / rect.height - 0.5;
+    progressRef.current = 0;
+    startTimeRef.current = performance.now();
+    isRunningRef.current = true;
 
-    pointerX.set(Math.max(-0.5, Math.min(0.5, relativeX)));
-    pointerY.set(Math.max(-0.5, Math.min(0.5, relativeY)));
+    const tick = (now: number) => {
+      if (!isRunningRef.current) {
+        return;
+      }
+
+      const elapsed = now - startTimeRef.current;
+      const nextProgress = Math.min(elapsed / duration, 1);
+
+      if (nextProgress !== progressRef.current) {
+        progressRef.current = nextProgress;
+        setProgress(nextProgress);
+      }
+
+      if (nextProgress < 1) {
+        animFrameRef.current = requestAnimationFrame(tick);
+        return;
+      }
+
+      isRunningRef.current = false;
+      nextTabTimeoutRef.current = window.setTimeout(() => {
+        progressRef.current = 0;
+        setProgress(0);
+        setActiveTab((previousTab) => (previousTab + 1) % swSimulations.length);
+      }, 300);
+    };
+
+    animFrameRef.current = requestAnimationFrame(tick);
+
+    return () => {
+      cancelAnimationFrame(animFrameRef.current);
+      if (nextTabTimeoutRef.current) {
+        clearTimeout(nextTabTimeoutRef.current);
+        nextTabTimeoutRef.current = null;
+      }
+      isRunningRef.current = false;
+    };
+  }, [activeTab, cycleSeed, isInView, swSimulations]);
+
+  const handleTabClick = (index: number) => {
+    cancelAnimationFrame(animFrameRef.current);
+    if (nextTabTimeoutRef.current) {
+      clearTimeout(nextTabTimeoutRef.current);
+      nextTabTimeoutRef.current = null;
+    }
+    isRunningRef.current = false;
+    progressRef.current = 0;
+    setProgress(0);
+    setActiveTab(index);
+    setCycleSeed((currentSeed) => currentSeed + 1);
   };
 
-  const handlePointerLeave = () => {
-    pointerX.set(0);
-    pointerY.set(0);
-  };
+  const activeSimulation = swSimulations[activeTab];
 
   return (
-    <div className="h-full w-full [perspective:1000px]">
-      <motion.div
-        ref={containerRef}
-        onPointerMove={handlePointerMove}
-        onPointerLeave={handlePointerLeave}
-        style={{ rotateX, rotateY, transformStyle: 'preserve-3d' }}
-        className="relative h-full overflow-hidden bg-[radial-gradient(circle_at_top,#141821_0%,#090b0f_64%,#060709_100%)]"
+    <div
+      ref={containerRef}
+      style={{
+        width: '100%',
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        padding: 8,
+        gap: 8,
+      }}
+    >
+      <div style={{ marginBottom: 8, flexShrink: 0 }}>
+        <div style={{ fontSize: 9, fontWeight: 600, letterSpacing: '0.12em', color: `${SW_COLOR}80`, marginBottom: 4 }}>
+          {'SOFTWARE \u00b7 EN VIVO'}
+        </div>
+        <div style={{ fontSize: 13, fontWeight: 600, color: 'rgba(255,255,255,0.8)', lineHeight: 1.3 }}>
+          Tu empresa bajo control total
+        </div>
+      </div>
+
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: `repeat(${swSimulations.length}, 1fr)`,
+          gap: 4,
+          flexShrink: 0,
+        }}
       >
-        <motion.div
-          className="pointer-events-none absolute inset-0 opacity-80"
-          style={{ background: glareBackground }}
-        />
+        {swSimulations.map((sim, index) => {
+          const isActive = index === activeTab;
+          const IconComp = sim.icon;
 
-        <div
-          className="pointer-events-none absolute inset-[8%] rounded-[20px] border border-white/6"
-          style={{ transform: 'translateZ(10px)' }}
-        />
-
-        <div
-          className="pointer-events-none absolute left-1/2 top-1/2 h-36 w-36 -translate-x-1/2 -translate-y-1/2 rounded-full blur-3xl opacity-35"
-          style={{
-            background: `radial-gradient(circle, ${service.accent}55 0%, ${service.accent}18 38%, transparent 76%)`,
-            transform: 'translateZ(24px)',
-          }}
-        />
-
-        <div
-          className="pointer-events-none absolute inset-0 bg-[linear-gradient(transparent_0%,rgba(255,255,255,0.035)_1px,transparent_1px)] bg-[length:100%_24px]"
-          style={{ transform: 'translateZ(0px)' }}
-        />
-
-        <div
-          className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,transparent_0%,rgba(255,255,255,0.025)_1px,transparent_1px)] bg-[length:32px_100%]"
-          style={{ transform: 'translateZ(0px)' }}
-        />
-
-        <div
-          className="pointer-events-none absolute left-6 top-6 text-[10px] uppercase tracking-[0.32em] text-white/28"
-          style={{ transform: 'translateZ(36px)' }}
-        >
-          Data Core / Software
-        </div>
-
-        <div
-          className="pointer-events-none absolute right-6 top-6 rounded-full border border-white/8 px-3 py-1"
-          style={{ transform: 'translateZ(52px)' }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <motion.div
-              animate={{ opacity: [1, 0.3, 1], scale: [1, 0.8, 1] }}
-              transition={{ duration: 1.2, repeat: Infinity }}
-              style={{ width: 6, height: 6, borderRadius: '50%', background: '#10b981' }}
-            />
-            <span style={{ fontSize: 9, color: '#10b981', fontWeight: 600, letterSpacing: '0.05em' }}>
-              SISTEMA ACTIVO
-            </span>
-            <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.2)' }}>
-              · ultima sync hace 2s
-            </span>
-          </div>
-        </div>
-
-        <div
-          className="absolute left-[8%] top-[18%] w-[74%]"
-          style={{ transformStyle: 'preserve-3d', transform: 'translateZ(34px)' }}
-        >
-          <motion.div
-            style={{ x: backX, y: backY }}
-            className="overflow-hidden rounded-[16px] border border-white/7 bg-white/[0.025] px-4 py-3 shadow-[0_16px_40px_rgba(0,0,0,0.2)]"
-          >
-            <div className="mb-3 text-[8px] uppercase tracking-[0.18em] text-white/28">runtime.ts</div>
-            {codeLines.map((line, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, x: -8 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: index * 0.1, duration: 0.3 }}
-                style={{
-                  fontSize: 11,
-                  fontFamily: 'monospace',
-                  color: line.color,
-                  paddingLeft: line.indent * 16,
-                  lineHeight: 1.8,
-                }}
-              >
-                {line.code}
-              </motion.div>
-            ))}
-          </motion.div>
-        </div>
-
-        <div
-          className="absolute right-[7%] top-[34%] w-[40%]"
-          style={{ transformStyle: 'preserve-3d', transform: 'translateZ(82px)' }}
-        >
-          <motion.div
-            style={{ x: midX, y: midY }}
-            className="overflow-hidden rounded-[18px] shadow-[0_20px_40px_rgba(0,0,0,0.25)]"
-          >
-            <div
+          return (
+            <button
+              key={sim.id}
+              type="button"
+              onClick={() => handleTabClick(index)}
               style={{
-                background: 'rgba(16,185,129,0.08)',
-                border: '1px solid rgba(16,185,129,0.2)',
-                borderRadius: 10,
-                padding: '10px 14px',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: 4,
+                padding: '7px 4px',
+                borderRadius: 8,
+                border: isActive ? `1px solid ${SW_COLOR}30` : '1px solid transparent',
+                background: isActive ? `${SW_COLOR}10` : 'transparent',
+                cursor: 'pointer',
+                position: 'relative',
+                overflow: 'hidden',
+                transition: 'all 200ms ease',
               }}
             >
+              {isActive && (
+                <motion.div
+                  layoutId="swTabGlow"
+                  style={{
+                    position: 'absolute',
+                    inset: 0,
+                    background: `radial-gradient(circle at 50% 0%, ${SW_COLOR}15, transparent 70%)`,
+                    pointerEvents: 'none',
+                  }}
+                />
+              )}
+
               <div
                 style={{
-                  fontSize: 8,
-                  color: 'rgba(16,185,129,0.6)',
-                  marginBottom: 4,
-                  letterSpacing: '0.08em',
+                  color: isActive ? SW_COLOR : 'rgba(255,255,255,0.2)',
+                  transition: 'color 200ms',
+                  position: 'relative',
                 }}
               >
-                REVENUE HOY
+                <IconComp size={12} strokeWidth={1.8} />
               </div>
-              <div style={{ fontSize: 20, fontWeight: 700, color: '#10b981' }}>$47.200</div>
-              <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.3)', marginTop: 2 }}>
-                ↑ 12% vs ayer
-              </div>
-            </div>
-          </motion.div>
-        </div>
 
-        <div
-          className="absolute left-[14%] top-[56%] w-[38%]"
-          style={{ transformStyle: 'preserve-3d', transform: 'translateZ(138px)' }}
-        >
+              <span
+                style={{
+                  fontSize: 8,
+                  fontWeight: isActive ? 600 : 400,
+                  color: isActive ? SW_COLOR : 'rgba(255,255,255,0.2)',
+                  letterSpacing: '0.04em',
+                  position: 'relative',
+                  transition: 'color 200ms',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {sim.label}
+              </span>
+
+              {isActive && (
+                <div
+                  style={{
+                    position: 'absolute',
+                    bottom: 0,
+                    left: 0,
+                    height: 2,
+                    width: `${progress * 100}%`,
+                    background: `linear-gradient(90deg, ${SW_COLOR}80, ${SW_COLOR})`,
+                    borderRadius: '0 2px 2px 0',
+                  }}
+                />
+              )}
+
+              {!isActive && index < activeTab && (
+                <div
+                  style={{
+                    position: 'absolute',
+                    bottom: 4,
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    width: 3,
+                    height: 3,
+                    borderRadius: '50%',
+                    background: 'rgba(255,255,255,0.15)',
+                  }}
+                />
+              )}
+            </button>
+          );
+        })}
+      </div>
+
+      <div
+        style={{
+          flex: 1,
+          position: 'relative',
+          overflow: 'hidden',
+          borderRadius: 22,
+          border: '1px solid rgba(255,255,255,0.06)',
+          background: 'rgba(255,255,255,0.025)',
+          padding: 8,
+          minHeight: 0,
+        }}
+      >
+        <AnimatePresence mode="wait">
           <motion.div
-            style={{ x: frontX, y: frontY }}
-            className="overflow-hidden rounded-[20px] shadow-[0_30px_60px_rgba(0,0,0,0.35)]"
+            key={activeTab}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.25, ease: [0.25, 0.46, 0.45, 0.94] }}
+            style={{ height: '100%' }}
           >
-            <div
-              style={{
-                background: 'rgba(6,182,212,0.08)',
-                border: '1px solid rgba(6,182,212,0.2)',
-                borderRadius: 10,
-                padding: '10px 14px',
-              }}
-            >
-              <div
-                style={{
-                  fontSize: 8,
-                  color: 'rgba(6,182,212,0.6)',
-                  marginBottom: 4,
-                  letterSpacing: '0.08em',
-                }}
-              >
-                LEADS ACTIVOS
-              </div>
-              <div style={{ fontSize: 20, fontWeight: 700, color: '#06b6d4' }}>34</div>
-              <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.3)', marginTop: 2 }}>
-                8 cerrando esta semana
-              </div>
-            </div>
+            {activeTab === 0
+              ? SimCRM({ isActive: isInView, progress, color: activeSimulation.color })
+              : activeTab === 1
+                ? SimDashboard({ isActive: isInView, progress, color: activeSimulation.color })
+                : activeTab === 2
+                  ? SimStock({ isActive: isInView, progress, color: activeSimulation.color })
+                  : SimEquipo({ isActive: isInView, progress, color: activeSimulation.color })}
           </motion.div>
-        </div>
-
-        <motion.div
-          className="pointer-events-none absolute bottom-6 right-6 rounded-[18px] border px-4 py-3 shadow-[0_24px_60px_rgba(0,0,0,0.32)]"
-          style={{
-            x: coreX,
-            y: coreY,
-            transform: 'translateZ(164px)',
-            borderColor: `${service.accent}35`,
-            background: 'rgba(8, 11, 16, 0.76)',
-          }}
-        >
-          <div className="text-[9px] uppercase tracking-[0.26em] text-white/40">Core State</div>
-          <div className="mt-2 text-2xl font-bold tracking-[-0.06em] text-white">Stable</div>
-          <div className="mt-1 text-[10px]" style={{ color: service.accent }}>
-            0 monthly licenses
-          </div>
-        </motion.div>
-      </motion.div>
+        </AnimatePresence>
+      </div>
     </div>
   );
 }
-
 function ServiceVisual({ service }: { service: Service }) {
   let scene: ReactNode;
 
@@ -2991,32 +6315,91 @@ function ServiceCard({
   const visualX = useTransform(scrollYProgress, [0, 0.17], [16, 0]);
   const numberOpacity = useTransform(scrollYProgress, [0, 0.05, 0.15, 0.85, 0.95, 1], [0, 0.04, 0, 0, 0.04, 0]);
   const filter = useMotionTemplate`blur(${blur}px) brightness(${brightness})`;
-  const isWebDevelopmentService = service.id === 1;
 
   return (
     <div ref={cardRef} className="relative h-auto md:h-[100vh]" style={{ zIndex: index + 1 }}>
+      {/* HEADER FUERA DE LA CARD */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.5 }}
+        style={{
+          marginBottom: 24,
+          paddingLeft: 4,
+        }}
+      >
+        {/* Tag */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 10,
+            marginBottom: 12,
+          }}
+        >
+          <div style={{ width: 20, height: 1, background: service.accent }} />
+          <span
+            style={{
+              fontSize: 10,
+              fontWeight: 600,
+              letterSpacing: '0.2em',
+              color: service.accent,
+              textTransform: 'uppercase',
+            }}
+          >
+            {service.tag}
+          </span>
+        </div>
+
+        {/* TÃ­tulo principal */}
+        <h3
+          style={{
+            fontSize: 'clamp(2rem, 3.5vw, 3rem)',
+            fontWeight: 800,
+            lineHeight: 1.05,
+            letterSpacing: '-0.025em',
+            color: 'white',
+            margin: '0 0 10px',
+          }}
+        >
+          {service.title}
+        </h3>
+
+        {/* Subfrase */}
+        <p
+          style={{
+            fontSize: 15,
+            lineHeight: 1.6,
+            color: 'rgba(255,255,255,0.4)',
+            maxWidth: 560,
+            margin: 0,
+          }}
+        >
+          {service.description}
+        </p>
+      </motion.div>
+
       <motion.article
         style={{
           scale,
           opacity,
           y,
           filter,
-          background: 'rgba(255,255,255,0.02)',
-          border: '1px solid rgba(255,255,255,0.07)',
-          borderRadius: 24,
+          background: 'rgba(255,255,255,0.025)',
+          border: '1px solid rgba(255,255,255,0.08)',
+          borderRadius: 20,
           overflow: 'hidden',
           display: 'grid',
           gridTemplateColumns: '1fr 1fr',
-          minHeight: 520,
           position: 'sticky',
           top: '10vh',
           boxShadow: `
-            0 0 0 1px rgba(255,255,255,0.04),
-            0 24px 64px rgba(0,0,0,0.4),
-            inset 0 1px 0 rgba(255,255,255,0.05)
+            inset 0 1px 0 rgba(255,255,255,0.06),
+            0 24px 48px rgba(0,0,0,0.3)
           `,
         }}
-        className="relative mx-auto w-full backdrop-blur-2xl md:h-[80vh] md:max-h-[80vh]"
+        className="relative mx-auto w-full backdrop-blur-2xl"
       >
         <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.05),transparent_34%,transparent_74%,rgba(255,255,255,0.02))]" />
         <motion.div
@@ -3039,300 +6422,59 @@ function ServiceCard({
         </motion.div>
 
         <div className="relative grid w-full items-stretch gap-6 p-4 sm:p-6 md:p-8 lg:grid-cols-[minmax(0,1fr)_1px_minmax(0,1fr)] lg:gap-0 lg:p-10">
-          <motion.div
-            style={{ x: textX }}
-            className="order-2 flex min-h-0 flex-col justify-between overflow-hidden rounded-3xl border border-white/[0.05] bg-white/[0.02] p-5 backdrop-blur-2xl sm:p-6 lg:order-1 lg:p-8"
-          >
-            {isWebDevelopmentService ? (
-              <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-                  <motion.div
-                    initial={{ width: 0 }}
-                    whileInView={{ width: 20 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.5 }}
-                    style={{ height: 1, background: service.accent }}
-                  />
-                  <span
-                    style={{
-                      fontSize: 10,
-                      fontWeight: 600,
-                      letterSpacing: '0.2em',
-                      color: service.accent,
-                    }}
-                  >
-                    {service.tag}
-                  </span>
-                </div>
-
-                <h3
-                  style={{
-                    fontSize: 'clamp(1.6rem, 2.5vw, 2.4rem)',
-                    fontWeight: 800,
-                    lineHeight: 1.08,
-                    letterSpacing: '-0.025em',
-                    color: 'white',
-                    marginBottom: 16,
-                  }}
-                >
-                  {service.title}
-                </h3>
-
-                <p
-                  style={{
-                    fontSize: 14,
-                    lineHeight: 1.65,
-                    color: 'rgba(255,255,255,0.45)',
-                    marginBottom: 24,
-                  }}
-                >
-                  {service.description}
-                </p>
-
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 28 }}>
-                  {service.outcomes.map((outcome, outcomeIndex) => (
-                    <motion.div
-                      key={outcome}
-                      initial={{ opacity: 0, x: -12 }}
-                      whileInView={{ opacity: 1, x: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ delay: outcomeIndex * 0.08 }}
-                      style={{ display: 'flex', alignItems: 'center', gap: 10 }}
-                    >
-                      <div
-                        style={{
-                          width: 20,
-                          height: 20,
-                          borderRadius: 6,
-                          background: `${service.accent}12`,
-                          border: `1px solid ${service.accent}25`,
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          flexShrink: 0,
-                        }}
-                      >
-                        <Check size={10} color={service.accent} />
-                      </div>
-                      <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)' }}>{outcome}</span>
-                    </motion.div>
-                  ))}
-                </div>
-              </div>
-            ) : (
-              <div>
-                <motion.div
-                  initial={{ opacity: 0, x: -16 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}
-                >
-                  <motion.div
-                    initial={{ width: 0 }}
-                    whileInView={{ width: 24 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.5, delay: 0.2 }}
-                    style={{ height: 1, background: service.accent, flexShrink: 0 }}
-                  />
-                  <span
-                    style={{
-                      fontSize: 10,
-                      fontWeight: 600,
-                      letterSpacing: '0.2em',
-                      color: service.accent,
-                      textTransform: 'uppercase',
-                    }}
-                  >
-                    {service.tag}
-                  </span>
-                </motion.div>
-
-                <h3
-                  style={{
-                    fontSize: 'clamp(1.8rem, 2.8vw, 2.6rem)',
-                    fontWeight: 800,
-                    lineHeight: 1.08,
-                    letterSpacing: '-0.025em',
-                    color: 'white',
-                    margin: '0 0 20px',
-                  }}
-                >
-                  {service.title}
-                </h3>
-
-                <p
-                  style={{
-                    fontSize: 15,
-                    lineHeight: 1.65,
-                    color: 'rgba(255,255,255,0.45)',
-                    margin: '0 0 28px',
-                    maxWidth: '90%',
-                  }}
-                >
-                  {service.description}
-                </p>
-
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 32 }}>
-                  {service.outcomes.map((outcome, outcomeIndex) => (
-                    <motion.div
-                      key={outcome}
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      whileInView={{ opacity: 1, scale: 1 }}
-                      viewport={{ once: true }}
-                      transition={{ delay: outcomeIndex * 0.06, duration: 0.3 }}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 6,
-                        padding: '6px 12px',
-                        borderRadius: 100,
-                        background: `${service.accent}08`,
-                        border: `1px solid ${service.accent}20`,
-                      }}
-                    >
-                      <div
-                        style={{
-                          width: 5,
-                          height: 5,
-                          borderRadius: '50%',
-                          background: service.accent,
-                          opacity: 0.8,
-                          flexShrink: 0,
-                        }}
-                      />
-                      <span
-                        style={{
-                          fontSize: 12,
-                          color: 'rgba(255,255,255,0.6)',
-                          fontWeight: 400,
-                        }}
-                      >
-                        {outcome}
-                      </span>
-                    </motion.div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {isWebDevelopmentService ? (
-              <div>
-                <div
-                  style={{
-                    borderTop: '1px solid rgba(255,255,255,0.06)',
-                    paddingTop: 20,
-                    marginBottom: 16,
-                    display: 'flex',
-                    alignItems: 'baseline',
-                    gap: 10,
-                    flexWrap: 'wrap',
-                  }}
-                >
-                  <span
-                    style={{
-                      fontSize: 11,
-                      color: 'rgba(255,255,255,0.3)',
-                      letterSpacing: '0.05em',
-                    }}
-                  >
-                    DESDE
-                  </span>
-                  <span
-                    style={{
-                      fontSize: 34,
-                      fontWeight: 800,
-                      color: 'white',
-                      letterSpacing: '-0.03em',
-                      lineHeight: 1,
-                    }}
-                  >
-                    {service.price}
-                  </span>
-                  <span
-                    style={{
-                      fontSize: 11,
-                      color: service.accent,
-                      background: `${service.accent}12`,
-                      border: `1px solid ${service.accent}25`,
-                      borderRadius: 100,
-                      padding: '4px 10px',
-                      fontWeight: 500,
-                    }}
-                  >
-                    {'⏱ '}
-                    {service.timeline}
-                  </span>
-                </div>
-
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 20 }}>
-                  {service.sectors.map((sector) => (
-                    <span
-                      key={sector}
-                      style={{
-                        fontSize: 11,
-                        color: 'rgba(255,255,255,0.3)',
-                        border: '1px solid rgba(255,255,255,0.08)',
-                        borderRadius: 4,
-                        padding: '3px 8px',
-                      }}
-                    >
-                      {sector}
-                    </span>
-                  ))}
-                </div>
-
-                <motion.button
-                  type="button"
-                  whileHover={{ x: 5 }}
-                  transition={{ type: 'spring', stiffness: 400, damping: 20 }}
-                  onClick={() => onNavigate(service.href)}
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: 8,
-                    background: 'none',
-                    border: 'none',
-                    cursor: 'pointer',
-                    padding: 0,
-                    fontSize: 12,
-                    fontWeight: 600,
-                    color: service.accent,
-                    letterSpacing: '0.08em',
-                    textTransform: 'uppercase',
-                  }}
-                >
-                  {service.cta}
-                  <motion.span
-                    animate={{ x: [0, 5, 0] }}
-                    transition={{ duration: 1.8, repeat: Infinity }}
-                  >
-                    {'↗'}
-                  </motion.span>
-                </motion.button>
-              </div>
-            ) : (
+          <motion.div style={{ x: textX }} className="order-2 lg:order-1">
             <div
               style={{
-                borderTop: '1px solid rgba(255,255,255,0.06)',
-                paddingTop: 24,
+                padding: '32px 28px',
                 display: 'flex',
                 flexDirection: 'column',
-                gap: 16,
+                gap: 20,
               }}
             >
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, flexWrap: 'wrap' }}>
-                <span
-                  style={{
-                    fontSize: 11,
-                    color: 'rgba(255,255,255,0.3)',
-                    letterSpacing: '0.05em',
-                  }}
-                >
+              {/* Outcomes */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                {service.outcomes.map((outcome) => (
+                  <div
+                    key={outcome}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 10,
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: 18,
+                        height: 18,
+                        borderRadius: 5,
+                        background: `${service.accent}12`,
+                        border: `1px solid ${service.accent}25`,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexShrink: 0,
+                      }}
+                    >
+                      <Check size={9} color={service.accent} />
+                    </div>
+                    <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)', lineHeight: 1.4 }}>
+                      {outcome}
+                    </span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Separador */}
+              <div style={{ height: 1, background: 'rgba(255,255,255,0.06)' }} />
+
+              {/* Precio */}
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'wrap' }}>
+                <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', letterSpacing: '0.05em' }}>
                   DESDE
                 </span>
                 <span
                   style={{
-                    fontSize: 36,
+                    fontSize: 32,
                     fontWeight: 800,
                     color: 'white',
                     letterSpacing: '-0.03em',
@@ -3343,31 +6485,31 @@ function ServiceCard({
                 </span>
                 <span
                   style={{
-                    fontSize: 11,
+                    fontSize: 10,
                     color: service.accent,
                     background: `${service.accent}12`,
                     border: `1px solid ${service.accent}25`,
                     borderRadius: 100,
-                    padding: '4px 10px',
+                    padding: '3px 8px',
                     fontWeight: 500,
                   }}
                 >
-                  <span aria-hidden="true">⏱ </span>
+                  <span aria-hidden="true">â± </span>
                   {service.timeline}
                 </span>
               </div>
 
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+              {/* Sectores */}
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
                 {service.sectors.map((sector) => (
                   <span
                     key={sector}
                     style={{
-                      fontSize: 11,
+                      fontSize: 10,
                       color: 'rgba(255,255,255,0.3)',
                       border: '1px solid rgba(255,255,255,0.08)',
                       borderRadius: 4,
-                      padding: '3px 8px',
-                      letterSpacing: '0.03em',
+                      padding: '3px 7px',
                     }}
                   >
                     {sector}
@@ -3375,37 +6517,37 @@ function ServiceCard({
                 ))}
               </div>
 
+              {/* CTA */}
               <motion.button
                 type="button"
-                whileHover={{ x: 6 }}
-                transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
                 onClick={() => onNavigate(service.href)}
                 style={{
-                  display: 'inline-flex',
+                  display: 'flex',
                   alignItems: 'center',
+                  justifyContent: 'center',
                   gap: 8,
-                  background: 'none',
-                  border: 'none',
+                  padding: '12px 20px',
+                  background: `linear-gradient(135deg, ${service.accent}25, ${service.accent}10)`,
+                  border: `1px solid ${service.accent}40`,
+                  borderRadius: 12,
                   cursor: 'pointer',
-                  padding: 0,
-                  fontSize: 13,
+                  fontSize: 12,
                   fontWeight: 600,
                   color: service.accent,
-                  letterSpacing: '0.05em',
+                  letterSpacing: '0.08em',
                   textTransform: 'uppercase',
+                  boxShadow: `0 0 20px ${service.accent}10`,
+                  transition: 'all 200ms ease',
                 }}
               >
                 {service.cta}
-                <motion.span
-                  animate={{ x: [0, 5, 0] }}
-                  transition={{ duration: 1.8, repeat: Infinity }}
-                  style={{ display: 'inline-flex' }}
-                >
-                  <ArrowUpRight size={15} />
+                <motion.span animate={{ x: [0, 4, 0] }} transition={{ duration: 1.5, repeat: Infinity }}>
+                  â†’
                 </motion.span>
               </motion.button>
-              </div>
-            )}
+            </div>
           </motion.div>
 
           <div
@@ -3413,7 +6555,7 @@ function ServiceCard({
             style={{
               width: 1,
               background:
-                'linear-gradient(180deg, transparent, rgba(255,255,255,0.06) 20%, rgba(255,255,255,0.06) 80%, transparent)',
+                'linear-gradient(180deg, transparent, rgba(255,255,255,0.07) 20%, rgba(255,255,255,0.07) 80%, transparent)',
               flexShrink: 0,
             }}
           />
@@ -3429,7 +6571,6 @@ function ServiceCard({
     </div>
   );
 }
-
 const PARTICLES = [
   { x: '8%', y: '15%', size: 1.5, duration: 8, delay: 0, opacity: 0.25 },
   { x: '85%', y: '10%', size: 1, duration: 10, delay: 1.5, opacity: 0.2 },
@@ -3787,7 +6928,7 @@ export default function OurServices() {
               maxWidth: 480,
             }}
           >
-            Desde tu primera presencia digital hasta automatizaciones con IA. Cada solución genera
+            Desde tu primera presencia digital hasta automatizaciones con IA. Cada soluciÃ³n genera
             resultados medibles desde el primer mes.
           </motion.p>
         </motion.div>
@@ -3854,3 +6995,4 @@ export default function OurServices() {
     </section>
   );
 }
+
