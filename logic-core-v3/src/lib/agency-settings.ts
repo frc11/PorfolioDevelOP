@@ -12,6 +12,9 @@ export const DEFAULT_AGENCY_SETTINGS = {
   alertOnChurn: true,
   alertOnExpiringSubscriptions: true,
   alertOnClientMessages: false,
+  osWeeklyDemoTarget: 8,
+  osTelegramBotToken: '',
+  osTelegramChatId: '',
 } as const
 
 export const AGENCY_TIMEZONE = 'America/Argentina/Buenos_Aires'

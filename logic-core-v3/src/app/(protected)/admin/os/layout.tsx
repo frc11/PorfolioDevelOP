@@ -26,7 +26,7 @@ export default async function AgencyOsLayout({
   const userName = session.user.name ?? session.user.email ?? 'Super Admin'
 
   return (
-    <div className="fixed inset-0 z-[80] overflow-hidden bg-[#080a0c] text-zinc-100">
+    <div className="fixed inset-0 z-[80] bg-[#080a0c] text-zinc-100">
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0"
@@ -45,7 +45,7 @@ export default async function AgencyOsLayout({
         <div className="flex h-full flex-col p-4">
           <AdminTopbar />
 
-          <main className="relative mt-4 flex-1 overflow-y-auto rounded-[28px] border border-white/10 bg-white/[0.03] p-4 shadow-[0_24px_80px_rgba(0,0,0,0.35)] backdrop-blur-md sm:p-6">
+          <main className="relative mt-4 flex-1 min-h-0 overflow-y-auto rounded-[28px] border border-white/10 bg-white/[0.03] p-4 shadow-[0_24px_80px_rgba(0,0,0,0.35)] backdrop-blur-md sm:p-6">
             {children}
           </main>
         </div>

@@ -1,3 +1,3 @@
 import { z } from 'zod'
 
-export const MilestoneIdSchema = z.string().cuid('Invalid milestone id')
+export const MilestoneIdSchema = z.string().trim().min(1, 'Invalid milestone id')

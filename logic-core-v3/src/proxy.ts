@@ -1,11 +1,12 @@
 import NextAuth from 'next-auth'
 import { authConfig } from '@/auth.config'
+import { NextResponse } from 'next/server'
 
 const { auth } = NextAuth(authConfig)
-import { NextResponse } from 'next/server'
 
 const LOGIN_PATH = '/login'
 const ADMIN_PATH = '/admin'
+const ADMIN_OS_PATH = '/admin/os'
 const DASHBOARD_PATH = '/dashboard'
 const ONBOARDING_PATH = '/bienvenida'
 const ADMIN_ROLE = 'SUPER_ADMIN'
@@ -14,6 +15,51 @@ const IMPERSONATION_COOKIE = 'impersonation-token'
 
 function isSafeCallbackUrl(value: string | null) {
   return Boolean(value && value.startsWith('/') && !value.startsWith('//'))
+}
+
+function getLegacyAdminRedirectPath(pathname: string): string | null {
+  if (pathname === ADMIN_OS_PATH || pathname.startsWith(`${ADMIN_OS_PATH}/`)) {
+    return null
+  }
+
+  if (pathname === ADMIN_PATH || pathname === '/admin/agency-dashboard') {
+    return ADMIN_OS_PATH
+  }
+
+  if (pathname === '/admin/leads') {
+    return '/admin/os/leads'
+  }
+
+  if (pathname === '/admin/projects') {
+    return '/admin/os/projects'
+  }
+
+  const projectDetailMatch = pathname.match(/^\/admin\/projects\/([^/]+)$/)
+  if (projectDetailMatch) {
+    return `/admin/os/projects/${projectDetailMatch[1]}`
+  }
+
+  if (pathname === '/admin/clients') {
+    return '/admin/os/clients'
+  }
+
+  if (pathname === '/admin/tickets') {
+    return '/admin/os/tickets'
+  }
+
+  if (pathname === '/admin/messages') {
+    return '/admin/os/messages'
+  }
+
+  if (pathname === '/admin/settings') {
+    return '/admin/os/settings'
+  }
+
+  if (pathname.startsWith(`${ADMIN_PATH}/`)) {
+    return ADMIN_OS_PATH
+  }
+
+  return null
 }
 
 export default auth((req) => {
@@ -26,6 +72,13 @@ export default auth((req) => {
 
   const pathname = nextUrl.pathname
   const callbackUrl = nextUrl.searchParams.get('callbackUrl')
+  const legacyAdminRedirectPath = getLegacyAdminRedirectPath(pathname)
+
+  if (legacyAdminRedirectPath) {
+    const redirectUrl = nextUrl.clone()
+    redirectUrl.pathname = legacyAdminRedirectPath
+    return NextResponse.redirect(redirectUrl, 308)
+  }
 
   const isLoginRoute = pathname === LOGIN_PATH
   const isAdminRoute = pathname.startsWith(ADMIN_PATH)

@@ -116,6 +116,8 @@ export function DashboardHistoryCharts({
   hoursByMemberByWeek,
   memberSeries,
 }: DashboardHistoryChartsProps) {
+  const objectiveLine = demosByWeek[0]?.objective ?? 0
+
   return (
     <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
       <ChartCard title="Demos enviadas por semana">
@@ -140,7 +142,7 @@ export function DashboardHistoryCharts({
               labelStyle={{ color: '#ffffff', fontWeight: 600 }}
             />
             <ReferenceLine
-              y={8}
+              y={objectiveLine}
               stroke="rgba(255,255,255,0.35)"
               strokeDasharray="4 4"
               ifOverflow="extendDomain"
@@ -210,10 +212,15 @@ export function DashboardHistoryCharts({
             <Tooltip
               cursor={{ stroke: 'rgba(52,211,153,0.35)', strokeWidth: 1 }}
               contentStyle={tooltipStyle}
-              formatter={(value) => [
-                formatCurrency(toNumericValue(value)),
-                'Acumulado',
-              ]}
+              formatter={(value, name) => {
+                const numericValue = toNumericValue(value)
+
+                if (name === 'revenue') {
+                  return [formatCurrency(numericValue), 'Ingreso del mes']
+                }
+
+                return [formatCurrency(numericValue), 'Acumulado']
+              }}
               labelStyle={{ color: '#ffffff', fontWeight: 600 }}
             />
             <Area
@@ -228,54 +235,60 @@ export function DashboardHistoryCharts({
       </ChartCard>
 
       <ChartCard title="Horas trabajadas por miembro por semana">
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart
-            data={hoursByMemberByWeek}
-            margin={{ top: 8, right: 12, left: -12, bottom: 0 }}
-            barGap={6}
-          >
-            <CartesianGrid stroke={chartGridStroke} strokeDasharray="3 3" vertical={false} />
-            <XAxis
-              dataKey="label"
-              axisLine={{ stroke: chartAxisStroke }}
-              tickLine={false}
-              tick={{ fill: chartAxisText, fontSize: 12 }}
-            />
-            <YAxis
-              tickFormatter={formatHourTick}
-              axisLine={false}
-              tickLine={false}
-              tick={{ fill: chartAxisText, fontSize: 12 }}
-            />
-            <Tooltip
-              cursor={{ fill: 'rgba(255,255,255,0.03)' }}
-              contentStyle={tooltipStyle}
-              formatter={(value, name) => [
-                formatHourTick(value),
-                String(name),
-              ]}
-              labelStyle={{ color: '#ffffff', fontWeight: 600 }}
-            />
-            <Legend
-              verticalAlign="top"
-              align="right"
-              iconType="circle"
-              formatter={(value: string | number) => (
-                <span className="text-xs text-zinc-300">{String(value)}</span>
-              )}
-            />
-            {memberSeries.map((member) => (
-              <Bar
-                key={member.key}
-                dataKey={member.key}
-                name={member.label}
-                fill={member.color}
-                radius={[6, 6, 0, 0]}
-                maxBarSize={24}
+        {memberSeries.length ? (
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart
+              data={hoursByMemberByWeek}
+              margin={{ top: 8, right: 12, left: -12, bottom: 0 }}
+              barGap={6}
+            >
+              <CartesianGrid stroke={chartGridStroke} strokeDasharray="3 3" vertical={false} />
+              <XAxis
+                dataKey="label"
+                axisLine={{ stroke: chartAxisStroke }}
+                tickLine={false}
+                tick={{ fill: chartAxisText, fontSize: 12 }}
               />
-            ))}
-          </BarChart>
-        </ResponsiveContainer>
+              <YAxis
+                tickFormatter={formatHourTick}
+                axisLine={false}
+                tickLine={false}
+                tick={{ fill: chartAxisText, fontSize: 12 }}
+              />
+              <Tooltip
+                cursor={{ fill: 'rgba(255,255,255,0.03)' }}
+                contentStyle={tooltipStyle}
+                formatter={(value, name) => [
+                  formatHourTick(value),
+                  String(name),
+                ]}
+                labelStyle={{ color: '#ffffff', fontWeight: 600 }}
+              />
+              <Legend
+                verticalAlign="top"
+                align="right"
+                iconType="circle"
+                formatter={(value: string | number) => (
+                  <span className="text-xs text-zinc-300">{String(value)}</span>
+                )}
+              />
+              {memberSeries.map((member) => (
+                <Bar
+                  key={member.key}
+                  dataKey={member.key}
+                  name={member.label}
+                  fill={member.color}
+                  radius={[6, 6, 0, 0]}
+                  maxBarSize={24}
+                />
+              ))}
+            </BarChart>
+          </ResponsiveContainer>
+        ) : (
+          <div className="flex h-full items-center justify-center rounded-[22px] border border-dashed border-white/10 bg-black/10 px-6 text-center text-sm text-zinc-500">
+            Todavia no hay horas suficientes para dibujar la serie semanal por miembro.
+          </div>
+        )}
       </ChartCard>
     </div>
   )

@@ -117,13 +117,6 @@ export function AdminSidebar({ userName, userRole }: AdminSidebarProps) {
           <p className="truncate text-sm font-medium text-zinc-100">{userName}</p>
           <p className="mt-1 text-[10px] uppercase tracking-[0.22em] text-zinc-500">{userRole}</p>
         </div>
-
-        <Link
-          href="/admin"
-          className="mt-3 inline-flex text-xs text-zinc-500 transition-colors hover:text-zinc-200"
-        >
-          {'\u2190'} {'Admin cl\u00e1sico'}
-        </Link>
       </div>
     </aside>
   )

@@ -14,8 +14,6 @@ type ProjectsPageProps = {
   }>
 }
 
-const INTERNAL_ORGANIZATION_SLUG = 'agency-os-internal'
-
 const STATUS_OPTIONS: Array<{ value: 'ALL' | ProjectStatus; label: string }> = [
   { value: 'ALL', label: 'Todos' },
   { value: 'PLANNING', label: 'Planning' },
@@ -96,11 +94,6 @@ export default async function AgencyOsProjectsPage({ searchParams }: ProjectsPag
   const [result, organizations] = await Promise.all([
     listProjects(),
     prisma.organization.findMany({
-      where: {
-        slug: {
-          not: INTERNAL_ORGANIZATION_SLUG,
-        },
-      },
       select: {
         id: true,
         companyName: true,

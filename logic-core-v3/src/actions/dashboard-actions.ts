@@ -27,6 +27,10 @@ export async function approveTaskAction(taskId: string): Promise<ActionResult> {
       where: { id: parsed.data.taskId },
       include: { project: true },
     })
+    const superAdmins = await prisma.user.findMany({
+      where: { role: 'SUPER_ADMIN' },
+      select: { id: true },
+    })
 
     if (!task || task.project.organizationId !== organizationId) {
       return { success: false, error: 'No encontramos esa entrega.' }
@@ -54,6 +58,20 @@ export async function approveTaskAction(taskId: string): Promise<ActionResult> {
         },
       })
 
+      if (superAdmins.length > 0) {
+        await tx.notification.createMany({
+          data: superAdmins.map((admin) => ({
+            type: 'SUCCESS',
+            title: `Entrega aprobada por cliente: ${task.title}`,
+            message: `El cliente aprobo "${task.title}" y el proyecto ya puede continuar.`,
+            userId: admin.id,
+            organizationId,
+            taskId: task.id,
+            actionUrl: `/admin/os/projects/${task.projectId}`,
+          })),
+        })
+      }
+
       await tx.message.create({
         data: {
           content: `✓ Aprobé la entrega de "${task.title}". ¡Todo perfecto!`,
@@ -65,7 +83,9 @@ export async function approveTaskAction(taskId: string): Promise<ActionResult> {
 
     revalidatePath('/dashboard')
     revalidatePath('/dashboard/project')
-    revalidatePath('/admin/messages')
+    revalidatePath('/admin/os/messages')
+    revalidatePath(`/admin/os/projects/${task.projectId}`)
+    revalidatePath(`/admin/os/projects/${task.projectId}/tasks`)
 
     return { success: true }
   } catch (error) {
@@ -94,6 +114,10 @@ export async function rejectTaskAction(
     const task = await prisma.task.findUnique({
       where: { id: parsed.data.taskId },
       include: { project: true },
+    })
+    const superAdmins = await prisma.user.findMany({
+      where: { role: 'SUPER_ADMIN' },
+      select: { id: true },
     })
 
     if (!task || task.project.organizationId !== organizationId) {
@@ -125,6 +149,20 @@ export async function rejectTaskAction(
         },
       })
 
+      if (superAdmins.length > 0) {
+        await tx.notification.createMany({
+          data: superAdmins.map((admin) => ({
+            type: 'WARNING',
+            title: `Cliente pidio cambios en: ${task.title}`,
+            message: `El cliente solicito cambios en "${task.title}". Motivo: ${parsed.data.reason}`,
+            userId: admin.id,
+            organizationId,
+            taskId: task.id,
+            actionUrl: `/admin/os/projects/${task.projectId}`,
+          })),
+        })
+      }
+
       await tx.message.create({
         data: {
           content: `✗ Solicité cambios en "${task.title}": ${parsed.data.reason}`,
@@ -136,7 +174,9 @@ export async function rejectTaskAction(
 
     revalidatePath('/dashboard')
     revalidatePath('/dashboard/project')
-    revalidatePath('/admin/messages')
+    revalidatePath('/admin/os/messages')
+    revalidatePath(`/admin/os/projects/${task.projectId}`)
+    revalidatePath(`/admin/os/projects/${task.projectId}/tasks`)
 
     return { success: true }
   } catch (error) {

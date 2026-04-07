@@ -35,9 +35,9 @@ const emptyValueToNull = (value: unknown) => {
   return value
 }
 
-export const ProjectIdSchema = z.string().cuid('Invalid project id')
-export const TaskIdSchema = z.string().cuid('Invalid task id')
-export const UserIdSchema = z.string().cuid('Invalid user id')
+export const ProjectIdSchema = z.string().trim().min(1, 'Invalid project id')
+export const TaskIdSchema = z.string().trim().min(1, 'Invalid task id')
+export const UserIdSchema = z.string().trim().min(1, 'Invalid user id')
 
 const optionalCreateStringSchema = z.preprocess(
   emptyStringToUndefined,

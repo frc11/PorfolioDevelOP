@@ -3,9 +3,7 @@
 import {
   LeadStatus,
   MilestoneType,
-  OsProjectStatus,
   OsServiceType,
-  OsTaskStatus,
   Prisma,
   ProjectStatus,
   ServiceStatus,
@@ -23,9 +21,6 @@ import {
   UpdateProjectSchema,
   UpdateProjectStatusSchema,
 } from './project.schemas'
-
-const INTERNAL_ORGANIZATION_SLUG = 'agency-os-internal'
-const INTERNAL_ORGANIZATION_NAME = 'Agency OS Internal'
 
 type ProjectListRecord = Prisma.ProjectGetPayload<{
   include: {
@@ -180,15 +175,6 @@ type ProjectOrganization = {
   slug: string
 }
 
-type LegacyProjectContext = {
-  organization: ProjectOrganization
-  normalizedServiceType: ServiceType | null
-  businessName?: string | null
-  contactName?: string | null
-  contactPhone?: string | null
-  contactEmail?: string | null
-}
-
 function serializeDate(value: Date | null): string | null {
   return value ? value.toISOString() : null
 }
@@ -202,10 +188,6 @@ function splitMilestoneAmounts(totalAmount: number) {
     startAmount: startCents / 100,
     deliveryAmount: deliveryCents / 100,
   }
-}
-
-function isInternalOrganization(organization: Pick<ProjectOrganization, 'slug'>): boolean {
-  return organization.slug === INTERNAL_ORGANIZATION_SLUG
 }
 
 function normalizeServiceTypeInput(
@@ -232,19 +214,6 @@ function normalizeServiceTypeInput(
   }
 }
 
-function mapPortalServiceTypeToLegacy(type: ServiceType): OsServiceType {
-  switch (type) {
-    case ServiceType.WEB_DEV:
-      return OsServiceType.WEB
-    case ServiceType.AI:
-      return OsServiceType.AI_AGENT
-    case ServiceType.AUTOMATION:
-      return OsServiceType.AUTOMATION
-    case ServiceType.SOFTWARE:
-      return OsServiceType.CUSTOM_SOFTWARE
-  }
-}
-
 function mapLegacyServiceTypeToPortal(type: OsServiceType | null | undefined): ServiceType | null {
   if (!type) {
     return null
@@ -253,92 +222,12 @@ function mapLegacyServiceTypeToPortal(type: OsServiceType | null | undefined): S
   return normalizeServiceTypeInput(type)
 }
 
-function normalizeProjectStatus(value: ProjectStatus | OsProjectStatus): ProjectStatus {
-  switch (value) {
-    case ProjectStatus.PLANNING:
-    case ProjectStatus.IN_PROGRESS:
-    case ProjectStatus.REVIEW:
-    case ProjectStatus.COMPLETED:
-      return value
-    case OsProjectStatus.EN_DESARROLLO:
-      return ProjectStatus.IN_PROGRESS
-    case OsProjectStatus.EN_REVISION:
-      return ProjectStatus.REVIEW
-    case OsProjectStatus.ENTREGADO:
-    case OsProjectStatus.EN_MANTENIMIENTO:
-      return ProjectStatus.COMPLETED
-    case OsProjectStatus.CANCELADO:
-      return ProjectStatus.PLANNING
-  }
-}
-
-function mapProjectStatusToLegacy(
-  status: ProjectStatus,
-  maintenanceStartDate: Date | null
-): OsProjectStatus {
-  switch (status) {
-    case ProjectStatus.PLANNING:
-    case ProjectStatus.IN_PROGRESS:
-      return OsProjectStatus.EN_DESARROLLO
-    case ProjectStatus.REVIEW:
-      return OsProjectStatus.EN_REVISION
-    case ProjectStatus.COMPLETED:
-      return maintenanceStartDate
-        ? OsProjectStatus.EN_MANTENIMIENTO
-        : OsProjectStatus.ENTREGADO
-  }
-}
-
-function mapTaskStatusToLegacy(status: TaskStatus): OsTaskStatus {
-  switch (status) {
-    case TaskStatus.TODO:
-      return OsTaskStatus.PENDIENTE
-    case TaskStatus.IN_PROGRESS:
-      return OsTaskStatus.EN_PROGRESO
-    case TaskStatus.DONE:
-      return OsTaskStatus.COMPLETADA
-  }
-}
-
-async function ensureInternalOrganization(
-  tx: Prisma.TransactionClient
-): Promise<ProjectOrganization> {
-  const existingOrganization = await tx.organization.findUnique({
-    where: {
-      slug: INTERNAL_ORGANIZATION_SLUG,
-    },
-    select: {
-      id: true,
-      companyName: true,
-      slug: true,
-    },
-  })
-
-  if (existingOrganization) {
-    return existingOrganization
-  }
-
-  return tx.organization.create({
-    data: {
-      companyName: INTERNAL_ORGANIZATION_NAME,
-      slug: INTERNAL_ORGANIZATION_SLUG,
-      n8nWorkflowIds: [],
-      onboardingCompleted: false,
-    },
-    select: {
-      id: true,
-      companyName: true,
-      slug: true,
-    },
-  })
-}
-
 async function resolveProjectOrganization(
   tx: Prisma.TransactionClient,
   organizationId?: string | null
-): Promise<ProjectOrganization> {
+): Promise<ProjectOrganization | null> {
   if (!organizationId) {
-    return ensureInternalOrganization(tx)
+    return null
   }
 
   const organization = await tx.organization.findUnique({
@@ -361,10 +250,10 @@ async function resolveProjectOrganization(
 
 async function syncOrganizationService(
   tx: Prisma.TransactionClient,
-  organization: ProjectOrganization,
+  organization: ProjectOrganization | null,
   serviceType: ServiceType | null
 ) {
-  if (!serviceType || isInternalOrganization(organization)) {
+  if (!serviceType || !organization) {
     return
   }
 
@@ -447,120 +336,6 @@ async function createDefaultMilestones(
   })
 }
 
-async function syncLegacyProjectMirror(
-  tx: Prisma.TransactionClient,
-  projectId: string,
-  context: LegacyProjectContext
-) {
-  const project = await tx.project.findUnique({
-    where: {
-      id: projectId,
-    },
-    include: {
-      osLead: {
-        select: {
-          id: true,
-          businessName: true,
-          contactName: true,
-          phone: true,
-          email: true,
-          serviceType: true,
-        },
-      },
-    },
-  })
-
-  if (!project) {
-    throw new Error('Project not found')
-  }
-
-  const derivedPortalServiceType =
-    context.normalizedServiceType ??
-    mapLegacyServiceTypeToPortal(project.osLead?.serviceType)
-  const legacyServiceType = derivedPortalServiceType
-    ? mapPortalServiceTypeToLegacy(derivedPortalServiceType)
-    : project.osLead?.serviceType ?? OsServiceType.CUSTOM_SOFTWARE
-  const businessName =
-    context.businessName?.trim() ||
-    project.osLead?.businessName ||
-    (isInternalOrganization(context.organization)
-      ? 'Proyecto interno Agency OS'
-      : context.organization.companyName)
-  const contactName =
-    context.contactName?.trim() ||
-    project.osLead?.contactName ||
-    businessName
-  const contactPhone = context.contactPhone ?? project.osLead?.phone ?? null
-  const contactEmail = context.contactEmail ?? project.osLead?.email ?? null
-
-  await tx.osProject.upsert({
-    where: {
-      id: project.id,
-    },
-    create: {
-      id: project.id,
-      leadId: project.osLeadId,
-      businessName,
-      contactName,
-      contactPhone,
-      contactEmail,
-      organizationId: isInternalOrganization(context.organization)
-        ? null
-        : context.organization.id,
-      name: project.name,
-      description: project.description,
-      serviceType: legacyServiceType,
-      status: mapProjectStatusToLegacy(project.status, project.maintenanceStartDate),
-      agreedAmount: project.agreedAmount ?? new Prisma.Decimal(0),
-      monthlyRate: project.monthlyRate,
-      maintenanceStartDate: project.maintenanceStartDate,
-      estimatedEndDate: project.estimatedEndDate,
-      deliveredAt: project.deliveredAt,
-    },
-    update: {
-      leadId: project.osLeadId,
-      businessName,
-      contactName,
-      contactPhone,
-      contactEmail,
-      organizationId: isInternalOrganization(context.organization)
-        ? null
-        : context.organization.id,
-      name: project.name,
-      description: project.description,
-      serviceType: legacyServiceType,
-      status: mapProjectStatusToLegacy(project.status, project.maintenanceStartDate),
-      agreedAmount: project.agreedAmount ?? new Prisma.Decimal(0),
-      monthlyRate: project.monthlyRate,
-      maintenanceStartDate: project.maintenanceStartDate,
-      estimatedEndDate: project.estimatedEndDate,
-      deliveredAt: project.deliveredAt,
-    },
-  })
-}
-
-function deriveLegacyServiceType(project: {
-  osLead: {
-    serviceType: OsServiceType | null
-  } | null
-  organization: {
-    services: Array<{
-      type: ServiceType
-    }>
-  }
-}): OsServiceType | null {
-  if (project.osLead?.serviceType) {
-    return project.osLead.serviceType
-  }
-
-  const activeServiceType = project.organization.services[0]?.type
-  if (!activeServiceType) {
-    return null
-  }
-
-  return mapPortalServiceTypeToLegacy(activeServiceType)
-}
-
 function deriveProjectStartDate(project: {
   osLead: {
     createdAt: Date
@@ -619,7 +394,7 @@ function deriveProjectActivityAt(project: ProjectListRecord): number {
 function buildProjectRevalidationPaths(input: {
   projectId: string
   leadId?: string | null
-  organization?: Pick<ProjectOrganization, 'slug'> | null
+  organizationId?: string | null
 }) {
   const paths = [
     '/admin/os/projects',
@@ -633,7 +408,7 @@ function buildProjectRevalidationPaths(input: {
     paths.push('/admin/os/leads', `/admin/os/leads/${input.leadId}`)
   }
 
-  if (input.organization && !isInternalOrganization(input.organization)) {
+  if (input.organizationId) {
     paths.push('/dashboard/project')
   }
 
@@ -643,11 +418,9 @@ function buildProjectRevalidationPaths(input: {
 function serializeProjectListItem(project: ProjectListRecord) {
   const normalizedServiceType =
     mapLegacyServiceTypeToPortal(project.osLead?.serviceType) ??
-    project.organization.services[0]?.type ??
+    project.organization?.services[0]?.type ??
     null
-  const businessName = isInternalOrganization(project.organization)
-    ? 'Proyecto interno Agency OS'
-    : project.organization.companyName
+  const businessName = project.organization?.companyName ?? 'Proyecto interno Agency OS'
   const contactName = project.osLead?.contactName ?? businessName
   const completedTasks = project.tasks.filter((task) => task.status === TaskStatus.DONE).length
   const totalTrackedHours = project.timeEntries.reduce((total, entry) => total + entry.hours, 0)
@@ -659,14 +432,11 @@ function serializeProjectListItem(project: ProjectListRecord) {
     contactName,
     contactPhone: project.osLead?.phone ?? null,
     contactEmail: project.osLead?.email ?? null,
-    organizationId: isInternalOrganization(project.organization)
-      ? null
-      : project.organization.id,
+    organizationId: project.organizationId ?? null,
     name: project.name,
     description: project.description,
     serviceType: normalizedServiceType,
     status: project.status,
-    legacyStatus: mapProjectStatusToLegacy(project.status, project.maintenanceStartDate),
     agreedAmount: project.agreedAmount?.toString() ?? null,
     monthlyRate: project.monthlyRate?.toString() ?? null,
     maintenanceStartDate: serializeDate(project.maintenanceStartDate),
@@ -692,7 +462,7 @@ function serializeProjectListItem(project: ProjectListRecord) {
           serviceType: mapLegacyServiceTypeToPortal(project.osLead.serviceType),
         }
       : null,
-    isInternal: isInternalOrganization(project.organization),
+    isInternal: project.organizationId === null,
     sortTimestamp: deriveProjectActivityAt(project),
   }
 }
@@ -700,11 +470,9 @@ function serializeProjectListItem(project: ProjectListRecord) {
 function serializeProjectDetail(project: ProjectDetailRecord) {
   const normalizedServiceType =
     mapLegacyServiceTypeToPortal(project.osLead?.serviceType) ??
-    project.organization.services[0]?.type ??
+    project.organization?.services[0]?.type ??
     null
-  const businessName = isInternalOrganization(project.organization)
-    ? 'Proyecto interno Agency OS'
-    : project.organization.companyName
+  const businessName = project.organization?.companyName ?? 'Proyecto interno Agency OS'
 
   return {
     id: project.id,
@@ -713,17 +481,18 @@ function serializeProjectDetail(project: ProjectDetailRecord) {
     contactName: project.osLead?.contactName ?? businessName,
     contactPhone: project.osLead?.phone ?? null,
     contactEmail: project.osLead?.email ?? null,
-    organization: {
-      id: isInternalOrganization(project.organization) ? null : project.organization.id,
-      companyName: project.organization.companyName,
-      slug: project.organization.slug,
-      isInternal: isInternalOrganization(project.organization),
-    },
+    organization: project.organization
+      ? {
+          id: project.organization.id,
+          companyName: project.organization.companyName,
+          slug: project.organization.slug,
+          isInternal: false,
+        }
+      : null,
     name: project.name,
     description: project.description,
     serviceType: normalizedServiceType,
     status: project.status,
-    legacyStatus: mapProjectStatusToLegacy(project.status, project.maintenanceStartDate),
     agreedAmount: project.agreedAmount?.toString() ?? null,
     monthlyRate: project.monthlyRate?.toString() ?? null,
     maintenanceStartDate: serializeDate(project.maintenanceStartDate),
@@ -745,7 +514,6 @@ function serializeProjectDetail(project: ProjectDetailRecord) {
       title: task.title,
       description: task.description,
       status: task.status,
-      legacyStatus: mapTaskStatusToLegacy(task.status),
       dueDate: serializeDate(task.dueDate),
       approvalStatus: task.approvalStatus,
       estimatedHours: task.estimatedHours,
@@ -802,7 +570,7 @@ export async function createProject(input: unknown): Promise<ActionResult<{ id: 
         data: {
           name: parsed.name,
           description: parsed.description,
-          organizationId: organization.id,
+          organizationId: organization?.id ?? null,
           agreedAmount: parsed.agreedAmount,
           monthlyRate: parsed.monthlyRate,
           estimatedEndDate: parsed.estimatedEndDate,
@@ -814,28 +582,19 @@ export async function createProject(input: unknown): Promise<ActionResult<{ id: 
         },
       })
 
-      await syncLegacyProjectMirror(tx, createdProject.id, {
-        organization,
-        normalizedServiceType,
-        businessName: parsed.businessName ?? null,
-        contactName: parsed.contactName ?? null,
-        contactPhone: parsed.contactPhone ?? null,
-        contactEmail: parsed.contactEmail ?? null,
-      })
-
       await createDefaultMilestones(tx, createdProject.id, parsed.agreedAmount)
 
       return {
         id: createdProject.id,
         leadId: createdProject.osLeadId,
-        organization,
+        organizationId: organization?.id ?? null,
       }
     })
 
     for (const path of buildProjectRevalidationPaths({
       projectId: project.id,
       leadId: project.leadId,
-      organization: project.organization,
+      organizationId: project.organizationId,
     })) {
       revalidatePath(path)
     }
@@ -885,7 +644,9 @@ export async function updateProject(input: unknown): Promise<ActionResult<{ id: 
         data: {
           ...(data.name !== undefined ? { name: data.name } : {}),
           ...(data.description !== undefined ? { description: data.description } : {}),
-          ...(data.organizationId !== undefined ? { organizationId: organization.id } : {}),
+          ...(data.organizationId !== undefined
+            ? { organizationId: organization?.id ?? null }
+            : {}),
           ...(data.agreedAmount !== undefined ? { agreedAmount: data.agreedAmount } : {}),
           ...(data.monthlyRate !== undefined ? { monthlyRate: data.monthlyRate } : {}),
           ...(data.estimatedEndDate !== undefined
@@ -899,26 +660,20 @@ export async function updateProject(input: unknown): Promise<ActionResult<{ id: 
         },
       })
 
-      await syncLegacyProjectMirror(tx, updatedProject.id, {
-        organization,
-        normalizedServiceType,
-        businessName: data.businessName ?? null,
-        contactName: data.contactName ?? null,
-        contactPhone: data.contactPhone ?? null,
-        contactEmail: data.contactEmail ?? null,
-      })
-
       return {
         id: updatedProject.id,
         leadId: updatedProject.osLeadId,
-        organization,
+        organizationId:
+          data.organizationId !== undefined
+            ? organization?.id ?? null
+            : currentProject.organizationId,
       }
     })
 
     for (const path of buildProjectRevalidationPaths({
       projectId: project.id,
       leadId: project.leadId,
-      organization: project.organization,
+      organizationId: project.organizationId,
     })) {
       revalidatePath(path)
     }
@@ -941,14 +696,10 @@ export async function updateProjectStatus(
         where: {
           id: parsed.projectId,
         },
-        include: {
-          organization: {
-            select: {
-              id: true,
-              companyName: true,
-              slug: true,
-            },
-          },
+        select: {
+          id: true,
+          osLeadId: true,
+          organizationId: true,
         },
       })
 
@@ -956,14 +707,13 @@ export async function updateProjectStatus(
         throw new Error('Project not found')
       }
 
-      const normalizedStatus = normalizeProjectStatus(parsed.status)
       const updatedProject = await tx.project.update({
         where: {
           id: parsed.projectId,
         },
         data: {
-          status: normalizedStatus,
-          ...(normalizedStatus === ProjectStatus.COMPLETED
+          status: parsed.status,
+          ...(parsed.status === ProjectStatus.COMPLETED
             ? { deliveredAt: new Date() }
             : {}),
         },
@@ -973,22 +723,17 @@ export async function updateProjectStatus(
         },
       })
 
-      await syncLegacyProjectMirror(tx, updatedProject.id, {
-        organization: currentProject.organization,
-        normalizedServiceType: null,
-      })
-
       return {
         id: updatedProject.id,
         leadId: updatedProject.osLeadId,
-        organization: currentProject.organization,
+        organizationId: currentProject.organizationId,
       }
     })
 
     for (const path of buildProjectRevalidationPaths({
       projectId: project.id,
       leadId: project.leadId,
-      organization: project.organization,
+      organizationId: project.organizationId,
     })) {
       revalidatePath(path)
     }
@@ -1017,11 +762,6 @@ export async function convertLeadToProject(
               id: true,
             },
           },
-          osProject: {
-            select: {
-              id: true,
-            },
-          },
         },
       })
 
@@ -1029,7 +769,7 @@ export async function convertLeadToProject(
         throw new Error('Lead not found')
       }
 
-      if (lead.project || lead.osProject) {
+      if (lead.project) {
         throw new Error('Lead already has a linked project')
       }
 
@@ -1042,7 +782,7 @@ export async function convertLeadToProject(
         data: {
           name: parsed.name,
           description: parsed.description,
-          organizationId: organization.id,
+          organizationId: organization?.id ?? null,
           agreedAmount: parsed.agreedAmount,
           monthlyRate: parsed.monthlyRate,
           estimatedEndDate: parsed.estimatedEndDate,
@@ -1074,28 +814,19 @@ export async function convertLeadToProject(
         },
       })
 
-      await syncLegacyProjectMirror(tx, linkedProject.id, {
-        organization,
-        normalizedServiceType,
-        businessName: lead.businessName,
-        contactName: lead.contactName,
-        contactPhone: lead.phone,
-        contactEmail: lead.email,
-      })
-
       await createDefaultMilestones(tx, linkedProject.id, parsed.agreedAmount)
 
       return {
         id: linkedProject.id,
         leadId: linkedProject.osLeadId,
-        organization,
+        organizationId: organization?.id ?? null,
       }
     })
 
     for (const path of buildProjectRevalidationPaths({
       projectId: project.id,
       leadId: project.leadId,
-      organization: project.organization,
+      organizationId: project.organizationId,
     })) {
       revalidatePath(path)
     }

@@ -1,4 +1,4 @@
-import { OsProjectStatus, OsServiceType, ProjectStatus, ServiceType } from '@prisma/client'
+import { OsServiceType, ProjectStatus, ServiceType } from '@prisma/client'
 import { z } from 'zod'
 
 const emptyStringToUndefined = (value: unknown) => {
@@ -33,11 +33,11 @@ const serviceTypeSchema = z.preprocess(
 
 const projectStatusSchema = z.preprocess(
   emptyStringToUndefined,
-  z.union([z.nativeEnum(ProjectStatus), z.nativeEnum(OsProjectStatus)])
+  z.nativeEnum(ProjectStatus)
 )
 
-export const ProjectIdSchema = z.string().cuid('Invalid project id')
-export const LeadIdSchema = z.string().cuid('Invalid lead id')
+export const ProjectIdSchema = z.string().trim().min(1, 'Invalid project id')
+export const LeadIdSchema = z.string().trim().min(1, 'Invalid lead id')
 export const OrganizationIdSchema = z.preprocess(
   (value) => {
     if (value === '') {
@@ -46,7 +46,7 @@ export const OrganizationIdSchema = z.preprocess(
 
     return emptyStringToUndefined(value)
   },
-  z.string().cuid('Invalid organization id').nullable().optional()
+  z.string().trim().min(1, 'Invalid organization id').nullable().optional()
 )
 
 export const CreateProjectSchema = z.object({

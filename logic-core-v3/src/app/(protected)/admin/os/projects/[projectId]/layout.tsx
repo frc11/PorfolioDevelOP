@@ -15,8 +15,6 @@ type ProjectLayoutProps = {
   }>
 }
 
-const INTERNAL_ORGANIZATION_SLUG = 'agency-os-internal'
-
 const STATUS_OPTIONS: ProjectStatus[] = [
   'PLANNING',
   'IN_PROGRESS',
@@ -82,13 +80,13 @@ function normalizeServiceType(
       services: Array<{
         type: ServiceType
       }>
-    }
+    } | null
     osLead: {
       serviceType: 'WEB' | 'AI_AGENT' | 'AUTOMATION' | 'CUSTOM_SOFTWARE' | null
     } | null
   }
 ): ServiceType | null {
-  if (project.organization.services[0]?.type) {
+  if (project.organization?.services[0]?.type) {
     return project.organization.services[0].type
   }
 
@@ -138,11 +136,6 @@ export default async function AgencyOsProjectLayout({ children, params }: Projec
       },
     }),
     prisma.organization.findMany({
-      where: {
-        slug: {
-          not: INTERNAL_ORGANIZATION_SLUG,
-        },
-      },
       select: {
         id: true,
         companyName: true,
@@ -157,11 +150,11 @@ export default async function AgencyOsProjectLayout({ children, params }: Projec
     redirect('/admin/os/projects')
   }
 
-  const isInternalProject = project.organization.slug === INTERNAL_ORGANIZATION_SLUG
+  const isInternalProject = project.organizationId === null
   const serviceType = normalizeServiceType(project)
   const companyName = isInternalProject
     ? 'Proyecto interno Agency OS'
-    : project.organization.companyName
+    : project.organization?.companyName ?? 'Cliente sin nombre'
 
   return (
     <section className="space-y-6">
@@ -209,7 +202,7 @@ export default async function AgencyOsProjectLayout({ children, params }: Projec
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
-            {!isInternalProject ? (
+            {!isInternalProject && project.organization ? (
               <form action={startImpersonationAction.bind(null, project.organization.id)}>
                 <button
                   type="submit"
@@ -254,7 +247,7 @@ export default async function AgencyOsProjectLayout({ children, params }: Projec
               organizations={organizations}
               project={{
                 id: project.id,
-                organizationId: isInternalProject ? null : project.organization.id,
+                organizationId: project.organizationId,
                 name: project.name,
                 description: project.description,
                 serviceType,

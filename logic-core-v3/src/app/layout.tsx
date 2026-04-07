@@ -15,6 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://develop.com.ar"),
   title: "develOP — Agencia de Desarrollo Digital | Tucumán, Argentina",
   description: "Agencia de desarrollo web, software a medida, automatización e IA en Tucumán y el NOA. Transformamos negocios con tecnología que genera resultados reales.",
   keywords: ["agencia desarrollo web tucumán", "software a medida argentina", "automatización procesos noa", "desarrollo digital tucumán", "agencia digital argentina", "inteligencia artificial pymes"],

@@ -1,6 +1,8 @@
 'use client'
 
 import { usePathname } from 'next/navigation'
+import { LogOut } from 'lucide-react'
+import { signOutAction } from '@/actions/auth-actions'
 
 function humanizeSegment(segment: string): string {
   if (!segment) {
@@ -70,8 +72,20 @@ export function AdminTopbar() {
         </h1>
       </div>
 
-      <div className="hidden rounded-full border border-white/10 bg-black/20 px-4 py-2 text-xs text-zinc-300 sm:block">
-        {formatToday()}
+      <div className="flex items-center gap-3">
+        <div className="hidden rounded-full border border-white/10 bg-black/20 px-4 py-2 text-xs text-zinc-300 sm:block">
+          {formatToday()}
+        </div>
+
+        <form action={signOutAction}>
+          <button
+            type="submit"
+            title="Cerrar sesión"
+            className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-black/20 text-zinc-500 transition-all hover:text-red-400 hover:bg-red-500/10 active:scale-95"
+          >
+            <LogOut size={15} />
+          </button>
+        </form>
       </div>
     </header>
   )

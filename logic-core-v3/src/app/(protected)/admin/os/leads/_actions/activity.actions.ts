@@ -17,7 +17,7 @@ const emptyStringToUndefined = (value: unknown) => {
   return trimmed === '' ? undefined : trimmed
 }
 
-const LeadIdSchema = z.string().cuid('Invalid lead id')
+const LeadIdSchema = z.string().trim().min(1, 'Invalid lead id')
 
 const optionalNotesSchema = z.preprocess(
   emptyStringToUndefined,

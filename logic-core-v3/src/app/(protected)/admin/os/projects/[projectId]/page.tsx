@@ -9,8 +9,6 @@ type ProjectOverviewPageProps = {
   }>
 }
 
-const INTERNAL_ORGANIZATION_SLUG = 'agency-os-internal'
-
 function formatDate(value: Date | null): string {
   if (!value) {
     return 'Sin fecha'
@@ -157,7 +155,7 @@ export default async function AgencyOsProjectOverviewPage({
     redirect('/admin/os/projects')
   }
 
-  const isInternalProject = project.organization.slug === INTERNAL_ORGANIZATION_SLUG
+  const isInternalProject = project.organizationId === null
   const startDate = deriveStartDate(project)
   const todoTasks = project.tasks.filter((task) => task.status === TaskStatus.TODO).length
   const inProgressTasks = project.tasks.filter(
@@ -201,7 +199,7 @@ export default async function AgencyOsProjectOverviewPage({
             </div>
           </div>
 
-          {!isInternalProject ? (
+          {!isInternalProject && project.organization ? (
             <div className="mt-4 rounded-2xl border border-cyan-400/15 bg-cyan-400/5 p-4">
               <p className="text-[10px] uppercase tracking-[0.22em] text-cyan-300/80">
                 Cliente vinculado

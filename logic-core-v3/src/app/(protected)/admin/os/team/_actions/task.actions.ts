@@ -15,8 +15,6 @@ import {
   UserIdSchema,
 } from './task.schemas'
 
-const INTERNAL_ORGANIZATION_SLUG = 'agency-os-internal'
-
 type ProjectTaskRecord = Prisma.TaskGetPayload<{
   select: {
     id: true
@@ -84,18 +82,18 @@ type UserTaskRecord = Prisma.TaskGetPayload<{
   }
 }>
 
-function shouldRevalidateDashboard(organizationSlug: string | null | undefined) {
-  return Boolean(organizationSlug) && organizationSlug !== INTERNAL_ORGANIZATION_SLUG
+function shouldRevalidateDashboard(organizationId: string | null | undefined) {
+  return Boolean(organizationId)
 }
 
-function revalidateTaskPaths(projectId: string, organizationSlug?: string | null) {
+function revalidateTaskPaths(projectId: string, organizationId?: string | null) {
   revalidatePath('/admin/os/projects')
   revalidatePath(`/admin/os/projects/${projectId}`)
   revalidatePath(`/admin/os/projects/${projectId}/tasks`)
   revalidatePath(`/admin/os/projects/${projectId}/hours`)
   revalidatePath('/admin/os/team')
 
-  if (shouldRevalidateDashboard(organizationSlug)) {
+  if (shouldRevalidateDashboard(organizationId)) {
     revalidatePath('/dashboard/project')
   }
 }
@@ -182,18 +180,14 @@ export async function createTask(input: unknown): Promise<ActionResult<{ id: str
           projectId: true,
           project: {
             select: {
-              organization: {
-                select: {
-                  slug: true,
-                },
-              },
+              organizationId: true,
             },
           },
         },
       })
     })
 
-    revalidateTaskPaths(task.projectId, task.project.organization.slug)
+    revalidateTaskPaths(task.projectId, task.project.organizationId)
     return ok({ id: task.id })
   } catch (error) {
     return fail(error instanceof Error ? error.message : 'Failed to create task')
@@ -221,17 +215,13 @@ export async function updateTask(input: unknown): Promise<ActionResult<{ id: str
         projectId: true,
         project: {
           select: {
-            organization: {
-              select: {
-                slug: true,
-              },
-            },
+            organizationId: true,
           },
         },
       },
     })
 
-    revalidateTaskPaths(task.projectId, task.project.organization.slug)
+    revalidateTaskPaths(task.projectId, task.project.organizationId)
     return ok({ id: task.id })
   } catch (error) {
     return fail(error instanceof Error ? error.message : 'Failed to update task')
@@ -250,11 +240,7 @@ export async function deleteTask(taskId: string): Promise<ActionResult<void>> {
         projectId: true,
         project: {
           select: {
-            organization: {
-              select: {
-                slug: true,
-              },
-            },
+            organizationId: true,
           },
         },
       },
@@ -268,7 +254,7 @@ export async function deleteTask(taskId: string): Promise<ActionResult<void>> {
       where: { id: parsedTaskId },
     })
 
-    revalidateTaskPaths(task.projectId, task.project.organization.slug)
+    revalidateTaskPaths(task.projectId, task.project.organizationId)
     return ok<void>(undefined)
   } catch (error) {
     return fail(error instanceof Error ? error.message : 'Failed to delete task')
@@ -294,11 +280,7 @@ export async function reorderTasks(
         projectId: true,
         project: {
           select: {
-            organization: {
-              select: {
-                slug: true,
-              },
-            },
+            organizationId: true,
           },
         },
       },
@@ -329,7 +311,7 @@ export async function reorderTasks(
       )
     )
 
-    revalidateTaskPaths(projectId, existingTasks[0]?.project.organization.slug)
+    revalidateTaskPaths(projectId, existingTasks[0]?.project.organizationId)
     return ok({ count: parsed.tasks.length })
   } catch (error) {
     return fail(error instanceof Error ? error.message : 'Failed to reorder tasks')

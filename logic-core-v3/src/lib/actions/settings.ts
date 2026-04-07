@@ -222,8 +222,6 @@ export async function inviteTeamMemberAction(input: {
       ),
     })
 
-    console.log(`[settings] Invite link for ${email}: ${inviteUrl}`)
-
     revalidatePath('/admin/settings')
 
     return {

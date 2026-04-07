@@ -4,6 +4,11 @@ import { revalidatePath } from 'next/cache'
 import { prisma } from '@/lib/prisma'
 import { requireSuperAdmin } from '@/lib/auth-guards'
 import { fail, ok, type ActionResult } from '@/lib/action-utils'
+import {
+  GetConversationSchema,
+  MarkAsReadSchema,
+  SendMessageSchema,
+} from './message.schemas'
 
 function revalidateMessagePaths(organizationId?: string) {
   revalidatePath('/admin/os/messages')
@@ -133,14 +138,11 @@ export async function getConversation(
 > {
   try {
     await requireSuperAdmin()
-
-    if (!organizationId.trim()) {
-      return fail('Invalid organization id')
-    }
+    const parsedOrganizationId = GetConversationSchema.parse(organizationId)
 
     const messages = await prisma.message.findMany({
       where: {
-        organizationId,
+        organizationId: parsedOrganizationId,
       },
       orderBy: {
         createdAt: 'asc',
@@ -168,20 +170,12 @@ export async function sendMessage(
 ): Promise<ActionResult<{ id: string }>> {
   try {
     await requireSuperAdmin()
-
-    if (!organizationId.trim()) {
-      return fail('Invalid organization id')
-    }
-
-    const trimmedContent = content.trim()
-    if (!trimmedContent) {
-      return fail('El mensaje no puede estar vacio.')
-    }
+    const parsed = SendMessageSchema.parse({ organizationId, content })
 
     const message = await prisma.message.create({
       data: {
-        organizationId,
-        content: trimmedContent,
+        organizationId: parsed.organizationId,
+        content: parsed.content.trim(),
         fromAdmin: true,
       },
       select: {
@@ -189,7 +183,7 @@ export async function sendMessage(
       },
     })
 
-    revalidateMessagePaths(organizationId)
+    revalidateMessagePaths(parsed.organizationId)
     return ok({ id: message.id })
   } catch (error) {
     return fail(error instanceof Error ? error.message : 'Failed to send message')
@@ -201,14 +195,11 @@ export async function markAsRead(
 ): Promise<ActionResult<{ count: number }>> {
   try {
     await requireSuperAdmin()
-
-    if (!organizationId.trim()) {
-      return fail('Invalid organization id')
-    }
+    const parsedOrganizationId = MarkAsReadSchema.parse(organizationId)
 
     const result = await prisma.message.updateMany({
       where: {
-        organizationId,
+        organizationId: parsedOrganizationId,
         fromAdmin: false,
         read: false,
       },
@@ -217,7 +208,7 @@ export async function markAsRead(
       },
     })
 
-    revalidateMessagePaths(organizationId)
+    revalidateMessagePaths(parsedOrganizationId)
     return ok({ count: result.count })
   } catch (error) {
     return fail(error instanceof Error ? error.message : 'Failed to mark messages as read')
