@@ -133,7 +133,7 @@ export default function CtaAutomation() {
                         className="text-[11px] font-mono uppercase tracking-widest mt-8"
                         style={{ color: "rgba(255,255,255,0.22)" }}
                     >
-                        Tucumán · Argentina · n8n · Make · APIs · IA
+                        Trabajamos con empresas de Tucuman, Salta, Catamarca y todo el NOA.
                     </p>
                 </motion.div>
             </div>

@@ -1,7 +1,7 @@
 ﻿'use client'
 
 import React, { useState, useMemo, useRef, useEffect } from 'react'
-import { motion, useInView, useReducedMotion, AnimatePresence } from 'motion/react'
+import { motion, useInView, useReducedMotion } from 'motion/react'
 
 // --- COMPONENTS ---
 
@@ -19,10 +19,11 @@ function AnimatedNumber({
   const [displayed, setDisplayed] = useState(value)
   const prevRef = useRef(value)
   const reduced = useReducedMotion()
+  const renderedValue = reduced ? value : displayed
 
   useEffect(() => {
     if (reduced) {
-      setDisplayed(value)
+      prevRef.current = value
       return
     }
 
@@ -48,7 +49,7 @@ function AnimatedNumber({
   return (
     <span style={style}>
       {prefix}
-      {displayed.toLocaleString('es-AR')}
+      {renderedValue.toLocaleString('es-AR')}
       {suffix}
     </span>
   )
@@ -71,10 +72,12 @@ export default function CalculadorIA() {
   // $12 USD/hora costo promedio NOA
   const ahorroUSD = useMemo(() => horasAhorradas * 12, [horasAhorradas])
 
-  const costoIA = 300 // USD/mes estimado
+  const inversionInicialIA = 300 // USD setup inicial (pago unico)
+  const mesesAmortizacion = 6
+  const costoIA = Math.round(inversionInicialIA / mesesAmortizacion) // Costo mensual equivalente para comparar
   const roiPct = useMemo(() => 
     Math.round(((ahorroUSD - costoIA) / costoIA) * 100), 
-  [ahorroUSD])
+  [ahorroUSD, costoIA])
 
   const colorROI = roiPct > 0 ? '#00ff88' : '#34a853'
 
@@ -294,6 +297,9 @@ export default function CalculadorIA() {
             />
             <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.4)', margin: 0 }}>
               Retorno sobre inversion de IA
+            </p>
+            <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.28)', margin: '10px 0 0' }}>
+              Basado en setup inicial USD {inversionInicialIA} amortizado en {mesesAmortizacion} meses
             </p>
           </motion.div>
 

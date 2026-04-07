@@ -4,11 +4,11 @@ import { motion } from 'framer-motion'
 import HeroSoftware from '@/components/software/HeroSoftware'
 import PainBentoSoftware from '@/components/software/PainBentoSoftware'
 import DiagnosticoSoftware from '@/components/software/DiagnosticoSoftware'
+import RoiSoftware from '@/components/software/RoiSoftware'
 import ProcesoSoftware from '@/components/software/ProcesoSoftware'
 import DashboardMockupSoftware from '@/components/software/DashboardMockupSoftware'
 import ArchitectureSoftware from '@/components/software/ArchitectureSoftware'
 import PipelineSoftware from '@/components/software/PipelineSoftware'
-import ShowcaseSoftware from '@/components/software/ShowcaseSoftware'
 import StatementSoftware from '@/components/software/StatementSoftware'
 import SocialProofSoftware from '@/components/software/SocialProofSoftware'
 import FaqSoftware from '@/components/software/FaqSoftware'
@@ -95,6 +95,12 @@ export default function SoftwareDevelopmentPage() {
             <SectionDivider />
 
             <SectionReveal delay={0.05}>
+                <RoiSoftware />
+            </SectionReveal>
+
+            <SectionDivider />
+
+            <SectionReveal delay={0.05}>
                 <DashboardMockupSoftware />
             </SectionReveal>
 
@@ -113,12 +119,6 @@ export default function SoftwareDevelopmentPage() {
             <SectionDivider />
 
             <PipelineSoftware />
-
-            <SectionDivider />
-
-            <SectionReveal delay={0.05}>
-                <ShowcaseSoftware />
-            </SectionReveal>
 
             <SectionDivider />
 

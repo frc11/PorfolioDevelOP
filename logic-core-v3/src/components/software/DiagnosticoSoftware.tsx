@@ -134,7 +134,7 @@ const resultados: Record<DiagnosticoId, DiagnosticoResult> = {
     subtitle: 'Los procesos repetitivos, en automático',
     description: 'Identificamos los procesos que más tiempo te roban y los automatizamos. Aprobaciones, notificaciones, reportes — sin intervención humana.',
     timeEstimate: '3 a 5 semanas',
-    priceRange: 'desde $1.400 USD',
+    priceRange: 'desde $1.500 USD',
     features: [
       'Mapeo de procesos actuales',
       'Flujos automáticos digitales',
@@ -536,6 +536,9 @@ function ResultCTA({ resultado, onReset }: { resultado: DiagnosticoResult, onRes
       <div>
         <p style={{ fontSize:'15px', fontWeight:700, color:'white', margin:'0 0 4px' }}>¿Es lo que necesitás?</p>
         <p style={{ fontSize:'13px', color:'rgba(255,255,255,0.35)', margin:0 }}>Hablamos sin compromiso para ajustar los detalles a tu caso.</p>
+        <p style={{ fontSize:'12px', color:'rgba(255,255,255,0.52)', margin:'8px 0 0', fontWeight:600 }}>
+          Proyectos desde $1.500 USD · Entrega por etapas
+        </p>
       </div>
 
       <div style={{ display:'flex', gap:'10px', flexWrap:'wrap', alignItems:'center' }}>
@@ -579,6 +582,65 @@ function ResultPanel({ resultado, onReset }: { resultado: DiagnosticoResult, onR
   )
 }
 
+function PostDiagnosticoCTA({ resultado }: { resultado: DiagnosticoResult }) {
+  const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '543812223344'
+  const waText = `Hola DevelOP, ya complete el diagnostico y quiero avanzar con ${resultado.title}`
+  const waUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(waText)}`
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 14 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.45, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
+      style={{
+        marginTop: '16px',
+        borderRadius: '18px',
+        border: `1px solid rgba(${resultado.colorRgb},0.25)`,
+        background: `linear-gradient(135deg, rgba(${resultado.colorRgb},0.09), rgba(255,255,255,0.02))`,
+        padding: 'clamp(16px,2.5vw,22px)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: '14px',
+        flexWrap: 'wrap',
+      }}
+    >
+      <div>
+        <p style={{ margin: '0 0 4px', fontSize: '14px', color: 'white', fontWeight: 700 }}>
+          Diagnostico listo. Si queres, lo bajamos a plan hoy mismo.
+        </p>
+        <p style={{ margin: 0, fontSize: '12px', color: 'rgba(255,255,255,0.45)' }}>
+          Proyectos desde $1.500 USD · Entrega por etapas
+        </p>
+      </div>
+
+      <motion.a
+        href={waUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        whileHover={{ scale: 1.03 }}
+        whileTap={{ scale: 0.97 }}
+        style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '8px',
+          background: `linear-gradient(135deg, rgb(${resultado.colorRgb}), rgba(${resultado.colorRgb},0.72))`,
+          color: 'white',
+          fontWeight: 800,
+          fontSize: '13px',
+          padding: '12px 22px',
+          borderRadius: '100px',
+          textDecoration: 'none',
+          boxShadow: `0 0 22px rgba(${resultado.colorRgb},0.32)`,
+          letterSpacing: '0.03em',
+        }}
+      >
+        💬 Ir a WhatsApp ahora →
+      </motion.a>
+    </motion.div>
+  )
+}
+
 // ─── MAIN COMPONENT ──────────────────────────────────────────────────────────
 
 export default function DiagnosticoSoftware() {
@@ -611,15 +673,18 @@ export default function DiagnosticoSoftware() {
             isInView={isInView}
           />
         ) : (
-          <ResultPanel 
-            resultado={resultado!} 
-            onReset={() => { 
-              setShowResult(false); 
-              setCurrentStep(0); 
-              setSelections({ rubro: '', problemas: [], equipo: '' }); 
-              setResultado(null) 
-            }} 
-          />
+          <>
+            <ResultPanel 
+              resultado={resultado!} 
+              onReset={() => { 
+                setShowResult(false); 
+                setCurrentStep(0); 
+                setSelections({ rubro: '', problemas: [], equipo: '' }); 
+                setResultado(null) 
+              }} 
+            />
+            <PostDiagnosticoCTA resultado={resultado!} />
+          </>
         )}
       </div>
     </section>

@@ -70,6 +70,10 @@ export const SoftwareDevelopmentCta = () => {
                         te enviamos una propuesta técnica en 48 horas.
                     </p>
 
+                    <p className="relative z-10 text-sm font-semibold text-violet-200/90 mb-10 max-w-xl mx-auto">
+                        Proyectos desde $1.500 USD · Entrega por etapas
+                    </p>
+
                     <div className="relative z-10 flex flex-col sm:flex-row items-center justify-center gap-4">
                         <MagneticCta>
                             <div className="group relative inline-flex items-center justify-center gap-4 px-10 py-5 bg-violet-600 text-white font-black uppercase tracking-widest rounded-full overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-[0_0_40px_rgba(139,92,246,0.5)] cursor-none text-sm">

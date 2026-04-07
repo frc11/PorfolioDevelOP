@@ -98,7 +98,7 @@ export default function AiSection() {
                             borderRadius: '100px', padding: '5px 14px',
                         }}
                     >
-                        [ INTELIGENCIA ARTIFICIAL APLICADA ]
+                        [ QUERES MAS? ]
                     </motion.span>
 
                     <h2
@@ -111,7 +111,7 @@ export default function AiSection() {
                             transition={{ duration: prefersReduced ? 0 : 0.7, delay: prefersReduced ? 0 : 0.1, ease }}
                             className="text-white"
                         >
-                            Tu web que
+                            Sumale IA a tu web
                         </motion.span>
                         <motion.span
                             initial={{ clipPath: 'inset(0 100% 0 0)' }}
@@ -120,7 +120,7 @@ export default function AiSection() {
                             className="text-transparent bg-clip-text"
                             style={{ backgroundImage: 'linear-gradient(135deg, #00e5ff 0%, #7b2fff 100%)', WebkitBackgroundClip: 'text' }}
                         >
-                            vende mientras dormis.
+                            cuando vos quieras.
                         </motion.span>
                     </h2>
 
@@ -131,7 +131,7 @@ export default function AiSection() {
                         className="mt-5 text-center"
                         style={{ fontSize: '16px', color: 'rgba(255,255,255,0.55)', maxWidth: '520px', lineHeight: 1.65 }}
                     >
-                        No es ciencia ficcion. Es lo que hace tu Sucursal Digital con IA integrada.
+                        Esto es opcional: una capa extra para escalar ventas, soporte y captacion sin tocar la base de tu web.
                     </motion.p>
                 </div>
 

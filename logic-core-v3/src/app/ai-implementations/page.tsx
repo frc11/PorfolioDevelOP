@@ -379,7 +379,7 @@ function LiveCaseChat({ variants, color, rgb }: { variants: CaseChatMessage[][],
     )
 }
 const CasosUsoIA = () => (
-    <section className="relative py-24 px-4 lg:px-8 overflow-hidden bg-[#080810]">
+    <section id="casos-ia" className="relative py-24 px-4 lg:px-8 overflow-hidden bg-[#080810]">
         <div
             aria-hidden="true"
             className="pointer-events-none absolute inset-0 z-0"
@@ -590,6 +590,36 @@ const CasosUsoIA = () => (
                     </motion.div>
                 ))}
             </div>
+
+            <motion.div
+                initial={{ opacity: 0, y: 16 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.55, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+                className="mt-12 flex flex-col items-center gap-3 text-center"
+            >
+                <motion.a
+                    href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '5493816223508'}?text=Hola%20develOP%2C%20quiero%20que%20mi%20negocio%20sea%20el%20proximo%20caso%20de%20IA`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    whileHover={{ y: -2, scale: 1.01 }}
+                    whileTap={{ scale: 0.985 }}
+                    className="inline-flex items-center justify-center rounded-full px-7 py-3 text-sm font-semibold tracking-wide"
+                    style={{
+                        color: '#34d399',
+                        border: '1px solid rgba(52,211,153,0.42)',
+                        background: 'rgba(52,211,153,0.07)',
+                        boxShadow: '0 12px 28px rgba(52,211,153,0.12)',
+                    }}
+                    aria-label="Tu negocio puede ser el proximo. Hablemos"
+                >
+                    Tu negocio puede ser el proximo. Hablemos -&gt;
+                </motion.a>
+
+                <p className="text-[11px] tracking-[0.05em] text-white/30">
+                    Diagnostico IA en 45 minutos · sin compromiso
+                </p>
+            </motion.div>
         </div>
         <style>{`
             @keyframes caseTyping {
@@ -597,6 +627,89 @@ const CasosUsoIA = () => (
                 50% { opacity: 1; transform: translateY(-2px); }
             }
         `}</style>
+    </section>
+)
+
+const CostAnchorIA = () => (
+    <section className="relative overflow-hidden bg-[#080810] px-4 py-24 lg:px-8">
+        <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0"
+            style={{ background: "radial-gradient(ellipse at 50% 0%, rgba(34,197,94,0.09) 0%, transparent 65%)" }}
+        />
+
+        <div className="relative z-10 mx-auto w-full max-w-6xl">
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+                className="mb-10 text-center"
+            >
+                <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-emerald-300/25 bg-emerald-300/10 px-4 py-1.5">
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-300 shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
+                    <span className="text-[10px] font-mono font-bold uppercase tracking-[0.22em] text-emerald-100/90">
+                        COSTO DE NO AUTOMATIZAR
+                    </span>
+                </div>
+
+                <h2 className="text-[clamp(30px,5vw,56px)] font-black leading-[0.95] tracking-[-0.05em]">
+                    <span className="block text-white">Atender WhatsApp a mano</span>
+                    <span className="block text-emerald-300">te cuesta todos los meses.</span>
+                </h2>
+            </motion.div>
+
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <motion.article
+                    initial={{ opacity: 0, y: 24 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.55, delay: 0.05, ease: [0.16, 1, 0.3, 1] }}
+                    className="rounded-[20px] border p-6 md:p-7"
+                    style={{
+                        borderColor: "rgba(148,163,184,0.28)",
+                        background: "linear-gradient(145deg, rgba(148,163,184,0.08), rgba(255,255,255,0.02))",
+                    }}
+                >
+                    <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.2em] text-white/50">Modelo tradicional</p>
+                    <h3 className="mb-2 text-2xl font-black text-white md:text-3xl">USD 450-700 / mes</h3>
+                    <p className="text-sm leading-7 text-white/58">
+                        Un perfil para responder consultas en horario comercial, mas supervision, ausencias y curva de entrenamiento.
+                    </p>
+                </motion.article>
+
+                <motion.article
+                    initial={{ opacity: 0, y: 24 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.55, delay: 0.12, ease: [0.16, 1, 0.3, 1] }}
+                    className="rounded-[20px] border p-6 md:p-7"
+                    style={{
+                        borderColor: "rgba(34,197,94,0.32)",
+                        background: "linear-gradient(145deg, rgba(34,197,94,0.14), rgba(255,255,255,0.02))",
+                    }}
+                >
+                    <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.2em] text-emerald-200/88">Implementacion IA develOP</p>
+                    <h3 className="mb-2 text-2xl font-black text-emerald-200 md:text-3xl">Desde USD 300 inicial</h3>
+                    <p className="text-sm leading-7 text-white/68">
+                        Setup base de agente IA para vender, calificar y responder 24/7. Pago inicial, con mantenimiento opcional.
+                    </p>
+                </motion.article>
+            </div>
+
+            <motion.div
+                initial={{ opacity: 0, y: 14 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.55, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                className="mt-8 rounded-[18px] border px-5 py-4 text-center"
+                style={{ borderColor: "rgba(34,197,94,0.24)", background: "rgba(34,197,94,0.08)" }}
+            >
+                <p className="m-0 text-sm leading-7 text-emerald-100/88 md:text-base">
+                    En muchos negocios, 1 mes de atencion manual ya cuesta mas que implementar IA.
+                </p>
+            </motion.div>
+        </div>
     </section>
 )
 
@@ -646,16 +759,16 @@ export default function AIImplementationsPage() {
             {/* 1. Hero */}
             <HeroIA />
 
-            {/* 2. Bento Grid */}
+            {/* 2. Live Chat Demo */}
             <SectionReveal>
-                <BentoIA />
+                <LiveChatIA />
             </SectionReveal>
 
             <SectionDivider />
 
-            {/* 3. Live Chat Demo */}
+            {/* 3. Bento Grid */}
             <SectionReveal delay={0.05}>
-                <LiveChatIA />
+                <BentoIA />
             </SectionReveal>
 
             <SectionDivider />
@@ -670,6 +783,13 @@ export default function AIImplementationsPage() {
             {/* 4b. Casos de uso reales */}
             <SectionReveal delay={0.05}>
                 <CasosUsoIA />
+            </SectionReveal>
+
+            <SectionDivider />
+
+            {/* 4c. Costo de no automatizar */}
+            <SectionReveal delay={0.05}>
+                <CostAnchorIA />
             </SectionReveal>
 
             <SectionDivider />

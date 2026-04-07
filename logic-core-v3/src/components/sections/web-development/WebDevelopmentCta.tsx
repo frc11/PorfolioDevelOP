@@ -142,6 +142,10 @@ export const WebDevelopmentCta = () => {
                                 Agendar Diagnóstico →
                             </MagneticButton>
 
+                            <div className="rounded-full border border-cyan-300/20 bg-cyan-300/[0.08] px-4 py-1.5 text-[12px] font-semibold tracking-[0.04em] text-cyan-100/90">
+                                Desde $800 USD · Cuotas disponibles
+                            </div>
+
                             <button
                                 className="inline-flex items-center gap-2 rounded-full border border-white/12 bg-transparent px-6 py-3 text-sm text-white/68 transition-all duration-200 hover:border-white/25 hover:text-white"
                                 onClick={() => {

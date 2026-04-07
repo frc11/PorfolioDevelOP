@@ -18,6 +18,7 @@ import ComparadorSection from '@/components/sections/web-development/ComparadorS
 import AiSection from '@/components/sections/web-development/AiSection'
 import PortfolioWebCases from '@/components/sections/web-development/PortfolioWebCases'
 import WebDevelopmentByRubro from '@/components/sections/web-development/WebDevelopmentByRubro'
+import { WebDevelopmentObjections } from '@/components/sections/web-development/WebDevelopmentObjections'
 import WebTemplatesImmersive from '@/components/sections/web-development/WebTemplatesImmersive'
 import { ChargeTraceButton } from '@/components/ui/buttons/ChargeTraceButton'
 
@@ -227,6 +228,31 @@ const CasosUsoWeb = () => (
                     )
                 })}
             </div>
+
+            <motion.div
+                initial={{ opacity: 0, y: 16 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.55, delay: 0.08, ease: [0.16, 1, 0.3, 1] }}
+                className="mt-12 flex justify-center"
+            >
+                <motion.button
+                    type="button"
+                    whileHover={{ y: -2, scale: 1.01 }}
+                    whileTap={{ scale: 0.985 }}
+                    onClick={() => document.getElementById('vault-section')?.scrollIntoView({ behavior: 'smooth' })}
+                    className="inline-flex items-center justify-center rounded-full px-7 py-3 text-sm font-semibold tracking-wide"
+                    style={{
+                        color: '#00e5ff',
+                        border: '1px solid rgba(0,229,255,0.42)',
+                        background: 'rgba(0,229,255,0.06)',
+                        boxShadow: '0 12px 28px rgba(0,229,255,0.12)',
+                    }}
+                    aria-label="¿Tu negocio es el siguiente? Hablemos"
+                >
+                    ¿Tu negocio es el siguiente? Hablemos →
+                </motion.button>
+            </motion.div>
         </div>
     </section>
 )
@@ -417,6 +443,12 @@ export default function WebDevelopmentPage() {
                 <CasosUsoWeb />
             </SectionReveal>
 
+            <SectionDivider color="violet" />
+
+            <SectionReveal delay={0.05}>
+                <WebDevelopmentObjections />
+            </SectionReveal>
+
             <SectionDivider />
 
             <SectionReveal delay={0.05}>
@@ -436,12 +468,6 @@ export default function WebDevelopmentPage() {
             </SectionReveal>
 
             <SectionDivider color="violet" />
-
-            <SectionReveal delay={0.05}>
-                <AiSection />
-            </SectionReveal>
-
-            <SectionDivider />
 
             <SectionReveal delay={0.05}>
                 <WebDevelopmentTimeline />
@@ -464,6 +490,14 @@ export default function WebDevelopmentPage() {
             <SectionReveal delay={0.05}>
                 <WebDevelopmentFaq />
             </SectionReveal>
+
+            <SectionDivider color="violet" />
+
+            <SectionReveal delay={0.05}>
+                <AiSection />
+            </SectionReveal>
+
+            <SectionDivider />
 
             <SectionReveal delay={0.05}>
                 <WebDevelopmentCta />

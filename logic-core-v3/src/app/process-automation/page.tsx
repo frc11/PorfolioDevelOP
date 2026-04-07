@@ -557,6 +557,36 @@ const CasosUsoAutomation = () => (
                     </motion.div>
                 ))}
             </div>
+
+            <motion.div
+                initial={{ opacity: 0, y: 16 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.55, delay: 0.08, ease: [0.16, 1, 0.3, 1] }}
+                className="mt-10 flex flex-col items-center gap-3 text-center"
+            >
+                <motion.a
+                    href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? '5493816223508'}?text=Hola%20develOP%2C%20quiero%20que%20mi%20empresa%20sea%20el%20proximo%20caso%20de%20automatizacion`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    whileHover={{ y: -2, scale: 1.01 }}
+                    whileTap={{ scale: 0.985 }}
+                    className="inline-flex items-center justify-center rounded-full px-7 py-3 text-sm font-semibold tracking-wide"
+                    style={{
+                        color: '#f59e0b',
+                        border: '1px solid rgba(245,158,11,0.42)',
+                        background: 'rgba(245,158,11,0.07)',
+                        boxShadow: '0 12px 28px rgba(245,158,11,0.14)',
+                    }}
+                    aria-label="Tu empresa puede ser el proximo caso. Hablemos"
+                >
+                    Tu empresa puede ser el proximo caso. Hablemos -&gt;
+                </motion.a>
+
+                <p className="text-[11px] tracking-[0.05em] text-white/30">
+                    Mapeo de procesos gratuito en 45 minutos · sin compromiso
+                </p>
+            </motion.div>
         </div>
     </section>
 )
@@ -632,13 +662,13 @@ export default function ProcessAutomationPage() {
 
             {/* Post-hero sections with staggered reveal animations */}
             <SectionReveal>
-                <CalculadoraAutomation />
+                <IntegracionesAutomation />
             </SectionReveal>
 
             <SectionDivider />
 
             <SectionReveal delay={0.05}>
-                <IntegracionesAutomation />
+                <CalculadoraAutomation />
             </SectionReveal>
 
             <SectionDivider />

@@ -571,7 +571,7 @@ export default function HeroAutomation() {
             fontWeight: 700,
             fontFamily: 'ui-monospace, monospace',
           }}>
-            TU EMPRESA, EN PILOTO AUTOMÁTICO
+            PROCESOS QUE CORREN SOLOS 24/7
           </span>
         </motion.div>
 
@@ -631,12 +631,13 @@ export default function HeroAutomation() {
             pointerEvents: 'none',
           }}
         >
-          Hacemos que WhatsApp, MercadoPago, AFIP y Excel se hablen solos.
-          <br/>
-          Tu equipo deja de copiar y pegar datos 
-          <span style={{ color: 'rgba(245,158,11,0.95)' }}>
-            y empieza a generar valor real.
+          Cada semana sin automatizar le cuesta a tu empresa{' '}
+          <span style={{ color: 'rgba(245,158,11,0.98)', fontWeight: 700 }}>
+            +12 horas de trabajo manual
           </span>
+          {' '}en tareas repetitivas que no facturan.
+          <br/>
+          Conectamos WhatsApp, MercadoPago, AFIP y Excel para que tu equipo deje de copiar y pegar datos y enfoque su tiempo en vender y operar mejor.
         </motion.p>
 
         {/* CTAAuto */}
