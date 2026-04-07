@@ -37,7 +37,7 @@ export function DashboardLayoutClient({
     .join('') || companyName.slice(0, 2).toUpperCase()
 
   return (
-    <div className="flex h-screen overflow-hidden bg-[#040506] text-zinc-100 selection:bg-cyan-500/30">
+    <div className="flex h-screen bg-[#040506] text-zinc-100 selection:bg-cyan-500/30">
       {/* Noise Texture */}
       <div
         className="pointer-events-none fixed inset-0 z-0 opacity-[0.015]"
@@ -100,7 +100,7 @@ export function DashboardLayoutClient({
       </AnimatePresence>
 
       {/* Main column */}
-      <div className="relative z-10 flex flex-1 flex-col overflow-hidden min-w-0">
+      <div className="relative z-10 flex flex-1 flex-col min-h-0 min-w-0 overflow-x-hidden">
         {banners}
 
         {/* Header */}
@@ -165,7 +165,7 @@ export function DashboardLayoutClient({
         </header>
 
         {/* Content */}
-        <main className="relative flex-1 overflow-x-hidden overflow-y-auto w-full p-3 sm:p-6 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
+        <main className="relative flex-1 min-h-0 overflow-x-hidden overflow-y-auto w-full p-3 sm:p-6 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
           <PageTransition>{children}</PageTransition>
         </main>
       </div>
