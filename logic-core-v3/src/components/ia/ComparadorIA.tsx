@@ -373,7 +373,7 @@ function ROISummary({ isInView }: { isInView: boolean }) {
                     ¿Cuánto ahorrás en tu negocio?
                 </p>
                 <motion.a
-                    href="#calculador"
+                    href="#cost-anchor"
                     whileHover={{ scale: 1.04 }}
                     whileTap={{ scale: 0.97 }}
                     transition={{ type: 'spring', stiffness: 400, damping: 15 }}

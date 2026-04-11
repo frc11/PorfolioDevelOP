@@ -90,7 +90,7 @@ export default function CtaIA() {
             </a>
 
             <a
-              href="#casos-ia"
+              href="#casos"
               className="inline-flex items-center gap-2 px-8 py-4 rounded-full font-bold text-sm transition-all duration-200 hover:scale-105"
               style={{
                 background: "rgba(255,255,255,0.05)",

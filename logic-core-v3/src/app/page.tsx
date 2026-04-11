@@ -12,8 +12,6 @@ import { About } from '@/components/sections/home/About'
 import { Portfolio } from '@/components/sections/home/Portfolio'
 import OurServices from '@/components/sections/home/OurServices';
 import { PortalDemo } from '@/components/sections/home/PortalDemo';
-
-
 import { InfiniteReviews } from '@/components/sections/home/InfiniteReviews'
 import { motion } from 'framer-motion'
 import { ThemeProvider, useTheme } from '@/hooks/useThemeObserver'

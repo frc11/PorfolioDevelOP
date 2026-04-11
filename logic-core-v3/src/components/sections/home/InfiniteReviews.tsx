@@ -91,38 +91,15 @@ const ActiveWord = ({ text, variant = 'solid' }: { text: string, variant?: 'soli
                     color: isSolid ? "transparent" : "#18181b", // transparent vs zinc-900
                     WebkitTextStroke: isSolid ? "1px #18181b" : "0px transparent" // black border vs none
                 }
-            } as any}
+            }}
         >
             {text}
         </motion.span>
     );
 };
 
-// Review Card Component
-const ReviewCard = ({ name, text }: { name: string; text: string }) => (
-    <motion.div
-        data-cursor="hover"
-        whileHover={{
-            scale: 1.05,
-            backgroundColor: "#18181b", // zinc-900
-            boxShadow: "0px 20px 40px rgba(0,0,0,0.2)",
-            borderColor: "#18181b"
-        }}
-        transition={{ type: "spring", stiffness: 400, damping: 25 }}
-        className="group flex flex-col gap-2 p-8 bg-white border border-zinc-100 shadow-sm rounded-none w-[400px] h-[200px] whitespace-normal shrink-0 justify-center cursor-none"
-    >
-        <motion.p
-            className="text-xl font-medium text-zinc-800 leading-snug group-hover:text-zinc-50 transition-colors duration-300"
-        >
-            "{text}"
-        </motion.p>
-        <motion.span
-            className="text-sm font-bold text-zinc-400 uppercase tracking-widest mt-4 group-hover:text-zinc-500 transition-colors duration-300"
-        >
-            {name}
-        </motion.span>
-    </motion.div>
-);
+// Review cards temporarily disabled
+// const ReviewCard = ({ name, text }: { name: string; text: string }) => (...)
 
 export const InfiniteReviewsDesktop = () => {
     return (
@@ -136,13 +113,15 @@ export const InfiniteReviewsDesktop = () => {
                 viewport={{ once: true, margin: "-15%" }}
                 transition={{ duration: 0.8, ease: "easeOut" }}
             >
-                {/* Marquee 1 - Left direction */}
+                {/* Marquee 1 (Reviews) disabled momentarily */}
+                {/*
                 <ParallaxText baseVelocity={-1}>
                     <ReviewCard name="TechCrunch" text="Redefining what a digital agency can deliver through sheer engineering excellence." />
                     <ReviewCard name="Awwwards" text="A masterclass in user experience, combining 3D depth with seamless interactions." />
                     <ReviewCard name="Forbes" text="The team behind the most scalable visual systems of 2024." />
                     <ReviewCard name="Wired" text="Where brutalist aesthetics meet sophisticated neural architecture." />
                 </ParallaxText>
+                */}
 
                 {/* Marquee 2 - Right direction (faster) - Mixed Variants */}
                 <ParallaxText baseVelocity={1.5}>
@@ -241,17 +220,8 @@ const MobileActiveWord = ({ text, variant = 'solid' }: { text: string, variant?:
     );
 };
 
-// Mobile Micro Review Card Component
-const MobileReviewCard = ({ name, text }: { name: string; text: string }) => (
-    <div className="flex flex-col gap-2 p-5 bg-white border border-zinc-200 shadow-md rounded-xl w-[280px] h-[160px] whitespace-normal justify-center shrink-0 mx-2">
-        <p className="text-sm font-medium text-zinc-800 leading-snug">
-            "{text}"
-        </p>
-        <span className="text-xs font-bold text-zinc-400 uppercase tracking-widest mt-2">
-            {name}
-        </span>
-    </div>
-);
+// Mobile review cards temporarily disabled
+// const MobileReviewCard = ({ name, text }: { name: string; text: string }) => (...)
 
 // Mobile Version: Triple Row Marquee
 const InfiniteReviewsMobile = () => {
@@ -273,13 +243,15 @@ const InfiniteReviewsMobile = () => {
                 transition={{ duration: 0.8, ease: "easeOut" }}
                 className="flex flex-col gap-2"
             >
-                {/* Track 1: Move Left (Cards) */}
+                {/* Track 1 (Reviews) disabled momentarily */}
+                {/*
                 <MobileParallaxText baseVelocity={-0.5}>
                     <MobileReviewCard name="TechCrunch" text="Redefining what a digital agency can deliver through sheer engineering excellence." />
                     <MobileReviewCard name="Awwwards" text="A masterclass in user experience, combining 3D depth with seamless interactions." />
                     <MobileReviewCard name="Forbes" text="The team behind the most scalable visual systems of 2024." />
                     <MobileReviewCard name="Wired" text="Where brutalist aesthetics meet sophisticated neural architecture." />
                 </MobileParallaxText>
+                */}
 
                 {/* Track 2: Move Right (Words) */}
                 <MobileParallaxText baseVelocity={1}>

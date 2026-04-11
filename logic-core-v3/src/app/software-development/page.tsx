@@ -5,7 +5,6 @@ import HeroSoftware from '@/components/software/HeroSoftware'
 import PainBentoSoftware from '@/components/software/PainBentoSoftware'
 import DiagnosticoSoftware from '@/components/software/DiagnosticoSoftware'
 import RoiSoftware from '@/components/software/RoiSoftware'
-import ProcesoSoftware from '@/components/software/ProcesoSoftware'
 import DashboardMockupSoftware from '@/components/software/DashboardMockupSoftware'
 import ArchitectureSoftware from '@/components/software/ArchitectureSoftware'
 import PipelineSoftware from '@/components/software/PipelineSoftware'
@@ -13,7 +12,6 @@ import StatementSoftware from '@/components/software/StatementSoftware'
 import SocialProofSoftware from '@/components/software/SocialProofSoftware'
 import FaqSoftware from '@/components/software/FaqSoftware'
 import { SoftwareDevelopmentCta } from '@/components/sections/software-development/SoftwareDevelopmentCta'
-import VaultSoftware from '@/components/software/VaultSoftware'
 
 // Section reveal with scroll-triggered fade + slide
 const SectionReveal = ({
@@ -83,13 +81,25 @@ export default function SoftwareDevelopmentPage() {
 
             {/* Post-hero sections with staggered reveal animations */}
             <SectionReveal>
-                <PainBentoSoftware />
+                <DashboardMockupSoftware />
             </SectionReveal>
 
             <SectionDivider />
 
             <SectionReveal delay={0.05}>
-                <DiagnosticoSoftware />
+                <ArchitectureSoftware />
+            </SectionReveal>
+
+            <SectionDivider />
+
+            <SectionReveal delay={0.05}>
+                <StatementSoftware />
+            </SectionReveal>
+
+            <SectionDivider />
+
+            <SectionReveal delay={0.05}>
+                <PainBentoSoftware />
             </SectionReveal>
 
             <SectionDivider />
@@ -101,19 +111,7 @@ export default function SoftwareDevelopmentPage() {
             <SectionDivider />
 
             <SectionReveal delay={0.05}>
-                <DashboardMockupSoftware />
-            </SectionReveal>
-
-            <SectionDivider />
-
-            <SectionReveal delay={0.05}>
-                <ProcesoSoftware />
-            </SectionReveal>
-
-            <SectionDivider />
-
-            <SectionReveal delay={0.05}>
-                <ArchitectureSoftware />
+                <DiagnosticoSoftware />
             </SectionReveal>
 
             <SectionDivider />
@@ -121,10 +119,6 @@ export default function SoftwareDevelopmentPage() {
             <PipelineSoftware />
 
             <SectionDivider />
-
-            <SectionReveal delay={0.05}>
-                <StatementSoftware />
-            </SectionReveal>
 
             <SectionReveal delay={0.05}>
                 <SocialProofSoftware />
@@ -138,7 +132,6 @@ export default function SoftwareDevelopmentPage() {
 
             <SectionDivider />
 
-            <VaultSoftware />
             <SectionReveal delay={0.05}>
                 <SoftwareDevelopmentCta />
             </SectionReveal>
