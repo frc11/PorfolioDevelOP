@@ -20,12 +20,12 @@ export function VideoClimax() {
                 style={{
                     position: 'absolute',
                     inset: 0,
-                    width: '112%',
-                    height: '112%',
+                    width: '120%',
+                    height: '120%',
                     objectFit: 'cover',
                     objectPosition: 'center 20%',
-                    marginLeft: '-6%',
-                    marginTop: '-6%',
+                    marginLeft: '-10%',
+                    marginTop: '-10%',
                     display: 'block',
                 }}
             />
@@ -43,22 +43,6 @@ export function VideoClimax() {
                 }}
             />
 
-            {/* Corner watermark gradient */}
-            <div
-                aria-hidden="true"
-                style={{
-                    position: 'absolute',
-                    bottom: 0,
-                    right: 0,
-                    width: '140px',
-                    height: '70px',
-                    zIndex: 10,
-                    background:
-                        'linear-gradient(135deg, transparent 0%, rgba(8,8,16,0.98) 55%, rgba(8,8,16,1) 100%)',
-                    pointerEvents: 'none',
-                }}
-            />
-
             {/* Badge */}
             <div
                 style={{
@@ -66,10 +50,8 @@ export function VideoClimax() {
                     bottom: '20px',
                     right: '20px',
                     zIndex: 20,
-                    background: 'rgba(0,0,0,0.8)',
-                    backdropFilter: 'blur(8px)',
-                    WebkitBackdropFilter: 'blur(8px)',
-                    border: '1px solid rgba(0,229,255,0.2)',
+                    background: '#0A0A0A',
+                    border: '1px solid rgba(255,255,255,0.1)',
                     borderRadius: '10px',
                     padding: '10px 16px',
                 }}

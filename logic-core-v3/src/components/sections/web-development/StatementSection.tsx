@@ -75,6 +75,26 @@ function StatementContent({ progress }: { progress: number }) {
         return `blur(${12 * (1 - t)}px)`
     }
 
+    function mixHexColor(from: string, to: string, t: number): string {
+        const clamped = Math.min(Math.max(t, 0), 1)
+        const f = from.replace('#', '')
+        const tt = to.replace('#', '')
+
+        const fr = parseInt(f.slice(0, 2), 16)
+        const fg = parseInt(f.slice(2, 4), 16)
+        const fb = parseInt(f.slice(4, 6), 16)
+
+        const tr = parseInt(tt.slice(0, 2), 16)
+        const tg = parseInt(tt.slice(2, 4), 16)
+        const tb = parseInt(tt.slice(4, 6), 16)
+
+        const r = Math.round(fr + (tr - fr) * clamped)
+        const g = Math.round(fg + (tg - fg) * clamped)
+        const b = Math.round(fb + (tb - fb) * clamped)
+
+        return `rgb(${r}, ${g}, ${b})`
+    }
+
     const words = [
         // Línea 1
         { text: 'El', s: 0.0, e: 0.06, color: 'white' },
@@ -106,40 +126,25 @@ function StatementContent({ progress }: { progress: number }) {
         const base: React.CSSProperties = {
             display: 'inline-block',
             marginRight: '0.22em',
-            opacity: op,
+            opacity: 0.24 + op * 0.76,
             filter: bl,
             transform: `translateY(${ty}px)`,
             transition: 'none',
             willChange: 'opacity, filter, transform',
         }
 
-        if (w.color === 'gradient') {
-            return (
-                <span key={i} style={{
-                    ...base,
-                    ...(w.text === 'convierte.' && op > 0.5 ? {
-                        filter: `${bl} drop-shadow(0 0 ${op * 20}px rgba(0,229,255,${op * 0.4}))`
-                    } : {})
-                }}>
-                    <span style={{
-                        background: 'linear-gradient(135deg, #00e5ff 0%, #7b2fff 100%)',
-                        WebkitBackgroundClip: 'text',
-                        WebkitTextFillColor: 'transparent',
-                        backgroundClip: 'text',
-                    }}>
-                        {w.text}
-                    </span>
-                </span>
-            )
-        }
+        const inactiveColor = '#3f3f46'
+        const activeColor =
+            w.color === 'cyan'
+                ? '#22d3ee'
+                : w.color === 'gradient'
+                    ? '#a78bfa'
+                    : '#ffffff'
 
         return (
             <span key={i} style={{
                 ...base,
-                color: w.color === 'cyan' ? '#00e5ff' : 'white',
-                ...(w.text === 'funciona.' && op > 0.7 ? {
-                    textShadow: `0 0 ${op * 40}px rgba(0,229,255,${op * 0.6})`
-                } : {}),
+                color: mixHexColor(inactiveColor, activeColor, op),
             }}>
                 {w.text}
             </span>
@@ -150,16 +155,6 @@ function StatementContent({ progress }: { progress: number }) {
         display: 'block',
         whiteSpace: 'nowrap',
     }
-
-    // Detectar línea activa
-    const activeLine =
-        revealProgress < 0.24 ? 1 :
-            revealProgress < 0.5 ? 2 : 3
-
-    // Color según línea activa
-    const glowColor = activeLine === 3
-        ? 'rgba(123,47,255,0.09)'
-        : 'rgba(0,229,255,0.07)'
 
     const badgeOpacity = Math.min(Math.max((revealProgress - 0.72) / 0.10, 0), 1)
     const badgeY = (1 - badgeOpacity) * 20
@@ -196,16 +191,16 @@ function StatementContent({ progress }: { progress: number }) {
                 opacity: scrollCueOpacity,
                 pointerEvents: 'none',
                 zIndex: 10,
-                padding: '10px 16px',
+                padding: '8px 14px',
                 borderRadius: '999px',
-                background: 'radial-gradient(ellipse at center, rgba(0,229,255,0.12) 0%, rgba(0,229,255,0.04) 45%, rgba(0,0,0,0) 80%)',
+                border: '1px solid rgba(255,255,255,0.10)',
+                background: 'rgba(0,0,0,0.22)',
             }}>
                 <span style={{
                     fontSize: '11px',
                     fontWeight: 800,
                     letterSpacing: '0.3em',
-                    color: 'rgba(232,248,255,0.92)',
-                    textShadow: '0 0 10px rgba(0,229,255,0.28)',
+                    color: 'rgba(228,228,231,0.88)',
                     textTransform: 'uppercase',
                 }}>
                     scrolleá
@@ -215,56 +210,14 @@ function StatementContent({ progress }: { progress: number }) {
                         <div key={i} style={{
                             width: '12px',
                             height: '12px',
-                            borderRight: '1.5px solid rgba(0,229,255,0.9)',
-                            borderBottom: '1.5px solid rgba(0,229,255,0.9)',
+                            borderRight: '1.5px solid rgba(228,228,231,0.75)',
+                            borderBottom: '1.5px solid rgba(228,228,231,0.75)',
                             transform: 'rotate(45deg)',
                             animation: `stmtChevron 1.4s ease-in-out ${i * 0.15}s infinite`,
-                            filter: 'drop-shadow(0 0 6px rgba(0,229,255,0.5))',
                         }} />
                     ))}
                 </div>
             </div>
-
-            {/* Ambient Side Lines */}
-            <div aria-hidden="true" style={{
-                position: 'absolute',
-                top: '15%',
-                bottom: '15%',
-                left: 'clamp(20px, 4vw, 60px)',
-                width: '1px',
-                background: 'linear-gradient(to bottom, transparent, rgba(0,229,255,0.15), transparent)',
-                opacity: Math.min(revealProgress * 5, 0.6),
-                pointerEvents: 'none',
-                zIndex: 0,
-            }} />
-            <div aria-hidden="true" style={{
-                position: 'absolute',
-                top: '15%',
-                bottom: '15%',
-                right: 'clamp(20px, 4vw, 60px)',
-                width: '1px',
-                background: 'linear-gradient(to bottom, transparent, rgba(0,229,255,0.15), transparent)',
-                opacity: Math.min(revealProgress * 5, 0.6),
-                pointerEvents: 'none',
-                zIndex: 0,
-            }} />
-
-            {/* Glow de fondo */}
-            <div style={{
-                position: 'absolute',
-                top: '50%', left: '50%',
-                transform: 'translate(-50%, -50%)',
-                width: '800px', height: '400px',
-                background: `radial-gradient(ellipse, 
-                    ${glowColor} 0%, 
-                    rgba(123,47,255,0.04) 40%, 
-                    transparent 70%)`,
-                filter: 'blur(100px)',
-                pointerEvents: 'none',
-                zIndex: 0,
-                opacity: Math.min(revealProgress * 4, 1),
-                transition: 'background 800ms ease',
-            }} />
 
             <h2 className="text-[clamp(28px,6vw,108px)] md:text-[clamp(40px,7.5vw,108px)]"
                 style={{
@@ -315,7 +268,7 @@ function StatementContent({ progress }: { progress: number }) {
                     height: '52px',
                     borderRadius: '14px',
                     background: '#ffffff',
-                    boxShadow: '0 0 24px rgba(255,255,255,0.18), 0 0 42px rgba(0,229,255,0.14)',
+                    border: '1px solid rgba(255,255,255,0.22)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',

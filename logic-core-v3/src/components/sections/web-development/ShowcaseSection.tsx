@@ -132,30 +132,10 @@ const duplicatedProjects = [...carouselProjects, ...carouselProjects]
 function ProjectCard({ project }: { project: CarouselProject }) {
     return (
         <div
-            className="group"
+            className="group min-w-[320px] max-w-[320px] shrink-0 overflow-hidden rounded-[14px] border border-white/10 bg-[#0A0A0F] transition-colors duration-300 hover:border-cyan-500/40 hover:bg-[#11131A]"
             style={{
-                minWidth: '320px',
-                maxWidth: '320px',
-                borderRadius: '14px',
-                overflow: 'hidden',
-                border: '1px solid rgba(255,255,255,0.07)',
-                background: 'rgba(255,255,255,0.02)',
-                flexShrink: 0,
-                transition: 'border-color 300ms, transform 300ms',
                 display: 'flex',
                 flexDirection: 'column',
-            }}
-            onMouseEnter={(e) => {
-                // Usamos un color con opacidad basado en el acento
-                // Asumiendo que project.accent es en formato hex #RRGGBB
-                e.currentTarget.style.borderColor = `${project.accent}40`
-                e.currentTarget.style.transform = 'translateY(-4px)'
-                e.currentTarget.style.boxShadow = '0 20px 40px rgba(0,0,0,0.4)'
-            }}
-            onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = 'rgba(255,255,255,0.07)'
-                e.currentTarget.style.transform = 'translateY(0)'
-                e.currentTarget.style.boxShadow = 'none'
             }}
         >
             {/* IMAGEN SUPERIOR */}
@@ -180,9 +160,7 @@ function ProjectCard({ project }: { project: CarouselProject }) {
                 <div style={{
                     position: 'absolute',
                     top: '10px', left: '10px',
-                    background: 'rgba(0,0,0,0.75)',
-                    backdropFilter: 'blur(8px)',
-                    WebkitBackdropFilter: 'blur(8px)',
+                    background: '#0A0A0F',
                     border: '1px solid rgba(255,255,255,0.1)',
                     borderRadius: '100px',
                     padding: '3px 10px',
@@ -246,7 +224,7 @@ function ProjectCard({ project }: { project: CarouselProject }) {
             <div style={{
                 height: '2px',
                 marginTop: 'auto',
-                background: `linear-gradient(90deg, ${project.accent}, transparent)`
+                background: project.accent
             }} />
         </div>
     )
@@ -377,41 +355,6 @@ export default function ShowcaseSection() {
     return (
         <section id="showcase-section" className="relative w-full bg-[#080810] py-32 px-4 overflow-hidden">
 
-            {/* ── GLOWS AMBIENTALES ── */}
-            {/* GLOW 1: Violet header */}
-            <div
-                className="absolute pointer-events-none z-0"
-                style={{
-                    top: '-100px', left: '50%', transform: 'translateX(-50%)',
-                    width: '700px', height: '400px',
-                    background: 'radial-gradient(ellipse, rgba(123,47,255,0.08) 0%, transparent 60%)',
-                    filter: 'blur(120px)'
-                }}
-                aria-hidden="true"
-            />
-            {/* GLOW 2: Cyan hero (left) */}
-            <div
-                className="absolute pointer-events-none z-0"
-                style={{
-                    top: '20%', left: '-80px',
-                    width: '500px', height: '500px',
-                    background: 'radial-gradient(circle, rgba(0,229,255,0.06) 0%, transparent 65%)',
-                    filter: 'blur(100px)'
-                }}
-                aria-hidden="true"
-            />
-            {/* GLOW 3: Violet carrusel (right) */}
-            <div
-                className="absolute pointer-events-none z-0"
-                style={{
-                    bottom: '15%', right: '-80px',
-                    width: '450px', height: '450px',
-                    background: 'radial-gradient(circle, rgba(123,47,255,0.06) 0%, transparent 65%)',
-                    filter: 'blur(90px)'
-                }}
-                aria-hidden="true"
-            />
-
             {/* CONTENIDO BASE */}
             <div className="max-w-[1440px] mx-auto relative z-10 w-full">
 
@@ -429,9 +372,9 @@ export default function ShowcaseSection() {
                             display: 'inline-block',
                             fontSize: '11px',
                             letterSpacing: '0.35em',
-                            color: '#00e5ff',
-                            background: 'rgba(0,229,255,0.08)',
-                            border: '1px solid rgba(0,229,255,0.2)',
+                            color: 'rgb(212 212 216)',
+                            background: 'rgba(255,255,255,0.05)',
+                            border: '1px solid rgba(255,255,255,0.1)',
                             borderRadius: '100px',
                             padding: '5px 14px',
                             marginBottom: '24px',
@@ -464,11 +407,7 @@ export default function ShowcaseSection() {
                                 display: 'block',
                                 fontSize: 'clamp(42px, 6vw, 80px)',
                                 fontWeight: 900,
-                                background: 'linear-gradient(135deg, #ffffff 0%, #00e5ff 50%, #7b2fff 100%)',
-                                WebkitBackgroundClip: 'text',
-                                backgroundClip: 'text',
-                                WebkitTextFillColor: 'transparent',
-                                color: 'transparent',
+                                color: '#22d3ee',
                             }}
                         >
                             construimos.
@@ -500,9 +439,10 @@ export default function ShowcaseSection() {
                     className="relative w-full flex flex-col group overflow-hidden"
                     style={{
                         borderRadius: '20px',
-                        border: '1px solid rgba(255,255,255,0.08)',
+                        border: '1px solid rgba(255,255,255,0.1)',
                         marginBottom: 'clamp(48px, 6vh, 80px)',
-                        background: '#0d0d1f',
+                        background: '#0A0A0F',
+                        boxShadow: '0 40px 90px rgba(0,0,0,0.8)',
                     }}
                 >
                     <div className="relative w-full" style={{ height: 'clamp(320px, 50vh, 600px)' }}>
@@ -612,10 +552,8 @@ export default function ShowcaseSection() {
                         <div className="hidden md:flex justify-end items-end h-full">
                             <motion.div
                                 style={{
-                                    background: 'rgba(0,0,0,0.7)',
-                                    backdropFilter: 'blur(12px)',
-                                    WebkitBackdropFilter: 'blur(12px)',
-                                    border: '1px solid rgba(0,229,255,0.2)',
+                                    background: '#0A0A0F',
+                                    border: '1px solid rgba(255,255,255,0.1)',
                                     borderRadius: '12px',
                                     padding: '16px 20px',
                                     textAlign: 'center',
@@ -624,14 +562,11 @@ export default function ShowcaseSection() {
                                     alignItems: 'center',
                                     gap: '8px'
                                 }}
-                                whileHover={{ scale: 1.05, borderColor: 'rgba(0,229,255,0.5)' }}
+                                whileHover={{ borderColor: 'rgba(255,255,255,0.2)' }}
                                 transition={{ duration: 0.2 }}
                             >
                                 <div className="flex items-center gap-2">
-                                    <span className="relative flex h-2 w-2">
-                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00e5ff] opacity-75"></span>
-                                        <span className="relative inline-flex rounded-full h-2 w-2 bg-[#00e5ff]"></span>
-                                    </span>
+                                    <span className="inline-flex h-2 w-2 rounded-full bg-cyan-400" />
                                     <span style={{
                                         fontSize: '9px',
                                         letterSpacing: '0.3em',

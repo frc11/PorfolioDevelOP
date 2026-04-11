@@ -91,7 +91,7 @@ function CaseVisual({
     return (
         <div
             ref={visualRef}
-            className="relative isolate w-full overflow-hidden rounded-[1.8rem] border border-white/[0.05] bg-[#050816] aspect-[4/3] sm:aspect-[16/9]"
+            className="relative isolate aspect-[4/3] w-full overflow-hidden rounded-[1.8rem] border border-zinc-800/80 bg-[#08080C] sm:aspect-[16/9]"
         >
             <motion.div
                 style={{ y }}
@@ -99,35 +99,22 @@ function CaseVisual({
                 transition={{ duration: 0.7, ease: 'easeOut' }}
                 className="absolute inset-0 rounded-[inherit]"
             >
-                <div
-                    className="absolute inset-0"
-                    style={{
-                        background: `linear-gradient(145deg, rgba(${item.accentRgb},0.34) 0%, rgba(8,12,28,0.18) 34%, rgba(8,12,28,0.82) 72%, rgba(${item.accentRgb},0.18) 100%)`,
-                    }}
-                />
-                <div
-                    className="absolute left-[12%] top-[14%] h-40 w-40 rounded-full blur-3xl"
-                    style={{ background: `radial-gradient(circle, rgba(${item.accentRgb},0.4) 0%, transparent 72%)` }}
-                />
-                <div
-                    className="absolute bottom-[12%] right-[10%] h-48 w-48 rounded-full blur-3xl"
-                    style={{ background: `radial-gradient(circle, rgba(${item.accentRgb},0.22) 0%, transparent 72%)` }}
-                />
+                <div className="absolute inset-0 bg-[#0B0D14]" />
 
                 <div className="absolute inset-0 p-4 md:p-6">
-                    <div className="h-full rounded-[1.45rem] border border-white/[0.06] bg-white/[0.03] p-3 md:p-4 backdrop-blur-xl">
+                    <div className="h-full rounded-[1.45rem] border border-zinc-800/80 bg-[#0F1118] p-3 md:p-4">
                         <div className="flex h-full min-h-0 flex-col">
                             <div className="mb-3 flex shrink-0 items-center gap-2">
                                 {['#ff5f57', '#febc2e', '#28c840'].map((color) => (
                                     <div key={color} className="h-2.5 w-2.5 rounded-full" style={{ background: color, opacity: 0.85 }} />
                                 ))}
-                                <div className="ml-auto rounded-full border border-white/[0.06] bg-black/20 px-3 py-1 text-[9px] uppercase tracking-[0.22em] text-white/30">
+                                <div className="ml-auto rounded-sm border border-white/10 bg-[#0A0A0F] px-3 py-1 text-[9px] uppercase tracking-[0.22em] text-zinc-400">
                                     {item.visualTitle}
                                 </div>
                             </div>
 
                             <div className="grid min-h-0 flex-1 grid-cols-[1.08fr_0.92fr] gap-3">
-                                <div className="flex min-h-0 flex-col rounded-[1.2rem] border border-white/[0.05] bg-black/20 p-3 md:p-4">
+                                <div className="flex min-h-0 flex-col rounded-[1.2rem] border border-white/10 bg-[#0A0A0F] p-3 md:p-4">
                                     <div className="text-[9px] uppercase tracking-[0.2em] text-white/35 md:text-[10px] md:tracking-[0.22em]">{item.industry}</div>
                                     <div className="mt-2 text-3xl md:mt-3 md:text-4xl">{item.icon}</div>
                                     <div className="mt-3 max-w-[13rem] text-[clamp(1.1rem,5.2vw,1.75rem)] font-black leading-[0.95] tracking-[-0.04em] text-white md:hidden">
@@ -138,7 +125,7 @@ function CaseVisual({
                                         {item.visualStats.map((stat) => (
                                             <span
                                                 key={stat}
-                                                className="rounded-full border border-white/[0.06] bg-white/[0.04] px-2.5 py-1 text-[9px] uppercase tracking-[0.18em] text-white/45 md:px-3 md:py-1.5 md:text-[10px] md:tracking-[0.22em]"
+                                                className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[9px] uppercase tracking-[0.18em] text-zinc-300 md:px-3 md:py-1.5 md:text-[10px] md:tracking-[0.22em]"
                                             >
                                                 {stat}
                                             </span>
@@ -152,7 +139,7 @@ function CaseVisual({
                                         return (
                                             <div
                                                 key={metric.label}
-                                                className="min-h-0 overflow-hidden rounded-[1.05rem] border border-white/[0.05] bg-white/[0.03] p-2.5 md:p-3"
+                                                className="min-h-0 overflow-hidden rounded-[1.05rem] border border-white/10 bg-white/5 p-2.5 md:p-3"
                                             >
                                                 <div className="truncate text-[7px] uppercase tracking-[0.14em] text-white/30 md:text-[10px] md:tracking-[0.22em]">{metric.label}</div>
                                                 <div
@@ -177,7 +164,7 @@ function CaseVisual({
             <motion.div
                 animate={isHovered ? { opacity: 0.26 } : { opacity: 0.48 }}
                 transition={{ duration: 0.7, ease }}
-                className="pointer-events-none absolute inset-0 rounded-[inherit] bg-[linear-gradient(180deg,rgba(2,6,23,0.12)_0%,rgba(2,6,23,0.3)_38%,rgba(2,6,23,0.72)_100%)]"
+                className="pointer-events-none absolute inset-0 rounded-[inherit] bg-black"
             />
         </div>
     )
@@ -218,14 +205,13 @@ function CaseCard({
             onHoverEnd={handleEnd}
             onPointerEnter={handleStart}
             onPointerLeave={handleEnd}
-            className="group relative overflow-hidden rounded-[2rem] border border-white/[0.05] bg-white/[0.02] p-4 backdrop-blur-xl"
+            className="group relative overflow-hidden rounded-[2rem] border border-white/10 bg-[#070709] p-4 transition-colors duration-300"
             style={{
-                boxShadow: `0 24px 80px rgba(0,0,0,0.34), 0 0 0 1px rgba(${item.accentRgb},0.05)`,
+                borderColor: isHovered ? `rgba(${item.accentRgb},0.3)` : 'rgba(255,255,255,0.1)',
+                backgroundColor: isHovered ? '#0A0A0F' : '#070709',
                 cursor: 'none',
             }}
         >
-            <div className="absolute inset-x-0 top-0 h-px bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.34),transparent)]" />
-
             <div className="grid gap-5 lg:grid-cols-[1.12fr_0.88fr] lg:gap-8">
                 <div className="relative overflow-hidden rounded-[1.85rem]">
                     <CaseVisual item={item} isHovered={isHovered} />
@@ -252,14 +238,7 @@ function CaseCard({
 
                 <div className="flex flex-col justify-between p-3 md:p-4">
                     <div>
-                        <div
-                            className="mb-5 inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-[10px] uppercase tracking-[0.22em]"
-                            style={{
-                                borderColor: `rgba(${item.accentRgb},0.2)`,
-                                background: `rgba(${item.accentRgb},0.08)`,
-                                color: item.accentColor,
-                            }}
-                        >
+                        <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-[10px] uppercase tracking-[0.22em] text-zinc-300">
                             <span>{item.icon}</span>
                             Caso real
                         </div>
@@ -272,7 +251,7 @@ function CaseCard({
                             {item.tech.map((tech) => (
                                 <span
                                     key={tech}
-                                    className="rounded-full border border-white/[0.06] bg-white/[0.03] px-3 py-2 text-[10px] uppercase tracking-[0.2em] text-white/42"
+                                    className="rounded-full border border-white/10 bg-white/5 px-3 py-2 text-[10px] uppercase tracking-[0.2em] text-zinc-300"
                                 >
                                     {tech}
                                 </span>
@@ -284,9 +263,9 @@ function CaseCard({
                         {item.metrics.map((metric) => (
                             <div
                                 key={metric.label}
-                                className="flex items-center justify-between rounded-[1.3rem] border border-white/[0.05] bg-white/[0.03] px-4 py-4"
+                                className="flex items-center justify-between rounded-[1.3rem] border border-white/10 bg-white/5 px-4 py-4"
                             >
-                                <div className="text-sm text-white/42">{metric.label}</div>
+                                <div className="text-sm text-zinc-400">{metric.label}</div>
                                 <div className="text-right text-xl font-black tracking-[-0.04em]" style={{ color: item.accentColor }}>
                                     {metric.value}
                                 </div>
@@ -324,22 +303,6 @@ export default function PortfolioWebCases() {
             className="relative w-full overflow-hidden bg-[#030014] px-6 py-20 md:px-12 md:py-32"
             style={{ cursor: 'none' }}
         >
-            <style>{`
-                @keyframes float {
-                    0%, 100% { transform: translateY(0px); }
-                    50% { transform: translateY(-7px); }
-                }
-            `}</style>
-
-            <div
-                aria-hidden="true"
-                className="pointer-events-none absolute left-1/2 top-0 z-0 h-[32rem] w-[58rem] -translate-x-1/2"
-                style={{
-                    background: 'radial-gradient(ellipse, rgba(0,229,255,0.06) 0%, rgba(123,47,255,0.04) 48%, transparent 72%)',
-                    filter: 'blur(90px)',
-                }}
-            />
-
             {!reducedMotion && (
                 <motion.div
                     aria-hidden="true"
@@ -348,7 +311,7 @@ export default function PortfolioWebCases() {
                     className="pointer-events-none absolute left-0 top-0 z-30 hidden md:block"
                     style={{ x: springX, y: springY }}
                 >
-                    <div className="-translate-x-1/2 -translate-y-1/2 rounded-full border border-white/10 bg-white/[0.08] px-5 py-3 text-[11px] font-semibold uppercase tracking-[0.28em] text-white backdrop-blur-xl shadow-[0_0_30px_rgba(0,229,255,0.12)]">
+                    <div className="-translate-x-1/2 -translate-y-1/2 rounded-full border border-white/10 bg-[#0A0A0F] px-5 py-3 text-[11px] font-semibold uppercase tracking-[0.28em] text-zinc-200">
                         Ver Proyecto
                     </div>
                 </motion.div>
@@ -361,8 +324,8 @@ export default function PortfolioWebCases() {
                     transition={{ duration: 0.6, ease }}
                     className="mb-14 text-center"
                 >
-                    <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-cyan-300/20 bg-cyan-300/10 px-4 py-1.5">
-                        <span className="text-[10px] font-mono font-bold uppercase tracking-[0.2em] text-cyan-400">
+                    <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5">
+                        <span className="text-[10px] font-mono font-bold uppercase tracking-[0.2em] text-zinc-400">
                             [ Casos de éxito ]
                         </span>
                     </div>
@@ -395,8 +358,8 @@ export default function PortfolioWebCases() {
                 >
                     ¿Tu negocio podría ser el próximo caso?{' '}
                     <span
-                        className="cursor-none text-cyan-400/60 transition-colors hover:text-cyan-400"
-                        onClick={() => document.getElementById('vault-section')?.scrollIntoView({ behavior: 'smooth' })}
+                        className="cursor-none text-zinc-300 transition-colors hover:text-cyan-300"
+                        onClick={() => document.getElementById('pricing-section')?.scrollIntoView({ behavior: 'smooth' })}
                     >
                         Conversemos →
                     </span>

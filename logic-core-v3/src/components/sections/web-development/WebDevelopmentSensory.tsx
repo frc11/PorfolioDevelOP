@@ -1,6 +1,6 @@
 "use client"
-import React, { useRef, useState } from 'react'
-import { motion, AnimatePresence, useInView, useReducedMotion } from 'framer-motion'
+import React, { useRef } from 'react'
+import { motion, useInView, useReducedMotion } from 'framer-motion'
 
 const microStats = [
     { value: '3s', label: 'para cautivar' },
@@ -16,32 +16,8 @@ export const WebDevelopmentSensory = () => {
     const prefersReduced = useReducedMotion()
     const shouldReveal = prefersReduced || isInView
 
-    const [isHoveringVideo, setIsHoveringVideo] = useState(false)
-    const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
-
-    const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-        const rect = e.currentTarget.getBoundingClientRect()
-        setMousePosition({
-            x: e.clientX - rect.left,
-            y: e.clientY - rect.top,
-        })
-    }
-
     return (
-        <section ref={sectionRef} className="py-24 relative z-10 w-full bg-transparent overflow-hidden">
-
-            {/* Glow ambiental */}
-            <div
-                aria-hidden="true"
-                className="absolute pointer-events-none"
-                style={{
-                    top: '-50px', right: '-50px',
-                    width: '500px', height: '500px',
-                    background: 'radial-gradient(circle, rgba(0,229,255,0.06) 0%, transparent 65%)',
-                    filter: 'blur(80px)',
-                    zIndex: 0,
-                }}
-            />
+        <section ref={sectionRef} className="py-24 relative z-10 w-full bg-[#030014] overflow-hidden">
 
             <div className="max-w-7xl mx-auto px-4 relative z-10">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-center">
@@ -58,9 +34,9 @@ export const WebDevelopmentSensory = () => {
                             style={{
                                 fontSize: '11px',
                                 letterSpacing: '0.35em',
-                                color: '#00e5ff',
-                                background: 'rgba(0,229,255,0.08)',
-                                border: '1px solid rgba(0,229,255,0.2)',
+                                color: 'rgba(255,255,255,0.72)',
+                                background: 'rgba(255,255,255,0.03)',
+                                border: '1px solid rgba(255,255,255,0.1)',
                                 borderRadius: '100px',
                                 padding: '5px 14px',
                                 alignSelf: 'flex-start',
@@ -87,12 +63,12 @@ export const WebDevelopmentSensory = () => {
                             </motion.div>
                         </h2>
 
-                        {/* Línea de acento degradada */}
+                        {/* Línea de acento */}
                         <div
                             style={{
                                 width: 'clamp(40px, 8%, 60px)',
-                                height: '3px',
-                                background: 'linear-gradient(90deg, #00e5ff, #7b2fff)',
+                                height: '2px',
+                                background: 'rgba(255,255,255,0.16)',
                                 borderRadius: '100px',
                                 margin: '16px 0 24px',
                             }}
@@ -141,48 +117,22 @@ export const WebDevelopmentSensory = () => {
                         transition={{ duration: prefersReduced ? 0 : 0.8, delay: prefersReduced ? 0 : 0.2, ease }}
                         className="relative w-full max-w-2xl mx-auto lg:mx-0 flex justify-center lg:justify-end"
                     >
-                        <div
-                            className={`relative w-full transition-all duration-300 ${isHoveringVideo ? 'cursor-none' : ''}`}
-                            onMouseEnter={() => setIsHoveringVideo(true)}
-                            onMouseLeave={() => setIsHoveringVideo(false)}
-                            onMouseMove={handleMouseMove}
-                        >
-                            {/* Crystal cursor */}
-                            <AnimatePresence>
-                                {isHoveringVideo && (
-                                    <motion.div
-                                        initial={{ opacity: 0, scale: 0.5 }}
-                                        animate={{ opacity: 1, scale: 1 }}
-                                        exit={{ opacity: 0, scale: 0.5 }}
-                                        transition={{ duration: 0.15 }}
-                                        className="pointer-events-none absolute z-50 w-20 h-20 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white font-bold text-xs uppercase flex items-center justify-center shadow-lg"
-                                        style={{ left: mousePosition.x, top: mousePosition.y, x: "-50%", y: "-50%" }}
-                                    >
-                                        PLAY
-                                    </motion.div>
-                                )}
-                            </AnimatePresence>
-
+                        <div className="relative w-full transition-all duration-300">
                             {/* Premium Video Capsule — no device frame */}
-                            <div
-                                className="w-full relative overflow-hidden pointer-events-none"
-                                style={{
-                                    borderRadius: '16px',
-                                    border: '1px solid rgba(255,255,255,0.1)',
-                                    boxShadow: '0 0 0 1px rgba(0,229,255,0.08), 0 24px 60px rgba(0,0,0,0.6), 0 0 60px rgba(0,229,255,0.05)',
-                                    position: 'relative',
-                                }}
-                            >
+                            <div className="relative w-full overflow-hidden pointer-events-none rounded-2xl border border-white/10 bg-[#0A0A0A] aspect-[16/9]">
                                 {/* Video — 112% scale crop to push watermark out of visible area */}
                                 <video
-                                    autoPlay loop muted playsInline
+                                    autoPlay
+                                    loop
+                                    muted
+                                    playsInline
                                     style={{
-                                        width: '112%',
-                                        height: '112%',
+                                        width: '124%',
+                                        height: '124%',
                                         objectFit: 'cover',
                                         objectPosition: 'center center',
-                                        marginLeft: '-6%',
-                                        marginTop: '-6%',
+                                        marginLeft: '0%',
+                                        marginTop: '-12%',
                                         display: 'block',
                                     }}
                                     src="/video/Male_business_owner_opens_laptop_delpmaspu_.mp4"
@@ -194,25 +144,8 @@ export const WebDevelopmentSensory = () => {
                                     className="absolute inset-0 pointer-events-none"
                                     style={{ background: 'linear-gradient(to top, rgba(8,8,16,0.4) 0%, transparent 40%)' }}
                                 />
-                                {/* Overlay cyan sutil */}
-                                <div
-                                    aria-hidden="true"
-                                    className="absolute inset-0 pointer-events-none"
-                                    style={{ background: 'rgba(0,229,255,0.03)' }}
-                                />
-                                {/* Watermark kill — corner gradient (120×60) */}
-                                <div
-                                    aria-hidden="true"
-                                    className="absolute pointer-events-none"
-                                    style={{
-                                        bottom: 0, right: 0,
-                                        width: '120px', height: '60px',
-                                        background: 'linear-gradient(135deg, transparent 0%, rgba(8,8,16,0.98) 55%, rgba(8,8,16,1) 100%)',
-                                        zIndex: 10,
-                                    }}
-                                />
 
-                                {/* Badge "0.05 segundos" — z-index 20 (over watermark overlay) */}
+                                {/* Badge "0.05 segundos" */}
                                 <motion.div
                                     initial={{ opacity: 0, y: 8 }}
                                     animate={shouldReveal ? { opacity: 1, y: 0 } : { opacity: 0, y: 8 }}
@@ -220,9 +153,7 @@ export const WebDevelopmentSensory = () => {
                                     className="absolute pointer-events-none"
                                     style={{
                                         bottom: '16px', left: '16px', zIndex: 20,
-                                        background: 'rgba(0,0,0,0.7)',
-                                        backdropFilter: 'blur(8px)',
-                                        WebkitBackdropFilter: 'blur(8px)',
+                                        background: '#0A0A0A',
                                         border: '1px solid rgba(255,255,255,0.1)',
                                         borderRadius: '8px',
                                         padding: '8px 12px',
@@ -244,3 +175,4 @@ export const WebDevelopmentSensory = () => {
         </section>
     )
 }
+

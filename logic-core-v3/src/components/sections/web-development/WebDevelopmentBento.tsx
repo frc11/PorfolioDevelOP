@@ -13,8 +13,7 @@ import { VideoCard } from "@/components/ui/VideoCard"
 
 const ease = [0.16, 1, 0.3, 1] as const
 
-const floatingIconClass =
-    "animate-[float_3s_ease-in-out_infinite] text-white/80 drop-shadow-[0_0_24px_rgba(94,234,212,0.15)]"
+const floatingIconClass = "text-white/80 drop-shadow-[0_0_24px_rgba(94,234,212,0.15)]"
 const glassCardClass =
     "relative overflow-hidden rounded-[2rem] border border-white/[0.05] bg-white/[0.02] backdrop-blur-xl shadow-[0_24px_80px_rgba(0,0,0,0.38)]"
 
@@ -176,10 +175,6 @@ export const WebDevelopmentBento = () => {
     return (
         <section ref={sectionRef} className="relative z-10 w-full overflow-hidden bg-transparent px-4 py-24">
             <style>{`
-                @keyframes float {
-                    0%, 100% { transform: translateY(0px); }
-                    50% { transform: translateY(-7px); }
-                }
                 @keyframes bounce-chevron-bento {
                     0%, 100% { transform: translateY(0px); }
                     50% { transform: translateY(8px); }
