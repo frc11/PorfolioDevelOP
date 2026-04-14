@@ -19,16 +19,26 @@ export function SmoothScroll({ children }: SmoothScrollProps) {
     const [lenisInstance, setLenisInstance] = useState<Lenis | null>(null);
 
     useEffect(() => {
+        const isTouchLikeDevice = window.matchMedia('(hover: none), (pointer: coarse)').matches;
+
+        // Keep native scroll physics on touch devices to avoid section jump/bounce artifacts.
+        if (isTouchLikeDevice) {
+            return;
+        }
+
         const lenis = new Lenis({
             duration: 1.5,
             easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
             orientation: 'vertical',
             gestureOrientation: 'vertical',
             smoothWheel: true,
+            syncTouch: false,
             wheelMultiplier: 1,
-            touchMultiplier: 2,
+            touchMultiplier: 1,
+            overscroll: false,
         });
 
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setLenisInstance(lenis);
 
         function raf(time: number) {

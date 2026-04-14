@@ -1,8 +1,8 @@
 "use client"
 
-import React, { useRef } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import dynamic from 'next/dynamic'
-import { motion, useScroll, useTransform } from 'framer-motion'
+import { motion, useReducedMotion, useScroll, useTransform } from 'framer-motion'
 import HeroMetrics from '@/components/ui/HeroMetrics'
 import { WebDevelopmentBento } from '@/components/sections/web-development/WebDevelopmentBento'
 import { WebDevelopmentFaq } from '@/components/sections/web-development/WebDevelopmentFaq'
@@ -58,9 +58,29 @@ const SectionDivider = ({ color = 'cyan' }: { color?: 'cyan' | 'violet' }) => {
 
 export default function WebDevelopmentPage() {
     const heroRef = useRef<HTMLDivElement>(null)
+    const shouldReduceMotion = useReducedMotion()
+    const [isTabletOrBelow, setIsTabletOrBelow] = useState(false)
     const { scrollYProgress } = useScroll({ target: heroRef, offset: ['start start', 'end start'] })
     const opacity = useTransform(scrollYProgress, [0, 1], [1, 0])
     const scale = useTransform(scrollYProgress, [0, 1], [1, 0.965])
+    const heroOpacity = shouldReduceMotion || isTabletOrBelow ? 1 : opacity
+    const heroScale = shouldReduceMotion || isTabletOrBelow ? 1 : scale
+
+    useEffect(() => {
+        if (typeof window === 'undefined') return
+
+        const mediaQuery = window.matchMedia('(max-width: 1024px)')
+        const syncViewport = () => setIsTabletOrBelow(mediaQuery.matches)
+        syncViewport()
+
+        if (typeof mediaQuery.addEventListener === 'function') {
+            mediaQuery.addEventListener('change', syncViewport)
+            return () => mediaQuery.removeEventListener('change', syncViewport)
+        }
+
+        mediaQuery.addListener(syncViewport)
+        return () => mediaQuery.removeListener(syncViewport)
+    }, [])
 
     return (
         <main className="relative min-h-screen w-full overflow-x-clip overflow-y-visible bg-[#020611] text-white">
@@ -79,10 +99,10 @@ export default function WebDevelopmentPage() {
             </div>
 
             <motion.div
-                style={{ opacity, scale }}
+                style={{ opacity: heroOpacity, scale: heroScale }}
                 className="relative z-10 mx-auto flex min-h-screen w-full max-w-[1920px] flex-col items-center justify-center px-4 pb-10 pt-24 lg:grid lg:grid-cols-[minmax(0,70%)_1px_minmax(0,30%)] lg:items-center lg:gap-8 lg:px-10 lg:pb-0 lg:pt-0"
             >
-                <div className="pointer-events-none absolute inset-x-4 inset-y-[6vh] rounded-[30px] border border-white/8 bg-[linear-gradient(180deg,rgba(6,12,24,0.66)_0%,rgba(5,10,20,0.78)_100%)] shadow-[0_30px_80px_rgba(0,0,0,0.26)] backdrop-blur-[5px] lg:inset-x-10 lg:inset-y-[7vh]" />
+                <div className="pointer-events-none absolute inset-x-4 inset-y-[6vh] rounded-[30px] border border-white/8 bg-[linear-gradient(180deg,rgba(6,12,24,0.66)_0%,rgba(5,10,20,0.78)_100%)] shadow-[0_20px_56px_rgba(0,0,0,0.24)] lg:inset-x-10 lg:inset-y-[7vh]" />
 
                 <motion.div
                     initial={{ x: -40, opacity: 0 }}
@@ -121,17 +141,52 @@ export default function WebDevelopmentPage() {
 
                     <div className="pointer-events-none absolute left-1/2 top-[30%] z-0 h-[28%] w-[58%] -translate-x-1/2 bg-cyan-400/10 blur-[130px] lg:left-0 lg:w-[40%] lg:translate-x-0" />
 
-                    <div className="relative z-10 w-full max-w-[1120px]">
-                        <h1 className="text-center text-[12.8vw] font-black uppercase leading-[0.88] tracking-[-0.055em] lg:text-left lg:text-[6.1vw] xl:text-[5.9vw] 2xl:text-[5.6vw]">
-                            <span className="block bg-gradient-to-r from-white via-zinc-100 to-cyan-200 bg-clip-text text-transparent lg:whitespace-nowrap">
+                    <motion.div
+                        initial={{ opacity: 0, y: 24 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.34, duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+                        className="relative z-10 w-full max-w-[1120px]"
+                    >
+                        <motion.h1
+                            animate={
+                                shouldReduceMotion
+                                    ? { x: 0, y: 0 }
+                                    : { x: [0, 0.35, 0, -0.35, 0], y: [0, -0.7, 0, 0.7, 0] }
+                            }
+                            transition={
+                                shouldReduceMotion
+                                    ? { duration: 0 }
+                                    : { duration: 4.9, repeat: Infinity, ease: 'easeInOut' }
+                            }
+                            className="text-center text-[12.8vw] font-black uppercase leading-[0.88] tracking-[-0.055em] lg:text-left lg:text-[min(5.5vw,4.95rem)] xl:text-[min(5.1vw,5.45rem)] 2xl:text-[min(4.8vw,5.95rem)]"
+                        >
+                            <span
+                                className="block text-balance bg-gradient-to-r from-white via-zinc-100 to-cyan-200 bg-clip-text text-transparent"
+                                style={{
+                                    backgroundSize: '220% 100%',
+                                    animation: shouldReduceMotion ? 'none' : 'heroWebShift 6.6s ease-in-out infinite',
+                                }}
+                            >
                                 Tu negocio, abierto
                             </span>
-                            <span className="block bg-gradient-to-r from-cyan-300 via-cyan-400 to-sky-300 bg-clip-text text-transparent">
+                            <span
+                                className="block bg-gradient-to-r from-cyan-300 via-cyan-400 to-sky-300 bg-clip-text text-transparent"
+                                style={{
+                                    backgroundSize: '240% 100%',
+                                    animation: shouldReduceMotion ? 'none' : 'heroWebShift 5.4s ease-in-out infinite, heroWebGlow 3.6s ease-in-out infinite',
+                                }}
+                            >
                                 Las 24 horas
-                                <span className="ml-[0.06em] inline-block text-cyan-300 [text-shadow:0_0_16px_rgba(34,211,238,0.78)]">.</span>
+                                <motion.span
+                                    className="ml-[0.06em] inline-block text-cyan-300 [text-shadow:0_0_16px_rgba(34,211,238,0.78)]"
+                                    animate={shouldReduceMotion ? { opacity: 1, scale: 1 } : { opacity: [0.82, 1, 0.82], scale: [1, 1.06, 1] }}
+                                    transition={shouldReduceMotion ? { duration: 0 } : { duration: 2.2, repeat: Infinity, ease: 'easeInOut' }}
+                                >
+                                    .
+                                </motion.span>
                             </span>
-                        </h1>
-                    </div>
+                        </motion.h1>
+                    </motion.div>
 
                     <p className="mt-6 max-w-[540px] px-4 text-base font-medium leading-relaxed tracking-wide text-zinc-100/92 drop-shadow-[0_2px_14px_rgba(0,0,0,0.85)] md:text-lg lg:mt-8 lg:px-0">
                         Transformamos tu Instagram y WhatsApp en un ecosistema que atrae clientes, cotiza y vende solo.
@@ -183,21 +238,21 @@ export default function WebDevelopmentPage() {
 
             <SectionDivider color="violet" />
 
-            <WebTemplatesImmersive />
-
-            <StatementSection />
-
-            <SectionDivider color="violet" />
-
             <SectionReveal delay={0.05}>
                 <Portfolio />
             </SectionReveal>
 
             <SectionDivider />
 
-            <SectionReveal delay={0.05}>
-                <WebDevelopmentSeo />
-            </SectionReveal>
+            <WebTemplatesImmersive />
+
+            <SectionDivider color="violet" />
+
+            <StatementSection />
+
+            <SectionDivider />
+
+            <WebDevelopmentSeo />
 
             <SectionDivider color="violet" />
 
@@ -219,9 +274,22 @@ export default function WebDevelopmentPage() {
 
             <SectionDivider color="violet" />
 
-            <SectionReveal delay={0.05}>
-                <WebDevelopmentCta />
-            </SectionReveal>
+            <WebDevelopmentCta />
+
+            <style>{`
+                @keyframes heroWebShift {
+                    0%, 100% { background-position: 0% 50%; }
+                    50% { background-position: 100% 50%; }
+                }
+                @keyframes heroWebGlow {
+                    0%, 100% {
+                        filter: drop-shadow(0 0 10px rgba(34,211,238,0.22)) drop-shadow(0 0 24px rgba(34,211,238,0.16));
+                    }
+                    50% {
+                        filter: drop-shadow(0 0 18px rgba(34,211,238,0.38)) drop-shadow(0 0 40px rgba(34,211,238,0.24));
+                    }
+                }
+            `}</style>
         </main>
     )
 }

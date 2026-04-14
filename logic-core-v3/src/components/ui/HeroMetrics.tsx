@@ -68,6 +68,7 @@ export default function HeroMetrics() {
     const resumeAfterRef = useRef(0);
     const lastAutoSetRef = useRef(0);
     const [isMobile, setIsMobile] = useState(false);
+    const prefersReducedMotion = useReducedMotion();
 
     const metricsToRender = useMemo(
         () => (isMobile ? [...METRICS, ...METRICS] : METRICS),
@@ -205,7 +206,7 @@ export default function HeroMetrics() {
             variants={containerVariants}
             initial="hidden"
             animate="visible"
-            className="hide-scrollbar flex w-full flex-row justify-start overflow-x-auto px-4 pb-4 md:w-full md:flex-col md:items-start md:overflow-visible md:px-0 md:pb-0"
+            className="hide-scrollbar flex w-full flex-row justify-start overflow-x-auto px-4 pb-4 md:w-full md:flex-col md:items-start md:overflow-visible md:px-4 md:pb-0 lg:px-0"
         >
             <div ref={contentRef} className="flex flex-row gap-4 md:w-full md:flex-col">
                 {metricsToRender.map((metric, index) => {
@@ -216,19 +217,47 @@ export default function HeroMetrics() {
                         <motion.div
                             key={`${metric.label}-${metric.suffix}-${index}`}
                             variants={itemVariants}
-                            className="flex max-w-[300px] flex-shrink-0 flex-col items-start justify-center rounded-[26px] border border-white/12 bg-[linear-gradient(180deg,rgba(10,16,28,0.84)_0%,rgba(6,10,18,0.92)_100%)] p-6 shadow-[0_18px_44px_rgba(0,0,0,0.32)] backdrop-blur-xl md:w-full md:max-w-none"
+                            whileHover={
+                                prefersReducedMotion
+                                    ? {}
+                                    : {
+                                        y: -4,
+                                        scale: 1.012,
+                                        borderColor: "rgba(103,232,249,0.44)",
+                                        boxShadow:
+                                            "0 0 0 1px rgba(34,211,238,0.24), 0 18px 44px rgba(0,0,0,0.45), 0 0 26px rgba(34,211,238,0.22)",
+                                      }
+                            }
+                            whileTap={prefersReducedMotion ? {} : { scale: 0.995 }}
+                            transition={{ duration: prefersReducedMotion ? 0 : 0.12, ease: "easeOut" }}
+                            className="group/metric relative flex max-w-[300px] flex-shrink-0 flex-col items-start justify-center overflow-hidden rounded-[26px] border border-white/12 bg-[linear-gradient(180deg,rgba(10,16,28,0.84)_0%,rgba(6,10,18,0.92)_100%)] p-6 shadow-[0_18px_44px_rgba(0,0,0,0.32)] backdrop-blur-xl md:w-full md:max-w-none"
                         >
-                            <div className="flex items-baseline gap-1 text-4xl font-black tracking-tight text-cyan-300 drop-shadow-[0_0_18px_rgba(34,211,238,0.16)] lg:text-5xl">
-                                {isNumeric ? (
-                                    <AnimatedCounter to={numericValue} />
-                                ) : (
-                                    <span>{metric.value}</span>
-                                )}
-                                <span className="text-2xl lg:text-3xl">{metric.suffix}</span>
+                            <span
+                                aria-hidden="true"
+                                className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-150 group-hover/metric:opacity-100"
+                                style={{
+                                    background:
+                                        "radial-gradient(80% 130% at 18% 0%, rgba(34,211,238,0.24) 0%, rgba(34,211,238,0.08) 48%, transparent 74%), radial-gradient(120% 90% at 92% 100%, rgba(167,139,250,0.18) 0%, transparent 64%)",
+                                }}
+                            />
+                            <span
+                                aria-hidden="true"
+                                className="pointer-events-none absolute -left-24 top-[-2rem] h-[220%] w-16 rotate-[22deg] bg-[linear-gradient(90deg,rgba(255,255,255,0),rgba(224,242,254,0.9),rgba(167,243,252,0.42),rgba(255,255,255,0))] opacity-0 blur-[1px] transition-all duration-300 ease-out group-hover/metric:left-[118%] group-hover/metric:opacity-100"
+                            />
+
+                            <div className="relative z-10">
+                                <div className="flex items-baseline gap-1 text-4xl font-black tracking-tight text-cyan-300 drop-shadow-[0_0_18px_rgba(34,211,238,0.16)] transition-all duration-100 group-hover/metric:text-cyan-200 group-hover/metric:drop-shadow-[0_0_24px_rgba(103,232,249,0.45)] lg:text-5xl">
+                                    {isNumeric ? (
+                                        <AnimatedCounter to={numericValue} />
+                                    ) : (
+                                        <span>{metric.value}</span>
+                                    )}
+                                    <span className="text-2xl transition-transform duration-100 group-hover/metric:translate-x-[1px] lg:text-3xl">{metric.suffix}</span>
+                                </div>
+                                <p className="mt-2 text-sm font-medium tracking-wide text-zinc-100 transition-colors duration-100 group-hover/metric:text-white md:text-base">
+                                    {metric.label}
+                                </p>
                             </div>
-                            <p className="mt-2 text-sm font-medium tracking-wide text-zinc-100 md:text-base">
-                                {metric.label}
-                            </p>
                         </motion.div>
                     );
                 })}

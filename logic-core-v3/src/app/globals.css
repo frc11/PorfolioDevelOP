@@ -48,6 +48,8 @@ body {
     /* Firefox */
     -ms-overflow-style: none;
     /* IE/Edge */
+    overscroll-behavior-y: none;
+    overscroll-behavior-x: none;
   }
 
   ::-webkit-scrollbar {

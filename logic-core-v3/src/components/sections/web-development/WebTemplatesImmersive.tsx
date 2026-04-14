@@ -1,12 +1,11 @@
 "use client"
 
-import React, { useRef, useState } from "react"
-import Image from "next/image"
+import React, { useEffect, useMemo, useRef, useState } from "react"
 import {
+    animate as motionAnimate,
     motion,
-    useMotionValueEvent,
+    useMotionValue,
     useReducedMotion,
-    useScroll,
     useSpring,
     useTransform,
     type MotionValue,
@@ -24,6 +23,7 @@ type TemplateItem = {
 }
 
 const SOURCE_SET = "chatgpt"
+const SNAP_IDLE_MS = 100
 
 const TEMPLATES: TemplateItem[] = [
     {
@@ -82,38 +82,140 @@ const TEMPLATES: TemplateItem[] = [
     },
 ]
 
+const clampIndex = (value: number) => Math.min(TEMPLATES.length - 1, Math.max(0, value))
+const fallbackTemplatePreview = "/images/showcase/case-default.svg"
+
+
 function TemplateStageCard({
     template,
     index,
     total,
     progress,
     reducedMotion,
+    enableButtonAutoHover,
+    isActive,
+    cardRef,
 }: {
     template: TemplateItem
     index: number
     total: number
     progress: MotionValue<number>
     reducedMotion: boolean
+    enableButtonAutoHover: boolean
+    isActive: boolean
+    cardRef?: (node: HTMLElement | null) => void
 }) {
+    const [isTemplateBtnShineActive, setIsTemplateBtnShineActive] = useState(false)
+
+    useEffect(() => {
+        if (!enableButtonAutoHover || !isActive) return
+
+        let hideTimeoutId: number | undefined
+
+        const triggerShinyCycle = () => {
+            setIsTemplateBtnShineActive(true)
+            if (hideTimeoutId) window.clearTimeout(hideTimeoutId)
+            hideTimeoutId = window.setTimeout(() => {
+                setIsTemplateBtnShineActive(false)
+            }, 560)
+        }
+
+        triggerShinyCycle()
+        const intervalId = window.setInterval(triggerShinyCycle, 2560)
+
+        return () => {
+            window.clearInterval(intervalId)
+            if (hideTimeoutId) window.clearTimeout(hideTimeoutId)
+        }
+    }, [enableButtonAutoHover, isActive])
+
+    const templateBtnAutoActive = enableButtonAutoHover && isActive && isTemplateBtnShineActive
+
     const segments = Math.max(1, total - 1)
     const point = index / segments
     const spread = 1 / total
-
     const start = Math.max(0, point - spread * 0.72)
     const end = Math.min(1, point + spread * 0.9)
+    const isFirst = index === 0
+    const isLast = index === total - 1
 
-    const opacity = useTransform(progress, [start, point, end], [0, 1, 0], { clamp: true })
-    const stageY = useTransform(progress, [start, point, end], reducedMotion ? [0, 0, 0] : [130, 0, -130], { clamp: true })
-    const stageScale = useTransform(progress, [start, point, end], reducedMotion ? [1, 1, 1] : [0.94, 1, 0.97], { clamp: true })
-    const stageRotateX = useTransform(progress, [start, point, end], reducedMotion ? [0, 0, 0] : [5, 0, -4], { clamp: true })
+    const opacityInput = isFirst ? [0, end] : isLast ? [start, 1] : [start, point, end]
+    const opacityOutput = isFirst ? [1, 0] : isLast ? [0, 1] : [0, 1, 0]
+    const opacity = useTransform(progress, opacityInput, opacityOutput, { clamp: true })
 
-    const imageScale = useTransform(progress, [start, point, end], [1.12, 1.04, 1], { clamp: true })
-    const imageY = useTransform(progress, [start, point, end], [18, 0, -12], { clamp: true })
+    const yInput = isFirst ? [0, end] : isLast ? [start, 1] : [start, point, end]
+    const yOutput = isFirst
+        ? reducedMotion
+            ? [0, 0]
+            : [0, -130]
+        : isLast
+            ? reducedMotion
+                ? [0, 0]
+                : [130, 0]
+            : reducedMotion
+                ? [0, 0, 0]
+                : [130, 0, -130]
+    const stageY = useTransform(progress, yInput, yOutput, { clamp: true })
+
+    const scaleInput = isFirst ? [0, end] : isLast ? [start, 1] : [start, point, end]
+    const scaleOutput = isFirst
+        ? reducedMotion
+            ? [1, 1]
+            : [1, 0.97]
+        : isLast
+            ? reducedMotion
+                ? [1, 1]
+                : [0.94, 1]
+            : reducedMotion
+                ? [1, 1, 1]
+                : [0.94, 1, 0.97]
+    const stageScale = useTransform(progress, scaleInput, scaleOutput, { clamp: true })
+
+    const rotInput = isFirst ? [0, end] : isLast ? [start, 1] : [start, point, end]
+    const rotOutput = isFirst
+        ? reducedMotion
+            ? [0, 0]
+            : [0, -4]
+        : isLast
+            ? reducedMotion
+                ? [0, 0]
+                : [5, 0]
+            : reducedMotion
+                ? [0, 0, 0]
+                : [5, 0, -4]
+    const stageRotateX = useTransform(progress, rotInput, rotOutput, { clamp: true })
+
+    const imageScaleInput = isFirst ? [0, end] : isLast ? [start, 1] : [start, point, end]
+    const imageScaleOutput = isFirst ? [1.04, 1] : isLast ? [1.12, 1.04] : [1.12, 1.04, 1]
+    const imageScale = useTransform(progress, imageScaleInput, imageScaleOutput, { clamp: true })
+
+    const imageYInput = isFirst ? [0, end] : isLast ? [start, 1] : [start, point, end]
+    const imageYOutput = isFirst ? [0, -12] : isLast ? [18, 0] : [18, 0, -12]
+    const imageY = useTransform(progress, imageYInput, imageYOutput, { clamp: true })
 
     const base = `/assets/templates/${SOURCE_SET}/${template.slug}`
+    const localPreviewUrl = `${base}/mid.webp`
+    const remotePreviewUrl = `https://image.thum.io/get/width/1800/noanimate/${template.url}`
+
+    const handlePreviewError = (event: React.SyntheticEvent<HTMLImageElement>) => {
+        const image = event.currentTarget
+        const stage = image.dataset.fallbackStage ?? "local"
+
+        if (stage === "local") {
+            image.dataset.fallbackStage = "remote"
+            image.src = remotePreviewUrl
+            return
+        }
+
+        if (stage === "remote") {
+            image.dataset.fallbackStage = "final"
+            image.src = fallbackTemplatePreview
+        }
+    }
 
     return (
         <motion.article
+            ref={cardRef}
             style={{
                 opacity,
                 y: stageY,
@@ -121,53 +223,96 @@ function TemplateStageCard({
                 rotateX: stageRotateX,
                 transformPerspective: 1500,
             }}
-            className="absolute inset-0 flex items-center justify-center px-4 py-8 md:px-8 md:py-10"
+            className="absolute inset-0 flex items-center justify-center px-3 py-3 md:px-6 md:py-5"
         >
             <div className="w-full max-w-[1320px]">
-                <div className="grid h-[78vh] min-h-[560px] overflow-hidden rounded-[28px] border border-white/10 bg-[#0A0A0F] lg:grid-cols-[0.42fr_0.58fr]">
-                    <div className="relative flex h-full flex-col justify-between border-b border-white/10 p-6 md:p-9 lg:border-b-0 lg:border-r">
-                        <div>
-                            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5">
+                <div
+                    className="grid h-[66vh] min-h-[420px] grid-rows-[1.03fr_0.97fr] overflow-hidden rounded-[28px] border md:h-[68vh] md:min-h-[500px] lg:h-[70vh] lg:min-h-[510px] lg:grid-cols-[0.42fr_0.58fr] lg:grid-rows-1"
+                    style={{
+                        borderColor: `rgba(${template.rgb},0.34)`,
+                        background:
+                            "linear-gradient(138deg, rgba(5,8,16,0.95) 0%, rgba(4,7,13,0.92) 58%, rgba(5,8,16,0.95) 100%)",
+                        boxShadow: `0 24px 72px rgba(0,0,0,0.42), inset 0 0 0 1px rgba(${template.rgb},0.08)`,
+                    }}
+                >
+                    <div className="relative flex min-h-0 flex-col justify-between border-b border-white/10 p-5 md:p-8 lg:h-full lg:border-b-0 lg:border-r">
+                        <div
+                            className="pointer-events-none absolute inset-x-0 top-0 h-28"
+                            style={{
+                                background: `linear-gradient(180deg, rgba(${template.rgb},0.14) 0%, rgba(${template.rgb},0) 100%)`,
+                            }}
+                        />
+
+                        <div className="relative z-10">
+                            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/12 bg-white/[0.06] px-3 py-1.5">
                                 <Sparkles size={12} style={{ color: template.accent }} />
-                                <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-zinc-300">{template.tagline}</span>
+                                <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-zinc-200">{template.tagline}</span>
                             </div>
 
-                            <h3 className="mb-3 text-[clamp(30px,4.5vw,64px)] font-black leading-[0.92] tracking-[-0.035em] text-white">
+                            <h3 className="mb-3 text-[clamp(28px,4.4vw,60px)] font-black leading-[0.92] tracking-[-0.034em] text-white">
                                 {template.name}
                             </h3>
 
-                            <p className="max-w-[44ch] text-sm leading-relaxed text-zinc-400 md:text-base">
-                                {template.description}
-                            </p>
+                            <p className="max-w-[44ch] text-xs leading-relaxed text-zinc-300/85 sm:text-sm md:text-base">{template.description}</p>
                         </div>
 
-                        <div>
-                            <div className="mb-4 h-[2px] w-full overflow-hidden rounded-full bg-white/10">
-                                <div className="h-full w-1/2 rounded-full" style={{ backgroundColor: template.accent }} />
+                        <div className="relative z-10 mb-3 mt-4 md:mb-5 md:mt-6 lg:mb-0">
+                            <div className="mb-4 h-[2px] w-full overflow-hidden rounded-full bg-white/12">
+                                <div
+                                    className="h-full w-1/2 rounded-full"
+                                    style={{ background: `linear-gradient(90deg, ${template.accent} 0%, rgba(${template.rgb},0.34) 100%)` }}
+                                />
                             </div>
 
                             <a
                                 href={template.url}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white px-5 py-2.5 text-xs font-bold uppercase tracking-[0.14em] text-[#09090f] transition-all duration-200 hover:scale-[1.01] hover:bg-zinc-200"
+                                className={`group/template-btn relative inline-flex items-center gap-2 overflow-hidden rounded-full border px-5 py-2.5 text-xs uppercase text-[#09090f] transition-[transform,box-shadow,border-color,background-color,color] duration-200 hover:scale-[1.01] hover:border-cyan-300/70 hover:bg-white hover:text-[#02040a] hover:shadow-[0_0_0_1px_rgba(34,211,238,0.42),0_0_22px_rgba(34,211,238,0.34)] ${templateBtnAutoActive ? "scale-[1.01] border-cyan-300/70 bg-white text-[#02040a] shadow-[0_0_0_1px_rgba(34,211,238,0.42),0_0_22px_rgba(34,211,238,0.34)]" : "border-white/14 bg-white"}`}
                             >
-                                Ver template
-                                <ArrowUpRight size={14} />
+                                <span
+                                    aria-hidden="true"
+                                    className={`pointer-events-none absolute inset-0 transition-opacity duration-150 group-hover/template-btn:opacity-100 ${templateBtnAutoActive ? "opacity-100" : "opacity-0"}`}
+                                    style={{
+                                        background:
+                                            "radial-gradient(72% 130% at 50% 0%, rgba(224,242,254,0.42) 0%, rgba(186,230,253,0.18) 48%, transparent 76%)",
+                                    }}
+                                />
+                                <span
+                                    aria-hidden="true"
+                                    className={`pointer-events-none absolute -bottom-8 top-[-2rem] w-14 rotate-[22deg] bg-[linear-gradient(90deg,rgba(125,211,252,0),rgba(224,242,254,0.95),rgba(196,181,253,0.18),rgba(125,211,252,0))] blur-[1px] transition-all duration-500 ease-out group-hover/template-btn:left-[112%] group-hover/template-btn:opacity-100 ${templateBtnAutoActive ? "left-[112%] opacity-100" : "-left-24 opacity-0"}`}
+                                />
+                                <span className={`relative z-10 tracking-[0.14em] transition-[font-weight,letter-spacing] duration-200 group-hover/template-btn:font-bold group-hover/template-btn:tracking-[0.16em] ${templateBtnAutoActive ? "font-bold tracking-[0.16em]" : "font-bold"}`}>
+                                    Ver template
+                                </span>
+                                <ArrowUpRight size={14} className={`relative z-10 transition-transform duration-150 group-hover/template-btn:translate-x-[1px] group-hover/template-btn:-translate-y-[1px] ${templateBtnAutoActive ? "translate-x-[1px] -translate-y-[1px]" : ""}`} />
                             </a>
                         </div>
                     </div>
 
-                    <div className="relative h-full min-h-[320px] overflow-hidden">
+                    <div className="relative min-h-0 overflow-hidden lg:h-full lg:min-h-[320px]">
+                        <motion.div style={{ scale: imageScale, y: imageY }} className="absolute inset-0">
+                            <motion.img
+                                src={localPreviewUrl}
+                                data-fallback-stage="local"
+                                onError={handlePreviewError}
+                                alt={`${template.name} preview`}
+                                className="h-full w-full object-cover object-top"
+                                loading={index === 0 ? "eager" : "lazy"}
+                            />
+                        </motion.div>
+
                         <motion.div
                             style={{ scale: imageScale, y: imageY }}
-                            className="absolute inset-0"
+                            className="pointer-events-none absolute inset-0"
                         >
-                            <Image
-                                src={`${base}/mid.webp`}
-                                alt={`${template.name} preview`}
-                                fill
-                                className="object-cover object-top"
+                            <iframe
+                                src={template.url}
+                                title={`${template.name} live preview`}
+                                loading={index === 0 ? "eager" : "lazy"}
+                                className="pointer-events-none absolute -left-[22%] -top-[18%] h-[146%] w-[146%] border-0 md:-left-[16%] md:-top-[12%] md:h-[132%] md:w-[132%] lg:-left-[10%] lg:-top-[8%] lg:h-[120%] lg:w-[120%]"
+                                referrerPolicy="no-referrer-when-downgrade"
+                                aria-label={`${template.name} live preview`}
                             />
                         </motion.div>
 
@@ -187,119 +332,275 @@ function TemplateStageCard({
     )
 }
 
-function ImmersiveTemplatesSection() {
+export default function WebTemplatesImmersive() {
     const sectionRef = useRef<HTMLElement>(null)
     const reducedMotion = !!useReducedMotion()
+    const [isBelowLg, setIsBelowLg] = useState(false)
     const [activeIndex, setActiveIndex] = useState(0)
+    const activeIndexRef = useRef(0)
+    const snapTimerRef = useRef<number | null>(null)
+    const snapAnimationRef = useRef<ReturnType<typeof motionAnimate> | null>(null)
+    const isSnappingRef = useRef(false)
 
-    const { scrollYProgress } = useScroll({
-        target: sectionRef,
-        offset: ["start start", "end end"],
-    })
+    const stepProgress = useMotionValue(0)
 
-    const smoothProgress = useSpring(scrollYProgress, {
+    const smoothProgress = useSpring(stepProgress, {
         stiffness: 90,
         damping: 28,
         mass: 0.36,
     })
+    const progressScale = useTransform(smoothProgress, [0, 1], [0, 1])
 
-    useMotionValueEvent(smoothProgress, "change", (latest) => {
-        const next = Math.min(TEMPLATES.length - 1, Math.max(0, Math.round(latest * (TEMPLATES.length - 1))))
-        setActiveIndex((prev) => (prev === next ? prev : next))
-    })
+    const activeTemplate = useMemo(() => TEMPLATES[activeIndex], [activeIndex])
+    const maxSteps = Math.max(1, TEMPLATES.length - 1)
+    const enableTemplateButtonAutoHover = isBelowLg && !reducedMotion
+
+    useEffect(() => {
+        const media = window.matchMedia("(max-width: 1023.98px)")
+        const sync = () => setIsBelowLg(media.matches)
+        sync()
+
+        media.addEventListener("change", sync)
+        return () => media.removeEventListener("change", sync)
+    }, [])
+
+    useEffect(() => {
+        activeIndexRef.current = activeIndex
+    }, [activeIndex])
+
+    useEffect(() => {
+        return () => {
+            if (snapTimerRef.current !== null) {
+                window.clearTimeout(snapTimerRef.current)
+                snapTimerRef.current = null
+            }
+            snapAnimationRef.current?.stop()
+        }
+    }, [])
+
+    useEffect(() => {
+        const clearSnapTimer = () => {
+            if (snapTimerRef.current !== null) {
+                window.clearTimeout(snapTimerRef.current)
+                snapTimerRef.current = null
+            }
+        }
+
+        const stopSnapAnimation = () => {
+            snapAnimationRef.current?.stop()
+            snapAnimationRef.current = null
+            isSnappingRef.current = false
+        }
+
+        const getSectionMetrics = () => {
+            const section = sectionRef.current
+            if (!section) return null
+
+            const rect = section.getBoundingClientRect()
+            const sectionStart = window.scrollY + rect.top
+            const sectionEnd = sectionStart + section.offsetHeight
+            const lockEnd = sectionEnd - window.innerHeight
+            const range = Math.max(lockEnd - sectionStart, 1)
+            return { sectionStart, lockEnd, range }
+        }
+
+        const startSnapToNearest = () => {
+            const metrics = getSectionMetrics()
+            if (!metrics) return
+
+            const currentY = window.scrollY
+            if (currentY < metrics.sectionStart || currentY > metrics.lockEnd) return
+
+            const nearestIndex = clampIndex(Math.round(((currentY - metrics.sectionStart) / metrics.range) * maxSteps))
+            const targetY = metrics.sectionStart + nearestIndex * window.innerHeight
+            if (Math.abs(targetY - currentY) < 2) return
+
+            stopSnapAnimation()
+            isSnappingRef.current = true
+
+            if (reducedMotion) {
+                window.scrollTo({ top: targetY, behavior: "auto" })
+                isSnappingRef.current = false
+                return
+            }
+
+            const fromY = currentY
+            const distance = targetY - fromY
+            const duration = Math.min(0.95, Math.max(0.48, Math.abs(distance) / 1300))
+
+            snapAnimationRef.current = motionAnimate(0, 1, {
+                duration,
+                ease: [0.16, 1, 0.3, 1],
+                onUpdate: (latest) => {
+                    window.scrollTo({ top: fromY + distance * latest, behavior: "auto" })
+                },
+                onComplete: () => {
+                    isSnappingRef.current = false
+                    snapAnimationRef.current = null
+                },
+            })
+        }
+
+        const scheduleSnap = () => {
+            if (reducedMotion) return
+            clearSnapTimer()
+            snapTimerRef.current = window.setTimeout(() => {
+                startSnapToNearest()
+            }, SNAP_IDLE_MS)
+        }
+
+        const syncFromScroll = () => {
+            const metrics = getSectionMetrics()
+            if (!metrics) return
+
+            const y = window.scrollY
+            if (y <= metrics.sectionStart) {
+                stepProgress.set(0)
+                if (activeIndexRef.current !== 0) setActiveIndex(0)
+                clearSnapTimer()
+                return
+            }
+
+            if (y >= metrics.lockEnd) {
+                stepProgress.set(1)
+                const last = clampIndex(maxSteps)
+                if (activeIndexRef.current !== last) setActiveIndex(last)
+                clearSnapTimer()
+                return
+            }
+
+            const progress = (y - metrics.sectionStart) / metrics.range
+            stepProgress.set(progress)
+
+            const nearest = clampIndex(Math.round(progress * maxSteps))
+            if (nearest !== activeIndexRef.current) {
+                setActiveIndex(nearest)
+            }
+
+            if (!isSnappingRef.current) {
+                scheduleSnap()
+            }
+        }
+
+        const interruptSnap = () => {
+            if (!isSnappingRef.current) return
+            stopSnapAnimation()
+        }
+
+        const onKeyDown = (event: KeyboardEvent) => {
+            if (
+                event.key === "ArrowDown" ||
+                event.key === "ArrowUp" ||
+                event.key === "PageDown" ||
+                event.key === "PageUp" ||
+                event.key === "Home" ||
+                event.key === "End" ||
+                event.key === " "
+            ) {
+                interruptSnap()
+            }
+        }
+
+        window.addEventListener("scroll", syncFromScroll, { passive: true })
+        window.addEventListener("wheel", interruptSnap, { passive: true })
+        window.addEventListener("touchstart", interruptSnap, { passive: true })
+        window.addEventListener("keydown", onKeyDown)
+
+        syncFromScroll()
+
+        return () => {
+            clearSnapTimer()
+            stopSnapAnimation()
+            window.removeEventListener("scroll", syncFromScroll)
+            window.removeEventListener("wheel", interruptSnap)
+            window.removeEventListener("touchstart", interruptSnap)
+            window.removeEventListener("keydown", onKeyDown)
+        }
+    }, [maxSteps, reducedMotion, stepProgress])
 
     return (
         <section
             ref={sectionRef}
-            className="relative w-full bg-[#030014]"
-            style={{ height: reducedMotion ? "auto" : `${TEMPLATES.length * 105}vh` }}
+            className="relative isolate w-full bg-[#02030d]"
+            style={{ height: `${TEMPLATES.length * 100}vh` }}
         >
             <div className="sticky top-0 h-screen overflow-hidden">
-                <div className="mx-auto flex h-full w-full max-w-[1400px] flex-col px-4 pb-7 pt-6 md:px-8 md:pt-8">
-                    <div className="flex items-end justify-between gap-4">
-                        <div>
-                            <div className="mb-2 inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1.5">
-                                <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-zinc-300">Templates inmersivos</span>
+                <div className="pointer-events-none absolute inset-0">
+                    <div className="absolute inset-0 bg-[radial-gradient(120%_75%_at_50%_-18%,rgba(0,229,255,0.15)_0%,rgba(2,3,12,0)_72%)]" />
+                    <motion.div
+                        className="absolute -left-[14%] top-[12%] h-[44%] w-[34%] rounded-full blur-[76px]"
+                        animate={{ x: [0, 56, 0], y: [0, -16, 0], opacity: [0.24, 0.44, 0.24] }}
+                        transition={{ duration: 13, repeat: Infinity, ease: "easeInOut" }}
+                        style={{ background: "radial-gradient(circle, rgba(0,229,255,0.28) 0%, transparent 72%)" }}
+                    />
+                    <motion.div
+                        className="absolute right-[-10%] top-[18%] h-[50%] w-[36%] rounded-full blur-[92px]"
+                        animate={{ x: [0, -50, 0], y: [0, 20, 0], opacity: [0.2, 0.34, 0.2] }}
+                        transition={{ duration: 15.5, repeat: Infinity, ease: "easeInOut" }}
+                        style={{ background: "radial-gradient(circle, rgba(139,92,246,0.24) 0%, transparent 74%)" }}
+                    />
+                    <motion.div
+                        className="absolute inset-0 opacity-[0.18]"
+                        animate={{ backgroundPositionY: ["0px", "84px"] }}
+                        transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
+                        style={{
+                            backgroundImage:
+                                "linear-gradient(to right, rgba(255,255,255,0.04) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.035) 1px, transparent 1px)",
+                            backgroundSize: "4rem 4rem",
+                            maskImage: "radial-gradient(ellipse at center, rgba(0,0,0,0.85) 22%, transparent 80%)",
+                        }}
+                    />
+                </div>
+
+                <div className="relative z-10 mx-auto flex h-full w-full max-w-[1440px] flex-col px-4 pb-6 pt-6 md:px-8 md:pt-8">
+                    <header className="shrink-0">
+                        <div className="mb-2 inline-flex items-center rounded-full border border-white/12 bg-white/[0.06] px-3 py-1.5">
+                            <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-zinc-200">Templates inmersivos</span>
+                        </div>
+
+                        <div className="flex items-end justify-between gap-4">
+                            <div className="min-w-0 flex-1">
+                                <h2 className="text-[clamp(16px,4.6vw,46px)] font-black leading-[1.04] tracking-[-0.03em] text-white [text-wrap:balance]">
+                                    Explora cada concepto como si fuera un{" "}
+                                    <span className="whitespace-nowrap">escenario real</span>
+                                </h2>
+
+                                <div className="mt-3 h-[3px] w-full overflow-hidden rounded-full bg-white/12">
+                                    <motion.div
+                                        className="h-full origin-left"
+                                        style={{
+                                            scaleX: progressScale,
+                                            background: `linear-gradient(90deg, ${activeTemplate.accent} 0%, rgba(${activeTemplate.rgb},0.34) 100%)`,
+                                        }}
+                                    />
+                                </div>
                             </div>
-                            <h2 className="text-[clamp(28px,4.2vw,54px)] font-black leading-[0.95] tracking-[-0.03em] text-white">
-                                Explora cada concepto como si fuera un escenario real
-                            </h2>
-                        </div>
 
-                        <div className="hidden items-center gap-3 md:flex">
-                            <span className="text-xs font-mono uppercase tracking-[0.2em] text-zinc-500">Scroll</span>
-                            <span className="text-sm font-semibold text-zinc-200">
-                                {String(activeIndex + 1).padStart(2, "0")} / {String(TEMPLATES.length).padStart(2, "0")}
-                            </span>
+                            <div className="hidden items-center gap-3 md:flex">
+                                <span className="text-[11px] font-mono uppercase tracking-[0.2em] text-zinc-400">Scroll continuo + auto-centro</span>
+                                <span className="text-sm font-semibold text-zinc-100">
+                                    {String(activeIndex + 1).padStart(2, "0")} / {String(TEMPLATES.length).padStart(2, "0")}
+                                </span>
+                            </div>
                         </div>
-                    </div>
+                    </header>
 
-                    <div className="relative mt-4 flex-1 md:mt-6">
-                        {TEMPLATES.map((template, index) => (
+                    <div className="relative mt-4 min-h-0 flex-1">
+                        {TEMPLATES.map((template, idx) => (
                             <TemplateStageCard
                                 key={template.slug}
                                 template={template}
-                                index={index}
+                                index={idx}
                                 total={TEMPLATES.length}
                                 progress={smoothProgress}
                                 reducedMotion={reducedMotion}
+                                enableButtonAutoHover={enableTemplateButtonAutoHover}
+                                isActive={idx === activeIndex}
                             />
-                        ))}
-                    </div>
-
-                    <div className="mx-auto mt-4 grid w-full max-w-[1080px] grid-cols-3 gap-2 md:grid-cols-6">
-                        {TEMPLATES.map((item, idx) => (
-                            <div
-                                key={item.slug}
-                                className="rounded-lg border px-2 py-2 text-center transition-colors duration-300"
-                                style={{
-                                    borderColor: idx === activeIndex ? "rgba(255,255,255,0.25)" : "rgba(255,255,255,0.08)",
-                                    backgroundColor: idx === activeIndex ? "rgba(255,255,255,0.08)" : "rgba(255,255,255,0.03)",
-                                }}
-                            >
-                                <span className="block truncate text-[10px] font-mono uppercase tracking-[0.14em] text-zinc-300">
-                                    {item.slug}
-                                </span>
-                            </div>
                         ))}
                     </div>
                 </div>
             </div>
-
-            {reducedMotion && (
-                <div className="mx-auto grid w-full max-w-[1280px] grid-cols-1 gap-6 px-4 py-20 md:grid-cols-2 md:px-8">
-                    {TEMPLATES.map((template) => {
-                        const base = `/assets/templates/${SOURCE_SET}/${template.slug}`
-
-                        return (
-                            <a
-                                key={`fallback-${template.slug}`}
-                                href={template.url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="group overflow-hidden rounded-[18px] border border-white/10 bg-[#0A0A0F]"
-                            >
-                                <div className="relative h-52 w-full">
-                                    <Image
-                                        src={`${base}/mid.webp`}
-                                        alt={template.name}
-                                        fill
-                                        className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
-                                    />
-                                </div>
-                                <div className="p-4">
-                                    <h4 className="text-lg font-bold text-white">{template.name}</h4>
-                                    <p className="text-sm text-zinc-400">{template.tagline}</p>
-                                </div>
-                            </a>
-                        )
-                    })}
-                </div>
-            )}
         </section>
     )
-}
-
-export default function WebTemplatesImmersive() {
-    return <ImmersiveTemplatesSection />
 }

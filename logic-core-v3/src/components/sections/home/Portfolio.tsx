@@ -29,7 +29,7 @@ const REAL_PROJECTS: Project[] = [
         tags: ["Next.js", "TypeScript", "Panel Admin", "CRM"],
         badge: "CASO REAL ✓",
         badgeColor: "green",
-        gradient: "linear-gradient(135deg, #052e16 0%, #064e3b 40%, #0f766e 80%, #134e4a 100%)",
+        gradient: "linear-gradient(135deg, #020817 0%, #06203a 40%, #0a3f63 80%, #0c5f86 100%)",
         year: "2026",
     },
 ];
@@ -89,7 +89,7 @@ const DEMO_PROJECTS: Project[] = [
 
 // ─── Badge styles ─────────────────────────────────────────────────────────────
 const BADGE_STYLES: Record<BadgeColor, string> = {
-    green: "bg-emerald-950 text-emerald-400 border border-emerald-700",
+    green: "bg-cyan-950/80 text-cyan-300 border border-cyan-700/70",
     cyan: "bg-cyan-950 text-cyan-400 border border-cyan-700",
     yellow: "bg-amber-950 text-amber-400 border border-amber-700",
     violet: "bg-violet-950 text-violet-400 border border-violet-700",
@@ -100,9 +100,9 @@ const BgPattern = () => (
     <div
         className="absolute inset-0 pointer-events-none z-0"
         style={{
-            backgroundImage: 'radial-gradient(circle at 1px 1px, #27272a 3px, transparent 0)',
+            backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(56,189,248,0.2) 3px, transparent 0)',
             backgroundSize: '32px 32px',
-            opacity: 0.25,
+            opacity: 0.22,
         }}
     />
 );
@@ -252,15 +252,15 @@ const DemoCard = ({ project, isDimmed, isFocused }: { project: Project; isDimmed
 
 // ─── Separator ───────────────────────────────────────────────────────────────
 const SectionSeparator = () => (
-    <div className="relative z-10 flex flex-col items-center py-12 md:py-16">
-        <div className="flex items-center gap-4 w-full max-w-2xl">
-            <div className="flex-1 h-px bg-zinc-800" />
-            <span className="text-zinc-500 font-mono text-sm tracking-widest whitespace-nowrap">
+    <div className="relative z-10 flex flex-col items-center py-10 max-[360px]:py-8 md:py-16">
+        <div className="flex w-full max-w-2xl items-center gap-3 max-[360px]:justify-center">
+            <div className="h-px flex-1 bg-zinc-800 max-[360px]:hidden" />
+            <span className="whitespace-nowrap text-center font-mono text-[11px] tracking-[0.2em] text-zinc-500 sm:text-sm sm:tracking-widest">
                 — DEMOS Y CONCEPTOS —
             </span>
-            <div className="flex-1 h-px bg-zinc-800" />
+            <div className="h-px flex-1 bg-zinc-800 max-[360px]:hidden" />
         </div>
-        <p className="text-zinc-600 text-xs font-mono mt-3 text-center max-w-md leading-relaxed">
+        <p className="mt-3 max-w-md px-3 text-center font-mono text-[11px] leading-relaxed text-zinc-600 sm:text-xs">
             Propuestas desarrolladas para mostrar capacidades en diferentes rubros
         </p>
     </div>
@@ -286,10 +286,10 @@ const PortfolioDesktop = () => {
     ];
 
     return (
-        <div className="relative bg-zinc-950 overflow-hidden">
+        <div className="relative overflow-hidden bg-[#020617]">
             <BgPattern />
-            <div className="absolute top-0 left-0 w-full h-64 bg-gradient-to-b from-zinc-950 to-transparent z-0 pointer-events-none" />
-            <div className="absolute bottom-0 left-0 w-full h-64 bg-gradient-to-t from-zinc-950 to-transparent z-0 pointer-events-none" />
+            <div className="absolute top-0 left-0 w-full h-64 bg-gradient-to-b from-[#020617] to-transparent z-0 pointer-events-none" />
+            <div className="absolute bottom-0 left-0 w-full h-64 bg-gradient-to-t from-[#020617] to-transparent z-0 pointer-events-none" />
 
             <div className="container mx-auto px-6 md:px-12 relative z-10 pt-24 pb-20">
 
@@ -303,8 +303,11 @@ const PortfolioDesktop = () => {
                     <div className="flex justify-between items-end mb-10 border-b border-zinc-800 pb-8">
                         <div>
                             <p className="text-zinc-500 text-xs font-mono tracking-widest mb-2">develOP — PORTAFOLIO</p>
-                            <h2 className="text-5xl md:text-7xl font-black text-zinc-100 tracking-tighter">
-                                NUESTROS <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-500">TRABAJOS</span>
+                            <h2 className="text-5xl md:text-7xl font-black text-zinc-100 tracking-tighter leading-[0.95]">
+                                NUESTROS{" "}
+                                <span className="inline-block text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-sky-500 pr-[0.06em]">
+                                    TRABAJOS
+                                </span>
                             </h2>
                         </div>
                         <span className="text-xs font-mono text-zinc-600 border border-zinc-800 px-3 py-1 rounded-full">
@@ -333,7 +336,7 @@ const PortfolioDesktop = () => {
                         <div>
                             <p className="text-zinc-500 text-xs font-mono tracking-widest mb-2">CAPACIDADES develOP</p>
                             <h2 className="text-4xl md:text-6xl font-black text-zinc-100 tracking-tighter">
-                                DEMOS <span className="text-transparent bg-clip-text bg-gradient-to-r from-zinc-400 to-zinc-700">POR RUBRO</span>
+                                DEMOS <span className="text-transparent bg-clip-text bg-gradient-to-r from-zinc-400 to-zinc-700 pr-[0.06em]">POR RUBRO</span>
                             </h2>
                         </div>
                         <div className="flex gap-4 items-center">
@@ -386,9 +389,8 @@ const PortfolioDesktop = () => {
                             <button
                                 key={i}
                                 onClick={() => setDemoIndex(i)}
-                                className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
-                                    i === demoIndex % DEMO_PROJECTS.length ? 'bg-zinc-400 w-4' : 'bg-zinc-700'
-                                }`}
+                                className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${i === demoIndex % DEMO_PROJECTS.length ? 'bg-zinc-400 w-4' : 'bg-zinc-700'
+                                    }`}
                             />
                         ))}
                     </div>
@@ -402,37 +404,37 @@ const PortfolioDesktop = () => {
 
 // ─── Mobile Card ──────────────────────────────────────────────────────────────
 const MobileCard = ({ project, size = 'normal' }: { project: Project; size?: 'large' | 'normal' }) => {
-    const height = size === 'large' ? 'h-72' : 'h-52';
+    const height = size === 'large' ? 'h-[22rem] max-[360px]:h-[24.5rem]' : 'h-[15.5rem] max-[360px]:h-[16.5rem]';
 
     return (
-        <div className={`relative w-full ${height} rounded-md overflow-hidden border border-zinc-800`}>
+        <div className={`relative w-full ${height} overflow-hidden rounded-lg border border-zinc-800`}>
             <div className="absolute inset-0" style={{ background: project.gradient }} />
             <div className="absolute inset-0 bg-black/30" />
 
             {/* Badge */}
-            <div className="absolute top-4 left-4 z-10">
-                <span className={`text-xs font-mono font-bold tracking-widest px-2 py-0.5 rounded-full ${BADGE_STYLES[project.badgeColor]}`}>
+            <div className="absolute left-4 top-4 z-10 max-[360px]:left-3 max-[360px]:top-3">
+                <span className={`rounded-full px-2 py-0.5 font-mono text-[10px] font-bold tracking-[0.12em] max-[360px]:text-[9px] ${BADGE_STYLES[project.badgeColor]}`}>
                     {project.badge}
                 </span>
             </div>
 
             {project.year && (
-                <div className="absolute top-4 right-4 z-10">
-                    <span className="text-zinc-300 font-mono text-xs border border-zinc-700 bg-black/60 px-2 py-0.5 rounded-full">
+                <div className="absolute right-4 top-4 z-10 max-[360px]:right-3 max-[360px]:top-3">
+                    <span className="rounded-full border border-zinc-700 bg-black/60 px-2 py-0.5 font-mono text-[10px] text-zinc-300 max-[360px]:text-[9px]">
                         {project.year}
                     </span>
                 </div>
             )}
 
-            <div className="absolute bottom-5 left-5 right-5 z-10">
-                <p className="text-zinc-400 text-xs font-mono tracking-widest mb-1">{project.category}</p>
-                <h3 className={`font-black text-white uppercase leading-none mb-2 ${size === 'large' ? 'text-2xl' : 'text-lg'}`}>
+            <div className="absolute bottom-4 left-4 right-4 z-10 max-[360px]:bottom-3 max-[360px]:left-3 max-[360px]:right-3">
+                <p className="mb-1.5 font-mono text-[10px] tracking-[0.14em] text-zinc-300/85 max-[360px]:tracking-[0.1em]">{project.category}</p>
+                <h3 className={`mb-2.5 font-black uppercase text-white ${size === 'large' ? 'text-[1.85rem] leading-[0.92] max-[360px]:text-[1.65rem]' : 'text-[1.18rem] leading-[1.02] max-[360px]:text-[1.05rem]'}`}>
                     {project.title}
                 </h3>
-                <p className="text-zinc-400 text-xs leading-relaxed">{project.description}</p>
-                <div className="flex flex-wrap gap-1 mt-2">
+                <p className="text-[12px] leading-[1.6] text-zinc-200/78">{project.description}</p>
+                <div className="mt-2.5 flex flex-wrap gap-1.5">
                     {project.tags.map((tag) => (
-                        <span key={tag} className="text-xs font-mono bg-white/10 text-zinc-400 px-2 py-0.5 rounded-full border border-white/10">
+                        <span key={tag} className="rounded-full border border-white/10 bg-white/10 px-2 py-0.5 font-mono text-[10px] text-zinc-300/88">
                             {tag}
                         </span>
                     ))}
@@ -450,7 +452,7 @@ const PortfolioMobile = () => {
     const visibleDemos = DEMO_PROJECTS.slice(demoPage * demosPerPage, (demoPage + 1) * demosPerPage);
 
     return (
-        <div className="relative bg-zinc-950 flex flex-col pt-20 pb-12 px-5 overflow-hidden">
+        <div className="relative flex flex-col overflow-hidden bg-[#020617] px-4 pb-12 pt-[4.75rem] max-[360px]:px-3 max-[360px]:pt-[4.25rem]">
             <BgPattern />
 
             {/* ── BLOQUE 1 ── */}
@@ -461,10 +463,13 @@ const PortfolioMobile = () => {
                 transition={{ duration: 0.7 }}
                 className="relative z-10"
             >
-                <div className="mb-6 border-b border-zinc-800 pb-5">
-                    <p className="text-zinc-500 text-xs font-mono tracking-widest mb-1">develOP — PORTAFOLIO</p>
-                    <h2 className="text-4xl font-black text-zinc-100 tracking-tighter">
-                        NUESTROS <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-500">TRABAJOS</span>
+                <div className="mb-6 border-b border-zinc-800 pb-5 max-[360px]:pb-4">
+                    <p className="mb-1 font-mono text-[11px] tracking-[0.16em] text-zinc-500">develOP — PORTAFOLIO</p>
+                    <h2 className="max-w-full pr-[0.05em] text-[clamp(1.8rem,9.2vw,2.35rem)] font-black leading-[0.92] tracking-[-0.03em] text-zinc-100">
+                        NUESTROS{" "}
+                        <span className="block sm:inline text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-sky-500">
+                            TRABAJOS
+                        </span>
                     </h2>
                 </div>
 
@@ -486,12 +491,12 @@ const PortfolioMobile = () => {
                 transition={{ duration: 0.7 }}
                 className="relative z-10"
             >
-                <div className="mb-5 border-b border-zinc-800 pb-5">
-                    <div className="flex justify-between items-center">
-                        <h2 className="text-3xl font-black text-zinc-100 tracking-tighter">
+                <div className="mb-5 border-b border-zinc-800 pb-5 max-[360px]:pb-4">
+                    <div className="flex items-center justify-between gap-2 max-[360px]:flex-col max-[360px]:items-start">
+                        <h2 className="max-w-full pr-[0.05em] text-[clamp(1.4rem,7.1vw,1.9rem)] font-black leading-[0.98] tracking-tighter text-zinc-100">
                             DEMOS <span className="text-transparent bg-clip-text bg-gradient-to-r from-zinc-400 to-zinc-700">POR RUBRO</span>
                         </h2>
-                        <span className="text-xs font-mono text-cyan-500 border border-cyan-900 bg-cyan-950/50 px-2 py-0.5 rounded-full">
+                        <span className="rounded-full border border-cyan-900 bg-cyan-950/50 px-2 py-0.5 font-mono text-[10px] text-cyan-500">
                             DEMO
                         </span>
                     </div>
@@ -514,18 +519,18 @@ const PortfolioMobile = () => {
                 </div>
 
                 {/* Controls */}
-                <div className="flex gap-4 mt-6 justify-center">
+                <div className="mt-6 flex justify-center gap-3 max-[360px]:gap-2">
                     <button
                         onClick={() => setDemoPage((p) => Math.max(0, p - 1))}
                         disabled={demoPage === 0}
-                        className="flex-1 max-w-[140px] h-12 rounded-full border border-zinc-700 flex items-center justify-center text-zinc-400 active:bg-zinc-800 transition-colors disabled:opacity-30 disabled:border-zinc-800"
+                        className="flex h-11 max-w-[132px] flex-1 items-center justify-center rounded-full border border-zinc-700 text-zinc-400 transition-colors active:bg-zinc-800 disabled:border-zinc-800 disabled:opacity-30"
                     >
                         <ArrowLeft className="w-5 h-5" />
                     </button>
                     <button
                         onClick={() => setDemoPage((p) => Math.min(totalPages - 1, p + 1))}
                         disabled={demoPage >= totalPages - 1}
-                        className="flex-1 max-w-[140px] h-12 rounded-full border border-zinc-700 flex items-center justify-center text-zinc-400 active:bg-zinc-800 transition-colors disabled:opacity-30 disabled:border-zinc-800"
+                        className="flex h-11 max-w-[132px] flex-1 items-center justify-center rounded-full border border-zinc-700 text-zinc-400 transition-colors active:bg-zinc-800 disabled:border-zinc-800 disabled:opacity-30"
                     >
                         <ArrowRight className="w-5 h-5" />
                     </button>
@@ -539,7 +544,7 @@ const PortfolioMobile = () => {
 
 // ─── Main Export ─────────────────────────────────────────────────────────────
 export const Portfolio = () => (
-    <section id="portfolio" className="relative w-full bg-zinc-950 overflow-hidden">
+    <section id="portfolio" className="relative w-full overflow-hidden bg-[#020617]">
         <div className="block md:hidden">
             <PortfolioMobile />
         </div>

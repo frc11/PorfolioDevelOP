@@ -14,18 +14,29 @@ export default function StatementSection() {
             const rect = section.getBoundingClientRect()
             const windowH = window.innerHeight
 
-            // El scroll empieza cuando la sección toca el fondo de la pantalla (rect.top = windowH)
-            // y termina cuando la sección sale por arriba (rect.bottom = 0)
-            const total = section.offsetHeight + windowH
-            const traveled = windowH - rect.top
-            const p = Math.min(Math.max(traveled / total, 0), 1)
+            // Progreso ligado al tramo real del sticky:
+            // 0 cuando la sección recién llega al top del viewport
+            // 1 justo cuando termina el sticky (antes de liberar el scroll normal)
+            const stickyRange = Math.max(section.offsetHeight - windowH, 1)
+            const traveled = Math.min(Math.max(-rect.top, 0), stickyRange)
+            const p = traveled / stickyRange
             setProgress(p)
         }
 
         window.addEventListener('scroll', handleScroll, { passive: true })
+        window.addEventListener('resize', handleScroll)
         handleScroll() // calcular al montar
-        return () => window.removeEventListener('scroll', handleScroll)
+        return () => {
+            window.removeEventListener('scroll', handleScroll)
+            window.removeEventListener('resize', handleScroll)
+        }
     }, [])
+
+    const pointerVars: React.CSSProperties = {
+        ['--stmt-mx' as string]: '50%',
+        ['--stmt-my' as string]: '52%',
+        ['--stmt-glow-opacity' as string]: 0,
+    }
 
     return (
         <section
@@ -39,6 +50,7 @@ export default function StatementSection() {
         >
             {/* Contenedor visible — fijo en el centro con JS */}
             <div style={{
+                ...pointerVars,
                 position: 'sticky',
                 top: 0,
                 height: '100vh',
@@ -47,7 +59,34 @@ export default function StatementSection() {
                 justifyContent: 'center',
                 backgroundColor: '#080810',
                 opacity: 1,
-            }}>
+            }}
+                onMouseEnter={(event) => {
+                    event.currentTarget.style.setProperty('--stmt-glow-opacity', '1')
+                }}
+                onMouseLeave={(event) => {
+                    event.currentTarget.style.setProperty('--stmt-glow-opacity', '0')
+                }}
+                onMouseMove={(event) => {
+                    const rect = event.currentTarget.getBoundingClientRect()
+                    const x = event.clientX - rect.left
+                    const y = event.clientY - rect.top
+                    event.currentTarget.style.setProperty('--stmt-mx', `${x}px`)
+                    event.currentTarget.style.setProperty('--stmt-my', `${y}px`)
+                }}
+            >
+                <div
+                    aria-hidden="true"
+                    style={{
+                        position: 'absolute',
+                        inset: 0,
+                        pointerEvents: 'none',
+                        opacity: 'var(--stmt-glow-opacity)' as unknown as number,
+                        transition: 'opacity 150ms linear',
+                        background:
+                            'radial-gradient(420px 320px at var(--stmt-mx) var(--stmt-my), rgba(34,211,238,0.18) 0%, rgba(167,139,250,0.12) 42%, rgba(8,8,16,0) 74%)',
+                        filter: 'blur(18px)',
+                    }}
+                />
                 <StatementContent progress={progress} />
             </div>
         </section>
@@ -55,9 +94,9 @@ export default function StatementSection() {
 }
 
 function StatementContent({ progress }: { progress: number }) {
-    // Arranca cuando la sección ya cubre ~80% del viewport.
-    // Con height: 300vh y el cálculo de progreso actual, eso corresponde a ~0.20.
-    const revealStart = 0.20
+    // Con el nuevo cálculo sticky, arrancamos un poco antes para que el texto
+    // y el badge terminen completos antes de liberar la sección.
+    const revealStart = 0.12
     const revealProgress = Math.min(Math.max((progress - revealStart) / (1 - revealStart), 0), 1)
 
     // Función helper: devuelve opacity 0→1
@@ -125,7 +164,7 @@ function StatementContent({ progress }: { progress: number }) {
 
         const base: React.CSSProperties = {
             display: 'inline-block',
-            marginRight: '0.22em',
+            marginRight: 'var(--stmt-word-gap, 0.22em)',
             opacity: 0.24 + op * 0.76,
             filter: bl,
             transform: `translateY(${ty}px)`,
@@ -153,10 +192,9 @@ function StatementContent({ progress }: { progress: number }) {
 
     const lineStyle: React.CSSProperties = {
         display: 'block',
-        whiteSpace: 'nowrap',
     }
 
-    const badgeOpacity = Math.min(Math.max((revealProgress - 0.72) / 0.10, 0), 1)
+    const badgeOpacity = Math.min(Math.max((revealProgress - 0.70) / 0.12, 0), 1)
     const badgeY = (1 - badgeOpacity) * 20
 
     const scrollCueOpacity = revealProgress <= 0
@@ -175,6 +213,20 @@ function StatementContent({ progress }: { progress: number }) {
                 @keyframes stmtChevron {
                     0%, 100% { opacity: 0.3; transform: rotate(45deg) translateY(0px) }
                     50% { opacity: 1; transform: rotate(45deg) translateY(3px) }
+                }
+                .stmt-title {
+                    --stmt-word-gap: 0.22em;
+                }
+                .stmt-line {
+                    white-space: nowrap;
+                }
+                @media (max-width: 480px) {
+                    .stmt-title {
+                        --stmt-word-gap: 0.14em;
+                    }
+                    .stmt-line {
+                        white-space: normal;
+                    }
                 }
             `}</style>
 
@@ -219,18 +271,18 @@ function StatementContent({ progress }: { progress: number }) {
                 </div>
             </div>
 
-            <h2 className="text-[clamp(28px,6vw,108px)] md:text-[clamp(40px,7.5vw,108px)]"
+            <h2 className="stmt-title text-[clamp(20px,8vw,108px)] md:text-[clamp(40px,7.5vw,108px)]"
                 style={{
                     position: 'relative',
                     zIndex: 1,
                     fontWeight: 900,
-                    lineHeight: 1.15,
+                    lineHeight: 1.18,
                     maxWidth: '95vw',
                     margin: '0 auto',
                 }}>
 
                 {/* Línea 1 */}
-                <span style={lineStyle}>
+                <span className="stmt-line" style={lineStyle}>
                     {words.slice(0, 7).map((w, i) => renderWord(w, i))}
                 </span>
 
@@ -238,7 +290,7 @@ function StatementContent({ progress }: { progress: number }) {
                 <span style={{ display: 'block', height: 'clamp(10px, 1.8vh, 24px)' }} />
 
                 {/* Línea 2 */}
-                <span style={lineStyle}>
+                <span className="stmt-line" style={lineStyle}>
                     {words.slice(7, 10).map((w, i) => renderWord(w, i + 7))}
                 </span>
 
@@ -246,7 +298,7 @@ function StatementContent({ progress }: { progress: number }) {
                 <span style={{ display: 'block', height: 'clamp(10px, 1.8vh, 24px)' }} />
 
                 {/* Línea 3 */}
-                <span style={lineStyle}>
+                <span className="stmt-line" style={lineStyle}>
                     {words.slice(10).map((w, i) => renderWord(w, i + 10))}
                 </span>
 

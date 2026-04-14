@@ -17,11 +17,52 @@ const floatingIconClass = "text-white/80 drop-shadow-[0_0_24px_rgba(94,234,212,0
 const glassCardClass =
     "relative overflow-hidden rounded-[2rem] border border-white/[0.05] bg-white/[0.02] backdrop-blur-xl shadow-[0_24px_80px_rgba(0,0,0,0.38)]"
 
-const fadeUp = (delay = 0) => ({
-    initial: { opacity: 0, y: 26 },
-    animate: { opacity: 1, y: 0 },
-    transition: { duration: 0.75, delay, ease },
-})
+const cardRevealVariants = {
+    hidden: {
+        opacity: 0,
+        y: 42,
+        scale: 0.965,
+        filter: "blur(12px) brightness(1.35) saturate(1.2)",
+    },
+    show: (delay: number) => ({
+        opacity: 1,
+        y: 0,
+        scale: 1,
+        filter: "blur(0px) brightness(1) saturate(1)",
+        transition: {
+            duration: 0.86,
+            delay,
+            ease,
+        },
+    }),
+}
+
+const burnVeilVariants = {
+    hidden: { y: "0%", opacity: 1 },
+    show: (delay: number) => ({
+        y: "108%",
+        opacity: 0.04,
+        transition: {
+            duration: 1.08,
+            delay: delay + 0.04,
+            ease: [0.22, 1, 0.36, 1] as const,
+        },
+    }),
+}
+
+const burnEdgeVariants = {
+    hidden: { y: "-8%", opacity: 0 },
+    show: (delay: number) => ({
+        y: "114%",
+        opacity: [0, 0.95, 0],
+        transition: {
+            duration: 1.12,
+            delay: delay + 0.06,
+            ease: [0.22, 1, 0.36, 1] as const,
+            times: [0, 0.2, 1] as const,
+        },
+    }),
+}
 
 const cardGlow =
     "pointer-events-none absolute inset-0 rounded-[inherit] bg-[linear-gradient(140deg,rgba(255,255,255,0.12),transparent_28%,transparent_70%,rgba(34,211,238,0.08))]"
@@ -84,9 +125,9 @@ const LighthouseGauge = () => {
     const displayCount = prefersReduced && isInView ? 100 : count
 
     return (
-        <div ref={containerRef} className="relative flex h-40 w-40 items-center justify-center">
-            <div className="absolute inset-5 rounded-full bg-cyan-400/10 blur-2xl" />
-            <svg className="h-full w-full -rotate-90" viewBox="0 0 120 120">
+        <div ref={containerRef} className="relative flex h-40 w-40 items-center justify-center overflow-visible">
+            <div className="pointer-events-none absolute -inset-2 rounded-full bg-cyan-400/12 blur-[34px]" />
+            <svg className="h-full w-full -rotate-90 overflow-visible" viewBox="0 0 120 120">
                 <circle cx="60" cy="60" r="45" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="6" />
                 <motion.circle
                     cx="60"
@@ -141,13 +182,109 @@ const ScrollCue = () => {
     )
 }
 
+const BurnRevealCard = ({
+    children,
+    className,
+    delay,
+    prefersReduced,
+    centerActivateByViewport = false,
+}: {
+    children: React.ReactNode
+    className: string
+    delay: number
+    prefersReduced: boolean
+    centerActivateByViewport?: boolean
+}) => {
+    const cardRef = useRef<HTMLElement>(null)
+    const isCentered = useInView(cardRef, { margin: "-45% 0px -45% 0px", amount: 0.08 })
+    const centerActive = centerActivateByViewport && isCentered
+    const hoverMotionClass = prefersReduced
+        ? ""
+        : "will-change-transform transition-transform duration-150 ease-out hover:scale-[1.022]"
+
+    return (
+        <motion.article
+            ref={cardRef}
+            custom={delay}
+            initial={prefersReduced ? false : "hidden"}
+            whileInView={prefersReduced ? undefined : "show"}
+            viewport={{ once: true, amount: 0.32 }}
+            variants={cardRevealVariants}
+            className={`${className} group/bento-card isolate ${hoverMotionClass}`}
+        >
+            <div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-[-1px] z-20 rounded-[inherit] border border-cyan-300/0 opacity-0 transition-all duration-150 ease-out group-hover/bento-card:border-cyan-300/40 group-hover/bento-card:opacity-100"
+                style={{
+                    boxShadow:
+                        "0 0 24px rgba(34,211,238,0.26), 0 0 44px rgba(167,139,250,0.2), inset 0 0 18px rgba(34,211,238,0.16)",
+                }}
+            />
+            <div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-0 z-20 rounded-[inherit] opacity-0 transition-opacity duration-150 ease-out group-hover/bento-card:opacity-100"
+                style={{
+                    background:
+                        "radial-gradient(85% 60% at 0% 0%, rgba(34,211,238,0.24) 0%, transparent 52%), radial-gradient(90% 64% at 100% 0%, rgba(167,139,250,0.22) 0%, transparent 56%), radial-gradient(82% 60% at 0% 100%, rgba(34,211,238,0.2) 0%, transparent 54%), radial-gradient(90% 62% at 100% 100%, rgba(167,139,250,0.2) 0%, transparent 56%)",
+                }}
+            />
+            {centerActive && (
+                <>
+                    <div
+                        aria-hidden="true"
+                        className="pointer-events-none absolute inset-[-1px] z-20 rounded-[inherit] border border-cyan-300/40 opacity-100"
+                        style={{
+                            boxShadow:
+                                "0 0 24px rgba(34,211,238,0.26), 0 0 44px rgba(167,139,250,0.2), inset 0 0 18px rgba(34,211,238,0.16)",
+                        }}
+                    />
+                    <div
+                        aria-hidden="true"
+                        className="pointer-events-none absolute inset-0 z-20 rounded-[inherit] opacity-100"
+                        style={{
+                            background:
+                                "radial-gradient(85% 60% at 0% 0%, rgba(34,211,238,0.24) 0%, transparent 52%), radial-gradient(90% 64% at 100% 0%, rgba(167,139,250,0.22) 0%, transparent 56%), radial-gradient(82% 60% at 0% 100%, rgba(34,211,238,0.2) 0%, transparent 54%), radial-gradient(90% 62% at 100% 100%, rgba(167,139,250,0.2) 0%, transparent 56%)",
+                        }}
+                    />
+                </>
+            )}
+            {!prefersReduced && (
+                <>
+                    <motion.div
+                        aria-hidden="true"
+                        custom={delay}
+                        variants={burnVeilVariants}
+                        className="pointer-events-none absolute inset-[-1px] z-30 rounded-[inherit]"
+                        style={{
+                            background:
+                                "linear-gradient(180deg, rgba(4,7,18,0.98) 0%, rgba(4,7,18,0.94) 55%, rgba(4,7,18,0.9) 100%)",
+                        }}
+                    />
+                    <motion.div
+                        aria-hidden="true"
+                        custom={delay}
+                        variants={burnEdgeVariants}
+                        className="pointer-events-none absolute left-[-12%] right-[-12%] top-0 z-40 h-16 rounded-full blur-[20px]"
+                        style={{
+                            background:
+                                "linear-gradient(90deg, rgba(255,148,87,0) 0%, rgba(255,186,124,0.72) 25%, rgba(255,129,43,0.88) 50%, rgba(255,186,124,0.72) 75%, rgba(255,148,87,0) 100%)",
+                        }}
+                    />
+                </>
+            )}
+            {children}
+        </motion.article>
+    )
+}
+
 export const WebDevelopmentBento = () => {
     const sectionRef = useRef<HTMLElement>(null)
     const gridRef = useRef<HTMLDivElement>(null)
-    const isSectionInView = useInView(sectionRef, { once: true, amount: 0.12 })
     const prefersReduced = useReducedMotion()
+    const [isTabletOrMobile, setIsTabletOrMobile] = useState(false)
     const mouseX = useMotionValue(0)
     const mouseY = useMotionValue(0)
+    const centerHoverByViewport = !prefersReduced && isTabletOrMobile
 
     const spotlight = useMotionTemplate`
         radial-gradient(380px circle at ${mouseX}px ${mouseY}px, rgba(34,211,238,0.15), rgba(167,139,250,0.09) 35%, transparent 70%)
@@ -172,6 +309,22 @@ export const WebDevelopmentBento = () => {
         mouseY.set(gridRef.current.clientHeight / 2)
     }, [mouseX, mouseY])
 
+    useEffect(() => {
+        if (typeof window === "undefined") return
+
+        const mediaQuery = window.matchMedia("(max-width: 1024px)")
+        const syncViewport = () => setIsTabletOrMobile(mediaQuery.matches)
+        syncViewport()
+
+        if (typeof mediaQuery.addEventListener === "function") {
+            mediaQuery.addEventListener("change", syncViewport)
+            return () => mediaQuery.removeEventListener("change", syncViewport)
+        }
+
+        mediaQuery.addListener(syncViewport)
+        return () => mediaQuery.removeListener(syncViewport)
+    }, [])
+
     return (
         <section ref={sectionRef} className="relative z-10 w-full overflow-hidden bg-transparent px-4 py-24">
             <style>{`
@@ -194,24 +347,76 @@ export const WebDevelopmentBento = () => {
 
             <div className="relative z-10 mx-auto max-w-7xl">
                 <motion.div
-                    initial={{ opacity: 0, y: 18 }}
-                    animate={isSectionInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 18 }}
-                    transition={{ duration: 0.7, ease }}
+                    initial={prefersReduced ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, amount: 0.55 }}
+                    transition={{ duration: prefersReduced ? 0 : 0.72, ease }}
                     className="mx-auto mb-14 max-w-4xl text-center"
                 >
-                    <span className="mb-5 inline-flex rounded-full border border-white/[0.07] bg-white/[0.03] px-4 py-2 text-[11px] uppercase tracking-[0.34em] text-cyan-300/85 backdrop-blur-xl">
+                    <motion.span
+                        initial={prefersReduced ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true, amount: 0.6 }}
+                        transition={{ duration: prefersReduced ? 0 : 0.54, delay: 0.04, ease }}
+                        className="mb-5 inline-flex rounded-full border border-white/[0.07] bg-white/[0.03] px-4 py-2 text-[11px] uppercase tracking-[0.34em] text-cyan-300/85 backdrop-blur-xl"
+                    >
                         [ Por qué la web cambia todo ]
-                    </span>
-                    <h2 className="text-[clamp(2.25rem,5vw,4rem)] font-black leading-[0.95] tracking-[-0.05em] text-white">
-                        No es una página web.
-                        <br />
-                        <span className="bg-gradient-to-r from-white via-cyan-200 to-violet-300 bg-clip-text text-transparent">
-                            Es tu vendedor más eficiente.
-                        </span>
-                    </h2>
-                    <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-white/52 md:text-lg">
+                    </motion.span>
+                    <div className="relative">
+                        {!prefersReduced && (
+                            <motion.div
+                                aria-hidden="true"
+                                initial={{ opacity: 0, y: 22, scale: 0.84 }}
+                                whileInView={{ opacity: [0, 1, 0.22], y: [22, 2, -4], scale: [0.84, 1.08, 1] }}
+                                viewport={{ once: true, amount: 0.6 }}
+                                transition={{
+                                    duration: 1.05,
+                                    delay: 0.08,
+                                    ease: [0.16, 1, 0.3, 1] as const,
+                                    times: [0, 0.4, 1],
+                                }}
+                                className="pointer-events-none absolute inset-x-[18%] top-[38%] h-24 rounded-full blur-[38px]"
+                                style={{ background: "radial-gradient(ellipse, rgba(34,211,238,0.75) 0%, rgba(167,139,250,0.6) 45%, rgba(167,139,250,0.02) 100%)" }}
+                            />
+                        )}
+                        <motion.h2
+                            initial={
+                                prefersReduced
+                                    ? { opacity: 1, y: 0 }
+                                    : {
+                                          opacity: 0,
+                                          y: 42,
+                                          filter: "blur(10px) brightness(2.25)",
+                                          textShadow:
+                                              "0 0 60px rgba(34,211,238,0.95), 0 0 120px rgba(167,139,250,0.75)",
+                                      }
+                            }
+                            whileInView={{
+                                opacity: 1,
+                                y: 0,
+                                filter: "blur(0px) brightness(1)",
+                                textShadow: "0 0 20px rgba(34,211,238,0.2), 0 0 48px rgba(167,139,250,0.18)",
+                            }}
+                            viewport={{ once: true, amount: 0.6 }}
+                            transition={{ duration: prefersReduced ? 0 : 1, delay: 0.1, ease }}
+                            className="relative text-[clamp(2.25rem,5vw,4rem)] font-black leading-[0.95] tracking-[-0.05em] text-white"
+                        >
+                            No es una página web.
+                            <br />
+                            <span className="bg-gradient-to-r from-white via-cyan-200 to-violet-300 bg-clip-text text-transparent">
+                                Es tu vendedor más eficiente.
+                            </span>
+                        </motion.h2>
+                    </div>
+                    <motion.p
+                        initial={prefersReduced ? { opacity: 1, y: 0 } : { opacity: 0, y: 14 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true, amount: 0.6 }}
+                        transition={{ duration: prefersReduced ? 0 : 0.64, delay: 0.2, ease }}
+                        className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-white/52 md:text-lg"
+                    >
                         Diseñamos una presencia que convence en segundos, aparece en el momento correcto y convierte incluso cuando vos no estás frente al mostrador.
-                    </p>
+                    </motion.p>
                 </motion.div>
 
                 <div
@@ -226,9 +431,11 @@ export const WebDevelopmentBento = () => {
                         style={{ background: spotlight }}
                     />
 
-                    <div className="relative z-10 grid grid-cols-1 gap-4 lg:grid-cols-12 lg:grid-rows-[minmax(18rem,auto)_minmax(14rem,auto)]">
-                        <motion.article
-                            {...fadeUp(0.12)}
+                    <div className="relative z-10 grid grid-cols-1 gap-4 lg:grid-cols-12 lg:gap-5 lg:grid-rows-[minmax(18rem,auto)_minmax(14rem,auto)]">
+                        <BurnRevealCard
+                            delay={0.08}
+                            prefersReduced={prefersReduced}
+                            centerActivateByViewport={centerHoverByViewport}
                             className={`${glassCardClass} min-h-[22rem] lg:col-span-7 lg:row-span-1`}
                         >
                             <div className={cardGlow} />
@@ -272,10 +479,12 @@ export const WebDevelopmentBento = () => {
                                     </div>
                                 </div>
                             </div>
-                        </motion.article>
+                        </BurnRevealCard>
 
-                        <motion.article
-                            {...fadeUp(0.2)}
+                        <BurnRevealCard
+                            delay={0.16}
+                            prefersReduced={prefersReduced}
+                            centerActivateByViewport={centerHoverByViewport}
                             className={`${glassCardClass} min-h-[24.5rem] lg:col-span-5 lg:row-span-1`}
                         >
                             <div className={cardGlow} />
@@ -297,10 +506,12 @@ export const WebDevelopmentBento = () => {
                                     <span>Sin fricción</span>
                                 </div>
                             </div>
-                        </motion.article>
+                        </BurnRevealCard>
 
-                        <motion.article
-                            {...fadeUp(0.28)}
+                        <BurnRevealCard
+                            delay={0.24}
+                            prefersReduced={prefersReduced}
+                            centerActivateByViewport={centerHoverByViewport}
                             className={`${glassCardClass} min-h-[18.5rem] lg:col-span-4 lg:row-span-1`}
                         >
                             <div className={cardGlow} />
@@ -340,10 +551,12 @@ export const WebDevelopmentBento = () => {
                                     </div>
                                 </div>
                             </div>
-                        </motion.article>
+                        </BurnRevealCard>
 
-                        <motion.article
-                            {...fadeUp(0.36)}
+                        <BurnRevealCard
+                            delay={0.32}
+                            prefersReduced={prefersReduced}
+                            centerActivateByViewport={centerHoverByViewport}
                             className={`${glassCardClass} min-h-[16.75rem] lg:col-span-8 lg:row-span-1`}
                         >
                             <div className={cardGlow} />
@@ -379,7 +592,7 @@ export const WebDevelopmentBento = () => {
                                     </div>
                                 </div>
                             </div>
-                        </motion.article>
+                        </BurnRevealCard>
                     </div>
                 </div>
 
@@ -388,3 +601,4 @@ export const WebDevelopmentBento = () => {
         </section>
     )
 }
+
