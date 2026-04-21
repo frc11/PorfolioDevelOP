@@ -14,6 +14,7 @@ import { WebDevelopmentTimeline } from '@/components/sections/web-development/We
 import ComparadorSection from '@/components/sections/web-development/ComparadorSection'
 import WebDevelopmentByRubro from '@/components/sections/web-development/WebDevelopmentByRubro'
 import WebTemplatesImmersive from '@/components/sections/web-development/WebTemplatesImmersive'
+import AiSection from '@/components/sections/web-development/AiSection'
 import { ChargeTraceButton } from '@/components/ui/buttons/ChargeTraceButton'
 import { Portfolio } from '@/components/sections/home/Portfolio'
 
@@ -263,16 +264,22 @@ export default function WebDevelopmentPage() {
             <SectionDivider />
 
             <SectionReveal delay={0.05}>
-                <PricingSection />
+                <WebDevelopmentFaq />
             </SectionReveal>
 
             <SectionDivider />
 
             <SectionReveal delay={0.05}>
-                <WebDevelopmentFaq />
+                <AiSection />
             </SectionReveal>
 
             <SectionDivider color="violet" />
+
+            <SectionReveal delay={0.05}>
+                <PricingSection />
+            </SectionReveal>
+
+            <SectionDivider />
 
             <WebDevelopmentCta />
 

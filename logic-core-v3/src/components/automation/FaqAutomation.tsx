@@ -223,6 +223,43 @@ export default function FaqAutomation() {
                         )
                     })}
                 </div>
+
+                <motion.button
+                    type="button"
+                    onClick={() => window.dispatchEvent(new CustomEvent("open-mascot-chat"))}
+                    initial={{ opacity: 0, y: 14 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+                    className="mt-10 w-full rounded-2xl border px-6 py-5 text-left transition-all duration-200"
+                    style={{
+                        borderColor: "rgba(245,158,11,0.34)",
+                        background: "linear-gradient(145deg, rgba(245,158,11,0.12), rgba(194,65,12,0.2))",
+                        boxShadow: "0 0 0 1px rgba(245,158,11,0.12), 0 12px 32px rgba(0,0,0,0.35)",
+                    }}
+                >
+                    <p
+                        style={{
+                            fontSize: "clamp(18px,2.2vw,24px)",
+                            fontWeight: 700,
+                            color: "#fde68a",
+                            margin: 0,
+                        }}
+                    >
+                        Tenes otra pregunta?
+                    </p>
+                    <p
+                        style={{
+                            marginTop: "8px",
+                            marginBottom: 0,
+                            fontSize: "14px",
+                            lineHeight: 1.6,
+                            color: "rgba(255,255,255,0.72)",
+                        }}
+                    >
+                        Abri el chatbot y pregunta lo que quieras.
+                    </p>
+                </motion.button>
             </div>
         </section>
     )
