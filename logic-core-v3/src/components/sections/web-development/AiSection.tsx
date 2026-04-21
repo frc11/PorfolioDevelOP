@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import React, { useRef, useState } from 'react'
 import Link from 'next/link'
@@ -45,20 +45,20 @@ const cards: AiCard[] = [
     {
         icon: <ChatIcon />,
         title: 'Responde al instante',
-        copy: 'Un asistente IA contesta preguntas de tus clientes las 24hs. Precios, horarios y disponibilidad, sin que vos toques el telefono.',
-        tag: 'ChatBot · IA conversacional',
+        copy: 'Un asistente IA contesta preguntas de tus clientes las 24hs. Precios, horarios y disponibilidad, sin qué vos toques el telefono.',
+        tag: 'ChatBot � IA conversacional',
     },
     {
         icon: <CalcIcon />,
         title: 'Cotiza y agenda solo',
-        copy: 'El cliente completa un formulario inteligente y recibe su presupuesto automatico. Vos recibis el pedido listo para confirmar.',
-        tag: 'Automatizacion · WhatsApp API',
+        copy: 'El cliente completa un formulario inteligente y recibe su presupuesto automático. Vos recibis el pedido listo para confirmar.',
+        tag: 'Automatización � WhatsApp API',
     },
     {
         icon: <TrendIcon />,
         title: 'Se posiciona solo',
         copy: 'Contenido generado y optimizado por IA para que Google te encuentre en cada busqueda local de tu rubro.',
-        tag: 'SEO automatico · Contenido IA',
+        tag: 'SEO automático � Contenido IA',
     },
 ]
 
@@ -67,7 +67,7 @@ const ease = [0.16, 1, 0.3, 1] as const
 export default function AiSection() {
     const sectionRef = useRef<HTMLElement>(null)
     const isInView = useInView(sectionRef, { once: true, amount: 0.15 })
-    const prefersReduced = useReducedMotion()
+    const prefersReduced = !!useReducedMotion()
     const shouldReveal = prefersReduced || isInView
 
     const [hoveredCard, setHoveredCard] = useState<number | null>(null)
@@ -120,7 +120,7 @@ export default function AiSection() {
                             className="text-transparent bg-clip-text"
                             style={{ backgroundImage: 'linear-gradient(135deg, #00e5ff 0%, #7b2fff 100%)', WebkitBackgroundClip: 'text' }}
                         >
-                            cuando vos quieras.
+                            cuándo vos quieras.
                         </motion.span>
                     </h2>
 
@@ -168,11 +168,11 @@ export default function AiSection() {
                                 animation: 'mascot-pulse 2s ease-in-out infinite',
                             }}
                         >
-                            ✦
+                            ?
                         </div>
                         <div style={{ textAlign: 'left' }}>
                             <div style={{ fontSize: '13px', fontWeight: 600, color: 'white', lineHeight: 1.3 }}>
-                                Queres verlo en accion?
+                                Queres verlo en acción?
                             </div>
                             <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)', lineHeight: 1.4 }}>
                                 Proba el asistente IA {'->'} habla con la mascota

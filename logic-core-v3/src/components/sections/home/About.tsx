@@ -94,7 +94,7 @@ const DigitalHighlight = ({ children }: { children: React.ReactNode }) => {
 // Location badge
 const LocationBadge = () => (
     <div className="inline-flex items-center gap-2 mt-6 px-4 py-2 rounded-full border border-white/10 bg-white/[0.02]">
-        <span className="text-base">📍</span>
+        <span className="text-base"></span>
         <span className="text-sm text-zinc-400 tracking-wide">
             Tucumán, Argentina — trabajamos con clientes de todo el país
         </span>
@@ -106,7 +106,7 @@ const teamMembers: TeamMemberProps[] = [
     {
         name: "Franco",
         role: "Co-Founder & Lead Developer",
-        description: "Desarrollo web, IA y arquitectura de sistemas. Convierto ideas de negocio en productos digitales que funcionan solos.",
+        description: "Desarrollo web, IA y arquitectura de sistemas. Convierto ideas de negocio en productos digitales qué funcionan solos.",
         skills: ["Next.js", "IA", "n8n", "TypeScript"],
         avatarInitial: "F",
         avatarGradient: "from-cyan-500 to-green-500",
@@ -114,7 +114,7 @@ const teamMembers: TeamMemberProps[] = [
     {
         name: "Equipo develOP",
         role: "Full Stack & Automatizaciones",
-        description: "Backend, bases de datos y flujos de automatización. Hacemos que los sistemas trabajen solos.",
+        description: "Backend, bases de datos y flujos de automatización. Hacemos qué los sistemas trabajen solos.",
         skills: ["Node.js", "PostgreSQL", "n8n", "APIs"],
         avatarInitial: "D",
         avatarGradient: "from-violet-500 to-cyan-500",
@@ -164,11 +164,11 @@ const AboutMobile = () => {
                                 No somos una agencia más. <br />
                                 <span className="mr-2">Somos el</span>
                                 <DigitalHighlight>
-                                    equipo técnico que tu empresa necesitaba.
+                                    equipo técnico qué tu empresa necesitaba.
                                 </DigitalHighlight>
                             </p>
                             <p className="text-lg text-zinc-500 leading-relaxed">
-                                Combinamos desarrollo web, inteligencia artificial y automatizaciones para que tu negocio crezca sin depender de vos todo el tiempo.
+                                Combinamos desarrollo web, inteligencia artificial y automatizaciones para qué tu negocio crezca sin depender de vos todo el tiempo.
                             </p>
                             <LocationBadge />
                         </div>
@@ -232,11 +232,11 @@ const AboutDesktop = () => {
                             No somos una agencia más. <br />
                             <span className="mr-2">Somos el</span>
                             <DigitalHighlight>
-                                equipo técnico que tu empresa necesitaba.
+                                equipo técnico qué tu empresa necesitaba.
                             </DigitalHighlight>
                         </p>
                         <p className="text-xl text-zinc-500 leading-relaxed max-w-2xl">
-                            Combinamos desarrollo web, inteligencia artificial y automatizaciones para que tu negocio crezca sin depender de vos todo el tiempo.
+                            Combinamos desarrollo web, inteligencia artificial y automatizaciones para qué tu negocio crezca sin depender de vos todo el tiempo.
                         </p>
                         <LocationBadge />
                     </div>

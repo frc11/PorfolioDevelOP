@@ -90,7 +90,7 @@ function GoogleSimulator({ centerMode }: { centerMode: boolean }) {
     const [typing, setTyping] = useState(false)
     const [searchPressed, setSearchPressed] = useState(false)
     const [searchClickPulse, setSearchClickPulse] = useState(0)
-    const prefersReduced = useReducedMotion()
+    const prefersReduced = !!useReducedMotion()
 
     useEffect(() => {
         const timers: number[] = []
@@ -317,7 +317,7 @@ function GoogleSimulator({ centerMode }: { centerMode: boolean }) {
                             <div className="rounded-[1.6rem] border border-cyan-300/[0.12] bg-white/[0.02] p-4 shadow-[0_0_36px_rgba(34,211,238,0.08)]">
                                 <div className="mb-3 flex items-center gap-3">
                                     <Sparkles className={`size-5 text-violet-200 ${floatingIconClass}`} />
-                                    <span className="text-[11px] uppercase tracking-[0.28em] text-white/35">Señales que importan</span>
+                                    <span className="text-[11px] uppercase tracking-[0.28em] text-white/35">Señales qué importan</span>
                                 </div>
                                 <div className="space-y-3">
                                     {["Título relevante", "Ficha local completa", "Velocidad mobile"].map((item) => (
@@ -371,7 +371,7 @@ function GoogleSimulator({ centerMode }: { centerMode: boolean }) {
                             >
                                 <div className="text-[11px] uppercase tracking-[0.28em] text-white/35">Lectura rápida</div>
                                 <p className="mt-3 text-sm leading-7 text-white/55">
-                                    Esto es lo que ven tus clientes cuando te buscan. Si no estás arriba, ese clic termina en otra marca.
+                                    Esto es lo qué ven tus clientes cuándo te buscan. Si no estás arriba, ese clic termina en otra marca.
                                 </p>
                             </CenterHoverCard>
                         </div>
@@ -383,7 +383,7 @@ function GoogleSimulator({ centerMode }: { centerMode: boolean }) {
 }
 
 export function WebDevelopmentSeo() {
-    const prefersReduced = useReducedMotion()
+    const prefersReduced = !!useReducedMotion()
     const titleRef = React.useRef<HTMLHeadingElement>(null)
     const titleInView = useInView(titleRef, { once: true, amount: 0.7 })
     const [typedStaticTitle, setTypedStaticTitle] = useState("")

@@ -13,7 +13,7 @@ const ease = [0.16, 1, 0.3, 1] as const
 export const WebDevelopmentSensory = () => {
     const sectionRef = useRef<HTMLElement>(null)
     const isInView = useInView(sectionRef, { once: true, amount: 0.2 })
-    const prefersReduced = useReducedMotion()
+    const prefersReduced = !!useReducedMotion()
     const shouldReveal = prefersReduced || isInView
 
     return (

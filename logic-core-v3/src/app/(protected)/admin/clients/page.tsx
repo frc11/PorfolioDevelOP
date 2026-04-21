@@ -1,4 +1,5 @@
 import Link from 'next/link'
+export const dynamic = 'force-dynamic'
 import { Users } from 'lucide-react'
 import { DeleteClientButton } from '@/components/admin/DeleteClientButton'
 import { HealthScoreDots } from '@/components/admin/HealthScoreDots'

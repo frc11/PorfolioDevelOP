@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useEffect, useRef, useState } from 'react';
 import { motion, useAnimationControls, useInView, useReducedMotion } from 'framer-motion';
@@ -56,7 +56,7 @@ export default function ComparadorSection() {
     const isInView = useInView(containerRef, { once: true, amount: 0.15 });
     const isChaosCentered = useInView(chaosCardRef, { margin: '-42% 0px -42% 0px', amount: 0.08 });
     const isControlCentered = useInView(controlCardRef, { margin: '-42% 0px -42% 0px', amount: 0.08 });
-    const prefersReduced = useReducedMotion();
+    const prefersReduced = !!useReducedMotion();
     const shouldReveal = prefersReduced || isInView;
     const chaosGlowControls = useAnimationControls();
     const controlGlowControls = useAnimationControls();
@@ -102,12 +102,12 @@ export default function ComparadorSection() {
 
     useEffect(() => {
         let cancelled = false;
-        let chaosTimer: ReturnType<typeof window.setTimeout> | null = null;
-        let controlTimer: ReturnType<typeof window.setTimeout> | null = null;
+        let chaosTimer: ReturnType<typeof setTimeout> | null = null;
+        let controlTimer: ReturnType<typeof setTimeout> | null = null;
 
         const wait = (ms: number, kind: 'chaos' | 'control') =>
             new Promise<void>((resolve) => {
-                const timeout = window.setTimeout(resolve, ms);
+                const timeout = setTimeout(resolve, ms);
                 if (kind === 'chaos') chaosTimer = timeout;
                 else controlTimer = timeout;
             });
@@ -175,8 +175,8 @@ export default function ComparadorSection() {
 
         return () => {
             cancelled = true;
-            if (chaosTimer) window.clearTimeout(chaosTimer);
-            if (controlTimer) window.clearTimeout(controlTimer);
+            if (chaosTimer) clearTimeout(chaosTimer);
+            if (controlTimer) clearTimeout(controlTimer);
             chaosGlowControls.stop();
             controlGlowControls.stop();
         };

@@ -15,7 +15,7 @@ const SECTION = 'rounded-2xl border border-white/[0.06] bg-white/[0.02] p-6'
 
 const STATS = [
   { label: 'Reseñas este mes', value: '23', icon: Star, color: 'text-yellow-400', bg: 'bg-yellow-500/10', trend: 35 },
-  { label: 'Rating promedio', value: '4.8 ★', icon: TrendingUp, color: 'text-emerald-400', bg: 'bg-emerald-500/10', trend: 4 },
+  { label: 'Rating promedio', value: '4.8 ', icon: TrendingUp, color: 'text-emerald-400', bg: 'bg-emerald-500/10', trend: 4 },
   { label: 'Solicitudes enviadas', value: '67', icon: Send, color: 'text-cyan-400', bg: 'bg-cyan-500/10', trend: 22 },
   { label: 'Tasa de conversión', value: '34%', icon: CheckCircle2, color: 'text-violet-400', bg: 'bg-violet-500/10', trend: 4 },
 ]

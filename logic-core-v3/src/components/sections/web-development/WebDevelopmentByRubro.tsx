@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import React, { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion, type Variants, useInView, useReducedMotion } from 'framer-motion'
@@ -27,7 +27,7 @@ const rubros: RubroData[] = [
         color: '#818cf8',
         colorRgb: '129,140,248',
         domain: 'autonorte.com.ar',
-        headline: 'Tu concesionaria sigue vendiendo incluso cuando el salón está cerrado.',
+        headline: 'Tu concesionaria sigue vendiendo incluso cuándo el salón está cerrado.',
         problema: 'Clientes comparan modelos y precios fuera de horario y se van con quien sí muestra un catálogo ordenado.',
         solucion: 'Diseñamos una vitrina digital con filtros, fichas claras y consulta directa lista para pasar al equipo comercial.',
         resultado: 'Más contactos calientes sin depender del horario del showroom.',
@@ -48,7 +48,7 @@ const rubros: RubroData[] = [
         domain: 'tuclinica.com.ar',
         headline: 'Tu clínica consigue pacientes mientras vos seguís atendiendo.',
         problema: 'Quien necesita turno rápido no quiere buscar teléfonos perdidos ni esperar respuesta manual.',
-        solucion: 'Mostramos especialidades, horarios y accesos clave en una experiencia que transmite orden y confianza.',
+        solucion: 'Mostramos especialidades, horarios y accesos clave en una experiencia qué transmite orden y confianza.',
         resultado: 'Menos fricción para reservar, más pacientes confirmados.',
         mockSubtitle: 'Flujo de turnos de alta conversión',
         mockItems: [
@@ -67,9 +67,9 @@ const rubros: RubroData[] = [
         domain: 'studiofit.com.ar',
         headline: 'Tu gimnasio convierte interés en inscripción sin repetir siempre lo mismo.',
         problema: 'La gente pregunta precios, horarios y clases por todos lados y se enfría antes de decidir.',
-        solucion: 'Centralizamos propuesta, beneficios y agenda para que la decisión ocurra en pocos clics.',
+        solucion: 'Centralizamos propuesta, beneficios y agenda para qué la decisión ocurra en pocos clics.',
         resultado: 'Más alumnos llegan con intención real de empezar.',
-        mockSubtitle: 'Sistema de membresías que convierte',
+        mockSubtitle: 'Sistema de membresías qué convierte',
         mockItems: [
             { title: 'Planes claros', description: 'Comparador simple de membresías y beneficios' },
             { title: 'Clase de prueba', description: 'Reserva automática con recordatorio previo' },
@@ -84,9 +84,9 @@ const rubros: RubroData[] = [
         color: '#fb923c',
         colorRgb: '251,146,60',
         domain: 'sazonurbana.com.ar',
-        headline: 'Tu restaurante se reserva mejor cuando la experiencia ya abre el apetito antes de llegar.',
+        headline: 'Tu restaurante se reserva mejor cuándo la experiencia ya abre el apetito antes de llegar.',
         problema: 'Si la carta está desordenada o vieja, la búsqueda termina en otro lugar más claro.',
-        solucion: 'Creamos una presencia que ordena menú, reservas y ubicación para que todo se entienda al instante.',
+        solucion: 'Creamos una presencia qué ordena menú, reservas y ubicación para qué todo se entienda al instante.',
         resultado: 'Más reservas y una marca más consistente en cada búsqueda.',
         mockSubtitle: 'Motor de reservas y carta digital',
         mockItems: [
@@ -103,8 +103,8 @@ const rubros: RubroData[] = [
         color: '#38bdf8',
         colorRgb: '56,189,248',
         domain: 'urbanprop.com.ar',
-        headline: 'Tu inmobiliaria destaca propiedades con una lectura mucho más seria que un feed suelto.',
-        problema: 'Publicar solo en redes diluye oportunidades y hace que cada propiedad pierda contexto.',
+        headline: 'Tu inmobiliaria destaca propiedades con una lectura mucho más seria qué un feed suelto.',
+        problema: 'Publicar solo en redes diluye oportunidades y hace qué cada propiedad pierda contexto.',
         solucion: 'Diseñamos un catálogo propio con jerarquía, filtros y consultas listas para convertir interés en visita.',
         resultado: 'Más descubrimiento, más autoridad y mejores consultas.',
         mockSubtitle: 'Catálogo inteligente para visitas',
@@ -503,7 +503,7 @@ function ResultNarrativeCard({ rubro, centerActivate, desktopHoverEnabled }: Nar
 export default function WebDevelopmentByRubro() {
     const sectionRef = useRef<HTMLElement>(null)
     const isInView = useInView(sectionRef, { once: true, amount: 0.1 })
-    const prefersReduced = useReducedMotion()
+    const prefersReduced = !!useReducedMotion()
     const [isTabletOrMobile, setIsTabletOrMobile] = useState(false)
     const [activeRubro, setActiveRubro] = useState(0)
     const [isPaused, setIsPaused] = useState(false)
@@ -669,7 +669,7 @@ export default function WebDevelopmentByRubro() {
                         transition={{ duration: prefersReduced ? 0 : 0.65, delay: 0.08, ease: [0.16, 1, 0.3, 1] }}
                         className="pb-[0.06em] pr-[0.04em] text-[clamp(2.2rem,5vw,4.4rem)] font-black leading-[0.99] tracking-[-0.05em] text-white"
                     >
-                        <span className="block">Una web que trabaja</span>
+                        <span className="block">Una web qué trabaja</span>
                         <span className="relative mt-1 block overflow-visible sm:inline-block sm:pr-2">
                             <motion.span
                                 initial={prefersReduced ? { scaleX: 1, opacity: 1 } : { scaleX: 0, opacity: 0.92 }}
@@ -708,7 +708,7 @@ export default function WebDevelopmentByRubro() {
                         transition={{ duration: prefersReduced ? 0 : 0.55, delay: 0.16, ease: [0.16, 1, 0.3, 1] }}
                         className="mt-6 max-w-2xl text-base leading-8 text-white/48 md:text-lg"
                     >
-                        Cambiamos el envoltorio genérico por una narrativa pensada para el problema real de tu rubro y para la decisión que querés provocar.
+                        Cambiamos el envoltorio genérico por una narrativa pensada para el problema real de tu rubro y para la decisión qué querés provocar.
                     </motion.p>
                 </div>
 

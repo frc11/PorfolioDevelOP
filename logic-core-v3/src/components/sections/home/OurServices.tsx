@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import {
@@ -60,14 +60,14 @@ const SERVICES: Service[] = [
   {
     id: 1,
     tag: 'SITIOS & LANDINGS',
-    title: 'Una presencia digital que convierte visitas en consultas reales.',
+    title: 'Tu vitrina abierta\nlas 24 horas.',
     description:
-      'DiseÃ±amos experiencias de alto impacto para que tu empresa se vea premium, aparezca bien posicionada y capture demanda sin depender de tu tiempo.',
+      'Diseñamos la presencia digital que pone tu negocio en Google, captura consultas mientras dormís y convierte visitas en clientes reales.',
     price: '$800 USD',
     timeline: '15 dias',
     metric: '+340% consultas promedio',
-    sectors: ['Concesionarias', 'Clinicas', 'Gimnasios', 'Restaurantes'],
-    outcomes: ['MÃ¡s autoridad en Google', 'Carga impecable en mobile', 'CaptaciÃ³n 24/7'],
+    sectors: ['Concesionarias', 'Clínicas', 'Gimnasios', 'Restaurantes'],
+    outcomes: ['Más autoridad en Google', 'Carga impecable en mobile', 'Captación 24/7'],
     cta: 'Explorar sitios web',
     href: '/web-development',
     accent: '#06b6d4',
@@ -78,14 +78,14 @@ const SERVICES: Service[] = [
   {
     id: 2,
     tag: 'INTELIGENCIA ARTIFICIAL',
-    title: 'Un sistema comercial que responde, filtra y agenda aunque tu equipo no estÃ© online.',
+    title: 'Un comercial que\nnunca se toma el día.',
     description:
-      'Integramos agentes de IA en WhatsApp y web para responder consultas, calificar leads y liberar tiempo ejecutivo sin perder velocidad de respuesta.',
+      'Un agente de IA responde consultas, califica leads y agenda reuniones por WhatsApp. A las 3AM, en feriados, siempre disponible.',
     price: '$300 USD',
     timeline: '7 dias',
-    metric: '94% respuesta automatica',
-    sectors: ['Concesionarias', 'Clinicas', 'Comercios', 'Inmobiliarias'],
-    outcomes: ['AtenciÃ³n inmediata', 'Mejor calidad de lead', 'Agenda operando sola'],
+    metric: '94% respuesta automática',
+    sectors: ['Concesionarias', 'Clínicas', 'Comercios', 'Inmobiliarias'],
+    outcomes: ['Atención inmediata', 'Mejor calidad de lead', 'Agenda operando sola'],
     cta: 'Explorar IA aplicada',
     href: '/ai-implementations',
     accent: '#8b5cf6',
@@ -95,15 +95,15 @@ const SERVICES: Service[] = [
   },
   {
     id: 3,
-    tag: 'AUTOMATIZACION',
-    title: 'Procesos conectados para que la operacion avance sin friccion humana.',
+    tag: 'AUTOMATIZACIÓN',
+    title: 'Tu operación,\nen piloto automático.',
     description:
-      'Orquestamos flujos entre tus herramientas para eliminar tareas repetitivas, acelerar seguimiento comercial y reducir errores administrativos.',
+      'Conectamos tus herramientas y automatizamos lo repetitivo. Reportes, seguimientos y notificaciones corriendo solos mientras vos te ocupás de lo importante.',
     price: '$200 USD',
     timeline: '5 dias',
     metric: '23hs por semana ahorradas',
-    sectors: ['Distribuidoras', 'Comercios', 'Clinicas', 'Inmobiliarias'],
-    outcomes: ['Menos trabajo manual', 'Follow-up automatico', 'Reportes al instante'],
+    sectors: ['Distribuidoras', 'Comercios', 'Clínicas', 'Inmobiliarias'],
+    outcomes: ['Menos trabajo manual', 'Follow-up automático', 'Reportes al instante'],
     cta: 'Explorar automatizaciones',
     href: '/process-automation',
     accent: '#10b981',
@@ -114,14 +114,14 @@ const SERVICES: Service[] = [
   {
     id: 4,
     tag: 'SOFTWARE A MEDIDA',
-    title: 'Un ecosistema propio para dirigir la empresa con claridad, control y velocidad.',
+    title: 'Tu empresa en\nuna sola pantalla.',
     description:
-      'Construimos software de gestion, CRM y paneles ejecutivos alineados con la logica real de tu negocio para escalar sin depender de planillas.',
+      'El sistema exacto para cómo trabaja tu negocio. Sin planillas, sin depender de nadie. Stock, ventas, clientes y equipo — todo centralizado.',
     price: '$1.500 USD',
     timeline: 'entrega por etapas',
     metric: '0 licencias mensuales',
-    sectors: ['Constructoras', 'Mayoristas', 'Clinicas', 'Concesionarias'],
-    outcomes: ['Operacion centralizada', 'Reportes directivos', 'Control total del dato'],
+    sectors: ['Constructoras', 'Mayoristas', 'Clínicas', 'Concesionarias'],
+    outcomes: ['operación centralizada', 'Reportes directivos', 'Control total del dato'],
     cta: 'Explorar software a medida',
     href: '/software-development',
     accent: '#f59e0b',
@@ -138,37 +138,203 @@ function StageFrame({
   service: Service;
   children: ReactNode;
 }) {
+  const [isMd, setIsMd] = useState(false);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(min-width: 768px)');
+    setIsMd(mediaQuery.matches);
+
+    const handler = (e: MediaQueryListEvent) => setIsMd(e.matches);
+    mediaQuery.addEventListener('change', handler);
+    return () => mediaQuery.removeEventListener('change', handler);
+  }, []);
+
   return (
-    <div className="relative h-full overflow-hidden rounded-3xl border border-white/[0.05] bg-white/[0.02] p-5 backdrop-blur-2xl md:p-6">
-      <div className="pointer-events-none absolute inset-0 opacity-90" style={{ background: service.glow }} />
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.06),transparent_34%,transparent_72%,rgba(255,255,255,0.02))]" />
+    <div
+      style={{
+        position: 'relative',
+        width: '100%',
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+      }}
+    >
+      {/* Glow de fondo del color del servicio */}
+      <div
+        style={{
+          position: 'absolute',
+          inset: -40,
+          background: `radial-gradient(ellipse 60% 50% at 50% 50%, ${service.accent}08 0%, transparent 70%)`,
+          pointerEvents: 'none',
+          zIndex: 0,
+        }}
+      />
 
-      <div className="pointer-events-none absolute right-[-4%] top-[-14%] text-[clamp(7rem,16vw,14rem)] font-black leading-none tracking-[-0.08em] text-white/[0.045] mix-blend-soft-light [text-shadow:0_0_40px_rgba(255,255,255,0.02)] [WebkitTextStroke:1px_rgba(255,255,255,0.05)]">
-        {String(service.id).padStart(2, '0')}
-      </div>
-
-      <div className="relative flex h-full flex-col">
-        <div className="flex items-center justify-between gap-3">
-          <div className="rounded-full border border-white/[0.06] bg-black/18 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.22em] text-white/50">
-            {service.tag}
+      {/* Browser window */}
+      <div
+        style={{
+          position: 'relative',
+          zIndex: 1,
+          background: 'rgba(10,10,12,0.95)',
+          backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
+          border: '1px solid rgba(255,255,255,0.10)',
+          borderRadius: 16,
+          overflow: 'hidden',
+          boxShadow: `
+            0 32px 80px rgba(0,0,0,0.6),
+            0 0 0 1px rgba(255,255,255,0.04),
+            inset 0 1px 0 rgba(255,255,255,0.07),
+            0 0 40px ${service.accent}10
+          `,
+          flex: 1,
+          display: 'flex',
+          flexDirection: 'column',
+        }}
+      >
+        {/* Browser top bar */}
+        <div
+          style={{
+            background: 'rgba(255,255,255,0.04)',
+            borderBottom: '1px solid rgba(255,255,255,0.07)',
+            padding: '10px 14px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 10,
+            flexShrink: 0,
+          }}
+        >
+          {/* Traffic lights */}
+          <div style={{ display: 'flex', gap: 5, flexShrink: 0 }}>
+            {['#ff5f57', '#ffbd2e', '#28c840'].map((c, i) => (
+              <div
+                key={i}
+                style={{
+                  width: 9,
+                  height: 9,
+                  borderRadius: '50%',
+                  background: c,
+                  opacity: 0.75,
+                }}
+              />
+            ))}
           </div>
+
+          {/* URL bar */}
           <div
-            className="rounded-full border px-3 py-1.5 text-[11px] font-semibold tracking-[0.04em]"
             style={{
-              borderColor: `${service.accent}28`,
+              flex: 1,
+              background: 'rgba(255,255,255,0.05)',
+              border: '1px solid rgba(255,255,255,0.08)',
+              borderRadius: 6,
+              padding: '4px 10px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+              maxWidth: 320,
+            }}
+          >
+            <div
+              style={{
+                width: 5,
+                height: 5,
+                borderRadius: '50%',
+                background: service.accent,
+                boxShadow: `0 0 4px ${service.accent}`,
+                flexShrink: 0,
+              }}
+            />
+            <span
+              style={{
+                fontSize: 10,
+                color: 'rgba(255,255,255,0.3)',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {service.tag.toLowerCase().replace(/\s+|&/g, '')}.develop.com.ar
+            </span>
+          </div>
+
+          {/* Badge de métrica del servicio */}
+          <div
+            style={{
+              marginLeft: 'auto',
+              fontSize: 9,
+              fontWeight: 600,
               color: service.accent,
-              backgroundColor: `${service.accent}12`,
+              background: `${service.accent}12`,
+              border: `1px solid ${service.accent}25`,
+              borderRadius: 100,
+              padding: '3px 8px',
+              letterSpacing: '0.04em',
+              flexShrink: 0,
             }}
           >
             {service.metric}
           </div>
         </div>
 
-        <div className="relative mt-5 flex-1 overflow-hidden rounded-[28px] border border-white/[0.06] bg-black/18 ring-1 ring-white/10 contrast-[1.05] saturate-[1.08]">
-          <div
-            className="pointer-events-none absolute inset-0 opacity-20 blur-3xl"
-            style={{ background: `radial-gradient(circle at 50% 50%, ${service.accent}, transparent 62%)` }}
-          />
+        {/* Top bar del portal — nombre del servicio */}
+        <div
+          style={{
+            background: 'rgba(255,255,255,0.02)',
+            borderBottom: '1px solid rgba(255,255,255,0.05)',
+            padding: '8px 14px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexShrink: 0,
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <service.icon size={12} color={service.accent} strokeWidth={1.5} />
+            <span
+              style={{
+                fontSize: 9,
+                fontWeight: 600,
+                letterSpacing: '0.12em',
+                color: `${service.accent}80`,
+                textTransform: 'uppercase',
+              }}
+            >
+              {service.tag}
+            </span>
+          </div>
+          <motion.div
+            animate={{ opacity: [0.5, 1, 0.5] }}
+            transition={{ duration: 2, repeat: Infinity }}
+            style={{
+              fontSize: 8,
+              color: '#10b981',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 4,
+            }}
+          >
+            <div
+              style={{
+                width: 5,
+                height: 5,
+                borderRadius: '50%',
+                background: '#10b981',
+              }}
+            />
+            EN VIVO
+          </motion.div>
+        </div>
+
+        {/* Área de contenido — las simulaciones */}
+        <div
+          style={{
+            height: isMd ? 800 : 700,
+            overflow: 'hidden',
+            position: 'relative',
+            flexShrink: 0,
+            padding: 0,
+          }}
+        >
           {children}
         </div>
       </div>
@@ -387,7 +553,7 @@ function WebScene({ service }: { service: Service }) {
   const activePlaceholder = placeholderConfigs[activeTab];
 
   function SimSEO({ isActive, progress, color }: SimProps) {
-    const query = 'ClÃ­nica odontolÃ³gica en TucumÃ¡n';
+    const query = 'Clínica odontológica en Tucumán';
     const typedLength = Math.floor(Math.min(progress / 0.25, 1) * query.length);
     const typedQuery = query.slice(0, typedLength);
     const showResults = progress > 0.28;
@@ -423,7 +589,7 @@ function WebScene({ service }: { service: Service }) {
                 marginBottom: 2,
               }}
             >
-              BÃšSQUEDA ACTIVA
+              BÚSQUEDA ACTIVA
             </div>
             <div
               style={{
@@ -431,7 +597,7 @@ function WebScene({ service }: { service: Service }) {
                 color: 'rgba(255,255,255,0.5)',
               }}
             >
-              Google Â· TucumÃ¡n, Argentina
+              Google · Tucumán, Argentina
             </div>
           </div>
           <div
@@ -450,7 +616,7 @@ function WebScene({ service }: { service: Service }) {
           </div>
         </div>
 
-        {/* Barra de bÃºsqueda glassmorphism */}
+        {/* Barra de búsqueda glassmorphism */}
         <div
           style={{
             display: 'flex',
@@ -517,7 +683,7 @@ function WebScene({ service }: { service: Service }) {
             flex: 1,
           }}
         >
-          {/* RESULTADO #1 â€” TU EMPRESA */}
+          {/* RESULTADO #1 — TU EMPRESA */}
           {showResults && (
             <motion.div
               initial={{ opacity: 0, y: 10 }}
@@ -574,7 +740,7 @@ function WebScene({ service }: { service: Service }) {
                 </motion.div>
               )}
 
-              {/* PosiciÃ³n + URL */}
+              {/* Posición + URL */}
               <div
                 style={{
                   display: 'flex',
@@ -627,7 +793,7 @@ function WebScene({ service }: { service: Service }) {
                 </div>
               </div>
 
-              {/* TÃ­tulo del resultado */}
+              {/* Título del resultado */}
               <div
                 style={{
                   fontSize: 13,
@@ -641,7 +807,7 @@ function WebScene({ service }: { service: Service }) {
                 Tu Empresa | develOP
               </div>
 
-              {/* DescripciÃ³n */}
+              {/* Descripción */}
               <div
                 style={{
                   fontSize: 10,
@@ -650,7 +816,7 @@ function WebScene({ service }: { service: Service }) {
                   transition: 'color 400ms',
                 }}
               >
-                El mejor servicio en tu zona. ConsultÃ¡ precios, pedÃ­ presupuesto online.
+                El mejor servicio en tu zona. Consultá precios, pedí presupuesto online.
               </div>
 
               {/* Stars */}
@@ -674,30 +840,30 @@ function WebScene({ service }: { service: Service }) {
                       transition={{ delay: s * 0.05, type: 'spring', stiffness: 400 }}
                       style={{ fontSize: 11, color: '#f59e0b' }}
                     >
-                      â˜…
+                      
                     </motion.span>
                   ))}
                   <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)', marginLeft: 4 }}>
-                    4.9 Â· 47 reseÃ±as
+                    4.9 · 47 reseñas
                   </span>
                 </motion.div>
               )}
             </motion.div>
           )}
 
-          {/* RESULTADOS 2 y 3 â€” competidores */}
+          {/* RESULTADOS 2 y 3 — competidores */}
           {[
             {
               pos: 2,
               url: 'competidor1.com',
-              title: 'Competidor Local â€” Servicios',
-              desc: 'InformaciÃ³n bÃ¡sica. Sin optimizaciÃ³n.',
+              title: 'Competidor Local — Servicios',
+              desc: 'Información básica. Sin optimización.',
             },
             {
               pos: 3,
               url: 'directoriolocal.com',
               title: 'Directorio de empresas',
-              desc: 'Listado general sin diferenciaciÃ³n.',
+              desc: 'Listado general sin diferenciación.',
             },
           ].map(
             (result, i) =>
@@ -1349,9 +1515,9 @@ function WebScene({ service }: { service: Service }) {
         >
           <div>
             <div style={{ fontSize: 9, letterSpacing: '0.15em', color: 'rgba(255,255,255,0.25)', marginBottom: 2 }}>
-              GOOGLE MAPS Â· LOCAL
+              GOOGLE MAPS · LOCAL
             </div>
-            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>TucumÃ¡n, Argentina</div>
+            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>Tucumán, Argentina</div>
           </div>
           <div
             style={{
@@ -1364,11 +1530,11 @@ function WebScene({ service }: { service: Service }) {
               fontWeight: 600,
             }}
           >
-            PRIMERA POSICIÃ“N
+            PRIMERA POSICIÓN
           </div>
         </div>
 
-        {/* Ãrea mapa + panel lateral */}
+        {/* írea mapa + panel lateral */}
         <div
           style={{
             flex: 1,
@@ -1520,7 +1686,7 @@ function WebScene({ service }: { service: Service }) {
                     position: 'relative',
                   }}
                 >
-                  <span style={{ transform: 'rotate(45deg)', fontSize: 13 }}>â˜…</span>
+                  <span style={{ transform: 'rotate(45deg)', fontSize: 13 }}></span>
                 </motion.div>
 
                 {/* Label */}
@@ -1541,7 +1707,7 @@ function WebScene({ service }: { service: Service }) {
                     letterSpacing: '0.03em',
                   }}
                 >
-                  TU EMPRESA Â· 5.0 â˜…
+                  TU EMPRESA · 5.0 
                 </motion.div>
               </motion.div>
             )}
@@ -1584,11 +1750,11 @@ function WebScene({ service }: { service: Service }) {
                 <div>
                   {[1, 2, 3, 4, 5].map((s) => (
                     <span key={s} style={{ fontSize: 10, color: '#f59e0b' }}>
-                      â˜…
+                      
                     </span>
                   ))}
                 </div>
-                <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.25)', marginTop: 2 }}>47 reseÃ±as</div>
+                <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.25)', marginTop: 2 }}>47 reseñas</div>
               </div>
 
               {/* Separador */}
@@ -1608,7 +1774,7 @@ function WebScene({ service }: { service: Service }) {
                   }}
                 >
                   <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.35)' }}>{item}</span>
-                  <span style={{ fontSize: 10, color }}>âœ“</span>
+                  <span style={{ fontSize: 10, color }}>✓</span>
                 </motion.div>
               ))}
 
@@ -1628,7 +1794,7 @@ function WebScene({ service }: { service: Service }) {
                   VS COMPETENCIA
                 </div>
                 {[
-                  { label: 'ReseÃ±as', you: '47', them: '8' },
+                  { label: 'Reseñas', you: '47', them: '8' },
                   { label: 'Rating', you: '5.0', them: '3.1' },
                 ].map((item, i) => (
                   <div
@@ -2206,34 +2372,34 @@ const AI_SIMULATIONS: AISimulation[] = [
   { id: 1, label: 'Chat IA',  icon: MessageSquare, duration: 6000, color: AI_COLOR },
   { id: 2, label: 'Leads',    icon: Target,        duration: 5500, color: AI_COLOR },
   { id: 3, label: 'Agenda',   icon: Calendar,      duration: 5000, color: AI_COLOR },
-  { id: 4, label: 'MÃ©tricas', icon: BarChart2,     duration: 4500, color: AI_COLOR },
+  { id: 4, label: 'Métricas', icon: BarChart2,     duration: 4500, color: AI_COLOR },
 ];
 
 type AISimProps = { isActive: boolean; progress: number; color: string };
 
 function SimChat({ isActive: _isActive, progress: _progress, color: _color }: AISimProps) {
-  return <div style={{ color: 'rgba(255,255,255,0.2)', fontSize: 11, padding: 12 }}>Chat IA â€” prÃ³ximo sprint</div>;
+  return <div style={{ color: 'rgba(255,255,255,0.2)', fontSize: 11, padding: 12 }}>Chat IA — próximo sprint</div>;
 }
 function SimLeadsIA({ isActive: _isActive, progress: _progress, color: _color }: AISimProps) {
-  return <div style={{ color: 'rgba(255,255,255,0.2)', fontSize: 11, padding: 12 }}>Leads IA â€” prÃ³ximo sprint</div>;
+  return <div style={{ color: 'rgba(255,255,255,0.2)', fontSize: 11, padding: 12 }}>Leads IA — próximo sprint</div>;
 }
 function SimAgenda({ isActive: _isActive, progress: _progress, color: _color }: AISimProps) {
-  return <div style={{ color: 'rgba(255,255,255,0.2)', fontSize: 11, padding: 12 }}>Agenda â€” prÃ³ximo sprint</div>;
+  return <div style={{ color: 'rgba(255,255,255,0.2)', fontSize: 11, padding: 12 }}>Agenda — próximo sprint</div>;
 }
-function SimMetricas({ isActive: _isActive, progress: _progress, color: _color }: AISimProps) {
-  return <div style={{ color: 'rgba(255,255,255,0.2)', fontSize: 11, padding: 12 }}>MÃ©tricas â€” prÃ³ximo sprint</div>;
+function SimMétricas({ isActive: _isActive, progress: _progress, color: _color }: AISimProps) {
+  return <div style={{ color: 'rgba(255,255,255,0.2)', fontSize: 11, padding: 12 }}>Métricas — próximo sprint</div>;
 }
 
 function AIScene({ service: _service }: { service: Service }) {
   type SimProps = { isActive: boolean; progress: number; color: string };
 
   function SimChat({ isActive, progress, color }: SimProps) {
-    const clientMsg1 = 'Hola! Tienen la Toyota Hilux 4x4 disponible? CuÃ¡nto sale?';
+    const clientMsg1 = 'Hola! Tienen la Toyota Hilux 4x4 disponible? Cuánto sale?';
     const botMsg1 =
-      'Â¡Hola! ðŸ‘‹ SÃ­, tenemos 2 Hilux 4x4 disponibles ahora mismo:\n\nâ€¢ AT Full: $47.500 USD\nâ€¢ MT SR: $43.200 USD\n\nÂ¿QuerÃ©s que te cuente las diferencias o preferÃ­s ver las fotos?';
-    const clientMsg2 = 'Me interesa la AT Full. Tienen financiaciÃ³n?';
+      '¡Hola!  Sí, tenemos 2 Hilux 4x4 disponibles ahora mismo:\n\n• AT Full: $47.500 USD\n• MT SR: $43.200 USD\n\n¿Querés que te cuente las diferencias o preferís ver las fotos?';
+    const clientMsg2 = 'Me interesa la AT Full. Tienen financiación?';
     const botMsg2 =
-      'Â¡SÃ­! Tenemos 3 opciones de financiaciÃ³n disponibles. TambiÃ©n puedo agendarte un test drive esta semana. Â¿CuÃ¡ndo te queda mejor? ðŸš—';
+      '¡Sí! Tenemos 3 opciones de financiación disponibles. También puedo agendarte un test drive está semana. ¿Cuándo te queda mejor? ðŸš—';
 
     const showHeader = progress > 0.1;
     const client1Length =
@@ -2306,7 +2472,7 @@ function AIScene({ service: _service }: { service: Service }) {
                   transition={{ duration: 1.5, repeat: isActive ? Infinity : 0 }}
                   style={{ width: 5, height: 5, borderRadius: '50%', background: '#25D366' }}
                 />
-                En lÃ­nea Â· Responde al instante
+                En línea · Responde al instante
               </div>
             </div>
             <div
@@ -2464,7 +2630,7 @@ function AIScene({ service: _service }: { service: Service }) {
                   gap: 4,
                 }}
               >
-                22:47 Â· IA
+                22:47 · IA
                 {showTimeBadge && (
                   <motion.span
                     initial={{ opacity: 0, scale: 0.8 }}
@@ -2554,7 +2720,7 @@ function AIScene({ service: _service }: { service: Service }) {
     const leads = [
       {
         name: 'Carlos M.',
-        msg: 'Quiero comprar una Hilux esta semana, tengo efectivo',
+        msg: 'Quiero comprar una Hilux está semana, tengo efectivo',
         score: 94,
         label: 'CALIENTE',
         labelColor: '#10b981',
@@ -2714,7 +2880,7 @@ function AIScene({ service: _service }: { service: Service }) {
                     </span>
                   </div>
 
-                  {/* Badge de clasificaciÃ³n */}
+                  {/* Badge de clasificación */}
                   <AnimatePresence>
                     {classified && (
                       <motion.div
@@ -2768,7 +2934,7 @@ function AIScene({ service: _service }: { service: Service }) {
                   {`"${lead.msg}"`}
                 </div>
 
-                {/* Barra de anÃ¡lisis */}
+                {/* Barra de análisis */}
                 {(analyzing || classified) && (
                   <div>
                     <div
@@ -2882,7 +3048,7 @@ function AIScene({ service: _service }: { service: Service }) {
   function SimAgenda({ isActive, progress, color }: SimProps) {
     void isActive;
 
-    const clientMsg = 'Hola! Quisiera sacar un turno para ver un auto esta semana';
+    const clientMsg = 'Hola! Quisiera sacar un turno para ver un auto está semana';
     const botMsg =
       '\u00a1Perfecto! Tengo disponibilidad:\n\ud83d\udcc5 Martes 14hs\n\ud83d\udcc5 Jueves 11hs\n\ud83d\udcc5 Viernes 16hs\n\u00bfCu\u00e1l te queda mejor?';
     const clientConfirm = 'El jueves a las 11hs perfecto';
@@ -3116,7 +3282,7 @@ function AIScene({ service: _service }: { service: Service }) {
                 ESTA SEMANA
               </div>
 
-              {/* DÃ­as */}
+              {/* Días */}
               <div
                 style={{
                   display: 'grid',
@@ -3186,9 +3352,9 @@ function AIScene({ service: _service }: { service: Service }) {
                       marginBottom: 3,
                     }}
                   >
-                    Jueves Â· 11:00hs
+                    Jueves · 11:00hs
                   </div>
-                  <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.35)' }}>Test Drive Â· Carlos M.</div>
+                  <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.35)' }}>Test Drive · Carlos M.</div>
                   <div style={{ fontSize: 8, color: `${color}70`, marginTop: 4 }}>
                     {'\ud83d\udcf2 Recordatorio programado'}
                   </div>
@@ -3201,7 +3367,7 @@ function AIScene({ service: _service }: { service: Service }) {
     );
   }
 
-  function SimMetricas({ isActive, progress, color }: SimProps) {
+  function SimMétricas({ isActive, progress, color }: SimProps) {
     void isActive;
 
     const totalConsultas = Math.floor(Math.min((progress - 0.15) / 0.35, 1) * 147);
@@ -3253,7 +3419,7 @@ function AIScene({ service: _service }: { service: Service }) {
             >
               {'DASHBOARD DE ATENCI\u00d3N'}
             </div>
-            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>Hoy Â· Tiempo real</div>
+            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>Hoy · Tiempo real</div>
           </div>
           <motion.div
             animate={{ opacity: [0.5, 1, 0.5] }}
@@ -3280,7 +3446,7 @@ function AIScene({ service: _service }: { service: Service }) {
           </motion.div>
         </div>
 
-        {/* MÃ©tricas principales */}
+        {/* Métricas principales */}
         {showMetrics && (
           <motion.div
             initial={{ opacity: 0 }}
@@ -3430,12 +3596,12 @@ function AIScene({ service: _service }: { service: Service }) {
                 fontWeight: 600,
               }}
             >
-              8.000Ã— m\u00e1s r\u00e1pido que un humano
+              8.000í— m\u00e1s r\u00e1pido qué un humano
             </div>
           </motion.div>
         )}
 
-        {/* GrÃ¡fico de actividad */}
+        {/* Gráfico de actividad */}
         {showChart && (
           <motion.div
             initial={{ opacity: 0 }}
@@ -3614,7 +3780,7 @@ function AIScene({ service: _service }: { service: Service }) {
     >
       <div style={{ marginBottom: 8, flexShrink: 0 }}>
         <div style={{ fontSize: 9, fontWeight: 600, letterSpacing: '0.12em', color: `${AI_COLOR}80`, marginBottom: 4 }}>
-          AGENTE IA Â· EN VIVO
+          AGENTE IA · EN VIVO
         </div>
         <div style={{ fontSize: 13, fontWeight: 600, color: 'rgba(255,255,255,0.8)', lineHeight: 1.3 }}>
           Tu sistema comercial trabajando ahora mismo
@@ -3749,7 +3915,7 @@ function AIScene({ service: _service }: { service: Service }) {
                 ? SimLeadsIA({ isActive: isInView, progress, color: activeSimulation.color })
                 : activeTab === 2
                   ? SimAgenda({ isActive: isInView, progress, color: activeSimulation.color })
-                  : SimMetricas({ isActive: isInView, progress, color: activeSimulation.color })}
+                  : SimMétricas({ isActive: isInView, progress, color: activeSimulation.color })}
           </motion.div>
         </AnimatePresence>
       </div>
@@ -3896,7 +4062,7 @@ function AutomationScene({ service }: { service: Service }) {
             >
               FLUJO ACTIVO
             </div>
-            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>Formulario â†’ n8n â†’ Apps</div>
+            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>Formulario → n8n → Apps</div>
           </div>
           {showCounter && (
             <motion.div
@@ -3951,7 +4117,7 @@ function AutomationScene({ service }: { service: Service }) {
 
               return visible ? (
                 <g key={index}>
-                  {/* LÃ­nea de conexiÃ³n */}
+                  {/* Línea de conexión */}
                   <motion.path
                     d={`M ${conn.fromX} ${conn.fromY} Q ${mx} ${my} ${conn.toX} ${conn.toY}`}
                     stroke="rgba(255,255,255,0.08)"
@@ -4096,7 +4262,7 @@ function AutomationScene({ service }: { service: Service }) {
       {
         time: 'Lun 10:32',
         label: 'Consulta recibida',
-        detail: 'Maria pregunto por precios de servicio',
+        detail: 'Maria preguntó por precios de servicio',
         icon: MessageSquare,
         iconColor: '#06b6d4',
         showAt: 0.12,
@@ -4113,8 +4279,8 @@ function AutomationScene({ service }: { service: Service }) {
       },
       {
         time: 'Mar 10:33',
-        label: 'Follow-up automatico',
-        detail: '"Â¡Hola Maria! Â¿Pudiste ver la info que te enviamos?"',
+        label: 'Follow-up automático',
+        detail: '"¡Hola Maria! ¿Pudiste ver la info que te enviamos?"',
         icon: Zap,
         iconColor: color,
         showAt: 0.45,
@@ -4123,7 +4289,7 @@ function AutomationScene({ service }: { service: Service }) {
       {
         time: 'Mar 11:15',
         label: 'Cliente responde',
-        detail: 'Maria: "Si! Me interesa, Â¿cuando podemos hablar?"',
+        detail: 'Maria: "Si! Me interesa, ¿cuándo podemos hablar?"',
         icon: MessageSquare,
         iconColor: '#10b981',
         showAt: 0.62,
@@ -4132,7 +4298,7 @@ function AutomationScene({ service }: { service: Service }) {
       {
         time: 'Mar 11:47',
         label: 'Deal cerrado',
-        detail: 'Turno agendado Â· Conversion: 94%',
+        detail: 'Turno agendado · Conversion: 94%',
         icon: CheckCircle,
         iconColor: '#10b981',
         showAt: 0.78,
@@ -4163,9 +4329,9 @@ function AutomationScene({ service }: { service: Service }) {
                 marginBottom: 2,
               }}
             >
-              SEGUIMIENTO AUTOMATICO
+              SEGUIMIENTO automático
             </div>
-            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>Ningun lead se pierde</div>
+            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>Ningún lead se pierde</div>
           </div>
           <div
             style={{
@@ -4184,7 +4350,7 @@ function AutomationScene({ service }: { service: Service }) {
 
         {/* Timeline */}
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 0, position: 'relative' }}>
-          {/* LÃ­nea vertical del timeline */}
+          {/* Línea vertical del timeline */}
           <div
             style={{
               position: 'absolute',
@@ -4215,7 +4381,7 @@ function AutomationScene({ service }: { service: Service }) {
                   position: 'relative',
                 }}
               >
-                {/* Ãcono del nodo */}
+                {/* ícono del nodo */}
                 <div
                   style={{
                     width: 30,
@@ -4306,7 +4472,7 @@ function AutomationScene({ service }: { service: Service }) {
             }}
           >
             <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.5)' }}>
-              Leads recuperados con follow-up automatico
+              Leads recuperados con follow-up automático
             </span>
             <motion.span
               animate={isActive ? { opacity: [0.85, 1, 0.85] } : { opacity: 1 }}
@@ -4325,10 +4491,10 @@ function AutomationScene({ service }: { service: Service }) {
     void isActive;
 
     const dataItems = [
-      { label: 'Ventas del mes', value: '$47.200', icon: 'ðŸ’°', readAt: 0.18 },
-      { label: 'Nuevos clientes', value: '23', icon: 'ðŸ‘¥', readAt: 0.23 },
-      { label: 'Consultas totales', value: '147', icon: 'ðŸ’¬', readAt: 0.28 },
-      { label: 'Tasa de cierre', value: '34%', icon: 'ðŸ“ˆ', readAt: 0.33 },
+      { label: 'Ventas del mes', value: '$47.200', icon: '', readAt: 0.18 },
+      { label: 'Nuevos clientes', value: '23', icon: '', readAt: 0.23 },
+      { label: 'Consultas totales', value: '147', icon: '', readAt: 0.28 },
+      { label: 'Tasa de cierre', value: '34%', icon: '', readAt: 0.33 },
     ] as const;
 
     const showClock = progress > 0.05;
@@ -4365,9 +4531,9 @@ function AutomationScene({ service }: { service: Service }) {
                 marginBottom: 2,
               }}
             >
-              REPORTE AUTOMATICO
+              REPORTE automático
             </div>
-            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>Cada lunes Â· 8:00 AM</div>
+            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>Cada lunes · 8:00 AM</div>
           </div>
           {showClock && (
             <motion.div
@@ -4389,7 +4555,7 @@ function AutomationScene({ service }: { service: Service }) {
           )}
         </div>
 
-        {/* RecolecciÃ³n de datos */}
+        {/* Recolección de datos */}
         {showDataCollection && !showReport && (
           <motion.div
             initial={{ opacity: 0 }}
@@ -4433,7 +4599,7 @@ function AutomationScene({ service }: { service: Service }) {
               )}
             </div>
 
-            {/* Barra de generaciÃ³n */}
+            {/* Barra de generación */}
             {generateProgress > 0 && (
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ marginTop: 12 }}>
                 <div
@@ -4518,7 +4684,7 @@ function AutomationScene({ service }: { service: Service }) {
               </div>
             </div>
 
-            {/* MÃ©tricas del reporte */}
+            {/* Métricas del reporte */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
               {dataItems.map((item, index) => (
                 <motion.div
@@ -4543,7 +4709,7 @@ function AutomationScene({ service }: { service: Service }) {
           </motion.div>
         )}
 
-        {/* NotificaciÃ³n enviado */}
+        {/* Notificación enviado */}
         {showSent && (
           <motion.div
             initial={{ opacity: 0, y: 6 }}
@@ -4579,7 +4745,7 @@ function AutomationScene({ service }: { service: Service }) {
               <div style={{ fontSize: 10, fontWeight: 700, color: '#25D366', marginBottom: 2 }}>
                 Enviado al equipo directivo
               </div>
-              <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.4)' }}>3 destinatarios Â· hace un momento</div>
+              <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.4)' }}>3 destinatarios · hace un momento</div>
             </div>
           </motion.div>
         )}
@@ -4639,9 +4805,9 @@ function AutomationScene({ service }: { service: Service }) {
                 marginBottom: 2,
               }}
             >
-              SYNC AUTOMATICO
+              SYNC automático
             </div>
-            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>Formulario â†’ 3 apps en 2 segundos</div>
+            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>Formulario → 3 apps en 2 segundos</div>
           </div>
           <div
             style={{
@@ -4673,7 +4839,7 @@ function AutomationScene({ service }: { service: Service }) {
             }}
           >
             <div style={{ fontSize: 8, color: 'rgba(255,255,255,0.25)', letterSpacing: '0.08em', marginBottom: 8 }}>
-              FORMULARIO WEB Â· ORIGEN
+              FORMULARIO WEB · ORIGEN
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
               {[
@@ -5530,9 +5696,9 @@ function SoftwareScene({ service }: { service: Service }) {
                 marginBottom: 2,
               }}
             >
-              GESTION DE STOCK
+              gestión DE STOCK
             </div>
-            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>Reposicion automatica activa</div>
+            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>Reposicion automática activa</div>
           </div>
           {showAlert && (
             <motion.div
@@ -5656,7 +5822,7 @@ function SoftwareScene({ service }: { service: Service }) {
           })}
         </div>
 
-        {/* Flujo automatico */}
+        {/* Flujo automático */}
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
           {/* Orden generada */}
           {showOrder && (
@@ -5679,7 +5845,7 @@ function SoftwareScene({ service }: { service: Service }) {
                   marginBottom: 6,
                 }}
               >
-                <span style={{ fontSize: 10, fontWeight: 600, color }}>Orden automatica generada</span>
+                <span style={{ fontSize: 10, fontWeight: 600, color }}>Orden automática generada</span>
                 <span style={{ fontSize: 9, color: `${color}70` }}>50 lt. Aceite 5W30</span>
               </div>
               <div style={{ height: 3, background: 'rgba(255,255,255,0.06)', borderRadius: 100, overflow: 'hidden' }}>
@@ -5764,7 +5930,7 @@ function SoftwareScene({ service }: { service: Service }) {
     const team = [
       { name: 'Martin G.', role: 'Ventas', avatar: 'MG', memberColor: '#06b6d4', activeAt: 0.08 },
       { name: 'Laura S.', role: 'Operaciones', avatar: 'LS', memberColor: '#8b5cf6', activeAt: 0.14 },
-      { name: 'Carlos P.', role: 'Tecnico', avatar: 'CP', memberColor: '#10b981', activeAt: 0.2 },
+      { name: 'Carlos P.', role: 'Técnico', avatar: 'CP', memberColor: '#10b981', activeAt: 0.2 },
     ] as const;
 
     const tasks = [
@@ -5775,6 +5941,7 @@ function SoftwareScene({ service }: { service: Service }) {
         progressVal: progress > 0.22 ? Math.min((progress - 0.22) / 0.28, 1) : 0,
         completedAt: 0.5,
         showAt: 0.22,
+        urgent: false,
       },
       {
         title: 'Preparar propuesta Clinica Norte',
@@ -5792,6 +5959,7 @@ function SoftwareScene({ service }: { service: Service }) {
         progressVal: progress > 0.34 ? Math.min((progress - 0.34) / 0.35, 1) * 0.4 : 0,
         completedAt: null,
         showAt: 0.34,
+        urgent: false,
       },
     ] as const;
 
@@ -6133,7 +6301,7 @@ function SoftwareScene({ service }: { service: Service }) {
     >
       <div style={{ marginBottom: 8, flexShrink: 0 }}>
         <div style={{ fontSize: 9, fontWeight: 600, letterSpacing: '0.12em', color: `${SW_COLOR}80`, marginBottom: 4 }}>
-          {'SOFTWARE \u00b7 EN VIVO'}
+          {'SOFTWARE · EN VIVO'}
         </div>
         <div style={{ fontSize: 13, fontWeight: 600, color: 'rgba(255,255,255,0.8)', lineHeight: 1.3 }}>
           Tu empresa bajo control total
@@ -6301,6 +6469,17 @@ function ServiceCard({
   onNavigate: (href: string) => void;
 }) {
   const cardRef = useRef<HTMLDivElement | null>(null);
+  const [isMd, setIsMd] = useState(false);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(min-width: 768px)');
+    setIsMd(mediaQuery.matches);
+
+    const handler = (e: MediaQueryListEvent) => setIsMd(e.matches);
+    mediaQuery.addEventListener('change', handler);
+    return () => mediaQuery.removeEventListener('change', handler);
+  }, []);
+
   const { scrollYProgress } = useScroll({
     target: cardRef,
     offset: ['start 85%', 'end start'],
@@ -6325,7 +6504,7 @@ function ServiceCard({
         viewport={{ once: true }}
         transition={{ duration: 0.5 }}
         style={{
-          marginBottom: 24,
+          marginBottom: 20,
           paddingLeft: 4,
         }}
       >
@@ -6352,15 +6531,16 @@ function ServiceCard({
           </span>
         </div>
 
-        {/* TÃ­tulo principal */}
+        {/* Título principal */}
         <h3
           style={{
-            fontSize: 'clamp(2rem, 3.5vw, 3rem)',
+            fontSize: 'clamp(1.8rem, 3vw, 2.8rem)',
             fontWeight: 800,
-            lineHeight: 1.05,
+            lineHeight: 1.08,
             letterSpacing: '-0.025em',
             color: 'white',
-            margin: '0 0 10px',
+            margin: '0 0 8px',
+            whiteSpace: 'pre-line',
           }}
         >
           {service.title}
@@ -6381,25 +6561,24 @@ function ServiceCard({
       </motion.div>
 
       <motion.article
+        className="relative mx-auto w-full backdrop-blur-2xl"
         style={{
           scale,
           opacity,
           y,
           filter,
-          background: 'rgba(255,255,255,0.025)',
+          background: 'rgba(255,255,255,0.02)',
           border: '1px solid rgba(255,255,255,0.08)',
           borderRadius: 20,
           overflow: 'hidden',
-          display: 'grid',
-          gridTemplateColumns: '1fr 1fr',
           position: 'sticky',
           top: '10vh',
+          minHeight: isMd ? 480 : 'auto',
           boxShadow: `
             inset 0 1px 0 rgba(255,255,255,0.06),
-            0 24px 48px rgba(0,0,0,0.3)
+            0 24px 60px rgba(0,0,0,0.4)
           `,
         }}
-        className="relative mx-auto w-full backdrop-blur-2xl"
       >
         <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.05),transparent_34%,transparent_74%,rgba(255,255,255,0.02))]" />
         <motion.div
@@ -6421,11 +6600,11 @@ function ServiceCard({
           0{service.id}
         </motion.div>
 
-        <div className="relative grid w-full items-stretch gap-6 p-4 sm:p-6 md:p-8 lg:grid-cols-[minmax(0,1fr)_1px_minmax(0,1fr)] lg:gap-0 lg:p-10">
+        <div className="relative grid w-full items-stretch gap-6 p-4 sm:p-6 md:p-8 lg:grid-cols-[minmax(0,2fr)_1px_minmax(0,3fr)] lg:gap-0 lg:p-6">
           <motion.div style={{ x: textX }} className="order-2 lg:order-1">
             <div
               style={{
-                padding: '32px 28px',
+                padding: '36px 32px',
                 display: 'flex',
                 flexDirection: 'column',
                 gap: 20,
@@ -6494,7 +6673,7 @@ function ServiceCard({
                     fontWeight: 500,
                   }}
                 >
-                  <span aria-hidden="true">â± </span>
+                  <span aria-hidden="true"> </span>
                   {service.timeline}
                 </span>
               </div>
@@ -6544,7 +6723,7 @@ function ServiceCard({
               >
                 {service.cta}
                 <motion.span animate={{ x: [0, 4, 0] }} transition={{ duration: 1.5, repeat: Infinity }}>
-                  â†’
+                  →
                 </motion.span>
               </motion.button>
             </div>
@@ -6561,8 +6740,12 @@ function ServiceCard({
           />
 
           <motion.div
-            style={{ x: visualX }}
-            className="order-1 min-h-[320px] overflow-hidden rounded-3xl lg:order-3"
+            style={{
+              x: visualX,
+              padding: isMd ? '16px 0 0 16px' : '0',
+              height: '100%',
+            }}
+            className="order-1 overflow-hidden lg:order-3"
           >
             <ServiceVisual service={service} />
           </motion.div>
@@ -6862,18 +7045,20 @@ export default function OurServices() {
       </div>
 
       <div className="relative z-10 mx-auto max-w-[1280px] px-5 pb-16 pt-20 sm:px-8 lg:px-10 lg:pt-28">
-        <motion.div
+        {/* HEADER INMERSIVO */}
+        <div
           style={{
-            y: headerY,
-            scale: headerScale,
-            textAlign: 'left',
-            maxWidth: 1280,
+            textAlign: 'center',
+            maxWidth: 800,
             margin: '0 auto',
-            paddingBottom: 64,
+            padding: '0 32px 80px',
+            position: 'relative',
+            zIndex: 1,
           }}
         >
+          {/* Badge */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 16 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5 }}
@@ -6881,63 +7066,152 @@ export default function OurServices() {
               display: 'inline-flex',
               alignItems: 'center',
               gap: 8,
-              marginBottom: 24,
+              border: '1px solid rgba(255,255,255,0.1)',
+              borderRadius: 100,
+              padding: '6px 16px',
+              marginBottom: 28,
+              background: 'rgba(255,255,255,0.04)',
             }}
           >
-            <div style={{ width: 20, height: 1, background: '#06b6d4' }} />
+            <div
+              style={{
+                width: 5,
+                height: 5,
+                borderRadius: '50%',
+                background: '#06b6d4',
+                boxShadow: '0 0 6px #06b6d4',
+              }}
+            />
             <span
               style={{
-                fontSize: 11,
+                fontSize: 10,
                 fontWeight: 600,
-                letterSpacing: '0.2em',
-                color: 'rgba(255,255,255,0.4)',
+                letterSpacing: '0.18em',
+                color: 'rgba(255,255,255,0.45)',
               }}
             >
-              STACK DEVELOP
+              EL ECOSISTEMA DEVELOP
             </span>
           </motion.div>
 
+          {/* H2 */}
           <motion.h2
             initial={{ opacity: 0, y: 24 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.1 }}
             style={{
-              fontSize: 'clamp(2.5rem, 5vw, 4.5rem)',
+              fontSize: 'clamp(2.8rem, 5.5vw, 5rem)',
               fontWeight: 800,
-              lineHeight: 1.05,
-              letterSpacing: '-0.025em',
+              lineHeight: 1.0,
+              letterSpacing: '-0.03em',
               margin: '0 0 20px',
             }}
           >
             <span style={{ color: 'rgba(255,255,255,0.35)', fontWeight: 300 }}>
-              {'Todo lo que tu negocio '}
+              Cuatro soluciones.
             </span>
-            <span style={{ color: 'white' }}>necesita para crecer.</span>
+            <br />
+            <span style={{ color: 'white' }}>Un solo objetivo.</span>
           </motion.h2>
 
+          {/* Subfrase */}
           <motion.p
             initial={{ opacity: 0, y: 16 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.2 }}
             style={{
-              fontSize: 16,
+              fontSize: 17,
               lineHeight: 1.65,
-              color: 'rgba(255,255,255,0.35)',
-              maxWidth: 480,
+              color: 'rgba(255,255,255,0.38)',
+              maxWidth: 560,
+              margin: '0 auto 40px',
             }}
           >
-            Desde tu primera presencia digital hasta automatizaciones con IA. Cada soluciÃ³n genera
-            resultados medibles desde el primer mes.
+            Todo lo que tu negocio necesita para vender más, operar mejor
+            y crecer{' '}
+            <strong style={{ color: 'rgba(255,255,255,0.6)', fontWeight: 500 }}>
+              sin contratar más gente.
+            </strong>
           </motion.p>
-        </motion.div>
 
+          {/* Chips de los 4 servicios con colores */}
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+            style={{
+              display: 'flex',
+              justifyContent: 'center',
+              flexWrap: 'wrap',
+              gap: 8,
+            }}
+          >
+            {[
+              { label: 'Sitio Web', color: '#06b6d4', price: '$800' },
+              { label: 'Agente IA', color: '#8b5cf6', price: '$300' },
+              { label: 'Automatizaciones', color: '#10b981', price: '$200' },
+              { label: 'Software', color: '#f59e0b', price: '$1.500' },
+            ].map((chip, i) => (
+              <motion.div
+                key={chip.label}
+                initial={{ opacity: 0, scale: 0.9 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.35 + i * 0.07, duration: 0.35 }}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 7,
+                  padding: '7px 14px',
+                  background: `${chip.color}08`,
+                  border: `1px solid ${chip.color}22`,
+                  borderRadius: 100,
+                }}
+              >
+                <div
+                  style={{
+                    width: 5,
+                    height: 5,
+                    borderRadius: '50%',
+                    background: chip.color,
+                    boxShadow: `0 0 6px ${chip.color}80`,
+                  }}
+                />
+                <span
+                  style={{
+                    fontSize: 12,
+                    fontWeight: 500,
+                    color: 'rgba(255,255,255,0.6)',
+                  }}
+                >
+                  {chip.label}
+                </span>
+                <span
+                  style={{
+                    fontSize: 11,
+                    color: chip.color,
+                    opacity: 0.7,
+                    borderLeft: `1px solid ${chip.color}30`,
+                    paddingLeft: 7,
+                  }}
+                >
+                  {chip.price}
+                </span>
+              </motion.div>
+            ))}
+          </motion.div>
+        </div>
+
+        {/* SEPARADOR */}
         <div
           style={{
+            width: '100%',
             height: 1,
-            margin: '64px 0 0',
             background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent)',
+            marginBottom: 80,
           }}
         />
 
@@ -6995,4 +7269,5 @@ export default function OurServices() {
     </section>
   );
 }
+
 

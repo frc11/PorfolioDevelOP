@@ -50,7 +50,7 @@ export function TransitionProvider({ children }: { children: ReactNode }) {
         const safetyTimer = setTimeout(() => {
             setIsAnimating(false);
             if (lenis) lenis.start();
-        }, 2000);
+        }, 1000);
 
         setTimeout(() => {
             executeScroll(targetId);
@@ -60,9 +60,9 @@ export function TransitionProvider({ children }: { children: ReactNode }) {
                 setIsAnimating(false);
                 if (lenis) lenis.start();
                 clearTimeout(safetyTimer);
-            }, 600);
+            }, 300);
 
-        }, 500);
+        }, 300);
     };
 
     const triggerTransition = (target: string) => {
@@ -91,13 +91,13 @@ export function TransitionProvider({ children }: { children: ReactNode }) {
 
                 // Attempt to ENFORCE our custom scroll offset multiple times against browser default
                 setTimeout(() => executeScroll(hash), 10);
+                setTimeout(() => executeScroll(hash), 150);
                 setTimeout(() => executeScroll(hash), 300);
-                setTimeout(() => executeScroll(hash), 600);
 
                 setTimeout(() => {
                     setIsAnimating(false);
-                }, 800);
-            }, 500);
+                }, 400);
+            }, 300);
             return;
         }
 
@@ -115,8 +115,8 @@ export function TransitionProvider({ children }: { children: ReactNode }) {
                 // 2. Shutter Open (after delay)
                 setTimeout(() => {
                     setIsAnimating(false);
-                }, 800);
-            }, 500);
+                }, 400);
+            }, 300);
             return;
         }
 

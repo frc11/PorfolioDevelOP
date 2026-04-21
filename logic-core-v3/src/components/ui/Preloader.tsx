@@ -53,7 +53,7 @@ const DOT_FIELD_FADE_OUT_DURATION_SECONDS = 0.4;
 const DOT_FIELD_ENTRY_DELAY_SECONDS = 0.18;
 const DOT_FIELD_COLUMNS = 16;
 const DOT_FIELD_ROWS = 10;
-const TYPEWRITER_CHARACTER_DELAY_MS = 55;
+const TYPEWRITER_CHARACTER_DELAY_MS = 20;
 const PRELOADER_SUBCOPY_DELAY_MS =
     PRELOADER_COPY_LABEL.length * TYPEWRITER_CHARACTER_DELAY_MS + 400;
 const PARTICLES: ParticleSpec[] = [
@@ -335,7 +335,7 @@ export default function Preloader({
 
             setPhase("drawing");
 
-            await wait(200);
+            await wait(100);
 
             if (isCancelledRef.current) {
                 return;
@@ -361,7 +361,7 @@ export default function Preloader({
                   )
                 : null;
 
-            await wait(DOT_FIELD_ENTRY_DELAY_SECONDS * 1000);
+            await wait(90);
 
             if (isCancelledRef.current) {
                 return;
@@ -369,7 +369,7 @@ export default function Preloader({
 
             setHasStartedCanvasReveal(true);
 
-            await wait(1020);
+            await wait(500);
 
             if (isCancelledRef.current) {
                 return;
@@ -381,7 +381,7 @@ export default function Preloader({
 
             setArtifactPhase("idle");
 
-            await wait(400);
+            await wait(200);
 
             if (isCancelledRef.current) {
                 return;
@@ -400,7 +400,7 @@ export default function Preloader({
                   )
                 : null;
 
-            await wait(2400);
+            await wait(1200);
 
             if (isCancelledRef.current) {
                 return;
@@ -420,7 +420,7 @@ export default function Preloader({
                 return;
             }
 
-            await wait(800);
+            await wait(400);
 
             if (isCancelledRef.current) {
                 return;
@@ -606,8 +606,6 @@ export default function Preloader({
                         transformOrigin: "center center",
                     }}
                 >
-                    <DotField active={shouldShowArtifactDecorations && isDotFieldVisible} />
-
                     {/* Edge shadows — top/bottom fade */}
                     <div
                         aria-hidden="true"

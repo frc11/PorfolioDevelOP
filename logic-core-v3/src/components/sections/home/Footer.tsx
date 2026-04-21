@@ -1,482 +1,805 @@
 'use client';
 
-import { useRef, useState } from 'react';
-import Link from 'next/link';
-import type { MotionValue } from 'framer-motion';
-import { motion, useMotionValue, useReducedMotion, useScroll, useSpring, useTransform } from 'framer-motion';
-import { Globe, Layers3, MonitorSmartphone, Sparkles } from 'lucide-react';
-import { useTransitionContext } from '@/context/TransitionContext';
+import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { MessageCircle, FileText, MapPin, Clock, Shield, Users } from 'lucide-react';
 
-const socialLinks = {
-  linkedin: 'https://linkedin.com/company/develop-agency',
-  instagram: 'https://instagram.com/develop.agency',
-  twitter: 'https://twitter.com/develop_agency',
-  email: 'mailto:hola@develop.com.ar',
-};
+const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '5493815000000';
+const WA_TEXT = encodeURIComponent(
+  'Hola! Vi tu página y me gustaría saber qué necesita mi negocio para crecer. ¿Pueden ayudarme?'
+);
 
-const GALLERY_ITEMS = [
-  {
-    eyebrow: 'Portal privado',
-    title: 'Client Portal',
-    description: 'Metricas, entregas y mensajes dentro de una sola vista.',
-    accentFrom: '#22d3ee',
-    accentTo: '#0f172a',
-    glow: 'rgba(34,211,238,0.24)',
-    badge: 'Live',
-  },
-  {
-    eyebrow: 'Software B2B',
-    title: 'Agency Dashboard',
-    description: 'Operaciones, equipo y modulos con una UI sobria y precisa.',
-    accentFrom: '#8b5cf6',
-    accentTo: '#111827',
-    glow: 'rgba(139,92,246,0.22)',
-    badge: 'Suite',
-  },
-  {
-    eyebrow: 'Web premium',
-    title: 'Landing Commerce',
-    description: 'Estructura comercial, velocidad y presencia visual.',
-    accentFrom: '#38bdf8',
-    accentTo: '#0b1120',
-    glow: 'rgba(56,189,248,0.2)',
-    badge: 'Launch',
-  },
-  {
-    eyebrow: 'Automatizacion',
-    title: 'Ops Flow',
-    description: 'Flujos conectados, menos friccion y mas control operativo.',
-    accentFrom: '#a78bfa',
-    accentTo: '#111827',
-    glow: 'rgba(167,139,250,0.22)',
-    badge: 'Flow',
-  },
+const LOGO_PATH =
+  'M532 700v-67q0-6 3-10l54-98q0-3 4-4l4 5q13 27 34 48 35 35 83 41a153 153 0 0 0 86-288c-62-28-134-13-178 39q-20 24-33 52l-57 127q-16 38-40 71-63 86-166 105-92 16-173-30A257 257 0 0 1 38 371a258 258 0 0 1 210-164 257 257 0 0 1 233 92q5 6 1 10l-52 93-1 1q-4 8-8 0l-7-13q-37-62-108-75-66-10-118 30-43 33-55 86-16 76 35 136 37 41 91 48 83 11 139-53 18-23 29-49l51-111q18-44 44-83a257 257 0 0 1 201-113q96-5 171 52a256 256 0 0 1 69 336 262 262 0 0 1-298 121q-8-4-7 6l-1 100 1 58q1 8-6 6H538q-7 1-6-7z';
+
+interface FormState {
+  nombre: string;
+  whatsapp: string;
+  rubro: string;
+  mensaje: string;
+}
+
+const TRUST_ITEMS = [
+  { icon: MapPin, text: 'Tucumán, Argentina' },
+  { icon: Clock, text: 'Respuesta < 2hs' },
+  { icon: Shield, text: 'Consulta gratuita' },
+  { icon: Users, text: '4+ años en el mercado' },
+] as const;
+
+const SOCIAL_LINKS = [
+  { label: 'LinkedIn', href: 'https://linkedin.com/company/develop-agency' },
+  { label: 'Instagram', href: 'https://instagram.com/develop.agency' },
+  { label: 'Twitter/X', href: 'https://twitter.com/develop_agency' },
+  { label: 'Email', href: 'mailto:hola@develop.com.ar' },
 ];
 
-function PreviewChrome() {
-  return (
-    <div className="flex items-center gap-1.5 border-b border-white/10 px-3 py-2">
-      <span className="h-2.5 w-2.5 rounded-full bg-red-400/70" />
-      <span className="h-2.5 w-2.5 rounded-full bg-yellow-300/70" />
-      <span className="h-2.5 w-2.5 rounded-full bg-emerald-400/70" />
-      <div className="ml-2 h-5 flex-1 rounded-full bg-white/[0.06]" />
-    </div>
-  );
-}
+export const Footer = () => {
+  const [showForm, setShowForm] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [form, setForm] = useState<FormState>({
+    nombre: '',
+    whatsapp: '',
+    rubro: '',
+    mensaje: '',
+  });
 
-function PreviewSurface({
-  item,
-  compact = false,
-}: {
-  item: (typeof GALLERY_ITEMS)[number];
-  compact?: boolean;
-}) {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    const webhookUrl = process.env.NEXT_PUBLIC_N8N_CONTACT_WEBHOOK_URL;
+    if (webhookUrl) {
+      try {
+        await fetch(webhookUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(form),
+        });
+        setSubmitted(true);
+      } catch {
+        window.open(
+          `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
+            `Hola! Soy ${form.nombre}. Rubro: ${form.rubro}. ${form.mensaje}`
+          )}`,
+          '_blank'
+        );
+      }
+    } else {
+      window.open(
+        `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
+          `Hola! Soy ${form.nombre}. Rubro: ${form.rubro}. ${form.mensaje}`
+        )}`,
+        '_blank'
+      );
+      setSubmitted(true);
+    }
+    setLoading(false);
+  };
+
   return (
-    <div
-      className={`relative overflow-hidden rounded-[26px] border border-white/10 bg-[#07090d]/95 shadow-[0_28px_60px_rgba(0,0,0,0.35)] ${compact ? 'h-[170px]' : 'h-[285px]'
-        }`}
-      style={{ boxShadow: `0 24px 60px rgba(0,0,0,0.32), 0 0 40px ${item.glow}` }}
+    <section
+      style={{
+        position: 'relative',
+        overflow: 'hidden',
+        background: '#080808',
+        paddingTop: 128,
+        paddingBottom: 80,
+      }}
     >
+      {/* ── FONDOS DECORATIVOS ── */}
+
+      {/* Línea superior */}
       <div
-        className="absolute inset-0 opacity-80"
         style={{
-          background: `radial-gradient(circle at top left, ${item.accentFrom}55 0%, transparent 45%), linear-gradient(180deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%)`,
+          position: 'absolute',
+          top: 0, left: 0, right: 0,
+          height: 1,
+          background: 'linear-gradient(90deg, transparent 0%, rgba(6,182,212,0.35) 50%, transparent 100%)',
+          pointerEvents: 'none',
         }}
       />
-      <PreviewChrome />
 
-      <div className="relative z-10 flex h-full flex-col p-4">
-        <div className="flex items-start justify-between">
-          <div>
-            <div className="text-[10px] uppercase tracking-[0.24em] text-zinc-400">{item.eyebrow}</div>
-            <div className="mt-2 text-lg font-semibold tracking-tight text-white">{item.title}</div>
-          </div>
-          <div className="rounded-full border border-white/10 bg-white/[0.05] px-2.5 py-1 text-[10px] uppercase tracking-[0.22em] text-zinc-300">
-            {item.badge}
-          </div>
-        </div>
+      {/* Glow principal centrado */}
+      <div
+        style={{
+          position: 'absolute',
+          top: '-10%',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          width: '70vw',
+          height: '70vw',
+          borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(6,182,212,0.07) 0%, rgba(6,182,212,0.02) 40%, transparent 70%)',
+          filter: 'blur(80px)',
+          pointerEvents: 'none',
+          willChange: 'transform',
+        }}
+      />
 
-        <div
-          className={`mt-4 rounded-[18px] border border-white/10 p-4 ${compact ? 'h-[88px]' : 'h-[118px]'
-            }`}
-          style={{
-            background: `linear-gradient(135deg, ${item.accentFrom}22 0%, ${item.accentTo} 100%)`,
-          }}
+      {/* Glow secundario — violeta bottom-left */}
+      <div
+        style={{
+          position: 'absolute',
+          bottom: '5%',
+          left: '-5%',
+          width: '40vw',
+          height: '40vw',
+          borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(139,92,246,0.04) 0%, transparent 70%)',
+          filter: 'blur(60px)',
+          pointerEvents: 'none',
+        }}
+      />
+
+      {/* Logo SVG de fondo — muy sutil */}
+      <div
+        style={{
+          position: 'absolute',
+          inset: 0,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          pointerEvents: 'none',
+          overflow: 'hidden',
+        }}
+      >
+        <svg
+          viewBox="0 0 1024 1024"
+          style={{ width: '78vw', maxWidth: 760, opacity: 0.028 }}
         >
-          <div className="flex h-full flex-col justify-between">
-            <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.22em] text-white/75">
-              <Sparkles className="h-3.5 w-3.5" />
-              develOP
-            </div>
-            <div className="max-w-[80%] text-sm font-medium leading-5 text-white/90">{item.description}</div>
-          </div>
-        </div>
-
-        <div className="mt-4 grid grid-cols-3 gap-2">
-          <div className="rounded-xl bg-white/[0.05] p-3">
-            <div className="text-[9px] uppercase tracking-[0.22em] text-zinc-500">UI</div>
-            <div className="mt-2 h-2 rounded-full bg-white/70" />
-            <div className="mt-2 h-2 w-2/3 rounded-full bg-white/20" />
-          </div>
-          <div className="rounded-xl bg-white/[0.05] p-3">
-            <div className="text-[9px] uppercase tracking-[0.22em] text-zinc-500">Core</div>
-            <div className="mt-2 h-2 rounded-full bg-white/80" />
-            <div className="mt-2 h-2 w-1/2 rounded-full bg-white/20" />
-          </div>
-          <div className="rounded-xl bg-white/[0.05] p-3">
-            <div className="text-[9px] uppercase tracking-[0.22em] text-zinc-500">Data</div>
-            <div className="mt-2 h-2 rounded-full bg-white/65" />
-            <div className="mt-2 h-2 w-3/4 rounded-full bg-white/20" />
-          </div>
-        </div>
+          <path d={LOGO_PATH} fill="white" />
+        </svg>
       </div>
-    </div>
-  );
-}
 
-function BackgroundPortalWall({
-  y,
-  scale,
-}: {
-  y: MotionValue<number>;
-  scale: MotionValue<number>;
-}) {
-  return (
-    <div className="pointer-events-none absolute inset-0 overflow-hidden">
-      <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(8,15,24,0.18)_0%,rgba(7,12,19,0.28)_50%,rgba(4,6,10,0.58)_100%)]" />
-
-      <motion.div
-        className="absolute inset-[-10%]"
-        style={{ y, scale }}
+      {/* ── CONTENIDO PRINCIPAL ── */}
+      <div
+        style={{
+          position: 'relative',
+          zIndex: 1,
+          maxWidth: 960,
+          margin: '0 auto',
+          padding: '0 24px',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          textAlign: 'center',
+        }}
       >
-        <div
-          className="absolute inset-0 opacity-[0.74] blur-[7px] saturate-[1.18] brightness-[1.2]"
+
+        {/* BADGE */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.45 }}
           style={{
-            backgroundImage: "url('/footer-portal-wall.svg')",
-            backgroundPosition: 'center',
-            backgroundRepeat: 'no-repeat',
-            backgroundSize: 'cover',
-          }}
-        />
-      </motion.div>
-
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(4,6,10,0.56)_0%,rgba(4,6,10,0.26)_20%,rgba(4,6,10,0.08)_36%,rgba(4,6,10,0.42)_72%,rgba(4,6,10,0.78)_100%)]" />
-      <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(4,6,10,0.34)_0%,rgba(4,6,10,0.08)_14%,rgba(4,6,10,0.01)_28%,rgba(4,6,10,0.01)_72%,rgba(4,6,10,0.08)_86%,rgba(4,6,10,0.34)_100%)]" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_8%_20%,rgba(34,211,238,0.14)_0%,transparent_20%),radial-gradient(circle_at_12%_78%,rgba(34,211,238,0.12)_0%,transparent_22%),radial-gradient(circle_at_92%_18%,rgba(167,139,250,0.14)_0%,transparent_22%),radial-gradient(circle_at_90%_84%,rgba(34,211,238,0.12)_0%,transparent_20%)]" />
-    </div>
-  );
-}
-
-function TiltedGallery({
-  items,
-  side,
-}: {
-  items: (typeof GALLERY_ITEMS)[number][];
-  side: 'left' | 'right';
-}) {
-  const shouldReduceMotion = useReducedMotion();
-
-  const positions =
-    side === 'left'
-      ? [
-        'left-6 top-2 -rotate-[8deg] z-20',
-        'left-0 top-[238px] rotate-[6deg] z-10',
-      ]
-      : [
-        'right-6 top-2 rotate-[8deg] z-20',
-        'right-0 top-[238px] -rotate-[6deg] z-10',
-      ];
-
-  return (
-    <div className="relative hidden h-[650px] w-[390px] xl:block">
-      {items.map((item, index) => (
-        <motion.div
-          key={`${side}-${item.title}`}
-          initial={{
-            opacity: 0,
-            x: side === 'left' ? -32 : 32,
-            y: 22,
-            rotate: side === 'left' ? -4 : 4,
-          }}
-          whileInView={{
-            opacity: 1,
-            x: 0,
-            y: 0,
-            rotate: 0,
-          }}
-          viewport={{ once: true, margin: '-10%' }}
-          transition={{
-            duration: 0.55,
-            delay: index * 0.08,
-            ease: [0.23, 1, 0.32, 1],
-          }}
-          whileHover={shouldReduceMotion ? undefined : { y: -6, scale: 1.01 }}
-          className={`absolute w-[342px] ${positions[index]}`}
-        >
-          <PreviewSurface item={item} />
-        </motion.div>
-      ))}
-    </div>
-  );
-}
-
-function FooterLink({ href, children }: { href: string; children: string }) {
-  return (
-    <Link
-      href={href}
-      className="text-[11px] uppercase tracking-[0.28em] text-zinc-500 transition-colors duration-200 hover:text-zinc-200"
-      target={href.startsWith('http') ? '_blank' : undefined}
-      rel={href.startsWith('http') ? 'noreferrer' : undefined}
-    >
-      {children}
-    </Link>
-  );
-}
-
-function MagneticButton({ href, isMobile = false }: { href: string; isMobile?: boolean }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const { triggerTransition } = useTransitionContext();
-  const x = useMotionValue(0);
-  const y = useMotionValue(0);
-  const [isSimulatingHover, setIsSimulatingHover] = useState(false);
-
-  const springConfig = { damping: 20, stiffness: 300, mass: 0.5 };
-  const mouseX = useSpring(x, springConfig);
-  const mouseY = useSpring(y, springConfig);
-  const textX = useTransform(mouseX, (value) => value * 0.3);
-  const textY = useTransform(mouseY, (value) => value * 0.3);
-
-  const handleMouseMove = (event: React.MouseEvent) => {
-    if (isMobile || !ref.current) return;
-
-    const { clientX, clientY } = event;
-    const { width, height, left, top } = ref.current.getBoundingClientRect();
-    const middleX = clientX - (left + width / 2);
-    const middleY = clientY - (top + height / 2);
-
-    x.set(middleX * 0.8);
-    y.set(middleY * 0.8);
-  };
-
-  const reset = () => {
-    if (isMobile) return;
-    x.set(0);
-    y.set(0);
-  };
-
-  const handleClick = (event: React.MouseEvent) => {
-    event.preventDefault();
-
-    if (isMobile) {
-      setIsSimulatingHover(true);
-
-      setTimeout(() => {
-        triggerTransition(href);
-
-        setTimeout(() => {
-          setIsSimulatingHover(false);
-        }, 1000);
-      }, 1500);
-    } else {
-      triggerTransition(href);
-    }
-  };
-
-  return (
-    <div
-      onClick={handleClick}
-      className={isMobile ? 'cursor-pointer' : 'cursor-none'}
-      data-cursor={isMobile ? '' : 'hover'}
-    >
-      <motion.div
-        ref={ref}
-        onMouseMove={handleMouseMove}
-        onMouseLeave={reset}
-        style={{ x: mouseX, y: mouseY }}
-        className={`relative flex items-center justify-center ${isSimulatingHover ? 'group-active-simulated' : 'group'
-          }`}
-        whileHover={!isMobile ? { scale: 1.55 } : {}}
-        animate={isSimulatingHover ? { scale: 1.55 } : { scale: 1 }}
-        transition={{ type: 'tween', ease: 'circOut', duration: isMobile ? 1.5 : 2.2 }}
-      >
-        <motion.div
-          className={`relative overflow-hidden rounded-full bg-white transition-shadow duration-500 ${isMobile ? 'h-48 w-48' : 'h-40 w-40 md:h-56 md:w-56'
-            } ${isSimulatingHover
-              ? 'shadow-[0_0_100px_0px_rgba(34,211,238,0.45),0_0_60px_0px_rgba(255,255,255,0.35)]'
-              : 'shadow-[0_0_50px_-10px_rgba(255,255,255,0.3)] group-hover:shadow-[0_0_100px_0px_rgba(34,211,238,0.45),0_0_60px_0px_rgba(255,255,255,0.35)]'
-            }`}
-          whileHover={
-            !isMobile
-              ? {
-                x: [0, -1, 1, -1, 1, 0],
-                y: [0, 1, -1, 1, -1, 0],
-              }
-              : {}
-          }
-          animate={
-            isSimulatingHover
-              ? {
-                x: [0, -1, 1, -1, 1, 0],
-                y: [0, 1, -1, 1, -1, 0],
-              }
-              : { x: 0, y: 0 }
-          }
-          transition={{
-            x: { repeat: Infinity, duration: 0.2, ease: 'linear' },
-            y: { repeat: Infinity, duration: 0.2, ease: 'linear', delay: 0.1 },
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 8,
+            border: '1px solid rgba(6,182,212,0.22)',
+            borderRadius: 100,
+            padding: '6px 16px',
+            background: 'rgba(6,182,212,0.07)',
+            marginBottom: 36,
           }}
         >
-          <div className="absolute inset-0 bg-gradient-to-tr from-white via-zinc-200 to-zinc-100 opacity-100" />
-          <div
-            className={`absolute inset-0 bg-gradient-to-tr from-cyan-50 via-white to-zinc-100 transition-opacity duration-700 ${isSimulatingHover ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
-              }`}
-          />
-          <div
-            className={`absolute inset-0 scale-95 rounded-full border transition-colors duration-500 ${isSimulatingHover
-              ? 'border-zinc-400 opacity-50'
-              : 'border-zinc-300 opacity-50 group-hover:border-zinc-400'
-              }`}
-          />
-
           <motion.div
-            style={{ x: textX, y: textY }}
-            className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center"
+            animate={{ opacity: [1, 0.3, 1] }}
+            transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+            style={{
+              width: 6, height: 6,
+              borderRadius: '50%',
+              background: '#06b6d4',
+              boxShadow: '0 0 8px rgba(6,182,212,0.8)',
+            }}
+          />
+          <span
+            style={{
+              fontSize: 10,
+              fontWeight: 600,
+              letterSpacing: '0.18em',
+              color: 'rgba(6,182,212,0.85)',
+            }}
           >
-            <span
-              className={`absolute inset-0 flex items-center justify-center text-center text-xl font-black tracking-tighter text-black transition-opacity duration-300 md:text-2xl ${isSimulatingHover ? 'opacity-0' : 'group-hover:opacity-0'
-                }`}
-            >
-              EMPEZAR
-            </span>
+            HABLEMOS
+          </span>
+        </motion.div>
 
+        {/* HEADLINE */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.55, delay: 0.08 }}
+          style={{ marginBottom: 16 }}
+        >
+          <h2
+            style={{
+              fontSize: 'clamp(2.2rem, 5vw, 4.2rem)',
+              fontWeight: 300,
+              lineHeight: 1.08,
+              letterSpacing: '-0.025em',
+              margin: 0,
+              color: 'rgba(255,255,255,0.45)',
+            }}
+          >
+            ¿No sabés por dónde
+          </h2>
+          <h2
+            style={{
+              fontSize: 'clamp(2.4rem, 5.5vw, 4.8rem)',
+              fontWeight: 800,
+              lineHeight: 1.0,
+              letterSpacing: '-0.035em',
+              margin: 0,
+              color: 'white',
+            }}
+          >
+            empezar?
+          </h2>
+        </motion.div>
+
+        {/* SUBLINE — copy central */}
+        <motion.p
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, delay: 0.14 }}
+          style={{
+            fontSize: 16,
+            lineHeight: 1.7,
+            color: 'rgba(255,255,255,0.38)',
+            maxWidth: 480,
+            margin: '0 auto',
+            marginBottom: 16,
+          }}
+        >
+          Contanos tu negocio en 2 minutos. Te decimos exactamente
+          qué necesitás y cuánto te costaría.{' '}
+          <span style={{ color: 'rgba(255,255,255,0.65)', fontWeight: 500 }}>
+            Sin compromiso. Sin tecnicismos.
+          </span>
+        </motion.p>
+
+        {/* CALLOUT — El primer paso es gratis */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.45, delay: 0.2 }}
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 10,
+            marginBottom: 52,
+          }}
+        >
+          <div
+            style={{
+              height: 1,
+              width: 32,
+              background: 'linear-gradient(90deg, transparent, rgba(6,182,212,0.4))',
+            }}
+          />
+          <span
+            style={{
+              fontSize: 13,
+              fontWeight: 600,
+              color: '#06b6d4',
+              letterSpacing: '0.04em',
+            }}
+          >
+            El primer paso es gratis.
+          </span>
+          <div
+            style={{
+              height: 1,
+              width: 32,
+              background: 'linear-gradient(90deg, rgba(6,182,212,0.4), transparent)',
+            }}
+          />
+        </motion.div>
+
+        {/* DOS CAMINOS DE CONVERSIÓN */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.55, delay: 0.18 }}
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(268px, 1fr))',
+            gap: 14,
+            width: '100%',
+            maxWidth: 660,
+            marginBottom: 0,
+          }}
+        >
+          {/* CTA WHATSAPP */}
+          <motion.a
+            href={`https://wa.me/${WHATSAPP_NUMBER}?text=${WA_TEXT}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            whileHover={{ scale: 1.025, y: -3 }}
+            whileTap={{ scale: 0.975 }}
+            transition={{ type: 'spring', stiffness: 380, damping: 38, mass: 0.9 }}
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'flex-start',
+              gap: 10,
+              padding: '22px 24px',
+              background: 'linear-gradient(135deg, rgba(6,182,212,0.13) 0%, rgba(6,182,212,0.04) 100%)',
+              border: '1px solid rgba(6,182,212,0.28)',
+              borderRadius: 18,
+              textDecoration: 'none',
+              cursor: 'pointer',
+              position: 'relative',
+              overflow: 'hidden',
+              boxShadow: '0 0 0 0 rgba(6,182,212,0)',
+              transition: 'box-shadow 300ms',
+            }}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLAnchorElement).style.boxShadow = '0 8px 32px rgba(6,182,212,0.15)';
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLAnchorElement).style.boxShadow = '0 0 0 0 rgba(6,182,212,0)';
+            }}
+          >
+            {/* Shimmer top-left */}
             <div
-              className={`absolute inset-0 flex items-center justify-center origin-center transform transition-all duration-500 delay-100 ${isSimulatingHover
-                ? 'opacity-100 scale-110 rotate-45'
-                : 'opacity-0 scale-50 rotate-45 group-hover:opacity-100 group-hover:scale-110'
-                }`}
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width={isMobile ? '74' : '62'}
-                height={isMobile ? '74' : '62'}
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="black"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="drop-shadow-sm"
-                style={{ transform: 'rotate(-45deg)' }}
+              style={{
+                position: 'absolute',
+                top: 0, left: 0,
+                width: '60%', height: '60%',
+                background: 'radial-gradient(circle at top left, rgba(6,182,212,0.08), transparent 70%)',
+                pointerEvents: 'none',
+              }}
+            />
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, position: 'relative' }}>
+              <div
+                style={{
+                  width: 34, height: 34,
+                  borderRadius: 10,
+                  background: 'rgba(6,182,212,0.12)',
+                  border: '1px solid rgba(6,182,212,0.22)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  flexShrink: 0,
+                }}
               >
-                <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z" />
-                <path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z" />
-                <path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0" />
-                <path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5" />
-              </svg>
+                <MessageCircle size={16} color="#06b6d4" strokeWidth={1.5} />
+              </div>
+              <span
+                style={{
+                  fontSize: 13,
+                  fontWeight: 700,
+                  color: '#06b6d4',
+                  letterSpacing: '0.04em',
+                }}
+              >
+                WhatsApp directo
+              </span>
+            </div>
+            <span
+              style={{
+                fontSize: 12,
+                color: 'rgba(255,255,255,0.38)',
+                lineHeight: 1.45,
+                textAlign: 'left',
+              }}
+            >
+              Respondemos en menos de 2hs en horario comercial
+            </span>
+            <div
+              style={{
+                fontSize: 11,
+                color: '#06b6d4',
+                fontWeight: 600,
+                letterSpacing: '0.02em',
+              }}
+            >
+              Abrir chat →
+            </div>
+          </motion.a>
+
+          {/* CTA FORMULARIO */}
+          <motion.div
+            whileHover={{ scale: 1.015, y: -2 }}
+            whileTap={{ scale: 0.985 }}
+            transition={{ type: 'spring', stiffness: 380, damping: 38, mass: 0.9 }}
+            onClick={() => setShowForm((prev) => !prev)}
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'flex-start',
+              gap: 10,
+              padding: '22px 24px',
+              background: showForm
+                ? 'rgba(255,255,255,0.055)'
+                : 'rgba(255,255,255,0.03)',
+              border: showForm
+                ? '1px solid rgba(255,255,255,0.13)'
+                : '1px solid rgba(255,255,255,0.07)',
+              borderRadius: 18,
+              cursor: 'pointer',
+              transition: 'background 250ms, border 250ms, box-shadow 300ms',
+            }}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLDivElement).style.boxShadow = '0 8px 28px rgba(0,0,0,0.3)';
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLDivElement).style.boxShadow = 'none';
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <div
+                style={{
+                  width: 34, height: 34,
+                  borderRadius: 10,
+                  background: 'rgba(255,255,255,0.05)',
+                  border: '1px solid rgba(255,255,255,0.09)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  flexShrink: 0,
+                }}
+              >
+                <FileText size={16} color="rgba(255,255,255,0.45)" strokeWidth={1.5} />
+              </div>
+              <span
+                style={{
+                  fontSize: 13,
+                  fontWeight: 700,
+                  color: 'rgba(255,255,255,0.65)',
+                  letterSpacing: '0.04em',
+                }}
+              >
+                Completar formulario
+              </span>
+            </div>
+            <span
+              style={{
+                fontSize: 12,
+                color: 'rgba(255,255,255,0.28)',
+                lineHeight: 1.45,
+                textAlign: 'left',
+              }}
+            >
+              Contanos tu negocio y te preparamos una propuesta
+            </span>
+            <div
+              style={{
+                fontSize: 11,
+                color: 'rgba(255,255,255,0.38)',
+                fontWeight: 500,
+              }}
+            >
+              {showForm ? 'Cerrar ↑' : 'Ver formulario →'}
             </div>
           </motion.div>
         </motion.div>
 
-        <div
-          className={`absolute inset-0 -z-10 scale-100 rounded-full border border-white/30 animate-[ping_3s_cubic-bezier(0,0,0.2,1)_infinite] transition-opacity duration-1000 ${isSimulatingHover ? 'opacity-0' : 'opacity-30 group-hover:opacity-0'
-            }`}
-        />
-      </motion.div>
-    </div>
-  );
-}
+        {/* FORMULARIO INLINE */}
+        <AnimatePresence>
+          {showForm && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.38, ease: [0.25, 0.46, 0.45, 0.94] }}
+              style={{ width: '100%', maxWidth: 560, overflow: 'hidden', marginTop: 14 }}
+            >
+              <AnimatePresence mode="wait">
+                {submitted ? (
+                  <motion.div
+                    key="success"
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.3 }}
+                    style={{
+                      background: 'rgba(6,182,212,0.06)',
+                      border: '1px solid rgba(6,182,212,0.18)',
+                      borderRadius: 16,
+                      padding: '36px 24px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      gap: 12,
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: 44, height: 44,
+                        borderRadius: '50%',
+                        background: 'rgba(6,182,212,0.12)',
+                        border: '1px solid rgba(6,182,212,0.3)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontSize: 20,
+                        color: '#06b6d4',
+                      }}
+                    >
+                      ✓
+                    </div>
+                    <p style={{ fontSize: 15, color: 'rgba(255,255,255,0.8)', margin: 0, fontWeight: 600 }}>
+                      ¡Consulta enviada!
+                    </p>
+                    <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.35)', margin: 0 }}>
+                      Te contactamos en menos de 2hs.
+                    </p>
+                  </motion.div>
+                ) : (
+                  <motion.form
+                    key="form"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    onSubmit={handleSubmit}
+                    style={{
+                      background: 'rgba(255,255,255,0.035)',
+                      backdropFilter: 'blur(20px) saturate(180%)',
+                      WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+                      border: '1px solid rgba(255,255,255,0.08)',
+                      borderRadius: 16,
+                      padding: '24px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: 12,
+                    }}
+                  >
+                    {(
+                      [
+                        { key: 'nombre', label: 'Nombre', type: 'text', placeholder: 'Tu nombre' },
+                        { key: 'whatsapp', label: 'WhatsApp', type: 'tel', placeholder: '+54 381 000-0000' },
+                        { key: 'rubro', label: 'Rubro de tu negocio', type: 'text', placeholder: 'Ej: Clínica, Restaurante, Gimnasio...' },
+                      ] as const
+                    ).map((field) => (
+                      <div key={field.key} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                        <label
+                          style={{
+                            fontSize: 10,
+                            fontWeight: 600,
+                            color: 'rgba(255,255,255,0.35)',
+                            letterSpacing: '0.1em',
+                            textTransform: 'uppercase',
+                            textAlign: 'left',
+                          }}
+                        >
+                          {field.label}
+                        </label>
+                        <input
+                          type={field.type}
+                          placeholder={field.placeholder}
+                          value={form[field.key]}
+                          onChange={(e) => setForm((prev) => ({ ...prev, [field.key]: e.target.value }))}
+                          required
+                          style={{
+                            background: 'rgba(255,255,255,0.05)',
+                            border: '1px solid rgba(255,255,255,0.09)',
+                            borderRadius: 10,
+                            padding: '11px 14px',
+                            fontSize: 14,
+                            color: 'white',
+                            outline: 'none',
+                            width: '100%',
+                            boxSizing: 'border-box',
+                          }}
+                        />
+                      </div>
+                    ))}
 
-export const Footer = () => {
-  const ref = useRef<HTMLElement>(null);
-  const shouldReduceMotion = useReducedMotion();
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ['start end', 'end start'],
-  });
-  const wallY = useTransform(scrollYProgress, [0, 1], shouldReduceMotion ? [0, 0] : [-48, 84]);
-  const wallScale = useTransform(scrollYProgress, [0, 1], shouldReduceMotion ? [1.12, 1.12] : [1.12, 1.2]);
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                      <label
+                        style={{
+                          fontSize: 10,
+                          fontWeight: 600,
+                          color: 'rgba(255,255,255,0.35)',
+                          letterSpacing: '0.1em',
+                          textTransform: 'uppercase',
+                          textAlign: 'left',
+                        }}
+                      >
+                        ¿Qué necesitás?
+                      </label>
+                      <textarea
+                        placeholder="Contanos brevemente qué querés lograr con tu negocio..."
+                        rows={3}
+                        value={form.mensaje}
+                        onChange={(e) => setForm((prev) => ({ ...prev, mensaje: e.target.value }))}
+                        style={{
+                          background: 'rgba(255,255,255,0.05)',
+                          border: '1px solid rgba(255,255,255,0.09)',
+                          borderRadius: 10,
+                          padding: '11px 14px',
+                          fontSize: 14,
+                          color: 'white',
+                          outline: 'none',
+                          width: '100%',
+                          boxSizing: 'border-box',
+                          resize: 'none',
+                          fontFamily: 'inherit',
+                        }}
+                      />
+                    </div>
 
-  return (
-    <footer ref={ref} className="relative overflow-hidden bg-[#04060a] py-24 md:py-32">
-      <BackgroundPortalWall y={wallY} scale={wallScale} />
+                    <motion.button
+                      type="submit"
+                      disabled={loading}
+                      whileHover={{ scale: loading ? 1 : 1.02 }}
+                      whileTap={{ scale: loading ? 1 : 0.97 }}
+                      style={{
+                        padding: '13px 24px',
+                        background: loading
+                          ? 'rgba(6,182,212,0.25)'
+                          : 'linear-gradient(135deg, #06b6d4, #0891b2)',
+                        border: 'none',
+                        borderRadius: 12,
+                        fontSize: 12,
+                        fontWeight: 700,
+                        color: 'white',
+                        letterSpacing: '0.08em',
+                        cursor: loading ? 'not-allowed' : 'pointer',
+                        boxShadow: loading ? 'none' : '0 0 28px rgba(6,182,212,0.3)',
+                        transition: 'background 200ms, box-shadow 200ms',
+                      }}
+                    >
+                      {loading ? 'ENVIANDO...' : 'ENVIAR CONSULTA →'}
+                    </motion.button>
 
-      <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_center,rgba(34,211,238,0.09)_0%,transparent_35%),radial-gradient(circle_at_bottom,rgba(139,92,246,0.08)_0%,transparent_32%)]" />
+                    <p
+                      style={{
+                        fontSize: 10,
+                        color: 'rgba(255,255,255,0.18)',
+                        textAlign: 'center',
+                        margin: 0,
+                        letterSpacing: '0.04em',
+                      }}
+                    >
+                      Te respondemos en menos de 2hs · Sin compromiso
+                    </p>
+                  </motion.form>
+                )}
+              </AnimatePresence>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-      <div className="relative z-10 mx-auto max-w-[1760px] px-4 sm:px-6 lg:px-8">
-        <div className="grid items-center gap-8 xl:grid-cols-[390px_minmax(0,820px)_390px] xl:gap-10">
-          <TiltedGallery items={GALLERY_ITEMS.slice(0, 2)} side="left" />
+        {/* TRUST ROW */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, delay: 0.28 }}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 0,
+            flexWrap: 'wrap',
+            justifyContent: 'center',
+            marginTop: 48,
+          }}
+        >
+          {TRUST_ITEMS.map((item, i) => {
+            const IconComp = item.icon;
+            return (
+              <div
+                key={i}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                }}
+              >
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 6,
+                    fontSize: 12,
+                    color: 'rgba(255,255,255,0.28)',
+                    padding: '0 20px',
+                  }}
+                >
+                  <IconComp size={12} strokeWidth={1.5} color="rgba(6,182,212,0.5)" />
+                  {item.text}
+                </div>
+                {i < TRUST_ITEMS.length - 1 && (
+                  <div
+                    style={{
+                      width: 1,
+                      height: 14,
+                      background: 'rgba(255,255,255,0.08)',
+                      flexShrink: 0,
+                    }}
+                  />
+                )}
+              </div>
+            );
+          })}
+        </motion.div>
+      </div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 28 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: '-10%' }}
-            transition={{ duration: 0.6, ease: [0.23, 1, 0.32, 1] }}
-            className="relative mx-auto flex min-h-[760px] w-full max-w-[820px] flex-col items-center justify-center overflow-hidden rounded-[36px] border border-white/10 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.06)_0%,rgba(255,255,255,0.02)_30%,rgba(6,8,12,0.86)_100%)] px-6 py-16 text-center shadow-[0_40px_100px_rgba(0,0,0,0.35)] backdrop-blur-xl md:px-10"
+      {/* ── SEPARADOR ── */}
+      <div
+        style={{
+          height: 1,
+          background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.07) 50%, transparent 100%)',
+          margin: '72px 0 56px',
+        }}
+      />
+
+      {/* ── FOOTER ── */}
+      <div
+        style={{
+          position: 'relative',
+          zIndex: 1,
+          maxWidth: 960,
+          margin: '0 auto',
+          padding: '0 24px',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: 20,
+        }}
+      >
+        {/* Logo + tagline */}
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
+          <svg
+            viewBox="0 0 1024 1024"
+            style={{ width: 26, height: 26, opacity: 0.35 }}
           >
-            <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.04)_0%,transparent_18%,transparent_82%,rgba(255,255,255,0.02)_100%)]" />
+            <path d={LOGO_PATH} fill="white" />
+          </svg>
+          <div
+            style={{
+              fontSize: 10,
+              color: 'rgba(255,255,255,0.18)',
+              letterSpacing: '0.18em',
+              textTransform: 'uppercase',
+            }}
+          >
+            develOP · Tucumán, Argentina · V.3.0
+          </div>
+        </div>
 
-            <div className="relative z-10 flex flex-col items-center">
-              <div className="inline-flex items-center gap-2 rounded-full border border-cyan-400/15 bg-cyan-400/8 px-4 py-1.5 text-[11px] uppercase tracking-[0.28em] text-cyan-300">
-                <Globe className="h-3.5 w-3.5" />
-                Build with develOP
-              </div>
+        {/* Redes */}
+        <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', justifyContent: 'center' }}>
+          {SOCIAL_LINKS.map((link, i) => (
+            <span key={link.label} style={{ display: 'flex', alignItems: 'center' }}>
+              <a
+                href={link.href}
+                target={link.href.startsWith('mailto') ? undefined : '_blank'}
+                rel={link.href.startsWith('mailto') ? undefined : 'noopener noreferrer'}
+                style={{
+                  fontSize: 10,
+                  fontWeight: 500,
+                  letterSpacing: '0.14em',
+                  color: 'rgba(255,255,255,0.2)',
+                  textDecoration: 'none',
+                  textTransform: 'uppercase',
+                  padding: '4px 10px',
+                  transition: 'color 200ms',
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = 'rgba(255,255,255,0.55)')}
+                onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(255,255,255,0.2)')}
+              >
+                {link.label}
+              </a>
+              {i < SOCIAL_LINKS.length - 1 && (
+                <span style={{ color: 'rgba(255,255,255,0.08)', fontSize: 10 }}>·</span>
+              )}
+            </span>
+          ))}
+        </div>
 
-              <div className="mt-8 text-transparent bg-gradient-to-b from-white via-zinc-200 to-zinc-500 bg-clip-text">
-                <h2 className="text-[16.8vw] font-black leading-[0.9] tracking-[0.16em] md:text-[6.8vw] md:tracking-[0.1em]">
-                  {shouldReduceMotion ? 'LISTO' : <span >¿LISTO</span>}
-                </h2>
-                <h2 className="mt-1.5 text-[10.2vw] font-bold leading-[0.94] tracking-[0.14em] text-zinc-300 md:text-[5.35vw] md:tracking-[0.1em]">
-                  {shouldReduceMotion ? 'PARA' : <span className="block pl-[0.14em]">PARA</span>}
-                </h2>
-              </div>
-
-              <div className="my-8 md:my-10">
-                <MagneticButton href="/contact" isMobile={false} />
-              </div>
-
-              <h2 className="text-[16.8vw] font-black leading-[0.8] tracking-[0.1em] text-transparent bg-gradient-to-b from-cyan-300 via-cyan-400 to-cyan-600 bg-clip-text md:text-[8.5vw] md:tracking-[0.1em]">
-                <span className="block pl-[0.1em] pb-[0.1em]">CRECER?</span>
-              </h2>
-
-              <p className="mt-10 max-w-2xl text-sm leading-7 text-zinc-400 md:text-base">
-                Una experiencia mas sobria, un CTA mas claro y un cierre que sigue teniendo presencia
-                sin depender de efectos pesados.
-              </p>
-
-              <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
-                <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-xs tracking-[0.2em] text-zinc-300 uppercase">
-                  <Layers3 className="h-3.5 w-3.5 text-cyan-300" />
-                  Landing pages
-                </div>
-                <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-xs tracking-[0.2em] text-zinc-300 uppercase">
-                  <MonitorSmartphone className="h-3.5 w-3.5 text-violet-300" />
-                  Client portals
-                </div>
-              </div>
-            </div>
-
-            <div className="relative z-10 mt-16 flex flex-col items-center gap-6">
-              <div className="text-[11px] uppercase tracking-[0.28em] text-zinc-500">Contacto</div>
-              <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-sm text-zinc-400">
-                <span>Tucuman, Argentina</span>
-                <span className="hidden text-zinc-700 md:inline">|</span>
-                <span>hola@develop.com.ar</span>
-                <span className="hidden text-zinc-700 md:inline">|</span>
-                <span>Respuesta &lt; 24hs</span>
-              </div>
-
-              <div className="flex flex-wrap justify-center gap-5 pt-2">
-                <FooterLink href={socialLinks.linkedin}>LinkedIn</FooterLink>
-                <FooterLink href={socialLinks.instagram}>Instagram</FooterLink>
-                <FooterLink href={socialLinks.twitter}>Twitter_X</FooterLink>
-                <FooterLink href={socialLinks.email}>Email</FooterLink>
-              </div>
-            </div>
-          </motion.div>
-
-          <TiltedGallery items={GALLERY_ITEMS.slice(2, 4)} side="right" />
+        {/* Copyright */}
+        <div
+          style={{
+            fontSize: 10,
+            color: 'rgba(255,255,255,0.1)',
+            letterSpacing: '0.06em',
+          }}
+        >
+           2026 develOP. Todos los derechos reservados.
         </div>
       </div>
-    </footer>
+    </section>
   );
 };

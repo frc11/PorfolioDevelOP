@@ -384,7 +384,7 @@ function NeuralCanvas() {
 }
 
 export default function HeroIA() {
-    const prefersReduced = useReducedMotion()
+    const prefersReduced = !!useReducedMotion()
 
 
     const stats = [

@@ -136,7 +136,7 @@ const TABBED_DIMENSIONS: TabbedDimension[] = [
   {
     label: 'La Anti-Agencia',
     summary:
-      'Velocidad real, decisiones directas y un delivery que evita la fricci\u00f3n comercial de una agencia tradicional.',
+      'Velocidad real, decisiones directas y un delivery qué evita la fricci\u00f3n comercial de una agencia tradicional.',
     feature: {
       tag: 'LA ANTI-AGENCIA',
       signal: 'Velocidad operativa',
@@ -177,33 +177,33 @@ const TABBED_DIMENSIONS: TabbedDimension[] = [
   {
     label: 'Ecosistema Rentable',
     summary:
-      'No entregamos una web aislada: dise\u00f1amos una infraestructura que captura, automatiza y convierte como un sistema.',
+      'No entregamos una web aislada: dise\u00f1amos una infraestructura qué captura, automatiza y convierte como un sistema.',
     feature: {
       tag: 'ECOSISTEMA RENTABLE',
       signal: 'ROI estructural',
       title: 'Tu negocio no necesita una web, necesita un ecosistema.',
       supportTitle: 'Arquitectura orientada a conversi\u00f3n.',
       text:
-        'Conectamos adquisici\u00f3n, operaci\u00f3n y conversi\u00f3n para que cada pieza trabaje en cadena. Menos silos, m\u00e1s retorno visible sobre la inversi\u00f3n.',
+        'Conectamos adquisici\u00f3n, operaci\u00f3n y conversi\u00f3n para qué cada pieza trabaje en cadena. Menos silos, m\u00e1s retorno visible sobre la inversi\u00f3n.',
       accent: 'emerald',
       visual: 'nodes',
     },
     cards: [
       {
         title: 'Retorno de Inversi\u00f3n',
-        text: 'Cada m\u00f3dulo est\u00e1 dise\u00f1ado para recuperar inversi\u00f3n con procesos que generan ventas.',
+        text: 'Cada m\u00f3dulo est\u00e1 dise\u00f1ado para recuperar inversi\u00f3n con procesos qué generan ventas.',
         accent: 'emerald',
         visual: 'roi',
       },
       {
         title: 'Operaci\u00f3n 24/7',
-        text: 'El sistema captura leads, responde y ejecuta incluso cuando tu equipo est\u00e1 offline.',
+        text: 'El sistema captura leads, responde y ejecuta incluso cuándo tu equipo est\u00e1 offline.',
         accent: 'cyan',
         visual: 'clock',
       },
       {
         title: 'Escalabilidad T\u00e9cnica',
-        text: 'La arquitectura crece por capas sin rehacer lo que ya funciona ni frenar la operaci\u00f3n.',
+        text: 'La arquitectura crece por capas sin rehacer lo qué ya funciona ni frenar la operaci\u00f3n.',
         accent: 'violet',
         visual: 'layers',
       },
@@ -225,7 +225,7 @@ const TABBED_DIMENSIONS: TabbedDimension[] = [
       title: 'Mientras tu competencia usa Excel, nosotros implementamos IA.',
       supportTitle: 'Procesamiento de datos en tiempo real.',
       text:
-        'Dise\u00f1amos capas de IA que responden, ordenan, califican y optimizan sin sumar caos. M\u00e1s throughput, menos tareas repetitivas y una ventaja que se siente desde la operaci\u00f3n.',
+        'Dise\u00f1amos capas de IA qué responden, ordenan, califican y optimizan sin sumar caos. M\u00e1s throughput, menos tareas repetitivas y una ventaja qué se siente desde la operaci\u00f3n.',
       accent: 'violet',
       visual: 'ai',
     },
@@ -250,7 +250,7 @@ const TABBED_DIMENSIONS: TabbedDimension[] = [
       },
       {
         title: 'Vanguardia Tech',
-        text: 'Integramos stacks y modelos de frontera antes de que se vuelvan est\u00e1ndar del mercado.',
+        text: 'Integramos stacks y modelos de frontera antes de qué se vuelvan est\u00e1ndar del mercado.',
         accent: 'violet',
         visual: 'logo',
       },
