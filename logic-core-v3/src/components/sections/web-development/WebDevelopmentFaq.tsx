@@ -353,6 +353,44 @@ export const WebDevelopmentFaq = () => {
                     delayOffset={0.12}
                     tone="violet"
                 />
+
+                <motion.button
+                    type="button"
+                    onClick={() => window.dispatchEvent(new CustomEvent("open-mascot-chat"))}
+                    initial={{ opacity: 0, y: 14 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, amount: 0.25 }}
+                    transition={{ duration: 0.45, delay: 0.08, ease }}
+                    className="mt-10 w-full rounded-2xl border px-6 py-5 text-left transition-all duration-200"
+                    style={{
+                        borderColor: 'rgba(34,211,238,0.36)',
+                        background:
+                            'linear-gradient(145deg, rgba(34,211,238,0.12) 0%, rgba(59,130,246,0.12) 55%, rgba(124,58,237,0.14) 100%)',
+                        boxShadow: '0 0 0 1px rgba(34,211,238,0.16), 0 14px 36px rgba(0,0,0,0.34)',
+                    }}
+                >
+                    <p
+                        style={{
+                            fontSize: 'clamp(18px,2.2vw,24px)',
+                            fontWeight: 700,
+                            color: 'rgba(224,242,254,0.96)',
+                            margin: 0,
+                        }}
+                    >
+                        Tenes otra pregunta?
+                    </p>
+                    <p
+                        style={{
+                            marginTop: '8px',
+                            marginBottom: 0,
+                            fontSize: '14px',
+                            lineHeight: 1.6,
+                            color: 'rgba(255,255,255,0.72)',
+                        }}
+                    >
+                        Abri el chatbot y pregunta lo que quieras.
+                    </p>
+                </motion.button>
             </motion.div>
         </section>
     )
