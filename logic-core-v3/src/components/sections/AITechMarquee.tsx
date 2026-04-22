@@ -3,20 +3,20 @@ import React from 'react'
 import { motion } from 'motion/react'
 
 const marqueeItems = [
-  { icon:'💬', label:'WhatsApp API' },
-  { icon:'📸', label:'Instagram Direct' },
-  { icon:'💳', label:'MercadoPago' },
-  { icon:'📅', label:'Google Calendar' },
-  { icon:'🧾', label:'AFIP' },
-  { icon:'📊', label:'Google Sheets' },
-  { icon:'📧', label:'Gmail' },
-  { icon:'📋', label:'Notion' },
-  { icon:'🔗', label:'Zapier' },
-  { icon:'🏪', label:'Tiendanube' },
-  { icon:'🛍', label:'Mercado Libre' },
-  { icon:'📦', label:'WooCommerce' },
-  { icon:'💼', label:'Salesforce' },
-  { icon:'📣', label:'Meta Ads' },
+  { icon:'', label:'WhatsApp API' },
+  { icon:'', label:'Instagram Direct' },
+  { icon:'', label:'MercadoPago' },
+  { icon:'', label:'Google Calendar' },
+  { icon:'', label:'AFIP' },
+  { icon:'', label:'Google Sheets' },
+  { icon:'', label:'Gmail' },
+  { icon:'', label:'Notion' },
+  { icon:'', label:'Zapier' },
+  { icon:'', label:'Tiendanube' },
+  { icon:'', label:'Mercado Libre' },
+  { icon:'', label:'WooCommerce' },
+  { icon:'', label:'Salesforce' },
+  { icon:'', label:'Meta Ads' },
 ]
 
 const allItems = [...marqueeItems, ...marqueeItems]

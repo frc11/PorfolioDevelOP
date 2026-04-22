@@ -26,7 +26,7 @@ const cases = [
         tech: ['Next.js', 'Tailwind', 'WhatsApp API'],
         accentColor: '#00e5ff',
         accentRgb: '0,229,255',
-        icon: '🚗',
+        icon: '',
         timeline: '4 semanas',
         visualTitle: 'Lead flow',
         visualStats: ['Stock vivo', 'Formularios activos', 'Mobile first'],
@@ -45,7 +45,7 @@ const cases = [
         tech: ['Next.js', 'Google Calendar API', 'SEO Local'],
         accentColor: '#7b2fff',
         accentRgb: '123,47,255',
-        icon: '🦷',
+        icon: '',
         timeline: '5 semanas',
         visualTitle: 'Turnos online',
         visualStats: ['Agenda 24/7', 'Confianza visual', 'SEO local'],
@@ -64,7 +64,7 @@ const cases = [
         tech: ['Next.js', 'TypeScript', 'Catálogo dinámico'],
         accentColor: '#00e5ff',
         accentRgb: '0,229,255',
-        icon: '📦',
+        icon: '',
         timeline: '6 semanas',
         visualTitle: 'Pedidos ágiles',
         visualStats: ['B2B ready', 'Catálogo fluido', 'Menos errores'],
@@ -81,7 +81,7 @@ function CaseVisual({
     isHovered: boolean
 }) {
     const visualRef = useRef<HTMLDivElement>(null)
-    const prefersReduced = useReducedMotion()
+    const prefersReduced = !!useReducedMotion()
     const { scrollYProgress } = useScroll({
         target: visualRef,
         offset: ['start end', 'end start'],

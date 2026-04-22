@@ -120,7 +120,7 @@ function buildTelegramMessage(leads: PendingLead[], today: Date, endOfDay: Date)
     const lastContactAt = lead.activities[0]?.createdAt ?? null
 
     if (isReactivationLead(lead, endOfDay)) {
-      return `🔄 <b>${escapeHtml(lead.businessName)}</b> — Se reactiva hoy`
+      return ` <b>${escapeHtml(lead.businessName)}</b> — Se reactiva hoy`
     }
 
     return `• <b>${escapeHtml(lead.businessName)}</b> — ${escapeHtml(
@@ -129,7 +129,7 @@ function buildTelegramMessage(leads: PendingLead[], today: Date, endOfDay: Date)
   })
 
   return [
-    `🔔 <b>Follow-ups pendientes — ${escapeHtml(formatDisplayDate(today))}</b>`,
+    ` <b>Follow-ups pendientes — ${escapeHtml(formatDisplayDate(today))}</b>`,
     '',
     ...lines,
     '',

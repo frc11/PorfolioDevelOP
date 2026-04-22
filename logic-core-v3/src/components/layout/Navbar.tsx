@@ -22,37 +22,50 @@ type ServiceItem = {
     price: string;
 };
 
-const NAV_ITEMS: readonly NavItem[] = [
+const MAIN_NAV_ITEMS: readonly NavItem[] = [
     { href: "/#inicio", label: "Inicio" },
     { href: "/#nosotros", label: "Nosotros" },
     { href: "/#portfolio", label: "Portfolio" },
     { href: "/#servicios", label: "Servicios", expandable: true },
-    { href: "/#caracteristicas", label: "Caracteristicas" },
+    { href: "/#caracteristicas", label: "Características" },
     { href: "/contact", label: "Contacto" },
 ] as const;
 
 const SERVICE_ITEMS: readonly ServiceItem[] = [
     { href: "/web-development", label: "Sitio Web", subLabel: "Presencia profesional", price: "$800" },
-    { href: "/ai-implementations", label: "Agente IA", subLabel: "Atencion 24/7", price: "$300" },
+    { href: "/ai-implementations", label: "Agente IA", subLabel: "Atención 24/7", price: "$300" },
     { href: "/software-development", label: "Software", subLabel: "Sistema a medida", price: "$1.500" },
-    { href: "/process-automation", label: "Automatizacion", subLabel: "Tareas automaticas", price: "$200" },
+    { href: "/process-automation", label: "Automatización", subLabel: "Tareas automáticas", price: "$200" },
 ] as const;
 
 const SERVICE_ROUTE_SET = new Set<string>(SERVICE_ITEMS.map((item) => item.href));
+
+export function getNavItems(pathname: string): NavItem[] {
+    if (SERVICE_ROUTE_SET.has(pathname)) {
+        return [
+            { href: `${pathname}#hero`, label: "Inicio" },
+            { href: `${pathname}#proceso`, label: "Proceso" },
+            { href: `${pathname}#faq`, label: "FAQ" },
+            { href: "/contact", label: "Contacto" },
+        ];
+    }
+    return [...MAIN_NAV_ITEMS];
+}
+
 const HASH_TO_LABEL: Readonly<Record<string, string>> = {
     "#inicio": "Inicio",
     "#nosotros": "Nosotros",
     "#portfolio": "Portfolio",
     "#servicios": "Servicios",
-    "#caracteristicas": "Caracteristicas",
+    "#caracteristicas": "Características",
+    "#hero": "Inicio",
+    "#proceso": "Proceso",
+    "#faq": "FAQ"
 };
 
 function getActiveTab(pathname: string, hash: string): string {
     if (pathname === "/contact") return "Contacto";
-    if (SERVICE_ROUTE_SET.has(pathname)) return "Servicios";
-    if (pathname !== "/") return "";
-
-    return HASH_TO_LABEL[hash] ?? "Inicio";
+    return HASH_TO_LABEL[hash] ?? (SERVICE_ROUTE_SET.has(pathname) ? "Inicio" : "Inicio");
 }
 
 function BrandLogo() {
@@ -138,15 +151,40 @@ export function Navbar() {
     useEffect(() => {
         if (typeof window === "undefined") return;
 
-        const syncActiveTab = () => {
-            setActiveTab(getActiveTab(pathname, window.location.hash));
-        };
+        let observer: IntersectionObserver;
 
-        syncActiveTab();
-        window.addEventListener("hashchange", syncActiveTab);
+        const timeoutId = window.setTimeout(() => {
+            const sections = document.querySelectorAll("section[id], div[id]");
+            if (sections.length === 0) return;
+
+            observer = new IntersectionObserver(
+                (entries) => {
+                    const visibleEntries = entries.filter((e) => e.isIntersecting);
+                    if (visibleEntries.length > 0) {
+                        visibleEntries.sort((a, b) => b.intersectionRatio - a.intersectionRatio);
+                        const topSection = visibleEntries[0];
+                        const id = topSection.target.id;
+                        
+                        const currentItems = getNavItems(pathname);
+                        const match = currentItems.find(item => item.href.endsWith(`#${id}`));
+                        if (match) {
+                            setActiveTab(match.label);
+                        } else if (id === "hero" || id === "inicio") {
+                            setActiveTab("Inicio");
+                        }
+                    }
+                },
+                { root: null, rootMargin: "-30% 0px -40% 0px", threshold: [0, 0.1, 0.25, 0.5, 0.75, 1] }
+            );
+
+            sections.forEach((section) => observer.observe(section));
+        }, 500);
+
+        setActiveTab(getActiveTab(pathname, window.location.hash));
 
         return () => {
-            window.removeEventListener("hashchange", syncActiveTab);
+            window.clearTimeout(timeoutId);
+            if (observer) observer.disconnect();
         };
     }, [pathname]);
 
@@ -280,7 +318,7 @@ export function Navbar() {
                                     },
                                 }}
                             >
-                                {NAV_ITEMS.map((item) => {
+                                {getNavItems(pathname).map((item) => {
                                     const isServices = item.expandable === true;
                                     const isActive = activeTab === item.label;
 
@@ -364,7 +402,7 @@ export function Navbar() {
                             </motion.div>
 
                             <div className="pt-5 text-xs tracking-wide text-white/24">
-                                Tucuman, Argentina
+                                Tucumán, Argentina
                             </div>
                         </motion.div>
                     ) : null}

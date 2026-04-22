@@ -91,7 +91,7 @@ const ActiveWord = ({ text, variant = 'solid' }: { text: string, variant?: 'soli
                     color: isSolid ? "transparent" : "#18181b", // transparent vs zinc-900
                     WebkitTextStroke: isSolid ? "1px #18181b" : "0px transparent" // black border vs none
                 }
-            }}
+            } as any}
         >
             {text}
         </motion.span>

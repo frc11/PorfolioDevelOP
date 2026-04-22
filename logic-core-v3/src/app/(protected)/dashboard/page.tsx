@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/prisma'
+export const dynamic = 'force-dynamic'
 import { redirect } from 'next/navigation'
 import { resolveOrgId } from '@/lib/preview'
 import {

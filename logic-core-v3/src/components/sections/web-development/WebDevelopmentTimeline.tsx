@@ -54,7 +54,7 @@ const milestones: Milestone[] = [
         step: '01',
         week: 'Semana 01',
         title: 'Estrategia y diseno',
-        description: 'Aterrizamos tu oferta, ordenamos el mensaje y definimos una experiencia que se sienta seria desde el primer segundo.',
+        description: 'Aterrizamos tu oferta, ordenamos el mensaje y definimos una experiencia qué se sienta seria desde el primer segundo.',
         deliverable: 'Diseno aprobado antes de construir',
         side: 'left',
         icon: Sparkles,
@@ -63,7 +63,7 @@ const milestones: Milestone[] = [
         step: '02',
         week: 'Semana 02',
         title: 'Construccion',
-        description: 'Convertimos ese sistema en una web rapida, clara y solida para que cada clic se sienta inmediato.',
+        description: 'Convertimos ese sistema en una web rapida, clara y solida para qué cada clic se sienta inmediato.',
         deliverable: 'Web funcional en entorno de prueba',
         side: 'right',
         icon: Wrench,
@@ -72,7 +72,7 @@ const milestones: Milestone[] = [
         step: '03',
         week: 'Semana 03',
         title: 'Posicionamiento Google',
-        description: 'Ajustamos estructura, velocidad y senales locales para que Google te entienda y te muestre donde importa.',
+        description: 'Ajustamos estructura, velocidad y senales locales para qué Google te entienda y te muestre donde importa.',
         deliverable: 'Search listo para salir a produccion',
         side: 'left',
         icon: Search,
@@ -382,7 +382,7 @@ function TimelineCard({
     active: boolean
     contentRef?: (node: HTMLElement | null) => void
 }) {
-    const prefersReduced = useReducedMotion()
+    const prefersReduced = !!useReducedMotion()
     const fromLeft = item.side === 'left'
     const Icon = item.icon
     const isVisible = prefersReduced || visible
@@ -470,7 +470,7 @@ function TimelineCard({
                                 >
                                     {item.week}
                                 </div>
-                                <div className="mt-1 text-sm text-white/35">Proceso guiado, sin friccion</div>
+                                <div className="mt-1 text-sm text-white/35">Proceso guiado, sin fricción</div>
                             </div>
                         </div>
 
@@ -506,7 +506,7 @@ function TimelineCard({
 }
 
 export function WebDevelopmentTimeline() {
-    const prefersReduced = useReducedMotion()
+    const prefersReduced = !!useReducedMotion()
     const sectionRef = useRef<HTMLElement>(null)
     const stepRefs = useRef<Array<HTMLElement | null>>([])
     const launchRef = useRef<HTMLDivElement>(null)
@@ -828,7 +828,7 @@ export function WebDevelopmentTimeline() {
                         }}
                         className="mx-auto mt-7 max-w-2xl text-base leading-8 text-white/52 md:text-xl"
                     >
-                        Un proceso corto, visible y concreto para pasar de una idea suelta a una presencia digital que ya vende y posiciona.
+                        Un proceso corto, visible y concreto para pasar de una idea suelta a una presencia digital qué ya vende y posiciona.
                     </motion.p>
                 </div>
 
@@ -920,7 +920,7 @@ export function WebDevelopmentTimeline() {
                                                 </span>
                                             </h3>
                                             <p className="mt-5 max-w-xl text-sm leading-7 text-white/55 md:text-base">
-                                                Publicamos, conectamos conversiones y dejamos todo listo para que tu operacion tenga una nueva sucursal activa desde el dia uno.
+                                                Publicamos, conectamos conversiones y dejamos todo listo para qué tu operación tenga una nueva sucursal activa desde el dia uno.
                                             </p>
 
                                             <div className="mt-8 space-y-3">

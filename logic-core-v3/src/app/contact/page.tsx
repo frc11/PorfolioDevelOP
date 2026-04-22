@@ -8,10 +8,10 @@ import type { ActionResult } from '@/lib/actions/schemas';
 
 const EMAIL = 'hola@develop.com.ar';
 const DEFAULT_PHONE_DIGITS = '543813165293';
-const LOCATION = 'Tucuman, Argentina';
+const LOCATION = 'Tucumán, Argentina';
 const SERVICE_OPTIONS = [
   { value: '', label: 'Selecciona un servicio' },
-  { value: 'automation', label: 'Automatizacion de procesos' },
+  { value: 'automation', label: 'Automatización de procesos' },
   { value: 'software', label: 'Software a medida' },
   { value: 'web', label: 'Desarrollo web' },
   { value: 'ai', label: 'Implementaciones IA' },
@@ -38,7 +38,7 @@ const CHANNELS = [
   {
     id: 'mail',
     title: 'Email',
-    subtitle: 'Dejanos contexto y te devolvemos plan de accion',
+    subtitle: 'Dejanos contexto y te devolvemos plan de acción',
     cta: 'Enviar email',
     icon: Mail,
     accent: '#5eead4',
@@ -119,8 +119,8 @@ export default function ContactPage() {
                 <span className="text-[#5eead4]"> hoy.</span>
               </h1>
               <p className="mt-3 max-w-[58ch] text-sm leading-relaxed text-[#c6e8e9]/76">
-                Esta pagina es solo para contacto. Sin scroll, sin distracciones, directo a la accion.
-                Elegi el canal que te quede comodo y te respondemos rapido.
+                Esta página es solo para contacto. Sin scroll, sin distracciones, directo a la acción.
+                Elegí el canal que te quede cómodo y te respondemos rápido.
               </p>
             </div>
 
@@ -158,7 +158,7 @@ export default function ContactPage() {
                     />
                   </div>
                   <div className="col-span-1">
-                    <label className="mb-1 block text-[10px] font-mono uppercase tracking-[0.18em] text-[#8deef5]/60">Telefono</label>
+                    <label className="mb-1 block text-[10px] font-mono uppercase tracking-[0.18em] text-[#8deef5]/60">Teléfono</label>
                     <input
                       name="phone"
                       type="tel"
@@ -227,7 +227,7 @@ export default function ContactPage() {
               <div className="rounded-2xl border border-[#22d3ee]/30 bg-[#22d3ee]/12 p-2.5">
                 <div className="mb-1 flex items-center gap-2 text-[#9feeff]">
                   <ShieldCheck className="h-4 w-4" />
-                  <span className="text-[10px] font-mono uppercase tracking-[0.2em]">Diagnostico inicial</span>
+                  <span className="text-[10px] font-mono uppercase tracking-[0.2em]">Diagnóstico inicial</span>
                 </div>
                 <p className="text-[13px] font-semibold text-white">Sin costo</p>
               </div>
@@ -255,14 +255,14 @@ export default function ContactPage() {
                 Hablemos <span className="text-[#5eead4]">hoy.</span>
               </h1>
               <p className="mt-2 text-sm leading-relaxed text-[#c6e8e9]/75">
-                WhatsApp, llamada o email. Elegi tu canal y arrancamos.
+                WhatsApp, llamada o email. Elegí tu canal y arrancamos.
               </p>
             </div>
 
             <div className="mb-3 flex items-end justify-between">
               <div>
                 <p className="text-[10px] font-mono uppercase tracking-[0.28em] text-[#8deef5]/72">Canales</p>
-                <h2 className="mt-2 text-2xl font-extrabold tracking-tight text-white md:text-3xl">Elegi como hablar</h2>
+                <h2 className="mt-2 text-2xl font-extrabold tracking-tight text-white md:text-3xl">Elegí como hablar</h2>
               </div>
               <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-[#7cdce4]/60">Online ahora</p>
             </div>

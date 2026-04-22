@@ -45,7 +45,7 @@ const burnVeilVariants = {
         transition: {
             duration: 1.08,
             delay: delay + 0.04,
-            ease: [0.22, 1, 0.36, 1] as const,
+            ease: [0.22, 1, 0.36, 1] as [number, number, number, number],
         },
     }),
 }
@@ -58,8 +58,8 @@ const burnEdgeVariants = {
         transition: {
             duration: 1.12,
             delay: delay + 0.06,
-            ease: [0.22, 1, 0.36, 1] as const,
-            times: [0, 0.2, 1] as const,
+            ease: [0.22, 1, 0.36, 1] as [number, number, number, number],
+            times: [0, 0.2, 1] as number[],
         },
     }),
 }
@@ -67,7 +67,7 @@ const burnEdgeVariants = {
 const cardGlow =
     "pointer-events-none absolute inset-0 rounded-[inherit] bg-[linear-gradient(140deg,rgba(255,255,255,0.12),transparent_28%,transparent_70%,rgba(34,211,238,0.08))]"
 
-const metricPills = ["UX que retiene", "Carga ultra rápida", "Conversión mobile"]
+const metricPills = ["UX qué retiene", "Carga ultra rápida", "Conversión mobile"]
 const seoPills = ["Google Maps", "Búsqueda local", "NOA"]
 const motionPills = ["WhatsApp", "Formularios", "Catálogo"]
 
@@ -93,7 +93,7 @@ const IconOrb = ({
 )
 
 const LighthouseGauge = () => {
-    const prefersReduced = useReducedMotion()
+    const prefersReduced = !!useReducedMotion()
     const containerRef = useRef<HTMLDivElement>(null)
     const isInView = useInView(containerRef, { once: true, amount: 0.5 })
     const [count, setCount] = useState(0)
@@ -176,7 +176,7 @@ const ScrollCue = () => {
                 </div>
             </div>
             <p className="mt-6 text-center text-sm italic text-white/40">
-                Una web que no convierte es decoración cara.
+                Una web qué no convierte es decoración cara.
             </p>
         </div>
     )
@@ -280,7 +280,7 @@ const BurnRevealCard = ({
 export const WebDevelopmentBento = () => {
     const sectionRef = useRef<HTMLElement>(null)
     const gridRef = useRef<HTMLDivElement>(null)
-    const prefersReduced = useReducedMotion()
+    const prefersReduced = !!useReducedMotion()
     const [isTabletOrMobile, setIsTabletOrMobile] = useState(false)
     const mouseX = useMotionValue(0)
     const mouseY = useMotionValue(0)
@@ -372,8 +372,8 @@ export const WebDevelopmentBento = () => {
                                 transition={{
                                     duration: 1.05,
                                     delay: 0.08,
-                                    ease: [0.16, 1, 0.3, 1] as const,
-                                    times: [0, 0.4, 1],
+                                    ease: [0.16, 1, 0.3, 1] as [number, number, number, number],
+                                    times: [0, 0.4, 1] as number[],
                                 }}
                                 className="pointer-events-none absolute inset-x-[18%] top-[38%] h-24 rounded-full blur-[38px]"
                                 style={{ background: "radial-gradient(ellipse, rgba(34,211,238,0.75) 0%, rgba(167,139,250,0.6) 45%, rgba(167,139,250,0.02) 100%)" }}
@@ -415,7 +415,7 @@ export const WebDevelopmentBento = () => {
                         transition={{ duration: prefersReduced ? 0 : 0.64, delay: 0.2, ease }}
                         className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-white/52 md:text-lg"
                     >
-                        Diseñamos una presencia que convence en segundos, aparece en el momento correcto y convierte incluso cuando vos no estás frente al mostrador.
+                        Diseñamos una presencia qué convence en segundos, aparece en el momento correcto y convierte incluso cuándo vos no estás frente al mostrador.
                     </motion.p>
                 </motion.div>
 
@@ -493,10 +493,10 @@ export const WebDevelopmentBento = () => {
                                 <IconOrb icon={Bolt} accent="rgba(34,211,238,0.22)" className="mb-5" />
                                 <LighthouseGauge />
                                 <h3 className="mt-3 text-2xl font-black tracking-[-0.04em] text-white">
-                                    El cliente que espera, se va.
+                                    El cliente qué espera, se va.
                                 </h3>
                                 <p className="mt-3 max-w-sm text-sm leading-7 text-white/52">
-                                    La carga se siente inmediata en desktop y mobile para que la intención no se enfríe antes del primer scroll.
+                                    La carga se siente inmediata en desktop y mobile para qué la intención no se enfríe antes del primer scroll.
                                 </p>
                                 <div className="mt-6 flex items-center gap-3 text-[11px] uppercase tracking-[0.24em] text-white/35">
                                     <span>Mobile first</span>
@@ -526,7 +526,7 @@ export const WebDevelopmentBento = () => {
                                         Primero en Google en tu ciudad.
                                     </h3>
                                     <p className="mt-4 max-w-sm text-sm leading-7 text-white/55">
-                                        Cuando alguien busca tu rubro en Tucumán, Salta o Jujuy, la intención cae sobre tu negocio antes que sobre la competencia.
+                                        cuándo alguien busca tu rubro en Tucumán, Salta o Jujuy, la intención cae sobre tu negocio antes qué sobre la competencia.
                                     </p>
                                 </div>
 
@@ -573,7 +573,7 @@ export const WebDevelopmentBento = () => {
                                         <span className="bg-gradient-to-r from-violet-200 to-cyan-200 bg-clip-text text-transparent"> vende mientras dormís.</span>
                                     </h3>
                                     <p className="mt-5 max-w-2xl text-sm leading-7 text-white/55 md:text-base">
-                                        Formularios, WhatsApp integrado y productos listos para consultar. Todo armado para que el siguiente clic suceda sin depender de tu presencia.
+                                        Formularios, WhatsApp integrado y productos listos para consultar. Todo armado para qué el siguiente clic suceda sin depender de tu presencia.
                                     </p>
                                 </div>
 

@@ -42,7 +42,7 @@ const NAV_ITEMS: readonly NavItem[] = [
     { href: "/#nosotros", label: "Nosotros", icon: Users },
     { href: "/#portfolio", label: "Portfolio", icon: Briefcase },
     { href: "/#servicios", label: "Servicios", icon: Layers3 },
-    { href: "/#caracteristicas", label: "Caracteristicas", icon: Sparkles },
+    { href: "/#caracteristicas", label: "Características", icon: Sparkles },
     { href: "/contact", label: "Contacto", icon: Mail },
 ] as const;
 
@@ -87,7 +87,7 @@ const HASH_TO_LABEL: Readonly<Record<string, string>> = {
     "#nosotros": "Nosotros",
     "#portfolio": "Portfolio",
     "#servicios": "Servicios",
-    "#caracteristicas": "Caracteristicas",
+    "#caracteristicas": "Características",
 };
 
 function getActiveTab(pathname: string, hash: string): string {
