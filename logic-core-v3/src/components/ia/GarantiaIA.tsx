@@ -2,9 +2,17 @@
 
 import React, { useEffect, useRef, useState } from 'react'
 import { motion, useInView, useReducedMotion } from 'motion/react'
+import {
+  FileText,
+  Lock,
+  Settings2,
+  ShieldCheck,
+  UserRoundCheck,
+  type LucideIcon,
+} from 'lucide-react'
 
 interface GuardrailFeature {
-  icon: string
+  icon: LucideIcon
   title: string
   description: string
 }
@@ -28,27 +36,44 @@ interface OrbitalParticle {
   size: number
 }
 
+interface LockGlyph {
+  top?: string
+  right?: string
+  left?: string
+  bottom?: string
+  size: string
+  rotate: number
+  delay: number
+  fromX: number
+  fromY: number
+  driftX: number
+  driftY: number
+  driftRotate: number
+  opacity: number
+  blur: string
+}
+
 const features: GuardrailFeature[] = [
   {
-    icon: '\u{1F4D8}',
+    icon: ShieldCheck,
     title: 'Solo responde lo que vos definis',
     description:
       'La IA solo conoce lo que le ensenas: tus precios, tus productos y tus politicas. No puede inventar informacion que no existe en tu negocio.',
   },
   {
-    icon: '\u{1F501}',
+    icon: UserRoundCheck,
     title: 'Deriva automatica a humanos',
     description:
       'Si la consulta supera su conocimiento, transfiere la conversacion a tu equipo al instante. Sin que el cliente note la diferencia.',
   },
   {
-    icon: '\u{1F4DD}',
+    icon: FileText,
     title: 'Todo queda registrado',
     description:
       'Cada conversacion queda guardada. Podes revisar que dijo la IA en cualquier momento y corregir si algo no esta bien.',
   },
   {
-    icon: '\u{1F512}',
+    icon: Settings2,
     title: 'Control total en tus manos',
     description:
       'Actualizas los datos de tu negocio cuando quieras y la IA incorpora los cambios en minutos. Vos decidis que sabe y que no.',
@@ -115,6 +140,107 @@ const orbitalTrackStartIndex = orbitalTracks.reduce<number[]>((indexes, track, i
   return indexes
 }, [])
 
+const LOCK_GLYPHS: LockGlyph[] = [
+  {
+    top: '-16%',
+    left: '-7%',
+    size: 'clamp(16rem,24vw,26rem)',
+    rotate: -12,
+    delay: 0,
+    fromX: 280,
+    fromY: 190,
+    driftX: 14,
+    driftY: -14,
+    driftRotate: 2,
+    opacity: 0.06,
+    blur: '2px',
+  },
+  {
+    top: '12%',
+    right: '-10%',
+    size: 'clamp(14rem,20vw,22rem)',
+    rotate: 16,
+    delay: 0.35,
+    fromX: -220,
+    fromY: 130,
+    driftX: -10,
+    driftY: 12,
+    driftRotate: -2,
+    opacity: 0.065,
+    blur: '2px',
+  },
+  {
+    bottom: '-20%',
+    left: '18%',
+    size: 'clamp(18rem,26vw,30rem)',
+    rotate: -7,
+    delay: 0.18,
+    fromX: 140,
+    fromY: -190,
+    driftX: 10,
+    driftY: -14,
+    driftRotate: 1.8,
+    opacity: 0.055,
+    blur: '2px',
+  },
+  {
+    bottom: '-15%',
+    right: '-6%',
+    size: 'clamp(15rem,22vw,24rem)',
+    rotate: 9,
+    delay: 0.5,
+    fromX: -180,
+    fromY: -170,
+    driftX: -12,
+    driftY: 10,
+    driftRotate: -1.7,
+    opacity: 0.06,
+    blur: '2px',
+  },
+  {
+    top: '44%',
+    left: '5%',
+    size: 'clamp(9rem,13vw,14rem)',
+    rotate: -8,
+    delay: 0.12,
+    fromX: 210,
+    fromY: -20,
+    driftX: 8,
+    driftY: -10,
+    driftRotate: 1.3,
+    opacity: 0.09,
+    blur: '1px',
+  },
+  {
+    top: '6%',
+    right: '6%',
+    size: 'clamp(10rem,14vw,16rem)',
+    rotate: 24,
+    delay: 0.26,
+    fromX: -250,
+    fromY: 170,
+    driftX: -9,
+    driftY: 9,
+    driftRotate: -1.4,
+    opacity: 0.092,
+    blur: '1px',
+  },
+  {
+    top: '20%',
+    left: '26%',
+    size: 'clamp(6rem,9vw,10rem)',
+    rotate: -14,
+    delay: 0.42,
+    fromX: 120,
+    fromY: 70,
+    driftX: 6,
+    driftY: -8,
+    driftRotate: 1.1,
+    opacity: 0.045,
+    blur: '1.5px',
+  },
+]
+
 function AtmosphereGarantia() {
   return (
     <>
@@ -152,7 +278,80 @@ function AtmosphereGarantia() {
   )
 }
 
-function LeftPanel({ isInView }: { isInView: boolean }) {
+function LeftPanel({
+  isInView,
+  isMobileL,
+  isTouchLike,
+}: {
+  isInView: boolean
+  isMobileL: boolean
+  isTouchLike: boolean
+}) {
+  const [hoveredFeature, setHoveredFeature] = useState<number | null>(null)
+  const [centerActiveFeatures, setCenterActiveFeatures] = useState<number[]>([])
+  const featureRefs = useRef<Array<HTMLDivElement | null>>([])
+
+  useEffect(() => {
+    if (!isTouchLike) {
+      return
+    }
+
+    let rafId = 0
+    const centerBand = 58
+
+    const updateActiveByCenter = () => {
+      const viewportCenterY = window.innerHeight / 2
+      const nextActiveIndexes: number[] = []
+
+      featureRefs.current.forEach((node, index) => {
+        if (!node) {
+          return
+        }
+
+        const rect = node.getBoundingClientRect()
+        const intersectsCenterBand =
+          rect.top <= viewportCenterY + centerBand && rect.bottom >= viewportCenterY - centerBand
+
+        if (intersectsCenterBand) {
+          nextActiveIndexes.push(index)
+        }
+      })
+
+      setCenterActiveFeatures((prev) => {
+        if (
+          prev.length === nextActiveIndexes.length &&
+          prev.every((value, idx) => value === nextActiveIndexes[idx])
+        ) {
+          return prev
+        }
+
+        return nextActiveIndexes
+      })
+    }
+
+    const requestUpdate = () => {
+      if (rafId) {
+        return
+      }
+      rafId = requestAnimationFrame(() => {
+        rafId = 0
+        updateActiveByCenter()
+      })
+    }
+
+    updateActiveByCenter()
+    window.addEventListener('scroll', requestUpdate, { passive: true })
+    window.addEventListener('resize', requestUpdate)
+
+    return () => {
+      if (rafId) {
+        cancelAnimationFrame(rafId)
+      }
+      window.removeEventListener('scroll', requestUpdate)
+      window.removeEventListener('resize', requestUpdate)
+    }
+  }, [isTouchLike])
+
   return (
     <motion.div
       initial={{ opacity: 0, x: -32 }}
@@ -172,6 +371,7 @@ function LeftPanel({ isInView }: { isInView: boolean }) {
           padding: '6px 16px',
           marginBottom: '24px',
           background: 'rgba(16,185,129,0.08)',
+          alignSelf: isMobileL ? 'center' : 'flex-start',
         }}
       >
         <div
@@ -202,6 +402,7 @@ function LeftPanel({ isInView }: { isInView: boolean }) {
           lineHeight: 1.1,
           letterSpacing: '-0.02em',
           margin: '0 0 16px',
+          textAlign: isMobileL ? 'center' : 'left',
         }}
       >
         <span style={{ color: 'white' }}>Cero alucinaciones.</span>
@@ -223,6 +424,11 @@ function LeftPanel({ isInView }: { isInView: boolean }) {
           lineHeight: 1.75,
           margin: '0 0 clamp(28px,4vh,40px)',
           maxWidth: '480px',
+          width: '100%',
+          textAlign: isMobileL ? 'center' : 'left',
+          marginLeft: isMobileL ? 'auto' : 0,
+          marginRight: isMobileL ? 'auto' : 0,
+          boxSizing: 'border-box',
         }}
       >
         Nuestros agentes no inventan respuestas. Los encapsulamos con reglas estrictas para que solo hablen en base a{' '}
@@ -234,11 +440,32 @@ function LeftPanel({ isInView }: { isInView: boolean }) {
           display: 'flex',
           flexDirection: 'column',
           gap: '16px',
+          width: '100%',
+          maxWidth: '100%',
         }}
       >
         {features.map((feature, i) => (
+          (() => {
+            const isCenterActive = isTouchLike && centerActiveFeatures.includes(i)
+            const isFeatureActive = hoveredFeature === i || isCenterActive
+
+            return (
           <motion.div
             key={feature.title}
+            ref={(node) => {
+              featureRefs.current[i] = node
+            }}
+            onHoverStart={() => {
+              if (!isTouchLike) {
+                setHoveredFeature(i)
+              }
+            }}
+            onHoverEnd={() => {
+              if (!isTouchLike) {
+                setHoveredFeature((current) => (current === i ? null : current))
+              }
+            }}
+            whileHover={{ x: 4, scale: 1.01 }}
             initial={{ opacity: 0, x: -16 }}
             animate={isInView ? { opacity: 1, x: 0 } : {}}
             transition={{
@@ -247,35 +474,101 @@ function LeftPanel({ isInView }: { isInView: boolean }) {
               ease: [0.16, 1, 0.3, 1],
             }}
             style={{
+              position: 'relative',
               display: 'flex',
+              flexDirection: isMobileL ? 'column' : 'row',
               gap: '14px',
-              alignItems: 'flex-start',
+              alignItems: isMobileL ? 'center' : 'flex-start',
+              borderRadius: '14px',
+              padding: isMobileL ? '14px 12px' : '12px 14px',
+              border:
+                isFeatureActive
+                  ? '1px solid rgba(16,185,129,0.38)'
+                  : '1px solid rgba(255,255,255,0.06)',
+              background:
+                isFeatureActive
+                  ? 'linear-gradient(140deg, rgba(16,185,129,0.14), rgba(4,15,20,0.42) 45%, rgba(255,255,255,0.02))'
+                  : 'rgba(255,255,255,0.01)',
+              boxShadow:
+                isFeatureActive
+                  ? '0 0 0 1px rgba(16,185,129,0.2), 0 0 26px rgba(16,185,129,0.24), inset 0 1px 0 rgba(255,255,255,0.08)'
+                  : 'inset 0 1px 0 rgba(255,255,255,0.04)',
+              transition: 'border-color 180ms ease, background 180ms ease, box-shadow 180ms ease',
+              width: '100%',
+              maxWidth: '100%',
+              boxSizing: 'border-box',
+              overflow: 'hidden',
             }}
           >
             <div
+              aria-hidden="true"
               style={{
+                position: 'absolute',
+                inset: 0,
+                borderRadius: '14px',
+                opacity: isFeatureActive ? 1 : 0,
+                pointerEvents: 'none',
+                background:
+                  'radial-gradient(90% 110% at 0% 0%, rgba(16,185,129,0.22) 0%, transparent 62%), radial-gradient(85% 100% at 100% 100%, rgba(52,211,153,0.18) 0%, transparent 65%)',
+                transition: 'opacity 180ms ease',
+              }}
+            />
+            <div
+              aria-hidden="true"
+              style={{
+                position: 'absolute',
+                left: 0,
+                top: 8,
+                bottom: 8,
+                width: '2px',
+                borderRadius: '2px',
+                background:
+                  isFeatureActive
+                    ? 'linear-gradient(180deg, rgba(16,185,129,0.9), rgba(16,185,129,0.2), transparent)'
+                    : 'transparent',
+                transition: 'background 180ms ease',
+              }}
+            />
+            <div
+            style={{
                 width: '40px',
                 height: '40px',
                 borderRadius: '10px',
-                background: 'rgba(16,185,129,0.1)',
-                border: '1px solid rgba(16,185,129,0.2)',
+                background:
+                  isFeatureActive
+                    ? 'linear-gradient(135deg, rgba(16,185,129,0.2), rgba(4,15,20,0.5))'
+                    : 'rgba(16,185,129,0.1)',
+                border:
+                  isFeatureActive
+                    ? '1px solid rgba(16,185,129,0.42)'
+                    : '1px solid rgba(16,185,129,0.2)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 fontSize: '18px',
                 flexShrink: 0,
+                color:
+                  isFeatureActive ? '#6ee7b7' : 'rgba(220,252,231,0.9)',
+                boxShadow:
+                  isFeatureActive
+                    ? '0 0 16px rgba(16,185,129,0.36), inset 0 0 10px rgba(16,185,129,0.2)'
+                    : 'none',
+                transition: 'all 180ms ease',
               }}
             >
-              {feature.icon}
+              <feature.icon size={18} strokeWidth={2.2} />
             </div>
 
-            <div>
+            <div style={{ textAlign: isMobileL ? 'center' : 'left', width: '100%', maxWidth: '100%' }}>
               <p
                 style={{
                   fontSize: '14px',
                   fontWeight: 700,
-                  color: 'white',
+                  color: isFeatureActive ? '#d1fae5' : 'white',
                   margin: '0 0 3px',
+                  textShadow:
+                    isFeatureActive ? '0 0 14px rgba(16,185,129,0.35)' : 'none',
+                  transition: 'color 180ms ease, text-shadow 180ms ease',
                 }}
               >
                 {feature.title}
@@ -283,30 +576,90 @@ function LeftPanel({ isInView }: { isInView: boolean }) {
               <p
                 style={{
                   fontSize: '13px',
-                  color: 'rgba(255,255,255,0.42)',
+                  color:
+                    isFeatureActive ? 'rgba(220,252,231,0.82)' : 'rgba(255,255,255,0.42)',
                   margin: 0,
                   lineHeight: 1.55,
+                  transition: 'color 180ms ease',
+                  overflowWrap: 'anywhere',
                 }}
               >
                 {feature.description}
               </p>
             </div>
           </motion.div>
+            )
+          })()
         ))}
       </div>
     </motion.div>
   )
 }
 
-function RightPanel({ isInView }: { isInView: boolean }) {
+function RightPanel({
+  isInView,
+  isMobileL,
+  isTouchLike,
+}: {
+  isInView: boolean
+  isMobileL: boolean
+  isTouchLike: boolean
+}) {
   const reduced = useReducedMotion()
   const [isHovered, setIsHovered] = useState(false)
+  const [isCenterActive, setIsCenterActive] = useState(false)
   const hoverRef = useRef(false)
+  const panelRef = useRef<HTMLDivElement | null>(null)
   const particleRefs = useRef<Array<SVGCircleElement | null>>([])
 
   useEffect(() => {
-    hoverRef.current = isHovered
-  }, [isHovered])
+    hoverRef.current = isHovered || isCenterActive
+  }, [isHovered, isCenterActive])
+
+  useEffect(() => {
+    if (!isTouchLike) {
+      return
+    }
+
+    let rafId = 0
+    const centerBand = 62
+
+    const updateCenterState = () => {
+      const node = panelRef.current
+      if (!node) {
+        return
+      }
+
+      const rect = node.getBoundingClientRect()
+      const viewportCenterY = window.innerHeight / 2
+      const intersectsCenterBand =
+        rect.top <= viewportCenterY + centerBand && rect.bottom >= viewportCenterY - centerBand
+
+      setIsCenterActive(intersectsCenterBand)
+    }
+
+    const requestUpdate = () => {
+      if (rafId) {
+        return
+      }
+      rafId = requestAnimationFrame(() => {
+        rafId = 0
+        updateCenterState()
+      })
+    }
+
+    updateCenterState()
+    window.addEventListener('scroll', requestUpdate, { passive: true })
+    window.addEventListener('resize', requestUpdate)
+
+    return () => {
+      if (rafId) {
+        cancelAnimationFrame(rafId)
+      }
+      window.removeEventListener('scroll', requestUpdate)
+      window.removeEventListener('resize', requestUpdate)
+    }
+  }, [isTouchLike])
 
   useEffect(() => {
     if (reduced) {
@@ -347,22 +700,34 @@ function RightPanel({ isInView }: { isInView: boolean }) {
     return () => cancelAnimationFrame(rafId)
   }, [reduced])
 
+  const isActive = isHovered || (isTouchLike && isCenterActive)
+
   return (
     <motion.div
+      ref={panelRef}
       initial={{ opacity: 0, scale: 0.9 }}
       animate={isInView ? { opacity: 1, scale: 1 } : {}}
       transition={{ duration: 0.9, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-      onHoverStart={() => setIsHovered(true)}
-      onHoverEnd={() => setIsHovered(false)}
+      onHoverStart={() => {
+        if (!isTouchLike) {
+          setIsHovered(true)
+        }
+      }}
+      onHoverEnd={() => {
+        if (!isTouchLike) {
+          setIsHovered(false)
+        }
+      }}
       style={{
         position: 'relative',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        minHeight: '560px',
+        minHeight: isMobileL ? '420px' : '560px',
         width: '100%',
         gap: '14px',
+        maxWidth: '100%',
       }}
     >
       <div
@@ -392,8 +757,8 @@ function RightPanel({ isInView }: { isInView: boolean }) {
             reduced
               ? undefined
               : {
-                  opacity: isHovered ? 1 : 0.72,
-                  scale: isHovered ? 1.08 : 1,
+                  opacity: isActive ? 1 : 0.72,
+                  scale: isActive ? 1.08 : 1,
                 }
           }
           transition={{ duration: 0.25, ease: 'easeOut' }}
@@ -460,11 +825,11 @@ function RightPanel({ isInView }: { isInView: boolean }) {
             reduced
               ? undefined
               : {
-                  scale: isHovered ? [1, 1.035, 1] : [1, 1.015, 1],
+                  scale: isActive ? [1, 1.035, 1] : [1, 1.015, 1],
                 }
           }
           transition={{
-            duration: isHovered ? 1.2 : 2.2,
+            duration: isActive ? 1.2 : 2.2,
             repeat: Number.POSITIVE_INFINITY,
             ease: 'easeInOut',
           }}
@@ -478,9 +843,9 @@ function RightPanel({ isInView }: { isInView: boolean }) {
           stroke="rgba(16,185,129,0.24)"
           strokeWidth="9"
           style={{ filter: 'blur(5px)' }}
-          animate={reduced ? undefined : { opacity: isHovered ? [0.25, 0.55, 0.25] : [0.2, 0.36, 0.2] }}
+          animate={reduced ? undefined : { opacity: isActive ? [0.25, 0.55, 0.25] : [0.2, 0.36, 0.2] }}
           transition={{
-            duration: isHovered ? 1 : 1.9,
+            duration: isActive ? 1 : 1.9,
             repeat: Number.POSITIVE_INFINITY,
             ease: 'easeInOut',
           }}
@@ -492,8 +857,8 @@ function RightPanel({ isInView }: { isInView: boolean }) {
             reduced
               ? undefined
               : {
-                  y: isHovered ? [0, -2, 0] : [0, -0.6, 0],
-                  scale: isHovered ? [1, 1.04, 1] : [1, 1.015, 1],
+                  y: isActive ? [0, -2, 0] : [0, -0.6, 0],
+                  scale: isActive ? [1, 1.04, 1] : [1, 1.015, 1],
                 }
           }
           transition={
@@ -501,12 +866,12 @@ function RightPanel({ isInView }: { isInView: boolean }) {
               ? undefined
               : {
                   y: {
-                    duration: isHovered ? 1.1 : 2.2,
+                    duration: isActive ? 1.1 : 2.2,
                     repeat: Number.POSITIVE_INFINITY,
                     ease: 'easeInOut',
                   },
                   scale: {
-                    duration: isHovered ? 1 : 2,
+                    duration: isActive ? 1 : 2,
                     repeat: Number.POSITIVE_INFINITY,
                     ease: 'easeInOut',
                   },
@@ -564,7 +929,7 @@ function RightPanel({ isInView }: { isInView: boolean }) {
               border: '1px solid rgba(16,185,129,0.26)',
               borderRadius: '100px',
               padding: '5px 12px',
-              fontSize: '11px',
+              fontSize: isMobileL ? '10px' : '11px',
               fontWeight: 600,
               color: 'rgba(52,211,153,0.95)',
               backdropFilter: 'blur(8px)',
@@ -579,7 +944,7 @@ function RightPanel({ isInView }: { isInView: boolean }) {
                   ? {
                       opacity: 1,
                       scale: 1,
-                      y: isHovered ? [0, -1.5, 0] : [0, -0.5, 0],
+                      y: isActive ? [0, -1.5, 0] : [0, -0.5, 0],
                     }
                   : {}
             }
@@ -590,7 +955,7 @@ function RightPanel({ isInView }: { isInView: boolean }) {
                     opacity: { delay: 0.6 + i * 0.1, duration: 0.4 },
                     scale: { delay: 0.6 + i * 0.1, duration: 0.4 },
                     y: {
-                      duration: isHovered ? 1.2 + i * 0.08 : 2 + i * 0.1,
+                      duration: isActive ? 1.2 + i * 0.08 : 2 + i * 0.1,
                       repeat: Number.POSITIVE_INFINITY,
                       ease: 'easeInOut',
                       delay: 0.35 + i * 0.05,
@@ -617,6 +982,7 @@ function RightPanel({ isInView }: { isInView: boolean }) {
           color: 'rgba(167,243,208,0.72)',
           letterSpacing: '0.01em',
           pointerEvents: 'none',
+          padding: isMobileL ? '0 4px' : 0,
         }}
       >
         El candado representa a la IA operando bajo parametros y reglas definidas por el cliente; los puntos orbitando
@@ -629,18 +995,106 @@ function RightPanel({ isInView }: { isInView: boolean }) {
 export default function GarantiaIA() {
   const sectionRef = useRef<HTMLElement>(null)
   const isInView = useInView(sectionRef, { once: true, amount: 0.2 })
+  const reduced = useReducedMotion()
+  const easing = [0.16, 1, 0.3, 1] as const
+  const [isMobileL, setIsMobileL] = useState(false)
+  const [isTouchLike, setIsTouchLike] = useState(false)
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return
+    }
+
+    const updateViewportFlags = () => {
+      setIsMobileL(window.innerWidth <= 425)
+      setIsTouchLike(window.innerWidth <= 1024)
+    }
+
+    updateViewportFlags()
+    window.addEventListener('resize', updateViewportFlags)
+
+    return () => {
+      window.removeEventListener('resize', updateViewportFlags)
+    }
+  }, [])
 
   return (
     <section
       ref={sectionRef}
       style={{
-        padding: 'clamp(80px,12vh,140px) clamp(20px,5vw,80px)',
-        background: '#080810',
+        padding: isMobileL
+          ? 'clamp(72px,10vh,96px) 12px clamp(84px,11vh,112px)'
+          : 'clamp(80px,12vh,140px) clamp(16px,5vw,80px)',
+        background: 'transparent',
         position: 'relative',
         overflow: 'hidden',
         zIndex: 1,
+        width: '100%',
+        maxWidth: '100%',
+        boxSizing: 'border-box',
       }}
     >
+      {LOCK_GLYPHS.map((glyph, index) => (
+        <motion.div
+          key={`lock-glyph-${index}`}
+          aria-hidden="true"
+          initial={
+            reduced
+              ? { opacity: glyph.opacity, x: 0, y: 0, rotate: glyph.rotate }
+              : { opacity: 0, x: glyph.fromX, y: glyph.fromY, rotate: glyph.rotate - 4 }
+          }
+          animate={
+            isInView
+              ? { opacity: glyph.opacity, x: 0, y: 0, rotate: glyph.rotate }
+              : {}
+          }
+          transition={{
+            duration: reduced ? 0 : 1.7,
+            delay: reduced ? 0 : glyph.delay,
+            ease: easing,
+          }}
+          style={{
+            position: 'absolute',
+            top: glyph.top,
+            right: glyph.right,
+            left: glyph.left,
+            bottom: glyph.bottom,
+            pointerEvents: 'none',
+            zIndex: 0,
+            userSelect: 'none',
+          }}
+        >
+          <motion.div
+            animate={
+              reduced
+                ? undefined
+                : {
+                    x: [0, glyph.driftX, 0],
+                    y: [0, glyph.driftY, 0],
+                    rotate: [glyph.rotate, glyph.rotate + glyph.driftRotate, glyph.rotate],
+                  }
+            }
+            transition={{
+              duration: reduced ? 0 : 9.5 + index * 1.2,
+              repeat: reduced ? 0 : Number.POSITIVE_INFINITY,
+              ease: 'easeInOut',
+              delay: reduced ? 0 : glyph.delay + 0.18,
+            }}
+            style={{ display: 'inline-flex' }}
+          >
+            <Lock
+              strokeWidth={1.7}
+              style={{
+                width: glyph.size,
+                height: glyph.size,
+                color: `rgba(110,231,183,${glyph.opacity})`,
+                filter: `blur(${glyph.blur}) drop-shadow(0 0 34px rgba(16,185,129,0.2))`,
+              }}
+            />
+          </motion.div>
+        </motion.div>
+      ))}
+
       <AtmosphereGarantia />
       <div
         style={{
@@ -648,18 +1102,22 @@ export default function GarantiaIA() {
           margin: '0 auto',
           position: 'relative',
           zIndex: 1,
+          width: '100%',
+          boxSizing: 'border-box',
         }}
       >
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-            gap: 'clamp(40px,6vw,80px)',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(min(300px, 100%), 1fr))',
+            gap: 'clamp(32px,6vw,80px)',
             alignItems: 'center',
+            width: '100%',
+            maxWidth: '100%',
           }}
         >
-          <LeftPanel isInView={isInView} />
-          <RightPanel isInView={isInView} />
+          <LeftPanel isInView={isInView} isMobileL={isMobileL} isTouchLike={isTouchLike} />
+          <RightPanel isInView={isInView} isMobileL={isMobileL} isTouchLike={isTouchLike} />
         </div>
       </div>
     </section>

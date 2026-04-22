@@ -435,7 +435,8 @@ function computeModuleProgress(lastCompletedSegment: number, activePacket: DataP
 }
 
 function ProcessDiagram({ flowStep, moduleProgress }: { flowStep: number; moduleProgress: number[] }) {
-  const moduleOrder = [0, 1, 2, 5, 4, 3]
+  const [hoveredStep, setHoveredStep] = useState<number | null>(null)
+  const moduleOrder = [0, 1, 2, 3, 4, 5]
 
   return (
     <div style={{ width: '100%', height: '100%' }}>
@@ -451,25 +452,45 @@ function ProcessDiagram({ flowStep, moduleProgress }: { flowStep: number; module
           height: '100%',
         }}
       >
-        {moduleOrder.map((stepIndex, visualIndex) => {
+        {moduleOrder.map((stepIndex) => {
           const step = EXPLAIN_STEPS[stepIndex]
           const progress = moduleProgress[stepIndex] ?? 0
           const active = flowStep >= stepIndex || progress > 0
-          const fillFromLeft = visualIndex < 3
+          const isHovered = hoveredStep === stepIndex
 
           return (
-            <div
+            <motion.div
               key={step.title}
+              onHoverStart={() => setHoveredStep(stepIndex)}
+              onHoverEnd={() => setHoveredStep((current) => (current === stepIndex ? null : current))}
+              whileHover={{
+                y: -3,
+                scale: 1.01,
+              }}
+              transition={{
+                duration: 0.18,
+                ease: [0.16, 1, 0.3, 1],
+              }}
               style={{
                 position: 'relative',
                 zIndex: 1,
-                background: 'rgba(255,255,255,0.025)',
-                border: active ? '1px solid rgba(16,185,129,0.27)' : '1px solid rgba(255,255,255,0.08)',
+                background: isHovered
+                  ? 'linear-gradient(140deg, rgba(9,20,24,0.92), rgba(7,10,18,0.96))'
+                  : 'linear-gradient(145deg, rgba(8,14,22,0.82), rgba(7,11,20,0.74))',
+                border:
+                  active || isHovered ? '1px solid rgba(16,185,129,0.4)' : '1px solid rgba(255,255,255,0.14)',
                 borderRadius: '12px',
                 minHeight: '104px',
                 padding: '12px 12px 11px',
-                transition: 'all 240ms ease',
+                boxShadow: isHovered
+                  ? '0 14px 32px rgba(0,0,0,0.46), 0 0 26px rgba(16,185,129,0.24), inset 0 1px 0 rgba(255,255,255,0.12)'
+                  : active
+                    ? '0 0 0 1px rgba(16,185,129,0.14), inset 0 1px 0 rgba(255,255,255,0.1)'
+                    : 'inset 0 1px 0 rgba(255,255,255,0.08)',
+                transition: 'all 220ms ease',
                 overflow: 'hidden',
+                backdropFilter: 'blur(12px) saturate(130%)',
+                WebkitBackdropFilter: 'blur(12px) saturate(130%)',
               }}
             >
               <div
@@ -480,7 +501,7 @@ function ProcessDiagram({ flowStep, moduleProgress }: { flowStep: number; module
                   background:
                     'linear-gradient(90deg, rgba(16,185,129,0.16) 0%, rgba(16,185,129,0.11) 55%, rgba(45,212,191,0.16) 100%)',
                   transform: `scaleX(${progress})`,
-                  transformOrigin: fillFromLeft ? 'left center' : 'right center',
+                  transformOrigin: 'left center',
                   transition: 'transform 120ms linear',
                   willChange: 'transform',
                 }}
@@ -492,8 +513,20 @@ function ProcessDiagram({ flowStep, moduleProgress }: { flowStep: number; module
                   inset: 0,
                   background:
                     'linear-gradient(100deg, rgba(52,211,153,0) 12%, rgba(45,212,191,0.16) 50%, rgba(52,211,153,0) 88%)',
-                  opacity: active ? 0.65 : 0,
+                  opacity: active || isHovered ? 0.65 : 0,
                   transition: 'opacity 260ms ease',
+                }}
+              />
+              <div
+                aria-hidden="true"
+                style={{
+                  position: 'absolute',
+                  inset: 0,
+                  background:
+                    'radial-gradient(120% 120% at 0% 0%, rgba(16,185,129,0.22) 0%, transparent 64%), radial-gradient(110% 120% at 100% 100%, rgba(45,212,191,0.14) 0%, transparent 68%)',
+                  opacity: isHovered ? 1 : 0,
+                  transition: 'opacity 200ms ease',
+                  pointerEvents: 'none',
                 }}
               />
               <p
@@ -504,7 +537,7 @@ function ProcessDiagram({ flowStep, moduleProgress }: { flowStep: number; module
                   fontSize: '10px',
                   fontWeight: 700,
                   letterSpacing: '0.08em',
-                  color: active ? '#34d399' : 'rgba(255,255,255,0.55)',
+                  color: active || isHovered ? '#34d399' : 'rgba(255,255,255,0.74)',
                   textTransform: 'uppercase',
                 }}
               >
@@ -517,12 +550,13 @@ function ProcessDiagram({ flowStep, moduleProgress }: { flowStep: number; module
                   margin: 0,
                   fontSize: '11px',
                   lineHeight: 1.45,
-                  color: 'rgba(255,255,255,0.56)',
+                  color: isHovered ? 'rgba(220,252,231,0.92)' : 'rgba(255,255,255,0.74)',
+                  transition: 'color 200ms ease',
                 }}
               >
                 {step.description}
               </p>
-            </div>
+            </motion.div>
           )
         })}
       </div>
@@ -818,7 +852,7 @@ export default function PipelineIA() {
       ref={sectionRef}
       style={{
         padding: 'clamp(74px,10vh,112px) clamp(20px,5vw,80px)',
-        background: '#080810',
+        background: 'transparent',
         position: 'relative',
         overflow: 'hidden',
       }}
@@ -889,7 +923,7 @@ export default function PipelineIA() {
           >
             Asi fluye la inteligencia.
           </h2>
-          <p style={{ fontSize: '15px', color: 'rgba(255,255,255,0.43)', margin: 0 }}>
+          <p style={{ fontSize: '15px', color: 'rgba(255,255,255,0.64)', margin: 0 }}>
             Consulta cliente {'\u2192'} IA responde {'\u2192'} cliente confirma {'\u2192'} IA cierra + CRM + Slack.
           </p>
           <p
@@ -911,11 +945,14 @@ export default function PipelineIA() {
               animate={show({ opacity: 1, scale: 1 })}
               transition={{ duration: 0.8, delay: 0.18, ease: [0.16, 1, 0.3, 1] }}
               style={{
-                background: 'rgba(255,255,255,0.02)',
-                border: '1px solid rgba(255,255,255,0.06)',
+                background: 'linear-gradient(150deg, rgba(7,14,22,0.9), rgba(6,11,19,0.82))',
+                border: '1px solid rgba(255,255,255,0.14)',
                 borderRadius: '22px',
                 padding: 'clamp(12px,2.5vw,24px)',
                 overflow: 'hidden',
+                boxShadow: '0 20px 42px rgba(0,0,0,0.44), 0 0 34px rgba(16,185,129,0.1)',
+                backdropFilter: 'blur(14px) saturate(140%)',
+                WebkitBackdropFilter: 'blur(14px) saturate(140%)',
               }}
             >
               <svg viewBox="0 0 980 500" style={{ width: '100%', height: 'auto', overflow: 'visible' }}>
@@ -987,19 +1024,21 @@ export default function PipelineIA() {
               animate={show({ opacity: 1, x: 0 })}
               transition={{ duration: 0.7, delay: 0.26, ease: [0.16, 1, 0.3, 1] }}
               style={{
-                background: 'rgba(0,0,0,0.4)',
-                border: '1px solid rgba(16,185,129,0.26)',
+                background: 'linear-gradient(155deg, rgba(7,14,22,0.9), rgba(6,11,18,0.84))',
+                border: '1px solid rgba(16,185,129,0.34)',
                 borderRadius: '20px',
                 overflow: 'hidden',
                 width: '100%',
-                boxShadow: '0 0 44px rgba(16,185,129,0.1)',
+                boxShadow: '0 0 54px rgba(16,185,129,0.14), 0 22px 48px rgba(0,0,0,0.44)',
+                backdropFilter: 'blur(16px) saturate(145%)',
+                WebkitBackdropFilter: 'blur(16px) saturate(145%)',
               }}
             >
               <div
                 style={{
                   padding: '12px 16px',
-                  background: 'rgba(16,185,129,0.08)',
-                  borderBottom: '1px solid rgba(16,185,129,0.16)',
+                  background: 'rgba(16,185,129,0.18)',
+                  borderBottom: '1px solid rgba(16,185,129,0.24)',
                   display: 'flex',
                   alignItems: 'center',
                   gap: '10px',
@@ -1103,11 +1142,13 @@ export default function PipelineIA() {
                           maxWidth: '82%',
                           borderRadius: isAI ? '14px 14px 14px 4px' : '14px 14px 4px 14px',
                           padding: '9px 11px',
-                          background: isAI ? 'rgba(16,185,129,0.12)' : 'rgba(255,255,255,0.08)',
-                          border: isAI ? '1px solid rgba(16,185,129,0.24)' : '1px solid rgba(255,255,255,0.13)',
+                          background: isAI ? 'rgba(16,185,129,0.22)' : 'rgba(255,255,255,0.16)',
+                          border: isAI ? '1px solid rgba(16,185,129,0.34)' : '1px solid rgba(255,255,255,0.2)',
                           fontSize: '12px',
                           lineHeight: 1.45,
-                          color: 'rgba(255,255,255,0.88)',
+                          color: 'rgba(255,255,255,0.96)',
+                          backdropFilter: 'blur(10px)',
+                          WebkitBackdropFilter: 'blur(10px)',
                         }}
                       >
                         {message.text}
@@ -1122,8 +1163,8 @@ export default function PipelineIA() {
                       style={{
                         padding: '8px 11px',
                         borderRadius: '14px 14px 14px 4px',
-                        background: 'rgba(16,185,129,0.12)',
-                        border: '1px solid rgba(16,185,129,0.22)',
+                        background: 'rgba(16,185,129,0.22)',
+                        border: '1px solid rgba(16,185,129,0.32)',
                         display: 'flex',
                         gap: '4px',
                         alignItems: 'center',
@@ -1149,21 +1190,22 @@ export default function PipelineIA() {
               <div
                 style={{
                   padding: '10px 14px',
-                  borderTop: '1px solid rgba(16,185,129,0.13)',
+                  borderTop: '1px solid rgba(16,185,129,0.22)',
                   display: 'flex',
                   gap: '8px',
                   alignItems: 'center',
+                  background: 'rgba(7,12,20,0.72)',
                 }}
               >
                 <div
                   style={{
                     flex: 1,
-                    background: 'rgba(255,255,255,0.04)',
-                    border: '1px solid rgba(255,255,255,0.08)',
+                    background: 'rgba(255,255,255,0.12)',
+                    border: '1px solid rgba(255,255,255,0.2)',
                     borderRadius: '100px',
                     padding: '8px 12px',
                     fontSize: '11px',
-                    color: 'rgba(255,255,255,0.22)',
+                    color: 'rgba(255,255,255,0.52)',
                   }}
                 >
                   Escribi tu mensaje...
@@ -1192,23 +1234,25 @@ export default function PipelineIA() {
               animate={show({ opacity: 1, x: 0 })}
               transition={{ duration: 0.7, delay: 0.32, ease: [0.16, 1, 0.3, 1] }}
               style={{
-                background: 'rgba(255,255,255,0.02)',
-                border: '1px solid rgba(255,255,255,0.07)',
+                background: 'linear-gradient(155deg, rgba(7,14,22,0.9), rgba(6,11,18,0.82))',
+                border: '1px solid rgba(255,255,255,0.14)',
                 borderRadius: '16px',
                 overflow: 'hidden',
                 height: '280px',
                 display: 'flex',
                 flexDirection: 'column',
+                backdropFilter: 'blur(14px) saturate(135%)',
+                WebkitBackdropFilter: 'blur(14px) saturate(135%)',
               }}
             >
               <div
                 style={{
                   padding: '12px 14px',
-                  borderBottom: '1px solid rgba(255,255,255,0.06)',
+                  borderBottom: '1px solid rgba(255,255,255,0.12)',
                   display: 'flex',
                   alignItems: 'center',
                   gap: '8px',
-                  background: 'rgba(255,255,255,0.02)',
+                  background: 'rgba(10,16,24,0.7)',
                 }}
               >
                 <div
@@ -1226,12 +1270,12 @@ export default function PipelineIA() {
                     fontSize: '11px',
                     fontWeight: 700,
                     letterSpacing: '0.15em',
-                    color: 'rgba(255,255,255,0.55)',
+                    color: 'rgba(255,255,255,0.78)',
                   }}
                 >
                   EVENTOS EN VIVO
                 </span>
-                <span style={{ marginLeft: 'auto', fontSize: '10px', color: 'rgba(255,255,255,0.28)' }}>
+                <span style={{ marginLeft: 'auto', fontSize: '10px', color: 'rgba(255,255,255,0.48)' }}>
                   {eventLog.length} eventos
                 </span>
               </div>
@@ -1248,11 +1292,13 @@ export default function PipelineIA() {
                       style={{
                         padding: '8px 10px',
                         borderRadius: '10px',
-                        border: '1px solid rgba(255,255,255,0.06)',
-                        background: 'rgba(255,255,255,0.02)',
+                        border: '1px solid rgba(255,255,255,0.14)',
+                        background: 'rgba(9,14,22,0.78)',
                         display: 'flex',
                         flexDirection: 'column',
                         gap: '4px',
+                        backdropFilter: 'blur(10px)',
+                        WebkitBackdropFilter: 'blur(10px)',
                       }}
                     >
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -1271,12 +1317,12 @@ export default function PipelineIA() {
                         >
                           {event.kind}
                         </span>
-                        <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.72)', fontWeight: 600 }}>{event.nodeLabel}</span>
-                        <span style={{ marginLeft: 'auto', fontSize: '10px', color: 'rgba(255,255,255,0.25)', fontFamily: 'monospace' }}>
+                        <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.86)', fontWeight: 600 }}>{event.nodeLabel}</span>
+                        <span style={{ marginLeft: 'auto', fontSize: '10px', color: 'rgba(255,255,255,0.42)', fontFamily: 'monospace' }}>
                           {event.timestamp}
                         </span>
                       </div>
-                      <p style={{ margin: 0, fontSize: '11px', color: 'rgba(255,255,255,0.56)', lineHeight: 1.45 }}>{event.message}</p>
+                      <p style={{ margin: 0, fontSize: '11px', color: 'rgba(255,255,255,0.78)', lineHeight: 1.45 }}>{event.message}</p>
                     </motion.div>
                   ))}
                 </AnimatePresence>
@@ -1286,7 +1332,7 @@ export default function PipelineIA() {
                     style={{
                       padding: '28px 12px',
                       textAlign: 'center',
-                      color: 'rgba(255,255,255,0.2)',
+                      color: 'rgba(255,255,255,0.44)',
                       fontSize: '12px',
                     }}
                   >
@@ -1332,13 +1378,15 @@ export default function PipelineIA() {
               }}
               style={{
                 flex: '1 1 160px',
-                background: 'linear-gradient(140deg, rgba(255,255,255,0.032) 0%, rgba(16,185,129,0.05) 100%)',
-                border: '1px solid rgba(255,255,255,0.07)',
+                background: 'linear-gradient(140deg, rgba(9,15,24,0.84) 0%, rgba(16,185,129,0.14) 100%)',
+                border: '1px solid rgba(255,255,255,0.16)',
                 borderRadius: '12px',
                 padding: '14px 12px',
                 textAlign: 'center',
                 transition: 'box-shadow 260ms ease, border-color 260ms ease, background 260ms ease',
                 cursor: 'default',
+                backdropFilter: 'blur(12px) saturate(130%)',
+                WebkitBackdropFilter: 'blur(12px) saturate(130%)',
               }}
             >
               <p
@@ -1352,7 +1400,7 @@ export default function PipelineIA() {
               >
                 {metric.value}
               </p>
-              <p style={{ margin: 0, fontSize: '11px', color: 'rgba(255,255,255,0.37)', lineHeight: 1.35 }}>{metric.label}</p>
+              <p style={{ margin: 0, fontSize: '11px', color: 'rgba(255,255,255,0.62)', lineHeight: 1.35 }}>{metric.label}</p>
             </motion.div>
           ))}
         </div>

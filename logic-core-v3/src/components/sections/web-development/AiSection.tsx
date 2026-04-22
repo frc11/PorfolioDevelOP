@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { motion, useInView, useReducedMotion } from 'framer-motion'
 
@@ -77,10 +77,97 @@ const ease = [0.16, 1, 0.3, 1] as const
 
 export default function AiSection() {
     const sectionRef = useRef<HTMLElement>(null)
+    const demoBadgeRef = useRef<HTMLButtonElement>(null)
+    const allImplementationsLinkRef = useRef<HTMLAnchorElement>(null)
+    const cardRefs = useRef<Array<HTMLElement | null>>([])
+    const scrollRafRef = useRef<number | null>(null)
     const isInView = useInView(sectionRef, { once: true, amount: 0.15 })
     const prefersReduced = useReducedMotion()
     const shouldReveal = prefersReduced || isInView
     const [hoveredCard, setHoveredCard] = useState<number | null>(null)
+    const [isDemoHovered, setIsDemoHovered] = useState(false)
+    const [isAllImplementationsHovered, setIsAllImplementationsHovered] = useState(false)
+    const [isTabletOrBelow, setIsTabletOrBelow] = useState(false)
+    const [centerActiveElement, setCenterActiveElement] = useState<string | null>(null)
+
+    useEffect(() => {
+        if (typeof window === 'undefined') return
+
+        const mediaQuery = window.matchMedia('(max-width: 1024px)')
+        const syncViewport = () => setIsTabletOrBelow(mediaQuery.matches)
+        syncViewport()
+
+        if (typeof mediaQuery.addEventListener === 'function') {
+            mediaQuery.addEventListener('change', syncViewport)
+            return () => mediaQuery.removeEventListener('change', syncViewport)
+        }
+
+        mediaQuery.addListener(syncViewport)
+        return () => mediaQuery.removeListener(syncViewport)
+    }, [])
+
+    useEffect(() => {
+        if (!isTabletOrBelow) return
+
+        const updateCenterActiveElement = () => {
+            const viewportCenter = window.innerHeight / 2
+            const centerBand = Math.max(92, window.innerHeight * 0.12)
+            const targets: Array<{ id: string; element: HTMLElement | null }> = [
+                { id: 'demo-badge', element: demoBadgeRef.current },
+                ...cards.map((_, index) => ({ id: `card-${index}`, element: cardRefs.current[index] })),
+                { id: 'all-implementations-link', element: allImplementationsLinkRef.current },
+            ]
+
+            let closestId: string | null = null
+            let closestDistance = Number.POSITIVE_INFINITY
+
+            targets.forEach(({ id, element }) => {
+                if (!element) return
+                const rect = element.getBoundingClientRect()
+                const elementCenter = rect.top + rect.height / 2
+                const distanceToCenter = Math.abs(elementCenter - viewportCenter)
+
+                if (distanceToCenter > centerBand) return
+
+                if (distanceToCenter < closestDistance) {
+                    closestDistance = distanceToCenter
+                    closestId = id
+                }
+            })
+
+            setCenterActiveElement((current) => (current === closestId ? current : closestId))
+        }
+
+        const requestCenterUpdate = () => {
+            if (scrollRafRef.current !== null) return
+            scrollRafRef.current = window.requestAnimationFrame(() => {
+                scrollRafRef.current = null
+                updateCenterActiveElement()
+            })
+        }
+
+        requestCenterUpdate()
+        window.addEventListener('scroll', requestCenterUpdate, { passive: true })
+        window.addEventListener('resize', requestCenterUpdate)
+
+        return () => {
+            window.removeEventListener('scroll', requestCenterUpdate)
+            window.removeEventListener('resize', requestCenterUpdate)
+            if (scrollRafRef.current !== null) {
+                window.cancelAnimationFrame(scrollRafRef.current)
+                scrollRafRef.current = null
+            }
+        }
+    }, [isTabletOrBelow])
+
+    const centeredCardIndex =
+        isTabletOrBelow && centerActiveElement?.startsWith('card-')
+            ? Number(centerActiveElement.replace('card-', ''))
+            : null
+
+    const isDemoBadgeActive = isDemoHovered || (isTabletOrBelow && centerActiveElement === 'demo-badge')
+    const isAllImplementationsLinkActive =
+        isAllImplementationsHovered || (isTabletOrBelow && centerActiveElement === 'all-implementations-link')
 
     return (
         <section
@@ -218,26 +305,38 @@ export default function AiSection() {
 
                 <div className="flex justify-center" style={{ marginBottom: '48px' }}>
                     <button
+                        ref={demoBadgeRef}
                         type="button"
                         aria-label="Probar asistente IA"
                         className="ai-demo-badge group relative overflow-hidden"
                         onClick={() => window.dispatchEvent(new CustomEvent('open-mascot-chat'))}
+                        onMouseEnter={() => setIsDemoHovered(true)}
+                        onMouseLeave={() => setIsDemoHovered(false)}
                         style={{
                             display: 'inline-flex',
                             alignItems: 'center',
                             gap: '10px',
-                            background:
-                                'linear-gradient(120deg, rgba(15,23,42,0.84) 0%, rgba(30,41,59,0.7) 55%, rgba(67,56,202,0.32) 100%)',
-                            border: '1px solid rgba(99,102,241,0.36)',
+                            background: isDemoBadgeActive
+                                ? 'linear-gradient(120deg, rgba(8,47,73,0.52) 0%, rgba(30,41,59,0.72) 54%, rgba(76,29,149,0.44) 100%)'
+                                : 'linear-gradient(120deg, rgba(15,23,42,0.84) 0%, rgba(30,41,59,0.7) 55%, rgba(67,56,202,0.32) 100%)',
+                            border: isDemoBadgeActive
+                                ? '1px solid rgba(34,211,238,0.62)'
+                                : '1px solid rgba(99,102,241,0.36)',
                             borderRadius: '100px',
                             padding: '10px 20px 10px 12px',
                             cursor: 'pointer',
-                            boxShadow: '0 12px 28px rgba(0,0,0,0.36)',
+                            transform: isDemoBadgeActive ? 'translateY(-2px) scale(1.01)' : 'translateY(0px) scale(1)',
+                            boxShadow: isDemoBadgeActive
+                                ? '0 0 0 1px rgba(34,211,238,0.26), 0 18px 42px rgba(0,0,0,0.4), 0 0 36px rgba(56,189,248,0.24)'
+                                : '0 12px 28px rgba(0,0,0,0.36)',
+                            transition: 'border-color 220ms ease, transform 220ms ease, box-shadow 220ms ease, background 220ms ease',
                         }}
                     >
                         <span
                             aria-hidden="true"
-                            className="pointer-events-none absolute inset-y-0 left-0 w-[34%] skew-x-[-18deg] bg-gradient-to-r from-white/0 via-cyan-200/24 to-white/0 opacity-0 group-hover:opacity-100"
+                            className={`pointer-events-none absolute inset-y-0 left-0 w-[34%] skew-x-[-18deg] bg-gradient-to-r from-white/0 via-cyan-200/24 to-white/0 ${
+                                isDemoBadgeActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+                            }`}
                             style={{ animation: prefersReduced ? 'none' : 'ai-shimmer 1.25s ease-out' }}
                         />
                         <div
@@ -277,34 +376,38 @@ export default function AiSection() {
                 </div>
 
                 <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-                    {cards.map((card, i) => (
-                        <motion.article
-                            key={card.title}
-                            initial={{ opacity: 0, y: 24 }}
-                            animate={shouldReveal ? { opacity: 1, y: 0 } : { opacity: 0, y: 24 }}
-                            transition={{ duration: prefersReduced ? 0 : 0.6, delay: prefersReduced ? 0 : 0.5 + i * 0.12, ease }}
-                            whileHover={prefersReduced ? {} : { scale: 1.018, y: -6 }}
-                            onHoverStart={() => setHoveredCard(i)}
-                            onHoverEnd={() => setHoveredCard(null)}
-                            className="group relative flex flex-col overflow-hidden rounded-[18px]"
-                            style={{
-                                background:
-                                    'linear-gradient(150deg, rgba(6,10,24,0.88) 0%, rgba(5,9,20,0.82) 58%, rgba(10,16,30,0.88) 100%)',
-                                backdropFilter: 'blur(14px)',
-                                WebkitBackdropFilter: 'blur(14px)',
-                                border:
-                                    hoveredCard === i
+                    {cards.map((card, i) => {
+                        const isCardActive = hoveredCard === i || centeredCardIndex === i
+
+                        return (
+                            <motion.article
+                                key={card.title}
+                                ref={(node) => {
+                                    cardRefs.current[i] = node
+                                }}
+                                initial={{ opacity: 0, y: 24 }}
+                                animate={shouldReveal ? { opacity: 1, y: 0 } : { opacity: 0, y: 24 }}
+                                transition={{ duration: prefersReduced ? 0 : 0.6, delay: prefersReduced ? 0 : 0.5 + i * 0.12, ease }}
+                                whileHover={prefersReduced || isTabletOrBelow ? {} : { scale: 1.018, y: -6 }}
+                                onHoverStart={() => setHoveredCard(i)}
+                                onHoverEnd={() => setHoveredCard(null)}
+                                className="group relative flex flex-col overflow-hidden rounded-[18px]"
+                                style={{
+                                    background:
+                                        'linear-gradient(150deg, rgba(6,10,24,0.88) 0%, rgba(5,9,20,0.82) 58%, rgba(10,16,30,0.88) 100%)',
+                                    backdropFilter: 'blur(14px)',
+                                    WebkitBackdropFilter: 'blur(14px)',
+                                    border: isCardActive
                                         ? `1px solid rgba(${card.accentRgb},0.56)`
                                         : '1px solid rgba(255,255,255,0.1)',
-                                padding: 'clamp(24px, 3vw, 36px)',
-                                boxShadow:
-                                    hoveredCard === i
+                                    padding: 'clamp(24px, 3vw, 36px)',
+                                    boxShadow: isCardActive
                                         ? `0 0 0 1px rgba(${card.accentRgb},0.22), 0 22px 56px rgba(0,0,0,0.56), 0 0 42px rgba(${card.accentRgb},0.2)`
                                         : '0 16px 46px rgba(0,0,0,0.44), inset 0 1px 0 rgba(255,255,255,0.04)',
-                                transition: 'border-color 220ms ease, box-shadow 220ms ease',
-                                cursor: 'default',
-                            }}
-                        >
+                                    transition: 'border-color 220ms ease, box-shadow 220ms ease',
+                                    cursor: 'default',
+                                }}
+                            >
                             <div
                                 aria-hidden="true"
                                 className="pointer-events-none absolute inset-0 opacity-[0.22]"
@@ -315,7 +418,9 @@ export default function AiSection() {
                             />
                             <div
                                 aria-hidden="true"
-                                className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                                className={`pointer-events-none absolute inset-0 transition-opacity duration-300 ${
+                                    isCardActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+                                }`}
                                 style={{
                                     background:
                                         `radial-gradient(80% 80% at 0% 0%, rgba(${card.accentRgb},0.24) 0%, transparent 65%), ` +
@@ -327,7 +432,7 @@ export default function AiSection() {
                                 className="pointer-events-none absolute left-0 top-0 h-[2px] w-full"
                                 style={{
                                     background:
-                                        hoveredCard === i
+                                        isCardActive
                                             ? `linear-gradient(90deg, rgba(${card.accentRgb},0.18), ${card.accentFrom}, ${card.accentTo}, rgba(${card.accentRgb},0.18))`
                                             : 'linear-gradient(90deg, rgba(255,255,255,0.12), rgba(255,255,255,0.02))',
                                 }}
@@ -340,7 +445,7 @@ export default function AiSection() {
                                     border: `1px solid rgba(${card.accentRgb},0.4)`,
                                     color: card.accentFrom,
                                     boxShadow:
-                                        hoveredCard === i
+                                        isCardActive
                                             ? `0 0 28px rgba(${card.accentRgb},0.3), inset 0 0 20px rgba(${card.accentRgb},0.18)`
                                             : `0 0 20px rgba(${card.accentRgb},0.16)`,
                                 }}
@@ -357,7 +462,7 @@ export default function AiSection() {
                                 style={{
                                     fontSize: '18px',
                                     fontWeight: 700,
-                                    color: hoveredCard === i ? card.accentFrom : 'white',
+                                    color: isCardActive ? card.accentFrom : 'white',
                                     marginBottom: '8px',
                                     transition: 'color 220ms ease',
                                 }}
@@ -382,7 +487,7 @@ export default function AiSection() {
                                     background: `linear-gradient(135deg, rgba(${card.accentRgb},0.16), rgba(15,23,42,0.52))`,
                                     border: `1px solid rgba(${card.accentRgb},0.36)`,
                                     boxShadow:
-                                        hoveredCard === i
+                                        isCardActive
                                             ? `0 0 18px rgba(${card.accentRgb},0.28), inset 0 0 12px rgba(${card.accentRgb},0.18)`
                                             : 'none',
                                     transition: 'box-shadow 220ms ease',
@@ -400,7 +505,8 @@ export default function AiSection() {
                                 </span>
                             </div>
                         </motion.article>
-                    ))}
+                        )
+                    })}
                 </div>
 
                 <motion.div
@@ -410,40 +516,32 @@ export default function AiSection() {
                     className="mt-8 flex justify-center"
                 >
                     <Link
+                        ref={allImplementationsLinkRef}
                         href="/ai-implementations"
                         className="group relative overflow-hidden"
+                        onMouseEnter={() => setIsAllImplementationsHovered(true)}
+                        onMouseLeave={() => setIsAllImplementationsHovered(false)}
                         style={{
                             display: 'inline-flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            border: '1px solid rgba(34,211,238,0.35)',
+                            border: isAllImplementationsLinkActive
+                                ? '1px solid rgba(34,211,238,0.66)'
+                                : '1px solid rgba(34,211,238,0.35)',
                             color: '#67e8f9',
                             borderRadius: '100px',
                             padding: '14px 32px',
                             fontSize: '14px',
                             letterSpacing: '0.05em',
                             textDecoration: 'none',
-                            background:
-                                'linear-gradient(120deg, rgba(8,47,73,0.2) 0%, rgba(15,23,42,0.42) 55%, rgba(76,29,149,0.26) 100%)',
-                            boxShadow: '0 10px 26px rgba(0,0,0,0.28)',
+                            background: isAllImplementationsLinkActive
+                                ? 'linear-gradient(120deg, rgba(8,47,73,0.46) 0%, rgba(15,23,42,0.66) 45%, rgba(76,29,149,0.42) 100%)'
+                                : 'linear-gradient(120deg, rgba(8,47,73,0.2) 0%, rgba(15,23,42,0.42) 55%, rgba(76,29,149,0.26) 100%)',
+                            boxShadow: isAllImplementationsLinkActive
+                                ? '0 0 0 1px rgba(34,211,238,0.24), 0 16px 34px rgba(0,0,0,0.38), 0 0 28px rgba(34,211,238,0.22)'
+                                : '0 10px 26px rgba(0,0,0,0.28)',
+                            transform: isAllImplementationsLinkActive ? 'translateY(-2px)' : 'translateY(0px)',
                             transition: 'transform 220ms ease, border-color 220ms ease, box-shadow 220ms ease, background 220ms ease',
-                        }}
-                        onMouseEnter={(e) => {
-                            const target = e.currentTarget as HTMLAnchorElement
-                            target.style.background =
-                                'linear-gradient(120deg, rgba(8,47,73,0.46) 0%, rgba(15,23,42,0.66) 45%, rgba(76,29,149,0.42) 100%)'
-                            target.style.borderColor = 'rgba(34,211,238,0.66)'
-                            target.style.boxShadow =
-                                '0 0 0 1px rgba(34,211,238,0.24), 0 16px 34px rgba(0,0,0,0.38), 0 0 28px rgba(34,211,238,0.22)'
-                            target.style.transform = 'translateY(-2px)'
-                        }}
-                        onMouseLeave={(e) => {
-                            const target = e.currentTarget as HTMLAnchorElement
-                            target.style.background =
-                                'linear-gradient(120deg, rgba(8,47,73,0.2) 0%, rgba(15,23,42,0.42) 55%, rgba(76,29,149,0.26) 100%)'
-                            target.style.borderColor = 'rgba(34,211,238,0.35)'
-                            target.style.boxShadow = '0 10px 26px rgba(0,0,0,0.28)'
-                            target.style.transform = 'translateY(0px)'
                         }}
                     >
                         Ver todas las implementaciones de IA {'->'}

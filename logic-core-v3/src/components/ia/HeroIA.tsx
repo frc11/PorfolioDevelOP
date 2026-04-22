@@ -1,15 +1,14 @@
-'use client'
+﻿'use client'
 
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { motion, useReducedMotion } from 'motion/react'
 
-interface Node {
+type NodePoint = {
     x: number
     y: number
     vx: number
     vy: number
     radius: number
-    baseRadius: number
     brightness: number
     pulseSpeed: number
     pulseOffset: number
@@ -17,41 +16,38 @@ interface Node {
     label?: string
 }
 
-interface Particle {
+type SignalParticle = {
     fromNode: number
     toNode: number
     progress: number
     speed: number
-    color: 'green' | 'violet'
+    color: 'green' | 'teal'
     size: number
 }
 
 function NeuralCanvas() {
     const canvasRef = useRef<HTMLCanvasElement>(null)
-    const mouseRef = useRef({ x: -999, y: -999 })
-    const animRef = useRef<number>(0)
+    const mouseRef = useRef({ x: -9999, y: -9999 })
+    const animationRef = useRef<number>(0)
 
     useEffect(() => {
         const canvas = canvasRef.current
         if (!canvas) return
-        const resolvedCanvas = canvas
-        const ctx = resolvedCanvas.getContext('2d')
+        const ctx = canvas.getContext('2d')
         if (!ctx) return
 
-        // ── RESIZE ──────────────────────────────
-        function resize() {
-            resolvedCanvas.width = window.innerWidth
-            resolvedCanvas.height = window.innerHeight
+        const resize = () => {
+            canvas.width = window.innerWidth
+            canvas.height = window.innerHeight
         }
         resize()
         window.addEventListener('resize', resize)
 
-        // Mantiene libre la zona central para no tapar el texto principal.
-        function getTextSafeZone() {
-            const zoneWidth = Math.min(resolvedCanvas.width * 0.66, 820)
-            const zoneHeight = Math.min(resolvedCanvas.height * 0.5, 450)
-            const left = (resolvedCanvas.width - zoneWidth) / 2
-            const top = (resolvedCanvas.height - zoneHeight) / 2 - 8
+        const getSafeZone = () => {
+            const zoneWidth = Math.min(canvas.width * 0.66, 820)
+            const zoneHeight = Math.min(canvas.height * 0.5, 450)
+            const left = (canvas.width - zoneWidth) / 2
+            const top = (canvas.height - zoneHeight) / 2 - 8
 
             return {
                 left,
@@ -61,8 +57,8 @@ function NeuralCanvas() {
             }
         }
 
-        function isInsideSafeZone(x: number, y: number, padding = 0) {
-            const zone = getTextSafeZone()
+        const isInsideSafeZone = (x: number, y: number, padding = 0) => {
+            const zone = getSafeZone()
             return (
                 x >= zone.left - padding &&
                 x <= zone.right + padding &&
@@ -71,16 +67,15 @@ function NeuralCanvas() {
             )
         }
 
-        // ── NODOS ───────────────────────────────
         const NODE_COUNT = 70
-        const nodes: Node[] = Array.from({ length: NODE_COUNT }, () => {
-            let x = Math.random() * resolvedCanvas.width
-            let y = Math.random() * resolvedCanvas.height
+        const nodes: NodePoint[] = Array.from({ length: NODE_COUNT }, () => {
+            let x = Math.random() * canvas.width
+            let y = Math.random() * canvas.height
             let attempts = 0
 
             while (isInsideSafeZone(x, y, 28) && attempts < 30) {
-                x = Math.random() * resolvedCanvas.width
-                y = Math.random() * resolvedCanvas.height
+                x = Math.random() * canvas.width
+                y = Math.random() * canvas.height
                 attempts++
             }
 
@@ -90,7 +85,6 @@ function NeuralCanvas() {
                 vx: (Math.random() - 0.5) * 0.5,
                 vy: (Math.random() - 0.5) * 0.5,
                 radius: 2 + Math.random() * 2.5,
-                baseRadius: 2 + Math.random() * 2.5,
                 brightness: Math.random(),
                 pulseSpeed: 0.005 + Math.random() * 0.015,
                 pulseOffset: Math.random() * Math.PI * 2,
@@ -98,104 +92,90 @@ function NeuralCanvas() {
             }
         })
 
-        // ── HUBS ────────────────────────────────
-        const HUB_LABELS = [
-            'DATOS', 'HISTORIAL', 'VENTAS',
-            'TURNO', 'PRECIOS', 'STOCK'
+        const hubLabels = ['DATOS', 'HISTORIAL', 'VENTAS', 'TURNO', 'PRECIOS', 'STOCK']
+        const hubPositions = [
+            [0.2, 0.3],
+            [0.5, 0.2],
+            [0.8, 0.3],
+            [0.2, 0.7],
+            [0.5, 0.8],
+            [0.8, 0.7],
         ]
 
-        nodes.forEach((n, i) => {
+        nodes.forEach((node, i) => {
             if (i < 6) {
-                n.isHub = true
-                n.label = HUB_LABELS[i]
-                n.baseRadius = 5 + Math.random() * 3
-                n.radius = n.baseRadius
-                const positions = [
-                    [0.2, 0.3], [0.5, 0.2], [0.8, 0.3],
-                    [0.2, 0.7], [0.5, 0.8], [0.8, 0.7]
-                ]
-                n.x = positions[i][0] * resolvedCanvas.width
-                n.y = positions[i][1] * resolvedCanvas.height
-                n.vx *= 0.3
-                n.vy *= 0.3
+                node.isHub = true
+                node.label = hubLabels[i]
+                node.radius = 5 + Math.random() * 3
+                node.x = hubPositions[i][0] * canvas.width
+                node.y = hubPositions[i][1] * canvas.height
+                node.vx *= 0.3
+                node.vy *= 0.3
             }
         })
 
-        // ── PARTICULES ──────────────────────────
-        const particles: Particle[] = []
+        const particles: SignalParticle[] = []
         const MAX_PARTICLES = 25
-
-        // ── RENDER LOOP ─────────────────────────
+        const CONNECTION_DIST = 160
+        const MOUSE_REPEL_DIST = 140
         let frame = 0
 
-        function draw() {
-            if (!ctx) return
+        const draw = () => {
             frame++
-            ctx.clearRect(0, 0, resolvedCanvas.width, resolvedCanvas.height)
-
-            // Fondo con trail effect
+            ctx.clearRect(0, 0, canvas.width, canvas.height)
             ctx.fillStyle = 'rgba(3, 3, 8, 0.18)'
-            ctx.fillRect(0, 0, resolvedCanvas.width, resolvedCanvas.height)
+            ctx.fillRect(0, 0, canvas.width, canvas.height)
 
             const mouse = mouseRef.current
-            const CONNECTION_DIST = 160
-            const MOUSE_REPEL_DIST = 140
 
-            // ── MOVER NODOS ──────────────────────
-            for (const n of nodes) {
-                // Pulso de brillo
-                n.brightness = 0.4 + 0.6 * Math.abs(Math.sin(frame * n.pulseSpeed + n.pulseOffset))
+            for (const node of nodes) {
+                node.brightness = 0.4 + 0.6 * Math.abs(Math.sin(frame * node.pulseSpeed + node.pulseOffset))
 
-                // Repulsión del mouse
-                const dx = n.x - mouse.x
-                const dy = n.y - mouse.y
+                const dx = node.x - mouse.x
+                const dy = node.y - mouse.y
                 const dist = Math.sqrt(dx * dx + dy * dy)
                 if (dist < MOUSE_REPEL_DIST && dist > 0) {
                     const force = (MOUSE_REPEL_DIST - dist) / MOUSE_REPEL_DIST
-                    n.vx += (dx / dist) * force * 0.6
-                    n.vy += (dy / dist) * force * 0.6
+                    node.vx += (dx / dist) * force * 0.6
+                    node.vy += (dy / dist) * force * 0.6
                 }
 
-                // Fricción
-                n.vx *= 0.98
-                n.vy *= 0.98
+                node.vx *= 0.98
+                node.vy *= 0.98
 
-                // Clamp velocidad
-                const speed = Math.sqrt(n.vx * n.vx + n.vy * n.vy)
+                const speed = Math.sqrt(node.vx * node.vx + node.vy * node.vy)
                 if (speed > 2) {
-                    n.vx = (n.vx / speed) * 2
-                    n.vy = (n.vy / speed) * 2
+                    node.vx = (node.vx / speed) * 2
+                    node.vy = (node.vy / speed) * 2
                 }
 
-                // Mover
-                n.x += n.vx
-                n.y += n.vy
+                node.x += node.vx
+                node.y += node.vy
 
-                if (isInsideSafeZone(n.x, n.y, 36)) {
-                    const zone = getTextSafeZone()
+                if (isInsideSafeZone(node.x, node.y, 36)) {
+                    const zone = getSafeZone()
                     const centerX = (zone.left + zone.right) / 2
                     const centerY = (zone.top + zone.bottom) / 2
-                    const offsetX = n.x - centerX
-                    const offsetY = n.y - centerY
+                    const offsetX = node.x - centerX
+                    const offsetY = node.y - centerY
 
                     if (Math.abs(offsetX) > Math.abs(offsetY)) {
-                        n.vx += (offsetX >= 0 ? 1 : -1) * 0.22
+                        node.vx += (offsetX >= 0 ? 1 : -1) * 0.22
                     } else {
-                        n.vy += (offsetY >= 0 ? 1 : -1) * 0.22
+                        node.vy += (offsetY >= 0 ? 1 : -1) * 0.22
                     }
                 }
 
-                // Bounce
-                if (n.x < 0 || n.x > resolvedCanvas.width) n.vx *= -1
-                if (n.y < 0 || n.y > resolvedCanvas.height) n.vy *= -1
-                n.x = Math.max(0, Math.min(resolvedCanvas.width, n.x))
-                n.y = Math.max(0, Math.min(resolvedCanvas.height, n.y))
+                if (node.x < 0 || node.x > canvas.width) node.vx *= -1
+                if (node.y < 0 || node.y > canvas.height) node.vy *= -1
+                node.x = Math.max(0, Math.min(canvas.width, node.x))
+                node.y = Math.max(0, Math.min(canvas.height, node.y))
             }
 
-            // ── DIBUJAR CONEXIONES ───────────────
             for (let i = 0; i < nodes.length; i++) {
                 for (let j = i + 1; j < nodes.length; j++) {
-                    const a = nodes[i], b = nodes[j]
+                    const a = nodes[i]
+                    const b = nodes[j]
                     const dx = a.x - b.x
                     const dy = a.y - b.y
                     const dist = Math.sqrt(dx * dx + dy * dy)
@@ -205,8 +185,6 @@ function NeuralCanvas() {
                     if (dist < CONNECTION_DIST && !isInsideSafeZone(midX, midY, 24)) {
                         const alpha = (1 - dist / CONNECTION_DIST) * 0.35
                         const brightness = (a.brightness + b.brightness) / 2
-
-                        // Degradado en la línea
                         const grad = ctx.createLinearGradient(a.x, a.y, b.x, b.y)
                         grad.addColorStop(0, `rgba(0, 255, 136, ${alpha * brightness})`)
                         grad.addColorStop(0.5, `rgba(15, 191, 115, ${alpha * brightness * 0.6})`)
@@ -222,76 +200,72 @@ function NeuralCanvas() {
                 }
             }
 
-            // ── DIBUJAR NODOS ────────────────────
-            for (const n of nodes) {
-                const glow = ctx.createRadialGradient(
-                    n.x, n.y, 0,
-                    n.x, n.y, n.radius * 6
-                )
-                glow.addColorStop(0, `rgba(0, 255, 136, ${0.9 * n.brightness})`)
-                glow.addColorStop(0.4, `rgba(0, 255, 136, ${0.3 * n.brightness})`)
+            for (const node of nodes) {
+                const glow = ctx.createRadialGradient(node.x, node.y, 0, node.x, node.y, node.radius * 6)
+                glow.addColorStop(0, `rgba(0, 255, 136, ${0.9 * node.brightness})`)
+                glow.addColorStop(0.4, `rgba(0, 255, 136, ${0.3 * node.brightness})`)
                 glow.addColorStop(1, 'rgba(0, 255, 136, 0)')
 
                 ctx.beginPath()
-                ctx.arc(n.x, n.y, n.radius * 6, 0, Math.PI * 2)
+                ctx.arc(node.x, node.y, node.radius * 6, 0, Math.PI * 2)
                 ctx.fillStyle = glow
                 ctx.fill()
 
-                // Núcleo del nodo
                 ctx.beginPath()
-                ctx.arc(n.x, n.y, n.radius * n.brightness, 0, Math.PI * 2)
-                ctx.fillStyle = `rgba(200, 255, 230, ${0.8 * n.brightness})`
+                ctx.arc(node.x, node.y, node.radius * node.brightness, 0, Math.PI * 2)
+                ctx.fillStyle = `rgba(200, 255, 230, ${0.8 * node.brightness})`
                 ctx.fill()
 
-                if (n.isHub) {
-                    // Anillo exterior pulsante
-                    const ringRadius = n.radius * 10 * n.brightness
+                if (node.isHub) {
+                    const ringRadius = node.radius * 10 * node.brightness
                     ctx.beginPath()
-                    ctx.arc(n.x, n.y, ringRadius, 0, Math.PI * 2)
-                    ctx.strokeStyle = `rgba(0, 255, 136, ${0.15 * n.brightness})`
+                    ctx.arc(node.x, node.y, ringRadius, 0, Math.PI * 2)
+                    ctx.strokeStyle = `rgba(0, 255, 136, ${0.15 * node.brightness})`
                     ctx.lineWidth = 1
                     ctx.stroke()
 
-                    // Anillo medio
                     ctx.beginPath()
-                    ctx.arc(n.x, n.y, n.radius * 5, 0, Math.PI * 2)
-                    ctx.strokeStyle = `rgba(0, 255, 136, ${0.3 * n.brightness})`
+                    ctx.arc(node.x, node.y, node.radius * 5, 0, Math.PI * 2)
+                    ctx.strokeStyle = `rgba(0, 255, 136, ${0.3 * node.brightness})`
                     ctx.lineWidth = 1
                     ctx.stroke()
 
-                    // Label del hub
-                    if (n.label) {
+                    if (node.label) {
                         ctx.font = '9px monospace'
-                        ctx.fillStyle = `rgba(0, 255, 136, ${0.5 * n.brightness})`
+                        ctx.fillStyle = `rgba(0, 255, 136, ${0.5 * node.brightness})`
                         ctx.textAlign = 'center'
-                        ctx.fillText(n.label, n.x, n.y + n.radius * 12)
+                        ctx.fillText(node.label, node.x, node.y + node.radius * 12)
                     }
                 }
             }
 
-            // ── SPAWNER DE PARTÍCULAS ────────────
             if (frame % 8 === 0 && particles.length < MAX_PARTICLES) {
                 const i = Math.floor(Math.random() * nodes.length)
                 const n = nodes[i]
-                let best = -1, bestDist = CONNECTION_DIST
+                let best = -1
+                let bestDist = CONNECTION_DIST
+
                 nodes.forEach((m, j) => {
                     if (j === i) return
                     const d = Math.hypot(m.x - n.x, m.y - n.y)
-                    if (d < bestDist) { bestDist = d; best = j }
+                    if (d < bestDist) {
+                        bestDist = d
+                        best = j
+                    }
                 })
+
                 if (best !== -1) {
                     particles.push({
                         fromNode: i,
                         toNode: best,
                         progress: 0,
                         speed: 0.008 + Math.random() * 0.012,
-                        color: Math.random() > 0.3 ? 'green' : 'violet',
+                        color: Math.random() > 0.3 ? 'green' : 'teal',
                         size: 1.5 + Math.random() * 1.5,
                     })
                 }
             }
 
-            // ── DIBUJAR Y MOVER PARTÍCULAS ───────
             for (let pi = particles.length - 1; pi >= 0; pi--) {
                 const p = particles[pi]
                 p.progress += p.speed
@@ -306,7 +280,6 @@ function NeuralCanvas() {
                 const x = from.x + (to.x - from.x) * p.progress
                 const y = from.y + (to.y - from.y) * p.progress
 
-                // Estela detrás de la partícula
                 const trailLen = 0.06
                 const trailProgress = Math.max(0, p.progress - trailLen)
                 const trailX = from.x + (to.x - from.x) * trailProgress
@@ -324,7 +297,6 @@ function NeuralCanvas() {
                 ctx.lineWidth = p.size * 0.8
                 ctx.stroke()
 
-                // Punto brillante (cabeza)
                 const pGlow = ctx.createRadialGradient(x, y, 0, x, y, p.size * 4)
                 pGlow.addColorStop(0, `rgba(${col}, 1)`)
                 pGlow.addColorStop(0.4, `rgba(${col}, 0.4)`)
@@ -336,38 +308,34 @@ function NeuralCanvas() {
                 ctx.fill()
             }
 
-            // ── LÍNEAS DE ESCÁNER ────────────────
-            const scanY1 = ((frame * 0.4) % (resolvedCanvas.height + 200)) - 100
-            const scanY2 = ((frame * 0.4 + resolvedCanvas.height * 0.5) % (resolvedCanvas.height + 200)) - 100
+            const scanY1 = ((frame * 0.4) % (canvas.height + 200)) - 100
+            const scanY2 = ((frame * 0.4 + canvas.height * 0.5) % (canvas.height + 200)) - 100
 
             for (const scanY of [scanY1, scanY2]) {
                 const scanGrad = ctx.createLinearGradient(0, scanY - 2, 0, scanY + 2)
                 scanGrad.addColorStop(0, 'rgba(0, 255, 136, 0)')
                 scanGrad.addColorStop(0.5, 'rgba(0, 255, 136, 0.06)')
                 scanGrad.addColorStop(1, 'rgba(0, 255, 136, 0)')
-
                 ctx.fillStyle = scanGrad
-                ctx.fillRect(0, scanY - 2, resolvedCanvas.width, 4)
+                ctx.fillRect(0, scanY - 2, canvas.width, 4)
             }
 
-            animRef.current = requestAnimationFrame(draw)
+            animationRef.current = requestAnimationFrame(draw)
         }
 
         draw()
 
-        return () => {
-            cancelAnimationFrame(animRef.current)
-            window.removeEventListener('resize', resize)
-        }
-    }, [])
-
-    // Mouse tracking en la sección padre
-    useEffect(() => {
-        function onMouseMove(e: MouseEvent) {
+        const onMouseMove = (e: MouseEvent) => {
             mouseRef.current = { x: e.clientX, y: e.clientY }
         }
+
         window.addEventListener('mousemove', onMouseMove)
-        return () => window.removeEventListener('mousemove', onMouseMove)
+
+        return () => {
+            cancelAnimationFrame(animationRef.current)
+            window.removeEventListener('resize', resize)
+            window.removeEventListener('mousemove', onMouseMove)
+        }
     }, [])
 
     return (
@@ -383,90 +351,284 @@ function NeuralCanvas() {
     )
 }
 
+type StatItem = {
+    value: string
+    label: string
+    pos: {
+        left?: string
+        right?: string
+        top?: string
+        bottom?: string
+    }
+}
+
+type StatOffset = {
+    x: number
+    y: number
+    vx: number
+    vy: number
+}
+
+const HERO_STATS: StatItem[] = [
+    { value: '+42%', label: 'LEADS CALIFICADOS', pos: { left: '-16%', top: '16%' } },
+    { value: '24/7', label: 'SIN DESCANSO', pos: { left: '-8%', top: '36%' } },
+    { value: '99.9%', label: 'UPTIME', pos: { left: '-15%', top: '58%' } },
+    { value: '5x', label: 'ESCALA SIMULTANEA', pos: { right: '-16%', top: '16%' } },
+    { value: '< 3s', label: 'TIEMPO DE RESPUESTA', pos: { right: '-8%', top: '36%' } },
+    { value: '-80%', label: 'CONSULTAS MANUALES', pos: { right: '-15%', top: '55%' } },
+]
+
 export default function HeroIA() {
     const prefersReduced = useReducedMotion()
+    const mouseRef = useRef({ x: -9999, y: -9999 })
+    const statRefs = useRef<Array<HTMLDivElement | null>>([])
+    const statCentersRef = useRef<Array<{ x: number; y: number }>>([])
+    const statOffsetsRef = useRef<StatOffset[]>(HERO_STATS.map(() => ({ x: 0, y: 0, vx: 0, vy: 0 })))
+    const [statOffsets, setStatOffsets] = useState<Array<{ x: number; y: number }>>(
+        HERO_STATS.map(() => ({ x: 0, y: 0 })),
+    )
 
+    useEffect(() => {
+        const onMouseMove = (e: MouseEvent) => {
+            mouseRef.current = { x: e.clientX, y: e.clientY }
+        }
+        const onMouseLeave = () => {
+            mouseRef.current = { x: -9999, y: -9999 }
+        }
 
-    const stats = [
-        { value: '24/7', label: 'sin descanso', icon: '🌙', pos: { left: '2%', top: '35%' } },
-        { value: '< 3s', label: 'tiempo de respuesta', icon: '⚡', pos: { right: '2%', top: '35%' } },
-        { value: '−80%', label: 'consultas manuales', icon: '📉', pos: { right: '-6%', top: '48%' } },
-    ]
+        window.addEventListener('mousemove', onMouseMove)
+        window.addEventListener('mouseout', onMouseLeave)
+
+        return () => {
+            window.removeEventListener('mousemove', onMouseMove)
+            window.removeEventListener('mouseout', onMouseLeave)
+        }
+    }, [])
+
+    useEffect(() => {
+        if (prefersReduced) {
+            statOffsetsRef.current = HERO_STATS.map(() => ({ x: 0, y: 0, vx: 0, vy: 0 }))
+            return
+        }
+
+        const REPEL_RADIUS = 260
+        const REPEL_ACCEL = 2
+        const RETURN_FORCE = 0.016
+        const DAMPING = 0.88
+        const MAX_SPEED = 18
+        const MAX_OFFSET_X = 140
+        const MAX_OFFSET_Y = 110
+
+        const recalcCenters = () => {
+            statCentersRef.current = HERO_STATS.map((_, index) => {
+                const el = statRefs.current[index]
+                if (!el) return { x: -9999, y: -9999 }
+                const rect = el.getBoundingClientRect()
+                return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 }
+            })
+        }
+
+        recalcCenters()
+        const bootFrames = [
+            requestAnimationFrame(recalcCenters),
+            window.setTimeout(recalcCenters, 260),
+            window.setTimeout(recalcCenters, 900),
+        ]
+        window.addEventListener('resize', recalcCenters)
+
+        let rafId = 0
+        const animate = () => {
+            const mouse = mouseRef.current
+            let changed = false
+
+            for (let i = 0; i < HERO_STATS.length; i++) {
+                const center = statCentersRef.current[i]
+                const offset = statOffsetsRef.current[i]
+                if (!center || !offset) continue
+
+                const currentX = center.x + offset.x
+                const currentY = center.y + offset.y
+                const dx = currentX - mouse.x
+                const dy = currentY - mouse.y
+                const dist = Math.sqrt(dx * dx + dy * dy)
+
+                if (dist < REPEL_RADIUS && dist > 0.01) {
+                    const force = (REPEL_RADIUS - dist) / REPEL_RADIUS
+                    offset.vx += (dx / dist) * force * REPEL_ACCEL
+                    offset.vy += (dy / dist) * force * REPEL_ACCEL
+                }
+
+                offset.vx += -offset.x * RETURN_FORCE
+                offset.vy += -offset.y * RETURN_FORCE
+
+                offset.vx *= DAMPING
+                offset.vy *= DAMPING
+
+                const speed = Math.sqrt(offset.vx * offset.vx + offset.vy * offset.vy)
+                if (speed > MAX_SPEED) {
+                    offset.vx = (offset.vx / speed) * MAX_SPEED
+                    offset.vy = (offset.vy / speed) * MAX_SPEED
+                }
+
+                offset.x += offset.vx
+                offset.y += offset.vy
+
+                if (offset.x > MAX_OFFSET_X) {
+                    offset.x = MAX_OFFSET_X
+                    offset.vx *= -0.26
+                } else if (offset.x < -MAX_OFFSET_X) {
+                    offset.x = -MAX_OFFSET_X
+                    offset.vx *= -0.26
+                }
+
+                if (offset.y > MAX_OFFSET_Y) {
+                    offset.y = MAX_OFFSET_Y
+                    offset.vy *= -0.26
+                } else if (offset.y < -MAX_OFFSET_Y) {
+                    offset.y = -MAX_OFFSET_Y
+                    offset.vy *= -0.26
+                }
+
+                if (Math.abs(offset.vx) > 0.01 || Math.abs(offset.vy) > 0.01 || Math.abs(offset.x) > 0.01 || Math.abs(offset.y) > 0.01) {
+                    changed = true
+                }
+            }
+
+            if (changed) {
+                setStatOffsets(statOffsetsRef.current.map((item) => ({ x: item.x, y: item.y })))
+            }
+
+            rafId = requestAnimationFrame(animate)
+        }
+
+        rafId = requestAnimationFrame(animate)
+
+        return () => {
+            cancelAnimationFrame(rafId)
+            cancelAnimationFrame(bootFrames[0] as number)
+            window.clearTimeout(bootFrames[1] as number)
+            window.clearTimeout(bootFrames[2] as number)
+            window.removeEventListener('resize', recalcCenters)
+        }
+    }, [prefersReduced])
+
+    const getReactiveCardStyle = (index: number) => {
+        const baseStyle: React.CSSProperties = {
+            transform: 'translate3d(0px, 0px, 0px) scale(1)',
+            border: '1px solid rgba(0,255,136,0.15)',
+            boxShadow: '0 0 0 rgba(0,255,136,0)',
+            transition: 'transform 18ms linear, border-color 40ms linear, box-shadow 40ms linear, background 40ms linear',
+            background: 'rgba(0,255,136,0.06)',
+        }
+
+        if (prefersReduced) return baseStyle
+
+        const offset = statOffsets[index] ?? { x: 0, y: 0 }
+        const intensity = Math.min(1, Math.hypot(offset.x, offset.y) / 72)
+
+        return {
+            ...baseStyle,
+            transform: `translate3d(${offset.x.toFixed(2)}px, ${offset.y.toFixed(2)}px, 0) scale(${(1 + intensity * 0.08).toFixed(3)})`,
+            border: `1px solid rgba(0,255,136,${(0.18 + intensity * 0.44).toFixed(3)})`,
+            boxShadow: `0 0 0 1px rgba(0,255,136,${(0.1 + intensity * 0.2).toFixed(3)}), 0 0 ${Math.round(28 + intensity * 38)}px rgba(0,255,136,${(0.18 + intensity * 0.34).toFixed(3)})`,
+            background: `rgba(0,255,136,${(0.06 + intensity * 0.16).toFixed(3)})`,
+        }
+    }
 
     return (
-        <section style={{
-            position: 'relative',
-            width: '100%',
-            height: '100vh',
-            minHeight: '700px',
-            background: '#030308',
-            overflow: 'hidden',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-        }}>
+        <section
+            className="hero-ia-root"
+            style={{
+                position: 'relative',
+                width: '100%',
+                height: '100svh',
+                minHeight: '100svh',
+                background: '#030308',
+                overflow: 'hidden',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+            }}
+        >
             <NeuralCanvas />
 
-            {/* VIGNETTE OVERLAY */}
-            <div
-                style={{
-                    position: 'absolute',
-                    inset: 0,
-                    zIndex: 5,
-                    pointerEvents: 'none',
-                    background: 'radial-gradient(ellipse at center, transparent 30%, rgba(3,3,8,0.4) 65%, rgba(3,3,8,0.85) 100%)',
-                }}
-            />
+                <div
+                    style={{
+                        position: 'absolute',
+                        inset: 0,
+                        zIndex: 5,
+                        pointerEvents: 'none',
+                        background: 'radial-gradient(ellipse at center, transparent 30%, rgba(3,3,8,0.4) 65%, rgba(3,3,8,0.85) 100%)',
+                    }}
+                />
 
-            <div style={{
-                position: 'relative',
-                zIndex: 10,
-                textAlign: 'center',
-                padding: '0 clamp(20px, 5vw, 60px)',
-                maxWidth: '900px',
-                pointerEvents: 'none',
-            }}>
-                {/* ── ESTADÍSTICAS FLOTANTES (Solo Desktop) ── */}
+                <div
+                    style={{
+                        position: 'relative',
+                        zIndex: 10,
+                        textAlign: 'center',
+                        padding: '0 clamp(20px, 5vw, 60px)',
+                        maxWidth: '900px',
+                        pointerEvents: 'none',
+                    }}
+                >
                 <div className="hidden sm:block">
-                    {stats.map((stat, i) => (
+                    {HERO_STATS.map((stat, i) => (
                         <motion.div
                             key={i}
+                            ref={(el) => {
+                                statRefs.current[i] = el
+                            }}
                             initial={{ opacity: 0, y: i % 2 === 0 ? 15 : -15 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.8, delay: 1.0 + i * 0.1 }}
                             style={{
                                 position: 'absolute',
                                 pointerEvents: 'none',
-                                background: 'rgba(0,255,136,0.06)',
-                                border: '1px solid rgba(0,255,136,0.15)',
-                                borderRadius: '12px',
-                                padding: '10px 16px',
-                                minWidth: '132px',
-                                textAlign: 'center',
-                                ...stat.pos
+                                ...stat.pos,
                             }}
                         >
-                            <motion.div
-                                animate={prefersReduced ? {} : { y: [0, -6, 0] }}
-                                transition={prefersReduced ? {} : {
-                                    duration: 3 + (i % 3) * 0.55,
-                                    repeat: Infinity,
-                                    ease: "easeInOut"
+                            <div
+                                style={{
+                                    borderRadius: '12px',
+                                    padding: '10px 16px',
+                                    minWidth: '132px',
+                                    textAlign: 'center',
+                                    ...getReactiveCardStyle(i),
                                 }}
                             >
-                                <div style={{ fontSize: '24px', marginBottom: '4px' }}>{stat.icon}</div>
-                                <div style={{ fontSize: '20px', fontWeight: 800, color: '#00ff88', lineHeight: 1 }}>
-                                    {stat.value}
-                                </div>
-                                <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.35)', letterSpacing: '0.1em', marginTop: '2px', textTransform: 'uppercase' }}>
-                                    {stat.label}
-                                </div>
-                            </motion.div>
+                                <motion.div
+                                    animate={prefersReduced ? {} : { y: [0, -6, 0] }}
+                                    transition={
+                                        prefersReduced
+                                            ? {}
+                                            : {
+                                                duration: 3 + (i % 3) * 0.55,
+                                                repeat: Infinity,
+                                                ease: 'easeInOut',
+                                            }
+                                    }
+                                >
+                                    <div style={{ fontSize: '20px', fontWeight: 800, color: '#00ff88', lineHeight: 1 }}>
+                                        {stat.value}
+                                    </div>
+                                    <div
+                                        style={{
+                                            fontSize: '10px',
+                                            color: 'rgba(255,255,255,0.42)',
+                                            letterSpacing: '0.1em',
+                                            marginTop: '3px',
+                                            textTransform: 'uppercase',
+                                        }}
+                                    >
+                                        {stat.label}
+                                    </div>
+                                </motion.div>
+                            </div>
                         </motion.div>
                     ))}
                 </div>
 
-                {/* ── BadgeIA ── */}
                 <motion.div
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -483,24 +645,29 @@ export default function HeroIA() {
                         pointerEvents: 'auto',
                     }}
                 >
-                    <span style={{
-                        width: '6px', height: '6px',
-                        borderRadius: '50%',
-                        background: '#00ff88',
-                        boxShadow: '0 0 8px rgba(0,255,136,0.8)',
-                        display: 'inline-block',
-                    }} className="animate-pulse-ia" />
-                    <span style={{
-                        fontSize: '11px',
-                        letterSpacing: '0.25em',
-                        color: '#00ff88',
-                        fontWeight: 600,
-                    }}>
-                        TU EMPRESA, EN PILOTO AUTOMÁTICO
+                    <span
+                        style={{
+                            width: '6px',
+                            height: '6px',
+                            borderRadius: '50%',
+                            background: '#00ff88',
+                            boxShadow: '0 0 8px rgba(0,255,136,0.8)',
+                            display: 'inline-block',
+                        }}
+                        className="animate-pulse-ia"
+                    />
+                    <span
+                        style={{
+                            fontSize: '11px',
+                            letterSpacing: '0.25em',
+                            color: '#00ff88',
+                            fontWeight: 600,
+                        }}
+                    >
+                        TU EMPRESA, EN PILOTO AUTOMATICO
                     </span>
                 </motion.div>
 
-                {/* ── TitleIA ── */}
                 <motion.h1
                     initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -545,7 +712,6 @@ export default function HeroIA() {
                     </span>
                 </motion.h1>
 
-                {/* ── SubtitleIA ── */}
                 <motion.p
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -567,7 +733,6 @@ export default function HeroIA() {
                     </span>
                 </motion.p>
 
-                {/* ── CTAHero ── */}
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -601,103 +766,24 @@ export default function HeroIA() {
                             cursor: 'default',
                         }}
                     >
-                        Probá la IA ahora →
-                    </motion.a>
-
-                    <motion.a
-                        href="#casos"
-                        whileHover={prefersReduced ? {} : {
-                            scale: 1.02,
-                            borderColor: 'rgba(0,255,136,0.5)',
-                            color: '#00ff88',
-                        }}
-                        whileTap={prefersReduced ? {} : { scale: 0.97 }}
-                        style={{
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '10px',
-                            background: 'transparent',
-                            border: '1px solid rgba(255,255,255,0.15)',
-                            color: 'rgba(255,255,255,0.6)',
-                            fontWeight: 600,
-                            fontSize: '14px',
-                            padding: '14px 28px',
-                            borderRadius: '100px',
-                            textDecoration: 'none',
-                            transition: 'all 200ms',
-                            cursor: 'default',
-                        }}
-                    >
-                        Ver casos de uso
+                        Proba la IA ahora {'->'}
                     </motion.a>
                 </motion.div>
-            </div>
+                </div>
 
-            {/* ── ScrollCue ── */}
-            <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 1.4, duration: 0.8 }}
-                style={{
-                    position: 'absolute',
-                    bottom: 'clamp(24px,4vh,40px)',
-                    left: '50%',
-                    transform: 'translateX(-50%)',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    gap: '8px',
-                    zIndex: 10,
-                    pointerEvents: 'none',
-                }}
-            >
-                <span style={{
-                    fontSize: '9px',
-                    letterSpacing: '0.35em',
-                    color: 'rgba(0,255,136,0.35)',
-                    textTransform: 'uppercase',
-                }}>
-                    explorar
-                </span>
-                {[0, 1].map(i => (
-                    <div key={i} style={{
-                        width: '8px', height: '8px',
-                        borderRight: '1px solid rgba(0,255,136,0.4)',
-                        borderBottom: '1px solid rgba(0,255,136,0.4)',
-                        transform: 'rotate(45deg)',
-                        animation: `chevronIA 1.4s ease-in-out ${i * 0.18}s infinite`,
-                    }} />
-                ))}
-            </motion.div>
-
-            <style>{`
-                @keyframes pulse-ia {
-                    0%, 100% { opacity: 1; transform: scale(1); }
-                    50% { opacity: 0.4; transform: scale(0.8); }
-                }
-                .animate-pulse-ia {
-                    animation: pulse-ia 1.5s ease-in-out infinite;
-                }
-                @keyframes chevronIA {
-                    0%, 100% { opacity: 0.3; transform: rotate(45deg) translateY(0); }
-                    50% { opacity: 1; transform: rotate(45deg) translateY(4px); }
-                }
-                @keyframes pulseTitleIA {
-                    0%, 100% { opacity: 1; text-shadow: 0 0 18px rgba(0, 255, 136, 0.35), 0 0 42px rgba(0, 255, 136, 0.18); }
-                    50% { opacity: 0.9; text-shadow: 0 0 26px rgba(0, 255, 136, 0.6), 0 0 68px rgba(0, 255, 136, 0.3); }
-                }
-                @keyframes liquidMetalIA {
-                    0% { background-position: 0% 50%; }
-                    50% { background-position: 100% 50%; }
-                    100% { background-position: 0% 50%; }
-                }
-                @keyframes gradientShift {
-                    0% { background-position: 0% 50%; }
-                    50% { background-position: 100% 50%; }
-                    100% { background-position: 0% 50%; }
-                }
-            `}</style>
+                <style>{`
+                    @keyframes pulse-ia {
+                        0%, 100% { opacity: 1; transform: scale(1); }
+                        50% { opacity: 0.4; transform: scale(0.8); }
+                    }
+                    .animate-pulse-ia {
+                        animation: pulse-ia 1.5s ease-in-out infinite;
+                    }
+                    @keyframes pulseTitleIA {
+                        0%, 100% { opacity: 1; text-shadow: 0 0 18px rgba(0, 255, 136, 0.35), 0 0 42px rgba(0, 255, 136, 0.18); }
+                        50% { opacity: 0.9; text-shadow: 0 0 26px rgba(0, 255, 136, 0.6), 0 0 68px rgba(0, 255, 136, 0.3); }
+                    }
+                `}</style>
         </section>
     )
 }
-

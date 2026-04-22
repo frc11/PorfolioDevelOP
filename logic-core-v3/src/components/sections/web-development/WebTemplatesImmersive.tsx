@@ -216,12 +216,15 @@ function TemplateStageCard({
     return (
         <motion.article
             ref={cardRef}
+            aria-hidden={!isActive}
             style={{
                 opacity,
                 y: stageY,
                 scale: stageScale,
                 rotateX: stageRotateX,
                 transformPerspective: 1500,
+                pointerEvents: isActive ? "auto" : "none",
+                zIndex: isActive ? 3 : 1,
             }}
             className="absolute inset-0 flex items-center justify-center px-3 py-3 md:px-6 md:py-5"
         >
@@ -268,6 +271,7 @@ function TemplateStageCard({
                                 href={template.url}
                                 target="_blank"
                                 rel="noopener noreferrer"
+                                tabIndex={isActive ? 0 : -1}
                                 className={`group/template-btn relative inline-flex items-center gap-2 overflow-hidden rounded-full border px-5 py-2.5 text-xs uppercase text-[#09090f] transition-[transform,box-shadow,border-color,background-color,color] duration-200 hover:scale-[1.01] hover:border-cyan-300/70 hover:bg-white hover:text-[#02040a] hover:shadow-[0_0_0_1px_rgba(34,211,238,0.42),0_0_22px_rgba(34,211,238,0.34)] ${templateBtnAutoActive ? "scale-[1.01] border-cyan-300/70 bg-white text-[#02040a] shadow-[0_0_0_1px_rgba(34,211,238,0.42),0_0_22px_rgba(34,211,238,0.34)]" : "border-white/14 bg-white"}`}
                             >
                                 <span

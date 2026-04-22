@@ -1,7 +1,20 @@
 ﻿'use client'
 
 import React, { useRef, useState, useEffect } from 'react'
-import { motion, useInView, AnimatePresence } from 'motion/react'
+import { motion, useInView } from 'motion/react'
+import {
+    Bot,
+    Calendar,
+    CircleDollarSign,
+    Clock3,
+    FileCheck2,
+    GaugeCircle,
+    ShieldCheck,
+    TrendingUp,
+    UserRound,
+    Users,
+    type LucideIcon,
+} from 'lucide-react'
 
 // ─── HELPERS ─────────────────────────────────────────────────────────────────
 
@@ -44,7 +57,7 @@ interface CompareRow {
     ai: string
     humanResult: ResultType
     aiResult: ResultType
-    icon: string
+    icon: LucideIcon
     highlight: boolean
 }
 
@@ -52,42 +65,42 @@ interface CompareRow {
 
 const rows: CompareRow[] = [
     {
-        id: 0, icon: '🕐', attribute: 'Disponibilidad',
+        id: 0, icon: Clock3, attribute: 'Disponibilidad',
         human: 'Lun–Vie · 9 a 18hs', ai: '24 / 7 / 365',
         humanResult: 'lose', aiResult: 'win', highlight: false,
     },
     {
-        id: 1, icon: '💰', attribute: 'Costo mensual',
+        id: 1, icon: CircleDollarSign, attribute: 'Costo mensual',
         human: '$180.000 – $350.000', ai: 'Desde $25.000',
         humanResult: 'lose', aiResult: 'win', highlight: true,
     },
     {
-        id: 2, icon: '⚡', attribute: 'Tiempo de respuesta',
+        id: 2, icon: GaugeCircle, attribute: 'Tiempo de respuesta',
         human: '2 – 24 horas', ai: '< 3 segundos',
         humanResult: 'lose', aiResult: 'win', highlight: false,
     },
     {
-        id: 3, icon: '📊', attribute: 'Capacidad simultánea',
+        id: 3, icon: Users, attribute: 'Capacidad simultánea',
         human: '1 conversación', ai: 'Ilimitadas',
         humanResult: 'lose', aiResult: 'win', highlight: false,
     },
     {
-        id: 4, icon: '🎯', attribute: 'Consistencia',
+        id: 4, icon: ShieldCheck, attribute: 'Consistencia',
         human: 'Variable según humor', ai: 'Siempre igual',
         humanResult: 'lose', aiResult: 'win', highlight: false,
     },
     {
-        id: 5, icon: '📈', attribute: 'Escalabilidad',
+        id: 5, icon: TrendingUp, attribute: 'Escalabilidad',
         human: 'Contratar más personas', ai: 'Instantánea',
         humanResult: 'lose', aiResult: 'win', highlight: false,
     },
     {
-        id: 6, icon: '🏖', attribute: 'Vacaciones / Licencias',
+        id: 6, icon: Calendar, attribute: 'Vacaciones / Licencias',
         human: 'Sí — el negocio para', ai: 'Nunca',
         humanResult: 'lose', aiResult: 'win', highlight: false,
     },
     {
-        id: 7, icon: '📚', attribute: 'Tiempo de onboarding',
+        id: 7, icon: FileCheck2, attribute: 'Tiempo de onboarding',
         human: '2 – 4 semanas', ai: '48 horas',
         humanResult: 'lose', aiResult: 'win', highlight: false,
     },
@@ -107,6 +120,7 @@ function CompareRowItem({
     // Costs for row id: 1
     const humanCost = useCountUp(180000, 1200, isInView && row.id === 1)
     const aiCost = useCountUp(25000, 900, isInView && row.id === 1)
+    const RowIcon = row.icon
 
     return (
         <motion.div
@@ -152,7 +166,23 @@ function CompareRowItem({
                     padding: 'clamp(14px,2vh,20px) 0',
                     display: 'flex', alignItems: 'center', gap: '10px',
                 }}>
-                    <span style={{ fontSize: '18px' }}>{row.icon}</span>
+                    <span style={{
+                        width: '24px',
+                        height: '24px',
+                        borderRadius: '7px',
+                        border: '1px solid rgba(255,255,255,0.14)',
+                        background: 'rgba(255,255,255,0.06)',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '9px',
+                        fontWeight: 800,
+                        letterSpacing: '0.06em',
+                        color: 'rgba(255,255,255,0.7)',
+                        flexShrink: 0,
+                    }}>
+                        <RowIcon size={13} strokeWidth={2.2} />
+                    </span>
                     <span style={{ fontSize: '13px', fontWeight: 600, color: 'rgba(255,255,255,0.55)' }}>
                         {row.attribute}
                     </span>
@@ -244,9 +274,9 @@ function TableHeader({ isInView }: { isInView: boolean }) {
                 <div style={{
                     width: '36px', height: '36px', borderRadius: '50%',
                     background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', flexShrink: 0,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
                 }}>
-                    👤
+                    <UserRound size={14} strokeWidth={2.1} color="rgba(255,255,255,0.76)" />
                 </div>
                 <div>
                     <p style={{ fontSize: '14px', fontWeight: 700, color: 'rgba(255,255,255,0.6)', margin: 0 }}>
@@ -265,10 +295,10 @@ function TableHeader({ isInView }: { isInView: boolean }) {
             }}>
                 <div style={{
                     width: '36px', height: '36px', borderRadius: '50%', flexShrink: 0,
-                    background: 'linear-gradient(135deg, #00ff88, #7b2fff)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px',
+                    background: 'linear-gradient(135deg, #00ff88, #34f5c5)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
                 }}>
-                    🤖
+                    <Bot size={14} strokeWidth={2.2} color="#04130b" />
                 </div>
                 <div>
                     <p style={{ fontSize: '14px', fontWeight: 700, color: '#00ff88', margin: 0 }}>
@@ -304,7 +334,7 @@ function ROISummary({ isInView }: { isInView: boolean }) {
             transition={{ duration: 0.8, delay: 0.9, ease: [0.16, 1, 0.3, 1] }}
             style={{
                 marginTop: 'clamp(32px,4vh,48px)',
-                background: 'linear-gradient(135deg, rgba(0, 255, 136, 0.08) 0%, rgba(123, 47, 255, 0.06) 100%)',
+                background: 'linear-gradient(135deg, rgba(0, 255, 136, 0.08) 0%, rgba(52, 245, 197, 0.06) 100%)',
                 border: '1px solid rgba(0,255,136,0.2)',
                 borderRadius: '20px',
                 padding: 'clamp(24px,3vw,40px)',
@@ -322,7 +352,7 @@ function ROISummary({ isInView }: { isInView: boolean }) {
             {/* Shimmer line */}
             <div style={{
                 position: 'absolute', top: 0, left: 0, right: 0, height: '1px',
-                background: 'linear-gradient(90deg, transparent, #00ff88 30%, #7b2fff 70%, transparent)',
+                background: 'linear-gradient(90deg, transparent, #00ff88 30%, #34f5c5 70%, transparent)',
             }} />
 
             {/* Savings Counter */}
@@ -352,9 +382,9 @@ function ROISummary({ isInView }: { isInView: boolean }) {
             <div style={{ textAlign: 'center', flex: '1 1 auto' }}>
                 <p style={{
                     fontSize: 'clamp(40px,6vw,72px)', fontWeight: 900, margin: 0, lineHeight: 1,
-                    background: 'linear-gradient(135deg, #00ff88, #7b2fff)',
-                    WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
-                    backgroundClip: 'text', fontFamily: 'monospace',
+                    color: '#34f5c5',
+                    textShadow: '0 0 24px rgba(52,245,197,0.22)',
+                    fontFamily: 'monospace',
                 }}>
                     {Math.round(savingPct)}%
                 </p>
@@ -370,23 +400,127 @@ function ROISummary({ isInView }: { isInView: boolean }) {
             {/* CTA */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', alignItems: 'flex-start', flex: '1 1 auto' }}>
                 <p style={{ fontSize: '14px', fontWeight: 600, color: 'white', margin: 0, maxWidth: '200px', lineHeight: 1.4 }}>
-                    ¿Cuánto ahorrás en tu negocio?
+                    Costo de no automatizar
                 </p>
-                <motion.a
-                    href="#cost-anchor"
-                    whileHover={{ scale: 1.04 }}
-                    whileTap={{ scale: 0.97 }}
-                    transition={{ type: 'spring', stiffness: 400, damping: 15 }}
+                <p
                     style={{
-                        display: 'inline-flex', alignItems: 'center', gap: '8px',
-                        background: 'linear-gradient(135deg, #00ff88, #00cc6a)',
-                        color: '#080810', fontWeight: 800, fontSize: '13px',
-                        letterSpacing: '0.04em', padding: '12px 24px', borderRadius: '100px',
-                        textDecoration: 'none', boxShadow: '0 0 24px rgba(0,255,136,0.3)',
+                        margin: 0,
+                        fontSize: '13px',
+                        lineHeight: 1.6,
+                        color: 'rgba(255,255,255,0.52)',
+                        maxWidth: '240px',
                     }}
                 >
-                    Calculá tu ahorro →
-                </motion.a>
+                    Cada mes con atencion manual suma sueldos, supervision y oportunidades perdidas por demora.
+                </p>
+                <div
+                    style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        background: 'rgba(0,255,136,0.14)',
+                        color: '#00ff88',
+                        fontWeight: 700,
+                        fontSize: '11px',
+                        letterSpacing: '0.08em',
+                        padding: '8px 14px',
+                        borderRadius: '100px',
+                        border: '1px solid rgba(0,255,136,0.28)',
+                    }}
+                >
+                    IMPLEMENTACION EN 7-14 DIAS
+                </div>
+            </div>
+        </motion.div>
+    )
+}
+
+function CostContextBlock({ isInView }: { isInView: boolean }) {
+    return (
+        <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={isInView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.7, delay: 1.05, ease: [0.16, 1, 0.3, 1] }}
+            style={{
+                marginTop: 'clamp(16px,2.5vh,24px)',
+                borderRadius: '18px',
+                border: '1px solid rgba(0,255,136,0.18)',
+                background: 'linear-gradient(145deg, rgba(0,255,136,0.08), rgba(52,245,197,0.04))',
+                padding: 'clamp(16px,2.4vw,26px)',
+            }}
+        >
+            <div style={{ marginBottom: '14px' }}>
+                <p
+                    style={{
+                        margin: '0 0 6px',
+                        fontSize: '11px',
+                        fontWeight: 700,
+                        letterSpacing: '0.18em',
+                        color: 'rgba(167,243,208,0.86)',
+                        textTransform: 'uppercase',
+                    }}
+                >
+                    Costo de no automatizar en contexto
+                </p>
+                <p style={{ margin: 0, fontSize: '13px', color: 'rgba(255,255,255,0.52)', lineHeight: 1.6 }}>
+                    Esta comparativa muestra por que el modelo tradicional termina siendo mas caro en pocos meses.
+                </p>
+            </div>
+
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                <div
+                    style={{
+                        borderRadius: '14px',
+                        border: '1px solid rgba(148,163,184,0.28)',
+                        background: 'linear-gradient(145deg, rgba(148,163,184,0.08), rgba(255,255,255,0.02))',
+                        padding: '16px',
+                    }}
+                >
+                    <p style={{ margin: '0 0 6px', fontSize: '10px', letterSpacing: '0.16em', color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', fontWeight: 700 }}>
+                        Modelo tradicional
+                    </p>
+                    <p style={{ margin: '0 0 6px', fontSize: '32px', fontWeight: 900, color: 'white', lineHeight: 1 }}>
+                        USD 450-700 / mes
+                    </p>
+                    <p style={{ margin: 0, fontSize: '13px', lineHeight: 1.6, color: 'rgba(255,255,255,0.58)' }}>
+                        Un perfil para responder en horario comercial, mas supervision, ausencias y curva de entrenamiento.
+                    </p>
+                </div>
+
+                <div
+                    style={{
+                        borderRadius: '14px',
+                        border: '1px solid rgba(0,255,136,0.3)',
+                        background: 'linear-gradient(145deg, rgba(0,255,136,0.14), rgba(255,255,255,0.02))',
+                        padding: '16px',
+                    }}
+                >
+                    <p style={{ margin: '0 0 6px', fontSize: '10px', letterSpacing: '0.16em', color: 'rgba(167,243,208,0.9)', textTransform: 'uppercase', fontWeight: 700 }}>
+                        Implementacion IA develOP
+                    </p>
+                    <p style={{ margin: '0 0 6px', fontSize: '32px', fontWeight: 900, color: '#a7f3d0', lineHeight: 1 }}>
+                        Desde USD 300 inicial
+                    </p>
+                    <p style={{ margin: 0, fontSize: '13px', lineHeight: 1.6, color: 'rgba(255,255,255,0.68)' }}>
+                        Setup base de agente IA para vender, calificar y responder 24/7, con mantenimiento opcional.
+                    </p>
+                </div>
+            </div>
+
+            <div
+                style={{
+                    marginTop: '12px',
+                    borderRadius: '12px',
+                    border: '1px solid rgba(0,255,136,0.24)',
+                    background: 'rgba(0,255,136,0.08)',
+                    padding: '10px 12px',
+                    textAlign: 'center',
+                    color: 'rgba(209,250,229,0.9)',
+                    fontSize: '13px',
+                    lineHeight: 1.5,
+                }}
+            >
+                En muchos negocios, 1 mes de atencion manual ya cuesta mas que implementar IA.
             </div>
         </motion.div>
     )
@@ -416,6 +550,7 @@ function CompareTable({
                 ))}
             </div>
             <ROISummary isInView={isInView} />
+            <CostContextBlock isInView={isInView} />
         </div>
     )
 }
@@ -449,10 +584,8 @@ function SectionHeader({ isInView }: { isInView: boolean }) {
                 <span style={{ display: 'block' }}>
                     <span style={{ color: 'white' }}>Los números </span>
                     <span style={{
-                        background: 'linear-gradient(90deg, #00ff88, #7b2fff)',
-                        WebkitBackgroundClip: 'text',
-                        WebkitTextFillColor: 'transparent',
-                        backgroundClip: 'text',
+                        color: '#34f5c5',
+                        textShadow: '0 0 18px rgba(52,245,197,0.18)',
                     }}>
                         hablan.
                     </span>
@@ -478,7 +611,7 @@ export default function ComparadorIA() {
             ref={sectionRef}
             style={{
                 padding: 'clamp(80px,12vh,140px) clamp(20px,5vw,80px)',
-                background: '#080810',
+                background: 'transparent',
                 position: 'relative',
                 overflow: 'hidden',
             }}
