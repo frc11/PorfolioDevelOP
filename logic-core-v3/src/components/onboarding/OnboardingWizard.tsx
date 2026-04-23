@@ -4,6 +4,7 @@ import { useState, useRef, useEffect, useActionState, Fragment, useCallback } fr
 import { motion, AnimatePresence } from 'framer-motion'
 import Image from 'next/image'
 import { saveOnboardingProfile } from '@/actions/onboarding-actions'
+import { Handshake } from 'lucide-react'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 

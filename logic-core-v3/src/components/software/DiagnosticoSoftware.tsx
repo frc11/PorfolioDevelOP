@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useCallback } from 'react'
 import { motion, AnimatePresence, useInView, useReducedMotion } from 'motion/react'
+import { CheckCircle2 } from 'lucide-react'
 
 // ─── TYPES ───────────────────────────────────────────────────────────────────
 
@@ -317,7 +318,7 @@ function ProgressBar({ current, total }: { current: number, total: number }) {
         {steps.map((s, i) => (
           <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
             <div style={{ width: '20px', height: '20px', borderRadius: '50%', background: i <= current ? 'linear-gradient(135deg, #6366f1, #7b2fff)' : 'rgba(255,255,255,0.08)', border: i <= current ? 'none' : '1px solid rgba(255,255,255,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', fontWeight: 700, color: i <= current ? 'white' : 'rgba(255,255,255,0.25)', transition: 'all 300ms' }}>
-              {i < current ? '✓' : i + 1}
+              {i < current ? <CheckCircle2 size={16} strokeWidth={1.5} className="text-white" /> : i + 1}
             </div>
             <span style={{ fontSize: '10px', color: i <= current ? 'rgba(99,102,241,0.8)' : 'rgba(255,255,255,0.2)', fontWeight: 600, whiteSpace: 'nowrap' }}>
               {s.id === 'rubro' ? 'Rubro' : s.id === 'problema' ? 'Dolor' : 'Equipo'}
@@ -369,7 +370,7 @@ function StepContent({
               style={{ padding: 'clamp(12px, 1.5vw, 18px)', borderRadius: '14px', border: isSelected ? '1px solid rgba(99,102,241,0.6)' : '1px solid rgba(255,255,255,0.08)', background: isSelected ? 'rgba(99,102,241,0.12)' : 'rgba(255,255,255,0.03)', cursor: 'none', textAlign: 'left', transition: 'background 200ms, border 200ms', boxShadow: isSelected ? '0 0 20px rgba(99,102,241,0.12)' : 'none', position: 'relative', overflow: 'hidden' }}
             >
               {isSelected && (
-                <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} style={{ position: 'absolute', top: '8px', right: '8px', width: '18px', height: '18px', borderRadius: '50%', background: '#6366f1', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', color: 'white', fontWeight: 700 }}>✓</motion.div>
+                <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} style={{ position: 'absolute', top: '8px', right: '8px', width: '18px', height: '18px', borderRadius: '50%', background: '#6366f1', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', color: 'white', fontWeight: 700 }}><CheckCircle2 size={14} strokeWidth={2} className="text-white" /></motion.div>
               )}
               <span style={{ fontSize: '22px', display: 'block', marginBottom: '8px' }}>{option.icon}</span>
               <span style={{ fontSize: '13px', fontWeight: 700, color: isSelected ? '#6366f1' : 'white', display: 'block', marginBottom: option.description ? '4px' : '0', transition: 'color 200ms' }}>{option.label}</span>
@@ -504,7 +505,7 @@ function ResultBody({ resultado }: { resultado: DiagnosticoResult }) {
         <div style={{ display:'flex', flexDirection:'column', gap:'8px' }}>
           {resultado.features.map((f, i) => (
             <motion.div key={i} initial={{ opacity:0, x:-12 }} animate={{ opacity:1, x:0 }} transition={{ delay:0.3 + i * 0.08, duration:0.4, ease:[0.16,1,0.3,1] }} style={{ display:'flex', alignItems:'center', gap:'10px' }}>
-              <div style={{ width:'20px', height:'20px', borderRadius:'50%', background:`rgba(${resultado.colorRgb},0.15)`, border:`1px solid rgba(${resultado.colorRgb},0.3)`, display:'flex', alignItems:'center', justifyContent:'center', fontSize:'10px', color:resultado.color, flexShrink:0 }}>✓</div>
+              <div style={{ width:'20px', height:'20px', borderRadius:'50%', background:`rgba(${resultado.colorRgb},0.15)`, border:`1px solid rgba(${resultado.colorRgb},0.3)`, display:'flex', alignItems:'center', justifyContent:'center', fontSize:'10px', color:resultado.color, flexShrink:0 }}><CheckCircle2 size={14} strokeWidth={1.5} style={{ color: resultado.color }} /></div>
               <span style={{ fontSize:'14px', color:'rgba(255,255,255,0.7)' }}>{f}</span>
             </motion.div>
           ))}
@@ -543,7 +544,7 @@ function ResultCTA({ resultado, onReset }: { resultado: DiagnosticoResult, onRes
 
       <div style={{ display:'flex', gap:'10px', flexWrap:'wrap', alignItems:'center' }}>
         <motion.button onClick={copyResult} whileHover={{ scale:1.02 }} whileTap={{ scale:0.97 }} style={{ background:'transparent', border:'1px solid rgba(255,255,255,0.08)', color:'rgba(255,255,255,0.3)', borderRadius:'100px', padding:'8px 14px', fontSize:'12px', cursor: 'none', display:'flex', alignItems:'center', gap:'6px', transition:'all 200ms' }}>
-          {copied ? '✓ Copiado' : '⎘ Compartir'}
+          {copied ? (<><CheckCircle2 size={12} strokeWidth={2} /> Copiado</>) : '⎘ Compartir'}
         </motion.button>
 
         <motion.button onClick={onReset} whileHover={{ scale:1.02 }} whileTap={{ scale:0.97 }} style={{ background:'transparent', border:'1px solid rgba(255,255,255,0.12)', color:'rgba(255,255,255,0.45)', borderRadius:'100px', padding:'12px 20px', fontSize:'13px', fontWeight:600, cursor: 'none', transition:'all 200ms' }}>

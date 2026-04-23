@@ -2,6 +2,7 @@
 
 import React, { useRef, useState, useEffect } from 'react'
 import { motion, useInView, AnimatePresence } from 'motion/react'
+import { User, Bot, X } from 'lucide-react'
 
 // ─── HELPERS ─────────────────────────────────────────────────────────────────
 
@@ -174,9 +175,9 @@ function CompareRowItem({
                         initial={{ scale: 0, opacity: 0 }}
                         animate={isInView ? { scale: 1, opacity: 0.5 } : { scale: 0, opacity: 0 }}
                         transition={{ delay: 0.35 + index * 0.07, duration: 0.3 }}
-                        style={{ fontSize: '14px', flexShrink: 0, color: '#ef4444' }}
+                        style={{ fontSize: '14px', flexShrink: 0, color: '#ef4444', display: 'flex', alignItems: 'center' }}
                     >
-                        ✗
+                        <X size={16} strokeWidth={2} />
                     </motion.span>
                     <span style={{
                         fontSize: '13px', color: 'rgba(255,255,255,0.35)',
@@ -205,9 +206,9 @@ function CompareRowItem({
                         initial={{ scale: 0, opacity: 0 }}
                         animate={isInView ? { scale: 1, opacity: 1 } : { scale: 0, opacity: 0 }}
                         transition={{ type: 'spring', stiffness: 400, damping: 12, delay: 0.4 + index * 0.07 }}
-                        style={{ fontSize: '14px', color: '#00ff88', display: 'inline-block', flexShrink: 0 }}
+                        style={{ fontSize: '14px', color: '#00ff88', display: 'inline-flex', alignItems: 'center', flexShrink: 0 }}
                     >
-                        ✓
+                        <X size={16} strokeWidth={2} style={{ color: '#00ff88' }} />
                     </motion.span>
                     <span style={{
                         fontSize: '13px',

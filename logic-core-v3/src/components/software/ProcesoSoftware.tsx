@@ -2,6 +2,7 @@
 
 import React, { useState, useRef } from 'react'
 import { motion, useInView, AnimatePresence, useReducedMotion } from 'motion/react'
+import { Diamond } from 'lucide-react'
 
 // ─── TYPES ───────────────────────────────────────────────────────────────────
 

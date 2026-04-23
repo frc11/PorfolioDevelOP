@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence, useInView, useReducedMotion } from 'motion/react'
+import { Bot, Phone, Package, Clock } from 'lucide-react'
 
 /**
  * BENTO AUTOMATION: "El Fin del Trabajo Robótico."

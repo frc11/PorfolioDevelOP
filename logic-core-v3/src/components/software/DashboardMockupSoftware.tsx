@@ -2,6 +2,7 @@
 
 import React, { useRef, useState, useEffect } from 'react'
 import { motion, useInView, useReducedMotion } from 'motion/react'
+import { Users } from 'lucide-react'
 
 /**
  * DASHBOARD MOCKUP SOFTWARE: Visualización de sistema de gestión.

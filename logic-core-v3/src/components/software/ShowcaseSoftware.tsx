@@ -8,6 +8,7 @@ import {
   XAxis, YAxis,
   Tooltip, ResponsiveContainer,
 } from 'recharts'
+import { ArrowDown, TrendingUp, TrendingDown } from 'lucide-react'
 
 // ─── TYPES ───────────────────────────────────────────────────────────────────
 
@@ -377,7 +378,7 @@ function MiniDashboard({ isInView }: { isInView: boolean }) {
               <div key={i} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '12px', padding: '12px' }}>
                 <p style={{ fontSize: '9px', color: 'rgba(255,255,255,0.3)', margin: '0 0 4px', letterSpacing: '0.1em', fontFamily: 'monospace' }}>{kpi.label.toUpperCase()}</p>
                 <p style={{ fontSize: '18px', fontWeight: 900, color: 'white', margin: '0 0 4px', fontFamily: 'monospace' }}>{kpi.prefix}{kpiValues[i].toLocaleString('es-AR')}</p>
-                <p style={{ fontSize: '10px', color: kpi.up ? '#4ade80' : '#f87171', margin: 0, fontWeight: 600 }}>{kpi.up ? '↑' : '↓'} {kpi.change}</p>
+                <p style={{ fontSize: '10px', color: kpi.up ? '#4ade80' : '#f87171', margin: 0, fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}>{kpi.up ? <TrendingUp size={12} strokeWidth={2} /> : <TrendingDown size={12} strokeWidth={2} />} {kpi.change}</p>
               </div>
             ))}
           </div>

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { motion, useReducedMotion, AnimatePresence, useInView } from 'motion/react'
+import { Link2, RefreshCw, CheckCircle2 } from 'lucide-react'
 
 // ─── TYPES ───────────────────────────────────────────────────────────────────
 
@@ -350,7 +351,7 @@ function BentoFlipCard({
             <h3 style={{ fontSize: pair.size === 'large' ? 'clamp(20px,2.5vw,28px)' : '18px', fontWeight: 900, color: 'white', margin: '0 0 8px' }}>{orden.title}</h3>
             <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.5)', lineHeight: 1.6, margin: '0 0 16px', maxWidth: pair.size === 'large' ? '440px' : '100%' }}>{orden.description}</p>
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', maxWidth: '100%', marginTop: 'auto', background: `rgba(${violetRgb},0.1)`, border: `1px solid rgba(${violetRgb},0.3)`, borderRadius: '8px', padding: '6px 12px' }}>
-              <span style={{ color:'#4ade80', fontSize:'12px' }}>✓</span>
+              <CheckCircle2 size={14} strokeWidth={2} style={{ color:'#4ade80', flexShrink: 0 }} />
               <span style={{ fontSize: '11px', color: `rgba(${violetRgb},1)`, fontWeight: 700, whiteSpace: 'normal', wordBreak: 'break-word' }}>{orden.detail}</span>
             </div>
           </div>

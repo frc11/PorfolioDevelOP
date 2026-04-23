@@ -10,6 +10,7 @@ import {
     useReducedMotion,
     useSpring,
 } from 'framer-motion'
+import { Mail, CheckCircle2, Cloud, Puzzle } from 'lucide-react'
 
 interface IntegrationItem {
     id: string
@@ -48,7 +49,7 @@ const INTEGRATIONS: IntegrationItem[] = [
     {
         id: 'gmail',
         name: 'Gmail',
-        mark: '✉️',
+        mark: 'mail',
         color: '#ea4335',
         colorRgb: '234,67,53',
         description: 'Correo y notificaciones',
@@ -88,7 +89,7 @@ const INTEGRATIONS: IntegrationItem[] = [
     {
         id: 'stripe',
         name: 'Stripe',
-        mark: '◈',
+        mark: 'check',
         color: '#635bff',
         colorRgb: '99,91,255',
         description: 'Pagos internacionales',
@@ -167,7 +168,11 @@ function IntegrationPill({
                         boxShadow: isHovered ? `0 0 26px rgba(${item.colorRgb},0.28)` : 'none',
                     }}
                 >
-                    <span>{item.mark}</span>
+                    {item.mark === 'mail' && <Mail size={20} strokeWidth={1.5} className="shrink-0" />}
+                    {item.mark === 'check' && <CheckCircle2 size={20} strokeWidth={1.5} className="shrink-0" />}
+                    {item.mark === 'cloud' && <Cloud size={20} strokeWidth={1.5} className="shrink-0" />}
+                    {item.mark === 'puzzle' && <Puzzle size={20} strokeWidth={1.5} className="shrink-0" />}
+                    {!['mail', 'check', 'cloud', 'puzzle'].includes(item.mark) && <span>{item.mark}</span>}
                 </div>
 
                 <div className="relative z-10 min-w-0">

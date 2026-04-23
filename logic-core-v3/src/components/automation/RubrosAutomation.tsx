@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo, useRef } from 'react'
 import { motion, AnimatePresence, useInView, useReducedMotion } from 'motion/react'
+import { UtensilsCrossed, Cake, Pill, Package, RefreshCw, Bot, ChevronRight } from 'lucide-react'
 
 /**
  * RUBROS AUTOMATION: "Soluciones por Rubro."
