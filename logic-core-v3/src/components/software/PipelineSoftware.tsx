@@ -9,6 +9,7 @@ import {
     useReducedMotion,
     useScroll,
 } from 'framer-motion'
+import { Code2, FlaskConical, Rocket, Search } from 'lucide-react'
 
 type Stage = {
     id: string
@@ -17,7 +18,7 @@ type Stage = {
     subtitle: string
     description: string
     output: string
-    icon: string
+    iconComponent: React.ReactNode
 }
 
 const stages: Stage[] = [
@@ -29,7 +30,7 @@ const stages: Stage[] = [
         description:
             'Traducimos operación, restricciones y objetivos de negocio en un sistema viable, medible y listo para escalar.',
         output: 'Mapa de módulos, riesgos y prioridades del producto',
-        icon: '◌',
+        iconComponent: <Search size={22} strokeWidth={1.5} />,
     },
     {
         id: 'development',
@@ -39,7 +40,7 @@ const stages: Stage[] = [
         description:
             'Construimos el núcleo técnico con una base clara: APIs, reglas de negocio, estados y superficies listas para operación real.',
         output: 'Servicios desacoplados y flujos críticos ya productivos',
-        icon: '⌘',
+        iconComponent: <Code2 size={22} strokeWidth={1.5} />,
     },
     {
         id: 'testing',
@@ -49,7 +50,7 @@ const stages: Stage[] = [
         description:
             'Probamos comportamiento, errores y escenarios límite para que la operación no dependa de “tener suerte” en producción.',
         output: 'Cobertura de riesgos, validaciones y calidad perceptible',
-        icon: '△',
+        iconComponent: <FlaskConical size={22} strokeWidth={1.5} />,
     },
     {
         id: 'deploy',
@@ -59,7 +60,7 @@ const stages: Stage[] = [
         description:
             'Lanzamos con métricas, monitoreo y visibilidad para que cada release sea controlado, trazable y sostenible.',
         output: 'Sistema online, medido y listo para iterar sin fricción',
-        icon: '↗',
+        iconComponent: <Rocket size={22} strokeWidth={1.5} />,
     },
 ] as const
 
@@ -120,8 +121,15 @@ export default function PipelineSoftware() {
     const viewportRef = useRef<HTMLDivElement>(null)
     const trackRef = useRef<HTMLDivElement>(null)
     const stageRefs = useRef<(HTMLElement | null)[]>([])
+    const [mounted, setMounted] = useState(false)
     const isInView = useInView(sectionRef, { once: true, amount: 0.08 })
     const reducedMotion = useReducedMotion()
+
+    useEffect(() => {
+        setMounted(true)
+    }, [])
+
+    const effectiveReducedMotion = mounted ? (reducedMotion ?? false) : false
     const [activeIndex, setActiveIndex] = useState(0)
     const stageAnchorsRef = useRef<number[]>([])
     const trackX = useMotionValue(0)
@@ -135,7 +143,7 @@ export default function PipelineSoftware() {
         const sectionElement = sectionRef.current
         if (!sectionElement) return
 
-        if (reducedMotion) {
+        if (effectiveReducedMotion) {
             stageAnchorsRef.current = []
             trackX.set(0)
             sectionElement.style.height = 'auto'
@@ -180,10 +188,10 @@ export default function PipelineSoftware() {
             resizeObserver.disconnect()
             window.removeEventListener('resize', measure)
         }
-    }, [reducedMotion, scrollYProgress, trackX])
+    }, [effectiveReducedMotion, scrollYProgress, trackX])
 
     useMotionValueEvent(scrollYProgress, 'change', (value) => {
-        if (!reducedMotion) {
+        if (!effectiveReducedMotion) {
             const anchors = stageAnchorsRef.current
             if (!anchors.length) return
 
@@ -223,16 +231,16 @@ export default function PipelineSoftware() {
                 ref={stickyRef}
                 className="relative"
                 style={{
-                    position: reducedMotion ? 'relative' : 'sticky',
+                    position: effectiveReducedMotion ? 'relative' : 'sticky',
                     top: 0,
-                    height: reducedMotion ? 'auto' : '100svh',
+                    height: effectiveReducedMotion ? 'auto' : '100svh',
                 }}
             >
                 <div className="mx-auto grid h-full max-w-[1600px] grid-rows-[auto_minmax(0,1fr)_auto] gap-6 px-[clamp(20px,5vw,80px)] py-[clamp(28px,4.2vh,48px)]">
                     <motion.div
                         initial={{ opacity: 0, y: 18 }}
                         animate={isInView ? { opacity: 1, y: 0 } : {}}
-                        transition={{ duration: reducedMotion ? 0 : 0.65, ease }}
+                        transition={{ duration: effectiveReducedMotion ? 0 : 0.65, ease }}
                         className="max-w-3xl"
                     >
                         <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-indigo-400/20 bg-indigo-400/[0.06] px-4 py-2">
@@ -279,26 +287,29 @@ export default function PipelineSoftware() {
                                             stageRefs.current[index] = element
                                         }}
                                         animate={{
-                                            opacity: reducedMotion ? 1 : isActive ? 1 : 0.34,
-                                            scale: reducedMotion ? 1 : isActive ? 1 : 0.94,
-                                            filter: reducedMotion ? 'blur(0px)' : isActive ? 'blur(0px)' : 'blur(0.6px)',
-                                            y: reducedMotion ? 0 : isActive ? -6 : 12,
+                                            opacity: effectiveReducedMotion ? 1 : isActive ? 1 : 0.34,
+                                            scale: effectiveReducedMotion ? 1 : isActive ? 1 : 0.94,
+                                            filter: effectiveReducedMotion ? 'blur(0px)' : isActive ? 'blur(0px)' : 'blur(0.6px)',
+                                            y: effectiveReducedMotion ? 0 : isActive ? -6 : 12,
                                         }}
                                         transition={{ duration: 0.45, ease }}
                                         className="relative flex h-full min-h-0 w-[min(84vw,30rem)] shrink-0 flex-col justify-between overflow-hidden rounded-[1.9rem] border border-white/10 bg-black/40 p-6 shadow-[0_24px_80px_rgba(0,0,0,0.35)] md:w-[32rem] md:p-7"
                                         style={{
                                             boxShadow: isActive
-                                                ? '0 0 0 1px rgba(34,211,238,0.18), 0 0 40px rgba(34,211,238,0.16), 0 24px 80px rgba(0,0,0,0.4)'
+                                                ? '0 0 0 1px rgba(34,211,238,0.22), 0 0 60px rgba(34,211,238,0.18), 0 0 120px rgba(99,102,241,0.08), 0 24px 80px rgba(0,0,0,0.4)'
                                                 : '0 24px 80px rgba(0,0,0,0.24)',
                                         }}
                                     >
                                         <div className="absolute inset-0 bg-[linear-gradient(145deg,rgba(255,255,255,0.05),transparent_34%,transparent_72%,rgba(34,211,238,0.05))]" />
-                                        <div
-                                            className="pointer-events-none absolute inset-0 transition-opacity duration-500"
-                                            style={{
+                                        <motion.div
+                                            className="pointer-events-none absolute inset-0"
+                                            animate={{
                                                 opacity: isActive ? 1 : 0,
-                                                background: 'radial-gradient(circle at 50% 50%, rgba(34,211,238,0.12) 0%, transparent 62%)',
+                                                background: isActive
+                                                    ? 'radial-gradient(circle at 50% 30%, rgba(34,211,238,0.15) 0%, rgba(99,102,241,0.06) 40%, transparent 65%)'
+                                                    : 'radial-gradient(circle at 50% 50%, transparent 0%, transparent 100%)',
                                             }}
+                                            transition={{ duration: 0.5, ease: 'easeInOut' }}
                                         />
                                         <div
                                             className="absolute inset-x-0 top-0 h-px bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.24),transparent)]"
@@ -316,14 +327,27 @@ export default function PipelineSoftware() {
                                                     </h3>
                                                 </div>
 
-                                                <div
-                                                    className="grid h-14 w-14 place-items-center rounded-[1rem] border border-white/10 bg-white/[0.04] text-2xl text-cyan-200"
+                                                <motion.div
+                                                    animate={{
+                                                        background: isActive
+                                                            ? 'rgba(34,211,238,0.12)'
+                                                            : 'rgba(255,255,255,0.03)',
+                                                        borderColor: isActive
+                                                            ? 'rgba(34,211,238,0.3)'
+                                                            : 'rgba(255,255,255,0.08)',
+                                                        boxShadow: isActive
+                                                            ? '0 0 20px rgba(34,211,238,0.2)'
+                                                            : 'none',
+                                                    }}
+                                                    transition={{ duration: 0.4 }}
+                                                    className="grid h-14 w-14 place-items-center rounded-[1rem] border"
                                                     style={{
+                                                        color: isActive ? '#22d3ee' : 'rgba(255,255,255,0.3)',
                                                         animation: isActive ? 'terminal-glow 2.4s ease-in-out infinite' : 'none',
                                                     }}
                                                 >
-                                                    {stage.icon}
-                                                </div>
+                                                    {stage.iconComponent}
+                                                </motion.div>
                                             </div>
 
                                             <div className="rounded-xl border border-white/[0.06] bg-white/[0.03] px-4 py-3 font-mono text-[11px] uppercase tracking-[0.22em] text-cyan-200/78">
@@ -359,11 +383,51 @@ export default function PipelineSoftware() {
                     <motion.div
                         initial={{ opacity: 0, y: 14 }}
                         animate={isInView ? { opacity: 1, y: 0 } : {}}
-                        transition={{ duration: reducedMotion ? 0 : 0.55, delay: 0.2, ease }}
-                        className="mt-2 flex items-center justify-between gap-4 text-[11px] uppercase tracking-[0.24em] text-white/26"
+                        transition={{ duration: effectiveReducedMotion ? 0 : 0.55, delay: 0.2, ease }}
+                        className="mt-2 flex items-center justify-between gap-4"
                     >
-                        <span>Scroll para recorrer el pipeline</span>
-                        <span>{stages[activeIndex].stage} en foco</span>
+                        <div className="flex items-center gap-3">
+                            {stages.map((stage, index) => (
+                                <motion.div
+                                    key={stage.id}
+                                    className="flex items-center gap-2"
+                                    animate={{ opacity: activeIndex === index ? 1 : 0.3 }}
+                                    transition={{ duration: 0.3 }}
+                                >
+                                    <motion.div
+                                        className="rounded-full"
+                                        animate={{
+                                            width: activeIndex === index ? '24px' : '6px',
+                                            height: '6px',
+                                            background: activeIndex === index
+                                                ? '#22d3ee'
+                                                : 'rgba(255,255,255,0.2)',
+                                            boxShadow: activeIndex === index
+                                                ? '0 0 8px rgba(34,211,238,0.6)'
+                                                : 'none',
+                                        }}
+                                        transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                                    />
+                                    <motion.span
+                                        className="font-mono text-[10px] uppercase tracking-[0.2em]"
+                                        animate={{
+                                            color: activeIndex === index
+                                                ? 'rgba(34,211,238,0.8)'
+                                                : 'rgba(255,255,255,0.2)',
+                                        }}
+                                        transition={{ duration: 0.3 }}
+                                    >
+                                        {activeIndex === index ? stage.title : ''}
+                                    </motion.span>
+                                </motion.div>
+                            ))}
+                        </div>
+
+                        <span className="text-[11px] uppercase tracking-[0.24em] text-white/26 font-mono">
+                            {activeIndex < stages.length - 1
+                                ? 'Scroll para continuar'
+                                : 'Pipeline completo'}
+                        </span>
                     </motion.div>
                 </div>
             </div>

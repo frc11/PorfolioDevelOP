@@ -78,7 +78,11 @@ function PrimeAtmosphere({ progress }: { progress: number }) {
 }
 
 function DataClusters({ progress }: { progress: number }) {
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => setMounted(true), [])
+
   const clusters = useMemo(() => {
+    if (!mounted) return []
     return Array.from({ length: 12 }).map((_, i) => ({
       id: i,
       x: Math.random() * 100,
@@ -87,9 +91,11 @@ function DataClusters({ progress }: { progress: number }) {
       type: Math.floor(Math.random() * 3),
       speed: 0.1 + Math.random() * 0.4
     }))
-  }, [])
+  }, [mounted])
 
   const contents = ["0xFA2", "{ ... }", "</>"]
+
+  if (!mounted) return null
 
   return (
     <div className="absolute inset-0 pointer-events-none z-0">
@@ -273,9 +279,11 @@ function StatementContent({ progress, shouldReduceMotion }: { progress: number, 
 export default function StatementSoftware() {
   const sectionRef = useRef<HTMLDivElement>(null)
   const [progress, setProgress] = useState(0)
+  const [mounted, setMounted] = useState(false)
   const shouldReduceMotion = useReducedMotion()
 
   useEffect(() => {
+    setMounted(true)
     const handleScroll = () => {
       const section = sectionRef.current
       if (!section) return
@@ -302,7 +310,7 @@ export default function StatementSoftware() {
         <DataClusters progress={progress} />
         <StatementContent 
           progress={progress} 
-          shouldReduceMotion={shouldReduceMotion ?? false} 
+          shouldReduceMotion={mounted ? (shouldReduceMotion ?? false) : false} 
         />
       </div>
     </section>

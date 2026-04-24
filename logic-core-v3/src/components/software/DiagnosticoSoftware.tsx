@@ -1,8 +1,14 @@
 'use client'
 
-import React, { useState, useRef, useCallback } from 'react'
+import React, { useState, useRef } from 'react'
 import { motion, AnimatePresence, useInView, useReducedMotion } from 'motion/react'
-import { CheckCircle2 } from 'lucide-react'
+import {
+  CheckCircle2,
+  ShoppingCart, Stethoscope, Settings, UtensilsCrossed,
+  Building2, Factory, BarChart2, XCircle, Search,
+  RefreshCw, Plug, Users, User, UserCheck, Landmark,
+  Monitor, MessageCircle, Package, Lock, Cpu, Copy,
+} from 'lucide-react'
 
 // ─── TYPES ───────────────────────────────────────────────────────────────────
 
@@ -19,7 +25,6 @@ type DiagnosticoId =
 interface DiagnosticoOption {
   id: string
   label: string
-  icon: string
   description?: string
 }
 
@@ -41,8 +46,35 @@ interface DiagnosticoResult {
   features: string[]
   color: string
   colorRgb: string
-  icon: string
+  iconComponent: React.ReactNode
   ctaText: string
+}
+
+// ─── ICON MAPS ────────────────────────────────────────────────────────────────
+
+const RUBRO_ICONS: Record<string, React.ReactNode> = {
+  comercio:     <ShoppingCart size={20} strokeWidth={1.5} />,
+  salud:        <Stethoscope size={20} strokeWidth={1.5} />,
+  servicios:    <Settings size={20} strokeWidth={1.5} />,
+  gastronomia:  <UtensilsCrossed size={20} strokeWidth={1.5} />,
+  inmobiliaria: <Building2 size={20} strokeWidth={1.5} />,
+  industria:    <Factory size={20} strokeWidth={1.5} />,
+}
+
+const PROBLEMA_ICONS: Record<string, React.ReactNode> = {
+  excel:    <BarChart2 size={20} strokeWidth={1.5} />,
+  errores:  <XCircle size={20} strokeWidth={1.5} />,
+  info:     <Search size={20} strokeWidth={1.5} />,
+  procesos: <RefreshCw size={20} strokeWidth={1.5} />,
+  sistemas: <Plug size={20} strokeWidth={1.5} />,
+  clientes: <Users size={20} strokeWidth={1.5} />,
+}
+
+const EQUIPO_ICONS: Record<string, React.ReactNode> = {
+  solo:     <User size={20} strokeWidth={1.5} />,
+  pequeno:  <UserCheck size={20} strokeWidth={1.5} />,
+  mediano:  <Building2 size={20} strokeWidth={1.5} />,
+  grande:   <Landmark size={20} strokeWidth={1.5} />,
 }
 
 // ─── DATA ────────────────────────────────────────────────────────────────────
@@ -54,12 +86,12 @@ const steps: DiagnosticoStep[] = [
     subquestion: 'Elegí el que más se parezca a tu negocio.',
     multiSelect: false,
     options: [
-      { id: 'comercio', icon: '🏪', label: 'Comercio / Distribuidora', description: 'Venta de productos, stock, pedidos' },
-      { id: 'salud', icon: '🏥', label: 'Salud / Clínica', description: 'Turnos, historias clínicas, facturación médica' },
-      { id: 'servicios', icon: '⚙️', label: 'Servicios / Consultora', description: 'Proyectos, facturación, gestión de clientes' },
-      { id: 'gastronomia', icon: '🍽', label: 'Gastronomía', description: 'Pedidos, stock, delivery, cajas' },
-      { id: 'inmobiliaria', icon: '🏠', label: 'Inmobiliaria / Construcción', description: 'Propiedades, contratos, cobranzas' },
-      { id: 'industria', icon: '🏭', label: 'Industria / Producción', description: 'Producción, insumos, control de calidad' },
+      { id: 'comercio', label: 'Comercio / Distribuidora', description: 'Venta de productos, stock, pedidos' },
+      { id: 'salud', label: 'Salud / Clínica', description: 'Turnos, historias clínicas, facturación médica' },
+      { id: 'servicios', label: 'Servicios / Consultora', description: 'Proyectos, facturación, gestión de clientes' },
+      { id: 'gastronomia', label: 'Gastronomía', description: 'Pedidos, stock, delivery, cajas' },
+      { id: 'inmobiliaria', label: 'Inmobiliaria / Construcción', description: 'Propiedades, contratos, cobranzas' },
+      { id: 'industria', label: 'Industria / Producción', description: 'Producción, insumos, control de calidad' },
     ],
   },
   {
@@ -68,12 +100,12 @@ const steps: DiagnosticoStep[] = [
     subquestion: 'Podés elegir más de uno. Sé honesto — nadie te juzga.',
     multiSelect: true,
     options: [
-      { id: 'excel', icon: '📊', label: 'Vivimos en el Excel' },
-      { id: 'errores', icon: '❌', label: 'Errores humanos constantes' },
-      { id: 'info', icon: '🔍', label: 'No tengo info en tiempo real' },
-      { id: 'procesos', icon: '🔄', label: 'Procesos manuales repetitivos' },
-      { id: 'sistemas', icon: '🔌', label: 'Sistemas que no se hablan' },
-      { id: 'clientes', icon: '👥', label: 'Pierdo clientes por falta de seguimiento' },
+      { id: 'excel', label: 'Vivimos en el Excel' },
+      { id: 'errores', label: 'Errores humanos constantes' },
+      { id: 'info', label: 'No tengo info en tiempo real' },
+      { id: 'procesos', label: 'Procesos manuales repetitivos' },
+      { id: 'sistemas', label: 'Sistemas que no se hablan' },
+      { id: 'clientes', label: 'Pierdo clientes por falta de seguimiento' },
     ],
   },
   {
@@ -82,10 +114,10 @@ const steps: DiagnosticoStep[] = [
     subquestion: 'Esto nos ayuda a dimensionar la solución correcta.',
     multiSelect: false,
     options: [
-      { id: 'solo', icon: '👤', label: 'Solo yo', description: 'Emprendedor o profesional independiente' },
-      { id: 'pequeno', icon: '👥', label: '2 a 10 personas', description: 'Equipo pequeño, mucho sombrero puesto' },
-      { id: 'mediano', icon: '🏢', label: '10 a 50 personas', description: 'Empresa en crecimiento, procesos a ordenar' },
-      { id: 'grande', icon: '🏛', label: 'Más de 50 personas', description: 'Organización que necesita sistemas robustos' },
+      { id: 'solo', label: 'Solo yo', description: 'Emprendedor o profesional independiente' },
+      { id: 'pequeno', label: '2 a 10 personas', description: 'Equipo pequeño, mucho sombrero puesto' },
+      { id: 'mediano', label: '10 a 50 personas', description: 'Empresa en crecimiento, procesos a ordenar' },
+      { id: 'grande', label: 'Más de 50 personas', description: 'Organización que necesita sistemas robustos' },
     ],
   },
 ]
@@ -107,7 +139,7 @@ const resultados: Record<DiagnosticoId, DiagnosticoResult> = {
     ],
     color: '#6366f1',
     colorRgb: '99,102,241',
-    icon: '🖥',
+    iconComponent: <Monitor size={32} strokeWidth={1.5} />,
     ctaText: 'Quiero mi sistema de gestión',
   },
   'crm-ventas': {
@@ -126,7 +158,7 @@ const resultados: Record<DiagnosticoId, DiagnosticoResult> = {
     ],
     color: '#7b2fff',
     colorRgb: '123,47,255',
-    icon: '🎯',
+    iconComponent: <Users size={32} strokeWidth={1.5} />,
     ctaText: 'Quiero mi CRM',
   },
   'automatizacion-procesos': {
@@ -145,7 +177,7 @@ const resultados: Record<DiagnosticoId, DiagnosticoResult> = {
     ],
     color: '#6366f1',
     colorRgb: '99,102,241',
-    icon: '⚡',
+    iconComponent: <RefreshCw size={32} strokeWidth={1.5} />,
     ctaText: 'Automatizar mis procesos',
   },
   'sistema-stock': {
@@ -164,7 +196,7 @@ const resultados: Record<DiagnosticoId, DiagnosticoResult> = {
     ],
     color: '#7b2fff',
     colorRgb: '123,47,255',
-    icon: '📦',
+    iconComponent: <Package size={32} strokeWidth={1.5} />,
     ctaText: 'Quiero control de mi stock',
   },
   'portal-clientes': {
@@ -183,7 +215,7 @@ const resultados: Record<DiagnosticoId, DiagnosticoResult> = {
     ],
     color: '#6366f1',
     colorRgb: '99,102,241',
-    icon: '🔐',
+    iconComponent: <Lock size={32} strokeWidth={1.5} />,
     ctaText: 'Quiero mi portal',
   },
   'erp-personalizado': {
@@ -202,7 +234,7 @@ const resultados: Record<DiagnosticoId, DiagnosticoResult> = {
     ],
     color: '#7b2fff',
     colorRgb: '123,47,255',
-    icon: '🏛',
+    iconComponent: <Cpu size={32} strokeWidth={1.5} />,
     ctaText: 'Quiero mi ERP',
   },
 }
@@ -242,16 +274,16 @@ function AtmosphereDiag() {
   return (
     <>
       {/* Glow principal superior */}
-      <div style={{ position:'absolute', top:'-80px', left:'50%', transform:'translateX(-50%)', width:'700px', height:'500px', background:'radial-gradient(ellipse, rgba(99,102,241,0.09) 0%, rgba(123,47,255,0.05) 40%, transparent 65%)', filter:'blur(100px)', pointerEvents:'none', zIndex:0, ariaHidden:'true' } as any}/>
+      <div style={{ position:'absolute', top:'-80px', left:'50%', transform:'translateX(-50%)', width:'700px', height:'500px', background:'radial-gradient(ellipse, rgba(99,102,241,0.09) 0%, rgba(123,47,255,0.05) 40%, transparent 65%)', filter:'blur(100px)', pointerEvents:'none', zIndex:0, ariaHidden:'true' } as React.CSSProperties}/>
 
       {/* Glow izquierda */}
-      <div style={{ position:'absolute', top:'20%', left:'-10%', width:'400px', height:'500px', background:'radial-gradient(ellipse, rgba(99,102,241,0.05) 0%, transparent 60%)', filter:'blur(80px)', pointerEvents:'none', zIndex:0 } as any}/>
+      <div style={{ position:'absolute', top:'20%', left:'-10%', width:'400px', height:'500px', background:'radial-gradient(ellipse, rgba(99,102,241,0.05) 0%, transparent 60%)', filter:'blur(80px)', pointerEvents:'none', zIndex:0 } as React.CSSProperties}/>
 
       {/* Glow derecha — violeta */}
-      <div style={{ position:'absolute', top:'30%', right:'-10%', width:'400px', height:'400px', background:'radial-gradient(ellipse, rgba(123,47,255,0.06) 0%, transparent 60%)', filter:'blur(80px)', pointerEvents:'none', zIndex:0 } as any}/>
+      <div style={{ position:'absolute', top:'30%', right:'-10%', width:'400px', height:'400px', background:'radial-gradient(ellipse, rgba(123,47,255,0.06) 0%, transparent 60%)', filter:'blur(80px)', pointerEvents:'none', zIndex:0 } as React.CSSProperties}/>
 
       {/* Grid de puntos */}
-      <div style={{ position:'absolute', inset:0, backgroundImage:`radial-gradient(circle, rgba(99,102,241,0.08) 1px, transparent 1px)`, backgroundSize:'52px 52px', pointerEvents:'none', zIndex:0, maskImage:'radial-gradient(ellipse at 50% 40%, black 0%, transparent 70%)', WebkitMaskImage:'radial-gradient(ellipse at 50% 40%, black 0%, transparent 70%)' } as any}/>
+      <div style={{ position:'absolute', inset:0, backgroundImage:`radial-gradient(circle, rgba(99,102,241,0.08) 1px, transparent 1px)`, backgroundSize:'52px 52px', pointerEvents:'none', zIndex:0, maskImage:'radial-gradient(ellipse at 50% 40%, black 0%, transparent 70%)', WebkitMaskImage:'radial-gradient(ellipse at 50% 40%, black 0%, transparent 70%)' } as React.CSSProperties}/>
 
       {/* Líneas horizontales sutiles */}
       {[20,50,80].map((top,i) => (
@@ -337,7 +369,7 @@ function StepContent({
 }: {
   step: DiagnosticoStep
   selections: { rubro: string, problemas: string[], equipo: string }
-  setSelections: (s: any) => void
+  setSelections: (s: { rubro: string, problemas: string[], equipo: string }) => void
 }) {
   return (
     <div>
@@ -347,7 +379,7 @@ function StepContent({
       <div className={`grid ${step.options.length === 4 ? 'grid-cols-2' : 'grid-cols-2 md:grid-cols-3'} gap-[10px]`}>
         {step.options.map(option => {
           const isSelected = step.id === 'problema' ? selections.problemas.includes(option.id) : step.id === 'rubro' ? selections.rubro === option.id : selections.equipo === option.id
-          
+
           const toggleSelection = () => {
             if (step.id === 'problema') {
               setSelections({ ...selections, problemas: isSelected ? selections.problemas.filter(p => p !== option.id) : [...selections.problemas, option.id] })
@@ -359,20 +391,40 @@ function StepContent({
           }
 
           return (
-            <motion.button 
-              key={option.id} 
+            <motion.button
+              key={option.id}
               onClick={toggleSelection}
               onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleSelection(); } }}
               tabIndex={0}
-              whileHover={{ scale: 1.02, y: -2 }} 
-              whileTap={{ scale: 0.98 }} 
-              transition={{ type: 'spring', stiffness: 400, damping: 20 }} 
-              style={{ padding: 'clamp(12px, 1.5vw, 18px)', borderRadius: '14px', border: isSelected ? '1px solid rgba(99,102,241,0.6)' : '1px solid rgba(255,255,255,0.08)', background: isSelected ? 'rgba(99,102,241,0.12)' : 'rgba(255,255,255,0.03)', cursor: 'none', textAlign: 'left', transition: 'background 200ms, border 200ms', boxShadow: isSelected ? '0 0 20px rgba(99,102,241,0.12)' : 'none', position: 'relative', overflow: 'hidden' }}
+              whileHover={{ scale: 1.02, y: -2 }}
+              whileTap={{ scale: 0.98 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+              style={{ padding: 'clamp(12px, 1.5vw, 18px)', borderRadius: '14px', border: isSelected ? '1px solid rgba(99,102,241,0.6)' : '1px solid rgba(255,255,255,0.08)', background: isSelected ? 'rgba(99,102,241,0.12)' : 'rgba(255,255,255,0.03)', cursor: 'pointer', textAlign: 'left', transition: 'background 200ms, border 200ms', boxShadow: isSelected ? '0 0 20px rgba(99,102,241,0.12)' : 'none', position: 'relative', overflow: 'hidden' }}
             >
               {isSelected && (
                 <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} style={{ position: 'absolute', top: '8px', right: '8px', width: '18px', height: '18px', borderRadius: '50%', background: '#6366f1', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', color: 'white', fontWeight: 700 }}><CheckCircle2 size={14} strokeWidth={2} className="text-white" /></motion.div>
               )}
-              <span style={{ fontSize: '22px', display: 'block', marginBottom: '8px' }}>{option.icon}</span>
+              <div
+                style={{
+                  width: '40px',
+                  height: '40px',
+                  borderRadius: '10px',
+                  background: isSelected ? 'rgba(99,102,241,0.15)' : 'rgba(255,255,255,0.04)',
+                  border: isSelected ? '1px solid rgba(99,102,241,0.3)' : '1px solid rgba(255,255,255,0.08)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginBottom: '10px',
+                  color: isSelected ? '#818cf8' : 'rgba(255,255,255,0.4)',
+                  transition: 'all 200ms',
+                }}
+              >
+                {step.id === 'rubro'
+                  ? RUBRO_ICONS[option.id]
+                  : step.id === 'problema'
+                  ? PROBLEMA_ICONS[option.id]
+                  : EQUIPO_ICONS[option.id]}
+              </div>
               <span style={{ fontSize: '13px', fontWeight: 700, color: isSelected ? '#6366f1' : 'white', display: 'block', marginBottom: option.description ? '4px' : '0', transition: 'color 200ms' }}>{option.label}</span>
               {option.description && <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.3)', lineHeight: 1.4 }}>{option.description}</span>}
             </motion.button>
@@ -387,17 +439,17 @@ function StepNav({ canAdvance, isLast, onNext, onBack }: { canAdvance: boolean, 
   return (
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'clamp(24px, 3vh, 36px)' }}>
       {onBack ? (
-        <motion.button onClick={onBack} whileHover={{ x: -3 }} style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.35)', fontSize: '14px', cursor: 'none', padding: '10px 0', display: 'flex', alignItems: 'center', gap: '6px' }}>← Atrás</motion.button>
+        <motion.button onClick={onBack} whileHover={{ x: -3 }} style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.35)', fontSize: '14px', cursor: 'pointer', padding: '10px 0', display: 'flex', alignItems: 'center', gap: '6px' }}>← Atrás</motion.button>
       ) : <div />}
-      <motion.button 
-        onClick={onNext} 
+      <motion.button
+        onClick={onNext}
         onKeyDown={(e) => { if (e.key === 'Enter') onNext(); }}
         tabIndex={canAdvance ? 0 : -1}
-        disabled={!canAdvance} 
-        whileHover={canAdvance ? { scale: 1.04 } : {}} 
-        whileTap={canAdvance ? { scale: 0.97 } : {}} 
-        transition={{ type: 'spring', stiffness: 400, damping: 15 }} 
-        style={{ background: canAdvance ? 'linear-gradient(135deg, #6366f1, #4f46e5)' : 'rgba(255,255,255,0.06)', color: canAdvance ? 'white' : 'rgba(255,255,255,0.2)', border: 'none', borderRadius: '100px', padding: '13px 28px', fontSize: '14px', fontWeight: 700, cursor: 'none', boxShadow: canAdvance ? '0 0 24px rgba(99,102,241,0.3)' : 'none', transition: 'background 200ms, box-shadow 200ms', letterSpacing: '0.04em' }}
+        disabled={!canAdvance}
+        whileHover={canAdvance ? { scale: 1.04 } : {}}
+        whileTap={canAdvance ? { scale: 0.97 } : {}}
+        transition={{ type: 'spring', stiffness: 400, damping: 15 }}
+        style={{ background: canAdvance ? 'linear-gradient(135deg, #6366f1, #4f46e5)' : 'rgba(255,255,255,0.06)', color: canAdvance ? 'white' : 'rgba(255,255,255,0.2)', border: 'none', borderRadius: '100px', padding: '13px 28px', fontSize: '14px', fontWeight: 700, cursor: 'pointer', boxShadow: canAdvance ? '0 0 24px rgba(99,102,241,0.3)' : 'none', transition: 'background 200ms, box-shadow 200ms', letterSpacing: '0.04em' }}
       >
         {isLast ? 'Ver mi diagnóstico →' : 'Siguiente →'}
       </motion.button>
@@ -416,32 +468,39 @@ function StepWizard({
   currentStep: number
   setCurrentStep: (n: number) => void
   selections: { rubro: string, problemas: string[], equipo: string }
-  setSelections: (s: any) => void
+  setSelections: (s: { rubro: string, problemas: string[], equipo: string }) => void
   onComplete: (r: string, p: string[], e: string) => void
   isInView: boolean
 }) {
+  const [mounted, setMounted] = useState(false)
   const step = steps[currentStep]
   const canAdvance = step.id === 'rubro' ? selections.rubro !== '' : step.id === 'problema' ? selections.problemas.length > 0 : selections.equipo !== ''
-  const shouldReduceMotion = useReducedMotion()
+  const isReduced = useReducedMotion()
+
+  React.useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  const shouldReduceMotion = mounted ? (isReduced ?? false) : false
 
   return (
-    <motion.div 
-      initial={{ opacity: 0, y: 28 }} 
-      animate={isInView ? { 
-        opacity: 1, 
+    <motion.div
+      initial={{ opacity: 0, y: 28 }}
+      animate={isInView ? {
+        opacity: 1,
         y: 0,
         boxShadow: shouldReduceMotion ? 'none' : `
           0 0 0 1px rgba(99,102,241,0.2),
           0 0 40px rgba(99,102,241,0.06),
           inset 0 1px 0 rgba(255,255,255,0.06)
-        ` 
-      } : {}} 
-      transition={{ 
-        duration: 0.7, 
-        delay: 0.35, 
+        `
+      } : {}}
+      transition={{
+        duration: 0.7,
+        delay: 0.35,
         ease: [0.16, 1, 0.3, 1],
         boxShadow: { duration: 1.0, delay: 0.5 }
-      }} 
+      }}
       style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '24px', overflow: 'hidden' }}
     >
       <ProgressBar current={currentStep} total={steps.length} />
@@ -467,8 +526,20 @@ function ResultHeader({ resultado }: { resultado: DiagnosticoResult }) {
 
       <div style={{ display:'grid', gridTemplateColumns:'minmax(0,1fr) auto', gap:'20px', alignItems:'start', position:'relative', zIndex:10 }}>
         <div style={{ display:'flex', alignItems:'flex-start', gap:'20px', flexWrap:'nowrap', minWidth:0 }}>
-          <div style={{ width:'72px', height:'72px', borderRadius:'20px', background:`rgba(${resultado.colorRgb},0.15)`, border:`1px solid rgba(${resultado.colorRgb},0.3)`, display:'flex', alignItems:'center', justifyContent:'center', fontSize:'36px', flexShrink:0, boxShadow:`0 0 30px rgba(${resultado.colorRgb},0.2)` }}>
-            {resultado.icon}
+          <div style={{
+            width: '72px',
+            height: '72px',
+            borderRadius: '20px',
+            background: `rgba(${resultado.colorRgb},0.15)`,
+            border: `1px solid rgba(${resultado.colorRgb},0.3)`,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: `rgb(${resultado.colorRgb})`,
+            flexShrink: 0,
+            boxShadow: `0 0 30px rgba(${resultado.colorRgb},0.2)`,
+          }}>
+            {resultado.iconComponent}
           </div>
 
           <div style={{ flex:1, minWidth:0 }}>
@@ -543,16 +614,16 @@ function ResultCTA({ resultado, onReset }: { resultado: DiagnosticoResult, onRes
       </div>
 
       <div style={{ display:'flex', gap:'10px', flexWrap:'wrap', alignItems:'center' }}>
-        <motion.button onClick={copyResult} whileHover={{ scale:1.02 }} whileTap={{ scale:0.97 }} style={{ background:'transparent', border:'1px solid rgba(255,255,255,0.08)', color:'rgba(255,255,255,0.3)', borderRadius:'100px', padding:'8px 14px', fontSize:'12px', cursor: 'none', display:'flex', alignItems:'center', gap:'6px', transition:'all 200ms' }}>
-          {copied ? (<><CheckCircle2 size={12} strokeWidth={2} /> Copiado</>) : '⎘ Compartir'}
+        <motion.button onClick={copyResult} whileHover={{ scale:1.02 }} whileTap={{ scale:0.97 }} style={{ background:'transparent', border:'1px solid rgba(255,255,255,0.08)', color:'rgba(255,255,255,0.3)', borderRadius:'100px', padding:'8px 14px', fontSize:'12px', cursor: 'pointer', display:'flex', alignItems:'center', gap:'6px', transition:'all 200ms' }}>
+          {copied ? (<><CheckCircle2 size={12} strokeWidth={2} /> Copiado</>) : (<><Copy size={12} strokeWidth={1.5} /> Compartir</>)}
         </motion.button>
 
-        <motion.button onClick={onReset} whileHover={{ scale:1.02 }} whileTap={{ scale:0.97 }} style={{ background:'transparent', border:'1px solid rgba(255,255,255,0.12)', color:'rgba(255,255,255,0.45)', borderRadius:'100px', padding:'12px 20px', fontSize:'13px', fontWeight:600, cursor: 'none', transition:'all 200ms' }}>
+        <motion.button onClick={onReset} whileHover={{ scale:1.02 }} whileTap={{ scale:0.97 }} style={{ background:'transparent', border:'1px solid rgba(255,255,255,0.12)', color:'rgba(255,255,255,0.45)', borderRadius:'100px', padding:'12px 20px', fontSize:'13px', fontWeight:600, cursor: 'pointer', transition:'all 200ms' }}>
           ← Repetir diagnóstico
         </motion.button>
 
-        <motion.a href={whatsappUrl} target="_blank" rel="noopener noreferrer" whileHover={{ scale:1.04 }} whileTap={{ scale:0.97 }} transition={{ type:'spring', stiffness:400, damping:15 }} style={{ display:'inline-flex', alignItems:'center', gap:'8px', background:`linear-gradient(135deg, rgb(${resultado.colorRgb}), rgba(${resultado.colorRgb},0.7))`, color:'white', fontWeight:800, fontSize:'14px', padding:'13px 28px', borderRadius:'100px', textDecoration:'none', boxShadow:`0 0 28px rgba(${resultado.colorRgb},0.35)`, letterSpacing:'0.03em' }}>
-          💬 {resultado.ctaText} →
+        <motion.a href={whatsappUrl} target="_blank" rel="noopener noreferrer" whileHover={{ scale:1.04 }} whileTap={{ scale:0.97 }} transition={{ type:'spring', stiffness:400, damping:15 }} style={{ display:'inline-flex', alignItems:'center', gap:'8px', background:`linear-gradient(135deg, rgb(${resultado.colorRgb}), rgba(${resultado.colorRgb},0.7))`, color:'white', fontWeight:800, fontSize:'14px', padding:'13px 28px', borderRadius:'100px', textDecoration:'none', boxShadow:`0 0 28px rgba(${resultado.colorRgb},0.35)`, letterSpacing:'0.03em', cursor:'pointer' }}>
+          <MessageCircle size={16} strokeWidth={1.5} /> {resultado.ctaText} →
         </motion.a>
       </div>
     </div>
@@ -634,9 +705,10 @@ function PostDiagnosticoCTA({ resultado }: { resultado: DiagnosticoResult }) {
           textDecoration: 'none',
           boxShadow: `0 0 22px rgba(${resultado.colorRgb},0.32)`,
           letterSpacing: '0.03em',
+          cursor: 'pointer',
         }}
       >
-        💬 Ir a WhatsApp ahora →
+        <MessageCircle size={15} strokeWidth={1.5} /> Ir a WhatsApp →
       </motion.a>
     </motion.div>
   )
@@ -661,28 +733,28 @@ export default function DiagnosticoSoftware() {
         <SocialProof isInView={isInView} />
 
         {!showResult ? (
-          <StepWizard 
-            currentStep={currentStep} 
-            setCurrentStep={setCurrentStep} 
-            selections={selections} 
-            setSelections={setSelections} 
-            onComplete={(rubro, problemas, equipo) => { 
-              const diagId = calcularDiagnostico(rubro, problemas, equipo); 
-              setResultado(resultados[diagId]); 
-              setShowResult(true) 
+          <StepWizard
+            currentStep={currentStep}
+            setCurrentStep={setCurrentStep}
+            selections={selections}
+            setSelections={setSelections}
+            onComplete={(rubro, problemas, equipo) => {
+              const diagId = calcularDiagnostico(rubro, problemas, equipo);
+              setResultado(resultados[diagId]);
+              setShowResult(true)
             }}
             isInView={isInView}
           />
         ) : (
           <>
-            <ResultPanel 
-              resultado={resultado!} 
-              onReset={() => { 
-                setShowResult(false); 
-                setCurrentStep(0); 
-                setSelections({ rubro: '', problemas: [], equipo: '' }); 
-                setResultado(null) 
-              }} 
+            <ResultPanel
+              resultado={resultado!}
+              onReset={() => {
+                setShowResult(false);
+                setCurrentStep(0);
+                setSelections({ rubro: '', problemas: [], equipo: '' });
+                setResultado(null)
+              }}
             />
             <PostDiagnosticoCTA resultado={resultado!} />
           </>
@@ -691,4 +763,3 @@ export default function DiagnosticoSoftware() {
     </section>
   )
 }
-

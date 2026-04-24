@@ -1,14 +1,8 @@
 'use client'
 
 import React, { useRef, useState, useEffect } from 'react'
-import { motion, useInView, useReducedMotion } from 'motion/react'
-import { Users } from 'lucide-react'
-
-/**
- * DASHBOARD MOCKUP SOFTWARE: Visualización de sistema de gestión.
- * 4 widgets principales + mini gráfico de barras.
- * Paleta indigo/violet coherente con software-development.
- */
+import { motion, useInView, useReducedMotion, AnimatePresence } from 'motion/react'
+import { Users, DollarSign, FileText, Activity } from 'lucide-react'
 
 const widgets = [
   {
@@ -25,7 +19,7 @@ const widgets = [
     positive: true,
     color: '#6366f1',
     colorRgb: '99,102,241',
-    icon: '💰',
+    iconComponent: <DollarSign size={14} strokeWidth={1.5} />,
   },
   {
     label: 'Clientes activos',
@@ -38,7 +32,7 @@ const widgets = [
     positive: true,
     color: '#7b2fff',
     colorRgb: '123,47,255',
-    icon: '👥',
+    iconComponent: <Users size={14} strokeWidth={1.5} />,
   },
   {
     label: 'Facturación neta',
@@ -51,7 +45,7 @@ const widgets = [
     positive: true,
     color: '#818cf8',
     colorRgb: '129,140,248',
-    icon: '📈',
+    iconComponent: <FileText size={14} strokeWidth={1.5} />,
   },
   {
     label: 'Uptime del sistema',
@@ -64,18 +58,22 @@ const widgets = [
     positive: true,
     color: '#34d399',
     colorRgb: '52,211,153',
-    icon: '⚡',
+    iconComponent: <Activity size={14} strokeWidth={1.5} />,
   },
 ]
 
 const barData = [62, 78, 55, 91, 84, 69, 95, 73, 88, 100, 76, 83]
 const barLabels = ['E', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D']
 
-const activityItems = [
+const allActivityItems = [
   { text: 'Pedido #4821 confirmado', time: 'hace 2 min', dot: '#6366f1' },
   { text: 'Stock actualizado — Producto A', time: 'hace 8 min', dot: '#7b2fff' },
   { text: 'Factura emitida — Cliente Torres', time: 'hace 15 min', dot: '#818cf8' },
   { text: 'Nuevo cliente registrado', time: 'hace 23 min', dot: '#34d399' },
+  { text: 'Cotización enviada — Empresa Norte', time: 'hace 1 min', dot: '#6366f1' },
+  { text: 'Turno confirmado — Paciente García', time: 'hace 4 min', dot: '#7b2fff' },
+  { text: 'Reporte semanal generado', time: 'hace 11 min', dot: '#818cf8' },
+  { text: 'Alerta stock — Producto B', time: 'hace 19 min', dot: '#f59e0b' },
 ]
 
 function CountUp({ to, formatDisplay, delay = 0 }: { to: number; formatDisplay: (v: number) => string; delay?: number }) {
@@ -110,8 +108,44 @@ function CountUp({ to, formatDisplay, delay = 0 }: { to: number; formatDisplay: 
 
 export default function DashboardMockupSoftware() {
   const sectionRef = useRef<HTMLElement>(null)
+  const [mounted, setMounted] = useState(false)
   const isInView = useInView(sectionRef, { once: true, amount: 0.2 })
   const reducedMotion = useReducedMotion()
+
+  const [feedOffset, setFeedOffset] = useState(0)
+  const [syncProgress, setSyncProgress] = useState(0)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  const effectiveReducedMotion = mounted ? (reducedMotion ?? false) : false
+
+  useEffect(() => {
+    if (!isInView) return
+    const id = setInterval(() => {
+      setFeedOffset(prev => (prev + 1) % allActivityItems.length)
+    }, 2800)
+    return () => clearInterval(id)
+  }, [isInView])
+
+  useEffect(() => {
+    if (!isInView) return
+    let rafId: number
+    const duration = 3000
+    const start = performance.now()
+    const tick = (now: number) => {
+      const elapsed = (now - start) % duration
+      setSyncProgress(Math.round((elapsed / duration) * 100))
+      rafId = requestAnimationFrame(tick)
+    }
+    rafId = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(rafId)
+  }, [isInView])
+
+  const visibleItems = Array.from({ length: 4 }, (_, i) =>
+    allActivityItems[(feedOffset + i) % allActivityItems.length]
+  )
 
   return (
     <section
@@ -131,7 +165,7 @@ export default function DashboardMockupSoftware() {
       <div className="relative max-w-6xl mx-auto z-10">
         {/* Header */}
         <motion.div
-          initial={reducedMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: -16 }}
+          initial={effectiveReducedMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: -16 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6 }}
           className="text-center mb-12"
@@ -167,8 +201,16 @@ export default function DashboardMockupSoftware() {
 
         {/* Dashboard Mockup */}
         <motion.div
-          initial={reducedMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 32 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          initial={effectiveReducedMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 32 }}
+          animate={isInView ? {
+            opacity: 1,
+            y: 0,
+            boxShadow: [
+              '0 0 0 1px rgba(99,102,241,0.05), 0 32px 80px rgba(0,0,0,0.5), 0 0 60px rgba(99,102,241,0.06)',
+              '0 0 0 1px rgba(99,102,241,0.08), 0 32px 80px rgba(0,0,0,0.5), 0 0 80px rgba(99,102,241,0.10)',
+              '0 0 0 1px rgba(99,102,241,0.05), 0 32px 80px rgba(0,0,0,0.5), 0 0 60px rgba(99,102,241,0.06)',
+            ],
+          } : {}}
           whileHover={{
             y: -2,
             boxShadow:
@@ -179,13 +221,16 @@ export default function DashboardMockupSoftware() {
             delay: 0.2,
             ease: [0.16, 1, 0.3, 1],
             y: { duration: 0.08, ease: 'linear' },
-            boxShadow: { duration: 0.08, ease: 'linear' },
+            boxShadow: {
+              duration: 4,
+              repeat: Infinity,
+              ease: 'easeInOut',
+            },
           }}
           className="relative rounded-2xl overflow-hidden"
           style={{
             background: 'rgba(15,15,30,0.95)',
             border: '1px solid rgba(99,102,241,0.2)',
-            boxShadow: '0 0 0 1px rgba(99,102,241,0.05), 0 32px 80px rgba(0,0,0,0.5), 0 0 60px rgba(99,102,241,0.06)',
           }}
         >
           {/* Top shine */}
@@ -202,7 +247,7 @@ export default function DashboardMockupSoftware() {
             style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', background: 'rgba(255,255,255,0.015)' }}
           >
             <div className="flex gap-1.5">
-              {['#ef4444', '#f59e0b', '#22c55e'].map((c) => (
+              {(['#ef4444', '#f59e0b', '#22c55e'] as const).map((c) => (
                 <div key={c} className="w-2.5 h-2.5 rounded-full" style={{ background: c, opacity: 0.7 }} />
               ))}
             </div>
@@ -216,6 +261,23 @@ export default function DashboardMockupSoftware() {
             <div className="flex items-center gap-1.5">
               <div className="w-1.5 h-1.5 rounded-full bg-green-400" style={{ boxShadow: '0 0 6px rgba(34,197,94,0.8)' }} />
               <span className="text-[10px] text-white/25 font-mono">ACTIVO</span>
+              <div className="flex items-center gap-1.5 ml-3">
+                <div
+                  className="relative h-[3px] rounded-full overflow-hidden"
+                  style={{ width: '48px', background: 'rgba(255,255,255,0.06)' }}
+                >
+                  <motion.div
+                    className="absolute inset-y-0 left-0 rounded-full"
+                    style={{
+                      width: `${syncProgress}%`,
+                      background: 'linear-gradient(90deg, #6366f1, #7b2fff)',
+                    }}
+                  />
+                </div>
+                <span className="text-[9px] font-mono text-white/20">
+                  {syncProgress}%
+                </span>
+              </div>
             </div>
           </div>
 
@@ -252,7 +314,7 @@ export default function DashboardMockupSoftware() {
               {widgets.map((w, idx) => (
                 <motion.div
                   key={w.label}
-                  initial={reducedMotion ? { opacity: 1 } : { opacity: 0, scale: 0.95 }}
+                  initial={effectiveReducedMotion ? { opacity: 1 } : { opacity: 0, scale: 0.95 }}
                   animate={isInView ? { opacity: 1, scale: 1 } : {}}
                   whileHover={{
                     y: -2,
@@ -281,7 +343,16 @@ export default function DashboardMockupSoftware() {
                     style={{ background: `linear-gradient(90deg, transparent, rgba(${w.colorRgb},0.5), transparent)` }}
                   />
                   <div className="flex items-start justify-between mb-2">
-                    <span className="text-lg">{w.icon}</span>
+                    <div
+                      className="flex items-center justify-center w-7 h-7 rounded-lg"
+                      style={{
+                        background: `rgba(${w.colorRgb},0.12)`,
+                        border: `1px solid rgba(${w.colorRgb},0.2)`,
+                        color: `rgb(${w.colorRgb})`,
+                      }}
+                    >
+                      {w.iconComponent}
+                    </div>
                     <span
                       className="text-[9px] font-mono px-1.5 py-0.5 rounded-full"
                       style={{ color: w.positive ? '#34d399' : '#ef4444', background: w.positive ? 'rgba(52,211,153,0.1)' : 'rgba(239,68,68,0.1)' }}
@@ -301,7 +372,7 @@ export default function DashboardMockupSoftware() {
             <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-4">
               {/* Bar chart */}
               <motion.div
-                initial={reducedMotion ? { opacity: 1 } : { opacity: 0, y: 12 }}
+                initial={effectiveReducedMotion ? { opacity: 1 } : { opacity: 0, y: 12 }}
                 animate={isInView ? { opacity: 1, y: 0 } : {}}
                 whileHover={{
                   y: -2,
@@ -329,7 +400,7 @@ export default function DashboardMockupSoftware() {
                     <motion.div
                       key={i}
                       className="flex-1 rounded-t-sm relative group"
-                      initial={reducedMotion ? {} : { height: 0 }}
+                      initial={effectiveReducedMotion ? {} : { height: 0 }}
                       animate={isInView ? { height: `${pct}%` } : { height: 0 }}
                       transition={{ duration: 0.6, delay: 0.6 + i * 0.04, ease: [0.16, 1, 0.3, 1] }}
                       whileHover={{
@@ -356,7 +427,7 @@ export default function DashboardMockupSoftware() {
 
               {/* Activity feed */}
               <motion.div
-                initial={reducedMotion ? { opacity: 1 } : { opacity: 0, y: 12 }}
+                initial={effectiveReducedMotion ? { opacity: 1 } : { opacity: 0, y: 12 }}
                 animate={isInView ? { opacity: 1, y: 0 } : {}}
                 whileHover={{
                   y: -2,
@@ -381,36 +452,39 @@ export default function DashboardMockupSoftware() {
                   </div>
                 </div>
                 <div className="flex flex-col gap-3">
-                  {activityItems.map((item, i) => (
-                    <motion.div
-                      key={i}
-                      initial={reducedMotion ? { opacity: 1 } : { opacity: 0, x: -8 }}
-                      animate={isInView ? { opacity: 1, x: 0 } : {}}
-                      transition={{ duration: 0.4, delay: 0.7 + i * 0.07 }}
-                      whileHover={{
-                        x: 2,
-                        background: 'rgba(123,47,255,0.08)',
-                        borderColor: 'rgba(123,47,255,0.26)',
-                      }}
-                      className="flex items-start gap-3"
-                      style={{
-                        border: '1px solid transparent',
-                        borderRadius: '10px',
-                        padding: '6px 8px',
-                        margin: '-2px -4px',
-                        transition: 'all 70ms linear',
-                      }}
-                    >
-                      <div
-                        className="w-1.5 h-1.5 rounded-full mt-1.5 shrink-0"
-                        style={{ background: item.dot, boxShadow: `0 0 6px ${item.dot}60` }}
-                      />
-                      <div className="flex-1 min-w-0">
-                        <div className="text-white/60 text-[12px] leading-snug truncate">{item.text}</div>
-                        <div className="text-white/20 text-[10px] mt-0.5 font-mono">{item.time}</div>
-                      </div>
-                    </motion.div>
-                  ))}
+                  <AnimatePresence mode="popLayout">
+                    {visibleItems.map((item) => (
+                      <motion.div
+                        key={item.text}
+                        initial={{ opacity: 0, y: -8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 8 }}
+                        transition={{ duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
+                        whileHover={{
+                          x: 2,
+                          background: 'rgba(123,47,255,0.08)',
+                          borderColor: 'rgba(123,47,255,0.26)',
+                        }}
+                        className="flex items-start gap-3"
+                        style={{
+                          border: '1px solid transparent',
+                          borderRadius: '10px',
+                          padding: '6px 8px',
+                          margin: '-2px -4px',
+                          transition: 'all 70ms linear',
+                        }}
+                      >
+                        <div
+                          className="w-1.5 h-1.5 rounded-full mt-1.5 shrink-0"
+                          style={{ background: item.dot, boxShadow: `0 0 6px ${item.dot}60` }}
+                        />
+                        <div className="flex-1 min-w-0">
+                          <div className="text-white/60 text-[12px] leading-snug truncate">{item.text}</div>
+                          <div className="text-white/20 text-[10px] mt-0.5 font-mono">{item.time}</div>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
                 </div>
               </motion.div>
             </div>
@@ -419,7 +493,7 @@ export default function DashboardMockupSoftware() {
 
         {/* Caption */}
         <motion.p
-          initial={reducedMotion ? { opacity: 1 } : { opacity: 0 }}
+          initial={effectiveReducedMotion ? { opacity: 1 } : { opacity: 0 }}
           animate={isInView ? { opacity: 1 } : {}}
           transition={{ duration: 0.5, delay: 0.8 }}
           className="text-center text-white/20 text-xs mt-5 font-mono tracking-wider"

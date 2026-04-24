@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef, useState } from 'react'
 import { motion, useReducedMotion } from 'motion/react'
+import { Target, Zap, BarChart2 } from 'lucide-react'
 
 // ─── TYPES ───────────────────────────────────────────────────────────────────
 
@@ -21,10 +22,16 @@ interface AuroraBlob {
 interface FloatCard {
   value: string
   label: string
-  icon: string
+  icon: 'target' | 'zap' | 'chart'
   colorRgb: string
   position: React.CSSProperties
   floatDelay: number
+}
+
+const FLOAT_ICONS: Record<string, React.ReactNode> = {
+  target: <Target size={14} strokeWidth={1.5} />,
+  zap: <Zap size={14} strokeWidth={1.5} />,
+  chart: <BarChart2 size={14} strokeWidth={1.5} />,
 }
 
 // ─── DATA ────────────────────────────────────────────────────────────────────
@@ -44,7 +51,7 @@ const floatCards: FloatCard[] = [
   {
     value: '−80%',
     label: 'errores operativos',
-    icon: '🎯',
+    icon: 'target',
     colorRgb: '99,102,241',
     position: { top: '20%', left: '-190px' },
     floatDelay: 0,
@@ -52,7 +59,7 @@ const floatCards: FloatCard[] = [
   {
     value: '1',
     label: 'sola pantalla',
-    icon: '⚡',
+    icon: 'zap',
     colorRgb: '123,47,255',
     position: { top: '20%', right: '-190px' },
     floatDelay: 1.2,
@@ -60,7 +67,7 @@ const floatCards: FloatCard[] = [
   {
     value: '∞',
     label: 'crece con vos',
-    icon: '📊',
+    icon: 'chart',
     colorRgb: '139,92,246',
     position: {
       bottom: '10%',
@@ -101,7 +108,7 @@ function AuroraCanvas({
         rx:0.45, ry:0.35,
         rotation: -20,
         speed:0.0004, phase:0,
-        color1:'rgba(99,102,241,0.35)',
+        color1:'rgba(99,102,241,0.22)',
         color2:'rgba(99,102,241,0)',
         alpha:1,
       },
@@ -110,7 +117,7 @@ function AuroraCanvas({
         rx:0.4, ry:0.3,
         rotation: 15,
         speed:0.0003, phase:1.2,
-        color1:'rgba(123,47,255,0.3)',
+        color1:'rgba(123,47,255,0.18)',
         color2:'rgba(123,47,255,0)',
         alpha:1,
       },
@@ -119,7 +126,7 @@ function AuroraCanvas({
         rx:0.55, ry:0.25,
         rotation: 5,
         speed:0.0005, phase:2.4,
-        color1:'rgba(139,92,246,0.2)',
+        color1:'rgba(139,92,246,0.13)',
         color2:'rgba(139,92,246,0)',
         alpha:1,
       },
@@ -128,7 +135,7 @@ function AuroraCanvas({
         rx:0.3, ry:0.4,
         rotation: -35,
         speed:0.0004, phase:3.6,
-        color1:'rgba(79,70,229,0.25)',
+        color1:'rgba(79,70,229,0.16)',
         color2:'rgba(79,70,229,0)',
         alpha:1,
       },
@@ -137,7 +144,7 @@ function AuroraCanvas({
         rx:0.35, ry:0.3,
         rotation: 25,
         speed:0.0003, phase:4.8,
-        color1:'rgba(167,139,250,0.18)',
+        color1:'rgba(167,139,250,0.11)',
         color2:'rgba(167,139,250,0)',
         alpha:1,
       },
@@ -201,7 +208,7 @@ function AuroraCanvas({
         inset: 0,
         width: '100%',
         height: '100%',
-        filter: 'blur(80px)',
+        filter: 'blur(100px)',
         zIndex: 0,
         pointerEvents: 'none',
       }}
@@ -270,9 +277,8 @@ function CapsuleVideo({
   return (
     <div style={{
       position: 'relative',
-      marginTop: 'clamp(32px,5vh,60px)',
-      maxWidth: '860px',
-      margin: 'clamp(32px,5vh,60px) auto 0',
+      maxWidth: '780px',
+      margin: 'clamp(20px,2.5vh,32px) auto 0',
     }}>
       {/* MÉTRICAS FLOTANTES (Desktop) */}
       {isDesktop && floatCards.map((card, i) => (
@@ -307,7 +313,9 @@ function CapsuleVideo({
           <div style={{ height: '2px', background: `linear-gradient(90deg, rgba(${card.colorRgb},1), transparent)`, borderRadius: '100px', marginBottom: '10px' }}/>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '5px' }}>
-            <span style={{ fontSize: '16px' }}>{card.icon}</span>
+            <span style={{ color: `rgb(${card.colorRgb})`, display: 'flex', alignItems: 'center' }}>
+                {FLOAT_ICONS[card.icon]}
+              </span>
             <span style={{ fontSize: '22px', fontWeight: 900, color: `rgb(${card.colorRgb})`, fontFamily: 'monospace', lineHeight: 1 }}>{card.value}</span>
           </div>
           <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.32)', margin: 0, lineHeight: 1.4 }}>{card.label}</p>
@@ -503,7 +511,7 @@ function TickerSection() {
   return (
     <div style={{
       position: 'relative',
-      marginTop: '40px',
+      marginTop: '24px',
       overflow: 'hidden',
       width: '100%',
       maskImage: 'linear-gradient(90deg, transparent 0%, black 10%, black 90%, transparent 100%)',
@@ -562,14 +570,14 @@ export default function HeroSoftware() {
     <section style={{
       position: 'relative',
       width: '100%',
-      minHeight: '100vh',
+      minHeight: '100svh',
       background: '#06060f',
       overflow: 'hidden',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
       flexDirection: 'column',
-      padding: 'clamp(100px,14vh,160px) clamp(20px,5vw,80px) clamp(80px,10vh,120px)',
+      padding: 'clamp(80px,10vh,110px) clamp(20px,5vw,80px) clamp(40px,5vh,60px)',
     }}>
       <AuroraCanvas mouseRef={mouseRef} />
       <GridOverlay />
@@ -699,43 +707,63 @@ export default function HeroSoftware() {
               whileTap={{ scale:0.97 }}
               transition={{ type:'spring', stiffness:400, damping:15 }}
               style={{
+                position: 'relative',
+                overflow: 'hidden',
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '10px',
                 background: 'linear-gradient(135deg, #6366f1, #4f46e5)',
                 color: 'white',
-                fontWeight: 800,
-                fontSize: '14px',
-                letterSpacing: '0.05em',
-                padding: '14px 32px',
-                borderRadius: '100px',
+                fontWeight: 700,
+                fontSize: '13px',
+                letterSpacing: '0.04em',
+                padding: '13px 28px',
+                borderRadius: '12px',
                 textDecoration: 'none',
-                boxShadow: '0 0 40px rgba(99,102,241,0.35), 0 8px 24px rgba(0,0,0,0.4)',
+                boxShadow: '0 0 32px rgba(99,102,241,0.3), 0 4px 16px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.15)',
               }}
             >
+              <motion.span
+                aria-hidden="true"
+                animate={{ x: ['-140%', '260%'] }}
+                transition={{ duration: 1.1, ease: 'easeInOut', repeat: Infinity, repeatDelay: 4 }}
+                style={{
+                  position: 'absolute',
+                  top: '-30%',
+                  bottom: '-30%',
+                  left: '-45%',
+                  width: '42%',
+                  transform: 'rotate(18deg)',
+                  background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent)',
+                  pointerEvents: 'none',
+                }}
+              />
               Diagnosticar mi empresa →
             </motion.a>
 
             <motion.a
               href="#pipeline"
               whileHover={{
-                scale:1.02,
-                borderColor:'rgba(99,102,241,0.5)',
-                color:'#6366f1',
+                scale: 1.02,
+                backgroundColor: 'rgba(255,255,255,0.07)',
+                borderColor: 'rgba(99,102,241,0.3)',
+                color: '#a5b4fc',
               }}
               whileTap={{ scale:0.97 }}
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '8px',
-                background: 'transparent',
-                border: '1px solid rgba(255,255,255,0.12)',
-                color: 'rgba(255,255,255,0.55)',
-                fontWeight: 600,
-                fontSize: '14px',
-                padding: '14px 28px',
-                borderRadius: '100px',
+                background: 'rgba(255,255,255,0.04)',
+                border: '1px solid rgba(255,255,255,0.10)',
+                color: 'rgba(255,255,255,0.5)',
+                fontWeight: 500,
+                fontSize: '13px',
+                padding: '13px 24px',
+                borderRadius: '12px',
                 textDecoration: 'none',
+                backdropFilter: 'blur(8px)',
+                WebkitBackdropFilter: 'blur(8px)',
                 transition: 'all 200ms',
               }}
             >
@@ -756,47 +784,10 @@ export default function HeroSoftware() {
               height: '1px',
               background: 'linear-gradient(90deg, transparent, rgba(99,102,241,0.4) 20%, rgba(123,47,255,0.5) 50%, rgba(99,102,241,0.4) 80%, transparent)',
               transformOrigin: 'center',
-              marginTop: '48px',
+              marginTop: '28px',
             }}
         />
       </div>
-
-      {/* Scroll Cue */}
-      <motion.div
-        initial={{ opacity:0 }}
-        animate={{ opacity:1 }}
-        transition={{ delay:1.6, duration:0.8 }}
-        style={{
-          position: 'absolute',
-          bottom: 'clamp(24px,4vh,40px)',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          gap: '8px',
-          zIndex: 10,
-          pointerEvents: 'none',
-        }}
-      >
-        <span style={{
-          fontSize: '9px',
-          letterSpacing: '0.35em',
-          color: 'rgba(99,102,241,0.4)',
-          textTransform: 'uppercase',
-        }}>
-          explorar
-        </span>
-        {[0,1].map(i => (
-          <div key={i} style={{
-            width: '8px', height: '8px',
-            borderRight: '1px solid rgba(99,102,241,0.5)',
-            borderBottom: '1px solid rgba(99,102,241,0.5)',
-            transform: 'rotate(45deg)',
-            animation: isReduced ? 'none' : `chevronSoft 1.4s ease-in-out ${i * 0.18}s infinite`,
-          }}/>
-        ))}
-      </motion.div>
 
       <style>{`
         @keyframes pulseIA {
@@ -818,10 +809,6 @@ export default function HeroSoftware() {
         @keyframes gradientShift {
           0%,100% { background-position: 0% 50% }
           50%     { background-position: 100% 50% }
-        }
-        @keyframes chevronSoft {
-          0%,100% { opacity:0.3; transform:rotate(45deg) translateY(0) }
-          50%     { opacity:1; transform:rotate(45deg) translateY(4px) }
         }
       `}</style>
     </section>

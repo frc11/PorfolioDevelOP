@@ -12,32 +12,49 @@ import {
 
 const ease = [0.16, 1, 0.3, 1] as const
 
-const headlineMain = 'Arquitectura modular, sin friccion operativa.'
-const headlineSub = 'Todos los modulos conectados para decidir en tiempo real.'
+const headlineMain = 'Tu sistema trabaja. Aunque vos no estés.'
+const headlineSub = 'Cada área conectada. Cada dato trazado. Sin intervención manual.'
 
-const architecturePillars = [
+interface ArchitecturePillar {
+    metric: string
+    metricColor: string
+    metricColorRgb: string
+    title: string
+    description: string
+}
+
+const architecturePillars: ArchitecturePillar[] = [
     {
-        title: 'Escala por modulos',
-        description: 'Suma areas nuevas sin rehacer lo que ya funciona.',
+        metric: '99.9%',
+        metricColor: '#34d399',
+        metricColorRgb: '52,211,153',
+        title: 'Uptime garantizado',
+        description: 'Tu sistema disponible las 24hs, los 365 días. Sin caídas en horario comercial.',
     },
     {
-        title: 'Trazabilidad completa',
-        description: 'Cada dato mantiene origen, reglas y destino.',
+        metric: '0',
+        metricColor: '#818cf8',
+        metricColorRgb: '129,140,248',
+        title: 'Pérdida de datos',
+        description: 'Backups automáticos cada hora. Todo lo que entrás, queda guardado para siempre.',
     },
     {
-        title: 'Visibilidad de punta a punta',
-        description: 'Direccion ve el estado real del negocio sin demoras.',
+        metric: '<2s',
+        metricColor: '#7b2fff',
+        metricColorRgb: '123,47,255',
+        title: 'Tiempo de respuesta',
+        description: 'Cualquier consulta, reporte o operación responde en menos de 2 segundos.',
     },
 ]
 
 const nodes = {
-    client: { x: 90, y: 130, label: 'Cliente', tone: '#67e8f9', rgb: '103,232,249' },
-    api: { x: 280, y: 130, label: 'API Core', tone: '#818cf8', rgb: '129,140,248' },
-    auth: { x: 475, y: 70, label: 'Auth', tone: '#c084fc', rgb: '192,132,252' },
-    orchestrator: { x: 475, y: 190, label: 'Flows', tone: '#f97316', rgb: '249,115,22' },
-    database: { x: 665, y: 78, label: 'Data', tone: '#34d399', rgb: '52,211,153' },
-    analytics: { x: 665, y: 190, label: 'BI', tone: '#22d3ee', rgb: '34,211,238' },
-    alerts: { x: 845, y: 130, label: 'Alerts', tone: '#f472b6', rgb: '244,114,182' },
+    client: { x: 90, y: 130, label: 'Pedido', tone: '#67e8f9', rgb: '103,232,249' },
+    api: { x: 280, y: 130, label: 'Sistema', tone: '#818cf8', rgb: '129,140,248' },
+    auth: { x: 475, y: 70, label: 'Seguridad', tone: '#c084fc', rgb: '192,132,252' },
+    orchestrator: { x: 475, y: 190, label: 'Procesos', tone: '#f97316', rgb: '249,115,22' },
+    database: { x: 665, y: 78, label: 'Datos', tone: '#34d399', rgb: '52,211,153' },
+    analytics: { x: 665, y: 190, label: 'Reportes', tone: '#22d3ee', rgb: '34,211,238' },
+    alerts: { x: 845, y: 130, label: 'Alertas', tone: '#f472b6', rgb: '244,114,182' },
 } as const
 
 const paths = [
@@ -219,19 +236,25 @@ function PathDots({
 export default function ArchitectureSoftware() {
     const sectionRef = useRef<HTMLElement>(null)
     const diagramRef = useRef<HTMLDivElement>(null)
+    const [mounted, setMounted] = useState(false)
     const isInView = useInView(sectionRef, { once: true, amount: 0.18 })
     const reducedMotion = useReducedMotion()
     const pulse = useMotionValue(0)
     const [diagramHovered, setDiagramHovered] = useState(false)
 
+    useEffect(() => {
+        setMounted(true)
+    }, [])
+
     useScroll({
         target: diagramRef,
         offset: ['start 78%', 'end 30%'],
     })
-    const shouldDraw = reducedMotion ? true : isInView
+    const effectiveReducedMotion = mounted ? (reducedMotion ?? false) : false
+    const shouldDraw = effectiveReducedMotion ? true : isInView
 
     useEffect(() => {
-        if (reducedMotion) return
+        if (effectiveReducedMotion) return
 
         let direction = 1
         let value = 0
@@ -301,7 +324,7 @@ export default function ArchitectureSoftware() {
                         >
                             <span className="h-1.5 w-1.5 rounded-full bg-indigo-300 shadow-[0_0_10px_rgba(129,140,248,0.9)]" />
                             <span className="text-[11px] font-bold uppercase tracking-[0.24em] text-indigo-300">
-                                [ Arquitectura B2B ]
+                                [ CONSTRUIDO PARA NO FALLAR ]
                             </span>
                         </motion.div>
 
@@ -320,7 +343,7 @@ export default function ArchitectureSoftware() {
                         </motion.h3>
 
                         <motion.p variants={lineVariants} className="mt-6 max-w-xl text-base leading-8 text-white/46 md:text-lg">
-                            Disenamos software que ordena el negocio desde adentro: entradas consistentes, procesamiento seguro y salidas listas para ejecutar, medir y escalar.
+                            No importa si son las 3AM o un feriado. Tu sistema procesa pedidos, actualiza stock, emite facturas y alerta a tu equipo — solo.
                         </motion.p>
                     </motion.div>
 
@@ -343,7 +366,7 @@ export default function ArchitectureSoftware() {
                             onFocus={() => setDiagramHovered(true)}
                             onBlur={() => setDiagramHovered(false)}
                             whileHover={
-                                reducedMotion
+                                effectiveReducedMotion
                                     ? undefined
                                     : {
                                         y: -3,
@@ -394,7 +417,7 @@ export default function ArchitectureSoftware() {
                                             d={path.d}
                                             color={path.color}
                                             trigger={shouldDraw}
-                                            reducedMotion={reducedMotion}
+                                            reducedMotion={effectiveReducedMotion}
                                             speedMultiplier={diagramHovered ? 2.6 : 1}
                                         />
                                     </g>
@@ -428,16 +451,16 @@ export default function ArchitectureSoftware() {
 
                             <div className="relative z-10 mt-5 grid gap-3 border-t border-white/8 pt-5 md:grid-cols-3">
                                 <div className="rounded-[1.1rem] border border-white/[0.05] bg-white/[0.02] p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-cyan-300/25 hover:bg-white/[0.04]">
-                                    <div className="text-[10px] uppercase tracking-[0.22em] text-white/28">Entrada</div>
-                                    <div className="mt-2 text-sm font-semibold text-white">Requests validadas</div>
+                                    <div className="text-[10px] uppercase tracking-[0.22em] text-white/28">Lo que pasa</div>
+                                    <div className="mt-2 text-sm font-semibold text-white">Un pedido, una venta, un turno</div>
                                 </div>
                                 <div className="rounded-[1.1rem] border border-white/[0.05] bg-white/[0.02] p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-cyan-300/25 hover:bg-white/[0.04]">
-                                    <div className="text-[10px] uppercase tracking-[0.22em] text-white/28">Proceso</div>
-                                    <div className="mt-2 text-sm font-semibold text-white">Reglas, permisos y flujos</div>
+                                    <div className="text-[10px] uppercase tracking-[0.22em] text-white/28">Lo que hace el sistema</div>
+                                    <div className="mt-2 text-sm font-semibold text-white">Procesa, actualiza y notifica</div>
                                 </div>
                                 <div className="rounded-[1.1rem] border border-white/[0.05] bg-white/[0.02] p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-cyan-300/25 hover:bg-white/[0.04]">
-                                    <div className="text-[10px] uppercase tracking-[0.22em] text-white/28">Salida</div>
-                                    <div className="mt-2 text-sm font-semibold text-white">Datos, alertas y decisiones</div>
+                                    <div className="text-[10px] uppercase tracking-[0.22em] text-white/28">Lo que ves vos</div>
+                                    <div className="mt-2 text-sm font-semibold text-white">Dashboard actualizado al segundo</div>
                                 </div>
                             </div>
                         </motion.div>
@@ -455,7 +478,7 @@ export default function ArchitectureSoftware() {
                                 key={pillar.title}
                                 variants={lineVariants}
                                 whileHover={
-                                    reducedMotion
+                                    effectiveReducedMotion
                                         ? undefined
                                         : {
                                             y: -4,
@@ -468,10 +491,32 @@ export default function ArchitectureSoftware() {
                                 transition={{ duration: 0.24, ease }}
                                 className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-5 transition-colors duration-300"
                             >
-                                <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-indigo-200/85">
+                                <div
+                                    style={{
+                                        fontSize: 'clamp(28px, 3vw, 36px)',
+                                        fontWeight: 900,
+                                        letterSpacing: '-0.03em',
+                                        color: pillar.metricColor,
+                                        lineHeight: 1,
+                                        marginBottom: '8px',
+                                        textShadow: `0 0 20px rgba(${pillar.metricColorRgb}, 0.4)`,
+                                    }}
+                                >
+                                    {pillar.metric}
+                                </div>
+                                <div
+                                    style={{
+                                        height: '2px',
+                                        width: '32px',
+                                        background: `linear-gradient(90deg, rgba(${pillar.metricColorRgb},1), transparent)`,
+                                        borderRadius: '100px',
+                                        marginBottom: '12px',
+                                    }}
+                                />
+                                <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: `rgba(${pillar.metricColorRgb}, 0.85)`, marginBottom: '8px' }}>
                                     {pillar.title}
                                 </p>
-                                <p className="mt-2 text-sm leading-7 text-white/62 md:text-[15px]">
+                                <p style={{ fontSize: '13px', lineHeight: 1.6, color: 'rgba(255,255,255,0.45)' }}>
                                     {pillar.description}
                                 </p>
                             </motion.div>
