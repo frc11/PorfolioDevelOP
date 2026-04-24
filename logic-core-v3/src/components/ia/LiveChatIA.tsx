@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence, useInView, useReducedMotion } from 'motion/react'
+import { Bolt, Clock3, FileCheck2, MessageSquareText, ShieldCheck } from 'lucide-react'
 
 // â”€â”€â”€ CONSTANTS & TYPES â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
@@ -26,6 +27,29 @@ interface ChatMessage {
   streaming?: boolean
 }
 
+function AssistantAvatar({ size = 28, fontSize = 11 }: { size?: number; fontSize?: number }) {
+  return (
+    <div
+      style={{
+        width: `${size}px`,
+        height: `${size}px`,
+        borderRadius: '50%',
+        background: 'linear-gradient(135deg, #00ff88, #0fbf73)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontSize: `${fontSize}px`,
+        fontWeight: 800,
+        letterSpacing: '0.04em',
+        color: '#052e1d',
+        flexShrink: 0,
+      }}
+    >
+      DP
+    </div>
+  )
+}
+
 // â”€â”€â”€ COMPONENTS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function MessageBubble({ message }: { message: ChatMessage }) {
@@ -44,13 +68,8 @@ function MessageBubble({ message }: { message: ChatMessage }) {
       }}
     >
       {!isUser && (
-        <div style={{
-          width: '28px', height: '28px', borderRadius: '50%',
-          background: 'linear-gradient(135deg, #00ff88, #0fbf73)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: '14px', flexShrink: 0, marginBottom: '2px',
-        }}>
-          {'\u{1F916}'}
+        <div style={{ marginBottom: '2px' }}>
+          <AssistantAvatar size={28} fontSize={11} />
         </div>
       )}
 
@@ -61,11 +80,13 @@ function MessageBubble({ message }: { message: ChatMessage }) {
         fontSize: '14px',
         lineHeight: 1.6,
         background: isUser
-          ? 'linear-gradient(135deg, rgba(0,255,136,0.2), rgba(0,255,136,0.1))'
-          : 'rgba(255,255,255,0.06)',
-        border: isUser ? '1px solid rgba(0,255,136,0.3)' : '1px solid rgba(255,255,255,0.08)',
-        color: isUser ? 'white' : 'rgba(255,255,255,0.85)',
+          ? 'linear-gradient(135deg, rgba(0,255,136,0.28), rgba(0,255,136,0.16))'
+          : 'rgba(8,14,22,0.78)',
+        border: isUser ? '1px solid rgba(0,255,136,0.42)' : '1px solid rgba(255,255,255,0.14)',
+        color: isUser ? 'white' : 'rgba(255,255,255,0.94)',
         position: 'relative',
+        backdropFilter: 'blur(12px) saturate(130%)',
+        WebkitBackdropFilter: 'blur(12px) saturate(130%)',
       }}>
         {message.content}
         {message.streaming && (
@@ -84,6 +105,13 @@ function MessageBubble({ message }: { message: ChatMessage }) {
 }
 
 function InfoPanel({ shouldReduceMotion }: { shouldReduceMotion: boolean }) {
+  const stats = [
+    { icon: Bolt, label: 'Atencion inmediata', value: '< 1 segundo' },
+    { icon: ShieldCheck, label: 'Conversacion privada', value: 'Encriptada' },
+    { icon: FileCheck2, label: 'Base operativa', value: 'Validada por DevelOP' },
+    { icon: Clock3, label: 'Sin horarios', value: '24 / 7 / 365' },
+  ]
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
       {/* Principal Card */}
@@ -96,13 +124,15 @@ function InfoPanel({ shouldReduceMotion }: { shouldReduceMotion: boolean }) {
         }}
         transition={{ type: 'spring', stiffness: 320, damping: 24 }}
         style={{
-          background: 'rgba(0,255,136,0.04)',
-          border: '1px solid rgba(0,255,136,0.12)',
+          background: 'linear-gradient(145deg, rgba(8,18,22,0.82), rgba(6,14,20,0.74))',
+          border: '1px solid rgba(0,255,136,0.24)',
           borderRadius: '16px',
           padding: '24px',
           position: 'relative',
           overflow: 'hidden',
           cursor: 'inherit',
+          backdropFilter: 'blur(16px) saturate(140%)',
+          WebkitBackdropFilter: 'blur(16px) saturate(140%)',
         }}
       >
         <motion.div
@@ -120,28 +150,23 @@ function InfoPanel({ shouldReduceMotion }: { shouldReduceMotion: boolean }) {
         <p style={{
           fontSize: '11px',
           letterSpacing: '0.2em',
-          color: 'rgba(0,255,136,0.6)',
+          color: 'rgba(0,255,136,0.82)',
           margin: '0 0 12px',
           fontWeight: 600,
         }}>
           QUE ESTAS USANDO?
         </p>
-        <h3 style={{ fontSize: '20px', fontWeight: 900, color: 'white', margin: '0 0 10px', lineHeight: 1.2 }}>
+        <h3 style={{ fontSize: '20px', fontWeight: 900, color: 'white', margin: '0 0 10px', lineHeight: 1.2, textShadow: '0 0 18px rgba(255,255,255,0.14)' }}>
           La misma IA que instalamos en negocios.
         </h3>
-        <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.45)', lineHeight: 1.65, margin: 0 }}>
+        <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.72)', lineHeight: 1.65, margin: 0 }}>
           No es una demo. Es un agente real entrenado sobre DevelOP y sus servicios.
           Exactamente asi funciona en un restaurante, medico o comercio.
         </p>
       </motion.div>
 
       {/* Tech Stats */}
-      {[
-        { icon: '\u26A1', label: 'Atencion inmediata', value: '< 1 segundo' },
-        { icon: '\uD83D\uDD12', label: 'Conversacion privada', value: 'Encriptada' },
-        { icon: '\uD83E\uDDE0', label: 'Cerebro digital', value: 'Entrenado por DevelOP' },
-        { icon: '\uD83C\uDF0E', label: 'Sin horarios', value: '24 / 7 / 365' },
-      ].map((stat, i) => (
+      {stats.map((stat, i) => (
         <motion.div
           key={i}
           initial={shouldReduceMotion ? { opacity: 1, x: 0 } : { opacity: 0, x: 20 }}
@@ -149,9 +174,9 @@ function InfoPanel({ shouldReduceMotion }: { shouldReduceMotion: boolean }) {
           whileHover={shouldReduceMotion ? {} : {
             y: -3,
             scale: 1.01,
-            borderColor: 'rgba(0,255,136,0.26)',
+            borderColor: 'rgba(0,255,136,0.34)',
             boxShadow: '0 14px 28px rgba(0,0,0,0.32), 0 0 22px rgba(0,255,136,0.1)',
-            background: 'rgba(0,255,136,0.05)',
+            background: 'rgba(0,255,136,0.1)',
           }}
           transition={{
             duration: 0.5,
@@ -169,12 +194,14 @@ function InfoPanel({ shouldReduceMotion }: { shouldReduceMotion: boolean }) {
             alignItems: 'center',
             gap: '14px',
             padding: '14px 16px',
-            background: 'rgba(255,255,255,0.02)',
-            border: '1px solid rgba(255,255,255,0.06)',
+            background: 'linear-gradient(145deg, rgba(8,14,22,0.82), rgba(7,12,20,0.7))',
+            border: '1px solid rgba(255,255,255,0.14)',
             borderRadius: '12px',
             position: 'relative',
             overflow: 'hidden',
             cursor: 'inherit',
+            backdropFilter: 'blur(12px) saturate(130%)',
+            WebkitBackdropFilter: 'blur(12px) saturate(130%)',
           }}
         >
           <div
@@ -188,10 +215,22 @@ function InfoPanel({ shouldReduceMotion }: { shouldReduceMotion: boolean }) {
               background: 'linear-gradient(180deg, rgba(0,255,136,0.7), rgba(15,191,115,0.2))',
             }}
           />
-          <span style={{ fontSize: '20px' }}>{stat.icon}</span>
+          <div
+            style={{
+              width: '22px',
+              height: '22px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#34d399',
+              flexShrink: 0,
+            }}
+          >
+            <stat.icon size={17} strokeWidth={2.2} />
+          </div>
           <div style={{ flex: 1 }}>
-            <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.3)', margin: '0 0 2px' }}>{stat.label}</p>
-            <p style={{ fontSize: '14px', fontWeight: 700, color: 'white', margin: 0 }}>{stat.value}</p>
+            <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.55)', margin: '0 0 2px' }}>{stat.label}</p>
+            <p style={{ fontSize: '14px', fontWeight: 700, color: 'white', margin: 0, textShadow: '0 0 14px rgba(255,255,255,0.12)' }}>{stat.value}</p>
           </div>
         </motion.div>
       ))}
@@ -317,7 +356,7 @@ export default function LiveChatIA() {
                 m.id === assistantId ? { ...m, streaming: false } : m
               ))
             }
-          } catch (e) {}
+          } catch {}
         }
       }
     } catch (error) {
@@ -336,7 +375,7 @@ export default function LiveChatIA() {
   return (
     <section ref={sectionRef} id="live-chat" style={{
       padding: 'clamp(80px,12vh,140px) clamp(20px,5vw,80px)',
-      background: '#080810',
+      background: 'transparent',
       position: 'relative',
       overflow: 'hidden',
     }}>
@@ -382,15 +421,15 @@ export default function LiveChatIA() {
             [ EN VIVO - PROBALO AHORA ]
           </div>
           <h2 style={{ fontSize: 'clamp(30px,4.5vw,58px)', fontWeight: 900, marginBottom: '16px', lineHeight: 1.1 }}>
-            <span style={{ color: 'white' }}>
+            <span style={{ color: 'white', textShadow: '0 0 24px rgba(255,255,255,0.2)' }}>
               No te lo contamos.
             </span>
             <br />
-            <span style={{ color: '#00ff88' }}>
+            <span style={{ color: '#00ff88', textShadow: '0 0 26px rgba(0,255,136,0.45)' }}>
               Te lo demostramos.
             </span>
           </h2>
-          <p style={{ fontSize: '16px', color: 'rgba(255,255,255,0.4)', margin: 0 }}>
+          <p style={{ fontSize: '16px', color: 'rgba(255,255,255,0.62)', margin: 0 }}>
             Habla con nuestra IA ahora mismo.<br />
             La misma que instalamos en tu negocio.<br />
             Pregunta lo que quieras.
@@ -408,7 +447,7 @@ export default function LiveChatIA() {
           >
             {/* Real-time Activity Line */}
             <div style={{
-              height: '2px', borderRadius: '100px', marginBottom: '12px', overflow: 'hidden', background: 'rgba(255,255,255,0.04)',
+              height: '2px', borderRadius: '100px', marginBottom: '12px', overflow: 'hidden', background: 'rgba(255,255,255,0.12)',
             }}>
               {isLoading && (
                 <motion.div
@@ -423,21 +462,19 @@ export default function LiveChatIA() {
 
             {/* Chat Container */}
             <div style={{
-              background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '24px',
+              background: 'linear-gradient(155deg, rgba(7,13,22,0.9), rgba(5,10,18,0.84))', border: '1px solid rgba(255,255,255,0.16)', borderRadius: '24px',
               overflow: 'hidden', display: 'flex', flexDirection: 'column', height: '600px',
-              boxShadow: '0 0 80px rgba(0,255,136,0.06), 0 32px 64px rgba(0,0,0,0.5)',
+              boxShadow: '0 0 90px rgba(0,255,136,0.14), 0 32px 64px rgba(0,0,0,0.54)',
+              backdropFilter: 'blur(18px) saturate(145%)',
+              WebkitBackdropFilter: 'blur(18px) saturate(145%)',
             }}>
               {/* Chat Header */}
               <div style={{
-                padding: '16px 20px', borderBottom: '1px solid rgba(255,255,255,0.06)',
-                display: 'flex', alignItems: 'center', gap: '12px', background: 'rgba(255,255,255,0.02)', flexShrink: 0
+                padding: '16px 20px', borderBottom: '1px solid rgba(255,255,255,0.12)',
+                display: 'flex', alignItems: 'center', gap: '12px', background: 'rgba(10,16,24,0.66)', flexShrink: 0
               }}>
                 <div style={{ position: 'relative', flexShrink: 0 }}>
-                  <div style={{
-                    width: '40px', height: '40px', borderRadius: '50%',
-                    background: 'linear-gradient(135deg, #00ff88, #0fbf73)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px'
-                  }}>{'\u{1F916}'}</div>
+                  <AssistantAvatar size={40} fontSize={14} />
                   <div style={{
                     position: 'absolute', bottom: '1px', right: '1px', width: '10px', height: '10px',
                     borderRadius: '50%', background: '#00ff88', border: '2px solid #080810',
@@ -445,17 +482,17 @@ export default function LiveChatIA() {
                   }} />
                 </div>
                 <div style={{ flex: 1 }}>
-                  <p style={{ fontSize: '14px', fontWeight: 700, color: 'white', margin: 0 }}>Asistente IA - DevelOP</p>
+                  <p style={{ fontSize: '14px', fontWeight: 700, color: 'white', margin: 0, textShadow: '0 0 14px rgba(255,255,255,0.14)' }}>Asistente IA - DevelOP</p>
                   <p style={{ fontSize: '11px', color: '#00ff88', margin: 0 }}>
                     {isLoading ? 'Escribiendo...' : '\u25CF En linea'}
                   </p>
                 </div>
                 <span className="hidden sm:inline-block" style={{
                   fontSize: '10px', fontWeight: 600, letterSpacing: '0.1em',
-                  background: 'rgba(0,255,136,0.08)', border: '1px solid rgba(0,255,136,0.2)',
-                  color: 'rgba(0,255,136,0.7)', borderRadius: '100px', padding: '4px 10px'
+                  background: 'rgba(0,255,136,0.18)', border: '1px solid rgba(0,255,136,0.34)',
+                  color: 'rgba(167,243,208,0.95)', borderRadius: '100px', padding: '4px 10px'
                 }}>
-                  ia-vendedor-pro
+                  canal-atencion-pro
                 </span>
               </div>
 
@@ -480,12 +517,14 @@ export default function LiveChatIA() {
                           width: '64px', height: '64px', borderRadius: '20px',
                           background: 'linear-gradient(135deg, rgba(0,255,136,0.15), rgba(15,191,115,0.15))',
                           border: '1px solid rgba(0,255,136,0.2)', display: 'flex', alignItems: 'center',
-                          justifyContent: 'center', fontSize: '32px'
+                          justifyContent: 'center'
                         }}
-                      >{'\u{1F9E0}'}</motion.div>
+                      >
+                        <MessageSquareText size={30} color='rgba(167,243,208,0.94)' strokeWidth={2.2} />
+                      </motion.div>
                       <div>
-                        <p style={{ fontSize: '15px', fontWeight: 600, color: 'rgba(255,255,255,0.7)', margin: '0 0 6px' }}>Que queres automatizar?</p>
-                        <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.25)', margin: 0 }}>Preguntame lo que quieras sobre IA</p>
+                        <p style={{ fontSize: '15px', fontWeight: 600, color: 'rgba(255,255,255,0.86)', margin: '0 0 6px' }}>Que queres automatizar?</p>
+                        <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.5)', margin: 0 }}>Preguntame sobre ventas, soporte y procesos</p>
                       </div>
                       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', width: '100%', maxWidth: '380px' }}>
                         {suggestions.map((s, i) => (
@@ -493,11 +532,11 @@ export default function LiveChatIA() {
                             key={i} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.1 + i * 0.05, duration: 0.4 }}
                             onClick={() => handleSend(s)}
-                            whileHover={{ scale: 1.02, borderColor: 'rgba(0,255,136,0.35)', background: 'rgba(0,255,136,0.06)' }}
+                            whileHover={{ scale: 1.02, borderColor: 'rgba(0,255,136,0.44)', background: 'rgba(0,255,136,0.12)' }}
                             whileTap={{ scale: 0.97 }}
                             style={{
-                              background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)',
-                              borderRadius: '10px', padding: '10px 12px', fontSize: '12px', color: 'rgba(255,255,255,0.55)',
+                              background: 'rgba(8,14,22,0.74)', border: '1px solid rgba(255,255,255,0.16)',
+                              borderRadius: '10px', padding: '10px 12px', fontSize: '12px', color: 'rgba(255,255,255,0.82)',
                               cursor: 'default', textAlign: 'left', lineHeight: 1.4, transition: 'all 200ms'
                             }}
                           >
@@ -512,14 +551,10 @@ export default function LiveChatIA() {
                   ))}
                   {isLoading && messages[messages.length - 1]?.role !== 'assistant' && (
                      <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} style={{ display: 'flex', gap: '8px', alignItems: 'flex-end' }}>
-                       <div style={{
-                         width: '28px', height: '28px', borderRadius: '50%',
-                         background: 'linear-gradient(135deg, #00ff88, #0fbf73)',
-                         display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px'
-                       }}>{'\u{1F916}'}</div>
-                       <div style={{ padding: '12px 16px', borderRadius: '18px 18px 18px 4px', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)', display: 'flex', gap: '4px', alignItems: 'center' }}>
+                       <AssistantAvatar size={28} fontSize={11} />
+                       <div style={{ padding: '12px 16px', borderRadius: '18px 18px 18px 4px', background: 'rgba(8,14,22,0.78)', border: '1px solid rgba(255,255,255,0.14)', display: 'flex', gap: '4px', alignItems: 'center' }}>
                          {[0, 1, 2].map(i => (
-                           <div key={i} style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'rgba(0,255,136,0.6)', animation: `pulse 1s infinite ${i * 0.2}s` }} />
+                           <div key={i} style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'rgba(0,255,136,0.85)', animation: `pulse 1s infinite ${i * 0.2}s` }} />
                          ))}
                        </div>
                      </motion.div>
@@ -529,9 +564,9 @@ export default function LiveChatIA() {
               </div>
 
               {/* Input Area */}
-              <div style={{ padding: '16px', borderTop: '1px solid rgba(255,255,255,0.06)', display: 'flex', gap: '10px', alignItems: 'center', flexShrink: 0, background: 'rgba(255,255,255,0.01)' }}>
+              <div style={{ padding: '16px', borderTop: '1px solid rgba(255,255,255,0.12)', display: 'flex', gap: '10px', alignItems: 'center', flexShrink: 0, background: 'rgba(8,14,22,0.72)' }}>
                 {messageCount >= MAX_MESSAGES ? (
-                  <div style={{ flex: 1, textAlign: 'center', fontSize: '13px', color: 'rgba(255,255,255,0.35)' }}>
+                  <div style={{ flex: 1, textAlign: 'center', fontSize: '13px', color: 'rgba(255,255,255,0.62)' }}>
                     Para continuar la conversacion,{' '}
                     <a href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER}?text=${encodeURIComponent('Hola DevelOP, probe la IA en vivo y quiero implementarla en mi empresa')}`} style={{ color: '#00ff88', fontWeight: 600, textDecoration: 'none' }} target="_blank" rel="noopener noreferrer">
                       escribinos por WhatsApp {'\u2192'}
@@ -546,7 +581,7 @@ export default function LiveChatIA() {
                       placeholder="Pregunta sobre automatizacion..."
                       disabled={isLoading}
                       style={{
-                        flex: 1, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
+                        flex: 1, background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.22)',
                         borderRadius: '100px', padding: '12px 20px', fontSize: '14px', color: 'white', outline: 'none', transition: 'border-color 200ms'
                       }}
                     />
