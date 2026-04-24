@@ -363,15 +363,17 @@ function LeftPanel({
         animate={isInView ? { opacity: 1, y: 0 } : {}}
         transition={{ delay: 0.1 }}
         style={{
-          display: 'inline-flex',
+          display: 'flex',
           alignItems: 'center',
           gap: '8px',
           border: '1px solid rgba(16,185,129,0.3)',
           borderRadius: '100px',
+          width: 'fit-content',
           padding: '6px 16px',
           marginBottom: '24px',
+          marginLeft: isMobileL ? 'auto' : 0,
+          marginRight: isMobileL ? 'auto' : 0,
           background: 'rgba(16,185,129,0.08)',
-          alignSelf: isMobileL ? 'center' : 'flex-start',
         }}
       >
         <div
@@ -1005,16 +1007,20 @@ export default function GarantiaIA() {
       return
     }
 
+    const isTabletOrDown = window.matchMedia('(max-width: 1023px)')
+
     const updateViewportFlags = () => {
       setIsMobileL(window.innerWidth <= 425)
-      setIsTouchLike(window.innerWidth <= 1024)
+      setIsTouchLike(isTabletOrDown.matches)
     }
 
     updateViewportFlags()
     window.addEventListener('resize', updateViewportFlags)
+    isTabletOrDown.addEventListener('change', updateViewportFlags)
 
     return () => {
       window.removeEventListener('resize', updateViewportFlags)
+      isTabletOrDown.removeEventListener('change', updateViewportFlags)
     }
   }, [])
 

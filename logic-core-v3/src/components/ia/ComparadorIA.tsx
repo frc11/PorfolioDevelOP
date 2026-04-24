@@ -1,10 +1,6 @@
 ﻿'use client'
 
-import React, { useRef, useState, useEffect } from 'react'
-<<<<<<< HEAD
-import { motion, useInView, AnimatePresence } from 'motion/react'
-import { User, Bot, X } from 'lucide-react'
-=======
+import React, { useRef, useState, useEffect, useLayoutEffect } from 'react'
 import { motion, useInView } from 'motion/react'
 import {
     Bot,
@@ -17,9 +13,21 @@ import {
     TrendingUp,
     UserRound,
     Users,
+    X,
     type LucideIcon,
 } from 'lucide-react'
->>>>>>> 375b3d5a179230b000c7f7bd76c99ca1c78ba0cf
+
+const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect
+
+function bindMediaChange(mq: MediaQueryList, listener: () => void) {
+    if (typeof mq.addEventListener === 'function') {
+        mq.addEventListener('change', listener)
+        return () => mq.removeEventListener('change', listener)
+    }
+
+    mq.addListener(listener)
+    return () => mq.removeListener(listener)
+}
 
 // ─── HELPERS ─────────────────────────────────────────────────────────────────
 
@@ -117,23 +125,139 @@ function CompareRowItem({
     row,
     index,
     isInView,
+    isTablet,
+    isMobileL,
+    isCenterActive,
 }: {
     row: CompareRow
     index: number
     isInView: boolean
+    isTablet: boolean
+    isMobileL: boolean
+    isCenterActive: boolean
 }) {
     // Costs for row id: 1
     const humanCost = useCountUp(180000, 1200, isInView && row.id === 1)
     const aiCost = useCountUp(25000, 900, isInView && row.id === 1)
     const RowIcon = row.icon
+    const humanValue = row.id === 1 ? `$${humanCost.toLocaleString('es-AR')}` : row.human
+    const aiValue = row.id === 1 ? `Desde $${aiCost.toLocaleString('es-AR')}` : row.ai
+
+    if (isMobileL) {
+        return (
+            <motion.div
+                initial={{ opacity: 0, y: 12 }}
+                animate={isInView ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.42, delay: 0.15 + index * 0.05, ease: [0.16, 1, 0.3, 1] }}
+                style={{
+                    border: isCenterActive
+                        ? '1px solid rgba(52,211,153,0.62)'
+                        : row.highlight
+                            ? '1px solid rgba(16,185,129,0.42)'
+                            : '1px solid rgba(255,255,255,0.14)',
+                    borderRadius: '14px',
+                    background: row.highlight
+                        ? 'linear-gradient(145deg, rgba(8,22,20,0.88), rgba(8,16,25,0.86))'
+                        : 'linear-gradient(145deg, rgba(8,16,24,0.86), rgba(6,12,19,0.86))',
+                    padding: '12px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '10px',
+                    boxShadow: isCenterActive
+                        ? '0 0 0 1px rgba(52,211,153,0.2), 0 10px 20px rgba(0,0,0,0.34)'
+                        : row.highlight
+                            ? '0 0 0 1px rgba(16,185,129,0.18), 0 14px 26px rgba(0,0,0,0.34)'
+                            : 'none',
+                }}
+            >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <span
+                        style={{
+                            width: '28px',
+                            height: '28px',
+                            borderRadius: '8px',
+                            border: '1px solid rgba(255,255,255,0.2)',
+                            background: 'rgba(255,255,255,0.08)',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            color: 'rgba(255,255,255,0.86)',
+                            flexShrink: 0,
+                        }}
+                    >
+                        <RowIcon size={14} strokeWidth={2.2} />
+                    </span>
+                    <p style={{ margin: 0, fontSize: '16px', fontWeight: 700, color: 'rgba(255,255,255,0.95)', lineHeight: 1.3 }}>
+                        {row.attribute}
+                    </p>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '8px' }}>
+                    <div
+                        style={{
+                            borderRadius: '10px',
+                            border: '1px solid rgba(239,68,68,0.35)',
+                            background: 'linear-gradient(145deg, rgba(239,68,68,0.12), rgba(24,10,12,0.52))',
+                            padding: '10px 12px',
+                        }}
+                    >
+                        <p style={{ margin: '0 0 6px', fontSize: '11px', letterSpacing: '0.14em', fontWeight: 700, color: 'rgba(254,202,202,0.9)' }}>
+                            HUMANO
+                        </p>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <X size={15} strokeWidth={2.1} style={{ color: '#f87171', flexShrink: 0 }} />
+                            <p
+                                style={{
+                                    margin: 0,
+                                    fontSize: '16px',
+                                    lineHeight: 1.35,
+                                    color: 'rgba(255,255,255,0.9)',
+                                    textDecoration: row.highlight ? 'line-through' : 'none',
+                                }}
+                            >
+                                {humanValue}
+                            </p>
+                        </div>
+                    </div>
+
+                    <div
+                        style={{
+                            borderRadius: '10px',
+                            border: '1px solid rgba(16,185,129,0.42)',
+                            background: 'linear-gradient(145deg, rgba(16,185,129,0.15), rgba(7,22,18,0.56))',
+                            padding: '10px 12px',
+                        }}
+                    >
+                        <p style={{ margin: '0 0 6px', fontSize: '11px', letterSpacing: '0.14em', fontWeight: 700, color: 'rgba(167,243,208,0.96)' }}>
+                            IA DEVELOP
+                        </p>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <X size={15} strokeWidth={2.1} style={{ color: '#00ff88', flexShrink: 0 }} />
+                            <p
+                                style={{
+                                    margin: 0,
+                                    fontSize: '17px',
+                                    lineHeight: 1.35,
+                                    fontWeight: row.highlight ? 800 : 700,
+                                    color: row.highlight ? '#00ff88' : 'rgba(220,252,231,0.95)',
+                                }}
+                            >
+                                {aiValue}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </motion.div>
+        )
+    }
 
     return (
-        <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={isInView ? { opacity: 1, x: 0 } : {}}
-            whileHover={{
-                backgroundColor: 'rgba(0,255,136,0.055)',
-                boxShadow: 'inset 0 0 0 1px rgba(0,255,136,0.2), 0 10px 24px rgba(0,0,0,0.28)',
+            <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={isInView ? { opacity: 1, x: 0, scale: isCenterActive ? 1.003 : 1 } : {}}
+                whileHover={{
+                    backgroundColor: 'rgba(0,255,136,0.055)',
+                    boxShadow: 'inset 0 0 0 1px rgba(0,255,136,0.2), 0 10px 24px rgba(0,0,0,0.28)',
                 scale: 1.0015,
             }}
             transition={{
@@ -146,10 +270,15 @@ function CompareRowItem({
             }}
             style={{
                 borderBottom: '1px solid rgba(255,255,255,0.05)',
-                background: row.highlight ? 'rgba(0,255,136,0.03)' : 'transparent',
+                background: isCenterActive
+                    ? 'linear-gradient(140deg, rgba(12,26,23,0.66), rgba(8,16,22,0.4))'
+                    : row.highlight
+                        ? 'rgba(0,255,136,0.03)'
+                        : 'transparent',
                 borderRadius: 0,
                 position: 'relative',
                 overflow: 'hidden',
+                boxShadow: isCenterActive ? 'inset 0 0 0 1px rgba(52,211,153,0.24)' : 'none',
             }}
         >
             <motion.div
@@ -164,12 +293,15 @@ function CompareRowItem({
                     pointerEvents: 'none',
                 }}
             />
-            <div className="grid grid-cols-1 sm:grid-cols-[1fr_1.5fr_1.5fr]">
+            <div
+                className="grid grid-cols-1 sm:grid-cols-[1fr_1.5fr_1.5fr]"
+                style={isTablet ? { gridTemplateColumns: '1.08fr 1.46fr 1.46fr' } : undefined}
+            >
 
                 {/* Attribute */}
                 <div style={{
-                    padding: 'clamp(14px,2vh,20px) 0',
-                    display: 'flex', alignItems: 'center', gap: '10px',
+                    padding: isTablet ? '16px 6px 16px 2px' : 'clamp(14px,2vh,20px) 0',
+                    display: 'flex', alignItems: 'center', gap: isTablet ? '12px' : '10px',
                 }}>
                     <span style={{
                         width: '24px',
@@ -188,15 +320,15 @@ function CompareRowItem({
                     }}>
                         <RowIcon size={13} strokeWidth={2.2} />
                     </span>
-                    <span style={{ fontSize: '13px', fontWeight: 600, color: 'rgba(255,255,255,0.55)' }}>
+                    <span style={{ fontSize: isTablet ? '14px' : '13px', fontWeight: 600, color: 'rgba(255,255,255,0.55)' }}>
                         {row.attribute}
                     </span>
                 </div>
 
                 {/* Human column */}
                 <div style={{
-                    padding: 'clamp(12px,2vh,20px) 16px',
-                    display: 'flex', alignItems: 'center', gap: '10px',
+                    padding: isTablet ? '16px 14px' : 'clamp(12px,2vh,20px) 16px',
+                    display: 'flex', alignItems: 'center', gap: isTablet ? '12px' : '10px',
                     borderLeft: '1px solid rgba(255,255,255,0.05)',
                 }}>
                     <span className="sm:hidden" style={{
@@ -214,17 +346,18 @@ function CompareRowItem({
                         <X size={16} strokeWidth={2} />
                     </motion.span>
                     <span style={{
-                        fontSize: '13px', color: 'rgba(255,255,255,0.35)',
+                        fontSize: isTablet ? '14px' : '13px', color: 'rgba(255,255,255,0.35)',
+                        lineHeight: 1.45,
                         textDecoration: row.highlight ? 'line-through' : 'none',
                     }}>
-                        {row.id === 1 ? `$${humanCost.toLocaleString('es-AR')}` : row.human}
+                        {humanValue}
                     </span>
                 </div>
 
                 {/* IA column */}
                 <div style={{
-                    padding: 'clamp(12px,2vh,20px) 16px',
-                    display: 'flex', alignItems: 'center', gap: '10px',
+                    padding: isTablet ? '16px 14px' : 'clamp(12px,2vh,20px) 16px',
+                    display: 'flex', alignItems: 'center', gap: isTablet ? '12px' : '10px',
                     background: 'transparent',
                     borderLeft: row.highlight
                         ? '2px solid rgba(0,255,136,0.4)'
@@ -245,11 +378,12 @@ function CompareRowItem({
                         <X size={16} strokeWidth={2} style={{ color: '#00ff88' }} />
                     </motion.span>
                     <span style={{
-                        fontSize: '13px',
+                        fontSize: isTablet ? '14px' : '13px',
                         fontWeight: row.highlight ? 700 : 500,
                         color: row.highlight ? '#00ff88' : 'rgba(255,255,255,0.8)',
+                        lineHeight: 1.45,
                     }}>
-                        {row.id === 1 ? `Desde $${aiCost.toLocaleString('es-AR')}` : row.ai}
+                        {aiValue}
                     </span>
                 </div>
             </div>
@@ -259,7 +393,7 @@ function CompareRowItem({
 
 // ─── TABLE HEADER ─────────────────────────────────────────────────────────────
 
-function TableHeader({ isInView }: { isInView: boolean }) {
+function TableHeader({ isInView, isTablet }: { isInView: boolean; isTablet: boolean }) {
     return (
         <motion.div
             initial={{ opacity: 0, y: -12 }}
@@ -275,7 +409,7 @@ function TableHeader({ isInView }: { isInView: boolean }) {
             }}
         >
             <div />
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '0 16px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: isTablet ? '8px' : '10px', padding: isTablet ? '0 12px' : '0 16px' }}>
                 <div style={{
                     width: '36px', height: '36px', borderRadius: '50%',
                     background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)',
@@ -283,17 +417,17 @@ function TableHeader({ isInView }: { isInView: boolean }) {
                 }}>
                     <UserRound size={14} strokeWidth={2.1} color="rgba(255,255,255,0.76)" />
                 </div>
-                <div>
-                    <p style={{ fontSize: '14px', fontWeight: 700, color: 'rgba(255,255,255,0.6)', margin: 0 }}>
+                <div style={{ minWidth: 0 }}>
+                    <p style={{ fontSize: isTablet ? '13px' : '14px', fontWeight: 700, color: 'rgba(255,255,255,0.6)', margin: 0 }}>
                         Empleado humano
                     </p>
-                    <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.25)', margin: 0 }}>
+                    <p style={{ fontSize: isTablet ? '10px' : '11px', color: 'rgba(255,255,255,0.25)', margin: 0 }}>
                         Modelo tradicional
                     </p>
                 </div>
             </div>
             <div style={{
-                display: 'flex', alignItems: 'center', gap: '10px', padding: '0 16px',
+                display: 'flex', alignItems: 'center', gap: isTablet ? '8px' : '10px', padding: isTablet ? '0 12px' : '0 16px',
                 background: 'transparent',
                 borderRadius: 0,
                 border: 'none',
@@ -305,22 +439,24 @@ function TableHeader({ isInView }: { isInView: boolean }) {
                 }}>
                     <Bot size={14} strokeWidth={2.2} color="#04130b" />
                 </div>
-                <div>
-                    <p style={{ fontSize: '14px', fontWeight: 700, color: '#00ff88', margin: 0 }}>
+                <div style={{ minWidth: 0 }}>
+                    <p style={{ fontSize: isTablet ? '13px' : '14px', fontWeight: 700, color: '#00ff88', margin: 0 }}>
                         Agente IA
                     </p>
-                    <p style={{ fontSize: '11px', color: 'rgba(0,255,136,0.5)', margin: 0 }}>
+                    <p style={{ fontSize: isTablet ? '10px' : '11px', color: 'rgba(0,255,136,0.5)', margin: 0 }}>
                         DevelOP · Siempre activo
                     </p>
                 </div>
-                <span style={{
-                    marginLeft: 'auto', fontSize: '9px', fontWeight: 700,
-                    letterSpacing: '0.15em', whiteSpace: 'nowrap',
-                    background: 'rgba(0,255,136,0.15)', color: '#00ff88',
-                    border: '1px solid rgba(0,255,136,0.3)', borderRadius: '100px', padding: '3px 8px',
-                }}>
-                    RECOMENDADO
-                </span>
+                {!isTablet ? (
+                    <span style={{
+                        marginLeft: 'auto', fontSize: '9px', fontWeight: 700,
+                        letterSpacing: '0.15em', whiteSpace: 'nowrap',
+                        background: 'rgba(0,255,136,0.15)', color: '#00ff88',
+                        border: '1px solid rgba(0,255,136,0.3)', borderRadius: '100px', padding: '3px 8px',
+                    }}>
+                        RECOMENDADO
+                    </span>
+                ) : null}
             </div>
         </motion.div>
     )
@@ -328,7 +464,15 @@ function TableHeader({ isInView }: { isInView: boolean }) {
 
 // ─── ROI SUMMARY ──────────────────────────────────────────────────────────────
 
-function ROISummary({ isInView }: { isInView: boolean }) {
+function ROISummary({
+    isInView,
+    isTablet,
+    isMobileL,
+}: {
+    isInView: boolean
+    isTablet: boolean
+    isMobileL: boolean
+}) {
     const saving = useCountUp(155000, 1800, isInView)
     const savingPct = useCountUp(86, 1400, isInView)
 
@@ -347,7 +491,7 @@ function ROISummary({ isInView }: { isInView: boolean }) {
                 alignItems: 'center',
                 justifyContent: 'space-between',
                 flexWrap: 'wrap',
-                gap: '24px',
+                gap: isTablet ? '18px' : '24px',
                 position: 'relative',
                 overflow: 'hidden',
                 flexDirection: 'row', // Default desktop
@@ -361,7 +505,7 @@ function ROISummary({ isInView }: { isInView: boolean }) {
             }} />
 
             {/* Savings Counter */}
-            <div style={{ flex: '1 1 auto' }}>
+            <div style={{ flex: isTablet ? '1 1 300px' : '1 1 auto', textAlign: isMobileL ? 'center' : 'left' }}>
                 <p style={{
                     fontSize: '12px', letterSpacing: '0.2em', color: 'rgba(255,255,255,0.3)',
                     textTransform: 'uppercase', margin: '0 0 8px',
@@ -380,11 +524,11 @@ function ROISummary({ isInView }: { isInView: boolean }) {
             </div>
 
             {/* Divider */}
-            <div className="hidden sm:block" style={{ width: '1px', alignSelf: 'stretch', background: 'rgba(255,255,255,0.08)', minHeight: '60px' }} />
-            <div className="sm:hidden" style={{ height: '1px', width: '100%', background: 'rgba(255,255,255,0.08)' }} />
+            {!isTablet ? <div className="hidden sm:block" style={{ width: '1px', alignSelf: 'stretch', background: 'rgba(255,255,255,0.08)', minHeight: '60px' }} /> : null}
+            {!isTablet ? <div className="sm:hidden" style={{ height: '1px', width: '100%', background: 'rgba(255,255,255,0.08)' }} /> : null}
 
             {/* Percentage */}
-            <div style={{ textAlign: 'center', flex: '1 1 auto' }}>
+            <div style={{ textAlign: 'center', flex: isTablet ? '0 1 190px' : '1 1 auto' }}>
                 <p style={{
                     fontSize: 'clamp(40px,6vw,72px)', fontWeight: 900, margin: 0, lineHeight: 1,
                     color: '#34f5c5',
@@ -399,12 +543,22 @@ function ROISummary({ isInView }: { isInView: boolean }) {
             </div>
 
             {/* Divider */}
-            <div className="hidden sm:block" style={{ width: '1px', alignSelf: 'stretch', background: 'rgba(255,255,255,0.08)', minHeight: '60px' }} />
-            <div className="sm:hidden" style={{ height: '1px', width: '100%', background: 'rgba(255,255,255,0.08)' }} />
+            {!isTablet ? <div className="hidden sm:block" style={{ width: '1px', alignSelf: 'stretch', background: 'rgba(255,255,255,0.08)', minHeight: '60px' }} /> : null}
+            {!isTablet ? <div className="sm:hidden" style={{ height: '1px', width: '100%', background: 'rgba(255,255,255,0.08)' }} /> : null}
 
             {/* CTA */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', alignItems: 'flex-start', flex: '1 1 auto' }}>
-                <p style={{ fontSize: '14px', fontWeight: 600, color: 'white', margin: 0, maxWidth: '200px', lineHeight: 1.4 }}>
+            <div
+                style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '12px',
+                    alignItems: isTablet || isMobileL ? 'center' : 'flex-start',
+                    textAlign: isTablet || isMobileL ? 'center' : 'left',
+                    flex: isTablet ? '1 1 100%' : '1 1 auto',
+                    width: isTablet ? '100%' : 'auto',
+                }}
+            >
+                <p style={{ fontSize: '14px', fontWeight: 600, color: 'white', margin: 0, maxWidth: isTablet ? 'none' : '200px', lineHeight: 1.4 }}>
                     Costo de no automatizar
                 </p>
                 <p
@@ -413,7 +567,7 @@ function ROISummary({ isInView }: { isInView: boolean }) {
                         fontSize: '13px',
                         lineHeight: 1.6,
                         color: 'rgba(255,255,255,0.52)',
-                        maxWidth: '240px',
+                        maxWidth: isTablet ? '520px' : '240px',
                     }}
                 >
                     Cada mes con atencion manual suma sueldos, supervision y oportunidades perdidas por demora.
@@ -440,7 +594,13 @@ function ROISummary({ isInView }: { isInView: boolean }) {
     )
 }
 
-function CostContextBlock({ isInView }: { isInView: boolean }) {
+function CostContextBlock({
+    isInView,
+    isMobileL,
+}: {
+    isInView: boolean
+    isMobileL: boolean
+}) {
     return (
         <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -463,11 +623,12 @@ function CostContextBlock({ isInView }: { isInView: boolean }) {
                         letterSpacing: '0.18em',
                         color: 'rgba(167,243,208,0.86)',
                         textTransform: 'uppercase',
+                        textAlign: isMobileL ? 'center' : 'left',
                     }}
                 >
                     Costo de no automatizar en contexto
                 </p>
-                <p style={{ margin: 0, fontSize: '13px', color: 'rgba(255,255,255,0.52)', lineHeight: 1.6 }}>
+                <p style={{ margin: 0, fontSize: '13px', color: 'rgba(255,255,255,0.52)', lineHeight: 1.6, textAlign: isMobileL ? 'center' : 'left' }}>
                     Esta comparativa muestra por que el modelo tradicional termina siendo mas caro en pocos meses.
                 </p>
             </div>
@@ -481,13 +642,13 @@ function CostContextBlock({ isInView }: { isInView: boolean }) {
                         padding: '16px',
                     }}
                 >
-                    <p style={{ margin: '0 0 6px', fontSize: '10px', letterSpacing: '0.16em', color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', fontWeight: 700 }}>
+                    <p style={{ margin: '0 0 6px', fontSize: '10px', letterSpacing: '0.16em', color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', fontWeight: 700, textAlign: isMobileL ? 'center' : 'left' }}>
                         Modelo tradicional
                     </p>
-                    <p style={{ margin: '0 0 6px', fontSize: '32px', fontWeight: 900, color: 'white', lineHeight: 1 }}>
+                    <p style={{ margin: '0 0 6px', fontSize: '32px', fontWeight: 900, color: 'white', lineHeight: 1, textAlign: isMobileL ? 'center' : 'left' }}>
                         USD 450-700 / mes
                     </p>
-                    <p style={{ margin: 0, fontSize: '13px', lineHeight: 1.6, color: 'rgba(255,255,255,0.58)' }}>
+                    <p style={{ margin: 0, fontSize: '13px', lineHeight: 1.6, color: 'rgba(255,255,255,0.58)', textAlign: isMobileL ? 'center' : 'left' }}>
                         Un perfil para responder en horario comercial, mas supervision, ausencias y curva de entrenamiento.
                     </p>
                 </div>
@@ -500,13 +661,13 @@ function CostContextBlock({ isInView }: { isInView: boolean }) {
                         padding: '16px',
                     }}
                 >
-                    <p style={{ margin: '0 0 6px', fontSize: '10px', letterSpacing: '0.16em', color: 'rgba(167,243,208,0.9)', textTransform: 'uppercase', fontWeight: 700 }}>
+                    <p style={{ margin: '0 0 6px', fontSize: '10px', letterSpacing: '0.16em', color: 'rgba(167,243,208,0.9)', textTransform: 'uppercase', fontWeight: 700, textAlign: isMobileL ? 'center' : 'left' }}>
                         Implementacion IA develOP
                     </p>
-                    <p style={{ margin: '0 0 6px', fontSize: '32px', fontWeight: 900, color: '#a7f3d0', lineHeight: 1 }}>
+                    <p style={{ margin: '0 0 6px', fontSize: '32px', fontWeight: 900, color: '#a7f3d0', lineHeight: 1, textAlign: isMobileL ? 'center' : 'left' }}>
                         Desde USD 300 inicial
                     </p>
-                    <p style={{ margin: 0, fontSize: '13px', lineHeight: 1.6, color: 'rgba(255,255,255,0.68)' }}>
+                    <p style={{ margin: 0, fontSize: '13px', lineHeight: 1.6, color: 'rgba(255,255,255,0.68)', textAlign: isMobileL ? 'center' : 'left' }}>
                         Setup base de agente IA para vender, calificar y responder 24/7, con mantenimiento opcional.
                     </p>
                 </div>
@@ -536,33 +697,121 @@ function CostContextBlock({ isInView }: { isInView: boolean }) {
 function CompareTable({
     rows,
     isInView,
+    isTablet,
+    isMobileL,
+    isTouchLike,
 }: {
     rows: CompareRow[]
     isInView: boolean
+    isTablet: boolean
+    isMobileL: boolean
+    isTouchLike: boolean
 }) {
+    const rowRefs = useRef<Array<HTMLDivElement | null>>([])
+    const [centerFocusedIndex, setCenterFocusedIndex] = useState<number | null>(null)
+
+    useEffect(() => {
+        if (!isTouchLike) {
+            return
+        }
+
+        let rafId = 0
+        let settleRafA = 0
+        let settleRafB = 0
+        let settleTimeoutA = 0
+        let settleTimeoutB = 0
+        const band = isMobileL ? 78 : 68
+
+        const updateCenterFocus = () => {
+            const viewportCenterY = window.innerHeight / 2
+            let bestIndex: number | null = null
+            let bestDistance = Number.POSITIVE_INFINITY
+
+            rowRefs.current.forEach((rowEl, idx) => {
+                if (!rowEl) return
+
+                const rect = rowEl.getBoundingClientRect()
+                if (rect.bottom < 0 || rect.top > window.innerHeight) return
+
+                const intersectsBand = rect.bottom >= viewportCenterY - band && rect.top <= viewportCenterY + band
+                if (!intersectsBand) return
+
+                const rectCenter = rect.top + rect.height / 2
+                const distance = Math.abs(rectCenter - viewportCenterY)
+                if (distance < bestDistance) {
+                    bestDistance = distance
+                    bestIndex = idx
+                }
+            })
+
+            setCenterFocusedIndex((prev) => (prev === bestIndex ? prev : bestIndex))
+        }
+
+        const scheduleUpdate = () => {
+            cancelAnimationFrame(rafId)
+            rafId = requestAnimationFrame(updateCenterFocus)
+        }
+
+        scheduleUpdate()
+        settleRafA = requestAnimationFrame(scheduleUpdate)
+        settleRafB = requestAnimationFrame(() => requestAnimationFrame(scheduleUpdate))
+        settleTimeoutA = window.setTimeout(scheduleUpdate, 110)
+        settleTimeoutB = window.setTimeout(scheduleUpdate, 260)
+        window.addEventListener('scroll', scheduleUpdate, { passive: true })
+        window.addEventListener('resize', scheduleUpdate)
+        window.addEventListener('orientationchange', scheduleUpdate)
+        window.visualViewport?.addEventListener('resize', scheduleUpdate)
+
+        return () => {
+            cancelAnimationFrame(rafId)
+            cancelAnimationFrame(settleRafA)
+            cancelAnimationFrame(settleRafB)
+            window.clearTimeout(settleTimeoutA)
+            window.clearTimeout(settleTimeoutB)
+            window.removeEventListener('scroll', scheduleUpdate)
+            window.removeEventListener('resize', scheduleUpdate)
+            window.removeEventListener('orientationchange', scheduleUpdate)
+            window.visualViewport?.removeEventListener('resize', scheduleUpdate)
+        }
+    }, [isMobileL, isTouchLike])
+
     return (
         <div style={{
             background: 'rgba(255,255,255,0.02)',
             border: '1px solid rgba(255,255,255,0.07)',
             borderRadius: '20px',
-            padding: 'clamp(20px,3vw,40px)',
+            padding: isMobileL ? '14px 10px 16px' : isTablet ? '20px 18px 24px' : 'clamp(20px,3vw,40px)',
             overflow: 'hidden',
         }}>
-            <TableHeader isInView={isInView} />
-            <div>
+            {!isMobileL ? <TableHeader isInView={isInView} isTablet={isTablet} /> : null}
+            <div style={isMobileL ? { display: 'flex', flexDirection: 'column', gap: '10px' } : undefined}>
                 {rows.map((row, i) => (
-                    <CompareRowItem key={row.id} row={row} index={i} isInView={isInView} />
+                    <div
+                        key={row.id}
+                        ref={(el) => {
+                            rowRefs.current[i] = el
+                        }}
+                    >
+                        <CompareRowItem
+                            row={row}
+                            index={i}
+                            isInView={isInView}
+                            isTablet={isTablet}
+                            isMobileL={isMobileL}
+                            isCenterActive={isTouchLike && centerFocusedIndex === i}
+                        />
+                    </div>
                 ))}
             </div>
-            <ROISummary isInView={isInView} />
-            <CostContextBlock isInView={isInView} />
+            <ROISummary isInView={isInView} isTablet={isTablet} isMobileL={isMobileL} />
+            <CostContextBlock isInView={isInView} isMobileL={isMobileL} />
         </div>
     )
 }
 
 // ─── HEADER ───────────────────────────────────────────────────────────────────
 
-function SectionHeader({ isInView }: { isInView: boolean }) {
+function SectionHeader({ isInView, isMobileL }: { isInView: boolean; isMobileL: boolean }) {
     return (
         <motion.div
             initial={{ opacity: 0, y: -16 }}
@@ -590,14 +839,24 @@ function SectionHeader({ isInView }: { isInView: boolean }) {
                     <span style={{ color: 'white' }}>Los números </span>
                     <span style={{
                         color: '#34f5c5',
-                        textShadow: '0 0 18px rgba(52,245,197,0.18)',
+                        textShadow: isMobileL ? '0 0 20px rgba(52,245,197,0.34)' : '0 0 18px rgba(52,245,197,0.18)',
                     }}>
                         hablan.
                     </span>
                 </span>
             </h2>
 
-            <p style={{ fontSize: '16px', color: 'rgba(255,255,255,0.4)', margin: 0, lineHeight: 1.6 }}>
+            <p
+                style={{
+                    fontSize: isMobileL ? '17px' : '16px',
+                    color: isMobileL ? 'rgba(255,255,255,0.72)' : 'rgba(255,255,255,0.4)',
+                    margin: 0,
+                    lineHeight: isMobileL ? 1.52 : 1.6,
+                    maxWidth: isMobileL ? '330px' : 'none',
+                    marginLeft: isMobileL ? 'auto' : 0,
+                    marginRight: isMobileL ? 'auto' : 0,
+                }}
+            >
                 No es reemplazar personas. Es liberar a tu equipo de las tareas repetitivas.
             </p>
         </motion.div>
@@ -609,21 +868,103 @@ function SectionHeader({ isInView }: { isInView: boolean }) {
 export default function ComparadorIA() {
     const sectionRef = useRef<HTMLElement>(null)
     const isInView   = useInView(sectionRef, { once: true, amount: 0.15 })
+    const [isTablet, setIsTablet] = useState(false)
+    const [isMobileL, setIsMobileL] = useState(false)
+    const [isTouchLike, setIsTouchLike] = useState(false)
+    const [viewportReady, setViewportReady] = useState(false)
+
+    useIsomorphicLayoutEffect(() => {
+        if (typeof window === 'undefined') return
+
+        const tabletMq = window.matchMedia('(min-width: 768px) and (max-width: 1023px)')
+        const mobileLMq = window.matchMedia('(max-width: 425px)')
+        const touchLikeMq = window.matchMedia('(max-width: 1023px)')
+
+        let settleRafA = 0
+        let settleRafB = 0
+        let settleTimeoutA = 0
+        let settleTimeoutB = 0
+
+        const updateViewport = () => {
+            const vvWidth = window.visualViewport?.width
+            const docWidth = document.documentElement?.clientWidth
+            const width = Math.round(
+                Math.min(
+                    window.innerWidth,
+                    vvWidth ?? Number.POSITIVE_INFINITY,
+                    docWidth ?? Number.POSITIVE_INFINITY,
+                ),
+            )
+
+            const nextIsTablet = tabletMq.matches || (width >= 768 && width <= 1023)
+            const nextIsMobileL = mobileLMq.matches || width <= 425
+            const nextIsTouchLike = touchLikeMq.matches || width < 1024
+
+            setIsTablet((prev) => (prev === nextIsTablet ? prev : nextIsTablet))
+            setIsMobileL((prev) => (prev === nextIsMobileL ? prev : nextIsMobileL))
+            setIsTouchLike((prev) => (prev === nextIsTouchLike ? prev : nextIsTouchLike))
+        }
+
+        updateViewport()
+        settleRafA = requestAnimationFrame(() => {
+            updateViewport()
+            setViewportReady(true)
+        })
+        settleRafB = requestAnimationFrame(() => requestAnimationFrame(updateViewport))
+        settleTimeoutA = window.setTimeout(updateViewport, 110)
+        settleTimeoutB = window.setTimeout(() => {
+            updateViewport()
+            setViewportReady(true)
+        }, 260)
+
+        window.addEventListener('resize', updateViewport)
+        window.addEventListener('orientationchange', updateViewport)
+        window.visualViewport?.addEventListener('resize', updateViewport)
+        const unbindTabletMq = bindMediaChange(tabletMq, updateViewport)
+        const unbindMobileLMq = bindMediaChange(mobileLMq, updateViewport)
+        const unbindTouchLikeMq = bindMediaChange(touchLikeMq, updateViewport)
+
+        return () => {
+            cancelAnimationFrame(settleRafA)
+            cancelAnimationFrame(settleRafB)
+            window.clearTimeout(settleTimeoutA)
+            window.clearTimeout(settleTimeoutB)
+            window.removeEventListener('resize', updateViewport)
+            window.removeEventListener('orientationchange', updateViewport)
+            window.visualViewport?.removeEventListener('resize', updateViewport)
+            unbindTabletMq()
+            unbindMobileLMq()
+            unbindTouchLikeMq()
+        }
+    }, [])
+
+    const tableLayoutKey = isMobileL ? 'mobile-l' : isTablet ? 'tablet' : 'desktop'
 
     return (
         <section
             id="comparador"
             ref={sectionRef}
             style={{
-                padding: 'clamp(80px,12vh,140px) clamp(20px,5vw,80px)',
+                padding: isMobileL
+                    ? 'clamp(72px,10vh,96px) 12px'
+                    : 'clamp(80px,12vh,140px) clamp(20px,5vw,80px)',
                 background: 'transparent',
                 position: 'relative',
                 overflow: 'hidden',
+                opacity: viewportReady ? 1 : 0,
+                transition: 'opacity 180ms ease',
             }}
         >
             <div style={{ maxWidth: '1000px', margin: '0 auto', position: 'relative', zIndex: 1 }}>
-                <SectionHeader isInView={isInView} />
-                <CompareTable rows={rows} isInView={isInView} />
+                <SectionHeader isInView={isInView} isMobileL={isMobileL} />
+                <CompareTable
+                    key={`compare-table-${tableLayoutKey}-${isTouchLike ? 'touch' : 'pointer'}`}
+                    rows={rows}
+                    isInView={isInView}
+                    isTablet={isTablet}
+                    isMobileL={isMobileL}
+                    isTouchLike={isTouchLike}
+                />
             </div>
         </section>
     )

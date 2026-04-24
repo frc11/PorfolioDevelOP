@@ -2,6 +2,17 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { AnimatePresence, motion, useInView, useReducedMotion } from 'motion/react'
+import {
+  BellRing,
+  Bot,
+  BrainCircuit,
+  FileSpreadsheet,
+  Globe,
+  MessageCircle,
+  Users,
+  Workflow,
+  type LucideIcon,
+} from 'lucide-react'
 
 type NodeId = 'wa' | 'web' | 'gateway' | 'ia' | 'crm' | 'slack' | 'sheets'
 type EventKind = 'entrada' | 'proceso' | 'salida'
@@ -23,7 +34,7 @@ interface PipelineNode {
   type: 'input' | 'core' | 'output'
   color: string
   colorRgb: string
-  icon: string
+  icon: LucideIcon
 }
 
 interface PipelineEdge {
@@ -87,7 +98,7 @@ const NODES: PipelineNode[] = [
     type: 'input',
     color: '#22c55e',
     colorRgb: '34,197,94',
-    icon: '\u{1F4AC}',
+    icon: MessageCircle,
   },
   {
     id: 'web',
@@ -98,7 +109,7 @@ const NODES: PipelineNode[] = [
     type: 'input',
     color: '#2dd4bf',
     colorRgb: '45,212,191',
-    icon: '\u{1F310}',
+    icon: Globe,
   },
   {
     id: 'gateway',
@@ -109,7 +120,7 @@ const NODES: PipelineNode[] = [
     type: 'core',
     color: '#10b981',
     colorRgb: '16,185,129',
-    icon: '\u26A1',
+    icon: Workflow,
   },
   {
     id: 'ia',
@@ -120,7 +131,7 @@ const NODES: PipelineNode[] = [
     type: 'core',
     color: '#34d399',
     colorRgb: '52,211,153',
-    icon: '\u{1F9E0}',
+    icon: BrainCircuit,
   },
   {
     id: 'sheets',
@@ -131,7 +142,7 @@ const NODES: PipelineNode[] = [
     type: 'output',
     color: '#2dd4bf',
     colorRgb: '45,212,191',
-    icon: '\u{1F4CB}',
+    icon: FileSpreadsheet,
   },
   {
     id: 'crm',
@@ -142,7 +153,7 @@ const NODES: PipelineNode[] = [
     type: 'output',
     color: '#34d399',
     colorRgb: '52,211,153',
-    icon: '\u{1F4CA}',
+    icon: Users,
   },
   {
     id: 'slack',
@@ -153,7 +164,7 @@ const NODES: PipelineNode[] = [
     type: 'output',
     color: '#22c55e',
     colorRgb: '34,197,94',
-    icon: '\u{1F4E8}',
+    icon: BellRing,
   },
 ]
 
@@ -243,6 +254,9 @@ const METRICS = [
   { value: '24/7', label: 'Ejecucion ininterrumpida' },
 ]
 
+const MAX_LIVE_EVENTS = 15
+const EVENT_LOG_RESET_FADE_MS = 260
+
 const NODE_BY_ID: Record<NodeId, PipelineNode> = NODES.reduce((acc, node) => {
   acc[node.id] = node
   return acc
@@ -253,19 +267,68 @@ const EDGE_BY_ID: Record<string, PipelineEdge> = EDGES.reduce((acc, edge) => {
   return acc
 }, {} as Record<string, PipelineEdge>)
 
-function getEdgePath(edge: PipelineEdge): string {
-  const from = NODE_BY_ID[edge.from]
-  const to = NODE_BY_ID[edge.to]
+const MOBILE_VERTICAL_NODE_POSITIONS: Record<
+  NodeId,
+  {
+    x: number
+    y: number
+  }
+> = {
+  sheets: { x: 154, y: 120 },
+  crm: { x: 250, y: 120 },
+  slack: { x: 346, y: 120 },
+  ia: { x: 250, y: 316 },
+  gateway: { x: 250, y: 494 },
+  wa: { x: 174, y: 658 },
+  web: { x: 326, y: 658 },
+}
+
+function projectNodePosition(
+  node: PipelineNode,
+  verticalMobile: boolean,
+): {
+  x: number
+  y: number
+} {
+  if (!verticalMobile) {
+    return { x: node.x, y: node.y }
+  }
+
+  return MOBILE_VERTICAL_NODE_POSITIONS[node.id]
+}
+
+function getEdgePath(
+  edge: PipelineEdge,
+  positionedNodes: Record<
+    NodeId,
+    {
+      x: number
+      y: number
+    }
+  >,
+): string {
+  const from = positionedNodes[edge.from]
+  const to = positionedNodes[edge.to]
   const midX = (from.x + to.x) / 2
   return `M ${from.x} ${from.y} C ${midX} ${from.y}, ${midX} ${to.y}, ${to.x} ${to.y}`
 }
 
-function getPointOnEdge(edgeId: string, progress: number): { x: number; y: number } {
+function getPointOnEdge(
+  edgeId: string,
+  progress: number,
+  positionedNodes: Record<
+    NodeId,
+    {
+      x: number
+      y: number
+    }
+  >,
+): { x: number; y: number } {
   const edge = EDGE_BY_ID[edgeId]
   if (!edge) return { x: 0, y: 0 }
 
-  const from = NODE_BY_ID[edge.from]
-  const to = NODE_BY_ID[edge.to]
+  const from = positionedNodes[edge.from]
+  const to = positionedNodes[edge.to]
   const midX = (from.x + to.x) / 2
   const t = progress
   const mt = 1 - t
@@ -362,15 +425,34 @@ function buildFlowSegments(sourceNode: 'wa' | 'web', scenario: FlowScenario): Fl
   ]
 }
 
-function NodeShape({ node, isActive }: { node: PipelineNode; isActive: boolean }) {
-  const radius = node.type === 'core' ? 36 : 28
+function NodeShape({
+  node,
+  x,
+  y,
+  isActive,
+  verticalMobile,
+}: {
+  node: PipelineNode
+  x: number
+  y: number
+  isActive: boolean
+  verticalMobile: boolean
+}) {
+  const radius = verticalMobile ? (node.type === 'core' ? 58 : 46) : node.type === 'core' ? 52 : 42
+  const iconSize = verticalMobile ? (node.type === 'core' ? 23 : 20) : node.type === 'core' ? 20 : 18
+  const iconTileSize = verticalMobile ? (node.type === 'core' ? 44 : 38) : node.type === 'core' ? 38 : 34
+  const iconStroke = node.type === 'core' ? 2.2 : 2
+  const labelFont = verticalMobile ? 18 : 15
+  const subLabelFont = verticalMobile ? 13 : 12
+  const labelOffset = verticalMobile ? 20 : 16
+  const subLabelOffset = verticalMobile ? 34 : 30
+  const IconComponent = node.icon
 
   return (
-    <g transform={`translate(${node.x}, ${node.y})`}>
-      <circle r={radius + 19} fill={`rgba(${node.colorRgb}, ${isActive ? 0.16 : 0.04})`} />
+    <g transform={`translate(${x}, ${y})`}>
       {node.type === 'core' ? (
         <circle
-          r={radius + 10}
+          r={radius + (verticalMobile ? 14 : 12)}
           fill="none"
           stroke={`rgba(${node.colorRgb}, ${isActive ? 0.42 : 0.14})`}
           strokeWidth="1"
@@ -379,7 +461,7 @@ function NodeShape({ node, isActive }: { node: PipelineNode; isActive: boolean }
       ) : null}
       {isActive ? (
         <circle
-          r={radius + 7}
+          r={radius + (verticalMobile ? 11 : 9)}
           fill="none"
           stroke={`rgba(${node.colorRgb}, 0.68)`}
           strokeWidth="2"
@@ -388,23 +470,47 @@ function NodeShape({ node, isActive }: { node: PipelineNode; isActive: boolean }
       ) : null}
       <circle
         r={radius}
-        fill={`rgba(${node.colorRgb}, ${isActive ? 0.2 : 0.08})`}
+        fill="rgba(3,10,18,0.72)"
+        stroke="none"
+      />
+      <circle
+        r={radius - 1}
+        fill={`rgba(${node.colorRgb}, ${isActive ? 0.34 : 0.2})`}
         stroke={`rgba(${node.colorRgb}, ${isActive ? 0.84 : 0.32})`}
         strokeWidth={isActive ? 2 : 1}
       />
-      <text textAnchor="middle" dominantBaseline="central" fontSize={node.type === 'core' ? 20 : 16}>
-        {node.icon}
-      </text>
+      <rect
+        x={-iconTileSize / 2}
+        y={-iconTileSize / 2}
+        width={iconTileSize}
+        height={iconTileSize}
+        rx={Math.round(iconTileSize * 0.25)}
+        fill={`rgba(${node.colorRgb}, ${isActive ? 0.44 : 0.3})`}
+        stroke={`rgba(${node.colorRgb}, ${isActive ? 0.54 : 0.3})`}
+        strokeWidth={isActive ? 1.4 : 1}
+      />
+      <g transform={`translate(${-iconSize / 2}, ${-iconSize / 2})`}>
+        <IconComponent
+          size={iconSize}
+          strokeWidth={iconStroke}
+          color={isActive ? '#dcfce7' : 'rgba(236,253,245,0.9)'}
+        />
+      </g>
       <text
-        y={radius + 16}
+        y={radius + labelOffset}
         textAnchor="middle"
-        fontSize="11"
-        fontWeight={isActive ? '700' : '500'}
+        fontSize={labelFont}
+        fontWeight={isActive ? '700' : '600'}
         fill={isActive ? node.color : 'rgba(255,255,255,0.53)'}
       >
         {node.label}
       </text>
-      <text y={radius + 29} textAnchor="middle" fontSize="9" fill="rgba(255,255,255,0.26)">
+      <text
+        y={radius + subLabelOffset}
+        textAnchor="middle"
+        fontSize={subLabelFont}
+        fill="rgba(255,255,255,0.26)"
+      >
         {node.sublabel}
       </text>
     </g>
@@ -574,6 +680,10 @@ export default function PipelineIA() {
   const [typing, setTyping] = useState(false)
   const [flowStep, setFlowStep] = useState(0)
   const [lastCompletedSegment, setLastCompletedSegment] = useState(-1)
+  const [isMobileVerticalDiagram, setIsMobileVerticalDiagram] = useState(false)
+  const [hoveredMetricIndex, setHoveredMetricIndex] = useState<number | null>(null)
+  const [centerMetricIndexes, setCenterMetricIndexes] = useState<number[]>([])
+  const [isEventLogResetting, setIsEventLogResetting] = useState(false)
 
   const sectionRef = useRef<HTMLElement>(null)
   const isInView = useInView(sectionRef, { once: true, amount: 0.15 })
@@ -587,6 +697,7 @@ export default function PipelineIA() {
   const timersRef = useRef<number[]>([])
   const eventCounterRef = useRef(0)
   const packetCounterRef = useRef(0)
+  const metricRefs = useRef<Record<number, HTMLDivElement | null>>({})
 
   const currentScenario = FLOW_SCENARIOS[scenarioIndex]
 
@@ -622,7 +733,7 @@ export default function PipelineIA() {
       color: node.color,
     }
 
-    setEventLog((prev) => [event, ...prev].slice(0, 18))
+    setEventLog((prev) => [event, ...prev].slice(0, MAX_LIVE_EVENTS))
   }, [])
 
   const activateNode = useCallback(
@@ -697,12 +808,32 @@ export default function PipelineIA() {
       setLastCompletedSegment(-1)
       setChatMessages([{ from: 'client', text: scenario.query }])
 
-      addEvent('entrada', scenario.sourceNode, `Consulta recibida: ${scenario.query}`)
-      activateNode(scenario.sourceNode, 840)
+      const kickoffFlow = () => {
+        if (flowRunRef.current !== runId) return
 
+        addEvent('entrada', scenario.sourceNode, `Consulta recibida: ${scenario.query}`)
+        activateNode(scenario.sourceNode, 840)
+
+        schedule(() => {
+          if (flowRunRef.current !== runId) return
+          spawnSegment(0, runId, travelSpeed)
+        }, 640)
+      }
+
+      if (reduced) {
+        setIsEventLogResetting(false)
+        setEventLog([])
+        kickoffFlow()
+        return
+      }
+
+      setIsEventLogResetting(true)
       schedule(() => {
-        spawnSegment(0, runId, travelSpeed)
-      }, 640)
+        if (flowRunRef.current !== runId) return
+        setEventLog([])
+        setIsEventLogResetting(false)
+        kickoffFlow()
+      }, EVENT_LOG_RESET_FADE_MS)
     },
     [activateNode, addEvent, clearScheduled, reduced, schedule, spawnSegment],
   )
@@ -842,10 +973,135 @@ export default function PipelineIA() {
   }, [clearScheduled, isInView, startCycle])
 
   const renderedMessages = useMemo(() => chatMessages.slice(-4), [chatMessages])
+  const positionedNodes = useMemo(
+    () =>
+      NODES.reduce(
+        (acc, node) => {
+          acc[node.id] = projectNodePosition(node, isMobileVerticalDiagram)
+          return acc
+        },
+        {} as Record<
+          NodeId,
+          {
+            x: number
+            y: number
+          }
+        >,
+      ),
+    [isMobileVerticalDiagram],
+  )
+  const diagramViewBox = useMemo(() => {
+    const positions = Object.values(positionedNodes)
+    const xValues = positions.map((node) => node.x)
+    const yValues = positions.map((node) => node.y)
+
+    const minX = Math.min(...xValues)
+    const maxX = Math.max(...xValues)
+    const minY = Math.min(...yValues)
+    const maxY = Math.max(...yValues)
+
+    const horizontalPadding = isMobileVerticalDiagram ? 64 : 56
+    const topPadding = isMobileVerticalDiagram ? 52 : 50
+    const bottomPadding = isMobileVerticalDiagram ? 104 : 72
+
+    const viewX = minX - horizontalPadding
+    const viewY = minY - topPadding
+    const viewWidth = maxX - minX + horizontalPadding * 2
+    const viewHeight = maxY - minY + topPadding + bottomPadding
+
+    return `${viewX} ${viewY} ${viewWidth} ${viewHeight}`
+  }, [isMobileVerticalDiagram, positionedNodes])
   const moduleProgress = useMemo(
     () => computeModuleProgress(lastCompletedSegment, packets[0] ?? null),
     [lastCompletedSegment, packets],
   )
+
+  useEffect(() => {
+    const updateMobileDiagram = () => {
+      const viewportWidth = window.visualViewport?.width ?? window.innerWidth
+      const isTabletUp = window.matchMedia('(min-width: 768px)').matches
+
+      if (isTabletUp || viewportWidth >= 768) {
+        setIsMobileVerticalDiagram(false)
+        return
+      }
+
+      const sectionWidth = sectionRef.current?.getBoundingClientRect().width ?? viewportWidth
+      setIsMobileVerticalDiagram(sectionWidth <= 560)
+    }
+
+    updateMobileDiagram()
+    window.addEventListener('resize', updateMobileDiagram)
+    window.visualViewport?.addEventListener('resize', updateMobileDiagram)
+
+    return () => {
+      window.removeEventListener('resize', updateMobileDiagram)
+      window.visualViewport?.removeEventListener('resize', updateMobileDiagram)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return
+    }
+
+    let rafId = 0
+    const isTouchOrTablet = () => window.matchMedia('(max-width: 1023px)').matches
+
+    const updateCenterMetrics = () => {
+      if (!isTouchOrTablet()) {
+        setCenterMetricIndexes((prev) => (prev.length === 0 ? prev : []))
+        return
+      }
+
+      const viewportCenterY = window.innerHeight / 2
+      const bandTop = viewportCenterY - 28
+      const bandBottom = viewportCenterY + 28
+      const nextIndexes: number[] = []
+
+      METRICS.forEach((_, index) => {
+        const el = metricRefs.current[index]
+        if (!el) {
+          return
+        }
+
+        const rect = el.getBoundingClientRect()
+        if (rect.bottom < 0 || rect.top > window.innerHeight) {
+          return
+        }
+
+        const intersectsCenterBand = rect.bottom >= bandTop && rect.top <= bandBottom
+        if (intersectsCenterBand) {
+          nextIndexes.push(index)
+        }
+      })
+
+      nextIndexes.sort((a, b) => a - b)
+      setCenterMetricIndexes((prev) => {
+        if (prev.length === nextIndexes.length && prev.every((value, idx) => value === nextIndexes[idx])) {
+          return prev
+        }
+        return nextIndexes
+      })
+    }
+
+    const scheduleUpdate = () => {
+      cancelAnimationFrame(rafId)
+      rafId = requestAnimationFrame(updateCenterMetrics)
+    }
+
+    scheduleUpdate()
+    window.addEventListener('scroll', scheduleUpdate, { passive: true })
+    window.addEventListener('resize', scheduleUpdate)
+    window.addEventListener('orientationchange', scheduleUpdate)
+
+    return () => {
+      cancelAnimationFrame(rafId)
+      window.removeEventListener('scroll', scheduleUpdate)
+      window.removeEventListener('resize', scheduleUpdate)
+      window.removeEventListener('orientationchange', scheduleUpdate)
+    }
+  }, [])
 
   return (
     <section
@@ -948,14 +1204,20 @@ export default function PipelineIA() {
                 background: 'linear-gradient(150deg, rgba(7,14,22,0.9), rgba(6,11,19,0.82))',
                 border: '1px solid rgba(255,255,255,0.14)',
                 borderRadius: '22px',
-                padding: 'clamp(12px,2.5vw,24px)',
+                padding: isMobileVerticalDiagram ? '10px 8px' : 'clamp(10px,1.8vw,16px)',
                 overflow: 'hidden',
                 boxShadow: '0 20px 42px rgba(0,0,0,0.44), 0 0 34px rgba(16,185,129,0.1)',
                 backdropFilter: 'blur(14px) saturate(140%)',
                 WebkitBackdropFilter: 'blur(14px) saturate(140%)',
               }}
             >
-              <svg viewBox="0 0 980 500" style={{ width: '100%', height: 'auto', overflow: 'visible' }}>
+              <div
+                style={{
+                  width: '100%',
+                  aspectRatio: isMobileVerticalDiagram ? '420 / 700' : '860 / 420',
+                }}
+              >
+                <svg viewBox={diagramViewBox} style={{ width: '100%', height: '100%', overflow: 'visible' }}>
                 <defs>
                   <filter id="pipeline-glow">
                     <feGaussianBlur stdDeviation="3" result="blur" />
@@ -967,18 +1229,18 @@ export default function PipelineIA() {
                 </defs>
 
                 {EDGES.map((edge) => {
-                  const path = getEdgePath(edge)
+                  const path = getEdgePath(edge, positionedNodes)
                   const active = activeEdgeId === edge.id
                   const edgeSource = NODE_BY_ID[edge.from]
                   return (
                     <g key={edge.id}>
-                      <path d={path} fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="1.4" strokeDasharray="4 4" />
+                      <path d={path} fill="none" stroke="rgba(255,255,255,0.11)" strokeWidth="1.8" strokeDasharray="5 4" />
                       {active ? (
                         <path
                           d={path}
                           fill="none"
                           stroke={`rgba(${edgeSource.colorRgb}, 0.65)`}
-                          strokeWidth="2.5"
+                          strokeWidth="3.2"
                           strokeDasharray="8 6"
                           filter="url(#pipeline-glow)"
                         />
@@ -988,12 +1250,19 @@ export default function PipelineIA() {
                 })}
 
                 {NODES.map((node) => (
-                  <NodeShape key={node.id} node={node} isActive={activeNodes.has(node.id)} />
+                  <NodeShape
+                    key={node.id}
+                    node={node}
+                    x={positionedNodes[node.id].x}
+                    y={positionedNodes[node.id].y}
+                    isActive={activeNodes.has(node.id)}
+                    verticalMobile={isMobileVerticalDiagram}
+                  />
                 ))}
 
                 {packets.map((packet) => {
-                  const pos = getPointOnEdge(packet.edgeId, packet.progress)
-                  const tail = getPointOnEdge(packet.edgeId, Math.max(0, packet.progress - 0.09))
+                  const pos = getPointOnEdge(packet.edgeId, packet.progress, positionedNodes)
+                  const tail = getPointOnEdge(packet.edgeId, Math.max(0, packet.progress - 0.09), positionedNodes)
                   return (
                     <g key={packet.id}>
                       <line
@@ -1010,7 +1279,8 @@ export default function PipelineIA() {
                     </g>
                   )
                 })}
-              </svg>
+                </svg>
+              </div>
             </motion.div>
 
             <div style={{ flex: 1, display: 'flex' }}>
@@ -1036,7 +1306,7 @@ export default function PipelineIA() {
             >
               <div
                 style={{
-                  padding: '12px 16px',
+                  padding: '13px 16px',
                   background: 'rgba(16,185,129,0.18)',
                   borderBottom: '1px solid rgba(16,185,129,0.24)',
                   display: 'flex',
@@ -1047,18 +1317,17 @@ export default function PipelineIA() {
                 <div
                   style={{
                     position: 'relative',
-                    width: '32px',
-                    height: '32px',
+                    width: '36px',
+                    height: '36px',
                     borderRadius: '50%',
                     background: 'linear-gradient(135deg, #34d399, #10b981)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    fontSize: '16px',
                     flexShrink: 0,
                   }}
                 >
-                  {'\u{1F916}'}
+                  <Bot size={14} strokeWidth={2.2} color="rgba(2,16,12,0.88)" />
                   <div
                     style={{
                       position: 'absolute',
@@ -1075,13 +1344,15 @@ export default function PipelineIA() {
                   />
                 </div>
                 <div style={{ minWidth: 0 }}>
-                  <p style={{ margin: 0, fontSize: '13px', color: 'white', fontWeight: 700 }}>IA DevelOP</p>
-                  <p style={{ margin: 0, fontSize: '10px', color: '#34d399' }}>{'\u2022'} En linea ahora</p>
+                  <p style={{ margin: 0, fontSize: '14px', color: 'white', fontWeight: 700 }}>IA DevelOP</p>
+                  <p style={{ margin: 0, fontSize: '11px', color: '#34d399', letterSpacing: '0.01em' }}>
+                    Estado activo
+                  </p>
                 </div>
                 <span
                   style={{
                     marginLeft: 'auto',
-                    fontSize: '10px',
+                    fontSize: '11px',
                     fontWeight: 700,
                     color: 'rgba(167,243,208,0.9)',
                     border: '1px solid rgba(16,185,129,0.28)',
@@ -1097,7 +1368,7 @@ export default function PipelineIA() {
               <div
                 style={{
                   height: '258px',
-                  padding: '12px',
+                  padding: '14px',
                   display: 'flex',
                   flexDirection: 'column',
                   justifyContent: 'flex-end',
@@ -1123,28 +1394,27 @@ export default function PipelineIA() {
                       {isAI ? (
                         <div
                           style={{
-                            width: '20px',
-                            height: '20px',
+                            width: '24px',
+                            height: '24px',
                             borderRadius: '50%',
                             background: 'linear-gradient(135deg, #34d399, #10b981)',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            fontSize: '10px',
                             flexShrink: 0,
                           }}
                         >
-                          {'\u{1F916}'}
+                          <Bot size={11} strokeWidth={2.2} color="rgba(2,16,12,0.88)" />
                         </div>
                       ) : null}
                       <div
                         style={{
                           maxWidth: '82%',
                           borderRadius: isAI ? '14px 14px 14px 4px' : '14px 14px 4px 14px',
-                          padding: '9px 11px',
+                          padding: '10px 13px',
                           background: isAI ? 'rgba(16,185,129,0.22)' : 'rgba(255,255,255,0.16)',
                           border: isAI ? '1px solid rgba(16,185,129,0.34)' : '1px solid rgba(255,255,255,0.2)',
-                          fontSize: '12px',
+                          fontSize: '13px',
                           lineHeight: 1.45,
                           color: 'rgba(255,255,255,0.96)',
                           backdropFilter: 'blur(10px)',
@@ -1161,7 +1431,7 @@ export default function PipelineIA() {
                   <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ display: 'flex', justifyContent: 'flex-start' }}>
                     <div
                       style={{
-                        padding: '8px 11px',
+                        padding: '9px 12px',
                         borderRadius: '14px 14px 14px 4px',
                         background: 'rgba(16,185,129,0.22)',
                         border: '1px solid rgba(16,185,129,0.32)',
@@ -1189,7 +1459,7 @@ export default function PipelineIA() {
 
               <div
                 style={{
-                  padding: '10px 14px',
+                  padding: '11px 14px',
                   borderTop: '1px solid rgba(16,185,129,0.22)',
                   display: 'flex',
                   gap: '8px',
@@ -1203,8 +1473,8 @@ export default function PipelineIA() {
                     background: 'rgba(255,255,255,0.12)',
                     border: '1px solid rgba(255,255,255,0.2)',
                     borderRadius: '100px',
-                    padding: '8px 12px',
-                    fontSize: '11px',
+                    padding: '9px 13px',
+                    fontSize: '12px',
                     color: 'rgba(255,255,255,0.52)',
                   }}
                 >
@@ -1280,7 +1550,15 @@ export default function PipelineIA() {
                 </span>
               </div>
 
-              <div style={{ padding: '8px', display: 'flex', flexDirection: 'column', gap: '4px', overflowY: 'auto', flex: 1 }}>
+              <motion.div
+                animate={
+                  isEventLogResetting
+                    ? { opacity: 0, y: 8, filter: 'blur(4px)' }
+                    : { opacity: 1, y: 0, filter: 'blur(0px)' }
+                }
+                transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+                style={{ padding: '8px', display: 'flex', flexDirection: 'column', gap: '4px', overflowY: 'auto', flex: 1 }}
+              >
                 <AnimatePresence initial={false}>
                   {eventLog.map((event) => (
                     <motion.div
@@ -1339,7 +1617,7 @@ export default function PipelineIA() {
                     Esperando primera ejecucion del flujo...
                   </div>
                 ) : null}
-              </div>
+              </motion.div>
             </motion.div>
           </div>
         </div>
@@ -1353,8 +1631,17 @@ export default function PipelineIA() {
           }}
         >
           {METRICS.map((metric, index) => (
+            (() => {
+              const isActive = hoveredMetricIndex === index || centerMetricIndexes.includes(index)
+
+              return (
             <motion.div
               key={metric.label}
+              ref={(el) => {
+                metricRefs.current[index] = el
+              }}
+              onHoverStart={() => setHoveredMetricIndex(index)}
+              onHoverEnd={() => setHoveredMetricIndex((current) => (current === index ? null : current))}
               initial={{ opacity: reduced ? 1 : 0, y: reduced ? 0 : 20 }}
               animate={show({ opacity: 1, y: 0 })}
               whileHover={
@@ -1363,8 +1650,6 @@ export default function PipelineIA() {
                   : {
                       y: -2,
                       scale: 1.006,
-                      borderColor: 'rgba(52,211,153,0.28)',
-                      boxShadow: '0 16px 30px rgba(5,12,18,0.52), 0 0 26px rgba(52,211,153,0.14)',
                     }
               }
               transition={{
@@ -1378,30 +1663,47 @@ export default function PipelineIA() {
               }}
               style={{
                 flex: '1 1 160px',
-                background: 'linear-gradient(140deg, rgba(9,15,24,0.84) 0%, rgba(16,185,129,0.14) 100%)',
-                border: '1px solid rgba(255,255,255,0.16)',
+                background: isActive
+                  ? 'linear-gradient(140deg, rgba(9,15,24,0.86) 0%, rgba(16,185,129,0.24) 100%)'
+                  : 'linear-gradient(140deg, rgba(9,15,24,0.84) 0%, rgba(16,185,129,0.14) 100%)',
+                border: isActive ? '1px solid rgba(52,211,153,0.3)' : '1px solid rgba(255,255,255,0.16)',
                 borderRadius: '12px',
                 padding: '14px 12px',
                 textAlign: 'center',
-                transition: 'box-shadow 260ms ease, border-color 260ms ease, background 260ms ease',
+                transition: 'box-shadow 220ms ease, border-color 220ms ease, background 220ms ease',
                 cursor: 'default',
                 backdropFilter: 'blur(12px) saturate(130%)',
                 WebkitBackdropFilter: 'blur(12px) saturate(130%)',
+                boxShadow: isActive
+                  ? '0 16px 30px rgba(5,12,18,0.52), 0 0 26px rgba(52,211,153,0.14)'
+                  : 'none',
               }}
             >
               <p
                 style={{
                   fontSize: 'clamp(22px,3vw,30px)',
                   fontWeight: 900,
-                  color: '#34d399',
+                  color: isActive ? '#6ee7b7' : '#34d399',
                   margin: '0 0 4px',
                   fontFamily: 'monospace',
+                  textShadow: isActive ? '0 0 14px rgba(52,211,153,0.24)' : 'none',
                 }}
               >
                 {metric.value}
               </p>
-              <p style={{ margin: 0, fontSize: '11px', color: 'rgba(255,255,255,0.62)', lineHeight: 1.35 }}>{metric.label}</p>
+              <p
+                style={{
+                  margin: 0,
+                  fontSize: '11px',
+                  color: isActive ? 'rgba(220,252,231,0.9)' : 'rgba(255,255,255,0.62)',
+                  lineHeight: 1.35,
+                }}
+              >
+                {metric.label}
+              </p>
             </motion.div>
+              )
+            })()
           ))}
         </div>
       </div>

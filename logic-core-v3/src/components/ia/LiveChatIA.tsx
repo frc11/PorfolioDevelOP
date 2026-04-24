@@ -105,6 +105,87 @@ function MessageBubble({ message }: { message: ChatMessage }) {
 }
 
 function InfoPanel({ shouldReduceMotion }: { shouldReduceMotion: boolean }) {
+  const [hoveredMain, setHoveredMain] = useState(false)
+  const [hoveredStatIndex, setHoveredStatIndex] = useState<number | null>(null)
+  const [hoveredCta, setHoveredCta] = useState(false)
+  const [centerMainActive, setCenterMainActive] = useState(false)
+  const [centerStatIndexes, setCenterStatIndexes] = useState<number[]>([])
+  const [centerCtaActive, setCenterCtaActive] = useState(false)
+  const mainCardRef = useRef<HTMLDivElement | null>(null)
+  const statRefs = useRef<Record<number, HTMLDivElement | null>>({})
+  const ctaRef = useRef<HTMLAnchorElement | null>(null)
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return
+    }
+
+    let rafId = 0
+    const isTabletOrDown = () => window.matchMedia('(max-width: 1023px)').matches
+    const centerBand = 30
+
+    const intersectsCenterBand = (element: Element | null) => {
+      if (!element) return false
+      const rect = element.getBoundingClientRect()
+      if (rect.bottom < 0 || rect.top > window.innerHeight) return false
+
+      const viewportCenterY = window.innerHeight / 2
+      const bandTop = viewportCenterY - centerBand
+      const bandBottom = viewportCenterY + centerBand
+      return rect.bottom >= bandTop && rect.top <= bandBottom
+    }
+
+    const updateCenterActivation = () => {
+      if (!isTabletOrDown()) {
+        setCenterMainActive((prev) => (prev ? false : prev))
+        setCenterStatIndexes((prev) => (prev.length ? [] : prev))
+        setCenterCtaActive((prev) => (prev ? false : prev))
+        return
+      }
+
+      setCenterMainActive((prev) => {
+        const next = intersectsCenterBand(mainCardRef.current)
+        return prev === next ? prev : next
+      })
+
+      const nextCenteredStats: number[] = []
+      Object.entries(statRefs.current).forEach(([key, node]) => {
+        const statIndex = Number(key)
+        if (Number.isNaN(statIndex) || !node) return
+        if (intersectsCenterBand(node)) nextCenteredStats.push(statIndex)
+      })
+      nextCenteredStats.sort((a, b) => a - b)
+      setCenterStatIndexes((prev) => {
+        if (prev.length === nextCenteredStats.length && prev.every((value, i) => value === nextCenteredStats[i])) {
+          return prev
+        }
+        return nextCenteredStats
+      })
+
+      setCenterCtaActive((prev) => {
+        const next = intersectsCenterBand(ctaRef.current)
+        return prev === next ? prev : next
+      })
+    }
+
+    const scheduleUpdate = () => {
+      cancelAnimationFrame(rafId)
+      rafId = requestAnimationFrame(updateCenterActivation)
+    }
+
+    scheduleUpdate()
+    window.addEventListener('scroll', scheduleUpdate, { passive: true })
+    window.addEventListener('resize', scheduleUpdate)
+    window.addEventListener('orientationchange', scheduleUpdate)
+
+    return () => {
+      cancelAnimationFrame(rafId)
+      window.removeEventListener('scroll', scheduleUpdate)
+      window.removeEventListener('resize', scheduleUpdate)
+      window.removeEventListener('orientationchange', scheduleUpdate)
+    }
+  }, [])
+
   const stats = [
     { icon: Bolt, label: 'Atencion inmediata', value: '< 1 segundo' },
     { icon: ShieldCheck, label: 'Conversacion privada', value: 'Encriptada' },
@@ -112,20 +193,26 @@ function InfoPanel({ shouldReduceMotion }: { shouldReduceMotion: boolean }) {
     { icon: Clock3, label: 'Sin horarios', value: '24 / 7 / 365' },
   ]
 
+  const isMainActive = hoveredMain || centerMainActive
+  const isCtaActive = hoveredCta || centerCtaActive
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
       {/* Principal Card */}
       <motion.div
+        ref={(node) => {
+          mainCardRef.current = node
+        }}
+        onHoverStart={() => setHoveredMain(true)}
+        onHoverEnd={() => setHoveredMain(false)}
         whileHover={shouldReduceMotion ? {} : {
           y: -4,
           scale: 1.012,
-          borderColor: 'rgba(0,255,136,0.26)',
-          boxShadow: '0 18px 34px rgba(0,0,0,0.38), 0 0 32px rgba(0,255,136,0.12)',
         }}
         transition={{ type: 'spring', stiffness: 320, damping: 24 }}
         style={{
           background: 'linear-gradient(145deg, rgba(8,18,22,0.82), rgba(6,14,20,0.74))',
-          border: '1px solid rgba(0,255,136,0.24)',
+          border: isMainActive ? '1px solid rgba(0,255,136,0.3)' : '1px solid rgba(0,255,136,0.24)',
           borderRadius: '16px',
           padding: '24px',
           position: 'relative',
@@ -133,6 +220,11 @@ function InfoPanel({ shouldReduceMotion }: { shouldReduceMotion: boolean }) {
           cursor: 'inherit',
           backdropFilter: 'blur(16px) saturate(140%)',
           WebkitBackdropFilter: 'blur(16px) saturate(140%)',
+          boxShadow: isMainActive
+            ? '0 18px 34px rgba(0,0,0,0.38), 0 0 32px rgba(0,255,136,0.12)'
+            : 'none',
+          transform: isMainActive ? 'translateY(-4px) scale(1.012)' : undefined,
+          transition: 'border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease',
         }}
       >
         <motion.div
@@ -167,43 +259,56 @@ function InfoPanel({ shouldReduceMotion }: { shouldReduceMotion: boolean }) {
 
       {/* Tech Stats */}
       {stats.map((stat, i) => (
-        <motion.div
-          key={i}
-          initial={shouldReduceMotion ? { opacity: 1, x: 0 } : { opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          whileHover={shouldReduceMotion ? {} : {
-            y: -3,
-            scale: 1.01,
-            borderColor: 'rgba(0,255,136,0.34)',
-            boxShadow: '0 14px 28px rgba(0,0,0,0.32), 0 0 22px rgba(0,255,136,0.1)',
-            background: 'rgba(0,255,136,0.1)',
-          }}
-          transition={{
-            duration: 0.5,
-            ease: [0.16, 1, 0.3, 1],
-            opacity: { delay: 0.3 + i * 0.08, duration: 0.5 },
-            x: { delay: 0.3 + i * 0.08, duration: 0.5 },
-            y: { type: 'spring', stiffness: 380, damping: 26 },
-            scale: { type: 'spring', stiffness: 380, damping: 26 },
-            borderColor: { duration: 0.18 },
-            boxShadow: { duration: 0.18 },
-            background: { duration: 0.18 },
-          }}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '14px',
-            padding: '14px 16px',
-            background: 'linear-gradient(145deg, rgba(8,14,22,0.82), rgba(7,12,20,0.7))',
-            border: '1px solid rgba(255,255,255,0.14)',
-            borderRadius: '12px',
-            position: 'relative',
-            overflow: 'hidden',
-            cursor: 'inherit',
-            backdropFilter: 'blur(12px) saturate(130%)',
-            WebkitBackdropFilter: 'blur(12px) saturate(130%)',
-          }}
-        >
+        (() => {
+          const isStatActive = hoveredStatIndex === i || centerStatIndexes.includes(i)
+
+          return (
+            <motion.div
+              key={i}
+              ref={(node) => {
+                statRefs.current[i] = node
+              }}
+              onHoverStart={() => setHoveredStatIndex(i)}
+              onHoverEnd={() => setHoveredStatIndex((current) => (current === i ? null : current))}
+              initial={shouldReduceMotion ? { opacity: 1, x: 0 } : { opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              whileHover={shouldReduceMotion ? {} : {
+                y: -3,
+                scale: 1.01,
+              }}
+              transition={{
+                duration: 0.5,
+                ease: [0.16, 1, 0.3, 1],
+                opacity: { delay: 0.3 + i * 0.08, duration: 0.5 },
+                x: { delay: 0.3 + i * 0.08, duration: 0.5 },
+                y: { type: 'spring', stiffness: 380, damping: 26 },
+                scale: { type: 'spring', stiffness: 380, damping: 26 },
+                borderColor: { duration: 0.18 },
+                boxShadow: { duration: 0.18 },
+                background: { duration: 0.18 },
+              }}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '14px',
+                padding: '14px 16px',
+                background: isStatActive
+                  ? 'rgba(0,255,136,0.1)'
+                  : 'linear-gradient(145deg, rgba(8,14,22,0.82), rgba(7,12,20,0.7))',
+                border: isStatActive ? '1px solid rgba(0,255,136,0.34)' : '1px solid rgba(255,255,255,0.14)',
+                borderRadius: '12px',
+                position: 'relative',
+                overflow: 'hidden',
+                cursor: 'inherit',
+                backdropFilter: 'blur(12px) saturate(130%)',
+                WebkitBackdropFilter: 'blur(12px) saturate(130%)',
+                boxShadow: isStatActive
+                  ? '0 14px 28px rgba(0,0,0,0.32), 0 0 22px rgba(0,255,136,0.1)'
+                  : 'none',
+                transform: isStatActive ? 'translateY(-3px) scale(1.01)' : undefined,
+                transition: 'border-color 180ms ease, box-shadow 180ms ease, background 180ms ease, transform 180ms ease',
+              }}
+            >
           <div
             aria-hidden="true"
             style={{
@@ -232,19 +337,24 @@ function InfoPanel({ shouldReduceMotion }: { shouldReduceMotion: boolean }) {
             <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.55)', margin: '0 0 2px' }}>{stat.label}</p>
             <p style={{ fontSize: '14px', fontWeight: 700, color: 'white', margin: 0, textShadow: '0 0 14px rgba(255,255,255,0.12)' }}>{stat.value}</p>
           </div>
-        </motion.div>
+            </motion.div>
+          )
+        })()
       ))}
 
       {/* CTA WhatsApp */}
       <motion.a
+        ref={(node) => {
+          ctaRef.current = node
+        }}
+        onHoverStart={() => setHoveredCta(true)}
+        onHoverEnd={() => setHoveredCta(false)}
         href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER}?text=${encodeURIComponent('Hola DevelOP, probe la IA en vivo y quiero implementarla en mi empresa')}`}
         target="_blank"
         rel="noopener noreferrer"
         whileHover={shouldReduceMotion ? {} : {
           scale: 1.025,
           y: -2,
-          boxShadow: '0 14px 34px rgba(37,211,102,0.34), 0 0 42px rgba(0,255,136,0.22)',
-          filter: 'brightness(1.05)',
         }}
         whileTap={{ scale: 0.97 }}
         transition={{ type: 'spring', stiffness: 400, damping: 15 }}
@@ -264,6 +374,12 @@ function InfoPanel({ shouldReduceMotion }: { shouldReduceMotion: boolean }) {
           marginTop: '4px',
           border: '1px solid rgba(255,255,255,0.16)',
           cursor: 'default',
+          transform: isCtaActive ? 'translateY(-2px) scale(1.025)' : undefined,
+          boxShadow: isCtaActive
+            ? '0 14px 34px rgba(37,211,102,0.34), 0 0 42px rgba(0,255,136,0.22)'
+            : '0 0 30px rgba(37,211,102,0.25)',
+          filter: isCtaActive ? 'brightness(1.05)' : 'none',
+          transition: 'box-shadow 180ms ease, filter 180ms ease, transform 180ms ease',
         }}
       >
         Quiero esto en mi negocio {'\u2192'}

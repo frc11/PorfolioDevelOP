@@ -278,7 +278,7 @@ function IntegrationStatsRow({ isInView }: { isInView: boolean }) {
     if (typeof window === 'undefined') return
 
     let rafId = 0
-    const isTouchOrTablet = () => window.innerWidth <= 1024
+    const isTouchOrTablet = () => window.matchMedia('(max-width: 1023px)').matches
 
     const updateCenterStat = () => {
       if (!isTouchOrTablet()) {
@@ -422,7 +422,7 @@ function IntegrationCardsGrid({ isInView }: { isInView: boolean }) {
     if (typeof window === 'undefined') return
 
     let rafId = 0
-    const isTouchOrTablet = () => window.innerWidth <= 1024
+    const isTouchOrTablet = () => window.matchMedia('(max-width: 1023px)').matches
 
     const updateCenterCard = () => {
       if (!isTouchOrTablet()) {

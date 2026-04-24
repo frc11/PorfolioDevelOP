@@ -207,7 +207,15 @@ const BACKGROUND_PARTICLES = [
     { x: 92, y: 16, size: 2.4, duration: 4.6, delay: 0.3 },
 ]
 
-function Header({ isInView, reducedMotion }: { isInView: boolean, reducedMotion: boolean | null }) {
+function Header({
+    isInView,
+    reducedMotion,
+    isMobileLOrDown,
+}: {
+    isInView: boolean
+    reducedMotion: boolean | null
+    isMobileLOrDown: boolean
+}) {
     const startOpacity = reducedMotion ? 1 : 0;
     const startY = reducedMotion ? 0 : -16;
 
@@ -220,15 +228,19 @@ function Header({ isInView, reducedMotion }: { isInView: boolean, reducedMotion:
                 style={{
                     display: 'inline-flex',
                     alignItems: 'center',
+                    justifyContent: 'center',
                     border: '1px solid rgba(0,255,136,0.3)',
                     color: '#00ff88',
-                    padding: '6px 16px',
+                    padding: isMobileLOrDown ? '6px 12px' : '6px 16px',
                     borderRadius: '100px',
-                    fontSize: '11px',
-                    letterSpacing: '0.25em',
+                    fontSize: isMobileLOrDown ? '10px' : '11px',
+                    letterSpacing: isMobileLOrDown ? '0.18em' : '0.25em',
                     fontWeight: 600,
                     marginBottom: '24px',
-                    background: 'rgba(0,255,136,0.14)'
+                    background: 'rgba(0,255,136,0.14)',
+                    maxWidth: 'calc(100% - 8px)',
+                    textAlign: 'center',
+                    boxSizing: 'border-box',
                 }}
             >
                 [ IA APLICADA A TU RUBRO ]
@@ -268,13 +280,17 @@ function Header({ isInView, reducedMotion }: { isInView: boolean, reducedMotion:
                 style={{
                     display: 'inline-flex',
                     alignItems: 'center',
+                    justifyContent: 'center',
                     gap: '10px',
                     background: 'rgba(6,12,20,0.78)',
                     border: '1px solid rgba(255,255,255,0.16)',
                     borderRadius: '100px',
-                    padding: '8px 16px',
+                    padding: isMobileLOrDown ? '8px 12px' : '8px 16px',
                     marginTop: '24px',
                     boxShadow: '0 10px 28px rgba(0,0,0,0.35)',
+                    maxWidth: '100%',
+                    flexWrap: isMobileLOrDown ? 'wrap' : 'nowrap',
+                    rowGap: '8px',
                 }}
             >
                 <div style={{ display: 'flex' }}>
@@ -291,8 +307,10 @@ function Header({ isInView, reducedMotion }: { isInView: boolean, reducedMotion:
                     ))}
                 </div>
                 <span style={{
-                    fontSize: '12px',
+                    fontSize: isMobileLOrDown ? '11px' : '12px',
                     color: 'rgba(255,255,255,0.5)',
+                    textAlign: 'center',
+                    overflowWrap: 'anywhere',
                 }}>
                     <strong style={{
                         color: 'white',
@@ -524,6 +542,7 @@ function VisibleMessages({
                     >
                         <div style={{
                             maxWidth: '78%',
+                            width: 'fit-content',
                             padding: '10px 14px',
                             borderRadius: isAI
                                 ? '4px 16px 16px 16px'
@@ -537,6 +556,7 @@ function VisibleMessages({
                                 ? `1px solid rgba(${rubro.colorRgb}, 0.34)`
                                 : '1px solid rgba(255,255,255,0.2)',
                             color: isAI ? 'white' : 'rgba(255,255,255,0.85)',
+                            overflowWrap: 'anywhere',
                         }}>
                             {msg.text}
                         </div>
@@ -579,6 +599,9 @@ export default function RubrosIA() {
     const [progress, setProgress] = useState(0)
     const [centerAutomationIdx, setCenterAutomationIdx] = useState<number | null>(null)
     const [isChatCentered, setIsChatCentered] = useState(false)
+    const [isTabletOrDown, setIsTabletOrDown] = useState(false)
+    const [isMobileLOrDown, setIsMobileLOrDown] = useState(false)
+    const [isMobileMS, setIsMobileMS] = useState(false)
     const progressRef = useRef(0)
     const automationRefs = useRef<Array<HTMLDivElement | null>>([])
     const chatCardRef = useRef<HTMLDivElement | null>(null)
@@ -591,6 +614,33 @@ export default function RubrosIA() {
     })
     const reducedMotion = useReducedMotion()
     const isAutoPaused = isPaused || Boolean(reducedMotion)
+
+    useEffect(() => {
+        if (typeof window === 'undefined') return
+
+        const tabletMq = window.matchMedia('(max-width: 1023px)')
+        const mobileLMq = window.matchMedia('(max-width: 425px)')
+        const mobileMSMq = window.matchMedia('(max-width: 375px)')
+
+        const updateViewportFlags = () => {
+            setIsTabletOrDown(tabletMq.matches)
+            setIsMobileLOrDown(mobileLMq.matches)
+            setIsMobileMS(mobileMSMq.matches)
+        }
+
+        updateViewportFlags()
+        window.addEventListener('resize', updateViewportFlags)
+        tabletMq.addEventListener('change', updateViewportFlags)
+        mobileLMq.addEventListener('change', updateViewportFlags)
+        mobileMSMq.addEventListener('change', updateViewportFlags)
+
+        return () => {
+            window.removeEventListener('resize', updateViewportFlags)
+            tabletMq.removeEventListener('change', updateViewportFlags)
+            mobileLMq.removeEventListener('change', updateViewportFlags)
+            mobileMSMq.removeEventListener('change', updateViewportFlags)
+        }
+    }, [])
 
     useEffect(() => {
         if (isAutoPaused || !isInView) return
@@ -622,10 +672,9 @@ export default function RubrosIA() {
         if (typeof window === 'undefined' || !isInView) return
 
         let rafId = 0
-        const isTouchOrTablet = () => window.innerWidth <= 1024
 
         const updateCenterFocus = () => {
-            if (!isTouchOrTablet()) {
+            if (!isTabletOrDown) {
                 setCenterAutomationIdx((prev) => (prev === null ? prev : null))
                 setIsChatCentered(false)
                 return
@@ -688,20 +737,22 @@ export default function RubrosIA() {
             window.removeEventListener('resize', scheduleUpdate)
             window.removeEventListener('orientationchange', scheduleUpdate)
         }
-    }, [active, isInView])
+    }, [active, isInView, isTabletOrDown])
 
     return (
         <section
             id="casos"
             ref={sectionRef}
             style={{
-                padding: 'clamp(72px,11vh,128px) clamp(20px,5vw,80px) clamp(44px,7vh,76px)',
+                padding: isTabletOrDown
+                    ? 'clamp(56px,9vh,96px) clamp(12px,4vw,24px) clamp(34px,6vh,64px)'
+                    : 'clamp(72px,11vh,128px) clamp(20px,5vw,80px) clamp(44px,7vh,76px)',
                 background: 'transparent',
                 position: 'relative',
                 overflow: 'hidden',
-                minHeight: '100svh',
+                minHeight: isTabletOrDown ? 'auto' : '100svh',
                 display: 'flex',
-                alignItems: 'center',
+                alignItems: isTabletOrDown ? 'flex-start' : 'center',
             }}
         >
             {/* PartÃ­culas decorativas de fondo */}
@@ -736,8 +787,10 @@ export default function RubrosIA() {
                 aria-hidden="true"
                 style={{
                     position: 'absolute',
-                    inset: '6% 3%',
-                    borderRadius: '28px',
+                    inset: isTabletOrDown
+                        ? (isMobileLOrDown ? '1.5% 1.5%' : '2.8% 2.2%')
+                        : '6% 3%',
+                    borderRadius: isTabletOrDown ? '20px' : '28px',
                     background: 'linear-gradient(180deg, rgba(4,9,18,0.72) 0%, rgba(4,9,18,0.52) 100%)',
                     border: '1px solid rgba(255,255,255,0.08)',
                     boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.08), 0 22px 60px rgba(0,0,0,0.35)',
@@ -748,9 +801,11 @@ export default function RubrosIA() {
 
             <div style={{
                 position: 'relative', zIndex: 1,
-                maxWidth: '1200px', margin: '0 auto', width: '100%'
+                maxWidth: '1200px', margin: '0 auto', width: '100%',
+                minWidth: 0,
+                paddingTop: isTabletOrDown ? 'clamp(8px,1.6vh,14px)' : 0,
             }}>
-                <Header isInView={isInView} reducedMotion={reducedMotion} />
+                <Header isInView={isInView} reducedMotion={reducedMotion} isMobileLOrDown={isMobileLOrDown} />
                 <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_420px] gap-[clamp(18px,2.6vw,36px)] items-start">
                     <div>
                         <TabSelector
@@ -857,6 +912,8 @@ export default function RubrosIA() {
                                             boxShadow: isCenterActive
                                                 ? `0 0 20px rgba(${rubro.colorRgb}, 0.16)`
                                                 : '0 10px 22px rgba(0,0,0,0.28)',
+                                            overflow: 'hidden',
+                                            minWidth: 0,
                                         }}
                                     >
                                         {/* Ãcono */}
@@ -879,8 +936,9 @@ export default function RubrosIA() {
                                         <div style={{ flex: 1 }}>
                                             <div style={{
                                                 display: 'flex',
+                                                flexDirection: isMobileMS ? 'column' : 'row',
                                                 justifyContent: 'space-between',
-                                                alignItems: 'flex-start',
+                                                alignItems: isMobileMS ? 'stretch' : 'flex-start',
                                                 gap: '8px',
                                                 marginBottom: '4px',
                                             }}>
@@ -888,6 +946,8 @@ export default function RubrosIA() {
                                                     fontSize: '14px',
                                                     fontWeight: 700,
                                                     color: 'white',
+                                                    minWidth: 0,
+                                                    overflowWrap: 'anywhere',
                                                 }}>
                                                     {auto.title}
                                                 </span>
@@ -901,8 +961,11 @@ export default function RubrosIA() {
                                                     border: `1px solid rgba(${rubro.colorRgb}, 0.38)`,
                                                     borderRadius: '100px',
                                                     padding: '3px 10px',
-                                                    whiteSpace: 'nowrap',
+                                                    whiteSpace: isMobileMS ? 'normal' : 'nowrap',
                                                     flexShrink: 0,
+                                                    alignSelf: isMobileMS ? 'flex-start' : 'auto',
+                                                    maxWidth: isMobileMS ? '100%' : 'none',
+                                                    overflowWrap: 'anywhere',
                                                     transition: 'all 60ms linear',
                                                 }}>
                                                     {auto.metric}
@@ -927,7 +990,7 @@ export default function RubrosIA() {
                     </div>
 
                     {/* â”€â”€ COLUMNA DERECHA (Prompt 3) â”€â”€ */}
-                    <div className="lg:pt-[2px]">
+                    <div className="lg:pt-[2px]" style={{ minWidth: 0 }}>
                     <AnimatePresence mode="wait">
                         <motion.div
                             key={active}
@@ -954,15 +1017,18 @@ export default function RubrosIA() {
                                 borderRadius: '24px',
                                 overflow: 'hidden',
                                 width: '100%',
-                                maxWidth: '420px',
+                                maxWidth: isTabletOrDown ? 'min(100%, 560px)' : '420px',
                                 margin: '0 auto',
-                                height: 'clamp(440px, 64vh, 620px)',
+                                height: isTabletOrDown
+                                    ? (isMobileLOrDown ? 'clamp(340px, 54vh, 500px)' : 'clamp(360px, 56vh, 560px)')
+                                    : 'clamp(440px, 64vh, 620px)',
                                 display: 'flex',
                                 flexDirection: 'column',
                                 boxShadow: isChatCentered
                                     ? `0 0 70px rgba(${rubro.colorRgb}, 0.12), 0 24px 64px rgba(0,0,0,0.5)`
                                     : `0 0 60px rgba(${rubro.colorRgb}, 0.08), 0 24px 64px rgba(0,0,0,0.5)`,
                                 transition: 'all 70ms linear',
+                                minWidth: 0,
                             }}
                         >
                             {/* Header del chat */}
