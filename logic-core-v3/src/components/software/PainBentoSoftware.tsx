@@ -169,36 +169,39 @@ const bentoPairs: BentoPair[] = [
   },
 ]
 
+const ambientOrbs = [
+  { top: '8%', left: '5%', size: 220, rgb: '239,68,68', duration: 13, delay: 0.2 },
+  { top: '18%', right: '8%', size: 260, rgb: '99,102,241', duration: 16, delay: 0.8 },
+  { top: '52%', left: '12%', size: 200, rgb: '123,47,255', duration: 14, delay: 0.4 },
+  { top: '62%', right: '14%', size: 240, rgb: '239,68,68', duration: 18, delay: 1.2 },
+  { bottom: '6%', left: '36%', size: 280, rgb: '99,102,241', duration: 15, delay: 0.6 },
+] as const
+
 // ─── COMPONENTS ──────────────────────────────────────────────────────────────
 
 function BentoFlipCard({
   pair,
   gridStyle,
-  isInView,
   onFirstFlip,
   onFlipChange,
 }: {
   pair: BentoPair
   gridStyle: React.CSSProperties
-  isInView: boolean
   onFirstFlip: () => void
   onFlipChange: (flipped: boolean) => void
 }) {
   const { caos, orden } = pair
   const violetRgb = '123,47,255'
-  const [mounted, setMounted] = useState(false)
   const isReduced = useReducedMotion()
   const [flipped, setFlipped] = useState(false)
   const [everHovered, setEverHovered] = useState(false)
   const [hasBeenFlippedOnce, setHasBeenFlippedOnce] = useState(false)
   const [hoverStarted, setHoverStarted] = useState(false)
   const [loss, setLoss] = useState(0)
+  const cardRef = useRef<HTMLDivElement>(null)
+  const cardIsInView = useInView(cardRef, { once: true, amount: 0.32 })
 
-  useEffect(() => {
-    setMounted(true)
-  }, [])
-
-  const effectiveIsReduced = mounted ? (isReduced ?? false) : false
+  const effectiveIsReduced = isReduced ?? false
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   useEffect(() => {
@@ -224,7 +227,7 @@ function BentoFlipCard({
       onFirstFlip()
     }
     if (state) setEverHovered(true)
-  }, [isReduced, hasBeenFlippedOnce, onFirstFlip, onFlipChange])
+  }, [effectiveIsReduced, hasBeenFlippedOnce, onFirstFlip, onFlipChange])
 
   const handleMouseEnter = () => {
     triggerFlip(true)
@@ -245,12 +248,13 @@ function BentoFlipCard({
 
   return (
     <motion.div
-      style={{ ...gridStyle, perspective: '1200px', position: 'relative' }}
-      initial={effectiveIsReduced ? { opacity: 1, y: 0, scale: 1 } : { opacity: 0, y: 28, scale: 0.97 }}
-      animate={isInView ? { opacity: 1, y: 0, scale: 1 } : {}}
+      ref={cardRef}
+      style={{ ...gridStyle, perspective: '1200px', position: 'relative', willChange: 'transform, opacity, filter' }}
+      initial={effectiveIsReduced ? { opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' } : { opacity: 0, y: 34, scale: 0.96, filter: 'blur(10px)' }}
+      animate={cardIsInView ? { opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' } : undefined}
       transition={{
-        duration: 0.65,
-        delay: isReduced ? 0 : pair.delay,
+        duration: 0.74,
+        delay: effectiveIsReduced ? 0 : pair.delay * 0.45,
         ease: [0.16, 1, 0.3, 1],
       }}
     >
@@ -290,19 +294,49 @@ function BentoFlipCard({
           position: 'absolute', inset: 0,
           backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden',
           borderRadius: '20px', overflow: 'hidden',
-          background: `linear-gradient(135deg, rgba(${caos.colorRgb},0.06) 0%, rgba(255,255,255,0.02) 100%)`,
-          border: `1px solid rgba(${caos.colorRgb},0.15)`,
-          boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.06), inset 0 -1px 0 rgba(0,0,0,0.2), 0 8px 32px rgba(0,0,0,0.4)',
+          background: `linear-gradient(140deg, rgba(${caos.colorRgb},0.11) 0%, rgba(12,14,28,0.86) 52%, rgba(8,10,22,0.94) 100%)`,
+          border: `1px solid rgba(${caos.colorRgb},0.24)`,
+          boxShadow: `inset 0 1px 0 rgba(255,255,255,0.08), inset 0 -1px 0 rgba(0,0,0,0.26), 0 16px 44px rgba(0,0,0,0.44), 0 0 30px rgba(${caos.colorRgb},0.10)`,
           padding: 'clamp(18px,2.5vw,28px)',
           display: effectiveIsReduced && flipped ? 'none' : 'block',
         }}>
           {/* Noise Effect */}
           <div style={{
             position: 'absolute', inset: 0,
-            opacity: 0.025, filter: 'url(#noise)',
+            opacity: 0.03, filter: 'url(#noise)',
             background: caos.color, pointerEvents: 'none',
             zIndex: 0, borderRadius: '20px',
           }}/>
+
+          <motion.div
+            aria-hidden="true"
+            animate={effectiveIsReduced ? undefined : { opacity: [0.16, 0.3, 0.16], x: ['-8%', '10%', '-8%'], y: ['-6%', '6%', '-6%'] }}
+            transition={{ duration: 10 + pair.id * 0.9, repeat: Infinity, ease: 'easeInOut' }}
+            style={{
+              position: 'absolute',
+              inset: '-32%',
+              zIndex: 0,
+              pointerEvents: 'none',
+              background: `radial-gradient(circle at 30% 40%, rgba(${caos.colorRgb},0.28), transparent 58%)`,
+              mixBlendMode: 'screen',
+            }}
+          />
+
+          <div
+            aria-hidden="true"
+            style={{
+              position: 'absolute',
+              top: '-44px',
+              right: '-26px',
+              width: '190px',
+              height: '190px',
+              borderRadius: '999px',
+              zIndex: 0,
+              pointerEvents: 'none',
+              background: `radial-gradient(circle, rgba(${caos.colorRgb},0.20), rgba(${caos.colorRgb},0))`,
+              filter: 'blur(20px)',
+            }}
+          />
 
           <div style={{ position: 'absolute', bottom: '-8px', right: '12px', fontSize: '88px', fontWeight: 900, lineHeight: 1, color: `rgba(${caos.colorRgb},0.04)`, userSelect: 'none', pointerEvents: 'none' }}>
             {String(pair.id + 1).padStart(2,'0')}
@@ -379,9 +413,9 @@ function BentoFlipCard({
           backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden',
           transform: effectiveIsReduced ? 'none' : 'rotateY(180deg)',
           borderRadius: '20px', overflow: 'hidden',
-          background: `linear-gradient(135deg, rgba(${violetRgb},0.1) 0%, rgba(255,255,255,0.03) 100%)`,
-          border: `1px solid rgba(${violetRgb},0.25)`,
-          boxShadow: `inset 0 1px 0 rgba(255,255,255,0.1), 0 0 40px rgba(${violetRgb},0.1), 0 8px 32px rgba(0,0,0,0.5)`,
+          background: `linear-gradient(140deg, rgba(${violetRgb},0.16) 0%, rgba(12,16,32,0.9) 52%, rgba(9,11,22,0.96) 100%)`,
+          border: `1px solid rgba(${violetRgb},0.32)`,
+          boxShadow: `inset 0 1px 0 rgba(255,255,255,0.12), 0 0 42px rgba(${violetRgb},0.14), 0 16px 40px rgba(0,0,0,0.5)`,
           padding: 'clamp(18px,2.5vw,28px)',
           display: effectiveIsReduced && !flipped ? 'none' : 'block',
           zIndex: effectiveIsReduced && flipped ? 5 : undefined,
@@ -391,6 +425,20 @@ function BentoFlipCard({
           </div>
           <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '2px', background: `linear-gradient(90deg, transparent, rgba(${violetRgb},0.8) 40%, rgba(${violetRgb},0.8) 60%, transparent)` }}/>
           <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '60px', background: `linear-gradient(to bottom, rgba(${violetRgb},0.08), transparent)`, pointerEvents: 'none' }}/>
+
+          <motion.div
+            aria-hidden="true"
+            animate={effectiveIsReduced ? undefined : { opacity: [0.22, 0.38, 0.22], x: ['6%', '-8%', '6%'], y: ['-8%', '6%', '-8%'] }}
+            transition={{ duration: 11 + pair.id, repeat: Infinity, ease: 'easeInOut' }}
+            style={{
+              position: 'absolute',
+              inset: '-30%',
+              zIndex: 0,
+              pointerEvents: 'none',
+              background: `radial-gradient(circle at 68% 30%, rgba(${violetRgb},0.28), transparent 60%)`,
+              mixBlendMode: 'screen',
+            }}
+          />
 
           <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', height: '100%' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
@@ -422,7 +470,6 @@ function BentoFlipCard({
 // ─── MAIN COMPONENT ──────────────────────────────────────────────────────────
 
 export default function PainBentoSoftware() {
-  const [mounted, setMounted] = useState(false)
   const isReduced = useReducedMotion()
   const sectionRef = useRef<HTMLElement>(null)
   const isInView = useInView(sectionRef, { once: true, amount: 0.1 })
@@ -430,11 +477,7 @@ export default function PainBentoSoftware() {
   const [anyFlipped, setAnyFlipped] = useState(false)
   const flippedCountRef = useRef(0)
 
-  useEffect(() => {
-    setMounted(true)
-  }, [])
-
-  const effectiveIsReduced = mounted ? (isReduced ?? false) : false
+  const effectiveIsReduced = isReduced ?? false
 
   const handleFirstFlip = useCallback(() => {
     setFlipCount(prev => prev + 1)
@@ -446,27 +489,80 @@ export default function PainBentoSoftware() {
   }, [])
 
   return (
-    <section ref={sectionRef} style={{ padding: 'clamp(80px,12vh,140px) clamp(20px,5vw,80px)', background: '#080810', position: 'relative', overflow: 'hidden' }}>
+    <section
+      ref={sectionRef}
+      style={{
+        padding: 'clamp(80px,12vh,140px) clamp(20px,5vw,80px)',
+        background: 'radial-gradient(130% 90% at 18% 10%, rgba(239,68,68,0.16) 0%, rgba(11,10,28,0.75) 40%, #070916 100%)',
+        position: 'relative',
+        overflow: 'hidden',
+      }}
+    >
 
       {/* ATMÓSFERA — GLOWS */}
       <motion.div
         aria-hidden="true"
         animate={{
           background: anyFlipped
-            ? 'radial-gradient(ellipse, rgba(99,102,241,0.07) 0%, transparent 60%)'
-            : 'radial-gradient(ellipse, rgba(239,68,68,0.04) 0%, transparent 60%)',
+            ? 'radial-gradient(ellipse, rgba(123,47,255,0.25) 0%, rgba(99,102,241,0.15) 38%, transparent 66%)'
+            : 'radial-gradient(ellipse, rgba(239,68,68,0.18) 0%, rgba(123,47,255,0.10) 40%, transparent 68%)',
+          opacity: [0.45, 0.72, 0.45],
+          scale: [1, 1.08, 1],
         }}
-        transition={{ duration: 0.8, ease: 'easeInOut' }}
-        style={{ position: 'absolute', top: '15%', left: '-8%', width: '500px', height: '400px', filter: 'blur(90px)', pointerEvents: 'none', zIndex: 0 }}
+        transition={{ duration: 8.5, repeat: Infinity, ease: 'easeInOut' }}
+        style={{ position: 'absolute', top: '-12%', left: '-14%', width: '640px', height: '540px', filter: 'blur(96px)', pointerEvents: 'none', zIndex: 0 }}
       />
-      <div
+      <motion.div
         aria-hidden="true"
-        style={{ position: 'absolute', top: '15%', right: '-8%', width: '600px', height: '500px', background: 'radial-gradient(ellipse, rgba(99,102,241,0.06) 0%, transparent 60%)', filter: 'blur(100px)', pointerEvents: 'none', zIndex: 0 }}
+        animate={effectiveIsReduced ? undefined : { x: ['-10%', '8%', '-10%'], y: ['-5%', '6%', '-5%'], opacity: [0.22, 0.45, 0.22] }}
+        transition={{ duration: 16, repeat: Infinity, ease: 'easeInOut' }}
+        style={{
+          position: 'absolute',
+          top: '8%',
+          right: '-16%',
+          width: '760px',
+          height: '560px',
+          background: 'radial-gradient(ellipse, rgba(99,102,241,0.24) 0%, rgba(123,47,255,0.12) 38%, transparent 70%)',
+          filter: 'blur(115px)',
+          pointerEvents: 'none',
+          zIndex: 0,
+        }}
       />
-      <div
+      <motion.div
         aria-hidden="true"
-        style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: '700px', height: '300px', background: 'radial-gradient(ellipse, rgba(123,47,255,0.03) 0%, transparent 65%)', filter: 'blur(120px)', pointerEvents: 'none', zIndex: 0 }}
+        animate={effectiveIsReduced ? undefined : { x: ['0%', '6%', '0%'], opacity: [0.2, 0.34, 0.2] }}
+        transition={{ duration: 20, repeat: Infinity, ease: 'easeInOut' }}
+        style={{
+          position: 'absolute',
+          inset: '-20% -10%',
+          pointerEvents: 'none',
+          zIndex: 0,
+          background: 'linear-gradient(115deg, transparent 12%, rgba(123,47,255,0.07) 38%, rgba(99,102,241,0.08) 54%, transparent 82%)',
+          filter: 'blur(22px)',
+        }}
       />
+      {ambientOrbs.map((orb, index) => (
+        <motion.div
+          key={`${orb.rgb}-${index}`}
+          aria-hidden="true"
+          animate={effectiveIsReduced ? undefined : { y: [0, -16, 0], scale: [1, 1.08, 1], opacity: [0.2, 0.36, 0.2] }}
+          transition={{ duration: orb.duration, repeat: Infinity, ease: 'easeInOut', delay: orb.delay }}
+          style={{
+            position: 'absolute',
+            width: `${orb.size}px`,
+            height: `${orb.size}px`,
+            borderRadius: '999px',
+            pointerEvents: 'none',
+            zIndex: 0,
+            filter: 'blur(24px)',
+            background: `radial-gradient(circle, rgba(${orb.rgb},0.35), rgba(${orb.rgb},0))`,
+            ...(orb.top ? { top: orb.top } : {}),
+            ...(orb.bottom ? { bottom: orb.bottom } : {}),
+            ...(orb.left ? { left: orb.left } : {}),
+            ...(orb.right ? { right: orb.right } : {}),
+          }}
+        />
+      ))}
 
       <svg style={{ position: 'absolute', width: 0, height: 0 }}>
         <filter id="noise">
@@ -485,12 +581,12 @@ export default function PainBentoSoftware() {
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[14px]">
-          <BentoFlipCard pair={bentoPairs[0]} gridStyle={{ gridColumn: 'span 2' }} isInView={isInView} onFirstFlip={handleFirstFlip} onFlipChange={handleFlipChange} />
-          <BentoFlipCard pair={bentoPairs[3]} gridStyle={{ gridRow: 'span 2' }} isInView={isInView} onFirstFlip={handleFirstFlip} onFlipChange={handleFlipChange} />
-          <BentoFlipCard pair={bentoPairs[1]} gridStyle={{}} isInView={isInView} onFirstFlip={handleFirstFlip} onFlipChange={handleFlipChange} />
-          <BentoFlipCard pair={bentoPairs[2]} gridStyle={{}} isInView={isInView} onFirstFlip={handleFirstFlip} onFlipChange={handleFlipChange} />
-          <BentoFlipCard pair={bentoPairs[4]} gridStyle={{}} isInView={isInView} onFirstFlip={handleFirstFlip} onFlipChange={handleFlipChange} />
-          <BentoFlipCard pair={bentoPairs[5]} gridStyle={{ gridColumn: 'span 2' }} isInView={isInView} onFirstFlip={handleFirstFlip} onFlipChange={handleFlipChange} />
+          <BentoFlipCard pair={bentoPairs[0]} gridStyle={{ gridColumn: 'span 2' }} onFirstFlip={handleFirstFlip} onFlipChange={handleFlipChange} />
+          <BentoFlipCard pair={bentoPairs[3]} gridStyle={{ gridRow: 'span 2' }} onFirstFlip={handleFirstFlip} onFlipChange={handleFlipChange} />
+          <BentoFlipCard pair={bentoPairs[1]} gridStyle={{}} onFirstFlip={handleFirstFlip} onFlipChange={handleFlipChange} />
+          <BentoFlipCard pair={bentoPairs[2]} gridStyle={{}} onFirstFlip={handleFirstFlip} onFlipChange={handleFlipChange} />
+          <BentoFlipCard pair={bentoPairs[4]} gridStyle={{}} onFirstFlip={handleFirstFlip} onFlipChange={handleFlipChange} />
+          <BentoFlipCard pair={bentoPairs[5]} gridStyle={{ gridColumn: 'span 2' }} onFirstFlip={handleFirstFlip} onFlipChange={handleFlipChange} />
         </div>
 
         <AnimatePresence>

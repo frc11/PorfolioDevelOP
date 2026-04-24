@@ -13,6 +13,11 @@ import SocialProofSoftware from '@/components/software/SocialProofSoftware'
 import FaqSoftware from '@/components/software/FaqSoftware'
 import { SoftwareDevelopmentCta } from '@/components/sections/software-development/SoftwareDevelopmentCta'
 
+// Structural scope for this phase:
+// Removed from page flow:
+// - ProcesoSoftware (vertical timeline)
+// - VaultSoftware (bank-grade security block)
+
 // Section reveal with scroll-triggered fade + slide
 const SectionReveal = ({
     children,
@@ -31,7 +36,7 @@ const SectionReveal = ({
     </motion.div>
 )
 
-// Thin gradient divider — indigo/violet palette for software
+// Thin gradient divider - indigo/violet palette for software
 const SectionDivider = () => (
     <motion.div
         initial={{ scaleX: 0, opacity: 0 }}
@@ -56,7 +61,7 @@ export default function SoftwareDevelopmentPage() {
                 style={{ backgroundImage: "url('https://grainy-gradients.vercel.app/noise.svg')" }}
             />
 
-            {/* Global top glow — indigo aurora */}
+            {/* Global top glow - indigo aurora */}
             <div
                 aria-hidden="true"
                 className="pointer-events-none fixed top-0 left-1/2 -translate-x-1/2 w-[1100px] h-[700px] opacity-25 z-0"
@@ -76,66 +81,74 @@ export default function SoftwareDevelopmentPage() {
                 }}
             />
 
-            {/* The Cinematic Hero Section — no reveal, loads immediately */}
+            {/* 1) Hero */}
             <HeroSoftware />
 
-            {/* Post-hero sections with staggered reveal animations */}
+            {/* 2) Todos los datos en una sola pantalla */}
             <SectionReveal>
                 <DashboardMockupSoftware />
             </SectionReveal>
 
             <SectionDivider />
 
+            {/* 3) Arquitectura B2B */}
             <SectionReveal delay={0.05}>
                 <ArchitectureSoftware />
             </SectionReveal>
 
             <SectionDivider />
 
+            {/* 4) Letras scrolling */}
             <SectionReveal delay={0.05}>
                 <StatementSoftware />
             </SectionReveal>
 
             <SectionDivider />
 
+            {/* 5) Conocemos tu empresa */}
             <SectionReveal delay={0.05}>
                 <PainBentoSoftware />
             </SectionReveal>
 
             <SectionDivider />
 
+            {/* 6) ROI */}
             <SectionReveal delay={0.05}>
                 <RoiSoftware />
             </SectionReveal>
 
             <SectionDivider />
 
+            {/* 7) Diagnostico */}
             <SectionReveal delay={0.05}>
                 <DiagnosticoSoftware />
             </SectionReveal>
 
             <SectionDivider />
 
+            {/* 8) Timeline horizontal */}
             <PipelineSoftware />
 
             <SectionDivider />
 
+            {/* 9) Testimonios */}
             <SectionReveal delay={0.05}>
                 <SocialProofSoftware />
             </SectionReveal>
 
             <SectionDivider />
 
+            {/* 10) FAQ */}
             <SectionReveal delay={0.05}>
                 <FaqSoftware />
             </SectionReveal>
 
             <SectionDivider />
 
+            {/* 11) CTA */}
             <SectionReveal delay={0.05}>
                 <SoftwareDevelopmentCta />
             </SectionReveal>
-
         </main>
     )
 }
