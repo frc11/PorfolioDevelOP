@@ -92,14 +92,28 @@ function Header({ isInView }: { isInView: boolean }) {
   const shouldReduceMotion = useReducedMotion()
 
   return (
-    <div className="text-center mb-10 md:mb-16">
+    <div className="text-center mb-10 md:mb-16 flex flex-col items-center">
       <motion.div
         initial={shouldReduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: -10 }}
         animate={isInView ? { opacity: 1, y: 0 } : {}}
         transition={{ duration: 0.6, delay: 0.1 }}
-        className="inline-flex items-center gap-2 border border-amber-500/30 rounded-full px-4 py-1.5 mb-6 bg-amber-500/5"
+        className="relative overflow-hidden inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/[0.05] px-4 py-1.5 mb-6"
       >
-        <span className="text-[10px] sm:text-[11px] font-mono tracking-[0.2em] text-amber-500 font-bold">
+        <motion.span
+          aria-hidden="true"
+          animate={shouldReduceMotion ? {} : { x: ['-150%', '250%'] }}
+          transition={{ duration: 1.8, repeat: Infinity, repeatDelay: 4.2, ease: 'easeInOut' }}
+          style={{
+            position: 'absolute',
+            inset: 0,
+            background: 'linear-gradient(90deg, transparent, rgba(245,158,11,0.2), transparent)',
+            borderRadius: '100px',
+            pointerEvents: 'none',
+            display: shouldReduceMotion ? 'none' : 'block',
+          }}
+        />
+        <span className="h-1.5 w-1.5 rounded-full bg-amber-500 shrink-0" style={{ animation: shouldReduceMotion ? 'none' : 'pulse 1.8s ease-in-out infinite', boxShadow: '0 0 8px rgba(245,158,11,0.9)' }} />
+        <span className="text-[10px] sm:text-[11px] font-mono tracking-[0.2em] text-amber-500 font-bold uppercase relative z-10">
           [ LA MÁQUINA DEL TIEMPO ]
         </span>
       </motion.div>
@@ -113,16 +127,35 @@ function Header({ isInView }: { isInView: boolean }) {
       >
         Automatizar no es un gasto.
         <br />
-        <span className="bg-gradient-to-r from-[#f59e0b] to-[#f97316] bg-clip-text text-transparent">
-          &ldquo;Es comprar tiempo de vida.&rdquo;
-        </span>
+        <div className="relative inline-block mt-1">
+            <span className="bg-gradient-to-r from-[#f59e0b] to-[#f97316] bg-clip-text text-transparent">
+            &ldquo;Es comprar tiempo de vida.&rdquo;
+            </span>
+            {!shouldReduceMotion && (
+                <motion.div
+                    initial={{ scaleX: 0, opacity: 0 }}
+                    animate={isInView ? { scaleX: 1, opacity: 1 } : {}}
+                    transition={{ duration: 0.9, delay: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                    style={{
+                        position: 'absolute',
+                        bottom: '-4px',
+                        left: '0%',
+                        right: '0%',
+                        height: '2px',
+                        background: 'linear-gradient(90deg, transparent, #f59e0b 40%, #f97316 60%, transparent)',
+                        transformOrigin: 'left',
+                        filter: 'blur(0.5px)',
+                    }}
+                />
+            )}
+        </div>
       </motion.h2>
 
       <motion.p
         initial={shouldReduceMotion ? { opacity: 1 } : { opacity: 0 }}
         animate={isInView ? { opacity: 1 } : {}}
         transition={{ duration: 0.6, delay: 0.38 }}
-        className="text-white/40 text-base md:text-lg max-w-xl mx-auto"
+        className="text-white/40 text-base md:text-lg max-w-xl mx-auto mt-2"
       >
         Mové el slider y mirá cuántas horas recupera tu equipo este mes.
       </motion.p>
@@ -454,6 +487,15 @@ function OdometerSide({ resultados, isInView }: { resultados: ROIResultados, isI
           transition: 'none',
         }}
       >
+        <span style={{ position: 'absolute', top: 0, left: 0, width: '1px', height: '18px', background: `rgba(245,158,11,0.4)`, borderTopLeftRadius: '22px', zIndex: 10 }} />
+        <span style={{ position: 'absolute', top: 0, left: 0, height: '1px', width: '18px', background: `rgba(245,158,11,0.4)`, borderTopLeftRadius: '22px', zIndex: 10 }} />
+        <span style={{ position: 'absolute', top: 0, right: 0, width: '1px', height: '18px', background: `rgba(245,158,11,0.4)`, borderTopRightRadius: '22px', zIndex: 10 }} />
+        <span style={{ position: 'absolute', top: 0, right: 0, height: '1px', width: '18px', background: `rgba(245,158,11,0.4)`, borderTopRightRadius: '22px', zIndex: 10 }} />
+        <span style={{ position: 'absolute', bottom: 0, left: 0, width: '1px', height: '18px', background: `rgba(245,158,11,0.4)`, borderBottomLeftRadius: '22px', zIndex: 10 }} />
+        <span style={{ position: 'absolute', bottom: 0, left: 0, height: '1px', width: '18px', background: `rgba(245,158,11,0.4)`, borderBottomLeftRadius: '22px', zIndex: 10 }} />
+        <span style={{ position: 'absolute', bottom: 0, right: 0, width: '1px', height: '18px', background: `rgba(245,158,11,0.4)`, borderBottomRightRadius: '22px', zIndex: 10 }} />
+        <span style={{ position: 'absolute', bottom: 0, right: 0, height: '1px', width: '18px', background: `rgba(245,158,11,0.4)`, borderBottomRightRadius: '22px', zIndex: 10 }} />
+
         {/* Shimmer top */}
         <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-amber-500 to-transparent" style={{ opacity: 0.7 }} />
 

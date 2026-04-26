@@ -10,6 +10,7 @@ import { usePathname } from 'next/navigation';
 
 const INITIAL_DELAY = 3000;   // Show prompt 3s after page load
 const IDLE_TIMEOUT = 25000;   // Re-show after 25s of inactivity
+const SLEEP_TIMEOUT = 90000;  // 90 seconds sin actividad -> dormir
 
 const IDLE_PROMPTS: Record<string, string[]> = {
     '/web-development': [
@@ -55,13 +56,30 @@ export function LogicCompanion() {
     const pathname = usePathname();
     const activePrompts = getContextPrompts(pathname || '/');
 
+    const CONTEXT_COLORS: Record<string, 'cyan' | 'violet' | 'emerald' | 'amber'> = {
+        '/web-development': 'cyan',
+        '/ai-implementations': 'violet',
+        '/process-automation': 'amber',
+        '/software-development': 'amber', // indigo no está en palette, fallback amber
+        '/contact': 'cyan',
+    };
+
+    const getContextColor = (path: string): 'cyan' | 'violet' | 'emerald' | 'amber' | 'cycle' => {
+        for (const [key, color] of Object.entries(CONTEXT_COLORS)) {
+            if (path.includes(key)) return color;
+        }
+        return 'cycle'; // landing y otras → cycling default
+    };
+
+    const contextColor = getContextColor(pathname || '/');
+
     const [isOpen, setIsOpen] = useState(false);
     const [showPrompt, setShowPrompt] = useState(false);
     const [promptIndex, setPromptIndex] = useState(0);
     const [isBooped, setIsBooped] = useState(false);
     const [isHovered, setIsHovered] = useState(false);
     const [hoverPulse, setHoverPulse] = useState(0);
-    const [phase] = useState<AvatarPhase>('active');
+    const [phase, setPhase] = useState<AvatarPhase>('active');
     const [scrollSection, setScrollSection] = useState<string>('top');
     const { messages, input, handleInputChange, handleSubmit, isThinking } = useLogicAI();
 
@@ -113,10 +131,12 @@ export function LogicCompanion() {
     // ─── Reset the idle countdown on user activity ───────────
     const resetIdleTimer = useCallback(() => {
         if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
+        // Despertar si está durmiendo
+        if (phase === 'sleeping') setPhase('active');
         if (hasShownOnceRef.current) {
             startIdleTimer();
         }
-    }, [startIdleTimer]);
+    }, [startIdleTimer, phase]);
 
     // ─── Periodic prompt rotation (8s) ────────────────────────
     useEffect(() => {
@@ -131,6 +151,34 @@ export function LogicCompanion() {
             if (rotationTimerRef.current) clearInterval(rotationTimerRef.current);
         };
     }, [showPrompt, isOpen, activePrompts.length]);
+
+    const sleepTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    useEffect(() => {
+        // Si el chat está abierto, no dormir
+        if (isOpen) {
+            if (sleepTimerRef.current) clearTimeout(sleepTimerRef.current);
+            if (phase === 'sleeping') setPhase('active');
+            return;
+        }
+
+        // Si hay un prompt visible, no dormir
+        if (showPrompt) {
+            if (sleepTimerRef.current) clearTimeout(sleepTimerRef.current);
+            if (phase === 'sleeping') setPhase('active');
+            return;
+        }
+
+        // Arrancar el timer de sleep
+        if (sleepTimerRef.current) clearTimeout(sleepTimerRef.current);
+        sleepTimerRef.current = setTimeout(() => {
+            setPhase('sleeping');
+        }, SLEEP_TIMEOUT);
+
+        return () => {
+            if (sleepTimerRef.current) clearTimeout(sleepTimerRef.current);
+        };
+    }, [isOpen, showPrompt, phase]);
 
     // ─── Initial 3s entry + idle event listeners ─────────────
     useEffect(() => {
@@ -191,140 +239,357 @@ export function LogicCompanion() {
 
     return (
         <>
-            {/* ── Glassmorphism 3.0 Tooltip ─────────────────── */}
-            <AnimatePresence mode="wait">
-                {showPrompt && !isOpen && (
-                    <motion.div
-                        key={`prompt-${promptIndex}`}
-                        initial={{ opacity: 0, y: 8, scale: 0.96 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: 4, scale: 0.98 }}
-                        transition={{
-                            duration: 0.5,
-                            ease: [0.16, 1, 0.3, 1],
-                        }}
-                        style={{
-                            background: 'rgba(8, 10, 20, 0.72)',
-                            backdropFilter: 'blur(24px)',
-                            WebkitBackdropFilter: 'blur(24px)',
-                            border: '1px solid rgba(180, 210, 255, 0.12)',
-                            borderRadius: '16px',
-                            boxShadow: `
-                                0 0 0 1px rgba(255,255,255,0.04),
-                                0 4px 24px rgba(0,0,0,0.5),
-                                0 1px 0 rgba(255,255,255,0.08) inset,
-                                0 -1px 0 rgba(0,0,0,0.3) inset
-                            `,
-                            padding: '14px 18px',
-                            maxWidth: '240px',
-                            minWidth: '180px',
-                            position: 'absolute',
-                            bottom: '8.5rem',
-                            right: '6rem',
-                            zIndex: 101,
-                            cursor: 'pointer'
-                        }}
-                        onClick={openFromPrompt}
-                        className="hidden md:block group"
-                    >
-                        {/* Upper accent line */}
-                        <div style={{
-                            position: 'absolute',
-                            top: 0,
-                            left: '20%',
-                            right: '20%',
-                            height: '1px',
-                            background: `linear-gradient(90deg, transparent, rgba(100,160,255,0.5) 40%, rgba(140,100,255,0.5) 60%, transparent)`,
-                            borderRadius: '1px',
-                        }} />
+            {/* WRAPPER ÚNICO: avatar + tooltip se anclan acá */}
+            <div
+                style={{
+                    position: 'fixed',
+                    bottom: '0.5rem',
+                    right: '0.5rem',
+                    zIndex: 96,
+                    pointerEvents: 'none',
+                }}
+                className="md:bottom-3 md:right-3"
+            >
+                {/* TOOLTIP — anclado relativo al wrapper */}
+                <AnimatePresence mode="wait">
+                    {showPrompt && !isOpen && phase !== 'sleeping' && (
+                        <motion.div
+                            key={`prompt-${promptIndex}`}
+                            initial={{ opacity: 0, y: 12, scale: 0.92, filter: 'blur(8px)' }}
+                            animate={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
+                            exit={{ opacity: 0, y: 6, scale: 0.96, filter: 'blur(4px)' }}
+                            transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
+                            onClick={openFromPrompt}
+                            className="hidden md:block group"
+                            style={{
+                                position: 'absolute',
+                                bottom: 'calc(100% - 1rem)',
+                                right: 'calc(100% - 4rem)',
+                                transformOrigin: 'bottom right',
+                                // Glassmorphism cyan-aware
+                                background: 'linear-gradient(145deg, rgba(6,182,212,0.08) 0%, rgba(8,10,22,0.82) 40%, rgba(8,10,22,0.78) 100%)',
+                                backdropFilter: 'blur(28px) saturate(180%)',
+                                WebkitBackdropFilter: 'blur(28px) saturate(180%)',
+                                border: '1px solid rgba(6,182,212,0.22)',
+                                borderRadius: '18px',
+                                boxShadow: `
+                                    0 0 0 1px rgba(255,255,255,0.04),
+                                    0 0 24px rgba(6,182,212,0.12),
+                                    0 8px 32px rgba(0,0,0,0.55),
+                                    inset 0 1px 0 rgba(6,182,212,0.15),
+                                    inset 0 -1px 0 rgba(0,0,0,0.3)
+                                `,
+                                padding: '16px 18px 14px',
+                                maxWidth: '252px',
+                                minWidth: '200px',
+                                zIndex: 101,
+                                cursor: 'pointer',
+                                pointerEvents: 'auto',
+                                overflow: 'visible',
+                            }}
+                        >
+                            {/* Accent line top — cyan */}
+                            <motion.div
+                                initial={{ scaleX: 0, opacity: 0 }}
+                                animate={{ scaleX: 1, opacity: 1 }}
+                                transition={{ duration: 0.55, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                                style={{
+                                    position: 'absolute',
+                                    top: 0,
+                                    left: '12%',
+                                    right: '12%',
+                                    height: '1px',
+                                    background: 'linear-gradient(90deg, transparent, rgba(6,182,212,0.9) 40%, rgba(124,58,237,0.7) 70%, transparent)',
+                                    transformOrigin: 'center',
+                                }}
+                            />
 
-                        {/* Content */}
-                        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
-                            {/* Pulse indicator */}
-                            <div style={{ marginTop: '3px', flexShrink: 0 }}>
-                                <div style={{
-                                    width: '6px',
-                                    height: '6px',
-                                    borderRadius: '50%',
-                                    background: '#4488ff',
-                                    boxShadow: '0 0 6px rgba(68,136,255,0.6)',
-                                    animation: 'breathe 2.5s ease-in-out infinite',
-                                }} />
+                            {/* Shimmer sweep */}
+                            <div style={{
+                                position: 'absolute',
+                                inset: 0,
+                                borderRadius: '18px',
+                                overflow: 'hidden',
+                                pointerEvents: 'none',
+                            }}>
+                                <motion.div
+                                    aria-hidden="true"
+                                    animate={{ x: ['-150%', '250%'] }}
+                                    transition={{
+                                        duration: 2.2,
+                                        repeat: Infinity,
+                                        repeatDelay: 5.5,
+                                        ease: 'easeInOut',
+                                    }}
+                                    style={{
+                                        position: 'absolute',
+                                        inset: 0,
+                                        background: 'linear-gradient(90deg, transparent, rgba(6,182,212,0.06), transparent)',
+                                        pointerEvents: 'none',
+                                        borderRadius: '18px',
+                                    }}
+                                />
                             </div>
 
-                            {/* Text */}
-                            <div>
-                                <p style={{
-                                    fontSize: '12px',
-                                    fontWeight: 500,
-                                    color: 'rgba(255,255,255,0.75)',
-                                    margin: 0,
-                                    lineHeight: 1.55,
+                            {/* Badge develOP */}
+                            <motion.div
+                                initial={{ opacity: 0, y: -4 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.4, delay: 0.15 }}
+                                style={{
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '5px',
+                                    background: 'rgba(6,182,212,0.10)',
+                                    border: '1px solid rgba(6,182,212,0.25)',
+                                    borderRadius: '100px',
+                                    padding: '3px 9px',
+                                    marginBottom: '10px',
+                                }}
+                            >
+                                <div style={{
+                                    width: '5px',
+                                    height: '5px',
+                                    borderRadius: '50%',
+                                    background: '#06b6d4',
+                                    boxShadow: '0 0 6px rgba(6,182,212,0.9)',
+                                    animation: 'breathe 2.2s ease-in-out infinite',
+                                    flexShrink: 0,
+                                }} />
+                                <span style={{
+                                    fontSize: '9px',
+                                    fontWeight: 700,
+                                    letterSpacing: '0.18em',
+                                    color: 'rgba(6,182,212,0.85)',
+                                    fontFamily: 'ui-monospace, monospace',
+                                    textTransform: 'uppercase',
+                                }}>
+                                    develOP · IA
+                                </span>
+                            </motion.div>
+
+                            {/* Texto principal — más bold y legible */}
+                            <motion.p
+                                initial={{ opacity: 0, y: 6 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.45, delay: 0.25 }}
+                                style={{
+                                    fontSize: '13.5px',
+                                    fontWeight: 600,
+                                    color: 'rgba(255,255,255,0.92)',
+                                    margin: '0 0 10px',
+                                    lineHeight: 1.5,
                                     letterSpacing: '0.01em',
                                     fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-                                }}>
-                                    {activePrompts[promptIndex % activePrompts.length]}
-                                </p>
+                                }}
+                            >
+                                {activePrompts[promptIndex % activePrompts.length]}
+                            </motion.p>
 
-                                {/* Micro CTA */}
-                                <p style={{
-                                    fontSize: '11px',
-                                    color: 'rgba(100,160,255,0.6)',
-                                    margin: '5px 0 0',
-                                    fontWeight: 500,
-                                    letterSpacing: '0.02em',
-                                }}>
-                                    Escribime →
-                                </p>
-                            </div>
-                        </div>
+                            {/* CTA con flecha animada */}
+                            <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                transition={{ duration: 0.35, delay: 0.38 }}
+                                style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'space-between',
+                                }}
+                            >
+                                <motion.span
+                                    style={{
+                                        fontSize: '11px',
+                                        color: 'rgba(6,182,212,0.75)',
+                                        fontWeight: 600,
+                                        letterSpacing: '0.04em',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '5px',
+                                        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+                                    }}
+                                >
+                                    Escribime
+                                    <motion.span
+                                        animate={{ x: [0, 4, 0] }}
+                                        transition={{ duration: 1.3, repeat: Infinity, ease: 'easeInOut' }}
+                                        style={{ display: 'inline-block' }}
+                                    >
+                                        →
+                                    </motion.span>
+                                </motion.span>
 
-                        {/* Close button */}
-                        <button
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                dismissPrompt();
-                            }}
-                            className="absolute top-2.5 right-2.5 p-1 text-zinc-500 hover:text-cyan-400 hover:bg-cyan-400/10 transition-colors duration-200"
-                            aria-label="Dismiss"
-                        >
-                            <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.5">
-                                <path d="M1 1l8 8M9 1l-8 8" />
+                                {/* Hint de tecla */}
+                                <span style={{
+                                    fontSize: '9px',
+                                    color: 'rgba(255,255,255,0.18)',
+                                    fontFamily: 'ui-monospace, monospace',
+                                    background: 'rgba(255,255,255,0.05)',
+                                    border: '1px solid rgba(255,255,255,0.08)',
+                                    borderRadius: '4px',
+                                    padding: '2px 5px',
+                                    letterSpacing: '0.04em',
+                                }}>
+                                    click
+                                </span>
+                            </motion.div>
+
+                            {/* Close button */}
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation()
+                                    dismissPrompt()
+                                }}
+                                style={{
+                                    position: 'absolute',
+                                    top: '10px',
+                                    right: '10px',
+                                    width: '22px',
+                                    height: '22px',
+                                    borderRadius: '50%',
+                                    background: 'rgba(255,255,255,0.04)',
+                                    border: '1px solid rgba(255,255,255,0.08)',
+                                    color: 'rgba(255,255,255,0.3)',
+                                    fontSize: '12px',
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    transition: 'all 150ms',
+                                    padding: 0,
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.currentTarget.style.background = 'rgba(6,182,212,0.12)'
+                                    e.currentTarget.style.borderColor = 'rgba(6,182,212,0.3)'
+                                    e.currentTarget.style.color = 'rgba(6,182,212,0.9)'
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.currentTarget.style.background = 'rgba(255,255,255,0.04)'
+                                    e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'
+                                    e.currentTarget.style.color = 'rgba(255,255,255,0.3)'
+                                }}
+                                aria-label="Dismiss"
+                            >
+                                ×
+                            </button>
+
+                            {/* TAIL: SVG que conecta tooltip → avatar */}
+                            <svg
+                                aria-hidden="true"
+                                width="80"
+                                height="60"
+                                viewBox="0 0 80 60"
+                                style={{
+                                    position: 'absolute',
+                                    bottom: '-52px',
+                                    right: '-24px',
+                                    pointerEvents: 'none',
+                                    overflow: 'visible',
+                                    zIndex: -1,
+                                }}
+                            >
+                                <defs>
+                                    <linearGradient id="tailGradientLogic" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" stopColor="rgba(100,160,255,0.55)" />
+                                        <stop offset="50%" stopColor="rgba(140,100,255,0.35)" />
+                                        <stop offset="100%" stopColor="rgba(140,100,255,0)" />
+                                    </linearGradient>
+                                    <filter id="tailGlowLogic">
+                                        <feGaussianBlur stdDeviation="1.5" result="blur" />
+                                        <feMerge>
+                                            <feMergeNode in="blur" />
+                                            <feMergeNode in="SourceGraphic" />
+                                        </feMerge>
+                                    </filter>
+                                </defs>
+
+                                <motion.path
+                                    d="M 8 0 Q 40 28, 65 52"
+                                    stroke="url(#tailGradientLogic)"
+                                    strokeWidth="1.5"
+                                    strokeLinecap="round"
+                                    fill="none"
+                                    filter="url(#tailGlowLogic)"
+                                    initial={{ pathLength: 0, opacity: 0 }}
+                                    animate={{ pathLength: 1, opacity: 1 }}
+                                    transition={{ duration: 0.7, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
+                                />
+
+                                <motion.circle
+                                    cx="65"
+                                    cy="52"
+                                    r="2"
+                                    fill="rgba(140,100,255,0.9)"
+                                    filter="url(#tailGlowLogic)"
+                                    animate={{ opacity: [0.4, 1, 0.4], scale: [0.8, 1.4, 0.8] }}
+                                    transition={{
+                                        duration: 1.8,
+                                        repeat: Infinity,
+                                        ease: 'easeInOut',
+                                        delay: 0.7,
+                                    }}
+                                />
+
+                                <motion.circle
+                                    r="1.5"
+                                    fill="rgba(180,200,255,1)"
+                                    filter="url(#tailGlowLogic)"
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: [0, 1, 0] }}
+                                    transition={{
+                                        duration: 2,
+                                        repeat: Infinity,
+                                        ease: 'easeInOut',
+                                        delay: 1,
+                                    }}
+                                >
+                                    <animateMotion
+                                        dur="2s"
+                                        repeatCount="indefinite"
+                                        begin="1s"
+                                        path="M 8 0 Q 40 28, 65 52"
+                                    />
+                                </motion.circle>
                             </svg>
-                        </button>
-                    </motion.div>
-                )}
-            </AnimatePresence>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
 
-            {/* ── NeuroAvatar ──────────────────────────────── */}
-            <div 
-                onClick={handleAvatarClick} 
-                onMouseEnter={() => {
-                    setIsHovered(true);
-                    setHoverPulse((prev) => prev + 1);
-                }}
-                onMouseLeave={() => setIsHovered(false)}
-                role="button" 
-                aria-label="Toggle AI Chat"
-                style={{ cursor: 'pointer' }}
-            >
-                <NeuroAvatar 
-                    isThinking={isThinking} 
-                    showPrompt={showPrompt && !isOpen} 
-                    isBooped={isBooped} 
-                    isHovered={isHovered}
-                    isOpen={isOpen} 
-                    phase={phase}
-                    scrollSection={scrollSection}
-                    messagePulse={messagePulse}
-                    lastMessageRole={lastMessageRole}
-                    hoverPulse={hoverPulse}
-                />
+                {/* AVATAR: ahora es child del wrapper (no fixed) */}
+                <div
+                    onClick={handleAvatarClick}
+                    onMouseEnter={() => {
+                        setIsHovered(true);
+                        setHoverPulse((prev) => prev + 1);
+                        if (phase === 'sleeping') setPhase('active');
+                    }}
+                    onMouseLeave={() => setIsHovered(false)}
+                    role="button"
+                    aria-label="Toggle AI Chat"
+                    style={{
+                        cursor: 'pointer',
+                        pointerEvents: 'auto',
+                        position: 'relative',
+                    }}
+                >
+                    <NeuroAvatar
+                        isThinking={isThinking}
+                        showPrompt={showPrompt && !isOpen}
+                        isBooped={isBooped}
+                        isHovered={isHovered}
+                        isOpen={isOpen}
+                        phase={phase}
+                        scrollSection={scrollSection}
+                        messagePulse={messagePulse}
+                        lastMessageRole={lastMessageRole}
+                        hoverPulse={hoverPulse}
+                        contextColor={contextColor}
+                        embedded
+                    />
+                </div>
             </div>
 
-
-
-            {/* ── Chat Window ─────────────────────────────── */}
+            {/* Chat Window queda fuera del wrapper porque tiene su propia posición */}
             <ChatWindow
                 messages={messages}
                 input={input}

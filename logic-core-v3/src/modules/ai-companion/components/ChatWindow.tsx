@@ -21,8 +21,6 @@ function getTextContent(message: { content?: unknown } | null | undefined): stri
     return '';
 }
 
-
-
 interface ChatWindowProps {
     messages: Message[];
     input: string;
@@ -80,6 +78,7 @@ export function ChatWindow({
     };
 
     return (
+        <>
         <AnimatePresence>
             {isOpen && (
                 <>
@@ -90,7 +89,7 @@ export function ChatWindow({
                         exit={{ opacity: 0 }}
                         onClick={onClose}
                         className="fixed inset-0 bg-black/60 backdrop-blur-md z-[90]"
-                        style={{ pointerEvents: 'auto' }}
+                        style={{ pointerEvents: 'auto', cursor: 'auto' }}
                         aria-hidden="true"
                     />
 
@@ -103,6 +102,7 @@ export function ChatWindow({
                         className="fixed bottom-4 left-4 right-4 z-[100] flex flex-col md:bottom-[16rem] md:left-auto md:right-6 md:w-[420px]"
                         style={{
                             pointerEvents: 'auto',
+                            cursor: 'auto',
                             background: 'linear-gradient(180deg, rgba(11, 14, 28, 0.92) 0%, rgba(6, 8, 18, 0.9) 100%)',
                             backdropFilter: 'blur(32px)',
                             WebkitBackdropFilter: 'blur(32px)',
@@ -136,30 +136,98 @@ export function ChatWindow({
                                 position: 'absolute',
                                 top: 0, left: '15%', right: '15%',
                                 height: '1px',
-                                background: `linear-gradient(90deg,
-                                    transparent,
-                                    rgba(80,120,255,0.6) 30%,
-                                    rgba(120,80,255,0.6) 70%,
-                                    transparent)`,
+                                background: 'linear-gradient(90deg, transparent, rgba(6,182,212,0.65) 35%, rgba(124,58,237,0.5) 65%, transparent)',
                             }} />
 
                             {/* Avatar mini del asistente */}
                             <div style={{
-                                width: '36px', height: '36px',
+                                width: '38px',
+                                height: '38px',
                                 borderRadius: '50%',
-                                background: 'radial-gradient(circle at 35% 35%, rgba(118,165,255,0.95) 0%, rgba(84,120,255,0.38) 42%, rgba(120,85,255,0.16) 100%)',
-                                border: '1px solid rgba(130,165,255,0.28)',
+                                background: 'radial-gradient(circle at 38% 35%, rgba(6,182,212,0.95) 0%, rgba(6,182,212,0.55) 45%, rgba(6,182,212,0.18) 100%)',
+                                border: '1px solid rgba(6,182,212,0.35)',
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
                                 flexShrink: 0,
-                                boxShadow: '0 0 22px rgba(84,120,255,0.18)',
+                                boxShadow: '0 0 18px rgba(6,182,212,0.25), inset 0 1px 0 rgba(255,255,255,0.2)',
+                                position: 'relative',
+                                overflow: 'hidden',
                             }}>
+                                {/* Face SVG inline */}
+                                <svg
+                                    width="22"
+                                    height="20"
+                                    viewBox="0 0 22 20"
+                                    fill="none"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                >
+                                    {/* Ojo izquierdo */}
+                                    <motion.ellipse
+                                        cx="7"
+                                        cy="9"
+                                        rx="2"
+                                        ry={isThinking ? 0.4 : 2}
+                                        fill="white"
+                                        fillOpacity="0.95"
+                                        animate={{
+                                            ry: isThinking ? 0.4 : [2, 0.15, 2],
+                                        }}
+                                        transition={{
+                                            ry: isThinking
+                                                ? { duration: 0.3 }
+                                                : { duration: 0.12, times: [0, 0.5, 1], repeat: Infinity, repeatDelay: 4.2 },
+                                        }}
+                                        style={{ filter: 'drop-shadow(0 0 3px rgba(6,182,212,0.8))' }}
+                                    />
+                                    {/* Ojo derecho */}
+                                    <motion.ellipse
+                                        cx="15"
+                                        cy="9"
+                                        rx="2"
+                                        ry={isThinking ? 0.4 : 2}
+                                        fill="white"
+                                        fillOpacity="0.95"
+                                        animate={{
+                                            ry: isThinking ? 0.4 : [2, 0.15, 2],
+                                        }}
+                                        transition={{
+                                            ry: isThinking
+                                                ? { duration: 0.3 }
+                                                : { duration: 0.12, times: [0, 0.5, 1], repeat: Infinity, repeatDelay: 4.2, delay: 0.04 },
+                                        }}
+                                        style={{ filter: 'drop-shadow(0 0 3px rgba(6,182,212,0.8))' }}
+                                    />
+                                    {/* Boca */}
+                                    <motion.path
+                                        d={isThinking ? 'M 7 15 Q 11 14 15 15' : 'M 7 15 Q 11 18 15 15'}
+                                        stroke="white"
+                                        strokeOpacity="0.85"
+                                        strokeWidth="1.5"
+                                        strokeLinecap="round"
+                                        fill="none"
+                                        animate={{
+                                            d: isThinking
+                                                ? 'M 7 15 Q 11 14 15 15'
+                                                : 'M 7 15 Q 11 18 15 15',
+                                        }}
+                                        transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                                        style={{ filter: 'drop-shadow(0 0 2px rgba(6,182,212,0.6))' }}
+                                    />
+                                </svg>
+
+                                {/* Shimmer interior */}
                                 <div style={{
-                                    width: '18px', height: '18px',
+                                    position: 'absolute',
+                                    top: '15%',
+                                    left: '20%',
+                                    width: '30%',
+                                    height: '20%',
+                                    background: 'rgba(255,255,255,0.35)',
                                     borderRadius: '50%',
-                                    background: 'radial-gradient(circle, rgba(215,232,255,0.98) 0%, rgba(143,176,255,0.55) 58%, rgba(80,100,255,0.1) 100%)',
-                                    boxShadow: '0 0 14px rgba(120,168,255,0.55)',
+                                    filter: 'blur(3px)',
+                                    transform: 'rotate(-30deg)',
+                                    pointerEvents: 'none',
                                 }} />
                             </div>
 
@@ -181,7 +249,36 @@ export function ChatWindow({
                                     margin: 0,
                                     fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
                                 }}>
-                                    {isThinking ? 'Analizando tu consulta...' : '● Disponible ahora'}
+                                    {isThinking ? (
+                                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                                            <span>Pensando</span>
+                                            <span style={{ display: 'inline-flex', gap: '2px' }}>
+                                                <motion.span
+                                                    animate={{ opacity: [0.3, 1, 0.3] }}
+                                                    transition={{ duration: 1.4, repeat: Infinity, ease: 'easeInOut', delay: 0 }}
+                                                    style={{ display: 'inline-block' }}
+                                                >
+                                                    ·
+                                                </motion.span>
+                                                <motion.span
+                                                    animate={{ opacity: [0.3, 1, 0.3] }}
+                                                    transition={{ duration: 1.4, repeat: Infinity, ease: 'easeInOut', delay: 0.2 }}
+                                                    style={{ display: 'inline-block' }}
+                                                >
+                                                    ·
+                                                </motion.span>
+                                                <motion.span
+                                                    animate={{ opacity: [0.3, 1, 0.3] }}
+                                                    transition={{ duration: 1.4, repeat: Infinity, ease: 'easeInOut', delay: 0.4 }}
+                                                    style={{ display: 'inline-block' }}
+                                                >
+                                                    ·
+                                                </motion.span>
+                                            </span>
+                                        </span>
+                                    ) : (
+                                        '● Disponible ahora'
+                                    )}
                                 </p>
                             </div>
 
@@ -264,18 +361,24 @@ export function ChatWindow({
                                                 lineHeight: 1.68,
                                                 fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
                                                 boxShadow: m.role === 'user'
-                                                    ? '0 12px 28px rgba(39,56,126,0.18)'
-                                                    : '0 10px 24px rgba(0,0,0,0.18)',
+                                                    ? '0 4px 16px rgba(6,182,212,0.12), 0 2px 8px rgba(0,0,0,0.25)'
+                                                    : '0 2px 12px rgba(0,0,0,0.2)',
                                                 ...(m.role === 'user' ? {
-                                                    background: 'linear-gradient(135deg, rgba(69,97,255,0.22), rgba(108,72,255,0.14))',
-                                                    border: '1px solid rgba(101,124,255,0.26)',
+                                                    background: 'linear-gradient(135deg, rgba(6,182,212,0.18) 0%, rgba(124,58,237,0.12) 100%)',
+                                                    border: '1px solid rgba(6,182,212,0.28)',
                                                     borderRadius: '18px 6px 18px 18px',
-                                                    color: 'rgba(255,255,255,0.92)',
+                                                    color: 'rgba(255,255,255,0.94)',
                                                 } : {
-                                                    background: 'rgba(255,255,255,0.045)',
-                                                    border: '1px solid rgba(255,255,255,0.07)',
-                                                    borderRadius: '8px 18px 18px 18px',
-                                                    color: 'rgba(255,255,255,0.84)',
+                                                    background: 'rgba(255,255,255,0.038)',
+                                                    borderTop: '1px solid rgba(255,255,255,0.08)',
+                                                    borderRight: '1px solid rgba(255,255,255,0.08)',
+                                                    borderBottom: '1px solid rgba(255,255,255,0.08)',
+                                                    borderLeft: '2px solid rgba(6,182,212,0.38)',
+                                                    borderTopLeftRadius: '6px',
+                                                    borderTopRightRadius: '18px',
+                                                    borderBottomRightRadius: '18px',
+                                                    borderBottomLeftRadius: '18px',
+                                                    color: 'rgba(255,255,255,0.88)',
                                                 })
                                             }}>
                                                 <div className="prose prose-invert prose-sm max-w-none">
@@ -395,37 +498,82 @@ export function ChatWindow({
                                     <motion.div
                                         initial={{ opacity: 0, y: 8 }}
                                         animate={{ opacity: 1, y: 0 }}
-                                        exit={{ opacity: 0 }}
-                                        style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 14px' }}
+                                        exit={{ opacity: 0, y: 4 }}
+                                        style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '12px',
+                                        padding: '8px 14px',
+                                        }}
                                     >
+                                        {/* Mini blob pulsante pensando */}
                                         <div style={{
-                                            width: '120px',
-                                            height: '2px',
-                                            background: 'rgba(255,255,255,0.06)',
-                                            borderRadius: '100px',
-                                            overflow: 'hidden',
-                                            position: 'relative',
+                                        width: '28px',
+                                        height: '28px',
+                                        borderRadius: '50%',
+                                        background: 'radial-gradient(circle at 38% 35%, rgba(6,182,212,0.9) 0%, rgba(6,182,212,0.4) 60%, rgba(6,182,212,0.1) 100%)',
+                                        border: '1px solid rgba(6,182,212,0.3)',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        flexShrink: 0,
+                                        boxShadow: '0 0 10px rgba(6,182,212,0.2)',
+                                        animation: 'thinkPulse 1.8s ease-in-out infinite',
                                         }}>
+                                        {/* Ojos cerrados del blob pensando */}
+                                        <svg width="14" height="10" viewBox="0 0 14 10" fill="none">
+                                            <motion.line
+                                            x1="2" y1="4" x2="5" y2="4"
+                                            stroke="white" strokeOpacity="0.9"
+                                            strokeWidth="1.2" strokeLinecap="round"
+                                            animate={{ y1: [4, 3.5, 4], y2: [4, 3.5, 4] }}
+                                            transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut' }}
+                                            />
+                                            <motion.line
+                                            x1="9" y1="4" x2="12" y2="4"
+                                            stroke="white" strokeOpacity="0.9"
+                                            strokeWidth="1.2" strokeLinecap="round"
+                                            animate={{ y1: [4, 3.5, 4], y2: [4, 3.5, 4] }}
+                                            transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut', delay: 0.1 }}
+                                            />
+                                        </svg>
+                                        </div>
+
+                                        {/* Dots orgánicos — no una barra mecánica */}
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                                        <div style={{ display: 'flex', gap: '5px', alignItems: 'center' }}>
+                                            {[0, 1, 2].map((i) => (
                                             <motion.div
-                                                animate={{ x: ['-100%', '200%'] }}
-                                                transition={{ duration: 1.4, ease: 'easeInOut', repeat: Infinity }}
+                                                key={i}
                                                 style={{
-                                                    position: 'absolute',
-                                                    top: 0, bottom: 0,
-                                                    width: '40%',
-                                                    background: 'linear-gradient(90deg, transparent, rgba(80,140,255,0.8), transparent)',
-                                                    borderRadius: '100px',
+                                                width: '5px',
+                                                height: '5px',
+                                                borderRadius: '50%',
+                                                background: `rgba(6,182,212,${0.5 + i * 0.15})`,
+                                                boxShadow: '0 0 4px rgba(6,182,212,0.4)',
+                                                }}
+                                                animate={{
+                                                scale: [1, 1.5, 1],
+                                                opacity: [0.4, 1, 0.4],
+                                                }}
+                                                transition={{
+                                                duration: 1.1,
+                                                repeat: Infinity,
+                                                ease: 'easeInOut',
+                                                delay: i * 0.18,
                                                 }}
                                             />
+                                            ))}
                                         </div>
                                         <span style={{
-                                            fontSize: '11px',
-                                            color: 'rgba(255,255,255,0.3)',
-                                            fontFamily: 'monospace',
-                                            letterSpacing: '0.08em',
+                                            fontSize: '10px',
+                                            color: 'rgba(6,182,212,0.55)',
+                                            fontFamily: 'ui-monospace, monospace',
+                                            letterSpacing: '0.1em',
                                         }}>
-                                            Procesando
+                                            pensando
                                         </span>
+                                        </div>
                                     </motion.div>
                                 )}
                             </AnimatePresence>
@@ -442,49 +590,104 @@ export function ChatWindow({
                                 display: 'flex',
                                 gap: '10px',
                                 alignItems: 'flex-end',
+                                position: 'relative',
                             }}
                         >
-                            <div style={{
+                            {/* Wrapper con glow on focus */}
+                            <div
+                            style={{
                                 flex: 1,
-                                background: 'rgba(255,255,255,0.045)',
+                                background: 'rgba(255,255,255,0.04)',
                                 border: '1px solid rgba(255,255,255,0.08)',
-                                borderRadius: '16px',
-                                padding: '11px 14px',
+                                borderRadius: '14px',
+                                padding: '10px 14px',
                                 position: 'relative',
-                                transition: 'all 200ms',
+                                transition: 'border-color 200ms, box-shadow 200ms',
                                 boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.03)',
-                            }}>
-                                <textarea
-                                    ref={inputRef}
-                                    value={input}
-                                    onChange={(e) => {
-                                        handleInputChange(e);
-                                        e.currentTarget.style.height = 'auto';
-                                        e.currentTarget.style.height = e.currentTarget.scrollHeight + 'px';
-                                    }}
-                                    onInput={(e) => {
-                                        e.currentTarget.style.height = 'auto';
-                                        e.currentTarget.style.height = e.currentTarget.scrollHeight + 'px';
-                                    }}
-                                    placeholder="Escribí tu consulta..."
-                                    disabled={isThinking}
-                                    rows={1}
-                                    style={{
-                                        background: 'transparent',
-                                        border: 'none',
-                                        outline: 'none',
-                                        color: 'rgba(255,255,255,0.85)',
-                                        fontSize: '13px',
-                                        width: '100%',
-                                        resize: 'none',
-                                        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-                                        lineHeight: 1.55,
-                                        minHeight: '20px',
-                                        maxHeight: '80px',
-                                        overflow: 'auto',
-                                    }}
-                                />
+                            }}
+                            onFocusCapture={(e) => {
+                                e.currentTarget.style.borderColor = 'rgba(6,182,212,0.35)'
+                                e.currentTarget.style.boxShadow = '0 0 0 3px rgba(6,182,212,0.08), inset 0 1px 0 rgba(255,255,255,0.03)'
+                            }}
+                            onBlurCapture={(e) => {
+                                e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'
+                                e.currentTarget.style.boxShadow = 'inset 0 1px 0 rgba(255,255,255,0.03)'
+                            }}
+                            >
+                            <textarea
+                                ref={inputRef}
+                                value={input}
+                                onChange={(e) => {
+                                handleInputChange(e)
+                                e.currentTarget.style.height = 'auto'
+                                e.currentTarget.style.height = e.currentTarget.scrollHeight + 'px'
+                                }}
+                                onInput={(e) => {
+                                e.currentTarget.style.height = 'auto'
+                                e.currentTarget.style.height = e.currentTarget.scrollHeight + 'px'
+                                }}
+                                onKeyDown={(e) => {
+                                if (e.key === 'Enter' && !e.shiftKey) {
+                                    e.preventDefault()
+                                    if (input.trim() && !isThinking) {
+                                    const form = e.currentTarget.closest('form')
+                                    if (form) form.requestSubmit()
+                                    }
+                                }
+                                }}
+                                placeholder="Escribí tu consulta..."
+                                disabled={isThinking}
+                                rows={1}
+                                style={{
+                                background: 'transparent',
+                                border: 'none',
+                                outline: 'none',
+                                color: 'rgba(255,255,255,0.88)',
+                                fontSize: '13px',
+                                width: '100%',
+                                resize: 'none',
+                                fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+                                lineHeight: 1.55,
+                                minHeight: '20px',
+                                maxHeight: '80px',
+                                overflow: 'auto',
+                                }}
+                            />
                             </div>
+
+                            {/* Hint Enter debajo del input — aparece solo si hay texto */}
+                            <AnimatePresence>
+                                {input.trim().length > 0 && !isThinking && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: 4 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0 }}
+                                    style={{
+                                    position: 'absolute',
+                                    bottom: '6px',
+                                    right: '58px',
+                                    fontSize: '9px',
+                                    color: 'rgba(255,255,255,0.2)',
+                                    fontFamily: 'ui-monospace, monospace',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '3px',
+                                    pointerEvents: 'none',
+                                    }}
+                                >
+                                    <span style={{
+                                    background: 'rgba(255,255,255,0.06)',
+                                    border: '1px solid rgba(255,255,255,0.1)',
+                                    borderRadius: '3px',
+                                    padding: '1px 4px',
+                                    fontSize: '8px',
+                                    }}>
+                                    Enter
+                                    </span>
+                                    para enviar
+                                </motion.div>
+                                )}
+                            </AnimatePresence>
 
                             {/* Botón enviar */}
                             <motion.button
@@ -496,18 +699,18 @@ export function ChatWindow({
                                 style={{
                                     width: '40px', height: '40px',
                                     borderRadius: '50%',
-                                    border: 'none',
+                                    border: '1px solid rgba(6,182,212,0.2)',
                                     cursor: isThinking || !input.trim() ? 'not-allowed' : 'pointer',
                                     background: isThinking || !input.trim()
-                                        ? 'rgba(255,255,255,0.06)'
-                                        : 'linear-gradient(135deg, rgba(60,100,255,0.8), rgba(100,60,255,0.8))',
+                                        ? 'rgba(255,255,255,0.05)'
+                                        : 'linear-gradient(135deg, rgba(6,182,212,0.85), rgba(6,182,212,0.65))',
                                     display: 'flex',
                                     alignItems: 'center',
                                     justifyContent: 'center',
                                     flexShrink: 0,
-                                    boxShadow: isThinking || !input.trim() ? 'none' : '0 0 18px rgba(80,100,255,0.32)',
+                                    boxShadow: isThinking || !input.trim() ? 'none' : '0 0 16px rgba(6,182,212,0.3), 0 2px 8px rgba(0,0,0,0.3)',
                                     transition: 'all 200ms',
-                                    color: 'white',
+                                    color: isThinking || !input.trim() ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.95)',
                                 }}
                                 aria-label="Send message"
                             >
@@ -518,5 +721,12 @@ export function ChatWindow({
                 </>
             )}
         </AnimatePresence>
+        <style jsx global>{`
+            @keyframes thinkPulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 10px rgba(6,182,212,0.2); }
+            50% { transform: scale(1.08); box-shadow: 0 0 18px rgba(6,182,212,0.45); }
+            }
+        `}</style>
+        </>
     );
 }

@@ -367,6 +367,16 @@ function FloatingStat({
   pos: React.CSSProperties; 
   delay: number 
 }) {
+  const [showLine, setShowLine] = useState(false)
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.innerWidth >= 1024) {
+      setShowLine(true)
+    }
+    const handleResize = () => setShowLine(window.innerWidth >= 1024)
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -406,6 +416,29 @@ function FloatingStat({
         <p style={{ fontSize: '18px', color: 'white', fontWeight: 900, margin: 0, letterSpacing: '-0.01em' }}>
           {value}
         </p>
+        {showLine && (
+          <svg
+            aria-hidden="true"
+            style={{
+              position: 'absolute',
+              top: '50%',
+              left: pos.right !== undefined ? 'auto' : '100%',
+              right: pos.right !== undefined ? '100%' : 'auto',
+              transform: 'translateY(-50%)',
+              width: '80px',
+              height: '2px',
+              overflow: 'visible',
+              pointerEvents: 'none',
+            }}
+          >
+            <line
+              x1="0" y1="1" x2="80" y2="1"
+              stroke="rgba(245,158,11,0.18)"
+              strokeWidth="1"
+              strokeDasharray="3 6"
+            />
+          </svg>
+        )}
       </motion.div>
     </motion.div>
   )
@@ -451,6 +484,20 @@ export default function HeroAutomation() {
         zIndex: 1,
       }}
     >
+      <div
+        aria-hidden="true"
+        style={{
+          position: 'absolute',
+          inset: 0,
+          backgroundImage: 'radial-gradient(circle, rgba(245,158,11,0.12) 1px, transparent 1px)',
+          backgroundSize: '52px 52px',
+          maskImage: 'radial-gradient(ellipse at 50% 50%, black 0%, transparent 75%)',
+          WebkitMaskImage: 'radial-gradient(ellipse at 50% 50%, black 0%, transparent 75%)',
+          opacity: 0.35,
+          pointerEvents: 'none',
+          zIndex: 0,
+        }}
+      />
       <style>{`
         @keyframes moveHand {
           0%, 100% { transform: translateX(0) }
@@ -544,6 +591,8 @@ export default function HeroAutomation() {
            animate={{ opacity: 1, y: 0 }}
            transition={{ duration: 0.6, delay: 0.2 }}
            style={{
+             position: 'relative',
+             overflow: 'hidden',
              display: 'inline-flex',
              alignItems: 'center',
              gap: '8px',
@@ -556,6 +605,19 @@ export default function HeroAutomation() {
              pointerEvents: 'none',
            }}
         >
+          <motion.span
+            aria-hidden="true"
+            animate={shouldReduceMotion ? {} : { x: ['-150%', '250%'] }}
+            transition={{ duration: 1.8, repeat: Infinity, repeatDelay: 4.2, ease: 'easeInOut' }}
+            style={{
+              position: 'absolute',
+              inset: 0,
+              background: 'linear-gradient(90deg, transparent, rgba(245,158,11,0.2), transparent)',
+              borderRadius: '100px',
+              pointerEvents: 'none',
+              display: shouldReduceMotion ? 'none' : 'block',
+            }}
+          />
           <div style={{
             width: '6px', height: '6px',
             borderRadius: '50%',
@@ -565,7 +627,7 @@ export default function HeroAutomation() {
             flexShrink: 0,
           }}/>
           <span style={{
-            fontSize: '11px',
+            fontSize: '10px',
             letterSpacing: '0.22em',
             color: '#f59e0b',
             fontWeight: 700,
@@ -583,8 +645,8 @@ export default function HeroAutomation() {
           style={{
             fontSize: 'clamp(42px, 7.5vw, 104px)',
             fontWeight: 900,
-            lineHeight: 0.97,
-            letterSpacing: '-0.04em',
+            lineHeight: 0.95,
+            letterSpacing: '-0.05em',
             margin: '0 0 clamp(18px, 2.5vh, 28px)',
             pointerEvents: 'none',
           }}
@@ -593,20 +655,39 @@ export default function HeroAutomation() {
             Eliminá el trabajo
           </span>
           <br/>
-          <span style={{
-            background: shouldReduceMotion
-                ? 'none'
-                : 'linear-gradient(135deg, #f59e0b 0%, #fbbf24 35%, #f97316 65%, #f59e0b 100%)',
-            backgroundSize: '300% 100%',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: shouldReduceMotion ? '#f59e0b' : 'transparent',
-            backgroundClip: 'text',
-            animation: shouldReduceMotion ? 'none' : 'amberShift 5s ease-in-out infinite',
-            display: 'inline-block',
-            color: shouldReduceMotion ? '#f59e0b' : 'inherit',
-          }}>
-            robótico para siempre.
-          </span>
+          <div style={{ position: 'relative', display: 'inline-block' }}>
+            <span style={{
+              background: shouldReduceMotion
+                  ? 'none'
+                  : 'linear-gradient(135deg, #f59e0b 0%, #fbbf24 35%, #f97316 65%, #f59e0b 100%)',
+              backgroundSize: '300% 100%',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: shouldReduceMotion ? '#f59e0b' : 'transparent',
+              backgroundClip: 'text',
+              animation: shouldReduceMotion ? 'none' : 'amberShift 5s ease-in-out infinite',
+              display: 'block',
+              color: shouldReduceMotion ? '#f59e0b' : 'inherit',
+            }}>
+              robótico para siempre.
+            </span>
+            {!shouldReduceMotion && (
+              <motion.div
+                initial={{ scaleX: 0, opacity: 0 }}
+                animate={{ scaleX: 1, opacity: 1 }}
+                transition={{ duration: 0.9, delay: 1.4, ease: [0.16, 1, 0.3, 1] }}
+                style={{
+                  position: 'absolute',
+                  bottom: '-6px',
+                  left: '8%',
+                  right: '8%',
+                  height: '2px',
+                  background: 'linear-gradient(90deg, transparent, #f59e0b 40%, #f97316 60%, transparent)',
+                  transformOrigin: 'center',
+                  filter: 'blur(0.5px)',
+                }}
+              />
+            )}
+          </div>
         </motion.h1>
 
         {/* SubtitleAuto */}
@@ -631,6 +712,18 @@ export default function HeroAutomation() {
             pointerEvents: 'none',
           }}
         >
+          <span style={{ position: 'absolute', top: 0, left: 0, width: '1px', height: '18px', background: 'rgba(245,158,11,0.3)', borderTopLeftRadius: '16px' }} />
+          <span style={{ position: 'absolute', top: 0, left: 0, height: '1px', width: '18px', background: 'rgba(245,158,11,0.3)', borderTopLeftRadius: '16px' }} />
+          
+          <span style={{ position: 'absolute', top: 0, right: 0, width: '1px', height: '18px', background: 'rgba(245,158,11,0.3)', borderTopRightRadius: '16px' }} />
+          <span style={{ position: 'absolute', top: 0, right: 0, height: '1px', width: '18px', background: 'rgba(245,158,11,0.3)', borderTopRightRadius: '16px' }} />
+          
+          <span style={{ position: 'absolute', bottom: 0, left: 0, width: '1px', height: '18px', background: 'rgba(245,158,11,0.3)', borderBottomLeftRadius: '16px' }} />
+          <span style={{ position: 'absolute', bottom: 0, left: 0, height: '1px', width: '18px', background: 'rgba(245,158,11,0.3)', borderBottomLeftRadius: '16px' }} />
+          
+          <span style={{ position: 'absolute', bottom: 0, right: 0, width: '1px', height: '18px', background: 'rgba(245,158,11,0.3)', borderBottomRightRadius: '16px' }} />
+          <span style={{ position: 'absolute', bottom: 0, right: 0, height: '1px', width: '18px', background: 'rgba(245,158,11,0.3)', borderBottomRightRadius: '16px' }} />
+
           Cada semana sin automatizar le cuesta a tu empresa{' '}
           <span style={{ color: 'rgba(245,158,11,0.98)', fontWeight: 700 }}>
             +12 horas de trabajo manual
@@ -655,48 +748,77 @@ export default function HeroAutomation() {
         >
           <motion.a
             href="#calculadora"
-            whileHover={{ scale: 1.04 }}
+            whileHover={{ scale: 1.03, y: -1 }}
             whileTap={{ scale: 0.97 }}
             transition={{ type: 'spring', stiffness: 400, damping: 15 }}
             style={{
+              position: 'relative',
               display: 'inline-flex',
               alignItems: 'center',
               gap: '10px',
               background: 'linear-gradient(135deg, #f59e0b, #f97316)',
               color: '#070709',
               fontWeight: 800,
-              fontSize: '14px',
-              letterSpacing: '0.05em',
-              padding: '14px 32px',
-              borderRadius: '100px',
+              fontSize: '13px',
+              letterSpacing: '0.06em',
+              padding: '13px 28px',
+              borderRadius: '12px',
               textDecoration: 'none',
-              boxShadow: `0 0 40px rgba(245,158,11,0.4), 0 8px 24px rgba(0,0,0,0.4)`,
+              boxShadow: '0 0 32px rgba(245,158,11,0.35), 0 4px 16px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.2)',
+              overflow: 'hidden',
+              isolation: 'isolate',
+              textTransform: 'uppercase',
             }}
           >
-            ENCENDER MI EMPRESA →
+            <motion.span
+              aria-hidden="true"
+              animate={{ x: ['-140%', '260%'] }}
+              transition={{
+                duration: 1.05,
+                repeat: Infinity,
+                repeatDelay: 3.95,
+                ease: 'easeInOut',
+              }}
+              style={{
+                position: 'absolute',
+                inset: '-30% 0',
+                left: '-45%',
+                width: '42%',
+                rotate: '18deg',
+                background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.45), transparent)',
+                pointerEvents: 'none',
+                zIndex: 0,
+              }}
+            />
+            <span style={{ position: 'relative', zIndex: 1 }}>
+              Encender mi empresa →
+            </span>
           </motion.a>
 
           <motion.a
             href="#flujo"
             whileHover={{
               scale: 1.02,
-              borderColor: 'rgba(245,158,11,0.5)',
+              borderColor: 'rgba(245,158,11,0.45)',
               color: '#f59e0b',
             }}
             whileTap={{ scale: 0.97 }}
+            transition={{ duration: 0.15 }}
             style={{
               display: 'inline-flex',
               alignItems: 'center',
               gap: '8px',
-              background: 'transparent',
-              border: '1px solid rgba(255,255,255,0.12)',
-              color: 'rgba(255,255,255,0.55)',
+              background: 'rgba(255,255,255,0.04)',
+              border: '1px solid rgba(255,255,255,0.10)',
+              color: 'rgba(255,255,255,0.5)',
               fontWeight: 600,
-              fontSize: '14px',
-              padding: '14px 28px',
-              borderRadius: '100px',
+              fontSize: '13px',
+              padding: '13px 24px',
+              borderRadius: '12px',
               textDecoration: 'none',
-              transition: 'all 200ms',
+              backdropFilter: 'blur(8px)',
+              WebkitBackdropFilter: 'blur(8px)',
+              letterSpacing: '0.02em',
             }}
           >
             Ver cómo funciona

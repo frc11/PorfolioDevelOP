@@ -2,7 +2,14 @@
 
 import React, { useState, useRef, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence, useInView, useReducedMotion } from 'motion/react'
-import { Bot, Phone, Package, Clock } from 'lucide-react'
+import {
+  Bot, Phone, Package, Clock,
+  Megaphone, Timer, PenLine, X,
+  MessageCircle, BarChart2, DollarSign,
+  CreditCard, Monitor, Keyboard, Mail,
+  Bell, ClipboardList, TrendingUp,
+  CheckCircle2, FileText, RefreshCw,
+} from 'lucide-react'
 
 /**
  * BENTO AUTOMATION: "El Fin del Trabajo Robótico."
@@ -12,7 +19,13 @@ import { Bot, Phone, Package, Clock } from 'lucide-react'
 // ─── TYPES ──────────────────────────────────────────────────────────────────
 
 interface WorkflowStep {
-  icon: string
+  icon: 'megaphone' | 'clock' | 'pencil' | 'x' |
+        'message' | 'chart' | 'dollar' |
+        'credit' | 'monitor' | 'keyboard' | 'mail' |
+        'package' | 'bell' | 'clipboard' |
+        'bot' | 'trending' | 'check' |
+        'file' | 'timer' | 'phone' |
+        'refresh'
   label: string
   arrow?: boolean
 }
@@ -37,6 +50,32 @@ interface BentoWorkflow {
   colorRgb: string
 }
 
+// ─── ICON MAP ───────────────────────────────────────────────────────────────
+
+const STEP_ICONS: Record<string, React.ReactNode> = {
+  megaphone: <Megaphone size={13} strokeWidth={1.5} />,
+  clock:     <Clock size={13} strokeWidth={1.5} />,
+  pencil:    <PenLine size={13} strokeWidth={1.5} />,
+  x:         <X size={13} strokeWidth={1.5} />,
+  message:   <MessageCircle size={13} strokeWidth={1.5} />,
+  chart:     <BarChart2 size={13} strokeWidth={1.5} />,
+  dollar:    <DollarSign size={13} strokeWidth={1.5} />,
+  credit:    <CreditCard size={13} strokeWidth={1.5} />,
+  monitor:   <Monitor size={13} strokeWidth={1.5} />,
+  keyboard:  <Keyboard size={13} strokeWidth={1.5} />,
+  mail:      <Mail size={13} strokeWidth={1.5} />,
+  package:   <Package size={13} strokeWidth={1.5} />,
+  bell:      <Bell size={13} strokeWidth={1.5} />,
+  clipboard: <ClipboardList size={13} strokeWidth={1.5} />,
+  bot:       <Bot size={13} strokeWidth={1.5} />,
+  trending:  <TrendingUp size={13} strokeWidth={1.5} />,
+  check:     <CheckCircle2 size={13} strokeWidth={1.5} />,
+  file:      <FileText size={13} strokeWidth={1.5} />,
+  timer:     <Timer size={13} strokeWidth={1.5} />,
+  phone:     <Phone size={13} strokeWidth={1.5} />,
+  refresh:   <RefreshCw size={13} strokeWidth={1.5} />,
+}
+
 // ─── DATA ───────────────────────────────────────────────────────────────────
 
 const workflows: BentoWorkflow[] = [
@@ -47,10 +86,10 @@ const workflows: BentoWorkflow[] = [
       title: 'El lead se enfría en WhatsApp',
       description: 'Un cliente escribe interesado. Pasan 2 horas hasta que alguien lo ve. Para ese entonces, ya le compró a tu competencia.',
       steps: [
-        { icon: '📣', label: 'Lead llega' },
-        { icon: '⌛', label: 'Espera horas', arrow: true },
-        { icon: '✍️', label: 'Carga manual', arrow: true },
-        { icon: '❌', label: 'Venta perdida', arrow: true },
+        { icon: 'megaphone', label: 'Lead llega' },
+        { icon: 'clock', label: 'Espera horas', arrow: true },
+        { icon: 'pencil', label: 'Carga manual', arrow: true },
+        { icon: 'x', label: 'Venta perdida', arrow: true },
       ],
       pain: '3 de cada 10 leads se pierden por demora',
     },
@@ -58,10 +97,10 @@ const workflows: BentoWorkflow[] = [
       title: 'Respuesta en segundos, 24/7',
       description: 'El sistema detecta el interés, lo registra y le responde al cliente al instante. El vendedor solo entra a cerrar.',
       steps: [
-        { icon: '📣', label: 'Lead entra' },
-        { icon: '💬', label: 'Respuesta auto', arrow: true },
-        { icon: '📊', label: 'CRM al día', arrow: true },
-        { icon: '💰', label: 'Cierre rápido', arrow: true },
+        { icon: 'megaphone', label: 'Lead entra' },
+        { icon: 'message', label: 'Respuesta auto', arrow: true },
+        { icon: 'chart', label: 'CRM al día', arrow: true },
+        { icon: 'dollar', label: 'Cierre rápido', arrow: true },
       ],
       gain: 'Ventas que antes se perdían por demora',
     },
@@ -74,10 +113,10 @@ const workflows: BentoWorkflow[] = [
       title: 'Cargar facturas a mano en AFIP',
       description: 'Recibís un pago y alguien tiene que entrar a la web de AFIP, cargar los datos uno a uno y después mandar el PDF.',
       steps: [
-        { icon: '💳', label: 'Pago recibido' },
-        { icon: '🖥️', label: 'Web AFIP', arrow: true },
-        { icon: '⌨️', label: 'Carga manual', arrow: true },
-        { icon: '📧', label: 'Mandar mail', arrow: true },
+        { icon: 'credit', label: 'Pago recibido' },
+        { icon: 'monitor', label: 'Web AFIP', arrow: true },
+        { icon: 'keyboard', label: 'Carga manual', arrow: true },
+        { icon: 'mail', label: 'Mandar mail', arrow: true },
       ],
       pain: 'Errores de carga y clientes esperando',
     },
@@ -85,9 +124,9 @@ const workflows: BentoWorkflow[] = [
       title: 'Cobro recibido, factura enviada',
       description: 'MercadoPago confirma el cobro. El sistema genera la factura oficial de AFIP y le manda el PDF al cliente solo.',
       steps: [
-        { icon: '💳', label: 'Pago confirmado' },
-        { icon: '🧾', label: 'AFIP auto', arrow: true },
-        { icon: '📧', label: 'PDF enviado', arrow: true },
+        { icon: 'credit', label: 'Pago confirmado' },
+        { icon: 'file', label: 'AFIP auto', arrow: true },
+        { icon: 'mail', label: 'PDF enviado', arrow: true },
       ],
       gain: '0 errores de carga y PDF al instante',
     },
@@ -100,9 +139,9 @@ const workflows: BentoWorkflow[] = [
       title: 'Prometer stock que no tenés',
       description: 'Vendes por WhatsApp pero no descontás de la planilla. Descubrís que no hay stock cuando ya lo cobraste.',
       steps: [
-        { icon: '📦', label: 'Stock irreal' },
-        { icon: '😤', label: 'Error humano', arrow: true },
-        { icon: '❌', label: 'Falta entrega', arrow: true },
+        { icon: 'package', label: 'Stock irreal' },
+        { icon: 'x', label: 'Error humano', arrow: true },
+        { icon: 'x', label: 'Falta entrega', arrow: true },
       ],
       pain: 'Promesas rotas y clientes enojados',
     },
@@ -110,9 +149,9 @@ const workflows: BentoWorkflow[] = [
       title: 'Sincronización total e inteligente',
       description: 'Cada venta en cualquier canal descuenta el stock real. Si baja del mínimo, el sistema te avisa por Slack.',
       steps: [
-        { icon: '📉', label: 'Stock crítico' },
-        { icon: '🔔', label: 'Aviso Slack', arrow: true },
-        { icon: '📋', label: 'Orden compra', arrow: true },
+        { icon: 'trending', label: 'Stock crítico' },
+        { icon: 'bell', label: 'Aviso Slack', arrow: true },
+        { icon: 'clipboard', label: 'Orden compra', arrow: true },
       ],
       gain: 'Nunca más vendés lo que no hay',
     },
@@ -125,9 +164,9 @@ const workflows: BentoWorkflow[] = [
       title: 'Perder el domingo armando Excels',
       description: 'Para saber cuánto vendiste tenés que juntar datos de 3 sistemas distintos y cruzarlos a mano un domingo.',
       steps: [
-        { icon: '📊', label: 'Juntar datos' },
-        { icon: '✍️', label: 'Cruzar manual', arrow: true },
-        { icon: '📧', label: 'Reporte tarde', arrow: true },
+        { icon: 'chart', label: 'Juntar datos' },
+        { icon: 'pencil', label: 'Cruzar manual', arrow: true },
+        { icon: 'mail', label: 'Reporte tarde', arrow: true },
       ],
       pain: 'Vivir en el caos sin números claros',
     },
@@ -135,9 +174,9 @@ const workflows: BentoWorkflow[] = [
       title: 'Tu negocio, en un solo vistazo',
       description: 'Todos los lunes a las 8 AM recibís un mensaje con lo facturado, lo vendido y el rendimiento de tu equipo.',
       steps: [
-        { icon: '🤖', label: 'Cruce auto' },
-        { icon: '📈', label: 'Gráficos solos', arrow: true },
-        { icon: '📧', label: 'Reporte listo', arrow: true },
+        { icon: 'bot', label: 'Cruce auto' },
+        { icon: 'trending', label: 'Gráficos solos', arrow: true },
+        { icon: 'mail', label: 'Reporte listo', arrow: true },
       ],
       gain: 'Reportes consolidados cada mañana',
     },
@@ -150,9 +189,9 @@ const workflows: BentoWorkflow[] = [
       title: 'Tu equipo atrapado en dudas básicas',
       description: 'Precios, horarios, dónde están. Tus empleados pierden el 80% del tiempo respondiendo lo mismo por milésima vez.',
       steps: [
-        { icon: '💬', label: 'Pregunta básica' },
-        { icon: '⏰', label: 'Tu gente ocupa', arrow: true },
-        { icon: '✍️', label: 'Resp. repetida', arrow: true },
+        { icon: 'message', label: 'Pregunta básica' },
+        { icon: 'clock', label: 'Tu gente ocupa', arrow: true },
+        { icon: 'pencil', label: 'Resp. repetida', arrow: true },
       ],
       pain: 'Empleados robots haciendo tareas simples',
     },
@@ -160,9 +199,9 @@ const workflows: BentoWorkflow[] = [
       title: 'Tu gente, solo donde genera valor',
       description: 'El sistema resuelve lo básico automáticamente. Tu equipo solo interviene en problemas reales o grandes ventas.',
       steps: [
-        { icon: '💬', label: 'Pregunta entra' },
-        { icon: '🤖', label: 'Resp. instantánea', arrow: true },
-        { icon: '✅', label: 'Tu equipo libre', arrow: true },
+        { icon: 'message', label: 'Pregunta entra' },
+        { icon: 'bot', label: 'Resp. instantánea', arrow: true },
+        { icon: 'check', label: 'Tu equipo libre', arrow: true },
       ],
       gain: '90% de consultas resueltas por el sistema',
     },
@@ -175,9 +214,9 @@ const workflows: BentoWorkflow[] = [
       title: 'Cobros vencidos sin seguimiento',
       description: 'Las facturas se vencen y nadie hace seguimiento constante. Terminás cobrando tarde y con flujo de caja desordenado.',
       steps: [
-        { icon: '📄', label: 'Factura emitida' },
-        { icon: '⏳', label: 'Vence sin aviso', arrow: true },
-        { icon: '📞', label: 'Seguimiento manual', arrow: true },
+        { icon: 'file', label: 'Factura emitida' },
+        { icon: 'timer', label: 'Vence sin aviso', arrow: true },
+        { icon: 'phone', label: 'Seguimiento manual', arrow: true },
       ],
       pain: 'Caja inestable por cobranzas tardías',
     },
@@ -185,9 +224,9 @@ const workflows: BentoWorkflow[] = [
       title: 'Recordatorios automáticos y cobro ágil',
       description: 'El sistema detecta vencimientos, envía recordatorios por WhatsApp y email, y notifica al equipo solo si requiere intervención.',
       steps: [
-        { icon: '📄', label: 'Factura emitida' },
-        { icon: '🤖', label: 'Recordatorio auto', arrow: true },
-        { icon: '✅', label: 'Cobro confirmado', arrow: true },
+        { icon: 'file', label: 'Factura emitida' },
+        { icon: 'bot', label: 'Recordatorio auto', arrow: true },
+        { icon: 'check', label: 'Cobro confirmado', arrow: true },
       ],
       gain: 'Menos mora y caja más predecible',
     },
@@ -439,6 +478,16 @@ function BentoFlipCard({
             border: '1px solid rgba(239, 68, 68, 0.15)',
             boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.07), inset 0 -1px 0 rgba(239,68,68,0.06), 0 0 0 1px rgba(239,68,68,0.05), 0 8px 32px rgba(0,0,0,0.45), 0 2px 8px rgba(0,0,0,0.3)',
           }}>
+            {/* Vignette Corners FRENTE */}
+            <span style={{ position: 'absolute', top: 0, left: 0, width: '1px', height: '18px', background: 'rgba(239,68,68,0.4)', borderTopLeftRadius: '20px' }} />
+            <span style={{ position: 'absolute', top: 0, left: 0, height: '1px', width: '18px', background: 'rgba(239,68,68,0.4)', borderTopLeftRadius: '20px' }} />
+            <span style={{ position: 'absolute', top: 0, right: 0, width: '1px', height: '18px', background: 'rgba(239,68,68,0.4)', borderTopRightRadius: '20px' }} />
+            <span style={{ position: 'absolute', top: 0, right: 0, height: '1px', width: '18px', background: 'rgba(239,68,68,0.4)', borderTopRightRadius: '20px' }} />
+            <span style={{ position: 'absolute', bottom: 0, left: 0, width: '1px', height: '18px', background: 'rgba(239,68,68,0.4)', borderBottomLeftRadius: '20px' }} />
+            <span style={{ position: 'absolute', bottom: 0, left: 0, height: '1px', width: '18px', background: 'rgba(239,68,68,0.4)', borderBottomLeftRadius: '20px' }} />
+            <span style={{ position: 'absolute', bottom: 0, right: 0, width: '1px', height: '18px', background: 'rgba(239,68,68,0.4)', borderBottomRightRadius: '20px' }} />
+            <span style={{ position: 'absolute', bottom: 0, right: 0, height: '1px', width: '18px', background: 'rgba(239,68,68,0.4)', borderBottomRightRadius: '20px' }} />
+
             {/* Dekor Line */}
             <div style={{
               position: 'absolute',
@@ -459,7 +508,16 @@ function BentoFlipCard({
               {workflow.antes.steps.map((step, i) => (
                 <React.Fragment key={i}>
                   <div className="flex flex-col items-center gap-1">
-                    <div className="w-8 h-8 rounded-lg bg-red-500/10 border border-red-500/20 flex items-center justify-center text-sm">{step.icon}</div>
+                    <div
+                      className="w-8 h-8 rounded-lg flex items-center justify-center"
+                      style={{
+                        background: 'rgba(239,68,68,0.12)',
+                        border: '1px solid rgba(239,68,68,0.2)',
+                        color: 'rgba(239,68,68,0.8)',
+                      }}
+                    >
+                      {STEP_ICONS[step.icon]}
+                    </div>
                     <span className="text-[8px] text-white/30 text-center leading-none max-w-[56px]">{step.label}</span>
                   </div>
                   {step.arrow && <span className="text-red-500/30 text-xs mb-4">→</span>}
@@ -536,6 +594,16 @@ function BentoFlipCard({
           border: `1px solid rgba(${workflow.colorRgb}, 0.28)`,
           boxShadow: `inset 0 1px 0 rgba(255,255,255,0.12), inset 0 -1px 0 rgba(${workflow.colorRgb},0.08), 0 0 0 1px rgba(${workflow.colorRgb},0.08), 0 0 60px rgba(${workflow.colorRgb},0.14), 0 4px 16px rgba(${workflow.colorRgb},0.1), 0 12px 40px rgba(0,0,0,0.55), 0 2px 6px rgba(0,0,0,0.4)`,
         }}>
+          {/* Vignette Corners REVERSO */}
+          <span style={{ position: 'absolute', top: 0, left: 0, width: '1px', height: '18px', background: `rgba(${workflow.colorRgb}, 0.5)`, borderTopLeftRadius: '20px' }} />
+          <span style={{ position: 'absolute', top: 0, left: 0, height: '1px', width: '18px', background: `rgba(${workflow.colorRgb}, 0.5)`, borderTopLeftRadius: '20px' }} />
+          <span style={{ position: 'absolute', top: 0, right: 0, width: '1px', height: '18px', background: `rgba(${workflow.colorRgb}, 0.5)`, borderTopRightRadius: '20px' }} />
+          <span style={{ position: 'absolute', top: 0, right: 0, height: '1px', width: '18px', background: `rgba(${workflow.colorRgb}, 0.5)`, borderTopRightRadius: '20px' }} />
+          <span style={{ position: 'absolute', bottom: 0, left: 0, width: '1px', height: '18px', background: `rgba(${workflow.colorRgb}, 0.5)`, borderBottomLeftRadius: '20px' }} />
+          <span style={{ position: 'absolute', bottom: 0, left: 0, height: '1px', width: '18px', background: `rgba(${workflow.colorRgb}, 0.5)`, borderBottomLeftRadius: '20px' }} />
+          <span style={{ position: 'absolute', bottom: 0, right: 0, width: '1px', height: '18px', background: `rgba(${workflow.colorRgb}, 0.5)`, borderBottomRightRadius: '20px' }} />
+          <span style={{ position: 'absolute', bottom: 0, right: 0, height: '1px', width: '18px', background: `rgba(${workflow.colorRgb}, 0.5)`, borderBottomRightRadius: '20px' }} />
+
           {/* Dekor Line */}
           <div style={{
             position: 'absolute',
@@ -559,7 +627,17 @@ function BentoFlipCard({
               {workflow.despues.steps.map((step, i) => (
                 <React.Fragment key={i}>
                   <div className="flex flex-col items-center gap-1">
-                    <div className="w-8 h-8 rounded-lg flex items-center justify-center text-sm" style={{ background: `rgba(${workflow.colorRgb}, 0.12)`, border: `1px solid rgba(${workflow.colorRgb}, 0.25)`, boxShadow: `0 0 8px rgba(${workflow.colorRgb}, 0.2)` }}>{step.icon}</div>
+                    <div
+                      className="w-8 h-8 rounded-lg flex items-center justify-center"
+                      style={{
+                        background: `rgba(${workflow.colorRgb}, 0.12)`,
+                        border: `1px solid rgba(${workflow.colorRgb}, 0.25)`,
+                        color: `rgba(${workflow.colorRgb}, 0.9)`,
+                        boxShadow: `0 0 8px rgba(${workflow.colorRgb}, 0.2)`,
+                      }}
+                    >
+                      {STEP_ICONS[step.icon]}
+                    </div>
                     <span className="text-[8px] text-white/40 text-center leading-none max-w-[56px]">{step.label}</span>
                   </div>
                   {step.arrow && <span className="text-xs mb-4" style={{ color: `rgba(${workflow.colorRgb}, 0.6)` }}>→</span>}
@@ -581,15 +659,31 @@ function BentoFlipCard({
 }
 
 function Header({ isInView }: { isInView: boolean }) {
+  const prefersReducedMotion = useReducedMotion()
+
   return (
-    <div className="text-center mb-12 md:mb-20">
+    <div className="text-center mb-12 md:mb-20 flex flex-col items-center">
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={isInView ? { opacity: 1, y: 0 } : {}}
         transition={{ duration: 0.6, delay: 0.1 }}
-        className="inline-flex items-center gap-2 border border-amber-500/30 rounded-full px-4 py-1.5 mb-6 bg-amber-500/5"
+        className="relative overflow-hidden inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/[0.05] px-4 py-1.5 mb-6"
       >
-        <span className="text-[10px] sm:text-[11px] font-mono tracking-[0.2em] text-amber-500 font-bold">
+        <motion.span
+          aria-hidden="true"
+          animate={prefersReducedMotion ? {} : { x: ['-150%', '250%'] }}
+          transition={{ duration: 1.8, repeat: Infinity, repeatDelay: 4.2, ease: 'easeInOut' }}
+          style={{
+            position: 'absolute',
+            inset: 0,
+            background: 'linear-gradient(90deg, transparent, rgba(245,158,11,0.2), transparent)',
+            borderRadius: '100px',
+            pointerEvents: 'none',
+            display: prefersReducedMotion ? 'none' : 'block',
+          }}
+        />
+        <span className="h-1.5 w-1.5 rounded-full bg-amber-500 shrink-0" style={{ animation: prefersReducedMotion ? 'none' : 'pulse 1.8s ease-in-out infinite', boxShadow: '0 0 8px rgba(245,158,11,0.9)' }} />
+        <span className="text-[10px] sm:text-[11px] font-mono tracking-[0.2em] text-amber-500 font-bold relative z-10 uppercase">
           [ EL FIN DEL TRABAJO ROBÓTICO ]
         </span>
       </motion.div>
@@ -601,14 +695,34 @@ function Header({ isInView }: { isInView: boolean }) {
         className="text-3xl md:text-5xl lg:text-6xl font-black text-white leading-[1.05] mb-4"
         style={{ letterSpacing: '-0.03em' }}
       >
-        Tus procesos, en piloto automático.
+        Tus procesos, <br className="md:hidden" />
+        <div className="relative inline-block mt-2 md:mt-0 md:ml-3">
+            <span className="bg-gradient-to-r from-white via-amber-200 to-orange-300 bg-clip-text text-transparent">en piloto automático.</span>
+            {!prefersReducedMotion && (
+                <motion.div
+                    initial={{ scaleX: 0, opacity: 0 }}
+                    animate={isInView ? { scaleX: 1, opacity: 1 } : {}}
+                    transition={{ duration: 0.9, delay: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                    style={{
+                        position: 'absolute',
+                        bottom: '-4px',
+                        left: '0%',
+                        right: '0%',
+                        height: '2px',
+                        background: 'linear-gradient(90deg, transparent, #f59e0b 40%, #f97316 60%, transparent)',
+                        transformOrigin: 'left',
+                        filter: 'blur(0.5px)',
+                    }}
+                />
+            )}
+        </div>
       </motion.h2>
 
       <motion.p
         initial={{ opacity: 0 }}
         animate={isInView ? { opacity: 1 } : {}}
         transition={{ duration: 0.6, delay: 0.4 }}
-        className="text-white/40 text-sm md:text-base max-w-xl mx-auto"
+        className="text-white/40 text-sm md:text-base max-w-xl mx-auto mt-4 md:mt-6"
       >
         Elegí el proceso que hoy te quita el sueño y mirá cómo lo resolvemos para siempre.
       </motion.p>
@@ -637,6 +751,20 @@ export default function BentoAutomation() {
       data-cursor="off"
       className="relative w-full py-20 md:py-32 lg:py-40 px-6 sm:px-12 bg-[#080810] overflow-hidden z-[1]"
     >
+      <div
+        aria-hidden="true"
+        style={{
+          position: 'absolute',
+          inset: 0,
+          backgroundImage: 'radial-gradient(circle, rgba(245,158,11,0.12) 1px, transparent 1px)',
+          backgroundSize: '52px 52px',
+          maskImage: 'radial-gradient(ellipse at 50% 50%, black 0%, transparent 75%)',
+          WebkitMaskImage: 'radial-gradient(ellipse at 50% 50%, black 0%, transparent 75%)',
+          opacity: 0.25,
+          pointerEvents: 'none',
+          zIndex: 0,
+        }}
+      />
       <AtmosphereBento />
 
       <div className="relative max-w-6xl mx-auto z-10">
