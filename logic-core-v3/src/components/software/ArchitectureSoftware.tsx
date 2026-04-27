@@ -302,7 +302,7 @@ export default function ArchitectureSoftware() {
     useEffect(() => {
         if (typeof window === 'undefined') return
 
-        const mediaQuery = window.matchMedia('(max-width: 1024px)')
+        const mediaQuery = window.matchMedia('(max-width: 1023px)')
         const syncViewportMode = () => setIsTouchViewport(mediaQuery.matches)
 
         syncViewportMode()

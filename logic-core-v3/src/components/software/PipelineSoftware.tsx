@@ -135,6 +135,9 @@ export default function PipelineSoftware() {
     const reducedMotion = useReducedMotion()
     const effectiveReducedMotion = reducedMotion ?? false
     const [activeIndex, setActiveIndex] = useState(0)
+    const [isCompactViewport, setIsCompactViewport] = useState(false)
+    const [isMobileViewport, setIsMobileViewport] = useState(false)
+    const [isTinyViewport, setIsTinyViewport] = useState(false)
     const stageAnchorsRef = useRef<number[]>([])
     const trackX = useMotionValue(0)
 
@@ -142,6 +145,36 @@ export default function PipelineSoftware() {
         target: sectionRef,
         offset: ['start start', 'end end'],
     })
+
+    useEffect(() => {
+        if (typeof window === 'undefined') return
+
+        const syncViewportMode = () => {
+            const width = window.innerWidth
+            const height = window.innerHeight
+            setIsCompactViewport(width <= 1200 || height <= 820)
+            setIsMobileViewport(width <= 640)
+            setIsTinyViewport(width <= 380 || height <= 700)
+        }
+
+        syncViewportMode()
+        window.addEventListener('resize', syncViewportMode)
+        return () => window.removeEventListener('resize', syncViewportMode)
+    }, [])
+
+    const gridPaddingY = isMobileViewport
+        ? 'clamp(16px,3svh,24px)'
+        : isCompactViewport
+            ? 'clamp(18px,3.2vh,34px)'
+            : 'clamp(28px,4.2vh,48px)'
+    const gridPaddingBottom = isMobileViewport
+        ? 'clamp(18px,4svh,34px)'
+        : 'clamp(88px,11svh,116px)'
+    const viewportMinHeight = isMobileViewport
+        ? '15rem'
+        : isCompactViewport
+            ? '18rem'
+            : '24rem'
 
     useEffect(() => {
         const sectionElement = sectionRef.current
@@ -212,6 +245,71 @@ export default function PipelineSoftware() {
         setActiveIndex((previous) => (previous === nextIndex ? previous : nextIndex))
     })
 
+    const renderPipelineControls = (placement: 'top' | 'bottom') => {
+        const isTopPlacement = placement === 'top'
+
+        return (
+            <motion.div
+                initial={{ opacity: 0, y: isTopPlacement ? 8 : 14 }}
+                animate={isInView ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: effectiveReducedMotion ? 0 : 0.55, delay: 0.2, ease }}
+                className={
+                    isTopPlacement
+                        ? 'relative z-20 mt-4 flex items-center justify-between gap-3'
+                        : 'relative z-20 mt-1 flex items-center justify-between gap-4'
+                }
+            >
+                <div className={isMobileViewport ? 'flex items-center gap-2' : isCompactViewport ? 'flex items-center gap-2.5' : 'flex items-center gap-3'}>
+                    {stages.map((stage, index) => (
+                        <motion.div
+                            key={stage.id}
+                            className={isMobileViewport ? 'flex items-center gap-1.5' : isCompactViewport ? 'flex items-center gap-1.5' : 'flex items-center gap-2'}
+                            animate={{ opacity: activeIndex === index ? 1 : 0.3 }}
+                            transition={{ duration: 0.3 }}
+                        >
+                            <motion.div
+                                className="rounded-full"
+                                animate={{
+                                    width: activeIndex === index ? (isMobileViewport ? '22px' : '24px') : (isMobileViewport ? '5px' : '6px'),
+                                    height: isMobileViewport ? '5px' : '6px',
+                                    background: activeIndex === index
+                                        ? stage.accent
+                                        : 'rgba(255,255,255,0.2)',
+                                    boxShadow: activeIndex === index
+                                        ? `0 0 10px rgba(${stage.accentRgb},0.7)`
+                                        : 'none',
+                                }}
+                                transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                            />
+                            <motion.span
+                                className={isMobileViewport
+                                    ? 'font-mono text-[9px] uppercase tracking-[0.16em]'
+                                    : 'font-mono text-[10px] uppercase tracking-[0.2em]'}
+                                animate={{
+                                    color: activeIndex === index
+                                        ? `rgba(${stage.accentRgb},0.92)`
+                                        : 'rgba(255,255,255,0.2)',
+                                }}
+                                transition={{ duration: 0.3 }}
+                            >
+                                {activeIndex === index ? stage.title : ''}
+                            </motion.span>
+                        </motion.div>
+                    ))}
+                </div>
+
+                <span className={isMobileViewport
+                    ? 'shrink-0 text-[9px] uppercase tracking-[0.16em] text-white/34 font-mono'
+                    : 'shrink-0 text-[11px] uppercase tracking-[0.24em] text-white/26 font-mono'}
+                >
+                    {activeIndex < stages.length - 1
+                        ? 'Scroll para continuar'
+                        : 'Pipeline completo'}
+                </span>
+            </motion.div>
+        )
+    }
+
     return (
         <section
             id="pipeline"
@@ -280,21 +378,44 @@ export default function PipelineSoftware() {
                     height: effectiveReducedMotion ? 'auto' : '100svh',
                 }}
             >
-                <div className="mx-auto grid h-full max-w-[1600px] grid-rows-[auto_minmax(0,1fr)_auto] gap-6 px-[clamp(20px,5vw,80px)] py-[clamp(28px,4.2vh,48px)]">
+                <div
+                    className={`mx-auto grid h-full max-w-[1600px] px-[clamp(20px,5vw,80px)] ${isMobileViewport ? 'grid-rows-[auto_minmax(0,1fr)]' : 'grid-rows-[auto_minmax(0,1fr)_auto]'}`}
+                    style={{
+                        gap: isMobileViewport ? '12px' : isCompactViewport ? '14px' : '24px',
+                        paddingTop: gridPaddingY,
+                        paddingBottom: gridPaddingBottom,
+                    }}
+                >
                     <motion.div
                         initial={{ opacity: 0, y: 18 }}
                         animate={isInView ? { opacity: 1, y: 0 } : {}}
                         transition={{ duration: effectiveReducedMotion ? 0 : 0.65, ease }}
-                        className="max-w-3xl"
+                        className={isMobileViewport ? 'max-w-none' : isCompactViewport ? 'max-w-[62rem]' : 'max-w-3xl'}
                     >
-                        <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-indigo-300/35 bg-indigo-300/[0.14] px-4 py-2 shadow-[0_10px_24px_rgba(0,0,0,0.3)]">
+                        <div className={isMobileViewport
+                            ? 'mb-3 inline-flex items-center gap-2 rounded-full border border-indigo-300/35 bg-indigo-300/[0.14] px-3 py-1.5 shadow-[0_10px_24px_rgba(0,0,0,0.3)]'
+                            : isCompactViewport
+                            ? 'mb-4 inline-flex items-center gap-2 rounded-full border border-indigo-300/35 bg-indigo-300/[0.14] px-3.5 py-1.5 shadow-[0_10px_24px_rgba(0,0,0,0.3)]'
+                            : 'mb-5 inline-flex items-center gap-2 rounded-full border border-indigo-300/35 bg-indigo-300/[0.14] px-4 py-2 shadow-[0_10px_24px_rgba(0,0,0,0.3)]'}
+                        >
                             <span className="h-1.5 w-1.5 rounded-full bg-indigo-300 shadow-[0_0_10px_rgba(129,140,248,0.85)]" />
                             <span className="text-[11px] font-bold uppercase tracking-[0.24em] text-indigo-300">
                                 [ El pipeline de entrega ]
                             </span>
                         </div>
 
-                        <h2 className="text-[clamp(2.3rem,5.2vw,5rem)] font-black leading-[0.9] tracking-[-0.06em] text-white">
+                        <h2
+                            className="font-black leading-[0.9] tracking-[-0.06em] text-white"
+                            style={{
+                                fontSize: isMobileViewport
+                                    ? isTinyViewport
+                                        ? 'clamp(1.9rem,9.4vw,2.3rem)'
+                                        : 'clamp(2.05rem,9.4vw,2.7rem)'
+                                    : isCompactViewport
+                                        ? 'clamp(2.1rem,6vw,3.8rem)'
+                                        : 'clamp(2.3rem,5.2vw,5rem)',
+                            }}
+                        >
                             Un proceso técnico
                             <br />
                             <span className="bg-gradient-to-r from-white via-indigo-200 to-cyan-200 bg-clip-text text-transparent">
@@ -302,23 +423,46 @@ export default function PipelineSoftware() {
                             </span>
                         </h2>
 
-                        <p className="mt-6 max-w-2xl text-base leading-8 text-white/62 md:text-lg">
+                        <p className={isMobileViewport
+                            ? 'mt-4 max-w-none text-[14px] leading-7 text-white/62'
+                            : isCompactViewport
+                            ? 'mt-4 max-w-[48rem] text-[15px] leading-7 text-white/62 md:text-base'
+                            : 'mt-6 max-w-2xl text-base leading-8 text-white/62 md:text-lg'}
+                        >
                             En vez de apilar etapas verticales, mostramos el proceso como una línea de ejecución: cada bloque entra en foco cuando llega al centro y deja claro qué produce antes de pasar al siguiente.
                         </p>
+
+                        {isMobileViewport && renderPipelineControls('top')}
                     </motion.div>
 
                     <div
                         ref={viewportRef}
-                        className="relative min-h-[24rem] overflow-hidden rounded-[2rem] border border-white/[0.12] bg-white/[0.05] backdrop-blur-xl"
+                        className={isTinyViewport
+                            ? 'relative overflow-hidden rounded-[1.5rem] border border-white/[0.12] bg-white/[0.05] backdrop-blur-xl'
+                            : 'relative overflow-hidden rounded-[2rem] border border-white/[0.12] bg-white/[0.05] backdrop-blur-xl'}
+                        style={{
+                            height: '100%',
+                            minHeight: viewportMinHeight,
+                        }}
                     >
-                        <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-24 bg-[linear-gradient(90deg,rgba(7,11,31,0.88),rgba(7,11,31,0))]" />
-                        <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-24 bg-[linear-gradient(270deg,rgba(7,11,31,0.88),rgba(7,11,31,0))]" />
+                        <div className={isMobileViewport
+                            ? 'pointer-events-none absolute inset-y-0 left-0 z-10 w-10 bg-[linear-gradient(90deg,rgba(7,11,31,0.88),rgba(7,11,31,0))]'
+                            : 'pointer-events-none absolute inset-y-0 left-0 z-10 w-24 bg-[linear-gradient(90deg,rgba(7,11,31,0.88),rgba(7,11,31,0))]'}
+                        />
+                        <div className={isMobileViewport
+                            ? 'pointer-events-none absolute inset-y-0 right-0 z-10 w-10 bg-[linear-gradient(270deg,rgba(7,11,31,0.88),rgba(7,11,31,0))]'
+                            : 'pointer-events-none absolute inset-y-0 right-0 z-10 w-24 bg-[linear-gradient(270deg,rgba(7,11,31,0.88),rgba(7,11,31,0))]'}
+                        />
                         <div className="pointer-events-none absolute left-1/2 top-0 z-10 h-full w-px -translate-x-1/2 bg-[linear-gradient(180deg,transparent,rgba(168,85,247,0.34)_18%,rgba(34,211,238,0.56)_48%,rgba(20,184,166,0.44)_72%,rgba(52,211,153,0.36)_86%,transparent)]" />
 
                         <motion.div
                             ref={trackRef}
                             style={{ x: trackX }}
-                            className="relative flex h-full w-max items-stretch gap-6 px-[clamp(18px,4vw,64px)] py-5 md:gap-7 md:py-6"
+                            className={isMobileViewport
+                                ? 'relative flex h-full w-max items-stretch gap-4 px-3.5 py-3.5'
+                                : isCompactViewport
+                                    ? 'relative flex h-full w-max items-stretch gap-5 px-[clamp(16px,3.4vw,46px)] py-4'
+                                    : 'relative flex h-full w-max items-stretch gap-6 px-[clamp(18px,4vw,64px)] py-5 md:gap-7 md:py-6'}
                         >
                             {stages.map((stage, index) => {
                                 const isActive = activeIndex === index
@@ -339,7 +483,11 @@ export default function PipelineSoftware() {
                                             y: effectiveReducedMotion ? 0 : isActive ? -6 : 12,
                                         }}
                                         transition={{ duration: 0.45, ease }}
-                                        className="relative flex h-full min-h-0 w-[min(84vw,30rem)] shrink-0 flex-col justify-between overflow-hidden rounded-[1.9rem] border p-6 shadow-[0_24px_80px_rgba(0,0,0,0.35)] md:w-[32rem] md:p-7"
+                                        className={isMobileViewport
+                                            ? 'relative flex h-full min-h-0 w-[min(calc(100vw-56px),22rem)] shrink-0 flex-col justify-start gap-3 overflow-hidden rounded-[1.45rem] border p-3.5 shadow-[0_24px_80px_rgba(0,0,0,0.35)]'
+                                            : isCompactViewport
+                                                ? 'relative flex h-full min-h-0 w-[min(86vw,26rem)] shrink-0 flex-col justify-between overflow-hidden rounded-[1.7rem] border p-5 shadow-[0_24px_80px_rgba(0,0,0,0.35)]'
+                                                : 'relative flex h-full min-h-0 w-[min(84vw,30rem)] shrink-0 flex-col justify-between overflow-hidden rounded-[1.9rem] border p-6 shadow-[0_24px_80px_rgba(0,0,0,0.35)] md:w-[32rem] md:p-7'}
                                         style={{
                                             borderColor: isActive
                                                 ? `rgba(${accentRgb},0.54)`
@@ -377,15 +525,25 @@ export default function PipelineSoftware() {
                                         />
 
                                         <div className="relative z-10">
-                                            <div className="mb-6 flex items-start justify-between gap-4">
+                                            <div className={isMobileViewport ? 'mb-3 flex items-start justify-between gap-2.5' : isCompactViewport ? 'mb-4 flex items-start justify-between gap-3' : 'mb-6 flex items-start justify-between gap-4'}>
                                                 <div>
                                                     <div
-                                                        className="font-mono text-[11px] font-bold uppercase tracking-[0.28em]"
+                                                        className={isMobileViewport ? 'font-mono text-[10px] font-bold uppercase tracking-[0.24em]' : 'font-mono text-[11px] font-bold uppercase tracking-[0.28em]'}
                                                         style={{ color: isActive ? `rgba(${accentRgb},0.92)` : 'rgba(255,255,255,0.42)' }}
                                                     >
                                                         [{stage.stage}]
                                                     </div>
-                                                    <h3 className="mt-4 text-[clamp(2rem,4vw,3.2rem)] font-black leading-[0.92] tracking-[-0.05em] text-white">
+                                                    <h3
+                                                        className="font-black leading-[0.92] tracking-[-0.05em] text-white"
+                                                        style={{
+                                                            marginTop: isMobileViewport ? '8px' : isCompactViewport ? '10px' : '16px',
+                                                            fontSize: isMobileViewport
+                                                                ? 'clamp(1.8rem,8.8vw,2.25rem)'
+                                                                : isCompactViewport
+                                                                    ? 'clamp(2.1rem,4.2vw,2.8rem)'
+                                                                    : 'clamp(2rem,4vw,3.2rem)',
+                                                        }}
+                                                    >
                                                         {stage.title}
                                                     </h3>
                                                 </div>
@@ -403,7 +561,11 @@ export default function PipelineSoftware() {
                                                             : 'none',
                                                     }}
                                                     transition={{ duration: 0.4 }}
-                                                    className="grid h-14 w-14 place-items-center rounded-[1rem] border"
+                                                    className={isMobileViewport
+                                                        ? 'grid h-11 w-11 shrink-0 place-items-center rounded-[0.85rem] border'
+                                                        : isCompactViewport
+                                                        ? 'grid h-12 w-12 place-items-center rounded-[0.9rem] border'
+                                                        : 'grid h-14 w-14 place-items-center rounded-[1rem] border'}
                                                     style={{
                                                         color: isActive ? accent : 'rgba(255,255,255,0.3)',
                                                         animation: isActive ? 'terminal-glow 2.4s ease-in-out infinite' : 'none',
@@ -414,7 +576,11 @@ export default function PipelineSoftware() {
                                             </div>
 
                                             <div
-                                                className="rounded-xl border px-4 py-3 font-mono text-[11px] uppercase tracking-[0.22em]"
+                                                className={isMobileViewport
+                                                    ? 'rounded-xl border px-3 py-2 font-mono text-[9px] uppercase leading-5 tracking-[0.16em]'
+                                                    : isCompactViewport
+                                                    ? 'rounded-xl border px-3 py-2.5 font-mono text-[10px] uppercase tracking-[0.2em]'
+                                                    : 'rounded-xl border px-4 py-3 font-mono text-[11px] uppercase tracking-[0.22em]'}
                                                 style={{
                                                     borderColor: `rgba(${accentRgb},0.3)`,
                                                     background: `linear-gradient(90deg, rgba(${accentRgb},0.14), rgba(255,255,255,0.04))`,
@@ -424,24 +590,70 @@ export default function PipelineSoftware() {
                                                 {stage.subtitle}
                                             </div>
 
-                                            <p className="mt-5 max-w-[26rem] text-sm leading-7 text-white/66 md:text-[15px]">
+                                            <p
+                                                className={isMobileViewport
+                                                    ? 'mt-3 max-w-[26rem] text-[12.5px] leading-[1.7] text-white/66'
+                                                    : isCompactViewport
+                                                    ? 'mt-3 max-w-[26rem] text-[13px] leading-6 text-white/66 md:text-sm'
+                                                    : 'mt-5 max-w-[26rem] text-sm leading-7 text-white/66 md:text-[15px]'}
+                                                style={isMobileViewport
+                                                    ? {
+                                                        display: '-webkit-box',
+                                                        WebkitLineClamp: 3,
+                                                        WebkitBoxOrient: 'vertical',
+                                                        overflow: 'hidden',
+                                                    }
+                                                    : isCompactViewport
+                                                    ? {
+                                                        display: '-webkit-box',
+                                                        WebkitLineClamp: isTinyViewport ? 3 : 4,
+                                                        WebkitBoxOrient: 'vertical',
+                                                        overflow: 'hidden',
+                                                    }
+                                                    : undefined}
+                                            >
                                                 {stage.description}
                                             </p>
                                         </div>
 
-                                        <div className="relative z-10">
-                                            <div className="border-t border-white/10 pt-5">
-                                                <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-white/36">
+                                        <div className={isMobileViewport ? 'relative z-10 mt-1' : 'relative z-10'}>
+                                            <div className={isMobileViewport ? 'border-t border-white/10 pt-3' : isCompactViewport ? 'border-t border-white/10 pt-3.5' : 'border-t border-white/10 pt-5'}>
+                                                <div className={isMobileViewport ? 'font-mono text-[9px] uppercase tracking-[0.18em] text-white/36' : 'font-mono text-[10px] uppercase tracking-[0.22em] text-white/36'}>
                                                     Output
                                                 </div>
-                                                <div className="mt-3 text-sm font-semibold leading-relaxed text-white/82 md:text-base">
+                                                <div
+                                                    className={isMobileViewport
+                                                        ? 'mt-2 text-[12.5px] font-semibold leading-snug text-white/82'
+                                                        : isCompactViewport
+                                                        ? 'mt-2 text-[14px] font-semibold leading-snug text-white/82 md:text-[15px]'
+                                                        : 'mt-3 text-sm font-semibold leading-relaxed text-white/82 md:text-base'}
+                                                    style={isMobileViewport
+                                                        ? {
+                                                            display: '-webkit-box',
+                                                            WebkitLineClamp: 2,
+                                                            WebkitBoxOrient: 'vertical',
+                                                            overflow: 'hidden',
+                                                        }
+                                                        : isCompactViewport
+                                                        ? {
+                                                            display: '-webkit-box',
+                                                            WebkitLineClamp: isTinyViewport ? 2 : 3,
+                                                            WebkitBoxOrient: 'vertical',
+                                                            overflow: 'hidden',
+                                                        }
+                                                        : undefined}
+                                                >
                                                     {stage.output}
                                                 </div>
                                             </div>
 
-                                            <div className="mt-6 flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.22em] text-white/26">
+                                            <div className={isMobileViewport ? 'mt-2 flex items-center justify-between font-mono text-[9px] uppercase tracking-[0.18em] text-white/26' : isCompactViewport ? 'mt-3 flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.2em] text-white/26' : 'mt-6 flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.22em] text-white/26'}>
                                                 <span>{String(index + 1).padStart(2, '0')} / {String(stages.length).padStart(2, '0')}</span>
-                                                <span style={{ color: isMuted ? 'rgba(255,255,255,0.24)' : `rgba(${accentRgb},0.9)` }}>active window</span>
+                                                {!isMobileViewport && !isTinyViewport && (
+                                                    <span style={{ color: isMuted ? 'rgba(255,255,255,0.24)' : `rgba(${accentRgb},0.9)` }}>
+                                                        active window
+                                                    </span>
+                                                )}
                                             </div>
                                         </div>
                                     </motion.article>
@@ -450,55 +662,7 @@ export default function PipelineSoftware() {
                         </motion.div>
                     </div>
 
-                    <motion.div
-                        initial={{ opacity: 0, y: 14 }}
-                        animate={isInView ? { opacity: 1, y: 0 } : {}}
-                        transition={{ duration: effectiveReducedMotion ? 0 : 0.55, delay: 0.2, ease }}
-                        className="mt-2 flex items-center justify-between gap-4"
-                    >
-                        <div className="flex items-center gap-3">
-                            {stages.map((stage, index) => (
-                                <motion.div
-                                    key={stage.id}
-                                    className="flex items-center gap-2"
-                                    animate={{ opacity: activeIndex === index ? 1 : 0.3 }}
-                                    transition={{ duration: 0.3 }}
-                                >
-                                    <motion.div
-                                        className="rounded-full"
-                                        animate={{
-                                            width: activeIndex === index ? '24px' : '6px',
-                                            height: '6px',
-                                            background: activeIndex === index
-                                                ? stage.accent
-                                                : 'rgba(255,255,255,0.2)',
-                                            boxShadow: activeIndex === index
-                                                ? `0 0 10px rgba(${stage.accentRgb},0.7)`
-                                                : 'none',
-                                        }}
-                                        transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-                                    />
-                                    <motion.span
-                                        className="font-mono text-[10px] uppercase tracking-[0.2em]"
-                                        animate={{
-                                            color: activeIndex === index
-                                                ? `rgba(${stage.accentRgb},0.92)`
-                                                : 'rgba(255,255,255,0.2)',
-                                        }}
-                                        transition={{ duration: 0.3 }}
-                                    >
-                                        {activeIndex === index ? stage.title : ''}
-                                    </motion.span>
-                                </motion.div>
-                            ))}
-                        </div>
-
-                        <span className="text-[11px] uppercase tracking-[0.24em] text-white/26 font-mono">
-                            {activeIndex < stages.length - 1
-                                ? 'Scroll para continuar'
-                                : 'Pipeline completo'}
-                        </span>
-                    </motion.div>
+                    {!isMobileViewport && renderPipelineControls('bottom')}
                 </div>
             </div>
         </section>

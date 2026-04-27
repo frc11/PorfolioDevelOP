@@ -221,8 +221,9 @@ function BentoFlipCard({
 
   useEffect(() => {
     const updateMode = () => {
-      const hasFinePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches
-      setIsDesktopMode(window.innerWidth >= 1024 && hasFinePointer)
+      // Keep center-triggered flip strictly below 1024px.
+      // At 1024px and above, always use desktop hover behavior.
+      setIsDesktopMode(window.innerWidth >= 1024)
     }
 
     updateMode()

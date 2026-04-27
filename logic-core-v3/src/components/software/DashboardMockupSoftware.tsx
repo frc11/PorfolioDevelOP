@@ -525,7 +525,7 @@ export default function DashboardMockupSoftware() {
   useEffect(() => {
     if (typeof window === 'undefined') return
 
-    const mediaQuery = window.matchMedia('(max-width: 1024px)')
+    const mediaQuery = window.matchMedia('(max-width: 1023px)')
     const syncViewportMode = () => setIsTouchViewport(mediaQuery.matches)
 
     syncViewportMode()
@@ -1149,7 +1149,7 @@ export default function DashboardMockupSoftware() {
                       boxShadow: `0 0 0 1px rgba(${currentRubro.colorRgb},0.18), 0 14px 24px rgba(${currentRubro.colorRgb},0.12)`,
                       transition: { duration: 0.01, ease: 'linear' },
                     }}
-                    className="dashboard-activity-card rounded-xl p-3.5 sm:p-5"
+                    className="dashboard-activity-card dashboard-sales-card rounded-xl p-3.5 sm:p-5"
                     style={{
                       background: 'rgba(255,255,255,0.02)',
                       border: '1px solid',
@@ -1161,10 +1161,10 @@ export default function DashboardMockupSoftware() {
                         : 'none',
                     }}
                   >
-                    <div className="mb-4 flex items-center justify-between sm:mb-5">
-                      <span className="text-xs font-medium text-white/60">Ventas mensuales</span>
+                    <div className="mb-4 flex min-w-0 items-center justify-between gap-2 sm:mb-5">
+                      <span className="min-w-0 truncate text-xs font-medium text-white/60">Ventas mensuales</span>
                       <span
-                        className="rounded-full px-2 py-0.5 font-mono text-[10px]"
+                        className="dashboard-sales-chip shrink-0 rounded-full px-2 py-0.5 font-mono text-[10px]"
                         style={{ color: currentRubro.color, background: `rgba(${currentRubro.colorRgb},0.15)` }}
                       >
                         2026
@@ -1230,7 +1230,7 @@ export default function DashboardMockupSoftware() {
                       boxShadow: `0 0 0 1px rgba(${currentRubro.colorRgb},0.18), 0 14px 24px rgba(${currentRubro.colorRgb},0.1)`,
                       transition: { duration: 0.01, ease: 'linear' },
                     }}
-                    className="rounded-xl p-3.5 sm:p-5"
+                    className="dashboard-recent-card rounded-xl p-3.5 sm:p-5"
                     style={{
                       background: 'rgba(255,255,255,0.02)',
                       border: '1px solid',
@@ -1242,9 +1242,9 @@ export default function DashboardMockupSoftware() {
                         : 'none',
                     }}
                   >
-                    <div className="mb-4 flex items-center justify-between">
-                      <span className="text-xs font-medium text-white/60">Actividad reciente</span>
-                      <div className="flex items-center gap-1.5">
+                    <div className="mb-4 flex min-w-0 items-center justify-between gap-2">
+                      <span className="min-w-0 truncate text-xs font-medium text-white/60">Actividad reciente</span>
+                      <div className="dashboard-live-badge flex shrink-0 items-center gap-1.5">
                         <div
                           className="h-1.5 w-1.5 rounded-full"
                           style={{
@@ -1255,7 +1255,7 @@ export default function DashboardMockupSoftware() {
                           }}
                         />
                         <span
-                          className="font-mono text-[9px]"
+                          className="dashboard-live-label font-mono text-[9px]"
                           style={{ color: isAutoPaused ? 'rgba(245,158,11,0.75)' : 'rgba(74,222,128,0.75)' }}
                         >
                           EN VIVO
@@ -1361,6 +1361,9 @@ export default function DashboardMockupSoftware() {
           .dashboard-activity-card {
             min-height: 236px;
           }
+          .dashboard-recent-card {
+            min-height: 236px;
+          }
           .dashboard-activity-list {
             min-height: 162px;
             overflow: hidden;
@@ -1368,6 +1371,9 @@ export default function DashboardMockupSoftware() {
         }
         @media (max-width: 640px) {
           .dashboard-activity-card {
+            min-height: 206px;
+          }
+          .dashboard-recent-card {
             min-height: 206px;
           }
           .dashboard-activity-list {
@@ -1378,18 +1384,43 @@ export default function DashboardMockupSoftware() {
           }
         }
         @media (max-width: 375px) {
+          .dashboard-sales-card,
+          .dashboard-recent-card {
+            width: 100%;
+            min-width: 0;
+            max-width: 100%;
+          }
           .dashboard-activity-card {
             min-height: 172px;
+            max-height: 172px;
+          }
+          .dashboard-recent-card {
+            min-height: 172px;
+            max-height: 172px;
           }
           .dashboard-activity-list {
+            height: 100px;
             min-height: 100px;
+            max-height: 100px;
+            overflow: hidden;
           }
           .dashboard-activity-item:nth-child(n+3) {
             display: none;
           }
+          .dashboard-live-badge {
+            max-width: 72px;
+            justify-content: flex-end;
+          }
+          .dashboard-live-label {
+            letter-spacing: 0.01em;
+            white-space: nowrap;
+          }
         }
         @media (max-width: 360px) {
           .dashboard-month-chip {
+            display: none;
+          }
+          .dashboard-sales-chip {
             display: none;
           }
         }
