@@ -70,29 +70,40 @@ function AtmosphereProof() {
     <>
       <div style={{
         position:'absolute',
-        top:0, left:'50%',
+        top:'-6%', left:'50%',
         transform:'translateX(-50%)',
-        width:'700px', height:'400px',
-        background:'radial-gradient(ellipse, rgba(99,102,241,0.06) 0%, transparent 65%)',
-        filter:'blur(100px)',
+        width:'920px', height:'520px',
+        background:'radial-gradient(ellipse, rgba(99,102,241,0.2) 0%, rgba(123,47,255,0.08) 38%, transparent 72%)',
+        filter:'blur(95px)',
         pointerEvents:'none',
         zIndex:0,
       }}/>
       <div style={{
         position:'absolute',
-        top:'30%', left:'-10%',
-        width:'400px', height:'400px',
-        background:'radial-gradient(ellipse, rgba(123,47,255,0.04) 0%, transparent 60%)',
-        filter:'blur(80px)',
+        top:'15%', left:'-14%',
+        width:'520px', height:'520px',
+        background:'conic-gradient(from 210deg, rgba(123,47,255,0.24), rgba(123,47,255,0.03), rgba(99,102,241,0.16), rgba(123,47,255,0.24))',
+        filter:'blur(92px)',
+        opacity:0.5,
         pointerEvents:'none',
         zIndex:0,
       }}/>
       <div style={{
         position:'absolute',
-        top:'30%', right:'-10%',
-        width:'400px', height:'400px',
-        background:'radial-gradient(ellipse, rgba(99,102,241,0.04) 0%, transparent 60%)',
-        filter:'blur(80px)',
+        top:'22%', right:'-14%',
+        width:'500px', height:'500px',
+        background:'radial-gradient(circle at 40% 40%, rgba(99,102,241,0.18) 0%, rgba(99,102,241,0.04) 44%, transparent 74%)',
+        filter:'blur(90px)',
+        opacity:0.72,
+        pointerEvents:'none',
+        zIndex:0,
+      }}/>
+      <div style={{
+        position:'absolute',
+        inset:0,
+        background:'linear-gradient(118deg, rgba(123,47,255,0.1) 0%, transparent 32%, rgba(99,102,241,0.12) 54%, transparent 86%)',
+        mixBlendMode:'screen',
+        opacity:0.75,
         pointerEvents:'none',
         zIndex:0,
       }}/>
@@ -350,7 +361,13 @@ export default function SocialProofSoftware() {
       ref={sectionRef}
       style={{
         padding:'clamp(80px,12vh,140px) clamp(20px,5vw,80px)',
-        background:'#080810',
+        backgroundColor:'#060816',
+        backgroundImage:`
+          radial-gradient(120% 110% at 50% -20%, rgba(99,102,241,0.34) 0%, rgba(9,10,27,0.8) 52%, rgba(6,8,22,1) 100%),
+          linear-gradient(122deg, rgba(123,47,255,0.16) 0%, transparent 34%, rgba(99,102,241,0.13) 56%, transparent 100%),
+          repeating-linear-gradient(90deg, rgba(255,255,255,0.025) 0 1px, transparent 1px 84px),
+          repeating-linear-gradient(0deg, rgba(255,255,255,0.018) 0 1px, transparent 1px 84px)
+        `,
         position:'relative',
         overflow:'hidden',
       }}

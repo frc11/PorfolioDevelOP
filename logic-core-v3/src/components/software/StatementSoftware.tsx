@@ -7,7 +7,7 @@ import { motion, useReducedMotion } from 'motion/react'
  * Componente de alto impacto con scroll-reveal.
  */
 
-// ─── TYPES ────────────────────────────────────────────────────────────────────
+// TYPES
 
 interface Word {
   text: string
@@ -16,7 +16,7 @@ interface Word {
   color?: 'white' | 'indigo' | 'gradient'
 }
 
-// ─── DATA ────────────────────────────────────────────────────────────────────
+// DATA
 
 const words: Word[] = [
   { text: 'Tu', s: 0.05, e: 0.11, color: 'white' },
@@ -42,7 +42,7 @@ const words: Word[] = [
   { text: 'menos.', s: 0.81, e: 0.85, color: 'gradient' },
 ]
 
-// ─── SUB-COMPONENTS ──────────────────────────────────────────────────────────
+// SUB-COMPONENTS
 
 function PrimeAtmosphere({ progress }: { progress: number }) {
   return (
@@ -200,7 +200,6 @@ function StatementContent({ progress, shouldReduceMotion }: { progress: number, 
     )
   }
 
-  const badgeOpacity = Math.min(Math.max((progress - 0.85) / 0.10, 0), 1)
   const examplesOpacity = Math.min(Math.max((progress - 0.77) / 0.12, 0), 1)
 
   return (
@@ -241,36 +240,62 @@ function StatementContent({ progress, shouldReduceMotion }: { progress: number, 
         Ferretería con stock sin Excel.
       </p>
 
+    </div>
+  )
+}
+
+function ScrollHint({
+  progress,
+  shouldReduceMotion,
+}: {
+  progress: number
+  shouldReduceMotion: boolean
+}) {
+  const fadeStart = 0.06
+  const fadeEnd = 0.14
+  const opacity = progress <= fadeStart
+    ? 1
+    : progress >= fadeEnd
+      ? 0
+      : 1 - ((progress - fadeStart) / (fadeEnd - fadeStart))
+
+  if (opacity <= 0) return null
+
+  return (
+    <div
+      className="pointer-events-none absolute inset-x-0 top-1/2 z-20 flex justify-center px-6"
+      style={{
+        opacity,
+        transform: `translateY(${(1 - opacity) * 8}px)`,
+      }}
+      aria-hidden="true"
+    >
       <div
-        className="absolute left-1/2 -translate-x-1/2 mt-12 flex flex-col items-center gap-6"
+        className="inline-flex flex-col items-center gap-1 rounded-[14px] border px-6 py-4 text-center backdrop-blur-md"
         style={{
-          opacity: badgeOpacity,
-          transform: `translate(-50%, ${(1 - badgeOpacity) * 40}px)`,
-          pointerEvents: 'none'
+          borderColor: 'rgba(129,140,248,0.28)',
+          background: 'linear-gradient(160deg, rgba(10,14,34,0.78) 0%, rgba(8,12,30,0.62) 100%)',
+          boxShadow: '0 14px 30px rgba(0,0,0,0.36), inset 0 1px 0 rgba(255,255,255,0.06)',
         }}
       >
-        <div className="relative p-1">
-          <div className="absolute inset-0 border border-indigo-500/20 rounded-full animate-spin" style={{ animationDuration: '10s' }} />
-          <div className="absolute inset-[-4px] border border-violet-500/10 rounded-full animate-spin" style={{ animationDuration: '15s', animationDirection: 'reverse' }} />
-          
-          <div className="relative px-8 py-3 bg-white/[0.03] backdrop-blur-2xl border border-white/10 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] flex items-center gap-4">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center p-1.5 shadow-[0_0_20px_rgba(99,102,241,0.4)]">
-              <svg viewBox="0 0 24 24" fill="white" className="w-full h-full">
-                <path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71L12 2z" />
-              </svg>
-            </div>
-            <div className="text-left">
-              <div className="text-sm font-black tracking-widest text-white uppercase">DevelOP PRIME</div>
-              <div className="text-[9px] font-mono text-indigo-400 font-bold tracking-[0.3em] uppercase opacity-60">Verified Architecture</div>
-            </div>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-6 w-full max-w-sm">
-          <div className="flex-1 h-px bg-gradient-to-r from-transparent via-indigo-500/40 to-transparent" />
-          <span className="text-[10px] font-mono tracking-[0.4em] text-white/20 uppercase whitespace-nowrap">Engineered Excellence</span>
-          <div className="flex-1 h-px bg-gradient-to-l from-transparent via-indigo-500/40 to-transparent" />
-        </div>
+        <span
+          className="font-mono text-[clamp(13px,1.5vw,16px)] font-semibold uppercase tracking-[0.28em] text-indigo-200/78"
+          style={{ animation: shouldReduceMotion ? 'none' : 'scrollHintFloat 1.4s ease-in-out infinite' }}
+        >
+          SCROLLEA
+        </span>
+        <span
+          className="mt-1 h-px w-[72%]"
+          style={{
+            background: 'linear-gradient(90deg, transparent, rgba(129,140,248,0.5), transparent)',
+          }}
+        />
+        <span
+          className="font-mono text-[clamp(10px,1.05vw,12px)] uppercase tracking-[0.24em] text-white/54"
+          style={{ animation: shouldReduceMotion ? 'none' : 'scrollHintPulse 2s ease-in-out infinite' }}
+        >
+          para empezar
+        </span>
       </div>
     </div>
   )
@@ -306,8 +331,22 @@ export default function StatementSoftware() {
           opacity: progress < 0.03 ? progress / 0.03 : 1
         }}
       >
+        <style>{`
+          @keyframes scrollHintFloat {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(2px); }
+          }
+          @keyframes scrollHintPulse {
+            0%, 100% { opacity: 0.55; }
+            50% { opacity: 1; }
+          }
+        `}</style>
         <PrimeAtmosphere progress={progress} />
         <DataClusters progress={progress} />
+        <ScrollHint
+          progress={progress}
+          shouldReduceMotion={mounted ? (shouldReduceMotion ?? false) : false}
+        />
         <StatementContent 
           progress={progress} 
           shouldReduceMotion={mounted ? (shouldReduceMotion ?? false) : false} 
@@ -316,3 +355,4 @@ export default function StatementSoftware() {
     </section>
   )
 }
+

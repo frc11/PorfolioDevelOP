@@ -18,6 +18,8 @@ type Stage = {
     subtitle: string
     description: string
     output: string
+    accent: string
+    accentRgb: string
     iconComponent: React.ReactNode
 }
 
@@ -30,6 +32,8 @@ const stages: Stage[] = [
         description:
             'Traducimos operación, restricciones y objetivos de negocio en un sistema viable, medible y listo para escalar.',
         output: 'Mapa de módulos, riesgos y prioridades del producto',
+        accent: '#a855f7',
+        accentRgb: '168,85,247',
         iconComponent: <Search size={22} strokeWidth={1.5} />,
     },
     {
@@ -40,6 +44,8 @@ const stages: Stage[] = [
         description:
             'Construimos el núcleo técnico con una base clara: APIs, reglas de negocio, estados y superficies listas para operación real.',
         output: 'Servicios desacoplados y flujos críticos ya productivos',
+        accent: '#22d3ee',
+        accentRgb: '34,211,238',
         iconComponent: <Code2 size={22} strokeWidth={1.5} />,
     },
     {
@@ -50,6 +56,8 @@ const stages: Stage[] = [
         description:
             'Probamos comportamiento, errores y escenarios límite para que la operación no dependa de “tener suerte” en producción.',
         output: 'Cobertura de riesgos, validaciones y calidad perceptible',
+        accent: '#14b8a6',
+        accentRgb: '20,184,166',
         iconComponent: <FlaskConical size={22} strokeWidth={1.5} />,
     },
     {
@@ -60,6 +68,8 @@ const stages: Stage[] = [
         description:
             'Lanzamos con métricas, monitoreo y visibilidad para que cada release sea controlado, trazable y sostenible.',
         output: 'Sistema online, medido y listo para iterar sin fricción',
+        accent: '#34d399',
+        accentRgb: '52,211,153',
         iconComponent: <Rocket size={22} strokeWidth={1.5} />,
     },
 ] as const
@@ -121,15 +131,9 @@ export default function PipelineSoftware() {
     const viewportRef = useRef<HTMLDivElement>(null)
     const trackRef = useRef<HTMLDivElement>(null)
     const stageRefs = useRef<(HTMLElement | null)[]>([])
-    const [mounted, setMounted] = useState(false)
     const isInView = useInView(sectionRef, { once: true, amount: 0.08 })
     const reducedMotion = useReducedMotion()
-
-    useEffect(() => {
-        setMounted(true)
-    }, [])
-
-    const effectiveReducedMotion = mounted ? (reducedMotion ?? false) : false
+    const effectiveReducedMotion = reducedMotion ?? false
     const [activeIndex, setActiveIndex] = useState(0)
     const stageAnchorsRef = useRef<number[]>([])
     const trackX = useMotionValue(0)
@@ -212,19 +216,59 @@ export default function PipelineSoftware() {
         <section
             id="pipeline"
             ref={sectionRef}
-            className="relative h-[100svh] bg-[#080810]"
+            className="relative h-[100svh] bg-[#070b1f]"
         >
             <style>{`
                 @keyframes terminal-glow {
                     0%, 100% { opacity: 0.55; }
                     50% { opacity: 1; }
                 }
+                @keyframes pipeline-aura-pulse {
+                    0%, 100% { opacity: 0.72; transform: scale(0.98); }
+                    50% { opacity: 1; transform: scale(1.03); }
+                }
             `}</style>
 
             <div
                 aria-hidden="true"
-                className="pointer-events-none absolute left-1/2 top-0 h-[34rem] w-[64rem] -translate-x-1/2 blur-[120px]"
-                style={{ background: 'radial-gradient(ellipse at center top, rgba(99,102,241,0.08) 0%, rgba(123,47,255,0.08) 38%, transparent 72%)' }}
+                className="pointer-events-none absolute inset-0"
+                style={{
+                    background:
+                        'radial-gradient(110% 76% at 84% 18%, rgba(139,92,246,0.22) 0%, rgba(8,12,34,0) 62%), radial-gradient(76% 64% at 16% 80%, rgba(56,189,248,0.16) 0%, rgba(7,10,28,0) 66%), linear-gradient(140deg, #040817 0%, #08102c 46%, #060a1b 100%)',
+                }}
+            />
+
+            <div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-0 opacity-[0.14]"
+                style={{
+                    backgroundImage:
+                        'repeating-linear-gradient(90deg, rgba(129,140,248,0.12) 0 1px, transparent 1px 56px), repeating-linear-gradient(180deg, rgba(56,189,248,0.1) 0 1px, transparent 1px 48px)',
+                    maskImage: 'radial-gradient(120% 84% at 50% 52%, black 0%, black 56%, transparent 100%)',
+                    WebkitMaskImage: 'radial-gradient(120% 84% at 50% 52%, black 0%, black 56%, transparent 100%)',
+                }}
+            />
+
+            <div
+                aria-hidden="true"
+                className="pointer-events-none absolute left-[50%] top-[-8%] h-[38rem] w-[70rem] -translate-x-1/2 blur-[120px]"
+                style={{
+                    background:
+                        'radial-gradient(ellipse at center, rgba(56,189,248,0.2) 0%, rgba(129,140,248,0.14) 32%, rgba(139,92,246,0.18) 52%, transparent 78%)',
+                    animation: effectiveReducedMotion ? 'none' : 'pipeline-aura-pulse 6.8s ease-in-out infinite',
+                }}
+            />
+
+            <div
+                aria-hidden="true"
+                className="pointer-events-none absolute left-[-8%] top-[34%] h-[20rem] w-[20rem] rounded-full blur-[86px]"
+                style={{ background: 'radial-gradient(circle, rgba(168,85,247,0.24) 0%, rgba(7,10,28,0) 70%)' }}
+            />
+
+            <div
+                aria-hidden="true"
+                className="pointer-events-none absolute right-[-10%] top-[38%] h-[22rem] w-[22rem] rounded-full blur-[94px]"
+                style={{ background: 'radial-gradient(circle, rgba(34,211,238,0.22) 0%, rgba(7,10,28,0) 72%)' }}
             />
 
             <div
@@ -243,7 +287,7 @@ export default function PipelineSoftware() {
                         transition={{ duration: effectiveReducedMotion ? 0 : 0.65, ease }}
                         className="max-w-3xl"
                     >
-                        <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-indigo-400/20 bg-indigo-400/[0.06] px-4 py-2">
+                        <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-indigo-300/35 bg-indigo-300/[0.14] px-4 py-2 shadow-[0_10px_24px_rgba(0,0,0,0.3)]">
                             <span className="h-1.5 w-1.5 rounded-full bg-indigo-300 shadow-[0_0_10px_rgba(129,140,248,0.85)]" />
                             <span className="text-[11px] font-bold uppercase tracking-[0.24em] text-indigo-300">
                                 [ El pipeline de entrega ]
@@ -258,18 +302,18 @@ export default function PipelineSoftware() {
                             </span>
                         </h2>
 
-                        <p className="mt-6 max-w-2xl text-base leading-8 text-white/44 md:text-lg">
+                        <p className="mt-6 max-w-2xl text-base leading-8 text-white/62 md:text-lg">
                             En vez de apilar etapas verticales, mostramos el proceso como una línea de ejecución: cada bloque entra en foco cuando llega al centro y deja claro qué produce antes de pasar al siguiente.
                         </p>
                     </motion.div>
 
                     <div
                         ref={viewportRef}
-                        className="relative min-h-[24rem] overflow-hidden rounded-[2rem] border border-white/[0.06] bg-white/[0.02] backdrop-blur-xl"
+                        className="relative min-h-[24rem] overflow-hidden rounded-[2rem] border border-white/[0.12] bg-white/[0.05] backdrop-blur-xl"
                     >
-                        <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-24 bg-[linear-gradient(90deg,#080810,rgba(8,8,16,0))]" />
-                        <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-24 bg-[linear-gradient(270deg,#080810,rgba(8,8,16,0))]" />
-                        <div className="pointer-events-none absolute left-1/2 top-0 z-10 h-full w-px -translate-x-1/2 bg-[linear-gradient(180deg,transparent,rgba(34,211,238,0.34)_20%,rgba(34,211,238,0.52)_50%,rgba(34,211,238,0.34)_80%,transparent)]" />
+                        <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-24 bg-[linear-gradient(90deg,rgba(7,11,31,0.88),rgba(7,11,31,0))]" />
+                        <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-24 bg-[linear-gradient(270deg,rgba(7,11,31,0.88),rgba(7,11,31,0))]" />
+                        <div className="pointer-events-none absolute left-1/2 top-0 z-10 h-full w-px -translate-x-1/2 bg-[linear-gradient(180deg,transparent,rgba(168,85,247,0.34)_18%,rgba(34,211,238,0.56)_48%,rgba(20,184,166,0.44)_72%,rgba(52,211,153,0.36)_86%,transparent)]" />
 
                         <motion.div
                             ref={trackRef}
@@ -279,6 +323,8 @@ export default function PipelineSoftware() {
                             {stages.map((stage, index) => {
                                 const isActive = activeIndex === index
                                 const isMuted = activeIndex !== index
+                                const accent = stage.accent
+                                const accentRgb = stage.accentRgb
 
                                 return (
                                     <motion.article
@@ -287,39 +333,56 @@ export default function PipelineSoftware() {
                                             stageRefs.current[index] = element
                                         }}
                                         animate={{
-                                            opacity: effectiveReducedMotion ? 1 : isActive ? 1 : 0.34,
-                                            scale: effectiveReducedMotion ? 1 : isActive ? 1 : 0.94,
+                                            opacity: effectiveReducedMotion ? 1 : isActive ? 1 : 0.46,
+                                            scale: effectiveReducedMotion ? 1 : isActive ? 1 : 0.95,
                                             filter: effectiveReducedMotion ? 'blur(0px)' : isActive ? 'blur(0px)' : 'blur(0.6px)',
                                             y: effectiveReducedMotion ? 0 : isActive ? -6 : 12,
                                         }}
                                         transition={{ duration: 0.45, ease }}
-                                        className="relative flex h-full min-h-0 w-[min(84vw,30rem)] shrink-0 flex-col justify-between overflow-hidden rounded-[1.9rem] border border-white/10 bg-black/40 p-6 shadow-[0_24px_80px_rgba(0,0,0,0.35)] md:w-[32rem] md:p-7"
+                                        className="relative flex h-full min-h-0 w-[min(84vw,30rem)] shrink-0 flex-col justify-between overflow-hidden rounded-[1.9rem] border p-6 shadow-[0_24px_80px_rgba(0,0,0,0.35)] md:w-[32rem] md:p-7"
                                         style={{
+                                            borderColor: isActive
+                                                ? `rgba(${accentRgb},0.54)`
+                                                : `rgba(${accentRgb},0.26)`,
+                                            background: isActive
+                                                ? `linear-gradient(140deg, rgba(${accentRgb},0.2) 0%, rgba(10,14,36,0.82) 36%, rgba(9,13,34,0.72) 100%)`
+                                                : `linear-gradient(140deg, rgba(${accentRgb},0.08) 0%, rgba(7,10,28,0.72) 45%, rgba(7,10,28,0.62) 100%)`,
                                             boxShadow: isActive
-                                                ? '0 0 0 1px rgba(34,211,238,0.22), 0 0 60px rgba(34,211,238,0.18), 0 0 120px rgba(99,102,241,0.08), 0 24px 80px rgba(0,0,0,0.4)'
+                                                ? `0 0 0 1px rgba(${accentRgb},0.22), 0 0 56px rgba(${accentRgb},0.24), 0 0 120px rgba(${accentRgb},0.08), 0 24px 80px rgba(0,0,0,0.4)`
                                                 : '0 24px 80px rgba(0,0,0,0.24)',
                                         }}
                                     >
-                                        <div className="absolute inset-0 bg-[linear-gradient(145deg,rgba(255,255,255,0.05),transparent_34%,transparent_72%,rgba(34,211,238,0.05))]" />
+                                        <div
+                                            className="absolute inset-0"
+                                            style={{
+                                                background: `linear-gradient(145deg, rgba(255,255,255,0.08), transparent 34%, transparent 72%, rgba(${accentRgb},0.14))`,
+                                            }}
+                                        />
                                         <motion.div
                                             className="pointer-events-none absolute inset-0"
                                             animate={{
                                                 opacity: isActive ? 1 : 0,
                                                 background: isActive
-                                                    ? 'radial-gradient(circle at 50% 30%, rgba(34,211,238,0.15) 0%, rgba(99,102,241,0.06) 40%, transparent 65%)'
+                                                    ? `radial-gradient(circle at 50% 30%, rgba(${accentRgb},0.22) 0%, rgba(${accentRgb},0.08) 40%, transparent 65%)`
                                                     : 'radial-gradient(circle at 50% 50%, transparent 0%, transparent 100%)',
                                             }}
                                             transition={{ duration: 0.5, ease: 'easeInOut' }}
                                         />
                                         <div
-                                            className="absolute inset-x-0 top-0 h-px bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.24),transparent)]"
-                                            style={{ opacity: isActive ? 1 : 0.35 }}
+                                            className="absolute inset-x-0 top-0 h-px"
+                                            style={{
+                                                background: `linear-gradient(90deg, transparent, rgba(${accentRgb},0.76), transparent)`,
+                                                opacity: isActive ? 1 : 0.45,
+                                            }}
                                         />
 
                                         <div className="relative z-10">
                                             <div className="mb-6 flex items-start justify-between gap-4">
                                                 <div>
-                                                    <div className="font-mono text-[11px] font-bold uppercase tracking-[0.28em] text-white/42">
+                                                    <div
+                                                        className="font-mono text-[11px] font-bold uppercase tracking-[0.28em]"
+                                                        style={{ color: isActive ? `rgba(${accentRgb},0.92)` : 'rgba(255,255,255,0.42)' }}
+                                                    >
                                                         [{stage.stage}]
                                                     </div>
                                                     <h3 className="mt-4 text-[clamp(2rem,4vw,3.2rem)] font-black leading-[0.92] tracking-[-0.05em] text-white">
@@ -330,19 +393,19 @@ export default function PipelineSoftware() {
                                                 <motion.div
                                                     animate={{
                                                         background: isActive
-                                                            ? 'rgba(34,211,238,0.12)'
+                                                            ? `rgba(${accentRgb},0.18)`
                                                             : 'rgba(255,255,255,0.03)',
                                                         borderColor: isActive
-                                                            ? 'rgba(34,211,238,0.3)'
+                                                            ? `rgba(${accentRgb},0.52)`
                                                             : 'rgba(255,255,255,0.08)',
                                                         boxShadow: isActive
-                                                            ? '0 0 20px rgba(34,211,238,0.2)'
+                                                            ? `0 0 24px rgba(${accentRgb},0.36)`
                                                             : 'none',
                                                     }}
                                                     transition={{ duration: 0.4 }}
                                                     className="grid h-14 w-14 place-items-center rounded-[1rem] border"
                                                     style={{
-                                                        color: isActive ? '#22d3ee' : 'rgba(255,255,255,0.3)',
+                                                        color: isActive ? accent : 'rgba(255,255,255,0.3)',
                                                         animation: isActive ? 'terminal-glow 2.4s ease-in-out infinite' : 'none',
                                                     }}
                                                 >
@@ -350,18 +413,25 @@ export default function PipelineSoftware() {
                                                 </motion.div>
                                             </div>
 
-                                            <div className="rounded-xl border border-white/[0.06] bg-white/[0.03] px-4 py-3 font-mono text-[11px] uppercase tracking-[0.22em] text-cyan-200/78">
+                                            <div
+                                                className="rounded-xl border px-4 py-3 font-mono text-[11px] uppercase tracking-[0.22em]"
+                                                style={{
+                                                    borderColor: `rgba(${accentRgb},0.3)`,
+                                                    background: `linear-gradient(90deg, rgba(${accentRgb},0.14), rgba(255,255,255,0.04))`,
+                                                    color: `rgba(${accentRgb},0.96)`,
+                                                }}
+                                            >
                                                 {stage.subtitle}
                                             </div>
 
-                                            <p className="mt-5 max-w-[26rem] text-sm leading-7 text-white/56 md:text-[15px]">
+                                            <p className="mt-5 max-w-[26rem] text-sm leading-7 text-white/66 md:text-[15px]">
                                                 {stage.description}
                                             </p>
                                         </div>
 
                                         <div className="relative z-10">
                                             <div className="border-t border-white/10 pt-5">
-                                                <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-white/28">
+                                                <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-white/36">
                                                     Output
                                                 </div>
                                                 <div className="mt-3 text-sm font-semibold leading-relaxed text-white/82 md:text-base">
@@ -371,7 +441,7 @@ export default function PipelineSoftware() {
 
                                             <div className="mt-6 flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.22em] text-white/26">
                                                 <span>{String(index + 1).padStart(2, '0')} / {String(stages.length).padStart(2, '0')}</span>
-                                                <span className={isMuted ? 'text-white/18' : 'text-cyan-200/70'}>active window</span>
+                                                <span style={{ color: isMuted ? 'rgba(255,255,255,0.24)' : `rgba(${accentRgb},0.9)` }}>active window</span>
                                             </div>
                                         </div>
                                     </motion.article>
@@ -400,10 +470,10 @@ export default function PipelineSoftware() {
                                             width: activeIndex === index ? '24px' : '6px',
                                             height: '6px',
                                             background: activeIndex === index
-                                                ? '#22d3ee'
+                                                ? stage.accent
                                                 : 'rgba(255,255,255,0.2)',
                                             boxShadow: activeIndex === index
-                                                ? '0 0 8px rgba(34,211,238,0.6)'
+                                                ? `0 0 10px rgba(${stage.accentRgb},0.7)`
                                                 : 'none',
                                         }}
                                         transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
@@ -412,7 +482,7 @@ export default function PipelineSoftware() {
                                         className="font-mono text-[10px] uppercase tracking-[0.2em]"
                                         animate={{
                                             color: activeIndex === index
-                                                ? 'rgba(34,211,238,0.8)'
+                                                ? `rgba(${stage.accentRgb},0.92)`
                                                 : 'rgba(255,255,255,0.2)',
                                         }}
                                         transition={{ duration: 0.3 }}

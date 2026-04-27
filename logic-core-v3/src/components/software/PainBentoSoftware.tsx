@@ -198,6 +198,7 @@ function BentoFlipCard({
   const [hasBeenFlippedOnce, setHasBeenFlippedOnce] = useState(false)
   const [hoverStarted, setHoverStarted] = useState(false)
   const [loss, setLoss] = useState(0)
+  const [isDesktopMode, setIsDesktopMode] = useState(true)
   const cardRef = useRef<HTMLDivElement>(null)
   const cardIsInView = useInView(cardRef, { once: true, amount: 0.32 })
 
@@ -218,8 +219,22 @@ function BentoFlipCard({
     }
   }, [hoverStarted, flipped, pair.id, effectiveIsReduced])
 
+  useEffect(() => {
+    const updateMode = () => {
+      const hasFinePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches
+      setIsDesktopMode(window.innerWidth >= 1024 && hasFinePointer)
+    }
+
+    updateMode()
+    window.addEventListener('resize', updateMode)
+
+    return () => {
+      window.removeEventListener('resize', updateMode)
+    }
+  }, [])
+
   const triggerFlip = useCallback((state: boolean) => {
-    if (effectiveIsReduced) return
+    if (effectiveIsReduced || state === flipped) return
     setFlipped(state)
     onFlipChange(state)
     if (state && !hasBeenFlippedOnce) {
@@ -227,20 +242,55 @@ function BentoFlipCard({
       onFirstFlip()
     }
     if (state) setEverHovered(true)
-  }, [effectiveIsReduced, hasBeenFlippedOnce, onFirstFlip, onFlipChange])
+  }, [effectiveIsReduced, flipped, hasBeenFlippedOnce, onFirstFlip, onFlipChange])
+
+  useEffect(() => {
+    if (isDesktopMode || effectiveIsReduced) return
+    const cardNode = cardRef.current
+    if (!cardNode) return
+
+    let ticking = false
+
+    const syncFlipWithViewport = () => {
+      ticking = false
+      const rect = cardNode.getBoundingClientRect()
+      if (rect.height <= 0) return
+      const cardCenter = rect.top + (rect.height / 2)
+      const viewportCenter = window.innerHeight / 2
+      triggerFlip(cardCenter <= viewportCenter)
+    }
+
+    const queueSync = () => {
+      if (ticking) return
+      ticking = true
+      window.requestAnimationFrame(syncFlipWithViewport)
+    }
+
+    queueSync()
+    window.addEventListener('scroll', queueSync, { passive: true })
+    window.addEventListener('resize', queueSync)
+
+    return () => {
+      window.removeEventListener('scroll', queueSync)
+      window.removeEventListener('resize', queueSync)
+    }
+  }, [effectiveIsReduced, isDesktopMode, triggerFlip])
 
   const handleMouseEnter = () => {
+    if (!isDesktopMode) return
     triggerFlip(true)
     setHoverStarted(true)
   }
 
   const handleMouseLeave = () => {
+    if (!isDesktopMode) return
     triggerFlip(false)
     setHoverStarted(false)
     setLoss(0)
   }
 
   const handleToggle = () => {
+    if (!isDesktopMode) return
     const newState = !flipped
     triggerFlip(newState)
     setHoverStarted(newState)
@@ -266,7 +316,8 @@ function BentoFlipCard({
           position: 'absolute',
           inset: '-4px',
           zIndex: 30,
-          cursor: 'none',
+          cursor: isDesktopMode ? 'none' : 'default',
+          pointerEvents: isDesktopMode ? 'auto' : 'none',
         }}
       />
 
@@ -278,13 +329,25 @@ function BentoFlipCard({
           width: '100%',
           height: '100%',
           minHeight:
-            pair.id === 0 || pair.id === 5
-              ? '252px'
-              : pair.size === 'large'
-                ? '220px'
-                : pair.size === 'small'
-                  ? '100%'
-                  : '180px',
+            isDesktopMode
+              ? (
+                pair.id === 0 || pair.id === 5
+                  ? '252px'
+                  : pair.size === 'large'
+                    ? '220px'
+                    : pair.size === 'small'
+                      ? '100%'
+                      : '180px'
+              )
+              : (
+                pair.id === 0 || pair.id === 5
+                  ? '268px'
+                  : pair.size === 'large'
+                    ? '240px'
+                    : pair.size === 'small'
+                      ? '228px'
+                      : '220px'
+              ),
           transformStyle: 'preserve-3d',
           pointerEvents: 'none',
         }}
@@ -475,9 +538,24 @@ export default function PainBentoSoftware() {
   const isInView = useInView(sectionRef, { once: true, amount: 0.1 })
   const [flipCount, setFlipCount] = useState(0)
   const [anyFlipped, setAnyFlipped] = useState(false)
+  const [isMobileOrTabletLayout, setIsMobileOrTabletLayout] = useState(false)
   const flippedCountRef = useRef(0)
 
   const effectiveIsReduced = isReduced ?? false
+
+  useEffect(() => {
+    const media = window.matchMedia('(max-width: 1023px)')
+    const sync = () => setIsMobileOrTabletLayout(media.matches)
+
+    sync()
+    if (typeof media.addEventListener === 'function') {
+      media.addEventListener('change', sync)
+      return () => media.removeEventListener('change', sync)
+    }
+
+    media.addListener(sync)
+    return () => media.removeListener(sync)
+  }, [])
 
   const handleFirstFlip = useCallback(() => {
     setFlipCount(prev => prev + 1)
@@ -487,6 +565,26 @@ export default function PainBentoSoftware() {
     flippedCountRef.current += flipped ? 1 : -1
     setAnyFlipped(flippedCountRef.current > 0)
   }, [])
+
+  const desktopCards = [
+    { pair: bentoPairs[0], gridStyle: { gridColumn: 'span 2' } },
+    { pair: bentoPairs[3], gridStyle: { gridRow: 'span 2' } },
+    { pair: bentoPairs[1], gridStyle: {} },
+    { pair: bentoPairs[2], gridStyle: {} },
+    { pair: bentoPairs[4], gridStyle: {} },
+    { pair: bentoPairs[5], gridStyle: { gridColumn: 'span 2' } },
+  ] as const
+
+  const mobileTabletCards = [
+    { pair: bentoPairs[0], gridStyle: {} },
+    { pair: bentoPairs[1], gridStyle: {} },
+    { pair: bentoPairs[2], gridStyle: {} },
+    { pair: bentoPairs[3], gridStyle: {} },
+    { pair: bentoPairs[4], gridStyle: {} },
+    { pair: bentoPairs[5], gridStyle: {} },
+  ] as const
+
+  const cardsToRender = isMobileOrTabletLayout ? mobileTabletCards : desktopCards
 
   return (
     <section
@@ -581,12 +679,15 @@ export default function PainBentoSoftware() {
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[14px]">
-          <BentoFlipCard pair={bentoPairs[0]} gridStyle={{ gridColumn: 'span 2' }} onFirstFlip={handleFirstFlip} onFlipChange={handleFlipChange} />
-          <BentoFlipCard pair={bentoPairs[3]} gridStyle={{ gridRow: 'span 2' }} onFirstFlip={handleFirstFlip} onFlipChange={handleFlipChange} />
-          <BentoFlipCard pair={bentoPairs[1]} gridStyle={{}} onFirstFlip={handleFirstFlip} onFlipChange={handleFlipChange} />
-          <BentoFlipCard pair={bentoPairs[2]} gridStyle={{}} onFirstFlip={handleFirstFlip} onFlipChange={handleFlipChange} />
-          <BentoFlipCard pair={bentoPairs[4]} gridStyle={{}} onFirstFlip={handleFirstFlip} onFlipChange={handleFlipChange} />
-          <BentoFlipCard pair={bentoPairs[5]} gridStyle={{ gridColumn: 'span 2' }} onFirstFlip={handleFirstFlip} onFlipChange={handleFlipChange} />
+          {cardsToRender.map(({ pair, gridStyle }) => (
+            <BentoFlipCard
+              key={pair.id}
+              pair={pair}
+              gridStyle={gridStyle}
+              onFirstFlip={handleFirstFlip}
+              onFlipChange={handleFlipChange}
+            />
+          ))}
         </div>
 
         <AnimatePresence>

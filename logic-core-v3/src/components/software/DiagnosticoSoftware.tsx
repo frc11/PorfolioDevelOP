@@ -733,18 +733,20 @@ export default function DiagnosticoSoftware() {
         <SocialProof isInView={isInView} />
 
         {!showResult ? (
-          <StepWizard
-            currentStep={currentStep}
-            setCurrentStep={setCurrentStep}
-            selections={selections}
-            setSelections={setSelections}
-            onComplete={(rubro, problemas, equipo) => {
-              const diagId = calcularDiagnostico(rubro, problemas, equipo);
-              setResultado(resultados[diagId]);
-              setShowResult(true)
-            }}
-            isInView={isInView}
-          />
+          <div className="diagnostico-step-gap">
+            <StepWizard
+              currentStep={currentStep}
+              setCurrentStep={setCurrentStep}
+              selections={selections}
+              setSelections={setSelections}
+              onComplete={(rubro, problemas, equipo) => {
+                const diagId = calcularDiagnostico(rubro, problemas, equipo);
+                setResultado(resultados[diagId]);
+                setShowResult(true)
+              }}
+              isInView={isInView}
+            />
+          </div>
         ) : (
           <>
             <ResultPanel
@@ -760,6 +762,19 @@ export default function DiagnosticoSoftware() {
           </>
         )}
       </div>
+      <style>{`
+        @media (max-width: 1023px) {
+          .diagnostico-step-gap {
+            margin-top: 14px;
+          }
+        }
+
+        @media (max-width: 767px) {
+          .diagnostico-step-gap {
+            margin-top: 20px;
+          }
+        }
+      `}</style>
     </section>
   )
 }

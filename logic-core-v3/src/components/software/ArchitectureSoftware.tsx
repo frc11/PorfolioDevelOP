@@ -23,6 +23,11 @@ interface ArchitecturePillar {
     description: string
 }
 
+interface DiagramFlowCard {
+    label: string
+    description: string
+}
+
 const architecturePillars: ArchitecturePillar[] = [
     {
         metric: '99.9%',
@@ -44,6 +49,21 @@ const architecturePillars: ArchitecturePillar[] = [
         metricColorRgb: '123,47,255',
         title: 'Tiempo de respuesta',
         description: 'Cualquier consulta, reporte o operación responde en menos de 2 segundos.',
+    },
+]
+
+const diagramFlowCards: DiagramFlowCard[] = [
+    {
+        label: 'Lo que pasa',
+        description: 'Un pedido, una venta, un turno',
+    },
+    {
+        label: 'Lo que hace el sistema',
+        description: 'Procesa, actualiza y notifica',
+    },
+    {
+        label: 'Lo que ves vos',
+        description: 'Dashboard actualizado al segundo',
     },
 ]
 
@@ -121,6 +141,26 @@ const lineVariants = {
 }
 
 const DOT_OFFSETS = [0.18, 0.54, 0.82] as const
+
+const ENERGY_TRAILS = [
+    'M -140 650 C 82 600, 260 546, 426 500 C 602 450, 782 386, 1004 308',
+    'M -80 692 C 146 636, 324 556, 518 514 C 684 476, 826 412, 1010 314',
+    'M -24 724 C 208 660, 382 582, 568 540 C 752 496, 866 434, 1016 320',
+    'M 52 746 C 286 684, 438 616, 620 574 C 796 532, 904 468, 1022 326',
+] as const
+
+const TRAIL_SPARKS = [
+    { x: 14, y: 73, size: 3.4, delay: 0.2 },
+    { x: 21, y: 69, size: 2.6, delay: 0.7 },
+    { x: 29, y: 66, size: 3.1, delay: 1.1 },
+    { x: 37, y: 63, size: 2.5, delay: 1.4 },
+    { x: 46, y: 60, size: 3.2, delay: 1.8 },
+    { x: 56, y: 56, size: 2.7, delay: 2.1 },
+    { x: 66, y: 52, size: 3.4, delay: 2.5 },
+    { x: 76, y: 48, size: 2.6, delay: 2.8 },
+    { x: 86, y: 43, size: 3.1, delay: 3.1 },
+    { x: 93, y: 39, size: 3.8, delay: 3.4 },
+] as const
 
 function PathDots({
     d,
@@ -236,22 +276,113 @@ function PathDots({
 export default function ArchitectureSoftware() {
     const sectionRef = useRef<HTMLElement>(null)
     const diagramRef = useRef<HTMLDivElement>(null)
-    const [mounted, setMounted] = useState(false)
+    const diagramCardRef = useRef<HTMLDivElement>(null)
+    const flowCardRefs = useRef<(HTMLDivElement | null)[]>([])
+    const pillarRefs = useRef<(HTMLDivElement | null)[]>([])
     const isInView = useInView(sectionRef, { once: true, amount: 0.18 })
     const reducedMotion = useReducedMotion()
     const pulse = useMotionValue(0)
     const [diagramHovered, setDiagramHovered] = useState(false)
-
-    useEffect(() => {
-        setMounted(true)
-    }, [])
+    const [isTouchViewport, setIsTouchViewport] = useState(false)
+    const [isDiagramCentered, setIsDiagramCentered] = useState(false)
+    const [centeredFlowCards, setCenteredFlowCards] = useState<boolean[]>(() =>
+        diagramFlowCards.map(() => false)
+    )
+    const [centeredPillars, setCenteredPillars] = useState<boolean[]>(() =>
+        architecturePillars.map(() => false)
+    )
 
     useScroll({
         target: diagramRef,
         offset: ['start 78%', 'end 30%'],
     })
-    const effectiveReducedMotion = mounted ? (reducedMotion ?? false) : false
+    const effectiveReducedMotion = reducedMotion ?? false
     const shouldDraw = effectiveReducedMotion ? true : isInView
+
+    useEffect(() => {
+        if (typeof window === 'undefined') return
+
+        const mediaQuery = window.matchMedia('(max-width: 1024px)')
+        const syncViewportMode = () => setIsTouchViewport(mediaQuery.matches)
+
+        syncViewportMode()
+        if (typeof mediaQuery.addEventListener === 'function') {
+            mediaQuery.addEventListener('change', syncViewportMode)
+            return () => mediaQuery.removeEventListener('change', syncViewportMode)
+        }
+
+        mediaQuery.addListener(syncViewportMode)
+        return () => mediaQuery.removeListener(syncViewportMode)
+    }, [])
+
+    useEffect(() => {
+        if (!isTouchViewport) return
+
+        const observer = new IntersectionObserver(
+            (entries) => {
+                entries.forEach((entry) => {
+                    const target = entry.target as HTMLElement
+                    const role = target.dataset.centerRole
+                    const rawIndex = target.dataset.centerIndex
+                    const index = rawIndex ? Number(rawIndex) : -1
+                    const isActive = entry.isIntersecting
+
+                    if (role === 'diagram') {
+                        setIsDiagramCentered((previous) => (previous === isActive ? previous : isActive))
+                        return
+                    }
+
+                    if (role === 'flow' && index >= 0) {
+                        setCenteredFlowCards((previous) => {
+                            if (previous[index] === isActive) return previous
+                            const next = [...previous]
+                            next[index] = isActive
+                            return next
+                        })
+                        return
+                    }
+
+                    if (role === 'pillar' && index >= 0) {
+                        setCenteredPillars((previous) => {
+                            if (previous[index] === isActive) return previous
+                            const next = [...previous]
+                            next[index] = isActive
+                            return next
+                        })
+                    }
+                })
+            },
+            {
+                root: null,
+                threshold: 0,
+                rootMargin: '-45% 0px -45% 0px',
+            }
+        )
+
+        const targets: HTMLElement[] = []
+        if (diagramCardRef.current) {
+            diagramCardRef.current.dataset.centerRole = 'diagram'
+            targets.push(diagramCardRef.current)
+        }
+
+        flowCardRefs.current.forEach((element, index) => {
+            if (!element) return
+            element.dataset.centerRole = 'flow'
+            element.dataset.centerIndex = String(index)
+            targets.push(element)
+        })
+
+        pillarRefs.current.forEach((element, index) => {
+            if (!element) return
+            element.dataset.centerRole = 'pillar'
+            element.dataset.centerIndex = String(index)
+            targets.push(element)
+        })
+
+        targets.forEach((element) => observer.observe(element))
+
+        return () => observer.disconnect()
+    }, [isTouchViewport])
 
     useEffect(() => {
         if (effectiveReducedMotion) return
@@ -276,10 +407,11 @@ export default function ArchitectureSoftware() {
 
         raf = requestAnimationFrame(loop)
         return () => cancelAnimationFrame(raf)
-    }, [pulse, reducedMotion])
+    }, [pulse, effectiveReducedMotion])
 
     const pulseScale = useTransform(pulse, [0, 1], [0.96, 1.08])
     const pulseOpacity = useTransform(pulse, [0, 1], [0.48, 0.92])
+    const diagramInteractive = diagramHovered || (isTouchViewport && isDiagramCentered)
 
     return (
         <section
@@ -287,26 +419,197 @@ export default function ArchitectureSoftware() {
             className="relative overflow-hidden bg-[#080810] px-[clamp(20px,5vw,80px)] py-[clamp(80px,12vh,140px)]"
         >
             <style>{`
-                @keyframes float {
-                    0%, 100% { transform: translateY(0px); }
-                    50% { transform: translateY(-6px); }
+                @keyframes gridDrift {
+                    from {
+                        background-position: 0 0, 0 0;
+                    }
+                    to {
+                        background-position: 0 72px, 72px 0;
+                    }
+                }
+
+                @keyframes floorShift {
+                    from {
+                        background-position: 0 0, 0 0;
+                    }
+                    to {
+                        background-position: 0 58px, 64px 0;
+                    }
+                }
+
+                @keyframes portalSpin {
+                    from {
+                        transform: rotate(0deg);
+                    }
+                    to {
+                        transform: rotate(360deg);
+                    }
+                }
+
+                @keyframes portalPulse {
+                    0%, 100% {
+                        opacity: 0.56;
+                        transform: scale(0.97);
+                    }
+                    50% {
+                        opacity: 0.88;
+                        transform: scale(1.04);
+                    }
+                }
+
+                @keyframes trailFlow {
+                    from {
+                        stroke-dashoffset: 0;
+                    }
+                    to {
+                        stroke-dashoffset: -340;
+                    }
+                }
+
+                @keyframes sparkPulse {
+                    0%, 100% {
+                        opacity: 0.28;
+                        transform: scale(0.74);
+                    }
+                    40% {
+                        opacity: 0.92;
+                        transform: scale(1);
+                    }
                 }
             `}</style>
 
             <div
                 aria-hidden="true"
-                className="pointer-events-none absolute inset-0 opacity-[0.018]"
+                className="pointer-events-none absolute inset-0"
+                style={{
+                    background:
+                        'radial-gradient(120% 88% at 16% 18%, rgba(18,66,166,0.16) 0%, rgba(10,16,40,0) 62%), radial-gradient(98% 74% at 84% 34%, rgba(132,56,255,0.16) 0%, rgba(8,9,22,0) 68%), linear-gradient(128deg, #03050d 0%, #040816 46%, #050713 100%)',
+                }}
+            />
+
+            <div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-0 opacity-[0.014]"
                 style={{
                     backgroundImage:
-                        "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E\")",
+                        "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E\")",
                     backgroundSize: '128px',
                 }}
             />
 
             <div
                 aria-hidden="true"
-                className="pointer-events-none absolute -left-28 top-[24%] h-[26rem] w-[26rem] rounded-full blur-[120px]"
-                style={{ background: 'radial-gradient(circle, rgba(99,102,241,0.09) 0%, transparent 72%)' }}
+                className="pointer-events-none absolute inset-0 opacity-[0.12]"
+                style={{
+                    backgroundImage:
+                        'repeating-linear-gradient(90deg, rgba(88,120,255,0.1) 0px, rgba(88,120,255,0.1) 1px, transparent 1px, transparent 64px), repeating-linear-gradient(180deg, rgba(64,94,212,0.09) 0px, rgba(64,94,212,0.09) 1px, transparent 1px, transparent 56px)',
+                    maskImage: 'radial-gradient(110% 86% at 50% 52%, black 0%, black 48%, transparent 100%)',
+                    WebkitMaskImage: 'radial-gradient(110% 86% at 50% 52%, black 0%, black 48%, transparent 100%)',
+                    animation: effectiveReducedMotion ? undefined : 'gridDrift 34s linear infinite',
+                }}
+            />
+
+            <div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-x-0 bottom-[-2rem] h-[44%] opacity-[0.14]"
+                style={{
+                    backgroundImage:
+                        'radial-gradient(84% 96% at 50% 116%, rgba(115,106,255,0.26) 0%, transparent 72%), repeating-linear-gradient(90deg, rgba(108,128,255,0.12) 0px, rgba(108,128,255,0.12) 1px, transparent 1px, transparent 70px), repeating-linear-gradient(180deg, rgba(117,78,255,0.1) 0px, rgba(117,78,255,0.1) 1px, transparent 1px, transparent 56px)',
+                    transform: 'perspective(960px) rotateX(69deg) scale(1.08)',
+                    transformOrigin: 'bottom center',
+                    animation: effectiveReducedMotion ? undefined : 'floorShift 38s linear infinite',
+                }}
+            />
+
+            <div
+                aria-hidden="true"
+                className="pointer-events-none absolute -left-28 top-[20%] h-[26rem] w-[26rem] rounded-full opacity-[0.38] blur-[118px]"
+                style={{ background: 'radial-gradient(circle, rgba(96,85,255,0.38) 0%, rgba(11,16,40,0) 72%)' }}
+            />
+
+            <div
+                aria-hidden="true"
+                className="pointer-events-none absolute right-[-11rem] top-[7%] h-[35rem] w-[35rem] rounded-full opacity-[0.48] blur-[18px]"
+                style={{
+                    background:
+                        'radial-gradient(circle at 50% 50%, rgba(153,92,255,0.42) 0%, rgba(104,73,255,0.24) 22%, rgba(34,211,238,0.1) 34%, rgba(8,12,30,0) 68%)',
+                    animation: effectiveReducedMotion ? undefined : 'portalPulse 5.8s ease-in-out infinite',
+                }}
+            />
+
+            <div
+                aria-hidden="true"
+                className="pointer-events-none absolute right-[-8rem] top-[13%] h-[29rem] w-[29rem] rounded-full opacity-[0.62]"
+                style={{
+                    background:
+                        'conic-gradient(from 96deg, rgba(34,211,238,0.08), rgba(167,139,250,0.86), rgba(236,72,153,0.52), rgba(34,211,238,0.08))',
+                    WebkitMask:
+                        'radial-gradient(circle, transparent 47%, black 49%, black 56%, transparent 58%, transparent 62%, black 64%, black 67%, transparent 69%)',
+                    mask:
+                        'radial-gradient(circle, transparent 47%, black 49%, black 56%, transparent 58%, transparent 62%, black 64%, black 67%, transparent 69%)',
+                    filter: 'drop-shadow(0 0 32px rgba(143,92,255,0.48))',
+                    animation: effectiveReducedMotion ? undefined : 'portalSpin 24s linear infinite',
+                }}
+            />
+
+            <svg
+                aria-hidden="true"
+                viewBox="0 0 1024 760"
+                preserveAspectRatio="none"
+                className="pointer-events-none absolute inset-x-0 bottom-[-3%] h-[78%] w-full opacity-[0.42]"
+            >
+                {ENERGY_TRAILS.map((trail, index) => (
+                    <g key={`energy-trail-${trail}`}>
+                        <path
+                            d={trail}
+                            fill="none"
+                            stroke={index % 2 === 0 ? 'rgba(168,85,247,0.22)' : 'rgba(34,211,238,0.2)'}
+                            strokeWidth={index === 2 ? 6.5 : 5}
+                            strokeLinecap="round"
+                        />
+                        <path
+                            d={trail}
+                            fill="none"
+                            stroke={index % 2 === 0 ? '#a855f7' : '#22d3ee'}
+                            strokeWidth={index === 1 ? 2.9 : 2.6}
+                            strokeLinecap="round"
+                            strokeDasharray="26 38"
+                            style={{
+                                filter: 'drop-shadow(0 0 8px rgba(168,85,247,0.52))',
+                                animation: effectiveReducedMotion ? undefined : `trailFlow ${10 + index * 1.9}s linear infinite`,
+                            }}
+                        />
+                    </g>
+                ))}
+            </svg>
+
+            <div aria-hidden="true" className="pointer-events-none absolute inset-0">
+                {TRAIL_SPARKS.map((spark) => (
+                    <span
+                        key={`spark-${spark.x}-${spark.y}`}
+                        className="absolute rounded-full"
+                        style={{
+                            left: `${spark.x}%`,
+                            top: `${spark.y}%`,
+                            width: `${spark.size}px`,
+                            height: `${spark.size}px`,
+                            background: 'rgba(191,219,254,0.78)',
+                            boxShadow: '0 0 8px rgba(139,92,246,0.45), 0 0 16px rgba(34,211,238,0.28)',
+                            animation: effectiveReducedMotion
+                                ? undefined
+                                : `sparkPulse 3.2s ease-in-out ${spark.delay}s infinite`,
+                        }}
+                    />
+                ))}
+            </div>
+
+            <div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-0"
+                style={{
+                    background:
+                        'linear-gradient(180deg, rgba(3,5,16,0.36) 0%, rgba(4,6,16,0.44) 56%, rgba(3,5,14,0.5) 100%)',
+                }}
             />
 
             <div className="relative mx-auto max-w-7xl">
@@ -320,7 +623,7 @@ export default function ArchitectureSoftware() {
                     >
                         <motion.div
                             variants={lineVariants}
-                            className="mb-6 inline-flex items-center gap-2 rounded-full border border-indigo-400/20 bg-indigo-400/[0.06] px-4 py-2"
+                            className="mb-6 inline-flex items-center gap-2 rounded-full border border-indigo-300/35 bg-indigo-300/[0.14] px-4 py-2 shadow-[0_8px_26px_rgba(0,0,0,0.32),inset_0_1px_0_rgba(255,255,255,0.18)] backdrop-blur-md"
                         >
                             <span className="h-1.5 w-1.5 rounded-full bg-indigo-300 shadow-[0_0_10px_rgba(129,140,248,0.9)]" />
                             <span className="text-[11px] font-bold uppercase tracking-[0.24em] text-indigo-300">
@@ -342,7 +645,7 @@ export default function ArchitectureSoftware() {
                             {headlineSub}
                         </motion.h3>
 
-                        <motion.p variants={lineVariants} className="mt-6 max-w-xl text-base leading-8 text-white/46 md:text-lg">
+                        <motion.p variants={lineVariants} className="mt-6 max-w-xl text-base leading-8 text-white/60 md:text-lg">
                             No importa si son las 3AM o un feriado. Tu sistema procesa pedidos, actualiza stock, emite facturas y alerta a tu equipo — solo.
                         </motion.p>
                     </motion.div>
@@ -357,6 +660,7 @@ export default function ArchitectureSoftware() {
                         </motion.div>
 
                         <motion.div
+                            ref={diagramCardRef}
                             initial={{ opacity: 0, y: 28, scale: 0.98 }}
                             whileInView={{ opacity: 1, y: 0, scale: 1 }}
                             viewport={{ once: true, amount: 0.35 }}
@@ -371,13 +675,23 @@ export default function ArchitectureSoftware() {
                                     : {
                                         y: -3,
                                         scale: 1.008,
-                                        borderColor: 'rgba(167,139,250,0.34)',
-                                        boxShadow: '0 30px 90px rgba(56,189,248,0.18)',
+                                        borderColor: 'rgba(167,139,250,0.46)',
+                                        boxShadow: '0 30px 90px rgba(56,189,248,0.2)',
                                     }
                             }
-                            className="relative overflow-hidden rounded-[2rem] border border-white/[0.06] bg-white/[0.02] p-4 shadow-[0_24px_80px_rgba(0,0,0,0.35)] backdrop-blur-xl transition-colors duration-300 md:p-6"
+                            className="relative overflow-hidden rounded-[2rem] border border-white/[0.14] p-4 shadow-[0_24px_80px_rgba(0,0,0,0.45),inset_0_1px_0_rgba(255,255,255,0.14)] backdrop-blur-[18px] transition-all duration-300 md:p-6"
+                            style={{
+                                background:
+                                    'linear-gradient(148deg, rgba(15,20,44,0.86) 0%, rgba(13,18,40,0.84) 44%, rgba(11,16,34,0.88) 100%)',
+                                borderColor: isTouchViewport && isDiagramCentered
+                                    ? 'rgba(167,139,250,0.46)'
+                                    : 'rgba(255,255,255,0.14)',
+                                boxShadow: isTouchViewport && isDiagramCentered
+                                    ? '0 30px 90px rgba(56,189,248,0.2), inset 0 1px 0 rgba(255,255,255,0.14)'
+                                    : '0 24px 80px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.14)',
+                            }}
                         >
-                            <div className="absolute inset-0 bg-[linear-gradient(145deg,rgba(255,255,255,0.06),transparent_30%,transparent_70%,rgba(34,211,238,0.06))]" />
+                            <div className="absolute inset-0 bg-[linear-gradient(145deg,rgba(255,255,255,0.12),rgba(255,255,255,0.03)_28%,rgba(4,8,24,0.06)_56%,rgba(34,211,238,0.08)_100%)]" />
 
                             <svg viewBox="0 0 940 260" className="relative z-10 w-full overflow-visible">
                                 <defs>
@@ -418,7 +732,7 @@ export default function ArchitectureSoftware() {
                                             color={path.color}
                                             trigger={shouldDraw}
                                             reducedMotion={effectiveReducedMotion}
-                                            speedMultiplier={diagramHovered ? 2.6 : 1}
+                                            speedMultiplier={diagramInteractive ? 2.6 : 1}
                                         />
                                     </g>
                                 ))}
@@ -450,18 +764,44 @@ export default function ArchitectureSoftware() {
                             </svg>
 
                             <div className="relative z-10 mt-5 grid gap-3 border-t border-white/8 pt-5 md:grid-cols-3">
-                                <div className="rounded-[1.1rem] border border-white/[0.05] bg-white/[0.02] p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-cyan-300/25 hover:bg-white/[0.04]">
-                                    <div className="text-[10px] uppercase tracking-[0.22em] text-white/28">Lo que pasa</div>
-                                    <div className="mt-2 text-sm font-semibold text-white">Un pedido, una venta, un turno</div>
-                                </div>
-                                <div className="rounded-[1.1rem] border border-white/[0.05] bg-white/[0.02] p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-cyan-300/25 hover:bg-white/[0.04]">
-                                    <div className="text-[10px] uppercase tracking-[0.22em] text-white/28">Lo que hace el sistema</div>
-                                    <div className="mt-2 text-sm font-semibold text-white">Procesa, actualiza y notifica</div>
-                                </div>
-                                <div className="rounded-[1.1rem] border border-white/[0.05] bg-white/[0.02] p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-cyan-300/25 hover:bg-white/[0.04]">
-                                    <div className="text-[10px] uppercase tracking-[0.22em] text-white/28">Lo que ves vos</div>
-                                    <div className="mt-2 text-sm font-semibold text-white">Dashboard actualizado al segundo</div>
-                                </div>
+                                {diagramFlowCards.map((card, index) => {
+                                    const centered = isTouchViewport && centeredFlowCards[index]
+                                    return (
+                                        <motion.div
+                                            key={card.label}
+                                            ref={(element) => {
+                                                flowCardRefs.current[index] = element
+                                            }}
+                                            whileHover={
+                                                effectiveReducedMotion
+                                                    ? undefined
+                                                    : {
+                                                        y: -2,
+                                                        borderColor: 'rgba(103,232,249,0.35)',
+                                                        backgroundColor: 'rgba(255,255,255,0.12)',
+                                                    }
+                                            }
+                                            animate={
+                                                centered
+                                                    ? {
+                                                        y: -2,
+                                                        borderColor: 'rgba(103,232,249,0.35)',
+                                                        backgroundColor: 'rgba(255,255,255,0.12)',
+                                                    }
+                                                    : {
+                                                        y: 0,
+                                                        borderColor: 'rgba(255,255,255,0.14)',
+                                                        backgroundColor: 'rgba(255,255,255,0.08)',
+                                                    }
+                                            }
+                                            transition={{ duration: 0.26, ease }}
+                                            className="rounded-[1.1rem] border p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.14),0_12px_24px_rgba(0,0,0,0.24)] backdrop-blur-md"
+                                        >
+                                            <div className="text-[10px] uppercase tracking-[0.22em] text-white/48">{card.label}</div>
+                                            <div className="mt-2 text-sm font-semibold text-white">{card.description}</div>
+                                        </motion.div>
+                                    )
+                                })}
                             </div>
                         </motion.div>
                     </div>
@@ -473,9 +813,12 @@ export default function ArchitectureSoftware() {
                         variants={containerVariants}
                         className="mt-4 grid gap-4 md:grid-cols-3 lg:col-span-2"
                     >
-                        {architecturePillars.map((pillar) => (
+                        {architecturePillars.map((pillar, index) => (
                             <motion.div
                                 key={pillar.title}
+                                ref={(element) => {
+                                    pillarRefs.current[index] = element
+                                }}
                                 variants={lineVariants}
                                 whileHover={
                                     effectiveReducedMotion
@@ -484,12 +827,21 @@ export default function ArchitectureSoftware() {
                                             y: -4,
                                             scale: 1.012,
                                             borderColor: 'rgba(129,140,248,0.34)',
-                                            backgroundColor: 'rgba(255,255,255,0.04)',
+                                            backgroundColor: 'rgba(255,255,255,0.1)',
                                             boxShadow: '0 18px 38px rgba(15,23,42,0.32)',
                                         }
                                 }
                                 transition={{ duration: 0.24, ease }}
-                                className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-5 transition-colors duration-300"
+                                className="rounded-2xl border border-white/[0.16] bg-white/[0.08] p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.14),0_14px_30px_rgba(0,0,0,0.26)] backdrop-blur-md transition-all duration-300"
+                                style={
+                                    isTouchViewport && centeredPillars[index]
+                                        ? {
+                                            borderColor: 'rgba(129,140,248,0.34)',
+                                            backgroundColor: 'rgba(255,255,255,0.1)',
+                                            boxShadow: '0 18px 38px rgba(15,23,42,0.32), inset 0 1px 0 rgba(255,255,255,0.14)',
+                                        }
+                                        : undefined
+                                }
                             >
                                 <div
                                     style={{
@@ -516,7 +868,7 @@ export default function ArchitectureSoftware() {
                                 <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: `rgba(${pillar.metricColorRgb}, 0.85)`, marginBottom: '8px' }}>
                                     {pillar.title}
                                 </p>
-                                <p style={{ fontSize: '13px', lineHeight: 1.6, color: 'rgba(255,255,255,0.45)' }}>
+                                <p style={{ fontSize: '13px', lineHeight: 1.6, color: 'rgba(255,255,255,0.62)' }}>
                                     {pillar.description}
                                 </p>
                             </motion.div>

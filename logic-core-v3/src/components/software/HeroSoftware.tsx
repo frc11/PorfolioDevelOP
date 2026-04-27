@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { motion, useReducedMotion } from 'motion/react'
 import { Target, Zap, BarChart2 } from 'lucide-react'
 
@@ -34,15 +34,69 @@ const statCards: StatCard[] = [
 ]
 
 function HeroStatsGrid() {
+  const cardRefs = useRef<Array<HTMLDivElement | null>>([])
+  const [isMobileOrTablet, setIsMobileOrTablet] = useState(false)
+  const [centerActive, setCenterActive] = useState<boolean[]>(() => statCards.map(() => false))
+
+  useEffect(() => {
+    const updateViewportMode = () => {
+      const widthMatch = window.matchMedia('(max-width: 1024px)').matches
+      const coarseMatch = window.matchMedia('(hover: none), (pointer: coarse)').matches
+      setIsMobileOrTablet(widthMatch || coarseMatch)
+    }
+
+    updateViewportMode()
+    window.addEventListener('resize', updateViewportMode)
+    return () => window.removeEventListener('resize', updateViewportMode)
+  }, [])
+
+  useEffect(() => {
+    if (!isMobileOrTablet) return
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        setCenterActive((prev) => {
+          const next = [...prev]
+          let changed = false
+
+          for (const entry of entries) {
+            const target = entry.target as HTMLElement
+            const index = Number(target.dataset.statIndex)
+            if (Number.isNaN(index)) continue
+
+            if (next[index] !== entry.isIntersecting) {
+              next[index] = entry.isIntersecting
+              changed = true
+            }
+          }
+
+          return changed ? next : prev
+        })
+      },
+      {
+        root: null,
+        rootMargin: '-45% 0px -45% 0px',
+        threshold: [0, 0.01, 0.5, 1],
+      },
+    )
+
+    for (const element of cardRefs.current) {
+      if (element) observer.observe(element)
+    }
+
+    return () => observer.disconnect()
+  }, [isMobileOrTablet])
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.75, delay: 0.95, ease: [0.16, 1, 0.3, 1] }}
+      className="hero-stats-grid"
       style={{
         marginTop: 'clamp(18px,2.8vh,26px)',
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
+        gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
         gap: '10px',
         width: '100%',
         maxWidth: '760px',
@@ -50,9 +104,14 @@ function HeroStatsGrid() {
         marginRight: 'auto',
       }}
     >
-      {statCards.map((card) => (
+      {statCards.map((card, index) => (
         <div
           key={card.label}
+          ref={(element) => {
+            cardRefs.current[index] = element
+          }}
+          data-stat-index={index}
+          className={`hero-stat-card${centerActive[index] ? ' is-active' : ''}`}
           style={{
             borderRadius: '14px',
             border: `1px solid rgba(${card.colorRgb},0.3)`,
@@ -63,6 +122,8 @@ function HeroStatsGrid() {
             boxShadow: '0 10px 24px rgba(0,0,0,0.24), inset 0 1px 0 rgba(255,255,255,0.06)',
             minWidth: 0,
             textAlign: 'left',
+            transform: 'scale(1)',
+            filter: 'brightness(1)',
           }}
         >
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
@@ -228,6 +289,7 @@ export default function HeroSoftware() {
 
   return (
     <section
+      className="hero-software-section"
       style={{
         position: 'relative',
         width: '100%',
@@ -256,12 +318,13 @@ export default function HeroSoftware() {
         }}
       />
 
-      <div style={{ position: 'relative', zIndex: 1, width: '100%', maxWidth: '1200px', margin: '0 auto' }}>
-        <div style={{ textAlign: 'center', maxWidth: '860px', margin: '0 auto', position: 'relative', zIndex: 1 }}>
+      <div className="hero-software-inner" style={{ position: 'relative', zIndex: 1, width: '100%', maxWidth: '1200px', margin: '0 auto' }}>
+        <div className="hero-main-stack" style={{ textAlign: 'center', maxWidth: '860px', margin: '0 auto', position: 'relative', zIndex: 1 }}>
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
+            className="hero-kicker"
             style={{
               display: 'inline-flex',
               alignItems: 'center',
@@ -293,6 +356,7 @@ export default function HeroSoftware() {
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.9, delay: 0.35, ease: [0.16, 1, 0.3, 1] }}
+            className="hero-title-wrap"
             style={{ position: 'relative', display: 'inline-block', marginBottom: 'clamp(14px,2.2vh,22px)' }}
           >
             <h1
@@ -326,6 +390,7 @@ export default function HeroSoftware() {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.6, ease: [0.16, 1, 0.3, 1] }}
+            className="hero-description"
             style={{
               fontSize: 'clamp(15px,1.8vw,19px)',
               color: 'rgba(255,255,255,0.42)',
@@ -346,6 +411,7 @@ export default function HeroSoftware() {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.8 }}
+            className="hero-cta-row"
             style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}
           >
             <motion.a
@@ -430,6 +496,88 @@ export default function HeroSoftware() {
         @keyframes gradientShift {
           0%, 100% { background-position: 0% 50%; }
           50% { background-position: 100% 50%; }
+        }
+
+        .hero-stat-card {
+          transition: none !important;
+          will-change: transform, filter, box-shadow, border-color;
+        }
+
+        @media (hover: hover) and (pointer: fine) {
+          .hero-stat-card:hover {
+            transform: scale(1.035);
+            filter: brightness(1.2);
+            border-color: rgba(167,139,250,0.72) !important;
+            box-shadow:
+              0 0 28px rgba(123,47,255,0.35),
+              0 14px 30px rgba(0,0,0,0.32),
+              inset 0 1px 0 rgba(255,255,255,0.09) !important;
+          }
+        }
+
+        .hero-stat-card.is-active {
+          transform: scale(1.035);
+          filter: brightness(1.2);
+          border-color: rgba(167,139,250,0.72) !important;
+          box-shadow:
+            0 0 28px rgba(123,47,255,0.35),
+            0 14px 30px rgba(0,0,0,0.32),
+            inset 0 1px 0 rgba(255,255,255,0.09) !important;
+        }
+
+        @media (max-width: 900px) {
+          .hero-stats-grid {
+            grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+          }
+        }
+
+        @media (max-width: 640px) {
+          .hero-stats-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+          }
+        }
+
+        @media (min-width: 361px) and (max-width: 430px) {
+          .hero-stats-grid .hero-stat-card:nth-child(3) {
+            grid-column: 1 / -1;
+          }
+        }
+
+        @media (max-width: 360px) {
+          .hero-software-section {
+            padding: 52px 16px 36px !important;
+          }
+
+          .hero-main-stack {
+            transform: translateY(-10px);
+          }
+
+          .hero-kicker {
+            margin-bottom: 16px !important;
+          }
+
+          .hero-title-wrap {
+            margin-bottom: 10px !important;
+          }
+
+          .hero-description {
+            margin: 0 auto 16px !important;
+            line-height: 1.52 !important;
+          }
+
+          .hero-cta-row {
+            gap: 10px !important;
+          }
+
+          .hero-stats-grid {
+            margin-top: 14px !important;
+            grid-template-columns: 1fr !important;
+            gap: 8px !important;
+          }
+
+          .hero-stats-grid .hero-stat-card {
+            padding: 10px 12px !important;
+          }
         }
       `}</style>
     </section>
