@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useMemo, useRef } from 'react'
+import React, { useState, useMemo, useRef, useEffect } from 'react'
 import { motion, AnimatePresence, useInView, useReducedMotion } from 'motion/react'
 import { UtensilsCrossed, Cake, Pill, Package, RefreshCw, Bot, ChevronRight } from 'lucide-react'
 
@@ -340,9 +340,23 @@ function Header({ isInView, reducedMotion }: { isInView: boolean, reducedMotion:
         initial={{ opacity: startOpacity, y: startY }}
         animate={isInView ? { opacity: 1, y: 0 } : {}}
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-        className="inline-flex items-center gap-2 border border-amber-500/30 rounded-full px-4 py-1.5 mb-6 bg-amber-500/5"
+        className="relative overflow-hidden inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/[0.05] px-4 py-1.5 mb-6"
       >
-        <span className="text-[10px] md:text-[11px] font-mono tracking-[0.2em] text-amber-500 font-bold uppercase">
+        <motion.span
+          aria-hidden="true"
+          animate={reducedMotion ? {} : { x: ['-150%', '250%'] }}
+          transition={{ duration: 1.8, repeat: Infinity, repeatDelay: 4.2, ease: 'easeInOut' }}
+          style={{
+            position: 'absolute',
+            inset: 0,
+            background: 'linear-gradient(90deg, transparent, rgba(245,158,11,0.2), transparent)',
+            borderRadius: '100px',
+            pointerEvents: 'none',
+            display: reducedMotion ? 'none' : 'block',
+          }}
+        />
+        <span className="h-1.5 w-1.5 rounded-full bg-amber-500 shrink-0" style={{ animation: reducedMotion ? 'none' : 'pulse 1.8s ease-in-out infinite', boxShadow: '0 0 8px rgba(245,158,11,0.9)' }} />
+        <span className="text-[10px] md:text-[11px] font-mono tracking-[0.22em] text-amber-500 font-bold uppercase relative z-10">
           [ AUTOMATIZACIONES POR RUBRO ]
         </span>
       </motion.div>
@@ -354,14 +368,33 @@ function Header({ isInView, reducedMotion }: { isInView: boolean, reducedMotion:
         className="text-3xl md:text-5xl lg:text-6xl font-black text-white leading-[1.05] mb-4"
         style={{ letterSpacing: '-0.03em' }}
       >
-        Tu negocio automatizado.
+        <div className="relative inline-block">
+            <span className="bg-gradient-to-r from-white via-amber-200 to-orange-300 bg-clip-text text-transparent">Tu negocio automatizado.</span>
+            {!reducedMotion && (
+                <motion.div
+                    initial={{ scaleX: 0, opacity: 0 }}
+                    animate={isInView ? { scaleX: 1, opacity: 1 } : {}}
+                    transition={{ duration: 0.9, delay: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                    style={{
+                        position: 'absolute',
+                        bottom: '-4px',
+                        left: '0%',
+                        right: '0%',
+                        height: '2px',
+                        background: 'linear-gradient(90deg, transparent, #f59e0b 40%, #f97316 60%, transparent)',
+                        transformOrigin: 'left',
+                        filter: 'blur(0.5px)',
+                    }}
+                />
+            )}
+        </div>
       </motion.h2>
 
       <motion.p 
         initial={{ opacity: startOpacity, y: startY }}
         animate={isInView ? { opacity: 1, y: 0 } : {}}
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 0.24 }}
-        className="text-white/40 text-sm md:text-base max-w-xl mx-auto"
+        className="text-white/40 text-sm md:text-base max-w-xl mx-auto mt-2"
       >
         Elegí tu rubro y mirá qué hace el sistema por vos.
       </motion.p>
@@ -393,15 +426,19 @@ function Header({ isInView, reducedMotion }: { isInView: boolean, reducedMotion:
 function TabSelector({
   rubros,
   active,
-  setActive,
+  handleTabClick,
   isInView,
   reducedMotion,
+  activeProgress,
+  isPaused,
 }: {
   rubros: Rubro[]
   active: number
-  setActive: (id: number) => void
+  handleTabClick: (id: number) => void
   isInView: boolean
   reducedMotion: boolean | null
+  activeProgress: number
+  isPaused: boolean
 }) {
   const startY = reducedMotion ? 0 : 20
   const startOpacity = reducedMotion ? 1 : 0
@@ -416,7 +453,7 @@ function TabSelector({
             initial={{ opacity: startOpacity, y: startY }}
             animate={isInView ? { opacity: 1, y: 0 } : {}}
             transition={{ delay: 0.25 + index * 0.07, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-            onClick={() => setActive(r.id)}
+            onClick={() => handleTabClick(r.id)}
             whileHover={reducedMotion ? {} : { y: -2 }}
             whileTap={reducedMotion ? {} : { scale: 0.97 }}
             className={`
@@ -449,6 +486,23 @@ function TabSelector({
               {r.label}
             </span>
 
+            {isActive && isPaused && (
+              <motion.span
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0 }}
+                style={{
+                  fontSize: '8px',
+                  color: `rgba(${r.colorRgb}, 0.6)`,
+                  letterSpacing: '0.1em',
+                  fontWeight: 700,
+                  marginLeft: '6px',
+                }}
+              >
+                ■
+              </motion.span>
+            )}
+
             {/* Underline & Shimmer for active state */}
             {isActive && (
               <>
@@ -460,11 +514,31 @@ function TabSelector({
                     animation: 'shimmerTab 2s ease-in-out infinite'
                   }}
                 />
-                <motion.div
-                  layoutId="activeTabUnderlineRubro"
-                  className="absolute bottom-0 left-0 right-0 h-[2px] rounded-full"
-                  style={{ background: r.gradient }}
-                />
+                
+                {/* Barra de progreso animada */}
+                <div
+                  style={{
+                    position: 'absolute',
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    height: '2px',
+                    background: 'rgba(255,255,255,0.08)',
+                    borderRadius: '0 0 12px 12px',
+                    overflow: 'hidden',
+                  }}
+                >
+                  <motion.div
+                    style={{
+                      height: '100%',
+                      background: r.gradient,
+                      borderRadius: '100px',
+                      transformOrigin: 'left center',
+                    }}
+                    animate={{ width: isPaused ? '100%' : `${activeProgress * 100}%` }}
+                    transition={{ duration: 0, ease: 'linear' }}
+                  />
+                </div>
                 {/* Ambient glow below tab */}
                 <div
                   className="absolute pointer-events-none"
@@ -785,7 +859,7 @@ function N8nFlowBlock({
         animate={{ opacity: 1, x: 0 }}
         exit={{ opacity: 0, x: -20 }}
         transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-        className="w-full max-w-[400px] mx-auto"
+        className="w-full max-w-[400px] mx-auto relative"
         style={{
           borderRadius: '24px',
           background: 'rgba(8,8,16,0.95)',
@@ -795,6 +869,15 @@ function N8nFlowBlock({
           fontFamily: 'ui-monospace, monospace',
         }}
       >
+        <span style={{ position: 'absolute', top: 0, left: 0, width: '1px', height: '18px', background: `rgba(${rubro.colorRgb},0.4)`, borderTopLeftRadius: '24px', zIndex: 10 }} />
+        <span style={{ position: 'absolute', top: 0, left: 0, height: '1px', width: '18px', background: `rgba(${rubro.colorRgb},0.4)`, borderTopLeftRadius: '24px', zIndex: 10 }} />
+        <span style={{ position: 'absolute', top: 0, right: 0, width: '1px', height: '18px', background: `rgba(${rubro.colorRgb},0.4)`, borderTopRightRadius: '24px', zIndex: 10 }} />
+        <span style={{ position: 'absolute', top: 0, right: 0, height: '1px', width: '18px', background: `rgba(${rubro.colorRgb},0.4)`, borderTopRightRadius: '24px', zIndex: 10 }} />
+        <span style={{ position: 'absolute', bottom: 0, left: 0, width: '1px', height: '18px', background: `rgba(${rubro.colorRgb},0.4)`, borderBottomLeftRadius: '24px', zIndex: 10 }} />
+        <span style={{ position: 'absolute', bottom: 0, left: 0, height: '1px', width: '18px', background: `rgba(${rubro.colorRgb},0.4)`, borderBottomLeftRadius: '24px', zIndex: 10 }} />
+        <span style={{ position: 'absolute', bottom: 0, right: 0, width: '1px', height: '18px', background: `rgba(${rubro.colorRgb},0.4)`, borderBottomRightRadius: '24px', zIndex: 10 }} />
+        <span style={{ position: 'absolute', bottom: 0, right: 0, height: '1px', width: '18px', background: `rgba(${rubro.colorRgb},0.4)`, borderBottomRightRadius: '24px', zIndex: 10 }} />
+
         {/* Header */}
         <div
           style={{
@@ -901,11 +984,46 @@ function N8nFlowBlock({
 
 export default function RubrosAutomation() {
   const [active, setActive] = useState(0)
+  const [isPaused, setIsPaused] = useState(false)
+  const [tabProgress, setTabProgress] = useState(0)
+  const TAB_DURATION = 4000 // ms por tab
+
   const rubro = rubros[active]
 
   const sectionRef = useRef<HTMLElement>(null)
   const isInView = useInView(sectionRef, { once: true, amount: 0.15 })
   const reducedMotion = useReducedMotion()
+
+  useEffect(() => {
+    if (isPaused || reducedMotion) return
+
+    const startTime = performance.now()
+    let rafId: number
+
+    const tick = (now: number) => {
+      const elapsed = now - startTime
+      const progress = Math.min(elapsed / TAB_DURATION, 1)
+      setTabProgress(progress)
+
+      if (progress < 1) {
+        rafId = requestAnimationFrame(tick)
+      } else {
+        setActive((prev) => (prev + 1) % rubros.length)
+        setTabProgress(0)
+      }
+    }
+
+    rafId = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(rafId)
+  }, [active, isPaused, reducedMotion])
+
+  // Cuando el usuario hace click en un tab, pausar 8 segundos
+  const handleTabClick = (id: number) => {
+    setActive(id)
+    setTabProgress(0)
+    setIsPaused(true)
+    setTimeout(() => setIsPaused(false), 8000)
+  }
 
   // 8 Partículas de fondo usando el color del rubro activo
   const particles = useMemo(
@@ -932,6 +1050,20 @@ export default function RubrosAutomation() {
       ref={sectionRef}
       className="relative w-full py-20 md:py-32 lg:py-40 px-6 sm:px-12 bg-[#080810] overflow-hidden z-[1]"
     >
+      <div
+        aria-hidden="true"
+        style={{
+          position: 'absolute',
+          inset: 0,
+          backgroundImage: 'radial-gradient(circle, rgba(245,158,11,0.12) 1px, transparent 1px)',
+          backgroundSize: '52px 52px',
+          maskImage: 'radial-gradient(ellipse at 50% 50%, black 0%, transparent 75%)',
+          WebkitMaskImage: 'radial-gradient(ellipse at 50% 50%, black 0%, transparent 75%)',
+          opacity: 0.25,
+          pointerEvents: 'none',
+          zIndex: 0,
+        }}
+      />
       {/* Background Particles */}
       {!reducedMotion && particles.map((p, i) => (
         <div 
@@ -968,12 +1100,18 @@ export default function RubrosAutomation() {
         <TabSelector
           rubros={rubros}
           active={active}
-          setActive={setActive}
+          handleTabClick={handleTabClick}
           isInView={isInView}
           reducedMotion={reducedMotion}
+          activeProgress={tabProgress}
+          isPaused={isPaused}
         />
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 mt-12 md:mt-16 items-start">
+        <div 
+          className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 mt-12 md:mt-16 items-start"
+          onMouseEnter={() => setIsPaused(true)}
+          onMouseLeave={() => setIsPaused(false)}
+        >
           <AutomationsPanel active={active} rubro={rubro} />
 
           {/* Right column: flujo n8n */}

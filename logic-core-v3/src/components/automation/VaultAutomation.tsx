@@ -76,6 +76,20 @@ export default function VaultAutomation() {
                 aria-hidden="true"
                 style={{
                     position: 'absolute',
+                    inset: 0,
+                    backgroundImage: `radial-gradient(circle, rgba(245,158,11,0.07) 1px, transparent 1px)`,
+                    backgroundSize: '52px 52px',
+                    pointerEvents: 'none',
+                    zIndex: 0,
+                    maskImage: 'radial-gradient(ellipse at 50% 50%, black 0%, transparent 70%)',
+                    WebkitMaskImage: 'radial-gradient(ellipse at 50% 50%, black 0%, transparent 70%)',
+                }}
+            />
+
+            <div
+                aria-hidden="true"
+                style={{
+                    position: 'absolute',
                     top: '-80px',
                     left: '50%',
                     transform: 'translateX(-50%)',
@@ -100,40 +114,27 @@ export default function VaultAutomation() {
                     initial={shouldReduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 16 }}
                     animate={isInView ? { opacity: 1, y: 0 } : {}}
                     transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-                    style={{ textAlign: 'center', marginBottom: '34px' }}
+                    style={{ textAlign: 'center', marginBottom: '34px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}
                 >
                     <div
-                        style={{
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '8px',
-                            border: '1px solid rgba(245,158,11,0.25)',
-                            background: 'rgba(245,158,11,0.07)',
-                            borderRadius: '100px',
-                            padding: '6px 16px',
-                            marginBottom: '18px',
-                        }}
+                        className="relative overflow-hidden inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/[0.05] px-4 py-1.5 mb-5"
                     >
-                        <span
+                        <motion.span
+                            aria-hidden="true"
+                            animate={shouldReduceMotion ? {} : { x: ['-150%', '250%'] }}
+                            transition={{ duration: 1.8, repeat: Infinity, repeatDelay: 4.2, ease: 'easeInOut' }}
                             style={{
-                                width: '5px',
-                                height: '5px',
-                                borderRadius: '50%',
-                                background: '#f59e0b',
-                                boxShadow: '0 0 6px rgba(245,158,11,0.9)',
+                                position: 'absolute',
+                                inset: 0,
+                                background: 'linear-gradient(90deg, transparent, rgba(245,158,11,0.2), transparent)',
+                                borderRadius: '100px',
+                                pointerEvents: 'none',
+                                display: shouldReduceMotion ? 'none' : 'block',
                             }}
                         />
-                        <span
-                            style={{
-                                fontSize: '11px',
-                                fontWeight: 700,
-                                letterSpacing: '0.2em',
-                                color: 'rgba(245,158,11,0.85)',
-                                textTransform: 'uppercase',
-                                fontFamily: 'ui-monospace, monospace',
-                            }}
-                        >
-                            PRICING
+                        <span className="h-1.5 w-1.5 rounded-full bg-amber-500 shrink-0" style={{ animation: shouldReduceMotion ? 'none' : 'pulse 1.8s ease-in-out infinite', boxShadow: '0 0 8px rgba(245,158,11,0.9)' }} />
+                        <span className="text-[10px] font-mono tracking-[0.22em] text-amber-500 font-bold uppercase relative z-10">
+                            [ PRICING ]
                         </span>
                     </div>
 
@@ -147,7 +148,29 @@ export default function VaultAutomation() {
                             color: 'white',
                         }}
                     >
-                        Planes para automatizar sin friccion
+                        Planes para automatizar <br className="md:hidden" />
+                        <div className="relative inline-block mt-1">
+                            <span className="bg-gradient-to-r from-[#f59e0b] to-[#f97316] bg-clip-text text-transparent">
+                                sin friccion.
+                            </span>
+                            {!shouldReduceMotion && (
+                                <motion.div
+                                    initial={{ scaleX: 0, opacity: 0 }}
+                                    animate={isInView ? { scaleX: 1, opacity: 1 } : {}}
+                                    transition={{ duration: 0.9, delay: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                                    style={{
+                                        position: 'absolute',
+                                        bottom: '-4px',
+                                        left: '0%',
+                                        right: '0%',
+                                        height: '2px',
+                                        background: 'linear-gradient(90deg, transparent, #f59e0b 40%, #f97316 60%, transparent)',
+                                        transformOrigin: 'left',
+                                        filter: 'blur(0.5px)',
+                                    }}
+                                />
+                            )}
+                        </div>
                     </h2>
 
                     <p
@@ -194,6 +217,15 @@ export default function VaultAutomation() {
                                     transition: 'background 90ms linear, border-color 90ms linear, box-shadow 90ms linear',
                                 }}
                             >
+                                <span style={{ position: 'absolute', top: 0, left: 0, width: '1px', height: '18px', background: `rgba(${tier.accentRgb},0.5)`, borderTopLeftRadius: '20px', zIndex: 10 }} />
+                                <span style={{ position: 'absolute', top: 0, left: 0, height: '1px', width: '18px', background: `rgba(${tier.accentRgb},0.5)`, borderTopLeftRadius: '20px', zIndex: 10 }} />
+                                <span style={{ position: 'absolute', top: 0, right: 0, width: '1px', height: '18px', background: `rgba(${tier.accentRgb},0.5)`, borderTopRightRadius: '20px', zIndex: 10 }} />
+                                <span style={{ position: 'absolute', top: 0, right: 0, height: '1px', width: '18px', background: `rgba(${tier.accentRgb},0.5)`, borderTopRightRadius: '20px', zIndex: 10 }} />
+                                <span style={{ position: 'absolute', bottom: 0, left: 0, width: '1px', height: '18px', background: `rgba(${tier.accentRgb},0.5)`, borderBottomLeftRadius: '20px', zIndex: 10 }} />
+                                <span style={{ position: 'absolute', bottom: 0, left: 0, height: '1px', width: '18px', background: `rgba(${tier.accentRgb},0.5)`, borderBottomLeftRadius: '20px', zIndex: 10 }} />
+                                <span style={{ position: 'absolute', bottom: 0, right: 0, width: '1px', height: '18px', background: `rgba(${tier.accentRgb},0.5)`, borderBottomRightRadius: '20px', zIndex: 10 }} />
+                                <span style={{ position: 'absolute', bottom: 0, right: 0, height: '1px', width: '18px', background: `rgba(${tier.accentRgb},0.5)`, borderBottomRightRadius: '20px', zIndex: 10 }} />
+
                                 <div
                                     aria-hidden="true"
                                     style={{

@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence, useInView, useReducedMotion } from 'motion/react'
+import { Target, Keyboard, Moon } from 'lucide-react'
 
 /**
  * FLUJO AUTOMATION: "La Anatomía de un Workflow."
@@ -140,19 +141,19 @@ const performanceMetrics = [
   { 
     value: '100%', 
     label: 'Efectividad en los datos', 
-    icon: '🎯', 
+    icon: <Target size={20} strokeWidth={1.5} />, 
     colorRgb: '245,158,11' 
   },
   { 
     value: '0ms', 
     label: 'Error en transcripción', 
-    icon: '⌨️', 
+    icon: <Keyboard size={20} strokeWidth={1.5} />, 
     colorRgb: '249,115,22' 
   },
   { 
     value: '24/7', 
     label: 'Vigilancia constante', 
-    icon: '🌙', 
+    icon: <Moon size={20} strokeWidth={1.5} />, 
     colorRgb: '245,158,11' 
   },
 ]
@@ -240,6 +241,15 @@ function FlowSVG({
     <div className="relative bg-[#ffffff]/[0.02] border border-white/[0.07] rounded-[20px] p-6 lg:p-10 overflow-hidden"
       style={{ boxShadow: '0 0 0 1px rgba(255,255,255,0.03), 0 24px 48px rgba(0,0,0,0.4)' }}
     >
+      <span className="absolute top-0 left-0 w-[1px] h-[18px] bg-amber-500/30 rounded-tl-[20px]" />
+      <span className="absolute top-0 left-0 h-[1px] w-[18px] bg-amber-500/30 rounded-tl-[20px]" />
+      <span className="absolute top-0 right-0 w-[1px] h-[18px] bg-amber-500/30 rounded-tr-[20px]" />
+      <span className="absolute top-0 right-0 h-[1px] w-[18px] bg-amber-500/30 rounded-tr-[20px]" />
+      <span className="absolute bottom-0 left-0 w-[1px] h-[18px] bg-amber-500/30 rounded-bl-[20px]" />
+      <span className="absolute bottom-0 left-0 h-[1px] w-[18px] bg-amber-500/30 rounded-bl-[20px]" />
+      <span className="absolute bottom-0 right-0 w-[1px] h-[18px] bg-amber-500/30 rounded-br-[20px]" />
+      <span className="absolute bottom-0 right-0 h-[1px] w-[18px] bg-amber-500/30 rounded-br-[20px]" />
+
       <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-amber-500/25 to-transparent" />
       <svg
         viewBox="0 0 1000 400"
@@ -544,15 +554,31 @@ function EventLog({ logEntries, isSimulating }: { logEntries: LogEntry[], isSimu
 }
 
 function Header({ isInView }: { isInView: boolean }) {
+  const prefersReducedMotion = useReducedMotion()
+
   return (
     <div className="mb-10 md:mb-14">
       <motion.div
         initial={{ opacity: 0, x: -10 }}
         animate={isInView ? { opacity: 1, x: 0 } : {}}
         transition={{ duration: 0.6, delay: 0.05 }}
-        className="inline-flex items-center gap-2 border border-amber-500/30 rounded-full px-4 py-1.5 mb-6 bg-amber-500/5"
+        className="relative overflow-hidden inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/[0.05] px-4 py-1.5 mb-6"
       >
-        <span className="text-[10px] sm:text-[11px] font-mono tracking-[0.2em] text-amber-500 font-bold">
+        <motion.span
+          aria-hidden="true"
+          animate={prefersReducedMotion ? {} : { x: ['-150%', '250%'] }}
+          transition={{ duration: 1.8, repeat: Infinity, repeatDelay: 4.2, ease: 'easeInOut' }}
+          style={{
+            position: 'absolute',
+            inset: 0,
+            background: 'linear-gradient(90deg, transparent, rgba(245,158,11,0.2), transparent)',
+            borderRadius: '100px',
+            pointerEvents: 'none',
+            display: prefersReducedMotion ? 'none' : 'block',
+          }}
+        />
+        <span className="h-1.5 w-1.5 rounded-full bg-amber-500 shrink-0" style={{ animation: prefersReducedMotion ? 'none' : 'pulse 1.8s ease-in-out infinite', boxShadow: '0 0 8px rgba(245,158,11,0.9)' }} />
+        <span className="text-[10px] font-mono tracking-[0.22em] text-amber-500 font-bold relative z-10">
           [ LA ANATOMÍA DE UN WORKFLOW ]
         </span>
       </motion.div>
@@ -566,7 +592,26 @@ function Header({ isInView }: { isInView: boolean }) {
       >
         Un lead entra.
         <br />
-        <span className="text-amber-500">Tres cosas pasan a la vez.</span>
+        <div className="relative inline-block mt-2">
+            <span className="text-amber-500">Tres cosas pasan a la vez.</span>
+            {!prefersReducedMotion && (
+                <motion.div
+                    initial={{ scaleX: 0, opacity: 0 }}
+                    animate={isInView ? { scaleX: 1, opacity: 1 } : {}}
+                    transition={{ duration: 0.9, delay: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                    style={{
+                        position: 'absolute',
+                        bottom: '-4px',
+                        left: '0%',
+                        right: '0%',
+                        height: '2px',
+                        background: 'linear-gradient(90deg, transparent, #f59e0b 40%, #f97316 60%, transparent)',
+                        transformOrigin: 'left',
+                        filter: 'blur(0.5px)',
+                    }}
+                />
+            )}
+        </div>
       </motion.h2>
 
       <motion.p
@@ -876,7 +921,10 @@ export default function FlujoAutomation() {
         </div>
 
         {/* MÉTRICAS DE IMPACTO */}
-        <div className="flex flex-wrap gap-3 md:gap-4 mt-12 md:mt-16">
+        <div className="flex flex-wrap gap-3 md:gap-4 mt-12 md:mt-16 relative">
+          {!shouldReduceMotion && (
+            <div className="absolute top-1/2 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-amber-500/10 to-transparent -translate-y-1/2 hidden md:block pointer-events-none" />
+          )}
           {performanceMetrics.map((m, i) => {
             const isHovered = hoveredMetricIndex === i
             return (

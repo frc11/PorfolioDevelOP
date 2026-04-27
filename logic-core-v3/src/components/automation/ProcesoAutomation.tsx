@@ -166,16 +166,33 @@ function AtmosphereProceso() {
 }
 
 function Header({ isInView }: { isInView: boolean }) {
+  const shouldReduceMotion = useReducedMotion()
+
   return (
-    <div style={{ marginBottom: 'clamp(40px, 6vh, 60px)' }}>
+    <div style={{ marginBottom: 'clamp(40px, 6vh, 60px)', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
       <motion.div 
         initial={{ opacity: 0, y: -10 }} 
         animate={isInView ? { opacity: 1, y: 0 } : {}} 
         transition={{ duration: 0.5, delay: 0.1 }}
-        style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', border: '1px solid rgba(245,158,11,0.4)', borderRadius: '100px', padding: '4px 14px', marginBottom: '20px', background: 'rgba(245,158,11,0.05)' }}
+        className="relative overflow-hidden inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/[0.05] px-4 py-1.5 mb-5"
       >
-        <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#f59e0b', boxShadow: '0 0 8px #f59e0b' }} />
-        <span style={{ fontSize: '10px', letterSpacing: '0.2em', color: '#f59e0b', fontWeight: 700 }}>[ EL CAMINO AL ÉXITO ]</span>
+        <motion.span
+          aria-hidden="true"
+          animate={shouldReduceMotion ? {} : { x: ['-150%', '250%'] }}
+          transition={{ duration: 1.8, repeat: Infinity, repeatDelay: 4.2, ease: 'easeInOut' }}
+          style={{
+            position: 'absolute',
+            inset: 0,
+            background: 'linear-gradient(90deg, transparent, rgba(245,158,11,0.2), transparent)',
+            borderRadius: '100px',
+            pointerEvents: 'none',
+            display: shouldReduceMotion ? 'none' : 'block',
+          }}
+        />
+        <span className="h-1.5 w-1.5 rounded-full bg-amber-500 shrink-0" style={{ animation: shouldReduceMotion ? 'none' : 'pulse 1.8s ease-in-out infinite', boxShadow: '0 0 8px rgba(245,158,11,0.9)' }} />
+        <span className="text-[10px] font-mono tracking-[0.22em] text-amber-500 font-bold uppercase relative z-10">
+          [ EL CAMINO AL ÉXITO ]
+        </span>
       </motion.div>
 
       <motion.h2
@@ -185,9 +202,28 @@ function Header({ isInView }: { isInView: boolean }) {
         style={{ fontSize: 'clamp(30px, 4.8vw, 60px)', fontWeight: 900, color: 'white', lineHeight: 1.05, margin: '0 0 18px', letterSpacing: '-0.03em' }}
       >
         Del caos al orden<br />
-        <span style={{ background: 'linear-gradient(135deg, #f59e0b, #f97316)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
-          en 15 días.
-        </span>
+        <div className="relative inline-block mt-1">
+            <span style={{ background: 'linear-gradient(135deg, #f59e0b, #f97316)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
+              en 15 días.
+            </span>
+            {!shouldReduceMotion && (
+                <motion.div
+                    initial={{ scaleX: 0, opacity: 0 }}
+                    animate={isInView ? { scaleX: 1, opacity: 1 } : {}}
+                    transition={{ duration: 0.9, delay: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                    style={{
+                        position: 'absolute',
+                        bottom: '-4px',
+                        left: '0%',
+                        right: '0%',
+                        height: '2px',
+                        background: 'linear-gradient(90deg, transparent, #f59e0b 40%, #f97316 60%, transparent)',
+                        transformOrigin: 'left',
+                        filter: 'blur(0.5px)',
+                    }}
+                />
+            )}
+        </div>
       </motion.h2>
 
       <motion.p
@@ -304,6 +340,15 @@ function StepRow({ paso, index, isActive, isInView, onClick, onHoverChange, shou
           onHoverChange(null)
         }}
       >
+        <span style={{ position: 'absolute', top: 0, left: 0, width: '1px', height: '18px', background: `rgba(${paso.colorRgb},0.5)`, borderTopLeftRadius: '18px', zIndex: 10 }} />
+        <span style={{ position: 'absolute', top: 0, left: 0, height: '1px', width: '18px', background: `rgba(${paso.colorRgb},0.5)`, borderTopLeftRadius: '18px', zIndex: 10 }} />
+        <span style={{ position: 'absolute', top: 0, right: 0, width: '1px', height: '18px', background: `rgba(${paso.colorRgb},0.5)`, borderTopRightRadius: '18px', zIndex: 10 }} />
+        <span style={{ position: 'absolute', top: 0, right: 0, height: '1px', width: '18px', background: `rgba(${paso.colorRgb},0.5)`, borderTopRightRadius: '18px', zIndex: 10 }} />
+        <span style={{ position: 'absolute', bottom: 0, left: 0, width: '1px', height: '18px', background: `rgba(${paso.colorRgb},0.5)`, borderBottomLeftRadius: '18px', zIndex: 10 }} />
+        <span style={{ position: 'absolute', bottom: 0, left: 0, height: '1px', width: '18px', background: `rgba(${paso.colorRgb},0.5)`, borderBottomLeftRadius: '18px', zIndex: 10 }} />
+        <span style={{ position: 'absolute', bottom: 0, right: 0, width: '1px', height: '18px', background: `rgba(${paso.colorRgb},0.5)`, borderBottomRightRadius: '18px', zIndex: 10 }} />
+        <span style={{ position: 'absolute', bottom: 0, right: 0, height: '1px', width: '18px', background: `rgba(${paso.colorRgb},0.5)`, borderBottomRightRadius: '18px', zIndex: 10 }} />
+
         {ripple && (
           <motion.div
             key={ripple.id}
@@ -612,6 +657,15 @@ export default function ProcesoAutomation() {
             boxShadow: '0 8px 32px rgba(0,0,0,0.25)',
           }}
         >
+          <span style={{ position: 'absolute', top: 0, left: 0, width: '1px', height: '18px', background: `rgba(245,158,11,0.5)`, borderTopLeftRadius: '20px', zIndex: 10 }} />
+          <span style={{ position: 'absolute', top: 0, left: 0, height: '1px', width: '18px', background: `rgba(245,158,11,0.5)`, borderTopLeftRadius: '20px', zIndex: 10 }} />
+          <span style={{ position: 'absolute', top: 0, right: 0, width: '1px', height: '18px', background: `rgba(245,158,11,0.5)`, borderTopRightRadius: '20px', zIndex: 10 }} />
+          <span style={{ position: 'absolute', top: 0, right: 0, height: '1px', width: '18px', background: `rgba(245,158,11,0.5)`, borderTopRightRadius: '20px', zIndex: 10 }} />
+          <span style={{ position: 'absolute', bottom: 0, left: 0, width: '1px', height: '18px', background: `rgba(245,158,11,0.5)`, borderBottomLeftRadius: '20px', zIndex: 10 }} />
+          <span style={{ position: 'absolute', bottom: 0, left: 0, height: '1px', width: '18px', background: `rgba(245,158,11,0.5)`, borderBottomLeftRadius: '20px', zIndex: 10 }} />
+          <span style={{ position: 'absolute', bottom: 0, right: 0, width: '1px', height: '18px', background: `rgba(245,158,11,0.5)`, borderBottomRightRadius: '20px', zIndex: 10 }} />
+          <span style={{ position: 'absolute', bottom: 0, right: 0, height: '1px', width: '18px', background: `rgba(245,158,11,0.5)`, borderBottomRightRadius: '20px', zIndex: 10 }} />
+
           {/* Línea de tiempo visual */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '0', flex: 1, minWidth: '280px' }}>
             {pasos.map((paso, i) => (

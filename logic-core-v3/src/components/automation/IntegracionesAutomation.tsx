@@ -10,12 +10,12 @@ import {
     useReducedMotion,
     useSpring,
 } from 'framer-motion'
-import { Mail, CheckCircle2, Cloud, Puzzle } from 'lucide-react'
+import { Mail, CheckCircle2, Cloud, Puzzle, Zap, MessageCircle, CreditCard, BarChart2, FileText, Send, CalendarDays, Receipt } from 'lucide-react'
 
 interface IntegrationItem {
     id: string
     name: string
-    mark: string
+    mark: 'zap' | 'message' | 'credit' | 'mail' | 'chart' | 'file' | 'send' | 'cloud' | 'check' | 'puzzle' | 'calendar' | 'receipt'
     color: string
     colorRgb: string
     description: string
@@ -25,7 +25,7 @@ const INTEGRATIONS: IntegrationItem[] = [
     {
         id: 'n8n',
         name: 'n8n',
-        mark: '⚡',
+        mark: 'zap',
         color: '#f97316',
         colorRgb: '249,115,22',
         description: 'Automatización de flujos',
@@ -33,7 +33,7 @@ const INTEGRATIONS: IntegrationItem[] = [
     {
         id: 'whatsapp',
         name: 'WhatsApp',
-        mark: '💬',
+        mark: 'message',
         color: '#25d366',
         colorRgb: '37,211,102',
         description: 'Mensajería instantánea',
@@ -41,7 +41,7 @@ const INTEGRATIONS: IntegrationItem[] = [
     {
         id: 'mercadopago',
         name: 'Mercado Pago',
-        mark: '💳',
+        mark: 'credit',
         color: '#00b1ea',
         colorRgb: '0,177,234',
         description: 'Cobros y pagos online',
@@ -57,7 +57,7 @@ const INTEGRATIONS: IntegrationItem[] = [
     {
         id: 'sheets',
         name: 'Google Sheets',
-        mark: '📊',
+        mark: 'chart',
         color: '#34a853',
         colorRgb: '52,168,83',
         description: 'Datos y reportes vivos',
@@ -65,7 +65,7 @@ const INTEGRATIONS: IntegrationItem[] = [
     {
         id: 'notion',
         name: 'Notion',
-        mark: '📝',
+        mark: 'file',
         color: '#ffffff',
         colorRgb: '255,255,255',
         description: 'Documentación y operación',
@@ -73,7 +73,7 @@ const INTEGRATIONS: IntegrationItem[] = [
     {
         id: 'slack',
         name: 'Slack',
-        mark: '📨',
+        mark: 'send',
         color: '#e01e5a',
         colorRgb: '224,30,90',
         description: 'Alertas para el equipo',
@@ -81,7 +81,7 @@ const INTEGRATIONS: IntegrationItem[] = [
     {
         id: 'tiendanube',
         name: 'Tiendanube',
-        mark: '☁️',
+        mark: 'cloud',
         color: '#7b2fff',
         colorRgb: '123,47,255',
         description: 'Pedidos de e-commerce',
@@ -97,7 +97,7 @@ const INTEGRATIONS: IntegrationItem[] = [
     {
         id: 'hubspot',
         name: 'HubSpot',
-        mark: '🧩',
+        mark: 'puzzle',
         color: '#ff7a59',
         colorRgb: '255,122,89',
         description: 'Seguimiento comercial',
@@ -105,7 +105,7 @@ const INTEGRATIONS: IntegrationItem[] = [
     {
         id: 'calendar',
         name: 'Calendar',
-        mark: '📅',
+        mark: 'calendar',
         color: '#4285f4',
         colorRgb: '66,133,244',
         description: 'Agenda y reservas',
@@ -113,12 +113,27 @@ const INTEGRATIONS: IntegrationItem[] = [
     {
         id: 'afip',
         name: 'AFIP',
-        mark: '🧾',
+        mark: 'receipt',
         color: '#f59e0b',
         colorRgb: '245,158,11',
         description: 'Facturación y gestión fiscal',
     },
 ]
+
+const MARK_ICONS: Record<string, React.ReactNode> = {
+    zap:      <Zap size={18} strokeWidth={1.5} />,
+    message:  <MessageCircle size={18} strokeWidth={1.5} />,
+    credit:   <CreditCard size={18} strokeWidth={1.5} />,
+    mail:     <Mail size={18} strokeWidth={1.5} />,
+    chart:    <BarChart2 size={18} strokeWidth={1.5} />,
+    file:     <FileText size={18} strokeWidth={1.5} />,
+    send:     <Send size={18} strokeWidth={1.5} />,
+    cloud:    <Cloud size={18} strokeWidth={1.5} />,
+    check:    <CheckCircle2 size={18} strokeWidth={1.5} />,
+    puzzle:   <Puzzle size={18} strokeWidth={1.5} />,
+    calendar: <CalendarDays size={18} strokeWidth={1.5} />,
+    receipt:  <Receipt size={18} strokeWidth={1.5} />,
+}
 
 function IntegrationPill({
     item,
@@ -163,16 +178,14 @@ function IntegrationPill({
                 />
 
                 <div
-                    className="relative z-10 grid h-11 w-11 place-items-center rounded-full border border-white/10 bg-white/[0.04] text-xl"
+                    className="relative z-10 grid h-11 w-11 place-items-center rounded-full border border-white/10 bg-white/[0.04]"
                     style={{
                         boxShadow: isHovered ? `0 0 26px rgba(${item.colorRgb},0.28)` : 'none',
+                        color: isHovered ? item.color : 'rgba(255,255,255,0.5)',
+                        transition: 'color 200ms, box-shadow 200ms',
                     }}
                 >
-                    {item.mark === 'mail' && <Mail size={20} strokeWidth={1.5} className="shrink-0" />}
-                    {item.mark === 'check' && <CheckCircle2 size={20} strokeWidth={1.5} className="shrink-0" />}
-                    {item.mark === 'cloud' && <Cloud size={20} strokeWidth={1.5} className="shrink-0" />}
-                    {item.mark === 'puzzle' && <Puzzle size={20} strokeWidth={1.5} className="shrink-0" />}
-                    {!['mail', 'check', 'cloud', 'puzzle'].includes(item.mark) && <span>{item.mark}</span>}
+                    {MARK_ICONS[item.mark] ?? <Zap size={18} strokeWidth={1.5} />}
                 </div>
 
                 <div className="relative z-10 min-w-0">
@@ -268,11 +281,24 @@ export default function IntegracionesAutomation() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={isInView ? { opacity: 1, y: 0 } : {}}
                     transition={{ duration: prefersReducedMotion ? 0 : 0.65, ease: [0.16, 1, 0.3, 1] }}
-                    className="mb-14 max-w-3xl"
+                    className="mx-auto mb-14 max-w-3xl text-center"
                 >
-                    <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-amber-400/20 bg-amber-400/[0.08] px-4 py-2">
-                        <span className="h-1.5 w-1.5 rounded-full bg-amber-400 shadow-[0_0_10px_rgba(251,191,36,0.9)]" />
-                        <span className="text-[11px] font-bold uppercase tracking-[0.24em] text-amber-300">
+                    <div className="relative overflow-hidden mb-5 inline-flex items-center gap-2 rounded-full border border-amber-400/20 bg-amber-400/[0.08] px-4 py-2">
+                        <motion.span
+                            aria-hidden="true"
+                            animate={prefersReducedMotion ? {} : { x: ['-150%', '250%'] }}
+                            transition={{ duration: 1.8, repeat: Infinity, repeatDelay: 4.2, ease: 'easeInOut' }}
+                            style={{
+                                position: 'absolute',
+                                inset: 0,
+                                background: 'linear-gradient(90deg, transparent, rgba(245,158,11,0.2), transparent)',
+                                borderRadius: '100px',
+                                pointerEvents: 'none',
+                                display: prefersReducedMotion ? 'none' : 'block',
+                            }}
+                        />
+                        <span className="h-1.5 w-1.5 rounded-full bg-amber-400 shadow-[0_0_10px_rgba(251,191,36,0.9)] shrink-0" style={{ animation: prefersReducedMotion ? 'none' : 'pulse 1.8s ease-in-out infinite' }} />
+                        <span className="text-[10px] font-bold uppercase tracking-[0.22em] text-amber-300 font-mono relative z-10">
                             [ Tus herramientas, conectadas ]
                         </span>
                     </div>
@@ -280,12 +306,31 @@ export default function IntegracionesAutomation() {
                     <h2 className="text-[clamp(2.6rem,6vw,5.4rem)] font-black leading-[0.9] tracking-[-0.06em] text-white">
                         Todo lo que ya usás.
                         <br />
-                        <span className="bg-gradient-to-r from-white via-amber-200 to-orange-300 bg-clip-text text-transparent">
-                            Ahora conectado.
-                        </span>
+                        <div className="relative inline-block">
+                            <span className="bg-gradient-to-r from-white via-amber-200 to-orange-300 bg-clip-text text-transparent">
+                                Ahora conectado.
+                            </span>
+                            {!prefersReducedMotion && (
+                                <motion.div
+                                    initial={{ scaleX: 0, opacity: 0 }}
+                                    animate={isInView ? { scaleX: 1, opacity: 1 } : {}}
+                                    transition={{ duration: 0.9, delay: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                                    style={{
+                                        position: 'absolute',
+                                        bottom: '-4px',
+                                        left: '8%',
+                                        right: '8%',
+                                        height: '2px',
+                                        background: 'linear-gradient(90deg, transparent, #f59e0b 40%, #f97316 60%, transparent)',
+                                        transformOrigin: 'center',
+                                        filter: 'blur(0.5px)',
+                                    }}
+                                />
+                            )}
+                        </div>
                     </h2>
 
-                    <p className="mt-6 max-w-2xl text-base leading-8 text-white/44 md:text-lg">
+                    <p className="mx-auto mt-6 max-w-2xl text-base leading-8 text-white/44 md:text-lg">
                         Un ecosistema que fluye de punta a punta. Cuando una integración entra en foco, el sistema entero baja el ruido para mostrar exactamente qué se activa.
                     </p>
                 </motion.div>
@@ -321,10 +366,16 @@ export default function IntegracionesAutomation() {
                     initial={{ opacity: 0, y: 18 }}
                     animate={isInView ? { opacity: 1, y: 0 } : {}}
                     transition={{ duration: prefersReducedMotion ? 0 : 0.55, delay: 0.18, ease: [0.16, 1, 0.3, 1] }}
-                    className="mt-8 flex items-center justify-between gap-4 text-[11px] uppercase tracking-[0.24em] text-white/26"
+                    className="mt-8 flex items-center justify-between gap-4 text-[11px] uppercase tracking-[0.24em] text-white/26 font-mono"
                 >
-                    <span>Hover para aislar una integración</span>
-                    <span>400+ automatizaciones posibles</span>
+                    <div className="inline-flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0" style={{ animation: 'pulse 1.8s ease-in-out infinite', boxShadow: '0 0 6px rgba(245,158,11,0.8)' }} />
+                        Hover para aislar una integración
+                    </div>
+                    <div className="inline-flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0" style={{ animation: 'pulse 1.8s ease-in-out infinite', boxShadow: '0 0 6px rgba(245,158,11,0.8)' }} />
+                        400+ automatizaciones posibles
+                    </div>
                 </motion.div>
 
                 <motion.div

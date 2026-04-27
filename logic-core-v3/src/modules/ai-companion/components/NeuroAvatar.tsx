@@ -1,12 +1,12 @@
 'use client';
 
-import { type ComponentRef, useEffect, useRef } from 'react';
+import { type ComponentRef, useEffect, useRef, useMemo } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { Float, MeshDistortMaterial } from '@react-three/drei';
 import type { Message } from 'ai';
 import * as THREE from 'three';
 
-export type AvatarPhase = 'dormant' | 'initializing' | 'stabilizing' | 'active';
+export type AvatarPhase = 'dormant' | 'initializing' | 'stabilizing' | 'active' | 'sleeping';
 
 interface NeuroAvatarProps {
     isThinking?: boolean;
@@ -19,12 +19,32 @@ interface NeuroAvatarProps {
     messagePulse?: number;
     lastMessageRole?: Message['role'];
     hoverPulse?: number;
+    contextColor?: 'cyan' | 'violet' | 'emerald' | 'amber' | 'cycle';
+    embedded?: boolean;
+}
+
+const mouseRef = { current: { x: 0, y: 0 } };
+
+function useMouseTracking() {
+    useEffect(() => {
+        if ('ontouchstart' in window) return;
+
+        const handleMove = (e: MouseEvent) => {
+            // Normalizar a rango -1 a 1 relativo al centro de la pantalla
+            const x = (e.clientX / window.innerWidth) * 2 - 1;
+            const y = (e.clientY / window.innerHeight) * 2 - 1;
+            mouseRef.current = { x, y };
+        };
+        window.addEventListener('mousemove', handleMove, { passive: true });
+        return () => window.removeEventListener('mousemove', handleMove);
+    }, []);
 }
 
 const PALETTE = {
     cyan: new THREE.Color('#06b6d4'),
     violet: new THREE.Color('#7c3aed'),
     emerald: new THREE.Color('#059669'),
+    amber: new THREE.Color('#f59e0b'),
     frantic: new THREE.Color('#a78bfa'),
     white: new THREE.Color('#ffffff'),
 };
@@ -64,39 +84,90 @@ function ColorController({
     isBooped,
     isHovered,
     phase,
+    contextColor,
     keyLightRef,
 }: {
     isThinking: boolean;
     isBooped: boolean;
     isHovered: boolean;
     phase: AvatarPhase;
+    contextColor: 'cyan' | 'violet' | 'emerald' | 'amber' | 'cycle';
     keyLightRef: React.RefObject<THREE.PointLight | null>;
 }) {
     const targetColor = useRef(new THREE.Color('#06b6d4'));
+    const transitionRef = useRef(1); // 0 = transition fresh, 1 = fully settled
+    const prevContextColorRef = useRef(contextColor);
+
+    useEffect(() => {
+        if (prevContextColorRef.current !== contextColor) {
+            transitionRef.current = 0;
+            prevContextColorRef.current = contextColor;
+        }
+    }, [contextColor]);
 
     useFrame((state, delta) => {
         const time = state.clock.elapsedTime;
 
+        // Avanzar transición de contexto
+        transitionRef.current = Math.min(1, transitionRef.current + delta * 0.45);
+
         if (phase === 'dormant') {
             targetColor.current.copy(PALETTE.white).multiplyScalar(0.2);
+        } else if (phase === 'sleeping') {
+            // Color tenue durante sleep
+            if (contextColor === 'cycle') {
+                computeCycleColor(time, targetColor.current);
+            } else {
+                targetColor.current.copy(PALETTE[contextColor]);
+            }
+            targetColor.current.multiplyScalar(0.45);
         } else if (isBooped) {
             targetColor.current.copy(PALETTE.white);
         } else if (isThinking) {
             targetColor.current.copy(PALETTE.frantic);
+        } else if (contextColor !== 'cycle') {
+            // CONTEXTO ACTIVO: tomar el color de la sección
+            const ctx = PALETTE[contextColor];
+
+            // Subtle breathing variation around the context color
+            // Cada color "respira" alrededor de su tono base sin saturar
+            const breathe = (Math.sin(time * 0.6) + 1) / 2;  // 0..1
+            targetColor.current.copy(ctx);
+
+            // Mezcla sutil con white para que respire
+            targetColor.current.lerp(PALETTE.white, breathe * 0.12);
+
+            if (isHovered) {
+                targetColor.current.lerp(PALETTE.white, 0.15);
+            }
         } else {
+            // CYCLING DEFAULT (landing y otras)
             computeCycleColor(time, targetColor.current);
             if (isHovered) {
                 targetColor.current.lerp(PALETTE.white, 0.18);
             }
         }
 
-        activeColorRef.current.lerp(targetColor.current, delta * 4);
+        // Lerp progresivo del color actual al target
+        // Más lento durante una transición de contexto fresh
+        const lerpFactor = transitionRef.current < 1 ? delta * 1.5 : delta * 4;
+        activeColorRef.current.lerp(targetColor.current, lerpFactor);
 
         if (keyLightRef.current) {
             keyLightRef.current.color.lerp(activeColorRef.current, delta * 3);
+
+            let targetIntensity = 4;
+            if (phase === 'sleeping') {
+                targetIntensity = 1.5;
+            } else if (phase === 'active') {
+                if (isThinking) targetIntensity = 5.4;
+                else if (isHovered) targetIntensity = 5.1;
+                else targetIntensity = 4.6;
+            }
+
             keyLightRef.current.intensity = THREE.MathUtils.lerp(
                 keyLightRef.current.intensity,
-                phase === 'active' ? (isThinking ? 5.4 : isHovered ? 5.1 : 4.6) : 4,
+                targetIntensity,
                 delta * 6,
             );
         }
@@ -112,6 +183,7 @@ function QuantumEye({
     isBooped,
     hoverPulse,
     isRight,
+    isSleeping,
 }: {
     positionX: number;
     isThinking: boolean;
@@ -119,6 +191,7 @@ function QuantumEye({
     isBooped: boolean;
     hoverPulse: number;
     isRight?: boolean;
+    isSleeping: boolean;
 }) {
     const meshRef = useRef<THREE.Mesh>(null);
     const matRef = useRef<THREE.MeshStandardMaterial>(null);
@@ -147,7 +220,12 @@ function QuantumEye({
         hoverTimeRef.current = Math.min(1, hoverTimeRef.current + delta * 1.9);
         const hoverWave = Math.sin(hoverTimeRef.current * Math.PI) * (1 - hoverTimeRef.current);
 
-        if (isBooped) {
+        if (isSleeping) {
+            targetSX = 1.0;
+            targetSY = 0.04;
+            targetSZ = 1.0;
+            winkTimeRef.current = 0;
+        } else if (isBooped) {
             targetSX = 1.4;
             targetSY = 1.4;
             targetSZ = 1.4;
@@ -216,12 +294,14 @@ function Eyebrow({
     showPrompt,
     isBooped,
     hoverPulse,
+    isSleeping,
 }: {
     side: 'left' | 'right';
     isThinking: boolean;
     showPrompt: boolean;
     isBooped: boolean;
     hoverPulse: number;
+    isSleeping: boolean;
 }) {
     const meshRef = useRef<THREE.Mesh>(null);
     const matRef = useRef<THREE.MeshStandardMaterial>(null);
@@ -247,14 +327,24 @@ function Eyebrow({
         hoverTimeRef.current = Math.min(1, hoverTimeRef.current + delta * 1.7);
         const hoverWave = Math.sin(hoverTimeRef.current * Math.PI) * (1 - hoverTimeRef.current);
 
-        if (isBooped) {
+        if (isSleeping) {
+            targetY = 0.12;
+            expressionRot = 0;
+        } else if (isBooped) {
             targetY = 0.26;
             expressionRot = isLeft ? 0.35 : -0.35;
         } else if (showPrompt) {
             targetY = 0.15 + Math.sin(time * 6) * 0.03;
             expressionRot = isLeft ? 0.1 : -0.1;
         } else if (isThinking) {
-            targetY = 0.22;
+            // Ceja izquierda sube ligeramente (curiosidad/concentración humana)
+            if (isLeft) {
+                targetY = 0.27;
+                expressionRot = 0.08;
+            } else {
+                targetY = 0.18;
+                expressionRot = -0.02;
+            }
         }
 
         targetY += hoverWave * 0.12;
@@ -295,6 +385,7 @@ function Mouth({
     messagePulse,
     lastMessageRole,
     hoverPulse,
+    isSleeping,
 }: {
     isThinking: boolean;
     showPrompt: boolean;
@@ -302,6 +393,7 @@ function Mouth({
     messagePulse: number;
     lastMessageRole: Message['role'];
     hoverPulse: number;
+    isSleeping: boolean;
 }) {
     const meshRef = useRef<THREE.Mesh>(null);
     const matRef = useRef<THREE.MeshStandardMaterial>(null);
@@ -340,7 +432,11 @@ function Mouth({
         let targetSY = 0.7;
         let targetSZ = 0.7;
 
-        if (isBooped) {
+        if (isSleeping) {
+            targetSX = 0.55;
+            targetSY = 0.55;
+            targetSZ = 0.55;
+        } else if (isBooped) {
             targetSX = 1.4;
             targetSY = 1.4;
             targetSZ = 1.4;
@@ -349,9 +445,9 @@ function Mouth({
             targetSY = 0.5;
             targetSZ = 0.5;
         } else if (isThinking) {
-            targetSX = 0.8;
-            targetSY = 0.15;
-            targetSZ = 0.8;
+            targetSX = 0.65;   // boca pequeña
+            targetSY = 0.18;   // línea sutil
+            targetSZ = 0.65;
         } else if (reactionRef.current.send > 0.01 || reactionRef.current.receive > 0.01) {
             targetSX = 0.92 + reactionRef.current.receive * 0.2;
             targetSY = 0.84 + reactionRef.current.send * 0.28;
@@ -392,6 +488,132 @@ function Mouth({
     );
 }
 
+function OrbitalParticles({
+    isSleeping,
+    isThinking,
+    isBooped,
+}: {
+    isSleeping: boolean;
+    isThinking: boolean;
+    isBooped: boolean;
+}) {
+    const groupRef = useRef<THREE.Group>(null);
+    const matRef = useRef<THREE.PointsMaterial>(null);
+    const bufferAttrRef = useRef<THREE.BufferAttribute>(null);
+    const frameRef = useRef(0);
+
+    // 24 partículas en órbitas elípticas con inclinaciones distintas
+    const { positions, speeds, radii, inclinations } = useMemo(() => {
+        const count = 24;
+        const positions = new Float32Array(count * 3);
+        const speeds: number[] = [];
+        const radii: number[] = [];
+        const inclinations: number[] = [];
+
+        for (let i = 0; i < count; i++) {
+            // Ángulo inicial distribuido uniformemente
+            const angle = (i / count) * Math.PI * 2;
+            // Radio de órbita: entre 1.05 y 1.35 (fuera del blob)
+            const r = 1.05 + Math.random() * 0.3;
+            // Inclinación del plano de órbita (da sensación 3D)
+            const inc = (Math.random() - 0.5) * Math.PI * 0.8;
+
+            positions[i * 3] = Math.cos(angle) * r;
+            positions[i * 3 + 1] = Math.sin(angle) * r * Math.cos(inc);
+            positions[i * 3 + 2] = Math.sin(angle) * r * Math.sin(inc);
+
+            // Velocidad angular individual (algunas más lentas, otras más rápidas)
+            speeds.push(0.18 + Math.random() * 0.22);
+            radii.push(r);
+            inclinations.push(inc);
+        }
+
+        return { positions, speeds, radii, inclinations };
+    }, []);
+
+    const positionsRef = useRef(positions);
+
+    useFrame((state, delta) => {
+        if (!groupRef.current || !matRef.current) return;
+        frameRef.current++;
+
+        const time = state.clock.elapsedTime;
+
+        // Velocidad global de órbita según estado
+        const globalSpeed = isSleeping
+            ? 0.12
+            : isThinking
+                ? 0.55
+                : isBooped
+                    ? 2.2
+                    : 0.28;
+
+        // Opacidad según estado
+        const targetOpacity = isSleeping ? 0.08 : isThinking ? 0.35 : 0.22;
+        matRef.current.opacity = THREE.MathUtils.lerp(
+            matRef.current.opacity,
+            targetOpacity,
+            delta * 2,
+        );
+
+        // Tamaño de partícula según estado
+        const targetSize = isSleeping ? 0.008 : isBooped ? 0.025 : 0.014;
+        matRef.current.size = THREE.MathUtils.lerp(
+            matRef.current.size,
+            targetSize,
+            delta * 3,
+        );
+
+        // Actualizar posición de cada partícula
+        const pos = positionsRef.current;
+        for (let i = 0; i < 24; i++) {
+            const speed = speeds[i] * globalSpeed;
+            const angle = time * speed + (i / 24) * Math.PI * 2;
+            const r = radii[i];
+            const inc = inclinations[i];
+
+            // Turbulencia suave: el radio oscila levemente
+            const turbulence = Math.sin(time * 0.4 + i * 0.7) * 0.06;
+            const currentR = r + turbulence;
+
+            pos[i * 3] = Math.cos(angle) * currentR;
+            pos[i * 3 + 1] = Math.sin(angle) * currentR * Math.cos(inc);
+            pos[i * 3 + 2] = Math.sin(angle) * currentR * Math.sin(inc);
+        }
+
+        if (bufferAttrRef.current) {
+            bufferAttrRef.current.needsUpdate = true;
+        }
+    });
+
+    return (
+        <group ref={groupRef}>
+            <points>
+                <bufferGeometry>
+                    <bufferAttribute
+                        ref={bufferAttrRef}
+                        attach="attributes-position"
+                        array={positionsRef.current}
+                        count={positionsRef.current.length / 3}
+                        itemSize={3}
+                    />
+                </bufferGeometry>
+                <pointsMaterial
+                    ref={matRef}
+                    size={0.014}
+                    transparent
+                    opacity={0.22}
+                    depthWrite={false}
+                    blending={THREE.AdditiveBlending}
+                    color={activeColorRef.current}
+                    vertexColors={false}
+                    sizeAttenuation
+                />
+            </points>
+        </group>
+    );
+}
+
 interface JellyBodyProps {
     isThinking: boolean;
     showPrompt: boolean;
@@ -401,6 +623,7 @@ interface JellyBodyProps {
     messagePulse: number;
     lastMessageRole: Message['role'];
     hoverPulse: number;
+    isSleeping: boolean;
 }
 
 type DistortMaterialHandle = ComponentRef<typeof MeshDistortMaterial>;
@@ -414,6 +637,7 @@ function JellyBody({
     messagePulse,
     lastMessageRole,
     hoverPulse,
+    isSleeping,
 }: JellyBodyProps) {
     const meshRef = useRef<THREE.Mesh>(null);
     const faceGroupRef = useRef<THREE.Group>(null);
@@ -507,7 +731,9 @@ function JellyBody({
         let targetSZ = 1;
         let targetPY = 0;
         const time = state.clock.elapsedTime;
-        const idleBreath = Math.sin(time * 1.15) * 0.035 + Math.sin(time * 0.42 + 1.4) * 0.018;
+        const breathSpeed = isSleeping ? 0.55 : 1.15;
+        const breathAmp = isSleeping ? 0.06 : 0.035;
+        const idleBreath = Math.sin(time * breathSpeed) * breathAmp + Math.sin(time * 0.42 + 1.4) * 0.018;
         const idleSway = Math.sin(time * 0.7) * 0.055;
         const idleNod = Math.cos(time * 0.58) * 0.025;
 
@@ -538,25 +764,46 @@ function JellyBody({
             let gazeTargetX = 0;
             let gazeOffsetX = 0;
 
-            if (showPrompt) {
+            if (isSleeping) {
+                gazeTargetY = 0;
+                gazeTargetX = -0.15;
+                gazeOffsetX = 0;
+            } else if (showPrompt) {
                 gazeTargetY = -0.5;
                 gazeTargetX = 0.3;
                 gazeOffsetX = -0.05;
             } else if (isThinking) {
-                gazeTargetY = Math.sin(time * 2.2) * 0.32;
-                gazeTargetX = 0.08 + Math.cos(time * 1.9) * 0.12;
-                gazeOffsetX = Math.sin(time * 1.6) * 0.035;
+                // GESTO HUMANO DE PENSAR: mirada arriba-izquierda con micro-drift
+                gazeTargetY = 0.5 + Math.sin(time * 0.8) * 0.08;    // izquierda con drift
+                gazeTargetX = -0.18 + Math.cos(time * 0.7) * 0.05;  // arriba con drift
+                gazeOffsetX = 0.04;
             } else if (isOpen) {
                 gazeTargetY = -0.4;
                 gazeTargetX = 0.1;
                 gazeOffsetX = -0.08;
-            } else if (isHovered) {
-                gazeTargetY = 0;
-                gazeTargetX = 0;
             } else {
-                gazeTargetY = Math.sin(time * 0.44) * 0.2 + sendWave * 0.06;
-                gazeTargetX = Math.cos(time * 0.38) * 0.08 + receiveWave * 0.04;
-                gazeOffsetX = Math.sin(time * 0.62) * 0.02;
+                // MOUSE TRACKING: el avatar mira al cursor
+                const mx = mouseRef.current.x;
+                const my = mouseRef.current.y;
+
+                // Limitamos el rango de rotación para que no se vea raro
+                const MAX_YAW = 0.55;   // rotación Y izquierda/derecha
+                const MAX_PITCH = 0.32; // rotación X arriba/abajo
+
+                gazeTargetY = THREE.MathUtils.clamp(-mx * MAX_YAW, -MAX_YAW, MAX_YAW);
+                gazeTargetX = THREE.MathUtils.clamp(my * MAX_PITCH, -MAX_PITCH, MAX_PITCH);
+
+                // Micro-offset de la cara en X para dar sensación de peso
+                gazeOffsetX = -mx * 0.04;
+
+                // Agregamos un micro-drift sinusoidal muy sutil para que no se
+                // vea mecánico cuando el mouse está quieto
+                gazeTargetY += Math.sin(time * 0.4) * 0.04;
+                gazeTargetX += Math.cos(time * 0.32) * 0.02;
+
+                // Reacción de mensajes recibidos/enviados suma al movimiento
+                gazeTargetY += sendWave * 0.06;
+                gazeTargetX += receiveWave * 0.04;
             }
 
             gazeTargetY += hoverWave * 0.12 * (isHovered ? 1 : 0.6);
@@ -583,9 +830,10 @@ function JellyBody({
             faceGroupRef.current.position.y = springLerp(faceGroupRef.current.position.y, 0.12, delta, FACE_SPRING);
         }
 
+        const thinkingTilt = isThinking ? -0.12 : 0;  // 5-7° hacia un lado
         meshRef.current.rotation.z = THREE.MathUtils.lerp(
             meshRef.current.rotation.z,
-            (isThinking ? Math.sin(time * 1.8) * 0.05 : idleSway) + receiveWave * 0.08 + hoverWave * 0.05,
+            thinkingTilt + (isThinking ? Math.sin(time * 1.2) * 0.025 : idleSway) + receiveWave * 0.08 + hoverWave * 0.05,
             delta * 3,
         );
         meshRef.current.rotation.x = THREE.MathUtils.lerp(
@@ -607,18 +855,18 @@ function JellyBody({
                 ref={bodyMatRef}
                 color="#06b6d4"
                 emissive="#06b6d4"
-                emissiveIntensity={0.4}
-                envMapIntensity={2}
+                emissiveIntensity={0.35}
+                envMapIntensity={2.8}
                 clearcoat={1}
-                clearcoatRoughness={0.1}
-                metalness={0.2}
-                roughness={0.1}
-                distort={isThinking ? 0.35 : showPrompt ? 0.15 : 0.3}
-                speed={isThinking ? 2.5 : showPrompt ? 1 : 2}
+                clearcoatRoughness={0.05}
+                metalness={0.05}
+                roughness={0.08}
+                distort={isSleeping ? 0.08 : isThinking ? 0.22 : showPrompt ? 0.15 : 0.3}
+                speed={isSleeping ? 0.4 : isThinking ? 1.4 : showPrompt ? 1 : 2}
             />
 
             <group ref={faceGroupRef} position={[0, 0.12, 1]}>
-                <QuantumEye positionX={-0.22} isThinking={isThinking} showPrompt={showPrompt} isBooped={isBooped} hoverPulse={hoverPulse} />
+                <QuantumEye positionX={-0.22} isThinking={isThinking} showPrompt={showPrompt} isBooped={isBooped} hoverPulse={hoverPulse} isSleeping={isSleeping} />
                 <QuantumEye
                     positionX={0.22}
                     isThinking={isThinking}
@@ -626,9 +874,10 @@ function JellyBody({
                     isBooped={isBooped}
                     hoverPulse={hoverPulse}
                     isRight
+                    isSleeping={isSleeping}
                 />
-                <Eyebrow side="left" isThinking={isThinking} showPrompt={showPrompt} isBooped={isBooped} hoverPulse={hoverPulse} />
-                <Eyebrow side="right" isThinking={isThinking} showPrompt={showPrompt} isBooped={isBooped} hoverPulse={hoverPulse} />
+                <Eyebrow side="left" isThinking={isThinking} showPrompt={showPrompt} isBooped={isBooped} hoverPulse={hoverPulse} isSleeping={isSleeping} />
+                <Eyebrow side="right" isThinking={isThinking} showPrompt={showPrompt} isBooped={isBooped} hoverPulse={hoverPulse} isSleeping={isSleeping} />
                 <Mouth
                     isThinking={isThinking}
                     showPrompt={showPrompt}
@@ -636,6 +885,7 @@ function JellyBody({
                     messagePulse={messagePulse}
                     lastMessageRole={lastMessageRole}
                     hoverPulse={hoverPulse}
+                    isSleeping={isSleeping}
                 />
             </group>
         </mesh>
@@ -652,18 +902,28 @@ export function NeuroAvatar({
     messagePulse = 0,
     lastMessageRole = 'assistant',
     hoverPulse = 0,
+    contextColor = 'cycle',
+    embedded = false,
 }: NeuroAvatarProps) {
     const keyLightRef = useRef<THREE.PointLight>(null);
     const isVisible = phase !== 'dormant';
+    const isSleeping = phase === 'sleeping';
     const wrapperScale = phase === 'initializing' ? 0.78 : phase === 'stabilizing' ? 0.9 : 1;
+
+    useMouseTracking();
+
+    const wrapperClasses = embedded
+        ? 'flex h-28 w-28 items-center justify-center pointer-events-none transition-[opacity,transform] duration-700 ease-out md:h-56 md:w-56'
+        : 'fixed bottom-2 right-2 z-[96] flex h-28 w-28 items-center justify-center pointer-events-none transition-[opacity,transform] duration-700 ease-out md:bottom-3 md:right-3 md:h-56 md:w-56';
 
     return (
         <div
-            className="fixed bottom-3 right-3 z-[96] flex h-44 w-44 items-center justify-center pointer-events-none transition-[opacity,transform] duration-700 ease-out md:h-56 md:w-56"
+            className={wrapperClasses}
             style={{
                 opacity: isVisible ? 1 : 0,
                 transform: `scale(${wrapperScale})`,
                 transformOrigin: 'bottom right',
+                position: embedded ? 'relative' : undefined,
             }}
             aria-label="AI Assistant Avatar"
         >
@@ -679,20 +939,57 @@ export function NeuroAvatar({
                     isBooped={isBooped}
                     isHovered={isHovered}
                     phase={phase}
+                    contextColor={contextColor}
                     keyLightRef={keyLightRef}
                 />
 
-                <ambientLight intensity={0.5} />
-                <hemisphereLight intensity={1.15} color="#dbeafe" groundColor="#0f172a" />
-                <pointLight ref={keyLightRef} position={[2, 2, 2]} intensity={5} color="#06b6d4" decay={2} />
-                <pointLight position={[-2, -1, -2]} intensity={3} color="#8b5cf6" decay={2} />
-                <directionalLight position={[0, 2.5, 3]} intensity={1.1} color="#ffffff" />
-                <directionalLight position={[-2.5, -1.5, 1]} intensity={0.5} color="#60a5fa" />
+                <ambientLight intensity={0.25} />
+
+                {/* KEY LIGHT — principal, posicionada arriba-derecha-frente
+                    Da forma y define la expresión del rostro */}
+                <pointLight
+                    ref={keyLightRef}
+                    position={[2.5, 2.5, 2.5]}
+                    intensity={5.5}
+                    color="#06b6d4"
+                    decay={2}
+                />
+
+                {/* FILL LIGHT — izquierda-abajo, suaviza las sombras
+                    Intensidad baja = no aplana, solo evita negro puro */}
+                <pointLight
+                    position={[-2.5, -0.8, 1.5]}
+                    intensity={1.8}
+                    color={
+                        contextColor === 'cyan' ? '#7c3aed' :
+                        contextColor === 'violet' ? '#06b6d4' :
+                        contextColor === 'amber' ? '#7c3aed' :
+                        '#7c3aed'
+                    }
+                    decay={2.5}
+                />
+
+                {/* RIM LIGHT — atrás-arriba, separa el blob del fondo
+                    El efecto "producto Apple" viene de acá */}
+                <pointLight
+                    position={[0, 3.5, -3]}
+                    intensity={3.2}
+                    color="rgba(255,255,255,1)"
+                    decay={1.8}
+                />
+
+                {/* FACE LIGHT — muy cerca, ilumina los rasgos faciales
+                    Sin esto los ojos y boca quedan planos */}
+                <directionalLight
+                    position={[0, 0.5, 3.5]}
+                    intensity={0.9}
+                    color="#ffffff"
+                />
 
                 <Float
-                    speed={isThinking ? 3.4 : 2.35}
-                    rotationIntensity={0.65}
-                    floatIntensity={isOpen ? 0.85 : 1.35}
+                    speed={isThinking ? 3.4 : isSleeping ? 0.6 : 2.35}
+                    rotationIntensity={isSleeping ? 0.1 : 0.65}
+                    floatIntensity={isOpen ? 0.55 : isSleeping ? 0.2 : 0.85}
                 >
                     <JellyBody
                         isThinking={isThinking}
@@ -703,9 +1000,43 @@ export function NeuroAvatar({
                         messagePulse={messagePulse}
                         lastMessageRole={lastMessageRole}
                         hoverPulse={hoverPulse}
+                        isSleeping={isSleeping}
+                    />
+                    <OrbitalParticles
+                        isSleeping={isSleeping}
+                        isThinking={isThinking}
+                        isBooped={isBooped}
                     />
                 </Float>
             </Canvas>
+
+            {/* Sleep Z indicator - SOLO si está sleeping */}
+            {isSleeping && (
+                <div
+                    aria-hidden="true"
+                    style={{
+                        position: 'absolute',
+                        top: '20%',
+                        right: '15%',
+                        pointerEvents: 'none',
+                        zIndex: 5,
+                        opacity: 0.4,
+                        fontSize: '14px',
+                        fontWeight: 700,
+                        color: '#06b6d4',
+                        fontFamily: 'ui-monospace, monospace',
+                        animation: 'sleepZ 3s ease-in-out infinite',
+                    }}
+                >
+                    z
+                </div>
+            )}
+            <style jsx global>{`
+                @keyframes sleepZ {
+                    0%, 100% { transform: translateY(0) scale(1); opacity: 0.4; }
+                    50% { transform: translateY(-8px) scale(1.1); opacity: 0.7; }
+                }
+            `}</style>
         </div>
     );
 }
