@@ -10,11 +10,11 @@ import { prisma } from '@/lib/prisma'
 import { sendEmail } from '@/lib/email'
 import { DEFAULT_AGENCY_SETTINGS, DEFAULT_AGENCY_SETTINGS_ID } from '@/lib/agency-settings'
 import {
-  PREMIUM_FEATURE_DEFAULTS,
   PREMIUM_FEATURE_KEYS,
   PREMIUM_FEATURE_LABELS,
   type PremiumFeatureKey,
 } from '@/lib/premium-features'
+
 import type { ActionResult } from '@/lib/actions/schemas'
 
 async function requireSuperAdmin() {
@@ -111,23 +111,22 @@ export async function updateModulePricingAction(input: {
       return { success: false, error: 'El precio debe ser un número válido.' }
     }
 
-    const fallback = PREMIUM_FEATURE_DEFAULTS[input.featureKey]
+    // Actualiza el precio en el catálogo PremiumModule.
+    // El featureKey legacy es idéntico al slug del nuevo catálogo para los módulos
+    // que no fueron renombrados. Para los que sí (ej: ecommerce → ecommerce-mantenimiento)
+    // usamos el slug nuevo directamente.
+    const LEGACY_KEY_TO_SLUG: Partial<Record<PremiumFeatureKey, string>> = {
+      'ecommerce': 'ecommerce-mantenimiento',
+      'motor-resenias': 'motor-resenas',
+      'email-automation': 'email-marketing',
+      'email-nurturing': 'email-marketing',
+    }
 
-    await prisma.modulePricing.upsert({
-      where: { featureKey: input.featureKey },
-      update: {
-        name: fallback.name,
-        price: input.price,
-        type: input.type,
-        active: input.active,
-      },
-      create: {
-        featureKey: input.featureKey,
-        name: fallback.name,
-        price: input.price,
-        type: input.type,
-        active: input.active,
-      },
+    const moduleSlug = LEGACY_KEY_TO_SLUG[input.featureKey] ?? input.featureKey
+
+    await prisma.premiumModule.updateMany({
+      where: { slug: moduleSlug },
+      data: { priceMonthlyUsd: input.price },
     })
 
     revalidatePath('/admin/settings')
@@ -144,6 +143,7 @@ export async function updateModulePricingAction(input: {
     }
   }
 }
+
 
 export async function inviteTeamMemberAction(input: {
   email: string

@@ -8,11 +8,11 @@ import {
   DEFAULT_AGENCY_SETTINGS,
 } from '@/lib/agency-settings'
 import {
-  PREMIUM_FEATURE_CATALOG,
   PREMIUM_FEATURE_DEFAULTS,
   PREMIUM_FEATURE_KEYS,
   type PremiumFeatureKey,
 } from '@/lib/premium-features'
+
 import {
   UpdateModulePricingSchema,
   UpdateSettingsSchema,
@@ -99,12 +99,10 @@ export async function getSettings(): Promise<
   try {
     await requireSuperAdmin()
 
-    const [settings, pricingRows] = await Promise.all([
+    const [settings, catalogModules] = await Promise.all([
       ensureAgencySettingsRecord(),
-      prisma.modulePricing.findMany(),
+      prisma.premiumModule.findMany({ orderBy: { sortOrder: 'asc' } }),
     ])
-
-    const pricingMap = new Map(pricingRows.map((item) => [item.featureKey, item]))
 
     return ok({
       settings: {
@@ -124,19 +122,14 @@ export async function getSettings(): Promise<
         osTelegramChatId: settings.osTelegramChatId ?? '',
         updatedAt: settings.updatedAt.toISOString(),
       },
-      modulePricing: PREMIUM_FEATURE_CATALOG.map((feature) => {
-        const pricing = pricingMap.get(feature.key)
-        const fallback = PREMIUM_FEATURE_DEFAULTS[feature.key]
-
-        return {
-          moduleKey: feature.key,
-          name: pricing?.name ?? feature.label,
-          description: feature.shortDescription,
-          price: pricing?.price ?? fallback.price,
-          type: pricing?.type ?? fallback.type,
-          active: pricing?.active ?? true,
-        }
-      }),
+      modulePricing: catalogModules.map((mod) => ({
+        moduleKey: mod.slug as PremiumFeatureKey,
+        name: mod.name,
+        description: mod.shortDescription,
+        price: mod.priceMonthlyUsd,
+        type: 'monthly',
+        active: mod.status === 'ACTIVE',
+      })),
     })
   } catch (error) {
     return fail(
@@ -203,21 +196,21 @@ export async function updateModulePricing(
     await requireSuperAdmin()
     const parsed = UpdateModulePricingSchema.parse({ moduleKey, price })
     const featureKey = parsed.moduleKey as PremiumFeatureKey
+
+    // Map legacy featureKey → new catalog slug
+    const LEGACY_TO_SLUG: Partial<Record<PremiumFeatureKey, string>> = {
+      'ecommerce': 'ecommerce-mantenimiento',
+      'motor-resenias': 'motor-resenas',
+      'email-automation': 'email-marketing',
+      'email-nurturing': 'email-marketing',
+    }
+    const moduleSlug = LEGACY_TO_SLUG[featureKey] ?? featureKey
+
     const defaults = PREMIUM_FEATURE_DEFAULTS[featureKey]
 
-    await prisma.modulePricing.upsert({
-      where: { featureKey },
-      update: {
-        name: defaults.name,
-        price: parsed.price,
-      },
-      create: {
-        featureKey,
-        name: defaults.name,
-        price: parsed.price,
-        type: defaults.type,
-        active: true,
-      },
+    await prisma.premiumModule.updateMany({
+      where: { slug: moduleSlug },
+      data: { priceMonthlyUsd: parsed.price },
     })
 
     revalidateSettingsPaths()

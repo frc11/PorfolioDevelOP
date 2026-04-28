@@ -1545,24 +1545,9 @@ async function ensureAgencySettings() {
     })
   }
 
-  for (const feature of PREMIUM_FEATURE_CATALOG) {
-    const existingFeature = await prisma.modulePricing.findUnique({
-      where: { featureKey: feature.key },
-    })
+  // NOTE: Module pricing is now managed via PremiumModule catalog.
+  // Run: npx tsx prisma/seeds/premium-modules.ts to seed the catalog.
 
-    if (!existingFeature) {
-      await prisma.modulePricing.create({
-        data: {
-          id: seedId('module-pricing', feature.key),
-          featureKey: feature.key,
-          name: feature.label,
-          price: feature.defaultPrice,
-          type: feature.defaultType,
-          active: true,
-        },
-      })
-    }
-  }
 }
 
 async function ensureLead(seed: LeadSeed, members: Record<MemberKey, User>) {

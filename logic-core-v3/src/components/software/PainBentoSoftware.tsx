@@ -655,10 +655,10 @@ export default function PainBentoSoftware() {
             zIndex: 0,
             filter: 'blur(24px)',
             background: `radial-gradient(circle, rgba(${orb.rgb},0.35), rgba(${orb.rgb},0))`,
-            ...(orb.top ? { top: orb.top } : {}),
-            ...(orb.bottom ? { bottom: orb.bottom } : {}),
-            ...(orb.left ? { left: orb.left } : {}),
-            ...(orb.right ? { right: orb.right } : {}),
+            ...('top' in orb ? { top: orb.top } : {}),
+            ...('bottom' in orb ? { bottom: orb.bottom } : {}),
+            ...('left' in orb ? { left: orb.left } : {}),
+            ...('right' in orb ? { right: orb.right } : {}),
           }}
         />
       ))}

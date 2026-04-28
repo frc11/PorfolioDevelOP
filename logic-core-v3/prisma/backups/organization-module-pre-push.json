@@ -1,0 +1,12 @@
+[
+  {
+    "id": "cmohakjiz00019fe89cc4vwj1",
+    "organizationId": "cmn06ozky00029fkw6txwlm9b",
+    "moduleId": "cmohajtds00029f8004w2yre9",
+    "status": "ACTIVE",
+    "activatedAt": "2026-04-27T14:27:45.755Z",
+    "cancelledAt": null,
+    "pausedAt": null,
+    "priceLockedUsd": 80
+  }
+]

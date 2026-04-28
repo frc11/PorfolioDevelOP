@@ -18,7 +18,7 @@ import { FadeIn } from '@/components/dashboard/FadeIn'
 import { StaggerContainer, StaggerItem } from '@/components/dashboard/StaggerWrapper'
 import { PremiumModuleCard } from '@/components/dashboard/PremiumModuleCard'
 import type { PremiumModuleCardProps } from '@/components/dashboard/PremiumModuleCard'
-import { PREMIUM_FEATURE_DEFAULTS } from '@/lib/premium-features'
+
 
 // ─── Service type config ───────────────────────────────────────────────────────
 
@@ -319,26 +319,28 @@ export default async function ServicesPage() {
   const organizationId = await resolveOrgId()
   if (!organizationId) redirect('/login')
 
-  const [services, modulePricing] = await Promise.all([
+  const [services, catalogModules] = await Promise.all([
     prisma.service.findMany({
       where: { organizationId },
       orderBy: { startDate: 'asc' },
     }),
-    prisma.modulePricing.findMany(),
+    prisma.premiumModule.findMany({ orderBy: { sortOrder: 'asc' } }),
   ])
 
   const activeCount = services.filter((s) => s.status === 'ACTIVE').length
-  const pricingMap = new Map(modulePricing.map((item) => [item.featureKey, item]))
+  const catalogBySlug = new Map(catalogModules.map((m) => [m.slug, m]))
   const premiumModules = PREMIUM_MODULES
-    .map((module) => ({
-      ...module,
-      priceFrom: pricingMap.get(module.moduleKey)?.price ?? PREMIUM_FEATURE_DEFAULTS[module.moduleKey as keyof typeof PREMIUM_FEATURE_DEFAULTS]?.price ?? module.priceFrom,
-      billingLabel: (pricingMap.get(module.moduleKey)?.type ?? PREMIUM_FEATURE_DEFAULTS[module.moduleKey as keyof typeof PREMIUM_FEATURE_DEFAULTS]?.type) === 'one-time'
-        ? 'USD único'
-        : 'USD/mes',
-      isActive: pricingMap.get(module.moduleKey)?.active ?? true,
-    }))
+    .map((module) => {
+      const catalogEntry = catalogBySlug.get(module.moduleKey)
+      return {
+        ...module,
+        priceFrom: catalogEntry?.priceMonthlyUsd ?? module.priceFrom,
+        billingLabel: 'USD/mes',
+        isActive: catalogEntry ? catalogEntry.status === 'ACTIVE' : true,
+      }
+    })
     .filter((module) => module.isActive)
+
 
   return (
     <div className="mx-auto flex max-w-5xl flex-col gap-8 pb-20">

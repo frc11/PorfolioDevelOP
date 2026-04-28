@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import React, { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence, useInView, useReducedMotion } from 'motion/react'
@@ -370,7 +370,7 @@ function InfoPanel({ shouldReduceMotion }: { shouldReduceMotion: boolean }) {
           padding: '16px 24px',
           borderRadius: '100px',
           textDecoration: 'none',
-          boxShadow: '0 0 30px rgba(37,211,102,0.25)',
+
           marginTop: '4px',
           border: '1px solid rgba(255,255,255,0.16)',
           cursor: 'default',

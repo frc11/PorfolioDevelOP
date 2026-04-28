@@ -2,7 +2,8 @@ import { prisma } from '@/lib/prisma'
 import { AdminSettingsConsole } from '@/components/admin/AdminSettingsConsole'
 import { DEFAULT_AGENCY_SETTINGS } from '@/lib/agency-settings'
 import { estimateLastLoginAt } from '@/lib/client-health'
-import { PREMIUM_FEATURE_CATALOG, PREMIUM_FEATURE_DEFAULTS } from '@/lib/premium-features'
+import { PREMIUM_FEATURE_KEYS, type PremiumFeatureKey } from '@/lib/premium-features'
+
 
 function maskValue(value: string | undefined) {
   if (!value) return null
@@ -10,9 +11,9 @@ function maskValue(value: string | undefined) {
 }
 
 export default async function SettingsPage() {
-  const [settings, pricingFromDb, teamMembers] = await Promise.all([
+  const [settings, catalogModules, teamMembers] = await Promise.all([
     prisma.agencySettings.findFirst({ orderBy: { updatedAt: 'desc' } }),
-    prisma.modulePricing.findMany(),
+    prisma.premiumModule.findMany({ orderBy: { sortOrder: 'asc' } }),
     prisma.user.findMany({
       where: { role: 'SUPER_ADMIN' },
       orderBy: { createdAt: 'asc' },
@@ -29,8 +30,6 @@ export default async function SettingsPage() {
       },
     }),
   ])
-
-  const pricingMap = new Map(pricingFromDb.map((item) => [item.featureKey, item]))
 
   return (
     <AdminSettingsConsole
@@ -84,18 +83,17 @@ export default async function SettingsPage() {
           estimatedUsage: 'USD 184 estimados',
         },
       }}
-      modulePricing={PREMIUM_FEATURE_CATALOG.map((feature) => {
-        const pricing = pricingMap.get(feature.key)
-        const defaults = PREMIUM_FEATURE_DEFAULTS[feature.key]
-        return {
-          featureKey: feature.key,
-          name: pricing?.name ?? feature.label,
-          description: feature.shortDescription,
-          price: pricing?.price ?? defaults.price,
-          type: pricing?.type ?? defaults.type,
-          active: pricing?.active ?? true,
-        }
-      })}
+      modulePricing={catalogModules
+        .filter((mod) => PREMIUM_FEATURE_KEYS.includes(mod.slug as PremiumFeatureKey))
+        .map((mod) => ({
+          featureKey: mod.slug as PremiumFeatureKey,
+          name: mod.name,
+          description: mod.shortDescription,
+          price: mod.priceMonthlyUsd,
+          type: 'monthly',
+          active: mod.status === 'ACTIVE',
+        }))}
+
       teamMembers={teamMembers.map((member) => {
         const lastAccess = estimateLastLoginAt(member.sessions[0]?.expires)
 

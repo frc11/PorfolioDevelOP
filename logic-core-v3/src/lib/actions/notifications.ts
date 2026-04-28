@@ -7,7 +7,7 @@ import { type ActionResult, NotificationIdSchema } from './schemas'
 
 function revalidateAll() {
   revalidatePath('/dashboard')
-  revalidatePath('/dashboard/notificaciones')
+  revalidatePath('/dashboard')
 }
 
 export async function markNotificationReadAction(id: string): Promise<ActionResult> {

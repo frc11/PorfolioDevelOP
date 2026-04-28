@@ -1,0 +1,101 @@
+[
+  {
+    "id": "cmn8eagsh00009fl0yp77tuit",
+    "featureKey": "whatsapp-autopilot",
+    "name": "Recepcionista IA & WhatsApp Autopilot",
+    "price": 150,
+    "type": "monthly",
+    "active": true,
+    "updatedAt": "2026-03-27T04:22:17.618Z"
+  },
+  {
+    "id": "osv2-module-pricing-agenda-inteligente",
+    "featureKey": "agenda-inteligente",
+    "name": "Agenda Inteligente 24/7",
+    "price": 80,
+    "type": "monthly",
+    "active": true,
+    "updatedAt": "2026-04-06T20:04:00.047Z"
+  },
+  {
+    "id": "osv2-module-pricing-social-media-hub",
+    "featureKey": "social-media-hub",
+    "name": "Social Media & Content Hub",
+    "price": 200,
+    "type": "monthly",
+    "active": true,
+    "updatedAt": "2026-04-06T20:04:00.228Z"
+  },
+  {
+    "id": "osv2-module-pricing-seo-avanzado",
+    "featureKey": "seo-avanzado",
+    "name": "Dominio de Busqueda Local",
+    "price": 120,
+    "type": "monthly",
+    "active": true,
+    "updatedAt": "2026-04-06T20:04:00.345Z"
+  },
+  {
+    "id": "osv2-module-pricing-ecommerce",
+    "featureKey": "ecommerce",
+    "name": "Vende Mientras Dormis",
+    "price": 300,
+    "type": "one-time",
+    "active": true,
+    "updatedAt": "2026-04-06T20:04:00.463Z"
+  },
+  {
+    "id": "osv2-module-pricing-pixel-retargeting",
+    "featureKey": "pixel-retargeting",
+    "name": "Recuperacion de Ventas",
+    "price": 100,
+    "type": "monthly",
+    "active": true,
+    "updatedAt": "2026-04-06T20:04:00.579Z"
+  },
+  {
+    "id": "osv2-module-pricing-motor-resenias",
+    "featureKey": "motor-resenias",
+    "name": "Motor de Resenias Automatico",
+    "price": 60,
+    "type": "monthly",
+    "active": true,
+    "updatedAt": "2026-04-06T20:04:00.693Z"
+  },
+  {
+    "id": "osv2-module-pricing-mini-crm",
+    "featureKey": "mini-crm",
+    "name": "Mini-CRM & Gestion de Leads",
+    "price": 80,
+    "type": "monthly",
+    "active": true,
+    "updatedAt": "2026-04-06T20:04:00.809Z"
+  },
+  {
+    "id": "osv2-module-pricing-email-nurturing",
+    "featureKey": "email-nurturing",
+    "name": "Email Marketing & Nurturing",
+    "price": 100,
+    "type": "monthly",
+    "active": true,
+    "updatedAt": "2026-04-06T20:04:00.927Z"
+  },
+  {
+    "id": "osv2-module-pricing-email-automation",
+    "featureKey": "email-automation",
+    "name": "Email Automation",
+    "price": 100,
+    "type": "monthly",
+    "active": true,
+    "updatedAt": "2026-04-06T20:04:01.044Z"
+  },
+  {
+    "id": "osv2-module-pricing-client-portal",
+    "featureKey": "client-portal",
+    "name": "Portal de Clientes White-label",
+    "price": 120,
+    "type": "monthly",
+    "active": true,
+    "updatedAt": "2026-04-06T20:04:01.163Z"
+  }
+]

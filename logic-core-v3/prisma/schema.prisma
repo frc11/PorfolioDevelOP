@@ -204,6 +204,7 @@ model Organization {
   subscription  Subscription?
   brandProfile  ClientBrandProfile?
   tickets       Ticket[]
+  premiumModules OrganizationModule[]
 }
 
 model OrgMember {
@@ -450,15 +451,7 @@ model AgencySettings {
   updatedAt                    DateTime @updatedAt
 }
 
-model ModulePricing {
-  id         String   @id @default(cuid())
-  featureKey String   @unique
-  name       String
-  price      Float
-  type       String   @default("monthly")
-  active     Boolean  @default(true)
-  updatedAt  DateTime @updatedAt
-}
+
 
 model OsLead {
   id             String         @id @default(cuid())
@@ -611,4 +604,64 @@ enum ActivityResult {
 enum MilestoneType {
   INICIO
   ENTREGA
+}
+
+enum PremiumModuleTier {
+  TIER_1_OPERATION
+  TIER_2_GROWTH
+  TIER_3_VERTICAL
+}
+
+enum PremiumModuleStatus {
+  ACTIVE
+  COMING_SOON
+  DEPRECATED
+}
+
+enum OrganizationModuleStatus {
+  ACTIVE
+  PAUSED
+  CANCELLED
+}
+
+model PremiumModule {
+  id              String              @id @default(cuid())
+  slug            String              @unique
+  name            String
+  shortDescription String
+  longDescription String?
+  tier            PremiumModuleTier
+  priceMonthlyUsd Float
+  iconName        String              // nombre de icono Lucide (ej: "MessageCircle")
+  accentColor     String              // hex color (ej: "#06b6d4")
+  validRubros     String[]            // [] = todos los rubros
+  status          PremiumModuleStatus @default(ACTIVE)
+  sortOrder       Int                 @default(0)
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+
+  organizations   OrganizationModule[]
+
+  @@index([tier])
+  @@index([status])
+  @@map("premium_module")
+}
+
+model OrganizationModule {
+  id             String                   @id @default(cuid())
+  organizationId String
+  moduleId       String
+  status         OrganizationModuleStatus @default(ACTIVE)
+  activatedAt    DateTime                 @default(now())
+  cancelledAt    DateTime?
+  pausedAt       DateTime?
+  priceLockedUsd Float
+
+  organization Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  module       PremiumModule @relation(fields: [moduleId], references: [id], onDelete: Restrict)
+
+  @@unique([organizationId, moduleId])
+  @@index([organizationId])
+  @@index([status])
+  @@map("organization_module")
 }

@@ -520,7 +520,7 @@ function IntegrationCardsGrid({ isInView }: { isInView: boolean }) {
                   <motion.article
                     key={card.id}
                     ref={(el) => {
-                      cardRefs.current[card.id] = el
+                      cardRefs.current[card.id] = el as HTMLDivElement | null
                     }}
                     onHoverStart={() => setHoveredCard(card.id)}
                     onHoverEnd={() => setHoveredCard((current) => (current === card.id ? null : current))}

@@ -265,7 +265,7 @@ export function NotificationCenter({
 
             {/* Footer */}
             <Link
-              href="/dashboard/notificaciones"
+              href="/dashboard"
               onClick={() => setIsOpen(false)}
               className="flex items-center justify-center gap-1.5 py-3 text-[10px] font-semibold uppercase tracking-widest text-zinc-500 transition-colors hover:text-cyan-400"
               style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}

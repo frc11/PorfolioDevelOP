@@ -48,7 +48,7 @@ export async function LeakMeter({ organizationId }: LeakMeterProps) {
         </p>
         
         <Link 
-          href="/dashboard/configuracion/pixel"
+          href="/dashboard/services"
           className="mt-8 inline-flex items-center gap-2 rounded-xl bg-white/5 border border-white/10 px-6 py-3 text-sm font-bold text-white transition-all duration-300 hover:bg-white/10 hover:border-red-500/40 hover:shadow-[0_0_20px_rgba(239,68,68,0.1)] active:scale-95"
         >
           Configurar Píxel de Rastreo

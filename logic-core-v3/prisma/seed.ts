@@ -17,7 +17,7 @@ import {
 } from '@prisma/client'
 import bcrypt from 'bcryptjs'
 import { DEFAULT_AGENCY_SETTINGS, DEFAULT_AGENCY_SETTINGS_ID } from '../src/lib/agency-settings'
-import { PREMIUM_FEATURE_CATALOG } from '../src/lib/premium-features'
+
 
 const prisma = new PrismaClient()
 
@@ -676,24 +676,9 @@ async function main() {
     },
   })
 
-  for (const feature of PREMIUM_FEATURE_CATALOG) {
-    await prisma.modulePricing.upsert({
-      where: { featureKey: feature.key },
-      update: {
-        name: feature.label,
-        price: feature.defaultPrice,
-        type: feature.defaultType,
-        active: true,
-      },
-      create: {
-        featureKey: feature.key,
-        name: feature.label,
-        price: feature.defaultPrice,
-        type: feature.defaultType,
-        active: true,
-      },
-    })
-  }
+  // NOTE: Module pricing catalog is now seeded via prisma/seeds/premium-modules.ts
+  // Run: npx tsx prisma/seeds/premium-modules.ts
+
 
   process.stdout.write(
     [
@@ -709,7 +694,8 @@ async function main() {
       '- Facturas: 2',
       `- Assets: ${assets.length}`,
       `- Notificaciones: ${notifications.length}`,
-      `- Modulos premium: ${PREMIUM_FEATURE_CATALOG.length}`,
+      `- Modulos premium: ver tabla premium_module en BD`,
+
       'Credenciales:',
       '- admin@develop.com / Admin1234!',
       '- cliente@sanmiguel.com / Cliente1234!',

@@ -3,6 +3,7 @@
 import { useEffect, useState, createContext, useContext } from 'react';
 import Lenis from 'lenis';
 import 'lenis/dist/lenis.css';
+import { usePathname } from 'next/navigation';
 
 interface SmoothScrollProps {
     children: React.ReactNode;
@@ -17,8 +18,15 @@ export function useLenis() {
 
 export function SmoothScroll({ children }: SmoothScrollProps) {
     const [lenisInstance, setLenisInstance] = useState<Lenis | null>(null);
+    const pathname = usePathname();
 
     useEffect(() => {
+        const isPortal = pathname && (pathname.startsWith('/admin') || pathname.startsWith('/dashboard'));
+        
+        if (isPortal) {
+            return;
+        }
+
         const isTouchLikeDevice = window.matchMedia('(hover: none), (pointer: coarse)').matches;
 
         // Keep native scroll physics on touch devices to avoid section jump/bounce artifacts.
@@ -52,7 +60,7 @@ export function SmoothScroll({ children }: SmoothScrollProps) {
             lenis.destroy();
             setLenisInstance(null);
         };
-    }, []);
+    }, [pathname]);
 
     return (
         <LenisContext.Provider value={lenisInstance}>

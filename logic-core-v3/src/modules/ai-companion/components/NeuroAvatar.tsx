@@ -591,11 +591,9 @@ function OrbitalParticles({
             <points>
                 <bufferGeometry>
                     <bufferAttribute
-                        ref={bufferAttrRef}
+                        ref={bufferAttrRef as any}
                         attach="attributes-position"
-                        array={positionsRef.current}
-                        count={positionsRef.current.length / 3}
-                        itemSize={3}
+                        args={[positionsRef.current, 3]}
                     />
                 </bufferGeometry>
                 <pointsMaterial
