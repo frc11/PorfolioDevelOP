@@ -25,6 +25,17 @@ export default async function DashboardLayout({
     getImpersonationSession(),
   ])
 
+  if (session?.user?.id) {
+    prisma.user
+      .update({
+        where: { id: session.user.id },
+        data: { lastDashboardVisit: new Date() },
+      })
+      .catch((error) => {
+        console.error('[lastDashboardVisit] update failed:', error)
+      })
+  }
+
   if (!organizationId) {
     redirect(session?.user?.role === 'SUPER_ADMIN' ? '/admin/clients' : '/login')
   }

@@ -141,16 +141,17 @@ model VerificationToken {
 // ─── User ─────────────────────────────────────────────────────────────────────
 
 model User {
-  id               String    @id @default(cuid())
-  name             String?
-  email            String    @unique
-  emailVerified    DateTime?
-  image            String?
-  password         String?
-  role             Role      @default(ORG_MEMBER)
-  unlockedFeatures String[]  @default([])
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
+  id                 String    @id @default(cuid())
+  name               String?
+  email              String    @unique
+  emailVerified      DateTime?
+  image              String?
+  password           String?
+  role               Role      @default(ORG_MEMBER)
+  unlockedFeatures   String[]  @default([])
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  lastDashboardVisit DateTime?
 
   accounts        Account[]
   sessions        Session[]
@@ -194,16 +195,30 @@ model Organization {
   notificationPrefs   Json?
   createdAt           DateTime @default(now())
 
-  members       OrgMember[]
-  services      Service[]
-  projects      Project[]
-  messages      Message[]
-  invoices      Invoice[]
-  notifications Notification[]
-  clientAssets  ClientAsset[]
-  subscription  Subscription?
-  brandProfile  ClientBrandProfile?
-  tickets       Ticket[]
+  // Health Score: connection status
+  // Structure: { ga4: {connected, lastSync}, searchConsole: {...}, ... }
+  dataConnections Json? @default("{\"ga4\":{\"connected\":false,\"lastSync\":null},\"searchConsole\":{\"connected\":false,\"lastSync\":null},\"googleBusinessProfile\":{\"connected\":false,\"lastSync\":null},\"whatsappBusiness\":{\"connected\":false,\"lastSync\":null},\"afip\":{\"connected\":false,\"lastSync\":null},\"pixel\":{\"connected\":false,\"lastSync\":null}}")
+
+  // Google reputation. Manual first, API when Reviews Engine is sold.
+  googleRating          Float?
+  googleReviewsCount    Int?      @default(0)
+  googleRatingUpdatedAt DateTime?
+
+  // Weekly AIBrief cache
+  cachedExecutiveBrief        String?   @db.Text
+  cachedExecutiveBriefAt      DateTime?
+  executiveBriefRegenerations Int       @default(0)
+
+  members        OrgMember[]
+  services       Service[]
+  projects       Project[]
+  messages       Message[]
+  invoices       Invoice[]
+  notifications  Notification[]
+  clientAssets   ClientAsset[]
+  subscription   Subscription?
+  brandProfile   ClientBrandProfile?
+  tickets        Ticket[]
   premiumModules OrganizationModule[]
 }
 
@@ -267,11 +282,11 @@ model Task {
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
 
-  projectId      String
-  project        Project        @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  assignedTo     User?          @relation("TaskAssignee", fields: [assignedToId], references: [id], onDelete: SetNull)
-  notifications  Notification[]
-  osTimeEntries  OsTimeEntry[]
+  projectId     String
+  project       Project        @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  assignedTo    User?          @relation("TaskAssignee", fields: [assignedToId], references: [id], onDelete: SetNull)
+  notifications Notification[]
+  osTimeEntries OsTimeEntry[]
 
   @@index([assignedToId])
 }
@@ -451,8 +466,6 @@ model AgencySettings {
   updatedAt                    DateTime @updatedAt
 }
 
-
-
 model OsLead {
   id             String         @id @default(cuid())
   businessName   String
@@ -625,22 +638,22 @@ enum OrganizationModuleStatus {
 }
 
 model PremiumModule {
-  id              String              @id @default(cuid())
-  slug            String              @unique
-  name            String
+  id               String              @id @default(cuid())
+  slug             String              @unique
+  name             String
   shortDescription String
-  longDescription String?
-  tier            PremiumModuleTier
-  priceMonthlyUsd Float
-  iconName        String              // nombre de icono Lucide (ej: "MessageCircle")
-  accentColor     String              // hex color (ej: "#06b6d4")
-  validRubros     String[]            // [] = todos los rubros
-  status          PremiumModuleStatus @default(ACTIVE)
-  sortOrder       Int                 @default(0)
-  createdAt       DateTime            @default(now())
-  updatedAt       DateTime            @updatedAt
+  longDescription  String?
+  tier             PremiumModuleTier
+  priceMonthlyUsd  Float
+  iconName         String // nombre de icono Lucide (ej: "MessageCircle")
+  accentColor      String // hex color (ej: "#06b6d4")
+  validRubros      String[] // [] = todos los rubros
+  status           PremiumModuleStatus @default(ACTIVE)
+  sortOrder        Int                 @default(0)
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
 
-  organizations   OrganizationModule[]
+  organizations OrganizationModule[]
 
   @@index([tier])
   @@index([status])

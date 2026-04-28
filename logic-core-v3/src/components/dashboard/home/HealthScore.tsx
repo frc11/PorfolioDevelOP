@@ -18,7 +18,7 @@
 import { motion, useSpring } from 'framer-motion'
 import { useEffect, useState } from 'react'
 import { ArrowUp, ArrowDown, Minus, Sparkles } from 'lucide-react'
-import { cn } from '@/lib/cn'
+import { cn } from '@/lib/utils'
 import type { HealthScoreResult, HealthScoreDimension } from '@/lib/health-score'
 
 // ─── Public component ─────────────────────────────────────────────────────────

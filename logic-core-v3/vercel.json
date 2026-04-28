@@ -3,6 +3,10 @@
     {
       "path": "/api/cron/os-follow-up",
       "schedule": "0 12 * * *"
+    },
+    {
+      "path": "/api/cron/regenerate-briefs",
+      "schedule": "0 10 * * 1"
     }
   ]
 }

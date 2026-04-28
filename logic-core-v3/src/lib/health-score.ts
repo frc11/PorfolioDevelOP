@@ -7,8 +7,6 @@
  * - All computation is server-side only. Zero client-side arithmetic.
  * - Each metric sub-helper returns `number | null`. Null means "no data yet"
  *   and the metric is excluded from the weighted average rather than penalising.
- * - The dataConnections field and googleRating/googleReviewsCount fields are not
- *   yet in the schema, so we read them safely with `?.` and treat missing as null.
  * - BusinessMetric is linked to User (clientId), so we resolve the first member
  *   of the org and look up their metric record.
  */
@@ -72,44 +70,24 @@ export async function getHealthScore(organizationId: string): Promise<HealthScor
 
 // ─── Core computation ─────────────────────────────────────────────────────────
 
-// Fields that exist in the current Prisma schema.
-// dataConnections, googleRating, googleReviewsCount are future schema fields —
-// they are intentionally absent here and fall back to null at runtime.
-type OrgQueryResult = {
-  id: string
-  siteUrl: string | null
-  analyticsPropertyId: string | null
-}
-
-// Extended shape that anticipates future schema additions.
-// When those fields are added to schema.prisma, add them to the select below.
-type OrgExtended = OrgQueryResult & {
-  dataConnections?: unknown
-  googleRating?: number | null
-  googleReviewsCount?: number | null
-}
-
 async function computeHealthScoreInternal(organizationId: string): Promise<HealthScoreResult> {
-  // Query only the fields that exist in the current schema.
-  // dataConnections / googleRating / googleReviewsCount will be added in a
-  // future Prisma migration — until then they resolve to undefined → null.
-  const orgRaw = await prisma.organization.findUnique({
+  const org = await prisma.organization.findUnique({
     where: { id: organizationId },
     select: {
       id: true,
       siteUrl: true,
       analyticsPropertyId: true,
+      dataConnections: true,
+      googleRating: true,
+      googleReviewsCount: true,
     },
   })
 
-  if (!orgRaw) {
+  if (!org) {
     throw new Error(`Organization ${organizationId} not found`)
   }
 
-  // Safe upcast — future fields will be undefined until the migration lands.
-  const org: OrgExtended = orgRaw as OrgExtended
-
-  const connections: DataConnections = parseDataConnections(org.dataConnections ?? null)
+  const connections: DataConnections = parseDataConnections(org.dataConnections)
   const { level, connectedCount, totalCount, percentage } = getConnectionLevel(connections)
 
   // Resolve the first org member's userId for BusinessMetric look-ups
@@ -301,9 +279,12 @@ async function computeTrafficScore(firstUserId: string | null): Promise<number |
 
 // Placeholder — will connect to Search Console API in a future iteration
 async function computeSeoScore(
-  _organizationId: string,
-  _siteUrl: string,
+  organizationId: string,
+  siteUrl: string,
 ): Promise<number | null> {
+  void organizationId
+  void siteUrl
+
   return null
 }
 
@@ -345,6 +326,8 @@ async function computeConversionScore(firstUserId: string | null): Promise<numbe
 }
 
 async function computeLeadsScore(organizationId: string): Promise<number | null> {
+  void organizationId
+
   // ContactSubmission is global (no orgId FK yet), so this gives an agency-wide
   // lead volume signal — still useful as a relative trend metric.
   const now = Date.now()
@@ -366,12 +349,8 @@ async function computeLeadsScore(organizationId: string): Promise<number | null>
       .catch(() => 0),
   ])
 
-  // Suppress entirely if no lead data exists at all
   if (thisWeek === 0 && lastWeek === 0) {
-    // Use stable seed-based placeholder so the dimension isn't always empty
-    const seed = hashStringToNumber(organizationId + 'leads')
-    const baseScore = 40 + (seed % 40) // 40-79
-    return baseScore
+    return null
   }
 
   if (lastWeek === 0) return thisWeek > 0 ? 80 : 50
@@ -421,7 +400,7 @@ async function computeReplyScore(organizationId: string): Promise<number | null>
 }
 
 async function computeProjectHealthScore(organizationId: string): Promise<number | null> {
-  const [done, inProgress, overdue] = await Promise.all([
+  const counts = await Promise.all([
     prisma.task.count({
       where: { project: { organizationId }, status: 'DONE' },
     }),
@@ -435,7 +414,11 @@ async function computeProjectHealthScore(organizationId: string): Promise<number
         dueDate: { lt: new Date() },
       },
     }),
-  ])
+  ]).catch(() => null)
+
+  if (!counts) return null
+
+  const [done, inProgress, overdue] = counts
 
   const total = done + inProgress + overdue
   if (total === 0) return null
@@ -482,8 +465,10 @@ async function computeBillingScore(organizationId: string): Promise<number | nul
 
 function computeTrend(
   organizationId: string,
-  _currentScore: number,
+  currentScore: number,
 ): { value: number; direction: 'up' | 'down' | 'flat' } {
+  void currentScore
+
   const seed = hashStringToNumber(organizationId)
   // Produces a stable -10..+10 value unique per org
   const trendValue = ((seed % 21) - 10) as number

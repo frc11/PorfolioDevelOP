@@ -1,102 +1,67 @@
-/**
- * data-connections.ts
- *
- * Defines the DataConnections shape stored as JSON in Organization.dataConnections
- * (future schema field), the parser that normalises unknown JSON to a typed struct,
- * and the `getConnectionLevel` classifier consumed by computeHealthScore.
- *
- * The field is intentionally a JSON blob so we can evolve sources without a
- * schema migration on every iteration.
- */
+export type DataSourceKey =
+  | 'ga4'
+  | 'searchConsole'
+  | 'googleBusinessProfile'
+  | 'whatsappBusiness'
+  | 'afip'
+  | 'pixel'
 
-// ─── Connection source descriptors ───────────────────────────────────────────
-
-export type DataConnectionSource = {
+export type DataConnectionStatus = {
   connected: boolean
-  connectedAt?: string | null // ISO date string
+  lastSync: string | null
 }
 
-export type DataConnections = {
-  ga4: DataConnectionSource
-  searchConsole: DataConnectionSource
-  whatsapp: DataConnectionSource
-  instagram: DataConnectionSource
-  googleMyBusiness: DataConnectionSource
-  stripe: DataConnectionSource
+export type DataConnections = Record<DataSourceKey, DataConnectionStatus>
+
+export const DEFAULT_DATA_CONNECTIONS: DataConnections = {
+  ga4: { connected: false, lastSync: null },
+  searchConsole: { connected: false, lastSync: null },
+  googleBusinessProfile: { connected: false, lastSync: null },
+  whatsappBusiness: { connected: false, lastSync: null },
+  afip: { connected: false, lastSync: null },
+  pixel: { connected: false, lastSync: null },
 }
 
-// ─── Level enum ──────────────────────────────────────────────────────────────
+export const DATA_SOURCE_LABELS: Record<DataSourceKey, string> = {
+  ga4: 'Google Analytics',
+  searchConsole: 'Search Console',
+  googleBusinessProfile: 'Google Business Profile',
+  whatsappBusiness: 'WhatsApp Business',
+  afip: 'AFIP',
+  pixel: 'Pixel de conversiones',
+}
 
 export type ConnectionLevel = 'ONBOARDING' | 'PARTIAL' | 'COMPLETE'
 
-const TOTAL_SOURCES = 6
-
-// ─── Default (zero-state) connections ────────────────────────────────────────
-
-export const DEFAULT_CONNECTIONS: DataConnections = {
-  ga4: { connected: false },
-  searchConsole: { connected: false },
-  whatsapp: { connected: false },
-  instagram: { connected: false },
-  googleMyBusiness: { connected: false },
-  stripe: { connected: false },
-}
-
-// ─── Parser ──────────────────────────────────────────────────────────────────
-
-/**
- * Safely coerces an unknown prisma JSON value into a typed DataConnections.
- * Unknown or malformed values fall back to the disconnected default.
- */
-export function parseDataConnections(raw: unknown): DataConnections {
-  if (raw === null || raw === undefined || typeof raw !== 'object' || Array.isArray(raw)) {
-    return { ...DEFAULT_CONNECTIONS }
-  }
-
-  const obj = raw as Record<string, unknown>
-
-  function parseSource(val: unknown): DataConnectionSource {
-    if (val === null || val === undefined || typeof val !== 'object' || Array.isArray(val)) {
-      return { connected: false }
-    }
-    const src = val as Record<string, unknown>
-    return {
-      connected: src['connected'] === true,
-      connectedAt: typeof src['connectedAt'] === 'string' ? src['connectedAt'] : null,
-    }
-  }
-
-  return {
-    ga4: parseSource(obj['ga4']),
-    searchConsole: parseSource(obj['searchConsole']),
-    whatsapp: parseSource(obj['whatsapp']),
-    instagram: parseSource(obj['instagram']),
-    googleMyBusiness: parseSource(obj['googleMyBusiness']),
-    stripe: parseSource(obj['stripe']),
-  }
-}
-
-// ─── Level classifier ────────────────────────────────────────────────────────
-
-export type ConnectionLevelResult = {
+export function getConnectionLevel(connections: DataConnections): {
   level: ConnectionLevel
   connectedCount: number
   totalCount: number
   percentage: number
-}
-
-export function getConnectionLevel(connections: DataConnections): ConnectionLevelResult {
-  const connectedCount = Object.values(connections).filter((s) => s.connected).length
-  const percentage = Math.round((connectedCount / TOTAL_SOURCES) * 100)
+} {
+  const total = Object.keys(connections).length
+  const connected = Object.values(connections).filter((connection) => connection.connected).length
+  const percentage = (connected / total) * 100
 
   let level: ConnectionLevel
-  if (connectedCount === 0) {
-    level = 'ONBOARDING'
-  } else if (connectedCount < 4) {
-    level = 'PARTIAL'
-  } else {
-    level = 'COMPLETE'
-  }
+  if (percentage < 30) level = 'ONBOARDING'
+  else if (percentage < 70) level = 'PARTIAL'
+  else level = 'COMPLETE'
 
-  return { level, connectedCount, totalCount: TOTAL_SOURCES, percentage }
+  return { level, connectedCount: connected, totalCount: total, percentage }
+}
+
+export function parseDataConnections(raw: unknown): DataConnections {
+  if (!raw || typeof raw !== 'object') return DEFAULT_DATA_CONNECTIONS
+  const parsed = raw as Partial<DataConnections>
+
+  return {
+    ga4: parsed.ga4 ?? DEFAULT_DATA_CONNECTIONS.ga4,
+    searchConsole: parsed.searchConsole ?? DEFAULT_DATA_CONNECTIONS.searchConsole,
+    googleBusinessProfile:
+      parsed.googleBusinessProfile ?? DEFAULT_DATA_CONNECTIONS.googleBusinessProfile,
+    whatsappBusiness: parsed.whatsappBusiness ?? DEFAULT_DATA_CONNECTIONS.whatsappBusiness,
+    afip: parsed.afip ?? DEFAULT_DATA_CONNECTIONS.afip,
+    pixel: parsed.pixel ?? DEFAULT_DATA_CONNECTIONS.pixel,
+  }
 }
