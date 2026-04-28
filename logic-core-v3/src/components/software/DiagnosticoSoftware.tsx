@@ -294,8 +294,24 @@ function AtmosphereDiag() {
 }
 
 function Header({ isInView }: { isInView: boolean }) {
+  const [isMobileOrTabletLayout, setIsMobileOrTabletLayout] = useState(false)
+
+  React.useEffect(() => {
+    const media = window.matchMedia('(max-width: 1023px)')
+    const sync = () => setIsMobileOrTabletLayout(media.matches)
+
+    sync()
+    if (typeof media.addEventListener === 'function') {
+      media.addEventListener('change', sync)
+      return () => media.removeEventListener('change', sync)
+    }
+
+    media.addListener(sync)
+    return () => media.removeListener(sync)
+  }, [])
+
   return (
-    <div style={{ marginBottom: 'clamp(40px, 5vh, 56px)' }}>
+    <div style={{ marginBottom: 'clamp(40px, 5vh, 56px)', textAlign: isMobileOrTabletLayout ? 'center' : 'left' }}>
       <motion.div initial={{ opacity: 0, y: -20 }} animate={isInView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6, delay: 0.1 }} style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', border: '1px solid rgba(99,102,241,0.4)', borderRadius: '100px', padding: '4px 14px', marginBottom: '20px', background: 'rgba(99,102,241,0.05)' }}>
         <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={isInView ? { opacity: 1, scale: 1 } : {}} transition={{ duration: 0.5, delay: 0.3 }} style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#6366f1', boxShadow: '0 0 8px #6366f1' }} />
         <span style={{ fontSize: '10px', letterSpacing: '0.2em', color: '#6366f1', fontWeight: 700 }}>[ DIAGNÓSTICO GRATUITO ]</span>
@@ -313,6 +329,22 @@ function Header({ isInView }: { isInView: boolean }) {
 }
 
 function SocialProof({ isInView }: { isInView: boolean }) {
+  const [isMobileOrTabletLayout, setIsMobileOrTabletLayout] = useState(false)
+
+  React.useEffect(() => {
+    const media = window.matchMedia('(max-width: 1023px)')
+    const sync = () => setIsMobileOrTabletLayout(media.matches)
+
+    sync()
+    if (typeof media.addEventListener === 'function') {
+      media.addEventListener('change', sync)
+      return () => media.removeEventListener('change', sync)
+    }
+
+    media.addListener(sync)
+    return () => media.removeListener(sync)
+  }, [])
+
   return (
     <motion.div
       initial={{ opacity:0, y:10 }}
@@ -323,6 +355,8 @@ function SocialProof({ isInView }: { isInView: boolean }) {
         alignItems:'center',
         gap:'12px',
         marginBottom:'28px',
+        marginLeft: isMobileOrTabletLayout ? 'auto' : 0,
+        marginRight: isMobileOrTabletLayout ? 'auto' : 0,
         padding:'10px 16px',
         background:'rgba(99,102,241,0.05)',
         border:'1px solid rgba(99,102,241,0.12)',
@@ -739,7 +773,7 @@ export default function DiagnosticoSoftware() {
   return (
     <section id="diagnostico" ref={sectionRef} style={{ padding: 'clamp(80px, 12vh, 140px) clamp(20px, 5vw, 80px)', background: '#06060f', position: 'relative', overflow: 'hidden' }}>
       <AtmosphereDiag />
-      <div style={{ maxWidth: '860px', margin: '0 auto', position: 'relative', zIndex: 1 }}>
+      <div style={{ maxWidth: '1440px', margin: '0 auto', position: 'relative', zIndex: 1 }}>
         <Header isInView={isInView} />
         <SocialProof isInView={isInView} />
 

@@ -304,7 +304,7 @@ export default function FaqIA() {
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true, amount: 0.25 }}
                     transition={{ duration: 0.65, delay: 0.08, ease }}
-                    className="mb-16"
+                    className="mb-16 text-center lg:text-left"
                 >
                     <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-emerald-300/20 bg-emerald-300/[0.07] px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.24em] text-emerald-100/88 shadow-[0_0_20px_rgba(34,197,94,0.2)]">
                         <span className="h-1.5 w-1.5 rounded-full bg-emerald-300 shadow-[0_0_14px_rgba(34,197,94,0.88)]" />
@@ -319,7 +319,7 @@ export default function FaqIA() {
                         </span>
                     </h2>
 
-                    <p className="mt-6 max-w-2xl text-base leading-8 text-zinc-300/75 md:text-lg">
+                    <p className="mx-auto mt-6 max-w-2xl text-base leading-8 text-zinc-300/75 md:text-lg lg:mx-0">
                         Respuestas directas para implementacion, tiempos, integraciones y como la IA impacta ventas, soporte y operacion real.
                     </p>
                 </motion.div>
@@ -336,13 +336,13 @@ export default function FaqIA() {
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true, amount: 0.3 }}
                     transition={{ duration: 0.5, delay: 0.08, ease }}
-                    className="mb-6 mt-14"
+                    className="mb-6 mt-14 text-center lg:text-left"
                 >
                     <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-emerald-300/18 bg-emerald-300/[0.06] px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.24em] text-emerald-100/82">
                         <span className="h-1.5 w-1.5 rounded-full bg-emerald-300/90" />
                         Objeciones comunes
                     </div>
-                    <p className="max-w-3xl text-sm leading-7 text-zinc-300/72 md:text-base">
+                    <p className="mx-auto max-w-3xl text-sm leading-7 text-zinc-300/72 md:text-base lg:mx-0">
                         Las dudas que mas frenan la decision de automatizar, reunidas en un solo bloque para que avances con claridad.
                     </p>
                 </motion.div>

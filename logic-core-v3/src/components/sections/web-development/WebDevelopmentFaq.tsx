@@ -303,7 +303,7 @@ export const WebDevelopmentFaq = () => {
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true, amount: 0.25 }}
                     transition={{ duration: 0.65, delay: 0.08, ease }}
-                    className="mb-16"
+                    className="mb-16 text-center lg:text-left"
                 >
                     <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-cyan-300/20 bg-cyan-300/[0.07] px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.24em] text-cyan-100/88 shadow-[0_0_20px_rgba(34,211,238,0.18)]">
                         <span className="h-1.5 w-1.5 rounded-full bg-cyan-300 shadow-[0_0_14px_rgba(34,211,238,0.85)]" />
@@ -318,7 +318,7 @@ export const WebDevelopmentFaq = () => {
                         </span>
                     </h2>
 
-                    <p className="mt-6 max-w-2xl text-base leading-8 text-zinc-300/75 md:text-lg">
+                    <p className="mx-auto mt-6 max-w-2xl text-base leading-8 text-zinc-300/75 md:text-lg lg:mx-0">
                         Respuestas directas para tiempos, inversion, soporte y como esta web termina siendo una herramienta real de ventas.
                     </p>
                 </motion.div>
@@ -335,13 +335,13 @@ export const WebDevelopmentFaq = () => {
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true, amount: 0.3 }}
                     transition={{ duration: 0.5, delay: 0.08, ease }}
-                    className="mt-14 mb-6"
+                    className="mt-14 mb-6 text-center lg:text-left"
                 >
                     <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-cyan-300/18 bg-cyan-300/[0.06] px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.24em] text-cyan-100/82">
                         <span className="h-1.5 w-1.5 rounded-full bg-cyan-300/90" />
                         Objeciones comunes
                     </div>
-                    <p className="max-w-3xl text-sm leading-7 text-zinc-300/72 md:text-base">
+                    <p className="mx-auto max-w-3xl text-sm leading-7 text-zinc-300/72 md:text-base lg:mx-0">
                         Las dudas que mas frenan la decision, reunidas aca para que tengas claridad total en un solo bloque.
                     </p>
                 </motion.div>

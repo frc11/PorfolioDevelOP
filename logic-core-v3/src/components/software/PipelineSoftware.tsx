@@ -136,6 +136,8 @@ export default function PipelineSoftware() {
     const effectiveReducedMotion = reducedMotion ?? false
     const [activeIndex, setActiveIndex] = useState(0)
     const [isCompactViewport, setIsCompactViewport] = useState(false)
+    const [isTabletOrMobileViewport, setIsTabletOrMobileViewport] = useState(false)
+    const [isTightDesktopViewport, setIsTightDesktopViewport] = useState(false)
     const [isMobileViewport, setIsMobileViewport] = useState(false)
     const [isTinyViewport, setIsTinyViewport] = useState(false)
     const stageAnchorsRef = useRef<number[]>([])
@@ -146,6 +148,9 @@ export default function PipelineSoftware() {
         offset: ['start start', 'end end'],
     })
 
+    // isShortViewport = screen is short (height-constrained) regardless of width
+    const [isShortViewport, setIsShortViewport] = useState(false)
+
     useEffect(() => {
         if (typeof window === 'undefined') return
 
@@ -153,6 +158,9 @@ export default function PipelineSoftware() {
             const width = window.innerWidth
             const height = window.innerHeight
             setIsCompactViewport(width <= 1200 || height <= 820)
+            setIsShortViewport(height <= 820)
+            setIsTightDesktopViewport(width >= 1024 && height <= 960)
+            setIsTabletOrMobileViewport(width < 1024)
             setIsMobileViewport(width <= 640)
             setIsTinyViewport(width <= 380 || height <= 700)
         }
@@ -165,16 +173,26 @@ export default function PipelineSoftware() {
     const gridPaddingY = isMobileViewport
         ? 'clamp(16px,3svh,24px)'
         : isCompactViewport
-            ? 'clamp(18px,3.2vh,34px)'
+            ? 'clamp(18px,3.2vh,28px)'
             : 'clamp(28px,4.2vh,48px)'
+    // Short viewports (height ≤ 820) need a small bottom padding so the
+    // bottom controls bar doesn't overlap the stage cards.
     const gridPaddingBottom = isMobileViewport
         ? 'clamp(18px,4svh,34px)'
-        : 'clamp(88px,11svh,116px)'
+        : isShortViewport
+            ? 'clamp(44px,6svh,64px)'
+            : isCompactViewport
+                ? 'clamp(72px,10svh,96px)'
+                : 'clamp(88px,11svh,116px)'
+    const isStageCardCompact = isCompactViewport || isTightDesktopViewport
+
     const viewportMinHeight = isMobileViewport
         ? '15rem'
         : isCompactViewport
-            ? '18rem'
-            : '24rem'
+            ? isTinyViewport
+                ? '10rem'
+                : '14rem'
+            : '0'
 
     useEffect(() => {
         const sectionElement = sectionRef.current
@@ -256,7 +274,7 @@ export default function PipelineSoftware() {
                 className={
                     isTopPlacement
                         ? 'relative z-20 mt-4 flex items-center justify-between gap-3'
-                        : 'relative z-20 mt-1 flex items-center justify-between gap-4'
+                        : 'relative z-30 flex min-h-7 items-center justify-between gap-4 self-start pt-1'
                 }
             >
                 <div className={isMobileViewport ? 'flex items-center gap-2' : isCompactViewport ? 'flex items-center gap-2.5' : 'flex items-center gap-3'}>
@@ -379,9 +397,9 @@ export default function PipelineSoftware() {
                 }}
             >
                 <div
-                    className={`mx-auto grid h-full max-w-[1600px] px-[clamp(20px,5vw,80px)] ${isMobileViewport ? 'grid-rows-[auto_minmax(0,1fr)]' : 'grid-rows-[auto_minmax(0,1fr)_auto]'}`}
+                    className={`mx-auto grid h-full max-w-[90rem] px-[clamp(20px,5vw,80px)] ${isMobileViewport ? 'grid-rows-[auto_minmax(0,1fr)]' : isCompactViewport ? 'grid-rows-[auto_minmax(0,1fr)_auto]' : 'grid-rows-[auto_minmax(0,1fr)_auto]'}`}
                     style={{
-                        gap: isMobileViewport ? '12px' : isCompactViewport ? '14px' : '24px',
+                        gap: isMobileViewport ? '12px' : isShortViewport ? '10px' : isCompactViewport ? '16px' : '24px',
                         paddingTop: gridPaddingY,
                         paddingBottom: gridPaddingBottom,
                     }}
@@ -390,7 +408,7 @@ export default function PipelineSoftware() {
                         initial={{ opacity: 0, y: 18 }}
                         animate={isInView ? { opacity: 1, y: 0 } : {}}
                         transition={{ duration: effectiveReducedMotion ? 0 : 0.65, ease }}
-                        className={isMobileViewport ? 'max-w-none' : isCompactViewport ? 'max-w-[62rem]' : 'max-w-3xl'}
+                        className={isTabletOrMobileViewport ? 'mx-auto max-w-none text-center' : isCompactViewport ? 'max-w-[62rem]' : isTightDesktopViewport ? 'max-w-[68rem]' : 'max-w-3xl'}
                     >
                         <div className={isMobileViewport
                             ? 'mb-3 inline-flex items-center gap-2 rounded-full border border-indigo-300/35 bg-indigo-300/[0.14] px-3 py-1.5 shadow-[0_10px_24px_rgba(0,0,0,0.3)]'
@@ -411,9 +429,13 @@ export default function PipelineSoftware() {
                                     ? isTinyViewport
                                         ? 'clamp(1.9rem,9.4vw,2.3rem)'
                                         : 'clamp(2.05rem,9.4vw,2.7rem)'
-                                    : isCompactViewport
-                                        ? 'clamp(2.1rem,6vw,3.8rem)'
-                                        : 'clamp(2.3rem,5.2vw,5rem)',
+                                    : isShortViewport
+                                        ? 'clamp(1.9rem,4.2vw,2.6rem)'
+                                        : isTightDesktopViewport
+                                            ? 'clamp(2.6rem,3.8vw,4.25rem)'
+                                        : isCompactViewport
+                                            ? 'clamp(2.1rem,5vw,3.4rem)'
+                                            : 'clamp(2.3rem,5.2vw,5rem)',
                             }}
                         >
                             Un proceso técnico
@@ -425,8 +447,12 @@ export default function PipelineSoftware() {
 
                         <p className={isMobileViewport
                             ? 'mt-4 max-w-none text-[14px] leading-7 text-white/62'
+                            : isShortViewport
+                            ? 'mt-2 max-w-[48rem] text-[13px] leading-6 text-white/62 hidden sm:block'
+                            : isTightDesktopViewport
+                            ? 'mt-4 max-w-[52rem] text-[15px] leading-7 text-white/62'
                             : isCompactViewport
-                            ? 'mt-4 max-w-[48rem] text-[15px] leading-7 text-white/62 md:text-base'
+                            ? `mt-4 max-w-[48rem] text-[15px] leading-7 text-white/62 md:text-base ${isTabletOrMobileViewport ? 'mx-auto' : ''}`
                             : 'mt-6 max-w-2xl text-base leading-8 text-white/62 md:text-lg'}
                         >
                             En vez de apilar etapas verticales, mostramos el proceso como una línea de ejecución: cada bloque entra en foco cuando llega al centro y deja claro qué produce antes de pasar al siguiente.
@@ -460,7 +486,7 @@ export default function PipelineSoftware() {
                             style={{ x: trackX }}
                             className={isMobileViewport
                                 ? 'relative flex h-full w-max items-stretch gap-4 px-3.5 py-3.5'
-                                : isCompactViewport
+                                : isStageCardCompact
                                     ? 'relative flex h-full w-max items-stretch gap-5 px-[clamp(16px,3.4vw,46px)] py-4'
                                     : 'relative flex h-full w-max items-stretch gap-6 px-[clamp(18px,4vw,64px)] py-5 md:gap-7 md:py-6'}
                         >
@@ -487,6 +513,8 @@ export default function PipelineSoftware() {
                                             ? 'relative flex h-full min-h-0 w-[min(calc(100vw-56px),22rem)] shrink-0 flex-col justify-start gap-3 overflow-hidden rounded-[1.45rem] border p-3.5 shadow-[0_24px_80px_rgba(0,0,0,0.35)]'
                                             : isCompactViewport
                                                 ? 'relative flex h-full min-h-0 w-[min(86vw,26rem)] shrink-0 flex-col justify-between overflow-hidden rounded-[1.7rem] border p-5 shadow-[0_24px_80px_rgba(0,0,0,0.35)]'
+                                                : isTightDesktopViewport
+                                                ? 'relative flex h-full min-h-0 w-[min(84vw,30rem)] shrink-0 flex-col justify-between overflow-hidden rounded-[1.7rem] border p-5 shadow-[0_24px_80px_rgba(0,0,0,0.35)]'
                                                 : 'relative flex h-full min-h-0 w-[min(84vw,30rem)] shrink-0 flex-col justify-between overflow-hidden rounded-[1.9rem] border p-6 shadow-[0_24px_80px_rgba(0,0,0,0.35)] md:w-[32rem] md:p-7'}
                                         style={{
                                             borderColor: isActive
@@ -525,10 +553,10 @@ export default function PipelineSoftware() {
                                         />
 
                                         <div className="relative z-10">
-                                            <div className={isMobileViewport ? 'mb-3 flex items-start justify-between gap-2.5' : isCompactViewport ? 'mb-4 flex items-start justify-between gap-3' : 'mb-6 flex items-start justify-between gap-4'}>
+                                            <div className={isMobileViewport ? 'mb-3 flex items-start justify-between gap-2.5' : isStageCardCompact ? 'mb-3 flex items-start justify-between gap-3' : 'mb-6 flex items-start justify-between gap-4'}>
                                                 <div>
                                                     <div
-                                                        className={isMobileViewport ? 'font-mono text-[10px] font-bold uppercase tracking-[0.24em]' : 'font-mono text-[11px] font-bold uppercase tracking-[0.28em]'}
+                                                        className={isMobileViewport ? 'font-mono text-[10px] font-bold uppercase tracking-[0.24em]' : isStageCardCompact ? 'font-mono text-[10px] font-bold uppercase tracking-[0.24em]' : 'font-mono text-[11px] font-bold uppercase tracking-[0.28em]'}
                                                         style={{ color: isActive ? `rgba(${accentRgb},0.92)` : 'rgba(255,255,255,0.42)' }}
                                                     >
                                                         [{stage.stage}]
@@ -536,11 +564,11 @@ export default function PipelineSoftware() {
                                                     <h3
                                                         className="font-black leading-[0.92] tracking-[-0.05em] text-white"
                                                         style={{
-                                                            marginTop: isMobileViewport ? '8px' : isCompactViewport ? '10px' : '16px',
+                                                            marginTop: isMobileViewport ? '8px' : isStageCardCompact ? '8px' : '16px',
                                                             fontSize: isMobileViewport
                                                                 ? 'clamp(1.8rem,8.8vw,2.25rem)'
-                                                                : isCompactViewport
-                                                                    ? 'clamp(2.1rem,4.2vw,2.8rem)'
+                                                                : isStageCardCompact
+                                                                    ? 'clamp(2rem,3.4vw,2.55rem)'
                                                                     : 'clamp(2rem,4vw,3.2rem)',
                                                         }}
                                                     >
@@ -563,7 +591,7 @@ export default function PipelineSoftware() {
                                                     transition={{ duration: 0.4 }}
                                                     className={isMobileViewport
                                                         ? 'grid h-11 w-11 shrink-0 place-items-center rounded-[0.85rem] border'
-                                                        : isCompactViewport
+                                                        : isStageCardCompact
                                                         ? 'grid h-12 w-12 place-items-center rounded-[0.9rem] border'
                                                         : 'grid h-14 w-14 place-items-center rounded-[1rem] border'}
                                                     style={{
@@ -578,7 +606,7 @@ export default function PipelineSoftware() {
                                             <div
                                                 className={isMobileViewport
                                                     ? 'rounded-xl border px-3 py-2 font-mono text-[9px] uppercase leading-5 tracking-[0.16em]'
-                                                    : isCompactViewport
+                                                    : isStageCardCompact
                                                     ? 'rounded-xl border px-3 py-2.5 font-mono text-[10px] uppercase tracking-[0.2em]'
                                                     : 'rounded-xl border px-4 py-3 font-mono text-[11px] uppercase tracking-[0.22em]'}
                                                 style={{
@@ -593,7 +621,7 @@ export default function PipelineSoftware() {
                                             <p
                                                 className={isMobileViewport
                                                     ? 'mt-3 max-w-[26rem] text-[12.5px] leading-[1.7] text-white/66'
-                                                    : isCompactViewport
+                                                    : isStageCardCompact
                                                     ? 'mt-3 max-w-[26rem] text-[13px] leading-6 text-white/66 md:text-sm'
                                                     : 'mt-5 max-w-[26rem] text-sm leading-7 text-white/66 md:text-[15px]'}
                                                 style={isMobileViewport
@@ -617,14 +645,14 @@ export default function PipelineSoftware() {
                                         </div>
 
                                         <div className={isMobileViewport ? 'relative z-10 mt-1' : 'relative z-10'}>
-                                            <div className={isMobileViewport ? 'border-t border-white/10 pt-3' : isCompactViewport ? 'border-t border-white/10 pt-3.5' : 'border-t border-white/10 pt-5'}>
-                                                <div className={isMobileViewport ? 'font-mono text-[9px] uppercase tracking-[0.18em] text-white/36' : 'font-mono text-[10px] uppercase tracking-[0.22em] text-white/36'}>
+                                            <div className={isMobileViewport ? 'border-t border-white/10 pt-3' : isStageCardCompact ? 'border-t border-white/10 pt-3' : 'border-t border-white/10 pt-5'}>
+                                                <div className={isMobileViewport ? 'font-mono text-[9px] uppercase tracking-[0.18em] text-white/36' : isStageCardCompact ? 'font-mono text-[9px] uppercase tracking-[0.2em] text-white/36' : 'font-mono text-[10px] uppercase tracking-[0.22em] text-white/36'}>
                                                     Output
                                                 </div>
                                                 <div
                                                     className={isMobileViewport
                                                         ? 'mt-2 text-[12.5px] font-semibold leading-snug text-white/82'
-                                                        : isCompactViewport
+                                                        : isStageCardCompact
                                                         ? 'mt-2 text-[14px] font-semibold leading-snug text-white/82 md:text-[15px]'
                                                         : 'mt-3 text-sm font-semibold leading-relaxed text-white/82 md:text-base'}
                                                     style={isMobileViewport
@@ -647,7 +675,7 @@ export default function PipelineSoftware() {
                                                 </div>
                                             </div>
 
-                                            <div className={isMobileViewport ? 'mt-2 flex items-center justify-between font-mono text-[9px] uppercase tracking-[0.18em] text-white/26' : isCompactViewport ? 'mt-3 flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.2em] text-white/26' : 'mt-6 flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.22em] text-white/26'}>
+                                            <div className={isMobileViewport ? 'mt-2 flex items-center justify-between font-mono text-[9px] uppercase tracking-[0.18em] text-white/26' : isStageCardCompact ? 'mt-3 flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.2em] text-white/26' : 'mt-6 flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.22em] text-white/26'}>
                                                 <span>{String(index + 1).padStart(2, '0')} / {String(stages.length).padStart(2, '0')}</span>
                                                 {!isMobileViewport && !isTinyViewport && (
                                                     <span style={{ color: isMuted ? 'rgba(255,255,255,0.24)' : `rgba(${accentRgb},0.9)` }}>

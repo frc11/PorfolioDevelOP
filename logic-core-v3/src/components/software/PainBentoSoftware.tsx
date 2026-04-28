@@ -670,13 +670,13 @@ export default function PainBentoSoftware() {
         </filter>
       </svg>
 
-      <div style={{ maxWidth: '1200px', margin: '0 auto', position: 'relative', zIndex: 1 }}>
-        <motion.div initial={effectiveIsReduced ? { opacity: 1, y: 0 } : { opacity: 0, y: -20 }} animate={isInView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6, delay: 0.1 }} style={{ marginBottom: 'clamp(40px,6vh,60px)' }}>
+      <div style={{ maxWidth: '1440px', margin: '0 auto', position: 'relative', zIndex: 1 }}>
+        <motion.div initial={effectiveIsReduced ? { opacity: 1, y: 0 } : { opacity: 0, y: -20 }} animate={isInView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6, delay: 0.1 }} style={{ marginBottom: 'clamp(40px,6vh,60px)', textAlign: isMobileOrTabletLayout ? 'center' : 'left' }}>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', border: '1px solid rgba(239,68,68,0.4)', borderRadius: '100px', padding: '4px 14px', marginBottom: '20px', background: 'rgba(239,68,68,0.05)' }}>
             <span style={{ fontSize: '10px', letterSpacing: '0.2em', color: '#ef4444', fontWeight: 700 }}>[ DEL CAOS AL ORDEN ALGORÍTMICO ]</span>
           </div>
           <h2 style={{ fontSize: 'clamp(28px,4vw,52px)', fontWeight: 900, color: 'white', lineHeight: 1.1, margin: '0 0 16px' }}>Conocemos tu empresa<br/>porque vivimos en ella.</h2>
-          <p style={{ fontSize: '15px', color: 'rgba(255,255,255,0.4)', maxWidth: '500px', margin: 0 }}>Cada card es una conversación real con dueños de negocios del NOA. Pasá el mouse para ver cómo lo resolvemos.</p>
+          <p style={{ fontSize: '15px', color: 'rgba(255,255,255,0.4)', maxWidth: '500px', margin: isMobileOrTabletLayout ? '0 auto' : 0 }}>Cada card es una conversación real con dueños de negocios del NOA. Pasá el mouse para ver cómo lo resolvemos.</p>
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[14px]">

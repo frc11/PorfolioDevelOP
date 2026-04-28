@@ -475,7 +475,7 @@ export default function DashboardMockupSoftware() {
   const [isPaused, setIsPaused] = useState(false)
   const [rotationProgress, setRotationProgress] = useState(0)
   const [feedOffset, setFeedOffset] = useState(0)
-  const [isTouchViewport, setIsTouchViewport] = useState(false)
+  const [isAutoHoverViewport, setIsAutoHoverViewport] = useState(false)
   const [centerHoverMap, setCenterHoverMap] = useState<Record<string, boolean>>({})
   const rotationProgressRef = useRef(0)
 
@@ -525,21 +525,32 @@ export default function DashboardMockupSoftware() {
   useEffect(() => {
     if (typeof window === 'undefined') return
 
-    const mediaQuery = window.matchMedia('(max-width: 1023px)')
-    const syncViewportMode = () => setIsTouchViewport(mediaQuery.matches)
+    const syncViewportMode = () => {
+      const viewportWidth = Math.max(
+        window.innerWidth,
+        window.visualViewport?.width ?? 0,
+        window.screen.width ?? 0
+      )
+      const shouldAutoHover = viewportWidth < 1024
 
-    syncViewportMode()
-    if (typeof mediaQuery.addEventListener === 'function') {
-      mediaQuery.addEventListener('change', syncViewportMode)
-      return () => mediaQuery.removeEventListener('change', syncViewportMode)
+      setIsAutoHoverViewport(shouldAutoHover)
+      if (!shouldAutoHover) {
+        setCenterHoverMap({})
+      }
     }
 
-    mediaQuery.addListener(syncViewportMode)
-    return () => mediaQuery.removeListener(syncViewportMode)
+    syncViewportMode()
+    window.addEventListener('resize', syncViewportMode)
+    window.visualViewport?.addEventListener('resize', syncViewportMode)
+
+    return () => {
+      window.removeEventListener('resize', syncViewportMode)
+      window.visualViewport?.removeEventListener('resize', syncViewportMode)
+    }
   }, [])
 
   useEffect(() => {
-    if (!isTouchViewport) return
+    if (!isAutoHoverViewport) return
     const sectionElement = sectionRef.current
     if (!sectionElement) return
 
@@ -573,7 +584,7 @@ export default function DashboardMockupSoftware() {
     centerTargets.forEach((target) => observer.observe(target))
 
     return () => observer.disconnect()
-  }, [isTouchViewport, activeRubro, feedOffset])
+  }, [isAutoHoverViewport, activeRubro, feedOffset])
 
   const visibleActivityItems = useMemo(
     () =>
@@ -589,7 +600,7 @@ export default function DashboardMockupSoftware() {
   }, [currentRubro])
 
   const ActiveRubroIcon = currentRubro.icon
-  const isCenterHoverActive = (key: string) => isTouchViewport && centerHoverMap[key] === true
+  const isCenterHoverActive = (key: string) => isAutoHoverViewport && centerHoverMap[key] === true
 
   return (
     <section
@@ -777,7 +788,7 @@ export default function DashboardMockupSoftware() {
         ))}
       </div>
 
-      <div className="relative z-10 mx-auto max-w-6xl">
+      <div className="relative z-10 mx-auto max-w-[90rem]">
         <motion.div
           initial={effectiveReducedMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: -16 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}

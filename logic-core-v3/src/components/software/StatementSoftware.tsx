@@ -1,6 +1,6 @@
 'use client'
 import React, { useEffect, useRef, useState, useMemo } from "react"
-import { motion, useReducedMotion } from 'motion/react'
+import { useReducedMotion } from 'motion/react'
 
 /**
  * STATEMENT SOFTWARE: "Tu empresa no necesita más Excel."
@@ -42,6 +42,23 @@ const words: Word[] = [
   { text: 'menos.', s: 0.81, e: 0.85, color: 'gradient' },
 ]
 
+const dataClusters = Array.from({ length: 12 }).map((_, i) => {
+  const seed = i + 1
+  const pseudoRandom = (offset: number) => {
+    const value = Math.sin((seed + offset) * 12.9898) * 43758.5453
+    return value - Math.floor(value)
+  }
+
+  return {
+    id: i,
+    x: pseudoRandom(0) * 100,
+    y: pseudoRandom(1) * 100,
+    z: pseudoRandom(2) * 200,
+    type: Math.floor(pseudoRandom(3) * 3),
+    speed: 0.1 + pseudoRandom(4) * 0.4,
+  }
+})
+
 // SUB-COMPONENTS
 
 function PrimeAtmosphere({ progress }: { progress: number }) {
@@ -79,18 +96,14 @@ function PrimeAtmosphere({ progress }: { progress: number }) {
 
 function DataClusters({ progress }: { progress: number }) {
   const [mounted, setMounted] = useState(false)
-  useEffect(() => setMounted(true), [])
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => setMounted(true))
+    return () => cancelAnimationFrame(frame)
+  }, [])
 
   const clusters = useMemo(() => {
     if (!mounted) return []
-    return Array.from({ length: 12 }).map((_, i) => ({
-      id: i,
-      x: Math.random() * 100,
-      y: Math.random() * 100,
-      z: Math.random() * 200,
-      type: Math.floor(Math.random() * 3),
-      speed: 0.1 + Math.random() * 0.4
-    }))
+    return dataClusters
   }, [mounted])
 
   const contents = ["0xFA2", "{ ... }", "</>"]
@@ -126,8 +139,6 @@ function DataClusters({ progress }: { progress: number }) {
 }
 
 function StatementContent({ progress, shouldReduceMotion }: { progress: number, shouldReduceMotion: boolean }) {
-  const isInView = progress > 0.01 && progress < 0.99
-  
   const getOpacity = (start: number, end: number) => {
     if (shouldReduceMotion) return 1
     if (progress <= start) return 0
@@ -203,7 +214,7 @@ function StatementContent({ progress, shouldReduceMotion }: { progress: number, 
   const examplesOpacity = Math.min(Math.max((progress - 0.77) / 0.12, 0), 1)
 
   return (
-    <div className="relative z-10 text-center px-6 w-full max-w-7xl mx-auto">
+    <div className="relative z-10 text-center px-6 w-full max-w-[90rem] mx-auto">
       <h2 className="font-black leading-[1.05] tracking-tighter">
         <div className="text-[clamp(32px,5.5vw,84px)] mb-4">
           {words.slice(0, 6).map((w, i) => renderWord(w, i))}
@@ -308,7 +319,7 @@ export default function StatementSoftware() {
   const shouldReduceMotion = useReducedMotion()
 
   useEffect(() => {
-    setMounted(true)
+    const frame = requestAnimationFrame(() => setMounted(true))
     const handleScroll = () => {
       const section = sectionRef.current
       if (!section) return
@@ -321,7 +332,10 @@ export default function StatementSoftware() {
     }
     window.addEventListener('scroll', handleScroll, { passive: true })
     handleScroll()
-    return () => window.removeEventListener('scroll', handleScroll)
+    return () => {
+      cancelAnimationFrame(frame)
+      window.removeEventListener('scroll', handleScroll)
+    }
   }, [])
 
   return (

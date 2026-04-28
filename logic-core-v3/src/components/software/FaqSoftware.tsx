@@ -260,14 +260,14 @@ export default function FaqSoftware() {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, amount: 0.2 }}
         transition={{ duration: prefersReducedMotion ? 0 : 0.55, delay: prefersReducedMotion ? 0 : 0.42, ease }}
-        className="relative z-10 mx-auto max-w-4xl"
+        className="relative z-10 mx-auto max-w-[90rem]"
       >
         <motion.div
           initial={{ opacity: 0, y: 22 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.25 }}
           transition={{ duration: 0.65, delay: 0.08, ease }}
-          className="mb-16"
+          className="mb-16 text-center lg:text-left"
         >
           <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-indigo-400/20 bg-indigo-400/[0.07] px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.24em] text-indigo-200/88 shadow-[0_0_20px_rgba(99,102,241,0.14)]">
             <span className="h-1.5 w-1.5 rounded-full bg-indigo-400 shadow-[0_0_14px_rgba(99,102,241,0.85)]" />
@@ -282,7 +282,7 @@ export default function FaqSoftware() {
             </span>
           </h2>
 
-          <p className="mt-6 max-w-2xl text-base leading-8 text-zinc-300/70 md:text-lg">
+          <p className="mx-auto mt-6 max-w-2xl text-base leading-8 text-zinc-300/70 md:text-lg lg:mx-0">
             Respondemos las dudas más comunes sobre desarrollo de software a medida
             para empresas de Tucumán y Argentina.
           </p>
@@ -300,13 +300,13 @@ export default function FaqSoftware() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.3 }}
           transition={{ duration: 0.5, delay: 0.08, ease }}
-          className="mb-6 mt-14"
+          className="mb-6 mt-14 text-center lg:text-left"
         >
           <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-violet-400/18 bg-violet-400/[0.06] px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.24em] text-violet-200/82">
             <span className="h-1.5 w-1.5 rounded-full bg-violet-400/90" />
             Objeciones comunes
           </div>
-          <p className="max-w-3xl text-sm leading-7 text-zinc-300/68 md:text-base">
+          <p className="mx-auto max-w-3xl text-sm leading-7 text-zinc-300/68 md:text-base lg:mx-0">
             Las dudas que más frenan la decisión, reunidas acá para que tengas claridad total.
           </p>
         </motion.div>

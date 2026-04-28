@@ -106,7 +106,7 @@ function TimelineRoi({
       ref={timelineGlowRef}
       onMouseEnter={isDesktopMode ? () => setTimelineGlowActive(true) : undefined}
       onMouseLeave={isDesktopMode ? () => setTimelineGlowActive(false) : undefined}
-      className="relative mt-5 mb-5 rounded-2xl border border-white/[0.06] bg-white/[0.02] p-6"
+      className="relative mt-5 mb-5 rounded-2xl border border-white/[0.06] bg-white/[0.02] px-4 py-5 sm:px-6 md:py-6"
       style={{
         transition: 'none',
         boxShadow: timelineGlowActive
@@ -126,14 +126,14 @@ function TimelineRoi({
       />
       {/* Línea conectora */}
       <div
-        className="absolute top-[52px] left-[10%] right-[10%] hidden h-[1px] lg:block"
+        className="absolute top-[52px] left-[10%] right-[10%] hidden h-[1px] md:block"
         style={{
           background:
             'linear-gradient(90deg, rgba(99,102,241,0.3), rgba(123,47,255,0.5), rgba(52,211,153,0.6))',
         }}
       />
       <div
-        className="absolute top-[52px] bottom-[52px] left-1/2 w-[1px] -translate-x-1/2 lg:hidden"
+        className="absolute top-[34px] bottom-[34px] left-1/2 w-[1px] -translate-x-1/2 md:hidden"
         style={{
           background:
             'linear-gradient(180deg, rgba(99,102,241,0.3), rgba(123,47,255,0.5), rgba(52,211,153,0.6))',
@@ -142,50 +142,92 @@ function TimelineRoi({
 
       {/* Punto animado que viaja por la línea */}
       <motion.div
-        className="absolute top-[48px] hidden h-[9px] w-[9px] rounded-full lg:block"
+        className="absolute top-[48px] hidden h-[9px] w-[9px] rounded-full md:block"
         style={{ background: '#6366f1', boxShadow: '0 0 12px rgba(99,102,241,0.8)' }}
         initial={{ left: '10%' }}
         animate={isInView ? { left: ['10%', '55%', '90%'] } : { left: '10%' }}
         transition={{ duration: 2.4, delay: 0.8, ease: [0.16, 1, 0.3, 1], times: [0, 0.5, 1] }}
       />
       <motion.div
-        className="absolute left-1/2 h-[9px] w-[9px] -translate-x-1/2 rounded-full lg:hidden"
+        className="absolute left-1/2 h-[9px] w-[9px] -translate-x-1/2 rounded-full md:hidden"
         style={{ background: '#6366f1', boxShadow: '0 0 12px rgba(99,102,241,0.8)' }}
-        initial={{ top: '52px' }}
-        animate={isInView ? { top: ['52px', '50%', 'calc(100% - 52px)'] } : { top: '52px' }}
+        initial={{ top: '34px' }}
+        animate={isInView ? { top: ['34px', '50%', 'calc(100% - 34px)'] } : { top: '34px' }}
         transition={{ duration: 2.4, delay: 0.8, ease: [0.16, 1, 0.3, 1], times: [0, 0.5, 1] }}
       />
 
-      <div className="relative grid grid-cols-3 gap-4">
-        {points.map((point, i) => (
-          <motion.div
-            key={i}
-            initial={{ opacity: 0, y: 12 }}
-            animate={isInView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.5, delay: 0.4 + i * 0.15, ease: [0.16, 1, 0.3, 1] }}
-            className="flex flex-col items-center text-center gap-3"
-          >
-            {/* Dot */}
-            <div
-              className="relative z-10 w-4 h-4 rounded-full border-2 border-[#06060f]"
-              style={{ background: point.dot, boxShadow: `0 0 12px ${point.dot}80` }}
-            />
-            {/* Valor */}
-            <div
-              className="text-lg font-black"
-              style={{ color: point.valueColor, letterSpacing: '-0.02em' }}
+      <div className="relative hidden grid-cols-3 gap-4 md:grid">
+        {points.map((point, i) => {
+          return (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 12 }}
+              animate={isInView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.5, delay: 0.4 + i * 0.15, ease: [0.16, 1, 0.3, 1] }}
+              className="flex flex-col items-center gap-3 text-center"
             >
-              {point.value}
-            </div>
-            {/* Labels */}
-            <div>
-              <div className="text-[11px] font-bold text-white/60 uppercase tracking-[0.12em]">
-                {point.label}
+              {/* Dot */}
+              <div
+                className="relative z-10 h-4 w-4 rounded-full border-2 border-[#06060f]"
+                style={{ background: point.dot, boxShadow: `0 0 12px ${point.dot}80` }}
+              />
+              {/* Valor */}
+              <div
+                className="text-lg font-black"
+                style={{ color: point.valueColor, letterSpacing: '-0.02em' }}
+              >
+                {point.value}
               </div>
-              <div className="text-[10px] text-white/30 mt-0.5">{point.sublabel}</div>
-            </div>
-          </motion.div>
-        ))}
+              {/* Labels */}
+              <div>
+                <div className="text-[11px] font-bold uppercase tracking-[0.12em] text-white/60">
+                  {point.label}
+                </div>
+                <div className="mt-0.5 text-[10px] text-white/30">{point.sublabel}</div>
+              </div>
+            </motion.div>
+          )
+        })}
+      </div>
+
+      <div className="relative flex flex-col gap-4 md:hidden">
+        {points.map((point, i) => {
+          const placeLeft = i % 2 === 0
+
+          return (
+            <motion.div
+              key={`mobile-${i}`}
+              initial={{ opacity: 0, y: 12 }}
+              animate={isInView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.5, delay: 0.4 + i * 0.15, ease: [0.16, 1, 0.3, 1] }}
+              className="relative min-h-[64px]"
+            >
+              <div
+                className="absolute left-1/2 top-2 z-10 h-4 w-4 -translate-x-1/2 rounded-full border-2 border-[#06060f]"
+                style={{ background: point.dot, boxShadow: `0 0 12px ${point.dot}80` }}
+              />
+
+              <div
+                className={placeLeft
+                  ? 'absolute right-[calc(50%+1.25rem)] top-0 w-[calc(50%-1.5rem)] text-right'
+                  : 'absolute left-[calc(50%+1.25rem)] top-0 w-[calc(50%-1.5rem)] text-left'}
+              >
+                <div
+                  className="whitespace-nowrap text-[clamp(0.78rem,3.7vw,1rem)] font-black leading-tight"
+                  style={{ color: point.valueColor, letterSpacing: '-0.02em' }}
+                >
+                  {point.value}
+                </div>
+                <div className="mt-2">
+                  <div className="text-[9px] font-bold uppercase tracking-[0.08em] text-white/60">
+                    {point.label}
+                  </div>
+                  <div className="mt-0.5 text-[8.5px] leading-snug text-white/30">{point.sublabel}</div>
+                </div>
+              </div>
+            </motion.div>
+          )
+        })}
       </div>
     </div>
   )
@@ -309,7 +351,7 @@ export default function RoiSoftware() {
         }}
       />
 
-      <div className="relative z-10 mx-auto max-w-6xl">
+      <div className="relative z-10 mx-auto max-w-[90rem]">
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={shouldReveal ? { opacity: 1, y: 0 } : { opacity: 0, y: 16 }}

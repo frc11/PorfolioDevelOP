@@ -318,7 +318,7 @@ export default function HeroSoftware() {
         }}
       />
 
-      <div className="hero-software-inner" style={{ position: 'relative', zIndex: 1, width: '100%', maxWidth: '1200px', margin: '0 auto' }}>
+      <div className="hero-software-inner" style={{ position: 'relative', zIndex: 1, width: '100%', maxWidth: '1440px', margin: '0 auto' }}>
         <div className="hero-main-stack" style={{ textAlign: 'center', maxWidth: '860px', margin: '0 auto', position: 'relative', zIndex: 1 }}>
           <motion.div
             initial={{ opacity: 0, y: -10 }}

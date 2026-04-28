@@ -259,7 +259,7 @@ export const SoftwareDevelopmentCta = () => {
                 }}
             />
 
-            <div className="relative z-10 mx-auto flex w-full max-w-6xl items-center justify-center">
+            <div className="relative z-10 mx-auto flex w-full max-w-[90rem] items-center justify-center">
                 <div className="relative isolate mx-auto w-full max-w-[20.75rem] max-[425px]:max-w-[19.25rem] max-[375px]:max-w-[16.75rem] sm:max-w-[29rem] md:max-w-[40rem] lg:max-w-[48rem] xl:max-w-[54rem]">
                     <div
                         aria-hidden="true"

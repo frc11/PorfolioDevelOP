@@ -283,7 +283,7 @@ export default function ArchitectureSoftware() {
     const reducedMotion = useReducedMotion()
     const pulse = useMotionValue(0)
     const [diagramHovered, setDiagramHovered] = useState(false)
-    const [isTouchViewport, setIsTouchViewport] = useState(false)
+    const [isAutoHoverViewport, setIsAutoHoverViewport] = useState(false)
     const [isDiagramCentered, setIsDiagramCentered] = useState(false)
     const [centeredFlowCards, setCenteredFlowCards] = useState<boolean[]>(() =>
         diagramFlowCards.map(() => false)
@@ -302,21 +302,38 @@ export default function ArchitectureSoftware() {
     useEffect(() => {
         if (typeof window === 'undefined') return
 
-        const mediaQuery = window.matchMedia('(max-width: 1023px)')
-        const syncViewportMode = () => setIsTouchViewport(mediaQuery.matches)
-
-        syncViewportMode()
-        if (typeof mediaQuery.addEventListener === 'function') {
-            mediaQuery.addEventListener('change', syncViewportMode)
-            return () => mediaQuery.removeEventListener('change', syncViewportMode)
+        const clearCenterStates = () => {
+            setIsDiagramCentered(false)
+            setCenteredFlowCards(diagramFlowCards.map(() => false))
+            setCenteredPillars(architecturePillars.map(() => false))
         }
 
-        mediaQuery.addListener(syncViewportMode)
-        return () => mediaQuery.removeListener(syncViewportMode)
+        const syncViewportMode = () => {
+            const viewportWidth = Math.max(
+                window.innerWidth,
+                window.visualViewport?.width ?? 0,
+                window.screen.width ?? 0
+            )
+            const shouldAutoHover = viewportWidth < 1024
+
+            setIsAutoHoverViewport(shouldAutoHover)
+            if (!shouldAutoHover) {
+                clearCenterStates()
+            }
+        }
+
+        syncViewportMode()
+        window.addEventListener('resize', syncViewportMode)
+        window.visualViewport?.addEventListener('resize', syncViewportMode)
+
+        return () => {
+            window.removeEventListener('resize', syncViewportMode)
+            window.visualViewport?.removeEventListener('resize', syncViewportMode)
+        }
     }, [])
 
     useEffect(() => {
-        if (!isTouchViewport) return
+        if (!isAutoHoverViewport) return
 
         const observer = new IntersectionObserver(
             (entries) => {
@@ -382,7 +399,7 @@ export default function ArchitectureSoftware() {
         targets.forEach((element) => observer.observe(element))
 
         return () => observer.disconnect()
-    }, [isTouchViewport])
+    }, [isAutoHoverViewport])
 
     useEffect(() => {
         if (effectiveReducedMotion) return
@@ -411,7 +428,7 @@ export default function ArchitectureSoftware() {
 
     const pulseScale = useTransform(pulse, [0, 1], [0.96, 1.08])
     const pulseOpacity = useTransform(pulse, [0, 1], [0.48, 0.92])
-    const diagramInteractive = diagramHovered || (isTouchViewport && isDiagramCentered)
+    const diagramInteractive = diagramHovered || (isAutoHoverViewport && isDiagramCentered)
 
     return (
         <section
@@ -612,18 +629,18 @@ export default function ArchitectureSoftware() {
                 }}
             />
 
-            <div className="relative mx-auto max-w-7xl">
+            <div className="relative mx-auto max-w-[90rem]">
                 <div className="grid items-start gap-10 lg:grid-cols-[0.92fr_1.08fr] lg:gap-12 xl:gap-14">
                     <motion.div
                         variants={containerVariants}
                         initial="hidden"
                         whileInView="visible"
                         viewport={{ once: true, amount: 0.4 }}
-                        className="relative z-10 max-w-2xl lg:max-w-none"
+                        className="relative z-10 mx-auto max-w-2xl text-center lg:mx-0 lg:max-w-none lg:text-left"
                     >
                         <motion.div
                             variants={lineVariants}
-                            className="mb-6 inline-flex items-center gap-2 rounded-full border border-indigo-300/35 bg-indigo-300/[0.14] px-4 py-2 shadow-[0_8px_26px_rgba(0,0,0,0.32),inset_0_1px_0_rgba(255,255,255,0.18)] backdrop-blur-md"
+                            className="mb-6 inline-flex items-center justify-center gap-2 rounded-full border border-indigo-300/35 bg-indigo-300/[0.14] px-4 py-2 shadow-[0_8px_26px_rgba(0,0,0,0.32),inset_0_1px_0_rgba(255,255,255,0.18)] backdrop-blur-md"
                         >
                             <span className="h-1.5 w-1.5 rounded-full bg-indigo-300 shadow-[0_0_10px_rgba(129,140,248,0.9)]" />
                             <span className="text-[11px] font-bold uppercase tracking-[0.24em] text-indigo-300">
@@ -645,7 +662,7 @@ export default function ArchitectureSoftware() {
                             {headlineSub}
                         </motion.h3>
 
-                        <motion.p variants={lineVariants} className="mt-6 max-w-xl text-base leading-8 text-white/60 md:text-lg">
+                        <motion.p variants={lineVariants} className="mx-auto mt-6 max-w-xl text-base leading-8 text-white/60 md:text-lg lg:mx-0">
                             No importa si son las 3AM o un feriado. Tu sistema procesa pedidos, actualiza stock, emite facturas y alerta a tu equipo — solo.
                         </motion.p>
                     </motion.div>
@@ -683,10 +700,10 @@ export default function ArchitectureSoftware() {
                             style={{
                                 background:
                                     'linear-gradient(148deg, rgba(15,20,44,0.86) 0%, rgba(13,18,40,0.84) 44%, rgba(11,16,34,0.88) 100%)',
-                                borderColor: isTouchViewport && isDiagramCentered
+                                borderColor: isAutoHoverViewport && isDiagramCentered
                                     ? 'rgba(167,139,250,0.46)'
                                     : 'rgba(255,255,255,0.14)',
-                                boxShadow: isTouchViewport && isDiagramCentered
+                                boxShadow: isAutoHoverViewport && isDiagramCentered
                                     ? '0 30px 90px rgba(56,189,248,0.2), inset 0 1px 0 rgba(255,255,255,0.14)'
                                     : '0 24px 80px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.14)',
                             }}
@@ -765,7 +782,7 @@ export default function ArchitectureSoftware() {
 
                             <div className="relative z-10 mt-5 grid gap-3 border-t border-white/8 pt-5 md:grid-cols-3">
                                 {diagramFlowCards.map((card, index) => {
-                                    const centered = isTouchViewport && centeredFlowCards[index]
+                                    const centered = isAutoHoverViewport && centeredFlowCards[index]
                                     return (
                                         <motion.div
                                             key={card.label}
@@ -834,7 +851,7 @@ export default function ArchitectureSoftware() {
                                 transition={{ duration: 0.24, ease }}
                                 className="rounded-2xl border border-white/[0.16] bg-white/[0.08] p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.14),0_14px_30px_rgba(0,0,0,0.26)] backdrop-blur-md transition-all duration-300"
                                 style={
-                                    isTouchViewport && centeredPillars[index]
+                                    isAutoHoverViewport && centeredPillars[index]
                                         ? {
                                             borderColor: 'rgba(129,140,248,0.34)',
                                             backgroundColor: 'rgba(255,255,255,0.1)',

@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { motion, useInView } from 'motion/react'
 
 // ─── TYPES ────────────────────────────────────────────────────────────────────
@@ -153,7 +153,7 @@ function Header({ isInView }: { isInView: boolean }) {
         Lo que dicen los que ya
         <br/>
         <span style={{ color:'#6366f1' }}>
-          "lo tienen funcionando."
+          &quot;lo tienen funcionando.&quot;
         </span>
       </motion.h2>
       <motion.p
@@ -174,16 +174,51 @@ function Header({ isInView }: { isInView: boolean }) {
 }
 
 function TestimonialCard({
-  t, isInView, delay,
+  t, isInView, delay, autoCenterHoverEnabled,
 }: {
   t: Testimonial
   isInView: boolean
   delay: number
+  autoCenterHoverEnabled: boolean
 }) {
+  const cardRef = useRef<HTMLDivElement>(null)
   const [hovered, setHovered] = useState(false)
+  const [centerActive, setCenterActive] = useState(false)
+  const active = hovered || centerActive
+
+  useEffect(() => {
+    if (!autoCenterHoverEnabled) {
+      const frame = window.requestAnimationFrame(() => setCenterActive(false))
+      return () => window.cancelAnimationFrame(frame)
+    }
+
+    const updateCenterState = () => {
+      const node = cardRef.current
+      if (!node) return
+
+      const rect = node.getBoundingClientRect()
+      const viewportHeight = window.innerHeight || document.documentElement.clientHeight
+      const viewportCenter = viewportHeight / 2
+      const cardCenter = rect.top + rect.height / 2
+      const activationBand = Math.min(180, Math.max(86, rect.height * 0.42))
+
+      setCenterActive(Math.abs(cardCenter - viewportCenter) <= activationBand)
+    }
+
+    updateCenterState()
+    window.addEventListener('scroll', updateCenterState, { passive: true })
+    window.addEventListener('resize', updateCenterState)
+
+    return () => {
+      window.removeEventListener('scroll', updateCenterState)
+      window.removeEventListener('resize', updateCenterState)
+    }
+  }, [autoCenterHoverEnabled])
 
   return (
     <motion.div
+      ref={cardRef}
+      className="testimonial-card"
       initial={{ opacity:0, y:24 }}
       animate={isInView
         ? { opacity:1, y:0 } : {}}
@@ -196,16 +231,17 @@ function TestimonialCard({
       whileHover={{ y: -5, transition: { duration: 0 } }}
       style={{
         background:`linear-gradient(135deg, rgba(${t.colorRgb},0.06) 0%, rgba(255,255,255,0.02) 100%)`,
-        border: `1px solid rgba(${t.colorRgb},${hovered ? 0.28 : 0.15})`,
+        border: `1px solid rgba(${t.colorRgb},${active ? 0.28 : 0.15})`,
         borderRadius:'20px',
-        padding:'clamp(24px,3vw,36px)',
+        padding:'clamp(18px,5vw,36px)',
         position:'relative',
         overflow:'hidden',
         display:'flex',
         flexDirection:'column',
         gap:'20px',
         backdropFilter: 'blur(10px)',
-        boxShadow: hovered
+        minWidth: 0,
+        boxShadow: active
           ? `inset 0 -100px 120px rgba(${t.colorRgb},0.12), 0 18px 44px rgba(0,0,0,0.45)`
           : 'inset 0 -40px 60px rgba(0,0,0,0.14), 0 8px 24px rgba(0,0,0,0.28)',
         transition: 'none',
@@ -218,9 +254,9 @@ function TestimonialCard({
         right:'-10%',
         bottom:'-30%',
         height:'65%',
-        background:`radial-gradient(ellipse at 50% 100%, rgba(${t.colorRgb},${hovered ? 0.24 : 0}) 0%, transparent 70%)`,
+        background:`radial-gradient(ellipse at 50% 100%, rgba(${t.colorRgb},${active ? 0.24 : 0}) 0%, transparent 70%)`,
         filter:'blur(26px)',
-        opacity: hovered ? 1 : 0,
+        opacity: active ? 1 : 0,
         transition:'none',
         pointerEvents:'none',
         zIndex:0,
@@ -246,7 +282,7 @@ function TestimonialCard({
         userSelect:'none',
         pointerEvents:'none',
       }}>
-        "
+        &quot;
       </div>
 
       {/* Quote */}
@@ -259,19 +295,21 @@ function TestimonialCard({
         position:'relative',
         zIndex:2,
       }}>
-        "{t.quote}"
+        &quot;{t.quote}&quot;
       </p>
 
       {/* Resultado destacado */}
       <div style={{
         display:'inline-flex',
         alignItems:'center',
+        flexWrap:'wrap',
         gap:'10px',
         background: `rgba(${t.colorRgb},0.08)`,
         border: `1px solid rgba(${t.colorRgb},0.2)`,
         borderRadius:'12px',
         padding:'10px 16px',
         alignSelf:'flex-start',
+        maxWidth:'100%',
         position:'relative',
         zIndex:2,
       }}>
@@ -318,7 +356,7 @@ function TestimonialCard({
         }}>
           {t.initials}
         </div>
-        <div>
+        <div style={{ minWidth: 0 }}>
           <p style={{
             fontSize:'14px',
             fontWeight:700,
@@ -331,6 +369,7 @@ function TestimonialCard({
             fontSize:'12px',
             color: `rgba(${t.colorRgb},0.7)`,
             margin:'0 0 1px',
+            overflowWrap:'anywhere',
           }}>
             {t.role} · {t.company}
           </p>
@@ -338,6 +377,7 @@ function TestimonialCard({
             fontSize:'11px',
             color:'rgba(255,255,255,0.25)',
             margin:0,
+            overflowWrap:'anywhere',
           }}>
             {t.rubro}
           </p>
@@ -352,15 +392,33 @@ function TestimonialCard({
 
 export default function SocialProofSoftware() {
   const sectionRef = useRef<HTMLElement>(null)
+  const [autoCenterHoverEnabled, setAutoCenterHoverEnabled] = useState(false)
   const isInView = useInView(sectionRef, {
     once:true, amount:0.1,
   })
+
+  useEffect(() => {
+    const updateViewportMode = () => {
+      const effectiveWidth = Math.max(
+        window.innerWidth,
+        window.visualViewport?.width ?? 0,
+        window.screen.width || 0
+      )
+
+      setAutoCenterHoverEnabled(effectiveWidth < 1024)
+    }
+
+    updateViewportMode()
+    window.addEventListener('resize', updateViewportMode)
+
+    return () => window.removeEventListener('resize', updateViewportMode)
+  }, [])
 
   return (
     <section
       ref={sectionRef}
       style={{
-        padding:'clamp(80px,12vh,140px) clamp(20px,5vw,80px)',
+        padding:'clamp(72px,12vh,140px) clamp(14px,5vw,80px)',
         backgroundColor:'#060816',
         backgroundImage:`
           radial-gradient(120% 110% at 50% -20%, rgba(99,102,241,0.34) 0%, rgba(9,10,27,0.8) 52%, rgba(6,8,22,1) 100%),
@@ -374,15 +432,15 @@ export default function SocialProofSoftware() {
     >
       <AtmosphereProof />
       <div style={{
-        maxWidth:'1100px',
+        maxWidth:'1440px',
         margin:'0 auto',
         position:'relative',
         zIndex:1,
       }}>
         <Header isInView={isInView} />
-        <div style={{
+        <div className="testimonials-grid" style={{
           display:'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 320px), 1fr))',
           gap:'clamp(14px,2vw,20px)',
         }}>
           {testimonials.map((t,i) => (
@@ -391,6 +449,7 @@ export default function SocialProofSoftware() {
               t={t}
               isInView={isInView}
               delay={0.25 + i*0.12}
+              autoCenterHoverEnabled={autoCenterHoverEnabled}
             />
           ))}
         </div>
@@ -416,10 +475,10 @@ export default function SocialProofSoftware() {
           }}
         >
           {/* Estrellas */}
-          <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:'8px' }}>
-            <div style={{ display:'flex', gap:'3px' }}>
+          <div className="rating-stat" style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:'8px' }}>
+            <div className="rating-stars" style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:'3px' }}>
               {'★★★★★'.split('').map((s,i) => (
-                <span key={i} style={{ fontSize:'24px', color:'#f59e0b' }}>{s}</span>
+                <span key={i} style={{ fontSize:'24px', lineHeight:1, color:'#f59e0b' }}>{s}</span>
               ))}
             </div>
             <span style={{ fontSize:'28px', fontWeight:900, color:'white', lineHeight:1 }}>5.0</span>
@@ -429,7 +488,7 @@ export default function SocialProofSoftware() {
           <div className="stat-divider" style={{ width:'1px', height:'60px', background:'rgba(255,255,255,0.08)' }}/>
 
           {/* Proyectos */}
-          <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:'4px' }}>
+          <div className="rating-stat" style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:'4px' }}>
             <span style={{ fontSize:'36px', fontWeight:900, color:'#6366f1', lineHeight:1, fontFamily:'monospace' }}>38+</span>
             <span style={{ fontSize:'11px', color:'rgba(255,255,255,0.25)', letterSpacing:'0.1em' }}>PROYECTOS ENTREGADOS</span>
           </div>
@@ -437,7 +496,7 @@ export default function SocialProofSoftware() {
           <div className="stat-divider" style={{ width:'1px', height:'60px', background:'rgba(255,255,255,0.08)' }}/>
 
           {/* Años */}
-          <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:'4px' }}>
+          <div className="rating-stat" style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:'4px' }}>
             <span style={{ fontSize:'36px', fontWeight:900, color:'#7b2fff', lineHeight:1, fontFamily:'monospace' }}>4+</span>
             <span style={{ fontSize:'11px', color:'rgba(255,255,255,0.25)', letterSpacing:'0.1em' }}>AÑOS EN EL MERCADO NOA</span>
           </div>
@@ -445,7 +504,7 @@ export default function SocialProofSoftware() {
           <div className="stat-divider" style={{ width:'1px', height:'60px', background:'rgba(255,255,255,0.08)' }}/>
 
           {/* Uptime */}
-          <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:'4px' }}>
+          <div className="rating-stat" style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:'4px' }}>
             <span style={{ fontSize:'36px', fontWeight:900, color:'#6366f1', lineHeight:1, fontFamily:'monospace' }}>99.9%</span>
             <span style={{ fontSize:'11px', color:'rgba(255,255,255,0.25)', letterSpacing:'0.1em' }}>UPTIME PROMEDIO</span>
           </div>
@@ -465,15 +524,66 @@ export default function SocialProofSoftware() {
         />
       </div>
 
-      <style jsx>{`
-        @media (max-width: 768px) {
+      <style jsx global>{`
+        @media (min-width: 768px) and (max-width: 1199px) {
+          .testimonials-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+          }
+
+          .testimonial-card:nth-child(3) {
+            grid-column: 1 / -1;
+          }
+        }
+
+        @media (max-width: 767px) {
+          .testimonials-grid {
+            grid-template-columns: minmax(0, 1fr) !important;
+          }
+
           .rating-global-container {
             display: grid !important;
-            grid-template-columns: 1fr 1fr !important;
-            gap: 24px !important;
+            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+            align-items: stretch !important;
+            gap: 18px 12px !important;
+            padding: 18px 12px !important;
           }
+
           .stat-divider {
             display: none !important;
+          }
+
+          .rating-stat {
+            min-width: 0 !important;
+          }
+
+          .rating-stat span {
+            overflow-wrap: anywhere;
+            text-align: center;
+          }
+
+          .rating-stars {
+            line-height: 1 !important;
+          }
+
+          .rating-stars span {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            width: 20px !important;
+            height: 24px !important;
+            line-height: 1 !important;
+            text-align: center !important;
+          }
+        }
+
+        @media (max-width: 359px) {
+          .rating-global-container {
+            gap: 16px 10px !important;
+            padding: 16px 10px !important;
+          }
+
+          .rating-stat span:first-child {
+            font-size: 30px !important;
           }
         }
       `}</style>
