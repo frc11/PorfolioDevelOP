@@ -686,7 +686,7 @@ export default function HeroIA() {
                         style={{
                             display: 'block',
                             color: '#f2fbff',
-                            textShadow: '0 0 14px rgba(201, 255, 230, 0.22), 0 0 38px rgba(0, 255, 136, 0.16)',
+                            textShadow: '0 0 10px rgba(201, 255, 230, 0.08)',
                         }}
                     >
                         Tu empresa trabaja
@@ -694,17 +694,32 @@ export default function HeroIA() {
                     <span style={{ display: 'block', marginTop: '0.04em' }}>
                         <span
                             style={{
-                                color: '#7deee0',
-                                textShadow: '0 0 14px rgba(0, 255, 200, 0.22), 0 0 30px rgba(0, 205, 145, 0.12)',
+                                background: prefersReduced
+                                    ? 'none'
+                                    : 'linear-gradient(135deg, #7deee0 0%, #34f5c5 36%, #10b981 68%, #7deee0 100%)',
+                                backgroundSize: '300% 100%',
+                                WebkitBackgroundClip: 'text',
+                                WebkitTextFillColor: prefersReduced ? '#7deee0' : 'transparent',
+                                backgroundClip: 'text',
+                                filter: 'brightness(1.04) saturate(1.08)',
+                                animation: prefersReduced ? 'none' : 'iaTitleShift 5s ease-in-out infinite, pulseTitleIA 3.4s ease-in-out infinite',
+                                color: prefersReduced ? '#7deee0' : 'inherit',
                             }}
                         >
                             mientras{' '}
                         </span>
                         <span
                             style={{
-                                color: '#00f2a3',
-                                textShadow: '0 0 22px rgba(0, 255, 136, 0.45), 0 0 56px rgba(0, 255, 136, 0.24)',
-                                animation: prefersReduced ? 'none' : 'pulseTitleIA 3.2s ease-in-out infinite',
+                                background: prefersReduced
+                                    ? 'none'
+                                    : 'linear-gradient(135deg, #00f2a3 0%, #34f5c5 35%, #10b981 65%, #00f2a3 100%)',
+                                backgroundSize: '300% 100%',
+                                WebkitBackgroundClip: 'text',
+                                WebkitTextFillColor: prefersReduced ? '#00f2a3' : 'transparent',
+                                backgroundClip: 'text',
+                                filter: 'brightness(1.04) saturate(1.08)',
+                                animation: prefersReduced ? 'none' : 'iaTitleShift 5s ease-in-out infinite, pulseTitleIA 3.4s ease-in-out infinite',
+                                color: prefersReduced ? '#00f2a3' : 'inherit',
                             }}
                         >
                             dormis.
@@ -779,9 +794,13 @@ export default function HeroIA() {
                     .animate-pulse-ia {
                         animation: pulse-ia 1.5s ease-in-out infinite;
                     }
+                    @keyframes iaTitleShift {
+                        0%, 100% { background-position: 0% 50%; }
+                        50% { background-position: 100% 50%; }
+                    }
                     @keyframes pulseTitleIA {
-                        0%, 100% { opacity: 1; text-shadow: 0 0 18px rgba(0, 255, 136, 0.35), 0 0 42px rgba(0, 255, 136, 0.18); }
-                        50% { opacity: 0.9; text-shadow: 0 0 26px rgba(0, 255, 136, 0.6), 0 0 68px rgba(0, 255, 136, 0.3); }
+                        0%, 100% { filter: brightness(1) saturate(1.05); }
+                        50% { filter: brightness(1.14) saturate(1.24); }
                     }
                 `}</style>
         </section>

@@ -372,13 +372,15 @@ export default function HeroSoftware() {
               Terminá con el caos
               <br />
               <span
+                className="hero-software-gradient-text"
                 style={{
-                  background: 'linear-gradient(135deg, #6366f1 0%, #a855f7 40%, #7b2fff 70%, #6366f1 100%)',
-                  backgroundSize: '200% 100%',
+                  background: 'linear-gradient(135deg, #818cf8 0%, #a855f7 36%, #7b2fff 68%, #c084fc 100%)',
+                  backgroundSize: '300% 100%',
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent',
                   backgroundClip: 'text',
-                  animation: isReduced ? 'none' : 'gradientShift 4s ease-in-out infinite',
+                  filter: 'brightness(1.04) saturate(1.08)',
+                  animation: isReduced ? 'none' : 'gradientShift 5s ease-in-out infinite, softwareTitleGlow 3.4s ease-in-out infinite',
                 }}
               >
                 de los 5 Excels.
@@ -496,6 +498,14 @@ export default function HeroSoftware() {
         @keyframes gradientShift {
           0%, 100% { background-position: 0% 50%; }
           50% { background-position: 100% 50%; }
+        }
+        @keyframes softwareTitleGlow {
+          0%, 100% {
+            filter: brightness(1) saturate(1.05);
+          }
+          50% {
+            filter: brightness(1.14) saturate(1.24);
+          }
         }
 
         .hero-stat-card {

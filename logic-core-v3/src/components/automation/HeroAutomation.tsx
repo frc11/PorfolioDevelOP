@@ -1,14 +1,14 @@
-'use client'
+﻿'use client'
 
 import React, { useRef, useEffect, useState } from 'react'
 import { motion, useReducedMotion, AnimatePresence } from 'motion/react'
 
-// ─── DATA & TYPES ───────────────────────────────────────────────────────────
+// â”€â”€â”€ DATA & TYPES â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 interface AppNode {
   id: string
   label: string
-  emoji: string
+  icon: 'message' | 'mail' | 'chart' | 'card' | 'megaphone' | 'workflow' | 'document' | 'receipt' | 'bolt'
   x: number // % of canvas
   y: number
   vx: number
@@ -21,19 +21,23 @@ interface AppNode {
 }
 
 const APP_NODES_DATA: Omit<AppNode, 'vx' | 'vy' | 'glowIntensity'>[] = [
-  { id: 'whatsapp', label: 'WhatsApp', emoji: '💬', x: 0.15, y: 0.35, phase: 0, size: 36, color: '#25d366', colorRgb: '37,211,102' },
-  { id: 'gmail', label: 'Gmail', emoji: '📧', x: 0.82, y: 0.28, phase: 1.2, size: 34, color: '#ea4335', colorRgb: '234,67,53' },
-  { id: 'sheets', label: 'Sheets', emoji: '📊', x: 0.20, y: 0.72, phase: 2.4, size: 32, color: '#34a853', colorRgb: '52,168,83' },
-  { id: 'mercadopago', label: 'MercadoPago', emoji: '💳', x: 0.78, y: 0.70, phase: 3.6, size: 34, color: '#00b1ea', colorRgb: '0,177,234' },
-  { id: 'meta', label: 'Meta Ads', emoji: '📣', x: 0.50, y: 0.18, phase: 0.8, size: 32, color: '#1877f2', colorRgb: '24,119,242' },
-  { id: 'slack', label: 'Slack', emoji: '📨', x: 0.88, y: 0.52, phase: 2.0, size: 30, color: '#e01e5a', colorRgb: '224,30,90' },
-  { id: 'notion', label: 'Notion', emoji: '📋', x: 0.12, y: 0.55, phase: 3.0, size: 30, color: '#ffffff', colorRgb: '255,255,255' },
-  { id: 'afip', label: 'AFIP', emoji: '🧾', x: 0.50, y: 0.82, phase: 4.2, size: 32, color: '#f59e0b', colorRgb: '245,158,11' },
+  { id: 'whatsapp', label: 'WhatsApp', icon: 'message', x: 0.15, y: 0.35, phase: 0, size: 36, color: '#25d366', colorRgb: '37,211,102' },
+  { id: 'gmail', label: 'Gmail', icon: 'mail', x: 0.82, y: 0.28, phase: 1.2, size: 34, color: '#ea4335', colorRgb: '234,67,53' },
+  { id: 'sheets', label: 'Sheets', icon: 'chart', x: 0.20, y: 0.72, phase: 2.4, size: 32, color: '#34a853', colorRgb: '52,168,83' },
+  { id: 'mercadopago', label: 'MercadoPago', icon: 'card', x: 0.78, y: 0.70, phase: 3.6, size: 34, color: '#00b1ea', colorRgb: '0,177,234' },
+  { id: 'meta', label: 'Meta Ads', icon: 'megaphone', x: 0.50, y: 0.18, phase: 0.8, size: 32, color: '#1877f2', colorRgb: '24,119,242' },
+  { id: 'slack', label: 'Slack', icon: 'workflow', x: 0.88, y: 0.52, phase: 2.0, size: 30, color: '#e01e5a', colorRgb: '224,30,90' },
+  { id: 'notion', label: 'Notion', icon: 'document', x: 0.12, y: 0.55, phase: 3.0, size: 30, color: '#ffffff', colorRgb: '255,255,255' },
+  { id: 'afip', label: 'AFIP', icon: 'receipt', x: 0.50, y: 0.82, phase: 4.2, size: 32, color: '#f59e0b', colorRgb: '245,158,11' },
+  { id: 'calendar', label: 'Calendar', icon: 'document', x: 0.32, y: 0.28, phase: 5.1, size: 29, color: '#4285f4', colorRgb: '66,133,244' },
+  { id: 'tiendanube', label: 'TiendaNube', icon: 'card', x: 0.64, y: 0.76, phase: 5.8, size: 29, color: '#7b2fff', colorRgb: '123,47,255' },
+  { id: 'hubspot', label: 'HubSpot', icon: 'workflow', x: 0.36, y: 0.64, phase: 6.5, size: 28, color: '#ff7a59', colorRgb: '255,122,89' },
+  { id: 'salesforce', label: 'Salesforce', icon: 'chart', x: 0.82, y: 0.44, phase: 7.2, size: 28, color: '#1798c1', colorRgb: '23,152,193' },
   // CENTRAL ORCHESTRATOR
   {
     id: 'n8n',
     label: 'n8n · Automatización',
-    emoji: '⚡',
+    icon: 'bolt',
     x: 0.50, y: 0.50,
     phase: 0,
     size: 52,
@@ -42,7 +46,433 @@ const APP_NODES_DATA: Omit<AppNode, 'vx' | 'vy' | 'glowIntensity'>[] = [
   }
 ]
 
-// ─── CANVAS SUB-COMPONENT ──────────────────────────────────────────────────
+const NODE_PRESETS: Record<string, Record<string, { x: number; y: number; size?: number }>> = {
+  compact: {
+    whatsapp: { x: 0.09, y: 0.36, size: 22 },
+    gmail: { x: 0.90, y: 0.25, size: 21 },
+    sheets: { x: 0.17, y: 0.73, size: 21 },
+    mercadopago: { x: 0.86, y: 0.67, size: 22 },
+    meta: { x: 0.36, y: 0.20, size: 21 },
+    slack: { x: 0.92, y: 0.48, size: 21 },
+    notion: { x: 0.08, y: 0.55, size: 21 },
+    afip: { x: 0.50, y: 0.84, size: 21 },
+    calendar: { x: 0.22, y: 0.22, size: 20 },
+    tiendanube: { x: 0.68, y: 0.79, size: 20 },
+    hubspot: { x: 0.31, y: 0.63, size: 20 },
+    salesforce: { x: 0.77, y: 0.38, size: 20 },
+    n8n: { x: 0.50, y: 0.52, size: 38 },
+  },
+  mobile: {
+    whatsapp: { x: 0.10, y: 0.37, size: 25 },
+    gmail: { x: 0.88, y: 0.25, size: 24 },
+    sheets: { x: 0.18, y: 0.74, size: 24 },
+    mercadopago: { x: 0.84, y: 0.68, size: 24 },
+    meta: { x: 0.35, y: 0.20, size: 24 },
+    slack: { x: 0.90, y: 0.50, size: 23 },
+    notion: { x: 0.09, y: 0.56, size: 23 },
+    afip: { x: 0.50, y: 0.84, size: 24 },
+    calendar: { x: 0.23, y: 0.23, size: 22 },
+    tiendanube: { x: 0.68, y: 0.78, size: 22 },
+    hubspot: { x: 0.32, y: 0.63, size: 22 },
+    salesforce: { x: 0.76, y: 0.39, size: 22 },
+    n8n: { x: 0.50, y: 0.52, size: 42 },
+  },
+  tablet: {
+    whatsapp: { x: 0.12, y: 0.34, size: 29 },
+    gmail: { x: 0.88, y: 0.29, size: 28 },
+    sheets: { x: 0.20, y: 0.75, size: 28 },
+    mercadopago: { x: 0.80, y: 0.72, size: 29 },
+    meta: { x: 0.37, y: 0.22, size: 28 },
+    slack: { x: 0.91, y: 0.51, size: 27 },
+    notion: { x: 0.10, y: 0.57, size: 27 },
+    afip: { x: 0.50, y: 0.84, size: 28 },
+    calendar: { x: 0.22, y: 0.22, size: 27 },
+    tiendanube: { x: 0.64, y: 0.77, size: 27 },
+    hubspot: { x: 0.35, y: 0.65, size: 26 },
+    salesforce: { x: 0.76, y: 0.41, size: 26 },
+    n8n: { x: 0.50, y: 0.52, size: 48 },
+  },
+  laptop: {
+    whatsapp: { x: 0.11, y: 0.39, size: 32 },
+    gmail: { x: 0.88, y: 0.30, size: 31 },
+    sheets: { x: 0.22, y: 0.76, size: 30 },
+    mercadopago: { x: 0.83, y: 0.69, size: 31 },
+    meta: { x: 0.38, y: 0.23, size: 30 },
+    slack: { x: 0.91, y: 0.53, size: 29 },
+    notion: { x: 0.10, y: 0.58, size: 29 },
+    afip: { x: 0.50, y: 0.84, size: 30 },
+    calendar: { x: 0.23, y: 0.25, size: 28 },
+    tiendanube: { x: 0.66, y: 0.77, size: 28 },
+    hubspot: { x: 0.35, y: 0.66, size: 28 },
+    salesforce: { x: 0.74, y: 0.43, size: 28 },
+    n8n: { x: 0.50, y: 0.53 },
+  },
+  desktop: {
+    whatsapp: { x: 0.13, y: 0.42 },
+    gmail: { x: 0.90, y: 0.32 },
+    sheets: { x: 0.21, y: 0.76 },
+    mercadopago: { x: 0.81, y: 0.68 },
+    meta: { x: 0.32, y: 0.24 },
+    slack: { x: 0.92, y: 0.54 },
+    notion: { x: 0.10, y: 0.56 },
+    afip: { x: 0.50, y: 0.84 },
+    calendar: { x: 0.20, y: 0.25, size: 30 },
+    tiendanube: { x: 0.66, y: 0.76, size: 30 },
+    hubspot: { x: 0.35, y: 0.67, size: 29 },
+    salesforce: { x: 0.72, y: 0.42, size: 29 },
+    n8n: { x: 0.50, y: 0.52 },
+  },
+}
+
+function getNodePreset(width: number) {
+  if (width < 380) return NODE_PRESETS.compact
+  if (width < 640) return NODE_PRESETS.mobile
+  if (width < 960) return NODE_PRESETS.tablet
+  if (width < 1280) return NODE_PRESETS.laptop
+  return NODE_PRESETS.desktop
+}
+
+function createResponsiveNodes(width = 1440): AppNode[] {
+  const preset = getNodePreset(width)
+
+  return APP_NODES_DATA.map((node) => {
+    const override = preset[node.id]
+
+    return {
+      ...node,
+      x: override?.x ?? node.x,
+      y: override?.y ?? node.y,
+      size: override?.size ?? node.size,
+      vx: 0,
+      vy: 0,
+      glowIntensity: node.id === 'n8n' ? 0.8 : 0,
+    }
+  })
+}
+
+function getHeroExclusionZones(width: number, height: number) {
+  if (width < 640) {
+    return [
+      { left: width * 0.04, right: width * 0.96, top: height * 0.13, bottom: height * 0.34 },
+      { left: width * 0.04, right: width * 0.96, top: height * 0.35, bottom: height * 0.57 },
+    ]
+  }
+
+  if (width < 960) {
+    return [
+      { left: width * 0.08, right: width * 0.92, top: height * 0.12, bottom: height * 0.33 },
+      { left: width * 0.10, right: width * 0.90, top: height * 0.35, bottom: height * 0.56 },
+    ]
+  }
+
+  if (width < 1280) {
+    return [
+      { left: width * 0.17, right: width * 0.83, top: height * 0.12, bottom: height * 0.41 },
+      { left: width * 0.22, right: width * 0.78, top: height * 0.43, bottom: height * 0.63 },
+    ]
+  }
+
+  return [
+    { left: width * 0.23, right: width * 0.77, top: height * 0.11, bottom: height * 0.43 },
+    { left: width * 0.30, right: width * 0.70, top: height * 0.45, bottom: height * 0.64 },
+  ]
+}
+
+function applyHeroExclusionFlow(node: AppNode, width: number, height: number, isMobileCanvas: boolean) {
+  const radius = node.size + (isMobileCanvas ? 16 : 24)
+  const influence = isMobileCanvas ? 74 : 112
+  const zones = getHeroExclusionZones(width, height)
+  const x = node.x * width
+  const y = node.y * height
+  let ax = 0
+  let ay = 0
+
+  for (const zone of zones) {
+    const left = zone.left - radius
+    const right = zone.right + radius
+    const top = zone.top - radius
+    const bottom = zone.bottom + radius
+    const inside = x >= left && x <= right && y >= top && y <= bottom
+    const closestX = Math.max(left, Math.min(x, right))
+    const closestY = Math.max(top, Math.min(y, bottom))
+    let dx = x - closestX
+    let dy = y - closestY
+
+    if (inside) {
+      dx = x - (left + right) / 2
+      dy = y - (top + bottom) / 2
+    }
+
+    let dist = Math.hypot(dx, dy)
+    if (dist < 0.001) {
+      dx = (node.vx || Math.sin(node.phase || 0.7)) * width
+      dy = (node.vy || Math.cos(node.phase || 1.1)) * height
+      dist = Math.hypot(dx, dy) || 1
+    }
+
+    if (!inside && dist > influence) continue
+
+    const normalX = dx / dist
+    const normalY = dy / dist
+    const pressure = inside
+      ? 1
+      : Math.max(0, (influence - dist) / influence)
+    const strength = (isMobileCanvas ? 0.0003 : 0.00024) * pressure
+    const cross = node.vx * -normalY + node.vy * normalX
+    const tangentSign = cross >= 0 ? 1 : -1
+    const tangentX = -normalY * tangentSign
+    const tangentY = normalX * tangentSign
+
+    ax += normalX * strength + tangentX * strength * 0.35
+    ay += normalY * strength + tangentY * strength * 0.35
+  }
+
+  node.vx += ax
+  node.vy += ay
+}
+
+function keepNodeInCanvas(
+  node: AppNode,
+  marginX: number,
+  marginY: number,
+  maxY: number
+) {
+  if (node.x < marginX) {
+    node.x = marginX
+    node.vx = Math.abs(node.vx) * 0.55
+  }
+  if (node.x > 1 - marginX) {
+    node.x = 1 - marginX
+    node.vx = -Math.abs(node.vx) * 0.55
+  }
+  if (node.y < marginY) {
+    node.y = marginY
+    node.vy = Math.abs(node.vy) * 0.55
+  }
+  if (node.y > maxY) {
+    node.y = maxY
+    node.vy = -Math.abs(node.vy) * 0.55
+  }
+}
+
+function applyNodeSeparation(nodes: AppNode[], width: number, height: number, isMobileCanvas: boolean) {
+  const minDistance = isMobileCanvas ? 58 : 82
+  const strength = isMobileCanvas ? 0.00006 : 0.000045
+
+  for (let i = 0; i < nodes.length; i++) {
+    const a = nodes[i]
+    if (a.id === 'n8n') continue
+
+    for (let j = i + 1; j < nodes.length; j++) {
+      const b = nodes[j]
+      if (b.id === 'n8n') continue
+
+      const dx = (a.x - b.x) * width
+      const dy = (a.y - b.y) * height
+      const distance = Math.hypot(dx, dy) || 1
+      if (distance >= minDistance) continue
+
+      const pressure = (minDistance - distance) / minDistance
+      const ax = (dx / distance) * pressure * strength
+      const ay = (dy / distance) * pressure * strength
+
+      a.vx += ax
+      a.vy += ay
+      b.vx -= ax
+      b.vy -= ay
+    }
+  }
+}
+
+function getN8nOrbitPosition(frame: number, width: number, isMobileCanvas: boolean) {
+  const t = frame * 0.0042
+  const centerY = isMobileCanvas ? 0.315 : width < 960 ? 0.335 : 0.36
+  const orbitX = isMobileCanvas ? 0.18 : width < 960 ? 0.16 : 0.22
+  const orbitY = isMobileCanvas ? 0.045 : width < 960 ? 0.052 : 0.06
+
+  return {
+    x: 0.5 + Math.cos(t) * orbitX,
+    y: centerY + Math.sin(t * 0.82) * orbitY,
+  }
+}
+
+function isPointInHeroExclusionZone(x: number, y: number, width: number, height: number, padding = 0) {
+  return getHeroExclusionZones(width, height).some(
+    (zone) =>
+      x >= zone.left - padding &&
+      x <= zone.right + padding &&
+      y >= zone.top - padding &&
+      y <= zone.bottom + padding
+  )
+}
+
+function roundedRectPath(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  radius: number
+) {
+  const r = Math.min(radius, width / 2, height / 2)
+  ctx.moveTo(x + r, y)
+  ctx.lineTo(x + width - r, y)
+  ctx.quadraticCurveTo(x + width, y, x + width, y + r)
+  ctx.lineTo(x + width, y + height - r)
+  ctx.quadraticCurveTo(x + width, y + height, x + width - r, y + height)
+  ctx.lineTo(x + r, y + height)
+  ctx.quadraticCurveTo(x, y + height, x, y + height - r)
+  ctx.lineTo(x, y + r)
+  ctx.quadraticCurveTo(x, y, x + r, y)
+}
+
+function drawNodeIcon(
+  ctx: CanvasRenderingContext2D,
+  icon: AppNode['icon'],
+  cx: number,
+  cy: number,
+  size: number,
+  color: string,
+  alpha = 1
+) {
+  const s = size
+  ctx.save()
+  ctx.translate(cx, cy)
+  ctx.strokeStyle = color
+  ctx.fillStyle = color
+  ctx.globalAlpha = alpha
+  ctx.lineWidth = Math.max(1.35, s * 0.075)
+  ctx.lineCap = 'round'
+  ctx.lineJoin = 'round'
+
+  switch (icon) {
+    case 'message': {
+      ctx.beginPath()
+      roundedRectPath(ctx, -s * 0.36, -s * 0.26, s * 0.72, s * 0.48, s * 0.16)
+      ctx.stroke()
+      ctx.beginPath()
+      ctx.moveTo(-s * 0.08, s * 0.22)
+      ctx.lineTo(-s * 0.2, s * 0.36)
+      ctx.lineTo(s * 0.06, s * 0.23)
+      ctx.stroke()
+      break
+    }
+    case 'mail': {
+      ctx.beginPath()
+      roundedRectPath(ctx, -s * 0.36, -s * 0.25, s * 0.72, s * 0.5, s * 0.07)
+      ctx.stroke()
+      ctx.beginPath()
+      ctx.moveTo(-s * 0.32, -s * 0.18)
+      ctx.lineTo(0, s * 0.04)
+      ctx.lineTo(s * 0.32, -s * 0.18)
+      ctx.stroke()
+      break
+    }
+    case 'chart': {
+      for (const [x, h] of [[-0.22, 0.32], [0, 0.52], [0.22, 0.72]] as const) {
+        ctx.beginPath()
+        ctx.moveTo(s * x, s * 0.28)
+        ctx.lineTo(s * x, s * (0.28 - h))
+        ctx.stroke()
+      }
+      ctx.beginPath()
+      ctx.moveTo(-s * 0.34, s * 0.28)
+      ctx.lineTo(s * 0.34, s * 0.28)
+      ctx.stroke()
+      break
+    }
+    case 'card': {
+      ctx.beginPath()
+      roundedRectPath(ctx, -s * 0.4, -s * 0.24, s * 0.8, s * 0.48, s * 0.08)
+      ctx.stroke()
+      ctx.beginPath()
+      ctx.moveTo(-s * 0.34, -s * 0.06)
+      ctx.lineTo(s * 0.34, -s * 0.06)
+      ctx.stroke()
+      ctx.beginPath()
+      ctx.moveTo(-s * 0.3, s * 0.11)
+      ctx.lineTo(-s * 0.08, s * 0.11)
+      ctx.stroke()
+      break
+    }
+    case 'megaphone': {
+      ctx.beginPath()
+      ctx.moveTo(-s * 0.34, -s * 0.06)
+      ctx.lineTo(s * 0.22, -s * 0.25)
+      ctx.lineTo(s * 0.22, s * 0.25)
+      ctx.lineTo(-s * 0.34, s * 0.06)
+      ctx.closePath()
+      ctx.stroke()
+      ctx.beginPath()
+      ctx.moveTo(-s * 0.18, s * 0.09)
+      ctx.lineTo(-s * 0.07, s * 0.34)
+      ctx.stroke()
+      break
+    }
+    case 'workflow': {
+      ctx.beginPath()
+      ctx.moveTo(-s * 0.28, -s * 0.14)
+      ctx.lineTo(s * 0.28, -s * 0.14)
+      ctx.moveTo(-s * 0.28, s * 0.14)
+      ctx.lineTo(s * 0.28, s * 0.14)
+      ctx.stroke()
+      ctx.beginPath()
+      ctx.arc(-s * 0.38, -s * 0.14, s * 0.07, 0, Math.PI * 2)
+      ctx.arc(s * 0.38, s * 0.14, s * 0.07, 0, Math.PI * 2)
+      ctx.fill()
+      break
+    }
+    case 'document': {
+      ctx.beginPath()
+      roundedRectPath(ctx, -s * 0.3, -s * 0.38, s * 0.6, s * 0.76, s * 0.06)
+      ctx.stroke()
+      ctx.beginPath()
+      ctx.moveTo(-s * 0.14, -s * 0.12)
+      ctx.lineTo(s * 0.16, -s * 0.12)
+      ctx.moveTo(-s * 0.14, s * 0.04)
+      ctx.lineTo(s * 0.16, s * 0.04)
+      ctx.moveTo(-s * 0.14, s * 0.2)
+      ctx.lineTo(s * 0.06, s * 0.2)
+      ctx.stroke()
+      break
+    }
+    case 'receipt': {
+      ctx.beginPath()
+      ctx.moveTo(-s * 0.28, -s * 0.36)
+      ctx.lineTo(s * 0.28, -s * 0.36)
+      ctx.lineTo(s * 0.28, s * 0.36)
+      ctx.lineTo(s * 0.14, s * 0.28)
+      ctx.lineTo(0, s * 0.36)
+      ctx.lineTo(-s * 0.14, s * 0.28)
+      ctx.lineTo(-s * 0.28, s * 0.36)
+      ctx.closePath()
+      ctx.stroke()
+      ctx.beginPath()
+      ctx.moveTo(-s * 0.12, -s * 0.12)
+      ctx.lineTo(s * 0.14, -s * 0.12)
+      ctx.moveTo(-s * 0.12, s * 0.05)
+      ctx.lineTo(s * 0.14, s * 0.05)
+      ctx.stroke()
+      break
+    }
+    case 'bolt': {
+      ctx.beginPath()
+      ctx.moveTo(s * 0.08, -s * 0.42)
+      ctx.lineTo(-s * 0.18, s * 0.05)
+      ctx.lineTo(s * 0.06, s * 0.05)
+      ctx.lineTo(-s * 0.06, s * 0.42)
+      ctx.lineTo(s * 0.26, -s * 0.1)
+      ctx.lineTo(s * 0.02, -s * 0.1)
+      ctx.closePath()
+      ctx.fill()
+      break
+    }
+  }
+
+  ctx.restore()
+}
+
+// â”€â”€â”€ CANVAS SUB-COMPONENT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function NodeCanvas({
   mouseRef,
@@ -51,14 +481,8 @@ function NodeCanvas({
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const animRef = useRef<number>(0)
-  const nodesRef = useRef<AppNode[]>(
-    APP_NODES_DATA.map(n => ({ 
-      ...n, 
-      vx: 0, 
-      vy: 0, 
-      glowIntensity: n.id === 'n8n' ? 0.8 : 0 
-    }))
-  )
+  const nodesRef = useRef<AppNode[]>(createResponsiveNodes())
+  const sizeRef = useRef({ width: 0, height: 0, dpr: 1 })
   const frameRef = useRef(0)
   const shouldReduceMotion = useReducedMotion()
 
@@ -70,11 +494,24 @@ function NodeCanvas({
 
     function resize() {
       if (!canvas) return
-      canvas.width = window.innerWidth
-      canvas.height = window.innerHeight
+      const rect = canvas.parentElement?.getBoundingClientRect()
+      const width = Math.max(1, Math.round(rect?.width ?? window.innerWidth))
+      const height = Math.max(1, Math.round(rect?.height ?? window.innerHeight))
+      const dpr = Math.min(window.devicePixelRatio || 1, 2)
+
+      canvas.width = Math.round(width * dpr)
+      canvas.height = Math.round(height * dpr)
+      sizeRef.current = { width, height, dpr }
+      nodesRef.current = createResponsiveNodes(width)
     }
     resize()
     window.addEventListener('resize', resize)
+    const canvasParent = canvas.parentElement
+    const resizeObserver =
+      typeof ResizeObserver !== 'undefined' && canvasParent
+        ? new ResizeObserver(resize)
+        : null
+    if (canvasParent) resizeObserver?.observe(canvasParent)
 
     const CONNECTION_DIST = 0.38
     const MOUSE_ATTRACT_DIST = 0.25
@@ -83,51 +520,95 @@ function NodeCanvas({
       if (!canvas || !ctx) return
       frameRef.current++
       const f = frameRef.current
-      const W = canvas.width
-      const H = canvas.height
+      const { width: W, height: H, dpr } = sizeRef.current
       const mouse = mouseRef.current
 
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
       ctx.clearRect(0, 0, W, H)
 
       const nodes = nodesRef.current
+      const isCompactCanvas = W < 420
+      const isMobileCanvas = W < 640
+      const isTabletOrLess = W < 1024
+      const hasMouseFocus = mouse.x > 0 || mouse.y > 0
+      const appNodes = nodes.filter((n) => n.id !== 'n8n')
 
-      // ── MOVER NODOS ────────────────────────
+      let focusX = mouse.x / W
+      let focusY = mouse.y / (H || 1)
+      if (isTabletOrLess && !hasMouseFocus && appNodes.length > 0) {
+        const phaseLen = 220
+        const phase = f % phaseLen
+        const baseIdx = Math.floor(f / phaseLen) % appNodes.length
+        const nextIdx = (baseIdx + 1) % appNodes.length
+        const blend = phase / phaseLen
+        const from = appNodes[baseIdx]
+        const to = appNodes[nextIdx]
+        const orbitX = Math.cos(f * 0.03 + from.phase) * 0.045
+        const orbitY = Math.sin(f * 0.024 + to.phase) * 0.03
+
+        focusX = from.x + (to.x - from.x) * blend + orbitX
+        focusY = from.y + (to.y - from.y) * blend + orbitY
+      }
+      focusX = Math.min(0.95, Math.max(0.05, focusX || 0.5))
+      focusY = Math.min(0.92, Math.max(0.08, focusY || 0.5))
+
+      // â”€â”€ MOVER NODOS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
       for (const n of nodes) {
         if (n.id === 'n8n') {
-            // n8n is fixed at center but has subtle vibration
-            const v = f * 0.001
-            n.x = 0.5 + Math.sin(v) * 0.002
-            n.y = 0.5 + Math.cos(v * 0.8) * 0.002
-            continue
+          const n8nOrbit = getN8nOrbitPosition(f, W, isMobileCanvas)
+          const blend = shouldReduceMotion ? 1 : 0.08
+          n.x += (n8nOrbit.x - n.x) * blend
+          n.y += (n8nOrbit.y - n.y) * blend
+          n.vx = 0
+          n.vy = 0
+          n.glowIntensity = 0.72
+          continue
         }
 
-        const t = f * 0.0008 + n.phase
-        // Float orbital lento
-        n.x += Math.sin(t) * 0.00015
-        n.y += Math.cos(t * 0.7) * 0.0001
+        const t = f * 0.018 + n.phase
+        const marginX = isMobileCanvas ? 0.055 : 0.08
+        const marginY = isMobileCanvas ? 0.09 : 0.12
+        const maxY = 0.9
 
-        // Clamp dentro del canvas
-        n.x = Math.max(0.08, Math.min(0.92, n.x))
-        n.y = Math.max(0.12, Math.min(0.88, n.y))
+        n.vx += Math.sin(t) * 0.000012
+        n.vy += Math.cos(t * 0.72) * 0.000009
 
-        // Atracción sutil hacia el mouse
-        const mx = mouse.x / W
-        const my = mouse.y / (H || 1)
-        const dx = mx - n.x
-        const dy = my - n.y
-        const dist = Math.sqrt(dx * dx + dy * dy)
+        // AtracciÃ³n sutil hacia el mouse
+        if (hasMouseFocus || isTabletOrLess) {
+          const dx = focusX - n.x
+          const dy = focusY - n.y
+          const dist = Math.sqrt(dx * dx + dy * dy)
 
-        if (dist < MOUSE_ATTRACT_DIST) {
-          const force = ((MOUSE_ATTRACT_DIST - dist) / MOUSE_ATTRACT_DIST) * 0.00008
-          n.x += dx * force
-          n.y += dy * force
-          n.glowIntensity = Math.min(n.glowIntensity + 0.05, 1)
+          if (dist < MOUSE_ATTRACT_DIST) {
+            const force = ((MOUSE_ATTRACT_DIST - dist) / MOUSE_ATTRACT_DIST) * 0.000025
+            n.vx += dx * force
+            n.vy += dy * force
+            n.glowIntensity = Math.min(n.glowIntensity + 0.05, 1)
+          } else {
+            n.glowIntensity = Math.max(n.glowIntensity - 0.02, 0)
+          }
         } else {
           n.glowIntensity = Math.max(n.glowIntensity - 0.02, 0)
         }
-      }
 
-      // ── CONEXIONES FORZADAS A n8n ───────────
+        applyHeroExclusionFlow(n, W, H, isMobileCanvas)
+
+        const maxSpeed = isMobileCanvas ? 0.00125 : 0.00105
+        const speed = Math.hypot(n.vx, n.vy)
+        if (speed > maxSpeed) {
+          n.vx = (n.vx / speed) * maxSpeed
+          n.vy = (n.vy / speed) * maxSpeed
+        }
+
+        n.x += n.vx
+        n.y += n.vy
+        n.vx *= 0.94
+        n.vy *= 0.94
+        keepNodeInCanvas(n, marginX, marginY, maxY)
+      }
+      applyNodeSeparation(nodes, W, H, isMobileCanvas)
+
+      // â”€â”€ CONEXIONES FORZADAS A n8n â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
       const n8nNode = nodes.find(n => n.id === 'n8n')!
       const cx1 = n8nNode.x * W
       const cy1 = n8nNode.y * H
@@ -137,7 +618,7 @@ function NodeCanvas({
         const cx2 = app.x * W
         const cy2 = app.y * H
 
-        // Línea base tenue punteada
+        // LÃ­nea base tenue punteada
         ctx.beginPath()
         ctx.moveTo(cx1, cy1)
         ctx.lineTo(cx2, cy2)
@@ -147,26 +628,28 @@ function NodeCanvas({
         ctx.stroke()
         ctx.setLineDash([])
 
-        // Partícula viajando desde app -> n8n
+        // PartÃ­cula viajando desde app -> n8n
         const particleSpeed = shouldReduceMotion ? 0.004 : 0.008
         const tP = ((f * particleSpeed + app.phase * 0.2) % 1)
         const px = cx2 + (cx1 - cx2) * tP
         const py = cy2 + (cy1 - cy2) * tP
         const pAlpha = Math.sin(tP * Math.PI) * 0.5
 
-        const pg = ctx.createRadialGradient(px, py, 0, px, py, 4)
-        pg.addColorStop(0, `rgba(245,158,11,${pAlpha})`)
-        pg.addColorStop(1, 'rgba(245,158,11,0)')
-        
-        ctx.beginPath()
-        ctx.arc(px, py, 4, 0, Math.PI * 2)
-        ctx.fillStyle = pg
-        ctx.fill()
+        if (!isPointInHeroExclusionZone(px, py, W, H, 10)) {
+          const pg = ctx.createRadialGradient(px, py, 0, px, py, 4)
+          pg.addColorStop(0, `rgba(245,158,11,${pAlpha})`)
+          pg.addColorStop(1, 'rgba(245,158,11,0)')
+
+          ctx.beginPath()
+          ctx.arc(px, py, 4, 0, Math.PI * 2)
+          ctx.fillStyle = pg
+          ctx.fill()
+        }
       }
 
-      // ── CONEXIONES DINÁMICAS (MOUSE) ────────
-      const mx = mouse.x / W
-      const my = mouse.y / (H || 1)
+      // â”€â”€ CONEXIONES DINÃMICAS (MOUSE) â”€â”€â”€â”€â”€â”€â”€â”€
+      const mx = focusX
+      const my = focusY
 
       for (let i = 0; i < nodes.length; i++) {
         for (let j = i + 1; j < nodes.length; j++) {
@@ -217,6 +700,7 @@ function NodeCanvas({
             const tProgress = (f * 0.02) % 1
             const px = a.x * W + (b.x * W - a.x * W) * tProgress
             const py = a.y * H + (b.y * H - a.y * H) * tProgress
+            if (isPointInHeroExclusionZone(px, py, W, H, 10)) continue
             const pg = ctx.createRadialGradient(px, py, 0, px, py, 6)
             pg.addColorStop(0, `rgba(255,220,100,${alpha})`)
             pg.addColorStop(1, 'rgba(245,158,11,0)')
@@ -228,7 +712,7 @@ function NodeCanvas({
         }
       }
 
-      // ── DIBUJAR NODOS ────────────────────────
+      // â”€â”€ DIBUJAR NODOS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
       // Sort to draw n8n last (on top)
       const sortedNodes = [...nodes].sort((a,b) => a.id === 'n8n' ? 1 : b.id === 'n8n' ? -1 : 0)
 
@@ -239,11 +723,14 @@ function NodeCanvas({
         const glow = n.glowIntensity
 
         if (n.id === 'n8n') {
+            const behindHeroText = isPointInHeroExclusionZone(cx, cy, W, H, R * 0.2)
+            const visibility = behindHeroText ? 0.16 : 0.78
+
             // Anillos pulsantes (3 anillos)
             for (let ring = 0; ring < 3; ring++) {
               const ringPhase = (f * 0.015 + ring * 0.33) % 1
               const ringR = R * (1 + ringPhase * 2.5)
-              const ringAlpha = (1 - ringPhase) * 0.25
+              const ringAlpha = (1 - ringPhase) * 0.25 * visibility
 
               ctx.beginPath()
               ctx.arc(cx, cy, ringR, 0, Math.PI * 2)
@@ -254,8 +741,8 @@ function NodeCanvas({
 
             // Glow grande permanente
             const bigGlow = ctx.createRadialGradient(cx, cy, 0, cx, cy, R * 5)
-            bigGlow.addColorStop(0, 'rgba(245,158,11,0.25)')
-            bigGlow.addColorStop(0.4, 'rgba(249,115,22,0.08)')
+            bigGlow.addColorStop(0, `rgba(245,158,11,${0.25 * visibility})`)
+            bigGlow.addColorStop(0.4, `rgba(249,115,22,${0.08 * visibility})`)
             bigGlow.addColorStop(1, 'rgba(245,158,11,0)')
             ctx.beginPath()
             ctx.arc(cx, cy, R * 5, 0, Math.PI * 2)
@@ -265,29 +752,27 @@ function NodeCanvas({
             // Borde doble y nucleo
             ctx.beginPath()
             ctx.arc(cx, cy, R, 0, Math.PI * 2)
-            ctx.fillStyle = 'rgba(245,158,11,0.12)'
+            ctx.fillStyle = `rgba(245,158,11,${0.12 * visibility})`
             ctx.fill()
-            ctx.strokeStyle = 'rgba(245,158,11,0.8)'
+            ctx.strokeStyle = `rgba(245,158,11,${0.8 * visibility})`
             ctx.lineWidth = 2
             ctx.stroke()
 
             ctx.beginPath()
             ctx.arc(cx, cy, R + 6, 0, Math.PI * 2)
-            ctx.strokeStyle = 'rgba(245,158,11,0.25)'
+            ctx.strokeStyle = `rgba(245,158,11,${0.25 * visibility})`
             ctx.lineWidth = 1
             ctx.stroke()
 
-            // Emoji n8n
-            ctx.font = `${R * 0.65}px serif`
-            ctx.textAlign = 'center'
-            ctx.textBaseline = 'middle'
-            ctx.fillStyle = 'white'
-            ctx.fillText(n.emoji, cx, cy)
+            drawNodeIcon(ctx, n.icon, cx, cy, R * 0.82, '#fbbf24', 0.95 * visibility)
 
             // Label n8n
-            ctx.font = '700 11px ui-monospace, monospace'
-            ctx.fillStyle = 'rgba(245,158,11,0.8)'
-            ctx.fillText(n.label, cx, cy + R + 18)
+            if (!isMobileCanvas && !behindHeroText) {
+              ctx.font = '700 11px ui-monospace, monospace'
+              ctx.textAlign = 'center'
+              ctx.fillStyle = 'rgba(245,158,11,0.8)'
+              ctx.fillText(n.label, cx, cy + R + 18)
+            }
             
             continue
         }
@@ -315,18 +800,15 @@ function NodeCanvas({
         ctx.lineWidth = glow > 0.3 ? 2 : 1
         ctx.stroke()
 
-        // Emoji
-        ctx.font = `${R * 0.9}px serif`
-        ctx.textAlign = 'center'
-        ctx.textBaseline = 'middle'
-        ctx.fillStyle = 'white'
-        ctx.fillText(n.emoji, cx, cy)
+        drawNodeIcon(ctx, n.icon, cx, cy, R * 0.92, n.color, 0.72 + glow * 0.28)
 
         // Label
-        ctx.font = `600 11px ui-monospace, monospace`
-        ctx.textAlign = 'center'
-        ctx.fillStyle = `rgba(245,158,11,${0.4 + glow * 0.5})`
-        ctx.fillText(n.label, cx, cy + R + 14)
+        if (!isCompactCanvas) {
+          ctx.font = `${isMobileCanvas ? 500 : 600} ${isMobileCanvas ? 9 : 11}px ui-monospace, monospace`
+          ctx.textAlign = 'center'
+          ctx.fillStyle = `rgba(245,158,11,${0.36 + glow * 0.46})`
+          ctx.fillText(n.label, cx, cy + R + (isMobileCanvas ? 11 : 14))
+        }
       }
 
       animRef.current = requestAnimationFrame(draw)
@@ -337,8 +819,9 @@ function NodeCanvas({
     return () => {
       cancelAnimationFrame(animRef.current)
       window.removeEventListener('resize', resize)
+      resizeObserver?.disconnect()
     }
-  }, [shouldReduceMotion])
+  }, [shouldReduceMotion, mouseRef])
 
   return (
     <canvas
@@ -367,16 +850,6 @@ function FloatingStat({
   pos: React.CSSProperties; 
   delay: number 
 }) {
-  const [showLine, setShowLine] = useState(false)
-  useEffect(() => {
-    if (typeof window !== 'undefined' && window.innerWidth >= 1024) {
-      setShowLine(true)
-    }
-    const handleResize = () => setShowLine(window.innerWidth >= 1024)
-    window.addEventListener('resize', handleResize)
-    return () => window.removeEventListener('resize', handleResize)
-  }, [])
-
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -416,35 +889,33 @@ function FloatingStat({
         <p style={{ fontSize: '18px', color: 'white', fontWeight: 900, margin: 0, letterSpacing: '-0.01em' }}>
           {value}
         </p>
-        {showLine && (
-          <svg
-            aria-hidden="true"
-            style={{
-              position: 'absolute',
-              top: '50%',
-              left: pos.right !== undefined ? 'auto' : '100%',
-              right: pos.right !== undefined ? '100%' : 'auto',
-              transform: 'translateY(-50%)',
-              width: '80px',
-              height: '2px',
-              overflow: 'visible',
-              pointerEvents: 'none',
-            }}
-          >
-            <line
-              x1="0" y1="1" x2="80" y2="1"
-              stroke="rgba(245,158,11,0.18)"
-              strokeWidth="1"
-              strokeDasharray="3 6"
-            />
-          </svg>
-        )}
+        <svg
+          aria-hidden="true"
+          style={{
+            position: 'absolute',
+            top: '50%',
+            left: pos.right !== undefined ? 'auto' : '100%',
+            right: pos.right !== undefined ? '100%' : 'auto',
+            transform: 'translateY(-50%)',
+            width: '80px',
+            height: '2px',
+            overflow: 'visible',
+            pointerEvents: 'none',
+          }}
+        >
+          <line
+            x1="0" y1="1" x2="80" y2="1"
+            stroke="rgba(245,158,11,0.18)"
+            strokeWidth="1"
+            strokeDasharray="3 6"
+          />
+        </svg>
       </motion.div>
     </motion.div>
   )
 }
 
-// ─── MAIN HERO COMPONENT ────────────────────────────────────────────────────
+// â”€â”€â”€ MAIN HERO COMPONENT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export default function HeroAutomation() {
   const mouseRef = useRef({ x: 0, y: 0 })
@@ -472,6 +943,7 @@ export default function HeroAutomation() {
 
   return (
     <section
+      className="automation-hero"
       style={{
         position: 'relative',
         width: '100%',
@@ -507,6 +979,14 @@ export default function HeroAutomation() {
           0%, 100% { background-position: 0% 50% }
           50% { background-position: 100% 50% }
         }
+        @keyframes automationTitleGlow {
+          0%, 100% {
+            filter: brightness(1) saturate(1.05);
+          }
+          50% {
+            filter: brightness(1.14) saturate(1.24);
+          }
+        }
         @keyframes pulse {
           0%, 100% { opacity: 1; box-shadow: 0 0 8px rgba(245,158,11,0.9), 0 0 16px rgba(245,158,11,0.4) }
           50% { opacity: 0.75; box-shadow: 0 0 16px rgba(245,158,11,1), 0 0 32px rgba(245,158,11,0.6) }
@@ -518,6 +998,181 @@ export default function HeroAutomation() {
         @keyframes ringPulseAmber {
           0%, 100% { transform: scale(1); opacity: 0.15 }
           50% { transform: scale(1.08); opacity: 0.05 }
+        }
+        .automation-hero {
+          min-height: 100svh !important;
+          box-sizing: border-box;
+          padding: 72px 0 96px;
+          isolation: isolate;
+        }
+        .automation-hero__content {
+          width: min(100%, 1060px) !important;
+          max-width: 1060px !important;
+          padding: 0 64px !important;
+          transform: translateY(-8px);
+        }
+        .automation-hero__badge {
+          gap: 10px !important;
+          margin-bottom: 30px !important;
+          padding: 11px 28px !important;
+          box-shadow: 0 0 28px rgba(245,158,11,0.12), inset 0 1px 0 rgba(255,255,255,0.06) !important;
+        }
+        .automation-hero__badge-label,
+        .automation-hero__button,
+        .automation-hero__hint span {
+          letter-spacing: 0 !important;
+        }
+        .automation-hero__badge-label {
+          white-space: nowrap;
+          font-size: 12px !important;
+          font-weight: 800 !important;
+        }
+        .automation-hero__title {
+          font-size: 92px !important;
+          line-height: 0.96 !important;
+          letter-spacing: 0 !important;
+          margin-bottom: 26px !important;
+          text-wrap: balance;
+        }
+        .automation-hero__copy {
+          max-width: 640px !important;
+          margin-bottom: 32px !important;
+          padding: 22px 28px !important;
+          font-size: 18px !important;
+          line-height: 1.62 !important;
+          border-radius: 14px !important;
+        }
+        .automation-hero__actions {
+          gap: 14px !important;
+        }
+        .automation-hero__button {
+          min-height: 48px;
+          justify-content: center;
+          white-space: nowrap;
+        }
+        @media (max-height: 780px) and (min-width: 960px) {
+          .automation-hero {
+            padding-top: 58px;
+            padding-bottom: 70px;
+          }
+          .automation-hero__content {
+            transform: translateY(-4px);
+          }
+          .automation-hero__badge {
+            margin-bottom: 22px !important;
+            padding: 10px 24px !important;
+          }
+          .automation-hero__title {
+            font-size: 82px !important;
+            margin-bottom: 22px !important;
+          }
+          .automation-hero__copy {
+            max-width: 610px !important;
+            margin-bottom: 26px !important;
+            padding: 18px 24px !important;
+            font-size: 16px !important;
+            line-height: 1.58 !important;
+          }
+        }
+        @media (max-width: 1280px) {
+          .automation-hero__content {
+            max-width: 920px !important;
+          }
+          .automation-hero__title {
+            font-size: 76px !important;
+          }
+        }
+        @media (max-width: 1120px) {
+          .automation-hero__floating-stats {
+            display: none !important;
+          }
+        }
+        @media (max-width: 960px) {
+          .automation-hero {
+            align-items: flex-start !important;
+            min-height: 900px !important;
+            padding-top: 74px;
+            padding-bottom: 112px;
+          }
+          .automation-hero__content {
+            max-width: 760px !important;
+            padding: 0 42px !important;
+            transform: none;
+          }
+          .automation-hero__title {
+            font-size: 64px !important;
+          }
+          .automation-hero__copy {
+            max-width: 620px !important;
+          }
+        }
+        @media (max-width: 640px) {
+          .automation-hero {
+            min-height: 870px !important;
+            padding-top: 50px;
+            padding-bottom: 100px;
+          }
+          .automation-hero__content {
+            padding: 0 20px !important;
+          }
+          .automation-hero__badge {
+            margin-bottom: 30px !important;
+            padding: 9px 18px !important;
+          }
+          .automation-hero__badge-label {
+            font-size: 10px !important;
+          }
+          .automation-hero__title {
+            font-size: 42px !important;
+            line-height: 0.98 !important;
+            margin-bottom: 20px !important;
+          }
+          .automation-hero__copy {
+            width: 100% !important;
+            max-width: 100% !important;
+            margin-bottom: 28px !important;
+            padding: 18px 18px !important;
+            font-size: 15px !important;
+            line-height: 1.6 !important;
+          }
+          .automation-hero__actions {
+            flex-direction: column;
+            align-items: center;
+            gap: 12px !important;
+          }
+          .automation-hero__button {
+            width: min(100%, 296px);
+          }
+          .automation-hero__hint {
+            display: none !important;
+          }
+        }
+        @media (max-width: 380px) {
+          .automation-hero {
+            min-height: 900px !important;
+            padding-top: 48px;
+          }
+          .automation-hero__content {
+            padding: 0 18px !important;
+          }
+          .automation-hero__badge {
+            padding: 8px 14px !important;
+          }
+          .automation-hero__badge-label {
+            font-size: 9px !important;
+          }
+          .automation-hero__title {
+            font-size: 39px !important;
+            margin-bottom: 18px !important;
+          }
+          .automation-hero__copy {
+            padding: 16px 14px !important;
+            font-size: 14px !important;
+            line-height: 1.56 !important;
+          }
+          .automation-hero__button {
+            width: min(100%, 280px);
+          }
         }
       `}</style>
 
@@ -531,7 +1186,7 @@ export default function HeroAutomation() {
           pointerEvents: 'none',
         }}
       >
-        {/* Aurora ámbar central */}
+        {/* Aurora Ã¡mbar central */}
         <div style={{
           position: 'absolute',
           top: '30%', left: '50%',
@@ -550,7 +1205,7 @@ export default function HeroAutomation() {
           filter: 'blur(100px)',
         }} />
 
-        {/* Aurora ámbar derecha */}
+        {/* Aurora Ã¡mbar derecha */}
         <div style={{
           position: 'absolute',
           top: '40%', right: '-10%',
@@ -576,6 +1231,7 @@ export default function HeroAutomation() {
 
       {/* Content Slot */}
       <div
+        className="automation-hero__content"
         style={{
           position: 'relative',
           zIndex: 10,
@@ -587,6 +1243,7 @@ export default function HeroAutomation() {
       >
         {/* BadgeAuto */}
         <motion.div
+           className="automation-hero__badge"
            initial={{ opacity: 0, y: -10 }}
            animate={{ opacity: 1, y: 0 }}
            transition={{ duration: 0.6, delay: 0.2 }}
@@ -598,7 +1255,7 @@ export default function HeroAutomation() {
              gap: '8px',
              border: '1px solid rgba(245,158,11,0.3)',
              borderRadius: '100px',
-             padding: '7px 20px',
+             padding: '11px 28px',
              marginBottom: '32px',
              background: 'rgba(245,158,11,0.07)',
              boxShadow: '0 0 20px rgba(245,158,11,0.08)',
@@ -619,14 +1276,14 @@ export default function HeroAutomation() {
             }}
           />
           <div style={{
-            width: '6px', height: '6px',
+            width: '8px', height: '8px',
             borderRadius: '50%',
             background: '#f59e0b',
             boxShadow: '0 0 8px rgba(245,158,11,0.9)',
             animation: 'pulse 1.8s ease-in-out infinite',
             flexShrink: 0,
           }}/>
-          <span style={{
+          <span className="automation-hero__badge-label" style={{
             fontSize: '10px',
             letterSpacing: '0.22em',
             color: '#f59e0b',
@@ -639,6 +1296,7 @@ export default function HeroAutomation() {
 
         {/* TitleAuto */}
         <motion.h1
+          className="automation-hero__title"
           initial={{ opacity: 0, y: 28 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.9, delay: 0.35, ease: [0.16, 1, 0.3, 1] }}
@@ -664,7 +1322,8 @@ export default function HeroAutomation() {
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: shouldReduceMotion ? '#f59e0b' : 'transparent',
               backgroundClip: 'text',
-              animation: shouldReduceMotion ? 'none' : 'amberShift 5s ease-in-out infinite',
+              filter: 'brightness(1.04) saturate(1.08)',
+              animation: shouldReduceMotion ? 'none' : 'amberShift 5s ease-in-out infinite, automationTitleGlow 3.4s ease-in-out infinite',
               display: 'block',
               color: shouldReduceMotion ? '#f59e0b' : 'inherit',
             }}>
@@ -692,6 +1351,7 @@ export default function HeroAutomation() {
 
         {/* SubtitleAuto */}
         <motion.p
+          className="automation-hero__copy"
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.6, ease: [0.16, 1, 0.3, 1] }}
@@ -703,7 +1363,7 @@ export default function HeroAutomation() {
             margin: '0 auto clamp(28px, 4vh, 44px)',
             background: 'linear-gradient(180deg, rgba(7,7,9,0.74) 0%, rgba(7,7,9,0.58) 100%)',
             border: '1px solid rgba(245,158,11,0.12)',
-            borderRadius: '16px',
+            borderRadius: 0,
             backdropFilter: 'blur(14px)',
             WebkitBackdropFilter: 'blur(14px)',
             boxShadow: '0 18px 48px rgba(0,0,0,0.34), inset 0 1px 0 rgba(255,255,255,0.04)',
@@ -712,17 +1372,17 @@ export default function HeroAutomation() {
             pointerEvents: 'none',
           }}
         >
-          <span style={{ position: 'absolute', top: 0, left: 0, width: '1px', height: '18px', background: 'rgba(245,158,11,0.3)', borderTopLeftRadius: '16px' }} />
-          <span style={{ position: 'absolute', top: 0, left: 0, height: '1px', width: '18px', background: 'rgba(245,158,11,0.3)', borderTopLeftRadius: '16px' }} />
+          <span style={{ position: 'absolute', top: 0, left: 0, width: '1px', height: '18px', background: 'rgba(245,158,11,0.3)' }} />
+          <span style={{ position: 'absolute', top: 0, left: 0, height: '1px', width: '18px', background: 'rgba(245,158,11,0.3)' }} />
           
-          <span style={{ position: 'absolute', top: 0, right: 0, width: '1px', height: '18px', background: 'rgba(245,158,11,0.3)', borderTopRightRadius: '16px' }} />
-          <span style={{ position: 'absolute', top: 0, right: 0, height: '1px', width: '18px', background: 'rgba(245,158,11,0.3)', borderTopRightRadius: '16px' }} />
+          <span style={{ position: 'absolute', top: 0, right: 0, width: '1px', height: '18px', background: 'rgba(245,158,11,0.3)' }} />
+          <span style={{ position: 'absolute', top: 0, right: 0, height: '1px', width: '18px', background: 'rgba(245,158,11,0.3)' }} />
           
-          <span style={{ position: 'absolute', bottom: 0, left: 0, width: '1px', height: '18px', background: 'rgba(245,158,11,0.3)', borderBottomLeftRadius: '16px' }} />
-          <span style={{ position: 'absolute', bottom: 0, left: 0, height: '1px', width: '18px', background: 'rgba(245,158,11,0.3)', borderBottomLeftRadius: '16px' }} />
+          <span style={{ position: 'absolute', bottom: 0, left: 0, width: '1px', height: '18px', background: 'rgba(245,158,11,0.3)' }} />
+          <span style={{ position: 'absolute', bottom: 0, left: 0, height: '1px', width: '18px', background: 'rgba(245,158,11,0.3)' }} />
           
-          <span style={{ position: 'absolute', bottom: 0, right: 0, width: '1px', height: '18px', background: 'rgba(245,158,11,0.3)', borderBottomRightRadius: '16px' }} />
-          <span style={{ position: 'absolute', bottom: 0, right: 0, height: '1px', width: '18px', background: 'rgba(245,158,11,0.3)', borderBottomRightRadius: '16px' }} />
+          <span style={{ position: 'absolute', bottom: 0, right: 0, width: '1px', height: '18px', background: 'rgba(245,158,11,0.3)' }} />
+          <span style={{ position: 'absolute', bottom: 0, right: 0, height: '1px', width: '18px', background: 'rgba(245,158,11,0.3)' }} />
 
           Cada semana sin automatizar le cuesta a tu empresa{' '}
           <span style={{ color: 'rgba(245,158,11,0.98)', fontWeight: 700 }}>
@@ -735,6 +1395,7 @@ export default function HeroAutomation() {
 
         {/* CTAAuto */}
         <motion.div
+          className="automation-hero__actions"
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, delay: 0.8 }}
@@ -747,6 +1408,7 @@ export default function HeroAutomation() {
           }}
         >
           <motion.a
+            className="automation-hero__button"
             href="#calculadora"
             whileHover={{ scale: 1.03, y: -1 }}
             whileTap={{ scale: 0.97 }}
@@ -796,6 +1458,7 @@ export default function HeroAutomation() {
           </motion.a>
 
           <motion.a
+            className="automation-hero__button"
             href="#flujo"
             whileHover={{
               scale: 1.02,
@@ -825,155 +1488,37 @@ export default function HeroAutomation() {
           </motion.a>
         </motion.div>
 
-        {/* Corporate Marquee */}
-        <div style={{
-          marginTop: 'clamp(40px, 6vh, 64px)',
-          position: 'relative',
-          width: '100vw',
-          left: '50%',
-          right: '50%',
-          marginLeft: '-50vw',
-          marginRight: '-50vw',
-          overflow: 'hidden',
-          padding: '18px 0',
-          background: 'rgba(245,158,11,0.025)',
-          borderTop: '1px solid rgba(245,158,11,0.12)',
-          borderBottom: '1px solid rgba(245,158,11,0.06)',
-          maskImage: 'linear-gradient(90deg, transparent 0%, black 12%, black 88%, transparent 100%)',
-          WebkitMaskImage: 'linear-gradient(90deg, transparent 0%, black 12%, black 88%, transparent 100%)',
-        }}>
-          <motion.div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              whiteSpace: 'nowrap',
-              width: 'max-content',
-            }}
-            animate={{ x: ["0%", "-50%"] }}
-            transition={{
-              duration: 45,
-              ease: "linear",
-              repeat: Infinity,
-            }}
-          >
-            {[
-              { color:'#25d366', label:'WHATSAPP API' },
-              { color:'#1877f2', label:'META ADS' },
-              { color:'#00b1ea', label:'MERCADO PAGO' },
-              { color:'#ffe600', label:'MERCADO LIBRE' },
-              { color:'#f59e0b', label:'AFIP' },
-              { color:'#34a853', label:'GOOGLE SHEETS' },
-              { color:'#ea4335', label:'GMAIL' },
-              { color:'#4285f4', label:'GOOGLE CALENDAR' },
-              { color:'#7b2fff', label:'TIENDANUBE' },
-              { color:'#e8e8e8', label:'NOTION' },
-              { color:'#e01e5a', label:'SLACK' },
-              { color:'#1798c1', label:'SALESFORCE' },
-            ].map((item, i) => (
-              <div
-                key={i}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '12px',
-                  padding: '0 clamp(20px, 3vw, 40px)',
-                  borderRight: '1px solid rgba(255,255,255,0.06)',
-                }}
-              >
-                <div style={{ width: '6px', height: '6px', borderRadius: '1px', background: item.color, flexShrink: 0 }} />
-                <span style={{
-                  fontSize: '11px',
-                  fontWeight: 800,
-                  color: 'rgba(255,255,255,0.3)',
-                  fontFamily: 'ui-monospace, monospace',
-                  letterSpacing: '0.15em',
-                }}>
-                  {item.label}
-                </span>
-              </div>
-            ))}
-            {/* Duplicado para loop infinito */}
-            {[
-              { color:'#25d366', label:'WHATSAPP API' },
-              { color:'#1877f2', label:'META ADS' },
-              { color:'#00b1ea', label:'MERCADO PAGO' },
-              { color:'#ffe600', label:'MERCADO LIBRE' },
-              { color:'#f59e0b', label:'AFIP' },
-              { color:'#34a853', label:'GOOGLE SHEETS' },
-              { color:'#ea4335', label:'GMAIL' },
-              { color:'#4285f4', label:'GOOGLE CALENDAR' },
-              { color:'#7b2fff', label:'TIENDANUBE' },
-              { color:'#e8e8e8', label:'NOTION' },
-              { color:'#e01e5a', label:'SLACK' },
-              { color:'#1798c1', label:'SALESFORCE' },
-            ].map((item, i) => (
-              <div
-                key={`dup-${i}`}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '12px',
-                  padding: '0 clamp(20px, 3vw, 40px)',
-                  borderRight: '1px solid rgba(255,255,255,0.06)',
-                }}
-              >
-                <div style={{ width: '6px', height: '6px', borderRadius: '1px', background: item.color, flexShrink: 0 }} />
-                <span style={{
-                  fontSize: '11px',
-                  fontWeight: 800,
-                  color: 'rgba(255,255,255,0.3)',
-                  fontFamily: 'ui-monospace, monospace',
-                  letterSpacing: '0.15em',
-                }}>
-                  {item.label}
-                </span>
-              </div>
-            ))}
-          </motion.div>
-        </div>
-
-        <p style={{
-          fontSize: '11px',
-          color: 'rgba(245,158,11,0.5)',
-          fontWeight: 900,
-          letterSpacing: '0.25em',
-          textAlign: 'center',
-          marginTop: '16px',
-          pointerEvents: 'none',
-          textTransform: 'uppercase',
-        }}>
-          CONECTAMOS LO QUE YA USÁS
-        </p>
       </div>
 
       {/* Floating Stats */}
       {!shouldReduceMotion && (
-        <>
+        <div className="automation-hero__floating-stats" aria-hidden="true">
           <FloatingStat 
             label="0% trabajo manual" 
             value="Garantizado" 
-            pos={{ top: '22%', left: '12%' }} 
+            pos={{ top: '28%', left: '11%' }}
             delay={1.4}
           />
           <FloatingStat 
             label="24/7" 
             value="Operando solo" 
-            pos={{ top: '65%', right: '10%' }} 
+            pos={{ top: '64%', right: '11%' }}
             delay={1.6}
           />
           <FloatingStat 
             label="<10%" 
             value="del costo de un sueldo" 
-            pos={{ bottom: '20%', left: '15%' }} 
+            pos={{ bottom: '22%', left: '15%' }}
             delay={1.8}
           />
-        </>
+        </div>
       )}
 
       {/* Mouse Interaction Hint */}
       <AnimatePresence>
         {showHint && !mouseMoved && !shouldReduceMotion && (
           <motion.div
+            className="automation-hero__hint"
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}

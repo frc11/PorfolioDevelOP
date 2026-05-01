@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useRef, useEffect, useCallback } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence, useInView, useReducedMotion } from 'motion/react'
 import { Target, Keyboard, Moon } from 'lucide-react'
 
@@ -39,7 +39,7 @@ interface FlowParticle {
 }
 
 interface LogEntry {
-  id: number
+  id: number | string
   message: string
   timestamp: string
 }
@@ -49,7 +49,7 @@ interface LogEntry {
 const flowNodes: FlowNode[] = [
   // TRIGGER
   { 
-    id: 'lead', x: 80, y: 200,
+    id: 'lead', x: 110, y: 200,
     label: 'Pago Recibido',
     sublabel: 'MercadoPago',
     icon: '💳',
@@ -59,7 +59,7 @@ const flowNodes: FlowNode[] = [
 
   // PROCESOS
   { 
-    id: 'calificar', x: 280, y: 140,
+    id: 'calificar', x: 320, y: 125,
     label: 'Validar Pago',
     sublabel: 'Proceso Automático',
     icon: '⚙️',
@@ -67,7 +67,7 @@ const flowNodes: FlowNode[] = [
     color: '#f97316', colorRgb: '249,115,22' 
   },
   { 
-    id: 'registrar', x: 280, y: 280,
+    id: 'registrar', x: 320, y: 275,
     label: 'Emitir Factura',
     sublabel: 'AFIP On-line',
     icon: '🧾',
@@ -77,7 +77,7 @@ const flowNodes: FlowNode[] = [
 
   // DISTRIBUIDOR
   { 
-    id: 'dispatch', x: 500, y: 200,
+    id: 'dispatch', x: 555, y: 200,
     label: 'Orquestador',
     sublabel: 'El cerebro',
     icon: '⚡',
@@ -87,7 +87,7 @@ const flowNodes: FlowNode[] = [
 
   // OUTPUTS (3 simultáneos)
   { 
-    id: 'whatsapp_out', x: 760, y: 100,
+    id: 'whatsapp_out', x: 835, y: 85,
     label: 'Notificar Cliente',
     sublabel: 'WhatsApp',
     icon: '💬',
@@ -95,7 +95,7 @@ const flowNodes: FlowNode[] = [
     color: '#25d366', colorRgb: '37,211,102' 
   },
   { 
-    id: 'vendedor_out', x: 760, y: 220,
+    id: 'vendedor_out', x: 835, y: 200,
     label: 'Aviso Logística',
     sublabel: 'Alerta en Slack',
     icon: '📨',
@@ -103,7 +103,7 @@ const flowNodes: FlowNode[] = [
     color: '#e01e5a', colorRgb: '224,30,90' 
   },
   { 
-    id: 'sheets_out', x: 760, y: 340,
+    id: 'sheets_out', x: 835, y: 315,
     label: 'Libro Ventas',
     sublabel: 'Registro en Excel',
     icon: '📊',
@@ -111,6 +111,20 @@ const flowNodes: FlowNode[] = [
     color: '#34a853', colorRgb: '52,168,83' 
   },
 ]
+
+const mobileFlowNodes: FlowNode[] = flowNodes.map(node => {
+  const positions: Record<string, { x: number, y: number }> = {
+    lead: { x: 210, y: 70 },
+    calificar: { x: 120, y: 200 },
+    registrar: { x: 300, y: 200 },
+    dispatch: { x: 210, y: 340 },
+    whatsapp_out: { x: 92, y: 520 },
+    vendedor_out: { x: 210, y: 570 },
+    sheets_out: { x: 328, y: 520 },
+  }
+
+  return { ...node, ...positions[node.id] }
+})
 
 const flowEdges: FlowEdge[] = [
   { id: 'l-c', from: 'lead', to: 'calificar' },
@@ -160,44 +174,369 @@ const performanceMetrics = [
 
 // ─── COMPONENTS ─────────────────────────────────────────────────────────────
 
-function AtmosphereFlow() {
+const FLOW_CYCLE_MS = 7600
+const svgNumber = (value: number) => Number(value.toFixed(3))
+
+const flowSegments = [
+  { edgeId: 'l-c', start: 420, end: 1620 },
+  { edgeId: 'l-r', start: 420, end: 1620 },
+  { edgeId: 'c-d', start: 1900, end: 3140 },
+  { edgeId: 'r-d', start: 2020, end: 3260 },
+  { edgeId: 'd-w', start: 3700, end: 5040 },
+  { edgeId: 'd-v', start: 3820, end: 5160 },
+  { edgeId: 'd-s', start: 3940, end: 5280 },
+]
+
+const nodeWindows = [
+  { nodeId: 'lead', start: 0, end: 1280 },
+  { nodeId: 'calificar', start: 1560, end: 2460 },
+  { nodeId: 'registrar', start: 1560, end: 2460 },
+  { nodeId: 'dispatch', start: 3120, end: 4280 },
+  { nodeId: 'whatsapp_out', start: 5020, end: 6100 },
+  { nodeId: 'vendedor_out', start: 5140, end: 6220 },
+  { nodeId: 'sheets_out', start: 5260, end: 6340 },
+]
+
+const logSchedule = [
+  { at: 120, nodeId: 'lead' },
+  { at: 1740, nodeId: 'calificar' },
+  { at: 1860, nodeId: 'registrar' },
+  { at: 3340, nodeId: 'dispatch' },
+  { at: 5120, nodeId: 'whatsapp_out' },
+  { at: 5240, nodeId: 'vendedor_out' },
+  { at: 5360, nodeId: 'sheets_out' },
+]
+
+function FlowNodeIcon({ node, isCompleted }: { node: FlowNode, isCompleted: boolean }) {
+  const color = isCompleted ? 'rgba(255,255,255,0.95)' : node.color
+  const muted = isCompleted ? 'rgba(255,255,255,0.58)' : `rgba(${node.colorRgb},0.42)`
+
+  if (isCompleted) {
+    return (
+      <g>
+        <rect x="-10" y="-10" width="20" height="20" rx="4" fill={`rgba(${node.colorRgb},0.72)`} />
+        <path d="M-5 0.5L-1.4 4L6 -5" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+      </g>
+    )
+  }
+
+  switch (node.id) {
+    case 'lead':
+      return (
+        <g>
+          <rect x="-10" y="-7" width="20" height="14" rx="2.5" fill="none" stroke={color} strokeWidth="2" />
+          <path d="M-7 -1H7M-7 4H1" stroke={muted} strokeWidth="1.8" strokeLinecap="round" />
+          <circle cx="6" cy="3.8" r="1.6" fill={color} />
+        </g>
+      )
+    case 'calificar':
+      return (
+        <g>
+          <circle cx="0" cy="0" r="4.4" fill="none" stroke={color} strokeWidth="2" />
+          <path d="M0 -10V-6.8M0 6.8V10M-10 0H-6.8M6.8 0H10M-7.1 -7.1L-4.8 -4.8M4.8 4.8L7.1 7.1M7.1 -7.1L4.8 -4.8M-4.8 4.8L-7.1 7.1" stroke={muted} strokeWidth="2" strokeLinecap="round" />
+        </g>
+      )
+    case 'registrar':
+      return (
+        <g>
+          <path d="M-7 -10H5L9 -6V10H-7Z" fill="none" stroke={color} strokeWidth="2" strokeLinejoin="round" />
+          <path d="M5 -10V-6H9M-3 -3H4M-3 2H4M-3 7H2" stroke={muted} strokeWidth="1.7" strokeLinecap="round" />
+        </g>
+      )
+    case 'dispatch':
+      return (
+        <g>
+          <path d="M2 -13L-7 2H0L-2 13L8 -3H1Z" fill={color} />
+        </g>
+      )
+    case 'whatsapp_out':
+      return (
+        <g>
+          <path d="M-9 -3C-9 -8 -4.6 -11 0.8 -11C6.6 -11 10 -7.7 10 -3.1C10 1.7 5.9 5 0.5 5C-1 5 -2.4 4.8 -3.7 4.3L-8 7L-6.7 2.5C-8.2 1.1 -9 -0.8 -9 -3Z" fill="none" stroke={color} strokeWidth="2" strokeLinejoin="round" />
+          <path d="M-3 -3H4M-3 1H2" stroke={muted} strokeWidth="1.7" strokeLinecap="round" />
+        </g>
+      )
+    case 'vendedor_out':
+      return (
+        <g>
+          <path d="M-10 -6H10V7H-10Z" fill="none" stroke={color} strokeWidth="2" strokeLinejoin="round" />
+          <path d="M-10 -6L0 1.5L10 -6M-6 9H6" stroke={muted} strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
+        </g>
+      )
+    case 'sheets_out':
+      return (
+        <g>
+          <rect x="-10" y="-10" width="20" height="20" rx="3" fill="none" stroke={color} strokeWidth="2" />
+          <path d="M-5 5V0M0 5V-6M5 5V-3" stroke={color} strokeWidth="2.2" strokeLinecap="round" />
+          <path d="M-6 8H6" stroke={muted} strokeWidth="1.6" strokeLinecap="round" />
+        </g>
+      )
+    default:
+      return <circle r="6" fill={color} />
+  }
+}
+
+function getMobileLabelPlacement(nodeId: string, radius: number) {
+  const placements: Record<string, { x: number, y: number, anchor: 'start' | 'middle' | 'end' }> = {
+    lead: { x: 0, y: -(radius + 17), anchor: 'middle' },
+    calificar: { x: -(radius + 12), y: 1, anchor: 'end' },
+    registrar: { x: radius + 12, y: 1, anchor: 'start' },
+    dispatch: { x: 0, y: -(radius + 17), anchor: 'middle' },
+    whatsapp_out: { x: 0, y: radius + 15, anchor: 'middle' },
+    vendedor_out: { x: 0, y: radius + 15, anchor: 'middle' },
+    sheets_out: { x: 0, y: radius + 15, anchor: 'middle' },
+  }
+
+  return placements[nodeId] ?? { x: 0, y: radius + 15, anchor: 'middle' as const }
+}
+
+const clamp01 = (value: number) => Math.min(1, Math.max(0, value))
+
+function getFlowSnapshot(elapsedMs: number, cycleStartedAtClock: number) {
+  const activeNodes = new Set<string>()
+  const completedOutputs = new Set<string>()
+  const edgeProgress: Record<string, number> = {}
+  const particles: FlowParticle[] = []
+
+  nodeWindows.forEach(({ nodeId, start, end }) => {
+    if (elapsedMs >= start && elapsedMs <= end) activeNodes.add(nodeId)
+  })
+
+  flowSegments.forEach((segment, index) => {
+    const progress = clamp01((elapsedMs - segment.start) / (segment.end - segment.start))
+
+    if (progress > 0) edgeProgress[segment.edgeId] = progress
+
+    if (progress > 0 && progress < 1) {
+      const edge = flowEdgeById[segment.edgeId]
+      const fromNode = flowNodeById[edge.from]
+
+      particles.push({
+        id: index,
+        edgeId: segment.edgeId,
+        progress,
+        speed: 0,
+        colorRgb: fromNode.colorRgb,
+        phase: 0,
+      })
+    }
+
+    if (progress >= 1) {
+      const edge = flowEdgeById[segment.edgeId]
+      if (outputNodeIds.has(edge.to)) completedOutputs.add(edge.to)
+    }
+  })
+
+  const logEntries = logSchedule
+    .filter(entry => elapsedMs >= entry.at)
+    .map((entry) => ({
+      id: entry.nodeId,
+      message: arrivalMessageByNodeId[entry.nodeId],
+      timestamp: new Date(cycleStartedAtClock + entry.at).toLocaleTimeString('es-AR', {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+      }),
+    }))
+    .reverse()
+
+  return { activeNodes, completedOutputs, edgeProgress, particles, logEntries }
+}
+
+const backdropCircuitPaths = [
+  'M-40 812H206L238 780H410L442 748H640L674 714H840',
+  'M30 870H310L342 838H510L542 806H756L790 772H980',
+  'M860 792H1048L1084 756H1210L1240 726H1510',
+  'M1036 138H1160L1194 104H1286L1320 70H1510',
+  'M1116 256H1238L1270 224H1378L1408 194H1510',
+  'M72 690H214L250 654H340L376 618H506',
+  'M1162 654V520H1218L1250 488H1306V380',
+  'M1320 750V622H1362L1392 592H1430V456',
+]
+
+const backdropSignalPaths = [
+  'M20 690C160 604 276 714 420 628C594 524 732 612 894 536C1062 456 1212 548 1428 438',
+  'M-10 752C154 672 302 772 462 702C650 620 798 694 952 626C1118 552 1272 640 1460 558',
+]
+
+const backdropNodes = [
+  { x: 128, y: 734, r: 4, delay: 0.1 },
+  { x: 408, y: 780, r: 5, delay: 0.7 },
+  { x: 694, y: 714, r: 3, delay: 1.2 },
+  { x: 980, y: 772, r: 4, delay: 0.4 },
+  { x: 1238, y: 726, r: 5, delay: 1.5 },
+  { x: 1392, y: 592, r: 3, delay: 0.9 },
+  { x: 1160, y: 104, r: 3, delay: 1.8 },
+]
+
+function GearOutline({
+  cx,
+  cy,
+  radius,
+  teeth,
+  opacity,
+  glow = false,
+}: {
+  cx: number
+  cy: number
+  radius: number
+  teeth: number
+  opacity: number
+  glow?: boolean
+}) {
+  const marks = Array.from({ length: teeth }, (_, index) => {
+    const angle = (Math.PI * 2 * index) / teeth
+    const outer = radius + 10
+    const inner = radius + 1
+
+    return {
+      x1: svgNumber(cx + Math.cos(angle) * inner),
+      y1: svgNumber(cy + Math.sin(angle) * inner),
+      x2: svgNumber(cx + Math.cos(angle) * outer),
+      y2: svgNumber(cy + Math.sin(angle) * outer),
+    }
+  })
+
+  const spokes = Array.from({ length: Math.max(3, Math.floor(teeth / 4)) }, (_, index) => {
+    const angle = (Math.PI * 2 * index) / Math.max(3, Math.floor(teeth / 4))
+
+    return {
+      x2: svgNumber(cx + Math.cos(angle) * (radius * 0.72)),
+      y2: svgNumber(cy + Math.sin(angle) * (radius * 0.72)),
+    }
+  })
+
   return (
-    <>
-      <div 
-        aria-hidden="true"
+    <g opacity={opacity} filter={glow ? 'url(#flowBackdropGlow)' : undefined}>
+      <circle cx={cx} cy={cy} r={radius + 13} fill="none" stroke="rgba(249,115,22,0.18)" strokeWidth="1" strokeDasharray="10 12" />
+      <circle cx={cx} cy={cy} r={radius} fill="none" stroke="rgba(249,115,22,0.52)" strokeWidth="1.6" />
+      <circle cx={cx} cy={cy} r={radius * 0.58} fill="none" stroke="rgba(251,191,36,0.28)" strokeWidth="1" />
+      <circle cx={cx} cy={cy} r={radius * 0.2} fill="none" stroke="rgba(249,115,22,0.42)" strokeWidth="1.2" />
+      {marks.map((mark, index) => (
+        <line
+          key={`tooth-${cx}-${cy}-${index}`}
+          x1={mark.x1}
+          y1={mark.y1}
+          x2={mark.x2}
+          y2={mark.y2}
+          stroke="rgba(249,115,22,0.54)"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+        />
+      ))}
+      {spokes.map((spoke, index) => (
+        <line
+          key={`spoke-${cx}-${cy}-${index}`}
+          x1={cx}
+          y1={cy}
+          x2={spoke.x2}
+          y2={spoke.y2}
+          stroke="rgba(251,191,36,0.34)"
+          strokeWidth="1"
+          strokeLinecap="round"
+        />
+      ))}
+    </g>
+  )
+}
+
+function AtmosphereFlow() {
+  const prefersReducedMotion = useReducedMotion()
+
+  return (
+    <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden" aria-hidden="true">
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_48%,rgba(245,158,11,0.075)_0%,rgba(249,115,22,0.026)_32%,rgba(7,7,9,0)_66%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_7%_76%,rgba(249,115,22,0.12)_0%,transparent_25%),radial-gradient(circle_at_93%_80%,rgba(245,158,11,0.1)_0%,transparent_28%),radial-gradient(circle_at_20%_10%,rgba(249,115,22,0.06)_0%,transparent_22%)]" />
+      <div
+        className="absolute inset-0 opacity-[0.16]"
         style={{
-          position: 'absolute',
-          top: '50%', left: '50%',
-          transform: 'translate(-50%, -50%)',
-          width: '900px', height: '400px',
-          background: 'radial-gradient(ellipse, rgba(245, 158, 11, 0.06) 0%, transparent 80%)',
-          filter: 'blur(80px)',
-          pointerEvents: 'none', zIndex: 0,
+          backgroundImage:
+            'linear-gradient(to right, rgba(249,115,22,0.08) 1px, transparent 1px), linear-gradient(to bottom, rgba(245,158,11,0.05) 1px, transparent 1px)',
+          backgroundSize: '84px 84px',
+          maskImage: 'radial-gradient(ellipse at center, rgba(0,0,0,0.45) 0%, transparent 72%)',
+          WebkitMaskImage: 'radial-gradient(ellipse at center, rgba(0,0,0,0.45) 0%, transparent 72%)',
         }}
       />
-      <div 
-        aria-hidden="true"
-        style={{
-          position: 'absolute',
-          top: '20%', left: '5%',
-          width: '400px', height: '400px',
-          background: 'radial-gradient(circle, rgba(249, 115, 22, 0.04) 0%, transparent 70%)',
-          filter: 'blur(90px)',
-          pointerEvents: 'none', zIndex: 0,
-        }}
-      />
-      <div 
-        aria-hidden="true"
-        style={{
-          position: 'absolute',
-          bottom: '20%', right: '5%',
-          width: '400px', height: '400px',
-          background: 'radial-gradient(circle, rgba(245, 158, 11, 0.05) 0%, transparent 70%)',
-          filter: 'blur(90px)',
-          pointerEvents: 'none', zIndex: 0,
-        }}
-      />
-    </>
+
+      <svg className="absolute inset-0 h-full w-full" viewBox="0 0 1440 980" preserveAspectRatio="none" role="presentation">
+        <defs>
+          <linearGradient id="flowBackdropStroke" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="rgba(249,115,22,0)" />
+            <stop offset="18%" stopColor="rgba(249,115,22,0.4)" />
+            <stop offset="52%" stopColor="rgba(251,191,36,0.32)" />
+            <stop offset="100%" stopColor="rgba(249,115,22,0)" />
+          </linearGradient>
+          <radialGradient id="flowBackdropNode">
+            <stop offset="0%" stopColor="rgba(251,191,36,0.98)" />
+            <stop offset="45%" stopColor="rgba(249,115,22,0.45)" />
+            <stop offset="100%" stopColor="rgba(249,115,22,0)" />
+          </radialGradient>
+          <filter id="flowBackdropGlow" x="-220" y="-220" width="1880" height="1420" filterUnits="userSpaceOnUse" colorInterpolationFilters="sRGB">
+            <feGaussianBlur stdDeviation="3.5" result="blur" />
+            <feMerge>
+              <feMergeNode in="blur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+          <mask id="flowBackdropFade">
+            <radialGradient id="flowBackdropFadeGradient" cx="50%" cy="48%" r="68%">
+              <stop offset="0%" stopColor="white" stopOpacity="0.34" />
+              <stop offset="48%" stopColor="white" stopOpacity="0.62" />
+              <stop offset="100%" stopColor="white" stopOpacity="0.18" />
+            </radialGradient>
+            <rect width="1440" height="980" fill="url(#flowBackdropFadeGradient)" />
+          </mask>
+        </defs>
+
+        <g mask="url(#flowBackdropFade)">
+          <g opacity="0.76">
+            {backdropCircuitPaths.map((path, index) => (
+              <g key={`flow-circuit-${index}`}>
+                <path d={path} fill="none" stroke="url(#flowBackdropStroke)" strokeWidth="1.1" />
+                <path d={path} fill="none" stroke="rgba(251,191,36,0.18)" strokeWidth="2.2" strokeDasharray="1 112" strokeLinecap="round" />
+              </g>
+            ))}
+          </g>
+
+          <g opacity="0.5">
+            {backdropSignalPaths.map((path, index) => (
+              <motion.path
+                key={`flow-signal-${index}`}
+                d={path}
+                fill="none"
+                stroke="rgba(249,115,22,0.32)"
+                strokeWidth="1.3"
+                strokeDasharray="2 156"
+                strokeLinecap="round"
+                animate={prefersReducedMotion ? {} : { strokeDashoffset: [0, -316] }}
+                transition={{ duration: 10 + index * 2, repeat: Infinity, ease: 'linear' }}
+              />
+            ))}
+          </g>
+
+          <GearOutline cx={42} cy={730} radius={104} teeth={28} opacity={0.34} glow />
+          <GearOutline cx={190} cy={514} radius={48} teeth={18} opacity={0.44} />
+          <GearOutline cx={278} cy={610} radius={56} teeth={18} opacity={0.34} />
+          <GearOutline cx={1170} cy={808} radius={42} teeth={18} opacity={0.32} />
+          <GearOutline cx={1362} cy={714} radius={54} teeth={20} opacity={0.42} />
+
+          {backdropNodes.map((node, index) => (
+            <motion.g
+              key={`flow-node-${index}`}
+              animate={prefersReducedMotion ? {} : { opacity: [0.28, 0.95, 0.38] }}
+              transition={{ duration: 3.8, repeat: Infinity, delay: node.delay, ease: 'easeInOut' }}
+            >
+              <circle cx={node.x} cy={node.y} r={node.r * 4.2} fill="url(#flowBackdropNode)" opacity="0.25" />
+              <circle cx={node.x} cy={node.y} r={node.r} fill="rgba(251,191,36,0.86)" filter="url(#flowBackdropGlow)" />
+            </motion.g>
+          ))}
+        </g>
+      </svg>
+
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(7,7,9,0.18)_0%,rgba(7,7,9,0.72)_58%,rgba(7,7,9,0.96)_100%)]" />
+      <div className="absolute inset-x-0 top-0 h-52 bg-gradient-to-b from-[#070709] via-[#070709]/80 to-transparent" />
+      <div className="absolute inset-x-0 bottom-0 h-56 bg-gradient-to-t from-[#070709] via-[#070709]/78 to-transparent" />
+    </div>
   )
 }
 
@@ -212,14 +551,30 @@ function FlowSVG({
   completedOutputs: Set<string>
   edgeProgress: Record<string, number>
 }) {
+  const [isMobileLayout, setIsMobileLayout] = useState(false)
+  const layoutNodes = isMobileLayout ? mobileFlowNodes : flowNodes
+  const layoutNodeById = Object.fromEntries(layoutNodes.map(node => [node.id, node])) as Record<string, FlowNode>
+  const viewBox = isMobileLayout ? '0 0 420 650' : '0 20 930 360'
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(max-width: 639px)')
+    const syncLayout = () => setIsMobileLayout(mediaQuery.matches)
+
+    syncLayout()
+    mediaQuery.addEventListener('change', syncLayout)
+
+    return () => mediaQuery.removeEventListener('change', syncLayout)
+  }, [])
+
   const getNodeRadius = (nodeId: string) => {
-    const node = flowNodeById[nodeId]
+    const node = layoutNodeById[nodeId]
+    if (isMobileLayout) return node.id === 'dispatch' ? 34 : node.type === 'trigger' ? 32 : 27
     return node.id === 'dispatch' ? 36 : node.type === 'trigger' ? 34 : 28
   }
 
   const getEdgePoints = (edge: FlowEdge) => {
-    const from = flowNodeById[edge.from]
-    const to = flowNodeById[edge.to]
+    const from = layoutNodeById[edge.from]
+    const to = layoutNodeById[edge.to]
     const dx = to.x - from.x
     const dy = to.y - from.y
     const len = Math.hypot(dx, dy) || 1
@@ -238,7 +593,7 @@ function FlowSVG({
   }
 
   return (
-    <div className="relative bg-[#ffffff]/[0.02] border border-white/[0.07] rounded-[20px] p-6 lg:p-10 overflow-hidden"
+    <div className="relative bg-[#ffffff]/[0.02] border border-white/[0.07] rounded-[20px] p-4 sm:p-6 lg:p-10 overflow-hidden"
       style={{ boxShadow: '0 0 0 1px rgba(255,255,255,0.03), 0 24px 48px rgba(0,0,0,0.4)' }}
     >
       <span className="absolute top-0 left-0 w-[1px] h-[18px] bg-amber-500/30 rounded-tl-[20px]" />
@@ -252,13 +607,13 @@ function FlowSVG({
 
       <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-amber-500/25 to-transparent" />
       <svg
-        viewBox="0 0 1000 400"
-        className="w-full h-auto overflow-visible"
+        viewBox={viewBox}
+        className="mx-auto h-auto w-full overflow-visible"
         style={{ filter: 'drop-shadow(0 0 20px rgba(0,0,0,0.5))' }}
       >
         <defs>
-          <filter id="flowGlow">
-            <feGaussianBlur stdDeviation="3" result="blur" />
+          <filter id="flowGlow" x="-120" y="-140" width="1180" height="720" filterUnits="userSpaceOnUse" colorInterpolationFilters="sRGB">
+            <feGaussianBlur stdDeviation="4.5" result="blur" />
             <feMerge>
               <feMergeNode in="blur" />
               <feMergeNode in="SourceGraphic" />
@@ -268,7 +623,8 @@ function FlowSVG({
 
         {/* EDGES base */}
         {flowEdges.map(edge => {
-          const from = flowNodeById[edge.from]
+          const from = layoutNodeById[edge.from]
+          const isOutputEdge = edge.from === 'dispatch'
           const points = getEdgePoints(edge)
           const edgeParticles = particles.filter(p => p.edgeId === edge.id)
           const liveProgress = edgeParticles.length > 0
@@ -277,38 +633,51 @@ function FlowSVG({
           const retainedProgress = edgeProgress[edge.id] ?? 0
           const furthestProgress = Math.max(liveProgress, retainedProgress)
           const hasFlow = furthestProgress > 0.001
-          const hx = points.x1 + (points.x2 - points.x1) * furthestProgress
-          const hy = points.y1 + (points.y2 - points.y1) * furthestProgress
+          const visualProgress = furthestProgress
+          const hx = svgNumber(points.x1 + (points.x2 - points.x1) * visualProgress)
+          const hy = svgNumber(points.y1 + (points.y2 - points.y1) * visualProgress)
+          const x1 = svgNumber(points.x1)
+          const y1 = svgNumber(points.y1)
+          const x2 = svgNumber(points.x2)
+          const y2 = svgNumber(points.y2)
+          const glowOpacity = isOutputEdge ? 0.22 : 0.14
+          const coreOpacity = furthestProgress >= 0.999 ? 0.98 : isOutputEdge ? 0.9 : 0.72
 
           return (
             <g key={edge.id}>
               <line
-                x1={points.x1} y1={points.y1}
-                x2={points.x2} y2={points.y2}
+                x1={x1} y1={y1}
+                x2={x2} y2={y2}
                 stroke="rgba(255, 255, 255, 0.07)"
                 strokeWidth={1.5}
                 strokeDasharray="4 8"
+                strokeLinecap="round"
               />
 
               {hasFlow && (
-                <line
-                  x1={points.x1} y1={points.y1}
-                  x2={hx} y2={hy}
-                  stroke={`rgba(${from.colorRgb}, 0.16)`}
-                  strokeWidth={5}
-                  strokeLinecap="round"
-                />
-              )}
-
-              {hasFlow && (
-                <line
-                  x1={points.x1} y1={points.y1}
-                  x2={hx} y2={hy}
-                  stroke={`rgba(${from.colorRgb}, ${furthestProgress >= 0.999 ? 0.82 : 0.68})`}
-                  strokeWidth={2.2}
-                  strokeLinecap="round"
-                  filter="url(#flowGlow)"
-                />
+                <>
+                  <line
+                    x1={x1} y1={y1}
+                    x2={hx} y2={hy}
+                    stroke={`rgba(${from.colorRgb}, ${glowOpacity})`}
+                    strokeWidth={isOutputEdge ? 14 : 9}
+                    strokeLinecap="round"
+                  />
+                  <line
+                    x1={x1} y1={y1}
+                    x2={hx} y2={hy}
+                    stroke={`rgba(${from.colorRgb}, ${isOutputEdge ? 0.34 : 0.22})`}
+                    strokeWidth={isOutputEdge ? 7 : 5}
+                    strokeLinecap="round"
+                  />
+                  <line
+                    x1={x1} y1={y1}
+                    x2={hx} y2={hy}
+                    stroke={`rgba(${from.colorRgb}, ${coreOpacity})`}
+                    strokeWidth={isOutputEdge ? 3.2 : 2.35}
+                    strokeLinecap="round"
+                  />
+                </>
               )}
             </g>
           )
@@ -356,15 +725,18 @@ function FlowSVG({
         })}
 
         {/* NODOS */}
-        {flowNodes.map(node => {
+        {layoutNodes.map(node => {
           const isActive = activeNodes.has(node.id)
           const isCompleted = completedOutputs.has(node.id)
           const R = node.id === 'dispatch' ? 36 : node.type === 'trigger' ? 34 : 28
+          const labelPlacement = isMobileLayout
+            ? getMobileLabelPlacement(node.id, R)
+            : { x: 0, y: R + 15, anchor: 'middle' as const }
           const incoming = flowEdges.filter(edge => edge.to === node.id)
           const outgoing = flowEdges.filter(edge => edge.from === node.id)
 
           const portFromEdge = (otherNodeId: string) => {
-            const other = flowNodeById[otherNodeId]
+            const other = layoutNodeById[otherNodeId]
             const dx = other.x - node.x
             const dy = other.y - node.y
             const len = Math.hypot(dx, dy) || 1
@@ -461,18 +833,14 @@ function FlowSVG({
                 )
               })}
 
-              <text
-                textAnchor="middle"
-                dominantBaseline="central"
-                fontSize={node.id === 'dispatch' ? "22" : "16"}
-                className="select-none"
-              >
-                {isCompleted ? '✅' : node.icon}
-              </text>
+              <g className="select-none">
+                <FlowNodeIcon node={node} isCompleted={isCompleted} />
+              </g>
 
               <text
-                y={R + 15}
-                textAnchor="middle"
+                x={labelPlacement.x}
+                y={labelPlacement.y}
+                textAnchor={labelPlacement.anchor}
                 fill={isActive || isCompleted ? node.color : 'rgba(255, 255, 255, 0.35)'}
                 fontSize="11"
                 fontWeight={isActive || isCompleted ? "700" : "400"}
@@ -481,8 +849,9 @@ function FlowSVG({
                 {node.label.toUpperCase()}
               </text>
               <text
-                y={R + 28}
-                textAnchor="middle"
+                x={labelPlacement.x}
+                y={labelPlacement.y + 13}
+                textAnchor={labelPlacement.anchor}
                 fill="rgba(255, 255, 255, 0.2)"
                 fontSize="9"
                 className="font-mono tracking-wider"
@@ -499,7 +868,7 @@ function FlowSVG({
 
 function EventLog({ logEntries, isSimulating }: { logEntries: LogEntry[], isSimulating: boolean }) {
   return (
-    <div className="relative mt-6 overflow-hidden rounded-2xl border border-white/[0.07]"
+    <div className="relative mt-6 h-[236px] overflow-hidden rounded-2xl border border-white/[0.07]"
       style={{ background: 'rgba(8,8,16,0.8)', boxShadow: '0 8px 32px rgba(0,0,0,0.3)' }}
     >
       <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-amber-500/25 to-transparent" />
@@ -522,7 +891,7 @@ function EventLog({ logEntries, isSimulating }: { logEntries: LogEntry[], isSimu
       </div>
 
       {/* Log Body */}
-      <div className="p-4 max-h-[160px] overflow-y-auto space-y-1.5" style={{ fontFamily: 'ui-monospace, monospace' }}>
+      <div className="h-[188px] overflow-y-auto p-4 space-y-1.5" style={{ fontFamily: 'ui-monospace, monospace' }}>
         <AnimatePresence initial={false} mode="popLayout">
           {logEntries.map((entry) => (
             <motion.div
@@ -543,7 +912,7 @@ function EventLog({ logEntries, isSimulating }: { logEntries: LogEntry[], isSimu
             </motion.div>
           ))}
           {logEntries.length === 0 && (
-            <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.12)', textAlign: 'center', padding: '20px 0', letterSpacing: '0.12em' }}>
+            <div className="grid h-full place-items-center" style={{ fontSize: '10px', color: 'rgba(255,255,255,0.12)', textAlign: 'center', letterSpacing: '0.12em' }}>
               SISTEMA LISTO
             </div>
           )}
@@ -557,7 +926,7 @@ function Header({ isInView }: { isInView: boolean }) {
   const prefersReducedMotion = useReducedMotion()
 
   return (
-    <div className="mb-10 md:mb-14">
+    <div className="mb-10 text-center md:mb-14 lg:text-left">
       <motion.div
         initial={{ opacity: 0, x: -10 }}
         animate={isInView ? { opacity: 1, x: 0 } : {}}
@@ -618,7 +987,7 @@ function Header({ isInView }: { isInView: boolean }) {
         initial={{ opacity:0 }}
         animate={isInView ? { opacity:1 } : {}}
         transition={{ duration:0.6, delay:0.3 }}
-        className="text-white/42 text-sm md:text-base mt-6 max-w-xl leading-relaxed"
+        className="mx-auto mt-6 max-w-xl text-sm leading-relaxed text-white/42 md:text-base lg:mx-0"
       >
         Así se ve tu empresa cuando la conectamos. El flujo se ejecuta en tiempo real
         y de forma continua para que veas cómo todos tus sistemas trabajan en armonía.
@@ -641,258 +1010,132 @@ export default function FlujoAutomation() {
   const [eventLog, setEventLog] = useState<LogEntry[]>([])
   const [edgeProgress, setEdgeProgress] = useState<Record<string, number>>({})
   const [hoveredMetricIndex, setHoveredMetricIndex] = useState<number | null>(null)
+  const [centerMetricIndex, setCenterMetricIndex] = useState<number | 'all' | null>(null)
 
   // Refs para loop de partículas
-  const particlesRef = useRef<FlowParticle[]>([])
+  const cycleStartedAtRef = useRef<number | null>(null)
+  const cycleStartedAtClockRef = useRef<number>(0)
   const animRef = useRef<number>(0)
-  const frameRef = useRef(0)
-  const activeNodesRef = useRef<Set<string>>(new Set())
-  const cycleTimeoutsRef = useRef<ReturnType<typeof setTimeout>[]>([])
-  const nodeTimeoutsRef = useRef<Record<string, ReturnType<typeof setTimeout> | undefined>>({})
-  const spawnCooldownRef = useRef<Record<string, number>>({})
-  const loggedNodesRef = useRef<Set<string>>(new Set())
-  const edgeProgressRef = useRef<Record<string, number>>({})
-
-  // Sincronizar ref de nodos activos para evitar stale closure en RAF
-  useEffect(() => {
-    activeNodesRef.current = activeNodes
-  }, [activeNodes])
-
-  useEffect(() => {
-    edgeProgressRef.current = edgeProgress
-  }, [edgeProgress])
-
+  const metricsGroupRef = useRef<HTMLDivElement | null>(null)
+  const metricRefs = useRef<Array<HTMLDivElement | null>>([])
   // Cleanup cleanup
   useEffect(() => {
     return () => cancelAnimationFrame(animRef.current)
   }, [])
 
-  const clearCycleTimeouts = useCallback(() => {
-    cycleTimeoutsRef.current.forEach(clearTimeout)
-    cycleTimeoutsRef.current = []
-  }, [])
-
-  const queueCycleTimeout = useCallback((fn: () => void, delay: number) => {
-    const timeoutId = setTimeout(fn, delay)
-    cycleTimeoutsRef.current.push(timeoutId)
-  }, [])
-
-  const clearNodeTimeouts = useCallback(() => {
-    Object.values(nodeTimeoutsRef.current).forEach(timeoutId => {
-      if (timeoutId) clearTimeout(timeoutId)
-    })
-    nodeTimeoutsRef.current = {}
-  }, [])
-
-  const getTimestamp = useCallback(
-    () =>
-      new Date().toLocaleTimeString('es-AR', {
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-      }),
-    []
-  )
-
-  const pushLog = useCallback((message: string) => {
-    setEventLog(prev => [
-      {
-        id: Date.now() + Math.random(),
-        message,
-        timestamp: getTimestamp(),
-      },
-      ...prev,
-    ].slice(0, 8))
-  }, [getTimestamp])
-
-  const activateNode = useCallback((nodeId: string, duration = 950) => {
-    const nextActive = new Set(activeNodesRef.current)
-    nextActive.add(nodeId)
-    activeNodesRef.current = nextActive
-    setActiveNodes(nextActive)
-
-    const prevTimeout = nodeTimeoutsRef.current[nodeId]
-    if (prevTimeout) clearTimeout(prevTimeout)
-
-    nodeTimeoutsRef.current[nodeId] = setTimeout(() => {
-      const updated = new Set(activeNodesRef.current)
-      updated.delete(nodeId)
-      activeNodesRef.current = updated
-      setActiveNodes(updated)
-    }, duration)
-  }, [])
-
-  const spawnParticle = useCallback((edgeId: string, speedBoost = 0) => {
-    const edge = flowEdgeById[edgeId]
-    if (!edge) return
-
-    const fromNode = flowNodeById[edge.from]
-    particlesRef.current.push({
-      id: Date.now() + Math.random(),
-      edgeId: edge.id,
-      progress: 0,
-      speed: 0.0046 + Math.random() * 0.0022 + speedBoost,
-      colorRgb: fromNode.colorRgb,
-      phase: Math.random(),
-    })
-  }, [])
-
-  const startParticleLoop = useCallback(() => {
-    if (shouldReduceMotion) return
+  useEffect(() => {
+    if (!isInView) return
 
     cancelAnimationFrame(animRef.current)
-    frameRef.current = 0
+    cycleStartedAtRef.current = null
+    cycleStartedAtClockRef.current = Date.now()
 
-    function tick() {
-      frameRef.current++
-      const f = frameRef.current
+    if (shouldReduceMotion) {
+      const snapshot = getFlowSnapshot(5600, cycleStartedAtClockRef.current)
+      setActiveNodes(snapshot.activeNodes)
+      setParticles([])
+      setCompletedOutputs(snapshot.completedOutputs)
+      setEdgeProgress(snapshot.edgeProgress)
+      setEventLog(snapshot.logEntries)
+      return
+    }
 
-      // Emitir pocas particulas para mantener un look mas limpio y profesional.
-      if (particlesRef.current.length < 8) {
-        flowEdges.forEach(edge => {
-          if (!activeNodesRef.current.has(edge.from)) return
-
-          const hasEdgeParticle = particlesRef.current.some(p => p.edgeId === edge.id)
-          if (hasEdgeParticle) return
-
-          const minGap = edge.from === 'dispatch' ? 80 : 96
-          const lastSpawnFrame = spawnCooldownRef.current[edge.id] ?? -10000
-          if (f - lastSpawnFrame < minGap) return
-
-          spawnParticle(edge.id, edge.from === 'dispatch' ? 0.0005 : 0)
-          spawnCooldownRef.current[edge.id] = f
-        })
+    const tick = (timestamp: number) => {
+      if (cycleStartedAtRef.current === null) {
+        cycleStartedAtRef.current = timestamp
+        cycleStartedAtClockRef.current = Date.now()
       }
 
-      // Avance y deteccion de llegada real.
-      const reachedNodeIds: string[] = []
-      particlesRef.current = particlesRef.current
-        .map(p => {
-          const progress = p.progress + p.speed
-          const prevProgress = edgeProgressRef.current[p.edgeId] ?? 0
-          if (progress > prevProgress) {
-            edgeProgressRef.current = { ...edgeProgressRef.current, [p.edgeId]: Math.min(progress, 1) }
-          }
-          return { ...p, progress }
-        })
-        .filter(p => {
-          if (p.progress < 1) return true
+      let elapsedMs = timestamp - cycleStartedAtRef.current
 
-          const edge = flowEdgeById[p.edgeId]
-          if (edge) reachedNodeIds.push(edge.to)
-
-          return false
-        })
-
-      if (reachedNodeIds.length > 0) {
-        const uniqueReached = Array.from(new Set(reachedNodeIds))
-
-        uniqueReached.forEach(nodeId => {
-          activateNode(nodeId, nodeId === 'dispatch' ? 1200 : 900)
-
-          if (outputNodeIds.has(nodeId)) {
-            setCompletedOutputs(prev => {
-              const next = new Set(prev)
-              next.add(nodeId)
-              return next
-            })
-          }
-
-          const msg = arrivalMessageByNodeId[nodeId]
-          if (msg && !loggedNodesRef.current.has(nodeId)) {
-            loggedNodesRef.current.add(nodeId)
-            pushLog(msg)
-          }
-        })
+      if (elapsedMs >= FLOW_CYCLE_MS) {
+        cycleStartedAtRef.current = timestamp
+        cycleStartedAtClockRef.current = Date.now()
+        elapsedMs = 0
       }
 
-      setParticles([...particlesRef.current])
-      setEdgeProgress(edgeProgressRef.current)
+      const snapshot = getFlowSnapshot(elapsedMs, cycleStartedAtClockRef.current)
+      setActiveNodes(snapshot.activeNodes)
+      setParticles(snapshot.particles)
+      setCompletedOutputs(snapshot.completedOutputs)
+      setEdgeProgress(snapshot.edgeProgress)
+      setEventLog(snapshot.logEntries)
       animRef.current = requestAnimationFrame(tick)
     }
 
     animRef.current = requestAnimationFrame(tick)
-  }, [activateNode, pushLog, shouldReduceMotion, spawnParticle])
 
-  const runSimulationCycle = useCallback(() => {
-    clearNodeTimeouts()
-    activeNodesRef.current = new Set()
-    setActiveNodes(new Set())
-    particlesRef.current = []
-    setParticles([])
-    setCompletedOutputs(new Set())
-    edgeProgressRef.current = {}
-    setEdgeProgress({})
-    spawnCooldownRef.current = {}
-    loggedNodesRef.current = new Set()
-
-    activateNode('lead', shouldReduceMotion ? 500 : 1150)
-    loggedNodesRef.current.add('lead')
-    pushLog(arrivalMessageByNodeId.lead)
-
-    if (shouldReduceMotion) {
-      const reducedSequence = [
-        { nodeId: 'calificar', delay: 280 },
-        { nodeId: 'registrar', delay: 420 },
-        { nodeId: 'dispatch', delay: 680 },
-        { nodeId: 'whatsapp_out', delay: 940 },
-        { nodeId: 'vendedor_out', delay: 1040 },
-        { nodeId: 'sheets_out', delay: 1140 },
-      ]
-
-      reducedSequence.forEach(({ nodeId, delay }) => {
-        queueCycleTimeout(() => {
-          activateNode(nodeId, nodeId === 'dispatch' ? 700 : 550)
-          const msg = arrivalMessageByNodeId[nodeId]
-          if (msg && !loggedNodesRef.current.has(nodeId)) {
-            loggedNodesRef.current.add(nodeId)
-            pushLog(msg)
-          }
-          if (outputNodeIds.has(nodeId)) {
-            setCompletedOutputs(prev => {
-              const next = new Set(prev)
-              next.add(nodeId)
-              return next
-            })
-          }
-        }, delay)
-      })
-      return
+    return () => {
+      cancelAnimationFrame(animRef.current)
     }
-
-    // Arranque real: el trigger dispara ambos caminos.
-    spawnParticle('l-c', 0.0006)
-    spawnParticle('l-r', 0.0006)
-  }, [activateNode, clearNodeTimeouts, pushLog, queueCycleTimeout, shouldReduceMotion, spawnParticle])
+  }, [isInView, shouldReduceMotion])
 
   useEffect(() => {
     if (!isInView) return
 
-    clearCycleTimeouts()
-    clearNodeTimeouts()
-    const bootstrapTimeout = setTimeout(() => {
-      runSimulationCycle()
-    }, 0)
+    const compactQuery = window.matchMedia('(max-width: 1023px)')
+    const tabletQuery = window.matchMedia('(min-width: 640px) and (max-width: 1023px)')
+    let frameId = 0
 
-    const cycleDuration = shouldReduceMotion ? 1700 : 7600
-    const intervalId = setInterval(() => {
-      clearCycleTimeouts()
-      clearNodeTimeouts()
-      runSimulationCycle()
-    }, cycleDuration)
+    const updateCenteredMetric = () => {
+      if (!compactQuery.matches) {
+        setCenterMetricIndex(null)
+        return
+      }
 
-    if (!shouldReduceMotion) {
-      startParticleLoop()
+      const viewportCenter = window.innerHeight / 2
+
+      if (tabletQuery.matches) {
+        const groupRect = metricsGroupRef.current?.getBoundingClientRect()
+        const isCenterCrossingGroup = groupRect
+          ? groupRect.top <= viewportCenter && groupRect.bottom >= viewportCenter
+          : false
+
+        setCenterMetricIndex(isCenterCrossingGroup ? 'all' : null)
+        return
+      }
+
+      let closestIndex: number | null = null
+      let closestDistance = Number.POSITIVE_INFINITY
+
+      metricRefs.current.forEach((element, index) => {
+        if (!element) return
+
+        const rect = element.getBoundingClientRect()
+        const isVisible = rect.bottom > 0 && rect.top < window.innerHeight
+        if (!isVisible) return
+
+        const cardCenter = rect.top + rect.height / 2
+        const distance = Math.abs(cardCenter - viewportCenter)
+
+        if (distance < closestDistance) {
+          closestDistance = distance
+          closestIndex = index
+        }
+      })
+
+      setCenterMetricIndex(closestIndex)
     }
+
+    const scheduleUpdate = () => {
+      cancelAnimationFrame(frameId)
+      frameId = requestAnimationFrame(updateCenteredMetric)
+    }
+
+    updateCenteredMetric()
+    window.addEventListener('scroll', scheduleUpdate, { passive: true })
+    window.addEventListener('resize', scheduleUpdate)
+    compactQuery.addEventListener('change', updateCenteredMetric)
+    tabletQuery.addEventListener('change', updateCenteredMetric)
 
     return () => {
-      clearTimeout(bootstrapTimeout)
-      clearInterval(intervalId)
-      clearCycleTimeouts()
-      clearNodeTimeouts()
-      cancelAnimationFrame(animRef.current)
+      cancelAnimationFrame(frameId)
+      window.removeEventListener('scroll', scheduleUpdate)
+      window.removeEventListener('resize', scheduleUpdate)
+      compactQuery.removeEventListener('change', updateCenteredMetric)
+      tabletQuery.removeEventListener('change', updateCenteredMetric)
     }
-  }, [clearCycleTimeouts, clearNodeTimeouts, isInView, runSimulationCycle, shouldReduceMotion, startParticleLoop])
+  }, [isInView])
 
   return (
     <section
@@ -921,15 +1164,19 @@ export default function FlujoAutomation() {
         </div>
 
         {/* MÉTRICAS DE IMPACTO */}
-        <div className="flex flex-wrap gap-3 md:gap-4 mt-12 md:mt-16 relative">
+        <div ref={metricsGroupRef} className="flex flex-wrap gap-3 md:gap-4 mt-12 md:mt-16 relative">
           {!shouldReduceMotion && (
             <div className="absolute top-1/2 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-amber-500/10 to-transparent -translate-y-1/2 hidden md:block pointer-events-none" />
           )}
           {performanceMetrics.map((m, i) => {
-            const isHovered = hoveredMetricIndex === i
+            const activeMetric = hoveredMetricIndex ?? centerMetricIndex
+            const isHovered = activeMetric === 'all' || activeMetric === i
             return (
               <motion.div
                 key={i}
+                ref={(element) => {
+                  metricRefs.current[i] = element
+                }}
                 initial={shouldReduceMotion ? { opacity:1 } : { opacity: 0, y: 16 }}
                 animate={isInView ? { opacity: 1, y: 0 } : {}}
                 transition={{ delay: 0.5 + i * 0.1, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}

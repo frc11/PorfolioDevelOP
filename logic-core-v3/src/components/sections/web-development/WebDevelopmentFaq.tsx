@@ -296,7 +296,7 @@ export const WebDevelopmentFaq = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.2 }}
                 transition={{ duration: prefersReducedMotion ? 0 : 0.55, delay: prefersReducedMotion ? 0 : 0.42, ease }}
-                className="relative z-10 mx-auto max-w-4xl"
+                className="relative z-10 mx-auto max-w-[90rem]"
             >
                 <motion.div
                     initial={{ opacity: 0, y: 22 }}

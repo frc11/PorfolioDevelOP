@@ -171,20 +171,22 @@ export default function WebDevelopmentPage() {
                                 Tu negocio, abierto
                             </span>
                             <span
-                                className="block bg-gradient-to-r from-cyan-300 via-cyan-400 to-sky-300 bg-clip-text text-transparent"
+                                className="block bg-clip-text text-transparent"
                                 style={{
-                                    backgroundSize: '240% 100%',
-                                    animation: shouldReduceMotion ? 'none' : 'heroWebShift 5.4s ease-in-out infinite, heroWebGlow 3.6s ease-in-out infinite',
+                                    background: shouldReduceMotion
+                                        ? 'none'
+                                        : 'linear-gradient(135deg, #67e8f9 0%, #22d3ee 35%, #0ea5e9 65%, #67e8f9 100%)',
+                                    backgroundSize: '300% 100%',
+                                    WebkitBackgroundClip: 'text',
+                                    WebkitTextFillColor: shouldReduceMotion ? '#22d3ee' : 'transparent',
+                                    backgroundClip: 'text',
+                                    filter: 'brightness(1.04) saturate(1.08)',
+                                    animation: shouldReduceMotion ? 'none' : 'heroWebShift 5s ease-in-out infinite, heroWebGlow 3.4s ease-in-out infinite',
+                                    color: shouldReduceMotion ? '#22d3ee' : 'inherit',
                                 }}
                             >
                                 Las 24 horas
-                                <motion.span
-                                    className="ml-[0.06em] inline-block text-cyan-300 [text-shadow:0_0_16px_rgba(34,211,238,0.78)]"
-                                    animate={shouldReduceMotion ? { opacity: 1, scale: 1 } : { opacity: [0.82, 1, 0.82], scale: [1, 1.06, 1] }}
-                                    transition={shouldReduceMotion ? { duration: 0 } : { duration: 2.2, repeat: Infinity, ease: 'easeInOut' }}
-                                >
-                                    .
-                                </motion.span>
+                                <span className="ml-[0.06em] inline-block">.</span>
                             </span>
                         </motion.h1>
                     </motion.div>
@@ -290,10 +292,10 @@ export default function WebDevelopmentPage() {
                 }
                 @keyframes heroWebGlow {
                     0%, 100% {
-                        filter: drop-shadow(0 0 10px rgba(34,211,238,0.22)) drop-shadow(0 0 24px rgba(34,211,238,0.16));
+                        filter: brightness(1) saturate(1.05);
                     }
                     50% {
-                        filter: drop-shadow(0 0 18px rgba(34,211,238,0.38)) drop-shadow(0 0 40px rgba(34,211,238,0.24));
+                        filter: brightness(1.14) saturate(1.24);
                     }
                 }
             `}</style>
