@@ -17,52 +17,74 @@ export type ExecutiveBriefResult = {
   canRegenerate: boolean
 }
 
-export async function getExecutiveBrief(organizationId: string): Promise<ExecutiveBriefResult> {
-  const org = await prisma.organization.findUnique({
-    where: { id: organizationId },
-    select: {
-      id: true,
-      companyName: true,
-      cachedExecutiveBrief: true,
-      cachedExecutiveBriefAt: true,
-      executiveBriefRegenerations: true,
-    },
-  })
+export async function getExecutiveBrief(
+  organizationId: string,
+): Promise<ExecutiveBriefResult | null> {
+  try {
+    const org = await prisma.organization.findUnique({
+      where: { id: organizationId },
+      select: {
+        id: true,
+        companyName: true,
+        cachedExecutiveBrief: true,
+        cachedExecutiveBriefAt: true,
+        executiveBriefRegenerations: true,
+      },
+    })
 
-  if (!org) throw new Error(`Organization ${organizationId} not found`)
-
-  const now = new Date()
-  const cacheAge = getCacheAgeDays(org.cachedExecutiveBriefAt, now)
-  const regenerationCount =
-    cacheAge >= CACHE_TTL_DAYS ? 0 : org.executiveBriefRegenerations
-
-  if (org.cachedExecutiveBrief && org.cachedExecutiveBriefAt && cacheAge < CACHE_TTL_DAYS) {
-    return {
-      text: org.cachedExecutiveBrief,
-      generatedAt: org.cachedExecutiveBriefAt,
-      isFresh: false,
-      regenerationsLeft: getRegenerationsLeft(regenerationCount),
-      canRegenerate: regenerationCount < REGENERATION_LIMIT,
+    if (!org) {
+      console.warn(`[Brief] Organization ${organizationId} not found`)
+      return null
     }
-  }
 
-  const text = await generateBriefText(organizationId, org.companyName)
+    const now = new Date()
+    const cacheAge = getCacheAgeDays(org.cachedExecutiveBriefAt, now)
+    const regenerationCount =
+      cacheAge >= CACHE_TTL_DAYS ? 0 : org.executiveBriefRegenerations
 
-  await prisma.organization.update({
-    where: { id: organizationId },
-    data: {
-      cachedExecutiveBrief: text,
-      cachedExecutiveBriefAt: now,
-      executiveBriefRegenerations: 0,
-    },
-  })
+    if (org.cachedExecutiveBrief && org.cachedExecutiveBriefAt && cacheAge < CACHE_TTL_DAYS) {
+      if (!org.cachedExecutiveBrief.trim()) return null
 
-  return {
-    text,
-    generatedAt: now,
-    isFresh: true,
-    regenerationsLeft: REGENERATION_LIMIT,
-    canRegenerate: true,
+      return {
+        text: org.cachedExecutiveBrief,
+        generatedAt: org.cachedExecutiveBriefAt,
+        isFresh: false,
+        regenerationsLeft: getRegenerationsLeft(regenerationCount),
+        canRegenerate: regenerationCount < REGENERATION_LIMIT,
+      }
+    }
+
+    try {
+      const text = await generateBriefText(organizationId, org.companyName ?? 'tu negocio')
+
+      if (!text || !text.trim()) {
+        console.warn(`[Brief] Generated empty text for org ${organizationId}`)
+        return null
+      }
+
+      await prisma.organization.update({
+        where: { id: organizationId },
+        data: {
+          cachedExecutiveBrief: text,
+          cachedExecutiveBriefAt: now,
+          executiveBriefRegenerations: 0,
+        },
+      })
+
+      return {
+        text,
+        generatedAt: now,
+        isFresh: true,
+        regenerationsLeft: REGENERATION_LIMIT,
+        canRegenerate: true,
+      }
+    } catch (err) {
+      console.error('[Brief] Generation failed:', err)
+      return null
+    }
+  } catch (err) {
+    console.error('[Brief] getExecutiveBrief failed:', err)
+    return null
   }
 }
 
@@ -95,6 +117,12 @@ export async function regenerateExecutiveBrief(
 
   try {
     const text = await generateBriefText(organizationId, org.companyName)
+
+    if (!text.trim()) {
+      console.warn(`[Brief] Generated empty text during regeneration for org ${organizationId}`)
+      return { ok: false, error: 'No pudimos regenerar el brief. Proba de nuevo en unos minutos.' }
+    }
+
     const now = new Date()
     const nextRegenerations = currentRegenerations + 1
 
@@ -137,6 +165,12 @@ export async function refreshExecutiveBriefCache(
   if (!org) throw new Error(`Organization ${organizationId} not found`)
 
   const text = await generateBriefText(organizationId, org.companyName)
+
+  if (!text.trim()) {
+    console.warn(`[Brief] Generated empty text during cache refresh for org ${organizationId}`)
+    throw new Error(`Generated empty executive brief for organization ${organizationId}`)
+  }
+
   const now = new Date()
 
   await prisma.organization.update({

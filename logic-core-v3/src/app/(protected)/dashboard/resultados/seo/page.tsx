@@ -8,7 +8,10 @@ import { FadeIn } from '@/components/dashboard/FadeIn'
 import { SeoAlertas } from '@/components/dashboard/SeoAlertas'
 import { OportunidadesSEO } from '@/components/dashboard/OportunidadesSEO'
 import { TrendBadge } from '@/components/dashboard/TrendBadge'
+import { PreviewBanner } from '@/components/dashboard/PreviewBanner'
+import { InsightsBlock } from '@/components/dashboard/results/InsightsBlock'
 import { requestUpsellAction } from '@/lib/actions/upsell'
+import { getSeoInsights } from '@/lib/ai/results-insights'
 import type { SearchConsoleData } from '@/lib/searchconsole'
 import {
   MousePointerClick,
@@ -125,21 +128,7 @@ export default async function SeoPage({
     <div className="flex flex-col gap-6">
 
       {isDemo ? (
-        // ── Demo mode ──
-        <FadeIn delay={0.05}>
-          <div className="flex items-center justify-between gap-4 rounded-xl border border-yellow-500/20 bg-yellow-500/5 px-5 py-3.5">
-            <div className="flex items-center gap-3 min-w-0">
-              <AlertTriangle size={15} className="flex-shrink-0 text-yellow-400" />
-              <p className="text-sm text-yellow-400/90 truncate">Estás viendo datos de demostración.</p>
-            </div>
-            <a
-              href="/dashboard/messages"
-              className="flex-shrink-0 text-xs font-semibold text-yellow-400 underline underline-offset-2 hover:text-yellow-300 transition-colors"
-            >
-              Activar métricas reales
-            </a>
-          </div>
-        </FadeIn>
+        <PreviewBanner context="seo" />
       ) : (
         <>
           {/* ── No site configured — empty state ── */}
@@ -190,19 +179,35 @@ export default async function SeoPage({
           )}
 
           {/* ── Site configured ── */}
-          {client.siteUrl && <SeoContent siteUrl={client.siteUrl} />}
+          {client.siteUrl && (
+            <SeoContent organizationId={organizationId} siteUrl={client.siteUrl} />
+          )}
         </>
       )}
 
       {/* ── Demo content — mock data via API fallback ── */}
-      {isDemo && <SeoContent siteUrl={client.siteUrl ?? 'https://demo.developseo.com'} hideBanner />}
+      {isDemo && (
+        <SeoContent
+          organizationId={organizationId}
+          siteUrl={client.siteUrl ?? 'https://demo.developseo.com'}
+          hideBanner
+        />
+      )}
     </div>
   )
 }
 
 // ─── SeoContent ───────────────────────────────────────────────────────────────
 
-async function SeoContent({ siteUrl, hideBanner }: { siteUrl: string; hideBanner?: boolean }) {
+async function SeoContent({
+  organizationId,
+  siteUrl,
+  hideBanner,
+}: {
+  organizationId: string
+  siteUrl: string
+  hideBanner?: boolean
+}) {
   const result = await getSearchConsoleData(siteUrl)
 
   if (!result.ok) {
@@ -222,28 +227,30 @@ async function SeoContent({ siteUrl, hideBanner }: { siteUrl: string; hideBanner
   }
 
   const { data } = result
+  const insights = data.isMockData
+    ? []
+    : await getSeoInsights({
+        organizationId,
+        totalImpressions: data.totalImpressions,
+        totalClicks: data.totalClicks,
+        averagePosition: data.avgPosition,
+        topQueries: data.topQueries.map((query) => ({
+          query: query.query,
+          impressions: query.impressions,
+          clicks: query.clicks,
+          position: query.position,
+        })),
+        topPages: data.topPages.map((page) => ({
+          url: page.page,
+          impressions: page.impressions,
+          clicks: page.clicks,
+        })),
+      })
 
   return (
     <div className="flex flex-col gap-6">
       {/* ── Demo banner ── */}
-      {data.isMockData && !hideBanner && (
-        <FadeIn delay={0.05}>
-          <div className="flex items-center justify-between gap-4 rounded-xl border border-yellow-500/20 bg-yellow-500/5 px-5 py-3.5">
-            <div className="flex items-center gap-3 min-w-0">
-              <AlertTriangle size={15} className="flex-shrink-0 text-yellow-400" />
-              <p className="text-sm text-yellow-400/90 truncate">
-                Estás viendo datos de demostración. Conectá tu Search Console real para ver tu rendimiento actual.
-              </p>
-            </div>
-            <a
-              href="/dashboard/messages"
-              className="flex-shrink-0 text-xs font-semibold text-yellow-400 underline underline-offset-2 hover:text-yellow-300 transition-colors"
-            >
-              Activar métricas reales
-            </a>
-          </div>
-        </FadeIn>
-      )}
+      {data.isMockData && !hideBanner && <PreviewBanner context="seo" />}
 
       {/* ── Alertas automáticas (máx 2) ── */}
       <FadeIn delay={0.08}>
@@ -348,6 +355,12 @@ async function SeoContent({ siteUrl, hideBanner }: { siteUrl: string; hideBanner
       {data.topQueries.length > 0 && (
         <FadeIn delay={0.4}>
           <OportunidadesSEO data={data} />
+        </FadeIn>
+      )}
+
+      {insights.length > 0 && (
+        <FadeIn delay={0.45}>
+          <InsightsBlock insights={insights} />
         </FadeIn>
       )}
 

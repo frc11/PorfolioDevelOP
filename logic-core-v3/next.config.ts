@@ -30,17 +30,17 @@ const nextConfig: NextConfig = {
       },
       {
         source: '/dashboard/ecommerce',
-        destination: '/dashboard/services?modulo=ecommerce-mantenimiento',
+        destination: '/dashboard/services?modulo=tienda-conectada',
         permanent: true,
       },
       {
         source: '/dashboard/email-automation',
-        destination: '/dashboard/services?modulo=email-marketing',
+        destination: '/dashboard/services?modulo=email-marketing-pro',
         permanent: true,
       },
       {
         source: '/dashboard/email-nurturing',
-        destination: '/dashboard/services?modulo=email-marketing',
+        destination: '/dashboard/services?modulo=email-marketing-pro',
         permanent: true,
       },
       {

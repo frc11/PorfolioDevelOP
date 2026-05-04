@@ -88,32 +88,27 @@ async function WeekResultsServerWrapper({ organizationId }: { organizationId: st
 }
 
 async function BriefServerWrapper({ organizationId }: { organizationId: string }) {
-  const brief = await getBriefOrFallback(organizationId)
-
-  return (
-    <AIExecutiveBriefV2
-      initialText={brief.text}
-      initialGeneratedAt={brief.generatedAt}
-      initialIsFresh={brief.isFresh}
-      initialRegenerationsLeft={brief.regenerationsLeft}
-      initialCanRegenerate={brief.canRegenerate}
-    />
-  )
-}
-
-async function getBriefOrFallback(organizationId: string) {
   try {
-    return await getExecutiveBrief(organizationId)
-  } catch (error) {
-    console.error('[dashboard brief] load failed:', error)
+    const brief = await getExecutiveBrief(organizationId)
 
-    return {
-      text: 'El resumen ejecutivo no esta disponible en este momento. El resto del dashboard sigue actualizado.',
-      generatedAt: new Date(),
-      isFresh: false,
-      regenerationsLeft: 3,
-      canRegenerate: true,
+    // Si el brief vino vacío o sin texto, no renderizar
+    if (!brief?.text?.trim()) {
+      console.log(`[AIBrief] No content for org ${organizationId}, skipping render`)
+      return null
     }
+
+    return (
+      <AIExecutiveBriefV2
+        initialText={brief.text}
+        initialGeneratedAt={brief.generatedAt}
+        initialIsFresh={brief.isFresh}
+        initialRegenerationsLeft={brief.regenerationsLeft}
+        initialCanRegenerate={brief.canRegenerate}
+      />
+    )
+  } catch (err) {
+    console.error('[AIBrief] Server wrapper failed:', err)
+    return null
   }
 }
 

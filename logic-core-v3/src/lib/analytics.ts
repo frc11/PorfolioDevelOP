@@ -8,6 +8,7 @@ export interface AnalyticsData {
   bounceRate: number          // percentage 0-100
   avgSessionDurationSec: number
   topPages: Array<{ page: string; sessions: number }>
+  topSources: Array<{ source: string; sessions: number }>
   dailySessions: Array<{ date: string; sessions: number }> // date: "YYYY-MM-DD"
   isMockData: boolean
 }
@@ -42,6 +43,12 @@ function getMockAnalyticsData(): AnalyticsData {
       { page: '/contacto', sessions: 298 },
       { page: '/usados', sessions: 187 },
       { page: '/financiacion', sessions: 193 },
+    ],
+    topSources: [
+      { source: 'Organic Search', sessions: 812 },
+      { source: 'Direct', sessions: 476 },
+      { source: 'Social', sessions: 318 },
+      { source: 'Referral', sessions: 236 },
     ],
     dailySessions,
     isMockData: true,
@@ -103,7 +110,7 @@ export async function getAnalyticsData(
 
   try {
     // Run both reports in parallel
-    const [summaryResponse, pagesResponse, dailyResponse] = await Promise.all([
+    const [summaryResponse, pagesResponse, dailyResponse, sourcesResponse] = await Promise.all([
       // Summary metrics
       analyticsClient.runReport({
         property,
@@ -132,6 +139,15 @@ export async function getAnalyticsData(
         metrics: [{ name: 'sessions' }],
         orderBys: [{ dimension: { dimensionName: 'date' } }],
       }),
+      // Sessions by source/channel
+      analyticsClient.runReport({
+        property,
+        dateRanges: [{ startDate: '30daysAgo', endDate: 'today' }],
+        dimensions: [{ name: 'sessionDefaultChannelGroup' }],
+        metrics: [{ name: 'sessions' }],
+        orderBys: [{ metric: { metricName: 'sessions' }, desc: true }],
+        limit: 5,
+      }),
     ])
 
     // Parse summary
@@ -159,6 +175,11 @@ export async function getAnalyticsData(
       }
     })
 
+    const topSources = (sourcesResponse[0]?.rows ?? []).map((row) => ({
+      source: rowValue(row, 'dimension', 0),
+      sessions: Math.round(parseFloat(rowValue(row, 'metric', 0))),
+    }))
+
     return {
       ok: true,
       data: {
@@ -167,6 +188,7 @@ export async function getAnalyticsData(
         bounceRate: Math.round(bounceRate * 10) / 10,
         avgSessionDurationSec: Math.round(avgSessionDurationSec),
         topPages,
+        topSources,
         dailySessions,
         isMockData: false,
       },

@@ -4,6 +4,8 @@ import { resolveOrgId } from '@/lib/preview'
 import { MessageThread } from '@/components/dashboard/MessageThread'
 import { FadeIn } from '@/components/dashboard/FadeIn'
 
+export const dynamic = 'force-dynamic'
+
 export default async function ClientMessagesPage() {
   const organizationId = await resolveOrgId()
   if (!organizationId) redirect('/login')

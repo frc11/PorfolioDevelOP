@@ -2,6 +2,7 @@
 
 import { auth } from '@/auth'
 import { sendAgencyAlert } from '@/lib/alerts'
+import { queueAdminMessageEmail } from '@/lib/email/admin-message-notification'
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 import {
@@ -51,6 +52,12 @@ export async function sendMessageAction(
         content: parsedMessage.data.content,
         fromAdmin: true,
       },
+    })
+
+    queueAdminMessageEmail({
+      organizationId: parsedOrganization.data.organizationId,
+      senderName: session.user.name ?? 'Equipo develOP',
+      messageContent: parsedMessage.data.content,
     })
 
     revalidatePath(`/admin/messages/${parsedOrganization.data.organizationId}`)

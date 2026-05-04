@@ -16,7 +16,7 @@ export function SeoAlertas({ data }: { data: SearchConsoleData }) {
         tipo: 'DANGER',
         titulo: 'Posición en Google muy baja',
         descripcion: `Tu posición promedio en Google es #${data.avgPosition.toFixed(0)}. Estás en la segunda página o más abajo. La mayoría de los clicks van a las primeras 3 posiciones.`,
-        accion: { label: 'Mejorar mi SEO', href: '/dashboard/messages' },
+        accion: { label: 'Mejorar mi SEO', href: '/dashboard/messages?context=default' },
       })
     }
 
@@ -26,7 +26,7 @@ export function SeoAlertas({ data }: { data: SearchConsoleData }) {
         tipo: 'WARNING',
         titulo: 'CTR bajo — la gente no entra',
         descripcion: `Tu tasa de clicks es del ${data.avgCtr.toFixed(1)}%. Tu sitio aparece en Google pero la gente no entra. Los títulos y descripciones necesitan mejora.`,
-        accion: { label: 'Optimizar títulos', href: '/dashboard/messages' },
+        accion: { label: 'Optimizar títulos', href: '/dashboard/messages?context=default' },
       })
     }
 

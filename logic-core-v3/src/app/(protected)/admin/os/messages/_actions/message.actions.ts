@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { prisma } from '@/lib/prisma'
 import { requireSuperAdmin } from '@/lib/auth-guards'
 import { fail, ok, type ActionResult } from '@/lib/action-utils'
+import { queueAdminMessageEmail } from '@/lib/email/admin-message-notification'
 import {
   GetConversationSchema,
   MarkAsReadSchema,
@@ -169,18 +170,30 @@ export async function sendMessage(
   content: string
 ): Promise<ActionResult<{ id: string }>> {
   try {
-    await requireSuperAdmin()
+    const adminUserId = await requireSuperAdmin()
     const parsed = SendMessageSchema.parse({ organizationId, content })
 
-    const message = await prisma.message.create({
-      data: {
-        organizationId: parsed.organizationId,
-        content: parsed.content.trim(),
-        fromAdmin: true,
-      },
-      select: {
-        id: true,
-      },
+    const [message, adminUser] = await Promise.all([
+      prisma.message.create({
+        data: {
+          organizationId: parsed.organizationId,
+          content: parsed.content.trim(),
+          fromAdmin: true,
+        },
+        select: {
+          id: true,
+        },
+      }),
+      prisma.user.findUnique({
+        where: { id: adminUserId },
+        select: { name: true },
+      }),
+    ])
+
+    queueAdminMessageEmail({
+      organizationId: parsed.organizationId,
+      senderName: adminUser?.name ?? 'Equipo develOP',
+      messageContent: parsed.content,
     })
 
     revalidateMessagePaths(parsed.organizationId)

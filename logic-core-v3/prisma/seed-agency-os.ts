@@ -1546,7 +1546,7 @@ async function ensureAgencySettings() {
   }
 
   // NOTE: Module pricing is now managed via PremiumModule catalog.
-  // Run: npx tsx prisma/seeds/premium-modules.ts to seed the catalog.
+  // Run: npx tsx prisma/seeds/sync-premium-modules.ts to sync the catalog.
 
 }
 

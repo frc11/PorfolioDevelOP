@@ -15,7 +15,7 @@ export interface SearchConsoleData {
     ctr: number
     position: number
   }>
-  topPages: Array<{ page: string; clicks: number }>
+  topPages: Array<{ page: string; clicks: number; impressions: number }>
   dailyData: Array<{ date: string; clicks: number; impressions: number }>
   isMockData: boolean
 }
@@ -52,11 +52,11 @@ function getMockSearchConsoleData(): SearchConsoleData {
       { query: 'financiacion autos tucuman',   clicks: 32, impressions: 890,  ctr: 3.6, position: 11.4 },
     ],
     topPages: [
-      { page: 'https://sanmiguel.com.ar/',             clicks: 124 },
-      { page: 'https://sanmiguel.com.ar/catalogo',     clicks: 87 },
-      { page: 'https://sanmiguel.com.ar/usados',       clicks: 63 },
-      { page: 'https://sanmiguel.com.ar/contacto',     clicks: 31 },
-      { page: 'https://sanmiguel.com.ar/financiacion', clicks: 19 },
+      { page: 'https://sanmiguel.com.ar/',             clicks: 124, impressions: 3120 },
+      { page: 'https://sanmiguel.com.ar/catalogo',     clicks: 87,  impressions: 2180 },
+      { page: 'https://sanmiguel.com.ar/usados',       clicks: 63,  impressions: 1640 },
+      { page: 'https://sanmiguel.com.ar/contacto',     clicks: 31,  impressions: 780 },
+      { page: 'https://sanmiguel.com.ar/financiacion', clicks: 19,  impressions: 510 },
     ],
     dailyData,
     isMockData: true,
@@ -198,6 +198,7 @@ export async function getSearchConsoleData(
         topPages: pageRows.map((r) => ({
           page: r.keys[0] ?? '',
           clicks: r.clicks,
+          impressions: r.impressions,
         })),
         dailyData: dailyRows.map((r) => ({
           date: r.keys[0] ?? '',

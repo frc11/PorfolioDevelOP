@@ -1,26 +1,15 @@
-import { prisma } from '@/lib/prisma'
-export const dynamic = 'force-dynamic'
-import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { resolveOrgId } from '@/lib/preview'
-import { ServiceType, ServiceStatus } from '@prisma/client'
-import {
-  Zap,
-  Globe,
-  Bot,
-  Cpu,
-  MessageSquare,
-  Sparkles,
-  FolderOpen,
-} from 'lucide-react'
+import { redirect } from 'next/navigation'
+import { Bot, Cpu, FolderOpen, Globe, MessageSquare, Sparkles, Zap } from 'lucide-react'
+import type { ServiceStatus, ServiceType } from '@prisma/client'
 import type { LucideIcon } from 'lucide-react'
 import { FadeIn } from '@/components/dashboard/FadeIn'
-import { StaggerContainer, StaggerItem } from '@/components/dashboard/StaggerWrapper'
 import { PremiumModuleCard } from '@/components/dashboard/PremiumModuleCard'
-import type { PremiumModuleCardProps } from '@/components/dashboard/PremiumModuleCard'
+import { StaggerContainer, StaggerItem } from '@/components/dashboard/StaggerWrapper'
+import { prisma } from '@/lib/prisma'
+import { resolveOrgId } from '@/lib/preview'
 
-
-// ─── Service type config ───────────────────────────────────────────────────────
+export const dynamic = 'force-dynamic'
 
 type ServiceTypeConfig = {
   label: string
@@ -60,8 +49,6 @@ const SERVICE_TYPE_CONFIG: Record<ServiceType, ServiceTypeConfig> = {
   },
 }
 
-// ─── Service status config ─────────────────────────────────────────────────────
-
 type ServiceStatusConfig = {
   label: string
   dotColor: string
@@ -90,136 +77,6 @@ const SERVICE_STATUS_CONFIG: Record<ServiceStatus, ServiceStatusConfig> = {
   },
 }
 
-// ─── Premium modules (sorted by priceFrom asc) ────────────────────────────────
-
-type ModuleData = PremiumModuleCardProps
-
-const PREMIUM_MODULES: ModuleData[] = [
-  {
-    moduleKey: 'motor-resenias',
-    name: 'Motor de Rese?as Autom?tico',
-    category: 'Reputaci?n Online',
-    description:
-      'Gener? rese?as positivas en Google y potenci? tu reputaci?n sin seguimiento manual.',
-    priceFrom: 60,
-    roiBadge: 'M?s confianza = m?s ventas',
-    iconKey: 'Star',
-    glowRgb: '234,179,8',
-  },
-  {
-    moduleKey: 'agenda-inteligente',
-    name: 'Agenda Inteligente 24/7',
-    category: 'Gesti?n de Tiempo',
-    description:
-      'Tus clientes reservan turnos en cualquier momento sin idas y vueltas por WhatsApp.',
-    priceFrom: 80,
-    roiBadge: 'Ahorr? 10hs/semana',
-    iconKey: 'Calendar',
-    glowRgb: '6,182,212',
-  },
-  {
-    moduleKey: 'mini-crm',
-    name: 'Mini-CRM & Gesti?n de Leads',
-    category: 'Ventas',
-    description:
-      'Organiz?, calific? y hac? seguimiento de cada lead desde un pipeline simple y accionable.',
-    priceFrom: 80,
-    roiBadge: '3x m?s cierres',
-    iconKey: 'Users',
-    glowRgb: '59,130,246',
-  },
-  {
-    moduleKey: 'pixel-retargeting',
-    name: 'Recuperaci?n de Ventas',
-    category: 'Conversi?n',
-    description:
-      'Detect? visitantes perdidos y activ? campa?as autom?ticas para recuperarlos.',
-    priceFrom: 100,
-    roiBadge: 'Recuper? el 25%',
-    iconKey: 'RefreshCw',
-    glowRgb: '249,115,22',
-  },
-  {
-    moduleKey: 'email-automation',
-    name: 'Email Automation',
-    category: 'Marketing',
-    description:
-      'Automatiz? seguimientos, ofertas y reactivaciones con secuencias inteligentes.',
-    priceFrom: 100,
-    roiBadge: '$42 retorno por $1',
-    iconKey: 'Mail',
-    glowRgb: '99,102,241',
-  },
-  {
-    moduleKey: 'email-nurturing',
-    name: 'Email Marketing & Nurturing',
-    category: 'Marketing',
-    description:
-      'Convert? leads fr?os en oportunidades con campa?as personalizadas y timing autom?tico.',
-    priceFrom: 100,
-    roiBadge: 'Leads m?s calientes',
-    iconKey: 'Mail',
-    glowRgb: '129,140,248',
-  },
-  {
-    moduleKey: 'seo-avanzado',
-    name: 'SEO Avanzado',
-    category: 'SEO Local',
-    description:
-      'Domin? b?squedas locales y mejor? tu posicionamiento con optimizaci?n t?cnica y de contenido.',
-    priceFrom: 120,
-    roiBadge: '+60% visibilidad',
-    iconKey: 'MapPin',
-    glowRgb: '167,139,250',
-  },
-  {
-    moduleKey: 'client-portal',
-    name: 'Portal de Clientes',
-    category: 'Experiencia',
-    description:
-      'Ofrec? un portal white-label para avances, archivos, propuestas y comunicaci?n.',
-    priceFrom: 120,
-    roiBadge: '+30% retenci?n',
-    iconKey: 'Users',
-    glowRgb: '245,158,11',
-  },
-  {
-    moduleKey: 'whatsapp-autopilot',
-    name: 'Recepcionista IA & WhatsApp Autopilot',
-    category: 'Automatizaci?n IA',
-    description:
-      'Respond? consultas y calific? leads por WhatsApp las 24 horas con IA.',
-    priceFrom: 150,
-    roiBadge: 'Ahorr? 15hs/semana',
-    iconKey: 'Bot',
-    glowRgb: '34,197,94',
-  },
-  {
-    moduleKey: 'social-media-hub',
-    name: 'Social Media & Content Hub',
-    category: 'Redes Sociales',
-    description:
-      'Gener?, aprob? y public? contenido con un flujo centralizado para tus redes.',
-    priceFrom: 200,
-    roiBadge: '5x m?s engagement',
-    iconKey: 'Share2',
-    glowRgb: '236,72,153',
-  },
-  {
-    moduleKey: 'ecommerce',
-    name: 'E-commerce',
-    category: 'Ventas Online',
-    description:
-      'Vend? online con cat?logo, checkout e integraciones para cobrar y gestionar pedidos.',
-    priceFrom: 300,
-    roiBadge: 'Ventas 24/7',
-    iconKey: 'ShoppingCart',
-    glowRgb: '52,211,153',
-  },
-]
-
-// ─── Service card ──────────────────────────────────────────────────────────────
-
 function ServiceCard({
   type,
   status,
@@ -235,13 +92,11 @@ function ServiceCard({
 
   return (
     <div className="group relative flex flex-col gap-5 overflow-hidden rounded-2xl border border-white/5 bg-[#07080a]/70 p-6 shadow-xl backdrop-blur-2xl transition-all duration-300 hover:border-white/10">
-      {/* Ambient glow */}
       <div
         className="pointer-events-none absolute -right-10 -top-10 h-36 w-36 rounded-full blur-[60px] opacity-10 transition-opacity duration-500 group-hover:opacity-25"
         style={{ background: `rgb(${cfg.glowRgb})` }}
       />
 
-      {/* Icon + status badge */}
       <div className="relative z-10 flex items-start justify-between gap-3">
         <div
           className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl"
@@ -264,37 +119,28 @@ function ServiceCard({
                 className={`absolute inline-flex h-full w-full animate-ping rounded-full opacity-60 ${statusCfg.dotColor}`}
               />
             )}
-            <span
-              className={`relative inline-flex h-1.5 w-1.5 rounded-full ${statusCfg.dotColor}`}
-            />
+            <span className={`relative inline-flex h-1.5 w-1.5 rounded-full ${statusCfg.dotColor}`} />
           </span>
           {statusCfg.label}
         </span>
       </div>
 
-      {/* Title */}
       <div className="relative z-10">
-        <h3 className="text-xl font-black uppercase tracking-tight text-white">
-          {cfg.label}
-        </h3>
+        <h3 className="text-xl font-black uppercase tracking-tight text-white">{cfg.label}</h3>
         <p className="mt-0.5 text-[10px] font-bold uppercase tracking-widest text-zinc-600">
           Servicio Principal
         </p>
       </div>
 
-      {/* Description */}
-      <p className="relative z-10 text-xs leading-relaxed text-zinc-500">
-        {cfg.description}
-      </p>
+      <p className="relative z-10 text-xs leading-relaxed text-zinc-500">{cfg.description}</p>
 
-      {/* Footer */}
       <div className="relative z-10 mt-auto flex items-end justify-between gap-3 border-t border-white/5 pt-5">
         <div>
           <p className="text-[9px] font-bold uppercase tracking-widest text-zinc-700">
             Activo desde
           </p>
           <p className="mt-0.5 text-[11px] font-bold tabular-nums text-zinc-400">
-            {new Date(startDate).toLocaleDateString('es-AR', {
+            {startDate.toLocaleDateString('es-AR', {
               day: '2-digit',
               month: 'long',
               year: 'numeric',
@@ -302,7 +148,7 @@ function ServiceCard({
           </p>
         </div>
         <Link
-          href="/dashboard/messages"
+          href="/dashboard/messages?context=default"
           className="flex items-center gap-1.5 rounded-xl border border-white/5 bg-white/[0.02] px-4 py-2 text-[10px] font-black uppercase tracking-widest text-zinc-500 transition-all hover:border-white/10 hover:bg-white/[0.05] hover:text-zinc-200 active:scale-95"
         >
           <MessageSquare size={11} />
@@ -313,8 +159,6 @@ function ServiceCard({
   )
 }
 
-// ─── Page ──────────────────────────────────────────────────────────────────────
-
 export default async function ServicesPage() {
   const organizationId = await resolveOrgId()
   if (!organizationId) redirect('/login')
@@ -324,28 +168,20 @@ export default async function ServicesPage() {
       where: { organizationId },
       orderBy: { startDate: 'asc' },
     }),
-    prisma.premiumModule.findMany({ orderBy: { sortOrder: 'asc' } }),
+    prisma.premiumModule.findMany({
+      where: {
+        status: { in: ['ACTIVE', 'COMING_SOON'] },
+      },
+      orderBy: { sortOrder: 'asc' },
+    }),
   ])
 
-  const activeCount = services.filter((s) => s.status === 'ACTIVE').length
-  const catalogBySlug = new Map(catalogModules.map((m) => [m.slug, m]))
-  const premiumModules = PREMIUM_MODULES
-    .map((module) => {
-      const catalogEntry = catalogBySlug.get(module.moduleKey)
-      return {
-        ...module,
-        priceFrom: catalogEntry?.priceMonthlyUsd ?? module.priceFrom,
-        billingLabel: 'USD/mes',
-        isActive: catalogEntry ? catalogEntry.status === 'ACTIVE' : true,
-      }
-    })
-    .filter((module) => module.isActive)
-
+  const activeCount = services.filter((service) => service.status === 'ACTIVE').length
+  const activeModules = catalogModules.filter((moduleData) => moduleData.status === 'ACTIVE')
+  const comingSoonModules = catalogModules.filter((moduleData) => moduleData.status === 'COMING_SOON')
 
   return (
     <div className="mx-auto flex max-w-5xl flex-col gap-8 pb-20">
-
-      {/* ── Header ──────────────────────────────────────────────────────── */}
       <FadeIn delay={0}>
         <div className="flex flex-col gap-4 pt-2 sm:flex-row sm:items-end sm:justify-between">
           <div>
@@ -372,7 +208,6 @@ export default async function ServicesPage() {
         </div>
       </FadeIn>
 
-      {/* ── Services grid / Empty state ──────────────────────────────────── */}
       {services.length === 0 ? (
         <FadeIn delay={0.06}>
           <div className="flex flex-col items-center gap-6 rounded-[2rem] border border-white/[0.07] bg-[#0a0c0f]/60 px-8 py-20 text-center backdrop-blur-xl">
@@ -389,7 +224,7 @@ export default async function ServicesPage() {
               </p>
             </div>
             <Link
-              href="/dashboard/messages"
+              href="/dashboard/messages?context=default"
               className="inline-flex items-center gap-2 rounded-xl border border-cyan-500/20 bg-cyan-500/10 px-6 py-3 text-sm font-semibold text-cyan-400 transition-all hover:border-cyan-500/30 hover:bg-cyan-500/20 active:scale-95"
             >
               <MessageSquare size={15} />
@@ -421,14 +256,11 @@ export default async function ServicesPage() {
         </FadeIn>
       )}
 
-      {/* ── Premium upsell section ───────────────────────────────────────── */}
       <FadeIn delay={0.12}>
         <div className="flex flex-col gap-6">
-
-          {/* Section header */}
           <div className="flex flex-col gap-1.5">
             <div className="flex items-center gap-2.5">
-              <Sparkles size={17} className="text-cyan-400 flex-shrink-0" />
+              <Sparkles size={17} className="flex-shrink-0 text-cyan-400" />
               <h2
                 className="text-xl font-black uppercase tracking-tight"
                 style={{
@@ -446,17 +278,61 @@ export default async function ServicesPage() {
             </p>
           </div>
 
-          {/* Modules grid */}
-          <StaggerContainer className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {premiumModules.map((module) => (
-              <StaggerItem key={module.moduleKey}>
-                <PremiumModuleCard {...module} />
-              </StaggerItem>
-            ))}
-          </StaggerContainer>
+          {activeModules.length > 0 && (
+            <div className="flex flex-col gap-4">
+              <div className="flex items-center gap-3">
+                <p className="text-xs font-bold uppercase tracking-widest text-zinc-600">
+                  Disponibles
+                </p>
+                <div className="h-px flex-1 bg-white/[0.05]" />
+              </div>
+              <StaggerContainer className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {activeModules.map((moduleData) => (
+                  <StaggerItem key={moduleData.slug}>
+                    <PremiumModuleCard
+                      slug={moduleData.slug}
+                      name={moduleData.name}
+                      shortDescription={moduleData.shortDescription}
+                      tier={moduleData.tier}
+                      priceMonthlyUsd={moduleData.priceMonthlyUsd}
+                      iconName={moduleData.iconName}
+                      accentColor={moduleData.accentColor}
+                      status={moduleData.status}
+                    />
+                  </StaggerItem>
+                ))}
+              </StaggerContainer>
+            </div>
+          )}
+
+          {comingSoonModules.length > 0 && (
+            <div className="flex flex-col gap-4">
+              <div className="flex items-center gap-3">
+                <p className="text-xs font-bold uppercase tracking-widest text-zinc-600">
+                  Próximamente
+                </p>
+                <div className="h-px flex-1 bg-white/[0.05]" />
+              </div>
+              <StaggerContainer className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {comingSoonModules.map((moduleData) => (
+                  <StaggerItem key={moduleData.slug}>
+                    <PremiumModuleCard
+                      slug={moduleData.slug}
+                      name={moduleData.name}
+                      shortDescription={moduleData.shortDescription}
+                      tier={moduleData.tier}
+                      priceMonthlyUsd={moduleData.priceMonthlyUsd}
+                      iconName={moduleData.iconName}
+                      accentColor={moduleData.accentColor}
+                      status={moduleData.status}
+                    />
+                  </StaggerItem>
+                ))}
+              </StaggerContainer>
+            </div>
+          )}
         </div>
       </FadeIn>
-
     </div>
   )
 }

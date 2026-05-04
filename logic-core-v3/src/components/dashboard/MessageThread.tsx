@@ -1,10 +1,12 @@
 'use client'
 
 import { useActionState, useEffect, useRef, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { sendClientMessageAction } from '@/lib/actions/messages'
-import { Send, Loader2, CheckCheck, ArrowUp } from 'lucide-react'
+import { Loader2, CheckCheck, ArrowUp } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import type { ActionResult } from '@/lib/actions/schemas'
+import { getMessageForContext } from '@/lib/data/message-context'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -53,19 +55,16 @@ function getTeamStatus(): { online: boolean; label: string } {
 
 const QUICK_REPLIES = [
   {
-    emoji: '📋',
     label: 'Solicitar actualización del proyecto',
-    text: 'Hola, quería consultar cómo va el estado del proyecto. ¿Hay novedades?',
+    context: 'proyecto',
   },
   {
-    emoji: '🐛',
     label: 'Reportar un problema',
-    text: 'Hola, quiero reportar un problema: [describí el problema acá]',
+    context: 'bug',
   },
   {
-    emoji: '💡',
     label: 'Tengo una idea / nueva función',
-    text: 'Hola, se me ocurrió una mejora que podría ser útil: [describí tu idea acá]',
+    context: 'mejora',
   },
 ] as const
 
@@ -79,12 +78,32 @@ export function MessageThread({ messages }: MessageThreadProps) {
   const [inputValue, setInputValue] = useState('')
   const bottomRef = useRef<HTMLDivElement>(null)
   const formRef = useRef<HTMLFormElement>(null)
+  const router = useRouter()
+  const searchParams = useSearchParams()
 
   const status = getTeamStatus()
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
+
+  useEffect(() => {
+    const context = searchParams.get('context')
+    const moduleName = searchParams.get('moduleName')
+
+    if (!context && !moduleName) return
+
+    const prefilledMessage = getMessageForContext(
+      context,
+      moduleName ? { moduleName } : undefined,
+    )
+
+    if (prefilledMessage) {
+      setInputValue(prefilledMessage)
+    }
+
+    router.replace('/dashboard/messages', { scroll: false })
+  }, [router, searchParams])
 
   useEffect(() => {
     if (!isPending && state?.success) {
@@ -243,13 +262,12 @@ export function MessageThread({ messages }: MessageThreadProps) {
             <motion.button
               key={qr.label}
               type="button"
-              onClick={() => setInputValue(qr.text)}
+              onClick={() => setInputValue(getMessageForContext(qr.context))}
               whileHover={{ scale: 1.04, y: -1 }}
               whileTap={{ scale: 0.96 }}
               transition={{ type: 'spring', stiffness: 400, damping: 20 }}
               className="flex items-center gap-1.5 rounded-full border border-white/[0.07] bg-white/[0.03] px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-zinc-400 backdrop-blur-sm transition-colors hover:border-cyan-500/25 hover:bg-cyan-500/10 hover:text-cyan-300"
             >
-              <span>{qr.emoji}</span>
               {qr.label}
             </motion.button>
           ))}

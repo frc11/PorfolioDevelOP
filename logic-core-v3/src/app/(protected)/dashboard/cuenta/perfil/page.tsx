@@ -80,6 +80,7 @@ const DEFAULT_PREFS: NotificationPrefs = {
   teamMessages: true,
   metricAlerts: true,
   developNews: false,
+  emailNotificationsOnMessage: true,
 }
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
@@ -186,6 +187,16 @@ export default async function ProfilePage() {
 
   if (!user) redirect('/login')
 
+  const currentMember = await prisma.orgMember.findUnique({
+    where: {
+      userId_organizationId: {
+        userId,
+        organizationId,
+      },
+    },
+    select: { emailNotificationsOnMessage: true },
+  })
+
   // Parse notification prefs with defaults
   const rawPrefs = org.notificationPrefs as Partial<NotificationPrefs> | null
   const notifPrefs: NotificationPrefs = {
@@ -193,6 +204,9 @@ export default async function ProfilePage() {
     teamMessages: rawPrefs?.teamMessages ?? DEFAULT_PREFS.teamMessages,
     metricAlerts: rawPrefs?.metricAlerts ?? DEFAULT_PREFS.metricAlerts,
     developNews: rawPrefs?.developNews ?? DEFAULT_PREFS.developNews,
+    emailNotificationsOnMessage:
+      currentMember?.emailNotificationsOnMessage ??
+      DEFAULT_PREFS.emailNotificationsOnMessage,
   }
 
   // Serialize plan data (no Date objects to client)

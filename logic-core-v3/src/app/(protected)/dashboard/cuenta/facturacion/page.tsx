@@ -6,7 +6,6 @@ import {
   AlertTriangle,
   CheckCircle2,
   Clock,
-  CreditCard,
   Download,
   FileText,
   Landmark,
@@ -15,7 +14,8 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { FadeIn } from '@/components/dashboard/FadeIn'
-import { BillingSubscriptionCard } from '@/components/dashboard/BillingSubscriptionCard'
+import { CurrentPlanCard } from '@/components/dashboard/CurrentPlanCard'
+import { getCurrentPlan } from '@/lib/billing/get-current-plan'
 import type { InvoiceStatus } from '@prisma/client'
 
 export const metadata = { title: 'Facturación | develOP Dashboard' }
@@ -58,7 +58,7 @@ export default async function BillingPage() {
   const [organizationId, session] = await Promise.all([resolveOrgId(), auth()])
   if (!organizationId) redirect('/login')
 
-  const [org, subscription, invoices] = await Promise.all([
+  const [org, subscription, invoices, currentPlan] = await Promise.all([
     prisma.organization.findUnique({
       where: { id: organizationId },
       select: { companyName: true },
@@ -68,6 +68,7 @@ export default async function BillingPage() {
       where: { organizationId },
       orderBy: { dueDate: 'desc' },
     }),
+    getCurrentPlan(organizationId),
   ])
 
   if (!org) redirect('/login')
@@ -80,14 +81,6 @@ export default async function BillingPage() {
     renewalDate !== null
       ? Math.ceil((renewalDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
       : null
-
-  const renewalDateFormatted = renewalDate
-    ? renewalDate.toLocaleDateString('es-AR', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-      })
-    : null
 
   const nextBillingFormatted = renewalDate
     ? renewalDate.toLocaleDateString('es-AR', {
@@ -109,16 +102,6 @@ export default async function BillingPage() {
 
   const billingEmail = session?.user?.email ?? ''
 
-  // ── Serialized subscription for client component ──────────────────────────
-  const subscriptionData = subscription
-    ? {
-        planName: subscription.planName,
-        status: subscription.status,
-        price: subscription.price,
-        currency: subscription.currency,
-      }
-    : null
-
   return (
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-8 pb-20">
 
@@ -132,7 +115,7 @@ export default async function BillingPage() {
               <p className="text-sm font-semibold text-red-300">
                 Tu suscripción está vencida.{' '}
                 <Link
-                  href="/dashboard/messages"
+                  href="/dashboard/messages?context=facturacion"
                   className="font-bold underline underline-offset-2 transition-colors hover:text-red-200"
                 >
                   Contactanos para regularizar.
@@ -159,11 +142,7 @@ export default async function BillingPage() {
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
 
           {/* Plan card */}
-          <BillingSubscriptionCard
-            subscription={subscriptionData}
-            daysUntilRenewal={daysUntilRenewal}
-            renewalDateFormatted={renewalDateFormatted}
-          />
+          <CurrentPlanCard plan={currentPlan} />
 
           {/* Invoice history */}
           <div className="flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#0c0e12]/80 shadow-2xl backdrop-blur-xl lg:col-span-2">
@@ -348,7 +327,7 @@ export default async function BillingPage() {
             {/* Update billing data */}
             <div className="flex flex-col justify-center px-6 py-5">
               <Link
-                href="/dashboard/messages"
+                href="/dashboard/messages?context=facturacion"
                 className="flex w-full items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2.5 text-[10px] font-black uppercase tracking-widest text-zinc-400 transition-all hover:border-white/20 hover:bg-white/[0.06] hover:text-zinc-200 active:scale-95"
               >
                 Actualizar datos de facturación

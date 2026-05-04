@@ -289,7 +289,7 @@ export function ProjectTaskTabs({
       {currentTasks.length > 0 && (
         <div className="flex justify-end">
           <Link
-            href="/dashboard/messages"
+            href="/dashboard/messages?context=proyecto"
             className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-widest text-zinc-600 hover:text-cyan-400 transition-colors"
           >
             Hablar con el equipo

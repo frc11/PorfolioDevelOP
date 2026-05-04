@@ -109,7 +109,7 @@ export async function getAttentionItems(organizationId: string): Promise<Attenti
         title: 'Estamos configurando tu negocio',
         description: `develOP esta conectando tus herramientas (${connectedCount}/${totalCount} listas).`,
         ctaLabel: 'Hablar con el equipo',
-        ctaHref: '/dashboard/messages',
+        ctaHref: '/dashboard/messages?context=activacion',
       })
     }
   }

@@ -676,8 +676,8 @@ async function main() {
     },
   })
 
-  // NOTE: Module pricing catalog is now seeded via prisma/seeds/premium-modules.ts
-  // Run: npx tsx prisma/seeds/premium-modules.ts
+  // NOTE: Module pricing catalog is now synced via prisma/seeds/sync-premium-modules.ts
+  // Run: npx tsx prisma/seeds/sync-premium-modules.ts
 
 
   process.stdout.write(

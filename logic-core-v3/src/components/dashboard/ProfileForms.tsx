@@ -526,6 +526,11 @@ const NOTIF_CONFIG: {
     desc: 'Mensajes directos del equipo develOP.',
   },
   {
+    key: 'emailNotificationsOnMessage',
+    label: 'Notificaciones por email cuando recibo un mensaje',
+    desc: 'Te avisamos por email cuando el equipo te escribe en el panel.',
+  },
+  {
     key: 'metricAlerts',
     label: 'Alertas de métricas',
     desc: 'Cuando tus métricas clave cambien significativamente.',

@@ -6,15 +6,15 @@ const prisma = new PrismaClient()
 const LEGACY_TO_NEW_SLUG: Record<string, string> = {
   'whatsapp-autopilot': 'whatsapp-autopilot',
   'agenda-inteligente': 'agenda-inteligente',
-  'social-media-hub': 'email-marketing', // social media → email marketing
+  'social-media-hub': 'email-marketing-pro', // social media → email marketing
   'seo-avanzado': '', // DEPRECATED — no migrar
-  'ecommerce': 'ecommerce-mantenimiento',
+  'ecommerce': 'tienda-conectada',
   'reactivacion-clientes': 'reactivacion-clientes',
   'motor-resenias': 'motor-resenas',
   'mini-crm': 'mini-crm',
-  'email-nurturing': 'email-marketing', // nurturing → email marketing
-  'email-automation': 'email-marketing',
-  'pixel-retargeting': 'email-marketing',
+  'email-nurturing': 'email-marketing-pro', // nurturing → email marketing
+  'email-automation': 'email-marketing-pro',
+  'pixel-retargeting': 'email-marketing-pro',
   'client-portal': '', // Deprecated maybe?
 }
 

@@ -17,6 +17,7 @@ export interface NotificationPrefs {
   teamMessages: boolean
   metricAlerts: boolean
   developNews: boolean
+  emailNotificationsOnMessage: boolean
 }
 
 export async function updateProfileAction(
@@ -102,8 +103,9 @@ export async function updateNotificationPrefsAction(
 ): Promise<ActionResult> {
   const session = await auth()
   const organizationId = session?.user?.organizationId
+  const userId = session?.user?.id
 
-  if (!organizationId) {
+  if (!organizationId || !userId) {
     return { success: false, error: 'Sesión inválida.' }
   }
 
@@ -112,15 +114,30 @@ export async function updateNotificationPrefsAction(
     teamMessages: formData.get('teamMessages') === 'true',
     metricAlerts: formData.get('metricAlerts') === 'true',
     developNews: formData.get('developNews') === 'true',
+    emailNotificationsOnMessage: formData.get('emailNotificationsOnMessage') === 'true',
+  }
+
+  const organizationPrefs = {
+    projectUpdates: prefs.projectUpdates,
+    teamMessages: prefs.teamMessages,
+    metricAlerts: prefs.metricAlerts,
+    developNews: prefs.developNews,
   }
 
   try {
-    await prisma.organization.update({
-      where: { id: organizationId },
-      data: { notificationPrefs: prefs as unknown as Record<string, boolean> },
-    })
+    await prisma.$transaction([
+      prisma.organization.update({
+        where: { id: organizationId },
+        data: { notificationPrefs: organizationPrefs },
+      }),
+      prisma.orgMember.updateMany({
+        where: { organizationId, userId },
+        data: { emailNotificationsOnMessage: prefs.emailNotificationsOnMessage },
+      }),
+    ])
 
     revalidatePath('/dashboard/profile')
+    revalidatePath('/dashboard/cuenta/perfil')
     return { success: true }
   } catch (error) {
     console.error('updateNotificationPrefsAction error:', error)

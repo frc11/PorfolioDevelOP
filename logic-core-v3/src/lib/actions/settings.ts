@@ -113,13 +113,13 @@ export async function updateModulePricingAction(input: {
 
     // Actualiza el precio en el catálogo PremiumModule.
     // El featureKey legacy es idéntico al slug del nuevo catálogo para los módulos
-    // que no fueron renombrados. Para los que sí (ej: ecommerce → ecommerce-mantenimiento)
+    // que no fueron renombrados. Para los que sí (ej: ecommerce → tienda-conectada)
     // usamos el slug nuevo directamente.
     const LEGACY_KEY_TO_SLUG: Partial<Record<PremiumFeatureKey, string>> = {
-      'ecommerce': 'ecommerce-mantenimiento',
+      'ecommerce': 'tienda-conectada',
       'motor-resenias': 'motor-resenas',
-      'email-automation': 'email-marketing',
-      'email-nurturing': 'email-marketing',
+      'email-automation': 'email-marketing-pro',
+      'email-nurturing': 'email-marketing-pro',
     }
 
     const moduleSlug = LEGACY_KEY_TO_SLUG[input.featureKey] ?? input.featureKey

@@ -101,7 +101,7 @@ export default async function ProjectPage() {
             </div>
 
             <Link
-              href="/dashboard/messages"
+              href="/dashboard/messages?context=proyecto"
               className="inline-flex items-center gap-2 rounded-xl border border-cyan-500/20 bg-cyan-500/10 px-6 py-3 text-sm font-semibold text-cyan-400 transition-all hover:bg-cyan-500/20 hover:border-cyan-500/30 active:scale-95"
             >
               <MessageSquare size={16} />
@@ -241,7 +241,7 @@ export default async function ProjectPage() {
               </p>
             </div>
             <Link
-              href="/dashboard/messages"
+              href="/dashboard/messages?context=proyecto"
               className="inline-flex items-center gap-2 rounded-lg border border-white/8 bg-white/[0.03] px-5 py-2.5 text-sm font-semibold text-zinc-400 transition-all hover:text-white hover:border-white/20 active:scale-95"
             >
               <MessageSquare size={15} />

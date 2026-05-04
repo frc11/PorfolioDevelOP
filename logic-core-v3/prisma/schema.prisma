@@ -204,6 +204,14 @@ model Organization {
   googleReviewsCount    Int?      @default(0)
   googleRatingUpdatedAt DateTime?
 
+  // Google Business Profile read-only integration
+  gbpAccountId      String?
+  gbpLocationId     String?
+  gbpAccessToken    String?   @db.Text
+  gbpRefreshToken   String?   @db.Text
+  gbpTokenExpiresAt DateTime?
+  gbpConnectedAt    DateTime?
+
   // Weekly AIBrief cache
   cachedExecutiveBrief        String?   @db.Text
   cachedExecutiveBriefAt      DateTime?
@@ -228,6 +236,7 @@ model OrgMember {
   organizationId String
   role           OrgRole  @default(ADMIN)
   joinedAt       DateTime @default(now())
+  emailNotificationsOnMessage Boolean @default(true)
 
   user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)

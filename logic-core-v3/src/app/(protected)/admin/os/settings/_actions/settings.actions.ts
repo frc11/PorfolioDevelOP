@@ -199,10 +199,10 @@ export async function updateModulePricing(
 
     // Map legacy featureKey → new catalog slug
     const LEGACY_TO_SLUG: Partial<Record<PremiumFeatureKey, string>> = {
-      'ecommerce': 'ecommerce-mantenimiento',
-      'motor-resenias': 'motor-resenas',
-      'email-automation': 'email-marketing',
-      'email-nurturing': 'email-marketing',
+        'ecommerce': 'tienda-conectada',
+        'motor-resenias': 'motor-resenas',
+        'email-automation': 'email-marketing-pro',
+        'email-nurturing': 'email-marketing-pro',
     }
     const moduleSlug = LEGACY_TO_SLUG[featureKey] ?? featureKey
 

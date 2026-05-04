@@ -16,7 +16,7 @@ export function AnalyticsAlertas({ data }: { data: AnalyticsData }) {
         tipo: 'DANGER',
         titulo: 'Tasa de rebote alta',
         descripcion: `Tu tasa de rebote es del ${data.bounceRate.toFixed(1)}%. Muchos visitantes se van sin interactuar. Revisemos el contenido de tu página principal.`,
-        accion: { label: 'Hablar con el equipo', href: '/dashboard/messages' },
+        accion: { label: 'Hablar con el equipo', href: '/dashboard/messages?context=default' },
       })
     }
 
@@ -51,7 +51,7 @@ export function AnalyticsAlertas({ data }: { data: AnalyticsData }) {
         titulo: 'Tiempo en sitio bajo',
         descripcion:
           'Los visitantes pasan poco tiempo en tu sitio. Podría mejorar con mejor contenido o velocidad de carga.',
-        accion: { label: 'Ver recomendaciones', href: '/dashboard/messages' },
+        accion: { label: 'Ver recomendaciones', href: '/dashboard/messages?context=default' },
       })
     }
 
