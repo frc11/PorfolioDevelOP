@@ -7,6 +7,7 @@ import { revalidatePath } from 'next/cache'
 import { auth } from '@/auth'
 import { prisma } from '@/lib/prisma'
 import { PREMIUM_FEATURE_KEYS, PREMIUM_FEATURE_LABELS, type PremiumFeatureKey } from '@/lib/premium-features'
+import { seedOnboardingTasksForOrg } from '@/lib/onboarding/seed-tasks-for-org'
 
 function slugify(text: string): string {
   return text
@@ -69,6 +70,7 @@ export async function createClientAction(
   const slug = await uniqueSlug(companyName)
   const hashedPassword = await bcrypt.hash(password, 12)
 
+  let newOrgId: string | undefined
   try {
     await prisma.$transaction(async (tx) => {
       const user = await tx.user.create({
@@ -85,12 +87,20 @@ export async function createClientAction(
         data: { companyName, slug, logoUrl },
       })
 
+      newOrgId = org.id
+
       await tx.orgMember.create({
         data: { userId: user.id, organizationId: org.id, role: 'ADMIN' },
       })
     })
   } catch {
     return 'Error al crear el cliente. Intenta de nuevo.'
+  }
+
+  if (newOrgId) {
+    await seedOnboardingTasksForOrg(newOrgId).catch((e) =>
+      console.error('[Onboarding] Error seeding tasks:', e),
+    )
   }
 
   revalidatePath('/admin/clients')

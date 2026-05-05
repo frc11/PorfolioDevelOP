@@ -1,6 +1,7 @@
 import { AIExecutiveBriefV2 } from '@/components/dashboard/home/AIExecutiveBriefV2'
 import { AttentionStack } from '@/components/dashboard/home/AttentionStack'
 import { HealthScore } from '@/components/dashboard/home/HealthScore'
+import { OnboardingStatusCard } from '@/components/dashboard/OnboardingStatusCard'
 import { WeekResultsGrid } from '@/components/dashboard/home/WeekResultsGrid'
 import { LoadingState, PageHeader } from '@/components/ui'
 import { getExecutiveBrief } from '@/lib/ai/executive-brief'
@@ -52,6 +53,10 @@ export default async function DashboardPage() {
         icon={Calendar}
         variant="gradient"
       />
+
+      <Suspense fallback={null}>
+        <OnboardingStatusCard organizationId={organizationId} />
+      </Suspense>
 
       <Suspense fallback={<HealthScoreSkeleton />}>
         <HealthScoreServerWrapper organizationId={organizationId} />

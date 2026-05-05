@@ -11,7 +11,10 @@ const WhyDevelOP = dynamic(() => import('@/components/sections/home/WhyDevelOP')
 import { About } from '@/components/sections/home/About'
 import { Portfolio } from '@/components/sections/home/Portfolio'
 import OurServices from '@/components/sections/home/OurServices';
-import { PortalDemo } from '@/components/sections/home/PortalDemo';
+import { PortalDemo } from '@/components/sections/portal-demo/PortalDemo';
+import { TodoIncluido } from '@/components/sections/todo-incluido/TodoIncluido'
+import { ModulosOpcionales } from '@/components/sections/modulos-opcionales/ModulosOpcionales'
+import { PortalDemoCTA } from '@/components/sections/portal-demo-cta/PortalDemoCTA'
 import { InfiniteReviews } from '@/components/sections/home/InfiniteReviews'
 import { motion } from 'framer-motion'
 import { ThemeProvider, useTheme } from '@/hooks/useThemeObserver'
@@ -85,6 +88,10 @@ function HomeContent() {
         <Section>
           <PortalDemo />
         </Section>
+
+        <TodoIncluido />
+        <ModulosOpcionales />
+        <PortalDemoCTA />
 
         <WhyDevelOP />
 

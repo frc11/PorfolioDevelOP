@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { ChevronLeft, ExternalLink, Pencil, Plus } from 'lucide-react'
+import { CheckSquare, ChevronLeft, ExternalLink, Pencil, Plus } from 'lucide-react'
 import { ProjectStatus, ServiceType } from '@prisma/client'
 import { DeleteServiceButton } from '@/components/admin/DeleteServiceButton'
 import { HealthScoreDots } from '@/components/admin/HealthScoreDots'
@@ -132,6 +132,10 @@ export default async function ClientDetailPage({
                 Ingresar como
               </button>
             </form>
+            <Link href={`/admin/clients/${id}/onboarding`} className="admin-btn-secondary inline-flex items-center gap-2 text-cyan-300">
+              <CheckSquare size={13} strokeWidth={1.5} />
+              Onboarding
+            </Link>
             <Link href={`/admin/clients/${id}/edit`} className="admin-btn-secondary inline-flex items-center gap-2">
               <Pencil size={13} />
               Editar

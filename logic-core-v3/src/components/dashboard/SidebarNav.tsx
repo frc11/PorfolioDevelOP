@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
-import { Home, FolderKanban, Zap, MessageSquare, BarChart3, TrendingUp, LifeBuoy, X, Settings, type LucideIcon } from 'lucide-react'
+import { Home, FolderKanban, Zap, MessageSquare, BarChart3, TrendingUp, LifeBuoy, X, Settings, Star, Mail, ShoppingBag, CalendarDays, type LucideIcon } from 'lucide-react'
 import { motion } from 'framer-motion'
 
 const NAV_ITEMS = [
@@ -20,6 +20,7 @@ interface SidebarNavProps {
   companyName: string
   unreadMessages?: number
   unlockedFeatures?: string[] // Kept for compatibility if passed
+  activeModuleSlugs?: string[]
   showCloseButton?: boolean
   onClose?: () => void
 }
@@ -28,6 +29,7 @@ export function SidebarNav({
   companyName,
   unreadMessages = 0,
   unlockedFeatures = [],
+  activeModuleSlugs = [],
   showCloseButton = false,
   onClose,
 }: SidebarNavProps) {
@@ -90,7 +92,7 @@ export function SidebarNav({
               >
                 {/* Hover Background Gradient */}
                 {!isActive && (
-                  <motion.div 
+                  <motion.div
                     className="absolute inset-0 rounded-lg bg-gradient-to-r from-white/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200"
                     initial={false}
                   />
@@ -101,14 +103,14 @@ export function SidebarNav({
                   whileHover={{ x: 2 }}
                   transition={{ duration: 0.2, ease: "easeOut" }}
                 >
-                  <Icon 
-                    size={16} 
-                    className={isActive ? 'drop-shadow-[0_0_8px_rgba(6,182,212,0.5)]' : 'transition-colors duration-200'} 
+                  <Icon
+                    size={16}
+                    className={isActive ? 'drop-shadow-[0_0_8px_rgba(6,182,212,0.5)]' : 'transition-colors duration-200'}
                   />
                 </motion.div>
-                
+
                 <span className="relative z-10 flex-1 tracking-wide">{label}</span>
-                
+
                 {isMessages && unreadMessages > 0 && (
                   <span className="relative z-10 flex min-w-[1.25rem] h-5 items-center justify-center rounded-full bg-cyan-500 px-1.5 text-[10px] font-bold text-black shadow-[0_0_10px_rgba(6,182,212,0.4)]">
                     {unreadMessages > 99 ? '99+' : unreadMessages}
@@ -118,6 +120,154 @@ export function SidebarNav({
             </li>
           )
         })}
+
+        {/* Premium modules */}
+        {activeModuleSlugs.includes('motor-resenas') && (() => {
+          const href = '/dashboard/modules/motor-resenas'
+          const isActive = pathname.startsWith(href)
+          return (
+            <li className="relative">
+              {isActive && (
+                <motion.div
+                  layoutId="sidebar-active-pill"
+                  className="absolute inset-0 bg-amber-500/10 rounded-lg shadow-[inset_2px_0_0_0_rgba(245,158,11,1),0_0_15px_rgba(245,158,11,0.12)]"
+                  transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                />
+              )}
+              <Link
+                href={href}
+                className={`group relative flex items-center gap-3 rounded-lg pl-6 pr-3 py-2 text-sm transition-all duration-200 z-10 ${
+                  isActive ? 'font-bold text-amber-400' : 'text-zinc-500 hover:text-zinc-200'
+                }`}
+              >
+                {!isActive && (
+                  <motion.div
+                    className="absolute inset-0 rounded-lg bg-gradient-to-r from-white/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                    initial={false}
+                  />
+                )}
+                <motion.div className="relative z-10" whileHover={{ x: 2 }} transition={{ duration: 0.2, ease: 'easeOut' }}>
+                  <Star
+                    size={14}
+                    strokeWidth={1.5}
+                    className={isActive ? 'drop-shadow-[0_0_8px_rgba(245,158,11,0.5)]' : 'transition-colors duration-200'}
+                  />
+                </motion.div>
+                <span className="relative z-10 flex-1 tracking-wide text-xs">Motor de Reseñas</span>
+              </Link>
+            </li>
+          )
+        })()}
+
+        {activeModuleSlugs.includes('email-marketing') && (() => {
+          const href = '/dashboard/modules/email-marketing'
+          const isActive = pathname.startsWith(href)
+          return (
+            <li className="relative">
+              {isActive && (
+                <motion.div
+                  layoutId="sidebar-active-pill"
+                  className="absolute inset-0 bg-cyan-500/10 rounded-lg shadow-[inset_2px_0_0_0_rgba(6,182,212,1),0_0_15px_rgba(6,182,212,0.12)]"
+                  transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                />
+              )}
+              <Link
+                href={href}
+                className={`group relative flex items-center gap-3 rounded-lg pl-6 pr-3 py-2 text-sm transition-all duration-200 z-10 ${
+                  isActive ? 'font-bold text-cyan-400' : 'text-zinc-500 hover:text-zinc-200'
+                }`}
+              >
+                {!isActive && (
+                  <motion.div
+                    className="absolute inset-0 rounded-lg bg-gradient-to-r from-white/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                    initial={false}
+                  />
+                )}
+                <motion.div className="relative z-10" whileHover={{ x: 2 }} transition={{ duration: 0.2, ease: 'easeOut' }}>
+                  <Mail
+                    size={14}
+                    strokeWidth={1.5}
+                    className={isActive ? 'drop-shadow-[0_0_8px_rgba(6,182,212,0.5)]' : 'transition-colors duration-200'}
+                  />
+                </motion.div>
+                <span className="relative z-10 flex-1 tracking-wide text-xs">Email Marketing</span>
+              </Link>
+            </li>
+          )
+        })()}
+
+        {activeModuleSlugs.includes('tienda-conectada') && (() => {
+          const href = '/dashboard/modules/tienda-conectada'
+          const isActive = pathname.startsWith(href)
+          return (
+            <li className="relative">
+              {isActive && (
+                <motion.div
+                  layoutId="sidebar-active-pill"
+                  className="absolute inset-0 bg-violet-500/10 rounded-lg shadow-[inset_2px_0_0_0_rgba(139,92,246,1),0_0_15px_rgba(139,92,246,0.12)]"
+                  transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                />
+              )}
+              <Link
+                href={href}
+                className={`group relative flex items-center gap-3 rounded-lg pl-6 pr-3 py-2 text-sm transition-all duration-200 z-10 ${
+                  isActive ? 'font-bold text-violet-400' : 'text-zinc-500 hover:text-zinc-200'
+                }`}
+              >
+                {!isActive && (
+                  <motion.div
+                    className="absolute inset-0 rounded-lg bg-gradient-to-r from-white/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                    initial={false}
+                  />
+                )}
+                <motion.div className="relative z-10" whileHover={{ x: 2 }} transition={{ duration: 0.2, ease: 'easeOut' }}>
+                  <ShoppingBag
+                    size={14}
+                    strokeWidth={1.5}
+                    className={isActive ? 'drop-shadow-[0_0_8px_rgba(139,92,246,0.5)]' : 'transition-colors duration-200'}
+                  />
+                </motion.div>
+                <span className="relative z-10 flex-1 tracking-wide text-xs">Tienda Online</span>
+              </Link>
+            </li>
+          )
+        })()}
+        {activeModuleSlugs.includes('agenda-inteligente') && (() => {
+          const href = '/dashboard/modules/agenda-inteligente'
+          const isActive = pathname.startsWith(href)
+          return (
+            <li className="relative">
+              {isActive && (
+                <motion.div
+                  layoutId="sidebar-active-pill"
+                  className="absolute inset-0 bg-emerald-500/10 rounded-lg shadow-[inset_2px_0_0_0_rgba(16,185,129,1),0_0_15px_rgba(16,185,129,0.12)]"
+                  transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                />
+              )}
+              <Link
+                href={href}
+                className={`group relative flex items-center gap-3 rounded-lg pl-6 pr-3 py-2 text-sm transition-all duration-200 z-10 ${
+                  isActive ? 'font-bold text-emerald-400' : 'text-zinc-500 hover:text-zinc-200'
+                }`}
+              >
+                {!isActive && (
+                  <motion.div
+                    className="absolute inset-0 rounded-lg bg-gradient-to-r from-white/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                    initial={false}
+                  />
+                )}
+                <motion.div className="relative z-10" whileHover={{ x: 2 }} transition={{ duration: 0.2, ease: 'easeOut' }}>
+                  <CalendarDays
+                    size={14}
+                    strokeWidth={1.5}
+                    className={isActive ? 'drop-shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 'transition-colors duration-200'}
+                  />
+                </motion.div>
+                <span className="relative z-10 flex-1 tracking-wide text-xs">Agenda Inteligente</span>
+              </Link>
+            </li>
+          )
+        })()}
       </ul>
 
       {/* Footer branding */}

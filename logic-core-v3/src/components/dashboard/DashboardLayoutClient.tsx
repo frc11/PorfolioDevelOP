@@ -15,6 +15,7 @@ interface DashboardLayoutClientProps {
   companyName: string
   unreadMessages: number
   unlockedFeatures: string[]
+  activeModuleSlugs: string[]
   notifications: Notification[]
   userDisplayName?: string
 }
@@ -25,6 +26,7 @@ export function DashboardLayoutClient({
   companyName,
   unreadMessages,
   unlockedFeatures,
+  activeModuleSlugs,
   notifications,
   userDisplayName,
 }: DashboardLayoutClientProps) {
@@ -63,6 +65,7 @@ export function DashboardLayoutClient({
           companyName={companyName}
           unreadMessages={unreadMessages}
           unlockedFeatures={unlockedFeatures}
+          activeModuleSlugs={activeModuleSlugs}
         />
       </div>
 

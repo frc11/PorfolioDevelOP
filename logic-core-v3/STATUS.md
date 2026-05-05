@@ -1,6 +1,6 @@
 # develOP — Estado de Funcionalidad Real
 
-**Última actualización:** 2026-05-02
+**Última actualización:** 2026-05-04
 **Mantenido por:** Franco
 
 > Este documento es el SOURCE OF TRUTH de qué está realmente
@@ -37,8 +37,8 @@
 
 ## 🟡 Funcional con mocks/datos de prueba
 
-- Resultados → Tráfico (estructura lista, datos demo, falta GA4 real por org)
-- Resultados → SEO (estructura lista, datos demo, falta Search Console real por org)
+- Resultados → Tráfico (estructura lista, datos demo, falta GA4 real por org — ver `docs/onboarding-data-connections.md`)
+- Resultados → SEO (estructura lista, datos demo, falta Search Console real por org — ver `docs/onboarding-data-connections.md`)
 - Health Score (estructura lista, calibrando si no hay APIs activas)
 - AI Executive Brief (genera con Claude Haiku 4.5, requiere ANTHROPIC_API_KEY)
 
@@ -65,8 +65,8 @@
 
 | API | Estado | Notas |
 |-----|--------|-------|
-| Google Analytics 4 | ⚪ Implementada con fallback mock | Falta activar por cliente |
-| Google Search Console | ⚪ Implementada con fallback mock | Falta activar por cliente |
+| Google Analytics 4 | ⚪ Lista para activar | Procedimiento en `docs/onboarding-data-connections.md` — pendiente cliente piloto |
+| Google Search Console | ⚪ Lista para activar | Procedimiento en `docs/onboarding-data-connections.md` — pendiente cliente piloto |
 | Anthropic (Claude) | ✅ Funcional | Para AIBrief |
 | Resend (email) | ✅ Funcional | Notificaciones transaccionales |
 | n8n REST API | ⚪ Implementada con fallback mock | Falta server n8n productivo |
