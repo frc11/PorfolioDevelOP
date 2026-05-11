@@ -41,6 +41,38 @@ export async function requestUpsellAction(
 
     const submissionMessage = `Solicitud de módulo premium: ${parsed.data.featureName}`
 
+    const module = await prisma.premiumModule.findUnique({
+      where: { slug: parsed.data.featureKey },
+      select: { id: true },
+    })
+
+    if (module) {
+      const existing = await prisma.organizationModule.findFirst({
+        where: { organizationId, moduleId: module.id },
+      })
+
+      if (existing) {
+        await prisma.organizationModule.update({
+          where: { id: existing.id },
+          data: {
+            upsellRequestCount: { increment: 1 },
+            upsellLastRequestedAt: new Date(),
+          },
+        })
+      } else {
+        await prisma.organizationModule.create({
+          data: {
+            organizationId,
+            moduleId: module.id,
+            status: 'INACTIVE',
+            priceLockedUsd: 0,
+            upsellRequestCount: 1,
+            upsellLastRequestedAt: new Date(),
+          },
+        })
+      }
+    }
+
     await prisma.contactSubmission.create({
       data: {
         name: user.name ?? org.companyName,

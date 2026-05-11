@@ -22,6 +22,7 @@ import {
 import type { PremiumModuleStatus, PremiumModuleTier } from '@prisma/client'
 import type { LucideIcon } from 'lucide-react'
 import { requestUpsellAction } from '@/lib/actions/upsell'
+import { useTransitionContext } from '@/context/TransitionContext'
 
 const ICON_MAP: Record<string, LucideIcon> = {
   Bot,
@@ -67,8 +68,8 @@ export function PremiumModuleCard({
 }: PremiumModuleCardProps) {
   const [reqStatus, setReqStatus] = useState<ReqStatus>('idle')
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
-  const [showToast, setShowToast] = useState(false)
   const [isPending, startTransition] = useTransition()
+  const { triggerTransition } = useTransitionContext()
 
   const Icon = ICON_MAP[iconName] ?? Bot
   const isComingSoon = status === 'COMING_SOON'
@@ -83,8 +84,8 @@ export function PremiumModuleCard({
 
       if (result.success) {
         setReqStatus('success')
-        setShowToast(true)
-        setTimeout(() => setShowToast(false), 4500)
+        const params = new URLSearchParams({ context: 'modulo', moduleName: name })
+        triggerTransition(`/dashboard/messages?${params.toString()}`)
         return
       }
 
@@ -248,25 +249,6 @@ export function PremiumModuleCard({
         )}
       </motion.div>
 
-      <AnimatePresence>
-        {showToast && (
-          <motion.div
-            initial={{ opacity: 0, y: 24, scale: 0.96 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 16, scale: 0.96 }}
-            transition={{ type: 'spring', stiffness: 340, damping: 28 }}
-            className="fixed bottom-8 left-1/2 z-[100] flex -translate-x-1/2 items-center gap-3 rounded-2xl border border-cyan-500/20 bg-[#0d0f13] px-5 py-3.5 shadow-[0_16px_60px_rgba(0,0,0,0.8)] backdrop-blur-xl"
-          >
-            <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border border-emerald-500/25 bg-emerald-500/10">
-              <CheckCircle2 size={15} className="text-emerald-400" />
-            </div>
-            <div>
-              <p className="text-[13px] font-bold text-white">Solicitud enviada</p>
-              <p className="text-[11px] text-zinc-400">Te contactamos en menos de 24 hs.</p>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </>
   )
 }

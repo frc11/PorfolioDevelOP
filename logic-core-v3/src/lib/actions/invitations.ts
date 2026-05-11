@@ -5,6 +5,7 @@ import { prisma } from '@/lib/prisma'
 import { auth } from '@/auth'
 import { Role } from '@prisma/client'
 import { revalidatePath } from 'next/cache'
+import { seedOnboardingTasksForOrg } from '@/lib/onboarding/seed-tasks-for-org'
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -88,6 +89,10 @@ export async function inviteClientAction(
   await prisma.orgMember.create({
     data: { userId: user.id, organizationId: org.id, role: 'ADMIN' },
   })
+
+  await seedOnboardingTasksForOrg(org.id).catch((e) =>
+    console.error('[Onboarding] Error seeding tasks:', e),
+  )
 
   // Invalidar invitaciones previas sin usar para este usuario (safety)
   await prisma.passwordResetToken.deleteMany({

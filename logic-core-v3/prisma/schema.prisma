@@ -100,6 +100,21 @@ enum AssetType {
   OTHER
 }
 
+enum OnboardingTaskCategory {
+  SETUP
+  DATA_CONNECTIONS
+  CONTENT
+  TRAINING
+  GO_LIVE
+}
+
+enum OnboardingTaskStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  SKIPPED
+}
+
 // ─── NextAuth Required Models ─────────────────────────────────────────────────
 
 model Account {
@@ -211,23 +226,41 @@ model Organization {
   gbpRefreshToken   String?   @db.Text
   gbpTokenExpiresAt DateTime?
   gbpConnectedAt    DateTime?
+  googleMapsPlaceId String?
+
+  // Tiendanube integration
+  tiendanubeStoreId       Int?
+  tiendanubeAccessToken   String?   @db.Text
+  tiendanubeStoreUrl      String?
+  tiendanubeConnectedAt   DateTime?
+
+  // Email Marketing (WIRE module)
+  brevoListId Int?
+
+  // Agenda Inteligente (Cal.com)
+  calComApiKey   String?  @db.Text
+  calComUsername String?
+  calComEmbedUrl String?
 
   // Weekly AIBrief cache
   cachedExecutiveBrief        String?   @db.Text
   cachedExecutiveBriefAt      DateTime?
   executiveBriefRegenerations Int       @default(0)
 
-  members        OrgMember[]
-  services       Service[]
-  projects       Project[]
-  messages       Message[]
-  invoices       Invoice[]
-  notifications  Notification[]
-  clientAssets   ClientAsset[]
-  subscription   Subscription?
-  brandProfile   ClientBrandProfile?
-  tickets        Ticket[]
-  premiumModules OrganizationModule[]
+  members         OrgMember[]
+  services        Service[]
+  projects        Project[]
+  messages        Message[]
+  invoices        Invoice[]
+  notifications   Notification[]
+  clientAssets    ClientAsset[]
+  subscription    Subscription?
+  brandProfile    ClientBrandProfile?
+  tickets         Ticket[]
+  premiumModules  OrganizationModule[]
+  emailContacts   EmailContact[]
+  emailCampaigns  EmailCampaign[]
+  onboardingTasks OnboardingTask[]
 }
 
 model OrgMember {
@@ -475,6 +508,28 @@ model AgencySettings {
   updatedAt                    DateTime @updatedAt
 }
 
+model OnboardingTask {
+  id             String                 @id @default(cuid())
+  organizationId String
+  organization   Organization           @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  category      OnboardingTaskCategory
+  title         String
+  description   String                 @db.Text
+  sortOrder     Int
+
+  status          OnboardingTaskStatus @default(PENDING)
+  completedAt     DateTime?
+  completedById   String?
+  internalNotes   String?              @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([organizationId, sortOrder])
+  @@index([organizationId, status])
+}
+
 model OsLead {
   id             String         @id @default(cuid())
   businessName   String
@@ -628,6 +683,14 @@ enum MilestoneType {
   ENTREGA
 }
 
+enum EmailCampaignStatus {
+  DRAFT
+  SCHEDULED
+  SENDING
+  SENT
+  FAILED
+}
+
 enum PremiumModuleTier {
   TIER_1_OPERATION
   TIER_2_GROWTH
@@ -641,6 +704,7 @@ enum PremiumModuleStatus {
 }
 
 enum OrganizationModuleStatus {
+  INACTIVE
   ACTIVE
   PAUSED
   CANCELLED
@@ -679,6 +743,9 @@ model OrganizationModule {
   pausedAt       DateTime?
   priceLockedUsd Float
 
+  upsellRequestCount    Int       @default(0)
+  upsellLastRequestedAt DateTime?
+
   organization Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   module       PremiumModule @relation(fields: [moduleId], references: [id], onDelete: Restrict)
 
@@ -686,4 +753,56 @@ model OrganizationModule {
   @@index([organizationId])
   @@index([status])
   @@map("organization_module")
+}
+
+model EmailContact {
+  id              String    @id @default(cuid())
+  organizationId  String
+  email           String
+  firstName       String?
+  lastName        String?
+  phone           String?
+  tags            String[]
+  source          String?
+  optedOut        Boolean   @default(false)
+  optedOutAt      DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, email])
+  @@index([organizationId])
+  @@index([organizationId, optedOut])
+}
+
+model EmailCampaign {
+  id              String    @id @default(cuid())
+  organizationId  String
+  name            String
+  subject         String
+  fromName        String
+  fromEmail       String
+  htmlContent     String    @db.Text
+  textContent     String?   @db.Text
+
+  status          EmailCampaignStatus @default(DRAFT)
+  scheduledFor    DateTime?
+  sentAt          DateTime?
+
+  recipientCount    Int @default(0)
+  openedCount       Int @default(0)
+  clickedCount      Int @default(0)
+  bouncedCount      Int @default(0)
+  unsubscribedCount Int @default(0)
+
+  brevoCampaignId Int?
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([organizationId, status])
 }

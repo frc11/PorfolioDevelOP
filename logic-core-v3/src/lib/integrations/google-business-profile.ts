@@ -220,3 +220,99 @@ function isGoogleReview(value: unknown): value is GoogleReview {
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null
 }
+
+// ─── Replies ───────────────────────────────────────────────────────────────────
+
+export async function replyToReview(
+  organizationId: string,
+  reviewName: string,
+  comment: string,
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const oauth2Client = await getAuthedClient(organizationId)
+  if (!oauth2Client) return { ok: false, error: 'GBP no conectado' }
+
+  try {
+    const res = await fetch(
+      `https://mybusiness.googleapis.com/v4/${reviewName}/reply`,
+      {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${oauth2Client.credentials.access_token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ comment }),
+      },
+    )
+
+    if (!res.ok) {
+      const text = await res.text()
+      return { ok: false, error: `Google API: ${res.status} ${text}` }
+    }
+
+    return { ok: true }
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : 'Unknown error' }
+  }
+}
+
+export type GBPReview = {
+  reviewName: string
+  reviewerName: string
+  rating: number
+  comment: string | null
+  createdAt: Date
+  reply: { comment: string; updatedAt: Date } | null
+}
+
+type GBPReviewAPIItem = {
+  name?: string | null
+  reviewer?: { displayName?: string | null } | null
+  starRating?: string | null
+  comment?: string | null
+  createTime?: string | null
+  reviewReply?: { comment?: string | null; updateTime?: string | null } | null
+}
+
+function isGBPReviewAPIItem(v: unknown): v is GBPReviewAPIItem {
+  return typeof v === 'object' && v !== null
+}
+
+export async function listReviews(organizationId: string): Promise<GBPReview[]> {
+  const oauth2Client = await getAuthedClient(organizationId)
+  if (!oauth2Client) return []
+
+  const org = await prisma.organization.findUnique({
+    where: { id: organizationId },
+    select: { gbpLocationId: true },
+  })
+  if (!org?.gbpLocationId) return []
+
+  try {
+    const res = await fetch(
+      `https://mybusiness.googleapis.com/v4/${org.gbpLocationId}/reviews?pageSize=50`,
+      { headers: { Authorization: `Bearer ${oauth2Client.credentials.access_token}` } },
+    )
+    const data: unknown = await res.json()
+
+    const reviews = isRecord(data) && Array.isArray(data.reviews)
+      ? (data.reviews as unknown[]).filter(isGBPReviewAPIItem)
+      : []
+
+    return reviews.map((r) => ({
+      reviewName: typeof r.name === 'string' ? r.name : '',
+      reviewerName: typeof r.reviewer?.displayName === 'string' ? r.reviewer.displayName : 'Anónimo',
+      rating: parseStarRating(r.starRating),
+      comment: typeof r.comment === 'string' ? r.comment : null,
+      createdAt: parseReviewDate(typeof r.createTime === 'string' ? r.createTime : null),
+      reply: r.reviewReply
+        ? {
+            comment: typeof r.reviewReply.comment === 'string' ? r.reviewReply.comment : '',
+            updatedAt: parseReviewDate(typeof r.reviewReply.updateTime === 'string' ? r.reviewReply.updateTime : null),
+          }
+        : null,
+    }))
+  } catch (err) {
+    console.error('[GBP listReviews] error:', err)
+    return []
+  }
+}

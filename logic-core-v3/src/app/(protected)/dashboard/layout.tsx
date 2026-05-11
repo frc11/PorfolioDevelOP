@@ -40,7 +40,7 @@ export default async function DashboardLayout({
     redirect(session?.user?.role === 'SUPER_ADMIN' ? '/admin/clients' : '/login')
   }
 
-  const [client, unreadMessages, notifications, currentUser, targetAdmin] = await Promise.all([
+  const [client, unreadMessages, notifications, currentUser, targetAdmin, activeModulesData] = await Promise.all([
     prisma.organization.findUnique({
       where: { id: organizationId },
       select: { companyName: true, onboardingCompleted: true },
@@ -72,7 +72,13 @@ export default async function DashboardLayout({
         },
       },
     }),
+    prisma.organizationModule.findMany({
+      where: { organizationId, status: 'ACTIVE' },
+      select: { module: { select: { slug: true } } },
+    }),
   ])
+
+  const activeModuleSlugs = activeModulesData.map((m) => m.module.slug)
 
   if (!client) redirect('/login')
 
@@ -93,6 +99,7 @@ export default async function DashboardLayout({
           ? (targetAdmin?.user.unlockedFeatures ?? [])
           : (currentUser?.unlockedFeatures ?? [])
       }
+      activeModuleSlugs={activeModuleSlugs}
       notifications={notifications}
       userDisplayName={
         preview
