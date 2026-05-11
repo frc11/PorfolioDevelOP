@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 
 interface TypewriterTextProps {
     words: string[];
@@ -9,6 +8,7 @@ interface TypewriterTextProps {
     deletingSpeed?: number;
     pauseDuration?: number;
     className?: string;
+    cursorClassName?: string;
 }
 
 export function TypewriterText({
@@ -17,6 +17,7 @@ export function TypewriterText({
     deletingSpeed = 50,
     pauseDuration = 2000,
     className = '',
+    cursorClassName = 'text-zinc-900',
 }: TypewriterTextProps) {
     const [wordIndex, setWordIndex] = useState(0);
     const [displayText, setDisplayText] = useState('');
@@ -70,20 +71,11 @@ export function TypewriterText({
                 }
             `}</style>
             <span className={className}>
-                <AnimatePresence mode="wait">
-                    <motion.span
-                        key={wordIndex}
-                        initial={{ opacity: 0.7 }}
-                        animate={{ opacity: 1 }}
-                        className="inline"
-                    >
-                        {displayText}
-                    </motion.span>
-                </AnimatePresence>
+                {displayText}
             </span>
             <span
                 style={{ animation: 'blink-cursor 1s steps(1) infinite' }}
-                className="inline-block ml-[2px] font-light text-cyan-400"
+                className={`inline-block ml-[2px] align-baseline font-light [text-shadow:none] ${cursorClassName}`}
             >
                 |
             </span>
