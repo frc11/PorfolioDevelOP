@@ -1,17 +1,31 @@
 'use client';
+<<<<<<< HEAD
 import { motion, useScroll, useVelocity, useSpring, useTransform } from 'motion/react';
+=======
+>>>>>>> 2e2538035336e0fb5af1444fcc07cf4be2d988cd
 
-export const KineticText = ({ children, className }: { children: React.ReactNode, className?: string }) => {
+import { motion, useScroll, useSpring, useTransform, useVelocity } from 'framer-motion';
+
+export const KineticText = ({
+    children,
+    className,
+}: {
+    children: React.ReactNode;
+    className?: string;
+}) => {
     const { scrollY } = useScroll();
     const scrollVelocity = useVelocity(scrollY);
-    const smoothVelocity = useSpring(scrollVelocity, { damping: 50, stiffness: 400 });
-
-    // Mapear velocidad a inclinación (ajusta el rango [-1000, 1000] según gusto)
-    // Skew effect: text tilts based on scroll speed
-    const skewX = useTransform(smoothVelocity, [-1000, 1000], [-15, 15], { clamp: false });
+    const smoothVelocity = useSpring(scrollVelocity, {
+        damping: 72,
+        stiffness: 240,
+        mass: 0.72,
+    });
+    const skewX = useTransform(smoothVelocity, [-1100, 1100], [-10, 10], {
+        clamp: true,
+    });
 
     return (
-        <div className={`overflow-hidden ${className}`}>
+        <div className={`overflow-hidden px-[0.08em] pb-[0.08em] pt-[0.03em] ${className}`}>
             <motion.div style={{ skewX }} className="origin-bottom">
                 {children}
             </motion.div>

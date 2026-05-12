@@ -1,249 +1,460 @@
 'use client';
+<<<<<<< HEAD
 import { useRef } from 'react';
 import { motion, useScroll, useTransform, useInView } from 'motion/react';
+=======
+
+import { useRef, useState } from 'react';
+import { motion, useInView, useMotionValueEvent, useScroll, useTransform } from 'framer-motion';
+import type { MotionValue } from 'framer-motion';
+>>>>>>> 2e2538035336e0fb5af1444fcc07cf4be2d988cd
 import { useThemeSection } from '@/hooks/useThemeObserver';
 import { KineticText } from '@/components/ui/KineticText';
 
-// Shared Interfaces
 interface TeamMemberProps {
     name: string;
     role: string;
     description: string;
-    skills: string[];
     avatarInitial: string;
-    avatarGradient: string;
+    tone: 'light' | 'dark';
 }
 
-// Avatar placeholder styled con iniciales
-const AvatarPlaceholder = ({ initial, gradient }: { initial: string; gradient: string }) => (
-    <motion.div
-        className={`w-full h-full flex items-center justify-center bg-gradient-to-br ${gradient}`}
-        whileHover={{ scale: 1.06 }}
-        transition={{ duration: 0.4, ease: 'easeOut' }}
-    >
-        <span className="text-black font-black text-8xl select-none">{initial}</span>
-    </motion.div>
-);
+const ABOUT_HERO_LOGO_TEXT_SIZE = 'clamp(9rem,18vw,24rem)';
+const ABOUT_HERO_LOGO_LINE_HEIGHT = '0.74';
+const ABOUT_HERO_LOGO_TRACKING = '-0.08em';
+const ABOUT_HERO_LOGO_SHADOW_WIDTH = 'min(88vw,78rem)';
+const ABOUT_HERO_LOGO_SHADOW_HEIGHT = 'clamp(3.5rem,6vw,6.5rem)';
+const ABOUT_HERO_LOGO_SHADOW_TOP = '86%';
+const ABOUT_HERO_LOGO_SHADOW_OPACITY = 0.56;
 
-// Mobile Team Member Card
-const TeamMemberMobile = ({ name, role, description, skills, avatarInitial, avatarGradient }: TeamMemberProps) => (
-    <div className="relative w-[80vw] h-[60vh] bg-white/[0.03] overflow-hidden rounded-2xl border border-white/[0.08] backdrop-blur-md">
-        <div className="absolute inset-0">
-            <AvatarPlaceholder initial={avatarInitial} gradient={avatarGradient} />
-        </div>
-        <div className="absolute bottom-0 left-0 p-6 bg-gradient-to-t from-black/95 via-black/70 to-transparent w-full">
-            <h3 className="font-bold text-3xl text-zinc-50">{name}</h3>
-            <p className="text-sm text-zinc-400 tracking-widest uppercase mt-1">{role}</p>
-            <p className="text-xs text-zinc-400 mt-2 leading-relaxed">{description}</p>
-            <div className="flex flex-wrap gap-1 mt-3">
-                {skills.map((skill) => (
-                    <span key={skill} className="text-[10px] px-2 py-0.5 rounded-full bg-cyan-400/10 text-cyan-400 border border-cyan-400/30">
-                        {skill}
-                    </span>
-                ))}
-            </div>
-        </div>
-    </div>
-);
-
-// Desktop Team Member Card (Original)
-const TeamMemberDesktop = ({ name, role, description, skills, avatarInitial, avatarGradient }: TeamMemberProps) => (
-    <motion.div
-        data-cursor="hover"
-        className="group relative w-[400px] h-[450px] bg-white/[0.03] overflow-hidden rounded-sm flex-shrink-0 border border-white/[0.08] backdrop-blur-md cursor-none"
-        whileHover={{ y: -6, boxShadow: '0 0 32px 0 rgba(34,211,238,0.12)' }}
-        transition={{ duration: 0.35, ease: 'easeOut' }}
-    >
-        <div className="absolute inset-0 transition-transform duration-700 group-hover:scale-110 grayscale group-hover:grayscale-0 opacity-80 group-hover:opacity-100">
-            <AvatarPlaceholder initial={avatarInitial} gradient={avatarGradient} />
-        </div>
-        <div className="absolute bottom-0 left-0 p-6 bg-zinc-950/95 backdrop-blur-md w-full translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out border-t border-white/[0.08]">
-            <h3 className="font-bold text-xl text-zinc-50">{name}</h3>
-            <p className="text-xs text-zinc-500 tracking-widest uppercase mt-1">{role}</p>
-            <p className="text-sm text-zinc-400 mt-2 leading-relaxed">{description}</p>
-            <div className="flex flex-wrap gap-1 mt-3">
-                {skills.map((skill) => (
-                    <span key={skill} className="text-[10px] px-2 py-0.5 rounded-full bg-cyan-400/10 text-cyan-400 border border-cyan-400/30">
-                        {skill}
-                    </span>
-                ))}
-            </div>
-        </div>
-    </motion.div>
-);
-
-// Shared Component: Digital Underline Highlighting
-const DigitalHighlight = ({ children }: { children: React.ReactNode }) => {
-    return (
-        <span
-            className="relative inline-block font-bold text-zinc-50 cursor-none"
-            data-cursor="hover"
-        >
-            <span className="relative z-10">{children}</span>
-            <motion.span
-                initial={{ scaleX: 0, opacity: 0 }}
-                whileInView={{ scaleX: 1, opacity: 1 }}
-                viewport={{ once: false, margin: "-10%" }}
-                transition={{ duration: 0.8, ease: "circOut", delay: 0.2 }}
-                className="absolute bottom-1 left-0 w-full h-[3px] bg-gradient-to-r from-cyan-400 to-blue-600 origin-left"
-            />
-        </span>
-    );
-};
-
-// Location badge
-const LocationBadge = () => (
-    <div className="inline-flex items-center gap-2 mt-6 px-4 py-2 rounded-full border border-white/10 bg-white/[0.02]">
-        <span className="text-base"></span>
-        <span className="text-sm text-zinc-400 tracking-wide">
-            Tucumán, Argentina — trabajamos con clientes de todo el país
-        </span>
-    </div>
-);
-
-// Team data
 const teamMembers: TeamMemberProps[] = [
     {
-        name: "Franco",
-        role: "Co-Founder & Lead Developer",
-        description: "Desarrollo web, IA y arquitectura de sistemas. Convierto ideas de negocio en productos digitales qué funcionan solos.",
-        skills: ["Next.js", "IA", "n8n", "TypeScript"],
-        avatarInitial: "F",
-        avatarGradient: "from-cyan-500 to-green-500",
+        name: 'Franco',
+        role: 'Co-Founder & Lead Developer',
+        description:
+            'Desarrollo web, IA y arquitectura de sistemas. Convierto ideas de negocio en productos digitales que funcionan solos.',
+        avatarInitial: 'F',
+        tone: 'light',
     },
     {
-        name: "Equipo develOP",
-        role: "Full Stack & Automatizaciones",
-        description: "Backend, bases de datos y flujos de automatización. Hacemos qué los sistemas trabajen solos.",
-        skills: ["Node.js", "PostgreSQL", "n8n", "APIs"],
-        avatarInitial: "D",
-        avatarGradient: "from-violet-500 to-cyan-500",
+        name: 'Valentino',
+        role: 'Full Stack & Automatizaciones',
+        description:
+            'Backend, bases de datos y flujos de automatización. Hacemos que los sistemas trabajen solos.',
+        avatarInitial: 'V',
+        tone: 'dark',
     },
 ];
 
-// -----------------------------------------------------------------------------
-// MOBILE IMPLEMENTATION (NEW LOGIC)
-// -----------------------------------------------------------------------------
+const AvatarPlaceholder = ({
+    initial,
+    tone,
+}: {
+    initial: string;
+    tone: TeamMemberProps['tone'];
+}) => (
+    <motion.div
+        className={`relative flex h-full w-full items-center justify-center overflow-hidden ${tone === 'light'
+            ? 'bg-[radial-gradient(circle_at_30%_18%,#ffffff_0%,#d9d9d9_34%,#8f8f8f_72%,#363636_100%)]'
+            : 'bg-[radial-gradient(circle_at_65%_20%,#7d7d7d_0%,#4f4f4f_38%,#1c1c1c_74%,#050505_100%)]'
+            }`}
+        whileHover={{ scale: 1.06 }}
+        transition={{ duration: 0.4, ease: 'easeOut' }}
+    >
+        <div
+            aria-hidden="true"
+            className="absolute inset-0 opacity-[0.14]"
+            style={{
+                backgroundImage:
+                    'linear-gradient(rgba(0,0,0,0.34) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,0.34) 1px, transparent 1px)',
+                backgroundSize: '36px 36px',
+            }}
+        />
+        <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/45 to-transparent" />
+        <span
+            className={`relative select-none text-8xl font-black drop-shadow-[0_18px_24px_rgba(0,0,0,0.22)] ${tone === 'light' ? 'text-black' : 'text-zinc-100'
+                }`}
+        >
+            {initial}
+        </span>
+    </motion.div>
+);
+
+const TeamMemberMobile = ({ name, role, description, avatarInitial, tone }: TeamMemberProps) => (
+    <div className="relative h-[60vh] w-[80vw] overflow-hidden rounded-2xl border border-white/[0.12] bg-white/[0.035] shadow-[0_24px_70px_rgba(255,255,255,0.08)] backdrop-blur-md">
+        <div className="absolute inset-0">
+            <AvatarPlaceholder initial={avatarInitial} tone={tone} />
+        </div>
+        <div className="absolute bottom-0 left-0 w-full border-t border-white/[0.1] bg-gradient-to-t from-black via-black/88 to-transparent p-6">
+            <h3 className="text-3xl font-bold text-zinc-50">{name}</h3>
+            <p className="mt-1 text-sm uppercase tracking-widest text-zinc-300">{role}</p>
+            <p className="mt-2 text-xs leading-relaxed text-zinc-400">{description}</p>
+        </div>
+    </div>
+);
+
+const TeamMemberDesktop = ({ name, role, description, avatarInitial, tone }: TeamMemberProps) => (
+    <motion.div
+        data-cursor="hover"
+        className="group relative h-[clamp(20rem,50vh,28.125rem)] w-[clamp(13rem,21vw,25rem)] flex-shrink-0 cursor-none overflow-hidden rounded-sm border border-white/[0.12] bg-white/[0.025] shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_30px_80px_rgba(0,0,0,0.55)] backdrop-blur-md"
+        whileHover={{
+            y: -6,
+            boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.12), 0 0 44px 0 rgba(255,255,255,0.12)',
+        }}
+        transition={{ duration: 0.35, ease: 'easeOut' }}
+    >
+        <div className="absolute inset-0 opacity-80 grayscale transition-all duration-700 group-hover:scale-110 group-hover:opacity-100 group-hover:grayscale-0">
+            <AvatarPlaceholder initial={avatarInitial} tone={tone} />
+        </div>
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/35 to-transparent" />
+        <div className="absolute bottom-0 left-0 w-full translate-y-full border-t border-white/[0.12] bg-black/92 p-6 shadow-[0_-18px_50px_rgba(255,255,255,0.06)] backdrop-blur-md transition-transform duration-500 ease-out group-hover:translate-y-0">
+            <h3 className="text-xl font-bold text-zinc-50">{name}</h3>
+            <p className="mt-1 text-xs uppercase tracking-widest text-zinc-400">{role}</p>
+            <p className="mt-2 text-sm leading-relaxed text-zinc-400">{description}</p>
+        </div>
+    </motion.div>
+);
+
+const HighlightGlyph = ({
+    glyph,
+    index,
+    active,
+}: {
+    glyph: string;
+    index: number;
+    active: boolean;
+}) => {
+    const delay = index * 0.028;
+    const isSpace = glyph === ' ';
+
+    return (
+        <motion.span
+            className={`relative inline-block pb-[0.04em] align-baseline will-change-transform ${isSpace ? 'w-[0.32em]' : ''}`}
+            animate={{
+                y: 0,
+                opacity: active ? 1 : isSpace ? 0.64 : 0.74,
+                color: active ? 'rgba(255,255,255,1)' : 'rgba(255,255,255,0.76)',
+                textShadow:
+                    active && !isSpace
+                        ? '0 0 8px rgba(255,255,255,0.32), 0 0 18px rgba(255,255,255,0.11)'
+                        : '0 0 0 rgba(255,255,255,0)',
+                filter: active ? 'contrast(1.08)' : 'contrast(0.92)',
+            }}
+            transition={{
+                duration: active ? 0.34 : 0.24,
+                delay: active ? delay : 0,
+                ease: [0.16, 1, 0.3, 1],
+            }}
+        >
+            {isSpace ? '\u00A0' : glyph}
+            <motion.span
+                aria-hidden="true"
+                className="absolute bottom-0 left-[-0.04em] h-[0.08em] w-[calc(100%+0.08em)] origin-left bg-[#b8b8b8]"
+                animate={{
+                    scaleX: active ? 1 : 0,
+                    opacity: active ? 1 : 0,
+                }}
+                transition={{
+                    duration: active ? 0.34 : 0.24,
+                    delay: active ? delay : 0,
+                    ease: [0.16, 1, 0.3, 1],
+                }}
+            />
+        </motion.span>
+    );
+};
+
+const DigitalHighlight = ({ children, active = false }: { children: string; active?: boolean }) => {
+    const words = children.trim().split(/\s+/);
+    let glyphIndex = 0;
+
+    return (
+        <motion.span data-cursor="hover" aria-label={children} className="inline font-semibold">
+            {words.map((word, wordIndex) => {
+                const letters = Array.from(word);
+
+                return (
+                    <span
+                        key={`${word}-${wordIndex}`}
+                        aria-hidden="true"
+                        className="relative inline-block whitespace-nowrap pb-[0.05em]"
+                    >
+                        {letters.map((glyph, charIndex) => {
+                            const currentIndex = glyphIndex;
+                            glyphIndex += 1;
+
+                            return (
+                                <HighlightGlyph
+                                    key={`${glyph}-${wordIndex}-${charIndex}`}
+                                    glyph={glyph}
+                                    index={currentIndex}
+                                    active={active}
+                                />
+                            );
+                        })}
+                    {wordIndex < words.length - 1
+                        ? (() => {
+                            const currentIndex = glyphIndex;
+                            glyphIndex += 1;
+
+                            return <HighlightGlyph key={`space-${wordIndex}`} glyph=" " index={currentIndex} active={active} />;
+                        })()
+                        : null}
+                </span>
+                );
+            })}
+        </motion.span>
+    );
+};
+
+const AnimatedLocationBadge = ({ progress }: { progress: MotionValue<number> }) => {
+    const scale = useTransform(progress, [0.78, 0.98], [1, 1.035], { clamp: true });
+    const borderColor = useTransform(progress, [0.78, 0.98], ['rgba(255,255,255,0.15)', 'rgba(255,255,255,0.34)'], {
+        clamp: true,
+    });
+    const background = useTransform(
+        progress,
+        [0.78, 0.98],
+        [
+            'linear-gradient(90deg, rgba(255,255,255,0.07), rgba(255,255,255,0.025), rgba(255,255,255,0.05))',
+            'linear-gradient(90deg, rgba(255,255,255,0.12), rgba(255,255,255,0.055), rgba(255,255,255,0.1))',
+        ],
+        { clamp: true },
+    );
+    const boxShadow = useTransform(
+        progress,
+        [0.78, 0.98],
+        [
+            'inset 0 1px 0 rgba(255,255,255,0.08), 0 18px 44px rgba(255,255,255,0.04)',
+            'inset 0 1px 0 rgba(255,255,255,0.16), 0 22px 58px rgba(255,255,255,0.12)',
+        ],
+        { clamp: true },
+    );
+    const dotScale = useTransform(progress, [0.78, 0.98], [1, 1.35], { clamp: true });
+    const dotBoxShadow = useTransform(
+        progress,
+        [0.78, 0.98],
+        ['0 0 16px rgba(255,255,255,0.38)', '0 0 28px rgba(255,255,255,0.62)'],
+        { clamp: true },
+    );
+
+    return (
+        <motion.div
+            className="mt-6 inline-flex max-w-full origin-left items-center gap-3 rounded-full px-4 py-2.5"
+            style={{ scale, borderColor, background, boxShadow, borderWidth: 1, borderStyle: 'solid' }}
+        >
+            <motion.span
+                className="h-1.5 w-1.5 shrink-0 rounded-full bg-zinc-100"
+                style={{ scale: dotScale, boxShadow: dotBoxShadow }}
+            />
+            <span className="text-sm tracking-wide text-zinc-300">
+                Tucumán, Argentina - trabajamos con clientes de todo el país
+            </span>
+        </motion.div>
+    );
+};
+
+const LocationBadge = ({ progress, active }: { progress?: MotionValue<number>; active?: boolean }) => {
+    if (typeof active === 'boolean') {
+        return (
+            <motion.div
+                className="mt-6 inline-flex max-w-full origin-left items-center gap-3 rounded-full px-4 py-2.5"
+                animate={{
+                    scale: active ? 1.035 : 1,
+                    borderColor: active ? 'rgba(255,255,255,0.34)' : 'rgba(255,255,255,0.15)',
+                    background: active
+                        ? 'linear-gradient(90deg, rgba(255,255,255,0.12), rgba(255,255,255,0.055), rgba(255,255,255,0.1))'
+                        : 'linear-gradient(90deg, rgba(255,255,255,0.07), rgba(255,255,255,0.025), rgba(255,255,255,0.05))',
+                    boxShadow: active
+                        ? 'inset 0 1px 0 rgba(255,255,255,0.16), 0 22px 58px rgba(255,255,255,0.12)'
+                        : 'inset 0 1px 0 rgba(255,255,255,0.08), 0 18px 44px rgba(255,255,255,0.04)',
+                }}
+                transition={{ duration: active ? 0.72 : 0.42, ease: [0.16, 1, 0.3, 1] }}
+                style={{ borderWidth: 1, borderStyle: 'solid' }}
+            >
+                <motion.span
+                    className="h-1.5 w-1.5 shrink-0 rounded-full bg-zinc-100"
+                    animate={{
+                        scale: active ? 1.35 : 1,
+                        boxShadow: active
+                            ? '0 0 28px rgba(255,255,255,0.62)'
+                            : '0 0 16px rgba(255,255,255,0.38)',
+                    }}
+                    transition={{ duration: active ? 0.72 : 0.42, ease: [0.16, 1, 0.3, 1] }}
+                />
+                <span className="text-sm tracking-wide text-zinc-300">
+                    Tucumán, Argentina - trabajamos con clientes de todo el país
+                </span>
+            </motion.div>
+        );
+    }
+
+    if (progress) {
+        return <AnimatedLocationBadge progress={progress} />;
+    }
+
+    return (
+        <div className="mt-6 inline-flex max-w-full items-center gap-3 rounded-full border border-white/15 bg-gradient-to-r from-white/[0.07] via-white/[0.025] to-white/[0.05] px-4 py-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_18px_44px_rgba(255,255,255,0.04)]">
+            <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-zinc-100 shadow-[0_0_16px_rgba(255,255,255,0.38)]" />
+            <span className="text-sm tracking-wide text-zinc-300">
+                TucumÃ¡n, Argentina - trabajamos con clientes de todo el paÃ­s
+            </span>
+        </div>
+    );
+};
+
 const AboutMobile = () => {
     const targetRef = useRef<HTMLDivElement>(null);
     const { scrollYProgress } = useScroll({ target: targetRef });
-
-    // Drive horizontal scroll from 0 to -300vw (showing 4 slides of 100vw each)
-    const x = useTransform(scrollYProgress, [0, 1], ["0%", "-300vw"]);
-
+    const x = useTransform(scrollYProgress, [0, 1], ['0%', '-300vw']);
     const inViewRef = useRef(null);
-    const isInView = useInView(inViewRef, { margin: "-10%" });
+    const isInView = useInView(inViewRef, { margin: '-10%' });
+
     useThemeSection(isInView, 'light');
 
     return (
-        <div ref={targetRef} className="relative h-[400vh] bg-zinc-950 block md:hidden" id='nosotros'>
-            {/* Trigger for theme observer */}
-            <div ref={inViewRef} className="absolute top-0 h-[20vh] w-full pointer-events-none" />
-
-            <div className="sticky top-0 h-screen overflow-hidden flex items-center">
+        <div ref={targetRef} className="relative block h-[400vh] bg-black md:hidden" id="nosotros">
+            <div ref={inViewRef} className="pointer-events-none absolute top-0 h-[20vh] w-full" />
+            <div className="sticky top-0 flex h-screen items-center overflow-hidden">
                 <motion.div style={{ x }} className="flex">
-
-                    {/* SLIDE 1: Title */}
-                    <div className="w-[100vw] h-screen flex items-center justify-center bg-zinc-950 flex-shrink-0">
-                        <div className="flex flex-col items-center">
-                            <h2 className="text-5xl font-black text-white tracking-tighter text-center leading-none">
-                                <KineticText>
-                                    SOMOS<br />
-                                    <span className="text-transparent bg-clip-text bg-gradient-to-r pl-4 pr-5 from-zinc-300 to-zinc-600">
-                                        develOP
-                                    </span>
-                                </KineticText>
-                            </h2>
-                        </div>
+                    <div className="flex h-screen w-[100vw] flex-shrink-0 items-center justify-center bg-black">
+                        <h2
+                            className="text-center font-black text-white"
+                            style={{
+                                fontSize: ABOUT_HERO_LOGO_TEXT_SIZE,
+                                lineHeight: ABOUT_HERO_LOGO_LINE_HEIGHT,
+                                letterSpacing: ABOUT_HERO_LOGO_TRACKING,
+                            }}
+                        >
+                            <KineticText>
+                                SOMOS
+                                <br />
+                                <span className="bg-gradient-to-b from-white to-zinc-500 bg-clip-text px-2 text-transparent">
+                                    develOP
+                                </span>
+                            </KineticText>
+                        </h2>
                     </div>
 
-                    {/* SLIDE 2: Description */}
-                    <div className="w-[100vw] h-screen flex items-center justify-center bg-zinc-950 flex-shrink-0 p-8">
-                        <div className="flex flex-col gap-6">
-                            <p className="text-2xl font-light text-zinc-400 leading-tight">
-                                No somos una agencia más. <br />
-                                <span className="mr-2">Somos el</span>
+                    <div className="flex h-screen w-[100vw] flex-shrink-0 items-center bg-black p-8">
+                        <div className="border-l border-white/15 pl-6">
+                            <p className="text-2xl font-light leading-tight text-zinc-300">
+                                No somos una agencia más.
+                                <br />
+                                Somos el{' '}
                                 <DigitalHighlight>
-                                    equipo técnico qué tu empresa necesitaba.
+                                    equipo técnico que tu empresa necesitaba.
                                 </DigitalHighlight>
                             </p>
-                            <p className="text-lg text-zinc-500 leading-relaxed">
-                                Combinamos desarrollo web, inteligencia artificial y automatizaciones para qué tu negocio crezca sin depender de vos todo el tiempo.
+                            <p className="mt-6 text-base leading-relaxed text-zinc-500">
+                                Combinamos desarrollo web, inteligencia artificial y automatizaciones para que tu negocio
+                                crezca sin depender de vos todo el tiempo.
                             </p>
                             <LocationBadge />
                         </div>
                     </div>
 
-                    {/* SLIDE 3: Profile 1 */}
-                    <div className="w-[100vw] h-screen flex items-center justify-center bg-zinc-950 flex-shrink-0">
+                    <div className="flex h-screen w-[100vw] flex-shrink-0 items-center justify-center bg-black">
                         <TeamMemberMobile {...teamMembers[0]} />
                     </div>
 
-                    {/* SLIDE 4: Profile 2 */}
-                    <div className="w-[100vw] h-screen flex items-center justify-center bg-zinc-950 flex-shrink-0">
+                    <div className="flex h-screen w-[100vw] flex-shrink-0 items-center justify-center bg-black">
                         <TeamMemberMobile {...teamMembers[1]} />
                     </div>
-
                 </motion.div>
             </div>
         </div>
     );
 };
 
-
-// -----------------------------------------------------------------------------
-// DESKTOP IMPLEMENTATION (ORIGINAL LOGIC)
-// -----------------------------------------------------------------------------
 const AboutDesktop = () => {
     const targetRef = useRef<HTMLDivElement>(null);
     const { scrollYProgress } = useScroll({ target: targetRef });
-
-    // Logic: Animation finishes at 75% of scroll, holding position for the remaining 25%
-    const x = useTransform(scrollYProgress, [0, 0.75], ["2%", "-48%"]);
-
+    const x = useTransform(scrollYProgress, [0, 0.12, 0.82], ['0vw', '0vw', '-100vw']);
+    const [isFinalEffectActive, setIsFinalEffectActive] = useState(false);
     const inViewRef = useRef(null);
-    const isInView = useInView(inViewRef, { margin: "-20%" });
+    const isInView = useInView(inViewRef, { margin: '-20%' });
+
     useThemeSection(isInView, 'light');
 
-    return (
-        <div ref={targetRef} className="relative h-[400vh] bg-zinc-950 hidden md:block" id='nosotros'>
-            {/* Top Fade (Integration with Hero) */}
-            <div className="absolute top-0 left-0 w-full h-64 bg-gradient-to-b from-zinc-950 to-transparent z-20 pointer-events-none" />
+    useMotionValueEvent(scrollYProgress, 'change', (latest) => {
+        setIsFinalEffectActive(latest >= 0.8);
+    });
 
-            <div ref={inViewRef} className="absolute top-0 h-[20vh] w-full pointer-events-none" />
+    return (
+        <div ref={targetRef} className="relative hidden h-[400vh] bg-black md:block" id="nosotros">
+            <div className="pointer-events-none absolute left-0 top-0 z-20 h-64 w-full bg-gradient-to-b from-black to-transparent" />
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_24%_42%,rgba(255,255,255,0.075),transparent_28%),radial-gradient(circle_at_77%_48%,rgba(255,255,255,0.055),transparent_30%)]" />
+            <div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-0 opacity-[0.1]"
+                style={{
+                    backgroundImage:
+                        'radial-gradient(circle at 1px 1px, rgba(255,255,255,0.34) 1px, transparent 0)',
+                    backgroundSize: '32px 32px',
+                    maskImage: 'linear-gradient(180deg, transparent 0%, black 20%, black 76%, transparent 100%)',
+                }}
+            />
+
+            <div ref={inViewRef} className="pointer-events-none absolute top-0 h-[20vh] w-full" />
             <div className="sticky top-0 flex h-screen items-center overflow-hidden">
-                <motion.div style={{ x }} className="flex gap-20 px-20 items-center">
-                    {/* SLIDE 1 */}
-                    <div className="flex-shrink-0 min-w-[80vw] flex items-center">
-                        <div className="text-[10rem] md:text-[14rem] leading-[0.8] font-black tracking-tighter text-zinc-50">
-                            <KineticText>
-                                <span className="pl-50">
-                                    SOMOS
-                                </span><br />
-                                <span className="text-transparent pl-50 bg-clip-text bg-gradient-to-r from-zinc-300 pr-50 to-zinc-600">
-                                    develOP
-                                </span>
-                            </KineticText>
+                <motion.div style={{ x }} className="flex items-center">
+                    <div className="flex h-screen w-screen flex-shrink-0 items-center justify-center px-[clamp(1rem,3vw,4rem)]">
+                        <div className="relative isolate">
+                            <div
+                                aria-hidden="true"
+                                className="pointer-events-none absolute left-1/2 z-0 -translate-x-1/2 rounded-[50%]"
+                                style={{
+                                    top: ABOUT_HERO_LOGO_SHADOW_TOP,
+                                    width: ABOUT_HERO_LOGO_SHADOW_WIDTH,
+                                    height: ABOUT_HERO_LOGO_SHADOW_HEIGHT,
+                                    opacity: ABOUT_HERO_LOGO_SHADOW_OPACITY,
+                                    background:
+                                        'radial-gradient(ellipse at center, rgba(255,255,255,0.58) 0%, rgba(255,255,255,0.28) 30%, rgba(255,255,255,0.1) 56%, transparent 84%)',
+                                }}
+                            />
+                            <div
+                                className="relative z-10 text-center font-black text-zinc-50"
+                                style={{
+                                    fontSize: ABOUT_HERO_LOGO_TEXT_SIZE,
+                                    lineHeight: ABOUT_HERO_LOGO_LINE_HEIGHT,
+                                    letterSpacing: ABOUT_HERO_LOGO_TRACKING,
+                                }}
+                            >
+                                <KineticText>
+                                    <span>SOMOS</span>
+                                    <br />
+                                    <span className="bg-gradient-to-b from-white to-zinc-500 bg-clip-text px-[0.08em] text-transparent">
+                                        develOP
+                                    </span>
+                                </KineticText>
+                            </div>
                         </div>
                     </div>
-                    {/* SLIDE 2 */}
-                    <div className="flex-shrink-0 w-[60vw] max-w-4xl flex flex-col justify-center gap-8 pl-20 border-l border-zinc-800">
-                        <p className="text-3xl md:text-5xl font-light text-zinc-400 leading-tight">
-                            No somos una agencia más. <br />
-                            <span className="mr-2">Somos el</span>
-                            <DigitalHighlight>
-                                equipo técnico qué tu empresa necesitaba.
-                            </DigitalHighlight>
-                        </p>
-                        <p className="text-xl text-zinc-500 leading-relaxed max-w-2xl">
-                            Combinamos desarrollo web, inteligencia artificial y automatizaciones para qué tu negocio crezca sin depender de vos todo el tiempo.
-                        </p>
-                        <LocationBadge />
-                    </div>
-                    {/* SLIDE 3 */}
-                    <div className="flex-shrink-0 flex gap-8 items-center pl-5">
-                        <TeamMemberDesktop {...teamMembers[0]} />
-                        <TeamMemberDesktop {...teamMembers[1]} />
+
+                    <div className="flex h-screen w-screen flex-shrink-0 items-center justify-center px-[clamp(1.25rem,4vw,5rem)]">
+                        <div className="flex w-full max-w-[112rem] items-center justify-center gap-[clamp(1.5rem,4vw,6rem)]">
+                            <div className="flex w-[clamp(20rem,42vw,56rem)] flex-shrink-0 flex-col justify-center gap-8 border-l border-white/[0.08] pl-[clamp(1.5rem,3vw,3.5rem)]">
+                                <p className="text-3xl font-light leading-tight text-zinc-300 md:text-4xl xl:text-5xl">
+                                    No somos una agencia más.
+                                    <br />
+                                    Somos el{' '}
+                                    <DigitalHighlight active={isFinalEffectActive}>
+                                        equipo técnico que tu empresa necesitaba.
+                                    </DigitalHighlight>
+                                </p>
+                                <p className="max-w-2xl text-lg leading-relaxed text-zinc-500 xl:text-xl">
+                                    Combinamos desarrollo web, inteligencia artificial y automatizaciones para que tu negocio
+                                    crezca sin depender de vos todo el tiempo.
+                                </p>
+                                <LocationBadge active={isFinalEffectActive} />
+                            </div>
+
+                            <div className="flex flex-shrink-0 items-center gap-8">
+                                <TeamMemberDesktop {...teamMembers[0]} />
+                                <TeamMemberDesktop {...teamMembers[1]} />
+                            </div>
+                        </div>
                     </div>
                 </motion.div>
             </div>
@@ -251,11 +462,9 @@ const AboutDesktop = () => {
     );
 };
 
-export const About = () => {
-    return (
-        <section id="about">
-            <AboutMobile />
-            <AboutDesktop />
-        </section>
-    );
-};
+export const About = () => (
+    <section id="about">
+        <AboutMobile />
+        <AboutDesktop />
+    </section>
+);
