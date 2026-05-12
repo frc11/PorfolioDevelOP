@@ -1,5 +1,5 @@
 'use client';
-import { motion, useScroll, useVelocity, useSpring, useTransform } from 'framer-motion';
+import { motion, useScroll, useVelocity, useSpring, useTransform } from 'motion/react';
 
 export const KineticText = ({ children, className }: { children: React.ReactNode, className?: string }) => {
     const { scrollY } = useScroll();

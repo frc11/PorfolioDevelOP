@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useEffect, useState } from "react"
-import { motion, useInView, useReducedMotion } from "framer-motion"
+import { motion, useInView, useReducedMotion } from "motion/react"
 import { ArrowUpRight, Check, Map, Search, Sparkles } from "lucide-react"
 
 interface Query {

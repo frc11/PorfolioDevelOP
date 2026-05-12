@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState } from 'react'
 import dynamic from 'next/dynamic'
-import { motion, useReducedMotion, useScroll, useTransform } from 'framer-motion'
+import { motion, useReducedMotion, useScroll, useTransform } from 'motion/react'
 import HeroMetrics from '@/components/ui/HeroMetrics'
 import { WebDevelopmentBento } from '@/components/sections/web-development/WebDevelopmentBento'
 import { WebDevelopmentFaq } from '@/components/sections/web-development/WebDevelopmentFaq'

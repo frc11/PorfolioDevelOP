@@ -1,6 +1,6 @@
 'use client'
 
-import { motion } from 'framer-motion'
+import { motion } from 'motion/react'
 import { AlertCircle, RefreshCw } from 'lucide-react'
 import { Badge } from './Badge'
 import { cn } from '@/lib/utils'

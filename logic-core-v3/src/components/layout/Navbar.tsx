@@ -1,6 +1,6 @@
 "use client";
 
-import { AnimatePresence, motion, useMotionValueEvent, useScroll } from "framer-motion";
+import { AnimatePresence, motion, useMotionValueEvent, useScroll } from "motion/react";
 import { ChevronDown, Grid2x2, X } from "lucide-react";
 import Image from "next/image";
 import { usePathname } from "next/navigation";

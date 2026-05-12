@@ -1,6 +1,6 @@
 "use client"
 import React, { useState } from 'react'
-import { motion } from 'framer-motion'
+import { motion } from 'motion/react'
 import { BrainCircuit, DatabaseZap, Eye, LineChart } from 'lucide-react'
 import { TypewriterText } from '@/components/ui/TypewriterText'
 

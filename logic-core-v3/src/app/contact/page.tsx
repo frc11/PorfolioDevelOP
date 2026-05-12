@@ -1,6 +1,6 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { ArrowUpRight, CheckCircle, Mail, MapPin, MessageCircle, PhoneCall, Send, ShieldCheck, TimerReset } from 'lucide-react';
 import { useActionState, useEffect } from 'react';
 import { submitContactForm } from '@/lib/actions/contact';

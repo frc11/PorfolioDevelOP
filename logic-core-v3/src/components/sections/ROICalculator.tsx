@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useEffect, useMemo, useState } from 'react'
-import { animate, motion, useMotionValue, useSpring, useTransform } from 'framer-motion'
+import { animate, motion, useMotionValue, useSpring, useTransform } from 'motion/react'
 
 function SliderField({
     label,

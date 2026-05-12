@@ -9,7 +9,7 @@ import {
     useSpring,
     useTransform,
     type MotionValue,
-} from "framer-motion"
+} from "motion/react"
 import { ArrowUpRight, Sparkles } from "lucide-react"
 
 type TemplateItem = {

@@ -3,7 +3,7 @@
 import { Badge, Card } from '@/components/ui'
 import { cn } from '@/lib/utils'
 import type { AttentionItem, AttentionPriority } from '@/lib/dashboard/attention'
-import { motion } from 'framer-motion'
+import { motion } from 'motion/react'
 import {
   AlertTriangle,
   ArrowRight,

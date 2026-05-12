@@ -1,6 +1,6 @@
 'use client';
 import { useState } from "react";
-import { motion, useMotionValue, useTransform, AnimatePresence } from "framer-motion";
+import { motion, useMotionValue, useTransform, AnimatePresence } from "motion/react";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 
 // ─── Types ───────────────────────────────────────────────────────────────────

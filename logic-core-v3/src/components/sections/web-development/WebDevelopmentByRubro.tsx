@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useEffect, useRef, useState } from 'react'
-import { AnimatePresence, motion, type Variants, useInView, useReducedMotion } from 'framer-motion'
+import { AnimatePresence, motion, type Variants, useInView, useReducedMotion } from 'motion/react'
 import { ArrowUpRight, Building2, Car, Dumbbell, HeartPulse, Pause, Play, Sparkles, Utensils } from 'lucide-react'
 
 interface RubroData {

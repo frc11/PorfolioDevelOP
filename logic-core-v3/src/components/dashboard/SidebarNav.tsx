@@ -4,7 +4,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { Home, FolderKanban, Zap, MessageSquare, BarChart3, TrendingUp, LifeBuoy, X, Settings, Star, Mail, ShoppingBag, CalendarDays, type LucideIcon } from 'lucide-react'
-import { motion } from 'framer-motion'
+import { motion } from 'motion/react'
 
 const NAV_ITEMS = [
   { href: '/dashboard',              label: 'Inicio',         icon: Home, exact: true },

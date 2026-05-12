@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
+import { motion } from 'motion/react'
 import { Play, Pause, Sparkles, Volume2 } from 'lucide-react'
 
 export function AIExecutiveBrief({

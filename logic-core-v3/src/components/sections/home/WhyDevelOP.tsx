@@ -9,7 +9,7 @@ import {
   useMotionTemplate,
   useMotionValue,
   useReducedMotion,
-} from 'framer-motion';
+} from 'motion/react';
 import {
   AlertTriangle,
   BarChart3,

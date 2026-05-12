@@ -1,5 +1,5 @@
 import { useThemeSection } from '@/hooks/useThemeObserver';
-import { useInView } from 'framer-motion';
+import { useInView } from 'motion/react';
 import { ReactNode, useRef } from 'react';
 
 interface SectionTransitionProps {

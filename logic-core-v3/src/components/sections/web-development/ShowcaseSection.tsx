@@ -27,7 +27,7 @@
 import React, { useState, useRef } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { motion, useAnimationFrame, useInView, useMotionValue, useReducedMotion } from 'framer-motion'
+import { motion, useAnimationFrame, useInView, useMotionValue, useReducedMotion } from 'motion/react'
 
 // ── Types ──────────────────────────────────────────────────────────
 interface CarouselProject {

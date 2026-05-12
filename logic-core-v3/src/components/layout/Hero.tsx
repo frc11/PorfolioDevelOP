@@ -2,7 +2,7 @@
 
 import { Canvas, useThree } from '@react-three/fiber'
 import { Suspense, useEffect, useLayoutEffect, useRef, useState, type RefObject } from 'react'
-import { motion } from 'framer-motion'
+import { motion } from 'motion/react'
 import { Environment, ContactShadows } from '@react-three/drei'
 import { EffectComposer, ChromaticAberration, Noise, Vignette } from '@react-three/postprocessing'
 import { HeroArtifact } from '@/components/3d/HeroArtifact'

@@ -11,7 +11,7 @@ import {
   useSpring,
   useTransform,
   useVelocity,
-} from 'framer-motion';
+} from 'motion/react';
 import {
   BarChart2,
   Bot,

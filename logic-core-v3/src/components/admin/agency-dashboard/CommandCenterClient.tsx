@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence } from 'motion/react'
 import { Users, FileText, Database, ChevronRight, Briefcase } from 'lucide-react'
 import { ProjectManager } from './ProjectManager'
 import { VaultManager } from './VaultManager'

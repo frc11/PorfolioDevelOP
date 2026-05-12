@@ -1,6 +1,6 @@
 'use client'
 
-import { motion } from 'framer-motion'
+import { motion } from 'motion/react'
 
 export function StaggerContainer({ children, className }: { children: React.ReactNode, className?: string }) {
   return (

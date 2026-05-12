@@ -1,6 +1,6 @@
 'use client'
 
-import { motion } from 'framer-motion'
+import { motion } from 'motion/react'
 
 const EASE_PREMIUM = [0.25, 0.46, 0.45, 0.94] as const
 

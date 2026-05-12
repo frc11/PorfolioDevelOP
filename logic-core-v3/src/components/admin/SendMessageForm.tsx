@@ -1,7 +1,7 @@
 'use client'
 
 import { useActionState, useEffect, useRef } from 'react'
-import { motion } from 'framer-motion'
+import { motion } from 'motion/react'
 import { Send } from 'lucide-react'
 import { sendMessageAction } from '@/lib/actions/messages'
 import type { ActionResult } from '@/lib/actions/schemas'

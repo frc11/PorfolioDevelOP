@@ -1,6 +1,6 @@
 "use client"
 import React, { useRef } from 'react'
-import { motion, useInView, useReducedMotion } from 'framer-motion'
+import { motion, useInView, useReducedMotion } from 'motion/react'
 
 const microStats = [
     { value: '3s', label: 'para cautivar' },

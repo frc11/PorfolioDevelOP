@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
-import { useMotionValue, useSpring, useInView } from 'framer-motion'
+import { useMotionValue, useSpring, useInView } from 'motion/react'
 
 export function AnimatedCounter({
   value,

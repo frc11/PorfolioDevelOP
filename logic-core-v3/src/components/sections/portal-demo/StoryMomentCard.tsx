@@ -1,6 +1,6 @@
 'use client'
 
-import { motion } from 'framer-motion'
+import { motion } from 'motion/react'
 import { Activity, Inbox, TrendingUp, ChevronRight, ImageOff } from 'lucide-react'
 import { useState } from 'react'
 import type { StoryMoment } from './data'

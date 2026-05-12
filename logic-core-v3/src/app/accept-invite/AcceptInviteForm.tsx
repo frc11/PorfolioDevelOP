@@ -1,7 +1,7 @@
 'use client'
 
 import { useActionState } from 'react'
-import { motion, type Variants } from 'framer-motion'
+import { motion, type Variants } from 'motion/react'
 import Link from 'next/link'
 import { acceptInviteAction } from './actions'
 

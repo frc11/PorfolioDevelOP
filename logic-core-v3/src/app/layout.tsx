@@ -45,7 +45,6 @@ import { PreloaderProvider } from "@/context/PreloaderContext";
 import { TransitionProvider } from "@/context/TransitionContext";
 import { Shutter } from "@/components/layout/Shutter";
 import { PublicOnlyComponents } from "@/components/layout/PublicOnlyComponents";
-import { ClientLogicCompanion } from "@/components/layout/ClientLogicCompanion";
 import { Toaster } from "sonner";
 
 export default function RootLayout({
@@ -74,7 +73,6 @@ export default function RootLayout({
           </SmoothScroll>
           <PublicOnlyComponents>
             <Preloader />
-            <ClientLogicCompanion />
           </PublicOnlyComponents>
           <Toaster 
             theme="dark" 

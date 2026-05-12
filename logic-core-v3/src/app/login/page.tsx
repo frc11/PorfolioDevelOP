@@ -1,7 +1,7 @@
 'use client'
 
 import { useActionState, useState } from 'react'
-import { motion, AnimatePresence, type Variants } from 'framer-motion'
+import { motion, AnimatePresence, type Variants } from 'motion/react'
 import dynamic from 'next/dynamic'
 import Image from 'next/image'
 import { loginAction, googleSignInAction, magicLinkAction } from './actions'

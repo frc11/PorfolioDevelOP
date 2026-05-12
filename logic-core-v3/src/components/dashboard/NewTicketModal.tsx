@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence } from 'motion/react'
 import { X, MessageSquarePlus, AlertCircle, Loader2 } from 'lucide-react'
 import * as z from 'zod'
 import { createTicketAction } from '@/actions/ticket-actions'

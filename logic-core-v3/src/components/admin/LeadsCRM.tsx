@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useMemo, useState, useTransition } from 'react'
-import { motion, AnimatePresence, type Variants } from 'framer-motion'
+import { motion, AnimatePresence, type Variants } from 'motion/react'
 import { Building2, CalendarDays, FileText, Sparkles, TrendingUp, UserRound } from 'lucide-react'
 import { toast } from 'sonner'
 import { updateLeadNotesAction, updateLeadStatusAction, type LeadStatus } from '@/lib/actions/leads'

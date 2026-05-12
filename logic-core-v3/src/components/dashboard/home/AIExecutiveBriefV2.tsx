@@ -3,7 +3,7 @@
 import { regenerateBriefAction } from '@/app/(protected)/dashboard/_actions/regenerate-brief'
 import { Badge, Card } from '@/components/ui'
 import { cn } from '@/lib/utils'
-import { motion } from 'framer-motion'
+import { motion } from 'motion/react'
 import { Lock, RefreshCw, Sparkles } from 'lucide-react'
 import { useState, useTransition } from 'react'
 

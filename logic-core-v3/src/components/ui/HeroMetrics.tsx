@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useState, useRef } from "react";
-import { motion, useInView, useReducedMotion, Variants } from "framer-motion";
+import { motion, useInView, useReducedMotion, Variants } from "motion/react";
 
 interface MetricType {
     value: string;

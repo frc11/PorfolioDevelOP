@@ -8,7 +8,7 @@ import {
     useMotionValueEvent,
     useReducedMotion,
     useScroll,
-} from 'framer-motion'
+} from 'motion/react'
 import { Code2, FlaskConical, Rocket, Search } from 'lucide-react'
 
 type Stage = {

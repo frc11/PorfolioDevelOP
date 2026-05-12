@@ -15,7 +15,7 @@
  * in getHealthScore(). No fetches or calculations run in the client.
  */
 
-import { motion, useSpring } from 'framer-motion'
+import { motion, useSpring } from 'motion/react'
 import { useEffect, useState } from 'react'
 import { ArrowUp, ArrowDown, Minus, Sparkles } from 'lucide-react'
 import { cn } from '@/lib/utils'

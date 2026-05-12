@@ -1,7 +1,7 @@
 'use client'
 
 import { useActionState, useState } from 'react'
-import { motion } from 'framer-motion'
+import { motion } from 'motion/react'
 import { sendClientMessageAction } from '@/lib/actions/messages'
 import { ArrowRight, CheckCircle2, Loader2, AlertOctagon, TrendingUp, Target } from 'lucide-react'
 import type { ActionResult } from '@/lib/actions/schemas'

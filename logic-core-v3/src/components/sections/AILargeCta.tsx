@@ -1,6 +1,6 @@
 "use client"
 import React, { useState } from 'react'
-import { motion } from 'framer-motion'
+import { motion } from 'motion/react'
 import { ArrowRight, Sparkles } from 'lucide-react'
 
 export const AILargeCta = () => {

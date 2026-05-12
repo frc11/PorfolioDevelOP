@@ -1,6 +1,6 @@
 'use client';
 import { useRef } from 'react';
-import { motion, useScroll, useTransform, useInView } from 'framer-motion';
+import { motion, useScroll, useTransform, useInView } from 'motion/react';
 import { useThemeSection } from '@/hooks/useThemeObserver';
 import { KineticText } from '@/components/ui/KineticText';
 

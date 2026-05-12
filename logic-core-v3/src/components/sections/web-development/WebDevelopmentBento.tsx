@@ -7,7 +7,7 @@ import {
     useMotionTemplate,
     useMotionValue,
     useReducedMotion,
-} from "framer-motion"
+} from "motion/react"
 import { Bolt, MapPinned, MousePointerClick, Orbit, ScanSearch } from "lucide-react"
 import { VideoCard } from "@/components/ui/VideoCard"
 

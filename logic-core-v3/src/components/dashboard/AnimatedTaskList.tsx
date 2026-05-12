@@ -1,6 +1,6 @@
 'use client'
 
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence } from 'motion/react'
 
 export function AnimatedTaskList({ children, className }: { children: React.ReactNode, className?: string }) {
   return (

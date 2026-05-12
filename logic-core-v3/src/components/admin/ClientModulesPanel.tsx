@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { motion } from 'framer-motion'
+import { motion } from 'motion/react'
 import { toast } from 'sonner'
 import { PREMIUM_FEATURE_OPTIONS, type PremiumFeatureKey } from '@/lib/premium-features'
 import { toggleClientFeatureAction } from '@/lib/actions/clients'
