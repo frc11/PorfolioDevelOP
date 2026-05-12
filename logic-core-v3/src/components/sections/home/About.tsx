@@ -1,13 +1,7 @@
 'use client';
-<<<<<<< HEAD
-import { useRef } from 'react';
-import { motion, useScroll, useTransform, useInView } from 'motion/react';
-=======
-
 import { useId, useRef, useState } from 'react';
 import { motion, useInView, useMotionValueEvent, useScroll, useTransform } from 'framer-motion';
 import type { MotionValue } from 'framer-motion';
->>>>>>> 2e2538035336e0fb5af1444fcc07cf4be2d988cd
 import { useThemeSection } from '@/hooks/useThemeObserver';
 import { KineticText } from '@/components/ui/KineticText';
 
@@ -351,7 +345,7 @@ const AboutLogoFilter = ({ filterId }: { filterId: string }) => (
     </svg>
 );
 
-const AboutLogoMark = ({ active }: { active: boolean }) => {
+const AboutLogoMark = ({ active, kineticActive }: { active: boolean; kineticActive: boolean }) => {
     const filterId = `about-logo-materialize-${useId().replace(/:/g, '')}`;
     const filterStyle = {
         '--about-logo-materialize-filter': `url(#${filterId})`,
@@ -383,7 +377,7 @@ const AboutLogoMark = ({ active }: { active: boolean }) => {
                     letterSpacing: ABOUT_HERO_LOGO_TRACKING,
                 }}
             >
-                <KineticText>
+                <KineticText enabled={kineticActive}>
                     <span>SOMOS</span>
                     <br />
                     <span className="bg-gradient-to-b from-white to-zinc-500 bg-clip-text px-[0.08em] text-transparent">
@@ -403,8 +397,15 @@ const AboutMobile = () => {
     const isInView = useInView(inViewRef, { margin: '-10%' });
     const logoRevealRef = useRef<HTMLDivElement>(null);
     const isLogoRevealInView = useInView(logoRevealRef, { amount: 0.75, once: true });
+    const [isHorizontalScrollActive, setIsHorizontalScrollActive] = useState(false);
 
     useThemeSection(isInView, 'light');
+
+    useMotionValueEvent(scrollYProgress, 'change', (latest) => {
+        if (latest > 0.01) {
+            setIsHorizontalScrollActive(true);
+        }
+    });
 
     return (
         <div ref={targetRef} className="relative block h-[400vh] bg-black md:hidden" id="nosotros">
@@ -412,7 +413,7 @@ const AboutMobile = () => {
             <div className="sticky top-0 flex h-screen items-center overflow-hidden">
                 <motion.div style={{ x }} className="flex">
                     <div ref={logoRevealRef} className="flex h-screen w-[100vw] flex-shrink-0 items-center justify-center bg-black">
-                        <AboutLogoMark active={isLogoRevealInView} />
+                        <AboutLogoMark active={isLogoRevealInView} kineticActive={isHorizontalScrollActive} />
                     </div>
 
                     <div className="flex h-screen w-[100vw] flex-shrink-0 items-center bg-black p-8">
@@ -451,6 +452,7 @@ const AboutDesktop = () => {
     const { scrollYProgress } = useScroll({ target: targetRef });
     const x = useTransform(scrollYProgress, [0, 0.12, 0.82], ['0vw', '0vw', '-100vw']);
     const [isFinalEffectActive, setIsFinalEffectActive] = useState(false);
+    const [isHorizontalScrollActive, setIsHorizontalScrollActive] = useState(false);
     const inViewRef = useRef(null);
     const isInView = useInView(inViewRef, { margin: '-20%' });
     const logoRevealRef = useRef<HTMLDivElement>(null);
@@ -460,6 +462,9 @@ const AboutDesktop = () => {
 
     useMotionValueEvent(scrollYProgress, 'change', (latest) => {
         setIsFinalEffectActive(latest >= 0.8);
+        if (latest > 0.12) {
+            setIsHorizontalScrollActive(true);
+        }
     });
 
     return (
@@ -481,7 +486,7 @@ const AboutDesktop = () => {
             <div className="sticky top-0 flex h-screen items-center overflow-hidden">
                 <motion.div style={{ x }} className="flex items-center">
                     <div ref={logoRevealRef} className="flex h-screen w-screen flex-shrink-0 items-center justify-center px-[clamp(1rem,3vw,4rem)]">
-                        <AboutLogoMark active={isLogoRevealInView} />
+                        <AboutLogoMark active={isLogoRevealInView} kineticActive={isHorizontalScrollActive} />
                     </div>
 
                     <div className="flex h-screen w-screen flex-shrink-0 items-center justify-center px-[clamp(1.25rem,4vw,5rem)]">
