@@ -3,7 +3,7 @@
 /* eslint-disable react/no-unescaped-entities */
 
 import { useMemo, useState, useTransition, type ReactNode } from 'react'
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence, motion } from 'motion/react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { BellRing, CheckCircle2, Globe, Loader2, Mail, PlugZap, ShieldCheck, Sparkles, TrendingUp, Users, X } from 'lucide-react'

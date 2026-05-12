@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useRef, useState } from "react"
-import { motion, useInView, useReducedMotion } from "framer-motion"
+import { motion, useInView, useReducedMotion } from "motion/react"
 import { Check, ChevronDown, ClipboardList, Palette, RefreshCw, ShieldCheck, type LucideIcon } from "lucide-react"
 
 type ObjectionItem = {

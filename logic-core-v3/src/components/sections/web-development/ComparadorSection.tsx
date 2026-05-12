@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from 'react';
-import { motion, useAnimationControls, useInView, useReducedMotion } from 'framer-motion';
+import { motion, useAnimationControls, useInView, useReducedMotion } from 'motion/react';
 import { Check, Clock3, GaugeCircle, Sparkles, Target, X } from 'lucide-react';
 
 const ScrollCue = () => {

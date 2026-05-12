@@ -7,7 +7,6 @@ import DemoIA from '@/components/ia/DemoIA'
 import PipelineIA from '@/components/ia/PipelineIA'
 import RubrosIA from '@/components/ia/RubrosIA'
 import ComparadorIA from '@/components/ia/ComparadorIA'
-import LiveChatIA from '@/components/ia/LiveChatIA'
 import TestimoniosIA from '@/components/ia/TestimoniosIA'
 import GarantiaIA from '@/components/ia/GarantiaIA'
 import FaqIA from '@/components/ia/FaqIA'
@@ -215,9 +214,26 @@ export default function AIImplementationsPage() {
             <SectionDivider />
 
             <SectionReveal delay={0.05}>
-                <SectionTone tone="livechat">
-                    <LiveChatIA />
-                </SectionTone>
+                    {/* TODO S16: Reintegrar chatbot nuevo en esta sección. 
+    El componente LiveChatIA legacy fue eliminado en S0. */}
+<section style={{
+  padding: '6rem 2rem',
+  textAlign: 'center',
+  background: 'rgba(255, 255, 255, 0.02)',
+  borderRadius: '24px',
+  margin: '4rem auto',
+  maxWidth: '1200px',
+  border: '1px solid rgba(255, 255, 255, 0.06)'
+}}>
+  <p style={{
+    color: 'rgba(255, 255, 255, 0.4)',
+    fontFamily: 'monospace',
+    fontSize: '0.875rem',
+    letterSpacing: '0.1em'
+  }}>
+    DEMO EN RECONSTRUCCIÓN
+  </p>
+</section>
             </SectionReveal>
 
             <SectionDivider />

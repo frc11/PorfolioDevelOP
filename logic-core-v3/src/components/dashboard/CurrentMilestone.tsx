@@ -1,6 +1,6 @@
 'use client'
 
-import { motion } from 'framer-motion'
+import { motion } from 'motion/react'
 import { Calendar, ArrowRight, Target, Sparkles, Clock } from 'lucide-react'
 
 interface CurrentMilestoneProps {

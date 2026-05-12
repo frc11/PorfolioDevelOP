@@ -7,7 +7,7 @@ import {
     useMotionValue,
     useReducedMotion,
     useTransform,
-} from "framer-motion"
+} from "motion/react"
 
 type ChargeTraceButtonProps = {
     label: string

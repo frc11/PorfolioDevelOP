@@ -4,7 +4,7 @@ import { useActionState } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { ChevronLeft } from 'lucide-react'
-import { motion } from 'framer-motion'
+import { motion } from 'motion/react'
 import { createTaskAction } from '@/lib/actions/projects'
 import { TaskStatus } from '@prisma/client'
 

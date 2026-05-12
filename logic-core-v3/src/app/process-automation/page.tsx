@@ -1,7 +1,7 @@
 "use client"
 
 import React from 'react'
-import { motion } from 'framer-motion'
+import { motion } from 'motion/react'
 import dynamic from 'next/dynamic'
 
 const DataPacketsCanvas = dynamic(() => import('@/components/automation/DataPacketsCanvas'), { ssr: false })

@@ -8,7 +8,7 @@ import {
     useReducedMotion,
     useScroll,
     useTransform,
-} from 'framer-motion'
+} from 'motion/react'
 
 const ease = [0.16, 1, 0.3, 1] as const
 

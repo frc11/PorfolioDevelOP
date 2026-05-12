@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence } from 'motion/react'
 import { useRouter } from 'next/navigation'
 import { Step1Empresa } from './Step1Empresa'
 import { Step2Conexiones } from './Step2Conexiones'

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useTransition, useRef, useEffect, useCallback } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence } from 'motion/react'
 import { PlusCircle, X, Send, Loader2, CheckCircle2 } from 'lucide-react'
 import { sendClientMessageAction } from '@/lib/actions/messages'
 

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect, useActionState, Fragment, useCallback } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence } from 'motion/react'
 import Image from 'next/image'
 import { saveOnboardingProfile } from '@/actions/onboarding-actions'
 import { Handshake } from 'lucide-react'

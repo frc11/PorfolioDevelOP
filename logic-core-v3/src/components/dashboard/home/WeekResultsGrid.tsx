@@ -2,7 +2,7 @@
 
 import { Card, Stat } from '@/components/ui'
 import type { WeekResultsData } from '@/lib/dashboard/week-results'
-import { motion } from 'framer-motion'
+import { motion } from 'motion/react'
 import { CheckCircle2, Eye, MessageSquare, UserCheck } from 'lucide-react'
 
 interface WeekResultsGridProps {

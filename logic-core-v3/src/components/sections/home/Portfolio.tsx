@@ -1,7 +1,6 @@
 'use client';
-import { useRef, useState } from "react";
-import Image from "next/image";
-import { motion, useInView, useMotionValue, useTransform, AnimatePresence } from "framer-motion";
+import { useState } from "react";
+import { motion, useMotionValue, useTransform, AnimatePresence } from "framer-motion";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 
 // ─── Types ───────────────────────────────────────────────────────────────────

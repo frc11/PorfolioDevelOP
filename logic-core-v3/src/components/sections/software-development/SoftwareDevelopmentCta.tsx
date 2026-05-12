@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useEffect, useRef, useState } from "react"
-import { motion, useMotionValue, useReducedMotion, useSpring, useTransform } from "framer-motion"
+import { motion, useMotionValue, useReducedMotion, useSpring, useTransform } from "motion/react"
 import { ArrowRight, Clock3, Gem, ShieldCheck } from "lucide-react"
 
 function MagneticButton({

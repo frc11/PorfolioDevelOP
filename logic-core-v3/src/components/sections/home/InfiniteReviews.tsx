@@ -8,7 +8,7 @@ import {
     useMotionValue,
     useVelocity,
     useAnimationFrame
-} from "framer-motion";
+} from "motion/react";
 
 // Local utility to avoid external dependency
 const wrap = (min: number, max: number, v: number) => {

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { motion, useReducedMotion, AnimatePresence, Variants } from "framer-motion";
+import { motion, useReducedMotion, AnimatePresence, Variants } from "motion/react";
 
 const SCRAMBLE_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%";
 

@@ -4,7 +4,7 @@ import { useActionState, useEffect, useRef, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { sendClientMessageAction } from '@/lib/actions/messages'
 import { Loader2, CheckCheck, ArrowUp } from 'lucide-react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence } from 'motion/react'
 import type { ActionResult } from '@/lib/actions/schemas'
 import { getMessageForContext } from '@/lib/data/message-context'
 

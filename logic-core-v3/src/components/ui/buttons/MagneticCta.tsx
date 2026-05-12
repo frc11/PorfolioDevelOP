@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useRef, useState, useEffect } from "react";
-import { animate, motion, useAnimate, useMotionValue, useSpring } from "framer-motion";
+import { animate, motion, useAnimate, useMotionValue, useSpring } from "motion/react";
 import Link from "next/link";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";

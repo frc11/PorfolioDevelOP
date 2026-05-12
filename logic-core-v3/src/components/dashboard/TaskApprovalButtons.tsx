@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence } from 'motion/react'
 import { approveTaskAction, rejectTaskAction } from '@/actions/dashboard-actions'
 import { Check, X, Loader2, AlertCircle } from 'lucide-react'
 import { toast } from 'sonner'

@@ -9,7 +9,7 @@ import {
     useScroll,
     useSpring,
     useTransform,
-} from 'framer-motion'
+} from 'motion/react'
 
 const cases = [
     {

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence } from 'motion/react'
 import { Menu, LogOut } from 'lucide-react'
 import { SidebarNav } from './SidebarNav'
 import { NotificationCenter } from './NotificationCenter'

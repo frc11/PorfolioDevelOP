@@ -3,7 +3,7 @@ import { useMemo, useState, useRef, useEffect, Suspense } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, Line, Sphere, Environment, Float, Html } from '@react-three/drei';
 import * as THREE from 'three';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'motion/react';
 import { HyperText } from '@/components/ui/HyperText';
 
 // --- Types ---

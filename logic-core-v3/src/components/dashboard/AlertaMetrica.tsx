@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence } from 'motion/react'
 import { X, AlertTriangle, AlertOctagon, CheckCircle2, Info } from 'lucide-react'
 
 export type AlertType = 'WARNING' | 'DANGER' | 'SUCCESS' | 'INFO'

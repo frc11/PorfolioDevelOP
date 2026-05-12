@@ -38,21 +38,11 @@ export default async function DashboardPage() {
   const organizationId = await resolveOrgId()
   if (!organizationId) redirect('/login')
 
-  const org = await prisma.organization.findUnique({
-    where: { id: organizationId },
-    select: { companyName: true },
-  })
-
-  if (!org) redirect('/login')
-
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-8 pb-20 sm:gap-10">
-      <PageHeader
-        eyebrow={formatDateES()}
-        title={`${getGreeting()}, ${org.companyName}`}
-        icon={Calendar}
-        variant="gradient"
-      />
+      <Suspense fallback={<PageHeaderSkeleton />}>
+        <DashboardGreetingWrapper organizationId={organizationId} />
+      </Suspense>
 
       <Suspense fallback={null}>
         <OnboardingStatusCard organizationId={organizationId} />
@@ -135,4 +125,36 @@ function WeekResultsSkeleton() {
 
 function BriefSkeleton() {
   return <LoadingState variant="skeleton-card" />
+}
+
+async function DashboardGreetingWrapper({ organizationId }: { organizationId: string }) {
+  const org = await prisma.organization.findUnique({
+    where: { id: organizationId },
+    select: { companyName: true },
+  })
+
+  if (!org) redirect('/login')
+
+  return (
+    <PageHeader
+      eyebrow={formatDateES()}
+      title={`${getGreeting()}, ${org.companyName}`}
+      icon={Calendar}
+      variant="gradient"
+    />
+  )
+}
+
+function PageHeaderSkeleton() {
+  return (
+    <header className="flex flex-col gap-3 pt-2 sm:flex-row sm:items-end sm:justify-between sm:pt-4">
+      <div className="flex items-center gap-3 w-full">
+        <div className="h-11 w-11 rounded-xl bg-white/[0.05] animate-pulse shrink-0" />
+        <div className="flex flex-col gap-2 w-full max-w-md">
+          <div className="h-3 w-32 bg-white/[0.05] rounded animate-pulse" />
+          <div className="h-8 w-64 bg-white/[0.08] rounded-md animate-pulse" />
+        </div>
+      </div>
+    </header>
+  )
 }

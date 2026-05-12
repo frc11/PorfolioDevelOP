@@ -1,4 +1,8 @@
 'use client';
+<<<<<<< HEAD
+import { motion, useScroll, useVelocity, useSpring, useTransform } from 'motion/react';
+=======
+>>>>>>> 2e2538035336e0fb5af1444fcc07cf4be2d988cd
 
 import { motion, useScroll, useSpring, useTransform, useVelocity } from 'framer-motion';
 

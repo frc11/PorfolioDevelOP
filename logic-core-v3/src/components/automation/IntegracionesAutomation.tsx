@@ -6,7 +6,7 @@ import {
     motion,
     useInView,
     useReducedMotion,
-} from 'framer-motion'
+} from 'motion/react'
 import { Mail, CheckCircle2, Cloud, Puzzle, Zap, MessageCircle, CreditCard, BarChart2, FileText, Send, CalendarDays, Receipt } from 'lucide-react'
 
 interface IntegrationItem {

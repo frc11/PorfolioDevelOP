@@ -261,6 +261,7 @@ model Organization {
   emailContacts   EmailContact[]
   emailCampaigns  EmailCampaign[]
   onboardingTasks OnboardingTask[]
+  botConfig         BotConfig?
 }
 
 model OrgMember {
@@ -805,4 +806,209 @@ model EmailCampaign {
 
   @@index([organizationId])
   @@index([organizationId, status])
+}
+
+// ============================================================
+// CHATBOT MODULE
+// ============================================================
+// All chatbot tables prefixed `chatbot_` via @@map.
+// See src/modules/chatbot/README.md for module boundary rules.
+
+model BotConfig {
+  id                 String   @id @default(cuid())
+
+  organizationId     String   @unique
+  organization       Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  // Identidad pública
+  slug               String   @unique
+  botName            String
+  isActive           Boolean  @default(true)
+
+  // Apariencia básica
+  accentColor        String   @default("#06b6d4")
+  accentSecondary    String?
+  chatSurfaceTint    String?
+
+  // Avatar
+  avatarStyle        String   @default("neuro")
+  avatarImageUrl     String?
+  avatarEmoji        String?
+
+  // Estilo visual extendido
+  borderRadius       String   @default("medium")
+  surfaceStyle       String   @default("glass")
+  position           String   @default("bottom_right")
+  fontStyle          String   @default("sans")
+  bubbleStyle        String   @default("rounded")
+  intensityLevel     String   @default("medium")
+
+  // Comportamiento conversacional
+  tone               String   @default("informal_rioplatense")
+  welcomeMessage     String   @db.Text
+  proactivePrompts   Json     @default("[]")
+  quickReplies       Json     @default("[]")
+  routeColorMap      Json     @default("{}")
+
+  // Derivación a WhatsApp
+  whatsappNumber     String?
+  whatsappMessage    String?  @db.Text
+
+  // LLM
+  llmProvider        String   @default("google")
+  llmModel           String   @default("gemini-2.5-flash")
+  temperature        Float    @default(0.7)
+  maxOutputTokens    Int      @default(800)
+
+  // Cuota mensual
+  monthlyQuota       Int      @default(1000)
+
+  // Rubro / industria
+  industry           String   @default("generic")
+
+  // Relaciones
+  knowledgeBase      KnowledgeBase?
+  conversations      Conversation[]
+  leads              ChatbotLead[]
+  quotaUsages        QuotaUsage[]
+
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  @@index([slug])
+  @@map("chatbot_bot_config")
+}
+
+model KnowledgeBase {
+  id                  String   @id @default(cuid())
+
+  botConfigId         String   @unique
+  botConfig           BotConfig @relation(fields: [botConfigId], references: [id], onDelete: Cascade)
+
+  // Secciones markdown (las 6 + forbiddenStatements)
+  businessInfo        String   @default("") @db.Text
+  servicesOrProducts  String   @default("") @db.Text
+  faq                 String   @default("") @db.Text
+  policies            String   @default("") @db.Text
+  salesGuidance       String   @default("") @db.Text
+  toneExamples        String   @default("") @db.Text
+  forbiddenStatements String   @default("") @db.Text
+
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@map("chatbot_knowledge_base")
+}
+
+model Conversation {
+  id                 String   @id @default(cuid())
+
+  botConfigId        String
+  botConfig          BotConfig @relation(fields: [botConfigId], references: [id], onDelete: Cascade)
+
+  // Identificación anónima del usuario
+  sessionId          String   @unique
+  ipHash             String?
+  userAgent          String?  @db.Text
+  referrerUrl        String?
+  currentPath        String?
+
+  // Lifecycle
+  startedAt          DateTime @default(now())
+  lastMessageAt      DateTime @default(now())
+  endedAt            DateTime?
+
+  // Métricas denormalizadas (actualizadas en transacción al guardar mensaje)
+  messageCount       Int      @default(0)
+  tokensIn           Int      @default(0)
+  tokensOut          Int      @default(0)
+  estimatedCostUsd   Decimal  @default(0) @db.Decimal(10, 6)
+
+  // Outcome
+  leadCaptured       Boolean  @default(false)
+
+  // Relaciones
+  messages           ChatMessage[]
+  lead               ChatbotLead?
+
+  @@index([botConfigId, startedAt])
+  @@index([sessionId])
+  @@map("chatbot_conversation")
+}
+
+model ChatMessage {
+  id              String   @id @default(cuid())
+
+  conversationId  String
+  conversation    Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  role            String   // "user" | "assistant" | "system"
+  content         String   @db.Text
+
+  // Solo para mensajes de assistant
+  toolCalls       Json?
+  tokensIn        Int?
+  tokensOut       Int?
+
+  createdAt       DateTime @default(now())
+
+  @@index([conversationId, createdAt])
+  @@map("chatbot_message")
+}
+
+model ChatbotLead {
+  id                  String   @id @default(cuid())
+
+  botConfigId         String
+  botConfig           BotConfig @relation(fields: [botConfigId], references: [id], onDelete: Cascade)
+
+  conversationId      String?  @unique
+  conversation        Conversation? @relation(fields: [conversationId], references: [id], onDelete: SetNull)
+
+  // Datos capturados
+  name                String?
+  email               String?
+  phone               String?
+  intent              String?              // "quote" | "info" | "demo" | "support" | "other"
+  message             String?  @db.Text
+
+  // Notificación
+  notificationSent    Boolean   @default(false)
+  notificationSentAt  DateTime?
+
+  // Estado gestionable por el cliente
+  status              String   @default("new")  // "new" | "contacted" | "qualified" | "lost" | "converted"
+
+  capturedAt          DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@index([botConfigId, capturedAt])
+  @@index([status])
+  @@map("chatbot_lead")
+}
+
+model QuotaUsage {
+  id                  String   @id @default(cuid())
+
+  botConfigId         String
+  botConfig           BotConfig @relation(fields: [botConfigId], references: [id], onDelete: Cascade)
+
+  year                Int
+  month               Int      // 1-12
+
+  conversationsCount  Int      @default(0)
+  tokensIn            Int      @default(0)
+  tokensOut           Int      @default(0)
+  costUsd             Decimal  @default(0) @db.Decimal(10, 4)
+
+  alert80Sent         Boolean   @default(false)
+  alert80SentAt       DateTime?
+  degradedAt          DateTime?
+
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@unique([botConfigId, year, month])
+  @@index([botConfigId])
+  @@map("chatbot_quota_usage")
 }

@@ -1,6 +1,6 @@
 'use client'
 
-import { motion } from 'framer-motion'
+import { motion } from 'motion/react'
 
 interface TrendBadgeProps {
   /** Numeric change — positive = up, negative = down */

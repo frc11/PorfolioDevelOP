@@ -2,7 +2,7 @@
 
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { Canvas } from "@react-three/fiber";
-import { AnimatePresence, motion, useAnimate } from "framer-motion";
+import { AnimatePresence, motion, useAnimate } from "motion/react";
 import {
     PreloaderArtifact,
     type PreloaderArtifactProps,

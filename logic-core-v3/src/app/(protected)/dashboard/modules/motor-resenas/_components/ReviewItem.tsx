@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence } from 'motion/react'
 import { Star, Sparkles, Send, RefreshCw, CheckCircle2, AlertCircle } from 'lucide-react'
 import { generateDraft, replyAction } from '@/components/dashboard/modules/motor-resenas/_actions'
 import type { GBPReview } from '@/lib/integrations/google-business-profile'
