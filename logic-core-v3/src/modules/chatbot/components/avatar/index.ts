@@ -1,0 +1,7 @@
+export { NeuroAvatar } from './NeuroAvatar'
+export type { NeuroAvatarProps, NeuroAvatarState } from './types'
+export { AvatarRenderer } from './AvatarRenderer'
+export { LegacyNeuroAvatar } from './LegacyNeuroAvatar'
+export { mapStateToLegacyProps, hexToContextColor } from './legacyStateMapper'
+export type { AvatarRendererProps } from './AvatarRenderer'
+export type { LegacyAvatarProps } from './legacyStateMapper'

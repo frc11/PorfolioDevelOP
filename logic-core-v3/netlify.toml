@@ -1,5 +1,6 @@
 [build]
-  command = "npm run build"
+  command = "npx prisma generate && npx prisma migrate deploy && npm run build"
+  publish = ".next"
 
 [build.environment]
   NODE_VERSION = "20"
@@ -10,3 +11,12 @@
 [dev]
   command = "npm run dev"
   port = 3000
+
+[functions]
+  node_bundler = "esbuild"
+
+[[redirects]]
+  from = "/api/chatbot/*"
+  to = "/api/chatbot/:splat"
+  status = 200
+  force = true

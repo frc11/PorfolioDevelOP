@@ -96,3 +96,66 @@ bot with realistic data. Run it after every schema change.
 
 - Sprint S0: Module skeleton created. No functionality yet.
 - See `docs/chatbot-sprints.md` for detailed sprint plan.
+
+## Deferred Decisions
+
+The following architectural decisions were deliberately deferred from
+the MVP to keep scope manageable. They are documented here so future
+contributors don't reimplement or remove them by mistake.
+
+### Multi-key support per organization (Scenario A)
+
+**Status:** Deferred to Phase 1.5.
+
+**What:** Each `BotConfig` would have its own (encrypted) `llmApiKey`
+field, so develOP can distribute load across multiple Google AI Studio
+API keys (one per client). This isolates abuse, simplifies per-client
+billing visibility, and lets Google's per-key quotas act as a hard backstop.
+
+**Why deferred:** MVP has only one client (develOP itself). The current
+implementation reads `CHATBOT_GOOGLE_API_KEY` from env vars globally,
+which is sufficient. Adding multi-key now would require:
+
+- New encrypted field in `BotConfig`
+- Refactor of `GoogleProvider` to accept per-instance keys
+- Admin UI for key management
+- Encryption key rotation strategy
+
+That's 1-2 sprints of work for zero current benefit.
+
+**When to revisit:** When the second real client is onboarded, OR when
+any single client's traffic justifies dedicated quota.
+
+**How to implement when needed:** Add `llmApiKey String?` to `BotConfig`
+schema, store encrypted with the same approach as the credentials vault
+in Logic Core. Update `getLLMProvider()` factory to accept the BotConfig
+and use its key if present, fall back to env var otherwise.
+
+## Testing the chat endpoint
+
+Once the API key is configured in `.env.local`, you can test the
+endpoint manually:
+
+```bash
+# Start dev server
+npm run dev
+
+# In another terminal:
+curl -X POST http://localhost:3000/api/chatbot/develop/chat \
+  -H "Content-Type: application/json" \
+  -d '{
+    "messages": [
+      { "role": "user", "content": "Hola, ¿qué servicios ofrecen?" }
+    ],
+    "sessionId": "manual-test-001",
+    "currentPath": "/"
+  }'
+```
+
+Expected: SSE stream with the assistant's response. After it
+finishes, check directly with Prisma Studio (`npx prisma studio`)
+or query the BD:
+
+```sql
+SELECT * FROM chatbot_conversation WHERE "sessionId" = 'manual-test-001';
+```

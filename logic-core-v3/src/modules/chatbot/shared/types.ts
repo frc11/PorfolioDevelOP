@@ -37,7 +37,7 @@ export type RouteColorMap = Record<string, string>
 /**
  * Avatar style options.
  */
-export type AvatarStyle = 'neuro' | 'simple' | 'custom_image' | 'emoji' | 'none'
+export type AvatarStyle = 'neuro' | 'legacy_neuro' | 'simple' | 'custom_image' | 'emoji' | 'none'
 
 /**
  * LLM provider options (only google is functional in MVP).

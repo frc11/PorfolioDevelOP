@@ -2,6 +2,8 @@
 
 import { usePathname } from 'next/navigation'
 
+import { LogicCompanion } from '@/modules/chatbot'
+
 const PORTAL_PREFIXES = ['/admin', '/dashboard']
 
 export function PublicOnlyComponents({
@@ -15,5 +17,10 @@ export function PublicOnlyComponents({
   )
 
   if (isPortal) return null
-  return <>{children}</>
+  return (
+    <>
+      {children}
+      <LogicCompanion slug="develop" />
+    </>
+  )
 }

@@ -1,0 +1,1 @@
+export { handleChatRequest } from './handleChatRequest'
