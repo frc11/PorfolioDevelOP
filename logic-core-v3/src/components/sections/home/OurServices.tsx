@@ -10,7 +10,6 @@ import {
   useScroll,
   useSpring,
   useTransform,
-  useVelocity,
 } from 'motion/react';
 import {
   BarChart2,
@@ -88,9 +87,9 @@ const SERVICES: Service[] = [
     outcomes: ['Atención inmediata', 'Mejor calidad de lead', 'Agenda operando sola'],
     cta: 'Explorar IA aplicada',
     href: '/ai-implementations',
-    accent: '#8b5cf6',
+    accent: '#10b981',
     glow:
-      'radial-gradient(circle at 18% 18%, rgba(139,92,246,0.18), transparent 0 36%), radial-gradient(circle at 86% 76%, rgba(139,92,246,0.08), transparent 0 28%)',
+      'radial-gradient(circle at 18% 18%, rgba(16,185,129,0.20), transparent 0 36%), radial-gradient(circle at 86% 76%, rgba(16,185,129,0.09), transparent 0 28%)',
     icon: Bot,
   },
   {
@@ -106,9 +105,9 @@ const SERVICES: Service[] = [
     outcomes: ['Menos trabajo manual', 'Follow-up automático', 'Reportes al instante'],
     cta: 'Explorar automatizaciones',
     href: '/process-automation',
-    accent: '#10b981',
+    accent: '#f59e0b',
     glow:
-      'radial-gradient(circle at 84% 20%, rgba(16,185,129,0.18), transparent 0 36%), radial-gradient(circle at 18% 82%, rgba(16,185,129,0.08), transparent 0 30%)',
+      'radial-gradient(circle at 84% 20%, rgba(245,158,11,0.20), transparent 0 36%), radial-gradient(circle at 18% 82%, rgba(245,158,11,0.09), transparent 0 30%)',
     icon: Zap,
   },
   {
@@ -124,12 +123,23 @@ const SERVICES: Service[] = [
     outcomes: ['operación centralizada', 'Reportes directivos', 'Control total del dato'],
     cta: 'Explorar software a medida',
     href: '/software-development',
-    accent: '#f59e0b',
+    accent: '#8b5cf6',
     glow:
-      'radial-gradient(circle at 18% 18%, rgba(245,158,11,0.18), transparent 0 36%), radial-gradient(circle at 84% 82%, rgba(245,158,11,0.08), transparent 0 30%)',
+      'radial-gradient(circle at 18% 18%, rgba(139,92,246,0.20), transparent 0 36%), radial-gradient(circle at 84% 82%, rgba(139,92,246,0.09), transparent 0 30%)',
     icon: Code2,
   },
 ];
+
+const ORDERED_SERVICE_IDS = [1, 2, 4, 3] as const;
+const ORDERED_SERVICES = ORDERED_SERVICE_IDS.map((serviceId) => {
+  const service = SERVICES.find((item) => item.id === serviceId);
+
+  if (!service) {
+    throw new Error(`Missing service ${serviceId}`);
+  }
+
+  return service;
+});
 
 function StageFrame({
   service,
@@ -138,23 +148,13 @@ function StageFrame({
   service: Service;
   children: ReactNode;
 }) {
-  const [isMd, setIsMd] = useState(false);
-
-  useEffect(() => {
-    const mediaQuery = window.matchMedia('(min-width: 768px)');
-    setIsMd(mediaQuery.matches);
-
-    const handler = (e: MediaQueryListEvent) => setIsMd(e.matches);
-    mediaQuery.addEventListener('change', handler);
-    return () => mediaQuery.removeEventListener('change', handler);
-  }, []);
-
   return (
     <div
       style={{
         position: 'relative',
         width: '100%',
         height: '100%',
+        minHeight: 0,
         display: 'flex',
         flexDirection: 'column',
       }}
@@ -171,7 +171,18 @@ function StageFrame({
       />
 
       {/* Browser window */}
-      <div
+      <motion.div
+        data-cursor="hover"
+        whileHover={{
+          borderColor: `${service.accent}42`,
+          boxShadow: `
+            0 30px 72px rgba(0,0,0,0.58),
+            0 0 0 1px rgba(255,255,255,0.05),
+            inset 0 1px 0 rgba(255,255,255,0.1),
+            0 0 54px ${service.accent}22
+          `,
+        }}
+        transition={{ duration: 0.16, ease: [0.25, 0.46, 0.45, 0.94] }}
         style={{
           position: 'relative',
           zIndex: 1,
@@ -188,8 +199,11 @@ function StageFrame({
             0 0 40px ${service.accent}10
           `,
           flex: 1,
+          height: '100%',
+          minHeight: 0,
           display: 'flex',
           flexDirection: 'column',
+          willChange: 'box-shadow, border-color',
         }}
       >
         {/* Browser top bar */}
@@ -307,7 +321,7 @@ function StageFrame({
             transition={{ duration: 2, repeat: Infinity }}
             style={{
               fontSize: 8,
-              color: '#10b981',
+              color: service.accent,
               display: 'flex',
               alignItems: 'center',
               gap: 4,
@@ -318,7 +332,8 @@ function StageFrame({
                 width: 5,
                 height: 5,
                 borderRadius: '50%',
-                background: '#10b981',
+                background: service.accent,
+                boxShadow: `0 0 8px ${service.accent}`,
               }}
             />
             EN VIVO
@@ -328,16 +343,16 @@ function StageFrame({
         {/* Área de contenido — las simulaciones */}
         <div
           style={{
-            height: isMd ? 800 : 700,
+            flex: 1,
+            minHeight: 0,
             overflow: 'hidden',
             position: 'relative',
-            flexShrink: 0,
             padding: 0,
           }}
         >
           {children}
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }
@@ -409,10 +424,10 @@ function WebScene({ service }: { service: Service }) {
   );
 
   const [webSimulations] = useState<WebSimulation[]>(() => [
-    { id: 1, label: 'SEO Local', icon: <SearchGlyph />, duration: 5000, color: '#06b6d4' },
-    { id: 2, label: 'Analytics', icon: <AnalyticsGlyph />, duration: 4500, color: '#10b981' },
-    { id: 3, label: 'Leads', icon: <LeadsGlyph />, duration: 5500, color: '#8b5cf6' },
-    { id: 4, label: 'Google Maps', icon: <MapsGlyph />, duration: 4000, color: '#f59e0b' },
+    { id: 1, label: 'SEO Local', icon: <SearchGlyph />, duration: 5000, color: service.accent },
+    { id: 2, label: 'Analytics', icon: <AnalyticsGlyph />, duration: 4500, color: service.accent },
+    { id: 3, label: 'Leads', icon: <LeadsGlyph />, duration: 5500, color: service.accent },
+    { id: 4, label: 'Google Maps', icon: <MapsGlyph />, duration: 4000, color: service.accent },
   ]);
 
   const [activeTab, setActiveTab] = useState(0);
@@ -2110,10 +2125,12 @@ function WebScene({ service }: { service: Service }) {
       style={{
         width: '100%',
         height: '100%',
+        minHeight: 0,
         display: 'flex',
         flexDirection: 'column',
         gap: 0,
         padding: 8,
+        overflow: 'hidden',
         background: `radial-gradient(circle at top, ${service.accent}12 0%, rgba(9,13,19,0.96) 42%, rgba(4,6,10,1) 100%)`,
       }}
     >
@@ -2358,7 +2375,7 @@ function WebScene({ service }: { service: Service }) {
   );
 }
 
-const AI_COLOR = '#8b5cf6';
+const AI_COLOR = '#10b981';
 
 type AISimulation = {
   id: number;
@@ -3772,10 +3789,12 @@ function AIScene({ service: _service }: { service: Service }) {
       style={{
         width: '100%',
         height: '100%',
+        minHeight: 0,
         display: 'flex',
         flexDirection: 'column',
         padding: 8,
         gap: 8,
+        overflow: 'hidden',
       }}
     >
       <div style={{ marginBottom: 8, flexShrink: 0 }}>
@@ -4010,7 +4029,7 @@ function AutomationScene({ service }: { service: Service }) {
 
   type SimProps = { isActive: boolean; progress: number; color: string };
 
-  const AUTO_COLOR = '#10b981';
+  const AUTO_COLOR = '#f59e0b';
 
   const [autoSimulations] = useState<AutomationSimulation[]>(() => [
     { id: 1, label: 'Flujo', icon: GitBranch, duration: 6000, color: AUTO_COLOR },
@@ -5102,10 +5121,12 @@ function AutomationScene({ service }: { service: Service }) {
       style={{
         width: '100%',
         height: '100%',
+        minHeight: 0,
         display: 'flex',
         flexDirection: 'column',
         padding: 8,
         gap: 8,
+        overflow: 'hidden',
       }}
     >
       <div style={{ marginBottom: 8, flexShrink: 0 }}>
@@ -5266,7 +5287,7 @@ function SoftwareScene({ service }: { service: Service }) {
 
   type SimProps = { isActive: boolean; progress: number; color: string };
 
-  const SW_COLOR = '#f59e0b';
+  const SW_COLOR = '#8b5cf6';
 
   const [swSimulations] = useState<SoftwareSimulation[]>(() => [
     { id: 1, label: 'CRM', icon: Users, duration: 5500, color: SW_COLOR },
@@ -6293,10 +6314,12 @@ function SoftwareScene({ service }: { service: Service }) {
       style={{
         width: '100%',
         height: '100%',
+        minHeight: 0,
         display: 'flex',
         flexDirection: 'column',
         padding: 8,
         gap: 8,
+        overflow: 'hidden',
       }}
     >
       <div style={{ marginBottom: 8, flexShrink: 0 }}>
@@ -6459,6 +6482,398 @@ function ServiceVisual({ service }: { service: Service }) {
   return <StageFrame service={service}>{scene}</StageFrame>;
 }
 
+const SERVICE_SIGNAL_SERIES: Record<number, number[]> = {
+  1: [18, 28, 25, 39, 34, 49, 44, 62, 74],
+  2: [12, 22, 36, 48, 61, 70, 81, 88, 94],
+  3: [6, 18, 33, 47, 58, 69, 78, 86, 92],
+  4: [16, 24, 31, 45, 52, 67, 75, 84, 90],
+};
+
+function ServiceMetricGraph({ service }: { service: Service }) {
+  const series = SERVICE_SIGNAL_SERIES[service.id] ?? SERVICE_SIGNAL_SERIES[1];
+  const points = series
+    .map((value, index) => {
+      const x = 8 + index * (184 / (series.length - 1));
+      const y = 74 - value * 0.62;
+      return `${x},${y}`;
+    })
+    .join(' ');
+
+  return (
+    <div aria-hidden="true" style={{ borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: 14 }}>
+      <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 16 }}>
+        <div>
+          <div
+            style={{
+              fontSize: 10,
+              fontWeight: 700,
+              letterSpacing: '0.18em',
+              textTransform: 'uppercase',
+              color: 'rgba(255,255,255,0.32)',
+            }}
+          >
+            Impacto estimado
+          </div>
+          <div style={{ marginTop: 4, fontSize: 13, color: 'rgba(255,255,255,0.62)', lineHeight: 1.35 }}>
+            {service.metric}
+          </div>
+        </div>
+        <div
+          style={{
+            height: 8,
+            width: 8,
+            borderRadius: '50%',
+            background: service.accent,
+            boxShadow: `0 0 18px ${service.accent}90`,
+            flexShrink: 0,
+          }}
+        />
+      </div>
+
+      <svg viewBox="0 0 208 86" style={{ marginTop: 10, display: 'block', width: '100%', height: 68 }}>
+        <path d={`M ${points} L 200 84 L 8 84 Z`} fill={service.accent} opacity="0.08" />
+        <polyline
+          points={points}
+          fill="none"
+          stroke={service.accent}
+          strokeWidth="4"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        {series.map((value, index) => {
+          const x = 8 + index * (184 / (series.length - 1));
+          const y = 74 - value * 0.62;
+
+          return (
+            <circle
+              key={`${service.id}-${index}`}
+              cx={x}
+              cy={y}
+              r={index === series.length - 1 ? 5 : 2.5}
+              fill={index === series.length - 1 ? service.accent : 'rgba(255,255,255,0.22)'}
+            />
+          );
+        })}
+      </svg>
+    </div>
+  );
+}
+
+function ServiceInfoCard({
+  service,
+  onNavigate,
+}: {
+  service: Service;
+  onNavigate: (href: string) => void;
+}) {
+  const Icon = service.icon;
+
+  return (
+    <motion.article
+      data-cursor="hover"
+      initial="rest"
+      whileHover="hover"
+      animate="rest"
+      variants={{
+        rest: {
+          y: 0,
+          borderColor: `${service.accent}24`,
+          boxShadow: `inset 0 1px 0 rgba(255,255,255,0.08), 0 24px 58px rgba(0,0,0,0.32), 0 0 36px ${service.accent}0D`,
+        },
+        hover: {
+          y: -3,
+          borderColor: `${service.accent}56`,
+          boxShadow: `inset 0 1px 0 rgba(255,255,255,0.12), 0 30px 70px rgba(0,0,0,0.36), 0 0 72px ${service.accent}24`,
+        },
+      }}
+      transition={{ duration: 0.16, ease: [0.25, 0.46, 0.45, 0.94] }}
+      style={{
+        position: 'relative',
+        overflow: 'hidden',
+        borderRadius: 8,
+        border: `1px solid ${service.accent}24`,
+        background: `${service.glow}, radial-gradient(circle at 72% 18%, ${service.accent}14, transparent 0 28%), linear-gradient(180deg, ${service.accent}0A, rgba(255,255,255,0.038) 36%, rgba(255,255,255,0.018))`,
+        boxShadow: `inset 0 1px 0 rgba(255,255,255,0.08), 0 24px 58px rgba(0,0,0,0.32), 0 0 36px ${service.accent}0D`,
+        padding: 'clamp(1.25rem, 2.25vw, 1.9rem)',
+        height: '100%',
+        minHeight: 0,
+        display: 'flex',
+        flexDirection: 'column',
+        willChange: 'transform, box-shadow, border-color',
+      }}
+    >
+      <motion.div
+        aria-hidden="true"
+        variants={{
+          rest: { opacity: 0.5, x: '-22%' },
+          hover: { opacity: 1, x: '18%' },
+        }}
+        transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
+        style={{
+          position: 'absolute',
+          top: 0,
+          bottom: 0,
+          left: '-45%',
+          width: '70%',
+          background:
+            'linear-gradient(105deg, transparent 0%, rgba(255,255,255,0.08) 45%, transparent 78%)',
+          pointerEvents: 'none',
+          filter: 'blur(10px)',
+        }}
+      />
+      <motion.div
+        aria-hidden="true"
+        variants={{
+          rest: { opacity: 0.4 },
+          hover: { opacity: 1 },
+        }}
+        transition={{ duration: 0.18 }}
+        style={{
+          position: 'absolute',
+          inset: 0,
+          background:
+            'linear-gradient(135deg, rgba(255,255,255,0.08), transparent 34%), linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.18) 100%)',
+          pointerEvents: 'none',
+        }}
+      />
+
+      <div style={{ position: 'relative', zIndex: 1, display: 'flex', minHeight: 0, height: '100%', flexDirection: 'column' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 18 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
+            <span style={{ width: 28, height: 1, background: service.accent, flexShrink: 0 }} />
+            <span
+              style={{
+                fontSize: 10,
+                fontWeight: 700,
+                letterSpacing: '0.2em',
+                color: service.accent,
+                textTransform: 'uppercase',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {service.tag}
+            </span>
+          </div>
+          <div
+            style={{
+              width: 34,
+              height: 34,
+              borderRadius: 8,
+              border: `1px solid ${service.accent}36`,
+              background: `${service.accent}10`,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0,
+            }}
+          >
+            <Icon size={16} color={service.accent} strokeWidth={1.7} />
+          </div>
+        </div>
+
+        <h3
+          style={{
+            margin: '18px 0 0',
+            maxWidth: 520,
+            fontSize: 'clamp(1.8rem, 3vw, 3.2rem)',
+            fontWeight: 900,
+            lineHeight: 0.96,
+            letterSpacing: '-0.04em',
+            color: '#fff',
+            whiteSpace: 'pre-line',
+          }}
+        >
+          {service.title}
+        </h3>
+
+        <p style={{ margin: '14px 0 0', maxWidth: 560, fontSize: 13, lineHeight: 1.62, color: 'rgba(255,255,255,0.54)' }}>
+          {service.description}
+        </p>
+
+        <div
+          style={{
+            marginTop: 18,
+            display: 'grid',
+            gap: 11,
+            borderRadius: 8,
+            border: '1px solid rgba(255,255,255,0.07)',
+            background: 'rgba(255,255,255,0.025)',
+            padding: 12,
+          }}
+        >
+          {service.outcomes.map((outcome) => (
+            <div key={outcome} style={{ display: 'flex', alignItems: 'center', gap: 11 }}>
+              <span
+                style={{
+                  width: 19,
+                  height: 19,
+                  borderRadius: 5,
+                  border: `1px solid ${service.accent}34`,
+                  background: `${service.accent}12`,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0,
+                }}
+              >
+                <Check size={10} color={service.accent} />
+              </span>
+              <span style={{ fontSize: 13, lineHeight: 1.45, color: 'rgba(255,255,255,0.68)' }}>{outcome}</span>
+            </div>
+          ))}
+        </div>
+
+        <div style={{ marginTop: 18 }}>
+          <ServiceMetricGraph service={service} />
+        </div>
+
+        <div style={{ marginTop: 18, display: 'flex', alignItems: 'baseline', gap: 10, flexWrap: 'wrap' }}>
+          <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.32)', letterSpacing: '0.12em' }}>
+            DESDE
+          </span>
+          <span
+            style={{
+              fontSize: 'clamp(1.6rem, 2.35vw, 2.25rem)',
+              fontWeight: 900,
+              color: 'white',
+              letterSpacing: '-0.045em',
+              lineHeight: 1,
+            }}
+          >
+            {service.price}
+          </span>
+          <span
+            style={{
+              fontSize: 10,
+              color: service.accent,
+              background: `${service.accent}12`,
+              border: `1px solid ${service.accent}30`,
+              borderRadius: 999,
+              padding: '4px 9px',
+              fontWeight: 700,
+            }}
+          >
+            {service.timeline}
+          </span>
+        </div>
+
+        <div style={{ marginTop: 13, display: 'flex', flexWrap: 'wrap', gap: 7 }}>
+          {service.sectors.map((sector) => (
+            <span
+              key={sector}
+              style={{
+                fontSize: 10,
+                color: 'rgba(255,255,255,0.42)',
+                border: '1px solid rgba(255,255,255,0.09)',
+                borderRadius: 6,
+                padding: '4px 8px',
+              }}
+            >
+              {sector}
+            </span>
+          ))}
+        </div>
+
+        <motion.button
+          type="button"
+          whileHover={{
+            scale: 1.012,
+            background: `linear-gradient(135deg, ${service.accent}34, ${service.accent}16)`,
+            borderColor: `${service.accent}70`,
+            boxShadow: `0 0 34px ${service.accent}24`,
+          }}
+          whileTap={{ scale: 0.985 }}
+          transition={{ duration: 0.14, ease: [0.25, 0.46, 0.45, 0.94] }}
+          onClick={() => onNavigate(service.href)}
+          style={{
+            marginTop: 'auto',
+            width: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 9,
+            padding: '14px 18px',
+            borderRadius: 8,
+            background: `linear-gradient(135deg, ${service.accent}26, ${service.accent}10)`,
+            border: `1px solid ${service.accent}42`,
+            color: service.accent,
+            cursor: 'pointer',
+            fontSize: 12,
+            fontWeight: 800,
+            letterSpacing: '0.1em',
+            textTransform: 'uppercase',
+            boxShadow: `0 0 24px ${service.accent}12`,
+          }}
+        >
+          {service.cta}
+          <motion.span animate={{ x: [0, 4, 0] }} transition={{ duration: 1.5, repeat: Infinity }}>
+            -&gt;
+          </motion.span>
+        </motion.button>
+      </div>
+    </motion.article>
+  );
+}
+
+function ServiceDemoPanel({ service }: { service: Service }) {
+  return (
+    <div
+      className="h-[clamp(30rem,64svh,38rem)] lg:h-full"
+      style={{ position: 'relative', minHeight: 0, perspective: 1400 }}
+    >
+      <div
+        aria-hidden="true"
+        style={{
+          position: 'absolute',
+          inset: '8% -8% 4%',
+          background: `radial-gradient(ellipse at center, ${service.accent}18, transparent 62%)`,
+          filter: 'blur(24px)',
+          opacity: 0.8,
+        }}
+      />
+      <div
+        aria-hidden="true"
+        style={{
+          position: 'absolute',
+          left: '8%',
+          right: '8%',
+          bottom: 8,
+          height: 34,
+          borderRadius: '50%',
+          background: `radial-gradient(ellipse at center, ${service.accent}26, transparent 68%)`,
+          filter: 'blur(14px)',
+        }}
+      />
+
+      <motion.div
+        initial="rest"
+        whileHover="hover"
+        animate="rest"
+        variants={{
+          rest: { filter: 'drop-shadow(0 32px 64px rgba(0,0,0,0.44))' },
+          hover: { filter: `drop-shadow(0 36px 72px rgba(0,0,0,0.5)) drop-shadow(0 0 26px ${service.accent}24)` },
+        }}
+        transition={{ duration: 0.16, ease: [0.25, 0.46, 0.45, 0.94] }}
+        style={{ position: 'relative', height: '100%', minHeight: 0, transformStyle: 'preserve-3d' }}
+      >
+        <motion.div
+          initial={{ opacity: 0, y: 18, rotateX: 4 }}
+          whileInView={{ opacity: 1, y: 0, rotateX: 0 }}
+          viewport={{ once: true, amount: 0.3 }}
+          transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+          style={{
+            height: '100%',
+            minHeight: 0,
+            transformOrigin: 'center center',
+          }}
+        >
+          <ServiceVisual service={service} />
+        </motion.div>
+      </motion.div>
+    </div>
+  );
+}
+
 function ServiceCard({
   service,
   index,
@@ -6469,289 +6884,44 @@ function ServiceCard({
   onNavigate: (href: string) => void;
 }) {
   const cardRef = useRef<HTMLDivElement | null>(null);
-  const [isMd, setIsMd] = useState(false);
-
-  useEffect(() => {
-    const mediaQuery = window.matchMedia('(min-width: 768px)');
-    setIsMd(mediaQuery.matches);
-
-    const handler = (e: MediaQueryListEvent) => setIsMd(e.matches);
-    mediaQuery.addEventListener('change', handler);
-    return () => mediaQuery.removeEventListener('change', handler);
-  }, []);
+  const isReversed = index % 2 === 1;
 
   const { scrollYProgress } = useScroll({
     target: cardRef,
     offset: ['start 85%', 'end start'],
   });
 
-  const scale = useTransform(scrollYProgress, [0, 0.12, 0.9, 1], [0.955, 1, 1, 0.985]);
-  const opacity = useTransform(scrollYProgress, [0, 0.08, 0.9, 1], [0.12, 1, 1, 0.72]);
-  const y = useTransform(scrollYProgress, [0, 0.12, 0.9, 1], [28, 0, 0, -12]);
-  const blur = useTransform(scrollYProgress, [0, 0.1], [4, 0]);
-  const brightness = useTransform(scrollYProgress, [0, 0.08, 0.9, 1], [0.82, 1, 1, 0.88]);
-  const textX = useTransform(scrollYProgress, [0, 0.14], [-16, 0]);
-  const visualX = useTransform(scrollYProgress, [0, 0.17], [16, 0]);
-  const numberOpacity = useTransform(scrollYProgress, [0, 0.05, 0.15, 0.85, 0.95, 1], [0, 0.04, 0, 0, 0.04, 0]);
-  const filter = useMotionTemplate`blur(${blur}px) brightness(${brightness})`;
+  const scale = useTransform(scrollYProgress, [0, 0.16, 0.86, 1], [0.97, 1, 1, 0.985]);
+  const opacity = useTransform(scrollYProgress, [0, 0.12, 0.9, 1], [0.18, 1, 1, 0.72]);
+  const y = useTransform(scrollYProgress, [0, 0.16, 0.88, 1], [24, 0, 0, -8]);
+  const infoX = useTransform(scrollYProgress, [0, 0.22], [isReversed ? 18 : -18, 0]);
+  const demoX = useTransform(scrollYProgress, [0, 0.22], [isReversed ? -18 : 18, 0]);
+  const demoRotateY = useTransform(scrollYProgress, [0, 0.22], [isReversed ? -1.4 : 1.4, 0]);
+  const gridClass = isReversed
+    ? 'lg:grid-cols-[minmax(0,1.18fr)_minmax(20rem,0.82fr)]'
+    : 'lg:grid-cols-[minmax(20rem,0.82fr)_minmax(0,1.18fr)]';
 
   return (
-    <div ref={cardRef} className="relative h-auto md:h-[100vh]" style={{ zIndex: index + 1 }}>
-      {/* HEADER FUERA DE LA CARD */}
+    <section ref={cardRef} className="relative py-8 md:py-14" style={{ zIndex: index + 1 }}>
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.5 }}
-        style={{
-          marginBottom: 20,
-          paddingLeft: 4,
-        }}
+        className={`mx-auto grid w-full items-stretch gap-8 lg:h-[clamp(32rem,66svh,39rem)] lg:gap-10 ${gridClass}`}
+        style={{ opacity, y, scale, perspective: 1400 }}
       >
-        {/* Tag */}
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 10,
-            marginBottom: 12,
-          }}
-        >
-          <div style={{ width: 20, height: 1, background: service.accent }} />
-          <span
-            style={{
-              fontSize: 10,
-              fontWeight: 600,
-              letterSpacing: '0.2em',
-              color: service.accent,
-              textTransform: 'uppercase',
-            }}
-          >
-            {service.tag}
-          </span>
-        </div>
-
-        {/* Título principal */}
-        <h3
-          style={{
-            fontSize: 'clamp(1.8rem, 3vw, 2.8rem)',
-            fontWeight: 800,
-            lineHeight: 1.08,
-            letterSpacing: '-0.025em',
-            color: 'white',
-            margin: '0 0 8px',
-            whiteSpace: 'pre-line',
-          }}
-        >
-          {service.title}
-        </h3>
-
-        {/* Subfrase */}
-        <p
-          style={{
-            fontSize: 15,
-            lineHeight: 1.6,
-            color: 'rgba(255,255,255,0.4)',
-            maxWidth: 560,
-            margin: 0,
-          }}
-        >
-          {service.description}
-        </p>
-      </motion.div>
-
-      <motion.article
-        className="relative mx-auto w-full backdrop-blur-2xl"
-        style={{
-          scale,
-          opacity,
-          y,
-          filter,
-          background: 'rgba(255,255,255,0.02)',
-          border: '1px solid rgba(255,255,255,0.08)',
-          borderRadius: 20,
-          overflow: 'hidden',
-          position: 'sticky',
-          top: '10vh',
-          minHeight: isMd ? 480 : 'auto',
-          boxShadow: `
-            inset 0 1px 0 rgba(255,255,255,0.06),
-            0 24px 60px rgba(0,0,0,0.4)
-          `,
-        }}
-      >
-        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.05),transparent_34%,transparent_74%,rgba(255,255,255,0.02))]" />
         <motion.div
-          style={{
-            position: 'absolute',
-            right: -20,
-            top: '50%',
-            transform: 'translateY(-50%)',
-            fontSize: '20vw',
-            fontWeight: 900,
-            color: service.accent,
-            opacity: numberOpacity,
-            pointerEvents: 'none',
-            letterSpacing: '-0.05em',
-            lineHeight: 1,
-            userSelect: 'none',
-          }}
+          style={{ x: infoX }}
+          className={`order-1 h-full ${isReversed ? 'lg:order-2' : 'lg:order-1'}`}
         >
-          0{service.id}
+          <ServiceInfoCard service={service} onNavigate={onNavigate} />
         </motion.div>
 
-        <div className="relative grid w-full items-stretch gap-6 p-4 sm:p-6 md:p-8 lg:grid-cols-[minmax(0,2fr)_1px_minmax(0,3fr)] lg:gap-0 lg:p-6">
-          <motion.div style={{ x: textX }} className="order-2 lg:order-1">
-            <div
-              style={{
-                padding: '36px 32px',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 20,
-              }}
-            >
-              {/* Outcomes */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                {service.outcomes.map((outcome) => (
-                  <div
-                    key={outcome}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 10,
-                    }}
-                  >
-                    <div
-                      style={{
-                        width: 18,
-                        height: 18,
-                        borderRadius: 5,
-                        background: `${service.accent}12`,
-                        border: `1px solid ${service.accent}25`,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        flexShrink: 0,
-                      }}
-                    >
-                      <Check size={9} color={service.accent} />
-                    </div>
-                    <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)', lineHeight: 1.4 }}>
-                      {outcome}
-                    </span>
-                  </div>
-                ))}
-              </div>
-
-              {/* Separador */}
-              <div style={{ height: 1, background: 'rgba(255,255,255,0.06)' }} />
-
-              {/* Precio */}
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'wrap' }}>
-                <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', letterSpacing: '0.05em' }}>
-                  DESDE
-                </span>
-                <span
-                  style={{
-                    fontSize: 32,
-                    fontWeight: 800,
-                    color: 'white',
-                    letterSpacing: '-0.03em',
-                    lineHeight: 1,
-                  }}
-                >
-                  {service.price}
-                </span>
-                <span
-                  style={{
-                    fontSize: 10,
-                    color: service.accent,
-                    background: `${service.accent}12`,
-                    border: `1px solid ${service.accent}25`,
-                    borderRadius: 100,
-                    padding: '3px 8px',
-                    fontWeight: 500,
-                  }}
-                >
-                  <span aria-hidden="true"> </span>
-                  {service.timeline}
-                </span>
-              </div>
-
-              {/* Sectores */}
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
-                {service.sectors.map((sector) => (
-                  <span
-                    key={sector}
-                    style={{
-                      fontSize: 10,
-                      color: 'rgba(255,255,255,0.3)',
-                      border: '1px solid rgba(255,255,255,0.08)',
-                      borderRadius: 4,
-                      padding: '3px 7px',
-                    }}
-                  >
-                    {sector}
-                  </span>
-                ))}
-              </div>
-
-              {/* CTA */}
-              <motion.button
-                type="button"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => onNavigate(service.href)}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: 8,
-                  padding: '12px 20px',
-                  background: `linear-gradient(135deg, ${service.accent}25, ${service.accent}10)`,
-                  border: `1px solid ${service.accent}40`,
-                  borderRadius: 12,
-                  cursor: 'pointer',
-                  fontSize: 12,
-                  fontWeight: 600,
-                  color: service.accent,
-                  letterSpacing: '0.08em',
-                  textTransform: 'uppercase',
-                  boxShadow: `0 0 20px ${service.accent}10`,
-                  transition: 'all 200ms ease',
-                }}
-              >
-                {service.cta}
-                <motion.span animate={{ x: [0, 4, 0] }} transition={{ duration: 1.5, repeat: Infinity }}>
-                  →
-                </motion.span>
-              </motion.button>
-            </div>
-          </motion.div>
-
-          <div
-            className="order-3 hidden lg:block"
-            style={{
-              width: 1,
-              background:
-                'linear-gradient(180deg, transparent, rgba(255,255,255,0.07) 20%, rgba(255,255,255,0.07) 80%, transparent)',
-              flexShrink: 0,
-            }}
-          />
-
-          <motion.div
-            style={{
-              x: visualX,
-              padding: isMd ? '16px 0 0 16px' : '0',
-              height: '100%',
-            }}
-            className="order-1 overflow-hidden lg:order-3"
-          >
-            <ServiceVisual service={service} />
-          </motion.div>
-        </div>
-      </motion.article>
-    </div>
+        <motion.div
+          style={{ x: demoX, rotateY: demoRotateY }}
+          className={`order-2 h-full ${isReversed ? 'lg:order-1' : 'lg:order-2'}`}
+        >
+          <ServiceDemoPanel service={service} />
+        </motion.div>
+      </motion.div>
+    </section>
   );
 }
 const PARTICLES = [
@@ -6855,16 +7025,113 @@ function FloatingParticles({ activeAccent }: { activeAccent: string }) {
   );
 }
 
+function ServiceSideProgressRails({
+  services,
+  activeServiceIndex,
+  activeAccent,
+  progress,
+}: {
+  services: Service[];
+  activeServiceIndex: number;
+  activeAccent: string;
+  progress: MotionValue<number>;
+}) {
+  const sides = ['left', 'right'] as const;
+
+  return (
+    <div
+      className="pointer-events-none absolute inset-y-0 left-1/2 z-20 hidden w-screen -translate-x-1/2 md:block"
+      aria-hidden="true"
+    >
+      <div style={{ position: 'sticky', top: 0, height: '100svh' }}>
+        {sides.map((side) => (
+          <div
+            key={side}
+            style={{
+              position: 'absolute',
+              top: '22svh',
+              height: '56svh',
+              width: 34,
+              display: 'flex',
+              justifyContent: 'center',
+              ...(side === 'left'
+                ? { left: 'clamp(1.25rem, 4.2vw, 4.75rem)' }
+                : { right: 'clamp(1.25rem, 4.2vw, 4.75rem)' }),
+            }}
+          >
+            <div
+              style={{
+                position: 'relative',
+                width: 6,
+                height: '100%',
+                borderRadius: 999,
+                background: 'rgba(255,255,255,0.04)',
+                border: '1px solid rgba(255,255,255,0.07)',
+                boxShadow: `inset 0 0 18px rgba(0,0,0,0.5), 0 0 34px ${activeAccent}16`,
+                overflow: 'visible',
+              }}
+            >
+              <motion.div
+                animate={{
+                  background: `linear-gradient(180deg, ${activeAccent}, ${activeAccent}82 58%, ${activeAccent}35)`,
+                  boxShadow: `0 0 26px ${activeAccent}70`,
+                }}
+                transition={{ duration: 0.55, ease: [0.25, 0.46, 0.45, 0.94] }}
+                style={{
+                  position: 'absolute',
+                  inset: 0,
+                  borderRadius: 999,
+                  scaleY: progress,
+                  transformOrigin: 'top center',
+                  opacity: 0.9,
+                }}
+              />
+
+              {services.map((service, index) => {
+                const isActive = activeServiceIndex === index;
+                const top = services.length > 1 ? `${(index / (services.length - 1)) * 100}%` : '50%';
+
+                return (
+                  <motion.div
+                    key={`${side}-${service.id}`}
+                    animate={{
+                      width: isActive ? 18 : 10,
+                      height: isActive ? 18 : 10,
+                      opacity: isActive ? 1 : 0.56,
+                      backgroundColor: service.accent,
+                      boxShadow: isActive ? `0 0 24px ${service.accent}` : `0 0 10px ${service.accent}40`,
+                    }}
+                    transition={{ duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] }}
+                    style={{
+                      position: 'absolute',
+                      top,
+                      left: '50%',
+                      transform: 'translate(-50%, -50%)',
+                      borderRadius: 999,
+                      border: '1px solid rgba(255,255,255,0.24)',
+                    }}
+                  />
+                );
+              })}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function OurServices() {
-  const SERVICE_ACCENTS = ['#06b6d4', '#8b5cf6', '#10b981', '#f59e0b'] as const;
   const sectionRef = useRef<HTMLElement | null>(null);
+  const servicesTrackRef = useRef<HTMLDivElement | null>(null);
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
   const [activeServiceIndex, setActiveServiceIndex] = useState(0);
   const { triggerTransition } = useTransitionContext();
   const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ['start start', 'end end'],
+    target: servicesTrackRef,
+    offset: ['start 78%', 'end 22%'],
   });
+  const sideProgress = useSpring(scrollYProgress, { stiffness: 120, damping: 32, mass: 0.35 });
 
   useEffect(() => {
     const observers: IntersectionObserver[] = [];
@@ -6893,10 +7160,7 @@ export default function OurServices() {
     return () => observers.forEach((observer) => observer.disconnect());
   }, []);
 
-  const activeAccent = SERVICE_ACCENTS[activeServiceIndex];
-
-  const headerY = useTransform(scrollYProgress, [0, 1], [0, -32]);
-  const headerScale = useTransform(scrollYProgress, [0, 1], [1, 0.985]);
+  const activeAccent = ORDERED_SERVICES[activeServiceIndex]?.accent ?? ORDERED_SERVICES[0]?.accent ?? '#06b6d4';
 
   return (
     <section
@@ -6953,8 +7217,8 @@ export default function OurServices() {
           animate={{
             background: `radial-gradient(
               ellipse 80% 60% at 50% 40%,
-              ${activeAccent}08 0%,
-              ${activeAccent}04 35%,
+              ${activeAccent}12 0%,
+              ${activeAccent}06 35%,
               transparent 70%
             )`,
           }}
@@ -6986,7 +7250,7 @@ export default function OurServices() {
           animate={{
             background: `radial-gradient(
               circle,
-              ${activeAccent}06 0%,
+              ${activeAccent}0B 0%,
               transparent 70%
             )`,
           }}
@@ -7044,14 +7308,14 @@ export default function OurServices() {
         <FloatingParticles activeAccent={activeAccent} />
       </div>
 
-      <div className="relative z-10 mx-auto max-w-[1280px] px-5 pb-16 pt-20 sm:px-8 lg:px-10 lg:pt-28">
+      <div className="relative z-10 mx-auto max-w-[1280px] px-5 pb-14 pt-20 sm:px-8 lg:px-10 lg:pt-24">
         {/* HEADER INMERSIVO */}
         <div
           style={{
             textAlign: 'center',
             maxWidth: 800,
             margin: '0 auto',
-            padding: '0 32px 80px',
+            padding: '0 32px 52px',
             position: 'relative',
             zIndex: 1,
           }}
@@ -7066,11 +7330,12 @@ export default function OurServices() {
               display: 'inline-flex',
               alignItems: 'center',
               gap: 8,
-              border: '1px solid rgba(255,255,255,0.1)',
+              border: `1px solid ${activeAccent}24`,
               borderRadius: 100,
               padding: '6px 16px',
               marginBottom: 28,
-              background: 'rgba(255,255,255,0.04)',
+              background: `${activeAccent}09`,
+              boxShadow: `0 0 26px ${activeAccent}10`,
             }}
           >
             <div
@@ -7078,8 +7343,8 @@ export default function OurServices() {
                 width: 5,
                 height: 5,
                 borderRadius: '50%',
-                background: '#06b6d4',
-                boxShadow: '0 0 6px #06b6d4',
+                background: activeAccent,
+                boxShadow: `0 0 10px ${activeAccent}`,
               }}
             />
             <span
@@ -7151,16 +7416,22 @@ export default function OurServices() {
           >
             {[
               { label: 'Sitio Web', color: '#06b6d4', price: '$800' },
-              { label: 'Agente IA', color: '#8b5cf6', price: '$300' },
-              { label: 'Automatizaciones', color: '#10b981', price: '$200' },
-              { label: 'Software', color: '#f59e0b', price: '$1.500' },
-            ].map((chip, i) => (
+              { label: 'Agente IA', color: '#10b981', price: '$300' },
+              { label: 'Software', color: '#8b5cf6', price: '$1.500' },
+              { label: 'Automatizaciones', color: '#f59e0b', price: '$200' },
+            ].map((chip) => (
               <motion.div
                 key={chip.label}
                 initial={{ opacity: 0, scale: 0.9 }}
                 whileInView={{ opacity: 1, scale: 1 }}
+                whileHover={{
+                  y: -2,
+                  background: `${chip.color}12`,
+                  borderColor: `${chip.color}45`,
+                  boxShadow: `0 0 26px ${chip.color}1F`,
+                }}
                 viewport={{ once: true }}
-                transition={{ delay: 0.35 + i * 0.07, duration: 0.35 }}
+                transition={{ duration: 0.16, ease: [0.25, 0.46, 0.45, 0.94] }}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -7169,6 +7440,7 @@ export default function OurServices() {
                   background: `${chip.color}08`,
                   border: `1px solid ${chip.color}22`,
                   borderRadius: 100,
+                  cursor: 'default',
                 }}
               >
                 <div
@@ -7210,46 +7482,21 @@ export default function OurServices() {
           style={{
             width: '100%',
             height: 1,
-            background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent)',
-            marginBottom: 80,
+            background: `linear-gradient(90deg, transparent, ${activeAccent}18, rgba(255,255,255,0.08), ${activeAccent}18, transparent)`,
+            marginBottom: 42,
           }}
         />
 
-        <div className="relative mt-16 md:min-h-[400vh]">
-          <div className="pointer-events-none absolute inset-y-0 left-0 z-10 hidden md:block">
-            <div
-              style={{
-                position: 'sticky',
-                top: '50%',
-                left: 0,
-                transform: 'translateY(-50%)',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 6,
-                padding: '0 0 0 16px',
-                zIndex: 10,
-              }}
-            >
-              {SERVICES.map((service, index) => (
-                <motion.div
-                  key={service.id}
-                  animate={{
-                    height: activeServiceIndex === index ? 32 : 12,
-                    background: activeServiceIndex === index ? service.accent : 'rgba(255,255,255,0.15)',
-                    opacity: activeServiceIndex === index ? 1 : 0.4,
-                  }}
-                  transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
-                  style={{
-                    width: 2,
-                    borderRadius: 100,
-                  }}
-                />
-              ))}
-            </div>
-          </div>
+        <div ref={servicesTrackRef} className="relative mt-6 md:mt-8">
+          <ServiceSideProgressRails
+            services={ORDERED_SERVICES}
+            activeServiceIndex={activeServiceIndex}
+            activeAccent={activeAccent}
+            progress={sideProgress}
+          />
 
-          <div className="space-y-6 md:space-y-0">
-            {SERVICES.map((service, index) => (
+          <div className="space-y-12 md:space-y-16 lg:space-y-20">
+            {ORDERED_SERVICES.map((service, index) => (
               <div
                 key={service.id}
                 ref={(element) => {
