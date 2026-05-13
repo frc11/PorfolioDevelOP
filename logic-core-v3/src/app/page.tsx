@@ -32,9 +32,6 @@ const Section = ({ children, className = "" }: { children: React.ReactNode, clas
   </motion.div>
 )
 
-import { SectionTransition } from '@/components/layout/SectionTransition'
-
-
 // ... (existing imports)
 
 function HomeContent() {
@@ -72,14 +69,6 @@ function HomeContent() {
         <Portfolio />
 
         <InfiniteReviews />
-
-        {/* BLUR TRANSITION: Frosted lens effect */}
-        <div className="relative z-20 -mb-32 pointer-events-none">
-          <SectionTransition
-            className="bg-gradient-to-b from-white via-white/60 to-transparent backdrop-blur-xl"
-            height="h-48"
-          />
-        </div>
 
         <Section>
           <OurServices />
