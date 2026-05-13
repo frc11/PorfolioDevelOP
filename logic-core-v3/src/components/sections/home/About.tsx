@@ -1,5 +1,9 @@
 'use client';
+<<<<<<< HEAD
 import { useRef, useState } from 'react';
+=======
+import { useId, useRef, useState } from 'react';
+>>>>>>> d1903b4efb17fa61d6249ed6cc8e0ece8fc8db98
 import { motion, useInView, useMotionValueEvent, useScroll, useTransform } from 'framer-motion';
 import type { MotionValue } from 'framer-motion';
 import { useThemeSection } from '@/hooks/useThemeObserver';
@@ -297,37 +301,123 @@ const LocationBadge = ({ progress, active }: { progress?: MotionValue<number>; a
     );
 };
 
+const AboutLogoFilter = ({ filterId }: { filterId: string }) => (
+    <svg aria-hidden="true" className="pointer-events-none absolute h-0 w-0 overflow-hidden">
+        <filter
+            id={filterId}
+            x="-18%"
+            y="-18%"
+            width="136%"
+            height="136%"
+            colorInterpolationFilters="sRGB"
+        >
+            <feTurbulence
+                type="fractalNoise"
+                baseFrequency="0.86 0.52"
+                numOctaves="4"
+                seed="19"
+                result="materializeNoise"
+            >
+                <animate
+                    attributeName="baseFrequency"
+                    values="0.86 0.52;0.58 0.36;0.24 0.14;0.001 0.001"
+                    keyTimes="0;0.34;0.72;1"
+                    dur="760ms"
+                    calcMode="spline"
+                    keySplines="0.16 1 0.3 1;0.16 1 0.3 1;0.16 1 0.3 1"
+                    fill="freeze"
+                />
+            </feTurbulence>
+            <feDisplacementMap
+                in="SourceGraphic"
+                in2="materializeNoise"
+                scale="56"
+                xChannelSelector="R"
+                yChannelSelector="G"
+            >
+                <animate
+                    attributeName="scale"
+                    values="56;38;15;0"
+                    keyTimes="0;0.32;0.7;1"
+                    dur="760ms"
+                    calcMode="spline"
+                    keySplines="0.16 1 0.3 1;0.16 1 0.3 1;0.16 1 0.3 1"
+                    fill="freeze"
+                />
+            </feDisplacementMap>
+        </filter>
+    </svg>
+);
+
+const AboutLogoMark = ({ active, kineticActive }: { active: boolean; kineticActive: boolean }) => {
+    const filterId = `about-logo-materialize-${useId().replace(/:/g, '')}`;
+    const filterStyle = {
+        '--about-logo-materialize-filter': `url(#${filterId})`,
+    } as React.CSSProperties;
+
+    return (
+        <div className="relative isolate overflow-visible px-[clamp(0.75rem,2.5vw,2rem)] pb-[clamp(1.4rem,3vw,3rem)]">
+            {active ? <AboutLogoFilter filterId={filterId} /> : null}
+
+            <div
+                aria-hidden="true"
+                className={`about-logo-shadow pointer-events-none absolute left-1/2 z-0 -translate-x-1/2 rounded-[50%] ${active ? 'is-active' : ''}`}
+                style={{
+                    top: ABOUT_HERO_LOGO_SHADOW_TOP,
+                    width: ABOUT_HERO_LOGO_SHADOW_WIDTH,
+                    height: ABOUT_HERO_LOGO_SHADOW_HEIGHT,
+                    '--about-logo-shadow-opacity': ABOUT_HERO_LOGO_SHADOW_OPACITY,
+                    background:
+                        'radial-gradient(ellipse at center, rgba(255,255,255,0.58) 0%, rgba(255,255,255,0.28) 30%, rgba(255,255,255,0.1) 56%, transparent 84%)',
+                } as React.CSSProperties}
+            />
+
+            <div
+                className={`about-logo-materialize relative z-10 text-center font-black text-zinc-50 ${active ? 'is-active' : ''}`}
+                style={{
+                    ...filterStyle,
+                    fontSize: ABOUT_HERO_LOGO_TEXT_SIZE,
+                    lineHeight: ABOUT_HERO_LOGO_LINE_HEIGHT,
+                    letterSpacing: ABOUT_HERO_LOGO_TRACKING,
+                }}
+            >
+                <KineticText enabled={kineticActive}>
+                    <span>SOMOS</span>
+                    <br />
+                    <span className="bg-gradient-to-b from-white to-zinc-500 bg-clip-text px-[0.08em] text-transparent">
+                        develOP
+                    </span>
+                </KineticText>
+            </div>
+        </div>
+    );
+};
+
 const AboutMobile = () => {
     const targetRef = useRef<HTMLDivElement>(null);
     const { scrollYProgress } = useScroll({ target: targetRef });
     const x = useTransform(scrollYProgress, [0, 1], ['0%', '-300vw']);
     const inViewRef = useRef(null);
     const isInView = useInView(inViewRef, { margin: '-10%' });
+    const logoRevealRef = useRef<HTMLDivElement>(null);
+    const isLogoRevealInView = useInView(logoRevealRef, { amount: 0.75, once: true });
+    const [isHorizontalScrollActive, setIsHorizontalScrollActive] = useState(false);
 
     useThemeSection(isInView, 'light');
+
+    useMotionValueEvent(scrollYProgress, 'change', (latest) => {
+        if (latest > 0.01) {
+            setIsHorizontalScrollActive(true);
+        }
+    });
 
     return (
         <div ref={targetRef} className="relative block h-[400vh] bg-black md:hidden" id="nosotros">
             <div ref={inViewRef} className="pointer-events-none absolute top-0 h-[20vh] w-full" />
             <div className="sticky top-0 flex h-screen items-center overflow-hidden">
                 <motion.div style={{ x }} className="flex">
-                    <div className="flex h-screen w-[100vw] flex-shrink-0 items-center justify-center bg-black">
-                        <h2
-                            className="text-center font-black text-white"
-                            style={{
-                                fontSize: ABOUT_HERO_LOGO_TEXT_SIZE,
-                                lineHeight: ABOUT_HERO_LOGO_LINE_HEIGHT,
-                                letterSpacing: ABOUT_HERO_LOGO_TRACKING,
-                            }}
-                        >
-                            <KineticText>
-                                SOMOS
-                                <br />
-                                <span className="bg-gradient-to-b from-white to-zinc-500 bg-clip-text px-2 text-transparent">
-                                    develOP
-                                </span>
-                            </KineticText>
-                        </h2>
+                    <div ref={logoRevealRef} className="flex h-screen w-[100vw] flex-shrink-0 items-center justify-center bg-black">
+                        <AboutLogoMark active={isLogoRevealInView} kineticActive={isHorizontalScrollActive} />
                     </div>
 
                     <div className="flex h-screen w-[100vw] flex-shrink-0 items-center bg-black p-8">
@@ -366,13 +456,19 @@ const AboutDesktop = () => {
     const { scrollYProgress } = useScroll({ target: targetRef });
     const x = useTransform(scrollYProgress, [0, 0.12, 0.82], ['0vw', '0vw', '-100vw']);
     const [isFinalEffectActive, setIsFinalEffectActive] = useState(false);
+    const [isHorizontalScrollActive, setIsHorizontalScrollActive] = useState(false);
     const inViewRef = useRef(null);
     const isInView = useInView(inViewRef, { margin: '-20%' });
+    const logoRevealRef = useRef<HTMLDivElement>(null);
+    const isLogoRevealInView = useInView(logoRevealRef, { amount: 0.75, once: true });
 
     useThemeSection(isInView, 'light');
 
     useMotionValueEvent(scrollYProgress, 'change', (latest) => {
         setIsFinalEffectActive(latest >= 0.8);
+        if (latest > 0.12) {
+            setIsHorizontalScrollActive(true);
+        }
     });
 
     return (
@@ -393,37 +489,8 @@ const AboutDesktop = () => {
             <div ref={inViewRef} className="pointer-events-none absolute top-0 h-[20vh] w-full" />
             <div className="sticky top-0 flex h-screen items-center overflow-hidden">
                 <motion.div style={{ x }} className="flex items-center">
-                    <div className="flex h-screen w-screen flex-shrink-0 items-center justify-center px-[clamp(1rem,3vw,4rem)]">
-                        <div className="relative isolate">
-                            <div
-                                aria-hidden="true"
-                                className="pointer-events-none absolute left-1/2 z-0 -translate-x-1/2 rounded-[50%]"
-                                style={{
-                                    top: ABOUT_HERO_LOGO_SHADOW_TOP,
-                                    width: ABOUT_HERO_LOGO_SHADOW_WIDTH,
-                                    height: ABOUT_HERO_LOGO_SHADOW_HEIGHT,
-                                    opacity: ABOUT_HERO_LOGO_SHADOW_OPACITY,
-                                    background:
-                                        'radial-gradient(ellipse at center, rgba(255,255,255,0.58) 0%, rgba(255,255,255,0.28) 30%, rgba(255,255,255,0.1) 56%, transparent 84%)',
-                                }}
-                            />
-                            <div
-                                className="relative z-10 text-center font-black text-zinc-50"
-                                style={{
-                                    fontSize: ABOUT_HERO_LOGO_TEXT_SIZE,
-                                    lineHeight: ABOUT_HERO_LOGO_LINE_HEIGHT,
-                                    letterSpacing: ABOUT_HERO_LOGO_TRACKING,
-                                }}
-                            >
-                                <KineticText>
-                                    <span>SOMOS</span>
-                                    <br />
-                                    <span className="bg-gradient-to-b from-white to-zinc-500 bg-clip-text px-[0.08em] text-transparent">
-                                        develOP
-                                    </span>
-                                </KineticText>
-                            </div>
-                        </div>
+                    <div ref={logoRevealRef} className="flex h-screen w-screen flex-shrink-0 items-center justify-center px-[clamp(1rem,3vw,4rem)]">
+                        <AboutLogoMark active={isLogoRevealInView} kineticActive={isHorizontalScrollActive} />
                     </div>
 
                     <div className="flex h-screen w-screen flex-shrink-0 items-center justify-center px-[clamp(1.25rem,4vw,5rem)]">
