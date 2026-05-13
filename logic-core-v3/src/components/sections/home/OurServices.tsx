@@ -1,12 +1,13 @@
 'use client';
 
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import {
   AnimatePresence,
   motion,
   type MotionValue,
   useMotionTemplate,
   useMotionValue,
+  useMotionValueEvent,
   useScroll,
   useSpring,
   useTransform,
@@ -36,6 +37,7 @@ import {
   Users,
   Zap,
 } from 'lucide-react';
+import { useLenis } from '@/components/layout/SmoothScroll';
 import { useTransitionContext } from '@/context/TransitionContext';
 
 type Service = {
@@ -59,7 +61,7 @@ const SERVICES: Service[] = [
   {
     id: 1,
     tag: 'SITIOS & LANDINGS',
-    title: 'Tu vitrina abierta\nlas 24 horas.',
+    title: 'Tu vitrina\nabierta las\n24 horas.',
     description:
       'Diseñamos la presencia digital que pone tu negocio en Google, captura consultas mientras dormís y convierte visitas en clientes reales.',
     price: '$800 USD',
@@ -77,7 +79,7 @@ const SERVICES: Service[] = [
   {
     id: 2,
     tag: 'INTELIGENCIA ARTIFICIAL',
-    title: 'Un comercial que\nnunca se toma el día.',
+    title: 'Un comercial\nque trabaja\nsin pausas.',
     description:
       'Un agente de IA responde consultas, califica leads y agenda reuniones por WhatsApp. A las 3AM, en feriados, siempre disponible.',
     price: '$300 USD',
@@ -95,7 +97,7 @@ const SERVICES: Service[] = [
   {
     id: 3,
     tag: 'AUTOMATIZACIÓN',
-    title: 'Tu operación,\nen piloto automático.',
+    title: 'Tu operación,\nen piloto\nautomático.',
     description:
       'Conectamos tus herramientas y automatizamos lo repetitivo. Reportes, seguimientos y notificaciones corriendo solos mientras vos te ocupás de lo importante.',
     price: '$200 USD',
@@ -113,7 +115,7 @@ const SERVICES: Service[] = [
   {
     id: 4,
     tag: 'SOFTWARE A MEDIDA',
-    title: 'Tu empresa en\nuna sola pantalla.',
+    title: 'Tu empresa\nen una sola\npantalla.',
     description:
       'El sistema exacto para cómo trabaja tu negocio. Sin planillas, sin depender de nadie. Stock, ventas, clientes y equipo — todo centralizado.',
     price: '$1.500 USD',
@@ -140,6 +142,15 @@ const ORDERED_SERVICES = ORDERED_SERVICE_IDS.map((serviceId) => {
 
   return service;
 });
+
+const SERVICE_SHORT_LABELS: Record<number, string> = {
+  1: 'Sitio Web',
+  2: 'Agente IA',
+  3: 'Automatizaciones',
+  4: 'Software',
+};
+
+const getServiceAnchorId = (serviceId: number) => `servicio-${serviceId}`;
 
 function StageFrame({
   service,
@@ -579,10 +590,13 @@ function WebScene({ service }: { service: Service }) {
       <div
         style={{
           height: '100%',
+          minHeight: 0,
+          maxHeight: '100%',
           display: 'flex',
           flexDirection: 'column',
           gap: 10,
           padding: '4px 2px',
+          overflow: 'hidden',
         }}
       >
         {/* Header del panel */}
@@ -855,7 +869,7 @@ function WebScene({ service }: { service: Service }) {
                       transition={{ delay: s * 0.05, type: 'spring', stiffness: 400 }}
                       style={{ fontSize: 11, color: '#f59e0b' }}
                     >
-                      
+
                     </motion.span>
                   ))}
                   <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)', marginLeft: 4 }}>
@@ -1080,6 +1094,7 @@ function WebScene({ service }: { service: Service }) {
             gridTemplateColumns: '3fr 2fr',
             gap: 6,
             minHeight: 0,
+            overflow: 'hidden',
           }}
         >
           {/* Grafico */}
@@ -1096,6 +1111,8 @@ function WebScene({ service }: { service: Service }) {
                 padding: '10px 10px 8px',
                 display: 'flex',
                 flexDirection: 'column',
+                minHeight: 0,
+                overflow: 'hidden',
               }}
             >
               <div
@@ -1110,7 +1127,7 @@ function WebScene({ service }: { service: Service }) {
               </div>
               <svg
                 viewBox="0 0 120 60"
-                style={{ flex: 1, width: '100%', overflow: 'visible' }}
+                style={{ flex: 1, width: '100%', minHeight: 0, overflow: 'hidden' }}
                 preserveAspectRatio="none"
               >
                 <defs>
@@ -1174,6 +1191,7 @@ function WebScene({ service }: { service: Service }) {
                 padding: '10px 8px 8px',
                 display: 'flex',
                 flexDirection: 'column',
+                minHeight: 0,
                 overflow: 'hidden',
               }}
             >
@@ -1188,7 +1206,7 @@ function WebScene({ service }: { service: Service }) {
               >
                 ORIGEN
               </div>
-              <div style={{ flex: 1, position: 'relative' }}>
+              <div style={{ flex: 1, minHeight: 0, position: 'relative', overflow: 'hidden' }}>
                 <svg
                   viewBox="20 5 100 270"
                   style={{ width: '100%', height: '100%' }}
@@ -1256,10 +1274,13 @@ function WebScene({ service }: { service: Service }) {
       <div
         style={{
           height: '100%',
+          minHeight: 0,
+          maxHeight: '100%',
           display: 'flex',
           flexDirection: 'column',
           gap: 8,
           padding: '4px 2px',
+          overflow: 'hidden',
         }}
       >
         {/* Header */}
@@ -1556,6 +1577,7 @@ function WebScene({ service }: { service: Service }) {
             display: 'flex',
             gap: 8,
             minHeight: 0,
+            overflow: 'hidden',
           }}
         >
           {/* Mapa */}
@@ -1722,7 +1744,7 @@ function WebScene({ service }: { service: Service }) {
                     letterSpacing: '0.03em',
                   }}
                 >
-                  TU EMPRESA · 5.0 
+                  TU EMPRESA · 5.0
                 </motion.div>
               </motion.div>
             )}
@@ -1765,7 +1787,7 @@ function WebScene({ service }: { service: Service }) {
                 <div>
                   {[1, 2, 3, 4, 5].map((s) => (
                     <span key={s} style={{ fontSize: 10, color: '#f59e0b' }}>
-                      
+
                     </span>
                   ))}
                 </div>
@@ -2337,37 +2359,37 @@ function WebScene({ service }: { service: Service }) {
           >
             {activeTab === 0
               ? SimSEO({
+                isActive: isInView,
+                progress,
+                color: activeSimulation.color,
+              })
+              : activeTab === 1
+                ? SimAnalytics({
                   isActive: isInView,
                   progress,
                   color: activeSimulation.color,
                 })
-              : activeTab === 1
-                ? SimAnalytics({
+                : activeTab === 2
+                  ? SimLeads({
                     isActive: isInView,
                     progress,
                     color: activeSimulation.color,
                   })
-              : activeTab === 2
-                  ? SimLeads({
+                  : activeTab === 3
+                    ? SimMaps({
                       isActive: isInView,
                       progress,
                       color: activeSimulation.color,
                     })
-                : activeTab === 3
-                  ? SimMaps({
+                    : activePlaceholder &&
+                    renderPlaceholderScene({
                       isActive: isInView,
                       progress,
                       color: activeSimulation.color,
-                    })
-              : activePlaceholder &&
-                renderPlaceholderScene({
-                  isActive: isInView,
-                  progress,
-                  color: activeSimulation.color,
-                  title: activePlaceholder.title,
-                  helper: activePlaceholder.helper,
-                  values: activePlaceholder.values,
-                })}
+                      title: activePlaceholder.title,
+                      helper: activePlaceholder.helper,
+                      values: activePlaceholder.values,
+                    })}
           </motion.div>
         </AnimatePresence>
       </div>
@@ -2386,10 +2408,10 @@ type AISimulation = {
 };
 
 const AI_SIMULATIONS: AISimulation[] = [
-  { id: 1, label: 'Chat IA',  icon: MessageSquare, duration: 6000, color: AI_COLOR },
-  { id: 2, label: 'Leads',    icon: Target,        duration: 5500, color: AI_COLOR },
-  { id: 3, label: 'Agenda',   icon: Calendar,      duration: 5000, color: AI_COLOR },
-  { id: 4, label: 'Métricas', icon: BarChart2,     duration: 4500, color: AI_COLOR },
+  { id: 1, label: 'Chat IA', icon: MessageSquare, duration: 6000, color: AI_COLOR },
+  { id: 2, label: 'Leads', icon: Target, duration: 5500, color: AI_COLOR },
+  { id: 3, label: 'Agenda', icon: Calendar, duration: 5000, color: AI_COLOR },
+  { id: 4, label: 'Métricas', icon: BarChart2, duration: 4500, color: AI_COLOR },
 ];
 
 type AISimProps = { isActive: boolean; progress: number; color: string };
@@ -4430,9 +4452,8 @@ function AutomationScene({ service }: { service: Service }) {
                         ? 'rgba(16,185,129,0.06)'
                         : 'rgba(255,255,255,0.03)',
                     backdropFilter: 'blur(20px)',
-                    border: `1px solid ${
-                      isAuto ? `${color}20` : isSuccess ? 'rgba(16,185,129,0.15)' : 'rgba(255,255,255,0.06)'
-                    }`,
+                    border: `1px solid ${isAuto ? `${color}20` : isSuccess ? 'rgba(16,185,129,0.15)' : 'rgba(255,255,255,0.06)'
+                      }`,
                     borderRadius: 8,
                     padding: '7px 10px',
                   }}
@@ -6099,9 +6120,8 @@ function SoftwareScene({ service }: { service: Service }) {
                       ? 'rgba(239,68,68,0.06)'
                       : 'rgba(255,255,255,0.03)',
                   backdropFilter: 'blur(20px)',
-                  border: `1px solid ${
-                    completed ? 'rgba(16,185,129,0.20)' : isUrgent ? 'rgba(239,68,68,0.20)' : 'rgba(255,255,255,0.07)'
-                  }`,
+                  border: `1px solid ${completed ? 'rgba(16,185,129,0.20)' : isUrgent ? 'rgba(239,68,68,0.20)' : 'rgba(255,255,255,0.07)'
+                    }`,
                   borderRadius: 8,
                   padding: '8px 10px',
                   transition: 'all 400ms ease',
@@ -6482,26 +6502,35 @@ function ServiceVisual({ service }: { service: Service }) {
   return <StageFrame service={service}>{scene}</StageFrame>;
 }
 
-const SERVICE_SIGNAL_SERIES: Record<number, number[]> = {
-  1: [18, 28, 25, 39, 34, 49, 44, 62, 74],
-  2: [12, 22, 36, 48, 61, 70, 81, 88, 94],
-  3: [6, 18, 33, 47, 58, 69, 78, 86, 92],
-  4: [16, 24, 31, 45, 52, 67, 75, 84, 90],
+const SERVICE_IMPACT_ITEMS: Record<number, Array<{ label: string; value: string }>> = {
+  1: [
+    { label: 'Base', value: 'SEO local' },
+    { label: 'Captura', value: 'Form + WhatsApp' },
+    { label: 'Carga', value: 'Mobile first' },
+  ],
+  2: [
+    { label: 'Canal', value: 'WhatsApp' },
+    { label: 'Filtro', value: 'Leads calificados' },
+    { label: 'Agenda', value: 'Turnos listos' },
+  ],
+  3: [
+    { label: 'Flujo', value: 'Apps conectadas' },
+    { label: 'Alertas', value: 'Seguimiento activo' },
+    { label: 'Reportes', value: 'Envio programado' },
+  ],
+  4: [
+    { label: 'Modulos', value: 'Ventas + stock' },
+    { label: 'Datos', value: 'Reportes propios' },
+    { label: 'Costo', value: 'Sin licencias' },
+  ],
 };
 
-function ServiceMetricGraph({ service }: { service: Service }) {
-  const series = SERVICE_SIGNAL_SERIES[service.id] ?? SERVICE_SIGNAL_SERIES[1];
-  const points = series
-    .map((value, index) => {
-      const x = 8 + index * (184 / (series.length - 1));
-      const y = 74 - value * 0.62;
-      return `${x},${y}`;
-    })
-    .join(' ');
+function ServiceImpactSnapshot({ service }: { service: Service }) {
+  const items = SERVICE_IMPACT_ITEMS[service.id] ?? SERVICE_IMPACT_ITEMS[1];
 
   return (
-    <div aria-hidden="true" style={{ borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: 14 }}>
-      <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 16 }}>
+    <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: 14 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
         <div>
           <div
             style={{
@@ -6514,7 +6543,7 @@ function ServiceMetricGraph({ service }: { service: Service }) {
           >
             Impacto estimado
           </div>
-          <div style={{ marginTop: 4, fontSize: 13, color: 'rgba(255,255,255,0.62)', lineHeight: 1.35 }}>
+          <div style={{ marginTop: 4, fontSize: 13, color: 'rgba(255,255,255,0.62)', lineHeight: 1.3 }}>
             {service.metric}
           </div>
         </div>
@@ -6530,31 +6559,38 @@ function ServiceMetricGraph({ service }: { service: Service }) {
         />
       </div>
 
-      <svg viewBox="0 0 208 86" style={{ marginTop: 10, display: 'block', width: '100%', height: 68 }}>
-        <path d={`M ${points} L 200 84 L 8 84 Z`} fill={service.accent} opacity="0.08" />
-        <polyline
-          points={points}
-          fill="none"
-          stroke={service.accent}
-          strokeWidth="4"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-        {series.map((value, index) => {
-          const x = 8 + index * (184 / (series.length - 1));
-          const y = 74 - value * 0.62;
-
-          return (
-            <circle
-              key={`${service.id}-${index}`}
-              cx={x}
-              cy={y}
-              r={index === series.length - 1 ? 5 : 2.5}
-              fill={index === series.length - 1 ? service.accent : 'rgba(255,255,255,0.22)'}
-            />
-          );
-        })}
-      </svg>
+      <div style={{ marginTop: 12, display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 8 }}>
+        {items.map((item) => (
+          <div
+            key={item.label}
+            style={{
+              minHeight: 54,
+              borderRadius: 8,
+              border: `1px solid ${service.accent}24`,
+              background: `${service.accent}0B`,
+              padding: '9px 10px',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center',
+              gap: 5,
+            }}
+          >
+            <span
+              style={{
+                fontSize: 8,
+                fontWeight: 800,
+                letterSpacing: '0.12em',
+                textTransform: 'uppercase',
+                color: `${service.accent}B5`,
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {item.label}
+            </span>
+            <span style={{ fontSize: 10, lineHeight: 1.25, color: 'rgba(255,255,255,0.62)' }}>{item.value}</span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
@@ -6594,7 +6630,7 @@ function ServiceInfoCard({
         border: `1px solid ${service.accent}24`,
         background: `${service.glow}, radial-gradient(circle at 72% 18%, ${service.accent}14, transparent 0 28%), linear-gradient(180deg, ${service.accent}0A, rgba(255,255,255,0.038) 36%, rgba(255,255,255,0.018))`,
         boxShadow: `inset 0 1px 0 rgba(255,255,255,0.08), 0 24px 58px rgba(0,0,0,0.32), 0 0 36px ${service.accent}0D`,
-        padding: 'clamp(1.25rem, 2.25vw, 1.9rem)',
+        padding: 'clamp(1.2rem, 2vw, 1.75rem)',
         height: '100%',
         minHeight: 0,
         display: 'flex',
@@ -6673,32 +6709,50 @@ function ServiceInfoCard({
 
         <h3
           style={{
-            margin: '18px 0 0',
+            margin: '16px 0 0',
             maxWidth: 520,
-            fontSize: 'clamp(1.8rem, 3vw, 3.2rem)',
+            fontSize: 'clamp(1.9rem, 2.45vw, 2.75rem)',
             fontWeight: 900,
-            lineHeight: 0.96,
+            lineHeight: 1,
             letterSpacing: '-0.04em',
             color: '#fff',
             whiteSpace: 'pre-line',
+            minHeight: '3em',
+            maxHeight: '3em',
+            overflow: 'hidden',
           }}
         >
           {service.title}
         </h3>
 
-        <p style={{ margin: '14px 0 0', maxWidth: 560, fontSize: 13, lineHeight: 1.62, color: 'rgba(255,255,255,0.54)' }}>
+        <p
+          style={{
+            margin: '14px 0 0',
+            maxWidth: 560,
+            fontSize: 13,
+            lineHeight: 1.48,
+            color: 'rgba(255,255,255,0.54)',
+            minHeight: '4.44em',
+            maxHeight: '4.44em',
+            overflow: 'hidden',
+            display: '-webkit-box',
+            WebkitLineClamp: 3,
+            WebkitBoxOrient: 'vertical',
+          }}
+        >
           {service.description}
         </p>
 
         <div
           style={{
-            marginTop: 18,
+            marginTop: 16,
             display: 'grid',
-            gap: 11,
+            gap: 9,
             borderRadius: 8,
             border: '1px solid rgba(255,255,255,0.07)',
             background: 'rgba(255,255,255,0.025)',
-            padding: 12,
+            padding: 11,
+            flexShrink: 0,
           }}
         >
           {service.outcomes.map((outcome) => (
@@ -6718,17 +6772,28 @@ function ServiceInfoCard({
               >
                 <Check size={10} color={service.accent} />
               </span>
-              <span style={{ fontSize: 13, lineHeight: 1.45, color: 'rgba(255,255,255,0.68)' }}>{outcome}</span>
+              <span style={{ fontSize: 13, lineHeight: 1.35, color: 'rgba(255,255,255,0.68)' }}>{outcome}</span>
             </div>
           ))}
         </div>
 
-        <div style={{ marginTop: 18 }}>
-          <ServiceMetricGraph service={service} />
+        <div style={{ marginTop: 16, flexShrink: 0 }}>
+          <ServiceImpactSnapshot service={service} />
         </div>
 
-        <div style={{ marginTop: 18, display: 'flex', alignItems: 'baseline', gap: 10, flexWrap: 'wrap' }}>
-          <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.32)', letterSpacing: '0.12em' }}>
+        <div
+          style={{
+            marginTop: 20,
+            display: 'grid',
+            gridTemplateColumns: 'auto minmax(0, max-content) auto',
+            alignItems: 'center',
+            justifyContent: 'start',
+            columnGap: 12,
+            rowGap: 8,
+            flexShrink: 0,
+          }}
+        >
+          <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.32)', letterSpacing: '0.12em', paddingTop: 4 }}>
             DESDE
           </span>
           <span
@@ -6757,7 +6822,7 @@ function ServiceInfoCard({
           </span>
         </div>
 
-        <div style={{ marginTop: 13, display: 'flex', flexWrap: 'wrap', gap: 7 }}>
+        <div style={{ marginTop: 16, display: 'flex', flexWrap: 'wrap', gap: 8, flexShrink: 0 }}>
           {service.sectors.map((sector) => (
             <span
               key={sector}
@@ -6766,7 +6831,8 @@ function ServiceInfoCard({
                 color: 'rgba(255,255,255,0.42)',
                 border: '1px solid rgba(255,255,255,0.09)',
                 borderRadius: 6,
-                padding: '4px 8px',
+                padding: '5px 9px',
+                lineHeight: 1,
               }}
             >
               {sector}
@@ -6792,7 +6858,8 @@ function ServiceInfoCard({
             alignItems: 'center',
             justifyContent: 'center',
             gap: 9,
-            padding: '14px 18px',
+            minHeight: 48,
+            padding: '13px 18px',
             borderRadius: 8,
             background: `linear-gradient(135deg, ${service.accent}26, ${service.accent}10)`,
             border: `1px solid ${service.accent}42`,
@@ -6803,6 +6870,7 @@ function ServiceInfoCard({
             letterSpacing: '0.1em',
             textTransform: 'uppercase',
             boxShadow: `0 0 24px ${service.accent}12`,
+            flexShrink: 0,
           }}
         >
           {service.cta}
@@ -6818,8 +6886,8 @@ function ServiceInfoCard({
 function ServiceDemoPanel({ service }: { service: Service }) {
   return (
     <div
-      className="h-[clamp(30rem,64svh,38rem)] lg:h-full"
-      style={{ position: 'relative', minHeight: 0, perspective: 1400 }}
+      className="h-[clamp(39rem,78svh,49rem)] overflow-visible lg:h-full"
+      style={{ position: 'relative', minHeight: 0, maxHeight: '100%', perspective: 1400, borderRadius: 16 }}
     >
       <div
         aria-hidden="true"
@@ -6850,20 +6918,67 @@ function ServiceDemoPanel({ service }: { service: Service }) {
         whileHover="hover"
         animate="rest"
         variants={{
-          rest: { filter: 'drop-shadow(0 32px 64px rgba(0,0,0,0.44))' },
-          hover: { filter: `drop-shadow(0 36px 72px rgba(0,0,0,0.5)) drop-shadow(0 0 26px ${service.accent}24)` },
+          rest: {},
+          hover: {},
         }}
         transition={{ duration: 0.16, ease: [0.25, 0.46, 0.45, 0.94] }}
-        style={{ position: 'relative', height: '100%', minHeight: 0, transformStyle: 'preserve-3d' }}
+        style={{
+          position: 'relative',
+          height: '100%',
+          minHeight: 0,
+          maxHeight: '100%',
+          overflow: 'visible',
+          borderRadius: 16,
+          transformStyle: 'preserve-3d',
+        }}
       >
+        <motion.div
+          aria-hidden="true"
+          variants={{
+            rest: { opacity: 0 },
+            hover: { opacity: 0 },
+          }}
+          transition={{ duration: 0.16, ease: [0.25, 0.46, 0.45, 0.94] }}
+          style={{
+            position: 'absolute',
+            inset: -22,
+            borderRadius: 20,
+            background: 'transparent',
+            boxShadow: 'none',
+            pointerEvents: 'none',
+            zIndex: 0,
+          }}
+        />
+        <motion.div
+          aria-hidden="true"
+          variants={{
+            rest: { opacity: 0 },
+            hover: { opacity: 1 },
+          }}
+          transition={{ duration: 0.18, ease: [0.25, 0.46, 0.45, 0.94] }}
+          style={{
+            position: 'absolute',
+            inset: -1,
+            borderRadius: 17,
+            border: `1px solid ${service.accent}38`,
+            boxShadow: `inset 0 1px 0 rgba(255,255,255,0.08), 0 0 18px ${service.accent}16`,
+            pointerEvents: 'none',
+            zIndex: 2,
+          }}
+        />
         <motion.div
           initial={{ opacity: 0, y: 18, rotateX: 4 }}
           whileInView={{ opacity: 1, y: 0, rotateX: 0 }}
           viewport={{ once: true, amount: 0.3 }}
           transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
           style={{
+            position: 'relative',
+            zIndex: 1,
             height: '100%',
             minHeight: 0,
+            maxHeight: '100%',
+            overflow: 'visible',
+            borderRadius: 16,
             transformOrigin: 'center center',
           }}
         >
@@ -6893,7 +7008,7 @@ function ServiceCard({
 
   const scale = useTransform(scrollYProgress, [0, 0.16, 0.86, 1], [0.97, 1, 1, 0.985]);
   const opacity = useTransform(scrollYProgress, [0, 0.12, 0.9, 1], [0.18, 1, 1, 0.72]);
-  const y = useTransform(scrollYProgress, [0, 0.16, 0.88, 1], [24, 0, 0, -8]);
+  const y = useTransform(scrollYProgress, [0, 0.16, 0.88, 1], [16, 0, 0, 0]);
   const infoX = useTransform(scrollYProgress, [0, 0.22], [isReversed ? 18 : -18, 0]);
   const demoX = useTransform(scrollYProgress, [0, 0.22], [isReversed ? -18 : 18, 0]);
   const demoRotateY = useTransform(scrollYProgress, [0, 0.22], [isReversed ? -1.4 : 1.4, 0]);
@@ -6902,21 +7017,27 @@ function ServiceCard({
     : 'lg:grid-cols-[minmax(20rem,0.82fr)_minmax(0,1.18fr)]';
 
   return (
-    <section ref={cardRef} className="relative py-8 md:py-14" style={{ zIndex: index + 1 }}>
+    <section
+      ref={cardRef}
+      id={getServiceAnchorId(service.id)}
+      data-service-card
+      className="relative scroll-mt-24"
+      style={{ zIndex: 1 }}
+    >
       <motion.div
-        className={`mx-auto grid w-full items-stretch gap-8 lg:h-[clamp(32rem,66svh,39rem)] lg:gap-10 ${gridClass}`}
-        style={{ opacity, y, scale, perspective: 1400 }}
+        className={`mx-auto grid w-full items-stretch gap-8 overflow-visible lg:h-[clamp(42rem,82svh,51rem)] lg:max-h-[clamp(42rem,82svh,51rem)] lg:gap-10 ${gridClass}`}
+        style={{ opacity, y, scale, perspective: 1400, minHeight: 0 }}
       >
         <motion.div
           style={{ x: infoX }}
-          className={`order-1 h-full ${isReversed ? 'lg:order-2' : 'lg:order-1'}`}
+          className={`order-1 h-full min-h-0 overflow-visible ${isReversed ? 'lg:order-2' : 'lg:order-1'}`}
         >
           <ServiceInfoCard service={service} onNavigate={onNavigate} />
         </motion.div>
 
         <motion.div
           style={{ x: demoX, rotateY: demoRotateY }}
-          className={`order-2 h-full ${isReversed ? 'lg:order-1' : 'lg:order-2'}`}
+          className={`order-2 h-full min-h-0 overflow-visible ${isReversed ? 'lg:order-1' : 'lg:order-2'}`}
         >
           <ServiceDemoPanel service={service} />
         </motion.div>
@@ -7025,142 +7146,784 @@ function FloatingParticles({ activeAccent }: { activeAccent: string }) {
   );
 }
 
-function ServiceSideProgressRails({
+function ServicesProgressRail({
   services,
   activeServiceIndex,
   activeAccent,
+  markers,
+  endMarker,
   progress,
 }: {
   services: Service[];
   activeServiceIndex: number;
   activeAccent: string;
+  markers: number[];
+  endMarker: number;
   progress: MotionValue<number>;
 }) {
-  const sides = ['left', 'right'] as const;
+  const firstMarker = markers[0] ?? 0;
+  const railBottom = Math.max(0, 100 - endMarker);
 
   return (
     <div
-      className="pointer-events-none absolute inset-y-0 left-1/2 z-20 hidden w-screen -translate-x-1/2 md:block"
+      className="pointer-events-none absolute inset-y-0 left-0 z-20 hidden w-[clamp(7rem,10vw,11rem)] lg:block"
       aria-hidden="true"
     >
-      <div style={{ position: 'sticky', top: 0, height: '100svh' }}>
-        {sides.map((side) => (
-          <div
-            key={side}
+      <div style={{ position: 'absolute', inset: 0 }}>
+        <motion.div
+          animate={{
+            boxShadow: `inset 0 0 22px rgba(0,0,0,0.68), 0 0 42px ${activeAccent}18`,
+          }}
+          transition={{ duration: 0.18, ease: [0.25, 0.46, 0.45, 0.94] }}
+          style={{
+            position: 'absolute',
+            top: `${firstMarker}%`,
+            bottom: `${railBottom}%`,
+            left: '50%',
+            width: 11,
+            transform: 'translateX(-50%)',
+            borderRadius: 999,
+            background: 'rgba(255,255,255,0.045)',
+            border: '1px solid rgba(255,255,255,0.08)',
+            boxShadow: `inset 0 0 22px rgba(0,0,0,0.68), 0 0 38px ${activeAccent}16`,
+            overflow: 'hidden',
+          }}
+        >
+          <motion.div
+            animate={{
+              background: `linear-gradient(180deg, ${activeAccent}, ${activeAccent}96 72%, ${activeAccent}30)`,
+              boxShadow: `0 0 38px ${activeAccent}7A`,
+            }}
+            transition={{ duration: 0.18, ease: [0.25, 0.46, 0.45, 0.94] }}
             style={{
               position: 'absolute',
-              top: '22svh',
-              height: '56svh',
-              width: 34,
-              display: 'flex',
-              justifyContent: 'center',
-              ...(side === 'left'
-                ? { left: 'clamp(1.25rem, 4.2vw, 4.75rem)' }
-                : { right: 'clamp(1.25rem, 4.2vw, 4.75rem)' }),
+              inset: 0,
+              borderRadius: 999,
+              scaleY: progress,
+              transformOrigin: 'top center',
             }}
-          >
-            <div
-              style={{
-                position: 'relative',
-                width: 6,
-                height: '100%',
-                borderRadius: 999,
-                background: 'rgba(255,255,255,0.04)',
-                border: '1px solid rgba(255,255,255,0.07)',
-                boxShadow: `inset 0 0 18px rgba(0,0,0,0.5), 0 0 34px ${activeAccent}16`,
-                overflow: 'visible',
+          />
+        </motion.div>
+
+        {services.map((service, index) => {
+          const isActive = activeServiceIndex === index;
+          const top = `${markers[index] ?? (index / services.length) * 100}%`;
+
+          return (
+            <motion.div
+              key={service.id}
+              animate={{
+                width: isActive ? 35 : 18,
+                height: isActive ? 35 : 18,
+                opacity: isActive ? 1 : 0.72,
+                backgroundColor: service.accent,
+                boxShadow: isActive
+                  ? `0 0 18px ${service.accent}, 0 0 48px ${service.accent}78`
+                  : `0 0 18px ${service.accent}50`,
               }}
-            >
-              <motion.div
-                animate={{
-                  background: `linear-gradient(180deg, ${activeAccent}, ${activeAccent}82 58%, ${activeAccent}35)`,
-                  boxShadow: `0 0 26px ${activeAccent}70`,
-                }}
-                transition={{ duration: 0.55, ease: [0.25, 0.46, 0.45, 0.94] }}
-                style={{
-                  position: 'absolute',
-                  inset: 0,
-                  borderRadius: 999,
-                  scaleY: progress,
-                  transformOrigin: 'top center',
-                  opacity: 0.9,
-                }}
-              />
-
-              {services.map((service, index) => {
-                const isActive = activeServiceIndex === index;
-                const top = services.length > 1 ? `${(index / (services.length - 1)) * 100}%` : '50%';
-
-                return (
-                  <motion.div
-                    key={`${side}-${service.id}`}
-                    animate={{
-                      width: isActive ? 18 : 10,
-                      height: isActive ? 18 : 10,
-                      opacity: isActive ? 1 : 0.56,
-                      backgroundColor: service.accent,
-                      boxShadow: isActive ? `0 0 24px ${service.accent}` : `0 0 10px ${service.accent}40`,
-                    }}
-                    transition={{ duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] }}
-                    style={{
-                      position: 'absolute',
-                      top,
-                      left: '50%',
-                      transform: 'translate(-50%, -50%)',
-                      borderRadius: 999,
-                      border: '1px solid rgba(255,255,255,0.24)',
-                    }}
-                  />
-                );
-              })}
-            </div>
-          </div>
-        ))}
+              transition={{ duration: 0.18, ease: [0.25, 0.46, 0.45, 0.94] }}
+              style={{
+                position: 'absolute',
+                top,
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                borderRadius: 999,
+                border: '1px solid rgba(255,255,255,0.28)',
+              }}
+            />
+          );
+        })}
       </div>
     </div>
+  );
+}
+
+function ServiceRailSpacer() {
+  return <div className="relative hidden min-h-full w-full lg:block" aria-hidden="true" />;
+}
+
+function ServiceRow({
+  service,
+  index,
+  onActive,
+  onNavigate,
+  onRowRef,
+}: {
+  service: Service;
+  index: number;
+  onActive: (index: number) => void;
+  onNavigate: (href: string) => void;
+  onRowRef: (index: number, element: HTMLDivElement | null) => void;
+}) {
+  const rowRef = useRef<HTMLDivElement | null>(null);
+  const setRowNode = useCallback(
+    (element: HTMLDivElement | null) => {
+      rowRef.current = element;
+      onRowRef(index, element);
+    },
+    [index, onRowRef]
+  );
+
+  useEffect(() => {
+    const currentRow = rowRef.current;
+    if (!currentRow) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && entry.intersectionRatio > 0.28) {
+          onActive(index);
+        }
+      },
+      {
+        threshold: [0.28, 0.45, 0.62],
+        rootMargin: '-18% 0px -18% 0px',
+      }
+    );
+
+    observer.observe(currentRow);
+    return () => observer.disconnect();
+  }, [index, onActive]);
+
+  return (
+    <div
+      ref={setRowNode}
+      data-service-row
+      className="grid items-stretch gap-8 py-16 md:py-20 lg:grid-cols-[clamp(7rem,10vw,11rem)_minmax(0,1fr)] lg:gap-12 lg:py-32 xl:py-36"
+    >
+      <ServiceRailSpacer />
+      <ServiceCard service={service} index={index} onNavigate={onNavigate} />
+    </div>
+  );
+}
+
+function ServicesDetailCta({ onNavigate }: { onNavigate: (href: string) => void }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 28 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.42 }}
+      transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
+      className="grid gap-8 pb-[38svh] pt-12 lg:grid-cols-[clamp(7rem,10vw,11rem)_minmax(0,1fr)] lg:gap-12 lg:pb-[42svh] lg:pt-20"
+    >
+      <div className="relative hidden min-h-full w-full lg:block" aria-hidden="true">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.7 }}
+          whileInView={{ opacity: [0, 1, 0.72], scale: [0.7, 1.18, 1] }}
+          viewport={{ once: true, amount: 0.8 }}
+          transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+          style={{
+            position: 'absolute',
+            top: 34,
+            left: '50%',
+            width: 34,
+            height: 34,
+            transform: 'translateX(-50%)',
+            borderRadius: 999,
+            background: '#06b6d4',
+            boxShadow: '0 0 26px #06b6d4, 0 0 76px rgba(6,182,212,0.55)',
+          }}
+        />
+        <motion.div
+          initial={{ opacity: 0, scaleY: 0 }}
+          whileInView={{ opacity: 1, scaleY: 1 }}
+          viewport={{ once: true, amount: 0.8 }}
+          transition={{ duration: 0.7, delay: 0.12, ease: [0.16, 1, 0.3, 1] }}
+          style={{
+            position: 'absolute',
+            top: 50,
+            bottom: 26,
+            left: '50%',
+            width: 10,
+            transform: 'translateX(-50%)',
+            transformOrigin: 'top center',
+            borderRadius: 999,
+            background: 'linear-gradient(180deg, #06b6d4, #10b981 34%, #8b5cf6 68%, #f59e0b)',
+            boxShadow: '0 0 42px rgba(6,182,212,0.28), 0 0 64px rgba(245,158,11,0.22)',
+          }}
+        />
+      </div>
+      <motion.div
+        data-cursor="hover"
+        initial="rest"
+        whileHover="hover"
+        whileInView="show"
+        viewport={{ once: true, amount: 0.45 }}
+        variants={{
+          rest: {
+            borderColor: 'rgba(255,255,255,0.10)',
+            boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.08), 0 28px 82px rgba(0,0,0,0.36)',
+          },
+          show: {
+            borderColor: 'rgba(6,182,212,0.28)',
+            boxShadow:
+              'inset 0 1px 0 rgba(255,255,255,0.12), 0 34px 110px rgba(0,0,0,0.44), 0 0 96px rgba(6,182,212,0.18), 0 0 120px rgba(245,158,11,0.10)',
+          },
+          hover: {
+            y: -3,
+            borderColor: 'rgba(255,255,255,0.18)',
+            boxShadow:
+              'inset 0 1px 0 rgba(255,255,255,0.14), 0 38px 120px rgba(0,0,0,0.48), 0 0 120px rgba(6,182,212,0.22), 0 0 140px rgba(245,158,11,0.14)',
+          },
+        }}
+        transition={{ duration: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
+        style={{
+          position: 'relative',
+          minHeight: 'clamp(23rem, 46svh, 32rem)',
+          overflow: 'hidden',
+          borderRadius: 10,
+          border: '1px solid rgba(255,255,255,0.10)',
+          background:
+            'linear-gradient(135deg, rgba(255,255,255,0.07), rgba(255,255,255,0.022)), radial-gradient(circle at 14% 18%, rgba(6,182,212,0.18), transparent 0 32%), radial-gradient(circle at 82% 20%, rgba(16,185,129,0.12), transparent 0 30%), radial-gradient(circle at 64% 90%, rgba(139,92,246,0.13), transparent 0 32%), radial-gradient(circle at 94% 76%, rgba(245,158,11,0.14), transparent 0 28%)',
+          boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.08), 0 28px 82px rgba(0,0,0,0.36)',
+          padding: 'clamp(1.4rem, 3vw, 3rem)',
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'end', justifyContent: 'space-between', gap: 24, flexWrap: 'wrap' }}>
+          <div>
+            <div
+              style={{
+                fontSize: 10,
+                fontWeight: 800,
+                letterSpacing: '0.18em',
+                textTransform: 'uppercase',
+                color: 'rgba(255,255,255,0.42)',
+                marginBottom: 10,
+              }}
+            >
+              Siguiente paso
+            </div>
+            <h3
+              style={{
+                margin: 0,
+                fontSize: 'clamp(1.45rem, 2.5vw, 2.2rem)',
+                lineHeight: 1.05,
+                letterSpacing: '-0.035em',
+                color: 'white',
+                fontWeight: 900,
+              }}
+            >
+              ProfundizÃ¡ en la soluciÃ³n que mÃ¡s sentido tenga para tu negocio.
+            </h3>
+          </div>
+        </div>
+
+        <div style={{ marginTop: 22, display: 'grid', gap: 10, gridTemplateColumns: 'repeat(auto-fit, minmax(11rem, 1fr))' }}>
+          {ORDERED_SERVICES.map((service) => (
+            <motion.button
+              key={service.id}
+              type="button"
+              onClick={() => onNavigate(service.href)}
+              whileHover={{
+                y: -2,
+                background: `${service.accent}16`,
+                borderColor: `${service.accent}5C`,
+                boxShadow: `0 0 28px ${service.accent}20`,
+              }}
+              whileTap={{ scale: 0.985 }}
+              transition={{ duration: 0.14, ease: [0.25, 0.46, 0.45, 0.94] }}
+              style={{
+                minHeight: 46,
+                borderRadius: 8,
+                border: `1px solid ${service.accent}2E`,
+                background: `${service.accent}0B`,
+                color: service.accent,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 9,
+                fontSize: 11,
+                fontWeight: 850,
+                letterSpacing: '0.09em',
+                textTransform: 'uppercase',
+                cursor: 'pointer',
+              }}
+            >
+              {SERVICE_SHORT_LABELS[service.id]}
+              <span aria-hidden="true">-&gt;</span>
+            </motion.button>
+          ))}
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+}
+
+function ServicesFullWidthCta({ onNavigate }: { onNavigate: (href: string) => void }) {
+  return (
+    <motion.div
+      id="servicios-siguiente-paso"
+      initial="rest"
+      whileInView="show"
+      viewport={{ once: true, amount: 0.34 }}
+      className="pb-[48svh] pt-24 lg:pb-[54svh] lg:pt-32"
+    >
+      <motion.div
+        data-cursor="hover"
+        initial="rest"
+        whileHover="hover"
+        variants={{
+          rest: {
+            opacity: 0,
+            y: 22,
+            borderColor: 'rgba(255,255,255,0.11)',
+            boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.08), 0 28px 82px rgba(0,0,0,0.38)',
+          },
+          show: {
+            opacity: 1,
+            y: 0,
+            borderColor: 'rgba(255,255,255,0.22)',
+            boxShadow:
+              'inset 0 1px 0 rgba(255,255,255,0.14), 0 46px 150px rgba(0,0,0,0.56), 0 0 120px rgba(6,182,212,0.30), 0 0 150px rgba(16,185,129,0.18), 0 0 160px rgba(245,158,11,0.16)',
+          },
+          hover: {
+            y: -5,
+            borderColor: 'rgba(255,255,255,0.30)',
+            boxShadow:
+              'inset 0 1px 0 rgba(255,255,255,0.18), 0 54px 170px rgba(0,0,0,0.60), 0 0 140px rgba(6,182,212,0.34), 0 0 170px rgba(139,92,246,0.20), 0 0 180px rgba(245,158,11,0.18)',
+          },
+        }}
+        transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+        style={{
+          position: 'relative',
+          minHeight: 'clamp(34rem, 68svh, 46rem)',
+          overflow: 'hidden',
+          borderRadius: 14,
+          border: '1px solid rgba(255,255,255,0.10)',
+          background:
+            'linear-gradient(135deg, rgba(255,255,255,0.082), rgba(255,255,255,0.022)), radial-gradient(circle at 12% 18%, rgba(6,182,212,0.22), transparent 0 30%), radial-gradient(circle at 78% 16%, rgba(16,185,129,0.16), transparent 0 32%), radial-gradient(circle at 62% 86%, rgba(139,92,246,0.16), transparent 0 31%), radial-gradient(circle at 96% 74%, rgba(245,158,11,0.18), transparent 0 30%)',
+          padding: 'clamp(1.5rem, 4vw, 4.75rem)',
+          display: 'flex',
+          alignItems: 'stretch',
+        }}
+      >
+        <motion.div
+          aria-hidden="true"
+          variants={{
+            rest: { opacity: 0, scaleX: 0.28 },
+            show: { opacity: [0, 1, 0.72], scaleX: [0.28, 1.04, 1] },
+            hover: { opacity: 1, scaleX: 1 },
+          }}
+          transition={{ duration: 1.05, ease: [0.16, 1, 0.3, 1] }}
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 'clamp(1.5rem, 4vw, 4.75rem)',
+            right: 'clamp(1.5rem, 4vw, 4.75rem)',
+            height: 3,
+            transformOrigin: 'center',
+            borderRadius: 999,
+            background:
+              'linear-gradient(90deg, transparent, #06b6d4 12%, #10b981 38%, #8b5cf6 68%, #f59e0b 88%, transparent)',
+            boxShadow:
+              '0 0 26px rgba(6,182,212,0.75), 0 0 58px rgba(139,92,246,0.36), 0 0 76px rgba(245,158,11,0.34)',
+          }}
+        />
+        <motion.div
+          aria-hidden="true"
+          variants={{
+            rest: { opacity: 0 },
+            show: { opacity: [0, 0.78, 0.48] },
+            hover: { opacity: 0.68 },
+          }}
+          transition={{ duration: 1.2, delay: 0.05, ease: [0.16, 1, 0.3, 1] }}
+          style={{
+            position: 'absolute',
+            inset: '-20% -10%',
+            background:
+              'radial-gradient(circle at 18% 28%, rgba(6,182,212,0.28), transparent 0 24%), radial-gradient(circle at 48% 10%, rgba(16,185,129,0.18), transparent 0 25%), radial-gradient(circle at 78% 34%, rgba(139,92,246,0.22), transparent 0 26%), radial-gradient(circle at 88% 78%, rgba(245,158,11,0.20), transparent 0 24%)',
+            filter: 'blur(26px)',
+            pointerEvents: 'none',
+          }}
+        />
+        <div
+          style={{
+            position: 'relative',
+            zIndex: 1,
+            width: '100%',
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 22rem), 1fr))',
+            gap: 'clamp(1.5rem, 4vw, 4rem)',
+            alignItems: 'center',
+          }}
+        >
+          <div style={{ minWidth: 0 }}>
+            <div
+              style={{
+                fontSize: 10,
+                fontWeight: 850,
+                letterSpacing: '0.18em',
+                textTransform: 'uppercase',
+                color: 'rgba(255,255,255,0.42)',
+                marginBottom: 14,
+              }}
+            >
+              Cierre de diagnostico
+            </div>
+            <h3
+              style={{
+                margin: 0,
+                maxWidth: 860,
+                fontSize: 'clamp(2.1rem, 5.4vw, 5.35rem)',
+                lineHeight: 0.95,
+                letterSpacing: '-0.035em',
+                color: 'white',
+                fontWeight: 900,
+              }}
+            >
+              Converti esta lectura en una decision clara.
+            </h3>
+            <p
+              style={{
+                margin: 'clamp(1.1rem, 2.4vw, 1.7rem) 0 0',
+                maxWidth: 760,
+                fontSize: 'clamp(1rem, 1.25vw, 1.18rem)',
+                lineHeight: 1.62,
+                color: 'rgba(255,255,255,0.64)',
+              }}
+            >
+              Si tu negocio necesita verse mejor, responder mas rapido, ahorrar horas o centralizar la operacion,
+              el proximo paso es elegir el frente con mayor impacto y construirlo con foco comercial desde el dia uno.
+            </p>
+            <div
+              style={{
+                marginTop: 'clamp(1.4rem, 3vw, 2.25rem)',
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(9rem, 1fr))',
+                gap: 10,
+                maxWidth: 760,
+              }}
+            >
+              {[
+                { label: '4 areas', value: 'Presencia, IA, procesos y sistema' },
+                { label: '1 plan', value: 'Prioridad segun retorno real' },
+                { label: '0 relleno', value: 'Solo piezas que mueven ventas' },
+              ].map((item) => (
+                <div
+                  key={item.label}
+                  style={{
+                    minHeight: 82,
+                    borderRadius: 10,
+                    border: '1px solid rgba(255,255,255,0.10)',
+                    background: 'rgba(255,255,255,0.035)',
+                    padding: '14px 15px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'center',
+                    gap: 7,
+                  }}
+                >
+                  <span
+                    style={{
+                      fontSize: 10,
+                      fontWeight: 850,
+                      letterSpacing: '0.14em',
+                      textTransform: 'uppercase',
+                      color: 'rgba(255,255,255,0.42)',
+                    }}
+                  >
+                    {item.label}
+                  </span>
+                  <span style={{ fontSize: 13, lineHeight: 1.35, color: 'rgba(255,255,255,0.68)' }}>{item.value}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div style={{ minWidth: 0, display: 'grid', gap: 12, alignContent: 'center' }}>
+            <div
+              style={{
+                fontSize: 10,
+                fontWeight: 850,
+                letterSpacing: '0.16em',
+                textTransform: 'uppercase',
+                color: 'rgba(255,255,255,0.40)',
+              }}
+            >
+              Elegi por donde empezar
+            </div>
+            {ORDERED_SERVICES.map((service, index) => {
+              const Icon = service.icon;
+
+              return (
+                <motion.button
+                  key={service.id}
+                  type="button"
+                  onClick={() => onNavigate(service.href)}
+                  whileHover={{
+                    x: 7,
+                    background: `${service.accent}16`,
+                    borderColor: `${service.accent}68`,
+                    boxShadow: `0 0 34px ${service.accent}24`,
+                  }}
+                  whileTap={{ scale: 0.985 }}
+                  transition={{ duration: 0.16, ease: [0.25, 0.46, 0.45, 0.94] }}
+                  style={{
+                    minHeight: 74,
+                    borderRadius: 10,
+                    border: `1px solid ${service.accent}30`,
+                    background: `linear-gradient(135deg, ${service.accent}10, rgba(255,255,255,0.025))`,
+                    color: service.accent,
+                    display: 'grid',
+                    gridTemplateColumns: '34px minmax(0,1fr) auto',
+                    alignItems: 'center',
+                    gap: 13,
+                    padding: '13px 16px',
+                    textAlign: 'left',
+                    cursor: 'pointer',
+                  }}
+                >
+                  <span
+                    style={{
+                      width: 34,
+                      height: 34,
+                      borderRadius: 9,
+                      display: 'grid',
+                      placeItems: 'center',
+                      background: `${service.accent}14`,
+                      border: `1px solid ${service.accent}32`,
+                      boxShadow: `0 0 22px ${service.accent}18`,
+                    }}
+                  >
+                    <Icon size={16} color={service.accent} strokeWidth={1.8} />
+                  </span>
+                  <span style={{ minWidth: 0 }}>
+                    <span
+                      style={{
+                        display: 'block',
+                        fontSize: 12,
+                        fontWeight: 900,
+                        letterSpacing: '0.10em',
+                        textTransform: 'uppercase',
+                      }}
+                    >
+                      {SERVICE_SHORT_LABELS[service.id]}
+                    </span>
+                    <span
+                      style={{
+                        display: 'block',
+                        marginTop: 4,
+                        fontSize: 11,
+                        lineHeight: 1.35,
+                        color: 'rgba(255,255,255,0.52)',
+                      }}
+                    >
+                      {service.metric}
+                    </span>
+                  </span>
+                  <span
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 8,
+                      fontSize: 11,
+                      fontWeight: 850,
+                      letterSpacing: '0.08em',
+                      textTransform: 'uppercase',
+                      color: index === 0 ? '#050607' : service.accent,
+                      background: index === 0 ? service.accent : `${service.accent}12`,
+                      border: `1px solid ${service.accent}30`,
+                      borderRadius: 999,
+                      padding: '7px 10px',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    Ver
+                    <span aria-hidden="true">-&gt;</span>
+                  </span>
+                </motion.button>
+              );
+            })}
+          </div>
+        </div>
+      </motion.div>
+    </motion.div>
   );
 }
 
 export default function OurServices() {
   const sectionRef = useRef<HTMLElement | null>(null);
   const servicesTrackRef = useRef<HTMLDivElement | null>(null);
-  const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const serviceRowRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const serviceScrollIntentRef = useRef(0);
+  const [railMarkers, setRailMarkers] = useState<number[]>([]);
+  const [railEndMarker, setRailEndMarker] = useState(100);
   const [activeServiceIndex, setActiveServiceIndex] = useState(0);
+  const [activeRailIndex, setActiveRailIndex] = useState(0);
   const { triggerTransition } = useTransitionContext();
-  const { scrollYProgress } = useScroll({
-    target: servicesTrackRef,
-    offset: ['start 78%', 'end 22%'],
-  });
-  const sideProgress = useSpring(scrollYProgress, { stiffness: 120, damping: 32, mass: 0.35 });
-
-  useEffect(() => {
-    const observers: IntersectionObserver[] = [];
-
-    cardRefs.current.forEach((ref, index) => {
-      if (!ref) return;
-
-      const observer = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            if (entry.isIntersecting && entry.intersectionRatio > 0.3) {
-              setActiveServiceIndex(index);
-            }
-          });
-        },
-        {
-          threshold: [0.3, 0.5, 0.7],
-          rootMargin: '-20% 0px -20% 0px',
-        }
-      );
-
-      observer.observe(ref);
-      observers.push(observer);
-    });
-
-    return () => observers.forEach((observer) => observer.disconnect());
-  }, []);
+  const lenis = useLenis();
+  const railRawProgress = useMotionValue(0);
+  const railProgress = useSpring(railRawProgress, { stiffness: 150, damping: 34, mass: 0.28 });
 
   const activeAccent = ORDERED_SERVICES[activeServiceIndex]?.accent ?? ORDERED_SERVICES[0]?.accent ?? '#06b6d4';
+  const activeRailAccent = ORDERED_SERVICES[activeRailIndex]?.accent ?? ORDERED_SERVICES[0]?.accent ?? '#06b6d4';
+
+  const updateRailProgress = useCallback(() => {
+    const firstRow = serviceRowRefs.current[0];
+    const lastRow = serviceRowRefs.current[ORDERED_SERVICES.length - 1];
+    const firstTarget = firstRow?.querySelector<HTMLElement>('[data-service-card]') ?? firstRow;
+    const lastTarget = lastRow?.querySelector<HTMLElement>('[data-service-card]') ?? lastRow;
+
+    if (!firstTarget || !lastTarget) return;
+
+    const firstRect = firstTarget.getBoundingClientRect();
+    const lastRect = lastTarget.getBoundingClientRect();
+    const firstTop = window.scrollY + firstRect.top;
+    const lastMiddle = window.scrollY + lastRect.top + lastRect.height * 0.5;
+    const viewportCenter = window.scrollY + window.innerHeight * 0.5;
+    const progressRange = lastMiddle - firstTop;
+    const nextProgress = progressRange > 0 ? (viewportCenter - firstTop) / progressRange : 0;
+
+    railRawProgress.set(Math.max(0, Math.min(1, nextProgress)));
+  }, [railRawProgress]);
+
+  const measureRailMarkers = useCallback(() => {
+    const track = servicesTrackRef.current;
+    if (!track) return;
+
+    const trackRect = track.getBoundingClientRect();
+    if (trackRect.height <= 0) return;
+
+    const nextMarkers = ORDERED_SERVICES.map((_, index) => {
+      const row = serviceRowRefs.current[index];
+      const target = row?.querySelector<HTMLElement>('[data-service-card]') ?? row;
+
+      if (!target) {
+        return (index / ORDERED_SERVICES.length) * 100;
+      }
+
+      const markerTop = target.getBoundingClientRect().top - trackRect.top;
+      return Math.max(0, Math.min(100, (markerTop / trackRect.height) * 100));
+    });
+
+    const lastRow = serviceRowRefs.current[ORDERED_SERVICES.length - 1];
+    const lastTarget = lastRow?.querySelector<HTMLElement>('[data-service-card]') ?? lastRow;
+    const lastRect = lastTarget?.getBoundingClientRect();
+    const nextEndMarker = lastRect
+      ? Math.max(0, Math.min(100, ((lastRect.bottom - trackRect.top) / trackRect.height) * 100))
+      : 100;
+
+    setRailMarkers(nextMarkers);
+    setRailEndMarker(nextEndMarker);
+    updateRailProgress();
+  }, [updateRailProgress]);
+
+  const setServiceRowRef = useCallback(
+    (index: number, element: HTMLDivElement | null) => {
+      serviceRowRefs.current[index] = element;
+      window.requestAnimationFrame(measureRailMarkers);
+    },
+    [measureRailMarkers]
+  );
+
+  const updateActiveRailIndex = useCallback(
+    (latestProgress: number) => {
+      if (railMarkers.length === 0) {
+        setActiveRailIndex(0);
+        return;
+      }
+
+      const firstMarker = railMarkers[0] ?? 0;
+      const currentRailPosition = firstMarker + latestProgress * (railEndMarker - firstMarker);
+      const nextIndex = railMarkers.reduce((currentIndex, marker, index) => {
+        return currentRailPosition + 0.2 >= marker ? index : currentIndex;
+      }, 0);
+
+      setActiveRailIndex((currentIndex) => (currentIndex === nextIndex ? currentIndex : nextIndex));
+    },
+    [railEndMarker, railMarkers]
+  );
+
+  useMotionValueEvent(railProgress, 'change', updateActiveRailIndex);
+
+  useEffect(() => {
+    const frame = window.requestAnimationFrame(() => {
+      updateActiveRailIndex(railProgress.get());
+    });
+
+    return () => window.cancelAnimationFrame(frame);
+  }, [railMarkers, railProgress, updateActiveRailIndex]);
+
+  useEffect(() => {
+    updateRailProgress();
+
+    let frame = 0;
+    const requestUpdate = () => {
+      window.cancelAnimationFrame(frame);
+      frame = window.requestAnimationFrame(updateRailProgress);
+    };
+
+    window.addEventListener('scroll', requestUpdate, { passive: true });
+    window.addEventListener('resize', requestUpdate);
+
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.removeEventListener('scroll', requestUpdate);
+      window.removeEventListener('resize', requestUpdate);
+    };
+  }, [updateRailProgress]);
+
+  const scrollToService = useCallback((serviceId: number) => {
+    const now = performance.now();
+    if (now - serviceScrollIntentRef.current < 120) return;
+    serviceScrollIntentRef.current = now;
+
+    const index = ORDERED_SERVICES.findIndex((service) => service.id === serviceId);
+    const row = index >= 0 ? serviceRowRefs.current[index] : null;
+    const target =
+      document.getElementById(getServiceAnchorId(serviceId)) ??
+      row?.querySelector<HTMLElement>('[data-service-card]') ??
+      row;
+
+    if (!target) return;
+
+    const rect = target.getBoundingClientRect();
+    const targetCenter = window.scrollY + rect.top + rect.height / 2;
+    const top = targetCenter - window.innerHeight / 2;
+    const targetTop = Math.max(0, top);
+    const distance = Math.abs(targetTop - window.scrollY);
+    const duration = Math.min(1.75, Math.max(0.7, distance / 1200));
+
+    setActiveServiceIndex(Math.max(0, index));
+    setActiveRailIndex(Math.max(0, index));
+
+    if (lenis) {
+      lenis.scrollTo(targetTop, {
+        immediate: false,
+        force: true,
+        lock: false,
+        duration,
+      });
+      return;
+    }
+
+    window.scrollTo({ top: targetTop, left: 0, behavior: 'smooth' });
+  }, [lenis]);
+
+  useEffect(() => {
+    measureRailMarkers();
+
+    const resizeObserver = new ResizeObserver(() => measureRailMarkers());
+    const track = servicesTrackRef.current;
+
+    if (track) {
+      resizeObserver.observe(track);
+    }
+
+    serviceRowRefs.current.forEach((row) => {
+      if (row) {
+        resizeObserver.observe(row);
+      }
+    });
+
+    window.addEventListener('resize', measureRailMarkers);
+    const timeout = window.setTimeout(measureRailMarkers, 350);
+
+    return () => {
+      resizeObserver.disconnect();
+      window.removeEventListener('resize', measureRailMarkers);
+      window.clearTimeout(timeout);
+    };
+  }, [measureRailMarkers]);
 
   return (
     <section
@@ -7308,7 +8071,7 @@ export default function OurServices() {
         <FloatingParticles activeAccent={activeAccent} />
       </div>
 
-      <div className="relative z-10 mx-auto max-w-[1280px] px-5 pb-14 pt-20 sm:px-8 lg:px-10 lg:pt-24">
+      <div className="relative z-10 mx-auto max-w-[1440px] px-5 pb-14 pt-20 sm:px-8 lg:px-10 lg:pt-24">
         {/* HEADER INMERSIVO */}
         <div
           style={{
@@ -7414,21 +8177,36 @@ export default function OurServices() {
               gap: 8,
             }}
           >
-            {[
-              { label: 'Sitio Web', color: '#06b6d4', price: '$800' },
-              { label: 'Agente IA', color: '#10b981', price: '$300' },
-              { label: 'Software', color: '#8b5cf6', price: '$1.500' },
-              { label: 'Automatizaciones', color: '#f59e0b', price: '$200' },
-            ].map((chip) => (
-              <motion.div
-                key={chip.label}
+            {ORDERED_SERVICES.map((service) => (
+              <motion.button
+                key={service.id}
+                type="button"
+                data-lenis-prevent
+                data-lenis-prevent-wheel
+                data-lenis-prevent-touch
+                aria-label={`Ir a ${SERVICE_SHORT_LABELS[service.id]}`}
+                onPointerDownCapture={(event) => {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  scrollToService(service.id);
+                }}
+                onPointerDown={(event) => {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  scrollToService(service.id);
+                }}
+                onClick={(event) => {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  scrollToService(service.id);
+                }}
                 initial={{ opacity: 0, scale: 0.9 }}
                 whileInView={{ opacity: 1, scale: 1 }}
                 whileHover={{
                   y: -2,
-                  background: `${chip.color}12`,
-                  borderColor: `${chip.color}45`,
-                  boxShadow: `0 0 26px ${chip.color}1F`,
+                  background: `${service.accent}12`,
+                  borderColor: `${service.accent}45`,
+                  boxShadow: `0 0 26px ${service.accent}1F`,
                 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.16, ease: [0.25, 0.46, 0.45, 0.94] }}
@@ -7437,10 +8215,10 @@ export default function OurServices() {
                   alignItems: 'center',
                   gap: 7,
                   padding: '7px 14px',
-                  background: `${chip.color}08`,
-                  border: `1px solid ${chip.color}22`,
+                  background: `${service.accent}08`,
+                  border: `1px solid ${service.accent}22`,
                   borderRadius: 100,
-                  cursor: 'default',
+                  cursor: 'pointer',
                 }}
               >
                 <div
@@ -7448,8 +8226,8 @@ export default function OurServices() {
                     width: 5,
                     height: 5,
                     borderRadius: '50%',
-                    background: chip.color,
-                    boxShadow: `0 0 6px ${chip.color}80`,
+                    background: service.accent,
+                    boxShadow: `0 0 6px ${service.accent}80`,
                   }}
                 />
                 <span
@@ -7459,20 +8237,20 @@ export default function OurServices() {
                     color: 'rgba(255,255,255,0.6)',
                   }}
                 >
-                  {chip.label}
+                  {SERVICE_SHORT_LABELS[service.id]}
                 </span>
                 <span
                   style={{
                     fontSize: 11,
-                    color: chip.color,
+                    color: service.accent,
                     opacity: 0.7,
-                    borderLeft: `1px solid ${chip.color}30`,
+                    borderLeft: `1px solid ${service.accent}30`,
                     paddingLeft: 7,
                   }}
                 >
-                  {chip.price}
+                  {service.price.replace(' USD', '')}
                 </span>
-              </motion.div>
+              </motion.button>
             ))}
           </motion.div>
         </div>
@@ -7488,30 +8266,30 @@ export default function OurServices() {
         />
 
         <div ref={servicesTrackRef} className="relative mt-6 md:mt-8">
-          <ServiceSideProgressRails
+          <ServicesProgressRail
             services={ORDERED_SERVICES}
-            activeServiceIndex={activeServiceIndex}
-            activeAccent={activeAccent}
-            progress={sideProgress}
+            activeServiceIndex={activeRailIndex}
+            activeAccent={activeRailAccent}
+            markers={railMarkers}
+            endMarker={railEndMarker}
+            progress={railProgress}
           />
 
-          <div className="space-y-12 md:space-y-16 lg:space-y-20">
+          <div>
             {ORDERED_SERVICES.map((service, index) => (
-              <div
+              <ServiceRow
                 key={service.id}
-                ref={(element) => {
-                  cardRefs.current[index] = element;
-                }}
-              >
-                <ServiceCard
-                  service={service}
-                  index={index}
-                  onNavigate={triggerTransition}
-                />
-              </div>
+                service={service}
+                index={index}
+                onActive={setActiveServiceIndex}
+                onNavigate={triggerTransition}
+                onRowRef={setServiceRowRef}
+              />
             ))}
           </div>
         </div>
+
+        <ServicesFullWidthCta onNavigate={triggerTransition} />
       </div>
     </section>
   );
