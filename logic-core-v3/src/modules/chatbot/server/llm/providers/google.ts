@@ -1,4 +1,4 @@
-import { createGoogleGenerativeAI } from '@ai-sdk/google'
+import { createVertex } from '@ai-sdk/google-vertex'
 import type { LanguageModel } from 'ai'
 import type { LLMProvider, ModelInfo } from '../types'
 import { ModelNotSupportedError } from '../types'
@@ -42,23 +42,23 @@ const GOOGLE_MODELS: Record<string, GoogleModelConfig> = {
 
 export class GoogleProvider implements LLMProvider {
   readonly name = 'google' as const
-  private client: ReturnType<typeof createGoogleGenerativeAI> | null = null
+  private client: ReturnType<typeof createVertex> | null = null
 
   constructor() {
-    // Verificar que la API Key está disponible
-    const apiKey = process.env.CHATBOT_GOOGLE_API_KEY
-    if (!apiKey) {
+    const credPath = process.env.GOOGLE_APPLICATION_CREDENTIALS
+    const project = process.env.CHATBOT_GCP_PROJECT_ID
+    if (!credPath || !project) {
       throw new Error(
-        'Google Provider requires CHATBOT_GOOGLE_API_KEY env var. ' +
-        'Please check your .env.local file.'
+        'Vertex AI requires GOOGLE_APPLICATION_CREDENTIALS and CHATBOT_GCP_PROJECT_ID env vars.'
       )
     }
   }
 
   private getClient() {
     if (!this.client) {
-      this.client = createGoogleGenerativeAI({
-        apiKey: process.env.CHATBOT_GOOGLE_API_KEY!,
+      this.client = createVertex({
+        project: process.env.CHATBOT_GCP_PROJECT_ID!,
+        location: process.env.CHATBOT_GCP_LOCATION ?? 'us-central1',
       })
     }
     return this.client
@@ -85,3 +85,4 @@ export class GoogleProvider implements LLMProvider {
     return Object.values(GOOGLE_MODELS).map(({ apiModelId: _omit, ...rest }) => rest)
   }
 }
+

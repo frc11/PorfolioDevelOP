@@ -13,7 +13,7 @@
     "migrate:os-v2": "ts-node prisma/migrate-os-to-unified.ts"
   },
   "dependencies": {
-    "@ai-sdk/google": "^3.0.73",
+    "@ai-sdk/google-vertex": "^4.0.128",
     "@ai-sdk/react": "^3.0.184",
     "@anthropic-ai/sdk": "^0.95.2",
     "@auth/prisma-adapter": "^2.11.1",

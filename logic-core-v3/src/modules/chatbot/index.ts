@@ -1,8 +1,11 @@
 /**
- * develOP Chatbot Module
+ * develOP Chatbot Module — Client-safe exports
  *
- * Public API of the chatbot module. Anything outside this module
- * should ONLY import from this barrel, never from internal files.
+ * This barrel is safe to import from client components.
+ * It contains ONLY types, UI components, and hooks.
+ *
+ * For server-side code (LLM, tools, DB queries), import from:
+ *   '@/modules/chatbot/index.server'
  *
  * @see README.md for extraction guide and module boundary rules.
  */
@@ -20,66 +23,7 @@ export type {
   BotIndustry,
 } from './shared/types'
 
-// More exports will be added as sprints progress.
-// Sprint S1: types only (no runtime code yet).
-
-// LLM abstraction (Sprint S2)
-export type { LLMProvider, ModelInfo } from './server/llm'
-export {
-  ProviderNotImplementedError,
-  ModelNotSupportedError,
-  getLLMProvider,
-  resetProviderCache,
-} from './server/llm'
-
-// Cost calculation (Sprint S2)
-export type { CostBreakdown } from './server/pricing'
-export { calculateCost } from './server/pricing'
-
-// Prompt builder (Sprint S3)
-export type {
-  BotConfigForPrompt,
-  KnowledgeBaseForPrompt,
-  PromptContext,
-  BuildSystemPromptInput,
-} from './server/prompts'
-export { buildSystemPrompt, formatTone, formatDateTimeArgentina } from './server/prompts'
-
-// Tools (Sprint S4)
-export type {
-  ToolCallContext,
-  ToolExecuteResult,
-  CaptureLeadResult,
-  ChatbotTools,
-  CaptureLeadInput,
-  OfferHandoffOptionsInput,
-  ShowWhatsappHandoffInput,
-  NavigateToPageInput,
-  ValidPath,
-} from './server/tools'
-export { getTools, VALID_PATHS } from './server/tools'
-
-// Chat handler (Sprint S5) — public entrypoint for the API route
-export { handleChatRequest } from './server/chat'
-
-// Auxiliary exports for testing and future use
-export { validateAssistantOutput, hashIp } from './server/safety'
-export type { ValidationWarning, ValidationSeverity } from './server/safety'
-export { checkRateLimit, resetRateLimits } from './server/rate-limit'
-export type { RateLimitResult } from './server/rate-limit'
-export { checkQuota, incrementQuota } from './server/quota'
-export type { QuotaCheckResult } from './server/quota'
-export { resolveBotBySlug, getOrCreateConversation } from './server/conversation'
-
-// Intent detection (Bloque E)
-export { detectIntent } from './server/intent'
-export type { IntentType, IntentResult } from './server/intent'
-
-export { chatbotLog } from './server/logging'
-export type { LogLevel } from './server/logging'
-
-// Config endpoint (Sprint S6)
-export { handleConfigRequest, getPublicConfig } from './server/config'
+// Public config type (Sprint S6)
 export type { PublicBotConfig } from './shared/publicConfig'
 
 // Avatar (Sprint S7)
@@ -124,25 +68,9 @@ export type { UseChatbotOptions, UseChatbotReturn } from './hooks'
 export { AvatarRenderer, LegacyNeuroAvatar } from './components/avatar'
 export type { AvatarRendererProps } from './components/avatar'
 
-// Admin (Sprint S13+)
+// Admin UI components (Sprint S13+)
 export { KnowledgeBaseEditor, BotConfigEditor } from './components/admin'
-export { saveKnowledgeBase, saveBotConfig } from './server/admin'
-export type { KnowledgeBaseInput, BotConfigInput } from './server/admin'
-
-// Dashboards (Sprint S15)
-export { LeadsTable, ConversationsTable } from './components/dashboards'
-export { listLeadsForBot, listConversationsForBot, getMonthlyUsageForBot } from './server/admin/queries'
-
-// Debug + Health (Sprint S20)
-export { chatbotDebug, chatbotError } from './server/logging'
-export { checkChatbotHealth } from './server/health'
-export type { HealthCheckResult } from './server/health'
-export { checkChatbotEnv, requireChatbotEnv } from './server/config/envValidator'
-export type { EnvVarStatus, EnvCheckResult } from './server/config/envValidator'
-
-// Activity Log (Sprint S21)
 export { ActivityLog } from './components/admin'
-export { logChatbotEvent } from './server/logging'
 
-export { runLLMSmokeTest } from './server/health'
-export type { SmokeTestResult } from './server/health'
+// Dashboard UI components (Sprint S15)
+export { LeadsTable, ConversationsTable } from './components/dashboards'

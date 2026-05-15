@@ -1,4 +1,4 @@
-import { handleConfigRequest } from '@/modules/chatbot'
+import { handleConfigRequest } from '@/modules/chatbot/index.server'
 
 export const runtime = 'nodejs'
 

@@ -1,4 +1,4 @@
-import { handleChatRequest } from '@/modules/chatbot'
+import { handleChatRequest } from '@/modules/chatbot/index.server'
 
 export const runtime = 'nodejs'
 export const maxDuration = 30
