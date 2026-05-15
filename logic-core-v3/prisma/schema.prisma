@@ -115,6 +115,27 @@ enum OnboardingTaskStatus {
   SKIPPED
 }
 
+enum NotificationMode {
+  IMMEDIATE
+  DAILY_DIGEST
+  DISABLED
+}
+
+enum InsightStatus {
+  PENDING
+  APPLIED
+  DISMISSED
+  IGNORED
+}
+
+enum InsightCategory {
+  KB_GAP
+  CONVERSION_LEAK
+  CONTENT_OPPORTUNITY
+  CONFIG_TWEAK
+  COMPETITIVE_INTEL
+}
+
 // ─── NextAuth Required Models ─────────────────────────────────────────────────
 
 model Account {
@@ -198,17 +219,19 @@ model PasswordResetToken {
 // ─── Modelos de Negocio ───────────────────────────────────────────────────────
 
 model Organization {
-  id                  String   @id @default(cuid())
-  companyName         String
-  slug                String   @unique
-  logoUrl             String?
-  analyticsPropertyId String?
-  siteUrl             String?
-  n8nWorkflowIds      String[]
-  onboardingCompleted Boolean  @default(false)
-  whatsapp            String?
-  notificationPrefs   Json?
-  createdAt           DateTime @default(now())
+  id                    String            @id @default(cuid())
+  companyName           String
+  slug                  String            @unique
+  logoUrl               String?
+  analyticsPropertyId   String?
+  siteUrl               String?
+  n8nWorkflowIds        String[]
+  onboardingCompleted   Boolean           @default(false)
+  whatsapp              String?
+  notificationPrefs     Json?
+  leadNotificationEmail String?
+  leadNotificationMode  NotificationMode? @default(IMMEDIATE)
+  createdAt             DateTime          @default(now())
 
   // Health Score: connection status
   // Structure: { ga4: {connected, lastSync}, searchConsole: {...}, ... }
@@ -229,16 +252,16 @@ model Organization {
   googleMapsPlaceId String?
 
   // Tiendanube integration
-  tiendanubeStoreId       Int?
-  tiendanubeAccessToken   String?   @db.Text
-  tiendanubeStoreUrl      String?
-  tiendanubeConnectedAt   DateTime?
+  tiendanubeStoreId     Int?
+  tiendanubeAccessToken String?   @db.Text
+  tiendanubeStoreUrl    String?
+  tiendanubeConnectedAt DateTime?
 
   // Email Marketing (WIRE module)
   brevoListId Int?
 
   // Agenda Inteligente (Cal.com)
-  calComApiKey   String?  @db.Text
+  calComApiKey   String? @db.Text
   calComUsername String?
   calComEmbedUrl String?
 
@@ -261,16 +284,16 @@ model Organization {
   emailContacts   EmailContact[]
   emailCampaigns  EmailCampaign[]
   onboardingTasks OnboardingTask[]
-  botConfig         BotConfig?
+  botConfig       BotConfig?
 }
 
 model OrgMember {
-  id             String   @id @default(cuid())
-  userId         String
-  organizationId String
-  role           OrgRole  @default(ADMIN)
-  joinedAt       DateTime @default(now())
-  emailNotificationsOnMessage Boolean @default(true)
+  id                          String   @id @default(cuid())
+  userId                      String
+  organizationId              String
+  role                        OrgRole  @default(ADMIN)
+  joinedAt                    DateTime @default(now())
+  emailNotificationsOnMessage Boolean  @default(true)
 
   user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
@@ -510,19 +533,19 @@ model AgencySettings {
 }
 
 model OnboardingTask {
-  id             String                 @id @default(cuid())
+  id             String       @id @default(cuid())
   organizationId String
-  organization   Organization           @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
-  category      OnboardingTaskCategory
-  title         String
-  description   String                 @db.Text
-  sortOrder     Int
+  category    OnboardingTaskCategory
+  title       String
+  description String                 @db.Text
+  sortOrder   Int
 
-  status          OnboardingTaskStatus @default(PENDING)
-  completedAt     DateTime?
-  completedById   String?
-  internalNotes   String?              @db.Text
+  status        OnboardingTaskStatus @default(PENDING)
+  completedAt   DateTime?
+  completedById String?
+  internalNotes String?              @db.Text
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -757,20 +780,20 @@ model OrganizationModule {
 }
 
 model EmailContact {
-  id              String    @id @default(cuid())
-  organizationId  String
-  email           String
-  firstName       String?
-  lastName        String?
-  phone           String?
-  tags            String[]
-  source          String?
-  optedOut        Boolean   @default(false)
-  optedOutAt      DateTime?
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  id             String    @id @default(cuid())
+  organizationId String
+  email          String
+  firstName      String?
+  lastName       String?
+  phone          String?
+  tags           String[]
+  source         String?
+  optedOut       Boolean   @default(false)
+  optedOutAt     DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
 
-  organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
   @@unique([organizationId, email])
   @@index([organizationId])
@@ -778,18 +801,18 @@ model EmailContact {
 }
 
 model EmailCampaign {
-  id              String    @id @default(cuid())
-  organizationId  String
-  name            String
-  subject         String
-  fromName        String
-  fromEmail       String
-  htmlContent     String    @db.Text
-  textContent     String?   @db.Text
+  id             String  @id @default(cuid())
+  organizationId String
+  name           String
+  subject        String
+  fromName       String
+  fromEmail      String
+  htmlContent    String  @db.Text
+  textContent    String? @db.Text
 
-  status          EmailCampaignStatus @default(DRAFT)
-  scheduledFor    DateTime?
-  sentAt          DateTime?
+  status       EmailCampaignStatus @default(DRAFT)
+  scheduledFor DateTime?
+  sentAt       DateTime?
 
   recipientCount    Int @default(0)
   openedCount       Int @default(0)
@@ -799,10 +822,10 @@ model EmailCampaign {
 
   brevoCampaignId Int?
 
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
   @@index([organizationId])
   @@index([organizationId, status])
@@ -815,123 +838,124 @@ model EmailCampaign {
 // See src/modules/chatbot/README.md for module boundary rules.
 
 model BotConfig {
-  id                 String   @id @default(cuid())
+  id String @id @default(cuid())
 
-  organizationId     String   @unique
-  organization       Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  organizationId String       @unique
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
   // Identidad pública
-  slug               String   @unique
-  botName            String
-  isActive           Boolean  @default(true)
+  slug     String  @unique
+  botName  String
+  isActive Boolean @default(true)
 
   // Apariencia básica
-  accentColor        String   @default("#06b6d4")
-  accentSecondary    String?
-  chatSurfaceTint    String?
+  accentColor     String  @default("#06b6d4")
+  accentSecondary String?
+  chatSurfaceTint String?
 
   // Avatar
-  avatarStyle        String   @default("neuro")
-  avatarImageUrl     String?
-  avatarEmoji        String?
+  avatarStyle    String  @default("neuro")
+  avatarImageUrl String?
+  avatarEmoji    String?
 
   // Estilo visual extendido
-  borderRadius       String   @default("medium")
-  surfaceStyle       String   @default("glass")
-  position           String   @default("bottom_right")
-  fontStyle          String   @default("sans")
-  bubbleStyle        String   @default("rounded")
-  intensityLevel     String   @default("medium")
+  borderRadius   String @default("medium")
+  surfaceStyle   String @default("glass")
+  position       String @default("bottom_right")
+  fontStyle      String @default("sans")
+  bubbleStyle    String @default("rounded")
+  intensityLevel String @default("medium")
 
   // Comportamiento conversacional
-  tone               String   @default("informal_rioplatense")
-  welcomeMessage     String   @db.Text
-  proactivePrompts   Json     @default("[]")
-  quickReplies       Json     @default("[]")
-  routeColorMap      Json     @default("{}")
+  tone             String @default("informal_rioplatense")
+  welcomeMessage   String @db.Text
+  proactivePrompts Json   @default("[]")
+  quickReplies     Json   @default("[]")
+  routeColorMap    Json   @default("{}")
 
   // Derivación a WhatsApp
-  whatsappNumber     String?
-  whatsappMessage    String?  @db.Text
+  whatsappNumber  String?
+  whatsappMessage String? @db.Text
 
   // LLM
-  llmProvider        String   @default("google")
-  llmModel           String   @default("gemini-2.5-flash")
-  temperature        Float    @default(0.7)
-  maxOutputTokens    Int      @default(800)
+  llmProvider     String @default("google")
+  llmModel        String @default("gemini-2.5-flash")
+  temperature     Float  @default(0.7)
+  maxOutputTokens Int    @default(800)
 
   // Cuota mensual
-  monthlyQuota       Int      @default(1000)
+  monthlyQuota Int @default(1000)
 
   // Rubro / industria
-  industry           String   @default("generic")
+  industry String @default("generic")
 
   // Relaciones
-  knowledgeBase      KnowledgeBase?
-  conversations      Conversation[]
-  leads              ChatbotLead[]
-  quotaUsages        QuotaUsage[]
-  events             ChatbotEvent[]
+  knowledgeBase KnowledgeBase?
+  conversations Conversation[]
+  leads         ChatbotLead[]
+  quotaUsages   QuotaUsage[]
+  events        ChatbotEvent[]
+  insights      ChatbotInsight[]
 
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([slug])
   @@map("chatbot_bot_config")
 }
 
 model KnowledgeBase {
-  id                  String   @id @default(cuid())
+  id String @id @default(cuid())
 
-  botConfigId         String   @unique
-  botConfig           BotConfig @relation(fields: [botConfigId], references: [id], onDelete: Cascade)
+  botConfigId String    @unique
+  botConfig   BotConfig @relation(fields: [botConfigId], references: [id], onDelete: Cascade)
 
   // Secciones markdown (las 6 + forbiddenStatements)
-  businessInfo        String   @default("") @db.Text
-  servicesOrProducts  String   @default("") @db.Text
-  faq                 String   @default("") @db.Text
-  policies            String   @default("") @db.Text
-  salesGuidance       String   @default("") @db.Text
-  toneExamples        String   @default("") @db.Text
-  forbiddenStatements String   @default("") @db.Text
+  businessInfo        String @default("") @db.Text
+  servicesOrProducts  String @default("") @db.Text
+  faq                 String @default("") @db.Text
+  policies            String @default("") @db.Text
+  salesGuidance       String @default("") @db.Text
+  toneExamples        String @default("") @db.Text
+  forbiddenStatements String @default("") @db.Text
 
-  createdAt           DateTime @default(now())
-  updatedAt           DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("chatbot_knowledge_base")
 }
 
 model Conversation {
-  id                 String   @id @default(cuid())
+  id String @id @default(cuid())
 
-  botConfigId        String
-  botConfig          BotConfig @relation(fields: [botConfigId], references: [id], onDelete: Cascade)
+  botConfigId String
+  botConfig   BotConfig @relation(fields: [botConfigId], references: [id], onDelete: Cascade)
 
   // Identificación anónima del usuario
-  sessionId          String   @unique
-  ipHash             String?
-  userAgent          String?  @db.Text
-  referrerUrl        String?
-  currentPath        String?
+  sessionId   String  @unique
+  ipHash      String?
+  userAgent   String? @db.Text
+  referrerUrl String?
+  currentPath String?
 
   // Lifecycle
-  startedAt          DateTime @default(now())
-  lastMessageAt      DateTime @default(now())
-  endedAt            DateTime?
+  startedAt     DateTime  @default(now())
+  lastMessageAt DateTime  @default(now())
+  endedAt       DateTime?
 
   // Métricas denormalizadas (actualizadas en transacción al guardar mensaje)
-  messageCount       Int      @default(0)
-  tokensIn           Int      @default(0)
-  tokensOut          Int      @default(0)
-  estimatedCostUsd   Decimal  @default(0) @db.Decimal(10, 6)
+  messageCount     Int     @default(0)
+  tokensIn         Int     @default(0)
+  tokensOut        Int     @default(0)
+  estimatedCostUsd Decimal @default(0) @db.Decimal(10, 6)
 
   // Outcome
-  leadCaptured       Boolean  @default(false)
+  leadCaptured Boolean @default(false)
 
   // Relaciones
-  messages           ChatMessage[]
-  lead               ChatbotLead?
-  events             ChatbotEvent[]
+  messages ChatMessage[]
+  lead     ChatbotLead?
+  events   ChatbotEvent[]
 
   @@index([botConfigId, startedAt])
   @@index([sessionId])
@@ -939,52 +963,52 @@ model Conversation {
 }
 
 model ChatMessage {
-  id              String   @id @default(cuid())
+  id String @id @default(cuid())
 
-  conversationId  String
-  conversation    Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
 
-  role            String   // "user" | "assistant" | "system"
-  content         String   @db.Text
+  role    String // "user" | "assistant" | "system"
+  content String @db.Text
 
   // Solo para mensajes de assistant
-  toolCalls       Json?
-  tokensIn        Int?
-  tokensOut       Int?
+  toolCalls Json?
+  tokensIn  Int?
+  tokensOut Int?
 
-  createdAt       DateTime @default(now())
+  createdAt DateTime @default(now())
 
   @@index([conversationId, createdAt])
   @@map("chatbot_message")
 }
 
 model ChatbotLead {
-  id                  String   @id @default(cuid())
+  id String @id @default(cuid())
 
-  botConfigId         String
-  botConfig           BotConfig @relation(fields: [botConfigId], references: [id], onDelete: Cascade)
+  botConfigId String
+  botConfig   BotConfig @relation(fields: [botConfigId], references: [id], onDelete: Cascade)
 
-  conversationId      String?  @unique
-  conversation        Conversation? @relation(fields: [conversationId], references: [id], onDelete: SetNull)
+  conversationId String?       @unique
+  conversation   Conversation? @relation(fields: [conversationId], references: [id], onDelete: SetNull)
 
   // Datos capturados
-  name                String?
-  email               String?
-  phone               String?
-  intent              String?              // "quote" | "info" | "demo" | "support" | "other"
-  message             String?  @db.Text
+  name    String?
+  email   String?
+  phone   String?
+  intent  String? // "quote" | "info" | "demo" | "support" | "other"
+  message String? @db.Text
 
   // Notificación
-  notificationSent    Boolean   @default(false)
-  notificationSentAt  DateTime?
+  notificationSent   Boolean   @default(false)
+  notificationSentAt DateTime?
 
   // Estado gestionable por el cliente
-  status              ChatbotLeadStatus   @default(NEW)
-  internalNotes       String?      @db.Text
-  lastStatusChangeAt  DateTime?
+  status             ChatbotLeadStatus @default(NEW)
+  internalNotes      String?           @db.Text
+  lastStatusChangeAt DateTime?
 
-  capturedAt          DateTime @default(now())
-  updatedAt           DateTime @updatedAt
+  capturedAt DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
   @@index([botConfigId, capturedAt])
   @@index([status])
@@ -999,26 +1023,45 @@ enum ChatbotLeadStatus {
   LOST
 }
 
+model ChatbotInsight {
+  id              String          @id @default(cuid())
+  botConfigId     String
+  category        InsightCategory
+  status          InsightStatus   @default(PENDING)
+  title           String
+  description     String          @db.Text
+  suggestedAction String          @db.Text
+  evidenceCount   Int
+  appliedAt       DateTime?
+  dismissedAt     DateTime?
+  createdAt       DateTime        @default(now())
+
+  botConfig BotConfig @relation(fields: [botConfigId], references: [id], onDelete: Cascade)
+
+  @@index([botConfigId, status, createdAt])
+  @@map("chatbot_insights")
+}
+
 model QuotaUsage {
-  id                  String   @id @default(cuid())
+  id String @id @default(cuid())
 
-  botConfigId         String
-  botConfig           BotConfig @relation(fields: [botConfigId], references: [id], onDelete: Cascade)
+  botConfigId String
+  botConfig   BotConfig @relation(fields: [botConfigId], references: [id], onDelete: Cascade)
 
-  year                Int
-  month               Int      // 1-12
+  year  Int
+  month Int // 1-12
 
-  conversationsCount  Int      @default(0)
-  tokensIn            Int      @default(0)
-  tokensOut           Int      @default(0)
-  costUsd             Decimal  @default(0) @db.Decimal(10, 4)
+  conversationsCount Int     @default(0)
+  tokensIn           Int     @default(0)
+  tokensOut          Int     @default(0)
+  costUsd            Decimal @default(0) @db.Decimal(10, 4)
 
-  alert80Sent         Boolean   @default(false)
-  alert80SentAt       DateTime?
-  degradedAt          DateTime?
+  alert80Sent   Boolean   @default(false)
+  alert80SentAt DateTime?
+  degradedAt    DateTime?
 
-  createdAt           DateTime @default(now())
-  updatedAt           DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([botConfigId, year, month])
   @@index([botConfigId])
@@ -1028,8 +1071,8 @@ model QuotaUsage {
 model ChatbotEvent {
   id             String   @id @default(cuid())
   botConfigId    String
-  type           String   // ej: "chat.message_received", "chat.lead_captured", "error.llm_failed"
-  level          String   // "info" | "warn" | "error" | "debug"
+  type           String // ej: "chat.message_received", "chat.lead_captured", "error.llm_failed"
+  level          String // "info" | "warn" | "error" | "debug"
   conversationId String?
   message        String   @db.Text
   metadata       Json?

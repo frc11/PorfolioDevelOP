@@ -63,9 +63,17 @@ export type { IntentType, IntentResult } from './server/intent'
 // Logging
 export { chatbotLog, chatbotDebug, chatbotError, logChatbotEvent } from './server/logging'
 export type { LogLevel } from './server/logging'
+export { sendLeadNotificationEmail } from './server/notifications'
 
 // Config endpoint (Sprint S6)
 export { handleConfigRequest, getPublicConfig } from './server/config'
+export {
+  generateInsightsForBot,
+  actOnInsight,
+  getPendingInsightsByOrgSlug,
+  getInsightHistoryByOrgSlug,
+  getInsightsCountForBot,
+} from './server/insights'
 
 // Admin server actions (Sprint S13+)
 export {
@@ -73,6 +81,7 @@ export {
   saveBotConfig,
   saveKnowledgeBaseByOrgSlug,
   saveBotConfigByOrgSlug,
+  sendTestNotification,
 } from './server/admin'
 export type { KnowledgeBaseInput, BotConfigInput } from './server/admin'
 

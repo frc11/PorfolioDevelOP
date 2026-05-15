@@ -33,6 +33,9 @@ const botConfigInputSchema = z.object({
   whatsappNumber: z.string().max(30).nullable(),
   // Quick replies (JSON column)
   quickReplies: z.array(quickReplySchema).max(8),
+  // Lead notifications
+  leadNotificationEmail: z.string().email().nullable(),
+  leadNotificationMode: z.enum(['IMMEDIATE', 'DAILY_DIGEST', 'DISABLED']),
 })
 
 export type BotConfigInput = z.infer<typeof botConfigInputSchema>
@@ -43,13 +46,24 @@ export async function saveBotConfig(input: BotConfigInput): Promise<{ success: b
     return { success: false, error: 'Invalid input: ' + parsed.error.message }
   }
   try {
-    const { botConfigId, ...data } = parsed.data
-    await prisma.botConfig.update({
-      where: { id: botConfigId },
-      data: {
-        ...data,
-        quickReplies: data.quickReplies as unknown as object,
-      },
+    const { botConfigId, leadNotificationEmail, leadNotificationMode, ...data } = parsed.data
+    await prisma.$transaction(async (tx) => {
+      const bot = await tx.botConfig.update({
+        where: { id: botConfigId },
+        data: {
+          ...data,
+          quickReplies: data.quickReplies as unknown as object,
+        },
+        select: { organizationId: true },
+      })
+
+      await tx.organization.update({
+        where: { id: bot.organizationId },
+        data: {
+          leadNotificationEmail,
+          leadNotificationMode,
+        },
+      })
     })
     chatbotLog('admin.bot_config_updated', { botConfigId })
     return { success: true }
