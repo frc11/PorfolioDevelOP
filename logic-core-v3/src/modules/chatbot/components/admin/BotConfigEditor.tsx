@@ -2,13 +2,15 @@
 
 import { useState, useTransition } from 'react'
 import { saveBotConfig, type BotConfigInput } from '../../server/admin/saveBotConfig'
+import { saveBotConfigByOrgSlug } from '../../server/admin/saveBotConfigByOrgSlug'
 import { Plus, Trash2, GripVertical } from 'lucide-react'
 
 interface BotConfigEditorProps {
   initial: BotConfigInput
+  orgSlug?: string
 }
 
-export function BotConfigEditor({ initial }: BotConfigEditorProps) {
+export function BotConfigEditor({ initial, orgSlug }: BotConfigEditorProps) {
   const [data, setData] = useState(initial)
   const [isPending, startTransition] = useTransition()
   const [status, setStatus] = useState<'idle' | 'saved' | 'error'>('idle')
@@ -20,7 +22,12 @@ export function BotConfigEditor({ initial }: BotConfigEditorProps) {
   const handleSave = () => {
     setStatus('idle')
     startTransition(async () => {
-      const result = await saveBotConfig(data)
+      // Remove botConfigId when calling the orgSlug version
+      const { botConfigId, ...restData } = data
+      const result = orgSlug
+        ? await saveBotConfigByOrgSlug({ orgSlug, ...restData })
+        : await saveBotConfig(data)
+
       if (result.success) {
         setStatus('saved')
         setTimeout(() => setStatus('idle'), 3000)

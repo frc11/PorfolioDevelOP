@@ -71,6 +71,17 @@ export type { AvatarRendererProps } from './components/avatar'
 // Admin UI components (Sprint S13+)
 export { KnowledgeBaseEditor, BotConfigEditor } from './components/admin'
 export { ActivityLog } from './components/admin'
+export { ClientChatbotTabs, StatCard, OnboardingWizard } from './components/admin'
+
+// Admin actions
+export { createClientWithBot } from './server/admin/createClientWithBot'
+export type { Industry } from './server/admin/createClientWithBot'
 
 // Dashboard UI components (Sprint S15)
 export { LeadsTable, ConversationsTable } from './components/dashboards'
+export { ClientDashboardTabs, ClientLeadsTable } from './components/dashboard'
+
+// Lead CRM Server Actions
+export { updateLeadStatus } from './server/admin/updateLeadStatus'
+export { saveClientSettings } from './server/admin/saveClientSettings'
+export { saveClientKnowledgeBase } from './server/admin/saveClientKnowledgeBase'

@@ -68,11 +68,18 @@ export type { LogLevel } from './server/logging'
 export { handleConfigRequest, getPublicConfig } from './server/config'
 
 // Admin server actions (Sprint S13+)
-export { saveKnowledgeBase, saveBotConfig } from './server/admin'
+export {
+  saveKnowledgeBase,
+  saveBotConfig,
+  saveKnowledgeBaseByOrgSlug,
+  saveBotConfigByOrgSlug,
+} from './server/admin'
 export type { KnowledgeBaseInput, BotConfigInput } from './server/admin'
 
 // Admin queries (Sprint S15)
+export { getClientChatbotSession } from './server/admin/getClientSession'
 export { listLeadsForBot, listConversationsForBot, getMonthlyUsageForBot } from './server/admin/queries'
+export { getBotByOrgSlug, listLeadsByOrgSlug, listConversationsByOrgSlug, getUsageByOrgSlug } from './server/admin/multiTenantQueries'
 
 // Health (Sprint S20)
 export { checkChatbotHealth, runLLMSmokeTest } from './server/health'

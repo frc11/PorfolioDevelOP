@@ -1,3 +1,6 @@
 export { KnowledgeBaseEditor } from './KnowledgeBaseEditor'
 export { BotConfigEditor } from './BotConfigEditor'
 export { ActivityLog } from './ActivityLog'
+export { ClientChatbotTabs } from './ClientChatbotTabs'
+export { StatCard } from './StatCard'
+export { OnboardingWizard } from './onboarding/OnboardingWizard'

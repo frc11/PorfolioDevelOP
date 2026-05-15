@@ -93,7 +93,7 @@ async function captureLeadExecute(
           phone,
           intent: input.intent,
           message: input.contextSummary,
-          status: 'new',
+          status: 'NEW',
         },
       })
 

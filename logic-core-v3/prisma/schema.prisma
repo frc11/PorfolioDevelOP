@@ -979,7 +979,9 @@ model ChatbotLead {
   notificationSentAt  DateTime?
 
   // Estado gestionable por el cliente
-  status              String   @default("new")  // "new" | "contacted" | "qualified" | "lost" | "converted"
+  status              ChatbotLeadStatus   @default(NEW)
+  internalNotes       String?      @db.Text
+  lastStatusChangeAt  DateTime?
 
   capturedAt          DateTime @default(now())
   updatedAt           DateTime @updatedAt
@@ -987,6 +989,14 @@ model ChatbotLead {
   @@index([botConfigId, capturedAt])
   @@index([status])
   @@map("chatbot_lead")
+}
+
+enum ChatbotLeadStatus {
+  NEW
+  CONTACTED
+  IN_NEGOTIATION
+  WON
+  LOST
 }
 
 model QuotaUsage {

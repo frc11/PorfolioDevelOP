@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from 'react'
 import { saveKnowledgeBase } from '../../server/admin/saveKnowledgeBase'
+import { saveKnowledgeBaseByOrgSlug } from '../../server/admin/saveKnowledgeBaseByOrgSlug'
 
 interface KnowledgeBaseEditorProps {
   botConfigId: string
@@ -14,6 +15,7 @@ interface KnowledgeBaseEditorProps {
     toneExamples: string
     forbiddenStatements: string
   }
+  orgSlug?: string
 }
 
 const SECTIONS = [
@@ -61,7 +63,7 @@ const SECTIONS = [
   },
 ] as const
 
-export function KnowledgeBaseEditor({ botConfigId, initialData }: KnowledgeBaseEditorProps) {
+export function KnowledgeBaseEditor({ botConfigId, initialData, orgSlug }: KnowledgeBaseEditorProps) {
   const [data, setData] = useState(initialData)
   const [isPending, startTransition] = useTransition()
   const [status, setStatus] = useState<'idle' | 'saved' | 'error'>('idle')
@@ -71,7 +73,10 @@ export function KnowledgeBaseEditor({ botConfigId, initialData }: KnowledgeBaseE
     setStatus('idle')
     setErrorMsg(null)
     startTransition(async () => {
-      const result = await saveKnowledgeBase({ botConfigId, ...data })
+      const result = orgSlug
+        ? await saveKnowledgeBaseByOrgSlug({ orgSlug, ...data })
+        : await saveKnowledgeBase({ botConfigId, ...data })
+
       if (result.success) {
         setStatus('saved')
         setTimeout(() => setStatus('idle'), 3000)

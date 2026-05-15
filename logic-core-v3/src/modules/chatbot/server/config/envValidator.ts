@@ -30,11 +30,31 @@ const ENV_VARS: Omit<EnvVarStatus, 'present'>[] = [
     description: 'PostgreSQL connection string for Neon DB',
     hint: 'Get it from Neon console → Connection details',
   },
+  // Vertex AI (current auth method)
+  {
+    name: 'GOOGLE_APPLICATION_CREDENTIALS',
+    required: true,
+    description: 'Path to Service Account JSON file for Vertex AI',
+    hint: 'Create a Service Account in Google Cloud Console with "Vertex AI User" role',
+  },
+  {
+    name: 'CHATBOT_GCP_PROJECT_ID',
+    required: true,
+    description: 'Google Cloud Project ID where Vertex AI API is enabled',
+    hint: 'Find it in Google Cloud Console → Project selector',
+  },
+  {
+    name: 'CHATBOT_GCP_LOCATION',
+    required: false,
+    description: 'Vertex AI region (defaults to us-central1)',
+    hint: 'Use a region close to your users, e.g. us-central1, europe-west1',
+  },
+  // Legacy — was used with @ai-sdk/google (API key auth). Kept as optional warning.
   {
     name: 'CHATBOT_GOOGLE_API_KEY',
-    required: true,
-    description: 'Google Generative Language API key',
-    hint: 'Get it from Google Cloud Console → APIs & Services → Credentials',
+    required: false,
+    description: '[LEGACY] Google Generative Language API key — superseded by Vertex AI Service Account',
+    hint: 'No longer required for the chatbot. Used by other AI modules.',
   },
   {
     name: 'CHATBOT_IP_HASH_SALT',
