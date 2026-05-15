@@ -6,7 +6,7 @@ const { auth } = NextAuth(authConfig)
 
 const LOGIN_PATH = '/login'
 const ADMIN_PATH = '/admin'
-const ADMIN_OS_PATH = '/admin/os'
+const ADMIN_OS_PATH = '/admin'
 const DASHBOARD_PATH = '/dashboard'
 const ONBOARDING_PATH = '/bienvenida'
 const ADMIN_ROLE = 'SUPER_ADMIN'
@@ -27,32 +27,32 @@ function getLegacyAdminRedirectPath(pathname: string): string | null {
   }
 
   if (pathname === '/admin/leads') {
-    return '/admin/os/leads'
+    return '/admin/leads'
   }
 
   if (pathname === '/admin/projects') {
-    return '/admin/os/projects'
+    return '/admin/projects'
   }
 
   const projectDetailMatch = pathname.match(/^\/admin\/projects\/([^/]+)$/)
   if (projectDetailMatch) {
-    return `/admin/os/projects/${projectDetailMatch[1]}`
+    return `/admin/projects/${projectDetailMatch[1]}`
   }
 
   if (pathname === '/admin/clients') {
-    return '/admin/os/clients'
+    return '/admin/clients'
   }
 
   if (pathname === '/admin/tickets') {
-    return '/admin/os/tickets'
+    return '/admin/tickets'
   }
 
   if (pathname === '/admin/messages') {
-    return '/admin/os/messages'
+    return '/admin/messages'
   }
 
   if (pathname === '/admin/settings') {
-    return '/admin/os/settings'
+    return '/admin/settings'
   }
 
   if (pathname.startsWith(`${ADMIN_PATH}/`)) {

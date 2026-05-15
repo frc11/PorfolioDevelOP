@@ -1,5 +1,6 @@
 import { streamText, type ModelMessage } from 'ai'
 import { z } from 'zod'
+import { detectIntent } from '../intent'
 import { prisma } from '@/lib/prisma'
 
 import {
@@ -14,6 +15,8 @@ import { checkQuota, incrementQuota } from '../quota'
 import { checkRateLimit } from '../rate-limit'
 import { hashIp, validateAssistantOutput } from '../safety'
 import { chatbotLog } from '../logging'
+import { chatbotDebug, chatbotError } from '../logging'
+import { logChatbotEvent } from '../logging'
 import type { LLMProviderName } from '../../shared/types'
 
 /**
@@ -57,6 +60,8 @@ export async function handleChatRequest(
   request: Request,
   slug: string
 ): Promise<Response> {
+  let bot: Awaited<ReturnType<typeof resolveBotBySlug>> = null
+  try {
   const startTime = Date.now()
 
   // ─── 1. Parse and validate body ───────────────────────────────
@@ -70,17 +75,33 @@ export async function handleChatRequest(
     return Response.json({ error: 'Invalid request body' }, { status: 400 })
   }
 
+  chatbotDebug('request_parsed', {
+    slug,
+    messageCount: body.messages.length,
+    sessionId: body.sessionId,
+    currentPath: body.currentPath,
+  })
+
   // ─── 2. Resolve bot ───────────────────────────────────────────
-  const bot = await resolveBotBySlug(slug)
+  bot = await resolveBotBySlug(slug)
   if (!bot) {
     chatbotLog('chat.bot_not_found', { slug }, 'warn')
     return Response.json({ error: 'Bot not found or inactive' }, { status: 404 })
   }
+  const resolvedBot = bot; // non-null reference for callbacks
 
   if (!bot.knowledgeBase) {
     chatbotLog('chat.bot_no_kb', { slug, botConfigId: bot.id }, 'error')
     return Response.json({ error: 'Bot misconfigured' }, { status: 500 })
   }
+
+  chatbotDebug('bot_resolved', {
+    botId: bot.id,
+    botName: bot.botName,
+    llmProvider: bot.llmProvider,
+    llmModel: bot.llmModel,
+    monthlyQuota: bot.monthlyQuota,
+  })
 
   // ─── 3. Rate limit ────────────────────────────────────────────
   const clientIp = extractClientIp(request)
@@ -161,7 +182,15 @@ export async function handleChatRequest(
     },
   })
 
-  // ─── 7. Build system prompt + tools ───────────────────────────
+  // ─── 7. Intent detection & Build system prompt ────────────────
+  const intentResult = detectIntent(lastUserMessage.content)
+  if (intentResult.intent !== 'unknown') {
+    chatbotDebug('intent_detected', {
+      intent: intentResult.intent,
+      conversationId: conversation.id,
+    })
+  }
+
   const systemPrompt = buildSystemPrompt({
     botConfig: {
       botName: bot.botName,
@@ -206,9 +235,19 @@ export async function handleChatRequest(
     messageCount: body.messages.length,
   })
 
+  chatbotDebug('llm_call_starting', {
+    conversationId: conversation.id,
+    systemPromptLength: systemPrompt.length,
+    toolCount: Object.keys(tools).length,
+  })
+
+  const enrichedSystemPrompt = intentResult.guidance
+    ? `${systemPrompt}\n\n---\n\n# CONTEXTO DEL TURNO ACTUAL\n\nIntención detectada: ${intentResult.intent}\n\n${intentResult.guidance}`
+    : systemPrompt
+
   const result = streamText({
     model,
-    system: systemPrompt,
+    system: enrichedSystemPrompt,
     messages: body.messages.map((m): ModelMessage => {
       if (m.role === 'user') {
         return { role: 'user', content: [{ type: 'text', text: m.content }] }
@@ -236,13 +275,21 @@ export async function handleChatRequest(
             },
             'warn'
           )
+          await logChatbotEvent({
+            botConfigId: resolvedBot.id,
+            type: 'chat.validation_warnings',
+            level: 'warn',
+            message: `${warnings.length} validation warning(s) en respuesta`,
+            conversationId: conversation.id,
+            metadata: { warnings: warnings.map((w) => w.patternId) },
+          })
         }
 
         const tokensIn = usage.inputTokens ?? 0
         const tokensOut = usage.outputTokens ?? 0
         const costBreakdown = calculateCost(
-          bot.llmProvider as LLMProviderName,
-          bot.llmModel,
+          resolvedBot.llmProvider as LLMProviderName,
+          resolvedBot.llmModel,
           tokensIn,
           tokensOut
         )
@@ -275,7 +322,7 @@ export async function handleChatRequest(
 
         // Update QuotaUsage for current period
         await incrementQuota({
-          botConfigId: bot.id,
+          botConfigId: resolvedBot.id,
           isNewConversation,
           messagesAdded: 2,
           tokensIn,
@@ -293,21 +340,54 @@ export async function handleChatRequest(
           warningCount: warnings.length,
           durationMs: Date.now() - startTime,
         })
-      } catch (persistError) {
-        chatbotLog(
-          'chat.persist_error',
-          {
-            conversationId: conversation.id,
-            error:
-              persistError instanceof Error
-                ? persistError.message
-                : 'unknown',
+
+        await logChatbotEvent({
+          botConfigId: resolvedBot.id,
+          type: 'chat.message_completed',
+          level: 'info',
+          message: `Respuesta enviada (${tokensIn} in / ${tokensOut} out)`,
+          conversationId: conversation.id,
+          metadata: {
+            tokensIn,
+            tokensOut,
+            costUsd: costBreakdown.totalUsd,
+            toolCallCount: toolCalls?.length ?? 0,
           },
-          'error'
-        )
+        })
+      } catch (persistError) {
+        chatbotError('chat.persist_error', persistError, { conversationId: conversation.id })
+        await logChatbotEvent({
+          botConfigId: resolvedBot.id,
+          type: 'chat.persist_error',
+          level: 'error',
+          message: persistError instanceof Error ? persistError.message : 'unknown',
+          conversationId: conversation.id,
+        })
       }
     },
   })
 
   return result.toUIMessageStreamResponse()
+
+  } catch (unhandledError) {
+    chatbotError('chat.unhandled_error', unhandledError, { slug })
+    if (bot) {
+      await logChatbotEvent({
+        botConfigId: bot.id,
+        type: 'chat.unhandled_error',
+        level: 'error',
+        message: unhandledError instanceof Error ? unhandledError.message : 'unknown',
+      })
+    }
+    return Response.json(
+      {
+        error: 'Internal server error in chatbot. Check server logs.',
+        // En development, devolver más detalle:
+        ...(process.env.NODE_ENV !== 'production' && {
+          debug: unhandledError instanceof Error ? unhandledError.message : String(unhandledError),
+        }),
+      },
+      { status: 500 }
+    )
+  }
 }

@@ -871,6 +871,7 @@ model BotConfig {
   conversations      Conversation[]
   leads              ChatbotLead[]
   quotaUsages        QuotaUsage[]
+  events             ChatbotEvent[]
 
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
@@ -930,6 +931,7 @@ model Conversation {
   // Relaciones
   messages           ChatMessage[]
   lead               ChatbotLead?
+  events             ChatbotEvent[]
 
   @@index([botConfigId, startedAt])
   @@index([sessionId])
@@ -1011,4 +1013,22 @@ model QuotaUsage {
   @@unique([botConfigId, year, month])
   @@index([botConfigId])
   @@map("chatbot_quota_usage")
+}
+
+model ChatbotEvent {
+  id             String   @id @default(cuid())
+  botConfigId    String
+  type           String   // ej: "chat.message_received", "chat.lead_captured", "error.llm_failed"
+  level          String   // "info" | "warn" | "error" | "debug"
+  conversationId String?
+  message        String   @db.Text
+  metadata       Json?
+  createdAt      DateTime @default(now())
+
+  botConfig    BotConfig     @relation(fields: [botConfigId], references: [id], onDelete: Cascade)
+  conversation Conversation? @relation(fields: [conversationId], references: [id], onDelete: SetNull)
+
+  @@index([botConfigId, createdAt(sort: Desc)])
+  @@index([level, createdAt(sort: Desc)])
+  @@map("chatbot_events")
 }

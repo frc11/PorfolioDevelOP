@@ -3,14 +3,6 @@ import type { LanguageModel } from 'ai'
 import type { LLMProvider, ModelInfo } from '../types'
 import { ModelNotSupportedError } from '../types'
 
-/**
- * Google Gemini provider.
- *
- * Reads API key from `CHATBOT_GOOGLE_API_KEY` env var.
- * Falls back to `GOOGLE_GENERATIVE_AI_API_KEY` if the chatbot-prefixed one
- * isn't set (compat with the legacy variable name).
- */
-
 interface GoogleModelConfig extends ModelInfo {
   apiModelId: string  // The actual model id Google's API expects
 }
@@ -50,26 +42,24 @@ const GOOGLE_MODELS: Record<string, GoogleModelConfig> = {
 
 export class GoogleProvider implements LLMProvider {
   readonly name = 'google' as const
-
-  private readonly apiKey: string
   private client: ReturnType<typeof createGoogleGenerativeAI> | null = null
 
   constructor() {
-    const apiKey =
-      process.env.CHATBOT_GOOGLE_API_KEY ?? process.env.GOOGLE_GENERATIVE_AI_API_KEY
-
+    // Verificar que la API Key está disponible
+    const apiKey = process.env.CHATBOT_GOOGLE_API_KEY
     if (!apiKey) {
       throw new Error(
-        'Missing API key: set CHATBOT_GOOGLE_API_KEY (preferred) or ' +
-          'GOOGLE_GENERATIVE_AI_API_KEY in your environment.'
+        'Google Provider requires CHATBOT_GOOGLE_API_KEY env var. ' +
+        'Please check your .env.local file.'
       )
     }
-    this.apiKey = apiKey
   }
 
   private getClient() {
     if (!this.client) {
-      this.client = createGoogleGenerativeAI({ apiKey: this.apiKey })
+      this.client = createGoogleGenerativeAI({
+        apiKey: process.env.CHATBOT_GOOGLE_API_KEY!,
+      })
     }
     return this.client
   }

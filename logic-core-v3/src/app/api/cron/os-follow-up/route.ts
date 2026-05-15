@@ -297,7 +297,7 @@ export async function GET(request: Request) {
         type: NotificationType.INFO,
         title: markerTitle,
         message: `OS follow-up digest sent for ${dayKey}`,
-        actionUrl: '/admin/os/leads',
+        actionUrl: '/admin/leads',
         read: true,
         createdAt: startOfDay,
       },

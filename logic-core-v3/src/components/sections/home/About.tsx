@@ -1,9 +1,5 @@
 'use client';
-<<<<<<< HEAD
-import { useRef, useState } from 'react';
-=======
 import { useId, useRef, useState } from 'react';
->>>>>>> d1903b4efb17fa61d6249ed6cc8e0ece8fc8db98
 import { motion, useInView, useMotionValueEvent, useScroll, useTransform } from 'framer-motion';
 import type { MotionValue } from 'framer-motion';
 import { useThemeSection } from '@/hooks/useThemeObserver';

@@ -67,7 +67,7 @@ export async function approveTaskAction(taskId: string): Promise<ActionResult> {
             userId: admin.id,
             organizationId,
             taskId: task.id,
-            actionUrl: `/admin/os/projects/${task.projectId}`,
+            actionUrl: `/admin/projects/${task.projectId}`,
           })),
         })
       }
@@ -83,9 +83,9 @@ export async function approveTaskAction(taskId: string): Promise<ActionResult> {
 
     revalidatePath('/dashboard')
     revalidatePath('/dashboard/project')
-    revalidatePath('/admin/os/messages')
-    revalidatePath(`/admin/os/projects/${task.projectId}`)
-    revalidatePath(`/admin/os/projects/${task.projectId}/tasks`)
+    revalidatePath('/admin/messages')
+    revalidatePath(`/admin/projects/${task.projectId}`)
+    revalidatePath(`/admin/projects/${task.projectId}/tasks`)
 
     return { success: true }
   } catch (error) {
@@ -158,7 +158,7 @@ export async function rejectTaskAction(
             userId: admin.id,
             organizationId,
             taskId: task.id,
-            actionUrl: `/admin/os/projects/${task.projectId}`,
+            actionUrl: `/admin/projects/${task.projectId}`,
           })),
         })
       }
@@ -174,9 +174,9 @@ export async function rejectTaskAction(
 
     revalidatePath('/dashboard')
     revalidatePath('/dashboard/project')
-    revalidatePath('/admin/os/messages')
-    revalidatePath(`/admin/os/projects/${task.projectId}`)
-    revalidatePath(`/admin/os/projects/${task.projectId}/tasks`)
+    revalidatePath('/admin/messages')
+    revalidatePath(`/admin/projects/${task.projectId}`)
+    revalidatePath(`/admin/projects/${task.projectId}/tasks`)
 
     return { success: true }
   } catch (error) {

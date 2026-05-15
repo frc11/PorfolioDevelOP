@@ -1,3 +1,4 @@
+export { ChatWindowV2 } from './ChatWindowV2'
 export { ChatWindow } from './ChatWindow'
 export { ChatHeader } from './ChatHeader'
 export { ChatMessages } from './ChatMessages'

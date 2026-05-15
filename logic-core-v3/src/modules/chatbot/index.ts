@@ -70,6 +70,11 @@ export type { RateLimitResult } from './server/rate-limit'
 export { checkQuota, incrementQuota } from './server/quota'
 export type { QuotaCheckResult } from './server/quota'
 export { resolveBotBySlug, getOrCreateConversation } from './server/conversation'
+
+// Intent detection (Bloque E)
+export { detectIntent } from './server/intent'
+export type { IntentType, IntentResult } from './server/intent'
+
 export { chatbotLog } from './server/logging'
 export type { LogLevel } from './server/logging'
 
@@ -127,3 +132,17 @@ export type { KnowledgeBaseInput, BotConfigInput } from './server/admin'
 // Dashboards (Sprint S15)
 export { LeadsTable, ConversationsTable } from './components/dashboards'
 export { listLeadsForBot, listConversationsForBot, getMonthlyUsageForBot } from './server/admin/queries'
+
+// Debug + Health (Sprint S20)
+export { chatbotDebug, chatbotError } from './server/logging'
+export { checkChatbotHealth } from './server/health'
+export type { HealthCheckResult } from './server/health'
+export { checkChatbotEnv, requireChatbotEnv } from './server/config/envValidator'
+export type { EnvVarStatus, EnvCheckResult } from './server/config/envValidator'
+
+// Activity Log (Sprint S21)
+export { ActivityLog } from './components/admin'
+export { logChatbotEvent } from './server/logging'
+
+export { runLLMSmokeTest } from './server/health'
+export type { SmokeTestResult } from './server/health'

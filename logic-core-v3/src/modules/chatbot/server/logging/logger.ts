@@ -26,3 +26,47 @@ export function chatbotLog(
   else if (level === 'warn') console.warn(json)
   else console.log(json)
 }
+
+/**
+ * Debug logger — only outputs in non-production environments.
+ *
+ * Use for verbose tracing during development: LLM request/response bodies,
+ * tool call details, conversation state transitions. Stays silent in prod.
+ */
+export function chatbotDebug(
+  event: string,
+  fields: Record<string, unknown> = {}
+): void {
+  if (process.env.NODE_ENV === 'production') return
+  const payload = {
+    type: `debug.${event}`,
+    level: 'debug',
+    timestamp: new Date().toISOString(),
+    ...fields,
+  }
+  // Use console.debug so it can be filtered separately if needed
+  console.debug(JSON.stringify(payload, null, 2))
+}
+
+/**
+ * Records a critical error event. Same as chatbotLog with level='error'
+ * but with stricter typing and explicit error object handling.
+ */
+export function chatbotError(
+  event: string,
+  error: unknown,
+  fields: Record<string, unknown> = {}
+): void {
+  const errorInfo =
+    error instanceof Error
+      ? { message: error.message, name: error.name, stack: error.stack }
+      : { message: String(error) }
+  const payload = {
+    type: `error.${event}`,
+    level: 'error',
+    timestamp: new Date().toISOString(),
+    error: errorInfo,
+    ...fields,
+  }
+  console.error(JSON.stringify(payload))
+}

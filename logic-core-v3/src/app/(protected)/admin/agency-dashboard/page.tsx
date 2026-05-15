@@ -1,7 +1,7 @@
 import { auth } from '@/auth'
 import { redirect } from 'next/navigation'
 import { getAgencyClients } from '@/actions/agency-actions'
-import { CommandCenterClient } from '@/components/admin/agency-dashboard/CommandCenterClient'
+import { CommandCenterClient } from './_components/CommandCenterClient'
 
 export default async function AgencyDashboardPage() {
   const session = await auth()

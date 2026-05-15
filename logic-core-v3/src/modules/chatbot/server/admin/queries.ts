@@ -37,3 +37,25 @@ export async function getMonthlyUsageForBot(botConfigId: string) {
     },
   })
 }
+
+export async function listRecentEvents(botConfigId: string, limit: number = 100) {
+  return prisma.chatbotEvent.findMany({
+    where: { botConfigId },
+    orderBy: { createdAt: 'desc' },
+    take: limit,
+    include: {
+      conversation: { select: { sessionId: true, currentPath: true } },
+    },
+  })
+}
+
+export async function listEventsSince(botConfigId: string, since: Date, limit: number = 50) {
+  return prisma.chatbotEvent.findMany({
+    where: { botConfigId, createdAt: { gt: since } },
+    orderBy: { createdAt: 'asc' },
+    take: limit,
+    include: {
+      conversation: { select: { sessionId: true, currentPath: true } },
+    },
+  })
+}

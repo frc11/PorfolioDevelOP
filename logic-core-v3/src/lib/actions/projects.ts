@@ -43,8 +43,8 @@ export async function createProjectAction(
     return 'Error al crear el proyecto. Intentá de nuevo.'
   }
 
-  revalidatePath('/admin/os/projects')
-  redirect(`/admin/os/projects/${project.id}`)
+  revalidatePath('/admin/projects')
+  redirect(`/admin/projects/${project.id}`)
 }
 
 // ─── Project: Update ──────────────────────────────────────────────────────────
@@ -77,9 +77,9 @@ export async function updateProjectAction(
     return 'Error al actualizar el proyecto. Intentá de nuevo.'
   }
 
-  revalidatePath('/admin/os/projects')
-  revalidatePath(`/admin/os/projects/${projectId}`)
-  redirect(`/admin/os/projects/${projectId}`)
+  revalidatePath('/admin/projects')
+  revalidatePath(`/admin/projects/${projectId}`)
+  redirect(`/admin/projects/${projectId}`)
 }
 
 // ─── Project: Delete ──────────────────────────────────────────────────────────
@@ -90,8 +90,8 @@ export async function deleteProjectAction(formData: FormData): Promise<void> {
 
   await prisma.project.delete({ where: { id: projectId } })
 
-  revalidatePath('/admin/os/projects')
-  redirect('/admin/os/projects')
+  revalidatePath('/admin/projects')
+  redirect('/admin/projects')
 }
 
 // ─── Task: Create ─────────────────────────────────────────────────────────────
@@ -123,8 +123,8 @@ export async function createTaskAction(
     return 'Error al crear la tarea. Intentá de nuevo.'
   }
 
-  revalidatePath(`/admin/os/projects/${projectId}`)
-  redirect(`/admin/os/projects/${projectId}`)
+  revalidatePath(`/admin/projects/${projectId}`)
+  redirect(`/admin/projects/${projectId}`)
 }
 
 // ─── Task: Update status (inline) ─────────────────────────────────────────────
@@ -141,7 +141,7 @@ export async function updateTaskStatusAction(formData: FormData): Promise<void> 
     data: { status: statusRaw },
   })
 
-  revalidatePath(`/admin/os/projects/${projectId}`)
+  revalidatePath(`/admin/projects/${projectId}`)
 }
 
 // ─── Task: Send for client approval ───────────────────────────────────────────
@@ -173,7 +173,7 @@ export async function sendTaskForApprovalAction(formData: FormData): Promise<voi
     })
   })
 
-  revalidatePath(`/admin/os/projects/${projectId}`)
+  revalidatePath(`/admin/projects/${projectId}`)
   revalidatePath('/dashboard/project')
   revalidatePath('/dashboard')
 }
@@ -187,6 +187,6 @@ export async function deleteTaskAction(formData: FormData): Promise<void> {
 
   await prisma.task.delete({ where: { id: taskId } })
 
-  revalidatePath(`/admin/os/projects/${projectId}`)
-  redirect(`/admin/os/projects/${projectId}`)
+  revalidatePath(`/admin/projects/${projectId}`)
+  redirect(`/admin/projects/${projectId}`)
 }

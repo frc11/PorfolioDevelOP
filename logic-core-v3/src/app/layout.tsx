@@ -54,6 +54,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <link rel="preconnect" href="https://grainy-gradients.vercel.app" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://placehold.co" crossOrigin="anonymous" />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >

@@ -1,8 +1,5 @@
 'use client';
-<<<<<<< HEAD
-=======
 import { useEffect } from 'react';
->>>>>>> d1903b4efb17fa61d6249ed6cc8e0ece8fc8db98
 import { motion, useScroll, useSpring, useTransform, useVelocity } from 'framer-motion';
 
 export const KineticText = ({
@@ -31,7 +28,7 @@ export const KineticText = ({
         kineticStrength.set(enabled ? 1 : 0);
     }, [enabled, kineticStrength]);
 
-    const skewX = useTransform([smoothVelocity, kineticStrength], ([velocity, strength]) => {
+    const skewX = useTransform([smoothVelocity, kineticStrength], ([velocity, strength]: number[]) => {
         const clampedVelocity = Math.max(-1100, Math.min(1100, velocity));
         return (clampedVelocity / 1100) * 10 * strength;
     });

@@ -3,7 +3,7 @@
 import { usePathname } from 'next/navigation'
 import { motion, AnimatePresence } from 'motion/react'
 import { AvatarRenderer } from './avatar'
-import { ChatWindow } from './chat'
+import { ChatWindowV2 as ChatWindow } from './chat/ChatWindowV2'
 import { ProactiveTooltip } from './tooltip'
 import { renderToolCall } from './tool-cards'
 import { useChatbot } from '../hooks/useChatbot'
@@ -48,8 +48,9 @@ export function LogicCompanion({ slug }: LogicCompanionProps) {
         )}
       </AnimatePresence>
 
-      <motion.button
-        type="button"
+      <motion.div
+        role="button"
+        tabIndex={0}
         onClick={chatbot.toggle}
         aria-label={chatbot.isOpen ? 'Cerrar chat' : 'Abrir chat'}
         style={{
@@ -86,7 +87,7 @@ export function LogicCompanion({ slug }: LogicCompanionProps) {
             />
           )}
         </div>
-      </motion.button>
+      </motion.div>
     </>
   )
 }

@@ -39,6 +39,10 @@ Lista de sprints del MVP del chatbot. Marcar `[x]` al completar cada uno.
 - [x] S17 — Migración landing develOP
 - [x] S18 — QA pass
 - [x] S19 — Deploy + smoke test
+- [x] S20 — Env validator + debug logging + health dashboard
+- [x] S21 — Activity log (ChatbotEvent + persistent logger + admin page)
+- [x] S22 — Health & Smoke endpoints (/health y /smoke)
+- [x] S23 — QA checklist + deploy procedure
 
 ## Bloque C — Reporte consolidado
 
@@ -54,6 +58,10 @@ Lista de sprints del MVP del chatbot. Marcar `[x]` al completar cada uno.
 - [x] S19 — Deploy config
 
 ### Estado final del MVP
+
+## MVP — Listo para deploy
+
+S0 a S23 completados. Ver `docs/chatbot-deploy.md` para procedure.
 - Build: PASS
 - Frontend público: avatar montado, chat funcional, tool cards renderizando
 - Admin: KB editable, BotConfig editable, dashboards funcionales

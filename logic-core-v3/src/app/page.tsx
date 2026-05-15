@@ -1,102 +1,46 @@
-"use client"
-
 import dynamic from 'next/dynamic'
-// import { Preloader } from '@/components/ui/Preloader'
+import { ThemeProvider } from '@/hooks/useThemeObserver'
+import { HomeWrapper } from '@/components/layout/HomeWrapper'
+import { SectionWrapper } from '@/components/layout/SectionWrapper'
+
+// Critical ATF (Above The Fold) Components
+import { Hero } from '@/components/layout/Hero'
+import { About } from '@/components/sections/home/About'
 
 // Heavy Components Lazy Loaded
-const Hero = dynamic(() => import('@/components/layout/Hero').then(mod => mod.Hero), { ssr: true })
 const Footer = dynamic(() => import('@/components/sections/home/Footer').then(mod => mod.Footer), { ssr: true })
 const WhyDevelOP = dynamic(() => import('@/components/sections/home/WhyDevelOP').then(mod => mod.WhyDevelOP), { ssr: true })
-
-import { About } from '@/components/sections/home/About'
-import { Portfolio } from '@/components/sections/home/Portfolio'
-import OurServices from '@/components/sections/home/OurServices';
-import { PortalDemo } from '@/components/sections/portal-demo/PortalDemo';
-import { TodoIncluido } from '@/components/sections/todo-incluido/TodoIncluido'
-import { ModulosOpcionales } from '@/components/sections/modulos-opcionales/ModulosOpcionales'
-import { PortalDemoCTA } from '@/components/sections/portal-demo-cta/PortalDemoCTA'
-import { InfiniteReviews } from '@/components/sections/home/InfiniteReviews'
-import { motion } from 'motion/react'
-import { ThemeProvider, useTheme } from '@/hooks/useThemeObserver'
-
-// Reusable Section Wrapper for unifying animations
-const Section = ({ children, className = "" }: { children: React.ReactNode, className?: string }) => (
-  <motion.div
-    initial={{ opacity: 0, y: 40 }}
-    whileInView={{ opacity: 1, y: 0 }}
-    viewport={{ once: true, margin: "-15%" }}
-    transition={{ duration: 0.8, ease: "easeOut" }}
-    className={className}
-  >
-    {children}
-  </motion.div>
-)
-
-// ... (existing imports)
-
-function HomeContent() {
-  const { theme } = useTheme()
-
-  // Theme colors - Hero is now excluded from this as it has its own style locking
-  const bgColor = theme === 'light' ? '#fafafa' : '#000000' // zinc-50 vs black
-  const textColor = theme === 'light' ? '#18181b' : '#ffffff' // zinc-900 vs white
-
-  return (
-    <motion.main
-      className="w-full relative font-sans"
-      animate={{
-        backgroundColor: bgColor,
-        color: textColor
-      }}
-      transition={{ duration: 0.8, ease: 'easeInOut' }}
-    >
-      {/* <Preloader /> Removed and moved to layout */}
-
-      {/* GLOBAL BACKGROUND - Removed ReactiveBackground for Light Mode */}
-      {/* <ReactiveBackground /> */}
-
-      {/* SCROLLABLE CONTENT */}
-      <div className="relative z-10 w-full">
-
-        {/* HERO SECTION (First Fold) - Now Modularized */}
-        <Hero />
-
-        {/* Light Mode Return - Horizontal Scroll */}
-        <About />
-
-
-
-        <Portfolio />
-
-        <InfiniteReviews />
-
-        <Section>
-          <OurServices />
-        </Section>
-
-        <Section>
-          <PortalDemo />
-        </Section>
-
-        <TodoIncluido />
-        <ModulosOpcionales />
-        <PortalDemoCTA />
-
-        <WhyDevelOP />
-
-
-
-        <Footer />
-
-      </div>
-    </motion.main>
-  )
-}
+const Portfolio = dynamic(() => import('@/components/sections/home/Portfolio').then(mod => mod.Portfolio), { loading: () => <div className="min-h-[50vh] animate-pulse bg-zinc-900/20" /> })
+const OurServices = dynamic(() => import('@/components/sections/home/OurServices'), { loading: () => <div className="min-h-[50vh] animate-pulse bg-zinc-900/20" /> })
+const PortalDemo = dynamic(() => import('@/components/sections/portal-demo/PortalDemo').then(mod => mod.PortalDemo), { loading: () => <div className="min-h-[50vh] animate-pulse bg-zinc-900/20" /> })
+const TodoIncluido = dynamic(() => import('@/components/sections/todo-incluido/TodoIncluido').then(mod => mod.TodoIncluido), { loading: () => <div className="min-h-[50vh] animate-pulse bg-zinc-900/20" /> })
+const ModulosOpcionales = dynamic(() => import('@/components/sections/modulos-opcionales/ModulosOpcionales').then(mod => mod.ModulosOpcionales), { loading: () => <div className="min-h-[50vh] animate-pulse bg-zinc-900/20" /> })
+const PortalDemoCTA = dynamic(() => import('@/components/sections/portal-demo-cta/PortalDemoCTA').then(mod => mod.PortalDemoCTA), { loading: () => <div className="min-h-[50vh] animate-pulse bg-zinc-900/20" /> })
+const InfiniteReviews = dynamic(() => import('@/components/sections/home/InfiniteReviews').then(mod => mod.InfiniteReviews), { loading: () => <div className="min-h-[20vh] animate-pulse bg-zinc-900/20" /> })
 
 export default function Home() {
   return (
     <ThemeProvider>
-      <HomeContent />
+      <HomeWrapper>
+        <Hero />
+        <About />
+        <Portfolio />
+        <InfiniteReviews />
+
+        <SectionWrapper>
+          <OurServices />
+        </SectionWrapper>
+
+        <SectionWrapper>
+          <PortalDemo />
+        </SectionWrapper>
+
+        <TodoIncluido />
+        <ModulosOpcionales />
+        <PortalDemoCTA />
+        <WhyDevelOP />
+        <Footer />
+      </HomeWrapper>
     </ThemeProvider>
   )
 }

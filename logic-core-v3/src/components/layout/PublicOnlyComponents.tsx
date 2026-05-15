@@ -1,8 +1,12 @@
 'use client'
 
+import dynamic from 'next/dynamic'
 import { usePathname } from 'next/navigation'
 
-import { LogicCompanion } from '@/modules/chatbot'
+const LogicCompanion = dynamic(
+  () => import('@/modules/chatbot').then((m) => ({ default: m.LogicCompanion })),
+  { ssr: false }
+)
 
 const PORTAL_PREFIXES = ['/admin', '/dashboard']
 

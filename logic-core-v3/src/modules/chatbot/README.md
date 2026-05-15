@@ -156,6 +156,29 @@ Expected: SSE stream with the assistant's response. After it
 finishes, check directly with Prisma Studio (`npx prisma studio`)
 or query the BD:
 
-```sql
 SELECT * FROM chatbot_conversation WHERE "sessionId" = 'manual-test-001';
 ```
+
+## Health & Smoke Test Endpoints
+
+### `GET /api/chatbot/[slug]/health`
+
+Cheap health check. Verifies env vars, DB, provider config, bot existence.
+Does NOT consume LLM tokens.
+
+```bash
+curl https://your-domain.com/api/chatbot/develop/health
+```
+
+Returns 200 if healthy, 503 if not.
+
+### `GET /api/chatbot/[slug]/smoke`
+
+Full smoke test. Includes health check + actual LLM call.
+Consumes ~10 tokens per invocation. Use sparingly.
+
+```bash
+curl https://your-domain.com/api/chatbot/develop/smoke
+```
+
+Returns 200 only if end-to-end works. 503 with details otherwise.

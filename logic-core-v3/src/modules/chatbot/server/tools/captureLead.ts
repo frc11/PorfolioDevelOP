@@ -1,6 +1,7 @@
 import { tool } from 'ai'
 import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
+import { logChatbotEvent } from '../logging'
 import type { ToolCallContext, CaptureLeadResult, ToolExecuteResult } from './types'
 
 /**
@@ -116,6 +117,19 @@ async function captureLeadExecute(
         // PII (name, contact value, message) intentionally omitted from logs
       })
     )
+
+    await logChatbotEvent({
+      botConfigId: ctx.botConfigId,
+      type: 'tool.lead_captured',
+      level: 'info',
+      message: `Lead capturado (intent: ${input.intent})`,
+      conversationId: ctx.conversationId,
+      metadata: {
+        intent: input.intent,
+        contactMethod: input.contactMethod,
+        leadId: result.id,
+      },
+    })
 
     return {
       success: true,

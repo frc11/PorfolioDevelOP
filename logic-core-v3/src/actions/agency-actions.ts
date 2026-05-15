@@ -25,6 +25,20 @@ export async function getAgencyClients() {
       },
       clientAssets: {
         orderBy: { createdAt: 'desc' }
+      },
+      botConfig: {
+        include: {
+          quotaUsages: {
+            where: {
+              year: new Date().getFullYear(),
+              month: new Date().getMonth() + 1
+            }
+          },
+          leads: {
+            orderBy: { capturedAt: 'desc' },
+            take: 5
+          }
+        }
       }
     },
     orderBy: { createdAt: 'desc' }
