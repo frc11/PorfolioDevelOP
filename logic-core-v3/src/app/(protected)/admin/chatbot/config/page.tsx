@@ -11,7 +11,10 @@ export default async function BotConfigPage() {
     redirect('/dashboard') // Fallback to safe area if not authorized
   }
 
-  const bot = await prisma.botConfig.findUnique({ where: { slug: 'develop' } })
+  const bot = await prisma.botConfig.findUnique({
+    where: { slug: 'develop' },
+    include: { organization: true },
+  })
   if (!bot) {
     return <div className="p-8 text-red-400">Bot not found.</div>
   }
@@ -34,6 +37,8 @@ export default async function BotConfigPage() {
     tone: bot.tone,
     whatsappNumber: bot.whatsappNumber,
     quickReplies: (bot.quickReplies as unknown as BotConfigInput['quickReplies']) ?? [],
+    leadNotificationEmail: bot.organization.leadNotificationEmail,
+    leadNotificationMode: bot.organization.leadNotificationMode ?? 'IMMEDIATE',
   }
 
   return (

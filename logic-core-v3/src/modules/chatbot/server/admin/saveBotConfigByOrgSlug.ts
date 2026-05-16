@@ -28,6 +28,8 @@ const SaveBotConfigInputSchema = z.object({
   tone: z.string().min(1).max(50),
   whatsappNumber: z.string().max(30).nullable(),
   quickReplies: z.array(quickReplySchema).max(8),
+  leadNotificationEmail: z.string().email().nullable(),
+  leadNotificationMode: z.enum(['IMMEDIATE', 'DAILY_DIGEST', 'DISABLED']),
 })
 
 export async function saveBotConfigByOrgSlug(
@@ -50,13 +52,23 @@ export async function saveBotConfigByOrgSlug(
   }
 
   try {
-    await prisma.botConfig.update({
-      where: { id: org.botConfig.id },
-      data: {
-        ...data,
-        quickReplies: data.quickReplies as unknown as object,
-      },
-    })
+    const { leadNotificationEmail, leadNotificationMode, ...botData } = data
+    await prisma.$transaction([
+      prisma.botConfig.update({
+        where: { id: org.botConfig.id },
+        data: {
+          ...botData,
+          quickReplies: botData.quickReplies as unknown as object,
+        },
+      }),
+      prisma.organization.update({
+        where: { id: org.id },
+        data: {
+          leadNotificationEmail,
+          leadNotificationMode,
+        },
+      }),
+    ])
 
     revalidatePath(`/admin/clients/${orgSlug}/chatbot/config`)
     return { success: true }

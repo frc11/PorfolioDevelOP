@@ -2,6 +2,7 @@ import { tool } from 'ai'
 import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
 import { logChatbotEvent } from '../logging'
+import { sendLeadNotificationEmail } from '../notifications'
 import type { ToolCallContext, CaptureLeadResult, ToolExecuteResult } from './types'
 
 /**
@@ -105,7 +106,53 @@ async function captureLeadExecute(
       return lead
     })
 
-    // 4. Log structured event (real notifications wired in S5+)
+    // 4. Notify the client without blocking the bot response.
+    async function notifyClient() {
+      try {
+        const bot = await prisma.botConfig.findUnique({
+          where: { id: ctx.botConfigId },
+          include: { organization: true },
+        })
+
+        const org = bot?.organization
+        if (!bot || !org?.leadNotificationEmail || org.leadNotificationMode === 'DISABLED') {
+          return
+        }
+
+        if (org.leadNotificationMode === 'IMMEDIATE') {
+          const notification = await sendLeadNotificationEmail({
+            to: org.leadNotificationEmail,
+            organizationName: org.companyName,
+            botName: bot.botName,
+            lead: {
+              name: input.name,
+              email,
+              phone,
+              intent: input.intent,
+              message: input.contextSummary,
+              createdAt: result.capturedAt,
+            },
+            dashboardUrl: `${process.env.NEXT_PUBLIC_APP_URL ?? ''}/dashboard/chatbot/leads`,
+          })
+
+          if (notification.ok) {
+            await prisma.chatbotLead.update({
+              where: { id: result.id },
+              data: {
+                notificationSent: true,
+                notificationSentAt: new Date(),
+              },
+            })
+          }
+        }
+      } catch (error) {
+        console.error('[captureLead] Notification failed but lead was saved', error)
+      }
+    }
+
+    void notifyClient()
+
+    // 5. Log structured event.
     console.log(
       JSON.stringify({
         type: 'capture_lead.created',

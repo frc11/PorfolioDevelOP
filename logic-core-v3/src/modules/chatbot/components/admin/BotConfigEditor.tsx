@@ -3,7 +3,8 @@
 import { useState, useTransition } from 'react'
 import { saveBotConfig, type BotConfigInput } from '../../server/admin/saveBotConfig'
 import { saveBotConfigByOrgSlug } from '../../server/admin/saveBotConfigByOrgSlug'
-import { Plus, Trash2, GripVertical } from 'lucide-react'
+import { sendTestNotification } from '../../server/admin/sendTestNotification'
+import { Plus, Trash2, GripVertical, Mail } from 'lucide-react'
 
 interface BotConfigEditorProps {
   initial: BotConfigInput
@@ -15,6 +16,8 @@ export function BotConfigEditor({ initial, orgSlug }: BotConfigEditorProps) {
   const [isPending, startTransition] = useTransition()
   const [status, setStatus] = useState<'idle' | 'saved' | 'error'>('idle')
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
+  const [testStatus, setTestStatus] = useState<'idle' | 'sent' | 'error'>('idle')
+  const [testErrorMsg, setTestErrorMsg] = useState<string | null>(null)
 
   const update = <K extends keyof BotConfigInput>(key: K, value: BotConfigInput[K]) =>
     setData((d) => ({ ...d, [key]: value }))
@@ -34,6 +37,31 @@ export function BotConfigEditor({ initial, orgSlug }: BotConfigEditorProps) {
       } else {
         setStatus('error')
         setErrorMsg(result.error ?? 'Error desconocido')
+      }
+    })
+  }
+
+  const handleSendTest = () => {
+    setTestStatus('idle')
+    setTestErrorMsg(null)
+    startTransition(async () => {
+      if (!data.leadNotificationEmail) {
+        setTestStatus('error')
+        setTestErrorMsg('Configura un email primero')
+        return
+      }
+
+      const result = await sendTestNotification({
+        orgSlug: orgSlug ?? 'develop',
+        email: data.leadNotificationEmail,
+      })
+
+      if (result.success) {
+        setTestStatus('sent')
+        setTimeout(() => setTestStatus('idle'), 3000)
+      } else {
+        setTestStatus('error')
+        setTestErrorMsg(result.error ?? 'No se pudo enviar')
       }
     })
   }
@@ -177,6 +205,40 @@ export function BotConfigEditor({ initial, orgSlug }: BotConfigEditorProps) {
           value={data.quickReplies}
           onChange={(v) => update('quickReplies', v)}
         />
+      </Section>
+
+      <Section title="Notificaciones por email">
+        <Field label="Email del cliente">
+          <Input
+            value={data.leadNotificationEmail ?? ''}
+            onChange={(v) => update('leadNotificationEmail', v.trim() || null)}
+            placeholder="dueno@negocio.com"
+          />
+        </Field>
+        <Field label="Modo">
+          <Select
+            value={data.leadNotificationMode}
+            onChange={(v) => update('leadNotificationMode', v as BotConfigInput['leadNotificationMode'])}
+            options={[
+              { value: 'IMMEDIATE', label: 'Inmediato' },
+              { value: 'DAILY_DIGEST', label: 'Digest diario' },
+              { value: 'DISABLED', label: 'Desactivado' },
+            ]}
+          />
+        </Field>
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={handleSendTest}
+            disabled={isPending || !data.leadNotificationEmail}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-zinc-700 text-sm text-zinc-100 hover:border-cyan-500/60 disabled:opacity-50"
+          >
+            <Mail size={16} />
+            Enviar email de prueba
+          </button>
+          {testStatus === 'sent' && <span className="text-xs text-emerald-400">Email enviado</span>}
+          {testStatus === 'error' && <span className="text-xs text-red-400">{testErrorMsg}</span>}
+        </div>
       </Section>
     </div>
   )
