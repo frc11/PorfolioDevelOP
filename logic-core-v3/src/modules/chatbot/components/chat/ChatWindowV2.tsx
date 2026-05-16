@@ -92,6 +92,7 @@ export function ChatWindowV2({
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.98, y: 10 }}
               transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+              data-chatbot-window
               className="fixed bottom-4 left-4 right-4 z-[100] flex flex-col md:bottom-[16rem] md:left-auto md:right-6 md:w-[420px]"
               style={{
                 pointerEvents: 'auto',
@@ -350,6 +351,7 @@ export function ChatWindowV2({
                     messages.map((m, idx) => (
                       <motion.div
                         key={m.id}
+                        data-chatbot-message={m.role}
                         initial={{ opacity: 0, y: 15, scale: 0.98 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
@@ -571,6 +573,7 @@ export function ChatWindowV2({
                   }}
                 >
                   <textarea
+                    data-chatbot-input
                     ref={inputRef}
                     value={input}
                     onChange={(e) => {

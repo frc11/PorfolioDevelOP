@@ -46,19 +46,37 @@ export class GoogleProvider implements LLMProvider {
 
   constructor() {
     const credPath = process.env.GOOGLE_APPLICATION_CREDENTIALS
+    const credJson = process.env.GOOGLE_VERTEX_CREDENTIALS_JSON
     const project = process.env.CHATBOT_GCP_PROJECT_ID
-    if (!credPath || !project) {
+
+    if (!project) {
+      throw new Error('GoogleProvider: CHATBOT_GCP_PROJECT_ID env var required')
+    }
+
+    // En production (Netlify) usamos JSON inline. En development local, file path.
+    if (!credPath && !credJson) {
       throw new Error(
-        'Vertex AI requires GOOGLE_APPLICATION_CREDENTIALS and CHATBOT_GCP_PROJECT_ID env vars.'
+        'GoogleProvider: needs either GOOGLE_APPLICATION_CREDENTIALS (file path) ' +
+        'or GOOGLE_VERTEX_CREDENTIALS_JSON (inline JSON string)'
       )
     }
   }
 
   private getClient() {
     if (!this.client) {
+      const credJson = process.env.GOOGLE_VERTEX_CREDENTIALS_JSON
+
       this.client = createVertex({
         project: process.env.CHATBOT_GCP_PROJECT_ID!,
         location: process.env.CHATBOT_GCP_LOCATION ?? 'us-central1',
+        // Si tenemos JSON inline, pasarlo como googleAuthOptions.credentials
+        ...(credJson
+          ? {
+              googleAuthOptions: {
+                credentials: JSON.parse(credJson),
+              },
+            }
+          : {}),
       })
     }
     return this.client

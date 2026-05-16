@@ -48,6 +48,8 @@ export function chatbotDebug(
   console.debug(JSON.stringify(payload, null, 2))
 }
 
+import * as Sentry from '@sentry/nextjs'
+
 /**
  * Records a critical error event. Same as chatbotLog with level='error'
  * but with stricter typing and explicit error object handling.
@@ -69,4 +71,16 @@ export function chatbotError(
     ...fields,
   }
   console.error(JSON.stringify(payload))
+
+  // Reportar a Sentry con contexto
+  Sentry.captureException(error, {
+    tags: {
+      module: 'chatbot',
+      event_type: event,
+    },
+    extra: {
+      ...fields,
+      errorInfo,
+    },
+  })
 }

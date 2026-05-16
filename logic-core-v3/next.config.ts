@@ -118,4 +118,13 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+import { withSentryConfig } from '@sentry/nextjs';
+
+export default withSentryConfig(nextConfig, {
+  org: "develop-agency",
+  project: "logic-core-v3",
+  silent: !process.env.CI,
+  widenClientFileUpload: true,
+  reactComponentAnnotation: { enabled: true },
+  tunnelRoute: "/monitoring",
+});

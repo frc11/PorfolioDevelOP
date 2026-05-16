@@ -49,6 +49,7 @@ export function LogicCompanion({ slug }: LogicCompanionProps) {
       </AnimatePresence>
 
       <motion.div
+        data-chatbot-avatar
         role="button"
         tabIndex={0}
         onClick={chatbot.toggle}
