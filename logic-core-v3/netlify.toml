@@ -20,3 +20,6 @@
   to = "/api/chatbot/:splat"
   status = 200
   force = true
+
+[functions."generate-insights-cron"]
+  schedule = "0 9 * * *"

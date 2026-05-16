@@ -80,6 +80,7 @@ export type { KnowledgeBaseInput, BotConfigInput } from './server/admin'
 export { getClientChatbotSession } from './server/admin/getClientSession'
 export { listLeadsForBot, listConversationsForBot, getMonthlyUsageForBot } from './server/admin/queries'
 export { getBotByOrgSlug, listLeadsByOrgSlug, listConversationsByOrgSlug, getUsageByOrgSlug } from './server/admin/multiTenantQueries'
+export { generateInsightsForBot } from './server/insights/generateInsightsForBot'
 
 // Health (Sprint S20)
 export { checkChatbotHealth, runLLMSmokeTest } from './server/health'

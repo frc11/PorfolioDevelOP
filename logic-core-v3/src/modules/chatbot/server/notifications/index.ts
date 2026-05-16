@@ -1,0 +1,1 @@
+export { sendInsightsNotificationEmail } from './sendInsightsNotification'
