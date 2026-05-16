@@ -3,7 +3,7 @@
 import { usePathname } from 'next/navigation'
 import { motion, AnimatePresence } from 'motion/react'
 import { AvatarRenderer } from './avatar'
-import { ChatWindowV2 as ChatWindow } from './chat/ChatWindowV2'
+import { ChatWindow } from './chat/ChatWindow'
 import { ProactiveTooltip } from './tooltip'
 import { renderToolCall } from './tool-cards'
 import { useChatbot } from '../hooks/useChatbot'
