@@ -2,7 +2,9 @@
 
 import { Bot, Activity, TrendingUp } from 'lucide-react'
 
-export function ChatbotManager({ botConfig, organizationId }: { botConfig: any, organizationId: string }) {
+import type { ClientData } from './CommandCenterClient'
+
+export function ChatbotManager({ botConfig, organizationId }: { botConfig: ClientData['botConfig'], organizationId: string }) {
   if (!botConfig) {
     return (
       <div className="p-4 rounded-xl border border-dashed border-zinc-700/50 bg-zinc-800/10 text-sm text-zinc-400">

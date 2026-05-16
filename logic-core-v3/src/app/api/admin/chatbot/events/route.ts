@@ -1,12 +1,15 @@
 import { prisma } from '@/lib/prisma'
 import { listRecentEvents, listEventsSince } from '@/modules/chatbot/server/admin/queries'
-
-// MVP: no auth check (admin path, but the page itself is in /admin/* which
-// should be protected at layout level). For Phase 1.5+, add auth here.
+import { auth } from '@/auth'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET(request: Request) {
+  const session = await auth()
+  if (!session?.user || session.user.role !== 'SUPER_ADMIN') {
+    return Response.json({ ok: false, error: 'Unauthorized' }, { status: 401 })
+  }
+
   const url = new URL(request.url)
   const slug = url.searchParams.get('slug') ?? 'develop'
   const since = url.searchParams.get('since')

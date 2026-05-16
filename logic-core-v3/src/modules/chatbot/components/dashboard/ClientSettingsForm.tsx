@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { saveClientSettings } from '@/modules/chatbot/server/admin/saveClientSettings'
 import type { BotConfig } from '@prisma/client'
+import { toast } from 'sonner'
 
 const COLORS = [
   { hex: '#06b6d4', name: 'Cyan' },
@@ -24,20 +25,30 @@ export function ClientSettingsForm({ bot }: { bot: BotConfig }) {
     (bot.quickReplies as any[]) ?? []
   )
   const [saving, setSaving] = useState(false)
-  const [saved, setSaved] = useState(false)
 
   async function handleSave() {
     setSaving(true)
-    setSaved(false)
     try {
-      const result = await saveClientSettings({
+      const promise = saveClientSettings({
         isActive,
         welcomeMessage,
         accentColor: accentColor as any,
         position: position as any,
         quickReplies,
+      }).then(res => {
+        if (!res.ok) throw new Error(res.error ?? 'Error')
+        return res
       })
-      if (result.ok) setSaved(true)
+      
+      toast.promise(promise, {
+        loading: 'Guardando configuración...',
+        success: 'Configuración guardada exitosamente',
+        error: 'No se pudo guardar la configuración'
+      })
+      
+      await promise
+    } catch (e) {
+      // toast handles the error notification
     } finally {
       setSaving(false)
     }
@@ -161,8 +172,7 @@ export function ClientSettingsForm({ bot }: { bot: BotConfig }) {
         </div>
       </div>
 
-      <div className="flex justify-end items-center gap-3 pt-4 border-t border-zinc-800">
-        {saved && <span className="text-sm text-emerald-400">✓ Guardado</span>}
+      <div className="flex justify-end pt-4 border-t border-zinc-800">
         <button
           onClick={handleSave}
           disabled={saving}

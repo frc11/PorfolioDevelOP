@@ -55,8 +55,8 @@ const NAV_SECTIONS: NavSection[] = [
   {
     label: 'INTELIGENCIA',
     items: [
-      { href: '/admin/chatbot/config', label: 'Bot Config', icon: Bot },
-      { href: '/admin/chatbot/knowledge-base', label: 'Base de Datos', icon: BookOpen },
+      { href: '/admin/chatbot/activity', label: 'Global Activity', icon: Bot },
+      { href: '/admin/chatbot/health', label: 'Health Score', icon: BookOpen },
     ],
   },
   {

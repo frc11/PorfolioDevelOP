@@ -1,7 +1,8 @@
+import { cache } from 'react'
 import { auth } from '@/auth'
 import { prisma } from '@/lib/prisma'
 
-export async function getClientChatbotSession() {
+export const getClientChatbotSession = cache(async () => {
   const session = await auth()
   if (!session?.user?.id) return null
 
@@ -24,4 +25,4 @@ export async function getClientChatbotSession() {
     organization: member.organization,
     bot: member.organization.botConfig,
   }
-}
+})

@@ -3,6 +3,7 @@
 import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
+import { requireSuperAdmin } from './requireSuperAdmin'
 
 const quickReplySchema = z.object({
   id: z.string(),
@@ -35,6 +36,7 @@ const SaveBotConfigInputSchema = z.object({
 export async function saveBotConfigByOrgSlug(
   input: z.infer<typeof SaveBotConfigInputSchema>
 ): Promise<{ success: boolean; error?: string }> {
+  await requireSuperAdmin()
   const parsed = SaveBotConfigInputSchema.safeParse(input)
   if (!parsed.success) {
     return { success: false, error: 'Invalid input: ' + parsed.error.message }

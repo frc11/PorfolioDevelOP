@@ -65,7 +65,7 @@ function getPostLoginPath(state: {
   return state.onboardingCompleted ? DASHBOARD_PATH : ONBOARDING_PATH
 }
 
-export const { handlers, auth, signIn, signOut } = NextAuth({
+const nextAuthResult = NextAuth({
   adapter: PrismaAdapter(prisma) as Adapter,
   trustHost: true,
   session: {
@@ -247,3 +247,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
   },
 })
+
+export const { handlers, signIn, signOut } = nextAuthResult
+export const auth = React.cache(nextAuthResult.auth)

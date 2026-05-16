@@ -7,8 +7,10 @@ import { ProjectManager } from './ProjectManager'
 import { VaultManager } from './VaultManager'
 import { ChatbotManager } from './ChatbotManager'
 
-// Simplified type for the frontend
-type ClientData = any
+import type { Prisma } from '@prisma/client'
+import type { getAgencyClients } from '@/actions/agency-actions'
+
+export type ClientData = Prisma.PromiseReturnType<typeof getAgencyClients>[number]
 
 export function CommandCenterClient({ initialClients }: { initialClients: ClientData[] }) {
   const [selectedClient, setSelectedClient] = useState<ClientData | null>(null)
@@ -124,7 +126,7 @@ export function CommandCenterClient({ initialClients }: { initialClients: Client
                   {selectedClient.clientAssets?.length > 0 && (
                     <div className="mt-4 flex flex-col gap-2">
                       <h4 className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Añadidos recientemente</h4>
-                      {selectedClient.clientAssets.slice(0, 3).map((asset: any) => (
+                      {selectedClient.clientAssets.slice(0, 3).map((asset: ClientData['clientAssets'][number]) => (
                         <div key={asset.id} className="flex justify-between items-center p-3 rounded-lg border border-white/5 bg-white/[0.02]">
                           <span className="text-sm text-zinc-300 truncate">{asset.name}</span>
                           <span className="text-[10px] bg-zinc-800 text-zinc-400 px-2 py-0.5 rounded">{asset.type}</span>

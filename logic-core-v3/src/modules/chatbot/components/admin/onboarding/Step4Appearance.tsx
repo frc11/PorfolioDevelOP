@@ -1,6 +1,6 @@
 'use client'
 
-import type { StepProps } from './types'
+import type { StepProps, OnboardingState } from './types'
 
 export function Step4Appearance({ state, update, onNext, onBack }: StepProps) {
   const canContinue = /^#[0-9a-fA-F]{6}$/.test(state.accentColor)
@@ -23,7 +23,7 @@ export function Step4Appearance({ state, update, onNext, onBack }: StepProps) {
         <label className="block text-sm text-zinc-400 mb-1">Estilo de Avatar</label>
         <select
           value={state.avatarStyle}
-          onChange={(e) => update({ avatarStyle: e.target.value as any })}
+          onChange={(e) => update({ avatarStyle: e.target.value as OnboardingState['avatarStyle'] })}
           className="w-full px-3 py-2 bg-zinc-900 border border-zinc-800 rounded text-zinc-100"
         >
           <option value="neuro">Neuro (Esfera de partículas)</option>
@@ -37,7 +37,7 @@ export function Step4Appearance({ state, update, onNext, onBack }: StepProps) {
         <label className="block text-sm text-zinc-400 mb-1">Posición en la pantalla</label>
         <select
           value={state.position}
-          onChange={(e) => update({ position: e.target.value as any })}
+          onChange={(e) => update({ position: e.target.value as OnboardingState['position'] })}
           className="w-full px-3 py-2 bg-zinc-900 border border-zinc-800 rounded text-zinc-100"
         >
           <option value="bottom_right">Abajo a la derecha</option>

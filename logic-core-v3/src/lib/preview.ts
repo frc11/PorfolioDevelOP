@@ -1,7 +1,9 @@
 import { auth } from '@/auth'
 import { getImpersonationSession } from '@/lib/impersonation'
 
-export async function resolveOrgId(): Promise<string | null> {
+import { cache } from 'react'
+
+export const resolveOrgId = cache(async (): Promise<string | null> => {
   const session = await auth()
   const role = session?.user?.role
 
@@ -15,11 +17,11 @@ export async function resolveOrgId(): Promise<string | null> {
   }
 
   return null
-}
+})
 
-export async function isAdminPreview(): Promise<boolean> {
+export const isAdminPreview = cache(async (): Promise<boolean> => {
   const session = await auth()
   if (session?.user?.role !== 'SUPER_ADMIN') return false
 
   return Boolean(await getImpersonationSession())
-}
+})

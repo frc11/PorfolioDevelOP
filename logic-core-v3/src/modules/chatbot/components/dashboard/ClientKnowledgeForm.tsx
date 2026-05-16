@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { saveClientKnowledgeBase } from '@/modules/chatbot/server/admin/saveClientKnowledgeBase'
 import type { KnowledgeBase } from '@prisma/client'
+import { toast } from 'sonner'
 
 export function ClientKnowledgeForm({ kb }: { kb: KnowledgeBase }) {
   const [businessInfo, setBusinessInfo] = useState(kb.businessInfo)
@@ -12,25 +13,30 @@ export function ClientKnowledgeForm({ kb }: { kb: KnowledgeBase }) {
   const [salesGuidance, setSalesGuidance] = useState(kb.salesGuidance)
 
   const [saving, setSaving] = useState(false)
-  const [saved, setSaved] = useState(false)
-  const [error, setError] = useState<string | null>(null)
 
   async function handleSave() {
     setSaving(true)
-    setSaved(false)
-    setError(null)
     try {
-      const result = await saveClientKnowledgeBase({
+      const promise = saveClientKnowledgeBase({
         businessInfo,
         servicesOrProducts,
         faq,
         policies,
         salesGuidance,
+      }).then(res => {
+        if (!res.ok) throw new Error(res.error ?? 'Error desconocido')
+        return res
       })
-      if (result.ok) setSaved(true)
-      else setError(result.error ?? 'Error desconocido')
+      
+      toast.promise(promise, {
+        loading: 'Guardando conocimientos...',
+        success: 'Base de conocimiento actualizada',
+        error: (err) => `No se pudo guardar: ${err.message}`
+      })
+      
+      await promise
     } catch (e) {
-      setError('Error de conexión o validación')
+      // toast handles error notification
     } finally {
       setSaving(false)
     }
@@ -122,9 +128,7 @@ export function ClientKnowledgeForm({ kb }: { kb: KnowledgeBase }) {
         </div>
       </div>
 
-      <div className="flex justify-end items-center gap-3 pt-4 border-t border-zinc-800">
-        {error && <span className="text-sm text-red-400">{error}</span>}
-        {saved && <span className="text-sm text-emerald-400">✓ Guardado</span>}
+      <div className="flex justify-end pt-4 border-t border-zinc-800">
         <button
           onClick={handleSave}
           disabled={saving}

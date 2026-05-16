@@ -1,6 +1,7 @@
 'use client'
 
 import type { StepProps } from './types'
+import type { Industry } from '../../../server/admin/createClientWithBot'
 import { INDUSTRIES_LABELS } from './industries'
 
 export function Step1Company({ state, update, onNext }: StepProps) {
@@ -25,7 +26,7 @@ export function Step1Company({ state, update, onNext }: StepProps) {
         <label className="block text-sm text-zinc-400 mb-1">Industria</label>
         <select
           value={state.industry}
-          onChange={(e) => update({ industry: e.target.value as any })}
+          onChange={(e) => update({ industry: e.target.value as Industry })}
           className="w-full px-3 py-2 bg-zinc-900 border border-zinc-800 rounded text-zinc-100"
         >
           {Object.entries(INDUSTRIES_LABELS).map(([value, label]) => (

@@ -5,6 +5,7 @@ import { saveBotConfig, type BotConfigInput } from '../../server/admin/saveBotCo
 import { saveBotConfigByOrgSlug } from '../../server/admin/saveBotConfigByOrgSlug'
 import { sendTestNotification } from '../../server/admin/sendTestNotification'
 import { Plus, Trash2, GripVertical, Mail } from 'lucide-react'
+import { toast } from 'sonner'
 
 interface BotConfigEditorProps {
   initial: BotConfigInput
@@ -14,16 +15,11 @@ interface BotConfigEditorProps {
 export function BotConfigEditor({ initial, orgSlug }: BotConfigEditorProps) {
   const [data, setData] = useState(initial)
   const [isPending, startTransition] = useTransition()
-  const [status, setStatus] = useState<'idle' | 'saved' | 'error'>('idle')
-  const [errorMsg, setErrorMsg] = useState<string | null>(null)
-  const [testStatus, setTestStatus] = useState<'idle' | 'sent' | 'error'>('idle')
-  const [testErrorMsg, setTestErrorMsg] = useState<string | null>(null)
 
   const update = <K extends keyof BotConfigInput>(key: K, value: BotConfigInput[K]) =>
     setData((d) => ({ ...d, [key]: value }))
 
   const handleSave = () => {
-    setStatus('idle')
     startTransition(async () => {
       // Remove botConfigId when calling the orgSlug version
       const { botConfigId, ...restData } = data
@@ -32,22 +28,17 @@ export function BotConfigEditor({ initial, orgSlug }: BotConfigEditorProps) {
         : await saveBotConfig(data)
 
       if (result.success) {
-        setStatus('saved')
-        setTimeout(() => setStatus('idle'), 3000)
+        toast.success('Bot configuration guardado correctamente')
       } else {
-        setStatus('error')
-        setErrorMsg(result.error ?? 'Error desconocido')
+        toast.error(result.error ?? 'Error desconocido al guardar')
       }
     })
   }
 
   const handleSendTest = () => {
-    setTestStatus('idle')
-    setTestErrorMsg(null)
     startTransition(async () => {
       if (!data.leadNotificationEmail) {
-        setTestStatus('error')
-        setTestErrorMsg('Configura un email primero')
+        toast.error('Configura un email primero')
         return
       }
 
@@ -57,11 +48,9 @@ export function BotConfigEditor({ initial, orgSlug }: BotConfigEditorProps) {
       })
 
       if (result.success) {
-        setTestStatus('sent')
-        setTimeout(() => setTestStatus('idle'), 3000)
+        toast.success('Email enviado')
       } else {
-        setTestStatus('error')
-        setTestErrorMsg(result.error ?? 'No se pudo enviar')
+        toast.error(result.error ?? 'No se pudo enviar')
       }
     })
   }
@@ -71,8 +60,6 @@ export function BotConfigEditor({ initial, orgSlug }: BotConfigEditorProps) {
       <div className="flex items-center justify-between sticky top-0 bg-zinc-950/80 backdrop-blur py-4 z-10 border-b border-zinc-800/50">
         <h1 className="text-2xl font-light">Bot Configuration</h1>
         <div className="flex items-center gap-3">
-          {status === 'saved' && <span className="text-xs text-emerald-400">Guardado ✓</span>}
-          {status === 'error' && <span className="text-xs text-red-400">{errorMsg}</span>}
           <button
             onClick={handleSave}
             disabled={isPending}
@@ -236,8 +223,6 @@ export function BotConfigEditor({ initial, orgSlug }: BotConfigEditorProps) {
             <Mail size={16} />
             Enviar email de prueba
           </button>
-          {testStatus === 'sent' && <span className="text-xs text-emerald-400">Email enviado</span>}
-          {testStatus === 'error' && <span className="text-xs text-red-400">{testErrorMsg}</span>}
         </div>
       </Section>
     </div>

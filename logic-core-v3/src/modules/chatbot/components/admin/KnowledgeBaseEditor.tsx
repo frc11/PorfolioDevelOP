@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react'
 import { saveKnowledgeBase } from '../../server/admin/saveKnowledgeBase'
 import { saveKnowledgeBaseByOrgSlug } from '../../server/admin/saveKnowledgeBaseByOrgSlug'
+import { toast } from 'sonner'
 
 interface KnowledgeBaseEditorProps {
   botConfigId: string
@@ -70,19 +71,15 @@ export function KnowledgeBaseEditor({ botConfigId, initialData, orgSlug }: Knowl
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
 
   const handleSave = () => {
-    setStatus('idle')
-    setErrorMsg(null)
     startTransition(async () => {
       const result = orgSlug
         ? await saveKnowledgeBaseByOrgSlug({ orgSlug, ...data })
         : await saveKnowledgeBase({ botConfigId, ...data })
 
       if (result.success) {
-        setStatus('saved')
-        setTimeout(() => setStatus('idle'), 3000)
+        toast.success('Knowledge Base guardado correctamente')
       } else {
-        setStatus('error')
-        setErrorMsg(result.error ?? 'Error desconocido')
+        toast.error(result.error ?? 'Error desconocido al guardar')
       }
     })
   }
@@ -92,8 +89,6 @@ export function KnowledgeBaseEditor({ botConfigId, initialData, orgSlug }: Knowl
       <div className="flex items-center justify-between sticky top-0 bg-zinc-950/80 backdrop-blur py-4 z-10">
         <h1 className="text-2xl font-light">Knowledge Base</h1>
         <div className="flex items-center gap-3">
-          {status === 'saved' && <span className="text-xs text-emerald-400">Guardado ✓</span>}
-          {status === 'error' && <span className="text-xs text-red-400">Error: {errorMsg}</span>}
           <button
             onClick={handleSave}
             disabled={isPending}

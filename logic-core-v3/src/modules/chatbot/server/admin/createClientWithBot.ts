@@ -3,6 +3,7 @@
 import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
+import { requireSuperAdmin } from './requireSuperAdmin'
 
 const INDUSTRIES = [
   'legal', 'contable', 'medico_odontologico', 'gimnasio', 'restaurant',
@@ -68,6 +69,7 @@ async function findUniqueSlug(base: string): Promise<string> {
 }
 
 export async function createClientWithBot(input: z.infer<typeof CreateClientInputSchema>) {
+  await requireSuperAdmin()
   const parsed = CreateClientInputSchema.parse(input)
 
   const baseSlug = slugify(parsed.orgName)

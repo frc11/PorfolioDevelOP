@@ -6,7 +6,8 @@ type StatColor = 'zinc' | 'cyan' | 'emerald' | 'amber' | 'violet' | 'alert'
 
 type StatCardProps = {
   label: string
-  value: string
+  value: string | number
+  format?: 'number' | 'currency' | 'compact'
   subtitle?: string
   trend?: StatTrend
   color?: StatColor
@@ -94,6 +95,7 @@ function normalizeProgress(progress: number): number {
 export function StatCard({
   label,
   value,
+  format = 'number',
   subtitle,
   trend = 'neutral',
   color = 'zinc',
@@ -103,6 +105,15 @@ export function StatCard({
   const palette = getColorClasses(color)
   const trendMeta = getTrendMeta(trend)
   const TrendIcon = trendMeta.icon
+
+  const formatted =
+    typeof value === 'string'
+      ? value
+      : format === 'currency'
+      ? `$${value.toFixed(4)}`
+      : format === 'compact'
+      ? new Intl.NumberFormat('en', { notation: 'compact' }).format(value)
+      : value.toLocaleString()
 
   return (
     <article
@@ -114,7 +125,7 @@ export function StatCard({
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
           <p className="text-[10px] uppercase tracking-[0.24em] text-zinc-500">{label}</p>
-          <p className="mt-3 text-3xl font-semibold tracking-tight text-white">{value}</p>
+          <p className="mt-3 text-3xl font-semibold tracking-tight text-white">{formatted}</p>
         </div>
 
         {Icon ? (

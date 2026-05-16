@@ -68,7 +68,7 @@ export function ActivityLog({ initialEvents, slug }: ActivityLogProps) {
           lastFetchRef.current = data.serverTime
         }
       } catch (error) {
-        console.error('Failed to fetch events:', error)
+        // Silenced: polling failures during navigation are expected and non-critical
       }
     }, 3000)
     return () => clearInterval(interval)

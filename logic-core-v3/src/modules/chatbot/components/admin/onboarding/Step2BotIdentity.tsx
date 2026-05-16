@@ -1,6 +1,6 @@
 'use client'
 
-import type { StepProps } from './types'
+import type { StepProps, OnboardingState } from './types'
 
 export function Step2BotIdentity({ state, update, onNext, onBack }: StepProps) {
   const canContinue = state.botName.length >= 2 && state.welcomeMessage.length >= 10
@@ -35,7 +35,7 @@ export function Step2BotIdentity({ state, update, onNext, onBack }: StepProps) {
         <label className="block text-sm text-zinc-400 mb-1">Tono de conversación</label>
         <select
           value={state.tone}
-          onChange={(e) => update({ tone: e.target.value as any })}
+          onChange={(e) => update({ tone: e.target.value as OnboardingState['tone'] })}
           className="w-full px-3 py-2 bg-zinc-900 border border-zinc-800 rounded text-zinc-100"
         >
           <option value="informal_rioplatense">Informal Rioplatense (vos)</option>

@@ -3,6 +3,7 @@
 import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
+import { requireSuperAdmin } from './requireSuperAdmin'
 
 const SaveKBInputSchema = z.object({
   orgSlug: z.string().min(1),
@@ -18,6 +19,7 @@ const SaveKBInputSchema = z.object({
 export async function saveKnowledgeBaseByOrgSlug(
   input: z.infer<typeof SaveKBInputSchema>
 ): Promise<{ success: boolean; error?: string }> {
+  await requireSuperAdmin()
   const parsed = SaveKBInputSchema.safeParse(input)
   if (!parsed.success) {
     return { success: false, error: 'Invalid input: ' + parsed.error.message }

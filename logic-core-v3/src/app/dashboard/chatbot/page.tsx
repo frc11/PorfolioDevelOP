@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { getClientChatbotSession, getUsageByOrgSlug, listLeadsByOrgSlug } from '@/modules/chatbot/index.server'
-import { StatCard } from '@/modules/chatbot/components/admin/StatCard'
+import { StatCard } from '@/app/(protected)/admin/_components/stat-card'
 import { redirect } from 'next/navigation'
 
 export default async function ChatbotOverviewPage() {
@@ -19,12 +19,12 @@ export default async function ChatbotOverviewPage() {
         <StatCard
           label="Conversaciones este mes"
           value={usage?.conversationsCount ?? 0}
-          accent="cyan"
+          color="cyan"
         />
         <StatCard
           label="Leads capturados"
           value={recentLeads.length}
-          accent="emerald"
+          color="emerald"
         />
         <StatCard
           label="Tasa de conversión"
@@ -33,12 +33,12 @@ export default async function ChatbotOverviewPage() {
               ? `${((recentLeads.length / usage.conversationsCount) * 100).toFixed(1)}%`
               : '—'
           }
-          accent="violet"
+          color="violet"
         />
         <StatCard
           label="Mensajes enviados"
           value={0}
-          accent="amber"
+          color="amber"
         />
       </div>
 

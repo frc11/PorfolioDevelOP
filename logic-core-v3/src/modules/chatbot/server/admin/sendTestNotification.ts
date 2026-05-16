@@ -2,6 +2,7 @@
 
 import { z } from 'zod'
 import { sendLeadNotificationEmail } from '../notifications'
+import { requireSuperAdmin } from './requireSuperAdmin'
 
 const SendTestNotificationSchema = z.object({
   orgSlug: z.string().min(1),
@@ -9,6 +10,7 @@ const SendTestNotificationSchema = z.object({
 })
 
 export async function sendTestNotification(input: z.infer<typeof SendTestNotificationSchema>) {
+  await requireSuperAdmin()
   const parsed = SendTestNotificationSchema.safeParse(input)
   if (!parsed.success) {
     return { success: false, error: 'Invalid input: ' + parsed.error.message }
