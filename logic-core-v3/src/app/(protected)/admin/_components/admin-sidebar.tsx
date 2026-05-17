@@ -10,6 +10,7 @@ import {
   type LucideIcon,
   MessageCircle,
   Settings,
+  History,
   UserCog,
   Users,
   Bot,
@@ -63,7 +64,10 @@ const NAV_SECTIONS: NavSection[] = [
   },
   {
     label: 'CONFIG',
-    items: [{ href: '/admin/settings', label: 'Configuraci\u00f3n', icon: Settings }],
+    items: [
+      { href: '/admin/settings', label: 'Configuraci\u00f3n', icon: Settings },
+      { href: '/admin/audit-log', label: 'Audit log', icon: History },
+    ],
   },
 ]
 
