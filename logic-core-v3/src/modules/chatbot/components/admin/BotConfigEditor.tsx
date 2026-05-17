@@ -5,7 +5,9 @@ import { Mail, Save } from 'lucide-react'
 import { toast } from 'sonner'
 import { saveBotConfig, type BotConfigInput } from '../../server/admin/saveBotConfig'
 import { saveBotConfigByOrgSlug } from '../../server/admin/saveBotConfigByOrgSlug'
+import { runPreflightChecks, type PreflightCheck } from '../../server/admin/preflightChecks'
 import { sendTestNotification } from '../../server/admin/sendTestNotification'
+import { ActivationModal } from './activation/ActivationModal'
 import { BotConfigPreview } from './config/BotConfigPreview'
 import { ConfigTabs, type ConfigTab } from './config/ConfigTabs'
 import { AdvancedTab } from './config/tabs/AdvancedTab'
@@ -46,6 +48,8 @@ const DEFAULTS = {
 export function BotConfigEditor({ initial, orgSlug, onSave }: BotConfigEditorProps) {
   const [state, setState] = useState<BotConfigEditorState>(() => normalizeInitial(initial))
   const [activeTab, setActiveTab] = useState<ConfigTab>('identity')
+  const [activationChecks, setActivationChecks] = useState<PreflightCheck[]>([])
+  const [showActivationModal, setShowActivationModal] = useState(false)
   const [saving, setSaving] = useState(false)
   const slug = initial.slug ?? orgSlug ?? 'sin-slug'
 
@@ -55,28 +59,68 @@ export function BotConfigEditor({ initial, orgSlug, onSave }: BotConfigEditorPro
     setState((prev) => ({ ...prev, [key]: value }))
   }
 
+  async function saveState(nextState: BotConfigEditorState) {
+    if (onSave) {
+      const result = await onSave(nextState)
+      if (!result.ok) throw new Error(result.error ?? 'Error guardando')
+      return result
+    }
+
+    const { botConfigId, ...restData } = nextState
+    const result = orgSlug
+      ? await saveBotConfigByOrgSlug({ orgSlug, ...restData })
+      : await saveBotConfig({ ...nextState, botConfigId })
+
+    if (!result.success) throw new Error(result.error ?? 'Error guardando')
+    return result
+  }
+
   async function handleSave() {
     setSaving(true)
 
-    const promise = (async () => {
-      if (onSave) {
-        const result = await onSave(state)
-        if (!result.ok) throw new Error(result.error ?? 'Error guardando')
-        return result
-      }
-
-      const { botConfigId, ...restData } = state
-      const result = orgSlug
-        ? await saveBotConfigByOrgSlug({ orgSlug, ...restData })
-        : await saveBotConfig(state)
-
-      if (!result.success) throw new Error(result.error ?? 'Error guardando')
-      return result
-    })()
+    const promise = saveState(state)
 
     toast.promise(promise, {
       loading: 'Guardando configuracion...',
       success: 'Cambios guardados',
+      error: (error: Error) => `Error: ${error.message}`,
+    })
+
+    try {
+      await promise
+    } catch {
+      // toast.promise muestra el error.
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  async function handleRequestActivation() {
+    setSaving(true)
+    try {
+      const checks = await runPreflightChecks(state.botConfigId)
+      setActivationChecks(checks)
+      setShowActivationModal(true)
+    } catch (error) {
+      toast.error(`No se pudieron correr los checks: ${String(error)}`)
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  async function handleConfirmActivation() {
+    const nextState = { ...state, isActive: true }
+    setSaving(true)
+
+    const promise = saveState(nextState).then((result) => {
+      setState(nextState)
+      setShowActivationModal(false)
+      return result
+    })
+
+    toast.promise(promise, {
+      loading: 'Activando bot...',
+      success: 'Bot activado',
       error: (error: Error) => `Error: ${error.message}`,
     })
 
@@ -148,7 +192,13 @@ export function BotConfigEditor({ initial, orgSlug, onSave }: BotConfigEditorPro
         <ConfigTabs active={activeTab} onChange={setActiveTab} />
 
         <div className="rounded-3xl border border-white/10 bg-white/[0.02] p-6">
-          {activeTab === 'identity' && <IdentityTab state={state} update={update} />}
+          {activeTab === 'identity' && (
+            <IdentityTab
+              state={state}
+              update={update}
+              onRequestActivation={handleRequestActivation}
+            />
+          )}
           {activeTab === 'appearance' && <AppearanceTab state={state} update={update} />}
           {activeTab === 'style' && <StyleTab state={state} update={update} />}
           {activeTab === 'behavior' && <BehaviorTab state={state} update={update} />}
@@ -159,6 +209,16 @@ export function BotConfigEditor({ initial, orgSlug, onSave }: BotConfigEditorPro
       <aside className="lg:sticky lg:top-6 lg:self-start">
         <BotConfigPreview state={state} />
       </aside>
+
+      <ActivationModal
+        open={showActivationModal}
+        onClose={() => setShowActivationModal(false)}
+        onConfirm={handleConfirmActivation}
+        checks={activationChecks}
+        loading={saving}
+        botName={state.botName}
+        botSlug={slug}
+      />
     </div>
   )
 }

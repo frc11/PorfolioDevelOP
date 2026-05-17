@@ -37,7 +37,11 @@ const TONES = [
   { value: 'casual', label: 'Casual' },
 ]
 
-export function IdentityTab({ state, update }: BotConfigTabProps) {
+interface IdentityTabProps extends BotConfigTabProps {
+  onRequestActivation: () => void
+}
+
+export function IdentityTab({ state, update, onRequestActivation }: IdentityTabProps) {
   return (
     <div className="space-y-6">
       <Field label="Nombre del bot" required hint="Como se presenta al usuario">
@@ -73,7 +77,17 @@ export function IdentityTab({ state, update }: BotConfigTabProps) {
               Cuando esta activo, responde en produccion
             </p>
           </div>
-          <Toggle checked={state.isActive} onChange={(value) => update('isActive', value)} label="Bot activo" />
+          <Toggle
+            checked={state.isActive}
+            onChange={(value) => {
+              if (value) {
+                onRequestActivation()
+              } else {
+                update('isActive', false)
+              }
+            }}
+            label="Bot activo"
+          />
         </div>
       </div>
     </div>
