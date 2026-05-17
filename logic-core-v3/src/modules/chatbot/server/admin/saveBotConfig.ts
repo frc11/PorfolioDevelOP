@@ -2,6 +2,7 @@
 
 import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
+import { computeDiff, logAdminAction, omitAuditNoise } from '@/lib/audit-log'
 import { chatbotLog } from '../logging'
 import { requireSuperAdmin } from './requireSuperAdmin'
 
@@ -60,14 +61,27 @@ const botConfigInputSchema = z.object({
 export type BotConfigInput = z.infer<typeof botConfigInputSchema>
 
 export async function saveBotConfig(input: BotConfigInput): Promise<{ success: boolean; error?: string }> {
-  await requireSuperAdmin()
+  const user = await requireSuperAdmin()
   const parsed = botConfigInputSchema.safeParse(input)
   if (!parsed.success) {
     return { success: false, error: 'Invalid input: ' + parsed.error.message }
   }
   try {
     const { botConfigId, leadNotificationEmail, leadNotificationMode, ...data } = parsed.data
-    await prisma.$transaction(async (tx) => {
+    const before = await prisma.botConfig.findUnique({
+      where: { id: botConfigId },
+      include: {
+        organization: {
+          select: { leadNotificationEmail: true, leadNotificationMode: true },
+        },
+      },
+    })
+
+    if (!before) {
+      return { success: false, error: 'Bot not found' }
+    }
+
+    const after = await prisma.$transaction(async (tx) => {
       const bot = await tx.botConfig.update({
         where: { id: botConfigId },
         data: {
@@ -76,16 +90,37 @@ export async function saveBotConfig(input: BotConfigInput): Promise<{ success: b
           proactivePrompts: data.proactivePrompts as unknown as object,
           routeColorMap: data.routeColorMap as unknown as object,
         },
-        select: { organizationId: true },
       })
 
-      await tx.organization.update({
+      const organization = await tx.organization.update({
         where: { id: bot.organizationId },
         data: {
           leadNotificationEmail,
           leadNotificationMode,
         },
+        select: { leadNotificationEmail: true, leadNotificationMode: true },
       })
+
+      return { ...bot, organization }
+    })
+
+    await logAdminAction({
+      userId: user.id ?? 'unknown',
+      userEmail: user.email,
+      userName: user.name,
+      actionType: before.isActive !== after.isActive
+        ? after.isActive
+          ? 'BOT_ACTIVATED'
+          : 'BOT_DEACTIVATED'
+        : 'BOT_CONFIG_UPDATED',
+      action: `Actualizo config del bot "${after.botName}"`,
+      targetType: 'BotConfig',
+      targetId: after.id,
+      diff: computeDiff(
+        omitAuditNoise(before as unknown as Record<string, unknown>),
+        omitAuditNoise(after as unknown as Record<string, unknown>),
+      ),
+      metadata: { organizationId: after.organizationId },
     })
     chatbotLog('admin.bot_config_updated', { botConfigId })
     return { success: true }

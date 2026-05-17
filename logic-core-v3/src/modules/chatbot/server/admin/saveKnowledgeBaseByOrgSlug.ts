@@ -3,6 +3,7 @@
 import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
+import { computeDiff, logAdminAction, omitAuditNoise } from '@/lib/audit-log'
 import { requireSuperAdmin } from './requireSuperAdmin'
 
 const SaveKBInputSchema = z.object({
@@ -19,7 +20,7 @@ const SaveKBInputSchema = z.object({
 export async function saveKnowledgeBaseByOrgSlug(
   input: z.infer<typeof SaveKBInputSchema>
 ): Promise<{ success: boolean; error?: string }> {
-  await requireSuperAdmin()
+  const user = await requireSuperAdmin()
   const parsed = SaveKBInputSchema.safeParse(input)
   if (!parsed.success) {
     return { success: false, error: 'Invalid input: ' + parsed.error.message }
@@ -37,9 +38,25 @@ export async function saveKnowledgeBaseByOrgSlug(
   }
 
   try {
-    await prisma.knowledgeBase.update({
+    const before = org.botConfig.knowledgeBase
+    const after = await prisma.knowledgeBase.update({
       where: { id: org.botConfig.knowledgeBase.id },
       data,
+    })
+
+    await logAdminAction({
+      userId: user.id ?? 'unknown',
+      userEmail: user.email,
+      userName: user.name,
+      actionType: 'KB_UPDATED',
+      action: `Actualizo KB del bot "${org.botConfig.botName}"`,
+      targetType: 'KnowledgeBase',
+      targetId: after.id,
+      diff: computeDiff(
+        omitAuditNoise(before as unknown as Record<string, unknown>),
+        omitAuditNoise(after as unknown as Record<string, unknown>),
+      ),
+      metadata: { botConfigId: org.botConfig.id, organizationId: org.id, orgSlug },
     })
 
     revalidatePath(`/admin/clients/${orgSlug}/chatbot/knowledge`)

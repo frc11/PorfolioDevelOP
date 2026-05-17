@@ -3,6 +3,7 @@
 import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
+import { computeDiff, logAdminAction, omitAuditNoise } from '@/lib/audit-log'
 import { requireSuperAdmin } from './requireSuperAdmin'
 
 const quickReplySchema = z.object({
@@ -54,7 +55,7 @@ const SaveBotConfigInputSchema = z.object({
 export async function saveBotConfigByOrgSlug(
   input: z.infer<typeof SaveBotConfigInputSchema>
 ): Promise<{ success: boolean; error?: string }> {
-  await requireSuperAdmin()
+  const user = await requireSuperAdmin()
   const parsed = SaveBotConfigInputSchema.safeParse(input)
   if (!parsed.success) {
     return { success: false, error: 'Invalid input: ' + parsed.error.message }
@@ -73,7 +74,8 @@ export async function saveBotConfigByOrgSlug(
 
   try {
     const { leadNotificationEmail, leadNotificationMode, ...botData } = data
-    await prisma.$transaction([
+    const before = org.botConfig
+    const [after] = await prisma.$transaction([
       prisma.botConfig.update({
         where: { id: org.botConfig.id },
         data: {
@@ -91,6 +93,25 @@ export async function saveBotConfigByOrgSlug(
         },
       }),
     ])
+
+    await logAdminAction({
+      userId: user.id ?? 'unknown',
+      userEmail: user.email,
+      userName: user.name,
+      actionType: before.isActive !== after.isActive
+        ? after.isActive
+          ? 'BOT_ACTIVATED'
+          : 'BOT_DEACTIVATED'
+        : 'BOT_CONFIG_UPDATED',
+      action: `Actualizo config del bot "${after.botName}"`,
+      targetType: 'BotConfig',
+      targetId: after.id,
+      diff: computeDiff(
+        omitAuditNoise(before as unknown as Record<string, unknown>),
+        omitAuditNoise(after as unknown as Record<string, unknown>),
+      ),
+      metadata: { organizationId: org.id, orgSlug },
+    })
 
     revalidatePath(`/admin/clients/${orgSlug}/chatbot/config`)
     return { success: true }

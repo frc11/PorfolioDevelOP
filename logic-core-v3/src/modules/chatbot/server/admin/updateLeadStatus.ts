@@ -3,6 +3,7 @@
 import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
+import { computeDiff, logAdminAction, omitAuditNoise } from '@/lib/audit-log'
 import { logChatbotEvent } from '../logging'
 import { getClientChatbotSession } from './getClientSession'
 
@@ -28,12 +29,32 @@ export async function updateLeadStatus(input: z.infer<typeof UpdateLeadStatusSch
     return { ok: false, error: 'Lead not found or unauthorized' }
   }
 
-  await prisma.chatbotLead.update({
+  const updatedLead = await prisma.chatbotLead.update({
     where: { id: parsed.leadId },
     data: {
       status: parsed.status,
       internalNotes: parsed.notes ?? lead.internalNotes,
       lastStatusChangeAt: new Date(),
+    },
+  })
+
+  const { botConfig, ...leadBeforeForDiff } = lead
+
+  await logAdminAction({
+    userId: session.user.id ?? 'unknown',
+    userEmail: session.user.email,
+    userName: session.user.name,
+    actionType: 'LEAD_STATUS_CHANGED',
+    action: `Cambio estado de lead a ${parsed.status}`,
+    targetType: 'ChatbotLead',
+    targetId: updatedLead.id,
+    diff: computeDiff(
+      omitAuditNoise(leadBeforeForDiff as unknown as Record<string, unknown>),
+      omitAuditNoise(updatedLead as unknown as Record<string, unknown>),
+    ),
+    metadata: {
+      botConfigId: lead.botConfigId,
+      organizationId: lead.botConfig.organizationId,
     },
   })
 

@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { prisma } from '@/lib/prisma'
+import { computeDiff, logAdminAction, omitAuditNoise } from '@/lib/audit-log'
 import { requireSuperAdmin } from './requireSuperAdmin'
 
 export async function listAlerts(filter?: { status?: string; severity?: string }) {
@@ -25,7 +26,8 @@ export async function listAlerts(filter?: { status?: string; severity?: string }
 export async function acknowledgeAlert(alertId: string) {
   const user = await requireSuperAdmin()
 
-  await prisma.botAlert.update({
+  const before = await prisma.botAlert.findUnique({ where: { id: alertId } })
+  const after = await prisma.botAlert.update({
     where: { id: alertId },
     data: {
       status: 'ACKNOWLEDGED',
@@ -34,6 +36,23 @@ export async function acknowledgeAlert(alertId: string) {
     },
   })
 
+  if (before) {
+    await logAdminAction({
+      userId: user.id ?? 'unknown',
+      userEmail: user.email,
+      userName: user.name,
+      actionType: 'ALERT_ACKNOWLEDGED',
+      action: `Marco alerta como vista: "${after.title}"`,
+      targetType: 'BotAlert',
+      targetId: after.id,
+      diff: computeDiff(
+        omitAuditNoise(before as unknown as Record<string, unknown>),
+        omitAuditNoise(after as unknown as Record<string, unknown>),
+      ),
+      metadata: { botConfigId: after.botConfigId },
+    })
+  }
+
   revalidatePath('/admin/alerts')
   return { ok: true }
 }
@@ -41,7 +60,8 @@ export async function acknowledgeAlert(alertId: string) {
 export async function resolveAlert(alertId: string) {
   const user = await requireSuperAdmin()
 
-  await prisma.botAlert.update({
+  const before = await prisma.botAlert.findUnique({ where: { id: alertId } })
+  const after = await prisma.botAlert.update({
     where: { id: alertId },
     data: {
       status: 'RESOLVED',
@@ -49,6 +69,23 @@ export async function resolveAlert(alertId: string) {
       resolvedBy: user.id,
     },
   })
+
+  if (before) {
+    await logAdminAction({
+      userId: user.id ?? 'unknown',
+      userEmail: user.email,
+      userName: user.name,
+      actionType: 'ALERT_RESOLVED',
+      action: `Resolvio alerta: "${after.title}"`,
+      targetType: 'BotAlert',
+      targetId: after.id,
+      diff: computeDiff(
+        omitAuditNoise(before as unknown as Record<string, unknown>),
+        omitAuditNoise(after as unknown as Record<string, unknown>),
+      ),
+      metadata: { botConfigId: after.botConfigId },
+    })
+  }
 
   revalidatePath('/admin/alerts')
   return { ok: true }

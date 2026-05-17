@@ -3,6 +3,7 @@
 import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
+import { logAdminAction } from '@/lib/audit-log'
 import { requireSuperAdmin } from './requireSuperAdmin'
 
 const INDUSTRIES = [
@@ -69,14 +70,14 @@ async function findUniqueSlug(base: string): Promise<string> {
 }
 
 export async function createClientWithBot(input: z.infer<typeof CreateClientInputSchema>) {
-  await requireSuperAdmin()
+  const user = await requireSuperAdmin()
   const parsed = CreateClientInputSchema.parse(input)
 
   const baseSlug = slugify(parsed.orgName)
   const uniqueSlug = await findUniqueSlug(baseSlug)
 
   // Transacción: crear todo en un solo commit
-  await prisma.$transaction(async (tx) => {
+  const created = await prisma.$transaction(async (tx) => {
     const org = await tx.organization.create({
       data: {
         companyName: parsed.orgName,
@@ -130,6 +131,23 @@ export async function createClientWithBot(input: z.infer<typeof CreateClientInpu
         forbiddenStatements: parsed.forbiddenStatements,
       },
     })
+
+    return { org, bot }
+  })
+
+  await logAdminAction({
+    userId: user.id ?? 'unknown',
+    userEmail: user.email,
+    userName: user.name,
+    actionType: 'CLIENT_CREATED',
+    action: `Creo cliente "${created.org.companyName}" con bot "${created.bot.botName}"`,
+    targetType: 'Organization',
+    targetId: created.org.id,
+    diff: {
+      organization: { before: null, after: created.org },
+      botConfig: { before: null, after: created.bot },
+    },
+    metadata: { botConfigId: created.bot.id, orgSlug: created.org.slug },
   })
 
   redirect(`/admin/clients/${uniqueSlug}/chatbot/overview`)
