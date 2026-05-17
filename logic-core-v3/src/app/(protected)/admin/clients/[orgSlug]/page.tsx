@@ -12,7 +12,7 @@ import { SupportTab } from './_components/tabs/SupportTab'
 import { VaultTab } from './_components/tabs/VaultTab'
 
 interface PageProps {
-  params: Promise<{ clientId: string }>
+  params: Promise<{ orgSlug: string }>
   searchParams: Promise<{ tab?: string }>
 }
 
@@ -29,14 +29,16 @@ export default async function ClientDetailPage({
     redirect('/login')
   }
 
-  const { clientId } = await params
+  const { orgSlug } = await params
   const { tab: tabParam } = await searchParams
   const activeTab: TabId = VALID_TABS.includes(tabParam as TabId)
     ? (tabParam as TabId)
     : 'overview'
 
-  const client = await prisma.organization.findUnique({
-    where: { id: clientId },
+  const client = await prisma.organization.findFirst({
+    where: {
+      OR: [{ id: orgSlug }, { slug: orgSlug }],
+    },
     include: {
       botConfig: {
         select: {
@@ -65,14 +67,14 @@ export default async function ClientDetailPage({
   return (
     <div className="space-y-6">
       <ClientHeader client={client} />
-      <ClientTabsNav clientId={clientId} activeTab={activeTab} />
+      <ClientTabsNav clientId={client.id} activeTab={activeTab} />
 
       <Suspense fallback={<TabSkeleton />}>
-        {activeTab === 'overview' && <OverviewTab clientId={clientId} />}
-        {activeTab === 'chatbot' && <ChatbotTab clientId={clientId} />}
-        {activeTab === 'projects' && <ProjectsTab clientId={clientId} />}
-        {activeTab === 'vault' && <VaultTab clientId={clientId} />}
-        {activeTab === 'support' && <SupportTab clientId={clientId} />}
+        {activeTab === 'overview' && <OverviewTab clientId={client.id} />}
+        {activeTab === 'chatbot' && <ChatbotTab clientId={client.id} />}
+        {activeTab === 'projects' && <ProjectsTab clientId={client.id} />}
+        {activeTab === 'vault' && <VaultTab clientId={client.id} />}
+        {activeTab === 'support' && <SupportTab clientId={client.id} />}
       </Suspense>
     </div>
   )
