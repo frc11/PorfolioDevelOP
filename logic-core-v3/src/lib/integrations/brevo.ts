@@ -102,6 +102,44 @@ export async function sendCampaign(campaignId: number): Promise<boolean> {
   }
 }
 
+export async function sendTransactionalEmail(params: {
+  to: string | string[]
+  subject: string
+  htmlContent: string
+  senderName?: string
+  senderEmail?: string
+}): Promise<{ ok: true; messageId?: string } | { ok: false; error: string; skipped?: boolean }> {
+  const apiKey = process.env.BREVO_API_KEY
+  if (!apiKey) {
+    return { ok: false, error: 'BREVO_API_KEY not configured', skipped: true }
+  }
+
+  try {
+    const res = await fetch(`${API_BASE}/smtp/email`, {
+      method: 'POST',
+      headers: headers(),
+      body: JSON.stringify({
+        sender: {
+          name: params.senderName ?? 'develOP Alerts',
+          email: params.senderEmail ?? process.env.BREVO_FROM_EMAIL ?? 'alerts@develop-agency.com',
+        },
+        to: (Array.isArray(params.to) ? params.to : [params.to]).map((email) => ({ email })),
+        subject: params.subject,
+        htmlContent: params.htmlContent,
+      }),
+    })
+
+    if (!res.ok) {
+      return { ok: false, error: `Brevo error: ${res.status} ${await res.text()}` }
+    }
+
+    const data = await res.json()
+    return { ok: true, messageId: data.messageId }
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : 'Unknown' }
+  }
+}
+
 export async function getCampaignStats(campaignId: number): Promise<{
   recipientCount: number
   opened: number

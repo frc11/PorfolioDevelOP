@@ -121,6 +121,29 @@ enum NotificationMode {
   DISABLED
 }
 
+enum BotAlertSeverity {
+  CRITICAL
+  HIGH
+  WARNING
+  INFO
+}
+
+enum BotAlertStatus {
+  PENDING
+  ACKNOWLEDGED
+  RESOLVED
+}
+
+enum BotAlertType {
+  QUOTA_EXHAUSTED
+  LLM_PROVIDER_ERROR
+  BOT_INACTIVE_WITH_TRAFFIC
+  LATENCY_DEGRADED
+  CRON_INSIGHTS_FAILED
+  ACTIVITY_ERRORS_SPIKE
+  CLIENT_NO_ACTIVITY
+}
+
 enum InsightStatus {
   PENDING
   APPLIED
@@ -896,6 +919,7 @@ model BotConfig {
   quotaUsages   QuotaUsage[]
   events        ChatbotEvent[]
   insights      ChatbotInsight[]
+  alerts        BotAlert[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -1084,4 +1108,35 @@ model ChatbotEvent {
   @@index([botConfigId, createdAt(sort: Desc)])
   @@index([level, createdAt(sort: Desc)])
   @@map("chatbot_events")
+}
+
+model BotAlert {
+  id String @id @default(cuid())
+
+  botConfigId String
+  botConfig   BotConfig @relation(fields: [botConfigId], references: [id], onDelete: Cascade)
+
+  type     BotAlertType
+  severity BotAlertSeverity
+  status   BotAlertStatus   @default(PENDING)
+
+  title       String
+  description String @db.Text
+  metadata    Json   @default("{}")
+
+  emailSent   Boolean   @default(false)
+  emailSentAt DateTime?
+
+  acknowledgedAt DateTime?
+  acknowledgedBy String?
+
+  resolvedAt DateTime?
+  resolvedBy String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([botConfigId, status])
+  @@index([status, createdAt])
+  @@map("chatbot_bot_alert")
 }

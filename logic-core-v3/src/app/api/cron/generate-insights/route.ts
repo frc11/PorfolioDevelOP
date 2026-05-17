@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { generateInsightsForBot } from '@/modules/chatbot/index.server'
+import { logChatbotEvent } from '@/modules/chatbot/server/logging'
 import { sendInsightsNotificationEmail } from '@/modules/chatbot/server/notifications/sendInsightsNotification'
 
 export const dynamic = 'force-dynamic'
@@ -74,6 +75,16 @@ export async function POST(req: Request) {
       }
     } catch (err) {
       console.error(`[cron] Failed for bot ${bot.id}`, err)
+      await logChatbotEvent({
+        botConfigId: bot.id,
+        type: 'cron.generate_insights_failed',
+        level: 'error',
+        message: err instanceof Error ? err.message : 'Unknown insights cron error',
+        metadata: {
+          orgSlug: bot.organization.slug,
+          orgName: bot.organization.companyName,
+        },
+      })
       results.failed++
     }
   }

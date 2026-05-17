@@ -352,6 +352,7 @@ export async function handleChatRequest(
             tokensOut,
             costUsd: costBreakdown.totalUsd,
             toolCallCount: toolCalls?.length ?? 0,
+            durationMs: Date.now() - startTime,
           },
         })
       } catch (persistError) {

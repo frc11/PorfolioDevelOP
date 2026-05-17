@@ -15,17 +15,20 @@ import {
   Command,
   Bot,
   BookOpen,
+  AlertTriangle,
 } from 'lucide-react'
 
 type AdminSidebarProps = {
   userName: string
   userRole: string
+  pendingAlerts?: number
 }
 
 type NavItem = {
   href: string
   label: string
   icon: LucideIcon
+  badgeKey?: 'pendingAlerts'
 }
 
 type NavSection = {
@@ -57,6 +60,7 @@ const NAV_SECTIONS: NavSection[] = [
     items: [
       { href: '/admin/chatbot/activity', label: 'Global Activity', icon: Bot },
       { href: '/admin/chatbot/health', label: 'Health Score', icon: BookOpen },
+      { href: '/admin/alerts', label: 'Alerts', icon: AlertTriangle, badgeKey: 'pendingAlerts' },
     ],
   },
   {
@@ -65,8 +69,9 @@ const NAV_SECTIONS: NavSection[] = [
   },
 ]
 
-export function AdminSidebar({ userName, userRole }: AdminSidebarProps) {
+export function AdminSidebar({ userName, userRole, pendingAlerts = 0 }: AdminSidebarProps) {
   const pathname = usePathname()
+  const badges = { pendingAlerts }
 
   return (
     <aside className="fixed inset-y-0 left-0 z-[90] flex w-[240px] flex-col border-r border-white/10 bg-white/5 backdrop-blur-xl">
@@ -101,6 +106,7 @@ export function AdminSidebar({ userName, userRole }: AdminSidebarProps) {
                     : pathname === item.href || pathname.startsWith(`${item.href}/`)
 
                 const Icon = item.icon
+                const badgeValue = item.badgeKey ? badges[item.badgeKey] : 0
 
                 return (
                   <Link
@@ -115,6 +121,11 @@ export function AdminSidebar({ userName, userRole }: AdminSidebarProps) {
                   >
                     <Icon className="h-4 w-4 shrink-0" />
                     <span>{item.label}</span>
+                    {badgeValue > 0 && (
+                      <span className="ml-auto rounded-full bg-red-500/20 px-2 py-0.5 text-[10px] font-semibold text-red-200">
+                        {badgeValue > 99 ? '99+' : badgeValue}
+                      </span>
+                    )}
                   </Link>
                 )
               })}

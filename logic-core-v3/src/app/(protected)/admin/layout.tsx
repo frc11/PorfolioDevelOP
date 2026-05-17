@@ -3,6 +3,7 @@ import { unstable_noStore as noStore } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { AdminSidebar } from './_components/admin-sidebar'
 import { AdminTopbar } from './_components/admin-topbar'
+import { prisma } from '@/lib/prisma'
 
 export const dynamic = 'force-dynamic'
 
@@ -24,6 +25,9 @@ export default async function AgencyOsLayout({
   }
 
   const userName = session.user.name ?? session.user.email ?? 'Super Admin'
+  const pendingAlerts = await prisma.botAlert.count({
+    where: { status: 'PENDING' },
+  })
 
   return (
     <div className="fixed inset-0 z-[80] bg-[#080a0c] text-zinc-100">
@@ -39,7 +43,7 @@ export default async function AgencyOsLayout({
         }}
       />
 
-      <AdminSidebar userName={userName} userRole={session.user.role} />
+      <AdminSidebar userName={userName} userRole={session.user.role} pendingAlerts={pendingAlerts} />
 
       <div className="relative h-full pl-[240px]">
         <div className="flex h-full flex-col p-4">
