@@ -109,11 +109,16 @@ export function ClientHeader({ client, allClients }: ClientHeaderProps) {
         </div>
 
         <div className="flex flex-col gap-3">
-          <div className="grid grid-cols-2 gap-2 text-xs sm:grid-cols-3 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-2 text-xs sm:grid-cols-3 lg:grid-cols-6">
             <StatChip label="Proyectos" value={client._count.projects} />
             <StatChip label="Archivos" value={client._count.clientAssets} />
             <StatChip label="Tickets" value={client._count.tickets} />
             <StatChip label="Mensajes" value={client._count.messages} />
+            <StatChip
+              label="Conversaciones"
+              value={client.botConfig?._count?.conversations ?? 0}
+            />
+            <StatChip label="Leads" value={client.botConfig?._count?.leads ?? 0} />
           </div>
           <div className="lg:self-end">
             <ImpersonateButton clientId={client.id} clientName={client.companyName} />
