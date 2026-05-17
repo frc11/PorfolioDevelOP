@@ -1,6 +1,6 @@
 import { ProjectStatus } from '@prisma/client'
 import { prisma } from '@/lib/prisma'
-import { ProjectManager } from '@/app/(protected)/admin/agency-dashboard/_components/ProjectManager'
+import { ProjectManager } from '@/components/admin/managers/ProjectManager'
 
 interface ProjectsTabProps {
   clientId: string

@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { Activity, ArrowRight, BookOpen, Bot, MessageSquare, Settings, Users } from 'lucide-react'
 import { prisma } from '@/lib/prisma'
 import { StatCard } from '@/app/(protected)/admin/_components/stat-card'
-import { ChatbotManager } from '@/app/(protected)/admin/agency-dashboard/_components/ChatbotManager'
+import { ChatbotManager } from '@/components/admin/managers/ChatbotManager'
 
 interface ChatbotTabProps {
   clientId: string

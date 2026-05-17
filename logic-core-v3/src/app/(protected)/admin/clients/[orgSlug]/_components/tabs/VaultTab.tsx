@@ -1,6 +1,6 @@
 import { ExternalLink } from 'lucide-react'
 import { prisma } from '@/lib/prisma'
-import { VaultManager } from '@/app/(protected)/admin/agency-dashboard/_components/VaultManager'
+import { VaultManager } from '@/components/admin/managers/VaultManager'
 
 interface VaultTabProps {
   clientId: string

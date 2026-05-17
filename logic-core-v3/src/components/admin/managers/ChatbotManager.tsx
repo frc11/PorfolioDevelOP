@@ -2,9 +2,27 @@
 
 import { Bot, Activity, TrendingUp } from 'lucide-react'
 
-import type { ClientData } from './CommandCenterClient'
+type ChatbotManagerBotConfig = {
+  botName: string
+  slug: string
+  llmModel: string
+  isActive: boolean
+  monthlyQuota: number
+  quotaUsages?: Array<{
+    tokensOut: number
+    costUsd: unknown
+    conversationsCount: number
+  }>
+  leads?: Array<{
+    id: string
+    name: string | null
+    email: string | null
+    phone: string | null
+    intent: string | null
+  }>
+} | null
 
-export function ChatbotManager({ botConfig, organizationId }: { botConfig: ClientData['botConfig'], organizationId: string }) {
+export function ChatbotManager({ botConfig }: { botConfig: ChatbotManagerBotConfig, organizationId: string }) {
   if (!botConfig) {
     return (
       <div className="p-4 rounded-xl border border-dashed border-zinc-700/50 bg-zinc-800/10 text-sm text-zinc-400">
