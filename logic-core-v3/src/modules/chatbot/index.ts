@@ -79,7 +79,7 @@ export type { Industry } from './server/admin/createClientWithBot'
 
 // Dashboard UI components (Sprint S15)
 export { LeadsTable, ConversationsTable } from './components/dashboards'
-export { ClientDashboardTabs, ClientLeadsTable } from './components/dashboard'
+export { ClientDashboardTabs, ClientLeadsTable, ChatbotUpsellLanding, ChatbotOverview } from './components/dashboard'
 
 // Lead CRM Server Actions
 export { updateLeadStatus } from './server/admin/updateLeadStatus'

@@ -7,9 +7,10 @@ export default async function ChatbotLayout({
   params,
 }: {
   children: React.ReactNode
-  params: Promise<{ orgSlug: string }>
+  params: Promise<{ clientId: string }>
 }) {
-  const { orgSlug } = await params
+  const { clientId } = await params
+  const orgSlug = clientId
   const data = await getBotByOrgSlug(orgSlug)
 
   if (!data) notFound()

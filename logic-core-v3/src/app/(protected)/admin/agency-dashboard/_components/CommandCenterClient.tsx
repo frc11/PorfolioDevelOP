@@ -1,5 +1,7 @@
 'use client'
 
+import Link from 'next/link'
+
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { Users, FileText, Database, ChevronRight, Briefcase, Bot } from 'lucide-react'
@@ -107,8 +109,19 @@ export function CommandCenterClient({ initialClients }: { initialClients: Client
                   {selectedClient.projects[0] ? (
                     <ProjectManager projectId={selectedClient.projects[0].id} organizationId={selectedClient.id} />
                   ) : (
-                    <div className="p-4 rounded-xl border border-dashed border-red-500/20 bg-red-500/5 text-sm text-red-400">
-                      Este cliente no tiene un proyecto en curso (`IN_PROGRESS`). Se debe crear un proyecto primero.
+                    <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-6 text-center">
+                      <p className="text-sm text-zinc-400 mb-1">
+                        Este cliente todavía no tiene proyectos activos
+                      </p>
+                      <p className="text-xs text-zinc-600 mb-4">
+                        Creá uno para empezar a gestionar entregables
+                      </p>
+                      <Link
+                        href={`/admin/projects/new?clientSlug=${selectedClient.slug}`}
+                        className="text-sm text-cyan-400 hover:underline"
+                      >
+                        Crear primer proyecto →
+                      </Link>
                     </div>
                   )}
                 </div>
@@ -142,7 +155,7 @@ export function CommandCenterClient({ initialClients }: { initialClients: Client
                     <Bot size={18} className="text-cyan-400" /> AI Companion
                   </h3>
                   <p className="text-xs text-zinc-500">Monitor de consumos, leads capturados y estado del chatbot.</p>
-                  <ChatbotManager botConfig={selectedClient.botConfig} organizationId={selectedClient.id} />
+                  <ChatbotManager botConfig={selectedClient.botConfig} organizationId={selectedClient.id} slug={selectedClient.slug} />
                 </div>
               </div>
             </motion.div>

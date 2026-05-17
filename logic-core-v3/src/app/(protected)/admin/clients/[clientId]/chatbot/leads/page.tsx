@@ -5,9 +5,10 @@ import { LeadsTable } from '@/modules/chatbot/components/dashboards/LeadsTable'
 export default async function ChatbotLeads({
   params,
 }: {
-  params: Promise<{ orgSlug: string }>
+  params: Promise<{ clientId: string }>
 }) {
-  const { orgSlug } = await params
+  const { clientId } = await params
+  const orgSlug = clientId
   const leads = await listLeadsByOrgSlug(orgSlug, 100)
 
   if (!leads) notFound()

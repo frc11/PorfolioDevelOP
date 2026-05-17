@@ -94,7 +94,6 @@ Generá hasta 3 insights.`
       system: systemPrompt,
       messages: [{ role: 'user', content: userPrompt }],
     })
-    console.log(`[Traffic Insights] Generated in ${Date.now() - startedAt}ms`)
 
     const textBlock = response.content.find((block) => block.type === 'text')
     if (!textBlock || textBlock.type !== 'text') return []
@@ -149,7 +148,6 @@ Generá hasta 3 insights.`
       system: systemPrompt,
       messages: [{ role: 'user', content: userPrompt }],
     })
-    console.log(`[SEO Insights] Generated in ${Date.now() - startedAt}ms`)
 
     const textBlock = response.content.find((block) => block.type === 'text')
     if (!textBlock || textBlock.type !== 'text') return []

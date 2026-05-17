@@ -5,9 +5,10 @@ import { ConversationsTable } from '@/modules/chatbot/components/dashboards/Conv
 export default async function ChatbotConversations({
   params,
 }: {
-  params: Promise<{ orgSlug: string }>
+  params: Promise<{ clientId: string }>
 }) {
-  const { orgSlug } = await params
+  const { clientId } = await params
+  const orgSlug = clientId
   const conversations = await listConversationsByOrgSlug(orgSlug, 100)
 
   if (!conversations) notFound()

@@ -10,9 +10,10 @@ import { StatCard } from '@/app/(protected)/admin/_components/stat-card'
 export default async function ChatbotOverview({
   params,
 }: {
-  params: Promise<{ orgSlug: string }>
+  params: Promise<{ clientId: string }>
 }) {
-  const { orgSlug } = await params
+  const { clientId } = await params
+  const orgSlug = clientId
 
   // Paralelizar queries
   const [bot, leads, conversations, usage] = await Promise.all([

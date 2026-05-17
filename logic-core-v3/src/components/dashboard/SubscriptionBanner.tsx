@@ -1,25 +1,9 @@
-import { prisma } from '@/lib/prisma'
-import { auth } from '@/auth'
 import { AlertTriangle, ExternalLink } from 'lucide-react'
 import Link from 'next/link'
+import { getSubscriptionForOrg } from '@/lib/subscription'
 
-export async function SubscriptionBanner() {
-  const session = await auth()
-  if (!session?.user?.id) return null
-
-  // Find user's organization and subscription
-  const orgMember = await prisma.orgMember.findFirst({
-    where: { userId: session.user.id },
-    include: {
-      organization: {
-        include: {
-          subscription: true
-        }
-      }
-    }
-  })
-
-  const subscription = orgMember?.organization?.subscription
+export async function SubscriptionBanner({ orgId }: { orgId: string }) {
+  const subscription = await getSubscriptionForOrg(orgId)
 
   if (!subscription || subscription.status !== 'PAST_DUE') {
     return null

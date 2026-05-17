@@ -33,13 +33,41 @@ const LEVEL_ICONS = {
   debug: '○',
 }
 
-function formatTime(iso: string): string {
-  const d = new Date(iso)
-  return d.toLocaleTimeString('es-AR', {
+function formatTime(timestamp: string | Date): string {
+  const date = new Date(timestamp)
+  const now = new Date()
+
+  const isSameDay =
+    date.getDate() === now.getDate() &&
+    date.getMonth() === now.getMonth() &&
+    date.getFullYear() === now.getFullYear()
+
+  const isYesterday = (() => {
+    const yesterday = new Date(now)
+    yesterday.setDate(yesterday.getDate() - 1)
+    return (
+      date.getDate() === yesterday.getDate() &&
+      date.getMonth() === yesterday.getMonth() &&
+      date.getFullYear() === yesterday.getFullYear()
+    )
+  })()
+
+  const time = date.toLocaleTimeString('es-AR', {
     hour: '2-digit',
     minute: '2-digit',
     second: '2-digit',
+    hour12: false,
   })
+
+  if (isSameDay) return `Hoy, ${time}`
+  if (isYesterday) return `Ayer, ${time}`
+
+  const dateStr = date.toLocaleDateString('es-AR', {
+    day: '2-digit',
+    month: '2-digit',
+    year: '2-digit',
+  })
+  return `${dateStr}, ${time}`
 }
 
 export function ActivityLog({ initialEvents, slug }: ActivityLogProps) {

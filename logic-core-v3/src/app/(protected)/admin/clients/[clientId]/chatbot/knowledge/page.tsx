@@ -5,9 +5,10 @@ import { KnowledgeBaseEditor } from '@/modules/chatbot/components/admin/Knowledg
 export default async function ChatbotKnowledge({
   params,
 }: {
-  params: Promise<{ orgSlug: string }>
+  params: Promise<{ clientId: string }>
 }) {
-  const { orgSlug } = await params
+  const { clientId } = await params
+  const orgSlug = clientId
   const data = await getBotByOrgSlug(orgSlug)
 
   if (!data || !data.bot.knowledgeBase) notFound()

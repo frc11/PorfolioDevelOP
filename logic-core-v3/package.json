@@ -2,7 +2,7 @@
   "name": "logic-core-v3",
   "version": "0.1.0",
   "private": true,
-  "scripts": {
+  "scripts": { "check-env": "node scripts/check-env.js",
     "dev": "next dev --webpack",
     "build": "next build --webpack",
     "start": "next start",
@@ -77,6 +77,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "dotenv": "^17.4.2",
     "eslint": "^9",
     "eslint-config-next": "^16.2.1",
     "tailwindcss": "^4",

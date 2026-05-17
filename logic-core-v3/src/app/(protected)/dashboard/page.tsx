@@ -88,7 +88,6 @@ async function BriefServerWrapper({ organizationId }: { organizationId: string }
 
     // Si el brief vino vacío o sin texto, no renderizar
     if (!brief?.text?.trim()) {
-      console.log(`[AIBrief] No content for org ${organizationId}, skipping render`)
       return null
     }
 

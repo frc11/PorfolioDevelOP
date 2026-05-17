@@ -1,3 +1,4 @@
+import { cache } from 'react'
 import { cookies } from 'next/headers'
 import { jwtVerify, SignJWT } from 'jose'
 import { auth } from '@/auth'
@@ -50,7 +51,7 @@ export async function verifyImpersonationToken(token: string) {
   } satisfies ImpersonationPayload
 }
 
-export async function getImpersonationSession() {
+export const getImpersonationSession = cache(async () => {
   const session = await auth()
   if (session?.user?.role !== 'SUPER_ADMIN' || !session.user.id) {
     return null
@@ -76,7 +77,7 @@ export async function getImpersonationSession() {
   } catch {
     return null
   }
-}
+})
 
 export function getImpersonationCookieOptions() {
   return {
