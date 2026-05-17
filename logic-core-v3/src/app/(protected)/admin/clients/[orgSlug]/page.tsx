@@ -35,38 +35,50 @@ export default async function ClientDetailPage({
     ? (tabParam as TabId)
     : 'overview'
 
-  const client = await prisma.organization.findFirst({
-    where: {
-      OR: [{ id: orgSlug }, { slug: orgSlug }],
-    },
-    include: {
-      botConfig: {
-        select: {
-          id: true,
-          slug: true,
-          botName: true,
-          isActive: true,
+  const [client, allClients] = await Promise.all([
+    prisma.organization.findFirst({
+      where: {
+        OR: [{ id: orgSlug }, { slug: orgSlug }],
+      },
+      include: {
+        botConfig: {
+          include: {
+            _count: {
+              select: { conversations: true, leads: true },
+            },
+          },
+        },
+        subscription: {
+          select: { status: true, planName: true },
+        },
+        _count: {
+          select: {
+            projects: true,
+            clientAssets: true,
+            tickets: true,
+            messages: true,
+          },
         },
       },
-      subscription: {
-        select: { status: true, planName: true },
-      },
-      _count: {
-        select: {
-          projects: true,
-          clientAssets: true,
-          tickets: true,
-          messages: true,
-        },
-      },
-    },
-  })
+    }),
+    prisma.organization.findMany({
+      select: { id: true, companyName: true, slug: true },
+      orderBy: { companyName: 'asc' },
+    }),
+  ])
 
   if (!client) notFound()
 
   return (
     <div className="space-y-6">
-      <ClientHeader client={client} />
+      <ClientHeader
+        client={client}
+        allClients={allClients.map((item) => ({
+          id: item.id,
+          name: item.companyName,
+          slug: item.slug,
+        }))}
+      />
       <ClientTabsNav clientId={client.id} activeTab={activeTab} />
 
       <Suspense fallback={<TabSkeleton />}>

@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { Building2, ChevronLeft, LogIn } from 'lucide-react'
 import { startImpersonationAction } from '../../_actions/client.actions'
+import { ClientSwitcher } from './ClientSwitcher'
 
 interface ClientHeaderProps {
   client: {
@@ -9,7 +10,11 @@ interface ClientHeaderProps {
     slug: string
     siteUrl: string | null
     whatsapp: string | null
-    botConfig: { isActive: boolean; botName: string } | null
+    botConfig: {
+      isActive: boolean
+      botName: string
+      _count?: { conversations: number; leads: number }
+    } | null
     subscription: { status: string; planName: string } | null
     _count: {
       projects: number
@@ -18,9 +23,10 @@ interface ClientHeaderProps {
       messages: number
     }
   }
+  allClients: Array<{ id: string; name: string; slug: string }>
 }
 
-export function ClientHeader({ client }: ClientHeaderProps) {
+export function ClientHeader({ client, allClients }: ClientHeaderProps) {
   return (
     <div className="space-y-4">
       <Link
@@ -32,15 +38,22 @@ export function ClientHeader({ client }: ClientHeaderProps) {
       </Link>
 
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-        <div className="flex items-start gap-4">
-          <div className="rounded-2xl bg-cyan-400/10 p-3">
+        <div className="flex min-w-0 items-start gap-4">
+          <div className="hidden rounded-2xl bg-cyan-400/10 p-3 sm:block">
             <Building2 className="h-6 w-6 text-cyan-300" strokeWidth={1.5} />
           </div>
-          <div>
+          <div className="min-w-0">
+            <div className="mb-3">
+              <ClientSwitcher
+                currentClientId={client.id}
+                currentClientName={client.companyName}
+                clients={allClients}
+              />
+            </div>
             <p className="text-[10px] uppercase tracking-[0.24em] text-zinc-500">
               Cliente
             </p>
-            <h1 className="text-3xl font-semibold tracking-tight text-zinc-100">
+            <h1 className="text-2xl font-semibold tracking-tight text-zinc-100 sm:text-3xl">
               {client.companyName}
             </h1>
             <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-zinc-400">
@@ -49,31 +62,45 @@ export function ClientHeader({ client }: ClientHeaderProps) {
               </span>
               {client.subscription && (
                 <>
-                  <span className="text-zinc-700">·</span>
-                  <span>{client.subscription.planName} ({client.subscription.status})</span>
+                  <span className="text-zinc-700">/</span>
+                  <span>
+                    {client.subscription.planName} ({client.subscription.status})
+                  </span>
                 </>
               )}
               {client.siteUrl && (
                 <>
-                  <span className="text-zinc-700">·</span>
-                  <a href={client.siteUrl} target="_blank" rel="noopener noreferrer" className="text-cyan-400 hover:underline">
+                  <span className="text-zinc-700">/</span>
+                  <a
+                    href={client.siteUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-cyan-400 hover:underline"
+                  >
                     Website
                   </a>
                 </>
               )}
               {client.whatsapp && (
                 <>
-                  <span className="text-zinc-700">·</span>
+                  <span className="text-zinc-700">/</span>
                   <span>WhatsApp: {client.whatsapp}</span>
                 </>
               )}
               {client.botConfig && (
                 <>
-                  <span className="text-zinc-700">·</span>
+                  <span className="text-zinc-700">/</span>
                   <span>
                     Bot:{' '}
-                    <span className={client.botConfig.isActive ? 'text-emerald-400' : 'text-zinc-500'}>
-                      {client.botConfig.botName} {client.botConfig.isActive ? '(activo)' : '(pausado)'}
+                    <span
+                      className={
+                        client.botConfig.isActive
+                          ? 'text-emerald-400'
+                          : 'text-zinc-500'
+                      }
+                    >
+                      {client.botConfig.botName}{' '}
+                      {client.botConfig.isActive ? '(activo)' : '(pausado)'}
                     </span>
                   </span>
                 </>
@@ -83,7 +110,7 @@ export function ClientHeader({ client }: ClientHeaderProps) {
         </div>
 
         <div className="flex flex-col gap-3">
-          <div className="grid grid-cols-2 gap-3 text-xs sm:grid-cols-4">
+          <div className="grid grid-cols-2 gap-2 text-xs sm:grid-cols-3 lg:grid-cols-4">
             <StatChip label="Proyectos" value={client._count.projects} />
             <StatChip label="Archivos" value={client._count.clientAssets} />
             <StatChip label="Tickets" value={client._count.tickets} />
