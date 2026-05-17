@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { Bot, Building2, Pin, PinOff, Plus, Search } from 'lucide-react'
+import { EmptyState } from '@/components/ui/EmptyState'
 
 interface ClientItem {
   id: string
@@ -163,15 +164,12 @@ export function ClientsListClient({ clients }: ClientsListClientProps) {
       </p>
 
       {filtered.length === 0 ? (
-        <div className="rounded-3xl border border-dashed border-white/10 bg-white/[0.02] p-12 text-center">
-          <Building2
-            className="mx-auto mb-3 h-10 w-10 text-zinc-600"
-            strokeWidth={1.5}
-          />
-          <p className="text-sm text-zinc-400">
-            {search ? `Sin resultados para "${search}"` : 'Sin clientes'}
-          </p>
-        </div>
+        <EmptyState
+          icon={Building2}
+          title={search ? `Sin resultados para "${search}"` : 'Sin clientes'}
+          description="Ajusta la busqueda o los filtros para encontrar clientes."
+          cta={{ label: 'Nuevo cliente', href: '/admin/clients/new' }}
+        />
       ) : (
         <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
           {filtered.map((client) => (

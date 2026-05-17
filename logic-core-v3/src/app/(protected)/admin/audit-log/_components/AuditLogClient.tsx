@@ -2,7 +2,8 @@
 
 import { useMemo, useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
-import { Building2, ChevronDown, Clock, Filter, User } from 'lucide-react'
+import { Building2, ChevronDown, Clock, Filter, History, User } from 'lucide-react'
+import { EmptyState } from '@/components/ui/EmptyState'
 
 type DiffValue = Record<string, { before: unknown; after: unknown }>
 
@@ -82,9 +83,11 @@ export function AuditLogClient({ initialEntries, stats }: AuditLogClientProps) {
 
       <div className="space-y-2">
         {filtered.length === 0 ? (
-          <div className="rounded-3xl border border-white/10 bg-white/[0.02] p-10 text-center">
-            <p className="text-sm text-zinc-400">Sin registros para este filtro</p>
-          </div>
+          <EmptyState
+            icon={History}
+            title="Sin registros para este filtro"
+            description="Cuando haya acciones administrativas que coincidan, van a aparecer aca."
+          />
         ) : (
           filtered.map((entry) => {
             const diff = normalizeDiff(entry.diff)

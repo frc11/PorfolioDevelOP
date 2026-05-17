@@ -3,6 +3,7 @@
 import { motion } from 'motion/react'
 import type { LucideIcon } from 'lucide-react'
 import type { ReactNode } from 'react'
+import Link from 'next/link'
 import { cn } from '@/lib/utils'
 
 interface EmptyStateProps {
@@ -10,8 +11,14 @@ interface EmptyStateProps {
   title: string
   description?: string
   action?: ReactNode
+  cta?: {
+    label: string
+    href?: string
+    onClick?: () => void
+  }
   className?: string
   size?: 'sm' | 'md' | 'lg'
+  variant?: 'default' | 'subtle'
 }
 
 const SIZE_STYLES = {
@@ -25,8 +32,10 @@ export function EmptyState({
   title,
   description,
   action,
+  cta,
   className,
   size = 'md',
+  variant = 'default',
 }: EmptyStateProps) {
   const sizes = SIZE_STYLES[size]
 
@@ -35,7 +44,14 @@ export function EmptyState({
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-      className={cn('flex flex-col items-center justify-center text-center', sizes.padding, className)}
+      className={cn(
+        'flex flex-col items-center justify-center text-center',
+        variant === 'default'
+          ? 'rounded-3xl border border-dashed border-white/10 bg-white/[0.02] px-6'
+          : 'bg-transparent',
+        sizes.padding,
+        className,
+      )}
     >
       <div className="relative mb-4">
         <motion.div
@@ -53,6 +69,27 @@ export function EmptyState({
       {description && (
         <p className="mt-1 max-w-sm text-xs leading-relaxed text-zinc-600">{description}</p>
       )}
+
+      {cta ? (
+        <div className="mt-5">
+          {cta.href ? (
+            <Link
+              href={cta.href}
+              className="inline-flex items-center gap-2 rounded-2xl bg-cyan-400/15 px-5 py-2.5 text-sm text-cyan-300 transition-colors hover:bg-cyan-400/25"
+            >
+              {cta.label}
+            </Link>
+          ) : (
+            <button
+              type="button"
+              onClick={cta.onClick}
+              className="inline-flex items-center gap-2 rounded-2xl bg-cyan-400/15 px-5 py-2.5 text-sm text-cyan-300 transition-colors hover:bg-cyan-400/25"
+            >
+              {cta.label}
+            </button>
+          )}
+        </div>
+      ) : null}
 
       {action && <div className="mt-5">{action}</div>}
     </motion.div>
