@@ -144,6 +144,26 @@ enum BotAlertType {
   CLIENT_NO_ACTIVITY
 }
 
+enum AuditActionType {
+  CLIENT_CREATED
+  CLIENT_UPDATED
+  CLIENT_DELETED
+  BOT_ACTIVATED
+  BOT_DEACTIVATED
+  BOT_CONFIG_UPDATED
+  KB_UPDATED
+  QUOTA_CHANGED
+  LEAD_STATUS_CHANGED
+  IMPERSONATION_STARTED
+  IMPERSONATION_ENDED
+  ALERT_ACKNOWLEDGED
+  ALERT_RESOLVED
+  USER_INVITED
+  USER_REMOVED
+  SUBSCRIPTION_CHANGED
+  OTHER
+}
+
 enum InsightStatus {
   PENDING
   APPLIED
@@ -1139,4 +1159,30 @@ model BotAlert {
   @@index([botConfigId, status])
   @@index([status, createdAt])
   @@map("chatbot_bot_alert")
+}
+
+model AdminAuditLog {
+  id String @id @default(cuid())
+
+  userId    String
+  userEmail String?
+  userName  String?
+
+  actionType AuditActionType
+  action     String
+  targetType String
+  targetId   String
+
+  diff     Json @default("{}")
+  metadata Json @default("{}")
+
+  ipAddress String?
+  userAgent String?
+
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
+  @@index([targetType, targetId, createdAt])
+  @@index([actionType, createdAt])
+  @@map("admin_audit_log")
 }
