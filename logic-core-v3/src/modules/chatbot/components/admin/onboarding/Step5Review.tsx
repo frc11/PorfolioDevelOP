@@ -1,12 +1,47 @@
 'use client'
 
 import { useState } from 'react'
-import type { StepProps } from './types'
+import { CheckCircle2 } from 'lucide-react'
+import type { OnboardingState } from './types'
 import { createClientWithBot } from '../../../server/admin/createClientWithBot'
+import { INDUSTRIES_LABELS } from './industries'
+import { slugify } from '@/lib/slugify'
 
-type Step5Props = Omit<StepProps, 'onNext' | 'update'>
+interface Step5Props {
+  state: OnboardingState
+  onBack?: () => void
+  onCreated: () => void
+}
 
-export function Step5Review({ state, onBack }: Step5Props) {
+const TONE_LABELS: Record<OnboardingState['tone'], string> = {
+  informal_rioplatense: 'Informal Rioplatense (vos)',
+  formal: 'Formal (usted)',
+  neutral: 'Neutral (tú)',
+}
+
+const AVATAR_LABELS: Record<OnboardingState['avatarStyle'], string> = {
+  neuro: 'Neuro (Esfera de partículas)',
+  legacy_neuro: 'Legacy Neuro (Avatar 3D)',
+  image: 'Imagen',
+  emoji: 'Emoji',
+}
+
+const POSITION_LABELS: Record<OnboardingState['position'], string> = {
+  bottom_right: 'Abajo a la derecha',
+  bottom_left: 'Abajo a la izquierda',
+}
+
+const KB_SECTIONS = [
+  { key: 'businessInfo' as const, label: 'Sobre el negocio' },
+  { key: 'servicesOrProducts' as const, label: 'Productos / Servicios' },
+  { key: 'faq' as const, label: 'Preguntas frecuentes' },
+  { key: 'policies' as const, label: 'Políticas' },
+  { key: 'salesGuidance' as const, label: 'Guía de ventas' },
+  { key: 'toneExamples' as const, label: 'Ejemplos de tono' },
+  { key: 'forbiddenStatements' as const, label: 'No decir' },
+]
+
+export function Step5Review({ state, onBack, onCreated }: Step5Props) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -14,60 +49,183 @@ export function Step5Review({ state, onBack }: Step5Props) {
     setIsSubmitting(true)
     setError(null)
     try {
+      onCreated() // Clear draft before redirect
       await createClientWithBot({
         ...state,
-        // Enforce specific position type for z.enum mapping
-        position: state.position as 'bottom_right' | 'bottom_left'
+        position: state.position as 'bottom_right' | 'bottom_left',
       })
+      // redirect() is called inside createClientWithBot on success
     } catch (err) {
+      // redirect() throws a NEXT_REDIRECT error — don't catch that
+      if (err instanceof Error && err.message.includes('NEXT_REDIRECT')) {
+        return
+      }
       setError(err instanceof Error ? err.message : 'Error al crear el cliente y bot.')
       setIsSubmitting(false)
     }
   }
 
+  const derivedSlug = slugify(state.orgName)
+
   return (
     <div className="space-y-6">
-      <h2 className="text-xl font-semibold text-zinc-100">5. Revisión Final</h2>
-      <p className="text-sm text-zinc-400">Verificá los datos antes de crear la organización y el chatbot.</p>
+      <div>
+        <h2 className="text-2xl font-semibold text-zinc-100 mb-1">
+          Revisá todo antes de crear
+        </h2>
+        <p className="text-sm text-zinc-400">
+          Una vez creado, podés seguir editando desde el panel del cliente.
+        </p>
+      </div>
 
-      <div className="bg-zinc-900 border border-zinc-800 rounded p-4 space-y-4 text-sm text-zinc-300">
-        <div>
-          <span className="font-semibold text-zinc-100">Empresa:</span> {state.orgName} ({state.industry}) - {state.city}
-        </div>
-        <div>
-          <span className="font-semibold text-zinc-100">Bot:</span> {state.botName}
-        </div>
-        <div>
-          <span className="font-semibold text-zinc-100">Tono:</span> {state.tone}
-        </div>
-        <div>
-          <span className="font-semibold text-zinc-100">Acento Visual:</span>{' '}
-          <span className="inline-block w-4 h-4 rounded-full border border-zinc-700 align-middle" style={{ backgroundColor: state.accentColor }} />
-        </div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <ReviewSection title="Empresa">
+          <ReviewRow label="Nombre" value={state.orgName} />
+          <ReviewRow label="Industria" value={INDUSTRIES_LABELS[state.industry] ?? state.industry} />
+          <ReviewRow label="Ciudad" value={state.city} />
+          <ReviewRow label="Website" value={state.websiteUrl || '—'} />
+          <ReviewRow label="Slug del bot" value={derivedSlug} mono />
+        </ReviewSection>
+
+        <ReviewSection title="Identidad del bot">
+          <ReviewRow label="Nombre" value={state.botName} />
+          <ReviewRow label="Tono" value={TONE_LABELS[state.tone]} />
+          <ReviewRow label="Avatar" value={AVATAR_LABELS[state.avatarStyle]} />
+          <ReviewRow
+            label="Color"
+            value={
+              <span className="flex items-center gap-2">
+                <span
+                  className="inline-block h-4 w-4 rounded-full border border-white/10"
+                  style={{ backgroundColor: state.accentColor }}
+                />
+                <span className="font-mono text-xs">{state.accentColor}</span>
+              </span>
+            }
+          />
+          <ReviewRow label="Posición" value={POSITION_LABELS[state.position]} />
+        </ReviewSection>
+
+        <ReviewSection title="Mensaje de bienvenida" full>
+          <p className="text-sm text-zinc-300 leading-relaxed bg-white/[0.02] rounded-xl p-4 border border-white/5">
+            {state.welcomeMessage}
+          </p>
+        </ReviewSection>
+
+        <ReviewSection title="WhatsApp" full={false}>
+          <ReviewRow label="Número" value={state.whatsappNumber || '—'} mono />
+          <ReviewRow
+            label="Quick replies"
+            value={state.quickReplies.length > 0 ? `${state.quickReplies.length} configurados` : '—'}
+          />
+        </ReviewSection>
+
+        <ReviewSection title="Knowledge Base" full>
+          <div className="space-y-2 text-sm">
+            {KB_SECTIONS.map((s) => {
+              const content = state[s.key]
+              const length = content?.length ?? 0
+              const hasContent = length >= 10
+              return (
+                <div key={s.key} className="flex items-center justify-between">
+                  <span className="text-zinc-300 flex items-center gap-2">
+                    <span className={`inline-block h-1.5 w-1.5 rounded-full ${hasContent ? 'bg-emerald-400' : 'bg-red-400'}`} />
+                    {s.label}
+                  </span>
+                  <span className="text-xs text-zinc-500 font-mono">
+                    {length} chars
+                  </span>
+                </div>
+              )
+            })}
+          </div>
+        </ReviewSection>
+
+        <ReviewSection title="LLM">
+          <ReviewRow label="Provider" value="Google (Vertex AI)" />
+          <ReviewRow label="Modelo" value="gemini-2.5-flash" />
+          <ReviewRow label="Quota" value="1000 conv/mes" mono />
+        </ReviewSection>
       </div>
 
       {error && (
-        <div className="p-3 rounded bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
-          {error}
+        <div className="rounded-2xl border border-red-400/30 bg-red-500/10 p-4 text-sm text-red-200">
+          <p className="font-medium mb-1">No se pudo crear el cliente</p>
+          <p className="text-red-300/80 text-xs">{error}</p>
         </div>
       )}
 
-      <div className="flex justify-between pt-4">
+      <div className="flex flex-col sm:flex-row gap-3 pt-4">
         <button
           onClick={onBack}
           disabled={isSubmitting}
-          className="px-6 py-2 bg-zinc-800 text-zinc-300 rounded font-medium hover:bg-zinc-700 disabled:opacity-40"
+          className="px-6 py-2 bg-zinc-800 text-zinc-300 rounded-xl font-medium hover:bg-zinc-700 disabled:opacity-40 transition-colors"
         >
           ← Volver
         </button>
         <button
           onClick={handleSubmit}
           disabled={isSubmitting}
-          className="px-6 py-2 bg-cyan-500 text-zinc-950 rounded font-medium disabled:opacity-40 flex items-center gap-2"
+          className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-cyan-400 px-6 py-3 text-sm font-medium text-zinc-950 hover:bg-cyan-300 transition-colors disabled:opacity-50"
         >
-          {isSubmitting ? 'Creando...' : 'Crear cliente y bot'}
+          {isSubmitting ? (
+            <>
+              <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" className="opacity-25" />
+                <path fill="currentColor" d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 00-8 8h4z" className="opacity-75" />
+              </svg>
+              Creando...
+            </>
+          ) : (
+            <>
+              <CheckCircle2 className="h-4 w-4" strokeWidth={1.5} />
+              Crear cliente y activar bot
+            </>
+          )}
         </button>
       </div>
+
+      <p className="text-xs text-zinc-500 text-center">
+        El cliente se creará y el bot quedará activo inmediatamente.
+      </p>
+    </div>
+  )
+}
+
+function ReviewSection({
+  title,
+  children,
+  full = false,
+}: {
+  title: string
+  children: React.ReactNode
+  full?: boolean
+}) {
+  return (
+    <div className={`rounded-2xl border border-white/10 bg-white/[0.02] p-5 ${full ? 'lg:col-span-2' : ''}`}>
+      <p className="text-[10px] uppercase tracking-[0.24em] text-zinc-500 mb-3">
+        {title}
+      </p>
+      <div className="space-y-2">{children}</div>
+    </div>
+  )
+}
+
+function ReviewRow({
+  label,
+  value,
+  mono = false,
+}: {
+  label: string
+  value: React.ReactNode
+  mono?: boolean
+}) {
+  return (
+    <div className="flex items-center justify-between text-sm">
+      <span className="text-zinc-500">{label}</span>
+      <span className={`text-zinc-200 ${mono ? 'font-mono text-xs' : ''}`}>
+        {value}
+      </span>
     </div>
   )
 }

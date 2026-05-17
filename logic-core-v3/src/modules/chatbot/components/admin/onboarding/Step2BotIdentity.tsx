@@ -1,9 +1,13 @@
 'use client'
 
 import type { StepProps, OnboardingState } from './types'
+import { getBotNameSuggestions, getWelcomeSuggestions } from './suggestions'
 
 export function Step2BotIdentity({ state, update, onNext, onBack }: StepProps) {
   const canContinue = state.botName.length >= 2 && state.welcomeMessage.length >= 10
+
+  const nameSuggestions = getBotNameSuggestions(state.industry)
+  const welcomeSuggestions = getWelcomeSuggestions(state.industry)
 
   return (
     <div className="space-y-6">
@@ -18,6 +22,25 @@ export function Step2BotIdentity({ state, update, onNext, onBack }: StepProps) {
           className="w-full px-3 py-2 bg-zinc-900 border border-zinc-800 rounded text-zinc-100"
           placeholder="Ej: Asistente Virtual"
         />
+        {nameSuggestions.length > 0 && (
+          <div className="mt-2">
+            <p className="text-[10px] uppercase tracking-[0.18em] text-zinc-500 mb-1.5">
+              Sugerencias para tu industria
+            </p>
+            <div className="flex flex-wrap gap-1.5">
+              {nameSuggestions.map((name) => (
+                <button
+                  key={name}
+                  type="button"
+                  onClick={() => update({ botName: name })}
+                  className="rounded-lg border border-white/10 bg-white/[0.02] px-3 py-1.5 text-xs text-zinc-300 hover:bg-white/[0.06] hover:border-cyan-500/30 transition-colors"
+                >
+                  {name}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       <div>
@@ -29,6 +52,28 @@ export function Step2BotIdentity({ state, update, onNext, onBack }: StepProps) {
           placeholder="Hola, ¿en qué puedo ayudarte hoy?"
           rows={3}
         />
+        <p className="text-xs text-zinc-600 mt-1">
+          {state.welcomeMessage.length}/500 caracteres
+        </p>
+        {welcomeSuggestions.length > 0 && (
+          <div className="mt-2">
+            <p className="text-[10px] uppercase tracking-[0.18em] text-zinc-500 mb-1.5">
+              Mensajes sugeridos
+            </p>
+            <div className="space-y-1.5">
+              {welcomeSuggestions.map((msg, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => update({ welcomeMessage: msg })}
+                  className="w-full text-left rounded-xl border border-white/10 bg-white/[0.02] p-3 text-xs text-zinc-400 hover:bg-white/[0.05] hover:text-zinc-200 hover:border-cyan-500/20 transition-colors leading-relaxed"
+                >
+                  {msg}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       <div>

@@ -1,9 +1,19 @@
 'use client'
 
+import { useEffect, useRef } from 'react'
 import type { StepProps, OnboardingState } from './types'
 
 export function Step4Appearance({ state, update, onNext, onBack }: StepProps) {
   const canContinue = /^#[0-9a-fA-F]{6}$/.test(state.accentColor)
+  const didPrefill = useRef(false)
+
+  // Pre-fill WhatsApp with Argentina country code
+  useEffect(() => {
+    if (!didPrefill.current && !state.whatsappNumber) {
+      update({ whatsappNumber: '549' })
+      didPrefill.current = true
+    }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className="space-y-6">
@@ -11,12 +21,21 @@ export function Step4Appearance({ state, update, onNext, onBack }: StepProps) {
 
       <div>
         <label className="block text-sm text-zinc-400 mb-1">Color de Acento (Hex)</label>
-        <input
-          type="color"
-          value={state.accentColor}
-          onChange={(e) => update({ accentColor: e.target.value })}
-          className="w-full h-10 px-3 py-1 bg-zinc-900 border border-zinc-800 rounded cursor-pointer"
-        />
+        <div className="flex items-center gap-3">
+          <input
+            type="color"
+            value={state.accentColor}
+            onChange={(e) => update({ accentColor: e.target.value })}
+            className="h-10 w-16 px-1 py-1 bg-zinc-900 border border-zinc-800 rounded cursor-pointer"
+          />
+          <input
+            type="text"
+            value={state.accentColor}
+            onChange={(e) => update({ accentColor: e.target.value })}
+            className="flex-1 px-3 py-2 bg-zinc-900 border border-zinc-800 rounded text-zinc-100 font-mono text-sm"
+            placeholder="#06b6d4"
+          />
+        </div>
       </div>
 
       <div>
@@ -46,7 +65,7 @@ export function Step4Appearance({ state, update, onNext, onBack }: StepProps) {
       </div>
 
       <div>
-        <label className="block text-sm text-zinc-400 mb-1">Número de WhatsApp (opcional)</label>
+        <label className="block text-sm text-zinc-400 mb-1">Número de WhatsApp</label>
         <input
           type="text"
           value={state.whatsappNumber ?? ''}
@@ -54,7 +73,7 @@ export function Step4Appearance({ state, update, onNext, onBack }: StepProps) {
           className="w-full px-3 py-2 bg-zinc-900 border border-zinc-800 rounded text-zinc-100"
           placeholder="Ej: 5493815555555"
         />
-        <p className="text-xs text-zinc-500 mt-1">Con código de país, sin el +.</p>
+        <p className="text-xs text-zinc-500 mt-1">Con código de país, sin el +. Pre-llenado con 549 (Argentina).</p>
       </div>
 
       <div className="flex justify-between pt-4">

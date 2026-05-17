@@ -3,9 +3,16 @@
 import type { StepProps } from './types'
 import type { Industry } from '../../../server/admin/createClientWithBot'
 import { INDUSTRIES_LABELS } from './industries'
+import { slugify } from '@/lib/slugify'
 
 export function Step1Company({ state, update, onNext }: StepProps) {
   const canContinue = state.orgName.length >= 2 && state.city.length >= 2
+
+  const handleOrgNameChange = (value: string) => {
+    update({ orgName: value })
+  }
+
+  const derivedSlug = slugify(state.orgName)
 
   return (
     <div className="space-y-6">
@@ -16,10 +23,16 @@ export function Step1Company({ state, update, onNext }: StepProps) {
         <input
           type="text"
           value={state.orgName}
-          onChange={(e) => update({ orgName: e.target.value })}
+          onChange={(e) => handleOrgNameChange(e.target.value)}
           className="w-full px-3 py-2 bg-zinc-900 border border-zinc-800 rounded text-zinc-100"
           placeholder="Ej: Concesionaria San Miguel"
         />
+        {state.orgName.length >= 2 && (
+          <p className="text-xs text-zinc-500 mt-1.5">
+            URL del bot:{' '}
+            <span className="font-mono text-cyan-400/80">/api/chatbot/{derivedSlug}</span>
+          </p>
+        )}
       </div>
 
       <div>
