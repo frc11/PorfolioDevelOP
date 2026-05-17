@@ -12,7 +12,6 @@ import {
   Settings,
   UserCog,
   Users,
-  Command,
   Bot,
   BookOpen,
   AlertTriangle,
@@ -49,7 +48,6 @@ const NAV_SECTIONS: NavSection[] = [
   {
     label: 'CLIENTES',
     items: [
-      { href: '/admin/agency-dashboard', label: 'Command Center', icon: Command },
       { href: '/admin/clients', label: 'Clientes', icon: Building2 },
       { href: '/admin/tickets', label: 'Tickets', icon: LifeBuoy },
       { href: '/admin/messages', label: 'Mensajes', icon: MessageCircle },
