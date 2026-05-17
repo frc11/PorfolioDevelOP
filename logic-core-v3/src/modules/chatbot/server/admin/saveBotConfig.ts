@@ -6,9 +6,10 @@ import { chatbotLog } from '../logging'
 import { requireSuperAdmin } from './requireSuperAdmin'
 
 const quickReplySchema = z.object({
-  id: z.string(),
+  id: z.string().optional(),
+  emoji: z.string().max(8).optional(),
   label: z.string().min(1).max(40),
-  prompt: z.string().min(1).max(200),
+  promptToSend: z.string().min(1).max(200),
 })
 
 const botConfigInputSchema = z.object({
@@ -16,24 +17,41 @@ const botConfigInputSchema = z.object({
   // Identity
   botName: z.string().min(1).max(50),
   isActive: z.boolean(),
+  industry: z.string().min(1).max(50),
+  tone: z.string().min(1).max(50),
   welcomeMessage: z.string().max(500),
   // Visual
   accentColor: z.string().regex(/^#[0-9a-fA-F]{6}$/),
   accentSecondary: z.string().regex(/^#[0-9a-fA-F]{6}$/).nullable(),
+  chatSurfaceTint: z.string().regex(/^#[0-9a-fA-F]{6}$/).nullable(),
   avatarStyle: z.enum(['neuro', 'legacy_neuro', 'simple', 'image', 'emoji']),
   avatarImageUrl: z.string().url().nullable(),
   avatarEmoji: z.string().max(8).nullable(),
   borderRadius: z.enum(['small', 'medium', 'large']),
-  surfaceStyle: z.string().max(50),
+  surfaceStyle: z.enum(['glass', 'solid', 'minimal']),
   position: z.enum(['bottom_right', 'bottom_left']),
+  fontStyle: z.enum(['sans', 'serif', 'mono']),
   bubbleStyle: z.enum(['sharp', 'rounded', 'pill']),
   intensityLevel: z.enum(['low', 'medium', 'high']),
-  // Behavior
-  tone: z.string().min(1).max(50),
   // Handoff
   whatsappNumber: z.string().max(30).nullable(),
+  whatsappMessage: z.string().max(500).nullable(),
+  // LLM
+  llmProvider: z.enum(['google', 'anthropic', 'openai']),
+  llmModel: z.string().min(1).max(80),
+  temperature: z.number().min(0).max(2),
+  maxOutputTokens: z.number().int().min(100).max(8192),
+  monthlyQuota: z.number().int().min(0).max(1_000_000),
   // Quick replies (JSON column)
   quickReplies: z.array(quickReplySchema).max(8),
+  proactivePrompts: z.record(z.array(z.string().min(1).max(240)).max(8)).refine(
+    (value) => Object.keys(value).length <= 30,
+    'Too many proactive prompt routes'
+  ),
+  routeColorMap: z.record(z.string().regex(/^#[0-9a-fA-F]{6}$/)).refine(
+    (value) => Object.keys(value).length <= 30,
+    'Too many route colors'
+  ),
   // Lead notifications
   leadNotificationEmail: z.string().email().nullable(),
   leadNotificationMode: z.enum(['IMMEDIATE', 'DAILY_DIGEST', 'DISABLED']),
@@ -55,6 +73,8 @@ export async function saveBotConfig(input: BotConfigInput): Promise<{ success: b
         data: {
           ...data,
           quickReplies: data.quickReplies as unknown as object,
+          proactivePrompts: data.proactivePrompts as unknown as object,
+          routeColorMap: data.routeColorMap as unknown as object,
         },
         select: { organizationId: true },
       })
