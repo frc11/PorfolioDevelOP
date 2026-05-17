@@ -1,29 +1,42 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useMemo, useState } from 'react'
+import { FlaskConical, Save } from 'lucide-react'
+import { toast } from 'sonner'
+import { estimateTokensFromKB } from '@/lib/tokens-estimate'
+import { validateKB } from '@/modules/chatbot/server/admin/validateKB'
 import { saveKnowledgeBase } from '../../server/admin/saveKnowledgeBase'
 import { saveKnowledgeBaseByOrgSlug } from '../../server/admin/saveKnowledgeBaseByOrgSlug'
-import { toast } from 'sonner'
+import { KBSearch } from './kb/KBSearch'
+import { KBValidation } from './kb/KBValidation'
+import { MarkdownEditor } from './kb/MarkdownEditor'
+import { SaveConfirmModal } from './kb/SaveConfirmModal'
+import { TestPromptSandbox } from './kb/TestPromptSandbox'
+
+type KnowledgeBaseData = {
+  businessInfo: string
+  servicesOrProducts: string
+  faq: string
+  policies: string
+  salesGuidance: string
+  toneExamples: string
+  forbiddenStatements: string
+}
 
 interface KnowledgeBaseEditorProps {
   botConfigId: string
-  initialData: {
-    businessInfo: string
-    servicesOrProducts: string
-    faq: string
-    policies: string
-    salesGuidance: string
-    toneExamples: string
-    forbiddenStatements: string
-  }
+  initialData: KnowledgeBaseData
   orgSlug?: string
+  botName?: string
+  tone?: string
+  companyName?: string
 }
 
 const SECTIONS = [
   {
     key: 'businessInfo',
-    label: 'Información del negocio',
-    placeholder: 'Quiénes son, dónde están, qué hacen, contactos básicos...',
+    label: 'Informacion del negocio',
+    placeholder: 'Quienes son, donde estan, que hacen, contactos basicos...',
     rows: 10,
   },
   {
@@ -35,85 +48,201 @@ const SECTIONS = [
   {
     key: 'faq',
     label: 'Preguntas frecuentes',
-    placeholder: 'Q&A en formato markdown. Usá **negritas** para preguntas.',
+    placeholder: 'Q&A en formato markdown. Usa **negritas** para preguntas.',
     rows: 15,
   },
   {
     key: 'policies',
-    label: 'Políticas y condiciones',
-    placeholder: 'Horarios, políticas de pago, garantías, devoluciones...',
+    label: 'Politicas y condiciones',
+    placeholder: 'Horarios, politicas de pago, garantias, devoluciones...',
     rows: 8,
   },
   {
     key: 'salesGuidance',
-    label: 'Guía de derivación a ventas',
-    placeholder: 'Cuándo derivar, cómo derivar, qué información capturar...',
+    label: 'Guia de derivacion a ventas',
+    placeholder: 'Cuando derivar, como derivar, que informacion capturar...',
     rows: 8,
   },
   {
     key: 'toneExamples',
     label: 'Ejemplos de tono y estilo',
-    placeholder: 'Ejemplos concretos de cómo debe sonar el bot...',
+    placeholder: 'Ejemplos concretos de como debe sonar el bot...',
     rows: 8,
   },
   {
     key: 'forbiddenStatements',
-    label: 'Frases prohibidas (anti-alucinación)',
-    placeholder: 'Cosas que el bot NUNCA debe decir, específicas de este negocio...',
+    label: 'Frases prohibidas',
+    placeholder: 'Cosas que el bot NUNCA debe decir, especificas de este negocio...',
     rows: 6,
   },
 ] as const
 
-export function KnowledgeBaseEditor({ botConfigId, initialData, orgSlug }: KnowledgeBaseEditorProps) {
-  const [data, setData] = useState(initialData)
-  const [isPending, startTransition] = useTransition()
-  const [status, setStatus] = useState<'idle' | 'saved' | 'error'>('idle')
-  const [errorMsg, setErrorMsg] = useState<string | null>(null)
+const SECTION_LABELS = Object.fromEntries(SECTIONS.map((section) => [section.key, section.label]))
 
-  const handleSave = () => {
-    startTransition(async () => {
-      const result = orgSlug
-        ? await saveKnowledgeBaseByOrgSlug({ orgSlug, ...data })
-        : await saveKnowledgeBase({ botConfigId, ...data })
+function normalizeKB(input: KnowledgeBaseData): KnowledgeBaseData {
+  return {
+    businessInfo: input.businessInfo ?? '',
+    servicesOrProducts: input.servicesOrProducts ?? '',
+    faq: input.faq ?? '',
+    policies: input.policies ?? '',
+    salesGuidance: input.salesGuidance ?? '',
+    toneExamples: input.toneExamples ?? '',
+    forbiddenStatements: input.forbiddenStatements ?? '',
+  }
+}
 
-      if (result.success) {
-        toast.success('Knowledge Base guardado correctamente')
-      } else {
-        toast.error(result.error ?? 'Error desconocido al guardar')
+export function KnowledgeBaseEditor({
+  botConfigId,
+  initialData,
+  orgSlug,
+  botName = 'Asistente',
+  tone = 'informal_rioplatense',
+  companyName,
+}: KnowledgeBaseEditorProps) {
+  const [originalKB, setOriginalKB] = useState<KnowledgeBaseData>(() => normalizeKB(initialData))
+  const [kb, setKb] = useState<KnowledgeBaseData>(() => normalizeKB(initialData))
+  const [activeSection, setActiveSection] = useState<string>('businessInfo')
+  const [showConfirm, setShowConfirm] = useState(false)
+  const [showSandbox, setShowSandbox] = useState(false)
+  const [saving, setSaving] = useState(false)
+
+  const kbRecord = kb as Record<string, string>
+  const originalKBRecord = originalKB as Record<string, string>
+  const totalTokens = useMemo(() => estimateTokensFromKB(kbRecord), [kbRecord])
+  const issues = useMemo(() => validateKB(kbRecord), [kbRecord])
+  const hasChanges = useMemo(
+    () => SECTIONS.some((section) => kb[section.key] !== originalKB[section.key]),
+    [kb, originalKB],
+  )
+
+  function updateSection(section: keyof KnowledgeBaseData, value: string) {
+    setKb((prev) => ({ ...prev, [section]: value }))
+  }
+
+  function handleJumpToSection(section: string) {
+    setActiveSection(section)
+    document.getElementById(`kb-section-${section}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+
+  async function handleSave() {
+    setSaving(true)
+    const payload = { ...kb }
+
+    const promise = (orgSlug
+      ? saveKnowledgeBaseByOrgSlug({ orgSlug, ...payload })
+      : saveKnowledgeBase({ botConfigId, ...payload })
+    ).then((result) => {
+      if (!result.success) {
+        throw new Error(result.error ?? 'Error guardando')
       }
+      setOriginalKB(payload)
+      setShowConfirm(false)
+      return result
     })
+
+    toast.promise(promise, {
+      loading: 'Guardando KB...',
+      success: 'KB guardada correctamente',
+      error: (error: Error) => `Error: ${error.message}`,
+    })
+
+    try {
+      await promise
+    } catch {
+      // toast.promise ya muestra el error.
+    } finally {
+      setSaving(false)
+    }
   }
 
   return (
-    <div className="flex flex-col gap-8 max-w-4xl">
-      <div className="flex items-center justify-between sticky top-0 bg-zinc-950/80 backdrop-blur py-4 z-10">
-        <h1 className="text-2xl font-light">Knowledge Base</h1>
-        <div className="flex items-center gap-3">
-          <button
-            onClick={handleSave}
-            disabled={isPending}
-            className="px-4 py-2 rounded-lg bg-cyan-500 text-black font-medium disabled:opacity-50"
-          >
-            {isPending ? 'Guardando...' : 'Guardar cambios'}
-          </button>
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
+        <div className="space-y-6">
+          <div className="sticky top-0 z-10 flex flex-col gap-4 border-b border-white/5 bg-zinc-950/90 py-4 backdrop-blur sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h1 className="text-2xl font-light text-zinc-100">
+                Knowledge Base
+              </h1>
+              <p className="mt-1 text-sm text-zinc-400">
+                ~{totalTokens} tokens estimados en total
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => setShowSandbox(true)}
+                className="inline-flex items-center gap-2 rounded-2xl border border-violet-400/20 bg-violet-500/[0.06] px-4 py-2 text-sm text-violet-300 hover:bg-violet-500/[0.12]"
+              >
+                <FlaskConical className="h-4 w-4" strokeWidth={1.5} />
+                Probar prompt
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowConfirm(true)}
+                disabled={!hasChanges || saving}
+                className="inline-flex items-center gap-2 rounded-2xl bg-cyan-400 px-4 py-2 text-sm font-medium text-zinc-950 hover:bg-cyan-300 disabled:opacity-50"
+              >
+                <Save className="h-4 w-4" strokeWidth={1.5} />
+                Guardar cambios
+              </button>
+            </div>
+          </div>
+
+          {SECTIONS.map(({ key, label, placeholder, rows }) => (
+            <div key={key} id={`kb-section-${key}`} className="scroll-mt-28">
+              <p
+                className={`mb-2 text-[10px] uppercase tracking-[0.24em] ${
+                  activeSection === key ? 'text-cyan-300' : 'text-cyan-500'
+                }`}
+              >
+                {label}
+              </p>
+              <MarkdownEditor
+                value={kb[key]}
+                onChange={(value) => updateSection(key, value)}
+                placeholder={placeholder}
+                rows={rows}
+              />
+            </div>
+          ))}
         </div>
+
+        <aside className="space-y-6 lg:sticky lg:top-24 lg:self-start">
+          <div>
+            <p className="mb-3 text-[10px] uppercase tracking-[0.24em] text-zinc-500">
+              Busqueda
+            </p>
+            <KBSearch kb={kbRecord} sectionLabels={SECTION_LABELS} onJumpToSection={handleJumpToSection} />
+          </div>
+
+          <div>
+            <p className="mb-3 text-[10px] uppercase tracking-[0.24em] text-zinc-500">
+              Validacion
+            </p>
+            <KBValidation issues={issues} />
+          </div>
+        </aside>
       </div>
 
-      {SECTIONS.map((section) => (
-        <div key={section.key} className="flex flex-col gap-2">
-          <label className="text-sm font-medium text-zinc-300">{section.label}</label>
-          <textarea
-            value={data[section.key as keyof typeof data]}
-            onChange={(e) => setData({ ...data, [section.key]: e.target.value })}
-            rows={section.rows}
-            placeholder={section.placeholder}
-            className="w-full px-4 py-3 rounded-lg bg-zinc-900 border border-zinc-800 text-sm font-mono text-zinc-100 resize-y focus:outline-none focus:border-cyan-500/50"
-          />
-          <div className="text-[10px] text-zinc-500 text-right">
-            {data[section.key as keyof typeof data].length} chars
-          </div>
-        </div>
-      ))}
+      <SaveConfirmModal
+        open={showConfirm}
+        onClose={() => setShowConfirm(false)}
+        onConfirm={handleSave}
+        oldKB={originalKBRecord}
+        newKB={kbRecord}
+        sectionLabels={SECTION_LABELS}
+        loading={saving}
+      />
+
+      <TestPromptSandbox
+        kb={kbRecord}
+        botName={botName}
+        tone={tone}
+        companyName={companyName}
+        open={showSandbox}
+        onClose={() => setShowSandbox(false)}
+      />
     </div>
   )
 }

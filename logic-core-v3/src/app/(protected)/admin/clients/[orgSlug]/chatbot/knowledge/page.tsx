@@ -12,5 +12,14 @@ export default async function ChatbotKnowledge({
 
   if (!data || !data.bot.knowledgeBase) notFound()
 
-  return <KnowledgeBaseEditor botConfigId={data.bot.id} initialData={data.bot.knowledgeBase} orgSlug={orgSlug} />
+  return (
+    <KnowledgeBaseEditor
+      botConfigId={data.bot.id}
+      initialData={data.bot.knowledgeBase}
+      orgSlug={orgSlug}
+      botName={data.bot.botName}
+      tone={data.bot.tone}
+      companyName={data.organization.companyName}
+    />
+  )
 }
