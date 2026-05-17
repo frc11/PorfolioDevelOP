@@ -2,7 +2,8 @@
 
 import { useEffect, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { CheckCircle2, LoaderCircle, Sparkles } from 'lucide-react'
+import { CheckCircle2, LoaderCircle, Sparkles, Users } from 'lucide-react'
+import { EmptyState } from '@/components/ui/EmptyState'
 import { convertInboundToLead } from '../_actions/inbound.actions'
 
 type InboundLeadRow = {
@@ -84,7 +85,16 @@ export function InboundLeadsTable({ leads }: InboundLeadsTableProps) {
         </div>
       ) : null}
 
-      <div className="overflow-x-auto">
+      {localLeads.length === 0 ? (
+        <EmptyState
+          icon={Users}
+          title="Todavia no hay leads inbound"
+          description="Cuando entren formularios desde el portal, van a aparecer aca para convertirlos al CRM."
+          size="md"
+        />
+      ) : (
+        <>
+      <div className="hidden overflow-x-auto md:block">
         <table className="min-w-full divide-y divide-white/10 text-sm">
           <thead className="bg-black/10 text-left text-zinc-500">
             <tr>
@@ -145,6 +155,61 @@ export function InboundLeadsTable({ leads }: InboundLeadsTableProps) {
           </tbody>
         </table>
       </div>
+
+      <div className="space-y-3 p-4 md:hidden">
+        {localLeads.map((lead) => {
+          const isConverted = Boolean(lead.convertedToLeadId)
+          const isPending = pendingId === lead.id
+
+          return (
+            <article
+              key={lead.id}
+              className="rounded-2xl border border-white/10 bg-white/[0.03] p-4"
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="font-medium text-zinc-100">{lead.name}</p>
+                  <p className="mt-1 truncate text-xs text-zinc-500">
+                    {lead.company?.trim() || 'Sin empresa'}
+                  </p>
+                </div>
+                <span className="shrink-0 text-xs text-zinc-500">
+                  {formatDate(lead.createdAt)}
+                </span>
+              </div>
+              <div className="mt-3 space-y-1 text-xs text-zinc-400">
+                <p>{lead.email}</p>
+                <p>{lead.phone ?? 'Sin telefono'}</p>
+                <p className="line-clamp-3 whitespace-pre-wrap">{lead.message}</p>
+              </div>
+              <div className="mt-4">
+                {isConverted ? (
+                  <span className="inline-flex items-center gap-2 rounded-full border border-emerald-400/20 bg-emerald-500/10 px-3 py-2 text-xs font-medium text-emerald-200">
+                    <CheckCircle2 className="h-4 w-4" />
+                    Ya convertido
+                  </span>
+                ) : (
+                  <button
+                    type="button"
+                    disabled={isPending}
+                    onClick={() => handleConvert(lead)}
+                    className="inline-flex items-center gap-2 rounded-2xl border border-cyan-400/20 bg-cyan-400/10 px-3 py-2 text-xs font-medium text-cyan-100 transition-colors hover:bg-cyan-400/15 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {isPending ? (
+                      <LoaderCircle className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Sparkles className="h-4 w-4" />
+                    )}
+                    Convertir a Lead OS
+                  </button>
+                )}
+              </div>
+            </article>
+          )
+        })}
+      </div>
+        </>
+      )}
     </section>
   )
 }

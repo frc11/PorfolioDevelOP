@@ -319,7 +319,7 @@ export function TimeEntryPanel({
                   </span>
                 </div>
 
-                <div className="overflow-x-auto">
+                <div className="hidden overflow-x-auto md:block">
                   <table className="min-w-full divide-y divide-white/10 text-sm">
                     <thead className="bg-black/10 text-left text-zinc-500">
                       <tr>
@@ -362,6 +362,44 @@ export function TimeEntryPanel({
                       ))}
                     </tbody>
                   </table>
+                </div>
+
+                <div className="space-y-3 p-4 md:hidden">
+                  {group.entries.map((entry) => (
+                    <article
+                      key={entry.id}
+                      className="rounded-2xl border border-white/10 bg-white/[0.03] p-4"
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <p className="font-medium text-zinc-100">{entry.task.title}</p>
+                          <p className="mt-1 text-xs text-zinc-500">
+                            {formatDate(entry.date)}
+                          </p>
+                        </div>
+                        <span className="shrink-0 rounded-full border border-cyan-400/20 bg-cyan-400/10 px-2.5 py-1 text-xs font-medium text-cyan-100">
+                          {formatHours(entry.hours)}
+                        </span>
+                      </div>
+                      <div className="mt-3 space-y-1 text-xs text-zinc-400">
+                        <p>{entry.user.name ?? entry.user.email ?? 'Super Admin'}</p>
+                        <p>{entry.notes?.trim() ? entry.notes : 'Sin notas'}</p>
+                      </div>
+                      <button
+                        type="button"
+                        disabled={isPending}
+                        onClick={() => setEntryToDelete(entry)}
+                        className="mt-4 inline-flex items-center gap-2 rounded-xl border border-rose-400/20 bg-rose-500/10 px-3 py-2 text-xs font-medium text-rose-200 transition-colors hover:bg-rose-500/15 disabled:opacity-60"
+                      >
+                        {deletingEntryId === entry.id ? (
+                          <LoaderCircle className="h-3.5 w-3.5 animate-spin" />
+                        ) : (
+                          <Trash2 className="h-3.5 w-3.5" />
+                        )}
+                        <span>Eliminar</span>
+                      </button>
+                    </article>
+                  ))}
                 </div>
               </article>
             ))}

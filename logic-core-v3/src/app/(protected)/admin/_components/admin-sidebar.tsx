@@ -22,6 +22,7 @@ type AdminSidebarProps = {
   userName: string
   userRole: string
   pendingAlerts?: number
+  onNavigate?: () => void
 }
 
 type NavItem = {
@@ -71,12 +72,17 @@ const NAV_SECTIONS: NavSection[] = [
   },
 ]
 
-export function AdminSidebar({ userName, userRole, pendingAlerts = 0 }: AdminSidebarProps) {
+export function AdminSidebar({
+  userName,
+  userRole,
+  pendingAlerts = 0,
+  onNavigate,
+}: AdminSidebarProps) {
   const pathname = usePathname()
   const badges = { pendingAlerts }
 
   return (
-    <aside className="fixed inset-y-0 left-0 z-[90] flex w-[240px] flex-col border-r border-white/10 bg-white/5 backdrop-blur-xl">
+    <div className="flex h-full w-[240px] flex-col border-r border-white/10 bg-white/5 backdrop-blur-xl">
       <div className="border-b border-white/10 px-5 py-5">
         <Link href="/admin" className="group block">
           <div className="flex items-center gap-3">
@@ -114,6 +120,7 @@ export function AdminSidebar({ userName, userRole, pendingAlerts = 0 }: AdminSid
                   <Link
                     key={item.href}
                     href={item.href}
+                    onClick={onNavigate}
                     className={[
                       'flex items-center gap-3 rounded-r-2xl border-l-2 px-4 py-3 text-sm transition-all duration-200',
                       isActive
@@ -142,6 +149,6 @@ export function AdminSidebar({ userName, userRole, pendingAlerts = 0 }: AdminSid
           <p className="mt-1 text-[10px] uppercase tracking-[0.22em] text-zinc-500">{userRole}</p>
         </div>
       </div>
-    </aside>
+    </div>
   )
 }

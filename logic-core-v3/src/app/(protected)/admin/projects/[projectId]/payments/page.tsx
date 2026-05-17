@@ -202,7 +202,13 @@ export default async function AgencyOsProjectPaymentsPage({
           </div>
         ) : (
           <div className="mt-5 overflow-hidden rounded-[24px] border border-white/10">
-            <div className="overflow-x-auto">
+            {project.maintenancePayments.length === 0 ? (
+              <div className="border border-dashed border-white/10 bg-white/[0.02] p-8 text-center text-sm text-zinc-500">
+                Todavia no hay meses generados para el mantenimiento.
+              </div>
+            ) : (
+              <>
+            <div className="hidden overflow-x-auto md:block">
               <table className="min-w-full divide-y divide-white/10 text-sm">
                 <thead className="bg-black/20 text-left text-zinc-500">
                   <tr>
@@ -213,8 +219,7 @@ export default async function AgencyOsProjectPaymentsPage({
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-white/10 bg-white/[0.03]">
-                  {project.maintenancePayments.length > 0 ? (
-                    project.maintenancePayments.map((payment) => (
+                  {project.maintenancePayments.map((payment) => (
                       <tr key={payment.id}>
                         <td className="px-4 py-4 text-zinc-200">
                           {monthLabel(payment.month, payment.year)}
@@ -254,17 +259,60 @@ export default async function AgencyOsProjectPaymentsPage({
                           )}
                         </td>
                       </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td className="px-4 py-6 text-zinc-500" colSpan={4}>
-                        Todavia no hay meses generados para el mantenimiento.
-                      </td>
-                    </tr>
-                  )}
+                    ))}
                 </tbody>
               </table>
             </div>
+            <div className="space-y-3 p-4 md:hidden">
+              {project.maintenancePayments.map((payment) => (
+                <article
+                  key={payment.id}
+                  className="rounded-2xl border border-white/10 bg-white/[0.03] p-4"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="font-medium text-zinc-100">
+                        {monthLabel(payment.month, payment.year)}
+                      </p>
+                      <p className="mt-1 text-sm text-zinc-400">
+                        {formatCurrency(payment.amount)}
+                      </p>
+                    </div>
+                    <span
+                      className={[
+                        'inline-flex rounded-full border px-2.5 py-1 text-[11px] font-medium',
+                        payment.paidAt
+                          ? 'border-emerald-400/20 bg-emerald-400/10 text-emerald-200'
+                          : 'border-amber-400/20 bg-amber-400/10 text-amber-200',
+                      ].join(' ')}
+                    >
+                      {payment.paidAt ? `Pagado ${formatDate(payment.paidAt)}` : 'Pendiente'}
+                    </span>
+                  </div>
+                  <div className="mt-4">
+                    {!payment.paidAt ? (
+                      <form
+                        action={async () => {
+                          'use server'
+                          await markMaintenancePaid(payment.id)
+                        }}
+                      >
+                        <button
+                          type="submit"
+                          className="rounded-xl border border-cyan-400/20 bg-cyan-400/10 px-3 py-2 text-xs font-medium text-cyan-100 transition-colors hover:bg-cyan-400/15"
+                        >
+                          Marcar pagado
+                        </button>
+                      </form>
+                    ) : (
+                      <span className="text-xs text-zinc-500">Sin accion</span>
+                    )}
+                  </div>
+                </article>
+              ))}
+            </div>
+              </>
+            )}
           </div>
         )}
       </section>
