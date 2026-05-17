@@ -9,7 +9,7 @@ type ConfirmDialogProps = {
   title: string
   description: string
   confirmLabel: string
-  variant?: 'danger' | 'default'
+  variant?: 'danger' | 'destructive' | 'default' | 'warning'
   isPending?: boolean
 }
 
@@ -28,8 +28,10 @@ export function ConfirmDialog({
   }
 
   const confirmClassName =
-    variant === 'danger'
+    variant === 'danger' || variant === 'destructive'
       ? 'border-rose-400/20 bg-rose-500/10 text-rose-100 hover:bg-rose-500/15'
+      : variant === 'warning'
+        ? 'border-amber-400/25 bg-amber-500/10 text-amber-100 hover:bg-amber-500/15'
       : 'border-cyan-400/20 bg-cyan-400/10 text-cyan-100 hover:bg-cyan-400/15'
 
   return (

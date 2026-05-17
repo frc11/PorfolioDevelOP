@@ -1,7 +1,7 @@
-import Link from 'next/link'
-import { Building2, ChevronLeft, LogIn } from 'lucide-react'
-import { startImpersonationAction } from '../../_actions/client.actions'
+import { Building2 } from 'lucide-react'
+import { AdminBreadcrumbs } from '@/app/(protected)/admin/_components/AdminBreadcrumbs'
 import { ClientSwitcher } from './ClientSwitcher'
+import { ImpersonateButton } from './ImpersonateButton'
 
 interface ClientHeaderProps {
   client: {
@@ -29,13 +29,12 @@ interface ClientHeaderProps {
 export function ClientHeader({ client, allClients }: ClientHeaderProps) {
   return (
     <div className="space-y-4">
-      <Link
-        href="/admin/clients"
-        className="inline-flex items-center gap-1 text-xs text-zinc-500 transition-colors hover:text-zinc-300"
-      >
-        <ChevronLeft className="h-3.5 w-3.5" strokeWidth={1.5} />
-        Volver a clientes
-      </Link>
+      <AdminBreadcrumbs
+        items={[
+          { label: 'Clientes', href: '/admin/clients' },
+          { label: client.companyName },
+        ]}
+      />
 
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div className="flex min-w-0 items-start gap-4">
@@ -116,15 +115,9 @@ export function ClientHeader({ client, allClients }: ClientHeaderProps) {
             <StatChip label="Tickets" value={client._count.tickets} />
             <StatChip label="Mensajes" value={client._count.messages} />
           </div>
-          <form action={startImpersonationAction.bind(null, client.id)} className="lg:self-end">
-            <button
-              type="submit"
-              className="inline-flex items-center gap-2 rounded-2xl border border-amber-400/20 bg-amber-400/10 px-4 py-2 text-sm font-medium text-amber-100 transition-colors hover:bg-amber-400/15"
-            >
-              <LogIn className="h-4 w-4" strokeWidth={1.5} />
-              Impersonar
-            </button>
-          </form>
+          <div className="lg:self-end">
+            <ImpersonateButton clientId={client.id} clientName={client.companyName} />
+          </div>
         </div>
       </div>
     </div>
