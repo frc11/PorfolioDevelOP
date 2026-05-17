@@ -2,8 +2,12 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
-import { Bot, Building2, Pin, PinOff, Plus, Search } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { motion } from 'motion/react'
+import { toast } from 'sonner'
+import { Bot, Building2, Download, Pause, Pin, PinOff, Plus, Search } from 'lucide-react'
 import { EmptyState } from '@/components/ui/EmptyState'
+import { bulkExportLeads, bulkPauseBots } from '@/lib/bulk-actions'
 
 interface ClientItem {
   id: string
@@ -24,6 +28,7 @@ interface ClientsListClientProps {
 const PIN_KEY = 'develop:admin:pinned-clients'
 
 export function ClientsListClient({ clients }: ClientsListClientProps) {
+  const router = useRouter()
   const [search, setSearch] = useState('')
   const [filterBot, setFilterBot] = useState<
     'all' | 'active' | 'inactive' | 'none'
@@ -32,6 +37,7 @@ export function ClientsListClient({ clients }: ClientsListClientProps) {
     'created',
   )
   const [pinned, setPinned] = useState<Set<string>>(new Set())
+  const [selected, setSelected] = useState<Set<string>>(new Set())
 
   useEffect(() => {
     try {
@@ -56,6 +62,52 @@ export function ClientsListClient({ clients }: ClientsListClientProps) {
     } catch {
       // localStorage can be unavailable in restricted browser contexts.
     }
+  }
+
+  function toggleSelected(id: string) {
+    const next = new Set(selected)
+    if (next.has(id)) {
+      next.delete(id)
+    } else {
+      next.add(id)
+    }
+    setSelected(next)
+  }
+
+  function selectAll() {
+    setSelected(new Set(filtered.map((client) => client.id)))
+  }
+
+  function deselectAll() {
+    setSelected(new Set())
+  }
+
+  async function handleBulkExportLeads() {
+    const result = await bulkExportLeads([...selected])
+    if (!result.ok) return
+
+    const blob = new Blob([result.csv], { type: 'text/csv;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const anchor = document.createElement('a')
+    anchor.href = url
+    anchor.download = `leads-${new Date().toISOString().split('T')[0]}.csv`
+    anchor.click()
+    URL.revokeObjectURL(url)
+    toast.success(`${result.count} leads exportados`)
+  }
+
+  async function handleBulkPauseBots() {
+    if (!confirm(`Pausar bots de ${selected.size} clientes?`)) return
+
+    const promise = bulkPauseBots([...selected])
+    toast.promise(promise, {
+      loading: 'Pausando bots...',
+      success: (result) => `${result.affected} bots pausados`,
+      error: 'Error pausando bots',
+    })
+    await promise
+    deselectAll()
+    router.refresh()
   }
 
   const filtered = useMemo(() => {
@@ -163,6 +215,56 @@ export function ClientsListClient({ clients }: ClientsListClientProps) {
         Mostrando {filtered.length} de {clients.length}
       </p>
 
+      {selected.size > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="sticky top-4 z-30 flex flex-col gap-3 rounded-2xl border border-cyan-400/30 bg-cyan-500/[0.08] p-3 backdrop-blur md:flex-row md:items-center md:justify-between"
+        >
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="text-sm text-cyan-300">
+              {selected.size} cliente{selected.size !== 1 ? 's' : ''}{' '}
+              seleccionado{selected.size !== 1 ? 's' : ''}
+            </span>
+            <button
+              type="button"
+              onClick={deselectAll}
+              className="text-xs text-zinc-400 hover:text-zinc-200"
+            >
+              Deseleccionar
+            </button>
+            {selected.size < filtered.length && (
+              <button
+                type="button"
+                onClick={selectAll}
+                className="text-xs text-zinc-400 hover:text-zinc-200"
+              >
+                Seleccionar visibles
+              </button>
+            )}
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={handleBulkExportLeads}
+              className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs text-zinc-300 hover:bg-white/[0.08]"
+            >
+              <Download className="h-3.5 w-3.5" strokeWidth={1.5} />
+              Exportar leads
+            </button>
+            <button
+              type="button"
+              onClick={handleBulkPauseBots}
+              className="inline-flex items-center gap-2 rounded-xl border border-amber-400/30 bg-amber-400/20 px-3 py-1.5 text-xs text-amber-200 hover:bg-amber-400/30"
+            >
+              <Pause className="h-3.5 w-3.5" strokeWidth={1.5} />
+              Pausar bots
+            </button>
+          </div>
+        </motion.div>
+      )}
+
       {filtered.length === 0 ? (
         <EmptyState
           icon={Building2}
@@ -177,7 +279,9 @@ export function ClientsListClient({ clients }: ClientsListClientProps) {
               key={client.id}
               client={client}
               pinned={pinned.has(client.id)}
+              selected={selected.has(client.id)}
               onTogglePin={() => togglePin(client.id)}
+              onToggleSelect={() => toggleSelected(client.id)}
             />
           ))}
         </div>
@@ -189,16 +293,32 @@ export function ClientsListClient({ clients }: ClientsListClientProps) {
 function ClientCard({
   client,
   pinned,
+  selected,
   onTogglePin,
+  onToggleSelect,
 }: {
   client: ClientItem
   pinned: boolean
+  selected: boolean
   onTogglePin: () => void
+  onToggleSelect: () => void
 }) {
   return (
-    <div className="group relative rounded-2xl border border-white/10 bg-white/[0.02] transition-colors hover:bg-white/[0.04]">
+    <div
+      className={`group relative rounded-2xl border bg-white/[0.02] transition-colors hover:bg-white/[0.04] ${
+        selected ? 'border-cyan-400/40' : 'border-white/10'
+      }`}
+    >
+      <input
+        type="checkbox"
+        checked={selected}
+        onChange={onToggleSelect}
+        onClick={(event) => event.stopPropagation()}
+        className="absolute left-3 top-3 z-10 h-4 w-4 rounded border-white/20 bg-white/[0.05] accent-cyan-400"
+        aria-label={`Seleccionar ${client.companyName}`}
+      />
       <Link href={`/admin/clients/${client.id}`} className="block p-5">
-        <div className="mb-3 flex items-start justify-between gap-3 pr-8">
+        <div className="mb-3 flex items-start justify-between gap-3 pl-6 pr-8">
           <div className="rounded-xl bg-cyan-400/10 p-2">
             <Building2 className="h-4 w-4 text-cyan-300" strokeWidth={1.5} />
           </div>
