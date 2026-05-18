@@ -1,56 +1,48 @@
 'use server'
 
 import { z } from 'zod'
-import { prisma } from '@/lib/prisma'
-import { revalidatePath } from 'next/cache'
-import { getClientChatbotSession } from './getClientSession'
-import { logChatbotEvent } from '../logging'
+import { updateBotAppearance } from '@/modules/chatbot/server/dashboard/updateBotAppearance'
+import {
+  BOT_POSITIONS,
+  CLIENT_AVATAR_STYLES,
+  CURATED_COLORS,
+} from '@/modules/chatbot/shared/appearance'
 
-// SOLO estos campos son editables desde dashboard cliente
+const legacyQuickReplySchema = z.union([
+  z.string().trim().min(1).max(40),
+  z.object({
+    label: z.string().trim().min(1).max(40),
+    prompt: z.string().optional(),
+    promptToSend: z.string().optional(),
+  }),
+])
+
 const ClientSettingsSchema = z.object({
-  isActive: z.boolean(),
-  welcomeMessage: z.string().min(10).max(500),
-  accentColor: z.enum([
-    '#06b6d4', // cyan
-    '#8b5cf6', // violet
-    '#10b981', // emerald
-    '#f59e0b', // amber
-    '#ef4444', // red
-    '#3b82f6', // blue
-  ]),
-  position: z.enum(['bottom_right', 'bottom_left']),
-  quickReplies: z.array(z.object({
-    id: z.string(),
-    label: z.string().min(1).max(40),
-    prompt: z.string().min(1).max(200),
-  })).max(6),
+  isActive: z.boolean().optional(),
+  welcomeMessage: z.string().trim().min(10).max(200),
+  accentColor: z.enum(CURATED_COLORS),
+  position: z.enum(BOT_POSITIONS),
+  avatarStyle: z.enum(CLIENT_AVATAR_STYLES).optional(),
+  avatarEmoji: z.string().trim().max(2).nullable().optional(),
+  quickReplies: z.array(legacyQuickReplySchema).max(4),
 })
 
+function quickReplyToText(reply: z.infer<typeof legacyQuickReplySchema>) {
+  return typeof reply === 'string' ? reply : reply.label
+}
+
 export async function saveClientSettings(input: z.infer<typeof ClientSettingsSchema>) {
-  const session = await getClientChatbotSession()
-  if (!session) return { ok: false, error: 'No session' }
+  const parsed = ClientSettingsSchema.safeParse(input)
+  if (!parsed.success) {
+    return { ok: false as const, error: 'Datos invalidos' }
+  }
 
-  const parsed = ClientSettingsSchema.parse(input)
-
-  await prisma.botConfig.update({
-    where: { id: session.bot.id },
-    data: {
-      isActive: parsed.isActive,
-      welcomeMessage: parsed.welcomeMessage,
-      accentColor: parsed.accentColor,
-      position: parsed.position,
-      quickReplies: parsed.quickReplies as unknown as object, // Prisma JSON handling
-    },
+  return updateBotAppearance({
+    accentColor: parsed.data.accentColor,
+    position: parsed.data.position,
+    avatarStyle: parsed.data.avatarStyle,
+    avatarEmoji: parsed.data.avatarEmoji ?? undefined,
+    welcomeMessage: parsed.data.welcomeMessage,
+    quickReplies: parsed.data.quickReplies.map(quickReplyToText),
   })
-
-  await logChatbotEvent({
-    botConfigId: session.bot.id,
-    type: 'bot.settings_updated',
-    level: 'info',
-    message: 'Client updated bot settings',
-    metadata: { userId: session.user.id, fields: Object.keys(parsed) },
-  })
-
-  revalidatePath('/dashboard/chatbot/settings')
-  return { ok: true }
 }
