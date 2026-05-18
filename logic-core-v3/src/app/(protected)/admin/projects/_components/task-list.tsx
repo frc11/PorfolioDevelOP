@@ -20,7 +20,7 @@ import {
   updateTask,
 } from '@/app/(protected)/admin/team/_actions/task.actions'
 import { ConfirmDialog } from '@/app/(protected)/admin/_components/confirm-dialog'
-import { EmptyState } from '@/app/(protected)/admin/_components/empty-state'
+import { EmptyState } from '@/components/ui'
 import { sendTaskForApprovalAction } from '@/lib/actions/projects'
 import { TaskForm } from './task-form'
 

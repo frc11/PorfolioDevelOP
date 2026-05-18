@@ -12,7 +12,7 @@ import {
   PhoneCall,
   Video,
 } from 'lucide-react'
-import { EmptyState } from '@/app/(protected)/admin/_components/empty-state'
+import { EmptyState } from '@/components/ui'
 import { createActivity } from '../_actions/activity.actions'
 
 type ActivityChannel =
@@ -353,8 +353,14 @@ export function LeadActivityFeed({
               icon={Inbox}
               title="Sin actividad registrada"
               description="Cuando registres mensajes, llamadas o seguimientos, el timeline va a aparecer aca."
-              actionLabel={showForm ? undefined : 'Registrar actividad'}
-              onAction={showForm ? undefined : () => setShowForm(true)}
+              cta={
+                showForm
+                  ? undefined
+                  : {
+                      label: 'Registrar actividad',
+                      onClick: () => setShowForm(true),
+                    }
+              }
             />
           )}
         </div>

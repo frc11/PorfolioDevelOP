@@ -3,8 +3,7 @@
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { ExternalLink, Eye, Inbox, PlayCircle } from 'lucide-react'
-import { Button, Field, Input, Select } from '@/components/ui'
-import { EmptyState } from '@/app/(protected)/admin/_components/empty-state'
+import { Button, EmptyState, Field, Input, Select } from '@/components/ui'
 import { createDemo, markDemoViewed } from '../_actions/demo.actions'
 
 type DemoServiceType = 'WEB' | 'AI_AGENT' | 'AUTOMATION' | 'CUSTOM_SOFTWARE' | null

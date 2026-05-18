@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { useMemo, useState } from 'react'
 import { LifeBuoy, MessageSquareText } from 'lucide-react'
 import type { TicketStatus } from '@prisma/client'
-import { EmptyState } from '@/app/(protected)/admin/_components/empty-state'
+import { EmptyState } from '@/components/ui'
 
 type TicketListItem = {
   id: string

@@ -1,6 +1,8 @@
+'use client'
+
 import Link from 'next/link'
 import { MessageCircleMore } from 'lucide-react'
-import { EmptyState } from '@/app/(protected)/admin/_components/empty-state'
+import { EmptyState } from '@/components/ui'
 
 type Conversation = {
   organizationId: string

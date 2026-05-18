@@ -2,7 +2,7 @@
 
 import { useDeferredValue, useState } from 'react'
 import { Building2, Search } from 'lucide-react'
-import { EmptyState } from '@/app/(protected)/admin/_components/empty-state'
+import { EmptyState } from '@/components/ui'
 import { ClientCard, type ClientCardData } from './client-card'
 
 type ClientListProps = {

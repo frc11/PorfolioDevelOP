@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { ChevronDown, Inbox } from 'lucide-react'
-import { EmptyState } from '@/app/(protected)/admin/_components/empty-state'
+import { EmptyState } from '@/components/ui'
 import { deleteLead, updateLeadStatus } from '../_actions/lead.actions'
 import {
   ACTIVE_PIPELINE_STATUSES,

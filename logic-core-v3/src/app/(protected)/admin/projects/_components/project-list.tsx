@@ -1,7 +1,7 @@
 'use client'
 
 import { FolderKanban } from 'lucide-react'
-import { EmptyState } from '@/app/(protected)/admin/_components/empty-state'
+import { EmptyState } from '@/components/ui'
 import { ProjectCard, type ProjectCardData } from './project-card'
 
 export type ProjectListItem = ProjectCardData

@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { AlertTriangle, Clock3, FolderKanban, Inbox, UserRound } from 'lucide-react'
 import type { TaskStatus } from '@prisma/client'
-import { EmptyState } from '@/app/(protected)/admin/_components/empty-state'
+import { EmptyState } from '@/components/ui'
 
 type WorkloadTask = {
   id: string
