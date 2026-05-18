@@ -1,9 +1,11 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 import { Building2, ChevronDown, Clock, Filter, History, User } from 'lucide-react'
 import { Badge, Card, EmptyState, Select } from '@/components/ui'
+import { staggerContainer, staggerItem } from '@/lib/motion-variants'
+import { useReducedMotion } from '@/lib/use-reduced-motion'
 
 type DiffValue = Record<string, { before: unknown; after: unknown }>
 
@@ -32,9 +34,15 @@ interface AuditLogClientProps {
 }
 
 export function AuditLogClient({ initialEntries, stats }: AuditLogClientProps) {
+  const reduced = useReducedMotion()
   const [entries] = useState(initialEntries)
   const [expanded, setExpanded] = useState<Set<string>>(new Set())
   const [filter, setFilter] = useState('all')
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   function toggleExpand(id: string) {
     const next = new Set(expanded)
@@ -79,98 +87,108 @@ export function AuditLogClient({ initialEntries, stats }: AuditLogClientProps) {
         </span>
       </div>
 
-      <div className="space-y-2">
-        {filtered.length === 0 ? (
-          <EmptyState
-            icon={History}
-            title="Sin registros para este filtro"
-            description="Cuando haya acciones administrativas que coincidan, van a aparecer aca."
-          />
-        ) : (
-          filtered.map((entry) => {
+      {filtered.length === 0 ? (
+        <EmptyState
+          icon={History}
+          title="Sin registros para este filtro"
+          description="Cuando haya acciones administrativas que coincidan, van a aparecer aca."
+        />
+      ) : (
+        <motion.div
+          className="space-y-2"
+          variants={reduced ? undefined : staggerContainer}
+          initial={reduced || mounted ? false : 'hidden'}
+          animate={reduced ? undefined : 'visible'}
+        >
+          {filtered.map((entry) => {
             const diff = normalizeDiff(entry.diff)
             const isExpanded = expanded.has(entry.id)
             const hasDiff = Object.keys(diff).length > 0
 
             return (
-              <Card
+              <motion.div
                 key={entry.id}
-                padding="none"
-                className="overflow-hidden"
+                variants={reduced ? undefined : staggerItem}
               >
-                <button
-                  type="button"
-                  onClick={() => hasDiff && toggleExpand(entry.id)}
-                  disabled={!hasDiff}
-                  className="w-full p-4 text-left transition-colors hover:bg-white/[0.02] disabled:cursor-default"
+                <Card
+                  padding="none"
+                  className="overflow-hidden"
                 >
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="min-w-0 flex-1">
-                      <div className="mb-1 flex flex-wrap items-center gap-2">
-                        <ActionBadge type={entry.actionType} />
-                        <span className="flex items-center gap-1 text-xs text-zinc-500">
-                          <Clock className="h-3 w-3" strokeWidth={1.5} />
-                          {new Date(entry.createdAt).toLocaleString('es-AR', {
-                            day: '2-digit',
-                            month: '2-digit',
-                            year: '2-digit',
-                            hour: '2-digit',
-                            minute: '2-digit',
-                            second: '2-digit',
-                            hour12: false,
-                          })}
-                        </span>
+                  <button
+                    type="button"
+                    onClick={() => hasDiff && toggleExpand(entry.id)}
+                    disabled={!hasDiff}
+                    className="w-full p-4 text-left transition-colors hover:bg-white/[0.02] disabled:cursor-default"
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="min-w-0 flex-1">
+                        <div className="mb-1 flex flex-wrap items-center gap-2">
+                          <ActionBadge type={entry.actionType} />
+                          <span className="flex items-center gap-1 text-xs text-zinc-500">
+                            <Clock className="h-3 w-3" strokeWidth={1.5} />
+                            {new Date(entry.createdAt).toLocaleString('es-AR', {
+                              day: '2-digit',
+                              month: '2-digit',
+                              year: '2-digit',
+                              hour: '2-digit',
+                              minute: '2-digit',
+                              second: '2-digit',
+                              hour12: false,
+                            })}
+                          </span>
+                        </div>
+                        <p className="text-sm text-zinc-200">{entry.action}</p>
+                        <div className="mt-1.5 flex flex-wrap items-center gap-3 text-xs text-zinc-500">
+                          <span className="flex items-center gap-1">
+                            <User className="h-3 w-3" strokeWidth={1.5} />
+                            {entry.userName ?? entry.userEmail ?? entry.userId}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Building2 className="h-3 w-3" strokeWidth={1.5} />
+                            {entry.targetType} / {entry.targetId.slice(0, 12)}
+                          </span>
+                        </div>
                       </div>
-                      <p className="text-sm text-zinc-200">{entry.action}</p>
-                      <div className="mt-1.5 flex flex-wrap items-center gap-3 text-xs text-zinc-500">
-                        <span className="flex items-center gap-1">
-                          <User className="h-3 w-3" strokeWidth={1.5} />
-                          {entry.userName ?? entry.userEmail ?? entry.userId}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <Building2 className="h-3 w-3" strokeWidth={1.5} />
-                          {entry.targetType} / {entry.targetId.slice(0, 12)}
-                        </span>
-                      </div>
-                    </div>
 
-                    {hasDiff && (
+                      {hasDiff && (
+                        <motion.div
+                          animate={reduced ? undefined : { rotate: isExpanded ? 180 : 0 }}
+                          transition={{ duration: 0.15 }}
+                          className={reduced && isExpanded ? 'rotate-180' : undefined}
+                        >
+                          <ChevronDown
+                            className="h-4 w-4 text-zinc-500"
+                            strokeWidth={1.5}
+                          />
+                        </motion.div>
+                      )}
+                    </div>
+                  </button>
+
+                  <AnimatePresence initial={false}>
+                    {isExpanded && hasDiff && (
                       <motion.div
-                        animate={{ rotate: isExpanded ? 180 : 0 }}
-                        transition={{ duration: 0.15 }}
+                        initial={reduced ? false : { height: 0 }}
+                        animate={{ height: 'auto' }}
+                        exit={reduced ? undefined : { height: 0 }}
+                        transition={{ duration: reduced ? 0 : 0.2 }}
+                        className="overflow-hidden border-t border-white/10"
                       >
-                        <ChevronDown
-                          className="h-4 w-4 text-zinc-500"
-                          strokeWidth={1.5}
-                        />
+                        <div className="bg-zinc-950/50 p-4">
+                          <p className="mb-3 text-[10px] uppercase tracking-[0.24em] text-zinc-500">
+                            Cambios
+                          </p>
+                          <DiffDisplay diff={diff} />
+                        </div>
                       </motion.div>
                     )}
-                  </div>
-                </button>
-
-                <AnimatePresence initial={false}>
-                  {isExpanded && hasDiff && (
-                    <motion.div
-                      initial={{ height: 0 }}
-                      animate={{ height: 'auto' }}
-                      exit={{ height: 0 }}
-                      transition={{ duration: 0.2 }}
-                      className="overflow-hidden border-t border-white/10"
-                    >
-                      <div className="bg-zinc-950/50 p-4">
-                        <p className="mb-3 text-[10px] uppercase tracking-[0.24em] text-zinc-500">
-                          Cambios
-                        </p>
-                        <DiffDisplay diff={diff} />
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </Card>
+                  </AnimatePresence>
+                </Card>
+              </motion.div>
             )
-          })
-        )}
-      </div>
+          })}
+        </motion.div>
+      )}
 
       {entries.length === 50 && (
         <div className="text-center">

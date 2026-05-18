@@ -1,10 +1,13 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { motion } from 'motion/react'
 import { AlertTriangle, CheckCircle, ExternalLink, Eye } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button, Card, EmptyState } from '@/components/ui'
+import { staggerContainer, staggerItem } from '@/lib/motion-variants'
+import { useReducedMotion } from '@/lib/use-reduced-motion'
 import {
   acknowledgeAlert,
   listAlerts,
@@ -20,45 +23,62 @@ interface AlertsClientProps {
 type Filter = 'all' | 'pending' | 'acknowledged' | 'resolved'
 
 export function AlertsClient({ initialAlerts }: AlertsClientProps) {
+  const reduced = useReducedMotion()
   const [alerts, setAlerts] = useState(initialAlerts)
   const [filter, setFilter] = useState<Filter>('pending')
+  const [mounted, setMounted] = useState(false)
+  const [pendingAction, setPendingAction] = useState<string | null>(null)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   const filtered = filter === 'all'
     ? alerts
     : alerts.filter((alert) => alert.status.toLowerCase() === filter)
 
   async function handleAck(id: string) {
-    const promise = acknowledgeAlert(id)
-    toast.promise(promise, {
-      loading: 'Marcando como visto...',
-      success: 'Alerta marcada como vista',
-      error: 'Error',
-    })
-    await promise
-    setAlerts((prev) =>
-      prev.map((alert) =>
-        alert.id === id
-          ? { ...alert, status: 'ACKNOWLEDGED', acknowledgedAt: new Date() }
-          : alert,
-      ),
-    )
+    setPendingAction(`${id}:ack`)
+    try {
+      const promise = acknowledgeAlert(id)
+      toast.promise(promise, {
+        loading: 'Marcando como visto...',
+        success: 'Alerta marcada como vista',
+        error: 'Error',
+      })
+      await promise
+      setAlerts((prev) =>
+        prev.map((alert) =>
+          alert.id === id
+            ? { ...alert, status: 'ACKNOWLEDGED', acknowledgedAt: new Date() }
+            : alert,
+        ),
+      )
+    } finally {
+      setPendingAction(null)
+    }
   }
 
   async function handleResolve(id: string) {
-    const promise = resolveAlert(id)
-    toast.promise(promise, {
-      loading: 'Resolviendo...',
-      success: 'Alerta resuelta',
-      error: 'Error',
-    })
-    await promise
-    setAlerts((prev) =>
-      prev.map((alert) =>
-        alert.id === id
-          ? { ...alert, status: 'RESOLVED', resolvedAt: new Date() }
-          : alert,
-      ),
-    )
+    setPendingAction(`${id}:resolve`)
+    try {
+      const promise = resolveAlert(id)
+      toast.promise(promise, {
+        loading: 'Resolviendo...',
+        success: 'Alerta resuelta',
+        error: 'Error',
+      })
+      await promise
+      setAlerts((prev) =>
+        prev.map((alert) =>
+          alert.id === id
+            ? { ...alert, status: 'RESOLVED', resolvedAt: new Date() }
+            : alert,
+        ),
+      )
+    } finally {
+      setPendingAction(null)
+    }
   }
 
   return (
@@ -87,67 +107,76 @@ export function AlertsClient({ initialAlerts }: AlertsClientProps) {
           description="Todo esta funcionando correctamente"
         />
       ) : (
-        <div className="space-y-3">
+        <motion.div
+          className="space-y-3"
+          variants={reduced ? undefined : staggerContainer}
+          initial={reduced || mounted ? false : 'hidden'}
+          animate={reduced ? undefined : 'visible'}
+        >
           {filtered.map((alert) => (
-            <Card
+            <motion.div
               key={alert.id}
-              padding="md"
+              variants={reduced ? undefined : staggerItem}
             >
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex-1">
-                  <div className="mb-2 flex items-center gap-2">
-                    <SeverityBadge severity={alert.severity} />
-                    <span className="text-xs text-zinc-500">
-                      {new Date(alert.createdAt).toLocaleString('es-AR', {
-                        day: '2-digit',
-                        month: '2-digit',
-                        hour: '2-digit',
-                        minute: '2-digit',
-                        hour12: false,
-                      })}
-                    </span>
-                  </div>
-                  <h3 className="mb-1 text-base font-medium text-zinc-100">
-                    {alert.title}
-                  </h3>
-                  <p className="mb-3 text-sm text-zinc-400">{alert.description}</p>
+              <Card padding="md">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex-1">
+                    <div className="mb-2 flex items-center gap-2">
+                      <SeverityBadge severity={alert.severity} />
+                      <span className="text-xs text-zinc-500">
+                        {new Date(alert.createdAt).toLocaleString('es-AR', {
+                          day: '2-digit',
+                          month: '2-digit',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                          hour12: false,
+                        })}
+                      </span>
+                    </div>
+                    <h3 className="mb-1 text-base font-medium text-zinc-100">
+                      {alert.title}
+                    </h3>
+                    <p className="mb-3 text-sm text-zinc-400">{alert.description}</p>
 
-                  <Link
-                    href={`/admin/clients/${alert.botConfig.organization.slug}/chatbot/overview`}
-                    className="inline-flex items-center gap-1 text-xs text-cyan-400 hover:underline"
-                  >
-                    Ver bot
-                    <ExternalLink className="h-3 w-3" strokeWidth={1.5} />
-                  </Link>
+                    <Link
+                      href={`/admin/clients/${alert.botConfig.organization.slug}/chatbot/overview`}
+                      className="inline-flex items-center gap-1 text-xs text-cyan-400 hover:underline"
+                    >
+                      Ver bot
+                      <ExternalLink className="h-3 w-3" strokeWidth={1.5} />
+                    </Link>
+                  </div>
+
+                  {alert.status === 'PENDING' && (
+                    <div className="flex flex-col gap-2">
+                      <Button
+                        type="button"
+                        onClick={() => void handleAck(alert.id)}
+                        variant="secondary"
+                        size="sm"
+                        loading={pendingAction === `${alert.id}:ack`}
+                        icon={<Eye className="h-3.5 w-3.5" strokeWidth={1.5} />}
+                      >
+                        Visto
+                      </Button>
+                      <Button
+                        type="button"
+                        onClick={() => void handleResolve(alert.id)}
+                        variant="secondary"
+                        size="sm"
+                        loading={pendingAction === `${alert.id}:resolve`}
+                        className="border-emerald-400/30 bg-emerald-400/15 text-emerald-300 hover:bg-emerald-400/25"
+                        icon={<CheckCircle className="h-3.5 w-3.5" strokeWidth={1.5} />}
+                      >
+                        Resolver
+                      </Button>
+                    </div>
+                  )}
                 </div>
-
-                {alert.status === 'PENDING' && (
-                  <div className="flex flex-col gap-2">
-                    <Button
-                      type="button"
-                      onClick={() => void handleAck(alert.id)}
-                      variant="secondary"
-                      size="sm"
-                      icon={<Eye className="h-3.5 w-3.5" strokeWidth={1.5} />}
-                    >
-                      Visto
-                    </Button>
-                    <Button
-                      type="button"
-                      onClick={() => void handleResolve(alert.id)}
-                      variant="secondary"
-                      size="sm"
-                      className="border-emerald-400/30 bg-emerald-400/15 text-emerald-300 hover:bg-emerald-400/25"
-                      icon={<CheckCircle className="h-3.5 w-3.5" strokeWidth={1.5} />}
-                    >
-                      Resolver
-                    </Button>
-                  </div>
-                )}
-              </div>
-            </Card>
+              </Card>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       )}
     </div>
   )
