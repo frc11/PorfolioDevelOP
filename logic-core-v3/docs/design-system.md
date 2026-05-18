@@ -214,3 +214,34 @@ Hacer:
 ```tsx
 <Button>
 ```
+
+## Playground visual
+
+Pagina interna con todos los componentes y variantes:
+
+**URL:** `/admin/_design`
+
+Solo accesible para SUPER_ADMIN. Sirve como:
+
+- Referencia visual cuando armas features nuevas
+- Contexto para IAs (Claude Code, Antigravity), usando capturas o snippets
+- Documentacion viva que no se desactualiza
+
+Cada seccion tiene:
+
+- Ejemplo renderizado del componente
+- Codigo de ejemplo copiable
+- Variantes principales
+
+Secciones disponibles:
+
+- Tokens
+- Typography
+- Buttons
+- Cards
+- Forms
+- Stats
+- Modals
+- Badges
+- Empty States
+- Patterns

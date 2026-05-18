@@ -16,6 +16,7 @@ import {
   Bot,
   BookOpen,
   AlertTriangle,
+  Palette,
 } from 'lucide-react'
 
 type AdminSidebarProps = {
@@ -68,6 +69,7 @@ const NAV_SECTIONS: NavSection[] = [
     items: [
       { href: '/admin/settings', label: 'Configuraci\u00f3n', icon: Settings },
       { href: '/admin/audit-log', label: 'Audit log', icon: History },
+      { href: '/admin/_design', label: 'Design System', icon: Palette },
     ],
   },
 ]
