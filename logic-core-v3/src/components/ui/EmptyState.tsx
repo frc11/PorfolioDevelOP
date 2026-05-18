@@ -4,6 +4,7 @@ import { motion } from 'motion/react'
 import type { LucideIcon } from 'lucide-react'
 import type { ReactNode } from 'react'
 import Link from 'next/link'
+import { Button } from './Button'
 import { cn } from '@/lib/utils'
 
 interface EmptyStateProps {
@@ -59,7 +60,7 @@ export function EmptyState({
           animate={{ scale: [1, 1.6, 1], opacity: [0.5, 0, 0.5] }}
           transition={{ duration: 3, repeat: Infinity, ease: 'easeOut' }}
         />
-        <div className="relative flex h-12 w-12 items-center justify-center rounded-full border border-white/[0.08] bg-white/[0.03] text-zinc-500">
+        <div className="relative flex h-12 w-12 items-center justify-center rounded-2xl border border-white/[0.08] bg-white/[0.04] text-zinc-500">
           <Icon size={sizes.iconSize / 2} strokeWidth={1.5} />
         </div>
       </div>
@@ -80,13 +81,9 @@ export function EmptyState({
               {cta.label}
             </Link>
           ) : (
-            <button
-              type="button"
-              onClick={cta.onClick}
-              className="inline-flex items-center gap-2 rounded-2xl bg-cyan-400/15 px-5 py-2.5 text-sm text-cyan-300 transition-colors hover:bg-cyan-400/25"
-            >
+            <Button variant="secondary" onClick={cta.onClick}>
               {cta.label}
-            </button>
+            </Button>
           )}
         </div>
       ) : null}
