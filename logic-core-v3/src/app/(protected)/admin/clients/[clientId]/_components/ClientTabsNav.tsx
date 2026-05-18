@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { motion } from 'motion/react'
 import { Archive, Bot, FolderKanban, LayoutDashboard, LifeBuoy } from 'lucide-react'
+import { Card } from '@/components/ui'
 
 const TABS = [
   { id: 'overview', label: 'Overview', icon: LayoutDashboard },
@@ -19,7 +20,7 @@ interface ClientTabsNavProps {
 
 export function ClientTabsNav({ clientId, activeTab }: ClientTabsNavProps) {
   return (
-    <div className="flex items-center gap-1 overflow-x-auto rounded-2xl border border-white/10 bg-white/[0.02] p-1.5">
+    <Card padding="none" className="flex items-center gap-1 overflow-x-auto p-1.5">
       {TABS.map((tab) => {
         const isActive = activeTab === tab.id
         const Icon = tab.icon
@@ -49,6 +50,6 @@ export function ClientTabsNav({ clientId, activeTab }: ClientTabsNavProps) {
           </Link>
         )
       })}
-    </div>
+    </Card>
   )
 }

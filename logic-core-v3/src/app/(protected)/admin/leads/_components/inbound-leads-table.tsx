@@ -2,8 +2,8 @@
 
 import { useEffect, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { CheckCircle2, LoaderCircle, Sparkles, Users } from 'lucide-react'
-import { EmptyState } from '@/components/ui/EmptyState'
+import { CheckCircle2, Sparkles, Users } from 'lucide-react'
+import { Button, Card, EmptyState } from '@/components/ui'
 import { convertInboundToLead } from '../_actions/inbound.actions'
 
 type InboundLeadRow = {
@@ -67,7 +67,7 @@ export function InboundLeadsTable({ leads }: InboundLeadsTableProps) {
   }
 
   return (
-    <section className="rounded-[28px] border border-white/10 bg-white/5 backdrop-blur-xl">
+    <Card padding="none" className="rounded-[28px] bg-white/5 backdrop-blur-xl">
       <div className="border-b border-white/10 px-5 py-4">
         <p className="text-[10px] uppercase tracking-[0.24em] text-zinc-500">
           Leads inbound
@@ -134,19 +134,18 @@ export function InboundLeadsTable({ leads }: InboundLeadsTableProps) {
                         Ya convertido
                       </span>
                     ) : (
-                      <button
+                      <Button
                         type="button"
                         disabled={isPending}
                         onClick={() => handleConvert(lead)}
-                        className="inline-flex items-center gap-2 rounded-2xl border border-cyan-400/20 bg-cyan-400/10 px-3 py-2 text-xs font-medium text-cyan-100 transition-colors hover:bg-cyan-400/15 disabled:cursor-not-allowed disabled:opacity-60"
+                        variant="secondary"
+                        size="sm"
+                        loading={isPending}
+                        icon={<Sparkles className="h-4 w-4" />}
+                        className="border-cyan-400/20 bg-cyan-400/10 text-cyan-100 hover:bg-cyan-400/15"
                       >
-                        {isPending ? (
-                          <LoaderCircle className="h-4 w-4 animate-spin" />
-                        ) : (
-                          <Sparkles className="h-4 w-4" />
-                        )}
                         Convertir a Lead OS
-                      </button>
+                      </Button>
                     )}
                   </td>
                 </tr>
@@ -162,9 +161,10 @@ export function InboundLeadsTable({ leads }: InboundLeadsTableProps) {
           const isPending = pendingId === lead.id
 
           return (
-            <article
+            <Card
               key={lead.id}
-              className="rounded-2xl border border-white/10 bg-white/[0.03] p-4"
+              padding="sm"
+              className="bg-white/[0.03]"
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
@@ -189,27 +189,26 @@ export function InboundLeadsTable({ leads }: InboundLeadsTableProps) {
                     Ya convertido
                   </span>
                 ) : (
-                  <button
+                  <Button
                     type="button"
                     disabled={isPending}
                     onClick={() => handleConvert(lead)}
-                    className="inline-flex items-center gap-2 rounded-2xl border border-cyan-400/20 bg-cyan-400/10 px-3 py-2 text-xs font-medium text-cyan-100 transition-colors hover:bg-cyan-400/15 disabled:cursor-not-allowed disabled:opacity-60"
+                    variant="secondary"
+                    size="sm"
+                    loading={isPending}
+                    icon={<Sparkles className="h-4 w-4" />}
+                    className="border-cyan-400/20 bg-cyan-400/10 text-cyan-100 hover:bg-cyan-400/15"
                   >
-                    {isPending ? (
-                      <LoaderCircle className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <Sparkles className="h-4 w-4" />
-                    )}
                     Convertir a Lead OS
-                  </button>
+                  </Button>
                 )}
               </div>
-            </article>
+            </Card>
           )
         })}
       </div>
         </>
       )}
-    </section>
+    </Card>
   )
 }

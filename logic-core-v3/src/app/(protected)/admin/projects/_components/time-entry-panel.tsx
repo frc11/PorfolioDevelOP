@@ -2,13 +2,13 @@
 
 import { useEffect, useMemo, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { Clock3, LoaderCircle, Plus, Trash2 } from 'lucide-react'
+import { Clock3, Plus, Trash2 } from 'lucide-react'
+import { Button, Card, EmptyState } from '@/components/ui'
 import {
   createTimeEntry,
   deleteTimeEntry,
 } from '@/app/(protected)/admin/team/_actions/time-entry.actions'
 import { ConfirmDialog } from '@/app/(protected)/admin/_components/confirm-dialog'
-import { EmptyState } from '@/app/(protected)/admin/_components/empty-state'
 
 type TaskOption = {
   id: string
@@ -279,18 +279,16 @@ export function TimeEntryPanel({
             ) : null}
 
             <div className="flex justify-end">
-              <button
+              <Button
                 type="submit"
                 disabled={isPending || tasks.length === 0}
-                className="inline-flex items-center gap-2 rounded-2xl border border-cyan-400/20 bg-cyan-400/10 px-4 py-3 text-sm font-medium text-cyan-100 transition-colors hover:bg-cyan-400/15 disabled:cursor-not-allowed disabled:opacity-60"
+                variant="secondary"
+                loading={isPending}
+                icon={<Plus className="h-4 w-4" />}
+                className="border-cyan-400/20 bg-cyan-400/10 text-cyan-100 hover:bg-cyan-400/15"
               >
-                {isPending ? (
-                  <LoaderCircle className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Plus className="h-4 w-4" />
-                )}
                 <span>{isPending ? 'Guardando...' : 'Registrar horas'}</span>
-              </button>
+              </Button>
             </div>
           </form>
         </section>
@@ -304,9 +302,10 @@ export function TimeEntryPanel({
         ) : (
           <section className="space-y-4">
             {localGroups.map((group) => (
-              <article
+              <Card
                 key={group.taskId}
-                className="overflow-hidden rounded-[28px] border border-white/10 bg-white/5 backdrop-blur-xl"
+                padding="none"
+                className="overflow-hidden rounded-[28px] bg-white/5 backdrop-blur-xl"
               >
                 <div className="flex flex-col gap-2 border-b border-white/10 bg-black/20 px-5 py-4 md:flex-row md:items-center md:justify-between">
                   <div>
@@ -344,19 +343,18 @@ export function TimeEntryPanel({
                             {entry.notes?.trim() ? entry.notes : 'Sin notas'}
                           </td>
                           <td className="px-4 py-4">
-                            <button
+                            <Button
                               type="button"
                               disabled={isPending}
                               onClick={() => setEntryToDelete(entry)}
-                              className="inline-flex items-center gap-2 rounded-xl border border-rose-400/20 bg-rose-500/10 px-3 py-2 text-xs font-medium text-rose-200 transition-colors hover:bg-rose-500/15 disabled:opacity-60"
+                              variant="danger"
+                              size="sm"
+                              loading={deletingEntryId === entry.id}
+                              icon={<Trash2 className="h-3.5 w-3.5" />}
+                              className="rounded-xl border-rose-400/20 bg-rose-500/10 px-3 py-2 text-rose-200 hover:bg-rose-500/15"
                             >
-                              {deletingEntryId === entry.id ? (
-                                <LoaderCircle className="h-3.5 w-3.5 animate-spin" />
-                              ) : (
-                                <Trash2 className="h-3.5 w-3.5" />
-                              )}
                               <span>Eliminar</span>
-                            </button>
+                            </Button>
                           </td>
                         </tr>
                       ))}
@@ -366,9 +364,10 @@ export function TimeEntryPanel({
 
                 <div className="space-y-3 p-4 md:hidden">
                   {group.entries.map((entry) => (
-                    <article
+                    <Card
                       key={entry.id}
-                      className="rounded-2xl border border-white/10 bg-white/[0.03] p-4"
+                      padding="sm"
+                      className="bg-white/[0.03]"
                     >
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0">
@@ -385,23 +384,22 @@ export function TimeEntryPanel({
                         <p>{entry.user.name ?? entry.user.email ?? 'Super Admin'}</p>
                         <p>{entry.notes?.trim() ? entry.notes : 'Sin notas'}</p>
                       </div>
-                      <button
+                      <Button
                         type="button"
                         disabled={isPending}
                         onClick={() => setEntryToDelete(entry)}
-                        className="mt-4 inline-flex items-center gap-2 rounded-xl border border-rose-400/20 bg-rose-500/10 px-3 py-2 text-xs font-medium text-rose-200 transition-colors hover:bg-rose-500/15 disabled:opacity-60"
+                        variant="danger"
+                        size="sm"
+                        loading={deletingEntryId === entry.id}
+                        icon={<Trash2 className="h-3.5 w-3.5" />}
+                        className="mt-4 rounded-xl border-rose-400/20 bg-rose-500/10 px-3 py-2 text-rose-200 hover:bg-rose-500/15"
                       >
-                        {deletingEntryId === entry.id ? (
-                          <LoaderCircle className="h-3.5 w-3.5 animate-spin" />
-                        ) : (
-                          <Trash2 className="h-3.5 w-3.5" />
-                        )}
                         <span>Eliminar</span>
-                      </button>
-                    </article>
+                      </Button>
+                    </Card>
                   ))}
                 </div>
-              </article>
+              </Card>
             ))}
           </section>
         )}

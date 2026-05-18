@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { Activity, ArrowRight, BookOpen, Bot, MessageSquare, Settings, Users } from 'lucide-react'
 import { prisma } from '@/lib/prisma'
-import { StatCard } from '@/components/ui'
+import { Card, StatCard } from '@/components/ui'
 import { ChatbotManager } from '@/components/admin/managers/ChatbotManager'
 
 interface ChatbotTabProps {
@@ -36,7 +36,7 @@ export async function ChatbotTab({ clientId }: ChatbotTabProps) {
 
   if (!org.botConfig) {
     return (
-      <div className="rounded-3xl border border-dashed border-white/10 bg-white/[0.02] p-12 text-center">
+      <Card variant="dashed" padding="xl" className="text-center">
         <Bot className="mx-auto mb-4 h-12 w-12 text-zinc-600" strokeWidth={1.5} />
         <p className="mb-2 text-base font-medium text-zinc-300">
           Este cliente todavia no tiene chatbot
@@ -51,7 +51,7 @@ export async function ChatbotTab({ clientId }: ChatbotTabProps) {
           Configurar chatbot
           <ArrowRight className="h-4 w-4" strokeWidth={1.5} />
         </Link>
-      </div>
+      </Card>
     )
   }
 
@@ -142,22 +142,25 @@ function QuickActionCard({
   return (
     <Link
       href={href}
-      className={`group rounded-2xl border bg-white/[0.02] p-5 transition-colors hover:bg-white/[0.04] ${
-        accent === 'cyan' ? 'border-cyan-400/20' : 'border-white/10'
-      }`}
+      className="group block"
     >
-      <div className="mb-3 flex items-start justify-between">
-        <Icon
-          className={`h-5 w-5 ${accent === 'cyan' ? 'text-cyan-400' : 'text-zinc-400'}`}
-          strokeWidth={1.5}
-        />
-        <ArrowRight
-          className="h-4 w-4 text-zinc-600 transition-colors group-hover:text-cyan-400"
-          strokeWidth={1.5}
-        />
-      </div>
-      <h3 className="mb-1 text-sm font-medium text-zinc-200">{title}</h3>
-      <p className="text-xs text-zinc-500">{description}</p>
+      <Card
+        variant="interactive"
+        className={accent === 'cyan' ? 'h-full border-cyan-400/20' : 'h-full'}
+      >
+        <div className="mb-3 flex items-start justify-between">
+          <Icon
+            className={`h-5 w-5 ${accent === 'cyan' ? 'text-cyan-400' : 'text-zinc-400'}`}
+            strokeWidth={1.5}
+          />
+          <ArrowRight
+            className="h-4 w-4 text-zinc-600 transition-colors group-hover:text-cyan-400"
+            strokeWidth={1.5}
+          />
+        </div>
+        <h3 className="mb-1 text-sm font-medium text-zinc-200">{title}</h3>
+        <p className="text-xs text-zinc-500">{description}</p>
+      </Card>
     </Link>
   )
 }
