@@ -2,17 +2,24 @@ import { ArrowDownRight, ArrowRight, ArrowUpRight, type LucideIcon } from 'lucid
 import { cn } from '@/lib/utils'
 
 type Accent = 'cyan' | 'emerald' | 'violet' | 'amber' | 'rose' | 'red' | 'zinc'
+type LegacyTrend = 'up' | 'down' | 'neutral'
+type StatTrend =
+  | LegacyTrend
+  | {
+      direction: 'up' | 'down' | 'flat'
+      value: string
+    }
 
 interface StatCardProps {
   label: string
   value: string | number
+  format?: 'number' | 'currency' | 'compact'
   subtitle?: string
   icon?: LucideIcon
   accent?: Accent
-  trend?: {
-    direction: 'up' | 'down' | 'flat'
-    value: string
-  }
+  color?: Accent | 'alert'
+  trend?: StatTrend
+  progress?: number
   className?: string
 }
 
@@ -33,15 +40,32 @@ const accentColors: Record<Accent, { text: string; bg: string; border: string }>
 export function StatCard({
   label,
   value,
+  format = 'number',
   subtitle,
   icon: Icon,
   accent,
+  color,
   trend,
+  progress,
   className,
 }: StatCardProps) {
-  const colors = accent ? accentColors[accent] : null
+  const resolvedAccent = accent ?? (color === 'alert' ? 'amber' : color)
+  const colors = resolvedAccent ? accentColors[resolvedAccent] : null
+  const formattedValue =
+    typeof value === 'string'
+      ? value
+      : format === 'currency'
+        ? `$${value.toFixed(4)}`
+        : format === 'compact'
+          ? new Intl.NumberFormat('en', { notation: 'compact' }).format(value)
+          : value.toLocaleString()
+  const trendMeta = normalizeTrend(trend)
   const TrendIcon =
-    trend?.direction === 'up' ? ArrowUpRight : trend?.direction === 'down' ? ArrowDownRight : ArrowRight
+    trendMeta.direction === 'up'
+      ? ArrowUpRight
+      : trendMeta.direction === 'down'
+        ? ArrowDownRight
+        : ArrowRight
 
   return (
     <div className={cn('rounded-2xl border border-white/10 bg-white/[0.02] p-5', className)}>
@@ -58,26 +82,49 @@ export function StatCard({
       </div>
 
       <p className={cn('text-2xl font-semibold tracking-tight', colors?.text ?? 'text-zinc-100')}>
-        {value}
+        {formattedValue}
       </p>
 
       {subtitle && <p className="mt-1 text-xs text-zinc-500">{subtitle}</p>}
 
-      {trend && (
+      {typeof progress === 'number' && (
+        <div className="mt-4 h-2 overflow-hidden rounded-full bg-white/10">
+          <div
+            className={cn('h-full rounded-full transition-[width]', colors?.bg ?? 'bg-zinc-300')}
+            style={{ width: `${Math.min(100, Math.max(0, progress))}%` }}
+          />
+        </div>
+      )}
+
+      {trendMeta.value && (
         <div
           className={cn(
             'mt-2 inline-flex items-center gap-1 text-xs',
-            trend.direction === 'up'
+            trendMeta.direction === 'up'
               ? 'text-emerald-400'
-              : trend.direction === 'down'
-                ? 'text-red-400'
+              : trendMeta.direction === 'down'
+                ? 'text-amber-300'
                 : 'text-zinc-500',
           )}
         >
           <TrendIcon className="h-3.5 w-3.5" strokeWidth={1.75} />
-          {trend.value}
+          {trendMeta.value}
         </div>
       )}
     </div>
   )
+}
+
+function normalizeTrend(trend?: StatTrend): { direction: 'up' | 'down' | 'flat'; value?: string } {
+  if (!trend) return { direction: 'flat' }
+  if (typeof trend !== 'string') return trend
+
+  switch (trend) {
+    case 'up':
+      return { direction: 'up', value: 'En alza' }
+    case 'down':
+      return { direction: 'down', value: 'Requiere atencion' }
+    case 'neutral':
+      return { direction: 'flat', value: 'Estable' }
+  }
 }

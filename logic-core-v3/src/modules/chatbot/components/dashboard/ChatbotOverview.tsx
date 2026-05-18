@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { StatCard } from '@/app/(protected)/admin/_components/stat-card'
+import { StatCard } from '@/components/ui'
 
 interface ChatbotOverviewProps {
   session: any

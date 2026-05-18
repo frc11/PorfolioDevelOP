@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { Activity, ArrowRight, BookOpen, Bot, MessageSquare, Settings, Users } from 'lucide-react'
 import { prisma } from '@/lib/prisma'
-import { StatCard } from '@/app/(protected)/admin/_components/stat-card'
+import { StatCard } from '@/components/ui'
 import { ChatbotManager } from '@/components/admin/managers/ChatbotManager'
 
 interface ChatbotTabProps {

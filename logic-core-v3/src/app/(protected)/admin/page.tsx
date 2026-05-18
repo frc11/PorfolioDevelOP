@@ -18,7 +18,7 @@ import {
 import { DEFAULT_AGENCY_SETTINGS } from '@/lib/agency-settings'
 import { prisma } from '@/lib/prisma'
 import { DashboardHistoryCharts } from './_components/dashboard-history-charts'
-import { StatCard } from './_components/stat-card'
+import { StatCard } from '@/components/ui'
 
 const MEMBER_BAR_COLORS = [
   '#22d3ee',

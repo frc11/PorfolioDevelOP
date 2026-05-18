@@ -5,7 +5,7 @@ import {
   listConversationsByOrgSlug,
   getUsageByOrgSlug,
 } from '@/modules/chatbot/index.server'
-import { StatCard } from '@/app/(protected)/admin/_components/stat-card'
+import { StatCard } from '@/components/ui'
 
 export default async function ChatbotOverview({
   params,

@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/prisma'
-import { StatCard } from '@/app/(protected)/admin/_components/stat-card'
+import { StatCard } from '@/components/ui'
 
 interface OverviewTabProps {
   clientId: string
