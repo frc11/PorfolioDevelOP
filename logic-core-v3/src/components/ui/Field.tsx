@@ -1,16 +1,18 @@
 import type { ReactNode } from 'react'
+import { cn } from '@/lib/utils'
 
 interface FieldProps {
   label: string
   hint?: string
   error?: string
   required?: boolean
+  className?: string
   children: ReactNode
 }
 
-export function Field({ label, hint, error, required, children }: FieldProps) {
+export function Field({ label, hint, error, required, className, children }: FieldProps) {
   return (
-    <div className="space-y-1.5">
+    <div className={cn('space-y-1.5', className)}>
       <label className="flex items-center gap-1 text-sm font-medium text-zinc-200">
         {label}
         {required && <span className="text-red-400">*</span>}

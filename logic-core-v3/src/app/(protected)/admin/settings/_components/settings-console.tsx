@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState, useTransition, type InputHTMLAttributes, type ReactNode } from 'react'
+import { useMemo, useState, useTransition, type ReactNode } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   BellRing,
@@ -12,6 +12,7 @@ import {
   Users,
 } from 'lucide-react'
 import { toast } from 'sonner'
+import { Field, Input } from '@/components/ui'
 import type { PremiumFeatureKey } from '@/lib/premium-features'
 import {
   updateModulePricing,
@@ -218,6 +219,7 @@ export function SettingsConsole({
             <div className="mt-6 grid gap-4 md:grid-cols-2">
               <Field label="Email principal">
                 <Input
+                  className="h-12 rounded-2xl bg-black/20 px-4 text-white"
                   value={draft.contactEmail}
                   onChange={(event) =>
                     setDraft((current) => ({
@@ -230,6 +232,7 @@ export function SettingsConsole({
               </Field>
               <Field label="WhatsApp">
                 <Input
+                  className="h-12 rounded-2xl bg-black/20 px-4 text-white"
                   value={draft.contactWhatsapp}
                   onChange={(event) =>
                     setDraft((current) => ({
@@ -242,6 +245,7 @@ export function SettingsConsole({
               </Field>
               <Field className="md:col-span-2" label="Sitio web">
                 <Input
+                  className="h-12 rounded-2xl bg-black/20 px-4 text-white"
                   value={draft.websiteUrl}
                   onChange={(event) =>
                     setDraft((current) => ({
@@ -254,6 +258,7 @@ export function SettingsConsole({
               </Field>
               <Field className="md:col-span-2" label="Webhook de alertas">
                 <Input
+                  className="h-12 rounded-2xl bg-black/20 px-4 text-white"
                   value={draft.alertWebhookUrl}
                   onChange={(event) =>
                     setDraft((current) => ({
@@ -441,6 +446,7 @@ export function SettingsConsole({
             <div className="mt-6 grid gap-4 lg:grid-cols-2">
               <Field label="Objetivo semanal de demos">
                 <Input
+                  className="h-12 rounded-2xl bg-black/20 px-4 text-white"
                   type="number"
                   min="0"
                   step="1"
@@ -553,6 +559,7 @@ export function SettingsConsole({
           <div className="mt-6 grid gap-4 xl:grid-cols-[1fr_1fr_0.8fr]">
             <Field label="Telegram Bot Token">
               <Input
+                className="h-12 rounded-2xl bg-black/20 px-4 text-white"
                 type="password"
                 value={draft.osTelegramBotToken}
                 onChange={(event) =>
@@ -572,6 +579,7 @@ export function SettingsConsole({
 
             <Field label="Telegram Chat ID">
               <Input
+                className="h-12 rounded-2xl bg-black/20 px-4 text-white"
                 value={draft.osTelegramChatId}
                 onChange={(event) =>
                   setDraft((current) => ({
@@ -640,39 +648,6 @@ function InfoPill({
       {icon}
       <span>{children}</span>
     </div>
-  )
-}
-
-function Field({
-  label,
-  className,
-  children,
-}: {
-  label: string
-  className?: string
-  children: ReactNode
-}) {
-  return (
-    <label className={cn('block', className)}>
-      <span className="mb-2 block text-sm font-medium text-zinc-200">{label}</span>
-      {children}
-    </label>
-  )
-}
-
-function Input(
-  props: InputHTMLAttributes<HTMLInputElement> & {
-    className?: string
-  }
-) {
-  return (
-    <input
-      {...props}
-      className={cn(
-        'h-12 w-full rounded-2xl border border-white/10 bg-black/20 px-4 text-sm text-white outline-none transition-colors placeholder:text-zinc-500 focus:border-cyan-400/35',
-        props.className
-      )}
-    />
   )
 }
 

@@ -2,7 +2,8 @@
 
 import { useEffect, useMemo, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { LoaderCircle, X } from 'lucide-react'
+import { X } from 'lucide-react'
+import { Button, Input } from '@/components/ui'
 import {
   createLead,
   updateLead,
@@ -148,13 +149,14 @@ export function LeadForm({ lead, triggerLabel = 'Nuevo lead' }: LeadFormProps) {
 
   return (
     <>
-      <button
+      <Button
         type="button"
         onClick={() => setIsOpen(true)}
-        className="inline-flex items-center rounded-2xl border border-cyan-400/20 bg-cyan-400/10 px-4 py-3 text-sm font-medium text-cyan-100 transition-colors hover:bg-cyan-400/15"
+        variant="secondary"
+        className="border-cyan-400/20 bg-cyan-400/10 text-cyan-100 hover:bg-cyan-400/15"
       >
         {triggerLabel}
-      </button>
+      </Button>
 
       {isOpen ? (
         <div className="fixed inset-0 z-[130] flex items-center justify-center bg-[#05070a]/80 p-4 backdrop-blur-md">
@@ -182,7 +184,7 @@ export function LeadForm({ lead, triggerLabel = 'Nuevo lead' }: LeadFormProps) {
                   <label className="mb-2 block text-sm font-medium text-zinc-200">
                     Business name
                   </label>
-                  <input
+                  <Input
                     value={formState.businessName}
                     onChange={(event) => updateField('businessName', event.target.value)}
                     className={inputClassName}
@@ -195,7 +197,7 @@ export function LeadForm({ lead, triggerLabel = 'Nuevo lead' }: LeadFormProps) {
 
                 <div>
                   <label className="mb-2 block text-sm font-medium text-zinc-200">Contacto</label>
-                  <input
+                  <Input
                     value={formState.contactName}
                     onChange={(event) => updateField('contactName', event.target.value)}
                     className={inputClassName}
@@ -205,7 +207,7 @@ export function LeadForm({ lead, triggerLabel = 'Nuevo lead' }: LeadFormProps) {
 
                 <div>
                   <label className="mb-2 block text-sm font-medium text-zinc-200">Teléfono</label>
-                  <input
+                  <Input
                     value={formState.phone}
                     onChange={(event) => updateField('phone', event.target.value)}
                     className={inputClassName}
@@ -215,7 +217,7 @@ export function LeadForm({ lead, triggerLabel = 'Nuevo lead' }: LeadFormProps) {
 
                 <div>
                   <label className="mb-2 block text-sm font-medium text-zinc-200">Email</label>
-                  <input
+                  <Input
                     value={formState.email}
                     onChange={(event) => updateField('email', event.target.value)}
                     className={inputClassName}
@@ -228,7 +230,7 @@ export function LeadForm({ lead, triggerLabel = 'Nuevo lead' }: LeadFormProps) {
 
                 <div>
                   <label className="mb-2 block text-sm font-medium text-zinc-200">Industria</label>
-                  <input
+                  <Input
                     value={formState.industry}
                     onChange={(event) => updateField('industry', event.target.value)}
                     className={inputClassName}
@@ -238,7 +240,7 @@ export function LeadForm({ lead, triggerLabel = 'Nuevo lead' }: LeadFormProps) {
 
                 <div>
                   <label className="mb-2 block text-sm font-medium text-zinc-200">Zona</label>
-                  <input
+                  <Input
                     value={formState.zone}
                     onChange={(event) => updateField('zone', event.target.value)}
                     className={inputClassName}
@@ -284,7 +286,7 @@ export function LeadForm({ lead, triggerLabel = 'Nuevo lead' }: LeadFormProps) {
                   <label className="mb-2 block text-sm font-medium text-zinc-200">
                     Instagram URL
                   </label>
-                  <input
+                  <Input
                     value={formState.instagramUrl}
                     onChange={(event) => updateField('instagramUrl', event.target.value)}
                     className={inputClassName}
@@ -299,7 +301,7 @@ export function LeadForm({ lead, triggerLabel = 'Nuevo lead' }: LeadFormProps) {
                   <label className="mb-2 block text-sm font-medium text-zinc-200">
                     Web actual
                   </label>
-                  <input
+                  <Input
                     value={formState.currentWebUrl}
                     onChange={(event) => updateField('currentWebUrl', event.target.value)}
                     className={inputClassName}
@@ -314,7 +316,7 @@ export function LeadForm({ lead, triggerLabel = 'Nuevo lead' }: LeadFormProps) {
                   <label className="mb-2 block text-sm font-medium text-zinc-200">
                     Google Maps URL
                   </label>
-                  <input
+                  <Input
                     value={formState.googleMapsUrl}
                     onChange={(event) => updateField('googleMapsUrl', event.target.value)}
                     className={inputClassName}
@@ -340,21 +342,20 @@ export function LeadForm({ lead, triggerLabel = 'Nuevo lead' }: LeadFormProps) {
               ) : null}
 
               <div className="flex items-center justify-end gap-3 border-t border-white/10 pt-5">
-                <button
+                <Button
                   type="button"
                   onClick={closeModal}
-                  className="rounded-2xl border border-white/10 px-4 py-3 text-sm text-zinc-300 transition-colors hover:bg-white/5"
+                  variant="secondary"
                 >
                   Cancelar
-                </button>
-                <button
+                </Button>
+                <Button
                   type="submit"
-                  disabled={isPending}
-                  className="inline-flex items-center gap-2 rounded-2xl border border-cyan-400/20 bg-cyan-400/10 px-4 py-3 text-sm font-medium text-cyan-100 transition-colors hover:bg-cyan-400/15 disabled:cursor-not-allowed disabled:opacity-60"
+                  loading={isPending}
+                  className="border border-cyan-400/20 bg-cyan-400/10 text-cyan-100 hover:bg-cyan-400/15"
                 >
-                  {isPending ? <LoaderCircle className="h-4 w-4 animate-spin" /> : null}
                   <span>{isPending ? 'Guardando...' : isEditMode ? 'Guardar cambios' : 'Crear lead'}</span>
-                </button>
+                </Button>
               </div>
             </form>
           </div>

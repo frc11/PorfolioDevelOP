@@ -1,9 +1,10 @@
 'use client'
 
 import { useEffect, useMemo, useState, useTransition } from 'react'
-import { AlertTriangle, LoaderCircle, X } from 'lucide-react'
+import { AlertTriangle, X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import type { ServiceType } from '@prisma/client'
+import { Button, Input } from '@/components/ui'
 import { createProject, updateProject } from '../_actions/project.actions'
 import { CreateProjectSchema } from '../_actions/project.schemas'
 
@@ -189,13 +190,14 @@ export function ProjectForm({
 
   return (
     <>
-      <button
+      <Button
         type="button"
         onClick={() => setIsOpen(true)}
-        className="inline-flex items-center rounded-2xl border border-cyan-400/20 bg-cyan-400/10 px-4 py-3 text-sm font-medium text-cyan-100 transition-colors hover:bg-cyan-400/15"
+        variant="secondary"
+        className="border-cyan-400/20 bg-cyan-400/10 text-cyan-100 hover:bg-cyan-400/15"
       >
         {triggerLabel}
-      </button>
+      </Button>
 
       {isOpen ? (
         <div className="fixed inset-0 z-[130] flex items-center justify-center bg-[#05070a]/80 p-4 backdrop-blur-md">
@@ -255,7 +257,7 @@ export function ProjectForm({
                   <label className="mb-2 block text-sm font-medium text-zinc-200">
                     Nombre del proyecto
                   </label>
-                  <input
+                  <Input
                     value={formState.name}
                     onChange={(event) => updateField('name', event.target.value)}
                     className={inputClassName}
@@ -303,7 +305,7 @@ export function ProjectForm({
                   <label className="mb-2 block text-sm font-medium text-zinc-200">
                     Entrega estimada
                   </label>
-                  <input
+                  <Input
                     type="date"
                     value={formState.estimatedEndDate}
                     onChange={(event) => updateField('estimatedEndDate', event.target.value)}
@@ -315,7 +317,7 @@ export function ProjectForm({
                   <label className="mb-2 block text-sm font-medium text-zinc-200">
                     Monto acordado
                   </label>
-                  <input
+                  <Input
                     inputMode="decimal"
                     value={formState.agreedAmount}
                     onChange={(event) => updateField('agreedAmount', event.target.value)}
@@ -334,7 +336,7 @@ export function ProjectForm({
                   <label className="mb-2 block text-sm font-medium text-zinc-200">
                     Monthly rate
                   </label>
-                  <input
+                  <Input
                     inputMode="decimal"
                     value={formState.monthlyRate}
                     onChange={(event) => updateField('monthlyRate', event.target.value)}
@@ -359,21 +361,20 @@ export function ProjectForm({
               ) : null}
 
               <div className="flex items-center justify-end gap-3 border-t border-white/10 pt-5">
-                <button
+                <Button
                   type="button"
                   onClick={closeModal}
-                  className="rounded-2xl border border-white/10 px-4 py-3 text-sm text-zinc-300 transition-colors hover:bg-white/5"
+                  variant="secondary"
                 >
                   Cancelar
-                </button>
-                <button
+                </Button>
+                <Button
                   type="submit"
-                  disabled={isPending}
-                  className="inline-flex items-center gap-2 rounded-2xl border border-cyan-400/20 bg-cyan-400/10 px-4 py-3 text-sm font-medium text-cyan-100 transition-colors hover:bg-cyan-400/15 disabled:cursor-not-allowed disabled:opacity-60"
+                  loading={isPending}
+                  className="border border-cyan-400/20 bg-cyan-400/10 text-cyan-100 hover:bg-cyan-400/15"
                 >
-                  {isPending ? <LoaderCircle className="h-4 w-4 animate-spin" /> : null}
                   <span>{isPending ? 'Guardando...' : isEditMode ? 'Guardar cambios' : 'Crear proyecto'}</span>
-                </button>
+                </Button>
               </div>
             </form>
           </div>

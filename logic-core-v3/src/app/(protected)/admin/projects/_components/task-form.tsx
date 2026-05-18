@@ -1,9 +1,10 @@
 'use client'
 
 import { useEffect, useMemo, useState, useTransition } from 'react'
-import { LoaderCircle, X } from 'lucide-react'
+import { X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import type { TaskStatus } from '@prisma/client'
+import { Button, Input } from '@/components/ui'
 import {
   createTask,
   updateTask,
@@ -164,13 +165,14 @@ export function TaskForm({
 
   return (
     <>
-      <button
+      <Button
         type="button"
         onClick={() => setIsOpen(true)}
-        className="inline-flex items-center rounded-2xl border border-cyan-400/20 bg-cyan-400/10 px-4 py-3 text-sm font-medium text-cyan-100 transition-colors hover:bg-cyan-400/15"
+        variant="secondary"
+        className="border-cyan-400/20 bg-cyan-400/10 text-cyan-100 hover:bg-cyan-400/15"
       >
         {triggerLabel}
-      </button>
+      </Button>
 
       {isOpen ? (
         <div className="fixed inset-0 z-[140] flex items-center justify-center bg-[#05070a]/80 p-4 backdrop-blur-md">
@@ -195,7 +197,7 @@ export function TaskForm({
             <form className="mt-6 space-y-5" onSubmit={handleSubmit}>
               <div>
                 <label className="mb-2 block text-sm font-medium text-zinc-200">Título</label>
-                <input
+                <Input
                   value={formState.title}
                   onChange={(event) => updateField('title', event.target.value)}
                   className={inputClassName}
@@ -235,7 +237,7 @@ export function TaskForm({
 
                 <div>
                   <label className="mb-2 block text-sm font-medium text-zinc-200">Horas estimadas</label>
-                  <input
+                  <Input
                     inputMode="decimal"
                     value={formState.estimatedHours}
                     onChange={(event) => updateField('estimatedHours', event.target.value)}
@@ -272,21 +274,20 @@ export function TaskForm({
               ) : null}
 
               <div className="flex items-center justify-end gap-3 border-t border-white/10 pt-5">
-                <button
+                <Button
                   type="button"
                   onClick={closeModal}
-                  className="rounded-2xl border border-white/10 px-4 py-3 text-sm text-zinc-300 transition-colors hover:bg-white/5"
+                  variant="secondary"
                 >
                   Cancelar
-                </button>
-                <button
+                </Button>
+                <Button
                   type="submit"
-                  disabled={isPending}
-                  className="inline-flex items-center gap-2 rounded-2xl border border-cyan-400/20 bg-cyan-400/10 px-4 py-3 text-sm font-medium text-cyan-100 transition-colors hover:bg-cyan-400/15 disabled:cursor-not-allowed disabled:opacity-60"
+                  loading={isPending}
+                  className="border border-cyan-400/20 bg-cyan-400/10 text-cyan-100 hover:bg-cyan-400/15"
                 >
-                  {isPending ? <LoaderCircle className="h-4 w-4 animate-spin" /> : null}
                   <span>{isPending ? 'Guardando...' : isEditMode ? 'Guardar cambios' : 'Crear tarea'}</span>
-                </button>
+                </Button>
               </div>
             </form>
           </div>

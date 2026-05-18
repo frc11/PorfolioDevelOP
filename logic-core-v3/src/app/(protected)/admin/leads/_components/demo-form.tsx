@@ -2,7 +2,8 @@
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { ExternalLink, Eye, Inbox, LoaderCircle, PlayCircle } from 'lucide-react'
+import { ExternalLink, Eye, Inbox, PlayCircle } from 'lucide-react'
+import { Button, Field, Input, Select } from '@/components/ui'
 import { EmptyState } from '@/app/(protected)/admin/_components/empty-state'
 import { createDemo, markDemoViewed } from '../_actions/demo.actions'
 
@@ -135,21 +136,21 @@ export function DemoForm({ leadId }: DemoFormProps) {
           <p className="mt-1 text-xs text-zinc-500">Asocia una demo o Loom al lead actual.</p>
         </div>
 
-        <button
+        <Button
           type="button"
           onClick={() => setIsOpen((current) => !current)}
-          className="inline-flex items-center gap-2 rounded-2xl border border-cyan-400/20 bg-cyan-400/10 px-4 py-3 text-sm font-medium text-cyan-100 transition-colors hover:bg-cyan-400/15"
+          variant="secondary"
+          loading={isPending}
+          className="border-cyan-400/20 bg-cyan-400/10 text-cyan-100 hover:bg-cyan-400/15"
         >
-          {isPending ? <LoaderCircle className="h-4 w-4 animate-spin" /> : null}
           <span>{isOpen ? 'Cerrar' : 'Agregar demo'}</span>
-        </button>
+        </Button>
       </div>
 
       {isOpen ? (
         <form onSubmit={handleSubmit} className="mt-4 space-y-4">
-          <div>
-            <label className="mb-2 block text-sm font-medium text-zinc-200">Demo URL</label>
-            <input
+          <Field label="Demo URL" required>
+            <Input
               required
               value={formState.demoUrl}
               onChange={(event) =>
@@ -158,11 +159,10 @@ export function DemoForm({ leadId }: DemoFormProps) {
               className={inputClassName}
               placeholder="https://demo..."
             />
-          </div>
+          </Field>
 
-          <div>
-            <label className="mb-2 block text-sm font-medium text-zinc-200">Loom URL</label>
-            <input
+          <Field label="Loom URL">
+            <Input
               value={formState.loomUrl}
               onChange={(event) =>
                 setFormState((current) => ({ ...current, loomUrl: event.target.value }))
@@ -170,11 +170,10 @@ export function DemoForm({ leadId }: DemoFormProps) {
               className={inputClassName}
               placeholder="https://loom.com/..."
             />
-          </div>
+          </Field>
 
-          <div>
-            <label className="mb-2 block text-sm font-medium text-zinc-200">Servicio</label>
-            <select
+          <Field label="Servicio">
+            <Select
               value={formState.serviceType}
               onChange={(event) =>
                 setFormState((current) => ({
@@ -183,18 +182,14 @@ export function DemoForm({ leadId }: DemoFormProps) {
                 }))
               }
               className={inputClassName}
-            >
-              <option value="">Seleccionar servicio</option>
-              {SERVICE_OPTIONS.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </div>
+              options={[
+                { value: '', label: 'Seleccionar servicio' },
+                ...SERVICE_OPTIONS,
+              ]}
+            />
+          </Field>
 
-          <div>
-            <label className="mb-2 block text-sm font-medium text-zinc-200">Notas</label>
+          <Field label="Notas">
             <textarea
               value={formState.notes}
               onChange={(event) =>
@@ -203,7 +198,7 @@ export function DemoForm({ leadId }: DemoFormProps) {
               className={`${inputClassName} min-h-24`}
               placeholder="Que cubre esta demo, observaciones, proximos pasos..."
             />
-          </div>
+          </Field>
 
           {error ? (
             <div className="rounded-2xl border border-rose-400/20 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
@@ -212,24 +207,23 @@ export function DemoForm({ leadId }: DemoFormProps) {
           ) : null}
 
           <div className="flex justify-end gap-3">
-            <button
+            <Button
               type="button"
               onClick={() => {
                 setIsOpen(false)
                 resetForm()
               }}
-              className="rounded-2xl border border-white/10 px-4 py-3 text-sm text-zinc-300 transition-colors hover:bg-white/5"
+              variant="secondary"
             >
               Cancelar
-            </button>
-            <button
+            </Button>
+            <Button
               type="submit"
-              disabled={isPending}
-              className="inline-flex items-center gap-2 rounded-2xl border border-cyan-400/20 bg-cyan-400/10 px-4 py-3 text-sm font-medium text-cyan-100 transition-colors hover:bg-cyan-400/15 disabled:opacity-60"
+              loading={isPending}
+              className="border border-cyan-400/20 bg-cyan-400/10 text-cyan-100 hover:bg-cyan-400/15"
             >
-              {isPending ? <LoaderCircle className="h-4 w-4 animate-spin" /> : null}
               <span>{isPending ? 'Guardando...' : 'Crear demo'}</span>
-            </button>
+            </Button>
           </div>
         </form>
       ) : null}
@@ -301,21 +295,20 @@ export function LeadDemosPanel({ leadId, demos }: LeadDemosPanelProps) {
                     Visto el {formatDate(demo.viewedAt)}
                   </span>
                 ) : (
-                  <button
+                  <Button
                     type="button"
                     disabled={demoPendingId === demo.id}
                     onClick={() => handleMarkViewed(demo.id)}
-                    className="inline-flex items-center gap-2 rounded-full border border-amber-400/20 bg-amber-500/10 px-3 py-1 text-xs font-medium text-amber-200 transition-colors hover:bg-amber-500/15 disabled:opacity-60"
+                    variant="secondary"
+                    size="sm"
+                    loading={demoPendingId === demo.id}
+                    icon={<PlayCircle className="h-3.5 w-3.5" />}
+                    className="rounded-full border-amber-400/20 bg-amber-500/10 px-3 py-1 text-amber-200 hover:bg-amber-500/15"
                   >
-                    {demoPendingId === demo.id ? (
-                      <LoaderCircle className="h-3.5 w-3.5 animate-spin" />
-                    ) : (
-                      <PlayCircle className="h-3.5 w-3.5" />
-                    )}
                     <span>
                       {demoPendingId === demo.id ? 'Guardando...' : 'Marcar como visto'}
                     </span>
-                  </button>
+                  </Button>
                 )}
               </div>
 
