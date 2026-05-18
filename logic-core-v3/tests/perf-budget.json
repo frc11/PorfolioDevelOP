@@ -1,0 +1,9 @@
+{
+  "/admin": { "warmMs": 3000, "coldMs": 5000 },
+  "/admin/clients": { "warmMs": 3000, "coldMs": 5000 },
+  "/admin/clients/[clientId]": { "warmMs": 3500, "coldMs": 6000 },
+  "/admin/clients/[orgSlug]/chatbot/overview": { "warmMs": 3500, "coldMs": 6000 },
+  "/dashboard": { "warmMs": 3000, "coldMs": 5000 },
+  "/dashboard/chatbot": { "warmMs": 3000, "coldMs": 5000 },
+  "/api/chatbot/develop/chat": { "warmMs": 13000, "coldMs": 15000 }
+}
