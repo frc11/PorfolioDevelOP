@@ -1,0 +1,501 @@
+'use client'
+
+import { useMemo, useState, useTransition } from 'react'
+import { AnimatePresence, motion } from 'motion/react'
+import { toast } from 'sonner'
+import {
+  AlignLeft,
+  AlignRight,
+  Bot,
+  Check,
+  Plus,
+  Smile,
+  Trash2,
+  type LucideIcon,
+} from 'lucide-react'
+import { Button } from '@/components/ui/Button'
+import { Card } from '@/components/ui/Card'
+import { Field } from '@/components/ui/Field'
+import { Input } from '@/components/ui/Input'
+import { Section } from '@/components/ui/Section'
+import { Eyebrow, Heading, Muted } from '@/components/ui/Typography'
+import { cn } from '@/lib/utils'
+import { updateBotAppearance } from '@/modules/chatbot/server/dashboard/updateBotAppearance'
+import {
+  CURATED_COLORS,
+  type BotPosition,
+  type ClientAvatarStyle,
+  type CuratedColor,
+  isCuratedColor,
+} from '@/modules/chatbot/shared/appearance'
+
+interface BotPersonalizationProps {
+  bot: {
+    id: string
+    accentColor: string
+    position: string
+    avatarStyle: string
+    avatarEmoji: string | null
+    botName: string
+    welcomeMessage: string
+    quickReplies: unknown
+  }
+}
+
+type BotPersonalizationState = {
+  accentColor: CuratedColor
+  position: BotPosition
+  avatarStyle: ClientAvatarStyle
+  avatarEmoji: string
+  welcomeMessage: string
+  quickReplies: string[]
+}
+
+const COLOR_LABELS: Record<CuratedColor, string> = {
+  '#06b6d4': 'Cyan develOP',
+  '#8b5cf6': 'Violeta',
+  '#10b981': 'Verde',
+  '#f59e0b': 'Ambar',
+  '#f43f5e': 'Rosa',
+  '#6366f1': 'Indigo',
+  '#0ea5e9': 'Celeste',
+  '#14b8a6': 'Turquesa',
+}
+
+function isBotPosition(value: string): value is BotPosition {
+  return value === 'bottom_right' || value === 'bottom_left'
+}
+
+function isClientAvatarStyle(value: string): value is ClientAvatarStyle {
+  return value === 'neuro' || value === 'emoji'
+}
+
+function normalizeQuickReplyTexts(value: unknown): string[] {
+  if (!Array.isArray(value)) return []
+
+  const replies: string[] = []
+
+  for (const item of value) {
+    const text =
+      typeof item === 'string'
+        ? item
+        : item && typeof item === 'object'
+          ? String(
+              (item as Record<string, unknown>).label ??
+                (item as Record<string, unknown>).promptToSend ??
+                (item as Record<string, unknown>).prompt ??
+                '',
+            )
+          : ''
+
+    const trimmed = text.trim()
+    if (trimmed) replies.push(trimmed.slice(0, 40))
+    if (replies.length >= 4) break
+  }
+
+  return replies
+}
+
+function normalizeBotState(bot: BotPersonalizationProps['bot']): BotPersonalizationState {
+  return {
+    accentColor: isCuratedColor(bot.accentColor) ? bot.accentColor : CURATED_COLORS[0],
+    position: isBotPosition(bot.position) ? bot.position : 'bottom_right',
+    avatarStyle: isClientAvatarStyle(bot.avatarStyle) ? bot.avatarStyle : 'neuro',
+    avatarEmoji: (bot.avatarEmoji ?? '').slice(0, 2),
+    welcomeMessage: bot.welcomeMessage.slice(0, 200),
+    quickReplies: normalizeQuickReplyTexts(bot.quickReplies),
+  }
+}
+
+export function BotPersonalization({ bot }: BotPersonalizationProps) {
+  const initialState = useMemo(() => normalizeBotState(bot), [bot])
+  const [state, setState] = useState<BotPersonalizationState>(initialState)
+  const [savedState, setSavedState] = useState<BotPersonalizationState>(initialState)
+  const [pending, startTransition] = useTransition()
+
+  function update<K extends keyof BotPersonalizationState>(
+    key: K,
+    value: BotPersonalizationState[K],
+  ) {
+    setState((prev) => ({ ...prev, [key]: value }))
+  }
+
+  const hasChanges = JSON.stringify(state) !== JSON.stringify(savedState)
+
+  function handleSave() {
+    startTransition(async () => {
+      const result = await updateBotAppearance({
+        accentColor: state.accentColor,
+        position: state.position,
+        avatarStyle: state.avatarStyle,
+        avatarEmoji: state.avatarEmoji,
+        welcomeMessage: state.welcomeMessage,
+        quickReplies: state.quickReplies,
+      })
+
+      if (result.ok) {
+        setSavedState(state)
+        toast.success('Cambios guardados. Tu chatbot ya se ve asi.')
+      } else {
+        toast.error(`Error: ${result.error}`)
+      }
+    })
+  }
+
+  return (
+    <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_380px]">
+      <div className="space-y-6">
+        <div>
+          <Eyebrow>Personalizacion</Eyebrow>
+          <Heading level={1}>Personalizar tu chatbot</Heading>
+          <Muted>Cambia la apariencia y los mensajes. Los cambios se aplican al guardar.</Muted>
+        </div>
+
+        <Section title="Color del bot" description="Elegi un color de la paleta curada.">
+          <Card padding="lg">
+            <div className="grid grid-cols-4 gap-3 sm:grid-cols-8">
+              {CURATED_COLORS.map((color) => {
+                const isActive = state.accentColor === color
+
+                return (
+                  <button
+                    key={color}
+                    type="button"
+                    onClick={() => update('accentColor', color)}
+                    title={COLOR_LABELS[color]}
+                    aria-label={`Color ${COLOR_LABELS[color]}`}
+                    aria-pressed={isActive}
+                    className={cn(
+                      'relative aspect-square rounded-2xl border-2 transition-transform focus:outline-none focus:ring-2 focus:ring-white/40',
+                      isActive
+                        ? 'scale-105 border-white/50'
+                        : 'border-white/10 hover:scale-[1.03] hover:border-white/25',
+                    )}
+                    style={{ backgroundColor: color }}
+                  >
+                    {isActive && (
+                      <motion.span
+                        layoutId="bot-color-check"
+                        className="absolute inset-0 flex items-center justify-center"
+                      >
+                        <Check className="h-5 w-5 text-white" strokeWidth={2.5} />
+                      </motion.span>
+                    )}
+                  </button>
+                )
+              })}
+            </div>
+
+            <p className="mt-4 text-xs text-zinc-500">
+              Color actual:{' '}
+              <span className="font-mono text-zinc-300">{state.accentColor}</span>
+              {' - '}
+              <span className="text-zinc-400">{COLOR_LABELS[state.accentColor]}</span>
+            </p>
+          </Card>
+        </Section>
+
+        <Section title="Posicion en tu sitio" description="Donde aparece el boton del chatbot.">
+          <Card padding="lg">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <OptionButton
+                label="Abajo a la izquierda"
+                icon={AlignLeft}
+                active={state.position === 'bottom_left'}
+                onClick={() => update('position', 'bottom_left')}
+              />
+              <OptionButton
+                label="Abajo a la derecha"
+                icon={AlignRight}
+                active={state.position === 'bottom_right'}
+                onClick={() => update('position', 'bottom_right')}
+              />
+            </div>
+          </Card>
+        </Section>
+
+        <Section title="Avatar" description="Elegi un estilo predefinido para el asistente.">
+          <Card padding="lg">
+            <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <OptionButton
+                label="Esfera animada"
+                icon={Bot}
+                active={state.avatarStyle === 'neuro'}
+                onClick={() => update('avatarStyle', 'neuro')}
+              />
+              <OptionButton
+                label="Emoji"
+                icon={Smile}
+                active={state.avatarStyle === 'emoji'}
+                onClick={() => update('avatarStyle', 'emoji')}
+              />
+            </div>
+
+            <AnimatePresence initial={false}>
+              {state.avatarStyle === 'emoji' && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="overflow-hidden"
+                >
+                  <Field label="Emoji" hint="Maximo 2 caracteres">
+                    <Input
+                      value={state.avatarEmoji}
+                      onChange={(event) => update('avatarEmoji', event.target.value.slice(0, 2))}
+                      placeholder="AI"
+                      maxLength={2}
+                    />
+                  </Field>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </Card>
+        </Section>
+
+        <Section title="Mensaje de bienvenida" description="Lo primero que ve el visitante.">
+          <Card padding="lg">
+            <Field label="Mensaje" hint={`${state.welcomeMessage.length}/200 caracteres`} required>
+              <textarea
+                value={state.welcomeMessage}
+                onChange={(event) =>
+                  update('welcomeMessage', event.target.value.slice(0, 200))
+                }
+                rows={3}
+                maxLength={200}
+                className="w-full resize-none rounded-xl border border-white/10 bg-white/[0.02] px-3 py-2 text-sm leading-relaxed text-zinc-200 placeholder:text-zinc-500 focus:border-cyan-400/30 focus:outline-none"
+                placeholder="Hola! Te ayudo en lo que necesites."
+              />
+            </Field>
+          </Card>
+        </Section>
+
+        <Section
+          title="Respuestas rapidas"
+          description="Hasta 4 opciones visibles para iniciar una conversacion."
+        >
+          <Card padding="lg">
+            <QuickRepliesEditor
+              quickReplies={state.quickReplies}
+              onChange={(replies) => update('quickReplies', replies)}
+            />
+          </Card>
+        </Section>
+
+        <div className="sticky bottom-4 z-10">
+          <Card padding="md" className="bg-zinc-950/90 backdrop-blur-xl">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <Muted>{hasChanges ? 'Tenes cambios sin guardar' : 'Todo guardado'}</Muted>
+              <Button onClick={handleSave} disabled={!hasChanges} loading={pending}>
+                Guardar cambios
+              </Button>
+            </div>
+          </Card>
+        </div>
+      </div>
+
+      <aside className="lg:sticky lg:top-6 lg:self-start">
+        <BotPreview state={state} botName={bot.botName} />
+      </aside>
+    </div>
+  )
+}
+
+function OptionButton({
+  label,
+  icon: Icon,
+  active,
+  onClick,
+}: {
+  label: string
+  icon: LucideIcon
+  active: boolean
+  onClick: () => void
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={active}
+      className={cn(
+        'min-h-24 rounded-2xl border p-4 text-left transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-400/30',
+        active
+          ? 'border-cyan-400/40 bg-cyan-400/10'
+          : 'border-white/10 bg-white/[0.02] hover:bg-white/[0.04]',
+      )}
+    >
+      <Icon
+        className={cn('mb-2 h-5 w-5', active ? 'text-cyan-300' : 'text-zinc-400')}
+        strokeWidth={1.5}
+      />
+      <p className={cn('text-sm', active ? 'text-cyan-300' : 'text-zinc-300')}>{label}</p>
+    </button>
+  )
+}
+
+function QuickRepliesEditor({
+  quickReplies,
+  onChange,
+}: {
+  quickReplies: string[]
+  onChange: (replies: string[]) => void
+}) {
+  const [newReply, setNewReply] = useState('')
+
+  function addReply() {
+    const trimmed = newReply.trim().slice(0, 40)
+    if (!trimmed || quickReplies.length >= 4) return
+    onChange([...quickReplies, trimmed])
+    setNewReply('')
+  }
+
+  function updateReply(index: number, value: string) {
+    onChange(quickReplies.map((reply, i) => (i === index ? value.slice(0, 40) : reply)))
+  }
+
+  function removeReply(index: number) {
+    onChange(quickReplies.filter((_, i) => i !== index))
+  }
+
+  return (
+    <div className="space-y-3">
+      {quickReplies.length > 0 && (
+        <div className="space-y-2">
+          {quickReplies.map((reply, index) => (
+            <div key={`${reply}-${index}`} className="grid grid-cols-[minmax(0,1fr)_40px] gap-2">
+              <Input
+                value={reply}
+                onChange={(event) => updateReply(index, event.target.value)}
+                maxLength={40}
+                aria-label={`Respuesta rapida ${index + 1}`}
+              />
+              <button
+                type="button"
+                onClick={() => removeReply(index)}
+                title="Eliminar"
+                aria-label="Eliminar respuesta rapida"
+                className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/[0.02] text-zinc-500 transition-colors hover:bg-red-500/10 hover:text-red-300"
+              >
+                <Trash2 className="h-4 w-4" strokeWidth={1.5} />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {quickReplies.length < 4 && (
+        <div className="flex flex-col gap-2 sm:flex-row">
+          <Input
+            value={newReply}
+            onChange={(event) => setNewReply(event.target.value.slice(0, 40))}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter') {
+                event.preventDefault()
+                addReply()
+              }
+            }}
+            placeholder="Ej: Cuanto cuesta?"
+            maxLength={40}
+          />
+          <Button
+            type="button"
+            size="sm"
+            variant="secondary"
+            onClick={addReply}
+            disabled={!newReply.trim()}
+            icon={<Plus className="h-4 w-4" strokeWidth={1.5} />}
+          >
+            Agregar
+          </Button>
+        </div>
+      )}
+
+      <p className="text-xs text-zinc-500">{quickReplies.length}/4 respuestas rapidas</p>
+    </div>
+  )
+}
+
+function BotPreview({
+  state,
+  botName,
+}: {
+  state: BotPersonalizationState
+  botName: string
+}) {
+  return (
+    <div className="overflow-hidden rounded-3xl border border-white/10 bg-white/[0.02]">
+      <div className="flex items-center justify-between border-b border-white/10 p-4">
+        <Eyebrow>Preview en vivo</Eyebrow>
+        <span className="text-xs text-zinc-500">Antes de guardar</span>
+      </div>
+
+      <div className="relative h-96 overflow-hidden bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.06),transparent_35%),linear-gradient(135deg,#09090b,#18181b_45%,#09090b)]">
+        <div
+          className={cn(
+            'absolute bottom-4 w-[min(18rem,calc(100%-2rem))]',
+            state.position === 'bottom_left' ? 'left-4' : 'right-4',
+          )}
+        >
+          <div
+            className="rounded-3xl border bg-zinc-950/90 p-4 shadow-2xl backdrop-blur"
+            style={{ borderColor: `${state.accentColor}30` }}
+          >
+            <div className="mb-4 flex items-center gap-3">
+              <div
+                className="flex h-10 w-10 items-center justify-center rounded-full text-lg"
+                style={{
+                  backgroundColor: `${state.accentColor}20`,
+                  color: state.accentColor,
+                }}
+              >
+                {state.avatarStyle === 'emoji' ? (
+                  state.avatarEmoji || 'AI'
+                ) : (
+                  <Bot className="h-5 w-5" strokeWidth={1.6} />
+                )}
+              </div>
+              <div className="min-w-0">
+                <p className="truncate text-sm font-medium text-zinc-100">{botName}</p>
+                <p className="text-xs text-emerald-400">Online</p>
+              </div>
+            </div>
+
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={state.welcomeMessage}
+                initial={{ opacity: 0, y: 4 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                className="mb-3 rounded-2xl bg-white/[0.04] p-3 text-sm leading-relaxed text-zinc-200"
+              >
+                {state.welcomeMessage || 'Mensaje de bienvenida...'}
+              </motion.div>
+            </AnimatePresence>
+
+            {state.quickReplies.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {state.quickReplies.map((reply, index) => (
+                  <button
+                    key={`${reply}-${index}`}
+                    type="button"
+                    className="max-w-full rounded-xl border px-3 py-1.5 text-left text-xs"
+                    style={{
+                      borderColor: `${state.accentColor}40`,
+                      color: state.accentColor,
+                    }}
+                  >
+                    <span className="block truncate">{reply}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <div className="border-t border-white/10 p-3 text-center">
+        <p className="text-xs text-zinc-500">Vista previa del widget en tu sitio</p>
+      </div>
+    </div>
+  )
+}
