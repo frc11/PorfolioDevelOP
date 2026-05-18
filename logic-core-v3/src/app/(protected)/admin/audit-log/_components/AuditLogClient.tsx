@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 import { Building2, ChevronDown, Clock, Filter, History, User } from 'lucide-react'
-import { EmptyState } from '@/components/ui/EmptyState'
+import { Badge, Card, EmptyState, Select } from '@/components/ui'
 
 type DiffValue = Record<string, { before: unknown; after: unknown }>
 
@@ -65,17 +65,15 @@ export function AuditLogClient({ initialEntries, stats }: AuditLogClientProps) {
 
       <div className="flex flex-wrap items-center gap-3">
         <Filter className="h-4 w-4 text-zinc-500" strokeWidth={1.5} />
-        <select
+        <Select
           value={filter}
           onChange={(event) => setFilter(event.target.value)}
-          className="rounded-xl border border-white/10 bg-white/[0.02] px-3 py-1.5 text-sm text-zinc-200 focus:border-cyan-400/30 focus:outline-none"
-        >
-          {actionTypes.map((type) => (
-            <option key={type} value={type}>
-              {type === 'all' ? 'Todas las acciones' : type}
-            </option>
-          ))}
-        </select>
+          className="w-auto py-1.5"
+          options={actionTypes.map((type) => ({
+            value: type,
+            label: type === 'all' ? 'Todas las acciones' : type,
+          }))}
+        />
         <span className="text-xs text-zinc-500">
           Mostrando {filtered.length} entries
         </span>
@@ -95,9 +93,10 @@ export function AuditLogClient({ initialEntries, stats }: AuditLogClientProps) {
             const hasDiff = Object.keys(diff).length > 0
 
             return (
-              <div
+              <Card
                 key={entry.id}
-                className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02]"
+                padding="none"
+                className="overflow-hidden"
               >
                 <button
                   type="button"
@@ -167,7 +166,7 @@ export function AuditLogClient({ initialEntries, stats }: AuditLogClientProps) {
                     </motion.div>
                   )}
                 </AnimatePresence>
-              </div>
+              </Card>
             )
           })
         )}
@@ -194,7 +193,7 @@ function StatBox({
   accent?: 'cyan'
 }) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-4">
+    <Card padding="sm">
       <p className="text-[10px] uppercase tracking-[0.24em] text-zinc-500">
         {label}
       </p>
@@ -205,7 +204,7 @@ function StatBox({
       >
         {value.toLocaleString('es-AR')}
       </p>
-    </div>
+    </Card>
   )
 }
 
@@ -225,11 +224,9 @@ function ActionBadge({ type }: { type: string }) {
     colors[type] ?? 'border-zinc-400/30 bg-zinc-500/15 text-zinc-300'
 
   return (
-    <span
-      className={`inline-flex items-center rounded-lg border px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider ${className}`}
-    >
+    <Badge variant="default" className={className}>
       {type}
-    </span>
+    </Badge>
   )
 }
 

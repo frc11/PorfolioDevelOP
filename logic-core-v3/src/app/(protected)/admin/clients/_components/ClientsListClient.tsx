@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import { motion } from 'motion/react'
 import { toast } from 'sonner'
 import { Bot, Building2, Download, Pause, Pin, PinOff, Plus, Search } from 'lucide-react'
-import { EmptyState } from '@/components/ui/EmptyState'
+import { Button, Card, EmptyState, Input, Select } from '@/components/ui'
 import { bulkExportLeads, bulkPauseBots } from '@/lib/bulk-actions'
 
 interface ClientItem {
@@ -166,41 +166,43 @@ export function ClientsListClient({ clients }: ClientsListClientProps) {
             className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500"
             strokeWidth={1.5}
           />
-          <input
+          <Input
             type="text"
             value={search}
             onChange={(event) => setSearch(event.target.value)}
             placeholder="Buscar por nombre, slug, web o WhatsApp..."
-            className="w-full rounded-2xl border border-white/10 bg-white/[0.02] py-2.5 pl-10 pr-3 text-sm text-zinc-200 placeholder:text-zinc-500 focus:border-cyan-400/30 focus:outline-none"
+            className="rounded-2xl py-2.5 pl-10"
           />
         </div>
 
-        <select
+        <Select
           value={filterBot}
           onChange={(event) =>
             setFilterBot(
               event.target.value as 'all' | 'active' | 'inactive' | 'none',
             )
           }
-          className="rounded-2xl border border-white/10 bg-white/[0.02] px-3 py-2.5 text-sm text-zinc-200 focus:border-cyan-400/30 focus:outline-none"
-        >
-          <option value="all">Todos los bots</option>
-          <option value="active">Bot activo</option>
-          <option value="inactive">Bot pausado</option>
-          <option value="none">Sin bot</option>
-        </select>
+          className="w-auto rounded-2xl py-2.5"
+          options={[
+            { value: 'all', label: 'Todos los bots' },
+            { value: 'active', label: 'Bot activo' },
+            { value: 'inactive', label: 'Bot pausado' },
+            { value: 'none', label: 'Sin bot' },
+          ]}
+        />
 
-        <select
+        <Select
           value={sortBy}
           onChange={(event) =>
             setSortBy(event.target.value as 'created' | 'name' | 'activity')
           }
-          className="rounded-2xl border border-white/10 bg-white/[0.02] px-3 py-2.5 text-sm text-zinc-200 focus:border-cyan-400/30 focus:outline-none"
-        >
-          <option value="created">Recientes primero</option>
-          <option value="name">Nombre A-Z</option>
-          <option value="activity">Mas activos</option>
-        </select>
+          className="w-auto rounded-2xl py-2.5"
+          options={[
+            { value: 'created', label: 'Recientes primero' },
+            { value: 'name', label: 'Nombre A-Z' },
+            { value: 'activity', label: 'Mas activos' },
+          ]}
+        />
 
         <Link
           href="/admin/clients/new"
@@ -245,22 +247,25 @@ export function ClientsListClient({ clients }: ClientsListClientProps) {
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
-            <button
+            <Button
               type="button"
               onClick={handleBulkExportLeads}
-              className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs text-zinc-300 hover:bg-white/[0.08]"
+              variant="secondary"
+              size="sm"
+              icon={<Download className="h-3.5 w-3.5" strokeWidth={1.5} />}
             >
-              <Download className="h-3.5 w-3.5" strokeWidth={1.5} />
               Exportar leads
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
               onClick={handleBulkPauseBots}
-              className="inline-flex items-center gap-2 rounded-xl border border-amber-400/30 bg-amber-400/20 px-3 py-1.5 text-xs text-amber-200 hover:bg-amber-400/30"
+              variant="secondary"
+              size="sm"
+              className="border-amber-400/30 bg-amber-400/20 text-amber-200 hover:bg-amber-400/30"
+              icon={<Pause className="h-3.5 w-3.5" strokeWidth={1.5} />}
             >
-              <Pause className="h-3.5 w-3.5" strokeWidth={1.5} />
               Pausar bots
-            </button>
+            </Button>
           </div>
         </motion.div>
       )}
@@ -304,8 +309,9 @@ function ClientCard({
   onToggleSelect: () => void
 }) {
   return (
-    <div
-      className={`group relative rounded-2xl border bg-white/[0.02] transition-colors hover:bg-white/[0.04] ${
+    <Card
+      padding="none"
+      className={`group relative hover:bg-white/[0.04] ${
         selected ? 'border-cyan-400/40' : 'border-white/10'
       }`}
     >
@@ -386,6 +392,6 @@ function ClientCard({
           <PinOff className="h-3.5 w-3.5 text-zinc-500" strokeWidth={1.5} />
         )}
       </button>
-    </div>
+    </Card>
   )
 }

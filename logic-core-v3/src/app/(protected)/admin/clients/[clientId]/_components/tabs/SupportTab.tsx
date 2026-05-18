@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { ExternalLink } from 'lucide-react'
 import { prisma } from '@/lib/prisma'
+import { Card } from '@/components/ui'
 
 interface SupportTabProps {
   clientId: string
@@ -28,12 +29,12 @@ export async function SupportTab({ clientId }: SupportTabProps) {
         ) : (
           <div className="space-y-2">
             {tickets.map((ticket) => (
-              <div key={ticket.id} className="rounded-xl border border-white/10 bg-white/[0.02] p-3">
+              <Card key={ticket.id} padding="sm" className="rounded-xl">
                 <p className="text-sm text-zinc-200">{ticket.title}</p>
                 <p className="mt-1 text-xs text-zinc-500">
                   Estado: {ticket.status} · {ticket.createdAt.toLocaleDateString('es-AR')}
                 </p>
-              </div>
+              </Card>
             ))}
           </div>
         )}
@@ -45,7 +46,7 @@ export async function SupportTab({ clientId }: SupportTabProps) {
         ) : (
           <div className="space-y-2">
             {recentMessages.map((message) => (
-              <div key={message.id} className="rounded-xl border border-white/10 bg-white/[0.02] p-3">
+              <Card key={message.id} padding="sm" className="rounded-xl">
                 <p className="line-clamp-2 text-sm text-zinc-200">{message.content}</p>
                 <p className="mt-1 text-xs text-zinc-500">
                   {message.createdAt.toLocaleString('es-AR', {
@@ -56,7 +57,7 @@ export async function SupportTab({ clientId }: SupportTabProps) {
                     hour12: false,
                   })}
                 </p>
-              </div>
+              </Card>
             ))}
           </div>
         )}
@@ -75,7 +76,7 @@ function SupportSection({
   children: React.ReactNode
 }) {
   return (
-    <div className="rounded-3xl border border-white/10 bg-white/[0.02] p-6">
+    <Card variant="elevated" padding="lg">
       <div className="mb-4 flex items-center justify-between">
         <h3 className="text-base font-medium text-zinc-200">{title}</h3>
         <Link
@@ -87,6 +88,6 @@ function SupportSection({
         </Link>
       </div>
       {children}
-    </div>
+    </Card>
   )
 }

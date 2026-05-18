@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { AlertTriangle, CheckCircle, ExternalLink, Eye } from 'lucide-react'
 import { toast } from 'sonner'
+import { Button, Card, EmptyState } from '@/components/ui'
 import {
   acknowledgeAlert,
   listAlerts,
@@ -62,7 +63,7 @@ export function AlertsClient({ initialAlerts }: AlertsClientProps) {
 
   return (
     <div className="space-y-6">
-      <div className="flex w-fit items-center gap-1 rounded-2xl border border-white/10 bg-white/[0.02] p-1.5">
+      <Card padding="none" className="flex w-fit items-center gap-1 p-1.5">
         {(['all', 'pending', 'acknowledged', 'resolved'] as const).map((item) => (
           <button
             key={item}
@@ -77,24 +78,20 @@ export function AlertsClient({ initialAlerts }: AlertsClientProps) {
             {item === 'all' ? 'Todas' : item === 'pending' ? 'Pendientes' : item === 'acknowledged' ? 'Vistas' : 'Resueltas'}
           </button>
         ))}
-      </div>
+      </Card>
 
       {filtered.length === 0 ? (
-        <div className="rounded-3xl border border-white/10 bg-white/[0.02] p-12 text-center">
-          <CheckCircle className="mx-auto mb-4 h-12 w-12 text-emerald-400" strokeWidth={1.5} />
-          <p className="mb-1 text-sm font-medium text-zinc-300">
-            Sin alertas {filter !== 'all' && `(${filter})`}
-          </p>
-          <p className="text-xs text-zinc-500">
-            Todo esta funcionando correctamente
-          </p>
-        </div>
+        <EmptyState
+          icon={CheckCircle}
+          title={`Sin alertas ${filter !== 'all' ? `(${filter})` : ''}`}
+          description="Todo esta funcionando correctamente"
+        />
       ) : (
         <div className="space-y-3">
           {filtered.map((alert) => (
-            <div
+            <Card
               key={alert.id}
-              className="rounded-2xl border border-white/10 bg-white/[0.02] p-5"
+              padding="md"
             >
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1">
@@ -126,26 +123,29 @@ export function AlertsClient({ initialAlerts }: AlertsClientProps) {
 
                 {alert.status === 'PENDING' && (
                   <div className="flex flex-col gap-2">
-                    <button
+                    <Button
                       type="button"
                       onClick={() => void handleAck(alert.id)}
-                      className="inline-flex items-center gap-1 rounded-xl border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs text-zinc-300 hover:bg-white/[0.08]"
+                      variant="secondary"
+                      size="sm"
+                      icon={<Eye className="h-3.5 w-3.5" strokeWidth={1.5} />}
                     >
-                      <Eye className="h-3.5 w-3.5" strokeWidth={1.5} />
                       Visto
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                       type="button"
                       onClick={() => void handleResolve(alert.id)}
-                      className="inline-flex items-center gap-1 rounded-xl bg-emerald-400/15 px-3 py-1.5 text-xs text-emerald-300 hover:bg-emerald-400/25"
+                      variant="secondary"
+                      size="sm"
+                      className="border-emerald-400/30 bg-emerald-400/15 text-emerald-300 hover:bg-emerald-400/25"
+                      icon={<CheckCircle className="h-3.5 w-3.5" strokeWidth={1.5} />}
                     >
-                      <CheckCircle className="h-3.5 w-3.5" strokeWidth={1.5} />
                       Resolver
-                    </button>
+                    </Button>
                   </div>
                 )}
               </div>
-            </div>
+            </Card>
           ))}
         </div>
       )}

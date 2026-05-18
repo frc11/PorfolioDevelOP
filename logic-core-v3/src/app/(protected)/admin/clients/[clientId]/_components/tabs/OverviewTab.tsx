@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/prisma'
-import { StatCard } from '@/components/ui'
+import { Card, StatCard } from '@/components/ui'
 
 interface OverviewTabProps {
   clientId: string
@@ -52,7 +52,7 @@ export async function OverviewTab({ clientId }: OverviewTabProps) {
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <div className="rounded-3xl border border-white/10 bg-white/[0.02] p-6">
+        <Card variant="elevated" padding="lg">
           <p className="mb-4 text-[10px] uppercase tracking-[0.24em] text-zinc-500">
             Informacion de contacto
           </p>
@@ -62,16 +62,16 @@ export async function OverviewTab({ clientId }: OverviewTabProps) {
             <InfoRow label="Website" value={client.siteUrl ?? '-'} link />
             <InfoRow label="Creado" value={client.createdAt.toLocaleDateString('es-AR')} />
           </div>
-        </div>
+        </Card>
 
-        <div className="rounded-3xl border border-white/10 bg-white/[0.02] p-6">
+        <Card variant="elevated" padding="lg">
           <p className="mb-4 text-[10px] uppercase tracking-[0.24em] text-zinc-500">
             Notas internas
           </p>
           <p className="text-sm italic text-zinc-400">
             Proximamente: notas editables del equipo develOP.
           </p>
-        </div>
+        </Card>
       </div>
     </div>
   )

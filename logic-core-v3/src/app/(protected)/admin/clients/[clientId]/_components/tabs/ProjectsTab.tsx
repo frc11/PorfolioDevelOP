@@ -1,5 +1,6 @@
 import { ProjectStatus } from '@prisma/client'
 import { prisma } from '@/lib/prisma'
+import { Card } from '@/components/ui'
 import { ProjectManager } from '@/components/admin/managers/ProjectManager'
 
 interface ProjectsTabProps {
@@ -27,13 +28,13 @@ export async function ProjectsTab({ clientId }: ProjectsTabProps) {
           Proyectos
         </p>
         {projects.length === 0 ? (
-          <div className="rounded-3xl border border-dashed border-white/10 bg-white/[0.02] p-10 text-center text-sm text-zinc-500">
+          <Card variant="dashed" padding="xl" className="text-center text-sm text-zinc-500">
             Este cliente no tiene proyectos cargados.
-          </div>
+          </Card>
         ) : (
           <div className="space-y-3">
             {projects.map((project) => (
-              <div key={project.id} className="rounded-2xl border border-white/10 bg-white/[0.02] p-4">
+              <Card key={project.id} padding="sm">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
                     <h3 className="text-sm font-medium text-zinc-100">{project.name}</h3>
@@ -49,7 +50,7 @@ export async function ProjectsTab({ clientId }: ProjectsTabProps) {
                   <span>{project.tasks.length} tareas</span>
                   <span>{project.tasks.filter((task) => task.approvalStatus === 'PENDING_APPROVAL').length} pendientes de aprobacion</span>
                 </div>
-              </div>
+              </Card>
             ))}
           </div>
         )}
@@ -62,9 +63,9 @@ export async function ProjectsTab({ clientId }: ProjectsTabProps) {
         {activeProject ? (
           <ProjectManager projectId={activeProject.id} organizationId={clientId} />
         ) : (
-          <div className="rounded-2xl border border-dashed border-red-500/20 bg-red-500/5 p-4 text-sm text-red-400">
+          <Card variant="dashed" padding="sm" className="border-red-500/20 bg-red-500/5 text-sm text-red-400">
             Se debe crear un proyecto primero.
-          </div>
+          </Card>
         )}
       </div>
     </div>
