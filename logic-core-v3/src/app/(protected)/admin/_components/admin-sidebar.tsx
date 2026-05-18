@@ -153,7 +153,7 @@ export function AdminSidebar({
                     />
                     <span>{item.label}</span>
                     {badgeValue > 0 && (
-                      <span className="ml-auto rounded-full bg-red-500/20 px-2 py-0.5 text-[10px] font-semibold text-red-200">
+                      <span className="ml-auto inline-flex min-w-[20px] items-center justify-center rounded-full border border-red-400/30 bg-red-500/20 px-1.5 py-0.5 text-[10px] font-medium text-red-300">
                         {badgeValue > 99 ? '99+' : badgeValue}
                       </span>
                     )}
