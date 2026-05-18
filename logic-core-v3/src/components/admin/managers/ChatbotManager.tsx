@@ -1,6 +1,7 @@
 'use client'
 
-import { Bot, Activity, TrendingUp } from 'lucide-react'
+import Link from 'next/link'
+import { Bot, Activity, TrendingUp, Settings, BookOpen, ArrowRight, Sparkles } from 'lucide-react'
 
 type ChatbotManagerBotConfig = {
   botName: string
@@ -22,24 +23,32 @@ type ChatbotManagerBotConfig = {
   }>
 } | null
 
-export function ChatbotManager({ botConfig }: { botConfig: ChatbotManagerBotConfig, organizationId: string }) {
+export function ChatbotManager({ botConfig, organizationId }: { botConfig: ClientData['botConfig'], organizationId: string }) {
   if (!botConfig) {
     return (
-      <div className="p-4 rounded-xl border border-dashed border-zinc-700/50 bg-zinc-800/10 text-sm text-zinc-400">
-        <div className="flex items-center gap-2 mb-2 text-zinc-300">
-          <Bot size={16} />
-          <span>Sin IA Configurada</span>
-        </div>
-        Este cliente no tiene un AI Companion activo. Puedes configurarlo desde la base de datos o el panel de creación.
+      <div className="rounded-2xl border border-dashed border-white/10 bg-white/[0.02] p-8 text-center">
+        <Bot className="h-8 w-8 text-zinc-600 mx-auto mb-3" strokeWidth={1.5} />
+        <p className="text-sm text-zinc-400 mb-1">
+          Este cliente todavía no tiene chatbot configurado
+        </p>
+        <p className="text-xs text-zinc-600 mb-4">
+          Creá uno para empezar a captar leads desde su sitio
+        </p>
+        <Link
+          href={`/admin/clients/new?prefillOrgSlug=${slug}`}
+          className="inline-flex items-center gap-2 rounded-2xl bg-cyan-400/15 px-5 py-2.5 text-sm text-cyan-300 hover:bg-cyan-400/25 transition-colors"
+        >
+          <Sparkles className="h-4 w-4" strokeWidth={1.5} />
+          Configurar chatbot
+        </Link>
       </div>
     )
   }
 
   const currentQuota = botConfig.quotaUsages?.[0] || { tokensOut: 0, costUsd: 0, conversationsCount: 0 }
-  // Assuming monthlyQuota is in "thousands" based on typical token quotas, but if it's exact, remove * 1000
-  const maxTokens = botConfig.monthlyQuota * 1000 
+  const maxTokens = botConfig.monthlyQuota * 1000
   const usagePercentage = Math.min((currentQuota.tokensOut / maxTokens) * 100, 100)
-  
+
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between p-4 rounded-xl border border-white/5 bg-white/[0.02]">
@@ -69,8 +78,8 @@ export function ChatbotManager({ botConfig }: { botConfig: ChatbotManagerBotConf
             {currentQuota.tokensOut.toLocaleString()} <span className="text-sm font-normal text-zinc-500">tokens</span>
           </div>
           <div className="w-full bg-zinc-800 rounded-full h-1.5 mt-2">
-            <div 
-              className={`h-1.5 rounded-full ${usagePercentage > 80 ? 'bg-red-500' : 'bg-cyan-500'}`} 
+            <div
+              className={`h-1.5 rounded-full ${usagePercentage > 80 ? 'bg-red-500' : 'bg-cyan-500'}`}
               style={{ width: `${usagePercentage}%` }}
             />
           </div>
@@ -101,7 +110,30 @@ export function ChatbotManager({ botConfig }: { botConfig: ChatbotManagerBotConf
         </div>
       </div>
 
-      {/* Leads list preview */}
+      <div className="mt-6 flex flex-wrap gap-3">
+        <Link
+          href={`/admin/clients/${slug}/chatbot/config`}
+          className="inline-flex items-center gap-2 rounded-2xl border border-cyan-400/20 bg-cyan-400/[0.06] px-5 py-2.5 text-sm text-cyan-300 hover:bg-cyan-400/[0.12] transition-colors"
+        >
+          <Settings className="h-4 w-4" strokeWidth={1.5} />
+          Configurar bot
+        </Link>
+        <Link
+          href={`/admin/clients/${slug}/chatbot/knowledge`}
+          className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.02] px-5 py-2.5 text-sm text-zinc-300 hover:bg-white/[0.05] transition-colors"
+        >
+          <BookOpen className="h-4 w-4" strokeWidth={1.5} />
+          Editar conocimiento
+        </Link>
+        <Link
+          href={`/admin/clients/${slug}/chatbot/overview`}
+          className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.02] px-5 py-2.5 text-sm text-zinc-300 hover:bg-white/[0.05] transition-colors ml-auto"
+        >
+          Ver detalle completo
+          <ArrowRight className="h-4 w-4" strokeWidth={1.5} />
+        </Link>
+      </div>
+
       {botConfig.leads && botConfig.leads.length > 0 && (
         <div className="mt-2 flex flex-col gap-2">
           <h4 className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Últimos Leads</h4>

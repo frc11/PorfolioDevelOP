@@ -107,7 +107,7 @@ export default async function DashboardLayout({
       }
       banners={
         <>
-          <SubscriptionBanner />
+          <SubscriptionBanner orgId={organizationId} />
           {preview && impersonation && (
             <ImpersonationBanner
               companyName={client.companyName}

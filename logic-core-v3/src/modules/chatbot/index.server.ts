@@ -87,6 +87,7 @@ export type { KnowledgeBaseInput, BotConfigInput } from './server/admin'
 
 // Admin queries (Sprint S15)
 export { getClientChatbotSession } from './server/admin/getClientSession'
+export { checkClientHasChatbot } from './server/admin/clientHasChatbot'
 export { listLeadsForBot, listConversationsForBot, getMonthlyUsageForBot } from './server/admin/queries'
 export { getBotByOrgSlug, listLeadsByOrgSlug, listConversationsByOrgSlug, getUsageByOrgSlug } from './server/admin/multiTenantQueries'
 
