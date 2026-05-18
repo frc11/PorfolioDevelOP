@@ -123,7 +123,7 @@ export function DashboardLayoutClient({
               aria-label="Abrir menú"
               className="md:hidden flex h-9 w-9 items-center justify-center rounded-lg border border-white/[0.07] bg-zinc-800/40 text-zinc-400 hover:text-zinc-200 transition-colors flex-shrink-0"
             >
-              <Menu size={18} />
+              <Menu size={18} strokeWidth={1.5} />
             </button>
 
             {/* Company avatar + name */}
@@ -161,7 +161,7 @@ export function DashboardLayoutClient({
                 className="flex h-9 w-9 items-center justify-center rounded-lg text-zinc-500 transition-all hover:text-red-400 hover:bg-red-500/10 active:scale-95"
                 style={{ border: '1px solid rgba(255,255,255,0.06)' }}
               >
-                <LogOut size={14} />
+                <LogOut size={14} strokeWidth={1.5} />
               </button>
             </form>
           </div>

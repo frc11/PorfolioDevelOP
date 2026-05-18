@@ -1,6 +1,8 @@
 import { prisma } from '@/lib/prisma'
 import { listLeadsForBot } from '@/modules/chatbot/server/admin/queries'
 import { LeadsTable } from '@/modules/chatbot/components/dashboards/LeadsTable'
+import { PageHeader } from '@/components/ui'
+import { Users } from 'lucide-react'
 
 export default async function ClientLeadsPage() {
   const bot = await prisma.botConfig.findUnique({ where: { slug: 'develop' } })
@@ -9,8 +11,13 @@ export default async function ClientLeadsPage() {
   const leads = await listLeadsForBot(bot.id)
 
   return (
-    <div className="min-h-screen text-white">
-      <h1 className="text-2xl font-light mb-6">Leads del chatbot</h1>
+    <div className="space-y-6 max-w-5xl mx-auto">
+      <PageHeader
+        eyebrow="Mi Chatbot"
+        title="Leads del chatbot"
+        description="Contactos capturados por el asistente de IA"
+        icon={Users}
+      />
       <LeadsTable leads={leads as never} />
     </div>
   )

@@ -13,7 +13,7 @@ import { PreviewBanner } from '@/components/dashboard/PreviewBanner'
 import { SessionsChart } from '@/components/dashboard/SessionsChart'
 import { InsightsBlock } from '@/components/dashboard/results/InsightsBlock'
 import { PageSpeedCard } from '@/components/dashboard/results/PageSpeedCard'
-import { LoadingState } from '@/components/ui/LoadingState'
+import { LoadingState, PageHeader } from '@/components/ui'
 import {
   AlertTriangle,
   BarChart,
@@ -58,6 +58,13 @@ export default async function AnalyticsPage({
 
   return (
     <div className="flex flex-col gap-6">
+      <PageHeader
+        eyebrow="Resultados"
+        title="Tráfico & Analytics"
+        description="Rendimiento de tu sitio en los últimos 30 días"
+        icon={TrendingUp}
+      />
+
       {isDemo && <PreviewBanner context="analytics" />}
 
       {isDemo && (

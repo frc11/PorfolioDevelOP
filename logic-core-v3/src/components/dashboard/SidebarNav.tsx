@@ -106,6 +106,7 @@ export function SidebarNav({
                 >
                   <Icon
                     size={16}
+                    strokeWidth={1.5}
                     className={isActive ? 'drop-shadow-[0_0_8px_rgba(6,182,212,0.5)]' : 'transition-colors duration-200'}
                   />
                 </motion.div>
