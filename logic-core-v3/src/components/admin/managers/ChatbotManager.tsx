@@ -23,7 +23,17 @@ type ChatbotManagerBotConfig = {
   }>
 } | null
 
-export function ChatbotManager({ botConfig, organizationId }: { botConfig: ClientData['botConfig'], organizationId: string }) {
+export function ChatbotManager({
+  botConfig,
+  organizationId,
+  organizationSlug,
+}: {
+  botConfig: ChatbotManagerBotConfig
+  organizationId: string
+  organizationSlug?: string
+}) {
+  const clientPath = organizationSlug ?? organizationId
+
   if (!botConfig) {
     return (
       <div className="rounded-2xl border border-dashed border-white/10 bg-white/[0.02] p-8 text-center">
@@ -35,7 +45,7 @@ export function ChatbotManager({ botConfig, organizationId }: { botConfig: Clien
           Creá uno para empezar a captar leads desde su sitio
         </p>
         <Link
-          href={`/admin/clients/new?prefillOrgSlug=${slug}`}
+          href={`/admin/clients/new?prefillOrgSlug=${clientPath}`}
           className="inline-flex items-center gap-2 rounded-2xl bg-cyan-400/15 px-5 py-2.5 text-sm text-cyan-300 hover:bg-cyan-400/25 transition-colors"
         >
           <Sparkles className="h-4 w-4" strokeWidth={1.5} />
@@ -112,21 +122,21 @@ export function ChatbotManager({ botConfig, organizationId }: { botConfig: Clien
 
       <div className="mt-6 flex flex-wrap gap-3">
         <Link
-          href={`/admin/clients/${slug}/chatbot/config`}
+          href={`/admin/clients/${clientPath}/chatbot/config`}
           className="inline-flex items-center gap-2 rounded-2xl border border-cyan-400/20 bg-cyan-400/[0.06] px-5 py-2.5 text-sm text-cyan-300 hover:bg-cyan-400/[0.12] transition-colors"
         >
           <Settings className="h-4 w-4" strokeWidth={1.5} />
           Configurar bot
         </Link>
         <Link
-          href={`/admin/clients/${slug}/chatbot/knowledge`}
+          href={`/admin/clients/${clientPath}/chatbot/knowledge`}
           className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.02] px-5 py-2.5 text-sm text-zinc-300 hover:bg-white/[0.05] transition-colors"
         >
           <BookOpen className="h-4 w-4" strokeWidth={1.5} />
           Editar conocimiento
         </Link>
         <Link
-          href={`/admin/clients/${slug}/chatbot/overview`}
+          href={`/admin/clients/${clientPath}/chatbot/overview`}
           className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.02] px-5 py-2.5 text-sm text-zinc-300 hover:bg-white/[0.05] transition-colors ml-auto"
         >
           Ver detalle completo

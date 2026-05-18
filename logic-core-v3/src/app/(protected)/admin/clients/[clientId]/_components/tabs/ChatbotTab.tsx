@@ -81,7 +81,7 @@ export async function ChatbotTab({ clientId }: ChatbotTabProps) {
         />
       </div>
 
-      <ChatbotManager botConfig={org.botConfig} organizationId={org.id} />
+      <ChatbotManager botConfig={org.botConfig} organizationId={org.id} organizationSlug={org.slug} />
 
       <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
         <QuickActionCard
