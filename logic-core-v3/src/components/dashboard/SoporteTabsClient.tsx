@@ -12,6 +12,7 @@ import {
   HelpCircle,
   Zap,
 } from 'lucide-react'
+import { EmptyState } from '@/components/ui'
 
 type TicketStatus = 'OPEN' | 'IN_PROGRESS' | 'RESOLVED'
 type TicketPriority = 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT'
@@ -148,10 +149,13 @@ export function SoporteTabsClient({ activeTickets, resolvedTickets }: Props) {
                     </div>
                   </div>
                 ) : (
-                  <div className="flex flex-col items-center justify-center py-14 text-center opacity-60">
-                    <Headphones size={32} className="mb-4 text-zinc-600" />
-                    <p className="text-sm text-zinc-500">No tenés tickets resueltos todavía.</p>
-                  </div>
+                  <EmptyState
+                    icon={Headphones}
+                    title="Sin tickets resueltos todavía"
+                    description="Cuando cerremos un ticket, va a aparecer acá como historial."
+                    variant="subtle"
+                    size="sm"
+                  />
                 )
               ) : (
                 <div className="divide-y divide-white/5">

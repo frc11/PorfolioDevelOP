@@ -1,75 +1,162 @@
+'use client'
+
 import Link from 'next/link'
-import { StatCard } from '@/components/ui'
+import { motion } from 'motion/react'
+import { MessageSquare, Users, DollarSign, Zap, ArrowRight } from 'lucide-react'
+import { BusinessStatCard } from './BusinessStatCard'
+import { staggerContainer, staggerItem } from '@/lib/motion-variants'
+import { useReducedMotion } from '@/lib/use-reduced-motion'
+import {
+  toBusinessMetrics,
+  formatCurrency,
+  formatConversationCount,
+  formatResponseTime,
+  generateBusinessSummary,
+} from '@/modules/chatbot/lib/business-metrics'
+import type { BotConfig, Organization, QuotaUsage, ChatbotLead } from '@prisma/client'
 
 interface ChatbotOverviewProps {
-  session: any
-  usage: any
-  recentLeads: any[]
+  session: {
+    user: { name?: string | null }
+    organization: Organization & { botConfig: BotConfig | null }
+    bot: BotConfig
+  }
+  usage: QuotaUsage | null
+  recentLeads: ChatbotLead[]
 }
 
 export function ChatbotOverview({ session, usage, recentLeads }: ChatbotOverviewProps) {
+  const reduced = useReducedMotion()
+  const metrics = toBusinessMetrics({
+    totalConversations: usage?.conversationsCount ?? 0,
+    capturedLeads: recentLeads.length,
+    leadValueUSD: 50,
+    successRate: 0.97,
+  })
+  const summary = generateBusinessSummary(metrics)
+
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard
-          label="Conversaciones este mes"
-          value={usage?.conversationsCount ?? 0}
-          color="cyan"
-        />
-        <StatCard
-          label="Leads capturados"
-          value={recentLeads.length}
-          color="emerald"
-        />
-        <StatCard
-          label="Tasa de conversión"
-          value={
-            usage && usage.conversationsCount > 0
-              ? `${((recentLeads.length / usage.conversationsCount) * 100).toFixed(1)}%`
-              : '—'
+      {/* Hero card */}
+      <div className="rounded-3xl border border-cyan-400/20 bg-gradient-to-br from-cyan-500/10 via-zinc-900 to-zinc-950 p-6 sm:p-8">
+        <div className="mb-4 flex items-center gap-3">
+          <div className="rounded-2xl bg-cyan-400/15 p-2.5">
+            <Zap className="h-5 w-5 text-cyan-300" strokeWidth={1.5} />
+          </div>
+          <span className="text-[10px] uppercase tracking-[0.24em] text-cyan-400">
+            Tu chatbot este mes
+          </span>
+        </div>
+
+        <h2 className="text-xl font-semibold text-zinc-100 sm:text-2xl">{summary}</h2>
+        <p className="mt-1 text-sm text-zinc-400">
+          {session.bot.botName} está atendiendo consultas las 24 horas.
+        </p>
+      </div>
+
+      {/* Stats */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <BusinessStatCard
+          label="Oportunidades"
+          value={metrics.leads}
+          description={
+            metrics.leads > 0
+              ? 'Personas listas para comprar'
+              : 'Cuando capturen, aparecen acá'
           }
-          color="violet"
+          icon={Users}
+          accent="violet"
+          context="este mes"
         />
-        <StatCard
-          label="Mensajes enviados"
-          value={0}
-          color="amber"
+
+        <BusinessStatCard
+          label="Valor estimado"
+          value={formatCurrency(metrics.estimatedValue)}
+          description={
+            metrics.estimatedValue > 0
+              ? 'En oportunidades capturadas'
+              : 'Crece con cada lead capturado'
+          }
+          icon={DollarSign}
+          accent="emerald"
+          context="este mes"
+        />
+
+        <BusinessStatCard
+          label="Personas atendidas"
+          value={formatConversationCount(metrics.conversations)}
+          icon={MessageSquare}
+          accent="cyan"
+          context="este mes"
+        />
+
+        <BusinessStatCard
+          label="Disponibilidad"
+          value="24/7"
+          description={`Responde en ~${formatResponseTime(metrics.avgResponseSeconds)}`}
+          icon={Zap}
+          accent="amber"
         />
       </div>
 
-      <div className="rounded-xl border border-zinc-800 bg-zinc-900/40 p-6">
-        <h2 className="text-base font-semibold text-zinc-200 mb-3">Leads recientes</h2>
+      {/* Leads recientes */}
+      <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-5">
+        <div className="mb-4 flex items-center justify-between">
+          <h3 className="text-[10px] uppercase tracking-[0.24em] text-zinc-500">
+            Leads recientes
+          </h3>
+          {recentLeads.length > 0 && (
+            <Link
+              href="/dashboard/chatbot/leads"
+              className="flex items-center gap-1 text-xs text-cyan-400 hover:text-cyan-300"
+            >
+              Ver todos
+              <ArrowRight className="h-3 w-3" strokeWidth={1.5} />
+            </Link>
+          )}
+        </div>
+
         {recentLeads.length === 0 ? (
-          <p className="text-sm text-zinc-500">
-            Sin leads capturados todavía. Cuando alguien deje sus datos, aparecerá acá.
+          <p className="py-4 text-center text-sm text-zinc-500">
+            Sin leads todavía. Cuando alguien deje sus datos, aparecerá acá.
           </p>
         ) : (
-          <ul className="space-y-3">
-            {recentLeads.map((lead: any) => (
-              <li key={lead.id} className="flex justify-between items-center text-sm">
+          <motion.ul
+            className="space-y-3"
+            variants={reduced ? undefined : staggerContainer}
+            initial={reduced ? undefined : 'hidden'}
+            animate={reduced ? undefined : 'visible'}
+          >
+            {recentLeads.map((lead) => (
+              <motion.li
+                key={lead.id}
+                variants={reduced ? undefined : staggerItem}
+                className="flex items-center justify-between rounded-xl border border-white/[0.06] bg-white/[0.015] px-4 py-3"
+              >
                 <div>
-                  <p className="text-zinc-100">{lead.name}</p>
-                  <p className="text-xs text-zinc-500">
-                    {lead.intent} · {new Date(lead.updatedAt).toLocaleDateString('es-AR')}
+                  <p className="text-sm font-medium text-zinc-200">
+                    {lead.name ?? 'Sin nombre'}
+                  </p>
+                  <p className="mt-0.5 text-xs text-zinc-500">
+                    {lead.intent ?? '—'} ·{' '}
+                    {new Date(lead.capturedAt).toLocaleDateString('es-AR')}
                   </p>
                 </div>
                 <Link
-                  href={`/dashboard/chatbot/leads`}
+                  href="/dashboard/chatbot/leads"
                   className="text-xs text-cyan-400 hover:underline"
                 >
                   Ver →
                 </Link>
-              </li>
+              </motion.li>
             ))}
-          </ul>
+          </motion.ul>
         )}
       </div>
 
-      {/* Placeholder para insights AI (se implementa en sprint futuro) */}
-      <div className="rounded-xl border border-violet-500/20 bg-violet-500/5 p-6">
-        <p className="text-xs text-violet-400 uppercase tracking-widest mb-2">
-          Insights AI
-        </p>
+      {/* Insights AI placeholder */}
+      <div className="rounded-2xl border border-violet-500/20 bg-violet-500/5 p-6">
+        <p className="mb-2 text-xs uppercase tracking-widest text-violet-400">Insights AI</p>
         <p className="text-sm text-zinc-300">
           Los insights automáticos se activarán cuando tu bot acumule más conversaciones.
         </p>

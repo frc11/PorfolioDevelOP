@@ -1,6 +1,8 @@
 'use client'
 
 import { motion } from 'motion/react'
+import { Users } from 'lucide-react'
+import { EmptyState } from '@/components/ui'
 
 interface Lead {
   id: string
@@ -33,9 +35,11 @@ function formatDate(d: Date | string): string {
 export function LeadsTable({ leads }: LeadsTableProps) {
   if (leads.length === 0) {
     return (
-      <div className="text-center py-16 text-zinc-500 text-sm">
-        Todavía no hay leads capturados por el chatbot.
-      </div>
+      <EmptyState
+        icon={Users}
+        title="Tu bot todavía no capturó leads"
+        description="Cuando alguien deje sus datos conversando con el chatbot, van a aparecer acá."
+      />
     )
   }
   return (

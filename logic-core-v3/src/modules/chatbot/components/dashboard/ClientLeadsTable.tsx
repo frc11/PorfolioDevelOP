@@ -2,88 +2,110 @@
 
 import { useState } from 'react'
 import { motion } from 'motion/react'
+import { Users } from 'lucide-react'
+import { PageHeader, EmptyState } from '@/components/ui'
+import { staggerContainer, staggerItem } from '@/lib/motion-variants'
+import { useReducedMotion } from '@/lib/use-reduced-motion'
 import { updateLeadStatus } from '@/modules/chatbot/server/admin/updateLeadStatus'
-import type { ChatbotLead } from '@prisma/client'
+import { BusinessLeadCard } from './BusinessLeadCard'
+import type { ChatbotLead, ChatbotLeadStatus } from '@prisma/client'
 
-const STATUS_COLORS = {
-  NEW: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/30',
-  CONTACTED: 'bg-amber-500/10 text-amber-400 border-amber-500/30',
-  IN_NEGOTIATION: 'bg-violet-500/10 text-violet-400 border-violet-500/30',
-  WON: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30',
-  LOST: 'bg-zinc-500/10 text-zinc-400 border-zinc-500/30',
-}
-
-const STATUS_LABELS = {
-  NEW: 'Nuevo',
+const STATUS_LABELS: Record<ChatbotLeadStatus, string> = {
+  NEW: 'Sin contactar',
   CONTACTED: 'Contactado',
   IN_NEGOTIATION: 'En negociación',
-  WON: 'Ganado',
+  WON: 'Cliente',
   LOST: 'Perdido',
 }
 
+const FILTER_ACCENT: Record<ChatbotLeadStatus | 'all', string> = {
+  all: 'border-zinc-700 bg-zinc-800 text-zinc-100',
+  NEW: 'border-amber-500/30 bg-amber-500/15 text-amber-300',
+  CONTACTED: 'border-blue-500/30 bg-blue-500/15 text-blue-300',
+  IN_NEGOTIATION: 'border-cyan-500/30 bg-cyan-500/15 text-cyan-300',
+  WON: 'border-emerald-500/30 bg-emerald-500/15 text-emerald-300',
+  LOST: 'border-zinc-500/30 bg-zinc-500/15 text-zinc-400',
+}
+
+const FILTER_INACTIVE = 'border-white/[0.06] bg-transparent text-zinc-500 hover:text-zinc-300'
+
 export function ClientLeadsTable({ leads }: { leads: ChatbotLead[] }) {
-  const [filter, setFilter] = useState<keyof typeof STATUS_COLORS | 'all'>('all')
+  const reduced = useReducedMotion()
+  const [filter, setFilter] = useState<ChatbotLeadStatus | 'all'>('all')
   const [selectedLead, setSelectedLead] = useState<ChatbotLead | null>(null)
 
   const filtered = filter === 'all' ? leads : leads.filter((l) => l.status === filter)
 
   return (
-    <div className="space-y-4">
-      {/* Filtros */}
-      <div className="flex gap-2 flex-wrap">
-        <button
-          onClick={() => setFilter('all')}
-          className={`px-3 py-1 text-xs rounded border ${filter === 'all' ? 'bg-zinc-700 text-zinc-100' : 'border-zinc-800 text-zinc-400'}`}
-        >
-          Todos ({leads.length})
-        </button>
-        {Object.entries(STATUS_LABELS).map(([key, label]) => {
-          const count = leads.filter((l) => l.status === key).length
-          return (
-            <button
-              key={key}
-              onClick={() => setFilter(key as any)}
-              className={`px-3 py-1 text-xs rounded border ${filter === key ? STATUS_COLORS[key as keyof typeof STATUS_COLORS] : 'border-zinc-800 text-zinc-400'}`}
-            >
-              {label} ({count})
-            </button>
-          )
-        })}
-      </div>
+    <div className="mx-auto max-w-5xl space-y-6">
+      <PageHeader
+        eyebrow="Mi Chatbot"
+        title="Mis leads"
+        description="Personas que charlaron con tu bot y dejaron sus datos"
+        icon={Users}
+      />
 
-      {/* Tabla */}
-      {filtered.length === 0 ? (
-        <p className="text-sm text-zinc-500 py-8 text-center">Sin leads en esta categoría.</p>
+      {leads.length === 0 ? (
+        <EmptyState
+          icon={Users}
+          title="Tu bot todavía no capturó leads"
+          description="Cuando alguien charle con tu chatbot y deje sus datos, vas a verlos acá. Compartí tu sitio para que empiecen a llegar."
+          cta={{ label: 'Ver mi chatbot', href: '/dashboard/chatbot' }}
+        />
       ) : (
-        <ul className="space-y-2">
-          {filtered.map((lead) => (
-            <li
-              key={lead.id}
-              onClick={() => setSelectedLead(lead)}
-              className="rounded-lg border border-zinc-800 bg-zinc-900/40 p-4 cursor-pointer hover:bg-zinc-900/60 transition-colors"
+        <>
+          {/* Filtros */}
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => setFilter('all')}
+              className={`min-h-[44px] rounded-xl border px-3 py-1 text-xs font-medium transition-colors ${filter === 'all' ? FILTER_ACCENT.all : FILTER_INACTIVE}`}
             >
-              <div className="flex justify-between items-start">
-                <div>
-                  <p className="font-medium text-zinc-100">{lead.name}</p>
-                  <p className="text-xs text-zinc-500 mt-1">
-                    {lead.email} · {lead.phone ?? 'Sin teléfono'}
-                  </p>
-                  <p className="text-xs text-zinc-600 mt-1">
-                    {lead.intent} · {new Date(lead.updatedAt).toLocaleDateString('es-AR')}
-                  </p>
-                </div>
-                <span
-                  className={`px-2 py-1 text-xs rounded border ${STATUS_COLORS[lead.status as keyof typeof STATUS_COLORS]}`}
+              Todos ({leads.length})
+            </button>
+            {(Object.keys(STATUS_LABELS) as ChatbotLeadStatus[]).map((key) => {
+              const count = leads.filter((l) => l.status === key).length
+              if (count === 0) return null
+              return (
+                <button
+                  key={key}
+                  onClick={() => setFilter(key)}
+                  className={`min-h-[44px] rounded-xl border px-3 py-1 text-xs font-medium transition-colors ${filter === key ? FILTER_ACCENT[key] : FILTER_INACTIVE}`}
                 >
-                  {STATUS_LABELS[lead.status as keyof typeof STATUS_LABELS]}
-                </span>
-              </div>
-            </li>
-          ))}
-        </ul>
+                  {STATUS_LABELS[key]} ({count})
+                </button>
+              )
+            })}
+          </div>
+
+          {/* Lista */}
+          {filtered.length === 0 ? (
+            <EmptyState
+              icon={Users}
+              title={`Sin leads en "${STATUS_LABELS[filter as ChatbotLeadStatus]}"`}
+              description="Cambiá el filtro para ver otros contactos."
+              variant="subtle"
+              size="sm"
+            />
+          ) : (
+            <motion.div
+              className="grid grid-cols-1 gap-4 sm:grid-cols-2"
+              variants={reduced ? undefined : staggerContainer}
+              initial={reduced ? undefined : 'hidden'}
+              animate={reduced ? undefined : 'visible'}
+            >
+              {filtered.map((lead) => (
+                <motion.div key={lead.id} variants={reduced ? undefined : staggerItem}>
+                  <BusinessLeadCard
+                    lead={lead}
+                    onClick={() => setSelectedLead(lead)}
+                  />
+                </motion.div>
+              ))}
+            </motion.div>
+          )}
+        </>
       )}
 
-      {/* Modal de detalle */}
       {selectedLead && (
         <LeadDetailModal
           lead={selectedLead}
@@ -95,14 +117,14 @@ export function ClientLeadsTable({ leads }: { leads: ChatbotLead[] }) {
 }
 
 function LeadDetailModal({ lead, onClose }: { lead: ChatbotLead; onClose: () => void }) {
-  const [status, setStatus] = useState(lead.status)
+  const [status, setStatus] = useState<ChatbotLeadStatus>(lead.status)
   const [notes, setNotes] = useState(lead.internalNotes ?? '')
   const [saving, setSaving] = useState(false)
 
   async function handleSave() {
     setSaving(true)
     try {
-      await updateLeadStatus({ leadId: lead.id, status: status as any, notes })
+      await updateLeadStatus({ leadId: lead.id, status, notes })
       onClose()
     } finally {
       setSaving(false)
@@ -113,55 +135,68 @@ function LeadDetailModal({ lead, onClose }: { lead: ChatbotLead; onClose: () => 
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4"
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 p-4 sm:items-center"
       onClick={onClose}
     >
       <motion.div
-        initial={{ scale: 0.95, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        className="bg-zinc-950 border border-zinc-800 rounded-xl p-6 max-w-lg w-full"
+        initial={{ scale: 0.97, opacity: 0, y: 8 }}
+        animate={{ scale: 1, opacity: 1, y: 0 }}
+        className="w-full max-w-lg rounded-2xl border border-white/10 bg-zinc-950 p-6"
         onClick={(e) => e.stopPropagation()}
       >
-        <h3 className="text-lg font-semibold text-zinc-100 mb-1">{lead.name}</h3>
-        <p className="text-xs text-zinc-500 mb-4">
-          {lead.email} · {lead.phone ?? 'Sin teléfono'}
+        <h3 className="text-lg font-semibold text-zinc-100">{lead.name ?? 'Sin nombre'}</h3>
+        <p className="mb-4 mt-0.5 text-xs text-zinc-500">
+          {lead.email ?? '—'} · {lead.phone ?? 'Sin teléfono'}
         </p>
 
-        <p className="text-sm text-zinc-300 mb-4 p-3 bg-zinc-900 rounded">
-          <strong>Mensaje:</strong> {lead.message}
-        </p>
+        {lead.message && (
+          <div className="mb-4 rounded-xl bg-zinc-900 p-3">
+            <p className="text-sm text-zinc-300">
+              <span className="font-medium text-zinc-400">Mensaje: </span>
+              {lead.message}
+            </p>
+          </div>
+        )}
 
         <div className="space-y-3">
           <div>
-            <label className="block text-xs text-zinc-500 mb-1">Estado</label>
+            <label className="mb-1 block text-xs text-zinc-500">Estado</label>
             <select
               value={status}
-              onChange={(e) => setStatus(e.target.value as any)}
-              className="w-full px-3 py-2 bg-zinc-900 border border-zinc-800 rounded text-zinc-100 text-sm"
+              onChange={(e) => setStatus(e.target.value as ChatbotLeadStatus)}
+              className="w-full rounded-xl border border-white/10 bg-zinc-900 px-3 py-2 text-sm text-zinc-100"
             >
-              {Object.entries(STATUS_LABELS).map(([key, label]) => (
-                <option key={key} value={key}>{label}</option>
+              {(Object.keys(STATUS_LABELS) as ChatbotLeadStatus[]).map((key) => (
+                <option key={key} value={key}>
+                  {STATUS_LABELS[key]}
+                </option>
               ))}
             </select>
           </div>
 
           <div>
-            <label className="block text-xs text-zinc-500 mb-1">Notas internas</label>
+            <label className="mb-1 block text-xs text-zinc-500">Notas internas</label>
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               rows={4}
-              className="w-full px-3 py-2 bg-zinc-900 border border-zinc-800 rounded text-zinc-100 text-sm"
+              className="w-full resize-none rounded-xl border border-white/10 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 placeholder-zinc-600"
               placeholder="Tus notas privadas sobre este lead..."
             />
           </div>
 
           <div className="flex justify-end gap-2 pt-2">
-            <button onClick={onClose} className="px-4 py-2 text-sm text-zinc-400">Cancelar</button>
+            <button
+              onClick={onClose}
+              className="min-h-[44px] rounded-xl px-4 py-2 text-sm text-zinc-400 hover:text-zinc-200"
+            >
+              Cancelar
+            </button>
             <button
               onClick={handleSave}
               disabled={saving}
-              className="px-4 py-2 bg-cyan-500 text-zinc-950 text-sm rounded font-medium disabled:opacity-40"
+              className="min-h-[44px] rounded-xl bg-cyan-500 px-4 py-2 text-sm font-medium text-zinc-950 disabled:opacity-40"
             >
               {saving ? 'Guardando...' : 'Guardar'}
             </button>

@@ -2,7 +2,8 @@ import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import { resolveOrgId } from '@/lib/preview'
 import { ProjectStatus } from '@prisma/client'
-import { MessageSquare, FolderOpen } from 'lucide-react'
+import { MessageSquare, FolderOpen, FolderKanban } from 'lucide-react'
+import { EmptyState } from '@/components/ui'
 import Link from 'next/link'
 import { FadeIn } from '@/components/dashboard/FadeIn'
 import { AnimatedProgressBar } from '@/components/dashboard/AnimatedProgressBar'
@@ -230,24 +231,12 @@ export default async function ProjectPage() {
       {/* ── 4. TASK TABS ──────────────────────────────────────────────────── */}
       <FadeIn delay={0.14}>
         {totalCount === 0 ? (
-          <div className="flex flex-col items-center gap-4 rounded-2xl border border-white/8 bg-white/[0.02] py-16 px-8 text-center">
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-white/8 bg-white/[0.03]">
-              <FolderOpen size={26} className="text-zinc-600" />
-            </div>
-            <div className="max-w-xs">
-              <p className="text-sm font-semibold text-zinc-400">Proyecto Naciente</p>
-              <p className="mt-1 text-xs text-zinc-600 leading-relaxed">
-                El equipo de develOP aún no ha asignado entregables a tu línea de tiempo. Recibirás notificaciones al iniciar la actividad.
-              </p>
-            </div>
-            <Link
-              href="/dashboard/messages?context=proyecto"
-              className="inline-flex items-center gap-2 rounded-lg border border-white/8 bg-white/[0.03] px-5 py-2.5 text-sm font-semibold text-zinc-400 transition-all hover:text-white hover:border-white/20 active:scale-95"
-            >
-              <MessageSquare size={15} />
-              Hablar con el equipo
-            </Link>
-          </div>
+          <EmptyState
+            icon={FolderKanban}
+            title="develOP está armando tu hoja de ruta"
+            description="Cuando el equipo asigne tareas y entregables a tu proyecto, los vas a ver acá. Recibís una notificación al iniciar la actividad."
+            cta={{ label: 'Hablar con el equipo', href: '/dashboard/messages?context=proyecto' }}
+          />
         ) : (
           <ProjectTaskTabs
             inProgress={serialized.inProgress}
