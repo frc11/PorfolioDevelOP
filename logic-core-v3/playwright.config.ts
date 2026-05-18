@@ -7,8 +7,15 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   workers: 1,
   reporter: process.env.CI ? 'github' : 'list',
+  expect: {
+    toHaveScreenshot: {
+      maxDiffPixels: 100,
+      threshold: 0.1,
+    },
+  },
   use: {
     baseURL: 'http://localhost:3000',
+    actionTimeout: 5000,
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
   },
