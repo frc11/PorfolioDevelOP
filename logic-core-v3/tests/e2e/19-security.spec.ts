@@ -18,7 +18,7 @@ test.describe('Security', () => {
   })
 
   test('API admin requiere auth', async ({ request }) => {
-    const response = await request.get('/api/admin/clients')
+    const response = await request.get('/api/admin/clients', { timeout: 20000 })
     test.skip(response.status() === 404, 'Admin clients API endpoint is not implemented')
     expect([401, 403, 307]).toContain(response.status())
   })

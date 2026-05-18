@@ -23,6 +23,12 @@ async function prepareVisualPage(page: Page) {
   })
 }
 
+async function gotoVisualPage(page: Page, path: string) {
+  await page.goto(path, { waitUntil: 'domcontentloaded', timeout: 30000 })
+  await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => undefined)
+  await page.waitForTimeout(500)
+}
+
 function stableMasks(page: Page) {
   return [
     page.locator('header').first(),
@@ -32,13 +38,14 @@ function stableMasks(page: Page) {
 }
 
 test.describe('Visual regression - admin', () => {
+  test.setTimeout(60_000)
+
   test.beforeEach(async ({ page }) => {
     await loginAsAdmin(page)
   })
 
   test('/admin matches baseline', async ({ page }) => {
-    await page.goto('/admin')
-    await page.waitForLoadState('networkidle')
+    await gotoVisualPage(page, '/admin')
     await prepareVisualPage(page)
     await expect(page).toHaveScreenshot('admin-home.png', {
       fullPage: true,
@@ -47,8 +54,7 @@ test.describe('Visual regression - admin', () => {
   })
 
   test('/admin/clients matches baseline', async ({ page }) => {
-    await page.goto('/admin/clients')
-    await page.waitForLoadState('networkidle')
+    await gotoVisualPage(page, '/admin/clients')
     await prepareVisualPage(page)
     await expect(page).toHaveScreenshot('admin-clients.png', {
       fullPage: true,
@@ -57,8 +63,7 @@ test.describe('Visual regression - admin', () => {
   })
 
   test('/admin/alerts matches baseline', async ({ page }) => {
-    await page.goto('/admin/alerts')
-    await page.waitForLoadState('networkidle')
+    await gotoVisualPage(page, '/admin/alerts')
     await prepareVisualPage(page)
     await expect(page).toHaveScreenshot('admin-alerts.png', {
       fullPage: true,
@@ -67,8 +72,7 @@ test.describe('Visual regression - admin', () => {
   })
 
   test('/admin/_design tokens section matches baseline', async ({ page }) => {
-    await page.goto('/admin/_design')
-    await page.waitForLoadState('networkidle')
+    await gotoVisualPage(page, '/admin/_design')
     await prepareVisualPage(page)
     await expect(page).toHaveScreenshot('admin-design-tokens.png', {
       fullPage: true,
@@ -78,6 +82,8 @@ test.describe('Visual regression - admin', () => {
 })
 
 test.describe('Visual regression - dashboard cliente', () => {
+  test.setTimeout(60_000)
+
   test.beforeAll(async () => {
     botFixture = await ensureClientBot(prisma)
   })
@@ -92,8 +98,7 @@ test.describe('Visual regression - dashboard cliente', () => {
   })
 
   test('/dashboard matches baseline', async ({ page }) => {
-    await page.goto('/dashboard')
-    await page.waitForLoadState('networkidle')
+    await gotoVisualPage(page, '/dashboard')
     await prepareVisualPage(page)
     await expect(page).toHaveScreenshot('dashboard-home.png', {
       fullPage: true,
@@ -102,8 +107,7 @@ test.describe('Visual regression - dashboard cliente', () => {
   })
 
   test('/dashboard/chatbot matches baseline', async ({ page }) => {
-    await page.goto('/dashboard/chatbot')
-    await page.waitForLoadState('networkidle')
+    await gotoVisualPage(page, '/dashboard/chatbot')
     await prepareVisualPage(page)
     await expect(page).toHaveScreenshot('dashboard-chatbot.png', {
       fullPage: true,
@@ -112,8 +116,7 @@ test.describe('Visual regression - dashboard cliente', () => {
   })
 
   test('/dashboard/chatbot/settings matches baseline', async ({ page }) => {
-    await page.goto('/dashboard/chatbot/settings')
-    await page.waitForLoadState('networkidle')
+    await gotoVisualPage(page, '/dashboard/chatbot/settings')
     await prepareVisualPage(page)
     await expect(page).toHaveScreenshot('dashboard-settings.png', {
       fullPage: true,

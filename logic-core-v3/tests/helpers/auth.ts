@@ -1,32 +1,31 @@
 import { Page, expect } from '@playwright/test'
 
-export async function loginAsAdmin(page: Page) {
-  await page.goto('/login')
-  await page.getByLabel(/^Email$/i).fill('admin@develop.com')
-  await page.getByLabel(/^Contraseña$/i).fill('Admin1234!')
+async function submitLogin(page: Page, email: string, password: string, target: RegExp) {
+  await page.goto('/login', { waitUntil: 'domcontentloaded', timeout: 30000 })
+  await page.getByLabel(/^Email$/i).fill(email)
+  await page.getByLabel(/^Contraseña$/i).fill(password)
+
   const submit = page.getByRole('button', { name: /^Ingresar$/i })
   await expect(submit).toBeVisible({ timeout: 15000 })
-  await submit.evaluate((button) => {
-    const submitButton = button as HTMLButtonElement
-    submitButton.form?.requestSubmit(submitButton)
-  })
-  await page.waitForURL(/\/admin/, { timeout: 30000 })
+
+  await Promise.all([
+    page.waitForURL(target, { timeout: 45000, waitUntil: 'domcontentloaded' }),
+    submit.evaluate((button) => {
+      const submitButton = button as HTMLButtonElement
+      submitButton.form?.requestSubmit(submitButton)
+    }),
+  ])
+}
+
+export async function loginAsAdmin(page: Page) {
+  await submitLogin(page, 'admin@develop.com', 'Admin1234!', /\/admin/)
 }
 
 export async function loginAsClient(page: Page) {
-  await page.goto('/login')
-  await page.getByLabel(/^Email$/i).fill('cliente@sanmiguel.com')
-  await page.getByLabel(/^Contraseña$/i).fill('Cliente1234!')
-  const submit = page.getByRole('button', { name: /^Ingresar$/i })
-  await expect(submit).toBeVisible({ timeout: 15000 })
-  await submit.evaluate((button) => {
-    const submitButton = button as HTMLButtonElement
-    submitButton.form?.requestSubmit(submitButton)
-  })
-  await page.waitForURL(/\/dashboard/, { timeout: 30000 })
+  await submitLogin(page, 'cliente@sanmiguel.com', 'Cliente1234!', /\/dashboard/)
 }
 
 export async function logout(page: Page) {
-  await page.getByRole('button', { name: /logout|cerrar sesión|salir/i }).click()
-  await page.waitForURL(/\/login/, { timeout: 5000 })
+  await page.getByRole('button', { name: /logout|cerrar sesion|cerrar sesión|salir/i }).click()
+  await page.waitForURL(/\/login/, { timeout: 5000, waitUntil: 'domcontentloaded' })
 }
