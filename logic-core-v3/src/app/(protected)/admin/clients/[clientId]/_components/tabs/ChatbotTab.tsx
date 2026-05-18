@@ -3,6 +3,7 @@ import { Activity, ArrowRight, BookOpen, Bot, MessageSquare, Settings, Users } f
 import { prisma } from '@/lib/prisma'
 import { Card, StatCard } from '@/components/ui'
 import { ChatbotManager } from '@/components/admin/managers/ChatbotManager'
+import { QuickActionMotion } from '../QuickActionMotion'
 
 interface ChatbotTabProps {
   clientId: string
@@ -140,27 +141,29 @@ function QuickActionCard({
   accent?: 'cyan'
 }) {
   return (
-    <Link
-      href={href}
-      className="group block"
-    >
-      <Card
-        variant="interactive"
-        className={accent === 'cyan' ? 'h-full border-cyan-400/20' : 'h-full'}
+    <QuickActionMotion>
+      <Link
+        href={href}
+        className="group block h-full"
       >
-        <div className="mb-3 flex items-start justify-between">
-          <Icon
-            className={`h-5 w-5 ${accent === 'cyan' ? 'text-cyan-400' : 'text-zinc-400'}`}
-            strokeWidth={1.5}
-          />
-          <ArrowRight
-            className="h-4 w-4 text-zinc-600 transition-colors group-hover:text-cyan-400"
-            strokeWidth={1.5}
-          />
-        </div>
-        <h3 className="mb-1 text-sm font-medium text-zinc-200">{title}</h3>
-        <p className="text-xs text-zinc-500">{description}</p>
-      </Card>
-    </Link>
+        <Card
+          variant="interactive"
+          className={accent === 'cyan' ? 'h-full border-cyan-400/20 hover:border-cyan-400/30' : 'h-full hover:border-white/20'}
+        >
+          <div className="mb-3 flex items-start justify-between">
+            <Icon
+              className={`h-5 w-5 ${accent === 'cyan' ? 'text-cyan-400' : 'text-zinc-400'}`}
+              strokeWidth={1.5}
+            />
+            <ArrowRight
+              className="h-4 w-4 text-zinc-600 transition-colors group-hover:text-cyan-400"
+              strokeWidth={1.5}
+            />
+          </div>
+          <h3 className="mb-1 text-sm font-medium text-zinc-200">{title}</h3>
+          <p className="text-xs text-zinc-500">{description}</p>
+        </Card>
+      </Link>
+    </QuickActionMotion>
   )
 }

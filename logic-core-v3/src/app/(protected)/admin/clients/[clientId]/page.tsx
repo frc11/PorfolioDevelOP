@@ -4,6 +4,7 @@ import { auth } from '@/auth'
 import { prisma } from '@/lib/prisma'
 import { ClientHeader } from './_components/ClientHeader'
 import { ClientTabsNav } from './_components/ClientTabsNav'
+import { TabContentTransition } from './_components/TabContentTransition'
 import { TabSkeleton } from './_components/TabSkeleton'
 import { ChatbotTab } from './_components/tabs/ChatbotTab'
 import { OverviewTab } from './_components/tabs/OverviewTab'
@@ -81,13 +82,15 @@ export default async function ClientDetailPage({
       />
       <ClientTabsNav clientId={client.id} activeTab={activeTab} />
 
-      <Suspense fallback={<TabSkeleton />}>
-        {activeTab === 'overview' && <OverviewTab clientId={client.id} />}
-        {activeTab === 'chatbot' && <ChatbotTab clientId={client.id} />}
-        {activeTab === 'projects' && <ProjectsTab clientId={client.id} />}
-        {activeTab === 'vault' && <VaultTab clientId={client.id} />}
-        {activeTab === 'support' && <SupportTab clientId={client.id} />}
-      </Suspense>
+      <TabContentTransition activeTab={activeTab}>
+        <Suspense fallback={<TabSkeleton />}>
+          {activeTab === 'overview' && <OverviewTab clientId={client.id} />}
+          {activeTab === 'chatbot' && <ChatbotTab clientId={client.id} />}
+          {activeTab === 'projects' && <ProjectsTab clientId={client.id} />}
+          {activeTab === 'vault' && <VaultTab clientId={client.id} />}
+          {activeTab === 'support' && <SupportTab clientId={client.id} />}
+        </Suspense>
+      </TabContentTransition>
     </div>
   )
 }

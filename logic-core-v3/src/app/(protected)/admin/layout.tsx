@@ -3,6 +3,7 @@ import { unstable_noStore as noStore } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import { AdminLayoutClient } from './_components/AdminLayoutClient'
+import { PageTransition } from './_components/PageTransition'
 
 export const dynamic = 'force-dynamic'
 
@@ -34,7 +35,7 @@ export default async function AgencyOsLayout({
       userRole={session.user.role}
       pendingAlerts={pendingAlerts}
     >
-      {children}
+      <PageTransition>{children}</PageTransition>
     </AdminLayoutClient>
   )
 }

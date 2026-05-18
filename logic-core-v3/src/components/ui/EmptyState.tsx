@@ -6,6 +6,7 @@ import type { ReactNode } from 'react'
 import Link from 'next/link'
 import { Button } from './Button'
 import { cn } from '@/lib/utils'
+import { useReducedMotion } from '@/lib/use-reduced-motion'
 
 interface EmptyStateProps {
   icon: LucideIcon
@@ -38,12 +39,13 @@ export function EmptyState({
   size = 'md',
   variant = 'default',
 }: EmptyStateProps) {
+  const reduced = useReducedMotion()
   const sizes = SIZE_STYLES[size]
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
+      initial={reduced ? false : { opacity: 0, y: 12 }}
+      animate={reduced ? undefined : { opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
       className={cn(
         'flex flex-col items-center justify-center text-center',
@@ -55,11 +57,7 @@ export function EmptyState({
       )}
     >
       <div className="relative mb-4">
-        <motion.div
-          className="absolute inset-0 rounded-full bg-cyan-500/[0.08]"
-          animate={{ scale: [1, 1.6, 1], opacity: [0.5, 0, 0.5] }}
-          transition={{ duration: 3, repeat: Infinity, ease: 'easeOut' }}
-        />
+        <div className="absolute inset-0 rounded-full bg-cyan-500/[0.08]" />
         <div className="relative flex h-12 w-12 items-center justify-center rounded-2xl border border-white/[0.08] bg-white/[0.04] text-zinc-500">
           <Icon size={sizes.iconSize / 2} strokeWidth={1.5} />
         </div>

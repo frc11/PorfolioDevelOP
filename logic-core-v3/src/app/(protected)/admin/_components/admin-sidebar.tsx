@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { motion } from 'motion/react'
 import {
   Building2,
   FolderKanban,
@@ -18,6 +19,7 @@ import {
   AlertTriangle,
   Palette,
 } from 'lucide-react'
+import { useReducedMotion } from '@/lib/use-reduced-motion'
 
 type AdminSidebarProps = {
   userName: string
@@ -81,6 +83,7 @@ export function AdminSidebar({
   onNavigate,
 }: AdminSidebarProps) {
   const pathname = usePathname()
+  const reduced = useReducedMotion()
   const badges = { pendingAlerts }
 
   return (
@@ -88,9 +91,13 @@ export function AdminSidebar({
       <div className="border-b border-white/10 px-5 py-5">
         <Link href="/admin" className="group block">
           <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-cyan-400/25 bg-cyan-400/10 text-sm font-semibold tracking-[0.16em] text-cyan-200 shadow-[0_0_28px_rgba(6,182,212,0.18)]">
+            <motion.div
+              whileHover={reduced ? undefined : { rotate: 5 }}
+              transition={{ duration: 0.3 }}
+              className="flex h-11 w-11 items-center justify-center rounded-2xl border border-cyan-400/25 bg-cyan-400/10 text-sm font-semibold tracking-[0.16em] text-cyan-200 shadow-[0_0_28px_rgba(6,182,212,0.18)]"
+            >
               dO
-            </div>
+            </motion.div>
             <div className="min-w-0">
               <p className="truncate text-base font-semibold tracking-tight text-white">develOP</p>
               <p className="text-[10px] uppercase tracking-[0.28em] text-zinc-500">Agency OS</p>
@@ -124,13 +131,26 @@ export function AdminSidebar({
                     href={item.href}
                     onClick={onNavigate}
                     className={[
-                      'flex items-center gap-3 rounded-r-2xl border-l-2 px-4 py-3 text-sm transition-all duration-200',
+                      'group relative flex items-center gap-3 rounded-r-2xl border-l-2 px-4 py-3 text-sm transition-colors duration-200 motion-reduce:transition-none',
                       isActive
                         ? 'border-cyan-400 bg-cyan-400/10 text-cyan-100'
                         : 'border-transparent text-zinc-400 hover:bg-white/[0.04] hover:text-zinc-100',
                     ].join(' ')}
                   >
-                    <Icon className="h-4 w-4 shrink-0" />
+                    <span
+                      aria-hidden="true"
+                      className={[
+                        'absolute left-1.5 h-1.5 w-1.5 rounded-full bg-cyan-300 transition-opacity motion-reduce:transition-none',
+                        isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-60',
+                      ].join(' ')}
+                    />
+                    <Icon
+                      className={[
+                        'h-4 w-4 shrink-0 transition-transform motion-reduce:transition-none',
+                        reduced ? '' : 'group-hover:scale-110',
+                      ].join(' ')}
+                      strokeWidth={1.5}
+                    />
                     <span>{item.label}</span>
                     {badgeValue > 0 && (
                       <span className="ml-auto rounded-full bg-red-500/20 px-2 py-0.5 text-[10px] font-semibold text-red-200">

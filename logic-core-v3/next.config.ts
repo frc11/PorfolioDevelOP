@@ -125,6 +125,5 @@ export default withSentryConfig(nextConfig, {
   project: "logic-core-v3",
   silent: !process.env.CI,
   widenClientFileUpload: true,
-  reactComponentAnnotation: { enabled: true },
   tunnelRoute: "/monitoring",
 });

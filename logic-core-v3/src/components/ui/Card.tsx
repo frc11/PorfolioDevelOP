@@ -50,6 +50,7 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(
         ref={ref}
         className={cn(
           'relative transition-all duration-300',
+          'motion-reduce:transition-none',
           VARIANT_STYLES[variant],
           PADDING_STYLES[padding],
           glow &&
