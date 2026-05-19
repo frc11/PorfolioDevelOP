@@ -22,7 +22,7 @@ function getLegacyAdminRedirectPath(pathname: string): string | null {
     return null
   }
 
-  if (pathname === ADMIN_PATH || pathname === '/admin/agency-dashboard') {
+  if (pathname === ADMIN_PATH) {
     return ADMIN_OS_PATH
   }
 

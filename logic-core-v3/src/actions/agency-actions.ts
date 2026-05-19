@@ -7,46 +7,6 @@ import { AssetType } from '@prisma/client'
 import { sendEmail } from '@/lib/email'
 import { ActionRequiredEmail } from '@/emails/ActionRequiredEmail'
 
-export async function getAgencyClients() {
-  const session = await auth()
-  if (session?.user?.role !== 'SUPER_ADMIN') {
-    throw new Error('Unauthorized')
-  }
-
-  const clients = await prisma.organization.findMany({
-    include: {
-      projects: {
-        where: { status: 'IN_PROGRESS' },
-        include: {
-          tasks: {
-            where: { approvalStatus: 'PENDING_APPROVAL' }
-          }
-        }
-      },
-      clientAssets: {
-        orderBy: { createdAt: 'desc' }
-      },
-      botConfig: {
-        include: {
-          quotaUsages: {
-            where: {
-              year: new Date().getFullYear(),
-              month: new Date().getMonth() + 1
-            }
-          },
-          leads: {
-            orderBy: { capturedAt: 'desc' },
-            take: 5
-          }
-        }
-      }
-    },
-    orderBy: { createdAt: 'desc' }
-  })
-
-  return clients
-}
-
 export async function createTaskForClientAction(
   projectId: string,
   organizationId: string,
@@ -110,7 +70,7 @@ export async function createTaskForClientAction(
     }
   }
 
-  revalidatePath('/admin/agency-dashboard')
+  revalidatePath('/admin/clients')
   return { success: true }
 }
 
@@ -133,6 +93,6 @@ export async function createClientAssetAction(
     }
   })
 
-  revalidatePath('/admin/agency-dashboard')
+  revalidatePath('/admin/clients')
   return { success: true }
 }
