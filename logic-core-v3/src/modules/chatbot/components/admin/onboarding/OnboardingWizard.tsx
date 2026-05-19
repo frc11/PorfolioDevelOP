@@ -34,6 +34,9 @@ const INITIAL_STATE: OnboardingState = {
   position: 'bottom_right',
   quickReplies: [],
   whatsappNumber: null,
+  userEmail: '',
+  userName: '',
+  userPhone: '',
 }
 
 export function OnboardingWizard() {

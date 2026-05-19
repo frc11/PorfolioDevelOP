@@ -2,7 +2,8 @@
   "name": "logic-core-v3",
   "version": "0.1.0",
   "private": true,
-  "scripts": { "check-env": "node scripts/check-env.js",
+  "scripts": {
+    "check-env": "node scripts/check-env.js",
     "dev": "next dev --webpack",
     "build": "next build --webpack",
     "start": "next start",
@@ -20,6 +21,7 @@
     "@ai-sdk/react": "^3.0.184",
     "@anthropic-ai/sdk": "^0.95.2",
     "@auth/prisma-adapter": "^2.11.1",
+    "@getbrevo/brevo": "^5.0.4",
     "@google-analytics/data": "^5.2.1",
     "@hookform/resolvers": "^5.2.2",
     "@next/swc-win32-x64-msvc": "^16.2.6",

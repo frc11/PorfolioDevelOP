@@ -1,16 +1,26 @@
 'use client'
 
 import { useState } from 'react'
-import { CheckCircle2 } from 'lucide-react'
+import { CheckCircle2, Copy, Check, Mail, AlertTriangle } from 'lucide-react'
 import type { OnboardingState } from './types'
 import { createClientWithBot } from '../../../server/admin/createClientWithBot'
 import { INDUSTRIES_LABELS } from './industries'
 import { slugify } from '@/lib/slugify'
+import { useTransitionContext } from '@/context/TransitionContext'
 
 interface Step5Props {
   state: OnboardingState
   onBack?: () => void
   onCreated: () => void
+}
+
+interface CreatedResult {
+  tempPassword: string
+  orgSlug: string
+  userName: string
+  userEmail: string
+  orgName: string
+  emailSent: boolean
 }
 
 const TONE_LABELS: Record<OnboardingState['tone'], string> = {
@@ -42,27 +52,107 @@ const KB_SECTIONS = [
 ]
 
 export function Step5Review({ state, onBack, onCreated }: Step5Props) {
+  const { triggerTransition } = useTransitionContext()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [created, setCreated] = useState<CreatedResult | null>(null)
+  const [copied, setCopied] = useState(false)
 
   const handleSubmit = async () => {
     setIsSubmitting(true)
     setError(null)
     try {
-      onCreated() // Clear draft before redirect
-      await createClientWithBot({
+      const result = await createClientWithBot({
         ...state,
         position: state.position as 'bottom_right' | 'bottom_left',
       })
-      // redirect() is called inside createClientWithBot on success
+      onCreated()
+      setCreated({
+        tempPassword: result.tempPassword,
+        orgSlug: result.orgSlug,
+        userName: result.userName,
+        userEmail: result.userEmail,
+        orgName: result.orgName,
+        emailSent: result.emailSent,
+      })
     } catch (err) {
-      // redirect() throws a NEXT_REDIRECT error — don't catch that
-      if (err instanceof Error && err.message.includes('NEXT_REDIRECT')) {
-        return
-      }
       setError(err instanceof Error ? err.message : 'Error al crear el cliente y bot.')
       setIsSubmitting(false)
     }
+  }
+
+  const handleCopy = async () => {
+    if (!created) return
+    await navigator.clipboard.writeText(created.tempPassword)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
+  if (created) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center gap-3">
+          <CheckCircle2 className="h-7 w-7 text-emerald-400 shrink-0" strokeWidth={1.5} />
+          <div>
+            <h2 className="text-xl font-semibold text-zinc-100">Cliente creado: {created.userName}</h2>
+            <p className="text-sm text-zinc-400">
+              {created.orgName} · {created.userEmail} · bot: {created.orgSlug}
+            </p>
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-amber-400/20 bg-amber-500/5 p-5 space-y-4">
+          <div>
+            <p className="text-xs text-zinc-500 uppercase tracking-widest mb-3">
+              Password temporal — cópiala ahora, no se vuelve a mostrar
+            </p>
+            <div className="flex items-center gap-3">
+              <div className="flex-1 rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 font-mono text-lg text-zinc-100 tracking-widest">
+                {created.tempPassword}
+              </div>
+              <button
+                onClick={handleCopy}
+                className="flex items-center gap-2 rounded-xl border border-zinc-700 bg-zinc-800 px-4 py-3 text-sm text-zinc-300 hover:bg-zinc-700 transition-colors"
+              >
+                {copied ? (
+                  <>
+                    <Check className="h-4 w-4 text-emerald-400" strokeWidth={1.5} />
+                    Copiado
+                  </>
+                ) : (
+                  <>
+                    <Copy className="h-4 w-4" strokeWidth={1.5} />
+                    Copiar
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+          <p className="text-xs text-amber-300/70">
+            El cliente va a tener que cambiarla al primer login.
+          </p>
+        </div>
+
+        {created.emailSent ? (
+          <div className="flex items-center gap-2 rounded-2xl border border-emerald-400/20 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">
+            <Mail className="h-4 w-4 shrink-0" strokeWidth={1.5} />
+            <span>Email con credenciales enviado a {created.userEmail}</span>
+          </div>
+        ) : (
+          <div className="flex items-start gap-2 rounded-2xl border border-amber-400/20 bg-amber-500/10 px-4 py-3 text-sm text-amber-200">
+            <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" strokeWidth={1.5} />
+            <span>El email no pudo enviarse — copiá las credenciales y mandáselas manualmente al cliente.</span>
+          </div>
+        )}
+
+        <button
+          onClick={() => triggerTransition(`/admin/clients/${created.orgSlug}/chatbot/overview`)}
+          className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-cyan-400 px-6 py-3 text-sm font-medium text-zinc-950 hover:bg-cyan-300 transition-colors"
+        >
+          Ir al panel del cliente →
+        </button>
+      </div>
+    )
   }
 
   const derivedSlug = slugify(state.orgName)
@@ -87,6 +177,12 @@ export function Step5Review({ state, onBack, onCreated }: Step5Props) {
           <ReviewRow label="Slug del bot" value={derivedSlug} mono />
         </ReviewSection>
 
+        <ReviewSection title="Usuario administrador">
+          <ReviewRow label="Nombre" value={state.userName || '—'} />
+          <ReviewRow label="Email" value={state.userEmail || '—'} />
+          <ReviewRow label="Teléfono" value={state.userPhone || '—'} />
+        </ReviewSection>
+
         <ReviewSection title="Identidad del bot">
           <ReviewRow label="Nombre" value={state.botName} />
           <ReviewRow label="Tono" value={TONE_LABELS[state.tone]} />
@@ -106,18 +202,18 @@ export function Step5Review({ state, onBack, onCreated }: Step5Props) {
           <ReviewRow label="Posición" value={POSITION_LABELS[state.position]} />
         </ReviewSection>
 
-        <ReviewSection title="Mensaje de bienvenida" full>
-          <p className="text-sm text-zinc-300 leading-relaxed bg-white/[0.02] rounded-xl p-4 border border-white/5">
-            {state.welcomeMessage}
-          </p>
-        </ReviewSection>
-
         <ReviewSection title="WhatsApp" full={false}>
           <ReviewRow label="Número" value={state.whatsappNumber || '—'} mono />
           <ReviewRow
             label="Quick replies"
             value={state.quickReplies.length > 0 ? `${state.quickReplies.length} configurados` : '—'}
           />
+        </ReviewSection>
+
+        <ReviewSection title="Mensaje de bienvenida" full>
+          <p className="text-sm text-zinc-300 leading-relaxed bg-white/[0.02] rounded-xl p-4 border border-white/5">
+            {state.welcomeMessage}
+          </p>
         </ReviewSection>
 
         <ReviewSection title="Knowledge Base" full>

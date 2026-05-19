@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma'
 import { Card, StatCard } from '@/components/ui'
+import { ResendCredentialsButton } from '../ResendCredentialsButton'
 
 interface OverviewTabProps {
   clientId: string
@@ -14,7 +15,7 @@ export async function OverviewTab({ clientId }: OverviewTabProps) {
         orderBy: { joinedAt: 'asc' },
         take: 1,
         include: {
-          user: { select: { name: true, email: true } },
+          user: { select: { id: true, name: true, email: true } },
         },
       },
       services: true,
@@ -62,6 +63,14 @@ export async function OverviewTab({ clientId }: OverviewTabProps) {
             <InfoRow label="Website" value={client.siteUrl ?? '-'} link />
             <InfoRow label="Creado" value={client.createdAt.toLocaleDateString('es-AR')} />
           </div>
+          {primaryMember?.user.id && primaryMember.user.email && (
+            <div className="mt-4 pt-4 border-t border-white/5">
+              <ResendCredentialsButton
+                userId={primaryMember.user.id}
+                userEmail={primaryMember.user.email}
+              />
+            </div>
+          )}
         </Card>
 
         <Card variant="elevated" padding="lg">

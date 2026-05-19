@@ -33,6 +33,11 @@ export interface OnboardingState {
   position: 'bottom_right' | 'bottom_left'
   quickReplies: QuickReply[]
   whatsappNumber: string | null
+
+  // Usuario administrador del cliente
+  userEmail: string
+  userName: string
+  userPhone: string
 }
 
 export interface StepProps {

@@ -12,6 +12,7 @@ datasource db {
 enum Role {
   SUPER_ADMIN
   ORG_MEMBER
+  CLIENT
 }
 
 enum OrgRole {
@@ -161,6 +162,8 @@ enum AuditActionType {
   USER_INVITED
   USER_REMOVED
   SUBSCRIPTION_CHANGED
+  EMAIL_SENT
+  CREDENTIALS_RESENT
   OTHER
 }
 
@@ -225,12 +228,14 @@ model User {
   email              String    @unique
   emailVerified      DateTime?
   image              String?
-  password           String?
-  role               Role      @default(ORG_MEMBER)
-  unlockedFeatures   String[]  @default([])
-  createdAt          DateTime  @default(now())
-  updatedAt          DateTime  @updatedAt
-  lastDashboardVisit DateTime?
+  password              String?
+  passwordResetRequired Boolean   @default(false)
+  phone                 String?
+  role                  Role      @default(ORG_MEMBER)
+  unlockedFeatures      String[]  @default([])
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  lastDashboardVisit    DateTime?
 
   accounts        Account[]
   sessions        Session[]

@@ -5,8 +5,17 @@ import type { Industry } from '../../../server/admin/createClientWithBot'
 import { INDUSTRIES_LABELS } from './industries'
 import { slugify } from '@/lib/slugify'
 
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
 export function Step1Company({ state, update, onNext }: StepProps) {
-  const canContinue = state.orgName.length >= 2 && state.city.length >= 2
+  const emailValid = EMAIL_RE.test(state.userEmail)
+  const emailTouched = state.userEmail.length > 0
+
+  const canContinue =
+    state.orgName.length >= 2 &&
+    state.city.length >= 2 &&
+    emailValid &&
+    state.userName.length >= 2
 
   const handleOrgNameChange = (value: string) => {
     update({ orgName: value })
@@ -68,6 +77,53 @@ export function Step1Company({ state, update, onNext }: StepProps) {
           className="w-full px-3 py-2 bg-zinc-900 border border-zinc-800 rounded text-zinc-100"
           placeholder="https://..."
         />
+      </div>
+
+      <div className="pt-4 border-t border-zinc-800">
+        <p className="text-xs text-zinc-500 uppercase tracking-widest mb-4">Usuario administrador</p>
+
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm text-zinc-400 mb-1">Nombre completo del cliente</label>
+            <input
+              type="text"
+              value={state.userName}
+              onChange={(e) => update({ userName: e.target.value })}
+              className="w-full px-3 py-2 bg-zinc-900 border border-zinc-800 rounded text-zinc-100"
+              placeholder="Ej: Lucía Pereyra"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm text-zinc-400 mb-1">Email del cliente</label>
+            <input
+              type="email"
+              value={state.userEmail}
+              onChange={(e) => update({ userEmail: e.target.value })}
+              className={`w-full px-3 py-2 bg-zinc-900 border rounded text-zinc-100 ${
+                emailTouched && !emailValid ? 'border-red-500/60' : 'border-zinc-800'
+              }`}
+              placeholder="cliente@empresa.com"
+            />
+            {emailTouched && !emailValid && (
+              <p className="text-xs text-red-400 mt-1">Email inválido</p>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-sm text-zinc-400 mb-1">
+              Teléfono de contacto{' '}
+              <span className="text-zinc-600">(opcional)</span>
+            </label>
+            <input
+              type="tel"
+              value={state.userPhone}
+              onChange={(e) => update({ userPhone: e.target.value })}
+              className="w-full px-3 py-2 bg-zinc-900 border border-zinc-800 rounded text-zinc-100"
+              placeholder="+54 9 11 1234-5678"
+            />
+          </div>
+        </div>
       </div>
 
       <div className="flex justify-end pt-4">

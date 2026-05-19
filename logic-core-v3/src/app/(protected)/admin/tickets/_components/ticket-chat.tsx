@@ -33,7 +33,7 @@ type TicketChatProps = {
       isAdmin: boolean
       user: {
         name: string | null
-        role: 'SUPER_ADMIN' | 'ORG_MEMBER'
+        role: 'SUPER_ADMIN' | 'ORG_MEMBER' | 'CLIENT'
       }
     }>
   }

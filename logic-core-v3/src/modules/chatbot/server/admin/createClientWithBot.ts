@@ -1,10 +1,13 @@
 'use server'
 
 import { z } from 'zod'
+import bcrypt from 'bcryptjs'
 import { prisma } from '@/lib/prisma'
-import { redirect } from 'next/navigation'
 import { logAdminAction } from '@/lib/audit-log'
 import { requireSuperAdmin } from './requireSuperAdmin'
+import { generateTempPassword } from '@/lib/security/generate-temp-password'
+import { sendTransactionalEmail } from '@/lib/email/brevo-service'
+import { welcomeClientEmail } from '@/lib/email/templates/welcome-client'
 
 const INDUSTRIES = [
   'legal', 'contable', 'medico_odontologico', 'gimnasio', 'restaurant',
@@ -20,12 +23,17 @@ const CreateClientInputSchema = z.object({
   city: z.string().min(2).max(60),
   websiteUrl: z.string().url().nullable(),
 
+  // Paso 1: Usuario administrador
+  userEmail: z.string().email(),
+  userName: z.string().min(2).max(100),
+  userPhone: z.string().optional().nullable(),
+
   // Paso 2: Bot identidad
   botName: z.string().min(2).max(60),
   welcomeMessage: z.string().min(10).max(500),
   tone: z.enum(['informal_rioplatense', 'formal', 'neutral']),
 
-  // Paso 3: KB (en parte 1 usamos placeholders, en parte 2 vendrán de templates)
+  // Paso 3: KB
   businessInfo: z.string().min(20),
   servicesOrProducts: z.string().min(20),
   faq: z.string().min(10),
@@ -52,7 +60,7 @@ function slugify(s: string): string {
   return s
     .toLowerCase()
     .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[̀-ͯ]/g, '')
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '')
     .slice(0, 50)
@@ -70,13 +78,15 @@ async function findUniqueSlug(base: string): Promise<string> {
 }
 
 export async function createClientWithBot(input: z.infer<typeof CreateClientInputSchema>) {
-  const user = await requireSuperAdmin()
+  const admin = await requireSuperAdmin()
   const parsed = CreateClientInputSchema.parse(input)
 
   const baseSlug = slugify(parsed.orgName)
   const uniqueSlug = await findUniqueSlug(baseSlug)
 
-  // Transacción: crear todo en un solo commit
+  const tempPassword = generateTempPassword()
+  const passwordHash = await bcrypt.hash(tempPassword, 10)
+
   const created = await prisma.$transaction(async (tx) => {
     const org = await tx.organization.create({
       data: {
@@ -86,10 +96,30 @@ export async function createClientWithBot(input: z.infer<typeof CreateClientInpu
       },
     })
 
+    const clientUser = await tx.user.create({
+      data: {
+        email: parsed.userEmail,
+        name: parsed.userName,
+        phone: parsed.userPhone ?? null,
+        role: 'CLIENT',
+        password: passwordHash,
+        passwordResetRequired: true,
+        emailVerified: null,
+      },
+    })
+
+    await tx.orgMember.create({
+      data: {
+        organizationId: org.id,
+        userId: clientUser.id,
+        role: 'ADMIN',
+      },
+    })
+
     const bot = await tx.botConfig.create({
       data: {
         organizationId: org.id,
-        slug: uniqueSlug,  // mismo slug para el bot
+        slug: uniqueSlug,
         botName: parsed.botName,
         welcomeMessage: parsed.welcomeMessage,
         isActive: true,
@@ -105,7 +135,7 @@ export async function createClientWithBot(input: z.infer<typeof CreateClientInpu
         bubbleStyle: 'rounded',
         intensityLevel: 'medium',
         tone: parsed.tone,
-        quickReplies: parsed.quickReplies as unknown as object, // Prisma JSON compatibility
+        quickReplies: parsed.quickReplies as unknown as object,
         proactivePrompts: {
           default: ['¿En qué puedo ayudarte?'],
         },
@@ -132,23 +162,71 @@ export async function createClientWithBot(input: z.infer<typeof CreateClientInpu
       },
     })
 
-    return { org, bot }
-  })
+    return { org, bot, clientUser }
+  }, { timeout: 30000 })
 
   await logAdminAction({
-    userId: user.id ?? 'unknown',
-    userEmail: user.email,
-    userName: user.name,
+    userId: admin.id ?? 'unknown',
+    userEmail: admin.email,
+    userName: admin.name,
     actionType: 'CLIENT_CREATED',
-    action: `Creo cliente "${created.org.companyName}" con bot "${created.bot.botName}"`,
+    action: `Creó cliente "${created.org.companyName}" con bot "${created.bot.botName}"`,
     targetType: 'Organization',
     targetId: created.org.id,
     diff: {
       organization: { before: null, after: created.org },
       botConfig: { before: null, after: created.bot },
     },
-    metadata: { botConfigId: created.bot.id, orgSlug: created.org.slug },
+    metadata: {
+      botConfigId: created.bot.id,
+      orgSlug: created.org.slug,
+      userId: created.clientUser.id,
+      userEmail: created.clientUser.email,
+    },
   })
 
-  redirect(`/admin/clients/${uniqueSlug}/chatbot/overview`)
+  const loginUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? 'https://develop.com.ar'}/login`
+  const emailContent = welcomeClientEmail({
+    clientName: created.clientUser.name ?? parsed.userName,
+    organizationName: created.org.companyName,
+    email: created.clientUser.email,
+    tempPassword,
+    loginUrl,
+  })
+
+  const emailResult = await sendTransactionalEmail({
+    to: { email: created.clientUser.email, name: created.clientUser.name ?? undefined },
+    subject: emailContent.subject,
+    htmlContent: emailContent.htmlContent,
+    textContent: emailContent.textContent,
+  })
+
+  await logAdminAction({
+    userId: admin.id ?? 'unknown',
+    userEmail: admin.email,
+    userName: admin.name,
+    actionType: 'EMAIL_SENT',
+    action: `Email de bienvenida ${emailResult.ok ? 'enviado' : 'fallido'} a "${created.clientUser.email}"`,
+    targetType: 'User',
+    targetId: created.clientUser.id,
+    metadata: {
+      emailType: 'welcome_client',
+      success: emailResult.ok,
+      messageId: emailResult.ok ? emailResult.messageId : null,
+      error: emailResult.ok ? null : emailResult.error,
+    },
+  })
+
+  return {
+    ok: true as const,
+    organizationId: created.org.id,
+    userId: created.clientUser.id,
+    tempPassword,
+    botSlug: created.bot.slug,
+    orgSlug: uniqueSlug,
+    userName: created.clientUser.name ?? parsed.userName,
+    userEmail: created.clientUser.email,
+    orgName: created.org.companyName,
+    emailSent: emailResult.ok,
+  }
 }
