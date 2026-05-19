@@ -1,14 +1,24 @@
-import { prisma } from '@/lib/prisma'
+import { redirect } from 'next/navigation'
+import { getClientChatbotSession } from '@/modules/chatbot/server/admin/getClientSession'
 import { listLeadsForBot } from '@/modules/chatbot/server/admin/queries'
 import { LeadsTable } from '@/modules/chatbot/components/dashboards/LeadsTable'
 import { PageHeader } from '@/components/ui'
 import { Users } from 'lucide-react'
 
-export default async function ClientLeadsPage() {
-  const bot = await prisma.botConfig.findUnique({ where: { slug: 'develop' } })
-  if (!bot) return <div className="p-8 text-red-400">Bot no encontrado.</div>
+export const dynamic = 'force-dynamic'
 
-  const leads = await listLeadsForBot(bot.id)
+export default async function ClientLeadsPage() {
+  const session = await getClientChatbotSession()
+  if (!session) redirect('/dashboard')
+
+  const rows = await listLeadsForBot(session.bot.id)
+
+  const leads = rows.map((r) => ({
+    ...r,
+    name: r.name ?? 'Sin nombre',
+    intent: r.intent ?? 'unknown',
+    message: r.message ?? '',
+  }))
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
@@ -18,7 +28,7 @@ export default async function ClientLeadsPage() {
         description="Contactos capturados por el asistente de IA"
         icon={Users}
       />
-      <LeadsTable leads={leads as never} />
+      <LeadsTable leads={leads} />
     </div>
   )
 }

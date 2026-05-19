@@ -6,6 +6,8 @@ import { prisma } from '@/lib/prisma'
 import { resolveOrgId } from '@/lib/preview'
 import { BotPersonalization } from '@/modules/chatbot/components/dashboard/BotPersonalization'
 
+export const dynamic = 'force-dynamic'
+
 export default async function ChatbotSettingsPage() {
   const session = await auth()
   if (!session?.user) redirect('/login')

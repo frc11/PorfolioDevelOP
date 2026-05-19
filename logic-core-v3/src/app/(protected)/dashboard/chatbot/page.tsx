@@ -8,6 +8,8 @@ import {
 import { ChatbotUpsellLanding, ChatbotOverview } from '@/modules/chatbot'
 import { redirect } from 'next/navigation'
 
+export const dynamic = 'force-dynamic'
+
 export default async function ChatbotDashboardPage() {
   const orgId = await resolveOrgId()
   if (!orgId) redirect('/login')
