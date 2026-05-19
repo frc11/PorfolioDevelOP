@@ -7,6 +7,7 @@ import { SidebarNav } from './SidebarNav'
 import { NotificationCenter } from './NotificationCenter'
 import { PageTransition } from './PageTransition'
 import { signOutAction } from '@/actions/auth-actions'
+import { VersionBadge } from '@/components/layout/VersionBadge'
 import type { Notification } from '@prisma/client'
 
 interface DashboardLayoutClientProps {
@@ -171,6 +172,11 @@ export function DashboardLayoutClient({
         <main className="relative flex-1 min-h-0 overflow-x-hidden overflow-y-auto w-full p-3 sm:p-6 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
           <PageTransition>{children}</PageTransition>
         </main>
+
+        <footer className="flex items-center justify-between border-t border-white/[0.05] px-4 py-2 text-xs text-zinc-600">
+          <span>© 2026 develOP</span>
+          <VersionBadge />
+        </footer>
       </div>
     </div>
   )

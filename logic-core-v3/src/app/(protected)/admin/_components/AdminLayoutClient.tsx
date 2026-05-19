@@ -5,6 +5,7 @@ import { useState } from 'react'
 import { Menu, X } from 'lucide-react'
 import { AdminSidebar } from './admin-sidebar'
 import { AdminTopbar } from './admin-topbar'
+import { VersionBadge } from '@/components/layout/VersionBadge'
 
 interface AdminLayoutClientProps {
   children: ReactNode
@@ -81,6 +82,11 @@ export function AdminLayoutClient({
           <main className="relative mt-4 min-h-0 flex-1 overflow-y-auto rounded-[28px] border border-white/10 bg-white/[0.03] p-4 shadow-[0_24px_80px_rgba(0,0,0,0.35)] backdrop-blur-md sm:p-6">
             {children}
           </main>
+
+          <footer className="flex items-center justify-between px-1 py-2 text-xs text-zinc-700">
+            <span>develOP Admin</span>
+            <VersionBadge />
+          </footer>
         </div>
       </div>
     </div>
