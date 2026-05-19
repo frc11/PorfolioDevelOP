@@ -1,3 +1,4 @@
+import { unstable_cache } from 'next/cache'
 import { prisma } from '@/lib/prisma'
 import { getConnectionLevel, parseDataConnections } from '@/lib/types/data-connections'
 
@@ -22,6 +23,14 @@ const PRIORITY_ORDER: Record<AttentionPriority, number> = {
 }
 
 export async function getAttentionItems(organizationId: string): Promise<AttentionItem[]> {
+  return unstable_cache(
+    async () => computeAttentionItems(organizationId),
+    ['attention-items', organizationId],
+    { revalidate: 300, tags: [`attention-items:${organizationId}`] }
+  )()
+}
+
+async function computeAttentionItems(organizationId: string): Promise<AttentionItem[]> {
   const items: AttentionItem[] = []
 
   const [subscription, pendingTask, unreadMsgCount, org] = await Promise.all([

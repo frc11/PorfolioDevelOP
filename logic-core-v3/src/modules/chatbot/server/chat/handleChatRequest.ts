@@ -103,10 +103,10 @@ export async function handleChatRequest(
     monthlyQuota: bot.monthlyQuota,
   })
 
-  // ─── 3. Rate limit ────────────────────────────────────────────
+  // ─── 3. Rate limit (per session — each conversation has its own bucket) ──
   const clientIp = extractClientIp(request)
   const ipHash = hashIp(clientIp)
-  const rateLimit = checkRateLimit(`chat:${slug}:${ipHash}`)
+  const rateLimit = checkRateLimit(`chat:${slug}:${body.sessionId}`)
   if (!rateLimit.allowed) {
     chatbotLog(
       'chat.rate_limited',
@@ -125,8 +125,21 @@ export async function handleChatRequest(
     )
   }
 
-  // ─── 4. Quota check ───────────────────────────────────────────
-  const quota = await checkQuota(bot.id, bot.monthlyQuota)
+  // ─── 4 & 5. Quota check + conversation (parallel) ─────────────
+  const userAgent = request.headers.get('user-agent')?.slice(0, 500) ?? undefined
+
+  const [quota, { conversation, isNew: isNewConversation }] = await Promise.all([
+    checkQuota(bot.id, bot.monthlyQuota),
+    getOrCreateConversation({
+      botConfigId: bot.id,
+      sessionId: body.sessionId,
+      currentPath: body.currentPath,
+      referrer: body.referrer,
+      visitorIpHash: ipHash,
+      visitorUserAgent: userAgent,
+    }),
+  ])
+
   if (!quota.withinQuota) {
     chatbotLog(
       'chat.quota_exceeded',
@@ -146,23 +159,6 @@ export async function handleChatRequest(
       ctaWhatsapp: true,
     })
   }
-
-  // ─── 5. Get/create conversation ───────────────────────────────
-  const userAgent = request.headers.get('user-agent')?.slice(0, 500) ?? undefined
-  const existingConvo = await prisma.conversation.findFirst({
-    where: { botConfigId: bot.id, sessionId: body.sessionId },
-    select: { id: true },
-  })
-  const isNewConversation = !existingConvo
-
-  const conversation = await getOrCreateConversation({
-    botConfigId: bot.id,
-    sessionId: body.sessionId,
-    currentPath: body.currentPath,
-    referrer: body.referrer,
-    visitorIpHash: ipHash,
-    visitorUserAgent: userAgent,
-  })
 
   // ─── 6. Persist user message ──────────────────────────────────
   const lastUserMessage = [...body.messages]

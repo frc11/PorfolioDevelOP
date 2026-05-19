@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { Bot } from 'lucide-react'
 import { auth } from '@/auth'
+import { unstable_cache } from 'next/cache'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { prisma } from '@/lib/prisma'
 import { resolveOrgId } from '@/lib/preview'
@@ -15,19 +16,24 @@ export default async function ChatbotSettingsPage() {
   const orgId = await resolveOrgId()
   if (!orgId) redirect('/login')
 
-  const bot = await prisma.botConfig.findUnique({
-    where: { organizationId: orgId },
-    select: {
-      id: true,
-      accentColor: true,
-      position: true,
-      avatarStyle: true,
-      avatarEmoji: true,
-      botName: true,
-      welcomeMessage: true,
-      quickReplies: true,
-    },
-  })
+  const bot = await unstable_cache(
+    async () =>
+      prisma.botConfig.findUnique({
+        where: { organizationId: orgId },
+        select: {
+          id: true,
+          accentColor: true,
+          position: true,
+          avatarStyle: true,
+          avatarEmoji: true,
+          botName: true,
+          welcomeMessage: true,
+          quickReplies: true,
+        },
+      }),
+    ['chatbot-bot-config', orgId],
+    { revalidate: 60, tags: [`chatbot-config:${orgId}`] }
+  )()
 
   if (!bot) {
     return (

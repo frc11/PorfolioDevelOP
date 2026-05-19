@@ -1,6 +1,6 @@
 'use server'
 
-import { revalidatePath } from 'next/cache'
+import { revalidatePath, revalidateTag } from 'next/cache'
 import { prisma } from '@/lib/prisma'
 import { logAdminAction } from '@/lib/audit-log'
 import { requireSuperAdmin } from '@/modules/chatbot/server/admin/requireSuperAdmin'
@@ -39,6 +39,7 @@ export async function bulkPauseBots(orgIds: string[]) {
   }
 
   revalidatePath('/admin/clients')
+  revalidateTag('admin-clients', {})
   return { ok: true, affected: bots.length }
 }
 

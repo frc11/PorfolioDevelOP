@@ -10,6 +10,7 @@ import { getWeekResults } from '@/lib/dashboard/week-results'
 import { getHealthScore } from '@/lib/health-score'
 import { resolveOrgId } from '@/lib/preview'
 import { prisma } from '@/lib/prisma'
+import { unstable_cache } from 'next/cache'
 import { Calendar } from 'lucide-react'
 import { redirect } from 'next/navigation'
 import { Suspense } from 'react'
@@ -127,10 +128,15 @@ function BriefSkeleton() {
 }
 
 async function DashboardGreetingWrapper({ organizationId }: { organizationId: string }) {
-  const org = await prisma.organization.findUnique({
-    where: { id: organizationId },
-    select: { companyName: true },
-  })
+  const org = await unstable_cache(
+    async () =>
+      prisma.organization.findUnique({
+        where: { id: organizationId },
+        select: { companyName: true },
+      }),
+    ['dashboard-greeting', organizationId],
+    { revalidate: 15, tags: [`org-meta:${organizationId}`] }
+  )()
 
   if (!org) redirect('/login')
 

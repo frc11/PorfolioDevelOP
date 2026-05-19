@@ -1,7 +1,7 @@
 'use server'
 
 import { ActivityChannel, ActivityResult, LeadStatus } from '@prisma/client'
-import { revalidatePath } from 'next/cache'
+import { revalidatePath, revalidateTag } from 'next/cache'
 import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
 import { requireSuperAdmin } from '@/lib/auth-guards'
@@ -93,6 +93,7 @@ export async function createActivity(
 
     revalidatePath('/admin/leads')
     revalidatePath(`/admin/leads/${parsed.leadId}`)
+    revalidateTag('admin-leads', {})
     return ok({ id: activity.id })
   } catch (error) {
     return fail(error instanceof Error ? error.message : 'Failed to create activity')

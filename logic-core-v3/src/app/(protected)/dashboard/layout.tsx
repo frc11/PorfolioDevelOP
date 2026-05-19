@@ -7,9 +7,44 @@ import { getImpersonationSession } from '@/lib/impersonation'
 import { ImpersonationBanner } from '@/components/dashboard/ImpersonationBanner'
 import { SubscriptionBanner } from '@/components/dashboard/SubscriptionBanner'
 import { DashboardLayoutClient } from '@/components/dashboard/DashboardLayoutClient'
-import { unstable_noStore as noStore } from 'next/cache'
+import { unstable_noStore as noStore, unstable_cache } from 'next/cache'
 
 export const dynamic = 'force-dynamic'
+
+function getCachedOrgMeta(orgId: string) {
+  return unstable_cache(
+    async () =>
+      prisma.organization.findUnique({
+        where: { id: orgId },
+        select: { companyName: true, onboardingCompleted: true },
+      }),
+    ['dashboard-org-meta', orgId],
+    { revalidate: 15, tags: [`org-meta:${orgId}`] }
+  )()
+}
+
+function getCachedUnreadMessages(orgId: string) {
+  return unstable_cache(
+    async () =>
+      prisma.message.count({
+        where: { organizationId: orgId, fromAdmin: true, read: false },
+      }),
+    ['dashboard-unread-messages', orgId],
+    { revalidate: 30, tags: [`unread-messages:${orgId}`] }
+  )()
+}
+
+function getCachedActiveModules(orgId: string) {
+  return unstable_cache(
+    async () =>
+      prisma.organizationModule.findMany({
+        where: { organizationId: orgId, status: 'ACTIVE' },
+        select: { module: { select: { slug: true } } },
+      }),
+    ['dashboard-active-modules', orgId],
+    { revalidate: 300, tags: [`org-modules:${orgId}`] }
+  )()
+}
 
 export default async function DashboardLayout({
   children,
@@ -41,22 +76,14 @@ export default async function DashboardLayout({
   }
 
   const [client, unreadMessages, notifications, activeModulesData, userFeaturesData] = await Promise.all([
-    prisma.organization.findUnique({
-      where: { id: organizationId },
-      select: { companyName: true, onboardingCompleted: true },
-    }),
-    prisma.message.count({
-      where: { organizationId, fromAdmin: true, read: false },
-    }),
+    getCachedOrgMeta(organizationId),
+    getCachedUnreadMessages(organizationId),
     prisma.notification.findMany({
       where: { organizationId },
       orderBy: { createdAt: 'desc' },
       take: 5,
     }),
-    prisma.organizationModule.findMany({
-      where: { organizationId, status: 'ACTIVE' },
-      select: { module: { select: { slug: true } } },
-    }),
+    getCachedActiveModules(organizationId),
     preview 
       ? prisma.orgMember.findFirst({
           where: { organizationId, role: 'ADMIN' },

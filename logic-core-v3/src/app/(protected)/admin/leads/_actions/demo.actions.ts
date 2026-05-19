@@ -1,7 +1,7 @@
 'use server'
 
 import { LeadStatus, OsServiceType } from '@prisma/client'
-import { revalidatePath } from 'next/cache'
+import { revalidatePath, revalidateTag } from 'next/cache'
 import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
 import { requireSuperAdmin } from '@/lib/auth-guards'
@@ -90,6 +90,7 @@ export async function createDemo(
 
     revalidatePath('/admin/leads')
     revalidatePath(`/admin/leads/${parsed.leadId}`)
+    revalidateTag('admin-leads', {})
     return ok({ id: demo.id })
   } catch (error) {
     return fail(error instanceof Error ? error.message : 'Failed to create demo')
@@ -126,6 +127,7 @@ export async function markDemoViewed(
 
     revalidatePath('/admin/leads')
     revalidatePath(`/admin/leads/${demo.leadId}`)
+    revalidateTag('admin-leads', {})
     return ok({ id: demo.id })
   } catch (error) {
     return fail(error instanceof Error ? error.message : 'Failed to mark demo as viewed')

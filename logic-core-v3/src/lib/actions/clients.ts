@@ -3,7 +3,7 @@
 import bcrypt from 'bcryptjs'
 import { Role } from '@prisma/client'
 import { redirect } from 'next/navigation'
-import { revalidatePath } from 'next/cache'
+import { revalidatePath, revalidateTag } from 'next/cache'
 import { auth } from '@/auth'
 import { prisma } from '@/lib/prisma'
 import { PREMIUM_FEATURE_KEYS, PREMIUM_FEATURE_LABELS, type PremiumFeatureKey } from '@/lib/premium-features'
@@ -104,6 +104,7 @@ export async function createClientAction(
   }
 
   revalidatePath('/admin/clients')
+  revalidateTag('admin-clients', {})
   redirect('/admin/clients')
 }
 
@@ -176,6 +177,7 @@ export async function updateClientAction(
   revalidatePath(`/admin/clients/${clientId}`)
   revalidatePath('/admin', 'layout')
   revalidatePath('/dashboard', 'layout')
+  revalidateTag('admin-clients', {})
   redirect(`/admin/clients/${clientId}`)
 }
 
@@ -189,6 +191,7 @@ export async function deleteClientAction(formData: FormData): Promise<void> {
   await prisma.organization.delete({ where: { id: clientId } })
 
   revalidatePath('/admin/clients')
+  revalidateTag('admin-clients', {})
   redirect('/admin/clients')
 }
 

@@ -1,6 +1,6 @@
 import type { Prisma } from '@prisma/client'
 import Link from 'next/link'
-import { unstable_noStore as noStore } from 'next/cache'
+import { unstable_cache } from 'next/cache'
 import { prisma } from '@/lib/prisma'
 import { LeadForm } from './_components/lead-form'
 import { InboundLeadsTable } from './_components/inbound-leads-table'
@@ -14,6 +14,34 @@ import {
   LeadPipeline,
 } from './_components/lead-pipeline'
 import { listInboundLeads } from './_actions/inbound.actions'
+
+const getLeads = unstable_cache(
+  async () =>
+    prisma.osLead.findMany({
+      include: {
+        _count: {
+          select: {
+            activities: true,
+            demos: true,
+          },
+        },
+        activities: {
+          select: {
+            createdAt: true,
+          },
+          orderBy: {
+            createdAt: 'desc',
+          },
+          take: 1,
+        },
+      },
+      orderBy: {
+        updatedAt: 'desc',
+      },
+    }),
+  ['admin-leads'],
+  { revalidate: 60, tags: ['admin-leads'] }
+)
 
 export const dynamic = 'force-dynamic'
 
@@ -72,34 +100,11 @@ export default async function AgencyOsLeadsPage({
 }: {
   searchParams: Promise<{ tab?: string }>
 }) {
-  noStore()
-
   const { tab } = await searchParams
   const activeTab: LeadTab = tab === 'inbound' ? 'inbound' : 'outbound'
 
   const [leads, inboundResult] = await Promise.all([
-    prisma.osLead.findMany({
-      include: {
-        _count: {
-          select: {
-            activities: true,
-            demos: true,
-          },
-        },
-        activities: {
-          select: {
-            createdAt: true,
-          },
-          orderBy: {
-            createdAt: 'desc',
-          },
-          take: 1,
-        },
-      },
-      orderBy: {
-        updatedAt: 'desc',
-      },
-    }),
+    getLeads(),
     activeTab === 'inbound' ? listInboundLeads() : Promise.resolve(null),
   ])
 

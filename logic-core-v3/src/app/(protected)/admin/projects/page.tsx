@@ -2,7 +2,18 @@ import Link from 'next/link'
 import { Building2 } from 'lucide-react'
 import { ProjectStatus, ServiceType } from '@prisma/client'
 import { prisma } from '@/lib/prisma'
+import { unstable_cache } from 'next/cache'
 import { listProjects } from './_actions/project.actions'
+
+const getOrganizationsForDropdown = unstable_cache(
+  async () =>
+    prisma.organization.findMany({
+      select: { id: true, companyName: true },
+      orderBy: { companyName: 'asc' },
+    }),
+  ['admin-orgs'],
+  { revalidate: 60, tags: ['admin-orgs', 'admin-clients'] }
+)
 import { ProjectForm } from './_components/project-form'
 import { ProjectList, type ProjectListItem } from './_components/project-list'
 
@@ -93,15 +104,7 @@ export default async function AgencyOsProjectsPage({ searchParams }: ProjectsPag
 
   const [result, organizations] = await Promise.all([
     listProjects(),
-    prisma.organization.findMany({
-      select: {
-        id: true,
-        companyName: true,
-      },
-      orderBy: {
-        companyName: 'asc',
-      },
-    }),
+    getOrganizationsForDropdown(),
   ])
 
   const projects: ProjectListItem[] = result.success ? result.data : []

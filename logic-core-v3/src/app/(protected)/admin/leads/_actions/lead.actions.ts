@@ -1,7 +1,7 @@
 'use server'
 
 import type { Prisma } from '@prisma/client'
-import { revalidatePath } from 'next/cache'
+import { revalidatePath, revalidateTag } from 'next/cache'
 import { prisma } from '@/lib/prisma'
 import { requireSuperAdmin } from '@/lib/auth-guards'
 import { fail, ok, type ActionResult } from '@/lib/action-utils'
@@ -55,6 +55,7 @@ export async function createLead(
     })
 
     revalidatePath('/admin/leads')
+    revalidateTag('admin-leads', {})
     return ok({ id: lead.id })
   } catch (error) {
     return fail(error instanceof Error ? error.message : 'Failed to create lead')
@@ -77,6 +78,7 @@ export async function updateLead(
 
     revalidatePath('/admin/leads')
     revalidatePath(`/admin/leads/${leadId}`)
+    revalidateTag('admin-leads', {})
     return ok({ id: lead.id })
   } catch (error) {
     return fail(error instanceof Error ? error.message : 'Failed to update lead')
@@ -102,6 +104,7 @@ export async function updateLeadStatus(
 
     revalidatePath('/admin/leads')
     revalidatePath(`/admin/leads/${parsed.leadId}`)
+    revalidateTag('admin-leads', {})
     return ok({ id: lead.id })
   } catch (error) {
     return fail(
@@ -122,6 +125,7 @@ export async function deleteLead(
     })
 
     revalidatePath('/admin/leads')
+    revalidateTag('admin-leads', {})
     return ok<void>(undefined)
   } catch (error) {
     return fail(error instanceof Error ? error.message : 'Failed to delete lead')
