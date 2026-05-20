@@ -15,8 +15,9 @@ import { ConfigTab } from './tabs/ConfigTab'
 import { KnowledgeTab } from './tabs/KnowledgeTab'
 import { ActivityTab } from './tabs/ActivityTab'
 import { LeadsTab } from './tabs/LeadsTab'
+import { InstallTab } from './tabs/InstallTab'
 
-export const VALID_TABS = ['overview', 'config', 'knowledge', 'activity', 'leads'] as const
+export const VALID_TABS = ['overview', 'config', 'knowledge', 'activity', 'leads', 'install'] as const
 export type TabId = (typeof VALID_TABS)[number]
 
 export type BotWithDetails = Prisma.BotConfigGetPayload<{
@@ -64,6 +65,7 @@ const TABS: { id: TabId; label: string }[] = [
   { id: 'knowledge', label: 'Knowledge Base' },
   { id: 'activity', label: 'Actividad' },
   { id: 'leads', label: 'Leads' },
+  { id: 'install', label: 'Instalación' },
 ]
 
 interface Props {
@@ -202,6 +204,16 @@ export function BotDetailClient({ bot, initialTab, initialEvents, monthlyUsage, 
             <ActivityTab slug={bot.slug} initialEvents={initialEvents} />
           )}
           {activeTab === 'leads' && <LeadsTab leads={leads} />}
+          {activeTab === 'install' && (
+            <InstallTab
+              bot={{
+                slug: bot.slug,
+                botName: bot.botName,
+                isActive,
+                allowedDomains: bot.allowedDomains,
+              }}
+            />
+          )}
         </motion.div>
       </AnimatePresence>
     </div>

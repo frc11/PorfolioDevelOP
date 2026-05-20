@@ -1,6 +1,7 @@
 import type { BotAlertSeverity, BotAlertType, Prisma } from '@prisma/client'
 import { prisma } from '@/lib/prisma'
 import { sendTransactionalEmail } from '@/lib/integrations/brevo'
+import { notifyTelegramOptional } from '@/lib/notifications/telegram'
 
 interface DetectedIssue {
   botConfigId: string
@@ -192,12 +193,54 @@ export async function detectBotIssues(): Promise<DetectedIssue[]> {
         metadata: { orgName, orgSlug, daysSinceActivity: 7 },
       })
     }
+
+    // DOMAIN_NOT_AUTHORIZED_SPIKE: 10+ bloqueos de origin en las últimas 24h
+    const domainBlockCount = await prisma.chatbotEvent.count({
+      where: {
+        botConfigId: bot.id,
+        type: 'SECURITY.BLOCKED_ORIGIN',
+        createdAt: { gte: oneDayAgo },
+      },
+    })
+
+    if (domainBlockCount >= 10) {
+      issues.push({
+        botConfigId: bot.id,
+        type: 'DOMAIN_NOT_AUTHORIZED_SPIKE' as BotAlertType,
+        severity: 'INFO',
+        title: `Spike de bloqueos de origen: ${orgName}`,
+        description: `${domainBlockCount} solicitudes bloqueadas por origen no autorizado en las ultimas 24 horas.`,
+        metadata: { blockCount: domainBlockCount, orgName, orgSlug },
+      })
+    }
+
+    // LEAD_CAPTURE_FAILURE: 3+ errores de capture_lead en la última hora
+    const leadCaptureErrors = await prisma.chatbotEvent.count({
+      where: {
+        botConfigId: bot.id,
+        type: 'capture_lead.error',
+        createdAt: { gte: oneHourAgo },
+      },
+    })
+
+    if (leadCaptureErrors >= 3) {
+      issues.push({
+        botConfigId: bot.id,
+        type: 'LEAD_CAPTURE_FAILURE' as BotAlertType,
+        severity: 'HIGH',
+        title: `Fallas en captura de leads: ${orgName}`,
+        description: `${leadCaptureErrors} errores de capture_lead en la ultima hora.`,
+        metadata: { errorCount: leadCaptureErrors, orgName, orgSlug },
+      })
+    }
   }
 
   return issues
 }
 
-export async function persistAndNotifyIssues(issues: DetectedIssue[]) {
+export async function persistAndNotifyIssues(issues: DetectedIssue[]): Promise<number> {
+  let created = 0
+
   for (const issue of issues) {
     const existing = await prisma.botAlert.findFirst({
       where: {
@@ -220,17 +263,40 @@ export async function persistAndNotifyIssues(issues: DetectedIssue[]) {
         metadata: issue.metadata as Prisma.InputJsonObject,
       },
     })
+    created++
 
     const emailResult = await sendAlertEmail(issue)
     if (emailResult.sent) {
       await prisma.botAlert.update({
         where: { id: alert.id },
-        data: {
-          emailSent: true,
-          emailSentAt: new Date(),
-        },
+        data: { emailSent: true, emailSentAt: new Date() },
       })
     }
+
+    if (issue.severity === 'CRITICAL' || issue.severity === 'HIGH') {
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
+      await notifyTelegramOptional(
+        `🚨 *${issue.severity}* — ${escapeMarkdown(issue.title)}\n` +
+          `${escapeMarkdown(issue.description)}\n` +
+          `Ver: ${appUrl}/admin/alerts`,
+      ).catch(() => {})
+    }
+  }
+
+  return created
+}
+
+export async function runAlertDetector(): Promise<{
+  issuesFound: number
+  alertsCreated: number
+  issues: Array<{ type: string; severity: string; title: string }>
+}> {
+  const issues = await detectBotIssues()
+  const alertsCreated = await persistAndNotifyIssues(issues)
+  return {
+    issuesFound: issues.length,
+    alertsCreated,
+    issues: issues.map((i) => ({ type: i.type, severity: i.severity, title: i.title })),
   }
 }
 
@@ -283,4 +349,8 @@ function escapeHtml(value: string): string {
 
 function escapeAttribute(value: string): string {
   return escapeHtml(value).replace(/`/g, '&#096;')
+}
+
+function escapeMarkdown(value: string): string {
+  return value.replace(/[_*[\]()~`>#+=|{}.!-]/g, '\\$&')
 }

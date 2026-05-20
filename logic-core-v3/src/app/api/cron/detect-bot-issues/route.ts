@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { detectBotIssues, persistAndNotifyIssues } from '@/modules/chatbot/server/admin/detectBotIssues'
+import { runAlertDetector } from '@/modules/chatbot/server/admin/detectBotIssues'
 
 export const dynamic = 'force-dynamic'
 
@@ -10,18 +10,8 @@ export async function GET(req: Request) {
   }
 
   try {
-    const issues = await detectBotIssues()
-    await persistAndNotifyIssues(issues)
-
-    return NextResponse.json({
-      ok: true,
-      issuesFound: issues.length,
-      issues: issues.map((issue) => ({
-        type: issue.type,
-        severity: issue.severity,
-        title: issue.title,
-      })),
-    })
+    const result = await runAlertDetector()
+    return NextResponse.json({ ok: true, ...result })
   } catch (error) {
     return NextResponse.json(
       { ok: false, error: String(error) },

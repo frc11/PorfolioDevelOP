@@ -297,6 +297,7 @@ function normalizeInitial(initial: BotConfigEditorInitial): BotConfigEditorState
     routeColorMap: normalizeRouteColorMap(initial.routeColorMap),
     leadNotificationEmail: initial.leadNotificationEmail ?? null,
     leadNotificationMode: initial.leadNotificationMode ?? DEFAULTS.leadNotificationMode,
+    allowedDomains: Array.isArray(initial.allowedDomains) ? initial.allowedDomains : [],
   }
 }
 
@@ -344,5 +345,5 @@ function normalizeRouteColorMap(value: unknown): BotConfigEditorState['routeColo
 }
 
 function countExposedEditableFields(_state: BotConfigEditorState): number {
-  return 27
+  return 28
 }

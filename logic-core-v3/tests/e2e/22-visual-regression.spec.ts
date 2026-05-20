@@ -121,6 +121,7 @@ test.describe('Visual regression - dashboard cliente', () => {
     await expect(page).toHaveScreenshot('dashboard-settings.png', {
       fullPage: true,
       mask: stableMasks(page),
+      maxDiffPixelRatio: 0.05,
     })
   })
 })

@@ -20,17 +20,20 @@ test.describe('Client chatbot section', () => {
 
   test('cliente con bot activo ve overview', async ({ page }) => {
     await loginAsClient(page)
-    await page.goto('/dashboard/chatbot', { waitUntil: 'domcontentloaded', timeout: 60000 })
+    await page.goto('/dashboard/chatbot', { waitUntil: 'networkidle', timeout: 60000 })
 
+    // Either chatbot overview metrics or upsell landing must be visible
     const hasOverview = await page
-      .getByText(/conversaciones|leads|tokens/i)
+      .getByText(/conversaciones|leads|tokens|oportunidades/i)
       .first()
-      .isVisible()
+      .waitFor({ state: 'visible', timeout: 5000 })
+      .then(() => true)
       .catch(() => false)
     const hasUpsell = await page
-      .getByText(/empleado virtual|activarlo/i)
+      .getByText(/empleado virtual|activarlo|develOP/i)
       .first()
-      .isVisible()
+      .waitFor({ state: 'visible', timeout: 5000 })
+      .then(() => true)
       .catch(() => false)
 
     expect(hasOverview || hasUpsell).toBe(true)

@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
 import { logChatbotEvent } from '../logging'
 import { sendLeadNotificationEmail } from '../notifications'
+import { notifyTelegramOptional } from '@/lib/notifications/telegram'
 import type { ToolCallContext, CaptureLeadResult, ToolExecuteResult } from './types'
 
 /**
@@ -115,9 +116,25 @@ async function captureLeadExecute(
         })
 
         const org = bot?.organization
-        if (!bot || !org?.leadNotificationEmail || org.leadNotificationMode === 'DISABLED') {
-          return
-        }
+        if (!bot || !org) return
+
+        // Telegram — always fires for the develOP team when configured (env-based)
+        const telegramMsg = [
+          `🟢 *Nuevo lead* — ${org.companyName}`,
+          `Bot: ${bot.botName}`,
+          input.name ? `Nombre: ${input.name}` : '',
+          email ? `Email: ${email}` : '',
+          phone ? `Tel: ${phone}` : '',
+          input.intent ? `Intent: ${input.intent}` : '',
+        ]
+          .filter(Boolean)
+          .join('\n')
+        void notifyTelegramOptional(telegramMsg).catch((err: unknown) => {
+          console.error('[captureLead] Telegram notify failed:', err)
+        })
+
+        // Email to client — only if configured and not disabled
+        if (!org.leadNotificationEmail || org.leadNotificationMode === 'DISABLED') return
 
         if (org.leadNotificationMode === 'IMMEDIATE') {
           const notification = await sendLeadNotificationEmail({

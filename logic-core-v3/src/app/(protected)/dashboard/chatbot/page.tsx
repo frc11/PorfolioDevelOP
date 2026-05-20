@@ -4,6 +4,7 @@ import {
   getClientChatbotSession,
   getUsageByOrgSlug,
   listLeadsByOrgSlug,
+  listRecentHandoffsByOrgSlug,
 } from '@/modules/chatbot/index.server'
 import { ChatbotUpsellLanding, ChatbotOverview } from '@/modules/chatbot'
 import { redirect } from 'next/navigation'
@@ -24,10 +25,11 @@ export default async function ChatbotDashboardPage() {
   if (!session) return <ChatbotUpsellLanding />
 
   const orgSlug = session.organization.slug
-  const [usage, recentLeads] = await Promise.all([
+  const [usage, recentLeads, recentHandoffs] = await Promise.all([
     getUsageByOrgSlug(orgSlug),
     listLeadsByOrgSlug(orgSlug, 5),
+    listRecentHandoffsByOrgSlug(orgSlug, 10),
   ])
 
-  return <ChatbotOverview session={session} usage={usage} recentLeads={recentLeads} />
+  return <ChatbotOverview session={session} usage={usage} recentLeads={recentLeads} recentHandoffs={recentHandoffs} />
 }

@@ -83,7 +83,9 @@
     iframe.setAttribute('allow', 'clipboard-write')
     iframe.setAttribute(
       'sandbox',
-      'allow-scripts allow-same-origin allow-forms allow-popups'
+      // allow-same-origin: el iframe necesita cookies/storage del dominio develOP
+      // allow-popups-to-escape-sandbox: links de handoff (WhatsApp) abren sin sandbox
+      'allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox'
     )
     iframe.src =
       BASE_URL +

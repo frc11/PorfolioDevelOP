@@ -23,3 +23,6 @@
 
 [functions."generate-insights-cron"]
   schedule = "0 9 * * *"
+
+[functions."send-weekly-reports-cron"]
+  schedule = "0 12 * * MON"

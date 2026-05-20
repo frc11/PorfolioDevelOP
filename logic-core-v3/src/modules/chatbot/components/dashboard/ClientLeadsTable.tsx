@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'motion/react'
 import { Users } from 'lucide-react'
 import { PageHeader, EmptyState } from '@/components/ui'
@@ -29,10 +29,26 @@ const FILTER_ACCENT: Record<ChatbotLeadStatus | 'all', string> = {
 
 const FILTER_INACTIVE = 'border-white/[0.06] bg-transparent text-zinc-500 hover:text-zinc-300'
 
-export function ClientLeadsTable({ leads }: { leads: ChatbotLead[] }) {
+export function ClientLeadsTable({ leads: initialLeads }: { leads: ChatbotLead[] }) {
   const reduced = useReducedMotion()
+  const [leads, setLeads] = useState<ChatbotLead[]>(initialLeads)
   const [filter, setFilter] = useState<ChatbotLeadStatus | 'all'>('all')
   const [selectedLead, setSelectedLead] = useState<ChatbotLead | null>(null)
+
+  useEffect(() => {
+    const id = setInterval(async () => {
+      try {
+        const res = await fetch('/api/dashboard/leads/recent')
+        if (res.ok) {
+          const { leads: fresh } = (await res.json()) as { leads: ChatbotLead[] }
+          setLeads(fresh)
+        }
+      } catch {
+        // polling failure is silent — stale data is acceptable
+      }
+    }, 30_000)
+    return () => clearInterval(id)
+  }, [])
 
   const filtered = filter === 'all' ? leads : leads.filter((l) => l.status === filter)
 

@@ -70,6 +70,48 @@ export async function listConversationsByOrgSlug(orgSlug: string, limit: number 
   }))
 }
 
+export type HandoffEvent = {
+  id: string
+  visitorName: string | null
+  reason: string | null
+  createdAt: Date
+  conversationId: string | null
+}
+
+export async function listRecentHandoffsByOrgSlug(
+  orgSlug: string,
+  limit: number = 10
+): Promise<HandoffEvent[]> {
+  const botInfo = await getBotByOrgSlug(orgSlug)
+  if (!botInfo) return []
+
+  const rows = await prisma.chatbotEvent.findMany({
+    where: {
+      botConfigId: botInfo.bot.id,
+      type: 'handoff.whatsapp',
+    },
+    orderBy: { createdAt: 'desc' },
+    take: limit,
+    select: {
+      id: true,
+      conversationId: true,
+      metadata: true,
+      createdAt: true,
+    },
+  })
+
+  return rows.map((r) => {
+    const meta = (r.metadata ?? {}) as Record<string, string | null>
+    return {
+      id: r.id,
+      conversationId: r.conversationId,
+      visitorName: meta.visitorName ?? null,
+      reason: meta.reason ?? null,
+      createdAt: r.createdAt,
+    }
+  })
+}
+
 export async function getUsageByOrgSlug(orgSlug: string) {
   return unstable_cache(
     async () => {

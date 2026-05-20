@@ -175,6 +175,7 @@ const nextAuthResult = NextAuth({
           role: user.role,
           organizationId: primaryMembership?.organizationId ?? undefined,
           orgRole: primaryMembership?.role ?? undefined,
+          passwordResetRequired: user.passwordResetRequired,
         }
       },
     }),
@@ -206,7 +207,7 @@ const nextAuthResult = NextAuth({
       return true
     },
     async jwt({ token, user, account, trigger }) {
-      const shouldRefreshFromDb = Boolean(user?.id || token.sub) && (trigger === 'update' || !user)
+      const shouldRefreshFromDb = Boolean(user?.id || token.sub) && (trigger === 'update' || trigger === 'signIn' || !user)
 
       if (shouldRefreshFromDb) {
         const accessState = await getUserAccessState((user?.id ?? token.sub) as string)
@@ -219,6 +220,11 @@ const nextAuthResult = NextAuth({
 
       if (user?.role) {
         token.role = user.role
+      }
+
+      // Propagate passwordResetRequired from credentials authorize on first login
+      if (user?.passwordResetRequired !== undefined) {
+        token.passwordResetRequired = Boolean(user.passwordResetRequired)
       }
 
       token.provider = account?.provider ?? token.provider ?? 'credentials'
@@ -253,5 +259,5 @@ const nextAuthResult = NextAuth({
   },
 })
 
-export const { handlers, signIn, signOut } = nextAuthResult
+export const { handlers, signIn, signOut, unstable_update } = nextAuthResult
 export const auth = React.cache(nextAuthResult.auth)

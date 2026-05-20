@@ -50,6 +50,7 @@ const SaveBotConfigInputSchema = z.object({
   ),
   leadNotificationEmail: z.string().email().nullable(),
   leadNotificationMode: z.enum(['IMMEDIATE', 'DAILY_DIGEST', 'DISABLED']),
+  allowedDomains: z.array(z.string().max(253)).max(50),
 })
 
 export async function saveBotConfigByOrgSlug(
@@ -61,7 +62,7 @@ export async function saveBotConfigByOrgSlug(
     return { success: false, error: 'Invalid input: ' + parsed.error.message }
   }
 
-  const { orgSlug, ...data } = parsed.data
+  const { orgSlug, allowedDomains, ...data } = parsed.data
 
   const org = await prisma.organization.findUnique({
     where: { slug: orgSlug },
@@ -80,6 +81,7 @@ export async function saveBotConfigByOrgSlug(
         where: { id: org.botConfig.id },
         data: {
           ...botData,
+          allowedDomains,
           quickReplies: botData.quickReplies as unknown as object,
           proactivePrompts: botData.proactivePrompts as unknown as object,
           routeColorMap: botData.routeColorMap as unknown as object,

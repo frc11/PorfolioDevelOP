@@ -56,6 +56,8 @@ const botConfigInputSchema = z.object({
   // Lead notifications
   leadNotificationEmail: z.string().email().nullable(),
   leadNotificationMode: z.enum(['IMMEDIATE', 'DAILY_DIGEST', 'DISABLED']),
+  // Dominios autorizados a embeber el widget
+  allowedDomains: z.array(z.string().max(253)).max(50),
 })
 
 export type BotConfigInput = z.infer<typeof botConfigInputSchema>
@@ -67,7 +69,7 @@ export async function saveBotConfig(input: BotConfigInput): Promise<{ success: b
     return { success: false, error: 'Invalid input: ' + parsed.error.message }
   }
   try {
-    const { botConfigId, leadNotificationEmail, leadNotificationMode, ...data } = parsed.data
+    const { botConfigId, leadNotificationEmail, leadNotificationMode, allowedDomains, ...data } = parsed.data
     const before = await prisma.botConfig.findUnique({
       where: { id: botConfigId },
       include: {
@@ -86,6 +88,7 @@ export async function saveBotConfig(input: BotConfigInput): Promise<{ success: b
         where: { id: botConfigId },
         data: {
           ...data,
+          allowedDomains,
           quickReplies: data.quickReplies as unknown as object,
           proactivePrompts: data.proactivePrompts as unknown as object,
           routeColorMap: data.routeColorMap as unknown as object,

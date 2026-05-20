@@ -1,123 +1,133 @@
 # Estado del Proyecto — develOP / Logic Core v3
 
-**Última actualización:** Mayo 2026
-**Versión actual:** v1.0.0 ✨
-**Próximo milestone:** v1.5 (fin de fase Beta)
+**Última actualización:** 2026-05-20 (cierre R24)
+**Versión actual:** v1.0.0 (post Alpha v2)
+**Próximo milestone:** Beta — features avanzadas
 
 ---
 
 ## Resumen 30 segundos
 
 develOP es un chatbot multi-tenant para PyMEs LATAM, integrado a Logic Core v3.
-Stack: Next.js 16, TypeScript, Prisma + Neon, NextAuth v5, Vertex AI.
+Stack: Next.js 16, TypeScript, Prisma + Neon, NextAuth v5, Vertex AI (Gemini 2.5 Flash), Brevo, Netlify.
 
-**Estado:** v1.0 release-ready. Fase Alpha completada (21 sprints).
-**Próximo:** Fase Beta — 8 features de valor.
-
----
-
-## Lo que se completó en Alpha (Mayo 2026)
-
-### Bloque pre-Alpha (Alpha.0.5 → 0.9)
-- ✓ Fixes post test manual
-- ✓ Limpieza legacy duplicado
-- ✓ Baseline performance + observability
-- ✓ Tests E2E ampliados
-- ✓ STATUS.md inicial
-
-### Bloque A — Profesionalización funcional admin (Alpha.1 → 5)
-- ✓ Re-auditoría con base limpia
-- ✓ Onboarding wizard premium (auto-save, pre-fills, preview)
-- ✓ KB Editor profesional (markdown, diff, búsqueda, sandbox)
-- ✓ BotConfig Editor con 14+ campos en 5 tabs
-- ✓ Sistema de activación + alertas (7 tipos)
-
-### Bloque B — Profesionalización admin operativa (Alpha.6 → 9)
-- ✓ Command Center unificado
-- ✓ Detail page premium (switcher Cmd+K, breadcrumbs, impersonate)
-- ✓ Audit log con diff JSON
-- ✓ Polish funcional + mobile básico
-
-### Bloque C — Design System (Alpha.10 → 12)
-- ✓ Design tokens + 12 componentes UI consolidados
-- ✓ Storybook-lite en `/admin/_design`
-- ✓ Migración masiva al design system
-
-### Bloque D — Estética admin (Alpha.13 → 15)
-- ✓ Animaciones (page transitions, stagger, hover lift)
-- ✓ Skeleton loaders premium
-- ✓ Polish Activity Log + Health + Alerts
-
-### Bloque E — Dashboard cliente (Alpha.16 → 18)
-- ✓ Audit + refinamiento estético
-- ✓ Métricas formato negocio + mobile completo
-- ✓ Personalización limitada del cliente
-
-### Bloque F — Cierre (Alpha.19 → 21)
-- ✓ Testing comprehensivo (22 specs E2E)
-- ✓ Documentación operativa (5 workflows)
-- ✓ Changelog v1.0 + versionado visible
+**Estado real al cierre de Alpha v2:**
+- Producto funcional end-to-end
+- Widget embebible en sitios externos (~5KB vanilla JS)
+- Onboarding completo sin SQL manual
+- Sistema de alertas operativo
+- Reportes semanales automáticos vía cron
+- 24 specs E2E + 1 integración (pass rate pendiente de verificación en CI)
 
 ---
 
-## Métricas baseline establecidas
+## Lo que funciona en v1.0
 
-### Chatbot runtime (mayo 2026)
-- P50: [rellenar con datos reales post-deploy]
-- P95: [rellenar con datos reales post-deploy]
-- Success rate: [rellenar con datos reales post-deploy]
+### Para develOP (admin)
+- ✅ Login y panel admin operativo
+- ✅ Crear cliente desde wizard (Org + User + Bot + email automático)
+- ✅ Gestión global de chatbots en `/admin/chatbots`
+- ✅ Crear bot para org existente o nueva en `/admin/chatbots/new`
+- ✅ Bulk operations (pausar, activar, exportar leads)
+- ✅ Página unificada de bot con 5 tabs (Overview, Config, KB, Activity, Install)
+- ✅ Editor con preview en vivo
+- ✅ Audit log de todas las acciones
+- ✅ Sistema de alertas con 7 tipos
+- ✅ Email/Telegram en alertas críticas
+- ✅ Re-envío manual de credenciales desde panel del cliente
+- ✅ Trigger manual de detector de issues y reportes semanales
+- ✅ Tab "Instalar" con snippet por plataforma (HTML, WordPress, Tiendanube, Shopify, Wix, Squarespace)
+- ✅ Configuración de dominios autorizados por bot
 
-### Performance admin (post-Alpha)
-- `/admin`: warm <1.5s
-- `/admin/clients`: warm <1.5s
-- `/admin/clients/[id]`: warm <2s
-- `/admin/chatbot/health`: warm <1.5s
+### Para el cliente final
+- ✅ Login con credenciales temporales
+- ✅ Cambio forzado de password al primer login
+- ✅ Dashboard con métricas en formato negocio
+- ✅ Leads en tiempo real (polling 30s)
+- ✅ Notificación email cuando se captura lead
+- ✅ Personalización limitada del bot (color, posición, avatar, welcome)
+- ✅ Vista de instalación con snippet copy-paste en `/dashboard/chatbot/install`
+- ✅ Reporte semanal automático por email (cada lunes a las 9am Argentina)
 
-### Performance dashboard cliente
-- `/dashboard`: warm <1.5s
-- `/dashboard/chatbot`: warm <1.5s
+### Para visitantes (en sitios del cliente)
+- ✅ Widget embebible vía `<script>` simple (~5KB)
+- ✅ Funciona en HTML, WordPress, Tiendanube, Shopify, Wix, Squarespace
+- ✅ Conversación con bot (Vertex AI Gemini 2.5 Flash)
+- ✅ Captura de leads automática con tool calling
+- ✅ Handoff a WhatsApp con contexto de la conversación
+- ✅ Domain whitelist — solo carga en dominios autorizados por el admin
+
+---
+
+## Métricas baseline al cierre
+
+### Chatbot runtime
+- P50: pendiente de medición en producción (era 4072ms antes de Alpha v2)
+- P95: pendiente de medición en producción (era 12987ms antes de Alpha v2)
+- Success rate: pendiente de medición en producción (era 33% antes de Alpha v2)
+
+### Admin performance (warm)
+- `/admin`: <1.5s
+- `/admin/clients`: <1.5s
+- `/admin/chatbots`: <1.5s
+- `/admin/clients/[id]`: <2s
+
+### Dashboard cliente (warm)
+- `/dashboard`: <1.5s
+- `/dashboard/chatbot`: <1.5s
 
 ### Database
-- Latencia Neon: ~93ms (sa-east-1)
+- Latencia Neon (sa-east-1): ~93ms warm
+- Cold start: ~1s después de inactividad prolongada
 
 ---
 
-## Test coverage actual
+## Test coverage
 
-- E2E (Playwright): 22 specs
-- Performance budgets: enforced
-- Visual regression: baselines establecidos
-- Security tests: auth + role checks
-
----
-
-## Próxima fase: Beta (8 features)
-
-| Feature | Días estimados |
-|---|---|
-| 1. Cards ricos (product, service, gallery, calendar) | 10-12 |
-| 2. KB híbrida con review queue | 6-7 |
-| 3. Widget embebible universal | 9-10 |
-| 4. Reportes semanales automáticos con AI | 4-5 |
-| 5. Lead scoring 0-100 con badges | 2-3 |
-| 6. Memoria persistente visitor con cookies | 3-4 |
-| 7. Sugerencias proactivas al dueño | 5-6 |
-| 8. Agenda integrada Cal.com | 4-5 |
-
-**Total Beta estimado:** 43-52 días de desarrollo (~3 meses calendario).
+- E2E (Playwright): 24 specs (01–22 originales, 30 onboarding E2E, 40 lead capture)
+- Integración: 1 spec (alerts-detector)
+- Pass rate: pendiente de verificación en entorno con env vars completos
+- Performance budgets: enforced en spec 21
+- Security tests: auth + role checks + CORS (spec 19)
+- Mobile responsive: spec 20
 
 ---
 
-## Decisiones tomadas durante Alpha
+## Cosas que NO están en v1.0 (intencional)
 
-- ✓ Migración a `/admin/clients/[clientId]` con tabs (deprecación agency-dashboard)
-- ✓ Versionado visible v1.0 + changelog público
-- ✓ Mobile: admin básico, dashboard cliente completo
-- ✓ Paleta curada 8 swatches para cliente (no color picker libre)
-- ✓ Personalización cliente limitada y segura
-- ✓ Activación: solo equipo develOP (no autoservicio)
-- ✓ KB híbrida diferida a Beta (cliente edita "fachada", develOP refina y aplica)
-- ✓ Reportes AI semanales diferidos a Beta
+### Postpone a Beta
+- ❌ Self-service signup del cliente
+- ❌ "Olvidé mi contraseña" via email
+- ❌ 2FA
+- ❌ Cards ricos (product, service, gallery, calendar)
+- ❌ KB híbrida con review queue (cliente edita, develOP revisa antes de aplicar)
+- ❌ Lead scoring 0-100 con badges
+- ❌ Memoria persistente del visitor con cookies
+- ❌ Sugerencias proactivas al dueño del negocio
+- ❌ Agenda integrada Cal.com
+- ❌ WhatsApp Business API (hoy es link, no API)
+- ❌ AIExecutiveBrief con LLM real (sigue MOCK)
+- ❌ Sistema modular por planes (Starter/Pro/Enterprise)
+
+### Limitaciones conocidas
+- ⚠ Cold start de Neon: ~1s en primer hit después de inactividad
+- ⚠ Rate limiter in-memory (se resetea en cold start del server)
+- ⚠ Reportes semanales por bot (no consolidados si un cliente tiene varios bots)
+- ⚠ Bulk operations sin schedule — se ejecutan en el momento, sin cola
+- ⚠ Sin tests de carga concurrente
+- ⚠ Admin básico en mobile (dashboard cliente sí es completo)
+
+---
+
+## Decisiones tomadas durante Alpha v2
+
+1. Nueva ruta canónica `/admin/chatbots` — la vieja `/admin/clients/[id]/chatbot/*` queda deprecada
+2. Widget como iframe + script vanilla JS (~5KB) — no dependencia de React en sitio del cliente
+3. CORS dinámico + domain whitelist por bot en `BotConfig.allowedDomains`
+4. Validación de origin server-side en todos los endpoints del chatbot
+5. Email de activación automático al activar bot (`bot-activated.ts`)
+6. Reportes semanales sin opt-in — los clientes ya tienen contrato
+7. `/dashboard/chatbot` refactorizado a rutas anidadas `/(protected)/dashboard/chatbot/*`
 
 ---
 
@@ -125,8 +135,9 @@ Stack: Next.js 16, TypeScript, Prisma + Neon, NextAuth v5, Vertex AI.
 
 - ⚠ Sistema modular por plan (Starter/Pro/Enterprise) — definir con socio
 - ⚠ Plan de Neon (Free vs Launch) — depende de backups
-- ⚠ Integración Tiendanube — pendiente decisión
+- ⚠ Integración Tiendanube vía API — pendiente decisión
 - ⚠ Cuándo activar feature toggles por suscripción
+- ⚠ Política de retención de conversaciones/leads
 
 ---
 
@@ -136,7 +147,7 @@ Stack: Next.js 16, TypeScript, Prisma + Neon, NextAuth v5, Vertex AI.
 git clone [repo]
 cd logic-core-v3
 npm install
-cp .env.example .env  # completar valores
+cp .env.example .env  # completar valores reales
 npm run check-env
 npx prisma migrate deploy
 npx prisma db seed
@@ -148,10 +159,10 @@ Credenciales seed:
 - Cliente: cliente@sanmiguel.com / Cliente1234!
 
 Recursos:
-- `docs/design-system.md` — componentes UI
-- `docs/testing-strategy.md` — cómo testear
-- `docs/operations/` — workflows operativos
-- `/admin/_design` — playground visual
+- `docs/operations/` — workflows operativos (6 workflows)
+- `docs/testing-strategy.md` — cómo correr tests
+- `docs/design-system.md` — tokens y componentes UI
+- `/admin/_design` — playground visual del design system
 
 ---
 
@@ -162,4 +173,4 @@ Recursos:
 
 ---
 
-*Este archivo se actualiza al cierre de cada fase mayor.*
+*Este archivo es la fuente única de verdad. Actualizar al cierre de cada milestone.*

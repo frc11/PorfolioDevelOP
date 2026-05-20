@@ -18,7 +18,7 @@ export function getTools(ctx: ToolCallContext) {
   return {
     capture_lead: buildCaptureLeadTool(ctx),
     offer_handoff_options: buildOfferHandoffOptionsTool(),
-    show_whatsapp_handoff: buildShowWhatsappHandoffTool(),
+    show_whatsapp_handoff: buildShowWhatsappHandoffTool(ctx),
     navigate_to_page: buildNavigateToPageTool(),
   }
 }

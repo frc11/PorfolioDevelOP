@@ -13,7 +13,7 @@ import { SupportTab } from './_components/tabs/SupportTab'
 import { VaultTab } from './_components/tabs/VaultTab'
 
 interface PageProps {
-  params: Promise<{ orgSlug: string }>
+  params: Promise<{ clientId: string }>
   searchParams: Promise<{ tab?: string }>
 }
 
@@ -30,7 +30,7 @@ export default async function ClientDetailPage({
     redirect('/login')
   }
 
-  const { orgSlug } = await params
+  const { clientId: orgSlug } = await params
   const { tab: tabParam } = await searchParams
   const activeTab: TabId = VALID_TABS.includes(tabParam as TabId)
     ? (tabParam as TabId)

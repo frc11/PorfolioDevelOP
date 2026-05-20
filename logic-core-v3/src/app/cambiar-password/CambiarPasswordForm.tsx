@@ -48,8 +48,7 @@ export function CambiarPasswordForm({ forceChange, userEmail }: Props) {
 
       if (result.ok) {
         toast.success('Contraseña cambiada correctamente')
-        router.refresh()
-        setTimeout(() => router.push('/dashboard'), 500)
+        router.push('/dashboard')
       } else {
         toast.error(result.error)
       }

@@ -17,6 +17,7 @@ declare module 'next-auth' {
     role: Role
     organizationId?: string
     orgRole?: OrgRole
+    passwordResetRequired?: boolean
   }
 }
 

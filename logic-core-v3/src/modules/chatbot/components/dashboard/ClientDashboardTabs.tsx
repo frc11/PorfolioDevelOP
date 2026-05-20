@@ -10,6 +10,7 @@ const TABS = [
   { id: 'conversations', label: 'Conversaciones', href: '/dashboard/chatbot/conversations' },
   { id: 'knowledge', label: 'Información', href: '/dashboard/chatbot/knowledge' },
   { id: 'settings', label: 'Configuración', href: '/dashboard/chatbot/settings' },
+  { id: 'install', label: 'Instalación', href: '/dashboard/chatbot/install' },
 ]
 
 export function ClientDashboardTabs() {

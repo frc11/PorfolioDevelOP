@@ -2,7 +2,7 @@
 
 import { z } from 'zod'
 import bcrypt from 'bcryptjs'
-import { auth } from '@/auth'
+import { auth, unstable_update } from '@/auth'
 import { prisma } from '@/lib/prisma'
 import { logAdminAction } from '@/lib/audit-log'
 
@@ -61,6 +61,9 @@ export async function cambiarPasswordAction(input: {
     targetId: user.id,
     metadata: { selfChange: true, wasForced: session.user.passwordResetRequired },
   })
+
+  // Force JWT cookie update so middleware sees passwordResetRequired: false immediately
+  await unstable_update({ user: { passwordResetRequired: false } })
 
   return { ok: true }
 }

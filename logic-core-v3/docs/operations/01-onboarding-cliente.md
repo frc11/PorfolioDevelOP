@@ -99,7 +99,7 @@ Aparece el warning con la password temporal en pantalla:
 
 ## Paso 3: Re-enviar credenciales (si es necesario)
 
-Desde el panel del cliente en `/admin/clients/[slug]`, tab **Overview**:
+Desde el panel del cliente en `/admin/clients/[clientId]`, tab **Overview**:
 
 1. Click en "Re-enviar credenciales"
 2. Click en "Confirmar"

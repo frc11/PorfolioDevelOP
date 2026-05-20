@@ -48,6 +48,7 @@ export function ConfigTab({ bot }: Props) {
       | 'IMMEDIATE'
       | 'DAILY_DIGEST'
       | 'DISABLED',
+    allowedDomains: bot.allowedDomains ?? [],
   }
 
   return <BotConfigEditor initial={initial} orgSlug={bot.organization.slug} />

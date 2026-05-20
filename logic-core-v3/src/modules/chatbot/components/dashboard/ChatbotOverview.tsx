@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { motion } from 'motion/react'
-import { MessageSquare, Users, DollarSign, Zap, ArrowRight } from 'lucide-react'
+import { MessageSquare, Users, DollarSign, Zap, ArrowRight, PhoneForwarded } from 'lucide-react'
 import { BusinessStatCard } from './BusinessStatCard'
 import { staggerContainer, staggerItem } from '@/lib/motion-variants'
 import { useReducedMotion } from '@/lib/use-reduced-motion'
@@ -14,6 +14,7 @@ import {
   generateBusinessSummary,
 } from '@/modules/chatbot/lib/business-metrics'
 import type { BotConfig, Organization, QuotaUsage, ChatbotLead } from '@prisma/client'
+import type { HandoffEvent } from '@/modules/chatbot/index.server'
 
 interface ChatbotOverviewProps {
   session: {
@@ -23,9 +24,10 @@ interface ChatbotOverviewProps {
   }
   usage: QuotaUsage | null
   recentLeads: ChatbotLead[]
+  recentHandoffs: HandoffEvent[]
 }
 
-export function ChatbotOverview({ session, usage, recentLeads }: ChatbotOverviewProps) {
+export function ChatbotOverview({ session, usage, recentLeads, recentHandoffs }: ChatbotOverviewProps) {
   const reduced = useReducedMotion()
   const metrics = toBusinessMetrics({
     totalConversations: usage?.conversationsCount ?? 0,
@@ -151,6 +153,49 @@ export function ChatbotOverview({ session, usage, recentLeads }: ChatbotOverview
               </motion.li>
             ))}
           </motion.ul>
+        )}
+      </div>
+
+      {/* Derivaciones recientes */}
+      <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-5">
+        <div className="mb-4 flex items-center gap-2">
+          <PhoneForwarded className="h-4 w-4 text-emerald-400" strokeWidth={1.5} />
+          <h3 className="text-[10px] uppercase tracking-[0.24em] text-zinc-500">
+            Derivaciones a WhatsApp
+          </h3>
+        </div>
+
+        {recentHandoffs.length === 0 ? (
+          <p className="py-4 text-center text-sm text-zinc-500">
+            Sin derivaciones todavía. Cuando el bot derive a alguien, aparece acá.
+          </p>
+        ) : (
+          <ul className="space-y-3">
+            {recentHandoffs.map((h) => (
+              <li
+                key={h.id}
+                className="flex items-start justify-between gap-4 rounded-xl border border-white/[0.06] bg-white/[0.015] px-4 py-3"
+              >
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-medium text-zinc-200">
+                    {h.visitorName ?? 'Visitante anónimo'}
+                  </p>
+                  {h.reason && (
+                    <p className="mt-0.5 truncate text-xs text-zinc-500">{h.reason}</p>
+                  )}
+                </div>
+                <span className="shrink-0 text-xs text-zinc-600">
+                  {new Date(h.createdAt).toLocaleString('es-AR', {
+                    day: '2-digit',
+                    month: 'short',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: false,
+                  })}
+                </span>
+              </li>
+            ))}
+          </ul>
         )}
       </div>
 

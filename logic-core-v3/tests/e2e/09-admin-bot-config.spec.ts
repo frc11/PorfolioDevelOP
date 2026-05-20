@@ -27,11 +27,15 @@ test.describe('Admin bot config', () => {
     const newValue = `Test edit ${Date.now()}`
 
     await typeControlledInput(welcomeField, newValue)
-    await page.getByRole('button', { name: /guardar|save/i }).click()
+    // "Revisar y guardar" opens the diff modal; then confirm in the modal
+    await page.getByRole('button', { name: /revisar y guardar/i }).click()
+    await page.getByRole('button', { name: /guardar cambios/i }).click()
 
-    await expect(page.getByText(/guardado|saved|exito/i)).toBeVisible({ timeout: 10000 })
+    await expect(page.getByText(/cambios guardados|guardado|saved/i)).toBeVisible({ timeout: 10000 })
 
+    // Restore original value
     await typeControlledInput(welcomeField, originalValue)
-    await page.getByRole('button', { name: /guardar|save/i }).click()
+    await page.getByRole('button', { name: /revisar y guardar/i }).click()
+    await page.getByRole('button', { name: /guardar cambios/i }).click()
   })
 })

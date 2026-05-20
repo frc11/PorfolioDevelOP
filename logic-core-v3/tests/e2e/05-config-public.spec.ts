@@ -1,7 +1,9 @@
 import { test, expect } from '@playwright/test'
 
 test('public config endpoint returns safe data only', async ({ request }) => {
-  const res = await request.get('/api/chatbot/develop/config')
+  const res = await request.get('/api/chatbot/develop/config', {
+    headers: { Origin: 'https://develop.com.ar' },
+  })
   expect(res.status()).toBe(200)
 
   const data = await res.json()

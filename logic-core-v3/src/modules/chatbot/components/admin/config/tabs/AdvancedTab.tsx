@@ -1,5 +1,6 @@
 'use client'
 
+import { Plus, Trash2 } from 'lucide-react'
 import { Field } from '../Field'
 import { Input } from '../Input'
 import { Select } from '../Select'
@@ -121,6 +122,62 @@ export function AdvancedTab({ state, update }: BotConfigTabProps) {
           ]}
         />
       </Field>
+
+      {/* ── Dominios permitidos ── */}
+      <div className="border-t border-white/10 pt-6">
+        <div className="mb-4">
+          <p className="text-sm font-medium text-zinc-200">Dominios permitidos</p>
+          <p className="mt-0.5 text-xs text-zinc-500">
+            Sitios donde el chatbot puede embeberse. Sin esto, el widget no va a cargar en sitios externos.
+          </p>
+        </div>
+
+        <div className="space-y-2 mb-3">
+          {state.allowedDomains.map((domain, idx) => (
+            <div key={idx} className="flex items-center gap-2">
+              <Input
+                value={domain}
+                onChange={(e) => {
+                  const next = [...state.allowedDomains]
+                  next[idx] = e.target.value
+                  update('allowedDomains', next)
+                }}
+                placeholder="ejemplo.com"
+                className="flex-1"
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  update(
+                    'allowedDomains',
+                    state.allowedDomains.filter((_, i) => i !== idx),
+                  )
+                }}
+                className="flex items-center justify-center w-8 h-8 rounded-lg border border-white/10 text-zinc-400 hover:border-red-500/40 hover:text-red-400 transition-colors"
+              >
+                <Trash2 size={13} strokeWidth={1.5} />
+              </button>
+            </div>
+          ))}
+        </div>
+
+        <button
+          type="button"
+          onClick={() => update('allowedDomains', [...state.allowedDomains, ''])}
+          className="inline-flex items-center gap-2 rounded-xl border border-white/10 px-3 py-1.5 text-xs text-zinc-300 hover:bg-white/[0.04] transition-colors"
+        >
+          <Plus size={13} strokeWidth={1.5} />
+          Agregar dominio
+        </button>
+
+        {state.allowedDomains.length === 0 && (
+          <div className="mt-3 rounded-xl border border-amber-500/30 bg-amber-500/5 px-3 py-2.5">
+            <p className="text-xs text-amber-300">
+              Sin dominios configurados, el chatbot no va a cargar en sitios externos.
+            </p>
+          </div>
+        )}
+      </div>
     </div>
   )
 }
