@@ -9,6 +9,7 @@ declare module 'next-auth' {
       orgRole?: OrgRole
       provider?: string
       onboardingCompleted?: boolean
+      passwordResetRequired: boolean
     } & DefaultSession['user']
   }
 
@@ -26,5 +27,6 @@ declare module 'next-auth/jwt' {
     orgRole?: string
     provider?: string
     onboardingCompleted?: boolean
+    passwordResetRequired?: boolean
   }
 }

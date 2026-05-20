@@ -18,6 +18,7 @@ import {
   BookOpen,
   AlertTriangle,
   Palette,
+  Upload,
 } from 'lucide-react'
 import { useReducedMotion } from '@/lib/use-reduced-motion'
 
@@ -45,6 +46,7 @@ const NAV_SECTIONS: NavSection[] = [
     label: 'OPERACIONES',
     items: [
       { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
+      { href: '/admin/chatbots', label: 'Chatbots', icon: Bot },
       { href: '/admin/leads', label: 'Leads', icon: Users },
       { href: '/admin/projects', label: 'Proyectos', icon: FolderKanban },
       { href: '/admin/team', label: 'Equipo', icon: UserCog },
@@ -54,6 +56,7 @@ const NAV_SECTIONS: NavSection[] = [
     label: 'CLIENTES',
     items: [
       { href: '/admin/clients', label: 'Clientes', icon: Building2 },
+      { href: '/admin/clients/bulk-import', label: 'Bulk Import', icon: Upload },
       { href: '/admin/tickets', label: 'Tickets', icon: LifeBuoy },
       { href: '/admin/messages', label: 'Mensajes', icon: MessageCircle },
     ],

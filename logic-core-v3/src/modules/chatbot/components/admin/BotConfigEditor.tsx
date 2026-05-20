@@ -1,13 +1,14 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { Mail, Save } from 'lucide-react'
+import { Mail, RotateCcw, Save } from 'lucide-react'
 import { toast } from 'sonner'
 import { saveBotConfig, type BotConfigInput } from '../../server/admin/saveBotConfig'
 import { saveBotConfigByOrgSlug } from '../../server/admin/saveBotConfigByOrgSlug'
 import { runPreflightChecks, type PreflightCheck } from '../../server/admin/preflightChecks'
 import { sendTestNotification } from '../../server/admin/sendTestNotification'
 import { ActivationModal } from './activation/ActivationModal'
+import { BotConfigDiffModal } from './config/BotConfigDiffModal'
 import { BotConfigPreview } from './config/BotConfigPreview'
 import { ConfigTabs, type ConfigTab } from './config/ConfigTabs'
 import { AdvancedTab } from './config/tabs/AdvancedTab'
@@ -46,14 +47,20 @@ const DEFAULTS = {
 } as const
 
 export function BotConfigEditor({ initial, orgSlug, onSave }: BotConfigEditorProps) {
+  const [initialState, setInitialState] = useState<BotConfigEditorState>(() => normalizeInitial(initial))
   const [state, setState] = useState<BotConfigEditorState>(() => normalizeInitial(initial))
   const [activeTab, setActiveTab] = useState<ConfigTab>('identity')
   const [activationChecks, setActivationChecks] = useState<PreflightCheck[]>([])
   const [showActivationModal, setShowActivationModal] = useState(false)
+  const [showDiff, setShowDiff] = useState(false)
   const [saving, setSaving] = useState(false)
   const slug = initial.slug ?? orgSlug ?? 'sin-slug'
 
   const exposedCount = useMemo(() => countExposedEditableFields(state), [state])
+  const hasChanges = useMemo(
+    () => JSON.stringify(state) !== JSON.stringify(initialState),
+    [state, initialState],
+  )
 
   function update<K extends keyof BotConfigEditorState>(key: K, value: BotConfigEditorState[K]) {
     setState((prev) => ({ ...prev, [key]: value }))
@@ -75,10 +82,15 @@ export function BotConfigEditor({ initial, orgSlug, onSave }: BotConfigEditorPro
     return result
   }
 
-  async function handleSave() {
+  async function handleConfirmSave() {
     setSaving(true)
+    const savedState = { ...state }
 
-    const promise = saveState(state)
+    const promise = saveState(savedState).then(result => {
+      setInitialState(savedState)
+      setShowDiff(false)
+      return result
+    })
 
     toast.promise(promise, {
       loading: 'Guardando configuracion...',
@@ -114,6 +126,7 @@ export function BotConfigEditor({ initial, orgSlug, onSave }: BotConfigEditorPro
 
     const promise = saveState(nextState).then((result) => {
       setState(nextState)
+      setInitialState(nextState)
       setShowActivationModal(false)
       return result
     })
@@ -155,19 +168,19 @@ export function BotConfigEditor({ initial, orgSlug, onSave }: BotConfigEditorPro
   }
 
   return (
-    <div className="grid grid-cols-1 gap-6 pb-24 lg:grid-cols-[minmax(0,1fr)_380px]">
-      <div className="space-y-6">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h1 className="text-2xl font-semibold text-zinc-100">
-              Configuracion del bot
-            </h1>
-            <p className="mt-1 text-sm text-zinc-400">
-              Slug: <span className="font-mono text-cyan-400">{slug}</span>
-              <span className="ml-3 text-xs text-zinc-600">{exposedCount} campos editables expuestos</span>
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-2">
+    <>
+      <div className="grid grid-cols-1 gap-6 pb-32 lg:grid-cols-[minmax(0,1fr)_380px]">
+        <div className="space-y-6">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h1 className="text-2xl font-semibold text-zinc-100">
+                Configuracion del bot
+              </h1>
+              <p className="mt-1 text-sm text-zinc-400">
+                Slug: <span className="font-mono text-cyan-400">{slug}</span>
+                <span className="ml-3 text-xs text-zinc-600">{exposedCount} campos editables expuestos</span>
+              </p>
+            </div>
             <button
               type="button"
               onClick={handleSendTest}
@@ -177,38 +190,58 @@ export function BotConfigEditor({ initial, orgSlug, onSave }: BotConfigEditorPro
               <Mail className="h-4 w-4" strokeWidth={1.5} />
               Test email
             </button>
-            <button
-              type="button"
-              onClick={handleSave}
-              disabled={saving}
-              className="inline-flex items-center gap-2 rounded-2xl bg-cyan-400 px-5 py-2.5 text-sm font-medium text-zinc-950 hover:bg-cyan-300 disabled:opacity-50"
-            >
-              <Save className="h-4 w-4" strokeWidth={1.5} />
-              {saving ? 'Guardando...' : 'Guardar cambios'}
-            </button>
+          </div>
+
+          <ConfigTabs active={activeTab} onChange={setActiveTab} />
+
+          <div className="rounded-3xl border border-white/10 bg-white/[0.02] p-6">
+            {activeTab === 'identity' && (
+              <IdentityTab
+                state={state}
+                update={update}
+                onRequestActivation={handleRequestActivation}
+              />
+            )}
+            {activeTab === 'appearance' && <AppearanceTab state={state} update={update} />}
+            {activeTab === 'style' && <StyleTab state={state} update={update} />}
+            {activeTab === 'behavior' && <BehaviorTab state={state} update={update} />}
+            {activeTab === 'advanced' && <AdvancedTab state={state} update={update} />}
           </div>
         </div>
 
-        <ConfigTabs active={activeTab} onChange={setActiveTab} />
-
-        <div className="rounded-3xl border border-white/10 bg-white/[0.02] p-6">
-          {activeTab === 'identity' && (
-            <IdentityTab
-              state={state}
-              update={update}
-              onRequestActivation={handleRequestActivation}
-            />
-          )}
-          {activeTab === 'appearance' && <AppearanceTab state={state} update={update} />}
-          {activeTab === 'style' && <StyleTab state={state} update={update} />}
-          {activeTab === 'behavior' && <BehaviorTab state={state} update={update} />}
-          {activeTab === 'advanced' && <AdvancedTab state={state} update={update} />}
-        </div>
+        <aside className="lg:sticky lg:top-6 lg:self-start">
+          <BotConfigPreview state={state} />
+        </aside>
       </div>
 
-      <aside className="lg:sticky lg:top-6 lg:self-start">
-        <BotConfigPreview state={state} />
-      </aside>
+      {/* Sticky save bar */}
+      {hasChanges && (
+        <div className="fixed bottom-6 left-1/2 z-20 w-full max-w-2xl -translate-x-1/2 px-4">
+          <div className="flex items-center justify-between rounded-2xl border border-cyan-400/30 bg-zinc-950/95 px-5 py-3.5 shadow-2xl backdrop-blur">
+            <p className="text-sm text-cyan-300">Tenés cambios sin guardar</p>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setState(initialState)}
+                disabled={saving}
+                className="inline-flex items-center gap-2 rounded-xl border border-white/10 px-4 py-2 text-sm text-zinc-300 hover:bg-white/[0.06] disabled:opacity-50"
+              >
+                <RotateCcw className="h-3.5 w-3.5" strokeWidth={1.5} />
+                Descartar
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowDiff(true)}
+                disabled={saving}
+                className="inline-flex items-center gap-2 rounded-xl bg-cyan-400 px-5 py-2 text-sm font-medium text-zinc-950 hover:bg-cyan-300 disabled:opacity-50"
+              >
+                <Save className="h-3.5 w-3.5" strokeWidth={1.5} />
+                Revisar y guardar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <ActivationModal
         open={showActivationModal}
@@ -219,7 +252,16 @@ export function BotConfigEditor({ initial, orgSlug, onSave }: BotConfigEditorPro
         botName={state.botName}
         botSlug={slug}
       />
-    </div>
+
+      <BotConfigDiffModal
+        open={showDiff}
+        onClose={() => setShowDiff(false)}
+        onConfirm={handleConfirmSave}
+        before={initialState}
+        after={state}
+        loading={saving}
+      />
+    </>
   )
 }
 

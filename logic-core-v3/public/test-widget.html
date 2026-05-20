@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Test Widget develOP</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      margin: 0;
+      padding: 40px 32px;
+      max-width: 760px;
+      line-height: 1.65;
+      color: #1a1a1a;
+      background: #f9fafb;
+    }
+    h1 { color: #06b6d4; margin-top: 0; }
+    h2 { color: #374151; font-size: 1rem; margin-top: 2rem; }
+    code {
+      background: #e5e7eb;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.88em;
+    }
+    pre {
+      background: #111827;
+      color: #e5e7eb;
+      padding: 16px 20px;
+      border-radius: 8px;
+      overflow-x: auto;
+      font-size: 0.875rem;
+    }
+    #log {
+      background: #111827;
+      color: #86efac;
+      padding: 14px 18px;
+      border-radius: 8px;
+      font-family: monospace;
+      font-size: 0.85rem;
+      min-height: 80px;
+      margin-top: 8px;
+      white-space: pre-wrap;
+    }
+    .api-buttons { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
+    .api-buttons button {
+      padding: 8px 18px;
+      border-radius: 8px;
+      border: 1px solid #d1d5db;
+      background: #fff;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: background 0.15s;
+    }
+    .api-buttons button:hover { background: #f3f4f6; }
+  </style>
+</head>
+<body>
+  <h1>Sitio de prueba — Widget develOP</h1>
+  <p>
+    Este es un sitio HTML estático simulando el sitio de un cliente.
+    Si ves un botón flotante cyan abajo a la derecha, el widget funciona.
+  </p>
+
+  <h2>¿Qué probar?</h2>
+  <ul>
+    <li>Click en la burbuja → el iframe carga el chatbot</li>
+    <li>Escribir un mensaje → el bot responde</li>
+    <li>Click en ✕ dentro del chat → el widget se cierra</li>
+    <li>Los botones de API <code>window.develOP</code> abajo</li>
+  </ul>
+
+  <h2>API pública (<code>window.develOP</code>)</h2>
+  <div class="api-buttons">
+    <button onclick="window.develOP.open()">develOP.open()</button>
+    <button onclick="window.develOP.close()">develOP.close()</button>
+    <button onclick="log('version: ' + window.develOP.version)">develOP.version</button>
+  </div>
+
+  <h2>Log de eventos</h2>
+  <div id="log">Esperando eventos...</div>
+
+  <h2>Snippet de integración</h2>
+  <pre>&lt;script src="https://develop.com.ar/widget.js"
+  data-bot="develop"
+  data-theme="dark"&gt;&lt;/script&gt;</pre>
+
+  <!-- El widget -->
+  <script src="/widget.js" data-bot="develop" data-theme="dark"></script>
+
+  <script>
+    var logEl = document.getElementById('log')
+    function log(msg) {
+      var ts = new Date().toLocaleTimeString()
+      logEl.textContent += '\n[' + ts + '] ' + msg
+      logEl.scrollTop = logEl.scrollHeight
+    }
+    logEl.textContent = ''
+
+    window.addEventListener('develop:lead', function (e) {
+      log('develop:lead → ' + JSON.stringify(e.detail))
+    })
+
+    // Log all develop:* messages for debugging
+    window.addEventListener('message', function (e) {
+      if (e.data && typeof e.data.type === 'string' && e.data.type.startsWith('develop:')) {
+        log('postMessage ← ' + e.data.type)
+      }
+    })
+  </script>
+</body>
+</html>

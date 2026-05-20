@@ -20,6 +20,7 @@ async function getUserAccessState(userId: string) {
     where: { id: userId },
     select: {
       role: true,
+      passwordResetRequired: true,
       orgMemberships: {
         select: {
           organizationId: true,
@@ -45,12 +46,14 @@ async function getUserAccessState(userId: string) {
     role === 'SUPER_ADMIN' ||
       (organizationId && organization?.companyName?.trim() && organization.onboardingCompleted)
   )
+  const passwordResetRequired = dbUser?.passwordResetRequired ?? false
 
   return {
     role,
     organizationId,
     orgRole,
     onboardingCompleted,
+    passwordResetRequired,
   }
 }
 
@@ -211,6 +214,7 @@ const nextAuthResult = NextAuth({
         token.organizationId = accessState.organizationId
         token.orgRole = accessState.orgRole
         token.onboardingCompleted = accessState.onboardingCompleted
+        token.passwordResetRequired = accessState.passwordResetRequired
       }
 
       if (user?.role) {
@@ -229,6 +233,7 @@ const nextAuthResult = NextAuth({
       session.user.orgRole = token.orgRole as OrgRole | undefined
       session.user.provider = token.provider as string | undefined
       session.user.onboardingCompleted = Boolean(token.onboardingCompleted)
+      session.user.passwordResetRequired = Boolean(token.passwordResetRequired)
       return session
     },
     async redirect({ url, baseUrl }) {

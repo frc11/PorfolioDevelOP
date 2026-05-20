@@ -12,6 +12,7 @@ import {
   DangerZone,
 } from '@/components/dashboard/ProfileForms'
 import { FadeIn } from '@/components/dashboard/FadeIn'
+import Link from 'next/link'
 import {
   Building2,
   Phone,
@@ -20,6 +21,7 @@ import {
   CreditCard,
   AlertTriangle,
   Eye,
+  ChevronRight,
 } from 'lucide-react'
 import type { NotificationPrefs } from '@/lib/actions/profile'
 
@@ -267,7 +269,18 @@ export default async function ProfilePage() {
           icon={<Lock size={15} className="text-cyan-400" />}
           style={GLASS_RED_SOFT}
         >
-          <PasswordForm />
+          <div className="flex flex-col gap-4">
+            <PasswordForm />
+            <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }} className="pt-4">
+              <Link
+                href="/cambiar-password"
+                className="flex items-center justify-between rounded-lg px-3 py-2.5 text-sm text-zinc-400 transition-colors hover:bg-white/[0.03] hover:text-zinc-200"
+              >
+                <span>Cambiar mi contraseña desde el asistente</span>
+                <ChevronRight size={14} strokeWidth={1.5} className="text-zinc-600" />
+              </Link>
+            </div>
+          </div>
         </Section>
       </FadeIn>
 

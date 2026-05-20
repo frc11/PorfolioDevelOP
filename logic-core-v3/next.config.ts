@@ -10,6 +10,27 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  async headers() {
+    return [
+      {
+        source: '/widget.js',
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=3600, s-maxage=3600' },
+          { key: 'Content-Type', value: 'application/javascript' },
+          { key: 'Access-Control-Allow-Origin', value: '*' },
+        ],
+      },
+      {
+        // Allow any site to embed the chatbot in an iframe.
+        // R18 will restrict to a whitelist of allowed origins.
+        source: '/embed/:slug*',
+        headers: [
+          { key: 'Content-Security-Policy', value: "frame-ancestors *;" },
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
+        ],
+      },
+    ]
+  },
   async redirects() {
     return [
       // Módulos premium → catálogo unificado

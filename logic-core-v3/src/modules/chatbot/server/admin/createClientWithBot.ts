@@ -84,6 +84,9 @@ export async function createClientWithBot(input: z.infer<typeof CreateClientInpu
   const baseSlug = slugify(parsed.orgName)
   const uniqueSlug = await findUniqueSlug(baseSlug)
 
+  const existingUser = await prisma.user.findUnique({ where: { email: parsed.userEmail }, select: { id: true } })
+  if (existingUser) throw new Error(`El email ${parsed.userEmail} ya está registrado en el sistema.`)
+
   const tempPassword = generateTempPassword()
   const passwordHash = await bcrypt.hash(tempPassword, 10)
 
@@ -93,6 +96,7 @@ export async function createClientWithBot(input: z.infer<typeof CreateClientInpu
         companyName: parsed.orgName,
         slug: uniqueSlug,
         siteUrl: parsed.websiteUrl,
+        onboardingCompleted: true,
       },
     })
 
@@ -101,10 +105,10 @@ export async function createClientWithBot(input: z.infer<typeof CreateClientInpu
         email: parsed.userEmail,
         name: parsed.userName,
         phone: parsed.userPhone ?? null,
-        role: 'CLIENT',
+        role: 'ORG_MEMBER',
         password: passwordHash,
         passwordResetRequired: true,
-        emailVerified: null,
+        emailVerified: new Date(),
       },
     })
 

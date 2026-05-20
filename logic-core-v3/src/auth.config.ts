@@ -23,6 +23,7 @@ export const authConfig: NextAuthConfig = {
       session.user.orgRole = token.orgRole as OrgRole | undefined
       session.user.provider = token.provider as string | undefined
       session.user.onboardingCompleted = Boolean(token.onboardingCompleted)
+      session.user.passwordResetRequired = Boolean(token.passwordResetRequired)
       return session
     },
   },

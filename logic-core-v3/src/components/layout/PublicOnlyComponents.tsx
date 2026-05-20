@@ -8,7 +8,7 @@ const LogicCompanion = dynamic(
   { ssr: false }
 )
 
-const PORTAL_PREFIXES = ['/admin', '/dashboard']
+const PORTAL_PREFIXES = ['/admin', '/dashboard', '/embed']
 
 export function PublicOnlyComponents({
   children,

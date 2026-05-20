@@ -62,17 +62,30 @@ function getLegacyAdminRedirectPath(pathname: string): string | null {
   return null
 }
 
+const CHANGE_PASSWORD_PATH = '/cambiar-password'
+const ALWAYS_ALLOWED = [CHANGE_PASSWORD_PATH, '/api/auth/', '/logout', '/api/']
+
 export default auth((req) => {
   const { nextUrl } = req
   const session = req.auth
   const role = session?.user?.role
   const onboardingCompleted = session?.user?.onboardingCompleted
+  const passwordResetRequired = session?.user?.passwordResetRequired
   const isAuthenticated = Boolean(session?.user)
   const isImpersonating = Boolean(req.cookies.get(IMPERSONATION_COOKIE)?.value)
 
   const pathname = nextUrl.pathname
   const callbackUrl = nextUrl.searchParams.get('callbackUrl')
   const legacyAdminRedirectPath = getLegacyAdminRedirectPath(pathname)
+
+  // Force password reset before allowing access to any protected route
+  if (
+    isAuthenticated &&
+    passwordResetRequired &&
+    !ALWAYS_ALLOWED.some(p => pathname.startsWith(p))
+  ) {
+    return NextResponse.redirect(new URL(CHANGE_PASSWORD_PATH, nextUrl))
+  }
 
   if (legacyAdminRedirectPath) {
     const redirectUrl = nextUrl.clone()
@@ -133,5 +146,5 @@ export default auth((req) => {
 })
 
 export const config = {
-  matcher: ['/admin/:path*', '/dashboard/:path*', '/login', '/bienvenida'],
+  matcher: ['/admin/:path*', '/dashboard/:path*', '/login', '/bienvenida', '/cambiar-password'],
 }

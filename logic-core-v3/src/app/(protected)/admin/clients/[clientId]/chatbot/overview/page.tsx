@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation'
+import Link from 'next/link'
 import {
   getBotByOrgSlug,
   listLeadsByOrgSlug,
@@ -27,6 +28,16 @@ export default async function ChatbotOverview({
 
   return (
     <div className="space-y-6">
+      {bot.bot?.id && (
+        <div className="rounded-2xl border border-cyan-400/30 bg-cyan-400/5 p-3">
+          <p className="text-xs text-cyan-300">
+            💡 Esta vista se va a deprecar. Ahora gestionás chatbots desde{' '}
+            <Link href={`/admin/chatbots/${bot.bot.id}`} className="underline underline-offset-2">
+              /admin/chatbots/[bot]
+            </Link>
+          </p>
+        </div>
+      )}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
           label="Conversaciones este mes"

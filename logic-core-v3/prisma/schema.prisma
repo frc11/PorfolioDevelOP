@@ -146,6 +146,7 @@ enum BotAlertType {
 }
 
 enum AuditActionType {
+  BOT_CREATED
   CLIENT_CREATED
   CLIENT_UPDATED
   CLIENT_DELETED
@@ -164,6 +165,8 @@ enum AuditActionType {
   SUBSCRIPTION_CHANGED
   EMAIL_SENT
   CREDENTIALS_RESENT
+  PASSWORD_CHANGED
+  LEADS_EXPORTED
   OTHER
 }
 
@@ -933,6 +936,9 @@ model BotConfig {
 
   // Cuota mensual
   monthlyQuota Int @default(1000)
+
+  // Dominios autorizados a embeber el widget (whitelist)
+  allowedDomains String[] @default([])
 
   // Rubro / industria
   industry String @default("generic")
