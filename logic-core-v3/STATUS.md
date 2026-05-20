@@ -1,7 +1,7 @@
 # Estado del Proyecto — develOP / Logic Core v3
 
-**Última actualización:** 2026-05-20 (cierre R24)
-**Versión actual:** v1.0.0 (post Alpha v2)
+**Última actualización:** 2026-05-20 (cierre R25 — smoke test + tag v1.0.0)
+**Versión actual:** v1.0.0
 **Próximo milestone:** Beta — features avanzadas
 
 ---
@@ -84,12 +84,13 @@ Stack: Next.js 16, TypeScript, Prisma + Neon, NextAuth v5, Vertex AI (Gemini 2.5
 
 ## Test coverage
 
-- E2E (Playwright): 24 specs (01–22 originales, 30 onboarding E2E, 40 lead capture)
-- Integración: 1 spec (alerts-detector)
-- Pass rate: pendiente de verificación en entorno con env vars completos
+- E2E (Playwright): 50 specs totales (01–22, 30 onboarding, 40 lead capture)
+- Resultado último run (2026-05-20): **39 passed / 0 failed / 10 skipped**
+- Skips: env-only (ANTHROPIC_API_KEY, BREVO no configurados en local)
 - Performance budgets: enforced en spec 21
-- Security tests: auth + role checks + CORS (spec 19)
+- Security tests: auth + role checks + CORS (spec 11)
 - Mobile responsive: spec 20
+- Visual regression: 7 baselines (spec 22)
 
 ---
 
