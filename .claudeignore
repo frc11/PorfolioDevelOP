@@ -1,0 +1,72 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build outputs
+.next/
+out/
+dist/
+build/
+
+# Prisma — migrations individuales (el schema sí se lee, los SQL no)
+prisma/migrations/
+
+# Static assets — binarios que Claude no puede procesar útilmente
+public/images/
+public/videos/
+public/fonts/
+public/icons/
+*.png
+*.jpg
+*.jpeg
+*.webp
+*.gif
+*.svg
+*.ico
+*.mp4
+*.webm
+*.woff
+*.woff2
+*.ttf
+*.otf
+
+# Environment files — nunca leer
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Logs y cache
+*.log
+npm-debug.log*
+.npm
+.eslintcache
+.cache/
+.parcel-cache/
+
+# Coverage y testing
+coverage/
+.nyc_output/
+__snapshots__/
+
+# OS y editor
+.DS_Store
+Thumbs.db
+.idea/
+*.swp
+*.swo
+
+# Lockfiles — no aportan contexto de arquitectura
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Netlify
+.netlify/
+netlify/
+
+# Typescript build info
+*.tsbuildinfo
+next-env.d.ts
