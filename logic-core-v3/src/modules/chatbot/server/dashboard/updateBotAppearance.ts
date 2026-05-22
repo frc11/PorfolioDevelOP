@@ -6,6 +6,7 @@ import { auth } from '@/auth'
 import { logAdminAction } from '@/lib/audit-log'
 import { prisma } from '@/lib/prisma'
 import { resolveOrgId } from '@/lib/preview'
+import { invalidateBotCache } from '@/modules/chatbot/server/conversation'
 import {
   BOT_POSITIONS,
   CLIENT_AVATAR_STYLES,
@@ -85,6 +86,8 @@ export async function updateBotAppearance(input: UpdateBotAppearanceInput) {
         : {}),
     },
   })
+
+  invalidateBotCache(updated.slug)
 
   await logAdminAction({
     userId: session.user.id ?? 'unknown',

@@ -1,13 +1,36 @@
 'use client'
 
 import { motion } from 'motion/react'
-import * as LucideIcons from 'lucide-react'
-import type { LucideIcon } from 'lucide-react'
+import {
+  Star,
+  Mail,
+  Calendar,
+  ShoppingBag,
+  MessageCircle,
+  Receipt,
+  Users,
+  DollarSign,
+  TrendingUp,
+  Box,
+  type LucideIcon,
+} from 'lucide-react'
 import type { PremiumModuleSeed } from '@/lib/data/premium-modules'
 
+// Static map enables webpack tree-shaking. Keep in sync with PREMIUM_MODULES_CATALOG iconName values.
+const ICON_MAP: Record<string, LucideIcon> = {
+  Star,
+  Mail,
+  Calendar,
+  ShoppingBag,
+  MessageCircle,
+  Receipt,
+  Users,
+  DollarSign,
+  TrendingUp,
+}
+
 function resolveLucideIcon(name: string): LucideIcon {
-  const Icon = (LucideIcons as unknown as Record<string, LucideIcon>)[name]
-  return Icon ?? LucideIcons.Box
+  return ICON_MAP[name] ?? Box
 }
 
 interface ModuloComingSoonCardProps {

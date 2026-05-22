@@ -4,6 +4,7 @@ import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 import { computeDiff, logAdminAction, omitAuditNoise } from '@/lib/audit-log'
+import { invalidateBotCache } from '../conversation'
 import { requireSuperAdmin } from './requireSuperAdmin'
 
 const SaveKBInputSchema = z.object({
@@ -43,6 +44,8 @@ export async function saveKnowledgeBaseByOrgSlug(
       where: { id: org.botConfig.knowledgeBase.id },
       data,
     })
+
+    invalidateBotCache(org.botConfig.slug)
 
     await logAdminAction({
       userId: user.id ?? 'unknown',

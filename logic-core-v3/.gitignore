@@ -30,8 +30,13 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
+# env files — block anything with .env, environment, or enviroment in the name
+# Pattern `.env*` only matches files starting with ".env" → typo files like
+# `enviroment.env` slip through. The extra patterns below catch those too.
 .env*
+*.env
+*environment*
+*enviroment*
 !.env.example
 
 # vercel

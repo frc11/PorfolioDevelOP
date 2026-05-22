@@ -1,13 +1,12 @@
-import Anthropic from '@anthropic-ai/sdk'
+import { generateText } from 'ai'
 import { getWeekResults } from '@/lib/dashboard/week-results'
 import { getHealthScore } from '@/lib/health-score'
 import { prisma } from '@/lib/prisma'
+import { getLLMProvider } from '@/modules/chatbot/server/llm/factory'
 
 const REGENERATION_LIMIT = 3
 const CACHE_TTL_DAYS = 7
-const CLAUDE_MODEL = 'claude-haiku-4-5-20251001'
-
-let anthropicClient: Anthropic | null = null
+const BRIEF_MODEL = 'gemini-2.5-flash'
 
 export type ExecutiveBriefResult = {
   text: string
@@ -224,29 +223,17 @@ Resultados:
 
 Genera el resumen ejecutivo de la semana.`
 
-  const response = await getAnthropicClient().messages.create({
-    model: CLAUDE_MODEL,
-    max_tokens: 200,
+  const provider = getLLMProvider('google')
+  const model = provider.getModel(BRIEF_MODEL)
+
+  const { text } = await generateText({
+    model,
     system: systemPrompt,
     messages: [{ role: 'user', content: userPrompt }],
+    maxOutputTokens: 200,
   })
 
-  const textBlock = response.content.find((block) => block.type === 'text')
-  if (!textBlock || textBlock.type !== 'text') {
-    throw new Error('No text content in Anthropic response')
-  }
-
-  return textBlock.text.trim()
-}
-
-function getAnthropicClient(): Anthropic {
-  const apiKey = process.env.ANTHROPIC_API_KEY?.trim()
-  if (!apiKey) {
-    throw new Error('ANTHROPIC_API_KEY is not configured')
-  }
-
-  anthropicClient ??= new Anthropic({ apiKey })
-  return anthropicClient
+  return text.trim()
 }
 
 function getCacheAgeDays(date: Date | null, now: Date): number {

@@ -4,6 +4,7 @@ import { auth } from '@/auth'
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 import { logAdminAction } from '@/lib/audit-log'
+import { invalidateBotCache } from '@/modules/chatbot/server/conversation'
 
 interface BulkResult {
   success: number
@@ -25,10 +26,12 @@ export async function bulkPauseBotsAction(botIds: string[]): Promise<BulkResult>
 
   for (const botId of botIds) {
     try {
-      await prisma.botConfig.update({
+      const bot = await prisma.botConfig.update({
         where: { id: botId },
         data: { isActive: false },
+        select: { slug: true },
       })
+      invalidateBotCache(bot.slug)
 
       await logAdminAction({
         userId,
@@ -69,10 +72,12 @@ export async function bulkActivateBotsAction(botIds: string[]): Promise<BulkResu
 
   for (const botId of botIds) {
     try {
-      await prisma.botConfig.update({
+      const bot = await prisma.botConfig.update({
         where: { id: botId },
         data: { isActive: true },
+        select: { slug: true },
       })
+      invalidateBotCache(bot.slug)
 
       await logAdminAction({
         userId,

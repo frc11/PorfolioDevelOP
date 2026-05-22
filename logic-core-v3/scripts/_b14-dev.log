@@ -1,0 +1,1110 @@
+
+> logic-core-v3@0.1.0 dev
+> next dev --turbopack
+
+▲ Next.js 16.2.1 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.1.27:3000
+- Environments: .env.local, .env
+✓ Ready in 552ms
+- Experiments (use with caution):
+  · clientTraceMetadata
+
+ GET /api/version 200 in 265ms (next.js: 235ms, application-code: 30ms)
+{
+  "type": "debug.request_parsed",
+  "level": "debug",
+  "timestamp": "2026-05-22T03:55:39.864Z",
+  "slug": "develop",
+  "messageCount": 1,
+  "sessionId": "b13-1779422137843-s-1",
+  "currentPath": "/"
+}
+{
+  "type": "debug.bot_resolved",
+  "level": "debug",
+  "timestamp": "2026-05-22T03:55:40.714Z",
+  "botId": "cmp2rnq7k00029fdg2649z5vw",
+  "botName": "Lucia",
+  "llmProvider": "google",
+  "llmModel": "gemini-2.5-flash",
+  "monthlyQuota": 1000
+}
+{"type":"chat.llm_request_start","level":"info","timestamp":"2026-05-22T03:55:41.395Z","slug":"develop","botConfigId":"cmp2rnq7k00029fdg2649z5vw","conversationId":"cmpgdzz5200019fy0afn0x8pr","isNewConversation":true,"provider":"google","model":"gemini-2.5-flash","messageCount":1}
+{
+  "type": "debug.llm_call_starting",
+  "level": "debug",
+  "timestamp": "2026-05-22T03:55:41.395Z",
+  "conversationId": "cmpgdzz5200019fy0afn0x8pr",
+  "systemPromptLength": 17862,
+  "toolCount": 4
+}
+{"type":"chat.llm_request_finished","level":"info","timestamp":"2026-05-22T03:55:45.135Z","conversationId":"cmpgdzz5200019fy0afn0x8pr","finishReason":"stop","tokensIn":5579,"tokensOut":92,"costUsd":0.001904,"toolCallCount":0,"warningCount":0,"durationMs":5274,"timings":{"validation_ms":3,"bot_resolve_ms":850,"rate_limit_ms":1,"conv_only_ms":253,"quota_only_ms":536,"db_pre_llm_ms":536,"user_msg_persist_ms":127,"intent_ms":0,"prompt_build_ms":16,"llm_setup_ms":0,"llm_ttfb_ms":3073,"llm_stream_ms":286,"llm_total_ms":3359,"post_persist_ms":380,"total_ms":5274}}
+{"type":"chat.message_completed","level":"info","timestamp":"2026-05-22T03:55:45.136Z","botConfigId":"cmp2rnq7k00029fdg2649z5vw","conversationId":"cmpgdzz5200019fy0afn0x8pr","tokensIn":5579,"tokensOut":92,"costUsd":0.0019037,"toolCallCount":0,"durationMs":5274,"latencyMs":5274,"timings":{"validation_ms":3,"bot_resolve_ms":850,"rate_limit_ms":1,"conv_only_ms":253,"quota_only_ms":536,"db_pre_llm_ms":536,"user_msg_persist_ms":127,"intent_ms":0,"prompt_build_ms":16,"llm_setup_ms":0,"llm_ttfb_ms":3073,"llm_stream_ms":286,"llm_total_ms":3359,"post_persist_ms":380,"total_ms":5274}}
+ POST /api/chatbot/develop/chat 200 in 7.3s (next.js: 1885ms, application-code: 5.4s)
+{
+  "type": "debug.request_parsed",
+  "level": "debug",
+  "timestamp": "2026-05-22T03:55:48.325Z",
+  "slug": "develop",
+  "messageCount": 1,
+  "sessionId": "b13-1779422137843-s0",
+  "currentPath": "/"
+}
+{
+  "type": "debug.bot_resolved",
+  "level": "debug",
+  "timestamp": "2026-05-22T03:55:48.326Z",
+  "botId": "cmp2rnq7k00029fdg2649z5vw",
+  "botName": "Lucia",
+  "llmProvider": "google",
+  "llmModel": "gemini-2.5-flash",
+  "monthlyQuota": 1000
+}
+{"type":"chat.llm_request_start","level":"info","timestamp":"2026-05-22T03:55:48.641Z","slug":"develop","botConfigId":"cmp2rnq7k00029fdg2649z5vw","conversationId":"cmpge050n000b9fy0fxt0j51h","isNewConversation":true,"provider":"google","model":"gemini-2.5-flash","messageCount":1}
+{
+  "type": "debug.llm_call_starting",
+  "level": "debug",
+  "timestamp": "2026-05-22T03:55:48.642Z",
+  "conversationId": "cmpge050n000b9fy0fxt0j51h",
+  "systemPromptLength": 17862,
+  "toolCount": 4
+}
+{"type":"chat.llm_request_finished","level":"info","timestamp":"2026-05-22T03:55:50.090Z","conversationId":"cmpge050n000b9fy0fxt0j51h","finishReason":"stop","tokensIn":5577,"tokensOut":75,"costUsd":0.001861,"toolCallCount":0,"warningCount":0,"durationMs":1765,"timings":{"validation_ms":0,"bot_resolve_ms":1,"rate_limit_ms":0,"quota_only_ms":127,"conv_only_ms":252,"db_pre_llm_ms":253,"user_msg_persist_ms":61,"intent_ms":0,"prompt_build_ms":1,"llm_setup_ms":0,"llm_ttfb_ms":1219,"llm_stream_ms":25,"llm_total_ms":1244,"post_persist_ms":204,"total_ms":1765}}
+{"type":"chat.message_completed","level":"info","timestamp":"2026-05-22T03:55:50.090Z","botConfigId":"cmp2rnq7k00029fdg2649z5vw","conversationId":"cmpge050n000b9fy0fxt0j51h","tokensIn":5577,"tokensOut":75,"costUsd":0.0018606,"toolCallCount":0,"durationMs":1765,"latencyMs":1765,"timings":{"validation_ms":0,"bot_resolve_ms":1,"rate_limit_ms":0,"quota_only_ms":127,"conv_only_ms":252,"db_pre_llm_ms":253,"user_msg_persist_ms":61,"intent_ms":0,"prompt_build_ms":1,"llm_setup_ms":0,"llm_ttfb_ms":1219,"llm_stream_ms":25,"llm_total_ms":1244,"post_persist_ms":204,"total_ms":1765}}
+ POST /api/chatbot/develop/chat 200 in 1855ms (next.js: 21ms, application-code: 1834ms)
+{
+  "type": "debug.request_parsed",
+  "level": "debug",
+  "timestamp": "2026-05-22T03:55:53.222Z",
+  "slug": "develop",
+  "messageCount": 1,
+  "sessionId": "b13-1779422137843-s1",
+  "currentPath": "/"
+}
+{
+  "type": "debug.bot_resolved",
+  "level": "debug",
+  "timestamp": "2026-05-22T03:55:53.222Z",
+  "botId": "cmp2rnq7k00029fdg2649z5vw",
+  "botName": "Lucia",
+  "llmProvider": "google",
+  "llmModel": "gemini-2.5-flash",
+  "monthlyQuota": 1000
+}
+{"type":"chat.llm_request_start","level":"info","timestamp":"2026-05-22T03:55:53.426Z","slug":"develop","botConfigId":"cmp2rnq7k00029fdg2649z5vw","conversationId":"cmpge08rb000l9fy0iq2fk0ef","isNewConversation":true,"provider":"google","model":"gemini-2.5-flash","messageCount":1}
+{
+  "type": "debug.llm_call_starting",
+  "level": "debug",
+  "timestamp": "2026-05-22T03:55:53.427Z",
+  "conversationId": "cmpge08rb000l9fy0iq2fk0ef",
+  "systemPromptLength": 17862,
+  "toolCount": 4
+}
+{"type":"chat.llm_request_finished","level":"info","timestamp":"2026-05-22T03:56:07.618Z","conversationId":"cmpge08rb000l9fy0iq2fk0ef","finishReason":"stop","tokensIn":5582,"tokensOut":71,"costUsd":0.001852,"toolCallCount":0,"warningCount":0,"durationMs":14397,"timings":{"validation_ms":1,"bot_resolve_ms":0,"rate_limit_ms":1,"quota_only_ms":78,"conv_only_ms":140,"db_pre_llm_ms":140,"user_msg_persist_ms":63,"intent_ms":0,"prompt_build_ms":0,"llm_setup_ms":0,"llm_ttfb_ms":11574,"llm_stream_ms":8,"llm_total_ms":11582,"post_persist_ms":2609,"total_ms":14397}}
+{"type":"chat.message_completed","level":"info","timestamp":"2026-05-22T03:56:07.619Z","botConfigId":"cmp2rnq7k00029fdg2649z5vw","conversationId":"cmpge08rb000l9fy0iq2fk0ef","tokensIn":5582,"tokensOut":71,"costUsd":0.0018521,"toolCallCount":0,"durationMs":14397,"latencyMs":14397,"timings":{"validation_ms":1,"bot_resolve_ms":0,"rate_limit_ms":1,"quota_only_ms":78,"conv_only_ms":140,"db_pre_llm_ms":140,"user_msg_persist_ms":63,"intent_ms":0,"prompt_build_ms":0,"llm_setup_ms":0,"llm_ttfb_ms":11574,"llm_stream_ms":8,"llm_total_ms":11582,"post_persist_ms":2609,"total_ms":14397}}
+ POST /api/chatbot/develop/chat 200 in 15.1s (next.js: 20ms, application-code: 15.0s)
+{
+  "type": "debug.request_parsed",
+  "level": "debug",
+  "timestamp": "2026-05-22T03:56:11.299Z",
+  "slug": "develop",
+  "messageCount": 1,
+  "sessionId": "b13-1779422137843-s2",
+  "currentPath": "/"
+}
+{
+  "type": "debug.bot_resolved",
+  "level": "debug",
+  "timestamp": "2026-05-22T03:56:11.300Z",
+  "botId": "cmp2rnq7k00029fdg2649z5vw",
+  "botName": "Lucia",
+  "llmProvider": "google",
+  "llmModel": "gemini-2.5-flash",
+  "monthlyQuota": 1000
+}
+{"type":"chat.llm_request_start","level":"info","timestamp":"2026-05-22T03:56:11.486Z","slug":"develop","botConfigId":"cmp2rnq7k00029fdg2649z5vw","conversationId":"cmpge0moz000v9fy0rwk88hjj","isNewConversation":true,"provider":"google","model":"gemini-2.5-flash","messageCount":1}
+{
+  "type": "debug.llm_call_starting",
+  "level": "debug",
+  "timestamp": "2026-05-22T03:56:11.487Z",
+  "conversationId": "cmpge0moz000v9fy0rwk88hjj",
+  "systemPromptLength": 17862,
+  "toolCount": 4
+}
+{"type":"chat.llm_request_finished","level":"info","timestamp":"2026-05-22T03:56:29.399Z","conversationId":"cmpge0moz000v9fy0rwk88hjj","finishReason":"stop","tokensIn":5581,"tokensOut":162,"costUsd":0.002079,"toolCallCount":0,"warningCount":0,"durationMs":18100,"timings":{"validation_ms":0,"bot_resolve_ms":1,"rate_limit_ms":0,"quota_only_ms":123,"conv_only_ms":122,"db_pre_llm_ms":123,"user_msg_persist_ms":63,"intent_ms":0,"prompt_build_ms":0,"llm_setup_ms":0,"llm_ttfb_ms":17190,"llm_stream_ms":469,"llm_total_ms":17659,"post_persist_ms":252,"total_ms":18100}}
+{"type":"chat.message_completed","level":"info","timestamp":"2026-05-22T03:56:29.399Z","botConfigId":"cmp2rnq7k00029fdg2649z5vw","conversationId":"cmpge0moz000v9fy0rwk88hjj","tokensIn":5581,"tokensOut":162,"costUsd":0.0020793,"toolCallCount":0,"durationMs":18100,"latencyMs":18100,"timings":{"validation_ms":0,"bot_resolve_ms":1,"rate_limit_ms":0,"quota_only_ms":123,"conv_only_ms":122,"db_pre_llm_ms":123,"user_msg_persist_ms":63,"intent_ms":0,"prompt_build_ms":0,"llm_setup_ms":0,"llm_ttfb_ms":17190,"llm_stream_ms":469,"llm_total_ms":17659,"post_persist_ms":252,"total_ms":18100}}
+ POST /api/chatbot/develop/chat 200 in 18.2s (next.js: 23ms, application-code: 18.2s)
+{
+  "type": "debug.request_parsed",
+  "level": "debug",
+  "timestamp": "2026-05-22T03:56:32.520Z",
+  "slug": "develop",
+  "messageCount": 1,
+  "sessionId": "b13-1779422137843-s3",
+  "currentPath": "/"
+}
+{
+  "type": "debug.bot_resolved",
+  "level": "debug",
+  "timestamp": "2026-05-22T03:56:32.521Z",
+  "botId": "cmp2rnq7k00029fdg2649z5vw",
+  "botName": "Lucia",
+  "llmProvider": "google",
+  "llmModel": "gemini-2.5-flash",
+  "monthlyQuota": 1000
+}
+{
+  "type": "debug.intent_detected",
+  "level": "debug",
+  "timestamp": "2026-05-22T03:56:32.701Z",
+  "intent": "service_inquiry",
+  "conversationId": "cmpge132c00159fy0by5kmyay"
+}
+{"type":"chat.llm_request_start","level":"info","timestamp":"2026-05-22T03:56:32.702Z","slug":"develop","botConfigId":"cmp2rnq7k00029fdg2649z5vw","conversationId":"cmpge132c00159fy0by5kmyay","isNewConversation":true,"provider":"google","model":"gemini-2.5-flash","messageCount":1}
+{
+  "type": "debug.llm_call_starting",
+  "level": "debug",
+  "timestamp": "2026-05-22T03:56:32.702Z",
+  "conversationId": "cmpge132c00159fy0by5kmyay",
+  "systemPromptLength": 17862,
+  "toolCount": 4
+}
+{"type":"chat.llm_request_finished","level":"info","timestamp":"2026-05-22T03:56:34.944Z","conversationId":"cmpge132c00159fy0by5kmyay","finishReason":"stop","tokensIn":5644,"tokensOut":185,"costUsd":0.002156,"toolCallCount":0,"warningCount":0,"durationMs":2424,"timings":{"validation_ms":0,"bot_resolve_ms":1,"rate_limit_ms":0,"quota_only_ms":117,"conv_only_ms":117,"db_pre_llm_ms":117,"user_msg_persist_ms":63,"intent_ms":0,"prompt_build_ms":1,"llm_setup_ms":0,"llm_ttfb_ms":1780,"llm_stream_ms":278,"llm_total_ms":2058,"post_persist_ms":184,"total_ms":2424}}
+{"type":"chat.message_completed","level":"info","timestamp":"2026-05-22T03:56:34.945Z","botConfigId":"cmp2rnq7k00029fdg2649z5vw","conversationId":"cmpge132c00159fy0by5kmyay","tokensIn":5644,"tokensOut":185,"costUsd":0.0021557,"toolCallCount":0,"durationMs":2424,"latencyMs":2424,"timings":{"validation_ms":0,"bot_resolve_ms":1,"rate_limit_ms":0,"quota_only_ms":117,"conv_only_ms":117,"db_pre_llm_ms":117,"user_msg_persist_ms":63,"intent_ms":0,"prompt_build_ms":1,"llm_setup_ms":0,"llm_ttfb_ms":1780,"llm_stream_ms":278,"llm_total_ms":2058,"post_persist_ms":184,"total_ms":2424}}
+ POST /api/chatbot/develop/chat 200 in 2.5s (next.js: 36ms, application-code: 2.5s)
+{
+  "type": "debug.request_parsed",
+  "level": "debug",
+  "timestamp": "2026-05-22T03:56:38.061Z",
+  "slug": "develop",
+  "messageCount": 1,
+  "sessionId": "b13-1779422137843-s4",
+  "currentPath": "/"
+}
+{
+  "type": "debug.bot_resolved",
+  "level": "debug",
+  "timestamp": "2026-05-22T03:56:38.061Z",
+  "botId": "cmp2rnq7k00029fdg2649z5vw",
+  "botName": "Lucia",
+  "llmProvider": "google",
+  "llmModel": "gemini-2.5-flash",
+  "monthlyQuota": 1000
+}
+{"type":"chat.llm_request_start","level":"info","timestamp":"2026-05-22T03:56:38.259Z","slug":"develop","botConfigId":"cmp2rnq7k00029fdg2649z5vw","conversationId":"cmpge17ca001f9fy0bvs4m5di","isNewConversation":true,"provider":"google","model":"gemini-2.5-flash","messageCount":1}
+{
+  "type": "debug.llm_call_starting",
+  "level": "debug",
+  "timestamp": "2026-05-22T03:56:38.259Z",
+  "conversationId": "cmpge17ca001f9fy0bvs4m5di",
+  "systemPromptLength": 17862,
+  "toolCount": 4
+}
+{"type":"chat.llm_request_finished","level":"info","timestamp":"2026-05-22T03:56:43.023Z","conversationId":"cmpge17ca001f9fy0bvs4m5di","finishReason":"stop","tokensIn":5583,"tokensOut":543,"costUsd":0.003032,"toolCallCount":0,"warningCount":0,"durationMs":4962,"timings":{"validation_ms":0,"bot_resolve_ms":0,"rate_limit_ms":1,"quota_only_ms":59,"conv_only_ms":136,"db_pre_llm_ms":136,"user_msg_persist_ms":60,"intent_ms":0,"prompt_build_ms":1,"llm_setup_ms":0,"llm_ttfb_ms":4541,"llm_stream_ms":28,"llm_total_ms":4569,"post_persist_ms":194,"total_ms":4962}}
+{"type":"chat.message_completed","level":"info","timestamp":"2026-05-22T03:56:43.023Z","botConfigId":"cmp2rnq7k00029fdg2649z5vw","conversationId":"cmpge17ca001f9fy0bvs4m5di","tokensIn":5583,"tokensOut":543,"costUsd":0.0030324,"toolCallCount":0,"durationMs":4962,"latencyMs":4962,"timings":{"validation_ms":0,"bot_resolve_ms":0,"rate_limit_ms":1,"quota_only_ms":59,"conv_only_ms":136,"db_pre_llm_ms":136,"user_msg_persist_ms":60,"intent_ms":0,"prompt_build_ms":1,"llm_setup_ms":0,"llm_ttfb_ms":4541,"llm_stream_ms":28,"llm_total_ms":4569,"post_persist_ms":194,"total_ms":4962}}
+ POST /api/chatbot/develop/chat 200 in 5.1s (next.js: 22ms, application-code: 5.0s)
+{
+  "type": "debug.request_parsed",
+  "level": "debug",
+  "timestamp": "2026-05-22T03:56:46.128Z",
+  "slug": "develop",
+  "messageCount": 1,
+  "sessionId": "b13-1779422137843-s5",
+  "currentPath": "/"
+}
+{
+  "type": "debug.bot_resolved",
+  "level": "debug",
+  "timestamp": "2026-05-22T03:56:46.547Z",
+  "botId": "cmp2rnq7k00029fdg2649z5vw",
+  "botName": "Lucia",
+  "llmProvider": "google",
+  "llmModel": "gemini-2.5-flash",
+  "monthlyQuota": 1000
+}
+{
+  "type": "debug.intent_detected",
+  "level": "debug",
+  "timestamp": "2026-05-22T03:56:46.751Z",
+  "intent": "service_inquiry",
+  "conversationId": "cmpge1dw3001p9fy0ib1zmqw6"
+}
+{"type":"chat.llm_request_start","level":"info","timestamp":"2026-05-22T03:56:46.752Z","slug":"develop","botConfigId":"cmp2rnq7k00029fdg2649z5vw","conversationId":"cmpge1dw3001p9fy0ib1zmqw6","isNewConversation":true,"provider":"google","model":"gemini-2.5-flash","messageCount":1}
+{
+  "type": "debug.llm_call_starting",
+  "level": "debug",
+  "timestamp": "2026-05-22T03:56:46.752Z",
+  "conversationId": "cmpge1dw3001p9fy0ib1zmqw6",
+  "systemPromptLength": 17862,
+  "toolCount": 4
+}
+{"type":"chat.llm_request_finished","level":"info","timestamp":"2026-05-22T03:56:48.452Z","conversationId":"cmpge1dw3001p9fy0ib1zmqw6","finishReason":"stop","tokensIn":5645,"tokensOut":119,"costUsd":0.001991,"toolCallCount":0,"warningCount":0,"durationMs":2324,"timings":{"validation_ms":0,"bot_resolve_ms":419,"rate_limit_ms":1,"quota_only_ms":62,"conv_only_ms":139,"db_pre_llm_ms":139,"user_msg_persist_ms":64,"intent_ms":0,"prompt_build_ms":1,"llm_setup_ms":0,"llm_ttfb_ms":1358,"llm_stream_ms":143,"llm_total_ms":1501,"post_persist_ms":198,"total_ms":2324}}
+{"type":"chat.message_completed","level":"info","timestamp":"2026-05-22T03:56:48.452Z","botConfigId":"cmp2rnq7k00029fdg2649z5vw","conversationId":"cmpge1dw3001p9fy0ib1zmqw6","tokensIn":5645,"tokensOut":119,"costUsd":0.0019909999999999997,"toolCallCount":0,"durationMs":2324,"latencyMs":2324,"timings":{"validation_ms":0,"bot_resolve_ms":419,"rate_limit_ms":1,"quota_only_ms":62,"conv_only_ms":139,"db_pre_llm_ms":139,"user_msg_persist_ms":64,"intent_ms":0,"prompt_build_ms":1,"llm_setup_ms":0,"llm_ttfb_ms":1358,"llm_stream_ms":143,"llm_total_ms":1501,"post_persist_ms":198,"total_ms":2324}}
+ POST /api/chatbot/develop/chat 200 in 2.4s (next.js: 21ms, application-code: 2.4s)
+{
+  "type": "debug.request_parsed",
+  "level": "debug",
+  "timestamp": "2026-05-22T03:56:51.591Z",
+  "slug": "develop",
+  "messageCount": 1,
+  "sessionId": "b13-1779422137843-s6",
+  "currentPath": "/"
+}
+{
+  "type": "debug.bot_resolved",
+  "level": "debug",
+  "timestamp": "2026-05-22T03:56:51.592Z",
+  "botId": "cmp2rnq7k00029fdg2649z5vw",
+  "botName": "Lucia",
+  "llmProvider": "google",
+  "llmModel": "gemini-2.5-flash",
+  "monthlyQuota": 1000
+}
+{
+  "type": "debug.intent_detected",
+  "level": "debug",
+  "timestamp": "2026-05-22T03:56:51.772Z",
+  "intent": "service_inquiry",
+  "conversationId": "cmpge1hs5001z9fy0yz3ls2u9"
+}
+{"type":"chat.llm_request_start","level":"info","timestamp":"2026-05-22T03:56:51.773Z","slug":"develop","botConfigId":"cmp2rnq7k00029fdg2649z5vw","conversationId":"cmpge1hs5001z9fy0yz3ls2u9","isNewConversation":true,"provider":"google","model":"gemini-2.5-flash","messageCount":1}
+{
+  "type": "debug.llm_call_starting",
+  "level": "debug",
+  "timestamp": "2026-05-22T03:56:51.774Z",
+  "conversationId": "cmpge1hs5001z9fy0yz3ls2u9",
+  "systemPromptLength": 17862,
+  "toolCount": 4
+}
+{"type":"chat.llm_request_finished","level":"info","timestamp":"2026-05-22T03:56:56.749Z","conversationId":"cmpge1hs5001z9fy0yz3ls2u9","finishReason":"stop","tokensIn":5648,"tokensOut":413,"costUsd":0.002727,"toolCallCount":0,"warningCount":0,"durationMs":5158,"timings":{"validation_ms":0,"bot_resolve_ms":1,"rate_limit_ms":0,"quota_only_ms":117,"conv_only_ms":119,"db_pre_llm_ms":119,"user_msg_persist_ms":61,"intent_ms":0,"prompt_build_ms":1,"llm_setup_ms":0,"llm_ttfb_ms":3983,"llm_stream_ms":803,"llm_total_ms":4786,"post_persist_ms":189,"total_ms":5158}}
+{"type":"chat.message_completed","level":"info","timestamp":"2026-05-22T03:56:56.750Z","botConfigId":"cmp2rnq7k00029fdg2649z5vw","conversationId":"cmpge1hs5001z9fy0yz3ls2u9","tokensIn":5648,"tokensOut":413,"costUsd":0.0027269,"toolCallCount":0,"durationMs":5158,"latencyMs":5158,"timings":{"validation_ms":0,"bot_resolve_ms":1,"rate_limit_ms":0,"quota_only_ms":117,"conv_only_ms":119,"db_pre_llm_ms":119,"user_msg_persist_ms":61,"intent_ms":0,"prompt_build_ms":1,"llm_setup_ms":0,"llm_ttfb_ms":3983,"llm_stream_ms":803,"llm_total_ms":4786,"post_persist_ms":189,"total_ms":5158}}
+ POST /api/chatbot/develop/chat 200 in 5.2s (next.js: 21ms, application-code: 5.2s)
+{
+  "type": "debug.request_parsed",
+  "level": "debug",
+  "timestamp": "2026-05-22T03:57:05.002Z",
+  "slug": "develop",
+  "messageCount": 1,
+  "sessionId": "b13-1779422137843-s7",
+  "currentPath": "/"
+}
+{
+  "type": "debug.bot_resolved",
+  "level": "debug",
+  "timestamp": "2026-05-22T03:57:05.003Z",
+  "botId": "cmp2rnq7k00029fdg2649z5vw",
+  "botName": "Lucia",
+  "llmProvider": "google",
+  "llmModel": "gemini-2.5-flash",
+  "monthlyQuota": 1000
+}
+{
+  "type": "debug.intent_detected",
+  "level": "debug",
+  "timestamp": "2026-05-22T03:57:05.256Z",
+  "intent": "service_inquiry",
+  "conversationId": "cmpge1s6m00299fy04id7w9mw"
+}
+{"type":"chat.llm_request_start","level":"info","timestamp":"2026-05-22T03:57:05.258Z","slug":"develop","botConfigId":"cmp2rnq7k00029fdg2649z5vw","conversationId":"cmpge1s6m00299fy04id7w9mw","isNewConversation":true,"provider":"google","model":"gemini-2.5-flash","messageCount":1}
+{
+  "type": "debug.llm_call_starting",
+  "level": "debug",
+  "timestamp": "2026-05-22T03:57:05.258Z",
+  "conversationId": "cmpge1s6m00299fy04id7w9mw",
+  "systemPromptLength": 17862,
+  "toolCount": 4
+}
+{"type":"chat.llm_request_finished","level":"info","timestamp":"2026-05-22T03:57:26.391Z","conversationId":"cmpge1s6m00299fy04id7w9mw","finishReason":"stop","tokensIn":5647,"tokensOut":155,"costUsd":0.002082,"toolCallCount":0,"warningCount":0,"durationMs":21389,"timings":{"validation_ms":0,"bot_resolve_ms":1,"rate_limit_ms":0,"quota_only_ms":75,"conv_only_ms":191,"db_pre_llm_ms":191,"user_msg_persist_ms":62,"intent_ms":0,"prompt_build_ms":1,"llm_setup_ms":0,"llm_ttfb_ms":18504,"llm_stream_ms":5,"llm_total_ms":18509,"post_persist_ms":2624,"total_ms":21389}}
+{"type":"chat.message_completed","level":"info","timestamp":"2026-05-22T03:57:26.392Z","botConfigId":"cmp2rnq7k00029fdg2649z5vw","conversationId":"cmpge1s6m00299fy04id7w9mw","tokensIn":5647,"tokensOut":155,"costUsd":0.0020816,"toolCallCount":0,"durationMs":21389,"latencyMs":21389,"timings":{"validation_ms":0,"bot_resolve_ms":1,"rate_limit_ms":0,"quota_only_ms":75,"conv_only_ms":191,"db_pre_llm_ms":191,"user_msg_persist_ms":62,"intent_ms":0,"prompt_build_ms":1,"llm_setup_ms":0,"llm_ttfb_ms":18504,"llm_stream_ms":5,"llm_total_ms":18509,"post_persist_ms":2624,"total_ms":21389}}
+ POST /api/chatbot/develop/chat 200 in 22.4s (next.js: 60ms, application-code: 22.3s)
+{
+  "type": "debug.request_parsed",
+  "level": "debug",
+  "timestamp": "2026-05-22T03:57:36.197Z",
+  "slug": "develop",
+  "messageCount": 1,
+  "sessionId": "b13-1779422137843-s8",
+  "currentPath": "/"
+}
+{
+  "type": "debug.bot_resolved",
+  "level": "debug",
+  "timestamp": "2026-05-22T03:57:36.197Z",
+  "botId": "cmp2rnq7k00029fdg2649z5vw",
+  "botName": "Lucia",
+  "llmProvider": "google",
+  "llmModel": "gemini-2.5-flash",
+  "monthlyQuota": 1000
+}
+{
+  "type": "debug.intent_detected",
+  "level": "debug",
+  "timestamp": "2026-05-22T03:57:38.064Z",
+  "intent": "price",
+  "conversationId": "cmpge2gn0002j9fy023s2vfbm"
+}
+{"type":"chat.llm_request_start","level":"info","timestamp":"2026-05-22T03:57:38.066Z","slug":"develop","botConfigId":"cmp2rnq7k00029fdg2649z5vw","conversationId":"cmpge2gn0002j9fy023s2vfbm","isNewConversation":true,"provider":"google","model":"gemini-2.5-flash","messageCount":1}
+{
+  "type": "debug.llm_call_starting",
+  "level": "debug",
+  "timestamp": "2026-05-22T03:57:38.066Z",
+  "conversationId": "cmpge2gn0002j9fy023s2vfbm",
+  "systemPromptLength": 17862,
+  "toolCount": 4
+}
+{"type":"chat.llm_request_finished","level":"info","timestamp":"2026-05-22T03:58:01.114Z","conversationId":"cmpge2gn0002j9fy023s2vfbm","finishReason":"stop","tokensIn":5635,"tokensOut":202,"costUsd":0.002195,"toolCallCount":0,"warningCount":0,"durationMs":24917,"timings":{"validation_ms":0,"bot_resolve_ms":0,"rate_limit_ms":1,"quota_only_ms":680,"conv_only_ms":1231,"db_pre_llm_ms":1231,"user_msg_persist_ms":635,"intent_ms":0,"prompt_build_ms":2,"llm_setup_ms":0,"llm_ttfb_ms":22447,"llm_stream_ms":178,"llm_total_ms":22625,"post_persist_ms":423,"total_ms":24917}}
+{"type":"chat.message_completed","level":"info","timestamp":"2026-05-22T03:58:01.114Z","botConfigId":"cmp2rnq7k00029fdg2649z5vw","conversationId":"cmpge2gn0002j9fy023s2vfbm","tokensIn":5635,"tokensOut":202,"costUsd":0.0021955,"toolCallCount":0,"durationMs":24917,"latencyMs":24917,"timings":{"validation_ms":0,"bot_resolve_ms":0,"rate_limit_ms":1,"quota_only_ms":680,"conv_only_ms":1231,"db_pre_llm_ms":1231,"user_msg_persist_ms":635,"intent_ms":0,"prompt_build_ms":2,"llm_setup_ms":0,"llm_ttfb_ms":22447,"llm_stream_ms":178,"llm_total_ms":22625,"post_persist_ms":423,"total_ms":24917}}
+ POST /api/chatbot/develop/chat 200 in 25.6s (next.js: 590ms, application-code: 25.0s)
+{
+  "type": "debug.request_parsed",
+  "level": "debug",
+  "timestamp": "2026-05-22T03:58:04.286Z",
+  "slug": "develop",
+  "messageCount": 1,
+  "sessionId": "b13-1779422137843-s9",
+  "currentPath": "/"
+}
+{
+  "type": "debug.bot_resolved",
+  "level": "debug",
+  "timestamp": "2026-05-22T03:58:04.460Z",
+  "botId": "cmp2rnq7k00029fdg2649z5vw",
+  "botName": "Lucia",
+  "llmProvider": "google",
+  "llmModel": "gemini-2.5-flash",
+  "monthlyQuota": 1000
+}
+{
+  "type": "debug.intent_detected",
+  "level": "debug",
+  "timestamp": "2026-05-22T03:58:04.660Z",
+  "intent": "price",
+  "conversationId": "cmpge320d002t9fy0xxj11igw"
+}
+{"type":"chat.llm_request_start","level":"info","timestamp":"2026-05-22T03:58:04.660Z","slug":"develop","botConfigId":"cmp2rnq7k00029fdg2649z5vw","conversationId":"cmpge320d002t9fy0xxj11igw","isNewConversation":true,"provider":"google","model":"gemini-2.5-flash","messageCount":1}
+{
+  "type": "debug.llm_call_starting",
+  "level": "debug",
+  "timestamp": "2026-05-22T03:58:04.661Z",
+  "conversationId": "cmpge320d002t9fy0xxj11igw",
+  "systemPromptLength": 17862,
+  "toolCount": 4
+}
+{"type":"chat.llm_request_finished","level":"info","timestamp":"2026-05-22T03:58:11.185Z","conversationId":"cmpge320d002t9fy0xxj11igw","finishReason":"stop","tokensIn":5636,"tokensOut":165,"costUsd":0.002103,"toolCallCount":0,"warningCount":0,"durationMs":6899,"timings":{"validation_ms":0,"bot_resolve_ms":174,"rate_limit_ms":1,"quota_only_ms":123,"conv_only_ms":131,"db_pre_llm_ms":131,"user_msg_persist_ms":68,"intent_ms":0,"prompt_build_ms":0,"llm_setup_ms":0,"llm_ttfb_ms":6287,"llm_stream_ms":52,"llm_total_ms":6339,"post_persist_ms":185,"total_ms":6899}}
+{"type":"chat.message_completed","level":"info","timestamp":"2026-05-22T03:58:11.186Z","botConfigId":"cmp2rnq7k00029fdg2649z5vw","conversationId":"cmpge320d002t9fy0xxj11igw","tokensIn":5636,"tokensOut":165,"costUsd":0.0021033000000000002,"toolCallCount":0,"durationMs":6899,"latencyMs":6899,"timings":{"validation_ms":0,"bot_resolve_ms":174,"rate_limit_ms":1,"quota_only_ms":123,"conv_only_ms":131,"db_pre_llm_ms":131,"user_msg_persist_ms":68,"intent_ms":0,"prompt_build_ms":0,"llm_setup_ms":0,"llm_ttfb_ms":6287,"llm_stream_ms":52,"llm_total_ms":6339,"post_persist_ms":185,"total_ms":6899}}
+ POST /api/chatbot/develop/chat 200 in 7.0s (next.js: 20ms, application-code: 7.0s)
+{
+  "type": "debug.request_parsed",
+  "level": "debug",
+  "timestamp": "2026-05-22T03:58:14.315Z",
+  "slug": "develop",
+  "messageCount": 1,
+  "sessionId": "b13-1779422137843-s10",
+  "currentPath": "/"
+}
+{
+  "type": "debug.bot_resolved",
+  "level": "debug",
+  "timestamp": "2026-05-22T03:58:14.316Z",
+  "botId": "cmp2rnq7k00029fdg2649z5vw",
+  "botName": "Lucia",
+  "llmProvider": "google",
+  "llmModel": "gemini-2.5-flash",
+  "monthlyQuota": 1000
+}
+{"type":"chat.llm_request_start","level":"info","timestamp":"2026-05-22T03:58:14.535Z","slug":"develop","botConfigId":"cmp2rnq7k00029fdg2649z5vw","conversationId":"cmpge39n200339fy0vevzddjc","isNewConversation":true,"provider":"google","model":"gemini-2.5-flash","messageCount":1}
+{
+  "type": "debug.llm_call_starting",
+  "level": "debug",
+  "timestamp": "2026-05-22T03:58:14.536Z",
+  "conversationId": "cmpge39n200339fy0vevzddjc",
+  "systemPromptLength": 17862,
+  "toolCount": 4
+}
+{"type":"chat.llm_request_finished","level":"info","timestamp":"2026-05-22T03:58:17.011Z","conversationId":"cmpge39n200339fy0vevzddjc","finishReason":"stop","tokensIn":5582,"tokensOut":174,"costUsd":0.00211,"toolCallCount":0,"warningCount":0,"durationMs":2696,"timings":{"validation_ms":0,"bot_resolve_ms":1,"rate_limit_ms":0,"quota_only_ms":98,"conv_only_ms":158,"db_pre_llm_ms":158,"user_msg_persist_ms":61,"intent_ms":0,"prompt_build_ms":0,"llm_setup_ms":0,"llm_ttfb_ms":2061,"llm_stream_ms":227,"llm_total_ms":2288,"post_persist_ms":187,"total_ms":2696}}
+{"type":"chat.message_completed","level":"info","timestamp":"2026-05-22T03:58:17.011Z","botConfigId":"cmp2rnq7k00029fdg2649z5vw","conversationId":"cmpge39n200339fy0vevzddjc","tokensIn":5582,"tokensOut":174,"costUsd":0.0021096,"toolCallCount":0,"durationMs":2696,"latencyMs":2696,"timings":{"validation_ms":0,"bot_resolve_ms":1,"rate_limit_ms":0,"quota_only_ms":98,"conv_only_ms":158,"db_pre_llm_ms":158,"user_msg_persist_ms":61,"intent_ms":0,"prompt_build_ms":0,"llm_setup_ms":0,"llm_ttfb_ms":2061,"llm_stream_ms":227,"llm_total_ms":2288,"post_persist_ms":187,"total_ms":2696}}
+ POST /api/chatbot/develop/chat 200 in 2.8s (next.js: 19ms, application-code: 2.8s)
+{
+  "type": "debug.request_parsed",
+  "level": "debug",
+  "timestamp": "2026-05-22T03:58:20.136Z",
+  "slug": "develop",
+  "messageCount": 1,
+  "sessionId": "b13-1779422137843-s11",
+  "currentPath": "/"
+}
+{
+  "type": "debug.bot_resolved",
+  "level": "debug",
+  "timestamp": "2026-05-22T03:58:20.136Z",
+  "botId": "cmp2rnq7k00029fdg2649z5vw",
+  "botName": "Lucia",
+  "llmProvider": "google",
+  "llmModel": "gemini-2.5-flash",
+  "monthlyQuota": 1000
+}
+{"type":"chat.llm_request_start","level":"info","timestamp":"2026-05-22T03:58:20.381Z","slug":"develop","botConfigId":"cmp2rnq7k00029fdg2649z5vw","conversationId":"cmpge3e5f003d9fy0tosvg1d0","isNewConversation":true,"provider":"google","model":"gemini-2.5-flash","messageCount":1}
+{
+  "type": "debug.llm_call_starting",
+  "level": "debug",
+  "timestamp": "2026-05-22T03:58:20.381Z",
+  "conversationId": "cmpge3e5f003d9fy0tosvg1d0",
+  "systemPromptLength": 17862,
+  "toolCount": 4
+}
+{"type":"chat.llm_request_finished","level":"info","timestamp":"2026-05-22T03:58:22.657Z","conversationId":"cmpge3e5f003d9fy0tosvg1d0","finishReason":"stop","tokensIn":5585,"tokensOut":236,"costUsd":0.002266,"toolCallCount":0,"warningCount":0,"durationMs":2521,"timings":{"validation_ms":0,"bot_resolve_ms":0,"rate_limit_ms":1,"quota_only_ms":120,"conv_only_ms":182,"db_pre_llm_ms":182,"user_msg_persist_ms":61,"intent_ms":0,"prompt_build_ms":1,"llm_setup_ms":0,"llm_ttfb_ms":1924,"llm_stream_ms":134,"llm_total_ms":2058,"post_persist_ms":218,"total_ms":2521}}
+{"type":"chat.message_completed","level":"info","timestamp":"2026-05-22T03:58:22.657Z","botConfigId":"cmp2rnq7k00029fdg2649z5vw","conversationId":"cmpge3e5f003d9fy0tosvg1d0","tokensIn":5585,"tokensOut":236,"costUsd":0.0022655,"toolCallCount":0,"durationMs":2521,"latencyMs":2521,"timings":{"validation_ms":0,"bot_resolve_ms":0,"rate_limit_ms":1,"quota_only_ms":120,"conv_only_ms":182,"db_pre_llm_ms":182,"user_msg_persist_ms":61,"intent_ms":0,"prompt_build_ms":1,"llm_setup_ms":0,"llm_ttfb_ms":1924,"llm_stream_ms":134,"llm_total_ms":2058,"post_persist_ms":218,"total_ms":2521}}
+ POST /api/chatbot/develop/chat 200 in 2.6s (next.js: 13ms, application-code: 2.6s)
+{
+  "type": "debug.request_parsed",
+  "level": "debug",
+  "timestamp": "2026-05-22T03:58:25.769Z",
+  "slug": "develop",
+  "messageCount": 1,
+  "sessionId": "b13-1779422137843-s12",
+  "currentPath": "/"
+}
+{
+  "type": "debug.bot_resolved",
+  "level": "debug",
+  "timestamp": "2026-05-22T03:58:25.769Z",
+  "botId": "cmp2rnq7k00029fdg2649z5vw",
+  "botName": "Lucia",
+  "llmProvider": "google",
+  "llmModel": "gemini-2.5-flash",
+  "monthlyQuota": 1000
+}
+{
+  "type": "debug.intent_detected",
+  "level": "debug",
+  "timestamp": "2026-05-22T03:58:25.969Z",
+  "intent": "service_inquiry",
+  "conversationId": "cmpge3ig8003n9fy02kgbcoxd"
+}
+{"type":"chat.llm_request_start","level":"info","timestamp":"2026-05-22T03:58:25.970Z","slug":"develop","botConfigId":"cmp2rnq7k00029fdg2649z5vw","conversationId":"cmpge3ig8003n9fy02kgbcoxd","isNewConversation":true,"provider":"google","model":"gemini-2.5-flash","messageCount":1}
+{
+  "type": "debug.llm_call_starting",
+  "level": "debug",
+  "timestamp": "2026-05-22T03:58:25.970Z",
+  "conversationId": "cmpge3ig8003n9fy02kgbcoxd",
+  "systemPromptLength": 17862,
+  "toolCount": 4
+}
+{"type":"chat.llm_request_finished","level":"info","timestamp":"2026-05-22T03:58:27.560Z","conversationId":"cmpge3ig8003n9fy02kgbcoxd","finishReason":"stop","tokensIn":5647,"tokensOut":86,"costUsd":0.001909,"toolCallCount":0,"warningCount":0,"durationMs":1791,"timings":{"validation_ms":0,"bot_resolve_ms":0,"rate_limit_ms":1,"quota_only_ms":62,"conv_only_ms":139,"db_pre_llm_ms":139,"user_msg_persist_ms":60,"intent_ms":0,"prompt_build_ms":1,"llm_setup_ms":0,"llm_ttfb_ms":1280,"llm_stream_ms":115,"llm_total_ms":1395,"post_persist_ms":194,"total_ms":1791}}
+{"type":"chat.message_completed","level":"info","timestamp":"2026-05-22T03:58:27.560Z","botConfigId":"cmp2rnq7k00029fdg2649z5vw","conversationId":"cmpge3ig8003n9fy02kgbcoxd","tokensIn":5647,"tokensOut":86,"costUsd":0.0019091,"toolCallCount":0,"durationMs":1791,"latencyMs":1791,"timings":{"validation_ms":0,"bot_resolve_ms":0,"rate_limit_ms":1,"quota_only_ms":62,"conv_only_ms":139,"db_pre_llm_ms":139,"user_msg_persist_ms":60,"intent_ms":0,"prompt_build_ms":1,"llm_setup_ms":0,"llm_ttfb_ms":1280,"llm_stream_ms":115,"llm_total_ms":1395,"post_persist_ms":194,"total_ms":1791}}
+ POST /api/chatbot/develop/chat 200 in 1875ms (next.js: 18ms, application-code: 1857ms)
+{
+  "type": "debug.request_parsed",
+  "level": "debug",
+  "timestamp": "2026-05-22T03:58:30.657Z",
+  "slug": "develop",
+  "messageCount": 1,
+  "sessionId": "b13-1779422137843-s13",
+  "currentPath": "/"
+}
+{
+  "type": "debug.bot_resolved",
+  "level": "debug",
+  "timestamp": "2026-05-22T03:58:30.658Z",
+  "botId": "cmp2rnq7k00029fdg2649z5vw",
+  "botName": "Lucia",
+  "llmProvider": "google",
+  "llmModel": "gemini-2.5-flash",
+  "monthlyQuota": 1000
+}
+{"type":"chat.llm_request_start","level":"info","timestamp":"2026-05-22T03:58:30.850Z","slug":"develop","botConfigId":"cmp2rnq7k00029fdg2649z5vw","conversationId":"cmpge3m7z003x9fy0xneh53vf","isNewConversation":true,"provider":"google","model":"gemini-2.5-flash","messageCount":1}
+{
+  "type": "debug.llm_call_starting",
+  "level": "debug",
+  "timestamp": "2026-05-22T03:58:30.850Z",
+  "conversationId": "cmpge3m7z003x9fy0xneh53vf",
+  "systemPromptLength": 17862,
+  "toolCount": 4
+}
+{"type":"chat.llm_request_finished","level":"info","timestamp":"2026-05-22T03:58:32.806Z","conversationId":"cmpge3m7z003x9fy0xneh53vf","finishReason":"stop","tokensIn":5584,"tokensOut":187,"costUsd":0.002143,"toolCallCount":0,"warningCount":0,"durationMs":2149,"timings":{"validation_ms":0,"bot_resolve_ms":1,"rate_limit_ms":0,"quota_only_ms":60,"conv_only_ms":121,"db_pre_llm_ms":121,"user_msg_persist_ms":70,"intent_ms":0,"prompt_build_ms":1,"llm_setup_ms":0,"llm_ttfb_ms":1529,"llm_stream_ms":239,"llm_total_ms":1768,"post_persist_ms":187,"total_ms":2149}}
+{"type":"chat.message_completed","level":"info","timestamp":"2026-05-22T03:58:32.807Z","botConfigId":"cmp2rnq7k00029fdg2649z5vw","conversationId":"cmpge3m7z003x9fy0xneh53vf","tokensIn":5584,"tokensOut":187,"costUsd":0.0021427,"toolCallCount":0,"durationMs":2149,"latencyMs":2149,"timings":{"validation_ms":0,"bot_resolve_ms":1,"rate_limit_ms":0,"quota_only_ms":60,"conv_only_ms":121,"db_pre_llm_ms":121,"user_msg_persist_ms":70,"intent_ms":0,"prompt_build_ms":1,"llm_setup_ms":0,"llm_ttfb_ms":1529,"llm_stream_ms":239,"llm_total_ms":1768,"post_persist_ms":187,"total_ms":2149}}
+ POST /api/chatbot/develop/chat 200 in 2.2s (next.js: 15ms, application-code: 2.2s)
+{
+  "type": "debug.request_parsed",
+  "level": "debug",
+  "timestamp": "2026-05-22T03:58:35.919Z",
+  "slug": "develop",
+  "messageCount": 1,
+  "sessionId": "b13-1779422137843-s14",
+  "currentPath": "/"
+}
+{
+  "type": "debug.bot_resolved",
+  "level": "debug",
+  "timestamp": "2026-05-22T03:58:35.919Z",
+  "botId": "cmp2rnq7k00029fdg2649z5vw",
+  "botName": "Lucia",
+  "llmProvider": "google",
+  "llmModel": "gemini-2.5-flash",
+  "monthlyQuota": 1000
+}
+{"type":"chat.llm_request_start","level":"info","timestamp":"2026-05-22T03:58:36.160Z","slug":"develop","botConfigId":"cmp2rnq7k00029fdg2649z5vw","conversationId":"cmpge3qbq00479fy0n93ybq7y","isNewConversation":true,"provider":"google","model":"gemini-2.5-flash","messageCount":1}
+{
+  "type": "debug.llm_call_starting",
+  "level": "debug",
+  "timestamp": "2026-05-22T03:58:36.161Z",
+  "conversationId": "cmpge3qbq00479fy0n93ybq7y",
+  "systemPromptLength": 17862,
+  "toolCount": 4
+}
+{"type":"chat.llm_request_finished","level":"info","timestamp":"2026-05-22T03:59:05.748Z","conversationId":"cmpge3qbq00479fy0n93ybq7y","finishReason":"stop","tokensIn":5582,"tokensOut":188,"costUsd":0.002145,"toolCallCount":0,"warningCount":0,"durationMs":29829,"timings":{"validation_ms":0,"bot_resolve_ms":0,"rate_limit_ms":1,"quota_only_ms":117,"conv_only_ms":180,"db_pre_llm_ms":180,"user_msg_persist_ms":60,"intent_ms":0,"prompt_build_ms":0,"llm_setup_ms":0,"llm_ttfb_ms":26999,"llm_stream_ms":6,"llm_total_ms":27005,"post_persist_ms":2582,"total_ms":29829}}
+{"type":"chat.message_completed","level":"info","timestamp":"2026-05-22T03:59:05.748Z","botConfigId":"cmp2rnq7k00029fdg2649z5vw","conversationId":"cmpge3qbq00479fy0n93ybq7y","tokensIn":5582,"tokensOut":188,"costUsd":0.0021446,"toolCallCount":0,"durationMs":29829,"latencyMs":29829,"timings":{"validation_ms":0,"bot_resolve_ms":0,"rate_limit_ms":1,"quota_only_ms":117,"conv_only_ms":180,"db_pre_llm_ms":180,"user_msg_persist_ms":60,"intent_ms":0,"prompt_build_ms":0,"llm_setup_ms":0,"llm_ttfb_ms":26999,"llm_stream_ms":6,"llm_total_ms":27005,"post_persist_ms":2582,"total_ms":29829}}
+ POST /api/chatbot/develop/chat 200 in 30.7s (next.js: 19ms, application-code: 30.7s)
+{
+  "type": "debug.request_parsed",
+  "level": "debug",
+  "timestamp": "2026-05-22T03:59:18.019Z",
+  "slug": "develop",
+  "messageCount": 1,
+  "sessionId": "b13-1779422137843-s15",
+  "currentPath": "/"
+}
+{
+  "type": "debug.bot_resolved",
+  "level": "debug",
+  "timestamp": "2026-05-22T03:59:19.365Z",
+  "botId": "cmp2rnq7k00029fdg2649z5vw",
+  "botName": "Lucia",
+  "llmProvider": "google",
+  "llmModel": "gemini-2.5-flash",
+  "monthlyQuota": 1000
+}
+{"type":"chat.llm_request_start","level":"info","timestamp":"2026-05-22T03:59:23.550Z","slug":"develop","botConfigId":"cmp2rnq7k00029fdg2649z5vw","conversationId":"cmpge4ou5004h9fy0c9vz5dnk","isNewConversation":true,"provider":"google","model":"gemini-2.5-flash","messageCount":1}
+{
+  "type": "debug.llm_call_starting",
+  "level": "debug",
+  "timestamp": "2026-05-22T03:59:23.550Z",
+  "conversationId": "cmpge4ou5004h9fy0c9vz5dnk",
+  "systemPromptLength": 17862,
+  "toolCount": 4
+}
+{"type":"chat.llm_request_finished","level":"info","timestamp":"2026-05-22T03:59:36.067Z","conversationId":"cmpge4ou5004h9fy0c9vz5dnk","finishReason":"stop","tokensIn":5585,"tokensOut":256,"costUsd":0.002315,"toolCallCount":0,"warningCount":0,"durationMs":18049,"timings":{"validation_ms":1,"bot_resolve_ms":1346,"rate_limit_ms":0,"quota_only_ms":1397,"conv_only_ms":2938,"db_pre_llm_ms":2938,"user_msg_persist_ms":1247,"intent_ms":0,"prompt_build_ms":0,"llm_setup_ms":0,"llm_ttfb_ms":9962,"llm_stream_ms":5,"llm_total_ms":9967,"post_persist_ms":2549,"total_ms":18049}}
+{"type":"chat.message_completed","level":"info","timestamp":"2026-05-22T03:59:36.068Z","botConfigId":"cmp2rnq7k00029fdg2649z5vw","conversationId":"cmpge4ou5004h9fy0c9vz5dnk","tokensIn":5585,"tokensOut":256,"costUsd":0.0023155,"toolCallCount":0,"durationMs":18049,"latencyMs":18049,"timings":{"validation_ms":1,"bot_resolve_ms":1346,"rate_limit_ms":0,"quota_only_ms":1397,"conv_only_ms":2938,"db_pre_llm_ms":2938,"user_msg_persist_ms":1247,"intent_ms":0,"prompt_build_ms":0,"llm_setup_ms":0,"llm_ttfb_ms":9962,"llm_stream_ms":5,"llm_total_ms":9967,"post_persist_ms":2549,"total_ms":18049}}
+ POST /api/chatbot/develop/chat 200 in 20.1s (next.js: 1239ms, application-code: 18.9s)
+{
+  "type": "debug.request_parsed",
+  "level": "debug",
+  "timestamp": "2026-05-22T03:59:47.513Z",
+  "slug": "develop",
+  "messageCount": 1,
+  "sessionId": "b13-1779422137843-s16",
+  "currentPath": "/"
+}
+{
+  "type": "debug.bot_resolved",
+  "level": "debug",
+  "timestamp": "2026-05-22T03:59:47.514Z",
+  "botId": "cmp2rnq7k00029fdg2649z5vw",
+  "botName": "Lucia",
+  "llmProvider": "google",
+  "llmModel": "gemini-2.5-flash",
+  "monthlyQuota": 1000
+}
+{
+  "type": "debug.intent_detected",
+  "level": "debug",
+  "timestamp": "2026-05-22T03:59:50.345Z",
+  "intent": "comparison",
+  "conversationId": "cmpge5a9x004r9fy0e1oh12y9"
+}
+{"type":"chat.llm_request_start","level":"info","timestamp":"2026-05-22T03:59:50.347Z","slug":"develop","botConfigId":"cmp2rnq7k00029fdg2649z5vw","conversationId":"cmpge5a9x004r9fy0e1oh12y9","isNewConversation":true,"provider":"google","model":"gemini-2.5-flash","messageCount":1}
+{
+  "type": "debug.llm_call_starting",
+  "level": "debug",
+  "timestamp": "2026-05-22T03:59:50.348Z",
+  "conversationId": "cmpge5a9x004r9fy0e1oh12y9",
+  "systemPromptLength": 17862,
+  "toolCount": 4
+}
+{"type":"chat.llm_request_finished","level":"info","timestamp":"2026-05-22T04:00:00.972Z","conversationId":"cmpge5a9x004r9fy0e1oh12y9","finishReason":"stop","tokensIn":5642,"tokensOut":176,"costUsd":0.002133,"toolCallCount":0,"warningCount":0,"durationMs":13459,"timings":{"validation_ms":0,"bot_resolve_ms":1,"rate_limit_ms":0,"quota_only_ms":1096,"conv_only_ms":1907,"db_pre_llm_ms":1908,"user_msg_persist_ms":922,"intent_ms":1,"prompt_build_ms":2,"llm_setup_ms":0,"llm_ttfb_ms":9921,"llm_stream_ms":493,"llm_total_ms":10414,"post_persist_ms":209,"total_ms":13459}}
+{"type":"chat.message_completed","level":"info","timestamp":"2026-05-22T04:00:00.972Z","botConfigId":"cmp2rnq7k00029fdg2649z5vw","conversationId":"cmpge5a9x004r9fy0e1oh12y9","tokensIn":5642,"tokensOut":176,"costUsd":0.0021326,"toolCallCount":0,"durationMs":13459,"latencyMs":13459,"timings":{"validation_ms":0,"bot_resolve_ms":1,"rate_limit_ms":0,"quota_only_ms":1096,"conv_only_ms":1907,"db_pre_llm_ms":1908,"user_msg_persist_ms":922,"intent_ms":1,"prompt_build_ms":2,"llm_setup_ms":0,"llm_ttfb_ms":9921,"llm_stream_ms":493,"llm_total_ms":10414,"post_persist_ms":209,"total_ms":13459}}
+ POST /api/chatbot/develop/chat 200 in 14.3s (next.js: 796ms, application-code: 13.5s)
+{
+  "type": "debug.request_parsed",
+  "level": "debug",
+  "timestamp": "2026-05-22T04:00:04.117Z",
+  "slug": "develop",
+  "messageCount": 1,
+  "sessionId": "b13-1779422137843-s17",
+  "currentPath": "/"
+}
+{
+  "type": "debug.bot_resolved",
+  "level": "debug",
+  "timestamp": "2026-05-22T04:00:04.118Z",
+  "botId": "cmp2rnq7k00029fdg2649z5vw",
+  "botName": "Lucia",
+  "llmProvider": "google",
+  "llmModel": "gemini-2.5-flash",
+  "monthlyQuota": 1000
+}
+{"type":"chat.llm_request_start","level":"info","timestamp":"2026-05-22T04:00:04.461Z","slug":"develop","botConfigId":"cmp2rnq7k00029fdg2649z5vw","conversationId":"cmpge5me800519fy0h08a3ib5","isNewConversation":true,"provider":"google","model":"gemini-2.5-flash","messageCount":1}
+{
+  "type": "debug.llm_call_starting",
+  "level": "debug",
+  "timestamp": "2026-05-22T04:00:04.461Z",
+  "conversationId": "cmpge5me800519fy0h08a3ib5",
+  "systemPromptLength": 17861,
+  "toolCount": 4
+}
+{"type":"chat.llm_request_finished","level":"info","timestamp":"2026-05-22T04:00:24.372Z","conversationId":"cmpge5me800519fy0h08a3ib5","finishReason":"tool-calls","tokensIn":5585,"tokensOut":115,"costUsd":0.001963,"toolCallCount":1,"warningCount":0,"durationMs":20255,"timings":{"validation_ms":0,"bot_resolve_ms":1,"rate_limit_ms":0,"quota_only_ms":134,"conv_only_ms":274,"db_pre_llm_ms":274,"user_msg_persist_ms":68,"intent_ms":0,"prompt_build_ms":0,"llm_setup_ms":0,"llm_ttfb_ms":16763,"llm_stream_ms":11,"llm_total_ms":16774,"post_persist_ms":3137,"total_ms":20255}}
+{"type":"chat.message_completed","level":"info","timestamp":"2026-05-22T04:00:24.372Z","botConfigId":"cmp2rnq7k00029fdg2649z5vw","conversationId":"cmpge5me800519fy0h08a3ib5","tokensIn":5585,"tokensOut":115,"costUsd":0.001963,"toolCallCount":1,"durationMs":20255,"latencyMs":20255,"timings":{"validation_ms":0,"bot_resolve_ms":1,"rate_limit_ms":0,"quota_only_ms":134,"conv_only_ms":274,"db_pre_llm_ms":274,"user_msg_persist_ms":68,"intent_ms":0,"prompt_build_ms":0,"llm_setup_ms":0,"llm_ttfb_ms":16763,"llm_stream_ms":11,"llm_total_ms":16774,"post_persist_ms":3137,"total_ms":20255}}
+ POST /api/chatbot/develop/chat 200 in 21.3s (next.js: 26ms, application-code: 21.3s)
+{
+  "type": "debug.request_parsed",
+  "level": "debug",
+  "timestamp": "2026-05-22T04:00:36.265Z",
+  "slug": "develop",
+  "messageCount": 1,
+  "sessionId": "b13-1779422137843-s18",
+  "currentPath": "/"
+}
+{
+  "type": "debug.bot_resolved",
+  "level": "debug",
+  "timestamp": "2026-05-22T04:00:37.466Z",
+  "botId": "cmp2rnq7k00029fdg2649z5vw",
+  "botName": "Lucia",
+  "llmProvider": "google",
+  "llmModel": "gemini-2.5-flash",
+  "monthlyQuota": 1000
+}
+{"type":"chat.llm_request_start","level":"info","timestamp":"2026-05-22T04:00:40.780Z","slug":"develop","botConfigId":"cmp2rnq7k00029fdg2649z5vw","conversationId":"cmpge6cvu005b9fy0g52yw5a9","isNewConversation":true,"provider":"google","model":"gemini-2.5-flash","messageCount":1}
+{
+  "type": "debug.llm_call_starting",
+  "level": "debug",
+  "timestamp": "2026-05-22T04:00:40.781Z",
+  "conversationId": "cmpge6cvu005b9fy0g52yw5a9",
+  "systemPromptLength": 17861,
+  "toolCount": 4
+}
+{"type":"chat.llm_request_finished","level":"info","timestamp":"2026-05-22T04:00:52.378Z","conversationId":"cmpge6cvu005b9fy0g52yw5a9","finishReason":"stop","tokensIn":5581,"tokensOut":54,"costUsd":0.001809,"toolCallCount":0,"warningCount":0,"durationMs":16113,"timings":{"validation_ms":0,"bot_resolve_ms":1201,"rate_limit_ms":1,"quota_only_ms":1117,"conv_only_ms":2404,"db_pre_llm_ms":2404,"user_msg_persist_ms":909,"intent_ms":0,"prompt_build_ms":0,"llm_setup_ms":0,"llm_ttfb_ms":10765,"llm_stream_ms":6,"llm_total_ms":10771,"post_persist_ms":825,"total_ms":16113}}
+{"type":"chat.message_completed","level":"info","timestamp":"2026-05-22T04:00:52.379Z","botConfigId":"cmp2rnq7k00029fdg2649z5vw","conversationId":"cmpge6cvu005b9fy0g52yw5a9","tokensIn":5581,"tokensOut":54,"costUsd":0.0018092999999999998,"toolCallCount":0,"durationMs":16113,"latencyMs":16113,"timings":{"validation_ms":0,"bot_resolve_ms":1201,"rate_limit_ms":1,"quota_only_ms":1117,"conv_only_ms":2404,"db_pre_llm_ms":2404,"user_msg_persist_ms":909,"intent_ms":0,"prompt_build_ms":0,"llm_setup_ms":0,"llm_ttfb_ms":10765,"llm_stream_ms":6,"llm_total_ms":10771,"post_persist_ms":825,"total_ms":16113}}
+ POST /api/chatbot/develop/chat 200 in 17.2s (next.js: 1009ms, application-code: 16.2s)
+{
+  "type": "debug.request_parsed",
+  "level": "debug",
+  "timestamp": "2026-05-22T04:00:55.542Z",
+  "slug": "develop",
+  "messageCount": 1,
+  "sessionId": "b13-1779422137843-s19",
+  "currentPath": "/"
+}
+{
+  "type": "debug.bot_resolved",
+  "level": "debug",
+  "timestamp": "2026-05-22T04:00:55.542Z",
+  "botId": "cmp2rnq7k00029fdg2649z5vw",
+  "botName": "Lucia",
+  "llmProvider": "google",
+  "llmModel": "gemini-2.5-flash",
+  "monthlyQuota": 1000
+}
+{"type":"chat.llm_request_start","level":"info","timestamp":"2026-05-22T04:00:56.191Z","slug":"develop","botConfigId":"cmp2rnq7k00029fdg2649z5vw","conversationId":"cmpge6q35005l9fy05nzfw5nr","isNewConversation":true,"provider":"google","model":"gemini-2.5-flash","messageCount":1}
+{
+  "type": "debug.llm_call_starting",
+  "level": "debug",
+  "timestamp": "2026-05-22T04:00:56.191Z",
+  "conversationId": "cmpge6q35005l9fy05nzfw5nr",
+  "systemPromptLength": 17861,
+  "toolCount": 4
+}
+{"type":"chat.llm_request_finished","level":"info","timestamp":"2026-05-22T04:01:00.669Z","conversationId":"cmpge6q35005l9fy05nzfw5nr","finishReason":"stop","tokensIn":5584,"tokensOut":222,"costUsd":0.00223,"toolCallCount":0,"warningCount":0,"durationMs":5127,"timings":{"validation_ms":0,"bot_resolve_ms":0,"rate_limit_ms":0,"conv_only_ms":267,"quota_only_ms":529,"db_pre_llm_ms":529,"user_msg_persist_ms":119,"intent_ms":0,"prompt_build_ms":1,"llm_setup_ms":0,"llm_ttfb_ms":3909,"llm_stream_ms":202,"llm_total_ms":4111,"post_persist_ms":366,"total_ms":5127}}
+{"type":"chat.message_completed","level":"info","timestamp":"2026-05-22T04:01:00.670Z","botConfigId":"cmp2rnq7k00029fdg2649z5vw","conversationId":"cmpge6q35005l9fy05nzfw5nr","tokensIn":5584,"tokensOut":222,"costUsd":0.0022302000000000003,"toolCallCount":0,"durationMs":5127,"latencyMs":5127,"timings":{"validation_ms":0,"bot_resolve_ms":0,"rate_limit_ms":0,"conv_only_ms":267,"quota_only_ms":529,"db_pre_llm_ms":529,"user_msg_persist_ms":119,"intent_ms":0,"prompt_build_ms":1,"llm_setup_ms":0,"llm_ttfb_ms":3909,"llm_stream_ms":202,"llm_total_ms":4111,"post_persist_ms":366,"total_ms":5127}}
+ POST /api/chatbot/develop/chat 200 in 5.3s (next.js: 19ms, application-code: 5.3s)
+{
+  "type": "debug.request_parsed",
+  "level": "debug",
+  "timestamp": "2026-05-22T04:01:04.459Z",
+  "slug": "develop",
+  "messageCount": 1,
+  "sessionId": "b13-1779422137843-s20",
+  "currentPath": "/"
+}
+{
+  "type": "debug.bot_resolved",
+  "level": "debug",
+  "timestamp": "2026-05-22T04:01:04.459Z",
+  "botId": "cmp2rnq7k00029fdg2649z5vw",
+  "botName": "Lucia",
+  "llmProvider": "google",
+  "llmModel": "gemini-2.5-flash",
+  "monthlyQuota": 1000
+}
+{"type":"chat.llm_request_start","level":"info","timestamp":"2026-05-22T04:01:04.754Z","slug":"develop","botConfigId":"cmp2rnq7k00029fdg2649z5vw","conversationId":"cmpge6wxs005v9fy00aykooma","isNewConversation":true,"provider":"google","model":"gemini-2.5-flash","messageCount":1}
+{
+  "type": "debug.llm_call_starting",
+  "level": "debug",
+  "timestamp": "2026-05-22T04:01:04.755Z",
+  "conversationId": "cmpge6wxs005v9fy00aykooma",
+  "systemPromptLength": 17861,
+  "toolCount": 4
+}
+{"type":"chat.llm_request_finished","level":"info","timestamp":"2026-05-22T04:01:22.702Z","conversationId":"cmpge6wxs005v9fy00aykooma","finishReason":"stop","tokensIn":5583,"tokensOut":360,"costUsd":0.002575,"toolCallCount":0,"warningCount":0,"durationMs":18243,"timings":{"validation_ms":0,"bot_resolve_ms":0,"rate_limit_ms":1,"quota_only_ms":111,"conv_only_ms":234,"db_pre_llm_ms":234,"user_msg_persist_ms":60,"intent_ms":0,"prompt_build_ms":0,"llm_setup_ms":0,"llm_ttfb_ms":14999,"llm_stream_ms":7,"llm_total_ms":15006,"post_persist_ms":2941,"total_ms":18243}}
+{"type":"chat.message_completed","level":"info","timestamp":"2026-05-22T04:01:22.703Z","botConfigId":"cmp2rnq7k00029fdg2649z5vw","conversationId":"cmpge6wxs005v9fy00aykooma","tokensIn":5583,"tokensOut":360,"costUsd":0.0025749,"toolCallCount":0,"durationMs":18243,"latencyMs":18243,"timings":{"validation_ms":0,"bot_resolve_ms":0,"rate_limit_ms":1,"quota_only_ms":111,"conv_only_ms":234,"db_pre_llm_ms":234,"user_msg_persist_ms":60,"intent_ms":0,"prompt_build_ms":0,"llm_setup_ms":0,"llm_ttfb_ms":14999,"llm_stream_ms":7,"llm_total_ms":15006,"post_persist_ms":2941,"total_ms":18243}}
+ POST /api/chatbot/develop/chat 200 in 19.3s (next.js: 20ms, application-code: 19.3s)
+{
+  "type": "debug.request_parsed",
+  "level": "debug",
+  "timestamp": "2026-05-22T04:01:34.725Z",
+  "slug": "develop",
+  "messageCount": 1,
+  "sessionId": "b13-1779422137843-s21",
+  "currentPath": "/"
+}
+{
+  "type": "debug.bot_resolved",
+  "level": "debug",
+  "timestamp": "2026-05-22T04:01:34.725Z",
+  "botId": "cmp2rnq7k00029fdg2649z5vw",
+  "botName": "Lucia",
+  "llmProvider": "google",
+  "llmModel": "gemini-2.5-flash",
+  "monthlyQuota": 1000
+}
+{
+  "type": "debug.intent_detected",
+  "level": "debug",
+  "timestamp": "2026-05-22T04:01:37.447Z",
+  "intent": "consultation",
+  "conversationId": "cmpge7kyi00659fy0kje7dlfp"
+}
+{"type":"chat.llm_request_start","level":"info","timestamp":"2026-05-22T04:01:37.448Z","slug":"develop","botConfigId":"cmp2rnq7k00029fdg2649z5vw","conversationId":"cmpge7kyi00659fy0kje7dlfp","isNewConversation":true,"provider":"google","model":"gemini-2.5-flash","messageCount":1}
+{
+  "type": "debug.llm_call_starting",
+  "level": "debug",
+  "timestamp": "2026-05-22T04:01:37.449Z",
+  "conversationId": "cmpge7kyi00659fy0kje7dlfp",
+  "systemPromptLength": 17861,
+  "toolCount": 4
+}
+{"type":"chat.llm_request_finished","level":"info","timestamp":"2026-05-22T04:01:50.131Z","conversationId":"cmpge7kyi00659fy0kje7dlfp","finishReason":"stop","tokensIn":5642,"tokensOut":771,"costUsd":0.00362,"toolCallCount":0,"warningCount":0,"durationMs":15407,"timings":{"validation_ms":1,"bot_resolve_ms":0,"rate_limit_ms":1,"quota_only_ms":996,"conv_only_ms":1862,"db_pre_llm_ms":1862,"user_msg_persist_ms":859,"intent_ms":0,"prompt_build_ms":1,"llm_setup_ms":0,"llm_ttfb_ms":12288,"llm_stream_ms":166,"llm_total_ms":12454,"post_persist_ms":228,"total_ms":15407}}
+{"type":"chat.message_completed","level":"info","timestamp":"2026-05-22T04:01:50.131Z","botConfigId":"cmp2rnq7k00029fdg2649z5vw","conversationId":"cmpge7kyi00659fy0kje7dlfp","tokensIn":5642,"tokensOut":771,"costUsd":0.0036201000000000002,"toolCallCount":0,"durationMs":15407,"latencyMs":15407,"timings":{"validation_ms":1,"bot_resolve_ms":0,"rate_limit_ms":1,"quota_only_ms":996,"conv_only_ms":1862,"db_pre_llm_ms":1862,"user_msg_persist_ms":859,"intent_ms":0,"prompt_build_ms":1,"llm_setup_ms":0,"llm_ttfb_ms":12288,"llm_stream_ms":166,"llm_total_ms":12454,"post_persist_ms":228,"total_ms":15407}}
+ POST /api/chatbot/develop/chat 200 in 16.5s (next.js: 1056ms, application-code: 15.5s)
+{
+  "type": "debug.request_parsed",
+  "level": "debug",
+  "timestamp": "2026-05-22T04:01:53.242Z",
+  "slug": "develop",
+  "messageCount": 1,
+  "sessionId": "b13-1779422137843-s22",
+  "currentPath": "/"
+}
+{
+  "type": "debug.bot_resolved",
+  "level": "debug",
+  "timestamp": "2026-05-22T04:01:53.580Z",
+  "botId": "cmp2rnq7k00029fdg2649z5vw",
+  "botName": "Lucia",
+  "llmProvider": "google",
+  "llmModel": "gemini-2.5-flash",
+  "monthlyQuota": 1000
+}
+{"type":"chat.llm_request_start","level":"info","timestamp":"2026-05-22T04:01:53.778Z","slug":"develop","botConfigId":"cmp2rnq7k00029fdg2649z5vw","conversationId":"cmpge7ysq006f9fy0gmuxszxm","isNewConversation":true,"provider":"google","model":"gemini-2.5-flash","messageCount":1}
+{
+  "type": "debug.llm_call_starting",
+  "level": "debug",
+  "timestamp": "2026-05-22T04:01:53.778Z",
+  "conversationId": "cmpge7ysq006f9fy0gmuxszxm",
+  "systemPromptLength": 17861,
+  "toolCount": 4
+}
+{"type":"chat.llm_request_finished","level":"info","timestamp":"2026-05-22T04:01:56.704Z","conversationId":"cmpge7ysq006f9fy0gmuxszxm","finishReason":"stop","tokensIn":5591,"tokensOut":323,"costUsd":0.002485,"toolCallCount":0,"warningCount":0,"durationMs":3462,"timings":{"validation_ms":0,"bot_resolve_ms":338,"rate_limit_ms":0,"conv_only_ms":118,"quota_only_ms":118,"db_pre_llm_ms":118,"user_msg_persist_ms":79,"intent_ms":0,"prompt_build_ms":1,"llm_setup_ms":0,"llm_ttfb_ms":2551,"llm_stream_ms":193,"llm_total_ms":2744,"post_persist_ms":182,"total_ms":3462}}
+{"type":"chat.message_completed","level":"info","timestamp":"2026-05-22T04:01:56.704Z","botConfigId":"cmp2rnq7k00029fdg2649z5vw","conversationId":"cmpge7ysq006f9fy0gmuxszxm","tokensIn":5591,"tokensOut":323,"costUsd":0.0024847999999999997,"toolCallCount":0,"durationMs":3462,"latencyMs":3462,"timings":{"validation_ms":0,"bot_resolve_ms":338,"rate_limit_ms":0,"conv_only_ms":118,"quota_only_ms":118,"db_pre_llm_ms":118,"user_msg_persist_ms":79,"intent_ms":0,"prompt_build_ms":1,"llm_setup_ms":0,"llm_ttfb_ms":2551,"llm_stream_ms":193,"llm_total_ms":2744,"post_persist_ms":182,"total_ms":3462}}
+ POST /api/chatbot/develop/chat 200 in 3.6s (next.js: 17ms, application-code: 3.6s)
+{
+  "type": "debug.request_parsed",
+  "level": "debug",
+  "timestamp": "2026-05-22T04:01:59.871Z",
+  "slug": "develop",
+  "messageCount": 1,
+  "sessionId": "b13-1779422137843-s23",
+  "currentPath": "/"
+}
+{
+  "type": "debug.bot_resolved",
+  "level": "debug",
+  "timestamp": "2026-05-22T04:01:59.871Z",
+  "botId": "cmp2rnq7k00029fdg2649z5vw",
+  "botName": "Lucia",
+  "llmProvider": "google",
+  "llmModel": "gemini-2.5-flash",
+  "monthlyQuota": 1000
+}
+{
+  "type": "debug.intent_detected",
+  "level": "debug",
+  "timestamp": "2026-05-22T04:02:00.056Z",
+  "intent": "service_inquiry",
+  "conversationId": "cmpge83nn006p9fy0eida4tvs"
+}
+{"type":"chat.llm_request_start","level":"info","timestamp":"2026-05-22T04:02:00.057Z","slug":"develop","botConfigId":"cmp2rnq7k00029fdg2649z5vw","conversationId":"cmpge83nn006p9fy0eida4tvs","isNewConversation":true,"provider":"google","model":"gemini-2.5-flash","messageCount":1}
+{
+  "type": "debug.llm_call_starting",
+  "level": "debug",
+  "timestamp": "2026-05-22T04:02:00.057Z",
+  "conversationId": "cmpge83nn006p9fy0eida4tvs",
+  "systemPromptLength": 17861,
+  "toolCount": 4
+}
+{"type":"chat.llm_request_finished","level":"info","timestamp":"2026-05-22T04:02:02.276Z","conversationId":"cmpge83nn006p9fy0eida4tvs","finishReason":"stop","tokensIn":5650,"tokensOut":132,"costUsd":0.002025,"toolCallCount":0,"warningCount":0,"durationMs":2405,"timings":{"validation_ms":0,"bot_resolve_ms":0,"rate_limit_ms":0,"quota_only_ms":57,"conv_only_ms":124,"db_pre_llm_ms":125,"user_msg_persist_ms":60,"intent_ms":0,"prompt_build_ms":1,"llm_setup_ms":0,"llm_ttfb_ms":1418,"llm_stream_ms":616,"llm_total_ms":2034,"post_persist_ms":184,"total_ms":2405}}
+{"type":"chat.message_completed","level":"info","timestamp":"2026-05-22T04:02:02.277Z","botConfigId":"cmp2rnq7k00029fdg2649z5vw","conversationId":"cmpge83nn006p9fy0eida4tvs","tokensIn":5650,"tokensOut":132,"costUsd":0.002025,"toolCallCount":0,"durationMs":2405,"latencyMs":2405,"timings":{"validation_ms":0,"bot_resolve_ms":0,"rate_limit_ms":0,"quota_only_ms":57,"conv_only_ms":124,"db_pre_llm_ms":125,"user_msg_persist_ms":60,"intent_ms":0,"prompt_build_ms":1,"llm_setup_ms":0,"llm_ttfb_ms":1418,"llm_stream_ms":616,"llm_total_ms":2034,"post_persist_ms":184,"total_ms":2405}}
+ POST /api/chatbot/develop/chat 200 in 2.5s (next.js: 23ms, application-code: 2.5s)
+{
+  "type": "debug.request_parsed",
+  "level": "debug",
+  "timestamp": "2026-05-22T04:02:05.407Z",
+  "slug": "develop",
+  "messageCount": 1,
+  "sessionId": "b13-1779422137843-s24",
+  "currentPath": "/"
+}
+{
+  "type": "debug.bot_resolved",
+  "level": "debug",
+  "timestamp": "2026-05-22T04:02:05.408Z",
+  "botId": "cmp2rnq7k00029fdg2649z5vw",
+  "botName": "Lucia",
+  "llmProvider": "google",
+  "llmModel": "gemini-2.5-flash",
+  "monthlyQuota": 1000
+}
+{
+  "type": "debug.intent_detected",
+  "level": "debug",
+  "timestamp": "2026-05-22T04:02:19.279Z",
+  "intent": "service_inquiry",
+  "conversationId": "cmpge87yd006z9fy0zs7h5pks"
+}
+{"type":"chat.llm_request_start","level":"info","timestamp":"2026-05-22T04:02:19.280Z","slug":"develop","botConfigId":"cmp2rnq7k00029fdg2649z5vw","conversationId":"cmpge87yd006z9fy0zs7h5pks","isNewConversation":true,"provider":"google","model":"gemini-2.5-flash","messageCount":1}
+{
+  "type": "debug.llm_call_starting",
+  "level": "debug",
+  "timestamp": "2026-05-22T04:02:19.281Z",
+  "conversationId": "cmpge87yd006z9fy0zs7h5pks",
+  "systemPromptLength": 17861,
+  "toolCount": 4
+}
+{"type":"chat.llm_request_finished","level":"info","timestamp":"2026-05-22T04:02:31.501Z","conversationId":"cmpge87yd006z9fy0zs7h5pks","finishReason":"stop","tokensIn":5646,"tokensOut":143,"costUsd":0.002051,"toolCallCount":0,"warningCount":0,"durationMs":26094,"timings":{"validation_ms":0,"bot_resolve_ms":1,"rate_limit_ms":0,"quota_only_ms":12506,"conv_only_ms":12785,"db_pre_llm_ms":12785,"user_msg_persist_ms":1086,"intent_ms":0,"prompt_build_ms":1,"llm_setup_ms":0,"llm_ttfb_ms":9010,"llm_stream_ms":6,"llm_total_ms":9016,"post_persist_ms":3204,"total_ms":26094}}
+{"type":"chat.message_completed","level":"info","timestamp":"2026-05-22T04:02:31.502Z","botConfigId":"cmp2rnq7k00029fdg2649z5vw","conversationId":"cmpge87yd006z9fy0zs7h5pks","tokensIn":5646,"tokensOut":143,"costUsd":0.0020513,"toolCallCount":0,"durationMs":26094,"latencyMs":26094,"timings":{"validation_ms":0,"bot_resolve_ms":1,"rate_limit_ms":0,"quota_only_ms":12506,"conv_only_ms":12785,"db_pre_llm_ms":12785,"user_msg_persist_ms":1086,"intent_ms":0,"prompt_build_ms":1,"llm_setup_ms":0,"llm_ttfb_ms":9010,"llm_stream_ms":6,"llm_total_ms":9016,"post_persist_ms":3204,"total_ms":26094}}
+ POST /api/chatbot/develop/chat 200 in 27.1s (next.js: 20ms, application-code: 27.1s)
+{
+  "type": "debug.request_parsed",
+  "level": "debug",
+  "timestamp": "2026-05-22T04:02:41.652Z",
+  "slug": "develop",
+  "messageCount": 1,
+  "sessionId": "b13-1779422137843-s25",
+  "currentPath": "/"
+}
+{
+  "type": "debug.bot_resolved",
+  "level": "debug",
+  "timestamp": "2026-05-22T04:02:41.652Z",
+  "botId": "cmp2rnq7k00029fdg2649z5vw",
+  "botName": "Lucia",
+  "llmProvider": "google",
+  "llmModel": "gemini-2.5-flash",
+  "monthlyQuota": 1000
+}
+{
+  "type": "debug.intent_detected",
+  "level": "debug",
+  "timestamp": "2026-05-22T04:02:43.479Z",
+  "intent": "service_inquiry",
+  "conversationId": "cmpge90eb00799fy0xljrdvbl"
+}
+{"type":"chat.llm_request_start","level":"info","timestamp":"2026-05-22T04:02:43.480Z","slug":"develop","botConfigId":"cmp2rnq7k00029fdg2649z5vw","conversationId":"cmpge90eb00799fy0xljrdvbl","isNewConversation":true,"provider":"google","model":"gemini-2.5-flash","messageCount":1}
+{
+  "type": "debug.llm_call_starting",
+  "level": "debug",
+  "timestamp": "2026-05-22T04:02:43.480Z",
+  "conversationId": "cmpge90eb00799fy0xljrdvbl",
+  "systemPromptLength": 17861,
+  "toolCount": 4
+}
+{"type":"chat.llm_request_finished","level":"info","timestamp":"2026-05-22T04:02:47.111Z","conversationId":"cmpge90eb00799fy0xljrdvbl","finishReason":"stop","tokensIn":5647,"tokensOut":224,"costUsd":0.002254,"toolCallCount":0,"warningCount":0,"durationMs":5460,"timings":{"validation_ms":1,"bot_resolve_ms":0,"rate_limit_ms":0,"quota_only_ms":714,"conv_only_ms":1336,"db_pre_llm_ms":1337,"user_msg_persist_ms":490,"intent_ms":0,"prompt_build_ms":1,"llm_setup_ms":0,"llm_ttfb_ms":3359,"llm_stream_ms":67,"llm_total_ms":3426,"post_persist_ms":204,"total_ms":5460}}
+{"type":"chat.message_completed","level":"info","timestamp":"2026-05-22T04:02:47.112Z","botConfigId":"cmp2rnq7k00029fdg2649z5vw","conversationId":"cmpge90eb00799fy0xljrdvbl","tokensIn":5647,"tokensOut":224,"costUsd":0.0022541,"toolCallCount":0,"durationMs":5460,"latencyMs":5460,"timings":{"validation_ms":1,"bot_resolve_ms":0,"rate_limit_ms":0,"quota_only_ms":714,"conv_only_ms":1336,"db_pre_llm_ms":1337,"user_msg_persist_ms":490,"intent_ms":0,"prompt_build_ms":1,"llm_setup_ms":0,"llm_ttfb_ms":3359,"llm_stream_ms":67,"llm_total_ms":3426,"post_persist_ms":204,"total_ms":5460}}
+ POST /api/chatbot/develop/chat 200 in 6.3s (next.js: 761ms, application-code: 5.5s)
+{
+  "type": "debug.request_parsed",
+  "level": "debug",
+  "timestamp": "2026-05-22T04:02:50.232Z",
+  "slug": "develop",
+  "messageCount": 1,
+  "sessionId": "b13-1779422137843-s26",
+  "currentPath": "/"
+}
+{
+  "type": "debug.bot_resolved",
+  "level": "debug",
+  "timestamp": "2026-05-22T04:02:50.232Z",
+  "botId": "cmp2rnq7k00029fdg2649z5vw",
+  "botName": "Lucia",
+  "llmProvider": "google",
+  "llmModel": "gemini-2.5-flash",
+  "monthlyQuota": 1000
+}
+{"type":"chat.llm_request_start","level":"info","timestamp":"2026-05-22T04:02:50.447Z","slug":"develop","botConfigId":"cmp2rnq7k00029fdg2649z5vw","conversationId":"cmpge96j9007j9fy0es8togaa","isNewConversation":true,"provider":"google","model":"gemini-2.5-flash","messageCount":1}
+{
+  "type": "debug.llm_call_starting",
+  "level": "debug",
+  "timestamp": "2026-05-22T04:02:50.447Z",
+  "conversationId": "cmpge96j9007j9fy0es8togaa",
+  "systemPromptLength": 17861,
+  "toolCount": 4
+}
+{"type":"chat.llm_request_finished","level":"info","timestamp":"2026-05-22T04:03:05.888Z","conversationId":"cmpge96j9007j9fy0es8togaa","finishReason":"stop","tokensIn":5584,"tokensOut":420,"costUsd":0.002725,"toolCallCount":0,"warningCount":0,"durationMs":15656,"timings":{"validation_ms":0,"bot_resolve_ms":0,"rate_limit_ms":1,"quota_only_ms":84,"conv_only_ms":151,"db_pre_llm_ms":151,"user_msg_persist_ms":62,"intent_ms":0,"prompt_build_ms":1,"llm_setup_ms":0,"llm_ttfb_ms":12358,"llm_stream_ms":6,"llm_total_ms":12364,"post_persist_ms":3076,"total_ms":15656}}
+{"type":"chat.message_completed","level":"info","timestamp":"2026-05-22T04:03:05.889Z","botConfigId":"cmp2rnq7k00029fdg2649z5vw","conversationId":"cmpge96j9007j9fy0es8togaa","tokensIn":5584,"tokensOut":420,"costUsd":0.0027252000000000005,"toolCallCount":0,"durationMs":15656,"latencyMs":15656,"timings":{"validation_ms":0,"bot_resolve_ms":0,"rate_limit_ms":1,"quota_only_ms":84,"conv_only_ms":151,"db_pre_llm_ms":151,"user_msg_persist_ms":62,"intent_ms":0,"prompt_build_ms":1,"llm_setup_ms":0,"llm_ttfb_ms":12358,"llm_stream_ms":6,"llm_total_ms":12364,"post_persist_ms":3076,"total_ms":15656}}
+ POST /api/chatbot/develop/chat 200 in 16.8s (next.js: 19ms, application-code: 16.8s)
+{
+  "type": "debug.request_parsed",
+  "level": "debug",
+  "timestamp": "2026-05-22T04:03:16.969Z",
+  "slug": "develop",
+  "messageCount": 1,
+  "sessionId": "b13-1779422137843-s27",
+  "currentPath": "/"
+}
+{
+  "type": "debug.bot_resolved",
+  "level": "debug",
+  "timestamp": "2026-05-22T04:03:18.049Z",
+  "botId": "cmp2rnq7k00029fdg2649z5vw",
+  "botName": "Lucia",
+  "llmProvider": "google",
+  "llmModel": "gemini-2.5-flash",
+  "monthlyQuota": 1000
+}
+{
+  "type": "debug.intent_detected",
+  "level": "debug",
+  "timestamp": "2026-05-22T04:03:20.266Z",
+  "intent": "service_inquiry",
+  "conversationId": "cmpge9sl6007t9fy0leqk7nfr"
+}
+{"type":"chat.llm_request_start","level":"info","timestamp":"2026-05-22T04:03:20.267Z","slug":"develop","botConfigId":"cmp2rnq7k00029fdg2649z5vw","conversationId":"cmpge9sl6007t9fy0leqk7nfr","isNewConversation":true,"provider":"google","model":"gemini-2.5-flash","messageCount":1}
+{
+  "type": "debug.llm_call_starting",
+  "level": "debug",
+  "timestamp": "2026-05-22T04:03:20.268Z",
+  "conversationId": "cmpge9sl6007t9fy0leqk7nfr",
+  "systemPromptLength": 17861,
+  "toolCount": 4
+}
+{"type":"chat.llm_request_finished","level":"info","timestamp":"2026-05-22T04:03:26.382Z","conversationId":"cmpge9sl6007t9fy0leqk7nfr","finishReason":"stop","tokensIn":5649,"tokensOut":114,"costUsd":0.00198,"toolCallCount":0,"warningCount":0,"durationMs":9413,"timings":{"validation_ms":0,"bot_resolve_ms":1080,"rate_limit_ms":1,"quota_only_ms":851,"conv_only_ms":1561,"db_pre_llm_ms":1561,"user_msg_persist_ms":655,"intent_ms":0,"prompt_build_ms":1,"llm_setup_ms":0,"llm_ttfb_ms":5762,"llm_stream_ms":171,"llm_total_ms":5933,"post_persist_ms":181,"total_ms":9413}}
+{"type":"chat.message_completed","level":"info","timestamp":"2026-05-22T04:03:26.383Z","botConfigId":"cmp2rnq7k00029fdg2649z5vw","conversationId":"cmpge9sl6007t9fy0leqk7nfr","tokensIn":5649,"tokensOut":114,"costUsd":0.0019797,"toolCallCount":0,"durationMs":9413,"latencyMs":9413,"timings":{"validation_ms":0,"bot_resolve_ms":1080,"rate_limit_ms":1,"quota_only_ms":851,"conv_only_ms":1561,"db_pre_llm_ms":1561,"user_msg_persist_ms":655,"intent_ms":0,"prompt_build_ms":1,"llm_setup_ms":0,"llm_ttfb_ms":5762,"llm_stream_ms":171,"llm_total_ms":5933,"post_persist_ms":181,"total_ms":9413}}
+ POST /api/chatbot/develop/chat 200 in 10.2s (next.js: 697ms, application-code: 9.5s)
+{
+  "type": "debug.request_parsed",
+  "level": "debug",
+  "timestamp": "2026-05-22T04:03:29.496Z",
+  "slug": "develop",
+  "messageCount": 1,
+  "sessionId": "b13-1779422137843-s28",
+  "currentPath": "/"
+}
+{
+  "type": "debug.bot_resolved",
+  "level": "debug",
+  "timestamp": "2026-05-22T04:03:29.496Z",
+  "botId": "cmp2rnq7k00029fdg2649z5vw",
+  "botName": "Lucia",
+  "llmProvider": "google",
+  "llmModel": "gemini-2.5-flash",
+  "monthlyQuota": 1000
+}
+{
+  "type": "debug.intent_detected",
+  "level": "debug",
+  "timestamp": "2026-05-22T04:03:29.741Z",
+  "intent": "consultation",
+  "conversationId": "cmpgea0t100839fy0vje44vef"
+}
+{"type":"chat.llm_request_start","level":"info","timestamp":"2026-05-22T04:03:29.742Z","slug":"develop","botConfigId":"cmp2rnq7k00029fdg2649z5vw","conversationId":"cmpgea0t100839fy0vje44vef","isNewConversation":true,"provider":"google","model":"gemini-2.5-flash","messageCount":1}
+{
+  "type": "debug.llm_call_starting",
+  "level": "debug",
+  "timestamp": "2026-05-22T04:03:29.743Z",
+  "conversationId": "cmpgea0t100839fy0vje44vef",
+  "systemPromptLength": 17861,
+  "toolCount": 4
+}
+{"type":"chat.llm_request_finished","level":"info","timestamp":"2026-05-22T04:03:32.071Z","conversationId":"cmpgea0t100839fy0vje44vef","finishReason":"stop","tokensIn":5639,"tokensOut":138,"costUsd":0.002037,"toolCallCount":0,"warningCount":0,"durationMs":2576,"timings":{"validation_ms":1,"bot_resolve_ms":0,"rate_limit_ms":0,"quota_only_ms":57,"conv_only_ms":181,"db_pre_llm_ms":183,"user_msg_persist_ms":62,"intent_ms":0,"prompt_build_ms":1,"llm_setup_ms":0,"llm_ttfb_ms":1821,"llm_stream_ms":324,"llm_total_ms":2145,"post_persist_ms":183,"total_ms":2576}}
+{"type":"chat.message_completed","level":"info","timestamp":"2026-05-22T04:03:32.071Z","botConfigId":"cmp2rnq7k00029fdg2649z5vw","conversationId":"cmpgea0t100839fy0vje44vef","tokensIn":5639,"tokensOut":138,"costUsd":0.0020367,"toolCallCount":0,"durationMs":2576,"latencyMs":2576,"timings":{"validation_ms":1,"bot_resolve_ms":0,"rate_limit_ms":0,"quota_only_ms":57,"conv_only_ms":181,"db_pre_llm_ms":183,"user_msg_persist_ms":62,"intent_ms":0,"prompt_build_ms":1,"llm_setup_ms":0,"llm_ttfb_ms":1821,"llm_stream_ms":324,"llm_total_ms":2145,"post_persist_ms":183,"total_ms":2576}}
+ POST /api/chatbot/develop/chat 200 in 2.7s (next.js: 17ms, application-code: 2.6s)
+⚠ Server is approaching the used memory threshold, restarting...
+▲ Next.js 16.2.1 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.1.27:3000
+- Environments: .env.local, .env
+✓ Ready in 328ms
+- Experiments (use with caution):
+  · clientTraceMetadata
+
+{
+  "type": "debug.request_parsed",
+  "level": "debug",
+  "timestamp": "2026-05-22T04:03:37.436Z",
+  "slug": "develop",
+  "messageCount": 1,
+  "sessionId": "b13-1779422137843-s29",
+  "currentPath": "/"
+}
+{
+  "type": "debug.bot_resolved",
+  "level": "debug",
+  "timestamp": "2026-05-22T04:03:38.207Z",
+  "botId": "cmp2rnq7k00029fdg2649z5vw",
+  "botName": "Lucia",
+  "llmProvider": "google",
+  "llmModel": "gemini-2.5-flash",
+  "monthlyQuota": 1000
+}
+{
+  "type": "debug.intent_detected",
+  "level": "debug",
+  "timestamp": "2026-05-22T04:03:38.840Z",
+  "intent": "consultation",
+  "conversationId": "cmpgea7kj00019fx4ugpqr435"
+}
+{"type":"chat.llm_request_start","level":"info","timestamp":"2026-05-22T04:03:38.843Z","slug":"develop","botConfigId":"cmp2rnq7k00029fdg2649z5vw","conversationId":"cmpgea7kj00019fx4ugpqr435","isNewConversation":true,"provider":"google","model":"gemini-2.5-flash","messageCount":1}
+{
+  "type": "debug.llm_call_starting",
+  "level": "debug",
+  "timestamp": "2026-05-22T04:03:38.844Z",
+  "conversationId": "cmpgea7kj00019fx4ugpqr435",
+  "systemPromptLength": 17861,
+  "toolCount": 4
+}
+{"type":"chat.llm_request_finished","level":"info","timestamp":"2026-05-22T04:03:47.812Z","conversationId":"cmpgea7kj00019fx4ugpqr435","finishReason":"stop","tokensIn":5639,"tokensOut":200,"costUsd":0.002192,"toolCallCount":0,"warningCount":0,"durationMs":10378,"timings":{"validation_ms":2,"bot_resolve_ms":771,"rate_limit_ms":1,"conv_only_ms":231,"quota_only_ms":515,"db_pre_llm_ms":515,"user_msg_persist_ms":117,"intent_ms":0,"prompt_build_ms":2,"llm_setup_ms":1,"llm_ttfb_ms":6391,"llm_stream_ms":10,"llm_total_ms":6401,"post_persist_ms":2567,"total_ms":10378}}
+{"type":"chat.message_completed","level":"info","timestamp":"2026-05-22T04:03:47.813Z","botConfigId":"cmp2rnq7k00029fdg2649z5vw","conversationId":"cmpgea7kj00019fx4ugpqr435","tokensIn":5639,"tokensOut":200,"costUsd":0.0021917,"toolCallCount":0,"durationMs":10378,"latencyMs":10378,"timings":{"validation_ms":2,"bot_resolve_ms":771,"rate_limit_ms":1,"conv_only_ms":231,"quota_only_ms":515,"db_pre_llm_ms":515,"user_msg_persist_ms":117,"intent_ms":0,"prompt_build_ms":2,"llm_setup_ms":1,"llm_ttfb_ms":6391,"llm_stream_ms":10,"llm_total_ms":6401,"post_persist_ms":2567,"total_ms":10378}}
+ POST /api/chatbot/develop/chat 200 in 12.8s (next.js: 2.0s, application-code: 10.8s)
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+
+<--- Last few GCs --->
+
+[67288:00000201FEE32000]   832350 ms: Scavenge 15891.6 (15939.3) -> 15878.0 (16014.0) MB, pooled: 0 MB, 24.96 / 0.00 ms  (average mu = 0.323, current mu = 0.294) allocation failure; 
+[67288:00000201FEE32000]   837029 ms: Mark-Compact (reduce) 15933.9 (16035.0) -> 15839.6 (15868.8) MB, pooled: 0 MB, 1280.81 / 99.90 ms  (+ 2945.2 ms in 588 steps since start of marking, biggest step 5.5 ms, walltime since start of marking 4679 ms) (avera
+FATAL ERROR: Ineffective mark-compacts near heap limit Allocation failed - JavaScript heap out of memory
+----- Native stack trace -----
+
+ 1: 00007FF74861AE1F node::OnFatalError+1343
+ 2: 00007FF7492637B7 v8::Function::NewInstance+423
+ 3: 00007FF749063E77 v8::base::AddressSpaceReservation::AddressSpaceReservation+322071
+ 4: 00007FF749067B84 v8::base::AddressSpaceReservation::AddressSpaceReservation+337700
+ 5: 00007FF749076B1C v8::internal::StrongRootAllocatorBase::deallocate_impl+16604
+ 6: 00007FF74907635B v8::internal::StrongRootAllocatorBase::deallocate_impl+14619
+ 7: 00007FF74A4DEBED v8::base::UnsignedDivisionByConstant<unsigned __int64>+2791309
+ 8: 00007FF749061940 v8::base::AddressSpaceReservation::AddressSpaceReservation+312544
+ 9: 00007FF7490E5619 v8::Unlocker::~Unlocker+9273
+10: 00007FF748C5B398 v8::String::Utf8Value::~Utf8Value+142680
+11: 00000201B927733A 
+[?25h

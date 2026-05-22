@@ -5,6 +5,7 @@ import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 import { getClientChatbotSession } from './getClientSession'
 import { logChatbotEvent } from '../logging'
+import { invalidateBotCache } from '../conversation'
 
 // SOLO 5 de los 7 campos son editables. toneExamples y forbiddenStatements son read-only
 // para el cliente (los maneja develOP)
@@ -28,10 +29,13 @@ export async function saveClientKnowledgeBase(input: z.infer<typeof ClientKBSche
 
   if (!kb) return { ok: false, error: 'KB not found' }
 
-  await prisma.knowledgeBase.update({
+  const updated = await prisma.knowledgeBase.update({
     where: { id: kb.id },
     data: parsed,
+    include: { botConfig: { select: { slug: true } } },
   })
+
+  invalidateBotCache(updated.botConfig.slug)
 
   await logChatbotEvent({
     botConfigId: session.bot.id,

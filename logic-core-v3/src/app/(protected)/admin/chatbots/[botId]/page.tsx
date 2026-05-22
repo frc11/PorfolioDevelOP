@@ -8,12 +8,12 @@ import {
 } from '@/modules/chatbot/server/admin/queries'
 import {
   BotDetailClient,
-  VALID_TABS,
-  type TabId,
   type MappedEvent,
   type LeadItem,
   type BotWithDetails,
+  type MonthlyUsage,
 } from './BotDetailClient'
+import { VALID_TABS, type TabId } from './tabs'
 
 interface Props {
   params: Promise<{ botId: string }>
@@ -82,12 +82,21 @@ export default async function BotDetailPage({ params, searchParams }: Props) {
     conversation: l.conversation ?? null,
   }))
 
+  const serializedUsage: MonthlyUsage = monthlyUsage
+    ? {
+        conversationsCount: monthlyUsage.conversationsCount,
+        tokensIn: monthlyUsage.tokensIn,
+        tokensOut: monthlyUsage.tokensOut,
+        costUsd: Number(monthlyUsage.costUsd),
+      }
+    : null
+
   return (
     <BotDetailClient
       bot={bot as BotWithDetails}
       initialTab={activeTab}
       initialEvents={initialEvents}
-      monthlyUsage={monthlyUsage}
+      monthlyUsage={serializedUsage}
       leads={leads}
     />
   )

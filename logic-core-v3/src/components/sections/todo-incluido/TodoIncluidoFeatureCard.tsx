@@ -1,13 +1,28 @@
 'use client'
 
 import { motion } from 'motion/react'
-import * as LucideIcons from 'lucide-react'
-import type { LucideIcon } from 'lucide-react'
+import {
+  BarChart3,
+  GitBranch,
+  MessageSquare,
+  ShieldCheck,
+  Sparkles,
+  Box,
+  type LucideIcon,
+} from 'lucide-react'
 import type { IncludedFeature } from './data'
 
+// Static map enables webpack tree-shaking. Keep in sync with IncludedFeature.iconName in ./data.
+const ICON_MAP: Record<string, LucideIcon> = {
+  BarChart3,
+  GitBranch,
+  MessageSquare,
+  ShieldCheck,
+  Sparkles,
+}
+
 function resolveLucideIcon(name: string): LucideIcon {
-  const Icon = (LucideIcons as unknown as Record<string, LucideIcon>)[name]
-  return Icon ?? LucideIcons.Box
+  return ICON_MAP[name] ?? Box
 }
 
 interface TodoIncluidoFeatureCardProps {

@@ -3,7 +3,10 @@
 import { useState, useTransition } from 'react'
 import { createClientAssetAction } from '@/actions/agency-actions'
 import { UploadCloud, Loader2 } from 'lucide-react'
-import { AssetType } from '@prisma/client'
+import type { AssetType } from '@prisma/client'
+
+// Mirror of prisma enum AssetType. Local literal keeps @prisma/client out of client bundle.
+const ASSET_TYPES = ['DOCUMENT', 'IMAGE', 'BRANDBOOK', 'LOGO', 'ACCESS', 'OTHER'] as const satisfies readonly AssetType[]
 
 export function VaultManager({ organizationId }: { organizationId: string }) {
   const [isPending, startTransition] = useTransition()
@@ -53,7 +56,7 @@ export function VaultManager({ organizationId }: { organizationId: string }) {
             disabled={isPending}
             className="bg-[#12141a] border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-emerald-500"
           >
-            {Object.values(AssetType).map((t) => (
+            {ASSET_TYPES.map((t) => (
               <option key={t} value={t}>{t}</option>
             ))}
           </select>

@@ -1,13 +1,12 @@
 'use client'
 
 import { MessageSquare, Users, Activity, Zap } from 'lucide-react'
-import type { QuotaUsage } from '@prisma/client'
 import { StatCard } from '@/components/ui/StatCard'
-import type { BotWithDetails } from '../BotDetailClient'
+import type { BotWithDetails, MonthlyUsage } from '../BotDetailClient'
 
 interface Props {
   bot: BotWithDetails
-  monthlyUsage: QuotaUsage | null
+  monthlyUsage: MonthlyUsage
 }
 
 export function OverviewTab({ bot, monthlyUsage }: Props) {

@@ -4,6 +4,7 @@ import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
 import { computeDiff, logAdminAction, omitAuditNoise } from '@/lib/audit-log'
 import { chatbotLog } from '../logging'
+import { invalidateBotCache } from '../conversation'
 import { requireSuperAdmin } from './requireSuperAdmin'
 
 const quickReplySchema = z.object({
@@ -106,6 +107,8 @@ export async function saveBotConfig(input: BotConfigInput): Promise<{ success: b
 
       return { ...bot, organization }
     })
+
+    invalidateBotCache(after.slug)
 
     await logAdminAction({
       userId: user.id ?? 'unknown',

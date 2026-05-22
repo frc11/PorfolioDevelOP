@@ -82,7 +82,29 @@ export async function ChatbotTab({ clientId }: ChatbotTabProps) {
         />
       </div>
 
-      <ChatbotManager botConfig={org.botConfig} organizationId={org.id} organizationSlug={org.slug} />
+      <ChatbotManager
+        botConfig={{
+          botName: org.botConfig.botName,
+          slug: org.botConfig.slug,
+          llmModel: org.botConfig.llmModel,
+          isActive: org.botConfig.isActive,
+          monthlyQuota: org.botConfig.monthlyQuota,
+          quotaUsages: org.botConfig.quotaUsages.map((q) => ({
+            tokensOut: q.tokensOut,
+            costUsd: Number(q.costUsd),
+            conversationsCount: q.conversationsCount,
+          })),
+          leads: org.botConfig.leads.map((l) => ({
+            id: l.id,
+            name: l.name,
+            email: l.email,
+            phone: l.phone,
+            intent: l.intent,
+          })),
+        }}
+        organizationId={org.id}
+        organizationSlug={org.slug}
+      />
 
       <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
         <QuickActionCard

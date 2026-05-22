@@ -85,7 +85,7 @@ export function ChatbotManager({
             Consumo (Este mes)
           </div>
           <div className="text-xl font-semibold text-white mb-1">
-            {currentQuota.tokensOut.toLocaleString()} <span className="text-sm font-normal text-zinc-500">tokens</span>
+            {currentQuota.tokensOut.toLocaleString('es-AR')} <span className="text-sm font-normal text-zinc-500">tokens</span>
           </div>
           <div className="w-full bg-zinc-800 rounded-full h-1.5 mt-2">
             <div
@@ -94,7 +94,7 @@ export function ChatbotManager({
             />
           </div>
           <div className="text-[10px] text-zinc-500 mt-1 text-right">
-            Límite: {maxTokens.toLocaleString()}
+            Límite: {maxTokens.toLocaleString('es-AR')}
           </div>
         </div>
 

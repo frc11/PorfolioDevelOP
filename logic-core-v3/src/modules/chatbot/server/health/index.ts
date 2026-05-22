@@ -1,4 +1,6 @@
 export { checkChatbotHealth } from './checkHealth'
 export { runLLMSmokeTest } from './smokeTest'
+export { buildHealthVerdict } from './buildHealthVerdict'
 export type { HealthCheckResult } from './checkHealth'
 export type { SmokeTestResult } from './smokeTest'
+export type { HealthVerdict, VerdictLevel, VerdictReason } from './buildHealthVerdict'

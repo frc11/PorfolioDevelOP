@@ -32,7 +32,7 @@ async function ClientsList() {
     botConfig: client.botConfig,
     subscription: client.subscription,
     _count: client._count,
-    createdAt: client.createdAt.toISOString(),
+    createdAt: new Date(client.createdAt).toISOString(),
   }))
   return (
     <>

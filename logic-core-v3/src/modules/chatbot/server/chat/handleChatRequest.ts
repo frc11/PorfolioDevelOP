@@ -64,6 +64,17 @@ export async function handleChatRequest(
   try {
   const startTime = Date.now()
 
+  // Per-stage timing breakdown (B1.3). Each `mark(key)` records the time
+  // elapsed since the previous mark and advances the cursor. Persisted in
+  // metadata.timings of the chat.message_completed event.
+  const timings: Record<string, number | null> = {}
+  let stepStart = startTime
+  const mark = (key: string): void => {
+    const now = Date.now()
+    timings[key] = now - stepStart
+    stepStart = now
+  }
+
   // ─── 1. Parse and validate body ───────────────────────────────
   let body: RequestBody
   try {
@@ -74,6 +85,7 @@ export async function handleChatRequest(
     chatbotLog('chat.bad_request', { slug, error: msg }, 'warn')
     return Response.json({ error: 'Invalid request body' }, { status: 400 })
   }
+  mark('validation_ms')
 
   chatbotDebug('request_parsed', {
     slug,
@@ -94,6 +106,8 @@ export async function handleChatRequest(
     chatbotLog('chat.bot_no_kb', { slug, botConfigId: bot.id }, 'error')
     return Response.json({ error: 'Bot misconfigured' }, { status: 500 })
   }
+
+  mark('bot_resolve_ms')
 
   chatbotDebug('bot_resolved', {
     botId: bot.id,
@@ -125,20 +139,38 @@ export async function handleChatRequest(
     )
   }
 
+  mark('rate_limit_ms')
+
   // ─── 4 & 5. Quota check + conversation (parallel) ─────────────
   const userAgent = request.headers.get('user-agent')?.slice(0, 500) ?? undefined
 
+  // Sub-timings of the Promise.all (B1.4): lets us quantify the savings
+  // of running these queries in parallel vs sequentially.
+  // quota_only_ms + conv_only_ms ≈ what the sequential version would take.
+  // db_pre_llm_ms ≈ max(quota_only_ms, conv_only_ms) since Promise.all
+  // settles when both finish.
   const [quota, { conversation, isNew: isNewConversation }] = await Promise.all([
-    checkQuota(bot.id, bot.monthlyQuota),
-    getOrCreateConversation({
-      botConfigId: bot.id,
-      sessionId: body.sessionId,
-      currentPath: body.currentPath,
-      referrer: body.referrer,
-      visitorIpHash: ipHash,
-      visitorUserAgent: userAgent,
-    }),
+    (async () => {
+      const t = Date.now()
+      const r = await checkQuota(bot.id, bot.monthlyQuota)
+      timings.quota_only_ms = Date.now() - t
+      return r
+    })(),
+    (async () => {
+      const t = Date.now()
+      const r = await getOrCreateConversation({
+        botConfigId: bot.id,
+        sessionId: body.sessionId,
+        currentPath: body.currentPath,
+        referrer: body.referrer,
+        visitorIpHash: ipHash,
+        visitorUserAgent: userAgent,
+      })
+      timings.conv_only_ms = Date.now() - t
+      return r
+    })(),
   ])
+  mark('db_pre_llm_ms')
 
   if (!quota.withinQuota) {
     chatbotLog(
@@ -177,9 +209,11 @@ export async function handleChatRequest(
       content: lastUserMessage.content,
     },
   })
+  mark('user_msg_persist_ms')
 
   // ─── 7. Intent detection & Build system prompt ────────────────
   const intentResult = detectIntent(lastUserMessage.content)
+  mark('intent_ms')
   if (intentResult.intent !== 'unknown') {
     chatbotDebug('intent_detected', {
       intent: intentResult.intent,
@@ -208,6 +242,7 @@ export async function handleChatRequest(
       isFirstMessage: isNewConversation,
     },
   })
+  mark('prompt_build_ms')
 
   const tools = getTools({
     conversationId: conversation.id,
@@ -216,6 +251,7 @@ export async function handleChatRequest(
     visitorIpHash: ipHash,
     visitorUserAgent: userAgent,
   })
+  mark('llm_setup_ms')
 
   // ─── 8. LLM call with streaming ───────────────────────────────
   const provider = getLLMProvider(bot.llmProvider as LLMProviderName)
@@ -241,6 +277,11 @@ export async function handleChatRequest(
     ? `${systemPrompt}\n\n---\n\n# CONTEXTO DEL TURNO ACTUAL\n\nIntención detectada: ${intentResult.intent}\n\n${intentResult.guidance}`
     : systemPrompt
 
+  // LLM call boundary — used to compute TTFB (first token from Vertex) and
+  // separate Vertex time from post-LLM persistence time.
+  const llmStartAt = Date.now()
+  let ttfbAt: number | null = null
+
   const result = streamText({
     model,
     system: enrichedSystemPrompt,
@@ -255,7 +296,22 @@ export async function handleChatRequest(
     }),
     tools,
     temperature: 0.7,
+    onChunk: ({ chunk }) => {
+      // Capture timestamp of the first useful chunk (text or tool-call).
+      // Other chunk types (reasoning-delta, raw, etc.) don't count as TTFB.
+      if (
+        ttfbAt === null &&
+        (chunk.type === 'text-delta' || chunk.type === 'tool-call')
+      ) {
+        ttfbAt = Date.now()
+      }
+    },
     onFinish: async ({ text, usage, finishReason, toolCalls, toolResults }) => {
+      const llmDoneAt = Date.now()
+      timings.llm_ttfb_ms = ttfbAt !== null ? ttfbAt - llmStartAt : null
+      timings.llm_stream_ms = ttfbAt !== null ? llmDoneAt - ttfbAt : null
+      timings.llm_total_ms = llmDoneAt - llmStartAt
+      stepStart = llmDoneAt
       try {
         // Validate output (capa 4)
         const warnings = validateAssistantOutput(text)
@@ -325,6 +381,9 @@ export async function handleChatRequest(
           tokensOut,
           costUsd: costBreakdown.totalUsd,
         })
+        mark('post_persist_ms')
+        const totalMs = Date.now() - startTime
+        timings.total_ms = totalMs
 
         chatbotLog('chat.llm_request_finished', {
           conversationId: conversation.id,
@@ -334,7 +393,8 @@ export async function handleChatRequest(
           costUsd: Number(costBreakdown.totalUsd.toFixed(6)),
           toolCallCount: toolCalls?.length ?? 0,
           warningCount: warnings.length,
-          durationMs: Date.now() - startTime,
+          durationMs: totalMs,
+          timings,
         })
 
         await logChatbotEvent({
@@ -348,7 +408,9 @@ export async function handleChatRequest(
             tokensOut,
             costUsd: costBreakdown.totalUsd,
             toolCallCount: toolCalls?.length ?? 0,
-            durationMs: Date.now() - startTime,
+            durationMs: totalMs,
+            latencyMs: totalMs,
+            timings,
           },
         })
       } catch (persistError) {

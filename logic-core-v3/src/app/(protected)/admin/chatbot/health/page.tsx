@@ -1,4 +1,5 @@
-import { checkChatbotHealth } from '@/modules/chatbot/server/health'
+import { checkChatbotHealth, buildHealthVerdict } from '@/modules/chatbot/server/health'
+import type { HealthVerdict, VerdictLevel } from '@/modules/chatbot/server/health'
 import { getLatencyHistory } from '@/modules/chatbot/server/admin/getLatencyHistory'
 import { LatencyChart } from '@/modules/chatbot/components/admin/health/LatencyChart'
 
@@ -6,35 +7,26 @@ export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
 export default async function HealthPage() {
-  const [health, latencyData] = await Promise.all([
+  const [health, latencyHistory] = await Promise.all([
     checkChatbotHealth('develop'),
     getLatencyHistory(24),
   ])
 
-  const isMockLatency = latencyData.every((p) => p.count > 0)
+  const verdict = buildHealthVerdict(health, latencyHistory)
 
   return (
     <div className="space-y-6">
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <p className="text-[10px] uppercase tracking-[0.24em] text-zinc-500">Inteligencia</p>
-          <h1 className="text-3xl font-semibold tracking-tight text-zinc-100">Health Score</h1>
-          <p className="mt-1 text-sm text-zinc-400">Estado operacional del chatbot develOP</p>
-        </div>
-        <span
-          className={`mt-1 shrink-0 rounded-full px-3 py-1.5 text-xs font-medium ${
-            health.ok
-              ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-400/30'
-              : 'bg-red-500/15 text-red-300 border border-red-400/30'
-          }`}
-        >
-          {health.ok ? 'ALL SYSTEMS OK' : 'ISSUES DETECTED'}
-        </span>
+      <div>
+        <p className="text-[10px] uppercase tracking-[0.24em] text-zinc-500">Inteligencia</p>
+        <h1 className="text-3xl font-semibold tracking-tight text-zinc-100">Health Score</h1>
+        <p className="mt-1 text-sm text-zinc-400">Estado operacional del chatbot develOP</p>
       </div>
+
+      <VerdictHero verdict={verdict} />
 
       <p className="text-[11px] font-mono text-zinc-600">Checked at: {health.timestamp}</p>
 
-      <LatencyChart data={latencyData} isMock={isMockLatency} />
+      <LatencyChart history={latencyHistory} />
 
       <div className="space-y-3">
         <HealthSection
@@ -164,6 +156,91 @@ export default async function HealthPage() {
       )}
     </div>
   )
+}
+
+function VerdictHero({ verdict }: { verdict: HealthVerdict }) {
+  const styles = verdictStyles(verdict.level)
+  return (
+    <div className={`rounded-[28px] border p-6 ${styles.container}`}>
+      <div className="flex items-start gap-4">
+        <div className={`shrink-0 text-4xl ${styles.icon}`} aria-hidden="true">
+          {verdictIcon(verdict.level)}
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className={`text-[10px] uppercase tracking-[0.24em] ${styles.eyebrow}`}>
+            Estado general
+          </p>
+          <h2 className={`mt-0.5 text-3xl font-semibold tracking-tight ${styles.headline}`}>
+            {verdict.headline}
+          </h2>
+          <p className={`mt-1 text-sm ${styles.subline}`}>{verdict.subline}</p>
+
+          {verdict.reasons.length > 0 && (
+            <ul className="mt-4 space-y-2">
+              {verdict.reasons.map((r, i) => (
+                <li
+                  key={i}
+                  className={`rounded-xl border px-3 py-2 ${reasonStyles(r.level)}`}
+                >
+                  <p className="text-sm font-medium">
+                    <span aria-hidden="true">{reasonIcon(r.level)} </span>
+                    {r.title}
+                  </p>
+                  {r.hint && <p className="mt-0.5 text-xs opacity-80">{r.hint}</p>}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function verdictStyles(level: VerdictLevel) {
+  if (level === 'ok') {
+    return {
+      container: 'border-emerald-400/30 bg-emerald-400/[0.06]',
+      icon: 'text-emerald-300',
+      eyebrow: 'text-emerald-300/80',
+      headline: 'text-emerald-200',
+      subline: 'text-emerald-100/80',
+    }
+  }
+  if (level === 'warning') {
+    return {
+      container: 'border-amber-400/30 bg-amber-400/[0.06]',
+      icon: 'text-amber-300',
+      eyebrow: 'text-amber-300/80',
+      headline: 'text-amber-200',
+      subline: 'text-amber-100/80',
+    }
+  }
+  return {
+    container: 'border-red-500/30 bg-red-500/[0.06]',
+    icon: 'text-red-300',
+    eyebrow: 'text-red-300/80',
+    headline: 'text-red-200',
+    subline: 'text-red-100/80',
+  }
+}
+
+function reasonStyles(level: VerdictLevel): string {
+  if (level === 'critical') return 'border-red-500/30 bg-red-500/[0.08] text-red-100'
+  if (level === 'warning') return 'border-amber-400/30 bg-amber-400/[0.08] text-amber-100'
+  return 'border-emerald-400/30 bg-emerald-400/[0.08] text-emerald-100'
+}
+
+function verdictIcon(level: VerdictLevel): string {
+  if (level === 'ok') return '✓'
+  if (level === 'warning') return '!'
+  return '✕'
+}
+
+function reasonIcon(level: VerdictLevel): string {
+  if (level === 'critical') return '✕'
+  if (level === 'warning') return '!'
+  return '✓'
 }
 
 function HealthSection({

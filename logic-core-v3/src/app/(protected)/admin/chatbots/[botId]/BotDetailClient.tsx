@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from 'motion/react'
 import { ChevronLeft, Play, Pause, ExternalLink, Bot } from 'lucide-react'
 import Link from 'next/link'
 import { toast } from 'sonner'
-import type { Prisma, QuotaUsage } from '@prisma/client'
+import type { Prisma } from '@prisma/client'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { toggleBotActiveAction } from './actions'
@@ -17,8 +17,8 @@ import { ActivityTab } from './tabs/ActivityTab'
 import { LeadsTab } from './tabs/LeadsTab'
 import { InstallTab } from './tabs/InstallTab'
 
-export const VALID_TABS = ['overview', 'config', 'knowledge', 'activity', 'leads', 'install'] as const
-export type TabId = (typeof VALID_TABS)[number]
+import { VALID_TABS, type TabId } from './tabs'
+export { VALID_TABS, type TabId }
 
 export type BotWithDetails = Prisma.BotConfigGetPayload<{
   include: {
@@ -47,6 +47,13 @@ export interface MappedEvent {
   metadata: Record<string, unknown> | null
 }
 
+export type MonthlyUsage = {
+  conversationsCount: number
+  tokensIn: number
+  tokensOut: number
+  costUsd: number
+} | null
+
 export type LeadItem = {
   id: string
   name: string | null
@@ -72,7 +79,7 @@ interface Props {
   bot: BotWithDetails
   initialTab: TabId
   initialEvents: MappedEvent[]
-  monthlyUsage: QuotaUsage | null
+  monthlyUsage: MonthlyUsage
   leads: LeadItem[]
 }
 

@@ -1,0 +1,54 @@
+
+==== B1.3 LATENCY TEST — runId=b13-1779420902364 ====
+Target:   POST http://localhost:3000/api/chatbot/develop/chat
+Prompts:  30  (sequential, 3000ms delay between)
+Mode:     single-turn conversations, fresh sessionId each
+
+[warmup] firing a throwaway request...
+[warmup] ok — ttfb= 8061ms total=11392ms
+
+[ 1/30] ttfb=  323ms  total= 2178ms  stream= 1855ms  chunks=4  bytes=1473  "Hola"
+[ 2/30] ttfb=  673ms  total= 2413ms  stream= 1740ms  chunks=5  bytes=3245  "Buen día, quería consultar algo"
+[ 3/30] ttfb=  370ms  total=15244ms  stream=14874ms  chunks=7  bytes=3523  "¿Qué servicios ofrecen?"
+[ 4/30] ttfb=  316ms  total= 3298ms  stream= 2982ms  chunks=6  bytes=3420  "¿Hacen páginas web?"
+[ 5/30] ttfb=  239ms  total= 3102ms  stream= 2863ms  chunks=5  bytes=6291  "¿Trabajan con tiendas online?"
+[ 6/30] ttfb=  244ms  total= 7365ms  stream= 7121ms  chunks=6  bytes=3508  "¿Hacen chatbots como vos?"
+[ 7/30] ttfb=  259ms  total= 3739ms  stream= 3480ms  chunks=5  bytes=4632  "¿Pueden automatizar tareas de mi negocio?"
+[ 8/30] ttfb=  406ms  total= 2916ms  stream= 2510ms  chunks=5  bytes=3749  "¿Desarrollan software a medida?"
+[ 9/30] ttfb=  297ms  total= 2160ms  stream= 1863ms  chunks=6  bytes=5216  "¿Cuánto cuesta una landing page?"
+[10/30] ttfb=  267ms  total=12875ms  stream=12608ms  chunks=5  bytes=5364  "¿Qué precio tiene una web institucional?"
+[11/30] ttfb= 1586ms  total= 5509ms  stream= 3923ms  chunks=5  bytes=6109  "¿Tienen planes mensuales?"
+[12/30] ttfb=  208ms  total= 3021ms  stream= 2813ms  chunks=5  bytes=5129  "¿Aceptan pagos en cuotas?"
+[13/30] ttfb=  211ms  total= 2125ms  stream= 1914ms  chunks=5  bytes=2888  "¿Cuánto tarda en estar lista una web?"
+[14/30] ttfb=  209ms  total= 2694ms  stream= 2485ms  chunks=5  bytes=3927  "¿Hacen mantenimiento después del lanzamiento?"
+[15/30] ttfb=  219ms  total= 2879ms  stream= 2660ms  chunks=6  bytes=5554  "¿En qué tecnologías trabajan?"
+[16/30] ttfb=  203ms  total= 2922ms  stream= 2719ms  chunks=5  bytes=4142  "¿Mejor WordPress o algo a medida?"
+[17/30] ttfb=  376ms  total= 3211ms  stream= 2835ms  chunks=5  bytes=5044  "¿Qué diferencia tienen contra otras agencias?"
+[18/30] ttfb= 5606ms  total= 8517ms  stream= 2911ms  chunks=6  bytes=3139  "¿Tienen casos de éxito que pueda ver?"
+[19/30] ttfb=  279ms  total= 2633ms  stream= 2354ms  chunks=4  bytes=1743  "¿Dónde están ubicados?"
+[20/30] ttfb=  222ms  total= 2077ms  stream= 1855ms  chunks=5  bytes=3189  "¿Atienden clientes fuera de Argentina?"
+[21/30] ttfb=  432ms  total= 5648ms  stream= 5216ms  chunks=5  bytes=9467  "¿Cómo es el proceso de trabajo?"
+[22/30] ttfb=  215ms  total= 3285ms  stream= 3070ms  chunks=5  bytes=4275  "¿Quién va a ser mi contacto durante el proyecto?"
+[23/30] ttfb=  217ms  total= 3498ms  stream= 3281ms  chunks=4  bytes=4899  "Tengo un comercio chico y necesito vender online, ¿qué me re"
+[24/30] ttfb=  213ms  total= 2719ms  stream= 2506ms  chunks=4  bytes=3117  "Quiero automatizar la facturación y los recordatorios a clie"
+[25/30] ERROR (0): fetch failed
+[26/30] ttfb=11337ms  total=23028ms  stream=11691ms  chunks=4  bytes=2613  "¿Pueden integrar mi sistema actual con WhatsApp?"
+[27/30] ttfb=  239ms  total= 7690ms  stream= 7451ms  chunks=5  bytes=5296  "¿Hacen migraciones desde otro proveedor?"
+[28/30] ttfb= 1930ms  total= 5450ms  stream= 3520ms  chunks=5  bytes=3780  "Mi web carga lento, ¿pueden ayudarme?"
+[29/30] ttfb=  245ms  total= 2659ms  stream= 2414ms  chunks=5  bytes=3935  "¿Cómo me contacto para arrancar?"
+[30/30] ttfb=  277ms  total= 2385ms  stream= 2108ms  chunks=5  bytes=4198  "¿Puedo agendar una reunión?"
+
+==== SUMMARY (client-side measurements) ====
+Wall-clock total: 252.0s
+Successful: 29/30
+Errors:
+  [24] 0: fetch failed
+  TTFB       n=29  min=  203  p50=  267  p90= 1930  p95= 5606  max=11337  mean=  952
+  TOTAL      n=29  min= 2077  p50= 3102  p90=12875  p95=15244  max=23028  mean= 5077
+  STREAM     n=29  min= 1740  p50= 2835  p90=11691  p95=12608  max=14874  mean= 4125
+
+RunId saved on each sessionId — use this to query ChatbotEvent:
+  WHERE conversation.sessionId LIKE 'b13-1779420902364-%'
+
+Next step: run scripts/_b13-latency-analyze.mjs to extract server-side breakdown.
+Client-side results saved: C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\scripts\_b13-latency-b13-1779420902364.json

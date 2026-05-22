@@ -4,6 +4,7 @@ import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
 import { computeDiff, logAdminAction, omitAuditNoise } from '@/lib/audit-log'
 import { chatbotLog } from '../logging'
+import { invalidateBotCache } from '../conversation'
 import { requireSuperAdmin } from './requireSuperAdmin'
 
 const knowledgeBaseInputSchema = z.object({
@@ -41,8 +42,10 @@ export async function saveKnowledgeBase(input: KnowledgeBaseInput): Promise<{ su
         toneExamples: parsed.data.toneExamples,
         forbiddenStatements: parsed.data.forbiddenStatements,
       },
-      include: { botConfig: { select: { botName: true, organizationId: true } } },
+      include: { botConfig: { select: { botName: true, slug: true, organizationId: true } } },
     })
+
+    invalidateBotCache(after.botConfig.slug)
 
     if (before) {
       const { botConfig, ...afterForDiff } = after

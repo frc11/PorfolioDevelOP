@@ -6,6 +6,7 @@ import { revalidatePath } from 'next/cache'
 import { logAdminAction } from '@/lib/audit-log'
 import { sendTransactionalEmail } from '@/lib/email/brevo-service'
 import { botActivatedEmail } from '@/lib/email/templates/bot-activated'
+import { invalidateBotCache } from '@/modules/chatbot/server/conversation'
 
 export async function toggleBotActiveAction(
   botId: string,
@@ -45,6 +46,8 @@ export async function toggleBotActiveAction(
       targetId: botId,
       metadata: { source: 'detail_page' },
     })
+
+    invalidateBotCache(bot.slug)
 
     if (newActive) {
       const primaryMember = bot.organization.members[0]?.user
