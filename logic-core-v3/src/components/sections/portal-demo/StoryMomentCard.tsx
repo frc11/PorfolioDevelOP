@@ -1,12 +1,16 @@
 'use client'
 
 import { motion } from 'motion/react'
-import { Activity, Inbox, TrendingUp, ChevronRight, ImageOff } from 'lucide-react'
-import { useState } from 'react'
+import { Activity, Inbox, TrendingUp, ChevronRight } from 'lucide-react'
 import type { StoryMoment } from './data'
 
 const EASE_PREMIUM = [0.25, 0.46, 0.45, 0.94] as const
+const EASE_REVEAL = [0.22, 1, 0.36, 1] as const
 const SPRING_SOFT = { type: 'spring', stiffness: 80, damping: 20 } as const
+const SECTION_ITEM = {
+  hidden: { opacity: 0, y: 22, filter: 'blur(6px)' },
+  visible: { opacity: 1, y: 0, filter: 'blur(0px)' },
+} as const
 
 const ICON_MAP = {
   Activity,
@@ -21,27 +25,188 @@ interface Props {
   index: number
 }
 
-function ScreenshotPlaceholder({ alt }: { alt: string }) {
+function HealthScoreMockup({ color }: { color: string }) {
   return (
-    <div className="w-full aspect-[16/10] rounded-xl bg-zinc-800/50 border border-zinc-700/50 flex flex-col items-center justify-center gap-3">
-      <ImageOff size={28} strokeWidth={1.5} className="text-zinc-600" />
-      <span className="text-xs text-zinc-500 text-center px-4">[Captura: {alt}]</span>
+    <div className="grid h-full grid-cols-[0.9fr_1.1fr] gap-4">
+      <div className="flex flex-col justify-between rounded-lg border border-white/[0.07] bg-white/[0.035] p-4">
+        <div>
+          <p className="text-[9px] font-bold uppercase tracking-[0.22em] text-white/35">Health Score</p>
+          <div className="mt-5 grid place-items-center">
+            <motion.div
+              initial={{ opacity: 0, rotate: -8, scale: 0.92 }}
+              whileInView={{ opacity: 1, rotate: 0, scale: 1 }}
+              viewport={{ once: true, amount: 0.5 }}
+              transition={{ duration: 0.7, ease: EASE_REVEAL }}
+              className="grid h-28 w-28 place-items-center rounded-full"
+              style={{
+                background: `conic-gradient(${color} 0 78%, rgba(255,255,255,0.08) 78% 100%)`,
+                boxShadow: `0 0 32px ${color}24`,
+              }}
+            >
+              <div className="grid h-20 w-20 place-items-center rounded-full bg-[#07090d]">
+                <span className="text-3xl font-black text-white">78</span>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+        <div className="rounded-md border border-cyan-400/15 bg-cyan-400/[0.06] px-3 py-2 text-[10px] text-cyan-100">
+          Semana normal. Sin alertas criticas.
+        </div>
+      </div>
+      <div className="flex flex-col gap-3">
+        {[
+          ['Salud digital', 82],
+          ['Comercial', 74],
+          ['Operaciones', 79],
+        ].map(([label, value]) => (
+          <motion.div
+            key={label}
+            initial={{ opacity: 0, y: 8 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.5 }}
+            transition={{ duration: 0.45, ease: EASE_REVEAL }}
+            className="rounded-lg border border-white/[0.07] bg-white/[0.035] p-3"
+          >
+            <div className="mb-2 flex items-center justify-between text-[10px] text-white/50">
+              <span>{label}</span>
+              <span style={{ color }}>{value}</span>
+            </div>
+            <div className="h-1.5 overflow-hidden rounded-full bg-white/[0.06]">
+              <motion.div
+                initial={{ scaleX: 0 }}
+                whileInView={{ scaleX: 1 }}
+                viewport={{ once: true, amount: 0.5 }}
+                transition={{ duration: 0.65, ease: EASE_REVEAL }}
+                className="h-full origin-left rounded-full"
+                style={{ width: `${value}%`, background: color }}
+              />
+            </div>
+          </motion.div>
+        ))}
+      </div>
     </div>
   )
 }
 
-function ScreenshotImage({ path, alt }: { path: string; alt: string }) {
-  const [errored, setErrored] = useState(false)
+function AttentionMockup({ color }: { color: string }) {
+  return (
+    <div className="flex h-full flex-col gap-3">
+      <div className="grid grid-cols-3 gap-3">
+        {['14 mails', '8 mensajes', '3 alertas'].map((item) => (
+          <div key={item} className="rounded-lg border border-white/[0.07] bg-white/[0.035] px-3 py-2 text-[10px] text-white/55">
+            {item}
+          </div>
+        ))}
+      </div>
+      <div className="grid flex-1 gap-3">
+        {[
+          ['Critico', 'Entrega del proyecto espera aprobacion', color],
+          ['Responder', '2 resenas de Google en 48h', '#f59e0b'],
+          ['Puede esperar', 'Resumen semanal listo para revisar', '#64748b'],
+        ].map(([tag, title, tagColor]) => (
+          <motion.div
+            key={title}
+            initial={{ opacity: 0, x: -10 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, amount: 0.5 }}
+            transition={{ duration: 0.5, ease: EASE_REVEAL }}
+            className="relative overflow-hidden rounded-lg border border-white/[0.07] bg-white/[0.035] p-4"
+          >
+            <div
+              className="absolute inset-y-0 left-0 w-1"
+              style={{ background: tagColor }}
+              aria-hidden
+            />
+            <div className="mb-2 flex items-center justify-between gap-3">
+              <span className="text-[9px] font-bold uppercase tracking-[0.18em]" style={{ color: tagColor }}>
+                {tag}
+              </span>
+              <span className="rounded-full border border-white/[0.08] px-2 py-0.5 text-[9px] text-white/35">Hoy</span>
+            </div>
+            <p className="text-sm font-semibold text-white/82">{title}</p>
+          </motion.div>
+        ))}
+      </div>
+    </div>
+  )
+}
 
-  if (errored) return <ScreenshotPlaceholder alt={alt} />
+function WeekResultsMockup({ color }: { color: string }) {
+  const bars = [46, 68, 58, 84, 76, 92, 72]
 
   return (
-    <img
-      src={path}
-      alt={alt}
-      onError={() => setErrored(true)}
-      className="w-full rounded-xl object-cover aspect-[16/10]"
-    />
+    <div className="flex h-full flex-col gap-4">
+      <div className="grid grid-cols-3 gap-3">
+        {[
+          ['Leads', '47', '+12%'],
+          ['Ventas', '8', '+3'],
+          ['Facturado', '$340K', '+18%'],
+        ].map(([label, value, trend]) => (
+          <div key={label} className="rounded-lg border border-white/[0.07] bg-white/[0.035] p-3">
+            <p className="text-[9px] uppercase tracking-[0.18em] text-white/35">{label}</p>
+            <div className="mt-2 flex items-end justify-between gap-2">
+              <span className="text-xl font-black text-white">{value}</span>
+              <span className="text-[10px]" style={{ color }}>{trend}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+      <div className="flex flex-1 items-end gap-2 rounded-lg border border-white/[0.07] bg-white/[0.035] p-4">
+        {bars.map((height, index) => (
+          <div key={index} className="flex flex-1 flex-col justify-end">
+            <motion.div
+              initial={{ scaleY: 0 }}
+              whileInView={{ scaleY: 1 }}
+              viewport={{ once: true, amount: 0.45 }}
+              transition={{ duration: 0.62, ease: EASE_REVEAL, delay: index * 0.04 }}
+              className="rounded-t-md"
+              style={{
+                height: `${height}%`,
+                minHeight: 26,
+                transformOrigin: 'bottom',
+                background: `linear-gradient(180deg, ${color}, ${color}55)`,
+                boxShadow: height > 80 ? `0 0 18px ${color}38` : 'none',
+              }}
+            />
+          </div>
+        ))}
+      </div>
+      <div className="rounded-lg border border-white/[0.07] bg-white/[0.03] p-3 text-xs leading-relaxed text-white/55">
+        La IA detecto una mejora de conversion y recomienda reforzar el canal que mas cierres genero.
+      </div>
+    </div>
+  )
+}
+
+function DashboardMockup({ moment }: { moment: StoryMoment }) {
+  return (
+    <div className="relative aspect-[16/10] w-full overflow-hidden rounded-xl border border-white/[0.08] bg-[#07090d] p-4">
+      <motion.div
+        className="pointer-events-none absolute inset-0"
+        whileHover={{ opacity: 0.95 }}
+        transition={{ duration: 0.35, ease: EASE_PREMIUM }}
+        style={{
+          background: `radial-gradient(circle at 18% 12%, ${moment.accentColor}1F, transparent 34%), linear-gradient(135deg, rgba(255,255,255,0.055), transparent 42%)`,
+          opacity: 0.72,
+        }}
+        aria-hidden
+      />
+      <div className="relative mb-4 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <span className="h-2.5 w-2.5 rounded-full bg-red-400/70" />
+          <span className="h-2.5 w-2.5 rounded-full bg-amber-300/70" />
+          <span className="h-2.5 w-2.5 rounded-full bg-emerald-300/70" />
+        </div>
+        <span className="rounded-full border border-white/[0.08] px-2 py-1 text-[9px] uppercase tracking-[0.18em] text-white/35">
+          develOP live
+        </span>
+      </div>
+      <div className="relative h-[calc(100%-2.4rem)]">
+        {moment.id === 'health-score' && <HealthScoreMockup color={moment.accentColor} />}
+        {moment.id === 'attention-stack' && <AttentionMockup color={moment.accentColor} />}
+        {moment.id === 'week-results' && <WeekResultsMockup color={moment.accentColor} />}
+      </div>
+    </div>
   )
 }
 
@@ -56,8 +221,21 @@ function ScreenshotCard({
     <motion.div
       initial={{ opacity: 0, scale: 0.96 }}
       whileInView={{ opacity: 1, scale: 1 }}
-      viewport={{ once: true }}
-      transition={{ ...SPRING_SOFT, delay }}
+      viewport={{ once: true, amount: 0.25 }}
+      whileHover={{
+        y: -4,
+        scale: 1.01,
+        borderColor: `${moment.accentColor}52`,
+        boxShadow: `0 18px 50px ${moment.accentColor}1A, 0 24px 80px rgba(0,0,0,0.42)`,
+      }}
+      transition={{
+        ...SPRING_SOFT,
+        delay,
+        y: { duration: 0.35, ease: EASE_REVEAL },
+        scale: { duration: 0.35, ease: EASE_REVEAL },
+        borderColor: { duration: 0.35, ease: EASE_REVEAL },
+        boxShadow: { duration: 0.35, ease: EASE_REVEAL },
+      }}
       style={{
         background: 'rgba(255,255,255,0.04)',
         backdropFilter: 'blur(20px) saturate(180%)',
@@ -67,7 +245,7 @@ function ScreenshotCard({
       }}
       className="p-3 shadow-2xl"
     >
-      <ScreenshotImage path={moment.screenshotPath} alt={moment.screenshotAlt} />
+      <DashboardMockup moment={moment} />
     </motion.div>
   )
 }
@@ -77,15 +255,27 @@ function TextColumn({ moment, delay }: { moment: StoryMoment; delay: number }) {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.6, ease: EASE_PREMIUM, delay }}
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, amount: 0.3 }}
+      variants={{
+        hidden: {},
+        visible: { transition: { staggerChildren: 0.08, delayChildren: delay } },
+      }}
       className="flex flex-col gap-5"
     >
       {/* Time badge */}
-      <div className="flex items-center gap-2">
-        <span
+      <motion.div variants={SECTION_ITEM} transition={{ duration: 0.58, ease: EASE_REVEAL }} className="flex items-center gap-2">
+        <motion.span
+          whileInView={{
+            boxShadow: [
+              `0 0 12px ${moment.accentColor}20`,
+              `0 0 24px ${moment.accentColor}34`,
+              `0 0 12px ${moment.accentColor}20`,
+            ],
+          }}
+          viewport={{ once: true }}
+          transition={{ duration: 1.4, ease: 'easeInOut', delay: delay + 0.25 }}
           className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold border"
           style={{
             color: moment.accentColor,
@@ -96,27 +286,34 @@ function TextColumn({ moment, delay }: { moment: StoryMoment; delay: number }) {
         >
           <Icon size={12} strokeWidth={1.5} />
           {moment.time} — {moment.timeBadge}
-        </span>
-      </div>
+        </motion.span>
+      </motion.div>
 
       {/* Question */}
-      <h3 className="text-2xl md:text-3xl font-bold text-white leading-snug">
+      <motion.h3 variants={SECTION_ITEM} transition={{ duration: 0.6, ease: EASE_REVEAL }} className="text-2xl md:text-3xl font-bold text-white leading-snug">
         {moment.question}
-      </h3>
+      </motion.h3>
 
       {/* Panel shows */}
-      <p className="text-base md:text-lg text-zinc-300 leading-relaxed">
+      <motion.p variants={SECTION_ITEM} transition={{ duration: 0.6, ease: EASE_REVEAL }} className="text-base md:text-lg text-zinc-300 leading-relaxed">
         {moment.panelShows}
-      </p>
+      </motion.p>
 
       {/* Decision */}
-      <p className="flex items-start gap-2 text-base text-zinc-400">
+      <motion.p variants={SECTION_ITEM} transition={{ duration: 0.6, ease: EASE_REVEAL }} className="flex items-start gap-2 text-base text-zinc-400">
         <ChevronRight size={16} strokeWidth={1.5} className="mt-0.5 shrink-0" style={{ color: moment.accentColor }} />
         {moment.decision}
-      </p>
+      </motion.p>
 
       {/* Outcome */}
-      <div
+      <motion.div
+        variants={SECTION_ITEM}
+        transition={{ duration: 0.6, ease: EASE_REVEAL }}
+        whileHover={{
+          x: 3,
+          backgroundColor: `${moment.accentColor}0F`,
+          boxShadow: `0 0 26px ${moment.accentColor}12`,
+        }}
         className="pl-4 py-3 pr-3 rounded-lg"
         style={{
           borderLeft: `3px solid ${moment.accentColor}`,
@@ -130,7 +327,7 @@ function TextColumn({ moment, delay }: { moment: StoryMoment; delay: number }) {
           Resultado
         </p>
         <p className="text-sm text-zinc-200 italic">{moment.outcome}</p>
-      </div>
+      </motion.div>
     </motion.div>
   )
 }

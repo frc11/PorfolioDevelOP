@@ -151,6 +151,8 @@ const SERVICE_SHORT_LABELS: Record<number, string> = {
 };
 
 const getServiceAnchorId = (serviceId: number) => `servicio-${serviceId}`;
+const getServiceAccent = (serviceId: number, fallback: string) =>
+  SERVICES.find((service) => service.id === serviceId)?.accent ?? fallback;
 
 function StageFrame({
   service,
@@ -7146,6 +7148,187 @@ function FloatingParticles({ activeAccent }: { activeAccent: string }) {
   );
 }
 
+function OurServicesBackground({ activeAccent }: { activeAccent: string }) {
+  const cyan = getServiceAccent(1, '#06b6d4');
+  const green = getServiceAccent(2, '#10b981');
+  const violet = getServiceAccent(4, '#8b5cf6');
+  const orange = getServiceAccent(3, '#f59e0b');
+  const zones = [
+    {
+      color: cyan,
+      inset: 'clamp(3rem, 7vw, 6rem) auto auto -12%',
+      width: '42vw',
+      height: '28rem',
+      background: `radial-gradient(ellipse at center, ${cyan}22, ${cyan}0B 35%, transparent 70%)`,
+      blur: 46,
+      opacity: 0.74,
+    },
+    {
+      color: green,
+      inset: '28% auto auto -10%',
+      width: '34vw',
+      height: '34rem',
+      background: `radial-gradient(ellipse at center, ${green}1D, ${green}08 38%, transparent 72%)`,
+      blur: 54,
+      opacity: 0.58,
+    },
+    {
+      color: violet,
+      inset: 'auto auto 10% -8%',
+      width: '38vw',
+      height: '30rem',
+      background: `radial-gradient(ellipse at center, ${violet}20, ${violet}0A 36%, transparent 72%)`,
+      blur: 58,
+      opacity: 0.62,
+    },
+    {
+      color: orange,
+      inset: 'auto -12% 2% auto',
+      width: '42vw',
+      height: '34rem',
+      background: `radial-gradient(ellipse at center, ${orange}22, ${orange}0A 34%, transparent 72%)`,
+      blur: 58,
+      opacity: 0.66,
+    },
+  ];
+
+  return (
+    <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden" aria-hidden="true">
+      <div
+        style={{
+          position: 'absolute',
+          inset: 0,
+          background:
+            'radial-gradient(ellipse 80% 34% at 50% 9%, rgba(25,38,58,0.42), transparent 64%), linear-gradient(180deg, #06070b 0%, #030407 42%, #020203 100%)',
+        }}
+      />
+
+      <div
+        style={{
+          position: 'absolute',
+          inset: 0,
+          backgroundImage:
+            `url("data:image/svg+xml,%3Csvg viewBox='0 0 220 220' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.72' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E")`,
+          backgroundRepeat: 'repeat',
+          backgroundSize: '160px 160px',
+          opacity: 0.32,
+        }}
+      />
+
+      {zones.map((zone) => (
+        <div
+          key={zone.color}
+          style={{
+            position: 'absolute',
+            inset: zone.inset,
+            width: zone.width,
+            height: zone.height,
+            background: zone.background,
+            filter: `blur(${zone.blur}px)`,
+            opacity: zone.opacity,
+          }}
+        />
+      ))}
+
+      <motion.div
+        animate={{
+          background: `radial-gradient(ellipse 55% 28% at 50% 22%, ${activeAccent}0D 0%, transparent 74%)`,
+        }}
+        transition={{ duration: 1.2, ease: 'easeInOut' }}
+        style={{
+          position: 'absolute',
+          inset: 0,
+          opacity: 0.9,
+        }}
+      />
+
+      <svg
+        className="hidden md:block"
+        viewBox="0 0 1440 2400"
+        preserveAspectRatio="none"
+        style={{
+          position: 'absolute',
+          inset: 0,
+          width: '100%',
+          height: '100%',
+          opacity: 0.44,
+        }}
+      >
+        <defs>
+          <linearGradient id="services-top-flow" x1="0" x2="1" y1="0" y2="0">
+            <stop offset="0" stopColor={cyan} stopOpacity="0" />
+            <stop offset="0.24" stopColor={cyan} stopOpacity="0.28" />
+            <stop offset="0.56" stopColor={green} stopOpacity="0.16" />
+            <stop offset="1" stopColor={green} stopOpacity="0" />
+          </linearGradient>
+          <linearGradient id="services-bottom-flow" x1="0" x2="1" y1="0" y2="0">
+            <stop offset="0" stopColor={violet} stopOpacity="0" />
+            <stop offset="0.22" stopColor={violet} stopOpacity="0.22" />
+            <stop offset="0.7" stopColor={orange} stopOpacity="0.24" />
+            <stop offset="1" stopColor={orange} stopOpacity="0" />
+          </linearGradient>
+          <pattern id="services-grid" width="72" height="72" patternUnits="userSpaceOnUse">
+            <path d="M72 0H0V72" fill="none" stroke="rgba(255,255,255,0.035)" strokeWidth="1" />
+          </pattern>
+        </defs>
+        <rect x="0" y="0" width="1440" height="2400" fill="url(#services-grid)" opacity="0.75" />
+
+        <g fill="none" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M-40 270 C160 250 210 150 365 155 C520 160 560 250 725 230 C880 212 960 106 1190 84" stroke="url(#services-top-flow)" strokeWidth="2" />
+          <path d="M-20 323 C172 316 254 232 392 246 C532 260 594 333 742 300 C902 264 1010 164 1260 156" stroke={cyan} strokeOpacity="0.10" strokeWidth="1" />
+          <path d="M118 176 L210 176 L210 118 L326 118 L326 92" stroke={cyan} strokeOpacity="0.18" strokeWidth="1.1" />
+          <path d="M72 238 L170 238 L170 292 L282 292" stroke={cyan} strokeOpacity="0.14" strokeWidth="1" />
+
+          <path d="M90 864 C226 805 320 842 414 778 C504 718 584 695 705 724" stroke={green} strokeOpacity="0.18" strokeWidth="1.2" />
+          <path d="M54 940 L178 900 L318 962 L454 884 L626 918" stroke={green} strokeOpacity="0.18" strokeWidth="1" />
+          <path d="M64 1048 L166 1048 L166 1108 L302 1108 L302 1166" stroke={green} strokeOpacity="0.12" strokeWidth="1" />
+
+          <path d="M-70 1774 C142 1718 234 1846 420 1764 C585 1691 654 1586 820 1618" stroke="url(#services-bottom-flow)" strokeWidth="2" />
+          <path d="M84 1908 L184 1840 L312 1884 L432 1800 L548 1832" stroke={violet} strokeOpacity="0.18" strokeWidth="1" />
+          <path d="M1006 1930 C1116 1856 1200 1866 1298 1794 C1362 1748 1414 1748 1486 1762" stroke={orange} strokeOpacity="0.20" strokeWidth="1.2" />
+          <path d="M1058 2028 L1142 2028 L1142 1970 L1238 1970 L1238 1912 L1326 1912" stroke={orange} strokeOpacity="0.16" strokeWidth="1" />
+        </g>
+
+        <g>
+          {[
+            { cx: 210, cy: 118, color: cyan },
+            { cx: 170, cy: 292, color: cyan },
+            { cx: 178, cy: 900, color: green },
+            { cx: 318, cy: 962, color: green },
+            { cx: 184, cy: 1840, color: violet },
+            { cx: 432, cy: 1800, color: violet },
+            { cx: 1142, cy: 1970, color: orange },
+            { cx: 1238, cy: 1912, color: orange },
+          ].map((node) => (
+            <circle key={`${node.cx}-${node.cy}`} cx={node.cx} cy={node.cy} r="4" fill={node.color} opacity="0.42" />
+          ))}
+        </g>
+      </svg>
+
+      <div
+        className="hidden lg:block"
+        style={{
+          position: 'absolute',
+          inset: '8% 13%',
+          borderRadius: '48%',
+          background: 'radial-gradient(ellipse at center, rgba(2,3,6,0.86) 0%, rgba(2,3,6,0.62) 34%, transparent 72%)',
+        }}
+      />
+
+      <div
+        style={{
+          position: 'absolute',
+          inset: 0,
+          background:
+            'linear-gradient(90deg, rgba(0,0,0,0.28), transparent 18%, transparent 82%, rgba(0,0,0,0.30)), linear-gradient(180deg, rgba(0,0,0,0.38), transparent 12%, transparent 88%, rgba(0,0,0,0.46))',
+        }}
+      />
+
+      <FloatingParticles activeAccent={activeAccent} />
+    </div>
+  );
+}
+
 function ServicesProgressRail({
   services,
   activeServiceIndex,
@@ -7449,40 +7632,79 @@ function ServicesDetailCta({ onNavigate }: { onNavigate: (href: string) => void 
 }
 
 function ServicesFullWidthCta({ onNavigate }: { onNavigate: (href: string) => void }) {
+  const [isCtaHovered, setIsCtaHovered] = useState(false);
+  const [ctaGlowStep, setCtaGlowStep] = useState(0);
+  const [hoveredCtaServiceId, setHoveredCtaServiceId] = useState<number | null>(null);
+  const ctaCorners = [
+    { key: 'web', color: getServiceAccent(1, '#06b6d4'), top: '-18%', left: '-10%' },
+    { key: 'ai', color: getServiceAccent(2, '#10b981'), top: '-18%', right: '-10%' },
+    { key: 'software', color: getServiceAccent(4, '#8b5cf6'), bottom: '-22%', left: '-10%' },
+    { key: 'automation', color: getServiceAccent(3, '#f59e0b'), bottom: '-22%', right: '-10%' },
+  ];
+  const ctaEase = [0.22, 1, 0.36, 1] as [number, number, number, number];
+  const hoveredCtaService = hoveredCtaServiceId
+    ? SERVICES.find((service) => service.id === hoveredCtaServiceId)
+    : null;
+  const activeCtaGlowColor = hoveredCtaService?.accent ?? ctaCorners[ctaGlowStep]?.color ?? getServiceAccent(1, '#06b6d4');
+  const ctaSmoothTransition = { duration: 0.78, ease: ctaEase };
+  const ctaGlowTransition = { duration: hoveredCtaServiceId ? 0.38 : 0.72, ease: ctaEase };
+  const ctaBaseShadow = 'inset 0 1px 0 rgba(255,255,255,0.14), 0 46px 150px rgba(0,0,0,0.56)';
+  const ctaHoverShadow = `inset 0 1px 0 rgba(255,255,255,0.18), 0 54px 170px rgba(0,0,0,0.60), 0 0 138px ${activeCtaGlowColor}66, 0 0 196px ${activeCtaGlowColor}36`;
+
+  useEffect(() => {
+    if (!isCtaHovered || hoveredCtaServiceId !== null) {
+      return;
+    }
+
+    const glowCycle = window.setInterval(() => {
+      setCtaGlowStep((current) => (current + 1) % ctaCorners.length);
+    }, 1000);
+
+    return () => window.clearInterval(glowCycle);
+  }, [isCtaHovered, hoveredCtaServiceId, ctaCorners.length]);
+
   return (
     <motion.div
       id="servicios-siguiente-paso"
       initial="rest"
       whileInView="show"
-      viewport={{ once: true, amount: 0.34 }}
-      className="pb-[48svh] pt-24 lg:pb-[54svh] lg:pt-32"
+      viewport={{ once: true, amount: 0.2 }}
+      className="pb-20 pt-24 md:pb-24 lg:pb-28 lg:pt-32"
     >
       <motion.div
         data-cursor="hover"
         initial="rest"
-        whileHover="hover"
+        onHoverStart={() => setIsCtaHovered(true)}
+        onHoverEnd={() => {
+          setIsCtaHovered(false);
+          setHoveredCtaServiceId(null);
+        }}
+        whileHover={{ y: -3, filter: 'brightness(1.02)' }}
+        animate={{
+          borderColor: isCtaHovered ? 'rgba(255,255,255,0.30)' : 'rgba(255,255,255,0.22)',
+          boxShadow: isCtaHovered ? ctaHoverShadow : ctaBaseShadow,
+        }}
         variants={{
           rest: {
-            opacity: 0,
-            y: 22,
+            opacity: 1,
+            y: 0,
+            filter: 'brightness(1)',
             borderColor: 'rgba(255,255,255,0.11)',
             boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.08), 0 28px 82px rgba(0,0,0,0.38)',
           },
           show: {
             opacity: 1,
             y: 0,
+            filter: 'brightness(1)',
             borderColor: 'rgba(255,255,255,0.22)',
-            boxShadow:
-              'inset 0 1px 0 rgba(255,255,255,0.14), 0 46px 150px rgba(0,0,0,0.56), 0 0 120px rgba(6,182,212,0.30), 0 0 150px rgba(16,185,129,0.18), 0 0 160px rgba(245,158,11,0.16)',
-          },
-          hover: {
-            y: -5,
-            borderColor: 'rgba(255,255,255,0.30)',
-            boxShadow:
-              'inset 0 1px 0 rgba(255,255,255,0.18), 0 54px 170px rgba(0,0,0,0.60), 0 0 140px rgba(6,182,212,0.34), 0 0 170px rgba(139,92,246,0.20), 0 0 180px rgba(245,158,11,0.18)',
+            boxShadow: ctaBaseShadow,
           },
         }}
-        transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+        transition={{
+          ...ctaSmoothTransition,
+          borderColor: { duration: 0.72, ease: ctaEase },
+          boxShadow: { duration: hoveredCtaServiceId ? 0.38 : 0.72, ease: ctaEase },
+        }}
         style={{
           position: 'relative',
           minHeight: 'clamp(34rem, 68svh, 46rem)',
@@ -7490,20 +7712,93 @@ function ServicesFullWidthCta({ onNavigate }: { onNavigate: (href: string) => vo
           borderRadius: 14,
           border: '1px solid rgba(255,255,255,0.10)',
           background:
-            'linear-gradient(135deg, rgba(255,255,255,0.082), rgba(255,255,255,0.022)), radial-gradient(circle at 12% 18%, rgba(6,182,212,0.22), transparent 0 30%), radial-gradient(circle at 78% 16%, rgba(16,185,129,0.16), transparent 0 32%), radial-gradient(circle at 62% 86%, rgba(139,92,246,0.16), transparent 0 31%), radial-gradient(circle at 96% 74%, rgba(245,158,11,0.18), transparent 0 30%)',
+            'linear-gradient(135deg, rgba(255,255,255,0.082), rgba(255,255,255,0.022)), radial-gradient(ellipse at center, rgba(2,4,8,0.88), rgba(2,4,8,0.42) 46%, rgba(2,4,8,0.16) 100%)',
           padding: 'clamp(1.5rem, 4vw, 4.75rem)',
           display: 'flex',
           alignItems: 'stretch',
         }}
       >
+        {ctaCorners.map(({ key, color, ...position }) => {
+          const isCornerActive = color === activeCtaGlowColor;
+
+          return (
+            <motion.div
+              key={key}
+              aria-hidden="true"
+              animate={{
+                opacity: isCtaHovered ? (isCornerActive ? 0.62 : 0.1) : 0,
+                scale: isCornerActive ? 1.08 : 0.96,
+              }}
+              transition={ctaGlowTransition}
+              style={{
+                position: 'absolute',
+                width: 'clamp(15rem, 31vw, 29rem)',
+                height: 'clamp(15rem, 31vw, 29rem)',
+                ...position,
+                background: `radial-gradient(circle at center, ${color}24 0%, ${color}10 34%, transparent 70%)`,
+                filter: 'blur(18px)',
+                pointerEvents: 'none',
+                zIndex: 0,
+              }}
+            />
+          );
+        })}
+        <div
+          aria-hidden="true"
+          style={{
+            position: 'absolute',
+            inset: '18% 18%',
+            borderRadius: '42%',
+            background: 'radial-gradient(ellipse at center, rgba(3,4,8,0.86) 0%, rgba(3,4,8,0.62) 48%, transparent 74%)',
+            pointerEvents: 'none',
+            zIndex: 0,
+          }}
+        />
         <motion.div
           aria-hidden="true"
-          variants={{
-            rest: { opacity: 0, scaleX: 0.28 },
-            show: { opacity: [0, 1, 0.72], scaleX: [0.28, 1.04, 1] },
-            hover: { opacity: 1, scaleX: 1 },
+          animate={{
+            opacity: isCtaHovered ? 0.46 : 0.1,
           }}
-          transition={{ duration: 1.05, ease: [0.16, 1, 0.3, 1] }}
+          transition={ctaGlowTransition}
+          style={{
+            position: 'absolute',
+            inset: 0,
+            background:
+              'linear-gradient(135deg, rgba(255,255,255,0.085), transparent 38%, rgba(255,255,255,0.045)), radial-gradient(ellipse at center, rgba(255,255,255,0.055), transparent 66%)',
+            pointerEvents: 'none',
+            zIndex: 0,
+          }}
+        />
+        <motion.div
+          aria-hidden="true"
+          animate={{
+            opacity: isCtaHovered ? 1 : 0,
+            borderColor: isCtaHovered ? `${activeCtaGlowColor}42` : `${activeCtaGlowColor}00`,
+            boxShadow: `0 0 110px ${activeCtaGlowColor}52, 0 0 190px ${activeCtaGlowColor}2E`,
+            scale: isCtaHovered ? 1 : 0.97,
+          }}
+          transition={{
+            opacity: { duration: 0.78, ease: ctaEase },
+            borderColor: { duration: hoveredCtaServiceId ? 0.38 : 0.65, ease: ctaEase },
+            boxShadow: { duration: hoveredCtaServiceId ? 0.38 : 0.65, ease: ctaEase },
+            scale: { duration: 0.78, ease: ctaEase },
+          }}
+          style={{
+            position: 'absolute',
+            inset: -2,
+            borderRadius: 15,
+            border: '1px solid transparent',
+            pointerEvents: 'none',
+            zIndex: 2,
+          }}
+        />
+        <motion.div
+          aria-hidden="true"
+          animate={{
+            opacity: isCtaHovered ? 0.78 : 0.24,
+            scaleX: isCtaHovered ? 1 : 0.96,
+          }}
+          transition={{ ...ctaGlowTransition, duration: 0.72 }}
           style={{
             position: 'absolute',
             top: 0,
@@ -7520,17 +7815,14 @@ function ServicesFullWidthCta({ onNavigate }: { onNavigate: (href: string) => vo
         />
         <motion.div
           aria-hidden="true"
-          variants={{
-            rest: { opacity: 0 },
-            show: { opacity: [0, 0.78, 0.48] },
-            hover: { opacity: 0.68 },
+          animate={{
+            opacity: isCtaHovered ? 0.26 : 0.04,
           }}
-          transition={{ duration: 1.2, delay: 0.05, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ ...ctaGlowTransition, duration: 0.78 }}
           style={{
             position: 'absolute',
             inset: '-20% -10%',
-            background:
-              'radial-gradient(circle at 18% 28%, rgba(6,182,212,0.28), transparent 0 24%), radial-gradient(circle at 48% 10%, rgba(16,185,129,0.18), transparent 0 25%), radial-gradient(circle at 78% 34%, rgba(139,92,246,0.22), transparent 0 26%), radial-gradient(circle at 88% 78%, rgba(245,158,11,0.20), transparent 0 24%)',
+            background: 'radial-gradient(ellipse at center, rgba(255,255,255,0.13), transparent 0 56%)',
             filter: 'blur(26px)',
             pointerEvents: 'none',
           }}
@@ -7598,13 +7890,23 @@ function ServicesFullWidthCta({ onNavigate }: { onNavigate: (href: string) => vo
                 { label: '1 plan', value: 'Prioridad segun retorno real' },
                 { label: '0 relleno', value: 'Solo piezas que mueven ventas' },
               ].map((item) => (
-                <div
+                <motion.div
                   key={item.label}
+                  data-cursor="hover"
+                  whileHover={{
+                    y: -2,
+                    backgroundColor: 'rgba(255,255,255,0.06)',
+                    borderColor: 'rgba(255,255,255,0.18)',
+                    boxShadow:
+                      'inset 0 1px 0 rgba(255,255,255,0.10), 0 16px 36px rgba(0,0,0,0.22), 0 0 28px rgba(255,255,255,0.07)',
+                  }}
+                  transition={{ duration: 0.18, ease: [0.25, 0.46, 0.45, 0.94] }}
                   style={{
                     minHeight: 82,
                     borderRadius: 10,
                     border: '1px solid rgba(255,255,255,0.10)',
-                    background: 'rgba(255,255,255,0.035)',
+                    backgroundColor: 'rgba(255,255,255,0.035)',
+                    boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04)',
                     padding: '14px 15px',
                     display: 'flex',
                     flexDirection: 'column',
@@ -7624,7 +7926,7 @@ function ServicesFullWidthCta({ onNavigate }: { onNavigate: (href: string) => vo
                     {item.label}
                   </span>
                   <span style={{ fontSize: 13, lineHeight: 1.35, color: 'rgba(255,255,255,0.68)' }}>{item.value}</span>
-                </div>
+                </motion.div>
               ))}
             </div>
           </div>
@@ -7641,7 +7943,7 @@ function ServicesFullWidthCta({ onNavigate }: { onNavigate: (href: string) => vo
             >
               Elegi por donde empezar
             </div>
-            {ORDERED_SERVICES.map((service, index) => {
+            {ORDERED_SERVICES.map((service) => {
               const Icon = service.icon;
 
               return (
@@ -7649,19 +7951,36 @@ function ServicesFullWidthCta({ onNavigate }: { onNavigate: (href: string) => vo
                   key={service.id}
                   type="button"
                   onClick={() => onNavigate(service.href)}
-                  whileHover={{
-                    x: 7,
-                    background: `${service.accent}16`,
-                    borderColor: `${service.accent}68`,
-                    boxShadow: `0 0 34px ${service.accent}24`,
+                  onHoverStart={() => setHoveredCtaServiceId(service.id)}
+                  onHoverEnd={() => setHoveredCtaServiceId(null)}
+                  initial="rowRest"
+                  whileHover="rowHover"
+                  variants={{
+                    rowRest: {
+                      x: 0,
+                      y: 0,
+                      backgroundColor: 'rgba(255,255,255,0.018)',
+                      borderColor: `${service.accent}30`,
+                      boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.03)',
+                    },
+                    rowHover: {
+                      x: 5,
+                      y: -2,
+                      backgroundColor: `${service.accent}0F`,
+                      borderColor: `${service.accent}72`,
+                      boxShadow: `inset 0 1px 0 rgba(255,255,255,0.08), 0 18px 42px rgba(0,0,0,0.28), 0 0 36px ${service.accent}24`,
+                    },
                   }}
                   whileTap={{ scale: 0.985 }}
                   transition={{ duration: 0.16, ease: [0.25, 0.46, 0.45, 0.94] }}
                   style={{
+                    position: 'relative',
                     minHeight: 74,
+                    overflow: 'hidden',
                     borderRadius: 10,
                     border: `1px solid ${service.accent}30`,
-                    background: `linear-gradient(135deg, ${service.accent}10, rgba(255,255,255,0.025))`,
+                    backgroundColor: 'rgba(255,255,255,0.018)',
+                    backgroundImage: `linear-gradient(135deg, ${service.accent}0A, rgba(255,255,255,0.02))`,
                     color: service.accent,
                     display: 'grid',
                     gridTemplateColumns: '34px minmax(0,1fr) auto',
@@ -7672,21 +7991,52 @@ function ServicesFullWidthCta({ onNavigate }: { onNavigate: (href: string) => vo
                     cursor: 'pointer',
                   }}
                 >
-                  <span
+                  <motion.span
+                    aria-hidden="true"
+                    variants={{
+                      rowRest: { opacity: 0 },
+                      rowHover: { opacity: 1 },
+                    }}
+                    transition={{ duration: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
                     style={{
+                      position: 'absolute',
+                      inset: 0,
+                      background: `radial-gradient(circle at 18% 50%, ${service.accent}22, transparent 0 36%), linear-gradient(120deg, ${service.accent}10, transparent 54%)`,
+                      pointerEvents: 'none',
+                    }}
+                  />
+                  <motion.span
+                    variants={{
+                      rowRest: {
+                        scale: 1,
+                        backgroundColor: `${service.accent}14`,
+                        borderColor: `${service.accent}32`,
+                        boxShadow: `0 0 22px ${service.accent}18`,
+                      },
+                      rowHover: {
+                        scale: 1.045,
+                        backgroundColor: `${service.accent}20`,
+                        borderColor: `${service.accent}64`,
+                        boxShadow: `0 0 16px ${service.accent}38, 0 0 34px ${service.accent}20`,
+                      },
+                    }}
+                    transition={{ duration: 0.18, ease: [0.25, 0.46, 0.45, 0.94] }}
+                    style={{
+                      position: 'relative',
+                      zIndex: 1,
                       width: 34,
                       height: 34,
                       borderRadius: 9,
+                      border: `1px solid ${service.accent}32`,
                       display: 'grid',
                       placeItems: 'center',
-                      background: `${service.accent}14`,
-                      border: `1px solid ${service.accent}32`,
+                      backgroundColor: `${service.accent}14`,
                       boxShadow: `0 0 22px ${service.accent}18`,
                     }}
                   >
                     <Icon size={16} color={service.accent} strokeWidth={1.8} />
-                  </span>
-                  <span style={{ minWidth: 0 }}>
+                  </motion.span>
+                  <span style={{ position: 'relative', zIndex: 1, minWidth: 0 }}>
                     <span
                       style={{
                         display: 'block',
@@ -7710,8 +8060,25 @@ function ServicesFullWidthCta({ onNavigate }: { onNavigate: (href: string) => vo
                       {service.metric}
                     </span>
                   </span>
-                  <span
+                  <motion.span
+                    variants={{
+                      rowRest: {
+                        color: service.accent,
+                        backgroundColor: 'rgba(4,6,10,0.22)',
+                        borderColor: `${service.accent}36`,
+                        boxShadow: `0 0 0 ${service.accent}00`,
+                      },
+                      rowHover: {
+                        color: '#050607',
+                        backgroundColor: service.accent,
+                        borderColor: `${service.accent}B8`,
+                        boxShadow: `0 0 18px ${service.accent}38`,
+                      },
+                    }}
+                    transition={{ duration: 0.18, ease: [0.25, 0.46, 0.45, 0.94] }}
                     style={{
+                      position: 'relative',
+                      zIndex: 1,
                       display: 'flex',
                       alignItems: 'center',
                       gap: 8,
@@ -7719,8 +8086,8 @@ function ServicesFullWidthCta({ onNavigate }: { onNavigate: (href: string) => vo
                       fontWeight: 850,
                       letterSpacing: '0.08em',
                       textTransform: 'uppercase',
-                      color: index === 0 ? '#050607' : service.accent,
-                      background: index === 0 ? service.accent : `${service.accent}12`,
+                      color: service.accent,
+                      backgroundColor: 'rgba(4,6,10,0.22)',
                       border: `1px solid ${service.accent}30`,
                       borderRadius: 999,
                       padding: '7px 10px',
@@ -7729,7 +8096,7 @@ function ServicesFullWidthCta({ onNavigate }: { onNavigate: (href: string) => vo
                   >
                     Ver
                     <span aria-hidden="true">-&gt;</span>
-                  </span>
+                  </motion.span>
                 </motion.button>
               );
             })}
@@ -7930,146 +8297,8 @@ export default function OurServices() {
       ref={sectionRef}
       id="servicios"
       className="relative overflow-hidden"
-      style={{
-        background: `
-          radial-gradient(circle at 50% 14%, rgba(42, 79, 93, 0.18) 0%, rgba(19, 29, 49, 0.14) 20%, rgba(3, 3, 5, 0) 44%),
-          radial-gradient(circle at 50% -8%, rgba(18, 25, 41, 0.58) 0%, rgba(7, 9, 14, 0.9) 36%, #030305 72%),
-          linear-gradient(180deg, #06070b 0%, #030305 34%, #020203 100%)
-        `,
-      }}
     >
-      <div className="pointer-events-none absolute inset-0 z-0">
-        <div
-          style={{
-            position: 'absolute',
-            inset: 0,
-            backgroundImage:
-              `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E")`,
-            backgroundRepeat: 'repeat',
-            backgroundSize: '128px 128px',
-            pointerEvents: 'none',
-            zIndex: 0,
-            opacity: 0.4,
-          }}
-        />
-        <div
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            height: 200,
-            background: 'linear-gradient(180deg, rgba(0,0,0,0.3), transparent)',
-            pointerEvents: 'none',
-            zIndex: 0,
-          }}
-        />
-        <div
-          style={{
-            position: 'absolute',
-            bottom: 0,
-            left: 0,
-            right: 0,
-            height: 200,
-            background: 'linear-gradient(0deg, rgba(0,0,0,0.3), transparent)',
-            pointerEvents: 'none',
-            zIndex: 0,
-          }}
-        />
-        <motion.div
-          animate={{
-            background: `radial-gradient(
-              ellipse 80% 60% at 50% 40%,
-              ${activeAccent}12 0%,
-              ${activeAccent}06 35%,
-              transparent 70%
-            )`,
-          }}
-          transition={{ duration: 1.2, ease: 'easeInOut' }}
-          style={{
-            position: 'absolute',
-            inset: 0,
-            pointerEvents: 'none',
-            zIndex: 0,
-          }}
-        />
-
-        <div
-          style={{
-            position: 'absolute',
-            top: '20%',
-            left: '-15%',
-            width: '40vw',
-            height: '40vw',
-            borderRadius: '50%',
-            background: 'rgba(255,255,255,0.015)',
-            filter: 'blur(80px)',
-            pointerEvents: 'none',
-            zIndex: 0,
-          }}
-        />
-
-        <motion.div
-          animate={{
-            background: `radial-gradient(
-              circle,
-              ${activeAccent}0B 0%,
-              transparent 70%
-            )`,
-          }}
-          transition={{ duration: 1.5, ease: 'easeInOut' }}
-          style={{
-            position: 'absolute',
-            top: '30%',
-            right: '-10%',
-            width: '35vw',
-            height: '35vw',
-            borderRadius: '50%',
-            filter: 'blur(100px)',
-            pointerEvents: 'none',
-            zIndex: 0,
-          }}
-        />
-
-        <div
-          style={{
-            position: 'absolute',
-            inset: 0,
-            background: `radial-gradient(
-              ellipse 100% 100% at 50% 50%,
-              transparent 40%,
-              rgba(0,0,0,0.4) 100%
-            )`,
-            pointerEvents: 'none',
-            zIndex: 0,
-          }}
-        />
-
-        <motion.div
-          animate={{
-            background: `linear-gradient(
-              90deg,
-              transparent 0%,
-              ${activeAccent}20 30%,
-              ${activeAccent}40 50%,
-              ${activeAccent}20 70%,
-              transparent 100%
-            )`,
-          }}
-          transition={{ duration: 1.2, ease: 'easeInOut' }}
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            height: 1,
-            pointerEvents: 'none',
-            zIndex: 1,
-          }}
-        />
-
-        <FloatingParticles activeAccent={activeAccent} />
-      </div>
+      <OurServicesBackground activeAccent={activeAccent} />
 
       <div className="relative z-10 mx-auto max-w-[1440px] px-5 pb-14 pt-20 sm:px-8 lg:px-10 lg:pt-24">
         {/* HEADER INMERSIVO */}
