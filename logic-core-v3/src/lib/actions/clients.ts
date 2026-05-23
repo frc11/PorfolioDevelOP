@@ -6,7 +6,6 @@ import { redirect } from 'next/navigation'
 import { revalidatePath, revalidateTag } from 'next/cache'
 import { auth } from '@/auth'
 import { prisma } from '@/lib/prisma'
-import { PREMIUM_FEATURE_KEYS, PREMIUM_FEATURE_LABELS, type PremiumFeatureKey } from '@/lib/premium-features'
 import { seedOnboardingTasksForOrg } from '@/lib/onboarding/seed-tasks-for-org'
 
 function slugify(text: string): string {
@@ -195,63 +194,3 @@ export async function deleteClientAction(formData: FormData): Promise<void> {
   redirect('/admin/clients')
 }
 
-export async function toggleClientFeatureAction(input: {
-  clientId: string
-  featureKey: PremiumFeatureKey
-  enabled: boolean
-}) {
-  const session = await auth()
-  if (session?.user?.role !== 'SUPER_ADMIN') {
-    return { success: false, error: 'No autorizado.' }
-  }
-
-  if (!PREMIUM_FEATURE_KEYS.includes(input.featureKey)) {
-    return { success: false, error: 'Módulo inválido.' }
-  }
-
-  const organization = await prisma.organization.findUnique({
-    where: { id: input.clientId },
-    select: {
-      companyName: true,
-      members: {
-        where: { role: 'ADMIN' },
-        select: {
-          userId: true,
-          user: {
-            select: {
-              unlockedFeatures: true,
-            },
-          },
-        },
-        take: 1,
-      },
-    },
-  })
-
-  const adminUser = organization?.members[0]
-
-  if (!organization || !adminUser) {
-    return { success: false, error: 'Cliente no encontrado.' }
-  }
-
-  const nextFeatures = input.enabled
-    ? Array.from(new Set([...adminUser.user.unlockedFeatures, input.featureKey]))
-    : adminUser.user.unlockedFeatures.filter((feature) => feature !== input.featureKey)
-
-  await prisma.user.update({
-    where: { id: adminUser.userId },
-    data: {
-      unlockedFeatures: nextFeatures,
-    },
-  })
-
-  revalidatePath(`/admin/clients/${input.clientId}/edit`)
-  revalidatePath(`/admin/clients/${input.clientId}`)
-  revalidatePath('/dashboard', 'layout')
-
-  return {
-    success: true,
-    features: nextFeatures,
-    message: `Módulo ${PREMIUM_FEATURE_LABELS[input.featureKey]} ${input.enabled ? 'activado' : 'desactivado'} para ${organization.companyName}`,
-  }
-}

@@ -2,12 +2,14 @@ import { AIExecutiveBriefV2 } from '@/components/dashboard/home/AIExecutiveBrief
 import { AttentionStack } from '@/components/dashboard/home/AttentionStack'
 import { HealthScore } from '@/components/dashboard/home/HealthScore'
 import { OnboardingStatusCard } from '@/components/dashboard/OnboardingStatusCard'
+import { UsageMeter } from '@/components/dashboard/plan/UsageMeter'
 import { WeekResultsGrid } from '@/components/dashboard/home/WeekResultsGrid'
 import { LoadingState, PageHeader } from '@/components/ui'
 import { getExecutiveBrief } from '@/lib/ai/executive-brief'
 import { getAttentionItems } from '@/lib/dashboard/attention'
 import { getWeekResults } from '@/lib/dashboard/week-results'
 import { getHealthScore } from '@/lib/health-score'
+import { getOrgUsageSnapshot } from '@/lib/plan/get-org-usage'
 import { resolveOrgId } from '@/lib/preview'
 import { prisma } from '@/lib/prisma'
 import { unstable_cache } from 'next/cache'
@@ -61,11 +63,24 @@ export default async function DashboardPage() {
         <WeekResultsServerWrapper organizationId={organizationId} />
       </Suspense>
 
+      <Suspense fallback={<UsageMeterSkeleton />}>
+        <UsageMeterServerWrapper organizationId={organizationId} />
+      </Suspense>
+
       <Suspense fallback={<BriefSkeleton />}>
         <BriefServerWrapper organizationId={organizationId} />
       </Suspense>
     </div>
   )
+}
+
+async function UsageMeterServerWrapper({ organizationId }: { organizationId: string }) {
+  const snapshot = await getOrgUsageSnapshot(organizationId)
+  return <UsageMeter snapshot={snapshot} />
+}
+
+function UsageMeterSkeleton() {
+  return <LoadingState variant="skeleton-card" />
 }
 
 async function HealthScoreServerWrapper({ organizationId }: { organizationId: string }) {

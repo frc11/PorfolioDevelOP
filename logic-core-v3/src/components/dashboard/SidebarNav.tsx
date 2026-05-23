@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
-import { Home, FolderKanban, Zap, MessageSquare, BarChart3, TrendingUp, LifeBuoy, X, Settings, Star, Mail, ShoppingBag, CalendarDays, Bot, type LucideIcon } from 'lucide-react'
+import { Home, FolderKanban, Zap, MessageSquare, BarChart3, TrendingUp, LifeBuoy, X, Settings, Star, Mail, ShoppingBag, CalendarDays, Bot, Gauge, type LucideIcon } from 'lucide-react'
 import { motion } from 'motion/react'
 
 const NAV_ITEMS = [
@@ -11,6 +11,7 @@ const NAV_ITEMS = [
   { href: '/dashboard/project',      label: 'Mi proyecto',    icon: FolderKanban },
   { href: '/dashboard/resultados',   label: 'Resultados',     icon: TrendingUp },
   { href: '/dashboard/services',     label: 'Mis servicios',  icon: Zap },
+  { href: '/dashboard/plan',         label: 'Mi plan',        icon: Gauge },
   { href: '/dashboard/chatbot',      label: 'Mi Chatbot',     icon: Bot },
   { href: '/dashboard/messages',     label: 'Mensajes',       icon: MessageSquare, badge: 'unreadMessages' },
   { href: '/dashboard/soporte',      label: 'Soporte',        icon: LifeBuoy },
@@ -20,7 +21,6 @@ const NAV_ITEMS = [
 interface SidebarNavProps {
   companyName: string
   unreadMessages?: number
-  unlockedFeatures?: string[] // Kept for compatibility if passed
   activeModuleSlugs?: string[]
   showCloseButton?: boolean
   onClose?: () => void
@@ -29,7 +29,6 @@ interface SidebarNavProps {
 export function SidebarNav({
   companyName,
   unreadMessages = 0,
-  unlockedFeatures = [],
   activeModuleSlugs = [],
   showCloseButton = false,
   onClose,

@@ -109,7 +109,23 @@ export function useChatbot({ slug, currentPath }: UseChatbotOptions): UseChatbot
   )
 
   const { messages: sdkMessages, sendMessage: sdkSendMessage, status } = useChat({ transport })
-  const isStreaming = status === 'streaming' || status === 'submitted'
+
+  // B3.7 — pendingSubmit hace que el estado "Pensando" reaccione en el mismo
+  // frame en que el usuario presiona Enter, sin esperar al microtick del SDK
+  // ni al primer byte HTTP. El SDK toma el control en el siguiente render y
+  // el flag se limpia. Decisión de B1.3: la única palanca de "velocidad" real
+  // es la PERCEPCIÓN — Vertex TTFB son ~2.3s y no se mueve.
+  const [pendingSubmit, setPendingSubmit] = useState(false)
+
+  useEffect(() => {
+    // En cuanto el SDK pasa a cualquier estado activo (o vuelve a ready/error)
+    // el flag optimista deja de ser necesario — `isStreaming` derived ya cubre.
+    if (status === 'submitted' || status === 'streaming' || status === 'error' || status === 'ready') {
+      setPendingSubmit(false)
+    }
+  }, [status])
+
+  const isStreaming = pendingSubmit || status === 'streaming' || status === 'submitted'
 
   const messages: UIChatMessage[] = useMemo(() => {
     return sdkMessages.map((m) => {
@@ -142,13 +158,16 @@ export function useChatbot({ slug, currentPath }: UseChatbotOptions): UseChatbot
 
   const avatarState: NeuroAvatarState = useMemo(() => {
     if (!isOpen) return 'idle'
-    if (status === 'submitted') return 'thinking'
+    if (pendingSubmit || status === 'submitted') return 'thinking'
     if (status === 'streaming') return 'speaking'
     return 'listening'
-  }, [isOpen, status])
+  }, [isOpen, status, pendingSubmit])
 
   const sendMessage = useCallback(
     (text: string) => {
+      // Setear el flag ANTES de delegar al SDK garantiza que "Pensando" /
+      // avatar thinking aparezcan en el mismo frame del Enter — sin gap.
+      setPendingSubmit(true)
       sdkSendMessage({ text })
     },
     [sdkSendMessage]
