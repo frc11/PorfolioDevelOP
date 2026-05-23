@@ -5,22 +5,51 @@ import { buildShowWhatsappHandoffTool } from './showWhatsappHandoff'
 import { buildNavigateToPageTool } from './navigateToPage'
 
 /**
- * Returns the complete tool set bound to the given conversation context.
- *
- * Server-side tools (capture_lead) have closures over `ctx` for DB writes.
- * Client-side tools (the other 3) are stateless and don't need context.
- *
- * Usage:
- *   const tools = getTools({ conversationId, botConfigId, organizationId })
- *   const result = streamText({ model, system, messages, tools })
+ * Slug → builder de cada tool. El builder recibe el contexto y devuelve
+ * la tool armada con su closure. Centraliza el catálogo así el filter de
+ * B4.2 no se desincroniza con el set real disponible.
  */
-export function getTools(ctx: ToolCallContext) {
-  return {
-    capture_lead: buildCaptureLeadTool(ctx),
-    offer_handoff_options: buildOfferHandoffOptionsTool(),
-    show_whatsapp_handoff: buildShowWhatsappHandoffTool(ctx),
-    navigate_to_page: buildNavigateToPageTool(),
+const TOOL_BUILDERS = {
+  capture_lead: (ctx: ToolCallContext) => buildCaptureLeadTool(ctx),
+  offer_handoff_options: (_ctx: ToolCallContext) => buildOfferHandoffOptionsTool(),
+  show_whatsapp_handoff: (ctx: ToolCallContext) => buildShowWhatsappHandoffTool(ctx),
+  navigate_to_page: (_ctx: ToolCallContext) => buildNavigateToPageTool(),
+} as const
+
+export type ToolSlug = keyof typeof TOOL_BUILDERS
+
+/** Lista canónica de slugs disponibles (en orden de declaración). */
+export const ALL_TOOL_SLUGS: readonly ToolSlug[] = Object.keys(
+  TOOL_BUILDERS,
+) as ToolSlug[]
+
+/**
+ * Returns the tool set bound to the given conversation context.
+ *
+ * Si se pasa `enabledTools`, sólo devuelve las que matchean Y existen
+ * en el catálogo. Slugs desconocidos en `enabledTools` se ignoran
+ * silenciosamente (cero crash). Si no se pasa o es `null`, devuelve
+ * el set completo (comportamiento pre-B4.2).
+ *
+ * B4.2 — gating de tools por plan:
+ *   const plan = await getPlanForOrg(orgId)
+ *   const tools = getTools(ctx, plan.tools)  // ← filtra por slugs del plan
+ */
+export function getTools(
+  ctx: ToolCallContext,
+  enabledTools: readonly string[] | null = null,
+) {
+  const allow: ReadonlySet<string> | null =
+    enabledTools === null ? null : new Set(enabledTools)
+
+  const result: Partial<Record<ToolSlug, ReturnType<(typeof TOOL_BUILDERS)[ToolSlug]>>> = {}
+
+  for (const slug of ALL_TOOL_SLUGS) {
+    if (allow !== null && !allow.has(slug)) continue
+    result[slug] = TOOL_BUILDERS[slug](ctx)
   }
+
+  return result
 }
 
 /**

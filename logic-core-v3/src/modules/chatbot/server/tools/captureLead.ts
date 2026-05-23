@@ -18,33 +18,42 @@ import type { ToolCallContext, CaptureLeadResult, ToolExecuteResult } from './ty
  * For now, we log structurally so the event is traceable.
  */
 
-export const captureLeadInputSchema = z.object({
-  name: z.string().min(2).max(100).describe(
-    'Nombre del usuario como se identificó'
-  ),
-  contactMethod: z.enum(['phone', 'email']).describe(
-    'Canal preferido de contacto'
-  ),
-  contactValue: z.string().min(5).max(200).describe(
-    'Número de teléfono (con código país si posible) o email'
-  ),
-  intent: z.enum(['quote', 'info', 'demo', 'support', 'other']).describe(
-    'Intención principal: quote=presupuesto, info=más info, demo=ver demo, support=problema con servicio actual, other=otro'
-  ),
-  contextSummary: z.string().min(10).max(500).describe(
-    'Resumen breve (1-2 oraciones) en español rioplatense de qué busca el usuario, qué servicio le interesa, qué problema quiere resolver. Esto va a la BD para que el equipo lo vea.'
-  ),
-})
+export const captureLeadInputSchema = z
+  .object({
+    name: z.string().min(2).max(100).describe(
+      'Nombre del usuario como se identificó'
+    ),
+    phone: z.string().min(5).max(50).optional().describe(
+      'Teléfono del usuario (con código de país si está disponible, ej: +54 9 11 ...). Omitir si el usuario no lo dio.'
+    ),
+    email: z.string().email().max(200).optional().describe(
+      'Email del usuario. Omitir si el usuario no lo dio.'
+    ),
+    intent: z.enum(['quote', 'info', 'demo', 'support', 'other']).describe(
+      'Intención principal: quote=presupuesto, info=más info, demo=ver demo, support=problema con servicio actual, other=otro'
+    ),
+    contextSummary: z.string().min(10).max(500).describe(
+      'Resumen breve (1-2 oraciones) en español rioplatense de qué busca el usuario, qué servicio le interesa, qué problema quiere resolver. Esto va a la BD para que el equipo lo vea.'
+    ),
+  })
+  .refine((data) => Boolean(data.phone) || Boolean(data.email), {
+    message: 'Se requiere al menos teléfono o email.',
+    path: ['phone'],
+  })
 
 export type CaptureLeadInput = z.infer<typeof captureLeadInputSchema>
 
 export const CAPTURE_LEAD_DESCRIPTION = `Guarda los datos de contacto del usuario en el sistema.
 
-USAR cuando: el usuario explícitamente expresó interés en ser contactado Y proporcionó nombre + método de contacto (teléfono o email).
+USAR cuando: el usuario explícitamente expresó interés en ser contactado Y proporcionó nombre + al menos un canal de contacto (teléfono o email).
+
+REGLAS DE CANALES:
+- Si el usuario te dio AMBOS (teléfono y email), pasá los DOS en la misma invocación: persistimos los dos canales. Es el caso ideal.
+- Si dio solo uno, pasá solo ese. No le pidas el otro si no lo ofreció voluntariamente — uno solo es suficiente.
 
 NO USAR si:
 - El usuario solo está consultando información sin intención de seguir
-- No proporcionó nombre o no proporcionó un método de contacto
+- No proporcionó nombre o no proporcionó ningún canal de contacto
 - Ya se invocó esta tool exitosamente en esta conversación (no duplicar)`
 
 /**
@@ -78,11 +87,12 @@ async function captureLeadExecute(
       }
     }
 
-    // 2. Normalize phone/email lightly (trim + basic validation)
-    const normalizedContact = input.contactValue.trim()
-
-    const email = input.contactMethod === 'email' ? normalizedContact : null
-    const phone = input.contactMethod === 'phone' ? normalizedContact : null
+    // 2. Normalize phone/email lightly (trim). Both channels persist if both came.
+    const email = input.email?.trim() || null
+    const phone = input.phone?.trim() || null
+    const channels = [phone ? 'phone' : null, email ? 'email' : null].filter(
+      (c): c is 'phone' | 'email' => c !== null,
+    )
 
     // 3. Create the lead and update conversation in a transaction
     const result = await prisma.$transaction(async (tx) => {
@@ -177,8 +187,8 @@ async function captureLeadExecute(
         botConfigId: ctx.botConfigId,
         leadId: result.id,
         intent: input.intent,
-        contactMethod: input.contactMethod,
-        // PII (name, contact value, message) intentionally omitted from logs
+        channels,
+        // PII (name, contact values, message) intentionally omitted from logs
       })
     )
 
@@ -186,11 +196,11 @@ async function captureLeadExecute(
       botConfigId: ctx.botConfigId,
       type: 'tool.lead_captured',
       level: 'info',
-      message: `Lead capturado (intent: ${input.intent})`,
+      message: `Lead capturado (intent: ${input.intent}, canales: ${channels.join('+') || 'ninguno'})`,
       conversationId: ctx.conversationId,
       metadata: {
         intent: input.intent,
-        contactMethod: input.contactMethod,
+        channels,
         leadId: result.id,
       },
     })

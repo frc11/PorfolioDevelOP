@@ -45,6 +45,17 @@ export interface PromptContext {
    * Used to decide whether the bot should greet again.
    */
   isFirstMessage: boolean
+
+  /**
+   * B4.5 — Soft-cap: cantidad aproximada de turnos del visitante en la
+   * conversación actual (calculado como `messageCount / 2`). El prompt
+   * usa este número para sugerir handoff cuando la sesión es larga,
+   * controlando el tail de costo sin endurecer el server.
+   *
+   * Undefined o 0 = primer mensaje. Soft-cap se activa a partir de
+   * `SOFT_CAP_THRESHOLD` (sections.ts).
+   */
+  userTurnsCount?: number
 }
 
 export interface BuildSystemPromptInput {

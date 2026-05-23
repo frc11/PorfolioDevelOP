@@ -7,8 +7,8 @@ export type {
 } from './types'
 
 // Factory (main entry point for consumers)
-export { getTools } from './getTools'
-export type { ChatbotTools } from './getTools'
+export { getTools, ALL_TOOL_SLUGS } from './getTools'
+export type { ChatbotTools, ToolSlug } from './getTools'
 
 // Individual tool builders (rarely needed, exposed for testing)
 export { buildCaptureLeadTool, CAPTURE_LEAD_DESCRIPTION, captureLeadInputSchema } from './captureLead'

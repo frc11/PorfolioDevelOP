@@ -75,7 +75,7 @@ export default async function DashboardLayout({
     redirect(session?.user?.role === 'SUPER_ADMIN' ? '/admin/clients' : '/login')
   }
 
-  const [client, unreadMessages, notifications, activeModulesData, userFeaturesData] = await Promise.all([
+  const [client, unreadMessages, notifications, activeModulesData] = await Promise.all([
     getCachedOrgMeta(organizationId),
     getCachedUnreadMessages(organizationId),
     prisma.notification.findMany({
@@ -84,31 +84,9 @@ export default async function DashboardLayout({
       take: 5,
     }),
     getCachedActiveModules(organizationId),
-    preview 
-      ? prisma.orgMember.findFirst({
-          where: { organizationId, role: 'ADMIN' },
-          select: { user: { select: { id: true, unlockedFeatures: true, name: true, email: true } } },
-        })
-      : (session?.user?.id 
-          ? prisma.user.findUnique({
-              where: { id: session.user.id },
-              select: { unlockedFeatures: true },
-            })
-          : Promise.resolve(null))
   ])
 
   const activeModuleSlugs = activeModulesData.map((m) => m.module.slug)
-  
-  // Cast safety: determine unlocked features based on preview state
-  let unlockedFeatures: string[] = []
-  let targetAdmin = null
-  
-  if (preview && userFeaturesData && 'user' in userFeaturesData) {
-    targetAdmin = userFeaturesData
-    unlockedFeatures = userFeaturesData.user.unlockedFeatures
-  } else if (!preview && userFeaturesData && 'unlockedFeatures' in userFeaturesData) {
-    unlockedFeatures = userFeaturesData.unlockedFeatures
-  }
 
   if (!client) redirect('/login')
 
@@ -124,7 +102,6 @@ export default async function DashboardLayout({
     <DashboardLayoutClient
       companyName={client.companyName}
       unreadMessages={unreadMessages}
-      unlockedFeatures={unlockedFeatures}
       activeModuleSlugs={activeModuleSlugs}
       notifications={notifications}
       userDisplayName={

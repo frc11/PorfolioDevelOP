@@ -187,6 +187,18 @@ enum InsightCategory {
   COMPETITIVE_INTEL
 }
 
+enum PlanKey {
+  STARTER
+  PRO
+  BUSINESS
+}
+
+enum SupportTier {
+  STANDARD
+  PRIORITY
+  PRIORITY_24H
+}
+
 // ─── NextAuth Required Models ─────────────────────────────────────────────────
 
 model Account {
@@ -228,16 +240,15 @@ model VerificationToken {
 // ─── User ─────────────────────────────────────────────────────────────────────
 
 model User {
-  id                 String    @id @default(cuid())
-  name               String?
-  email              String    @unique
-  emailVerified      DateTime?
-  image              String?
+  id                    String    @id @default(cuid())
+  name                  String?
+  email                 String    @unique
+  emailVerified         DateTime?
+  image                 String?
   password              String?
   passwordResetRequired Boolean   @default(false)
   phone                 String?
   role                  Role      @default(ORG_MEMBER)
-  unlockedFeatures      String[]  @default([])
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt
   lastDashboardVisit    DateTime?
@@ -421,17 +432,69 @@ model Message {
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 }
 
+model Plan {
+  id              String  @id @default(cuid())
+  key             PlanKey @unique
+  name            String
+  monthlyPrice    Decimal @db.Decimal(10, 2)
+  setupFloorPrice Decimal @db.Decimal(10, 2)
+
+  // 7 dimensiones de gating (server-enforced en B4.2)
+  quota          Int
+  llmModel       String
+  tools          String[]
+  maxDomains     Int?
+  reportsEnabled Boolean  @default(false)
+  insightEnabled Boolean  @default(false)
+  crmEnabled     Boolean  @default(false)
+
+  supportTier SupportTier @default(STANDARD)
+  active      Boolean     @default(true)
+  sortOrder   Int         @default(0)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  subscriptions        Subscription[]
+  pendingSubscriptions Subscription[] @relation("PendingPlan")
+
+  @@map("plan")
+}
+
 model Subscription {
-  id             String             @id @default(cuid())
-  organizationId String             @unique
-  organization   Organization       @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  id             String       @id @default(cuid())
+  organizationId String       @unique
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   planName       String
-  status         SubscriptionStatus @default(ACTIVE)
-  price          Float
-  currency       String             @default("USD")
-  renewalDate    DateTime?
-  createdAt      DateTime           @default(now())
-  updatedAt      DateTime           @updatedAt
+  planId         String?
+  plan           Plan?        @relation(fields: [planId], references: [id])
+
+  // ─── B4.3: Billing override (separado del gating) ───
+  // El gating del bot SIEMPRE lee del Plan (via getPlanForOrg).
+  // El billing/facturación lee priceOverride si está seteado y la fecha
+  // de vencimiento no pasó. NO mezclar — son responsibilities distintas.
+  priceOverride  Decimal?  @db.Decimal(10, 2)
+  overrideUntil  DateTime?
+  overrideReason String?   @db.Text
+
+  // ─── B4.3: Scheduling de cambio de plan ───
+  // Upgrade = se aplica inmediato (sortOrder mayor del nuevo Plan).
+  // Downgrade = se difiere al inicio del próximo ciclo (sortOrder menor).
+  // getPlanForOrg aplica lazy el pending cuando la fecha pasó (sin cron).
+  pendingPlanId          String?
+  pendingPlan            Plan?     @relation("PendingPlan", fields: [pendingPlanId], references: [id])
+  pendingPlanEffectiveAt DateTime?
+  lastPlanChangedAt      DateTime?
+
+  status      SubscriptionStatus @default(ACTIVE)
+  price       Float
+  currency    String             @default("USD")
+  renewalDate DateTime?
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+
+  @@index([planId])
+  @@index([pendingPlanId])
+  @@index([pendingPlanEffectiveAt])
 }
 
 model Invoice {

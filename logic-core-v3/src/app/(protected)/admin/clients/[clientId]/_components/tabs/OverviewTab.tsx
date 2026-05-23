@@ -1,6 +1,8 @@
 import { prisma } from '@/lib/prisma'
 import { Card, StatCard } from '@/components/ui'
 import { ResendCredentialsButton } from '../ResendCredentialsButton'
+import { PlanAssignmentCard } from '../PlanAssignmentCard'
+import { BillingOverrideCard } from '../BillingOverrideCard'
 
 interface OverviewTabProps {
   clientId: string
@@ -51,6 +53,9 @@ export async function OverviewTab({ clientId }: OverviewTabProps) {
           color="violet"
         />
       </div>
+
+      <PlanAssignmentCard clientId={clientId} />
+      <BillingOverrideCard clientId={clientId} />
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <Card variant="elevated" padding="lg">

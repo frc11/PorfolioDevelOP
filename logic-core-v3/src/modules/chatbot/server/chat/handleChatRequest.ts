@@ -1,4 +1,4 @@
-import { streamText, type ModelMessage } from 'ai'
+import { streamText, stepCountIs, type ModelMessage } from 'ai'
 import { z } from 'zod'
 import { detectIntent } from '../intent'
 import { prisma } from '@/lib/prisma'
@@ -11,13 +11,20 @@ import { buildSystemPrompt, formatDateTimeArgentina } from '../prompts'
 import { getTools } from '../tools'
 import { getLLMProvider } from '../llm'
 import { calculateCost } from '../pricing'
-import { checkQuota, incrementQuota } from '../quota'
+import {
+  checkQuota,
+  incrementQuota,
+  tryReserveConversation,
+  triggerUpsellAlertIfFirst,
+} from '../quota'
 import { checkRateLimit } from '../rate-limit'
 import { hashIp, validateAssistantOutput } from '../safety'
 import { chatbotLog } from '../logging'
 import { chatbotDebug, chatbotError } from '../logging'
 import { logChatbotEvent } from '../logging'
 import type { LLMProviderName } from '../../shared/types'
+import { getPlanForOrg, type EffectivePlan } from '@/lib/plan'
+import { originMatchesAllowed } from '@/lib/security/origin-matcher'
 
 /**
  * Body schema for POST /api/chatbot/[slug]/chat.
@@ -50,6 +57,110 @@ function extractClientIp(request: Request): string {
   const real = request.headers.get('x-real-ip')
   if (real) return real
   return 'unknown'
+}
+
+/**
+ * B4.2/B4.5 — Respuesta estandarizada de modo degradado.
+ *
+ * Lockeada en la economía del producto: cuando el gating bloquea,
+ * NUNCA llamamos a Gemini. Devolvemos JSON canned + datos para que el
+ * widget arme el handoff de WhatsApp con la info del bot real.
+ *
+ * Cero costo de LLM, cero crash, cero 500.
+ *
+ * El widget detecta `mode === 'degraded'` y muestra el CTA WhatsApp
+ * directamente. La `reason` permite distinguir downstream (telemetría,
+ * UI texto distinto en el widget si quisiera).
+ */
+type DegradedReason = 'quota_exhausted' | 'domain_overflow'
+
+interface DegradedContext {
+  whatsappNumber: string | null
+  whatsappMessage: string | null
+  companyName: string | null
+}
+
+function degradedResponse(
+  message: string,
+  reason: DegradedReason,
+  bot: DegradedContext = {
+    whatsappNumber: null,
+    whatsappMessage: null,
+    companyName: null,
+  },
+): Response {
+  return Response.json({
+    mode: 'degraded',
+    reason,
+    message,
+    ctaWhatsapp: true,
+    whatsappNumber: bot.whatsappNumber,
+    whatsappMessage: bot.whatsappMessage,
+    companyName: bot.companyName,
+  })
+}
+
+/**
+ * B4.2 — Aplica el cap de `maxDomains` del plan al array de dominios
+ * autorizados del bot.
+ *
+ * Si el plan no tiene cap (`null` = uso justo / ilimitado), devuelve
+ * el array entero. Si el bot tiene más dominios configurados que el
+ * plan permite (downgrade sin limpieza), los primeros N son efectivos
+ * y el resto queda como "overflow" — pasa validateOrigin (que mira el
+ * full array) pero NO pasa el check defensivo de este pipeline.
+ */
+function effectiveAllowedDomains(
+  botAllowedDomains: readonly string[],
+  planMaxDomains: number | null,
+): { effective: string[]; overflow: string[] } {
+  if (planMaxDomains === null) {
+    return { effective: [...botAllowedDomains], overflow: [] }
+  }
+  return {
+    effective: botAllowedDomains.slice(0, planMaxDomains),
+    overflow: botAllowedDomains.slice(planMaxDomains),
+  }
+}
+
+/**
+ * B4.2 — ¿El origin es efectivamente autorizado para este (bot, plan)?
+ *
+ * Replica los escapes de `validateOrigin` (dev/localhost, develop.com.ar)
+ * y después aplica el slice del plan. NO duplica el matcher (delega a
+ * `originMatchesAllowed`). Llamado DESPUÉS de validateOrigin (que ya
+ * autorizó el origin contra el full `bot.allowedDomains`).
+ *
+ * Devuelve `false` solo si el origin matchea exclusivamente un dominio
+ * "overflow" (configurado en el bot pero excedido por el cap del plan).
+ */
+function isOriginWithinPlanCap(
+  origin: string | null,
+  botAllowedDomains: readonly string[],
+  planMaxDomains: number | null,
+): boolean {
+  // Dev → localhost siempre OK (la batería de regresión corre desde localhost)
+  if (
+    process.env.NODE_ENV === 'development' &&
+    origin &&
+    (origin.includes('localhost') || origin.includes('127.0.0.1'))
+  ) {
+    return true
+  }
+  // develop.com.ar nunca cae al cap
+  if (
+    origin === 'https://develop.com.ar' ||
+    origin === 'https://www.develop.com.ar'
+  ) {
+    return true
+  }
+  // Sin cap del plan → cualquier origin que pasó validateOrigin pasa acá también
+  if (planMaxDomains === null) return true
+  // Sin origin (curl, same-origin) — ya pasó validateOrigin, no aplico el cap
+  if (!origin) return true
+
+  const { effective } = effectiveAllowedDomains(botAllowedDomains, planMaxDomains)
+  return originMatchesAllowed(origin, effective)
 }
 
 /**
@@ -141,18 +252,24 @@ export async function handleChatRequest(
 
   mark('rate_limit_ms')
 
-  // ─── 4 & 5. Quota check + conversation (parallel) ─────────────
+  // ─── 4 & 5. Plan + quota check + conversation (parallel) ──────
+  // B4.2: getPlanForOrg() suma 1 DB lookup (cacheada 60s) en paralelo
+  //       a las otras dos. La cuota del plan reemplaza bot.monthlyQuota
+  //       como límite efectivo.
   const userAgent = request.headers.get('user-agent')?.slice(0, 500) ?? undefined
 
-  // Sub-timings of the Promise.all (B1.4): lets us quantify the savings
-  // of running these queries in parallel vs sequentially.
-  // quota_only_ms + conv_only_ms ≈ what the sequential version would take.
-  // db_pre_llm_ms ≈ max(quota_only_ms, conv_only_ms) since Promise.all
-  // settles when both finish.
-  const [quota, { conversation, isNew: isNewConversation }] = await Promise.all([
+  const [plan, quota, { conversation, isNew: isNewConversation }] = await Promise.all([
     (async () => {
       const t = Date.now()
-      const r = await checkQuota(bot.id, bot.monthlyQuota)
+      const r: EffectivePlan = await getPlanForOrg(bot.organization.id)
+      timings.plan_only_ms = Date.now() - t
+      return r
+    })(),
+    (async () => {
+      const t = Date.now()
+      // Lectura optimista contra QuotaUsage. El cap real lo enforce el
+      // tryReserveConversation atómico de abajo cuando aplica.
+      const r = await checkQuota(bot.id, Number.MAX_SAFE_INTEGER)
       timings.quota_only_ms = Date.now() - t
       return r
     })(),
@@ -172,24 +289,154 @@ export async function handleChatRequest(
   ])
   mark('db_pre_llm_ms')
 
-  if (!quota.withinQuota) {
+  chatbotDebug('plan_resolved', {
+    botConfigId: bot.id,
+    organizationId: bot.organization.id,
+    planKey: plan.key,
+    isFallback: plan.isFallback,
+    quota: plan.quota,
+    llmModel: plan.llmModel,
+    tools: plan.tools,
+    maxDomains: plan.maxDomains,
+  })
+
+  // ─── 5.a Gating: dominio (defensive cap del plan) ─────────────
+  // validateOrigin (en route.ts) ya autorizó el origin contra
+  // `bot.allowedDomains` completo. Acá aplicamos el cap del plan:
+  // si el bot tiene N dominios pero el plan permite M < N, los
+  // dominios bot.allowedDomains[M:] son "overflow" y NO deben servir.
+  const requestOrigin = request.headers.get('origin')
+  if (!isOriginWithinPlanCap(requestOrigin, bot.allowedDomains, plan.maxDomains)) {
+    chatbotLog(
+      'chat.gating_domain_overflow',
+      {
+        slug,
+        botConfigId: bot.id,
+        origin: requestOrigin,
+        planKey: plan.key,
+        planMaxDomains: plan.maxDomains,
+        botAllowedDomainCount: bot.allowedDomains.length,
+      },
+      'warn',
+    )
+    await logChatbotEvent({
+      botConfigId: bot.id,
+      type: 'chat.gating_domain_overflow',
+      level: 'warn',
+      message: `Origin ${requestOrigin ?? 'no-origin'} excede el cap del plan ${plan.key}`,
+      conversationId: conversation.id,
+      metadata: { origin: requestOrigin, planKey: plan.key, maxDomains: plan.maxDomains },
+    })
+    return degradedResponse(
+      'Este dominio no está habilitado en el plan actual. ¿Te ayudo por WhatsApp?',
+      'domain_overflow',
+      {
+        whatsappNumber: bot.whatsappNumber,
+        whatsappMessage: bot.whatsappMessage,
+        companyName: bot.organization.companyName,
+      },
+    )
+  }
+
+  // ─── 5.b Gating: cuota mensual (optimista + reserva atómica) ──
+  // Optimista: si ya estamos por encima del cap, ni intentamos el LLM.
+  if (quota.conversationsUsed >= plan.quota) {
     chatbotLog(
       'chat.quota_exceeded',
       {
         slug,
         botConfigId: bot.id,
         conversationsUsed: quota.conversationsUsed,
-        conversationsLimit: quota.conversationsLimit,
+        conversationsLimit: plan.quota,
+        planKey: plan.key,
+        isFallback: plan.isFallback,
         period: `${quota.year}-${String(quota.month).padStart(2, '0')}`,
       },
-      'warn'
+      'warn',
     )
-    return Response.json({
-      mode: 'degraded',
-      message:
-        'Estamos atendiendo muchas consultas este mes. ¿Te ayudo por WhatsApp directamente?',
-      ctaWhatsapp: true,
+    await logChatbotEvent({
+      botConfigId: bot.id,
+      type: 'chat.quota_exceeded',
+      level: 'warn',
+      message: `Cuota agotada (${quota.conversationsUsed}/${plan.quota}) — plan ${plan.key}`,
+      conversationId: conversation.id,
+      metadata: {
+        conversationsUsed: quota.conversationsUsed,
+        conversationsLimit: plan.quota,
+        planKey: plan.key,
+        period: `${quota.year}-${String(quota.month).padStart(2, '0')}`,
+      },
     })
+    // B4.5: alerta de upsell idempotente (1 por bot/mes via degradedAt atómico).
+    await triggerUpsellAlertIfFirst({
+      botConfigId: bot.id,
+      organizationName: bot.organization.companyName,
+      planKey: plan.key,
+      planQuota: plan.quota,
+      conversationsUsed: quota.conversationsUsed,
+      year: quota.year,
+      month: quota.month,
+      adminLinkPath: `/admin/clients/${bot.organization.id}`,
+    })
+    return degradedResponse(
+      'Por hoy alcanzamos el límite de atención automática del mes. Te derivo con el equipo por WhatsApp así seguimos sin demoras.',
+      'quota_exhausted',
+      {
+        whatsappNumber: bot.whatsappNumber,
+        whatsappMessage: bot.whatsappMessage,
+        companyName: bot.organization.companyName,
+      },
+    )
+  }
+
+  // Atomic reserve: solo para conversación nueva (mensaje en convo
+  // existente no incrementa el contador, así que no necesita reserve).
+  // Cubre el race TOCTOU exacto en el último cupo del mes.
+  if (isNewConversation) {
+    const reserve = await tryReserveConversation(bot.id, plan.quota)
+    if (!reserve.reserved) {
+      chatbotLog(
+        'chat.quota_reserve_failed',
+        {
+          slug,
+          botConfigId: bot.id,
+          conversationsUsed: reserve.conversationsUsed,
+          conversationsLimit: reserve.conversationsLimit,
+          planKey: plan.key,
+        },
+        'warn',
+      )
+      await logChatbotEvent({
+        botConfigId: bot.id,
+        type: 'chat.quota_exceeded',
+        level: 'warn',
+        message: `TOCTOU: cuota se llenó entre check y reserve — ${reserve.conversationsUsed}/${plan.quota}`,
+        conversationId: conversation.id,
+        metadata: { reservedRace: true, planKey: plan.key },
+      })
+      // B4.5: el race TOCTOU también dispara el upsell alert (cubre el caso del
+      // último cupo cuando concurrent requests pegan al mismo tiempo).
+      await triggerUpsellAlertIfFirst({
+        botConfigId: bot.id,
+        organizationName: bot.organization.companyName,
+        planKey: plan.key,
+        planQuota: plan.quota,
+        conversationsUsed: reserve.conversationsUsed,
+        year: reserve.year,
+        month: reserve.month,
+        adminLinkPath: `/admin/clients/${bot.organization.id}`,
+      })
+      return degradedResponse(
+        'Por hoy alcanzamos el límite de atención automática del mes. Te derivo con el equipo por WhatsApp así seguimos sin demoras.',
+        'quota_exhausted',
+        {
+          whatsappNumber: bot.whatsappNumber,
+          whatsappMessage: bot.whatsappMessage,
+          companyName: bot.organization.companyName,
+        },
+      )
+    }
+    timings.quota_reserve_ms = Date.now() - stepStart
   }
 
   // ─── 6. Persist user message ──────────────────────────────────
@@ -240,22 +487,36 @@ export async function handleChatRequest(
       currentPath: body.currentPath,
       currentDateTime: formatDateTimeArgentina(),
       isFirstMessage: isNewConversation,
+      // B4.5: soft-cap. messageCount cuenta user+assistant (~2 por turno);
+      // dividimos para obtener turnos del visitante. Conversation nueva → 0.
+      userTurnsCount: Math.floor((conversation.messageCount ?? 0) / 2),
     },
   })
   mark('prompt_build_ms')
 
-  const tools = getTools({
-    conversationId: conversation.id,
-    botConfigId: bot.id,
-    organizationId: bot.organization.id,
-    visitorIpHash: ipHash,
-    visitorUserAgent: userAgent,
-  })
+  // B4.2 — Tools filtradas por plan.tools. Slugs desconocidos en
+  // plan.tools se ignoran silenciosamente (getTools usa el catálogo
+  // canónico). Si plan.tools quedara vacío (no debería en planes
+  // sembrados), `tools` queda {} y el modelo no invoca ninguna.
+  const tools = getTools(
+    {
+      conversationId: conversation.id,
+      botConfigId: bot.id,
+      organizationId: bot.organization.id,
+      visitorIpHash: ipHash,
+      visitorUserAgent: userAgent,
+    },
+    plan.tools,
+  )
   mark('llm_setup_ms')
 
   // ─── 8. LLM call with streaming ───────────────────────────────
+  // B4.2 — Modelo viene del plan, no del BotConfig (legacy).
+  //   plan.llmModel ya es 'gemini-2.5-flash' en los 3 planes sembrados.
+  //   bot.llmProvider sigue siendo del BotConfig (no hay dimensión
+  //   provider en Plan todavía — toda la flota usa 'google' hoy).
   const provider = getLLMProvider(bot.llmProvider as LLMProviderName)
-  const model = provider.getModel(bot.llmModel)
+  const model = provider.getModel(plan.llmModel)
 
   chatbotLog('chat.llm_request_start', {
     slug,
@@ -263,7 +524,10 @@ export async function handleChatRequest(
     conversationId: conversation.id,
     isNewConversation,
     provider: bot.llmProvider,
-    model: bot.llmModel,
+    model: plan.llmModel,
+    planKey: plan.key,
+    planIsFallback: plan.isFallback,
+    toolSlugsEnabled: Object.keys(tools),
     messageCount: body.messages.length,
   })
 
@@ -282,6 +546,15 @@ export async function handleChatRequest(
   const llmStartAt = Date.now()
   let ttfbAt: number | null = null
 
+  // MS-1: stepCountIs(3) habilita multi-step.
+  //   Step 1 — modelo invoca tool (ej. capture_lead).
+  //   Step 2 — modelo lee toolResult y genera texto de confirmación + (opcionalmente)
+  //            invoca otra tool (ej. offer_handoff_options).
+  //   Step 3 — margen defensivo si el modelo decide encadenar algo más.
+  //   Sin esto (default v6 = 1 step), una tool call termina el turn sin texto previo
+  //   ni encadenamiento. H2/H3 documentados en bitácora B3.3-B3.6.
+  let stepCount = 0
+
   const result = streamText({
     model,
     system: enrichedSystemPrompt,
@@ -296,6 +569,10 @@ export async function handleChatRequest(
     }),
     tools,
     temperature: 0.7,
+    stopWhen: stepCountIs(3),
+    onStepFinish: () => {
+      stepCount += 1
+    },
     onChunk: ({ chunk }) => {
       // Capture timestamp of the first useful chunk (text or tool-call).
       // Other chunk types (reasoning-delta, raw, etc.) don't count as TTFB.
@@ -306,11 +583,26 @@ export async function handleChatRequest(
         ttfbAt = Date.now()
       }
     },
-    onFinish: async ({ text, usage, finishReason, toolCalls, toolResults }) => {
+    onFinish: async ({ text, usage, finishReason, toolCalls, toolResults, steps }) => {
       const llmDoneAt = Date.now()
       timings.llm_ttfb_ms = ttfbAt !== null ? ttfbAt - llmStartAt : null
       timings.llm_stream_ms = ttfbAt !== null ? llmDoneAt - ttfbAt : null
       timings.llm_total_ms = llmDoneAt - llmStartAt
+      timings.step_count = stepCount
+
+      // MS-1: en multi-step (stopWhen=stepCountIs(3)), las propiedades top-level
+      // del onFinish (toolCalls, usage) son SOLO del último step. Tenemos que
+      // agregar manualmente desde `steps[]` para que el chatMessage final tenga:
+      //   - todas las tool calls de todo el run (capture_lead step 1 + offer_handoff_options step 2)
+      //   - tokens/cost reales del run completo (no solo del último step)
+      const hasSteps = steps && steps.length > 0
+      const allToolCalls = hasSteps ? steps.flatMap((s) => s.toolCalls ?? []) : toolCalls ?? []
+      const totalIn = hasSteps
+        ? steps.reduce((sum, s) => sum + (s.usage?.inputTokens ?? 0), 0)
+        : (usage?.inputTokens ?? 0)
+      const totalOut = hasSteps
+        ? steps.reduce((sum, s) => sum + (s.usage?.outputTokens ?? 0), 0)
+        : (usage?.outputTokens ?? 0)
       stepStart = llmDoneAt
       try {
         // Validate output (capa 4)
@@ -337,8 +629,9 @@ export async function handleChatRequest(
           })
         }
 
-        const tokensIn = usage.inputTokens ?? 0
-        const tokensOut = usage.outputTokens ?? 0
+        // MS-1: tokens y tool calls agregados desde todos los steps (ver bloque arriba).
+        const tokensIn = totalIn
+        const tokensOut = totalOut
         const costBreakdown = calculateCost(
           resolvedBot.llmProvider as LLMProviderName,
           resolvedBot.llmModel,
@@ -346,7 +639,7 @@ export async function handleChatRequest(
           tokensOut
         )
 
-        // Persist assistant message + tool calls
+        // Persist assistant message + tool calls (all steps).
         await prisma.chatMessage.create({
           data: {
             conversationId: conversation.id,
@@ -354,8 +647,8 @@ export async function handleChatRequest(
             content: text,
             tokensIn,
             tokensOut,
-            toolCalls: toolCalls && toolCalls.length > 0
-              ? (toolCalls as unknown as object)
+            toolCalls: allToolCalls.length > 0
+              ? (allToolCalls as unknown as object)
               : undefined,
           },
         })
@@ -372,10 +665,14 @@ export async function handleChatRequest(
           },
         })
 
-        // Update QuotaUsage for current period
+        // Update QuotaUsage for current period.
+        // B4.2: `conversationsCount` ya se incrementó atómicamente vía
+        // tryReserveConversation cuando isNewConversation=true. Acá pasamos
+        // false siempre para evitar double-count del counter. Tokens y cost
+        // se siguen acumulando normalmente.
         await incrementQuota({
           botConfigId: resolvedBot.id,
-          isNewConversation,
+          isNewConversation: false,
           messagesAdded: 2,
           tokensIn,
           tokensOut,
@@ -391,7 +688,7 @@ export async function handleChatRequest(
           tokensIn,
           tokensOut,
           costUsd: Number(costBreakdown.totalUsd.toFixed(6)),
-          toolCallCount: toolCalls?.length ?? 0,
+          toolCallCount: allToolCalls.length,
           warningCount: warnings.length,
           durationMs: totalMs,
           timings,
@@ -407,7 +704,7 @@ export async function handleChatRequest(
             tokensIn,
             tokensOut,
             costUsd: costBreakdown.totalUsd,
-            toolCallCount: toolCalls?.length ?? 0,
+            toolCallCount: allToolCalls.length,
             durationMs: totalMs,
             latencyMs: totalMs,
             timings,
