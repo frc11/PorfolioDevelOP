@@ -79,7 +79,6 @@ type TabbedDimension = {
 const EASE_OUT = [0.22, 1, 0.36, 1] as const;
 const TAB_PILL_SPRING = { type: 'spring', stiffness: 340, damping: 30, mass: 0.9 } as const;
 const AUTO_ADVANCE_MS = 17_000;
-const PROGRESS_TICK_MS = 100;
 const SECONDARY_GRID_VARIANTS = {
   hidden: {},
   visible: {
@@ -109,7 +108,7 @@ const SECONDARY_CARD_VARIANTS = {
   },
 } as const;
 const GLASS_CARD_CLASS =
-  'rounded-3xl border border-white/[0.05] bg-[#ffffff]/[0.02] shadow-[0_8px_32px_0_rgba(0,0,0,0.3)] backdrop-blur-2xl';
+  'rounded-3xl border border-white/[0.05] bg-[#ffffff]/[0.02] shadow-[0_8px_32px_0_rgba(0,0,0,0.3)] backdrop-blur-xl';
 
 function useIsMobileViewport() {
   const [isMobile, setIsMobile] = useState(false);
@@ -295,21 +294,56 @@ const ACCENT_STYLES: Record<
 function useCardSpotlight(enabled = true) {
   const x = useMotionValue(-320);
   const y = useMotionValue(-320);
+  const frameRef = useRef<number | null>(null);
+  const latestPointerRef = useRef<{
+    target: HTMLElement;
+    clientX: number;
+    clientY: number;
+  } | null>(null);
   const motionBackground = useMotionTemplate`radial-gradient(260px circle at ${x}px ${y}px, rgba(6,182,212,0.15), transparent 72%)`;
+
+  useEffect(() => {
+    return () => {
+      if (frameRef.current !== null) {
+        window.cancelAnimationFrame(frameRef.current);
+      }
+    };
+  }, []);
 
   const handleMouseMove = (event: ReactMouseEvent<HTMLElement>) => {
     if (!enabled) {
       return;
     }
-    const rect = event.currentTarget.getBoundingClientRect();
-    x.set(event.clientX - rect.left);
-    y.set(event.clientY - rect.top);
+
+    latestPointerRef.current = {
+      target: event.currentTarget,
+      clientX: event.clientX,
+      clientY: event.clientY,
+    };
+
+    if (frameRef.current !== null) {
+      return;
+    }
+
+    frameRef.current = window.requestAnimationFrame(() => {
+      frameRef.current = null;
+      const latestPointer = latestPointerRef.current;
+
+      if (!latestPointer) {
+        return;
+      }
+
+      const rect = latestPointer.target.getBoundingClientRect();
+      x.set(latestPointer.clientX - rect.left);
+      y.set(latestPointer.clientY - rect.top);
+    });
   };
 
   const handleMouseLeave = () => {
     if (!enabled) {
       return;
     }
+    latestPointerRef.current = null;
     x.set(-320);
     y.set(-320);
   };
@@ -547,7 +581,7 @@ function TabbedCardIcon({ visual }: { visual: TabVisualKey }) {
   const Icon = iconMap[visual];
 
   return (
-    <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl border border-white/[0.08] bg-gradient-to-b from-white/[0.05] to-transparent text-white/60 shadow-inner transition-all duration-500 group-hover:-translate-y-1.5 group-hover:border-cyan-500/40 group-hover:bg-cyan-500/20 group-hover:text-cyan-400 group-hover:shadow-[0_0_30px_rgba(34,211,238,0.25)]">
+    <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl border border-white/[0.08] bg-gradient-to-b from-white/[0.05] to-transparent text-white/60 shadow-inner transition-all duration-500 group-hover:-translate-y-1.5 group-hover:border-cyan-500/40 group-hover:bg-cyan-500/20 group-hover:text-cyan-400 group-hover:shadow-[0_0_30px_rgba(34,211,238,0.25)]">
       <Icon className="h-6 w-6 text-current drop-shadow-sm" />
     </div>
   );
@@ -601,9 +635,7 @@ function ProgressVisual({ accent, animationKey }: { accent: AccentKey; animation
   );
 }
 
-function LockVisual({ accent }: { accent: AccentKey }) {
-  const tone = ACCENT_STYLES[accent];
-
+function LockVisual() {
   return (
     <div className="-mx-5 -mt-5 mb-6 sm:-mx-6 sm:-mt-6 relative flex w-[calc(100%+40px)] sm:w-[calc(100%+48px)] h-[150px] items-center justify-center overflow-hidden rounded-t-[24px] border-b border-white/5 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.03),transparent_70%)]">
       <div className="relative flex h-24 w-24 items-center justify-center rounded-3xl border border-white/10 bg-gradient-to-b from-white/10 to-transparent shadow-[inset_0_1px_2px_rgba(255,255,255,0.1),0_0_30px_rgba(255,255,255,0.02)] transition-all duration-500 group-hover:border-emerald-500/30 group-hover:shadow-[0_0_40px_rgba(16,185,129,0.15)] group-hover:from-emerald-500/10">
@@ -618,7 +650,7 @@ function LockVisual({ accent }: { accent: AccentKey }) {
   );
 }
 
-function StatusVisual({ accent, animationKey }: { accent: AccentKey; animationKey: number }) {
+function StatusVisual({ animationKey }: { animationKey: number }) {
   const shouldReduceMotion = useReducedMotion();
 
   return (
@@ -886,7 +918,7 @@ function MainAIVisual() {
   );
 }
 
-function RoiVisual({ accent }: { accent: AccentKey }) {
+function RoiVisual() {
   const shouldReduceMotion = useReducedMotion();
 
   return (
@@ -921,7 +953,7 @@ function RoiVisual({ accent }: { accent: AccentKey }) {
   );
 }
 
-function ClockVisual({ accent }: { accent: AccentKey }) {
+function ClockVisual() {
   const shouldReduceMotion = useReducedMotion();
 
   return (
@@ -950,7 +982,7 @@ function ClockVisual({ accent }: { accent: AccentKey }) {
   );
 }
 
-function LayersVisual({ accent }: { accent: AccentKey }) {
+function LayersVisual() {
   const shouldReduceMotion = useReducedMotion();
 
   return (
@@ -972,7 +1004,7 @@ function LayersVisual({ accent }: { accent: AccentKey }) {
   );
 }
 
-function DashboardVisual({ accent }: { accent: AccentKey }) {
+function DashboardVisual() {
   const shouldReduceMotion = useReducedMotion();
 
   return (
@@ -988,7 +1020,7 @@ function DashboardVisual({ accent }: { accent: AccentKey }) {
                     className="w-3 rounded-full bg-cyan-300 shadow-[0_0_10px_rgba(34,211,238,0.7)]"
                     style={{ height }}
                     animate={shouldReduceMotion ? { opacity: 1 } : { opacity: [0.5, 1, 0.5] }}
-                    transition={{ duration: 1.2, repeat: Infinity, ease: 'easeInOut', delay: Math.random() * 1.5 }}
+                    transition={{ duration: 1.2, repeat: Infinity, ease: 'easeInOut', delay: index * 0.28 }}
                   />
                 </div>
               ))}
@@ -1010,7 +1042,7 @@ function DashboardVisual({ accent }: { accent: AccentKey }) {
               key={index}
               className="h-3 w-8 rounded-full bg-cyan-500/80 shadow-[0_0_8px_rgba(34,211,238,0.5)]"
               animate={shouldReduceMotion ? { opacity: 0.85 } : { opacity: [0.5, 1, 0.5] }}
-              transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: Math.random() * 1.2 }}
+              transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: index * 0.22 }}
             />
           ))}
         </div>
@@ -1163,11 +1195,11 @@ function CardVisual({
   }
 
   if (visual === 'lock') {
-    return <LockVisual accent={accent} />;
+    return <LockVisual />;
   }
 
   if (visual === 'status') {
-    return <StatusVisual accent={accent} animationKey={animationKey} />;
+    return <StatusVisual animationKey={animationKey} />;
   }
 
   return <OwnershipVisual accent={accent} />;
@@ -1204,7 +1236,7 @@ function FeaturedCard({ feature, activeTab }: { feature: TabbedFeature; activeTa
       />
 
       <div className="relative z-10 flex h-full flex-col gap-6 md:gap-8">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex min-h-[4.25rem] flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="inline-flex items-center gap-2 rounded-full border border-white/5 bg-white/[0.04] px-4 py-1.5 text-[11px] font-bold uppercase tracking-[0.28em] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_0_15px_rgba(255,255,255,0.02)] transition-colors group-hover:bg-white/[0.06] group-hover:border-white/10">
             <span className="h-1.5 w-1.5 rounded-full animate-pulse" style={{ backgroundColor: tone.strong, boxShadow: `0 0 10px ${tone.glow}` }} />
             {feature.tag}
@@ -1215,7 +1247,7 @@ function FeaturedCard({ feature, activeTab }: { feature: TabbedFeature; activeTa
           </div>
         </div>
 
-        <div className="max-w-2xl">
+        <div className="max-w-2xl md:min-h-[12rem]">
           <h3 className="text-3xl font-black tracking-tighter text-white drop-shadow-sm md:text-4xl lg:text-5xl">
             {feature.supportTitle}
           </h3>
@@ -1224,7 +1256,9 @@ function FeaturedCard({ feature, activeTab }: { feature: TabbedFeature; activeTa
           </p>
         </div>
 
-        {showAgencyComparison ? <AgencyComparisonVisual /> : <div className="mt-auto"><TabbedFeatureVisual visual={feature.visual} /></div>}
+        <div className="mt-auto">
+          {showAgencyComparison ? <AgencyComparisonVisual /> : <TabbedFeatureVisual visual={feature.visual} />}
+        </div>
       </div>
     </motion.article>
   );
@@ -1244,7 +1278,7 @@ function SecondaryCard({ card, activeTab, cardIndex }: { card: TabbedCard; activ
       whileHover={shouldReduceMotion || isMobile ? undefined : { y: -5 }}
       onMouseMove={isMobile ? undefined : handleMouseMove}
       onMouseLeave={isMobile ? undefined : handleMouseLeave}
-      className={`group relative min-h-[220px] overflow-hidden ${GLASS_CARD_CLASS} p-5 transition-colors duration-500 hover:border-white/12 sm:min-h-[236px] sm:p-6 md:min-h-[252px]`}
+      className={`group relative min-h-[220px] overflow-hidden ${GLASS_CARD_CLASS} p-5 transition-colors duration-500 hover:border-white/12 sm:min-h-[236px] sm:p-6 md:h-full md:min-h-0`}
     >
       <motion.div className="pointer-events-none absolute inset-0 rounded-3xl" style={{ background }} />
       <motion.div
@@ -1263,13 +1297,15 @@ function SecondaryCard({ card, activeTab, cardIndex }: { card: TabbedCard; activ
       />
 
       <div className="relative z-10 flex h-full flex-col">
-        <div className="mb-6 min-h-[56px] md:mb-8">
+        <div className="mb-6 min-h-[150px] md:mb-7">
           <TabbedCardVisual visual={card.visual} accent={card.accent} animationKey={activeTab} />
         </div>
 
-        <div className="mt-auto max-w-[18rem]">
-          <TabbedCardIcon visual={card.visual} />
-          <h3 className="text-xl font-bold tracking-tight text-white transition-all duration-300 md:text-2xl group-hover:text-cyan-300 group-hover:drop-shadow-[0_0_12px_rgba(34,211,238,0.5)]">{card.title}</h3>
+        <div className="mt-auto flex min-h-[188px] max-w-[18rem] flex-col justify-start md:h-[216px] md:min-h-0">
+          <div className="mb-4 flex h-12 items-center">
+            <TabbedCardIcon visual={card.visual} />
+          </div>
+          <h3 className="min-h-[3rem] text-xl font-bold leading-tight tracking-tight text-white transition-all duration-300 md:min-h-[3.5rem] md:text-2xl group-hover:text-cyan-300 group-hover:drop-shadow-[0_0_12px_rgba(34,211,238,0.5)]">{card.title}</h3>
           <p className="mt-3 text-sm leading-6 text-zinc-400 transition-colors duration-300 group-hover:text-zinc-300">{card.text}</p>
         </div>
       </div>
@@ -1291,19 +1327,19 @@ function TabbedCardVisual({
   }
 
   if (visual === 'roi') {
-    return <RoiVisual accent={accent} />;
+    return <RoiVisual />;
   }
 
   if (visual === 'clock') {
-    return <ClockVisual accent={accent} />;
+    return <ClockVisual />;
   }
 
   if (visual === 'layers') {
-    return <LayersVisual accent={accent} />;
+    return <LayersVisual />;
   }
 
   if (visual === 'dashboard') {
-    return <DashboardVisual accent={accent} />;
+    return <DashboardVisual />;
   }
 
   if (visual === 'agents') {
@@ -1333,6 +1369,102 @@ function TabbedFeatureVisual({ visual }: { visual: TabMainVisualKey }) {
   return <MainAIVisual />;
 }
 
+function WhyDevelopBackground() {
+  const shouldReduceMotion = useReducedMotion();
+  const glowAnimation = shouldReduceMotion
+    ? { opacity: 0.72, scale: 1 }
+    : { opacity: [0.55, 0.86, 0.55], scale: [1, 1.04, 1] };
+
+  return (
+    <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
+      <div className="absolute inset-0 bg-[#030303]" />
+      <div className="absolute inset-0 bg-[linear-gradient(180deg,#02040a_0%,#06111b_42%,#04070d_100%)]" />
+
+      <div
+        className="absolute inset-0 opacity-[0.055]"
+        style={{
+          backgroundImage:
+            'linear-gradient(rgba(34,211,238,0.14) 1px, transparent 1px), linear-gradient(90deg, rgba(34,211,238,0.12) 1px, transparent 1px)',
+          backgroundSize: '42px 42px',
+          maskImage: 'radial-gradient(circle at 50% 44%, transparent 0%, rgba(0,0,0,0.28) 34%, black 74%)',
+        }}
+      />
+
+      <motion.div
+        className="absolute -left-44 top-10 h-[34rem] w-[34rem] rounded-full bg-[radial-gradient(circle,rgba(20,184,166,0.20)_0%,rgba(6,182,212,0.10)_34%,transparent_68%)] blur-3xl"
+        animate={glowAnimation}
+        transition={{ duration: 9, repeat: Infinity, ease: 'easeInOut' }}
+      />
+      <motion.div
+        className="absolute -right-48 top-1/4 h-[38rem] w-[38rem] rounded-full bg-[radial-gradient(circle,rgba(14,165,233,0.18)_0%,rgba(99,102,241,0.08)_42%,transparent_70%)] blur-3xl"
+        animate={glowAnimation}
+        transition={{ duration: 10.5, repeat: Infinity, ease: 'easeInOut', delay: 1.1 }}
+      />
+
+      <svg
+        className="absolute left-0 top-16 hidden h-[34rem] w-[28rem] opacity-45 md:block"
+        viewBox="0 0 448 544"
+        fill="none"
+      >
+        <path d="M18 88H106L151 132H256" stroke="url(#why-left-line)" strokeWidth="1" />
+        <path d="M0 224H86L133 177H228L284 122" stroke="url(#why-left-line)" strokeWidth="1" />
+        <path d="M45 334H124L184 274H302" stroke="url(#why-left-line)" strokeWidth="1" />
+        <path d="M12 456H116L168 404H246L308 342" stroke="url(#why-left-line)" strokeWidth="1" />
+        {[106, 151, 228, 284, 124, 184, 302, 168, 246, 308].map((cx, index) => (
+          <circle
+            key={`why-left-node-${index}`}
+            cx={cx}
+            cy={[88, 132, 177, 122, 334, 274, 274, 404, 404, 342][index]}
+            r={index % 3 === 0 ? 3.6 : 2.4}
+            fill={index % 2 === 0 ? '#22d3ee' : '#14b8a6'}
+            opacity={index % 3 === 0 ? 0.58 : 0.34}
+          />
+        ))}
+        <defs>
+          <linearGradient id="why-left-line" x1="0" x2="320" y1="0" y2="420" gradientUnits="userSpaceOnUse">
+            <stop stopColor="#22d3ee" stopOpacity="0" />
+            <stop offset="0.45" stopColor="#22d3ee" stopOpacity="0.34" />
+            <stop offset="1" stopColor="#14b8a6" stopOpacity="0.08" />
+          </linearGradient>
+        </defs>
+      </svg>
+
+      <svg
+        className="absolute right-0 bottom-12 hidden h-[32rem] w-[32rem] opacity-40 lg:block"
+        viewBox="0 0 512 512"
+        fill="none"
+      >
+        <path d="M512 80H406L350 136H226L170 192" stroke="url(#why-right-line)" strokeWidth="1" />
+        <path d="M496 206H382L326 262H208L142 328" stroke="url(#why-right-line)" strokeWidth="1" />
+        <path d="M512 390H424L368 334H270L202 402H112" stroke="url(#why-right-line)" strokeWidth="1" />
+        <path d="M386 54V126M448 162V236M410 310V388" stroke="#38bdf8" strokeOpacity="0.14" strokeWidth="1" />
+        {[406, 350, 226, 382, 326, 208, 424, 368, 270, 202].map((cx, index) => (
+          <circle
+            key={`why-right-node-${index}`}
+            cx={cx}
+            cy={[80, 136, 136, 206, 262, 262, 390, 334, 334, 402][index]}
+            r={index % 4 === 0 ? 4 : 2.5}
+            fill={index % 2 === 0 ? '#38bdf8' : '#2dd4bf'}
+            opacity={index % 4 === 0 ? 0.54 : 0.32}
+          />
+        ))}
+        <defs>
+          <linearGradient id="why-right-line" x1="512" x2="108" y1="72" y2="420" gradientUnits="userSpaceOnUse">
+            <stop stopColor="#38bdf8" stopOpacity="0" />
+            <stop offset="0.48" stopColor="#38bdf8" stopOpacity="0.28" />
+            <stop offset="1" stopColor="#2dd4bf" stopOpacity="0.08" />
+          </linearGradient>
+        </defs>
+      </svg>
+
+      <div className="absolute inset-x-0 top-0 h-56 bg-gradient-to-b from-[#02040a] via-[#030712]/86 to-transparent" />
+      <div className="absolute inset-x-0 bottom-0 h-52 bg-gradient-to-t from-zinc-950 via-[#05070d]/88 to-transparent" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(2,6,23,0.58)_0%,rgba(2,6,23,0.42)_34%,transparent_64%)]" />
+      <div className="absolute inset-y-0 left-1/2 w-[min(72rem,90vw)] -translate-x-1/2 bg-[linear-gradient(90deg,transparent_0%,rgba(0,0,0,0.34)_16%,rgba(0,0,0,0.48)_50%,rgba(0,0,0,0.34)_84%,transparent_100%)]" />
+    </div>
+  );
+}
+
 export function WhyDevelOP() {
   const ref = useRef<HTMLElement>(null);
   const isInView = useInView(ref, {
@@ -1340,52 +1472,38 @@ export function WhyDevelOP() {
     margin: '-20%',
   });
   const [activeTab, setActiveTab] = useState(0);
-  const [cycleProgress, setCycleProgress] = useState(0);
+  const cycleProgress = useMotionValue(0);
   const activeDimension = TABBED_DIMENSIONS[activeTab];
   const shouldReduceMotion = useReducedMotion();
 
   useThemeSection(isInView, 'dark');
 
   useEffect(() => {
-    const progressStep = PROGRESS_TICK_MS / AUTO_ADVANCE_MS;
-    const intervalId = window.setInterval(() => {
-      setCycleProgress((current) => {
-        const next = current + progressStep;
+    cycleProgress.set(0);
 
-        if (next >= 1) {
-          setActiveTab((previous) => (previous + 1) % TABBED_DIMENSIONS.length);
-          return 0;
-        }
+    if (!isInView || shouldReduceMotion) {
+      return;
+    }
 
-        return next;
-      });
-    }, PROGRESS_TICK_MS);
+    const progressControls = animate(cycleProgress, 1, {
+      duration: AUTO_ADVANCE_MS / 1000,
+      ease: 'linear',
+      onComplete: () => {
+        setActiveTab((previous) => (previous + 1) % TABBED_DIMENSIONS.length);
+      },
+    });
 
-    return () => window.clearInterval(intervalId);
-  }, []);
+    return () => progressControls.stop();
+  }, [activeTab, cycleProgress, isInView, shouldReduceMotion]);
 
   const handleTabChange = (index: number) => {
     setActiveTab(index);
-    setCycleProgress(0);
+    cycleProgress.set(0);
   };
 
   return (
-    <section ref={ref} id="caracteristicas" className="relative overflow-hidden bg-[#030712] py-28 md:py-36">
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(34,211,238,0.08),transparent_36%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_right,rgba(14,165,233,0.1),transparent_30%)]" />
-        <div
-          className="absolute inset-0 opacity-[0.08]"
-          style={{
-            backgroundImage:
-              'linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px)',
-            backgroundSize: '32px 32px',
-          }}
-        />
-      </div>
-
-      <div className="pointer-events-none absolute top-0 left-0 h-24 w-full bg-gradient-to-b from-[#030712] via-[#030712]/80 to-transparent backdrop-blur-xl" />
-      <div className="pointer-events-none absolute bottom-0 left-0 h-32 w-full bg-gradient-to-t from-zinc-950 via-zinc-950/80 to-transparent backdrop-blur-sm" />
+    <section ref={ref} id="caracteristicas" className="relative overflow-hidden bg-[#030303] py-28 md:py-36">
+      <WhyDevelopBackground />
 
       <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <motion.div
@@ -1398,7 +1516,7 @@ export function WhyDevelOP() {
           <div className="inline-flex items-center rounded-full border border-cyan-400/20 bg-cyan-400/8 px-4 py-1.5 text-[11px] uppercase tracking-[0.28em] text-cyan-300">
             Why develOP
           </div>
-          <div className="mt-5 min-h-[7.5rem] overflow-hidden md:min-h-[9rem]">
+          <div className="mt-5 min-h-[7.5rem] overflow-hidden md:h-[9rem] md:min-h-0">
             <AnimatePresence mode="wait" initial={false}>
               <motion.h2
                 key={activeDimension.feature.title}
@@ -1412,18 +1530,20 @@ export function WhyDevelOP() {
               </motion.h2>
             </AnimatePresence>
           </div>
-          <AnimatePresence mode="wait" initial={false}>
-            <motion.p
-              key={activeDimension.summary}
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 12 }}
-              transition={{ duration: 0.28, ease: EASE_OUT }}
-              className="mt-5 text-sm leading-7 text-zinc-300 md:text-base"
-            >
-              {activeDimension.summary}
-            </motion.p>
-          </AnimatePresence>
+          <div className="relative mt-5 min-h-[5.25rem] md:h-[3.75rem] md:min-h-0">
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.p
+                key={activeDimension.summary}
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 12 }}
+                transition={{ duration: 0.28, ease: EASE_OUT }}
+                className="text-sm leading-7 text-zinc-300 md:absolute md:inset-x-0 md:top-0 md:text-base"
+              >
+                {activeDimension.summary}
+              </motion.p>
+            </AnimatePresence>
+          </div>
         </motion.div>
 
         <div className="mb-10">
@@ -1456,9 +1576,7 @@ export function WhyDevelOP() {
                   <span className="absolute inset-x-3 bottom-1.5 h-px overflow-hidden rounded-full bg-cyan-500/10">
                     <motion.span
                       className="block h-full origin-left bg-cyan-500/30"
-                      animate={{ scaleX: isActive ? cycleProgress : 0 }}
-                      transition={{ ease: 'linear', duration: PROGRESS_TICK_MS / 1000 }}
-                      style={{ transformOrigin: 'left center' }}
+                      style={{ scaleX: isActive ? cycleProgress : 0, transformOrigin: 'left center' }}
                     />
                   </span>
                 </button>
@@ -1468,35 +1586,37 @@ export function WhyDevelOP() {
           </div>
         </div>
 
-        <AnimatePresence mode="wait" initial={false}>
-          <motion.div
-            key={activeDimension.label}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 20 }}
-            transition={{ duration: 0.3, ease: EASE_OUT }}
-            className="grid grid-cols-1 gap-4 md:grid-cols-[minmax(0,1.16fr)_minmax(0,1fr)]"
-          >
-            <FeaturedCard feature={activeDimension.feature} activeTab={activeTab} />
-
+        <div className="relative md:h-[940px] lg:h-[900px] xl:h-[860px]">
+          <AnimatePresence mode="wait" initial={false}>
             <motion.div
-              variants={SECONDARY_GRID_VARIANTS}
-              initial="hidden"
-              animate="visible"
-              exit="exit"
-              className="grid gap-4 sm:grid-cols-2 xl:auto-rows-fr"
+              key={activeDimension.label}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 20 }}
+              transition={{ duration: 0.3, ease: EASE_OUT }}
+              className="grid grid-cols-1 gap-4 md:absolute md:inset-0 md:h-full md:min-h-0 md:grid-cols-[minmax(0,1.16fr)_minmax(0,1fr)]"
             >
-              {activeDimension.cards.map((card, index) => (
-                <SecondaryCard
-                  key={`${activeDimension.label}-${card.title}-${index}`}
-                  card={card}
-                  activeTab={activeTab}
-                  cardIndex={index}
-                />
-              ))}
+              <FeaturedCard feature={activeDimension.feature} activeTab={activeTab} />
+
+              <motion.div
+                variants={SECONDARY_GRID_VARIANTS}
+                initial="hidden"
+                animate="visible"
+                exit="exit"
+                className="grid gap-4 sm:grid-cols-2 md:h-full md:min-h-0 md:grid-rows-2 xl:auto-rows-fr"
+              >
+                {activeDimension.cards.map((card, index) => (
+                  <SecondaryCard
+                    key={`${activeDimension.label}-${card.title}-${index}`}
+                    card={card}
+                    activeTab={activeTab}
+                    cardIndex={index}
+                  />
+                ))}
+              </motion.div>
             </motion.div>
-          </motion.div>
-        </AnimatePresence>
+          </AnimatePresence>
+        </div>
       </div>
     </section>
   );
