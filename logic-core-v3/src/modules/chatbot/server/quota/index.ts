@@ -1,2 +1,5 @@
-export { checkQuota, incrementQuota } from './checker'
-export type { QuotaCheckResult, QuotaIncrementInput } from './checker'
+export { checkQuota, incrementQuota, tryReserveConversation } from './checker'
+export type { QuotaCheckResult, QuotaIncrementInput, QuotaReserveResult } from './checker'
+
+export { triggerUpsellAlertIfFirst } from './upsellAlert'
+export type { TriggerUpsellAlertInput } from './upsellAlert'

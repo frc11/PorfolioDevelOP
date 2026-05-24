@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/prisma'
+import { originMatchesAllowed } from './origin-matcher'
 
 interface ValidateOriginInput {
   origin: string | null
@@ -62,20 +63,9 @@ export async function validateOrigin(
     return { allowed: false, reason: 'no_domains_configured', botConfigId: bot.id }
   }
 
-  // Match exacto o subdominio
-  try {
-    const originHost = new URL(origin).host
-    for (const entry of bot.allowedDomains) {
-      const clean = entry
-        .replace(/^https?:\/\//, '')
-        .replace(/^\*\./, '')
-        .replace(/\/$/, '')
-
-      if (originHost === clean) return { allowed: true, botConfigId: bot.id }
-      if (originHost.endsWith('.' + clean)) return { allowed: true, botConfigId: bot.id }
-    }
-  } catch {
-    return { allowed: false, reason: 'invalid_origin', botConfigId: bot.id }
+  // Match exacto o subdominio (delegado al matcher compartido)
+  if (originMatchesAllowed(origin, bot.allowedDomains)) {
+    return { allowed: true, botConfigId: bot.id }
   }
 
   return { allowed: false, reason: 'domain_not_allowed', botConfigId: bot.id }

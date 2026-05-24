@@ -81,7 +81,6 @@ async function main() {
       password: adminPassword,
       role: Role.SUPER_ADMIN,
       emailVerified: new Date(),
-      unlockedFeatures: [],
     },
     create: {
       name: 'Admin DevelOP',
@@ -89,7 +88,6 @@ async function main() {
       password: adminPassword,
       role: Role.SUPER_ADMIN,
       emailVerified: new Date(),
-      unlockedFeatures: [],
     },
   })
 
@@ -100,7 +98,6 @@ async function main() {
       password: clientPassword,
       role: Role.ORG_MEMBER,
       emailVerified: new Date(),
-      unlockedFeatures: ['mini-crm'],
     },
     create: {
       name: 'Carlos Mendoza',
@@ -108,7 +105,6 @@ async function main() {
       password: clientPassword,
       role: Role.ORG_MEMBER,
       emailVerified: new Date(),
-      unlockedFeatures: ['mini-crm'],
     },
   })
 

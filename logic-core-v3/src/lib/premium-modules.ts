@@ -11,8 +11,9 @@ export type PremiumModuleWithStatus = PremiumModule & {
  * Lista todos los módulos premium del catálogo, indicando
  * cuáles están activos para una organización dada.
  *
- * Compatibilidad: lee de OrganizationModule (nuevo modelo) Y
- * fallback a User.unlockedFeatures (legacy) durante la migración.
+ * Lee exclusivamente de OrganizationModule. El sistema legacy
+ * `User.unlockedFeatures` se deprecó en B4.4 (datos migrados +
+ * columna dropeada).
  */
 export async function getModulesForOrganization(
   organizationId: string,
@@ -71,7 +72,6 @@ export async function getMonthlyRecurringRevenue(
 
 /**
  * Devuelve los slugs de los módulos activos de una organización.
- * Útil para reemplazar consultas a User.unlockedFeatures.
  */
 export async function getActiveModuleSlugs(
   organizationId: string,

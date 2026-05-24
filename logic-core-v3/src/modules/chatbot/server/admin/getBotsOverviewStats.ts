@@ -1,5 +1,6 @@
 import { cache } from 'react'
 import { prisma } from '@/lib/prisma'
+import { excludeDqWhere } from '@/modules/chatbot/server/scoring'
 
 const THIRTY_DAYS_AGO = () => new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
 
@@ -10,8 +11,12 @@ export const getBotsOverviewStats = cache(async () => {
     prisma.conversation.count({
       where: { startedAt: { gte: THIRTY_DAYS_AGO() } },
     }),
+    // B5.3 — métricas de conversión excluyen DQ (empleo/proveedor/spam/postventa<0).
     prisma.chatbotLead.count({
-      where: { capturedAt: { gte: THIRTY_DAYS_AGO() } },
+      where: {
+        capturedAt: { gte: THIRTY_DAYS_AGO() },
+        ...excludeDqWhere(),
+      },
     }),
   ])
 

@@ -8,6 +8,7 @@ import { ImpersonationBanner } from '@/components/dashboard/ImpersonationBanner'
 import { SubscriptionBanner } from '@/components/dashboard/SubscriptionBanner'
 import { DashboardLayoutClient } from '@/components/dashboard/DashboardLayoutClient'
 import { unstable_noStore as noStore, unstable_cache } from 'next/cache'
+import { countHotNewLeadsForOrg } from '@/modules/chatbot/index.server'
 
 export const dynamic = 'force-dynamic'
 
@@ -31,6 +32,18 @@ function getCachedUnreadMessages(orgId: string) {
       }),
     ['dashboard-unread-messages', orgId],
     { revalidate: 30, tags: [`unread-messages:${orgId}`] }
+  )()
+}
+
+// B5.7 — cuenta de leads hot + NEW para el badge del sidebar.
+// Revalidate 30s para alinear con el polling de la lista de leads y mantener
+// presión barata en DB. Tag específico para poder invalidar desde mutaciones
+// (updateLeadStatus / captureLead) en el futuro si hace falta refrescar al toque.
+function getCachedHotLeadsCount(orgId: string) {
+  return unstable_cache(
+    async () => countHotNewLeadsForOrg(orgId),
+    ['dashboard-hot-leads-count', orgId],
+    { revalidate: 30, tags: [`hot-leads-count:${orgId}`] }
   )()
 }
 
@@ -75,40 +88,19 @@ export default async function DashboardLayout({
     redirect(session?.user?.role === 'SUPER_ADMIN' ? '/admin/clients' : '/login')
   }
 
-  const [client, unreadMessages, notifications, activeModulesData, userFeaturesData] = await Promise.all([
+  const [client, unreadMessages, hotLeadsCount, notifications, activeModulesData] = await Promise.all([
     getCachedOrgMeta(organizationId),
     getCachedUnreadMessages(organizationId),
+    getCachedHotLeadsCount(organizationId),
     prisma.notification.findMany({
       where: { organizationId },
       orderBy: { createdAt: 'desc' },
       take: 5,
     }),
     getCachedActiveModules(organizationId),
-    preview 
-      ? prisma.orgMember.findFirst({
-          where: { organizationId, role: 'ADMIN' },
-          select: { user: { select: { id: true, unlockedFeatures: true, name: true, email: true } } },
-        })
-      : (session?.user?.id 
-          ? prisma.user.findUnique({
-              where: { id: session.user.id },
-              select: { unlockedFeatures: true },
-            })
-          : Promise.resolve(null))
   ])
 
   const activeModuleSlugs = activeModulesData.map((m) => m.module.slug)
-  
-  // Cast safety: determine unlocked features based on preview state
-  let unlockedFeatures: string[] = []
-  let targetAdmin = null
-  
-  if (preview && userFeaturesData && 'user' in userFeaturesData) {
-    targetAdmin = userFeaturesData
-    unlockedFeatures = userFeaturesData.user.unlockedFeatures
-  } else if (!preview && userFeaturesData && 'unlockedFeatures' in userFeaturesData) {
-    unlockedFeatures = userFeaturesData.unlockedFeatures
-  }
 
   if (!client) redirect('/login')
 
@@ -124,7 +116,7 @@ export default async function DashboardLayout({
     <DashboardLayoutClient
       companyName={client.companyName}
       unreadMessages={unreadMessages}
-      unlockedFeatures={unlockedFeatures}
+      hotLeadsCount={hotLeadsCount}
       activeModuleSlugs={activeModuleSlugs}
       notifications={notifications}
       userDisplayName={

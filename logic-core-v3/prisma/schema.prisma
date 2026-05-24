@@ -187,6 +187,18 @@ enum InsightCategory {
   COMPETITIVE_INTEL
 }
 
+enum PlanKey {
+  STARTER
+  PRO
+  BUSINESS
+}
+
+enum SupportTier {
+  STANDARD
+  PRIORITY
+  PRIORITY_24H
+}
+
 // ─── NextAuth Required Models ─────────────────────────────────────────────────
 
 model Account {
@@ -228,16 +240,15 @@ model VerificationToken {
 // ─── User ─────────────────────────────────────────────────────────────────────
 
 model User {
-  id                 String    @id @default(cuid())
-  name               String?
-  email              String    @unique
-  emailVerified      DateTime?
-  image              String?
+  id                    String    @id @default(cuid())
+  name                  String?
+  email                 String    @unique
+  emailVerified         DateTime?
+  image                 String?
   password              String?
   passwordResetRequired Boolean   @default(false)
   phone                 String?
   role                  Role      @default(ORG_MEMBER)
-  unlockedFeatures      String[]  @default([])
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt
   lastDashboardVisit    DateTime?
@@ -421,17 +432,69 @@ model Message {
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 }
 
+model Plan {
+  id              String  @id @default(cuid())
+  key             PlanKey @unique
+  name            String
+  monthlyPrice    Decimal @db.Decimal(10, 2)
+  setupFloorPrice Decimal @db.Decimal(10, 2)
+
+  // 7 dimensiones de gating (server-enforced en B4.2)
+  quota          Int
+  llmModel       String
+  tools          String[]
+  maxDomains     Int?
+  reportsEnabled Boolean  @default(false)
+  insightEnabled Boolean  @default(false)
+  crmEnabled     Boolean  @default(false)
+
+  supportTier SupportTier @default(STANDARD)
+  active      Boolean     @default(true)
+  sortOrder   Int         @default(0)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  subscriptions        Subscription[]
+  pendingSubscriptions Subscription[] @relation("PendingPlan")
+
+  @@map("plan")
+}
+
 model Subscription {
-  id             String             @id @default(cuid())
-  organizationId String             @unique
-  organization   Organization       @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  id             String       @id @default(cuid())
+  organizationId String       @unique
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   planName       String
-  status         SubscriptionStatus @default(ACTIVE)
-  price          Float
-  currency       String             @default("USD")
-  renewalDate    DateTime?
-  createdAt      DateTime           @default(now())
-  updatedAt      DateTime           @updatedAt
+  planId         String?
+  plan           Plan?        @relation(fields: [planId], references: [id])
+
+  // ─── B4.3: Billing override (separado del gating) ───
+  // El gating del bot SIEMPRE lee del Plan (via getPlanForOrg).
+  // El billing/facturación lee priceOverride si está seteado y la fecha
+  // de vencimiento no pasó. NO mezclar — son responsibilities distintas.
+  priceOverride  Decimal?  @db.Decimal(10, 2)
+  overrideUntil  DateTime?
+  overrideReason String?   @db.Text
+
+  // ─── B4.3: Scheduling de cambio de plan ───
+  // Upgrade = se aplica inmediato (sortOrder mayor del nuevo Plan).
+  // Downgrade = se difiere al inicio del próximo ciclo (sortOrder menor).
+  // getPlanForOrg aplica lazy el pending cuando la fecha pasó (sin cron).
+  pendingPlanId          String?
+  pendingPlan            Plan?     @relation("PendingPlan", fields: [pendingPlanId], references: [id])
+  pendingPlanEffectiveAt DateTime?
+  lastPlanChangedAt      DateTime?
+
+  status      SubscriptionStatus @default(ACTIVE)
+  price       Float
+  currency    String             @default("USD")
+  renewalDate DateTime?
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+
+  @@index([planId])
+  @@index([pendingPlanId])
+  @@index([pendingPlanEffectiveAt])
 }
 
 model Invoice {
@@ -1052,8 +1115,36 @@ model ChatbotLead {
   name    String?
   email   String?
   phone   String?
-  intent  String? // "quote" | "info" | "demo" | "support" | "other"
+  // intent: legacy String? (datos previos a B5.1: "quote"|"info"|"demo"|"support"|"other").
+  // A partir de B5.1 el bot escribe valores alineados con B3.6:
+  // "purchase_ready"|"schedule_visit"|"quote_request"|"human_request"|"support"|"other".
+  // No se enum-iza en DB para no romper rows legacy (additive).
+  intent  String?
   message String? @db.Text
+
+  // B5.1 — Categoría DQ. Llenada por el bot al capturar; B5.3 la usa para descalificar.
+  category LeadCategory @default(sales)
+
+  // B5.1 — Señales estructuradas detectadas en la conversación.
+  // Llenadas por el bot con criterio anti-alucinación (si no apareció, false).
+  // providedPhone/providedEmail las DERIVA el handler del input — no del LLM.
+  requestedAppointment Boolean @default(false)
+  mentionedFinancing   Boolean @default(false)
+  mentionedTradeIn     Boolean @default(false)
+  askedSpecificModel   Boolean @default(false)
+  providedPhone        Boolean @default(false)
+  providedEmail        Boolean @default(false)
+
+  // B5.1 — Canal de origen (futuro: 'widget' | 'instagram' | 'whatsapp_inbound' | ...).
+  // No se llena aún — el campo queda para que B5+ pueda discriminar sin migración nueva.
+  channel String?
+
+  // B5.1 — Campos de scoring que B5.2 va a poblar.
+  // Hasta entonces quedan null y son ignorados por la vista actual.
+  // scoreSignals guarda el detalle "qué subió/bajó el score" para explicabilidad (B5.4).
+  score          Int?
+  classification LeadClassification?
+  scoreSignals   Json?
 
   // Notificación
   notificationSent   Boolean   @default(false)
@@ -1069,6 +1160,11 @@ model ChatbotLead {
 
   @@index([botConfigId, capturedAt])
   @@index([status])
+  // B5.1 — índices que B5.2 (scoring) y la vista de 5B van a consumir.
+  @@index([classification])
+  @@index([score])
+  @@index([category])
+  @@index([botConfigId, classification, capturedAt(sort: Desc)])
   @@map("chatbot_lead")
 }
 
@@ -1078,6 +1174,24 @@ enum ChatbotLeadStatus {
   IN_NEGOTIATION
   WON
   LOST
+}
+
+// B5.1 — Categoría DQ (B5.3 la usa para descalificar leads no comerciales).
+enum LeadCategory {
+  sales
+  postventa
+  employment
+  provider
+  spam
+  other
+}
+
+// B5.1 — Clasificación de scoring (B5.2). dq = descalificado por categoría no-sales.
+enum LeadClassification {
+  hot
+  warm
+  cold
+  dq
 }
 
 model ChatbotInsight {

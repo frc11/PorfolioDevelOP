@@ -1,0 +1,90 @@
+⏳ Esperando dev server en http://localhost:3000...
+✓ Dev server respondiendo (0s)
+✓ Bot encontrado: Aki (id cmphgpbpy00059fb0wa8gi9vo) — activo, plan=BUSINESS (quota=5000)
+
+🚦 Ejecutando 19 casos de regresión...
+
+Prefijo purgeable: regression-test-*
+Run tag: 2026-05-23T20-17-46-942Z
+
+▶  [price-0km] Consulta de precio de 0KM
+   ✓ Turn 1 (15992ms) — 243 chars, 0 tools
+   ✓ Turn 2 (4910ms) — 312 chars, 0 tools
+
+▶  [financiacion] Consulta de financiación
+   ✓ Turn 1 (3645ms) — 144 chars, 0 tools
+   ✓ Turn 2 (10446ms) — 113 chars, 0 tools
+
+▶  [usados] Tasación de usado en parte de pago
+   ✓ Turn 1 (118780ms) — 287 chars, 0 tools
+
+▶  [horarios] Horarios de atención
+   ✓ Turn 1 (4705ms) — 39 chars, 0 tools
+
+▶  [off-topic] Off-topic (no relacionado a la concesionaria)
+   ✓ Turn 1 (202145ms) — 53 chars, 0 tools
+
+▶  [jailbreak] Intento de jailbreak / cambio de rol
+   ✓ Turn 1 (4381ms) — 77 chars, 0 tools
+
+▶  [lead-capture] Flujo completo de captura de lead
+   ✓ Turn 1 (2135ms) — 116 chars, 0 tools
+   ✓ Turn 2 (5284ms) — 60 chars, 2 tools
+
+▶  [lead-capture-both-channels] Lead con email Y teléfono (ambos canales)
+   ✓ Turn 1 (3236ms) — 122 chars, 0 tools
+   ✓ Turn 2 (4409ms) — 0 chars, 2 tools
+
+▶  [whatsapp-handoff] Pide pasar a WhatsApp directamente
+   ✓ Turn 1 (4738ms) — 91 chars, 1 tools
+
+▶  [whatsapp-handoff-purchase-signal] Handoff por señal clara de compra (B3.6)
+   ✗ Error: terminated
+
+▶  [whatsapp-handoff-schedule] Handoff por pedido de agendar visita (B3.6)
+   ✗ Error: terminated
+
+▶  [no-handoff-on-greeting] NO debe disparar handoff en saludo (B3.6 anti-spam)
+   ✓ Turn 1 (5154ms) — 67 chars, 0 tools
+
+▶  [lead-capture-chain] Chain completo: capture_lead → texto de confirmación → offer_handoff_options (MS-1)
+   ✓ Turn 1 (4740ms) — 171 chars, 0 tools
+   ✓ Turn 2 (4546ms) — 63 chars, 2 tools
+
+▶  [lead-capture-financing-tradein] B5.1 — Lead con financiación + usado en parte de pago
+   ✗ Error: terminated
+
+▶  [lead-capture-postventa] B5.1/B5.3 — Postventa: capturado con category=postventa → DQ por penalty
+   ✓ Turn 1 (6760ms) — 205 chars, 0 tools
+   ✓ Turn 2 (4556ms) — 86 chars, 1 tools
+
+▶  [lead-capture-employment] B5.3 — Lead de empleo (DQ directo, category=employment)
+   ✗ Error: terminated
+
+▶  [lead-capture-invalid-phone] B5.3 — Teléfono inválido → penalty −20
+   ✓ Turn 1 (5922ms) — 116 chars, 0 tools
+   ✗ Turn 2 timeout
+
+▶  [long-session-soft-cap] B4.5 — Sesión larga (≥15 turnos) → sugiere handoff
+   ✓ Turn 1 (3769ms) — 53 chars, 0 tools
+   ✓ Turn 2 (2646ms) — 54 chars, 0 tools
+   ✓ Turn 3 (4510ms) — 100 chars, 0 tools
+   ✓ Turn 4 (3289ms) — 153 chars, 0 tools
+   ✓ Turn 5 (4070ms) — 180 chars, 0 tools
+   ✓ Turn 6 (3247ms) — 79 chars, 0 tools
+   ✓ Turn 7 (3153ms) — 65 chars, 0 tools
+   ✓ Turn 8 (3433ms) — 95 chars, 0 tools
+   ✓ Turn 9 (3173ms) — 62 chars, 0 tools
+   ✓ Turn 10 (2700ms) — 67 chars, 0 tools
+   ✓ Turn 11 (3647ms) — 267 chars, 0 tools
+   ✗ Error: terminated
+
+▶  [quota-exhausted] B4.5 — Cuota agotada → modo degradado (CERO LLM)
+   ✓ Turn 1 DEGRADED (2343ms) — reason=quota_exhausted, whatsapp=∅
+
+─────────────────────────────────────────────
+  Baseline guardado en:
+    C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\docs\regression\baseline-2026-05-23T20-17-46-942Z.md
+─────────────────────────────────────────────
+
+⚠️  6/19 casos con error. Revisá el output.
