@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/prisma'
+import { excludeDqWhere } from '@/modules/chatbot/server/scoring'
 
 export interface WeeklyReportData {
   orgName: string
@@ -57,10 +58,12 @@ export async function buildWeeklyReport(botId: string): Promise<WeeklyReportData
         startedAt: { gte: prevWeekStart, lt: weekStart },
       },
     }),
+    // B5.3 — leads del reporte semanal excluyen DQ (no ensucia métricas del cliente)
     prisma.chatbotLead.findMany({
       where: {
         botConfigId: bot.id,
         capturedAt: { gte: weekStart, lte: weekEnd },
+        ...excludeDqWhere(),
       },
       select: { name: true, capturedAt: true },
       orderBy: { capturedAt: 'desc' },
@@ -70,6 +73,7 @@ export async function buildWeeklyReport(botId: string): Promise<WeeklyReportData
       where: {
         botConfigId: bot.id,
         capturedAt: { gte: prevWeekStart, lt: weekStart },
+        ...excludeDqWhere(),
       },
     }),
     prisma.chatMessage.findMany({

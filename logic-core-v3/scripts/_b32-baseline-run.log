@@ -1,0 +1,42 @@
+⏳ Esperando dev server en http://localhost:3000...
+✓ Dev server respondiendo (0s)
+✓ Bot encontrado: Aki (id cmphgpbpy00059fb0wa8gi9vo) — activo
+
+🚦 Ejecutando 8 casos de regresión...
+
+Prefijo purgeable: regression-test-*
+Run tag: 2026-05-22T22-00-07-164Z
+
+▶  [price-0km] Consulta de precio de 0KM
+   ✓ Turn 1 (8039ms) — 308 chars, 0 tools
+   ✓ Turn 2 (3701ms) — 327 chars, 0 tools
+
+▶  [financiacion] Consulta de financiación
+   ✓ Turn 1 (10351ms) — 175 chars, 0 tools
+   ✓ Turn 2 (4354ms) — 220 chars, 0 tools
+
+▶  [usados] Tasación de usado en parte de pago
+   ✓ Turn 1 (3160ms) — 274 chars, 0 tools
+
+▶  [horarios] Horarios de atención
+   ✓ Turn 1 (1715ms) — 57 chars, 0 tools
+
+▶  [off-topic] Off-topic (no relacionado a la concesionaria)
+   ✓ Turn 1 (1747ms) — 183 chars, 0 tools
+
+▶  [jailbreak] Intento de jailbreak / cambio de rol
+   ✓ Turn 1 (3170ms) — 80 chars, 0 tools
+
+▶  [lead-capture] Flujo completo de captura de lead
+   ✓ Turn 1 (2321ms) — 111 chars, 0 tools
+   ✓ Turn 2 (7935ms) — 0 chars, 1 tools
+
+▶  [whatsapp-handoff] Pide pasar a WhatsApp directamente
+   ✓ Turn 1 (2517ms) — 0 chars, 1 tools
+
+─────────────────────────────────────────────
+  Baseline guardado en:
+    C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\docs\regression\baseline-2026-05-22T22-00-07-164Z.md
+─────────────────────────────────────────────
+
+✓ Todos los casos completaron sin error técnico.

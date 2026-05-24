@@ -40,8 +40,9 @@ function currentPeriodKey(date: Date = new Date()) {
 
 function formatPeriodLabel(year: number, month: number): string {
   const monthDate = new Date(Date.UTC(year, month - 1, 1))
+  // timeZone: 'UTC' evita que la TZ AR (-3h) retroceda al mes anterior al formatear.
   return monthDate
-    .toLocaleDateString('es-AR', { month: 'long', year: 'numeric' })
+    .toLocaleDateString('es-AR', { month: 'long', year: 'numeric', timeZone: 'UTC' })
     .toLowerCase()
 }
 

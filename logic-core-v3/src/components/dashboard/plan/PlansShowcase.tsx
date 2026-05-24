@@ -11,9 +11,13 @@
  *  - Locked-as-celebration: para el plan actual, las features del próximo
  *    tier aparecen como "candado dorado" + frase positiva ("Cuando
  *    estés listo para crecer"). Nunca es alarma.
- *  - El CTA de upgrade NO está enchufado todavía a `requestUpsellAction`
- *    (eso es B10). Por ahora linkea a `messages?context=...` para que el
- *    cliente hable con su equipo develOP — el flujo manual que ya existe.
+ *
+ * MS-3 — El CTA de upgrade ahora pasa por `<UpgradeCtaButton>` (client),
+ * que invoca `requestUpsellAction` ANTES del redirect a `/dashboard/messages`.
+ * Esto registra el lead en `contactSubmission`, dispara la alerta a develOP
+ * (Telegram via `sendAgencyAlert`) y notifica al super_admin — todo antes
+ * de que el cliente tenga que escribir nada. El CTA de downgrade
+ * ("Hablar con mi equipo") sigue siendo `<Link>` plano: no es upsell.
  *
  * Mobile: las 3 cards se stackean en col en xs/sm; cambian a grid-cols-3
  * en lg+. El badge "MÁS POPULAR" sigue visible en mobile (top-right de la
@@ -30,6 +34,7 @@ import {
   type PlanBenefit,
   type PlanPresentation,
 } from '@/lib/plan/plan-presentation'
+import { UpgradeCtaButton } from './UpgradeCtaButton'
 
 interface PlansShowcaseProps {
   currentPlanKey: PlanKey
@@ -197,26 +202,29 @@ function PlanCta({ plan, isCurrent, isUpgrade, isDowngrade, isHighlighted }: Pla
     )
   }
 
-  // upgrade
+  // upgrade — MS-3: pasa por el client que registra el lead antes del redirect
+  const planKeyLower = plan.key.toLowerCase()
+
   if (isHighlighted) {
     return (
-      <Link
-        href={`/dashboard/messages?context=plan-upgrade-${plan.key.toLowerCase()}`}
-        className="group flex w-full items-center justify-center gap-2 rounded-xl border border-amber-500/40 bg-gradient-to-r from-amber-500/15 via-amber-400/10 to-amber-500/15 px-4 py-3 text-[10px] font-black uppercase tracking-widest text-amber-300 transition-all hover:border-amber-400/60 hover:from-amber-500/25 hover:to-amber-500/25"
+      <UpgradeCtaButton
+        planKeyLower={planKeyLower}
+        planName={plan.name}
+        label={plan.ctaUpgrade}
+        className="group flex w-full items-center justify-center gap-2 rounded-xl border border-amber-500/40 bg-gradient-to-r from-amber-500/15 via-amber-400/10 to-amber-500/15 px-4 py-3 text-[10px] font-black uppercase tracking-widest text-amber-300 transition-all hover:border-amber-400/60 hover:from-amber-500/25 hover:to-amber-500/25 disabled:cursor-wait disabled:opacity-60"
       >
         <Sparkles size={13} strokeWidth={1.8} className="transition-transform group-hover:rotate-12" />
-        {plan.ctaUpgrade}
-      </Link>
+      </UpgradeCtaButton>
     )
   }
 
   return (
-    <Link
-      href={`/dashboard/messages?context=plan-upgrade-${plan.key.toLowerCase()}`}
-      className="group flex w-full items-center justify-center gap-2 rounded-xl border border-cyan-500/30 bg-cyan-500/10 px-4 py-3 text-[10px] font-black uppercase tracking-widest text-cyan-300 transition-all hover:border-cyan-400/50 hover:bg-cyan-500/20"
-    >
-      {plan.ctaUpgrade}
-    </Link>
+    <UpgradeCtaButton
+      planKeyLower={planKeyLower}
+      planName={plan.name}
+      label={plan.ctaUpgrade}
+      className="group flex w-full items-center justify-center gap-2 rounded-xl border border-cyan-500/30 bg-cyan-500/10 px-4 py-3 text-[10px] font-black uppercase tracking-widest text-cyan-300 transition-all hover:border-cyan-400/50 hover:bg-cyan-500/20 disabled:cursor-wait disabled:opacity-60"
+    />
   )
 }
 

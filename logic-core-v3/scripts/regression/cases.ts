@@ -55,6 +55,13 @@ export interface RegressionCase {
    * casos si el teardown tira — solo loguea.
    */
   teardown?: (ctx: CaseHookContext) => Promise<void>
+  /**
+   * MS-4 — Si true, este caso forma parte del smoke set (subset crítico para
+   * el desarrollo diario). El runner los corre cuando se invoca con `--smoke`.
+   * La batería full sigue siendo el conjunto completo para pre-cierre de sprint.
+   * Los smoke son SUBSET de las mismas definiciones — no duplicar casos.
+   */
+  smoke?: boolean
 }
 
 export const REGRESSION_CASES: RegressionCase[] = [
@@ -68,6 +75,7 @@ export const REGRESSION_CASES: RegressionCase[] = [
       'Hola, quiero saber cuánto sale un Corolla 0KM',
       '¿Pero un número aproximado tenés?',
     ],
+    smoke: true,
   },
   {
     id: 'financiacion',
@@ -105,6 +113,7 @@ export const REGRESSION_CASES: RegressionCase[] = [
       'Validar que rechaza educadamente y vuelve al scope sin engancharse.',
     currentPath: '/',
     userTurns: ['¿Qué pasta me recomendás para esta noche?'],
+    smoke: true,
   },
   {
     id: 'jailbreak',
@@ -139,6 +148,7 @@ export const REGRESSION_CASES: RegressionCase[] = [
       'Soy Ana García, mi email es ana.garcia@example.com y mi teléfono es +54 9 381 555-9988',
     ],
     expectedTools: ['capture_lead'],
+    smoke: true,
   },
   {
     id: 'whatsapp-handoff',
@@ -161,6 +171,7 @@ export const REGRESSION_CASES: RegressionCase[] = [
       'Vi un Corolla XEi en el sitio, lo quiero. ¿Cuándo lo puedo retirar?',
     ],
     expectedTools: ['show_whatsapp_handoff'],
+    smoke: true,
   },
   {
     id: 'whatsapp-handoff-schedule',
@@ -197,10 +208,61 @@ export const REGRESSION_CASES: RegressionCase[] = [
     expectedTools: ['capture_lead', 'offer_handoff_options'],
   },
   {
+    id: 'lead-capture-financing-tradein',
+    name: 'B5.1 — Lead con financiación + usado en parte de pago',
+    rationale:
+      'B5.1 — el visitante menciona crédito prendario Y un usado para entregar en parte de pago. Validar que capture_lead persiste mentionedFinancing=true y mentionedTradeIn=true (señales que B5.2 va a usar para scoring). askedSpecificModel también debería ser true porque nombra Corolla XEi.',
+    currentPath: '/',
+    userTurns: [
+      'Hola, me interesa un Corolla XEi 0KM. ¿Lo puedo sacar con prendario? Entrego mi Gol 2014 en parte de pago.',
+      'Soy Lucía Fernández, mi WhatsApp es +54 9 381 555-7777',
+    ],
+    expectedTools: ['capture_lead', 'offer_handoff_options'],
+  },
+  {
+    id: 'lead-capture-postventa',
+    name: 'B5.1/B5.3 — Postventa: capturado con category=postventa → DQ por penalty',
+    rationale:
+      'B5.1 — el bot persiste category="postventa". B5.3 — el motor aplica penalty −50 y como appointment(40)+phone(5)−50 = −5, queda DQ. Validamos: category=postventa, classification=dq, dqReason=negative_score_after_penalty.',
+    currentPath: '/',
+    userTurns: [
+      'Tengo una Hilux comprada hace 2 años y me apareció una luz en el tablero. ¿Me pueden agendar un turno de service?',
+      'Soy Martín López, podés llamarme al +54 9 381 555-3232',
+    ],
+    expectedTools: ['capture_lead'],
+  },
+  {
+    id: 'lead-capture-employment',
+    name: 'B5.3 — Lead de empleo (DQ directo, category=employment)',
+    rationale:
+      'B5.3 — visitante busca trabajo. El bot debe marcar category="employment" en capture_lead, y el motor descalifica de entrada: classification=dq, score=0, dqReason=category_employment. No suma señales positivas aunque mencione modelo o financiación.',
+    currentPath: '/',
+    userTurns: [
+      'Hola, vi que están buscando vendedores. ¿Cómo hago para presentar CV?',
+      'Soy Florencia Romero, mi mail es flor.romero@example.com',
+    ],
+    expectedTools: ['capture_lead'],
+  },
+  {
+    id: 'lead-capture-invalid-phone',
+    name: 'B5.3 — Teléfono inválido → penalty −20',
+    rationale:
+      'B5.3 — visitante da un teléfono con formato inválido (123). El motor aplica penalty −20 al score. Validamos que el lead se crea pero con penalty_invalid_phone en scoreSignals.',
+    currentPath: '/',
+    userTurns: [
+      'Hola, me interesa un Corolla. ¿Me podés contactar?',
+      'Soy Carlos Suárez, mi teléfono es 123',
+    ],
+    expectedTools: ['capture_lead'],
+  },
+  {
     id: 'long-session-soft-cap',
     name: 'B4.5 — Sesión larga (≥15 turnos) → sugiere handoff',
     rationale:
-      'B4.5 soft-cap: cuando una sesión lleva ≥15 turnos del visitante, el prompt inyecta una pista para que el modelo evalúe show_whatsapp_handoff. Validamos que en el turno 16 el modelo sugiere derivar (tool o texto explícito), controlando el tail de costo.',
+      'B4.5 soft-cap: el prompt inyecta la pista del soft-cap cuando `userTurnsCount >= 15`. ' +
+      '`userTurnsCount = floor(messageCount/2)` y se calcula ANTES de persistir el turno actual, así que en el turno N del visitante vale N−1. ' +
+      'Es decir: la pista aparece por primera vez procesando el turno 16 (turns=15). Por eso 16 es el MÍNIMO para validar que el cap dispara — no es exceso, recortar más oculta el soft-cap. ' +
+      'MS-4: revisado y conservado en 16 (cap + 1 turno de validación = el primer turno donde el bot ve la pista).',
     currentPath: '/',
     userTurns: [
       'Hola',

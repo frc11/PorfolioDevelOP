@@ -2966,3 +2966,1162 @@ Solo matches en comments + 1 `capitalize` (Tailwind class). Cero jerga en string
 - ⏳ Pre-fill del mensaje en `messages?context=plan-upgrade-{key}` — extender page de messages para interpretar el query.
 - ⏳ (Opcional) Banner explícito "Plan pendiente de asignación" para fallback. Bajo impacto, edge case raro.
 
+### 11) Adenda post-cierre — fix TZ en `periodLabel` + verificación visual real   ·   2026-05-23
+
+Verificación real con browser (Claude Preview, login como `matsu-admin@dev.local` ORG_MEMBER) descubrió un bug menor que el grep + scan estructural no podía detectar.
+
+**Bug**: el header del medidor mostraba `Período: abril de 2026` cuando el mes UTC era mayo.
+
+**Root cause**: en [get-org-usage.ts:formatPeriodLabel](logic-core-v3/src/lib/plan/get-org-usage.ts):
+```ts
+const monthDate = new Date(Date.UTC(year, month - 1, 1))   // mayo 1, 00:00 UTC
+return monthDate.toLocaleDateString('es-AR', { month: 'long', year: 'numeric' })
+// → "abril de 2026"  (TZ AR = UTC-3 retrocede a abril 30, 21:00)
+```
+
+El `toLocaleDateString` con locale `es-AR` aplica la TZ Argentina por defecto. El primer día del mes UTC, en TZ AR, cae al último día del mes anterior — el label entonces sale corrido un mes.
+
+**Fix** (1 línea): agregar `timeZone: 'UTC'` al options del format.
+
+```ts
+return monthDate
+  .toLocaleDateString('es-AR', { month: 'long', year: 'numeric', timeZone: 'UTC' })
+  .toLowerCase()
+```
+
+Verificación: `node -e "..."` con el fix devuelve `"mayo de 2026"`. Reload del browser confirmó el render correcto. `npx tsc --noEmit` post-fix → exit 0.
+
+**Verificación visual real** (con browser, 1440x1500 desktop y 375x2600 mobile en `/dashboard/plan`, viewport 1440x900 en `/dashboard`):
+
+- ✅ Layout desktop: UsageMeter completo + 3 cards en grid de 3 columnas con Pro destacado (border ámbar + badge "Más popular") + Business marcado "Tu plan" (badge cyan) + footer cyan "Estás en el plan más completo" (correcto: Matsu es BUSINESS, sin candados).
+- ✅ Layout mobile: stack vertical de las 3 cards, badges no se superponen al título (gracias a `w-fit shrink-0`), header del medidor en `flex-col` con counter `text-3xl` legible.
+- ✅ UsageMeter integrado en `/dashboard` home entre WeekResultsGrid y el brief, con los mismos datos reales (0/5.000, Plan BUSINESS).
+- ✅ Cero jerga en JSX (re-confirmado por grep): los únicos matches de "token / LLM / conversación / CRM / quota" en `src/components/dashboard/plan/` y `src/lib/plan/plan-presentation.ts` son en comments JSDoc.
+
+**Cleanup**: borrado el throwaway `scripts/_b46-reset-matsu-pw.ts` (que seteaba pw conocida en `matsu-admin@dev.local` para autenticar el screenshot). La password de matsu-admin queda en `B46-verify-screenshot` (dev DB, sin riesgo en prod — Franco la puede resetear corriendo de nuevo `seed-matsu.ts` o ignorarla). Logs `_b46-verify-{build,dev}.log` también borrados.
+
+**Archivos modificados en la adenda**:
+- ✏️ [src/lib/plan/get-org-usage.ts](logic-core-v3/src/lib/plan/get-org-usage.ts) — `formatPeriodLabel` ahora pasa `timeZone: 'UTC'` al format.
+
+
+
+---
+## ✅ MS-2 — Widget degradado: derivación digna a WhatsApp   ·   2026-05-23
+
+**Objetivo**: cerrar el gap visible al visitante que dejó B4.5. El backend ya respondía el modo degradado con payload completo (`reason`, `message`, `whatsappNumber`, `whatsappMessage`, `companyName`), pero el widget de `/embed/[slug]` ignoraba esos campos y mostraba un banner amarillo con texto engañoso ("respuestas pueden tardar más") sin CTA. El visitante final terminaba en pantalla vacía / confusa — el peor lugar para tener algo roto.
+
+### 1) Diagnóstico antes de tocar
+
+Tres bugs encadenados en la capa cliente:
+
+1. **[useChatbot.ts:75-95](logic-core-v3/src/modules/chatbot/hooks/useChatbot.ts#L75-L95)** detectaba `data?.mode === ''degraded''` pero solo seteaba un boolean `degradedMode = true`. El payload entero (`reason` / `message` / `whatsappNumber` / `whatsappMessage` / `companyName`) se descartaba.
+2. **[ChatbotEmbed.tsx:265-279](logic-core-v3/src/modules/chatbot/components/embed/ChatbotEmbed.tsx#L265-L279)** renderizaba un banner amarillo inline con texto engañoso ("Las respuestas pueden tardar un poco más de lo normal") — NO menciona WhatsApp, sin botón, contradice lo que realmente pasó (cuota agotada).
+3. **[DegradedBanner.tsx](logic-core-v3/src/modules/chatbot/components/chat/DegradedBanner.tsx)** existía desde un sprint anterior con la intención correcta (CTA WhatsApp) pero **estaba huérfano** — el QA checklist [chatbot-qa-checklist.md:93](logic-core-v3/docs/chatbot-qa-checklist.md#L93) ya marcaba "Aparece el DegradedBanner con CTA WhatsApp" pero nadie lo montó en el embed.
+
+### 2) Cambios
+
+**[src/modules/chatbot/hooks/useChatbot.ts](logic-core-v3/src/modules/chatbot/hooks/useChatbot.ts)**: tipos nuevos `DegradedReason` + `DegradedInfo` que matchean 1-a-1 el JSON del backend (ver [handleChatRequest.ts:83-101](logic-core-v3/src/modules/chatbot/server/chat/handleChatRequest.ts#L83-L101)). El interceptor de `DefaultChatTransport.fetch` ahora parsea TODO el payload y lo guarda en `degradedInfo: DegradedInfo | null`. `degradedMode: boolean` queda como derivado (`degradedInfo !== null`) para no romper consumers viejos (`LogicCompanion.tsx`, `ChatWindow.tsx`). Defensive null checks por cada campo string del payload — si el backend manda algo raro, normalizamos a `null` sin crashear.
+
+**[src/modules/chatbot/components/chat/DegradedBanner.tsx](logic-core-v3/src/modules/chatbot/components/chat/DegradedBanner.tsx)**: reescrito con shape `{ info: DegradedInfo }`. Render: card con borde verde sutil (rgba 37,211,102), icono `MessageCircle` circular `#25D366`, título "Te seguimos por WhatsApp", el `message` del payload, y un `<a href="https://wa.me/{numero limpio}?text={message URL-encoded}">` con `target="_blank" rel="noopener noreferrer"` y `aria-label`. El número se sanea client-side con `replace(/\D/g, '''')` (defensive: el backend podría mandar con espacios/guiones). Si `whatsappNumber` viene null, fallback digno: "Volvé a probar más tarde y vamos a poder seguir ayudándote" (sin botón, sin pinta de error). Tap target del CTA: `minHeight: 44px` para mobile.
+
+**[src/modules/chatbot/components/embed/ChatbotEmbed.tsx](logic-core-v3/src/modules/chatbot/components/embed/ChatbotEmbed.tsx)**:
+- Importa `DegradedBanner`, elimina el banner amarillo inline.
+- Monta `<DegradedBanner info={chatbot.degradedInfo} />` al **final** del messages list (no arriba) — así queda como última cosa que el visitante ve después de su propio mensaje, no perdido en el scroll.
+- Input deshabilitado cuando `degradedInfo !== null` con placeholder "Continuá la conversación por WhatsApp" — el embed no tiene sentido de "seguir hablándole al bot" cuando el bot ya derivó. Send button también queda gris (mismo flag).
+- Thinking dots ahora están **fuera del AnimatePresence** — ver bug encontrado abajo.
+- Keys explícitas en los hijos condicionales del AnimatePresence (`empty-state`, `degraded-banner`) para eliminar warning React "Encountered two children with the same key".
+
+### 3) Cómo detecta y renderiza el estado degradado
+
+Flow visitante:
+
+1. Visitante escribe mensaje, envía.
+2. `handleChatRequest` (backend) ve `quota.conversationsUsed >= plan.quota` (o `domain_overflow`) y responde `{ mode: ''degraded'', reason, message, whatsappNumber, whatsappMessage, companyName }` con `content-type: application/json`. NO llama a Gemini.
+3. El `transport.fetch` interceptor de `useChatbot.ts` clona la response, parsea, ve `mode === ''degraded''` → setea `degradedInfo` con el payload entero y devuelve un stream vacío al SDK para que no rompa.
+4. `ChatbotEmbed` ve `chatbot.degradedInfo !== null` → monta `<DegradedBanner />` al final del messages list y bloquea el input.
+5. Visitante toca "Abrir WhatsApp" → `wa.me/{numero}?text={mensaje}` abre la app de WhatsApp con el mensaje pre-armado del bot.
+
+Cero error visible. Cero pantalla vacía. Cero "el bot dejó de responder".
+
+### 4) Verificación visual — desktop + mobile (browser real)
+
+Verificación con Claude Preview en `/embed/matsu`, forzando el degradado con un monkey-patch del `window.fetch` que intercepta solo `/api/chatbot/matsu/chat` y devuelve el payload canned (reversible — se va al recargar, NO toca backend ni DB).
+
+**Desktop (800x900)**: card verde digna ocupando ~90% del ancho del messages container, alineada a flex-start. Ícono WhatsApp circular verde, título "Te seguimos por WhatsApp", párrafo con el mensaje del payload completo ("Por hoy alcanzamos el límite de atención automática del mes..."), botón verde full-width "Abrir WhatsApp" con ícono ExternalLink. Estética armoniza con el resto del widget (acento cian del header arriba, acento verde de la card abajo). Cero apariencia de error.
+
+**Mobile (375x812)**: stack vertical, padding 14px, texto legible (12.5px), botón "Abrir WhatsApp" full-width con `minHeight: 44px` (tap target ergonómico). El placeholder del input cambia a "Continuá la conversación por WhatsApp" y el textarea queda disabled.
+
+**Verificación funcional del CTA** (via `preview_eval`):
+- `href = "https://wa.me/5491155551234?text=Hola%20Matsu%2C%20vengo%20del%20chat..."` (número limpio sin espacios/+, mensaje URL-encoded).
+- `target = "_blank"`, `rel = "noopener noreferrer"` (security).
+- `textarea.disabled = true`, placeholder degradado activo.
+
+**Console post-fix**: cero errores. (Hubo un warning "two children with the same key" en el primer render — lo arreglé agregando keys explícitas al AnimatePresence, ver punto 5.)
+
+### 5) Bugs colaterales encontrados durante la verificación visual
+
+La verificación real con browser cazó dos bugs que el grep + tsc no detectaban — exactamente el tipo de cosa que justifica la regla "todo sprint UI/UX se verifica con browser":
+
+**5.a Ghost del thinking-dots en el momento de la transición**. Cuando el endpoint devuelve degraded (stream vacío), el `isThinking` pasa de `true` a `false` en el mismo frame que `degradedInfo` se setea. El `motion.div` de los thinking-dots dentro de `AnimatePresence` empezaba la animación de exit (`opacity: 0`), pero los 3 inner `motion.div` tienen `animate: { scale: [1, 1.5, 1], opacity: [0.4, 1, 0.4] }` con `repeat: Infinity` — esa animación **sobreescribe el opacity heredado del padre durante el exit**, dejando los 3 dots visibles como "fantasma" hasta el próximo paint. Fix: saqué los thinking-dots **fuera** del `AnimatePresence` — ahora el unmount es inmediato y limpio, sin exit animation. En el flujo normal el bug no se ve porque el stream tarda 2s+ y la animación de exit termina antes de que se note.
+
+**5.b Warning "two children with the same key"** en el `AnimatePresence`. Era pre-existente (el empty state y los thinking-dots nunca tuvieron `key` explícita) pero mi nuevo `<DegradedBanner />` lo acentuó. Fix: `key="empty-state"` y `key="degraded-banner"` explícitos.
+
+### 6) Findings out-of-scope (NO toqué — bandera para Franco)
+
+- 🚩 **[ChatWindow.tsx:313-320](logic-core-v3/src/modules/chatbot/components/chat/ChatWindow.tsx#L313-L320)** tiene el MISMO bug del banner engañoso ("modo degradado, respuestas pueden tardar más / ser más breves") con clases Tailwind amber. Este `ChatWindow` es el chat del sitio principal de develop.com.ar (montado por `LogicCompanion.tsx`), NO el embed externo de visitantes — por eso no entra en MS-2 (scope es `/embed/[slug]`). Cuando se aborde, el fix es: importar `DegradedBanner` y pasar `chatbot.degradedInfo` (el hook ya lo expone). Toma 5 min.
+- 🚩 **[types.ts:34](logic-core-v3/src/modules/chatbot/components/chat/types.ts#L34)** y **[ChatWindow.tsx:19,31](logic-core-v3/src/modules/chatbot/components/chat/ChatWindow.tsx#L19)** todavía consumen `degradedMode: boolean`. Funcionan vía el derivado que dejé en el hook (`degradedMode = degradedInfo !== null`), pero cuando se haga el fix de arriba conviene migrar esas props al `DegradedInfo` completo y deprecar el boolean.
+
+### 7) Reglas absolutas (chequeo final)
+
+- ✅ El visitante NUNCA ve un error técnico ni un mensaje vacío en degraded — es una card verde con CTA claro.
+- ✅ Usa los campos REALES del payload de B4.5 — `whatsappNumber` saneado, `whatsappMessage` URL-encoded, `message` literal del backend, `companyName` para el fallback del mensaje.
+- ✅ Mobile verificado en 375x812 — padding, tap target 44px, sin overflow.
+
+### Archivos modificados
+
+- [src/modules/chatbot/hooks/useChatbot.ts](logic-core-v3/src/modules/chatbot/hooks/useChatbot.ts) — tipos `DegradedInfo` + interceptor del transport guarda payload completo.
+- [src/modules/chatbot/components/chat/DegradedBanner.tsx](logic-core-v3/src/modules/chatbot/components/chat/DegradedBanner.tsx) — reescrito con CTA WhatsApp verde + fallback sin número.
+- [src/modules/chatbot/components/embed/ChatbotEmbed.tsx](logic-core-v3/src/modules/chatbot/components/embed/ChatbotEmbed.tsx) — banner inline removido, DegradedBanner montado al final, input deshabilitado en degraded, thinking-dots fuera del AnimatePresence, keys explícitas.
+
+### Listo para
+- ✅ Endpoint degradado deja el front armado para CUALQUIER `reason` futura (`quota_exhausted` y `domain_overflow` hoy; si B5+ agrega `payment_failed` o algo, el widget ya consume `message` literal del payload — cero cambio en cliente).
+- ✅ Build verde (`npx tsc --noEmit` → exit 0).
+- ⏳ **MS-3** y futuros: ya hay infra de `DegradedInfo` en el hook — si MS-3 toca el otro widget (`ChatWindow.tsx` del sitio develop), reutilizar `DegradedBanner` + el `degradedInfo` del hook (5 min).
+
+
+---
+## ✅ MS-3 — CTA de upgrade de plan conectado a `requestUpsellAction`   ·   2026-05-23
+
+**Objetivo**: cerrar el gap que dejó B4.6. El CTA dorado "Subir a Pro/Business" del dashboard de planes solo linkeaba a `/dashboard/messages?context=...` sin registrar la intención en ningún lado. Si el cliente no escribía el mensaje, el lead se perdía. Conectar el CTA con el `requestUpsellAction` que **ya existe** (`src/lib/actions/upsell.ts`) — la misma action que `/dashboard/services` usa para módulos premium y que dispara alerta a develOP via Telegram.
+
+### 1) Decisión de arquitectura — reutilizar la action sin tocarla
+
+Leyendo [upsell.ts:44-49](logic-core-v3/src/lib/actions/upsell.ts#L44-L49) descubrí algo clave: la action busca `prisma.premiumModule.findUnique({ where: { slug: featureKey } })` y si **no encuentra el módulo**, simplemente skipea el bloque `organizationModule` (línea 49: `if (module) {`). El resto del flujo — `contactSubmission` (línea 76), `sendAgencyAlert({ type: 'LEAD_UPSELL' })` (línea 87), `Notification` para cliente + super_admin (línea 100) — corre igual.
+
+Esto significa que puedo invocar `requestUpsellAction("plan-upgrade-pro", "Plan Pro")` y todo el upsell flow se dispara **sin contaminar** la tabla de módulos premium. Cero cambios a la action, cero discriminador `kind: 'MODULE' | 'PLAN'`, cero schema migration. Se respeta literalmente la regla "Reutilizá `requestUpsellAction` existente, NO crees un sistema nuevo de upsell".
+
+### 2) Cambios
+
+**Nuevo: [src/components/dashboard/plan/UpgradeCtaButton.tsx](logic-core-v3/src/components/dashboard/plan/UpgradeCtaButton.tsx)** — client component que reemplaza el `<Link>` plano de los CTAs upgrade. Recibe `planKeyLower`, `planName`, `label`, `className`, `children` para mantener el estilo exacto que B4.6 definió (el caller pasa todas las clases). Al click:
+   1. Llama `requestUpsellAction("plan-upgrade-{key}", "Plan {Name}")` dentro de un `useTransition`.
+   2. Espera el resultado (`await`) — si falla por red, loggea pero igual sigue.
+   3. Hace `window.location.assign(targetHref)` (navegación HARD, no `router.push`) — ver bug en sección 5.
+   4. `disabled` mientras `isPending` para prevenir double-click → 2 leads por el mismo intento.
+
+**Modificado: [src/components/dashboard/plan/PlansShowcase.tsx](logic-core-v3/src/components/dashboard/plan/PlansShowcase.tsx)** — los 2 ramos de la función `PlanCta` que renderizaban `<Link href="/dashboard/messages?context=plan-upgrade-${key}">` ahora montan `<UpgradeCtaButton />` con las mismas clases. Sigue siendo Server Component (solo importa el client). El branch `isDowngrade` (CTA gris "Hablar con mi equipo") mantiene `<Link>` plano — NO es upsell, solo facilitate el flujo manual.
+
+**Modificado: [src/lib/data/message-context.ts](logic-core-v3/src/lib/data/message-context.ts)** — agregadas 6 entradas al mapping:
+- `plan-upgrade-pro`, `plan-upgrade-business`, `plan-upgrade-starter` — pre-fill del mensaje cuando el cliente aterriza desde el CTA dorado.
+- `plan-change-pro`, `plan-change-business`, `plan-change-starter` — pre-fill para el flujo de downgrade (sin disparar action, solo mensaje).
+
+`MessageThread.tsx` **no requirió cambios** — ya lee `?context=` via `useSearchParams` (línea 91), llama `getMessageForContext`, setea el textarea y limpia el query con `router.replace`. Solo faltaba el mapping en `message-context.ts`.
+
+### 3) Flujo end-to-end (cómo se conectó)
+
+```
+Cliente en /dashboard/plan → click <UpgradeCtaButton aria-label="Subir a Pro">
+  ↓
+useTransition() → await requestUpsellAction("plan-upgrade-pro", "Plan Pro")
+  ↓
+  ├─ premiumModule.findUnique({ slug: "plan-upgrade-pro" }) → null → skip organizationModule
+  ├─ contactSubmission.create({ service: "plan-upgrade-pro", message: "Solicitud de módulo premium: Plan Pro", ... })
+  ├─ sendAgencyAlert({ type: 'LEAD_UPSELL', clientName: "Matsu", detail: "...", link: "/admin/leads" })  → Telegram
+  ├─ Notification(INFO) al cliente: "Tu solicitud para activar 'Plan Pro' fue recibida."
+  ├─ Notification(ACTION_REQUIRED) al super_admin: "Matsu está interesada en Plan Pro" → actionUrl: /admin/leads
+  └─ revalidatePath('/admin/leads' + '/admin' layout + '/dashboard')
+  ↓
+window.location.assign("/dashboard/messages?context=plan-upgrade-pro")
+  ↓
+MessageThread useEffect → getMessageForContext("plan-upgrade-pro")
+  → setInputValue("Hola! Quería subir mi asistente al plan Pro. ¿Cuándo lo coordinamos y cuáles serían los próximos pasos?")
+  → router.replace("/dashboard/messages") (limpia query)
+```
+
+Si el cliente envía el mensaje: develOP lo recibe por 2 canales (lead + mensaje); admin resuelve el doble-conteo manual (idempotencia out of scope — el riesgo de duplicar es preferible al riesgo de perder). Si el cliente se va sin enviar: el lead ya quedó al click. **Cero leads perdidos por friction**.
+
+### 4) Verificación visual real (browser, login matsu-admin@dev.local)
+
+Setup: throwaway `_ms3-set-matsu-plan.ts STARTER` para downgradear Matsu (default es BUSINESS, donde NO se ve el CTA dorado upgrade — todo es current o downgrade). Esperado plan-cache TTL de 60s. Throwaway `_ms3-reset-matsu-pw.ts` para password conocida (mismo patrón que B4.6 con `_b46-reset-matsu-pw.ts`).
+
+**Estado pre-click**: card Pro con borde dorado, badge "MÁS POPULAR", CTA dorado `SUBIR A PRO` con ícono Sparkles. `contactSubmission.count({ service: { startsWith: 'plan-upgrade-' } }) === 0`.
+
+**Post-click**:
+- ✅ URL navegó a `/dashboard/messages?context=plan-upgrade-pro` → router.replace la limpió a `/dashboard/messages`.
+- ✅ Textarea pre-cargado: **"Hola! Quería subir mi asistente al plan Pro. ¿Cuándo lo coordinamos y cuáles serían los próximos pasos?"**
+- ✅ Badge "2" en la campana del header — las 2 INFO al cliente (2 clicks en la verificación: 1 con bug, 1 con fix).
+- ✅ DB `contactSubmission` row: `service="plan-upgrade-pro"`, `message="Solicitud de módulo premium: Plan Pro"`, `name="Matsu Admin (scaffolding)"`, `email="matsu-admin@dev.local"`, `company="Matsu"`, `read=false` — aparece en `/admin/leads` tab Inbound.
+- ✅ DB `notification` rows: 1 INFO al cliente + 1 ACTION_REQUIRED al super_admin con `actionUrl: /admin/leads`.
+- ✅ Server logs: `ƒ requestUpsellAction("plan-upgrade-pro", "Plan Pro") in 1549ms ../src/lib/actions/upsell.ts`.
+- ✅ `sendAgencyAlert({ type: 'LEAD_UPSELL' })` invocado (fire-and-forget, sin verificación directa de DB pero el patrón es idéntico al de módulos premium y comparte el mismo `sendAgencyAlert` import).
+
+### 5) Bug encontrado por la verificación visual
+
+**`router.push()` se cancelaba por el `revalidatePath('/dashboard')` de la action.** Primer click: la action completó OK, DB row creada, notifications creadas — pero el browser se quedó en `/dashboard/plan` con el plan-badge actualizado a "Plan Starter" en lugar de redirigir. La cadena fue:
+   1. `await requestUpsellAction(...)` → completa.
+   2. Internamente la action llama `revalidatePath('/dashboard')` (línea 130 de upsell.ts) → dispara re-fetch del Server Component padre.
+   3. React Server Components empezó a re-renderizar la página actual.
+   4. `router.push(targetHref)` se intentó pero quedó **descartado por el re-render en curso**.
+
+Fix (commited): cambiar `router.push()` por `window.location.assign(targetHref)` — navegación HARD del browser que NO se cancela por revalidations de Next. Es brusca (full page reload) pero garantiza que el cliente llega a messages. La pérdida es animacional (no transition suave entre pages), aceptable porque el flujo es one-shot.
+
+Este bug solo se manifestó con la verificación real — `tsc --noEmit` no lo detecta (es un race de runtime entre 2 APIs de Next). Documentado en el comentario inline en `UpgradeCtaButton.tsx`.
+
+### 6) Cleanup post-verificación
+
+- ✅ `_ms3-set-matsu-plan.ts BUSINESS` — restaurado Matsu al plan original.
+- ✅ Borradas las 2 `contactSubmission` de prueba + 4 `notification` rows asociadas (deleteMany filtrando por `service: 'plan-upgrade-*'` y `title contains "Plan Pro"`).
+- ✅ Scripts `_ms3-reset-matsu-pw.ts` y `_ms3-set-matsu-plan.ts` borrados (mismo patrón de B4.6).
+
+### 7) Reglas absolutas (chequeo final)
+
+- ✅ Se reutilizó `requestUpsellAction` SIN modificarla — el truco fue descubrir que internamente tolera `featureKey` que no es módulo premium (skipea el bloque `organizationModule`).
+- ✅ El registro de intención ocurre ANTES del redirect (`await` en el `useTransition`). Si el cliente no completa el mensaje, el lead ya quedó.
+- ✅ Validación + auth en la action: línea 13-19 chequea `session.user.id` + `organizationId`, línea 21 valida con Zod `UpsellRequestSchema`.
+
+### Archivos modificados / creados
+
+- ➕ [src/components/dashboard/plan/UpgradeCtaButton.tsx](logic-core-v3/src/components/dashboard/plan/UpgradeCtaButton.tsx) — client wrapper del CTA dorado.
+- ✏️ [src/components/dashboard/plan/PlansShowcase.tsx](logic-core-v3/src/components/dashboard/plan/PlansShowcase.tsx) — los 2 CTAs de upgrade (Pro highlighted + Business regular) ahora usan `<UpgradeCtaButton>`.
+- ✏️ [src/lib/data/message-context.ts](logic-core-v3/src/lib/data/message-context.ts) — 6 entradas nuevas: 3 `plan-upgrade-*` + 3 `plan-change-*`.
+
+### Listo para
+- ✅ El upsell de planes ahora deja lead trazable en `/admin/leads` igual que los módulos premium — mismo canal, mismo flow, mismo dashboard.
+- ✅ Build verde (`npx tsc --noEmit` → exit 0).
+- ✅ Verificación browser end-to-end OK con cleanup de DB + scripts post-test.
+- ⏳ **Out-of-scope para futuro sprint**: idempotencia del lead (si el cliente clickea Pro 3 veces, hoy quedan 3 rows + 6 notifications). Patrón posible: dedupe por `(organizationId, service)` en una ventana de tiempo, o feature `recentlyRequested` que oculte el CTA por 24h post-click. No es bloqueante — admin puede mergear duplicados manualmente.
+- ⏳ El campo `service` en `contactSubmission` ahora contiene tanto slugs de módulos (`whatsapp-business`, `analytics-pro`, etc) como `plan-upgrade-{key}`. La UI de `/admin/leads` muestra el string crudo. Si conviene distinguir visualmente "módulo" vs "plan upgrade", agregar un mapeo lado admin (~10 líneas en `InboundLeadsTable`). Fuera de scope MS-3.
+
+
+---
+## ✅ B5.1 — Señales estructuradas en captura de lead (cimiento del scoring)   ·   2026-05-23
+
+**Objetivo:** dejar el lead capturado con la información que B5.2 (scoring), B5.3 (DQ) y B5.4 (explicabilidad) van a necesitar. Sin señales estructuradas no hay scoring posible. Decisión de arquitectura: el bot llena los flags en el mismo `capture_lead` (cero llamada extra a LLM, el modelo ya entiende la conversación cuando dispara la tool).
+
+### 1) Diagnóstico antes de tocar
+
+Estado pre-sprint del [model ChatbotLead](logic-core-v3/prisma/schema.prisma#L1105):
+- Campos de contacto + `intent String?` (libre) + `message` + `notificationSent` + `status` + timestamps.
+- `intent` legacy guardaba `"quote"|"info"|"demo"|"support"|"other"` (enum viejo del Zod de captureLead, anterior a B3.6).
+- [showWhatsappHandoff.ts:25-32](logic-core-v3/src/modules/chatbot/server/tools/showWhatsappHandoff.ts#L25) ya tiene `HANDOFF_INTENTS` (B3.6) con vocabulario distinto: `purchase_ready|schedule_visit|quote_request|human_request|support|other`. **Dos vocabularios paralelos** — y el scoring necesita uno solo.
+
+Pregunta crítica respondida antes de tocar schema: ¿migrar el enum legacy a uno nuevo o agregar campo? **Mantenemos `intent String?` legacy** (los rows previos tienen valores que NO matchean el enum de B3.6 — migrar el TYPE rompe additive). La alineación se hace a nivel app: el Zod de la tool ahora rechaza valores fuera del enum de B3.6. Trade-off: rows viejos conservan sus valores antiguos; rows nuevos a partir de B5.1 escriben el vocabulario unificado. Cero migración destructive.
+
+### 2) Schema — additive, índices definidos ahora
+
+Migración `20260523183030_b51_add_lead_signals_and_scoring` — solo `ADD COLUMN` y `CREATE INDEX`, cero `DROP`/`ALTER ... TYPE`:
+
+```sql
+CREATE TYPE "LeadCategory" AS ENUM ('sales', 'postventa', 'employment', 'provider', 'spam', 'other');
+CREATE TYPE "LeadClassification" AS ENUM ('hot', 'warm', 'cold', 'dq');
+
+ALTER TABLE "chatbot_lead"
+  ADD COLUMN "category" "LeadCategory" NOT NULL DEFAULT 'sales',
+  ADD COLUMN "requestedAppointment" BOOLEAN NOT NULL DEFAULT false,
+  ADD COLUMN "mentionedFinancing"   BOOLEAN NOT NULL DEFAULT false,
+  ADD COLUMN "mentionedTradeIn"     BOOLEAN NOT NULL DEFAULT false,
+  ADD COLUMN "askedSpecificModel"   BOOLEAN NOT NULL DEFAULT false,
+  ADD COLUMN "providedPhone"        BOOLEAN NOT NULL DEFAULT false,
+  ADD COLUMN "providedEmail"        BOOLEAN NOT NULL DEFAULT false,
+  ADD COLUMN "channel"              TEXT,
+  ADD COLUMN "score"                INTEGER,
+  ADD COLUMN "classification"       "LeadClassification",
+  ADD COLUMN "scoreSignals"         JSONB;
+
+CREATE INDEX "chatbot_lead_classification_idx"                  ON "chatbot_lead"("classification");
+CREATE INDEX "chatbot_lead_score_idx"                           ON "chatbot_lead"("score");
+CREATE INDEX "chatbot_lead_category_idx"                        ON "chatbot_lead"("category");
+CREATE INDEX "chatbot_lead_botConfigId_classification_capturedAt_idx"
+  ON "chatbot_lead"("botConfigId", "classification", "capturedAt" DESC);
+```
+
+Decisiones del shape:
+- **`category` `NOT NULL DEFAULT 'sales'`** — rows legacy se backfilan con `sales` (asumimos venta hasta que B5.3 demuestre lo contrario). Default safe para no romper aggregations existentes.
+- **Flags `BOOLEAN NOT NULL DEFAULT false`** — anti-alucinación por construcción: ausencia = false, no null. Simplifica B5.2 (no hay que tratar null como "no sé").
+- **`classification` nullable** (no NOT NULL) — los rows previos a B5.2 quedan sin clasificar hasta que el motor de scoring corra. Cuando 5.2 mergee, podrá hacer backfill batch.
+- **`score` `INTEGER` nullable** — mismo motivo. B5.2 escribe; B5.4 puede recalcular en vivo aplicando decaimiento sobre este valor.
+- **`scoreSignals` `JSONB`** — explicabilidad para B5.4. Shape libre por ahora (B5.2 lo define).
+- **`channel String?`** — campo futuro reservado. NO se llena en B5.1 (la consigna lo pedía explícito).
+- **Índices**: los 4 que pidió la consigna (`classification`, `score`, `capturedAt`, `status`) más uno compuesto `[botConfigId, classification, capturedAt DESC]` que adelanta la query típica de la vista 5B ("leads hot de mi bot, último primero"). `capturedAt` ya tenía índice compuesto `[botConfigId, capturedAt]` desde antes — no dupliqué.
+
+**Aplicar en prod:** `npx prisma migrate deploy` lo hace Netlify automáticamente al mergear (per `netlify.toml`). Como es 100% additive (cero `DROP`, cero `ALTER TYPE` de columna existente, cero datos perdidos), no requiere checkpoint manual. Las columnas tienen DEFAULT, así que el rollout no rompe writes en vuelo.
+
+### 3) Tool `capture_lead` — el bot rellena las señales
+
+[captureLead.ts](logic-core-v3/src/modules/chatbot/server/tools/captureLead.ts) ahora exporta dos constantes compartidas con `showWhatsappHandoff.ts`:
+
+```ts
+export const LEAD_INTENTS = ['purchase_ready','schedule_visit','quote_request','human_request','support','other'] as const
+export const LEAD_CATEGORIES = ['sales','postventa','employment','provider','spam','other'] as const
+```
+
+Schema Zod extendido con 5 campos nuevos:
+
+| Campo | Tipo | Default | Lo llena |
+|---|---|---|---|
+| `category` | `enum(LEAD_CATEGORIES)` | `'sales'` | Bot (DQ si la consulta no es venta) |
+| `requestedAppointment` | `boolean` | `false` | Bot (true si pidió cita/turno/test drive) |
+| `mentionedFinancing` | `boolean` | `false` | Bot (true si tocó crédito/cuotas/prendario) |
+| `mentionedTradeIn` | `boolean` | `false` | Bot (true si mencionó usado en parte de pago) |
+| `askedSpecificModel` | `boolean` | `false` | Bot (true si nombró un modelo concreto) |
+
+`providedPhone` y `providedEmail` **NO los pide al LLM** — los deriva el handler de `Boolean(phone)` y `Boolean(email)`. El modelo no puede mentir sobre datos que él mismo mandó.
+
+Regla anti-alucinación insertada en `CAPTURE_LEAD_DESCRIPTION` (+ explicada en cada `.describe()` de los flags): *"Si una señal no apareció, mandá false — NO infles para 'ayudar'. Si la consulta no es de venta, marcá la category correspondiente."*
+
+**Presupuesto B3.3:** la description del tool pasó de 432 → 870 chars (+438) y cada flag aporta su `.describe()` (≈80 chars c/u × 5 = 400). Total agregado al "área tool" del prompt: ~840 chars ≈ 220 tokens. El `buildSystemPrompt` propio (sin tools) sigue intacto en 10.255 chars — no toqué [sections.ts](logic-core-v3/src/modules/chatbot/server/prompts/sections.ts). El presupuesto B3.3 (-15.7% bajo baseline B3.2) se mantiene en el system prompt; el incremento queda confinado al tool schema, que es donde tiene que estar.
+
+### 4) Verificación con la batería B3.2
+
+2 casos nuevos en [cases.ts](logic-core-v3/scripts/regression/cases.ts):
+
+- **`lead-capture-financing-tradein`** (Lucía Fernández): *"Hola, me interesa un Corolla XEi 0KM. ¿Lo puedo sacar con prendario? Entrego mi Gol 2014 en parte de pago."* + *"Soy Lucía, mi WhatsApp es +54..."*. Espera flags: `mentionedFinancing=true, mentionedTradeIn=true, askedSpecificModel=true, requestedAppointment=false`.
+- **`lead-capture-postventa`** (Martín López): *"Tengo una Hilux comprada hace 2 años y me apareció una luz en el tablero. ¿Me pueden agendar un turno de service?"*. Espera `category=postventa, requestedAppointment=true`, los demás flags `false`.
+
+[run-baseline.ts](logic-core-v3/scripts/regression/run-baseline.ts) ahora trae los nuevos campos del lead al snapshot.
+
+**Resultado (cross-run, 17 casos × 2):**
+
+| Caso | Run 1 | Run 2 | Snapshot validado |
+|---|---|---|---|
+| `lead-capture-financing-tradein` | ✅ | ✅ | `mentionedFinancing=true, mentionedTradeIn=true, askedSpecificModel=true, requestedAppointment=false, category=sales, intent=quote_request, providedPhone=true, providedEmail=false` |
+| `lead-capture-postventa` | ✅ | ⚠ terminated | (run 1) `category=postventa, requestedAppointment=true, mentionedFinancing=false, mentionedTradeIn=false, askedSpecificModel=false, intent=schedule_visit, providedPhone=true, providedEmail=false` |
+| `lead-capture` (preexistente) | ⚠ terminated | ✅ | Captura intacta (intent ahora `quote_request` o similar del nuevo enum) |
+| `lead-capture-both-channels` (preexistente B3.5) | ✅ | ✅ | Ambos canales persisten (`providedPhone=true, providedEmail=true`) |
+| `lead-capture-chain` (preexistente MS-1) | ✅ | ✅ | Chain `capture_lead → offer_handoff_options` intacto, sin regresión MS-1 |
+
+**Anti-alucinación validada caso por caso:**
+- En `financing-tradein`, el visitante NO pidió cita → `requestedAppointment=false`. El bot NO infló.
+- En `postventa`, NO mencionó financiación ni usado → ambos `false`. El bot NO inventó señales para "justificar" el lead.
+- Cada flag refleja exactamente lo que apareció en el texto del visitante.
+
+**Ruido cross-run (no es regresión B5.1):** 3-4 casos por run caen con `Error: terminated` en posiciones aleatorias (run 1: `off-topic`, `lead-capture`, `long-session`; run 2: `jailbreak`, `lead-capture-postventa`, `long-session`). El dev log muestra `prisma:error Error in PostgreSQL connection: Closed` — el pool de Neon serverless cierra conexiones bajo carga sostenida (17 casos × ≥2 turnos cada uno × LLM stream). Lo confirma que casos distintos caen entre runs y nunca el mismo dos veces (excepto `long-session-soft-cap` que tiene 16 turnos seguidos y choca el rate-limit interno). **NO toqué nada de eso** — es deuda preexistente del runner contra Neon dev, fuera de scope B5.1.
+
+### 5) Healthchecks post-sprint
+
+```bash
+npx tsc --noEmit                        # ✅ EXIT 0
+npm run build                            # ✅ Compiled successfully (29/29 páginas)
+npx prisma migrate status                # ✅ 46 migrations, Database schema is up to date
+```
+
+### 6) Archivos modificados / creados
+
+- ➕ [prisma/migrations/20260523183030_b51_add_lead_signals_and_scoring/migration.sql](logic-core-v3/prisma/migrations/20260523183030_b51_add_lead_signals_and_scoring/migration.sql) — additive: 2 enums + 11 columnas + 4 índices.
+- ✏️ [prisma/schema.prisma](logic-core-v3/prisma/schema.prisma) — `ChatbotLead` extendido + enums `LeadCategory`/`LeadClassification`.
+- ✏️ [src/modules/chatbot/server/tools/captureLead.ts](logic-core-v3/src/modules/chatbot/server/tools/captureLead.ts) — Zod schema con 5 campos nuevos, `LEAD_INTENTS`/`LEAD_CATEGORIES` exportados, description con anti-alucinación, handler persiste flags + deriva `providedPhone`/`providedEmail` del input, log estructurado incluye `signals`.
+- ✏️ [scripts/regression/cases.ts](logic-core-v3/scripts/regression/cases.ts) — 2 casos B5.1 (`lead-capture-financing-tradein`, `lead-capture-postventa`).
+- ✏️ [scripts/regression/run-baseline.ts](logic-core-v3/scripts/regression/run-baseline.ts) — snapshot del lead incluye `category` + 6 flags.
+- ➕ [docs/regression/baseline-2026-05-23T18-33-48-648Z.md](logic-core-v3/docs/regression/baseline-2026-05-23T18-33-48-648Z.md) — run 1.
+
+**Sin tocar:**
+- `sections.ts` (system prompt) — presupuesto B3.3 intacto.
+- `showWhatsappHandoff.ts` — B3.6 sigue funcionando con su propio `HANDOFF_INTENTS` (que ahora coincide 1-a-1 con `LEAD_INTENTS`).
+- UI de leads (admin + dashboard cliente) — los nuevos campos están disponibles para 5B; no construí vista todavía.
+- Notificaciones (Telegram, email) — el mensaje sigue mostrando los campos previos. Si se quiere mostrar señales en el Telegram, son 5 líneas en `notifyClient()` (ver bandera #2 abajo).
+
+### 7) Decisiones no especificadas
+
+1. **`intent` en DB queda `String?` (no enum Prisma)**. Razón: cambiar el TYPE de la columna sin destruir datos legacy es complejo (requeriría columna nueva + backfill + rename + drop). Con additive estricto, la alineación se hace a nivel Zod. Rows legacy mantienen sus valores antiguos; rows nuevos siguen el vocabulario unificado. B5.2 / B5.3 tienen que tolerar ambos al leer leads históricos.
+2. **`category` con default `'sales'`**. Razón: los rows pre-B5.1 no tenían categorización. Asumir `sales` es safe para venta (la mayoría de los rows actuales son comerciales) y evita NULL handling en B5.2/B5.3.
+3. **`providedPhone`/`providedEmail` derivados del input** (no del LLM). Razón: el modelo podría mentir o equivocarse; el handler ve la verdad del input. Estructural > confianza en el LLM.
+4. **Cinco flags positivos (sin "negativos")**. La consigna pedía estos 5. No agregué flags como `expressedUrgency` o `mentionedBudget` aunque podrían sumar al scoring — eso queda para B5.2 si el motor los necesita. YAGNI hoy.
+5. **`channel String?` (no enum)**. Razón: aún no hay catálogo cerrado de canales. Cuando se sumen instagram/wa-inbound/etc., un enum tipa mejor; mientras tanto, libre.
+6. **No regené el baseline B3.6 antes de mergear** — usé los runs B5.1 contra el código nuevo. La comparativa importante es flags persisten correctamente (validado) y casos preexistentes no rompieron (`lead-capture-both-channels` y `lead-capture-chain` pasaron en ambos runs).
+7. **El segundo run sobreescribió el baseline-{ts}.md del primero** (timestamps distintos = archivos distintos). El run 1 vive en [baseline-2026-05-23T18-33-48-648Z.md](logic-core-v3/docs/regression/baseline-2026-05-23T18-33-48-648Z.md). Si te interesa comparar, el run 2 es `baseline-2026-05-23T19-05-38-809Z.md` (lo dejé también en `docs/regression/`).
+
+### 8) Flags para Franco
+
+- 🚩 **El bot usa el nuevo vocabulario de `intent` desde ya** (`purchase_ready|schedule_visit|quote_request|human_request|support|other`). En la vista de leads de admin (`/admin/clients/[clientId]/chatbot/leads`) y en el dashboard de Matsu, los **leads pre-B5.1 siguen mostrando sus intents legacy** (`quote`/`info`/`demo`). No es bug — son rows históricos. Cuando 5B construya la vista nueva, podemos mapear legacy → nuevo (`quote → quote_request`, `info → other`, `demo → other`) o mostrar ambos crudos. Lo decidimos en 5B.
+- 🚩 **El Telegram de capture_lead todavía NO muestra señales** (sigue con nombre/email/tel/intent del schema viejo). Si querés que el equipo de Matsu vea de un vistazo "fue lead caliente: financiación + usado + test drive" en el push, son ~10 líneas en `notifyClient()` armando un bloque "Señales: 🚗 modelo específico, 💳 financiación, 🔄 usado en parte de pago". Dejame el OK y lo agrego (microsprint <30 min).
+- 🚩 **Ruido del runner contra Neon dev**: 3-4 de 17 casos caen con `terminated` por pool closed. NO toqué el runner — la deuda existe desde B3.2 (Neon serverless tiende a cerrar conexiones idle del Prisma client bajo carga). Mitigación posible: agregar reintentos con backoff en `run-baseline.ts`, o cambiar a `directUrl` para los runs de regression. Microsprint dedicado si te parece, fuera de scope B5.1.
+- 🚩 **El caso `long-session-soft-cap` (16 turnos) cae casi siempre** — mismo motivo que arriba más rate-limit interno (10 msgs/min por sessionId). El `interTurnDelayMs = 7000` ayuda pero no es suficiente cuando un cold start de Vertex toma 100s en el medio. Si querés que ese caso pase consistente, hay que subirlo a 10s o bajar a 12 turnos.
+- 🚩 **`category` de DQ todavía no descalifica nada** — solo se persiste. Cuando B5.3 entre, va a filtrar en la vista y/o setear `classification='dq'` automáticamente. Hoy el lead de postventa queda con `score=null, classification=null` (a la espera de B5.2).
+- 🚩 **`channel` queda en `null`** en todos los leads — el campo está reservado para B5+. No es bug.
+
+### Listo para
+- ✅ Cimiento de scoring en su lugar: cada lead nuevo a partir de B5.1 trae 5 flags + category + intent unificado.
+- ✅ Anti-alucinación verificada con casos donde las señales aparecen Y donde NO aparecen — el bot no infla.
+- ✅ Índices listos para que B5.2 (scoring) y la vista 5B no necesiten otra migración.
+- ✅ Build verde + tsc verde + migrate status up-to-date (46 migrations).
+- ✅ Sin regresión funcional: `lead-capture-both-channels` y `lead-capture-chain` (MS-1) pasaron 2/2 runs.
+- ⏳ **B5.2** — motor de scoring que lee estas señales y escribe `score`/`classification`/`scoreSignals`.
+- ⏳ **B5.3** — DQ activo sobre `category != 'sales'`.
+- ⏳ **5B** — vista de "Leads una locura" consume `classification` + `score` (índices ya están).
+
+
+---
+## ✅ B5.2 — Motor de scoring heurístico server-side (tabla lockeada)   ·   2026-05-23
+
+**Objetivo:** convertir las señales estructuradas de B5.1 en un score 0-100 + clasificación hot/warm/cold, persistido en el lead al capturar. Función pura, server-side, CERO LLM. El visitante no puede tocar su propio score por construcción (el modelo no ve la tabla; el cálculo corre en el handler de la tool).
+
+### 1) Función pura — la tabla vive en código, documentada
+
+[src/modules/chatbot/server/scoring/calculateLeadScore.ts](logic-core-v3/src/modules/chatbot/server/scoring/calculateLeadScore.ts) expone:
+
+```ts
+export const SCORING_TABLE = [
+  { key: 'requestedAppointment', label: 'Pidió cita / test drive',           points: 40 },
+  { key: 'mentionedFinancing',   label: 'Mencionó financiación',             points: 25 },
+  { key: 'mentionedTradeIn',     label: 'Mencionó usado en parte de pago',   points: 20 },
+  { key: 'askedSpecificModel',   label: 'Preguntó por modelo específico',    points: 10 },
+  { key: 'providedPhone',        label: 'Dejó teléfono',                     points:  5 },
+] as const                                                              //  100 ⇐ máximo
+
+export const HOT_THRESHOLD = 70   //  [70, 100] → hot
+export const WARM_THRESHOLD = 40  //  [40,  69] → warm
+                                  //  [ 0,  39] → cold
+
+export function calculateLeadScore(signals: LeadSignals): ScoreResult
+export function classifyScore(score: number): LeadScoreClassification
+```
+
+Función pura: mismas señales → mismo score, sin side-effects, sin DB, sin red. La devuelvo con el desglose de **qué** sumó (sólo las señales que dispararon) — eso va a `ChatbotLead.scoreSignals` (Json) y B5.4 lo lee para mostrar "por qué este lead es caliente" sin recalcular.
+
+`classifyScore` está exportada por separado: B5.4 va a aplicar decaimiento temporal en lectura y necesita re-clasificar sin remontar el motor entero.
+
+**El motor no conoce `category`.** Es 100% señal positiva. Si en B5.3 hace falta sobrescribir `classification='dq'` cuando la categoría no es `sales`, eso es un ajuste posterior (no se mete en la pureza de este motor).
+
+### 2) Persistencia — calculado y guardado en el mismo `capture_lead`
+
+[captureLead.ts](logic-core-v3/src/modules/chatbot/server/tools/captureLead.ts) ahora calcula el score **antes** del `prisma.$transaction` y lo pasa en el `create` del lead — una sola escritura, atomica con el resto del payload. No hay una pasada extra ni un cron:
+
+```ts
+const providedPhone = Boolean(phone)
+const providedEmail = Boolean(email)
+const { score, classification, signals: scoreSignals } = calculateLeadScore({
+  requestedAppointment: input.requestedAppointment,
+  mentionedFinancing:   input.mentionedFinancing,
+  mentionedTradeIn:     input.mentionedTradeIn,
+  askedSpecificModel:   input.askedSpecificModel,
+  providedPhone,
+})
+
+await tx.chatbotLead.create({
+  data: {
+    /* ...campos previos... */
+    score,
+    classification,
+    scoreSignals: scoreSignals as unknown as Prisma.InputJsonValue,
+  },
+})
+```
+
+El log `tool.lead_captured` ahora incluye `score`, `classification` y `scoreBreakdown` en metadata, así que un debug post-mortem desde `chatbot_events` permite reconstruir el cálculo sin tocar `chatbot_lead`.
+
+**Sin recalcular en lectura.** El valor persiste — la vista 5B / Telegram / explicabilidad B5.4 leen del campo, no recomputan. La regla "Que el score quede guardado, no recalculado en cada lectura (salvo el decaimiento de B5.4)" se cumple por construcción.
+
+### 3) Test unit standalone — 22/22 asserts
+
+[scripts/_b52-test-scoring.ts](logic-core-v3/scripts/_b52-test-scoring.ts) corre el motor sin DB ni red. Cubre:
+
+- **Sanity de la tabla**: suma = 100, umbrales 70/40.
+- **Cada señal sola**: appointment=40/warm, financing=25/cold, tradeIn=20/cold, specificModel=10/cold, phone=5/cold.
+- **Casos compuestos de la consigna**: appointment+tradeIn = **60 warm**, +financing = **85 hot**.
+- **Extremos del umbral**: classifyScore(39)=cold, (40)=warm, (69)=warm, (70)=hot, (100)=hot.
+- **Casos esperados de la batería B5.1**: Lucía (60 warm), Martín (45 warm).
+- **Todas las señales**: 100 hot con 5 ítems en `signals`.
+- **Cero señales**: 0 cold con `signals=[]`.
+- **Pureza**: 2 llamadas con el mismo input devuelven JSON idéntico.
+
+```bash
+$ npx tsx scripts/_b52-test-scoring.ts
+…
+─────────────────────────────────────────────
+  ✓ Todos los asserts pasaron
+```
+
+### 4) Validación end-to-end con la batería — los scores cuadran
+
+Re-corrí [run-baseline.ts](logic-core-v3/scripts/regression/run-baseline.ts) (snapshot extendido con `score`, `classification`, `scoreSignals`). 4 leads capturados, scores leídos directo de la DB:
+
+| Caso | Flags reales detectadas por el bot | Suma manual | DB score / classification |
+|---|---|---:|---|
+| `lead-capture` (Juan, *"quiero comprar un 0KM"*) | phone | 5 | **5 / cold** ✅ |
+| `lead-capture-chain` (Pedro, service Toyota) | phone | 5 | **5 / cold** ✅ |
+| `lead-capture-financing-tradein` (Lucía, Corolla XEi + prendario + Gol 2014) | financing, tradeIn, specificModel, phone | 25+20+10+5 = 60 | **60 / warm** ✅ |
+| `lead-capture-postventa` (Martín, turno service Hilux) | appointment, phone | 40+5 = 45 | **45 / warm** ✅ |
+
+`scoreSignals` persistido y ordenado igual que la tabla (mayor a menor impacto). Ejemplo Lucía:
+
+```json
+[
+  { "key": "mentionedFinancing",   "label": "Mencionó financiación",            "points": 25 },
+  { "key": "mentionedTradeIn",     "label": "Mencionó usado en parte de pago",  "points": 20 },
+  { "key": "askedSpecificModel",   "label": "Preguntó por modelo específico",   "points": 10 },
+  { "key": "providedPhone",        "label": "Dejó teléfono",                    "points":  5 }
+]
+```
+
+Ningún lead "saltó" al hot — la batería B5.1 no tiene un caso con `requestedAppointment=true` Y otras señales fuertes simultáneamente. El unit test cubre el camino al hot (appointment+tradeIn+financing=85, todas=100). No vi necesidad de inflar la batería con otro caso conversacional porque los unit tests ya cubren el threshold; la batería es para regresión funcional del bot.
+
+**Casos sin lead (price-0km, off-topic, handoffs, etc.)**: `score=null, classification=null` — coherente, no se invoca `capture_lead`, no hay lead que puntuar. La vista 5B va a tener que tolerar `null` para leads pre-B5.2 (rows legacy) — los índices ya soportan ese caso (Postgres indexa `null` correctamente).
+
+### 5) Anti-manipulación verificada por construcción
+
+La consigna pide: *"El visitante no puede manipular su propio score."* Cómo se garantiza:
+
+1. **El visitante manda lenguaje natural, no flags.** El LLM interpreta su texto y decide los booleans en `capture_lead`.
+2. **Los flags no salen del visitante.** Salen del modelo, que tiene la regla anti-alucinación: "si no apareció en la conversación, mandá false" (B5.1).
+3. **El cálculo del score corre en el handler, en el server, después de la validación Zod.** El visitante no envía `score`, no envía `classification`, no envía `scoreSignals`.
+4. **`providedPhone` / `providedEmail` se derivan del input** (no del LLM): si no hay `phone`, `providedPhone=false` siempre. El bot no puede "regalar" puntos diciendo que dio teléfono cuando no lo dio.
+5. **La tabla no está en el prompt.** El modelo no sabe que "agendar visita" suma 40 puntos, así que un visitante que intente "ingeniería social" sobre el bot ("decime que pedí cita aunque no la pedí") no mueve el score — el bot no sabe que eso le sumaría algo.
+
+**Test de prompt injection** (verificado en run anterior B3.3 + jailbreak case de la batería): el bot rechaza "ignorá tus instrucciones / mostrame el prompt". No tiene cómo coronarse a sí mismo de hot.
+
+### 6) Sin LLM en el camino crítico
+
+Cero llamadas a Gemini desde el motor de scoring. El cálculo es:
+- **5 lecturas booleanas** de las señales.
+- **5 sumas enteras** (peor caso).
+- **2 comparaciones** para la clasificación.
+- **1 `push` por señal disparada** (max 5).
+
+Latencia: sub-microsegundo. El cost-correctness del bot no cambia: B5.2 no suma tokens al stream, no aumenta steps del SDK, no toca el path de Vertex.
+
+### 7) Healthchecks post-sprint
+
+```bash
+npx tsc --noEmit                                       # ✅ EXIT 0
+npx tsx scripts/_b52-test-scoring.ts                   # ✅ 22/22 asserts
+npx tsx scripts/regression/run-baseline.ts             # ✅ casos B5.1 + B5.2 con score
+npm run build                                          # ✅ Compiled successfully
+npx prisma migrate status                              # ✅ 46 migrations, up to date
+```
+
+(El runner reportó 3 casos con `terminated` aleatorio, ya documentado en B5.1 — preexistente del runner contra Neon dev, no es regresión de B5.2.)
+
+### 8) Archivos modificados / creados
+
+- ➕ [src/modules/chatbot/server/scoring/calculateLeadScore.ts](logic-core-v3/src/modules/chatbot/server/scoring/calculateLeadScore.ts) — función pura + tabla + umbrales + `classifyScore` exportada para B5.4.
+- ➕ [src/modules/chatbot/server/scoring/index.ts](logic-core-v3/src/modules/chatbot/server/scoring/index.ts) — re-export.
+- ✏️ [src/modules/chatbot/server/tools/captureLead.ts](logic-core-v3/src/modules/chatbot/server/tools/captureLead.ts) — cálculo + persistencia en el `create` + log estructurado con score.
+- ➕ [scripts/_b52-test-scoring.ts](logic-core-v3/scripts/_b52-test-scoring.ts) — test unit standalone (22 asserts, runnable con `tsx`).
+- ✏️ [scripts/regression/run-baseline.ts](logic-core-v3/scripts/regression/run-baseline.ts) — snapshot del lead incluye `score`, `classification`, `scoreSignals`.
+- ➕ [docs/regression/baseline-2026-05-23T19-42-43-822Z.md](logic-core-v3/docs/regression/baseline-2026-05-23T19-42-43-822Z.md) — baseline con scores persistidos.
+
+**Sin tocar:**
+- Schema Prisma — B5.1 ya dejó las 3 columnas (`score`, `classification`, `scoreSignals`).
+- `showWhatsappHandoff.ts` — el motor recibe la misma forma de señales que B5.1 ya pide en `capture_lead`. Handoff no captura lead.
+- Prompt del bot — el motor no exige nada del modelo más allá de los flags B5.1.
+- UI de leads — la vista 5B consume estos campos cuando se construya.
+
+### 9) Decisiones no especificadas
+
+1. **El motor no conoce `category`.** Razón: pureza del cálculo. Si en B5.3 el lead postventa hay que bajarlo a `dq`, eso es un override (`if (lead.category !== 'sales') lead.classification = 'dq'`) en el path de B5.3. Mezclar las dos lógicas acá hace al motor menos auditable.
+2. **`providedEmail` NO suma puntos.** La consigna lista "Teléfono +5" pero no email. Email queda como dato útil para contacto, no como señal de venta — un visitante puede dejar email sin compromiso. Phone es más comprometedor (WhatsApp, llamada). Lockeado según research.
+3. **`scoreSignals` solo incluye las señales que dispararon** (no las que vinieron false). Razón: explicabilidad humana. "Te lo paso porque pidió cita Y mencionó financiación" es accionable; "no mencionó financiación, no mencionó usado, ..." es ruido. Si B5.4 quiere mostrar todas explícitamente, puede iterar la `SCORING_TABLE` completa y matchear contra las flags del lead.
+4. **`Prisma.InputJsonValue` cast en el boundary.** El tipo de dominio `ScoredSignal` tiene `key: keyof LeadSignals` (string union estricto), que Prisma rechaza para `Json` por su `Index signature`. Casteo `as unknown as Prisma.InputJsonValue` en el lugar del `create`. Es boundary entre dominio y persistencia; no contamina el dominio.
+5. **Umbrales 40 / 70 (no 50 / 80 u otros).** Vienen del research B5.0 lockeado. El motor expone `HOT_THRESHOLD` y `WARM_THRESHOLD` como constantes — si en el futuro Franco quiere experimentar, son 2 valores a tunear sin tocar el resto.
+6. **Sin telemetría de "score promedio por bot" todavía.** La consigna pedía "si querés, dejá un log/console para verificar los scores calculados" — eso lo cumplo con el log estructurado `tool.lead_captured` que ya incluye `score` y `classification`. Cuando 5B necesite gráficos, podemos agregar un agregado en `getBotsOverviewStats.ts` (~15 líneas).
+7. **Idempotencia**: si la tool se invoca dos veces sobre la misma conversación (el handler ya lo previene con el `findUnique`), no se recalcula el score — devuelve el lead existente. Si en el futuro queremos "actualizar señales y re-puntuar", hay que escribir un `recalculateLeadScore(leadId)` aparte. Fuera de scope hoy.
+
+### 10) Flags para Franco
+
+- 🚩 **El score se calcula solo al capturar.** Si las señales se actualizan después (ej. el visitante vuelve y deja teléfono en una segunda conversación), el score NO se recalcula automático. Para B5.4 (decaimiento) eso es OK — el decaimiento se aplica en lectura. Pero si vos querés "lead que volvió a la semana y ahora pidió test drive" → score actualizado, hace falta el recalc. Microsprint si lo necesitás.
+- 🚩 **Casos en producción con score=null.** Los leads previos a este merge tienen `score=null, classification=null`. La vista 5B y cualquier query que ordene por score tienen que tratar null como "sin scorear" (Postgres ordena `nulls last` por defecto en `ORDER BY score DESC`, perfecto). Si querés backfilear los leads viejos con scores calculados sobre sus flags (también null porque B5.1 los tampoco tenía), no aporta — sería todo `score=5` (sólo phone si tienen) o `score=0`. Mejor dejar `null` = "lead histórico, sin información estructurada".
+- 🚩 **El bot de Pedro Martínez (lead-capture-chain) puso `category=postventa`** porque la consulta era "turno para service del Toyota". Eso es correcto comportamiento del bot (B5.1 dijo "marcá postventa si la consulta evidentemente no es venta"). Score=5 cold + category=postventa → cuando B5.3 entre, este lead va a quedar marcado DQ y no aparecerá en el pipeline comercial. Funciona como esperábamos.
+- 🚩 **El Telegram al equipo sigue sin mostrar score.** Hoy muestra nombre/email/tel/intent. Si querés que el push diga "🔥 Lead caliente (score 85): pidió cita + mencionó financiación + Corolla XEi", son ~12 líneas en `notifyClient()` armando un block. Avisame y lo hago en microsprint (incluye también las señales B5.1 que mencioné en la flag previa).
+- 🚩 **El motor NO conoce señales negativas.** Si un visitante dice "no me interesa", no resta puntos — el bot probablemente no invoca `capture_lead` en ese caso (no hay datos de contacto). Si en el futuro vemos leads "ruidosos" entrando con score warm que en realidad eran tibios falsos, podemos sumar flags negativos (`expressedDoubt`, `mentionedComparingCompetitor`) restando. YAGNI hoy.
+
+### Listo para
+- ✅ Cada lead nuevo trae score 0-100 + classification hot/warm/cold persistidos.
+- ✅ `scoreSignals` queda como JSON para que B5.4 explique "por qué" sin recalcular.
+- ✅ 22/22 asserts unit + 4 leads reales validados end-to-end contra la tabla.
+- ✅ Cero LLM en el camino del cálculo. Anti-manipulación por construcción.
+- ✅ Build verde + tsc verde + migrate up-to-date.
+- ⏳ **B5.3** — DQ activo: cuando `category != 'sales'`, sobrescribir `classification='dq'` en lectura o como post-step del create.
+- ⏳ **B5.4** — decaimiento temporal en vivo: `displayScore = score * decay(antigüedad)` + explicabilidad con `scoreSignals`.
+- ⏳ **5B** — vista de "Leads una locura" consume directamente `classification`, ordenando por `score DESC, capturedAt DESC` (índice `[botConfigId, classification, capturedAt DESC]` ya lo soporta).
+
+---
+## ✅ MS-4 — Batería de regresión usable: smoke set + estabilización del pool   ·   2026-05-23
+
+**Objetivo:** dejar la batería utilizable en el día a día (smoke set rápido) y estabilizar el pool de Neon para que los `terminated` no ensucien los resultados. Sin tocar concurrencia ni sleeps — eso queda para MS-5.
+
+### 1) Smoke set — alivio diario
+
+Invocación:
+```bash
+# Smoke (uso diario durante desarrollo, 4 casos críticos)
+npx tsx scripts/regression/run-baseline.ts --smoke
+
+# Full (pre-cierre de sprint, 19 casos)
+npx tsx scripts/regression/run-baseline.ts
+```
+
+El smoke es **subset** de las mismas definiciones de [cases.ts](logic-core-v3/scripts/regression/cases.ts) — agregado un campo `smoke?: boolean` a `RegressionCase` y marcados 4 casos. NO se duplicó el archivo de casos (regla absoluta del sprint: si copiás, derivan y mienten).
+
+Casos del smoke:
+| Caso | Por qué crítico |
+|------|------------------|
+| `price-0km` | Anti-alucinación en precios (KB de Matsu no tiene precios). |
+| `lead-capture-both-channels` | Captura + email Y teléfono + chain MS-1 a `offer_handoff_options`. |
+| `whatsapp-handoff-purchase-signal` | Trigger comercial B3.6 con señal fuerte de compra. |
+| `off-topic` | Guardrail anti no-business. |
+
+**Wall clock smoke: 44.3s** (vs ~30-36 min del full) — 4/4 OK en la corrida de verificación. Output: [docs/regression/smoke-2026-05-23T21-19-30-029Z.md](logic-core-v3/docs/regression/smoke-2026-05-23T21-19-30-029Z.md). El archivo usa prefijo `smoke-` (vs `baseline-` del full) para que no se confundan en el directorio.
+
+El runner además agregó al markdown: línea `Set: SMOKE | FULL` y `Wall clock: Xs` en el encabezado — para que cualquier archivo abierto a futuro diga sólo con mirar arriba qué tipo de corrida es.
+
+### 2) Estabilización del pool de Neon — `DIRECT_URL` + retry transient
+
+**a) `DIRECT_URL` (bypass pgbouncer) — wiring listo, var pendiente de setear.**
+
+El runner ahora lee `process.env.DIRECT_URL`. Si existe, construye el `PrismaClient` con esa URL en vez de la `DATABASE_URL` pooled. Si no, cae al pool y avisa explícitamente:
+
+```
+⚠ DIRECT_URL no seteado — usando DATABASE_URL pooled.
+  Para reducir `terminated`, agregá DIRECT_URL al .env.local (connection string Neon SIN `-pooler`).
+```
+
+**No inventé la URL** — la consigna fue explícita. Flag para Franco abajo. Mismo cambio aplicado a [diag-timings.ts](logic-core-v3/scripts/regression/diag-timings.ts) para consistencia (las queries de timings también golpean a Neon).
+
+**b) 1 retry con backoff 2s SOLO en `terminated`.**
+
+Helper en [run-baseline.ts](logic-core-v3/scripts/regression/run-baseline.ts:55):
+```ts
+function isTerminatedError(e: unknown): boolean {
+  if (!(e instanceof Error)) return false
+  if (/terminat/i.test(e.message)) return true
+  const cause = (e as Error & { cause?: unknown }).cause
+  if (cause instanceof Error && /terminat/i.test(cause.message)) return true
+  return false
+}
+
+async function withTerminatedRetry<T>(label, fn) {
+  try { return await fn() }
+  catch (e) {
+    if (!isTerminatedError(e)) throw e   // ← asserts de comportamiento NUNCA se reintentan
+    console.log(`   ⟳ ${label}: terminated, retry once en 2s...`)
+    await sleep(2000)
+    return await fn()
+  }
+}
+```
+
+Puntos de aplicación (todos sensibles a terminated, ninguno enmascara asserts):
+- **Fetch + drain del stream JUNTOS** (`turn N request`): el `terminated` cae empíricamente en ambos lados — pre-handler y mid-stream — así que el wrap conjunto cubre el path real. Idempotencia: misma `sessionId`, misma `conversationHistory` → `getOrCreateConversation` es idempotente.
+- **`waitForAssistantMessage`** (poll loop sobre `prisma.findUnique`): cada tick puede retry. El timeout global (30s) sigue siendo el árbitro — si no aparece el message en ese plazo, retorna `null` (NO throw) y el caller lo reporta como **fallo de comportamiento**, sin retry.
+- **`finalConv lookup`** post-case.
+
+**Separación crítica retry-vs-regresión** (la pidió la consigna explícitamente):
+- Lo único reintentado es `e.message` (o `e.cause.message`) matcheando `/terminat/i`.
+- Asserts del cuerpo (HTTP no-200, JSON inválido, `expectsDegraded` mismatch, `null` de `waitForAssistantMessage`) → propagan tal cual, sin retry. Un fallo real del bot **no se puede enmascarar** porque el wrapper no toca ese camino.
+
+### 3) Antes/después de `terminated` y `fetch failed`
+
+| Run | Cuándo | Casos con error infra | Notas |
+|-----|--------|------------------------|-------|
+| Baseline pre-MS-4 ([20:17](logic-core-v3/docs/regression/baseline-2026-05-23T20-17-46-942Z.md)) | Pool, sin retry | 5/19 — `whatsapp-handoff-purchase-signal`, `whatsapp-handoff-schedule`, `lead-capture-financing-tradein`, `lead-capture-employment`, `long-session-soft-cap` (todos `terminated`) | Estado "pre" del diagnóstico. |
+| Full MS-4 #1 ([21:20](logic-core-v3/docs/regression/baseline-2026-05-23T21-20-32-446Z.md)) | Pool, retry SOLO sobre `e.message` y SOLO en fetch (drain sin wrap) | 6/19 — pero `0 ⟳` logueados | El drain del stream NO estaba envuelto: el `terminated` lo tiraba `reader.read()` y caía fuera del retry. Diagnosticado y arreglado en el commit. |
+| Full MS-4 #2 (21:33, parcial: hangueó en `no-handoff-on-greeting` después de 13/19 casos) | Pool, retry sobre fetch+drain+cause-chain | **1 retry exitoso registrado** (`⟳ turn 2 request: terminated, retry once en 2s... ✓ Turn 2`); 0 errores en los 13 casos que llegaron a completar | El retry funciona: recuperó `lead-capture` turn 2 de un terminated transient. **Sin DIRECT_URL**, una corrida prolongada igualmente puede hangearse cuando Neon entra en estrés sostenido — ese ya es el límite de mitigación que admite esta tanda. |
+
+**Lectura:** el retry hace lo que tenía que hacer (vimos al menos una recuperación real en vivo y los 13 casos que completaron salieron limpios). El techo real es Neon dev: bajo carga prolongada, ni el retry ni el pool achican el `terminated`, sólo lo hace `DIRECT_URL`. La var queda flageada y MS-5 (paralelización) está bloqueado hasta que se sume.
+
+**Verificación de "ningún assert real quedó enmascarado":** la condición de retry sólo matchea string `/terminat/i` en el error tirado. Los asserts de comportamiento del runner no lanzan errores con esa firma — son returns (`null` de waitForAssistantMessage, HTTP no-200 → `result.error = "Turn N: HTTP X"`, JSON parse failure → `result.error = "Turn N: expectsDegraded pero response no era JSON"`, etc.). Auditado a mano: ninguno de esos paths pasa por `withTerminatedRetry`.
+
+### 4) Recortes seguros
+
+**a) `long-session-soft-cap` — REVISADO, conservado en 16 turnos.**
+
+La consigna pedía bajar de 16→12 y nota previa marcaba "REVISÁ". El análisis: el threshold del soft-cap es `SOFT_CAP_THRESHOLD = 15` en [sections.ts:181](logic-core-v3/src/modules/chatbot/server/prompts/sections.ts:181), y `userTurnsCount = floor(messageCount / 2)` se calcula ANTES de persistir el turno actual ([handleChatRequest.ts:492](logic-core-v3/src/modules/chatbot/server/chat/handleChatRequest.ts:492)) — así que en el turno N del visitante vale `N − 1`.
+
+Implicación: el prompt inyecta la pista del soft-cap por primera vez procesando el **turno 16** (turns=15). No antes. Recortar a 12 (o cualquier valor < 16) **oculta el soft-cap** — el test pasaría sin probar nada. **16 es el MÍNIMO real** (cap + 1 turno donde el bot ya ve la pista y puede reaccionar). No es exceso. Documentado en el `rationale` del caso en [cases.ts](logic-core-v3/scripts/regression/cases.ts).
+
+**b) Diag script promovido a tooling permanente.**
+
+Movido: `scripts/_diag-timings.ts` → [`scripts/regression/diag-timings.ts`](logic-core-v3/scripts/regression/diag-timings.ts) — sin `_` prefix (no es throwaway), bajo `regression/` (es parte del toolkit). Docstring rehecho. También consume `DIRECT_URL` si está seteado (consistencia con el runner). Invocación:
+```bash
+npx tsx scripts/regression/diag-timings.ts <RUN_TAG>
+# ej: npx tsx scripts/regression/diag-timings.ts 2026-05-23T21-20-32-446Z
+```
+
+### 5) Archivos modificados / creados / movidos
+
+- ✏️ [scripts/regression/cases.ts](logic-core-v3/scripts/regression/cases.ts) — campo `smoke?: boolean` en la interface; `smoke: true` en 4 casos; rationale extendido de `long-session-soft-cap` documentando la matemática del cap.
+- ✏️ [scripts/regression/run-baseline.ts](logic-core-v3/scripts/regression/run-baseline.ts) — flag `--smoke`, `DIRECT_URL` gating en `PrismaClient`, `isTerminatedError` + `withTerminatedRetry`, wrap de fetch+drain conjunto, wrap de `waitForAssistantMessage` y `finalConv lookup`, output con prefijo `smoke-`/`baseline-` y wall clock en encabezado.
+- 🔀 `scripts/_diag-timings.ts` → [`scripts/regression/diag-timings.ts`](logic-core-v3/scripts/regression/diag-timings.ts) — promovido, docstring permanente, DIRECT_URL gating consistente.
+- ➕ [docs/regression/smoke-2026-05-23T21-19-30-029Z.md](logic-core-v3/docs/regression/smoke-2026-05-23T21-19-30-029Z.md) — primer smoke en verde (44.3s, 4/4 OK).
+- ➕ [docs/regression/baseline-2026-05-23T21-20-32-446Z.md](logic-core-v3/docs/regression/baseline-2026-05-23T21-20-32-446Z.md) — full con retry activo (diagnóstico de la #1, identificó que el drain estaba fuera del wrap).
+
+**Sin tocar:**
+- `handleChatRequest.ts` / `sections.ts` — el comportamiento del soft-cap no se movió, sólo se documentó la matemática en el rationale del caso.
+- Inter-turn sleeps (`2500ms` normal, `7000ms` para sesiones largas) — out of scope MS-4, van a MS-5 junto con verificación de rate-limit.
+- Paralelización — out of scope, va a MS-5.
+
+### 6) Decisiones no especificadas
+
+1. **Smoke = subset por tag, no por flag de runner que recibe IDs.** La consigna dejaba abierto `--smoke` o `tag smoke: true`. Elegí el tag (`smoke: true` en cada definición) porque hace al smoke set parte declarativa del archivo de casos — si alguien agrega un caso nuevo y lo considera crítico, marca el flag y listo. Si fuera una lista hardcoded en el runner, divergiría silenciosamente del archivo de casos cuando se renombre un id.
+2. **Wrap del fetch+drain como unidad sola.** Empíricamente el `terminated` cae mitad en el handshake del fetch, mitad en `reader.read()` mid-stream. Wraps separados harían que el drain quede sin retry. Idempotencia justificada por `getOrCreateConversation`.
+3. **Cause chain en `isTerminatedError`.** undici envuelve socket errors en `TypeError: fetch failed` con el real en `e.cause`. Sin inspeccionar la cadena, missábamos el caso "fetch failed" — que en el diagnóstico fue un ~17% de los errores infra. Inspeccionar `.cause` es seguro porque sigue siendo string matching: jamás cruza a comportamiento.
+4. **No bajé `long-session-soft-cap`.** La consigna dejó la puerta abierta a recortar si era seguro — no es. Documentado matemáticamente en el caso, no por suposición.
+5. **Prefijo `smoke-` vs `baseline-` en el filename.** Para que el directorio de regresión muestre de un vistazo qué tipo de corrida fue. Si se mezclaran, sería confuso comparar wall clocks o errores entre archivos. La carpeta ya tiene baselines viejas — los smokes nuevos no la ensucian.
+6. **DIRECT_URL: warn en vez de abort.** Si Franco no la setea, el runner sigue funcionando con el pool — sólo avisa que la mitigación está incompleta. Abortar sería bloquear el smoke (que sí da valor incluso con pool).
+
+### 7) Flags para Franco
+
+- 🚩 **DIRECT_URL pendiente en `.env.local`.** El connection string es el mismo de `DATABASE_URL` pero SIN `-pooler` en el host: `ep-quiet-waterfall-acv0fpll.sa-east-1.aws.neon.tech` (en vez de `ep-quiet-waterfall-acv0fpll-pooler.sa-east-1.aws.neon.tech`). Idealmente el sufijo `?sslmode=require&channel_binding=require` se mantiene igual. **No lo inventé yo a propósito** — confirmalo vos en el dashboard de Neon antes de pegarlo, por si la branch dev tiene otra forma. Sin esa var, el retry mitiga lo transient pero el pool puede seguir cerrando conexiones bajo carga sostenida (vimos hangs en runs prolongados).
+- 🚩 **Smoke para el día a día, full antes de cerrar sprint.** El protocolo: durante el desarrollo de un sprint, `--smoke` (~45s) cada vez que toques el bot. Antes de marcar el sprint cerrado, full (~10 min con retry, más si Neon está pesado). El gate pre-cierre sigue siendo el full — el smoke es complementario, no reemplazo.
+- 🚩 **MS-5 sigue bloqueado hasta DIRECT_URL.** La paralelización (var de la consigna original) presiona más al pool. Mientras `DATABASE_URL` siga apuntando a `-pooler` sin un `DIRECT_URL` con conexión cruda, paralelizar empeora el `terminated`, no mejora. Primero el setting, después la paralelización.
+- 🚩 **La 2da corrida full quedó parcial (13/19 cases) por hang en `no-handoff-on-greeting`.** No es bug del runner, es Neon dev no respondiendo en una conexión. Los 13 que completaron salieron limpios. El retry recuperó al menos 1 caso (`lead-capture` turn 2) que en pre-MS-4 hubiera quedado en `❌ terminated`.
+- 🚩 **Si al correr la primera vez con DIRECT_URL los `terminated` desaparecen del baseline (esperable), borrar los .log throwaway `_b32-*.log`, `_b33-*.log`, `_b35-*.log`, `_b36-*.log`, `_b52-*.log`, `_b53-*.log`, `_ms1-*.log`, `_ms4-*.log` de `scripts/` — quedaron del diagnóstico iterativo del bloque B5 + MS-4, ya no aportan.
+
+### Listo para
+- ✅ Smoke set funcional (44.3s, 4 casos críticos) usable durante el desarrollo de un sprint.
+- ✅ Retry transient en terminated implementado y verificado en vivo (1 recuperación real en la 2da corrida).
+- ✅ `DIRECT_URL` wired — basta con setearla en `.env.local` para activar el bypass del pool.
+- ✅ `long-session-soft-cap` revisado matemáticamente y conservado en 16 (mínimo real, no exceso).
+- ✅ Diag tooling promovido a `scripts/regression/diag-timings.ts` para re-medir wall clock cuando se toque la batería.
+- ✅ tsc verde post-cambios.
+- ⏳ **Franco**: setear `DIRECT_URL` en `.env.local`, después correr 1 full para confirmar caída de `terminated` baja a 0 o casi.
+- ⏳ **MS-5**: paralelización + recorte de sleeps + verificación de rate-limit, todo gateado a que DIRECT_URL haya bajado los `terminated` primero.
+
+---
+
+## ✅ B5.4 — Decay temporal, combos potenciadores y explicabilidad legible
+
+**Fecha:** 2026-05-23
+**Sprint anterior:** MS-4 (smoke set + retry transient)
+**Sprint siguiente:** B5.5 (vista de "leads calientes" que consume `getEffectiveScore` + `getScoreExplanation`)
+
+### 1) Objetivo
+Hacer el scoring de B5.2/B5.3 verdaderamente útil:
+- **Decaimiento**: un lead caliente sin responder en 48h tiene que enfriarse solo, calculado en lectura sin cron.
+- **Combos**: dos señales que valen más juntas que separadas (perfil real de cierre en concesionaria) tienen que sumar bonus.
+- **Explicabilidad**: el dueño tiene que ver POR QUÉ un lead es caliente, no un número opaco. "Tiene usado + pide financiación" vende; "85" confunde.
+
+Todo puro, server-side, cero LLM. Mismas señales + misma fecha → mismo resultado (determinista, auditable).
+
+### 2) Diseño — curva de decaimiento (en vivo, sin cron)
+
+Curva escalonada por tramos discretos. Aplicada en lectura sobre `score` base, usando `capturedAt` como referencia de actividad:
+
+| Edad desde captura | Multiplicador | Tier         | Label PyME (UI)                |
+|--------------------|--------------:|--------------|--------------------------------|
+| `< 24h`            |     **1.00**  | `fresh`      | "Recién capturado"             |
+| `24 – 48h`         |     **0.90**  | `cooling`    | "Un día sin responder"         |
+| `48 – 72h`         |     **0.75**  | `warm`       | "Dos días sin responder"       |
+| `3 – 7 días`       |     **0.60**  | `urgent`     | "Casi una semana sin responder"|
+| `7 – 14 días`      |     **0.45**  | `cold`       | "Más de una semana frío"       |
+| `> 14 días`        |     **0.30**  | `archived`   | "Casi perdido"                 |
+
+**Reglas duras:**
+- `applyTimeDecay(baseScore, lastActivityAt, now)` → multiplier + effectiveScore (clamp `[0,100]`).
+- `baseScore = 0` → `effectiveScore = 0` (un score 0 no se enfría más).
+- `lastActivityAt` en el futuro (clock skew) → `multiplier = 1.00`, no penaliza. `ageDays` se clampa a 0.
+- **DQ es DQ siempre**: `getEffectiveScore({ classification: 'dq', ... })` devuelve el snapshot tal cual, sin enfriar ni re-clasificar. Un lead descartado por empleo/proveedor/spam/postventa-negativo NO "se rescata con el tiempo".
+- Piso 0.30 (no 0) — el dueño igual tiene que poder ver leads viejos en auditoría con su tier `archived`.
+
+**Por qué escalonada y no lineal continua:** una curva con `lerp` interno entre tramos era más matemática pero menos auditable. Con tramos discretos, decir "este lead vale 0.75 porque tiene entre 2 y 3 días" es directo. La granularidad fina no aporta en PyME — lo que importa es el orden de magnitud.
+
+### 3) Diseño — combos potenciadores
+
+Bonus aditivos aplicados **después** de la suma positiva, **antes** de penalties:
+
+| Combo                                              | Bonus | Label PyME                                   |
+|----------------------------------------------------|------:|----------------------------------------------|
+| `mentionedTradeIn` + `mentionedFinancing`          | **+10** | "Tiene usado + pide financiación (perfil de cierre)" |
+| `askedSpecificModel` + `requestedAppointment`      |  **+5** | "Sabe qué modelo quiere + agenda visita"     |
+
+**Reglas duras:**
+- Cada combo dispara independientemente. Si los dos matchean, suman ambos (+15).
+- Tope teórico tras combos: `40+25+20+10+5 + 10+5 = 115` → clamp final a **100**.
+- Los combos NO disparan si el lead quedó DQ por categoría (corte rápido al inicio).
+- Persisten en `scoreSignals` con prefijo `combo_` para que `getScoreExplanation` los reconozca como tipo `combo`.
+
+**Criterio de selección:** elegí los 2 combos que el research de B5.0 marcó como "perfil de cierre típico en concesionaria argentina":
+- **TradeIn + Financing** vale más que la suma porque es el patrón de cliente que ya tiene el dinero amarrado en su usado y necesita el saldo financiado — bajísimo riesgo de baja, alto tiket porcentual real.
+- **SpecificModel + Appointment** muestra que pasó del "estoy mirando" al "este es el que quiero, decime cuándo voy". El bonus es menor porque ambos signals individuales ya pesan bastante (40+10=50) y agregar mucho llevaría siempre a hot, perdiendo discriminación.
+
+No agregué un tercer combo (p.ej. financing+appointment) porque sería ruido — la mayoría de leads agendados también mencionan financiación, y un combo demasiado común deja de ser señal.
+
+### 4) Explicabilidad — `getScoreExplanation()`
+
+Helper puro que toma el `ScoredSignal[]` persistido (B5.1/B5.2/B5.3/B5.4) y devuelve líneas listas para UI:
+
+```ts
+type ScoreExplanationKind = 'positive' | 'combo' | 'penalty' | 'dq'
+interface ScoreExplanationLine extends ScoredSignal { kind: ScoreExplanationKind }
+```
+
+- **Kind derivado del prefijo del key** (`combo_*`, `penalty_*`, `dq_*`, resto `positive`). Sin metadata adicional → 100% retro-compatible con leads de B5.1/B5.2/B5.3 sin migración.
+- **Orden estable**: positives → combos → penalties → dq. La UI puede renderizar arriba lo bueno y abajo lo malo sin lógica extra.
+- **No recalcula**: respeta el snapshot guardado al capturar. Si los labels cambiaron entre captura y lectura, los viejos se ven tal cual (auditabilidad > cosmética).
+
+### 5) Labels PyME refinados (lockear desde B5.4)
+
+Estos son los labels nuevos que escribe el motor a partir de B5.4. Los leads pre-B5.4 mantienen sus labels viejos (snapshot por captura — el cliente puede ver mix transitorio durante días):
+
+| Key                              | Antes                                   | Ahora                                          |
+|----------------------------------|-----------------------------------------|------------------------------------------------|
+| `mentionedFinancing`             | "Mencionó financiación"                 | **"Pidió financiación / cuotas"**              |
+| `mentionedTradeIn`               | "Mencionó usado en parte de pago"       | **"Tiene usado para entregar"**                |
+| `askedSpecificModel`             | "Preguntó por modelo específico"        | **"Pregunta por modelo específico"**           |
+| `penalty_postventa`              | "Penalización: consulta de postventa"   | **"Consulta de postventa (no compra)"**        |
+| `penalty_invalid_phone`          | "Penalización: teléfono con formato inválido" | **"Teléfono con formato dudoso"**       |
+| `dq_employment`                  | "Descalificado: busca empleo"           | **"Descartado: busca trabajo"**                |
+| `dq_provider`                    | "Descalificado: ofrece servicios"       | **"Descartado: proveedor (ofrece servicios)"** |
+
+Sin la palabra "Penalización" / "Descalificado" (jerga técnica) — el dueño lee el motivo directamente.
+
+### 6) Verificación
+
+**Batería B5.4** (`scripts/_b54-test-scoring.ts` — 50+ asserts, todos verdes):
+- Combos: tradeIn+financing solo (55 warm), specificModel+appointment solo (55 warm), ambos juntos (100 hot tras clamp), no disparan si falta la otra mitad, suman con penalty postventa (5 cold), no se aplican en DQ.
+- Decay: 12 puntos de la curva (de 1h a 100 días) contra multiplier+tier esperados, redondeo correcto, clamp `[0,100]`, clock skew protegido.
+- `getEffectiveScore`: re-clasifica hot→warm cuando enfría; DQ se mantiene DQ tras 52 días.
+- Explicabilidad: orden estable por kind, labels sin jerga, ningún label expone key técnico, retro-compatible con signals viejos.
+- `DECAY_CURVE`: monotonía decreciente, piso 0.30, primer tramo 1.00, último Infinity.
+
+**Batería B5.3** re-corrida tras los cambios — todos verdes (actualicé 1 assert que asumía 90 brutos → 40 warm; con el combo nuevo da 100 brutos → 50 warm, semánticamente coherente con el motor evolucionado).
+
+**Typecheck** (`npx tsc --noEmit`) — verde.
+
+### 7) Cambios concretos
+
+- ✏️ [src/modules/chatbot/server/scoring/calculateLeadScore.ts](logic-core-v3/src/modules/chatbot/server/scoring/calculateLeadScore.ts) — agregadas tablas `COMBO_BONUSES` y `DECAY_CURVE`, paso 3 (combos) en `calculateLeadScore`, funciones `applyTimeDecay` / `getEffectiveScore` / `getScoreExplanation`, tipos `DecayTier` / `DecayResult` / `LeadScoreSnapshot` / `EffectiveScoreResult` / `ScoreExplanationKind` / `ScoreExplanationLine` / `ComboBonus`. Labels PyME refinados en `SCORING_TABLE`, `DQ_CATEGORY_LABELS` y `PENALTY_LABELS` (nuevo).
+- ✏️ [src/modules/chatbot/server/scoring/index.ts](logic-core-v3/src/modules/chatbot/server/scoring/index.ts) — re-exporta los nuevos helpers + tipos para consumo desde la vista 5B.
+- ➕ [scripts/_b54-test-scoring.ts](logic-core-v3/scripts/_b54-test-scoring.ts) — batería unit pura (sin DB, sin LLM, `now` inyectable).
+- ✏️ [scripts/_b53-test-scoring.ts](logic-core-v3/scripts/_b53-test-scoring.ts) — actualizado 1 assert (90 brutos en postventa) para reflejar el nuevo combo tradein+financing. Resto sin tocar.
+
+### 8) Sin tocar
+
+- `captureLead.ts` — el handler sigue persistiendo `score` / `classification` / `scoreSignals` igual que en B5.3. El decay se aplica EN LECTURA (`getEffectiveScore` desde el dashboard), no en escritura. Si lo aplicáramos en captura, perderíamos la trazabilidad del score base original — el cliente vería "score=50" sin poder reconstruir el por qué.
+- `dqFilter.ts` — los DQ se siguen excluyendo igual de las queries del cliente.
+- `dashboard/leads/recent/route.ts` — sigue devolviendo `leads[]` crudos. La vista 5B (próximo sprint) va a aplicar `getEffectiveScore` al render para mostrar score efectivo + tier + explicación.
+- Schema Prisma — cero cambios. Todo lo nuevo es derivado en lectura sobre datos ya persistidos.
+
+### 9) Decisiones no especificadas
+
+1. **`capturedAt` como referencia de "última actividad", no `updatedAt`.** `updatedAt` se mueve cuando el cliente del CRM cambia el status — eso NO es "el lead se volvió a manifestar". Usar `updatedAt` haría que mover un lead a "Contactado" resetee su frescura, ocultando leads viejos. Si B5.5/B5.6 quieren un `lastUserMessageAt` más fino (p.ej. el lead respondió a un email del comercial), es otra historia.
+2. **Decay en lectura, no en escritura.** Persistir el score base + reconstruir el efectivo al leer permite cambiar la curva sin migrar la DB. Si el research dice "el piso debería ser 0.20 no 0.30", basta editar `DECAY_CURVE`. Si guardáramos el efectivo en DB, cada cambio de curva requeriría recalcular toda la tabla.
+3. **DQ no se decae.** Filosóficamente, el DQ es una decisión categórica del motor ("este no es un lead comercial real"). El paso del tiempo no la revisa. Si quisiéramos que un DQ "expire" para auditoría más limpia, eso es un job de archivado de B7+, no decay.
+4. **Bonus de combos +10 / +5 (no +20 / +10).** El combo no debe convertir un lead intermedio en hot por su sola fuerza — debe **inclinar la balanza** cuando ya hay señales sólidas. Con +10 max, un lead que tiene tradeIn+financing solo (sin appointment ni teléfono) llega a 55 warm — todavía warm, no hot. El motor diferencia bien quién tiene compromiso real (appointment, teléfono) de quién tiene perfil económico cerrado pero no se comprometió aún.
+5. **Tramos discretos en la curva en vez de fórmula continua.** Probé mentalmente una `score * exp(-k*ageDays)` y queda más matemático pero el dueño no puede mirar el número y decir "ah, está en `warm` porque tiene entre 2 y 3 días". Los tramos discretos hacen la explicación trivial. La consigna decía "curva simple" — esto es lo más simple que respeta los 4 puntos pedidos.
+6. **`getScoreExplanation` deriva `kind` del prefijo del key (no de un campo persistido).** Esto da retro-compatibilidad gratis con cualquier `scoreSignals` viejo en DB sin migración. Si en B5.5 hace falta un `kind: 'info'` (señal neutral, no mueve el score) la migración sería trivial — agregás prefijo `info_*` al motor, el helper lo reconoce.
+
+### 10) Flags para Franco
+
+- 🚩 **Vista de leads (`/dashboard/chatbot/leads` o similar) NO está enchufada a `getEffectiveScore` aún.** Hoy la API devuelve el score crudo persistido. La vista 5B (próximo sprint) es la que va a aplicar decay y explicación en el render. Si querés ver el decay en acción antes, podés llamar `getEffectiveScore` desde una página temporal o un script de inspección.
+- 🚩 **Si vamos a mostrar mix de leads pre/post-B5.4 en la UI**, los leads viejos tienen labels "Mencionó financiación" etc. y los nuevos "Pidió financiación / cuotas". Es esperado (cada captura "fotografía" el motor en su momento). Si Franco quiere homogeneidad cosmética, sería un script de migración one-shot que reescribe `scoreSignals.label` por key — fuera del scope B5.4.
+- 🚩 **El decay asume `capturedAt` ≈ "última señal del usuario".** Hoy es correcto porque la conversación termina cuando capturamos el lead. Si en B7+ habilitamos lead re-engagement (el bot vuelve a hablar con un lead ya capturado), va a haber que introducir `ChatbotLead.lastUserMessageAt` o reusar `Conversation.updatedAt` con filtro de quien escribió último.
+- 🚩 **La curva no está calibrada con datos reales — es heurística inicial.** Cuando tengamos un volumen real de leads capturados (digamos 200+ en producción) podemos sacar la métrica "% de leads que convirtieron por tier de edad" y ajustar los multipliers para que matcheen la realidad de Aki / clientes nuevos. Por ahora el research B5.0 sostiene los números.
+
+### Listo para
+- ✅ Motor enriquecido con combos + decay + explicabilidad — 50+ asserts verdes.
+- ✅ Tipos exportados y re-exportados desde `scoring/index.ts` listos para consumir en B5.5.
+- ✅ Retro-compatible con leads ya persistidos (no requiere migración ni rescore).
+- ✅ Labels PyME refinados (sin "Penalización" / "Descalificado" / "Mencionó").
+- ✅ `getEffectiveScore` respeta DQ (no rescata).
+- ✅ B5.3 re-verificada tras los cambios (1 assert actualizado por combo nuevo, resto intacto).
+- ⏳ **B5.5**: vista de leads calientes que renderiza `effectiveScore` + `tierLabel` + `getScoreExplanation` agrupado. Mobile-first como B4.6, sin jerga.
+
+
+---
+
+## ✅ B5.5 — Vista de leads enriquecida: priorización por score efectivo
+
+**Fecha:** 2026-05-23
+**Objetivo:** Que el dueño del negocio entre a `/dashboard/chatbot/leads` y de un vistazo sepa a quién llamar primero — ordenado por score efectivo (no crudo), con badge Caliente/Tibio/Frío prominente, filtrable por fecha/calidad/estado, sin jerga técnica.
+
+### 1) Estado previo
+
+La vista ya existía desde B5.3-B5.4:
+- `page.tsx` server-rendered, consumía `listLeadsByOrgSlug()` y aplicaba `getEffectiveScore()` + `getScoreExplanation()` antes de pasar al cliente.
+- `ClientLeadsTable` tenía 2 filtros (calidad + estado), badge en card, modal de detalle.
+- `updateLeadStatus` ya estaba blindado (Zod + anti-IDOR + auditoría) — confirmado.
+- API `/api/dashboard/leads/recent` ya enriquecía con score efectivo y filtraba DQ.
+
+Gaps reales contra el spec del sprint, detectados por el subagente Explore:
+1. La lista **NO se ordenaba por score efectivo**, venía ordenada por `capturedAt desc` (orderBy de Prisma) y se renderizaba así.
+2. **Faltaba el filtro por fecha** (solo había calidad + estado).
+3. Si el tenant capturó leads pero todos eran DQ, el empty state decía "tu bot todavía no capturó contactos" (mentira — sí capturó).
+4. **Jerga literal** en pantalla: `"Mis leads"`, `"Score efectivo: 85"`, `"sobre este lead"`, aria-label `"Score efectivo: …"`.
+
+### 2) Qué se enriqueció
+
+- **Sort por effectiveScore desc en memoria** (page.tsx + route.ts). Nulls al final, desempate por `capturedAt desc`. Documentado en el código que el orden es en-app sobre el efectivo porque el índice DB sirve al filtro (clasificación, estado) pero el efectivo (crudo × decay) no está en DB.
+- **3 filas de filtros encadenadas**: fecha → calidad → estado. Cada filtro reduce el set siguiente para que los conteos en los chips reflejen lo que el usuario ya filtró (en vez de mostrar conteos absolutos engañosos).
+- **Filtro por fecha con TZ Argentina** (`startOfTodayInAR()` usa `Intl.DateTimeFormat` con `America/Argentina/Buenos_Aires`, computa el inicio del día calendario en AR como instante UTC). Buckets: Hoy / Últimos 7d / Últimos 30d / Cualquier fecha. Defaultea a "Cualquier fecha".
+- **Empty state diferenciado solo-DQ**: page.tsx ahora calcula `hadOnlyDq = rawLeads.length > 0 && visibleRaw.length === 0` y lo pasa como prop. ClientLeadsTable muestra "Tu bot capturó contactos, pero ninguno requiere seguimiento" (icono Filter, sin CTA) en lugar del genérico "todavía no capturó contactos" (icono Users, con CTA).
+- **Empty state filtros vacíos**: cuando los filtros aplicados no matchean ningún lead, mensaje genérico "No hay contactos con esos filtros — Probá cambiar la fecha, la calidad o el estado". Antes era específico a un solo filtro y se desincronizaba con la nueva cadena.
+- **Limpieza de jerga visible**:
+  - PageHeader: "Mis leads" → **"Mis contactos"**
+  - Modal ScoreExplanationSection pie: "Score efectivo: 85" → **"Nivel de interés ahora: 85 / 100 · {tier}"**
+  - Modal textarea placeholder: "sobre este lead..." → **"sobre este contacto..."**
+  - BusinessLeadCard aria-label: "Score efectivo: 85 — Caliente" → **"Nivel de interés: 85 de 100 — Caliente"**
+  - Empty states: "leads" → "contactos"
+
+### 3) Robustez defensiva (out-of-scope acotado)
+
+Tuve que tocar `applyTimeDecay()` en `scoring/calculateLeadScore.ts` — fix defensivo para tolerar `Date | string | null | undefined` en `lastActivityAt`. Razón: `unstable_cache` deserializa Date → string al rehidratar; además, en preview el dev server tenía un módulo cacheado pre-fix que crasheaba con `TypeError: lastActivityAt.getTime is not a function`. La signature se ensanchó pero el comportamiento happy-path es idéntico. Si la fecha es inválida o falta, asume actividad reciente (`multiplier=1`) en vez de crashear — degrada en vez de tirar 500. **Esto es deuda menor que merece quedarse permanente, no flag de roadmap-pendientes.**
+
+### 4) Anti-IDOR (re-confirmado, no se tocó)
+
+`updateLeadStatus` ya estaba bien:
+- `getClientChatbotSession()` valida autenticación.
+- Zod schema valida input (leadId string, status enum, notes max 2000).
+- Verifica explícito `lead.botConfig.organizationId !== session.organization.id` → retorna error.
+- Auditoría con `logAdminAction` + `logChatbotEvent`.
+
+### 5) Files modificados
+
+- `src/app/(protected)/dashboard/chatbot/leads/page.tsx` — sort por effectiveScore, prop `hadOnlyDq`.
+- `src/app/api/dashboard/leads/recent/route.ts` — sort por effectiveScore (consistencia con polling de 30s).
+- `src/modules/chatbot/components/dashboard/ClientLeadsTable.tsx` — filtro fecha + TZ AR, cadena 3 filtros, empty solo-DQ, empty filtros genérico, "Mis contactos", "Nivel de interés ahora", "sobre este contacto".
+- `src/modules/chatbot/components/dashboard/BusinessLeadCard.tsx` — aria-label sin "Score".
+- `src/modules/chatbot/server/scoring/calculateLeadScore.ts` — guard defensivo en `applyTimeDecay` (Date|string|null|undefined).
+
+### 6) Verificación
+
+- `npx tsc --noEmit` → **EXIT 0**, sin errores.
+- `npx prisma migrate status` → sin cambios de schema en este sprint.
+- Endpoint `/api/dashboard/leads/recent` → **200 OK** con leads enriquecidos y ordenados.
+- Server-rendered `/dashboard/chatbot/leads` → **200 OK** repetidos (14 requests en logs, todos 200 después del fix defensivo).
+- DOM check vía `preview_eval`:
+  - Filtros renderizados con conteos correctos: `"Cualquier fecha (56)"`, `"Hoy (27)"`, `"Tibios (6)"`, `"Sin contactar (56)"` — confirma cadena de filtros.
+  - aria-label nuevo: `"Nivel de interés: 60 de 100 — Tibio"` — confirma limpieza de jerga + accesibilidad.
+  - `hasOldJerga: false` (no aparece "Score efectivo", "Mis leads", "este lead").
+
+### 7) Flag visual para Franco
+
+🚩 **Screenshots desktop/mobile bloqueados por PreloaderContext (bug pre-existente, NO regresión de B5.5).**
+
+El preview headless (`preview_screenshot`) timeoutea en `/dashboard/chatbot/leads` porque el PreloaderContext (archivo frozen) se queda en "CARGANDO" indefinidamente cuando no hay interacción de usuario real — mismo síntoma ya documentado en sprints anteriores y reproducible en `/dashboard` y rutas vecinas.
+
+Evidencia de que la vista SÍ está OK (independiente del preloader):
+- Server Component responde HTML 200 con todo el contenido correcto.
+- DOM se monta (`preview_eval` confirma filtros, badges, cards bajo el overlay).
+- Cero errores nuevos en `preview_logs` después del fix defensivo (los logs históricos con `lastActivityAt` son del bundle pre-fix).
+
+**Acción para Franco:** abrir manualmente `/dashboard/chatbot/leads` en un browser real (Chrome/Firefox) y validar visualmente: orden por score efectivo desc, 3 filas de filtros, badge prominente, modal "Nivel de interés ahora", sin jerga. Si algo se ve roto, reabrimos.
+
+### 8) Listo para
+
+- ✅ Sort por score efectivo desc en page.tsx y route.ts (en memoria, doc'd).
+- ✅ Filtro por fecha con TZ Argentina (Hoy / 7d / 30d / Cualquier fecha).
+- ✅ Empty states diferenciados (sin leads / solo-DQ / filtros vacíos).
+- ✅ Jerga visible eliminada (UI + aria-labels).
+- ✅ Anti-IDOR + Zod en `updateLeadStatus` re-confirmado.
+- ✅ Guard defensivo en `applyTimeDecay` (no crashea ante Date inválido / unstable_cache string).
+- ✅ TypeScript clean, server 200, schema unchanged.
+- ⏳ **Visual QA manual de Franco** en browser real (preview headless bloqueado por PreloaderContext frozen).
+
+---
+
+## ✅ B5.6 — Vista de detalle de lead: contacto, "por qué", y conversación
+
+**Fecha:** 2026-05-23
+**Objetivo:** Que el dueño entre al detalle de un lead, entienda en 5 segundos quién es / qué tan caliente / por qué, y tenga acción inmediata (WhatsApp con mensaje pre-armado). La explicabilidad de B5.4 es la pieza que hace creíble el score — sin el "por qué", el número es magia.
+
+### 1) Decisión arquitectónica
+
+Reemplacé el modal-en-la-lista por una **ruta dedicada** `/dashboard/chatbot/leads/[id]`:
+- Bookmarkable / shareable / ctrl-clickeable (mobile + web).
+- En mobile, una página > modal (no compite con el header sticky ni el sidebar).
+- Permite mostrar más contenido (conversación tail) sin pelearse con el scroll del modal.
+- **Habilita anti-IDOR a nivel ruta**: el id viene de la URL, no de la lista — un cliente puede manipularlo, así que se valida server-side.
+
+La card del listado ahora linkea al detalle (vía `next/link`) en vez de abrir un modal. Las acciones rápidas inline (WhatsApp, "marcar contactado", "es cliente") siguen funcionando desde la card sin navegar.
+
+### 2) Helpers server con anti-IDOR
+
+Agregué dos helpers en `multiTenantQueries.ts`:
+
+```ts
+// Una sola query con filtro relacional. Si el id no existe O es de otra org → null.
+// El cliente recibe 404 (notFound), no leak de existencia (no diferencia "no existe"
+// de "no es tuyo").
+getLeadByIdForOrg(leadId, organizationId)
+
+// Mismo guard, defense-in-depth: aunque el lead.conversationId apunte a una conversación
+// de otra org (no debería, pero), no devuelve nada.
+getConversationMessagesForOrg(conversationId, organizationId, limit)
+```
+
+El filtro va dentro de Prisma (`where: { id, botConfig: { organizationId } }`), no en JS post-fetch — más performante y atómico.
+
+### 3) Página `[id]/page.tsx` (Server Component)
+
+- Resuelve `getClientChatbotSession()`. Si no hay sesión → redirect `/dashboard`.
+- `getLeadByIdForOrg(id, session.organization.id)`. Si null → `notFound()`.
+- Aplica `getEffectiveScore` + `getScoreExplanation` en lectura (mismo patrón que la lista).
+- Fetch de mensajes de la conversación origen (si existe).
+- Renderiza `<LeadDetail>` con todo enriquecido.
+
+### 4) Componente `LeadDetail` (cliente)
+
+Estructura, de arriba a abajo:
+
+1. **Link "← Volver a mis contactos"**.
+2. **Hero card**: nombre + tiempo desde captura + tier de decay + badge de estado + badge de calidad (Caliente/Tibio/Frío con número 0-100). DQ no muestra badge de calidad (es filtro, no calidad).
+3. **"Qué quiere"** (intent traducido).
+4. **Contacto AMBOS canales** (fix MS-1): teléfono y email lado a lado en grid 2×1. Si uno falta, se muestra el placeholder discreto "Sin teléfono" / "Sin email" (no se oculta el slot — el dueño ve que el lead no dejó ese canal). Ambos son tap-targets `min-h-[44px]` con `tel:` / `mailto:`.
+5. **Acciones rápidas**: WhatsApp con mensaje pre-armado, "Marcar contactado" (solo si NEW), "Es cliente" (cualquier estado salvo WON/LOST).
+6. **Por qué está calificado así**: lista de señales con iconos diferenciados (Check positiva, Star combo, AlertTriangle penalty), label legible PyME, puntos. Footer con "Nivel de interés ahora: 60 / 100 · {tier}".
+7. **De qué hablaron**:
+   - Mensaje al dejar los datos (lead.message).
+   - Tail de la conversación origen — burbujas estilo chat, filtradas a `role: 'user' | 'assistant'` (system/tool no aportan al dueño).
+   - Path donde estaba mirando (`conversation.currentPath`) en footer monoespaciado.
+   - Empty state si no hay conversación guardada.
+8. **Seguimiento**: edit completo de estado + notas (max 2000, contador). Botón Guardar con feedback "Guardado".
+
+### 5) WhatsApp pre-armado
+
+```ts
+buildWhatsappMessage(firstName, intentLabel)
+// → "Hola Lucía, te contacto por tu consulta (pedido de cotización) que dejaste
+//    en nuestro sitio. ¿Cómo puedo ayudarte?"
+```
+
+Saludo personalizado con primer nombre si está, intent traducido en lower-case. El dueño puede editarlo antes de mandar (WhatsApp web abre con el texto pre-cargado).
+
+### 6) Files modificados
+
+- `src/modules/chatbot/server/admin/multiTenantQueries.ts` — `+getLeadByIdForOrg`, `+getConversationMessagesForOrg`.
+- `src/modules/chatbot/index.server.ts` — re-export de los dos helpers nuevos.
+- `src/app/(protected)/dashboard/chatbot/leads/[id]/page.tsx` — **nuevo** (Server Component con anti-IDOR + enriquecimiento + fetch de mensajes).
+- `src/modules/chatbot/components/dashboard/LeadDetail.tsx` — **nuevo** (cliente: hero + por qué + conversación + seguimiento + WA pre-armado).
+- `src/modules/chatbot/components/dashboard/BusinessLeadCard.tsx` — cambió prop `onClick` por `href`; info-area envuelta en `<Link>` (botones de acción quedan fuera del Link para no anidar interactivos).
+- `src/modules/chatbot/components/dashboard/ClientLeadsTable.tsx` — removí el modal interno (LeadDetailModal + ScoreExplanationSection), removí `selectedLead` state e imports obsoletos. La card linkea a `/dashboard/chatbot/leads/{id}`.
+
+### 7) Verificación
+
+- `npx tsc --noEmit` → **EXIT 0**.
+- `npx prisma migrate status` → schema unchanged.
+- Server-side smoke tests (vía `preview_eval` contra el preview dev server):
+
+| Caso | URL | Resultado |
+|---|---|---|
+| Lead warm real (Lucía F.) | `/leads/cmpivy2sd006x9f4gtgsr823m` | **200**, badge "Tibio", "Por qué", "De qué hablaron", WhatsApp con mensaje pre-armado correcto |
+| Lead cold real | `/leads/cmpivzvl6008r9f4ghh6izyvh` | **200**, badge "Frío", todas las secciones presentes, sin jerga |
+| Lead DQ (Pedro M.) | `/leads/cmpit5gl900uh9fgs6y7f3q8u` | **200**, sin badge de calidad (DQ no es calidad), "Por qué" muestra las señales que descalificaron, notas editables |
+| Lead inexistente / cross-org | `/leads/cmpivy2sd006x9f4gINVALID` | **notFound()** — anti-IDOR confirmado, no leak de existencia |
+
+- DOM check: link "Volver a mis contactos", 3 secciones h2 ("Por qué…", "De qué hablaron", "Seguimiento"), WhatsApp href con `?text=Hola%20Luc%C3%ADa...`, sin "Score" / "Mis leads" / "este lead" en el body.
+
+### 8) Flag visual para Franco
+
+🚩 Mismo bloqueador que B5.5: el PreloaderContext frozen impide `preview_screenshot` headless de cualquier ruta `/dashboard/*`. El DOM se monta correctamente bajo el overlay (verificado por `eval`).
+
+**Acción manual recomendada:** abrir en browser real:
+- `/dashboard/chatbot/leads/cmpivy2sd006x9f4gtgsr823m` (lead tibio con conversación)
+- `/dashboard/chatbot/leads/cmpivzvl6008r9f4ghh6izyvh` (lead frío)
+- `/dashboard/chatbot/leads/cmpit5gl900uh9fgs6y7f3q8u` (lead DQ — debe abrir sin badge de calidad)
+- `/dashboard/chatbot/leads/INVALID` (debe mostrar 404 de Next, no leak)
+- Validar también desktop + mobile (≤ 375px): grid de contacto colapsa a 1col, burbujas de conversación legibles, botones tap-target ≥ 44px.
+
+### 9) Listo para
+
+- ✅ Ruta dedicada `/dashboard/chatbot/leads/[id]` con anti-IDOR en server.
+- ✅ Helpers `getLeadByIdForOrg` + `getConversationMessagesForOrg` con filtro relacional Prisma.
+- ✅ Vista con hero, ambos canales de contacto (fix MS-1), por qué, conversación tail, WhatsApp pre-armado, edit completo de seguimiento.
+- ✅ Card del listado migrada de modal → Link al detalle.
+- ✅ Cero jerga visible ni en aria-labels (heredado B5.5).
+- ✅ TSC clean, server responde 200 en los 3 cases (warm/cold/dq), notFound en id inválido.
+- ⏳ **Visual QA manual de Franco** en browser real (preview headless bloqueado por PreloaderContext frozen, no es regresión).
+
+
+---
+
+## ✅ B5.7 — Aviso de leads calientes: mejor presentación sin canal nuevo
+
+**Fecha:** 2026-05-23
+**Objetivo:** Que un lead caliente nuevo se note rápido en el dashboard sin meter push real (futuro), sin duplicar el canal a develOP, y sin romper el polling de 30s existente.
+
+### 1) Estado previo
+
+- Polling crudo cada 30s en `ClientLeadsTable` → `/api/dashboard/leads/recent` (B5.5).
+- Canal a develOP ya existente: Telegram al equipo (siempre) + email al `org.leadNotificationEmail` cuando `IMMEDIATE` — disparados al capturar. **No se toca.**
+- `NotificationCenter` (campana) existe pero no se alimenta de leads — sigue así, esto NO es su propósito.
+- Sidebar ya tenía patrón de badge (`unreadMessages` cyan). No había badge para leads.
+- ClientDashboardTabs sin indicadores.
+- Sin `seenAt` / `readAt` en `ChatbotLead` — el flag implícito es `status === 'NEW'`. No agrego campo porque no hace falta: al cambiar a CONTACTED, el contador baja solo.
+
+### 2) Decisión arquitectónica
+
+Tres puntos de presencia visual del aviso, **alimentados por la misma fuente** (un solo count en DB con cache compartido):
+
+1. **Badge rose** en el item "Mi Chatbot" del sidebar — visible desde cualquier ruta del dashboard.
+2. **Dot rose con ping** en la tab "Leads" del sub-nav del chatbot — visible cuando el usuario está adentro de "Mi Chatbot" pero no en la tab Leads (suprimido cuando ya estás ahí).
+3. **Ring rose pulsante** en las cards de la lista que son hot + status=NEW — guía la atención hacia los leads concretos a atacar.
+
+Sin canal externo nuevo. Sin push real. Sin Notification record nuevo.
+
+### 3) Por qué `classification` cruda y no efectiva post-decay
+
+El badge usa `classification === 'hot' AND status === 'NEW'` directo de DB (con índice). NO usa el efectivo post-decay. Razones:
+
+- Performance: el efectivo no está en DB → tendríamos que traer todos los leads y computar en app cada vez que renderiza el sidebar.
+- Semántica del badge: el indicador dice "tenés trabajo pendiente con leads que EN ALGÚN MOMENTO fueron calientes y nadie contactó". Un lead que ya envejeció a warm por decay **sigue mereciendo atención** mientras nadie lo haya tocado — el badge no es "qué tan caliente está ahora", es "qué te falta".
+
+El ring de la card SÍ usa el efectivo (`effectiveClassification === 'hot' && status === 'NEW'`) — porque ahí el dueño ve la calidad actual real del lead.
+
+### 4) Cache compartido entre 3 puntos
+
+- `dashboard/layout.tsx` y `dashboard/chatbot/layout.tsx` llaman ambos a `unstable_cache` con **mismo key** `['dashboard-hot-leads-count', orgId]` y mismo `revalidate: 30`. Comparten resultado in-memory — no doble query DB por render.
+- Cadencia 30s alineada con el polling client.
+- Tag `hot-leads-count:${orgId}` listo para `revalidateTag()` desde mutaciones futuras (`captureLead` cuando aterrice un hot, `updateLeadStatus` cuando se mueva de NEW).
+
+### 5) Optimización del polling existente
+
+Antes: `setInterval(fetch, 30_000)` corría aunque la pestaña estuviera oculta en background.
+
+Después:
+- `document.visibilitychange` listener pausa el interval cuando la tab pasa a hidden.
+- Al volver al foco, `refresh()` inmediato + restart del interval — el dueño ve fresco lo que pasó mientras tanto, sin esperar 30s.
+
+No rompe el polling (mismo endpoint, misma cadencia activa) — solo deja de gastar requests cuando nadie mira.
+
+### 6) Files modificados / creados
+
+- `src/modules/chatbot/server/admin/multiTenantQueries.ts` — `+countHotNewLeadsForOrg(orgId)`.
+- `src/modules/chatbot/index.server.ts` — re-export del helper.
+- `src/app/(protected)/dashboard/layout.tsx` — `+getCachedHotLeadsCount` (revalidate 30s, tag `hot-leads-count`), pasado a `DashboardLayoutClient`.
+- `src/app/(protected)/dashboard/chatbot/layout.tsx` — mismo helper de cache, pasa `hotLeadsCount` al `ClientDashboardTabs`.
+- `src/components/dashboard/DashboardLayoutClient.tsx` — nuevo prop `hotLeadsCount`, propagado al `SidebarNav` (desktop + mobile).
+- `src/components/dashboard/SidebarNav.tsx` — item "Mi Chatbot" marcado con `badge: 'hotLeads'`; nuevo prop `hotLeadsCount`; render del badge rose con `animate-ping` + número + aria-label "N contactos calientes sin contactar".
+- `src/modules/chatbot/components/dashboard/ClientDashboardTabs.tsx` — nuevo prop `hotLeadsCount`; dot rose con ping junto al label "Leads" cuando hay hot+NEW y la tab no está activa.
+- `src/modules/chatbot/components/dashboard/ClientLeadsTable.tsx` — refactor del polling: pausa con `visibilitychange`, fetch inmediato al volver al foco; pasa `highlight={isHotNew}` a cada card.
+- `src/modules/chatbot/components/dashboard/BusinessLeadCard.tsx` — nuevo prop `highlight`, render de ring rose pulsante absoluto sobre la Card.
+
+### 7) Verificación
+
+- `npx tsc --noEmit` → **EXIT 0**.
+- Helper directo: `countHotNewLeadsForOrg(orgId)` → 0 inicial → 1 después de promover un lead → 0 después de revertir (confirmado con Prisma directo).
+- HTML server-rendered con un lead promovido a hot+NEW:
+  - `/dashboard/chatbot/leads`: aria-label "1 contacto caliente sin contactar" × 1 (badge sidebar), `animate-ping` × 1, `bg-rose-500` × 2 (ping + solid del badge).
+  - `/dashboard/chatbot`: aria-label "1 contacto caliente sin contactar" × 2 (badge sidebar + dot tab), `bg-rose-500` × 4 (2 elementos × 2 spans).
+  - El dot tab se suprime cuando la tab Leads ya está activa (`!isActive`), por eso solo aparece en /chatbot, no en /chatbot/leads.
+- API `/api/dashboard/leads/recent`: el lead promovido aparece con `effectiveClassification: 'hot'` cuando tiene score válido — el polling cliente recibe esto y aplica el ring (corre cada 30s vs el SSR inicial que sirve `listLeadsByOrgSlug` cacheado 120s).
+- Lead de prueba revertido a su estado original (`classification: null, score: null`) — DB limpia.
+
+### 8) Lo que NO se hizo (a propósito)
+
+- ❌ Push real / web push / service workers — fuera de scope, futuro.
+- ❌ Email/Telegram nuevo — ya existe el canal develOP (no duplicamos).
+- ❌ Crear `Notification` record por cada lead hot — la campana es genérica y este no es su propósito; meter leads ahí confunde y duplica.
+- ❌ Campo `seenAt` / `readAt` en `ChatbotLead` — el contador baja solo al cambiar `status` a CONTACTED. No hace falta más estado.
+
+### 9) Flag visual para Franco
+
+🚩 Mismo bloqueador heredado: `preview_screenshot` headless atascado en PreloaderContext frozen — los 3 indicadores (badge sidebar, dot tab, ring card) están confirmados server-side por DOM scan, pero no puedo capturar screenshot pixel-perfect.
+
+**Acción manual recomendada en browser real:**
+1. Promover un lead a `classification='hot'` + `status='NEW'` con `score >= 70` (o esperar uno real). Ver:
+   - Badge rose pulsante en sidebar sobre "Mi Chatbot" desde cualquier ruta `/dashboard/*`.
+   - Dot rose con ping junto al label "Leads" en `/dashboard/chatbot` (debería desaparecer al abrir `/dashboard/chatbot/leads`).
+   - Ring rose pulsante alrededor de la card del lead hot+NEW en la lista (esperar polling 30s si recién promovido).
+2. Cambiar el lead a `CONTACTED` y verificar que los 3 indicadores desaparecen tras el cache revalidate (≤30s).
+3. Background tab test: abrir `/dashboard/chatbot/leads`, cambiar a otra pestaña 1 min, volver — debería ver fetch inmediato al volver al foco (DevTools Network).
+
+### 10) Listo para
+
+- ✅ `countHotNewLeadsForOrg` con índice DB sobre `(classification, status)` — barato.
+- ✅ Cache 30s alineado con polling, tag para invalidar desde mutaciones futuras si hace falta.
+- ✅ 3 puntos de presencia visual (sidebar badge, tab dot, card ring) — mismo dato, misma cadencia.
+- ✅ Polling client pausado en background tab + refresh inmediato al volver al foco.
+- ✅ Cero canal nuevo, cero push, cero email, cero Notification record.
+- ✅ TSC clean, helper validado end-to-end con Prisma directo, HTML server-side con los 3 indicadores presentes.
+- ⏳ **Visual QA manual de Franco** en browser real (preview headless bloqueado por PreloaderContext frozen).
+- ⏳ **Push real / web push** → roadmap futuro (B6+), cuando haya tracción real y el cliente lo pida.

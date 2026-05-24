@@ -1115,8 +1115,36 @@ model ChatbotLead {
   name    String?
   email   String?
   phone   String?
-  intent  String? // "quote" | "info" | "demo" | "support" | "other"
+  // intent: legacy String? (datos previos a B5.1: "quote"|"info"|"demo"|"support"|"other").
+  // A partir de B5.1 el bot escribe valores alineados con B3.6:
+  // "purchase_ready"|"schedule_visit"|"quote_request"|"human_request"|"support"|"other".
+  // No se enum-iza en DB para no romper rows legacy (additive).
+  intent  String?
   message String? @db.Text
+
+  // B5.1 — Categoría DQ. Llenada por el bot al capturar; B5.3 la usa para descalificar.
+  category LeadCategory @default(sales)
+
+  // B5.1 — Señales estructuradas detectadas en la conversación.
+  // Llenadas por el bot con criterio anti-alucinación (si no apareció, false).
+  // providedPhone/providedEmail las DERIVA el handler del input — no del LLM.
+  requestedAppointment Boolean @default(false)
+  mentionedFinancing   Boolean @default(false)
+  mentionedTradeIn     Boolean @default(false)
+  askedSpecificModel   Boolean @default(false)
+  providedPhone        Boolean @default(false)
+  providedEmail        Boolean @default(false)
+
+  // B5.1 — Canal de origen (futuro: 'widget' | 'instagram' | 'whatsapp_inbound' | ...).
+  // No se llena aún — el campo queda para que B5+ pueda discriminar sin migración nueva.
+  channel String?
+
+  // B5.1 — Campos de scoring que B5.2 va a poblar.
+  // Hasta entonces quedan null y son ignorados por la vista actual.
+  // scoreSignals guarda el detalle "qué subió/bajó el score" para explicabilidad (B5.4).
+  score          Int?
+  classification LeadClassification?
+  scoreSignals   Json?
 
   // Notificación
   notificationSent   Boolean   @default(false)
@@ -1132,6 +1160,11 @@ model ChatbotLead {
 
   @@index([botConfigId, capturedAt])
   @@index([status])
+  // B5.1 — índices que B5.2 (scoring) y la vista de 5B van a consumir.
+  @@index([classification])
+  @@index([score])
+  @@index([category])
+  @@index([botConfigId, classification, capturedAt(sort: Desc)])
   @@map("chatbot_lead")
 }
 
@@ -1141,6 +1174,24 @@ enum ChatbotLeadStatus {
   IN_NEGOTIATION
   WON
   LOST
+}
+
+// B5.1 — Categoría DQ (B5.3 la usa para descalificar leads no comerciales).
+enum LeadCategory {
+  sales
+  postventa
+  employment
+  provider
+  spam
+  other
+}
+
+// B5.1 — Clasificación de scoring (B5.2). dq = descalificado por categoría no-sales.
+enum LeadClassification {
+  hot
+  warm
+  cold
+  dq
 }
 
 model ChatbotInsight {

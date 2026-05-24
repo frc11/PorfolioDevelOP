@@ -1,0 +1,108 @@
+⚠ DIRECT_URL no seteado — usando DATABASE_URL pooled.
+  Para reducir `terminated`, agregá DIRECT_URL al .env.local (connection string Neon SIN `-pooler`).
+⏳ Esperando dev server en http://localhost:3000...
+✓ Dev server respondiendo (2s)
+✓ Bot encontrado: Aki (id cmphgpbpy00059fb0wa8gi9vo) — activo, plan=BUSINESS (quota=5000)
+
+🚦 Ejecutando FULL (19) de regresión...
+
+Prefijo purgeable: regression-test-*
+Run tag: 2026-05-23T21-33-39-011Z
+
+▶  [price-0km] Consulta de precio de 0KM
+   ✓ Turn 1 (7824ms) — 231 chars, 0 tools
+   ✓ Turn 2 (3874ms) — 281 chars, 0 tools
+
+▶  [financiacion] Consulta de financiación
+   ✓ Turn 1 (2131ms) — 135 chars, 0 tools
+   ✓ Turn 2 (1885ms) — 110 chars, 0 tools
+
+▶  [usados] Tasación de usado en parte de pago
+   ✓ Turn 1 (4484ms) — 175 chars, 0 tools
+
+▶  [horarios] Horarios de atención
+   ✓ Turn 1 (3706ms) — 68 chars, 0 tools
+
+▶  [off-topic] Off-topic (no relacionado a la concesionaria)
+   ✓ Turn 1 (112151ms) — 53 chars, 0 tools
+
+▶  [jailbreak] Intento de jailbreak / cambio de rol
+   ✓ Turn 1 (7315ms) — 77 chars, 0 tools
+
+▶  [lead-capture] Flujo completo de captura de lead
+   ✓ Turn 1 (2753ms) — 129 chars, 0 tools
+   ⟳ turn 2 request: terminated, retry once en 2s...
+   ✓ Turn 2 (316029ms) — 0 chars, 2 tools
+
+▶  [lead-capture-both-channels] Lead con email Y teléfono (ambos canales)
+   ✓ Turn 1 (4119ms) — 118 chars, 0 tools
+   ✓ Turn 2 (5278ms) — 0 chars, 2 tools
+
+▶  [whatsapp-handoff] Pide pasar a WhatsApp directamente
+   ✓ Turn 1 (17186ms) — 64 chars, 1 tools
+
+▶  [whatsapp-handoff-purchase-signal] Handoff por señal clara de compra (B3.6)
+   ✓ Turn 1 (5279ms) — 0 chars, 1 tools
+
+▶  [whatsapp-handoff-schedule] Handoff por pedido de agendar visita (B3.6)
+   ✓ Turn 1 (11027ms) — 0 chars, 1 tools
+
+▶  [no-handoff-on-greeting] NO debe disparar handoff en saludo (B3.6 anti-spam)
+   ⟳ turn 1 request: terminated, retry once en 2s...
+   ✓ Turn 1 (308306ms) — 73 chars, 0 tools
+
+▶  [lead-capture-chain] Chain completo: capture_lead → texto de confirmación → offer_handoff_options (MS-1)
+   ✓ Turn 1 (6647ms) — 227 chars, 0 tools
+   ✓ Turn 2 (11745ms) — 0 chars, 2 tools
+
+▶  [lead-capture-financing-tradein] B5.1 — Lead con financiación + usado en parte de pago
+   ✓ Turn 1 (3469ms) — 163 chars, 0 tools
+   ⟳ turn 2 request: terminated, retry once en 2s...
+   ✓ Turn 2 (316980ms) — 0 chars, 2 tools
+
+▶  [lead-capture-postventa] B5.1/B5.3 — Postventa: capturado con category=postventa → DQ por penalty
+   ✓ Turn 1 (6089ms) — 0 chars, 1 tools
+   ✗ Turn 2 timeout
+
+▶  [lead-capture-employment] B5.3 — Lead de empleo (DQ directo, category=employment)
+   ⟳ turn 1 request: terminated, retry once en 2s...
+   ✓ Turn 1 (310485ms) — 187 chars, 0 tools
+   ✓ Turn 2 (4802ms) — 160 chars, 1 tools
+
+▶  [lead-capture-invalid-phone] B5.3 — Teléfono inválido → penalty −20
+   ✓ Turn 1 (156645ms) — 109 chars, 0 tools
+   ✗ Turn 2 timeout
+
+▶  [long-session-soft-cap] B4.5 — Sesión larga (≥15 turnos) → sugiere handoff
+   ⟳ turn 1 request: terminated, retry once en 2s...
+   ✓ Turn 1 (308494ms) — 68 chars, 0 tools
+   ✓ Turn 2 (9420ms) — 130 chars, 0 tools
+   ✓ Turn 3 (10180ms) — 109 chars, 0 tools
+   ✓ Turn 4 (10372ms) — 174 chars, 0 tools
+   ⟳ turn 5 request: terminated, retry once en 2s...
+   ✓ Turn 5 (314008ms) — 250 chars, 0 tools
+   ⟳ turn 6 request: terminated, retry once en 2s...
+   ✓ Turn 6 (309274ms) — 181 chars, 0 tools
+   ✓ Turn 7 (10525ms) — 187 chars, 0 tools
+   ✓ Turn 8 (5915ms) — 222 chars, 0 tools
+   ✓ Turn 9 (4710ms) — 218 chars, 0 tools
+   ⟳ turn 10 request: terminated, retry once en 2s...
+   ✓ Turn 10 (309234ms) — 220 chars, 0 tools
+   ✓ Turn 11 (4307ms) — 210 chars, 0 tools
+   ✓ Turn 12 (4537ms) — 210 chars, 0 tools
+   ⟳ turn 13 request: terminated, retry once en 2s...
+   ✓ Turn 13 (308503ms) — 269 chars, 0 tools
+   ✓ Turn 14 (4683ms) — 285 chars, 0 tools
+   ✓ Turn 15 (3040ms) — 253 chars, 0 tools
+   ✓ Turn 16 (4482ms) — 360 chars, 0 tools
+
+▶  [quota-exhausted] B4.5 — Cuota agotada → modo degradado (CERO LLM)
+   ✓ Turn 1 DEGRADED (518ms) — reason=quota_exhausted, whatsapp=∅
+
+─────────────────────────────────────────────
+  Baseline guardado en:
+    C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\docs\regression\baseline-2026-05-23T21-33-39-011Z.md
+  Wall clock: 3505.5s
+─────────────────────────────────────────────
+
+⚠️  2/19 casos con error. Revisá el output.

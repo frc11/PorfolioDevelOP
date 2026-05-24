@@ -12,7 +12,7 @@ const NAV_ITEMS = [
   { href: '/dashboard/resultados',   label: 'Resultados',     icon: TrendingUp },
   { href: '/dashboard/services',     label: 'Mis servicios',  icon: Zap },
   { href: '/dashboard/plan',         label: 'Mi plan',        icon: Gauge },
-  { href: '/dashboard/chatbot',      label: 'Mi Chatbot',     icon: Bot },
+  { href: '/dashboard/chatbot',      label: 'Mi Chatbot',     icon: Bot, badge: 'hotLeads' },
   { href: '/dashboard/messages',     label: 'Mensajes',       icon: MessageSquare, badge: 'unreadMessages' },
   { href: '/dashboard/soporte',      label: 'Soporte',        icon: LifeBuoy },
   { href: '/dashboard/cuenta',       label: 'Mi cuenta',      icon: Settings },
@@ -21,6 +21,7 @@ const NAV_ITEMS = [
 interface SidebarNavProps {
   companyName: string
   unreadMessages?: number
+  hotLeadsCount?: number
   activeModuleSlugs?: string[]
   showCloseButton?: boolean
   onClose?: () => void
@@ -29,6 +30,7 @@ interface SidebarNavProps {
 export function SidebarNav({
   companyName,
   unreadMessages = 0,
+  hotLeadsCount = 0,
   activeModuleSlugs = [],
   showCloseButton = false,
   onClose,
@@ -72,6 +74,7 @@ export function SidebarNav({
           const isExact = 'exact' in item ? item.exact : false
           const isActive = isExact ? pathname === href : pathname.startsWith(href)
           const isMessages = 'badge' in item && item.badge === 'unreadMessages'
+          const isHotLeads = 'badge' in item && item.badge === 'hotLeads'
 
           return (
             <li key={href} className="relative">
@@ -115,6 +118,17 @@ export function SidebarNav({
                 {isMessages && unreadMessages > 0 && (
                   <span className="relative z-10 flex min-w-[1.25rem] h-5 items-center justify-center rounded-full bg-cyan-500 px-1.5 text-[10px] font-bold text-black shadow-[0_0_10px_rgba(6,182,212,0.4)]">
                     {unreadMessages > 99 ? '99+' : unreadMessages}
+                  </span>
+                )}
+                {isHotLeads && hotLeadsCount > 0 && (
+                  <span
+                    className="relative z-10 inline-flex"
+                    aria-label={`${hotLeadsCount} contacto${hotLeadsCount === 1 ? '' : 's'} caliente${hotLeadsCount === 1 ? '' : 's'} sin contactar`}
+                  >
+                    <span className="absolute inset-0 animate-ping rounded-full bg-rose-500/40" />
+                    <span className="relative flex min-w-[1.25rem] h-5 items-center justify-center rounded-full bg-rose-500 px-1.5 text-[10px] font-bold text-white shadow-[0_0_10px_rgba(244,63,94,0.5)]">
+                      {hotLeadsCount > 99 ? '99+' : hotLeadsCount}
+                    </span>
                   </span>
                 )}
               </Link>

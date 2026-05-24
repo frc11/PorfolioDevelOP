@@ -50,6 +50,59 @@ export async function listLeadsByOrgSlug(orgSlug: string, limit: number = 50) {
   )()
 }
 
+// B5.7 — cuenta de leads "hot + sin contactar" para el badge de notificación
+// del sidebar. Usa `classification` cruda de DB (no el efectivo post-decay) por
+// dos razones: (1) el efectivo no está en DB → tendríamos que traer todos y
+// computar en app, ineficiente; (2) un lead que fue hot al capturar y sigue
+// NEW merece atención del dueño aunque haya envejecido a warm — el badge
+// indica trabajo pendiente, no calidad actual. El efectivo correcto se ve al
+// abrir la lista.
+export async function countHotNewLeadsForOrg(organizationId: string): Promise<number> {
+  return prisma.chatbotLead.count({
+    where: {
+      botConfig: { organizationId },
+      status: 'NEW',
+      classification: 'hot',
+    },
+  })
+}
+
+// B5.6 — fetch de un lead por id con anti-IDOR. Devuelve null si el lead no existe
+// o pertenece a otra org. Prisma compone el filtro relacional en una sola query,
+// así un atacante que adivine ids ajenos recibe null (no 403, no leak de existencia).
+export async function getLeadByIdForOrg(leadId: string, organizationId: string) {
+  return prisma.chatbotLead.findFirst({
+    where: {
+      id: leadId,
+      botConfig: { organizationId },
+    },
+    include: {
+      conversation: {
+        select: { id: true, sessionId: true, currentPath: true, startedAt: true, lastMessageAt: true, messageCount: true },
+      },
+    },
+  })
+}
+
+// B5.6 — mensajes de una conversación con el mismo guard relacional. Si la
+// conversación no es de la org, devuelve [] (no leak). `limit` cap inferior
+// para evitar fetchs masivos desde la UI.
+export async function getConversationMessagesForOrg(
+  conversationId: string,
+  organizationId: string,
+  limit: number = 50,
+) {
+  return prisma.chatMessage.findMany({
+    where: {
+      conversationId,
+      conversation: { botConfig: { organizationId } },
+    },
+    orderBy: { createdAt: 'asc' },
+    take: Math.min(Math.max(limit, 1), 200),
+    select: { id: true, role: true, content: true, createdAt: true },
+  })
+}
+
 export async function listConversationsByOrgSlug(orgSlug: string, limit: number = 50) {
   const botInfo = await getBotByOrgSlug(orgSlug)
   if (!botInfo) return []

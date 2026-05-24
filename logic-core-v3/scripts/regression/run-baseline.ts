@@ -15,18 +15,70 @@
  *
  * Run:
  *   1. En una terminal: `npm run dev` (espera a "Ready in …")
- *   2. En otra terminal: `npx tsx scripts/regression/run-baseline.ts`
+ *   2. En otra terminal:
+ *        - Full (pre-cierre de sprint): `npx tsx scripts/regression/run-baseline.ts`
+ *        - Smoke (uso diario, 4 casos críticos): `npx tsx scripts/regression/run-baseline.ts --smoke`
  *
  * El runner verifica que el dev server responde antes de empezar.
+ *
+ * MS-4 — Pool de Neon:
+ *   - Si `DIRECT_URL` está seteado, el cliente Prisma del runner lo usa para
+ *     bypassear pgbouncer (reduce los `terminated` por pool cerrado bajo carga).
+ *   - 1 retry con backoff 2s SOLO en errores `terminated` (transient de Neon).
+ *     Fallos de comportamiento NUNCA se reintentan: la condición de retry
+ *     matchea el string del error de conexión, no asserts.
  */
 
 import 'dotenv/config'
 import { PrismaClient, Prisma } from '@prisma/client'
 import { writeFile, mkdir } from 'node:fs/promises'
 import { join } from 'node:path'
-import { REGRESSION_CASES, type CaseHookContext } from './cases'
+import { REGRESSION_CASES, type CaseHookContext, type RegressionCase } from './cases'
 
-const prisma = new PrismaClient()
+const SMOKE_MODE = process.argv.includes('--smoke')
+
+// MS-4: usar conexión directa (sin pgbouncer) si DIRECT_URL existe.
+// Si no, caemos al DATABASE_URL pooled y avisamos — no inventamos URL.
+const DIRECT_URL = process.env.DIRECT_URL
+if (DIRECT_URL) {
+  console.log('✓ Usando DIRECT_URL (bypass pgbouncer) para el cliente Prisma del runner')
+} else {
+  console.log(
+    '⚠ DIRECT_URL no seteado — usando DATABASE_URL pooled.\n' +
+      '  Para reducir `terminated`, agregá DIRECT_URL al .env.local (connection string Neon SIN `-pooler`).',
+  )
+}
+const prisma = new PrismaClient(
+  DIRECT_URL ? { datasources: { db: { url: DIRECT_URL } } } : undefined,
+)
+
+/**
+ * MS-4 — Retry helper: reintenta UNA vez si la promesa rechaza con un error
+ * de conexión transient de Neon (matchea `/terminat/i` en `e.message` o en
+ * `e.cause.message` — undici envuelve socket errors en `TypeError: fetch failed`).
+ * NO reintenta returns (null/false/etc) ni errores que NO sean de conexión:
+ * un fallo de comportamiento del bot (regresión real) jamás se enmascara.
+ */
+function isTerminatedError(e: unknown): boolean {
+  if (!(e instanceof Error)) return false
+  if (/terminat/i.test(e.message)) return true
+  const cause = (e as Error & { cause?: unknown }).cause
+  if (cause instanceof Error && /terminat/i.test(cause.message)) return true
+  return false
+}
+
+async function withTerminatedRetry<T>(label: string, fn: () => Promise<T>): Promise<T> {
+  try {
+    return await fn()
+  } catch (e) {
+    if (!isTerminatedError(e)) {
+      throw e
+    }
+    console.log(`   ⟳ ${label}: terminated, retry once en 2s...`)
+    await new Promise((r) => setTimeout(r, 2000))
+    return await fn()
+  }
+}
 
 const BASE_URL = process.env.B32_BASE_URL ?? 'http://localhost:3000'
 const BOT_SLUG = 'matsu'
@@ -72,6 +124,18 @@ interface CapturedCase {
     email: string | null
     phone: string | null
     intent: string | null
+    // B5.1 — señales estructuradas + clasificación DQ
+    category: string
+    requestedAppointment: boolean
+    mentionedFinancing: boolean
+    mentionedTradeIn: boolean
+    askedSpecificModel: boolean
+    providedPhone: boolean
+    providedEmail: boolean
+    // B5.2 — score heurístico server-side
+    score: number | null
+    classification: string | null
+    scoreSignals: Prisma.JsonValue
   } | null
   error: string | null
 }
@@ -139,15 +203,20 @@ async function waitForAssistantMessage(
 ): Promise<{ content: string; toolCalls: ToolCallRecord[] } | null> {
   const start = Date.now()
   while (Date.now() - start < timeoutMs) {
-    const conv = await prisma.conversation.findUnique({
-      where: { sessionId },
-      include: {
-        messages: {
-          orderBy: { createdAt: 'asc' },
-          where: { role: 'assistant' },
+    // MS-4: cada poll-tick se reintenta UNA vez en terminated. El timeout
+    // global sigue siendo el árbitro de "no apareció" → retorna null (NO
+    // throw) → el caller lo reporta como fallo de comportamiento sin retry.
+    const conv = await withTerminatedRetry('waitForAssistantMessage', () =>
+      prisma.conversation.findUnique({
+        where: { sessionId },
+        include: {
+          messages: {
+            orderBy: { createdAt: 'asc' },
+            where: { role: 'assistant' },
+          },
         },
-      },
-    })
+      }),
+    )
     if (conv && conv.messages.length >= expectedAssistantCount) {
       const last = conv.messages[expectedAssistantCount - 1]
       return {
@@ -198,17 +267,41 @@ async function runCase(
       conversationHistory.push({ role: 'user', content: userText })
 
       const t0 = Date.now()
-      const res = await fetch(`${BASE_URL}/api/chatbot/${BOT_SLUG}/chat`, {
-        method: 'POST',
-        headers: {
-          'content-type': 'application/json',
-          origin: BASE_URL,
-        },
-        body: JSON.stringify({
-          messages: conversationHistory,
-          sessionId,
-          currentPath: c.currentPath,
-        }),
+      // MS-4: fetch + drain del stream van JUNTOS dentro del retry. El
+      // `terminated` empíricamente cae tanto en el fetch (Neon corta el
+      // socket pre-handler) como en el `reader.read()` (corte mid-stream).
+      // Wrap conjunto = un solo retry cubre ambos. Idempotencia: sessionId
+      // es el mismo y `getOrCreateConversation` es idempotente; si el primer
+      // intento no llegó a `onFinish` (stream murió antes), el segundo
+      // corre desde cero. Asserts del cuerpo (HTTP no-200, JSON inválido,
+      // expectsDegraded mismatch, etc.) NO se reintentan: el wrapper sólo
+      // matchea `/terminat/i` en el mensaje del error tirado.
+      const res = await withTerminatedRetry(`turn ${i + 1} request`, async () => {
+        const r = await fetch(`${BASE_URL}/api/chatbot/${BOT_SLUG}/chat`, {
+          method: 'POST',
+          headers: {
+            'content-type': 'application/json',
+            origin: BASE_URL,
+          },
+          body: JSON.stringify({
+            messages: conversationHistory,
+            sessionId,
+            currentPath: c.currentPath,
+          }),
+        })
+        // Drenamos sólo para el path streaming (HTTP 200, no degradado).
+        // Si el stream tira terminated, el throw burbujea acá y disparamos
+        // el retry. Si HTTP no-200, devolvemos sin drenar — el caller hace
+        // el assert y reporta.
+        if (r.ok && r.body && !c.expectsDegraded) {
+          const reader = r.body.getReader()
+          // eslint-disable-next-line no-constant-condition
+          while (true) {
+            const { done } = await reader.read()
+            if (done) break
+          }
+        }
+        return r
       })
 
       if (!res.ok) {
@@ -258,15 +351,7 @@ async function runCase(
         continue
       }
 
-      // Drain stream — onFinish corre cuando el stream cierra
-      if (res.body) {
-        const reader = res.body.getReader()
-        // eslint-disable-next-line no-constant-condition
-        while (true) {
-          const { done } = await reader.read()
-          if (done) break
-        }
-      }
+      // Stream ya drenado dentro del withTerminatedRetry arriba.
       const latencyMs = Date.now() - t0
 
       // Esperar a que onFinish persista el message N+1 (i+1 asistentes esperados)
@@ -300,10 +385,12 @@ async function runCase(
     // B4.5: cuando expectsDegraded, no hay conversation persistida (el bot
     // no llegó al getOrCreateConversation por el early-return). Skip snapshot.
     if (!c.expectsDegraded) {
-      const finalConv = await prisma.conversation.findUnique({
-        where: { sessionId },
-        include: { lead: true },
-      })
+      const finalConv = await withTerminatedRetry('finalConv lookup', () =>
+        prisma.conversation.findUnique({
+          where: { sessionId },
+          include: { lead: true },
+        }),
+      )
       if (finalConv) {
         result.conversationId = finalConv.id
         result.leadCaptured = finalConv.leadCaptured
@@ -313,6 +400,18 @@ async function runCase(
             email: finalConv.lead.email,
             phone: finalConv.lead.phone,
             intent: finalConv.lead.intent,
+            // B5.1 — señales que B5.2 (scoring) consume
+            category: finalConv.lead.category,
+            requestedAppointment: finalConv.lead.requestedAppointment,
+            mentionedFinancing: finalConv.lead.mentionedFinancing,
+            mentionedTradeIn: finalConv.lead.mentionedTradeIn,
+            askedSpecificModel: finalConv.lead.askedSpecificModel,
+            providedPhone: finalConv.lead.providedPhone,
+            providedEmail: finalConv.lead.providedEmail,
+            // B5.2 — score persistido en el lead al capturar
+            score: finalConv.lead.score,
+            classification: finalConv.lead.classification,
+            scoreSignals: finalConv.lead.scoreSignals,
           }
         }
       }
@@ -342,15 +441,17 @@ function formatToolCall(tc: ToolCallRecord): string {
   return `**🔧 ${tc.toolName}**\n${args}`
 }
 
-function renderMarkdown(captured: CapturedCase[]): string {
+function renderMarkdown(captured: CapturedCase[], wallMs: number, smoke: boolean): string {
   const ts = new Date().toISOString()
   const lines: string[] = []
-  lines.push(`# Baseline de regresión — bot Matsu`)
+  lines.push(`# ${smoke ? 'Smoke' : 'Baseline'} de regresión — bot Matsu`)
   lines.push('')
   lines.push(`Generado: ${ts}`)
+  lines.push(`Set: ${smoke ? '**SMOKE** (subset crítico, uso diario)' : '**FULL** (pre-cierre de sprint)'}`)
   lines.push(`Run tag: \`${RUN_TAG}\``)
   lines.push(`Bot slug: \`${BOT_SLUG}\``)
   lines.push(`Casos ejecutados: ${captured.length}`)
+  lines.push(`Wall clock: **${(wallMs / 1000).toFixed(1)}s**`)
   lines.push(
     `Errores: ${captured.filter((c) => c.error).length} / ${captured.length}`,
   )
@@ -464,24 +565,39 @@ async function main(): Promise<void> {
     month: now.getUTCMonth() + 1,
   }
 
-  console.log(`\n🚦 Ejecutando ${REGRESSION_CASES.length} casos de regresión...\n`)
+  // MS-4: filtro --smoke. Smoke set = subset de las MISMAS definiciones
+  // (campo `smoke: true` en cases.ts). Sin duplicar archivo de casos.
+  const casesToRun: RegressionCase[] = SMOKE_MODE
+    ? REGRESSION_CASES.filter((c) => c.smoke)
+    : REGRESSION_CASES
+  if (SMOKE_MODE && casesToRun.length === 0) {
+    console.error('ABORT: --smoke pero ningún caso tiene `smoke: true` en cases.ts.')
+    process.exit(1)
+  }
+
+  const setLabel = SMOKE_MODE ? `SMOKE (${casesToRun.length})` : `FULL (${casesToRun.length})`
+  console.log(`\n🚦 Ejecutando ${setLabel} de regresión...\n`)
   console.log(`Prefijo purgeable: ${SESSION_PREFIX}*`)
   console.log(`Run tag: ${RUN_TAG}`)
 
+  const wallStart = Date.now()
   const captured: CapturedCase[] = []
-  for (const c of REGRESSION_CASES) {
+  for (const c of casesToRun) {
     captured.push(await runCase(c, hookCtx))
   }
+  const wallMs = Date.now() - wallStart
 
   // Output
   const outDir = join(process.cwd(), 'docs', 'regression')
   await mkdir(outDir, { recursive: true })
-  const outPath = join(outDir, `baseline-${RUN_TAG}.md`)
-  await writeFile(outPath, renderMarkdown(captured), 'utf8')
+  const prefix = SMOKE_MODE ? 'smoke' : 'baseline'
+  const outPath = join(outDir, `${prefix}-${RUN_TAG}.md`)
+  await writeFile(outPath, renderMarkdown(captured, wallMs, SMOKE_MODE), 'utf8')
 
   console.log('\n─────────────────────────────────────────────')
-  console.log(`  Baseline guardado en:`)
+  console.log(`  ${SMOKE_MODE ? 'Smoke' : 'Baseline'} guardado en:`)
   console.log(`    ${outPath}`)
+  console.log(`  Wall clock: ${(wallMs / 1000).toFixed(1)}s`)
   console.log('─────────────────────────────────────────────\n')
 
   const failed = captured.filter((c) => c.error).length

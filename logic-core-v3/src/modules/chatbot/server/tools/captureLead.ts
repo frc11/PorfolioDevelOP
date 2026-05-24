@@ -1,8 +1,10 @@
 import { tool } from 'ai'
 import { z } from 'zod'
+import type { Prisma } from '@prisma/client'
 import { prisma } from '@/lib/prisma'
 import { logChatbotEvent } from '../logging'
 import { sendLeadNotificationEmail } from '../notifications'
+import { calculateLeadScore } from '../scoring'
 import { notifyTelegramOptional } from '@/lib/notifications/telegram'
 import type { ToolCallContext, CaptureLeadResult, ToolExecuteResult } from './types'
 
@@ -18,6 +20,30 @@ import type { ToolCallContext, CaptureLeadResult, ToolExecuteResult } from './ty
  * For now, we log structurally so the event is traceable.
  */
 
+/**
+ * B5.1 — Enums alineados con scoring server-side.
+ * - LEAD_INTENTS: mismos valores que `HANDOFF_INTENTS` (showWhatsappHandoff.ts) — un solo
+ *   vocabulario de intenciones en todo el módulo del bot.
+ * - LEAD_CATEGORIES: clasificación de DQ que B5.3 va a consumir.
+ */
+export const LEAD_INTENTS = [
+  'purchase_ready',
+  'schedule_visit',
+  'quote_request',
+  'human_request',
+  'support',
+  'other',
+] as const
+
+export const LEAD_CATEGORIES = [
+  'sales',
+  'postventa',
+  'employment',
+  'provider',
+  'spam',
+  'other',
+] as const
+
 export const captureLeadInputSchema = z
   .object({
     name: z.string().min(2).max(100).describe(
@@ -29,11 +55,28 @@ export const captureLeadInputSchema = z
     email: z.string().email().max(200).optional().describe(
       'Email del usuario. Omitir si el usuario no lo dio.'
     ),
-    intent: z.enum(['quote', 'info', 'demo', 'support', 'other']).describe(
-      'Intención principal: quote=presupuesto, info=más info, demo=ver demo, support=problema con servicio actual, other=otro'
+    intent: z.enum(LEAD_INTENTS).describe(
+      'Intención principal: purchase_ready=lo quiere/pide retirar; schedule_visit=quiere agendar visita/test drive; quote_request=pide cotización formal; human_request=pide humano sin urgencia; support=problema con servicio actual; other=otro.'
     ),
     contextSummary: z.string().min(10).max(500).describe(
-      'Resumen breve (1-2 oraciones) en español rioplatense de qué busca el usuario, qué servicio le interesa, qué problema quiere resolver. Esto va a la BD para que el equipo lo vea.'
+      'Resumen breve (1-2 oraciones) en español rioplatense de qué busca el usuario. Va a la BD para el equipo.'
+    ),
+    // B5.1 — Categoría DQ (descalificación). Si la consulta NO es comercial, marcala.
+    category: z.enum(LEAD_CATEGORIES).default('sales').describe(
+      'sales=consulta comercial real (default); postventa=problema/turno service/garantía; employment=busca trabajo/CV; provider=ofrece servicios/cotiza para vendernos; spam=basura; other=no encaja. Solo marcá distinto a sales si la conversación lo evidencia.'
+    ),
+    // B5.1 — Flags de señal. Anti-alucinación: si NO apareció, mandá false. No infles.
+    requestedAppointment: z.boolean().default(false).describe(
+      'true SOLO si pidió cita/visita/test drive/turno (palabras como "agendar", "ir a verlo", "test drive", "turno").'
+    ),
+    mentionedFinancing: z.boolean().default(false).describe(
+      'true SOLO si mencionó financiación/cuotas/crédito/prendario/leasing. false si nunca lo tocó.'
+    ),
+    mentionedTradeIn: z.boolean().default(false).describe(
+      'true SOLO si mencionó entregar un usado en parte de pago/tasación. false si nunca lo dijo.'
+    ),
+    askedSpecificModel: z.boolean().default(false).describe(
+      'true SOLO si nombró un modelo concreto (ej. "Corolla XEi", "Hilux SRV"). false si fue genérico ("un 0KM", "algo familiar").'
     ),
   })
   .refine((data) => Boolean(data.phone) || Boolean(data.email), {
@@ -50,6 +93,8 @@ USAR cuando: el usuario explícitamente expresó interés en ser contactado Y pr
 REGLAS DE CANALES:
 - Si el usuario te dio AMBOS (teléfono y email), pasá los DOS en la misma invocación: persistimos los dos canales. Es el caso ideal.
 - Si dio solo uno, pasá solo ese. No le pidas el otro si no lo ofreció voluntariamente — uno solo es suficiente.
+
+REGLAS DE SEÑALES (B5.1): además de los datos de contacto, completá los flags (requestedAppointment, mentionedFinancing, mentionedTradeIn, askedSpecificModel) y la category con base en lo que REALMENTE apareció en la conversación. Si una señal no apareció, mandá false — NO infles para "ayudar". Si la consulta no es de venta (postventa, busca trabajo, ofrece servicios), marcá la category correspondiente: el sistema la usa para descalificar.
 
 NO USAR si:
 - El usuario solo está consultando información sin intención de seguir
@@ -94,7 +139,29 @@ async function captureLeadExecute(
       (c): c is 'phone' | 'email' => c !== null,
     )
 
-    // 3. Create the lead and update conversation in a transaction
+    // 3. B5.2/B5.3 — Calcular score ANTES del create. Función pura, server-side,
+    //    sin LLM. Mismas señales → mismo score (predecible y auditable).
+    //    B5.3 también aplica:
+    //      - DQ por categoría (employment/provider/spam) → classification='dq', score=0
+    //      - Penalty postventa (−50) y phone inválido (−20)
+    //    `scoreSignals` incluye penalties (points negativos) para explicabilidad B5.4.
+    const providedPhone = Boolean(phone)
+    const providedEmail = Boolean(email)
+    const { score, classification, signals: scoreSignals, dqReason } = calculateLeadScore({
+      signals: {
+        requestedAppointment: input.requestedAppointment,
+        mentionedFinancing: input.mentionedFinancing,
+        mentionedTradeIn: input.mentionedTradeIn,
+        askedSpecificModel: input.askedSpecificModel,
+        providedPhone,
+      },
+      category: input.category,
+      phone,
+    })
+
+    // 4. Create the lead and update conversation in a transaction.
+    //    B5.1: providedPhone/providedEmail SE DERIVAN del input — no del LLM.
+    //    El bot no puede inflar esto: si no mandó phone, providedPhone=false. Estructural.
     const result = await prisma.$transaction(async (tx) => {
       const lead = await tx.chatbotLead.create({
         data: {
@@ -106,6 +173,21 @@ async function captureLeadExecute(
           intent: input.intent,
           message: input.contextSummary,
           status: 'NEW',
+          // B5.1 — Señales estructuradas
+          category: input.category,
+          requestedAppointment: input.requestedAppointment,
+          mentionedFinancing: input.mentionedFinancing,
+          mentionedTradeIn: input.mentionedTradeIn,
+          askedSpecificModel: input.askedSpecificModel,
+          providedPhone,
+          providedEmail,
+          // B5.2 — Score heurístico calculado server-side (cero LLM).
+          score,
+          classification,
+          // `scoreSignals` es `ScoredSignal[]` (JSON-serializable estructuralmente).
+          // Cast en el boundary Prisma porque `keyof LeadSignals` no es asignable
+          // a InputJsonValue sin perder tipo en el dominio.
+          scoreSignals: scoreSignals as unknown as Prisma.InputJsonValue,
         },
       })
 
@@ -117,7 +199,7 @@ async function captureLeadExecute(
       return lead
     })
 
-    // 4. Notify the client without blocking the bot response.
+    // 5. Notify the client without blocking the bot response.
     async function notifyClient() {
       try {
         const bot = await prisma.botConfig.findUnique({
@@ -179,7 +261,7 @@ async function captureLeadExecute(
 
     void notifyClient()
 
-    // 5. Log structured event.
+    // 6. Log structured event — incluye score B5.2 + DQ reason B5.3.
     console.log(
       JSON.stringify({
         type: 'capture_lead.created',
@@ -187,7 +269,11 @@ async function captureLeadExecute(
         botConfigId: ctx.botConfigId,
         leadId: result.id,
         intent: input.intent,
+        category: input.category,
         channels,
+        score,
+        classification,
+        dqReason,
         // PII (name, contact values, message) intentionally omitted from logs
       })
     )
@@ -196,12 +282,27 @@ async function captureLeadExecute(
       botConfigId: ctx.botConfigId,
       type: 'tool.lead_captured',
       level: 'info',
-      message: `Lead capturado (intent: ${input.intent}, canales: ${channels.join('+') || 'ninguno'})`,
+      message: `Lead capturado (intent: ${input.intent}, category: ${input.category}, score: ${score}/${classification}${dqReason ? ` [dq=${dqReason}]` : ''}, canales: ${channels.join('+') || 'ninguno'})`,
       conversationId: ctx.conversationId,
       metadata: {
         intent: input.intent,
+        category: input.category,
         channels,
         leadId: result.id,
+        // B5.1 — flags de señal para trazabilidad / debugging del scoring
+        signals: {
+          requestedAppointment: input.requestedAppointment,
+          mentionedFinancing: input.mentionedFinancing,
+          mentionedTradeIn: input.mentionedTradeIn,
+          askedSpecificModel: input.askedSpecificModel,
+          providedPhone,
+          providedEmail,
+        },
+        // B5.2/B5.3 — score calculado + desglose + razón de DQ
+        score,
+        classification,
+        dqReason,
+        scoreBreakdown: scoreSignals,
       },
     })
 

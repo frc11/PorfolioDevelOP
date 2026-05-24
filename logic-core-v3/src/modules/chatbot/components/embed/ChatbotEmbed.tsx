@@ -6,6 +6,7 @@ import { Send, Sparkles } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 import { useChatbot } from '../../hooks/useChatbot'
 import { renderToolCall } from '../tool-cards'
+import { DegradedBanner } from '../chat/DegradedBanner'
 
 interface ChatbotEmbedProps {
   slug: string
@@ -81,7 +82,7 @@ export function ChatbotEmbed({ slug }: ChatbotEmbedProps) {
 
   const send = useCallback(() => {
     const text = input.trim()
-    if (!text || chatbot.isStreaming) return
+    if (!text || chatbot.isStreaming || chatbot.degradedInfo) return
     chatbot.sendMessage(text)
     notifyParent('message-sent')
     setInput('')
@@ -98,6 +99,8 @@ export function ChatbotEmbed({ slug }: ChatbotEmbedProps) {
   }
 
   const isThinking = chatbot.isStreaming
+  const isDegraded = chatbot.degradedInfo !== null
+  const inputDisabled = isThinking || isDegraded
 
   if (chatbot.isLoading || !chatbot.config) {
     return (
@@ -262,25 +265,10 @@ export function ChatbotEmbed({ slug }: ChatbotEmbedProps) {
         role="log"
         aria-live="polite"
       >
-        {chatbot.degradedMode && (
-          <div
-            style={{
-              background: 'rgba(234,179,8,0.08)',
-              border: '1px solid rgba(234,179,8,0.2)',
-              color: 'rgba(253,224,71,0.85)',
-              padding: '10px 14px',
-              borderRadius: '12px',
-              fontSize: '12px',
-              lineHeight: 1.5,
-            }}
-          >
-            ⚠️ Modo degradado activo. Las respuestas pueden tardar un poco más de lo normal.
-          </div>
-        )}
-
         <AnimatePresence initial={false}>
           {chatbot.messages.length === 0 ? (
             <div
+              key="empty-state"
               style={{
                 display: 'flex',
                 flexDirection: 'column',
@@ -449,35 +437,39 @@ export function ChatbotEmbed({ slug }: ChatbotEmbedProps) {
             ))
           )}
 
-          {isThinking && (
-            <motion.div
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
-              style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '4px 2px' }}
-            >
-              {[0, 1, 2].map((i) => (
-                <motion.div
-                  key={i}
-                  style={{
-                    width: '6px',
-                    height: '6px',
-                    borderRadius: '50%',
-                    background: `rgba(6,182,212,${0.5 + i * 0.15})`,
-                    boxShadow: '0 0 4px rgba(6,182,212,0.4)',
-                  }}
-                  animate={{ scale: [1, 1.5, 1], opacity: [0.4, 1, 0.4] }}
-                  transition={{
-                    duration: 1.1,
-                    repeat: Infinity,
-                    ease: 'easeInOut',
-                    delay: i * 0.18,
-                  }}
-                />
-              ))}
-            </motion.div>
+          {chatbot.degradedInfo && (
+            <DegradedBanner key="degraded-banner" info={chatbot.degradedInfo} />
           )}
         </AnimatePresence>
+
+        {/* MS-2: thinking dots FUERA del AnimatePresence — los inner dots tienen
+            `animate` infinito que sobreescribe el opacity de exit del padre,
+            dejando un residuo fantasma cuando el unmount es instantáneo (caso
+            degradado: SDK termina al instante con stream vacío). Sin
+            AnimatePresence el unmount es inmediato y limpio. */}
+        {isThinking && !chatbot.degradedInfo && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '4px 2px' }}>
+            {[0, 1, 2].map((i) => (
+              <motion.div
+                key={i}
+                style={{
+                  width: '6px',
+                  height: '6px',
+                  borderRadius: '50%',
+                  background: `rgba(6,182,212,${0.5 + i * 0.15})`,
+                  boxShadow: '0 0 4px rgba(6,182,212,0.4)',
+                }}
+                animate={{ scale: [1, 1.5, 1], opacity: [0.4, 1, 0.4] }}
+                transition={{
+                  duration: 1.1,
+                  repeat: Infinity,
+                  ease: 'easeInOut',
+                  delay: i * 0.18,
+                }}
+              />
+            ))}
+          </div>
+        )}
 
         <div ref={messagesEndRef} style={{ height: '1px' }} />
       </div>
@@ -521,8 +513,8 @@ export function ChatbotEmbed({ slug }: ChatbotEmbedProps) {
               e.currentTarget.style.height = e.currentTarget.scrollHeight + 'px'
             }}
             onKeyDown={handleKeyDown}
-            placeholder="Escribí tu consulta..."
-            disabled={isThinking}
+            placeholder={isDegraded ? 'Continuá la conversación por WhatsApp' : 'Escribí tu consulta...'}
+            disabled={inputDisabled}
             rows={1}
             style={{
               background: 'transparent',
@@ -546,15 +538,15 @@ export function ChatbotEmbed({ slug }: ChatbotEmbedProps) {
           whileHover={{ scale: 1.08 }}
           whileTap={{ scale: 0.94 }}
           transition={{ type: 'spring', stiffness: 400, damping: 15 }}
-          disabled={isThinking || !input.trim()}
+          disabled={inputDisabled || !input.trim()}
           style={{
             width: '40px',
             height: '40px',
             borderRadius: '50%',
             border: '1px solid rgba(6,182,212,0.2)',
-            cursor: isThinking || !input.trim() ? 'not-allowed' : 'pointer',
+            cursor: inputDisabled || !input.trim() ? 'not-allowed' : 'pointer',
             background:
-              isThinking || !input.trim()
+              inputDisabled || !input.trim()
                 ? 'rgba(255,255,255,0.05)'
                 : 'linear-gradient(135deg, rgba(6,182,212,0.85), rgba(6,182,212,0.65))',
             display: 'flex',
@@ -562,12 +554,12 @@ export function ChatbotEmbed({ slug }: ChatbotEmbedProps) {
             justifyContent: 'center',
             flexShrink: 0,
             boxShadow:
-              isThinking || !input.trim()
+              inputDisabled || !input.trim()
                 ? 'none'
                 : '0 0 16px rgba(6,182,212,0.28), 0 2px 8px rgba(0,0,0,0.3)',
             transition: 'all 200ms',
             color:
-              isThinking || !input.trim()
+              inputDisabled || !input.trim()
                 ? 'rgba(255,255,255,0.2)'
                 : 'rgba(255,255,255,0.95)',
           }}

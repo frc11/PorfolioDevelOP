@@ -120,6 +120,16 @@ npx prisma migrate status
 
 ---
 
+## Subagentes
+
+Estándar permanente — no opcional. Los subagentes corren en su propia ventana de contexto (no inflan la del padre) y son read-only. Solo el agente padre escribe código.
+
+- **Descubrimiento** (mapear schema/rutas/tools/estado antes de tocar código): usar el subagente built-in `Explore`. El padre espera su mapa antes de planificar.
+- **Verificación de UI** (cualquier sprint que toque pantallas): despachar el subagente `visual-qa` contra las rutas tocadas, desktop + mobile. El padre ESPERA su reporte. Si reporta ❌ ROTO/BUG → no cerrar el sprint. Si reporta ❓ A CONFIRMAR → flag al humano, no asumir.
+- **Batería de regresión** (cuando exista el subagente `regression-runner`): delegar la corrida — async, no bloquea contexto del padre. Hasta que exista, correr la batería directo.
+
+---
+
 ## Frozen files
 
 | File | Rule |

@@ -16,7 +16,31 @@ export const MESSAGE_CONTEXTS: Record<string, string> = {
 
   proyecto:
     'Hola! Quería consultarles sobre el estado de mi proyecto. ¿Pueden actualizarme?',
-  
+
+  // MS-3 — pre-fill cuando el cliente llega desde el CTA dorado del dashboard
+  // de planes. El lead ya quedó registrado en `requestUpsellAction` ANTES del
+  // redirect; este mensaje es para que el cliente no escriba de cero si decide
+  // mandar el mensaje también.
+  'plan-upgrade-pro':
+    'Hola! Quería subir mi asistente al plan Pro. ¿Cuándo lo coordinamos y cuáles serían los próximos pasos?',
+
+  'plan-upgrade-business':
+    'Hola! Quería subir mi asistente al plan Business. ¿Cuándo lo coordinamos y cuáles serían los próximos pasos?',
+
+  'plan-upgrade-starter':
+    'Hola! Quería ajustar mi plan al Starter. ¿Lo vemos juntos?',
+
+  // Downgrade / cambio lateral (CTA gris "Hablar con mi equipo" de PlansShowcase).
+  // NO dispara `requestUpsellAction` — no es upsell, solo pre-fill de mensaje.
+  'plan-change-pro':
+    'Hola! Quería revisar el cambio de mi plan al Pro. ¿Lo vemos juntos?',
+
+  'plan-change-business':
+    'Hola! Quería revisar el cambio de mi plan al Business. ¿Lo vemos juntos?',
+
+  'plan-change-starter':
+    'Hola! Quería revisar el cambio de mi plan al Starter. ¿Lo vemos juntos?',
+
   default:
     '',
 }

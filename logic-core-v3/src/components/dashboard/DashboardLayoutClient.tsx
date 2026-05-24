@@ -15,6 +15,7 @@ interface DashboardLayoutClientProps {
   banners?: React.ReactNode
   companyName: string
   unreadMessages: number
+  hotLeadsCount?: number
   activeModuleSlugs: string[]
   notifications: Notification[]
   userDisplayName?: string
@@ -25,6 +26,7 @@ export function DashboardLayoutClient({
   banners,
   companyName,
   unreadMessages,
+  hotLeadsCount = 0,
   activeModuleSlugs,
   notifications,
   userDisplayName,
@@ -63,6 +65,7 @@ export function DashboardLayoutClient({
         <SidebarNav
           companyName={companyName}
           unreadMessages={unreadMessages}
+          hotLeadsCount={hotLeadsCount}
           activeModuleSlugs={activeModuleSlugs}
         />
       </div>
@@ -91,6 +94,7 @@ export function DashboardLayoutClient({
               <SidebarNav
                 companyName={companyName}
                 unreadMessages={unreadMessages}
+                hotLeadsCount={hotLeadsCount}
                 activeModuleSlugs={activeModuleSlugs}
                 showCloseButton
                 onClose={() => setMobileSidebarOpen(false)}

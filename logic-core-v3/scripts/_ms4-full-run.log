@@ -1,0 +1,85 @@
+⚠ DIRECT_URL no seteado — usando DATABASE_URL pooled.
+  Para reducir `terminated`, agregá DIRECT_URL al .env.local (connection string Neon SIN `-pooler`).
+⏳ Esperando dev server en http://localhost:3000...
+✓ Dev server respondiendo (0s)
+✓ Bot encontrado: Aki (id cmphgpbpy00059fb0wa8gi9vo) — activo, plan=BUSINESS (quota=5000)
+
+🚦 Ejecutando FULL (19) de regresión...
+
+Prefijo purgeable: regression-test-*
+Run tag: 2026-05-23T21-20-32-446Z
+
+▶  [price-0km] Consulta de precio de 0KM
+   ✓ Turn 1 (5588ms) — 266 chars, 0 tools
+   ✓ Turn 2 (4056ms) — 353 chars, 0 tools
+
+▶  [financiacion] Consulta de financiación
+   ✓ Turn 1 (3677ms) — 113 chars, 0 tools
+   ✓ Turn 2 (2856ms) — 130 chars, 0 tools
+
+▶  [usados] Tasación de usado en parte de pago
+   ✗ Turn 1 HTTP error: 500
+
+▶  [horarios] Horarios de atención
+   ✗ Error: terminated
+
+▶  [off-topic] Off-topic (no relacionado a la concesionaria)
+   ✓ Turn 1 (5188ms) — 53 chars, 0 tools
+
+▶  [jailbreak] Intento de jailbreak / cambio de rol
+   ✓ Turn 1 (3379ms) — 77 chars, 0 tools
+
+▶  [lead-capture] Flujo completo de captura de lead
+   ✓ Turn 1 (3380ms) — 123 chars, 0 tools
+   ✓ Turn 2 (4417ms) — 0 chars, 2 tools
+
+▶  [lead-capture-both-channels] Lead con email Y teléfono (ambos canales)
+   ✓ Turn 1 (2896ms) — 158 chars, 0 tools
+   ✓ Turn 2 (4595ms) — 176 chars, 2 tools
+
+▶  [whatsapp-handoff] Pide pasar a WhatsApp directamente
+   ✓ Turn 1 (5640ms) — 0 chars, 1 tools
+
+▶  [whatsapp-handoff-purchase-signal] Handoff por señal clara de compra (B3.6)
+   ✓ Turn 1 (5307ms) — 0 chars, 1 tools
+
+▶  [whatsapp-handoff-schedule] Handoff por pedido de agendar visita (B3.6)
+   ✓ Turn 1 (4915ms) — 0 chars, 1 tools
+
+▶  [no-handoff-on-greeting] NO debe disparar handoff en saludo (B3.6 anti-spam)
+   ✓ Turn 1 (4019ms) — 83 chars, 0 tools
+
+▶  [lead-capture-chain] Chain completo: capture_lead → texto de confirmación → offer_handoff_options (MS-1)
+   ✓ Turn 1 (4076ms) — 179 chars, 0 tools
+   ✗ Turn 2 timeout
+
+▶  [lead-capture-financing-tradein] B5.1 — Lead con financiación + usado en parte de pago
+   ✓ Turn 1 (4548ms) — 347 chars, 0 tools
+   ✓ Turn 2 (5021ms) — 173 chars, 1 tools
+
+▶  [lead-capture-postventa] B5.1/B5.3 — Postventa: capturado con category=postventa → DQ por penalty
+   ✓ Turn 1 (5218ms) — 279 chars, 0 tools
+   ✓ Turn 2 (5726ms) — 157 chars, 2 tools
+
+▶  [lead-capture-employment] B5.3 — Lead de empleo (DQ directo, category=employment)
+   ✓ Turn 1 (2661ms) — 160 chars, 0 tools
+   ✓ Turn 2 (4020ms) — 146 chars, 1 tools
+
+▶  [lead-capture-invalid-phone] B5.3 — Teléfono inválido → penalty −20
+   ✓ Turn 1 (2722ms) — 149 chars, 0 tools
+   ✗ Turn 2 timeout
+
+▶  [long-session-soft-cap] B4.5 — Sesión larga (≥15 turnos) → sugiere handoff
+   ✓ Turn 1 (4266ms) — 60 chars, 0 tools
+   ✗ Error: terminated
+
+▶  [quota-exhausted] B4.5 — Cuota agotada → modo degradado (CERO LLM)
+   ✗ Error: fetch failed
+
+─────────────────────────────────────────────
+  Baseline guardado en:
+    C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\docs\regression\baseline-2026-05-23T21-20-32-446Z.md
+  Wall clock: 596.5s
+─────────────────────────────────────────────
+
+⚠️  6/19 casos con error. Revisá el output.

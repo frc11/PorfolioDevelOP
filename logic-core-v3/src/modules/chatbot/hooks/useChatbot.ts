@@ -25,6 +25,19 @@ export interface UseChatbotOptions {
   currentPath: string
 }
 
+// Payload del backend en modo degradado — ver handleChatRequest.ts:83-101.
+// Cuando el endpoint corta sin llamar a Gemini (cuota agotada / dominio fuera de cap),
+// devuelve este JSON con todo lo necesario para armar el handoff a WhatsApp en el cliente.
+export type DegradedReason = 'quota_exhausted' | 'domain_overflow'
+
+export interface DegradedInfo {
+  reason: DegradedReason
+  message: string
+  whatsappNumber: string | null
+  whatsappMessage: string | null
+  companyName: string | null
+}
+
 export interface UseChatbotReturn {
   config: PublicBotConfig | null
   isLoading: boolean
@@ -36,6 +49,7 @@ export interface UseChatbotReturn {
   isStreaming: boolean
   avatarState: NeuroAvatarState
   degradedMode: boolean
+  degradedInfo: DegradedInfo | null
   sendMessage: (text: string) => void
   acceptProactivePrompt: (prompt: string) => void
   triggerWhatsappHandoff: () => void
@@ -47,7 +61,7 @@ export function useChatbot({ slug, currentPath }: UseChatbotOptions): UseChatbot
   const [config, setConfig] = useState<PublicBotConfig | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isOpen, setIsOpen] = useState(false)
-  const [degradedMode, setDegradedMode] = useState(false)
+  const [degradedInfo, setDegradedInfo] = useState<DegradedInfo | null>(null)
   const sessionIdRef = useRef<string>(getOrCreateSessionId())
 
   useEffect(() => {
@@ -80,7 +94,28 @@ export function useChatbot({ slug, currentPath }: UseChatbotOptions): UseChatbot
               const cloned = response.clone()
               const data = await cloned.json()
               if (data?.mode === 'degraded') {
-                setDegradedMode(true)
+                // MS-2: capturamos el payload completo del backend (B4.5) para
+                // que el widget pueda armar el handoff a WhatsApp con la info
+                // real del bot (número, mensaje pre-armado, nombre de la org).
+                // Si algún campo no viene, normalizamos a null sin romper.
+                const reason: DegradedReason =
+                  data.reason === 'domain_overflow' ? 'domain_overflow' : 'quota_exhausted'
+                setDegradedInfo({
+                  reason,
+                  message: typeof data.message === 'string' ? data.message : '',
+                  whatsappNumber:
+                    typeof data.whatsappNumber === 'string' && data.whatsappNumber.length > 0
+                      ? data.whatsappNumber
+                      : null,
+                  whatsappMessage:
+                    typeof data.whatsappMessage === 'string' && data.whatsappMessage.length > 0
+                      ? data.whatsappMessage
+                      : null,
+                  companyName:
+                    typeof data.companyName === 'string' && data.companyName.length > 0
+                      ? data.companyName
+                      : null,
+                })
                 // Return an empty stream so the SDK doesn't error
                 return new Response('', {
                   status: 200,
@@ -199,9 +234,14 @@ export function useChatbot({ slug, currentPath }: UseChatbotOptions): UseChatbot
   const close = useCallback(() => setIsOpen(false), [])
   const toggle = useCallback(() => setIsOpen((v) => !v), [])
 
+  // `degradedMode` se deriva de `degradedInfo` para que cualquier consumer
+  // viejo siga funcionando, mientras el flujo nuevo (B4.5/MS-2) usa el payload
+  // entero para armar el handoff a WhatsApp.
+  const degradedMode = degradedInfo !== null
+
   return {
     config, isLoading, isOpen, open, close, toggle,
-    messages, isStreaming, avatarState, degradedMode,
+    messages, isStreaming, avatarState, degradedMode, degradedInfo,
     sendMessage, acceptProactivePrompt,
     triggerWhatsappHandoff, triggerCallbackHandoff, navigateTo,
   }
