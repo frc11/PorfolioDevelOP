@@ -18,7 +18,13 @@
 
 /* Logic Core V3: The Inversion System */
 :root {
-  /* Default Light (Zinc-50) */
+  /* Default dark fallback prevents white flashes before section themes hydrate. */
+  --color-void: #030303;
+  --color-obsidian: #f4f4f5;
+  --color-accent: #06b6d4;
+}
+
+[data-theme='light'] {
   --color-void: #fafafa;
   --color-obsidian: #18181b;
   --color-accent: #06b6d4;

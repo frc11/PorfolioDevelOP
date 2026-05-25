@@ -5,7 +5,6 @@ import {
   AnimatePresence,
   motion,
   type MotionValue,
-  useMotionTemplate,
   useMotionValue,
   useMotionValueEvent,
   useScroll,
@@ -2416,22 +2415,9 @@ const AI_SIMULATIONS: AISimulation[] = [
   { id: 4, label: 'Métricas', icon: BarChart2, duration: 4500, color: AI_COLOR },
 ];
 
-type AISimProps = { isActive: boolean; progress: number; color: string };
+function AIScene({ service }: { service: Service }) {
+  void service;
 
-function SimChat({ isActive: _isActive, progress: _progress, color: _color }: AISimProps) {
-  return <div style={{ color: 'rgba(255,255,255,0.2)', fontSize: 11, padding: 12 }}>Chat IA — próximo sprint</div>;
-}
-function SimLeadsIA({ isActive: _isActive, progress: _progress, color: _color }: AISimProps) {
-  return <div style={{ color: 'rgba(255,255,255,0.2)', fontSize: 11, padding: 12 }}>Leads IA — próximo sprint</div>;
-}
-function SimAgenda({ isActive: _isActive, progress: _progress, color: _color }: AISimProps) {
-  return <div style={{ color: 'rgba(255,255,255,0.2)', fontSize: 11, padding: 12 }}>Agenda — próximo sprint</div>;
-}
-function SimMétricas({ isActive: _isActive, progress: _progress, color: _color }: AISimProps) {
-  return <div style={{ color: 'rgba(255,255,255,0.2)', fontSize: 11, padding: 12 }}>Métricas — próximo sprint</div>;
-}
-
-function AIScene({ service: _service }: { service: Service }) {
   type SimProps = { isActive: boolean; progress: number; color: string };
 
   function SimChat({ isActive, progress, color }: SimProps) {
@@ -3965,81 +3951,6 @@ function AIScene({ service: _service }: { service: Service }) {
     </div>
   );
 }
-function useMagneticOffset() {
-  const targetX = useMotionValue(0);
-  const targetY = useMotionValue(0);
-
-  const springConfig = { stiffness: 190, damping: 20, mass: 0.35 };
-  const x = useSpring(targetX, springConfig);
-  const y = useSpring(targetY, springConfig);
-
-  return { targetX, targetY, x, y };
-}
-
-type MagneticFlowPathProps = {
-  fromX: MotionValue<number>;
-  fromY: MotionValue<number>;
-  toX: MotionValue<number>;
-  toY: MotionValue<number>;
-  burstWidth: MotionValue<number>;
-  burstOpacity: MotionValue<number>;
-  burstFilter: MotionValue<string>;
-  color: string;
-  connectionIndex: number;
-};
-
-function MagneticFlowPath({
-  fromX,
-  fromY,
-  toX,
-  toY,
-  burstWidth,
-  burstOpacity,
-  burstFilter,
-  color,
-  connectionIndex,
-}: MagneticFlowPathProps) {
-  const controlOffset = useTransform(() => (toX.get() - fromX.get()) * 0.28);
-  const controlStartX = useTransform(() => fromX.get() + controlOffset.get());
-  const controlEndX = useTransform(() => toX.get() - controlOffset.get());
-  const pulseX = useTransform(() => fromX.get() + (toX.get() - fromX.get()) * 0.5);
-  const pulseY = useTransform(() => fromY.get() + (toY.get() - fromY.get()) * 0.5);
-  const path = useMotionTemplate`M ${fromX} ${fromY} C ${controlStartX} ${fromY} ${controlEndX} ${toY} ${toX} ${toY}`;
-
-  return (
-    <>
-      <motion.path
-        d={path}
-        fill="none"
-        stroke={color}
-        strokeWidth={1.2}
-        strokeOpacity={0.18}
-      />
-      <motion.path
-        d={path}
-        fill="none"
-        stroke={color}
-        strokeWidth={burstWidth}
-        strokeLinecap="round"
-        strokeOpacity={burstOpacity}
-        style={{ filter: burstFilter }}
-      />
-      <motion.circle
-        r={2.5}
-        fill={color}
-        animate={{ opacity: [0.12, 0.95, 0.12] }}
-        transition={{ duration: 2.2, repeat: Infinity, ease: 'easeInOut', delay: connectionIndex * 0.18 }}
-        style={{
-          cx: pulseX,
-          cy: pulseY,
-          filter: burstFilter,
-        }}
-      />
-    </>
-  );
-}
-
-
 function AutomationScene({ service }: { service: Service }) {
   void service;
 
@@ -7479,158 +7390,6 @@ function ServiceRow({
   );
 }
 
-function ServicesDetailCta({ onNavigate }: { onNavigate: (href: string) => void }) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 28 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.42 }}
-      transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
-      className="grid gap-8 pb-[38svh] pt-12 lg:grid-cols-[clamp(7rem,10vw,11rem)_minmax(0,1fr)] lg:gap-12 lg:pb-[42svh] lg:pt-20"
-    >
-      <div className="relative hidden min-h-full w-full lg:block" aria-hidden="true">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.7 }}
-          whileInView={{ opacity: [0, 1, 0.72], scale: [0.7, 1.18, 1] }}
-          viewport={{ once: true, amount: 0.8 }}
-          transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-          style={{
-            position: 'absolute',
-            top: 34,
-            left: '50%',
-            width: 34,
-            height: 34,
-            transform: 'translateX(-50%)',
-            borderRadius: 999,
-            background: '#06b6d4',
-            boxShadow: '0 0 26px #06b6d4, 0 0 76px rgba(6,182,212,0.55)',
-          }}
-        />
-        <motion.div
-          initial={{ opacity: 0, scaleY: 0 }}
-          whileInView={{ opacity: 1, scaleY: 1 }}
-          viewport={{ once: true, amount: 0.8 }}
-          transition={{ duration: 0.7, delay: 0.12, ease: [0.16, 1, 0.3, 1] }}
-          style={{
-            position: 'absolute',
-            top: 50,
-            bottom: 26,
-            left: '50%',
-            width: 10,
-            transform: 'translateX(-50%)',
-            transformOrigin: 'top center',
-            borderRadius: 999,
-            background: 'linear-gradient(180deg, #06b6d4, #10b981 34%, #8b5cf6 68%, #f59e0b)',
-            boxShadow: '0 0 42px rgba(6,182,212,0.28), 0 0 64px rgba(245,158,11,0.22)',
-          }}
-        />
-      </div>
-      <motion.div
-        data-cursor="hover"
-        initial="rest"
-        whileHover="hover"
-        whileInView="show"
-        viewport={{ once: true, amount: 0.45 }}
-        variants={{
-          rest: {
-            borderColor: 'rgba(255,255,255,0.10)',
-            boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.08), 0 28px 82px rgba(0,0,0,0.36)',
-          },
-          show: {
-            borderColor: 'rgba(6,182,212,0.28)',
-            boxShadow:
-              'inset 0 1px 0 rgba(255,255,255,0.12), 0 34px 110px rgba(0,0,0,0.44), 0 0 96px rgba(6,182,212,0.18), 0 0 120px rgba(245,158,11,0.10)',
-          },
-          hover: {
-            y: -3,
-            borderColor: 'rgba(255,255,255,0.18)',
-            boxShadow:
-              'inset 0 1px 0 rgba(255,255,255,0.14), 0 38px 120px rgba(0,0,0,0.48), 0 0 120px rgba(6,182,212,0.22), 0 0 140px rgba(245,158,11,0.14)',
-          },
-        }}
-        transition={{ duration: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
-        style={{
-          position: 'relative',
-          minHeight: 'clamp(23rem, 46svh, 32rem)',
-          overflow: 'hidden',
-          borderRadius: 10,
-          border: '1px solid rgba(255,255,255,0.10)',
-          background:
-            'linear-gradient(135deg, rgba(255,255,255,0.07), rgba(255,255,255,0.022)), radial-gradient(circle at 14% 18%, rgba(6,182,212,0.18), transparent 0 32%), radial-gradient(circle at 82% 20%, rgba(16,185,129,0.12), transparent 0 30%), radial-gradient(circle at 64% 90%, rgba(139,92,246,0.13), transparent 0 32%), radial-gradient(circle at 94% 76%, rgba(245,158,11,0.14), transparent 0 28%)',
-          boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.08), 0 28px 82px rgba(0,0,0,0.36)',
-          padding: 'clamp(1.4rem, 3vw, 3rem)',
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'end', justifyContent: 'space-between', gap: 24, flexWrap: 'wrap' }}>
-          <div>
-            <div
-              style={{
-                fontSize: 10,
-                fontWeight: 800,
-                letterSpacing: '0.18em',
-                textTransform: 'uppercase',
-                color: 'rgba(255,255,255,0.42)',
-                marginBottom: 10,
-              }}
-            >
-              Siguiente paso
-            </div>
-            <h3
-              style={{
-                margin: 0,
-                fontSize: 'clamp(1.45rem, 2.5vw, 2.2rem)',
-                lineHeight: 1.05,
-                letterSpacing: '-0.035em',
-                color: 'white',
-                fontWeight: 900,
-              }}
-            >
-              ProfundizÃ¡ en la soluciÃ³n que mÃ¡s sentido tenga para tu negocio.
-            </h3>
-          </div>
-        </div>
-
-        <div style={{ marginTop: 22, display: 'grid', gap: 10, gridTemplateColumns: 'repeat(auto-fit, minmax(11rem, 1fr))' }}>
-          {ORDERED_SERVICES.map((service) => (
-            <motion.button
-              key={service.id}
-              type="button"
-              onClick={() => onNavigate(service.href)}
-              whileHover={{
-                y: -2,
-                background: `${service.accent}16`,
-                borderColor: `${service.accent}5C`,
-                boxShadow: `0 0 28px ${service.accent}20`,
-              }}
-              whileTap={{ scale: 0.985 }}
-              transition={{ duration: 0.14, ease: [0.25, 0.46, 0.45, 0.94] }}
-              style={{
-                minHeight: 46,
-                borderRadius: 8,
-                border: `1px solid ${service.accent}2E`,
-                background: `${service.accent}0B`,
-                color: service.accent,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: 9,
-                fontSize: 11,
-                fontWeight: 850,
-                letterSpacing: '0.09em',
-                textTransform: 'uppercase',
-                cursor: 'pointer',
-              }}
-            >
-              {SERVICE_SHORT_LABELS[service.id]}
-              <span aria-hidden="true">-&gt;</span>
-            </motion.button>
-          ))}
-        </div>
-      </motion.div>
-    </motion.div>
-  );
-}
-
 function ServicesFullWidthCta({ onNavigate }: { onNavigate: (href: string) => void }) {
   const [isCtaHovered, setIsCtaHovered] = useState(false);
   const [ctaGlowStep, setCtaGlowStep] = useState(0);
@@ -8296,9 +8055,59 @@ export default function OurServices() {
     <section
       ref={sectionRef}
       id="servicios"
-      className="relative overflow-hidden"
+      className="relative isolate overflow-hidden bg-[#020407] text-white"
     >
       <OurServicesBackground activeAccent={activeAccent} />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 top-0 z-[1] h-[clamp(12rem,24vw,22rem)]"
+        style={{
+          background:
+            'linear-gradient(180deg, rgba(0,0,0,0.88) 0%, rgba(2,4,7,0.62) 34%, rgba(2,4,7,0.26) 68%, transparent 100%)',
+        }}
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute left-1/2 top-[-12rem] z-[1] h-[26rem] w-[72rem] -translate-x-1/2 rounded-full blur-2xl"
+        style={{
+          background:
+            'radial-gradient(ellipse, rgba(0,0,0,0.72), rgba(2,7,12,0.42) 38%, rgba(6,182,212,0.035) 58%, transparent 76%)',
+        }}
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-80"
+        style={{
+          background:
+            'linear-gradient(180deg, transparent 0%, rgba(2,4,7,0.48) 42%, #020407 100%)',
+        }}
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute bottom-[-11rem] left-1/2 z-[1] h-80 w-[72rem] -translate-x-1/2 rounded-full blur-3xl"
+        style={{
+          background:
+            'radial-gradient(ellipse, rgba(6,182,212,0.08), rgba(139,92,246,0.045) 38%, rgba(249,115,22,0.025) 58%, transparent 76%)',
+        }}
+      />
+      <svg
+        aria-hidden="true"
+        className="pointer-events-none absolute bottom-[-4.5rem] left-[-7%] z-[1] hidden h-52 w-[64rem] opacity-18 lg:block"
+        viewBox="0 0 1020 220"
+        fill="none"
+        preserveAspectRatio="none"
+      >
+        <path
+          d="M0 126C160 82 254 172 392 124C528 76 630 82 760 132C874 176 944 132 1020 96"
+          stroke="rgba(56,189,248,0.34)"
+          strokeWidth="1"
+        />
+        <path
+          d="M0 164C178 122 276 196 422 152C566 108 688 120 820 164C918 196 972 166 1020 142"
+          stroke="rgba(139,92,246,0.22)"
+          strokeWidth="1"
+        />
+      </svg>
 
       <div className="relative z-10 mx-auto max-w-[1440px] px-5 pb-14 pt-20 sm:px-8 lg:px-10 lg:pt-24">
         {/* HEADER INMERSIVO */}

@@ -11,11 +11,11 @@ import { About } from '@/components/sections/home/About'
 const Footer = dynamic(() => import('@/components/sections/home/Footer').then(mod => mod.Footer), { ssr: true })
 const WhyDevelOP = dynamic(() => import('@/components/sections/home/WhyDevelOP').then(mod => mod.WhyDevelOP), { ssr: true })
 const Portfolio = dynamic(() => import('@/components/sections/home/Portfolio').then(mod => mod.Portfolio), { loading: () => <div className="min-h-[50vh] animate-pulse bg-zinc-900/20" /> })
-const OurServices = dynamic(() => import('@/components/sections/home/OurServices'), { loading: () => <div className="min-h-[50vh] animate-pulse bg-zinc-900/20" /> })
-const PortalDemo = dynamic(() => import('@/components/sections/portal-demo/PortalDemo').then(mod => mod.PortalDemo), { loading: () => <div className="min-h-[50vh] animate-pulse bg-zinc-900/20" /> })
-const TodoIncluido = dynamic(() => import('@/components/sections/todo-incluido/TodoIncluido').then(mod => mod.TodoIncluido), { loading: () => <div className="min-h-[50vh] animate-pulse bg-zinc-900/20" /> })
-const ModulosOpcionales = dynamic(() => import('@/components/sections/modulos-opcionales/ModulosOpcionales').then(mod => mod.ModulosOpcionales), { loading: () => <div className="min-h-[50vh] animate-pulse bg-zinc-900/20" /> })
-const PortalDemoCTA = dynamic(() => import('@/components/sections/portal-demo-cta/PortalDemoCTA').then(mod => mod.PortalDemoCTA), { loading: () => <div className="min-h-[50vh] animate-pulse bg-zinc-900/20" /> })
+const OurServices = dynamic(() => import('@/components/sections/home/OurServices'), { loading: () => <div className="min-h-[50vh] animate-pulse bg-[#030303]" /> })
+const PortalDemo = dynamic(() => import('@/components/sections/portal-demo/PortalDemo').then(mod => mod.PortalDemo), { loading: () => <div className="min-h-[50vh] animate-pulse bg-[#030303]" /> })
+const TodoIncluido = dynamic(() => import('@/components/sections/todo-incluido/TodoIncluido').then(mod => mod.TodoIncluido), { loading: () => <div className="min-h-[50vh] animate-pulse bg-[#030303]" /> })
+const ModulosOpcionales = dynamic(() => import('@/components/sections/modulos-opcionales/ModulosOpcionales').then(mod => mod.ModulosOpcionales), { loading: () => <div className="min-h-[50vh] animate-pulse bg-[#030303]" /> })
+const PortalDemoCTA = dynamic(() => import('@/components/sections/portal-demo-cta/PortalDemoCTA').then(mod => mod.PortalDemoCTA), { loading: () => <div className="min-h-[50vh] animate-pulse bg-[#030303]" /> })
 const InfiniteReviews = dynamic(() => import('@/components/sections/home/InfiniteReviews').then(mod => mod.InfiniteReviews), { loading: () => <div className="min-h-[20vh] animate-pulse bg-zinc-900/20" /> })
 
 export default function Home() {

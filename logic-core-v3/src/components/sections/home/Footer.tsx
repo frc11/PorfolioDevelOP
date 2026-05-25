@@ -21,9 +21,9 @@ interface FormState {
 
 const TRUST_ITEMS = [
   { icon: MapPin, text: 'Tucumán, Argentina' },
-  { icon: Clock, text: 'Respuesta < 2hs' },
+  { icon: Clock, text: 'Respuesta Inmediata' },
   { icon: Shield, text: 'Consulta gratuita' },
-  { icon: Users, text: '4+ años en el mercado' },
+  { icon: Users, text: '2+ años en el mercado' },
 ] as const;
 
 const SOCIAL_LINKS = [
@@ -33,8 +33,10 @@ const SOCIAL_LINKS = [
   { label: 'Email', href: 'mailto:hola@develop.com.ar' },
 ];
 
+const CTA_EASE = [0.22, 1, 0.36, 1] as [number, number, number, number];
+
 export const Footer = () => {
-  const [showForm, setShowForm] = useState(false);
+  const [contactMode, setContactMode] = useState<'options' | 'form'>('options');
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [form, setForm] = useState<FormState>({
@@ -43,7 +45,6 @@ export const Footer = () => {
     rubro: '',
     mensaje: '',
   });
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -81,58 +82,29 @@ export const Footer = () => {
       style={{
         position: 'relative',
         overflow: 'hidden',
-        background: '#080808',
-        paddingTop: 128,
-        paddingBottom: 80,
+        background: '#050505',
+        minHeight: '100svh',
+        paddingTop: 'clamp(18px, 2.5svh, 42px)',
+        paddingBottom: 'clamp(12px, 2svh, 28px)',
       }}
     >
-      {/* ── FONDOS DECORATIVOS ── */}
-
-      {/* Línea superior */}
+      {/* Fondo minimalista */}
       <div
         style={{
           position: 'absolute',
-          top: 0, left: 0, right: 0,
-          height: 1,
-          background: 'linear-gradient(90deg, transparent 0%, rgba(6,182,212,0.35) 50%, transparent 100%)',
+          inset: 0,
+          background:
+            'radial-gradient(circle at 50% 44%, rgba(255,255,255,0.025) 0%, transparent 38%, rgba(0,0,0,0.72) 100%)',
           pointerEvents: 'none',
         }}
       />
 
-      {/* Glow principal centrado */}
-      <div
-        style={{
-          position: 'absolute',
-          top: '-10%',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          width: '70vw',
-          height: '70vw',
-          borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(6,182,212,0.07) 0%, rgba(6,182,212,0.02) 40%, transparent 70%)',
-          filter: 'blur(80px)',
-          pointerEvents: 'none',
-          willChange: 'transform',
-        }}
-      />
-
-      {/* Glow secundario — violeta bottom-left */}
-      <div
-        style={{
-          position: 'absolute',
-          bottom: '5%',
-          left: '-5%',
-          width: '40vw',
-          height: '40vw',
-          borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(139,92,246,0.04) 0%, transparent 70%)',
-          filter: 'blur(60px)',
-          pointerEvents: 'none',
-        }}
-      />
-
-      {/* Logo SVG de fondo — muy sutil */}
-      <div
+      {/* Firma de marca */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.985, y: 10 }}
+        whileInView={{ opacity: 1, scale: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.45 }}
+        transition={{ duration: 1.4, ease: CTA_EASE }}
         style={{
           position: 'absolute',
           inset: 0,
@@ -143,13 +115,32 @@ export const Footer = () => {
           overflow: 'hidden',
         }}
       >
-        <svg
+        <motion.svg
           viewBox="0 0 1024 1024"
-          style={{ width: '78vw', maxWidth: 760, opacity: 0.028 }}
+          style={{ width: 'min(66vw, 620px)', opacity: 0.18 }}
         >
-          <path d={LOGO_PATH} fill="white" />
-        </svg>
-      </div>
+          <motion.path
+            d={LOGO_PATH}
+            fill="transparent"
+            stroke="rgba(255,255,255,0.7)"
+            strokeWidth={10}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            initial={{ pathLength: 0, opacity: 0 }}
+            whileInView={{ pathLength: 1, opacity: 1 }}
+            viewport={{ once: true, amount: 0.45 }}
+            transition={{ duration: 2.4, ease: CTA_EASE }}
+          />
+          <motion.path
+            d={LOGO_PATH}
+            fill="white"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 0.12 }}
+            viewport={{ once: true, amount: 0.45 }}
+            transition={{ duration: 1.2, delay: 1.25, ease: CTA_EASE }}
+          />
+        </motion.svg>
+      </motion.div>
 
       {/* ── CONTENIDO PRINCIPAL ── */}
       <div
@@ -162,55 +153,19 @@ export const Footer = () => {
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
+          justifyContent: 'center',
           textAlign: 'center',
         }}
       >
 
-        {/* BADGE */}
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.45 }}
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: 8,
-            border: '1px solid rgba(6,182,212,0.22)',
-            borderRadius: 100,
-            padding: '6px 16px',
-            background: 'rgba(6,182,212,0.07)',
-            marginBottom: 36,
-          }}
-        >
-          <motion.div
-            animate={{ opacity: [1, 0.3, 1] }}
-            transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-            style={{
-              width: 6, height: 6,
-              borderRadius: '50%',
-              background: '#06b6d4',
-              boxShadow: '0 0 8px rgba(6,182,212,0.8)',
-            }}
-          />
-          <span
-            style={{
-              fontSize: 10,
-              fontWeight: 600,
-              letterSpacing: '0.18em',
-              color: 'rgba(6,182,212,0.85)',
-            }}
-          >
-            HABLEMOS
-          </span>
-        </motion.div>
+        <div aria-hidden="true" style={{ height: 54 }} />
 
         {/* HEADLINE */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0, y: 20, filter: 'blur(6px)' }}
+          whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
           viewport={{ once: true }}
-          transition={{ duration: 0.55, delay: 0.08 }}
+          transition={{ duration: 0.68, delay: 0.08, ease: CTA_EASE }}
           style={{ marginBottom: 16 }}
         >
           <h2
@@ -241,10 +196,10 @@ export const Footer = () => {
 
         {/* SUBLINE — copy central */}
         <motion.p
-          initial={{ opacity: 0, y: 16 }}
-          whileInView={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0, y: 18, filter: 'blur(6px)' }}
+          whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
           viewport={{ once: true }}
-          transition={{ duration: 0.5, delay: 0.14 }}
+          transition={{ duration: 0.64, delay: 0.16, ease: CTA_EASE }}
           style={{
             fontSize: 16,
             lineHeight: 1.7,
@@ -263,29 +218,29 @@ export const Footer = () => {
 
         {/* CALLOUT — El primer paso es gratis */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          whileInView={{ opacity: 1, scale: 1 }}
+          initial={{ opacity: 0, y: 14, filter: 'blur(5px)' }}
+          whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
           viewport={{ once: true }}
-          transition={{ duration: 0.45, delay: 0.2 }}
+          transition={{ duration: 0.58, delay: 0.24, ease: CTA_EASE }}
           style={{
             display: 'inline-flex',
             alignItems: 'center',
             gap: 10,
-            marginBottom: 52,
+            marginBottom: 24,
           }}
         >
           <div
             style={{
               height: 1,
               width: 32,
-              background: 'linear-gradient(90deg, transparent, rgba(6,182,212,0.4))',
+              background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.24))',
             }}
           />
           <span
             style={{
               fontSize: 13,
               fontWeight: 600,
-              color: '#06b6d4',
+              color: 'rgba(255,255,255,0.68)',
               letterSpacing: '0.04em',
             }}
           >
@@ -295,24 +250,43 @@ export const Footer = () => {
             style={{
               height: 1,
               width: 32,
-              background: 'linear-gradient(90deg, rgba(6,182,212,0.4), transparent)',
+              background: 'linear-gradient(90deg, rgba(255,255,255,0.24), transparent)',
             }}
           />
         </motion.div>
 
-        {/* DOS CAMINOS DE CONVERSIÓN */}
+        {/* BLOQUE INTERACTIVO: opciones/formulario */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0, y: 20, filter: 'blur(6px)' }}
+          whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
           viewport={{ once: true }}
-          transition={{ duration: 0.55, delay: 0.18 }}
+          transition={{ duration: 0.66, delay: 0.32, ease: CTA_EASE }}
           style={{
+            position: 'relative',
+            width: '100%',
+            maxWidth: 720,
+            minHeight: 'clamp(250px, 28svh, 300px)',
+            overflow: 'hidden',
+          }}
+        >
+          <AnimatePresence mode="wait" initial={false}>
+            {contactMode === 'options' ? (
+              <motion.div
+                key="options"
+                initial={{ opacity: 0, y: 22, scale: 0.985, filter: 'blur(6px)' }}
+                animate={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
+                exit={{ opacity: 0, y: -18, scale: 0.985, filter: 'blur(6px)' }}
+                transition={{ duration: 0.72, ease: CTA_EASE }}
+          style={{
+            position: 'absolute',
+            inset: 0,
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fit, minmax(268px, 1fr))',
-            gap: 14,
+            alignItems: 'center',
+            gap: 10,
             width: '100%',
             maxWidth: 660,
-            marginBottom: 0,
+            margin: '0 auto',
           }}
         >
           {/* CTA WHATSAPP */}
@@ -322,28 +296,32 @@ export const Footer = () => {
             rel="noopener noreferrer"
             whileHover={{ scale: 1.025, y: -3 }}
             whileTap={{ scale: 0.975 }}
-            transition={{ type: 'spring', stiffness: 380, damping: 38, mass: 0.9 }}
+            transition={{ type: 'spring', stiffness: 320, damping: 34, mass: 0.9 }}
             style={{
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'flex-start',
-              gap: 10,
-              padding: '22px 24px',
-              background: 'linear-gradient(135deg, rgba(6,182,212,0.13) 0%, rgba(6,182,212,0.04) 100%)',
-              border: '1px solid rgba(6,182,212,0.28)',
+              gap: 8,
+              padding: '16px 20px',
+              background: 'linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.018) 100%)',
+              border: '1px solid rgba(255,255,255,0.13)',
               borderRadius: 18,
               textDecoration: 'none',
               cursor: 'pointer',
               position: 'relative',
               overflow: 'hidden',
-              boxShadow: '0 0 0 0 rgba(6,182,212,0)',
-              transition: 'box-shadow 300ms',
+              boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.06), 0 0 0 rgba(255,255,255,0)',
+              transition: 'background 500ms ease, border-color 500ms ease, box-shadow 500ms ease',
             }}
             onMouseEnter={(e) => {
-              (e.currentTarget as HTMLAnchorElement).style.boxShadow = '0 8px 32px rgba(6,182,212,0.15)';
+              (e.currentTarget as HTMLAnchorElement).style.background = 'linear-gradient(135deg, rgba(255,255,255,0.095) 0%, rgba(255,255,255,0.028) 100%)';
+              (e.currentTarget as HTMLAnchorElement).style.borderColor = 'rgba(255,255,255,0.28)';
+              (e.currentTarget as HTMLAnchorElement).style.boxShadow = 'inset 0 1px 0 rgba(255,255,255,0.14), 0 18px 52px rgba(255,255,255,0.075), 0 22px 70px rgba(0,0,0,0.42)';
             }}
             onMouseLeave={(e) => {
-              (e.currentTarget as HTMLAnchorElement).style.boxShadow = '0 0 0 0 rgba(6,182,212,0)';
+              (e.currentTarget as HTMLAnchorElement).style.background = 'linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.018) 100%)';
+              (e.currentTarget as HTMLAnchorElement).style.borderColor = 'rgba(255,255,255,0.13)';
+              (e.currentTarget as HTMLAnchorElement).style.boxShadow = 'inset 0 1px 0 rgba(255,255,255,0.06), 0 0 0 rgba(255,255,255,0)';
             }}
           >
             {/* Shimmer top-left */}
@@ -352,7 +330,7 @@ export const Footer = () => {
                 position: 'absolute',
                 top: 0, left: 0,
                 width: '60%', height: '60%',
-                background: 'radial-gradient(circle at top left, rgba(6,182,212,0.08), transparent 70%)',
+                background: 'radial-gradient(circle at top left, rgba(255,255,255,0.075), transparent 70%)',
                 pointerEvents: 'none',
               }}
             />
@@ -361,19 +339,19 @@ export const Footer = () => {
                 style={{
                   width: 34, height: 34,
                   borderRadius: 10,
-                  background: 'rgba(6,182,212,0.12)',
-                  border: '1px solid rgba(6,182,212,0.22)',
+                  background: 'rgba(255,255,255,0.065)',
+                  border: '1px solid rgba(255,255,255,0.12)',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   flexShrink: 0,
                 }}
               >
-                <MessageCircle size={16} color="#06b6d4" strokeWidth={1.5} />
+                <MessageCircle size={16} color="rgba(255,255,255,0.78)" strokeWidth={1.5} />
               </div>
               <span
                 style={{
                   fontSize: 13,
                   fontWeight: 700,
-                  color: '#06b6d4',
+                  color: 'rgba(255,255,255,0.86)',
                   letterSpacing: '0.04em',
                 }}
               >
@@ -393,7 +371,7 @@ export const Footer = () => {
             <div
               style={{
                 fontSize: 11,
-                color: '#06b6d4',
+                color: 'rgba(255,255,255,0.66)',
                 fontWeight: 600,
                 letterSpacing: '0.02em',
               }}
@@ -406,49 +384,61 @@ export const Footer = () => {
           <motion.div
             whileHover={{ scale: 1.015, y: -2 }}
             whileTap={{ scale: 0.985 }}
-            transition={{ type: 'spring', stiffness: 380, damping: 38, mass: 0.9 }}
-            onClick={() => setShowForm((prev) => !prev)}
+            transition={{ type: 'spring', stiffness: 320, damping: 34, mass: 0.9 }}
+            onClick={() => setContactMode('form')}
             style={{
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'flex-start',
-              gap: 10,
-              padding: '22px 24px',
-              background: showForm
-                ? 'rgba(255,255,255,0.055)'
-                : 'rgba(255,255,255,0.03)',
-              border: showForm
-                ? '1px solid rgba(255,255,255,0.13)'
-                : '1px solid rgba(255,255,255,0.07)',
+              gap: 8,
+              padding: '16px 20px',
+              background: 'linear-gradient(135deg, rgba(255,255,255,0.045) 0%, rgba(255,255,255,0.018) 100%)',
+              border: '1px solid rgba(255,255,255,0.095)',
               borderRadius: 18,
               cursor: 'pointer',
-              transition: 'background 250ms, border 250ms, box-shadow 300ms',
+              position: 'relative',
+              overflow: 'hidden',
+              boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.045), 0 0 0 rgba(255,255,255,0)',
+              transition: 'background 500ms ease, border-color 500ms ease, box-shadow 500ms ease',
             }}
             onMouseEnter={(e) => {
-              (e.currentTarget as HTMLDivElement).style.boxShadow = '0 8px 28px rgba(0,0,0,0.3)';
+              (e.currentTarget as HTMLDivElement).style.background = 'linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.024) 100%)';
+              (e.currentTarget as HTMLDivElement).style.borderColor = 'rgba(255,255,255,0.24)';
+              (e.currentTarget as HTMLDivElement).style.boxShadow = 'inset 0 1px 0 rgba(255,255,255,0.12), 0 18px 48px rgba(255,255,255,0.055), 0 22px 70px rgba(0,0,0,0.42)';
             }}
             onMouseLeave={(e) => {
-              (e.currentTarget as HTMLDivElement).style.boxShadow = 'none';
+              (e.currentTarget as HTMLDivElement).style.background = 'linear-gradient(135deg, rgba(255,255,255,0.045) 0%, rgba(255,255,255,0.018) 100%)';
+              (e.currentTarget as HTMLDivElement).style.borderColor = 'rgba(255,255,255,0.095)';
+              (e.currentTarget as HTMLDivElement).style.boxShadow = 'inset 0 1px 0 rgba(255,255,255,0.045), 0 0 0 rgba(255,255,255,0)';
             }}
           >
+            <div
+              style={{
+                position: 'absolute',
+                inset: 0,
+                background: 'linear-gradient(115deg, transparent 0%, rgba(255,255,255,0.045) 48%, transparent 72%)',
+                opacity: 0.45,
+                pointerEvents: 'none',
+              }}
+            />
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <div
                 style={{
                   width: 34, height: 34,
                   borderRadius: 10,
-                  background: 'rgba(255,255,255,0.05)',
-                  border: '1px solid rgba(255,255,255,0.09)',
+                  background: 'rgba(255,255,255,0.055)',
+                  border: '1px solid rgba(255,255,255,0.12)',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   flexShrink: 0,
                 }}
               >
-                <FileText size={16} color="rgba(255,255,255,0.45)" strokeWidth={1.5} />
+                <FileText size={16} color="rgba(255,255,255,0.72)" strokeWidth={1.5} />
               </div>
               <span
                 style={{
                   fontSize: 13,
                   fontWeight: 700,
-                  color: 'rgba(255,255,255,0.65)',
+                  color: 'rgba(255,255,255,0.82)',
                   letterSpacing: '0.04em',
                 }}
               >
@@ -472,20 +462,26 @@ export const Footer = () => {
                 fontWeight: 500,
               }}
             >
-              {showForm ? 'Cerrar ↑' : 'Ver formulario →'}
+              Ver formulario →
             </div>
           </motion.div>
         </motion.div>
-
-        {/* FORMULARIO INLINE */}
-        <AnimatePresence>
-          {showForm && (
+            ) : (
             <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.38, ease: [0.25, 0.46, 0.45, 0.94] }}
-              style={{ width: '100%', maxWidth: 560, overflow: 'hidden', marginTop: 14 }}
+              key="form"
+              initial={{ opacity: 0, y: 22, scale: 0.985, filter: 'blur(6px)' }}
+              animate={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
+              exit={{ opacity: 0, y: -18, scale: 0.985, filter: 'blur(6px)' }}
+              transition={{ duration: 0.72, ease: CTA_EASE }}
+              style={{
+                position: 'absolute',
+                inset: 0,
+                width: '100%',
+                maxWidth: 720,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
             >
               <AnimatePresence mode="wait">
                 {submitted ? (
@@ -496,8 +492,8 @@ export const Footer = () => {
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.3 }}
                     style={{
-                      background: 'rgba(6,182,212,0.06)',
-                      border: '1px solid rgba(6,182,212,0.18)',
+                      background: 'rgba(255,255,255,0.045)',
+                      border: '1px solid rgba(255,255,255,0.14)',
                       borderRadius: 16,
                       padding: '36px 24px',
                       display: 'flex',
@@ -510,11 +506,11 @@ export const Footer = () => {
                       style={{
                         width: 44, height: 44,
                         borderRadius: '50%',
-                        background: 'rgba(6,182,212,0.12)',
-                        border: '1px solid rgba(6,182,212,0.3)',
+                        background: 'rgba(255,255,255,0.08)',
+                        border: '1px solid rgba(255,255,255,0.2)',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                         fontSize: 20,
-                        color: '#06b6d4',
+                        color: 'rgba(255,255,255,0.85)',
                       }}
                     >
                       ✓
@@ -534,15 +530,17 @@ export const Footer = () => {
                     exit={{ opacity: 0 }}
                     onSubmit={handleSubmit}
                     style={{
-                      background: 'rgba(255,255,255,0.035)',
+                      width: '100%',
+                      maxWidth: 720,
+                      background: 'linear-gradient(180deg, rgba(255,255,255,0.052), rgba(255,255,255,0.026))',
                       backdropFilter: 'blur(20px) saturate(180%)',
                       WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-                      border: '1px solid rgba(255,255,255,0.08)',
+                      border: '1px solid rgba(255,255,255,0.115)',
                       borderRadius: 16,
-                      padding: '24px',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: 12,
+                      padding: 12,
+                      display: 'grid',
+                      gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+                      gap: 7,
                     }}
                   >
                     {(
@@ -552,7 +550,7 @@ export const Footer = () => {
                         { key: 'rubro', label: 'Rubro de tu negocio', type: 'text', placeholder: 'Ej: Clínica, Restaurante, Gimnasio...' },
                       ] as const
                     ).map((field) => (
-                      <div key={field.key} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                      <div key={field.key} style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                         <label
                           style={{
                             fontSize: 10,
@@ -573,20 +571,31 @@ export const Footer = () => {
                           required
                           style={{
                             background: 'rgba(255,255,255,0.05)',
-                            border: '1px solid rgba(255,255,255,0.09)',
+                            border: '1px solid rgba(255,255,255,0.11)',
                             borderRadius: 10,
-                            padding: '11px 14px',
-                            fontSize: 14,
+                            padding: '8px 10px',
+                            fontSize: 12,
                             color: 'white',
                             outline: 'none',
                             width: '100%',
                             boxSizing: 'border-box',
+                            transition: 'border-color 250ms ease, background 250ms ease, box-shadow 250ms ease',
+                          }}
+                          onFocus={(e) => {
+                            e.currentTarget.style.borderColor = 'rgba(255,255,255,0.34)';
+                            e.currentTarget.style.background = 'rgba(255,255,255,0.075)';
+                            e.currentTarget.style.boxShadow = '0 0 0 3px rgba(255,255,255,0.045)';
+                          }}
+                          onBlur={(e) => {
+                            e.currentTarget.style.borderColor = 'rgba(255,255,255,0.11)';
+                            e.currentTarget.style.background = 'rgba(255,255,255,0.05)';
+                            e.currentTarget.style.boxShadow = 'none';
                           }}
                         />
                       </div>
                     ))}
 
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 4, gridColumn: '1 / -1' }}>
                       <label
                         style={{
                           fontSize: 10,
@@ -601,24 +610,66 @@ export const Footer = () => {
                       </label>
                       <textarea
                         placeholder="Contanos brevemente qué querés lograr con tu negocio..."
-                        rows={3}
+                        rows={2}
                         value={form.mensaje}
                         onChange={(e) => setForm((prev) => ({ ...prev, mensaje: e.target.value }))}
                         style={{
                           background: 'rgba(255,255,255,0.05)',
-                          border: '1px solid rgba(255,255,255,0.09)',
+                          border: '1px solid rgba(255,255,255,0.11)',
                           borderRadius: 10,
-                          padding: '11px 14px',
-                          fontSize: 14,
+                          padding: '8px 10px',
+                          fontSize: 12,
                           color: 'white',
                           outline: 'none',
                           width: '100%',
                           boxSizing: 'border-box',
                           resize: 'none',
                           fontFamily: 'inherit',
+                          transition: 'border-color 250ms ease, background 250ms ease, box-shadow 250ms ease',
+                        }}
+                        onFocus={(e) => {
+                          e.currentTarget.style.borderColor = 'rgba(255,255,255,0.34)';
+                          e.currentTarget.style.background = 'rgba(255,255,255,0.075)';
+                          e.currentTarget.style.boxShadow = '0 0 0 3px rgba(255,255,255,0.045)';
+                        }}
+                        onBlur={(e) => {
+                          e.currentTarget.style.borderColor = 'rgba(255,255,255,0.11)';
+                          e.currentTarget.style.background = 'rgba(255,255,255,0.05)';
+                          e.currentTarget.style.boxShadow = 'none';
                         }}
                       />
                     </div>
+
+                    <button
+                      type="button"
+                      onClick={() => setContactMode('options')}
+                      style={{
+                        alignSelf: 'stretch',
+                        background: 'transparent',
+                        border: '1px solid rgba(255,255,255,0.12)',
+                        borderRadius: 12,
+                        color: 'rgba(255,255,255,0.54)',
+                        cursor: 'pointer',
+                        fontSize: 11,
+                        fontWeight: 700,
+                        letterSpacing: '0.08em',
+                        textTransform: 'uppercase',
+                        minHeight: 40,
+                        transition: 'color 250ms ease, border-color 250ms ease, background 250ms ease',
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.color = 'rgba(255,255,255,0.82)';
+                        e.currentTarget.style.borderColor = 'rgba(255,255,255,0.24)';
+                        e.currentTarget.style.background = 'rgba(255,255,255,0.045)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.color = 'rgba(255,255,255,0.54)';
+                        e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)';
+                        e.currentTarget.style.background = 'transparent';
+                      }}
+                    >
+                      Volver
+                    </button>
 
                     <motion.button
                       type="submit"
@@ -626,19 +677,20 @@ export const Footer = () => {
                       whileHover={{ scale: loading ? 1 : 1.02 }}
                       whileTap={{ scale: loading ? 1 : 0.97 }}
                       style={{
-                        padding: '13px 24px',
+                        padding: '11px 18px',
                         background: loading
-                          ? 'rgba(6,182,212,0.25)'
-                          : 'linear-gradient(135deg, #06b6d4, #0891b2)',
-                        border: 'none',
+                          ? 'rgba(255,255,255,0.18)'
+                          : 'linear-gradient(135deg, rgba(255,255,255,0.92), rgba(185,185,185,0.78))',
+                        border: '1px solid rgba(255,255,255,0.18)',
                         borderRadius: 12,
                         fontSize: 12,
                         fontWeight: 700,
-                        color: 'white',
+                        color: '#050505',
                         letterSpacing: '0.08em',
                         cursor: loading ? 'not-allowed' : 'pointer',
-                        boxShadow: loading ? 'none' : '0 0 28px rgba(6,182,212,0.3)',
+                        boxShadow: loading ? 'none' : '0 12px 36px rgba(255,255,255,0.09)',
                         transition: 'background 200ms, box-shadow 200ms',
+                        gridColumn: '2 / -1',
                       }}
                     >
                       {loading ? 'ENVIANDO...' : 'ENVIAR CONSULTA →'}
@@ -646,6 +698,7 @@ export const Footer = () => {
 
                     <p
                       style={{
+                        gridColumn: '1 / -1',
                         fontSize: 10,
                         color: 'rgba(255,255,255,0.18)',
                         textAlign: 'center',
@@ -661,27 +714,30 @@ export const Footer = () => {
             </motion.div>
           )}
         </AnimatePresence>
+        </motion.div>
 
         {/* TRUST ROW */}
         <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
+          initial={{ opacity: 0, y: 18, filter: 'blur(5px)' }}
+          whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
           viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.28 }}
+          transition={{ duration: 0.62, delay: 0.46, ease: CTA_EASE }}
           style={{
             display: 'flex',
             alignItems: 'center',
             gap: 0,
             flexWrap: 'wrap',
             justifyContent: 'center',
-            marginTop: 48,
+            marginTop: 28,
           }}
         >
           {TRUST_ITEMS.map((item, i) => {
             const IconComp = item.icon;
             return (
-              <div
+              <motion.div
                 key={i}
+                whileHover={{ y: -2 }}
+                transition={{ duration: 0.25, ease: CTA_EASE }}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -691,26 +747,34 @@ export const Footer = () => {
                   style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: 6,
-                    fontSize: 12,
-                    color: 'rgba(255,255,255,0.28)',
-                    padding: '0 20px',
+                    gap: 8,
+                    fontSize: 13,
+                    fontWeight: 500,
+                    color: 'rgba(255,255,255,0.5)',
+                    padding: '3px 14px',
+                    transition: 'color 250ms ease',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.color = 'rgba(255,255,255,0.82)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.color = 'rgba(255,255,255,0.5)';
                   }}
                 >
-                  <IconComp size={12} strokeWidth={1.5} color="rgba(6,182,212,0.5)" />
+                  <IconComp size={14} strokeWidth={1.5} color="rgba(255,255,255,0.54)" />
                   {item.text}
                 </div>
                 {i < TRUST_ITEMS.length - 1 && (
                   <div
                     style={{
                       width: 1,
-                      height: 14,
-                      background: 'rgba(255,255,255,0.08)',
+                      height: 18,
+                      background: 'rgba(255,255,255,0.075)',
                       flexShrink: 0,
                     }}
                   />
                 )}
-              </div>
+              </motion.div>
             );
           })}
         </motion.div>
@@ -721,12 +785,16 @@ export const Footer = () => {
         style={{
           height: 1,
           background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.07) 50%, transparent 100%)',
-          margin: '72px 0 56px',
+          margin: '36px 0 28px',
         }}
       />
 
       {/* ── FOOTER ── */}
-      <div
+      <motion.div
+        initial={{ opacity: 0, y: 14, filter: 'blur(5px)' }}
+        whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.62, delay: 0.12, ease: CTA_EASE }}
         style={{
           position: 'relative',
           zIndex: 1,
@@ -736,7 +804,7 @@ export const Footer = () => {
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          gap: 20,
+          gap: 16,
         }}
       >
         {/* Logo + tagline */}
@@ -799,7 +867,7 @@ export const Footer = () => {
         >
            2026 develOP. Todos los derechos reservados.
         </div>
-      </div>
+      </motion.div>
     </section>
   );
 };
