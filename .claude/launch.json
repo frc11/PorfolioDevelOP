@@ -6,6 +6,12 @@
       "runtimeExecutable": "npm",
       "runtimeArgs": ["--prefix", "logic-core-v3", "run", "dev"],
       "port": 3000
+    },
+    {
+      "name": "next-prod-qa",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["--prefix", "logic-core-v3", "run", "start:qa"],
+      "port": 3001
     }
   ]
 }

@@ -1,12 +1,20 @@
+import { Prisma } from '@prisma/client'
 import { generateText } from 'ai'
-import { getWeekResults } from '@/lib/dashboard/week-results'
-import { getHealthScore } from '@/lib/health-score'
+import { getWeekResults, type WeekResultsData } from '@/lib/dashboard/week-results'
+import { getHealthScore, type HealthScoreResult } from '@/lib/health-score'
 import { prisma } from '@/lib/prisma'
+import { getISOWeekKeyAR } from '@/lib/tz-ar'
 import { getLLMProvider } from '@/modules/chatbot/server/llm/factory'
 
 const REGENERATION_LIMIT = 3
 const CACHE_TTL_DAYS = 7
 const BRIEF_MODEL = 'gemini-2.5-flash'
+
+// B6.4 — Gate intradiario. Sin esto, el usuario podía gastar las 3 regen
+// semanales en cascada (refresh / click / click) sin valor real (un negocio no
+// cambia en 30 segundos). Esto NO toca el límite semanal ni el cache — solo
+// espacia las regen manuales.
+const MIN_HOURS_BETWEEN_MANUAL_REGENS = 4
 
 export type ExecutiveBriefResult = {
   text: string
@@ -54,9 +62,12 @@ export async function getExecutiveBrief(
     }
 
     try {
-      const text = await generateBriefText(organizationId, org.companyName ?? 'tu negocio')
+      const generation = await generateBriefText(
+        organizationId,
+        org.companyName ?? 'tu negocio',
+      )
 
-      if (!text || !text.trim()) {
+      if (!generation || !generation.text.trim()) {
         console.warn(`[Brief] Generated empty text for org ${organizationId}`)
         return null
       }
@@ -64,14 +75,16 @@ export async function getExecutiveBrief(
       await prisma.organization.update({
         where: { id: organizationId },
         data: {
-          cachedExecutiveBrief: text,
+          cachedExecutiveBrief: generation.text,
           cachedExecutiveBriefAt: now,
           executiveBriefRegenerations: 0,
         },
       })
 
+      await persistBriefSnapshot(organizationId, generation, now)
+
       return {
-        text,
+        text: generation.text,
         generatedAt: now,
         isFresh: true,
         regenerationsLeft: REGENERATION_LIMIT,
@@ -102,7 +115,8 @@ export async function regenerateExecutiveBrief(
 
   if (!org) return { ok: false, error: 'Organizacion no encontrada' }
 
-  const cacheAge = getCacheAgeDays(org.cachedExecutiveBriefAt, new Date())
+  const now = new Date()
+  const cacheAge = getCacheAgeDays(org.cachedExecutiveBriefAt, now)
   const currentRegenerations =
     cacheAge >= CACHE_TTL_DAYS ? 0 : org.executiveBriefRegenerations
 
@@ -114,30 +128,50 @@ export async function regenerateExecutiveBrief(
     }
   }
 
-  try {
-    const text = await generateBriefText(organizationId, org.companyName)
+  // B6.4 — Gate intradiario: si la última escritura fue una regen manual
+  // (`executiveBriefRegenerations > 0` — el cron resetea a 0 cuando refresca,
+  // así que un contador positivo prueba que lo último que escribió el cache
+  // fue un click manual), no permitir otra antes de MIN_HOURS_BETWEEN_MANUAL_REGENS.
+  if (currentRegenerations > 0 && org.cachedExecutiveBriefAt) {
+    const hoursSinceLast =
+      (now.getTime() - org.cachedExecutiveBriefAt.getTime()) / (1000 * 60 * 60)
+    if (hoursSinceLast < MIN_HOURS_BETWEEN_MANUAL_REGENS) {
+      const minutesLeft = Math.max(
+        1,
+        Math.ceil((MIN_HOURS_BETWEEN_MANUAL_REGENS - hoursSinceLast) * 60),
+      )
+      return {
+        ok: false,
+        error: `Ya regeneraste el brief hace poco. Proba de nuevo en ${formatWaitTime(minutesLeft)}.`,
+      }
+    }
+  }
 
-    if (!text.trim()) {
+  try {
+    const generation = await generateBriefText(organizationId, org.companyName)
+
+    if (!generation.text.trim()) {
       console.warn(`[Brief] Generated empty text during regeneration for org ${organizationId}`)
       return { ok: false, error: 'No pudimos regenerar el brief. Proba de nuevo en unos minutos.' }
     }
 
-    const now = new Date()
     const nextRegenerations = currentRegenerations + 1
 
     await prisma.organization.update({
       where: { id: organizationId },
       data: {
-        cachedExecutiveBrief: text,
+        cachedExecutiveBrief: generation.text,
         cachedExecutiveBriefAt: now,
         executiveBriefRegenerations: nextRegenerations,
       },
     })
 
+    await persistBriefSnapshot(organizationId, generation, now)
+
     return {
       ok: true,
       brief: {
-        text,
+        text: generation.text,
         generatedAt: now,
         isFresh: true,
         regenerationsLeft: getRegenerationsLeft(nextRegenerations),
@@ -163,9 +197,9 @@ export async function refreshExecutiveBriefCache(
 
   if (!org) throw new Error(`Organization ${organizationId} not found`)
 
-  const text = await generateBriefText(organizationId, org.companyName)
+  const generation = await generateBriefText(organizationId, org.companyName)
 
-  if (!text.trim()) {
+  if (!generation.text.trim()) {
     console.warn(`[Brief] Generated empty text during cache refresh for org ${organizationId}`)
     throw new Error(`Generated empty executive brief for organization ${organizationId}`)
   }
@@ -175,14 +209,16 @@ export async function refreshExecutiveBriefCache(
   await prisma.organization.update({
     where: { id: organizationId },
     data: {
-      cachedExecutiveBrief: text,
+      cachedExecutiveBrief: generation.text,
       cachedExecutiveBriefAt: now,
       executiveBriefRegenerations: 0,
     },
   })
 
+  await persistBriefSnapshot(organizationId, generation, now)
+
   return {
-    text,
+    text: generation.text,
     generatedAt: now,
     isFresh: true,
     regenerationsLeft: REGENERATION_LIMIT,
@@ -190,7 +226,16 @@ export async function refreshExecutiveBriefCache(
   }
 }
 
-async function generateBriefText(organizationId: string, companyName: string): Promise<string> {
+type BriefGeneration = {
+  text: string
+  healthScore: HealthScoreResult
+  weekResults: WeekResultsData
+}
+
+async function generateBriefText(
+  organizationId: string,
+  companyName: string,
+): Promise<BriefGeneration> {
   const [healthScore, weekResults] = await Promise.all([
     getHealthScore(organizationId),
     getWeekResults(organizationId),
@@ -233,12 +278,64 @@ Genera el resumen ejecutivo de la semana.`
     maxOutputTokens: 200,
   })
 
-  return text.trim()
+  return { text: text.trim(), healthScore, weekResults }
+}
+
+// Persiste un snapshot semanal del brief para histórico/comparaciones. Aditivo
+// al cache vigente — el cache sigue en Organization.cachedExecutiveBrief*. Upsert
+// por (orgId, periodKey): si la misma org regenera N veces en la semana, queda
+// el último válido. Solo guarda agregados — sin PII ni leads crudos.
+async function persistBriefSnapshot(
+  organizationId: string,
+  generation: BriefGeneration,
+  generatedAt: Date,
+): Promise<void> {
+  try {
+    const periodKey = getISOWeekKeyAR(generatedAt)
+    const healthScores = generation.healthScore as unknown as Prisma.InputJsonValue
+    const weekResults = generation.weekResults as unknown as Prisma.InputJsonValue
+
+    await prisma.executiveBriefSnapshot.upsert({
+      where: {
+        organizationId_periodKey: { organizationId, periodKey },
+      },
+      create: {
+        organizationId,
+        periodKey,
+        content: generation.text,
+        healthScores,
+        weekResults,
+        createdAt: generatedAt,
+      },
+      update: {
+        content: generation.text,
+        healthScores,
+        weekResults,
+        createdAt: generatedAt,
+      },
+    })
+  } catch (err) {
+    // El snapshot es aditivo; si falla, no rompemos el flujo del brief.
+    console.error('[Brief] persistBriefSnapshot failed:', err)
+  }
 }
 
 function getCacheAgeDays(date: Date | null, now: Date): number {
   if (!date) return Infinity
   return (now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24)
+}
+
+// Rioplatense friendly: "5 minutos", "1 hora", "3 horas y 20 minutos".
+function formatWaitTime(minutesLeft: number): string {
+  if (minutesLeft < 60) {
+    return minutesLeft === 1 ? '1 minuto' : `${minutesLeft} minutos`
+  }
+  const hours = Math.floor(minutesLeft / 60)
+  const mins = minutesLeft % 60
+  const hourPart = hours === 1 ? '1 hora' : `${hours} horas`
+  if (mins === 0) return hourPart
+  const minPart = mins === 1 ? '1 minuto' : `${mins} minutos`
+  return `${hourPart} y ${minPart}`
 }
 
 function getRegenerationsLeft(regenerations: number): number {

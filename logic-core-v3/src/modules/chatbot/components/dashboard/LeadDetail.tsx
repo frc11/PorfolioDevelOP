@@ -12,6 +12,7 @@ import {
   Flame,
   TrendingUp,
   Minus,
+  Ban,
   Check,
   Star,
   AlertTriangle,
@@ -77,10 +78,40 @@ const STATUS_LABELS: Record<ChatbotLeadStatus, string> = {
   LOST: 'Perdido',
 }
 
-const CLASS_CONFIG: Record<Classification, { icon: LucideIcon; label: string; className: string }> = {
-  hot:  { icon: Flame,      label: 'Caliente', className: 'border-rose-500/30 bg-rose-500/15 text-rose-300' },
-  warm: { icon: TrendingUp, label: 'Tibio',    className: 'border-amber-500/30 bg-amber-500/15 text-amber-300' },
-  cold: { icon: Minus,      label: 'Frío',     className: 'border-sky-500/30 bg-sky-500/15 text-sky-400' },
+// Mismo lenguaje visual que BusinessLeadCard: badge XL protagonista + sublabel
+// del estado, con número 0-100 chico (dato secundario, no protagonista).
+const CLASS_CONFIG: Record<Classification, {
+  icon: LucideIcon
+  label: string
+  sublabel: string
+  containerClass: string
+  iconClass: string
+  textClass: string
+}> = {
+  hot: {
+    icon: Flame,
+    label: 'Caliente',
+    sublabel: 'Listo para llamar',
+    containerClass: 'border-rose-500/30 bg-rose-500/10',
+    iconClass: 'text-rose-400',
+    textClass: 'text-rose-200',
+  },
+  warm: {
+    icon: TrendingUp,
+    label: 'Tibio',
+    sublabel: 'Necesita un empujón',
+    containerClass: 'border-amber-500/30 bg-amber-500/10',
+    iconClass: 'text-amber-400',
+    textClass: 'text-amber-200',
+  },
+  cold: {
+    icon: Minus,
+    label: 'Frío',
+    sublabel: 'Baja prioridad',
+    containerClass: 'border-sky-500/30 bg-sky-500/10',
+    iconClass: 'text-sky-400',
+    textClass: 'text-sky-200',
+  },
 }
 
 const INTENT_LABELS: Record<string, string> = {
@@ -102,8 +133,13 @@ export function LeadDetail({ lead, enriched, messages, botSlug }: LeadDetailProp
 
   const statusMeta = STATUS_BADGE[status]
   const cls = enriched.effectiveClassification
+  const isDq = cls === 'dq'
   const cardCls = cls === 'hot' || cls === 'warm' || cls === 'cold' ? CLASS_CONFIG[cls] : null
   const intentLabel = INTENT_LABELS[lead.intent ?? 'unknown'] ?? 'Consulta'
+  // Para DQ: la "razón" es el primer signal de tipo 'dq' (el motor de scoring
+  // garantiza al menos uno cuando classification='dq'). Para no-DQ: signals
+  // positivos/combos/penalties; ocultamos los kind='dq' (no aplican).
+  const dqSignal = isDq ? enriched.scoreExplanation.find((s) => s.kind === 'dq') ?? null : null
   const visibleSignals = enriched.scoreExplanation.filter((s) => s.kind !== 'dq')
 
   const firstName = (lead.name ?? '').split(' ')[0] || ''
@@ -152,19 +188,46 @@ export function LeadDetail({ lead, enriched, messages, botSlug }: LeadDetailProp
               )}
             </p>
           </div>
-          <div className="flex shrink-0 flex-col items-end gap-1.5">
-            <Badge variant={statusMeta.variant}>{statusMeta.label}</Badge>
-            {cardCls && enriched.effectiveScore != null && (
+          {/* En DQ no mostramos el badge de status CRM — NEW/CONTACTED/WON
+              no aplican a un contacto descalificado por el bot. */}
+          {!isDq && <Badge variant={statusMeta.variant}>{statusMeta.label}</Badge>}
+        </div>
+
+        {/* Protagonista del detalle: badge XL de clase (hot/warm/cold) o variante
+            gris "Descartado" cuando el lead es DQ. Número 0-100 secundario. */}
+        {cardCls ? (
+          <div
+            className={`mb-4 flex items-center gap-3 rounded-xl border px-4 py-3 ${cardCls.containerClass}`}
+            aria-label={`Nivel de interés: ${cardCls.label}${enriched.effectiveScore != null ? `, ${enriched.effectiveScore} de 100` : ''}`}
+          >
+            <cardCls.icon className={`h-8 w-8 shrink-0 ${cardCls.iconClass}`} strokeWidth={1.5} aria-hidden />
+            <div className="min-w-0 flex-1">
+              <p className={`text-lg font-semibold leading-tight ${cardCls.textClass}`}>
+                {cardCls.label}
+              </p>
+              <p className="text-xs text-zinc-400">{cardCls.sublabel}</p>
+            </div>
+            {enriched.effectiveScore != null && (
               <span
-                className={`flex items-center gap-1 rounded-lg border px-2 py-0.5 text-[11px] font-medium ${cardCls.className}`}
-                aria-label={`Nivel de interés: ${enriched.effectiveScore} de 100 — ${cardCls.label}`}
+                className="shrink-0 rounded-md bg-white/[0.04] px-2 py-1 text-xs font-medium tabular-nums text-zinc-500"
+                title={`Nivel de interés ahora: ${enriched.effectiveScore} de 100`}
               >
-                <cardCls.icon className="h-3 w-3" strokeWidth={1.5} />
-                {enriched.effectiveScore} · {cardCls.label}
+                {enriched.effectiveScore}/100
               </span>
             )}
           </div>
-        </div>
+        ) : isDq ? (
+          <div
+            className="mb-4 flex items-center gap-3 rounded-xl border border-zinc-700/50 bg-zinc-800/40 px-4 py-3"
+            aria-label="Descartado por el bot — no es una consulta comercial"
+          >
+            <Ban className="h-8 w-8 shrink-0 text-zinc-500" strokeWidth={1.5} aria-hidden />
+            <div className="min-w-0 flex-1">
+              <p className="text-lg font-semibold leading-tight text-zinc-300">Descartado</p>
+              <p className="text-xs text-zinc-500">No es una consulta comercial</p>
+            </div>
+          </div>
+        ) : null}
 
         {/* Qué quiere */}
         {lead.intent && lead.intent !== 'unknown' && (
@@ -208,34 +271,53 @@ export function LeadDetail({ lead, enriched, messages, botSlug }: LeadDetailProp
           )}
         </div>
 
-        {/* Acciones rápidas */}
-        <div className="flex flex-wrap gap-2 border-t border-white/[0.06] pt-4">
-          {waHref && (
-            <a
-              href={waHref}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex min-h-[44px] items-center gap-2 rounded-xl border border-emerald-400/30 bg-emerald-400/10 px-4 py-2 text-sm font-medium text-emerald-300 transition-colors hover:bg-emerald-400/20"
-            >
-              <MessageSquare className="h-4 w-4" strokeWidth={1.5} />
-              WhatsApp con mensaje
-            </a>
-          )}
-          {status === 'NEW' && (
-            <Button size="sm" variant="secondary" disabled={isPending} onClick={() => handleQuickStatus('CONTACTED')}>
-              Marcar contactado
-            </Button>
-          )}
-          {status !== 'WON' && status !== 'LOST' && (
-            <Button size="sm" disabled={isPending} onClick={() => handleQuickStatus('WON')}>
-              ✓ Es cliente
-            </Button>
-          )}
-        </div>
+        {/* Acciones rápidas — solo para leads comerciales. En DQ no hay
+            seguimiento que hacer (postventa/empleo/spam/proveedor). */}
+        {!isDq && (
+          <div className="flex flex-wrap gap-2 border-t border-white/[0.06] pt-4">
+            {waHref && (
+              <a
+                href={waHref}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex min-h-[44px] items-center gap-2 rounded-xl border border-emerald-400/30 bg-emerald-400/10 px-4 py-2 text-sm font-medium text-emerald-300 transition-colors hover:bg-emerald-400/20"
+              >
+                <MessageSquare className="h-4 w-4" strokeWidth={1.5} />
+                WhatsApp con mensaje
+              </a>
+            )}
+            {status === 'NEW' && (
+              <Button size="sm" variant="secondary" disabled={isPending} onClick={() => handleQuickStatus('CONTACTED')}>
+                Marcar contactado
+              </Button>
+            )}
+            {status !== 'WON' && status !== 'LOST' && (
+              <Button size="sm" disabled={isPending} onClick={() => handleQuickStatus('WON')}>
+                ✓ Es cliente
+              </Button>
+            )}
+          </div>
+        )}
       </Card>
 
-      {/* Por qué está calificado así */}
-      {(visibleSignals.length > 0 || enriched.effectiveScore != null) && (
+      {/* Por qué — explicabilidad del scoring en lenguaje de dueño. Dos modos:
+          DQ → motivo único en gris (sin puntos visibles, no aporta al dueño).
+          No-DQ → lista de señales positivas/combos/penalties con puntos. */}
+      {isDq && dqSignal ? (
+        <Card padding="lg">
+          <h2 className="mb-3 text-sm font-semibold text-zinc-200">
+            Por qué fue descartado
+          </h2>
+          <div className="flex items-start gap-2.5 rounded-xl border border-zinc-700/40 bg-zinc-800/30 p-3">
+            <Ban className="mt-0.5 h-5 w-5 shrink-0 text-zinc-500" strokeWidth={1.5} aria-hidden />
+            <p className="flex-1 text-sm text-zinc-300">{dqSignal.label}</p>
+          </div>
+          <p className="mt-3 text-[11px] text-zinc-600">
+            El bot identificó esta consulta como no comercial (postventa, empleo,
+            propuesta de proveedor o spam). No aparece en la lista principal.
+          </p>
+        </Card>
+      ) : (visibleSignals.length > 0 || enriched.effectiveScore != null) ? (
         <Card padding="lg">
           <h2 className="mb-3 text-sm font-semibold text-zinc-200">
             Por qué está calificado así
@@ -280,7 +362,7 @@ export function LeadDetail({ lead, enriched, messages, botSlug }: LeadDetailProp
             </div>
           )}
         </Card>
-      )}
+      ) : null}
 
       {/* De qué hablaron */}
       <Card padding="lg">
@@ -315,24 +397,30 @@ export function LeadDetail({ lead, enriched, messages, botSlug }: LeadDetailProp
         )}
       </Card>
 
-      {/* Notas + estado (edit completo) */}
+      {/* Seguimiento (no-DQ) / Notas (DQ). En DQ no hay status CRM editable —
+          el lead está descartado por el bot y no entra al pipeline comercial.
+          El dueño puede igual anotarse cosas ("verificado como spam", etc.). */}
       <Card padding="lg">
-        <h2 className="mb-3 text-sm font-semibold text-zinc-200">Seguimiento</h2>
+        <h2 className="mb-3 text-sm font-semibold text-zinc-200">
+          {isDq ? 'Notas' : 'Seguimiento'}
+        </h2>
         <div className="space-y-3">
-          <div>
-            <label className="mb-1 block text-xs text-zinc-500">Estado</label>
-            <select
-              value={status}
-              onChange={(e) => setStatus(e.target.value as ChatbotLeadStatus)}
-              className="w-full rounded-xl border border-white/10 bg-zinc-900 px-3 py-2 text-sm text-zinc-100"
-            >
-              {(Object.keys(STATUS_LABELS) as ChatbotLeadStatus[]).map((key) => (
-                <option key={key} value={key}>
-                  {STATUS_LABELS[key]}
-                </option>
-              ))}
-            </select>
-          </div>
+          {!isDq && (
+            <div>
+              <label className="mb-1 block text-xs text-zinc-500">Estado</label>
+              <select
+                value={status}
+                onChange={(e) => setStatus(e.target.value as ChatbotLeadStatus)}
+                className="w-full rounded-xl border border-white/10 bg-zinc-900 px-3 py-2 text-sm text-zinc-100"
+              >
+                {(Object.keys(STATUS_LABELS) as ChatbotLeadStatus[]).map((key) => (
+                  <option key={key} value={key}>
+                    {STATUS_LABELS[key]}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
 
           <div>
             <label className="mb-1 block text-xs text-zinc-500">Notas internas</label>

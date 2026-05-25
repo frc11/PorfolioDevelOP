@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react'
 import Link from 'next/link'
 import { motion } from 'motion/react'
-import { Phone, Mail, MessageSquare, Clock, Flame, TrendingUp, Minus } from 'lucide-react'
+import { Phone, Mail, MessageSquare, Clock, Flame, TrendingUp, Minus, Ban } from 'lucide-react'
 import { Badge } from '@/components/ui/Badge'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
@@ -21,17 +21,51 @@ const STATUS_BADGE: Record<ChatbotLeadStatus, { variant: 'default' | 'warning' |
 
 type EffectiveClassification = 'hot' | 'warm' | 'cold'
 
-const SCORE_CONFIG: Record<EffectiveClassification, { icon: LucideIcon; label: string; className: string }> = {
-  hot:  { icon: Flame,      label: 'Caliente', className: 'border-rose-500/30 bg-rose-500/15 text-rose-300' },
-  warm: { icon: TrendingUp, label: 'Tibio',    className: 'border-amber-500/30 bg-amber-500/15 text-amber-300' },
-  cold: { icon: Minus,      label: 'Frío',     className: 'border-sky-500/30 bg-sky-500/15 text-sky-400' },
+// Config del bloque-protagonista: icon grande, texto XL, y un sub-label corto
+// que orienta al dueño ("listo para llamar"). El número 0-100 va aparte, chico.
+const SCORE_CONFIG: Record<EffectiveClassification, {
+  icon: LucideIcon
+  label: string
+  sublabel: string
+  containerClass: string
+  iconClass: string
+  textClass: string
+}> = {
+  hot: {
+    icon: Flame,
+    label: 'Caliente',
+    sublabel: 'Listo para llamar',
+    containerClass: 'border-rose-500/30 bg-rose-500/10',
+    iconClass: 'text-rose-400',
+    textClass: 'text-rose-200',
+  },
+  warm: {
+    icon: TrendingUp,
+    label: 'Tibio',
+    sublabel: 'Necesita un empujón',
+    containerClass: 'border-amber-500/30 bg-amber-500/10',
+    iconClass: 'text-amber-400',
+    textClass: 'text-amber-200',
+  },
+  cold: {
+    icon: Minus,
+    label: 'Frío',
+    sublabel: 'Baja prioridad',
+    containerClass: 'border-sky-500/30 bg-sky-500/10',
+    iconClass: 'text-sky-400',
+    textClass: 'text-sky-200',
+  },
 }
 
 const INTENT_LABELS: Record<string, string> = {
   quote: 'Pedido de cotización',
+  quote_request: 'Pedido de cotización',
   info: 'Consulta de información',
   demo: 'Solicitud de demo',
   support: 'Soporte',
+  purchase_ready: 'Listo para comprar',
+  schedule_visit: 'Quiere agendar una visita',
+  human_request: 'Pidió hablar con una persona',
   other: 'Consulta general',
   unknown: 'Consulta general',
 }
@@ -41,18 +75,31 @@ interface BusinessLeadCardProps {
   effectiveScore?: number | null
   effectiveClassification?: EffectiveClassification | null
   decayTierLabel?: string | null
-  /** B5.7 — anillo rose pulsante para destacar hot+NEW sin agregar canal nuevo. */
+  /** Anillo rose pulsante para destacar hot+NEW sin abrir canal nuevo. */
   highlight?: boolean
+  /** B5.7 v2: el lead apareció en el último tick del polling — mostrar chip "Nuevo" durante 6s. */
+  isFresh?: boolean
+  /** True si esta card es de la vista "Descartados" — usa badge neutro. */
+  isDq?: boolean
   href?: string
 }
 
-export function BusinessLeadCard({ lead, effectiveScore, effectiveClassification, decayTierLabel, highlight = false, href }: BusinessLeadCardProps) {
+export function BusinessLeadCard({
+  lead,
+  effectiveScore,
+  effectiveClassification,
+  decayTierLabel,
+  highlight = false,
+  isFresh = false,
+  isDq = false,
+  href,
+}: BusinessLeadCardProps) {
   const [isPending, startTransition] = useTransition()
   const [localStatus, setLocalStatus] = useState<ChatbotLeadStatus>(lead.status)
   const timeAgo = formatTimeAgo(lead.capturedAt)
   const statusMeta = STATUS_BADGE[localStatus]
-  const intentLabel = INTENT_LABELS[lead.intent ?? 'unknown'] ?? 'Consulta'
-  const scoreCfg = effectiveClassification ? SCORE_CONFIG[effectiveClassification] : null
+  const intentLabel = INTENT_LABELS[lead.intent ?? 'unknown'] ?? 'Consulta general'
+  const scoreCfg = !isDq && effectiveClassification ? SCORE_CONFIG[effectiveClassification] : null
 
   function handleMarkContacted() {
     startTransition(async () => {
@@ -68,40 +115,80 @@ export function BusinessLeadCard({ lead, effectiveScore, effectiveClassification
     })
   }
 
-  // Bloque de info (header + intent + contactos). Si hay href, todo el bloque navega
-  // al detalle; los <a tel:>/<a mailto:> internos hacen stopPropagation para no
-  // disparar la navegación del wrapper.
+  // Patrón "linked card": el Link es un overlay absolute que cubre toda la
+  // card (z-10), el contenido va por encima (z-20). Así toda la card navega
+  // al detalle PERO los <a tel:> y <a mailto:> internos son clickeables
+  // independientemente. Evita `<a>` anidado dentro de `<a>` (HTML inválido).
   const infoBlock = (
     <>
-      {/* Header */}
-      <div className="mb-4 flex items-start justify-between gap-3">
+      {/* Header: nombre + timestamp · status arriba a la derecha */}
+      <div className="mb-3 flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <h3 className="truncate text-base font-semibold text-zinc-100">
-            {lead.name ?? 'Sin nombre'}
-          </h3>
+          <div className="flex items-center gap-2">
+            <h3 className="truncate text-base font-semibold text-zinc-100">
+              {lead.name ?? 'Sin nombre'}
+            </h3>
+            {isFresh && (
+              <span
+                className="inline-flex shrink-0 items-center gap-1 rounded-full border border-cyan-400/40 bg-cyan-400/15 px-1.5 py-0.5 text-[10px] font-medium text-cyan-300"
+                aria-label="Lead nuevo"
+              >
+                <span className="relative flex h-1.5 w-1.5">
+                  <span className="absolute inset-0 animate-ping rounded-full bg-cyan-400/70" />
+                  <span className="relative h-1.5 w-1.5 rounded-full bg-cyan-400" />
+                </span>
+                Nuevo
+              </span>
+            )}
+          </div>
           <p className="mt-0.5 flex items-center gap-1 text-xs text-zinc-500">
             <Clock className="h-3 w-3 shrink-0" strokeWidth={1.5} />
             Hace {timeAgo}
-            {decayTierLabel && (
+            {decayTierLabel && !isDq && (
               <span className="text-zinc-600"> · {decayTierLabel}</span>
             )}
           </p>
         </div>
-        <div className="flex shrink-0 flex-col items-end gap-1.5">
-          <Badge variant={statusMeta.variant}>{statusMeta.label}</Badge>
-          {scoreCfg && effectiveScore != null && (
+        {!isDq && <Badge variant={statusMeta.variant}>{statusMeta.label}</Badge>}
+      </div>
+
+      {/* Protagonista: badge XL de clase. Para DQ, badge gris neutro. */}
+      {scoreCfg ? (
+        <div
+          className={`mb-4 flex items-center gap-3 rounded-xl border px-3 py-2.5 ${scoreCfg.containerClass}`}
+          aria-label={`Nivel de interés: ${scoreCfg.label}${effectiveScore != null ? `, ${effectiveScore} de 100` : ''}`}
+        >
+          <scoreCfg.icon className={`h-7 w-7 shrink-0 ${scoreCfg.iconClass}`} strokeWidth={1.5} aria-hidden />
+          <div className="min-w-0 flex-1">
+            <p className={`text-base font-semibold leading-tight ${scoreCfg.textClass}`}>
+              {scoreCfg.label}
+            </p>
+            <p className="text-[11px] text-zinc-400">{scoreCfg.sublabel}</p>
+          </div>
+          {effectiveScore != null && (
             <span
-              className={`flex items-center gap-1 rounded-lg border px-2 py-0.5 text-[11px] font-medium ${scoreCfg.className}`}
-              aria-label={`Nivel de interés: ${effectiveScore} de 100 — ${scoreCfg.label}`}
+              className="shrink-0 rounded-md bg-white/[0.04] px-1.5 py-0.5 text-[10px] font-medium tabular-nums text-zinc-500"
+              aria-hidden
+              title={`${effectiveScore} de 100`}
             >
-              <scoreCfg.icon className="h-3 w-3" strokeWidth={1.5} />
-              {effectiveScore} · {scoreCfg.label}
+              {effectiveScore}/100
             </span>
           )}
         </div>
-      </div>
+      ) : isDq ? (
+        <div
+          className="mb-4 flex items-center gap-3 rounded-xl border border-zinc-700/50 bg-zinc-800/40 px-3 py-2.5"
+          aria-label="Descartado por el bot"
+        >
+          <Ban className="h-7 w-7 shrink-0 text-zinc-500" strokeWidth={1.5} aria-hidden />
+          <div className="min-w-0 flex-1">
+            <p className="text-base font-semibold leading-tight text-zinc-300">Descartado</p>
+            <p className="text-[11px] text-zinc-500">No es una consulta comercial</p>
+          </div>
+        </div>
+      ) : null}
 
-      {/* Intent */}
+      {/* Qué quiere */}
       {lead.intent && lead.intent !== 'unknown' && (
         <div className="mb-4 rounded-xl border border-white/[0.06] bg-white/[0.02] p-3">
           <p className="mb-1 text-[10px] uppercase tracking-[0.24em] text-zinc-500">
@@ -146,41 +233,47 @@ export function BusinessLeadCard({ lead, effectiveScore, effectiveClassification
         />
       )}
       <Card variant={href ? 'interactive' : 'default'} padding="lg">
-        {href ? (
-          <Link href={href} className="block cursor-pointer">
-            {infoBlock}
-          </Link>
-        ) : (
-          infoBlock
+        {href && (
+          <Link
+            href={href}
+            aria-label={`Ver detalle de ${lead.name ?? 'contacto'}`}
+            className="absolute inset-0 z-10 rounded-2xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-400"
+          />
         )}
+        <div className="relative z-20">
+          {infoBlock}
 
-        {/* Acciones — fuera del Link para que los buttons no naveguen */}
-        <div className="flex flex-wrap gap-2 border-t border-white/[0.06] pt-4">
-          {lead.phone && (
-            <a
-              href={`https://wa.me/${lead.phone.replace(/\D/g, '')}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex min-h-[44px] items-center gap-2 rounded-xl border border-emerald-400/30 bg-emerald-400/10 px-3 py-2 text-xs text-emerald-300 hover:bg-emerald-400/20"
-            >
-              <MessageSquare className="h-3.5 w-3.5" strokeWidth={1.5} />
-              WhatsApp
-            </a>
-          )}
-          {localStatus === 'NEW' && (
-            <Button
-              size="sm"
-              variant="secondary"
-              disabled={isPending}
-              onClick={handleMarkContacted}
-            >
-              Marcar contactado
-            </Button>
-          )}
-          {localStatus !== 'WON' && localStatus !== 'LOST' && (
-            <Button size="sm" disabled={isPending} onClick={handleMarkConverted}>
-              ✓ Es cliente
-            </Button>
+          {/* Acciones — en el plano z-20 (clickeables sobre el Link overlay).
+              En vista DQ no aparecen: son contactos descalificados, sin seguimiento. */}
+          {!isDq && (
+            <div className="flex flex-wrap gap-2 border-t border-white/[0.06] pt-4">
+              {lead.phone && (
+                <a
+                  href={`https://wa.me/${lead.phone.replace(/\D/g, '')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex min-h-[44px] items-center gap-2 rounded-xl border border-emerald-400/30 bg-emerald-400/10 px-3 py-2 text-xs text-emerald-300 hover:bg-emerald-400/20"
+                >
+                  <MessageSquare className="h-3.5 w-3.5" strokeWidth={1.5} />
+                  WhatsApp
+                </a>
+              )}
+              {localStatus === 'NEW' && (
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  disabled={isPending}
+                  onClick={handleMarkContacted}
+                >
+                  Marcar contactado
+                </Button>
+              )}
+              {localStatus !== 'WON' && localStatus !== 'LOST' && (
+                <Button size="sm" disabled={isPending} onClick={handleMarkConverted}>
+                  ✓ Es cliente
+                </Button>
+              )}
+            </div>
           )}
         </div>
       </Card>

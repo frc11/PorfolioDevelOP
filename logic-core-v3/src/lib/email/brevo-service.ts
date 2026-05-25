@@ -9,6 +9,9 @@ interface SendEmailInput {
   subject: string
   htmlContent: string
   textContent?: string
+  // RFC 8058 compliance + cabeceras custom (ej. List-Unsubscribe / List-Unsubscribe-Post
+  // para 1-click unsubscribe). Opcional para no romper callers existentes.
+  headers?: Record<string, string>
 }
 
 export async function sendTransactionalEmail(
@@ -30,6 +33,7 @@ export async function sendTransactionalEmail(
         email: process.env.BREVO_FROM_EMAIL ?? 'hola@develop.com.ar',
       },
       to: [input.to],
+      headers: input.headers,
     })
 
     return { ok: true, messageId: result.messageId }

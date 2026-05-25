@@ -1,7 +1,7 @@
-import type { NeuroAvatarState } from './types'
+import type { AvatarCoreState } from './types'
 
 /**
- * Mapper from the modern 5-state model to the legacy NeuroAvatar's
+ * Mapper from the canonical 3-state model to the legacy NeuroAvatar's
  * complex prop combinations.
  *
  * The legacy avatar uses "phases" (dormant/initializing/stabilizing/active/sleeping)
@@ -36,17 +36,20 @@ export function hexToContextColor(hex: string): LegacyAvatarProps['contextColor'
 }
 
 /**
- * Translates the modern state into props for the legacy avatar.
+ * Translates the canonical state into props for the legacy avatar.
  *
  * Notes:
  * - We avoid 'sleeping' phase (which renders the "Z" sprite) — that
- *   was deliberately rejected in design review (B2B mismatch). Instead,
- *   'dormant' is mapped to phase='dormant' with isOpen=false.
+ *   was deliberately rejected in design review (B2B mismatch).
+ * - 'idle' renders the avatar at rest with the chat closed — phase
+ *   'active' keeps the face fully rendered (no fade), isOpen=false
+ *   pauses reactive animations. Drops the previous 'dormant' state's
+ *   opacity dip, which now belongs to the parent container if needed.
  * - 'speaking' is mapped to active + messagePulse bumped to trigger
  *   the mouth/face reactions.
  */
 export function mapStateToLegacyProps(
-  state: NeuroAvatarState,
+  state: AvatarCoreState,
   accentColor: string,
   messagePulse: number = 0
 ): LegacyAvatarProps {
@@ -67,13 +70,9 @@ export function mapStateToLegacyProps(
   switch (state) {
     case 'idle':
       return { ...base, isOpen: false }
-    case 'listening':
-      return { ...base, isHovered: true }
     case 'thinking':
       return { ...base, isThinking: true }
     case 'speaking':
       return { ...base, messagePulse: messagePulse + 1, lastMessageRole: 'assistant' }
-    case 'dormant':
-      return { ...base, phase: 'dormant', isOpen: false }
   }
 }

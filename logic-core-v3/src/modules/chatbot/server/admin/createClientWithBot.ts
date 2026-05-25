@@ -4,6 +4,7 @@ import { z } from 'zod'
 import bcrypt from 'bcryptjs'
 import { prisma } from '@/lib/prisma'
 import { logAdminAction } from '@/lib/audit-log'
+import { AVATAR_STYLE_SCHEMA } from '@/modules/chatbot/components/avatar'
 import { requireSuperAdmin } from './requireSuperAdmin'
 import { generateTempPassword } from '@/lib/security/generate-temp-password'
 import { sendTransactionalEmail } from '@/lib/email/brevo-service'
@@ -44,7 +45,7 @@ const CreateClientInputSchema = z.object({
 
   // Paso 4: Apariencia
   accentColor: z.string().regex(/^#[0-9a-fA-F]{6}$/),
-  avatarStyle: z.enum(['neuro', 'legacy_neuro', 'image', 'emoji']),
+  avatarStyle: AVATAR_STYLE_SCHEMA,
   position: z.enum(['bottom_right', 'bottom_left']),
   quickReplies: z.array(z.object({
     id: z.string(),
@@ -226,6 +227,7 @@ export async function createClientWithBot(input: z.infer<typeof CreateClientInpu
     organizationId: created.org.id,
     userId: created.clientUser.id,
     tempPassword,
+    botId: created.bot.id,
     botSlug: created.bot.slug,
     orgSlug: uniqueSlug,
     userName: created.clientUser.name ?? parsed.userName,

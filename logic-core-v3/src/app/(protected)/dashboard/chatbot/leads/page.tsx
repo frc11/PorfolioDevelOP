@@ -1,32 +1,80 @@
-import { getClientChatbotSession, listLeadsByOrgSlug } from '@/modules/chatbot/index.server'
+import {
+  getClientChatbotSession,
+  listLeadsForDashboard,
+  countDqLeadsForOrg,
+  type LeadDashboardFilters,
+} from '@/modules/chatbot/index.server'
 import { ClientLeadsTable } from '@/modules/chatbot/components/dashboard/ClientLeadsTable'
 import { getEffectiveScore, getScoreExplanation } from '@/modules/chatbot/server/scoring'
 import type { ScoredSignal, LeadScoreClassification } from '@/modules/chatbot/server/scoring'
+import type { ChatbotLeadStatus } from '@prisma/client'
+import type { DateRange } from '@/lib/tz-ar'
 import { redirect } from 'next/navigation'
 
 export const dynamic = 'force-dynamic'
 
-export default async function ClientLeadsPage() {
+const VALID_STATUSES: ChatbotLeadStatus[] = ['NEW', 'CONTACTED', 'IN_NEGOTIATION', 'WON', 'LOST']
+const VALID_RANGES: DateRange[] = ['all', 'today', '7d', '30d']
+
+function parseStatus(v: string | undefined): ChatbotLeadStatus | undefined {
+  if (!v) return undefined
+  return (VALID_STATUSES as string[]).includes(v) ? (v as ChatbotLeadStatus) : undefined
+}
+
+function parseRange(v: string | undefined): DateRange {
+  if (!v) return 'all'
+  return (VALID_RANGES as string[]).includes(v) ? (v as DateRange) : 'all'
+}
+
+interface PageProps {
+  searchParams: Promise<{ status?: string; range?: string; view?: string }>
+}
+
+export default async function ClientLeadsPage({ searchParams }: PageProps) {
   const session = await getClientChatbotSession()
   if (!session) redirect('/dashboard')
 
-  const rawLeads = await listLeadsByOrgSlug(session.organization.slug, 200)
-  // B5.5 — aplica getEffectiveScore en lectura, filtra DQ del lado del cliente
-  const now = new Date()
-  const visibleRaw = rawLeads.filter((lead) => lead.classification !== 'dq')
-  // Si capturó leads pero todos eran DQ, mostrar empty state distinto
-  const hadOnlyDq = rawLeads.length > 0 && visibleRaw.length === 0
+  const params = await searchParams
+  const statusFilter = parseStatus(params.status)
+  const rangeFilter = parseRange(params.range)
+  const showingDq = params.view === 'dq'
 
-  const leads = visibleRaw
+  // Filtros DB: status, range, exclusión DQ (o solo DQ si view=dq). Aprovecha:
+  // @@index([botConfigId, capturedAt]), @@index([status]),
+  // @@index([botConfigId, classification, capturedAt(sort: Desc)]).
+  const filters: LeadDashboardFilters = {
+    status: statusFilter,
+    range: rangeFilter,
+    onlyDq: showingDq,
+  }
+
+  // El conteo DQ es global a la org (no respeta filtros) — sirve para que el
+  // chip "Descartados (N)" muestre siempre el total real disponible.
+  const [rawLeads, dqCount] = await Promise.all([
+    listLeadsForDashboard(session.organization.id, filters, 200),
+    countDqLeadsForOrg(session.organization.id),
+  ])
+
+  // Si la org no captura aún ninguno (incluyendo DQ), el empty state base
+  // ofrece CTA al chatbot. `hadOnlyDq` solo aplica a la vista no-DQ.
+  const hadOnlyDq = !showingDq && rawLeads.length === 0 && dqCount > 0
+
+  const now = new Date()
+  const leads = rawLeads
     .map((lead) => {
       if (lead.score == null || lead.classification == null) {
-        return { ...lead, effectiveScore: null, effectiveClassification: null, decayTierLabel: null, scoreExplanation: [] }
+        return {
+          ...lead,
+          effectiveScore: null,
+          effectiveClassification: null,
+          decayTierLabel: null,
+          scoreExplanation: [],
+        }
       }
       const effective = getEffectiveScore(
         {
           score: lead.score,
           classification: lead.classification as LeadScoreClassification,
-          // unstable_cache serializa dates como strings → normalizar siempre
           lastActivityAt: new Date(lead.capturedAt),
         },
         now,
@@ -42,10 +90,9 @@ export default async function ClientLeadsPage() {
         scoreExplanation: getScoreExplanation(signals),
       }
     })
-    // Orden por score efectivo desc; nulls al final, desempate por capturedAt desc.
-    // En-app sobre el efectivo: la query usa índices DB para filtrar,
-    // pero el efectivo (crudo × decay) no está en DB y se computa acá.
-    // Trade-off: no escala a >miles de leads sin paginación + materialización.
+    // Orden en memoria por score efectivo desc. No se puede en DB porque el
+    // efectivo = crudo × decay temporal, y el decay se aplica en lectura.
+    // A volumen miles+, esto pide paginación + materialización (roadmap-pendientes).
     .sort((a, b) => {
       if (a.effectiveScore == null && b.effectiveScore == null) {
         return new Date(b.capturedAt).getTime() - new Date(a.capturedAt).getTime()
@@ -56,5 +103,14 @@ export default async function ClientLeadsPage() {
       return new Date(b.capturedAt).getTime() - new Date(a.capturedAt).getTime()
     })
 
-  return <ClientLeadsTable leads={leads} hadOnlyDq={hadOnlyDq} />
+  return (
+    <ClientLeadsTable
+      leads={leads}
+      hadOnlyDq={hadOnlyDq}
+      dqCount={dqCount}
+      showingDq={showingDq}
+      initialStatus={statusFilter ?? 'all'}
+      initialRange={rangeFilter}
+    />
+  )
 }

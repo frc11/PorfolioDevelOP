@@ -1,5 +1,8 @@
 import { unstable_cache } from 'next/cache'
 import { prisma } from '@/lib/prisma'
+import type { Prisma, ChatbotLeadStatus } from '@prisma/client'
+import { excludeDqWhere } from '../scoring/dqFilter'
+import { startOfDateRange, type DateRange } from '@/lib/tz-ar'
 
 export async function getBotByOrgSlug(orgSlug: string) {
   const organization = await prisma.organization.findUnique({
@@ -48,6 +51,88 @@ export async function listLeadsByOrgSlug(orgSlug: string, limit: number = 50) {
     ['chatbot-leads', orgSlug, String(limit)],
     { revalidate: 120, tags: [`chatbot-leads:${orgSlug}`] }
   )()
+}
+
+// B5.5 — Filtros para la vista del dueño. `status` y `range` se aplican en DB
+// (índices @@index([status]) y @@index([botConfigId, capturedAt])). El filtro
+// por clase (hot/warm/cold) NO está acá porque depende del score EFECTIVO
+// post-decay, que se computa en app — se aplica después en page.tsx.
+export interface LeadDashboardFilters {
+  status?: ChatbotLeadStatus
+  range?: DateRange
+  /** Si true, devuelve SOLO los DQ. Si false (default), excluye DQ. */
+  onlyDq?: boolean
+}
+
+/**
+ * Lista leads de una org con filtros server-side. Sin unstable_cache:
+ * las combinaciones de filtros vivirían como cache keys distintos y el set
+ * ya queda acotado por los filtros DB. El polling cliente refresca cada 30s.
+ *
+ * Multi-tenancy: filtro relacional `botConfig: { organizationId }` — un id
+ * de otra org devuelve [] sin leak de existencia.
+ */
+export async function listLeadsForDashboard(
+  organizationId: string,
+  filters: LeadDashboardFilters = {},
+  limit: number = 200,
+) {
+  const where: Prisma.ChatbotLeadWhereInput = {
+    botConfig: { organizationId },
+  }
+
+  if (filters.onlyDq) {
+    where.classification = 'dq'
+  } else {
+    Object.assign(where, excludeDqWhere())
+  }
+
+  if (filters.status) {
+    where.status = filters.status
+  }
+
+  if (filters.range && filters.range !== 'all') {
+    const start = startOfDateRange(filters.range)
+    if (start) {
+      where.capturedAt = { gte: start }
+    }
+  }
+
+  const rows = await prisma.chatbotLead.findMany({
+    where,
+    // El orden final por score efectivo se hace EN MEMORIA (page.tsx) porque el
+    // efectivo = score crudo × decay temporal, y el decay no está en DB.
+    // El índice DB (botConfigId, capturedAt) ordena el set acotado por fecha;
+    // sirve como desempate estable cuando dos efectivos empatan.
+    orderBy: { capturedAt: 'desc' },
+    take: limit,
+    include: {
+      conversation: {
+        select: { sessionId: true, currentPath: true, startedAt: true },
+      },
+    },
+  })
+
+  return rows.map((r) => ({
+    ...r,
+    name: r.name ?? 'Sin nombre',
+    intent: r.intent ?? 'unknown',
+    message: r.message ?? '',
+  }))
+}
+
+/**
+ * Conteo de DQ de la org. Lo usa el toggle "Ver descartados" para mostrar el
+ * número incluso cuando la vista actual los excluye. Índice usado:
+ * @@index([botConfigId, classification, capturedAt(sort: Desc)]) — pega justo.
+ */
+export async function countDqLeadsForOrg(organizationId: string): Promise<number> {
+  return prisma.chatbotLead.count({
+    where: {
+      botConfig: { organizationId },
+      classification: 'dq',
+    },
+  })
 }
 
 // B5.7 — cuenta de leads "hot + sin contactar" para el badge de notificación
@@ -105,22 +190,27 @@ export async function getConversationMessagesForOrg(
 
 export async function listConversationsByOrgSlug(orgSlug: string, limit: number = 50) {
   const botInfo = await getBotByOrgSlug(orgSlug)
-  if (!botInfo) return []
+  if (!botInfo) return { items: [], total: 0 }
 
-  const rows = await prisma.conversation.findMany({
-    where: { botConfigId: botInfo.bot.id },
-    orderBy: { lastMessageAt: 'desc' },
-    take: limit,
-    include: {
-      lead: { select: { id: true, name: true, intent: true } },
-      _count: { select: { messages: true } },
-    },
-  })
+  const [rows, total] = await Promise.all([
+    prisma.conversation.findMany({
+      where: { botConfigId: botInfo.bot.id },
+      orderBy: { lastMessageAt: 'desc' },
+      take: limit,
+      include: {
+        lead: { select: { id: true, name: true, intent: true } },
+        _count: { select: { messages: true } },
+      },
+    }),
+    prisma.conversation.count({ where: { botConfigId: botInfo.bot.id } }),
+  ])
 
-  return rows.map((r) => ({
+  const items = rows.map((r) => ({
     ...r,
     lead: r.lead ? { ...r.lead, name: r.lead.name ?? 'Sin nombre' } : null,
   }))
+
+  return { items, total }
 }
 
 export type HandoffEvent = {

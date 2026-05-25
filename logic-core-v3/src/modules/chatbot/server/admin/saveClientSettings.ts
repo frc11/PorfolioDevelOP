@@ -2,9 +2,9 @@
 
 import { z } from 'zod'
 import { updateBotAppearance } from '@/modules/chatbot/server/dashboard/updateBotAppearance'
+import { CLIENT_AVATAR_STYLE_SCHEMA } from '@/modules/chatbot/components/avatar'
 import {
   BOT_POSITIONS,
-  CLIENT_AVATAR_STYLES,
   CURATED_COLORS,
 } from '@/modules/chatbot/shared/appearance'
 
@@ -22,7 +22,7 @@ const ClientSettingsSchema = z.object({
   welcomeMessage: z.string().trim().min(10).max(200),
   accentColor: z.enum(CURATED_COLORS),
   position: z.enum(BOT_POSITIONS),
-  avatarStyle: z.enum(CLIENT_AVATAR_STYLES).optional(),
+  avatarStyle: CLIENT_AVATAR_STYLE_SCHEMA.optional(),
   avatarEmoji: z.string().trim().max(2).nullable().optional(),
   quickReplies: z.array(legacyQuickReplySchema).max(4),
 })

@@ -5,11 +5,13 @@ import {
   listRecentEvents,
   getMonthlyUsageForBot,
   listLeadsForBot,
+  listConversationsForBot,
 } from '@/modules/chatbot/server/admin/queries'
 import {
   BotDetailClient,
   type MappedEvent,
   type LeadItem,
+  type ConversationItem,
   type BotWithDetails,
   type MonthlyUsage,
 } from './BotDetailClient'
@@ -29,7 +31,7 @@ export default async function BotDetailPage({ params, searchParams }: Props) {
   const { botId } = await params
   const { tab } = await searchParams
 
-  const [bot, rawEvents, monthlyUsage, rawLeads] = await Promise.all([
+  const [bot, rawEvents, monthlyUsage, rawLeads, rawConversations] = await Promise.all([
     prisma.botConfig.findUnique({
       where: { id: botId },
       include: {
@@ -51,6 +53,7 @@ export default async function BotDetailPage({ params, searchParams }: Props) {
     listRecentEvents(botId, 100),
     getMonthlyUsageForBot(botId),
     listLeadsForBot(botId, 100),
+    listConversationsForBot(botId, 100),
   ])
 
   if (!bot) notFound()
@@ -82,6 +85,21 @@ export default async function BotDetailPage({ params, searchParams }: Props) {
     conversation: l.conversation ?? null,
   }))
 
+  const conversations: ConversationItem[] = rawConversations.map(c => ({
+    id: c.id,
+    sessionId: c.sessionId,
+    currentPath: c.currentPath,
+    messageCount: c.messageCount,
+    tokensIn: c.tokensIn,
+    tokensOut: c.tokensOut,
+    estimatedCostUsd: Number(c.estimatedCostUsd),
+    leadCaptured: c.leadCaptured,
+    startedAt: c.startedAt ? c.startedAt.toISOString() : null,
+    lastMessageAt: c.lastMessageAt ? c.lastMessageAt.toISOString() : null,
+    lead: c.lead ? { id: c.lead.id, name: c.lead.name ?? 'Sin nombre', intent: c.lead.intent } : null,
+    _count: c._count,
+  }))
+
   const serializedUsage: MonthlyUsage = monthlyUsage
     ? {
         conversationsCount: monthlyUsage.conversationsCount,
@@ -98,6 +116,7 @@ export default async function BotDetailPage({ params, searchParams }: Props) {
       initialEvents={initialEvents}
       monthlyUsage={serializedUsage}
       leads={leads}
+      conversations={conversations}
     />
   )
 }

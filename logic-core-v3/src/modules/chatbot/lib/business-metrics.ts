@@ -7,14 +7,14 @@ export interface BusinessMetrics {
 }
 
 export function toBusinessMetrics(input: {
-  totalConversations: number
+  monthlyConversations: number
   capturedLeads: number
   leadValueUSD?: number
   avgLatencyMs?: number
   successRate?: number
 }): BusinessMetrics {
   return {
-    conversations: input.totalConversations,
+    conversations: input.monthlyConversations,
     leads: input.capturedLeads,
     estimatedValue: (input.capturedLeads ?? 0) * (input.leadValueUSD ?? 50),
     responseRate: Math.round((input.successRate ?? 0.95) * 100),

@@ -10,7 +10,22 @@ export const CURATED_COLORS = [
 ] as const
 
 export const BOT_POSITIONS = ['bottom_right', 'bottom_left'] as const
-export const CLIENT_AVATAR_STYLES = ['neuro', 'emoji'] as const
+/**
+ * Avatar ids that the CLIENT dashboard exposes. Must stay in sync with
+ * AVATAR_REGISTRY in src/modules/chatbot/components/avatar/registry.ts.
+ * Listed here as plain literals so this shared module stays free of UI
+ * component imports (avoids circular dep with the registry).
+ *
+ * Source of truth for runtime validation lives in
+ * src/modules/chatbot/components/avatar/avatarStyleSchema.ts.
+ */
+export const CLIENT_AVATAR_STYLES = [
+  'neuro',
+  'legacy_neuro',
+  'monograma',
+  'onda',
+  'geometrico',
+] as const
 
 export type CuratedColor = (typeof CURATED_COLORS)[number]
 export type BotPosition = (typeof BOT_POSITIONS)[number]

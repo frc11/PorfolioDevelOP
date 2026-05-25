@@ -4,6 +4,7 @@ import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 import { computeDiff, logAdminAction, omitAuditNoise } from '@/lib/audit-log'
+import { AVATAR_STYLE_SCHEMA } from '@/modules/chatbot/components/avatar'
 import { invalidateBotCache } from '../conversation'
 import { requireSuperAdmin } from './requireSuperAdmin'
 
@@ -24,7 +25,7 @@ const SaveBotConfigInputSchema = z.object({
   accentColor: z.string().regex(/^#[0-9a-fA-F]{6}$/),
   accentSecondary: z.string().regex(/^#[0-9a-fA-F]{6}$/).nullable(),
   chatSurfaceTint: z.string().regex(/^#[0-9a-fA-F]{6}$/).nullable(),
-  avatarStyle: z.enum(['neuro', 'legacy_neuro', 'simple', 'image', 'emoji']),
+  avatarStyle: AVATAR_STYLE_SCHEMA,
   avatarImageUrl: z.string().url().nullable(),
   avatarEmoji: z.string().max(8).nullable(),
   borderRadius: z.enum(['small', 'medium', 'large']),
@@ -118,7 +119,7 @@ export async function saveBotConfigByOrgSlug(
       metadata: { organizationId: org.id, orgSlug },
     })
 
-    revalidatePath(`/admin/clients/${orgSlug}/chatbot/config`)
+    revalidatePath(`/admin/chatbots/${after.id}`)
     return { success: true }
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'Unknown error'

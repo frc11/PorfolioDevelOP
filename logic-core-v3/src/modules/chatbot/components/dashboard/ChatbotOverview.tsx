@@ -30,7 +30,7 @@ interface ChatbotOverviewProps {
 export function ChatbotOverview({ session, usage, recentLeads, recentHandoffs }: ChatbotOverviewProps) {
   const reduced = useReducedMotion()
   const metrics = toBusinessMetrics({
-    totalConversations: usage?.conversationsCount ?? 0,
+    monthlyConversations: usage?.conversationsCount ?? 0,
     capturedLeads: recentLeads.length,
     leadValueUSD: 50,
     successRate: 0.97,
@@ -199,13 +199,6 @@ export function ChatbotOverview({ session, usage, recentLeads, recentHandoffs }:
         )}
       </div>
 
-      {/* Insights AI placeholder */}
-      <div className="rounded-2xl border border-violet-500/20 bg-violet-500/5 p-6">
-        <p className="mb-2 text-xs uppercase tracking-widest text-violet-400">Insights AI</p>
-        <p className="text-sm text-zinc-300">
-          Los insights automáticos se activarán cuando tu bot acumule más conversaciones.
-        </p>
-      </div>
     </div>
   )
 }

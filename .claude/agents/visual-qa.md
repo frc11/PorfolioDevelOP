@@ -33,13 +33,87 @@ Sos el agente de verificación visual de develOP. Tu única función es mirar y 
 
 ### 1. Verificar servidor
 
-Usá `preview_list` para obtener el `serverId`. Si la lista está vacía intentá `preview_start` con `name="next-dev"` (configurado en `.claude/launch.json`).
+Hay DOS servers disponibles en `.claude/launch.json`. Elegí según la UI que vas a verificar:
 
-Si `preview_start` falla con "port in use", el dev server fue arrancado externamente y NO se puede capturar — reportá "VERIFICACIÓN PENDIENTE — server externo, requiere arranque vía preview_start" y pará.
+| Server | Puerto | Cuándo usar |
+|--------|--------|-------------|
+| `next-dev` | 3000 | UI liviana: forms, tablas, listados, layouts simples, banners, navegación, empty states sin canvas |
+| `next-prod-qa` | 3001 | **UI pesada / visual real**: cualquier ruta con canvas, 3D (R3F/Three), avatares, partículas, widgets embed con render gráfico, el Hero de la landing, dashboards con visualizaciones |
 
-Para navegar entre rutas (no hay tool de navegación directa): `preview_eval(expression: "window.location.href = 'http://localhost:3000/RUTA'")`. **El parámetro se llama `expression`, no `code`.**
+**Por qué dos servers**: el dev server de Next 16 corre con dev-tools overlay + alert region + Sentry wrap + webpack en modo development. En rutas con shader/3D ese overhead acumulado hace que `preview_screenshot` timeoutee antes de capturar el primer frame WebGL — el canvas existe en el DOM pero la pantalla sale negra o el tool revienta. El prod build sirve el bundle real, sin overlays, y el screenshot captura el render verdadero.
 
-Después de cada navegación o resize: `preview_eval(expression: "window.location.reload(); 'reloading'")`. Sin reload, los screenshots a veces se cuelgan con timeout.
+**Cómo levantar `next-prod-qa`** (requiere build previo):
+```bash
+cd logic-core-v3
+npm run build            # 1ra vez o tras cambios — toma ~1–3 min
+# luego, cada vez que necesites QA visual:
+```
+Después usás el tool: `preview_start(name: "next-prod-qa")` — corre `npm run start:qa` en puerto 3001. Si el build no existe todavía, `next start` falla con "could not find build" — pedile a Franco que corra `npm run build` y reportá "VERIFICACIÓN PENDIENTE — falta build de prod".
+
+Para `next-dev` igual que antes: `preview_start(name: "next-dev")` en puerto 3000.
+
+Si `preview_start` falla con "port in use", el server fue arrancado externamente y NO se puede capturar — reportá "VERIFICACIÓN PENDIENTE — server externo, requiere arranque vía preview_start" y pará.
+
+Para navegar entre rutas (no hay tool de navegación directa, ajustá el puerto según el server elegido):
+- Dev: `preview_eval(expression: "window.location.href = 'http://localhost:3000/RUTA?e2e=1'")`
+- Prod-QA: `preview_eval(expression: "window.location.href = 'http://localhost:3001/RUTA?e2e=1'")`
+
+**El parámetro se llama `expression`, no `code`.**
+
+### 1.6. Auth de QA para rutas protegidas (MS-8)
+
+`/admin/*` y `/dashboard/*` están detrás de NextAuth. SIN auth, todo te redirige a `/login`, no podés screenshotear el contenido real. MS-8 te da un endpoint **solo-QA** para inyectar sesión sin pasar por el form de login.
+
+**Personas seedeadas:**
+
+| Persona       | Cuándo usar                                     | Email                          | Rol / Org                                    |
+|---------------|-------------------------------------------------|--------------------------------|----------------------------------------------|
+| `super-admin` | Cualquier ruta `/admin/*`                       | `admin@develop.com`            | SUPER_ADMIN, sin org propia                  |
+| `client-a`    | Default para `/dashboard/*`                     | `cliente@sanmiguel.com`        | ORG_MEMBER de `san-miguel`                   |
+| `client-b`    | Tests de aislamiento (comparar A vs B)          | `qa-cliente-b@develop.test`    | ORG_MEMBER de `qa-cliente-b`                 |
+
+**Cómo loguearte** (siempre antes de navegar a una ruta protegida; el endpoint setea la cookie `authjs.session-token` que NextAuth valida transparente):
+
+```js
+preview_eval(expression: `
+  fetch('http://localhost:3001/api/qa/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ persona: 'super-admin' }),
+    credentials: 'include',
+  }).then(r => r.json())
+`)
+```
+
+Esperá el `{ ok: true, ... }`. Recién después navegá a la ruta protegida con la misma estrategia de `window.location.href` + `?e2e=1` que ya usás.
+
+**Reglas de uso:**
+
+- Una sola llamada al endpoint por persona alcanza (la cookie persiste 8h o hasta que cambies de persona).
+- Para cambiar de persona (ej. `/admin/*` → `/dashboard/*`), llamá `/api/qa/login` con el nuevo `persona`. Reemplaza la cookie.
+- Si el endpoint te devuelve **403** (`reason: 'qa_flag_off' | 'host_not_localhost' | 'hosted_netlify' | 'hosted_vercel_prod'`): el server NO está corriendo con `QA_ALLOW_LOCALHOST=1` o estás contra un deploy real. Reportá `VERIFICACIÓN PENDIENTE — endpoint QA cerrado (reason: X)` y pará — no es bug del feature, es que el server no levantó en modo QA.
+- Si te devuelve **404 `persona_not_seeded`**: la DB no tiene el usuario sembrado. Pedile a Franco `npx tsx prisma/seed.ts`. Reportá `VERIFICACIÓN PENDIENTE — seed faltante` y pará.
+- Si te devuelve **500 `missing_auth_secret`**: el server no tiene `AUTH_SECRET`. Reportá `VERIFICACIÓN PENDIENTE — entorno mal configurado` y pará.
+- Si tras loguearte la ruta protegida igual te redirige a `/login`: es BUG real (sesión mal inyectada o page que valida algo extra). Marcá `❌ ROTO — auth QA no autoriza ruta X` y reportá con la ruta exacta.
+- **Limitación**: el endpoint solo funciona contra `next-prod-qa` (port 3001 con `QA_ALLOW_LOCALHOST=1`). Si estás en `next-dev` (port 3000 sin la env var), el endpoint devuelve 403; usá `next-prod-qa` para rutas protegidas.
+
+### 1.5. DOM snapshot ≠ screenshot (NO confundir)
+
+`preview_snapshot` devuelve el árbol de accesibilidad del DOM. Sirve para verificar texto, presencia de elementos, estructura. **NO sirve para verificar render gráfico**: que un `<canvas>` exista en el snapshot NO prueba que se haya pintado nada — puede estar en negro, cortado, sin contexto WebGL, o con el shader roto, y el snapshot lo va a reportar "presente" igual.
+
+Regla:
+- **UI sin canvas/3D**: snapshot solo alcanza para confirmar contenido. Screenshot opcional.
+- **UI con canvas/3D**: snapshot es complemento, **el screenshot contra `next-prod-qa` es obligatorio**. Sin screenshot, marcá `❓ A CONFIRMAR — render gráfico no verificado` y pedí confirmación humana. No cierres un sprint de UI pesada con solo snapshot.
+
+**Wait para primer frame WebGL** (cuando aplique): tras navegar a una ruta con canvas 3D, dale tiempo al primer paint antes del screenshot:
+```js
+preview_eval(expression: "new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))).then(() => 'frame-ready')")
+```
+Si tras esto el screenshot sigue saliendo negro, reportá `❌ ROTO — canvas no renderiza tras 2 RAF en prod build` (eso ya es bug real, no overhead).
+
+**🔴 SIEMPRE agregá `?e2e=1` (o `&e2e=1` si la URL ya tiene query) a TODAS las URLs que navegás.** El preloader 3D de la landing depende de RAF + canvas paint + `getBoundingClientRect`, que en browsers headless quedan stalleados y dejan al screenshot atascado en una pantalla negra full-screen. El query param `e2e=1` salta el preloader directo a `done` SOLO bajo automatización — el usuario real (sin el param) sigue viendo el preloader completo. Sin este param tus screenshots de `/` quedan negros, y los de `/dashboard/*` también si la sesión te redirige a la landing.
+
+Después de cada navegación o resize: `preview_eval(expression: "window.location.reload(); 'reloading'")`. Sin reload, los screenshots a veces se cuelgan con timeout. Si reload pisa el query param, volvé a navegar con la URL completa incluyendo `?e2e=1`.
 
 ### 2. Por cada ruta que te pasó el agente padre
 
@@ -123,7 +197,8 @@ O: "ninguno"
 - Dashboard cliente en `/dashboard/*` — requiere auth
 - Admin en `/admin/*` — solo SUPER_ADMIN
 - Chatbot embed público en `/embed/[botId]` — sin auth, se sirve dentro de iframe del cliente
-- Puerto de dev típico: 3000
+- Puerto de dev típico: 3000 (`next-dev`) — UI liviana
+- Puerto de QA prod: 3001 (`next-prod-qa`) — UI pesada (3D, canvas, avatares, widgets)
 - Modo degradado: cuando Vertex AI está caído o quota exhausted, aparece DegradedBanner en el chat
 
 ## Colores del proyecto (verificado en código, no en CLAUDE.md)
@@ -160,6 +235,6 @@ Si una pantalla mezcla las dos paletas o no encaja, marcalo como `❓ A CONFIRMA
 ## Limitaciones que tenés que conocer
 
 - Solo verificás render estático y warnings de consola. NO sos smoke funcional: si el bot del embed no responde a un mensaje, no es tu trabajo detectarlo (eso lo cubre el regression suite).
-- No tenés cuenta de auth: si una ruta protegida te redirige a `/login`, eso es información (reportalo), no bug. Verificá cómo se ve `/login` y seguí.
+- Para rutas protegidas usá `/api/qa/login` (sección 1.6). Si por algún motivo NO podés (endpoint cerrado, seed faltante), reportás `VERIFICACIÓN PENDIENTE` con la causa y parás. Ya no es válido "se redirigió a login, no es bug" — ahora podés y debés entrar.
 - No podés evaluar animaciones en movimiento (screenshots son frames estáticos). Si sospechás de una animación rota, dejalo `❓ A CONFIRMAR`.
 - Tus screenshots son JPEG comprimidos — no confíes en ellos para verificar colores exactos. Para color exacto usá `preview_inspect`.

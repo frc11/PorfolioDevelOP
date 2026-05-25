@@ -2,7 +2,7 @@
 
 import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
-import { revalidatePath } from 'next/cache'
+import { revalidatePath, revalidateTag } from 'next/cache'
 import { computeDiff, logAdminAction, omitAuditNoise } from '@/lib/audit-log'
 import { logChatbotEvent } from '../logging'
 import { getClientChatbotSession } from './getClientSession'
@@ -67,5 +67,20 @@ export async function updateLeadStatus(input: z.infer<typeof UpdateLeadStatusSch
   })
 
   revalidatePath('/dashboard/chatbot/leads')
+
+  // B5.7 v2 — Invalidar el cache del badge sidebar cuando el cambio afecta el
+  // contador hot+NEW. El badge cuenta classification='hot' AND status='NEW';
+  // basta con detectar si el lead cruzó esa frontera en cualquier dirección
+  // (entró o salió). Sin esto, el badge tardaba hasta 30s del TTL en bajar.
+  const wasHotNew = lead.classification === 'hot' && lead.status === 'NEW'
+  const isHotNew = lead.classification === 'hot' && parsed.status === 'NEW'
+  if (wasHotNew !== isHotNew) {
+    try {
+      revalidateTag(`hot-leads-count:${lead.botConfig.organizationId}`, {})
+    } catch (err) {
+      console.error('[updateLeadStatus] revalidateTag failed:', err)
+    }
+  }
+
   return { ok: true }
 }

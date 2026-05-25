@@ -169,6 +169,9 @@ enum AuditActionType {
   CREDENTIALS_RESENT
   PASSWORD_CHANGED
   LEADS_EXPORTED
+  CRM_INTEGRATION_UPDATED
+  CRM_INTEGRATION_TESTED
+  CRM_SYNC_RETRIED
   OTHER
 }
 
@@ -334,21 +337,85 @@ model Organization {
   cachedExecutiveBriefAt      DateTime?
   executiveBriefRegenerations Int       @default(0)
 
-  members         OrgMember[]
-  services        Service[]
-  projects        Project[]
-  messages        Message[]
-  invoices        Invoice[]
-  notifications   Notification[]
-  clientAssets    ClientAsset[]
-  subscription    Subscription?
-  brandProfile    ClientBrandProfile?
-  tickets         Ticket[]
-  premiumModules  OrganizationModule[]
-  emailContacts   EmailContact[]
-  emailCampaigns  EmailCampaign[]
-  onboardingTasks OnboardingTask[]
-  botConfig       BotConfig?
+  // B6.2 — opt-out del reporte ejecutivo semanal por email. Se setea desde el
+  // link de unsubscribe del propio mail (1-click). El cron de envío respeta este
+  // flag antes de mandar.
+  executiveReportOptOut Boolean @default(false)
+
+  members           OrgMember[]
+  services          Service[]
+  projects          Project[]
+  messages          Message[]
+  invoices          Invoice[]
+  notifications     Notification[]
+  clientAssets      ClientAsset[]
+  subscription      Subscription?
+  brandProfile      ClientBrandProfile?
+  tickets           Ticket[]
+  premiumModules    OrganizationModule[]
+  emailContacts     EmailContact[]
+  emailCampaigns    EmailCampaign[]
+  onboardingTasks   OnboardingTask[]
+  botConfig         BotConfig?
+  crmIntegration    CrmIntegration?
+  briefSnapshots    ExecutiveBriefSnapshot[]
+  weeklyReportLogs  WeeklyReportLog[]
+}
+
+// Histórico semanal del executive brief. Aditivo al cache vigente en Organization
+// (cachedExecutiveBrief*) — no lo reemplaza. Un snapshot por org por semana ISO
+// (periodKey calculado en TZ-AR). Si la org regenera N veces dentro de la misma
+// semana, el snapshot se sobrescribe (upsert) y queda el último válido. Guarda
+// SOLO agregados (sin PII ni leads crudos).
+model ExecutiveBriefSnapshot {
+  id             String   @id @default(cuid())
+  organizationId String
+  content        String   @db.Text
+  healthScores   Json
+  weekResults    Json
+  periodKey      String
+  createdAt      DateTime @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, periodKey])
+  @@index([organizationId, createdAt])
+}
+
+// B6.2 — log de envíos del reporte ejecutivo semanal.
+// Idempotencia: unique en (orgId, periodKey) — una sola entrega por org por
+// semana ISO. Si el cron corre dos veces o falla a mitad, reintenta solo las
+// que están en FAILED o no existen; las SENT se saltean.
+// Estados terminales: SENT, FAILED, SKIPPED_*. Intermedio: PENDING (mientras
+// el send está en vuelo).
+enum WeeklyReportStatus {
+  PENDING
+  SENT
+  FAILED
+  SKIPPED_PLAN
+  SKIPPED_OPTOUT
+  SKIPPED_NO_RECIPIENT
+  SKIPPED_NO_DATA
+}
+
+model WeeklyReportLog {
+  id             String             @id @default(cuid())
+  organizationId String
+  periodKey      String
+  status         WeeklyReportStatus @default(PENDING)
+  recipientEmail String?
+  messageId      String?
+  errorMessage   String?            @db.Text
+  attempts       Int                @default(0)
+  sentAt         DateTime?
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, periodKey])
+  @@index([status])
+  @@index([periodKey])
 }
 
 model OrgMember {
@@ -1158,6 +1225,9 @@ model ChatbotLead {
   capturedAt DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
+  // B5.8 — historial de syncs a CRM del cliente vía n8n.
+  crmSyncAttempts CrmSyncAttempt[]
+
   @@index([botConfigId, capturedAt])
   @@index([status])
   // B5.1 — índices que B5.2 (scoring) y la vista de 5B van a consumir.
@@ -1312,4 +1382,82 @@ model AdminAuditLog {
   @@index([targetType, targetId, createdAt])
   @@index([actionType, createdAt])
   @@map("admin_audit_log")
+}
+
+// ─── B5.8 — CRM Integration ───────────────────────────────────────────────────
+// Sync de leads del chatbot al CRM del cliente vía n8n. Una integración por org.
+// Regla absoluta: el lead se guarda en DB ANTES de intentar el sync. El sync es
+// secundario y nunca puede hacer perder un lead. Gateado por plan.crmEnabled.
+
+enum CrmProvider {
+  N8N
+}
+
+enum CrmSyncStatus {
+  PENDING
+  SUCCESS
+  FAILED
+  RETRYING
+}
+
+model CrmIntegration {
+  id String @id @default(cuid())
+
+  organizationId String       @unique
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  provider   CrmProvider @default(N8N)
+  webhookUrl String      @db.Text
+  enabled    Boolean     @default(false)
+
+  // Auth opcional vía header (ej. "X-Webhook-Secret"). Secret cifrado AES-256-GCM
+  // con env CRM_SECRET_KEY. Si los 4 campos son null, no se manda header de auth.
+  secretHeaderName String?
+  secretEncrypted  String? @db.Text
+  secretIv         String?
+  secretTag        String?
+
+  // Última actividad (sanitizada — sin PII en lastErrorMessage).
+  lastSyncAt       DateTime?
+  lastErrorAt      DateTime?
+  lastErrorMessage String?   @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  syncAttempts CrmSyncAttempt[]
+
+  @@map("crm_integration")
+}
+
+// Historial de intentos de sync. Los reads aplican stale detection:
+// un PENDING/RETRYING con attemptedAt > SYNC_STALE_THRESHOLD_MS se considera FAILED
+// (proceso muerto antes de marcar resultado, ej. cold start). Resolución en lectura,
+// sin cron — mismo patrón que el decay del score (B5.4).
+model CrmSyncAttempt {
+  id String @id @default(cuid())
+
+  leadId String
+  lead   ChatbotLead @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  integrationId String
+  integration   CrmIntegration @relation(fields: [integrationId], references: [id], onDelete: Cascade)
+
+  // Denormalizado por tenant safety: queries por org no requieren join multi-nivel.
+  organizationId String
+
+  status        CrmSyncStatus @default(PENDING)
+  attemptNumber Int           @default(1)
+
+  httpStatus   Int?
+  errorMessage String? @db.Text
+
+  attemptedAt DateTime  @default(now())
+  completedAt DateTime?
+  durationMs  Int?
+
+  @@index([leadId, attemptedAt(sort: Desc)])
+  @@index([integrationId, status, attemptedAt(sort: Desc)])
+  @@index([organizationId, status])
+  @@map("crm_sync_attempt")
 }

@@ -62,7 +62,7 @@ export async function saveKnowledgeBaseByOrgSlug(
       metadata: { botConfigId: org.botConfig.id, organizationId: org.id, orgSlug },
     })
 
-    revalidatePath(`/admin/clients/${orgSlug}/chatbot/knowledge`)
+    revalidatePath(`/admin/chatbots/${org.botConfig.id}`)
     return { success: true }
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'Unknown error'

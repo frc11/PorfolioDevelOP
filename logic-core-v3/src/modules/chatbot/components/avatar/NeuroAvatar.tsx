@@ -8,12 +8,16 @@ import { CentralCore } from './CentralCore'
 import { STATE_CONFIG, type NeuroAvatarProps } from './types'
 
 /**
- * NeuroAvatar — exclusive 3D avatar for develOP.
+ * NeuroAvatar — heavy 3D avatar ("Orbe Neural" in the registry).
  *
  * Renders a Fibonacci sphere of glowing particles around a bright core.
- * 5 states drive rotation speed, radius variation, core scale and glow.
+ * The 3 canonical states (idle / thinking / speaking) drive rotation
+ * speed, radius variation, core scale and glow.
  *
  * Optimized for small sizes (~56px). Performant on mobile.
+ *
+ * `businessInitials` is part of the canonical contract but ignored here
+ * (the orb has no text). The Monogram avatar (B7.2) is the consumer.
  */
 export function NeuroAvatar({
   state,
@@ -27,11 +31,12 @@ export function NeuroAvatar({
   return (
     <motion.div
       className={className}
-      style={{ width: size, height: size }}
+      style={{ width: size, height: size, overflow: 'hidden' }}
       animate={{ opacity: config.opacity }}
       transition={{ duration: 0.6 }}
     >
       <Canvas
+        style={{ width: '100%', height: '100%', display: 'block' }}
         camera={{ position: [0, 0, 3], fov: 45 }}
         gl={{
           antialias: false,

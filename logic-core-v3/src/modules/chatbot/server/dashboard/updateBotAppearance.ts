@@ -7,9 +7,9 @@ import { logAdminAction } from '@/lib/audit-log'
 import { prisma } from '@/lib/prisma'
 import { resolveOrgId } from '@/lib/preview'
 import { invalidateBotCache } from '@/modules/chatbot/server/conversation'
+import { CLIENT_AVATAR_STYLE_SCHEMA } from '@/modules/chatbot/components/avatar'
 import {
   BOT_POSITIONS,
-  CLIENT_AVATAR_STYLES,
   CURATED_COLORS,
 } from '@/modules/chatbot/shared/appearance'
 
@@ -19,7 +19,7 @@ const UpdateBotAppearanceSchema = z
   .object({
     accentColor: z.enum(CURATED_COLORS).optional(),
     position: z.enum(BOT_POSITIONS).optional(),
-    avatarStyle: z.enum(CLIENT_AVATAR_STYLES).optional(),
+    avatarStyle: CLIENT_AVATAR_STYLE_SCHEMA.optional(),
     avatarEmoji: z.string().trim().max(2).optional(),
     welcomeMessage: z.string().trim().min(10).max(200).optional(),
     quickReplies: z.array(quickReplyTextSchema).max(4).optional(),

@@ -1,12 +1,16 @@
 'use client'
 
+import { useEffect, useRef, useCallback } from 'react'
 import { usePathname } from 'next/navigation'
-import { motion, AnimatePresence } from 'motion/react'
+import { motion, AnimatePresence, useReducedMotion } from 'motion/react'
 import { AvatarRenderer } from './avatar'
+import { deriveBusinessInitials } from '../shared/businessInitials'
+import { CHATBOT_Z_INDEX } from '../shared/zIndex'
 import { ChatWindow } from './chat/ChatWindow'
 import { ProactiveTooltip } from './tooltip'
 import { renderToolCall } from './tool-cards'
 import { useChatbot } from '../hooks/useChatbot'
+import { useChatbotSounds } from '../hooks/useChatbotSounds'
 import type { ToolCallInUIMessage } from './chat/types'
 
 interface LogicCompanionProps {
@@ -16,13 +20,44 @@ interface LogicCompanionProps {
 export function LogicCompanion({ slug }: LogicCompanionProps) {
   const pathname = usePathname() ?? '/'
   const chatbot = useChatbot({ slug, currentPath: pathname })
+  const sounds = useChatbotSounds()
+  const reducedMotion = useReducedMotion()
+
+  // Fire `playMessage` only on the streaming→ready transition (not on every
+  // re-render). The interaction-guard inside the hook covers the autoplay
+  // policy: if the user has not opened the widget yet, this is a no-op.
+  const wasStreamingRef = useRef<boolean>(false)
+  useEffect(() => {
+    if (wasStreamingRef.current && !chatbot.isStreaming) {
+      sounds.playMessage()
+    }
+    wasStreamingRef.current = chatbot.isStreaming
+  }, [chatbot.isStreaming, sounds])
+
+  const handleToggle = useCallback(() => {
+    // Play the open chime BEFORE flipping state so the AudioContext is created
+    // inside the user gesture frame (some browsers — notably Safari — are
+    // strict about this).
+    if (!chatbot.isOpen) sounds.playOpen()
+    chatbot.toggle()
+  }, [chatbot, sounds])
 
   if (chatbot.isLoading || !chatbot.config) return null
 
+  // Respect safe-area-inset on iPhone notch / Android gesture nav. The bubble
+  // should never sit *under* the home indicator on a 14 Pro or behind the
+  // right-edge swipe area on a Pixel. `max(...)` keeps the desktop spacing
+  // (24px) when there's no inset to worry about.
   const position =
     chatbot.config.position === 'bottom_left'
-      ? { bottom: 24, left: 24 }
-      : { bottom: 24, right: 24 }
+      ? {
+          bottom: 'max(24px, env(safe-area-inset-bottom))',
+          left: 'max(24px, env(safe-area-inset-left))',
+        }
+      : {
+          bottom: 'max(24px, env(safe-area-inset-bottom))',
+          right: 'max(24px, env(safe-area-inset-right))',
+        }
 
   return (
     <>
@@ -36,7 +71,7 @@ export function LogicCompanion({ slug }: LogicCompanionProps) {
             onSendMessage={chatbot.sendMessage}
             onClose={chatbot.close}
             onQuickReply={chatbot.sendMessage}
-            degradedMode={chatbot.degradedMode}
+            degradedInfo={chatbot.degradedInfo}
             renderToolCall={(tc: ToolCallInUIMessage) =>
               renderToolCall(tc, chatbot.config!, {
                 onSelectWhatsapp: chatbot.triggerWhatsappHandoff,
@@ -44,6 +79,8 @@ export function LogicCompanion({ slug }: LogicCompanionProps) {
                 onNavigate: chatbot.navigateTo,
               })
             }
+            muted={sounds.muted}
+            onToggleMute={sounds.toggleMute}
           />
         )}
       </AnimatePresence>
@@ -52,12 +89,12 @@ export function LogicCompanion({ slug }: LogicCompanionProps) {
         data-chatbot-avatar
         role="button"
         tabIndex={0}
-        onClick={chatbot.toggle}
+        onClick={handleToggle}
         aria-label={chatbot.isOpen ? 'Cerrar chat' : 'Abrir chat'}
         style={{
           position: 'fixed',
           ...position,
-          zIndex: 9999,
+          zIndex: CHATBOT_Z_INDEX.bubble,
           width: 56,
           height: 56,
           borderRadius: '50%',
@@ -66,9 +103,15 @@ export function LogicCompanion({ slug }: LogicCompanionProps) {
           background: 'transparent',
           cursor: 'pointer',
         }}
-        whileHover={{ scale: 1.08 }}
-        whileTap={{ scale: 0.95 }}
-        transition={{ type: 'spring', stiffness: 400, damping: 18 }}
+        initial={reducedMotion ? { scale: 1, opacity: 1 } : { scale: 0, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        whileHover={reducedMotion ? undefined : { scale: 1.08 }}
+        whileTap={reducedMotion ? undefined : { scale: 0.95 }}
+        transition={
+          reducedMotion
+            ? { duration: 0 }
+            : { type: 'spring', stiffness: 380, damping: 38, mass: 0.9 }
+        }
       >
         <div className="relative w-full h-full">
           <AvatarRenderer
@@ -78,6 +121,7 @@ export function LogicCompanion({ slug }: LogicCompanionProps) {
             size={56}
             avatarImageUrl={chatbot.config.avatarImageUrl}
             avatarEmoji={chatbot.config.avatarEmoji}
+            businessInitials={deriveBusinessInitials(chatbot.config.botName)}
           />
           {!chatbot.isOpen && (
             <ProactiveTooltip

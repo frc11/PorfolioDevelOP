@@ -6,10 +6,8 @@ import { toast } from 'sonner'
 import {
   AlignLeft,
   AlignRight,
-  Bot,
   Check,
   Plus,
-  Smile,
   Trash2,
   type LucideIcon,
 } from 'lucide-react'
@@ -21,7 +19,10 @@ import { Section } from '@/components/ui/Section'
 import { Eyebrow, Heading, Muted } from '@/components/ui/Typography'
 import { cn } from '@/lib/utils'
 import { updateBotAppearance } from '@/modules/chatbot/server/dashboard/updateBotAppearance'
+import { AvatarPicker, AvatarRenderer } from '@/modules/chatbot/components/avatar'
+import { deriveBusinessInitials } from '@/modules/chatbot/shared/businessInitials'
 import {
+  CLIENT_AVATAR_STYLES,
   CURATED_COLORS,
   type BotPosition,
   type ClientAvatarStyle,
@@ -46,7 +47,6 @@ type BotPersonalizationState = {
   accentColor: CuratedColor
   position: BotPosition
   avatarStyle: ClientAvatarStyle
-  avatarEmoji: string
   welcomeMessage: string
   quickReplies: string[]
 }
@@ -67,7 +67,7 @@ function isBotPosition(value: string): value is BotPosition {
 }
 
 function isClientAvatarStyle(value: string): value is ClientAvatarStyle {
-  return value === 'neuro' || value === 'emoji'
+  return (CLIENT_AVATAR_STYLES as readonly string[]).includes(value)
 }
 
 function normalizeQuickReplyTexts(value: unknown): string[] {
@@ -101,7 +101,6 @@ function normalizeBotState(bot: BotPersonalizationProps['bot']): BotPersonalizat
     accentColor: isCuratedColor(bot.accentColor) ? bot.accentColor : CURATED_COLORS[0],
     position: isBotPosition(bot.position) ? bot.position : 'bottom_right',
     avatarStyle: isClientAvatarStyle(bot.avatarStyle) ? bot.avatarStyle : 'neuro',
-    avatarEmoji: (bot.avatarEmoji ?? '').slice(0, 2),
     welcomeMessage: bot.welcomeMessage.slice(0, 200),
     quickReplies: normalizeQuickReplyTexts(bot.quickReplies),
   }
@@ -128,7 +127,6 @@ export function BotPersonalization({ bot }: BotPersonalizationProps) {
         accentColor: state.accentColor,
         position: state.position,
         avatarStyle: state.avatarStyle,
-        avatarEmoji: state.avatarEmoji,
         welcomeMessage: state.welcomeMessage,
         quickReplies: state.quickReplies,
       })
@@ -214,42 +212,19 @@ export function BotPersonalization({ bot }: BotPersonalizationProps) {
           </Card>
         </Section>
 
-        <Section title="Avatar" description="Elegi un estilo predefinido para el asistente.">
+        <Section
+          title="Avatar"
+          description="Elegi cómo se ve tu asistente. Pasá el mouse sobre una opción para verla animada."
+        >
           <Card padding="lg">
-            <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <OptionButton
-                label="Esfera animada"
-                icon={Bot}
-                active={state.avatarStyle === 'neuro'}
-                onClick={() => update('avatarStyle', 'neuro')}
-              />
-              <OptionButton
-                label="Emoji"
-                icon={Smile}
-                active={state.avatarStyle === 'emoji'}
-                onClick={() => update('avatarStyle', 'emoji')}
-              />
-            </div>
-
-            <AnimatePresence initial={false}>
-              {state.avatarStyle === 'emoji' && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  exit={{ opacity: 0, height: 0 }}
-                  className="overflow-hidden"
-                >
-                  <Field label="Emoji" hint="Maximo 2 caracteres">
-                    <Input
-                      value={state.avatarEmoji}
-                      onChange={(event) => update('avatarEmoji', event.target.value.slice(0, 2))}
-                      placeholder="AI"
-                      maxLength={2}
-                    />
-                  </Field>
-                </motion.div>
-              )}
-            </AnimatePresence>
+            <AvatarPicker
+              value={state.avatarStyle}
+              onChange={(id) => {
+                if (isClientAvatarStyle(id)) update('avatarStyle', id)
+              }}
+              accentColor={state.accentColor}
+              businessInitials={deriveBusinessInitials(bot.botName)}
+            />
           </Card>
         </Section>
 
@@ -441,18 +416,14 @@ function BotPreview({
             style={{ borderColor: `${state.accentColor}30` }}
           >
             <div className="mb-4 flex items-center gap-3">
-              <div
-                className="flex h-10 w-10 items-center justify-center rounded-full text-lg"
-                style={{
-                  backgroundColor: `${state.accentColor}20`,
-                  color: state.accentColor,
-                }}
-              >
-                {state.avatarStyle === 'emoji' ? (
-                  state.avatarEmoji || 'AI'
-                ) : (
-                  <Bot className="h-5 w-5" strokeWidth={1.6} />
-                )}
+              <div className="flex h-10 w-10 items-center justify-center">
+                <AvatarRenderer
+                  style={state.avatarStyle}
+                  state="idle"
+                  accentColor={state.accentColor}
+                  size={40}
+                  businessInitials={deriveBusinessInitials(botName)}
+                />
               </div>
               <div className="min-w-0">
                 <p className="truncate text-sm font-medium text-zinc-100">{botName}</p>

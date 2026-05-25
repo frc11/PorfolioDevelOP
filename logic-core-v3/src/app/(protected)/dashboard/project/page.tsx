@@ -8,7 +8,6 @@ import Link from 'next/link'
 import { FadeIn } from '@/components/dashboard/FadeIn'
 import { AnimatedProgressBar } from '@/components/dashboard/AnimatedProgressBar'
 import { AnimatedCounter } from '@/components/dashboard/AnimatedCounter'
-import { CurrentMilestone } from '@/components/dashboard/CurrentMilestone'
 import { ProjectTaskTabs } from '@/components/dashboard/ProjectTaskTabs'
 import type { SerializedTask } from '@/components/dashboard/ProjectTaskTabs'
 
@@ -132,13 +131,6 @@ export default async function ProjectPage() {
     done:       tasks.filter((t) => t.status === 'DONE').map(serializeTask),
   }
 
-  // Milestone countdown (hardcoded milestone: 15-Apr-2026)
-  const MILESTONE_DATE = new Date('2026-04-15T00:00:00')
-  const milestoneDaysUntil = Math.max(
-    0,
-    Math.ceil((MILESTONE_DATE.getTime() - Date.now()) / 86_400_000)
-  )
-
   return (
     <div className="flex flex-col gap-8 max-w-5xl mx-auto pb-20">
 
@@ -218,17 +210,7 @@ export default async function ProjectPage() {
         </div>
       </FadeIn>
 
-      {/* ── 3. MILESTONE ──────────────────────────────────────────────────── */}
-      <FadeIn delay={0.1}>
-        <CurrentMilestone
-          title="Lanzamiento del Panel de Control"
-          dueDate="15 de Abril, 2026"
-          daysUntil={milestoneDaysUntil}
-          description="Fase final de integración donde habilitaremos el acceso total a tus métricas y gestión de inventario en tiempo real."
-        />
-      </FadeIn>
-
-      {/* ── 4. TASK TABS ──────────────────────────────────────────────────── */}
+      {/* ── 3. TASK TABS ──────────────────────────────────────────────────── */}
       <FadeIn delay={0.14}>
         {totalCount === 0 ? (
           <EmptyState
