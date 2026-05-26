@@ -44,7 +44,7 @@ export async function listLeadsByOrgSlug(orgSlug: string, limit: number = 50) {
       return rows.map((r) => ({
         ...r,
         name: r.name ?? 'Sin nombre',
-        intent: r.intent ?? 'unknown',
+        intent: r.intent,
         message: r.message ?? '',
       }))
     },
@@ -116,7 +116,7 @@ export async function listLeadsForDashboard(
   return rows.map((r) => ({
     ...r,
     name: r.name ?? 'Sin nombre',
-    intent: r.intent ?? 'unknown',
+    intent: r.intent,
     message: r.message ?? '',
   }))
 }

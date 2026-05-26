@@ -1,5 +1,15 @@
+import { ChatbotEventLevel } from '@prisma/client'
 import { prisma } from '@/lib/prisma'
 import { chatbotLog } from './logger'
+
+// B11.4 — mantenemos la API lowercase para no romper los ~15 callsites
+// existentes; el mapping a enum UPPER vive acá. El console logger sigue
+// recibiendo lowercase (formato histórico de los logs).
+const LEVEL_TO_ENUM: Record<'info' | 'warn' | 'error', ChatbotEventLevel> = {
+  info: ChatbotEventLevel.INFO,
+  warn: ChatbotEventLevel.WARN,
+  error: ChatbotEventLevel.ERROR,
+}
 
 /**
  * Logs an event AND persists it to the chatbot_events table for the
@@ -35,7 +45,7 @@ export async function logChatbotEvent(params: {
       data: {
         botConfigId: params.botConfigId,
         type: params.type,
-        level: params.level,
+        level: LEVEL_TO_ENUM[params.level],
         message: params.message,
         conversationId: params.conversationId ?? null,
         metadata: (params.metadata ?? null) as never,

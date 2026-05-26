@@ -50,6 +50,10 @@ export async function cambiarPasswordAction(input: {
     data: {
       password: newHash,
       passwordResetRequired: false,
+      // SEC-AUTH-03: invalidar JWTs activos en otros dispositivos. El unstable_update
+      // de abajo refresca la sessionVersion del token actual, así el user que cambia
+      // su password no se desloguea en esta pestaña.
+      sessionVersion: { increment: 1 },
     },
   })
 

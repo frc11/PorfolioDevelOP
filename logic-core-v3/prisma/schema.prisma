@@ -147,6 +147,45 @@ enum BotAlertType {
   LEAD_CAPTURE_FAILURE
 }
 
+// B11.4 — string → enum (5 campos del módulo chatbot)
+enum ChatMessageRole {
+  USER
+  ASSISTANT
+  SYSTEM
+}
+
+enum ChatbotLeadIntent {
+  PURCHASE_READY
+  SCHEDULE_VISIT
+  QUOTE_REQUEST
+  HUMAN_REQUEST
+  SUPPORT
+  OTHER
+  // Legacy pre-B5.1 — mantenidos en el enum para no romper rows existentes.
+  QUOTE
+  INFO
+  DEMO
+}
+
+enum ChatbotEventLevel {
+  INFO
+  WARN
+  ERROR
+  DEBUG
+}
+
+enum BotIntensityLevel {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum LlmProvider {
+  GOOGLE
+  ANTHROPIC
+  OPENAI
+}
+
 enum AuditActionType {
   BOT_CREATED
   CLIENT_CREATED
@@ -250,6 +289,7 @@ model User {
   image                 String?
   password              String?
   passwordResetRequired Boolean   @default(false)
+  sessionVersion        Int       @default(1)
   phone                 String?
   role                  Role      @default(ORG_MEMBER)
   createdAt             DateTime  @default(now())
@@ -263,7 +303,6 @@ model User {
   notifications   Notification[]
   tickets         Ticket[]
   ticketMessages  TicketMessage[]
-  businessMetrics BusinessMetric[]
   assignedTasks   Task[]               @relation("TaskAssignee")
   osAssignedLeads OsLead[]             @relation("OsLeadAssignee")
   osActivities    OsLeadActivity[]     @relation("OsActivityPerformer")
@@ -360,6 +399,8 @@ model Organization {
   crmIntegration    CrmIntegration?
   briefSnapshots    ExecutiveBriefSnapshot[]
   weeklyReportLogs  WeeklyReportLog[]
+  businessMetrics   BusinessMetric[]
+  pageViews         PageView[]
 }
 
 // Histórico semanal del executive brief. Aditivo al cache vigente en Organization
@@ -456,13 +497,15 @@ model Project {
   estimatedEndDate     DateTime?
   osLeadId             String?       @unique
 
-  organizationId      String?
-  organization        Organization?          @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  organizationId      String
+  organization        Organization           @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   tasks               Task[]
   osLead              OsLead?                @relation(fields: [osLeadId], references: [id])
   paymentMilestones   OsPaymentMilestone[]
   maintenancePayments OsMaintenancePayment[]
   timeEntries         OsTimeEntry[]
+
+  @@index([organizationId])
 }
 
 model Task {
@@ -612,6 +655,10 @@ model Notification {
   task   Task?   @relation(fields: [taskId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
+
+  // B11.5 — dashboard/layout.tsx:81 hace findMany({where:{organizationId}, orderBy:{createdAt:'desc'}, take:5})
+  // en CADA request al /dashboard. Hoy solo PK index → seq scan + sort.
+  @@index([organizationId, createdAt(sort: Desc)])
 }
 
 model ClientAsset {
@@ -674,27 +721,31 @@ model TicketMessage {
   @@index([userId])
 }
 
+// B11.6 — clientId (FK a User) → organizationId (FK a Organization).
+// Tablas vacías al momento de la migración (verificado en pre-flight).
+// La métrica es del NEGOCIO (org), no del usuario individual que la captura.
 model BusinessMetric {
-  id              String   @id @default(cuid())
-  clientId        String
-  client          User     @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  id              String       @id @default(cuid())
+  organizationId  String
+  organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   month           String
   monthlyVisitors Int
   bounceRate      Float
   avgTicketPrice  Float
-  createdAt       DateTime @default(now())
+  createdAt       DateTime     @default(now())
 
-  @@index([clientId])
+  @@index([organizationId])
 }
 
 model PageView {
-  id        String   @id @default(cuid())
-  clientId  String
-  url       String
-  duration  Int?
-  createdAt DateTime @default(now())
+  id             String       @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  url            String
+  duration       Int?
+  createdAt      DateTime     @default(now())
 
-  @@index([clientId])
+  @@index([organizationId])
 }
 
 model AgencySettings {
@@ -1047,7 +1098,7 @@ model BotConfig {
   position       String @default("bottom_right")
   fontStyle      String @default("sans")
   bubbleStyle    String @default("rounded")
-  intensityLevel String @default("medium")
+  intensityLevel BotIntensityLevel @default(MEDIUM)
 
   // Comportamiento conversacional
   tone             String @default("informal_rioplatense")
@@ -1061,7 +1112,7 @@ model BotConfig {
   whatsappMessage String? @db.Text
 
   // LLM
-  llmProvider     String @default("google")
+  llmProvider     LlmProvider @default(GOOGLE)
   llmModel        String @default("gemini-2.5-flash")
   temperature     Float  @default(0.7)
   maxOutputTokens Int    @default(800)
@@ -1146,6 +1197,9 @@ model Conversation {
 
   @@index([botConfigId, startedAt])
   @@index([sessionId])
+  // B11.5 — multiTenantQueries.ts:57 + queries.ts:17 ordenan por lastMessageAt DESC.
+  // Hoy 49 filas → impacto invisible; a 10k filas/bot evita sort en memoria.
+  @@index([botConfigId, lastMessageAt(sort: Desc)])
   @@map("chatbot_conversation")
 }
 
@@ -1155,7 +1209,7 @@ model ChatMessage {
   conversationId String
   conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
 
-  role    String // "user" | "assistant" | "system"
+  role    ChatMessageRole
   content String @db.Text
 
   // Solo para mensajes de assistant
@@ -1182,11 +1236,11 @@ model ChatbotLead {
   name    String?
   email   String?
   phone   String?
-  // intent: legacy String? (datos previos a B5.1: "quote"|"info"|"demo"|"support"|"other").
-  // A partir de B5.1 el bot escribe valores alineados con B3.6:
-  // "purchase_ready"|"schedule_visit"|"quote_request"|"human_request"|"support"|"other".
-  // No se enum-iza en DB para no romper rows legacy (additive).
-  intent  String?
+  // B11.4 — enum-izado. El enum `ChatbotLeadIntent` incluye los valores
+  // legacy pre-B5.1 (QUOTE/INFO/DEMO) junto con los nuevos B5.1+
+  // (PURCHASE_READY/SCHEDULE_VISIT/QUOTE_REQUEST/HUMAN_REQUEST/SUPPORT/OTHER)
+  // para no romper rows pre-existentes (backfill via UPPER(intent)).
+  intent  ChatbotLeadIntent?
   message String? @db.Text
 
   // B5.1 — Categoría DQ. Llenada por el bot al capturar; B5.3 la usa para descalificar.
@@ -1313,7 +1367,7 @@ model ChatbotEvent {
   id             String   @id @default(cuid())
   botConfigId    String
   type           String // ej: "chat.message_received", "chat.lead_captured", "error.llm_failed"
-  level          String // "info" | "warn" | "error" | "debug"
+  level          ChatbotEventLevel
   conversationId String?
   message        String   @db.Text
   metadata       Json?
@@ -1324,6 +1378,10 @@ model ChatbotEvent {
 
   @@index([botConfigId, createdAt(sort: Desc)])
   @@index([level, createdAt(sort: Desc)])
+  // B11.5 — detectBotIssues.ts ejecuta 6 queries `where: { botConfigId, type, createdAt: { gte } }`.
+  // El index actual (botConfigId, createdAt) traía superset y filtraba `type` en memoria.
+  // Con este nuevo, el cron de detección pasa de seq tail-filter a index scan directo.
+  @@index([botConfigId, type, createdAt(sort: Desc)])
   @@map("chatbot_events")
 }
 

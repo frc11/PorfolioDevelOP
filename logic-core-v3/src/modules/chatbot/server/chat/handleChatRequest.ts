@@ -452,7 +452,7 @@ export async function handleChatRequest(
   await prisma.chatMessage.create({
     data: {
       conversationId: conversation.id,
-      role: 'user',
+      role: 'USER',
       content: lastUserMessage.content,
     },
   })
@@ -643,7 +643,7 @@ export async function handleChatRequest(
         await prisma.chatMessage.create({
           data: {
             conversationId: conversation.id,
-            role: 'assistant',
+            role: 'ASSISTANT',
             content: text,
             tokensIn,
             tokensOut,

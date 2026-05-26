@@ -9,7 +9,7 @@ interface BotConfigPreviewProps {
 export function BotConfigPreview({ state }: BotConfigPreviewProps) {
   const radius = state.borderRadius === 'small' ? '12px' : state.borderRadius === 'large' ? '32px' : '24px'
   const bubbleRadius = state.bubbleStyle === 'sharp' ? '8px' : state.bubbleStyle === 'pill' ? '999px' : '18px'
-  const surfaceOpacity = state.intensityLevel === 'low' ? '0.72' : state.intensityLevel === 'high' ? '0.95' : '0.84'
+  const surfaceOpacity = state.intensityLevel === 'LOW' ? '0.72' : state.intensityLevel === 'HIGH' ? '0.95' : '0.84'
   const fontFamily = state.fontStyle === 'serif' ? 'Georgia, serif' : state.fontStyle === 'mono' ? 'var(--font-mono), monospace' : 'var(--font-sans), sans-serif'
 
   return (

@@ -48,7 +48,7 @@ test.describe('Alert detector — integration', () => {
         data: {
           botConfigId: bot.id,
           type: 'llm.error',
-          level: 'error',
+          level: 'ERROR',
           message: `LLM provider error test ${i}`,
           metadata: { error: 'LLM_PROVIDER_ERROR' },
           createdAt: new Date(Date.now() - 5 * 60 * 1000),
@@ -128,7 +128,7 @@ test.describe('Alert detector — integration', () => {
         data: {
           botConfigId: bot.id,
           type: 'SECURITY.BLOCKED_ORIGIN',
-          level: 'warn',
+          level: 'WARN',
           message: `Blocked request from https://evil-${i}.com`,
           metadata: { origin: `https://evil-${i}.com`, reason: 'domain_not_allowed' },
           createdAt: new Date(Date.now() - 60 * 60 * 1000),
@@ -173,7 +173,7 @@ test.describe('Alert detector — integration', () => {
         data: {
           botConfigId: bot.id,
           type: 'capture_lead.error',
-          level: 'error',
+          level: 'ERROR',
           message: `Lead capture error test ${i}`,
           metadata: { error: 'Validation failed' },
           createdAt: new Date(Date.now() - 10 * 60 * 1000),
@@ -218,7 +218,7 @@ test.describe('Alert detector — integration', () => {
         data: {
           botConfigId: bot.id,
           type: 'generic.error',
-          level: 'error',
+          level: 'ERROR',
           message: `Activity error test ${i}`,
           createdAt: new Date(Date.now() - 15 * 60 * 1000),
         },

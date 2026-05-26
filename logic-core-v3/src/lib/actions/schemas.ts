@@ -79,3 +79,41 @@ export const TaskRejectionSchema = z.object({
   taskId: z.string().trim().min(1, 'Tarea inválida.'),
   reason: z.string().trim().min(3, 'Indicá el motivo del rechazo.').max(1000, 'El motivo es demasiado largo.'),
 })
+
+export const ForgotPasswordSchema = z.object({
+  email: z
+    .string()
+    .trim()
+    .toLowerCase()
+    .min(3, 'Email inválido.')
+    .max(254, 'Email demasiado largo.')
+    .email('Email inválido.'),
+})
+
+export const ResetPasswordSchema = z
+  .object({
+    token: z
+      .string()
+      .trim()
+      .min(32, 'Token inválido o ausente.')
+      .max(128, 'Token inválido.')
+      .regex(/^[a-f0-9]+$/i, 'Token inválido.'),
+    password: z
+      .string()
+      .min(8, 'La contraseña debe tener al menos 8 caracteres.')
+      .max(128, 'Contraseña demasiado larga.'),
+    confirm: z.string().min(1, 'Confirmá la contraseña.'),
+  })
+  .refine((d) => d.password === d.confirm, {
+    path: ['confirm'],
+    message: 'Las contraseñas no coinciden.',
+  })
+
+export const ResendCredentialsParamsSchema = z.object({
+  userId: z
+    .string()
+    .trim()
+    .min(1, 'Usuario inválido.')
+    .max(64, 'Usuario inválido.')
+    .regex(/^[a-z0-9]+$/i, 'Usuario inválido.'),
+})

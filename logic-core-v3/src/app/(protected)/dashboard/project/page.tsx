@@ -198,13 +198,10 @@ export default async function ProjectPage() {
               )}
             </div>
 
-            {/* Progress bar */}
+            {/* Progress bar — solo si hay tareas. El estado vacío vive en el
+                EmptyState de abajo (B12.2) para evitar duplicar copy. */}
             {totalCount > 0 && (
               <AnimatedProgressBar progressPct={progressPct} />
-            )}
-
-            {totalCount === 0 && (
-              <p className="text-sm text-zinc-600 italic">Sin tareas asignadas aún.</p>
             )}
           </div>
         </div>

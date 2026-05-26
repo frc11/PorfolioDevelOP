@@ -1,6 +1,6 @@
 import { tool } from 'ai'
 import { z } from 'zod'
-import type { Prisma } from '@prisma/client'
+import type { Prisma, ChatbotLeadIntent } from '@prisma/client'
 import { revalidateTag } from 'next/cache'
 import { prisma } from '@/lib/prisma'
 import { logChatbotEvent } from '../logging'
@@ -161,6 +161,12 @@ async function captureLeadExecute(
       phone,
     })
 
+    // B11.4 — el LLM pasa lowercase (LEAD_INTENTS), la DB es enum UPPER.
+    // Type-assert es safe: LEAD_INTENTS y ChatbotLeadIntent comparten los 6
+    // valores nuevos B5.1+ exactamente (legacy QUOTE/INFO/DEMO no se generan
+    // desde el LLM nuevo, solo viven en rows pre-existentes).
+    const intentEnum = input.intent.toUpperCase() as ChatbotLeadIntent
+
     // 4. Create the lead and update conversation in a transaction.
     //    B5.1: providedPhone/providedEmail SE DERIVAN del input — no del LLM.
     //    El bot no puede inflar esto: si no mandó phone, providedPhone=false. Estructural.
@@ -172,7 +178,7 @@ async function captureLeadExecute(
           name: input.name,
           email,
           phone,
-          intent: input.intent,
+          intent: intentEnum,
           message: input.contextSummary,
           status: 'NEW',
           // B5.1 — Señales estructuradas

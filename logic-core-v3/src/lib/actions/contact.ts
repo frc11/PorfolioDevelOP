@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 import { sendLeadToN8n } from '@/lib/n8n'
 import { sendAgencyAlert } from '@/lib/alerts'
+import { requireSuperAdmin } from '@/lib/auth-guards'
 import { ContactFormSchema, type ActionResult } from './schemas'
 
 export type ContactFormState = ActionResult | null
@@ -74,7 +75,16 @@ export async function submitContactForm(
   return contactFormAction(prevState, formData)
 }
 
+// B11.2 fix F6: antes esta action no validaba auth. Cualquiera con un id de
+// ContactSubmission podía mark-as-read. No es cross-tenant (ContactSubmission
+// es global de la landing) pero permitía vandalism (esconder leads del admin).
 export async function markLeadAsRead(id: string): Promise<ActionResult> {
+  try {
+    await requireSuperAdmin()
+  } catch {
+    return { success: false, error: 'No autorizado.' }
+  }
+
   if (!id) {
     return { success: false, error: 'Lead inválido.' }
   }

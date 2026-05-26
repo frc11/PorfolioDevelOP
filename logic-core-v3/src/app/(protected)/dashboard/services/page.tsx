@@ -6,6 +6,7 @@ import type { LucideIcon } from 'lucide-react'
 import { FadeIn } from '@/components/dashboard/FadeIn'
 import { PremiumModuleCard } from '@/components/dashboard/PremiumModuleCard'
 import { StaggerContainer, StaggerItem } from '@/components/dashboard/StaggerWrapper'
+import { EmptyState } from '@/components/ui'
 import { prisma } from '@/lib/prisma'
 import { resolveOrgId } from '@/lib/preview'
 
@@ -210,27 +211,13 @@ export default async function ServicesPage() {
 
       {services.length === 0 ? (
         <FadeIn delay={0.06}>
-          <div className="flex flex-col items-center gap-6 rounded-[2rem] border border-white/[0.07] bg-[#0a0c0f]/60 px-8 py-20 text-center backdrop-blur-xl">
-            <div className="relative flex h-20 w-20 items-center justify-center rounded-2xl border border-white/[0.07] bg-white/[0.02]">
-              <div className="absolute inset-0 animate-pulse rounded-2xl bg-cyan-500/5" />
-              <FolderOpen size={32} className="relative z-10 text-zinc-600" />
-            </div>
-            <div className="max-w-xs space-y-2">
-              <h2 className="text-lg font-black uppercase italic tracking-tight text-white">
-                Aún no tenés servicios activos
-              </h2>
-              <p className="text-sm font-medium leading-relaxed text-zinc-500">
-                Contactanos para comenzar tu proyecto con develOP.
-              </p>
-            </div>
-            <Link
-              href="/dashboard/messages?context=default"
-              className="inline-flex items-center gap-2 rounded-xl border border-cyan-500/20 bg-cyan-500/10 px-6 py-3 text-sm font-semibold text-cyan-400 transition-all hover:border-cyan-500/30 hover:bg-cyan-500/20 active:scale-95"
-            >
-              <MessageSquare size={15} />
-              Hablar con el equipo
-            </Link>
-          </div>
+          <EmptyState
+            icon={FolderOpen}
+            title="Todavía no tenés servicios activos"
+            description="Contactanos para empezar tu proyecto con develOP. Apenas activemos un servicio, lo vas a ver acá."
+            size="lg"
+            cta={{ label: 'Hablar con el equipo', href: '/dashboard/messages?context=default' }}
+          />
         </FadeIn>
       ) : (
         <FadeIn delay={0.06}>

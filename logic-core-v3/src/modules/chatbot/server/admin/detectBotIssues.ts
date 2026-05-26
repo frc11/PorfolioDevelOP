@@ -84,7 +84,7 @@ export async function detectBotIssues(): Promise<DetectedIssue[]> {
     const consecutiveProviderErrors = await prisma.chatbotEvent.findMany({
       where: {
         botConfigId: bot.id,
-        level: 'error',
+        level: 'ERROR',
         createdAt: { gte: oneHourAgo },
         OR: [
           { type: { contains: 'llm' } },
@@ -160,7 +160,7 @@ export async function detectBotIssues(): Promise<DetectedIssue[]> {
     const activityErrors = await prisma.chatbotEvent.count({
       where: {
         botConfigId: bot.id,
-        level: 'error',
+        level: 'ERROR',
         createdAt: { gte: oneHourAgo },
       },
     })

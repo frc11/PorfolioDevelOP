@@ -1651,7 +1651,7 @@ async function ensureLeadDemos(leadId: string, demos: DemoSeed[]) {
 
 async function ensureProject(
   seed: ProjectSeed,
-  organizationId: string | null,
+  organizationId: string,
   leadId: string | null
 ) {
   const existingByLead = leadId
@@ -1662,7 +1662,7 @@ async function ensureProject(
 
   const existingByName = await prisma.project.findFirst({
     where: {
-      organizationId: organizationId ?? null,
+      organizationId,
       name: seed.name,
     },
   })
@@ -1673,7 +1673,7 @@ async function ensureProject(
     name: seed.name,
     description: seed.description,
     status: seed.status,
-    organizationId: organizationId ?? null,
+    organizationId,
     agreedAmount: seed.agreedAmount,
     monthlyRate: seed.monthlyRate,
     maintenanceStartDate: seed.maintenanceStartDate,
@@ -2008,12 +2008,13 @@ async function main() {
   }
 
   for (const projectSeed of projectSeeds) {
-    const organizationId = projectSeed.organizationSlug
-      ? organizationIdBySlug.get(projectSeed.organizationSlug) ?? null
-      : null
+    // B11.1: Project.organizationId es NOT NULL. Project sin organizationSlug
+    // (legacy "proyecto interno de agencia") debe quedar bajo la org `develop`.
+    const effectiveSlug = projectSeed.organizationSlug ?? 'develop'
+    const organizationId = organizationIdBySlug.get(effectiveSlug)
 
-    if (projectSeed.organizationSlug && !organizationId) {
-      throw new Error(`No se encontro organizationId para ${projectSeed.organizationSlug}`)
+    if (!organizationId) {
+      throw new Error(`No se encontro organizationId para ${effectiveSlug}`)
     }
 
     const linkedLeadId = projectSeed.linkedLeadBusinessName

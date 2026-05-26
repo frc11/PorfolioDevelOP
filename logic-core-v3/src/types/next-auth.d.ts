@@ -29,5 +29,6 @@ declare module 'next-auth/jwt' {
     provider?: string
     onboardingCompleted?: boolean
     passwordResetRequired?: boolean
+    sessionVersion?: number
   }
 }

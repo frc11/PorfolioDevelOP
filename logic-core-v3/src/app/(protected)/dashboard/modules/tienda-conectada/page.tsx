@@ -13,6 +13,7 @@ import { resolveOrgId } from '@/lib/preview'
 import { isModuleActive } from '@/lib/modules/check-activation'
 import { getStoreSummary, type TiendanubeStoreSummary } from '@/lib/integrations/tiendanube'
 import { prisma } from '@/lib/prisma'
+import { EmptyState } from '@/components/ui'
 import { ConnectStoreCard } from './_components/ConnectStoreCard'
 
 export const dynamic = 'force-dynamic'
@@ -153,7 +154,13 @@ async function TiendanubeOverview({ organizationId }: { organizationId: string }
         </h2>
 
         {data.topProducts.length === 0 ? (
-          <p className="text-sm text-zinc-600">Sin pedidos este mes todavía.</p>
+          <EmptyState
+            icon={ShoppingCart}
+            title="Sin pedidos este mes"
+            description="Cuando se hagan compras en tu tienda van a aparecer acá los productos más vendidos del mes."
+            size="sm"
+            variant="subtle"
+          />
         ) : (
           <ol className="flex flex-col gap-3">
             {data.topProducts.map((p, i) => (

@@ -138,7 +138,7 @@ export async function createClientWithBot(input: z.infer<typeof CreateClientInpu
         position: parsed.position,
         fontStyle: 'sans',
         bubbleStyle: 'rounded',
-        intensityLevel: 'medium',
+        intensityLevel: 'MEDIUM',
         tone: parsed.tone,
         quickReplies: parsed.quickReplies as unknown as object,
         proactivePrompts: {
@@ -146,7 +146,7 @@ export async function createClientWithBot(input: z.infer<typeof CreateClientInpu
         },
         routeColorMap: {},
         chatSurfaceTint: null,
-        llmProvider: 'google',
+        llmProvider: 'GOOGLE',
         llmModel: 'gemini-2.5-flash',
         monthlyQuota: 1000,
         whatsappNumber: parsed.whatsappNumber,

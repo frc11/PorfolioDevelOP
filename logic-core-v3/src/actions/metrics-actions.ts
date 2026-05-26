@@ -4,8 +4,10 @@ import { auth } from '@/auth'
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 
+// B11.6 — recibe `organizationId` (antes era `clientId` apuntando a User.id;
+// la métrica conceptualmente es del negocio, no del individuo).
 export async function upsertBusinessMetrics(
-  clientId: string,
+  organizationId: string,
   data: {
     month: string
     monthlyVisitors: number
@@ -20,7 +22,7 @@ export async function upsertBusinessMetrics(
 
   const existingMetric = await prisma.businessMetric.findFirst({
     where: {
-      clientId,
+      organizationId,
       month: data.month
     }
   })
@@ -37,7 +39,7 @@ export async function upsertBusinessMetrics(
   } else {
     await prisma.businessMetric.create({
       data: {
-        clientId,
+        organizationId,
         month: data.month,
         monthlyVisitors: data.monthlyVisitors,
         bounceRate: data.bounceRate,

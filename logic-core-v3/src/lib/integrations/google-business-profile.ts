@@ -1,11 +1,14 @@
 import { google } from 'googleapis'
 import { unstable_cache } from 'next/cache'
 import { prisma } from '@/lib/prisma'
+import { signOAuthState } from '@/lib/security/oauth-state'
 
 const SCOPES = [
   'https://www.googleapis.com/auth/business.manage',
   'https://www.googleapis.com/auth/businessprofileperformance',
 ]
+
+export const GBP_OAUTH_SCOPE = 'google-business:v1'
 
 type GoogleReview = {
   reviewer?: {
@@ -36,7 +39,9 @@ export function getAuthUrl(orgId: string): string {
   return oauth2Client.generateAuthUrl({
     access_type: 'offline',
     scope: SCOPES,
-    state: orgId,
+    // SEC-AUTH-01 / B11 F3: state firmado con HMAC. El callback DEBE validar la
+    // firma antes de confiar en el orgId — usar verifyOAuthState(GBP_OAUTH_SCOPE, state).
+    state: signOAuthState(GBP_OAUTH_SCOPE, orgId),
     prompt: 'consent',
   })
 }

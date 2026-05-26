@@ -173,14 +173,17 @@ function HealthScoreOnboarding({ data }: { data: HealthScoreResult }) {
             </p>
           </div>
 
-          {/* Progress bar */}
+          {/* Progress bar — B12.7: label antes era "Implementación 0/6" sin
+              contexto. Ahora dice qué cuenta (fuentes de datos: GA4, GSC, GBP,
+              WhatsApp, AFIP, Pixel) para que el cliente lo entienda de un
+              vistazo. */}
           <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
-            <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center justify-between mb-2 gap-3">
               <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500">
-                Implementación
+                Integraciones conectadas
               </span>
-              <span className="text-xs font-bold text-cyan-400">
-                {data.connectedSources}/{data.totalSources}
+              <span className="text-xs font-bold text-cyan-400 tabular-nums">
+                {data.connectedSources} <span className="text-zinc-600">/</span> {data.totalSources}
               </span>
             </div>
             <div className="h-1.5 rounded-full bg-white/[0.04] overflow-hidden">
@@ -192,7 +195,7 @@ function HealthScoreOnboarding({ data }: { data: HealthScoreResult }) {
               />
             </div>
             <p className="text-[10px] text-zinc-600 mt-2">
-              ETA: tu score real estará disponible en pocos días.
+              Conectamos tus herramientas (Analytics, WhatsApp, AFIP y más). Apenas tengamos datos suficientes vas a ver tu score real.
             </p>
           </div>
         </div>

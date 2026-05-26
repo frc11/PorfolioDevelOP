@@ -5,6 +5,7 @@ import { resolveOrgId } from '@/lib/preview'
 import { isModuleActive } from '@/lib/modules/check-activation'
 import { getCalSummary, type CalBooking } from '@/lib/integrations/cal-com'
 import { prisma } from '@/lib/prisma'
+import { EmptyState } from '@/components/ui'
 
 export const dynamic = 'force-dynamic'
 
@@ -257,15 +258,12 @@ async function AgendaOverview({
           Próximos turnos
         </h2>
         {summary.upcomingBookings.length === 0 ? (
-          <div
-            className="rounded-xl px-5 py-8 text-center"
-            style={{
-              background: 'rgba(255,255,255,0.025)',
-              border: '1px solid rgba(255,255,255,0.07)',
-            }}
-          >
-            <p className="text-sm text-zinc-600">Sin turnos próximos todavía.</p>
-          </div>
+          <EmptyState
+            icon={CalendarDays}
+            title="Sin turnos próximos"
+            description="Cuando alguien reserve un turno en tu link de agenda, va a aparecer acá."
+            size="sm"
+          />
         ) : (
           <div className="flex flex-col gap-2">
             {summary.upcomingBookings.map((booking) => (

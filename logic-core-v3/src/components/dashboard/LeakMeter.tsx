@@ -14,13 +14,13 @@ export async function LeakMeter({ organizationId }: LeakMeterProps) {
   const [totalViews, leakCount] = await Promise.all([
     prisma.pageView.count({
       where: { 
-        clientId: organizationId,
+        organizationId,
         createdAt: { gte: firstDayOfMonth }
       }
     }),
     prisma.pageView.count({
       where: { 
-        clientId: organizationId,
+        organizationId,
         duration: { lt: 5 },
         createdAt: { gte: firstDayOfMonth }
       }

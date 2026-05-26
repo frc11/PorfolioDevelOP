@@ -13,22 +13,26 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 })
     }
 
+    // B11.6 — PageView ahora se atribuye a la org del caller, no al user.id.
+    // ORG_MEMBER: deriva del session (no acepta org del body). SUPER_ADMIN:
+    // permite enviar `organizationId` explícito (impersonation/instrumentación).
     const data = await request.json()
-    const clientId = String(data?.clientId ?? '')
     const url = String(data?.url ?? '')
     const duration = data?.duration
+    const bodyOrgId = typeof data?.organizationId === 'string' ? data.organizationId : null
 
-    if (!clientId || !url) {
+    const organizationId =
+      session.user.role === 'SUPER_ADMIN'
+        ? bodyOrgId ?? session.user.organizationId ?? null
+        : session.user.organizationId ?? null
+
+    if (!organizationId || !url) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
-    }
-
-    if (session.user.role !== 'SUPER_ADMIN' && clientId !== session.user.id) {
-      return NextResponse.json({ error: 'Sin permisos' }, { status: 403 })
     }
 
     await prisma.pageView.create({
       data: {
-        clientId,
+        organizationId,
         url,
         duration: typeof duration === 'number' ? duration : Number(duration) || null,
       },

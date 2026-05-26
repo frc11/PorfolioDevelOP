@@ -90,4 +90,15 @@ Lista única de deuda explícita conocida. Cada entrada referencia el sprint que
 
 ---
 
+## B11.5 — Borrado de 6 índices "muertos" (diferido a post-B14)
+
+### Drop de índices con 0 scans en pg_stat_user_indexes
+- **Sprint origen:** B11.5 (2026-05-25) — solo se agregaron los 3 faltantes, NO se borró nada.
+- **Qué:** El audit `docs/audits/2026-05-auditoria-db.md` §3.1 propone borrar 6 índices marcados con 0 idx_scan en pg_stat_user_indexes (P2-1, P2-2, P2-3): `@@index([slug])` de BotConfig (redundante por `slug @unique`), `@@index([status])` y `@@index([nextFollowUpAt])` de OsLead (subsumidos por el compuesto `(status, nextFollowUpAt)`), `@@index([organizationId])` solos de EmailContact y EmailCampaign (subsumidos por sus compuestos), y otros en ChatbotLead/ChatbotEvent/Task de la sección 3.1 del audit.
+- **Por qué se postpuso:** **`pg_stat_user_indexes` del Neon de DEV no es base válida para decidir borrados.** Dev casi no tiene tráfico, así que CASI TODOS los índices marcan 0 scans — incluyendo los críticos. Borrar acá sería "borrar a ciegas con disfraz de dato". La regla del sprint fue explícita: **solo AGREGAR en B11.5**.
+- **Cuándo prioritarlo:** **Post-B14, con la PROD de Matsu viva ≥ 2 semanas** (tiempo suficiente para que las queries de dashboard cliente + admin + crons hayan ejecutado al menos una vez cada una). Recién entonces `pg_stat_user_indexes` refleja uso real y los índices con `idx_scan=0` son razonablemente seguros de dropear.
+- **Implementación:** Re-correr la query del audit (`docs/audits/2026-05-auditoria-db.md` §3.1) contra PROD, cruzar contra los 6 candidatos, confirmar que siguen con 0 scans + revisar que no son del path crítico de algún feature recién lanzado, y entonces migration aditiva de DROPs. Reset `pg_stat_user_indexes` con `pg_stat_reset()` ANTES del período de medición para descartar arrastre histórico.
+
+---
+
 *Convenio: cuando una pendiente se ejecuta, se moverá a `bitacora-roadmap.md` como su propio sprint cerrado y se borrará de acá. No se acumulan entradas resueltas.*

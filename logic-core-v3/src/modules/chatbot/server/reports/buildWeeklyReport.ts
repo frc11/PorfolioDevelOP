@@ -82,7 +82,7 @@ export async function buildWeeklyReport(botId: string): Promise<WeeklyReportData
           botConfigId: bot.id,
           startedAt: { gte: weekStart, lte: weekEnd },
         },
-        role: 'user',
+        role: 'USER',
       },
       select: { content: true },
       take: 100,

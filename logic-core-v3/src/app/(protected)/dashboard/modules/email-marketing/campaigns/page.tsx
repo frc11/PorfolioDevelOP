@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import { Plus, Send, FileText, AlertCircle, Mail } from 'lucide-react'
 import { resolveOrgId } from '@/lib/preview'
 import { prisma } from '@/lib/prisma'
+import { EmptyState } from '@/components/ui'
 import type { EmailCampaignStatus } from '@prisma/client'
 
 export const dynamic = 'force-dynamic'
@@ -53,31 +54,14 @@ export default async function CampaignsPage() {
         </Link>
       </div>
 
-      {/* Empty state */}
+      {/* Empty state — B12.2: unificado al EmptyState compartido */}
       {campaigns.length === 0 && (
-        <div
-          className="px-5 py-14 text-center"
-          style={{
-            background: 'rgba(255,255,255,0.025)',
-            backdropFilter: 'blur(20px) saturate(180%)',
-            WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-            border: '1px solid rgba(255,255,255,0.07)',
-            borderRadius: '12px',
-          }}
-        >
-          <div className="mx-auto flex max-w-xs flex-col items-center">
-            <div
-              className="flex h-14 w-14 items-center justify-center rounded-2xl mb-4"
-              style={{ background: 'rgba(6,182,212,0.1)', border: '1px solid rgba(6,182,212,0.2)' }}
-            >
-              <Mail size={24} strokeWidth={1.5} className="text-cyan-400" />
-            </div>
-            <p className="text-sm font-bold text-zinc-300">Todavía no hay campañas</p>
-            <p className="mt-2 text-xs leading-relaxed text-zinc-500">
-              Creá tu primera campaña de email y empezá a conectar con tus contactos.
-            </p>
-          </div>
-        </div>
+        <EmptyState
+          icon={Mail}
+          title="Todavía no hay campañas"
+          description="Creá tu primera campaña de email y empezá a conectar con tus contactos."
+          cta={{ label: 'Nueva campaña', href: '/dashboard/modules/email-marketing/campaigns/new' }}
+        />
       )}
 
       {/* Campaign list */}

@@ -189,7 +189,7 @@ export function BusinessLeadCard({
       ) : null}
 
       {/* Qué quiere */}
-      {lead.intent && lead.intent !== 'unknown' && (
+      {lead.intent && (
         <div className="mb-4 rounded-xl border border-white/[0.06] bg-white/[0.02] p-3">
           <p className="mb-1 text-[10px] uppercase tracking-[0.24em] text-zinc-500">
             Qué quiere

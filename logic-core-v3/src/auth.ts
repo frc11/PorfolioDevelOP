@@ -21,6 +21,7 @@ async function getUserAccessState(userId: string) {
     select: {
       role: true,
       passwordResetRequired: true,
+      sessionVersion: true,
       orgMemberships: {
         select: {
           organizationId: true,
@@ -47,6 +48,7 @@ async function getUserAccessState(userId: string) {
       (organizationId && organization?.companyName?.trim() && organization.onboardingCompleted)
   )
   const passwordResetRequired = dbUser?.passwordResetRequired ?? false
+  const sessionVersion = dbUser?.sessionVersion
 
   return {
     role,
@@ -54,6 +56,8 @@ async function getUserAccessState(userId: string) {
     orgRole,
     onboardingCompleted,
     passwordResetRequired,
+    sessionVersion,
+    userExists: Boolean(dbUser),
   }
 }
 
@@ -207,15 +211,31 @@ const nextAuthResult = NextAuth({
       return true
     },
     async jwt({ token, user, account, trigger }) {
-      const shouldRefreshFromDb = Boolean(user?.id || token.sub) && (trigger === 'update' || trigger === 'signIn' || !user)
+      const userId = (user?.id ?? token.sub) as string | undefined
+      const shouldRefreshFromDb = Boolean(userId) && (trigger === 'update' || trigger === 'signIn' || !user)
 
-      if (shouldRefreshFromDb) {
-        const accessState = await getUserAccessState((user?.id ?? token.sub) as string)
+      if (userId && shouldRefreshFromDb) {
+        const accessState = await getUserAccessState(userId)
+
+        // SEC-AUTH-03: sessionVersion check. Si el token ya traía una versión y no matchea
+        // la de DB (porque hubo reset/cambio de password), la sesión se invalida — retornar
+        // null fuerza re-login. Skipear en signIn/update (eventos legítimos que refrescan).
+        if (
+          trigger !== 'signIn' &&
+          trigger !== 'update' &&
+          typeof token.sessionVersion === 'number' &&
+          accessState.sessionVersion !== undefined &&
+          token.sessionVersion !== accessState.sessionVersion
+        ) {
+          return null
+        }
+
         token.role = accessState.role
         token.organizationId = accessState.organizationId
         token.orgRole = accessState.orgRole
         token.onboardingCompleted = accessState.onboardingCompleted
         token.passwordResetRequired = accessState.passwordResetRequired
+        token.sessionVersion = accessState.sessionVersion
       }
 
       if (user?.role) {

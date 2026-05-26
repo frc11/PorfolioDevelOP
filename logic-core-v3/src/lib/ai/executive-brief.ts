@@ -10,11 +10,28 @@ const REGENERATION_LIMIT = 3
 const CACHE_TTL_DAYS = 7
 const BRIEF_MODEL = 'gemini-2.5-flash'
 
+// B12.7 — Gemini 2.5 Flash es un "thinking model": consume tokens internos de
+// razonamiento contra el mismo budget de `maxOutputTokens`. Con 200 dejaba ~5
+// tokens reales para el texto y el brief salía cortado ("Estimado/a, esta").
+// 1024 cubre thinking interno (~600-800) + 3 oraciones (~80-120 tokens) con
+// margen, sin volverlo verboso porque el system prompt sigue acotando a 3 sent.
+const BRIEF_MAX_OUTPUT_TOKENS = 1024
+
 // B6.4 — Gate intradiario. Sin esto, el usuario podía gastar las 3 regen
 // semanales en cascada (refresh / click / click) sin valor real (un negocio no
 // cambia en 30 segundos). Esto NO toca el límite semanal ni el cache — solo
 // espacia las regen manuales.
 const MIN_HOURS_BETWEEN_MANUAL_REGENS = 4
+
+// B12.7 — Guard para detectar briefs truncados antes de cachearlos. Un brief
+// válido termina en puntuación de cierre y tiene al menos una oración. Si el
+// LLM corta a mitad (thinking-budget agotado, stream interrumpido, etc.) no
+// queremos persistir "Estimado/a, esta" en cache por 7 días.
+function isBriefValid(text: string): boolean {
+  const trimmed = text.trim()
+  if (trimmed.length < 80) return false
+  return /[.!?]["'»)\]]?$/.test(trimmed)
+}
 
 export type ExecutiveBriefResult = {
   text: string
@@ -49,9 +66,12 @@ export async function getExecutiveBrief(
     const regenerationCount =
       cacheAge >= CACHE_TTL_DAYS ? 0 : org.executiveBriefRegenerations
 
-    if (org.cachedExecutiveBrief && org.cachedExecutiveBriefAt && cacheAge < CACHE_TTL_DAYS) {
-      if (!org.cachedExecutiveBrief.trim()) return null
-
+    if (
+      org.cachedExecutiveBrief &&
+      org.cachedExecutiveBriefAt &&
+      cacheAge < CACHE_TTL_DAYS &&
+      isBriefValid(org.cachedExecutiveBrief)
+    ) {
       return {
         text: org.cachedExecutiveBrief,
         generatedAt: org.cachedExecutiveBriefAt,
@@ -67,8 +87,10 @@ export async function getExecutiveBrief(
         org.companyName ?? 'tu negocio',
       )
 
-      if (!generation || !generation.text.trim()) {
-        console.warn(`[Brief] Generated empty text for org ${organizationId}`)
+      if (!generation || !isBriefValid(generation.text)) {
+        console.warn(
+          `[Brief] Generated invalid/truncated text for org ${organizationId} (len=${generation?.text?.length ?? 0})`,
+        )
         return null
       }
 
@@ -150,8 +172,10 @@ export async function regenerateExecutiveBrief(
   try {
     const generation = await generateBriefText(organizationId, org.companyName)
 
-    if (!generation.text.trim()) {
-      console.warn(`[Brief] Generated empty text during regeneration for org ${organizationId}`)
+    if (!isBriefValid(generation.text)) {
+      console.warn(
+        `[Brief] Generated invalid/truncated text during regeneration for org ${organizationId} (len=${generation.text.length})`,
+      )
       return { ok: false, error: 'No pudimos regenerar el brief. Proba de nuevo en unos minutos.' }
     }
 
@@ -199,9 +223,11 @@ export async function refreshExecutiveBriefCache(
 
   const generation = await generateBriefText(organizationId, org.companyName)
 
-  if (!generation.text.trim()) {
-    console.warn(`[Brief] Generated empty text during cache refresh for org ${organizationId}`)
-    throw new Error(`Generated empty executive brief for organization ${organizationId}`)
+  if (!isBriefValid(generation.text)) {
+    console.warn(
+      `[Brief] Generated invalid/truncated text during cache refresh for org ${organizationId} (len=${generation.text.length})`,
+    )
+    throw new Error(`Generated invalid executive brief for organization ${organizationId}`)
   }
 
   const now = new Date()
@@ -275,7 +301,7 @@ Genera el resumen ejecutivo de la semana.`
     model,
     system: systemPrompt,
     messages: [{ role: 'user', content: userPrompt }],
-    maxOutputTokens: 200,
+    maxOutputTokens: BRIEF_MAX_OUTPUT_TOKENS,
   })
 
   return { text: text.trim(), healthScore, weekResults }

@@ -58,7 +58,7 @@ export async function generateInsightsForBot(botConfigId: string) {
     .slice(0, 50)
     .map((conversation, index) => {
       const userMessages = conversation.messages
-        .filter((message) => message.role === 'user')
+        .filter((message) => message.role === 'USER')
         .map((message) => message.content)
         .join(' | ')
 

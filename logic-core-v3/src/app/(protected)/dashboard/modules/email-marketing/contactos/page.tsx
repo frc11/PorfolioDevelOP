@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { Users, UserCheck, UserMinus } from 'lucide-react'
 import { resolveOrgId } from '@/lib/preview'
 import { prisma } from '@/lib/prisma'
+import { EmptyState } from '@/components/ui'
 import { ImportCSVButton } from './_components/ImportCSVButton'
 
 export const dynamic = 'force-dynamic'
@@ -75,32 +76,13 @@ export default async function ContactosPage() {
         <ImportCSVButton />
       </div>
 
-      {/* Empty state */}
+      {/* Empty state — B12.2: unificado al EmptyState compartido */}
       {contacts.length === 0 && (
-        <div
-          className="px-5 py-14 text-center"
-          style={{
-            background: 'rgba(255,255,255,0.025)',
-            backdropFilter: 'blur(20px) saturate(180%)',
-            WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-            border: '1px solid rgba(255,255,255,0.07)',
-            borderRadius: '12px',
-          }}
-        >
-          <div className="mx-auto flex max-w-xs flex-col items-center">
-            <div
-              className="flex h-14 w-14 items-center justify-center rounded-2xl mb-4"
-              style={{ background: 'rgba(6,182,212,0.1)', border: '1px solid rgba(6,182,212,0.2)' }}
-            >
-              <Users size={24} strokeWidth={1.5} className="text-cyan-400" />
-            </div>
-            <p className="text-sm font-bold text-zinc-300">Sin contactos todavía</p>
-            <p className="mt-2 text-xs leading-relaxed text-zinc-500">
-              Importá un CSV con tus contactos para empezar a enviar campañas.
-              Formato: <span className="font-mono text-zinc-400">email,firstName,lastName,phone</span>
-            </p>
-          </div>
-        </div>
+        <EmptyState
+          icon={Users}
+          title="Sin contactos todavía"
+          description="Importá un CSV con tus contactos para empezar a enviar campañas. Formato: email, firstName, lastName, phone."
+        />
       )}
 
       {/* Contacts table */}

@@ -51,7 +51,7 @@ export async function POST(
           data: {
             botConfigId: validation.botConfigId,
             type: 'SECURITY.BLOCKED_ORIGIN',
-            level: 'warn',
+            level: 'WARN',
             message: `Blocked request from ${origin ?? 'no-origin'}`,
             metadata: { origin, reason: validation.reason },
           },

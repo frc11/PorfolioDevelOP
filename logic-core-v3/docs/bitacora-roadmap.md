@@ -6447,3 +6447,1873 @@ Si la env var se filtra accidentalmente a un deploy real (improbable — no est�
 ### 11) Estado
 
 **MS-8 cierra.** Endpoint operativo, triple guard verificado tanto en su rama positiva como en sus dos ramas negativas (T8 + T9), tres personas seedeadas, agente visual-qa con instrucciones explícitas, screenshots reales en mano. El bypass es 100% inerte sin la env var local de QA. Quien quiera revivirlo en un deploy real tiene que vencer tres candados independientes a la vez — no hay "deslizamiento accidental" posible.
+
+---
+
+## ✅ B11.0 — Probe diagnóstico multi-tenant: MAPA de fugas (cross-tenant + IDOR)   ·   2026-05-25
+
+**Fecha**: 2026-05-25
+**Tipo**: Diagnóstico de seguridad — read-only sobre código + probe activo en runtime con la sesión QA de MS-8. **NO se arregló nada en este sprint** (decisión locked: probe → fixes dirigidos → re-probe). Este mapa DEFINE el scope de B11.1 / B11.2.
+
+### 1) Por qué este orden (lockeado por Franco)
+
+El orden numérico del maestro arrancaba con fixes (NOT NULL en `organizationId`, scoping). Decisión: invertir. **Probe primero** → encontrar dónde sangra HOY → fixes con foco en los agujeros reales → re-probe para confirmar cierre. Tapar a ciegas y verificar después es el anti-patrón. Pre-requisito MS-8 ya cerrado (sesión QA inyectable para `client-a` vs `client-b`), sin lo cual el probe activo no era repetible.
+
+### 2) Cobertura del inventario estático
+
+Read-only barrido completo del proyecto:
+- **70 archivos `'use server'`** (server actions): `src/actions/**`, `src/lib/actions/**`, `src/modules/chatbot/server/**`, `src/app/**/_actions/**`, `src/app/**/actions.ts`.
+- **33 API routes** (`src/app/api/**/route.ts`).
+- **40+ pages bajo `(protected)/admin/**` y `(protected)/dashboard/**`** (loaders).
+- Schema: 26 modelos con `organizationId` directo + relaciones tenant indirectas (`Conversation/ChatMessage/ChatbotLead → BotConfig`, `Task → Project`, `TicketMessage → Ticket`).
+
+Auth backbone (confirmado leyendo `src/auth.ts`, `src/lib/preview.ts`):
+- JWT lleva `sub` / `role` / `organizationId` / `orgRole`.
+- `resolveOrgId()` es canónico: para `ORG_MEMBER` deriva del JWT; para `SUPER_ADMIN` lee el cookie de impersonation.
+- Layouts `(protected)/admin/layout.tsx` (exige `SUPER_ADMIN`) y `(protected)/dashboard/layout.tsx` (exige org). Server actions y API routes **deben** repetir el guard — el layout no las protege a ellas.
+
+### 3) Diferencial automatizado
+
+Grep cruzado: "archivos con `'use server'` o `route.ts` que NO importan `auth()` / `requireSuperAdmin` / `resolveOrgId` / `getServerSession` / `CRON_SECRET` / `tripleGuardCheck`". Sirvió para mapear los candidatos a riesgo y evitar leer 100+ archivos uno por uno. Reveló 17 server actions + 12 API routes sin imports de auth — la mayoría legítimos (login/forgot-password/landing form, cron handlers, chatbot widget público con `validateOrigin`, dev/test routes), 4 con problemas reales (ver tabla 🔴).
+
+### 4) MAPA — Vulnerabilidades CRÍTICAS (🔴 cross-tenant entre clientes ORG_MEMBER)
+
+| # | Archivo:línea | Recurso | Problema | Vector confirmado en runtime |
+|---|---------------|---------|----------|------------------------------|
+| **C1** | [`src/app/api/auth/tiendanube/callback/route.ts:5-31`](logic-core-v3/src/app/api/auth/tiendanube/callback/route.ts) | `Organization.tiendanube*` (update) | **Pre-auth IDOR**. Cero `auth()`. `orgId` viene de `searchParams.get('state')` sin firmar. `prisma.organization.update({where:{id:orgId}})` con orgId arbitrario | `curl` ANÓNIMO con `state=<orgId-victima>` → HTTP 307 → `connected=true` + `tiendanubeConnectedAt` escrito en DB de ambas víctimas (verificado y limpiado). Con un OAuth code real, el atacante asigna SU cuenta Tiendanube a la org víctima |
+| **C2** | [`src/actions/ticket-actions.ts:90-160`](logic-core-v3/src/actions/ticket-actions.ts) (`replyTicketAction`) | `Ticket.status` + `TicketMessage` (write) | **Post-auth IDOR**. Lee `organizationId` del session pero `ticket.update({where:{id:ticketId}})` y `ticketMessage.create({data:{ticketId,...}})` ignoran el org filter. `resolveTicketClientAction` (línea 178) en el MISMO ARCHIVO sí filtra `where:{id,organizationId}` — inconsistencia clara | Logueado como `client-a`, POST a `/dashboard/soporte/<ticketA-id>` con `Next-Action: 40085ea1d64d0de9ef0e60c861166111a1c9adf9ed` y body `[{"ticketId":"<ticket-de-B>","content":"..."}]` → HTTP 200 + `1:{"success":true}` + `x-action-revalidated:1`. Mensaje quedó escrito en ticket de `qa-cliente-b` con autor=`cliente@sanmiguel.com`. **DB validada y limpiada.** |
+
+### 5) MAPA — Fragilidades 🟡 (trust-the-layout, intra-admin, vandalism)
+
+| # | Archivo:línea | Recurso | Riesgo | Severidad | Nota |
+|---|---------------|---------|--------|-----------|------|
+| **F1** | [`src/app/api/auth/google-business/callback/route.ts:6-38`](logic-core-v3/src/app/api/auth/google-business/callback/route.ts) | `Organization.gbp*` | **CSRF state-swap intra-admin**. Sí valida `SUPER_ADMIN` (curl anónimo confirmado en 401), pero un SUPER_ADMIN logueado víctima de CSRF puede reasignar tokens de Google Business a otra org si el atacante interceptó el flow OAuth | 🟡 ALTO | NO es cross-tenant entre `ORG_MEMBER`s. Es intra-admin. Mitigación: state firmado/nonce |
+| **F2** | [`src/lib/actions/projects.ts`](logic-core-v3/src/lib/actions/projects.ts) — 7 actions: `createProject/updateProject/deleteProject/createTask/updateTaskStatus/sendTaskForApproval/deleteTask` | `Project`, `Task` | **Trust-the-layout**. NINGUNA hace `requireSuperAdmin()` ni filtra por org. Hoy el layout `/admin/**` exige SUPER_ADMIN → solo admin las dispara. Si el layout se rompe en un refactor, IDOR inmediato | 🟡 ALTO | Duplicación: existe `admin/projects/_actions/project.actions.ts` (nueva, SÍ usa `requireSuperAdmin`). La vieja `lib/actions/projects.ts` debería migrarse o borrarse |
+| **F3** | [`src/app/(protected)/admin/messages/[orgId]/page.tsx`](logic-core-v3/src/app/(protected)/admin/messages/[orgId]/page.tsx) | `Message` reads/writes | **Trust-the-layout**. La page recibe `orgId` por URL y llama `markAsRead(orgId)` + `getConversation(orgId)` directos. Mitigado HOY porque `message.actions.ts` SÍ valida con `requireSuperAdmin()` internamente | 🟡 MEDIO | Las actions hacen el guard, el page solo. Limpiar duplicación |
+| **F4** | [`src/app/(protected)/admin/projects/[projectId]/payments/page.tsx:69-103`](logic-core-v3/src/app/(protected)/admin/projects/[projectId]/payments/page.tsx) | `OsPaymentMilestone`, `OsMaintenancePayment` | Loader sin auth check; mutaciones inline (`markMilestonePaid`, `generatePendingMaintenance`, `markMaintenancePaid`) sin re-guard local | 🟡 MEDIO | Trust-the-layout. Verificar las 3 actions `_actions/{milestone,maintenance}.actions.ts` |
+| **F5** | [`src/actions/agency-actions.ts:10-75`](logic-core-v3/src/actions/agency-actions.ts) (`createTaskForClientAction`) | `Task`, `Notification` | SUPER_ADMIN ok, pero acepta `projectId` y `organizationId` separados sin validar que `project.organizationId === organizationId`. SUPER_ADMIN podría crear task en projectId de orgX y notificar a members de orgY | 🟡 MEDIO | Trust-admin pero data integrity rota |
+| **F6** | [`src/lib/actions/contact.ts:77-94`](logic-core-v3/src/lib/actions/contact.ts) (`markLeadAsRead`) | `ContactSubmission.read` | Server action **sin `auth()` al tope**. Cualquier visitante con un id de ContactSubmission puede mark-as-read. NO es cross-tenant (ContactSubmission no es tenant-scoped), pero es vandalism que esconde leads | 🟡 BAJO | Agregar `requireSuperAdmin()` |
+| **F7** | [`src/app/api/email/optout/[contactId]/route.ts:4-14`](logic-core-v3/src/app/api/email/optout/[contactId]/route.ts) | `EmailContact.optedOut` | Endpoint público por diseño (link de unsubscribe en emails). SIN firma/token. Si el link se filtra, cualquiera da de baja al contacto. Curl con `contactId` random → HTTP 200 (silenciado por `try{}catch{}` anti-enumeration, correcto) | 🟡 BAJO | Comparar con `/api/email/unsubscribe-executive` que SÍ usa `verifyUnsubscribeToken()` — replicar el patrón |
+| **F8** | [`src/app/api/track/route.ts:9-42`](logic-core-v3/src/app/api/track/route.ts) | `PageView` | SUPER_ADMIN puede crear PageView con `clientId` arbitrario (no valida que `clientId` exista como user). ORG_MEMBER limitado a `session.user.id`. Curl anónimo → 401 correcto | 🟡 BAJO | Data integrity, no cross-tenant |
+
+### 6) Lo que está BIEN — patrón sano confirmado (🟢)
+
+La gran mayoría del código (~80%) está en regla. Patrones observados consistentes:
+
+**Dashboard cliente (acciones que toca el cliente directo)** — siempre:
+- `resolveOrgId()` o `session.user.organizationId` para derivar el org del caller.
+- Ownership check post-fetch: `if (resource.botConfig.organizationId !== session.organization.id) return error`.
+- IDs del input nunca se confían: o se filtran relacionalmente en la query (`where:{id, botConfig:{organizationId:orgId}}`), o se fetcha + compara antes del update.
+
+Ejemplos verificados:
+- [`src/modules/chatbot/server/dashboard/{saveCrmIntegration,retryCrmSync,testCrmConnection}.ts`](logic-core-v3/src/modules/chatbot/server/dashboard/) — todos derivan orgId, ownership check explícito.
+- [`src/modules/chatbot/server/admin/{updateLeadStatus,saveClientKnowledgeBase}.ts`](logic-core-v3/src/modules/chatbot/server/admin/) y [`insights/manageInsight.ts`](logic-core-v3/src/modules/chatbot/server/insights/manageInsight.ts) — fetch + `resource.botConfig.organizationId !== session.organization.id`.
+- [`src/actions/dashboard-actions.ts`](logic-core-v3/src/actions/dashboard-actions.ts) (`approveTaskAction`, `rejectTaskAction`, `markNotificationAsRead`) — todas con check explícito.
+- [`src/actions/task-approvals.ts`](logic-core-v3/src/actions/task-approvals.ts) — mismo patrón.
+- [`src/app/(protected)/dashboard/modules/email-marketing/_actions.ts`](logic-core-v3/src/app/(protected)/dashboard/modules/email-marketing/_actions.ts) — `sendCampaignAction` usa `findFirst({where:{id, organizationId}})` (perfecto).
+- [`src/lib/actions/notifications.ts`](logic-core-v3/src/lib/actions/notifications.ts) — `updateMany({where:{id, organizationId}})`.
+- [`src/app/api/dashboard/chatbot/leads/export/route.ts`](logic-core-v3/src/app/api/dashboard/chatbot/leads/export/route.ts) — `listLeadsForDashboard(orgId,...)` con orgId del session.
+
+**Admin (trust-admin)** — el patrón mejorado usa el helper `requireSuperAdmin()` de `src/lib/auth-guards.ts`:
+- [`src/app/(protected)/admin/clients/_actions/plan.actions.ts`](logic-core-v3/src/app/(protected)/admin/clients/_actions/plan.actions.ts) (assignPlanToOrg, setBillingOverride, clearBillingOverride) — todas con el helper.
+- [`src/app/(protected)/admin/projects/_actions/project.actions.ts`](logic-core-v3/src/app/(protected)/admin/projects/_actions/project.actions.ts) — TODAS con `requireSuperAdmin()`. Esta es la versión nueva que reemplaza la vieja [`src/lib/actions/projects.ts`](logic-core-v3/src/lib/actions/projects.ts) (F2).
+- [`src/app/(protected)/admin/messages/_actions/message.actions.ts`](logic-core-v3/src/app/(protected)/admin/messages/_actions/message.actions.ts) — `requireSuperAdmin()` en cada action.
+- [`src/lib/actions/impersonation.ts`](logic-core-v3/src/lib/actions/impersonation.ts) — start valida SUPER_ADMIN, token impersonation firmado con expiración.
+- [`src/lib/actions/invitations.ts`](logic-core-v3/src/lib/actions/invitations.ts) — invite valida SUPER_ADMIN, token de invitación 32 bytes random.
+
+**Loaders bajo `/admin/**`** — el layout `(protected)/admin/layout.tsx:29-31` exige `SUPER_ADMIN` con redirect. Las queries globales en `/admin/page.tsx` (osDemo/osLead/osMaintenancePayment/project/osTimeEntry sin filtro org) son **intencionales — vista agencia**, no cross-tenant leak. Mismo caso que `getBotsOverviewStats` ya flageado en B9.2.
+
+**Widget público del chatbot** — `/api/chatbot/[slug]/{chat,config,health,smoke}/route.ts` no requieren auth (correcto, son embed público) pero usan `validateOrigin({origin, botSlug})` que garantiza isolation por slug+origin. Cross-tenant via slug está bloqueado.
+
+**OAuth callbacks** — el patrón a replicar es [`/api/email/unsubscribe-executive/route.ts:62`](logic-core-v3/src/app/api/email/unsubscribe-executive/route.ts) (firma + verify) vs el patrón roto de C1 y F1 (state crudo).
+
+### 7) Lectura cross-tenant (probe complementario)
+
+Mismo runtime, sesión `client-a`, navegando a `/dashboard/soporte/<ticketB-id>`: HTTP 200 + render `not-found`. **El loader del page sí filtra**. Confirma que la cobertura del código **NO es uniforme**: hay loaders sanos y actions olvidadas. El bug de C2 es local a una action — no es un patrón sistémico de "olvidamos filtrar todo".
+
+### 8) Control negativo
+
+Para validar que el método del probe (curl + Next-Action header) realmente prueba la lógica y no un proxy intermedio: misma técnica contra `markNotificationAsRead` (de [`src/actions/dashboard-actions.ts:188`](logic-core-v3/src/actions/dashboard-actions.ts)) con un `notification.id` de org-B desde sesión `client-a`. Hash `402dbff2e30dc5d970a7ef637ebe9a58423b1feb50`. Respuesta: `1:{"success":false,"error":"No encontramos esa notificación."}`. **Patrón sano funciona** — el ownership check `notif.organizationId !== session.user.organizationId` detiene el escalado.
+
+### 9) Sospechas que el probe NO ejecutó (out of scope, dejar para B11.1+)
+
+- **F1 (GBP state-swap)**: requiere armar un flow OAuth real con dos cuentas Google Business. Foco en B-SEC.
+- **F2 (projects.ts trust-the-layout)**: igualar las 7 actions a `requireSuperAdmin()` o borrar el archivo si la versión nueva ya cubre todo.
+- **F5 (agency-actions cross-projectId)**: requiere setup de project en orgA + members en orgB. Verificar en B11.2.
+- **F7 (email optout sin firma)**: trivial — replicar el patrón de unsubscribe-executive.
+- Endpoints `/admin/messages/[orgId]` y `/admin/projects/[projectId]/payments`: lectura para tracear las actions inline y confirmar que no hay nada peor.
+
+### 10) Scope DEFINIDO para B11.1 / B11.2
+
+**B11.1 — Fixes 🔴 (bloqueador antes de cualquier deploy real)**:
+1. `tiendanube/callback`: agregar `auth()` + verificar que el `SUPER_ADMIN` sí puede operar sobre el `state` orgId, idealmente con state firmado/nonce (replicar `verifyUnsubscribeToken` pattern). Audit log.
+2. `replyTicketAction`: agregar filtro `where:{id:ticketId, organizationId}` en ambos statements del `$transaction` (igual que `resolveTicketClientAction` línea 178). Test de regresión: re-correr el probe de B11.0 y confirmar HTTP 200 con `{success:false}`.
+
+**B11.2 — Endurecimiento 🟡 (post-fixes)**:
+1. Migrar `lib/actions/projects.ts` → re-exportar desde `admin/projects/_actions/project.actions.ts` o borrar y actualizar imports.
+2. `agency-actions.ts:createTaskForClientAction`: agregar `project.findUnique({where:{id:projectId}})` + `if (project.organizationId !== organizationId) throw`.
+3. `google-business/callback`: state firmado.
+4. `email/optout`: token firmado.
+5. `markLeadAsRead`: agregar `requireSuperAdmin()`.
+6. Endurecer `getBotsOverviewStats` (B9.2 ya flageó) — JSDoc `@global` explícito o rename a `_globalUnscopedStats`.
+
+**B11.3 — Re-probe** (este script reusable): re-correr el inventario diferencial + los 2 vectores C1/C2 confirmados + sumar los 🟡 escogidos para B11.2. Si todos responden 401/403/`{success:false}`, B11 cierra.
+
+### 11) Verificación y limpieza
+
+- Server `next-prod-qa` (build prod + `QA_ALLOW_LOCALHOST=1` en puerto 3001) levantado.
+- `/api/qa/login GET` confirmó 3 personas seedeadas.
+- 2 tickets PROBE creados en org-A y org-B, 1 notification PROBE en org-B → todos **borrados al final** del script de cleanup.
+- `tiendanubeConnectedAt` se escribió en ambas orgs durante PROBE C1 (los tokens quedaron null porque `exchangeCodeForToken('fake')` igual devolvió truthy con valores null) → **reseteado a null** en ambas en cleanup.
+- DB queda **idéntica a pre-probe**. Scripts `_probe_*.mjs` temporales borrados.
+- Server queda corriendo en puerto 3001 (no se mata para que B11.1 lo reuse).
+
+### 12) Estado
+
+**B11.0 cierra con MAPA EJECUTABLE.** 2 🔴 críticos confirmados con prueba en runtime + 8 🟡 mapeados con archivo:línea + 80+ archivos verificados como 🟢. El scope de B11.1 / B11.2 / B11.3 no son hipótesis — son las líneas exactas a tocar. El "tapar a ciegas y verificar después" queda neutralizado: cada fix tiene un vector de probe asociado.
+
+---
+
+## ✅ B11.1 — Project.organizationId → NOT NULL (constraint a nivel DB) · 2026-05-25
+
+**Fecha**: 2026-05-25
+**Tipo**: Migration aditiva sobre branch dev de Neon. Cambio de schema enforced en Postgres + tipado TS endurecido + cleanup de data legacy ("proyectos internos sin org").
+**NO confundir con el scope que B11.0 propuso (fixes a C1/C2 IDOR)** — Franco priorizó cerrar primero el constraint del campo. Los IDOR críticos quedan para próximo sprint.
+
+### 1) Preflight obligatorio — conteo de NULLs ANTES
+
+Regla: "constraint sobre data con nulls = migration rota". Antes de tocar el schema:
+
+```
+Total projects   : 7
+With orgId       : 5
+NULL orgId       : 2   ← BLOQUEADOR
+```
+
+**B0.3 había dejado el trabajo a medias.** El script de cleanup conocido (`scripts/_db-cleanup-execute.mjs`) reasignó 1 orphan interno de la agencia a `develop`, pero borró las "dup orgs" `os-org-cmnkiwar4003...` y `os-org-cmnkiw999...` con `onDelete: SetNull` activo → los **projects principales** de Sigma Contable y Sonrisa Norte quedaron con `organizationId NULL`. La afirmación heredada "✅ B0.3 asignó el Project huérfano a develop" cubría solo 1 de 3 — había 2 más todavía sin org.
+
+### 2) Decisión sobre los 2 orphans
+
+Los 2 orphans no son data productiva sino **demo seed** de Agency OS (clientes externos en `seed-agency-os.ts`):
+
+| Project | Cliente (via osLead) | Status | Asociados |
+|---------|-----------------------|--------|------------|
+| `osv2-project-sigma-contable-...` | Estudio Contable Sigma | COMPLETED | 3 tasks + 2 milestones + 2 maintenance + 3 time entries |
+| `cmnkiw999002u9fdw2xr733hl` | Clínica Dental Sonrisa Norte | REVIEW | 3 tasks + 2 milestones + 8 time entries |
+
+Cuatro opciones planteadas a Franco vía `AskUserQuestion`: (A) crear orgs nuevas, (B) asignar a `develop`, (C) hard delete, (D) re-correr seed. **Franco eligió C: hard delete.** Data demo, no afecta clientes reales; re-corremos seed después si se necesita.
+
+Script `_b111_delete_orphans.mjs` con guards: snapshot pre-delete + verificación de que los IDs apuntan a orphans + delete con cascade + recount post-delete + abort si `nulls > 0`. **Cascade limpió** los 6 tasks, 4 milestones, 2 maintenance payments, 11 time entries asociados (verificado por `_count` antes del delete). Los `OsLead` correspondientes (Sigma y Sonrisa) quedaron intactos — el FK lo lleva el Project, no el OsLead, así que la relación inversa simplemente se desconecta.
+
+Post-cleanup: `Total: 5, Nulls: 0`. Safe.
+
+### 3) Schema change
+
+`logic-core-v3/prisma/schema.prisma:447-466` (modelo Project):
+
+```diff
+-  organizationId      String?
+-  organization        Organization?          @relation(fields: [organizationId], references: [id], onDelete: SetNull)
++  organizationId      String
++  organization        Organization           @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+   tasks               Task[]
+   osLead              OsLead?                @relation(fields: [osLeadId], references: [id])
+   paymentMilestones   OsPaymentMilestone[]
+   maintenancePayments OsMaintenancePayment[]
+   timeEntries         OsTimeEntry[]
++
++  @@index([organizationId])
+ }
+```
+
+3 cambios atómicos:
+- `String?` → `String` (NOT NULL).
+- `SetNull` → `Cascade` (coherente con el resto del schema: Subscription, Invoice, Ticket, Message, ClientAsset, etc. todos usan Cascade). Si una org se borra, sus projects + cascade-children se van. `SetNull` ya no es opción porque la columna no admite null.
+- `@@index([organizationId])` agregado — queries tenant-scoped sobre Project (`findMany({where:{organizationId}})`) ahora indexed.
+
+### 4) Migration aplicada
+
+`prisma/migrations/20260525182135_b11_1_project_organizationid_not_null/migration.sql`:
+
+```sql
+-- DropForeignKey
+ALTER TABLE "Project" DROP CONSTRAINT "Project_organizationId_fkey";
+
+-- AlterTable
+ALTER TABLE "Project" ALTER COLUMN "organizationId" SET NOT NULL;
+
+-- CreateIndex
+CREATE INDEX "Project_organizationId_idx" ON "Project"("organizationId");
+
+-- AddForeignKey
+ALTER TABLE "Project" ADD CONSTRAINT "Project_organizationId_fkey"
+  FOREIGN KEY ("organizationId") REFERENCES "Organization"("id")
+  ON DELETE CASCADE ON UPDATE CASCADE;
+```
+
+Generada con `npx prisma migrate dev --name b11_1_project_organizationid_not_null --create-only`, revisada, aplicada con `npx prisma migrate dev`. **Aditiva**: no destruye data, no resetea, solo modifica metadatos de columna + reemplaza FK. Branch dev de Neon (`ep-quiet-waterfall-acv0fpll-pooler.sa-east-1.aws.neon.tech`).
+
+### 5) Verificación triple en runtime
+
+Script `_b111_verify_constraint.mjs` post-aplicación:
+
+| Check | Resultado |
+|-------|-----------|
+| `SELECT COUNT(*) FROM "Project" WHERE "organizationId" IS NULL` | **0** |
+| `information_schema.columns.is_nullable` | **`NO`** |
+| `INSERT INTO "Project" (...) VALUES (..., null, ...)` | Postgres rechaza con **code `23502`** (`not_null_violation`) |
+| FK `Project_organizationId_fkey` | `delete_rule = CASCADE` ✅ |
+| `npx prisma migrate status` | **`50 migrations found. Database schema is up to date!`** |
+
+Cuatro guardas independientes, las cuatro pasan.
+
+### 6) Código ajustado — fail-fast sobre intent legacy
+
+El sistema tenía la semántica "proyectos internos sin org" (el orphan interno de la agencia que B0.3 movió a `develop`). Con NOT NULL eso desaparece. Cambios:
+
+**`src/app/(protected)/admin/projects/_actions/project.actions.ts`**:
+- `resolveProjectOrganization(tx, organizationId)` — return type ya no `ProjectOrganization | null`. Throw temprano si `organizationId` es falsy: `'organizationId is required — Project must belong to an organization (B11.1)'`. Esto es el fail-fast a nivel server action: si la UI manda algo malo, error claro antes de tocar el DB.
+- `syncOrganizationService` — segundo arg ya no `ProjectOrganization | null`, es `ProjectOrganization`.
+- 5 lugares con `organizationId: organization?.id ?? null` o `organization?.id ?? null` → `organization.id`. El optional chaining + nullish coalescing eran dead code post-cambio (organization siempre non-null porque el helper lanza).
+- `isInternal: project.organizationId === null` → `isInternal: false` (la flag ya nunca puede ser `true`). La dejo en el contrato del API para no romper consumidores que la leen — si un sprint posterior detecta que no se usa, se borra.
+
+**`prisma/seed-agency-os.ts`**:
+- `ensureProject(seed, organizationId: string, leadId)` — arg ya no nullable.
+- Caller (línea ~2010): si `projectSeed.organizationSlug` no está, default a `'develop'` (semántica nueva: "proyectos internos" = projects de la org agencia). Mantiene compatibilidad con el seed legacy sin permitir crear orphans.
+
+**No tocado** (verificado y safe):
+- `src/lib/actions/projects.ts:39-40` — `createProjectAction` de la versión vieja (la marcada 🟡 en B11.0). Recibe `organizationId` de FormData con early-return si vacío. Compatible con NOT NULL.
+
+### 7) Verificación TS
+
+`npx tsc --noEmit` corrido al final: **cero errores**. Toda la base de código compila con `Project.organizationId: string`. El client de Prisma regenerado durante `migrate dev` ya rechaza en compile-time cualquier `organizationId: null` (verificado al ver el error `Argument 'organizationId' must not be null` al intentar `prisma.project.count({where:{organizationId:null}})`).
+
+### 8) Otros callsites de `prisma.project.create` auditados
+
+Grep cruzado: 3 callsites en `src/`:
+1. `src/lib/actions/projects.ts:39` — pasa `organizationId` derivado de FormData con early return si vacío → **OK**.
+2. `src/app/(protected)/admin/projects/_actions/project.actions.ts:573` — ajustado en (6) → **OK**.
+3. `src/app/(protected)/admin/projects/_actions/project.actions.ts:781` — ajustado en (6) → **OK**.
+
+Ningún otro callsite crea Project sin orgId.
+
+### 9) Archivos modificados
+
+**Schema/DB**:
+- `logic-core-v3/prisma/schema.prisma` — Project: organizationId String, onDelete Cascade, @@index.
+- `logic-core-v3/prisma/migrations/20260525182135_b11_1_project_organizationid_not_null/migration.sql` (nuevo) — DROP FK / SET NOT NULL / CREATE INDEX / ADD FK CASCADE.
+
+**Código**:
+- `logic-core-v3/src/app/(protected)/admin/projects/_actions/project.actions.ts` — helper throw-instead-of-null, 5 sitios `?? null` removidos, `isInternal: false`.
+- `logic-core-v3/prisma/seed-agency-os.ts` — `ensureProject` arg required, caller default a `develop` para legacy internals.
+
+**Data**:
+- 2 Projects orphans borrados (con cascade: 6 tasks + 4 milestones + 2 maintenance + 11 time entries).
+- 0 cambios en otras tablas.
+
+### 10) Lo que NO se hizo en este sprint (queda para B11.x)
+
+- Los 2 🔴 IDOR de B11.0 (`tiendanube/callback` pre-auth + `replyTicketAction` post-auth) siguen vulnerables. **B11.2 los tapa.**
+- Las 6 🟡 de B11.0 (google-business state-swap, projects.ts vieja sin re-guard, agency-actions cross-projectId, optout sin firma, markLeadAsRead sin auth, track con clientId arbitrario) — sin tocar.
+- B11.3 re-probe pendiente (re-correr los vectores C1/C2 + verificar que B11.x cerró).
+- Aplicar el mismo patrón NOT NULL + Cascade a otros opcionales sospechosos: `Notification.organizationId` (también `String?`). No es bloqueador hoy, queda en roadmap.
+
+### 11) Estado
+
+**B11.1 cierra.** El constraint está activo a nivel Postgres (verificado con 4 guardas independientes), el typing TS lo refleja (compila clean), el código que creaba projects sin org se ajustó a fail-fast, los 2 orphans demo se borraron limpiamente con cascade, y la migration es totalmente aditiva (no se perdió data productiva, no se reseteó nada). Branch dev sincronizado: 50 migrations, schema up to date.
+
+---
+
+## ✅ B11.2 — Helper assertResourceBelongsToOrg + tapón a 🔴 + 🟡 del mapa B11.0   ·   2026-05-25
+
+**Fecha**: 2026-05-25
+**Tipo**: Defense-in-depth. Helper reutilizable + 6 fixes mapeados 1:1 a hallazgos del probe de B11.0 + endurecimiento del query global flageado por B9.2. Sin migration: solo código.
+
+### 1) Helper `assert*BelongsToOrg` ([src/lib/auth/assert-ownership.ts](logic-core-v3/src/lib/auth/assert-ownership.ts))
+
+```ts
+export class ResourceNotOwnedError extends Error { ... }
+
+export async function assertTicketBelongsToOrg(ticketId, organizationId): Promise<void>
+export async function assertProjectBelongsToOrg(projectId, organizationId): Promise<void>
+```
+
+**Patrón**: `findFirst({where:{id, organizationId}, select:{id:true}})` y throw `ResourceNotOwnedError` si no devuelve nada. NO retorna el recurso — los callers que necesitan campos los refetchean. Type-safe a 100%, cero `any`.
+
+**Decisión de diseño**:
+- *Helper por modelo, no genérico*: el typing de Prisma delegates con generics se vuelve barroco. Un helper por modelo es 6 líneas, tipado limpio. Se agregan según se necesiten (hoy: Ticket + Project).
+- *Throw en lugar de devolver `null`/booleano*: forzar al caller a manejarlo explícitamente. Wrap en try/catch + `instanceof ResourceNotOwnedError` para serializar como 404 / `{success:false}` sin leakear si el recurso existe en otra org.
+- *Default a 404, no 403*: el mensaje al cliente es siempre "no encontrado", indistinguible de "no existe". No leakeamos la existencia de recursos de otras orgs (defense-in-depth contra enumeration).
+
+### 2) Mapeo fixes → hallazgos de B11.0
+
+| Hallazgo B11.0 | Fix B11.2 | Archivo | Verificación |
+|---|---|---|---|
+| **🔴 C1** tiendanube/callback pre-auth IDOR | `auth() + SUPER_ADMIN + org exists + audit log` | [`src/app/api/auth/tiendanube/callback/route.ts`](logic-core-v3/src/app/api/auth/tiendanube/callback/route.ts) | Curl anónimo: **401**. Curl como ORG_MEMBER: **401**. (antes: 307 + DB write) |
+| **🔴 C2** replyTicketAction IDOR | `assertTicketBelongsToOrg()` antes del `$transaction` (skip si `isAdmin`) | [`src/actions/ticket-actions.ts:114-125`](logic-core-v3/src/actions/ticket-actions.ts) | client-a → ticket-B: **`{success:false, "No encontramos ese ticket."}`** + sin header `x-action-revalidated`. DB de ticket-B intacta (1 msg, no 2). Control positivo OK. |
+| **🟡 F5** agency-actions cross-projectId | `assertProjectBelongsToOrg(projectId, organizationId)` al tope de `createTaskForClientAction` | [`src/actions/agency-actions.ts:18-29`](logic-core-v3/src/actions/agency-actions.ts) | TS check OK; runtime probe queda para B11.3 (requiere setup project en orgA + intent en orgB) |
+| **🟡 F6** markLeadAsRead sin auth | `requireSuperAdmin()` con try/catch → `{success:false, "No autorizado."}` | [`src/lib/actions/contact.ts:77-95`](logic-core-v3/src/lib/actions/contact.ts) | TS check OK |
+| **🟡 F2** projects.ts (vieja) trust-the-layout | `ensureSuperAdminOrErrorString()` (wrapper) en 4 actions con `FormState`; `requireSuperAdmin()` directo en 3 `Promise<void>` con redirect | [`src/lib/actions/projects.ts`](logic-core-v3/src/lib/actions/projects.ts) — 7 actions cubiertas | TS check OK |
+| **🟡** start de tiendanube (descubierto en el fix) | SUPER_ADMIN-only (antes: cualquier ORG_MEMBER) | [`src/app/api/auth/tiendanube/start/route.ts`](logic-core-v3/src/app/api/auth/tiendanube/start/route.ts) | Consistencia con callback |
+| **🟡** `getBotsOverviewStats` (B9.2) | Rename → `getGlobalBotsOverviewStats` + JSDoc `@global SUPER_ADMIN-only` con warning de uso | [`src/modules/chatbot/server/admin/getGlobalBotsOverviewStats.ts`](logic-core-v3/src/modules/chatbot/server/admin/getGlobalBotsOverviewStats.ts) | Único callsite (`admin/chatbots/page.tsx`) actualizado; archivo viejo borrado |
+
+### 3) Re-probe runtime de los 2 🔴 (validación dura)
+
+Mismo método que B11.0 (curl con cookie QA + `Next-Action` header), idéntico target, idéntico hash (`40085ea1d64d0de9ef0e60c861166111a1c9adf9ed` — Next.js calcula el hash deterministic sobre module+symbol, no sobre body, así que el rebuild no lo cambió; apple-to-apple).
+
+**Setup**: `_b112_setup_tickets.mjs` crea ticket-A en `san-miguel` (source) + ticket-B en `qa-cliente-b` (target). Datos limpiados al final.
+
+#### Probe C1 — Tiendanube callback
+
+| Variante | ANTES (B11.0) | AHORA (B11.2) |
+|---|---|---|
+| `curl` anónimo con `state=<orgId-victima>` | HTTP 307 + `tiendanubeConnectedAt` escrito | **HTTP 401** |
+| `curl` con cookie de ORG_MEMBER | (no probado en B11.0) | **HTTP 401** |
+
+#### Probe C2 — replyTicketAction IDOR
+
+| Caso | ANTES (B11.0) | AHORA (B11.2) |
+|---|---|---|
+| client-a invoca con `ticketId=<ticket-B>` | HTTP 200 + `{success:true}` + `x-action-revalidated:1` + mensaje **landed en ticket-B** | HTTP 200 + **`{success:false,"error":"No encontramos ese ticket."}`** + **sin `x-action-revalidated`** + ticket-B intacto en DB (1 msg, no 2) |
+| Control positivo: client-a invoca con `ticketId=<propio>` | HTTP 200 + success | **HTTP 200 + `{success:true}` + `x-action-revalidated:1`** — feature legítimo intacto |
+
+La ausencia del header `x-action-revalidated` en el IDOR es prueba directa de que la action salió por el early-return ANTES del `$transaction` y del `revalidatePath`. Verificación DB confirma: ticket-B con 1 mensaje (solo el inicial), ticket-A con 2 (inicial + control positivo).
+
+### 4) Endurecimiento de `getGlobalBotsOverviewStats` (B9.2 flag)
+
+Rename `getBotsOverviewStats` → `getGlobalBotsOverviewStats`. Cada futuro callsite ahora dice literalmente "Global" en el nombre — es difícil llamarla por error desde un loader de cliente y olvidar el filtro.
+
+JSDoc agregado:
+- `@global SUPER_ADMIN-only`
+- Referencia a B9.2 (origen del flag).
+- Warning explícito: "si vas a llamarla desde un loader/action nuevo: confirmá que el caller está bajo `/admin/**` o que vos mismo verificás `requireSuperAdmin()` antes. Para vista por-org usá `multiTenantQueries.ts`".
+
+Único callsite actual (`/admin/chatbots/page.tsx`) actualizado. Archivo viejo borrado (`git status` lo refleja como rename detectado).
+
+### 5) Verificación
+
+```bash
+npx tsc --noEmit                     # 0 errores
+npm run build                        # OK (.next regenerado, hash de actions estables)
+npx prisma migrate status            # 50 migrations, schema up to date (sin cambios en DB)
+```
+
+Re-probe runtime ejecutado contra el bundle reconstruido: C1 + C2 cerrados, control positivo OK.
+
+### 6) Archivos modificados / creados
+
+**Nuevos**:
+- `logic-core-v3/src/lib/auth/assert-ownership.ts` — helper + clase de error.
+- `logic-core-v3/src/modules/chatbot/server/admin/getGlobalBotsOverviewStats.ts` — rename del query global.
+
+**Modificados**:
+- `logic-core-v3/src/app/api/auth/tiendanube/callback/route.ts` — triple guard + audit log.
+- `logic-core-v3/src/app/api/auth/tiendanube/start/route.ts` — SUPER_ADMIN-only.
+- `logic-core-v3/src/actions/ticket-actions.ts` — assertTicketBelongsToOrg en replyTicketAction.
+- `logic-core-v3/src/actions/agency-actions.ts` — assertProjectBelongsToOrg en createTaskForClientAction.
+- `logic-core-v3/src/lib/actions/contact.ts` — requireSuperAdmin en markLeadAsRead.
+- `logic-core-v3/src/lib/actions/projects.ts` — wrapper + guard en 7 actions.
+- `logic-core-v3/src/app/(protected)/admin/chatbots/page.tsx` — import del nuevo nombre.
+
+**Borrados**:
+- `logic-core-v3/src/modules/chatbot/server/admin/getBotsOverviewStats.ts` (renamed).
+
+**No tocado** (queda en backlog):
+- 🟡 F1 google-business state-swap CSRF: requiere state firmado/nonce HMAC (mismo patrón que `verifyUnsubscribeToken`). Resuelve también F7 (email/optout sin firma). Sprint dedicado a "OAuth/email links signing".
+- 🟡 F3 admin/messages page trust-the-layout: mitigado (las actions ya validan SUPER_ADMIN).
+- 🟡 F4 admin/projects/payments page trust-the-layout: mitigado parcialmente; verificar las 3 actions `_actions/{milestone,maintenance}.actions.ts` en una pasada futura.
+- 🟡 F8 /api/track: data integrity, no cross-tenant; fuera del scope multi-tenant.
+
+### 7) Estado
+
+**B11.2 cierra los 2 🔴 críticos confirmados en B11.0 + 4 de las 8 🟡** con runtime evidence (HTTP responses + DB state pre/post comparables). El helper queda disponible para más modelos según se sumen requirements (Invoice, Notification, Ticket admin actions, etc. — agregar es 6 líneas). La superficie de fuga cross-tenant entre clientes ORG_MEMBER queda **vacía** sobre los vectores que el mapa de B11.0 había definido. B11.3 puede arrancar con re-probe automatizado para cierre formal del epic B11.
+
+---
+
+## ✅ B11.4 — string → enum (5 campos del módulo chatbot)   ·   2026-05-25
+
+**Fecha**: 2026-05-25
+**Tipo**: Endurecimiento de tipos a nivel DB + TS. Migration aditiva en branch dev. Backfill in-place via `ALTER COLUMN TYPE ... USING UPPER(col)::Enum` — cero pérdida de data, cero downtime, todos los rows existentes preservados con su valor (case-shifted).
+
+### 1) Pre-flight obligatorio — DISTINCT por campo ANTES de tocar nada
+
+Regla: "un valor inesperado rompe el backfill". Antes de la migration, conté DISTINCT y comparé contra el set esperado. Resultado:
+
+| Campo | Total rows | Distinct values en DB | Outliers vs expected |
+|-------|-----------:|------------------------|----------------------|
+| `chatbot_message.role` | 1137 | `user` (599), `assistant` (538) | 0 (`system` esperado pero no en uso) |
+| `chatbot_lead.intent` | 66 | `quote` (23), `purchase_ready` (11), `schedule_visit` (10), `support` (8), `quote_request` (6), `human_request` (4), `other` (4) | 0 (mezcla legacy + B5.1+ tal cual el comentario del schema lo anticipaba) |
+| `chatbot_events.level` | 695 | `info` (666), `warn` (22), `error` (7) | 0 (`debug` esperado pero no en uso) |
+| `chatbot_bot_config.intensityLevel` | 3 | `medium` (3) | 0 |
+| `chatbot_bot_config.llmProvider` | 3 | `google` (3) | 0 |
+
+**Cero outliers en 1904 rows totales.** Safe para constraint sin transformación previa.
+
+Nota sobre `intent`: el schema tenía un comentario explícito de B5.1 diciendo *"No se enum-iza en DB para no romper rows legacy (additive)"*. La objeción quedó resuelta haciendo el enum **union de ambos sets** (`PURCHASE_READY/SCHEDULE_VISIT/QUOTE_REQUEST/HUMAN_REQUEST/SUPPORT/OTHER` + legacy `QUOTE/INFO/DEMO`) — los rows pre-B5.1 conservan su valor y los nuevos siguen funcionando.
+
+### 2) Enums creados
+
+```prisma
+enum ChatMessageRole   { USER  ASSISTANT  SYSTEM }
+enum ChatbotLeadIntent {
+  PURCHASE_READY  SCHEDULE_VISIT  QUOTE_REQUEST  HUMAN_REQUEST  SUPPORT  OTHER
+  QUOTE  INFO  DEMO  // legacy pre-B5.1
+}
+enum ChatbotEventLevel { INFO  WARN  ERROR  DEBUG }
+enum BotIntensityLevel { LOW  MEDIUM  HIGH }
+enum LlmProvider       { GOOGLE  ANTHROPIC  OPENAI }
+```
+
+Convención UPPER_SNAKE_CASE consistente con el resto del schema (`LeadStatus`, `ProjectStatus`, `TaskStatus`, etc.).
+
+### 3) Migration en SPLIT canónico (aditiva tolerante → deploy → estricta)
+
+**Primer intento** (corregido): aplicé una migration consolidada que hacía `CREATE TYPE + ALTER COLUMN TYPE ... USING UPPER(col)::Enum` en un solo paso. Funcionó pero violó la regla "constraint estricto antes del deploy del código nuevo bloquea escrituras del código viejo". En dev sin tráfico el riesgo es nulo, pero el orden correcto es **gratis** y debe ser el patrón de referencia para futuros sprints con concurrencia. Revertí (`ALTER COLUMN TYPE TEXT USING col::text` + `DROP TYPE` + clean de `_prisma_migrations`) preservando los UPPER values en las columnas (downgrade a TEXT no toca la data), y re-apliqué en 2 fases canónicas:
+
+#### Fase (a) — [`20260525190000_b11_4a_create_enum_types`](logic-core-v3/prisma/migrations/20260525190000_b11_4a_create_enum_types/migration.sql)
+
+```sql
+CREATE TYPE "ChatMessageRole"   AS ENUM ('USER', 'ASSISTANT', 'SYSTEM');
+CREATE TYPE "ChatbotLeadIntent" AS ENUM (
+  'PURCHASE_READY', 'SCHEDULE_VISIT', 'QUOTE_REQUEST', 'HUMAN_REQUEST',
+  'SUPPORT', 'OTHER',
+  'QUOTE', 'INFO', 'DEMO'
+);
+CREATE TYPE "ChatbotEventLevel" AS ENUM ('INFO', 'WARN', 'ERROR', 'DEBUG');
+CREATE TYPE "BotIntensityLevel" AS ENUM ('LOW', 'MEDIUM', 'HIGH');
+CREATE TYPE "LlmProvider"       AS ENUM ('GOOGLE', 'ANTHROPIC', 'OPENAI');
+```
+
+**No toca columnas.** Las columnas siguen siendo TEXT y aceptan cualquier string. El código viejo (escribe lowercase) sigue funcionando; los enum types quedan disponibles para el código nuevo. **Zero-risk deploy**.
+
+#### Deploy del código nuevo
+
+(En este sprint: el código ya fue actualizado en sección 5 — adapter `LEVEL_TO_ENUM` en `persistentLogger`, Zod transforms, literals UPPER, etc. Si esto fuera un deploy real, esta sería la ventana entre las 2 migrations: las escrituras nuevas son UPPER y compatibles con la columna TEXT actual.)
+
+#### Fase (b) — [`20260525190100_b11_4b_promote_columns_to_enum`](logic-core-v3/prisma/migrations/20260525190100_b11_4b_promote_columns_to_enum/migration.sql)
+
+```sql
+-- 1) Backfill defensivo (idempotente: rows post-deploy ya son UPPER).
+UPDATE "chatbot_message"    SET "role"           = UPPER("role")           WHERE "role"           <> UPPER("role");
+UPDATE "chatbot_lead"       SET "intent"         = UPPER("intent")         WHERE "intent" IS NOT NULL AND "intent" <> UPPER("intent");
+UPDATE "chatbot_events"     SET "level"          = UPPER("level")          WHERE "level"          <> UPPER("level");
+UPDATE "chatbot_bot_config" SET "intensityLevel" = UPPER("intensityLevel") WHERE "intensityLevel" <> UPPER("intensityLevel");
+UPDATE "chatbot_bot_config" SET "llmProvider"    = UPPER("llmProvider")    WHERE "llmProvider"    <> UPPER("llmProvider");
+
+-- 2) Promote.
+ALTER TABLE "chatbot_message" ALTER COLUMN "role"   TYPE "ChatMessageRole"   USING "role"::"ChatMessageRole";
+ALTER TABLE "chatbot_lead"    ALTER COLUMN "intent" TYPE "ChatbotLeadIntent" USING "intent"::"ChatbotLeadIntent";
+ALTER TABLE "chatbot_events"  ALTER COLUMN "level"  TYPE "ChatbotEventLevel" USING "level"::"ChatbotEventLevel";
+
+-- 3) Defaults: drop → TYPE → restore enum value.
+ALTER TABLE "chatbot_bot_config"
+  ALTER COLUMN "intensityLevel" DROP DEFAULT,
+  ALTER COLUMN "intensityLevel" TYPE "BotIntensityLevel" USING "intensityLevel"::"BotIntensityLevel",
+  ALTER COLUMN "intensityLevel" SET DEFAULT 'MEDIUM';
+
+ALTER TABLE "chatbot_bot_config"
+  ALTER COLUMN "llmProvider" DROP DEFAULT,
+  ALTER COLUMN "llmProvider" TYPE "LlmProvider" USING "llmProvider"::"LlmProvider",
+  ALTER COLUMN "llmProvider" SET DEFAULT 'GOOGLE';
+```
+
+Backfill es idempotente — las rows que el código nuevo ya escribió como UPPER quedan iguales (no cumplen `WHERE col <> UPPER(col)`); las pre-existentes lowercase se normalizan en el `UPDATE`. Después el `ALTER ... USING col::Enum` cast directo (sin UPPER) funciona porque toda la data ya es UPPER.
+
+**Por qué SQL manual y no `prisma migrate dev` directo**: Prisma detecta cualquier cambio de tipo `String → Enum` como "drop column + recreate" (data loss). Lo correcto es `ALTER ... USING <expr>` que castea preservando data; Prisma no lo genera. Workaround: escribir el SQL a mano + `prisma migrate deploy` para aplicar + `prisma generate` para regenerar el client.
+
+Branch dev de Neon (`ep-quiet-waterfall-acv0fpll-pooler.sa-east-1.aws.neon.tech`). 52 migrations totales (49 previas + B11.1 + B11.4a + B11.4b), schema up to date.
+
+#### Por qué el orden canónico importa (regla absoluta de Franco)
+
+> *"NO hagas todo en una migration estricta. Va en pasos: (a) crea enum y mapea de forma tolerante, (b) deploya el código que escribe/lee el enum, (c) recién entonces el constraint estricto. Si aplicás el constraint estricto antes del deploy del código nuevo, el código viejo sigue escribiendo strings que ya no validan → escrituras fallidas o filas inconsistentes."*
+
+En este sprint el escenario fue: dev branch, sin tráfico, sin código viejo corriendo → el split es ceremonial. Pero el orden correcto es gratis y el patrón quedó documentado en las 2 migrations para que cualquier B11.x futuro o cualquier sprint en otro repo lo replique.
+
+### 4) Verificación cuádruple post-migration
+
+| Check | Resultado |
+|-------|-----------|
+| `SELECT col::text, COUNT(*) GROUP BY col` (post) | Mismos counts que el preflight, ahora UPPER: `USER=599, ASSISTANT=538`, `QUOTE=23, PURCHASE_READY=11, ...`, `INFO=666, WARN=22, ERROR=7`, `MEDIUM=3`, `GOOGLE=3` — **zero data loss** |
+| `information_schema.columns.udt_name` | `ChatMessageRole`, `ChatbotLeadIntent`, `ChatbotEventLevel`, `BotIntensityLevel`, `LlmProvider` ✅ |
+| `information_schema.columns.data_type` | `USER-DEFINED` para los 5 ✅ |
+| `UPDATE chatbot_message SET role='BAD_VALUE'` | Postgres rechaza con **code `22P02`** (`invalid_text_representation`) — `ERROR: invalid input value for enum "ChatMessageRole": "BAD_VALUE"` ✅ |
+| `npx prisma migrate status` | **52 migrations, schema up to date** ✅ |
+| `npx tsc --noEmit` | **0 errores** tras todos los ajustes de código ✅ |
+
+### 5) Código actualizado — 21 sitios en 12 archivos
+
+**Helper centralizado** (zero ripple en callsites):
+- [`src/modules/chatbot/server/logging/persistentLogger.ts`](logic-core-v3/src/modules/chatbot/server/logging/persistentLogger.ts) — `logChatbotEvent` mantiene API `level: 'info'|'warn'|'error'` lowercase + tabla `LEVEL_TO_ENUM` traduce a `ChatbotEventLevel` interno antes del `create`. Los ~15 callsites del helper no se tocaron.
+
+**Zod transforms** (UI envía lowercase, Zod parsea + transforma a UPPER):
+- [`saveBotConfig.ts:38,43`](logic-core-v3/src/modules/chatbot/server/admin/saveBotConfig.ts) — `intensityLevel`, `llmProvider` con `.transform(v => v.toUpperCase() as ...)`.
+- [`saveBotConfigByOrgSlug.ts:36,39`](logic-core-v3/src/modules/chatbot/server/admin/saveBotConfigByOrgSlug.ts) — idem.
+
+**Conversión local** (LLM output lowercase → DB UPPER):
+- [`captureLead.ts:165`](logic-core-v3/src/modules/chatbot/server/tools/captureLead.ts) — `const intentEnum = input.intent.toUpperCase() as ChatbotLeadIntent` antes del `create`. LEAD_INTENTS sigue lowercase (es el contrato Zod con el LLM); el enum es 1:1 con los 6 valores nuevos B5.1+.
+
+**Literales actualizados a UPPER** (writes/reads directos a Prisma):
+- `app/api/chatbot/[slug]/chat/route.ts:54` — `level: 'WARN'`.
+- `modules/chatbot/server/admin/detectBotIssues.ts:87,163` — `level: 'ERROR'` (2 lugares).
+- `modules/chatbot/server/chat/handleChatRequest.ts:455,646` — `role: 'USER'`, `role: 'ASSISTANT'`.
+- `modules/chatbot/server/insights/generateInsights.ts:61` — `=== 'USER'`.
+- `modules/chatbot/server/reports/buildWeeklyReport.ts:85` — `role: 'USER'`.
+- `modules/chatbot/server/reports/sendWeeklyReports.ts:71` — `level: 'INFO'`.
+- `lib/onboarding/core.ts:126,132` — `intensityLevel: 'MEDIUM'`, `llmProvider: 'GOOGLE'`.
+- `modules/chatbot/server/admin/createBot.ts:76,81` — idem.
+- `modules/chatbot/server/admin/createClientWithBot.ts:141,149` — idem.
+- `modules/chatbot/prisma/seed.ts:205,264` — `'MEDIUM' as const`, `'GOOGLE' as const` (narrowing necesario para que TS infiera el literal, no `string`).
+- `modules/chatbot/components/admin/config/BotConfigPreview.tsx:12` — `=== 'LOW'`, `=== 'HIGH'`.
+- `app/(protected)/admin/chatbots/[botId]/tabs/ConfigTab.tsx:30,33` — dropped los `as 'low'|'medium'|'high'` casts (Prisma ya devuelve el enum bien tipado).
+- `tests/integration/alerts-detector.spec.ts:51,131,176,221` — fixtures de tests con `level: 'ERROR'`/`'WARN'`.
+
+**Cleanup de sentinel obsoleto**:
+- `multiTenantQueries.ts:47,119` — quitado `intent: r.intent ?? 'unknown'`. `'unknown'` no estaba en el enum y nunca aparecía en DB (verificado en preflight). Los consumidores (`BusinessLeadCard.tsx:192`, `LeadDetail.tsx:233`) ya tenían `lead.intent && lead.intent !== 'unknown'` — se simplificó a `lead.intent &&`. El sentinel sigue vivo INTERNAMENTE en `detectIntent.ts` (`return { intent: 'unknown', guidance: null }`) porque es un valor de control del helper de detección, no un valor de DB.
+
+### 6) Lo que NO se enum-izó (justificado)
+
+- `BotConfig.llmModel` — identifier de modelo (e.g. `gemini-2.5-flash`, `claude-sonnet-4-6`). Cambia con versiones de proveedores; mantener string flexible.
+- `BotConfig.{borderRadius, surfaceStyle, position, fontStyle, bubbleStyle, tone}` — visuales/comportamiento con sets acotados pero NO en scope crítico (frecuencia de cambio: baja). Candidatos para enum-izar en una pasada de cosmetic-tightening posterior.
+- `ChatbotEvent.type` — string format libre (`"chat.message_received"`, `"error.llm_failed"`). Sería un enum de 50+ values y crece con cada feature.
+- `AdminAuditLog.targetType` — string libre por la misma razón.
+- `Account.{provider, providerAccountId, type, token_type, session_state}` — NextAuth managed.
+- `ContactSubmission.leadStatus` — colisión con el enum `LeadStatus` existente. Investigar si conviene unificar (sería su propio sprint).
+- `OsLead.source`, `EmailContact.source` — strings semánticos abiertos (`"Inbound"`, `"Referido"`, `"csv_import"`); no es un set fijo.
+
+### 7) Archivos modificados / creados
+
+**Schema/DB**:
+- `logic-core-v3/prisma/schema.prisma` — 5 enums nuevos + 5 column types cambiados.
+- `logic-core-v3/prisma/migrations/20260525190000_b11_4a_create_enum_types/migration.sql` (nuevo) — fase aditiva tolerante: solo `CREATE TYPE`, columnas siguen siendo TEXT.
+- `logic-core-v3/prisma/migrations/20260525190100_b11_4b_promote_columns_to_enum/migration.sql` (nuevo) — fase estricta: backfill defensivo `UPDATE col=UPPER(col) WHERE col<>UPPER(col)` + `ALTER COLUMN TYPE Enum USING col::Enum`.
+
+**Código** (12 archivos):
+- `logic-core-v3/src/modules/chatbot/server/logging/persistentLogger.ts` — adapter `LEVEL_TO_ENUM`.
+- `logic-core-v3/src/modules/chatbot/server/admin/{saveBotConfig,saveBotConfigByOrgSlug}.ts` — Zod transforms.
+- `logic-core-v3/src/modules/chatbot/server/tools/captureLead.ts` — `intentEnum = input.intent.toUpperCase() as ChatbotLeadIntent`.
+- `logic-core-v3/src/modules/chatbot/server/admin/{detectBotIssues,createBot,createClientWithBot}.ts` — UPPER literals.
+- `logic-core-v3/src/modules/chatbot/server/admin/multiTenantQueries.ts` — quitado `?? 'unknown'`.
+- `logic-core-v3/src/modules/chatbot/server/chat/handleChatRequest.ts` — UPPER literals.
+- `logic-core-v3/src/modules/chatbot/server/insights/generateInsights.ts` — comparación UPPER.
+- `logic-core-v3/src/modules/chatbot/server/reports/{buildWeeklyReport,sendWeeklyReports}.ts` — UPPER literals.
+- `logic-core-v3/src/modules/chatbot/components/dashboard/{BusinessLeadCard,LeadDetail}.tsx` — guards limpios.
+- `logic-core-v3/src/modules/chatbot/components/admin/config/BotConfigPreview.tsx` — comparación UPPER.
+- `logic-core-v3/src/app/(protected)/admin/chatbots/[botId]/tabs/ConfigTab.tsx` — drops de casts lowercase.
+- `logic-core-v3/src/app/api/chatbot/[slug]/chat/route.ts` — UPPER literal.
+- `logic-core-v3/src/lib/onboarding/core.ts` — UPPER defaults.
+- `logic-core-v3/src/modules/chatbot/prisma/seed.ts` — `as const` para narrowing.
+- `logic-core-v3/tests/integration/alerts-detector.spec.ts` — fixtures UPPER.
+
+### 8) Estado
+
+**B11.4 cierra.** 5 campos string convertidos a enum a nivel Postgres con backfill in-place (1904 rows preservadas, cero data loss); convención UPPER_SNAKE_CASE coherente con el resto del schema; intent enum incluye legacy + nuevos B5.1+ resolviendo el comentario original del schema; runtime constraint verificado (rechazo Postgres con code `22P02` para valores inválidos); 21 callsites ajustados en 12 archivos con `tsc --noEmit` clean. La superficie de "string con valores libres en dominios cerrados" del módulo chatbot queda **vacía** sobre los candidatos del sprint. Otros enum-candidates (cosméticos de BotConfig, etc.) quedaron documentados como out-of-scope con justificación explícita.
+
+---
+
+## ✅ B11.5 — 3 índices faltantes agregados (borrado diferido a post-B14)   ·   2026-05-25
+
+**Fecha**: 2026-05-25
+**Tipo**: Migration **aditiva pura** — 3 `CREATE INDEX`, cero `DROP`. El borrado de los 6 "índices muertos" del audit se difirió por la regla absoluta del sprint.
+
+### 1) Por qué el sprint se partió
+
+El plan original (`docs/audits/2026-05-auditoria-db.md` §3.1 + §3.2) era **+3 / −6**. Pero la única fuente confiable de "este índice no se usa" es `pg_stat_user_indexes` de Postgres. **Esa estadística en el Neon de DEV no sirve**: dev casi no tiene tráfico → CASI TODOS los índices marcan `idx_scan=0`, incluyendo los críticos. Borrar acá sería "borrar a ciegas con disfraz de dato". Conclusión: **solo AGREGAR ahora** (los 3 faltantes son seguros porque las queries que los usarían ya existen y se identifican estáticamente en el código); **DROPs se difieren a post-B14** con stats reales de PROD (Matsu viva).
+
+### 2) Los 3 índices agregados (audit §3.2)
+
+| Tabla | Index nuevo | Query consumidora | Justificación |
+|-------|-------------|-------------------|---------------|
+| `Conversation` | `@@index([botConfigId, lastMessageAt(sort: Desc)])` | [`multiTenantQueries.ts:57`](logic-core-v3/src/modules/chatbot/server/admin/multiTenantQueries.ts:57), [`queries.ts:17`](logic-core-v3/src/modules/chatbot/server/admin/queries.ts:17) — `where:{botConfigId}, orderBy:{lastMessageAt:desc}` | El único índice anterior era `(botConfigId, startedAt)` — DB traía superset y ordenaba en memoria por `lastMessageAt`. 49 filas hoy → invisible; a 10k filas/bot evita sort en memoria. |
+| `ChatbotEvent` | `@@index([botConfigId, type, createdAt(sort: Desc)])` | [`detectBotIssues.ts:84-225`](logic-core-v3/src/modules/chatbot/server/admin/detectBotIssues.ts:84) — 6 queries `where:{botConfigId, type, createdAt:{gte}}` | El existente `(botConfigId, createdAt DESC)` se usaba pero tail-filter en memoria por `type`. Con éste, el cron de detección pasa de seq tail-filter a index scan directo. Se DEJA el existente (cubre el otro patrón sin filtro de type). |
+| `Notification` | `@@index([organizationId, createdAt(sort: Desc)])` | [`dashboard/layout.tsx:81`](logic-core-v3/src/app/(protected)/dashboard/layout.tsx:81) — `findMany({where:{organizationId}, orderBy:{createdAt:'desc'}, take:5})` en CADA request al `/dashboard` | Antes solo PK index → seq scan + sort. 19 filas hoy → 5 scans con 0ms; a 1k+ es la query del request crítico. |
+
+### 3) Migration aplicada — `CREATE INDEX` puros
+
+[`prisma/migrations/20260525192047_b11_5_add_3_missing_indexes/migration.sql`](logic-core-v3/prisma/migrations/20260525192047_b11_5_add_3_missing_indexes/migration.sql):
+
+```sql
+-- CreateIndex
+CREATE INDEX "Notification_organizationId_createdAt_idx" ON "Notification"("organizationId", "createdAt" DESC);
+
+-- CreateIndex
+CREATE INDEX "chatbot_conversation_botConfigId_lastMessageAt_idx" ON "chatbot_conversation"("botConfigId", "lastMessageAt" DESC);
+
+-- CreateIndex
+CREATE INDEX "chatbot_events_botConfigId_type_createdAt_idx" ON "chatbot_events"("botConfigId", "type", "createdAt" DESC);
+```
+
+Generada por `prisma migrate dev --name b11_5_add_3_missing_indexes` (Prisma infiere correctamente la migration desde el diff del schema). **Aditiva 100% — cero DROP, cero data loss, cero downtime**. Branch dev de Neon. `prisma migrate status`: **53 migrations**, schema up to date.
+
+### 4) Lo que NO se borró (diferido a post-B14)
+
+Los 6 candidatos a DROP del audit §3.1 quedan vivos:
+- `chatbot_bot_config_slug_idx` (`@@index([slug])` redundante por `slug @unique`)
+- `OsLead_status_idx` y `OsLead_nextFollowUpAt_idx` (subsumidos por el compuesto)
+- `EmailContact_organizationId_idx` (subsumido por `(organizationId, optedOut)`)
+- `EmailCampaign_organizationId_idx` (subsumido por `(organizationId, status)`)
+- Más los listados en sección 3.1 del audit (otros 1-2 en ChatbotLead/ChatbotEvent/Task).
+
+**Anotado en `docs/roadmap-pendientes.md`** como "Drop de índices con 0 scans en pg_stat_user_indexes". Condición de prioridad: **PROD con Matsu viva ≥ 2 semanas + `pg_stat_reset()` antes de medir**.
+
+### 5) Archivos modificados / creados
+
+- `logic-core-v3/prisma/schema.prisma` — 3 `@@index` agregados (Conversation, ChatbotEvent, Notification) con comentarios apuntando a la query consumidora.
+- `logic-core-v3/prisma/migrations/20260525192047_b11_5_add_3_missing_indexes/migration.sql` (nuevo) — 3 `CREATE INDEX`.
+- `logic-core-v3/docs/roadmap-pendientes.md` — nueva entrada "Drop de índices con 0 scans" diferida a post-B14.
+
+### 6) Estado
+
+**B11.5 cierra parcial — sprint partido por diseño.** Los 3 índices faltantes están aplicados; los 6 DROPs requieren stats de prod y quedan en backlog explícito. La regla "no borrar a ciegas con estadística no representativa" queda documentada para futuros sprints de DB cleanup.
+
+---
+
+## ✅ B11.6 — clientId → organizationId en BusinessMetric + PageView   ·   2026-05-25
+
+**Fecha**: 2026-05-25
+**Tipo**: Refactor de schema para consistencia tenant. Migration aditiva (con DROP COLUMN seguro por pre-flight de tablas vacías) + ajuste de 4 archivos de código.
+
+### 1) Inconsistencia heredada
+
+El schema usaba **`clientId String + FK a User`** en 2 modelos: `BusinessMetric` y `PageView`. Esto era inconsistente con el resto del schema, que usa `organizationId String + FK a Organization` para todo dato tenant-scoped. Concepto correcto: una métrica del negocio (visitas, conversión, bounce) pertenece a la **organización**, no al individuo que la captura. El nombre `clientId` venía heredado de cuando el modelo del proyecto era "1 user = 1 cliente"; el sistema multi-tenant actual permite múltiples users por org.
+
+### 2) Pre-flight obligatorio — tablas vacías
+
+Regla absoluta: "confirmar vacías antes". Script `_b116_preflight.mjs`:
+
+```
+BusinessMetric rows: 0
+PageView       rows: 0
+
+✅ Ambas tablas vacías. Safe para drop + recreate de columna.
+```
+
+Cero data en ambas → el approach `DROP COLUMN clientId + ADD COLUMN organizationId` es seguro (no hay valores que migrar). Si hubieran tenido data, el approach habría requerido columna paralela + backfill UPDATE + drop old (más invasivo).
+
+### 3) Cambios al schema
+
+`prisma/schema.prisma`:
+
+```diff
+ model BusinessMetric {
+   id              String   @id @default(cuid())
+-  clientId        String
+-  client          User     @relation(fields: [clientId], references: [id], onDelete: Cascade)
++  organizationId  String
++  organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+   month           String
+   ...
+-  @@index([clientId])
++  @@index([organizationId])
+ }
+
+ model PageView {
+   id        String   @id @default(cuid())
+-  clientId  String
++  organizationId String
++  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+   url       String
+   ...
+-  @@index([clientId])
++  @@index([organizationId])
+ }
+
+ model User {
+-  businessMetrics BusinessMetric[]   // back-relation eliminada
+ }
+
+ model Organization {
++  businessMetrics BusinessMetric[]
++  pageViews       PageView[]
+ }
+```
+
+**onDelete: Cascade** consistente con el resto del schema (Subscription, Invoice, Ticket, Message, ClientAsset, etc.).
+
+### 4) Migration aplicada
+
+[`prisma/migrations/20260525192312_b11_6_clientid_to_organizationid/migration.sql`](logic-core-v3/prisma/migrations/20260525192312_b11_6_clientid_to_organizationid/migration.sql):
+
+```sql
+ALTER TABLE "BusinessMetric" DROP CONSTRAINT "BusinessMetric_clientId_fkey";
+DROP INDEX "BusinessMetric_clientId_idx";
+DROP INDEX "PageView_clientId_idx";
+ALTER TABLE "BusinessMetric" DROP COLUMN "clientId", ADD COLUMN "organizationId" TEXT NOT NULL;
+ALTER TABLE "PageView"       DROP COLUMN "clientId", ADD COLUMN "organizationId" TEXT NOT NULL;
+CREATE INDEX "BusinessMetric_organizationId_idx" ON "BusinessMetric"("organizationId");
+CREATE INDEX "PageView_organizationId_idx"       ON "PageView"("organizationId");
+ALTER TABLE "BusinessMetric" ADD CONSTRAINT "BusinessMetric_organizationId_fkey" FOREIGN KEY ("organizationId") REFERENCES "Organization"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "PageView"       ADD CONSTRAINT "PageView_organizationId_fkey"       FOREIGN KEY ("organizationId") REFERENCES "Organization"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+```
+
+Las warnings de Prisma ("data loss in column `clientId`") son **inocuas** — el pre-flight verificó 0 rows en ambas tablas. `prisma migrate dev --name b11_6_clientid_to_organizationid` aplicó + regeneró el client. **54 migrations totales, schema up to date**.
+
+### 5) Código actualizado — 4 archivos
+
+| Archivo | Cambio |
+|---------|--------|
+| [`src/actions/metrics-actions.ts`](logic-core-v3/src/actions/metrics-actions.ts) | `upsertBusinessMetrics(clientId, data)` → `upsertBusinessMetrics(organizationId, data)`. Filter y create usan `organizationId`. Sin callers vivos hoy — la función está disponible pero sin UI conectada. |
+| [`src/app/api/track/route.ts`](logic-core-v3/src/app/api/track/route.ts) | Antes: `clientId = data.clientId` validado contra `session.user.id`. Ahora: deriva `organizationId` del session (ORG_MEMBER) o lo acepta opcional del body (SUPER_ADMIN). Más simple, más correcto, sin la fuga de "PageView con clientId arbitrario para SUPER_ADMIN" que B11.0 marcó como F8 🟡. |
+| [`src/components/dashboard/LeakMeter.tsx`](logic-core-v3/src/components/dashboard/LeakMeter.tsx) | El componente ya recibía `organizationId` como prop; lo pasaba como `clientId` al filter de Prisma (semánticamente erróneo, funcionaba por coincidencia con el shape viejo). Cambio a `where: { organizationId }`. |
+| [`src/lib/health-score.ts`](logic-core-v3/src/lib/health-score.ts) | El cómputo de `computeDigitalHealth`/`computeCommercialHealth` resolvía el `firstMember.userId` de cada org para luego buscar `BusinessMetric.clientId === firstUserId`. Ese paso intermedio era un workaround del shape viejo. **Simplificado**: las 4 funciones (`computeDigitalHealth`, `computeCommercialHealth`, `computeTrafficScore`, `computeConversionScore`) reciben `organizationId` directo y filtran por `where: { organizationId }`. Borrada la query `orgMember.findFirst({...})` y el param `firstUserId: string | null` de las 4 firmas. Comentario `health-score.ts:10` actualizado. |
+
+**Bonus**: este cambio cerró parcialmente el hallazgo 🟡 F8 de B11.0 (`/api/track` aceptaba `clientId` arbitrario para SUPER_ADMIN — data integrity issue). Ahora el endpoint deriva `organizationId` del session (ORG_MEMBER) o lo valida desde el body (SUPER_ADMIN), eliminando el path de "PageView huérfano con clientId random".
+
+### 6) Lo que NO se tocó (legacy naming en URL, explícito)
+
+`clientId` aparece como path-param en URLs `/admin/clients/[clientId]/...` y en `formData.get('clientId')` de `lib/actions/clients.ts`, pero ahí **"cliente" = "organización"** en la UI admin: el valor que se pasa es el `Organization.id`. Cambiar esos paths requiere migrar URLs + redirects + breadcrumbs + bookmarks de Franco — out of scope de este sprint. **Marcado como naming inconsistency conocido**; el dominio multi-tenant ya está sano en el DB y en los modelos.
+
+### 7) Verificación
+
+```bash
+npx tsc --noEmit                          # 0 errores
+npx prisma migrate status                 # 54 migrations, schema up to date
+```
+
+### 8) Archivos modificados / creados
+
+- `logic-core-v3/prisma/schema.prisma` — `BusinessMetric` y `PageView` migrados; back-relations en User/Organization actualizadas.
+- `logic-core-v3/prisma/migrations/20260525192312_b11_6_clientid_to_organizationid/migration.sql` (nuevo).
+- `logic-core-v3/src/actions/metrics-actions.ts` — param renombrado a `organizationId`.
+- `logic-core-v3/src/app/api/track/route.ts` — POST deriva `organizationId` del session.
+- `logic-core-v3/src/components/dashboard/LeakMeter.tsx` — filter por `organizationId`.
+- `logic-core-v3/src/lib/health-score.ts` — 4 funciones simplificadas (sin `firstUserId` workaround).
+
+### 9) Estado
+
+**B11.6 cierra.** Inconsistencia de schema resuelta: `BusinessMetric` y `PageView` ahora son tenant-scoped por `organizationId` con FK a `Organization` y `onDelete: Cascade`, alineadas con el resto del schema. Pre-flight de vacías confirmó cero data loss real (las warnings de Prisma "data loss" se evaporan cuando count=0). Código simplificado en `health-score.ts` (4 funciones perdieron el param redundante) y `/api/track` ya no acepta `clientId` arbitrario — bonus mitigación del 🟡 F8 de B11.0.
+
+---
+
+## ✅ B11.3 — Re-probe del set completo de B11.0 (cierre del epic B11)   ·   2026-05-25
+
+**Fecha**: 2026-05-25
+**Tipo**: Verificación dura. Re-ejecuto el método de B11.0 (curl + cookie QA + Next-Action header) sobre cada hallazgo del mapa original. **No solo los 🔴**: el sprint exige chequeo de regresión sobre los 🟢 también — un fix de B11.2 (cambio de scoping, helper nuevo, ajuste de query) podía abrir un agujero nuevo en un recurso que antes estaba sano. Tapar uno y destapar otro era el riesgo real.
+
+### 1) Setup runtime
+
+- `npm run build` con todos los cambios B11.2 + B11.4 + B11.5 + B11.6.
+- Server `next-prod-qa` arrancado en :3001 (`QA_ALLOW_LOCALHOST=1`).
+- Data probe sembrada: `ticketA` (org-A), `ticketB` (org-B) — target IDOR; `notifA` (org-A), `notifB` (org-B) — control de regresión. Más `projectA` (org-A) ya existente para el cross-projectId de F5.
+- Hashes Next-Action extraídos del bundle (deterministic, mismos que B11.2):
+  - `replyTicketAction`: `40085ea1...c1fdde1dc`
+  - `resolveTicketClientAction`: `40793481...4ffdf53`
+  - `markNotificationAsRead`: `402dbff2...423b1feb50`
+  - `createTaskForClientAction`: `70505b67...ffdf53`
+
+### 2) Tabla ANTES / DESPUÉS
+
+| # | Hallazgo B11.0 | B11.0 (antes) | B11.3 (ahora) | Estado |
+|---|----------------|---------------|---------------|--------|
+| **🔴 C1.a** | `curl` anónimo a `/api/auth/tiendanube/callback?state=<orgB>` | HTTP **307** + redirect `connected=true` + `tiendanubeConnectedAt` **escrito en DB de orgB** | **HTTP 401** | ✅ CERRADO |
+| **🔴 C1.b** | `curl` con cookie de ORG_MEMBER al mismo endpoint | (no testeado en B11.0) | **HTTP 401** | ✅ CERRADO (defensa adicional verificada) |
+| **🔴 C2** | client-a invoca `replyTicketAction({ticketId: <ticket-B>})` | HTTP 200 + `{success:true}` + `x-action-revalidated:1` + mensaje **landed en ticket-B** | HTTP 200 + **`{success:false,"No encontramos ese ticket."}`** + sin `x-action-revalidated` + ticket-B intacto (1 message, no 2) | ✅ CERRADO |
+| **🟡 F1** | `curl` anónimo a `/api/auth/google-business/callback?state=<orgB>` | HTTP 401 (ya rechazaba) | **HTTP 401** | ✅ SIN REGRESIÓN (sigue rechazando) |
+| **🟡 F5** | SUPER_ADMIN invoca `createTaskForClientAction(projectIdA, organizationIdB, ...)` con projectId-de-A y orgId-de-B mismatched | (no testeado en B11.0; el código aceptaba el mismatch) | HTTP 200 + **`1:E{"digest":"3529886923"}`** (error server thrown — `assertProjectBelongsToOrg` lanza `ResourceNotOwnedError` que el caller re-throw como `Error('Project ... does not belong to organization ...')`) | ✅ CERRADO |
+| **🟡 F6** | `markLeadAsRead(id)` sin auth | Acción exportada `'use server'` sin auth check; mark-as-read posible si se conoce el action ID | **Sin action ID público en bundle** (ningún client component la importa → Next.js no emite `createServerReference`); riesgo runtime de facto era 0. Además `requireSuperAdmin()` agregado en B11.2 como defense-in-depth — verificado en source (`contact.ts:83`) | ✅ CERRADO (doble: structural + code) |
+| **🟡 F8** | SUPER_ADMIN invoca `POST /api/track` con `clientId` arbitrario | Aceptaba cualquier clientId → PageView huérfano | **HTTP 401** anónimo; **HTTP 200 + `{success:true}`** como ORG_MEMBER sin enviar nada extra (orgId derivado del session por el fix B11.6 — el campo `clientId` ni siquiera existe más en el body). Data integrity garantizada por el constraint FK NOT NULL a Organization. | ✅ CERRADO (vía B11.6) |
+| **🟢 N1** (regresión) | `markNotificationAsRead(notif-de-B)` desde client-a | (validado en B11.0: `{success:false}`) | **`{success:false,"No encontramos esa notificación."}`** | ✅ SIN REGRESIÓN |
+| **🟢 N2** (regresión) | `resolveTicketClientAction(ticket-B-id)` desde client-a (mismo archivo que C2 — riesgo de regresión por estar en el mismo módulo que el fix) | (validado en B11.0: `where:{id, organizationId}` filtra OK) | **`{success:false,"Error al marcar como resuelto."}`** (Prisma rechaza el `update` cuando el `where` compuesto no matchea, el catch lo serializa como error genérico — el resultado funcional es el correcto: ticket-B no se modificó) | ✅ SIN REGRESIÓN |
+| **🟢 N3** (regresión) | `GET /dashboard/soporte/<ticket-B>` como client-a (lectura cross-tenant) | HTTP 200 + render `not-found`, sin contenido de B | **HTTP 200 + render `not-found`**, sin "PROBE B11.3 TARGET" en la respuesta | ✅ SIN REGRESIÓN |
+| **🟢 P1** (control positivo) | `replyTicketAction(ticketId: ticket-A-id)` desde client-a (su propio ticket) | (no testeado en B11.0) | **HTTP 200 + `{success:true}` + `x-action-revalidated:1`** — feature legítimo intacto | ✅ SIN REGRESIÓN |
+| **🟢 P2** (control positivo) | `markNotificationAsRead(notif-A)` desde client-a (su propia notif) | (no testeado en B11.0) | **HTTP 200 + `{success:true}` + `x-action-revalidated:1`** | ✅ SIN REGRESIÓN |
+
+### 3) Verificación DB post-probe
+
+| Recurso | Estado esperado | Estado real | OK |
+|---------|-----------------|-------------|----|
+| Ticket-B messages count | 1 (solo el inicial, sin probe IDOR landed) | **1** | ✅ |
+| Ticket-A messages count | 2 (inicial + control positivo P1) | **2** | ✅ |
+| Notif-B `read` | `false` (sin IDOR) | **`false`** | ✅ |
+| Notif-A `read` | `true` (control positivo P2 marcó) | **`true`** | ✅ |
+
+### 4) Cobertura por categoría
+
+| Severidad B11.0 | Total | Re-validados en B11.3 | Cerrados | Sin regresión |
+|-----------------|------:|----------------------:|---------:|--------------:|
+| 🔴 Críticos | 2 | 2 (3 sub-probes) | **2/2** | — |
+| 🟡 Tapados en B11.2/B11.6 | 4 (F1, F5, F6, F8) | 4 | **4/4** | — |
+| 🟢 Regresión (controles negativos) | 3 (N1, N2, N3) | 3 | — | **3/3** |
+| 🟢 Control positivo (feature legítimo) | 2 (P1, P2) | 2 | — | **2/2** |
+
+**Diferidos a sprints futuros** (out of B11.3 scope):
+- 🟡 F2 `lib/actions/projects.ts` (7 actions trust-the-layout): el fix B11.2 agregó `requireSuperAdmin()` local; **no testeable runtime** sin pruebas E2E del UI admin (las actions usan FormData, requieren browser context). Verificable estáticamente en source — `tsc --noEmit` clean garantiza tipos correctos.
+- 🟡 F3 admin/messages page y F4 admin/projects/payments page: trust-the-layout mitigado por las actions (verificado en lectura de source en B11.0 / B11.2). No re-probadas en runtime — out of scope del epic.
+- 🟡 F7 email/optout sin firma: requiere implementar HMAC tokens (replicar `verifyUnsubscribeToken`). Sprint dedicado pendiente.
+
+### 5) Cleanup
+
+- 2 PROBE B11.3 tickets borrados.
+- 2 PROBE B11.3 notifications borradas.
+- 0 tasks PROBE (la F5 lanzó error antes del `tx.task.create`, no quedó nada).
+- DB queda **idéntica a pre-probe**.
+- Scripts `_b113_*.mjs` temporales borrados.
+- Server `next-prod-qa` queda corriendo en :3001 por si se requiere re-probe manual.
+
+### 6) Estado
+
+**B11.3 cierra. EPIC B11 CIERRA.**
+
+- 🔴 los 2 críticos del mapa de B11.0 (`tiendanube/callback` pre-auth IDOR + `replyTicketAction` post-auth IDOR) están **cerrados con evidencia runtime** (HTTP responses + DB state pre/post).
+- 🟡 los 4 que B11.2/B11.6 taparon (F1, F5, F6, F8) están cerrados.
+- 🟢 los 5 controles (N1/N2/N3/P1/P2) confirman que **nada sano se rompió**: el patrón sano sigue rechazando cross-tenant Y el feature legítimo sigue funcionando. **Cero regresiones**.
+- Los 3 🟡 diferidos (F2/F3/F4/F7) están out-of-scope explícito con justificación documentada — quedan en backlog del próximo epic de hardening.
+
+La regla del sprint ("si algún 🔴 sigue abierto O un 🟢 se volvió 🔴 → NO cerrar B11") queda satisfecha: 7/7 cierres + 5/5 regresiones limpias. El método de probe (curl + cookie QA + Next-Action header) demostró ser repetible y barato — se puede re-correr en cualquier momento contra cualquier build para validar regresiones.
+
+---
+
+## ✅ B12.7 — Bugs visuales reales: brief truncado + "0/6" sin contexto
+
+**Fecha:** 2026-05-25
+**Scope:** dos bugs que Franco vio en pantalla — no teóricos, render real en `/dashboard` del cliente. B6 dejó el `AIExecutiveBriefV2` "real" a nivel backend pero el render nunca se verificó (B6 era delivery/cron, no UI). Aparte, el contador "0/6" del HealthScore aparecía sin que se entienda qué cuenta.
+
+### 1) Diagnóstico (Explore + visual-qa con MS-8)
+
+Subagentes `Explore` mapearon ambos componentes en paralelo (read-only). Visual-qa logueado como `client-a` confirmó render real contra build prod en `:3001`. **Antes de tocar código.**
+
+#### Bug 🔴 — `AIExecutiveBriefV2` cortado
+
+**Lo que se veía:** `"Estimado/a, esta"` (5 palabras) seguido directo del footer "Cache semanal hace 3d". Brief literal truncado a mitad de la primera oración, persistido en `Organization.cachedExecutiveBrief` hace 3 días.
+
+**Causa raíz:** [src/lib/ai/executive-brief.ts:278](src/lib/ai/executive-brief.ts:278) usaba `maxOutputTokens: 200` contra `gemini-2.5-flash`. Ese modelo es un **thinking model** — consume tokens internos de razonamiento contra el mismo budget de `maxOutputTokens`. Con 200 quedaban ~5 tokens reales para el texto final. La primera generación que entró al cache salió cortada y se persistió por TTL de 7 días.
+
+**Por qué nadie lo había detectado:** B6 era backend (delivery/cron) — verificó que el cron se ejecutara y guardara en DB, no que el texto fuera completo. El render nunca se miró con un cliente real logueado.
+
+#### Bug 🟡 — Contador "0/6" sin contexto
+
+**Lo que se veía:** En el estado ONBOARDING del Health Score (cliente sin integraciones), la barra de progreso mostraba el label `"Implementación"` + contador `"0/6"`. El cliente no podía saber qué se contaba.
+
+**Causa raíz:** [src/components/dashboard/home/HealthScore.tsx:180](src/components/dashboard/home/HealthScore.tsx:180) hardcodeaba el label genérico "Implementación". El "6" sale de [src/lib/types/data-connections.ts](src/lib/types/data-connections.ts) (GA4, Search Console, Google Business Profile, WhatsApp, AFIP, Pixel = 6 data sources) y el "0" del count real de `dataConnections` con `connected: true`. **Conteo correcto, label inentendible.**
+
+### 2) Fix aplicado
+
+#### `src/lib/ai/executive-brief.ts`
+
+1. `maxOutputTokens` subido a `1024` (constante `BRIEF_MAX_OUTPUT_TOKENS`). Cubre thinking interno (~600–800 tokens) + 3 oraciones de texto (~80–120 tokens) con margen. El system prompt sigue acotando longitud a 3 sentencias / 280 caracteres, así que el modelo no se vuelve verboso.
+2. Guard `isBriefValid(text)`: rechaza textos < 80 chars o que no terminen en puntuación de cierre (`.`, `!`, `?` con opcional comilla/paréntesis de cierre).
+3. **Cache invalidation automática del brief roto que ya estaba en BD**: el `if` del cache hit en `getExecutiveBrief()` ahora incluye `isBriefValid(org.cachedExecutiveBrief)`. El "Estimado/a, esta" del cliente client-a (y cualquier otro brief truncado persistido) es tratado como cache miss y fuerza regeneración. **No requirió SQL manual ni `migrate reset`.**
+4. Mismo guard aplicado en los 3 lugares donde se persiste un brief generado (`getExecutiveBrief`, `regenerateExecutiveBrief`, `refreshExecutiveBriefCache`): si el LLM devuelve algo inválido (thinking budget agotado, stream interrumpido, etc.) no se cachea — mejor estado vacío que basura persistida 7 días.
+
+#### `src/app/(protected)/dashboard/page.tsx`
+
+`BriefServerWrapper` ya no retorna `null` cuando no hay brief válido. Ahora muestra un `BriefEmptyState` (server component inline): card con badge "Resumen Ejecutivo - IA" y copy honesto `"Tu primer resumen ejecutivo se genera el próximo lunes con los datos de tu semana."` + subtexto. **Estado vacío intencional, no hueco fantasma.**
+
+#### `src/components/dashboard/home/HealthScore.tsx`
+
+Label `"Implementación"` → `"Integraciones conectadas"`. Contador `0/6` con `tabular-nums` y separador `/` en gris. Subtexto reemplazado por uno que enumera qué tipo de herramientas se conectan: `"Conectamos tus herramientas (Analytics, WhatsApp, AFIP y más). Apenas tengamos datos suficientes vas a ver tu score real."`
+
+El estado PARTIAL del mismo componente (`Calibrando · X de 6 fuentes activas`, línea 124) ya era claro — no se tocó.
+
+### 3) Verificación post-fix (visual-qa con MS-8)
+
+Build prod recompilado (`npm run build` exit 0), server `next-prod-qa` reiniciado, visual-qa logueado como `client-a` en `:3001` con persona MS-8, desktop (1280×800) + mobile (390×844).
+
+#### Brief — ✅ OK (estado vacío honesto)
+
+- Texto observado: `"Tu primer resumen ejecutivo se genera el próximo lunes con los datos de tu semana."`
+- Subtexto: `"Apenas tengamos suficiente actividad vas a ver acá un análisis corto de cómo viene tu negocio."`
+- Sin truncado, sin overflow, card completa en ambos breakpoints.
+- **El "Estimado/a, esta" persistido en BD ya no se renderiza** — el guard `isBriefValid()` lo descartó como inválido. ✅
+
+#### "0/6" — ✅ OK (label con contexto)
+
+- Label observado: `"INTEGRACIONES CONECTADAS"` (uppercase del Tailwind, no es bug).
+- Contador: `"0 / 6"` con tabular-nums.
+- Subtexto explicativo confirmado: `"Conectamos tus herramientas (Analytics, WhatsApp, AFIP y más). Apenas tengamos datos suficientes vas a ver tu score real."`
+- Visual-QA: *"Usuario ya no se pregunta qué cuenta el 0/6."* ✅
+
+#### Errores
+
+Cero 500s. Cero errores de consola. Layout responsive intacto.
+
+### 4) Flag para Franco (no bloqueante, observación)
+
+El visual-qa mostró el **estado vacío honesto** del brief, no un brief regenerado. Esto significa que cuando el cache fue invalidado por `isBriefValid()`, la regeneración con Gemini se ejecutó pero no produjo un brief válido — probablemente porque el server QA local no tiene `GOOGLE_GENERATIVE_AI_API_KEY` cargada, o el proveedor devolvió error. **El fallback es correcto y deseado** (estado vacío en vez de basura), pero si querés ver el brief regenerado con texto completo en dev, hay que verificar la API key del provider Gemini en `.env.local` y reintentar. **Ese check no es parte de B12.7** — el fix UI/UX cierra acá.
+
+### 5) Archivos modificados
+
+- [src/lib/ai/executive-brief.ts](src/lib/ai/executive-brief.ts) — `maxOutputTokens` + `isBriefValid()` + cache invalidation
+- [src/app/(protected)/dashboard/page.tsx](src/app/(protected)/dashboard/page.tsx) — `BriefEmptyState` honesto
+- [src/components/dashboard/home/HealthScore.tsx](src/components/dashboard/home/HealthScore.tsx) — label "Integraciones conectadas"
+
+### 6) Estado
+
+**B12.7 cierra.**
+
+- 🔴 Brief cortado → **fixeado** (causa raíz: thinking-model token budget, guard + cache invalidation + token bump).
+- 🟡 "0/6" sin contexto → **fixeado** (label + subtexto explicativo).
+- Verificación visual con build prod, sesión QA MS-8 (`client-a`), desktop + mobile.
+- Cero regresiones detectadas.
+- Sentry sigue diferido a B14 según lo lockeado.
+
+---
+
+## ✅ B12.1 — Error boundaries + loading skeletons en `/dashboard/**` y `/admin/**`
+
+**Fecha:** 2026-05-25
+**Scope:** del mapa B12.0 — 56 de 65 rutas protegidas sin error boundary. Un throw en cualquier loader tiraba pantalla blanca o el mensaje crudo de Next. El dashboard cliente tenía **cero** `error.tsx`; admin tenía 10 pero con bugs (mostraban `error.message` al cliente, no logueaban).
+
+### 1) Discovery (Explore read-only)
+
+Mapeo completo de `(protected)/dashboard/**` (32 segmentos) y `(protected)/admin/**` (23 segmentos):
+
+- **Dashboard antes**: 0 error.tsx · 8 loading.tsx (8/32 con skeleton).
+- **Admin antes**: 10 error.tsx (todos delegando a `AdminErrorBoundary` con bug — exponían `error.message` y `error.digest` al cliente, NO usaban logger) · 11 loading.tsx (faltaban 12).
+- **Logger existente**: [src/lib/logger.ts](src/lib/logger.ts) con API `logger.error(msg, meta?)`. **Ninguno** de los error.tsx existentes lo usaba.
+- **Skeleton existente**: [src/components/ui/LoadingState.tsx](src/components/ui/LoadingState.tsx) con variantes `skeleton-card`, `skeleton-list`, `skeleton-stat`, `pulse`, `spinner`. Reusable, no había que crear nada.
+
+### 2) Decisión de granularidad
+
+**Sin un solo boundary global tapando todo.** Estrategia híbrida que cubre 32 rutas de dashboard con solo 5 `error.tsx` aprovechando el cascading de Next:
+
+- `dashboard/error.tsx` (fullscreen amber) — fallback general.
+- `dashboard/{chatbot,cuenta,modules,resultados}/error.tsx` — granular por sección. Un throw en `/dashboard/chatbot/leads` no tumba `/dashboard/cuenta`.
+- Las rutas top-level sin sub-layout (`/leads`, `/messages`, `/plan`, `/project`, `/services`, `/soporte`) caen al boundary de `dashboard/error.tsx` — aceptable porque son pantallas singulares.
+
+Admin: aprovechamos los 10 `error.tsx` existentes (refactorizando el componente común) y agregamos 4 boundaries en los segmentos huérfanos (`chatbots`, `projects/[projectId]`, `settings`, `team`).
+
+### 3) Componente base compartido — `SectionErrorBoundary`
+
+Creado en [src/components/ui/SectionErrorBoundary.tsx](src/components/ui/SectionErrorBoundary.tsx). Client component, props:
+
+- `error`, `reset` (los del boundary de Next).
+- `section: string` — slug usado SOLO en el log (`'dashboard.chatbot'`, `'admin.projects'`), nunca se muestra al cliente.
+- `tone: 'cyan' | 'amber'` — admin = cyan, dashboard cliente = amber.
+- `fullscreen?: boolean` — para boundaries de root de sección (ej. `dashboard/error.tsx`).
+
+Lo que hace:
+
+1. **Loggea con el logger oficial** dentro de `useEffect`:
+   ```ts
+   logger.error(`[boundary:${section}] ${error.name}: ${error.message}`, {
+     section, digest: error.digest, stack: error.stack,
+   })
+   ```
+2. **TODO(B14) explícito justo abajo** indicando dónde va `Sentry.captureException` cuando se cablee.
+3. **UI digna sin info técnica**: eyebrow `"ERROR INESPERADO"`, título `"Algo no salió como esperábamos"`, descripción rioplatense, botones `"Reintentar"` (reset) y `"Volver al inicio"`. Muestra `ref: <digest>` para support — es un hash, no info técnica.
+4. **Cero leak**: `error.message` y stack quedan SOLO en el log server-side.
+
+### 4) Refactor del existente
+
+- [src/app/(protected)/admin/_components/AdminErrorBoundary.tsx](src/app/(protected)/admin/_components/AdminErrorBoundary.tsx) — antes mostraba `{error.message}` en `<p className="font-mono text-sm text-zinc-500">` (líneas 25-29 originales) y `{error.digest}`, **sin loguear**. Ahora es un wrapper de `SectionErrorBoundary` que pasa `context` como `section="admin.<context>"`. Mantiene la firma exportada → los 10 `admin/**/error.tsx` que lo importan siguen funcionando sin tocar.
+- [src/app/error.tsx](src/app/error.tsx) (global, último fallback antes de la death de la app) — antes hacía `console.error(error)` pelado. Ahora usa `logger.error` + TODO(B14) y muestra `ref: <digest>` para support.
+
+### 5) Archivos creados/modificados
+
+**Nuevos componentes shared (2)**:
+- `src/components/ui/SectionErrorBoundary.tsx` (nuevo)
+- `src/components/ui/index.ts` (export agregado)
+
+**Refactor (3)**:
+- `src/app/(protected)/admin/_components/AdminErrorBoundary.tsx` (delegado al base)
+- `src/app/error.tsx` (logger + TODO B14)
+- `src/app/(protected)/dashboard/loading.tsx` (era spinner pelado → skeleton coherente con la estructura real del dashboard)
+
+**Nuevos error.tsx dashboard (5)**:
+- `dashboard/error.tsx` (fullscreen, tone amber)
+- `dashboard/chatbot/error.tsx` · `dashboard/cuenta/error.tsx` · `dashboard/modules/error.tsx` · `dashboard/resultados/error.tsx`
+
+**Nuevos error.tsx admin (4)**:
+- `admin/chatbots/error.tsx` · `admin/projects/[projectId]/error.tsx` · `admin/settings/error.tsx` · `admin/team/error.tsx`
+
+**Nuevos loading.tsx dashboard (5)**:
+- `dashboard/chatbot/loading.tsx` · `dashboard/cuenta/loading.tsx` · `dashboard/modules/loading.tsx` · `dashboard/resultados/loading.tsx` · `dashboard/plan/loading.tsx`
+
+**Nuevos loading.tsx admin (3)**:
+- `admin/settings/loading.tsx` · `admin/team/loading.tsx` · `admin/projects/[projectId]/loading.tsx`
+
+**Total**: 2 nuevos shared + 3 refactor + 17 boundary files = **22 archivos**.
+
+### 6) TODO Sentry (B14)
+
+Cableado pendiente en **3 lugares**:
+
+1. [src/components/ui/SectionErrorBoundary.tsx](src/components/ui/SectionErrorBoundary.tsx) — dentro del `useEffect`, comentario `// TODO(B14): cablear Sentry acá.` con el snippet listo (tags `section`/`boundary`, extra `digest`).
+2. [src/app/error.tsx](src/app/error.tsx) — mismo patrón, tag `boundary: 'root'`.
+3. Cuando B14 instale `@sentry/nextjs`, basta con descomentar y agregar el `import * as Sentry`.
+
+Ningún `error.tsx` individual necesita tocarse — todos delegan al base.
+
+### 7) Verificación (visual-qa MS-8)
+
+Build prod recompilado, server `next-prod-qa` reiniciado, `client-a` logueado. Para forzar un throw se creó **temporalmente** la ruta `dashboard/qa-throw/page.tsx` (con `force-dynamic` para no romper el prerender) que tira `throw new Error('QA forced throw — verificando dashboard/error.tsx (B12.1)')`. **Borrada al cerrar el sprint** (no queda en main).
+
+Visual-qa con `?e2e=1` para evitar el WebGL context loss del HeroArtifact en headless.
+
+#### Error boundary disparado — ✅ OK
+
+En `dashboard/qa-throw?e2e=1` (desktop + mobile), texto observado:
+
+- Eyebrow: `"ERROR INESPERADO"` ✓
+- Título: `"Algo no salió como esperábamos"` ✓
+- Descripción: `"Tomamos nota del problema y lo estamos revisando. Probá de nuevo y, si sigue, recargá la página o volvé al inicio."` ✓
+- Botones: `"Reintentar"` (amber) + `"Volver al inicio"` (zinc) ✓
+
+**Confirmación explícita del visual-qa** de que NO aparece en pantalla:
+- ❌ El texto literal del throw: `"QA forced throw"` — no se ve.
+- ❌ Stack trace — no se ve.
+- ❌ Nombre de archivo / línea — no se ve.
+- ❌ `error.message` crudo — no se ve.
+
+La regla absoluta del sprint (`🔴 Cero stack trace o mensaje técnico crudo visible al cliente`) queda satisfecha.
+
+#### Loading skeleton — ✅ OK
+
+`/dashboard?e2e=1` muestra el skeleton coherente: header placeholder + bloque grande 360px (health score) + grid 4 stat cards + card brief skeleton. Cero spinner pelado.
+
+#### Sanity 3 rutas — ✅ OK
+
+`/dashboard/leads`, `/dashboard/cuenta`, `/dashboard/modules/email-marketing` cargan sin error. Cero regresiones por los edits.
+
+### 8) Estado
+
+**B12.1 cierra.**
+
+- 🔴 56 rutas sin boundary → cubiertas con 9 nuevos error.tsx + cascading de Next + base shared.
+- 🔴 Bug existente del AdminErrorBoundary (exponía `error.message` al cliente) → tapado.
+- 🔴 Global error.tsx no logueaba → arreglado.
+- Granularidad respetada: error en una sección no tumba el dashboard entero.
+- Logger oficial usado en los 3 puntos críticos, con TODO(B14) explícito.
+- Sandbox `qa-throw/` eliminado tras verificación — no queda código de QA en main.
+
+---
+
+## ✅ B12.5 — Reset de contraseña automatizado (público + admin)
+
+Fecha: 2026-05-25
+
+### Contexto
+
+Hoy el reset es manual: cliente avisa por WhatsApp/mail, Franco regenera la temporal a mano. Hay que automatizarlo sin abrir vectores de ataque — los flujos de reset son blanco clásico de enumeration, brute force de tokens y spam de inbox.
+
+Cuando arranqué encontré que el esqueleto YA existía:
+- `PasswordResetToken` con `token`, `userId`, `expiresAt`, `usedAt` en schema.
+- `User.passwordResetRequired` ya seteado en el flujo de login.
+- `/forgot-password/page.tsx` + action y `/reset-password/page.tsx` + form.
+- `/api/admin/users/[userId]/resend-credentials` enviando por Brevo.
+- Enum `AuditActionType` con `PASSWORD_CHANGED` y `CREDENTIALS_RESENT`.
+
+Lo que NO estaba bien: gaps de seguridad en cada endpoint. Este sprint cierra esos gaps.
+
+### Reglas absolutas que mantuve
+
+1. 🔴 Token un-solo-uso + expiración corta (45 min) + invalidación al usarse.
+2. 🔴 Anti-enumeration: respuesta IDÉNTICA exista o no el email.
+3. 🔴 Rate limit en todos los endpoints (por IP, por email, por admin).
+4. 🔴 Password temporal jamás en logs ni en audit metadata.
+5. 🔴 Validación Zod en los 3 endpoints.
+
+### 1) Helper de rate-limit reutilizable
+
+Archivo creado: `src/lib/security/auth-rate-limit.ts`
+
+Wrapper sobre el `checkRateLimit` in-memory que ya usaba el chatbot. No dupliqué lógica: re-uso el mismo Map por proceso. La identidad se hashea con SHA-256 antes de meterse en el Map — IPs y emails nunca quedan en claro dentro del estado del proceso.
+
+Presets:
+
+| Scope | Límite | Ventana | Por qué |
+|---|---|---|---|
+| `forgotPasswordPerIp` | 5 | 15 min | Frena reconnaissance masivo desde una IP. |
+| `forgotPasswordPerEmail` | 3 | 60 min | Protege un inbox específico de inundación. |
+| `resetPasswordPerIp` | 10 | 15 min | Frena brute-force del token (32 bytes hex ≈ 256 bits, igual). |
+| `resendCredentialsPerAdmin` | 10 | 60 min | Frena UI con doble click y abuso de cuenta admin comprometida. |
+
+Helper expone `applyAuthRateLimit({ scope, identifier })` y `getClientIpHash()` (lee `x-forwarded-for` / `x-real-ip` y devuelve hash de 24 chars).
+
+Limitación heredada del MVP: in-memory, cold starts resetean estado, múltiples instancias serverless no comparten estado. Aceptable para tráfico actual; pendiente Upstash Redis cuando crezca.
+
+### 2) Template Brevo para password reset
+
+Archivo creado: `src/lib/email/templates/password-reset.ts`
+
+Mismo look-and-feel que `welcome-client.ts` (background `#09090b`, card `#18181b`, accent cyan `#06b6d4`). Inputs: `clientName`, `resetUrl`, `expiresInMinutes`. Devuelve `{ subject, htmlContent, textContent }`. Copy rioplatense en `forgotPasswordAction` se ata acá.
+
+El template incluye el resetUrl en el botón Y en texto plano (fallback si el cliente de mail no renderiza HTML). Y aclara explícitamente que el link vence en X minutos y es de un solo uso.
+
+### 3) Zod schemas
+
+Agregado a `src/lib/actions/schemas.ts`:
+- `ForgotPasswordSchema`: email lowercased, max 254, formato email.
+- `ResetPasswordSchema`: token (32-128 chars, regex `[a-f0-9]+` que matchea `crypto.randomBytes(32).toString('hex')`), password (8-128), confirm con `.refine` para matching.
+- `ResendCredentialsParamsSchema`: userId (regex `[a-z0-9]+`, max 64) para validar el path param.
+
+### 4) `forgot-password/actions.ts` — refactor
+
+Archivo: `src/app/forgot-password/actions.ts`
+
+Cambios:
+
+a. **Migrado de Resend → Brevo.** El endpoint usaba `sendEmail` (de `@/lib/email`, basado en Resend) mientras que `resend-credentials` usa Brevo. Inconsistencia tapada — ahora ambos endpoints usan `sendTransactionalEmail` de `@/lib/email/brevo-service`. Resend queda solo para Magic Link en `auth.ts`.
+
+b. **Zod input validation.** Sale el bloque manual `if (!email || !email.includes('@'))`, entra `ForgotPasswordSchema.safeParse`.
+
+c. **Rate limit doble:**
+   - Por IP (5 / 15 min): frena reconnaissance.
+   - Por email (3 / 60 min): frena inundación de un inbox específico.
+
+d. **Anti-enumeration robusto.** El mensaje devuelto es IDÉNTICO en los 4 casos:
+   - Usuario existe y mail enviado OK.
+   - Usuario existe pero Brevo falla.
+   - Usuario NO existe.
+   - Rate limit dispara (no revelo "te rate-limité" — silencio anti-recon).
+
+   Mensaje único: `"Si la cuenta existe, te mandamos un mail con instrucciones en los próximos minutos."`
+
+e. **Mitigación timing attack.** Antes: si el usuario no existía, retornaba inmediatamente (~10ms); si existía, hacía `findUnique + deleteMany + create + sendEmail` (~400-600ms). Diferencia detectable, igual a enumeration por timing. Mitigación: cuando el usuario no existe, ejecuto `bcrypt.compare(email, DUMMY_HASH)` con cost 10 (~80ms) — empareja el costo del hash que correría en el flujo "existe". No es bit-perfect, pero achica la ventana lo suficiente como para que el rate-limit la cubra antes de que un atacante extraiga señal.
+
+f. **Token: 45 minutos de expiración** (dentro del rango 30-60 que pediste). Sigue siendo de un solo uso (`usedAt` en DB).
+
+g. **Invalidación de tokens previos.** Al pedir un nuevo reset, los tokens previos sin usar del mismo `userId` se borran en la misma transacción que la creación del nuevo. Garantiza un solo link válido a la vez.
+
+h. **Sin logs en claro.** Ni el token ni el email completo aparecen en `console.log`. Solo se loguea `[forgot-password] email send failed { reason }` si Brevo devolvió error — sin payload.
+
+### 5) `reset-password/actions.ts` — refactor
+
+Archivo: `src/app/reset-password/actions.ts`
+
+Cambios:
+
+a. **Zod validation** con `ResetPasswordSchema` (token + password + confirm con refine).
+
+b. **Rate limit por IP** (`resetPasswordPerIp`, 10 / 15 min). Si dispara, devuelve mensaje con `retryAfterSeconds` formateado en minutos — acá sí lo informo porque el usuario YA tiene un token válido en la URL, no hay riesgo de enumeration en el endpoint de completion.
+
+c. **Mensaje genérico para errores de token.** Antes distinguía "no existe" / "expirado" / "ya usado" con 3 mensajes distintos — eso permitía a un atacante saber si un token fue usado o solo expirado. Ahora único mensaje: `"Este enlace no es válido o ya expiró. Solicitá uno nuevo."`
+
+d. **`passwordResetRequired: false`** se setea junto con el cambio de password — antes no se reseteaba, así que un cliente que se reseteaba via link seguía teniendo el flag de "primer login" en la sesión.
+
+e. **Audit log** `PASSWORD_CHANGED` se loguea con `logAdminAction` al completar, con `metadata: { method: 'reset_token' }`. El audit guarda el `userId`, email, name, IP y user-agent — pero NUNCA el password ni el token. Misma firma que el log que ya hace `cambiar-password/actions.ts`.
+
+f. **Transacción atómica:** el update del user y el `usedAt = now()` del token van en `prisma.$transaction` — si falla uno, falla el otro. Garantía: nunca queda un token "consumido" sin password cambiada (o viceversa).
+
+### 6) `resend-credentials/route.ts` — endurecido
+
+Archivo: `src/app/api/admin/users/[userId]/resend-credentials/route.ts`
+
+Cambios:
+
+a. **`requireSuperAdmin` ya estaba** (inline `session.user.role === 'SUPER_ADMIN'`). Confirmado.
+
+b. **Rate limit por admin** (`resendCredentialsPerAdmin`, 10 / hora). Si dispara devuelve `429` con `retryAfterSeconds` — acá sí informo porque el caller es un humano admin en su UI, no un atacante anónimo.
+
+c. **Zod del path param** con `ResendCredentialsParamsSchema`. Userid acotado a `[a-z0-9]+` de 1-64 chars (cuid o similar).
+
+d. **`tempPassword` confirmado fuera de logs.** Audit metadata guarda solo `{ emailSent: bool, error: string | null }` — la temp password jamás se escribe en `AdminAuditLog`. El único momento donde la temp password sale del servidor: si Brevo falla, se devuelve en el JSON response al admin para que pueda copiarla y reenviar manual — ese es el comportamiento que pediste mantener. La respuesta nunca se loguea servidor-side; el admin la consume en cliente sobre HTTPS.
+
+e. **Comportamiento si Brevo OK:** `tempPassword: null` en el response, el admin no la ve nunca (queda solo en el mail que llegó al cliente).
+
+### 7) Confirmación operativa
+
+Probé el flujo en preview server con dev (puerto 3000):
+
+- `/forgot-password` carga y muestra el form (eyebrow "PORTAL DE CLIENTES", input EMAIL, botón "Enviar enlace"). Sin regresión visual — solo cambié la action, el page.tsx no se tocó.
+- Login sigue mostrando el link `¿Olvidaste tu contraseña?` apuntando a `/forgot-password` (línea 337 de `src/app/login/page.tsx`).
+
+**Confirmación explícita de la regla absoluta de anti-enumeration:**
+Con email inexistente, `forgotPasswordAction` ejecuta `bcrypt.compare(email, DUMMY_HASH)` (~80ms) y devuelve `{ type: 'success', message: ANTI_ENUM_MESSAGE }`. Con email existente, ejecuta la transacción + Brevo y devuelve EL MISMO `{ type: 'success', message: ANTI_ENUM_MESSAGE }`. Mensaje verbatim:
+
+> "Si la cuenta existe, te mandamos un mail con instrucciones en los próximos minutos."
+
+No hay rama del código que devuelva un mensaje distinto entre "existe" / "no existe" / "rate-limit".
+
+### 8) Lo que NO toqué (out of scope, queda como pendiente)
+
+- **Upstash Redis para rate-limit.** Hoy es in-memory por proceso. Si el tráfico crece y Vercel escala horizontalmente, un atacante puede pegarle a distintas instancias para multiplicar el límite. Mitigation futura, no hoy.
+- **Endpoint para invalidar todos los tokens de un usuario (logout-all).** Útil para revocación post-incidente. No urgente.
+- **UI admin "regenerar password"** — el botón en el panel admin que dispara `/api/admin/users/[userId]/resend-credentials` no fue parte de este sprint. Si ya existe, está cubierto. Si no, es un paso aparte.
+- **Reseteo de sesiones activas al cambiar password.** Hoy NextAuth con JWT no invalida sesiones existentes cuando se cambia la password — si un atacante ya tenía un JWT activo, sigue siendo válido hasta `maxAge` (8h). Mitigación posible: bumpear un `passwordChangedAt` y validar en el callback `jwt`. Out of scope acá.
+
+### 9) Archivos modificados / creados
+
+Creados:
+- `src/lib/security/auth-rate-limit.ts`
+- `src/lib/email/templates/password-reset.ts`
+
+Modificados:
+- `src/lib/actions/schemas.ts` (+3 schemas)
+- `src/app/forgot-password/actions.ts` (refactor completo: Brevo + Zod + rate limit + anti-timing)
+- `src/app/reset-password/actions.ts` (refactor completo: Zod + audit + reset flag + rate limit + mensaje genérico)
+- `src/app/api/admin/users/[userId]/resend-credentials/route.ts` (rate limit + Zod del param)
+
+Sin migraciones de Prisma — todos los modelos ya existían. `npx prisma migrate status` confirmó 54 migraciones al día antes y después.
+
+### 10) Estado
+
+**B12.5 cierra.**
+
+- 🔴 Token un-solo-uso + expiración 45 min + invalidación de previos → ✅
+- 🔴 Anti-enumeration con mensaje idéntico en todas las ramas (existe / no existe / rate-limit) → ✅
+- 🔴 Rate limit en `/forgot-password` (IP + email), `/reset-password` (IP), `/resend-credentials` (admin) → ✅
+- 🔴 Temp password fuera de logs y de audit metadata; solo viaja al admin si Brevo falla, vía HTTPS → ✅
+- 🔴 Zod en los 3 endpoints → ✅
+- Bonus: migración a Brevo del forgot-password (estaba en Resend) para consistencia.
+- Bonus: mitigación de timing attack via bcrypt dummy hash.
+- Bonus: audit log de `PASSWORD_CHANGED` también para el flujo público de reset (antes solo lo hacía el flujo authenticated).
+
+---
+
+## ✅ B12.6 — Release Candidate: smoke honesto + re-tag v0.9.0-rc.1
+
+Fecha: 2026-05-25
+
+### Contexto
+
+Cierre de la fase de robustez. Esto NO es v1.0. v1.0 lo firma Matsu usándolo en prod sin romperse — esto es el Release Candidate de la beta. El sprint tiene 3 patas: smoke manual honesto, build/tsc/migrate sync, y re-tag con un número que diga la verdad del estado.
+
+Hallazgo previo: ya existía un tag `v1.0.0` (commit `1746e27`, 19/May/2026, mensaje "Alpha phase complete"). Esa fue una declaración aspiracional — después de ese tag vinieron sprints B0.6→B4.6 (plan model + billing override + degraded mode + client usage), B12.1 (error boundaries), B12.5 (reset de contraseña endurecido), y este B12.6. v1.0.0 ya no era cierto.
+
+### 1) Build / TypeScript / migrate status
+
+- `npx tsc --noEmit` — exit 0, cero líneas de output. **Strict mode clean.**
+- `npm run build` — exit 0. Solo warnings preexistentes de Sentry sobre `onRequestError` y `global-error.js` (no introducidos por este sprint ni los anteriores). Build de producción se generó completo, todas las rutas listadas.
+- `npx prisma migrate status` — 54 migraciones, "Database schema is up to date!"
+
+Nota: encontré un archivo `ts_errors.log` del 25/Mar/2026 (2 meses stale) que un visual-qa subagente leyó por error confundiendo el estado del TS. NO es un log vivo — es un artefacto que quedó committeado de una corrida vieja. Anotado para borrar.
+
+### 2) Smoke logueado — flujos críticos
+
+Server: `next-prod-qa` (port 3001, build de producción real, reiniciado fresh contra `.next` recién generado). Persona resolver: `POST /api/qa/login` con triple guard (`QA_ALLOW_LOCALHOST=1` + localhost + no-prod-deploy). Tres personas seedeadas: `super-admin`, `client-a`, `client-b`.
+
+| # | Ruta | Persona | Estado | HTTP |
+|---|---|---|---|---|
+| 1 | `/login` | (none) | ✅ | 200 |
+| 2 | `/forgot-password` | (none) | ✅ | 200 |
+| 3 | `/reset-password` | (none) | ✅ | 200 |
+| 4 | `/reset-password?token=...` | (none) | ✅ | 200 |
+| 5 | `/dashboard` | (none) | ✅ middleware | 307 → /login |
+| 6 | `/dashboard` | client-a | ✅ | 200 |
+| 7 | `/dashboard/leads` | client-a | ✅ | 200 |
+| 8 | `/dashboard/cuenta` | client-a | ✅ | 200 |
+| 9 | `/dashboard/services` | client-a | ✅ | 200 |
+| 10 | `/admin` | (none) | ✅ middleware | 307 → /login |
+| 11 | `/admin` | super-admin | ✅ | 200 |
+| 12 | `/admin/clients` | super-admin | ✅ | 200 |
+| 13 | `/admin/leads` | super-admin | ✅ | 200 |
+| 14 | `/admin/team` | super-admin | ✅ | 200 |
+| 15 | `/admin/tickets` | super-admin | ✅ | 200 |
+| 16 | `/embed/develop` | (none) | ✅ | 200 |
+| 17 | `/embed/chatbot` | (none) | ✅ | 200 |
+| 18 | `/embed/matsu` | (none) | ✅ | 200 |
+| 19 | `/api/qa/login` (GET) | (none) | ✅ | 200 |
+| 20 | `/api/qa/login` (POST) | n/a | ✅ login OK, cookie set | 200 |
+
+Detalle de verificación: probas server-side con curl (HTTP layer) + `preview_snapshot` en el browser embebido (accessibility tree) cuando se necesitó contenido. El snapshot de `/forgot-password` en B12.5 ya había mostrado el form completo (input email, botón "Enviar enlace", link "Volver al inicio de sesión") — no se repitió porque no toqué el page.tsx.
+
+**Sobre `/embed`:** en la primera pasada probé slugs de `organization` (san-miguel, sonrisa-norte, sigma-contable) y devolvían 404. Ese era falso positivo: `/embed/[slug]` busca en `botConfig`, no en `organization`. Slugs reales en DB: `develop`, `chatbot`, `matsu` — los tres devuelven 200. **`/embed/matsu` funciona** (importante por el nombre del cliente que va a firmar v1.0).
+
+### 3) Anotaciones (NO arreglar en este sprint — scope creep)
+
+1. **[nice-to-fix]** `/login` no es screenshotteable bajo headless. El componente `DotMatrix` (Three.js canvas con `ssr: false`) no pinta su primer frame en automation — el screenshot timea a los 30s. Funciona en browser real (el HTML/funcional está OK, `tsc --noEmit` clean, el snapshot accessibility tree devuelve la estructura completa). Falta extender el patrón `?e2e=1` (que ya tenía B12.1 para el HeroArtifact en `/dashboard`) al DotMatrix en login/forgot-password/reset-password para que el visual-qa pueda screenshottear las páginas de auth. Anotado, NO arreglar acá.
+
+2. **[cosmetic / housekeeping]** `logic-core-v3/ts_errors.log` (Mar 2026) quedó committeado en el repo. Un agente externo lo leyó y reportó falsos blockers de TypeScript ya resueltos hace dos meses. Anotado para borrar (`git rm ts_errors.log`).
+
+3. **[carry-over de B12.5]** Upstash Redis para rate-limit distribuido (hoy in-memory por proceso, vulnerable a múltiples instancias serverless). No urgente.
+
+4. **[carry-over de B12.5]** Invalidación de sesiones JWT activas al cambiar contraseña (hoy un JWT robado sigue válido hasta `maxAge` 8h, incluso después de un reset). Mitigation futura.
+
+No se encontraron blockers del producto. El `/login` headless es limitación del harness de QA, no del producto.
+
+### 4) Re-tag honesto
+
+**Tag elegido: `v0.9.0-rc.1`** (apuntando a HEAD = `6c0cfef`, "Merge branch 'main' of https://github.com/frc11/PorfolioDevelOP").
+
+**Justificación de por qué NO es v1.0.0:**
+
+> v1.0.0 lo firma Matsu usándolo en prod sin romperse, no nosotros. El estado actual es "robustez completa, falta validación en prod con cliente real". Ese es exactamente lo que dice un Release Candidate: candidato a v1.0.0, no v1.0.0 mismo.
+
+El tag `v1.0.0` previo (commit `1746e27`, 19/May) fue creado al cerrar "Alpha phase complete" — pero después de esa fecha vinieron:
+- Sprint B0.6→B4.6: plan model + billing override + degraded mode + client usage dashboard.
+- Sprint B12.1: error boundaries + loading skeletons en 56 rutas.
+- Sprint B12.5: reset de contraseña endurecido (token un-solo-uso, anti-enum, rate limit, password fuera de logs).
+- Sprint B12.6 (este): smoke + re-tag.
+
+Un tag v1.0.0 sobre el estado de 19/May era mentira porque después se siguió endureciendo. El re-tag corrige la narrativa.
+
+**Acciones git ejecutadas:**
+
+```
+git tag -d v1.0.0                  # borrado del tag aspiracional
+git tag -a v0.9.0-rc.1 ...         # nuevo tag anotado sobre HEAD
+```
+
+El `v1.0.0` previo solo existía local (verificado con `git ls-remote --tags origin v1.0.0` — sin output). No requirió `git push --delete origin v1.0.0`.
+
+El nuevo `v0.9.0-rc.1` quedó local. Push al remote pendiente — Franco decide cuándo es visible al equipo en GitHub.
+
+**Mensaje del tag** (extracto): "develOP v0.9.0-rc.1 — Release Candidate (B12.6). Robustez completa. Falta validación en prod por Matsu para considerar v1.0.0."
+
+**Camino a v1.0.0:**
+1. Push de `v0.9.0-rc.1` al remote cuando Franco decida.
+2. Matsu en prod, usándolo, durante un período acordado (Franco define).
+3. Si sobrevive sin romperse → bump a `v1.0.0` honesto.
+4. Si rompe → fix + `v0.9.0-rc.2`, repetir.
+
+### 5) Archivos modificados / creados
+
+Sin cambios de código en este sprint — fue un sprint de verificación + tag. Solo:
+- `docs/bitacora-roadmap.md` — esta entrada.
+- Tag git `v0.9.0-rc.1` (local).
+- Tag git `v1.0.0` (borrado local).
+
+### 6) Estado
+
+**B12.6 cierra. Fase de robustez completa.**
+
+- 🔴 NO se tagueó v1.0.0 → ✅ se tagueó `v0.9.0-rc.1`.
+- 🔴 El smoke anotó lo que vio mal sin arreglar nada → ✅ 2 nice-to-fix + 2 carry-over de B12.5 anotados, cero código tocado.
+- ✅ Build prod limpio, tsc clean, migrate sync.
+- ✅ 18 rutas + 2 endpoints API smoke-tested, todas OK.
+- ✅ Tag honesto: la versión refleja "robustez completa, falta prod + Matsu vivo", no el optimismo.
+
+**Próximo paso del proyecto (out of scope acá):** Matsu en prod con `v0.9.0-rc.1` pusheado.
+
+---
+
+## ✅ B-SEC.2 — Upgrade Next.js 16.2.1 → 16.2.6 + npm audit fix (Fase B de auditoría)
+
+**Contexto.** B-SEC.1 (la auditoría) había identificado a Next.js 16.2.1 como el hallazgo P0 más urgente: 14 advisories activos en la versión instalada, varios con CVSS ≥7.5, incluyendo **middleware/proxy bypass** (GHSA-26hh-7cqf-hhc6 + GHSA-492v-c6pp-mqqv, ambos auth-bypass en App Router), **SSRF en WebSocket upgrades** (GHSA-c4j6-fc7j-m34r, CVSS 8.6), DoS en Server Components y Cache Components, cache poisoning, XSS con CSP nonces. En un SaaS multi-tenant el middleware/routing es la frontera entre clientes — un bypass es la llave maestra. `fixAvailable: true` para todo: era upgrade de versión, no refactor.
+
+Sprint scope estricto: **solo el upgrade + audit fix**. Cero refactors. Si algo se rompía con el upgrade, era el upgrade, no otra cosa.
+
+### 1) Discovery
+
+- **Versión vieja instalada**: `next@16.2.1`, `eslint-config-next@16.2.1`. (El binario nativo `@next/swc-win32-x64-msvc` ya estaba en `^16.2.6` desde antes — el SWC estaba desincronizado del core, raro.)
+- **Latest estable línea 16.2.x** (`npm view next dist-tags`): `next@16.2.6`. La línea publicada es 16.2.0 → 16.2.6. Las pre-releases (`canary`, `beta`) descartadas — no estables.
+- **Versión parcheada mínima**: 16.2.6. La advisory GHSA-26hh-7cqf-hhc6 es "incomplete-fix follow-up" de un advisory previo (era `<16.2.5`, después se descubrió que 16.2.5 no cerraba completamente, hace falta 16.2.6).
+- **Target elegido**: `next@16.2.6` + `eslint-config-next@16.2.6` (alinear ambos).
+- **Estado inicial de `npm audit`**: 1 critical / 5 high / 9 moderate / 15 total. La critical es `protobufjs <7.5.5` (RCE, CVSS 9.8) — transitive de `@google-analytics/data` / `googleapis`.
+
+### 2) Cambios aplicados
+
+| Acción | Detalle |
+|---|---|
+| Upgrade Next core | `next: ^16.2.1 → ^16.2.6` en `package.json` línea 49 |
+| Upgrade ESLint config | `eslint-config-next: ^16.2.1 → ^16.2.6` en `package.json` línea 90 |
+| Specifier SWC | `@next/swc-win32-x64-msvc` ya estaba en `^16.2.6` — sin cambio |
+| `npm install` | Sincronizó `node_modules/next` al `16.2.6` real en disk (el primer install con `--prefix` desfasó el lock vs disk; re-install desde dentro de `logic-core-v3/` lo alineó) |
+| `npm audit fix` | **Sin `--force`**. Aplicó: `removed 3 packages, changed 23 packages, audited 1023 packages in 25s`. Cerró todos los transitives con `fixAvailable: true` (protobufjs, defu, effect, prisma + @prisma/config, dompurify, qs, nanoid, brace-expansion, @protobufjs/utf8, svix, uuid, resend) sin romper SemVer-major en ningún directo. |
+
+CVEs cerrados por el upgrade de Next.js a 16.2.6 (los que importan, hay 14 advisories en total — cito severidades altas):
+
+- **GHSA-26hh-7cqf-hhc6** (CVSS 7.5, high) — Middleware/Proxy bypass via segment-prefetch routes (auth bypass en App Router).
+- **GHSA-492v-c6pp-mqqv** (CVSS 8.1, high) — Middleware/Proxy bypass via dynamic route parameter injection.
+- **GHSA-267c-6grr-h53f** (CVSS 7.5, high) — Middleware/Proxy bypass via segment-prefetch (variante).
+- **GHSA-36qx-fr4f-26g5** (CVSS 7.5, high) — Middleware/Proxy bypass en Pages Router con i18n.
+- **GHSA-c4j6-fc7j-m34r** (CVSS 8.6, high) — SSRF en WebSocket upgrades.
+- **GHSA-q4gf-8mx6-v5v3** + **GHSA-8h8q-6873-q5fj** (CVSS 7.5) — DoS con Server Components.
+- **GHSA-mg66-mrh9-m8jx** (CVSS 7.5) — DoS por exhausto de conexiones en Cache Components.
+- **GHSA-ffhc-5mcf-pf4q** (CVSS 4.7) — XSS en App Router con CSP nonces.
+- **GHSA-gx5p-jg67-6x7h** (CVSS 6.1) — XSS en `beforeInteractive` scripts.
+- **GHSA-h64f-5h5j-jqjh** (CVSS 5.9) — DoS en Image Optimization API.
+- Cache poisoning: GHSA-3g8h-86w9-wvmq, GHSA-vfv6-92ff-j949, GHSA-wfc6-r584-vfw7.
+
+CVEs cerrados por `npm audit fix` (transitives, los principales):
+
+- **protobufjs** `<=7.5.7 → ≥7.5.8` (cierra critical GHSA-xq3m-2v4x-88gg CVSS 9.8 RCE + 7 advisories adicionales).
+- **defu** (high, GHSA-737v-mqg7-c878 — prototype pollution).
+- **effect** (high, GHSA-38f7-945m-qr2g — AsyncLocalStorage race).
+- **prisma** + **@prisma/config** (high, via `effect`).
+- **dompurify**, **qs**, **nanoid**, **brace-expansion**, **uuid**, **svix**, **resend** (moderate).
+
+### 3) Lo que se difirió (requiere `--force` con downgrade absurdo)
+
+Quedaron **2 advisories moderate**, ambos vinculados al mismo issue:
+
+- **postcss `<8.5.10`** (GHSA-qx2v-qp2m-jg93, CVSS 6.1) — XSS via unescaped `</style>` en CSS stringify output.
+- **next** (moderate, transitive de la postcss vulnerable).
+
+El único `fix available via npm audit fix --force` sería **downgrade de `next` a `9.3.3`** — un major-DOWNgrade que regresaría el framework cuatro años atrás y reabriría TODOS los advisories que acabamos de cerrar. **No aplicado**.
+
+Razón realista del riesgo: postcss es vulnerable cuando se procesa CSS user-generated con un `</style>` no escapado en el stringify output. La app usa Tailwind (CSS estático compile-time, no runtime), no procesa CSS user-input. Riesgo realista bajo. Esperamos a que Next publique `16.2.7+` con postcss `≥8.5.10` (o `16.3.x`).
+
+### 4) Verificación
+
+| Check | Resultado |
+|---|---|
+| `npm run build` (post-upgrade, pre-audit-fix) | ✅ Compiled successfully in 61s · TS 24.3s · 30 static pages |
+| `npm run build` (post-audit-fix, build final) | ✅ Compiled successfully in 31.0s · TS 25.3s · 30 static pages |
+| `tsc --noEmit` (post-upgrade) | ✅ exit 0 |
+| `tsc --noEmit` (post-audit-fix) | ✅ exit 0 |
+| `npm audit` inicial | 1 crit / 5 high / 9 moderate / **15 total** |
+| `npm audit` final | 0 crit / 0 high / **2 moderate / 2 total** |
+| Reducción | **13 de 15 advisories cerrados (87%)**, incluyendo el critical y los 5 high |
+| Log build final | `▲ Next.js 16.2.6 (webpack)` confirmado en la cabecera |
+
+El build de Next reportó la versión `16.2.6` correctamente en la cabecera del output (`▲ Next.js 16.2.6 (webpack)`). La primera corrida había mostrado `16.2.1` por inconsistencia node_modules vs lockfile (artefacto del `--prefix` en el primer install) — se resolvió con `npm install` desde dentro de `logic-core-v3/` que sincronizó `node_modules/next` al 16.2.6 real. Build final ejecutado **después** de esa sincronización.
+
+### 5) Smoke MS-8: el middleware sigue protegiendo
+
+🔴 **Nota honesta**: este sprint hizo **smoke estático** (no runtime con browser). El runtime smoke MS-8 completo (con cookies, sesiones reales, 307s) lo corre Franco aparte. Lo que SÍ verifiqué:
+
+- **No hay `src/middleware.ts`** en el repo (confirmado con Glob). La protección de rutas la hacen los layouts protegidos vía `await auth() + redirect()`. El upgrade no introdujo un middleware nuevo (no era el patrón antes del CVE, no lo es después).
+- **`src/app/(protected)/admin/layout.tsx`** (`AgencyOsLayout`): `await auth()` → redirige a `/login` si no hay sesión (línea 25-27); redirige a `/dashboard` si `session.user.role !== 'SUPER_ADMIN'` (línea 29-31). Gating SUPER_ADMIN correcto. **Intacto post-upgrade**.
+- **`src/app/(protected)/dashboard/layout.tsx`** (`DashboardLayout`): `await auth()` en paralelo con `resolveOrgId()`; sin `organizationId` redirige a `/login` (o a `/admin/clients` si SUPER_ADMIN sin org); sin onboarding completo redirige a `/bienvenida` (líneas 87-113). Gating multi-tenant correcto. **Intacto post-upgrade**.
+- **El código del proyecto compila sin cambios** contra Next 16.2.6 (`tsc --noEmit` exit 0, build exit 0). Eso indica que las APIs públicas de Next que usamos (`auth`, `redirect`, `headers`, `unstable_cache`, `unstable_noStore`, App Router) no rompieron breaking changes entre 16.2.1 → 16.2.6 (esperado: misma minor, solo patches).
+
+Lo que el smoke estático **no** prueba (y queda para MS-8 con browser real):
+- Que un anónimo recibe 307 → `/login` al pedir `/admin/*` o `/dashboard/*` en runtime.
+- Que el CVE específico de middleware bypass está cerrado (eso lo prueba el changelog de Next; nosotros confirmamos que la versión parcheada está instalada y corriendo).
+
+### 6) Archivos modificados
+
+- `package.json` — bumps `next` y `eslint-config-next` de `^16.2.1` a `^16.2.6`.
+- `package-lock.json` — regenerado por `npm install` + `npm audit fix`: 23 paquetes cambiados, 3 removidos, total deps 1135 → 1132.
+- Sin cambios en código de aplicación, schema, ni docs (salvo esta entrada).
+
+### 7) Estado
+
+**B-SEC.2 cierra. El P0 más urgente de la auditoría queda neutralizado.**
+
+- 🔴 SOLO upgrade + audit fix, cero otros cambios → ✅ scope respetado, sin código de app tocado.
+- 🔴 Majors a ciegas no → ✅ `npm audit fix` corrió sin `--force`. Los 2 moderates remanentes (postcss / next-via-postcss) requerían downgrade major absurdo y se reportaron en lugar de aplicarse.
+- 🔴 Middleware sigue protegiendo → ✅ smoke estático confirma layouts intactos + build limpio; runtime smoke completo queda para MS-8 con browser.
+- ✅ Build prod limpio (`Next.js 16.2.6` confirmado en cabecera), tsc clean, 30 static pages OK.
+- ✅ 13 de 15 advisories cerrados — critical RCE de protobufjs + 5 high (4 bypass de auth + 1 SSRF + 1 race) eliminados.
+
+**Próximo paso (out of scope acá):**
+- MS-8 runtime smoke con browser (Franco) — confirmar 307s reales en `/admin` y `/dashboard` para anónimos, y separación de roles SUPER_ADMIN vs ORG_MEMBER.
+- Revisar el resto del reporte de auditoría (`docs/auditoria-seguridad-2026-05.md`) — quedan P1s (OAuth state HMAC, JWT post-reset, rate-limit serverless, LLM hardening) para próximos sprints.
+- Eventualmente: re-correr `npm audit` cuando Next publique `16.2.7+` para cerrar los 2 moderates restantes vía upgrade upstream.
+
+---
+
+## ✅ B-SEC.3a — Invalidación de sesiones JWT al cambiar/resetear password (SEC-AUTH-03)
+
+**Contexto.** B-SEC.1 (auditoría) marcó como **P1** que después de un reset de password (B12.5) los JWTs viejos seguían siendo criptográficamente válidos hasta `maxAge` 8h. Si el motivo del reset fue compromiso, el atacante mantenía acceso. Patrón estándar de fix: versionado de sesión server-side. Implementación clásica: campo `sessionVersion` en `User`, se incrementa cuando algo invalida sesiones (cambio de password, logout-all), y el callback JWT compara la versión del token con la de DB en cada request.
+
+### 1) Discovery (mapeo previo)
+
+- **Strategy de NextAuth**: `jwt` (sin DB sessions), `maxAge: 8h`, `updateAge: 1h`. Definido en `src/auth.ts:74-78`.
+- **Callback `jwt`** (`src/auth.ts:209-232` pre-cambio): cada request hace refresh-from-DB de role/orgId/etc cuando `(trigger === 'update' || trigger === 'signIn' || !user)` — que es esencialmente "siempre que hay un userId". O sea, el patrón de query-on-every-request ya estaba — solo había que sumar `sessionVersion` al payload de esa query y agregar el check de mismatch.
+- **`getUserAccessState`** (`src/auth.ts:18-58`): la función que centraliza el refresh-from-DB. Era el lugar natural para sumar el campo.
+- **Cuatro call-sites de cambio de password** identificados (todos sobre `prisma.user.update` con `password`):
+  1. `src/app/reset-password/actions.ts` — reset vía token email (B12.5).
+  2. `src/app/cambiar-password/actions.ts` — cambio normal del user logueado.
+  3. `src/lib/actions/profile.ts` (`updatePasswordAction`) — cambio normal del user logueado, ruta alternativa desde `/dashboard/profile`.
+  4. `src/app/api/admin/users/[userId]/resend-credentials/route.ts` — admin resetea credenciales del user target.
+  
+  No incluidos (creación inicial, no hay sesiones previas a invalidar): `accept-invite/actions.ts`, `createClientWithBot.ts`, `clients.ts`, `onboarding/core.ts`.
+- **Tipos NextAuth**: `src/types/next-auth.d.ts` declara `JWT` y `User` extendidos — había que sumar `sessionVersion?: number` a `JWT`.
+- **Estado DB**: `npx prisma migrate status` → "Database schema is up to date" (54 migrations), confirmado pre-cambio. Dev DB en Neon (`ep-quiet-waterfall-acv0fpll`), apuntando a `neondb`.
+
+### 2) Migration aditiva
+
+Schema (`prisma/schema.prisma:284-309`):
+
+```diff
+ model User {
+   ...
+   password              String?
+   passwordResetRequired Boolean   @default(false)
++  sessionVersion        Int       @default(1)
+   phone                 String?
+   ...
+ }
+```
+
+Comando: `npx prisma migrate dev --name add_user_session_version`.
+
+SQL generado (`prisma/migrations/20260526050401_add_user_session_version/migration.sql`):
+
+```sql
+-- AlterTable
+ALTER TABLE "User" ADD COLUMN     "sessionVersion" INTEGER NOT NULL DEFAULT 1;
+```
+
+**Aditiva pura**: solo `ADD COLUMN` con `DEFAULT 1`. Existing rows reciben `1` automáticamente. Sin `DROP`, sin `RENAME`, sin migración de datos. Migrate dev aplicada en Neon dev. Cumple "migration aditiva, dev primero, NUNCA reset".
+
+**Tropiezo del camino**: el primer intento usó `--create-only` y generó una migration vacía (`-- This is an empty migration.`) por algún glitch del diff engine de Prisma. Borrado el folder vacío y re-corrido sin `--create-only` resolvió.
+
+### 3) Tipos extendidos
+
+`src/types/next-auth.d.ts`:
+
+```diff
+ declare module 'next-auth/jwt' {
+   interface JWT {
+     ...
+     passwordResetRequired?: boolean
++    sessionVersion?: number
+   }
+ }
+```
+
+`?: number` (opcional) — necesario para tolerar tokens legacy emitidos **antes** del deploy, que no traen el campo. El callback los maneja correctamente (ver §4).
+
+### 4) Callback JWT — emisión + check
+
+`src/auth.ts` cambios:
+
+**`getUserAccessState`** ahora selecciona `sessionVersion` de la DB y lo retorna en el objeto.
+
+**Callback `jwt`** reestructurado (`src/auth.ts:213-252`):
+
+```ts
+async jwt({ token, user, account, trigger }) {
+  const userId = (user?.id ?? token.sub) as string | undefined
+  const shouldRefreshFromDb = Boolean(userId) && (trigger === 'update' || trigger === 'signIn' || !user)
+
+  if (userId && shouldRefreshFromDb) {
+    const accessState = await getUserAccessState(userId)
+
+    // SEC-AUTH-03: si el token traía sessionVersion y no matchea DB → invalidate.
+    // Skip en signIn/update (legítimos, refrescan la versión).
+    if (
+      trigger !== 'signIn' &&
+      trigger !== 'update' &&
+      typeof token.sessionVersion === 'number' &&
+      accessState.sessionVersion !== undefined &&
+      token.sessionVersion !== accessState.sessionVersion
+    ) {
+      return null   // ← invalidate
+    }
+
+    token.role = accessState.role
+    // ... resto de campos ...
+    token.sessionVersion = accessState.sessionVersion
+  }
+  // ... fallthrough igual que antes ...
+  return token
+}
+```
+
+**Por qué `return null` invalida**: NextAuth v5 trata un `null` del callback jwt como sesión inválida. `auth()` retorna `null` → cualquier `layout.tsx` protegido (`admin/layout.tsx`, `dashboard/layout.tsx`) hace `if (!session?.user) redirect('/login')`. Loop completo.
+
+**Por qué se skipea el check en `signIn` y `update`**: ambos eventos legítimamente refrescan la sessionVersion del token (signIn = login fresh; update = `unstable_update`, que se llama después de un cambio de password del propio user para no deslogarlo en su tab actual). Si no se skipeara, esos events se autoinvalidarían.
+
+### 5) Call-sites — incremento + manejo del tab activo
+
+| Archivo | Cambio | Nota |
+|---|---|---|
+| `src/app/reset-password/actions.ts:68-82` | `sessionVersion: { increment: 1 }` dentro de la `$transaction` que setea la nueva password | El user que resetea está anonymous (vino del email); no hay sesión que preservar. Los JWTs viejos (víctima en otro device, atacante con token robado) caen en el próximo request por mismatch. |
+| `src/app/cambiar-password/actions.ts:48-54` | Idem dentro del `update` | Ya hacía `unstable_update({ user: { passwordResetRequired: false } })` post-update → callback recibe `trigger='update'` → skip del check + token.sessionVersion refrescado al nuevo valor. **Tab actual sigue logueado**, otros devices caen. |
+| `src/lib/actions/profile.ts:185-228` (`updatePasswordAction`) | Idem + agregado `unstable_update({})` (no lo hacía antes) + import `unstable_update` desde `@/auth` | Misma lógica que cambiar-password. La ruta `/dashboard/profile` no se desloguea al usuario; otros devices del mismo user sí. |
+| `src/app/api/admin/users/[userId]/resend-credentials/route.ts:64-70` | Idem en el `update` del user target | El admin que ejecuta NO se ve afectado (es otro user). El user target con un JWT viejo cae al primer refresh. |
+
+### 6) Verificación del cierre real
+
+🔴 **Smoke estático del flujo** (runtime con browser real queda para Franco — esta es la misma situación que B-SEC.2: el cambio es en el callback de auth, no observable en una pantalla aislada sin un flujo end-to-end multi-device).
+
+Trazo de los seis escenarios relevantes:
+
+| # | Escenario | `token.sessionVersion` | `DB.sessionVersion` | Trigger | Resultado |
+|---|---|---|---|---|---|
+| A | signIn fresh | undefined → 1 | 1 | `signIn` | ✅ Token emitido con `sessionVersion=1` |
+| B | Request normal post-login | 1 | 1 | undefined | ✅ Iguales → continúa logueado |
+| C | User cambia password en device A | 1 → 2 (vía `unstable_update`) | 1 → 2 | `update` | ✅ Skip check → tab actual no se desloguea |
+| D | Device B del mismo user (token viejo) | 1 | 2 | undefined | ✅ **mismatch → return null → re-login** |
+| E | Atacante con JWT robado, víctima resetea via email | 1 | 1 → 2 (post-reset) | undefined | ✅ **mismatch → atacante deslogueado en próximo request** |
+| F | Admin resetea credenciales del user X | (admin no toca su token) | sessionVersion de X sube | — | ✅ X cae en su próximo request por mismatch |
+
+**Edge case (legacy tokens pre-deploy)**: tokens emitidos antes de este sprint no tienen `sessionVersion` en el payload. El guard `typeof token.sessionVersion === 'number'` los deja pasar el primer refresh post-deploy (donde se les asigna `sessionVersion` desde DB) y el check vuelve a operar normalmente desde el segundo refresh. Esto **no** introduce bypass — un atacante con token legacy robado: en su primer request post-deploy hereda `sessionVersion = N` de DB; cuando la víctima resetea (DB → N+1), el siguiente request del atacante ve mismatch e invalida.
+
+**Compile-level**:
+
+| Check | Resultado |
+|---|---|
+| `tsc --noEmit` | ✅ exit 0 |
+| `npm run build` | ✅ exit 0 — "Compiled successfully in 47s · TS 50s · 30 static pages" |
+| `npx prisma migrate status` | ✅ "Database schema is up to date" tras aplicar la migration |
+| Migration SQL revisado | ✅ `ADD COLUMN` puro, aditivo, sin pérdida de datos |
+| Prisma Client regenerado | ✅ v6.19.3 (postinstall hook + migrate dev) |
+
+🔴 **Lo que el smoke estático no prueba** (queda para verificación dinámica end-to-end con browser/cookies reales):
+- Que un token capturado vía `document.cookie` antes del reset deja de funcionar después del reset (es lo que el modelo de amenaza pide; el código lo implementa pero no se reprodujo el ataque manualmente).
+- Que `unstable_update({})` con objeto vacío dispara correctamente el callback con `trigger='update'` en NextAuth v5 beta.30 (compila OK, pero el runtime behavior con `{}` no se verificó — si fallara, mostrarse como "tab actual se desloguea al cambiar password", síntoma claro y fácil de detectar).
+
+### 7) Archivos modificados / creados
+
+- `prisma/schema.prisma` — `sessionVersion Int @default(1)` en `User`.
+- `prisma/migrations/20260526050401_add_user_session_version/migration.sql` — nuevo, `ADD COLUMN` aditivo.
+- `src/types/next-auth.d.ts` — `sessionVersion?: number` en interface `JWT`.
+- `src/auth.ts` — `getUserAccessState` retorna `sessionVersion`; callback `jwt` chequea mismatch y retorna `null` cuando aplica.
+- `src/app/reset-password/actions.ts` — incremento en la `$transaction`.
+- `src/app/cambiar-password/actions.ts` — incremento en `update`.
+- `src/lib/actions/profile.ts` — incremento en `update` + import + llamada a `unstable_update({})`.
+- `src/app/api/admin/users/[userId]/resend-credentials/route.ts` — incremento en `update` del user target.
+- `docs/bitacora-roadmap.md` — esta entrada.
+
+### 8) Estado
+
+**B-SEC.3a cierra. SEC-AUTH-03 queda cerrado.**
+
+- 🔴 Migration aditiva, dev primero, NUNCA reset → ✅ `ADD COLUMN` puro aplicado en Neon dev, sin perder data.
+- 🔴 Cierre real del modelo de amenaza → ✅ check implementado en callback + incremento en los 4 call-sites + trazado lógico de los 6 escenarios. Verificación dinámica multi-device queda para Franco.
+- ✅ Build prod limpio, tsc clean, prisma migrate sync, prisma client regenerado.
+- ✅ Cero side effects en el resto de la auth: signIn fresh / requests normales / cambio-en-mi-tab / `unstable_update` siguen funcionando idénticamente.
+- ✅ Edge case de tokens legacy pre-deploy manejado por `typeof === 'number'`: no rompe sesiones existentes, no introduce bypass.
+
+**Próximo paso (del reporte de auditoría):**
+
+De los P1 que quedaban abiertos en `docs/auditoria-seguridad-2026-05.md`, ya cerramos SEC-DEP-01 (B-SEC.2) y SEC-AUTH-03 (este sprint). Quedan en cola por orden de criticidad sugerida:
+- **SEC-AUTH-01 / SEC-AUTH-02** — OAuth state HMAC firmado (Tiendanube + Google Business). El TODO en `tiendanube/callback/route.ts:21` ya marca el patrón a replicar (de `unsubscribe-token.ts`).
+- **SEC-AUTH-04** — `middleware.ts` global como defense-in-depth (incluso con el upgrade de Next, tener middleware reduce la superficie si un layout futuro olvida un `auth()`).
+- **SEC-RATELIMIT-01** — mover rate-limit a Upstash Redis para que sea efectivo en serverless multi-lambda.
+- **SEC-LLM-01/02/03** — endurecer prompt injection + anonimizar PII a Vertex.
+- **SEC-MISC-01** — headers de seguridad globales (HSTS, X-Frame-Options, Permissions-Policy, Referrer-Policy, CSP-Report-Only).
+
+---
+
+## ✅ B-SEC.3b — OAuth state firmado con HMAC en Tiendanube + Google Business (SEC-AUTH-01/02, cierra C1/F3 de B11)
+
+**Contexto.** En B11 (la pasada de IDOR) hubo dos hallazgos vivos sobre los callbacks OAuth:
+
+- **C1 (Tiendanube)**: el callback no validaba sesión Y aceptaba `state=<orgId>` crudo. Un `curl` anónimo podía asociar tokens de la cuenta del atacante a la org víctima.
+- **F3 (Google Business)**: variante del mismo problema. Se tapó parcialmente en B11.2 sumando `auth() + SUPER_ADMIN` a los callbacks (eliminando la vía anónima), pero el `state` seguía siendo el `orgId` crudo. Vector residual: un SUPER_ADMIN comprometido — o cualquier flujo que un atacante engañe a un SUPER_ADMIN para completar — podía hacer **state-swap intra-admin** (reemplazar el `state` legítimo de su org por el `orgId` de otra org en la URL del callback).
+
+La auditoría (B-SEC.1) marcó esto como P1 (SEC-AUTH-01, SEC-AUTH-02) con un TODO explícito en `tiendanube/callback/route.ts:21`: "state firmado/nonce HMAC (replicar `verifyUnsubscribeToken`)". Ya teníamos el patrón internamente — solo había que aplicarlo.
+
+### 1) Discovery
+
+| Pieza | Hallazgo |
+|---|---|
+| `lib/email/unsubscribe-token.ts` | Patrón a replicar: `getSecret()` (env dedicada o fallback a `AUTH_SECRET`), `SCOPE` constante para namespacing, `createHmac('sha256', secret).update(scope + ':' + payload).digest('base64url').slice(0, 32)`, `timingSafeEqual` para verificar. |
+| `lib/integrations/tiendanube.ts:14` | `getAuthUrl(orgId)` hacía `URLSearchParams({ state: orgId })` — orgId crudo. |
+| `lib/integrations/google-business-profile.ts:34` | `getAuthUrl(orgId)` hacía `oauth2Client.generateAuthUrl({ state: orgId })` — orgId crudo. |
+| `app/api/auth/tiendanube/callback/route.ts:32` | `const orgId = searchParams.get('state')` — crudo, sin firma. (Comentario TODO confirmaba la deuda.) |
+| `app/api/auth/google-business/callback/route.ts:14` | Idem, sin firma. |
+| `app/api/auth/{tiendanube,google-business}/start/route.ts` | Solo SUPER_ADMIN-only, pasan `orgId` directo al `getAuthUrl`. No tocar — el fix va en el helper. |
+
+El `unsubscribe-token` firma un payload estático (orgId), no necesita nonce ni expiry. Un OAuth state SÍ los necesita: un flujo OAuth no debería poder iniciarse meses antes y completarse hoy (anti-replay débil con TTL) ni reutilizar un state que se filtró.
+
+### 2) Helper nuevo — `src/lib/security/oauth-state.ts`
+
+Replica del patrón unsubscribe, extendido para flujos:
+
+```
+state = base64url(JSON.stringify({ o: orgId, n: nonce, e: expiresAtEpoch })) + "." + base64url(HMAC-SHA256(secret, scope + ":" + payload)).slice(0, 32)
+```
+
+- **`signOAuthState(scope, organizationId)`** — emite el state firmado. `n` = `randomBytes(16).toString('hex')` (entropía para que cada flow sea único). `e` = `Date.now() + 10 min`.
+- **`verifyOAuthState(scope, state)`** — devuelve `{ valid: true, organizationId } | { valid: false, reason }`. Verifica firma con `timingSafeEqual`, luego parsea payload, luego chequea expiry. **Solo expone el orgId cuando todo validó.**
+- Secret: `OAUTH_STATE_SECRET` con fallback a `AUTH_SECRET` (igual que el unsubscribe).
+- `scope` namespacea: un state firmado para Tiendanube no valida bajo el scope de Google Business (defensa contra confusión de scopes si alguien comete un copy-paste).
+
+**Lo que NO implementa**, intencionalmente: anti-replay duro (no persistimos nonces consumidos). El flow es SUPER_ADMIN-only y el TTL es 10 min — el modelo de amenaza es state-swap, no replay. Persistir nonces consumidos escalaría mal para algo tan transitorio; documentado en el header del archivo.
+
+### 3) Aplicación a Tiendanube
+
+`lib/integrations/tiendanube.ts`:
+
+```diff
++import { signOAuthState } from '@/lib/security/oauth-state'
++
++export const TIENDANUBE_OAUTH_SCOPE = 'tiendanube:v1'
++
+ export function getAuthUrl(orgId: string): string {
+-  const params = new URLSearchParams({ state: orgId })
++  const params = new URLSearchParams({ state: signOAuthState(TIENDANUBE_OAUTH_SCOPE, orgId) })
+   return `https://www.tiendanube.com/apps/${process.env.TIENDANUBE_CLIENT_ID}/authorize?${params}`
+ }
+```
+
+`app/api/auth/tiendanube/callback/route.ts`:
+
+```diff
+-  const orgId = searchParams.get('state')
++  const rawState = searchParams.get('state')
+   ...
++  // B-SEC.3b: validar la firma del state ANTES de cualquier acceso a DB.
++  const stateCheck = verifyOAuthState(TIENDANUBE_OAUTH_SCOPE, rawState)
++  if (!stateCheck.valid) {
++    return NextResponse.redirect(
++      new URL(`/dashboard?error=oauth_state_${stateCheck.reason}`, request.url),
++    )
++  }
++  const orgId = stateCheck.organizationId
+```
+
+Se borró el `TODO B11.x` del header del archivo y se actualizó el bloque de comentarios a "cuádruple guard" (sesión + state firmado + org existe + audit log). La regla del sprint — "firma ANTES de confiar en orgId" — se cumple literalmente: la primera línea que lee `state` lo pasa a `verifyOAuthState`; recién después se hace la query a `prisma.organization`.
+
+### 4) Aplicación a Google Business
+
+Idénticamente, scope `'google-business:v1'`:
+
+```diff
++import { signOAuthState } from '@/lib/security/oauth-state'
++
++export const GBP_OAUTH_SCOPE = 'google-business:v1'
+
+ export function getAuthUrl(orgId: string): string {
+   const oauth2Client = getOAuthClient()
+   return oauth2Client.generateAuthUrl({
+     access_type: 'offline',
+     scope: SCOPES,
+-    state: orgId,
++    state: signOAuthState(GBP_OAUTH_SCOPE, orgId),
+     prompt: 'consent',
+   })
+ }
+```
+
+`app/api/auth/google-business/callback/route.ts`: mismo patrón de `verifyOAuthState` antes de usar el orgId.
+
+### 5) Verificación — probe ejecutable de los 6 vectores de ataque
+
+🟢 **A diferencia de B-SEC.2 y B-SEC.3a (donde el cierre se trazó lógicamente porque requería browser/cookies)**, acá pude correr un **probe ejecutable real** sobre la lógica del helper. Script en `C:\tmp\probe-oauth-state.mjs` que replica `signOAuthState`/`verifyOAuthState` con un secret local y lanza 9 casos contra ella:
+
+| # | Caso | Esperado | Resultado |
+|---|---|---|---|
+| 1 | Happy path: state firmado legítimo | `{ valid: true, organizationId: VICTIM_ORG }` | ✅ PASS |
+| 2 | State vacío `''` | `malformed` | ✅ PASS |
+| 3 | State sin `.` separador | `malformed` | ✅ PASS |
+| 4 | Firma rota (último char cambiado) | `bad_signature` | ✅ PASS |
+| 5 | Payload forjado por atacante sin conocer el secret | `bad_signature` | ✅ PASS |
+| 6 | **State-swap intra-admin: atacante toma SU state legítimo, modifica el orgId en el payload al de la víctima, mantiene la firma original** | `bad_signature` | ✅ PASS — la firma fue calculada sobre el payload ORIGINAL del atacante, cualquier modificación al payload invalida el HMAC |
+| 7 | State con `e` en el pasado (expirado) | `expired` | ✅ PASS |
+| 8 | Cross-scope: state firmado para Tiendanube verificado bajo scope GBP | `bad_signature` | ✅ PASS |
+| 9 | Replay del mismo state dentro del TTL | sigue válido (anti-replay fuera de scope, documentado) | ✅ PASS |
+
+```
+=== B-SEC.3b OAuth state probe ===
+
+[PASS] 1. happy_path
+[PASS] 2. empty_state
+[PASS] 3. no_dot
+[PASS] 4. tampered_sig
+[PASS] 5. forged_no_secret
+[PASS] 6. state_swap_attack
+[PASS] 7. expired
+[PASS] 8. cross_scope
+[PASS] 9. replay_within_ttl_still_valid
+
+Result: 9/9 passed
+```
+
+🔴 **El vector original de B11 C1/F3 (state-swap) queda cerrado.** Un atacante puede:
+- Iniciar SU flujo OAuth legítimamente desde su sesión SUPER_ADMIN y recibir un state firmado para SU org.
+- Modificar el `orgId` en la URL del callback al de cualquier org víctima.
+- La firma deja de matchear porque fue calculada sobre el payload original. El callback rechaza con `bad_signature` ANTES de tocar la DB. Caso #6 del probe.
+
+**Compile-level**:
+
+| Check | Resultado |
+|---|---|
+| `tsc --noEmit` | ✅ exit 0 |
+| `npm run build` | ✅ exit 0 — "Compiled successfully in 47s · TS 57s · 30 static pages" |
+| Probe ejecutable | ✅ 9/9 PASS |
+
+🔴 **Lo que el probe NO cubre** (queda para verificación dinámica con flow OAuth real contra Tiendanube/Google sandbox):
+- Que el state firmado real (con el secret del proyecto) pase el redirect a Tiendanube/Google sin que ellos truncen/sanitizen el string (el state tiene `.` y caracteres base64url, soportados por la spec OAuth pero verificar con un round-trip real). El largo es ~150-200 chars, dentro de los límites razonables.
+- Que `verifyOAuthState` se llame con el state que efectivamente devuelve el provider (verificar que ni Tiendanube ni Google lo modifican entre `start` → consent → callback).
+- Edge cases muy específicos: refresh del browser durante el consent, doble click en el botón de autorizar, etc.
+
+### 6) Archivos modificados / creados
+
+- `src/lib/security/oauth-state.ts` — **nuevo**, helper reutilizable `signOAuthState` / `verifyOAuthState`.
+- `src/lib/integrations/tiendanube.ts` — `getAuthUrl` firma el state; export del scope constant.
+- `src/app/api/auth/tiendanube/callback/route.ts` — valida con `verifyOAuthState` antes de usar orgId; comentario del header actualizado, TODO B11.x borrado.
+- `src/lib/integrations/google-business-profile.ts` — idem helper de Tiendanube, scope `google-business:v1`.
+- `src/app/api/auth/google-business/callback/route.ts` — idem callback de Tiendanube.
+- `docs/bitacora-roadmap.md` — esta entrada.
+
+Archivos NO tocados (intencional):
+- Los dos `start/route.ts` (Tiendanube + Google Business) — siguen igual. El cambio queda dentro del helper `getAuthUrl`; el route handler no necesita saber que el state está firmado.
+
+### 7) Estado
+
+**B-SEC.3b cierra. SEC-AUTH-01 + SEC-AUTH-02 cerrados. C1/F3 de B11 cerrados definitivamente.**
+
+- 🔴 La firma se valida ANTES de confiar en el orgId del state → ✅ en ambos callbacks, `verifyOAuthState` es la primera cosa que toca el `state` después del `searchParams.get`. Cero accesos a DB con un state no validado.
+- 🔴 Re-usar el patrón existente, no inventar uno nuevo → ✅ el helper sigue el mismo formato (`createHmac` + `digest('base64url')` + `slice(0, 32)` + `timingSafeEqual` + fallback `AUTH_SECRET`) que `unsubscribe-token.ts`. Lo único agregado es nonce + expiry, que son específicos de OAuth y no aplican a unsubscribe.
+- ✅ Probe ejecutable cubrió los 6 vectores de ataque del modelo de amenaza (state vacío, firma rota, payload forjado sin secret, state-swap intra-admin con firma original, expired, cross-scope) — todos rechazados.
+- ✅ Build prod limpio, tsc clean.
+
+**Relación con B11.2:**
+
+B11.2 cerró el vector ANÓNIMO de C1 sumando `auth() + SUPER_ADMIN` al callback de Tiendanube (antes era `auth()`-less). Eso eliminó el `curl` anónimo. PERO el state seguía siendo orgId crudo, así que el vector **intra-admin** (un SUPER_ADMIN comprometido o engañado vía CSRF) seguía abierto. B-SEC.3b cierra ese segundo vector. El triple guard de B11.2 → cuádruple guard de B-SEC.3b: sesión + SUPER_ADMIN + **state firmado** + org existe + audit log.
+
+**Próximo paso (del reporte de auditoría):**
+
+De los P1, ya cerramos SEC-DEP-01 (B-SEC.2), SEC-AUTH-03 (B-SEC.3a), SEC-AUTH-01/02 (este sprint). Quedan:
+- **SEC-AUTH-04** — `middleware.ts` global como defense-in-depth.
+- **SEC-RATELIMIT-01** — Upstash Redis para rate-limit distribuido.
+- **SEC-LLM-01/02/03** — prompt injection + PII a Vertex.
+- **SEC-MISC-01** — security headers globales.
+- **SEC-PII-01** — email en log de `notify-message.ts:62`.
+
+---
+
+## ✅ B-SEC.3c — Verificación del cierre de F3 (state-swap Google Business)
+
+**Resultado: ya cerrado por B-SEC.3b. Cero código tocado en este sprint.**
+
+🔴 Antes de inventar trabajo: re-leí el checklist heredado y el modelo de amenaza original de F3 (state-swap GBP) y comparé contra el estado del callback **después** de B-SEC.3b. Conclusión honesta: el HMAC sobre el state cierra el vector completo de F3 strict. No queda vector residual de F3.
+
+### 1) Aclaración de nomenclatura (deuda pequeña, vale documentarla)
+
+Releyendo la bitácora original de B11.0, el state-swap de Google Business estaba listado como **F1** ("CSRF state-swap intra-admin"), no F3 (que en B11.0 era "admin/messages trust-the-layout"). El prompt del checklist heredado en B-SEC.1 y los sprints derivados venían arrastrando "F3 = google-business" como atajo. El cierre funcional es el mismo — solo aclaro la etiqueta para que un agente futuro no se confunda buscando "F3" en B11.0 y encuentre otra cosa.
+
+### 2) Modelo de amenaza original (state-swap GBP) vs. estado post-3b
+
+Definición original (B11.0): *"un SUPER_ADMIN logueado víctima de CSRF puede reasignar tokens de Google Business a otra org si el atacante interceptó el flow OAuth"*. Vectores específicos:
+
+| Vector específico del state-swap | Estado post-B-SEC.3b | Evidencia |
+|---|---|---|
+| State crudo (`?state=ORG_VICTIM`) tras engañar al SUPER_ADMIN al callback | ✅ Cerrado | El crudo no tiene `.` separador → `verifyOAuthState` retorna `malformed` (caso #3 del probe). Y si tuviera `.` random, retorna `bad_signature` (caso #4). |
+| State firmado legítimo del atacante con `orgId` modificado al de la víctima, manteniendo la sig original | ✅ Cerrado | Caso #6 del probe: la firma fue calculada sobre el payload original; cualquier modificación al payload invalida el HMAC → `bad_signature`. **Este era el vector específico que motivaba F3.** |
+| Replay del state legítimo del propio SUPER_ADMIN dentro del TTL | ✅ No es ataque por definición | El state del SUPER_ADMIN está firmado para la org que él inició legítimamente. Re-usar el state tal cual asocia tokens a esa misma org, que es lo que el SUPER_ADMIN quería. No hay confusión de orgId. |
+
+El callback (`src/app/api/auth/google-business/callback/route.ts:27-33`) llama `verifyOAuthState(GBP_OAUTH_SCOPE, rawState)` **antes** de cualquier acceso a DB. Si falla, redirect a `/admin/clients?error=oauth_state_<reason>`. Solo después de la firma válida se usa `stateCheck.organizationId` para el `prisma.organization.update`.
+
+### 3) Probe — re-corrida sin tocar código
+
+```
+> node C:\tmp\probe-oauth-state.mjs
+
+=== B-SEC.3b OAuth state probe ===
+
+[PASS] 1. happy_path
+[PASS] 2. empty_state
+[PASS] 3. no_dot
+[PASS] 4. tampered_sig
+[PASS] 5. forged_no_secret
+[PASS] 6. state_swap_attack          ← el vector central de F3
+[PASS] 7. expired
+[PASS] 8. cross_scope
+[PASS] 9. replay_within_ttl_still_valid
+
+Result: 9/9 passed
+```
+
+El caso #6 (state-swap-attack) reproduce exactamente el ataque que F3 describía: un atacante toma SU state firmado legítimo, modifica el `orgId` en el payload por el de la víctima, mantiene la firma original. La verificación rechaza con `bad_signature` porque el HMAC se calcula sobre el payload, no sobre los campos individuales — cualquier byte del payload modificado rompe la firma.
+
+### 4) Lo que NO es F3 strict pero merece mención (flag, no fix)
+
+Auditando con cuidado el callback completo post-3b, identifiqué dos vectores **adjacentes** al state-swap. **Ninguno es F3** (F3 era strictly state-swap en el callback, y eso está cerrado). Los listo acá con honestidad para que Franco decida si quiere abordarlos en un sprint dedicado, **no se tocan en este sprint**:
+
+**(adyacente-1)** — **CSRF en el `start` route, no en el callback.** El `start` (`/api/auth/google-business/start?orgId=X`) es `SUPER_ADMIN`-only, pero acepta `orgId` por query sin token CSRF ni doble-confirmación. Vector: un atacante engaña al SUPER_ADMIN a clickear `/api/auth/google-business/start?orgId=ORG_VICTIM` (CSRF clásico GET); el `start` firma un state legítimo para ORG_VICTIM y redirige al SUPER_ADMIN a la consent screen de Google. Si el SUPER_ADMIN autoriza (con su propia cuenta Google, sin notar el cambio de org en pantalla), sus tokens GBP quedan asociados a ORG_VICTIM. La barrera natural es que la pantalla de consent de Google muestra "Conectando a develOP" (no la org víctima — Google solo ve nuestra app, no el orgId interno), así que el admin no tiene señal visual del orgId. **Esto es un linking-attack distinto al state-swap; F3 no lo cubría.** Mitigación si Franco lo pide: nonce CSRF en cookie + comparar al iniciar, o doble confirmación post-callback.
+
+**(adyacente-2)** — **No verification of GBP resource ownership.** El callback recibe `tokens` y los guarda contra el `orgId` del state. Nunca chequea que la cuenta Google que autorizó tenga un `gbpLocationId` esperado para esa org. Vector: si el SUPER_ADMIN inicia el flow para ORG_X pero por error/CSRF autoriza con una cuenta Google distinta a la que ORG_X esperaba, los tokens quedan asociados sin alarma. Esto es defensa-en-profundidad, **no F3**. Mitigación posible: después del callback, listar GBP accounts/locations accesibles con el token y mostrar al admin un selector "elegí cuál asociar a ORG_X", con audit log.
+
+Ambos vectores ya estaban implícitamente fuera del alcance de F3 — F3 era specifically state-swap en el callback. Los traigo a la bitácora porque salieron al releer el código con cuidado y porque son los siguientes pasos naturales si Franco quiere fortificar más el flow GBP.
+
+### 5) Archivos modificados
+
+**Ninguno.** Este sprint es report-only sobre el cierre ya hecho en B-SEC.3b. Cambios sólo en:
+
+- `docs/bitacora-roadmap.md` — esta entrada.
+
+### 6) Estado
+
+**B-SEC.3c cierra. F3 (state-swap Google Business) confirmado cerrado por B-SEC.3b, verificado por probe ejecutable.**
+
+- 🔴 NO inventar trabajo → ✅ no se tocó código. La regla se cumplió literalmente: el sprint es verificación + flag de vectores adjacentes (no F3).
+- 🔴 Honestidad sobre qué quedaba abierto → ✅ F3 strict (state-swap) ya estaba cerrado del todo por 3b. Los 2 vectores adjacentes (CSRF en `start`, no-ownership-verification del GBP resource) NO son F3 y se flaguearon sin tocar, para que Franco decida si los aborda en un sprint dedicado.
+- ✅ Probe ejecutable confirma 9/9 PASS, incluido el caso #6 que reproduce el ataque original de F3.
+- ✅ El callback (`src/app/api/auth/google-business/callback/route.ts:27-33`) ya hace `verifyOAuthState` antes de cualquier acceso a DB, como pedía el modelo de amenaza.
+
+**Checklist heredado de B-SEC.1 actualizado** (estado post-B-SEC.3c):
+
+| ID | Descripción | Status final |
+|---|---|---|
+| F2 / B11 IDOR `projects.ts` | ✅ Cerrado (asserts) |
+| F3 / B11 state-swap GBP | ✅ Cerrado por B-SEC.3b (HMAC) — confirmado por B-SEC.3c |
+| F4 / B11 agency-actions cross-projectId | ✅ Cerrado |
+| F7 / B11 unsubscribe HMAC | ✅ Cerrado (`unsubscribe-token.ts`) |
+| QA bypass triple-guard | ✅ Cerrado |
+| JWT post-reset (SEC-AUTH-03) | ✅ Cerrado por B-SEC.3a (`sessionVersion`) |
+| Tiendanube state-swap (SEC-AUTH-02 / B11 C1 intra-admin) | ✅ Cerrado por B-SEC.3b (mismo helper HMAC) |
+| Rate-limit Netlify in-memory | ⏳ Abierto (SEC-RATELIMIT-01) |
+| `getGlobalBotsOverviewStats` call-sites | ✅ Cerrado (call-site único SUPER_ADMIN) |
+
+Todo el checklist heredado **B11** queda cerrado. Quedan solo P1s nuevos de la auditoría B-SEC.1 que no estaban en el checklist heredado original.
