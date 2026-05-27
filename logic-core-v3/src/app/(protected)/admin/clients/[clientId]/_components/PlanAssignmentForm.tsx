@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { PlanKey } from '@prisma/client'
+import { PlanKey } from '@/lib/prisma-enums'
 import { Button, Select } from '@/components/ui'
 import { assignPlanToOrg } from '../../_actions/plan.actions'
 

@@ -245,7 +245,6 @@ const DEVELOP_BOT_CONFIG = {
     { emoji: '🌐', label: 'Quiero un sitio', promptToSend: 'Quiero saber sobre desarrollo de sitios web' },
     { emoji: '🤖', label: 'Necesito IA', promptToSend: 'Quiero saber sobre implementación de IA en mi negocio' },
     { emoji: '⚙️', label: 'Automatizaciones', promptToSend: 'Quiero automatizar procesos de mi empresa' },
-    { emoji: '💰', label: '¿Cuánto cuesta?', promptToSend: '¿Cuánto cuestan sus servicios?' },
   ],
 
   routeColorMap: {

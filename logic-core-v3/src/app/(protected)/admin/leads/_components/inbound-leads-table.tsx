@@ -73,7 +73,7 @@ export function InboundLeadsTable({ leads }: InboundLeadsTableProps) {
           Leads inbound
         </p>
         <p className="mt-2 text-sm text-zinc-400">
-          Formularios que entraron desde el portal y pueden convertirse al CRM de Agency OS.
+          Formularios que entraron desde el portal y pueden convertirse al CRM interno.
         </p>
       </div>
 

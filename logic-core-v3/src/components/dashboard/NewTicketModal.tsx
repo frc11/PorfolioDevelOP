@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'motion/react'
 import { X, MessageSquarePlus, AlertCircle, Loader2 } from 'lucide-react'
 import * as z from 'zod'
 import { createTicketAction } from '@/actions/ticket-actions'
-import { TicketCategory, TicketPriority } from '@prisma/client'
+import { TicketCategory, TicketPriority } from '@/lib/prisma-enums'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 

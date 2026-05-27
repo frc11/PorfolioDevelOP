@@ -22,25 +22,25 @@ export function ColorPicker({ value, onChange, nullable }: ColorPickerProps) {
 
   return (
     <div className="space-y-3">
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2">
         <input
           type="color"
           value={swatchValue}
           onChange={(event) => onChange(event.target.value)}
-          className="h-10 w-16 cursor-pointer rounded-lg border border-white/10 bg-transparent"
+          className="h-9 w-12 cursor-pointer rounded-sm border border-white/10 bg-transparent"
         />
         <input
           type="text"
           value={value}
           onChange={(event) => onChange(event.target.value)}
-          className="flex-1 rounded-xl border border-white/10 bg-white/[0.02] px-3 py-2 font-mono text-sm text-zinc-200 placeholder:text-zinc-500 focus:border-cyan-400/30 focus:outline-none"
+          className="flex-1 rounded-sm border border-white/10 bg-white/[0.02] px-3 py-2 font-mono text-sm text-zinc-200 placeholder:text-zinc-500 focus:border-cyan-400/30 focus:outline-none"
           placeholder={nullable ? 'Sin color' : '#06b6d4'}
         />
         {nullable && (
           <button
             type="button"
             onClick={() => onChange('')}
-            className="rounded-xl border border-white/10 px-3 py-2 text-xs text-zinc-400 hover:bg-white/[0.04] hover:text-zinc-200"
+            className="rounded-sm border border-white/10 px-3 py-2 text-xs text-zinc-400 hover:bg-white/[0.04] hover:text-zinc-200"
           >
             Limpiar
           </button>
@@ -48,17 +48,18 @@ export function ColorPicker({ value, onChange, nullable }: ColorPickerProps) {
       </div>
 
       <div>
-        <p className="mb-2 text-xs text-zinc-500">Sugerencias:</p>
-        <div className="flex flex-wrap gap-2">
+        <p className="mb-2 text-xs text-zinc-500">Sugerencias</p>
+        <div className="flex flex-wrap gap-1.5">
           {PRESET_COLORS.map((color) => (
             <button
               key={color.value}
               type="button"
               onClick={() => onChange(color.value)}
               title={color.label}
-              className={`h-8 w-8 rounded-lg border-2 transition-transform hover:scale-110 ${
+              aria-label={color.label}
+              className={`h-6 w-6 rounded-sm border transition-transform hover:scale-110 ${
                 value.toLowerCase() === color.value.toLowerCase()
-                  ? 'border-white/40'
+                  ? 'border-white/40 ring-1 ring-white/30'
                   : 'border-white/10'
               }`}
               style={{ backgroundColor: color.value }}

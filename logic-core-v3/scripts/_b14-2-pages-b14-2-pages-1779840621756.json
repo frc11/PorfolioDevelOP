@@ -1,0 +1,419 @@
+{
+  "runId": "b14-2-pages-1779840621756",
+  "baseUrl": "https://develop-portfolio.netlify.app",
+  "samplesPerPage": 5,
+  "summary": {
+    "/": {
+      "samples": 5,
+      "ok": 5,
+      "ttfb": {
+        "n": 5,
+        "min": 54,
+        "p50": 55,
+        "p95": 1269,
+        "max": 1269,
+        "mean": 298
+      },
+      "coldFirst": 1269
+    },
+    "/login": {
+      "samples": 5,
+      "ok": 0,
+      "ttfb": {
+        "n": 0
+      },
+      "coldFirst": null
+    },
+    "/forgot-password": {
+      "samples": 5,
+      "ok": 0,
+      "ttfb": {
+        "n": 0
+      },
+      "coldFirst": null
+    },
+    "/contact": {
+      "samples": 5,
+      "ok": 5,
+      "ttfb": {
+        "n": 5,
+        "min": 52,
+        "p50": 54,
+        "p95": 229,
+        "max": 229,
+        "mean": 89
+      },
+      "coldFirst": 229
+    },
+    "/web-development": {
+      "samples": 5,
+      "ok": 5,
+      "ttfb": {
+        "n": 5,
+        "min": 52,
+        "p50": 54,
+        "p95": 434,
+        "max": 434,
+        "mean": 130
+      },
+      "coldFirst": 434
+    },
+    "/software-development": {
+      "samples": 5,
+      "ok": 5,
+      "ttfb": {
+        "n": 5,
+        "min": 52,
+        "p50": 53,
+        "p95": 540,
+        "max": 540,
+        "mean": 150
+      },
+      "coldFirst": 540
+    },
+    "/process-automation": {
+      "samples": 5,
+      "ok": 5,
+      "ttfb": {
+        "n": 5,
+        "min": 50,
+        "p50": 53,
+        "p95": 397,
+        "max": 397,
+        "mean": 122
+      },
+      "coldFirst": 397
+    }
+  },
+  "raw": {
+    "/": [
+      {
+        "url": "https://develop-portfolio.netlify.app/",
+        "httpStatus": 200,
+        "err": null,
+        "ttfbMs": 1269,
+        "totalMs": 1319,
+        "bytes": 138274,
+        "at": "2026-05-27T00:10:23.077Z"
+      },
+      {
+        "url": "https://develop-portfolio.netlify.app/",
+        "httpStatus": 200,
+        "err": null,
+        "ttfbMs": 54,
+        "totalMs": 104,
+        "bytes": 138274,
+        "at": "2026-05-27T00:10:25.190Z"
+      },
+      {
+        "url": "https://develop-portfolio.netlify.app/",
+        "httpStatus": 200,
+        "err": null,
+        "ttfbMs": 54,
+        "totalMs": 105,
+        "bytes": 138274,
+        "at": "2026-05-27T00:10:27.302Z"
+      },
+      {
+        "url": "https://develop-portfolio.netlify.app/",
+        "httpStatus": 200,
+        "err": null,
+        "ttfbMs": 55,
+        "totalMs": 105,
+        "bytes": 138274,
+        "at": "2026-05-27T00:10:29.415Z"
+      },
+      {
+        "url": "https://develop-portfolio.netlify.app/",
+        "httpStatus": 200,
+        "err": null,
+        "ttfbMs": 57,
+        "totalMs": 106,
+        "bytes": 138274,
+        "at": "2026-05-27T00:10:31.524Z"
+      }
+    ],
+    "/login": [
+      {
+        "url": "https://develop-portfolio.netlify.app/login",
+        "httpStatus": 404,
+        "err": null,
+        "ttfbMs": 3134,
+        "totalMs": 3151,
+        "bytes": 22081,
+        "at": "2026-05-27T00:10:36.689Z"
+      },
+      {
+        "url": "https://develop-portfolio.netlify.app/login",
+        "httpStatus": 404,
+        "err": null,
+        "ttfbMs": 438,
+        "totalMs": 438,
+        "bytes": 22081,
+        "at": "2026-05-27T00:10:39.130Z"
+      },
+      {
+        "url": "https://develop-portfolio.netlify.app/login",
+        "httpStatus": 404,
+        "err": null,
+        "ttfbMs": 328,
+        "totalMs": 342,
+        "bytes": 22081,
+        "at": "2026-05-27T00:10:41.484Z"
+      },
+      {
+        "url": "https://develop-portfolio.netlify.app/login",
+        "httpStatus": 404,
+        "err": null,
+        "ttfbMs": 366,
+        "totalMs": 367,
+        "bytes": 22081,
+        "at": "2026-05-27T00:10:43.865Z"
+      },
+      {
+        "url": "https://develop-portfolio.netlify.app/login",
+        "httpStatus": 404,
+        "err": null,
+        "ttfbMs": 317,
+        "totalMs": 317,
+        "bytes": 22081,
+        "at": "2026-05-27T00:10:46.190Z"
+      }
+    ],
+    "/forgot-password": [
+      {
+        "url": "https://develop-portfolio.netlify.app/forgot-password",
+        "httpStatus": 404,
+        "err": null,
+        "ttfbMs": 277,
+        "totalMs": 278,
+        "bytes": 22081,
+        "at": "2026-05-27T00:10:48.475Z"
+      },
+      {
+        "url": "https://develop-portfolio.netlify.app/forgot-password",
+        "httpStatus": 404,
+        "err": null,
+        "ttfbMs": 287,
+        "totalMs": 287,
+        "bytes": 22081,
+        "at": "2026-05-27T00:10:50.776Z"
+      },
+      {
+        "url": "https://develop-portfolio.netlify.app/forgot-password",
+        "httpStatus": 404,
+        "err": null,
+        "ttfbMs": 281,
+        "totalMs": 281,
+        "bytes": 22081,
+        "at": "2026-05-27T00:10:53.065Z"
+      },
+      {
+        "url": "https://develop-portfolio.netlify.app/forgot-password",
+        "httpStatus": 404,
+        "err": null,
+        "ttfbMs": 280,
+        "totalMs": 280,
+        "bytes": 22081,
+        "at": "2026-05-27T00:10:55.349Z"
+      },
+      {
+        "url": "https://develop-portfolio.netlify.app/forgot-password",
+        "httpStatus": 404,
+        "err": null,
+        "ttfbMs": 311,
+        "totalMs": 311,
+        "bytes": 22081,
+        "at": "2026-05-27T00:10:57.661Z"
+      }
+    ],
+    "/contact": [
+      {
+        "url": "https://develop-portfolio.netlify.app/contact",
+        "httpStatus": 200,
+        "err": null,
+        "ttfbMs": 229,
+        "totalMs": 229,
+        "bytes": 27272,
+        "at": "2026-05-27T00:10:59.894Z"
+      },
+      {
+        "url": "https://develop-portfolio.netlify.app/contact",
+        "httpStatus": 200,
+        "err": null,
+        "ttfbMs": 54,
+        "totalMs": 54,
+        "bytes": 27272,
+        "at": "2026-05-27T00:11:01.956Z"
+      },
+      {
+        "url": "https://develop-portfolio.netlify.app/contact",
+        "httpStatus": 200,
+        "err": null,
+        "ttfbMs": 52,
+        "totalMs": 52,
+        "bytes": 27272,
+        "at": "2026-05-27T00:11:04.009Z"
+      },
+      {
+        "url": "https://develop-portfolio.netlify.app/contact",
+        "httpStatus": 200,
+        "err": null,
+        "ttfbMs": 56,
+        "totalMs": 56,
+        "bytes": 27272,
+        "at": "2026-05-27T00:11:06.074Z"
+      },
+      {
+        "url": "https://develop-portfolio.netlify.app/contact",
+        "httpStatus": 200,
+        "err": null,
+        "ttfbMs": 54,
+        "totalMs": 55,
+        "bytes": 27272,
+        "at": "2026-05-27T00:11:08.134Z"
+      }
+    ],
+    "/web-development": [
+      {
+        "url": "https://develop-portfolio.netlify.app/web-development",
+        "httpStatus": 200,
+        "err": null,
+        "ttfbMs": 434,
+        "totalMs": 538,
+        "bytes": 200500,
+        "at": "2026-05-27T00:11:10.686Z"
+      },
+      {
+        "url": "https://develop-portfolio.netlify.app/web-development",
+        "httpStatus": 200,
+        "err": null,
+        "ttfbMs": 52,
+        "totalMs": 103,
+        "bytes": 200500,
+        "at": "2026-05-27T00:11:12.800Z"
+      },
+      {
+        "url": "https://develop-portfolio.netlify.app/web-development",
+        "httpStatus": 200,
+        "err": null,
+        "ttfbMs": 55,
+        "totalMs": 104,
+        "bytes": 200500,
+        "at": "2026-05-27T00:11:14.917Z"
+      },
+      {
+        "url": "https://develop-portfolio.netlify.app/web-development",
+        "httpStatus": 200,
+        "err": null,
+        "ttfbMs": 53,
+        "totalMs": 105,
+        "bytes": 200500,
+        "at": "2026-05-27T00:11:17.031Z"
+      },
+      {
+        "url": "https://develop-portfolio.netlify.app/web-development",
+        "httpStatus": 200,
+        "err": null,
+        "ttfbMs": 54,
+        "totalMs": 108,
+        "bytes": 200500,
+        "at": "2026-05-27T00:11:19.139Z"
+      }
+    ],
+    "/software-development": [
+      {
+        "url": "https://develop-portfolio.netlify.app/software-development",
+        "httpStatus": 200,
+        "err": null,
+        "ttfbMs": 540,
+        "totalMs": 632,
+        "bytes": 184456,
+        "at": "2026-05-27T00:11:21.783Z"
+      },
+      {
+        "url": "https://develop-portfolio.netlify.app/software-development",
+        "httpStatus": 200,
+        "err": null,
+        "ttfbMs": 53,
+        "totalMs": 103,
+        "bytes": 184456,
+        "at": "2026-05-27T00:11:23.890Z"
+      },
+      {
+        "url": "https://develop-portfolio.netlify.app/software-development",
+        "httpStatus": 200,
+        "err": null,
+        "ttfbMs": 54,
+        "totalMs": 104,
+        "bytes": 184456,
+        "at": "2026-05-27T00:11:26.005Z"
+      },
+      {
+        "url": "https://develop-portfolio.netlify.app/software-development",
+        "httpStatus": 200,
+        "err": null,
+        "ttfbMs": 53,
+        "totalMs": 113,
+        "bytes": 184456,
+        "at": "2026-05-27T00:11:28.120Z"
+      },
+      {
+        "url": "https://develop-portfolio.netlify.app/software-development",
+        "httpStatus": 200,
+        "err": null,
+        "ttfbMs": 52,
+        "totalMs": 102,
+        "bytes": 184456,
+        "at": "2026-05-27T00:11:30.223Z"
+      }
+    ],
+    "/process-automation": [
+      {
+        "url": "https://develop-portfolio.netlify.app/process-automation",
+        "httpStatus": 200,
+        "err": null,
+        "ttfbMs": 397,
+        "totalMs": 455,
+        "bytes": 150028,
+        "at": "2026-05-27T00:11:32.686Z"
+      },
+      {
+        "url": "https://develop-portfolio.netlify.app/process-automation",
+        "httpStatus": 200,
+        "err": null,
+        "ttfbMs": 50,
+        "totalMs": 103,
+        "bytes": 150028,
+        "at": "2026-05-27T00:11:34.797Z"
+      },
+      {
+        "url": "https://develop-portfolio.netlify.app/process-automation",
+        "httpStatus": 200,
+        "err": null,
+        "ttfbMs": 52,
+        "totalMs": 103,
+        "bytes": 150028,
+        "at": "2026-05-27T00:11:36.902Z"
+      },
+      {
+        "url": "https://develop-portfolio.netlify.app/process-automation",
+        "httpStatus": 200,
+        "err": null,
+        "ttfbMs": 56,
+        "totalMs": 109,
+        "bytes": 150028,
+        "at": "2026-05-27T00:11:39.018Z"
+      },
+      {
+        "url": "https://develop-portfolio.netlify.app/process-automation",
+        "httpStatus": 200,
+        "err": null,
+        "ttfbMs": 53,
+        "totalMs": 105,
+        "bytes": 150028,
+        "at": "2026-05-27T00:11:41.137Z"
+      }
+    ]
+  }
+}

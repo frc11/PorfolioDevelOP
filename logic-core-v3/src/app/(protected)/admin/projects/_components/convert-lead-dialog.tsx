@@ -149,8 +149,8 @@ export function ConvertLeadDialog({
           <div className="relative max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-[28px] border border-white/10 bg-[#0c1016]/95 p-6 shadow-[0_30px_120px_rgba(0,0,0,0.55)] backdrop-blur-xl">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <p className="text-[10px] uppercase tracking-[0.24em] text-zinc-500">
-                  Agency OS / Leads / Conversión
+                <p className="text-xs tracking-tight text-zinc-500">
+                  develOP / Leads / Conversión
                 </p>
                 <h3 className="mt-2 text-2xl font-semibold tracking-tight text-white">
                   Convertir lead en proyecto

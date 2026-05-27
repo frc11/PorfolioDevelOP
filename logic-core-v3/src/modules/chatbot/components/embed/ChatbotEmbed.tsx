@@ -2,11 +2,12 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
-import { Send, Sparkles, Volume2, VolumeX } from 'lucide-react'
+import { Send, Sparkles } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 import { useChatbot } from '../../hooks/useChatbot'
 import { useChatbotSounds } from '../../hooks/useChatbotSounds'
 import { renderToolCall } from '../tool-cards'
+import { ChatHeader } from '../chat/ChatHeader'
 import { DegradedBanner } from '../chat/DegradedBanner'
 
 interface ChatbotEmbedProps {
@@ -160,136 +161,15 @@ export function ChatbotEmbed({ slug }: ChatbotEmbedProps) {
         fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
       }}
     >
-      {/* Header */}
-      <div
-        style={{
-          padding: '14px 18px',
-          borderBottom: '1px solid rgba(255,255,255,0.06)',
-          background: 'rgba(255,255,255,0.02)',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '12px',
-          position: 'relative',
-          flexShrink: 0,
-        }}
-      >
-        {/* Top accent line */}
-        <div
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: '10%',
-            right: '10%',
-            height: '1px',
-            background:
-              'linear-gradient(90deg, transparent, rgba(6,182,212,0.65) 35%, rgba(124,58,237,0.5) 65%, transparent)',
-          }}
-        />
-
-        {/* Bot avatar mini */}
-        <div
-          style={{
-            width: '38px',
-            height: '38px',
-            borderRadius: '50%',
-            flexShrink: 0,
-            background:
-              'radial-gradient(circle at 38% 35%, rgba(6,182,212,0.95) 0%, rgba(6,182,212,0.55) 45%, rgba(6,182,212,0.18) 100%)',
-            border: '1px solid rgba(6,182,212,0.35)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            boxShadow: '0 0 18px rgba(6,182,212,0.25), inset 0 1px 0 rgba(255,255,255,0.2)',
-          }}
-        >
-          <svg width="22" height="20" viewBox="0 0 22 20" fill="none">
-            <ellipse
-              cx="7" cy="9" rx="2" ry={isThinking ? 0.4 : 2}
-              fill="white" fillOpacity="0.95"
-              style={{ filter: 'drop-shadow(0 0 3px rgba(6,182,212,0.8))' }}
-            />
-            <ellipse
-              cx="15" cy="9" rx="2" ry={isThinking ? 0.4 : 2}
-              fill="white" fillOpacity="0.95"
-              style={{ filter: 'drop-shadow(0 0 3px rgba(6,182,212,0.8))' }}
-            />
-            <path
-              d={isThinking ? 'M 7 15 Q 11 14 15 15' : 'M 7 15 Q 11 18 15 15'}
-              stroke="white" strokeOpacity="0.85" strokeWidth="1.5"
-              strokeLinecap="round" fill="none"
-              style={{ filter: 'drop-shadow(0 0 2px rgba(6,182,212,0.6))' }}
-            />
-          </svg>
-        </div>
-
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <p
-            style={{
-              fontSize: '13px',
-              fontWeight: 600,
-              color: 'rgba(255,255,255,0.85)',
-              margin: 0,
-              letterSpacing: '0.01em',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
-            }}
-          >
-            {config.botName}
-          </p>
-          <p style={{ fontSize: '11px', margin: 0, color: isThinking ? 'rgba(120,160,255,0.7)' : 'rgba(80,220,130,0.6)' }}>
-            {isThinking ? 'Pensando...' : '🟢 Disponible ahora'}
-          </p>
-        </div>
-
-        <button
-          onClick={sounds.toggleMute}
-          aria-label={sounds.muted ? 'Activar sonido' : 'Silenciar'}
-          aria-pressed={sounds.muted}
-          style={{
-            width: '28px',
-            height: '28px',
-            borderRadius: '50%',
-            background: 'rgba(255,255,255,0.04)',
-            border: '1px solid rgba(255,255,255,0.08)',
-            color: 'rgba(255,255,255,0.45)',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            transition: 'all 200ms',
-            flexShrink: 0,
-          }}
-        >
-          {sounds.muted ? (
-            <VolumeX size={14} strokeWidth={1.5} />
-          ) : (
-            <Volume2 size={14} strokeWidth={1.5} />
-          )}
-        </button>
-
-        <button
-          onClick={() => notifyParent('close')}
-          style={{
-            width: '28px',
-            height: '28px',
-            borderRadius: '50%',
-            background: 'rgba(255,255,255,0.04)',
-            border: '1px solid rgba(255,255,255,0.08)',
-            color: 'rgba(255,255,255,0.35)',
-            fontSize: '14px',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            transition: 'all 200ms',
-            flexShrink: 0,
-          }}
-          aria-label="Cerrar chat"
-        >
-          ✕
-        </button>
-      </div>
+      {/* Header — unificado con ChatHeader (mismo AvatarRenderer + tokens) */}
+      <ChatHeader
+        config={config}
+        avatarState={chatbot.avatarState}
+        isStreaming={chatbot.isStreaming}
+        onClose={() => notifyParent('close')}
+        muted={sounds.muted}
+        onToggleMute={sounds.toggleMute}
+      />
 
       {/* Messages */}
       <div

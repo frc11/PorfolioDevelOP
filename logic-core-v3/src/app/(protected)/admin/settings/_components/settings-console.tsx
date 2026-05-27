@@ -170,8 +170,8 @@ export function SettingsConsole({
       <section className="rounded-[30px] border border-white/10 bg-white/5 p-6 backdrop-blur-xl">
         <div className="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
           <div>
-            <p className="text-[10px] uppercase tracking-[0.24em] text-zinc-500">
-              Agency OS / Configuracion
+            <p className="text-xs tracking-tight text-zinc-500">
+              develOP / Configuración
             </p>
             <h1 className="mt-2 text-3xl font-semibold tracking-tight text-white">
               Centro de control operativo
@@ -422,7 +422,7 @@ export function SettingsConsole({
 
       <section className="space-y-4">
         <SectionTitle
-          eyebrow="Agency OS"
+          eyebrow="develOP"
           title="Parametros internos del equipo"
           description="Centraliza la meta comercial semanal, el ritmo de follow-up y la composicion del equipo."
         />
@@ -433,7 +433,7 @@ export function SettingsConsole({
               <div>
                 <h2 className="text-xl font-semibold text-white">Operacion comercial</h2>
                 <p className="mt-1 text-sm text-zinc-400">
-                  Configuracion propia de Agency OS para seguimiento de demos.
+                  Configuración propia del panel para seguimiento de demos.
                 </p>
               </div>
               <SaveButton

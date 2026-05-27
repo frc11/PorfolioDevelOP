@@ -21,8 +21,8 @@ export default async function ChatbotsPage() {
     <div className="space-y-6">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="text-[10px] uppercase tracking-[0.24em] text-zinc-500">Operaciones</p>
-          <h1 className="text-3xl font-semibold tracking-tight text-zinc-100">Chatbots</h1>
+          <p className="text-xs tracking-tight text-zinc-500">Operaciones</p>
+          <h1 className="text-3xl font-medium tracking-tight text-zinc-100">Chatbots</h1>
           <p className="text-sm text-zinc-400 mt-1">
             {stats.totalBots} bots configurados · {stats.activeBots} activos
           </p>
@@ -38,28 +38,25 @@ export default async function ChatbotsPage() {
           value={stats.activeBots}
           subtitle={`de ${stats.totalBots} totales`}
           icon={Bot}
-          accent="cyan"
         />
         <StatCard
           label="Bots pausados"
           value={stats.inactiveBots}
           subtitle="no responden"
           icon={Zap}
-          accent={stats.inactiveBots > 0 ? 'amber' : 'zinc'}
+          accent={stats.inactiveBots > 0 ? 'amber' : undefined}
         />
         <StatCard
           label="Conversaciones"
           value={stats.conversationsLast30d}
           subtitle="últimos 30 días"
           icon={MessageSquare}
-          accent="violet"
         />
         <StatCard
           label="Leads capturados"
           value={stats.leadsLast30d}
           subtitle="últimos 30 días"
           icon={Users}
-          accent="emerald"
         />
       </div>
 

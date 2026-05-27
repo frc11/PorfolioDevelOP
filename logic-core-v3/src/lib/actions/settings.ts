@@ -3,7 +3,7 @@
 import crypto from 'crypto'
 import * as React from 'react'
 import { revalidatePath } from 'next/cache'
-import { google } from 'googleapis'
+import { GoogleAuth } from 'google-auth-library'
 import { auth } from '@/auth'
 import { sendTestAgencyAlert } from '@/lib/alerts'
 import { prisma } from '@/lib/prisma'
@@ -283,7 +283,7 @@ export async function verifyGooglePermissionsAction(): Promise<ActionResult<{ me
     }
 
     const credentials = JSON.parse(keyJson) as Record<string, unknown>
-    const authClient = new google.auth.GoogleAuth({
+    const authClient = new GoogleAuth({
       credentials,
       scopes: [
         'https://www.googleapis.com/auth/webmasters.readonly',

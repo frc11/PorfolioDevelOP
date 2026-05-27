@@ -548,8 +548,8 @@ export default async function AgencyOsPage() {
       <div className="rounded-[28px] border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
         <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
           <div>
-            <p className="text-[10px] uppercase tracking-[0.24em] text-zinc-500">
-              Agency OS / Dashboard
+            <p className="text-xs tracking-tight text-zinc-500">
+              develOP / Dashboard
             </p>
             <h2 className="mt-2 text-3xl font-semibold tracking-tight text-white">
               KPIs comerciales, operativos y financieros
@@ -560,7 +560,7 @@ export default async function AgencyOsPage() {
             </p>
           </div>
 
-          <div className="rounded-full border border-white/10 bg-black/20 px-4 py-2 text-xs uppercase tracking-[0.2em] text-zinc-400">
+          <div className="rounded-full border border-white/10 bg-black/20 px-4 py-2 text-xs tracking-tight text-zinc-400">
             Objetivo semanal: {weeklyDemoGoal} demos
           </div>
         </div>
@@ -568,9 +568,8 @@ export default async function AgencyOsPage() {
 
       <div className="space-y-4">
         <SectionHeader
-          eyebrow="Fila 1"
           title="KPIs comerciales"
-          description="Datos de Agency OS para velocidad de venta, seguimiento y conversion."
+          description="Datos del panel para velocidad de venta, seguimiento y conversión."
         />
 
         <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
@@ -579,7 +578,6 @@ export default async function AgencyOsPage() {
             value={`${demosThisWeek} / ${weeklyDemoGoal}`}
             subtitle="Seguimiento contra objetivo semanal"
             trend={demosThisWeek >= weeklyDemoGoal ? 'up' : 'neutral'}
-            color="cyan"
             icon={Target}
             progress={demosProgress}
           />
@@ -589,11 +587,11 @@ export default async function AgencyOsPage() {
             value={String(pendingFollowUps)}
             subtitle={
               pendingFollowUps > 0
-                ? 'Hay conversaciones que requieren accion hoy'
-                : 'Bandeja comercial al dia'
+                ? 'Hay conversaciones que requieren acción hoy'
+                : 'Bandeja comercial al día'
             }
             trend={pendingFollowUps > 0 ? 'down' : 'neutral'}
-            color={pendingFollowUps > 0 ? 'alert' : 'amber'}
+            color={pendingFollowUps > 0 ? 'alert' : undefined}
             icon={CalendarCheck2}
           />
 
@@ -611,7 +609,6 @@ export default async function AgencyOsPage() {
 
       <div className="space-y-4">
         <SectionHeader
-          eyebrow="Fila 2"
           title="KPIs operativos"
           description="Salud del portal de clientes, soporte y delivery sobre los modelos base del SaaS."
         />
@@ -622,34 +619,31 @@ export default async function AgencyOsPage() {
             value={formatCurrency(mrr)}
             subtitle="Suma de suscripciones activas"
             trend={mrr > 0 ? 'up' : 'neutral'}
-            color="emerald"
             icon={Wallet}
           />
 
           <StatCard
             label="Clientes activos"
             value={String(activeClients)}
-            subtitle="Organizaciones con suscripcion activa"
+            subtitle="Organizaciones con suscripción activa"
             trend={activeClients > 0 ? 'up' : 'neutral'}
-            color="cyan"
             icon={UsersRound}
           />
 
           <StatCard
             label="Tickets abiertos"
             value={String(openTickets)}
-            subtitle="Soporte en OPEN o IN_PROGRESS"
+            subtitle="Tickets sin resolver"
             trend={openTickets > 0 ? 'down' : 'neutral'}
-            color={openTickets > 0 ? 'alert' : 'amber'}
+            color={openTickets > 0 ? 'alert' : undefined}
             icon={LifeBuoy}
           />
 
           <StatCard
             label="Proyectos en curso"
             value={String(projectsInProgress)}
-            subtitle="Projects con status IN_PROGRESS"
+            subtitle="En desarrollo"
             trend={projectsInProgress > 0 ? 'up' : 'neutral'}
-            color="violet"
             icon={FolderKanban}
           />
         </div>
@@ -657,7 +651,6 @@ export default async function AgencyOsPage() {
 
       <div className="space-y-4">
         <SectionHeader
-          eyebrow="Fila 3"
           title="Ingresos y financiero"
           description="Cruza revenue comprometido, mantenimiento cobrado y esfuerzo real del equipo."
         />
@@ -668,7 +661,6 @@ export default async function AgencyOsPage() {
             value={formatCurrency(monthlyRevenue)}
             subtitle={`${formatCurrency(projectRevenueThisMonth)} en proyectos + ${formatCurrency(maintenanceRevenueThisMonth)} en mantenimiento`}
             trend={monthlyRevenue > 0 ? 'up' : 'neutral'}
-            color="emerald"
             icon={DollarSign}
           />
 
@@ -682,7 +674,6 @@ export default async function AgencyOsPage() {
             value={formatCurrency(averageHourlyValue)}
             subtitle={`${formatHours(monthHoursTotal)} registradas en el mes actual`}
             trend={averageHourlyValue > 0 ? 'up' : 'neutral'}
-            color="cyan"
             icon={Gauge}
           />
         </div>
@@ -690,9 +681,8 @@ export default async function AgencyOsPage() {
 
       <div className="space-y-4">
         <SectionHeader
-          eyebrow="Graficos"
-          title="Tendencias ultimas semanas y meses"
-          description="Series historicas para demos, cierre, revenue acumulado y capacidad del equipo."
+          title="Tendencias últimas semanas y meses"
+          description="Series históricas para demos, cierre, revenue acumulado y capacidad del equipo."
         />
 
         <DashboardHistoryCharts
@@ -708,18 +698,15 @@ export default async function AgencyOsPage() {
 }
 
 function SectionHeader({
-  eyebrow,
   title,
   description,
 }: {
-  eyebrow: string
   title: string
   description: string
 }) {
   return (
     <div>
-      <p className="text-[10px] uppercase tracking-[0.24em] text-zinc-500">{eyebrow}</p>
-      <h3 className="mt-2 text-2xl font-semibold tracking-tight text-white">{title}</h3>
+      <h3 className="text-2xl font-medium tracking-tight text-white">{title}</h3>
       <p className="mt-2 max-w-3xl text-sm leading-6 text-zinc-400">{description}</p>
     </div>
   )
@@ -743,33 +730,33 @@ function DualMetricCard({
   icon: typeof BarChart3
 }) {
   return (
-    <article className="rounded-[26px] border border-fuchsia-400/15 bg-fuchsia-400/[0.06] p-5 backdrop-blur-xl transition-colors">
+    <article className="rounded-2xl border border-white/10 bg-white/[0.02] p-5 backdrop-blur-xl transition-colors">
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
-          <p className="text-[10px] uppercase tracking-[0.24em] text-zinc-500">{label}</p>
+          <p className="text-xs tracking-tight text-zinc-500">{label}</p>
         </div>
 
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-fuchsia-400/20 bg-fuchsia-400/10 text-fuchsia-200">
-          <Icon className="h-5 w-5" />
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md bg-white/[0.04] text-zinc-400">
+          <Icon className="h-5 w-5" strokeWidth={1.5} />
         </div>
       </div>
 
       <div className="mt-4 grid gap-3 sm:grid-cols-2">
-        <div className="rounded-2xl border border-white/10 bg-black/20 px-4 py-4">
-          <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">{primaryLabel}</p>
-          <p className="mt-2 text-3xl font-semibold tracking-tight text-white">{primaryValue}</p>
+        <div className="rounded-md border border-white/10 bg-black/20 px-4 py-4">
+          <p className="text-xs tracking-tight text-zinc-500">{primaryLabel}</p>
+          <p className="mt-2 text-3xl font-medium tracking-tight text-white">{primaryValue}</p>
         </div>
-        <div className="rounded-2xl border border-white/10 bg-black/20 px-4 py-4">
-          <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">{secondaryLabel}</p>
-          <p className="mt-2 text-3xl font-semibold tracking-tight text-white">{secondaryValue}</p>
+        <div className="rounded-md border border-white/10 bg-black/20 px-4 py-4">
+          <p className="text-xs tracking-tight text-zinc-500">{secondaryLabel}</p>
+          <p className="mt-2 text-3xl font-medium tracking-tight text-white">{secondaryValue}</p>
         </div>
       </div>
 
       <div className="mt-4 flex items-center justify-between gap-3">
         <p className="min-h-[20px] text-sm text-zinc-400">{subtitle}</p>
-        <div className="inline-flex items-center gap-1 text-xs font-medium text-fuchsia-200">
-          <BarChart3 className="h-3.5 w-3.5" />
-          <span>Conversion</span>
+        <div className="inline-flex items-center gap-1 text-xs font-medium text-zinc-400">
+          <BarChart3 className="h-3.5 w-3.5" strokeWidth={1.5} />
+          <span>Conversión</span>
         </div>
       </div>
     </article>
@@ -795,13 +782,13 @@ function MemberHoursCard({
       : 1
 
   return (
-    <article className="rounded-[26px] border border-white/10 bg-white/5 p-5 backdrop-blur-xl transition-colors">
+    <article className="rounded-2xl border border-white/10 bg-white/5 p-5 backdrop-blur-xl transition-colors">
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
-          <p className="text-[10px] uppercase tracking-[0.24em] text-zinc-500">
+          <p className="text-xs tracking-tight text-zinc-500">
             Horas trabajadas esta semana por miembro
           </p>
-          <p className="mt-3 text-3xl font-semibold tracking-tight text-white">
+          <p className="mt-3 text-3xl font-medium tracking-tight text-white">
             {formatHours(totalHours)}
           </p>
           <p className="mt-2 text-sm text-zinc-400">
