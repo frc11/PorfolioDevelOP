@@ -1,12 +1,16 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { motion, useMotionValue, useSpring } from 'motion/react';
 
 export const CustomCursor = () => {
     const cursorX = useMotionValue(-100);
     const cursorY = useMotionValue(-100);
     const [isHovering, setIsHovering] = useState(false);
+    const [isHidden, setIsHidden] = useState(false);
+    const lastPointerRef = useRef<{ x: number; y: number } | null>(null);
+    const lastCursorModeRef = useRef<'default' | 'hover' | 'hidden'>('default');
+    const scrollRafRef = useRef<number | null>(null);
 
     // Physics configuration for the "aura" (trailing effect)
     const springConfig = { damping: 25, stiffness: 150 };
@@ -14,19 +18,24 @@ export const CustomCursor = () => {
     const cursorYSpring = useSpring(cursorY, springConfig);
 
     useEffect(() => {
-        // Move cursor logic
-        const moveCursor = (e: MouseEvent) => {
-            cursorX.set(e.clientX);
-            cursorY.set(e.clientY);
-        };
+        const updateCursorStateFromTarget = (target: Element | null) => {
+            if (!(target instanceof HTMLElement)) {
+                if (lastCursorModeRef.current !== 'default') {
+                    lastCursorModeRef.current = 'default';
+                    setIsHidden(false);
+                    setIsHovering(false);
+                }
+                return;
+            }
 
-        // Hover detection logic
-        const handleMouseOver = (e: MouseEvent) => {
-            const target = e.target as HTMLElement;
             const isCursorSuppressed = !!target.closest('[data-cursor="off"]');
 
             if (isCursorSuppressed) {
-                setIsHovering(false);
+                if (lastCursorModeRef.current !== 'hidden') {
+                    lastCursorModeRef.current = 'hidden';
+                    setIsHidden(true);
+                    setIsHovering(false);
+                }
                 return;
             }
 
@@ -40,15 +49,55 @@ export const CustomCursor = () => {
                 target.closest('button') ||
                 target.closest('a');
 
-            if (isInteractive) {
-                setIsHovering(true);
-            } else {
-                setIsHovering(false);
+            const nextMode = isInteractive ? 'hover' : 'default';
+
+            if (lastCursorModeRef.current === nextMode) {
+                return;
             }
+
+            lastCursorModeRef.current = nextMode;
+            setIsHidden(false);
+            setIsHovering(isInteractive);
         };
 
-        window.addEventListener('mousemove', moveCursor);
+        // Move cursor logic
+        const moveCursor = (e: MouseEvent) => {
+            lastPointerRef.current = { x: e.clientX, y: e.clientY };
+            cursorX.set(e.clientX);
+            cursorY.set(e.clientY);
+            updateCursorStateFromTarget(e.target as Element | null);
+        };
+
+        // Hover detection logic
+        const handleMouseOver = (e: MouseEvent) => {
+            updateCursorStateFromTarget(e.target as Element | null);
+        };
+
+        const syncCursorTargetFromPoint = () => {
+            const point = lastPointerRef.current;
+
+            if (!point) {
+                return;
+            }
+
+            const target = document.elementFromPoint(point.x, point.y);
+            updateCursorStateFromTarget(target);
+        };
+
+        const handleScroll = () => {
+            if (scrollRafRef.current !== null) {
+                return;
+            }
+
+            scrollRafRef.current = window.requestAnimationFrame(() => {
+                scrollRafRef.current = null;
+                syncCursorTargetFromPoint();
+            });
+        };
+
+        window.addEventListener('mousemove', moveCursor, { passive: true });
         window.addEventListener('mouseover', handleMouseOver);
+        window.addEventListener('scroll', handleScroll, { passive: true, capture: true });
 
         // Initial position to prevent jump
         cursorX.set(window.innerWidth / 2);
@@ -57,6 +106,11 @@ export const CustomCursor = () => {
         return () => {
             window.removeEventListener('mousemove', moveCursor);
             window.removeEventListener('mouseover', handleMouseOver);
+            window.removeEventListener('scroll', handleScroll, true);
+
+            if (scrollRafRef.current !== null) {
+                window.cancelAnimationFrame(scrollRafRef.current);
+            }
         };
     }, [cursorX, cursorY]);
 
@@ -68,6 +122,18 @@ export const CustomCursor = () => {
           body, a, button {
             cursor: none;
           }
+
+          [data-cursor="off"],
+          [data-cursor="off"] * {
+            cursor: auto !important;
+          }
+
+          [data-cursor="off"] a,
+          [data-cursor="off"] button,
+          [data-cursor="off"] [role="button"] {
+            cursor: pointer !important;
+          }
+
         }
       `}</style>
 
@@ -79,7 +145,9 @@ export const CustomCursor = () => {
                     y: cursorY,
                     translateX: '-50%',
                     translateY: '-50%',
-                    mixBlendMode: 'difference'
+                    mixBlendMode: 'difference',
+                    opacity: isHidden ? 0 : 1,
+                    visibility: isHidden ? 'hidden' : 'visible',
                 }}
             />
 
@@ -91,11 +159,12 @@ export const CustomCursor = () => {
                     y: cursorYSpring,
                     translateX: '-50%',
                     translateY: '-50%',
-                    mixBlendMode: 'difference'
+                    mixBlendMode: 'difference',
+                    visibility: isHidden ? 'hidden' : 'visible',
                 }}
                 animate={{
                     scale: isHovering ? 2.5 : 1,
-                    opacity: isHovering ? 0.8 : 0.4,
+                    opacity: isHidden ? 0 : isHovering ? 0.8 : 0.4,
                     backgroundColor: isHovering ? 'rgba(255, 255, 255, 0.1)' : 'transparent',
                     borderColor: isHovering ? 'rgba(255, 255, 255, 0.8)' : 'rgba(255, 255, 255, 0.5)'
                 }}

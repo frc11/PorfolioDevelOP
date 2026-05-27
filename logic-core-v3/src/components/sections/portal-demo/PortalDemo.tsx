@@ -20,30 +20,30 @@ function DashboardStoryBackground() {
         className="absolute inset-x-0 top-0 h-72"
         style={{
           background:
-            'linear-gradient(180deg, #020407 0%, rgba(2,7,12,0.68) 34%, transparent 100%)',
+            'linear-gradient(180deg, #020407 0%, rgba(2,7,12,0.72) 34%, transparent 100%)',
         }}
       />
       <div
-        className="absolute left-1/2 top-[-13rem] h-80 w-[72rem] -translate-x-1/2 rounded-full blur-3xl"
+        className="absolute left-1/2 top-[-13rem] h-80 w-[68rem] -translate-x-1/2 rounded-full blur-3xl"
         style={{
           background:
-            'radial-gradient(ellipse, rgba(6,182,212,0.075), rgba(139,92,246,0.04) 40%, transparent 74%)',
+            'radial-gradient(ellipse, rgba(6,182,212,0.08), rgba(37,99,235,0.035) 44%, transparent 74%)',
         }}
       />
       <svg
-        className="absolute left-[-7%] top-[-5rem] hidden h-52 w-[64rem] opacity-16 lg:block"
+        className="absolute left-[-9%] top-[-5rem] hidden h-52 w-[64rem] opacity-18 lg:block"
         viewBox="0 0 1020 220"
         fill="none"
         preserveAspectRatio="none"
       >
         <path
-          d="M0 88C168 132 270 88 408 130C548 174 658 168 792 122C892 88 958 104 1020 132"
-          stroke="rgba(56,189,248,0.30)"
+          d="M0 84C152 126 252 80 392 120C544 164 646 170 792 126C892 96 954 104 1020 132"
+          stroke="rgba(56,189,248,0.34)"
           strokeWidth="1"
         />
         <path
-          d="M0 126C174 164 296 124 436 156C580 188 704 180 842 148C930 128 982 144 1020 162"
-          stroke="rgba(139,92,246,0.18)"
+          d="M0 126C164 154 280 114 430 146C574 176 690 178 838 148C926 130 984 142 1020 154"
+          stroke="rgba(37,99,235,0.22)"
           strokeWidth="1"
         />
       </svg>

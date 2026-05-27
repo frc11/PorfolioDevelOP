@@ -39,6 +39,7 @@ const CANVAS_FADE_OUT_DURATION_SECONDS = 0.5;
 const DISSOLVE_DURATION_SECONDS = 0.4;
 const MOBILE_EXIT_DURATION_SECONDS = 0.35;
 const HERO_RECT_WAIT_TIMEOUT_MS = 300;
+const ARTIFACT_LOAD_TIMEOUT_MS = 2500;
 const SWAP_OVERLAP_WAIT_MS = 200;
 const HERO_REVEAL_EASE: [number, number, number, number] = [0.25, 0.46, 0.45, 0.94];
 const PRELOADER_SUBCOPY = "TUCUM\u00c1N \u00b7 ARGENTINA";
@@ -307,6 +308,11 @@ export default function Preloader({
                     resolve();
                 } else {
                     artifactLoadedResolveRef.current = resolve;
+                    const timeoutId = window.setTimeout(() => {
+                        artifactLoadedResolveRef.current = null;
+                        resolve();
+                    }, ARTIFACT_LOAD_TIMEOUT_MS);
+                    timeoutIdsRef.current.push(timeoutId);
                 }
             });
 

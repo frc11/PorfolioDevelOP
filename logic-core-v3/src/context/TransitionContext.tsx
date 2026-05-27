@@ -32,7 +32,7 @@ export function TransitionProvider({ children }: { children: ReactNode }) {
                 offset: offset,
                 immediate: true,
                 force: true,
-                lock: true // Ensure the user can't interrupt the scroll
+                lock: false
             });
         } else if (element) {
             const shouldCenter = targetId === 'servicios' || targetId === 'caracteristicas';

@@ -19,22 +19,52 @@ const fadeUp = {
 
 const cardsContainer = {
   hidden: {},
-  visible: {
-    transition: {
-      staggerChildren: 0.08,
-      delayChildren: 0.08,
-    },
-  },
+  visible: {},
 }
 
 const compactCardsContainer = {
   hidden: {},
-  visible: {
-    transition: {
-      staggerChildren: 0.055,
-      delayChildren: 0.05,
-    },
+  visible: {},
+}
+
+const activeModuleReveal = {
+  hidden: {
+    opacity: 0,
+    scale: 0.74,
+    filter: 'blur(24px) brightness(0.45)',
+    pointerEvents: 'none',
   },
+  visible: (index: number = 0) => ({
+    opacity: 1,
+    scale: 1,
+    filter: 'blur(0px) brightness(1)',
+    pointerEvents: 'auto',
+    transition: {
+      duration: 1,
+      delay: index < 2 ? 0.22 + index * 0.18 : 1.02 + (index - 2) * 0.18,
+      ease: EASE_PREMIUM,
+    },
+  }),
+}
+
+const comingSoonReveal = {
+  hidden: {
+    opacity: 0,
+    scale: 0.76,
+    filter: 'blur(20px) brightness(0.5)',
+    pointerEvents: 'none',
+  },
+  visible: (index: number = 0) => ({
+    opacity: 1,
+    scale: 1,
+    filter: 'blur(0px) brightness(1)',
+    pointerEvents: 'auto',
+    transition: {
+      duration: 0.9,
+      delay: 0.22 + index * 0.48,
+      ease: EASE_PREMIUM,
+    },
+  }),
 }
 
 const PLUS_SYMBOLS = [
@@ -424,7 +454,7 @@ export function ModulosOpcionales() {
         <motion.div
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: true, amount: 0.22 }}
+          viewport={{ once: true, amount: 0.28, margin: '0px 0px -18% 0px' }}
           variants={cardsContainer}
           className="mb-16"
         >
@@ -433,7 +463,14 @@ export function ModulosOpcionales() {
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {activeModules.map((mod, i) => (
-              <ModuloActiveCard key={mod.slug} module={mod} index={i} />
+              <motion.div
+                key={mod.slug}
+                custom={i}
+                variants={activeModuleReveal}
+                className="h-full will-change-[transform,opacity,filter]"
+              >
+                <ModuloActiveCard module={mod} index={i} />
+              </motion.div>
             ))}
           </div>
         </motion.div>
@@ -443,7 +480,7 @@ export function ModulosOpcionales() {
         <motion.div
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: true, amount: 0.25 }}
+          viewport={{ once: true, amount: 0.32, margin: '0px 0px -16% 0px' }}
           variants={compactCardsContainer}
         >
           <p className="text-[11px] font-bold tracking-[0.18em] text-zinc-500 uppercase mb-6">
@@ -451,7 +488,14 @@ export function ModulosOpcionales() {
           </p>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
             {comingSoonModules.map((mod, i) => (
-              <ModuloComingSoonCard key={mod.slug} module={mod} index={i} />
+              <motion.div
+                key={mod.slug}
+                custom={i}
+                variants={comingSoonReveal}
+                className="h-full will-change-[transform,opacity,filter]"
+              >
+                <ModuloComingSoonCard module={mod} index={i} />
+              </motion.div>
             ))}
           </div>
         </motion.div>

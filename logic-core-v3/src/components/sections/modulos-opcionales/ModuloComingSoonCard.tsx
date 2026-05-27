@@ -16,16 +16,6 @@ import {
 import type { PremiumModuleSeed } from '@/lib/data/premium-modules'
 
 const EASE_PREMIUM = [0.22, 1, 0.36, 1] as const
-const COMING_CARD_VARIANTS = {
-  hidden: { opacity: 0, x: -10, y: 12, filter: 'blur(4px)' },
-  visible: {
-    opacity: 1,
-    x: 0,
-    y: 0,
-    filter: 'blur(0px)',
-    transition: { duration: 0.5, ease: EASE_PREMIUM },
-  },
-}
 
 function ModuleIcon({ name, color }: { name: string; color: string }) {
   const iconProps = { size: 15, strokeWidth: 1.5, style: { color } }
@@ -60,31 +50,47 @@ interface ModuloComingSoonCardProps {
 }
 
 export function ModuloComingSoonCard({ module }: ModuloComingSoonCardProps) {
+  const isLongTitle = module.name.length > 24
+
   return (
     <motion.div
       variants={{
-        ...COMING_CARD_VARIANTS,
         hover: {
-          y: -3,
-          scale: 1.008,
+          x: 0,
+          y: -4,
+          scale: 1.01,
+          rotate: 0,
           borderColor: `${module.accentColor}52`,
           boxShadow: `0 16px 44px rgba(0,0,0,0.34), 0 0 28px ${module.accentColor}14`,
         },
       }}
       whileHover="hover"
       transition={{
+        x: { duration: 0.3, ease: EASE_PREMIUM },
         y: { duration: 0.32, ease: EASE_PREMIUM },
         scale: { duration: 0.32, ease: EASE_PREMIUM },
+        rotate: { duration: 0.3, ease: EASE_PREMIUM },
         borderColor: { duration: 0.32, ease: EASE_PREMIUM },
         boxShadow: { duration: 0.32, ease: EASE_PREMIUM },
       }}
-      className="group relative overflow-hidden p-5 rounded-xl border border-white/[0.07] bg-gradient-to-br from-white/[0.025] to-transparent cursor-default"
+      className="group relative h-full min-h-[224px] overflow-visible rounded-xl border border-white/[0.07] bg-gradient-to-br from-white/[0.025] to-transparent p-4 cursor-default sm:min-h-[218px] sm:p-5"
       style={{
         backdropFilter: 'blur(20px) saturate(180%)',
         WebkitBackdropFilter: 'blur(20px) saturate(180%)',
         willChange: 'transform',
+        transformOrigin: 'center',
       }}
     >
+      <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-xl" aria-hidden>
+        <div
+          className="absolute inset-x-4 bottom-0 h-px"
+          style={{
+            background: `linear-gradient(90deg, transparent, ${module.accentColor}B0, transparent)`,
+            boxShadow: `0 0 14px ${module.accentColor}26`,
+            opacity: 0.52,
+          }}
+        />
+      </div>
       <motion.div
         aria-hidden
         className="absolute inset-0 rounded-xl pointer-events-none"
@@ -95,20 +101,6 @@ export function ModuloComingSoonCard({ module }: ModuloComingSoonCardProps) {
         }}
         transition={{ duration: 0.34, ease: EASE_PREMIUM }}
         style={{ boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.12)' }}
-      />
-      <motion.div
-        aria-hidden
-        className="absolute inset-x-0 top-1/2 h-px pointer-events-none"
-        variants={{
-          hidden: { x: '-120%', opacity: 0 },
-          visible: { x: '-120%', opacity: 0 },
-          hover: { x: '120%', opacity: [0, 0.75, 0] },
-        }}
-        transition={{ duration: 0.9, ease: EASE_PREMIUM }}
-        style={{
-          background: `linear-gradient(90deg, transparent, ${module.accentColor}B0, transparent)`,
-          boxShadow: `0 0 16px ${module.accentColor}30`,
-        }}
       />
       <motion.div
         aria-hidden
@@ -124,10 +116,10 @@ export function ModuloComingSoonCard({ module }: ModuloComingSoonCardProps) {
         }}
       />
 
-      <div className="relative z-10 flex flex-col gap-3">
-        <div className="flex items-center justify-between">
+      <div className="relative z-10 flex h-full flex-col gap-2.5">
+        <div className="flex min-h-9 items-center justify-between gap-2">
           <motion.div
-            className="w-9 h-9 rounded-lg flex items-center justify-center"
+            className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
             variants={{
               hidden: { scale: 1, boxShadow: '0 0 0 rgba(0,0,0,0)' },
               visible: { scale: 1, boxShadow: '0 0 0 rgba(0,0,0,0)' },
@@ -163,15 +155,21 @@ export function ModuloComingSoonCard({ module }: ModuloComingSoonCardProps) {
               },
             }}
             transition={{ duration: 0.28, ease: EASE_PREMIUM }}
-            className="text-[9px] font-bold tracking-widest px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400"
+            className="shrink-0 rounded-full border border-amber-500/20 bg-amber-500/10 px-2 py-0.5 text-[8px] font-bold tracking-[0.14em] text-amber-400 sm:text-[9px] sm:tracking-widest"
           >
             PR&Oacute;XIMAMENTE
           </motion.span>
         </div>
 
-        <h4 className="font-semibold text-sm text-white leading-snug">{module.name}</h4>
+        <h4
+          className={`flex min-h-[2.45rem] items-start font-semibold leading-[1.25] text-white ${
+            isLongTitle ? 'text-[12px] tracking-[-0.01em] lg:whitespace-nowrap' : 'text-sm'
+          }`}
+        >
+          {module.name}
+        </h4>
 
-        <p className="text-xs text-zinc-500 leading-relaxed line-clamp-2">
+        <p className="mt-auto min-h-[3.1rem] overflow-hidden text-xs leading-[1.42] text-zinc-500 line-clamp-2">
           {module.shortDescription}
         </p>
       </div>

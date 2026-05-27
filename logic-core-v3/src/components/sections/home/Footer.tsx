@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import { motion, AnimatePresence } from 'motion/react';
 import { MessageCircle, FileText, MapPin, Clock, Shield, Users } from 'lucide-react';
 
@@ -11,6 +12,32 @@ const WA_TEXT = encodeURIComponent(
 
 const LOGO_PATH =
   'M532 700v-67q0-6 3-10l54-98q0-3 4-4l4 5q13 27 34 48 35 35 83 41a153 153 0 0 0 86-288c-62-28-134-13-178 39q-20 24-33 52l-57 127q-16 38-40 71-63 86-166 105-92 16-173-30A257 257 0 0 1 38 371a258 258 0 0 1 210-164 257 257 0 0 1 233 92q5 6 1 10l-52 93-1 1q-4 8-8 0l-7-13q-37-62-108-75-66-10-118 30-43 33-55 86-16 76 35 136 37 41 91 48 83 11 139-53 18-23 29-49l51-111q18-44 44-83a257 257 0 0 1 201-113q96-5 171 52a256 256 0 0 1 69 336 262 262 0 0 1-298 121q-8-4-7 6l-1 100 1 58q1 8-6 6H538q-7 1-6-7z';
+
+function BrandLogo({
+  width = 30,
+  opacity = 0.42,
+}: {
+  width?: number;
+  opacity?: number;
+}) {
+  return (
+    <Image
+      src="/logodevelOP.svg"
+      alt="develOP"
+      width={width}
+      height={width}
+      style={{
+        display: 'block',
+        width,
+        height: 'auto',
+        aspectRatio: '1 / 1',
+        objectFit: 'contain',
+        opacity,
+        filter: 'invert(1)',
+      }}
+    />
+  );
+}
 
 interface FormState {
   nombre: string;
@@ -34,6 +61,9 @@ const SOCIAL_LINKS = [
 ];
 
 const CTA_EASE = [0.22, 1, 0.36, 1] as [number, number, number, number];
+const LOGO_DRAW_DURATION = 2.7;
+const CONTENT_REVEAL_DELAY = 2.45;
+const LOGO_SOFTEN_DURATION = 0.9;
 
 export const Footer = () => {
   const [contactMode, setContactMode] = useState<'options' | 'form'>('options');
@@ -98,13 +128,25 @@ export const Footer = () => {
           pointerEvents: 'none',
         }}
       />
+      <div
+        aria-hidden="true"
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          height: 'clamp(120px, 18vw, 220px)',
+          background: 'linear-gradient(180deg, #000 0%, rgba(0,0,0,0.78) 36%, transparent 100%)',
+          pointerEvents: 'none',
+        }}
+      />
 
       {/* Firma de marca */}
       <motion.div
-        initial={{ opacity: 0, scale: 0.985, y: 10 }}
-        whileInView={{ opacity: 1, scale: 1, y: 0 }}
+        initial={{ opacity: 1 }}
+        whileInView={{ opacity: 1 }}
         viewport={{ once: true, amount: 0.45 }}
-        transition={{ duration: 1.4, ease: CTA_EASE }}
+        transition={{ duration: 0 }}
         style={{
           position: 'absolute',
           inset: 0,
@@ -117,7 +159,19 @@ export const Footer = () => {
       >
         <motion.svg
           viewBox="0 0 1024 1024"
-          style={{ width: 'min(66vw, 620px)', opacity: 0.18 }}
+          initial={{ opacity: 0, scale: 0.985, filter: 'blur(0px)' }}
+          whileInView={{
+            opacity: [0, 0.22, 0.11],
+            scale: [0.985, 1, 1.01],
+            filter: ['blur(0px)', 'blur(0px)', 'blur(1.6px)'],
+          }}
+          viewport={{ once: true, amount: 0.45 }}
+          transition={{
+            duration: LOGO_DRAW_DURATION + LOGO_SOFTEN_DURATION,
+            times: [0, LOGO_DRAW_DURATION / (LOGO_DRAW_DURATION + LOGO_SOFTEN_DURATION), 1],
+            ease: CTA_EASE,
+          }}
+          style={{ width: 'min(66vw, 620px)' }}
         >
           <motion.path
             d={LOGO_PATH}
@@ -129,21 +183,25 @@ export const Footer = () => {
             initial={{ pathLength: 0, opacity: 0 }}
             whileInView={{ pathLength: 1, opacity: 1 }}
             viewport={{ once: true, amount: 0.45 }}
-            transition={{ duration: 2.4, ease: CTA_EASE }}
+            transition={{ duration: LOGO_DRAW_DURATION, ease: CTA_EASE }}
           />
           <motion.path
             d={LOGO_PATH}
             fill="white"
             initial={{ opacity: 0 }}
-            whileInView={{ opacity: 0.12 }}
+            whileInView={{ opacity: 0.1 }}
             viewport={{ once: true, amount: 0.45 }}
-            transition={{ duration: 1.2, delay: 1.25, ease: CTA_EASE }}
+            transition={{ duration: 1.1, delay: 2.1, ease: CTA_EASE }}
           />
         </motion.svg>
       </motion.div>
 
       {/* ── CONTENIDO PRINCIPAL ── */}
-      <div
+      <motion.div
+        initial={{ opacity: 0, y: 20, filter: 'blur(6px)' }}
+        whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+        viewport={{ once: true, amount: 0.3 }}
+        transition={{ duration: 0.72, delay: CONTENT_REVEAL_DELAY, ease: CTA_EASE }}
         style={{
           position: 'relative',
           zIndex: 1,
@@ -265,7 +323,7 @@ export const Footer = () => {
             position: 'relative',
             width: '100%',
             maxWidth: 720,
-            minHeight: 'clamp(250px, 28svh, 300px)',
+            minHeight: 'clamp(315px, 35svh, 335px)',
             overflow: 'hidden',
           }}
         >
@@ -281,7 +339,7 @@ export const Footer = () => {
             position: 'absolute',
             inset: 0,
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(268px, 1fr))',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 250px), 1fr))',
             alignItems: 'center',
             gap: 10,
             width: '100%',
@@ -539,7 +597,7 @@ export const Footer = () => {
                       borderRadius: 16,
                       padding: 12,
                       display: 'grid',
-                      gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+                      gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 140px), 1fr))',
                       gap: 7,
                     }}
                   >
@@ -656,6 +714,7 @@ export const Footer = () => {
                         textTransform: 'uppercase',
                         minHeight: 40,
                         transition: 'color 250ms ease, border-color 250ms ease, background 250ms ease',
+                        minWidth: 0,
                       }}
                       onMouseEnter={(e) => {
                         e.currentTarget.style.color = 'rgba(255,255,255,0.82)';
@@ -690,7 +749,7 @@ export const Footer = () => {
                         cursor: loading ? 'not-allowed' : 'pointer',
                         boxShadow: loading ? 'none' : '0 12px 36px rgba(255,255,255,0.09)',
                         transition: 'background 200ms, box-shadow 200ms',
-                        gridColumn: '2 / -1',
+                        minWidth: 0,
                       }}
                     >
                       {loading ? 'ENVIANDO...' : 'ENVIAR CONSULTA →'}
@@ -778,10 +837,14 @@ export const Footer = () => {
             );
           })}
         </motion.div>
-      </div>
+      </motion.div>
 
       {/* ── SEPARADOR ── */}
-      <div
+      <motion.div
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true, amount: 0.3 }}
+        transition={{ duration: 0.62, delay: CONTENT_REVEAL_DELAY + 0.28, ease: CTA_EASE }}
         style={{
           height: 1,
           background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.07) 50%, transparent 100%)',
@@ -794,7 +857,7 @@ export const Footer = () => {
         initial={{ opacity: 0, y: 14, filter: 'blur(5px)' }}
         whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
         viewport={{ once: true }}
-        transition={{ duration: 0.62, delay: 0.12, ease: CTA_EASE }}
+        transition={{ duration: 0.62, delay: CONTENT_REVEAL_DELAY + 0.34, ease: CTA_EASE }}
         style={{
           position: 'relative',
           zIndex: 1,
@@ -804,29 +867,9 @@ export const Footer = () => {
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          gap: 16,
+          gap: 12,
         }}
       >
-        {/* Logo + tagline */}
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
-          <svg
-            viewBox="0 0 1024 1024"
-            style={{ width: 26, height: 26, opacity: 0.35 }}
-          >
-            <path d={LOGO_PATH} fill="white" />
-          </svg>
-          <div
-            style={{
-              fontSize: 10,
-              color: 'rgba(255,255,255,0.18)',
-              letterSpacing: '0.18em',
-              textTransform: 'uppercase',
-            }}
-          >
-            develOP · Tucumán, Argentina · V.3.0
-          </div>
-        </div>
-
         {/* Redes */}
         <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', justifyContent: 'center' }}>
           {SOCIAL_LINKS.map((link, i) => (
@@ -842,7 +885,7 @@ export const Footer = () => {
                   color: 'rgba(255,255,255,0.2)',
                   textDecoration: 'none',
                   textTransform: 'uppercase',
-                  padding: '4px 10px',
+                  padding: '0px 10px',
                   transition: 'color 200ms',
                 }}
                 onMouseEnter={(e) => (e.currentTarget.style.color = 'rgba(255,255,255,0.55)')}
@@ -863,9 +906,17 @@ export const Footer = () => {
             fontSize: 10,
             color: 'rgba(255,255,255,0.1)',
             letterSpacing: '0.06em',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 8,
+            flexWrap: 'wrap',
+            textAlign: 'center',
           }}
         >
-           2026 develOP. Todos los derechos reservados.
+          <span>2026</span>
+          <BrandLogo width={18} opacity={0.16} />
+          <span>Todos los derechos reservados.</span>
         </div>
       </motion.div>
     </section>

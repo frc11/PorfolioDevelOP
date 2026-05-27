@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState, type MouseEvent as ReactMouseEvent } from 'react';
+import Image from 'next/image';
 import {
   AnimatePresence,
   animate,
@@ -78,6 +79,64 @@ type TabbedDimension = {
 
 const EASE_OUT = [0.22, 1, 0.36, 1] as const;
 const TAB_PILL_SPRING = { type: 'spring', stiffness: 340, damping: 30, mass: 0.9 } as const;
+const SECTION_REVEAL_VARIANTS = {
+  hidden: {},
+  visible: {
+    transition: {
+      staggerChildren: 0.16,
+      delayChildren: 0.08,
+    },
+  },
+} as const;
+const HEADER_REVEAL_VARIANTS = {
+  hidden: { opacity: 0, y: 12, scale: 0.985, filter: 'blur(10px)' },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    filter: 'blur(0px)',
+    transition: { duration: 0.72, ease: EASE_OUT },
+  },
+} as const;
+const TABS_REVEAL_VARIANTS = {
+  hidden: { opacity: 0, y: 10, scale: 0.985, filter: 'blur(8px)' },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    filter: 'blur(0px)',
+    transition: { duration: 0.58, ease: EASE_OUT },
+  },
+} as const;
+const PANEL_REVEAL_VARIANTS = {
+  hidden: { opacity: 0, y: 14, scale: 0.985, filter: 'blur(12px)' },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    filter: 'blur(0px)',
+    transition: { duration: 0.74, ease: EASE_OUT },
+  },
+} as const;
+
+function BrandLogoMark({ size = 18, opacity = 0.9 }: { size?: number; opacity?: number }) {
+  return (
+    <Image
+      src="/logodevelOP.svg"
+      alt="develOP"
+      width={size}
+      height={size}
+      style={{
+        display: 'block',
+        height: size,
+        width: size,
+        objectFit: 'contain',
+        opacity,
+        filter: 'invert(1)',
+      }}
+    />
+  );
+}
 const AUTO_ADVANCE_MS = 17_000;
 const SECONDARY_GRID_VARIANTS = {
   hidden: {},
@@ -405,13 +464,13 @@ function AgencyComparisonVisual() {
   ];
 
   return (
-    <div ref={containerRef} className="mt-4 w-full rounded-3xl border border-white/[0.04] bg-[#0a0a0c]/80 p-2 backdrop-blur-2xl relative overflow-hidden">
+    <div ref={containerRef} className="mt-3 w-full rounded-3xl border border-white/[0.04] bg-[#0a0a0c]/80 p-2 backdrop-blur-2xl relative overflow-hidden">
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.015)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.015)_1px,transparent_1px)] bg-[size:16px_16px] opacity-60 [mask-image:radial-gradient(ellipse_at_center,black_50%,transparent_100%)]" />
       
-      <div className="relative z-10 flex w-full flex-col gap-6 rounded-[24px] border border-white/[0.04] bg-white/[0.02] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] md:p-5">
+      <div className="relative z-10 flex w-full flex-col gap-3 rounded-[24px] border border-white/[0.04] bg-white/[0.02] p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] md:p-4">
         
-        <div className="relative overflow-hidden rounded-[24px] border border-red-900/30 bg-[radial-gradient(ellipse_at_top_left,rgba(153,27,27,0.15),transparent_70%),linear-gradient(180deg,rgba(10,10,12,0.2),rgba(10,10,12,0.6))] p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.03),0_0_20px_rgba(220,38,38,0.04)] md:p-6 lg:p-7">
-          <div className="mb-6 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-end">
+        <div className="relative overflow-hidden rounded-[22px] border border-red-900/30 bg-[radial-gradient(ellipse_at_top_left,rgba(153,27,27,0.15),transparent_70%),linear-gradient(180deg,rgba(10,10,12,0.2),rgba(10,10,12,0.6))] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.03),0_0_20px_rgba(220,38,38,0.04)] md:p-4 lg:p-5">
+          <div className="mb-3 flex flex-col items-start justify-between gap-2 sm:flex-row sm:items-end">
             <div className="flex flex-col gap-1.5">
               <span className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-red-500/80">
                 <AlertTriangle className="h-4 w-4 text-red-500 drop-shadow-[0_0_8px_rgba(239,68,68,0.4)]" />
@@ -422,7 +481,7 @@ function AgencyComparisonVisual() {
               </span>
             </div>
             <div className="flex items-baseline gap-1.5 whitespace-nowrap pl-6 sm:pl-0">
-              <span ref={count76Ref} className="font-mono text-[2.75rem] font-black leading-none tracking-tighter text-red-500 drop-shadow-[0_0_15px_rgba(239,68,68,0.5)] md:text-[3.25rem]">
+              <span ref={count76Ref} className="font-mono text-[2.15rem] font-black leading-none tracking-tighter text-red-500 drop-shadow-[0_0_15px_rgba(239,68,68,0.5)] md:text-[2.6rem]">
                 {shouldSimplify ? '76' : '0'}
               </span>
               <span className="text-sm font-bold tracking-widest text-red-500/50">DÍAS</span>
@@ -439,7 +498,7 @@ function AgencyComparisonVisual() {
             />
           </div>
 
-          <div className="relative mt-2 h-10 w-full px-1">
+          <div className="relative mt-1.5 h-8 w-full px-1">
             {frictionIcons.map((item, i) => (
               <motion.div
                 key={i}
@@ -463,7 +522,7 @@ function AgencyComparisonVisual() {
             ))}
           </div>
 
-          <div className="relative mt-2 flex flex-wrap gap-2.5">
+          <div className="relative mt-1.5 flex flex-wrap gap-1.5">
             {[
               'Procesos R\u00edgidos',
               'Alta Dependencia',
@@ -475,7 +534,7 @@ function AgencyComparisonVisual() {
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.4, delay: shouldSimplify ? 0 : 0.5 + i * 0.4, ease: 'easeOut' }}
-                className="flex items-center gap-2 rounded-full border border-red-500/20 bg-red-950/40 px-3 py-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.02),0_0_12px_rgba(239,68,68,0.1)] hover:border-red-500/40 transition-colors"
+                className="flex items-center gap-1.5 rounded-full border border-red-500/20 bg-red-950/40 px-2.5 py-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.02),0_0_12px_rgba(239,68,68,0.1)] hover:border-red-500/40 transition-colors"
                >
                 <XCircle className="h-3.5 w-3.5 text-red-500 drop-shadow-[0_0_6px_rgba(239,68,68,0.7)]" />
                 <span className="text-[9px] font-bold uppercase tracking-widest text-red-300">{label}</span>
@@ -484,19 +543,20 @@ function AgencyComparisonVisual() {
           </div>
         </div>
 
-        <div className="relative overflow-hidden rounded-[24px] border border-cyan-700/30 bg-[radial-gradient(ellipse_at_top_left,rgba(8,145,178,0.15),transparent_70%),linear-gradient(180deg,rgba(10,10,12,0.2),rgba(10,10,12,0.6))] p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_0_30px_rgba(34,211,238,0.08)] md:p-6 lg:p-7">
-          <div className="mb-6 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-end">
+        <div className="relative overflow-hidden rounded-[22px] border border-cyan-700/30 bg-[radial-gradient(ellipse_at_top_left,rgba(8,145,178,0.15),transparent_70%),linear-gradient(180deg,rgba(10,10,12,0.2),rgba(10,10,12,0.6))] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_0_30px_rgba(34,211,238,0.08)] md:p-4 lg:p-5">
+          <div className="mb-3 flex flex-col items-start justify-between gap-2 sm:flex-row sm:items-end">
             <div className="flex flex-col gap-1.5">
               <span className="relative z-10 flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-cyan-400">
-                <Zap className="h-4 w-4 fill-cyan-400 drop-shadow-[0_0_10px_rgba(34,211,238,0.8)]" />
-                develOP
+                <span className="flex h-5 w-5 items-center justify-center rounded-full border border-cyan-300/20 bg-cyan-300/10 shadow-[0_0_14px_rgba(34,211,238,0.18)]">
+                  <BrandLogoMark size={13} opacity={0.9} />
+                </span>
               </span>
               <span className="relative z-10 pl-6 text-xs font-semibold tracking-wider text-cyan-300/60 md:text-sm">
                 DIRECTO AL OBJETIVO
               </span>
             </div>
             <div className="relative z-10 flex items-baseline gap-1.5 whitespace-nowrap pl-6 sm:pl-0">
-              <span ref={count15Ref} className="font-mono text-[2.75rem] font-black leading-none tracking-tighter text-cyan-300 drop-shadow-[0_0_20px_rgba(34,211,238,0.6)] md:text-[3.25rem]">
+              <span ref={count15Ref} className="font-mono text-[2.15rem] font-black leading-none tracking-tighter text-cyan-300 drop-shadow-[0_0_20px_rgba(34,211,238,0.6)] md:text-[2.6rem]">
                 {shouldSimplify ? '15' : '0'}
               </span>
               <span className="text-sm font-bold tracking-widest text-cyan-400/60">DÍAS</span>
@@ -513,7 +573,7 @@ function AgencyComparisonVisual() {
             />
           </div>
 
-          <div className="relative mt-2 h-10 w-full px-1">
+          <div className="relative mt-1.5 h-8 w-full px-1">
             {velocityIcons.map((item, i) => (
               <motion.div
                 key={i}
@@ -537,7 +597,7 @@ function AgencyComparisonVisual() {
             ))}
           </div>
 
-          <div className="relative z-10 mt-2 flex flex-wrap gap-2.5">
+          <div className="relative z-10 mt-1.5 flex flex-wrap gap-1.5">
             {[
               'Iteraci\u00f3n R\u00e1pida',
               'Sin intermediarios',
@@ -549,7 +609,7 @@ function AgencyComparisonVisual() {
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.4, delay: shouldSimplify ? 0 : 0.5 + i * 0.4, ease: 'easeOut' }}
-                className="flex items-center gap-2 rounded-full border border-cyan-500/30 bg-cyan-950/50 px-3 py-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_0_15px_rgba(34,211,238,0.15)] hover:border-cyan-400/50 transition-colors"
+                className="flex items-center gap-1.5 rounded-full border border-cyan-500/30 bg-cyan-950/50 px-2.5 py-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_0_15px_rgba(34,211,238,0.15)] hover:border-cyan-400/50 transition-colors"
               >
                 <CheckCircle2 className="h-3.5 w-3.5 text-cyan-400 drop-shadow-[0_0_8px_rgba(34,211,238,0.9)]" />
                 <span className="text-[9px] font-bold uppercase tracking-widest text-cyan-100">{label}</span>
@@ -592,7 +652,7 @@ function ProgressVisual({ accent, animationKey }: { accent: AccentKey; animation
   const tone = ACCENT_STYLES[accent];
 
   return (
-    <div className="-mx-5 -mt-5 mb-6 sm:-mx-6 sm:-mt-6 relative flex w-[calc(100%+40px)] sm:w-[calc(100%+48px)] h-[150px] flex-col justify-end overflow-hidden rounded-t-[24px] border-b border-cyan-500/10 bg-[radial-gradient(ellipse_at_top,rgba(8,145,178,0.15),transparent_70%)] px-6 pb-6">
+    <div className="-mx-5 -mt-5 mb-6 sm:-mx-6 sm:-mt-6 relative flex h-[160px] w-[calc(100%+40px)] flex-col justify-end overflow-hidden rounded-t-[24px] border-b border-cyan-500/10 bg-[radial-gradient(ellipse_at_top,rgba(8,145,178,0.15),transparent_70%)] px-6 pb-6 sm:w-[calc(100%+48px)]">
       <div className="flex items-end justify-between gap-3 relative z-10 w-full">
         <div className="space-y-1">
           <div className="text-[10px] font-bold uppercase tracking-[0.28em] text-cyan-400/80 drop-shadow-[0_0_5px_rgba(34,211,238,0.3)]">Entrega real</div>
@@ -637,7 +697,7 @@ function ProgressVisual({ accent, animationKey }: { accent: AccentKey; animation
 
 function LockVisual() {
   return (
-    <div className="-mx-5 -mt-5 mb-6 sm:-mx-6 sm:-mt-6 relative flex w-[calc(100%+40px)] sm:w-[calc(100%+48px)] h-[150px] items-center justify-center overflow-hidden rounded-t-[24px] border-b border-white/5 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.03),transparent_70%)]">
+    <div className="-mx-5 -mt-5 mb-6 sm:-mx-6 sm:-mt-6 relative flex h-[160px] w-[calc(100%+40px)] items-center justify-center overflow-hidden rounded-t-[24px] border-b border-white/5 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.03),transparent_70%)] sm:w-[calc(100%+48px)]">
       <div className="relative flex h-24 w-24 items-center justify-center rounded-3xl border border-white/10 bg-gradient-to-b from-white/10 to-transparent shadow-[inset_0_1px_2px_rgba(255,255,255,0.1),0_0_30px_rgba(255,255,255,0.02)] transition-all duration-500 group-hover:border-emerald-500/30 group-hover:shadow-[0_0_40px_rgba(16,185,129,0.15)] group-hover:from-emerald-500/10">
         <Lock className="absolute h-10 w-10 text-white/40 transition-all duration-500 group-hover:-rotate-12 group-hover:scale-75 group-hover:opacity-0" />
         <LockOpen
@@ -654,7 +714,7 @@ function StatusVisual({ animationKey }: { animationKey: number }) {
   const shouldReduceMotion = useReducedMotion();
 
   return (
-    <div className="-mx-5 -mt-5 mb-6 sm:-mx-6 sm:-mt-6 relative flex w-[calc(100%+40px)] sm:w-[calc(100%+48px)] h-[150px] flex-col justify-center overflow-hidden rounded-t-[24px] border-b border-emerald-900/10 bg-[radial-gradient(ellipse_at_left,rgba(16,185,129,0.1),transparent_70%)] px-8">
+    <div className="-mx-5 -mt-5 mb-6 sm:-mx-6 sm:-mt-6 relative flex h-[160px] w-[calc(100%+40px)] flex-col justify-center overflow-hidden rounded-t-[24px] border-b border-emerald-900/10 bg-[radial-gradient(ellipse_at_left,rgba(16,185,129,0.1),transparent_70%)] px-8 sm:w-[calc(100%+48px)]">
       <div className="text-[10px] font-bold uppercase tracking-[0.28em] text-emerald-400/80 drop-shadow-[0_0_5px_rgba(52,211,153,0.3)] mb-4">Soporte directo</div>
       <div className="flex items-center gap-6">
         <span className="relative flex h-8 w-8 items-center justify-center">
@@ -682,7 +742,7 @@ function OwnershipVisual({ accent }: { accent: AccentKey }) {
   const tone = ACCENT_STYLES[accent];
 
   return (
-    <div className="-mx-5 -mt-5 mb-6 sm:-mx-6 sm:-mt-6 relative flex w-[calc(100%+40px)] sm:w-[calc(100%+48px)] h-[150px] items-center justify-center overflow-hidden rounded-t-[24px] border-b border-cyan-500/10 bg-[radial-gradient(ellipse_at_top,rgba(8,145,178,0.15),transparent_70%)]">
+    <div className="-mx-5 -mt-5 mb-6 sm:-mx-6 sm:-mt-6 relative flex h-[160px] w-[calc(100%+40px)] items-center justify-center overflow-hidden rounded-t-[24px] border-b border-cyan-500/10 bg-[radial-gradient(ellipse_at_top,rgba(8,145,178,0.15),transparent_70%)] sm:w-[calc(100%+48px)]">
       <motion.div
         className="relative flex h-20 w-48 items-center gap-5 rounded-2xl border border-cyan-500/40 bg-cyan-950/50 px-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.1),0_10px_30px_rgba(0,0,0,0.5)] backdrop-blur-md"
         animate={shouldReduceMotion ? { y: 0 } : { y: [-4, 4, -4], boxShadow: [`0 10px 30px rgba(0,0,0,0.5), 0 0 0px ${tone.glow}`, `0 10px 30px rgba(0,0,0,0.5), 0 0 25px ${tone.glow}`, `0 10px 30px rgba(0,0,0,0.5), 0 0 0px ${tone.glow}`] }}
@@ -922,9 +982,9 @@ function RoiVisual() {
   const shouldReduceMotion = useReducedMotion();
 
   return (
-    <div className="-mx-5 -mt-5 mb-6 sm:-mx-6 sm:-mt-6 relative flex w-[calc(100%+40px)] sm:w-[calc(100%+48px)] h-[150px] items-end justify-center overflow-hidden rounded-t-[24px] border-b border-cyan-500/10 bg-[radial-gradient(ellipse_at_bottom,rgba(34,211,238,0.12),transparent_70%)]">
+    <div className="-mx-5 -mt-5 mb-6 sm:-mx-6 sm:-mt-6 relative flex h-[160px] w-[calc(100%+40px)] items-end justify-center overflow-hidden rounded-t-[24px] border-b border-cyan-500/10 bg-[radial-gradient(ellipse_at_bottom,rgba(34,211,238,0.12),transparent_70%)] sm:w-[calc(100%+48px)]">
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(34,211,238,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(34,211,238,0.04)_1px,transparent_1px)] bg-[size:20px_20px] [mask-image:linear-gradient(to_bottom,transparent,black)]" />
-      <svg viewBox="0 0 300 100" className="h-[90%] w-full relative z-10" aria-hidden="true" preserveAspectRatio="none">
+      <svg viewBox="-16 -28 332 148" className="relative z-10 h-[90%] w-full overflow-visible" aria-hidden="true" preserveAspectRatio="none">
         <path d="M0 80 H300" stroke="rgba(34,211,238,0.15)" strokeWidth="1" strokeDasharray="4 4" />
         <path d="M0 50 H300" stroke="rgba(34,211,238,0.1)" strokeWidth="1" strokeDasharray="4 4" />
         <path d="M0 20 H300" stroke="rgba(34,211,238,0.05)" strokeWidth="1" strokeDasharray="4 4" />
@@ -957,7 +1017,7 @@ function ClockVisual() {
   const shouldReduceMotion = useReducedMotion();
 
   return (
-    <div className="-mx-5 -mt-5 mb-6 sm:-mx-6 sm:-mt-6 relative flex w-[calc(100%+40px)] sm:w-[calc(100%+48px)] h-[150px] items-center justify-center overflow-hidden rounded-t-[24px] border-b border-cyan-500/10 bg-[radial-gradient(circle_at_center,rgba(8,145,178,0.15),transparent_60%)]">
+    <div className="-mx-5 -mt-5 mb-6 sm:-mx-6 sm:-mt-6 relative flex h-[160px] w-[calc(100%+40px)] items-center justify-center overflow-hidden rounded-t-[24px] border-b border-cyan-500/10 bg-[radial-gradient(circle_at_center,rgba(8,145,178,0.15),transparent_60%)] sm:w-[calc(100%+48px)]">
       {/* Sonar Radar Rings */}
       <motion.div
         className="absolute h-16 w-16 rounded-full border border-cyan-400"
@@ -986,7 +1046,7 @@ function LayersVisual() {
   const shouldReduceMotion = useReducedMotion();
 
   return (
-    <div className="-mx-5 -mt-5 mb-6 sm:-mx-6 sm:-mt-6 relative flex w-[calc(100%+40px)] sm:w-[calc(100%+48px)] h-[150px] items-center justify-center overflow-hidden rounded-t-[24px] border-b border-cyan-500/10 bg-[radial-gradient(ellipse_at_top,rgba(8,145,178,0.15),transparent_70%)] [perspective:800px]">
+    <div className="-mx-5 -mt-5 mb-6 sm:-mx-6 sm:-mt-6 relative flex h-[160px] w-[calc(100%+40px)] items-center justify-center overflow-hidden rounded-t-[24px] border-b border-cyan-500/10 bg-[radial-gradient(ellipse_at_top,rgba(8,145,178,0.15),transparent_70%)] [perspective:800px] sm:w-[calc(100%+48px)]">
       <div className="relative h-24 w-40 mt-4">
         {[0, 1, 2].map((layer) => (
           <motion.div
@@ -1008,7 +1068,7 @@ function DashboardVisual() {
   const shouldReduceMotion = useReducedMotion();
 
   return (
-    <div className="-mx-5 -mt-5 mb-6 sm:-mx-6 sm:-mt-6 relative flex w-[calc(100%+40px)] sm:w-[calc(100%+48px)] h-[150px] items-center justify-center overflow-hidden rounded-t-[24px] border-b border-cyan-500/10 bg-[radial-gradient(ellipse_at_left,rgba(8,145,178,0.15),transparent_70%)]">
+    <div className="-mx-5 -mt-5 mb-6 sm:-mx-6 sm:-mt-6 relative flex h-[160px] w-[calc(100%+40px)] items-center justify-center overflow-hidden rounded-t-[24px] border-b border-cyan-500/10 bg-[radial-gradient(ellipse_at_left,rgba(8,145,178,0.15),transparent_70%)] sm:w-[calc(100%+48px)]">
       <div className="grid w-full max-w-[200px] gap-3">
         <div className="grid grid-cols-[1fr_0.6fr] gap-3">
           <div className="rounded-xl border border-cyan-700/50 bg-cyan-950/50 p-3.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_0_15px_rgba(34,211,238,0.1)] backdrop-blur-md">
@@ -1123,13 +1183,13 @@ function MetricsVisual({ accent }: { accent: AccentKey }) {
   const itemHeight = 16;
 
   const renderTicker = (values: string[]) => (
-    <div className="h-4 overflow-hidden">
+    <div className="h-4 min-w-[32px] overflow-hidden">
       <motion.div
         animate={shouldReduceMotion ? { y: 0 } : { y: [0, -itemHeight, -itemHeight * 2, 0] }}
         transition={{ duration: 4.4, repeat: Infinity, ease: 'easeInOut' }}
       >
         {values.map((value) => (
-          <div key={value} className={`h-4 text-[13px] font-semibold leading-4 ${tone.textClass}`}>
+          <div key={value} className={`h-4 whitespace-nowrap text-center text-[13px] font-semibold leading-4 ${tone.textClass}`}>
             {value}
           </div>
         ))}
@@ -1138,8 +1198,8 @@ function MetricsVisual({ accent }: { accent: AccentKey }) {
   );
 
   return (
-    <div className="grid w-24 gap-2 rounded-[22px] border border-white/10 bg-black/20 p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
-      <div className="grid grid-cols-3 gap-2">
+    <div className="inline-grid w-auto min-w-[132px] max-w-full gap-2 rounded-[22px] border border-white/10 bg-black/20 px-3.5 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
+      <div className="grid grid-cols-3 gap-3">
         {renderTicker(['42%', '58%', '71%'])}
         {renderTicker(['18m', '12m', '7m'])}
         {renderTicker(['1.4x', '1.9x', '2.3x'])}
@@ -1171,11 +1231,11 @@ function LogoPulseVisual() {
         transition={{ duration: 6.4, repeat: Infinity, ease: 'linear' }}
       />
       <motion.div
-        className="relative rounded-full border border-white/10 bg-[#0b0e12]/90 px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.28em] text-white"
+        className="relative flex h-10 min-w-12 items-center justify-center rounded-full border border-white/10 bg-[#0b0e12]/90 px-3 py-2"
         animate={shouldReduceMotion ? { scale: 1 } : { scale: [1, 1.05, 1] }}
         transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut' }}
       >
-        develOP
+        <BrandLogoMark size={20} opacity={0.92} />
       </motion.div>
     </div>
   );
@@ -1297,7 +1357,7 @@ function SecondaryCard({ card, activeTab, cardIndex }: { card: TabbedCard; activ
       />
 
       <div className="relative z-10 flex h-full flex-col">
-        <div className="mb-6 min-h-[150px] md:mb-7">
+        <div className="mb-6 min-h-[160px] md:mb-7">
           <TabbedCardVisual visual={card.visual} accent={card.accent} animationKey={activeTab} />
         </div>
 
@@ -1457,10 +1517,32 @@ function WhyDevelopBackground() {
         </defs>
       </svg>
 
-      <div className="absolute inset-x-0 top-0 h-56 bg-gradient-to-b from-[#02040a] via-[#030712]/86 to-transparent" />
+      <div className="absolute inset-x-0 top-0 h-72 bg-[linear-gradient(180deg,#020407_0%,rgba(2,7,12,0.72)_34%,transparent_100%)]" />
+      <div
+        className="absolute left-1/2 top-[-13rem] h-80 w-[68rem] -translate-x-1/2 rounded-full blur-3xl"
+        style={{
+          background:
+            'radial-gradient(ellipse, rgba(6,182,212,0.08), rgba(37,99,235,0.035) 44%, transparent 74%)',
+        }}
+      />
       <div className="absolute inset-x-0 bottom-0 h-52 bg-gradient-to-t from-zinc-950 via-[#05070d]/88 to-transparent" />
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(2,6,23,0.58)_0%,rgba(2,6,23,0.42)_34%,transparent_64%)]" />
       <div className="absolute inset-y-0 left-1/2 w-[min(72rem,90vw)] -translate-x-1/2 bg-[linear-gradient(90deg,transparent_0%,rgba(0,0,0,0.34)_16%,rgba(0,0,0,0.48)_50%,rgba(0,0,0,0.34)_84%,transparent_100%)]" />
+      <div
+        className="absolute inset-x-0 bottom-[-1px] h-[clamp(14rem,28vw,28rem)]"
+        style={{
+          background:
+            'linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.38) 30%, rgba(0,0,0,0.82) 72%, #000 100%)',
+          backdropFilter: 'blur(2px)',
+          WebkitBackdropFilter: 'blur(2px)',
+        }}
+      />
+      <div
+        className="absolute bottom-[-13rem] left-1/2 h-[22rem] w-[76rem] -translate-x-1/2 rounded-full blur-3xl"
+        style={{
+          background: 'radial-gradient(ellipse, rgba(0,0,0,0.92), rgba(0,0,0,0.58) 44%, transparent 76%)',
+        }}
+      />
     </div>
   );
 }
@@ -1505,32 +1587,35 @@ export function WhyDevelOP() {
     <section ref={ref} id="caracteristicas" className="relative overflow-hidden bg-[#030303] py-28 md:py-36">
       <WhyDevelopBackground />
 
-      <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <motion.div
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.28 }}
+        variants={SECTION_REVEAL_VARIANTS}
+        className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8"
+      >
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: '-10%' }}
-          transition={{ duration: 0.55, ease: EASE_OUT }}
-          className="mx-auto mb-14 max-w-3xl text-center"
+          variants={HEADER_REVEAL_VARIANTS}
+          className="mx-auto mb-9 max-w-5xl text-center"
         >
           <div className="inline-flex items-center rounded-full border border-cyan-400/20 bg-cyan-400/8 px-4 py-1.5 text-[11px] uppercase tracking-[0.28em] text-cyan-300">
             Why develOP
           </div>
-          <div className="mt-5 min-h-[7.5rem] overflow-hidden md:h-[9rem] md:min-h-0">
+          <div className="relative mx-auto mt-5 min-h-[13.25rem] max-w-6xl overflow-visible py-1 md:h-[12.25rem] md:min-h-0 md:py-2 lg:h-[10.75rem]">
             <AnimatePresence mode="wait" initial={false}>
               <motion.h2
                 key={activeDimension.feature.title}
-                initial={{ y: '110%', opacity: 0, filter: 'blur(16px)' }}
-                animate={{ y: '0%', opacity: 1, filter: 'blur(0px)' }}
-                exit={{ y: '-24%', opacity: 0, filter: 'blur(12px)' }}
+                initial={{ y: 28, opacity: 0, filter: 'blur(10px)' }}
+                animate={{ y: 0, opacity: 1, filter: 'blur(0px)' }}
+                exit={{ y: -18, opacity: 0, filter: 'blur(8px)' }}
                 transition={{ duration: shouldReduceMotion ? 0.01 : 0.65, ease: EASE_OUT }}
-                className="bg-gradient-to-b from-white to-white/40 bg-clip-text text-5xl font-black leading-[1.1] tracking-tighter text-transparent md:text-6xl"
+                className="absolute inset-x-0 top-0 bg-gradient-to-b from-white to-white/40 bg-clip-text pb-2 text-[clamp(2.2rem,9vw,3.1rem)] font-black leading-[1.14] tracking-tighter text-transparent md:text-[clamp(3.15rem,4.7vw,3.85rem)] lg:text-[3.85rem]"
               >
                 {activeDimension.feature.title}
               </motion.h2>
             </AnimatePresence>
           </div>
-          <div className="relative mt-5 min-h-[5.25rem] md:h-[3.75rem] md:min-h-0">
+          <div className="relative mx-auto mt-4 min-h-[5.25rem] max-w-3xl md:h-[3.75rem] md:min-h-0">
             <AnimatePresence mode="wait" initial={false}>
               <motion.p
                 key={activeDimension.summary}
@@ -1546,7 +1631,7 @@ export function WhyDevelOP() {
           </div>
         </motion.div>
 
-        <div className="mb-10">
+        <motion.div variants={TABS_REVEAL_VARIANTS} className="mb-10">
           <div className="w-full overflow-x-auto pb-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           <div
             className="mx-auto inline-flex min-w-max items-center gap-2 whitespace-nowrap rounded-full border border-white/5 bg-white/[0.02] p-1"
@@ -1584,9 +1669,9 @@ export function WhyDevelOP() {
             })}
           </div>
           </div>
-        </div>
+        </motion.div>
 
-        <div className="relative md:h-[940px] lg:h-[900px] xl:h-[860px]">
+        <motion.div variants={PANEL_REVEAL_VARIANTS} className="relative md:h-[960px] lg:h-[920px] xl:h-[880px]">
           <AnimatePresence mode="wait" initial={false}>
             <motion.div
               key={activeDimension.label}
@@ -1616,8 +1701,8 @@ export function WhyDevelOP() {
               </motion.div>
             </motion.div>
           </AnimatePresence>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
     </section>
   );
 }

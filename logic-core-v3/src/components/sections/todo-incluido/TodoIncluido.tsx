@@ -8,12 +8,27 @@ const EASE_PREMIUM = [0.22, 1, 0.36, 1] as const
 
 const cardsContainer = {
   hidden: {},
-  visible: {
-    transition: {
-      staggerChildren: 0.09,
-      delayChildren: 0.08,
-    },
+  visible: {},
+}
+
+const featureCardReveal = {
+  hidden: {
+    opacity: 0,
+    scale: 0.74,
+    filter: 'blur(24px) brightness(0.45)',
+    pointerEvents: 'none',
   },
+  visible: (index: number = 0) => ({
+    opacity: 1,
+    scale: 1,
+    filter: 'blur(0px) brightness(1)',
+    pointerEvents: 'auto',
+    transition: {
+      duration: 1.08,
+      delay: 0.28 + index * 0.62,
+      ease: EASE_PREMIUM,
+    },
+  }),
 }
 
 const fadeUp = {
@@ -273,7 +288,7 @@ export function TodoIncluido() {
           <p className="text-xs font-semibold tracking-[0.2em] text-zinc-500 uppercase mb-4">
             TODO ESTO VIENE INCLUIDO EN TU PLAN
           </p>
-          <h2 className="text-4xl md:text-5xl lg:text-6xl font-black text-white tracking-tight mb-6">
+          <h2 className="mb-6 overflow-visible pb-2 text-4xl font-black leading-[1.18] tracking-tight text-white md:text-5xl lg:text-6xl">
             5 herramientas premium,{' '}
             <span className="text-zinc-400">sin extras.</span>
           </h2>
@@ -286,19 +301,32 @@ export function TodoIncluido() {
         <motion.div
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: true, amount: 0.22 }}
+          viewport={{ once: true, amount: 0.28, margin: '0px 0px -18% 0px' }}
           variants={cardsContainer}
-          transition={{ ease: EASE_PREMIUM }}
           className="flex flex-col gap-6"
         >
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {firstRow.map((feature, i) => (
-              <TodoIncluidoFeatureCard key={feature.id} feature={feature} index={i} />
+              <motion.div
+                key={feature.id}
+                custom={i}
+                variants={featureCardReveal}
+                className="h-full will-change-[transform,opacity,filter]"
+              >
+                <TodoIncluidoFeatureCard feature={feature} index={i} />
+              </motion.div>
             ))}
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:w-2/3 lg:mx-auto">
             {secondRow.map((feature, i) => (
-              <TodoIncluidoFeatureCard key={feature.id} feature={feature} index={i + 3} />
+              <motion.div
+                key={feature.id}
+                custom={i + 3}
+                variants={featureCardReveal}
+                className="h-full will-change-[transform,opacity,filter]"
+              >
+                <TodoIncluidoFeatureCard feature={feature} index={i + 3} />
+              </motion.div>
             ))}
           </div>
         </motion.div>

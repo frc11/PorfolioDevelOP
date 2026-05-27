@@ -16,15 +16,6 @@ import {
 import type { PremiumModuleSeed } from '@/lib/data/premium-modules'
 
 const EASE_PREMIUM = [0.22, 1, 0.36, 1] as const
-const CARD_VARIANTS = {
-  hidden: { opacity: 0, y: 26, filter: 'blur(6px)' },
-  visible: {
-    opacity: 1,
-    y: 0,
-    filter: 'blur(0px)',
-    transition: { duration: 0.64, ease: EASE_PREMIUM },
-  },
-}
 
 function ModuleIcon({ name, color, size = 24 }: { name: string; color: string; size?: number }) {
   const iconProps = { size, strokeWidth: 1.5, style: { color } }
@@ -121,8 +112,8 @@ export function ModuloActiveCard({ module }: ModuloActiveCardProps) {
 
   return (
     <motion.div
+      data-scroll-hover-target
       variants={{
-        ...CARD_VARIANTS,
         hover: {
           y: -5,
           scale: 1.01,
@@ -137,16 +128,20 @@ export function ModuloActiveCard({ module }: ModuloActiveCardProps) {
         borderColor: { duration: 0.34, ease: EASE_PREMIUM },
         boxShadow: { duration: 0.34, ease: EASE_PREMIUM },
       }}
-      className="group relative overflow-hidden p-8 rounded-2xl border border-white/[0.08] bg-gradient-to-br from-white/[0.04] to-transparent cursor-default"
+      className="group relative h-full overflow-hidden rounded-2xl border border-white/[0.08] bg-gradient-to-br from-white/[0.04] to-transparent p-7 cursor-default sm:p-8"
       style={{
         backdropFilter: 'blur(20px) saturate(180%)',
         WebkitBackdropFilter: 'blur(20px) saturate(180%)',
         willChange: 'transform',
+        '--scroll-hover-y': '-5px',
+        '--scroll-hover-scale': '1.01',
+        '--scroll-hover-border': `${module.accentColor}70`,
+        '--scroll-hover-shadow': `0 18px 60px ${module.accentColor}1C, 0 24px 90px rgba(0,0,0,0.45)`,
       }}
     >
       <motion.div
         aria-hidden
-        className="absolute inset-0 rounded-2xl pointer-events-none"
+        className="scroll-hover-reveal absolute inset-0 rounded-2xl pointer-events-none"
         variants={{
           hidden: { opacity: 0, scale: 0.98 },
           visible: { opacity: 0, scale: 0.98 },
@@ -159,7 +154,7 @@ export function ModuloActiveCard({ module }: ModuloActiveCardProps) {
       />
       <motion.div
         aria-hidden
-        className="absolute inset-x-8 top-0 h-px pointer-events-none"
+        className="scroll-hover-reveal absolute inset-x-8 top-0 h-px pointer-events-none"
         variants={{
           hidden: { opacity: 0, scaleX: 0.25 },
           visible: { opacity: 0, scaleX: 0.25 },
@@ -173,7 +168,7 @@ export function ModuloActiveCard({ module }: ModuloActiveCardProps) {
       />
       <motion.div
         aria-hidden
-        className="absolute inset-0 rounded-2xl pointer-events-none"
+        className="scroll-hover-reveal absolute inset-0 rounded-2xl pointer-events-none"
         variants={{
           hidden: { opacity: 0 },
           visible: { opacity: 0 },
@@ -183,10 +178,10 @@ export function ModuloActiveCard({ module }: ModuloActiveCardProps) {
         style={{ boxShadow: `inset 0 0 0 1px ${module.accentColor}66` }}
       />
 
-      <div className="relative z-10 flex flex-col gap-6 h-full">
-        <div className="flex items-start justify-between">
+      <div className="relative z-10 flex h-full flex-col gap-6">
+        <div className="flex min-h-14 items-start justify-between gap-4">
           <motion.div
-            className="w-14 h-14 rounded-2xl flex items-center justify-center"
+            className="w-14 h-14 rounded-2xl flex items-center justify-center shrink-0"
             variants={{
               hidden: { rotate: 0, scale: 1, boxShadow: '0 0 0 rgba(0,0,0,0)' },
               visible: { rotate: 0, scale: 1, boxShadow: '0 0 0 rgba(0,0,0,0)' },
@@ -205,13 +200,13 @@ export function ModuloActiveCard({ module }: ModuloActiveCardProps) {
             <ModuleIcon name={module.iconName} color={module.accentColor} />
           </motion.div>
 
-          <span className="text-[10px] font-semibold tracking-widest px-2.5 py-1 rounded-full bg-white/[0.06] border border-white/[0.10] text-zinc-400">
+          <span className="shrink-0 rounded-full border border-white/[0.10] bg-white/[0.06] px-2.5 py-1 text-[10px] font-semibold tracking-widest text-zinc-400">
             {tierLabel}
           </span>
         </div>
 
         <div className="flex flex-col gap-2">
-          <h3 className="font-bold text-2xl text-white leading-tight">{module.name}</h3>
+          <h3 className="min-h-[3.6rem] text-2xl font-bold leading-[1.18] text-white">{module.name}</h3>
           <p className="text-base text-zinc-300 leading-relaxed">{module.shortDescription}</p>
         </div>
 

@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import {
   AnimatePresence,
@@ -27,7 +28,9 @@ import {
   Mail,
   MessageSquare,
   Package,
+  Pause,
   Phone,
+  Play,
   RefreshCw,
   Search,
   Target,
@@ -152,6 +155,222 @@ const SERVICE_SHORT_LABELS: Record<number, string> = {
 const getServiceAnchorId = (serviceId: number) => `servicio-${serviceId}`;
 const getServiceAccent = (serviceId: number, fallback: string) =>
   SERVICES.find((service) => service.id === serviceId)?.accent ?? fallback;
+const SERVICE_DEMO_HOLD_MS = 2000;
+const SERVICE_DEMO_ADVANCE_DELAY_MS = 300;
+
+type ServiceDemoCycleConfig = {
+  activeIndex: number;
+  itemCount: number;
+  animationDuration: number;
+  isInView: boolean;
+  cycleSeed: number;
+  onAdvance: () => void;
+};
+
+function useServiceDemoCycle({
+  activeIndex,
+  itemCount,
+  animationDuration,
+  isInView,
+  cycleSeed,
+  onAdvance,
+}: ServiceDemoCycleConfig) {
+  const [progress, setProgress] = useState(0);
+  const [animationProgress, setAnimationProgress] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+  const progressRef = useRef(0);
+  const animationProgressRef = useRef(0);
+  const animFrameRef = useRef(0);
+  const nextTabTimeoutRef = useRef<number | null>(null);
+  const startTimeRef = useRef(0);
+  const pausedAtRef = useRef<number | null>(null);
+  const isRunningRef = useRef(false);
+  const isPausedRef = useRef(false);
+  const tickRef = useRef<((now: number) => void) | null>(null);
+
+  const clearPendingCycle = useCallback(() => {
+    cancelAnimationFrame(animFrameRef.current);
+
+    if (nextTabTimeoutRef.current) {
+      clearTimeout(nextTabTimeoutRef.current);
+      nextTabTimeoutRef.current = null;
+    }
+  }, []);
+
+  const resetCycle = useCallback(() => {
+    clearPendingCycle();
+    progressRef.current = 0;
+    animationProgressRef.current = 0;
+    pausedAtRef.current = null;
+    isRunningRef.current = false;
+    isPausedRef.current = false;
+    tickRef.current = null;
+    setProgress(0);
+    setAnimationProgress(0);
+    setIsPaused(false);
+  }, [clearPendingCycle]);
+
+  const togglePause = useCallback(() => {
+    if (!isInView) {
+      return;
+    }
+
+    if (isPausedRef.current) {
+      if (pausedAtRef.current !== null) {
+        startTimeRef.current += performance.now() - pausedAtRef.current;
+      }
+
+      pausedAtRef.current = null;
+      isPausedRef.current = false;
+      isRunningRef.current = true;
+      setIsPaused(false);
+
+      if (tickRef.current) {
+        animFrameRef.current = requestAnimationFrame(tickRef.current);
+      }
+
+      return;
+    }
+
+    if (!isRunningRef.current || progressRef.current >= 1) {
+      return;
+    }
+
+    pausedAtRef.current = performance.now();
+    isPausedRef.current = true;
+    isRunningRef.current = false;
+    setIsPaused(true);
+    clearPendingCycle();
+  }, [clearPendingCycle, isInView]);
+
+  useEffect(() => {
+    clearPendingCycle();
+    progressRef.current = 0;
+    animationProgressRef.current = 0;
+    pausedAtRef.current = null;
+    isPausedRef.current = false;
+    const resetStateTimeout = window.setTimeout(() => {
+      setProgress(0);
+      setAnimationProgress(0);
+      setIsPaused(false);
+    }, 0);
+
+    if (!isInView || itemCount <= 0) {
+      isRunningRef.current = false;
+      tickRef.current = null;
+      return () => {
+        clearTimeout(resetStateTimeout);
+      };
+    }
+
+    const cycleAnimationDuration = Math.max(animationDuration, 1);
+    const cycleTotalDuration = cycleAnimationDuration + SERVICE_DEMO_HOLD_MS;
+
+    startTimeRef.current = performance.now();
+    isRunningRef.current = true;
+
+    const tick = (now: number) => {
+      if (!isRunningRef.current || isPausedRef.current) {
+        return;
+      }
+
+      const elapsed = now - startTimeRef.current;
+      const nextProgress = Math.min(elapsed / cycleTotalDuration, 1);
+      const nextAnimationProgress = Math.min(elapsed / cycleAnimationDuration, 1);
+
+      if (nextProgress !== progressRef.current) {
+        progressRef.current = nextProgress;
+        setProgress(nextProgress);
+      }
+
+      if (nextAnimationProgress !== animationProgressRef.current) {
+        animationProgressRef.current = nextAnimationProgress;
+        setAnimationProgress(nextAnimationProgress);
+      }
+
+      if (nextProgress < 1) {
+        animFrameRef.current = requestAnimationFrame(tick);
+        return;
+      }
+
+      isRunningRef.current = false;
+      nextTabTimeoutRef.current = window.setTimeout(() => {
+        progressRef.current = 0;
+        animationProgressRef.current = 0;
+        setProgress(0);
+        setAnimationProgress(0);
+        onAdvance();
+      }, SERVICE_DEMO_ADVANCE_DELAY_MS);
+    };
+
+    tickRef.current = tick;
+    animFrameRef.current = requestAnimationFrame(tick);
+
+    return () => {
+      clearTimeout(resetStateTimeout);
+      clearPendingCycle();
+      isRunningRef.current = false;
+      tickRef.current = null;
+    };
+  }, [activeIndex, animationDuration, clearPendingCycle, cycleSeed, isInView, itemCount, onAdvance]);
+
+  return {
+    progress,
+    animationProgress,
+    isPaused,
+    togglePause,
+    resetCycle,
+  };
+}
+
+function ServiceDemoPauseButton({
+  isPaused,
+  onToggle,
+  color,
+}: {
+  isPaused: boolean;
+  onToggle: () => void;
+  color: string;
+}) {
+  const Icon = isPaused ? Play : Pause;
+  const label = isPaused ? 'Reanudar' : 'Pausar';
+
+  return (
+    <motion.button
+      type="button"
+      aria-label={label}
+      onClick={onToggle}
+      whileHover={{
+        borderColor: `${color}55`,
+        background: `${color}14`,
+        boxShadow: `0 0 18px ${color}18`,
+      }}
+      whileTap={{ scale: 0.96 }}
+      transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 6,
+        height: 26,
+        borderRadius: 999,
+        border: `1px solid ${color}28`,
+        background: 'rgba(255,255,255,0.035)',
+        color: 'rgba(255,255,255,0.74)',
+        padding: '0 9px',
+        cursor: 'pointer',
+        fontSize: 8,
+        fontWeight: 750,
+        letterSpacing: '0.08em',
+        textTransform: 'uppercase',
+        whiteSpace: 'nowrap',
+      }}
+    >
+      <Icon size={10} color={color} strokeWidth={2.2} />
+      <span>{label}</span>
+    </motion.button>
+  );
+}
 
 function StageFrame({
   service,
@@ -439,19 +658,14 @@ function WebScene({ service }: { service: Service }) {
     { id: 1, label: 'SEO Local', icon: <SearchGlyph />, duration: 5000, color: service.accent },
     { id: 2, label: 'Analytics', icon: <AnalyticsGlyph />, duration: 4500, color: service.accent },
     { id: 3, label: 'Leads', icon: <LeadsGlyph />, duration: 5500, color: service.accent },
-    { id: 4, label: 'Google Maps', icon: <MapsGlyph />, duration: 4000, color: service.accent },
+    { id: 4, label: 'Google Maps', icon: <MapsGlyph />, duration: 6500, color: service.accent },
   ]);
 
   const [activeTab, setActiveTab] = useState(0);
+  const [hoveredWebTab, setHoveredWebTab] = useState<number | null>(null);
   const [isInView, setIsInView] = useState(false);
-  const [progress, setProgress] = useState(0);
   const [cycleSeed, setCycleSeed] = useState(0);
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const progressRef = useRef(0);
-  const animFrameRef = useRef(0);
-  const nextTabTimeoutRef = useRef<number | null>(null);
-  const startTimeRef = useRef(0);
-  const isRunningRef = useRef(false);
   const placeholderConfigs: PlaceholderConfig[] = [
     {
       title: 'SEO Local',
@@ -507,77 +721,35 @@ function WebScene({ service }: { service: Service }) {
     return () => observer.disconnect();
   }, []);
 
-  useEffect(() => {
-    if (nextTabTimeoutRef.current) {
-      clearTimeout(nextTabTimeoutRef.current);
-      nextTabTimeoutRef.current = null;
-    }
+  const advanceWebTab = useCallback(() => {
+    setActiveTab((previousTab) => (previousTab + 1) % webSimulations.length);
+  }, [webSimulations.length]);
 
-    if (!isInView) {
-      cancelAnimationFrame(animFrameRef.current);
-      isRunningRef.current = false;
-      return;
-    }
-
-    const duration = webSimulations[activeTab]?.duration ?? 1;
-
-    progressRef.current = 0;
-    startTimeRef.current = performance.now();
-    isRunningRef.current = true;
-
-    const tick = (now: number) => {
-      if (!isRunningRef.current) {
-        return;
-      }
-
-      const elapsed = now - startTimeRef.current;
-      const nextProgress = Math.min(elapsed / duration, 1);
-
-      if (nextProgress !== progressRef.current) {
-        progressRef.current = nextProgress;
-        setProgress(nextProgress);
-      }
-
-      if (nextProgress < 1) {
-        animFrameRef.current = requestAnimationFrame(tick);
-        return;
-      }
-
-      isRunningRef.current = false;
-      nextTabTimeoutRef.current = window.setTimeout(() => {
-        progressRef.current = 0;
-        setProgress(0);
-        setActiveTab((previousTab) => (previousTab + 1) % webSimulations.length);
-      }, 300);
-    };
-
-    animFrameRef.current = requestAnimationFrame(tick);
-
-    return () => {
-      cancelAnimationFrame(animFrameRef.current);
-      if (nextTabTimeoutRef.current) {
-        clearTimeout(nextTabTimeoutRef.current);
-        nextTabTimeoutRef.current = null;
-      }
-      isRunningRef.current = false;
-    };
-  }, [activeTab, cycleSeed, isInView, webSimulations]);
+  const {
+    progress,
+    animationProgress,
+    isPaused,
+    togglePause,
+    resetCycle,
+  } = useServiceDemoCycle({
+    activeIndex: activeTab,
+    itemCount: webSimulations.length,
+    animationDuration: webSimulations[activeTab]?.duration ?? 1,
+    isInView,
+    cycleSeed,
+    onAdvance: advanceWebTab,
+  });
 
   const handleTabClick = (index: number) => {
-    cancelAnimationFrame(animFrameRef.current);
-    if (nextTabTimeoutRef.current) {
-      clearTimeout(nextTabTimeoutRef.current);
-      nextTabTimeoutRef.current = null;
-    }
-    isRunningRef.current = false;
-    progressRef.current = 0;
-    setProgress(0);
+    resetCycle();
+    setHoveredWebTab(null);
     setActiveTab(index);
     setCycleSeed((currentSeed) => currentSeed + 1);
   };
 
   const activeSimulation = webSimulations[activeTab];
   const activePlaceholder = placeholderConfigs[activeTab];
+  const visualWebTab = hoveredWebTab ?? activeTab;
 
   function SimSEO({ isActive, progress, color }: SimProps) {
     const query = 'Clínica odontológica en Tucumán';
@@ -595,8 +767,8 @@ function WebScene({ service }: { service: Service }) {
           maxHeight: '100%',
           display: 'flex',
           flexDirection: 'column',
-          gap: 10,
-          padding: '4px 2px',
+          gap: 8,
+          padding: '2px',
           overflow: 'hidden',
         }}
       >
@@ -656,7 +828,7 @@ function WebScene({ service }: { service: Service }) {
             backdropFilter: 'blur(20px)',
             border: '1px solid rgba(255,255,255,0.10)',
             borderRadius: 12,
-            padding: '10px 14px',
+            padding: '8px 12px',
             flexShrink: 0,
           }}
         >
@@ -709,8 +881,10 @@ function WebScene({ service }: { service: Service }) {
           style={{
             display: 'flex',
             flexDirection: 'column',
-            gap: 6,
+            gap: 5,
             flex: 1,
+            minHeight: 0,
+            overflow: 'hidden',
           }}
         >
           {/* RESULTADO #1 — TU EMPRESA */}
@@ -726,7 +900,7 @@ function WebScene({ service }: { service: Service }) {
                 backdropFilter: 'blur(20px)',
                 border: `1px solid ${highlightFirst ? `${color}30` : 'rgba(255,255,255,0.07)'}`,
                 borderRadius: 12,
-                padding: '12px 14px',
+                padding: '10px 12px',
                 position: 'relative',
                 overflow: 'hidden',
                 transition: 'all 600ms cubic-bezier(0.25, 0.46, 0.45, 0.94)',
@@ -842,7 +1016,7 @@ function WebScene({ service }: { service: Service }) {
                 style={{
                   fontSize: 10,
                   color: highlightFirst ? 'rgba(255,255,255,0.45)' : 'rgba(255,255,255,0.2)',
-                  lineHeight: 1.5,
+                  lineHeight: 1.42,
                   transition: 'color 400ms',
                 }}
               >
@@ -913,7 +1087,7 @@ function WebScene({ service }: { service: Service }) {
                     backdropFilter: 'blur(10px)',
                     border: '1px solid rgba(255,255,255,0.05)',
                     borderRadius: 10,
-                    padding: '10px 14px',
+                    padding: '8px 12px',
                   }}
                 >
                   <div
@@ -953,21 +1127,49 @@ function WebScene({ service }: { service: Service }) {
     const conv = (progress * 3.2).toFixed(1);
 
     const baseData = [45, 62, 58, 78, 71, 95, 88, 112, 98, 128, 115, 148];
-    const visiblePoints = Math.floor(progress * baseData.length);
     const showGraph = progress > 0.2;
     const showMap = progress > 0.4;
-
-    // Silueta Argentina mejorada
-    const argentinaPath =
-      'M80,8 C88,8 98,12 105,20 C112,28 115,38 114,50 C113,60 108,68 110,80 C112,90 108,100 105,112 C102,122 104,132 100,142 C96,152 92,162 88,172 C84,182 80,192 76,202 C72,212 68,222 62,232 C56,242 50,252 44,260 C40,266 36,268 34,264 C32,258 34,250 36,242 C38,234 36,226 34,216 C32,206 34,196 32,186 C30,176 28,166 30,156 C28,146 26,136 28,126 C26,116 24,106 26,96 C24,86 22,76 24,66 C26,56 28,46 26,36 C28,28 34,18 42,12 C52,6 66,6 80,8Z';
+    const chartProgress = Math.max(0, Math.min((progress - 0.2) / 0.72, 1));
+    const easedChartProgress = chartProgress * chartProgress * (3 - 2 * chartProgress);
+    const chartWidth = 160;
+    const chartHeight = 86;
+    const chartPadX = 11;
+    const chartPadTop = 13;
+    const chartPadBottom = 16;
+    const chartBaseY = chartHeight - chartPadBottom;
+    const chartPlotWidth = chartWidth - chartPadX * 2;
+    const chartPlotHeight = chartHeight - chartPadTop - chartPadBottom;
+    const dataMin = 36;
+    const dataMax = 156;
+    const chartPoints = baseData.map((value, index) => ({
+      x: chartPadX + (index / (baseData.length - 1)) * chartPlotWidth,
+      y: chartBaseY - ((value - dataMin) / (dataMax - dataMin)) * chartPlotHeight,
+    }));
+    const chartLinePath = chartPoints
+      .map((point, index) => `${index === 0 ? 'M' : 'L'} ${point.x.toFixed(2)} ${point.y.toFixed(2)}`)
+      .join(' ');
+    const chartAreaPath = `${chartLinePath} L ${chartPoints[chartPoints.length - 1].x.toFixed(2)} ${chartBaseY} L ${chartPoints[0].x.toFixed(2)} ${chartBaseY} Z`;
+    const markerSegment = Math.min(baseData.length - 2, Math.floor(easedChartProgress * (baseData.length - 1)));
+    const markerSegmentProgress = easedChartProgress * (baseData.length - 1) - markerSegment;
+    const markerStart = chartPoints[markerSegment];
+    const markerEnd = chartPoints[markerSegment + 1] ?? markerStart;
+    const marker = {
+      x: markerStart.x + (markerEnd.x - markerStart.x) * markerSegmentProgress,
+      y: markerStart.y + (markerEnd.y - markerStart.y) * markerSegmentProgress,
+    };
+    const chartRevealWidth = Math.max(0, chartPadX + chartPlotWidth * easedChartProgress);
+    const gradientId = `analytics-grad-${color.replace('#', '')}`;
+    const clipId = `analytics-clip-${color.replace('#', '')}`;
 
     const mapCities = [
-      { name: 'Buenos Aires', cx: 65, cy: 175, r: 6 },
-      { name: 'C\u00f3rdoba', cx: 58, cy: 130, r: 5 },
-      { name: 'Rosario', cx: 62, cy: 152, r: 4 },
-      { name: 'Tucum\u00e1n', cx: 52, cy: 82, r: 4 },
-      { name: 'Mendoza', cx: 40, cy: 138, r: 4 },
-      { name: 'Salta', cx: 48, cy: 56, r: 3 },
+      { name: 'Formosa', left: '60%', top: '11%', size: 6.4 },
+      { name: 'Tucum\u00e1n', left: '44%', top: '15%', size: 6.8 },
+      { name: 'C\u00f3rdoba', left: '48%', top: '30%', size: 8 },
+      { name: 'Mendoza', left: '30%', top: '45%', size: 7.2 },
+      { name: 'Corrientes', left: '70%', top: '20%', size: 6.8 },
+      { name: 'Buenos Aires', left: '65%', top: '35%', size: 9.6 },
+      { name: 'Santa Cruz', left: '30%', top: '75%', size: 7.2 },
+      { name: 'Tierra del Fuego', left: '39%', top: '92%', size: 6.4 },
     ];
 
     return (
@@ -1127,53 +1329,61 @@ function WebScene({ service }: { service: Service }) {
                 {'\u00daLTIMOS 12 D\u00cdAS'}
               </div>
               <svg
-                viewBox="0 0 120 60"
-                style={{ flex: 1, width: '100%', minHeight: 0, overflow: 'hidden' }}
+                viewBox={`0 0 ${chartWidth} ${chartHeight}`}
+                style={{ flex: 1, width: '100%', minHeight: 0, overflow: 'visible' }}
                 preserveAspectRatio="none"
               >
                 <defs>
-                  <linearGradient id={`grad-${color.replace('#', '')}`} x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor={color} stopOpacity="0.25" />
+                  <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor={color} stopOpacity="0.24" />
                     <stop offset="100%" stopColor={color} stopOpacity="0" />
                   </linearGradient>
+                  <clipPath id={clipId}>
+                    <rect x="0" y="0" width={chartRevealWidth} height={chartHeight} rx="2" />
+                  </clipPath>
                 </defs>
-                {visiblePoints > 1 &&
-                  (() => {
-                    const pts = baseData.slice(0, visiblePoints).map((v, i) => ({
-                      x: (i / (baseData.length - 1)) * 120,
-                      y: 55 - (v / 160) * 50,
-                    }));
-                    const areaD = [
-                      `M ${pts[0].x} 60`,
-                      ...pts.map((p) => `L ${p.x} ${p.y}`),
-                      `L ${pts[pts.length - 1].x} 60 Z`,
-                    ].join(' ');
-                    const lineD = pts.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
-                    return (
-                      <>
-                        <path d={areaD} fill={`url(#grad-${color.replace('#', '')})`} />
-                        <path
-                          d={lineD}
-                          fill="none"
-                          stroke={color}
-                          strokeWidth="1.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                        {/* Punto final con glow */}
-                        <circle cx={pts[pts.length - 1].x} cy={pts[pts.length - 1].y} r="3" fill={color} />
-                        <circle
-                          cx={pts[pts.length - 1].x}
-                          cy={pts[pts.length - 1].y}
-                          r="6"
-                          fill="none"
-                          stroke={color}
-                          strokeWidth="0.5"
-                          opacity="0.4"
-                        />
-                      </>
-                    );
-                  })()}
+                {[0.25, 0.5, 0.75].map((line) => (
+                  <line
+                    key={line}
+                    x1={chartPadX}
+                    x2={chartWidth - chartPadX}
+                    y1={chartPadTop + chartPlotHeight * line}
+                    y2={chartPadTop + chartPlotHeight * line}
+                    stroke="rgba(255,255,255,0.055)"
+                    strokeWidth="0.7"
+                  />
+                ))}
+                <g clipPath={`url(#${clipId})`}>
+                  <path d={chartAreaPath} fill={`url(#${gradientId})`} />
+                  <motion.path
+                    d={chartLinePath}
+                    fill="none"
+                    stroke={color}
+                    strokeWidth="2.1"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    style={{ filter: `drop-shadow(0 0 4px ${color}66)` }}
+                    initial={false}
+                    animate={{ opacity: showGraph ? 1 : 0 }}
+                    transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+                  />
+                </g>
+                {chartProgress > 0.03 && (
+                  <g>
+                    <circle cx={marker.x} cy={marker.y} r="3" fill={color} />
+                    <motion.circle
+                      cx={marker.x}
+                      cy={marker.y}
+                      r="7"
+                      fill="none"
+                      stroke={color}
+                      strokeWidth="0.7"
+                      opacity="0.42"
+                      animate={isActive ? { r: [5.5, 8.5, 5.5], opacity: [0.3, 0.05, 0.3] } : { r: 6, opacity: 0.25 }}
+                      transition={{ duration: 2.2, repeat: isActive ? Infinity : 0, ease: 'easeInOut' }}
+                    />
+                  </g>
+                )}
               </svg>
             </motion.div>
           )}
@@ -1208,49 +1418,57 @@ function WebScene({ service }: { service: Service }) {
                 ORIGEN
               </div>
               <div style={{ flex: 1, minHeight: 0, position: 'relative', overflow: 'hidden' }}>
-                <svg
-                  viewBox="20 5 100 270"
-                  style={{ width: '100%', height: '100%' }}
-                  preserveAspectRatio="xMidYMid meet"
-                >
-                  {/* Silueta Argentina */}
-                  <path
-                    d={argentinaPath}
-                    fill="rgba(255,255,255,0.06)"
-                    stroke="rgba(255,255,255,0.12)"
-                    strokeWidth="0.8"
-                  />
-                  {/* Ciudades */}
-                  {mapCities.map(
-                    (city, i) =>
-                      progress > 0.42 + i * 0.07 && (
-                        <g key={city.name}>
-                          {/* Anillo pulsante */}
-                          <motion.circle
-                            cx={city.cx}
-                            cy={city.cy}
-                            r={city.r * 2}
-                            fill="none"
-                            stroke={color}
-                            strokeWidth="0.5"
-                            animate={{ r: [city.r * 1.5, city.r * 3, city.r * 1.5], opacity: [0.4, 0, 0.4] }}
-                            transition={{ duration: 2.5, repeat: Infinity, delay: i * 0.3 }}
-                          />
-                          {/* Punto */}
-                          <motion.circle
-                            cx={city.cx}
-                            cy={city.cy}
-                            r={city.r}
-                            fill={color}
-                            initial={{ r: 0, opacity: 0 }}
-                            animate={{ r: city.r, opacity: 0.85 }}
-                            transition={{ type: 'spring', stiffness: 300, delay: i * 0.08 }}
-                            style={{ filter: `drop-shadow(0 0 3px ${color})` }}
-                          />
-                        </g>
-                      )
-                  )}
-                </svg>
+                <Image
+                  src="/maps/argentina.svg"
+                  alt="Mapa de Argentina"
+                  fill
+                  sizes="160px"
+                  style={{
+                    position: 'absolute',
+                    objectFit: 'cover',
+                    objectPosition: '48% 41%',
+                    padding: 0,
+                    opacity: 0.58,
+                    filter: `invert(1) grayscale(1) brightness(1.32) contrast(1.08) drop-shadow(0 0 10px ${color}20)`,
+                    pointerEvents: 'none',
+                    userSelect: 'none',
+                  }}
+                />
+                {mapCities.map(
+                  (city, i) =>
+                    progress > 0.42 + i * 0.07 && (
+                      <motion.span
+                        key={city.name}
+                        initial={{ opacity: 0, scale: 0 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ type: 'spring', stiffness: 300, damping: 18, delay: i * 0.08 }}
+                        style={{
+                          position: 'absolute',
+                          left: city.left,
+                          top: city.top,
+                          width: city.size,
+                          height: city.size,
+                          borderRadius: '50%',
+                          background: color,
+                          transform: 'translate(-50%, -50%)',
+                          boxShadow: `0 0 4px ${color}, 0 0 12px ${color}66`,
+                          zIndex: 2,
+                        }}
+                      >
+                        <motion.span
+                          aria-hidden
+                          animate={{ scale: [1, 2.6, 1], opacity: [0.42, 0, 0.42] }}
+                          transition={{ duration: 2.5, repeat: Infinity, delay: i * 0.3 }}
+                          style={{
+                            position: 'absolute',
+                            inset: -city.size * 0.6,
+                            borderRadius: '50%',
+                            border: `1px solid ${color}`,
+                          }}
+                        />
+                      </motion.span>
+                    )
+                )}
               </div>
             </motion.div>
           )}
@@ -1521,14 +1739,68 @@ function WebScene({ service }: { service: Service }) {
   }
   function SimMaps({ isActive, progress, color }: SimProps) {
     const showGrid = progress > 0.1;
-    const showCompetitors = progress > 0.22;
+    const showCompetitors = progress > 0.1;
     const showClient = progress > 0.5;
-    const showPanel = progress > 0.72;
+    const showPanel = progress > 0.5;
 
     const competitors = [
-      { x: '28%', y: '48%', rating: '2.8', delay: 0.22 },
-      { x: '68%', y: '36%', rating: '3.1', delay: 0.3 },
-      { x: '58%', y: '65%', rating: '3.4', delay: 0.38 },
+  // ZONA 1 - noroeste / arriba izquierda, sin tapar “San Miguel”
+  { x: '4%', y: '19%', rank: '#2', rating: '3.8', delay: 0.10 },
+  { x: '14%', y: '1%', rank: '#3', rating: '3.6', delay: 0.18 },
+  { x: '11%', y: '22%', rank: '#4', rating: '3.4', delay: 0.30 },
+
+  // ZONA 2 - norte centro, por encima del texto grande
+  { x: '36%', y: '2%', rank: '#2', rating: '3.9', delay: 0.22 },
+  { x: '40%', y: '10%', rank: '#3', rating: '3.7', delay: 0.34 },
+  { x: '30%', y: '35%', rank: '#4', rating: '3.5', delay: 0.42 },
+
+  // ZONA 3 - norte derecha
+  { x: '65%', y: '12%', rank: '#2', rating: '3.8', delay: 0.14 },
+  { x: '80%', y: '22%', rank: '#3', rating: '3.6', delay: 0.26 },
+  { x: '60%', y: '37%', rank: '#4', rating: '3.4', delay: 0.38 },
+
+  // ZONA 4 - oeste medio / Villa Luján, evitando tapar texto
+  { x: '15%', y: '53%', rank: '#2', rating: '3.7', delay: 0.20 },
+  { x: '25%', y: '42%', rank: '#3', rating: '3.5', delay: 0.32 },
+  { x: '31%', y: '59%', rank: '#4', rating: '3.3', delay: 0.44 },
+
+  // ZONA 5 - este medio / Villa 9 de Julio, separados del texto
+  { x: '90%', y: '30%', rank: '#2', rating: '3.8', delay: 0.16 },
+  { x: '86%', y: '47%', rank: '#3', rating: '3.6', delay: 0.28 },
+  { x: '94%', y: '48%', rank: '#4', rating: '3.4', delay: 0.40 },
+
+  // ZONA 6 - sudoeste / abajo izquierda
+  { x: '9%', y: '72%', rank: '#2', rating: '3.6', delay: 0.24 },
+  { x: '18%', y: '82%', rank: '#3', rating: '3.4', delay: 0.36 },
+  { x: '26%', y: '74%', rank: '#4', rating: '3.2', delay: 0.46 },
+
+  // ZONA 7 - sur centro, sin tapar “Centro”
+  { x: '43%', y: '78%', rank: '#2', rating: '3.7', delay: 0.33 },
+  { x: '59%', y: '81%', rank: '#3', rating: '3.5', delay: 0.41 },
+  { x: '70%', y: '80%', rank: '#4', rating: '3.3', delay: 0.47 },
+
+  // ZONA 8 - sudeste / Parque 9 de Julio, evitando tapar el texto grande
+  { x: '83%', y: '82%', rank: '#2', rating: '3.6', delay: 0.12 },
+  { x: '84%', y: '64%', rank: '#3', rating: '3.4', delay: 0.25 },
+  { x: '94%', y: '82%', rank: '#4', rating: '3.2', delay: 0.35 },
+
+  // ZONA TU EMPRESA - aparecen últimos antes del #1
+  { x: '50%', y: '50%', rank: '#2', rating: '3.6', delay: 0.455 },
+  { x: '74%', y: '63%', rank: '#3', rating: '3.4', delay: 0.465 },
+  { x: '50%', y: '64%', rank: '#4', rating: '3.2', delay: 0.475 },
+  { x: '65%', y: '66%', rank: '#5', rating: '3.0', delay: 0.485 },
+];
+    const primaryMapMarker = { left: '62%', top: '60%' };
+    const gridZones = [
+      { left: '30%', top: '10%', rank: '#3', active: true },
+      { left: '10%', top: '10%', rank: '#4', active: true },
+      { left: '53%', top: '12%', rank: '#4', active: true },
+      { left: '68%', top: '31%', rank: '#2', active: true },
+      { left: '27%', top: '52%', rank: '#2', active: true },
+      { left: '90%', top: '60%', rank: '#2', active: true },
+      { left: '90%', top: '40%', rank: '#3', active: true },
+      { left: '15%', top: '74%', rank: '#4', active: true },
+      { left: '50%', top: '80%', rank: '#2', active: true },
     ];
 
     return (
@@ -1575,8 +1847,9 @@ function WebScene({ service }: { service: Service }) {
         <div
           style={{
             flex: 1,
-            display: 'flex',
-            gap: 8,
+            display: 'grid',
+            gridTemplateColumns: 'minmax(0,1fr) 122px',
+            gap: 10,
             minHeight: 0,
             overflow: 'hidden',
           }}
@@ -1584,7 +1857,6 @@ function WebScene({ service }: { service: Service }) {
           {/* Mapa */}
           <div
             style={{
-              flex: 1,
               background: 'rgba(255,255,255,0.03)',
               backdropFilter: 'blur(20px)',
               border: '1px solid rgba(255,255,255,0.07)',
@@ -1606,10 +1878,90 @@ function WebScene({ service }: { service: Service }) {
                   linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
                   linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)
                 `,
-                  backgroundSize: '24px 24px',
+                  backgroundSize: '26px 26px',
                 }}
               />
             )}
+
+            {showGrid && (
+              <motion.div
+                initial={{ opacity: 0, scale: 1.025 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
+                style={{
+                  position: 'absolute',
+                  inset: 0,
+                  overflow: 'hidden',
+                }}
+              >
+                <Image
+                  src="/maps/tucuman-googlemaps.png"
+                  alt="Mapa real de Tucumán"
+                  fill
+                  sizes="420px"
+                  priority={false}
+                  style={{
+                    objectFit: 'cover',
+                    objectPosition: 'center',
+                    opacity: 0.68,
+                    filter: 'saturate(0.72) contrast(1.08) brightness(0.64)',
+                    transform: 'scale(1.03)',
+                    pointerEvents: 'none',
+                    userSelect: 'none',
+                  }}
+                />
+                <div
+                  aria-hidden
+                  style={{
+                    position: 'absolute',
+                    inset: 0,
+                    background:
+                      `radial-gradient(circle at ${primaryMapMarker.left} ${primaryMapMarker.top}, ${color}26, transparent 0 24%), linear-gradient(180deg, rgba(2,6,23,0.22), rgba(2,6,23,0.48))`,
+                    mixBlendMode: 'screen',
+                    pointerEvents: 'none',
+                  }}
+                />
+                <div
+                  aria-hidden
+                  style={{
+                    position: 'absolute',
+                    inset: 0,
+                    background:
+                      'linear-gradient(135deg, rgba(2,6,23,0.18), rgba(2,6,23,0.02) 42%, rgba(2,6,23,0.36)), radial-gradient(circle at 50% 50%, transparent 0 45%, rgba(0,0,0,0.30) 100%)',
+                    pointerEvents: 'none',
+                  }}
+                />
+              </motion.div>
+            )}
+
+            {showGrid &&
+              gridZones.map((zone, index) => (
+                <motion.div
+                  key={`${zone.left}-${zone.top}`}
+                  initial={{ opacity: 0, scale: 0.92 }}
+                  animate={{ opacity: zone.active ? 1 : 0.45, scale: 1 }}
+                  transition={{ duration: 0.35, delay: index * 0.025 }}
+                  style={{
+                    position: 'absolute',
+                    left: zone.left,
+                    top: zone.top,
+                    width: 36,
+                    height: 30,
+                    transform: 'translate(-50%, -50%)',
+                    borderRadius: 9,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: 10,
+                    fontWeight: 800,
+                    color: zone.active ? color : 'rgba(255,255,255,0.22)',
+                    background: zone.active ? `${color}12` : 'rgba(255,255,255,0.035)',
+                    border: `1px solid ${zone.active ? `${color}35` : 'rgba(255,255,255,0.06)'}`,
+                  }}
+                >
+                  {zone.rank}
+                </motion.div>
+              ))}
 
             {/* Pins competidores */}
             {showCompetitors &&
@@ -1630,21 +1982,53 @@ function WebScene({ service }: { service: Service }) {
                         flexDirection: 'column',
                         alignItems: 'center',
                         gap: 3,
+                        zIndex: 4,
                       }}
                     >
                       <div
                         style={{
-                          width: 18,
-                          height: 18,
+                          width: 16,
+                          height: 16,
                           borderRadius: '50% 50% 50% 0',
                           transform: 'rotate(-45deg)',
-                          background: 'rgba(120,120,120,0.5)',
-                          border: '1px solid rgba(160,160,160,0.25)',
+                          background: 'rgba(148,163,184,0.22)',
+                          border: '1px solid rgba(203,213,225,0.18)',
                           backdropFilter: 'blur(8px)',
                         }}
                       />
                       <div
                         style={{
+                          display: 'none',
+                          background: 'rgba(20,20,20,0.9)',
+                          backdropFilter: 'blur(8px)',
+                          border: '1px solid rgba(255,255,255,0.08)',
+                          borderRadius: 5,
+                          padding: '2px 5px',
+                          fontSize: 8,
+                          color: 'rgba(255,255,255,0.36)',
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
+                        {comp.rank} · {comp.rating}
+                      </div>
+                      <div
+                        style={{
+                          background: 'rgba(15,23,42,0.86)',
+                          backdropFilter: 'blur(8px)',
+                          border: '1px solid rgba(255,255,255,0.08)',
+                          borderRadius: 6,
+                          padding: '2px 6px',
+                          fontSize: 8,
+                          fontWeight: 800,
+                          color: 'rgba(255,255,255,0.46)',
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
+                        {comp.rank}
+                      </div>
+                      <div
+                        style={{
+                          display: 'none',
                           background: 'rgba(20,20,20,0.85)',
                           backdropFilter: 'blur(8px)',
                           border: '1px solid rgba(255,255,255,0.08)',
@@ -1669,27 +2053,25 @@ function WebScene({ service }: { service: Service }) {
                 transition={{ type: 'spring', stiffness: 260, damping: 18 }}
                 style={{
                   position: 'absolute',
-                  left: '50%',
-                  top: '42%',
-                  transform: 'translate(-50%, -100%)',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  gap: 4,
+                  left: primaryMapMarker.left,
+                  top: primaryMapMarker.top,
+                  width: 0,
+                  height: 0,
+                  transform: 'translate(-50%, -50%)',
                   zIndex: 10,
                 }}
               >
                 {/* Anillos */}
-                {[1, 2].map((ring) => (
+                {[1, 2, 3].map((ring) => (
                   <motion.div
                     key={ring}
                     animate={{
-                      scale: [1, 2 + ring * 0.8],
-                      opacity: [0.5, 0],
+                      scale: [1, 2.2 + ring * 0.62],
+                      opacity: [0.38, 0],
                     }}
                     transition={{
-                      duration: 2.2,
-                      delay: ring * 0.5,
+                      duration: 2.6,
+                      delay: ring * 0.42,
                       repeat: isActive ? Infinity : 0,
                       ease: 'easeOut',
                     }}
@@ -1699,33 +2081,63 @@ function WebScene({ service }: { service: Service }) {
                       height: 30,
                       borderRadius: '50%',
                       border: `1px solid ${color}`,
-                      top: '50%',
-                      left: '50%',
-                      transform: 'translate(-50%, -50%)',
+                      top: -15,
+                      left: -15,
+                      transform: 'translate(-50%, -45%)',
                       pointerEvents: 'none',
                     }}
                   />
                 ))}
 
-                {/* Pin */}
-                <motion.div
-                  animate={isActive ? { y: [0, -5, 0] } : { y: 0 }}
-                  transition={{ duration: 2, repeat: isActive ? Infinity : 0, ease: 'easeInOut' }}
+                {/* Zona ranking principal */}
+                <div
                   style={{
-                    width: 32,
-                    height: 32,
-                    borderRadius: '50% 50% 50% 0',
-                    transform: 'rotate(-45deg)',
-                    background: `linear-gradient(135deg, ${color}, ${color}cc)`,
-                    boxShadow: `0 0 24px ${color}50, 0 4px 16px rgba(0,0,0,0.5)`,
+                    position: 'absolute',
+                    left: 0,
+                    top: 0,
+                    width: 50,
+                    height: 38,
+                    borderRadius: 12,
+                    transform: 'translate(-50%, -50%)',
+                    background: `linear-gradient(135deg, ${color}24, ${color}10)`,
+                    boxShadow: `0 0 26px ${color}24, inset 0 1px 0 rgba(255,255,255,0.20)`,
                     display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    position: 'relative',
+                    alignItems: 'flex-end',
+                    justifyContent: 'flex-end',
+                    padding: '0 6px 5px 0',
+                    border: `1px solid ${color}70`,
+                    pointerEvents: 'none',
                   }}
                 >
-                  <span style={{ transform: 'rotate(45deg)', fontSize: 13 }}></span>
-                </motion.div>
+                  <span style={{ fontSize: 12, fontWeight: 900, color, lineHeight: 1, textShadow: `0 0 14px ${color}66` }}>
+                    #1
+                  </span>
+                </div>
+
+                {/* Pin */}
+                <div
+                  style={{
+                    position: 'absolute',
+                    left: 0,
+                    top: 2,
+                    width: 30,
+                    height: 40,
+                    transform: 'translate(-50%, -100%)',
+                    filter: `drop-shadow(0 0 18px ${color}55) drop-shadow(0 5px 10px rgba(0,0,0,0.55))`,
+                    pointerEvents: 'none',
+                  }}
+                >
+                  <svg viewBox="0 0 30 40" width="30" height="40" aria-hidden="true">
+                    <path
+                      d="M15 38C15 38 26 25.6 26 15.2C26 8.6 21.08 3.5 15 3.5C8.92 3.5 4 8.6 4 15.2C4 25.6 15 38 15 38Z"
+                      fill="rgba(2,6,23,0.96)"
+                      stroke={color}
+                      strokeWidth="1.4"
+                    />
+                    <circle cx="15" cy="15.5" r="5.6" fill={color} />
+                    <circle cx="15" cy="15.5" r="2.4" fill="#020617" opacity="0.88" />
+                  </svg>
+                </div>
 
                 {/* Label */}
                 <motion.div
@@ -1733,20 +2145,63 @@ function WebScene({ service }: { service: Service }) {
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 0.35, type: 'spring' }}
                   style={{
-                    background: color,
+                    position: 'absolute',
+                    left: 42,
+                    top: -18,
+                    transform: 'translateY(-50%)',
+                    background: 'rgba(2,6,23,0.88)',
                     backdropFilter: 'blur(8px)',
-                    color: 'black',
+                    color,
                     fontSize: 9,
                     fontWeight: 800,
-                    padding: '3px 8px',
+                    padding: '4px 8px',
                     borderRadius: 6,
+                    border: `1px solid ${color}35`,
                     whiteSpace: 'nowrap',
-                    boxShadow: `0 2px 12px ${color}40`,
+                    boxShadow: `0 2px 12px rgba(0,0,0,0.36), 0 0 14px ${color}1F`,
                     letterSpacing: '0.03em',
                   }}
                 >
-                  TU EMPRESA · 5.0
+                  TU EMPRESA
                 </motion.div>
+              </motion.div>
+            )}
+
+            {showClient && (
+              <motion.div
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.28, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+                style={{
+                  position: 'absolute',
+                  left: 12,
+                  right: 12,
+                  bottom: 10,
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(3, 1fr)',
+                  gap: 6,
+                  zIndex: 6,
+                }}
+              >
+                {[
+                  ['7/9', 'zonas top 3'],
+                  ['+41%', 'llamadas'],
+                  ['5.0', 'rating'],
+                ].map(([value, label]) => (
+                  <div
+                    key={label}
+                    style={{
+                      borderRadius: 8,
+                      border: '1px solid rgba(255,255,255,0.08)',
+                      background: 'rgba(0,0,0,0.34)',
+                      padding: '5px 6px',
+                      backdropFilter: 'blur(10px)',
+                    }}
+                  >
+                    <div style={{ color, fontSize: 12, fontWeight: 800, lineHeight: 1 }}>{value}</div>
+                    <div style={{ color: 'rgba(255,255,255,0.34)', fontSize: 7, marginTop: 3, whiteSpace: 'nowrap' }}>{label}</div>
+                  </div>
+                ))}
               </motion.div>
             )}
           </div>
@@ -1758,18 +2213,104 @@ function WebScene({ service }: { service: Service }) {
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
               style={{
-                width: 108,
+                minWidth: 0,
                 background: 'rgba(255,255,255,0.04)',
                 backdropFilter: 'blur(20px)',
                 border: `1px solid ${color}20`,
                 borderRadius: 12,
-                padding: '12px 10px',
+                padding: '10px',
                 display: 'flex',
                 flexDirection: 'column',
-                gap: 8,
+                gap: 7,
+                minHeight: 0,
                 flexShrink: 0,
               }}
             >
+              <div
+                style={{
+                  borderRadius: 10,
+                  border: `1px solid ${color}22`,
+                  background: `${color}0C`,
+                  padding: '8px',
+                }}
+              >
+                <div style={{ fontSize: 8, color, marginBottom: 4, letterSpacing: '0.08em', fontWeight: 700 }}>
+                  POSICION LOCAL
+                </div>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
+                  <span style={{ fontSize: 20, fontWeight: 900, color, lineHeight: 1 }}>TOP</span>
+                  <span style={{ fontSize: 8, color: 'rgba(255,255,255,0.38)' }}>en tu zona</span>
+                </div>
+              </div>
+
+              <div>
+                <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 5 }}>
+                  <span style={{ fontSize: 8, color: 'rgba(255,255,255,0.25)', letterSpacing: '0.08em' }}>REPUTACION</span>
+                  <span style={{ color, fontSize: 13, fontWeight: 800 }}>5.0</span>
+                </div>
+                <div style={{ display: 'flex', gap: 2, marginBottom: 4 }}>
+                  {[1, 2, 3, 4, 5].map((s) => (
+                    <span key={s} style={{ width: 7, height: 7, borderRadius: 2, background: '#f59e0b', boxShadow: '0 0 8px rgba(245,158,11,0.28)' }} />
+                  ))}
+                </div>
+                <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.3)' }}>47 resenas activas</div>
+              </div>
+
+              <div style={{ height: 1, background: 'rgba(255,255,255,0.06)' }} />
+
+              {[
+                ['Perfil completo', '100%'],
+                ['Web conectada', 'OK'],
+                ['WhatsApp visible', 'OK'],
+              ].map((item, i) => (
+                <motion.div
+                  key={item[0]}
+                  initial={{ opacity: 0, x: 4 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: i * 0.08, duration: 0.25 }}
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    gap: 6,
+                  }}
+                >
+                  <span style={{ fontSize: 8.5, color: 'rgba(255,255,255,0.42)' }}>{item[0]}</span>
+                  <span style={{ fontSize: 8, color, fontWeight: 800 }}>{item[1]}</span>
+                </motion.div>
+              ))}
+
+              <div style={{ height: 1, background: 'rgba(255,255,255,0.06)' }} />
+
+              <div>
+                <div style={{ fontSize: 7, color: 'rgba(255,255,255,0.2)', marginBottom: 5, letterSpacing: '0.08em' }}>
+                  VS COMPETENCIA
+                </div>
+                {[
+                  { label: 'Resenas', you: '47', them: '8' },
+                  { label: 'Rating', you: '5.0', them: '3.4' },
+                  { label: 'Top 3', you: '7/9', them: '2/9' },
+                ].map((item) => (
+                  <div
+                    key={item.label}
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      marginBottom: 4,
+                    }}
+                  >
+                    <span style={{ fontSize: 8, color: 'rgba(255,255,255,0.28)' }}>{item.label}</span>
+                    <div style={{ display: 'flex', gap: 5, alignItems: 'center' }}>
+                      <span style={{ fontSize: 10, color, fontWeight: 700 }}>{item.you}</span>
+                      <span style={{ fontSize: 7, color: 'rgba(255,255,255,0.15)' }}>vs</span>
+                      <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.2)' }}>{item.them}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div style={{ display: 'none' }}>
               {/* Rating principal */}
               <div>
                 <div
@@ -1852,6 +2393,7 @@ function WebScene({ service }: { service: Service }) {
                     </div>
                   </div>
                 ))}
+              </div>
               </div>
             </motion.div>
           )}
@@ -2152,7 +2694,7 @@ function WebScene({ service }: { service: Service }) {
         display: 'flex',
         flexDirection: 'column',
         gap: 0,
-        padding: 8,
+        padding: 6,
         overflow: 'hidden',
         background: `radial-gradient(circle at top, ${service.accent}12 0%, rgba(9,13,19,0.96) 42%, rgba(4,6,10,1) 100%)`,
       }}
@@ -2164,7 +2706,7 @@ function WebScene({ service }: { service: Service }) {
           alignItems: 'center',
           justifyContent: 'space-between',
           gap: 12,
-          padding: '2px 8px 10px',
+          padding: '0 8px 8px',
         }}
       >
         <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
@@ -2199,42 +2741,51 @@ function WebScene({ service }: { service: Service }) {
           </span>
         </div>
 
-        <motion.div
-          animate={{
-            background: isInView ? 'rgba(16,185,129,0.12)' : 'rgba(255,255,255,0.04)',
-            borderColor: isInView ? 'rgba(16,185,129,0.3)' : 'rgba(255,255,255,0.08)',
-          }}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 5,
-            border: '1px solid',
-            borderRadius: 100,
-            padding: '3px 8px',
-            whiteSpace: 'nowrap',
-          }}
-        >
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+          <ServiceDemoPauseButton
+            isPaused={isPaused}
+            onToggle={togglePause}
+            color={activeSimulation.color}
+          />
           <motion.div
             animate={{
-              background: isInView ? '#10b981' : 'rgba(255,255,255,0.2)',
-              boxShadow: isInView ? '0 0 6px #10b981' : 'none',
+              background: isInView && !isPaused ? 'rgba(16,185,129,0.12)' : 'rgba(255,255,255,0.04)',
+              borderColor: isInView && !isPaused ? 'rgba(16,185,129,0.3)' : 'rgba(255,255,255,0.08)',
             }}
-            style={{ width: 5, height: 5, borderRadius: '50%' }}
-          />
-          <span
             style={{
-              fontSize: 8,
-              fontWeight: 600,
-              letterSpacing: '0.08em',
-              color: isInView ? '#10b981' : 'rgba(255,255,255,0.25)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 5,
+              border: '1px solid',
+              borderRadius: 100,
+              padding: '3px 8px',
+              whiteSpace: 'nowrap',
             }}
           >
-            {isInView ? 'ACTIVO' : 'PAUSADO'}
-          </span>
-        </motion.div>
+            <motion.div
+              animate={{
+                background: isInView && !isPaused ? '#10b981' : 'rgba(255,255,255,0.2)',
+                boxShadow: isInView && !isPaused ? '0 0 6px #10b981' : 'none',
+              }}
+              style={{ width: 5, height: 5, borderRadius: '50%' }}
+            />
+            <span
+              style={{
+                fontSize: 8,
+                fontWeight: 600,
+                letterSpacing: '0.08em',
+                color: isInView && !isPaused ? '#10b981' : 'rgba(255,255,255,0.25)',
+              }}
+            >
+              {isInView && !isPaused ? 'ACTIVO' : 'PAUSADO'}
+            </span>
+          </motion.div>
+        </div>
       </div>
 
       <div
+        onMouseLeave={() => setHoveredWebTab(null)}
+        onPointerLeave={() => setHoveredWebTab(null)}
         style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(4, 1fr)',
@@ -2247,20 +2798,24 @@ function WebScene({ service }: { service: Service }) {
       >
         {webSimulations.map((sim, index) => {
           const isActive = index === activeTab;
+          const isVisual = index === visualWebTab;
 
           return (
             <button
               key={sim.id}
               type="button"
               onClick={() => handleTabClick(index)}
+              onPointerEnter={() => setHoveredWebTab(index)}
+              onFocus={() => setHoveredWebTab(index)}
+              onBlur={() => setHoveredWebTab(null)}
               style={{
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
                 gap: 5,
-                padding: '10px 4px 8px',
-                background: isActive ? `${sim.color}10` : 'transparent',
-                border: `1px solid ${isActive ? `${sim.color}30` : 'transparent'}`,
+                padding: '8px 4px 7px',
+                background: isVisual ? `${sim.color}10` : 'transparent',
+                border: `1px solid ${isVisual ? `${sim.color}30` : 'transparent'}`,
                 borderRadius: 10,
                 cursor: 'pointer',
                 position: 'relative',
@@ -2268,9 +2823,10 @@ function WebScene({ service }: { service: Service }) {
                 transition: 'all 200ms ease',
               }}
             >
-              {isActive && (
+              {isVisual && (
                 <motion.div
                   layoutId="tabGlow"
+                  transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
                   style={{
                     position: 'absolute',
                     inset: 0,
@@ -2282,7 +2838,7 @@ function WebScene({ service }: { service: Service }) {
 
               <div
                 style={{
-                  color: isActive ? sim.color : 'rgba(255,255,255,0.2)',
+                  color: isVisual ? sim.color : 'rgba(255,255,255,0.2)',
                   transition: 'color 200ms',
                   position: 'relative',
                 }}
@@ -2293,8 +2849,8 @@ function WebScene({ service }: { service: Service }) {
               <span
                 style={{
                   fontSize: 8,
-                  fontWeight: isActive ? 600 : 400,
-                  color: isActive ? sim.color : 'rgba(255,255,255,0.2)',
+                  fontWeight: isVisual ? 600 : 400,
+                  color: isVisual ? sim.color : 'rgba(255,255,255,0.2)',
                   letterSpacing: '0.04em',
                   position: 'relative',
                   transition: 'color 200ms',
@@ -2304,14 +2860,16 @@ function WebScene({ service }: { service: Service }) {
                 {sim.label}
               </span>
 
-              {isActive && (
-                <div
+              {isVisual && (
+                <motion.div
+                  layoutId="webTabIndicator"
+                  transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
                   style={{
                     position: 'absolute',
                     bottom: 0,
                     left: 0,
                     height: 2,
-                    width: `${progress * 100}%`,
+                    width: isActive ? `${progress * 100}%` : '100%',
                     background: `linear-gradient(90deg, ${sim.color}80, ${sim.color})`,
                     borderRadius: '0 2px 2px 0',
                   }}
@@ -2345,7 +2903,7 @@ function WebScene({ service }: { service: Service }) {
           borderRadius: 22,
           border: '1px solid rgba(255,255,255,0.06)',
           background: 'rgba(255,255,255,0.025)',
-          padding: 8,
+          padding: 6,
           minHeight: 0,
         }}
       >
@@ -2361,31 +2919,31 @@ function WebScene({ service }: { service: Service }) {
             {activeTab === 0
               ? SimSEO({
                 isActive: isInView,
-                progress,
+                progress: animationProgress,
                 color: activeSimulation.color,
               })
               : activeTab === 1
                 ? SimAnalytics({
                   isActive: isInView,
-                  progress,
+                  progress: animationProgress,
                   color: activeSimulation.color,
                 })
                 : activeTab === 2
                   ? SimLeads({
                     isActive: isInView,
-                    progress,
+                    progress: animationProgress,
                     color: activeSimulation.color,
                   })
                   : activeTab === 3
                     ? SimMaps({
                       isActive: isInView,
-                      progress,
+                      progress: animationProgress,
                       color: activeSimulation.color,
                     })
                     : activePlaceholder &&
                     renderPlaceholderScene({
                       isActive: isInView,
-                      progress,
+                      progress: animationProgress,
                       color: activeSimulation.color,
                       title: activePlaceholder.title,
                       helper: activePlaceholder.helper,
@@ -3152,8 +3710,8 @@ function AIScene({ service }: { service: Service }) {
           style={{
             flex: 1,
             display: 'grid',
-            gridTemplateColumns: '1fr auto',
-            gap: 8,
+            gridTemplateColumns: 'minmax(0, 1fr) 132px',
+            gap: 10,
             minHeight: 0,
           }}
         >
@@ -3280,10 +3838,10 @@ function AIScene({ service }: { service: Service }) {
           {/* Mini calendario */}
           <div
             style={{
-              width: 90,
               display: 'flex',
               flexDirection: 'column',
-              gap: 6,
+              gap: 8,
+              minHeight: 0,
               flexShrink: 0,
             }}
           >
@@ -3293,7 +3851,7 @@ function AIScene({ service }: { service: Service }) {
                 backdropFilter: 'blur(20px)',
                 border: '1px solid rgba(255,255,255,0.08)',
                 borderRadius: 10,
-                padding: '8px',
+                padding: '8px 7px',
               }}
             >
               {/* Mes */}
@@ -3313,8 +3871,9 @@ function AIScene({ service }: { service: Service }) {
               <div
                 style={{
                   display: 'grid',
-                  gridTemplateColumns: 'repeat(5, 1fr)',
+                  gridTemplateColumns: 'repeat(5, 20px)',
                   gap: 3,
+                  justifyContent: 'center',
                 }}
               >
                 {days.map((day, index) => {
@@ -3330,8 +3889,8 @@ function AIScene({ service }: { service: Service }) {
                         }}
                         transition={{ duration: 0.4, ease: 'easeOut' }}
                         style={{
-                          width: 24,
-                          height: 24,
+                          width: 20,
+                          height: 22,
                           borderRadius: 6,
                           display: 'flex',
                           alignItems: 'center',
@@ -3365,10 +3924,10 @@ function AIScene({ service }: { service: Service }) {
                     backdropFilter: 'blur(20px)',
                     border: `1px solid ${color}25`,
                     borderRadius: 10,
-                    padding: '8px',
+                    padding: '8px 9px',
                   }}
                 >
-                  <div style={{ fontSize: 8, color, fontWeight: 600, marginBottom: 5, letterSpacing: '0.06em' }}>
+                  <div style={{ fontSize: 8, color, fontWeight: 700, marginBottom: 5, letterSpacing: '0.08em' }}>
                     CONFIRMADO
                   </div>
                   <div
@@ -3377,6 +3936,7 @@ function AIScene({ service }: { service: Service }) {
                       color: 'rgba(255,255,255,0.7)',
                       fontWeight: 600,
                       marginBottom: 3,
+                      lineHeight: 1.25,
                     }}
                   >
                     Jueves · 11:00hs
@@ -3696,15 +4256,9 @@ function AIScene({ service }: { service: Service }) {
 
   const [activeTab, setActiveTab] = useState(0);
   const [isInView, setIsInView] = useState(false);
-  const [progress, setProgress] = useState(0);
   const [cycleSeed, setCycleSeed] = useState(0);
 
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const progressRef = useRef(0);
-  const animFrameRef = useRef(0);
-  const nextTabTimeoutRef = useRef<number | null>(null);
-  const startTimeRef = useRef(0);
-  const isRunningRef = useRef(false);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -3722,71 +4276,27 @@ function AIScene({ service }: { service: Service }) {
     return () => observer.disconnect();
   }, []);
 
-  useEffect(() => {
-    if (nextTabTimeoutRef.current) {
-      clearTimeout(nextTabTimeoutRef.current);
-      nextTabTimeoutRef.current = null;
-    }
+  const advanceAiTab = useCallback(() => {
+    setActiveTab((previousTab) => (previousTab + 1) % AI_SIMULATIONS.length);
+  }, []);
 
-    if (!isInView) {
-      cancelAnimationFrame(animFrameRef.current);
-      isRunningRef.current = false;
-      return;
-    }
-
-    const duration = AI_SIMULATIONS[activeTab]?.duration ?? 1;
-
-    progressRef.current = 0;
-    startTimeRef.current = performance.now();
-    isRunningRef.current = true;
-
-    const tick = (now: number) => {
-      if (!isRunningRef.current) {
-        return;
-      }
-
-      const elapsed = now - startTimeRef.current;
-      const nextProgress = Math.min(elapsed / duration, 1);
-
-      if (nextProgress !== progressRef.current) {
-        progressRef.current = nextProgress;
-        setProgress(nextProgress);
-      }
-
-      if (nextProgress < 1) {
-        animFrameRef.current = requestAnimationFrame(tick);
-        return;
-      }
-
-      isRunningRef.current = false;
-      nextTabTimeoutRef.current = window.setTimeout(() => {
-        progressRef.current = 0;
-        setProgress(0);
-        setActiveTab((previousTab) => (previousTab + 1) % AI_SIMULATIONS.length);
-      }, 300);
-    };
-
-    animFrameRef.current = requestAnimationFrame(tick);
-
-    return () => {
-      cancelAnimationFrame(animFrameRef.current);
-      if (nextTabTimeoutRef.current) {
-        clearTimeout(nextTabTimeoutRef.current);
-        nextTabTimeoutRef.current = null;
-      }
-      isRunningRef.current = false;
-    };
-  }, [activeTab, cycleSeed, isInView]);
+  const {
+    progress,
+    animationProgress,
+    isPaused,
+    togglePause,
+    resetCycle,
+  } = useServiceDemoCycle({
+    activeIndex: activeTab,
+    itemCount: AI_SIMULATIONS.length,
+    animationDuration: AI_SIMULATIONS[activeTab]?.duration ?? 1,
+    isInView,
+    cycleSeed,
+    onAdvance: advanceAiTab,
+  });
 
   const handleTabClick = (index: number) => {
-    cancelAnimationFrame(animFrameRef.current);
-    if (nextTabTimeoutRef.current) {
-      clearTimeout(nextTabTimeoutRef.current);
-      nextTabTimeoutRef.current = null;
-    }
-    isRunningRef.current = false;
-    progressRef.current = 0;
-    setProgress(0);
+    resetCycle();
     setActiveTab(index);
     setCycleSeed((currentSeed) => currentSeed + 1);
   };
@@ -3807,13 +4317,29 @@ function AIScene({ service }: { service: Service }) {
         overflow: 'hidden',
       }}
     >
-      <div style={{ marginBottom: 8, flexShrink: 0 }}>
+      <div
+        style={{
+          marginBottom: 8,
+          flexShrink: 0,
+          display: 'flex',
+          alignItems: 'flex-start',
+          justifyContent: 'space-between',
+          gap: 10,
+        }}
+      >
+        <div style={{ minWidth: 0 }}>
         <div style={{ fontSize: 9, fontWeight: 600, letterSpacing: '0.12em', color: `${AI_COLOR}80`, marginBottom: 4 }}>
           AGENTE IA · EN VIVO
         </div>
         <div style={{ fontSize: 13, fontWeight: 600, color: 'rgba(255,255,255,0.8)', lineHeight: 1.3 }}>
           Tu sistema comercial trabajando ahora mismo
         </div>
+        </div>
+        <ServiceDemoPauseButton
+          isPaused={isPaused}
+          onToggle={togglePause}
+          color={activeSimulation.color}
+        />
       </div>
 
       <div
@@ -3939,12 +4465,12 @@ function AIScene({ service }: { service: Service }) {
             style={{ height: '100%' }}
           >
             {activeTab === 0
-              ? SimChat({ isActive: isInView, progress, color: activeSimulation.color })
+              ? SimChat({ isActive: isInView, progress: animationProgress, color: activeSimulation.color })
               : activeTab === 1
-                ? SimLeadsIA({ isActive: isInView, progress, color: activeSimulation.color })
+                ? SimLeadsIA({ isActive: isInView, progress: animationProgress, color: activeSimulation.color })
                 : activeTab === 2
-                  ? SimAgenda({ isActive: isInView, progress, color: activeSimulation.color })
-                  : SimMétricas({ isActive: isInView, progress, color: activeSimulation.color })}
+                  ? SimAgenda({ isActive: isInView, progress: animationProgress, color: activeSimulation.color })
+                  : SimMétricas({ isActive: isInView, progress: animationProgress, color: activeSimulation.color })}
           </motion.div>
         </AnimatePresence>
       </div>
@@ -4129,56 +4655,56 @@ function AutomationScene({ service }: { service: Service }) {
                   position: 'absolute',
                   left: `${node.x}%`,
                   top: `${node.y}%`,
-                  transform: 'translate(-50%, -50%)',
+                  transform: 'translate(-50%, -16px)',
+                  width: 72,
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
                   gap: 3,
                 }}
               >
-                {/* Anillo pulsante en nodo activo */}
-                {nodeActive && (
+                <div style={{ position: 'relative', width: 32, height: 32, flexShrink: 0 }}>
+                  {/* Anillo pulsante en nodo activo */}
+                  {nodeActive && (
+                    <motion.div
+                      animate={{ scale: [1, 1.8], opacity: [0.5, 0] }}
+                      transition={{ duration: 1.2, repeat: isActive ? Infinity : 0 }}
+                      style={{
+                        position: 'absolute',
+                        inset: 0,
+                        borderRadius: '50%',
+                        border: `1px solid ${node.nodeColor}`,
+                      }}
+                    />
+                  )}
+
+                  {/* Nodo */}
                   <motion.div
-                    animate={{ scale: [1, 1.8], opacity: [0.5, 0] }}
-                    transition={{ duration: 1.2, repeat: isActive ? Infinity : 0 }}
+                    animate={{
+                      background: nodeActive ? `${node.nodeColor}25` : 'rgba(255,255,255,0.05)',
+                      borderColor: nodeActive ? `${node.nodeColor}50` : 'rgba(255,255,255,0.10)',
+                      boxShadow: nodeActive ? `0 0 16px ${node.nodeColor}30` : 'none',
+                    }}
+                    transition={{ duration: 0.4 }}
                     style={{
-                      position: 'absolute',
+                      position: 'relative',
                       width: 32,
                       height: 32,
                       borderRadius: '50%',
-                      border: `1px solid ${node.nodeColor}`,
-                      top: '50%',
-                      left: '50%',
-                      transform: 'translate(-50%, -50%)',
+                      backdropFilter: 'blur(20px)',
+                      border: '1px solid',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
                     }}
-                  />
-                )}
-
-                {/* Nodo */}
-                <motion.div
-                  animate={{
-                    background: nodeActive ? `${node.nodeColor}25` : 'rgba(255,255,255,0.05)',
-                    borderColor: nodeActive ? `${node.nodeColor}50` : 'rgba(255,255,255,0.10)',
-                    boxShadow: nodeActive ? `0 0 16px ${node.nodeColor}30` : 'none',
-                  }}
-                  transition={{ duration: 0.4 }}
-                  style={{
-                    width: 32,
-                    height: 32,
-                    borderRadius: '50%',
-                    backdropFilter: 'blur(20px)',
-                    border: '1px solid',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}
-                >
-                  <IconComp
-                    size={13}
-                    color={nodeActive ? node.nodeColor : 'rgba(255,255,255,0.3)'}
-                    strokeWidth={1.5}
-                  />
-                </motion.div>
+                  >
+                    <IconComp
+                      size={13}
+                      color={nodeActive ? node.nodeColor : 'rgba(255,255,255,0.3)'}
+                      strokeWidth={1.5}
+                    />
+                  </motion.div>
+                </div>
 
                 {/* Label */}
                 <div style={{ textAlign: 'center' }}>
@@ -4952,15 +5478,9 @@ function AutomationScene({ service }: { service: Service }) {
 
   const [activeTab, setActiveTab] = useState(0);
   const [isInView, setIsInView] = useState(false);
-  const [progress, setProgress] = useState(0);
   const [cycleSeed, setCycleSeed] = useState(0);
 
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const progressRef = useRef(0);
-  const animFrameRef = useRef(0);
-  const nextTabTimeoutRef = useRef<number | null>(null);
-  const startTimeRef = useRef(0);
-  const isRunningRef = useRef(false);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -4978,71 +5498,27 @@ function AutomationScene({ service }: { service: Service }) {
     return () => observer.disconnect();
   }, []);
 
-  useEffect(() => {
-    if (nextTabTimeoutRef.current) {
-      clearTimeout(nextTabTimeoutRef.current);
-      nextTabTimeoutRef.current = null;
-    }
+  const advanceAutoTab = useCallback(() => {
+    setActiveTab((previousTab) => (previousTab + 1) % autoSimulations.length);
+  }, [autoSimulations.length]);
 
-    if (!isInView) {
-      cancelAnimationFrame(animFrameRef.current);
-      isRunningRef.current = false;
-      return;
-    }
-
-    const duration = autoSimulations[activeTab]?.duration ?? 1;
-
-    progressRef.current = 0;
-    startTimeRef.current = performance.now();
-    isRunningRef.current = true;
-
-    const tick = (now: number) => {
-      if (!isRunningRef.current) {
-        return;
-      }
-
-      const elapsed = now - startTimeRef.current;
-      const nextProgress = Math.min(elapsed / duration, 1);
-
-      if (nextProgress !== progressRef.current) {
-        progressRef.current = nextProgress;
-        setProgress(nextProgress);
-      }
-
-      if (nextProgress < 1) {
-        animFrameRef.current = requestAnimationFrame(tick);
-        return;
-      }
-
-      isRunningRef.current = false;
-      nextTabTimeoutRef.current = window.setTimeout(() => {
-        progressRef.current = 0;
-        setProgress(0);
-        setActiveTab((previousTab) => (previousTab + 1) % autoSimulations.length);
-      }, 300);
-    };
-
-    animFrameRef.current = requestAnimationFrame(tick);
-
-    return () => {
-      cancelAnimationFrame(animFrameRef.current);
-      if (nextTabTimeoutRef.current) {
-        clearTimeout(nextTabTimeoutRef.current);
-        nextTabTimeoutRef.current = null;
-      }
-      isRunningRef.current = false;
-    };
-  }, [activeTab, autoSimulations, cycleSeed, isInView]);
+  const {
+    progress,
+    animationProgress,
+    isPaused,
+    togglePause,
+    resetCycle,
+  } = useServiceDemoCycle({
+    activeIndex: activeTab,
+    itemCount: autoSimulations.length,
+    animationDuration: autoSimulations[activeTab]?.duration ?? 1,
+    isInView,
+    cycleSeed,
+    onAdvance: advanceAutoTab,
+  });
 
   const handleTabClick = (index: number) => {
-    cancelAnimationFrame(animFrameRef.current);
-    if (nextTabTimeoutRef.current) {
-      clearTimeout(nextTabTimeoutRef.current);
-      nextTabTimeoutRef.current = null;
-    }
-    isRunningRef.current = false;
-    progressRef.current = 0;
-    setProgress(0);
+    resetCycle();
     setActiveTab(index);
     setCycleSeed((currentSeed) => currentSeed + 1);
   };
@@ -5063,13 +5539,29 @@ function AutomationScene({ service }: { service: Service }) {
         overflow: 'hidden',
       }}
     >
-      <div style={{ marginBottom: 8, flexShrink: 0 }}>
-        <div style={{ fontSize: 9, fontWeight: 600, letterSpacing: '0.12em', color: `${AUTO_COLOR}80`, marginBottom: 4 }}>
-          {'AUTOMATIZACIONES \u00b7 EN VIVO'}
+      <div
+        style={{
+          marginBottom: 8,
+          flexShrink: 0,
+          display: 'flex',
+          alignItems: 'flex-start',
+          justifyContent: 'space-between',
+          gap: 10,
+        }}
+      >
+        <div style={{ minWidth: 0 }}>
+          <div style={{ fontSize: 9, fontWeight: 600, letterSpacing: '0.12em', color: `${AUTO_COLOR}80`, marginBottom: 4 }}>
+            {'AUTOMATIZACIONES \u00b7 EN VIVO'}
+          </div>
+          <div style={{ fontSize: 13, fontWeight: 600, color: 'rgba(255,255,255,0.8)', lineHeight: 1.3 }}>
+            Tus procesos corriendo solos ahora mismo
+          </div>
         </div>
-        <div style={{ fontSize: 13, fontWeight: 600, color: 'rgba(255,255,255,0.8)', lineHeight: 1.3 }}>
-          Tus procesos corriendo solos ahora mismo
-        </div>
+        <ServiceDemoPauseButton
+          isPaused={isPaused}
+          onToggle={togglePause}
+          color={activeSimulation.color}
+        />
       </div>
 
       <div
@@ -5195,12 +5687,12 @@ function AutomationScene({ service }: { service: Service }) {
             style={{ height: '100%' }}
           >
             {activeTab === 0
-              ? SimFlujo({ isActive: isInView, progress, color: activeSimulation.color })
+              ? SimFlujo({ isActive: isInView, progress: animationProgress, color: activeSimulation.color })
               : activeTab === 1
-                ? SimFollowUp({ isActive: isInView, progress, color: activeSimulation.color })
+                ? SimFollowUp({ isActive: isInView, progress: animationProgress, color: activeSimulation.color })
                 : activeTab === 2
-                  ? SimReporte({ isActive: isInView, progress, color: activeSimulation.color })
-                  : SimSync({ isActive: isInView, progress, color: activeSimulation.color })}
+                  ? SimReporte({ isActive: isInView, progress: animationProgress, color: activeSimulation.color })
+                  : SimSync({ isActive: isInView, progress: animationProgress, color: activeSimulation.color })}
           </motion.div>
         </AnimatePresence>
       </div>
@@ -6144,15 +6636,9 @@ function SoftwareScene({ service }: { service: Service }) {
 
   const [activeTab, setActiveTab] = useState(0);
   const [isInView, setIsInView] = useState(false);
-  const [progress, setProgress] = useState(0);
   const [cycleSeed, setCycleSeed] = useState(0);
 
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const progressRef = useRef(0);
-  const animFrameRef = useRef(0);
-  const nextTabTimeoutRef = useRef<number | null>(null);
-  const startTimeRef = useRef(0);
-  const isRunningRef = useRef(false);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -6170,71 +6656,27 @@ function SoftwareScene({ service }: { service: Service }) {
     return () => observer.disconnect();
   }, []);
 
-  useEffect(() => {
-    if (nextTabTimeoutRef.current) {
-      clearTimeout(nextTabTimeoutRef.current);
-      nextTabTimeoutRef.current = null;
-    }
+  const advanceSoftwareTab = useCallback(() => {
+    setActiveTab((previousTab) => (previousTab + 1) % swSimulations.length);
+  }, [swSimulations.length]);
 
-    if (!isInView) {
-      cancelAnimationFrame(animFrameRef.current);
-      isRunningRef.current = false;
-      return;
-    }
-
-    const duration = swSimulations[activeTab]?.duration ?? 1;
-
-    progressRef.current = 0;
-    startTimeRef.current = performance.now();
-    isRunningRef.current = true;
-
-    const tick = (now: number) => {
-      if (!isRunningRef.current) {
-        return;
-      }
-
-      const elapsed = now - startTimeRef.current;
-      const nextProgress = Math.min(elapsed / duration, 1);
-
-      if (nextProgress !== progressRef.current) {
-        progressRef.current = nextProgress;
-        setProgress(nextProgress);
-      }
-
-      if (nextProgress < 1) {
-        animFrameRef.current = requestAnimationFrame(tick);
-        return;
-      }
-
-      isRunningRef.current = false;
-      nextTabTimeoutRef.current = window.setTimeout(() => {
-        progressRef.current = 0;
-        setProgress(0);
-        setActiveTab((previousTab) => (previousTab + 1) % swSimulations.length);
-      }, 300);
-    };
-
-    animFrameRef.current = requestAnimationFrame(tick);
-
-    return () => {
-      cancelAnimationFrame(animFrameRef.current);
-      if (nextTabTimeoutRef.current) {
-        clearTimeout(nextTabTimeoutRef.current);
-        nextTabTimeoutRef.current = null;
-      }
-      isRunningRef.current = false;
-    };
-  }, [activeTab, cycleSeed, isInView, swSimulations]);
+  const {
+    progress,
+    animationProgress,
+    isPaused,
+    togglePause,
+    resetCycle,
+  } = useServiceDemoCycle({
+    activeIndex: activeTab,
+    itemCount: swSimulations.length,
+    animationDuration: swSimulations[activeTab]?.duration ?? 1,
+    isInView,
+    cycleSeed,
+    onAdvance: advanceSoftwareTab,
+  });
 
   const handleTabClick = (index: number) => {
-    cancelAnimationFrame(animFrameRef.current);
-    if (nextTabTimeoutRef.current) {
-      clearTimeout(nextTabTimeoutRef.current);
-      nextTabTimeoutRef.current = null;
-    }
-    isRunningRef.current = false;
-    progressRef.current = 0;
-    setProgress(0);
+    resetCycle();
     setActiveTab(index);
     setCycleSeed((currentSeed) => currentSeed + 1);
   };
@@ -6255,13 +6697,29 @@ function SoftwareScene({ service }: { service: Service }) {
         overflow: 'hidden',
       }}
     >
-      <div style={{ marginBottom: 8, flexShrink: 0 }}>
+      <div
+        style={{
+          marginBottom: 8,
+          flexShrink: 0,
+          display: 'flex',
+          alignItems: 'flex-start',
+          justifyContent: 'space-between',
+          gap: 10,
+        }}
+      >
+        <div style={{ minWidth: 0 }}>
         <div style={{ fontSize: 9, fontWeight: 600, letterSpacing: '0.12em', color: `${SW_COLOR}80`, marginBottom: 4 }}>
           {'SOFTWARE · EN VIVO'}
         </div>
         <div style={{ fontSize: 13, fontWeight: 600, color: 'rgba(255,255,255,0.8)', lineHeight: 1.3 }}>
           Tu empresa bajo control total
         </div>
+        </div>
+        <ServiceDemoPauseButton
+          isPaused={isPaused}
+          onToggle={togglePause}
+          color={activeSimulation.color}
+        />
       </div>
 
       <div
@@ -6387,12 +6845,12 @@ function SoftwareScene({ service }: { service: Service }) {
             style={{ height: '100%' }}
           >
             {activeTab === 0
-              ? SimCRM({ isActive: isInView, progress, color: activeSimulation.color })
+              ? SimCRM({ isActive: isInView, progress: animationProgress, color: activeSimulation.color })
               : activeTab === 1
-                ? SimDashboard({ isActive: isInView, progress, color: activeSimulation.color })
+                ? SimDashboard({ isActive: isInView, progress: animationProgress, color: activeSimulation.color })
                 : activeTab === 2
-                  ? SimStock({ isActive: isInView, progress, color: activeSimulation.color })
-                  : SimEquipo({ isActive: isInView, progress, color: activeSimulation.color })}
+                  ? SimStock({ isActive: isInView, progress: animationProgress, color: activeSimulation.color })
+                  : SimEquipo({ isActive: isInView, progress: animationProgress, color: activeSimulation.color })}
           </motion.div>
         </AnimatePresence>
       </div>
@@ -8079,32 +8537,32 @@ export default function OurServices() {
         className="pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-80"
         style={{
           background:
-            'linear-gradient(180deg, transparent 0%, rgba(2,4,7,0.48) 42%, #020407 100%)',
+            'linear-gradient(180deg, transparent 0%, rgba(2,7,12,0.44) 42%, #020407 100%)',
         }}
       />
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute bottom-[-11rem] left-1/2 z-[1] h-80 w-[72rem] -translate-x-1/2 rounded-full blur-3xl"
+        className="pointer-events-none absolute bottom-[-12rem] left-1/2 z-[1] h-80 w-[70rem] -translate-x-1/2 rounded-full blur-3xl"
         style={{
           background:
-            'radial-gradient(ellipse, rgba(6,182,212,0.08), rgba(139,92,246,0.045) 38%, rgba(249,115,22,0.025) 58%, transparent 76%)',
+            'radial-gradient(ellipse, rgba(6,182,212,0.09), rgba(37,99,235,0.04) 42%, transparent 72%)',
         }}
       />
       <svg
         aria-hidden="true"
-        className="pointer-events-none absolute bottom-[-4.5rem] left-[-7%] z-[1] hidden h-52 w-[64rem] opacity-18 lg:block"
+        className="pointer-events-none absolute bottom-[-4rem] left-[-8%] z-[1] hidden h-52 w-[64rem] opacity-20 lg:block"
         viewBox="0 0 1020 220"
         fill="none"
         preserveAspectRatio="none"
       >
         <path
-          d="M0 126C160 82 254 172 392 124C528 76 630 82 760 132C874 176 944 132 1020 96"
-          stroke="rgba(56,189,248,0.34)"
+          d="M0 150C150 96 240 188 380 132C530 72 630 64 760 112C866 152 930 126 1020 78"
+          stroke="rgba(56,189,248,0.40)"
           strokeWidth="1"
         />
         <path
-          d="M0 164C178 122 276 196 422 152C566 108 688 120 820 164C918 196 972 166 1020 142"
-          stroke="rgba(139,92,246,0.22)"
+          d="M0 184C160 138 270 202 410 158C560 110 670 98 814 146C910 178 970 154 1020 128"
+          stroke="rgba(37,99,235,0.26)"
           strokeWidth="1"
         />
       </svg>
@@ -8219,23 +8677,10 @@ export default function OurServices() {
               <motion.button
                 key={service.id}
                 type="button"
-                data-lenis-prevent
-                data-lenis-prevent-wheel
-                data-lenis-prevent-touch
+                data-cursor="hover"
                 aria-label={`Ir a ${SERVICE_SHORT_LABELS[service.id]}`}
-                onPointerDownCapture={(event) => {
-                  event.preventDefault();
-                  event.stopPropagation();
-                  scrollToService(service.id);
-                }}
-                onPointerDown={(event) => {
-                  event.preventDefault();
-                  event.stopPropagation();
-                  scrollToService(service.id);
-                }}
                 onClick={(event) => {
                   event.preventDefault();
-                  event.stopPropagation();
                   scrollToService(service.id);
                 }}
                 initial={{ opacity: 0, scale: 0.9 }}
@@ -8256,7 +8701,7 @@ export default function OurServices() {
                   background: `${service.accent}08`,
                   border: `1px solid ${service.accent}22`,
                   borderRadius: 100,
-                  cursor: 'pointer',
+                  cursor: 'none',
                 }}
               >
                 <div
