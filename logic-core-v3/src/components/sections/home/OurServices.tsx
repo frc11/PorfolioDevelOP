@@ -359,7 +359,7 @@ function ServiceDemoPauseButton({
         color: 'rgba(255,255,255,0.74)',
         padding: '0 9px',
         cursor: 'pointer',
-        fontSize: 8,
+        fontSize: 9,
         fontWeight: 750,
         letterSpacing: '0.08em',
         textTransform: 'uppercase',
@@ -506,7 +506,7 @@ function StageFrame({
           <div
             style={{
               marginLeft: 'auto',
-              fontSize: 9,
+              fontSize: 10,
               fontWeight: 600,
               color: service.accent,
               background: `${service.accent}12`,
@@ -551,7 +551,7 @@ function StageFrame({
             animate={{ opacity: [0.5, 1, 0.5] }}
             transition={{ duration: 2, repeat: Infinity }}
             style={{
-              fontSize: 8,
+              fontSize: 9,
               color: service.accent,
               display: 'flex',
               alignItems: 'center',
@@ -758,6 +758,32 @@ function WebScene({ service }: { service: Service }) {
     const showResults = progress > 0.28;
     const highlightFirst = progress > 0.55;
     const showStars = progress > 0.7;
+    const competitorResults = [
+      {
+        pos: 2,
+        url: 'competidor1.com',
+        title: 'Clínica local | Turnos',
+        desc: 'Presencia básica en Google.',
+      },
+      {
+        pos: 3,
+        url: 'directoriolocal.com',
+        title: 'Directorio de clínicas',
+        desc: 'Listado general sin CTA.',
+      },
+      {
+        pos: 4,
+        url: 'odontologiatuc.com',
+        title: 'Consultorio odontológico',
+        desc: 'Ficha incompleta.',
+      },
+      {
+        pos: 5,
+        url: 'guiaempresas.com',
+        title: 'Guía de servicios',
+        desc: 'Resultado secundario.',
+      },
+    ];
 
     return (
       <div
@@ -900,7 +926,7 @@ function WebScene({ service }: { service: Service }) {
                 backdropFilter: 'blur(20px)',
                 border: `1px solid ${highlightFirst ? `${color}30` : 'rgba(255,255,255,0.07)'}`,
                 borderRadius: 12,
-                padding: '10px 12px',
+                padding: '9px 12px',
                 position: 'relative',
                 overflow: 'hidden',
                 transition: 'all 600ms cubic-bezier(0.25, 0.46, 0.45, 0.94)',
@@ -933,7 +959,7 @@ function WebScene({ service }: { service: Service }) {
                     right: 10,
                     background: color,
                     color: 'black',
-                    fontSize: 8,
+                    fontSize: 9,
                     fontWeight: 800,
                     padding: '2px 8px',
                     borderRadius: '0 0 6px 6px',
@@ -1000,10 +1026,10 @@ function WebScene({ service }: { service: Service }) {
               {/* Título del resultado */}
               <div
                 style={{
-                  fontSize: 13,
+                  fontSize: 14,
                   fontWeight: highlightFirst ? 700 : 400,
                   color: highlightFirst ? 'white' : 'rgba(255,255,255,0.4)',
-                  marginBottom: 4,
+                  marginBottom: 3,
                   transition: 'all 400ms',
                   lineHeight: 1.3,
                 }}
@@ -1014,7 +1040,7 @@ function WebScene({ service }: { service: Service }) {
               {/* Descripción */}
               <div
                 style={{
-                  fontSize: 10,
+                  fontSize: 11,
                   color: highlightFirst ? 'rgba(255,255,255,0.45)' : 'rgba(255,255,255,0.2)',
                   lineHeight: 1.42,
                   transition: 'color 400ms',
@@ -1033,7 +1059,7 @@ function WebScene({ service }: { service: Service }) {
                     display: 'flex',
                     alignItems: 'center',
                     gap: 4,
-                    marginTop: 8,
+                    marginTop: 6,
                   }}
                 >
                   {[1, 2, 3, 4, 5].map((s) => (
@@ -1055,39 +1081,27 @@ function WebScene({ service }: { service: Service }) {
             </motion.div>
           )}
 
-          {/* RESULTADOS 2 y 3 — competidores */}
-          {[
-            {
-              pos: 2,
-              url: 'competidor1.com',
-              title: 'Competidor Local — Servicios',
-              desc: 'Información básica. Sin optimización.',
-            },
-            {
-              pos: 3,
-              url: 'directoriolocal.com',
-              title: 'Directorio de empresas',
-              desc: 'Listado general sin diferenciación.',
-            },
-          ].map(
+          {/* RESULTADOS 2 a 5 — competidores con presencia decreciente */}
+          {competitorResults.map(
             (result, i) =>
               showResults &&
-              progress > 0.35 + i * 0.1 && (
+              progress > 0.36 + i * 0.075 && (
                 <motion.div
                   key={result.pos}
                   initial={{ opacity: 0, y: 8 }}
                   animate={{
-                    opacity: highlightFirst ? 0.35 : 0.7,
+                    opacity: highlightFirst ? [0.58, 0.45, 0.32, 0.22][i] : [0.82, 0.68, 0.52, 0.38][i],
                     y: 0,
                     filter: highlightFirst ? 'grayscale(0.6)' : 'none',
                   }}
-                  transition={{ duration: 0.4, delay: i * 0.1 }}
+                  transition={{ duration: 0.35, delay: i * 0.055 }}
                   style={{
                     background: 'rgba(255,255,255,0.02)',
                     backdropFilter: 'blur(10px)',
                     border: '1px solid rgba(255,255,255,0.05)',
                     borderRadius: 10,
-                    padding: '8px 12px',
+                    padding: '6px 11px',
+                    flexShrink: 0,
                   }}
                 >
                   <div
@@ -1095,25 +1109,25 @@ function WebScene({ service }: { service: Service }) {
                       display: 'flex',
                       gap: 8,
                       alignItems: 'center',
-                      marginBottom: 3,
+                      marginBottom: 2,
                     }}
                   >
-                    <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.2)', fontWeight: 600 }}>
+                    <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.24)', fontWeight: 700 }}>
                       #{result.pos}
                     </span>
-                    <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.2)' }}>{result.url}</span>
+                    <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.22)' }}>{result.url}</span>
                   </div>
                   <div
                     style={{
-                      fontSize: 12,
+                      fontSize: 11,
                       color: 'rgba(255,255,255,0.35)',
-                      marginBottom: 3,
+                      marginBottom: 2,
                       fontWeight: 500,
                     }}
                   >
                     {result.title}
                   </div>
-                  <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.2)' }}>{result.desc}</div>
+                  <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.22)', lineHeight: 1.25 }}>{result.desc}</div>
                 </motion.div>
               )
           )}
@@ -1163,8 +1177,8 @@ function WebScene({ service }: { service: Service }) {
 
     const mapCities = [
       { name: 'Formosa', left: '60%', top: '11%', size: 6.4 },
-      { name: 'Tucum\u00e1n', left: '44%', top: '15%', size: 6.8 },
-      { name: 'C\u00f3rdoba', left: '48%', top: '30%', size: 8 },
+      { name: 'Tucumán', left: '44%', top: '15%', size: 6.8 },
+      { name: 'Córdoba', left: '48%', top: '30%', size: 8 },
       { name: 'Mendoza', left: '30%', top: '45%', size: 7.2 },
       { name: 'Corrientes', left: '70%', top: '20%', size: 6.8 },
       { name: 'Buenos Aires', left: '65%', top: '35%', size: 9.6 },
@@ -1202,7 +1216,7 @@ function WebScene({ service }: { service: Service }) {
             >
               PANEL EN TIEMPO REAL
             </div>
-            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>{'\u00daltimos 30 d\u00edas \u00b7 Tu sitio'}</div>
+            <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.55)', lineHeight: 1.35 }}>Últimos 30 días · Tu sitio</div>
           </div>
           <motion.div
             animate={isActive ? { opacity: [0.5, 1, 0.5] } : { opacity: 0.5 }}
@@ -1255,7 +1269,7 @@ function WebScene({ service }: { service: Service }) {
             >
               <div
                 style={{
-                  fontSize: 8,
+                  fontSize: 9,
                   color: 'rgba(255,255,255,0.25)',
                   letterSpacing: '0.08em',
                   marginBottom: 4,
@@ -1282,7 +1296,7 @@ function WebScene({ service }: { service: Service }) {
                   fontWeight: 500,
                 }}
               >
-                {'\u2191 '}
+                ↑{' '}
                 {m.trend}
               </div>
             </div>
@@ -1320,13 +1334,13 @@ function WebScene({ service }: { service: Service }) {
             >
               <div
                 style={{
-                  fontSize: 8,
+                  fontSize: 9,
                   color: 'rgba(255,255,255,0.2)',
                   letterSpacing: '0.08em',
                   marginBottom: 8,
                 }}
               >
-                {'\u00daLTIMOS 12 D\u00cdAS'}
+                {'ÚLTIMOS 12 DÍAS'}
               </div>
               <svg
                 viewBox={`0 0 ${chartWidth} ${chartHeight}`}
@@ -1408,7 +1422,7 @@ function WebScene({ service }: { service: Service }) {
             >
               <div
                 style={{
-                  fontSize: 8,
+                  fontSize: 9,
                   color: 'rgba(255,255,255,0.2)',
                   letterSpacing: '0.08em',
                   marginBottom: 4,
@@ -1488,6 +1502,13 @@ function WebScene({ service }: { service: Service }) {
     const submitted = progress > 0.5;
     const showWhatsApp = progress > 0.62;
     const showIA = progress > 0.8;
+    const leadEvents = [
+      { label: 'Lead capturado', detail: 'Formulario validado', threshold: 0.52, Icon: CheckCircle },
+      { label: 'WhatsApp enviado', detail: 'Aviso instantáneo al equipo', threshold: 0.62, Icon: MessageSquare },
+      { label: 'IA clasificó intención', detail: 'Consulta de precios · alta prioridad', threshold: 0.72, Icon: Bot },
+      { label: 'Equipo notificado', detail: 'Comercial asignado', threshold: 0.82, Icon: Users },
+      { label: 'Seguimiento programado', detail: 'Recordatorio en 24hs', threshold: 0.9, Icon: Clock },
+    ];
 
     return (
       <div
@@ -1515,7 +1536,7 @@ function WebScene({ service }: { service: Service }) {
             <div style={{ fontSize: 9, letterSpacing: '0.15em', color: 'rgba(255,255,255,0.25)', marginBottom: 2 }}>
               FORMULARIO DE CONTACTO
             </div>
-            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>{'Captura autom\u00e1tica \u00b7 24/7'}</div>
+            <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.55)', lineHeight: 1.35 }}>Captura automática · 24/7</div>
           </div>
           <div
             style={{
@@ -1528,7 +1549,7 @@ function WebScene({ service }: { service: Service }) {
               fontWeight: 600,
             }}
           >
-            {'CAPTACI\u00d3N'}
+            CAPTACIÓN
           </div>
         </div>
 
@@ -1572,7 +1593,7 @@ function WebScene({ service }: { service: Service }) {
                 <div style={{ flex: 1 }}>
                   <div
                     style={{
-                      fontSize: 8,
+                      fontSize: 9,
                       color: 'rgba(255,255,255,0.25)',
                       marginBottom: 2,
                       letterSpacing: '0.06em',
@@ -1644,92 +1665,155 @@ function WebScene({ service }: { service: Service }) {
                 transition: 'all 400ms ease',
               }}
             >
-              {submitted ? '\u2713 CONSULTA ENVIADA' : 'ENVIANDO...'}
+              {submitted ? '✓ CONSULTA ENVIADA' : 'ENVIANDO...'}
             </motion.div>
           )}
         </AnimatePresence>
 
-        {/* Notificaciones */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 6, flex: 1 }}>
-          <AnimatePresence>
-            {showWhatsApp && (
-              <motion.div
-                initial={{ opacity: 0, x: 16, scale: 0.96 }}
-                animate={{ opacity: 1, x: 0, scale: 1 }}
-                transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-                style={{
-                  background: 'rgba(37,211,102,0.07)',
-                  backdropFilter: 'blur(20px)',
-                  border: '1px solid rgba(37,211,102,0.20)',
-                  borderRadius: 10,
-                  padding: '10px 12px',
-                  display: 'flex',
-                  alignItems: 'flex-start',
-                  gap: 10,
-                }}
-              >
-                <div
-                  style={{
-                    width: 28,
-                    height: 28,
-                    background: 'rgba(37,211,102,0.15)',
-                    borderRadius: 8,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    flexShrink: 0,
-                  }}
-                >
-                  <MessageSquare size={13} color="#25D366" />
-                </div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: 10, fontWeight: 700, color: '#25D366', marginBottom: 3 }}>
-                    {'WhatsApp \u2192 Tu equipo'}
-                  </div>
-                  <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.45)', lineHeight: 1.4 }}>
-                    {'"Nueva consulta: Carlos Mendoza \u2014 Precios"'}
-                  </div>
-                </div>
-                <span style={{ fontSize: 8, color: 'rgba(255,255,255,0.2)', flexShrink: 0 }}>ahora</span>
-              </motion.div>
-            )}
+        {/* Flujo operativo */}
+        <div
+          style={{
+            flex: 1,
+            minHeight: 0,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 5,
+            justifyContent: 'space-between',
+            background: 'rgba(255,255,255,0.025)',
+            border: '1px solid rgba(255,255,255,0.06)',
+            borderRadius: 12,
+            padding: '8px 9px',
+            overflow: 'hidden',
+          }}
+        >
+          {leadEvents.map(({ label, detail, threshold, Icon }, index) => {
+            const active = progress > threshold;
 
-            {showIA && (
+            return (
               <motion.div
-                initial={{ opacity: 0, x: 16, scale: 0.96 }}
-                animate={{ opacity: 1, x: 0, scale: 1 }}
-                transition={{ type: 'spring', stiffness: 300, damping: 20, delay: 0.15 }}
+                key={label}
+                initial={false}
+                animate={{
+                  opacity: active ? 1 : 0.34,
+                  scale: active ? 1 : 0.985,
+                  borderColor: active ? `${color}28` : 'rgba(255,255,255,0.055)',
+                  backgroundColor: active ? `${color}08` : 'rgba(255,255,255,0.018)',
+                }}
+                transition={{ duration: 0.28, delay: active ? index * 0.025 : 0 }}
                 style={{
-                  background: `${color}07`,
-                  backdropFilter: 'blur(20px)',
-                  border: `1px solid ${color}20`,
-                  borderRadius: 10,
-                  padding: '10px 12px',
                   display: 'flex',
-                  alignItems: 'flex-start',
-                  gap: 10,
+                  alignItems: 'center',
+                  gap: 8,
+                  border: '1px solid rgba(255,255,255,0.055)',
+                  borderRadius: 9,
+                  padding: '6px 8px',
+                  minHeight: 0,
                 }}
               >
-                <div
+                <motion.div
+                  animate={{
+                    backgroundColor: active ? color : 'rgba(255,255,255,0.08)',
+                    color: active ? '#020617' : 'rgba(255,255,255,0.28)',
+                    boxShadow: active ? `0 0 12px ${color}30` : 'none',
+                  }}
                   style={{
-                    width: 28,
-                    height: 28,
-                    background: `${color}15`,
-                    borderRadius: 8,
+                    width: 22,
+                    height: 22,
+                    borderRadius: 7,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     flexShrink: 0,
                   }}
                 >
-                  <Bot size={13} color={color} />
-                </div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: 10, fontWeight: 700, color, marginBottom: 3 }}>{'IA \u2192 Carlos Mendoza'}</div>
-                  <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.45)', lineHeight: 1.4 }}>
-                    {'"\u00a1Hola Carlos! Recibimos tu consulta, te contactamos en minutos \ud83d\ude80"'}
+                  <Icon size={12} strokeWidth={2.2} />
+                </motion.div>
+                <div style={{ minWidth: 0, flex: 1 }}>
+                  <div
+                    style={{
+                      fontSize: 10,
+                      fontWeight: 750,
+                      color: active ? 'rgba(255,255,255,0.86)' : 'rgba(255,255,255,0.34)',
+                      lineHeight: 1.2,
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                    }}
+                  >
+                    {label}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: 9,
+                      color: active ? 'rgba(255,255,255,0.46)' : 'rgba(255,255,255,0.22)',
+                      lineHeight: 1.25,
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                    }}
+                  >
+                    {detail}
                   </div>
                 </div>
+                {active && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    style={{
+                      width: 16,
+                      height: 16,
+                      borderRadius: '50%',
+                      background: `${color}20`,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0,
+                    }}
+                  >
+                    <Check size={10} color={color} strokeWidth={3} />
+                  </motion.div>
+                )}
+              </motion.div>
+            );
+          })}
+
+          <AnimatePresence>
+            {(showWhatsApp || showIA) && (
+              <motion.div
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 4 }}
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: '1fr auto',
+                  alignItems: 'center',
+                  gap: 8,
+                  borderRadius: 9,
+                  padding: '7px 9px',
+                  background: showIA ? `${color}10` : 'rgba(37,211,102,0.08)',
+                  border: `1px solid ${showIA ? `${color}28` : 'rgba(37,211,102,0.22)'}`,
+                }}
+              >
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ fontSize: 10, fontWeight: 800, color: showIA ? color : '#25D366', lineHeight: 1.2 }}>
+                    {showIA ? 'IA → Carlos Mendoza' : 'WhatsApp → Tu equipo'}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: 9,
+                      color: 'rgba(255,255,255,0.48)',
+                      lineHeight: 1.28,
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                    }}
+                  >
+                    {showIA
+                      ? 'Respuesta lista y seguimiento activo'
+                      : '"Nueva consulta: Carlos Mendoza — Precios"'}
+                  </div>
+                </div>
+                <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.32)', fontWeight: 700 }}>ahora</span>
               </motion.div>
             )}
           </AnimatePresence>
@@ -1826,7 +1910,7 @@ function WebScene({ service }: { service: Service }) {
             <div style={{ fontSize: 9, letterSpacing: '0.15em', color: 'rgba(255,255,255,0.25)', marginBottom: 2 }}>
               GOOGLE MAPS · LOCAL
             </div>
-            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>Tucumán, Argentina</div>
+            <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.55)', lineHeight: 1.35 }}>Tucumán, Argentina</div>
           </div>
           <div
             style={{
@@ -2004,7 +2088,7 @@ function WebScene({ service }: { service: Service }) {
                           border: '1px solid rgba(255,255,255,0.08)',
                           borderRadius: 5,
                           padding: '2px 5px',
-                          fontSize: 8,
+                          fontSize: 9,
                           color: 'rgba(255,255,255,0.36)',
                           whiteSpace: 'nowrap',
                         }}
@@ -2018,7 +2102,7 @@ function WebScene({ service }: { service: Service }) {
                           border: '1px solid rgba(255,255,255,0.08)',
                           borderRadius: 6,
                           padding: '2px 6px',
-                          fontSize: 8,
+                          fontSize: 9,
                           fontWeight: 800,
                           color: 'rgba(255,255,255,0.46)',
                           whiteSpace: 'nowrap',
@@ -2034,12 +2118,12 @@ function WebScene({ service }: { service: Service }) {
                           border: '1px solid rgba(255,255,255,0.08)',
                           borderRadius: 5,
                           padding: '2px 5px',
-                          fontSize: 8,
+                          fontSize: 9,
                           color: 'rgba(255,255,255,0.35)',
                           whiteSpace: 'nowrap',
                         }}
                       >
-                        {comp.rating} â­
+                        {comp.rating} ⭐
                       </div>
                     </motion.div>
                   )
@@ -2199,7 +2283,7 @@ function WebScene({ service }: { service: Service }) {
                     }}
                   >
                     <div style={{ color, fontSize: 12, fontWeight: 800, lineHeight: 1 }}>{value}</div>
-                    <div style={{ color: 'rgba(255,255,255,0.34)', fontSize: 7, marginTop: 3, whiteSpace: 'nowrap' }}>{label}</div>
+                    <div style={{ color: 'rgba(255,255,255,0.38)', fontSize: 9, marginTop: 3, whiteSpace: 'nowrap' }}>{label}</div>
                   </div>
                 ))}
               </motion.div>
@@ -2234,18 +2318,18 @@ function WebScene({ service }: { service: Service }) {
                   padding: '8px',
                 }}
               >
-                <div style={{ fontSize: 8, color, marginBottom: 4, letterSpacing: '0.08em', fontWeight: 700 }}>
-                  POSICION LOCAL
+                <div style={{ fontSize: 9, color, marginBottom: 4, letterSpacing: '0.08em', fontWeight: 700 }}>
+                  POSICIÓN LOCAL
                 </div>
                 <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
                   <span style={{ fontSize: 20, fontWeight: 900, color, lineHeight: 1 }}>TOP</span>
-                  <span style={{ fontSize: 8, color: 'rgba(255,255,255,0.38)' }}>en tu zona</span>
+                  <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.42)' }}>en tu zona</span>
                 </div>
               </div>
 
               <div>
                 <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 5 }}>
-                  <span style={{ fontSize: 8, color: 'rgba(255,255,255,0.25)', letterSpacing: '0.08em' }}>REPUTACION</span>
+                  <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.3)', letterSpacing: '0.08em' }}>REPUTACIÓN</span>
                   <span style={{ color, fontSize: 13, fontWeight: 800 }}>5.0</span>
                 </div>
                 <div style={{ display: 'flex', gap: 2, marginBottom: 4 }}>
@@ -2253,7 +2337,7 @@ function WebScene({ service }: { service: Service }) {
                     <span key={s} style={{ width: 7, height: 7, borderRadius: 2, background: '#f59e0b', boxShadow: '0 0 8px rgba(245,158,11,0.28)' }} />
                   ))}
                 </div>
-                <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.3)' }}>47 resenas activas</div>
+                <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.36)' }}>47 reseñas activas</div>
               </div>
 
               <div style={{ height: 1, background: 'rgba(255,255,255,0.06)' }} />
@@ -2275,19 +2359,19 @@ function WebScene({ service }: { service: Service }) {
                     gap: 6,
                   }}
                 >
-                  <span style={{ fontSize: 8.5, color: 'rgba(255,255,255,0.42)' }}>{item[0]}</span>
-                  <span style={{ fontSize: 8, color, fontWeight: 800 }}>{item[1]}</span>
+                  <span style={{ fontSize: 9.5, color: 'rgba(255,255,255,0.46)' }}>{item[0]}</span>
+                  <span style={{ fontSize: 9, color, fontWeight: 800 }}>{item[1]}</span>
                 </motion.div>
               ))}
 
               <div style={{ height: 1, background: 'rgba(255,255,255,0.06)' }} />
 
               <div>
-                <div style={{ fontSize: 7, color: 'rgba(255,255,255,0.2)', marginBottom: 5, letterSpacing: '0.08em' }}>
+                <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.24)', marginBottom: 5, letterSpacing: '0.08em' }}>
                   VS COMPETENCIA
                 </div>
                 {[
-                  { label: 'Resenas', you: '47', them: '8' },
+                  { label: 'Reseñas', you: '47', them: '8' },
                   { label: 'Rating', you: '5.0', them: '3.4' },
                   { label: 'Top 3', you: '7/9', them: '2/9' },
                 ].map((item) => (
@@ -2300,11 +2384,11 @@ function WebScene({ service }: { service: Service }) {
                       marginBottom: 4,
                     }}
                   >
-                    <span style={{ fontSize: 8, color: 'rgba(255,255,255,0.28)' }}>{item.label}</span>
+                    <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.32)' }}>{item.label}</span>
                     <div style={{ display: 'flex', gap: 5, alignItems: 'center' }}>
-                      <span style={{ fontSize: 10, color, fontWeight: 700 }}>{item.you}</span>
-                      <span style={{ fontSize: 7, color: 'rgba(255,255,255,0.15)' }}>vs</span>
-                      <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.2)' }}>{item.them}</span>
+                      <span style={{ fontSize: 11, color, fontWeight: 700 }}>{item.you}</span>
+                      <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.18)' }}>vs</span>
+                      <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.24)' }}>{item.them}</span>
                     </div>
                   </div>
                 ))}
@@ -2315,7 +2399,7 @@ function WebScene({ service }: { service: Service }) {
               <div>
                 <div
                   style={{
-                    fontSize: 8,
+                    fontSize: 9,
                     color: 'rgba(255,255,255,0.25)',
                     marginBottom: 4,
                     letterSpacing: '0.06em',
@@ -2364,7 +2448,7 @@ function WebScene({ service }: { service: Service }) {
               <div>
                 <div
                   style={{
-                    fontSize: 7,
+                    fontSize: 9,
                     color: 'rgba(255,255,255,0.2)',
                     marginBottom: 5,
                     letterSpacing: '0.08em',
@@ -2385,10 +2469,10 @@ function WebScene({ service }: { service: Service }) {
                       marginBottom: 4,
                     }}
                   >
-                    <span style={{ fontSize: 8, color: 'rgba(255,255,255,0.25)' }}>{item.label}</span>
+                    <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.25)' }}>{item.label}</span>
                     <div style={{ display: 'flex', gap: 5, alignItems: 'center' }}>
                       <span style={{ fontSize: 10, color, fontWeight: 700 }}>{item.you}</span>
-                      <span style={{ fontSize: 7, color: 'rgba(255,255,255,0.15)' }}>vs</span>
+                      <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.15)' }}>vs</span>
                       <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.2)' }}>{item.them}</span>
                     </div>
                   </div>
@@ -2437,7 +2521,7 @@ function WebScene({ service }: { service: Service }) {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
           <span
             style={{
-              fontSize: 10,
+              fontSize: 11,
               letterSpacing: '0.18em',
               textTransform: 'uppercase',
               color: 'rgba(255,255,255,0.35)',
@@ -2723,7 +2807,7 @@ function WebScene({ service }: { service: Service }) {
           </span>
           <span
             style={{
-              fontSize: 14,
+              fontSize: 15,
               fontWeight: 700,
               letterSpacing: '-0.03em',
               color: 'rgba(255,255,255,0.92)',
@@ -2733,11 +2817,12 @@ function WebScene({ service }: { service: Service }) {
           </span>
           <span
             style={{
-              fontSize: 10,
-              color: 'rgba(255,255,255,0.3)',
+              fontSize: 11,
+              color: 'rgba(255,255,255,0.36)',
+              lineHeight: 1.35,
             }}
           >
-            Cada funci\u00f3n trabajando mientras dorm\u00eds
+            Cada función trabajando mientras dormís
           </span>
         </div>
 
@@ -2771,7 +2856,7 @@ function WebScene({ service }: { service: Service }) {
             />
             <span
               style={{
-                fontSize: 8,
+                fontSize: 10,
                 fontWeight: 600,
                 letterSpacing: '0.08em',
                 color: isInView && !isPaused ? '#10b981' : 'rgba(255,255,255,0.25)',
@@ -2848,7 +2933,7 @@ function WebScene({ service }: { service: Service }) {
 
               <span
                 style={{
-                  fontSize: 8,
+                  fontSize: 9,
                   fontWeight: isVisual ? 600 : 400,
                   color: isVisual ? sim.color : 'rgba(255,255,255,0.2)',
                   letterSpacing: '0.04em',
@@ -2967,10 +3052,10 @@ type AISimulation = {
 };
 
 const AI_SIMULATIONS: AISimulation[] = [
-  { id: 1, label: 'Chat IA', icon: MessageSquare, duration: 6000, color: AI_COLOR },
-  { id: 2, label: 'Leads', icon: Target, duration: 5500, color: AI_COLOR },
-  { id: 3, label: 'Agenda', icon: Calendar, duration: 5000, color: AI_COLOR },
-  { id: 4, label: 'Métricas', icon: BarChart2, duration: 4500, color: AI_COLOR },
+  { id: 1, label: 'Chat IA', icon: MessageSquare, duration: 6800, color: AI_COLOR },
+  { id: 2, label: 'Leads', icon: Target, duration: 6200, color: AI_COLOR },
+  { id: 3, label: 'Agenda', icon: Calendar, duration: 6000, color: AI_COLOR },
+  { id: 4, label: 'Métricas', icon: BarChart2, duration: 5200, color: AI_COLOR },
 ];
 
 function AIScene({ service }: { service: Service }) {
@@ -2979,12 +3064,14 @@ function AIScene({ service }: { service: Service }) {
   type SimProps = { isActive: boolean; progress: number; color: string };
 
   function SimChat({ isActive, progress, color }: SimProps) {
-    const clientMsg1 = 'Hola! Tienen la Toyota Hilux 4x4 disponible? Cuánto sale?';
+    const clientMsg1 = '¡Hola! ¿Tienen la Toyota Hilux 4x4 disponible? ¿Cuánto sale?';
     const botMsg1 =
-      '¡Hola!  Sí, tenemos 2 Hilux 4x4 disponibles ahora mismo:\n\n• AT Full: $47.500 USD\n• MT SR: $43.200 USD\n\n¿Querés que te cuente las diferencias o preferís ver las fotos?';
+      '¡Hola! Sí, tenemos 2 Hilux 4x4 disponibles:\n• AT Full: $47.500 USD\n• MT SR: $43.200 USD\nPuedo mostrarte fotos o simular financiación.';
     const clientMsg2 = 'Me interesa la AT Full. Tienen financiación?';
     const botMsg2 =
-      '¡Sí! Tenemos 3 opciones de financiación disponibles. También puedo agendarte un test drive está semana. ¿Cuándo te queda mejor? ðŸš—';
+      'Sí. Hay 3 opciones disponibles. También puedo agendarte un test drive esta semana.';
+    const clientMsg3 = 'Perfecto, jueves a la mañana.';
+    const botMsg3 = 'Listo. Te reservé jueves 11:00 y avisé al equipo comercial.';
 
     const showHeader = progress > 0.1;
     const client1Length =
@@ -2992,8 +3079,11 @@ function AIScene({ service }: { service: Service }) {
     const showTyping = progress > 0.38 && progress < 0.52;
     const bot1Length = progress > 0.52 ? Math.floor(Math.min((progress - 0.52) / 0.23, 1) * botMsg1.length) : 0;
     const client2Length =
-      progress > 0.76 ? Math.floor(Math.min((progress - 0.76) / 0.09, 1) * clientMsg2.length) : 0;
-    const bot2Length = progress > 0.86 ? Math.floor(Math.min((progress - 0.86) / 0.14, 1) * botMsg2.length) : 0;
+      progress > 0.7 ? Math.floor(Math.min((progress - 0.7) / 0.08, 1) * clientMsg2.length) : 0;
+    const bot2Length = progress > 0.78 ? Math.floor(Math.min((progress - 0.78) / 0.09, 1) * botMsg2.length) : 0;
+    const client3Length =
+      progress > 0.88 ? Math.floor(Math.min((progress - 0.88) / 0.05, 1) * clientMsg3.length) : 0;
+    const bot3Length = progress > 0.93 ? Math.floor(Math.min((progress - 0.93) / 0.07, 1) * botMsg3.length) : 0;
     const showTimeBadge = progress > 0.92;
 
     return (
@@ -3062,7 +3152,7 @@ function AIScene({ service }: { service: Service }) {
             </div>
             <div
               style={{
-                fontSize: 8,
+                fontSize: 9,
                 color: 'rgba(255,255,255,0.2)',
                 letterSpacing: '0.05em',
               }}
@@ -3078,7 +3168,7 @@ function AIScene({ service }: { service: Service }) {
             flex: 1,
             display: 'flex',
             flexDirection: 'column',
-            gap: 8,
+            gap: 6,
             overflowY: 'hidden',
           }}
         >
@@ -3096,7 +3186,7 @@ function AIScene({ service }: { service: Service }) {
                   border: `1px solid ${color}25`,
                   borderRadius: '12px 12px 2px 12px',
                   padding: '8px 11px',
-                  fontSize: 11,
+                  fontSize: 12,
                   color: 'rgba(255,255,255,0.85)',
                   lineHeight: 1.45,
                 }}
@@ -3119,7 +3209,7 @@ function AIScene({ service }: { service: Service }) {
               </div>
               <div
                 style={{
-                  fontSize: 8,
+                  fontSize: 9,
                   color: 'rgba(255,255,255,0.2)',
                   textAlign: 'right',
                   marginTop: 2,
@@ -3182,9 +3272,9 @@ function AIScene({ service }: { service: Service }) {
                   border: '1px solid rgba(255,255,255,0.09)',
                   borderRadius: '12px 12px 12px 2px',
                   padding: '8px 11px',
-                  fontSize: 11,
+                  fontSize: 12,
                   color: 'rgba(255,255,255,0.8)',
-                  lineHeight: 1.5,
+                  lineHeight: 1.42,
                   whiteSpace: 'pre-line',
                 }}
               >
@@ -3206,7 +3296,7 @@ function AIScene({ service }: { service: Service }) {
               </div>
               <div
                 style={{
-                  fontSize: 8,
+                  fontSize: 9,
                   color: 'rgba(255,255,255,0.2)',
                   marginTop: 2,
                   paddingLeft: 4,
@@ -3229,7 +3319,7 @@ function AIScene({ service }: { service: Service }) {
                       fontWeight: 600,
                     }}
                   >
-                    âš¡ 1.8s
+                    ⚡ 1.8s
                   </motion.span>
                 )}
               </div>
@@ -3250,7 +3340,7 @@ function AIScene({ service }: { service: Service }) {
                   border: `1px solid ${color}25`,
                   borderRadius: '12px 12px 2px 12px',
                   padding: '8px 11px',
-                  fontSize: 11,
+                  fontSize: 12,
                   color: 'rgba(255,255,255,0.85)',
                   lineHeight: 1.45,
                 }}
@@ -3259,7 +3349,7 @@ function AIScene({ service }: { service: Service }) {
               </div>
               <div
                 style={{
-                  fontSize: 8,
+                  fontSize: 9,
                   color: 'rgba(255,255,255,0.2)',
                   textAlign: 'right',
                   marginTop: 2,
@@ -3285,12 +3375,58 @@ function AIScene({ service }: { service: Service }) {
                   border: '1px solid rgba(255,255,255,0.09)',
                   borderRadius: '12px 12px 12px 2px',
                   padding: '8px 11px',
-                  fontSize: 11,
+                  fontSize: 12,
                   color: 'rgba(255,255,255,0.8)',
                   lineHeight: 1.5,
                 }}
               >
                 {botMsg2.slice(0, bot2Length)}
+              </div>
+            </motion.div>
+          )}
+
+          {client3Length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, x: 10 }}
+              animate={{ opacity: 1, x: 0 }}
+              style={{ alignSelf: 'flex-end', maxWidth: '82%' }}
+            >
+              <div
+                style={{
+                  background: `${color}20`,
+                  backdropFilter: 'blur(20px)',
+                  border: `1px solid ${color}25`,
+                  borderRadius: '12px 12px 2px 12px',
+                  padding: '7px 10px',
+                  fontSize: 12,
+                  color: 'rgba(255,255,255,0.85)',
+                  lineHeight: 1.4,
+                }}
+              >
+                {clientMsg3.slice(0, client3Length)}
+              </div>
+            </motion.div>
+          )}
+
+          {bot3Length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              style={{ alignSelf: 'flex-start', maxWidth: '88%' }}
+            >
+              <div
+                style={{
+                  background: `${color}10`,
+                  backdropFilter: 'blur(20px)',
+                  border: `1px solid ${color}25`,
+                  borderRadius: '12px 12px 12px 2px',
+                  padding: '7px 10px',
+                  fontSize: 12,
+                  color: 'rgba(255,255,255,0.82)',
+                  lineHeight: 1.42,
+                }}
+              >
+                {botMsg3.slice(0, bot3Length)}
               </div>
             </motion.div>
           )}
@@ -3305,37 +3441,50 @@ function AIScene({ service }: { service: Service }) {
     const leads = [
       {
         name: 'Carlos M.',
-        msg: 'Quiero comprar una Hilux está semana, tengo efectivo',
+        msg: 'Quiero comprar una Hilux esta semana, tengo efectivo',
         score: 94,
         label: 'CALIENTE',
         labelColor: '#10b981',
-        delay: 0.15,
-        analyzeAt: 0.42,
-        classifyAt: 0.67,
+        delay: 0.12,
       },
       {
-        name: 'Ana Garc\u00eda',
-        msg: 'Me gustar\u00eda saber los precios de las camionetas',
+        name: 'Ana García',
+        msg: 'Me gustaría saber los precios de las camionetas',
         score: 61,
         label: 'TIBIO',
         labelColor: '#f59e0b',
-        delay: 0.24,
-        analyzeAt: 0.5,
-        classifyAt: 0.73,
+        delay: 0.17,
       },
       {
         name: 'Juan P.',
         msg: 'Solo estoy viendo opciones por ahora',
         score: 22,
-        label: 'FR\u00cdO',
+        label: 'FRÍO',
         labelColor: '#6b7280',
-        delay: 0.33,
-        analyzeAt: 0.58,
-        classifyAt: 0.79,
+        delay: 0.22,
+      },
+      {
+        name: 'Sofía R.',
+        msg: 'Necesito financiar una unidad para mi empresa',
+        score: 82,
+        label: 'CALIENTE',
+        labelColor: '#10b981',
+        delay: 0.27,
+      },
+      {
+        name: 'Martín L.',
+        msg: 'Quiero comparar planes antes de decidir',
+        score: 48,
+        label: 'TIBIO',
+        labelColor: '#f59e0b',
+        delay: 0.32,
       },
     ];
 
-    const showSummary = progress > 0.88;
+    const scoreProgress = Math.max(0, Math.min((progress - 0.48) / 0.22, 1));
+    const analyzing = progress > 0.42 && progress < 0.7;
+    const classified = progress > 0.7;
+    const showSummary = progress > 0.82;
 
     return (
       <div
@@ -3365,17 +3514,17 @@ function AIScene({ service }: { service: Service }) {
                 marginBottom: 2,
               }}
             >
-              {'CALIFICACI\u00d3N AUTOM\u00c1TICA'}
+              {'CALIFICACIÓN AUTOMÁTICA'}
             </div>
-            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>
-              {'IA analizando intenci\u00f3n de compra'}
+            <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.55)', lineHeight: 1.35 }}>
+              IA analizando intención de compra
             </div>
           </div>
           <motion.div
             animate={{ opacity: [0.5, 1, 0.5] }}
             transition={{ duration: 1.5, repeat: Infinity }}
             style={{
-              fontSize: 9,
+              fontSize: 10,
               color,
               display: 'flex',
               alignItems: 'center',
@@ -3401,18 +3550,14 @@ function AIScene({ service }: { service: Service }) {
           style={{
             display: 'flex',
             flexDirection: 'column',
-            gap: 6,
+            gap: 5,
             flex: 1,
+            minHeight: 0,
+            justifyContent: 'space-between',
           }}
         >
           {leads.map((lead) => {
             const visible = progress > lead.delay;
-            const analyzing = progress > lead.analyzeAt && progress < lead.classifyAt;
-            const analyzeProgress =
-              progress > lead.analyzeAt
-                ? Math.min((progress - lead.analyzeAt) / (lead.classifyAt - lead.analyzeAt), 1)
-                : 0;
-            const classified = progress > lead.classifyAt;
 
             return visible ? (
               <motion.div
@@ -3425,8 +3570,9 @@ function AIScene({ service }: { service: Service }) {
                   backdropFilter: 'blur(20px)',
                   border: `1px solid ${classified ? `${lead.labelColor}25` : 'rgba(255,255,255,0.07)'}`,
                   borderRadius: 10,
-                  padding: '10px 12px',
+                  padding: '7px 10px',
                   transition: 'all 500ms ease',
+                  minHeight: 0,
                 }}
               >
                 {/* Fila superior: nombre + badge */}
@@ -3435,20 +3581,20 @@ function AIScene({ service }: { service: Service }) {
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'center',
-                    marginBottom: 6,
+                    marginBottom: 4,
                   }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                     <div
                       style={{
-                        width: 24,
-                        height: 24,
+                        width: 22,
+                        height: 22,
                         borderRadius: '50%',
                         background: classified ? `${lead.labelColor}20` : 'rgba(255,255,255,0.06)',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        fontSize: 10,
+                        fontSize: 11,
                         transition: 'background 400ms',
                       }}
                     >
@@ -3456,7 +3602,7 @@ function AIScene({ service }: { service: Service }) {
                     </div>
                     <span
                       style={{
-                        fontSize: 12,
+                        fontSize: 13,
                         fontWeight: 600,
                         color: 'rgba(255,255,255,0.8)',
                       }}
@@ -3509,11 +3655,14 @@ function AIScene({ service }: { service: Service }) {
                 {/* Mensaje del lead */}
                 <div
                   style={{
-                    fontSize: 10,
+                    fontSize: 11,
                     color: 'rgba(255,255,255,0.4)',
-                    lineHeight: 1.4,
-                    marginBottom: analyzing || classified ? 8 : 0,
+                    lineHeight: 1.3,
+                    marginBottom: analyzing || classified ? 6 : 0,
                     fontStyle: 'italic',
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
                   }}
                 >
                   {`"${lead.msg}"`}
@@ -3530,7 +3679,7 @@ function AIScene({ service }: { service: Service }) {
                         marginBottom: 4,
                       }}
                     >
-                      <span style={{ fontSize: 8, color: 'rgba(255,255,255,0.25)', letterSpacing: '0.06em' }}>
+                      <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.25)', letterSpacing: '0.06em' }}>
                         {classified ? 'SCORE FINAL' : 'ANALIZANDO...'}
                       </span>
                       {classified && (
@@ -3555,9 +3704,9 @@ function AIScene({ service }: { service: Service }) {
                     >
                       <motion.div
                         animate={{
-                          width: classified ? `${lead.score}%` : `${analyzeProgress * lead.score}%`,
+                            width: `${scoreProgress * lead.score}%`,
                         }}
-                        transition={{ duration: 0.3 }}
+                        transition={{ duration: 0.34, ease: [0.22, 1, 0.36, 1] }}
                         style={{
                           height: '100%',
                           background: classified
@@ -3590,9 +3739,9 @@ function AIScene({ service }: { service: Service }) {
               }}
             >
               {[
-                { label: 'CALIENTES', count: '1', color: '#10b981' },
-                { label: 'TIBIOS', count: '1', color: '#f59e0b' },
-                { label: 'FR\u00cdOS', count: '1', color: '#6b7280' },
+                { label: 'CALIENTES', count: '2', color: '#10b981' },
+                { label: 'TIBIOS', count: '2', color: '#f59e0b' },
+                { label: 'FRÍOS', count: '1', color: '#6b7280' },
               ].map((item, index) => (
                 <motion.div
                   key={item.label}
@@ -3613,7 +3762,7 @@ function AIScene({ service }: { service: Service }) {
                   </div>
                   <div
                     style={{
-                      fontSize: 7,
+                      fontSize: 9,
                       color: 'rgba(255,255,255,0.25)',
                       marginTop: 2,
                       letterSpacing: '0.06em',
@@ -3633,12 +3782,12 @@ function AIScene({ service }: { service: Service }) {
   function SimAgenda({ isActive, progress, color }: SimProps) {
     void isActive;
 
-    const clientMsg = 'Hola! Quisiera sacar un turno para ver un auto está semana';
+    const clientMsg = '¡Hola! Quisiera sacar un turno para ver un auto esta semana';
     const botMsg =
-      '\u00a1Perfecto! Tengo disponibilidad:\n\ud83d\udcc5 Martes 14hs\n\ud83d\udcc5 Jueves 11hs\n\ud83d\udcc5 Viernes 16hs\n\u00bfCu\u00e1l te queda mejor?';
+      '¡Perfecto! Tengo disponibilidad:\n📅 Martes 14hs\n📅 Jueves 11hs\n📅 Viernes 16hs\n¿Cuál te queda mejor?';
     const clientConfirm = 'El jueves a las 11hs perfecto';
     const botConfirm =
-      '\u2705 \u00a1Listo! Turno confirmado para el Jueves a las 11hs. Te mando el recordatorio 24hs antes \ud83d\udcf2';
+      '✅ ¡Listo! Turno confirmado para el Jueves a las 11hs. Te mando el recordatorio 24hs antes 📲';
 
     const showHeader = progress > 0.08;
     const clientLength =
@@ -3650,6 +3799,13 @@ function AIScene({ service }: { service: Service }) {
       progress > 0.6 ? Math.floor(Math.min((progress - 0.6) / 0.15, 1) * botConfirm.length) : 0;
     const calendarFilled = progress > 0.64;
     const showEventDetail = progress > 0.76;
+    const showSyncNotes = progress > 0.84;
+    const agendaChecks = [
+      'Recordatorio enviado',
+      'Calendario sincronizado',
+      'Cliente confirmado',
+      'Sin intervención humana',
+    ];
 
     const days = ['L', 'M', 'X', 'J', 'V'];
     const bookedDay = 3;
@@ -3685,9 +3841,9 @@ function AIScene({ service }: { service: Service }) {
                   marginBottom: 2,
                 }}
               >
-                {'AGENDA AUTOM\u00c1TICA'}
+                AGENDA AUTOMÁTICA
               </div>
-              <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>{'Sin intervenci\u00f3n humana'}</div>
+              <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.55)', lineHeight: 1.35 }}>Sin intervención humana</div>
             </div>
             <div
               style={{
@@ -3738,7 +3894,7 @@ function AIScene({ service }: { service: Service }) {
                     border: `1px solid ${color}25`,
                     borderRadius: '10px 10px 2px 10px',
                     padding: '7px 10px',
-                    fontSize: 10,
+                    fontSize: 11,
                     color: 'rgba(255,255,255,0.85)',
                     lineHeight: 1.45,
                   }}
@@ -3776,7 +3932,7 @@ function AIScene({ service }: { service: Service }) {
                     border: '1px solid rgba(255,255,255,0.09)',
                     borderRadius: '10px 10px 10px 2px',
                     padding: '7px 10px',
-                    fontSize: 10,
+                    fontSize: 11,
                     color: 'rgba(255,255,255,0.75)',
                     lineHeight: 1.6,
                     whiteSpace: 'pre-line',
@@ -3801,7 +3957,7 @@ function AIScene({ service }: { service: Service }) {
                     border: `1px solid ${color}25`,
                     borderRadius: '10px 10px 2px 10px',
                     padding: '7px 10px',
-                    fontSize: 10,
+                    fontSize: 11,
                     color: 'rgba(255,255,255,0.85)',
                   }}
                 >
@@ -3824,7 +3980,7 @@ function AIScene({ service }: { service: Service }) {
                     border: `1px solid ${color}25`,
                     borderRadius: '10px 10px 10px 2px',
                     padding: '7px 10px',
-                    fontSize: 10,
+                    fontSize: 11,
                     color: 'rgba(255,255,255,0.8)',
                     lineHeight: 1.45,
                   }}
@@ -3840,7 +3996,7 @@ function AIScene({ service }: { service: Service }) {
             style={{
               display: 'flex',
               flexDirection: 'column',
-              gap: 8,
+              gap: 6,
               minHeight: 0,
               flexShrink: 0,
             }}
@@ -3851,7 +4007,7 @@ function AIScene({ service }: { service: Service }) {
                 backdropFilter: 'blur(20px)',
                 border: '1px solid rgba(255,255,255,0.08)',
                 borderRadius: 10,
-                padding: '8px 7px',
+                padding: '7px',
               }}
             >
               {/* Mes */}
@@ -3880,7 +4036,7 @@ function AIScene({ service }: { service: Service }) {
                   const isBooked = index === bookedDay && calendarFilled;
                   return (
                     <div key={day} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
-                      <span style={{ fontSize: 7, color: 'rgba(255,255,255,0.25)' }}>{day}</span>
+                      <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.25)' }}>{day}</span>
                       <motion.div
                         animate={{
                           background: isBooked ? color : 'rgba(255,255,255,0.05)',
@@ -3927,12 +4083,12 @@ function AIScene({ service }: { service: Service }) {
                     padding: '8px 9px',
                   }}
                 >
-                  <div style={{ fontSize: 8, color, fontWeight: 700, marginBottom: 5, letterSpacing: '0.08em' }}>
+                  <div style={{ fontSize: 9, color, fontWeight: 700, marginBottom: 5, letterSpacing: '0.08em' }}>
                     CONFIRMADO
                   </div>
                   <div
                     style={{
-                      fontSize: 10,
+                      fontSize: 11,
                       color: 'rgba(255,255,255,0.7)',
                       fontWeight: 600,
                       marginBottom: 3,
@@ -3941,10 +4097,57 @@ function AIScene({ service }: { service: Service }) {
                   >
                     Jueves · 11:00hs
                   </div>
-                  <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.35)' }}>Test Drive · Carlos M.</div>
-                  <div style={{ fontSize: 8, color: `${color}70`, marginTop: 4 }}>
-                    {'\ud83d\udcf2 Recordatorio programado'}
+                  <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)' }}>Test Drive · Carlos M.</div>
+                  <div style={{ fontSize: 9, color: `${color}75`, marginTop: 4 }}>
+                    📲 Recordatorio programado
                   </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            <AnimatePresence>
+              {showSyncNotes && (
+                <motion.div
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 4,
+                    background: 'rgba(255,255,255,0.035)',
+                    border: '1px solid rgba(255,255,255,0.07)',
+                    borderRadius: 10,
+                    padding: '7px',
+                  }}
+                >
+                  {agendaChecks.map((item, index) => (
+                    <motion.div
+                      key={item}
+                      initial={{ opacity: 0, x: 4 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.04, duration: 0.22 }}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 5,
+                        minWidth: 0,
+                      }}
+                    >
+                      <CheckCircle size={10} color={color} strokeWidth={2.4} style={{ flexShrink: 0 }} />
+                      <span
+                        style={{
+                          fontSize: 9,
+                          color: 'rgba(255,255,255,0.46)',
+                          lineHeight: 1.2,
+                          whiteSpace: 'nowrap',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                        }}
+                      >
+                        {item}
+                      </span>
+                    </motion.div>
+                  ))}
                 </motion.div>
               )}
             </AnimatePresence>
@@ -4004,9 +4207,9 @@ function AIScene({ service }: { service: Service }) {
                 marginBottom: 2,
               }}
             >
-              {'DASHBOARD DE ATENCI\u00d3N'}
+              DASHBOARD DE ATENCIÓN
             </div>
-            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>Hoy · Tiempo real</div>
+            <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.55)', lineHeight: 1.35 }}>Hoy · Tiempo real</div>
           </div>
           <motion.div
             animate={{ opacity: [0.5, 1, 0.5] }}
@@ -4048,7 +4251,7 @@ function AIScene({ service }: { service: Service }) {
             {[
               { label: 'CONSULTAS', value: totalConsultas.toString(), color },
               { label: 'RESPONDIDAS', value: respondidas.toString(), color: '#10b981' },
-              { label: 'SATISFACCI\u00d3N', value: `${satisfaccion}%`, color: '#f59e0b' },
+              { label: 'SATISFACCIÓN', value: `${satisfaccion}%`, color: '#f59e0b' },
             ].map((metric, index) => (
               <div
                 key={index}
@@ -4062,7 +4265,7 @@ function AIScene({ service }: { service: Service }) {
               >
                 <div
                   style={{
-                    fontSize: 7,
+                    fontSize: 9,
                     color: 'rgba(255,255,255,0.25)',
                     letterSpacing: '0.08em',
                     marginBottom: 4,
@@ -4072,7 +4275,7 @@ function AIScene({ service }: { service: Service }) {
                 </div>
                 <div
                   style={{
-                    fontSize: 20,
+                    fontSize: 22,
                     fontWeight: 800,
                     color: metric.color,
                     lineHeight: 1,
@@ -4103,7 +4306,7 @@ function AIScene({ service }: { service: Service }) {
           >
             <div
               style={{
-                fontSize: 8,
+                fontSize: 9,
                 color: 'rgba(255,255,255,0.25)',
                 letterSpacing: '0.10em',
                 marginBottom: 10,
@@ -4115,10 +4318,10 @@ function AIScene({ service }: { service: Service }) {
               {/* IA */}
               <div style={{ flex: 1 }}>
                 <div style={{ display: 'flex', alignItems: 'baseline', gap: 4, marginBottom: 6 }}>
-                  <span style={{ fontSize: 26, fontWeight: 800, color, lineHeight: 1, letterSpacing: '-0.03em' }}>
+                  <span style={{ fontSize: 28, fontWeight: 800, color, lineHeight: 1, letterSpacing: '-0.03em' }}>
                     1.8s
                   </span>
-                  <span style={{ fontSize: 9, color: `${color}80` }}>IA</span>
+                  <span style={{ fontSize: 10, color: `${color}80` }}>IA</span>
                 </div>
                 <div
                   style={{
@@ -4148,7 +4351,7 @@ function AIScene({ service }: { service: Service }) {
                 <div style={{ display: 'flex', alignItems: 'baseline', gap: 4, marginBottom: 6 }}>
                   <span
                     style={{
-                      fontSize: 26,
+                      fontSize: 28,
                       fontWeight: 800,
                       color: 'rgba(255,255,255,0.3)',
                       lineHeight: 1,
@@ -4157,7 +4360,7 @@ function AIScene({ service }: { service: Service }) {
                   >
                     4hs
                   </span>
-                  <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.2)' }}>humano</span>
+                  <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.24)' }}>humano</span>
                 </div>
                 <div
                   style={{
@@ -4173,17 +4376,17 @@ function AIScene({ service }: { service: Service }) {
             <div
               style={{
                 marginTop: 8,
-                fontSize: 9,
+                fontSize: 10,
                 color,
                 background: `${color}10`,
                 border: `1px solid ${color}20`,
                 borderRadius: 6,
-                padding: '4px 8px',
+                padding: '5px 8px',
                 textAlign: 'center',
                 fontWeight: 600,
               }}
             >
-              8.000í— m\u00e1s r\u00e1pido qué un humano
+              8.000× más rápido que un humano
             </div>
           </motion.div>
         )}
@@ -4198,16 +4401,20 @@ function AIScene({ service }: { service: Service }) {
               backdropFilter: 'blur(20px)',
               border: '1px solid rgba(255,255,255,0.07)',
               borderRadius: 10,
-              padding: '8px 10px',
+              padding: '9px 10px',
               flex: 1,
+              minHeight: 0,
+              display: 'flex',
+              flexDirection: 'column',
             }}
           >
             <div
               style={{
-                fontSize: 8,
+                fontSize: 9,
                 color: 'rgba(255,255,255,0.2)',
                 letterSpacing: '0.08em',
                 marginBottom: 8,
+                flexShrink: 0,
               }}
             >
               ACTIVIDAD HOY
@@ -4217,7 +4424,8 @@ function AIScene({ service }: { service: Service }) {
                 display: 'flex',
                 alignItems: 'flex-end',
                 gap: 4,
-                height: 36,
+                flex: 1,
+                minHeight: 78,
               }}
             >
               {chartData.map((bar, index) => (
@@ -4244,7 +4452,7 @@ function AIScene({ service }: { service: Service }) {
                       boxShadow: bar.value > 0.7 ? `0 0 8px ${color}40` : 'none',
                     }}
                   />
-                  <span style={{ fontSize: 6, color: 'rgba(255,255,255,0.2)' }}>{bar.hour}</span>
+                  <span style={{ fontSize: 8, color: 'rgba(255,255,255,0.24)' }}>{bar.hour}</span>
                 </div>
               ))}
             </div>
@@ -4398,7 +4606,7 @@ function AIScene({ service }: { service: Service }) {
 
               <span
                 style={{
-                  fontSize: 8,
+                  fontSize: 9,
                   fontWeight: isActive ? 600 : 400,
                   color: isActive ? AI_COLOR : 'rgba(255,255,255,0.2)',
                   letterSpacing: '0.04em',
@@ -4710,7 +4918,7 @@ function AutomationScene({ service }: { service: Service }) {
                 <div style={{ textAlign: 'center' }}>
                   <div
                     style={{
-                      fontSize: 8,
+                      fontSize: 9,
                       fontWeight: 600,
                       color: nodeActive ? node.nodeColor : 'rgba(255,255,255,0.35)',
                       transition: 'color 400ms',
@@ -4721,7 +4929,7 @@ function AutomationScene({ service }: { service: Service }) {
                   </div>
                   <div
                     style={{
-                      fontSize: 7,
+                      fontSize: 9,
                       color: 'rgba(255,255,255,0.2)',
                       whiteSpace: 'nowrap',
                     }}
@@ -4914,7 +5122,7 @@ function AutomationScene({ service }: { service: Service }) {
                     >
                       {event.label}
                     </span>
-                    <span style={{ fontSize: 8, color: 'rgba(255,255,255,0.2)' }}>{event.time}</span>
+                    <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.2)' }}>{event.time}</span>
                   </div>
                   <div
                     style={{
@@ -5178,7 +5386,7 @@ function AutomationScene({ service }: { service: Service }) {
                     border: '1px solid rgba(255,255,255,0.05)',
                   }}
                 >
-                  <div style={{ fontSize: 8, color: 'rgba(255,255,255,0.25)', marginBottom: 3 }}>
+                  <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.25)', marginBottom: 3 }}>
                     {item.label.toUpperCase()}
                   </div>
                   <div style={{ fontSize: 16, fontWeight: 800, color, letterSpacing: '-0.02em' }}>{item.value}</div>
@@ -5317,7 +5525,7 @@ function AutomationScene({ service }: { service: Service }) {
               flexShrink: 0,
             }}
           >
-            <div style={{ fontSize: 8, color: 'rgba(255,255,255,0.25)', letterSpacing: '0.08em', marginBottom: 8 }}>
+            <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.25)', letterSpacing: '0.08em', marginBottom: 8 }}>
               FORMULARIO WEB · ORIGEN
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
@@ -5335,7 +5543,7 @@ function AutomationScene({ service }: { service: Service }) {
                     padding: '5px 8px',
                   }}
                 >
-                  <div style={{ fontSize: 7, color: 'rgba(255,255,255,0.25)', marginBottom: 2 }}>
+                  <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.25)', marginBottom: 2 }}>
                     {field.label.toUpperCase()}
                   </div>
                   <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.7)', fontWeight: 500 }}>{field.value}</div>
@@ -5551,7 +5759,7 @@ function AutomationScene({ service }: { service: Service }) {
       >
         <div style={{ minWidth: 0 }}>
           <div style={{ fontSize: 9, fontWeight: 600, letterSpacing: '0.12em', color: `${AUTO_COLOR}80`, marginBottom: 4 }}>
-            {'AUTOMATIZACIONES \u00b7 EN VIVO'}
+            {'AUTOMATIZACIONES · EN VIVO'}
           </div>
           <div style={{ fontSize: 13, fontWeight: 600, color: 'rgba(255,255,255,0.8)', lineHeight: 1.3 }}>
             Tus procesos corriendo solos ahora mismo
@@ -5620,7 +5828,7 @@ function AutomationScene({ service }: { service: Service }) {
 
               <span
                 style={{
-                  fontSize: 8,
+                  fontSize: 9,
                   fontWeight: isActive ? 600 : 400,
                   color: isActive ? AUTO_COLOR : 'rgba(255,255,255,0.2)',
                   letterSpacing: '0.04em',
@@ -5818,7 +6026,7 @@ function SoftwareScene({ service }: { service: Service }) {
                 />
                 <div
                   style={{
-                    fontSize: 8,
+                    fontSize: 9,
                     fontWeight: 600,
                     color: stage.stageColor,
                     letterSpacing: '0.05em',
@@ -5826,7 +6034,7 @@ function SoftwareScene({ service }: { service: Service }) {
                 >
                   {stage.label}
                 </div>
-                <div style={{ fontSize: 8, color: 'rgba(255,255,255,0.25)', marginTop: 1 }}>
+                <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.25)', marginTop: 1 }}>
                   {stageIndex === 3 ? closedTotal : stage.total}
                 </div>
               </div>
@@ -5877,7 +6085,7 @@ function SoftwareScene({ service }: { service: Service }) {
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       style={{
-                        fontSize: 8,
+                        fontSize: 9,
                         color: '#10b981',
                         marginTop: 2,
                         fontWeight: 600,
@@ -5973,7 +6181,7 @@ function SoftwareScene({ service }: { service: Service }) {
               padding: '10px 12px',
             }}
           >
-            <div style={{ fontSize: 8, color: 'rgba(255,255,255,0.25)', letterSpacing: '0.08em', marginBottom: 4 }}>
+            <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.25)', letterSpacing: '0.08em', marginBottom: 4 }}>
               {kpis[0].label}
             </div>
             <div style={{ fontSize: 24, fontWeight: 800, color, letterSpacing: '-0.03em', lineHeight: 1 }}>
@@ -5992,11 +6200,11 @@ function SoftwareScene({ service }: { service: Service }) {
               padding: '10px 8px',
             }}
           >
-            <div style={{ fontSize: 7, color: 'rgba(255,255,255,0.25)', letterSpacing: '0.06em', marginBottom: 4 }}>
+            <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.25)', letterSpacing: '0.06em', marginBottom: 4 }}>
               {kpis[1].label}
             </div>
             <div style={{ fontSize: 22, fontWeight: 800, color: '#10b981', lineHeight: 1 }}>{kpis[1].value}</div>
-            <div style={{ fontSize: 8, color: 'rgba(16,185,129,0.6)', marginTop: 3 }}>nuevos</div>
+            <div style={{ fontSize: 9, color: 'rgba(16,185,129,0.6)', marginTop: 3 }}>nuevos</div>
           </div>
 
           {/* Retencion */}
@@ -6009,11 +6217,11 @@ function SoftwareScene({ service }: { service: Service }) {
               padding: '10px 8px',
             }}
           >
-            <div style={{ fontSize: 7, color: 'rgba(255,255,255,0.25)', letterSpacing: '0.06em', marginBottom: 4 }}>
+            <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.25)', letterSpacing: '0.06em', marginBottom: 4 }}>
               RETEN.
             </div>
             <div style={{ fontSize: 22, fontWeight: 800, color: '#8b5cf6', lineHeight: 1 }}>{kpis[2].value}%</div>
-            <div style={{ fontSize: 8, color: 'rgba(139,92,246,0.6)', marginTop: 3 }}>clientes</div>
+            <div style={{ fontSize: 9, color: 'rgba(139,92,246,0.6)', marginTop: 3 }}>clientes</div>
           </div>
         </div>
 
@@ -6031,7 +6239,7 @@ function SoftwareScene({ service }: { service: Service }) {
               padding: '10px 12px',
             }}
           >
-            <div style={{ fontSize: 8, color: 'rgba(255,255,255,0.2)', letterSpacing: '0.08em', marginBottom: 8 }}>
+            <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.2)', letterSpacing: '0.08em', marginBottom: 8 }}>
               REVENUE MENSUAL
             </div>
             <div
@@ -6069,7 +6277,7 @@ function SoftwareScene({ service }: { service: Service }) {
                         minHeight: barProgress > 0 ? 2 : 0,
                       }}
                     />
-                    <span style={{ fontSize: 7, color: 'rgba(255,255,255,0.2)' }}>{bar.month}</span>
+                    <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.2)' }}>{bar.month}</span>
                   </div>
                 );
               })}
@@ -6143,9 +6351,9 @@ function SoftwareScene({ service }: { service: Service }) {
                 marginBottom: 2,
               }}
             >
-              gestión DE STOCK
+              GESTIÓN DE STOCK
             </div>
-            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>Reposicion automática activa</div>
+            <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.55)', lineHeight: 1.35 }}>Reposición automática activa</div>
           </div>
           {showAlert && (
             <motion.div
@@ -6196,7 +6404,7 @@ function SoftwareScene({ service }: { service: Service }) {
             }}
           >
             {['PRODUCTO', 'STOCK', 'MINIMO'].map((header) => (
-              <span key={header} style={{ fontSize: 7, color: 'rgba(255,255,255,0.2)', letterSpacing: '0.08em' }}>
+              <span key={header} style={{ fontSize: 9, color: 'rgba(255,255,255,0.2)', letterSpacing: '0.08em' }}>
                 {header}
               </span>
             ))}
@@ -6489,7 +6697,7 @@ function SoftwareScene({ service }: { service: Service }) {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    fontSize: 8,
+                    fontSize: 9,
                     fontWeight: 700,
                     color: member.memberColor,
                     flexShrink: 0,
@@ -6499,7 +6707,7 @@ function SoftwareScene({ service }: { service: Service }) {
                 </div>
                 <div>
                   <div style={{ fontSize: 9, fontWeight: 600, color: 'rgba(255,255,255,0.75)' }}>{member.name}</div>
-                  <div style={{ fontSize: 7, color: 'rgba(255,255,255,0.3)' }}>{member.role}</div>
+                  <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.3)' }}>{member.role}</div>
                 </div>
               </motion.div>
             ) : null
@@ -6576,7 +6784,7 @@ function SoftwareScene({ service }: { service: Service }) {
                       animate={{ opacity: [1, 0.4, 1] }}
                       transition={{ duration: 0.8, repeat: isActive ? Infinity : 0 }}
                       style={{
-                        fontSize: 8,
+                        fontSize: 9,
                         color: '#ef4444',
                         fontWeight: 700,
                         letterSpacing: '0.05em',
@@ -6778,7 +6986,7 @@ function SoftwareScene({ service }: { service: Service }) {
 
               <span
                 style={{
-                  fontSize: 8,
+                  fontSize: 9,
                   fontWeight: isActive ? 600 : 400,
                   color: isActive ? SW_COLOR : 'rgba(255,255,255,0.2)',
                   letterSpacing: '0.04em',
@@ -6948,7 +7156,7 @@ function ServiceImpactSnapshot({ service }: { service: Service }) {
           >
             <span
               style={{
-                fontSize: 8,
+                fontSize: 9,
                 fontWeight: 800,
                 letterSpacing: '0.12em',
                 textTransform: 'uppercase',
