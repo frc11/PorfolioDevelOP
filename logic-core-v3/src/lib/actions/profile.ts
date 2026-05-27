@@ -1,7 +1,7 @@
 'use server'
 
 import bcrypt from 'bcryptjs'
-import { auth } from '@/auth'
+import { auth, unstable_update } from '@/auth'
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 import {
@@ -221,8 +221,15 @@ export async function updatePasswordAction(
     const hashed = await bcrypt.hash(parsed.data.newPassword, 12)
     await prisma.user.update({
       where: { id: userId },
-      data: { password: hashed },
+      data: {
+        password: hashed,
+        // SEC-AUTH-03: invalidar JWTs activos en otros dispositivos. El unstable_update
+        // refresca el token actual para no desloguear al user en esta pestaña.
+        sessionVersion: { increment: 1 },
+      },
     })
+
+    await unstable_update({})
 
     revalidatePath('/dashboard/profile')
     return { success: true }

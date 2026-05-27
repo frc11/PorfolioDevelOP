@@ -4,7 +4,7 @@ import { HealthScore } from '@/components/dashboard/home/HealthScore'
 import { OnboardingStatusCard } from '@/components/dashboard/OnboardingStatusCard'
 import { UsageMeter } from '@/components/dashboard/plan/UsageMeter'
 import { WeekResultsGrid } from '@/components/dashboard/home/WeekResultsGrid'
-import { LoadingState, PageHeader } from '@/components/ui'
+import { Badge, Card, LoadingState, PageHeader } from '@/components/ui'
 import { getExecutiveBrief } from '@/lib/ai/executive-brief'
 import { getAttentionItems } from '@/lib/dashboard/attention'
 import { getWeekResults } from '@/lib/dashboard/week-results'
@@ -13,7 +13,7 @@ import { getOrgUsageSnapshot } from '@/lib/plan/get-org-usage'
 import { resolveOrgId } from '@/lib/preview'
 import { prisma } from '@/lib/prisma'
 import { unstable_cache } from 'next/cache'
-import { Calendar } from 'lucide-react'
+import { Calendar, Sparkles } from 'lucide-react'
 import { redirect } from 'next/navigation'
 import { Suspense } from 'react'
 
@@ -102,9 +102,8 @@ async function BriefServerWrapper({ organizationId }: { organizationId: string }
   try {
     const brief = await getExecutiveBrief(organizationId)
 
-    // Si el brief vino vacío o sin texto, no renderizar
     if (!brief?.text?.trim()) {
-      return null
+      return <BriefEmptyState />
     }
 
     return (
@@ -118,8 +117,30 @@ async function BriefServerWrapper({ organizationId }: { organizationId: string }
     )
   } catch (err) {
     console.error('[AIBrief] Server wrapper failed:', err)
-    return null
+    return <BriefEmptyState />
   }
+}
+
+// B12.7 — Estado vacío honesto. Antes el wrapper retornaba null y el card
+// desaparecía sin que el cliente supiera que existía. Ahora siempre muestra
+// algo: si todavía no hay brief (cliente nuevo o generación fallida), explica
+// cuándo va a aparecer en vez de dejar un hueco.
+function BriefEmptyState() {
+  return (
+    <Card variant="highlighted" padding="lg">
+      <div className="space-y-3">
+        <Badge tone="violet" size="sm" icon={<Sparkles size={10} />}>
+          Resumen Ejecutivo - IA
+        </Badge>
+        <p className="text-base font-medium leading-relaxed text-zinc-300 sm:text-lg">
+          Tu primer resumen ejecutivo se genera el próximo lunes con los datos de tu semana.
+        </p>
+        <p className="text-xs text-zinc-600">
+          Apenas tengamos suficiente actividad vas a ver acá un análisis corto de cómo viene tu negocio.
+        </p>
+      </div>
+    </Card>
+  )
 }
 
 function HealthScoreSkeleton() {

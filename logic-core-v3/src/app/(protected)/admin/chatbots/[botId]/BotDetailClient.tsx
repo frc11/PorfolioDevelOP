@@ -15,6 +15,7 @@ import { ConfigTab } from './tabs/ConfigTab'
 import { KnowledgeTab } from './tabs/KnowledgeTab'
 import { ActivityTab } from './tabs/ActivityTab'
 import { LeadsTab } from './tabs/LeadsTab'
+import { ConversationsTab } from './tabs/ConversationsTab'
 import { InstallTab } from './tabs/InstallTab'
 
 import { VALID_TABS, type TabId } from './tabs'
@@ -66,12 +67,28 @@ export type LeadItem = {
   conversation: { sessionId: string; currentPath: string | null } | null
 }
 
+export type ConversationItem = {
+  id: string
+  sessionId: string
+  currentPath: string | null
+  messageCount: number
+  tokensIn: number
+  tokensOut: number
+  estimatedCostUsd: number
+  leadCaptured: boolean
+  startedAt: string | null
+  lastMessageAt: string | null
+  lead: { id: string; name: string; intent: string | null } | null
+  _count: { messages: number }
+}
+
 const TABS: { id: TabId; label: string }[] = [
   { id: 'overview', label: 'Overview' },
   { id: 'config', label: 'Configuración' },
   { id: 'knowledge', label: 'Knowledge Base' },
   { id: 'activity', label: 'Actividad' },
   { id: 'leads', label: 'Leads' },
+  { id: 'conversations', label: 'Conversaciones' },
   { id: 'install', label: 'Instalación' },
 ]
 
@@ -81,9 +98,10 @@ interface Props {
   initialEvents: MappedEvent[]
   monthlyUsage: MonthlyUsage
   leads: LeadItem[]
+  conversations: ConversationItem[]
 }
 
-export function BotDetailClient({ bot, initialTab, initialEvents, monthlyUsage, leads }: Props) {
+export function BotDetailClient({ bot, initialTab, initialEvents, monthlyUsage, leads, conversations }: Props) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [activeTab, setActiveTab] = useState<TabId>(initialTab)
@@ -211,6 +229,9 @@ export function BotDetailClient({ bot, initialTab, initialEvents, monthlyUsage, 
             <ActivityTab slug={bot.slug} initialEvents={initialEvents} />
           )}
           {activeTab === 'leads' && <LeadsTab leads={leads} />}
+          {activeTab === 'conversations' && (
+            <ConversationsTab conversations={conversations} totalCount={bot._count.conversations} />
+          )}
           {activeTab === 'install' && (
             <InstallTab
               bot={{

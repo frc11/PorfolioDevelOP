@@ -1,7 +1,11 @@
 import { NextResponse } from 'next/server'
 import { auth } from '@/auth'
-import { exchangeCodeForTokens } from '@/lib/integrations/google-business-profile'
+import {
+  exchangeCodeForTokens,
+  GBP_OAUTH_SCOPE,
+} from '@/lib/integrations/google-business-profile'
 import { prisma } from '@/lib/prisma'
+import { verifyOAuthState } from '@/lib/security/oauth-state'
 
 export async function GET(request: Request) {
   const session = await auth()
@@ -11,11 +15,22 @@ export async function GET(request: Request) {
 
   const { searchParams } = new URL(request.url)
   const code = searchParams.get('code')
-  const orgId = searchParams.get('state')
+  const rawState = searchParams.get('state')
 
-  if (!code || !orgId) {
+  if (!code || !rawState) {
     return NextResponse.json({ error: 'Missing code or state' }, { status: 400 })
   }
+
+  // B-SEC.3b (cierra SEC-AUTH-01 / B11 F3): validar la firma del state ANTES
+  // de cualquier acceso a DB. Sin esto, un atacante podía sobreescribir gbp*
+  // tokens en cualquier org cambiando el `state` de la URL del callback.
+  const stateCheck = verifyOAuthState(GBP_OAUTH_SCOPE, rawState)
+  if (!stateCheck.valid) {
+    return NextResponse.redirect(
+      new URL(`/admin/clients?error=oauth_state_${stateCheck.reason}`, request.url),
+    )
+  }
+  const orgId = stateCheck.organizationId
 
   try {
     const tokens = await exchangeCodeForTokens(code)

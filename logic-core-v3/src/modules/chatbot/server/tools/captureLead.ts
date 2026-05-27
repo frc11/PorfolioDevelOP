@@ -1,10 +1,12 @@
 import { tool } from 'ai'
 import { z } from 'zod'
-import type { Prisma } from '@prisma/client'
+import type { Prisma, ChatbotLeadIntent } from '@prisma/client'
+import { revalidateTag } from 'next/cache'
 import { prisma } from '@/lib/prisma'
 import { logChatbotEvent } from '../logging'
 import { sendLeadNotificationEmail } from '../notifications'
 import { calculateLeadScore } from '../scoring'
+import { syncLeadToCrm } from '../crm'
 import { notifyTelegramOptional } from '@/lib/notifications/telegram'
 import type { ToolCallContext, CaptureLeadResult, ToolExecuteResult } from './types'
 
@@ -159,6 +161,12 @@ async function captureLeadExecute(
       phone,
     })
 
+    // B11.4 — el LLM pasa lowercase (LEAD_INTENTS), la DB es enum UPPER.
+    // Type-assert es safe: LEAD_INTENTS y ChatbotLeadIntent comparten los 6
+    // valores nuevos B5.1+ exactamente (legacy QUOTE/INFO/DEMO no se generan
+    // desde el LLM nuevo, solo viven en rows pre-existentes).
+    const intentEnum = input.intent.toUpperCase() as ChatbotLeadIntent
+
     // 4. Create the lead and update conversation in a transaction.
     //    B5.1: providedPhone/providedEmail SE DERIVAN del input — no del LLM.
     //    El bot no puede inflar esto: si no mandó phone, providedPhone=false. Estructural.
@@ -170,7 +178,7 @@ async function captureLeadExecute(
           name: input.name,
           email,
           phone,
-          intent: input.intent,
+          intent: intentEnum,
           message: input.contextSummary,
           status: 'NEW',
           // B5.1 — Señales estructuradas
@@ -209,6 +217,19 @@ async function captureLeadExecute(
 
         const org = bot?.organization
         if (!bot || !org) return
+
+        // B5.7 v2 — Invalidar el cache del badge sidebar "hot+NEW" cuando el lead
+        // capturado entra como hot. Sin esto, el badge esperaba TTL 30s del
+        // unstable_cache para reflejar el nuevo lead — ahora se actualiza al
+        // próximo render de cualquier ruta /dashboard/*. El tag ya existía,
+        // estaba listo para esta invalidación.
+        if (classification === 'hot') {
+          try {
+            revalidateTag(`hot-leads-count:${org.id}`, {})
+          } catch (err) {
+            console.error('[captureLead] revalidateTag failed:', err)
+          }
+        }
 
         // Telegram — always fires for the develOP team when configured (env-based)
         const telegramMsg = [
@@ -260,6 +281,15 @@ async function captureLeadExecute(
     }
 
     void notifyClient()
+
+    // 5b. B5.8 — Sync a CRM del cliente vía n8n. DB-primero: el lead YA está
+    //     guardado (step 4). Este hook es secundario y resiliente — si n8n
+    //     está caído, el lead no se pierde, solo queda CrmSyncAttempt FAILED.
+    //     syncLeadToCrm atrapa todos sus errores internos; este catch defensivo
+    //     es por si falla el dispatch mismo. NO propaga al LLM.
+    void syncLeadToCrm({ leadId: result.id, trigger: 'auto' }).catch((err: unknown) => {
+      console.error('[captureLead] CRM sync wrapper failed:', err)
+    })
 
     // 6. Log structured event — incluye score B5.2 + DQ reason B5.3.
     console.log(

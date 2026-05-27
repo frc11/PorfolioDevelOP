@@ -5,6 +5,7 @@ import { resolveOrgId } from '@/lib/preview'
 import { isModuleActive } from '@/lib/modules/check-activation'
 import { listReviews } from '@/lib/integrations/google-business-profile'
 import { prisma } from '@/lib/prisma'
+import { EmptyState } from '@/components/ui'
 import { ReviewItem } from './_components/ReviewItem'
 import { AskReviewSection } from './_components/AskReviewSection'
 
@@ -57,20 +58,11 @@ async function ReviewsList({
 
   if (reviews.length === 0) {
     return (
-      <div
-        style={{
-          background: 'rgba(255,255,255,0.025)',
-          backdropFilter: 'blur(20px) saturate(180%)',
-          WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-          border: '1px solid rgba(255,255,255,0.07)',
-          borderRadius: '12px',
-        }}
-        className="px-5 py-10 text-center"
-      >
-        <p className="text-sm text-zinc-500">
-          Sin reseñas todavía. Cuando recibas reseñas en Google aparecerán acá.
-        </p>
-      </div>
+      <EmptyState
+        icon={Star}
+        title="Sin reseñas todavía"
+        description="Cuando recibas reseñas en tu perfil de Google Business van a aparecer acá para que puedas responderlas."
+      />
     )
   }
 

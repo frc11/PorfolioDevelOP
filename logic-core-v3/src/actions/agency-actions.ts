@@ -6,6 +6,10 @@ import { revalidatePath } from 'next/cache'
 import { AssetType } from '@prisma/client'
 import { sendEmail } from '@/lib/email'
 import { ActionRequiredEmail } from '@/emails/ActionRequiredEmail'
+import {
+  assertProjectBelongsToOrg,
+  ResourceNotOwnedError,
+} from '@/lib/auth/assert-ownership'
 
 export async function createTaskForClientAction(
   projectId: string,
@@ -15,6 +19,19 @@ export async function createTaskForClientAction(
   const session = await auth()
   if (session?.user?.role !== 'SUPER_ADMIN') {
     throw new Error('Unauthorized')
+  }
+
+  // B11.2 fix F5: SUPER_ADMIN podía pasar projectId y organizationId
+  // separados sin validar que el project pertenece a esa org. Esto creaba
+  // tasks en projects de orgX notificando a members de orgY. Tiramos
+  // temprano si la combinación no coincide.
+  try {
+    await assertProjectBelongsToOrg(projectId, organizationId)
+  } catch (error) {
+    if (error instanceof ResourceNotOwnedError) {
+      throw new Error(`Project ${projectId} does not belong to organization ${organizationId}`)
+    }
+    throw error
   }
 
   const result = await prisma.$transaction(async (tx) => {

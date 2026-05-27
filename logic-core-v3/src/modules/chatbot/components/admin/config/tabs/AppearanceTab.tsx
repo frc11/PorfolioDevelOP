@@ -3,18 +3,13 @@
 import { ColorPicker } from '../ColorPicker'
 import { Field } from '../Field'
 import { Input } from '../Input'
-import { Select } from '../Select'
+import { AvatarPicker } from '@/modules/chatbot/components/avatar'
+import { deriveBusinessInitials } from '@/modules/chatbot/shared/businessInitials'
 import type { BotConfigTabProps } from '../types'
 
-const AVATAR_STYLES = [
-  { value: 'neuro', label: 'Neuro (particle sphere)' },
-  { value: 'legacy_neuro', label: 'Legacy Neuro (3D face)' },
-  { value: 'simple', label: 'Simple' },
-  { value: 'emoji', label: 'Emoji' },
-  { value: 'image', label: 'Imagen custom' },
-]
-
 export function AppearanceTab({ state, update }: BotConfigTabProps) {
+  const initials = deriveBusinessInitials(state.botName)
+
   return (
     <div className="space-y-6">
       <Field label="Color de acento" required>
@@ -37,11 +32,18 @@ export function AppearanceTab({ state, update }: BotConfigTabProps) {
         />
       </Field>
 
-      <Field label="Estilo del avatar">
-        <Select
+      <Field
+        label="Estilo del avatar"
+        hint="Hover sobre una opción para verla en estado activo. La elección se aplica al guardar."
+      >
+        <AvatarPicker
           value={state.avatarStyle}
-          onChange={(event) => update('avatarStyle', event.target.value as typeof state.avatarStyle)}
-          options={AVATAR_STYLES}
+          onChange={(id) => update('avatarStyle', id)}
+          accentColor={state.accentColor}
+          businessInitials={initials}
+          includeEscapeHatches
+          avatarImageUrl={state.avatarImageUrl}
+          avatarEmoji={state.avatarEmoji}
         />
       </Field>
 
@@ -60,7 +62,7 @@ export function AppearanceTab({ state, update }: BotConfigTabProps) {
           <Input
             value={state.avatarEmoji ?? ''}
             onChange={(event) => update('avatarEmoji', event.target.value || null)}
-            placeholder="Bot"
+            placeholder="🤖"
             maxLength={8}
           />
         </Field>
@@ -68,3 +70,4 @@ export function AppearanceTab({ state, update }: BotConfigTabProps) {
     </div>
   )
 }
+

@@ -1,91 +1,110 @@
 'use server'
 
 import crypto from 'crypto'
-import * as React from 'react'
+import bcrypt from 'bcryptjs'
 import { prisma } from '@/lib/prisma'
-import { sendEmail } from '@/lib/email'
+import { ForgotPasswordSchema } from '@/lib/actions/schemas'
+import { sendTransactionalEmail } from '@/lib/email/brevo-service'
+import { passwordResetEmail } from '@/lib/email/templates/password-reset'
+import { applyAuthRateLimit, getClientIpHash } from '@/lib/security/auth-rate-limit'
 
 export type ForgotPasswordState =
   | { type: 'error'; message: string }
   | { type: 'success'; message: string }
   | null
 
+const TOKEN_EXPIRES_MINUTES = 45
+const ANTI_ENUM_MESSAGE =
+  'Si la cuenta existe, te mandamos un mail con instrucciones en los próximos minutos.'
+
+// Hash dummy precomputado para igualar el costo cuando el usuario NO existe.
+// Mitiga timing attack: bcrypt.compare contra un hash con el mismo cost (10).
+const DUMMY_HASH = '$2b$10$CwTycUXWue0Thq9StjUM0uJ8/8DqWlqaA5jE0n6Z9Vp.NwcAk7Bru'
+
 export async function forgotPasswordAction(
   _prevState: ForgotPasswordState,
-  formData: FormData
+  formData: FormData,
 ): Promise<ForgotPasswordState> {
-  const email = String(formData.get('email') ?? '').trim().toLowerCase()
+  // 1) Validación Zod
+  const parsed = ForgotPasswordSchema.safeParse({
+    email: formData.get('email'),
+  })
 
-  if (!email || !email.includes('@') || email.length > 254) {
-    return { type: 'error', message: 'Email inválido.' }
+  if (!parsed.success) {
+    return {
+      type: 'error',
+      message: parsed.error.issues[0]?.message ?? 'Email inválido.',
+    }
   }
 
-  // Siempre devolver el mismo mensaje para evitar user enumeration
-  const successMsg = 'Si el email existe en el sistema, recibirás un enlace en minutos.'
+  const email = parsed.data.email
 
-  const user = await prisma.user.findUnique({ where: { email } })
-  if (!user) return { type: 'success', message: successMsg }
+  // 2) Rate limit por IP — protege el endpoint completo
+  const ipHash = await getClientIpHash()
+  const ipLimit = applyAuthRateLimit({ scope: 'forgotPasswordPerIp', identifier: ipHash })
+  if (!ipLimit.allowed) {
+    // Mensaje idéntico al éxito: no revelamos el rate-limit (anti-enum / anti-recon).
+    return { type: 'success', message: ANTI_ENUM_MESSAGE }
+  }
 
-  // Invalidar tokens anteriores sin usar
-  await prisma.passwordResetToken.deleteMany({
-    where: { userId: user.id, usedAt: null },
+  // 3) Rate limit por email — protege un inbox específico de ser inundado.
+  const emailLimit = applyAuthRateLimit({
+    scope: 'forgotPasswordPerEmail',
+    identifier: email,
+  })
+  if (!emailLimit.allowed) {
+    return { type: 'success', message: ANTI_ENUM_MESSAGE }
+  }
+
+  // 4) Resolver usuario
+  const user = await prisma.user.findUnique({
+    where: { email },
+    select: { id: true, name: true, email: true },
   })
 
+  // 5) Mitigación timing-attack: si el usuario no existe ejecutamos trabajo
+  //    equivalente al hash que correría si existiera (cost 10, ~80ms).
+  if (!user) {
+    await bcrypt.compare(email, DUMMY_HASH)
+    return { type: 'success', message: ANTI_ENUM_MESSAGE }
+  }
+
+  // 6) Invalidar tokens previos sin usar + crear uno nuevo (un-solo-uso, expiración corta).
   const token = crypto.randomBytes(32).toString('hex')
-  const expiresAt = new Date(Date.now() + 60 * 60 * 1000) // 1 hora
+  const expiresAt = new Date(Date.now() + TOKEN_EXPIRES_MINUTES * 60_000)
 
-  await prisma.passwordResetToken.create({
-    data: { token, userId: user.id, expiresAt },
-  })
+  await prisma.$transaction([
+    prisma.passwordResetToken.deleteMany({
+      where: { userId: user.id, usedAt: null },
+    }),
+    prisma.passwordResetToken.create({
+      data: { token, userId: user.id, expiresAt },
+    }),
+  ])
 
-  const baseUrl = process.env.NEXTAUTH_URL ?? 'http://localhost:3000'
+  // 7) Email transaccional vía Brevo (mismo provider que welcome / resend-credentials).
+  const baseUrl =
+    process.env.NEXT_PUBLIC_APP_URL ?? process.env.NEXTAUTH_URL ?? 'http://localhost:3000'
   const resetUrl = `${baseUrl}/reset-password?token=${token}`
 
-  await sendEmail({
-    to: user.email,
-    subject: 'Restablecé tu contraseña de develOP',
-    react: React.createElement(
-      'div',
-      {
-        style: {
-          fontFamily: 'Arial, sans-serif',
-          color: '#111827',
-          lineHeight: 1.6,
-        },
-      },
-      React.createElement('h1', { style: { fontSize: '20px' } }, 'Restablecer contraseña'),
-      React.createElement(
-        'p',
-        null,
-        'Recibimos una solicitud para cambiar la contraseña de tu cuenta en develOP.'
-      ),
-      React.createElement(
-        'p',
-        null,
-        React.createElement(
-          'a',
-          {
-            href: resetUrl,
-            style: {
-              display: 'inline-block',
-              padding: '12px 18px',
-              background: '#06b6d4',
-              color: '#ffffff',
-              textDecoration: 'none',
-              borderRadius: '8px',
-              fontWeight: 'bold',
-            },
-          },
-          'Crear nueva contraseña'
-        )
-      ),
-      React.createElement(
-        'p',
-        { style: { fontSize: '12px', color: '#6b7280' } },
-        'Este enlace vence en 1 hora. Si no lo pediste, podés ignorar este mensaje.'
-      )
-    ),
+  const content = passwordResetEmail({
+    clientName: user.name ?? 'Hola',
+    resetUrl,
+    expiresInMinutes: TOKEN_EXPIRES_MINUTES,
   })
 
-  return { type: 'success', message: successMsg }
+  const result = await sendTransactionalEmail({
+    to: { email: user.email, name: user.name ?? undefined },
+    subject: content.subject,
+    htmlContent: content.htmlContent,
+    textContent: content.textContent,
+  })
+
+  // No logueamos el token ni el email en limpio. Sólo el outcome.
+  if (!result.ok) {
+    console.error('[forgot-password] email send failed', { reason: result.error })
+  }
+
+  // 8) Respuesta idéntica al caso "usuario no existe".
+  return { type: 'success', message: ANTI_ENUM_MESSAGE }
 }

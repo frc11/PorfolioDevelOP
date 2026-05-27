@@ -7,6 +7,10 @@ import { Send, Sparkles } from 'lucide-react'
 import type { UIChatMessage, ToolCallInUIMessage } from './types'
 import type { PublicBotConfig } from '../../shared/publicConfig'
 import type { NeuroAvatarState } from '../avatar'
+import type { DegradedInfo } from '../../hooks/useChatbot'
+import { CHATBOT_Z_INDEX } from '../../shared/zIndex'
+import { ChatHeader } from './ChatHeader'
+import { DegradedBanner } from './DegradedBanner'
 
 export interface ChatWindowProps {
   config: PublicBotConfig
@@ -16,8 +20,11 @@ export interface ChatWindowProps {
   onSendMessage: (text: string) => void
   onClose: () => void
   onQuickReply: (text: string) => void
-  degradedMode?: boolean
+  /** Full payload for B8.3 — rendered as DegradedBanner with WhatsApp CTA. */
+  degradedInfo?: DegradedInfo | null
   renderToolCall?: (toolCall: ToolCallInUIMessage) => React.ReactNode
+  muted?: boolean
+  onToggleMute?: () => void
 }
 
 export function ChatWindow({
@@ -28,9 +35,12 @@ export function ChatWindow({
   onSendMessage,
   onClose,
   onQuickReply,
-  degradedMode,
+  degradedInfo,
   renderToolCall,
+  muted,
+  onToggleMute,
 }: ChatWindowProps) {
+  const degraded = !!degradedInfo
   const [input, setInput] = useState('')
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
@@ -81,8 +91,8 @@ export function ChatWindow({
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={onClose}
-              className="fixed inset-0 bg-black/60 backdrop-blur-md z-[90]"
-              style={{ pointerEvents: 'auto', cursor: 'auto' }}
+              className="fixed inset-0 bg-black/60 backdrop-blur-md"
+              style={{ pointerEvents: 'auto', cursor: 'auto', zIndex: CHATBOT_Z_INDEX.backdrop }}
               aria-hidden="true"
             />
 
@@ -93,10 +103,11 @@ export function ChatWindow({
               exit={{ opacity: 0, scale: 0.98, y: 10 }}
               transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
               data-chatbot-window
-              className="fixed bottom-4 left-4 right-4 z-[100] flex flex-col md:bottom-[16rem] md:left-auto md:right-6 md:w-[420px]"
+              className="fixed bottom-4 left-4 right-4 flex flex-col md:bottom-[16rem] md:left-auto md:right-6 md:w-[420px]"
               style={{
                 pointerEvents: 'auto',
                 cursor: 'auto',
+                zIndex: CHATBOT_Z_INDEX.panel,
                 background: 'linear-gradient(180deg, rgba(11, 14, 28, 0.92) 0%, rgba(6, 8, 18, 0.9) 100%)',
                 backdropFilter: 'blur(32px)',
                 WebkitBackdropFilter: 'blur(32px)',
@@ -110,192 +121,22 @@ export function ChatWindow({
                 `,
                 borderRadius: '24px',
                 overflow: 'hidden',
-                maxHeight: '72vh',
+                // 72dvh: dynamic viewport — the sheet shrinks when the virtual
+                // keyboard opens so the textarea + send button stay visible.
+                maxHeight: '72dvh',
               }}
               role="dialog"
               aria-label={`Consultor ${config.botName}`}
             >
-              {/* Header */}
-              <div style={{
-                padding: '14px 18px',
-                borderBottom: '1px solid rgba(255,255,255,0.06)',
-                background: 'rgba(255,255,255,0.02)',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px',
-                position: 'relative',
-              }}>
-                {/* Línea de acento superior */}
-                <div style={{
-                  position: 'absolute',
-                  top: 0, left: '15%', right: '15%',
-                  height: '1px',
-                  background: 'linear-gradient(90deg, transparent, rgba(6,182,212,0.65) 35%, rgba(124,58,237,0.5) 65%, transparent)',
-                }} />
-
-                {/* Avatar mini del asistente */}
-                <div style={{
-                  width: '38px',
-                  height: '38px',
-                  borderRadius: '50%',
-                  background: 'radial-gradient(circle at 38% 35%, rgba(6,182,212,0.95) 0%, rgba(6,182,212,0.55) 45%, rgba(6,182,212,0.18) 100%)',
-                  border: '1px solid rgba(6,182,212,0.35)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  flexShrink: 0,
-                  boxShadow: '0 0 18px rgba(6,182,212,0.25), inset 0 1px 0 rgba(255,255,255,0.2)',
-                  position: 'relative',
-                  overflow: 'hidden',
-                }}>
-                  {/* Face SVG inline */}
-                  <svg
-                    width="22"
-                    height="20"
-                    viewBox="0 0 22 20"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    {/* Ojo izquierdo */}
-                    <motion.ellipse
-                      cx="7"
-                      cy="9"
-                      rx="2"
-                      ry={isThinking ? 0.4 : 2}
-                      fill="white"
-                      fillOpacity="0.95"
-                      animate={{
-                        ry: isThinking ? 0.4 : [2, 0.15, 2],
-                      }}
-                      transition={{
-                        ry: isThinking
-                          ? { duration: 0.3 }
-                          : { duration: 0.12, times: [0, 0.5, 1], repeat: Infinity, repeatDelay: 4.2 },
-                      }}
-                      style={{ filter: 'drop-shadow(0 0 3px rgba(6,182,212,0.8))' }}
-                    />
-                    {/* Ojo derecho */}
-                    <motion.ellipse
-                      cx="15"
-                      cy="9"
-                      rx="2"
-                      ry={isThinking ? 0.4 : 2}
-                      fill="white"
-                      fillOpacity="0.95"
-                      animate={{
-                        ry: isThinking ? 0.4 : [2, 0.15, 2],
-                      }}
-                      transition={{
-                        ry: isThinking
-                          ? { duration: 0.3 }
-                          : { duration: 0.12, times: [0, 0.5, 1], repeat: Infinity, repeatDelay: 4.2, delay: 0.04 },
-                      }}
-                      style={{ filter: 'drop-shadow(0 0 3px rgba(6,182,212,0.8))' }}
-                    />
-                    {/* Boca */}
-                    <motion.path
-                      d={isThinking ? 'M 7 15 Q 11 14 15 15' : 'M 7 15 Q 11 18 15 15'}
-                      stroke="white"
-                      strokeOpacity="0.85"
-                      strokeWidth="1.5"
-                      strokeLinecap="round"
-                      fill="none"
-                      animate={{
-                        d: isThinking
-                          ? 'M 7 15 Q 11 14 15 15'
-                          : 'M 7 15 Q 11 18 15 15',
-                      }}
-                      transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-                      style={{ filter: 'drop-shadow(0 0 2px rgba(6,182,212,0.6))' }}
-                    />
-                  </svg>
-
-                  {/* Shimmer interior */}
-                  <div style={{
-                    position: 'absolute',
-                    top: '15%',
-                    left: '20%',
-                    width: '30%',
-                    height: '20%',
-                    background: 'rgba(255,255,255,0.35)',
-                    borderRadius: '50%',
-                    filter: 'blur(3px)',
-                    transform: 'rotate(-30deg)',
-                    pointerEvents: 'none',
-                  }} />
-                </div>
-
-                {/* Info del asistente */}
-                <div style={{ flex: 1 }}>
-                  <p style={{
-                    fontSize: '13px',
-                    fontWeight: 600,
-                    color: 'rgba(255,255,255,0.85)',
-                    margin: 0,
-                    letterSpacing: '0.01em',
-                    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-                  }}>
-                    Consultor {config.botName}
-                  </p>
-                  <p style={{
-                    fontSize: '11px',
-                    color: isThinking ? 'rgba(120,160,255,0.7)' : 'rgba(80,220,130,0.6)',
-                    margin: 0,
-                    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-                  }}>
-                    {isThinking ? (
-                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                        <span>Pensando</span>
-                        <span style={{ display: 'inline-flex', gap: '2px' }}>
-                          <motion.span
-                            animate={{ opacity: [0.3, 1, 0.3] }}
-                            transition={{ duration: 1.4, repeat: Infinity, ease: 'easeInOut', delay: 0 }}
-                            style={{ display: 'inline-block' }}
-                          >
-                            ·
-                          </motion.span>
-                          <motion.span
-                            animate={{ opacity: [0.3, 1, 0.3] }}
-                            transition={{ duration: 1.4, repeat: Infinity, ease: 'easeInOut', delay: 0.2 }}
-                            style={{ display: 'inline-block' }}
-                          >
-                            ·
-                          </motion.span>
-                          <motion.span
-                            animate={{ opacity: [0.3, 1, 0.3] }}
-                            transition={{ duration: 1.4, repeat: Infinity, ease: 'easeInOut', delay: 0.4 }}
-                            style={{ display: 'inline-block' }}
-                          >
-                            ·
-                          </motion.span>
-                        </span>
-                      </span>
-                    ) : (
-                      '🟢 Disponible ahora'
-                    )}
-                  </p>
-                </div>
-
-                {/* Botón de cierre minimalista */}
-                <button
-                  onClick={onClose}
-                  style={{
-                    width: '28px', height: '28px',
-                    borderRadius: '50%',
-                    background: 'rgba(255,255,255,0.04)',
-                    border: '1px solid rgba(255,255,255,0.08)',
-                    color: 'rgba(255,255,255,0.35)',
-                    fontSize: '14px',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    transition: 'all 200ms',
-                  }}
-                >
-                  ✕
-                </button>
-              </div>
+              {/* Header — uses ChatHeader so the configured avatar shows here too */}
+              <ChatHeader
+                config={config}
+                avatarState={avatarState}
+                isStreaming={isStreaming}
+                onClose={onClose}
+                muted={muted}
+                onToggleMute={onToggleMute}
+              />
 
               {/* Messages Area */}
               <div className="chat-messages-area flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto p-5 md:p-6"
@@ -310,14 +151,7 @@ export function ChatWindow({
                 role="log"
                 aria-live="polite"
               >
-                {degradedMode && (
-                  <div className="bg-yellow-500/10 border border-yellow-500/20 text-yellow-200/90 p-3 rounded-xl text-xs flex items-start gap-3">
-                    <span className="text-base leading-none">⚠️</span>
-                    <p className="m-0 leading-relaxed">
-                      El asistente está operando en <b>modo degradado</b>. Las respuestas pueden tardar un poco más o ser más breves de lo normal.
-                    </p>
-                  </div>
-                )}
+                {degradedInfo && <DegradedBanner info={degradedInfo} />}
                 <AnimatePresence initial={false}>
                   {messages.length === 0 ? (
                     <div className="flex h-full flex-col items-center justify-center space-y-4 py-6 text-center opacity-75">
@@ -588,15 +422,20 @@ export function ChatWindow({
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' && !e.shiftKey) {
                         e.preventDefault()
-                        if (input.trim() && !isThinking) {
+                        if (input.trim() && !isThinking && !degraded) {
                           const form = e.currentTarget.closest('form')
                           if (form) form.requestSubmit()
                         }
                       }
                     }}
-                    placeholder="Escribí tu consulta..."
-                    disabled={isThinking}
+                    placeholder={degraded ? 'Continuá la conversación por WhatsApp' : 'Escribí tu consulta...'}
+                    disabled={isThinking || degraded}
                     rows={1}
+                    inputMode="text"
+                    autoCapitalize="sentences"
+                    autoCorrect="on"
+                    spellCheck={true}
+                    enterKeyHint="send"
                     style={{
                       background: 'transparent',
                       border: 'none',
@@ -654,22 +493,22 @@ export function ChatWindow({
                   whileHover={{ scale: 1.08 }}
                   whileTap={{ scale: 0.94 }}
                   transition={{ type: 'spring', stiffness: 400, damping: 15 }}
-                  disabled={isThinking || !input.trim()}
+                  disabled={isThinking || degraded || !input.trim()}
                   style={{
                     width: '40px', height: '40px',
                     borderRadius: '50%',
                     border: '1px solid rgba(6,182,212,0.2)',
-                    cursor: isThinking || !input.trim() ? 'not-allowed' : 'pointer',
-                    background: isThinking || !input.trim()
+                    cursor: isThinking || degraded || !input.trim() ? 'not-allowed' : 'pointer',
+                    background: isThinking || degraded || !input.trim()
                       ? 'rgba(255,255,255,0.05)'
                       : 'linear-gradient(135deg, rgba(6,182,212,0.85), rgba(6,182,212,0.65))',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     flexShrink: 0,
-                    boxShadow: isThinking || !input.trim() ? 'none' : '0 0 16px rgba(6,182,212,0.3), 0 2px 8px rgba(0,0,0,0.3)',
+                    boxShadow: isThinking || degraded || !input.trim() ? 'none' : '0 0 16px rgba(6,182,212,0.3), 0 2px 8px rgba(0,0,0,0.3)',
                     transition: 'all 200ms',
-                    color: isThinking || !input.trim() ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.95)',
+                    color: isThinking || degraded || !input.trim() ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.95)',
                   }}
                   aria-label="Send message"
                 >

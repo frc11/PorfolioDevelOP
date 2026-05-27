@@ -8,7 +8,7 @@ export default async function ChatbotConversationsPage() {
   const session = await getClientChatbotSession()
   if (!session) redirect('/dashboard')
 
-  const conversations = await listConversationsByOrgSlug(session.organization.slug, 100)
+  const { items, total } = await listConversationsByOrgSlug(session.organization.slug, 100)
 
   return (
     <div className="space-y-4">
@@ -17,7 +17,7 @@ export default async function ChatbotConversationsPage() {
         <h2 className="text-xl font-semibold text-zinc-100 mt-0.5">Conversaciones</h2>
         <p className="text-sm text-zinc-500 mt-1">Historial completo de chats con tu asistente</p>
       </div>
-      <ConversationsTable conversations={conversations} />
+      <ConversationsTable conversations={items} totalCount={total} />
     </div>
   )
 }

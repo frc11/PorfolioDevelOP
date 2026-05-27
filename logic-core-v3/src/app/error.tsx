@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
+import { logger } from '@/lib/logger'
 
 export default function GlobalError({
     error,
@@ -10,7 +11,20 @@ export default function GlobalError({
     reset: () => void
 }) {
     useEffect(() => {
-        console.error(error)
+        // B12.1 — Logger oficial en vez de console.error pelado. Este es el
+        // último fallback antes de que la app muera, así que conviene dejar
+        // metadata explícita.
+        logger.error(`[boundary:root] ${error.name}: ${error.message}`, {
+            section: 'root',
+            digest: error.digest,
+            stack: error.stack,
+        })
+
+        // TODO(B14): cablear Sentry acá.
+        //   Sentry.captureException(error, {
+        //     tags: { boundary: 'root' },
+        //     extra: { digest: error.digest },
+        //   })
     }, [error])
 
     return (
@@ -25,6 +39,11 @@ export default function GlobalError({
                 <p className="text-sm text-zinc-500 leading-relaxed mb-8">
                     Ocurrió un error inesperado. Podés intentar recargar la página o volver al inicio.
                 </p>
+                {error.digest && (
+                    <p className="mb-6 font-mono text-[10px] text-zinc-700">
+                        ref: {error.digest}
+                    </p>
+                )}
                 <div className="flex gap-3 justify-center">
                     <button
                         onClick={reset}

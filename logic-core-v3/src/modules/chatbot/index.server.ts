@@ -89,8 +89,8 @@ export type { KnowledgeBaseInput, BotConfigInput } from './server/admin'
 export { getClientChatbotSession } from './server/admin/getClientSession'
 export { checkClientHasChatbot } from './server/admin/clientHasChatbot'
 export { listLeadsForBot, listConversationsForBot, getMonthlyUsageForBot } from './server/admin/queries'
-export { getBotByOrgSlug, listLeadsByOrgSlug, listConversationsByOrgSlug, getUsageByOrgSlug, listRecentHandoffsByOrgSlug, getLeadByIdForOrg, getConversationMessagesForOrg, countHotNewLeadsForOrg } from './server/admin/multiTenantQueries'
-export type { HandoffEvent } from './server/admin/multiTenantQueries'
+export { getBotByOrgSlug, listLeadsByOrgSlug, listLeadsForDashboard, countDqLeadsForOrg, listConversationsByOrgSlug, getUsageByOrgSlug, listRecentHandoffsByOrgSlug, getLeadByIdForOrg, getConversationMessagesForOrg, countHotNewLeadsForOrg } from './server/admin/multiTenantQueries'
+export type { HandoffEvent, LeadDashboardFilters } from './server/admin/multiTenantQueries'
 
 // Health (Sprint S20)
 export { checkChatbotHealth, runLLMSmokeTest } from './server/health'

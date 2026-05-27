@@ -16,6 +16,7 @@ interface Step5Props {
 
 interface CreatedResult {
   tempPassword: string
+  botId: string
   orgSlug: string
   userName: string
   userEmail: string
@@ -69,6 +70,7 @@ export function Step5Review({ state, onBack, onCreated }: Step5Props) {
       onCreated()
       setCreated({
         tempPassword: result.tempPassword,
+        botId: result.botId,
         orgSlug: result.orgSlug,
         userName: result.userName,
         userEmail: result.userEmail,
@@ -146,7 +148,7 @@ export function Step5Review({ state, onBack, onCreated }: Step5Props) {
         )}
 
         <button
-          onClick={() => triggerTransition(`/admin/clients/${created.orgSlug}/chatbot/overview`)}
+          onClick={() => triggerTransition(`/admin/chatbots/${created.botId}?tab=overview`)}
           className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-cyan-400 px-6 py-3 text-sm font-medium text-zinc-950 hover:bg-cyan-300 transition-colors"
         >
           Ir al panel del cliente →

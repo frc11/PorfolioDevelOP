@@ -3,6 +3,7 @@
 import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
 import { computeDiff, logAdminAction, omitAuditNoise } from '@/lib/audit-log'
+import { AVATAR_STYLE_SCHEMA } from '@/modules/chatbot/components/avatar'
 import { chatbotLog } from '../logging'
 import { invalidateBotCache } from '../conversation'
 import { requireSuperAdmin } from './requireSuperAdmin'
@@ -26,7 +27,7 @@ const botConfigInputSchema = z.object({
   accentColor: z.string().regex(/^#[0-9a-fA-F]{6}$/),
   accentSecondary: z.string().regex(/^#[0-9a-fA-F]{6}$/).nullable(),
   chatSurfaceTint: z.string().regex(/^#[0-9a-fA-F]{6}$/).nullable(),
-  avatarStyle: z.enum(['neuro', 'legacy_neuro', 'simple', 'image', 'emoji']),
+  avatarStyle: AVATAR_STYLE_SCHEMA,
   avatarImageUrl: z.string().url().nullable(),
   avatarEmoji: z.string().max(8).nullable(),
   borderRadius: z.enum(['small', 'medium', 'large']),
@@ -34,12 +35,13 @@ const botConfigInputSchema = z.object({
   position: z.enum(['bottom_right', 'bottom_left']),
   fontStyle: z.enum(['sans', 'serif', 'mono']),
   bubbleStyle: z.enum(['sharp', 'rounded', 'pill']),
-  intensityLevel: z.enum(['low', 'medium', 'high']),
+  // B11.4 — UI envía lowercase, DB es enum UPPER. Zod transforma en el parse.
+  intensityLevel: z.enum(['low', 'medium', 'high']).transform((v) => v.toUpperCase() as 'LOW' | 'MEDIUM' | 'HIGH'),
   // Handoff
   whatsappNumber: z.string().max(30).nullable(),
   whatsappMessage: z.string().max(500).nullable(),
   // LLM
-  llmProvider: z.enum(['google', 'anthropic', 'openai']),
+  llmProvider: z.enum(['google', 'anthropic', 'openai']).transform((v) => v.toUpperCase() as 'GOOGLE' | 'ANTHROPIC' | 'OPENAI'),
   llmModel: z.string().min(1).max(80),
   temperature: z.number().min(0).max(2),
   maxOutputTokens: z.number().int().min(100).max(8192),

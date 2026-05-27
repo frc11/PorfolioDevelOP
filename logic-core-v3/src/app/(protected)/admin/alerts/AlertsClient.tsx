@@ -219,7 +219,7 @@ export function AlertsClient({ initialAlerts }: AlertsClientProps) {
 
                       <div className="flex items-center justify-between gap-2">
                         <Link
-                          href={`/admin/clients/${alert.botConfig.organization.slug}/chatbot/overview`}
+                          href={`/admin/chatbots/${alert.botConfig.id}?tab=overview`}
                           className="inline-flex items-center gap-1 text-[11px] text-cyan-400 hover:underline"
                         >
                           Ver bot

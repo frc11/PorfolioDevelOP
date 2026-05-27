@@ -1,7 +1,10 @@
 import { unstable_cache } from 'next/cache'
 import { prisma } from '@/lib/prisma'
+import { signOAuthState } from '@/lib/security/oauth-state'
 
 const API_BASE = 'https://api.tiendanube.com/v1'
+
+export const TIENDANUBE_OAUTH_SCOPE = 'tiendanube:v1'
 
 const headers = (storeId: number, accessToken: string) => ({
   'Authentication': `bearer ${accessToken}`,
@@ -12,7 +15,9 @@ const headers = (storeId: number, accessToken: string) => ({
 // ─── OAuth Flow ───
 
 export function getAuthUrl(orgId: string): string {
-  const params = new URLSearchParams({ state: orgId })
+  // SEC-AUTH-02 / B11 C1: state firmado con HMAC. El callback DEBE validar la
+  // firma antes de confiar en el orgId — usar verifyOAuthState(TIENDANUBE_OAUTH_SCOPE, state).
+  const params = new URLSearchParams({ state: signOAuthState(TIENDANUBE_OAUTH_SCOPE, orgId) })
   return `https://www.tiendanube.com/apps/${process.env.TIENDANUBE_CLIENT_ID}/authorize?${params}`
 }
 

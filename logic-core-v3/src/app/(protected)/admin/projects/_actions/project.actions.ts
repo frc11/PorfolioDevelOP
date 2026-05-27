@@ -224,10 +224,10 @@ function mapLegacyServiceTypeToPortal(type: OsServiceType | null | undefined): S
 
 async function resolveProjectOrganization(
   tx: Prisma.TransactionClient,
-  organizationId?: string | null
-): Promise<ProjectOrganization | null> {
+  organizationId: string | null | undefined
+): Promise<ProjectOrganization> {
   if (!organizationId) {
-    return null
+    throw new Error('organizationId is required — Project must belong to an organization (B11.1)')
   }
 
   const organization = await tx.organization.findUnique({
@@ -250,10 +250,10 @@ async function resolveProjectOrganization(
 
 async function syncOrganizationService(
   tx: Prisma.TransactionClient,
-  organization: ProjectOrganization | null,
+  organization: ProjectOrganization,
   serviceType: ServiceType | null
 ) {
-  if (!serviceType || !organization) {
+  if (!serviceType) {
     return
   }
 
@@ -432,7 +432,7 @@ function serializeProjectListItem(project: ProjectListRecord) {
     contactName,
     contactPhone: project.osLead?.phone ?? null,
     contactEmail: project.osLead?.email ?? null,
-    organizationId: project.organizationId ?? null,
+    organizationId: project.organizationId,
     name: project.name,
     description: project.description,
     serviceType: normalizedServiceType,
@@ -462,7 +462,7 @@ function serializeProjectListItem(project: ProjectListRecord) {
           serviceType: mapLegacyServiceTypeToPortal(project.osLead.serviceType),
         }
       : null,
-    isInternal: project.organizationId === null,
+    isInternal: false,
     sortTimestamp: deriveProjectActivityAt(project),
   }
 }
@@ -570,7 +570,7 @@ export async function createProject(input: unknown): Promise<ActionResult<{ id: 
         data: {
           name: parsed.name,
           description: parsed.description,
-          organizationId: organization?.id ?? null,
+          organizationId: organization.id,
           agreedAmount: parsed.agreedAmount,
           monthlyRate: parsed.monthlyRate,
           estimatedEndDate: parsed.estimatedEndDate,
@@ -645,7 +645,7 @@ export async function updateProject(input: unknown): Promise<ActionResult<{ id: 
           ...(data.name !== undefined ? { name: data.name } : {}),
           ...(data.description !== undefined ? { description: data.description } : {}),
           ...(data.organizationId !== undefined
-            ? { organizationId: organization?.id ?? null }
+            ? { organizationId: organization.id }
             : {}),
           ...(data.agreedAmount !== undefined ? { agreedAmount: data.agreedAmount } : {}),
           ...(data.monthlyRate !== undefined ? { monthlyRate: data.monthlyRate } : {}),
@@ -665,7 +665,7 @@ export async function updateProject(input: unknown): Promise<ActionResult<{ id: 
         leadId: updatedProject.osLeadId,
         organizationId:
           data.organizationId !== undefined
-            ? organization?.id ?? null
+            ? organization.id
             : currentProject.organizationId,
       }
     })
@@ -782,7 +782,7 @@ export async function convertLeadToProject(
         data: {
           name: parsed.name,
           description: parsed.description,
-          organizationId: organization?.id ?? null,
+          organizationId: organization.id,
           agreedAmount: parsed.agreedAmount,
           monthlyRate: parsed.monthlyRate,
           estimatedEndDate: parsed.estimatedEndDate,
@@ -819,7 +819,7 @@ export async function convertLeadToProject(
       return {
         id: linkedProject.id,
         leadId: linkedProject.osLeadId,
-        organizationId: organization?.id ?? null,
+        organizationId: organization.id,
       }
     })
 

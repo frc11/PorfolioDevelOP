@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { ProjectStatus, TaskStatus } from '@prisma/client'
+import { requireSuperAdmin } from '@/lib/auth-guards'
 
 // ─── Guards ───────────────────────────────────────────────────────────────────
 
@@ -15,12 +16,29 @@ function isTaskStatus(value: unknown): value is TaskStatus {
   return Object.values(TaskStatus).includes(value as TaskStatus)
 }
 
+// B11.2 fix F2: defense-in-depth. Las actions de este archivo eran
+// trust-the-layout (`/admin/**` exige SUPER_ADMIN). Si el layout-guard se
+// rompía en un refactor, IDOR inmediato. Agregamos guard local en cada action.
+// Wrapper que devuelve string error para `useFormState`-style actions, o
+// throw para las `Promise<void>` que disparan redirect/error boundary.
+async function ensureSuperAdminOrErrorString(): Promise<string | null> {
+  try {
+    await requireSuperAdmin()
+    return null
+  } catch {
+    return 'No autorizado.'
+  }
+}
+
 // ─── Project: Create ──────────────────────────────────────────────────────────
 
 export async function createProjectAction(
   _prevState: string | null,
   formData: FormData
 ): Promise<string | null> {
+  const authErr = await ensureSuperAdminOrErrorString()
+  if (authErr) return authErr
+
   const name = (formData.get('name') as string | null)?.trim() ?? ''
   const description = (formData.get('description') as string | null)?.trim() || null
   const organizationId = (formData.get('organizationId') as string | null) ?? ''
@@ -53,6 +71,9 @@ export async function updateProjectAction(
   _prevState: string | null,
   formData: FormData
 ): Promise<string | null> {
+  const authErr = await ensureSuperAdminOrErrorString()
+  if (authErr) return authErr
+
   const projectId = (formData.get('projectId') as string | null) ?? ''
   const name = (formData.get('name') as string | null)?.trim() ?? ''
   const description = (formData.get('description') as string | null)?.trim() || null
@@ -85,6 +106,8 @@ export async function updateProjectAction(
 // ─── Project: Delete ──────────────────────────────────────────────────────────
 
 export async function deleteProjectAction(formData: FormData): Promise<void> {
+  await requireSuperAdmin()
+
   const projectId = (formData.get('projectId') as string | null) ?? ''
   if (!projectId) return
 
@@ -100,6 +123,9 @@ export async function createTaskAction(
   _prevState: string | null,
   formData: FormData
 ): Promise<string | null> {
+  const authErr = await ensureSuperAdminOrErrorString()
+  if (authErr) return authErr
+
   const projectId = (formData.get('projectId') as string | null) ?? ''
   const title = (formData.get('title') as string | null)?.trim() ?? ''
   const description = (formData.get('description') as string | null)?.trim() || null
@@ -130,6 +156,8 @@ export async function createTaskAction(
 // ─── Task: Update status (inline) ─────────────────────────────────────────────
 
 export async function updateTaskStatusAction(formData: FormData): Promise<void> {
+  await requireSuperAdmin()
+
   const taskId = (formData.get('taskId') as string | null) ?? ''
   const projectId = (formData.get('projectId') as string | null) ?? ''
   const statusRaw = formData.get('status') as string | null
@@ -147,6 +175,8 @@ export async function updateTaskStatusAction(formData: FormData): Promise<void> 
 // ─── Task: Send for client approval ───────────────────────────────────────────
 
 export async function sendTaskForApprovalAction(formData: FormData): Promise<void> {
+  await requireSuperAdmin()
+
   const taskId = (formData.get('taskId') as string | null) ?? ''
   const projectId = (formData.get('projectId') as string | null) ?? ''
   if (!taskId) return
@@ -181,6 +211,8 @@ export async function sendTaskForApprovalAction(formData: FormData): Promise<voi
 // ─── Task: Delete ─────────────────────────────────────────────────────────────
 
 export async function deleteTaskAction(formData: FormData): Promise<void> {
+  await requireSuperAdmin()
+
   const taskId = (formData.get('taskId') as string | null) ?? ''
   const projectId = (formData.get('projectId') as string | null) ?? ''
   if (!taskId) return

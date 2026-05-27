@@ -3,6 +3,13 @@
 
   var WIDGET_VERSION = '1.0.0'
 
+  // z-index tokens — mirror CHATBOT_Z_INDEX in src/modules/chatbot/shared/zIndex.ts.
+  // High enough to layer above typical host UI (nav, sticky headers, common
+  // overlays in 100-9999 range) but NOT int32 max — we leave headroom so the
+  // host can still render legitimate full-screen overlays above us.
+  var Z_BUBBLE = 2147000100
+  var Z_PANEL = 2147000200
+
   // Detect origin from the script tag's src so it works in dev and prod
   var scripts = document.querySelectorAll('script[data-bot]')
   var scriptTag = scripts[scripts.length - 1]
@@ -29,33 +36,61 @@
   var iframe = null
   var bubble = null
   var side = position === 'bottom-left' ? 'left:20px;' : 'right:20px;'
-  var sideM = position === 'bottom-left' ? 'left:16px;' : 'right:16px;'
+  // Mobile: respect safe-area-inset on iPhone notch / Android gesture nav.
+  // max() makes sure we stay at least 16px in from the edge.
+  var sideM =
+    position === 'bottom-left'
+      ? 'left:max(16px,env(safe-area-inset-left));'
+      : 'right:max(16px,env(safe-area-inset-right));'
 
   // Styles
+  //
+  // CSS isolation strategy: the iframe content is fully isolated (browser
+  // sandboxing). What lives in the host DOM is the bubble (and the iframe
+  // element itself). Both start with `all: initial` to neutralise host CSS
+  // resets (e.g. `* { box-sizing }`, `button { all: revert }`), then declare
+  // every property explicitly. This makes the widget hermetic against the
+  // host's stylesheet without a Shadow DOM refactor for a single button.
+  //
+  // 🔴 Pending: this hardening is verified only against build prod in
+  // isolation. Real-world embedded verification (third-party hostile CSS)
+  // is deferred — see B8.1 bitácora entry.
   var style = document.createElement('style')
   style.textContent =
     '.dvlp-bubble{' +
+    'all:initial;' +
     'position:fixed;' + side +
     'bottom:20px;width:56px;height:56px;border-radius:28px;' +
-    'background:#06b6d4;cursor:pointer;z-index:999999;' +
+    'background:#06b6d4;cursor:pointer;z-index:' + Z_BUBBLE + ';' +
     'box-shadow:0 4px 24px rgba(0,0,0,0.25);' +
     'display:flex;align-items:center;justify-content:center;' +
     'transition:transform 0.2s,opacity 0.2s;border:none;padding:0;' +
+    'box-sizing:border-box;line-height:1;' +
+    'font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;' +
     '}' +
     '.dvlp-bubble:hover{transform:scale(1.06);}' +
-    '.dvlp-bubble svg{width:26px;height:26px;fill:white;pointer-events:none;}' +
+    '.dvlp-bubble svg{' +
+    'all:initial;display:block;width:26px;height:26px;fill:white;pointer-events:none;' +
+    '}' +
     '.dvlp-iframe{' +
+    'all:initial;' +
     'position:fixed;' + side +
     'bottom:20px;width:380px;height:600px;max-height:90vh;' +
-    'border:none;border-radius:16px;z-index:999998;' +
+    'border:none;border-radius:16px;z-index:' + Z_PANEL + ';' +
     'box-shadow:0 12px 40px rgba(0,0,0,0.35);' +
     'opacity:0;pointer-events:none;transition:opacity 0.25s,transform 0.25s;' +
     'transform:translateY(12px) scale(0.97);' +
+    'box-sizing:border-box;display:block;background:transparent;' +
     '}' +
     '.dvlp-iframe.dvlp-open{opacity:1;pointer-events:auto;transform:translateY(0) scale(1);}' +
     '@media(max-width:480px){' +
-    '.dvlp-iframe{width:100vw;height:100vh;max-height:100vh;bottom:0;left:0!important;right:0!important;border-radius:0;}' +
-    '.dvlp-bubble{' + sideM + 'bottom:16px;}' +
+    // height: 100vh fallback for browsers that pre-date dvh (Safari < 15.4,
+    // Chrome < 108). 100dvh below shrinks when the virtual keyboard opens so
+    // the iframe footer stays visible. The two declarations are intentional —
+    // CSS picks the last supported one.
+    '.dvlp-iframe{width:100vw;height:100vh;height:100dvh;max-height:100dvh;bottom:0;left:0!important;right:0!important;border-radius:0;}' +
+    // Bubble mobile: respect safe-area-inset-bottom (home indicator on iPhone).
+    '.dvlp-bubble{' + sideM + 'bottom:max(16px,env(safe-area-inset-bottom));}' +
     '}'
 
   document.head.appendChild(style)

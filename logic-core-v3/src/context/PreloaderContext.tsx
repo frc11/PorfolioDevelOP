@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useCallback, useContext, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useState } from "react";
 
 export type PreloaderPhase =
     | "drawing"
@@ -23,6 +23,28 @@ export const PreloaderContext = createContext<PreloaderContextType | undefined>(
     undefined,
 );
 
+// Headless automation (Playwright/Puppeteer/headless Chrome) reliably stalls
+// the preloader because runSequence depends on RAF + canvas paint + getBoundingClientRect.
+// Visual-qa screenshots were getting stuck on the full-screen black overlay.
+// This jumps phase straight to "done" only when running under automation,
+// leaving the real-user preloader experience untouched.
+function isAutomationEnvironment(): boolean {
+    if (typeof window === "undefined" || typeof navigator === "undefined") {
+        return false;
+    }
+
+    if (navigator.webdriver === true) {
+        return true;
+    }
+
+    try {
+        const params = new URLSearchParams(window.location.search);
+        return params.get("e2e") === "1";
+    } catch {
+        return false;
+    }
+}
+
 export function PreloaderProvider({
     children,
 }: Readonly<{
@@ -32,6 +54,12 @@ export function PreloaderProvider({
     const [heroCanvasRect, setHeroCanvasRectState] = useState<DOMRect | null>(
         null,
     );
+
+    useEffect(() => {
+        if (isAutomationEnvironment()) {
+            setPhaseState("done");
+        }
+    }, []);
 
     const setPhase = useCallback((nextPhase: PreloaderPhase) => {
         setPhaseState(nextPhase);

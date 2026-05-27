@@ -1,15 +1,17 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useCallback, useRef, useTransition } from 'react'
+import { useRouter, usePathname } from 'next/navigation'
 import { motion } from 'motion/react'
-import { Users, Flame, TrendingUp, Minus, Filter } from 'lucide-react'
+import { Users, Flame, TrendingUp, Minus, Filter, Ban } from 'lucide-react'
 import { PageHeader, EmptyState } from '@/components/ui'
 import { staggerContainer, staggerItem } from '@/lib/motion-variants'
 import { useReducedMotion } from '@/lib/use-reduced-motion'
 import { BusinessLeadCard } from './BusinessLeadCard'
+import { ExportLeadsButton } from './ExportLeadsButton'
+import { withinDateRange, type DateRange } from '@/lib/tz-ar'
 import type { ChatbotLead, ChatbotLeadStatus } from '@prisma/client'
 
-// B5.5 — Tipo enriquecido con scoring efectivo (decay + explicabilidad)
 type LeadClassification = 'hot' | 'warm' | 'cold' | 'dq'
 type ScoreKind = 'positive' | 'combo' | 'penalty' | 'dq'
 type ExplanationLine = { key: string; label: string; points: number; kind: ScoreKind }
@@ -48,7 +50,6 @@ const FILTER_ACCENT: Record<ChatbotLeadStatus | 'all', string> = {
 
 const FILTER_INACTIVE = 'border-white/[0.06] bg-transparent text-zinc-500 hover:text-zinc-300'
 
-type DateRange = 'all' | 'today' | '7d' | '30d'
 const DATE_LABELS: Record<DateRange, string> = {
   all: 'Cualquier fecha',
   today: 'Hoy',
@@ -56,64 +57,76 @@ const DATE_LABELS: Record<DateRange, string> = {
   '30d': 'Últimos 30 días',
 }
 
-// Inicio del día actual en TZ Argentina (UTC-3, sin DST). Devuelve un Date apuntando al
-// instante UTC equivalente. Se usa para filtros relativos de fecha.
-function startOfTodayInAR(): Date {
-  const fmt = new Intl.DateTimeFormat('en-CA', {
-    timeZone: 'America/Argentina/Buenos_Aires',
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  })
-  const parts = fmt.formatToParts(new Date())
-  const y = parts.find((p) => p.type === 'year')!.value
-  const m = parts.find((p) => p.type === 'month')!.value
-  const d = parts.find((p) => p.type === 'day')!.value
-  // 00:00 AR == 03:00 UTC mismo día calendario AR
-  return new Date(`${y}-${m}-${d}T03:00:00.000Z`)
-}
-
-function withinDateRange(capturedAt: Date | string, range: DateRange, todayAR: Date): boolean {
-  if (range === 'all') return true
-  const ts = new Date(capturedAt).getTime()
-  const today = todayAR.getTime()
-  if (range === 'today') return ts >= today
-  if (range === '7d')  return ts >= today - 6  * 86_400_000
-  if (range === '30d') return ts >= today - 29 * 86_400_000
-  return true
-}
-
 interface ClientLeadsTableProps {
   leads: LeadWithScore[]
+  /** El tenant capturó leads pero TODOS eran DQ — empty state distinto. */
   hadOnlyDq?: boolean
+  /** Total de DQ en la org (independiente del filtro actual). */
+  dqCount: number
+  /** True si la vista activa muestra SOLO descartados. */
+  showingDq: boolean
+  /** Filtros server-side ya aplicados, para sincronizar la UI. */
+  initialStatus: ChatbotLeadStatus | 'all'
+  initialRange: DateRange
 }
 
-export function ClientLeadsTable({ leads: initialLeads, hadOnlyDq = false }: ClientLeadsTableProps) {
+export function ClientLeadsTable({
+  leads,
+  hadOnlyDq = false,
+  dqCount,
+  showingDq,
+  initialStatus,
+  initialRange,
+}: ClientLeadsTableProps) {
   const reduced = useReducedMotion()
-  const [leads, setLeads] = useState<LeadWithScore[]>(initialLeads)
-  const [classFilter, setClassFilter] = useState<'all' | 'hot' | 'warm' | 'cold'>('all')
-  const [filter, setFilter] = useState<ChatbotLeadStatus | 'all'>('all')
-  const [dateFilter, setDateFilter] = useState<DateRange>('all')
-  const todayAR = useMemo(() => startOfTodayInAR(), [])
+  const router = useRouter()
+  const pathname = usePathname()
+  const [, startTransition] = useTransition()
 
-  // B5.7 — polling cada 30s, PAUSADO cuando la pestaña está oculta para no
-  // gastar requests en tabs en background. Al volver a focus, fetch inmediato
-  // para que el dueño vea fresco lo que pasó mientras tanto.
+  // Filtro por clase es CLIENTE: depende del score efectivo (post-decay), que
+  // no está en DB. status/range/view sí van por URL (server filters).
+  const [classFilter, setClassFilter] = useState<'all' | 'hot' | 'warm' | 'cold'>('all')
+
+  // B5.7 v2 — Detección de leads nuevos llegados durante el polling. El primer
+  // render establece baseline (no marca nada como nuevo). En refresh siguientes,
+  // los IDs que NO estaban antes se marcan como "freshIds" durante 6s para que
+  // el dueño los note sin tener que comparar a mano. La fuente es la lista
+  // server-rendered: `router.refresh()` muta `leads` y este effect detecta el delta.
+  const seenIdsRef = useRef<Set<string> | null>(null)
+  const [freshIds, setFreshIds] = useState<Set<string>>(new Set())
+  useEffect(() => {
+    if (seenIdsRef.current === null) {
+      seenIdsRef.current = new Set(leads.map((l) => l.id))
+      return
+    }
+    const seen = seenIdsRef.current
+    const justAdded = leads.map((l) => l.id).filter((id) => !seen.has(id))
+    if (justAdded.length === 0) return
+    justAdded.forEach((id) => seen.add(id))
+    setFreshIds((prev) => {
+      const next = new Set(prev)
+      justAdded.forEach((id) => next.add(id))
+      return next
+    })
+    const timer = setTimeout(() => {
+      setFreshIds((prev) => {
+        const next = new Set(prev)
+        justAdded.forEach((id) => next.delete(id))
+        return next
+      })
+    }, 6000)
+    return () => clearTimeout(timer)
+  }, [leads])
+
+  // B5.5 — refresh cada 30s del Server Component (re-corre query con filtros
+  // activos). Pausado en tab oculta. Más limpio que un endpoint paralelo:
+  // una sola query es la verdad y respeta filtros sin duplicar lógica.
   useEffect(() => {
     let intervalId: ReturnType<typeof setInterval> | null = null
 
-    async function refresh() {
-      try {
-        const res = await fetch('/api/dashboard/leads/recent')
-        if (res.ok) {
-          const { leads: fresh } = (await res.json()) as { leads: LeadWithScore[] }
-          setLeads(fresh)
-        }
-      } catch {
-        // polling failure is silent — stale data is acceptable
-      }
+    function refresh() {
+      startTransition(() => router.refresh())
     }
-
     function start() {
       if (intervalId != null) return
       intervalId = setInterval(refresh, 30_000)
@@ -124,12 +137,8 @@ export function ClientLeadsTable({ leads: initialLeads, hadOnlyDq = false }: Cli
       intervalId = null
     }
     function handleVisibility() {
-      if (document.hidden) {
-        stop()
-      } else {
-        refresh()
-        start()
-      }
+      if (document.hidden) stop()
+      else { refresh(); start() }
     }
 
     if (!document.hidden) start()
@@ -138,34 +147,95 @@ export function ClientLeadsTable({ leads: initialLeads, hadOnlyDq = false }: Cli
       stop()
       document.removeEventListener('visibilitychange', handleVisibility)
     }
-  }, [])
+  }, [router])
 
-  // Cadena de filtros: fecha → clase → estado. Cada uno reduce el set siguiente
-  // para que los conteos en los chips reflejen lo que el usuario ya filtró.
-  const byDate = leads.filter((l) => withinDateRange(l.capturedAt, dateFilter, todayAR))
+  // Cuando el server cambia el set (filtros), el filtro de clase puede quedar
+  // sobre una clase sin matches. Reseteo a 'all' al cambiar la fuente.
+  useEffect(() => {
+    setClassFilter('all')
+  }, [showingDq, initialStatus, initialRange])
 
-  const hotCount  = byDate.filter(l => l.effectiveClassification === 'hot').length
-  const warmCount = byDate.filter(l => l.effectiveClassification === 'warm').length
-  const coldCount = byDate.filter(l => l.effectiveClassification === 'cold').length
+  const updateParams = useCallback(
+    (patch: Record<string, string | undefined>) => {
+      const params = new URLSearchParams()
+      const merged: Record<string, string | undefined> = {
+        status: initialStatus === 'all' ? undefined : initialStatus,
+        range: initialRange === 'all' ? undefined : initialRange,
+        view: showingDq ? 'dq' : undefined,
+        ...patch,
+      }
+      for (const [k, v] of Object.entries(merged)) {
+        if (v) params.set(k, v)
+      }
+      const qs = params.toString()
+      startTransition(() => router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false }))
+    },
+    [pathname, router, initialStatus, initialRange, showingDq],
+  )
 
-  const byClass  = classFilter === 'all' ? byDate : byDate.filter(l => l.effectiveClassification === classFilter)
-  const filtered = filter === 'all' ? byClass : byClass.filter((l) => l.status === filter)
+  // Conteos del set actual para chips. En modo DQ el set ya es solo DQ → los
+  // chips de clase no se muestran.
+  const now = useMemo(() => new Date(), [leads])
+  const byDate = useMemo(
+    () => leads.filter((l) => withinDateRange(l.capturedAt, initialRange, now)),
+    [leads, initialRange, now],
+  )
+  const hotCount  = byDate.filter((l) => l.effectiveClassification === 'hot').length
+  const warmCount = byDate.filter((l) => l.effectiveClassification === 'warm').length
+  const coldCount = byDate.filter((l) => l.effectiveClassification === 'cold').length
+
+  const byClass = showingDq || classFilter === 'all'
+    ? byDate
+    : byDate.filter((l) => l.effectiveClassification === classFilter)
+  const filtered = byClass
+
+  const hasNoLeads = leads.length === 0
+  const headerTitle = showingDq ? 'Contactos descartados' : 'Mis contactos'
+  const headerDescription = showingDq
+    ? 'Consultas que el bot identificó como no comerciales (postventa, empleo, spam o proveedores).'
+    : 'Personas que charlaron con tu bot y dejaron sus datos'
 
   return (
     <div className="mx-auto max-w-5xl space-y-6">
       <PageHeader
         eyebrow="Mi Chatbot"
-        title="Mis contactos"
-        description="Personas que charlaron con tu bot y dejaron sus datos"
-        icon={Users}
+        title={headerTitle}
+        description={headerDescription}
+        icon={showingDq ? Ban : Users}
       />
 
-      {leads.length === 0 ? (
-        hadOnlyDq ? (
+      {/* Toggle entre vista comercial y descartados. Siempre visible si hay DQ
+          en la org, para que el dueño sepa que existen y pueda revisarlos. */}
+      {(dqCount > 0 || showingDq) && (
+        <div className="flex flex-wrap gap-2">
+          <button
+            onClick={() => updateParams({ view: undefined })}
+            className={`min-h-[44px] rounded-xl border px-3 py-1 text-xs font-medium transition-colors ${!showingDq ? FILTER_ACCENT.all : FILTER_INACTIVE}`}
+          >
+            Contactos a seguir
+          </button>
+          <button
+            onClick={() => updateParams({ view: 'dq', status: undefined })}
+            className={`inline-flex min-h-[44px] items-center gap-1.5 rounded-xl border px-3 py-1 text-xs font-medium transition-colors ${showingDq ? 'border-zinc-500/40 bg-zinc-600/15 text-zinc-300' : FILTER_INACTIVE}`}
+          >
+            <Ban className="h-3.5 w-3.5" strokeWidth={1.5} />
+            Descartados ({dqCount})
+          </button>
+        </div>
+      )}
+
+      {hasNoLeads ? (
+        showingDq ? (
+          <EmptyState
+            icon={Filter}
+            title="No hay contactos descartados con estos filtros"
+            description="Probá cambiar la fecha o volver a 'Contactos a seguir' para ver los activos."
+          />
+        ) : hadOnlyDq ? (
           <EmptyState
             icon={Filter}
             title="Tu bot capturó contactos, pero ninguno requiere seguimiento"
-            description="Las consultas recibidas fueron de postventa, propuestas de empleo o spam, así que no aparecen acá. Si pensás que esto es un error, contactá a soporte."
+            description="Las consultas recibidas fueron de postventa, propuestas de empleo o spam. Tocá 'Descartados' arriba si querés verlas."
           />
         ) : (
           <EmptyState
@@ -177,72 +247,79 @@ export function ClientLeadsTable({ leads: initialLeads, hadOnlyDq = false }: Cli
         )
       ) : (
         <>
-          {/* Filtro por fecha (B5.5) — TZ Argentina */}
+          {/* Filtro por fecha — TZ AR. Va a URL. */}
           <div className="flex flex-wrap gap-2">
-            {(Object.keys(DATE_LABELS) as DateRange[]).map((key) => {
-              const count = key === 'all'
-                ? leads.length
-                : leads.filter((l) => withinDateRange(l.capturedAt, key, todayAR)).length
-              if (key !== 'all' && count === 0) return null
-              return (
-                <button
-                  key={key}
-                  onClick={() => setDateFilter(key)}
-                  className={`min-h-[44px] rounded-xl border px-3 py-1 text-xs font-medium transition-colors ${dateFilter === key ? FILTER_ACCENT.all : FILTER_INACTIVE}`}
-                >
-                  {DATE_LABELS[key]} ({count})
-                </button>
-              )
-            })}
+            {(Object.keys(DATE_LABELS) as DateRange[]).map((key) => (
+              <button
+                key={key}
+                onClick={() => updateParams({ range: key === 'all' ? undefined : key })}
+                className={`min-h-[44px] rounded-xl border px-3 py-1 text-xs font-medium transition-colors ${initialRange === key ? FILTER_ACCENT.all : FILTER_INACTIVE}`}
+              >
+                {DATE_LABELS[key]}
+              </button>
+            ))}
           </div>
 
-          {/* Filtro por calidad (B5.5) */}
-          <div className="flex flex-wrap gap-2">
-            <button
-              onClick={() => setClassFilter('all')}
-              className={`min-h-[44px] rounded-xl border px-3 py-1 text-xs font-medium transition-colors ${classFilter === 'all' ? FILTER_ACCENT.all : FILTER_INACTIVE}`}
-            >
-              Todos ({byDate.length})
-            </button>
-            {(['hot', 'warm', 'cold'] as const).map((cls) => {
-              const count = cls === 'hot' ? hotCount : cls === 'warm' ? warmCount : coldCount
-              if (count === 0) return null
-              const cfg = CLASS_CONFIG[cls]
-              const Icon = CLASS_ICONS[cls]
-              return (
-                <button
-                  key={cls}
-                  onClick={() => setClassFilter(cls)}
-                  className={`inline-flex min-h-[44px] items-center gap-1.5 rounded-xl border px-3 py-1 text-xs font-medium transition-colors ${classFilter === cls ? cfg.activeClass : FILTER_INACTIVE}`}
-                >
-                  <Icon className="h-3.5 w-3.5" strokeWidth={1.5} />
-                  {cfg.label} ({count})
-                </button>
-              )
-            })}
-          </div>
+          {/* Filtro por calidad — CLIENTE (efectivo post-decay). Solo en modo
+              comercial: descartados no tienen clase. */}
+          {!showingDq && (
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={() => setClassFilter('all')}
+                className={`min-h-[44px] rounded-xl border px-3 py-1 text-xs font-medium transition-colors ${classFilter === 'all' ? FILTER_ACCENT.all : FILTER_INACTIVE}`}
+              >
+                Todos ({byDate.length})
+              </button>
+              {(['hot', 'warm', 'cold'] as const).map((cls) => {
+                const count = cls === 'hot' ? hotCount : cls === 'warm' ? warmCount : coldCount
+                if (count === 0) return null
+                const cfg = CLASS_CONFIG[cls]
+                const Icon = CLASS_ICONS[cls]
+                return (
+                  <button
+                    key={cls}
+                    onClick={() => setClassFilter(cls)}
+                    className={`inline-flex min-h-[44px] items-center gap-1.5 rounded-xl border px-3 py-1 text-xs font-medium transition-colors ${classFilter === cls ? cfg.activeClass : FILTER_INACTIVE}`}
+                  >
+                    <Icon className="h-3.5 w-3.5" strokeWidth={1.5} />
+                    {cfg.label} ({count})
+                  </button>
+                )
+              })}
+            </div>
+          )}
 
-          {/* Filtro por estado CRM */}
-          <div className="flex flex-wrap gap-2">
-            <button
-              onClick={() => setFilter('all')}
-              className={`min-h-[44px] rounded-xl border px-3 py-1 text-xs font-medium transition-colors ${filter === 'all' ? FILTER_ACCENT.all : FILTER_INACTIVE}`}
-            >
-              Todos los estados ({byClass.length})
-            </button>
-            {(Object.keys(STATUS_LABELS) as ChatbotLeadStatus[]).map((key) => {
-              const count = byClass.filter((l) => l.status === key).length
-              if (count === 0) return null
-              return (
+          {/* Filtro por estado CRM — va a URL. Solo en modo comercial. */}
+          {!showingDq && (
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={() => updateParams({ status: undefined })}
+                className={`min-h-[44px] rounded-xl border px-3 py-1 text-xs font-medium transition-colors ${initialStatus === 'all' ? FILTER_ACCENT.all : FILTER_INACTIVE}`}
+              >
+                Todos los estados
+              </button>
+              {(Object.keys(STATUS_LABELS) as ChatbotLeadStatus[]).map((key) => (
                 <button
                   key={key}
-                  onClick={() => setFilter(key)}
-                  className={`min-h-[44px] rounded-xl border px-3 py-1 text-xs font-medium transition-colors ${filter === key ? FILTER_ACCENT[key] : FILTER_INACTIVE}`}
+                  onClick={() => updateParams({ status: key })}
+                  className={`min-h-[44px] rounded-xl border px-3 py-1 text-xs font-medium transition-colors ${initialStatus === key ? FILTER_ACCENT[key] : FILTER_INACTIVE}`}
                 >
-                  {STATUS_LABELS[key]} ({count})
+                  {STATUS_LABELS[key]}
                 </button>
-              )
-            })}
+              ))}
+            </div>
+          )}
+
+          {/* B5.9 — Exportar lo que está filtrado en pantalla. Respeta status,
+              range, view=dq y classFilter (cliente, post-decay). */}
+          <div className="flex justify-end">
+            <ExportLeadsButton
+              status={initialStatus}
+              range={initialRange}
+              showingDq={showingDq}
+              classFilter={classFilter}
+              hasLeads={filtered.length > 0}
+            />
           </div>
 
           {/* Lista */}
@@ -263,18 +340,20 @@ export function ClientLeadsTable({ leads: initialLeads, hadOnlyDq = false }: Cli
             >
               {filtered.map((lead) => {
                 const isHotNew = lead.effectiveClassification === 'hot' && lead.status === 'NEW'
+                const classForCard =
+                  lead.effectiveClassification === 'dq' || lead.effectiveClassification === null
+                    ? null
+                    : lead.effectiveClassification
                 return (
                   <motion.div key={lead.id} variants={reduced ? undefined : staggerItem}>
                     <BusinessLeadCard
                       lead={lead}
                       effectiveScore={lead.effectiveScore}
-                      effectiveClassification={
-                        lead.effectiveClassification === 'dq' || lead.effectiveClassification === null
-                          ? null
-                          : lead.effectiveClassification
-                      }
+                      effectiveClassification={classForCard}
                       decayTierLabel={lead.decayTierLabel}
-                      highlight={isHotNew}
+                      highlight={isHotNew && !showingDq}
+                      isFresh={freshIds.has(lead.id)}
+                      isDq={showingDq}
                       href={`/dashboard/chatbot/leads/${lead.id}`}
                     />
                   </motion.div>

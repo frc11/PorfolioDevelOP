@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'motion/react'
 import { X } from 'lucide-react'
 import type { ProactiveTooltipProps } from './types'
 import { useTooltipTriggers } from './useTooltipTriggers'
+import { CHATBOT_Z_INDEX } from '../../shared/zIndex'
 
 const AUTO_DISMISS_MS = 8000
 
@@ -41,9 +42,13 @@ export function ProactiveTooltip({
     onDismiss()
   }, [reset, onDismiss])
 
-  // When a trigger fires, pick a prompt and show
+  // When a trigger fires, pick a prompt and show.
+  // Queue policy: max 1 visible at a time. If one is already showing, a new
+  // trigger is ignored (its `firedRef` flag in useTooltipTriggers stays set,
+  // so it won't refire — the user simply doesn't see overlapping prompts).
   useEffect(() => {
     if (!trigger) return
+    if (visible) return
     const prompt = pickPromptForPath(
       config.proactivePrompts as Record<string, string[]>,
       currentPath
@@ -60,7 +65,9 @@ export function ProactiveTooltip({
     }, AUTO_DISMISS_MS)
 
     return () => clearTimeout(dismissTimer)
-  }, [trigger, config.proactivePrompts, currentPath, handleDismiss, reset])
+  }, [trigger, visible, config.proactivePrompts, currentPath, handleDismiss, reset])
+
+  const isLeftAligned = config.position === 'bottom_left'
 
   return (
     <AnimatePresence>
@@ -74,7 +81,11 @@ export function ProactiveTooltip({
             transition: { type: 'spring', stiffness: 300, damping: 20 },
           }}
           exit={{ opacity: 0, y: 8, scale: 0.95, transition: { duration: 0.2 } }}
-          className="absolute bottom-full right-0 mb-3 max-w-[280px]"
+          className={`absolute bottom-full mb-3 ${isLeftAligned ? 'left-0' : 'right-0'}`}
+          style={{
+            zIndex: CHATBOT_Z_INDEX.tooltip,
+            maxWidth: 'min(280px, calc(100vw - 32px))',
+          }}
         >
           <div
             className="rounded-2xl border px-4 py-3 shadow-lg flex flex-col gap-2 cursor-pointer relative"
@@ -103,9 +114,9 @@ export function ProactiveTooltip({
               <X size={12} strokeWidth={1.5} />
             </button>
           </div>
-          {/* Caret pointing down */}
+          {/* Caret pointing down towards the bubble */}
           <div
-            className="w-3 h-3 rotate-45 absolute -bottom-1.5 right-6"
+            className={`w-3 h-3 rotate-45 absolute -bottom-1.5 ${isLeftAligned ? 'left-6' : 'right-6'}`}
             style={{
               background: 'rgba(15,15,18,0.96)',
               borderRight: `1px solid ${config.accentColor}40`,

@@ -202,7 +202,7 @@ const DEVELOP_BOT_CONFIG = {
   position: 'bottom_right',
   fontStyle: 'sans',
   bubbleStyle: 'rounded',
-  intensityLevel: 'medium',
+  intensityLevel: 'MEDIUM' as const,
 
   // Comportamiento conversacional
   tone: 'informal_rioplatense',
@@ -261,7 +261,7 @@ const DEVELOP_BOT_CONFIG = {
   whatsappMessage: 'Hola, vi su web y me gustaría conocer más sobre sus servicios.',
 
   // LLM
-  llmProvider: 'google',
+  llmProvider: 'GOOGLE' as const,
   llmModel: 'gemini-2.5-flash',
   temperature: 0.7,
   maxOutputTokens: 800,

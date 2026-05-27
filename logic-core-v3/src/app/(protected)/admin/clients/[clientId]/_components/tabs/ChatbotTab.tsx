@@ -66,12 +66,12 @@ export async function ChatbotTab({ clientId }: ChatbotTabProps) {
           color={org.botConfig.isActive ? 'emerald' : 'zinc'}
         />
         <StatCard
-          label="Conversaciones"
+          label="Conversaciones (total)"
           value={org.botConfig._count.conversations}
           color="cyan"
         />
         <StatCard
-          label="Leads"
+          label="Leads (total)"
           value={org.botConfig._count.leads}
           color="violet"
         />
@@ -84,6 +84,7 @@ export async function ChatbotTab({ clientId }: ChatbotTabProps) {
 
       <ChatbotManager
         botConfig={{
+          id: org.botConfig.id,
           botName: org.botConfig.botName,
           slug: org.botConfig.slug,
           llmModel: org.botConfig.llmModel,
@@ -108,38 +109,38 @@ export async function ChatbotTab({ clientId }: ChatbotTabProps) {
 
       <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
         <QuickActionCard
-          href={`/admin/clients/${org.slug}/chatbot/overview`}
+          href={`/admin/chatbots/${org.botConfig.id}?tab=overview`}
           icon={Bot}
           title="Overview completo"
           description="Metricas y datos del bot"
         />
         <QuickActionCard
-          href={`/admin/clients/${org.slug}/chatbot/config`}
+          href={`/admin/chatbots/${org.botConfig.id}?tab=config`}
           icon={Settings}
           title="Configurar bot"
           description="Identidad, apariencia, comportamiento"
           accent="cyan"
         />
         <QuickActionCard
-          href={`/admin/clients/${org.slug}/chatbot/knowledge`}
+          href={`/admin/chatbots/${org.botConfig.id}?tab=knowledge`}
           icon={BookOpen}
           title="Knowledge Base"
           description="Editar lo que sabe el bot"
         />
         <QuickActionCard
-          href={`/admin/clients/${org.slug}/chatbot/conversations`}
+          href={`/admin/chatbots/${org.botConfig.id}?tab=conversations`}
           icon={MessageSquare}
           title="Conversaciones"
           description="Historial completo"
         />
         <QuickActionCard
-          href={`/admin/clients/${org.slug}/chatbot/leads`}
+          href={`/admin/chatbots/${org.botConfig.id}?tab=leads`}
           icon={Users}
           title="Leads"
           description="Oportunidades capturadas"
         />
         <QuickActionCard
-          href={`/admin/clients/${org.slug}/chatbot/activity`}
+          href={`/admin/chatbots/${org.botConfig.id}?tab=activity`}
           icon={Activity}
           title="Activity log"
           description="Eventos en tiempo real"

@@ -69,9 +69,10 @@ function daysFromNow(days: number) {
 }
 
 async function main() {
-  const [adminPassword, clientPassword] = await Promise.all([
+  const [adminPassword, clientPassword, clientBPassword] = await Promise.all([
     bcrypt.hash('Admin1234!', 12),
     bcrypt.hash('Cliente1234!', 12),
+    bcrypt.hash('ClienteB1234!', 12),
   ])
 
   const admin = await prisma.user.upsert({
@@ -105,6 +106,55 @@ async function main() {
       password: clientPassword,
       role: Role.ORG_MEMBER,
       emailVerified: new Date(),
+    },
+  })
+
+  // MS-8 — Segundo cliente / org para tests de aislamiento (B11.3 probe).
+  // El TLD `.test` es reservado por RFC 2606: nunca resolverá DNS público,
+  // dejando claro que esto es data de QA, no demo presentable.
+  const clientB = await prisma.user.upsert({
+    where: { email: 'qa-cliente-b@develop.test' },
+    update: {
+      name: 'QA Cliente B',
+      password: clientBPassword,
+      role: Role.ORG_MEMBER,
+      emailVerified: new Date(),
+    },
+    create: {
+      name: 'QA Cliente B',
+      email: 'qa-cliente-b@develop.test',
+      password: clientBPassword,
+      role: Role.ORG_MEMBER,
+      emailVerified: new Date(),
+    },
+  })
+
+  const organizationB = await prisma.organization.upsert({
+    where: { slug: 'qa-cliente-b' },
+    update: {
+      companyName: 'QA Cliente B SA',
+      onboardingCompleted: true,
+    },
+    create: {
+      id: 'demo-org-qa-cliente-b',
+      companyName: 'QA Cliente B SA',
+      slug: 'qa-cliente-b',
+      onboardingCompleted: true,
+    },
+  })
+
+  await prisma.orgMember.upsert({
+    where: {
+      userId_organizationId: {
+        userId: clientB.id,
+        organizationId: organizationB.id,
+      },
+    },
+    update: { role: OrgRole.ADMIN },
+    create: {
+      userId: clientB.id,
+      organizationId: organizationB.id,
+      role: OrgRole.ADMIN,
     },
   })
 
@@ -680,8 +730,10 @@ async function main() {
     [
       'Seed demo listo:',
       `- Admin: ${admin.email}`,
-      `- Cliente: ${client.email}`,
-      `- Organizacion: ${organization.companyName} (${organization.slug})`,
+      `- Cliente A: ${client.email} (org ${organization.slug})`,
+      `- Cliente B (QA): ${clientB.email} (org ${organizationB.slug})`,
+      `- Organizacion A: ${organization.companyName} (${organization.slug})`,
+      `- Organizacion B (QA): ${organizationB.companyName} (${organizationB.slug})`,
       '- Servicios: 2',
       `- Proyecto: ${project.name}`,
       `- Tareas: ${tasks.length}`,
@@ -695,6 +747,7 @@ async function main() {
       'Credenciales:',
       '- admin@develop.com / Admin1234!',
       '- cliente@sanmiguel.com / Cliente1234!',
+      '- qa-cliente-b@develop.test / ClienteB1234! (QA, aislamiento)',
       'Notas de compatibilidad del schema:',
       '- service.name no existe; se sembraron 2 servicios por tipo.',
       '- project.deadline no existe; se agregó al description.',

@@ -7,8 +7,8 @@
  * - All computation is server-side only. Zero client-side arithmetic.
  * - Each metric sub-helper returns `number | null`. Null means "no data yet"
  *   and the metric is excluded from the weighted average rather than penalising.
- * - BusinessMetric is linked to User (clientId), so we resolve the first member
- *   of the org and look up their metric record.
+ * - BusinessMetric is linked to Organization (B11.6 — antes era User.id como
+ *   `clientId`). El lookup va directo por organizationId.
  */
 
 import { prisma } from '@/lib/prisma'
@@ -90,15 +90,11 @@ async function computeHealthScoreInternal(organizationId: string): Promise<Healt
   const connections: DataConnections = parseDataConnections(org.dataConnections)
   const { level, connectedCount, totalCount, percentage } = getConnectionLevel(connections)
 
-  // Resolve the first org member's userId for BusinessMetric look-ups
-  const firstMember = await prisma.orgMember.findFirst({
-    where: { organizationId },
-    select: { userId: true },
-  })
-
+  // B11.6 — BusinessMetric ahora se atribuye a la org directo, ya no hay
+  // que resolver el firstMember para buscar por User.id.
   const [digital, commercial, operational] = await Promise.all([
-    computeDigitalHealth(organizationId, org, connections, firstMember?.userId ?? null),
-    computeCommercialHealth(organizationId, firstMember?.userId ?? null),
+    computeDigitalHealth(organizationId, org, connections),
+    computeCommercialHealth(organizationId),
     computeOperationalHealth(organizationId),
   ])
 
@@ -145,7 +141,6 @@ async function computeDigitalHealth(
   organizationId: string,
   org: DigitalOrgFields,
   connections: DataConnections,
-  firstUserId: string | null,
 ): Promise<{ score: number; metricsAvailable: number; metricsTotal: number }> {
   let scoreSum = 0
   let metricsAvailable = 0
@@ -153,7 +148,7 @@ async function computeDigitalHealth(
 
   // 1.1 Web traffic (GA4)
   if (connections.ga4.connected) {
-    const trafficScore = await computeTrafficScore(firstUserId)
+    const trafficScore = await computeTrafficScore(organizationId)
     if (trafficScore !== null) {
       scoreSum += trafficScore
       metricsAvailable++
@@ -189,13 +184,12 @@ async function computeDigitalHealth(
 
 async function computeCommercialHealth(
   organizationId: string,
-  firstUserId: string | null,
 ): Promise<{ score: number; metricsAvailable: number; metricsTotal: number }> {
   let scoreSum = 0
   let metricsAvailable = 0
   const metricsTotal = 3
 
-  const conversionScore = await computeConversionScore(firstUserId)
+  const conversionScore = await computeConversionScore(organizationId)
   if (conversionScore !== null) {
     scoreSum += conversionScore
     metricsAvailable++
@@ -256,12 +250,10 @@ async function computeOperationalHealth(
 
 // ─── Metric sub-helpers ───────────────────────────────────────────────────────
 
-async function computeTrafficScore(firstUserId: string | null): Promise<number | null> {
-  if (!firstUserId) return null
-
+async function computeTrafficScore(organizationId: string): Promise<number | null> {
   const metric = await prisma.businessMetric
     .findFirst({
-      where: { clientId: firstUserId },
+      where: { organizationId },
       orderBy: { createdAt: 'desc' },
       select: { monthlyVisitors: true },
     })
@@ -294,9 +286,7 @@ function computeReputationScore(rating: number, reviewsCount: number): number {
   return Math.round(ratingScore + volumeScore)
 }
 
-async function computeConversionScore(firstUserId: string | null): Promise<number | null> {
-  if (!firstUserId) return null
-
+async function computeConversionScore(organizationId: string): Promise<number | null> {
   const [submissions, metric] = await Promise.all([
     prisma.contactSubmission
       .count({
@@ -307,7 +297,7 @@ async function computeConversionScore(firstUserId: string | null): Promise<numbe
       .catch(() => 0),
     prisma.businessMetric
       .findFirst({
-        where: { clientId: firstUserId },
+        where: { organizationId },
         orderBy: { createdAt: 'desc' },
         select: { monthlyVisitors: true },
       })

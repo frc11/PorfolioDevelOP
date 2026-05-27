@@ -147,6 +147,45 @@ enum BotAlertType {
   LEAD_CAPTURE_FAILURE
 }
 
+// B11.4 — string → enum (5 campos del módulo chatbot)
+enum ChatMessageRole {
+  USER
+  ASSISTANT
+  SYSTEM
+}
+
+enum ChatbotLeadIntent {
+  PURCHASE_READY
+  SCHEDULE_VISIT
+  QUOTE_REQUEST
+  HUMAN_REQUEST
+  SUPPORT
+  OTHER
+  // Legacy pre-B5.1 — mantenidos en el enum para no romper rows existentes.
+  QUOTE
+  INFO
+  DEMO
+}
+
+enum ChatbotEventLevel {
+  INFO
+  WARN
+  ERROR
+  DEBUG
+}
+
+enum BotIntensityLevel {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum LlmProvider {
+  GOOGLE
+  ANTHROPIC
+  OPENAI
+}
+
 enum AuditActionType {
   BOT_CREATED
   CLIENT_CREATED
@@ -169,6 +208,9 @@ enum AuditActionType {
   CREDENTIALS_RESENT
   PASSWORD_CHANGED
   LEADS_EXPORTED
+  CRM_INTEGRATION_UPDATED
+  CRM_INTEGRATION_TESTED
+  CRM_SYNC_RETRIED
   OTHER
 }
 
@@ -247,6 +289,7 @@ model User {
   image                 String?
   password              String?
   passwordResetRequired Boolean   @default(false)
+  sessionVersion        Int       @default(1)
   phone                 String?
   role                  Role      @default(ORG_MEMBER)
   createdAt             DateTime  @default(now())
@@ -260,7 +303,6 @@ model User {
   notifications   Notification[]
   tickets         Ticket[]
   ticketMessages  TicketMessage[]
-  businessMetrics BusinessMetric[]
   assignedTasks   Task[]               @relation("TaskAssignee")
   osAssignedLeads OsLead[]             @relation("OsLeadAssignee")
   osActivities    OsLeadActivity[]     @relation("OsActivityPerformer")
@@ -334,21 +376,87 @@ model Organization {
   cachedExecutiveBriefAt      DateTime?
   executiveBriefRegenerations Int       @default(0)
 
-  members         OrgMember[]
-  services        Service[]
-  projects        Project[]
-  messages        Message[]
-  invoices        Invoice[]
-  notifications   Notification[]
-  clientAssets    ClientAsset[]
-  subscription    Subscription?
-  brandProfile    ClientBrandProfile?
-  tickets         Ticket[]
-  premiumModules  OrganizationModule[]
-  emailContacts   EmailContact[]
-  emailCampaigns  EmailCampaign[]
-  onboardingTasks OnboardingTask[]
-  botConfig       BotConfig?
+  // B6.2 — opt-out del reporte ejecutivo semanal por email. Se setea desde el
+  // link de unsubscribe del propio mail (1-click). El cron de envío respeta este
+  // flag antes de mandar.
+  executiveReportOptOut Boolean @default(false)
+
+  members           OrgMember[]
+  services          Service[]
+  projects          Project[]
+  messages          Message[]
+  invoices          Invoice[]
+  notifications     Notification[]
+  clientAssets      ClientAsset[]
+  subscription      Subscription?
+  brandProfile      ClientBrandProfile?
+  tickets           Ticket[]
+  premiumModules    OrganizationModule[]
+  emailContacts     EmailContact[]
+  emailCampaigns    EmailCampaign[]
+  onboardingTasks   OnboardingTask[]
+  botConfig         BotConfig?
+  crmIntegration    CrmIntegration?
+  briefSnapshots    ExecutiveBriefSnapshot[]
+  weeklyReportLogs  WeeklyReportLog[]
+  businessMetrics   BusinessMetric[]
+  pageViews         PageView[]
+}
+
+// Histórico semanal del executive brief. Aditivo al cache vigente en Organization
+// (cachedExecutiveBrief*) — no lo reemplaza. Un snapshot por org por semana ISO
+// (periodKey calculado en TZ-AR). Si la org regenera N veces dentro de la misma
+// semana, el snapshot se sobrescribe (upsert) y queda el último válido. Guarda
+// SOLO agregados (sin PII ni leads crudos).
+model ExecutiveBriefSnapshot {
+  id             String   @id @default(cuid())
+  organizationId String
+  content        String   @db.Text
+  healthScores   Json
+  weekResults    Json
+  periodKey      String
+  createdAt      DateTime @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, periodKey])
+  @@index([organizationId, createdAt])
+}
+
+// B6.2 — log de envíos del reporte ejecutivo semanal.
+// Idempotencia: unique en (orgId, periodKey) — una sola entrega por org por
+// semana ISO. Si el cron corre dos veces o falla a mitad, reintenta solo las
+// que están en FAILED o no existen; las SENT se saltean.
+// Estados terminales: SENT, FAILED, SKIPPED_*. Intermedio: PENDING (mientras
+// el send está en vuelo).
+enum WeeklyReportStatus {
+  PENDING
+  SENT
+  FAILED
+  SKIPPED_PLAN
+  SKIPPED_OPTOUT
+  SKIPPED_NO_RECIPIENT
+  SKIPPED_NO_DATA
+}
+
+model WeeklyReportLog {
+  id             String             @id @default(cuid())
+  organizationId String
+  periodKey      String
+  status         WeeklyReportStatus @default(PENDING)
+  recipientEmail String?
+  messageId      String?
+  errorMessage   String?            @db.Text
+  attempts       Int                @default(0)
+  sentAt         DateTime?
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, periodKey])
+  @@index([status])
+  @@index([periodKey])
 }
 
 model OrgMember {
@@ -389,13 +497,15 @@ model Project {
   estimatedEndDate     DateTime?
   osLeadId             String?       @unique
 
-  organizationId      String?
-  organization        Organization?          @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  organizationId      String
+  organization        Organization           @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   tasks               Task[]
   osLead              OsLead?                @relation(fields: [osLeadId], references: [id])
   paymentMilestones   OsPaymentMilestone[]
   maintenancePayments OsMaintenancePayment[]
   timeEntries         OsTimeEntry[]
+
+  @@index([organizationId])
 }
 
 model Task {
@@ -545,6 +655,10 @@ model Notification {
   task   Task?   @relation(fields: [taskId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
+
+  // B11.5 — dashboard/layout.tsx:81 hace findMany({where:{organizationId}, orderBy:{createdAt:'desc'}, take:5})
+  // en CADA request al /dashboard. Hoy solo PK index → seq scan + sort.
+  @@index([organizationId, createdAt(sort: Desc)])
 }
 
 model ClientAsset {
@@ -607,27 +721,31 @@ model TicketMessage {
   @@index([userId])
 }
 
+// B11.6 — clientId (FK a User) → organizationId (FK a Organization).
+// Tablas vacías al momento de la migración (verificado en pre-flight).
+// La métrica es del NEGOCIO (org), no del usuario individual que la captura.
 model BusinessMetric {
-  id              String   @id @default(cuid())
-  clientId        String
-  client          User     @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  id              String       @id @default(cuid())
+  organizationId  String
+  organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   month           String
   monthlyVisitors Int
   bounceRate      Float
   avgTicketPrice  Float
-  createdAt       DateTime @default(now())
+  createdAt       DateTime     @default(now())
 
-  @@index([clientId])
+  @@index([organizationId])
 }
 
 model PageView {
-  id        String   @id @default(cuid())
-  clientId  String
-  url       String
-  duration  Int?
-  createdAt DateTime @default(now())
+  id             String       @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  url            String
+  duration       Int?
+  createdAt      DateTime     @default(now())
 
-  @@index([clientId])
+  @@index([organizationId])
 }
 
 model AgencySettings {
@@ -980,7 +1098,7 @@ model BotConfig {
   position       String @default("bottom_right")
   fontStyle      String @default("sans")
   bubbleStyle    String @default("rounded")
-  intensityLevel String @default("medium")
+  intensityLevel BotIntensityLevel @default(MEDIUM)
 
   // Comportamiento conversacional
   tone             String @default("informal_rioplatense")
@@ -994,7 +1112,7 @@ model BotConfig {
   whatsappMessage String? @db.Text
 
   // LLM
-  llmProvider     String @default("google")
+  llmProvider     LlmProvider @default(GOOGLE)
   llmModel        String @default("gemini-2.5-flash")
   temperature     Float  @default(0.7)
   maxOutputTokens Int    @default(800)
@@ -1079,6 +1197,9 @@ model Conversation {
 
   @@index([botConfigId, startedAt])
   @@index([sessionId])
+  // B11.5 — multiTenantQueries.ts:57 + queries.ts:17 ordenan por lastMessageAt DESC.
+  // Hoy 49 filas → impacto invisible; a 10k filas/bot evita sort en memoria.
+  @@index([botConfigId, lastMessageAt(sort: Desc)])
   @@map("chatbot_conversation")
 }
 
@@ -1088,7 +1209,7 @@ model ChatMessage {
   conversationId String
   conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
 
-  role    String // "user" | "assistant" | "system"
+  role    ChatMessageRole
   content String @db.Text
 
   // Solo para mensajes de assistant
@@ -1115,11 +1236,11 @@ model ChatbotLead {
   name    String?
   email   String?
   phone   String?
-  // intent: legacy String? (datos previos a B5.1: "quote"|"info"|"demo"|"support"|"other").
-  // A partir de B5.1 el bot escribe valores alineados con B3.6:
-  // "purchase_ready"|"schedule_visit"|"quote_request"|"human_request"|"support"|"other".
-  // No se enum-iza en DB para no romper rows legacy (additive).
-  intent  String?
+  // B11.4 — enum-izado. El enum `ChatbotLeadIntent` incluye los valores
+  // legacy pre-B5.1 (QUOTE/INFO/DEMO) junto con los nuevos B5.1+
+  // (PURCHASE_READY/SCHEDULE_VISIT/QUOTE_REQUEST/HUMAN_REQUEST/SUPPORT/OTHER)
+  // para no romper rows pre-existentes (backfill via UPPER(intent)).
+  intent  ChatbotLeadIntent?
   message String? @db.Text
 
   // B5.1 — Categoría DQ. Llenada por el bot al capturar; B5.3 la usa para descalificar.
@@ -1157,6 +1278,9 @@ model ChatbotLead {
 
   capturedAt DateTime @default(now())
   updatedAt  DateTime @updatedAt
+
+  // B5.8 — historial de syncs a CRM del cliente vía n8n.
+  crmSyncAttempts CrmSyncAttempt[]
 
   @@index([botConfigId, capturedAt])
   @@index([status])
@@ -1243,7 +1367,7 @@ model ChatbotEvent {
   id             String   @id @default(cuid())
   botConfigId    String
   type           String // ej: "chat.message_received", "chat.lead_captured", "error.llm_failed"
-  level          String // "info" | "warn" | "error" | "debug"
+  level          ChatbotEventLevel
   conversationId String?
   message        String   @db.Text
   metadata       Json?
@@ -1254,6 +1378,10 @@ model ChatbotEvent {
 
   @@index([botConfigId, createdAt(sort: Desc)])
   @@index([level, createdAt(sort: Desc)])
+  // B11.5 — detectBotIssues.ts ejecuta 6 queries `where: { botConfigId, type, createdAt: { gte } }`.
+  // El index actual (botConfigId, createdAt) traía superset y filtraba `type` en memoria.
+  // Con este nuevo, el cron de detección pasa de seq tail-filter a index scan directo.
+  @@index([botConfigId, type, createdAt(sort: Desc)])
   @@map("chatbot_events")
 }
 
@@ -1312,4 +1440,82 @@ model AdminAuditLog {
   @@index([targetType, targetId, createdAt])
   @@index([actionType, createdAt])
   @@map("admin_audit_log")
+}
+
+// ─── B5.8 — CRM Integration ───────────────────────────────────────────────────
+// Sync de leads del chatbot al CRM del cliente vía n8n. Una integración por org.
+// Regla absoluta: el lead se guarda en DB ANTES de intentar el sync. El sync es
+// secundario y nunca puede hacer perder un lead. Gateado por plan.crmEnabled.
+
+enum CrmProvider {
+  N8N
+}
+
+enum CrmSyncStatus {
+  PENDING
+  SUCCESS
+  FAILED
+  RETRYING
+}
+
+model CrmIntegration {
+  id String @id @default(cuid())
+
+  organizationId String       @unique
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  provider   CrmProvider @default(N8N)
+  webhookUrl String      @db.Text
+  enabled    Boolean     @default(false)
+
+  // Auth opcional vía header (ej. "X-Webhook-Secret"). Secret cifrado AES-256-GCM
+  // con env CRM_SECRET_KEY. Si los 4 campos son null, no se manda header de auth.
+  secretHeaderName String?
+  secretEncrypted  String? @db.Text
+  secretIv         String?
+  secretTag        String?
+
+  // Última actividad (sanitizada — sin PII en lastErrorMessage).
+  lastSyncAt       DateTime?
+  lastErrorAt      DateTime?
+  lastErrorMessage String?   @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  syncAttempts CrmSyncAttempt[]
+
+  @@map("crm_integration")
+}
+
+// Historial de intentos de sync. Los reads aplican stale detection:
+// un PENDING/RETRYING con attemptedAt > SYNC_STALE_THRESHOLD_MS se considera FAILED
+// (proceso muerto antes de marcar resultado, ej. cold start). Resolución en lectura,
+// sin cron — mismo patrón que el decay del score (B5.4).
+model CrmSyncAttempt {
+  id String @id @default(cuid())
+
+  leadId String
+  lead   ChatbotLead @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  integrationId String
+  integration   CrmIntegration @relation(fields: [integrationId], references: [id], onDelete: Cascade)
+
+  // Denormalizado por tenant safety: queries por org no requieren join multi-nivel.
+  organizationId String
+
+  status        CrmSyncStatus @default(PENDING)
+  attemptNumber Int           @default(1)
+
+  httpStatus   Int?
+  errorMessage String? @db.Text
+
+  attemptedAt DateTime  @default(now())
+  completedAt DateTime?
+  durationMs  Int?
+
+  @@index([leadId, attemptedAt(sort: Desc)])
+  @@index([integrationId, status, attemptedAt(sort: Desc)])
+  @@index([organizationId, status])
+  @@map("crm_sync_attempt")
 }

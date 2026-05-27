@@ -2,7 +2,7 @@ import { Suspense } from 'react'
 import { auth } from '@/auth'
 import { redirect } from 'next/navigation'
 import { listAllBots } from '@/modules/chatbot/server/admin/listAllBots'
-import { getBotsOverviewStats } from '@/modules/chatbot/server/admin/getBotsOverviewStats'
+import { getGlobalBotsOverviewStats } from '@/modules/chatbot/server/admin/getGlobalBotsOverviewStats'
 import { BotsListClient } from './BotsListClient'
 import { StatCard } from '@/components/ui/StatCard'
 import { Button } from '@/components/ui/Button'
@@ -15,7 +15,7 @@ export default async function ChatbotsPage() {
     redirect('/login')
   }
 
-  const [bots, stats] = await Promise.all([listAllBots(), getBotsOverviewStats()])
+  const [bots, stats] = await Promise.all([listAllBots(), getGlobalBotsOverviewStats()])
 
   return (
     <div className="space-y-6">

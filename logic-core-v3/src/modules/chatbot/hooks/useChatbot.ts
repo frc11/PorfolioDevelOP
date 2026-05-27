@@ -25,10 +25,21 @@ export interface UseChatbotOptions {
   currentPath: string
 }
 
-// Payload del backend en modo degradado — ver handleChatRequest.ts:83-101.
-// Cuando el endpoint corta sin llamar a Gemini (cuota agotada / dominio fuera de cap),
-// devuelve este JSON con todo lo necesario para armar el handoff a WhatsApp en el cliente.
-export type DegradedReason = 'quota_exhausted' | 'domain_overflow'
+// Estados degradados que el widget muestra como derivación digna a WhatsApp.
+//
+//  - quota_exhausted / domain_overflow: vienen del payload de /chat
+//    (handleChatRequest.ts:83-101). Reactivos a cada request.
+//  - bot_paused: viene del /config cuando `BotConfig.isActive = false`
+//    (B8.3). Persistente — al reabrir el panel sigue mostrándose, hasta
+//    que el cliente recargue la página o el admin reactive el bot.
+//  - provider_error: el SDK de chat falló (5xx, red, Vertex caído). El
+//    widget NO debe quedar mostrando un error técnico — degrada a la
+//    misma tarjeta de WhatsApp usando el contacto del config ya cargado.
+export type DegradedReason =
+  | 'quota_exhausted'
+  | 'domain_overflow'
+  | 'bot_paused'
+  | 'provider_error'
 
 export interface DegradedInfo {
   reason: DegradedReason
@@ -37,6 +48,9 @@ export interface DegradedInfo {
   whatsappMessage: string | null
   companyName: string | null
 }
+
+const PROVIDER_ERROR_MESSAGE =
+  'Estamos teniendo una dificultad técnica para responder en este momento. Seguí la conversación por WhatsApp y te contestamos enseguida.'
 
 export interface UseChatbotReturn {
   config: PublicBotConfig | null
@@ -63,6 +77,12 @@ export function useChatbot({ slug, currentPath }: UseChatbotOptions): UseChatbot
   const [isOpen, setIsOpen] = useState(false)
   const [degradedInfo, setDegradedInfo] = useState<DegradedInfo | null>(null)
   const sessionIdRef = useRef<string>(getOrCreateSessionId())
+  // Mirror of `config` for use inside the transport's `fetch` (whose closure
+  // is created once and would otherwise capture a stale `null` config).
+  const configRef = useRef<PublicBotConfig | null>(null)
+  useEffect(() => {
+    configRef.current = config
+  }, [config])
 
   useEffect(() => {
     let cancelled = false
@@ -71,6 +91,19 @@ export function useChatbot({ slug, currentPath }: UseChatbotOptions): UseChatbot
       .then((data: PublicBotConfig | null) => {
         if (cancelled) return
         setConfig(data)
+        // B8.3 — bot pausado llega vía config.paused (en lugar del viejo 404
+        // silencioso). Lo proyectamos al mismo carril de `degradedInfo` que
+        // los degradados de /chat para que ChatWindow/ChatbotEmbed lo rendericen
+        // con DegradedBanner sin lógica especial.
+        if (data?.paused) {
+          setDegradedInfo({
+            reason: 'bot_paused',
+            message: data.paused.message,
+            whatsappNumber: data.paused.whatsappNumber,
+            whatsappMessage: data.paused.whatsappMessage,
+            companyName: data.paused.companyName,
+          })
+        }
         setIsLoading(false)
       })
       .catch(() => {
@@ -87,7 +120,35 @@ export function useChatbot({ slug, currentPath }: UseChatbotOptions): UseChatbot
       new DefaultChatTransport({
         api: `/api/chatbot/${slug}/chat`,
         fetch: async (input, init) => {
-          const response = await fetch(input, init)
+          // B8.3 — provider_error: cualquier 5xx o falla de red del endpoint
+          // de chat se reescribe a una respuesta degradada con CTA WhatsApp,
+          // usando el contacto del config que ya cargamos. El visitante NUNCA
+          // ve un error técnico (modo "cero-Vertex": si Vertex/Gemini cae,
+          // esto cubre la UX sin un kill switch dedicado).
+          const buildProviderErrorStream = (): Response => {
+            const cfg = configRef.current
+            setDegradedInfo({
+              reason: 'provider_error',
+              message: PROVIDER_ERROR_MESSAGE,
+              whatsappNumber: cfg?.whatsappNumber ?? null,
+              whatsappMessage: null,
+              companyName: null,
+            })
+            return new Response('', {
+              status: 200,
+              headers: { 'content-type': 'text/event-stream' },
+            })
+          }
+
+          let response: Response
+          try {
+            response = await fetch(input, init)
+          } catch {
+            return buildProviderErrorStream()
+          }
+          if (response.status >= 500) {
+            return buildProviderErrorStream()
+          }
           // Clone so we can read body without consuming for the SDK
           if (response.headers.get('content-type')?.includes('application/json')) {
             try {
@@ -192,11 +253,10 @@ export function useChatbot({ slug, currentPath }: UseChatbotOptions): UseChatbot
   }, [sdkMessages])
 
   const avatarState: NeuroAvatarState = useMemo(() => {
-    if (!isOpen) return 'idle'
     if (pendingSubmit || status === 'submitted') return 'thinking'
     if (status === 'streaming') return 'speaking'
-    return 'listening'
-  }, [isOpen, status, pendingSubmit])
+    return 'idle'
+  }, [status, pendingSubmit])
 
   const sendMessage = useCallback(
     (text: string) => {
@@ -231,7 +291,15 @@ export function useChatbot({ slug, currentPath }: UseChatbotOptions): UseChatbot
   }, [])
 
   const open = useCallback(() => setIsOpen(true), [])
-  const close = useCallback(() => setIsOpen(false), [])
+  // Cierre del panel: limpiamos los degradados *reactivos* (los que vienen
+  // por /chat — cuota, dominio, error de proveedor) para que la próxima
+  // apertura no muestre el cartel viejo si el server ya volvió a la normalidad.
+  // `bot_paused` NO se limpia: es estado persistente del config; sigue válido
+  // hasta que el cliente recargue la página o el admin reactive el bot.
+  const close = useCallback(() => {
+    setIsOpen(false)
+    setDegradedInfo((prev) => (prev?.reason === 'bot_paused' ? prev : null))
+  }, [])
   const toggle = useCallback(() => setIsOpen((v) => !v), [])
 
   // `degradedMode` se deriva de `degradedInfo` para que cualquier consumer

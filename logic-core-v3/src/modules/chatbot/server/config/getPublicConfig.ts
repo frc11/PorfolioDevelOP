@@ -1,6 +1,25 @@
 import { prisma } from '@/lib/prisma'
-import type { PublicBotConfig } from '../../shared/publicConfig'
+import type { PausedInfo, PublicBotConfig } from '../../shared/publicConfig'
 import type { QuickReply, ProactivePromptsMap, RouteColorMap } from '../../shared/types'
+
+const DEFAULT_PAUSED_MESSAGE =
+  'El asistente está fuera de servicio temporalmente. Si necesitás algo, escribinos por WhatsApp y te respondemos enseguida.'
+
+function buildPausedInfo(bot: {
+  whatsappNumber: string | null
+  organization: { companyName: string | null } | null
+}): PausedInfo {
+  const companyName = bot.organization?.companyName ?? null
+  const prefill = companyName
+    ? `Hola ${companyName}, vengo del chat de la web y quería seguir la conversación por acá.`
+    : 'Hola, vengo del chat de la web y quería seguir la conversación por acá.'
+  return {
+    message: DEFAULT_PAUSED_MESSAGE,
+    whatsappNumber: bot.whatsappNumber,
+    whatsappMessage: prefill,
+    companyName,
+  }
+}
 
 function normalizeQuickReplies(value: unknown): QuickReply[] {
   if (!Array.isArray(value)) return []
@@ -35,8 +54,13 @@ function normalizeQuickReplies(value: unknown): QuickReply[] {
 }
 
 /**
- * Returns the public config for a bot by its slug, or null if not found
- * or inactive.
+ * Returns the public config for a bot by its slug, or null if the bot
+ * doesn't exist at all.
+ *
+ * When the bot exists but `isActive = false` (B8.3 — paused), the config
+ * is still returned with a populated `paused` field. The widget reads this
+ * and renders a dignified "reach us by WhatsApp" card instead of vanishing
+ * with a 404. The visitor on the host site always sees something coherent.
  *
  * Uses Prisma `select` to fetch only the fields needed — no server-only
  * data (llmProvider, llmModel, monthlyQuota, tone, temperature, etc.)
@@ -65,10 +89,11 @@ export async function getPublicConfig(slug: string): Promise<PublicBotConfig | n
       routeColorMap: true,
       proactivePrompts: true,
       whatsappNumber: true,
+      organization: { select: { companyName: true } },
     },
   })
 
-  if (!bot || !bot.isActive) return null
+  if (!bot) return null
 
   return {
     botName: bot.botName,
@@ -90,5 +115,6 @@ export async function getPublicConfig(slug: string): Promise<PublicBotConfig | n
     routeColorMap: (bot.routeColorMap as unknown as RouteColorMap) ?? {},
     proactivePrompts: (bot.proactivePrompts as unknown as ProactivePromptsMap) ?? {},
     whatsappNumber: bot.whatsappNumber,
+    paused: bot.isActive ? null : buildPausedInfo(bot),
   }
 }

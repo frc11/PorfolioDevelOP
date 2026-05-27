@@ -13,6 +13,10 @@ import { resolveOrgId } from '@/lib/preview'
 import { sendAgencyAlert } from '@/lib/alerts'
 import { revalidatePath } from 'next/cache'
 import { TicketReplyEmail } from '@/emails/TicketReplyEmail'
+import {
+  assertTicketBelongsToOrg,
+  ResourceNotOwnedError,
+} from '@/lib/auth/assert-ownership'
 
 export async function createTicketAction({
   title,
@@ -108,6 +112,22 @@ export async function replyTicketAction({
   }
 
   const isAdmin = session.user.role === 'SUPER_ADMIN'
+
+  // B11.2 fix C2: defense-in-depth contra IDOR. Antes este action
+  // ignoraba `organizationId` en el `where` y permitía a un cliente
+  // de org A escribir en un ticket de org B (confirmado runtime en B11.0).
+  // Helper tira ResourceNotOwnedError si el ticket no es del caller.
+  // SUPER_ADMIN: skip — la versión admin vive en `lib/actions/tickets.ts`.
+  if (!isAdmin) {
+    try {
+      await assertTicketBelongsToOrg(parsed.data.ticketId, organizationId)
+    } catch (error) {
+      if (error instanceof ResourceNotOwnedError) {
+        return { success: false, error: 'No encontramos ese ticket.' }
+      }
+      throw error
+    }
+  }
 
   try {
     await prisma.$transaction(async (tx) => {

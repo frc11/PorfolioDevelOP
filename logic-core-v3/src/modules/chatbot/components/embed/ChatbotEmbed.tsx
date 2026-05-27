@@ -2,9 +2,10 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
-import { Send, Sparkles } from 'lucide-react'
+import { Send, Sparkles, Volume2, VolumeX } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 import { useChatbot } from '../../hooks/useChatbot'
+import { useChatbotSounds } from '../../hooks/useChatbotSounds'
 import { renderToolCall } from '../tool-cards'
 import { DegradedBanner } from '../chat/DegradedBanner'
 
@@ -15,12 +16,25 @@ interface ChatbotEmbedProps {
 
 export function ChatbotEmbed({ slug }: ChatbotEmbedProps) {
   const chatbot = useChatbot({ slug, currentPath: '/' })
+  const sounds = useChatbotSounds()
   const parentOriginRef = useRef<string>('*')
   const [input, setInput] = useState('')
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
   const seenToolCallIds = useRef<Set<string>>(new Set())
   const openCalledRef = useRef(false)
+  const wasStreamingRef = useRef<boolean>(false)
+
+  // Fire the message chime on the streaming→ready transition. No-op until
+  // the user has interacted (the embed mounts already-open, but autoplay
+  // policy still applies inside the iframe — `markInteraction` is wired into
+  // the first send below).
+  useEffect(() => {
+    if (wasStreamingRef.current && !chatbot.isStreaming) {
+      sounds.playMessage()
+    }
+    wasStreamingRef.current = chatbot.isStreaming
+  }, [chatbot.isStreaming, sounds])
 
   // Start chat open immediately on mount
   useEffect(() => {
@@ -83,13 +97,15 @@ export function ChatbotEmbed({ slug }: ChatbotEmbedProps) {
   const send = useCallback(() => {
     const text = input.trim()
     if (!text || chatbot.isStreaming || chatbot.degradedInfo) return
+    // First real user gesture inside the iframe — unlocks the message chime.
+    sounds.markInteraction()
     chatbot.sendMessage(text)
     notifyParent('message-sent')
     setInput('')
     if (inputRef.current) {
       inputRef.current.style.height = 'auto'
     }
-  }, [input, chatbot, notifyParent])
+  }, [input, chatbot, notifyParent, sounds])
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -107,7 +123,7 @@ export function ChatbotEmbed({ slug }: ChatbotEmbedProps) {
       <div
         style={{
           width: '100%',
-          height: '100vh',
+          height: '100dvh',
           background: 'linear-gradient(180deg, #0b0e1c 0%, #060812 100%)',
           display: 'flex',
           alignItems: 'center',
@@ -134,7 +150,9 @@ export function ChatbotEmbed({ slug }: ChatbotEmbedProps) {
     <div
       style={{
         width: '100%',
-        height: '100vh',
+        // 100dvh ajusta al viewport dinámico (teclado virtual abierto/cerrado).
+        // Sin esto, el input quedaba detrás del teclado en iOS/Android.
+        height: '100dvh',
         background: 'linear-gradient(180deg, rgba(11,14,28,1) 0%, rgba(6,8,18,1) 100%)',
         display: 'flex',
         flexDirection: 'column',
@@ -223,6 +241,32 @@ export function ChatbotEmbed({ slug }: ChatbotEmbedProps) {
             {isThinking ? 'Pensando...' : '🟢 Disponible ahora'}
           </p>
         </div>
+
+        <button
+          onClick={sounds.toggleMute}
+          aria-label={sounds.muted ? 'Activar sonido' : 'Silenciar'}
+          aria-pressed={sounds.muted}
+          style={{
+            width: '28px',
+            height: '28px',
+            borderRadius: '50%',
+            background: 'rgba(255,255,255,0.04)',
+            border: '1px solid rgba(255,255,255,0.08)',
+            color: 'rgba(255,255,255,0.45)',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            transition: 'all 200ms',
+            flexShrink: 0,
+          }}
+        >
+          {sounds.muted ? (
+            <VolumeX size={14} strokeWidth={1.5} />
+          ) : (
+            <Volume2 size={14} strokeWidth={1.5} />
+          )}
+        </button>
 
         <button
           onClick={() => notifyParent('close')}
@@ -516,6 +560,11 @@ export function ChatbotEmbed({ slug }: ChatbotEmbedProps) {
             placeholder={isDegraded ? 'Continuá la conversación por WhatsApp' : 'Escribí tu consulta...'}
             disabled={inputDisabled}
             rows={1}
+            inputMode="text"
+            autoCapitalize="sentences"
+            autoCorrect="on"
+            spellCheck={true}
+            enterKeyHint="send"
             style={{
               background: 'transparent',
               border: 'none',

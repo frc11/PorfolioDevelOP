@@ -71,7 +71,7 @@ export type { AvatarRendererProps } from './components/avatar'
 // Admin UI components (Sprint S13+)
 export { KnowledgeBaseEditor, BotConfigEditor } from './components/admin'
 export { ActivityLog } from './components/admin'
-export { ClientChatbotTabs, OnboardingWizard } from './components/admin'
+export { OnboardingWizard } from './components/admin'
 
 // Admin actions
 export { createClientWithBot } from './server/admin/createClientWithBot'

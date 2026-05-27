@@ -18,6 +18,9 @@ export interface ValidateOriginResult {
  * - Sin allowedDomains configurados: rechaza (excepto localhost en dev)
  * - Con allowedDomains: matchea exacto + subdominios
  * - localhost siempre permitido en NODE_ENV=development
+ * - localhost permitido en prod builds cuando QA_ALLOW_LOCALHOST=1
+ *   (escape hatch para el server next-prod-qa de MS-7 — opt-in, nunca
+ *   activado en deploys reales)
  * - develop.com.ar siempre permitido
  */
 export async function validateOrigin(
@@ -25,13 +28,23 @@ export async function validateOrigin(
 ): Promise<ValidateOriginResult> {
   const { origin, botSlug } = input
 
-  // En dev, permitir todo localhost
-  if (
-    process.env.NODE_ENV === 'development' &&
-    origin &&
+  const isLocalhost =
+    !!origin &&
     (origin.includes('localhost') || origin.includes('127.0.0.1'))
-  ) {
+
+  // En dev, permitir todo localhost
+  if (process.env.NODE_ENV === 'development' && isLocalhost) {
     return { allowed: true }
+  }
+
+  // QA local sobre prod build (next-prod-qa): opt-in vía env var.
+  // Cubre dos casos: cross-origin con Origin=localhost (iframe, script
+  // embed apuntando a localhost), y same-origin GET donde el browser omite
+  // el header Origin (caso típico del config fetch del propio sitio del
+  // portfolio en build prod local). El flag es opt-in, nunca activo en
+  // deploys reales.
+  if (process.env.QA_ALLOW_LOCALHOST === '1' && (isLocalhost || !origin)) {
+    return { allowed: true, reason: 'qa_allow_localhost' }
   }
 
   // Sin origin (curl, same-origin, SSR) — solo en no-prod

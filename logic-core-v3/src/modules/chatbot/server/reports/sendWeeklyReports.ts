@@ -68,7 +68,7 @@ export async function sendWeeklyReports(): Promise<SendWeeklyReportsResult> {
             data: {
               botConfigId: bot.id,
               type: 'REPORT.WEEKLY_SENT',
-              level: 'info',
+              level: 'INFO',
               message: `Weekly report sent to ${primary.email}`,
               metadata: { recipientEmail: primary.email },
             },

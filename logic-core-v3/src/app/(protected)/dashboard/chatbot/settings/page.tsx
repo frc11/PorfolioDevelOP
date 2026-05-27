@@ -6,6 +6,7 @@ import { EmptyState } from '@/components/ui/EmptyState'
 import { prisma } from '@/lib/prisma'
 import { resolveOrgId } from '@/lib/preview'
 import { BotPersonalization } from '@/modules/chatbot/components/dashboard/BotPersonalization'
+import { CrmIntegrationCard } from '@/modules/chatbot/components/dashboard/CrmIntegrationCard'
 
 export const dynamic = 'force-dynamic'
 
@@ -45,5 +46,11 @@ export default async function ChatbotSettingsPage() {
     )
   }
 
-  return <BotPersonalization bot={bot} />
+  return (
+    <div className="space-y-10">
+      <BotPersonalization bot={bot} />
+      {/* B5.8 — Integración con CRM via n8n. Se auto-gatekeepa por plan adentro. */}
+      <CrmIntegrationCard />
+    </div>
+  )
 }
