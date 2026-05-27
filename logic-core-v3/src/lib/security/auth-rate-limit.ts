@@ -1,24 +1,27 @@
 import { createHash } from 'crypto'
 import { headers } from 'next/headers'
-import { checkRateLimit, type RateLimitResult } from '@/modules/chatbot/server/rate-limit/inMemoryLimiter'
+import { checkRateLimit, type RateLimitResult } from '@/lib/rate-limit/limiter'
+import { RATE_LIMIT_PRESETS } from '@/lib/rate-limit/presets'
 
-// Presets pensados para endpoints de auth. Se afinan con datos reales.
-export const AUTH_RATE_LIMITS = {
-  // Solicitud de reset (público): protege contra spam de "olvidé contraseña"
-  forgotPasswordPerIp: { limit: 5, windowMs: 15 * 60_000 },
-  forgotPasswordPerEmail: { limit: 3, windowMs: 60 * 60_000 },
-  // Completar reset (público): protege contra brute force del token
-  resetPasswordPerIp: { limit: 10, windowMs: 15 * 60_000 },
-  // Admin: re-envío de credenciales
-  resendCredentialsPerAdmin: { limit: 10, windowMs: 60 * 60_000 },
-} as const
+// Re-exporto para compatibilidad con imports históricos del módulo.
+export { RATE_LIMIT_PRESETS as AUTH_RATE_LIMITS }
+
+// Sólo los presets aplicables a auth — el resto (chatbot) vive en el mismo
+// objeto centralizado pero no se expone como scope válido acá.
+type AuthRateLimitScope = Extract<
+  keyof typeof RATE_LIMIT_PRESETS,
+  | 'forgotPasswordPerIp'
+  | 'forgotPasswordPerEmail'
+  | 'resetPasswordPerIp'
+  | 'resendCredentialsPerAdmin'
+>
 
 export type AuthRateLimitOutcome =
   | { allowed: true; remaining: number; retryAfterSeconds: 0 }
   | { allowed: false; remaining: 0; retryAfterSeconds: number }
 
 function hashIdentifier(scope: string, raw: string): string {
-  // No queremos IPs ni emails en claro dentro del Map del proceso.
+  // No queremos IPs ni emails en claro dentro de la tabla.
   return `${scope}:${createHash('sha256').update(raw.toLowerCase()).digest('hex').slice(0, 24)}`
 }
 
@@ -39,13 +42,19 @@ export async function getClientIpHash(): Promise<string> {
 }
 
 export interface AuthRateLimitInput {
-  scope: keyof typeof AUTH_RATE_LIMITS
+  scope: AuthRateLimitScope
   identifier: string
 }
 
-export function applyAuthRateLimit(input: AuthRateLimitInput): AuthRateLimitOutcome {
-  const preset = AUTH_RATE_LIMITS[input.scope]
+export async function applyAuthRateLimit(
+  input: AuthRateLimitInput,
+): Promise<AuthRateLimitOutcome> {
+  const preset = RATE_LIMIT_PRESETS[input.scope]
   const key = hashIdentifier(input.scope, input.identifier)
-  const result = checkRateLimit(key, preset.limit, preset.windowMs)
+  const result = await checkRateLimit({
+    key,
+    limit: preset.limit,
+    windowMs: preset.windowMs,
+  })
   return toOutcome(result)
 }

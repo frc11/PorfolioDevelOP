@@ -1,5 +1,6 @@
 import { streamText, stepCountIs, type ModelMessage } from 'ai'
 import { z } from 'zod'
+import * as Sentry from '@sentry/nextjs'
 import { detectIntent } from '../intent'
 import { prisma } from '@/lib/prisma'
 
@@ -17,7 +18,8 @@ import {
   tryReserveConversation,
   triggerUpsellAlertIfFirst,
 } from '../quota'
-import { checkRateLimit } from '../rate-limit'
+import { checkRateLimit } from '@/lib/rate-limit/limiter'
+import { RATE_LIMIT_PRESETS } from '@/lib/rate-limit/presets'
 import { hashIp, validateAssistantOutput } from '../safety'
 import { chatbotLog } from '../logging'
 import { chatbotDebug, chatbotError } from '../logging'
@@ -231,7 +233,11 @@ export async function handleChatRequest(
   // ─── 3. Rate limit (per session — each conversation has its own bucket) ──
   const clientIp = extractClientIp(request)
   const ipHash = hashIp(clientIp)
-  const rateLimit = checkRateLimit(`chat:${slug}:${body.sessionId}`)
+  const rateLimit = await checkRateLimit({
+    key: `chatbotPerBotSession:${slug}:${body.sessionId}`,
+    limit: RATE_LIMIT_PRESETS.chatbotPerBotSession.limit,
+    windowMs: RATE_LIMIT_PRESETS.chatbotPerBotSession.windowMs,
+  })
   if (!rateLimit.allowed) {
     chatbotLog(
       'chat.rate_limited',
@@ -719,6 +725,12 @@ export async function handleChatRequest(
           message: persistError instanceof Error ? persistError.message : 'unknown',
           conversationId: conversation.id,
         })
+        // B14.5 — Sentry para errores inesperados del runtime del bot.
+        // El scrub-pii del beforeSend limpia antes de mandar.
+        Sentry.captureException(persistError, {
+          tags: { module: 'chatbot', stage: 'persist' },
+          extra: { conversationId: conversation.id, botSlug: slug },
+        })
       }
     },
   })
@@ -735,6 +747,13 @@ export async function handleChatRequest(
         message: unhandledError instanceof Error ? unhandledError.message : 'unknown',
       })
     }
+    // B14.5 — el caso más crítico: el endpoint devolvió 500 al visitante.
+    // Tag stage=unhandled = error de runtime no anticipado, máxima prioridad
+    // de triage. Scrub-pii limpia el payload antes de mandar.
+    Sentry.captureException(unhandledError, {
+      tags: { module: 'chatbot', stage: 'unhandled' },
+      extra: { botSlug: slug, botId: bot?.id },
+    })
     return Response.json(
       {
         error: 'Internal server error in chatbot. Check server logs.',

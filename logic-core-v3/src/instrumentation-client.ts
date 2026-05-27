@@ -1,4 +1,5 @@
 import * as Sentry from '@sentry/nextjs'
+import { scrubPii } from '@/lib/sentry/scrub-pii'
 
 Sentry.init({
   dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
@@ -9,6 +10,12 @@ Sentry.init({
   replaysOnErrorSampleRate: 1.0,
   replaysSessionSampleRate: 0.0,
   environment: process.env.NODE_ENV,
+  // B14.5 — PII scrubbing también en client. Importante: session replays
+  // de Sentry tienen su propio scrubbing nativo (maskAllText por default),
+  // pero los eventos de error pasan por acá.
+  beforeSend(event, hint) {
+    return scrubPii(event, hint)
+  },
 })
 
 export const onRouterTransitionStart = Sentry.captureRouterTransitionStart;

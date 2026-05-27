@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
+import * as Sentry from '@sentry/nextjs'
 import { logger } from '@/lib/logger'
 
 export default function GlobalError({
@@ -20,11 +21,13 @@ export default function GlobalError({
             stack: error.stack,
         })
 
-        // TODO(B14): cablear Sentry acá.
-        //   Sentry.captureException(error, {
-        //     tags: { boundary: 'root' },
-        //     extra: { digest: error.digest },
-        //   })
+        // B14.5 — captureException con tags. El scrub-pii del beforeSend
+        // (instrumentation-client.ts) limpia el evento antes de mandarlo,
+        // así que aunque error.message o stack tengan PII, no leakea.
+        Sentry.captureException(error, {
+          tags: { boundary: 'root' },
+          extra: { digest: error.digest },
+        })
     }, [error])
 
     return (

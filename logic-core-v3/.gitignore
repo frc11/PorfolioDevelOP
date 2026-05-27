@@ -53,3 +53,14 @@ vertex-credentials.json
 
 test-results/
 playwright-report/
+
+# DB backups (B14.3) — contienen PII, NUNCA commitear.
+# El workflow GH Actions guarda los dumps como artifacts cifrados; los locales
+# quedan en backups/ y nunca tocan el repo.
+backups/
+*.sql
+*.sql.gz
+*.dump
+*.gpg
+# Excepción: las migrations de Prisma son código del repo, no dumps con PII.
+!prisma/migrations/**/*.sql

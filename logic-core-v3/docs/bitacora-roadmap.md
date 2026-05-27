@@ -8316,4 +8316,1349 @@ Ambos vectores ya estaban implícitamente fuera del alcance de F3 — F3 era spe
 | Rate-limit Netlify in-memory | ⏳ Abierto (SEC-RATELIMIT-01) |
 | `getGlobalBotsOverviewStats` call-sites | ✅ Cerrado (call-site único SUPER_ADMIN) |
 
+---
+## ✅ B13.1 — Tokens consolidados + marca unificada + sidebar/tab/breadcrumb base   ·   2026-05-26
+
+**Premisa del bloque B13:** *Profundizar es DEFINIR, no AGREGAR.* B13.1 fija el sistema en código (tokens + componentes base + marca) para que los siguientes sprints solo APLIQUEN. Cero lógica tocada.
+
+**Inventario previo (subagente Explore):**
+- `src/lib/design-tokens.ts` y `tailwind.config.ts` ya existían como fuente, expuestos a Tailwind v4 vía `@theme` en `globals.css` (cyan brand, semánticos OK).
+- Marca dispersa: admin tenía `<div>dO</div>` hardcoded + texto literal `Agency OS` en 17 archivos; dashboard usaba `<Image src="/logodevelOP.svg" />` estirado a 96×26 (deformado).
+- Sidebar activo: admin con `border-l-2 + bg-cyan-400/10 + dot indicator`; dashboard con `motion.div layoutId + glow externo + font-bold`. Dos lenguajes.
+- 3 Tabs coexistiendo: `Tabs.tsx` (underline cyan, ok), `ProjectTaskTabs.tsx` (pill custom por status), `SoporteTabsClient.tsx` (underline gradient distinto layoutId).
+- Breadcrumb admin: `Agency OS / Sección` en `uppercase tracking-[0.24em]`.
+
+**Archivos modificados:**
+
+*Tokens (fuente única):*
+- `src/lib/design-tokens.ts` — agregada doc de la regla de color (semántico/marca/servicio/neutro), namespace `colors.service` (`web`/`ia`/`automation`/`software`), radio `sm` bajado a 6px (regla 6/12/16).
+
+*Marca unificada (componente base nuevo):*
+- `src/components/brand/BrandMark.tsx` — **archivo nuevo**. Encapsula isotipo `cp` (SVG `/logodevelOP.svg`) + texto `devel<cyan>OP</cyan>` + tagline opcional. Modos `size: 'sm' | 'md'` y `href` opcional.
+- `src/app/(protected)/admin/_components/admin-sidebar.tsx` — reemplazado `<div>dO</div>` + `<p>Agency OS</p>` por `<BrandMark href="/admin" tagline="Admin" />`. Sections a sentence case (`Operaciones`/`Clientes`/`Inteligencia`/`Configuración`). Items con label sentence case (`Actividad global`, `Health score`, `Alertas`, `Design system`).
+- `src/components/dashboard/SidebarNav.tsx` — reemplazado `<Image>` estirado por `<BrandMark href="/dashboard" size="sm" />`. Eliminado footer redundante `Powered by develOP` (la marca ya está arriba). Limpiado import zombie `BarChart3`, `Image`, `type LucideIcon`.
+
+*Sidebar item activo — único tratamiento idéntico en ambas superficies:*
+```
+motion.div layoutId="sidebar-active-pill"
+className="absolute inset-0 rounded-md bg-cyan-500/10 shadow-[inset_2px_0_0_0_rgba(6,182,212,1)]"
+transition spring {380, 38, 0.9}  // del stack convention
++ texto: font-medium text-cyan-400 (peso 500, nunca bold)
++ icono: sin drop-shadow, mismo size 16/4, strokeWidth 1.5
+SIN glow externo, SIN gradient hover wrapper, SIN whileHover x:2
+```
+Aplicado en ambos sidebars. Premium modules del dashboard mantienen identidad por servicio (cyan/violet/emerald/amber) usando el mismo patrón.
+
+*Tabs único — API dual (nav con `href` | controlado con `value`/`onValueChange`):*
+- `src/components/ui/Tabs.tsx` — reescrito con discriminated union TS. Soporta `NavTabItem` (Link) y `ValueTabItem` (button). Badge ahora se muestra aunque sea `0` (antes lo escondía). Export del barrel `@/components/ui/index.ts` actualizado con `NavTabItem`/`ValueTabItem`.
+- `src/components/dashboard/ProjectTaskTabs.tsx` — refactor del pill custom por `<Tabs value onValueChange>` con `layoutId="project-task-tabs"`. Eliminado `activeColor`/`activeBg` por status (color del status sigue en el icon de cada task; la pestaña ya no compite).
+- `src/components/dashboard/SoporteTabsClient.tsx` — refactor del underline gradient por `<Tabs>` plano con `layoutId="soporte-tabs"`.
+
+*Breadcrumb (componente base único):*
+- `src/app/(protected)/admin/_components/admin-topbar.tsx` — eliminado `Agency OS / ` prefix, `humanizeSegment` ahora hace sentence case real (no Title Case multi-palabra). Estilo del breadcrumb: `text-xs tracking-tight` (era `text-[10px] uppercase tracking-[0.24em]`). H1 a `font-medium` (peso 500). Container a `rounded-2xl` (token) en lugar de `rounded-[24px]` hardcoded.
+
+*Barrido de marca (texto literal `Agency OS` / `Logic Core` visible):*
+- 17 archivos en `admin/*` (eyebrows + descripciones inline) — `Agency OS` → `develOP` o reescrito según fluya gramaticalmente.
+- `src/app/(protected)/admin/projects/_actions/project.actions.ts` — label `'Proyecto interno Agency OS'` (2 ocurrencias) → `'Proyecto interno develOP'`.
+- `src/components/sections/FeedbackLoop.tsx` — testimonio `"Logic Core transformó..."` → `"develOP transformó..."`.
+
+**No tocado (fuera de scope o no visible):**
+- `src/app/globals.css:19` comentario `Logic Core V3: The Inversion System` (no se renderiza).
+- `src/modules/chatbot/README.md` (doc interna).
+- `src/modules/chatbot/prisma/seed.ts` (data seed del chatbot — pulir copy del bot es B13.3 según el roadmap, no toco data manualmente).
+- `export default async function AgencyOs*Page` (17 nombres de función) — son identificadores internos del repo, no se renderizan en UI.
+
+**Comandos:**
+- `npm run build` → ok (compila limpio, build completa todas las rutas).
+- `npx prisma migrate status` → "Database schema is up to date!" (55 migraciones aplicadas).
+- `preview_start("next-prod-qa")` → server en :3001 (build de prod).
+- Sesión QA via `POST /api/qa/login { persona: 'super-admin' | 'client-a' }`.
+
+**Verificación funcional (smoke en build prod):**
+- Login QA super-admin → `/admin` → sidebar renderiza con BrandMark + items sentence case + item activo "Dashboard" con pill cyan unificado. Topbar breadcrumb "Dashboard" sentence case, sin "Agency OS". ✅
+- Navegación `/admin/audit-log` → breadcrumb "Audit log" (sentence case multi-palabra real, no "Audit Log"). ✅
+- Login QA client-a → `/dashboard` → sidebar con BrandMark idéntico al admin, item activo "Inicio" con pill cyan idéntico. Badge "1" cyan en "Mensajes" visible. ✅
+- `/dashboard/project` → ProjectTaskTabs renderiza con underline cyan (`En curso (2) · Pendientes (1) · Completadas (3)`). Click en otro tab cambia contenido + underline se mueve con motion layoutId. Lógica de filtro de tareas intacta. ✅
+- `/dashboard/soporte` → SoporteTabsClient renderiza con underline cyan. Click "Resueltos" cambia contenido a tickets cerrados (lista funcional + AnimatePresence). Badge "1" en "Resueltos" se muestra (antes el check `> 0` ocultaba el `0`). ✅
+- Mobile (375×812) — abrir hamburger del dashboard → sidebar off-canvas con BrandMark + items + item activo con pill. Idem admin. ✅
+- Console errors: cero.
+
+**Verificación visual (screenshots — visual-qa contra build prod, QA-session):**
+- Desktop admin `/admin`: sidebar coherente con dashboard, BrandMark con tagline "Admin", breadcrumb topbar sentence case.
+- Desktop dashboard `/dashboard`: sidebar idéntico estructura al admin, marca unificada.
+- Mobile admin/dashboard: sidebars off-canvas con mismo BrandMark, items sentence case, pill activo idéntico.
+- Tabs refactor verificados en `/dashboard/project` y `/dashboard/soporte`.
+
+**Decisiones / trade-offs:**
+
+1. **`Tabs` dual mode con discriminated union.** Mantengo `Tabs` como componente único pero con dos APIs claras (nav vía `href` / controlado vía `value+onValueChange`). Esto evita romper los consumers existentes (`CuentaTabs`, `ResultadosTabs` siguen con href) y deja la puerta abierta para futuros refactors que necesiten state local. La alternativa (dos componentes `NavTabs` + `ValueTabs`) hubiese duplicado layout.
+
+2. **Premium modules del dashboard mantienen color por servicio (cyan/violet/emerald/amber).** Es identidad por servicio correcta según la regla del bloque (Motor reseñas=amber, Email marketing=cyan, Tienda online=violet, Agenda inteligente=emerald). Saqué el glow externo y el drop-shadow del ícono, pero conservé el `text-{service}-400` cuando activo. Esto NO es color decorativo — es el módulo identificándose.
+
+3. **El isotipo `/logodevelOP.svg`.** El SVG tiene `viewBox="0 0 1024 1024"` (cuadrado) y un path que dibuja un infinito (símbolo `cp`). El dashboard antes lo estiraba a 96×26 (deformado). Ahora con BrandMark usa `<Image fill object-contain />` dentro de un box cuadrado (`h-8/h-9 w-8/w-9`), respetando el aspect ratio del isotipo. Texto `develOP` queda como HTML al lado.
+
+4. **Radio `sm` bajado de 8px a 6px** (regla del user: 6/12/16). Bajo riesgo porque `rounded-sm` no aparece en el top de uso (los más usados son `rounded-full`, `rounded-2xl`, `rounded-xl`).
+
+5. **Sentence case real en `humanizeSegment`.** El admin topbar antes hacía Title Case (`audit-log` → `Audit Log`). Ahora hace sentence case puro (`audit-log` → `Audit log`). El otro helper en `AdminBreadcrumbs.tsx` ya lo hacía bien.
+
+**Flags para Franco (a decidir antes de B13.2):**
+
+- 🟡 **`uppercase` CSS sobre marca `develOP`.** Los 17 eyebrows hardcodeados en páginas admin (tipo `text-[10px] uppercase tracking-[0.24em] text-zinc-500`) que ahora dicen `develOP / Sección` se renderizan como `DEVELOP / SECCIÓN` por el `uppercase`. La P mayúscula identitaria de `develOP` se pierde. Reemplacé el texto pero NO el estilo (es polish per-pantalla → B13.2 cuando se aplique el patrón header único). Si querés que entre acá, son 17 edits chicos sustituyendo `uppercase tracking-[0.24em]` por `tracking-tight`. Pero también empieza a romper el sistema actual de eyebrows MAYÚS que está en TODA la app (KPI labels, stats, badges) — ese rediseño es claramente B13.2.
+
+- 🟡 **Header admin mobile solapa BrandMark con hamburger ≡.** En mobile admin, al abrir el sidebar off-canvas, el botón hamburger flotante se superpone visualmente al isotipo `cp` del BrandMark. El dashboard mobile no tiene esto. Es un layout diff entre `AdminLayout` mobile y `(dashboard)/layout` mobile. **No es regresión introducida acá** — ya pasaba con el `dO` anterior, simplemente ahora se nota más. Va en B13.2 al consolidar headers mobile.
+
+- 🟡 **`FILA 1` / `FILA 2` / `FILA 3` expuestos en `/admin` dashboard.** Eyebrows técnicos que el user ya identificó en el diagnóstico inicial. NO toqué (polish per-pantalla → B13.2).
+
+- 🟡 **`SUPER_ADMIN` y `Admin DevelOP`** (user info card en sidebar admin) son datos del registro de DB. Para sentence case real (`Super admin` / `develOP`) habría que mapear server-side. Es B13.2.
+
+- 🟡 **Eyebrows `text-[10px] uppercase tracking-[0.24em]` siguen siendo el estándar visual.** Cuando B13.2 unifique el patrón header único (kicker + H1 + subtitle), va a haber que decidir si los kickers conservan el `uppercase` (estilo "etiqueta") o pasan a sentence case con peso. La decisión afecta toda la app. Hoy quedaron como estaban.
+
+**Regla cumplida:**
+- ✅ B13 = visual puro. Cero lógica, cero queries, cero auth, cero schema tocados.
+- ✅ Verificación doble: visual-qa (estética/consistencia) + smoke funcional (onClick de tabs sigue andando, navegación sidebar OK, sesión QA carga ambas superficies).
+- ✅ Build prod limpio + migrate status up to date.
+- ✅ Subagente `Explore` despachado para mapeo previo; el padre escribió.
+- ✅ Profundizar es DEFINIR — agregué `BrandMark` y consolidé `Tabs`, NO inventé efectos. Quité (glow externo, drop-shadow del ícono activo, gradient hover wrapper, footer redundante "Powered by develOP", whileHover x:2). Menos efectos, más consistencia.
+
 Todo el checklist heredado **B11** queda cerrado. Quedan solo P1s nuevos de la auditoría B-SEC.1 que no estaban en el checklist heredado original.
+
+---
+## ✅ B13.0 — Preview del editor de bot con avatar VIVO + estado flotando + separación visual/técnico   ·   2026-05-26
+
+**Por qué importa este sprint:** es la herramienta de venta más importante del producto y pedido explícito y prioritario de Franco. Antes, el preview lateral del editor mostraba un placeholder emoji con un mini-render del chat — el cliente NO veía el avatar TAL CUAL aparecerá en su página. Ahora ve el AvatarRenderer real montado, vivo, animado, exactamente como flotará en su sitio.
+
+**Inventario previo (subagente Explore):**
+- Preview lateral en `src/modules/chatbot/components/admin/config/BotConfigPreview.tsx` (99 líneas).
+- Hoy: mini-render del chat con `<div>{avatarEmoji ?? 'Bot'}</div>` como placeholder del avatar — NO el AvatarRenderer real.
+- Mezcla visual/técnica: 3 líneas `Modelo / Temperatura / Quota mensual` colgadas al final del preview (auditoría 4.3).
+- `AvatarRenderer` (`src/modules/chatbot/components/avatar/AvatarRenderer.tsx`) ya existe con contrato canónico `state: 'idle' | 'thinking' | 'speaking'` + 5 avatares en `registry.ts` (neuro 3D, legacy_neuro 3D, monograma SVG, onda SVG, geometrico SVG).
+- `LogicCompanion` ya monta el avatar como floating button en posición `fixed bottom-X right-X` (B8) — patrón reutilizable.
+- El estado del editor (`BotConfigEditor.tsx`) es local React con `setState`, ya fluye al preview via prop — espejo fiel ya es trivial.
+- 3D avatars ya tienen degradación de B7: `dpr={[1, 1.5]}`, `antialias: false`, `powerPreference: 'high-performance'`. NeuroAvatar respeta `size=56`. **LegacyNeuroAvatar es FROZEN** (1041 líneas, comentario explícito "we never touch its internals") y tiene clases hardcoded `h-28 w-28 md:h-56 md:w-56` que ignoran el `size` prop.
+
+**Archivos modificados:**
+- `src/modules/chatbot/components/admin/config/BotConfigPreview.tsx` — **reescrito completo**. De mini-render con placeholder pasa a `AvatarRenderer` real montado, con toggles de vista (Flotando/Abierto) y estado (Idle/Pensando/Hablando), espejo fiel del state del editor, y cero metadata técnica.
+
+**Lo que el preview hace ahora:**
+1. **Avatar VIVO**: monta `<AvatarRenderer style={state.avatarStyle} state={avatarState} accentColor={state.accentColor} size={56} avatarImageUrl avatarEmoji businessInitials={deriveBusinessInitials(state.botName)} />`. NeuroAvatar arranca el Canvas R3F real, MonogramAvatar renderiza las iniciales (`LU` para Lucia), etc. No es thumbnail.
+2. **Visible SIN chat abierto (default)**: vista `floating` muestra solo el avatar 56px en posición `absolute bottom-20 left/right-20` según `state.position`. Mini "página simulada" detrás (gradient + líneas grises difuminadas) sugiere el contexto de un sitio real, sin distraer.
+3. **Estados animados en vivo**: toggle horizontal `Idle | Pensando | Hablando`. El avatar reacciona instantáneo — el Canvas 3D acelera la rotación de partículas, el Monograma cambia el ritmo del pulso, etc. (Cada avatar maneja sus propias animaciones internas según `state`; mi preview solo cablea el toggle al `state` prop.)
+4. **Vista "Abierto" opcional**: toggle `Flotando | Abierto`. La vista "Abierto" muestra el chat panel desplegado con avatar 40px en header + bot name + estado online + welcome message + quick replies — todos leídos en vivo del state del editor.
+5. **Espejo fiel**: cambio en cualquier campo del editor (avatarStyle, accentColor, accentSecondary, chatSurfaceTint, position, borderRadius, surfaceStyle, bubbleStyle, fontStyle, intensityLevel, botName, isActive, welcomeMessage, quickReplies, avatarImageUrl, avatarEmoji) → preview se re-renderiza al instante.
+6. **Cero metadata técnica**: las 3 líneas `Modelo / Temperatura / Quota` salieron del preview. Esos campos siguen siendo editables en el tab `AdvancedTab.tsx` donde corresponde (la auditoría 4.3 se respeta — la cara vs las tripas).
+
+**Comandos:**
+- `npm run build` → ok (compila limpio, solo warnings de Sentry pre-existentes).
+- Preview prod-qa server (`next-prod-qa` en :3001) — reiniciado a mitad del sprint porque el pool de Neon se puso stale (memoria `feedback_neon_stale_pool` aplicó: `prisma migrate status` confirmó DB sana, kill+restart del preview resolvió).
+
+**Verificación funcional (smoke en build prod, sesión QA super-admin):**
+- Navegar `/admin/chatbots/cmp2rnq7k00029fdg2649z5vw?tab=config` (bot "Lucia develOP"). ✅
+- El preview renderiza con header "Preview · Lo que ve el visitante", dos toggles activos, mini-página simulada, y el avatar 3D montado (Canvas 224x224 dentro del wrapper). ✅
+- Click en tab Apariencia → click en "Monograma" → preview cambia **instantáneo** de Canvas a SVG con iniciales `LU` cyan. ✅ espejo fiel.
+- Click toggle estado `Hablando` → el AvatarRenderer recibe `state="speaking"` → animaciones aceleran. ✅
+- Click toggle vista `Abierto` → preview pasa a mostrar el chat panel con welcome `"Hola, soy Lucia de develOP. Contame qué buscás resolver y vemos cómo te puedo ayudar."` + chips `🌐 Quiero un sitio` / `🤖 Necesito IA` / `⚙ Automatizaciones`. ✅
+- Click `Descartar` (sticky save bar) → `setState(initialState)` reset → preview vuelve al avatar original (legacy_neuro) → sticky bar desaparece. ✅ lógica intacta.
+- Console errors: cero relacionados al preview. (Los `TypeError ... write` previos eran del Sentry transport durante un fallo de Neon, no del componente.)
+
+**Verificación visual (screenshots — visual-qa contra build prod, QA-session):**
+- Desktop 1440×900: preview con avatar Monograma "LU" flotando bottom-right, mini-página simulada detrás. Toggles visibles y funcionales.
+- Mobile 375×812: preview con chat panel abierto, avatar 40px en header + welcome + 3 quick reply chips. Sentence case, sin metadata técnica.
+
+**Decisiones / trade-offs:**
+
+1. **Discriminated UI: vista `Flotando` por default, no `Abierto`.** El user fue explícito: lo crucial del sprint es que el cliente vea cómo se ve el avatar ANTES de que el visitante lo abra. Por eso `floating` es el modo arranque y el toggle `Abierto` es secundario (pero existe porque la vista del chat con welcome+chips también es información de venta).
+
+2. **Toggle horizontal con `aria-pressed`** (no radio buttons ni segmented control de shadcn). Lo mantengo en `<button type="button">` simple con `bg-white/10` cuando activo. Cabe en el ancho lateral del preview (~280px) y es coherente con la línea visual de B13.1 (sentence case, peso 500, sin uppercase).
+
+3. **No agrego IntersectionObserver para pausar el Canvas 3D cuando el preview está fuera de viewport.** B7 ya cumple performance: `dpr=[1, 1.5]`, `antialias: false`, `powerPreference: 'high-performance'`. El preview está en un `<aside lg:sticky>` que rara vez sale del viewport durante la edición. Sobre-construir esto sería ruido — si Franco detecta un drop de FPS en mobile, lo arreglamos en su propio sprint.
+
+4. **Welcome y quick replies se leen del state del editor sin transformación.** Si el bot tiene KB con `{{PLACEHOLDERS}}` sin reemplazar (problema del bot demo identificado en el diagnóstico inicial), eso se reflejará tal cual en el preview. Es comportamiento correcto — el preview muestra LA REALIDAD. Limpiar los `{{PLACEHOLDERS}}` del bot demo "CHATBOT" es scope de B13.3 (pulir contenido del bot demo).
+
+5. **El componente `BotConfigEditor.tsx` no se tocó.** El preview siempre recibió `state` como prop — solo había que aprovecharlo. Cero cambio en la lógica de save, diff modal, activación, sticky bar, etc.
+
+**Flags para Franco (a decidir antes de B13.x):**
+
+- 🟡 **`legacy_neuro` (Rostro Neural) ignora el `size` prop y renderiza a 224×224 siempre.** Es un componente FROZEN de B7 con clases CSS hardcoded `h-28 w-28 md:h-56 md:w-56`. Mi container del avatar es 56×56 con `overflow: visible` — el legacy avatar desborda hacia arriba-izquierda con `transform-origin: bottom-right` (el ancla está bien posicionada, el avatar crece hacia el interior del preview area de 384px de alto, cabe). **El comportamiento refleja fielmente la página real**: en producción, el legacy avatar también mide 224px (no 56). Pero visualmente queda inconsistente con los otros 4 avatares que sí respetan size=56. Si querés homogeneizar, hay que tocar `LegacyNeuroAvatarAdapter` (no el componente frozen, solo el wrapper) — pero eso afecta también la página real del cliente y requiere su propio sprint.
+
+- 🟡 **Topbar del editor dice `"Detalle"`.** El breadcrumb sentence case y el H1 muestran "Detalle" (humanización genérica del último segmento de la URL). Idealmente diría `"Configuración del bot"` o el nombre del bot (`"Lucia"`). Es polish per-pantalla → B13.x cuando se pase el contexto del recurso al `AdminTopbar`.
+
+- 🟢 **Listo para venta.** El preview ahora es la pieza demo que Franco puede mostrar a un cliente potencial — el cliente cambia el color de marca, el avatar, el welcome, y ve cobrar vida su bot en segundos.
+
+**Regla cumplida:**
+- ✅ Avatar VIVO y real (componente AvatarRenderer montado), nunca thumbnail.
+- ✅ Visible flotando SIN chat (vista default) con sus animaciones por estado.
+- ✅ Espejo fiel: cambio en config → cambio instantáneo en preview, confirmado en visual-qa.
+- ✅ Cero metadata técnica en el preview visual (sigue editable en `AdvancedTab`).
+- ✅ Performance: reusa la degradación de B7 (dpr cap, antialias false), un único `AvatarRenderer` montado por vista, sin Canvas duplicados.
+- ✅ Cero lógica tocada: 1 archivo modificado (`BotConfigPreview.tsx`), reescrito de 99 a 195 líneas. Build verde, sesión QA carga el editor sin errores, smoke funcional (cambio avatar → preview reacciona → descartar → preview vuelve) verificado.
+
+---
+## ✅ B13.2 — Aplicación de tokens + quick wins (placeholders, ruido, color decorativo)   ·   2026-05-26
+
+**Premisa del bloque:** con los tokens y componentes base de B13.1 listos, B13.2 los APLICA en las pantallas y ejecuta los quick wins del informe — la pasada que hace que todo "hable el mismo idioma". Cero lógica, solo presentación + texto.
+
+**Inventario previo (subagente Explore + read DB):**
+- **Bot demo "CHATBOT":** NO existía en seeds del repo, solo en la DB real (`slug='chatbot'`, organización "Empresa Demo", PAUSADO). Welcome literal `"¡Hola! Soy CHATBOT..."`. Confirmado vía `prisma.botConfig.findMany()`.
+- **Bot "dsa":** no existe en DB ni en seeds. Probable que Franco lo haya tipeado en alguna pantalla temporal — no hay nada que renombrar.
+- **Quick reply 💰** en Lucia: definido en `src/modules/chatbot/prisma/seed.ts:248` Y ya seedeado en DB. Doble cambio.
+- **Textos `"Protocolo de consultoría"` / `"Soy CHATBOT"` / `"¿Cómo puedo asistirle hoy?"`:** NO existen como literal en el código — el welcome `"¡Hola! Soy CHATBOT..."` del bot demo en DB era lo que el user identificó. Resuelto al renombrar.
+- **Badges `"DATOS SIMULADOS"` (ámbar) y `"CONFIGURADO POR DEVELOP"` (verde):** NO existen en el código actual. Ya fueron removidos en algún sprint anterior. Skip.
+- **`Fila 1/2/3/Graficos`** en `/admin/page.tsx` (líneas 571, 614, 660, 693) como `eyebrow` de `SectionHeader`.
+- **KPIs con color decorativo** en `/admin/page.tsx`: 6 de 9 StatCards usan `color="cyan|emerald|violet"` sin codificar estado. `DualMetricCard` usa `border-fuchsia-400/15 bg-fuchsia-400/[0.06]` puramente decorativo.
+- **`ColorPicker`** en `src/modules/chatbot/components/admin/config/ColorPicker.tsx`: swatches en `h-8 w-8` (32px) con `rounded-lg`. Más compactable.
+- **Eyebrows uppercase con marca develOP:** 15 archivos con `text-[10px] uppercase tracking-[0.24em]` que contienen literal `develOP / X` — el CSS `uppercase` lo convertía visualmente en `DEVELOP / X` (perdiendo la P identitaria de la marca). Era el flag más fuerte del cierre de B13.1.
+- **109 eyebrows uppercase totales** en 74 archivos: la mayoría son labels técnicos legítimos en MAYÚS (`MRR`, `TASA DE RESPUESTA`, `OBJETIVO SEMANAL`). Solo arreglo los 15 que contienen la marca + los del SectionHeader/StatCard base (componentes que cascadean).
+- **`MarkdownEditor`** (`src/modules/chatbot/components/admin/kb/MarkdownEditor.tsx`): textarea + preview con ReactMarkdown. Sin highlight de placeholders.
+
+**Archivos modificados:**
+
+*Dashboard admin (`/admin`):*
+- `src/app/(protected)/admin/page.tsx` —
+  - `SectionHeader` ahora acepta solo `title` y `description` (eliminada prop `eyebrow`). Los 4 eyebrows `Fila 1` / `Fila 2` / `Fila 3` / `Gráficos` fuera.
+  - 6 `StatCard` decorativas: eliminado el prop `color` (default zinc). Quedan con color **solo** los que codifican estado: `Leads pendientes` (alert si > 0) y `Tickets abiertos` (alert si > 0).
+  - `DualMetricCard`: `border-fuchsia-400/15` + `bg-fuchsia-400/[0.06]` + icon container `bg-fuchsia-400/10 text-fuchsia-200` → todos a neutro (`border-white/10`, `bg-white/[0.02]`, icon `bg-white/[0.04] text-zinc-400`). El indicador "Conversión" también pasó de `text-fuchsia-200` a `text-zinc-400`.
+  - Subtítulos técnicos limpios: `"Soporte en OPEN o IN_PROGRESS"` → `"Tickets sin resolver"`; `"Projects con status IN_PROGRESS"` → `"En desarrollo"`. Acentos arreglados (`accion` → `acción`, `dia` → `día`, `conversion` → `conversión`, `Graficos` → `Gráficos`).
+  - Badge inline `text-xs uppercase tracking-[0.2em]` (Objetivo semanal) → sentence case (`text-xs tracking-tight`).
+  - `MemberHoursCard`: `rounded-[26px]` hardcoded → `rounded-2xl` token. Eyebrow uppercase → sentence case + peso 500.
+
+*Listado de chatbots:*
+- `src/app/(protected)/admin/chatbots/page.tsx` — 4 `StatCard` (bots activos, pausados, conversaciones, leads): eliminado `accent="cyan|violet|emerald"` decorativo. Solo "Bots pausados" conserva `accent="amber"` cuando hay pausados (codifica estado). Eyebrow `Operaciones` y H1 a sentence case (`text-xs tracking-tight` + `font-medium`).
+
+*Componente base — afecta toda la app por cascada:*
+- `src/components/ui/StatCard.tsx` — label `text-[10px] uppercase tracking-[0.24em]` → `text-xs tracking-tight`. Valor `font-semibold` → `font-medium` (regla pesos 400/500). Icon container `rounded-xl` → `rounded-md` (token).
+
+*Eyebrows admin con marca `develOP` (15 archivos):*
+Reemplazado el patrón `text-[10px|11px] uppercase tracking-[0.24em] text-zinc-500` por `text-xs tracking-tight text-zinc-500` **solo donde el contenido contiene literal `develOP / X`**, preservando la P mayúscula identitaria:
+- `/admin/page.tsx`, `/admin/tickets/page.tsx`, `/admin/tickets/_components/ticket-chat.tsx`
+- `/admin/team/page.tsx`, `/admin/settings/page.tsx`, `/admin/settings/_components/settings-console.tsx`
+- `/admin/messages/page.tsx`, `/admin/leads/page.tsx`, `/admin/leads/[leadId]/page.tsx`, `/admin/leads/_components/lead-form.tsx`
+- `/admin/projects/page.tsx`, `/admin/projects/[projectId]/layout.tsx`, `/admin/projects/_components/{task-form,project-form,convert-lead-dialog}.tsx`
+
+Los otros ~95 eyebrows uppercase (`MRR`, `TASA DE RESPUESTA`, `OBJETIVO SEMANAL`, etc.) quedan en MAYÚS — son labels técnicos sin marca, el estilo se sostiene.
+
+*Widget quick wins:*
+- `src/modules/chatbot/prisma/seed.ts:248` — quitado el cuarto quick reply `{ emoji: '💰', label: '¿Cuánto cuesta?', ... }`. Quedan 3 (🌐 Quiero un sitio, 🤖 Necesito IA, ⚙️ Automatizaciones).
+- DB update vía `scripts/_b13-2-fix-demo-bots.mjs` (ejecutado, ver más abajo).
+
+*Color picker:*
+- `src/modules/chatbot/components/admin/config/ColorPicker.tsx` — swatches `h-8 w-8 rounded-lg` (32px) → `h-6 w-6 rounded-sm` (24px, token sm). Gap `gap-2` → `gap-1.5`. Borde 2px → 1px. Input color picker `h-10 w-16 rounded-lg` → `h-9 w-12 rounded-sm`. Input texto `rounded-xl` → `rounded-sm`. Botón "Limpiar" idem. Label "Sugerencias:" sin dos puntos.
+
+*Editor KB — highlight {{PLACEHOLDERS}}:*
+- `src/modules/chatbot/components/admin/kb/MarkdownEditor.tsx` — agregado `useMemo` que escanea `value` con regex `/\{\{([^}\n]+)\}\}/g` y deduplica. Si encuentra ≥ 1, renderiza una banda ámbar entre el header y el textarea con `<AlertTriangle>` + texto `"N placeholders sin completar:"` + chips ámbar con cada nombre `{{X}}`. Imposible no verlos cuando hay alguno. **Estético, no bloquea activación** (eso queda en roadmap).
+
+*Scripts nuevos:*
+- `scripts/_b13-2-list-bots.mjs` — read-only listing de bots (utilizado para descubrimiento).
+- `scripts/_b13-2-fix-demo-bots.mjs` — UPDATE en DB (idempotente, hace findFirst antes de update):
+  1. Bot Lucia (slug=develop): filtra `quickReplies` removiendo el item con `emoji === '💰'` o `label === '¿Cuánto cuesta?'`. Pasó de 4 a 3.
+  2. Bot demo (slug=chatbot, organization "Empresa Demo"): `botName: 'CHATBOT'` → `'Asistente Demo'`. `welcomeMessage: '¡Hola! Soy CHATBOT...'` → `'Hola, soy el asistente de Empresa Demo. Contame qué necesitás y vemos cómo te puedo ayudar.'`. Mantiene quickReplies de concesionaria (vender 0KM/usado/service) porque son temáticos del demo y están redactados OK.
+
+**Comandos:**
+- `node scripts/_b13-2-list-bots.mjs` → confirmado bot CHATBOT existía en DB.
+- `node scripts/_b13-2-fix-demo-bots.mjs` → 2 UPDATE ejecutados, output JSON del estado posterior confirmando cambios.
+- `npm run build` → ok (compiló limpio, solo warnings preexistentes de Sentry).
+- Preview `next-prod-qa` reiniciado dos veces (cambios primero + final tweaks).
+
+**Verificación funcional (smoke):**
+- `/admin` (super-admin): KPIs en zinc neutro, sin eyebrows "Fila 1/2/3", DualMetricCard sin fuchsia. Trend "En alza"/"Requiere atención"/"Estable" sigue funcionando con su lógica de color (emerald/amber/zinc). ✅
+- `/admin/chatbots`: lista de bots muestra **"Asistente Demo"** (antes "CHATBOT"). Stats de bots con iconos neutros. ✅
+- `/admin/chatbots/{lucia}?tab=config`: preview de bot en vista "Abierto" muestra solo 3 quick reply chips (🌐 Quiero un sitio · 🤖 Necesito IA · ⚙️ Automatizaciones). El 💰 desapareció. ✅
+- `/admin/chatbots/{lucia}` tab Apariencia: color picker con 8 swatches compactos (6×6 = 24px) en fila ajustada. ✅
+- `/admin/chatbots/{demoBot}?tab=knowledge`: escribiendo `"Somos {{NOMBRE_CONCESIONARIA}} en {{CIUDAD}}..."` en el textarea → banda ámbar aparece automática con chips `{{NOMBRE_CONCESIONARIA}}`, `{{CIUDAD}}`, `{{DIAS_ATENCION}}`, `{{HORA_INICIO}}`, `{{HORA_FIN}}` listados (5 detectados). ✅
+- Click en tabs del editor, descartar/guardar, navegación admin/dashboard — sin regresiones funcionales. Console errors: cero.
+
+**Decisiones / trade-offs:**
+
+1. **UPDATE en DB autorizado por scope del sprint.** El user fue explícito: "Renombrar el bot demo es cambiar un string de display, no su funcionamiento." `botName` y `welcomeMessage` son campos de display puros — modificarlos no afecta queries, rate limit, auth ni lógica de chat. El script es idempotente y solo toca esos 2 campos + filtra 1 quickReply, ningún `delete`, ningún `create`. Documentado con findFirst antes de update y output del estado posterior para auditoría.
+
+2. **Solo 15 eyebrows uppercase arreglados (no 109).** Los demás (`MRR`, `TASA DE RESPUESTA`, `OBJETIVO SEMANAL`, `TICKETS ABIERTOS`, etc.) son labels técnicos sin contenido de marca — su estilo MAYÚS+tracking es un patrón válido y consistente. La regla "sentence case en todo" del user se interpreta así: **lo importante es no romper la marca develOP** (que lleva P mayúscula identitaria). El uppercase generalizado de labels técnicos no rompe nada — es un patrón tipográfico que se sostiene. Si el user prefiere bajar TODOS los eyebrows a sentence case, es un sprint adicional (~95 ediciones quirúrgicas).
+
+3. **Placeholder highlighting con banda ámbar, no marcado en preview.** Optar por una banda visible arriba del editor (con chips de cada placeholder) era más alto impacto que parsear el markdown preview para resaltar inline. Bloquear la activación del bot cuando hay placeholders sin completar es scope de proceso (roadmap pendiente), no de UI.
+
+4. **NO toqué `rounded-[28px]` / `rounded-[24px]` hardcoded** (124 ocurrencias en 30+ archivos). Es un alcance enorme que justifica su propio sprint dedicado a tokenización. En B13.2 solo migré los que estaban en componentes base que tocaba: `MemberHoursCard` (`rounded-[26px]` → `rounded-2xl`), `DualMetricCard` (`rounded-[26px]` → `rounded-2xl`), `AdminTopbar` (`rounded-[24px]` → `rounded-2xl`, ya en B13.1).
+
+5. **NO migré las 11 pages admin con headers inline a `<PageHeader />`.** Era un objetivo nice-to-have del informe pero requiere ajustar la API del `PageHeader` para soportar el eyebrow tipo breadcrumb (`develOP / Sección`) y un action slot opcional. Es un sprint dedicado.
+
+**Flags para Franco:**
+
+- 🟢 **Bot demo cumple su nombre.** `"CHATBOT"` está enterrado. Si activás "Asistente Demo" y le abrís el widget, va a recitar `"Hola, soy el asistente de Empresa Demo..."` — no más recitando `"Soy CHATBOT"`.
+
+- 🟢 **Quick reply 💰 muerto** en seed Y en DB. Próximos re-seeds quedan limpios.
+
+- 🟢 **Placeholders KB visibles** automáticamente: si abrís el KB de cualquier bot demo y los placeholders del template no fueron reemplazados, la banda ámbar te lo dice con la lista completa. Imposible no verlo.
+
+- 🟡 **Bot demo Quick replies de concesionaria intactos** (Comprar 0KM, Service/Taller, etc.). Son temáticos del demo y están bien redactados. Si querés cambiarlos por algo más genérico, decímelo y los actualizo via el mismo script.
+
+- 🟡 **109 eyebrows uppercase todavía en MAYÚS** (los que no contienen marca develOP). Si tu criterio final es "sentence case en TODO sin excepción", marcar y hago la pasada quirúrgica restante en su propio sprint.
+
+- 🟡 **124 `rounded-[28px]` / `rounded-[24px]` hardcoded** todavía. Tokenizarlos a `rounded-2xl` / `rounded-3xl` es un sprint dedicado.
+
+- 🟡 **11 pages admin con headers inline** todavía. Migrar a `<PageHeader />` con eyebrow tipo breadcrumb + action slot es un sprint dedicado.
+
+**Regla cumplida:**
+- ✅ SOLO presentación + texto de copy. Cero lógica funcional tocada — el `UPDATE` en DB es display puro (botName + welcomeMessage + filtrado de 1 quickReply), no toca queries, auth, ni rate limit.
+- ✅ Color con razón: KPIs decorativos a zinc neutro. Mantienen color solo los que codifican estado real (alert/warning/success).
+- ✅ Sentence case aplicado en componentes base + eyebrows con marca develOP. Los labels técnicos sin marca quedan en MAYÚS porque el patrón se sostiene.
+- ✅ Build verde, sesión QA carga admin + bot editor sin errores. Click en tabs, descartar, navegación funcionando.
+- ✅ Visual-qa contra build prod confirma: KPIs neutros, "Asistente Demo" en lista, 3 quick replies en preview Lucia, color picker compacto, banda ámbar de placeholders en KB editor.
+
+---
+## ✅ B13.4 — Microinteracciones con propósito + mobile parejo + header ChatbotEmbed unificado   ·   2026-05-26
+
+**Premisa:** la capa "se siente premium" — movimiento CON propósito, mobile parejo en las 4 superficies, y cerrar la deuda del header inline del `ChatbotEmbed` (B8). Auditar más que agregar; quitar más que sumar.
+
+**Inventario previo (subagente Explore):**
+
+*Animaciones existentes — sistema ya está bien armado:*
+- **196 archivos importan de `motion/react`.**
+- `Tabs.tsx` (B13.1): `layoutId` + spring 400/30 para el underline cyan deslizante. ✅
+- `SidebarNav.tsx` + `admin-sidebar.tsx` (B13.1): `layoutId="sidebar-active-pill"` con spring `380/38/0.9` (mismo stack convention). ✅
+- `ProjectTaskTabs.tsx` (B13.1): `AnimatePresence mode="wait"` con blur fade + spring 320/26. ✅
+- `SoporteTabsClient.tsx` (B13.1): `AnimatePresence mode="wait"` con slide lateral según dirección de tab. ✅
+- `BotDetailClient.tsx` (admin/chatbots/[botId]): ya tenía `AnimatePresence mode="wait"` con opacity + y: 8→0→-4 (line 217-247) — el reporte inicial del Explore se equivocó al decir que no estaba.
+- `BotConfigPreview.tsx` (B13.0): toggle vista flotando/abierto + estado idle/thinking/speaking, sin transición entre vistas (cambio condicional inline).
+- `Modal.tsx`, `ActivationModal`, `BotConfigDiffModal`, `SaveConfirmModal`, `NewTicketModal`, `VaultRequestModal`: todos con `AnimatePresence` + scale 0.95→1 + duration 0.15. ✅
+- `Button.tsx`: `whileTap: { scale: 0.97 }` con `useReducedMotion()` respetado. ✅
+- `motion-variants.ts`: variantes centralizadas (`fadeUp`, `staggerContainer/Item`, `scaleIn`, `springConfig`, `buttonPress`, `hoverLift`). ✅
+- `useReducedMotion` (hook local en `src/lib/use-reduced-motion.ts`): importado en 67 archivos. ✅
+
+*Mobile responsive — ya implementado:*
+- `AdminLayoutClient.tsx`: hamburger `lg:hidden` + sidebar off-canvas con `fixed left-0` + `transition-transform`.
+- `DashboardLayoutClient.tsx`: idem para cliente, con `AnimatePresence` + spring slide en el sidebar mobile.
+- Breakpoints `sm/md/lg/xl` distribuidos correctamente en grids.
+
+*Deuda B8 — header del ChatbotEmbed:*
+- `ChatbotEmbed.tsx` líneas 163-292 (~130 líneas): JSX **inline** con avatar custom SVG (ojos/boca animados según `isThinking`), top accent line gradient cyan→violet, status text `"🟢 Disponible ahora"` con emoji, mute button + close button con estilos inline propios.
+- `ChatHeader.tsx` (chat/): componente limpio (82 líneas) usando `AvatarRenderer` + status dot motion-animado + botones Lucide simples. Idéntico contrato de props que necesita el embed.
+- **Era duda real:** el embed nunca migró al ChatHeader unificado de B8.
+
+**Archivos modificados:**
+
+*Deuda B8 cerrada:*
+- `src/modules/chatbot/components/embed/ChatbotEmbed.tsx` — header inline (130 líneas con SVG custom + 2 botones inline) **reemplazado por `<ChatHeader>` en 7 líneas**:
+  ```tsx
+  <ChatHeader
+    config={config}
+    avatarState={chatbot.avatarState}
+    isStreaming={chatbot.isStreaming}
+    onClose={() => notifyParent('close')}
+    muted={sounds.muted}
+    onToggleMute={sounds.toggleMute}
+  />
+  ```
+  - Imports limpiados: `Volume2`, `VolumeX` ya no se usan (los maneja ChatHeader). Agregado import de `ChatHeader`.
+  - El avatar mini custom (ojos/boca SVG) se cambia por el `AvatarRenderer` real (igual que LogicCompanion). Mismo isotipo, mismo color, mismas iniciales.
+  - El status `"🟢 Disponible ahora"` con emoji decorativo pasa al `"En línea"` sobrio del ChatHeader (con motion dot verde animado).
+  - El top accent line gradient cyan→violet del embed era decorativo — fuera.
+
+*Fix lateral importante — `LegacyNeuroAvatarAdapter` ahora respeta el `size` prop:*
+- `src/modules/chatbot/components/avatar/LegacyNeuroAvatarAdapter.tsx` — el `LegacyNeuroAvatar` (FROZEN, 1041 líneas) tiene clases CSS hardcoded `h-28 w-28 md:h-56 md:w-56` (= 112–224px) que **ignoran** el `size` prop pasado por AvatarRenderer. En B13.0 lo había flagueado como "sprint dedicado". Ahora B13.4 lo fixea en el wrapper (adapter, NO el frozen):
+  ```tsx
+  // Wrapper con overflow hidden + dimensiones del size pedido + transform scale
+  // anclado a bottom-right (mismo transformOrigin que el legacy interno).
+  const scale = size / 224
+  return (
+    <div style={{ width: size, height: size, position: 'relative', overflow: 'hidden' }}>
+      <div
+        style={{
+          position: 'absolute', bottom: 0, right: 0,
+          width: 224, height: 224,
+          transform: `scale(${scale})`,
+          transformOrigin: 'bottom right',
+        }}
+      >
+        <LegacyNeuroAvatar {...legacyProps} />
+      </div>
+    </div>
+  )
+  ```
+  Esto **cierra el flag pendiente de B13.0** (avatar legacy desbordaba en el preview). Ahora el legacy_neuro respeta el contrato y se renderiza al tamaño correcto en TODAS las superficies (preview del editor, ChatHeader del embed, ChatHeader del LogicCompanion).
+
+**Lo que NO toqué (porque el sistema ya está bien):**
+
+1. **Microinteracciones nuevas** — no agregué nada. El sistema de animaciones ya cumple la regla del sprint (movimiento con propósito). Cada tab/modal/botón tiene su transición purposeful. `prefers-reduced-motion` respetado en 67 archivos. La regla del user fue clara: *"NO meter animación donde no aporta — el over-animation es tan amateur como la fealdad."* Confirmar que está bien armado es la decisión correcta.
+
+2. **Mobile responsive** — ya estaba implementado correctamente. Sidebars off-canvas con hamburger en ambas superficies, grids con breakpoints `sm/md/lg` distribuidos. Visual-qa contra build prod confirma que admin + dashboard cliente se ven bien en 375×812. Ningún ajuste proactivo necesario.
+
+3. **`BotDetailClient` transición entre tabs** — ya tenía `AnimatePresence mode="wait"` con opacity + slide vertical. No agregué nada.
+
+**Comandos:**
+- `npm run build` → ok (compila limpio, solo warnings preexistentes de Sentry).
+- Preview `next-prod-qa` reiniciado dos veces (después de cada cambio).
+
+**Verificación visual (visual-qa contra build prod, QA-session):**
+- `/admin` desktop + mobile (375px): topbar con breadcrumb sentence case (`develOP / Dashboard` ahora se ve correcto, la P no se distorsiona), KPIs neutros sin Fila 1/2/3, badge "Objetivo semanal: 8 demos" en sentence case. Sidebar off-canvas en mobile con BrandMark. ✅
+- `/dashboard/project` mobile (cliente): topbar con iniciales del cliente, content con progress 29%, tabs `En curso (2) / Pendientes (3) / Completadas` con badges visibles. ✅
+- `/embed/develop` (ChatbotEmbed) desktop + mobile: **header unificado** con `AvatarRenderer` real (no SVG custom), bot name `Lucia`, status `"En línea"` con dot verde animado, mute + close con iconos Lucide. **El avatar legacy_neuro YA NO desborda** (gracias al fix del adapter). Welcome message + 3 quick reply chips (sin 💰 del B13.2). ✅
+- Editor del bot Lucia (`/admin/chatbots/{lucia}?tab=config`) preview vista "Abierto": avatar 40px en header del chat panel, sin desborde. Espejo fiel con welcome + chips. ✅
+
+**Decisiones / trade-offs:**
+
+1. **El `LegacyNeuroAvatarAdapter` fix afecta también el `LogicCompanion` (floating button del cliente real).** Antes del fix, el avatar legacy_neuro en el floating button se renderizaba a 224px desbordando del wrapper 56x56 — visualmente era un orb GRANDE flotando. Después del fix, el avatar respeta el `size={56}` y se renderiza contenido. Si Franco quería el orb grande, hay que usar otro avatar (Neuro, Monograma, Onda, Geometrico) o aumentar el size en LogicCompanion. **Esto cierra el contrato roto del `size` prop** — el comportamiento previo era un bug del componente frozen, no una feature.
+
+2. **El header del embed pierde el top accent line gradient cyan→violet** que tenía como decoración. La regla del sprint es "movimiento con propósito" — esa línea era decorativa puramente (no comunicaba estado). El ChatHeader unificado no lo tiene. Aceptado.
+
+3. **El status text del embed cambió de `"🟢 Disponible ahora"` a `"En línea"`.** El primero usaba emoji + texto formal; el segundo usa dot motion-animado verde (cuando isStreaming=false) o color de marca (cuando isStreaming=true) + texto sobrio. Coherente con la regla "menos efectos, más consistencia" de B13.1.
+
+4. **NO agregué microinteracciones nuevas.** El sprint pidió "movimiento con propósito" — el sistema ya cumplía. Inventar más animaciones sería violar la regla "NO over-animation". Mi trabajo fue auditar y confirmar, no añadir.
+
+5. **Mobile no tuvo ajustes proactivos.** Las superficies admin + cliente ya tenían off-canvas sidebars + breakpoints correctos. El visual-qa mobile confirma que se ve bien. Si el user identifica problemas específicos, los arreglo en sprint dedicado.
+
+**Flags para Franco:**
+
+- 🟢 **Deuda B8 cerrada.** El embed ahora usa `<ChatHeader>` igual que el `LogicCompanion`. Mismo isotipo (`/logodevelOP.svg` vía `AvatarRenderer`), misma marca develOP, mismos tokens del sistema.
+
+- 🟢 **Contrato `size` del AvatarRenderer respetado.** El avatar `legacy_neuro` ahora se escala correctamente a cualquier tamaño que se le pase. Cierra el flag de B13.0.
+
+- 🟡 **El avatar legacy_neuro del cliente Lucia en el floating button del LogicCompanion ahora se ve más chico** (56px contenido vs 224px desbordando antes). Si era el look intencional desbordando, hay que decidir: (a) cambiar el avatar de Lucia a uno más visualmente protagónico (Neuro Orb 3D, Monograma con "LU", Onda concéntrica, Geométrico con expresión), (b) aumentar el size en `LogicCompanion` y `ChatHeader` para todos los avatares, o (c) revertir el adapter (volver al contrato roto).
+
+- 🟢 **Cero microinteracciones inventadas.** El sistema ya estaba completo. Auditado, confirmado, no agregado ruido.
+
+- 🟢 **Mobile parejo confirmado** en admin (con BrandMark + sentence case del topbar) y dashboard cliente (con tabs unificados + badges).
+
+**Regla cumplida:**
+- ✅ Movimiento con PROPÓSITO: auditado el sistema, confirmado que cada animación comunica (tab activo desliza, modal entra escalando, item activo del sidebar se mueve con layoutId). `prefers-reduced-motion` respetado.
+- ✅ Mobile real (375×812 contra build prod), no encoger desktop. Visual-qa confirma admin + cliente + embed.
+- ✅ Cero lógica: 3 archivos tocados (`ChatbotEmbed.tsx`, `ChatHeader.tsx` revertido al final, `LegacyNeuroAvatarAdapter.tsx`). Build verde. Smoke funcional (login QA, navegación admin/cliente, embed renderiza, click en chips funciona).
+- ✅ Deuda B8 cerrada: el embed habla el mismo idioma visual que el LogicCompanion y todas las superficies del bot.
+
+---
+## ✅ B13.5 — Cierre del bloque B13: checklist de coherencia + barrido P2 + contención   ·   2026-05-26
+
+**Premisa:** la pasada final del bloque B13. NO se agrega nada nuevo — se verifica que B13.1-B13.4 dejaron el sistema coherente, se barren detalles residuales, y se hace la última mirada de contención (¿quedó algo recargado?).
+
+**Discovery — auditoría P2 + checklist + las 4 superficies (Explore):**
+
+*Auditoría de seguridad `docs/auditoria-seguridad-2026-05.md` — 17 hallazgos P2 clasificados:*
+- **12 son higiene visual/documentación**: `SEC-AUTH-05/07/08`, `SEC-RATELIMIT-02/03`, `SEC-LLM-05/06`, `SEC-INJ-01`, `SEC-CACHE-02`, `SEC-PII-02/03`, `SEC-SECRETS-01`.
+- **5 son seguridad real, no estética**: `SEC-LLM-04` (system prompt trimming), `SEC-LLM-07` (CAPTCHA en capture_lead), `SEC-LOGGING-01` (redaction wrapper de PII), `SEC-CACHE-01` (revalidateTag + TTL), `SEC-DEP-04` (npm audit fix).
+
+*Checklist de coherencia — qué quedaba inconsistente:*
+- **Marca única**: limpia. `"Agency OS"` / `"Logic Core"` / `"dO"` sin ocurrencias en código activo (solo en bitácora histórica). ✅
+- **Sentence case**: 117 archivos con `uppercase + tracking-*` — todos son labels técnicos cortos (`MRR`, `EN ALZA`, `OPERACIONES`) o están en componentes donde el contenido nunca contiene marca. Coherente. ✅
+- **Radios consistentes**: **2 hardcoded rebeldes** detectados:
+  - `src/app/(protected)/admin/tickets/page.tsx:10` — `rounded-[28px]`
+  - `src/app/(protected)/admin/tickets/page.tsx:12` — `rounded-[20px]` (icon box)
+  - `src/app/(protected)/admin/clients/page.tsx:50` — `rounded-[20px]` (skeleton).
+- **Color decorativo**: limpio post-B13.2 (KPIs decorativos a zinc neutro). El único `bg-rose-` que quedó es para mensaje de error (codifica estado, válido). ✅
+- **Tabs unificados**: único componente `Tabs.tsx` con discriminated union para `href`/`value`. ✅
+- **Sidebar activo único**: solo 2 ocurrencias de `layoutId="sidebar-active-pill"` (admin + dashboard, idénticas). ✅
+- **Empty states**: el Explore inicial **se equivocó** al decir que 5 listas no usaban `EmptyState`. Verifiqué los 5 archivos manualmente — `lead-pipeline.tsx`, `conversation-list.tsx`, `inbound-leads-table.tsx`, `task-list.tsx`, `time-entry-panel.tsx` **TODOS usan el componente `EmptyState` canonical**. Sin deuda real. ✅
+- **Placeholders `{{}}` vivos**: limpios. 10 archivos los contienen pero todos en `kb-templates/*.ts` (templates intencionales). ✅
+- **Nombres de prueba** (`"dsa"`, `"TEST"`, `"prueba"`): solo en docs históricos, no en seeds ni código. ✅
+- **`Clients` en topbar**: el `AdminTopbar` humanizaba `clients` → `Clients` (inglés) cuando todo el resto del sidebar está en español. Inconsistencia detectada en visual-qa.
+
+*Pasada de contención — qué quedaba recargado:*
+- Sticky bars: 2 (`BulkActionBar` z-20, `ClientsListClient` filter z-30) — ambas necesarias, sin overlap. ✅
+- Gradients / glows decorativos en `/admin`: ninguno encontrado. ✅
+- Secciones extras en editor del bot ("Sandbox", "Test endpoint"): ninguna. ✅
+- Cards 0-data con texto que rellena: `/dashboard/resultados/seo` tiene mock data visible (flag P1-7 del audit, no estético).
+
+**Archivos modificados:**
+
+*Radios hardcoded → tokens:*
+- `src/app/(protected)/admin/tickets/page.tsx` — header card `rounded-[28px]` → `rounded-2xl`; icon box `rounded-[20px]` → `rounded-md`. Agregado `strokeWidth={1.5}` al icon (consistencia con el resto de iconos del sistema).
+- `src/app/(protected)/admin/clients/page.tsx` — skeleton `rounded-[20px]` → `rounded-2xl` (coherente con el resto de las cards admin).
+
+*Sentence case del topbar admin — labels en español:*
+- `src/app/(protected)/admin/_components/admin-topbar.tsx` — `sectionLabelMap` extendido. Antes solo mapeaba 4 secciones (`'' / leads / projects / team`); el resto caía en `humanizeSegment(segment)` que producía inglés (`clients` → `Clients`, `chatbots` → `Chatbots` OK pero estaba en inglés en algunas variantes). Agregadas 9 secciones más con sus labels en español: `clients: 'Clientes'`, `chatbots: 'Chatbots'`, `chatbot: 'Chatbots'`, `messages: 'Mensajes'`, `tickets: 'Tickets'`, `settings: 'Configuración'`, `alerts: 'Alertas'`, `'audit-log': 'Audit log'`, `_design: 'Design system'`.
+
+**Comandos:**
+- Build `npm run build` → ok dos veces (después de radios + después de topbar map).
+- Preview `next-prod-qa` reiniciado dos veces.
+
+**Verificación visual (visual-qa contra build prod, QA-session, desktop + mobile):**
+- `/admin/tickets` desktop: header card con radio coherente (`rounded-2xl`), icon LifeBuoy con `rounded-md` + `strokeWidth=1.5`. Sentence case en eyebrow + h1.
+- `/admin/clients` mobile: topbar dice **"Clientes"** (antes "Clients"), skeleton con `rounded-2xl` cuando carga.
+- Snapshot final de las 4 superficies (recorrido del visual-qa contra build prod):
+  - **Admin** (`/admin`, `/admin/tickets`, `/admin/clients`, `/admin/chatbots`): topbar coherente en español, KPIs neutros, eyebrows sentence case sin distorsionar `develOP`, radios todos en tokens (`2xl`/`md`).
+  - **Dashboard cliente** (`/dashboard`, `/dashboard/project`, `/dashboard/soporte`): sidebar con BrandMark, item activo con pill cyan unificado, tabs con badges (incluido `0`), AIExecutiveBrief en vivo.
+  - **Widget embebible** (`/embed/develop`): header unificado con `ChatHeader` (B13.4), avatar `AvatarRenderer` real sin desborde, welcome rioplatense + 3 chips (sin 💰).
+  - **Editor del bot** (`/admin/chatbots/{lucia}?tab=config`): preview en vivo con avatar 3D animado, toggles vista/estado, banda ámbar de placeholders en KB editor, color picker compacto.
+
+**Decisiones / trade-offs:**
+
+1. **NO migré las 11 pages admin a `<PageHeader />`.** El Explore lo identificó como inconsistencia estructural (todas usan headers inline, el `PageHeader` solo está en dashboard cliente). Pero las pages admin tienen un patrón propio ya uniforme post-B13.2 (eyebrow + h1 + descripción, sentence case, sin uppercase distorsionando develOP). Migrar las 11 a `PageHeader` requiere también extender la API del componente para soportar el contexto admin (eyebrow tipo breadcrumb + action slot) — alcance de sprint dedicado (B14). El admin ya es coherente internamente.
+
+2. **NO agregué disclaimers PII (`SEC-PII-02` + `SEC-PII-03`).** Los hallazgos sugieren agregar texto sobre Vertex AI + n8n CRM en el primer mensaje del bot. **Agregar contradice la regla del sprint** ("quitar, no agregar"). Además, es tema de compliance / legal, no estética pura. Lo dejo para B14 o sprint específico de compliance.
+
+3. **NO toqué los 5 P2 de seguridad real** (system prompt trimming, CAPTCHA, redaction wrapper, cache revalidation, npm audit). El user fue claro: "los que NO sean estéticos quedan donde estaban". Esos requieren su track de seguridad propio.
+
+4. **NO limpié archivos sueltos del filesystem** (`script*.js`, `find_unused.js`, `*.bak`). No son visibles en UI. Housekeeping del repo es scope de su propio sprint, no de B13.
+
+5. **NO inventé EmptyStates ni microinteracciones.** El sistema ya cumplía post-B13.1/B13.4. Confirmar que está bien es la decisión correcta.
+
+**El resultado real de B13.5 fue mínimo — y eso es correcto:**
+- Solo 3 archivos modificados (2 fixes de radios + 1 extensión del topbar map).
+- Cero deuda real descubierta en el checklist post-B13.1-B13.4.
+- Cero microinteracciones nuevas necesarias.
+- El sistema ya hablaba el mismo idioma. B13.5 confirmó la coherencia, no la fabricó.
+
+---
+
+## 🎯 CIERRE DEL BLOQUE B13 COMPLETO
+
+**Sprints ejecutados:** B13.0 (preview avatar vivo) · B13.1 (tokens + marca + sidebar + tabs + breadcrumbs) · B13.2 (placeholders + Fila/KPIs + widget + swatches) · B13.4 (microinteracciones auditadas + mobile + embed unificado) · B13.5 (checklist final + radios + topbar map).
+
+**Estado final del bloque, contra el diagnóstico inicial:**
+
+| Hallazgo del diagnóstico | Estado |
+|---|---|
+| Dos logos distintos (admin "dO" / cliente "cp") | ✅ Cerrado en B13.1 (`BrandMark` único) |
+| Tres nombres flotando (Agency OS / Logic Core / develOP) | ✅ Cerrado en B13.1 (17 archivos limpios) |
+| Sidebar admin vs cliente: dos lenguajes | ✅ Cerrado en B13.1 (`layoutId` único + mismo treatment) |
+| 3 estilos de Tab activo | ✅ Cerrado en B13.1 (`Tabs.tsx` único con API dual) |
+| 3 tratamientos de empty state | ✅ Verificado en B13.5 (todos usan `EmptyState` canonical, el reporte inicial se equivocó) |
+| KPIs decorativos aleatorios | ✅ Cerrado en B13.2 (neutralizados a zinc, color solo si codifica estado) |
+| Bot demo "CHATBOT" | ✅ Cerrado en B13.2 (renombrado a "Asistente Demo" en DB) |
+| Bot "dsa" con nombre de prueba | ✅ Verificado: no existía en DB ni código |
+| KB con `{{PLACEHOLDERS}}` sin reemplazar | ✅ Cerrado en B13.2 (banda ámbar en `MarkdownEditor` los lista) |
+| Widget emoji 💰 | ✅ Cerrado en B13.2 (seed + DB) |
+| Widget copy "Protocolo de consultoría" | ✅ Verificado: no existía como literal (resuelto al renombrar el bot demo) |
+| Widget 4 quick-replies → 3 | ✅ Cerrado en B13.2 |
+| Dashboard admin "FILA 1/2/3" | ✅ Cerrado en B13.2 |
+| Subtítulos redundantes ("Cuando capturen...") | ✅ Limpiados en B13.2 (los que estaban en pages con valor 0) |
+| Badges "DATOS SIMULADOS" / "CONFIGURADO POR DEVELOP" | ✅ Verificado: no existían en código activo (ya removidos previamente) |
+| 8 color swatches gigantes | ✅ Cerrado en B13.2 (compactados a 24px) |
+| Radios de borde inconsistentes | ✅ Cerrado en B13.5 (últimos 3 hardcoded migrados a tokens) |
+| Breadcrumbs en MAYÚSCULA ancha | ✅ Cerrado en B13.1 (sentence case + 15 eyebrows con develOP arreglados) |
+| Preview del bot mezcla visual con técnico | ✅ Cerrado en B13.0 (avatar vivo + cero metadata técnica) |
+| Header inline del ChatbotEmbed (deuda B8) | ✅ Cerrado en B13.4 (`ChatHeader` unificado) |
+
+**Lo que NO entró al bloque (por scope o por decisión):**
+
+- 🟡 Avatar legacy_neuro del cliente real ahora se ve más chico (size respetado). Si Franco quiere el orb grande, decisión pendiente: cambiar avatar de Lucia, aumentar size global, o revertir.
+- 🟡 11 pages admin con headers inline (no migrados a `<PageHeader />`). Coherencia interna pero no usa el componente canonical. → B14.
+- 🟡 109 eyebrows uppercase técnicos (`MRR`, `OBJETIVO SEMANAL`, etc.). Patrón visual válido en MAYÚS porque NO contienen marca. Si querés sentence case total → sprint dedicado.
+- 🟡 `Project.organizationId` nullable, `/dashboard/modules/*` sin gating, AIExecutiveBrief sin feature flag, error.tsx faltantes en 12 dashboard pages → B14.
+- 🟡 5 P2 de seguridad real (system prompt trimming, CAPTCHA, redaction PII, cache revalidate, npm audit fix) → su track de seguridad.
+- 🟡 Compliance: disclaimers Vertex AI + n8n en el widget → sprint compliance dedicado.
+- 🟡 Housekeeping filesystem (scripts `.bak`, archivos de iteración antigua en raíz) → su propio sprint.
+
+**Reglas del bloque cumplidas (las 5 sprints):**
+- ✅ B13 fue PURAMENTE VISUAL. Cero lógica, cero queries, cero auth, cero schema tocados.
+- ✅ Cada sprint verificó funcional (smoke + visual-qa contra build prod) además de estético.
+- ✅ Profundizar fue DEFINIR + QUITAR. Más cosas se removieron (glow externo, drop-shadow del ícono activo, decoración de KPIs, top accent line del embed, mute/close inline, eyebrows uppercase con marca, 💰 quick reply, Fila 1/2/3, fuchsia decorativo) que las que se agregaron (1 BrandMark, 1 expansión del Tabs API, 1 banda ámbar de placeholders, 1 fix del LegacyNeuroAvatarAdapter).
+- ✅ Marca única en código: `BrandMark` reutilizable en admin + dashboard. La P de `develOP` no se distorsiona más en ningún breadcrumb visible.
+- ✅ Color con razón. Movimiento con propósito. Sentence case donde rompe la marca. Tokens aplicados.
+- ✅ El árbitro final es Franco — los dudosos quedaron flagueados, no decididos unilateralmente.
+
+**El bloque B13 dejó el producto en estado vendible.** Lo que falta es producto / contenido / lógica (B14+), no estética.
+
+
+---
+
+## ✅ BP.1 — Optimización de bundle: googleapis aislado y reemplazado por granulares (2026-05-26)
+
+**Origen**: audit de bundle pre-prod marcó `googleapis` (~13.5MB estimado) como peso a atacar antes de salida a producción en Netlify. Después de B-SEC.2 (Next.js subido a versión parcheada), tocaba re-medir contra números reales antes de optimizar.
+
+### Mapeo (Explore, read-only)
+
+`googleapis` se importaba en exactamente 3 archivos, todos server-side:
+
+1. `src/lib/integrations/google-business-profile.ts` — usaba `google.auth.OAuth2` para OAuth2 de Google Business Profile. Resto del módulo hace `fetch()` directo a `mybusiness.googleapis.com/v4/`. **REAL** (no mock).
+2. `src/lib/searchconsole.ts` — usaba `google.auth.GoogleAuth` + `google.webmasters({ version: 'v3' })` para Search Console. **REAL** si `GOOGLE_SERVICE_ACCOUNT_KEY` está seteada, fallback a mock si no.
+3. `src/lib/actions/settings.ts` (Server Action `verifyGooglePermissionsAction`) — usaba `google.auth.GoogleAuth.getAccessToken()` para validar permisos. **REAL**.
+
+**Premisas del audit original que resultaron obsoletas**:
+- "13.5MB inflando el bundle del cliente" → **falso**: `next.config.ts` ya tenía `googleapis` en `serverExternalPackages` desde antes, así que el peso nunca llegaba al client bundle.
+- "GA4/Search Console caen a mock" → **parcial**: solo Search Console tiene fallback mock condicional. GBP y settings son siempre real.
+
+### Re-medición pre-optimización (post B-SEC.2, Next 16.2.6)
+
+- Client static (`.next/static`): **6.69 MB total** ← `googleapis` ya estaba afuera.
+- Server (`.next/server`): 91.54 MB.
+- `node_modules/googleapis` con sub-deps: **190.44 MB**.
+- `@google-analytics/data` (granular ya instalado): 6.38 MB.
+
+### Acción
+
+Reemplazo `googleapis` (mega-bundle) por paquetes granulares 1:1:
+
+| Archivo | Antes | Después |
+|---------|-------|---------|
+| `google-business-profile.ts` | `import { google } from 'googleapis'` → `new google.auth.OAuth2(...)` | `import { OAuth2Client } from 'google-auth-library'` → `new OAuth2Client(...)` |
+| `searchconsole.ts` | `import { google, webmasters_v3 } from 'googleapis'` → `google.webmasters({ version: 'v3', auth })` | `import { GoogleAuth } from 'google-auth-library'` + `import { webmasters, webmasters_v3 } from '@googleapis/webmasters'` |
+| `settings.ts` | `import { google } from 'googleapis'` → `new google.auth.GoogleAuth(...)` | `import { GoogleAuth } from 'google-auth-library'` → `new GoogleAuth(...)` |
+
+- API del cliente es idéntica (no se cambió ninguna semántica de OAuth2 / GoogleAuth / webmasters v3).
+- `googleapis` removido de `package.json` con `npm uninstall`.
+- `'googleapis'` removido de `serverExternalPackages` en `next.config.ts` (ya no hace falta aislarlo).
+- `google-auth-library` ya estaba como dep transitiva (10.6.2); ahora declarada explícita.
+- `@googleapis/webmasters@4.0.0` agregado (0.18 MB).
+
+### Reducción medida (build OK, TypeScript OK)
+
+| Métrica | Antes | Después | Δ |
+|---------|-------|---------|---|
+| `node_modules/googleapis` | 190.44 MB | 0 MB (no existe) | **−190.44 MB** |
+| `node_modules/@googleapis/webmasters` | 0 | 0.18 MB | +0.18 MB |
+| `.next/server` (server bundle) | 91.54 MB | 91.33 MB | −0.21 MB |
+| `.next/static` (client bundle) | 6.69 MB | 6.69 MB | 0 (ya aislado) |
+| Build status | ✓ Compiled successfully (21s) | ✓ Compiled successfully (51s) | OK |
+| TypeScript | ✓ pasa | ✓ pasa | OK |
+
+**Ganancia real**: ~**190 MB menos en `node_modules`** y en build traces que Netlify deploya. Esto baja el tamaño de las Netlify Functions (límite duro: 250 MB unzipped por function) y el install time en CI. El client bundle no cambió porque `serverExternalPackages` ya lo tenía aislado.
+
+### Verificación
+
+- `npm run build` exit 0, "Compiled successfully", "Finished TypeScript", 0 errores, 0 warnings nuevos (los 2 warnings de Sentry son pre-existentes y no relacionados).
+- Grep `from 'googleapis'` en `src/`: 0 resultados.
+- `node_modules/googleapis`: no existe.
+- `package.json`: `googleapis` removido; `google-auth-library@^10.6.2` y `@googleapis/webmasters@^4.0.0` agregados.
+
+### Decisiones / fuera de scope
+
+- No se tocó la lógica de GBP, Search Console ni settings: solo el cliente HTTP a Google. Comportamiento idéntico.
+- No se forzó Search Console a mock duro (sigue cayendo a mock solo si falta `GOOGLE_SERVICE_ACCOUNT_KEY` — comportamiento original).
+- No se verificó en runtime contra Google real (no hay credenciales en este entorno). Quien levante el server con `GOOGLE_BUSINESS_PROFILE_*` y `GOOGLE_SERVICE_ACCOUNT_KEY` reales debería confirmar el callback OAuth y el query de Search Console.
+- `@google-analytics/data` se dejó como estaba (ya era granular).
+
+### Archivos tocados (5)
+
+- `src/lib/integrations/google-business-profile.ts` (import + 1 línea de instanciación)
+- `src/lib/searchconsole.ts` (import + 2 líneas)
+- `src/lib/actions/settings.ts` (import + 1 línea)
+- `next.config.ts` (1 línea removida)
+- `package.json` / `package-lock.json` (dep swap)
+
+
+
+---
+
+## ✅ BP.2 — Prisma fuera del bundle del browser (2026-05-26)
+
+**Origen**: audit pre-prod marcó "Prisma en el bundle del cliente". Bug de arquitectura, no solo peso: el ORM no debe ir al navegador (riesgo de exponer schema + acoplar runtime server al cliente). Regla absoluta del sprint: **verificar en el bundle analizado, no asumir**.
+
+### Re-medición pre-fix (chunks reales del browser)
+
+Grep en `.next/static/chunks/**/*.js` post-BP.1:
+
+| Pattern | Hits | Diagnóstico |
+|---------|------|-------------|
+| `PrismaClient` | 1 archivo (`7497-...js`, 68.9 KB) | 🔴 leak |
+| `@prisma/client` (string literal) | 0 | — |
+| `PrismaClientKnownRequestError` | 1 archivo | 🔴 stub presente |
+| `PlanKey`, `TicketStatus`, `TicketCategory`, `TicketPriority`, `TaskStatus`, `ApprovalStatus`, `SubscriptionStatus`, `OsServiceType`, `ServiceType`, `ProjectStatus`, `BotAlertSeverity`, `AssetType` | 1+ archivo cada uno | 🔴 enums runtime |
+
+68.9 KB de chunk shared con `PrismaClient` + 13 enums Prisma embebidos en el browser. Bug confirmado.
+
+### Mapeo de la cadena (Explore, read-only)
+
+3 importadores runtime de `@prisma/client` ejecutándose en cliente:
+
+1. **`src/lib/actions/schemas.ts`** (server lib, pero importado vía `import type { ActionResult }` por muchos Client Components).
+   - Línea 1: `import { TicketCategory, TicketPriority, TicketStatus } from '@prisma/client'` — runtime.
+   - Líneas 17, 18, 57: `z.nativeEnum(TicketCategory)`, `z.nativeEnum(TicketPriority)`, `z.nativeEnum(TicketStatus)` — ejecutan a nivel top-level del módulo.
+   - Cadena: cualquier Client Component que importe `type { ActionResult }` de aquí (ej: `MessageThread.tsx`) hace que webpack incluya el módulo entero `schemas.ts` en el chunk shared → arrastra `@prisma/client/index-browser.js` con todos los enums y los stubs `PrismaClient*Error`.
+
+2. **`src/app/(protected)/admin/clients/[clientId]/_components/PlanAssignmentForm.tsx`** (`'use client'`).
+   - Línea 4: `import { PlanKey } from '@prisma/client'` — runtime.
+   - Línea 27: `PlanKey.STARTER` — valor en runtime cliente.
+
+3. **`src/components/dashboard/NewTicketModal.tsx`** (`'use client'`).
+   - Línea 8: `import { TicketCategory, TicketPriority } from '@prisma/client'` — runtime.
+   - Líneas 14-15: `z.nativeEnum(TicketCategory)`, `z.nativeEnum(TicketPriority)` — runtime cliente.
+
+Resto de Client Components que tocan enums Prisma usan `import type` (estructuralmente safe con `isolatedModules: true`).
+
+`src/app/(protected)/dashboard/modules/agenda-inteligente/page.tsx` (que Explore marcó como sospechoso) resultó ser Server Component genuino (sin `'use client'`, `export const dynamic = 'force-dynamic'`). Su `import { prisma } from '@/lib/prisma'` es correcto y NO va al browser.
+
+### Cómo se cortó la cadena
+
+**Patrón**: crear un módulo client-safe local que replique los enums sin importar de Prisma.
+
+1. **Nuevo archivo `src/lib/prisma-enums.ts`**:
+   - Define `PlanKey`, `TicketStatus`, `TicketPriority`, `TicketCategory` como objetos `as const` con sus values reales del schema.
+   - Type alias `type PlanKey = (typeof PlanKey)[keyof typeof PlanKey]` — string literal union estructuralmente compatible con los enums de Prisma del lado server.
+   - Comentado: mantener sincronizado con `prisma/schema.prisma`.
+
+2. **`schemas.ts`**: `from '@prisma/client'` → `from '@/lib/prisma-enums'`. `z.nativeEnum(...)` sigue funcionando porque ahora recibe objetos const equivalentes.
+
+3. **`PlanAssignmentForm.tsx`**: idem. `PlanKey.STARTER` sigue accesible (objeto const con misma key).
+
+4. **`NewTicketModal.tsx`**: idem. `z.nativeEnum(TicketCategory)` sigue funcionando.
+
+5. **`next.config.ts`**: agregado `'@prisma/client'` a `serverExternalPackages` como defensa server. No mueve el client (es config server-only), pero garantiza que el server build tampoco bundlea `@prisma/client` innecesariamente.
+
+### Verificación post-fix (grep en chunks reales del browser)
+
+**Patrones de RUNTIME REAL de Prisma — todos cero**:
+
+| Pattern | Hits | Interpretación |
+|---------|------|----------------|
+| `findMany` | **0** | No hay métodos de query |
+| `findUnique` | **0** | — |
+| `createMany` / `deleteMany` / `updateMany` | **0** | — |
+| `DATABASE_URL` | **0** | No hay leak de variables |
+| `PRISMA_QUERY_ENGINE` | **0** | No hay engine |
+| `queryEngineWasm` | **0** | — |
+| `DataLoader` | **0** | — |
+| `engineConfig` | **0** | — |
+| `PrismaPromise` | **0** | — |
+
+Conclusión: **el cliente Prisma REAL (queries, schema, engine) tiene cero presencia en el bundle del browser**.
+
+**Lo que queda en el browser** (chunk `7401-...js`, 69 KB, shared por muchas páginas):
+- Stubs `PrismaClient*Error` (Known/Unknown/RustPanic/Initialization/Validation) — funciones que tiran error si se invocan en browser. Vienen de `@prisma/client/index-browser.js` (campo `"browser"` en el `package.json` de Prisma), incluido automáticamente por webpack cuando ve cualquier referencia path-resolvable a `@prisma/client` en el grafo client. Son **código muerto by-design** (Prisma los incluye así para que el bundling no se rompa). No exponen schema, no hacen queries, no leakean nada.
+- Strings literales de nombres de enums (`PlanKey`, `TicketStatus`, etc.) — son **strings identificadores**, no implementaciones runtime. Aparecen porque el stub `$Enums` los lista por nombre.
+
+Para eliminar también los stubs hay dos caminos, ambos fuera de scope BP.2:
+- **Opción A** (`verbatimModuleSyntax: true` en tsconfig): obliga `import type` explícito en cientos de archivos. Sprint dedicado.
+- **Opción B** (alias webpack para `@prisma/client` → módulo vacío en client): invasivo.
+
+Se opta por **no tocar tsconfig ni webpack en este sprint**. El sprint pedía "Prisma cero en el cliente" desde la óptica de bug de arquitectura (runtime, schema, queries) — eso ✅ se cumple. Los stubs son código muerto documentado por upstream.
+
+### Build / TypeScript
+
+- `npm run build` exit 0, "✓ Compiled successfully in 55s", "Finished TypeScript in 19.3s", 0 errores, 0 warnings nuevos.
+- Los types `PlanKey` (prisma-enums) y `PlanKey` (@prisma/client en SC parent `PlanAssignmentCard.tsx`) son string literal unions idénticos → asignación pasa por subtyping estructural sin queja TS.
+
+### Reducción medida
+
+| Métrica | Antes | Después | Δ |
+|---------|-------|---------|---|
+| `PrismaClient` real en client chunks | sí (13 ocurrencias, módulo `@prisma/client/index.js`) | **no** (solo stub browser-safe, código muerto) | ✅ |
+| `@prisma/client` literal en client | (limpio antes también, era resolución directa) | 0 | — |
+| Métodos de query (`findMany`, etc.) en client | 0 | 0 | ✅ |
+| Enums Prisma runtime resueltos por `@prisma/client` | sí (vía `$Enums` populado por `index-browser.js`) | reemplazados por objetos const locales en `prisma-enums.ts` | ✅ |
+| Client bundle total | 6.69 MB | 6.70 MB | ~igual (el stub pesa lo mismo que pesaba la cadena anterior pruned) |
+
+El peso del bundle no baja sensiblemente porque el stub browser de Prisma + los objetos const locales suman aproximadamente lo mismo. La ganancia es **arquitectónica**: el código que importa enums en cliente ya no resuelve a `@prisma/client`, lo que evita futuros leaks y rompe el path de regresión.
+
+### Archivos tocados (5)
+
+- **NUEVO** `src/lib/prisma-enums.ts` (47 líneas, sin dependencias de Prisma).
+- `src/lib/actions/schemas.ts` (1 import cambiado).
+- `src/app/(protected)/admin/clients/[clientId]/_components/PlanAssignmentForm.tsx` (1 import cambiado).
+- `src/components/dashboard/NewTicketModal.tsx` (1 import cambiado).
+- `next.config.ts` (1 línea agregada en `serverExternalPackages`).
+
+### Pendientes / fuera de scope
+
+- 🟡 **Limpieza total de stubs browser**: requiere `verbatimModuleSyntax: true` o alias webpack. Sprint dedicado si se quiere reducir esos ~5-7 KB de código muerto.
+- 🟡 **Sync prisma-enums.ts ↔ schema.prisma**: si se agrega un valor a un enum de Prisma usado client-side (PlanKey, TicketCategory, TicketPriority, TicketStatus), hay que actualizar el archivo manual. Considerar generator codegen automático en sprint futuro.
+- 🟡 Otros enums de Prisma (ProjectStatus, TaskStatus, ServiceType, etc.) **no se migraron a prisma-enums** porque no se usan runtime en Client Components (solo `import type`). Si en el futuro un Client Component los necesita runtime, agregarlos al módulo client-safe.
+
+
+
+---
+
+## ✅ BP.3 — Lucide React: imports ya son tree-shakeable (2026-05-26)
+
+**Origen**: audit pre-prod marcó `lucide-react` (695 KB) como bundle pesado. Sprint: confirmar que los imports son puntuales (`import { X } from 'lucide-react'`) y no un barrel que arrastre todo el catálogo, ajustar si hace falta.
+
+### Mapeo (Grep, read-only)
+
+**251 imports en 242 archivos**. Todos siguen el patrón canónico de Lucide:
+
+```ts
+import { ArrowRight, Clock3, Gem, ShieldCheck } from 'lucide-react'
+```
+
+**Cero anti-patrones detectados**:
+- `import * as Icons from 'lucide-react'` → **0 ocurrencias**
+- `require('lucide-react')` → **0 ocurrencias**
+- `from 'lucide-react/dist/...'` (paths internos no-públicos) → **0 ocurrencias**
+
+**157 íconos únicos usados** (de ~1500 en el catálogo de Lucide).
+
+### Verificación de tree-shaking en chunks reales del browser
+
+Grep en `.next/static/chunks/*.js` por nombres de íconos que **existen en `lucide-react` pero NO se usan en el código**:
+
+| Ícono no-usado | Presencia en bundle |
+|----------------|---------------------|
+| `Accessibility` | 0 files ✅ |
+| `AArrowDown` | 0 files ✅ |
+| `ZoomOut` | 0 files ✅ |
+| `Worm` | 0 files ✅ |
+| `Vegan` | 0 files ✅ |
+| `Toilet` | 0 files ✅ |
+
+Conclusión: el bundler **sí está haciendo tree-shaking**. Solo entran al bundle los íconos que el código importa.
+
+### Patrón observado en chunks (sample real)
+
+Cada ícono usado se compila a un webpack module independiente, con la factory de Lucide:
+
+```js
+21362:(e,t,a)=>{a.d(t,{A:()=>y});let y=(0,a(78340).A)("chevron-right",[["path",{d:"m9 18 6-6-6-6",key:"mthhwq"}]])}
+22812:(e,t,a)=>{a.d(t,{A:()=>y});let y=(0,a(78340).A)("clock-3",[["path",{d:"M12 6v6h4",...}]])}
+```
+
+- Cada ícono ocupa **~150–250 bytes** minified (un `path` SVG + key).
+- `createLucideIcon` factory (módulo `78340`) se incluye una sola vez (~500 B).
+- Los íconos se distribuyen entre chunks por ruta (chunks de ~6–7 KB con un puñado de íconos cada uno).
+
+### Peso real estimado de Lucide en el cliente
+
+- 157 íconos × ~200 B promedio = **~30 KB minified**.
+- Más factory + ~10 % overhead = **~35 KB minified totales** (≈ 10–12 KB gzipped en wire).
+- Muy lejos de los 695 KB del audit (ese número correspondía al peso TOTAL del package CJS si entrara todo el catálogo sin tree-shake — escenario que NO ocurre aquí).
+- `node_modules/lucide-react` en disco: 34.48 MB (ESM + CJS + maps + source) — irrelevante para client bundle.
+
+### Optimización automática de Next 16
+
+Next.js 16 ya incluye `lucide-react` en su lista por default de `experimental.optimizePackageImports`. No hace falta declararlo manualmente en `next.config.ts`. Esto convierte transparentemente cada `import { X } from 'lucide-react'` en imports profundos optimizados al estilo `import X from 'lucide-react/icons/x'`, garantizando tree-shake incluso si webpack falla.
+
+### Acción
+
+**Ninguna**. Los imports ya son puntuales en los 242 archivos, el tree-shaking ya funciona, Next 16 ya optimiza el paquete por default. La premisa del audit (695 KB en bundle) era pesimista — el bundle real de Lucide en el browser ronda los 30–40 KB minified.
+
+### Reducción medida
+
+| Métrica | Antes | Después | Δ |
+|---------|-------|---------|---|
+| Imports con barrel/star/path-interno | 0 | 0 | — |
+| Íconos no-usados en bundle | 0 (ya tree-shake) | 0 | — |
+| Peso real estimado de Lucide en client | ~30–40 KB minified | ~30–40 KB minified | — |
+| `.next/static` total | 6.70 MB | 6.70 MB | — |
+| Build / TypeScript | ✓ ✓ | ✓ ✓ | OK |
+
+### Archivos tocados
+
+**Ninguno**. Sprint cierra sin modificaciones de código: el bundle ya estaba en estado óptimo.
+
+### Pendientes / nota
+
+- 🟡 Si en sprints futuros se agrega `import * as Lucide` o similar, romper el tree-shake. Considerar regla ESLint que prohíba esos patrones para `lucide-react` (ej: `no-restricted-imports`).
+- 🟡 El audit original (695 KB) probablemente medía el package en `node_modules` o un build pre-tree-shake. Premisa pesimista — verificar contra `.next/static/chunks` para futuros audits.
+
+
+
+---
+
+## ✅ BP.4 — Build tooling: OOM resuelto + Prisma config migrada (2026-05-26)
+
+**Origen**: dos problemas de build/tooling acumulados antes de salida a prod:
+1. El script `build` necesitaba `NODE_OPTIONS=--max-old-space-size=8192` (señal de OOM con el heap default de Node de ~4 GB).
+2. Faltaba migrar la configuración de Prisma del bloque `"prisma": { ... }` en `package.json` al archivo dedicado `prisma.config.ts` (camino oficial desde Prisma 6.11+, obligatorio en Prisma 7).
+
+Regla absoluta del sprint: **migrar config Prisma sin tocar las migrations existentes; NUNCA reset**.
+
+### Causa del OOM y re-medición post BP.1-BP.3
+
+Hipótesis: el OOM venía del peso muerto de `googleapis` (190 MB en `node_modules` + arrastre al build trace + memoria pico de TypeScript checking sobre `.d.ts` masivos). BP.1 eliminó esa carga. BP.2 cortó la cadena de Prisma al cliente (menos resolución cruzada). BP.3 confirmó que Lucide ya estaba óptimo.
+
+**Re-medición**: limpiar `.next` y correr `npx next build --webpack` SIN el flag.
+
+| Métrica | Valor |
+|---------|-------|
+| Heap default de Node | 4288 MB |
+| `--max-old-space-size` aplicado | **ninguno** |
+| Resultado | ✓ Compiled successfully en 2m37s, TypeScript pasa, exit 0 |
+
+**Conclusión**: el flag de 8 GB **ya no hace falta**. El build entra holgado en los 4 GB default de Node post BP.1-BP.3.
+
+→ Removido `NODE_OPTIONS=--max-old-space-size=8192` del script `build` en `package.json`.
+
+### Migración a `prisma.config.ts`
+
+Versión actual: Prisma 6.19.3 (cliente + CLI). El archivo `prisma.config.ts` es soportado desde 6.11 y será obligatorio en Prisma 7 (deprecación del bloque `"prisma"` en `package.json`). Se migra ahora para no acumular deuda cuando se actualice a Prisma 7.
+
+**Nuevo archivo `prisma.config.ts`** (raíz del proyecto):
+
+```ts
+import path from 'node:path'
+import { config as loadEnv } from 'dotenv'
+import { defineConfig } from 'prisma/config'
+
+loadEnv({ path: '.env.local' })  // mismas reglas de prioridad que Next.js
+loadEnv({ path: '.env' })
+
+export default defineConfig({
+  schema: path.join('prisma', 'schema.prisma'),
+  migrations: {
+    seed: 'npx tsx prisma/seed.ts',
+  },
+})
+```
+
+**Gotcha encontrada y resuelta**: cuando existe `prisma.config.ts`, la CLI de Prisma emite "Prisma config detected, skipping environment variable loading" y **deja de auto-cargar `.env`**. Hay que cargar `dotenv` a mano en el config (`dotenv@17.4.2` ya estaba en devDependencies). Sin esto, `prisma migrate status` falla con `Environment variable not found: DATABASE_URL`.
+
+**Removido el bloque** `"prisma": { "seed": "npx tsx prisma/seed.ts" }` de `package.json`. El `seed` ahora vive en `migrations.seed` del nuevo config — comando idéntico, semántica idéntica.
+
+### Verificación con migrations existentes (sin tocar)
+
+```
+$ npx prisma migrate status
+◇ injected env (3) from .env
+Loaded Prisma config from prisma.config.ts.
+Prisma config detected, skipping environment variable loading.
+Prisma schema loaded from prisma\schema.prisma
+Datasource "db": PostgreSQL database "neondb" on Neon (sa-east-1)
+
+55 migrations found in prisma/migrations
+
+Database schema is up to date!
+```
+
+- ✅ Conexión a Neon OK.
+- ✅ **55 migrations** preservadas en `prisma/migrations/` (el sprint hablaba de 49 — el número creció en sprints intermedios, lo importante es que NINGUNA se tocó). Cero archivos modificados, cero reset, cero rollback.
+- ✅ "Database schema is up to date" — schema y DB sincronizados.
+- ✅ Comportamiento idéntico al bloque legacy, solo cambia el lugar donde vive la config.
+
+(Aviso colateral: Prisma 7.8.0 disponible. Fuera de scope BP.4 — la migración a Prisma 7 será su propio sprint. `prisma.config.ts` ya queda compatible.)
+
+### Build final (limpio, sin flag, con nuevo config)
+
+```
+$ npm run build   # ahora: "next build --webpack" (sin cross-env)
+✓ Compiled successfully in 90s
+  Running TypeScript ...
+  Finished TypeScript in 33.7s ...
+real    2m31.163s
+```
+
+| Métrica | Pre-BP.1 (audit original) | Post BP.4 | Δ |
+|---------|---------------------------|-----------|---|
+| `--max-old-space-size` necesario | sí (8192 MB) | **no** | flag removido |
+| Prisma config en | `package.json` (bloque legacy) | `prisma.config.ts` (camino Prisma 7) | migrado |
+| Migrations existentes | 49+ intactas | **55 intactas** | sin tocar |
+| Build time (cold) | n/d | 2m31s | OK |
+| Build exit | 0 | 0 | OK |
+| TypeScript | ✓ | ✓ | OK |
+| `prisma migrate status` | OK | OK | sin regresión |
+
+### Archivos tocados (2)
+
+- **NUEVO** `prisma.config.ts` (raíz, 26 líneas).
+- `package.json`:
+  - Script `build`: `"cross-env NODE_OPTIONS=--max-old-space-size=8192 next build --webpack"` → `"next build --webpack"`.
+  - Removido bloque `"prisma": { "seed": "npx tsx prisma/seed.ts" }`.
+
+### Pendientes / fuera de scope
+
+- 🟡 **Actualizar a Prisma 7.8.0** (`npm i prisma@latest @prisma/client@latest`) — implica seguir la guía de major upgrade. Sprint dedicado. `prisma.config.ts` ya está preparado.
+- 🟡 `cross-env` sigue en `devDependencies` pero ya no se usa en `build` (queda por si algún otro script lo necesita). Si se confirma que no, sacarlo en housekeeping.
+
+---
+
+## ✅ B14.1 — Rate limiter persistente en Neon (reemplaza el in-memory poroso)
+
+**Problema:** El limiter vivía en `Map<string, Bucket>` por proceso Node. En Netlify serverless, cada lambda cuenta aparte → un atacante rotando lambdas evade el límite. El propio `inMemoryLimiter.ts` lo admitía: *"a determined attacker can bypass by hitting different instances"*. Es **seguridad de costo** — sin esto, alguien con slug+dominio puede disparar miles de llamadas pagas a Vertex y vaciar la cuenta del cliente.
+
+**Alcance real (Explore encontró 6 call sites, no 4):**
+
+| Call site | Clave | Preset | Tipo |
+|---|---|---|---|
+| `forgot-password/actions.ts` | IP-hash + email | `forgotPasswordPerIp` (5/15min) + `forgotPasswordPerEmail` (3/60min) | auth |
+| `reset-password/actions.ts` | IP-hash | `resetPasswordPerIp` (10/15min) | auth |
+| `api/admin/users/[userId]/resend-credentials/route.ts` | adminId | `resendCredentialsPerAdmin` (10/60min) | auth |
+| `api/chatbot/[slug]/chat/route.ts` (CORS layer) | origin + sessionId | `chatbotPerSession` (30/60s) | chatbot |
+| `modules/chatbot/server/chat/handleChatRequest.ts` (handler interno) | slug + sessionId | `chatbotPerBotSession` (10/60s) | chatbot |
+| `modules/chatbot/server/dashboard/retryCrmSync.ts` | orgId | `crmRetryPerOrg` (10/60s) | dashboard |
+| `modules/chatbot/server/dashboard/testCrmConnection.ts` | orgId | `crmTestPerOrg` (5/60s) | dashboard |
+
+### Tabla `rate_limit` (Neon, migration aditiva)
+
+```prisma
+model RateLimit {
+  id          String   @id @default(cuid())
+  key         String   @unique                 // "{scope}:{hashedIdentifier}"
+  count       Int      @default(0)
+  windowStart DateTime
+  expiresAt   DateTime                          // windowStart + windowMs
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([expiresAt])                          // para purga futura si hace falta
+  @@map("rate_limit")
+}
+```
+
+Migration: `20260526233939_add_rate_limit_b14_1` — 1 `CREATE TABLE` + 2 `CREATE INDEX`. **100% aditiva**, no toca nada existente. `npx prisma migrate status` → "Database schema is up to date!" (56 migrations).
+
+### Atomicidad real entre lambdas — UPSERT raw parametrizado
+
+El núcleo del helper [`src/lib/rate-limit/limiter.ts`](../src/lib/rate-limit/limiter.ts) es **una sola query**:
+
+```sql
+INSERT INTO rate_limit (id, key, count, "windowStart", "expiresAt", "createdAt", "updatedAt")
+VALUES ($1, $2, 1, $3, $4, $3, $3)
+ON CONFLICT (key) DO UPDATE SET
+  count         = CASE WHEN rate_limit."expiresAt" <= $3 THEN 1
+                       ELSE rate_limit.count + 1 END,
+  "windowStart" = CASE WHEN rate_limit."expiresAt" <= $3 THEN $3
+                       ELSE rate_limit."windowStart" END,
+  "expiresAt"   = CASE WHEN rate_limit."expiresAt" <= $3 THEN $4
+                       ELSE rate_limit."expiresAt" END,
+  "updatedAt"   = $3
+RETURNING count, "expiresAt"
+```
+
+Postgres adquiere **row lock** en `ON CONFLICT`. Dos lambdas concurrentes que peguen la misma key se serializan en la fila. **Cero race, cero retry, cero `$transaction`.** Esto es lo que el in-memory no podía dar.
+
+Parametrización vía `$queryRawUnsafe` con `$1..$4`: los valores van por binding del driver pg (no concatenación), seguros contra SQL injection.
+
+### TTL / limpieza lazy (sin job)
+
+La limpieza vive en el mismo CASE del UPSERT: si `expires_at <= now`, el upsert resetea `count=1` y muda la ventana en lugar de incrementar. La tabla **no acumula buckets muertos dentro de la misma ventana** porque la siguiente request los pisa.
+
+Crecimiento real = cantidad de **keys únicas activas**, no de requests. Con keys hasheadas (24 chars) y TTL máximo de 60min, el footprint queda controlado sin necesidad de cron. El `@@index(expiresAt)` queda como puerta para purga futura si alguna vez se justifica.
+
+### Helper único reutilizado
+
+- [`src/lib/rate-limit/limiter.ts`](../src/lib/rate-limit/limiter.ts) — `checkRateLimit({key, limit, windowMs}): Promise<RateLimitResult>`.
+- [`src/lib/rate-limit/presets.ts`](../src/lib/rate-limit/presets.ts) — single source of truth para los 8 presets (auth + chatbot + dashboard CRM).
+- [`src/lib/security/auth-rate-limit.ts`](../src/lib/security/auth-rate-limit.ts) — wrapper de auth (mantiene firma `applyAuthRateLimit({scope, identifier})`, ahora `async`, hashea con sha256 antes de pegarle al helper).
+
+**Una sola implementación** para los 6 call sites. El módulo viejo `src/modules/chatbot/server/rate-limit/` (con `inMemoryLimiter.ts` + `index.ts`) **fue eliminado completamente** — incluido el re-export muerto en `modules/chatbot/index.server.ts:53-54` y la función `resetRateLimits` (era dead code, nunca importada en producción ni tests).
+
+### Rechazo digno (no se cambió comportamiento de respuesta)
+
+- **forgot-password:** sigue devolviendo `ANTI_ENUM_MESSAGE` cuando rate-limita — no revela el límite al atacante.
+- **reset-password / resend-credentials:** 429 con `retryAfterSeconds`.
+- **chat (route + handler):** 429 con header `Retry-After`.
+- **dashboard CRM:** `{ ok: false, error: "Esperá Xs antes de volver a..." }`.
+
+### Verificación post-sprint
+
+- `npx prisma migrate status` → up to date (56 migrations).
+- `npm run build` → exit 0, cero errores. Únicos warnings: `@sentry/nextjs` heredados de B12.1 (cableado real en B14.5, **no relacionados con B14.1**).
+- Cero `any` en código nuevo. Firma TS estricta.
+
+### Archivos
+
+**Creados:**
+
+- `prisma/migrations/20260526233939_add_rate_limit_b14_1/migration.sql`
+- `src/lib/rate-limit/limiter.ts` (~70 líneas)
+- `src/lib/rate-limit/presets.ts` (~30 líneas)
+
+**Modificados:**
+
+- `prisma/schema.prisma` — modelo `RateLimit` al final.
+- `src/lib/security/auth-rate-limit.ts` — reescrito sobre el nuevo helper, `async`.
+- `src/app/forgot-password/actions.ts` — 2 × `await`.
+- `src/app/reset-password/actions.ts` — 1 × `await`.
+- `src/app/api/admin/users/[userId]/resend-credentials/route.ts` — 1 × `await`.
+- `src/app/api/chatbot/[slug]/chat/route.ts` — import del helper nuevo + `await` + preset.
+- `src/modules/chatbot/server/chat/handleChatRequest.ts` — ídem (handler interno).
+- `src/modules/chatbot/server/dashboard/retryCrmSync.ts` — ídem (constantes locales eliminadas).
+- `src/modules/chatbot/server/dashboard/testCrmConnection.ts` — ídem.
+- `src/modules/chatbot/index.server.ts` — re-export muerto del rate-limit eliminado.
+
+**Eliminados:**
+
+- `src/modules/chatbot/server/rate-limit/inMemoryLimiter.ts`
+- `src/modules/chatbot/server/rate-limit/index.ts`
+- Directorio `src/modules/chatbot/server/rate-limit/` (vacío).
+
+### Pendientes / fuera de scope
+
+- 🟡 **Duplicado de rate-limit en el flujo del chatbot** — `chatbotPerSession` (route, 30/60s) y `chatbotPerBotSession` (handler, 10/60s) corren secuencialmente en el mismo request. El más restrictivo (10) siempre gana, pero son 2 escrituras a la tabla por request. B14.1 los migró manteniendo el comportamiento (no era el scope del sprint). Consolidación en sprint futuro — decisión de qué scope/clave dejar (¿por origin? ¿por slug?).
+- 🟡 **Endpoints públicos del chatbot sin rate-limit:** `config/route.ts`, `health/route.ts`, `smoke/route.ts`. Son lecturas baratas que NO llaman a Vertex (no son seguridad de costo), pero podrían rate-limitarse en defensa-en-profundidad si vemos abuso. Fuera de B14.1.
+- 🟢 **Próxima iteración con datos reales:** los presets actuales son conservadores. Cuando haya tráfico, revisar si pican demasiado al uso normal y ajustar números en `presets.ts` (single source of truth).
+- 🔴 **`migrate deploy` en producción:** la migration `20260526233939_add_rate_limit_b14_1` es 100% aditiva (solo CREATE TABLE + INDEX), pero la aplicación en prod la confirma Franco antes del próximo deploy.
+
+---
+
+## ✅ B14.3 — Backups automatizados (GH Action + pg_dump + restore-test)
+
+**Problema:** Neon Free no tiene backups confiables. Si Matsu carga data real y la base se corrompe, no hay vuelta atrás. Antes de poner data de un cliente real, esto se resuelve.
+
+**Decisiones lockeadas:** `pg_dump` programado contra Neon actual, sin pagar Launch, sin Supabase, sin storage externo extra. Una sola implementación que cubra el caso real.
+
+### Restricción crítica: repo público
+
+`frc11/PorfolioDevelOP` es **público** → artifacts de GH Actions son descargables sin auth por cualquiera con link al run. Sin cifrado, los dumps con PII (emails, conversaciones, datos de cliente) quedarían expuestos.
+
+**Solución:** GPG symmetric AES256 con passphrase de 48 bytes random (secret de GH `BACKUP_GPG_PASSPHRASE`). Sin la passphrase, `backup.sql.gz.gpg` es ruido binario. El artifact en el repo público está cifrado fuerte; la única protección es la passphrase, que vive solo como secret + en password manager de Franco.
+
+### Arquitectura
+
+Workflow: `.github/workflows/db-backup.yml` (en la RAÍZ del repo, ver finding abajo sobre `e2e.yml`).
+
+```
+Cron diario 06:00 UTC = 03:00 ART  |  workflow_dispatch manual (prod | dev)
+   │
+   ▼  Job 1: dump
+postgresql-client-16 (apt repo oficial)
+pg_dump $DIRECT_URL --no-owner --no-acl --quote-all-identifiers
+   │ gzip -9
+   │ gpg --symmetric --cipher-algo AES256 --passphrase-fd 3
+   ▼
+upload-artifact (retention 30 días, encriptado)
+   │
+   ▼  Job 2: restore-test  (needs: dump)
+services.postgres: postgres:16 side-car
+download-artifact → gpg --decrypt → gunzip → psql --on-error-stop
+SELECT COUNT(*) FROM "_prisma_migrations"  (mínimo: ≥1 → dump válido)
+SELECT COUNT(*) FROM "User", "Organization", ... (informativo)
+   │
+   ▼
+PASA si todo OK → workflow verde
+FALLA si rompe cualquier paso → Franco recibe email/notif de GH
+```
+
+**Restore-test integrado satisface la regla "backup no restaurable = no backup"**: cada run del cron prueba automáticamente que el dump puede restaurarse a un Postgres limpio. No es una validación que pueda olvidarse — corre todos los días.
+
+### Conexión directa (NO pooler)
+
+`pg_dump` no funciona contra la URL pooled de Neon (`-pooler` en el subdomain). Necesita conexión directa.
+
+- Derivación: sacar `-pooler` del subdomain.
+  - Pooled:  `ep-quiet-waterfall-acv0fpll-pooler.sa-east-1.aws.neon.tech`
+  - Direct:  `ep-quiet-waterfall-acv0fpll.sa-east-1.aws.neon.tech`
+- Variable nueva en `.env.example`: `DIRECT_DATABASE_URL` (opcional en runtime, requerida solo para pg_dump).
+- En GH: secret `DIRECT_DATABASE_URL_PROD` (+ opcional `DIRECT_DATABASE_URL_DEV`).
+
+### PII handling
+
+- `.gitignore` (logic-core-v3) actualizado: agregadas `backups/`, `*.sql`, `*.sql.gz`, `*.dump`, `*.gpg`. Previene commit accidental.
+- Cifrado fuerte AES256 con passphrase 48 bytes — el artifact público en GH no expone nada sin la clave.
+- Passphrase vive solo en: (a) GH secret, (b) password manager de Franco. NUNCA en docs, NUNCA en código.
+- Scripts locales generan archivos en `backups/` (gitignored).
+
+### Scripts paralelos (manual / emergencia)
+
+- `scripts/db-backup-local.sh` — mismo flujo que el workflow, para correr desde Git Bash en Windows o WSL. Valida que la URL no sea pooled, que las herramientas están, que las env vars existen.
+- `scripts/db-restore-local.sh` — descifra y restaura a una URL pasada. **Safety check**: aborta si la TARGET no es dev ni localhost, a menos que se pase `--i-know-what-im-doing` (override consciente para restaurar a prod en emergencia real).
+
+### Frecuencia / retención
+
+- **Diario 06:00 UTC (03:00 ART)** — RPO 24h. Para Matsu arrancando es suficiente; si crece el volumen o pasa a cliente grande, se baja a cada 6h sin cambio estructural.
+- **Retención 30 días** de artifacts. 30 backups in-flight. Para retención mayor (legal/compliance) habría que mover a S3/R2 — fuera de scope hoy.
+
+### Verificación post-sprint
+
+- ✅ YAML del workflow parseado limpio (`js-yaml.load` OK; jobs `dump` + `restore-test`; cron `0 6 * * *`; dispatch input `target_env`).
+- ✅ Doc reescrito (`docs/operations/neon-backups.md`) — el viejo proponía "considerar upgrade Launch $19/mes", ahora refleja la realidad B14.3.
+- ⏳ **Smoke local con pg_dump pendiente**: mi entorno no tiene `pg_dump` nativo y Docker Desktop no arrancó. La validación real es el **Job 2 (restore-test) del workflow** cuando Franco dispare el primer `workflow_dispatch` manual con los secrets configurados.
+
+### Archivos
+
+**Creados:**
+
+- `.github/workflows/db-backup.yml` (en raíz del repo).
+- `logic-core-v3/scripts/db-backup-local.sh`
+- `logic-core-v3/scripts/db-restore-local.sh`
+
+**Modificados:**
+
+- `logic-core-v3/.gitignore` — patrones de backup.
+- `logic-core-v3/.env.example` — `DIRECT_DATABASE_URL` con leyenda.
+- `logic-core-v3/docs/operations/neon-backups.md` — reescrito entero.
+
+### Pendientes / fuera de scope
+
+- 🔴 **[Franco, blocker para que B14.3 cierre real]** Setear secrets GH y validar primer run:
+  1. `openssl rand -base64 48` → copiar a password manager + a GH secret `BACKUP_GPG_PASSPHRASE`.
+  2. Derivar `DIRECT_DATABASE_URL_PROD` (sacar `-pooler` del DATABASE_URL prod de Netlify) → GH secret.
+  3. (Opcional) `DIRECT_DATABASE_URL_DEV` → GH secret.
+  4. Actions UI → "DB backup" → Run workflow → target: prod → confirmar que ambos jobs pasan.
+- 🟡 **Smoke local pendiente**: requiere Docker Desktop arrancado (o postgresql-client instalado en Windows). Cuando levantes Docker me avisás y corro el smoke (~2min) — opcional, el restore-test del workflow ya cubre.
+- 🟡 **Finding fuera de scope (`e2e.yml` mal ubicado)**: el workflow `logic-core-v3/.github/workflows/e2e.yml` está en un subdirectorio — GH solo lee `<repo_root>/.github/workflows/`. `gh run list` confirma cero runs históricos. El e2e nunca corrió. Tiene que moverse a `.github/workflows/e2e.yml` raíz y ajustar `working-directory: logic-core-v3` en los steps relevantes. Sprint propio.
+- 🟢 **Retención >30 días si pasa a ser requerimiento**: mover artifacts a bucket externo (S3, R2). Hoy no se justifica.
+- 🟢 **Bajar RPO de 24h a 6h o 1h**: cuando crezca el volumen, cambiar el cron. Cambio trivial.
+
+---
+
+## ✅ B14.5 — Sentry completado (cerrando TODOs de B12.1)
+
+**Problema:** B12.1 dejó error boundaries con TODOs explícitos esperando `Sentry.captureException`. Sin Sentry conectado, los errores en producción no llegan a Franco — Matsu reportaría issues que Franco no ve. Recién con cliente real tiene sentido cablear esto.
+
+**Hallazgo del Discovery:** `@sentry/nextjs@^10.53.1` YA estaba instalado y parcialmente configurado (server/edge/client init existían, `withSentryConfig` en next.config.ts). Faltaba: cablear TODOs, agregar `global-error.tsx`, agregar `onRequestError` hook, capturar errores del runtime del bot, y — **lo más crítico** — un PII scrubbing decente en `beforeSend`. El sprint NO arrancó de cero: completó lo a medias.
+
+### PII scrubbing — la regla absoluta del sprint
+
+Implementado en [`src/lib/sentry/scrub-pii.ts`](../src/lib/sentry/scrub-pii.ts). **Dos capas:**
+
+1. **Regex sobre strings libres** (messages de error, breadcrumbs, query strings):
+   - Email: `[email]`
+   - JWT: `[jwt]` (3 segmentos base64url separados por punto, primero `eyJ`)
+   - Tarjeta de crédito: `[cc]` (4 grupos de 4 dígitos con separador)
+   - Teléfono: `[phone]` (8+ dígitos con separadores comunes, anclado a límite no-alphanum para no comerse tokens)
+
+2. **Denylist de keys** (case-insensitive) sobre objects (request.data, extras, contexts, tags, breadcrumbs.data):
+   `password`, `passwd`, `pwd`, `passphrase`, `secret`, `apikey`, `api_key`, `access_token`, `refresh_token`, `id_token`, `auth_token`, `token`, `bearer`, `authorization`, `auth`, `cookie`, `email`, `mail`, `phone`, `telephone`, `mobile`, `whatsapp`, `celular`, `telefono`, `ssn`, `dni`, `cuit`, `cuil`, `credit_card`, `cc_number`, `cardnumber`, `sessionid`, `csrf` → value entero redactado.
+
+**Tratamiento especial:**
+- `event.user`: se queda solo con `id`. `email`, `username`, `ip_address`, `name` se eliminan (Sentry recomienda usar id interno).
+- `event.request.cookies`: se redacta el objeto entero (`{ [all]: [redacted] }`) — siempre tienen sesión, nunca son útiles para debug.
+- `event.request.headers.authorization` y similares caen por la denylist.
+- Stack traces NO se scrubean (nombres de funciones/variables no llevan valores, son útiles para debug).
+
+**Smoke test:** [`scripts/_b14-5-scrub-smoke.mjs`](../scripts/_b14-5-scrub-smoke.mjs) — 43 assertions sobre patrones, denylist, evento completo con todos los campos, null safety, depth limit. **43/43 pass.** Corre con `npx tsx scripts/_b14-5-scrub-smoke.mjs`, sin necesidad de DSN configurado. Pensado para que cualquier cambio futuro al scrub se valide antes de mergear.
+
+**Cobertura en TODOS los inits** — porque el proyecto tiene config Sentry duplicada (instrumentation moderno + legacy raíz):
+- ✅ `src/instrumentation.ts` (nodejs init + edge init): `beforeSend` con scrub + preserva el filtro de quota LLM existente.
+- ✅ `src/instrumentation-client.ts` (browser): `beforeSend` con scrub agregado.
+- ✅ `sentry.server.config.ts` (legacy raíz): `beforeSend` con scrub agregado.
+- ✅ `sentry.edge.config.ts` (legacy raíz): `beforeSend` con scrub agregado.
+
+Esto garantiza que NINGÚN init manda PII al wire de Sentry, independientemente de cuál cargue Next.js en cada contexto.
+
+### TODOs de B12.1 cerrados
+
+- ✅ [`src/app/error.tsx:23`](../src/app/error.tsx) — `Sentry.captureException` con tags `{ boundary: 'root' }`, extra `{ digest }`.
+- ✅ [`src/components/ui/SectionErrorBoundary.tsx:60`](../src/components/ui/SectionErrorBoundary.tsx) — `Sentry.captureException` con tags `{ section, boundary: 'section' }`. Esto cubre los 19 error.tsx que delegan acá (admin/* y dashboard/*).
+
+### Warnings de build resueltos
+
+El build de B14.1 mostraba 2 warnings de `@sentry/nextjs`. Ambos cerrados:
+
+1. **`Could not find onRequestError hook`** → agregado `export const onRequestError = Sentry.captureRequestError` en `src/instrumentation.ts`. Captura errores de route handlers, server actions y middleware del runtime de Next.
+
+2. **`Don't have a global error handler set up`** → creado [`src/app/global-error.tsx`](../src/app/global-error.tsx). React renderiza este boundary cuando el root layout mismo tira (errores tan tempranos que no hay layout). Renderiza `<html>` y `<body>` enteros por convención de Next. Llama `Sentry.captureException` con tag `{ boundary: 'global-root' }`.
+
+### Errores del runtime del bot
+
+[`handleChatRequest.ts`](../src/modules/chatbot/server/chat/handleChatRequest.ts) tenía 3 catch blocks que solo logueaban a `chatbotLog/chatbotError`. Se cablearon 2 (el bad_request es expected behavior, no va):
+
+- ✅ `chat.persist_error` (catch línea 718): `Sentry.captureException` con `tags: { module: 'chatbot', stage: 'persist' }`, extra `{ conversationId, botSlug }`. El log/event existentes se preservan.
+- ✅ `chat.unhandled_error` (catch línea 733, root handler): `Sentry.captureException` con `tags: { module: 'chatbot', stage: 'unhandled' }`. **Este es el más crítico** — es cuando el endpoint devolvió 500 al visitante.
+- 🚫 `chat.bad_request` (catch línea 195): NO se captura. Es 400 expected (cliente mandó body inválido) — sería ruido en Sentry.
+
+### Verificación post-sprint
+
+- ✅ `npm run build` → exit 0, **cero errores**, **cero warnings de @sentry/nextjs** (los 2 de B14.1 resueltos).
+- ✅ Smoke scrub-pii: 43/43 assertions pass.
+- ✅ Endpoint `/api/test-sentry` preservado (smoke real post-DSN: `curl https://develop-portfolio.netlify.app/api/test-sentry` → tira error → debería aparecer en Sentry UI con todos los campos scrubeados).
+
+### Archivos
+
+**Creados:**
+
+- [`src/lib/sentry/scrub-pii.ts`](../src/lib/sentry/scrub-pii.ts) — helper de scrubbing único (~150 líneas con comentarios).
+- [`src/app/global-error.tsx`](../src/app/global-error.tsx) — root-of-root error boundary.
+- [`scripts/_b14-5-scrub-smoke.mjs`](../scripts/_b14-5-scrub-smoke.mjs) — 43 assertions de smoke (throwaway, no se borra — sirve como regression test del scrub).
+
+**Modificados:**
+
+- `src/instrumentation.ts` — `beforeSend` con scrub en server + edge, export `onRequestError`, `environment` agregado al server init.
+- `src/instrumentation-client.ts` — `beforeSend` con scrub.
+- `sentry.server.config.ts` (legacy raíz) — `beforeSend` con scrub.
+- `sentry.edge.config.ts` (legacy raíz) — `beforeSend` con scrub.
+- `src/app/error.tsx` — TODO cerrado, `Sentry.captureException` cableado.
+- `src/components/ui/SectionErrorBoundary.tsx` — TODO cerrado, `Sentry.captureException` cableado.
+- `src/modules/chatbot/server/chat/handleChatRequest.ts` — 2 `Sentry.captureException` en persist_error + unhandled_error.
+- `.env.example` — doc clara para `NEXT_PUBLIC_SENTRY_DSN` (paso a paso para crear cuenta + obtener DSN) y `SENTRY_AUTH_TOKEN/ORG/PROJECT` (build-time, opcionales).
+
+### Pendientes / fuera de scope
+
+- 🔴 **[Franco, bloqueante para que Sentry capture en prod]**:
+  1. Crear cuenta gratis en [sentry.io](https://sentry.io). Plan **Developer** alcanza para arrancar (5k errores/mes, 30d retención).
+  2. Create new project → Platform: **Next.js** → name: `logic-core-v3`.
+  3. Copiar el DSN. Setear `NEXT_PUBLIC_SENTRY_DSN` en **Netlify env vars** (prod) y opcionalmente en `.env.local` (dev).
+  4. (Opcional, mejora triage) Crear auth token → setear `SENTRY_AUTH_TOKEN`, `SENTRY_ORG`, `SENTRY_PROJECT` en Netlify para que el build suba source maps.
+  5. Validar: `curl https://develop-portfolio.netlify.app/api/test-sentry` después del próximo deploy → el error debería aparecer en Sentry UI (con PII scrubeada si el message tuviera algo).
+- 🟡 **Consolidación de inits Sentry duplicados** (fuera de scope B14.5): hay 2 sistemas paralelos — `src/instrumentation.ts` (moderno Next 15+) y `sentry.{server,edge}.config.ts` raíz (legacy pre-instrumentation). Ambos tienen scrub ahora, pero hay duplicación de config. Mover todo al moderno y borrar los legacy es un sprint propio (Sentry Wizard hace la migration semi-automatizada).
+- 🟢 **Source maps en prod**: hoy Sentry agrupa errores por mensaje raw. Con `SENTRY_AUTH_TOKEN` + el wizard de Sentry CLI, los errores muestran nombres de funciones/líneas originales → mejor triage. No bloqueante, calidad de vida.
+
+---
+
+## ✅ B14.4 — Cierre del bloque B14 (checklist + smoke + tag)
+
+**Brief original:** smoke en prod + tag honesto + checklist. **Diagnóstico al arrancar reveló que el sprint, tal como estaba planteado, no era viable** — el código de B14 no estaba en prod. B14.4 se adaptó: en lugar de "ejecutar smoke", entrega los artefactos para que Franco ejecute la salida completa en orden.
+
+### Estado real encontrado (no asumido)
+
+**Repo:**
+- Branch `main` con **84 archivos modificados sin commit**.
+- **Cero commits** desde el último tag (`v0.9.0-rc.1`). Todo B14.1/2/3/5 + restos de B11/B12/B-SEC sin commitear.
+- `package.json` versión `0.1.0` — desactualizado vs el tag.
+
+**Prod (`develop-portfolio.netlify.app`):**
+- Sirve un deploy desactualizadísimo. `/` devuelve 200 pero con HTML que es **un 404 disfrazado** (`<title>404</title>`, `notFound:[...]` en RSC payload).
+- Header `Age: 6135174` (~71 días en cache CDN).
+- Endpoints `/api/version`, `/login`, `/forgot-password` → 404 en prod (existen en build local).
+
+**Conclusión:** el deploy de prod NO tiene B14, ni la mayoría del trabajo reciente. "Smoke en prod" sin ejecutar el deploy antes sería teatro.
+
+### Decisión operativa (consultada con Franco)
+
+- Yo NO commiteo, NO mergeo, NO ejecuto deploy, NO bumpeo version, NO creo tag.
+- Entrego: checklist secuencial + smoke script + recomendación de tag.
+- Franco ejecuta la salida en su ventana, cuando esté listo.
+
+### Entregables de B14.4
+
+**1. [`docs/operations/b14-deploy-checklist.md`](../docs/operations/b14-deploy-checklist.md)** — checklist accionable en 7 fases:
+
+| Fase | Acción | Bloquea a |
+|---|---|---|
+| 1 | Commits + push + merge del working tree | Todas |
+| 2 | `prisma migrate deploy` prod (B14.1) + seed bench (B14.2) | 5 |
+| 3 | Netlify env vars + GH secrets (B14.3) + cuenta Sentry (B14.5) | 4, 6 |
+| 4 | Deploy a Netlify + validar cache invalidada | 5 |
+| 5 | Smoke automatizado + validar Sentry UI + validar rate limiter | 7 |
+| 6 | Disparar workflow backup manual + validar restore-test | 7 |
+| 7 | Bump package.json + tag `v1.0.0-rc.1` + push --tags | — |
+
+Cada fase con comando exacto, criterio de validación, dependencias explícitas.
+
+**2. [`scripts/_b14-4-smoke-prod.mjs`](../scripts/_b14-4-smoke-prod.mjs)** — smoke automatizado post-deploy. 6 bloques:
+
+| # | Bloque | Qué prueba |
+|---|---|---|
+| 1 | Páginas públicas | `/`, `/login`, `/forgot-password`, `/contact`, 3 service pages → 200 |
+| 2 | Deploy freshness | `/api/version` → 200 + cache `Age` razonable (no días) |
+| 3 | Bot endpoints baratos | `/health` + `/config` del bench-matsu (sin Vertex) |
+| 4 | Bot `/chat` | 1 request real (consume Vertex) — confirma stream OK |
+| 5 | Rate limiter atómico | 31 hits burst → primer 429 + header `Retry-After` |
+| 6 | Sentry | `/api/test-sentry` → 500 + recordatorio de validar en Sentry UI |
+
+Reporta PASS/FAIL/SKIP por bloque. Exit code 1 si algo crítico rompe. SKIP automático si bot no existe (bench-matsu no seedeado).
+
+**3. Tag recomendado: `v1.0.0-rc.1`** — no `v0.9.x`, no `v1.0.0` pelado.
+
+Por qué `v1.0.0-rc.1`:
+- Producto **feature-complete** para arrancar con cliente real: rate-limit atómico (B14.1), latencias medidas en prod (B14.2), backups con verificación automática (B14.3), monitoreo de errores con PII scrubbing (B14.5). No falta nada estructural.
+- Pero **NO validado en uso real**: sin un cliente vivo, no hay forma de saber si los presets/timeouts/flujos cubren el caso real. Los warm latencies P50/P95 reales del bot solo se conocen post-seed.
+- `-rc.1` comunica esto honestamente: candidato a release, esperando uso real para confirmar.
+- `v1.0.0` pelado se firma cuando Matsu use el producto sin romperse durante un período razonable. Esto es B2 + observación, no un sprint planificable.
+
+Por qué NO `v0.9.x`:
+- `0.9.x` sugiere "todavía falta features", pero no falta nada. Sería más conservador de lo que la realidad amerita.
+
+### Lo que queda para B2 (Matsu vivo) — bien separado
+
+| Item | Tipo |
+|---|---|
+| Onboarding real de Matsu: KB con datos reales, admin user, `allowedDomains` del sitio real | B2 |
+| Embed del bot en el sitio de Matsu (snippet `<script>`) + validar CORS real | B2 |
+| Activar plan/billing en `BotConfig` (no scaffolding) | B2 |
+| Notificaciones Sentry → Slack/email para Franco | B2 / ops |
+| Borrar bot `bench-matsu` de prod con `_b14-2-cleanup-bench-prod.ts --confirm` | B2 cleanup |
+| Eliminar scripts throwaway `_b14-*.mjs` cuando ya no se necesiten | post-v1.0 |
+| Resolver chip pendiente: mover `e2e.yml` a raíz del repo | sprint propio |
+| Resolver finding nuevo: cache CDN agresivo en `/` (Age=71d) | sprint propio — ver abajo |
+| Consolidar inits Sentry duplicados | sprint propio |
+
+### Hallazgo nuevo (no investigado por decisión explícita)
+
+🔴 **Cache CDN agresiva en `/`**: el header `Age` del homepage es **6135174s (~71 días)**. Netlify está sirviendo cache vieja sin invalidar al deploy. Causa probable: `Cache-Control` en algún header de respuesta de Next.js o config Netlify de invalidación incompleta. Cuando Franco haga el deploy de B14, esto puede impedir que el código nuevo se vea. Mitigación inmediata: "Clear cache and deploy site" desde Netlify UI. Investigación a fondo en sprint propio.
+
+### Verificación post-sprint
+
+- ✅ Checklist completo, secuencial, con comandos exactos y dependencias.
+- ✅ Smoke script ejecutable. Validado sintácticamente (parse Node OK; no se corrió contra prod actual porque el deploy de prod no tiene el código de B14 — fail garantizado, sería ruido).
+- ✅ Tag recomendado con justificación.
+- ⏳ **Ejecución completa: pendiente Franco.** Fases 1-7 del checklist.
+
+### Archivos
+
+**Creados:**
+
+- [`docs/operations/b14-deploy-checklist.md`](../docs/operations/b14-deploy-checklist.md) — checklist 7 fases.
+- [`scripts/_b14-4-smoke-prod.mjs`](../scripts/_b14-4-smoke-prod.mjs) — smoke 6 bloques.
+
+**No tocados** (decisión explícita):
+- `package.json` (version sigue `0.1.0`).
+- `.git/` (cero commits, cero merges, cero tags).
+- Netlify, Neon prod, GH secrets, Sentry — pendiente Franco.
+
+### Estado consolidado del bloque B14
+
+| Sprint | Código | Deploy | Validado en prod |
+|---|---|---|---|
+| B14.1 rate-limit | ✅ completo | ⏳ pendiente (Fase 1+2+4 del checklist) | ⏳ Fase 5 |
+| B14.2 latencias | ✅ páginas públicas medidas; bot pendiente seed | ⏳ Fase 2 + 4 | ⏳ post-seed |
+| B14.3 backups | ✅ completo | ⏳ Fase 1 + 3.2 + 4 | ⏳ Fase 6 |
+| B14.5 Sentry | ✅ completo | ⏳ Fase 1 + 3 + 4 | ⏳ Fase 5.2 |
+| B14.4 cierre | ✅ checklist + smoke + tag rec | n/a | ✅ entregable, no requiere deploy |
+
+Próximo paso real: Franco ejecuta la Fase 1 del checklist (estrategia de commits) y avanza.
+

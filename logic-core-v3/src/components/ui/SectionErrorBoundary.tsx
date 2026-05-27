@@ -2,6 +2,7 @@
 
 import { AlertCircle, RefreshCw } from 'lucide-react'
 import { useEffect } from 'react'
+import * as Sentry from '@sentry/nextjs'
 import { logger } from '@/lib/logger'
 
 interface SectionErrorBoundaryProps {
@@ -57,11 +58,13 @@ export function SectionErrorBoundary({
       stack: error.stack,
     })
 
-    // TODO(B14): cablear Sentry acá.
-    //   Sentry.captureException(error, {
-    //     tags: { section, boundary: 'section' },
-    //     extra: { digest: error.digest },
-    //   })
+    // B14.5 — captureException con sección como tag para filtrar en Sentry UI.
+    // El scrub-pii (beforeSend en instrumentation-client.ts) limpia antes de
+    // mandar, así que stack/message con PII queda redactado.
+    Sentry.captureException(error, {
+      tags: { section, boundary: 'section' },
+      extra: { digest: error.digest },
+    })
   }, [error, section])
 
   const styles = TONE_STYLES[tone]

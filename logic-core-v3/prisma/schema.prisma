@@ -1519,3 +1519,26 @@ model CrmSyncAttempt {
   @@index([organizationId, status])
   @@map("crm_sync_attempt")
 }
+
+// Rate limit compartido entre lambdas (B14.1). Reemplaza el limiter in-memory
+// poroso. La atomicidad la garantiza el UPSERT con ON CONFLICT (row lock de
+// Postgres) — ver src/lib/rate-limit/limiter.ts.
+//
+// `key` codifica scope + identificador hasheado: "{scope}:{hash24}".
+// `expiresAt` = windowStart + windowMs. La limpieza es lazy: el propio UPSERT
+// resetea el bucket cuando la ventana expiró, así la tabla no crece por
+// claves muertas dentro de la misma ventana. El índice en expiresAt deja la
+// puerta abierta a un job de purga futuro si hace falta.
+model RateLimit {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  count       Int      @default(0)
+  windowStart DateTime
+  expiresAt   DateTime
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([expiresAt])
+  @@map("rate_limit")
+}
