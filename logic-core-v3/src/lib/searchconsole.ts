@@ -1,5 +1,5 @@
-import { google } from 'googleapis'
-import type { webmasters_v3 } from 'googleapis'
+import { GoogleAuth } from 'google-auth-library'
+import { webmasters, webmasters_v3 } from '@googleapis/webmasters'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -111,12 +111,12 @@ export async function getSearchConsoleData(
     return { ok: true, data: getMockSearchConsoleData() }
   }
 
-  const auth = new google.auth.GoogleAuth({
+  const auth = new GoogleAuth({
     credentials,
     scopes: ['https://www.googleapis.com/auth/webmasters.readonly'],
   })
 
-  const searchconsole = google.webmasters({ version: 'v3', auth })
+  const searchconsole = webmasters({ version: 'v3', auth })
 
   const startDate = dateNDaysAgo(28)
   const endDate = dateNDaysAgo(0)

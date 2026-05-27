@@ -70,9 +70,9 @@ export function StatCard({
   return (
     <div className={cn('rounded-2xl border border-white/10 bg-white/[0.02] p-5', className)}>
       <div className="mb-3 flex items-start justify-between">
-        <p className="text-[10px] uppercase tracking-[0.24em] text-zinc-500">{label}</p>
+        <p className="text-xs tracking-tight text-zinc-500">{label}</p>
         {Icon && (
-          <div className={cn('rounded-xl p-1.5', colors?.bg ?? 'bg-white/[0.04]')}>
+          <div className={cn('rounded-md p-1.5', colors?.bg ?? 'bg-white/[0.04]')}>
             <Icon
               className={cn('h-4 w-4', colors?.text ?? 'text-zinc-400')}
               strokeWidth={1.5}
@@ -81,7 +81,7 @@ export function StatCard({
         )}
       </div>
 
-      <p className={cn('text-2xl font-semibold tracking-tight', colors?.text ?? 'text-zinc-100')}>
+      <p className={cn('text-2xl font-medium tracking-tight', colors?.text ?? 'text-zinc-100')}>
         {formattedValue}
       </p>
 

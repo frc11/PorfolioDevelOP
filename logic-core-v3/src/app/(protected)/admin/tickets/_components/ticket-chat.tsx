@@ -93,8 +93,8 @@ export function TicketChat({ ticket }: TicketChatProps) {
       <div className="rounded-[28px] border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div className="min-w-0">
-            <p className="text-[10px] uppercase tracking-[0.24em] text-zinc-500">
-              Agency OS / Tickets
+            <p className="text-xs tracking-tight text-zinc-500">
+              develOP / Tickets
             </p>
             <h1 className="mt-2 text-3xl font-semibold tracking-tight text-white">{ticket.title}</h1>
             <div className="mt-3 flex flex-wrap items-center gap-3 text-sm text-zinc-400">

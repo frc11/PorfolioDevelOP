@@ -1,12 +1,14 @@
 'use client'
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
-import { Columns, Edit3, Eye } from 'lucide-react'
+import { AlertTriangle, Columns, Edit3, Eye } from 'lucide-react'
 import { estimateTokens } from '@/lib/tokens-estimate'
 
 type ViewMode = 'edit' | 'preview' | 'split'
+
+const PLACEHOLDER_REGEX = /\{\{([^}\n]+)\}\}/g
 
 interface MarkdownEditorProps {
   value: string
@@ -24,6 +26,11 @@ export function MarkdownEditor({
   const [mode, setMode] = useState<ViewMode>('split')
   const tokens = estimateTokens(value)
 
+  const placeholdersFound = useMemo(() => {
+    const matches = [...value.matchAll(PLACEHOLDER_REGEX)]
+    return [...new Set(matches.map((m) => m[1].trim()))]
+  }, [value])
+
   return (
     <div className="overflow-hidden rounded-2xl border border-white/10">
       <div className="flex flex-col gap-3 border-b border-white/10 bg-white/[0.02] px-4 py-2 sm:flex-row sm:items-center sm:justify-between">
@@ -37,6 +44,23 @@ export function MarkdownEditor({
           <span>~{tokens} tokens</span>
         </div>
       </div>
+
+      {placeholdersFound.length > 0 && (
+        <div className="flex flex-wrap items-center gap-2 border-b border-amber-500/25 bg-amber-500/[0.06] px-4 py-2">
+          <AlertTriangle className="h-3.5 w-3.5 shrink-0 text-amber-400" strokeWidth={1.5} />
+          <span className="text-[11px] text-amber-300">
+            {placeholdersFound.length} placeholder{placeholdersFound.length === 1 ? '' : 's'} sin completar:
+          </span>
+          {placeholdersFound.map((name) => (
+            <span
+              key={name}
+              className="rounded-sm border border-amber-500/30 bg-amber-500/15 px-1.5 py-0.5 font-mono text-[11px] text-amber-200"
+            >
+              {`{{${name}}}`}
+            </span>
+          ))}
+        </div>
+      )}
 
       <div className={`grid ${mode === 'split' ? 'lg:grid-cols-2' : 'grid-cols-1'} gap-px bg-white/5`}>
         {(mode === 'edit' || mode === 'split') && (

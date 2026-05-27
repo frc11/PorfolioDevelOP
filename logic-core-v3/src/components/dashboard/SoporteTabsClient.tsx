@@ -12,7 +12,7 @@ import {
   HelpCircle,
   Zap,
 } from 'lucide-react'
-import { EmptyState } from '@/components/ui'
+import { EmptyState, Tabs } from '@/components/ui'
 
 type TicketStatus = 'OPEN' | 'IN_PROGRESS' | 'RESOLVED'
 type TicketPriority = 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT'
@@ -79,38 +79,16 @@ export function SoporteTabsClient({ activeTickets, resolvedTickets }: Props) {
   return (
     <div className="flex flex-col gap-8">
       <div className="flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#0c0e12]/80 shadow-2xl backdrop-blur-xl">
-        <div className="relative flex border-b border-white/5">
-          {[
-            { key: 'active' as const, label: 'Abiertos / En curso', count: activeTickets.length },
-            { key: 'resolved' as const, label: 'Resueltos', count: resolvedTickets.length },
-          ].map((tab) => (
-            <button
-              key={tab.key}
-              onClick={() => setActiveTab(tab.key)}
-              className={`relative flex items-center gap-2.5 px-5 py-4 text-sm font-semibold transition-colors duration-200 sm:px-7 ${
-                activeTab === tab.key ? 'text-white' : 'text-zinc-500 hover:text-zinc-300'
-              }`}
-            >
-              {activeTab === tab.key && (
-                <motion.div
-                  layoutId="soporte-tab-indicator"
-                  className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-cyan-500 to-blue-500"
-                  transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-                />
-              )}
-              {tab.label}
-              <span
-                className={`rounded-full border px-2 py-0.5 text-[10px] font-bold ${
-                  activeTab === tab.key
-                    ? 'border-white/10 bg-white/10 text-white'
-                    : 'border-white/5 bg-white/5 text-zinc-500'
-                }`}
-              >
-                {tab.count}
-              </span>
-            </button>
-          ))}
-        </div>
+        <Tabs
+          layoutId="soporte-tabs"
+          value={activeTab}
+          onValueChange={(v) => setActiveTab(v as 'active' | 'resolved')}
+          className="border-b-white/5"
+          items={[
+            { value: 'active', label: 'Abiertos / en curso', badge: activeTickets.length },
+            { value: 'resolved', label: 'Resueltos', badge: resolvedTickets.length },
+          ]}
+        />
 
         <div className="min-h-[220px]">
           <AnimatePresence mode="wait">

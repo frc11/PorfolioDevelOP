@@ -47,7 +47,7 @@ function ClientsListSkeleton() {
     <div className="space-y-3">
       <div className="h-4 w-40 animate-pulse rounded bg-white/5" />
       {[0, 1, 2, 3].map((i) => (
-        <div key={i} className="h-20 animate-pulse rounded-[20px] bg-white/5" />
+        <div key={i} className="h-20 animate-pulse rounded-2xl bg-white/5" />
       ))}
     </div>
   )
