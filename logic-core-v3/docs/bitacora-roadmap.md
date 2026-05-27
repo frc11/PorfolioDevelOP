@@ -9662,3 +9662,613 @@ Por qué NO `v0.9.x`:
 
 Próximo paso real: Franco ejecuta la Fase 1 del checklist (estrategia de commits) y avanza.
 
+---
+
+## ✅ CC.1 — Auditoría: ¿qué configura hoy el cliente en /dashboard/*?
+
+**Objetivo:** mapear TODO lo que un cliente puede CONFIGURAR o EDITAR (no solo ver) en `/dashboard/*`, clasificarlo según el principio rector, y dejar la lista lockeada antes de mover una sola línea en CC.2+.
+
+**Principio rector (recordatorio):** el dashboard del cliente es para el DUEÑO de un negocio (ej. concesionaria), no para un técnico. Pregunta-test: *"¿el dueño de una concesionaria entiende esto y debería tocarlo?"*. Si la respuesta es no → 🔴 técnico, va al admin de develOP.
+
+**Método:** subagente `Explore` recorrió `/dashboard/**` + componentes referenciados; padre cerró huecos en archivos no cubiertos (boveda, soporte, messages, project, agenda, tienda, motor-resenas, services, resultados/seo, knowledge). Solo se incluyen items con form/input/submit/toggle que GUARDAN cambios — read-only puro no entra.
+
+### Convención
+
+- 🟢 **Legítimo cliente** — entra el dueño del negocio sin ayuda.
+- 🔴 **Técnico → mover al admin** — URLs/secrets/tokens/modelos/temperatura/endpoints; el dueño no debe verlo ni tocarlo.
+- 🟡 **Dudoso** — Franco decide (incluye decisiones ya tomadas en briefing pero no implementadas).
+
+---
+
+### `/dashboard/chatbot/settings`
+
+- 🔴 **Integración CRM (webhook n8n + secret)** — [`CrmIntegrationCard.tsx`](../src/modules/chatbot/components/dashboard/CrmIntegrationCard.tsx) renderiza [`CrmConfigForm.tsx`](../src/modules/chatbot/components/dashboard/CrmConfigForm.tsx) (líneas 34-220). Campos: `webhookUrl`, `enabled`, `secretHeaderName`, `secretValue`. Actions: `saveCrmIntegration`, `testCrmConnection`, `retryCrmSync`. **Justificación:** URL HTTP + header de autenticación + secret cifrado = infraestructura n8n. Un dueño de concesionaria no entiende qué es un webhook ni qué header poner. **Deuda B5.8 explícita:** no existe vista admin todavía, develOP lo configura por impersonation. CC.2 paga la deuda: MOVER al admin (no borrar; el sync debe seguir funcionando, scoped por org).
+- 🟢 **Personalización visual del bot** — [`BotPersonalization.tsx`](../src/modules/chatbot/components/dashboard/BotPersonalization.tsx) (líneas 33-52, 234+). Campos: `accentColor` (paleta curada de 8), `position` (bottom_left/bottom_right), `avatarStyle` (neuro/lottie/emoji/initials — set restringido cliente), `welcomeMessage` (≤200ch), `quickReplies` (≤4 botones). Action: `updateBotAppearance`. **Justificación:** visuales puras, el dueño decide cómo se ve su bot. **Notar:** `botName` NO es editable acá (solo display) — lo configura el admin; correcto.
+
+### `/dashboard/chatbot/knowledge`
+
+- 🟡 **Base de conocimiento (KB)** — [`ClientKnowledgeForm.tsx`](../src/modules/chatbot/components/dashboard/ClientKnowledgeForm.tsx) (líneas 8-142). Campos editables hoy por cliente: `businessInfo`, `servicesOrProducts`, `faq`, `policies`, `salesGuidance`. Campos ya read-only (admin-only): `toneExamples`, `forbiddenStatements` con badge "Configurado por develOP". Action: `saveClientKnowledgeBase`. **Decisión-Franco ya tomada en briefing CC:** la KB pasa a SOLO-LECTURA en el dashboard del cliente (la edición la hace develOP; sync automática vía Sanity = proyecto futuro, fuera de scope). Sigue 🟡 acá porque la decisión está tomada pero NO implementada — CC.x la baja a read-only. Marcar para confirmar el cuándo (¿CC.2 junto con CRM, o sprint propio?).
+
+### `/dashboard/chatbot/install`
+
+- (nada editable) — [`ClientInstallView.tsx`](../src/app/(protected)/dashboard/chatbot/install/ClientInstallView.tsx) solo muestra el snippet `<script>` y `allowedDomains` como display. `allowedDomains` se edita SOLO desde admin ([`saveBotConfig.ts`](../src/modules/chatbot/server/admin/saveBotConfig.ts) + [`AdvancedTab.tsx`](../src/modules/chatbot/components/admin/config/tabs/AdvancedTab.tsx)) — bien architecturado, no requiere movimiento.
+
+### `/dashboard/chatbot/leads`, `/conversations`
+
+- (nada editable) — listas read-only con filtros de view-state. No aplica.
+
+### `/dashboard/cuenta/perfil`
+
+Todos los editables viven en [`ProfileForms.tsx`](../src/components/dashboard/ProfileForms.tsx):
+
+- 🟢 **Datos de empresa** (líneas 197-280). Campos: `companyName`, `logoUrl`, `name`. Action: `updateProfileAction`. **Justificación:** identidad del negocio, el dueño manda.
+- 🟢 **Datos de contacto** (líneas 283-340). Campos: `whatsapp` (email es read-only). Action: `updateContactAction`. **Justificación:** info de contacto del negocio.
+- 🟢 **Cambio de contraseña** (líneas 372-509). Campos: `currentPassword`, `newPassword`, `confirmPassword`. Action: `updatePasswordAction`. **Justificación:** seguridad de su cuenta.
+- 🟢 **Preferencias de notificaciones** (líneas 512-598). Toggles: `projectUpdates`, `teamMessages`, `emailNotificationsOnMessage`, `metricAlerts`, `developNews`. Action: `updateNotificationPrefsAction`. **Justificación:** preferencias personales.
+- 🟢 **Solicitar eliminación de cuenta** (líneas 686-789). Action: `requestAccountDeletionAction` (crea ticket). **Justificación:** acción de cuenta legítima.
+
+### `/dashboard/cuenta/boveda`
+
+- (nada editable) — [`page.tsx`](../src/app/(protected)/dashboard/cuenta/boveda/page.tsx). Solo lectura de assets que sube develOP + `VaultRequestModal` (pedir cosas). El cliente NO sube assets — el admin sí (correcto).
+
+### `/dashboard/cuenta/facturacion`
+
+- (nada editable) — solo lectura de facturas.
+
+### `/dashboard/messages`
+
+- 🟢 **Enviar mensaje a develOP** — [`MessageThread.tsx`](../src/components/dashboard/MessageThread.tsx) (línea 77, 282). Textarea libre. Action: `sendClientMessageAction`. **Justificación:** comunicación legítima cliente↔agencia.
+
+### `/dashboard/soporte`
+
+- 🟢 **Crear ticket** — [`NewTicketModal.tsx`](../src/components/dashboard/NewTicketModal.tsx) (líneas 13-15, 142-187). Campos: `title`, `category` (TECHNICAL/BILLING/FEATURE_REQUEST/OTHER), `priority` (LOW/MEDIUM/HIGH/URGENT), `description`. Action: `createTicketAction`. **Justificación:** soporte es del cliente; el "TECHNICAL" no expone tecnicismos, es solo categoría del pedido.
+
+### `/dashboard/project`
+
+- 🟢 **Aprobar / rechazar tareas** — [`TaskApprovalButtons.tsx`](../src/components/dashboard/TaskApprovalButtons.tsx) (líneas 16, 29). Inputs: confirmación, `reason` (al rechazar). Actions: `approveTaskAction`, `rejectTaskAction`. **Justificación:** el dueño aprueba entregables de su proyecto.
+
+### `/dashboard/modules/email-marketing`
+
+- 🟢 **Crear campaña de email** — [`campaigns/new/page.tsx`](../src/app/(protected)/dashboard/modules/email-marketing/campaigns/new/page.tsx) (líneas 85-107). Campos: `name`, `subject`, `fromName`, `fromEmail`, `htmlContent`. Actions: `createCampaignAction`, `sendCampaignAction`. **Justificación:** marketing del negocio.
+- 🟡 **`fromEmail` libre sin validación visible de dominio verificado.** No es config técnica per se (el dueño SÍ entiende "de qué email se manda"), pero si no hay verificación SPF/DKIM por dominio aguas abajo del action, hay riesgo de spoofing/deliverability mala. Marcar para que Franco confirme si el envío valida dominio del remitente. Si no valida → endurecer (no es CC.x, es un sprint de seguridad/deliverability propio).
+- 🟢 **Importar contactos CSV** — [`ImportCSVButton.tsx`](../src/app/(protected)/dashboard/modules/email-marketing/contactos/_components/ImportCSVButton.tsx). Action: `importContactsAction`. **Justificación:** gestión de contactos del cliente.
+
+### `/dashboard/modules/motor-resenas`
+
+- 🟢 **Responder reseña de Google** — [`ReviewItem.tsx`](../src/app/(protected)/dashboard/modules/motor-resenas/_components/ReviewItem.tsx) (líneas 37-239). Textarea `draft`. Actions: `generateDraft` (IA), `replyAction` (publicar). **Justificación:** reputación pública del negocio, el dueño manda.
+- (nada técnico) — `placeId` ya es read-only y muestra explícitamente "Tu equipo de develOP debe configurar tu placeId" ([`AskReviewSection.tsx`](../src/app/(protected)/dashboard/modules/motor-resenas/_components/AskReviewSection.tsx) líneas 14-40). Correcto.
+
+### `/dashboard/modules/tienda-conectada`
+
+- 🟢 **Conectar Tiendanube (OAuth start)** — [`ConnectStoreCard.tsx`](../src/app/(protected)/dashboard/modules/tienda-conectada/_components/ConnectStoreCard.tsx) (línea 39). No es form: link `/api/auth/tiendanube/start?orgId=…` (redirect al consent screen de Tiendanube). **Justificación:** autorización OAuth = acción legítima del dueño (no expone tokens; el callback los guarda server-side). **Nota:** no encontré botón "desconectar" — si se quiere agregar, sigue siendo 🟢.
+
+### `/dashboard/modules/agenda-inteligente`
+
+- (nada editable) — [`page.tsx`](../src/app/(protected)/dashboard/modules/agenda-inteligente/page.tsx). `calComApiKey`/`calComUsername`/`calComEmbedUrl` viven en `Organization` y SOLO se LEEN acá (línea 324). La API key se configura admin-only — correcto.
+
+### `/dashboard/resultados/seo`
+
+- 🟢 **"Activar SEO Avanzado" (botón)** — [`page.tsx`](../src/app/(protected)/dashboard/resultados/seo/page.tsx) (líneas 122-125, 161). Action inline server-action que llama `requestUpsellAction('seo-avanzado', …)`. **Justificación:** "pedir cambios/upgrades" cae directo en el principio rector. No edita config técnica — crea un pedido.
+
+### `/dashboard/resultados/{reputacion,trafico}`, `/dashboard/leads`, `/dashboard/services`, `/dashboard/plan`, `/dashboard/` (home)
+
+- (nada editable) — todas read-only. KPIs, listas, briefs IA generados server-side, links a otros lados.
+
+---
+
+### Totales
+
+| Clasificación | Cantidad | Items |
+|---|---|---|
+| 🟢 **Legítimo cliente** | **13** | Personalización bot · Datos empresa · Contacto · Contraseña · Notificaciones · Eliminación cuenta · Enviar mensaje · Crear ticket · Aprobar/rechazar tarea · Crear campaña · Importar CSV · Responder reseña · Conectar Tiendanube · Activar SEO (pedido) |
+| 🔴 **Técnico → mover al admin** | **1** | Integración CRM (webhook n8n + secret) |
+| 🟡 **Dudoso (decisión Franco)** | **2** | KB del bot (decisión ya tomada → read-only, falta implementar) · `fromEmail` libre en campañas (¿hay validación de dominio?) |
+
+---
+
+### Hallazgos clave
+
+1. **El único 🔴 puro es CRM.** El resto del dashboard ya está bien clasificado arquitectónicamente — los tecnicismos (model, temperature, systemPrompt, allowedDomains, calComApiKey, placeId, calComEmbedUrl, toneExamples, forbiddenStatements) ya viven solo en el admin o vienen marcados read-only con badge "Configurado por develOP". Franco fue conservador en el dashboard del cliente desde el inicio.
+2. **La query en [`/dashboard/chatbot/settings/page.tsx`](../src/app/(protected)/dashboard/chatbot/settings/page.tsx) (líneas 24-33) hace `select` explícito de SOLO 7 campos visuales** del `BotConfig`. Cero exposición accidental de `systemPrompt`, `model`, `temperature` al cliente. Bien hecho.
+3. **Deuda B5.8 confirmada y delimitada:** no existe vista admin del CRM. CC.2 = crear hogar en admin + mover el form ahí (no borrar del cliente todavía hasta tener paridad).
+4. **El KB ya es 50% read-only** (tone + forbidden ya admin-only con badge). CC-KB solo tiene que extender el patrón a los otros 5 campos.
+5. **Flag B7 estético** (settings del cliente "comprimido a 1280px, ~60% en blanco") sigue vigente — relevante una vez que se vacíe el `CrmIntegrationCard` de ese page (BotPersonalization sola va a quedar todavía más vacía). Marcar para sprint de pulida.
+6. **Nada con URL/token/modelo/temperatura/prompt expuesto al cliente que el agent inicial no haya visto.** La auditoría de este sprint cierra ese miedo: hay UN solo caso de tecnicismo en el dashboard, y es el CRM.
+
+### Decisiones pendientes de Franco antes de CC.2
+
+- ✅ / ❌ Confirmar la lista de 1 🔴 + 2 🟡 (¿se mueven los 3 en CC.2, o solo el CRM y los 🟡 van en sprints separados?).
+- ✅ / ❌ Confirmar timing del KB→read-only (¿junto con CRM en CC.2, o sprint propio CC-KB después?).
+- ✅ / ❌ ¿`fromEmail` de campañas se mira en CC o se difiere a un sprint de email-deliverability propio? (Recomendación: diferir; no es scope CC.)
+
+### Archivos tocados en CC.1
+
+- `docs/bitacora-roadmap.md` — append de este reporte.
+
+**Cero código modificado.** Solo auditoría. CC.2 espera confirmación de Franco sobre la lista de arriba.
+
+---
+
+## ✅ CC.2 — Mover CrmIntegrationCard del dashboard cliente al admin
+
+**Objetivo:** sacar el webhook n8n + secret del dashboard del cliente y darle hogar en el admin de develOP. Pagar la deuda B5.8 (no había vista admin del CRM). El sync de leads sigue funcionando igual — solo cambió **quién configura**, no el motor.
+
+**Principio rector aplicado:** webhook URL + header secret = tecnicismo puro → el dueño de una concesionaria no lo ve ni lo toca. Lo configura develOP por org desde el admin.
+
+### Decisión Franco previa al sprint
+
+Indicador read-only "CRM conectado ✓" para el cliente Business: **SÍ, agregarlo** (sin URL/secret). Implementado como `CrmStatusIndicator`.
+
+### Cambios
+
+**1. Server actions migradas a admin-only** (4 archivos nuevos en `server/admin/integrations/`):
+
+- [`saveCrmIntegration.ts`](../src/modules/chatbot/server/admin/integrations/saveCrmIntegration.ts) — guarda config. Guard `auth() + resolveOrgId()` → `requireSuperAdmin() + organizationId` recibido como param. Audit log `source: 'admin_develop'`.
+- [`testCrmConnection.ts`](../src/modules/chatbot/server/admin/integrations/testCrmConnection.ts) — test ping al webhook. Mismo cambio de guard.
+- [`retryCrmSync.ts`](../src/modules/chatbot/server/admin/integrations/retryCrmSync.ts) — retry manual del sync de un lead. Mismo cambio de guard. Sigue disparando `syncLeadToCrm` (motor sin cambios).
+- [`getCrmSyncHistory.ts`](../src/modules/chatbot/server/admin/integrations/getCrmSyncHistory.ts) — lectura del historial. `getOrgSyncHistory` y `getLeadSyncHistory` ahora reciben `organizationId` como param + `await requireSuperAdmin()`.
+
+Las 4 actions viejas (en `server/dashboard/`) fueron **borradas**. Cero referencias residuales en el repo (grep verificado).
+
+**2. Componentes movidos al admin** (`components/admin/integrations/`):
+
+- [`CrmIntegrationAdminCard.tsx`](../src/modules/chatbot/components/admin/integrations/CrmIntegrationAdminCard.tsx) — reemplazo server-side de `CrmIntegrationCard`. Recibe `organizationId` + `organizationName` como props (no más `resolveOrgId`). Misma lógica: locked state si plan no permite, form + history si OK. Mensajes recontextualizados para audiencia interna ("plan no incluye CRM" → orientado a develOP).
+- [`CrmConfigForm.tsx`](../src/modules/chatbot/components/admin/integrations/CrmConfigForm.tsx) — form recibe `organizationId` y lo pasa a las actions admin.
+- [`CrmSyncHistoryList.tsx`](../src/modules/chatbot/components/admin/integrations/CrmSyncHistoryList.tsx) — recibe `organizationId` y se lo pasa al `RetrySyncButton`.
+- [`RetrySyncButton.tsx`](../src/modules/chatbot/components/admin/integrations/RetrySyncButton.tsx) — recibe `organizationId` + `leadId`, llama al action admin.
+- [`CrmSyncBadge.tsx`](../src/modules/chatbot/components/admin/integrations/CrmSyncBadge.tsx) — presentational pura, sin cambios funcionales (solo cambia ubicación).
+
+Los 5 componentes viejos (en `components/dashboard/`) fueron **borrados**. Cero referencias residuales.
+
+**3. Tab "Integraciones" en el admin del bot**:
+
+- [`tabs.ts`](../src/app/(protected)/admin/chatbots/[botId]/tabs.ts) — `VALID_TABS` extendido con `'integrations'`.
+- [`tabs/IntegrationsTab.tsx`](../src/app/(protected)/admin/chatbots/[botId]/tabs/IntegrationsTab.tsx) — server component nuevo. Banner cyan con copy "El cliente NO ve la URL ni el secret" + renderiza `CrmIntegrationAdminCard`.
+- [`BotDetailClient.tsx`](../src/app/(protected)/admin/chatbots/[botId]/BotDetailClient.tsx) — agregado al array `TABS`. Recibe `integrationsTab: React.ReactNode` por prop (patrón ReactNode-as-prop para mantener el tab como Server Component dentro de un Client Component padre — necesario porque el card usa `node:crypto` indirectamente vía `encryptSecret`).
+- [`page.tsx`](../src/app/(protected)/admin/chatbots/[botId]/page.tsx) — renderiza el `<IntegrationsTab>` server-side y lo pasa al `BotDetailClient`.
+
+**4. Dashboard cliente — card sacado + indicador read-only**:
+
+- [`/dashboard/chatbot/settings/page.tsx`](../src/app/(protected)/dashboard/chatbot/settings/page.tsx) — reemplazado `<CrmIntegrationCard />` por `<CrmStatusIndicator />`. Sigue renderizando `<BotPersonalization>` arriba (visuales del bot, sin tocar).
+- [`CrmStatusIndicator.tsx`](../src/modules/chatbot/components/dashboard/CrmStatusIndicator.tsx) — nuevo server component **read-only**. 4 estados:
+  - Plan no incluye CRM → `return null` (cero exposición).
+  - Plan OK + sin integración → icono MessageCircle zinc + "Aún no está configurada · develOP la va a conectar" + link a `/dashboard/messages?context=crm`.
+  - Plan OK + integración + disabled → icono PauseCircle ámbar + "Sync pausado" + link a soporte.
+  - Plan OK + integración + enabled → icono Check verde + "Conectada · sync activo" + link a soporte.
+
+**Cero URL, cero secret, cero toggle, cero botón, cero historial visible al cliente.** Garantía estructural: el JSX del nuevo componente no contiene esos elementos.
+
+### Confirmación de que el sync de leads sigue andando
+
+El motor `syncLeadToCrm` ([`server/crm/syncLeadToCrm.ts`](../src/modules/chatbot/server/crm/syncLeadToCrm.ts)) **NO se tocó**. Lee la config de `prisma.crmIntegration` por `organizationId` resuelto del lead (`lead.botConfig.organization.id`), no de quién hizo el save. Verificado en CC.1 discovery; reverificado en CC.2 que ninguna línea cambió.
+
+→ La movida es transparente para el sync: develOP guarda la config desde el admin con las nuevas actions, el motor la lee igual cuando se captura un lead. Cero cambios en el flujo runtime.
+
+### Cambio de guards y audit log
+
+| Action | Antes | Ahora |
+|---|---|---|
+| `saveCrmIntegration` | `auth() + resolveOrgId()` (cliente) | `requireSuperAdmin() + organizationId` param |
+| `testCrmConnection` | idem | idem |
+| `retryCrmSync` | idem | idem |
+| `getOrgSyncHistory` | idem | idem |
+| `getLeadSyncHistory` | idem | idem |
+| Audit log `source` | `'dashboard_cliente'` | `'admin_develop'` |
+| Audit log `action` | "Cliente actualizó/probó/reintentó…" | "develOP actualizó/probó/reintentó…" |
+
+`requireSuperAdmin()` ya existía en [`server/admin/requireSuperAdmin.ts`](../src/modules/chatbot/server/admin/requireSuperAdmin.ts) — se reusó.
+
+### Verificación
+
+**Compilación:**
+- ✅ `next build --webpack` compila correctamente. El bug inicial (`UnhandledSchemeError: node:crypto` por importar el card server desde el `BotDetailClient` `'use client'`) se resolvió con el patrón **ReactNode-as-prop**: el `page.tsx` renderiza el tab server-side y se lo pasa al cliente como `React.ReactNode`.
+- ✅ `npx tsc --noEmit` filtrado a archivos CC.2: **cero errores**.
+- ⚠️ `npx tsc --noEmit` global: 4 errores **pre-existentes en main** (`ModuloActiveCard.tsx:136`, `StoryMomentCard.tsx:268`, `CustomCursor.tsx:60`, otro en landing). NO introducidos por CC.2 — son deuda anterior. Verificado con `git stash` + rebuild en main limpio.
+
+**visual-qa** (subagente `visual-qa` contra `next-dev-qa` puerto 3002, sesión QA `client-a` y `super-admin`):
+
+- ✅ **Pantalla 2 — Admin `/admin/chatbots/[botId]?tab=integrations`** (desktop 1280 + mobile 390):
+  - Tab "Integraciones" visible y activo en el tab bar.
+  - Banner cyan "Integraciones de Matsu" con copy correcto.
+  - Card "Webhook n8n" con todos los campos: input URL, toggle "Sync activo", sección header opcional, indicador "Sin secret configurado", botones "Guardar" + "Probar conexión".
+  - Layout responsive OK en mobile, todo accesible.
+
+- ⏳ **Pantalla 1 — Cliente `/dashboard/chatbot/settings`**: visual-qa BLOQUEADO porque la org de `client-a` (la persona QA del cliente) NO tiene `BotConfig` seedeado → el layout `/dashboard/chatbot/*` redirige a `/dashboard` vía `getClientChatbotSession()`. **No es bug de CC.2** — es brecha del seed.
+  - **Garantía estructural en lugar de screenshot:** el JSX de `/dashboard/chatbot/settings/page.tsx` ahora importa `CrmStatusIndicator` (no `CrmIntegrationCard`); el JSX de `CrmStatusIndicator.tsx` no contiene ningún `<input>`, `<Toggle>`, `<Button>` de save/test, ni renderiza `webhookUrl`, `secretHeaderName` o `secretEncrypted`. La única fuente posible de URL/secret al cliente desapareció del repo (`grep` confirma 0 referencias residuales). Cliente NO puede ver tecnicismos.
+  - **Pendiente real:** screenshot del cliente cuando exista seed de BotConfig para `client-a` (deuda separada, ver abajo).
+
+- ⏳ **Pantalla 3 — Lead detail cliente**: no verificada visual por mismo blocker de seed. Garantía estructural: `grep` de `CrmSyncBadge|crmSync` en `/dashboard/chatbot/leads/[id]/page.tsx` = 0. El cliente NO ve sync status en sus leads.
+
+### Hydration mismatch reportado por visual-qa (pre-existente, no CC.2)
+
+El visual-qa reportó un hydration mismatch en el `TransitionContext` que bloquea la navegación cliente-side desde el sidebar. Workaround: hard-nav con `window.location.href`. **No es scope CC.2** — issue anterior con el preloader/transition layer. Marcado como deuda para investigar aparte.
+
+### Deuda operativa creada (no scope CC.2 pero útil)
+
+Para destrabar el `visual-qa` (que requiere `QA_ALLOW_LOCALHOST=1` y el `next-dev` no lo tenía), se agregaron:
+
+- [`logic-core-v3/package.json`](../package.json) — script `dev:qa: cross-env QA_ALLOW_LOCALHOST=1 next dev --webpack -p 3002`.
+- [`.claude/launch.json`](../../.claude/launch.json) — entry `next-dev-qa` en port 3002.
+
+Sin esto, `visual-qa` solo podía verificar contra `next-prod-qa`, que requiere build prod previo, que NO pasa por los 4 TS errors pre-existentes. Esta tríada (next-dev-qa) destraba el sprint y queda como herramienta reusable. Si Franco quiere borrarla, son 2 líneas.
+
+### Archivos tocados
+
+**Creados (10):**
+- `src/modules/chatbot/server/admin/integrations/saveCrmIntegration.ts`
+- `src/modules/chatbot/server/admin/integrations/testCrmConnection.ts`
+- `src/modules/chatbot/server/admin/integrations/retryCrmSync.ts`
+- `src/modules/chatbot/server/admin/integrations/getCrmSyncHistory.ts`
+- `src/modules/chatbot/components/admin/integrations/CrmIntegrationAdminCard.tsx`
+- `src/modules/chatbot/components/admin/integrations/CrmConfigForm.tsx`
+- `src/modules/chatbot/components/admin/integrations/CrmSyncHistoryList.tsx`
+- `src/modules/chatbot/components/admin/integrations/RetrySyncButton.tsx`
+- `src/modules/chatbot/components/admin/integrations/CrmSyncBadge.tsx`
+- `src/modules/chatbot/components/dashboard/CrmStatusIndicator.tsx`
+- `src/app/(protected)/admin/chatbots/[botId]/tabs/IntegrationsTab.tsx`
+
+**Modificados (4):**
+- `src/app/(protected)/admin/chatbots/[botId]/BotDetailClient.tsx` (add tab + prop)
+- `src/app/(protected)/admin/chatbots/[botId]/page.tsx` (render IntegrationsTab + pass as prop)
+- `src/app/(protected)/admin/chatbots/[botId]/tabs.ts` (extend VALID_TABS)
+- `src/app/(protected)/dashboard/chatbot/settings/page.tsx` (reemplazar Card por Indicator)
+- `package.json` (script `dev:qa` — deuda operativa)
+- `.claude/launch.json` (entry `next-dev-qa` — deuda operativa)
+
+**Borrados (9):**
+- `src/modules/chatbot/components/dashboard/CrmIntegrationCard.tsx`
+- `src/modules/chatbot/components/dashboard/CrmConfigForm.tsx`
+- `src/modules/chatbot/components/dashboard/CrmSyncHistoryList.tsx`
+- `src/modules/chatbot/components/dashboard/CrmSyncBadge.tsx`
+- `src/modules/chatbot/components/dashboard/RetrySyncButton.tsx`
+- `src/modules/chatbot/server/dashboard/saveCrmIntegration.ts`
+- `src/modules/chatbot/server/dashboard/testCrmConnection.ts`
+- `src/modules/chatbot/server/dashboard/retryCrmSync.ts`
+- `src/modules/chatbot/server/dashboard/getCrmSyncHistory.ts`
+
+### Pendientes / Out-of-scope flagged
+
+1. **Seed de `BotConfig` para `client-a`** — sin esto el visual-qa del cliente no se puede correr end-to-end. Sprint propio chiquito (ampliar `prisma/seed.ts` para que QA Cliente B o A tengan un bot con plan Business). Bloqueante para futuros sprints CC que verifiquen UX del cliente con chatbot.
+2. **Hydration mismatch en TransitionContext / preloader** — pre-existente. Bloquea click-nav del sidebar en dev (hard-nav funciona). Sprint propio.
+3. **4 errores TypeScript en main** (`ModuloActiveCard.tsx`, `StoryMomentCard.tsx`, `CustomCursor.tsx`) — pre-existentes, bloquean `npm run build` y por ende `next-prod-qa`. Sprint propio (5 min de fixes: cast a `as React.CSSProperties` + un null check).
+4. **Lucide icons como props desde Server Components warning** — pre-existente, no crítico.
+
+### Confirmación de los criterios del brief
+
+- ✅ Card sacado de `/dashboard/chatbot/settings`: confirmed (el componente fue removido y el archivo borrado).
+- ✅ Hogar nuevo en el admin: confirmed (tab "Integraciones" en `/admin/chatbots/[botId]?tab=integrations`).
+- ✅ Guard cambiado a SUPER_ADMIN: confirmed (4 actions usan `requireSuperAdmin()`).
+- ✅ Sync de leads sigue funcionando: confirmed por análisis (`syncLeadToCrm` no se tocó; lee config por `organizationId` del lead, no de la sesión).
+- ✅ Multi-tenant scoped por org: confirmed (las actions reciben `organizationId` validado contra la DB; el admin lo deriva del bot lookup).
+- ✅ Indicador read-only "CRM conectado" para cliente Business: confirmed (`CrmStatusIndicator` con 4 estados, sin exponer URL/secret).
+
+---
+
+## ✅ CC.3 — Knowledge Base del cliente: solo-lectura
+
+**Objetivo:** el cliente VE qué sabe su bot (los 7 campos de KB) pero NO los edita. La edición la hace develOP desde el admin (que ya tenía su propio editor con `requireSuperAdmin`). El cliente entiende cómo actualizar — pedirlo desde Mensajes — y no queda con una vista muerta.
+
+**Razón:** evitar que el cliente rompa el bot escribiendo KB inconsistente. La sync automática vía Sanity queda explícitamente fuera de scope (proyecto futuro).
+
+### Defense-in-depth aplicado (mismo criterio que B11 y CC.2)
+
+🔴 **No basta con ocultar el form.** Se eliminó la server action de escritura del lado cliente (`saveClientKnowledgeBase`) por completo del repo. No queda endpoint que reciba escrituras desde la sesión del cliente: aunque alguien construya un POST a mano contra el path del action, ya no hay handler que lo reciba. La escritura de KB queda escencialmente solo en el admin (`saveKnowledgeBase` con `requireSuperAdmin()`).
+
+### Cambios
+
+**1. Vista cliente read-only nueva:**
+
+- [`ClientKnowledgeView.tsx`](../src/modules/chatbot/components/dashboard/ClientKnowledgeView.tsx) — reemplazo del `ClientKnowledgeForm`. Server component (lo recibe `kb: KnowledgeBase` por prop). Renderiza:
+  - Header con icono BookOpen + título "Lo que sabe tu chatbot" + descripción "La curamos con develOP para asegurar consistencia y que no responda algo incorrecto."
+  - Card CTA arriba con icono MessageCircle: "¿Necesitás actualizar algo? Pedinos el cambio desde Mensajes" + link a `/dashboard/messages?context=knowledge`. Tono propositivo, NO de error/deshabilitado.
+  - Section "Contenido actual" con los **7 campos** (los 5 que antes eran editables del lado cliente + los 2 admin-only que ya tenían chip "Configurado por develOP"). Cada bloque: título + descripción breve + caja `<pre>` con `whitespace-pre-wrap` para respetar saltos de línea sin parsear markdown.
+  - Empty state por campo si está vacío: caja gris itálica con copy "Todavía no cargamos esta sección. Pedinos el cambio para sumarla." (para los 5 del cliente) o "develOP no cargó X todavía" (para los 2 técnicos).
+  - Los 2 campos técnicos (`toneExamples`, `forbiddenStatements`) conservan su chip emerald "Configurado por develOP" para mantener la convención visual ya conocida.
+
+  **JSX confirmado cero editables:** `grep` por `<input>`, `<textarea>`, `<select>`, `onChange`, `onSubmit`, `onClick.*save`, `formAction` en `ClientKnowledgeView.tsx` = 0 matches.
+
+**2. Borrado del form y del action de escritura cliente:**
+
+- `src/modules/chatbot/components/dashboard/ClientKnowledgeForm.tsx` — **borrado**.
+- `src/modules/chatbot/server/admin/saveClientKnowledgeBase.ts` — **borrado** (aunque vivía en `server/admin/`, no usaba `requireSuperAdmin` sino `getClientChatbotSession` → aceptaba escrituras de la sesión del cliente; es el endpoint problemático que había que cerrar).
+- Barrel exports actualizados:
+  - [`components/dashboard/index.ts`](../src/modules/chatbot/components/dashboard/index.ts) — re-export `ClientKnowledgeForm` → `ClientKnowledgeView`.
+  - [`modules/chatbot/index.ts`](../src/modules/chatbot/index.ts) — `export saveClientKnowledgeBase` reemplazado por comentario CC.3 explicando la eliminación.
+
+**3. Page del cliente actualizada:**
+
+- [`/dashboard/chatbot/knowledge/page.tsx`](../src/app/(protected)/dashboard/chatbot/knowledge/page.tsx) — import + render cambian de `ClientKnowledgeForm` a `ClientKnowledgeView`. El resto (lookup `unstable_cache` de KB, redirect si no hay session/kb) NO se toca.
+
+### Admin sigue editando (intacto)
+
+- [`saveKnowledgeBase.ts`](../src/modules/chatbot/server/admin/saveKnowledgeBase.ts) — server action admin con `requireSuperAdmin()` y los 7 campos editables (incluidos `toneExamples` y `forbiddenStatements`). **NO se tocó.**
+- [`saveKnowledgeBaseByOrgSlug.ts`](../src/modules/chatbot/server/admin/saveKnowledgeBaseByOrgSlug.ts) — variante por org-slug. **NO se tocó.**
+- [`KnowledgeBaseEditor.tsx`](../src/modules/chatbot/components/admin/KnowledgeBaseEditor.tsx) — editor admin con todos los 7 campos editables, preview, validación. **NO se tocó.**
+- [`KnowledgeTab.tsx`](../src/app/(protected)/admin/chatbots/[botId]/tabs/KnowledgeTab.tsx) — tab admin. **NO se tocó.**
+
+→ develOP edita la KB de cada bot desde `/admin/chatbots/[botId]?tab=knowledge` exactamente igual que antes.
+
+### Verificación
+
+**Type-check:** `npx tsc --noEmit` filtrado a archivos CC.3 = **0 errores nuevos**. Mismos 4 errores TS pre-existentes que ya estaban en main (no scope CC.3).
+
+**visual-qa** (subagente contra `next-dev-qa` puerto 3002):
+
+- ✅ **Admin `/admin/chatbots/[botId]?tab=knowledge`** (desktop 1280 + mobile 390):
+  - Tab "Knowledge Base" presente y editor accesible.
+  - 7 textareas EDITABLES (no read-only, no disabled).
+  - Botón "Guardar cambios" (cyan, disabled-cuando-no-hay-cambios = correcto).
+  - Botón "Previsualizar" presente.
+  - Panel de validación a la derecha.
+  - Los 2 campos admin-only (`toneExamples`, `forbiddenStatements`) editables con chip "Configurado por develOP" (mantiene info para develOP sobre qué hereda al render del cliente).
+  - Mobile: editor con modes Editor/Split/Preview, contador chars+tokens, botones accesibles.
+  - **Confirmado: el editor admin sigue 100% funcional.**
+
+- ⏳ **Cliente `/dashboard/chatbot/knowledge`**: visual-qa BLOQUEADO por la misma brecha de seed reportada en CC.2 (org de `client-a` y `client-b` no tiene `BotConfig`, el page redirige a `/dashboard` vía `getClientChatbotSession()`). **No es bug de CC.3** — es el mismo blocker operativo.
+  - **Garantía estructural en lugar de screenshot:**
+    - `ClientKnowledgeForm.tsx` (form viejo con 5 `<textarea>` editables, useState, botón "Guardar cambios", llamada a `saveClientKnowledgeBase`) **fue borrado del repo**.
+    - `ClientKnowledgeView.tsx` (nuevo) grep cero `<input>`, `<textarea>`, `<select>`, `onChange`, `onSubmit`, `onClick.*save`, `formAction` → estructuralmente imposible de editar desde la UI.
+    - `saveClientKnowledgeBase.ts` **fue borrado del repo** → no existe handler de escritura aceptable desde sesión cliente. Cualquier intento de POST contra ese path devuelve 404. Defense-in-depth real.
+    - El page `/dashboard/chatbot/knowledge` ahora importa `ClientKnowledgeView`, no `ClientKnowledgeForm` (verificado por edit).
+  - **Pendiente real:** screenshot del cliente cuando exista seed de BotConfig para `client-a` o `client-b` (deuda separada — la misma que CC.2 flageó).
+
+### Archivos tocados
+
+**Creado (1):**
+- `src/modules/chatbot/components/dashboard/ClientKnowledgeView.tsx`
+
+**Modificados (3):**
+- `src/app/(protected)/dashboard/chatbot/knowledge/page.tsx` (import Form→View)
+- `src/modules/chatbot/components/dashboard/index.ts` (barrel: Form→View)
+- `src/modules/chatbot/index.ts` (sacar export `saveClientKnowledgeBase`)
+
+**Borrados (2):**
+- `src/modules/chatbot/components/dashboard/ClientKnowledgeForm.tsx`
+- `src/modules/chatbot/server/admin/saveClientKnowledgeBase.ts`
+
+### Pendientes / Out-of-scope flagged
+
+1. **Seed de `BotConfig` para `client-a` o `client-b`** — sigue bloqueando visual-qa de cualquier vista bajo `/dashboard/chatbot/*` del cliente. Es el MISMO pendiente que CC.2. Sprint propio chiquito para resolver de una vez (ampliar `prisma/seed.ts`).
+2. **Sync automática KB ↔ Sanity** — explícitamente fuera de scope CC. Proyecto futuro.
+3. **`feedback_loop` con develOP** — hoy el cliente pide cambios por Mensajes (link a `/dashboard/messages?context=knowledge`). Si Franco quiere un flujo dedicado tipo "Solicitud de cambio de KB" con tracking, es sprint propio (no scope CC).
+
+### Confirmación de los criterios del brief
+
+- ✅ Vista KB del cliente solo-lectura: confirmed (`ClientKnowledgeView`, cero editables).
+- ✅ Mensaje claro de "pedir cambios": confirmed (Card CTA arriba + link a Mensajes con context).
+- ✅ Server action de escritura del cliente desactivada (no solo oculta): confirmed (archivo borrado del repo, defense-in-depth real).
+- ✅ Edición admin de KB intacta: confirmed (`saveKnowledgeBase` + `KnowledgeBaseEditor` + `KnowledgeTab` no tocados; visual-qa admin OK).
+
+---
+
+## ✅ CC.4 — Paridad del preview vivo entre admin y cliente
+
+**Objetivo:** asegurar que el cliente vea el MISMO preview vivo de B13.0 en `/dashboard/chatbot/settings` que el admin tiene en `/admin/chatbots/[botId]?tab=config`. Reusar el componente (un preview, dos lugares) y NO exponer tecnicismos al cliente.
+
+### Estado de paridad encontrado: NO había paridad
+
+**Admin** (B13.0): `BotConfigPreview` con avatar vivo (estados idle/thinking/speaking), toggle vista flotando/abierto, mensaje + quick replies como chips con accent color, página simulada con líneas difusas detrás, layout completo según los 14 campos visuales.
+
+**Cliente** (anterior): `BotPreview` interno definido dentro de `BotPersonalization.tsx`:
+- Avatar SIEMPRE en `state="idle"` — sin animaciones thinking/speaking.
+- Solo vista "abierta" (sin toggle a "flotando").
+- NO consumía `bubbleStyle`, `surfaceStyle`, `intensityLevel`, `fontStyle`, `chatSurfaceTint` — render genérico no fiel.
+- Quick replies como botones (no chips coloreados).
+- Sin "página simulada" detrás.
+
+→ Divergencia clara. El cliente veía una versión degradada de su propio bot.
+
+### Cambios
+
+**1. Preview compartido — un solo componente para los dos:**
+
+- [`src/modules/chatbot/components/preview/BotConfigPreview.tsx`](../src/modules/chatbot/components/preview/BotConfigPreview.tsx) — el preview vivo de B13.0 mudado de `components/admin/config/` a un path neutro `components/preview/`. Receives `BotPreviewState` (subset visual definido en `components/preview/types.ts`).
+- [`src/modules/chatbot/components/preview/types.ts`](../src/modules/chatbot/components/preview/types.ts) — define `BotPreviewState` con TODOS los campos visuales que el preview consume (15 fields). Los enums laxos a `string` con normalización interna en el componente (las funciones `normalizeRadius`, `normalizeBubble`, `normalizeSurface`, `normalizeFont`, `normalizeIntensity`, `isLeftPosition`) para tolerar el `string` crudo que Prisma devuelve en la query del cliente. Esto desacopla el preview del state-completo-del-admin (que tiene 28 campos, muchos no visuales como `monthlyQuota`, `llmModel`, etc.).
+- [`src/modules/chatbot/components/preview/index.ts`](../src/modules/chatbot/components/preview/index.ts) — barrel export.
+- **El archivo anterior** `src/modules/chatbot/components/admin/config/BotConfigPreview.tsx` **fue borrado.** Sin referencias residuales.
+
+**2. Admin usa el preview compartido:**
+
+- [`BotConfigEditor.tsx`](../src/modules/chatbot/components/admin/BotConfigEditor.tsx) — import cambia de `./config/BotConfigPreview` a `../preview`. Agregado helper `adminStateToPreview(state: BotConfigEditorState): BotPreviewState` que mapea el state-completo del admin al subset que consume el preview compartido. Cero cambios funcionales — visual idéntico al anterior.
+
+**3. Cliente usa el preview compartido y elimina su versión interna:**
+
+- [`BotPersonalization.tsx`](../src/modules/chatbot/components/dashboard/BotPersonalization.tsx) — la función `BotPreview` interna (con avatar siempre idle, sin toggle, sin campos admin) **fue eliminada**. Se importa `BotConfigPreview` compartido. Agregado helper `buildPreviewState(state, bot): BotPreviewState` que arma el state del preview como merge:
+  - **Cambios en vivo del cliente** (`state`): `accentColor`, `position`, `avatarStyle`, `welcomeMessage`, `quickReplies`.
+  - **Configurado por admin, viene de DB** (`bot` prop): `botName`, `isActive`, `avatarImageUrl`, `avatarEmoji`, `chatSurfaceTint`, `borderRadius`, `bubbleStyle`, `surfaceStyle`, `intensityLevel`, `fontStyle`.
+- **Quick replies con emoji preservado** (ver `extractQuickRepliesFromJson`): si el cliente NO modificó quick replies (state coincide con el original normalizado de DB), el preview lee el JSON crudo del bot que incluye emojis configurados por el admin. Si el cliente SÍ los modificó, el preview muestra sus strings sin emoji (refleja lo que va a quedar al guardar — `updateBotAppearance` no preserva emoji por diseño actual). Esto es paridad HONESTA: el cliente ve los emojis del admin mientras no toque nada, y al editar ve que pierde los emojis (le da feedback claro de lo que va a guardar).
+
+**4. Page `/dashboard/chatbot/settings` amplía el `select`:**
+
+- [`/dashboard/chatbot/settings/page.tsx`](../src/app/(protected)/dashboard/chatbot/settings/page.tsx) — agregados 8 campos al `prisma.botConfig.findUnique({ select })`:
+  - `isActive`, `avatarImageUrl`, `chatSurfaceTint`, `borderRadius`, `bubbleStyle`, `surfaceStyle`, `intensityLevel`, `fontStyle`.
+  Necesarios para que `BotPersonalization` pueda alimentar el preview con datos reales del admin. El `unstable_cache` se mantiene (revalidate 60s + tag `chatbot-config:${orgId}`).
+
+### Verificación
+
+**Type-check:** `npx tsc --noEmit` filtrado a archivos CC.4 = **0 errores nuevos**. Mismos 4 errores pre-existentes (landing/cursor).
+
+**Cero tecnicismo en el preview del cliente** — confirmado por audit del tipo `BotPreviewState`: NO contiene `llmProvider`, `llmModel`, `temperature`, `maxOutputTokens`, `monthlyQuota`, `allowedDomains`, `leadNotificationEmail`, `proactivePrompts`, `routeColorMap`. Solo lo que ve el visitante final.
+
+**visual-qa** (subagente contra `next-dev-qa` puerto 3002):
+
+- ✅ **Admin `/admin/chatbots/[botId]?tab=config`** (desktop 1600):
+  - Sección "Preview" + título + "Lo que ve el visitante".
+  - Toggles funcionales "Vista" (Flotando/Abierto) y "Estado" (Idle/Pensando/Hablando).
+  - Área h-96 con fondo dark gradient + líneas blancas difusas (página simulada).
+  - Modo "Abierto": widget completo con avatar 40x40, botName ("Lucia"), estado "En línea", mensaje de bienvenida, quick replies con emojis como chips coloreados ("🌐 Quiero un sitio", "🤖 Necesito IA", "⚙️ Automatizaciones").
+  - Layout grid `lg:grid-cols-[minmax(0,1fr)_380px]`.
+  - Confirma que el preview funciona idéntico al de B13.0.
+
+- ⏳ **Cliente `/dashboard/chatbot/settings`**: visual-qa BLOQUEADO por la **misma brecha de seed** que CC.2 y CC.3 (org de `client-a` y `client-b` sin BotConfig → redirect a `/dashboard`).
+  - **Garantía estructural en lugar de screenshot:**
+    1. **Mismo componente importado**: `BotPersonalization.tsx` línea 24 → `import { BotConfigPreview, type BotPreviewState } from '@/modules/chatbot/components/preview'`. El admin importa del mismo path.
+    2. **Mismo render**: `<BotConfigPreview state={buildPreviewState(state, bot)} />` — exactamente el mismo componente, con state armado del merge.
+    3. **Cero tecnicismo**: el tipo `BotPreviewState` NO contiene ningún campo de LLM/quota/dominios/notificaciones. Imposible exponer config técnica al cliente.
+    4. **Quick replies con emoji**: confirmado por código que `extractQuickRepliesFromJson(bot.quickReplies)` preserva el campo `emoji` cuando viene en el JSON original.
+    5. **Layout idéntico**: ambos lados usan `lg:grid-cols-[minmax(0,1fr)_380px]` con preview en aside sticky.
+
+- **Bug detectado y arreglado durante visual-qa:** el primer pass del cliente perdía emojis de quick replies (porque `state.quickReplies: string[]` no los contiene). Refactor del `buildPreviewState` para que cuando el cliente NO haya modificado quick replies, el preview lea los emojis del JSON original guardado. Confirmed via tsc pasada limpia post-fix.
+
+### Archivos tocados
+
+**Creados (3):**
+- `src/modules/chatbot/components/preview/BotConfigPreview.tsx` (movido de admin/config/)
+- `src/modules/chatbot/components/preview/types.ts`
+- `src/modules/chatbot/components/preview/index.ts`
+
+**Modificados (3):**
+- `src/modules/chatbot/components/admin/BotConfigEditor.tsx` (path import + helper adminStateToPreview)
+- `src/modules/chatbot/components/dashboard/BotPersonalization.tsx` (props ampliadas + BotPreview interno borrado + buildPreviewState + extractQuickRepliesFromJson)
+- `src/app/(protected)/dashboard/chatbot/settings/page.tsx` (select ampliado con 8 campos visuales admin)
+
+**Borrado (1):**
+- `src/modules/chatbot/components/admin/config/BotConfigPreview.tsx`
+
+### Confirmación de los criterios del brief
+
+- ✅ El cliente ve el preview vivo de B13.0: confirmed (mismo componente importado en ambos lados).
+- ✅ Reuso de componente, NO duplicación: confirmed (un único `BotConfigPreview` en `components/preview/`, admin y cliente lo importan, archivo viejo del admin borrado).
+- ✅ Avatar con animaciones (idle/thinking/speaking): confirmed (el componente tiene el toggle de estado que setea `avatarState` en `<AvatarRenderer state={avatarState} />`).
+- ✅ Color de marca + iniciales reales del bot: confirmed (`state.accentColor` propaga al preview y a quick replies como `${accentColor}35/18`; `deriveBusinessInitials(state.botName)` para fallback).
+- ✅ Paridad real, no degradada: confirmed (admin y cliente alimentan el mismo `BotPreviewState` con merge de campos visuales completos).
+- ✅ Cero tecnicismo en el preview cliente: confirmed (tipo `BotPreviewState` solo expone campos visuales; no contiene LLM, quota, dominios, ni notificaciones).
+
+### Pendientes / Out-of-scope flagged
+
+1. **Seed `BotConfig` para `client-a` o `client-b`** (recurring para 3er sprint consecutivo) — el visual-qa cliente sigue blocked. Sprint propio chiquito ya muy necesario.
+2. **Edición de emojis en quick replies por el cliente** — hoy el cliente solo edita el texto (string). Si Franco quiere que el cliente también pueda agregar emojis a sus quick replies, hay que sumar emoji picker en la UI + propagación al `updateBotAppearance`. Fuera de scope CC.4 (es features-creep). El comportamiento actual es honesto: el cliente ve los emojis que el admin configuró mientras no toque nada; al editar, el preview muestra lo que va a guardar (sin emoji).
+
+---
+
+## ✅ CC.5 — Pulida visual del dashboard cliente
+
+**Objetivo:** alinear el dashboard del cliente al lenguaje visual del admin (B13.1) y destrabar los blockers operativos que arrastraban 3 sprints (seed faltante + TS errors pre-existentes). Sprint subjetivo donde Franco es árbitro — las decisiones se consultan, no se asumen.
+
+### Pre-requisitos resueltos primero (deuda heredada)
+
+CC.5 requería visual-qa contra **build prod** + recorrer **todas las secciones del cliente logueado**. Dos blockers lo impedían:
+
+1. **Seed `BotConfig` para `client-a`** ([`prisma/seed.ts`](../prisma/seed.ts)). Pago de la deuda flageada en CC.2, CC.3 y CC.4. Agregué:
+   - Subscription apuntando al `Plan BUSINESS` (`planId` + `planName` desde `prisma.plan.findUnique`) — habilita CRM para San Miguel.
+   - `BotConfig` "Lucía" con valores realistas: avatarStyle neuro, accentColor cyan, position bottom_right, welcomeMessage en rioplatense, quickReplies con emojis (🚗 Ver autos, 💳 Planes de pago, 📅 Test drive), industry automotive, allowedDomains sanmiguelautos.com.ar.
+   - `KnowledgeBase` con contenido real de concesionaria (businessInfo, servicesOrProducts, faq, policies, salesGuidance, toneExamples, forbiddenStatements) — todas las pantallas KB ahora se ven pobladas.
+   - Fallback con warning si Plan BUSINESS no está seedeado primero (`npx tsx prisma/seeds/sync-plans.ts`).
+2. **4 TS errors pre-existentes en main** (deuda CC.2):
+   - [`ModuloActiveCard.tsx:136`](../src/components/sections/modulos-opcionales/ModuloActiveCard.tsx) + [`StoryMomentCard.tsx:268`](../src/components/sections/portal-demo/StoryMomentCard.tsx) — CSS custom properties no aceptadas por `MotionStyle`. Fix: cast `as React.CSSProperties` (1 línea cada uno).
+   - [`CustomCursor.tsx:60`](../src/components/ui/CustomCursor.tsx) — `target.closest('button') || ...` devuelve `Element | null`, no `boolean`. Fix: `setIsHovering(Boolean(isInteractive))`.
+   - Tras los 3 fixes: `npx tsc --noEmit` = 0 errores. `npm run build --webpack` pasa. `next-prod-qa` (puerto 3001) ahora arranca.
+
+### Discovery (Explore visual-qa)
+
+Recorrido completo de las 23 rutas del dashboard cliente como `client-a` en build prod (puerto 3001), desktop 1280x900 + mobile 390x844. Hallazgos clasificados:
+
+**❌ Falso positivo desestimado (importante):**
+- **"B7 layout comprimido en `/chatbot/settings` — 60% del ancho derecho vacío"** → tras inspeccionar el DOM real con `preview_eval`: viewport 1280px, sidebar 239px, main 1040px, grid `588px 380px` (contenido + aside preview), aside posicionado en x=876, right edge en 1256. **El preview SÍ se renderiza a la derecha como en el admin.** El `lg:grid-cols-[minmax(0,1fr)_380px]` funciona como debe. El visual-qa anterior midió mal (probablemente screenshot a viewport < 1024px → grid colapsado a 1 columna). NO HAY BUG B7. La página no está rota.
+
+**✅ Hallazgos reales y accionables (Franco eligió la prioridad):**
+1. **[ALTA]** Patrón `PageHeader` (B13.1: eyebrow + título + descripción + ícono) NO está unificado en todas las superficies del cliente. Varios layouts y pages usan headers ad-hoc con tipografía/spacing distinto.
+2. **[MEDIA]** Tras CC.2 (`CrmIntegrationCard` removido) `/chatbot/settings` queda más corto verticalmente. ¿Densificar o dejar?
+3. **[CAUTELA]** 5 pantallas con "demasiado aire" en desktop: `/dashboard`, `/chatbot` overview, `/chatbot/leads`, `/chatbot/conversations`, `/resultados/reputacion`. Auditar si tienen EmptyState B13.3 o si están crudas.
+
+### Decisión Franco (árbitro)
+
+> **Prioridad ALTA**: unificar headers al PageHeader. Cambio de mayor impacto en percepción de calidad. Es lo que B13.1 prometió.
+> **Prioridad MEDIA**: densificar settings SOLO si encuentro algo genuinamente útil que mostrar. Si no, página corta es honesta — "aire es Apple".
+> **Cautela**: para los 5 empty states, primero confirmar si ya tienen patrón B13.3 aplicado. Si sí + se ven con aire en desktop → dejar. Si no → migrar.
+> **No tocar** el grid de `/chatbot/settings` que ya funciona a 1280px.
+
+### Cambios
+
+**1. Patrón `PageHeader` extendido + unificado (PRIORIDAD ALTA):**
+
+- [`src/components/ui/PageHeader.tsx`](../src/components/ui/PageHeader.tsx) — agregada prop `accent: 'cyan' | 'amber' | 'emerald' | 'violet' | 'rose' | 'indigo'` (default cyan). Antes el ícono estaba hardcoded cyan; ahora los módulos premium pueden mantener su identidad de color sin desviarse del patrón. Tabla `ACCENT_CLASSES` mapea cada accent a sus utility classes.
+- **Pantallas migradas a `<PageHeader>`** (10 archivos):
+  - [`/dashboard/cuenta/layout.tsx`](../src/app/(protected)/dashboard/cuenta/layout.tsx) — Settings cyan.
+  - [`/dashboard/chatbot/layout.tsx`](../src/app/(protected)/dashboard/chatbot/layout.tsx) — Bot cyan, título = botName del cliente, descripción dinámica según `isActive`.
+  - [`/dashboard/project/page.tsx`](../src/app/(protected)/dashboard/project/page.tsx) — FolderOpen cyan, status badge como `action` slot (preserva el badge animado IN_PROGRESS/COMPLETED).
+  - [`/dashboard/services/page.tsx`](../src/app/(protected)/dashboard/services/page.tsx) — Zap cyan, chip "X servicios activos" como `action`.
+  - [`/dashboard/resultados/layout.tsx`](../src/app/(protected)/dashboard/resultados/layout.tsx) — TrendingUp cyan.
+  - [`/dashboard/modules/motor-resenas/page.tsx`](../src/app/(protected)/dashboard/modules/motor-resenas/page.tsx) — Star **amber**.
+  - [`/dashboard/modules/agenda-inteligente/page.tsx`](../src/app/(protected)/dashboard/modules/agenda-inteligente/page.tsx) — CalendarDays **emerald**.
+  - [`/dashboard/modules/tienda-conectada/page.tsx`](../src/app/(protected)/dashboard/modules/tienda-conectada/page.tsx) — ShoppingBag **violet**, chip "¡Conectada!" como `action`.
+  - [`/dashboard/modules/email-marketing/layout.tsx`](../src/app/(protected)/dashboard/modules/email-marketing/layout.tsx) — Mail cyan.
+
+  Las páginas que YA usaban `PageHeader` (`/dashboard`, `/leads`, `/messages`, `/plan`, `/soporte`, `/resultados/trafico`) no se tocan. Tampoco el preview vivo del bot (CC.4), la KB read-only (CC.3) ni el card de CRM admin (CC.2).
+
+**2. Decisión sobre densificar `/chatbot/settings` (PRIORIDAD MEDIA):**
+
+Considerado y **descartado**. El único contenido genuinamente útil sería listar `allowedDomains` ("Tu bot está activo en X dominios"), pero esa información ya vive en `/dashboard/chatbot/install` y duplicarla en settings sería relleno decorativo. Franco dijo "si no encontrás algo genuinamente útil, dejá la página corta — aire es Apple". La página queda con `BotPersonalization` (contenido + preview vivo sticky) + `CrmStatusIndicator` (lectura del estado CRM, sin URL/secret). Suficiente. Sin scope-creep.
+
+**3. Auditoría de los 5 empty states con "aire" (PRIORIDAD CAUTELA):**
+
+| Pantalla | Estado del empty state | Decisión |
+|---|---|---|
+| `/dashboard` | `BriefEmptyState` propio: `Card variant="highlighted"` + `Badge violet` + copy explicativo "Tu primer resumen ejecutivo se genera el próximo lunes..." | ✅ B13.3 aplicado. Dejar. |
+| `/dashboard/chatbot` (overview) | Hero card cyan + 4 `BusinessStatCard` con copy contextual ("Cuando capturen, aparecen acá", etc.) | ✅ B13.3 aplicado. Dejar. |
+| `/dashboard/chatbot/leads` | `ClientLeadsTable` ya usa `EmptyState` de `@/components/ui` en 4 escenarios (sin filtros, con filtros, DQ-only, etc.) | ✅ B13.3 aplicado. Dejar. |
+| `/dashboard/chatbot/conversations` | **CRUDO**: `<div className="text-center py-16">Todavía no hay conversaciones registradas.</div>` | ❌ Migrado. |
+| `/dashboard/resultados/reputacion` | `ReputationEmptyState` custom: icon Star cyan con glow, copy explicativo, CTA "Hablar con mi equipo" + hint "Setup manual por ahora" | ✅ B13.3 aplicado en espíritu (no usa el componente base pero el patrón es premium). Dejar. |
+
+**Solo 1 de 5 necesitaba migración real.** El resto ya tenía B13.3 aplicado, "aire" no era bug. Aplicación de la regla "no rehacer lo que ya funciona".
+
+**4. Migración de conversations al `EmptyState`:**
+
+- [`ConversationsTable.tsx`](../src/modules/chatbot/components/dashboards/ConversationsTable.tsx) — empty state crudo reemplazado por `<EmptyState icon={MessagesSquare} title="Todavía no hay conversaciones" description="Cuando alguien hable con tu chatbot en el sitio, el historial completo va a aparecer acá." cta={{ label: 'Ver cómo se instala', href: '/dashboard/chatbot/install' }} />`. Ícono, descripción explicativa, CTA accionable → patrón B13.3 completo.
+- [`/dashboard/chatbot/conversations/page.tsx`](../src/app/(protected)/dashboard/chatbot/conversations/page.tsx) — eliminé el header ad-hoc duplicado del page (eyebrow "Mi Chatbot" + h2 "Conversaciones" + descripción). El `chatbot/layout.tsx` ya pone un `PageHeader` arriba — tener uno más era ruido visual.
+
+### Verificación
+
+**Type-check:** `npx tsc --noEmit` = **0 errores totales** (los 4 pre-existentes resueltos en Pre-req).
+
+**Build prod:** `npm run build --webpack` pasa limpio. `next-prod-qa` (puerto 3001) arranca, sirve el bundle producción.
+
+**visual-qa post-fixes** (subagente contra `next-prod-qa`, sesión `client-a` con BotConfig seedeado):
+
+- ✅ **Bloque A — PageHeader unificado** (5/5 pantallas activas verificadas desktop 1280):
+  - `/dashboard/cuenta/perfil`, `/dashboard/chatbot/settings`, `/dashboard/project`, `/dashboard/services`, `/dashboard/resultados/seo` → todas con PageHeader correcto (eyebrow + título grande + ícono coloreado + descripción + action slot donde aplica). Layout coherente entre las 5. Cero regresión.
+  - ⚠️ Los 4 módulos premium (motor-resenas, agenda, tienda, email-marketing) NO se pudieron verificar visualmente porque el seed actual no los activa para `client-a` → redirect a `/dashboard`. Audit de código confirma que la migración a `PageHeader` con `accent` correcto está bien aplicada en los 4 archivos. Verificación visual real queda para cuando se active alguno de los módulos en seed (deuda separada).
+- ✅ **Bloque B — EmptyState conversations**: ícono `MessagesSquare` + título + descripción + CTA "Ver cómo se instala" funcionando.
+- ✅ **Bloque C — No-regresión**: preview vivo del bot intacto (toggles vista/estado funcionan, accent cyan, quick replies con emojis del seed visible: 🚗 Ver autos, 💳 Planes de pago, 📅 Test drive). KB read-only de CC.3 también intacta.
+- ✅ **Bloque D — Mobile 390**: header de `/chatbot/settings` apila bien; status badge del `/project` visible debajo del header sin overlap; layouts responsive.
+- ✅ **Console**: cero errores críticos (solo logs informativos "THREE.WebGLRenderer: Context Lost" en navegación, normal).
+
+### Archivos tocados
+
+**Modificados (12):**
+- `prisma/seed.ts` (Subscription + BotConfig + KnowledgeBase para San Miguel)
+- `src/components/sections/modulos-opcionales/ModuloActiveCard.tsx` (TS cast)
+- `src/components/sections/portal-demo/StoryMomentCard.tsx` (TS cast)
+- `src/components/ui/CustomCursor.tsx` (Boolean cast)
+- `src/components/ui/PageHeader.tsx` (prop `accent` agregada)
+- `src/app/(protected)/dashboard/cuenta/layout.tsx` (PageHeader)
+- `src/app/(protected)/dashboard/chatbot/layout.tsx` (PageHeader)
+- `src/app/(protected)/dashboard/chatbot/conversations/page.tsx` (sacado header dup)
+- `src/app/(protected)/dashboard/project/page.tsx` (PageHeader x2 — empty + main)
+- `src/app/(protected)/dashboard/services/page.tsx` (PageHeader con action)
+- `src/app/(protected)/dashboard/resultados/layout.tsx` (PageHeader)
+- `src/app/(protected)/dashboard/modules/motor-resenas/page.tsx` (PageHeader amber)
+- `src/app/(protected)/dashboard/modules/agenda-inteligente/page.tsx` (PageHeader emerald)
+- `src/app/(protected)/dashboard/modules/tienda-conectada/page.tsx` (PageHeader violet con action)
+- `src/app/(protected)/dashboard/modules/email-marketing/layout.tsx` (PageHeader cyan)
+- `src/modules/chatbot/components/dashboards/ConversationsTable.tsx` (EmptyState aplicado)
+
+**Sin cambios (decisiones explícitas):**
+- `/dashboard/chatbot/settings/page.tsx` — densificación descartada por Franco ("aire es Apple").
+- Empty states de `/dashboard`, `/chatbot` overview, `/chatbot/leads`, `/reputacion` — ya tenían B13.3.
+- Preview vivo del bot, KB read-only, CRM admin card — son CC.2/CC.3/CC.4, no se tocan.
+- 6 páginas que ya usaban `PageHeader` originalmente (leads, messages, plan, soporte, trafico, home).
+
+### Decisiones subjetivas / ❓ pendientes para Franco
+
+1. **Activación de módulos premium en seed**: hoy `client-a` tiene los 4 módulos (motor-resenas, agenda, tienda, email-marketing) sin activar → el visual-qa no puede verificar el PageHeader migrado de cada uno end-to-end. Audit de código confirma que están OK, pero si querés validación visual real, hay que extender `prisma/seed.ts` con `prisma.organizationModule` ACTIVE para esos 4 (o al menos para 1-2 representativos). Sprint propio chiquito.
+2. **Hidratación / TransitionContext**: el hydration mismatch reportado por visual-qa en CC.2/CC.3 sigue ahí (bloquea click-nav del sidebar en dev, no en prod). No es scope CC.5 — sprint propio si querés que se sienta más fluido.
+3. **Greeting "Buenas tardes" en redirect de módulos desactivados**: cuando client-a navega a `/dashboard/modules/motor-resenas` (desactivado), redirige a `/dashboard` y muestra el greeting + "Health Score · En construcción · Calibrando tu score". El visual-qa lo marcó como "estado especial intencional". ❓ Para Franco: ¿el calibrating health score es la UX deseada al primer login, o se siente largo/innecesario? No scope CC.5.
+
+### Confirmación de los criterios del brief
+
+- ✅ Layout arreglado: confirmado que el supuesto B7 no era real (cazado con DOM inspect, reportado a Franco antes de tocar).
+- ✅ Alineación a tokens B13.1: PageHeader unificado en 10 pantallas con accent extendido para preservar identidad de módulos premium.
+- ✅ Densidad / progressive disclosure: auditadas las 5 pantallas, 4/5 ya tenían B13.3 aplicado (dejadas), 1/5 migrada (conversations). Settings NO densificado por decisión explícita de Franco.
+- ✅ Espacio para Franco: el sprint le mostró los hallazgos antes de actuar, Franco eligió prioridades, las ❓ subjetivas (módulos seed, hydration, greeting calibrando) quedan listadas para que él arbitre como sprints propios.
+

@@ -137,7 +137,7 @@ export function ModuloActiveCard({ module }: ModuloActiveCardProps) {
         '--scroll-hover-scale': '1.01',
         '--scroll-hover-border': `${module.accentColor}70`,
         '--scroll-hover-shadow': `0 18px 60px ${module.accentColor}1C, 0 24px 90px rgba(0,0,0,0.45)`,
-      }}
+      } as React.CSSProperties}
     >
       <motion.div
         aria-hidden

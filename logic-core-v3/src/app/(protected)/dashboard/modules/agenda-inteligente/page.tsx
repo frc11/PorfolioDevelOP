@@ -5,7 +5,7 @@ import { resolveOrgId } from '@/lib/preview'
 import { isModuleActive } from '@/lib/modules/check-activation'
 import { getCalSummary, type CalBooking } from '@/lib/integrations/cal-com'
 import { prisma } from '@/lib/prisma'
-import { EmptyState } from '@/components/ui'
+import { EmptyState, PageHeader } from '@/components/ui'
 
 export const dynamic = 'force-dynamic'
 
@@ -329,24 +329,13 @@ export default async function AgendaInteligentePage() {
 
   return (
     <div className="flex flex-col gap-6 max-w-2xl">
-      {/* Header */}
-      <div>
-        <div className="flex items-center gap-3 mb-1">
-          <div
-            className="flex h-9 w-9 items-center justify-center rounded-xl"
-            style={{
-              background: 'rgba(16,185,129,0.12)',
-              border: '1px solid rgba(16,185,129,0.2)',
-            }}
-          >
-            <CalendarDays size={18} strokeWidth={1.5} className="text-emerald-400" />
-          </div>
-          <h1 className="text-lg font-black tracking-tight text-zinc-100">Agenda Inteligente</h1>
-        </div>
-        <p className="text-sm text-zinc-500 pl-12">
-          Tus reservas, turnos y métricas de ocupación en un solo lugar.
-        </p>
-      </div>
+      <PageHeader
+        eyebrow="Módulo"
+        title="Agenda inteligente"
+        description="Tus reservas, turnos y métricas de ocupación en un solo lugar."
+        icon={CalendarDays}
+        accent="emerald"
+      />
 
       {!isConnected ? (
         <ConnectAgendaCard />

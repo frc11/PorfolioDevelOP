@@ -7,10 +7,11 @@ import { Button } from '@/components/ui/Button'
 import { Field } from '@/components/ui/Field'
 import { Input } from '@/components/ui/Input'
 import { Toggle } from '@/components/ui/Toggle'
-import { saveCrmIntegration } from '@/modules/chatbot/server/dashboard/saveCrmIntegration'
-import { testCrmConnection } from '@/modules/chatbot/server/dashboard/testCrmConnection'
+import { saveCrmIntegration } from '@/modules/chatbot/server/admin/integrations/saveCrmIntegration'
+import { testCrmConnection } from '@/modules/chatbot/server/admin/integrations/testCrmConnection'
 
 interface CrmConfigFormProps {
+  organizationId: string
   initial: {
     webhookUrl: string
     enabled: boolean
@@ -20,18 +21,7 @@ interface CrmConfigFormProps {
   encryptionAvailable: boolean
 }
 
-/**
- * B5.8 — Formulario de config de la integración CRM (webhook n8n).
- *
- * Lógica del secret:
- *   - editingSecret=false → no se toca el campo (saveCrmIntegration recibe `secret: undefined`)
- *   - editingSecret=true + valor vacío → `secret: null` (limpia el secret guardado)
- *   - editingSecret=true + valor cargado → `secret: "valor"` (encrypta y guarda)
- *
- * Si encryptionAvailable=false, todo el bloque de secret se deshabilita con
- * tooltip — el dueño puede igual guardar URL+enabled.
- */
-export function CrmConfigForm({ initial, encryptionAvailable }: CrmConfigFormProps) {
+export function CrmConfigForm({ organizationId, initial, encryptionAvailable }: CrmConfigFormProps) {
   const [webhookUrl, setWebhookUrl] = useState(initial?.webhookUrl ?? '')
   const [enabled, setEnabled] = useState(initial?.enabled ?? false)
   const [secretHeaderName, setSecretHeaderName] = useState(
@@ -56,6 +46,7 @@ export function CrmConfigForm({ initial, encryptionAvailable }: CrmConfigFormPro
       }
 
       const result = await saveCrmIntegration({
+        organizationId,
         webhookUrl: webhookUrl.trim(),
         enabled,
         secretHeaderName:
@@ -76,7 +67,7 @@ export function CrmConfigForm({ initial, encryptionAvailable }: CrmConfigFormPro
 
   function handleTest() {
     startTest(async () => {
-      const result = await testCrmConnection()
+      const result = await testCrmConnection({ organizationId })
       if (result.ok) {
         toast.success(
           `Conexión OK — HTTP ${result.httpStatus} · ${result.durationMs}ms`,
@@ -122,8 +113,8 @@ export function CrmConfigForm({ initial, encryptionAvailable }: CrmConfigFormPro
           </div>
           <div className="text-xs text-zinc-500">
             {encryptionAvailable
-              ? 'Si tu webhook requiere un header de auth (ej. X-Webhook-Secret), configurálo acá. Se guarda cifrado.'
-              : 'No disponible: el cifrado de secrets no está configurado. La URL la podés guardar igual.'}
+              ? 'Si el webhook requiere un header de auth (ej. X-Webhook-Secret), configurálo acá. Se guarda cifrado.'
+              : 'No disponible: el cifrado de secrets no está configurado (CRM_SECRET_KEY ausente). La URL la podés guardar igual.'}
           </div>
         </div>
 

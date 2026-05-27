@@ -9,7 +9,7 @@ import { runPreflightChecks, type PreflightCheck } from '../../server/admin/pref
 import { sendTestNotification } from '../../server/admin/sendTestNotification'
 import { ActivationModal } from './activation/ActivationModal'
 import { BotConfigDiffModal } from './config/BotConfigDiffModal'
-import { BotConfigPreview } from './config/BotConfigPreview'
+import { BotConfigPreview, type BotPreviewState } from '../preview'
 import { ConfigTabs, type ConfigTab } from './config/ConfigTabs'
 import { AdvancedTab } from './config/tabs/AdvancedTab'
 import { AppearanceTab } from './config/tabs/AppearanceTab'
@@ -210,7 +210,7 @@ export function BotConfigEditor({ initial, orgSlug, onSave }: BotConfigEditorPro
         </div>
 
         <aside className="lg:sticky lg:top-6 lg:self-start">
-          <BotConfigPreview state={state} />
+          <BotConfigPreview state={adminStateToPreview(state)} />
         </aside>
       </div>
 
@@ -346,4 +346,29 @@ function normalizeRouteColorMap(value: unknown): BotConfigEditorState['routeColo
 
 function countExposedEditableFields(_state: BotConfigEditorState): number {
   return 28
+}
+
+/** CC.4 — Adapta el state del editor admin al subset que consume el preview compartido. */
+function adminStateToPreview(state: BotConfigEditorState): BotPreviewState {
+  return {
+    botName: state.botName,
+    isActive: state.isActive,
+    accentColor: state.accentColor,
+    chatSurfaceTint: state.chatSurfaceTint,
+    position: state.position,
+    avatarStyle: state.avatarStyle,
+    avatarImageUrl: state.avatarImageUrl,
+    avatarEmoji: state.avatarEmoji,
+    borderRadius: state.borderRadius,
+    bubbleStyle: state.bubbleStyle,
+    surfaceStyle: state.surfaceStyle,
+    intensityLevel: state.intensityLevel,
+    fontStyle: state.fontStyle,
+    welcomeMessage: state.welcomeMessage,
+    quickReplies: state.quickReplies.map((reply) => ({
+      id: reply.id,
+      emoji: reply.emoji,
+      label: reply.label,
+    })),
+  }
 }

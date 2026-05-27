@@ -84,4 +84,4 @@ export { ClientDashboardTabs, ClientLeadsTable, ChatbotUpsellLanding, ChatbotOve
 // Lead CRM Server Actions
 export { updateLeadStatus } from './server/admin/updateLeadStatus'
 export { saveClientSettings } from './server/admin/saveClientSettings'
-export { saveClientKnowledgeBase } from './server/admin/saveClientKnowledgeBase'
+// CC.3 — saveClientKnowledgeBase eliminado. La edición de KB queda solo en el admin (saveKnowledgeBase + requireSuperAdmin).

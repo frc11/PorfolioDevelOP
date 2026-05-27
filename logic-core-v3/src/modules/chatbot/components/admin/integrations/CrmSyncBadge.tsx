@@ -39,11 +39,6 @@ const STATUS_CONFIG = {
   spin: boolean
 }>
 
-/**
- * B5.8 — Chip de estado del sync a CRM. Pensado para mostrar en el historial
- * del card de config y dentro del detalle del lead. Lee el status EFECTIVO,
- * no el crudo: el caller ya tiene que haberlo pasado por getEffectiveSyncStatus().
- */
 export function CrmSyncBadge({ status, size = 'sm' }: CrmSyncBadgeProps) {
   const cfg = STATUS_CONFIG[status]
   const Icon = cfg.icon

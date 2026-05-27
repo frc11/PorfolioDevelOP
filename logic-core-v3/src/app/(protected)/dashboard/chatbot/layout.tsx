@@ -1,7 +1,9 @@
 import { redirect } from 'next/navigation'
 import { unstable_cache } from 'next/cache'
+import { Bot } from 'lucide-react'
 import { getClientChatbotSession, countHotNewLeadsForOrg } from '@/modules/chatbot/index.server'
 import { ClientDashboardTabs } from '@/modules/chatbot/components/dashboard/ClientDashboardTabs'
+import { PageHeader } from '@/components/ui'
 
 // B5.7 — comparte cache-key con el layout padre (`dashboard-hot-leads-count`)
 // para que el badge del sidebar y el dot de la tab "Leads" usen la misma
@@ -29,17 +31,16 @@ export default async function ChatbotDashboardLayout({
 
   return (
     <div className="flex flex-col gap-6">
-      <header>
-        <p className="text-xs text-zinc-500 uppercase tracking-widest">Mi Chatbot</p>
-        <h1 className="text-2xl font-semibold text-zinc-100">{session.bot.botName}</h1>
-        <p className="text-sm text-zinc-400 mt-1">
-          {session.bot.isActive ? (
-            <span className="text-emerald-400">● Activo</span>
-          ) : (
-            <span className="text-zinc-500">● Pausado</span>
-          )}
-        </p>
-      </header>
+      <PageHeader
+        eyebrow="Mi Chatbot"
+        title={session.bot.botName}
+        description={
+          session.bot.isActive
+            ? 'Activo · respondiendo a tus visitantes'
+            : 'Pausado · no responde hasta que lo reactives'
+        }
+        icon={Bot}
+      />
 
       <ClientDashboardTabs hotLeadsCount={hotLeadsCount} />
 

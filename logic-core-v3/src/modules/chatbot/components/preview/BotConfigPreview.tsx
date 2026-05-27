@@ -1,13 +1,13 @@
 'use client'
 
 import { useState } from 'react'
-import { AvatarRenderer } from '../../avatar'
-import type { AvatarCoreState } from '../../avatar/types'
-import { deriveBusinessInitials } from '../../../shared/businessInitials'
-import type { BotConfigEditorState } from './types'
+import { AvatarRenderer } from '../avatar'
+import type { AvatarCoreState } from '../avatar/types'
+import { deriveBusinessInitials } from '../../shared/businessInitials'
+import type { BotPreviewState } from './types'
 
 interface BotConfigPreviewProps {
-  state: BotConfigEditorState
+  state: BotPreviewState
 }
 
 type ViewMode = 'floating' | 'open'
@@ -23,25 +23,71 @@ const AVATAR_STATES: { value: AvatarCoreState; label: string }[] = [
   { value: 'speaking', label: 'Hablando' },
 ]
 
+function normalizeIntensity(value: string): 'LOW' | 'MEDIUM' | 'HIGH' {
+  const upper = value.toUpperCase()
+  if (upper === 'LOW' || upper === 'HIGH') return upper
+  return 'MEDIUM'
+}
+
+function normalizeRadius(value: string): 'small' | 'medium' | 'large' {
+  if (value === 'small' || value === 'large') return value
+  return 'medium'
+}
+
+function normalizeBubble(value: string): 'sharp' | 'rounded' | 'pill' {
+  if (value === 'sharp' || value === 'pill') return value
+  return 'rounded'
+}
+
+function normalizeSurface(value: string): 'glass' | 'solid' | 'minimal' {
+  if (value === 'solid' || value === 'minimal') return value
+  return 'glass'
+}
+
+function normalizeFont(value: string): 'sans' | 'serif' | 'mono' {
+  if (value === 'serif' || value === 'mono') return value
+  return 'sans'
+}
+
+function isLeftPosition(value: string): boolean {
+  return value === 'bottom_left'
+}
+
+/**
+ * CC.4 — Preview vivo del bot, reusado entre admin y dashboard cliente.
+ *
+ * Recibe `BotPreviewState` (subset visual). Permite togglear:
+ *  - Vista: "flotando" (avatar suelto) vs "abierto" (widget desplegado).
+ *  - Estado del avatar: idle / thinking / speaking (animaciones vivas).
+ *
+ * Cero tecnicismo expuesto — solo lo que el visitante final ve.
+ */
 export function BotConfigPreview({ state }: BotConfigPreviewProps) {
   const [viewMode, setViewMode] = useState<ViewMode>('floating')
   const [avatarState, setAvatarState] = useState<AvatarCoreState>('idle')
 
+  const borderRadiusToken = normalizeRadius(state.borderRadius)
+  const bubbleStyleToken = normalizeBubble(state.bubbleStyle)
+  const surfaceStyleToken = normalizeSurface(state.surfaceStyle)
+  const fontStyleToken = normalizeFont(state.fontStyle)
+
   const radius =
-    state.borderRadius === 'small' ? '12px' : state.borderRadius === 'large' ? '32px' : '24px'
+    borderRadiusToken === 'small' ? '12px' : borderRadiusToken === 'large' ? '32px' : '24px'
   const bubbleRadius =
-    state.bubbleStyle === 'sharp' ? '8px' : state.bubbleStyle === 'pill' ? '999px' : '18px'
-  const surfaceOpacity =
-    state.intensityLevel === 'LOW' ? 0.72 : state.intensityLevel === 'HIGH' ? 0.95 : 0.84
+    bubbleStyleToken === 'sharp' ? '8px' : bubbleStyleToken === 'pill' ? '999px' : '18px'
+
+  const intensity = normalizeIntensity(state.intensityLevel)
+  const surfaceOpacity = intensity === 'LOW' ? 0.72 : intensity === 'HIGH' ? 0.95 : 0.84
+
   const fontFamily =
-    state.fontStyle === 'serif'
+    fontStyleToken === 'serif'
       ? 'Georgia, serif'
-      : state.fontStyle === 'mono'
+      : fontStyleToken === 'mono'
         ? 'var(--font-mono), monospace'
         : 'var(--font-sans), sans-serif'
 
   const initials = deriveBusinessInitials(state.botName)
-  const isLeft = state.position === 'bottom_left'
+  const isLeft = isLeftPosition(state.position)
 
   const surfaceBg = state.chatSurfaceTint
     ? `${state.chatSurfaceTint}${Math.round(surfaceOpacity * 255)
@@ -146,9 +192,9 @@ export function BotConfigPreview({ state }: BotConfigPreviewProps) {
               className="p-3 text-sm leading-relaxed text-zinc-200"
               style={{
                 background:
-                  state.surfaceStyle === 'minimal' ? 'transparent' : 'rgba(255,255,255,0.05)',
+                  surfaceStyleToken === 'minimal' ? 'transparent' : 'rgba(255,255,255,0.05)',
                 border:
-                  state.surfaceStyle === 'solid'
+                  surfaceStyleToken === 'solid'
                     ? `1px solid ${state.accentColor}30`
                     : '1px solid rgba(255,255,255,0.06)',
                 borderRadius: bubbleRadius,

@@ -1,5 +1,8 @@
 'use client'
 
+import { MessagesSquare } from 'lucide-react'
+import { EmptyState } from '@/components/ui'
+
 interface ConversationRow {
   id: string
   sessionId: string
@@ -28,9 +31,12 @@ function formatDate(d: Date | string | null): string {
 export function ConversationsTable({ conversations, totalCount }: Props) {
   if (conversations.length === 0) {
     return (
-      <div className="text-center py-16 text-zinc-500 text-sm">
-        Todavía no hay conversaciones registradas.
-      </div>
+      <EmptyState
+        icon={MessagesSquare}
+        title="Todavía no hay conversaciones"
+        description="Cuando alguien hable con tu chatbot en el sitio, el historial completo va a aparecer acá."
+        cta={{ label: 'Ver cómo se instala', href: '/dashboard/chatbot/install' }}
+      />
     )
   }
   const visible = conversations.length

@@ -5,6 +5,7 @@
   "scripts": {
     "check-env": "node scripts/check-env.js",
     "dev": "next dev --webpack",
+    "dev:qa": "cross-env QA_ALLOW_LOCALHOST=1 next dev --webpack -p 3002",
     "build": "next build --webpack",
     "start": "next start",
     "start:qa": "cross-env QA_ALLOW_LOCALHOST=1 next start -p 3001",

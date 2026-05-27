@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation'
 import { Mail } from 'lucide-react'
 import { resolveOrgId } from '@/lib/preview'
 import { isModuleActive } from '@/lib/modules/check-activation'
+import { PageHeader } from '@/components/ui'
 
 export const dynamic = 'force-dynamic'
 
@@ -24,21 +25,13 @@ export default async function EmailMarketingLayout({ children }: { children: Rea
 
   return (
     <div className="flex flex-col gap-6 max-w-3xl">
-      {/* Header */}
-      <div>
-        <div className="flex items-center gap-3 mb-1">
-          <div
-            className="flex h-9 w-9 items-center justify-center rounded-xl"
-            style={{ background: 'rgba(6,182,212,0.12)', border: '1px solid rgba(6,182,212,0.2)' }}
-          >
-            <Mail size={18} strokeWidth={1.5} className="text-cyan-400" />
-          </div>
-          <h1 className="text-lg font-black tracking-tight text-zinc-100">Email Marketing</h1>
-        </div>
-        <p className="text-sm text-zinc-500 pl-12">
-          Enviá campañas de email a tus contactos y seguí los resultados en tiempo real.
-        </p>
-      </div>
+      <PageHeader
+        eyebrow="Módulo"
+        title="Email marketing"
+        description="Enviá campañas de email a tus contactos y seguí los resultados en tiempo real."
+        icon={Mail}
+        accent="cyan"
+      />
 
       {/* Tabs */}
       <div

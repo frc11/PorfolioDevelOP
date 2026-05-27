@@ -269,7 +269,7 @@ function ScreenshotCard({
         '--scroll-hover-scale': '1.01',
         '--scroll-hover-border': `${moment.accentColor}52`,
         '--scroll-hover-shadow': `0 18px 50px ${moment.accentColor}1A, 0 24px 80px rgba(0,0,0,0.42)`,
-      }}
+      } as React.CSSProperties}
       className="p-3 shadow-2xl"
     >
       <DashboardMockup moment={moment} />

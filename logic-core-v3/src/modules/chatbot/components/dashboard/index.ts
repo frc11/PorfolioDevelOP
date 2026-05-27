@@ -1,7 +1,7 @@
 export { ClientDashboardTabs } from './ClientDashboardTabs'
 export { ClientLeadsTable } from './ClientLeadsTable'
 export { ClientSettingsForm } from './ClientSettingsForm'
-export { ClientKnowledgeForm } from './ClientKnowledgeForm'
+export { ClientKnowledgeView } from './ClientKnowledgeView'
 export { ChatbotUpsellLanding } from './ChatbotUpsellLanding'
 export { ChatbotOverview } from './ChatbotOverview'
 export { BotPersonalization } from './BotPersonalization'

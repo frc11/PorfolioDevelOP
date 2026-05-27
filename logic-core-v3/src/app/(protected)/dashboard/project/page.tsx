@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation'
 import { resolveOrgId } from '@/lib/preview'
 import { ProjectStatus } from '@prisma/client'
 import { MessageSquare, FolderOpen, FolderKanban } from 'lucide-react'
-import { EmptyState } from '@/components/ui'
+import { EmptyState, PageHeader } from '@/components/ui'
 import Link from 'next/link'
 import { FadeIn } from '@/components/dashboard/FadeIn'
 import { AnimatedProgressBar } from '@/components/dashboard/AnimatedProgressBar'
@@ -70,16 +70,12 @@ export default async function ProjectPage() {
     return (
       <div className="flex flex-col gap-6 max-w-4xl mx-auto">
         <FadeIn>
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
-            <div>
-              <h1 className="text-2xl font-black tracking-tight text-white uppercase sm:text-3xl">
-                Mi Proyecto
-              </h1>
-              <p className="mt-1 text-xs font-medium text-zinc-600 uppercase tracking-widest">
-                Estado actual y hoja de ruta estratégica
-              </p>
-            </div>
-          </div>
+          <PageHeader
+            eyebrow="Tablero"
+            title="Mi proyecto"
+            description="Estado actual y hoja de ruta estratégica"
+            icon={FolderOpen}
+          />
         </FadeIn>
 
         <FadeIn delay={0.08}>
@@ -136,32 +132,28 @@ export default async function ProjectPage() {
 
       {/* ── 1. HEADER ─────────────────────────────────────────────────────── */}
       <FadeIn delay={0}>
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pt-2">
-          <div>
-            <h1 className="text-2xl font-black tracking-tight text-white uppercase sm:text-3xl">
-              Mi Proyecto
-            </h1>
-            <p className="mt-1 text-xs font-medium text-zinc-600 uppercase tracking-widest">
-              Estado actual y hoja de ruta estratégica
-            </p>
-          </div>
-
-          {/* Animated status badge */}
-          <div
-            className={`inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-[10px] font-black uppercase tracking-widest ${PROJECT_STATUS_STYLE[project.status]}`}
-          >
-            {project.status === 'IN_PROGRESS' && (
-              <span className="relative flex h-2 w-2 flex-shrink-0">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-blue-400 opacity-60" />
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-blue-400" />
-              </span>
-            )}
-            {project.status === 'COMPLETED' && (
-              <span className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.8)]" />
-            )}
-            {PROJECT_STATUS_LABEL[project.status]}
-          </div>
-        </div>
+        <PageHeader
+          eyebrow="Tablero"
+          title="Mi proyecto"
+          description="Estado actual y hoja de ruta estratégica"
+          icon={FolderOpen}
+          action={
+            <div
+              className={`inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-[10px] font-black uppercase tracking-widest ${PROJECT_STATUS_STYLE[project.status]}`}
+            >
+              {project.status === 'IN_PROGRESS' && (
+                <span className="relative flex h-2 w-2 flex-shrink-0">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-blue-400 opacity-60" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-blue-400" />
+                </span>
+              )}
+              {project.status === 'COMPLETED' && (
+                <span className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.8)]" />
+              )}
+              {PROJECT_STATUS_LABEL[project.status]}
+            </div>
+          }
+        />
       </FadeIn>
 
       {/* ── 2. HERO — progress card ────────────────────────────────────────── */}

@@ -1,51 +1,42 @@
 'use server'
 
-import { auth } from '@/auth'
+import { z } from 'zod'
 import { logAdminAction } from '@/lib/audit-log'
 import { prisma } from '@/lib/prisma'
-import { resolveOrgId } from '@/lib/preview'
 import { getPlanForOrg } from '@/lib/plan/get-plan-for-org'
 import { planAllows } from '@/lib/plan/plan-allows'
 import { testN8nConnection } from '@/modules/chatbot/server/crm'
 import { checkRateLimit } from '@/lib/rate-limit/limiter'
 import { RATE_LIMIT_PRESETS } from '@/lib/rate-limit/presets'
+import { requireSuperAdmin } from '@/modules/chatbot/server/admin/requireSuperAdmin'
 
-/**
- * B5.8 — Test de conexión al webhook n8n del cliente.
- *
- * Manda un payload claramente marcado `{ test: true, ... }` al webhook guardado
- * y devuelve si llegó (httpStatus + duración). NO crea un CrmSyncAttempt —
- * no es un sync real, no debería ensuciar el historial.
- *
- * Rate limit: 5 tests por minuto por org. n8n del cliente no debería recibir
- * spam si el dueño martillea el botón.
- *
- * Audit log: CRM_INTEGRATION_TESTED con metadata { httpStatus, durationMs, ok }.
- */
+const TestCrmConnectionSchema = z
+  .object({
+    organizationId: z.string().min(1),
+  })
+  .strict()
 
-export async function testCrmConnection() {
-  const session = await auth()
-  if (!session?.user) {
-    return { ok: false as const, error: 'No autenticado' }
+type TestCrmConnectionInput = z.infer<typeof TestCrmConnectionSchema>
+
+export async function testCrmConnection(input: TestCrmConnectionInput) {
+  const adminUser = await requireSuperAdmin()
+
+  const parsed = TestCrmConnectionSchema.safeParse(input)
+  if (!parsed.success) {
+    return { ok: false as const, error: 'Datos inválidos' }
   }
+  const { organizationId } = parsed.data
 
-  const orgId = await resolveOrgId()
-  if (!orgId) {
-    return { ok: false as const, error: 'Sin organización' }
-  }
-
-  // Plan gate
-  const plan = await getPlanForOrg(orgId)
+  const plan = await getPlanForOrg(organizationId)
   if (!planAllows(plan, 'crm')) {
     return {
       ok: false as const,
-      error: 'Tu plan actual no incluye integración con CRM',
+      error: 'El plan de esta organización no incluye integración con CRM',
     }
   }
 
-  // Rate limit por org. Si el dueño martillea el botón, frena.
   const rate = await checkRateLimit({
-    key: `crmTestPerOrg:${orgId}`,
+    key: `crmTestPerOrg:${organizationId}`,
     limit: RATE_LIMIT_PRESETS.crmTestPerOrg.limit,
     windowMs: RATE_LIMIT_PRESETS.crmTestPerOrg.windowMs,
   })
@@ -58,7 +49,7 @@ export async function testCrmConnection() {
   }
 
   const integration = await prisma.crmIntegration.findUnique({
-    where: { organizationId: orgId },
+    where: { organizationId },
   })
 
   if (!integration) {
@@ -68,14 +59,12 @@ export async function testCrmConnection() {
     }
   }
 
-  // Payload de test claramente marcado. Sirve también para que el cliente
-  // pueda discriminar en n8n entre tests y leads reales si quiere.
   const testPayload = {
     _version: '1.0' as const,
     _test: true,
     leadId: 'test-ping',
     capturedAt: new Date().toISOString(),
-    message: 'Conexión de prueba desde develOP',
+    message: 'Conexión de prueba desde develOP (admin)',
   }
 
   const hasSecret =
@@ -100,19 +89,19 @@ export async function testCrmConnection() {
   })
 
   await logAdminAction({
-    userId: session.user.id ?? 'unknown',
-    userEmail: session.user.email ?? undefined,
-    userName: session.user.name ?? undefined,
+    userId: adminUser.id ?? 'unknown',
+    userEmail: adminUser.email ?? undefined,
+    userName: adminUser.name ?? undefined,
     actionType: 'CRM_INTEGRATION_TESTED',
-    action: 'Cliente probó conexión al webhook CRM',
+    action: 'develOP probó conexión al webhook CRM de la org',
     targetType: 'CrmIntegration',
     targetId: integration.id,
     metadata: {
-      organizationId: orgId,
+      source: 'admin_develop',
+      organizationId,
       result: result.ok ? 'success' : 'failed',
       httpStatus: result.httpStatus,
       durationMs: result.durationMs,
-      // errorMessage ya viene sanitizado (sin PII, max 200 chars).
       errorMessage: result.errorMessage,
     },
   })

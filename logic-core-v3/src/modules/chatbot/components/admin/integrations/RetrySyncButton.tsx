@@ -4,23 +4,19 @@ import { useTransition } from 'react'
 import { RotateCw } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/Button'
-import { retryCrmSync } from '@/modules/chatbot/server/dashboard/retryCrmSync'
+import { retryCrmSync } from '@/modules/chatbot/server/admin/integrations/retryCrmSync'
 
 interface RetrySyncButtonProps {
+  organizationId: string
   leadId: string
 }
 
-/**
- * B5.8 — Botón "Reintentar" para un attempt FAILED. Dispara retryCrmSync,
- * que crea un CrmSyncAttempt nuevo. La UI se revalida sola via revalidatePath
- * de la action.
- */
-export function RetrySyncButton({ leadId }: RetrySyncButtonProps) {
+export function RetrySyncButton({ organizationId, leadId }: RetrySyncButtonProps) {
   const [pending, startTransition] = useTransition()
 
   function handleClick() {
     startTransition(async () => {
-      const result = await retryCrmSync({ leadId })
+      const result = await retryCrmSync({ organizationId, leadId })
       if (result.ok) {
         toast.success('Reintento disparado. En unos segundos se actualiza el historial.')
       } else {

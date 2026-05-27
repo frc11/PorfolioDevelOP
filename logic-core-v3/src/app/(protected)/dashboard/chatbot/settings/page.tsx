@@ -6,7 +6,7 @@ import { EmptyState } from '@/components/ui/EmptyState'
 import { prisma } from '@/lib/prisma'
 import { resolveOrgId } from '@/lib/preview'
 import { BotPersonalization } from '@/modules/chatbot/components/dashboard/BotPersonalization'
-import { CrmIntegrationCard } from '@/modules/chatbot/components/dashboard/CrmIntegrationCard'
+import { CrmStatusIndicator } from '@/modules/chatbot/components/dashboard/CrmStatusIndicator'
 
 export const dynamic = 'force-dynamic'
 
@@ -23,6 +23,7 @@ export default async function ChatbotSettingsPage() {
         where: { organizationId: orgId },
         select: {
           id: true,
+          // Editables por el cliente
           accentColor: true,
           position: true,
           avatarStyle: true,
@@ -30,6 +31,16 @@ export default async function ChatbotSettingsPage() {
           botName: true,
           welcomeMessage: true,
           quickReplies: true,
+          // CC.4 — Campos configurados por admin que el preview consume
+          // para ser un espejo fiel del widget real (no se editan acá).
+          isActive: true,
+          avatarImageUrl: true,
+          chatSurfaceTint: true,
+          borderRadius: true,
+          bubbleStyle: true,
+          surfaceStyle: true,
+          intensityLevel: true,
+          fontStyle: true,
         },
       }),
     ['chatbot-bot-config', orgId],
@@ -49,8 +60,9 @@ export default async function ChatbotSettingsPage() {
   return (
     <div className="space-y-10">
       <BotPersonalization bot={bot} />
-      {/* B5.8 — Integración con CRM via n8n. Se auto-gatekeepa por plan adentro. */}
-      <CrmIntegrationCard />
+      {/* CC.2 — La config del CRM (webhook + secret) la maneja develOP desde el admin.
+          El cliente solo ve el estado read-only acá. Gatekeep por plan vive adentro. */}
+      <CrmStatusIndicator />
     </div>
   )
 }
