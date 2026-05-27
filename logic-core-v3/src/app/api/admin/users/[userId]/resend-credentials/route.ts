@@ -22,7 +22,7 @@ export async function POST(
 
   // Rate limit por admin: protege contra spam involuntario (UI con doble click)
   // y abuso de cuenta admin comprometida.
-  const adminLimit = applyAuthRateLimit({
+  const adminLimit = await applyAuthRateLimit({
     scope: 'resendCredentialsPerAdmin',
     identifier: adminId,
   })

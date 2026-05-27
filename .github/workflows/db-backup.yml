@@ -1,0 +1,218 @@
+# B14.3 — Backup automatizado de la DB Neon con verificación de restore.
+#
+# Por qué este workflow vive en la RAÍZ del repo (no en logic-core-v3/.github/workflows/):
+# GitHub Actions solo descubre workflows en <repo_root>/.github/workflows/. El
+# archivo logic-core-v3/.github/workflows/e2e.yml está MAL ubicado y nunca corrió
+# — pendiente moverlo (fuera de scope de B14.3).
+#
+# Flujo:
+#   1. Job `dump`:
+#        - Instala postgresql-client-16 (matchea la versión de Postgres en Neon).
+#        - Corre pg_dump contra DIRECT_URL (sin pooler — el pooler no soporta dump).
+#        - Comprime (gzip -9) y cifra (gpg AES256 symmetric con passphrase de secret).
+#        - Sube como artifact con retención 30 días.
+#   2. Job `restore-test`:
+#        - Levanta un Postgres 16 side-car.
+#        - Baja el artifact, descifra, restaura.
+#        - Valida que el dump contiene rows (al menos _prisma_migrations).
+#        - Si falla cualquier paso, el workflow falla → notificación a Franco.
+#
+# Por qué cifrado simétrico:
+#   El repo es PÚBLICO. Sin cifrado, cualquiera con el link al run podría descargar
+#   el artifact con PII (emails, mensajes, datos de cliente). GPG AES256 con
+#   passphrase fuerte (BACKUP_GPG_PASSPHRASE) hace el archivo ruido binario sin
+#   la clave.
+#
+# Restauración manual (fuera del workflow):
+#   gh run download <RUN_ID> -n <ARTIFACT_NAME>
+#   gpg --decrypt --batch --passphrase '<PASSPHRASE>' backup.sql.gz.gpg | gunzip | psql <TARGET_URL>
+#   (ver docs/operations/neon-backups.md)
+#
+# Secrets requeridos (Franco los setea en repo settings):
+#   - DIRECT_DATABASE_URL_PROD   URL directa Neon main branch (sin -pooler)
+#   - DIRECT_DATABASE_URL_DEV    URL directa Neon dev branch (opcional, para target=dev)
+#   - BACKUP_GPG_PASSPHRASE      Generada con: openssl rand -base64 48
+
+name: DB backup
+
+on:
+  schedule:
+    # Diario a las 06:00 UTC = 03:00 ART (UTC-3, sin DST en Argentina).
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+    inputs:
+      target_env:
+        description: 'Branch Neon a respaldar'
+        type: choice
+        options: [prod, dev]
+        default: prod
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  dump:
+    name: pg_dump + encrypt
+    runs-on: ubuntu-latest
+    outputs:
+      artifact_name: ${{ steps.meta.outputs.artifact_name }}
+    steps:
+      - name: Set metadata
+        id: meta
+        run: |
+          DATE=$(date -u +%Y%m%d-%H%M%S)
+          TARGET="${{ github.event.inputs.target_env || 'prod' }}"
+          NAME="neon-${TARGET}-backup-${DATE}"
+          echo "artifact_name=${NAME}" >> "$GITHUB_OUTPUT"
+          echo "target=${TARGET}" >> "$GITHUB_OUTPUT"
+          echo "[meta] artifact=${NAME} target=${TARGET}"
+
+      - name: Install postgresql-client-16
+        run: |
+          sudo install -d /usr/share/postgresql-common/pgdg
+          sudo curl -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc \
+            --fail https://www.postgresql.org/media/keys/ACCC4CF8.asc
+          sudo sh -c 'echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
+          sudo apt-get update -qq
+          sudo apt-get install -y postgresql-client-16
+          pg_dump --version
+
+      - name: Resolve target URL
+        id: target
+        env:
+          DIRECT_DATABASE_URL_PROD: ${{ secrets.DIRECT_DATABASE_URL_PROD }}
+          DIRECT_DATABASE_URL_DEV: ${{ secrets.DIRECT_DATABASE_URL_DEV }}
+          TARGET: ${{ steps.meta.outputs.target }}
+        run: |
+          if [ "$TARGET" = "prod" ]; then
+            URL="$DIRECT_DATABASE_URL_PROD"
+          else
+            URL="$DIRECT_DATABASE_URL_DEV"
+          fi
+          if [ -z "$URL" ]; then
+            echo "ERROR: secret faltante para target=$TARGET" >&2
+            echo "       Setear DIRECT_DATABASE_URL_${TARGET^^} en repo secrets." >&2
+            exit 1
+          fi
+          # Mask para que cualquier print accidental quede oculto en logs.
+          echo "::add-mask::$URL"
+          echo "url=$URL" >> "$GITHUB_OUTPUT"
+
+      - name: pg_dump + gzip + gpg encrypt
+        env:
+          PG_URL: ${{ steps.target.outputs.url }}
+          PASSPHRASE: ${{ secrets.BACKUP_GPG_PASSPHRASE }}
+        run: |
+          if [ -z "$PASSPHRASE" ]; then
+            echo "ERROR: secret BACKUP_GPG_PASSPHRASE no seteado." >&2
+            exit 1
+          fi
+          # --no-owner / --no-acl: Neon no permite SET ROLE de usuarios externos;
+          # quitarlos hace el dump restaurable contra cualquier Postgres limpio.
+          # --quote-all-identifiers: defensivo contra collisions con reserved words.
+          set -o pipefail
+          pg_dump "$PG_URL" \
+            --no-owner --no-acl \
+            --format=plain \
+            --quote-all-identifiers \
+          | gzip -9 \
+          | gpg --batch --yes --symmetric --cipher-algo AES256 \
+                --passphrase-fd 3 --output backup.sql.gz.gpg \
+                3<<<"$PASSPHRASE"
+          ls -lh backup.sql.gz.gpg
+          file backup.sql.gz.gpg
+
+      - name: Upload encrypted artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.meta.outputs.artifact_name }}
+          path: backup.sql.gz.gpg
+          retention-days: 30
+          if-no-files-found: error
+
+  restore-test:
+    name: Restore-test (validar dump)
+    needs: dump
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: restoretest
+          POSTGRES_DB: restoretest
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      LOCAL_URL: postgresql://postgres:restoretest@localhost:5432/restoretest
+    steps:
+      - name: Install postgresql-client-16
+        run: |
+          sudo install -d /usr/share/postgresql-common/pgdg
+          sudo curl -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc \
+            --fail https://www.postgresql.org/media/keys/ACCC4CF8.asc
+          sudo sh -c 'echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
+          sudo apt-get update -qq
+          sudo apt-get install -y postgresql-client-16
+
+      - name: Wait for postgres
+        run: |
+          for i in $(seq 1 30); do
+            if pg_isready -h localhost -p 5432 -U postgres > /dev/null 2>&1; then
+              echo "postgres ready"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "postgres no respondió en 60s" >&2
+          exit 1
+
+      - name: Download encrypted artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ needs.dump.outputs.artifact_name }}
+
+      - name: Decrypt + restore
+        env:
+          PASSPHRASE: ${{ secrets.BACKUP_GPG_PASSPHRASE }}
+        run: |
+          set -o pipefail
+          gpg --batch --yes --decrypt \
+              --passphrase-fd 3 backup.sql.gz.gpg 3<<<"$PASSPHRASE" \
+          | gunzip \
+          | psql "$LOCAL_URL" \
+              --quiet \
+              --variable=ON_ERROR_STOP=1 \
+              > restore.log 2>&1 || (
+                echo "❌ psql falló durante restore. Últimas líneas del log:" >&2
+                tail -50 restore.log >&2
+                exit 1
+              )
+          echo "✓ Restore completo (`wc -l < restore.log` líneas en restore.log)."
+
+      - name: Validate row counts
+        run: |
+          # Las tablas usan PascalCase (Prisma sin @@map en muchas) — requieren
+          # quoting. `_prisma_migrations` es la única que SIEMPRE debe tener
+          # rows (>=1) si el dump es válido — es el indicador más confiable.
+          MIG_COUNT=$(psql "$LOCAL_URL" -tAc 'SELECT COUNT(*) FROM "_prisma_migrations"')
+          echo "_prisma_migrations: $MIG_COUNT"
+          if [ "$MIG_COUNT" -lt 1 ]; then
+            echo "❌ _prisma_migrations vacío — dump no incluye historia de migraciones." >&2
+            exit 1
+          fi
+
+          # Conteo informativo de tablas core. No fallan el job si están en 0
+          # (DB recién seedeada puede no tener leads aún, por ej.).
+          for tbl in '"User"' '"Organization"' '"BotConfig"' '"Conversation"' '"ChatbotLead"' '"rate_limit"'; do
+            COUNT=$(psql "$LOCAL_URL" -tAc "SELECT COUNT(*) FROM $tbl" 2>/dev/null || echo "(missing)")
+            echo "$tbl: $COUNT"
+          done
+
+          echo ""
+          echo "✅ Restore-test pasó. El backup es restaurable."

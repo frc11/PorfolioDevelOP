@@ -9,7 +9,8 @@ import { resolveOrgId } from '@/lib/preview'
 import { getPlanForOrg } from '@/lib/plan/get-plan-for-org'
 import { planAllows } from '@/lib/plan/plan-allows'
 import { syncLeadToCrm } from '@/modules/chatbot/server/crm'
-import { checkRateLimit } from '@/modules/chatbot/server/rate-limit/inMemoryLimiter'
+import { checkRateLimit } from '@/lib/rate-limit/limiter'
+import { RATE_LIMIT_PRESETS } from '@/lib/rate-limit/presets'
 
 /**
  * B5.8 — Retry manual de sync para un lead. Lo dispara el dueño desde el
@@ -31,9 +32,6 @@ const RetryCrmSyncSchema = z
   .strict()
 
 type RetryCrmSyncInput = z.infer<typeof RetryCrmSyncSchema>
-
-const RETRY_RATE_LIMIT = 10
-const RETRY_RATE_WINDOW_MS = 60_000
 
 export async function retryCrmSync(input: RetryCrmSyncInput) {
   const session = await auth()
@@ -60,7 +58,11 @@ export async function retryCrmSync(input: RetryCrmSyncInput) {
     }
   }
 
-  const rate = checkRateLimit(`crm-retry:${orgId}`, RETRY_RATE_LIMIT, RETRY_RATE_WINDOW_MS)
+  const rate = await checkRateLimit({
+    key: `crmRetryPerOrg:${orgId}`,
+    limit: RATE_LIMIT_PRESETS.crmRetryPerOrg.limit,
+    windowMs: RATE_LIMIT_PRESETS.crmRetryPerOrg.windowMs,
+  })
   if (!rate.allowed) {
     const waitSeconds = Math.max(1, Math.ceil((rate.resetAt - Date.now()) / 1000))
     return {

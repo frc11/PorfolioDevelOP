@@ -47,11 +47,9 @@ export { getTools, VALID_PATHS } from './server/tools'
 // Chat handler (Sprint S5)
 export { handleChatRequest } from './server/chat'
 
-// Safety, rate-limiting, quota
+// Safety, quota — rate-limit migrado a @/lib/rate-limit/limiter (B14.1).
 export { validateAssistantOutput, hashIp } from './server/safety'
 export type { ValidationWarning, ValidationSeverity } from './server/safety'
-export { checkRateLimit, resetRateLimits } from './server/rate-limit'
-export type { RateLimitResult } from './server/rate-limit'
 export { checkQuota, incrementQuota } from './server/quota'
 export type { QuotaCheckResult } from './server/quota'
 export { resolveBotBySlug, getOrCreateConversation } from './server/conversation'

@@ -7,7 +7,8 @@ import { resolveOrgId } from '@/lib/preview'
 import { getPlanForOrg } from '@/lib/plan/get-plan-for-org'
 import { planAllows } from '@/lib/plan/plan-allows'
 import { testN8nConnection } from '@/modules/chatbot/server/crm'
-import { checkRateLimit } from '@/modules/chatbot/server/rate-limit/inMemoryLimiter'
+import { checkRateLimit } from '@/lib/rate-limit/limiter'
+import { RATE_LIMIT_PRESETS } from '@/lib/rate-limit/presets'
 
 /**
  * B5.8 — Test de conexión al webhook n8n del cliente.
@@ -21,9 +22,6 @@ import { checkRateLimit } from '@/modules/chatbot/server/rate-limit/inMemoryLimi
  *
  * Audit log: CRM_INTEGRATION_TESTED con metadata { httpStatus, durationMs, ok }.
  */
-
-const TEST_RATE_LIMIT = 5
-const TEST_RATE_WINDOW_MS = 60_000
 
 export async function testCrmConnection() {
   const session = await auth()
@@ -46,7 +44,11 @@ export async function testCrmConnection() {
   }
 
   // Rate limit por org. Si el dueño martillea el botón, frena.
-  const rate = checkRateLimit(`crm-test:${orgId}`, TEST_RATE_LIMIT, TEST_RATE_WINDOW_MS)
+  const rate = await checkRateLimit({
+    key: `crmTestPerOrg:${orgId}`,
+    limit: RATE_LIMIT_PRESETS.crmTestPerOrg.limit,
+    windowMs: RATE_LIMIT_PRESETS.crmTestPerOrg.windowMs,
+  })
   if (!rate.allowed) {
     const waitSeconds = Math.max(1, Math.ceil((rate.resetAt - Date.now()) / 1000))
     return {
