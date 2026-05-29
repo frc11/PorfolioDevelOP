@@ -641,8 +641,8 @@ function TabbedCardIcon({ visual }: { visual: TabVisualKey }) {
   const Icon = iconMap[visual];
 
   return (
-    <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl border border-white/[0.08] bg-gradient-to-b from-white/[0.05] to-transparent text-white/60 shadow-inner transition-all duration-500 group-hover:-translate-y-1.5 group-hover:border-cyan-500/40 group-hover:bg-cyan-500/20 group-hover:text-cyan-400 group-hover:shadow-[0_0_30px_rgba(34,211,238,0.25)]">
-      <Icon className="h-6 w-6 text-current drop-shadow-sm" />
+    <div className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-white/[0.08] bg-gradient-to-b from-white/[0.05] to-transparent text-white/60 shadow-inner transition-all duration-500 group-hover:-translate-y-1.5 group-hover:border-cyan-500/40 group-hover:bg-cyan-500/20 group-hover:text-cyan-400 group-hover:shadow-[0_0_30px_rgba(34,211,238,0.25)]">
+      <Icon className="h-5 w-5 text-current drop-shadow-sm" />
     </div>
   );
 }
@@ -652,7 +652,7 @@ function ProgressVisual({ accent, animationKey }: { accent: AccentKey; animation
   const tone = ACCENT_STYLES[accent];
 
   return (
-    <div className="-mx-5 -mt-5 mb-6 sm:-mx-6 sm:-mt-6 relative flex h-[160px] w-[calc(100%+40px)] flex-col justify-end overflow-hidden rounded-t-[24px] border-b border-cyan-500/10 bg-[radial-gradient(ellipse_at_top,rgba(8,145,178,0.15),transparent_70%)] px-6 pb-6 sm:w-[calc(100%+48px)]">
+    <div className="-mx-5 -mt-5 mb-4 sm:-mx-6 sm:-mt-6 relative flex h-[120px] w-[calc(100%+40px)] flex-col justify-end overflow-hidden rounded-t-[24px] border-b border-cyan-500/10 bg-[radial-gradient(ellipse_at_top,rgba(8,145,178,0.15),transparent_70%)] px-6 pb-6 sm:w-[calc(100%+48px)]">
       <div className="flex items-end justify-between gap-3 relative z-10 w-full">
         <div className="space-y-1">
           <div className="text-[10px] font-bold uppercase tracking-[0.28em] text-cyan-400/80 drop-shadow-[0_0_5px_rgba(34,211,238,0.3)]">Entrega real</div>
@@ -697,7 +697,7 @@ function ProgressVisual({ accent, animationKey }: { accent: AccentKey; animation
 
 function LockVisual() {
   return (
-    <div className="-mx-5 -mt-5 mb-6 sm:-mx-6 sm:-mt-6 relative flex h-[160px] w-[calc(100%+40px)] items-center justify-center overflow-hidden rounded-t-[24px] border-b border-white/5 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.03),transparent_70%)] sm:w-[calc(100%+48px)]">
+    <div className="-mx-5 -mt-5 mb-4 sm:-mx-6 sm:-mt-6 relative flex h-[120px] w-[calc(100%+40px)] items-center justify-center overflow-hidden rounded-t-[24px] border-b border-white/5 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.03),transparent_70%)] sm:w-[calc(100%+48px)]">
       <div className="relative flex h-24 w-24 items-center justify-center rounded-3xl border border-white/10 bg-gradient-to-b from-white/10 to-transparent shadow-[inset_0_1px_2px_rgba(255,255,255,0.1),0_0_30px_rgba(255,255,255,0.02)] transition-all duration-500 group-hover:border-emerald-500/30 group-hover:shadow-[0_0_40px_rgba(16,185,129,0.15)] group-hover:from-emerald-500/10">
         <Lock className="absolute h-10 w-10 text-white/40 transition-all duration-500 group-hover:-rotate-12 group-hover:scale-75 group-hover:opacity-0" />
         <LockOpen
@@ -714,7 +714,7 @@ function StatusVisual({ animationKey }: { animationKey: number }) {
   const shouldReduceMotion = useReducedMotion();
 
   return (
-    <div className="-mx-5 -mt-5 mb-6 sm:-mx-6 sm:-mt-6 relative flex h-[160px] w-[calc(100%+40px)] flex-col justify-center overflow-hidden rounded-t-[24px] border-b border-emerald-900/10 bg-[radial-gradient(ellipse_at_left,rgba(16,185,129,0.1),transparent_70%)] px-8 sm:w-[calc(100%+48px)]">
+    <div className="-mx-5 -mt-5 mb-4 sm:-mx-6 sm:-mt-6 relative flex h-[120px] w-[calc(100%+40px)] flex-col justify-center overflow-hidden rounded-t-[24px] border-b border-emerald-900/10 bg-[radial-gradient(ellipse_at_left,rgba(16,185,129,0.1),transparent_70%)] px-8 sm:w-[calc(100%+48px)]">
       <div className="text-[10px] font-bold uppercase tracking-[0.28em] text-emerald-400/80 drop-shadow-[0_0_5px_rgba(52,211,153,0.3)] mb-4">Soporte directo</div>
       <div className="flex items-center gap-6">
         <span className="relative flex h-8 w-8 items-center justify-center">
@@ -742,7 +742,7 @@ function OwnershipVisual({ accent }: { accent: AccentKey }) {
   const tone = ACCENT_STYLES[accent];
 
   return (
-    <div className="-mx-5 -mt-5 mb-6 sm:-mx-6 sm:-mt-6 relative flex h-[160px] w-[calc(100%+40px)] items-center justify-center overflow-hidden rounded-t-[24px] border-b border-cyan-500/10 bg-[radial-gradient(ellipse_at_top,rgba(8,145,178,0.15),transparent_70%)] sm:w-[calc(100%+48px)]">
+    <div className="-mx-5 -mt-5 mb-4 sm:-mx-6 sm:-mt-6 relative flex h-[120px] w-[calc(100%+40px)] items-center justify-center overflow-hidden rounded-t-[24px] border-b border-cyan-500/10 bg-[radial-gradient(ellipse_at_top,rgba(8,145,178,0.15),transparent_70%)] sm:w-[calc(100%+48px)]">
       <motion.div
         className="relative flex h-20 w-48 items-center gap-5 rounded-2xl border border-cyan-500/40 bg-cyan-950/50 px-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.1),0_10px_30px_rgba(0,0,0,0.5)] backdrop-blur-md"
         animate={shouldReduceMotion ? { y: 0 } : { y: [-4, 4, -4], boxShadow: [`0 10px 30px rgba(0,0,0,0.5), 0 0 0px ${tone.glow}`, `0 10px 30px rgba(0,0,0,0.5), 0 0 25px ${tone.glow}`, `0 10px 30px rgba(0,0,0,0.5), 0 0 0px ${tone.glow}`] }}
@@ -820,8 +820,8 @@ function MainNodesVisual() {
   }, [shouldSimplify]);
 
   return (
-    <div className="flex min-h-[220px] items-center justify-center md:min-h-[260px]">
-      <div className="relative flex w-full items-center justify-center overflow-hidden rounded-[24px] border border-cyan-800/30 bg-[radial-gradient(ellipse_at_center,rgba(8,145,178,0.2),transparent_70%),linear-gradient(180deg,rgba(10,10,12,0.1),rgba(10,10,12,0.7))] py-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_0_30px_rgba(34,211,238,0.05)] md:py-8 lg:min-h-[300px]">
+    <div className="flex min-h-[180px] items-center justify-center md:min-h-[200px]">
+      <div className="relative flex w-full items-center justify-center overflow-hidden rounded-[24px] border border-cyan-800/30 bg-[radial-gradient(ellipse_at_center,rgba(8,145,178,0.2),transparent_70%),linear-gradient(180deg,rgba(10,10,12,0.1),rgba(10,10,12,0.7))] py-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_0_30px_rgba(34,211,238,0.05)] md:py-6 lg:min-h-[240px]">
         <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(34,211,238,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(34,211,238,0.03)_1px,transparent_1px)] bg-[size:32px_32px]" />
         <svg
           viewBox="0 0 420 280"
@@ -907,7 +907,7 @@ function MainAIVisual() {
   const outputs = ['✓ Cita Agendada', '✓ CRM Actualizado', '✓ Lead Calificado'] as const;
 
   return (
-    <div className="relative flex min-h-[220px] flex-col items-center justify-center gap-5 overflow-hidden rounded-2xl border border-white/5 bg-white/[0.01] px-4 py-5 sm:px-6 md:min-h-[250px] md:flex-row md:justify-between md:px-10 md:py-0">
+    <div className="relative flex min-h-[180px] flex-col items-center justify-center gap-4 overflow-hidden rounded-2xl border border-white/5 bg-white/[0.01] px-4 py-4 sm:px-6 md:min-h-[200px] md:flex-row md:justify-between md:px-10 md:py-0">
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:24px_24px]" />
       <div className="flex w-full flex-col gap-3 md:w-auto">
         {inputs.map((item, index) => (
@@ -982,7 +982,7 @@ function RoiVisual() {
   const shouldReduceMotion = useReducedMotion();
 
   return (
-    <div className="-mx-5 -mt-5 mb-6 sm:-mx-6 sm:-mt-6 relative flex h-[160px] w-[calc(100%+40px)] items-end justify-center overflow-hidden rounded-t-[24px] border-b border-cyan-500/10 bg-[radial-gradient(ellipse_at_bottom,rgba(34,211,238,0.12),transparent_70%)] sm:w-[calc(100%+48px)]">
+    <div className="-mx-5 -mt-5 mb-4 sm:-mx-6 sm:-mt-6 relative flex h-[120px] w-[calc(100%+40px)] items-end justify-center overflow-hidden rounded-t-[24px] border-b border-cyan-500/10 bg-[radial-gradient(ellipse_at_bottom,rgba(34,211,238,0.12),transparent_70%)] sm:w-[calc(100%+48px)]">
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(34,211,238,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(34,211,238,0.04)_1px,transparent_1px)] bg-[size:20px_20px] [mask-image:linear-gradient(to_bottom,transparent,black)]" />
       <svg viewBox="-16 -28 332 148" className="relative z-10 h-[90%] w-full overflow-visible" aria-hidden="true" preserveAspectRatio="none">
         <path d="M0 80 H300" stroke="rgba(34,211,238,0.15)" strokeWidth="1" strokeDasharray="4 4" />
@@ -1017,7 +1017,7 @@ function ClockVisual() {
   const shouldReduceMotion = useReducedMotion();
 
   return (
-    <div className="-mx-5 -mt-5 mb-6 sm:-mx-6 sm:-mt-6 relative flex h-[160px] w-[calc(100%+40px)] items-center justify-center overflow-hidden rounded-t-[24px] border-b border-cyan-500/10 bg-[radial-gradient(circle_at_center,rgba(8,145,178,0.15),transparent_60%)] sm:w-[calc(100%+48px)]">
+    <div className="-mx-5 -mt-5 mb-4 sm:-mx-6 sm:-mt-6 relative flex h-[120px] w-[calc(100%+40px)] items-center justify-center overflow-hidden rounded-t-[24px] border-b border-cyan-500/10 bg-[radial-gradient(circle_at_center,rgba(8,145,178,0.15),transparent_60%)] sm:w-[calc(100%+48px)]">
       {/* Sonar Radar Rings */}
       <motion.div
         className="absolute h-16 w-16 rounded-full border border-cyan-400"
@@ -1046,7 +1046,7 @@ function LayersVisual() {
   const shouldReduceMotion = useReducedMotion();
 
   return (
-    <div className="-mx-5 -mt-5 mb-6 sm:-mx-6 sm:-mt-6 relative flex h-[160px] w-[calc(100%+40px)] items-center justify-center overflow-hidden rounded-t-[24px] border-b border-cyan-500/10 bg-[radial-gradient(ellipse_at_top,rgba(8,145,178,0.15),transparent_70%)] [perspective:800px] sm:w-[calc(100%+48px)]">
+    <div className="-mx-5 -mt-5 mb-4 sm:-mx-6 sm:-mt-6 relative flex h-[120px] w-[calc(100%+40px)] items-center justify-center overflow-hidden rounded-t-[24px] border-b border-cyan-500/10 bg-[radial-gradient(ellipse_at_top,rgba(8,145,178,0.15),transparent_70%)] [perspective:800px] sm:w-[calc(100%+48px)]">
       <div className="relative h-24 w-40 mt-4">
         {[0, 1, 2].map((layer) => (
           <motion.div
@@ -1068,7 +1068,7 @@ function DashboardVisual() {
   const shouldReduceMotion = useReducedMotion();
 
   return (
-    <div className="-mx-5 -mt-5 mb-6 sm:-mx-6 sm:-mt-6 relative flex h-[160px] w-[calc(100%+40px)] items-center justify-center overflow-hidden rounded-t-[24px] border-b border-cyan-500/10 bg-[radial-gradient(ellipse_at_left,rgba(8,145,178,0.15),transparent_70%)] sm:w-[calc(100%+48px)]">
+    <div className="-mx-5 -mt-5 mb-4 sm:-mx-6 sm:-mt-6 relative flex h-[120px] w-[calc(100%+40px)] items-center justify-center overflow-hidden rounded-t-[24px] border-b border-cyan-500/10 bg-[radial-gradient(ellipse_at_left,rgba(8,145,178,0.15),transparent_70%)] sm:w-[calc(100%+48px)]">
       <div className="grid w-full max-w-[200px] gap-3">
         <div className="grid grid-cols-[1fr_0.6fr] gap-3">
           <div className="rounded-xl border border-cyan-700/50 bg-cyan-950/50 p-3.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_0_15px_rgba(34,211,238,0.1)] backdrop-blur-md">
@@ -1281,7 +1281,7 @@ function FeaturedCard({ feature, activeTab }: { feature: TabbedFeature; activeTa
       whileHover={shouldReduceMotion || isMobile ? undefined : { y: -6 }}
       onMouseMove={isMobile ? undefined : handleMouseMove}
       onMouseLeave={isMobile ? undefined : handleMouseLeave}
-      className={`group relative h-full min-h-[420px] overflow-hidden ${GLASS_CARD_CLASS} p-5 transition-colors duration-500 hover:border-white/12 sm:p-6 md:min-h-[520px] md:p-8`}
+      className={`group relative h-full min-h-[340px] overflow-hidden ${GLASS_CARD_CLASS} p-4 transition-colors duration-500 hover:border-white/12 sm:p-5 md:min-h-0 md:p-6`}
     >
       <motion.div className="pointer-events-none absolute inset-0 rounded-3xl" style={{ background }} />
       <div
@@ -1295,8 +1295,8 @@ function FeaturedCard({ feature, activeTab }: { feature: TabbedFeature; activeTa
         style={{ background: `linear-gradient(90deg, transparent 0%, ${tone.strong} 50%, transparent 100%)` }}
       />
 
-      <div className="relative z-10 flex h-full flex-col gap-6 md:gap-8">
-        <div className="flex min-h-[4.25rem] flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="relative z-10 flex h-full flex-col gap-4 md:gap-5">
+        <div className="flex min-h-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="inline-flex items-center gap-2 rounded-full border border-white/5 bg-white/[0.04] px-4 py-1.5 text-[11px] font-bold uppercase tracking-[0.28em] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_0_15px_rgba(255,255,255,0.02)] transition-colors group-hover:bg-white/[0.06] group-hover:border-white/10">
             <span className="h-1.5 w-1.5 rounded-full animate-pulse" style={{ backgroundColor: tone.strong, boxShadow: `0 0 10px ${tone.glow}` }} />
             {feature.tag}
@@ -1307,11 +1307,11 @@ function FeaturedCard({ feature, activeTab }: { feature: TabbedFeature; activeTa
           </div>
         </div>
 
-        <div className="max-w-2xl md:min-h-[12rem]">
-          <h3 className="text-3xl font-black tracking-tighter text-white drop-shadow-sm md:text-4xl lg:text-5xl">
+        <div className="max-w-2xl md:min-h-0">
+          <h3 className="text-2xl font-black tracking-tighter text-white drop-shadow-sm md:text-3xl lg:text-4xl">
             {feature.supportTitle}
           </h3>
-          <p className="mt-5 max-w-2xl text-base leading-relaxed text-zinc-400 md:text-lg transition-colors group-hover:text-zinc-300">
+          <p className="mt-3 max-w-2xl text-sm leading-relaxed text-zinc-400 md:text-base transition-colors group-hover:text-zinc-300">
             {feature.text}
           </p>
         </div>
@@ -1338,7 +1338,7 @@ function SecondaryCard({ card, activeTab, cardIndex }: { card: TabbedCard; activ
       whileHover={shouldReduceMotion || isMobile ? undefined : { y: -5 }}
       onMouseMove={isMobile ? undefined : handleMouseMove}
       onMouseLeave={isMobile ? undefined : handleMouseLeave}
-      className={`group relative min-h-[220px] overflow-hidden ${GLASS_CARD_CLASS} p-5 transition-colors duration-500 hover:border-white/12 sm:min-h-[236px] sm:p-6 md:h-full md:min-h-0`}
+      className={`group relative min-h-[180px] overflow-hidden ${GLASS_CARD_CLASS} p-4 transition-colors duration-500 hover:border-white/12 sm:min-h-[190px] sm:p-5 md:h-full md:min-h-0`}
     >
       <motion.div className="pointer-events-none absolute inset-0 rounded-3xl" style={{ background }} />
       <motion.div
@@ -1357,16 +1357,16 @@ function SecondaryCard({ card, activeTab, cardIndex }: { card: TabbedCard; activ
       />
 
       <div className="relative z-10 flex h-full flex-col">
-        <div className="mb-6 min-h-[160px] md:mb-7">
+        <div className="mb-3 min-h-[112px] md:mb-4">
           <TabbedCardVisual visual={card.visual} accent={card.accent} animationKey={activeTab} />
         </div>
 
-        <div className="mt-auto flex min-h-[188px] max-w-[18rem] flex-col justify-start md:h-[216px] md:min-h-0">
-          <div className="mb-4 flex h-12 items-center">
+        <div className="mt-auto flex min-h-0 max-w-[18rem] flex-col justify-start md:min-h-0">
+          <div className="mb-2 flex h-9 items-center">
             <TabbedCardIcon visual={card.visual} />
           </div>
-          <h3 className="min-h-[3rem] text-xl font-bold leading-tight tracking-tight text-white transition-all duration-300 md:min-h-[3.5rem] md:text-2xl group-hover:text-cyan-300 group-hover:drop-shadow-[0_0_12px_rgba(34,211,238,0.5)]">{card.title}</h3>
-          <p className="mt-3 text-sm leading-6 text-zinc-400 transition-colors duration-300 group-hover:text-zinc-300">{card.text}</p>
+          <h3 className="min-h-0 text-lg font-bold leading-tight tracking-tight text-white transition-all duration-300 md:text-xl group-hover:text-cyan-300 group-hover:drop-shadow-[0_0_12px_rgba(34,211,238,0.5)]">{card.title}</h3>
+          <p className="mt-2 text-[13px] leading-6 text-zinc-400 transition-colors duration-300 group-hover:text-zinc-300">{card.text}</p>
         </div>
       </div>
     </motion.article>
@@ -1584,7 +1584,7 @@ export function WhyDevelOP() {
   };
 
   return (
-    <section ref={ref} id="caracteristicas" className="relative overflow-hidden bg-[#030303] py-28 md:py-36">
+    <section ref={ref} id="caracteristicas" className="relative overflow-hidden bg-[#030303] py-16 md:py-20">
       <WhyDevelopBackground />
 
       <motion.div
@@ -1596,12 +1596,12 @@ export function WhyDevelOP() {
       >
         <motion.div
           variants={HEADER_REVEAL_VARIANTS}
-          className="mx-auto mb-9 max-w-5xl text-center"
+          className="mx-auto mb-6 max-w-5xl text-center"
         >
           <div className="inline-flex items-center rounded-full border border-cyan-400/20 bg-cyan-400/8 px-4 py-1.5 text-[11px] uppercase tracking-[0.28em] text-cyan-300">
             Why develOP
           </div>
-          <div className="relative mx-auto mt-5 min-h-[13.25rem] max-w-6xl overflow-visible py-1 md:h-[12.25rem] md:min-h-0 md:py-2 lg:h-[10.75rem]">
+          <div className="relative mx-auto mt-4 min-h-[9.5rem] max-w-6xl overflow-visible py-1 md:h-[8.75rem] md:min-h-0 md:py-1 lg:h-[8rem]">
             <AnimatePresence mode="wait" initial={false}>
               <motion.h2
                 key={activeDimension.feature.title}
@@ -1615,7 +1615,7 @@ export function WhyDevelOP() {
               </motion.h2>
             </AnimatePresence>
           </div>
-          <div className="relative mx-auto mt-4 min-h-[5.25rem] max-w-3xl md:h-[3.75rem] md:min-h-0">
+          <div className="relative mx-auto mt-3 min-h-[4rem] max-w-3xl md:h-[3.25rem] md:min-h-0">
             <AnimatePresence mode="wait" initial={false}>
               <motion.p
                 key={activeDimension.summary}
@@ -1631,7 +1631,7 @@ export function WhyDevelOP() {
           </div>
         </motion.div>
 
-        <motion.div variants={TABS_REVEAL_VARIANTS} className="mb-10">
+        <motion.div variants={TABS_REVEAL_VARIANTS} className="mb-6">
           <div className="w-full overflow-x-auto pb-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           <div
             className="mx-auto inline-flex min-w-max items-center gap-2 whitespace-nowrap rounded-full border border-white/5 bg-white/[0.02] p-1"
@@ -1671,7 +1671,7 @@ export function WhyDevelOP() {
           </div>
         </motion.div>
 
-        <motion.div variants={PANEL_REVEAL_VARIANTS} className="relative md:h-[960px] lg:h-[920px] xl:h-[880px]">
+        <motion.div variants={PANEL_REVEAL_VARIANTS} className="relative md:h-[600px] lg:h-[560px] xl:h-[540px]">
           <AnimatePresence mode="wait" initial={false}>
             <motion.div
               key={activeDimension.label}

@@ -9,7 +9,14 @@
       "Bash(ls -laR /c/Users/franc/Desktop/PorfolioDevelOP/logic-core-v3/src/app/\\\\\\(protected\\\\\\)/)",
       "Bash(npm install:*)",
       "Bash(ls \"c:/Users/franc/Desktop/PorfolioDevelOP/logic-core-v3/.env\"*)",
-      "Bash(npx prisma:*)"
+      "Bash(npx prisma:*)",
+      "Bash(rm -f /tmp/crm_verify.mjs)",
+      "PowerShell(Push-Location C:\\\\PorfolioDevelOP\\\\logic-core-v3; npm run lint; $code = $LASTEXITCODE; Pop-Location; \"EXIT: $code\")",
+      "PowerShell(Push-Location C:\\\\PorfolioDevelOP\\\\logic-core-v3; npx tsc --noEmit 2>&1 | Out-File -FilePath \"$env:TEMP\\\\tsc_out.txt\" -Encoding utf8; Pop-Location; \"--- OurServices errors: ---\"; Select-String -Path \"$env:TEMP\\\\tsc_out.txt\" -Pattern \"OurServices\" -SimpleMatch; \"--- total error lines: ---\"; \\(Select-String -Path \"$env:TEMP\\\\tsc_out.txt\" -Pattern \"error TS\"\\).Count)",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(netstat -ano)",
+      "Read(//c/Users/Valentino/.claude/projects/C--PorfolioDevelOP/**)",
+      "Read(//c/Users/Valentino/.claude/projects/C--PorfolioDevelOP/memory/**)"
     ]
   }
 }
