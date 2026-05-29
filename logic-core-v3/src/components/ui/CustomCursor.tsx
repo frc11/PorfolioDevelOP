@@ -57,7 +57,7 @@ export const CustomCursor = () => {
 
             lastCursorModeRef.current = nextMode;
             setIsHidden(false);
-            setIsHovering(isInteractive);
+            setIsHovering(Boolean(isInteractive));
         };
 
         // Move cursor logic

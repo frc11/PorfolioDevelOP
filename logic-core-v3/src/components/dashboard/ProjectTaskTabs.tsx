@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { CheckCircle2, Clock, Loader2, Calendar, AlertTriangle, MessageSquare, ArrowRight } from 'lucide-react'
 import Link from 'next/link'
+import { Tabs, type ValueTabItem } from '@/components/ui'
 import { TaskApprovalButtons } from './TaskApprovalButtons'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -45,10 +46,10 @@ function getImpact(title: string): string | null {
 
 // ─── Tab config ───────────────────────────────────────────────────────────────
 
-const TABS: { key: TaskStatus; label: string; activeColor: string; activeBg: string }[] = [
-  { key: 'IN_PROGRESS', label: 'En Curso',    activeColor: 'text-blue-400',    activeBg: 'bg-blue-500/10 border-blue-500/20' },
-  { key: 'TODO',        label: 'Pendientes',  activeColor: 'text-zinc-300',     activeBg: 'bg-zinc-500/10 border-zinc-500/20' },
-  { key: 'DONE',        label: 'Completadas', activeColor: 'text-emerald-400',  activeBg: 'bg-emerald-500/10 border-emerald-500/20' },
+const TAB_DEFS: { value: TaskStatus; label: string }[] = [
+  { value: 'IN_PROGRESS', label: 'En curso' },
+  { value: 'TODO',        label: 'Pendientes' },
+  { value: 'DONE',        label: 'Completadas' },
 ]
 
 // ─── Task icon ────────────────────────────────────────────────────────────────
@@ -225,40 +226,16 @@ export function ProjectTaskTabs({
       </AnimatePresence>
 
       {/* ── Tabs ────────────────────────────────────────────────────────────── */}
-      <div className="flex items-stretch gap-1.5 rounded-xl border border-white/5 bg-zinc-950/60 p-1 backdrop-blur-md">
-        {TABS.map((tab) => {
-          const count = taskMap[tab.key].length
-          const isActive = activeTab === tab.key
-          return (
-            <button
-              key={tab.key}
-              onClick={() => setActiveTab(tab.key)}
-              className={`relative flex flex-1 items-center justify-center gap-2 rounded-lg px-3 py-2.5 text-[10px] sm:text-xs font-bold uppercase tracking-wider transition-all duration-200 ${
-                isActive ? tab.activeColor : 'text-zinc-600 hover:text-zinc-400'
-              }`}
-            >
-              {isActive && (
-                <motion.div
-                  layoutId="tab-pill"
-                  className={`absolute inset-0 rounded-lg border ${tab.activeBg}`}
-                  transition={{ type: 'spring', stiffness: 320, damping: 28 }}
-                />
-              )}
-              <span className="relative z-10 hidden sm:inline">{tab.label}</span>
-              <span className="relative z-10 sm:hidden">
-                {tab.key === 'IN_PROGRESS' ? 'Curso' : tab.key === 'TODO' ? 'Pend.' : 'Hecho'}
-              </span>
-              <span
-                className={`relative z-10 inline-flex h-5 min-w-[1.25rem] items-center justify-center rounded-full px-1 text-[10px] font-black tabular-nums ${
-                  isActive ? 'bg-white/15 text-inherit' : 'bg-white/5 text-zinc-700'
-                }`}
-              >
-                {count}
-              </span>
-            </button>
-          )
-        })}
-      </div>
+      <Tabs
+        layoutId="project-task-tabs"
+        value={activeTab}
+        onValueChange={(v) => setActiveTab(v as TaskStatus)}
+        items={TAB_DEFS.map<ValueTabItem>((t) => ({
+          value: t.value,
+          label: t.label,
+          badge: taskMap[t.value].length,
+        }))}
+      />
 
       {/* ── Task list ───────────────────────────────────────────────────────── */}
       <AnimatePresence mode="wait">

@@ -1,32 +1,14 @@
-import { auth } from '@/auth'
 import { prisma } from '@/lib/prisma'
-import { resolveOrgId } from '@/lib/preview'
 import { getEffectiveSyncStatus } from '@/modules/chatbot/server/crm'
 import type { CrmSyncStatus } from '@prisma/client'
-
-/**
- * B5.8 — Lectura del historial de syncs a CRM.
- *
- * Dos modos:
- *   - getLeadSyncHistory(leadId) → todos los attempts de un lead (max 20).
- *     Usado en LeadDetail para mostrar trazabilidad por lead.
- *   - getOrgSyncHistory({ cursor, limit }) → historial paginado de la org.
- *     Usado en CrmIntegrationCard (settings) para ver el panorama global.
- *
- * Multi-tenant: ambas queries filtran por organizationId resuelto del session.
- * Imposible leer attempts de otra org.
- *
- * PENDING zombie: cada attempt pasa por getEffectiveSyncStatus antes de salir,
- * así un PENDING/RETRYING viejo (>5min) se reporta como FAILED a la UI sin
- * necesidad de un cron que actualice la DB.
- */
+import { requireSuperAdmin } from '@/modules/chatbot/server/admin/requireSuperAdmin'
 
 export interface SyncHistoryEntry {
   id: string
   leadId: string
   /** Status efectivo: PENDING/RETRYING viejos se reportan como FAILED. */
   status: CrmSyncStatus
-  rawStatus: CrmSyncStatus // status crudo en DB (para debug si hace falta)
+  rawStatus: CrmSyncStatus
   attemptNumber: number
   httpStatus: number | null
   errorMessage: string | null
@@ -74,25 +56,19 @@ const ATTEMPT_SELECT = {
   durationMs: true,
 } as const
 
-/**
- * Historial de un lead específico. Verifica multi-tenant: el lead debe
- * pertenecer a la org actual.
- */
-export async function getLeadSyncHistory(leadId: string): Promise<{
-  ok: true
-  entries: SyncHistoryEntry[]
-} | { ok: false; error: string }> {
-  const session = await auth()
-  if (!session?.user) return { ok: false, error: 'No autenticado' }
+export async function getLeadSyncHistory(
+  organizationId: string,
+  leadId: string,
+): Promise<
+  | { ok: true; entries: SyncHistoryEntry[] }
+  | { ok: false; error: string }
+> {
+  await requireSuperAdmin()
 
-  const orgId = await resolveOrgId()
-  if (!orgId) return { ok: false, error: 'Sin organización' }
-
-  // Filtro doble: leadId + organizationId denormalizado en la tabla.
   const attempts = await prisma.crmSyncAttempt.findMany({
     where: {
       leadId,
-      organizationId: orgId,
+      organizationId,
     },
     orderBy: { attemptedAt: 'desc' },
     take: 20,
@@ -103,34 +79,28 @@ export async function getLeadSyncHistory(leadId: string): Promise<{
 }
 
 export interface OrgSyncHistoryQuery {
+  organizationId: string
   cursor?: string
   limit?: number
   statusFilter?: CrmSyncStatus
 }
 
-/**
- * Historial global de la org, paginado por cursor (id del último attempt visto).
- */
-export async function getOrgSyncHistory(query: OrgSyncHistoryQuery = {}): Promise<{
-  ok: true
-  entries: SyncHistoryEntry[]
-  nextCursor: string | null
-} | { ok: false; error: string }> {
-  const session = await auth()
-  if (!session?.user) return { ok: false, error: 'No autenticado' }
+export async function getOrgSyncHistory(query: OrgSyncHistoryQuery): Promise<
+  | { ok: true; entries: SyncHistoryEntry[]; nextCursor: string | null }
+  | { ok: false; error: string }
+> {
+  await requireSuperAdmin()
 
-  const orgId = await resolveOrgId()
-  if (!orgId) return { ok: false, error: 'Sin organización' }
-
+  const { organizationId } = query
   const limit = Math.min(Math.max(query.limit ?? 20, 1), 100)
 
   const attempts = await prisma.crmSyncAttempt.findMany({
     where: {
-      organizationId: orgId,
+      organizationId,
       ...(query.statusFilter ? { status: query.statusFilter } : {}),
     },
     orderBy: { attemptedAt: 'desc' },
-    take: limit + 1, // +1 para detectar nextCursor sin segunda query
+    take: limit + 1,
     ...(query.cursor ? { cursor: { id: query.cursor }, skip: 1 } : {}),
     select: ATTEMPT_SELECT,
   })

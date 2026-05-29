@@ -333,21 +333,35 @@ async function main() {
     })
   }
 
+  // CC.5 — Suscripción a plan BUSINESS para que San Miguel pueda usar CRM.
+  // El subscription apunta al Plan creado por prisma/seeds/sync-plans.ts.
+  // Si el plan no existe (sync-plans no se corrió), seguimos con planName plano
+  // y log de warning — el dashboard renderiza igual, solo CRM queda locked.
+  const businessPlan = await prisma.plan.findUnique({ where: { key: 'BUSINESS' } })
+
+  if (!businessPlan) {
+    console.warn(
+      '[seed] Plan BUSINESS no encontrado. Corré `npx tsx prisma/seeds/sync-plans.ts` antes para que el subscription se vincule. Por ahora se crea sin planId — CRM queda gateado.',
+    )
+  }
+
   await prisma.subscription.upsert({
     where: { organizationId: organization.id },
     update: {
-      planName: 'Plan Profesional',
+      planName: businessPlan?.name ?? 'Plan Profesional',
+      planId: businessPlan?.id ?? null,
       status: SubscriptionStatus.ACTIVE,
-      price: 150,
+      price: businessPlan ? Number(businessPlan.monthlyPrice) : 150,
       currency: 'USD',
       renewalDate: daysFromNow(30),
     },
     create: {
       id: IDS.subscription,
       organizationId: organization.id,
-      planName: 'Plan Profesional',
+      planName: businessPlan?.name ?? 'Plan Profesional',
+      planId: businessPlan?.id ?? null,
       status: SubscriptionStatus.ACTIVE,
-      price: 150,
+      price: businessPlan ? Number(businessPlan.monthlyPrice) : 150,
       currency: 'USD',
       renewalDate: daysFromNow(30),
     },
@@ -725,6 +739,60 @@ async function main() {
   // NOTE: Module pricing catalog is now synced via prisma/seeds/sync-premium-modules.ts
   // Run: npx tsx prisma/seeds/sync-premium-modules.ts
 
+  // CC.5 — BotConfig + KnowledgeBase para San Miguel (destrabar visual-qa cliente).
+  // Sin esto, /dashboard/chatbot/* redirige porque getClientChatbotSession() devuelve null.
+  // Valores realistas para que las pantallas de personalización, KB y preview se vean
+  // "pobladas" (no vacías) cuando Franco verifique.
+  const sanMiguelBot = await prisma.botConfig.upsert({
+    where: { organizationId: organization.id },
+    update: {},
+    create: {
+      organizationId: organization.id,
+      slug: 'sanmiguel',
+      botName: 'Lucía',
+      isActive: true,
+      accentColor: '#06b6d4',
+      chatSurfaceTint: null,
+      avatarStyle: 'neuro',
+      borderRadius: 'medium',
+      surfaceStyle: 'glass',
+      position: 'bottom_right',
+      fontStyle: 'sans',
+      bubbleStyle: 'rounded',
+      tone: 'informal_rioplatense',
+      welcomeMessage:
+        '¡Hola! Soy Lucía, te ayudo con info sobre nuestros autos, planes de pago, agendar test drive o lo que necesites.',
+      quickReplies: [
+        { id: 'qr-1', emoji: '🚗', label: 'Ver autos disponibles', promptToSend: 'Quiero ver los autos disponibles' },
+        { id: 'qr-2', emoji: '💳', label: 'Planes de pago', promptToSend: 'Cómo son los planes de pago' },
+        { id: 'qr-3', emoji: '📅', label: 'Agendar test drive', promptToSend: 'Quiero agendar un test drive' },
+      ],
+      industry: 'automotive',
+      allowedDomains: ['sanmiguelautos.com.ar', 'www.sanmiguelautos.com.ar'],
+    },
+  })
+
+  await prisma.knowledgeBase.upsert({
+    where: { botConfigId: sanMiguelBot.id },
+    update: {},
+    create: {
+      botConfigId: sanMiguelBot.id,
+      businessInfo:
+        'San Miguel Autos — concesionaria multimarca en Tucumán, desde 1998. Atendemos en Av. Mate de Luna 2300, lunes a viernes de 9 a 19, sábados de 9 a 13.',
+      servicesOrProducts:
+        '- Autos 0km: Toyota, Volkswagen, Renault, Fiat.\n- Usados certificados (con garantía 6 meses).\n- Planes de ahorro y financiación bancaria.\n- Servicio post-venta y taller propio.',
+      faq:
+        '- ¿Tienen financiación? Sí, ofrecemos crédito propio + bancos + planes de ahorro.\n- ¿Aceptan usados en parte de pago? Sí, hacemos tasación gratis.\n- ¿Cuánto demora la entrega? Entre 7 y 30 días según modelo y stock.',
+      policies:
+        'Garantía oficial de fábrica en 0km. Usados con 6 meses de garantía mecánica. Devolución no aceptada salvo defecto de fabricación documentado en los primeros 30 días.',
+      salesGuidance:
+        'Si el cliente quiere precio específico o agendar test drive → derivar a WhatsApp del asesor. Si pregunta por stock de un modelo específico, ofrecer reservar visita.',
+      toneExamples:
+        'Tono cercano y rioplatense, sin abusar del "vos". Ejemplo: "Dale, te lo armo y te paso el contacto del asesor en un toque."',
+      forbiddenStatements:
+        'No prometer precios fijos sin consultar (el stock varía). No comprometer entregas en menos de 7 días. No dar datos personales de empleados.',
+    },
+  })
 
   process.stdout.write(
     [

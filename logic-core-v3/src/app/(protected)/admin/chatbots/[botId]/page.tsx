@@ -16,6 +16,7 @@ import {
   type MonthlyUsage,
 } from './BotDetailClient'
 import { VALID_TABS, type TabId } from './tabs'
+import { IntegrationsTab } from './tabs/IntegrationsTab'
 
 interface Props {
   params: Promise<{ botId: string }>
@@ -117,6 +118,12 @@ export default async function BotDetailPage({ params, searchParams }: Props) {
       monthlyUsage={serializedUsage}
       leads={leads}
       conversations={conversations}
+      integrationsTab={
+        <IntegrationsTab
+          organizationId={bot.organization.id}
+          organizationName={bot.organization.companyName}
+        />
+      }
     />
   )
 }

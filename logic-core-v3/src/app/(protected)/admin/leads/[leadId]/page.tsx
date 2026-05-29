@@ -212,8 +212,8 @@ export default async function AgencyOsLeadDetailPage({ params }: LeadPageProps) 
       <div className="rounded-[28px] border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
           <div>
-            <p className="text-[10px] uppercase tracking-[0.24em] text-zinc-500">
-              Agency OS / Leads / Ficha
+            <p className="text-xs tracking-tight text-zinc-500">
+              develOP / Leads / Ficha
             </p>
             <h2 className="mt-2 text-3xl font-semibold tracking-tight text-white">
               {lead.businessName}

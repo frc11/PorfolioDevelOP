@@ -41,14 +41,14 @@ export async function forgotPasswordAction(
 
   // 2) Rate limit por IP — protege el endpoint completo
   const ipHash = await getClientIpHash()
-  const ipLimit = applyAuthRateLimit({ scope: 'forgotPasswordPerIp', identifier: ipHash })
+  const ipLimit = await applyAuthRateLimit({ scope: 'forgotPasswordPerIp', identifier: ipHash })
   if (!ipLimit.allowed) {
     // Mensaje idéntico al éxito: no revelamos el rate-limit (anti-enum / anti-recon).
     return { type: 'success', message: ANTI_ENUM_MESSAGE }
   }
 
   // 3) Rate limit por email — protege un inbox específico de ser inundado.
-  const emailLimit = applyAuthRateLimit({
+  const emailLimit = await applyAuthRateLimit({
     scope: 'forgotPasswordPerEmail',
     identifier: email,
   })

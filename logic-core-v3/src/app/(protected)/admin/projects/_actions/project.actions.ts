@@ -420,7 +420,7 @@ function serializeProjectListItem(project: ProjectListRecord) {
     mapLegacyServiceTypeToPortal(project.osLead?.serviceType) ??
     project.organization?.services[0]?.type ??
     null
-  const businessName = project.organization?.companyName ?? 'Proyecto interno Agency OS'
+  const businessName = project.organization?.companyName ?? 'Proyecto interno develOP'
   const contactName = project.osLead?.contactName ?? businessName
   const completedTasks = project.tasks.filter((task) => task.status === TaskStatus.DONE).length
   const totalTrackedHours = project.timeEntries.reduce((total, entry) => total + entry.hours, 0)
@@ -472,7 +472,7 @@ function serializeProjectDetail(project: ProjectDetailRecord) {
     mapLegacyServiceTypeToPortal(project.osLead?.serviceType) ??
     project.organization?.services[0]?.type ??
     null
-  const businessName = project.organization?.companyName ?? 'Proyecto interno Agency OS'
+  const businessName = project.organization?.companyName ?? 'Proyecto interno develOP'
 
   return {
     id: project.id,

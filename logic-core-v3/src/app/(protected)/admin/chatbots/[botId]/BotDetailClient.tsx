@@ -90,6 +90,7 @@ const TABS: { id: TabId; label: string }[] = [
   { id: 'leads', label: 'Leads' },
   { id: 'conversations', label: 'Conversaciones' },
   { id: 'install', label: 'Instalación' },
+  { id: 'integrations', label: 'Integraciones' },
 ]
 
 interface Props {
@@ -99,9 +100,10 @@ interface Props {
   monthlyUsage: MonthlyUsage
   leads: LeadItem[]
   conversations: ConversationItem[]
+  integrationsTab: React.ReactNode
 }
 
-export function BotDetailClient({ bot, initialTab, initialEvents, monthlyUsage, leads, conversations }: Props) {
+export function BotDetailClient({ bot, initialTab, initialEvents, monthlyUsage, leads, conversations, integrationsTab }: Props) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [activeTab, setActiveTab] = useState<TabId>(initialTab)
@@ -242,6 +244,7 @@ export function BotDetailClient({ bot, initialTab, initialEvents, monthlyUsage, 
               }}
             />
           )}
+          {activeTab === 'integrations' && integrationsTab}
         </motion.div>
       </AnimatePresence>
     </div>

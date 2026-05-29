@@ -3,7 +3,7 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   serverExternalPackages: [
     '@react-pdf/renderer',
-    'googleapis',
+    '@prisma/client',
     'require-in-the-middle',
     'import-in-the-middle',
   ],

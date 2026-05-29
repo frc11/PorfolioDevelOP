@@ -187,8 +187,8 @@ export default async function AgencyOsTeamPage() {
   return (
     <section className="space-y-6">
       <div className="rounded-[28px] border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
-        <p className="text-[10px] uppercase tracking-[0.24em] text-zinc-500">
-          Agency OS / Equipo
+        <p className="text-xs tracking-tight text-zinc-500">
+          develOP / Equipo
         </p>
         <h2 className="mt-2 text-3xl font-semibold tracking-tight text-white">
           Workload por miembro

@@ -18,8 +18,8 @@ export default async function AgencyOsSettingsPage() {
             </div>
 
             <div>
-              <p className="text-[10px] uppercase tracking-[0.24em] text-zinc-500">
-                Agency OS / Configuracion
+              <p className="text-xs tracking-tight text-zinc-500">
+                develOP / Configuración
               </p>
               <h1 className="mt-2 text-3xl font-semibold tracking-tight text-white">
                 Configuracion

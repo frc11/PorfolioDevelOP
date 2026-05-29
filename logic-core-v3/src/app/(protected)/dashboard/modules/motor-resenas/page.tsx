@@ -5,7 +5,7 @@ import { resolveOrgId } from '@/lib/preview'
 import { isModuleActive } from '@/lib/modules/check-activation'
 import { listReviews } from '@/lib/integrations/google-business-profile'
 import { prisma } from '@/lib/prisma'
-import { EmptyState } from '@/components/ui'
+import { EmptyState, PageHeader } from '@/components/ui'
 import { ReviewItem } from './_components/ReviewItem'
 import { AskReviewSection } from './_components/AskReviewSection'
 
@@ -157,24 +157,13 @@ export default async function MotorResenasPage() {
 
   return (
     <div className="flex flex-col gap-6 max-w-2xl">
-      {/* Header */}
-      <div>
-        <div className="flex items-center gap-3 mb-1">
-          <div
-            className="flex h-9 w-9 items-center justify-center rounded-xl"
-            style={{
-              background: 'rgba(245,158,11,0.12)',
-              border: '1px solid rgba(245,158,11,0.2)',
-            }}
-          >
-            <Star size={18} strokeWidth={1.5} className="text-amber-400" />
-          </div>
-          <h1 className="text-lg font-black tracking-tight text-zinc-100">Motor de Reseñas</h1>
-        </div>
-        <p className="text-sm text-zinc-500 pl-12">
-          Respondé reseñas de Google con IA y pedile a tus clientes que te dejen una.
-        </p>
-      </div>
+      <PageHeader
+        eyebrow="Módulo"
+        title="Motor de reseñas"
+        description="Respondé reseñas de Google con IA y pedile a tus clientes que te dejen una."
+        icon={Star}
+        accent="amber"
+      />
 
       {/* Reviews */}
       <Suspense fallback={<ReviewsSkeleton />}>

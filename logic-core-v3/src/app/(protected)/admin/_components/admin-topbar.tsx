@@ -13,11 +13,8 @@ function humanizeSegment(segment: string): string {
     return 'Detalle'
   }
 
-  return segment
-    .split('-')
-    .filter(Boolean)
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(' ')
+  const text = segment.replace(/[-_]/g, ' ').trim()
+  return text.charAt(0).toUpperCase() + text.slice(1)
 }
 
 function getTopbarMeta(pathname: string) {
@@ -29,6 +26,15 @@ function getTopbarMeta(pathname: string) {
     leads: 'Leads',
     projects: 'Proyectos',
     team: 'Equipo',
+    clients: 'Clientes',
+    chatbots: 'Chatbots',
+    chatbot: 'Chatbots',
+    messages: 'Mensajes',
+    tickets: 'Tickets',
+    settings: 'Configuración',
+    alerts: 'Alertas',
+    'audit-log': 'Audit log',
+    _design: 'Design system',
   }
 
   const sectionLabel = sectionLabelMap[section] ?? humanizeSegment(section)
@@ -37,8 +43,8 @@ function getTopbarMeta(pathname: string) {
 
   const breadcrumb =
     currentLabel === sectionLabel
-      ? `Agency OS / ${sectionLabel}`
-      : `Agency OS / ${sectionLabel} / ${currentLabel}`
+      ? sectionLabel
+      : `${sectionLabel} / ${currentLabel}`
 
   return {
     breadcrumb,
@@ -62,12 +68,12 @@ export function AdminTopbar() {
   const meta = getTopbarMeta(pathname)
 
   return (
-    <header className="flex h-16 items-center justify-between rounded-[24px] border border-white/10 bg-white/5 px-5 backdrop-blur-xl">
+    <header className="flex h-16 items-center justify-between rounded-2xl border border-white/10 bg-white/5 px-5 backdrop-blur-xl">
       <div className="min-w-0">
-        <p className="truncate text-[10px] uppercase tracking-[0.24em] text-zinc-500">
+        <p className="truncate text-xs tracking-tight text-zinc-500">
           {meta.breadcrumb}
         </p>
-        <h1 className="mt-1 truncate text-lg font-semibold tracking-tight text-white">
+        <h1 className="mt-1 truncate text-lg font-medium tracking-tight text-white">
           {meta.title}
         </h1>
       </div>

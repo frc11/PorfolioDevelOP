@@ -17,7 +17,7 @@ export async function resetPasswordAction(
 ): Promise<ResetPasswordState> {
   // 1) Rate limit por IP — protege contra brute-force del token.
   const ipHash = await getClientIpHash()
-  const ipLimit = applyAuthRateLimit({ scope: 'resetPasswordPerIp', identifier: ipHash })
+  const ipLimit = await applyAuthRateLimit({ scope: 'resetPasswordPerIp', identifier: ipHash })
   if (!ipLimit.allowed) {
     return {
       type: 'error',

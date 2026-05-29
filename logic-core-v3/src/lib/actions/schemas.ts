@@ -1,4 +1,4 @@
-import { TicketCategory, TicketPriority, TicketStatus } from '@prisma/client'
+import { TicketCategory, TicketPriority, TicketStatus } from '@/lib/prisma-enums'
 import { z } from 'zod'
 
 export type ActionResult<T = unknown> = {

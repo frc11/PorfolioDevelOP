@@ -153,7 +153,7 @@ export default async function AgencyOsProjectLayout({ children, params }: Projec
   const isInternalProject = project.organizationId === null
   const serviceType = normalizeServiceType(project)
   const companyName = isInternalProject
-    ? 'Proyecto interno Agency OS'
+    ? 'Proyecto interno develOP'
     : project.organization?.companyName ?? 'Cliente sin nombre'
 
   return (
@@ -161,8 +161,8 @@ export default async function AgencyOsProjectLayout({ children, params }: Projec
       <div className="rounded-[28px] border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
         <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
           <div>
-            <p className="text-[10px] uppercase tracking-[0.24em] text-zinc-500">
-              Agency OS / Proyectos / Ficha
+            <p className="text-xs tracking-tight text-zinc-500">
+              develOP / Proyectos / Ficha
             </p>
             <h2 className="mt-2 text-3xl font-semibold tracking-tight text-white">{project.name}</h2>
             <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-zinc-400">

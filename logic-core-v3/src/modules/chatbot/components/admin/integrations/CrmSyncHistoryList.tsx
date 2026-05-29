@@ -1,14 +1,14 @@
 import { History } from 'lucide-react'
 import { EmptyState } from '@/components/ui/EmptyState'
-import type { SyncHistoryEntry } from '@/modules/chatbot/server/dashboard/getCrmSyncHistory'
+import type { SyncHistoryEntry } from '@/modules/chatbot/server/admin/integrations/getCrmSyncHistory'
 import { CrmSyncBadge } from './CrmSyncBadge'
 import { RetrySyncButton } from './RetrySyncButton'
 
 interface CrmSyncHistoryListProps {
+  organizationId: string
   entries: SyncHistoryEntry[]
 }
 
-// TZ-AR: orden por capturedAt/attemptedAt formateado en hora Argentina (B5.5 standard).
 const ARG_DATETIME_FMT = new Intl.DateTimeFormat('es-AR', {
   timeZone: 'America/Argentina/Buenos_Aires',
   day: '2-digit',
@@ -22,22 +22,13 @@ function formatAttemptedAt(date: Date): string {
   return ARG_DATETIME_FMT.format(date)
 }
 
-/**
- * B5.8 — Lista del historial de syncs (a nivel org o a nivel lead).
- *
- * Cada entry ya viene con status EFECTIVO (PENDING/RETRYING viejos
- * reportados como FAILED por getEffectiveSyncStatus en el server action).
- *
- * Sin paginación interna por ahora — el server action ya limita a 10/20.
- * Si crece volumen, se agrega "Ver más" con cursor (deuda).
- */
-export function CrmSyncHistoryList({ entries }: CrmSyncHistoryListProps) {
+export function CrmSyncHistoryList({ organizationId, entries }: CrmSyncHistoryListProps) {
   if (entries.length === 0) {
     return (
       <EmptyState
         icon={History}
         title="Todavía no hay sincronizaciones"
-        description="Cuando el chatbot capture un lead, va a aparecer acá el resultado del sync a tu CRM."
+        description="Cuando el chatbot capture un lead, va a aparecer acá el resultado del sync al CRM."
         size="sm"
       />
     )
@@ -81,7 +72,9 @@ export function CrmSyncHistoryList({ entries }: CrmSyncHistoryListProps) {
               )}
             </div>
           </div>
-          {entry.status === 'FAILED' && <RetrySyncButton leadId={entry.leadId} />}
+          {entry.status === 'FAILED' && (
+            <RetrySyncButton organizationId={organizationId} leadId={entry.leadId} />
+          )}
         </li>
       ))}
     </ul>

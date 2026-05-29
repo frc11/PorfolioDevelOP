@@ -129,8 +129,8 @@ export default async function AgencyOsProjectsPage({ searchParams }: ProjectsPag
       <div className="rounded-[28px] border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
         <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
           <div>
-            <p className="text-[10px] uppercase tracking-[0.24em] text-zinc-500">
-              Agency OS / Proyectos
+            <p className="text-xs tracking-tight text-zinc-500">
+              develOP / Proyectos
             </p>
             <h2 className="mt-2 text-3xl font-semibold tracking-tight text-white">
               Entregas, mantenimiento y rentabilidad

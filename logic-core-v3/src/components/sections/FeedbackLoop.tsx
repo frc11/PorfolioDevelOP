@@ -4,7 +4,7 @@ import { Quote } from 'lucide-react'
 
 const REVIEWS = [
     {
-        text: "Logic Core transformó nuestra operación logística. La eficiencia aumentó un 40% en el primer trimestre.",
+        text: "develOP transformó nuestra operación logística. La eficiencia aumentó un 40% en el primer trimestre.",
         author: "Carlos Méndez",
         role: "COO @ LogiTech Global"
     },

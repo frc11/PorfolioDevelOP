@@ -7,19 +7,19 @@ export default async function AgencyOsTicketsPage() {
 
   return (
     <section className="space-y-6">
-      <div className="rounded-[28px] border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
+      <div className="rounded-2xl border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
         <div className="flex items-start gap-4">
-          <div className="flex h-14 w-14 items-center justify-center rounded-[20px] border border-cyan-400/20 bg-cyan-400/10 text-cyan-100">
-            <LifeBuoy className="h-7 w-7" />
+          <div className="flex h-14 w-14 items-center justify-center rounded-md border border-cyan-400/20 bg-cyan-400/10 text-cyan-100">
+            <LifeBuoy className="h-7 w-7" strokeWidth={1.5} />
           </div>
 
           <div>
-            <p className="text-[10px] uppercase tracking-[0.24em] text-zinc-500">
-              Agency OS / Soporte
+            <p className="text-xs tracking-tight text-zinc-500">
+              develOP / Soporte
             </p>
             <h1 className="mt-2 text-3xl font-semibold tracking-tight text-white">Tickets</h1>
             <p className="mt-3 max-w-2xl text-sm leading-6 text-zinc-400">
-              Bandeja unificada de conversaciones de soporte del portal, con seguimiento por estado y respuesta directa desde Agency OS.
+              Bandeja unificada de conversaciones de soporte del portal, con seguimiento por estado y respuesta directa desde el panel.
             </p>
           </div>
         </div>

@@ -20,12 +20,12 @@ export default async function AgencyOsMessagesPage() {
           </div>
 
           <div>
-            <p className="text-[10px] uppercase tracking-[0.24em] text-zinc-500">
-              Agency OS / Comunicacion
+            <p className="text-xs tracking-tight text-zinc-500">
+              develOP / Comunicación
             </p>
             <h1 className="mt-2 text-3xl font-semibold tracking-tight text-white">Mensajes</h1>
             <p className="mt-3 max-w-2xl text-sm leading-6 text-zinc-400">
-              Inbox centralizado para conversar con clientes del portal y responder sin salir de Agency OS.
+              Inbox centralizado para conversar con clientes del portal y responder sin salir del panel.
             </p>
           </div>
         </div>

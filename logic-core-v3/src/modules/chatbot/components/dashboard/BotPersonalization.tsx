@@ -1,7 +1,7 @@
 'use client'
 
 import { useMemo, useState, useTransition } from 'react'
-import { AnimatePresence, motion } from 'motion/react'
+import { motion } from 'motion/react'
 import { toast } from 'sonner'
 import {
   AlignLeft,
@@ -19,8 +19,9 @@ import { Section } from '@/components/ui/Section'
 import { Eyebrow, Heading, Muted } from '@/components/ui/Typography'
 import { cn } from '@/lib/utils'
 import { updateBotAppearance } from '@/modules/chatbot/server/dashboard/updateBotAppearance'
-import { AvatarPicker, AvatarRenderer } from '@/modules/chatbot/components/avatar'
+import { AvatarPicker } from '@/modules/chatbot/components/avatar'
 import { deriveBusinessInitials } from '@/modules/chatbot/shared/businessInitials'
+import { BotConfigPreview, type BotPreviewState } from '@/modules/chatbot/components/preview'
 import {
   CLIENT_AVATAR_STYLES,
   CURATED_COLORS,
@@ -33,6 +34,7 @@ import {
 interface BotPersonalizationProps {
   bot: {
     id: string
+    /** Campos que el cliente edita */
     accentColor: string
     position: string
     avatarStyle: string
@@ -40,6 +42,17 @@ interface BotPersonalizationProps {
     botName: string
     welcomeMessage: string
     quickReplies: unknown
+    /** Campos visuales configurados por develOP en el admin — el cliente no los edita
+     * pero el preview los necesita para ser un espejo fiel del widget real.
+     * Vienen crudos de Prisma como `string` (los enums no se preservan en el query). */
+    isActive: boolean
+    avatarImageUrl: string | null
+    chatSurfaceTint: string | null
+    borderRadius: string
+    bubbleStyle: string
+    surfaceStyle: string
+    intensityLevel: string
+    fontStyle: string
   }
 }
 
@@ -270,7 +283,7 @@ export function BotPersonalization({ bot }: BotPersonalizationProps) {
       </div>
 
       <aside className="lg:sticky lg:top-6 lg:self-start">
-        <BotPreview state={state} botName={bot.botName} />
+        <BotConfigPreview state={buildPreviewState(state, bot)} />
       </aside>
     </div>
   )
@@ -390,83 +403,71 @@ function QuickRepliesEditor({
   )
 }
 
-function BotPreview({
-  state,
-  botName,
-}: {
-  state: BotPersonalizationState
-  botName: string
-}) {
-  return (
-    <div className="overflow-hidden rounded-3xl border border-white/10 bg-white/[0.02]">
-      <div className="flex items-center justify-between border-b border-white/10 p-4">
-        <Eyebrow>Preview en vivo</Eyebrow>
-        <span className="text-xs text-zinc-500">Antes de guardar</span>
-      </div>
+/**
+ * CC.4 — Arma el `BotPreviewState` para alimentar el preview compartido.
+ *
+ * Merge: cambios en vivo del cliente (state) + campos visuales que el admin
+ * ya configuró (bot prop). El cliente NUNCA edita los del admin, pero sí los
+ * VE reflejados en el preview para que sea espejo fiel del widget real.
+ *
+ * Quick replies: si el cliente NO los modificó (state coincide con el original
+ * normalizado de DB), mostramos el JSON original con emojis incluidos —
+ * paridad fiel con el admin. Si SÍ los modificó, mostramos sus strings sin
+ * emoji (refleja lo que va a guardarse — el update borra emojis por diseño
+ * de `toPublicQuickReplies` en `updateBotAppearance`).
+ */
+function buildPreviewState(
+  state: BotPersonalizationState,
+  bot: BotPersonalizationProps['bot'],
+): BotPreviewState {
+  const originalNormalized = normalizeQuickReplyTexts(bot.quickReplies)
+  const clientEditedReplies =
+    JSON.stringify(state.quickReplies) !== JSON.stringify(originalNormalized)
 
-      <div className="relative h-96 overflow-hidden bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.06),transparent_35%),linear-gradient(135deg,#09090b,#18181b_45%,#09090b)]">
-        <div
-          className={cn(
-            'absolute bottom-4 w-[min(18rem,calc(100%-2rem))]',
-            state.position === 'bottom_left' ? 'left-4' : 'right-4',
-          )}
-        >
-          <div
-            className="rounded-3xl border bg-zinc-950/90 p-4 shadow-2xl backdrop-blur"
-            style={{ borderColor: `${state.accentColor}30` }}
-          >
-            <div className="mb-4 flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center">
-                <AvatarRenderer
-                  style={state.avatarStyle}
-                  state="idle"
-                  accentColor={state.accentColor}
-                  size={40}
-                  businessInitials={deriveBusinessInitials(botName)}
-                />
-              </div>
-              <div className="min-w-0">
-                <p className="truncate text-sm font-medium text-zinc-100">{botName}</p>
-                <p className="text-xs text-emerald-400">Online</p>
-              </div>
-            </div>
+  const quickReplies: BotPreviewState['quickReplies'] = clientEditedReplies
+    ? state.quickReplies.map((label, index) => ({
+        id: `${index}-${label}`,
+        label,
+      }))
+    : extractQuickRepliesFromJson(bot.quickReplies)
 
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={state.welcomeMessage}
-                initial={{ opacity: 0, y: 4 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0 }}
-                className="mb-3 rounded-2xl bg-white/[0.04] p-3 text-sm leading-relaxed text-zinc-200"
-              >
-                {state.welcomeMessage || 'Mensaje de bienvenida...'}
-              </motion.div>
-            </AnimatePresence>
+  return {
+    accentColor: state.accentColor,
+    position: state.position,
+    avatarStyle: state.avatarStyle,
+    welcomeMessage: state.welcomeMessage,
+    quickReplies,
+    botName: bot.botName,
+    isActive: bot.isActive,
+    avatarImageUrl: bot.avatarImageUrl,
+    avatarEmoji: bot.avatarEmoji,
+    chatSurfaceTint: bot.chatSurfaceTint,
+    borderRadius: bot.borderRadius,
+    bubbleStyle: bot.bubbleStyle,
+    surfaceStyle: bot.surfaceStyle,
+    intensityLevel: bot.intensityLevel,
+    fontStyle: bot.fontStyle,
+  }
+}
 
-            {state.quickReplies.length > 0 && (
-              <div className="flex flex-wrap gap-2">
-                {state.quickReplies.map((reply, index) => (
-                  <button
-                    key={`${reply}-${index}`}
-                    type="button"
-                    className="max-w-full rounded-xl border px-3 py-1.5 text-left text-xs"
-                    style={{
-                      borderColor: `${state.accentColor}40`,
-                      color: state.accentColor,
-                    }}
-                  >
-                    <span className="block truncate">{reply}</span>
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      <div className="border-t border-white/10 p-3 text-center">
-        <p className="text-xs text-zinc-500">Vista previa del widget en tu sitio</p>
-      </div>
-    </div>
-  )
+/**
+ * Lee el JSON crudo de `bot.quickReplies` (config guardada) y extrae label +
+ * emoji para el preview. Tolerante a strings sueltos o shapes inesperados.
+ */
+function extractQuickRepliesFromJson(value: unknown): BotPreviewState['quickReplies'] {
+  if (!Array.isArray(value)) return []
+  const out: BotPreviewState['quickReplies'] = []
+  for (const [index, item] of value.entries()) {
+    if (typeof item === 'string') {
+      const label = item.trim()
+      if (label) out.push({ id: `${index}-${label}`, label })
+    } else if (item && typeof item === 'object') {
+      const record = item as Record<string, unknown>
+      const label = typeof record.label === 'string' ? record.label.trim() : ''
+      const emoji = typeof record.emoji === 'string' ? record.emoji : undefined
+      if (label) out.push({ id: `${index}-${label}`, label, emoji })
+    }
+    if (out.length >= 4) break
+  }
+  return out
 }

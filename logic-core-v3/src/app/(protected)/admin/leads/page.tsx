@@ -125,8 +125,8 @@ export default async function AgencyOsLeadsPage({
     <section className="space-y-6">
       <div className="flex flex-col gap-4 rounded-[28px] border border-white/10 bg-white/5 p-5 backdrop-blur-xl sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="text-[11px] uppercase tracking-[0.24em] text-zinc-500">
-            Agency OS / Leads
+          <p className="text-xs tracking-tight text-zinc-500">
+            develOP / Leads
           </p>
           <h2 className="mt-2 text-2xl font-semibold tracking-tight text-white">
             Pipeline comercial
@@ -134,7 +134,7 @@ export default async function AgencyOsLeadsPage({
           <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-400">
             {activeTab === 'outbound'
               ? 'Seguimiento visual de prospectos, demos y cierres con prioridad operativa sobre cada lead.'
-              : 'Formularios entrantes del portal que pueden convertirse al pipeline comercial de Agency OS.'}
+              : 'Formularios entrantes del portal que pueden convertirse al pipeline comercial interno.'}
           </p>
         </div>
 

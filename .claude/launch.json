@@ -9,6 +9,12 @@
       "autoPort": true
     },
     {
+      "name": "next-dev-qa",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["--prefix", "logic-core-v3", "run", "dev:qa"],
+      "port": 3002
+    },
+    {
       "name": "next-prod-qa",
       "runtimeExecutable": "npm",
       "runtimeArgs": ["--prefix", "logic-core-v3", "run", "start:qa"],

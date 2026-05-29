@@ -6,7 +6,7 @@ import type { LucideIcon } from 'lucide-react'
 import { FadeIn } from '@/components/dashboard/FadeIn'
 import { PremiumModuleCard } from '@/components/dashboard/PremiumModuleCard'
 import { StaggerContainer, StaggerItem } from '@/components/dashboard/StaggerWrapper'
-import { EmptyState } from '@/components/ui'
+import { EmptyState, PageHeader } from '@/components/ui'
 import { prisma } from '@/lib/prisma'
 import { resolveOrgId } from '@/lib/preview'
 
@@ -184,29 +184,25 @@ export default async function ServicesPage() {
   return (
     <div className="mx-auto flex max-w-5xl flex-col gap-8 pb-20">
       <FadeIn delay={0}>
-        <div className="flex flex-col gap-4 pt-2 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <h1 className="flex items-center gap-3 text-2xl font-black uppercase tracking-tight text-white sm:text-3xl">
-              <Zap size={26} className="text-cyan-400" />
-              Mis Servicios
-            </h1>
-            <p className="mt-1 text-xs font-medium uppercase tracking-widest text-zinc-600">
-              Servicios contratados con develOP
-            </p>
-          </div>
-
-          {activeCount > 0 && (
-            <div className="flex w-fit items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-4 py-2">
-              <span className="relative flex h-1.5 w-1.5">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
-                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400" />
-              </span>
-              <span className="text-[10px] font-black uppercase tracking-widest text-emerald-400">
-                {activeCount} {activeCount === 1 ? 'servicio activo' : 'servicios activos'}
-              </span>
-            </div>
-          )}
-        </div>
+        <PageHeader
+          eyebrow="Mis servicios"
+          title="Servicios contratados"
+          description="Lo que tenés activo con develOP y los módulos disponibles para sumar."
+          icon={Zap}
+          action={
+            activeCount > 0 ? (
+              <div className="flex w-fit items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-4 py-2">
+                <span className="relative flex h-1.5 w-1.5">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
+                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                </span>
+                <span className="text-[10px] font-black uppercase tracking-widest text-emerald-400">
+                  {activeCount} {activeCount === 1 ? 'servicio activo' : 'servicios activos'}
+                </span>
+              </div>
+            ) : undefined
+          }
+        />
       </FadeIn>
 
       {services.length === 0 ? (

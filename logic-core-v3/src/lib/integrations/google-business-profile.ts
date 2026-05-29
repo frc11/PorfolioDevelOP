@@ -1,4 +1,4 @@
-import { google } from 'googleapis'
+import { OAuth2Client } from 'google-auth-library'
 import { unstable_cache } from 'next/cache'
 import { prisma } from '@/lib/prisma'
 import { signOAuthState } from '@/lib/security/oauth-state'
@@ -27,7 +27,7 @@ type GoogleReviewsResponse = {
 }
 
 export function getOAuthClient() {
-  return new google.auth.OAuth2(
+  return new OAuth2Client(
     process.env.GOOGLE_BUSINESS_PROFILE_CLIENT_ID,
     process.env.GOOGLE_BUSINESS_PROFILE_CLIENT_SECRET,
     process.env.GOOGLE_BUSINESS_PROFILE_REDIRECT_URI,

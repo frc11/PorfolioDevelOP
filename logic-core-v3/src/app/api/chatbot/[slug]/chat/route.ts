@@ -1,6 +1,7 @@
 import { handleChatRequest } from '@/modules/chatbot/index.server'
 import { validateOrigin } from '@/lib/security/validate-origin'
-import { checkRateLimit } from '@/modules/chatbot/server/rate-limit'
+import { checkRateLimit } from '@/lib/rate-limit/limiter'
+import { RATE_LIMIT_PRESETS } from '@/lib/rate-limit/presets'
 import { prisma } from '@/lib/prisma'
 
 export const runtime = 'nodejs'
@@ -74,8 +75,12 @@ export async function POST(
     // body parse fail → use fallback key
   }
 
-  const rateKey = `${origin ?? 'no-origin'}:${sessionId}`
-  const rate = checkRateLimit(rateKey, 30, 60_000)
+  const rateKey = `chatbotPerSession:${origin ?? 'no-origin'}:${sessionId}`
+  const rate = await checkRateLimit({
+    key: rateKey,
+    limit: RATE_LIMIT_PRESETS.chatbotPerSession.limit,
+    windowMs: RATE_LIMIT_PRESETS.chatbotPerSession.windowMs,
+  })
 
   if (!rate.allowed) {
     return new Response('Too many requests', {

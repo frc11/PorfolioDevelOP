@@ -1,43 +1,37 @@
 import { Lock, Send } from 'lucide-react'
-import { auth } from '@/auth'
-import { resolveOrgId } from '@/lib/preview'
 import { prisma } from '@/lib/prisma'
 import { getPlanForOrg } from '@/lib/plan/get-plan-for-org'
 import { planAllows } from '@/lib/plan/plan-allows'
 import { Card } from '@/components/ui/Card'
 import { Section } from '@/components/ui/Section'
 import { isCrmEncryptionConfigured } from '@/modules/chatbot/server/crm'
-import { getOrgSyncHistory } from '@/modules/chatbot/server/dashboard/getCrmSyncHistory'
+import { getOrgSyncHistory } from '@/modules/chatbot/server/admin/integrations/getCrmSyncHistory'
 import { CrmConfigForm } from './CrmConfigForm'
 import { CrmSyncHistoryList } from './CrmSyncHistoryList'
 
+interface CrmIntegrationAdminCardProps {
+  organizationId: string
+  organizationName: string
+}
+
 /**
- * B5.8 — Card de integración CRM (n8n) que se renderiza al final de la página
- * de Settings del chatbot.
+ * CC.2 — Versión admin del card de integración CRM. Reemplaza la versión que
+ * vivía en el dashboard del cliente. La configura develOP (SUPER_ADMIN), scoped
+ * por la org del bot en /admin/chatbots/[botId].
  *
- * Estados:
- *   - plan sin crmEnabled → locked state (no rompe, muestra upgrade)
- *   - plan ok pero no hay integration → form vacío
- *   - plan ok + integration → form precargado + historial
- *
- * Es Server Component: lee plan + integration + historial en el server, pasa
- * todo precargado a los Client Components (form, history list).
+ * Mismo motor de sync (syncLeadToCrm) — solo cambia quién configura.
  */
-export async function CrmIntegrationCard() {
-  const session = await auth()
-  if (!session?.user) return null
+export async function CrmIntegrationAdminCard({
+  organizationId,
+  organizationName,
+}: CrmIntegrationAdminCardProps) {
+  const plan = await getPlanForOrg(organizationId)
 
-  const orgId = await resolveOrgId()
-  if (!orgId) return null
-
-  const plan = await getPlanForOrg(orgId)
-
-  // Locked state: el plan no incluye CRM. Mostramos por qué y cómo activarlo.
   if (!planAllows(plan, 'crm')) {
     return (
       <Section
-        title="Integración con tu CRM"
-        description="Mandá cada lead capturado a tu CRM vía n8n."
+        title="Integración con CRM"
+        description={`El plan de ${organizationName} no incluye CRM. Para habilitar, el cliente debe upgradear (o develOP forzar el plan desde admin de clientes).`}
       >
         <Card padding="lg">
           <div className="flex items-start gap-4">
@@ -53,9 +47,8 @@ export async function CrmIntegrationCard() {
                 Disponible en plan Business
               </h3>
               <p className="text-sm text-zinc-400">
-                La integración con CRM vía n8n manda cada lead capturado a tu
-                sistema (CRM, hoja de cálculo, automatización — lo que armes en
-                n8n). Tu plan actual no la incluye. Escribinos para activarla.
+                La integración CRM (webhook n8n) está bloqueada por plan en esta
+                organización. Subí el plan del cliente para habilitarla.
               </p>
             </div>
           </div>
@@ -64,10 +57,9 @@ export async function CrmIntegrationCard() {
     )
   }
 
-  // Plan OK: cargo integration + historial en paralelo.
   const [integration, history] = await Promise.all([
     prisma.crmIntegration.findUnique({
-      where: { organizationId: orgId },
+      where: { organizationId },
       select: {
         webhookUrl: true,
         enabled: true,
@@ -75,7 +67,7 @@ export async function CrmIntegrationCard() {
         secretEncrypted: true,
       },
     }),
-    getOrgSyncHistory({ limit: 10 }),
+    getOrgSyncHistory({ organizationId, limit: 10 }),
   ])
 
   const initial = integration
@@ -92,8 +84,8 @@ export async function CrmIntegrationCard() {
   return (
     <div className="space-y-6">
       <Section
-        title="Integración con tu CRM"
-        description="Cada lead capturado se manda automáticamente a tu webhook n8n. Configurá la URL y activá el sync."
+        title="Webhook n8n"
+        description={`Cada lead capturado por el bot de ${organizationName} se manda automáticamente a este webhook. Configurá la URL, el header de auth (opcional) y activá el sync.`}
       >
         <Card padding="lg">
           <div className="mb-5 flex items-center gap-3 border-b border-white/[0.06] pb-4">
@@ -107,11 +99,12 @@ export async function CrmIntegrationCard() {
             <div className="min-w-0">
               <div className="text-sm font-medium text-zinc-200">Webhook n8n</div>
               <div className="text-xs text-zinc-500">
-                Plan Business · sync habilitado
+                Plan Business · {integration?.enabled ? 'sync habilitado' : 'sync pausado'}
               </div>
             </div>
           </div>
           <CrmConfigForm
+            organizationId={organizationId}
             initial={initial}
             encryptionAvailable={encryptionAvailable}
           />
@@ -121,11 +114,14 @@ export async function CrmIntegrationCard() {
       {integration && (
         <Section
           title="Historial de sincronizaciones"
-          description="Últimos intentos de sync — si alguno falló, podés reintentarlo."
+          description="Últimos intentos de sync. Si alguno falló, podés reintentarlo manualmente."
         >
           <Card padding="md">
             {history.ok ? (
-              <CrmSyncHistoryList entries={history.entries} />
+              <CrmSyncHistoryList
+                organizationId={organizationId}
+                entries={history.entries}
+              />
             ) : (
               <div className="py-2 text-sm text-zinc-400">
                 No se pudo cargar el historial

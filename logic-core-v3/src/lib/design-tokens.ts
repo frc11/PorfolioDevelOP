@@ -3,6 +3,17 @@
  *
  * Fuente unica de verdad para spacing, colors, radii, typography.
  * Importar desde aca en lugar de hardcodear valores.
+ *
+ * REGLA DE COLOR — no decorativo, siempre con razon.
+ *   1. SEMANTICO (estado): success / warning / danger / info.
+ *      Verde = bueno/resuelto. Ambar = atencion/pendiente. Rojo = problema/error. Azul = info.
+ *   2. MARCA / ACCION: brand (cyan) para lo accionable y el estado activo.
+ *   3. IDENTIDAD POR SERVICIO: service.web / service.ia / service.automation / service.software.
+ *      Usar solo donde el contexto sea ese servicio (modulo premium, card de servicio en landing).
+ *   4. NEUTRO: todo lo demas — surface / border / text en escala de grises sobre dark.
+ *
+ * Si un icono o card no comunica estado, no comunica accion, ni representa un servicio,
+ * es NEUTRO. No hay color decorativo.
  */
 
 // ===========================================
@@ -77,6 +88,15 @@ export const colors = {
     rose: '#f43f5e',
     amber: '#f59e0b',
   },
+
+  // Identidad por SERVICIO — usar SOLO donde el contexto sea ese servicio
+  // (modulo premium, card de servicio en landing). Nunca decorativo.
+  service: {
+    web: '#06b6d4', // cyan-500 — Web Development
+    ia: '#8b5cf6', // violet-500 — IA / Chatbots
+    automation: '#10b981', // emerald-500 — Automation
+    software: '#f59e0b', // amber-500 — Software / Custom
+  },
 } as const
 
 // ===========================================
@@ -97,12 +117,14 @@ export const spacing = {
 // ===========================================
 // BORDER RADIUS
 // ===========================================
+// Escala unica — sm para controles, md para cards, lg para modales/hero.
+// Usar tokens nombrados (input/card/modal) cuando el contexto este claro.
 export const radii = {
   none: '0',
-  sm: '0.5rem', // 8px
-  md: '0.75rem', // 12px (rounded-xl)
-  lg: '1rem', // 16px (rounded-2xl) - DEFAULT
-  xl: '1.5rem', // 24px (rounded-3xl) - HERO
+  sm: '0.375rem', // 6px — inputs, botones, swatches, chips
+  md: '0.75rem', // 12px — cards, tiles, paneles
+  lg: '1rem', // 16px — modales, dialogos, sheets
+  xl: '1.5rem', // 24px — hero containers
   full: '9999px',
 } as const
 
