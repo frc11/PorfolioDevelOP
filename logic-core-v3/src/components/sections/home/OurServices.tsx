@@ -3203,7 +3203,7 @@ function AIScene({ service }: { service: Service }) {
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'flex-end',
-            gap: 6,
+            gap: 3,
             overflowY: 'hidden',
           }}
         >
@@ -3220,7 +3220,7 @@ function AIScene({ service }: { service: Service }) {
                   backdropFilter: 'blur(20px)',
                   border: `1px solid ${color}25`,
                   borderRadius: '12px 12px 2px 12px',
-                  padding: '8px 11px',
+                  padding: '6px 9px',
                   fontSize: 12,
                   color: 'rgba(255,255,255,0.85)',
                   lineHeight: 1.45,
@@ -3306,10 +3306,10 @@ function AIScene({ service }: { service: Service }) {
                   backdropFilter: 'blur(20px)',
                   border: '1px solid rgba(255,255,255,0.09)',
                   borderRadius: '12px 12px 12px 2px',
-                  padding: '8px 11px',
+                  padding: '6px 9px',
                   fontSize: 12,
                   color: 'rgba(255,255,255,0.8)',
-                  lineHeight: 1.42,
+                  lineHeight: 1.35,
                   whiteSpace: 'pre-line',
                 }}
               >
@@ -3355,6 +3355,7 @@ function AIScene({ service }: { service: Service }) {
                       display: 'inline-flex',
                       alignItems: 'center',
                       gap: 3,
+                      whiteSpace: 'nowrap',
                     }}
                   >
                     <Clock size={10} color={color} strokeWidth={2} style={{ flexShrink: 0 }} />
@@ -3378,7 +3379,7 @@ function AIScene({ service }: { service: Service }) {
                   backdropFilter: 'blur(20px)',
                   border: `1px solid ${color}25`,
                   borderRadius: '12px 12px 2px 12px',
-                  padding: '8px 11px',
+                  padding: '6px 9px',
                   fontSize: 12,
                   color: 'rgba(255,255,255,0.85)',
                   lineHeight: 1.45,
@@ -3413,10 +3414,10 @@ function AIScene({ service }: { service: Service }) {
                   backdropFilter: 'blur(20px)',
                   border: '1px solid rgba(255,255,255,0.09)',
                   borderRadius: '12px 12px 12px 2px',
-                  padding: '8px 11px',
+                  padding: '6px 9px',
                   fontSize: 12,
                   color: 'rgba(255,255,255,0.8)',
-                  lineHeight: 1.5,
+                  lineHeight: 1.4,
                 }}
               >
                 {botMsg2.slice(0, bot2Length)}
@@ -3443,6 +3444,10 @@ function AIScene({ service }: { service: Service }) {
                     padding: '1px 6px',
                     color,
                     fontWeight: 600,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 3,
+                    whiteSpace: 'nowrap',
                   }}
                 >
                   <Clock size={10} color={color} strokeWidth={2} style={{ flexShrink: 0 }} />
@@ -3528,6 +3533,10 @@ function AIScene({ service }: { service: Service }) {
                     padding: '1px 6px',
                     color,
                     fontWeight: 600,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 3,
+                    whiteSpace: 'nowrap',
                   }}
                 >
                   <Clock size={10} color={color} strokeWidth={2} style={{ flexShrink: 0 }} />
@@ -3615,6 +3624,10 @@ function AIScene({ service }: { service: Service }) {
                     padding: '1px 6px',
                     color,
                     fontWeight: 600,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 3,
+                    whiteSpace: 'nowrap',
                   }}
                 >
                   <Clock size={10} color={color} strokeWidth={2} style={{ flexShrink: 0 }} />
@@ -3746,7 +3759,7 @@ function AIScene({ service }: { service: Service }) {
             gap: 5,
             flex: 1,
             minHeight: 0,
-            justifyContent: 'space-between',
+            justifyContent: 'flex-end',
           }}
         >
           {leads.map((lead) => {
@@ -4079,7 +4092,7 @@ function AIScene({ service }: { service: Service }) {
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'flex-end',
-              gap: 14,
+              gap: 7,
               overflow: 'hidden',
             }}
           >
@@ -4096,7 +4109,7 @@ function AIScene({ service }: { service: Service }) {
                     backdropFilter: 'blur(20px)',
                     border: `1px solid ${color}25`,
                     borderRadius: '10px 10px 2px 10px',
-                    padding: '7px 10px',
+                    padding: '6px 9px',
                     fontSize: 13,
                     color: 'rgba(255,255,255,0.85)',
                     lineHeight: 1.45,
@@ -4145,10 +4158,10 @@ function AIScene({ service }: { service: Service }) {
                     backdropFilter: 'blur(20px)',
                     border: '1px solid rgba(255,255,255,0.09)',
                     borderRadius: '10px 10px 10px 2px',
-                    padding: '7px 10px',
+                    padding: '6px 9px',
                     fontSize: 13,
                     color: 'rgba(255,255,255,0.75)',
-                    lineHeight: 1.6,
+                    lineHeight: 1.45,
                     whiteSpace: 'pre-line',
                   }}
                 >
@@ -4179,6 +4192,7 @@ function AIScene({ service }: { service: Service }) {
                       display: 'inline-flex',
                       alignItems: 'center',
                       gap: 3,
+                      whiteSpace: 'nowrap',
                     }}
                   >
                     <Clock size={10} color={color} strokeWidth={2} style={{ flexShrink: 0 }} />
@@ -4201,7 +4215,7 @@ function AIScene({ service }: { service: Service }) {
                     backdropFilter: 'blur(20px)',
                     border: `1px solid ${color}25`,
                     borderRadius: '10px 10px 2px 10px',
-                    padding: '7px 10px',
+                    padding: '6px 9px',
                     fontSize: 13,
                     color: 'rgba(255,255,255,0.85)',
                   }}
@@ -4235,7 +4249,7 @@ function AIScene({ service }: { service: Service }) {
                     backdropFilter: 'blur(20px)',
                     border: '1px solid rgba(255,255,255,0.09)',
                     borderRadius: '10px 10px 10px 2px',
-                    padding: '7px 10px',
+                    padding: '6px 9px',
                     fontSize: 13,
                     color: 'rgba(255,255,255,0.8)',
                     lineHeight: 1.45,
@@ -4268,6 +4282,7 @@ function AIScene({ service }: { service: Service }) {
                       display: 'inline-flex',
                       alignItems: 'center',
                       gap: 3,
+                      whiteSpace: 'nowrap',
                     }}
                   >
                     <Clock size={10} color={color} strokeWidth={2} style={{ flexShrink: 0 }} />
@@ -4290,7 +4305,7 @@ function AIScene({ service }: { service: Service }) {
                     backdropFilter: 'blur(20px)',
                     border: `1px solid ${color}25`,
                     borderRadius: '10px 10px 2px 10px',
-                    padding: '7px 10px',
+                    padding: '6px 9px',
                     fontSize: 13,
                     color: 'rgba(255,255,255,0.85)',
                     lineHeight: 1.45,
@@ -4325,10 +4340,10 @@ function AIScene({ service }: { service: Service }) {
                     backdropFilter: 'blur(20px)',
                     border: '1px solid rgba(255,255,255,0.09)',
                     borderRadius: '10px 10px 10px 2px',
-                    padding: '7px 10px',
+                    padding: '6px 9px',
                     fontSize: 13,
                     color: 'rgba(255,255,255,0.8)',
-                    lineHeight: 1.5,
+                    lineHeight: 1.45,
                   }}
                 >
                   {botConfirm2.slice(0, botConfirm2Length)}
@@ -4358,6 +4373,7 @@ function AIScene({ service }: { service: Service }) {
                       display: 'inline-flex',
                       alignItems: 'center',
                       gap: 3,
+                      whiteSpace: 'nowrap',
                     }}
                   >
                     <Clock size={10} color={color} strokeWidth={2} style={{ flexShrink: 0 }} />
@@ -5157,6 +5173,10 @@ function AutomationScene({ service }: { service: Service }) {
   ]);
 
   function SimFlujo({ isActive, progress, color }: SimProps) {
+    // Raise endpoints toward the icon circle center. Increase → lines move up; decrease → move down.
+    const ICON_CENTER_OFFSET_Y = -3;
+    const CONNECTION_BOW = -6;
+    const ICON_CENTER_OFFSET_X = -5; // + = líneas a la izquierda · - = a la derecha
     const nodes = [
       { id: 'form', label: 'Formulario', sublabel: 'Web', icon: Globe, nodeColor: '#06b6d4', x: 10, y: 15 },
       { id: 'n8n', label: 'n8n', sublabel: 'Orquesta', icon: Zap, nodeColor: color, x: 42, y: 45 },
@@ -5177,126 +5197,54 @@ function AutomationScene({ service }: { service: Service }) {
     const n8nActive = progress > 0.45 && progress < 0.78;
 
     return (
-      <div
-        style={{
-          height: '100%',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 8,
-          padding: '4px 2px',
-        }}
-      >
+      <div style={{ height: '100%', display: 'flex', flexDirection: 'column', gap: 8, padding: '4px 2px' }}>
         {/* Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', flexShrink: 0 }}>
           <div>
-            <div
-              style={{
-                fontSize: 9,
-                letterSpacing: '0.15em',
-                color: 'rgba(255,255,255,0.25)',
-                marginBottom: 2,
-              }}
-            >
-              FLUJO ACTIVO
-            </div>
+            <div style={{ fontSize: 9, letterSpacing: '0.15em', color: 'rgba(255,255,255,0.25)', marginBottom: 2 }}>FLUJO ACTIVO</div>
             <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>Formulario → n8n → Apps</div>
           </div>
           {showCounter && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              style={{
-                fontSize: 9,
-                color,
-                background: `${color}12`,
-                border: `1px solid ${color}25`,
-                borderRadius: 6,
-                padding: '4px 8px',
-                fontWeight: 600,
-                display: 'flex',
-                alignItems: 'center',
-                gap: 4,
-              }}
-            >
-              <motion.div
-                animate={{ opacity: [1, 0.3, 1] }}
-                transition={{ duration: 1, repeat: isActive ? Infinity : 0 }}
-                style={{ width: 5, height: 5, borderRadius: '50%', background: color }}
-              />
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ fontSize: 9, color, background: `${color}12`, border: `1px solid ${color}25`, borderRadius: 6, padding: '4px 8px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 4 }}>
+              <motion.div animate={{ opacity: [1, 0.3, 1] }} transition={{ duration: 1, repeat: isActive ? Infinity : 0 }} style={{ width: 5, height: 5, borderRadius: '50%', background: color }} />
               {execCount} hoy
             </motion.div>
           )}
         </div>
 
         {/* Canvas del flujo */}
-        <div
-          style={{
-            flex: 1,
-            background: 'rgba(255,255,255,0.03)',
-            backdropFilter: 'blur(20px)',
-            border: '1px solid rgba(255,255,255,0.07)',
-            borderRadius: 12,
-            position: 'relative',
-            overflow: 'hidden',
-          }}
-        >
+        <div style={{ flex: 1, background: 'rgba(255,255,255,0.03)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12, position: 'relative', overflow: 'hidden' }}>
           {/* SVG de conexiones */}
-          <svg
-            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
-            viewBox="0 0 100 100"
-            preserveAspectRatio="none"
-          >
+          <svg style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }} viewBox="0 0 100 100" preserveAspectRatio="none">
             {connections.map((conn, index) => {
               const visible = progress > conn.showAt;
               const pulseProgress = progress > conn.pulseAt ? Math.min((progress - conn.pulseAt) / 0.15, 1) : 0;
 
-              // Control point = punto medio desplazado PERPENDICULAR al segmento (bow natural),
-              // no un offset vertical fijo. Así la curva sale/entra alineada a cada centro.
+              // Offset endpoints toward icon circle — does not affect node positioning
+              const afy = conn.fromY - ICON_CENTER_OFFSET_Y;
+              const aty = conn.toY - ICON_CENTER_OFFSET_Y;
+              const afx = conn.fromX - ICON_CENTER_OFFSET_X;
+              const atx = conn.toX - ICON_CENTER_OFFSET_X;
+
+              // Perpendicular bow (direction vector uses raw delta — offset cancels)
               const dx = conn.toX - conn.fromX;
               const dy = conn.toY - conn.fromY;
               const len = Math.hypot(dx, dy) || 1;
-              const mx = (conn.fromX + conn.toX) / 2 + (-dy / len) * 6;
-              const my = (conn.fromY + conn.toY) / 2 + (dx / len) * 6;
+              const mx = (afx + atx) / 2 + (-dy / len) * CONNECTION_BOW;
+              const my = (afy + aty) / 2 + (dx / len) * CONNECTION_BOW;
 
-              // El pulso recorre EXACTAMENTE la misma curva de Bézier cuadrática que la línea:
-              // se muestrean puntos sobre B(t) (no se pasa por el punto de control), evitando que
-              // el punto quede flotando fuera del trazo.
+              // 6-point bezier sampling for pulse trajectory
               const bezier = (a: number, c: number, b: number, t: number): number =>
                 (1 - t) * (1 - t) * a + 2 * (1 - t) * t * c + t * t * b;
               const ts = [0, 0.2, 0.4, 0.6, 0.8, 1];
-              const cxs = ts.map((t) => bezier(conn.fromX, mx, conn.toX, t));
-              const cys = ts.map((t) => bezier(conn.fromY, my, conn.toY, t));
+              const cxs = ts.map((t) => bezier(afx, mx, atx, t));
+              const cys = ts.map((t) => bezier(afy, my, aty, t));
 
               return visible ? (
                 <g key={index}>
-                  {/* Línea de conexión (reveal por opacidad, sin pathLength) */}
-                  <motion.path
-                    d={`M ${conn.fromX} ${conn.fromY} Q ${mx} ${my} ${conn.toX} ${conn.toY}`}
-                    stroke="rgba(255,255,255,0.08)"
-                    strokeWidth="0.8"
-                    fill="none"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.45, ease: 'easeOut' }}
-                  />
-                  {/* Pulso de datos: viaja sobre la curva real */}
+                  <motion.path d={`M ${afx} ${afy} Q ${mx} ${my} ${atx} ${aty}`} stroke="rgba(255,255,255,0.08)" strokeWidth="0.8" fill="none" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.45, ease: 'easeOut' }} />
                   {pulseProgress > 0 && (
-                    <motion.circle
-                      r="1.2"
-                      fill={progress > conn.pulseAt + 0.08 ? color : '#06b6d4'}
-                      filter={`drop-shadow(0 0 2px ${color})`}
-                      animate={{
-                        cx: cxs,
-                        cy: cys,
-                        opacity: [0, 1, 1, 1, 1, 0],
-                      }}
-                      transition={{
-                        duration: 0.8,
-                        repeat: isActive ? Infinity : 0,
-                        delay: index * 0.2,
-                        ease: 'easeInOut',
-                      }}
-                    />
+                    <motion.circle r="1.2" fill={progress > conn.pulseAt + 0.08 ? color : '#06b6d4'} filter={`drop-shadow(0 0 2px ${color})`} animate={{ cx: cxs, cy: cys, opacity: [0, 1, 1, 1, 1, 0] }} transition={{ duration: 0.8, repeat: isActive ? Infinity : 0, delay: index * 0.2, ease: 'easeInOut' }} />
                   )}
                 </g>
               ) : null;
@@ -5306,100 +5254,23 @@ function AutomationScene({ service }: { service: Service }) {
           {/* Nodos */}
           {nodes.map((node, index) => {
             const nodeVisible = progress > index * 0.06;
-            const nodeActive =
-              progress > 0.45 &&
-              (node.id === 'n8n'
-                ? n8nActive
-                : node.id === 'whatsapp'
-                  ? progress > 0.58
-                  : node.id === 'crm'
-                    ? progress > 0.65
-                    : progress > 0.35);
+            const nodeActive = progress > 0.45 && (node.id === 'n8n' ? n8nActive : node.id === 'whatsapp' ? progress > 0.58 : node.id === 'crm' ? progress > 0.65 : progress > 0.35);
             const IconComp = node.icon;
 
             return nodeVisible ? (
-              <motion.div
-                key={node.id}
-                initial={{ scale: 0, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ type: 'spring', stiffness: 400, damping: 15, delay: index * 0.05 }}
-                style={{
-                  position: 'absolute',
-                  left: `${node.x}%`,
-                  top: `${node.y}%`,
-                  transform: 'translate(-50%, -16px)',
-                  width: 72,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  gap: 3,
-                }}
-              >
+              <motion.div key={node.id} initial={{ scale: 0, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: 'spring', stiffness: 400, damping: 15, delay: index * 0.05 }} style={{ position: 'absolute', left: `${node.x}%`, top: `${node.y}%`, transform: 'translate(-50%, -16px)', width: 72, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
                 <div style={{ position: 'relative', width: 32, height: 32, flexShrink: 0 }}>
-                  {/* Anillo pulsante en nodo activo */}
                   {nodeActive && (
-                    <motion.div
-                      animate={{ scale: [1, 1.8], opacity: [0.5, 0] }}
-                      transition={{ duration: 1.2, repeat: isActive ? Infinity : 0 }}
-                      style={{
-                        position: 'absolute',
-                        inset: 0,
-                        borderRadius: '50%',
-                        border: `1px solid ${node.nodeColor}`,
-                      }}
-                    />
+                    <motion.div animate={{ scale: [1, 1.8], opacity: [0.5, 0] }} transition={{ duration: 1.2, repeat: isActive ? Infinity : 0 }} style={{ position: 'absolute', inset: 0, borderRadius: '50%', border: `1px solid ${node.nodeColor}` }} />
                   )}
-
-                  {/* Nodo */}
-                  <motion.div
-                    animate={{
-                      background: nodeActive ? `${node.nodeColor}25` : 'rgba(255,255,255,0.05)',
-                      borderColor: nodeActive ? `${node.nodeColor}50` : 'rgba(255,255,255,0.10)',
-                      boxShadow: nodeActive ? `0 0 16px ${node.nodeColor}30` : 'none',
-                    }}
-                    transition={{ duration: 0.4 }}
-                    style={{
-                      position: 'relative',
-                      width: 32,
-                      height: 32,
-                      borderRadius: '50%',
-                      backdropFilter: 'blur(20px)',
-                      border: '1px solid',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                    }}
-                  >
-                    <IconComp
-                      size={13}
-                      color={nodeActive ? node.nodeColor : 'rgba(255,255,255,0.3)'}
-                      strokeWidth={1.5}
-                    />
+                  <motion.div animate={{ background: nodeActive ? `${node.nodeColor}25` : 'rgba(255,255,255,0.05)', borderColor: nodeActive ? `${node.nodeColor}50` : 'rgba(255,255,255,0.10)', boxShadow: nodeActive ? `0 0 16px ${node.nodeColor}30` : 'none' }} transition={{ duration: 0.4 }} style={{ position: 'relative', width: 32, height: 32, borderRadius: '50%', backdropFilter: 'blur(20px)', border: '1px solid', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <IconComp size={13} color={nodeActive ? node.nodeColor : 'rgba(255,255,255,0.3)'} strokeWidth={1.5} />
                   </motion.div>
                 </div>
-
                 {/* Label */}
                 <div style={{ textAlign: 'center' }}>
-                  <div
-                    style={{
-                      fontSize: 9,
-                      fontWeight: 600,
-                      color: nodeActive ? node.nodeColor : 'rgba(255,255,255,0.35)',
-                      transition: 'color 400ms',
-                      whiteSpace: 'nowrap',
-                    }}
-                  >
-                    {node.label}
-                  </div>
-                  <div
-                    style={{
-                      fontSize: 9,
-                      color: 'rgba(255,255,255,0.2)',
-                      whiteSpace: 'nowrap',
-                    }}
-                  >
-                    {node.sublabel}
-                  </div>
+                  <div style={{ fontSize: 9, fontWeight: 600, color: nodeActive ? node.nodeColor : 'rgba(255,255,255,0.35)', transition: 'color 400ms', whiteSpace: 'nowrap' }}>{node.label}</div>
+                  <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.2)', whiteSpace: 'nowrap' }}>{node.sublabel}</div>
                 </div>
               </motion.div>
             ) : null;
@@ -7287,7 +7158,7 @@ function SoftwareScene({ service }: { service: Service }) {
         </div>
 
         {/* Flujo automático */}
-        <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', gap: 5 }}>
+        <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', gap: 4 }}>
           {/* Orden generada */}
           {showOrder && (
             <motion.div
@@ -7444,7 +7315,7 @@ function SoftwareScene({ service }: { service: Service }) {
                 backdropFilter: 'blur(20px)',
                 border: '1px solid rgba(255,255,255,0.07)',
                 borderRadius: 10,
-                padding: '6px 10px',
+                padding: '8px 12px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-around',
@@ -7458,15 +7329,15 @@ function SoftwareScene({ service }: { service: Service }) {
               ].map((metric) => (
                 <div
                   key={metric.label}
-                  style={{ display: 'flex', alignItems: 'center', gap: 4, minWidth: 0 }}
+                  style={{ display: 'flex', alignItems: 'center', gap: 5, minWidth: 0 }}
                 >
-                  <metric.icon size={12} color={metric.metricColor} strokeWidth={1.5} style={{ flexShrink: 0 }} />
-                  <span style={{ fontSize: 12, fontWeight: 800, color: metric.metricColor, letterSpacing: '-0.02em' }}>
+                  <metric.icon size={15} color={metric.metricColor} strokeWidth={1.5} style={{ flexShrink: 0 }} />
+                  <span style={{ fontSize: 15, fontWeight: 800, color: metric.metricColor, letterSpacing: '-0.02em' }}>
                     {metric.value}
                   </span>
                   <span
                     style={{
-                      fontSize: 9,
+                      fontSize: 11,
                       color: 'rgba(255,255,255,0.35)',
                       whiteSpace: 'nowrap',
                       overflow: 'hidden',

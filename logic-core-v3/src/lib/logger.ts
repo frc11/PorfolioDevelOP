@@ -4,7 +4,11 @@ class LogicLogger {
   private isDev = process.env.NODE_ENV === 'development'
 
   private writeStdout(message: string) {
-    process.stdout.write(`${message}\n`)
+    if (typeof process !== 'undefined' && process.stdout && typeof process.stdout.write === 'function') {
+      process.stdout.write(`${message}\n`)
+    } else {
+      console.log(message)
+    }
   }
 
   private format(level: LogLevel, message: string, meta?: unknown) {
