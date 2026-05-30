@@ -467,10 +467,10 @@ function AgencyComparisonVisual() {
     <div ref={containerRef} className="mt-3 w-full rounded-3xl border border-white/[0.04] bg-[#0a0a0c]/80 p-2 backdrop-blur-2xl relative overflow-hidden">
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.015)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.015)_1px,transparent_1px)] bg-[size:16px_16px] opacity-60 [mask-image:radial-gradient(ellipse_at_center,black_50%,transparent_100%)]" />
       
-      <div className="relative z-10 flex w-full flex-col gap-3 rounded-[24px] border border-white/[0.04] bg-white/[0.02] p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] md:p-4">
-        
-        <div className="relative overflow-hidden rounded-[22px] border border-red-900/30 bg-[radial-gradient(ellipse_at_top_left,rgba(153,27,27,0.15),transparent_70%),linear-gradient(180deg,rgba(10,10,12,0.2),rgba(10,10,12,0.6))] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.03),0_0_20px_rgba(220,38,38,0.04)] md:p-4 lg:p-5">
-          <div className="mb-3 flex flex-col items-start justify-between gap-2 sm:flex-row sm:items-end">
+      <div className="relative z-10 flex w-full flex-col gap-2 rounded-[24px] border border-white/[0.04] bg-white/[0.02] p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] md:p-4">
+
+        <div className="relative overflow-hidden rounded-[22px] border border-red-900/30 bg-[radial-gradient(ellipse_at_top_left,rgba(153,27,27,0.15),transparent_70%),linear-gradient(180deg,rgba(10,10,12,0.2),rgba(10,10,12,0.6))] p-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.03),0_0_20px_rgba(220,38,38,0.04)] md:p-3">
+          <div className="mb-2 flex flex-col items-start justify-between gap-2 sm:flex-row sm:items-end">
             <div className="flex flex-col gap-1.5">
               <span className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-red-500/80">
                 <AlertTriangle className="h-4 w-4 text-red-500 drop-shadow-[0_0_8px_rgba(239,68,68,0.4)]" />
@@ -481,7 +481,7 @@ function AgencyComparisonVisual() {
               </span>
             </div>
             <div className="flex items-baseline gap-1.5 whitespace-nowrap pl-6 sm:pl-0">
-              <span ref={count76Ref} className="font-mono text-[2.15rem] font-black leading-none tracking-tighter text-red-500 drop-shadow-[0_0_15px_rgba(239,68,68,0.5)] md:text-[2.6rem]">
+              <span ref={count76Ref} className="font-mono text-[1.6rem] font-black leading-none tracking-tighter text-red-500 drop-shadow-[0_0_15px_rgba(239,68,68,0.5)] md:text-[2rem]">
                 {shouldSimplify ? '76' : '0'}
               </span>
               <span className="text-sm font-bold tracking-widest text-red-500/50">DÍAS</span>
@@ -498,7 +498,7 @@ function AgencyComparisonVisual() {
             />
           </div>
 
-          <div className="relative mt-1.5 h-8 w-full px-1">
+          <div className="relative mt-1.5 h-6 w-full px-1">
             {frictionIcons.map((item, i) => (
               <motion.div
                 key={i}
@@ -534,7 +534,7 @@ function AgencyComparisonVisual() {
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.4, delay: shouldSimplify ? 0 : 0.5 + i * 0.4, ease: 'easeOut' }}
-                className="flex items-center gap-1.5 rounded-full border border-red-500/20 bg-red-950/40 px-2.5 py-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.02),0_0_12px_rgba(239,68,68,0.1)] hover:border-red-500/40 transition-colors"
+                className="flex items-center gap-1.5 rounded-full border border-red-500/20 bg-red-950/40 px-2 py-0.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.02),0_0_12px_rgba(239,68,68,0.1)] hover:border-red-500/40 transition-colors"
                >
                 <XCircle className="h-3.5 w-3.5 text-red-500 drop-shadow-[0_0_6px_rgba(239,68,68,0.7)]" />
                 <span className="text-[9px] font-bold uppercase tracking-widest text-red-300">{label}</span>
@@ -543,8 +543,8 @@ function AgencyComparisonVisual() {
           </div>
         </div>
 
-        <div className="relative overflow-hidden rounded-[22px] border border-cyan-700/30 bg-[radial-gradient(ellipse_at_top_left,rgba(8,145,178,0.15),transparent_70%),linear-gradient(180deg,rgba(10,10,12,0.2),rgba(10,10,12,0.6))] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_0_30px_rgba(34,211,238,0.08)] md:p-4 lg:p-5">
-          <div className="mb-3 flex flex-col items-start justify-between gap-2 sm:flex-row sm:items-end">
+        <div className="relative overflow-hidden rounded-[22px] border border-cyan-700/30 bg-[radial-gradient(ellipse_at_top_left,rgba(8,145,178,0.15),transparent_70%),linear-gradient(180deg,rgba(10,10,12,0.2),rgba(10,10,12,0.6))] p-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_0_30px_rgba(34,211,238,0.08)] md:p-3">
+          <div className="mb-2 flex flex-col items-start justify-between gap-2 sm:flex-row sm:items-end">
             <div className="flex flex-col gap-1.5">
               <span className="relative z-10 flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-cyan-400">
                 <span className="flex h-5 w-5 items-center justify-center rounded-full border border-cyan-300/20 bg-cyan-300/10 shadow-[0_0_14px_rgba(34,211,238,0.18)]">
@@ -556,7 +556,7 @@ function AgencyComparisonVisual() {
               </span>
             </div>
             <div className="relative z-10 flex items-baseline gap-1.5 whitespace-nowrap pl-6 sm:pl-0">
-              <span ref={count15Ref} className="font-mono text-[2.15rem] font-black leading-none tracking-tighter text-cyan-300 drop-shadow-[0_0_20px_rgba(34,211,238,0.6)] md:text-[2.6rem]">
+              <span ref={count15Ref} className="font-mono text-[1.6rem] font-black leading-none tracking-tighter text-cyan-300 drop-shadow-[0_0_20px_rgba(34,211,238,0.6)] md:text-[2rem]">
                 {shouldSimplify ? '15' : '0'}
               </span>
               <span className="text-sm font-bold tracking-widest text-cyan-400/60">DÍAS</span>
@@ -573,7 +573,7 @@ function AgencyComparisonVisual() {
             />
           </div>
 
-          <div className="relative mt-1.5 h-8 w-full px-1">
+          <div className="relative mt-1.5 h-6 w-full px-1">
             {velocityIcons.map((item, i) => (
               <motion.div
                 key={i}
@@ -609,7 +609,7 @@ function AgencyComparisonVisual() {
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.4, delay: shouldSimplify ? 0 : 0.5 + i * 0.4, ease: 'easeOut' }}
-                className="flex items-center gap-1.5 rounded-full border border-cyan-500/30 bg-cyan-950/50 px-2.5 py-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_0_15px_rgba(34,211,238,0.15)] hover:border-cyan-400/50 transition-colors"
+                className="flex items-center gap-1.5 rounded-full border border-cyan-500/30 bg-cyan-950/50 px-2 py-0.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_0_15px_rgba(34,211,238,0.15)] hover:border-cyan-400/50 transition-colors"
               >
                 <CheckCircle2 className="h-3.5 w-3.5 text-cyan-400 drop-shadow-[0_0_8px_rgba(34,211,238,0.9)]" />
                 <span className="text-[9px] font-bold uppercase tracking-widest text-cyan-100">{label}</span>
@@ -641,8 +641,8 @@ function TabbedCardIcon({ visual }: { visual: TabVisualKey }) {
   const Icon = iconMap[visual];
 
   return (
-    <div className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-white/[0.08] bg-gradient-to-b from-white/[0.05] to-transparent text-white/60 shadow-inner transition-all duration-500 group-hover:-translate-y-1.5 group-hover:border-cyan-500/40 group-hover:bg-cyan-500/20 group-hover:text-cyan-400 group-hover:shadow-[0_0_30px_rgba(34,211,238,0.25)]">
-      <Icon className="h-5 w-5 text-current drop-shadow-sm" />
+    <div className="inline-flex h-9 w-9 md:h-7 md:w-7 items-center justify-center rounded-xl border border-white/[0.08] bg-gradient-to-b from-white/[0.05] to-transparent text-white/60 shadow-inner transition-all duration-500 group-hover:-translate-y-1.5 group-hover:border-cyan-500/40 group-hover:bg-cyan-500/20 group-hover:text-cyan-400 group-hover:shadow-[0_0_30px_rgba(34,211,238,0.25)]">
+      <Icon className="h-5 w-5 md:h-4 md:w-4 text-current drop-shadow-sm" />
     </div>
   );
 }
@@ -652,7 +652,7 @@ function ProgressVisual({ accent, animationKey }: { accent: AccentKey; animation
   const tone = ACCENT_STYLES[accent];
 
   return (
-    <div className="-mx-5 -mt-5 mb-4 sm:-mx-6 sm:-mt-6 relative flex h-[120px] w-[calc(100%+40px)] flex-col justify-end overflow-hidden rounded-t-[24px] border-b border-cyan-500/10 bg-[radial-gradient(ellipse_at_top,rgba(8,145,178,0.15),transparent_70%)] px-6 pb-6 sm:w-[calc(100%+48px)]">
+    <div className="-mx-5 -mt-5 mb-4 md:mb-1 sm:-mx-6 sm:-mt-6 relative flex h-[120px] md:h-[100px] w-[calc(100%+40px)] flex-col justify-end overflow-hidden rounded-t-[24px] border-b border-cyan-500/10 bg-[radial-gradient(ellipse_at_top,rgba(8,145,178,0.15),transparent_70%)] px-6 pb-6 md:pb-2 sm:w-[calc(100%+48px)]">
       <div className="flex items-end justify-between gap-3 relative z-10 w-full">
         <div className="space-y-1">
           <div className="text-[10px] font-bold uppercase tracking-[0.28em] text-cyan-400/80 drop-shadow-[0_0_5px_rgba(34,211,238,0.3)]">Entrega real</div>
@@ -661,7 +661,7 @@ function ProgressVisual({ accent, animationKey }: { accent: AccentKey; animation
             initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: shouldReduceMotion ? 0.01 : 0.45, ease: 'easeOut' }}
-            className="text-[3rem] font-black leading-none tracking-tighter text-cyan-300 drop-shadow-[0_0_20px_rgba(34,211,238,0.8)]"
+            className="text-[3rem] md:text-[1.75rem] font-black leading-none tracking-tighter text-cyan-300 drop-shadow-[0_0_20px_rgba(34,211,238,0.8)]"
           >
             100%
           </motion.div>
@@ -670,7 +670,7 @@ function ProgressVisual({ accent, animationKey }: { accent: AccentKey; animation
           live
         </div>
       </div>
-      <div className="relative mt-4 h-2.5 w-full overflow-hidden rounded-full border border-cyan-700/50 bg-cyan-950/40 shadow-[inset_0_1px_3px_rgba(0,0,0,0.5)] z-10">
+      <div className="relative mt-4 md:mt-1 h-2.5 w-full overflow-hidden rounded-full border border-cyan-700/50 bg-cyan-950/40 shadow-[inset_0_1px_3px_rgba(0,0,0,0.5)] z-10">
         <motion.div
           key={`progress-fill-${animationKey}`}
           className="absolute inset-y-0 left-0 rounded-full shadow-[0_0_15px_#22d3ee,0_0_30px_#fff]"
@@ -697,11 +697,11 @@ function ProgressVisual({ accent, animationKey }: { accent: AccentKey; animation
 
 function LockVisual() {
   return (
-    <div className="-mx-5 -mt-5 mb-4 sm:-mx-6 sm:-mt-6 relative flex h-[120px] w-[calc(100%+40px)] items-center justify-center overflow-hidden rounded-t-[24px] border-b border-white/5 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.03),transparent_70%)] sm:w-[calc(100%+48px)]">
-      <div className="relative flex h-24 w-24 items-center justify-center rounded-3xl border border-white/10 bg-gradient-to-b from-white/10 to-transparent shadow-[inset_0_1px_2px_rgba(255,255,255,0.1),0_0_30px_rgba(255,255,255,0.02)] transition-all duration-500 group-hover:border-emerald-500/30 group-hover:shadow-[0_0_40px_rgba(16,185,129,0.15)] group-hover:from-emerald-500/10">
-        <Lock className="absolute h-10 w-10 text-white/40 transition-all duration-500 group-hover:-rotate-12 group-hover:scale-75 group-hover:opacity-0" />
+    <div className="-mx-5 -mt-5 mb-4 md:mb-1 sm:-mx-6 sm:-mt-6 relative flex h-[120px] md:h-[100px] w-[calc(100%+40px)] items-center justify-center overflow-hidden rounded-t-[24px] border-b border-white/5 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.03),transparent_70%)] sm:w-[calc(100%+48px)]">
+      <div className="relative flex h-24 w-24 md:h-[72px] md:w-[72px] items-center justify-center rounded-3xl border border-white/10 bg-gradient-to-b from-white/10 to-transparent shadow-[inset_0_1px_2px_rgba(255,255,255,0.1),0_0_30px_rgba(255,255,255,0.02)] transition-all duration-500 group-hover:border-emerald-500/30 group-hover:shadow-[0_0_40px_rgba(16,185,129,0.15)] group-hover:from-emerald-500/10">
+        <Lock className="absolute h-10 w-10 md:h-8 md:w-8 text-white/40 transition-all duration-500 group-hover:-rotate-12 group-hover:scale-75 group-hover:opacity-0" />
         <LockOpen
-          className="absolute h-10 w-10 scale-75 text-emerald-400 opacity-0 transition-all duration-500 group-hover:scale-100 group-hover:opacity-100"
+          className="absolute h-10 w-10 md:h-8 md:w-8 scale-75 text-emerald-400 opacity-0 transition-all duration-500 group-hover:scale-100 group-hover:opacity-100"
           style={{ filter: `drop-shadow(0 0 20px rgba(52,211,153,0.9))` }}
         />
         <div className="absolute inset-0 rounded-3xl bg-emerald-500/20 opacity-0 blur-2xl transition-opacity duration-500 group-hover:opacity-100" />
@@ -714,8 +714,8 @@ function StatusVisual({ animationKey }: { animationKey: number }) {
   const shouldReduceMotion = useReducedMotion();
 
   return (
-    <div className="-mx-5 -mt-5 mb-4 sm:-mx-6 sm:-mt-6 relative flex h-[120px] w-[calc(100%+40px)] flex-col justify-center overflow-hidden rounded-t-[24px] border-b border-emerald-900/10 bg-[radial-gradient(ellipse_at_left,rgba(16,185,129,0.1),transparent_70%)] px-8 sm:w-[calc(100%+48px)]">
-      <div className="text-[10px] font-bold uppercase tracking-[0.28em] text-emerald-400/80 drop-shadow-[0_0_5px_rgba(52,211,153,0.3)] mb-4">Soporte directo</div>
+    <div className="-mx-5 -mt-5 mb-4 md:mb-1 sm:-mx-6 sm:-mt-6 relative flex h-[120px] md:h-[100px] w-[calc(100%+40px)] flex-col justify-center overflow-hidden rounded-t-[24px] border-b border-emerald-900/10 bg-[radial-gradient(ellipse_at_left,rgba(16,185,129,0.1),transparent_70%)] px-8 sm:w-[calc(100%+48px)]">
+      <div className="text-[10px] font-bold uppercase tracking-[0.28em] text-emerald-400/80 drop-shadow-[0_0_5px_rgba(52,211,153,0.3)] mb-4 md:mb-2">Soporte directo</div>
       <div className="flex items-center gap-6">
         <span className="relative flex h-8 w-8 items-center justify-center">
           <span className="absolute h-10 w-10 rounded-full animate-ping bg-emerald-500/50" />
@@ -742,9 +742,9 @@ function OwnershipVisual({ accent }: { accent: AccentKey }) {
   const tone = ACCENT_STYLES[accent];
 
   return (
-    <div className="-mx-5 -mt-5 mb-4 sm:-mx-6 sm:-mt-6 relative flex h-[120px] w-[calc(100%+40px)] items-center justify-center overflow-hidden rounded-t-[24px] border-b border-cyan-500/10 bg-[radial-gradient(ellipse_at_top,rgba(8,145,178,0.15),transparent_70%)] sm:w-[calc(100%+48px)]">
+    <div className="-mx-5 -mt-5 mb-4 md:mb-1 sm:-mx-6 sm:-mt-6 relative flex h-[120px] md:h-[100px] w-[calc(100%+40px)] items-center justify-center overflow-hidden rounded-t-[24px] border-b border-cyan-500/10 bg-[radial-gradient(ellipse_at_top,rgba(8,145,178,0.15),transparent_70%)] sm:w-[calc(100%+48px)]">
       <motion.div
-        className="relative flex h-20 w-48 items-center gap-5 rounded-2xl border border-cyan-500/40 bg-cyan-950/50 px-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.1),0_10px_30px_rgba(0,0,0,0.5)] backdrop-blur-md"
+        className="relative flex h-20 md:h-[68px] w-48 items-center gap-5 rounded-2xl border border-cyan-500/40 bg-cyan-950/50 px-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.1),0_10px_30px_rgba(0,0,0,0.5)] backdrop-blur-md"
         animate={shouldReduceMotion ? { y: 0 } : { y: [-4, 4, -4], boxShadow: [`0 10px 30px rgba(0,0,0,0.5), 0 0 0px ${tone.glow}`, `0 10px 30px rgba(0,0,0,0.5), 0 0 25px ${tone.glow}`, `0 10px 30px rgba(0,0,0,0.5), 0 0 0px ${tone.glow}`] }}
         transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
       >
@@ -820,8 +820,8 @@ function MainNodesVisual() {
   }, [shouldSimplify]);
 
   return (
-    <div className="flex min-h-[180px] items-center justify-center md:min-h-[200px]">
-      <div className="relative flex w-full items-center justify-center overflow-hidden rounded-[24px] border border-cyan-800/30 bg-[radial-gradient(ellipse_at_center,rgba(8,145,178,0.2),transparent_70%),linear-gradient(180deg,rgba(10,10,12,0.1),rgba(10,10,12,0.7))] py-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_0_30px_rgba(34,211,238,0.05)] md:py-6 lg:min-h-[240px]">
+    <div className="flex h-full min-h-[180px] items-center justify-center md:min-h-[200px]">
+      <div className="relative flex h-full min-h-0 w-full items-center justify-center overflow-hidden rounded-[24px] border border-cyan-800/30 bg-[radial-gradient(ellipse_at_center,rgba(8,145,178,0.2),transparent_70%),linear-gradient(180deg,rgba(10,10,12,0.1),rgba(10,10,12,0.7))] py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_0_30px_rgba(34,211,238,0.05)] md:py-5 lg:min-h-[200px]">
         <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(34,211,238,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(34,211,238,0.03)_1px,transparent_1px)] bg-[size:32px_32px]" />
         <svg
           viewBox="0 0 420 280"
@@ -982,7 +982,7 @@ function RoiVisual() {
   const shouldReduceMotion = useReducedMotion();
 
   return (
-    <div className="-mx-5 -mt-5 mb-4 sm:-mx-6 sm:-mt-6 relative flex h-[120px] w-[calc(100%+40px)] items-end justify-center overflow-hidden rounded-t-[24px] border-b border-cyan-500/10 bg-[radial-gradient(ellipse_at_bottom,rgba(34,211,238,0.12),transparent_70%)] sm:w-[calc(100%+48px)]">
+    <div className="-mx-5 -mt-5 mb-4 md:mb-1 sm:-mx-6 sm:-mt-6 relative flex h-[120px] md:h-[100px] w-[calc(100%+40px)] items-end justify-center overflow-hidden rounded-t-[24px] border-b border-cyan-500/10 bg-[radial-gradient(ellipse_at_bottom,rgba(34,211,238,0.12),transparent_70%)] sm:w-[calc(100%+48px)]">
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(34,211,238,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(34,211,238,0.04)_1px,transparent_1px)] bg-[size:20px_20px] [mask-image:linear-gradient(to_bottom,transparent,black)]" />
       <svg viewBox="-16 -28 332 148" className="relative z-10 h-[90%] w-full overflow-visible" aria-hidden="true" preserveAspectRatio="none">
         <path d="M0 80 H300" stroke="rgba(34,211,238,0.15)" strokeWidth="1" strokeDasharray="4 4" />
@@ -1017,7 +1017,7 @@ function ClockVisual() {
   const shouldReduceMotion = useReducedMotion();
 
   return (
-    <div className="-mx-5 -mt-5 mb-4 sm:-mx-6 sm:-mt-6 relative flex h-[120px] w-[calc(100%+40px)] items-center justify-center overflow-hidden rounded-t-[24px] border-b border-cyan-500/10 bg-[radial-gradient(circle_at_center,rgba(8,145,178,0.15),transparent_60%)] sm:w-[calc(100%+48px)]">
+    <div className="-mx-5 -mt-5 mb-4 md:mb-1 sm:-mx-6 sm:-mt-6 relative flex h-[120px] md:h-[100px] w-[calc(100%+40px)] items-center justify-center overflow-hidden rounded-t-[24px] border-b border-cyan-500/10 bg-[radial-gradient(circle_at_center,rgba(8,145,178,0.15),transparent_60%)] sm:w-[calc(100%+48px)]">
       {/* Sonar Radar Rings */}
       <motion.div
         className="absolute h-16 w-16 rounded-full border border-cyan-400"
@@ -1046,8 +1046,8 @@ function LayersVisual() {
   const shouldReduceMotion = useReducedMotion();
 
   return (
-    <div className="-mx-5 -mt-5 mb-4 sm:-mx-6 sm:-mt-6 relative flex h-[120px] w-[calc(100%+40px)] items-center justify-center overflow-hidden rounded-t-[24px] border-b border-cyan-500/10 bg-[radial-gradient(ellipse_at_top,rgba(8,145,178,0.15),transparent_70%)] [perspective:800px] sm:w-[calc(100%+48px)]">
-      <div className="relative h-24 w-40 mt-4">
+    <div className="-mx-5 -mt-5 mb-4 md:mb-1 sm:-mx-6 sm:-mt-6 relative flex h-[120px] md:h-[100px] w-[calc(100%+40px)] items-center justify-center overflow-hidden rounded-t-[24px] border-b border-cyan-500/10 bg-[radial-gradient(ellipse_at_top,rgba(8,145,178,0.15),transparent_70%)] [perspective:800px] sm:w-[calc(100%+48px)]">
+      <div className="relative h-24 md:h-20 w-40 mt-4 md:mt-0">
         {[0, 1, 2].map((layer) => (
           <motion.div
             key={layer}
@@ -1068,12 +1068,12 @@ function DashboardVisual() {
   const shouldReduceMotion = useReducedMotion();
 
   return (
-    <div className="-mx-5 -mt-5 mb-4 sm:-mx-6 sm:-mt-6 relative flex h-[120px] w-[calc(100%+40px)] items-center justify-center overflow-hidden rounded-t-[24px] border-b border-cyan-500/10 bg-[radial-gradient(ellipse_at_left,rgba(8,145,178,0.15),transparent_70%)] sm:w-[calc(100%+48px)]">
-      <div className="grid w-full max-w-[200px] gap-3">
-        <div className="grid grid-cols-[1fr_0.6fr] gap-3">
-          <div className="rounded-xl border border-cyan-700/50 bg-cyan-950/50 p-3.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_0_15px_rgba(34,211,238,0.1)] backdrop-blur-md">
-            <div className="mb-4 h-2 w-16 rounded-full bg-cyan-400/80 shadow-[0_0_8px_rgba(34,211,238,0.5)]" />
-            <div className="flex items-end gap-2 h-10">
+    <div className="-mx-5 -mt-5 mb-4 md:mb-1 sm:-mx-6 sm:-mt-6 relative flex h-[120px] md:h-[100px] w-[calc(100%+40px)] items-center justify-center overflow-hidden rounded-t-[24px] border-b border-cyan-500/10 bg-[radial-gradient(ellipse_at_left,rgba(8,145,178,0.15),transparent_70%)] sm:w-[calc(100%+48px)]">
+      <div className="grid w-full max-w-[200px] gap-3 md:gap-2">
+        <div className="grid grid-cols-[1fr_0.6fr] gap-3 md:gap-2">
+          <div className="rounded-xl border border-cyan-700/50 bg-cyan-950/50 p-3.5 md:p-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_0_15px_rgba(34,211,238,0.1)] backdrop-blur-md">
+            <div className="mb-4 md:mb-1 h-2 w-16 rounded-full bg-cyan-400/80 shadow-[0_0_8px_rgba(34,211,238,0.5)]" />
+            <div className="flex items-end gap-2 h-10 md:h-6">
               {[14, 26, 40, 20].map((height, index) => (
                 <div key={index} className="flex h-full items-end">
                   <motion.div
@@ -1086,7 +1086,7 @@ function DashboardVisual() {
               ))}
             </div>
           </div>
-          <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-cyan-700/50 bg-cyan-950/50 p-3.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_0_15px_rgba(34,211,238,0.1)] backdrop-blur-md">
+          <div className="flex flex-col items-center justify-center gap-3 md:gap-1.5 rounded-xl border border-cyan-700/50 bg-cyan-950/50 p-3.5 md:p-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_0_15px_rgba(34,211,238,0.1)] backdrop-blur-md">
             <motion.div
               className="h-6 w-6 rounded-full bg-cyan-400 shadow-[0_0_25px_rgba(34,211,238,1)]"
               animate={shouldReduceMotion ? { opacity: 1 } : { opacity: [0.3, 1, 0.3] }}
@@ -1096,7 +1096,7 @@ function DashboardVisual() {
           </div>
         </div>
 
-        <div className="flex justify-between rounded-xl border border-cyan-700/50 bg-cyan-950/50 px-3.5 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_0_15px_rgba(34,211,238,0.1)] backdrop-blur-md">
+        <div className="flex justify-between rounded-xl border border-cyan-700/50 bg-cyan-950/50 px-3.5 py-3 md:px-2 md:py-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_0_15px_rgba(34,211,238,0.1)] backdrop-blur-md">
           {Array.from({ length: 4 }).map((_, index) => (
             <motion.div
               key={index}
@@ -1281,7 +1281,7 @@ function FeaturedCard({ feature, activeTab }: { feature: TabbedFeature; activeTa
       whileHover={shouldReduceMotion || isMobile ? undefined : { y: -6 }}
       onMouseMove={isMobile ? undefined : handleMouseMove}
       onMouseLeave={isMobile ? undefined : handleMouseLeave}
-      className={`group relative h-full min-h-[340px] overflow-hidden ${GLASS_CARD_CLASS} p-4 transition-colors duration-500 hover:border-white/12 sm:p-5 md:min-h-0 md:p-6`}
+      className={`group relative h-full min-h-[340px] overflow-hidden ${GLASS_CARD_CLASS} p-4 transition-colors duration-500 hover:border-white/12 sm:p-5 md:min-h-0 md:p-5`}
     >
       <motion.div className="pointer-events-none absolute inset-0 rounded-3xl" style={{ background }} />
       <div
@@ -1295,8 +1295,8 @@ function FeaturedCard({ feature, activeTab }: { feature: TabbedFeature; activeTa
         style={{ background: `linear-gradient(90deg, transparent 0%, ${tone.strong} 50%, transparent 100%)` }}
       />
 
-      <div className="relative z-10 flex h-full flex-col gap-4 md:gap-5">
-        <div className="flex min-h-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="relative z-10 flex h-full flex-col gap-3 md:gap-4">
+        <div className="flex min-h-0 shrink-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="inline-flex items-center gap-2 rounded-full border border-white/5 bg-white/[0.04] px-4 py-1.5 text-[11px] font-bold uppercase tracking-[0.28em] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_0_15px_rgba(255,255,255,0.02)] transition-colors group-hover:bg-white/[0.06] group-hover:border-white/10">
             <span className="h-1.5 w-1.5 rounded-full animate-pulse" style={{ backgroundColor: tone.strong, boxShadow: `0 0 10px ${tone.glow}` }} />
             {feature.tag}
@@ -1307,16 +1307,16 @@ function FeaturedCard({ feature, activeTab }: { feature: TabbedFeature; activeTa
           </div>
         </div>
 
-        <div className="max-w-2xl md:min-h-0">
-          <h3 className="text-2xl font-black tracking-tighter text-white drop-shadow-sm md:text-3xl lg:text-4xl">
+        <div className="max-w-2xl shrink-0 md:min-h-0">
+          <h3 className="text-2xl font-black tracking-tighter text-white drop-shadow-sm md:text-3xl lg:text-3xl">
             {feature.supportTitle}
           </h3>
-          <p className="mt-3 max-w-2xl text-sm leading-relaxed text-zinc-400 md:text-base transition-colors group-hover:text-zinc-300">
+          <p className="mt-2 max-w-2xl text-sm leading-relaxed text-zinc-400 md:text-base transition-colors group-hover:text-zinc-300">
             {feature.text}
           </p>
         </div>
 
-        <div className="mt-auto">
+        <div className="relative flex-1 min-h-0 overflow-hidden">
           {showAgencyComparison ? <AgencyComparisonVisual /> : <TabbedFeatureVisual visual={feature.visual} />}
         </div>
       </div>
@@ -1338,7 +1338,7 @@ function SecondaryCard({ card, activeTab, cardIndex }: { card: TabbedCard; activ
       whileHover={shouldReduceMotion || isMobile ? undefined : { y: -5 }}
       onMouseMove={isMobile ? undefined : handleMouseMove}
       onMouseLeave={isMobile ? undefined : handleMouseLeave}
-      className={`group relative min-h-[180px] overflow-hidden ${GLASS_CARD_CLASS} p-4 transition-colors duration-500 hover:border-white/12 sm:min-h-[190px] sm:p-5 md:h-full md:min-h-0`}
+      className={`group relative min-h-[180px] overflow-hidden ${GLASS_CARD_CLASS} p-4 transition-colors duration-500 hover:border-white/12 sm:min-h-[190px] sm:p-5 md:h-full md:min-h-0 md:p-4`}
     >
       <motion.div className="pointer-events-none absolute inset-0 rounded-3xl" style={{ background }} />
       <motion.div
@@ -1357,16 +1357,16 @@ function SecondaryCard({ card, activeTab, cardIndex }: { card: TabbedCard; activ
       />
 
       <div className="relative z-10 flex h-full flex-col">
-        <div className="mb-3 min-h-[112px] md:mb-4">
+        <div className="mb-3 min-h-[112px] md:mb-0 md:min-h-0">
           <TabbedCardVisual visual={card.visual} accent={card.accent} animationKey={activeTab} />
         </div>
 
-        <div className="mt-auto flex min-h-0 max-w-[18rem] flex-col justify-start md:min-h-0">
-          <div className="mb-2 flex h-9 items-center">
+        <div className="mt-auto flex min-h-0 flex-col justify-start md:min-h-0">
+          <div className="mb-2 flex h-9 md:h-7 items-center">
             <TabbedCardIcon visual={card.visual} />
           </div>
-          <h3 className="min-h-0 text-lg font-bold leading-tight tracking-tight text-white transition-all duration-300 md:text-xl group-hover:text-cyan-300 group-hover:drop-shadow-[0_0_12px_rgba(34,211,238,0.5)]">{card.title}</h3>
-          <p className="mt-2 text-[13px] leading-6 text-zinc-400 transition-colors duration-300 group-hover:text-zinc-300">{card.text}</p>
+          <h3 className="min-h-0 text-base font-bold leading-tight tracking-tight text-white transition-all duration-300 md:text-lg group-hover:text-cyan-300 group-hover:drop-shadow-[0_0_12px_rgba(34,211,238,0.5)]">{card.title}</h3>
+          <p className="mt-2 text-[13px] leading-6 md:leading-5 text-zinc-400 transition-colors duration-300 group-hover:text-zinc-300">{card.text}</p>
         </div>
       </div>
     </motion.article>
