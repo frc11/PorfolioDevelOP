@@ -128,7 +128,7 @@ export default async function AgencyOsLeadsPage({
           <p className="text-xs tracking-tight text-zinc-500">
             develOP / Leads
           </p>
-          <h2 className="mt-2 text-2xl font-semibold tracking-tight text-white">
+          <h2 className="mt-2 text-3xl font-semibold tracking-tight text-white">
             Pipeline comercial
           </h2>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-400">
