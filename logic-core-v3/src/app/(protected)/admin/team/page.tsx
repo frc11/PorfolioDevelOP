@@ -1,5 +1,6 @@
 import { Role, TaskStatus } from '@prisma/client'
 import { prisma } from '@/lib/prisma'
+import { StaggerReveal } from '@/components/ui/StaggerReveal'
 import { MemberWorkload } from './_components/member-workload'
 
 function startOfWeek(date: Date): Date {
@@ -198,9 +199,9 @@ export default async function AgencyOsTeamPage() {
         </p>
       </div>
 
-      <div className="grid gap-4">
-        {workloadData.length > 0 ? (
-          workloadData.map((member) => (
+      {workloadData.length > 0 ? (
+        <StaggerReveal className="grid gap-4">
+          {workloadData.map((member) => (
             <MemberWorkload
               key={member.user.id}
               user={member.user}
@@ -209,16 +210,18 @@ export default async function AgencyOsTeamPage() {
               monthlyHours={member.monthlyHours}
               groupedTasks={member.groupedTasks}
             />
-          ))
-        ) : (
+          ))}
+        </StaggerReveal>
+      ) : (
+        <div className="grid gap-4">
           <div className="flex min-h-[220px] flex-col items-center justify-center rounded-[28px] border border-dashed border-white/10 bg-black/10 px-6 py-10 text-center">
             <p className="text-lg font-medium text-zinc-200">Sin miembros para mostrar</p>
             <p className="mt-2 max-w-md text-sm leading-6 text-white/40">
               Cuando haya usuarios SUPER_ADMIN disponibles, su carga operativa va a aparecer aca.
             </p>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </section>
   )
 }
