@@ -4,6 +4,7 @@ import { HealthScore } from '@/components/dashboard/home/HealthScore'
 import { OnboardingStatusCard } from '@/components/dashboard/OnboardingStatusCard'
 import { UsageMeter } from '@/components/dashboard/plan/UsageMeter'
 import { WeekResultsGrid } from '@/components/dashboard/home/WeekResultsGrid'
+import { FadeIn } from '@/components/dashboard/FadeIn'
 import { Badge, Card, LoadingState, PageHeader } from '@/components/ui'
 import { getExecutiveBrief } from '@/lib/ai/executive-brief'
 import { getAttentionItems } from '@/lib/dashboard/attention'
@@ -177,12 +178,14 @@ async function DashboardGreetingWrapper({ organizationId }: { organizationId: st
   if (!org) redirect('/login')
 
   return (
-    <PageHeader
-      eyebrow={formatDateES()}
-      title={`${getGreeting()}, ${org.companyName}`}
-      icon={Calendar}
-      variant="gradient"
-    />
+    <FadeIn>
+      <PageHeader
+        eyebrow={formatDateES()}
+        title={`${getGreeting()}, ${org.companyName}`}
+        icon={Calendar}
+        variant="gradient"
+      />
+    </FadeIn>
   )
 }
 
