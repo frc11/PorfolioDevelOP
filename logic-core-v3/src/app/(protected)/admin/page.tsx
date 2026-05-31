@@ -19,6 +19,7 @@ import { DEFAULT_AGENCY_SETTINGS } from '@/lib/agency-settings'
 import { prisma } from '@/lib/prisma'
 import { DashboardHistoryCharts } from './_components/dashboard-history-charts'
 import { StatCard } from '@/components/ui'
+import { StaggerReveal } from '@/components/ui/StaggerReveal'
 
 const MEMBER_BAR_COLORS = [
   '#22d3ee',
@@ -544,7 +545,8 @@ export default async function AgencyOsPage() {
   const averageHourlyValue = monthHoursTotal > 0 ? monthlyRevenue / monthHoursTotal : 0
 
   return (
-    <section className="space-y-8">
+    <section>
+      <StaggerReveal className="space-y-8">
       <div className="rounded-[28px] border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
         <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
           <div>
@@ -693,6 +695,7 @@ export default async function AgencyOsPage() {
           memberSeries={memberSeries}
         />
       </div>
+      </StaggerReveal>
     </section>
   )
 }
