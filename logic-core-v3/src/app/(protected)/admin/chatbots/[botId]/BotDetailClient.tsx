@@ -178,7 +178,7 @@ export function BotDetailClient({ bot, initialTab, initialEvents, monthlyUsage, 
             >
               {isActive ? 'Pausar bot' : 'Activar bot'}
             </Button>
-            <Link href={`/api/chatbot/${bot.slug}/chat`} target="_blank">
+            <Link href={`/api/chatbot/${bot.slug}/chat`} target="_blank" prefetch={false}>
               <Button
                 variant="ghost"
                 size="sm"
