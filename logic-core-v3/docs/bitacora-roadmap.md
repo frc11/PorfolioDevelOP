@@ -10420,3 +10420,57 @@ Criterio transversal: animación SOLO donde comunica (llegada/jerarquía/progres
 5. **Módulos premium gated por seed** (no verificables sin activar) → deuda de seed.
 6. **Empty states admin con ilustración SVG** (alerts/team/health hoy son texto + emoji): es una mejora válida pero agregar ilustraciones nuevas es más diseño-nuevo que pulido → propuesta para Franco, no autónoma.
 7. Cualquier mejora que requiera tocar lógica/data/props de comportamiento → anotada al aparecer.
+
+
+### FASE 2 — EJECUCIÓN (commits atómicos por vista)
+
+Cada cambio es puramente presentacional (className/motion/JSX de wrapper). Cero lógica, data, server actions, schema, auth ni props de comportamiento. tsc + build verdes en cada batch; cada vista verificada con screenshot real contra el build de prod local (:3001), desktop Y mobile, vía preview manejado por el padre. Reduced-motion respetado en todo lo nuevo.
+
+**Commits (en orden):**
+- `f2f0b83` — **polish(motion): FadeIn respeta prefers-reduced-motion.** Elevación estricta del primitivo de reveal del dashboard (si el usuario pidió menos movimiento, el contenido aparece directo sin animar). Beneficia TODAS las páginas que ya usaban FadeIn. No destructivo.
+- `97cadde` — **dashboard/home:** reveal del PageHeader del saludo (antes entraba estático mientras las secciones de abajo ya animaban → arranque desparejo; ahora parejo).
+- `97cadde`/`...` — **dashboard/plan:** reveal secuenciado header → UsageMeter → PlansShowcase (delay). Era 100% estática; ahora al estándar del resto del dashboard. Verificado desktop+mobile (3 cards en fila / stack).
+- `c2eda38` — **dashboard/resultados/reputacion:** `FadeIn` page para igualar a seo/trafico (era la única sub-vista de resultados sin reveal → inconsistencia corregida).
+- `e48b3e7` — **dashboard/chatbot/install:** stagger reveal de los pasos (alertas + Paso 1/2/3) con el patrón canónico (staggerContainer/Item + useReducedMotion). Comunica la progresión del onboarding. Selector de plataforma y snippet intactos.
+- `37116cb` — **polish(motion): helper StaggerReveal.** Nuevo wrapper reusable que empaqueta el stagger CANÓNICO (motion-variants) + reduced-motion, envolviendo cada hijo directo como item. Consolida hacia el sistema canónico (no fragmenta).
+- `1bd18fc` — **admin/team:** stagger reveal de las cards de workload (era la única lista del admin sin reveal; bots/projects/tickets/messages/clients ya lo tenían → paridad).
+- `02553bd` — **admin/home (AgencyOsPage):** stagger reveal de los 5 bloques KPI. ORTOGONAL al estilo del panel — NO repetí el cambio de estilo que B15 revirtió acá (rounded-[28px]/bg-white/5 intactos). Verificado: charts Recharts renderizan OK (6 elementos), layout idéntico al baseline, cero errores de consola.
+
+### REPORTE FINAL — EXP-EST
+
+**(a) Qué cambié por vista (todo solo estética):**
+- Dashboard: home (header reveal), plan (reveal secuenciado), reputacion (FadeIn page), chatbot/install (stagger de pasos).
+- Admin: team (stagger de cards), home (stagger de bloques KPI).
+- Sistema/animación: FadeIn ahora respeta reduced-motion; nuevo helper StaggerReveal (canónico + reduced-motion).
+
+**(b) Qué ANOTÉ para criterio de Franco (NO ejecutado):**
+1. **Leak `(scaffolding)`** en /admin/audit-log (entry LEAD_STATUS_CHANGED) — bug real cazado por el visual-qa, pero el texto se genera en label/datos, no en presentación → FUNCIONAL, fuera de Regla #0. Fix propio.
+2. **Formato `$10.0000`** (5 decimales) en revenue del detalle de bot: `StatCard` con `format="currency"` hace `toFixed(4)` (pensado para costos LLM en centavos); para revenue es la prop equivocada → semántico/lógico, no estético. Fix propio.
+3. **Fragmentación del sistema de animación** (coexisten FadeIn, StaggerWrapper y los variants canónicos): unificar en un set canónico es decisión de dirección (primitivo compartido, blast radius global). StaggerReveal ya empuja hacia el canónico, pero la unificación completa es tuya.
+4. **Unificación admin↔dashboard** (decisión #3 de B15): sigue siendo decisión estratégica tuya, no autónoma.
+5. **Módulos premium gated por seed** (agenda/motor-resenas/tienda/email-marketing): no verificables sin activarlos en seed → deuda de seed.
+6. **Empty states admin con ilustración SVG** (alerts/team/health hoy texto + emoji): mejora válida pero es diseño-nuevo, no pulido → propuesta para vos.
+
+**(c) Qué NO toqué por funcional/dudoso (Regla #0):**
+- Todo lo de la sección (b) puntos 1-2 (bugs que viven en lógica/datos).
+- Forms/consolas de settings (dashboard y admin): NO animados a propósito — una animación de entrada en un form de settings es decorativa, no comunica (mismo criterio "si no comunica, no va" de B15).
+- `chatbot/settings` (BotPersonalization): density y animación ya descartadas por Franco ("aire es Apple").
+- Cero handlers, server actions, queries, schema, auth, validaciones o props de comportamiento.
+
+**(d) Vistas sin tocar y por qué:**
+- **Ya estaban animadas** (no había nada que sumar sin redundar): dashboard home sections (HealthScore/AttentionStack/WeekResultsGrid/Brief), chatbot overview/conversations/leads, leads, messages, project, services, resultados/seo, resultados/trafico, cuenta/{perfil,facturacion,boveda}, soporte; admin lists (chatbots/clients/projects/tickets/messages/audit-log), admin/alerts, admin/chatbot/activity, y **admin/chatbots/[botId]** (que YA tiene AnimatePresence + fade/slide de contenido de tab + layoutId en el underline — el visual-qa lo reportó como "instantáneo" pero el código confirma que está animado; NO se tocó: disciplina de verificar la afirmación del agente contra el código).
+- **Deliberadamente NO animadas:** forms/consolas de settings (decorativo).
+- **Evitadas por riesgo/sensibilidad:** admin/leads (pipeline Kanban — animar columnas podría interferir con la percepción de drag), admin/chatbot/health (bajo tráfico, secciones con empty states ya coherentes). Anotadas como posibles, no ejecutadas para no forzar.
+- **No verificables:** módulos premium gated por seed (ver b.5).
+
+**Notas operativas:**
+- **Arquitectura de verificación:** el toolset de preview (`preview_*`) solo opera sobre servers que el propio contexto levanta (serverId por-contexto) → con un solo puerto 3001, el padre manejó el prod-QA para todo el job (login QA por cookie, `?e2e=1`, restart limpio tras cada rebuild para esquivar server-stale). El subagente visual-qa SÍ corrió el recorrido admin completo (reporte integrado en la auditoría).
+- **Disciplina:** la única "afirmación de bug" del visual-qa que tocaba estética (tabs instantáneas en bot detail) se verificó FALSA contra el código antes de actuar — no se tocó.
+
+**Cierre — confirmaciones del brief:**
+- ✅ Rama `experimento/estetica-goal` (nunca main). CERO push (solo commits locales).
+- ✅ `npm run build` (webpack) VERDE + `npx tsc --noEmit` VERDE en el cierre.
+- ✅ CERO funcionalidad tocada — solo className/motion/JSX presentacional. El `prefetch={false}` pendiente de Franco quedó aislado en su commit baseline, no se tocó.
+- ✅ Commits atómicos por vista (cherry-pickeables / descartables granularmente).
+- ✅ Reduced-motion respetado en todo lo nuevo; charts Recharts intactos; sin re-renders extra (wrappers presentacionales, datos computados igual server-side).
+- ✅ Auditoría escrita ANTES de ejecutar (entregable clave).
