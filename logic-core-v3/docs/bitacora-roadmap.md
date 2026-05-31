@@ -10272,3 +10272,54 @@ Considerado y **descartado**. El único contenido genuinamente útil sería list
 - ✅ Densidad / progressive disclosure: auditadas las 5 pantallas, 4/5 ya tenían B13.3 aplicado (dejadas), 1/5 migrada (conversations). Settings NO densificado por decisión explícita de Franco.
 - ✅ Espacio para Franco: el sprint le mostró los hallazgos antes de actuar, Franco eligió prioridades, las ❓ subjetivas (módulos seed, hydration, greeting calibrando) quedan listadas para que él arbitre como sprints propios.
 
+
+---
+
+## B15 — Consolidación design system B13 en TODO el portal (job desatendido)
+
+**Fecha:** 2026-05-30 · **Modo:** autónomo, aplicar-no-inventar · **Stack:** Next 16, motion/react, Tailwind 4, TS estricto.
+
+**Premisa:** aplicar y consolidar el sistema B13 que YA EXISTE (cyan `#06b6d4` marca primaria — NO amber, amber es solo color de servicio "software"; glassmorphism; tokens en `src/lib/design-tokens.ts` + `design-patterns.ts`; primitivos en `src/components/ui`). NO inventar dirección nueva. Decisiones de dirección → se ANOTAN para Franco, no se ejecutan.
+
+**Diagnóstico de baseline (visual-qa, prod local QA :3001, desktop+mobile):** el **dashboard ya está consolidado a los tokens** por el sprint B13.2/CC.5 previo (PageHeader/EmptyState/Section unificados; settings con "aire es Apple" por decisión explícita de Franco). El **admin tiene su PROPIO lenguaje de diseño coherente** (panel `rounded-[28px] bg-white/5 backdrop-blur-xl` en 36 lugares + box anidado `rounded-[22px] bg-black/20` + shell `rounded-[28px] bg-white/[0.03]`), distinto de los tokens del dashboard pero internamente consistente. **El portal tiene DOS lenguajes coherentes (dashboard=tokens, admin=panels propios); unificarlos es una decisión de dirección de Franco, no algo para hacer en piezas de forma autónoma.** El warning de charts `width(-1)/height(-1)` del baseline resultó ser **artefacto headless** — verificado: los charts renderizan bien en prod (barras/línea/área visibles), NO es bug.
+
+### ❓ Decisiones de DIRECCIÓN anotadas (NO ejecutadas — esperan criterio de Franco)
+1. **Eyebrow token ambiguo:** el sistema se contradice — `design-patterns.ts`/`<Eyebrow>` = `tracking-[0.24em] text-zinc-500` sin bold, pero `PageHeader` = `tracking-[0.28em] text-zinc-600 font-semibold`, y hay 0.2/0.22/0.25/0.3 dispersos (cientos de usos, muchos en marketing fuera de scope). Homogeneizar portal-wide NO es "aplicar" sobre un sistema internamente inconsistente → es dirección. Franco define EL valor canónico y se aplica en un sprint propio.
+2. **Settings density / "60% blanco":** ya descartado por Franco ("aire es Apple"). Respetado, no se toca el grid.
+3. **Unificación admin ↔ dashboard (LA decisión grande):** el dashboard usa los tokens (`rounded-2xl bg-white/[0.02]`, primitivos Card/StatCard); el admin usa su lenguaje propio (`rounded-[28px] bg-white/5` panel ×36, `rounded-[22px] bg-black/20` box, headers boxed). Ambos coherentes por separado. ¿Querés que el admin migre a los tokens del dashboard (portal 100% parejo) o que el admin conserve su identidad de "consola"? Si es migrar, es un sprint grande dedicado (36+ panels) con verificación visual end-to-end — NO autónomo en piezas. Mientras tanto el admin queda como está (coherente consigo mismo).
+4. **Peso de título en headers admin:** dividido — unboxed (`chatbots`) usa `text-3xl font-medium text-zinc-100`; boxed (`AgencyOsPage`, `leads`, `tickets`) usa `font-semibold text-white` (y `leads` además `text-2xl`, el único outlier de tamaño real). Definí UN patrón de header admin y se aplica de una.
+
+### Vistas
+- **V1 — Dashboard home** ✅ commit `f2f36af`: sentence-case "Resultados de la semana" + section labels al token `0.24em`. Ya estaba consolidada (PageHeader/Card/Badge/LoadingState + motion/react con reveals). Toque mínimo, sin redesign.
+- **V2 — Dashboard bot settings** ✅ sin cambios: `BotPersonalization` ya usa primitivos del sistema (Eyebrow/Heading/Muted, Section, Card, Field, Button) + `layoutId` en el check de color. Density NO tocada (decisión "aire es Apple" de Franco). Animación de entrada descartada: en un form de settings sería decorativa, no comunicativa (regla "si no comunica, no va"). Baseline QA: renderiza OK desktop+mobile.
+- **V3 — Dashboard leads** ✅ sin cambios: empty state ya B13.3 (icono + copy + CTA "Ver mi chatbot"). Baseline QA: OK desktop+mobile.
+- **V4 — Admin overview** (`/admin`, `AgencyOsPage`) ⏪ commit `b0bc086` **REVERTIDO** por `bb4cf0d`. Intenté alinear AgencyOsPage a los tokens del dashboard (rounded-2xl/`bg-white/[0.02]`), pero al enumerar el admin descubrí que `rounded-[28px] bg-white/5` es su **lenguaje de panel de-facto en 36 lugares** — mi cambio convirtió AgencyOsPage en una **isla inconsistente** con sus 36 hermanos. Es el caso de libro de "aplicar vs inventar": migrar el admin a los tokens del dashboard es DIRECCIÓN, no aplicación. Revertido y anotado. Charts verificados OK (artefacto headless, no bug; lógica intacta). **Lección:** antes de "normalizar" tokens en un módulo, enumerar la convención del módulo entero — no asumir que el token documentado del dashboard es el canon del admin.
+- **V5 — Admin bot editor** (`/admin/chatbots/[botId]`) ✅ sin cambios: `OverviewTab` ya consolidado (StatCard + `rounded-2xl bg-white/[0.02]` + eyebrow canónico `tracking-[0.24em]`). Paridad de preview con dashboard ya integrada por commit `6f65749` (ChatHeader/BotConfigPreview unificados). Nota: `BotDetailClient.tsx` tiene un cambio funcional pendiente de Franco (`prefetch={false}`) que NO toqué ni commiteé.
+
+- **V6 — Resto del admin (clients, leads, projects, team, tickets, messages, settings, alerts, audit-log)** ✅ commit `9628b80` (2 fixes mínimos DENTRO del lenguaje admin): `leads` título `text-2xl`→`text-3xl` y `chatbots` `font-medium`→`font-semibold`, alineando 2 outliers a la convención admin dominante (`text-3xl font-semibold`, confirmada en 5 páginas). NO se tocó el resto: las demás "inconsistencias" detectadas (subagente Explore + verificación manual) son el **lenguaje admin propio** (panel `rounded-[28px] bg-white/5` ×36, box `rounded-[22px] bg-black/20`) — internamente coherente; normalizarlas a los tokens del dashboard sería el mismo error que V4. Eyebrows in-card `0.22` vs `0.24` quedan bajo la decisión de dirección #1.
+
+### REPORTE FINAL CONSOLIDADO — B15
+
+**(a) Qué se tocó (commits atómicos por vista):**
+- `f2f36af` — V1 dashboard home: sentence-case "Resultados de la semana" + section labels al token `tracking-[0.24em]`.
+- `9628b80` — V6 admin headers: `leads` título a `text-3xl`, `chatbots` a `font-semibold` (convención admin propia).
+- `b0bc086` → REVERTIDO por `bb4cf0d` — V4 admin overview: intento de migrar a tokens del dashboard, revertido al descubrir que rompía la consistencia con 36 paneles admin hermanos.
+
+**(b) Decisiones de DIRECCIÓN anotadas (NO ejecutadas — esperan a Franco):**
+1. Eyebrow canónico (el sistema se contradice: `<Eyebrow>`/design-patterns `0.24em` sin bold vs `PageHeader` `0.28em` semibold vs dispersos).
+2. Settings density (ya resuelto por Franco: "aire es Apple").
+3. **Unificación admin ↔ dashboard** (LA grande): el portal tiene dos lenguajes coherentes — dashboard=tokens, admin=panels propios `rounded-[28px] bg-white/5`. Migrar el admin es un sprint dedicado con verificación visual end-to-end, no autónomo en piezas.
+4. Patrón único de header admin (peso/tamaño/color de título: split menor `text-white` vs `text-zinc-100`, ya unificado peso/tamaño).
+
+**(c) Vistas sin cambios y por qué:**
+- V2 settings, V3 leads: ya consolidadas por B13.2/CC.5; settings con decisión "aire es Apple".
+- V5 admin bot editor: ya usa tokens + StatCard; paridad de preview ya integrada (`6f65749`).
+- Resto admin: lenguaje propio coherente (ver decisión #3).
+
+**(d) Confirmaciones del brief:**
+- ✅ Build final verde + tsc verde.
+- ✅ NINGÚN push hecho (solo commits locales).
+- ✅ CERO funcionalidad tocada (solo clases/copy de presentación). El cambio funcional pendiente de Franco en `BotDetailClient.tsx` (`prefetch={false}`) NO fue tocado ni commiteado.
+- ✅ Aplicar-no-inventar respetado: el único intento de "inventar" (migrar admin a tokens del dashboard, V4) fue cazado y revertido; el resto de decisiones de dirección quedan anotadas para Franco, no ejecutadas.
+
+**Conclusión honesta:** el portal ya estaba en buena forma (dashboard consolidado en B13.2/CC.5; admin coherente consigo mismo). El valor real de B15 no fue volumen de cambios sino **disciplina**: 3 consolidaciones seguras + identificar que la "consolidación grande" (unificar admin y dashboard bajo un solo lenguaje) es una decisión estratégica de Franco, no trabajo mecánico autónomo. Evitar el Frankenstein fue el entregable principal.
