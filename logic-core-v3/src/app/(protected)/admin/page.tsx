@@ -545,7 +545,7 @@ export default async function AgencyOsPage() {
 
   return (
     <section className="space-y-8">
-      <div className="rounded-3xl border border-white/10 bg-white/[0.04] p-5 backdrop-blur-xl">
+      <div className="rounded-[28px] border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
         <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
           <div>
             <p className="text-xs tracking-tight text-zinc-500">
@@ -736,17 +736,17 @@ function DualMetricCard({
           <p className="text-xs tracking-tight text-zinc-500">{label}</p>
         </div>
 
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white/[0.04] text-zinc-400">
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md bg-white/[0.04] text-zinc-400">
           <Icon className="h-5 w-5" strokeWidth={1.5} />
         </div>
       </div>
 
       <div className="mt-4 grid gap-3 sm:grid-cols-2">
-        <div className="rounded-xl border border-white/10 bg-black/20 px-4 py-4">
+        <div className="rounded-md border border-white/10 bg-black/20 px-4 py-4">
           <p className="text-xs tracking-tight text-zinc-500">{primaryLabel}</p>
           <p className="mt-2 text-3xl font-medium tracking-tight text-white">{primaryValue}</p>
         </div>
-        <div className="rounded-xl border border-white/10 bg-black/20 px-4 py-4">
+        <div className="rounded-md border border-white/10 bg-black/20 px-4 py-4">
           <p className="text-xs tracking-tight text-zinc-500">{secondaryLabel}</p>
           <p className="mt-2 text-3xl font-medium tracking-tight text-white">{secondaryValue}</p>
         </div>
@@ -782,7 +782,7 @@ function MemberHoursCard({
       : 1
 
   return (
-    <article className="rounded-2xl border border-white/10 bg-white/[0.02] p-5 backdrop-blur-xl transition-colors">
+    <article className="rounded-2xl border border-white/10 bg-white/5 p-5 backdrop-blur-xl transition-colors">
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
           <p className="text-xs tracking-tight text-zinc-500">
@@ -798,7 +798,7 @@ function MemberHoursCard({
           </p>
         </div>
 
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.02] text-zinc-200">
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-zinc-200">
           <CalendarCheck2 className="h-5 w-5" />
         </div>
       </div>
