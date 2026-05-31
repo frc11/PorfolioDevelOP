@@ -1,6 +1,6 @@
 'use client'
 
-import { motion } from 'motion/react'
+import { motion, useReducedMotion } from 'motion/react'
 import { ReactNode } from 'react'
 
 export function FadeIn({
@@ -12,11 +12,23 @@ export function FadeIn({
   delay?: number
   className?: string
 }) {
+  // Respeta prefers-reduced-motion: si el usuario pidió menos movimiento,
+  // el contenido aparece directo (sin desplazamiento ni blur), sin animar.
+  const shouldReduceMotion = useReducedMotion()
+
   return (
     <motion.div
-      initial={{ opacity: 0, y: 15, filter: 'blur(8px)' }}
-      animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-      transition={{ type: 'spring', stiffness: 80, damping: 15, delay }}
+      initial={shouldReduceMotion ? false : { opacity: 0, y: 15, filter: 'blur(8px)' }}
+      animate={
+        shouldReduceMotion
+          ? { opacity: 1 }
+          : { opacity: 1, y: 0, filter: 'blur(0px)' }
+      }
+      transition={
+        shouldReduceMotion
+          ? { duration: 0 }
+          : { type: 'spring', stiffness: 80, damping: 15, delay }
+      }
       className={className}
     >
       {children}
