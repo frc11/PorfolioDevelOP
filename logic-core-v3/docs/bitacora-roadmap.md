@@ -10331,3 +10331,92 @@ Considerado y **descartado**. El único contenido genuinamente útil sería list
 - ✅ Aplicar-no-inventar respetado: el único intento de "inventar" (migrar admin a tokens del dashboard, V4) fue cazado y revertido; el resto de decisiones de dirección quedan anotadas para Franco, no ejecutadas.
 
 **Conclusión honesta:** el portal ya estaba en buena forma (dashboard consolidado en B13.2/CC.5; admin coherente consigo mismo). B15 sumó, dentro de las reglas: consolidación de typografía/headers donde había outliers intra-módulo (V1 home, V6 admin titles) + **animación con propósito pareja en todo el portal** (4 listas del admin llevadas al estándar animado del dashboard). Y igual de importante: **disciplina** — cazar y revertir el intento de Frankenstein (V4, migrar admin a tokens del dashboard) y dejar la unificación admin↔dashboard como decisión estratégica de Franco en vez de ejecutarla a ciegas. Lo único que falta para "TODO el portal 100% parejo" es esa unificación de lenguaje de superficie, que es deliberadamente tuya (decisión #3): cada módulo quedó coherente consigo mismo y la animación quedó pareja entre ambos.
+
+
+---
+
+## EXP-EST — Experimento de mejora estética del portal (job desatendido)
+
+**Fecha:** 2026-05-31 · **Modo:** autónomo, punta a punta, libertad de criterio ESTÉTICO · **Rama:** `experimento/estetica-goal` (NUNCA main, CERO push) · **Stack:** Next 16, motion/react, Tailwind 4, TS estricto.
+
+**Premisa (distinta a B15):** B15 fue "aplicar-no-inventar". Este experimento explícitamente da **libertad de criterio estético** ("Franco quiere ver capacidades") para ELEVAR el design system B13 — sin destruirlo — siempre bajo **Regla #0: SOLO estética, CERO funcionalidad**. Prohibido tocar lógica/handlers, data/server actions/queries, schema/Prisma, auth/middleware, o props que cambien comportamiento. Solo className/Tailwind, motion/react, JSX presentacional (wrappers de animación, divs de layout), tokens, spacing, color, tipografía. Ante la duda → funcional → NO tocar, anotar para Franco.
+
+### Setup (hecho)
+- Rama `experimento/estetica-goal` creada desde main. Cambio funcional pendiente de Franco (`prefetch={false}` en `BotDetailClient.tsx`) aislado en commit baseline para no contaminar los commits atómicos.
+- `npm run build` (webpack) = VERDE (exit 0). `npx prisma migrate status` = limpio (56 migraciones, "schema up to date"). Sin migrate.
+- Server prod QA local arriba en :3001 (`start:qa`, QA_ALLOW_LOCALHOST=1).
+
+### Decisión de arquitectura de VERIFICACIÓN (cambio operativo vs B15)
+Restricción real del toolset de preview descubierta en este job: `preview_*` solo opera sobre servers que el propio contexto levantó con `preview_start` (necesita un `serverId`), y el estado de preview es por-contexto (un subagente no ve el server del padre). Con un solo puerto (3001) para el prod-QA, dos contextos compitiendo por el server se pisan. Resolución: el agente padre maneja el preview server para todo el job (un solo prod-QA, login QA por cookie vía `POST /api/qa/login` con personas `client-a`/`super-admin`, navegación con `?e2e=1`), con restart limpio tras cada rebuild para esquivar el server-stale. Para no inflar contexto: snapshots de texto como primario, screenshots solo en vistas clave y para confirmar cambios. (Un subagente `visual-qa` SÍ logró correr el recorrido admin completo en su propia ventana — su reporte está integrado abajo.)
+
+### Diagnóstico de baseline (qué ya está animado/consolidado — para no re-hacer lo de B15)
+- **Dashboard**: ya MUY animado. `FadeIn` (reveal con blur(8px)+spring) a nivel page en cuenta/perfil, cuenta/facturacion, cuenta/boveda, messages, project, services, resultados/seo, resultados/trafico. Home con secciones auto-animadas (HealthScore, AttentionStack, WeekResultsGrid, AIExecutiveBriefV2) que streamean por `<Suspense>`. Listas (LeadsTable, ConversationsTable) con stagger. Librería rica: AnimatedCounter, AnimatedProgressBar, AnimatedTaskList, StaggerWrapper, TrendBadge.
+- **Admin**: listas (bots, projects, tickets, messages, clients, audit-log) ya con stagger reveal + `useReducedMotion` (B15 + previos). Lenguaje de panel propio (`rounded-[28px] bg-white/5`) coherente. Detalle de cliente bien animado (ClientTabsNav + TabContentTransition + QuickActionMotion).
+- **Reduced-motion**: patrón establecido vía hook `useReducedMotion` (72 archivos), NO media query CSS. A respetar en todo lo nuevo.
+- **Fragmentación de sistema de animación (anotado para Franco, NO refactor autónomo):** coexisten 3 sistemas de reveal — `motion-variants.ts` (`staggerContainer/Item`, canónico, y=8/12), `StaggerWrapper.tsx` (y=20 scale=0.95 spring), y `FadeIn.tsx` (y=15 blur(8px) spring). Unificarlos es decisión de dirección (primitivo compartido, blast radius global) → se ANOTA.
+
+### FASE 1 — AUDITORÍA POR VISTA (escrita ANTES de ejecutar)
+Fundada en: (a) análisis de código del estado de animación/estructura de TODAS las vistas, (b) spot-check visual de home dashboard y home admin por el padre, (c) recorrido visual completo del admin por subagente visual-qa (18 rutas + detalles, prod :3001), (d) estado documentado en B15. Las vistas que se EJECUTEN se verifican visualmente una por una en Fase 2.
+
+#### Shell / chrome (ambos lados)
+- Sidebars (dashboard `SidebarNav`, admin `admin-sidebar`) ya con motion; admin-sidebar respeta reduced-motion. Topbars estáticos y correctos (animarlos no comunicaría nada). PageTransition admin + transición de tabs ya existen. OK. Oportunidad menor: feedback hover/active más nítido en items de nav.
+
+#### DASHBOARD
+- **/dashboard (home)** — secciones animadas ✅; pero el **PageHeader del saludo NO revela** → arranque desparejo (header estático, contenido de abajo entra animado). Para `client-a`: health score "CALIBRANDO" + 1 attention card → se siente algo vacío. **Oportunidad:** reveal suave del header para alinear el arranque.
+- **/dashboard/chatbot (overview)** — `ChatbotOverview` con motion ✅.
+- **/dashboard/chatbot/conversations** — `ConversationsTable` stagger + EmptyState B13.3 ✅.
+- **/dashboard/chatbot/install** — `ClientInstallView` SIN motion → estática. Pasos/snippets de instalación. **Oportunidad:** reveal secuencial de pasos (comunica onboarding).
+- **/dashboard/chatbot/knowledge** — KB read-only, probable estática. Oportunidad menor.
+- **/dashboard/chatbot/leads** — `ClientLeadsTable` con motion ✅.
+- **/dashboard/chatbot/settings** — `BotPersonalization`; B15 decidió NO animar (form settings = decorativo). Respetar.
+- **/dashboard/leads** — `LeadsTable` animada ✅.
+- **/dashboard/messages** — `FadeIn` page + `MessageThread` animado ✅.
+- **/dashboard/plan** — ❌ TOTALMENTE ESTÁTICA. `PageHeader` + `UsageMeter` (server, sin motion) + `PlansShowcase` (server, 3 cards sin motion). Alta visibilidad (consumo + upgrade). Medidor con barra shine y cards con buena jerarquía, pero entran de golpe. **Oportunidad TOP:** reveal secuenciado de secciones + stagger de las 3 plan-cards. Puramente presentacional (wrappers).
+- **/dashboard/project** — `FadeIn` page + `ProjectTaskTabs` animado ✅.
+- **/dashboard/services** — `FadeIn` page ✅.
+- **/dashboard/resultados** → redirige a `/trafico`. `trafico` y `seo` con `FadeIn` page ✅. Charts estáticos pero revelan dentro del bloque (no animar el dibujado del chart, sería caro/decorativo).
+- **/dashboard/resultados/reputacion** — ❌ `GBPMetricsCard` o empty state, ambos estáticos, SIN FadeIn page (a diferencia de seo/trafico → inconsistencia). **Oportunidad:** alinear con seo/trafico (FadeIn page). Bajo riesgo.
+- **/dashboard/soporte** — `SoporteTabsClient` animado ✅.
+- **/dashboard/cuenta/{perfil,facturacion,boveda}** — `FadeIn` page ✅.
+- **/dashboard/modules/{agenda,motor-resenas,tienda,email-marketing}** — gated por seed; `client-a` los tiene inactivos → redirige a /dashboard. No verificables sin activar seed (deuda separada, B15). PageHeaders ya migrados. No tocar a ciegas.
+
+#### ADMIN (lenguaje de panel propio — evaluar DENTRO de él, NO migrar al dashboard)
+Recorrido visual del subagente: TODAS las rutas cargan, sin blancos, sin errores JS críticos, navegación coherente, paleta cyan + glassmorphism consistente.
+- **/admin (AgencyOsPage)** — panel boxed con KPIs comerciales/operativos/financieros + stat tiles. Mucho espacio negro abajo (patrón "command center" intencional). Entra estático. B15 intentó migrarlo a tokens del dashboard y se REVIRTIÓ — NO repetir. **Oportunidad:** reveal de secciones KPI dentro del lenguaje panel, si aporta.
+- **/admin/chatbots** — stagger reveal (B15) ✅.
+- **/admin/chatbots/new** — `CreateBotForm` con motion. No animar de más.
+- **/admin/chatbots/[botId]** — `BotDetailClient` + tabs. Overview consolidado (B15). El subagente notó **transición entre tabs instantánea (sin fade)**. **Oportunidad:** `AnimatePresence mode="wait"` + fade del contenido del tab al cambiar (comunica el cambio). A confirmar que el switch sea presentacional.
+- **/admin/clients** — `ClientsListClient` stagger + reduced-motion ✅.
+- **/admin/clients/[clientId]** — `ClientTabsNav` + `TabContentTransition` + `QuickActionMotion` con motion ✅. Bien animado. (El subagente notó preview lento por densidad de datos — perf, no estético.)
+- **/admin/clients/new** — form. No animar de más.
+- **/admin/leads** — pipeline Kanban (Outbound/Inbound) + tablas; `lead-*` mayormente sin motion. **Oportunidad posible:** reveal de columnas/cards del pipeline si estático.
+- **/admin/projects** — `project-list` stagger (B15) ✅. El subagente notó densidad alta por card (monto/inicio/pagos/tareas/horas) → jerarquía mejorable (destacar monto, bajar peso de metadata) — toque tipográfico de bajo riesgo.
+- **/admin/tickets** — `ticket-list` stagger (B15) ✅.
+- **/admin/messages** — `conversation-list` stagger (B15) ✅. Split-view.
+- **/admin/team** — `member-workload` sin motion. Cards de miembros. **Oportunidad posible:** stagger reveal de las cards (mismo estándar que las otras listas admin).
+- **/admin/settings** + **/settings/{alerts,reports}** — consolas/forms de settings. NO animar (decorativo, mismo criterio que dashboard settings).
+- **/admin/alerts** — `AlertsClient` con motion ✅. Empty state minimalista (texto + 🎉).
+- **/admin/audit-log** — `AuditLogClient` con motion + reduced-motion ✅. ⚠️ El subagente cazó un **leak de texto `(scaffolding)`** en un entry "LEAD_STATUS_CHANGED" → ANOTADO para Franco (vive en generación de label/datos, no presentación → fuera de Regla #0).
+- **/admin/chatbot/activity** — chart Recharts animado + log de eventos ✅.
+- **/admin/chatbot/health** — health score con secciones; entra estático; tiene empty states ("SIN DATOS" coherentes). **Oportunidad posible:** reveal de secciones si aporta.
+
+### Oportunidades priorizadas a EJECUTAR (Fase 2) — orden por impacto / riesgo bajo
+1. **Dashboard /plan** — reveal secuenciado de secciones + stagger de las 3 plan-cards. (TOP: alta visibilidad, hoy 100% estática.)
+2. **Dashboard home** — reveal del PageHeader del saludo (arranque parejo).
+3. **Dashboard /resultados/reputacion** — FadeIn page para igualar a seo/trafico (corrige inconsistencia).
+4. **Dashboard /chatbot/install** — reveal secuencial de pasos (si estática).
+5. **Admin /admin/chatbots/[botId]** — fade del contenido de tab al cambiar (si presentacional).
+6. **Admin /admin/team** — stagger reveal de cards de miembros (estándar de las otras listas).
+7. **Admin /admin home + leads + health** — reveal de secciones SI estáticos y SIN tocar el lenguaje de panel.
+8. **Micro-interacciones puntuales** — `hoverLift`/`buttonPress` (variants existentes) donde CTAs/cards accionables no tienen feedback, a nivel vista (no en primitivos compartidos).
+
+Criterio transversal: animación SOLO donde comunica (llegada/jerarquía/progreso), nunca decorativa; `useReducedMotion` respetado; `will-change` en lo pesado; sin re-renders ni waterfalls; commits atómicos por vista; cada vista ejecutada se verifica con screenshot real (desktop+mobile) antes de cerrar.
+
+### Anotado para Franco (NO ejecutado — dirección, bug funcional, o fuera de Regla #0)
+1. **Leak `(scaffolding)`** en /admin/audit-log (entry LEAD_STATUS_CHANGED). Bug real, pero el texto se genera en label/datos (no presentación) → funcional, fuera de scope. Buscar el origen del label y removerlo en un fix propio.
+2. **Formato `$10.0000`** (5 decimales) en revenue del detalle de bot: `StatCard` con `format="currency"` hace `value.toFixed(4)` (pensado para costos LLM en centavos). Para revenue es el formato equivocado → semántico/lógico (prop equivocada), no estético. Fix propio.
+3. **Unificación del sistema de animación** (3 sets de reveal coexisten) → primitivo compartido, decisión de dirección.
+4. **Unificación admin↔dashboard** (decisión #3 de B15) → sigue siendo tuya, no autónoma.
+5. **Módulos premium gated por seed** (no verificables sin activar) → deuda de seed.
+6. **Empty states admin con ilustración SVG** (alerts/team/health hoy son texto + emoji): es una mejora válida pero agregar ilustraciones nuevas es más diseño-nuevo que pulido → propuesta para Franco, no autónoma.
+7. Cualquier mejora que requiera tocar lógica/data/props de comportamiento → anotada al aparecer.
