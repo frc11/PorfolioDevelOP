@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { AnimatePresence, motion } from 'motion/react'
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
+import { staggerContainer, staggerItem } from '@/lib/motion-variants'
 import Link from 'next/link'
 import { Bot, MessageSquare, Users, Search } from 'lucide-react'
 import { Card } from '@/components/ui/Card'
@@ -21,6 +22,7 @@ export function BotsListClient({ bots }: Props) {
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all')
   const [industryFilter, setIndustryFilter] = useState<string>('all')
   const [selected, setSelected] = useState<Set<string>>(new Set())
+  const reduce = useReducedMotion()
 
   const filtered = useMemo(() => {
     return bots.filter(bot => {
@@ -127,16 +129,23 @@ export function BotsListClient({ bots }: Props) {
           }
         />
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+        <motion.div
+          key={`${statusFilter}-${industryFilter}`}
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"
+          variants={staggerContainer}
+          initial={reduce ? false : 'hidden'}
+          animate="visible"
+        >
           {filtered.map(bot => (
             <BotCard
               key={bot.id}
               bot={bot}
               selected={selected.has(bot.id)}
               onToggleSelect={() => toggleSelected(bot.id)}
+              reduce={Boolean(reduce)}
             />
           ))}
-        </div>
+        </motion.div>
       )}
     </div>
   )
@@ -146,13 +155,20 @@ function BotCard({
   bot,
   selected,
   onToggleSelect,
+  reduce,
 }: {
   bot: BotListItem
   selected: boolean
   onToggleSelect: () => void
+  reduce: boolean
 }) {
   return (
-    <motion.div className="relative" whileHover={{ y: -2 }} transition={{ duration: 0.2 }}>
+    <motion.div
+      className="relative"
+      variants={staggerItem}
+      whileHover={reduce ? undefined : { y: -2 }}
+      transition={{ duration: 0.2 }}
+    >
       <input
         type="checkbox"
         checked={selected}
