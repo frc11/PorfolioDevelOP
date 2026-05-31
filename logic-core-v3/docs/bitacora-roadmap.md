@@ -10303,6 +10303,7 @@ Considerado y **descartado**. El único contenido genuinamente útil sería list
 **(a) Qué se tocó (commits atómicos por vista):**
 - `f2f36af` — V1 dashboard home: sentence-case "Resultados de la semana" + section labels al token `tracking-[0.24em]`.
 - `9628b80` — V6 admin headers: `leads` título a `text-3xl`, `chatbots` a `font-semibold` (convención admin propia).
+- `47b6721` — **Animación con propósito** (lista de bots admin, `BotsListClient`): stagger reveal fade+slide-up con las variants del sistema (`staggerContainer`/`staggerItem`, mismo patrón que el home), re-revela al cambiar filtro estado/industria, respeta `prefers-reduced-motion`, hover preservado. Verificado visual-qa desktop+mobile.
 - `b0bc086` → REVERTIDO por `bb4cf0d` — V4 admin overview: intento de migrar a tokens del dashboard, revertido al descubrir que rompía la consistencia con 36 paneles admin hermanos.
 
 **(b) Decisiones de DIRECCIÓN anotadas (NO ejecutadas — esperan a Franco):**
@@ -10316,10 +10317,12 @@ Considerado y **descartado**. El único contenido genuinamente útil sería list
 - V5 admin bot editor: ya usa tokens + StatCard; paridad de preview ya integrada (`6f65749`).
 - Resto admin: lenguaje propio coherente (ver decisión #3).
 
+**(e) Animación con propósito:** el patrón de stagger reveal del sistema (motion-variants) queda aplicado en AMBOS lados — dashboard home (nativo, pre-existente) y admin lista de bots (`47b6721`, agregado). Criterio: solo donde COMUNICA (llegada/filtrado de una lista), nunca decorativo; reduced-motion respetado. NO se agregó a forms de settings (sería decorativo) ni se forzó en RSC (evita romper el límite servidor/cliente).
+
 **(d) Confirmaciones del brief:**
 - ✅ Build final verde + tsc verde.
 - ✅ NINGÚN push hecho (solo commits locales).
 - ✅ CERO funcionalidad tocada (solo clases/copy de presentación). El cambio funcional pendiente de Franco en `BotDetailClient.tsx` (`prefetch={false}`) NO fue tocado ni commiteado.
 - ✅ Aplicar-no-inventar respetado: el único intento de "inventar" (migrar admin a tokens del dashboard, V4) fue cazado y revertido; el resto de decisiones de dirección quedan anotadas para Franco, no ejecutadas.
 
-**Conclusión honesta:** el portal ya estaba en buena forma (dashboard consolidado en B13.2/CC.5; admin coherente consigo mismo). El valor real de B15 no fue volumen de cambios sino **disciplina**: 3 consolidaciones seguras + identificar que la "consolidación grande" (unificar admin y dashboard bajo un solo lenguaje) es una decisión estratégica de Franco, no trabajo mecánico autónomo. Evitar el Frankenstein fue el entregable principal.
+**Conclusión honesta:** el portal ya estaba en buena forma (dashboard consolidado en B13.2/CC.5; admin coherente consigo mismo). El valor real de B15 no fue volumen de cambios sino **disciplina**: 4 commits seguros (consolidación V1 + headers admin V6 + animación con propósito) + identificar que la "consolidación grande" (unificar admin y dashboard bajo un solo lenguaje) es una decisión estratégica de Franco, no trabajo mecánico autónomo. Evitar el Frankenstein (cazar y revertir V4) fue tan parte del entregable como lo que sí se tocó.
