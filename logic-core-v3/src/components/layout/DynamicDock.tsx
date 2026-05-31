@@ -1,18 +1,13 @@
 "use client";
 
-import { AnimatePresence, motion, useMotionValue, useSpring } from "motion/react";
+import { AnimatePresence, motion, useMotionValue, useSpring, type Transition } from "motion/react";
 import {
     Bot,
-    Briefcase,
     Code2,
-    Globe,
     House,
-    Layers3,
     LogIn,
-    Mail,
-    Sparkles,
-    Users,
-    Zap,
+    Network,
+    Workflow,
     type LucideIcon,
 } from "lucide-react";
 import Image from "next/image";
@@ -26,76 +21,27 @@ type NavItem = {
     href: string;
     label: string;
     icon: LucideIcon;
-};
-
-type ServiceItem = {
-    href: string;
-    label: string;
-    subLabel: string;
-    price: string;
-    icon: LucideIcon;
-    color: string;
+    color?: string;
 };
 
 const NAV_ITEMS: readonly NavItem[] = [
     { href: "/#inicio", label: "Inicio", icon: House },
-    { href: "/#nosotros", label: "Nosotros", icon: Users },
-    { href: "/#portfolio", label: "Portfolio", icon: Briefcase },
-    { href: "/#servicios", label: "Servicios", icon: Layers3 },
-    { href: "/#caracteristicas", label: "Características", icon: Sparkles },
-    { href: "/contact", label: "Contacto", icon: Mail },
+    { href: "/web-development", label: "Desarrollo Web", icon: Network, color: "#06b6d4" },
+    { href: "/ai-implementations", label: "Chatbot", icon: Bot, color: "#10b981" },
+    { href: "/software-development", label: "Desarrollo de Software", icon: Code2, color: "#8b5cf6" },
+    { href: "/process-automation", label: "Automatizaciones", icon: Workflow, color: "#f59e0b" },
 ] as const;
 
-const SERVICE_ITEMS: readonly ServiceItem[] = [
-    {
-        href: "/web-development",
-        label: "Sitio Web",
-        subLabel: "Presencia profesional",
-        price: "$800",
-        icon: Globe,
-        color: "#06b6d4",
-    },
-    {
-        href: "/ai-implementations",
-        label: "Agente IA",
-        subLabel: "Atencion 24/7",
-        price: "$300",
-        icon: Bot,
-        color: "#8b5cf6",
-    },
-    {
-        href: "/software-development",
-        label: "Software",
-        subLabel: "Sistema a medida",
-        price: "$1.500",
-        icon: Code2,
-        color: "#10b981",
-    },
-    {
-        href: "/process-automation",
-        label: "Automatizacion",
-        subLabel: "Tareas automaticas",
-        price: "$200",
-        icon: Zap,
-        color: "#f59e0b",
-    },
-] as const;
-
-const SERVICE_ROUTE_SET = new Set<string>(SERVICE_ITEMS.map((item) => item.href));
-const HASH_TO_LABEL: Readonly<Record<string, string>> = {
-    "#inicio": "Inicio",
-    "#nosotros": "Nosotros",
-    "#portfolio": "Portfolio",
-    "#servicios": "Servicios",
-    "#caracteristicas": "Características",
+const ROUTE_TO_LABEL: Readonly<Record<string, string>> = {
+    "/web-development": "Desarrollo Web",
+    "/ai-implementations": "Chatbot",
+    "/software-development": "Desarrollo de Software",
+    "/process-automation": "Automatizaciones",
 };
 
-function getActiveTab(pathname: string, hash: string): string {
-    if (pathname === "/contact") return "Contacto";
-    if (SERVICE_ROUTE_SET.has(pathname)) return "Servicios";
-    if (pathname !== "/") return "";
-
-    return HASH_TO_LABEL[hash] ?? "Inicio";
+function getActiveTab(pathname: string): string {
+    if (pathname === "/") return "Inicio";
+    return ROUTE_TO_LABEL[pathname] ?? "";
 }
 
 function getLightLevel(scrollPosition: number, viewportHeight: number): "light" | "dark" {
@@ -168,85 +114,6 @@ function MagneticItem({
     );
 }
 
-function ServicesMenu({ onActivate }: { onActivate: (href: string) => void }) {
-    return (
-        <motion.div
-            initial={{ opacity: 0, y: 10, scale: 0.98 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 8, scale: 0.98 }}
-            transition={{ type: "spring", stiffness: 420, damping: 34 }}
-            className="absolute bottom-[calc(100%+18px)] left-1/2 z-50 w-[336px] -translate-x-1/2 rounded-[1.25rem] border border-white/[0.08] bg-[#050507]/88 p-2 shadow-[0_24px_80px_rgba(0,0,0,0.56)]"
-            style={{ backdropFilter: "blur(42px) saturate(180%)" }}
-        >
-            <div className="space-y-1">
-                {SERVICE_ITEMS.map((item) => (
-                    <motion.button
-                        key={item.href}
-                        type="button"
-                        initial="rest"
-                        whileHover="hover"
-                        whileTap={{ scale: 0.985 }}
-                        variants={{
-                            rest: { backgroundColor: "rgba(255,255,255,0)" },
-                            hover: { backgroundColor: `${item.color}10` },
-                        }}
-                        onClick={(event) => {
-                            event.preventDefault();
-                            event.stopPropagation();
-                            onActivate(item.href);
-                        }}
-                        className="grid w-full grid-cols-[28px_minmax(0,1fr)_auto] items-center gap-2.5 rounded-[10px] px-3 py-2.5 text-left"
-                    >
-                        <div
-                            className="flex h-7 w-7 items-center justify-center rounded-lg"
-                            style={{
-                                background: `${item.color}18`,
-                                border: `1px solid ${item.color}30`,
-                            }}
-                        >
-                            <item.icon size={14} color={item.color} strokeWidth={1.5} />
-                        </div>
-
-                        <div className="min-w-0">
-                            <div className="text-[13px] font-medium text-white/85">
-                                {item.label}
-                            </div>
-                            <div className="mt-[1px] text-[10px] text-white/35">
-                                {item.subLabel}
-                            </div>
-                        </div>
-
-                        <motion.div
-                            variants={{
-                                rest: { opacity: 0.7, scale: 1 },
-                                hover: { opacity: 1, scale: 1.03 },
-                            }}
-                            transition={{ duration: 0.14 }}
-                            className="whitespace-nowrap text-[11px] font-medium"
-                            style={{ color: item.color }}
-                        >
-                            {item.price}
-                        </motion.div>
-                    </motion.button>
-                ))}
-            </div>
-
-            <motion.button
-                type="button"
-                whileTap={{ scale: 0.985 }}
-                onClick={(event) => {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    onActivate("/#servicios");
-                }}
-                className="mt-2 flex w-full items-center justify-center rounded-[10px] border border-white/[0.06] px-3 py-2.5 text-[10px] font-semibold tracking-[0.18em] text-white/46 transition-colors duration-150 hover:text-white/74"
-            >
-                VER TODOS LOS SERVICIOS
-            </motion.button>
-        </motion.div>
-    );
-}
-
 function DockCta({ isExpanded }: { isExpanded: boolean }) {
     const { triggerTransition } = useTransitionContext();
 
@@ -313,6 +180,7 @@ function DockItem({
     item,
     isExpanded,
     isHighlighted,
+    pillTransition,
     onActivate,
     onHoverStart,
     onHoverEnd,
@@ -321,6 +189,7 @@ function DockItem({
     item: NavItem;
     isExpanded: boolean;
     isHighlighted: boolean;
+    pillTransition: Transition;
     onActivate: (label: string) => void;
     onHoverStart: () => void;
     onHoverEnd: () => void;
@@ -349,8 +218,12 @@ function DockItem({
                 {isHighlighted ? (
                     <motion.div
                         layoutId="navbar-pill"
-                        transition={{ type: "spring", stiffness: 420, damping: 34, mass: 0.72 }}
-                        className="absolute inset-0 rounded-[18px] border border-white/[0.08] bg-white/10"
+                        transition={pillTransition}
+                        className="absolute inset-0 rounded-[18px] border"
+                        style={{
+                            borderColor: item.color ? `${item.color}3d` : "rgba(255,255,255,0.08)",
+                            backgroundColor: item.color ? `${item.color}1f` : "rgba(255,255,255,0.10)",
+                        }}
                     />
                 ) : null}
 
@@ -380,6 +253,7 @@ function DockItem({
                                 size={isExpanded ? 16 : 15}
                                 strokeWidth={1.75}
                                 className={isHighlighted ? "text-white" : "text-white/72"}
+                                color={isHighlighted && item.color ? item.color : undefined}
                             />
                         </motion.div>
 
@@ -395,7 +269,9 @@ function DockItem({
                                     style={{
                                         fontSize: 9,
                                         letterSpacing: "0.05em",
-                                        color: isHighlighted ? "rgba(255,255,255,0.58)" : "rgba(255,255,255,0.4)",
+                                        color: isHighlighted
+                                            ? item.color ?? "rgba(255,255,255,0.58)"
+                                            : "rgba(255,255,255,0.4)",
                                     }}
                                 >
                                     {item.label}
@@ -409,9 +285,11 @@ function DockItem({
     );
 }
 
+const PILL_SPRING: Transition = { type: "spring", stiffness: 420, damping: 34, mass: 0.72 };
+const PILL_INSTANT: Transition = { duration: 0 };
+
 export function DynamicDock() {
     const pathname = usePathname();
-    const { triggerTransition } = useTransitionContext();
 
     const lastScrollY = useRef(0);
     const collapseTimeoutRef = useRef<number | null>(null);
@@ -468,19 +346,26 @@ export function DynamicDock() {
     }, []);
 
     useEffect(() => {
-        if (typeof window === "undefined") return;
-
-        const syncActiveTab = () => {
-            setActiveTab(getActiveTab(pathname, window.location.hash));
-        };
-
-        syncActiveTab();
-        window.addEventListener("hashchange", syncActiveTab);
-
-        return () => {
-            window.removeEventListener("hashchange", syncActiveTab);
-        };
+        setActiveTab(getActiveTab(pathname));
     }, [pathname]);
+
+    // Gate the pill's layout transition: spring (slide) only on the render where the
+    // highlight moves to another item (hover / route change); for scroll/expand/collapse/
+    // resize reflows the highlight is unchanged, so the pill snaps to its item's new box
+    // instantly (duration 0) with no lateral glide.
+    //
+    // We read the ref during render and update it in an effect (which does NOT re-render).
+    // This is intentional and required: a state-based equivalent forces an extra render to
+    // duration:0 right after the spring starts, truncating the slide mid-flight. Reading the
+    // ref here keeps the spring committed on the "moved" render alive until the next natural
+    // re-render. So the react-hooks/refs lint rule is disabled on the read below by design.
+    const prevHighlightRef = useRef(highlightedTab);
+    // eslint-disable-next-line react-hooks/refs
+    const highlightMoved = prevHighlightRef.current !== highlightedTab;
+    useEffect(() => {
+        prevHighlightRef.current = highlightedTab;
+    });
+    const pillTransition = highlightMoved ? PILL_SPRING : PILL_INSTANT;
 
     const clearCollapseTimeout = () => {
         if (collapseTimeoutRef.current !== null) {
@@ -567,19 +452,11 @@ export function DynamicDock() {
                             item={item}
                             isExpanded={isExpanded}
                             isHighlighted={highlightedTab === item.label}
+                            pillTransition={pillTransition}
                             onActivate={handleTabActivate}
                             onHoverStart={() => setHoveredTab(item.label)}
                             onHoverEnd={() => setHoveredTab(null)}
-                        >
-                            {item.label === "Servicios" && hoveredTab === "Servicios" ? (
-                                <ServicesMenu
-                                    onActivate={(href) => {
-                                        setActiveTab("Servicios");
-                                        triggerTransition(href);
-                                    }}
-                                />
-                            ) : null}
-                        </DockItem>
+                        />
                     ))}
                 </div>
 
