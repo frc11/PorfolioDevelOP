@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { Info, MessageCircle, Star } from 'lucide-react'
+import { FadeIn } from '@/components/dashboard/FadeIn'
 import { GBPMetricsCard } from '@/components/dashboard/results/GBPMetricsCard'
 import { getGBPMetrics } from '@/lib/integrations/google-business-profile'
 import type { GBPLocationMetrics } from '@/lib/integrations/google-business-profile'
@@ -18,9 +19,9 @@ export default async function ReputacionPage() {
   }
 
   return (
-    <div className="flex flex-col gap-6">
+    <FadeIn className="flex flex-col gap-6">
       {metrics ? <GBPMetricsCard metrics={metrics} /> : <ReputationEmptyState />}
-    </div>
+    </FadeIn>
   )
 }
 
