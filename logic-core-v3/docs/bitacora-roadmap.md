@@ -10474,3 +10474,171 @@ Cada cambio es puramente presentacional (className/motion/JSX de wrapper). Cero 
 - ✅ Commits atómicos por vista (cherry-pickeables / descartables granularmente).
 - ✅ Reduced-motion respetado en todo lo nuevo; charts Recharts intactos; sin re-renders extra (wrappers presentacionales, datos computados igual server-side).
 - ✅ Auditoría escrita ANTES de ejecutar (entregable clave).
+
+---
+
+## ✅ FIX.1 — Build verde (probe: ¿`@googleapis/webmasters` falta de verdad?)
+
+**Contexto (AUDIT-4):** `next build` cortaba porque `@googleapis/webmasters` (declarado en `package.json:28`) no estaba en `node_modules`. Sin saber si faltaba en el repo o era `node_modules` local desincronizado → PROBE-FIRST, no asumir.
+
+**Resultado del probe — ERA ENTORNO LOCAL, no falta nada en el repo:**
+
+| Check | Resultado |
+|---|---|
+| `@googleapis/webmasters` en `package.json` | ✅ línea 28 (`^4.0.0`) |
+| `@googleapis/webmasters` en `package-lock.json` | ✅ líneas 18 + 862 (resuelta a `webmasters-4.0.0.tgz`) |
+| `npm ci` (limpio, reinstala desde lock) | ✅ 1022 paquetes, `postinstall: prisma generate` verde |
+| `npm run build` (webpack) | ✅ **EXIT 0** — "Compiled successfully in 22.9s", 30/30 páginas estáticas |
+| Cambios en `package.json` / `package-lock.json` | ✅ **cero** (`git diff` vacío) |
+
+**Diagnóstico:** la dependencia **no falta** — está declarada, está en el lock y se instala correctamente desde el lock. El fallo de build de AUDIT-4 fue un `node_modules` local desincronizado; `npm ci` lo resolvió. La TAREA condicional (agregar dep) **no se disparó**.
+
+**Qué se hizo:** NADA de código. Solo `npm ci` (reinstalación de entorno). Cero cambios al repo.
+
+**Healthcheck:** `npm run build` exit 0 confirmado (re-corrida limpia). Prerequisito del resto cumplido — build verde, lock consistente, se puede seguir.
+
+---
+
+## ✅ FIX.2 — BUG A: `/chat` tiraba 500 en los 4 bots (provider enum MAYÚSCULA)
+
+**Contexto (AUDIT-2):** B11.4 enum-izó `llmProvider` a MAYÚSCULA (`GOOGLE`); el factory de providers solo aceptaba minúscula (`'google'`), sin normalización. `handleChatRequest:524` → `getLLMProvider(bot.llmProvider as LLMProviderName)` = `getLLMProvider("GOOGLE")` → `default: throw new Error('Unknown LLM provider: GOOGLE')` → outer catch → **HTTP 500 en runtime para los 4 bots**. El cast `as LLMProviderName` engañaba a tsc (build/AUDIT-1 verdes) y el health-probe `GET /smoke` lo ocultaba (usa el provider default del env, bypassea el campo del bot). **El producto no respondía.**
+
+**Discovery (subagente Explore):** además de `:524`, había un **segundo call-site con el mismo bug** — `src/app/api/admin/chatbot/demo-chat/[slug]/route.ts:45` (también pasa `bot.llmProvider` casteado). Los demás call-sites pasan literal `'google'` o sin arg. **Cero normalización** preexistente en todo `src/` (grep confirmado).
+
+**Fix (decisión lockeada: normalizar en el factory, NO tocar el enum → sin migración):**
+- `src/modules/chatbot/server/llm/factory.ts:20-26` — el nombre resuelto se normaliza con `.toLowerCase()` **antes** del switch y del cache. `"GOOGLE"`, `"google"`, `"Google"` resuelven todos a `case 'google'`. Switch, cache, default y exhaustiveness-check intactos.
+- **Una sola línea de lógica, un solo archivo.** Centralizar en el factory tapa el síntoma (`:524`) **y** previene el próximo caso (`demo-chat:45` y cualquier provider que venga en mayúscula del enum).
+- Lookup `:524` **no se tocó** — con el factory tolerante, el cast existente funciona en runtime. Verificado.
+
+**🔴 Verificación runtime (lo que define el sprint — POST /chat REAL, no el health-probe `/smoke`):**
+- Build prod local verde → server QA `next start -p 3001` (`QA_ALLOW_LOCALHOST=1`).
+- **POST real** `→ /api/chatbot/matsu/chat` con `{messages, sessionId, currentPath}` (mismo contrato que el runner de regresión; sessionId `regression-test-fix2-buga-*` purgeable).
+- **Resultado: HTTP 200** + stream data-protocol del AI SDK con `providerMetadata.vertex` (prueba de que `getLLMProvider("GOOGLE")`→`'google'`→`GoogleProvider`/Vertex resolvió e invocó el modelo). Respuesta real del bot: *"Bien, ¿vos? Contame, ¿qué necesitás saber sobre Matsu hoy?"*, `finishReason:"stop"`. Cero `Unknown LLM provider` en el body.
+- **Antes:** 500 `Unknown LLM provider: GOOGLE`. **Ahora:** 200 + respuesta. Bug realmente cerrado en runtime.
+- **Bots de cliente (develop/sanmiguel):** NO se postearon para no ensuciar data real (disciplina de la auditoría). Comparten el código path idéntico (todos `llmProvider="GOOGLE"` → mismo factory), así que el fix centralizado los cubre.
+
+**Anti-ensuciar:** la prueba creó 1 conversation + 2 mensajes + 1 event, **0 leads** (saludo benigno). Purgada quirúrgicamente solo por su prefijo `regression-test-fix2-buga-` (host-check dev + verify-prefijo + transacción), sin tocar las 279 conversaciones `regression-test-` históricas. Scripts efímeros borrados. `git status` final = solo `factory.ts` + esta bitácora.
+
+**🟡 Deuda anotada para Franco (NO ejecutada — prolijidad post-deploy):** el enum `LlmProvider` (MAYÚSCULA) y el tipo `LLMProviderName` (minúscula) siguen desalineados. El factory tolerante lo absorbe en runtime, pero **alinearlos** (enum→minúscula, o un tipo único, eliminando los casts `as LLMProviderName` de `:524` y `demo-chat:45`) sería más limpio. Requiere migración → decisión tuya, post-deploy.
+
+**Healthcheck:** `tsc --noEmit` exit 0 · `npm run build` exit 0 · POST `/chat` real **200**. Sin esto no había producto — cierre crítico del bloque.
+
+---
+
+## ✅ FIX.3 — A1: gatear insights + weekly-report por plan (server-side)
+
+**Contexto (AUDIT-2 / A1):** `planAllows(plan,'insight')` y `planAllows(plan,'reports')` existían pero con **0 callers** en runtime (solo `'crm'` se chequeaba). Los crons `generate-insights` (diario) y `send-weekly-reports` (lunes), agendados en `netlify.toml`, iteraban `findMany({where:{isActive:true}})` **sin mirar el plan** → un STARTER / org sin plan (`insightEnabled:false`/`reportsEnabled:false`) recibiría insights y el reporte semanal que su plan excluye. Integridad de producto, no seguridad.
+
+**Discovery (subagente Explore):** patrón gold-standard a clonar = el gate de `'crm'` en `syncLeadToCrm.ts:59-64` → `const plan = await getPlanForOrg(org.id)` (cacheado 60s, fallback features=false para orgs sin plan) → `if (!planAllows(plan, feature)) return/skip`. Ambos crons ya traen `bot.organization` (con `id`) en su `findMany` → **no hizo falta tocar el query** (cero over-fetch). `planAllows` ya soportaba `'insight'`/`'reports'`.
+
+**Fix (mismo patrón que 'crm', placed ANTES de la generación):**
+- `generate-insights/route.ts` — al tope del loop, antes de `generateInsightsForBot(bot.id)`: `getPlanForOrg(bot.organization.id)` + `if (!planAllows(plan,'insight')) { results.skipped_plan++; continue }`. Nuevo contador `skipped_plan` en el JSON de respuesta.
+- `sendWeeklyReports.ts` — al tope del loop, antes de `buildWeeklyReport(bot.id)`: idéntico con `planAllows(plan,'reports')` + `results.skippedPlan++`. Campo aditivo `skippedPlan` en `SendWeeklyReportsResult` (consumido por el cron route y por `admin/reports/send-now` — el gate ahora aplica también al "enviar ahora" del admin, correcto: defensa en profundidad).
+- 🔴 **Lógica de generación INTACTA** — solo se agregó el gate de quién entra. `generateInsightsForBot`/`buildWeeklyReport`/envío de emails sin tocar.
+
+**🔴 Verificación (probe read-only sobre data real — cero generación, cero emails, cero escrituras):** por cada bot activo se leyó `subscription→plan` y se replicó la decisión del gate:
+
+| bot | plan | insight | reports |
+|---|---|---|---|
+| matsu | BUSINESS | GENERA | ENVÍA |
+| develop | FALLBACK (sin plan) | **SKIP (gate)** | **SKIP (gate)** |
+| sanmiguel | BUSINESS | GENERA | ENVÍA |
+
+→ INSIGHTS: 2 generarían, **1 salteado por plan**. WEEKLY: 2 enviarían, **1 salteado por plan**. El gate filtra de verdad (no es tautología): `develop` (org sin plan → fallback features=false) que **pre-FIX.3 recibía ambos**, ahora se saltea — exactamente la fuga de A1. Probe efímero removido. No se postearon los crons en vivo a propósito: generar insights / mandar el weekly dispararía LLM + emails reales (mutación). El gate corre ANTES de eso, así que el probe de datos lo prueba sin efectos.
+
+**Observación de datos (no es bug de código, para Franco):** el bot propio `develop` no tiene plan/subscription asignado → cae en FALLBACK. Si la agencia quiere insights/reporte para su propio bot, asignarle un plan PRO/BUSINESS.
+
+**🟡 NOTA PENDIENTE PARA FRANCO (verificación de infra, no de código):** confirmá en el **dashboard de Netlify** si los scheduled functions `generate-insights-cron` y `send-weekly-reports-cron` **realmente disparan** las rutas — el mapeo nombre-de-función→ruta de `@netlify/plugin-nextjs` NO es obvio (`generate-insights-cron` ≠ ruta `generate-insights`). El gate se cableó igual por correctitud, pero saber si los cron están vivos define la **urgencia real**: si disparan, la fuga era ACTIVA (clientes sin plan recibiendo features); si no, era latente. En ambos casos el gate ahora está bien.
+
+**Healthcheck:** `tsc --noEmit` exit 0 · `npm run build` exit 0 · gate verificado sobre data real (1/3 bots correctamente salteado en ambos crons).
+
+---
+
+## ✅ FIX.4 — BUG B: tool-call inválida perdía el mensaje del assistant (toolCalls no serializable)
+
+**Contexto (AUDIT-2 / BUG B):** si el modelo emitía un `capture_lead` con input inválido (ej. teléfono `"123"`, falla Zod `min(5)`), el AI SDK marcaba la tool-call `invalid:true` con un `error: ZodError` que tiene `addIssue:[Function]` — NO serializable. `handleChatRequest.ts:656` persistía `allToolCalls` crudo → `prisma.chatMessage.create` hacía **throw** (`"could not serialize [object Function]"`) → caía en el catch `chat.persist_error` → **el mensaje del assistant de ese turno se perdía** (sin crash, pero hueco en el historial). Disparable por un usuario tipeando un teléfono corto — frecuente.
+
+**Discovery (subagente Explore):** confirmada la causa (el `error: ZodError` en el elemento `DynamicToolCall`). `allToolCalls` se arma en `:604-605` (`steps.flatMap(s => s.toolCalls)`). Los consumidores (`parseToolCalls` del runner) solo leen `toolName` + `input`/`args`; el front lee del stream del SDK, no de la columna DB. Columna `ChatMessage.toolCalls Json?`. → la forma sanitizada solo necesita ser serializable y mantener `toolName`+`input`.
+
+**Fix (`handleChatRequest.ts`, solo el qué/cómo se persiste — la validación Zod NO se tocó):**
+- Nuevo helper `sanitizeToolCallsForPersist(toolCalls)` (exportado para testeo): mapea cada tool-call a un objeto **solo con campos serializables** — `toolName` + `input` (lo que ya leen los consumidores) + `toolCallId`, y para las inválidas `invalid:true` + `error` como **STRING** legible (vía `summarizeToolCallError`, que extrae `issues` `path: message` del ZodError, o `.message`, o `String()`). El objeto `ZodError` con la función se descarta.
+- `:656` ahora persiste `sanitizeToolCallsForPersist(allToolCalls)` en vez del array crudo.
+- Cero `any` (campos tipados estructuralmente como `unknown` y narrowed). Validación Zod de `captureLead` intacta — sigue rechazando teléfonos inválidos.
+
+**🔴 Verificación (determinística, capa de persistencia real, sin LLM — script efímero):**
+- Se generó un `ZodError` **real** con `captureLeadInputSchema.safeParse({phone:'123',...})` (confirmado: sigue rechazando "123"; el error tiene `addIssue` función) y se armó la tool-call inválida tal como la arma el SDK.
+- **ANTES** (toolCalls crudos): `prisma.chatMessage.create` → **THROW reproducido**.
+- **DESPUÉS** (`sanitizeToolCallsForPersist`): `create` **OK**; row persistida = `[{toolName:'capture_lead', input:{...phone:'123'...}, toolCallId, invalid:true, error:"phone: String must contain at least 5 character(s)"}]`.
+- Aserciones (todas ✓): `toolName` preservado · `invalid:true` · `error` es STRING legible · **sin `addIssue`/función** · `input` del intento conservado (registro legible de qué falló). Compatible con `parseToolCalls`.
+- Anti-ensuciar: 1 Conversation throwaway (prefijo `regression-test-fix4-bugb-`), purgada por su prefijo (host-check dev + verify-prefijo + `$transaction`). Script temporal borrado. `git status` final = solo `handleChatRequest.ts` + bitácora (para este fix).
+
+**Healthcheck:** `tsc --noEmit` exit 0 · `npm run build` exit 0 · verificación determinística ✅ (THROW antes / persiste después / Zod sigue rechazando).
+
+---
+
+## ✅ FIX.6 — Decisiones de criterio (PRESENTADAS, NO ejecutadas)
+
+> 🔴 **CERO cambios de código en este sprint.** Son decisiones de marca/UX/dirección que NO las toma un agente. Acá quedan con evidencia + opciones + recomendación, para el OK de Franco (este chat o el chat Portal). Recién con el OK se ejecutan en otro sprint.
+
+### Decisión 1 — Formato de moneda: unificar a un formatter único
+
+**Qué es:** conviven ≥4 renderizados de moneda distintos en el admin, todos a mano. El codebase YA tiene el patrón canónico bueno (`Intl.NumberFormat` con `style:'currency'`).
+
+**Dónde (evidencia):**
+- ✅ **Canónico (a seguir):** `dashboard/modules/tienda-conectada/page.tsx:24` → `new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' })`.
+- ❌ `components/ui/StatCard.tsx:58` → `` `$${value.toFixed(4)}` `` → **"$10.0000"** (4 decimales; pensado para costo LLM en centavos, mal aplicado a revenue — el bug b.2 del reporte EXP-EST).
+- ❌ `admin/page.tsx:115` → `` `USD ${Intl es-AR…}` `` → **"USD 240"**.
+- ❌ `admin/page.tsx:122` + `admin/_components/dashboard-history-charts.tsx:72` → `` `$${Intl es-AR…}` `` → **"$1.500"** (sin símbolo de divisa).
+- ❌ `admin/clients/[clientId]/_components/BillingOverrideCard.tsx:43,49,51,60` → `` `$${planPrice.toFixed(2)}` `` → **"$X.XX"**.
+- (varios `Intl('es-AR',{currency:'USD'})` rinden **"US$ 1.200,00"** — el 4º estilo).
+
+**Opciones:**
+1. **(Recomendada)** Un helper compartido `formatMoney(amount, { currency = 'USD' })` en `src/lib/` usando `Intl.NumberFormat('es-AR',{style:'currency',currency})`, + un `formatCostUsd()` separado para los costos LLM sub-centavo (el único caso legítimo de 4 decimales). Reemplazar los call-sites de a poco. Una sola fuente de verdad, símbolo+separadores consistentes, arregla el "$10.0000" de revenue.
+2. Solo arreglar el bug puntual de `StatCard` (revenue con `toFixed(2)` o Intl) y dejar el resto. Mínimo, pero la fragmentación sigue.
+3. No tocar. La deuda visual persiste.
+**Recomiendo opción 1**, ejecutada en un sprint propio (blast radius = muchos call-sites, conviene aislarlo). La divisa real del negocio es **USD** (precios en USD, ver seed), así que el default del helper = USD.
+
+### Decisión 2 — "Logic Core" en el KB del bot de develOP (marca)
+
+**Qué es:** el codename interno "Logic Core" aparece ×3 en el KB que el **bot le recita al visitante** (A2 de la auditoría: client-facing, no solo interno).
+
+**Dónde:** `src/modules/chatbot/prisma/seed.ts`
+- `:36` — *"…portal SaaS propio (**Logic Core**) donde ve el estado de sus proyectos…"*
+- `:85` — *"…acceso al portal **Logic Core**…"*
+- `:103` — *"Soporte: Por mensajes en el portal **Logic Core**…"*
+
+**Opciones:**
+1. **(Recomendada)** Reemplazar "Logic Core" → **"el portal"** / **"tu portal develOP"** (genérico, sin exponer codename). El visitante no necesita el nombre interno del producto.
+2. Mantener "Logic Core" como **nombre de producto público** (si Franco quiere que el portal tenga marca propia frente al cliente).
+3. Reemplazar por **"develOP"** a secas.
+**Recomiendo opción 1**: "el portal develOP" es claro y no filtra un codename interno. Es decisión de marca tuya — si "Logic Core" va a ser marca pública, opción 2. Ejecución = editar el seed + re-seed del bot `develop` (cuidado: re-seed es operación de datos; coordinar). Relacionado: el portal ya tiene lenguaje de marca propio (cyan), ver memoria de diseño.
+
+### Decisión 3 — Breadcrumbs/títulos en inglés en el admin
+
+**Qué es:** dos sistemas de breadcrumb title-casean el slug crudo → quedan en **inglés** los segundos niveles y los slugs no mapeados (Activity, Health, Tasks…), mientras el sidebar está en español ("Actividad global") → inconsistencia.
+
+**Dónde:**
+- `admin/_components/admin-topbar.tsx:24-38` tiene `sectionLabelMap` (top-level en español: Leads, Proyectos, Equipo…) **pero** los segundos niveles pasan por `humanizeSegment` (`:7-18`) que solo capitaliza el slug → `activity`→**"Activity"**, `health`→**"Health"**, `tasks`→**"Tasks"**.
+- `admin/_components/AdminBreadcrumbs.tsx:57` + `humanize` (`:65-67`) → idem, todos los segmentos en inglés crudo.
+
+**Opciones:**
+1. **(Recomendada)** Extender el `sectionLabelMap` a un mapa slug→label en español sentence-case **compartido** por ambos componentes (incluyendo segundos niveles: activity→"Actividad", health→"Salud", tasks→"Tareas", alerts→"Alertas"…), con `humanize` como fallback. Bajo riesgo, puramente de copy.
+2. Traducir solo los slugs que hoy leakean en inglés, sin unificar los dos sistemas.
+3. No tocar.
+**Recomiendo opción 1**: un único mapa compartido evita que el próximo slug nuevo vuelva a salir en inglés. Es copy/i18n, sin lógica.
+
+### Decisión 4 — Header del widget "En línea" hardcodeado
+
+**Qué es:** el header del chat siempre muestra "En línea" (y punto verde) cuando no está escribiendo — **no refleja** bot pausado/offline.
+
+**Dónde:** `src/modules/chatbot/components/chat/ChatHeader.tsx:55` → `{isStreaming ? 'Escribiendo…' : 'En línea'}` (+ el dot `:47-54` siempre verde salvo streaming).
+
+**Opciones:**
+1. **(Recomendada)** Cablear al estado real del bot (`isActive`/pausado), que el widget ya conoce o puede recibir en `config`: pausado → "No disponible" + dot gris; activo → "En línea" + verde. ⚠️ Es **cambio de comportamiento** (no cosmético): hay que pasar el estado al header — sprint propio, fuera de Regla #0.
+2. Texto neutro fijo ("Asistente virtual") sin claim de disponibilidad — evita mentir sin cablear estado.
+3. No tocar (un bot pausado normalmente no renderiza el widget, así que el impacto real puede ser bajo — confirmar).
+**Recomiendo opción 1** si el widget puede mostrarse con el bot pausado; si no, la 2 es un quick-win honesto. Definir requiere confirmar cuándo se renderiza el header con el bot no-activo.
+
+---
+
+**Cierre FIX.6:** 4 decisiones presentadas con evidencia (archivo:línea) + 2-3 opciones + recomendación cada una. **CERO cambios de código** en este sprint (`git diff` sin archivos de `src/`). Quedan para el OK de Franco; al aprobarse, cada una se ejecuta en su propio sprint (la 1 y la 4 con blast radius/comportamiento → aislar; la 2 implica re-seed; la 3 es copy de bajo riesgo).
