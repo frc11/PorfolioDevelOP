@@ -29,6 +29,67 @@ import { getPlanForOrg, type EffectivePlan } from '@/lib/plan'
 import { originMatchesAllowed } from '@/lib/security/origin-matcher'
 
 /**
+ * BUG B — Convierte el `error` de una tool-call inválida en un string legible.
+ *
+ * Cuando el modelo emite una tool-call con input inválido, el AI SDK adjunta un
+ * `ZodError` que tiene `addIssue: [Function]` → NO serializable por Prisma. Acá
+ * extraemos solo el mensaje (issues `path: message`, o `.message`, o String()).
+ */
+function summarizeToolCallError(error: unknown): string {
+  if (error === null || error === undefined) return 'invalid tool call'
+  const e = error as { issues?: unknown; message?: unknown }
+  if (Array.isArray(e.issues)) {
+    const parts = e.issues
+      .map((raw) => {
+        const issue = raw as { path?: unknown; message?: unknown }
+        const path = Array.isArray(issue.path) ? issue.path.join('.') : ''
+        const msg = typeof issue.message === 'string' ? issue.message : 'invalid'
+        return path ? `${path}: ${msg}` : msg
+      })
+      .filter((s) => s.length > 0)
+    if (parts.length > 0) return parts.join('; ')
+  }
+  if (typeof e.message === 'string') return e.message
+  return String(error)
+}
+
+/**
+ * BUG B — Sanitiza las tool-calls antes de persistir en `ChatMessage.toolCalls`.
+ *
+ * Una tool-call inválida (ej. capture_lead con teléfono < 5 chars) trae un
+ * `error: ZodError` NO serializable → `prisma.chatMessage.create` hacía throw y
+ * se perdía el mensaje del assistant entero. Acá nos quedamos SOLO con campos
+ * serializables: `toolName` + `input` (lo que ya leen los consumidores, ej.
+ * `parseToolCalls` del runner de regresión) + un registro legible del fallo
+ * (`invalid:true` + `error` como STRING). NO toca la validación Zod —que sigue
+ * rechazando—, solo el qué/cómo se persiste.
+ */
+export function sanitizeToolCallsForPersist(
+  toolCalls: readonly unknown[],
+): Array<Record<string, unknown>> {
+  return toolCalls.map((tc) => {
+    const obj = (tc ?? {}) as {
+      toolName?: unknown
+      toolCallId?: unknown
+      input?: unknown
+      args?: unknown
+      invalid?: unknown
+      error?: unknown
+    }
+    const clean: Record<string, unknown> = {
+      toolName: typeof obj.toolName === 'string' ? obj.toolName : '(unknown)',
+      input: obj.input ?? obj.args ?? null,
+    }
+    if (typeof obj.toolCallId === 'string') clean.toolCallId = obj.toolCallId
+    if (obj.invalid === true) {
+      clean.invalid = true
+      clean.error = summarizeToolCallError(obj.error)
+    }
+    return clean
+  })
+}
+
+/**
  * Body schema for POST /api/chatbot/[slug]/chat.
  * Validates incoming requests from the frontend.
  */
@@ -654,7 +715,7 @@ export async function handleChatRequest(
             tokensIn,
             tokensOut,
             toolCalls: allToolCalls.length > 0
-              ? (allToolCalls as unknown as object)
+              ? (sanitizeToolCallsForPersist(allToolCalls) as unknown as object)
               : undefined,
           },
         })
