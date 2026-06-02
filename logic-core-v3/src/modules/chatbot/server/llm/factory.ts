@@ -18,8 +18,12 @@ const cache = new Map<LLMProviderName, LLMProvider>()
  * reads `CHATBOT_LLM_PROVIDER` env var, falling back to "google".
  */
 export function getLLMProvider(name?: LLMProviderName): LLMProvider {
-  const providerName: LLMProviderName =
+  // Case-insensitive: el enum Prisma `LlmProvider` guarda MAYÚSCULA ("GOOGLE")
+  // desde B11.4, mientras los `case` de abajo son minúscula. Normalizamos para
+  // que el valor del enum, la env var y cualquier literal resuelvan al mismo provider.
+  const providerName: LLMProviderName = (
     name ?? (process.env.CHATBOT_LLM_PROVIDER as LLMProviderName | undefined) ?? 'google'
+  ).toLowerCase() as LLMProviderName
 
   const cached = cache.get(providerName)
   if (cached) return cached
