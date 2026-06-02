@@ -3,6 +3,8 @@ import { prisma } from '@/lib/prisma'
 import { generateInsightsForBot } from '@/modules/chatbot/index.server'
 import { logChatbotEvent } from '@/modules/chatbot/server/logging'
 import { sendInsightsNotificationEmail } from '@/modules/chatbot/server/notifications/sendInsightsNotification'
+import { getPlanForOrg } from '@/lib/plan/get-plan-for-org'
+import { planAllows } from '@/lib/plan/plan-allows'
 
 export const dynamic = 'force-dynamic'
 
@@ -26,6 +28,7 @@ export async function POST(req: Request) {
   const results = {
     total: bots.length,
     processed: 0,
+    skipped_plan: 0,
     skipped_pending_overload: 0,
     skipped_insufficient: 0,
     generated: 0,
@@ -35,6 +38,15 @@ export async function POST(req: Request) {
 
   for (const bot of bots) {
     try {
+      // Plan gate — solo orgs cuyo plan incluye insights (mismo patrón que 'crm'
+      // en syncLeadToCrm.ts). getPlanForOrg cachea y cae a fallback (features=false)
+      // para orgs sin plan, así un STARTER nunca recibe insights que no incluye.
+      const plan = await getPlanForOrg(bot.organization.id)
+      if (!planAllows(plan, 'insight')) {
+        results.skipped_plan++
+        continue
+      }
+
       // Skipear si ya tiene mucho PENDING acumulado
       const pendingCount = 0 // await prisma.chatbotInsight.count({ where: { botConfigId: bot.id, status: 'PENDING' } })
       if (pendingCount >= 5) {
