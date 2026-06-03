@@ -99,9 +99,10 @@ export const CustomCursor = () => {
         window.addEventListener('mouseover', handleMouseOver);
         window.addEventListener('scroll', handleScroll, { passive: true, capture: true });
 
-        // Initial position to prevent jump
-        cursorX.set(window.innerWidth / 2);
-        cursorY.set(window.innerHeight / 2);
+        // NO inicializar en el centro: el dot primario usa mix-blend-difference y
+        // sobre el blanco del intro se veía NEGRO, fijo en el centro, hasta el
+        // primer mousemove. Queda fuera de pantalla (-100,-100, su valor inicial)
+        // hasta que el usuario mueve el mouse — entonces aparece directo en el cursor.
 
         return () => {
             window.removeEventListener('mousemove', moveCursor);
@@ -165,7 +166,7 @@ export const CustomCursor = () => {
                 animate={{
                     scale: isHovering ? 2.5 : 1,
                     opacity: isHidden ? 0 : isHovering ? 0.8 : 0.4,
-                    backgroundColor: isHovering ? 'rgba(255, 255, 255, 0.1)' : 'transparent',
+                    backgroundColor: isHovering ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0)',
                     borderColor: isHovering ? 'rgba(255, 255, 255, 0.8)' : 'rgba(255, 255, 255, 0.5)'
                 }}
                 transition={{

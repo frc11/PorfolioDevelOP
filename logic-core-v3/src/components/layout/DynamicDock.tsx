@@ -1,11 +1,12 @@
 "use client";
 
-import { AnimatePresence, motion, useMotionValue, useSpring, type Transition } from "motion/react";
+import { AnimatePresence, motion, useMotionValue, useReducedMotion, useSpring, type Transition } from "motion/react";
 import {
     Bot,
     Code2,
     House,
     LogIn,
+    Mail,
     Network,
     Workflow,
     type LucideIcon,
@@ -16,6 +17,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 
 import { useTransitionContext } from "@/context/TransitionContext";
+import { usePreloader } from "@/context/PreloaderContext";
 
 type NavItem = {
     href: string;
@@ -30,6 +32,7 @@ const NAV_ITEMS: readonly NavItem[] = [
     { href: "/ai-implementations", label: "Chatbot", icon: Bot, color: "#10b981" },
     { href: "/software-development", label: "Desarrollo de Software", icon: Code2, color: "#8b5cf6" },
     { href: "/process-automation", label: "Automatizaciones", icon: Workflow, color: "#f59e0b" },
+    { href: "/contact", label: "Contacto", icon: Mail },
 ] as const;
 
 const ROUTE_TO_LABEL: Readonly<Record<string, string>> = {
@@ -37,6 +40,7 @@ const ROUTE_TO_LABEL: Readonly<Record<string, string>> = {
     "/ai-implementations": "Chatbot",
     "/software-development": "Desarrollo de Software",
     "/process-automation": "Automatizaciones",
+    "/contact": "Contacto",
 };
 
 function getActiveTab(pathname: string): string {
@@ -114,7 +118,15 @@ function MagneticItem({
     );
 }
 
-function DockCta({ isExpanded }: { isExpanded: boolean }) {
+function DockCta({
+    isExpanded,
+    sizeTransition,
+    swapTransition,
+}: {
+    isExpanded: boolean;
+    sizeTransition: Transition;
+    swapTransition: Transition;
+}) {
     const { triggerTransition } = useTransitionContext();
 
     return (
@@ -131,10 +143,10 @@ function DockCta({ isExpanded }: { isExpanded: boolean }) {
                 borderRadius: 9999,
             }}
             transition={{
-                width: { type: "spring", stiffness: 380, damping: 34, mass: 0.9 },
-                height: { type: "spring", stiffness: 380, damping: 34, mass: 0.9 },
-                paddingLeft: { type: "spring", stiffness: 380, damping: 34, mass: 0.9 },
-                paddingRight: { type: "spring", stiffness: 380, damping: 34, mass: 0.9 },
+                width: sizeTransition,
+                height: sizeTransition,
+                paddingLeft: sizeTransition,
+                paddingRight: sizeTransition,
                 y: { type: "spring", stiffness: 360, damping: 28 },
             }}
             className="group relative isolate flex items-center justify-center overflow-hidden rounded-full bg-gradient-to-r from-cyan-600 to-cyan-800 text-white shadow-[0_14px_34px_rgba(8,145,178,0.28),inset_0_1px_0_rgba(255,255,255,0.14)]"
@@ -146,7 +158,7 @@ function DockCta({ isExpanded }: { isExpanded: boolean }) {
                         initial={{ opacity: 0, y: 3 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -3 }}
-                        transition={{ duration: 0.16 }}
+                        transition={swapTransition}
                         className="relative z-10 flex items-center gap-1.5 whitespace-nowrap text-[13px] font-medium tracking-wide"
                     >
                         <span aria-hidden="true">→</span>
@@ -158,7 +170,7 @@ function DockCta({ isExpanded }: { isExpanded: boolean }) {
                         initial={{ opacity: 0, scale: 0.82 }}
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0, scale: 0.82 }}
-                        transition={{ duration: 0.16 }}
+                        transition={swapTransition}
                         className="relative z-10 flex items-center justify-center"
                     >
                         <LogIn size={13} strokeWidth={1.9} />
@@ -181,6 +193,9 @@ function DockItem({
     isExpanded,
     isHighlighted,
     pillTransition,
+    sizeTransition,
+    textTransition,
+    reduceMotion,
     onActivate,
     onHoverStart,
     onHoverEnd,
@@ -190,6 +205,9 @@ function DockItem({
     isExpanded: boolean;
     isHighlighted: boolean;
     pillTransition: Transition;
+    sizeTransition: Transition;
+    textTransition: Transition;
+    reduceMotion: boolean;
     onActivate: (label: string) => void;
     onHoverStart: () => void;
     onHoverEnd: () => void;
@@ -232,10 +250,7 @@ function DockItem({
                         minWidth: isExpanded ? expandedMinWidth : 60,
                         height: isExpanded ? 40 : 36,
                     }}
-                    transition={{
-                        minWidth: { type: "spring", stiffness: 380, damping: 38, mass: 0.9 },
-                        height: { type: "spring", stiffness: 380, damping: 38, mass: 0.9 },
-                    }}
+                    transition={sizeTransition}
                     className="relative z-10 flex items-center justify-center px-2.5"
                 >
                     <MagneticItem
@@ -245,15 +260,20 @@ function DockItem({
                         <motion.div
                             key={`${item.label}-${isExpanded ? "expanded" : "compact"}`}
                             initial={{ scale: isExpanded ? 0.9 : 1 }}
-                            animate={{ scale: isExpanded ? [0.9, 1.08, 1] : [1, 0.85, 1] }}
-                            transition={{ duration: 0.3, ease: "easeOut" }}
+                            animate={{ scale: reduceMotion ? 1 : isExpanded ? [0.9, 1.08, 1] : [1, 0.85, 1] }}
+                            transition={reduceMotion ? { duration: 0 } : { duration: 0.3, ease: "easeOut" }}
                             className="flex items-center justify-center"
                         >
                             <item.icon
                                 size={isExpanded ? 16 : 15}
                                 strokeWidth={1.75}
-                                className={isHighlighted ? "text-white" : "text-white/72"}
+                                className={isHighlighted ? "text-white" : "text-white/38"}
                                 color={isHighlighted && item.color ? item.color : undefined}
+                                style={
+                                    isHighlighted && !item.color
+                                        ? { filter: "drop-shadow(0 0 5px rgba(255,255,255,0.40))" }
+                                        : undefined
+                                }
                             />
                         </motion.div>
 
@@ -261,17 +281,48 @@ function DockItem({
                             {isExpanded ? (
                                 <motion.span
                                     key={`label-${item.label}`}
-                                    initial={{ opacity: 0, y: 4, height: 0 }}
-                                    animate={{ opacity: 1, y: 0, height: "auto" }}
-                                    exit={{ opacity: 0, y: -4, height: 0 }}
-                                    transition={{ duration: 0.15 }}
+                                    initial={
+                                        reduceMotion
+                                            ? { opacity: 0, width: 0, height: 0 }
+                                            : {
+                                                  opacity: 0,
+                                                  width: 0,
+                                                  height: 0,
+                                                  y: TEXT_FADE_Y,
+                                                  filter: `blur(${TEXT_FADE_BLUR}px)`,
+                                              }
+                                    }
+                                    animate={
+                                        reduceMotion
+                                            ? { opacity: 1, width: "auto", height: "auto" }
+                                            : {
+                                                  opacity: 1,
+                                                  width: "auto",
+                                                  height: "auto",
+                                                  y: 0,
+                                                  filter: "blur(0px)",
+                                              }
+                                    }
+                                    exit={
+                                        reduceMotion
+                                            ? { opacity: 0, width: 0, height: 0 }
+                                            : {
+                                                  opacity: 0,
+                                                  width: 0,
+                                                  height: 0,
+                                                  y: -TEXT_FADE_Y,
+                                                  filter: `blur(${TEXT_FADE_BLUR}px)`,
+                                              }
+                                    }
+                                    transition={textTransition}
                                     className="overflow-hidden whitespace-nowrap font-medium"
                                     style={{
                                         fontSize: 9,
                                         letterSpacing: "0.05em",
                                         color: isHighlighted
-                                            ? item.color ?? "rgba(255,255,255,0.58)"
-                                            : "rgba(255,255,255,0.4)",
+                                            ? item.color ?? "#ffffff"
+                                            : "rgba(255,255,255,0.27)",
+                                        willChange: "opacity, transform, filter",
                                     }}
                                 >
                                     {item.label}
@@ -288,8 +339,38 @@ function DockItem({
 const PILL_SPRING: Transition = { type: "spring", stiffness: 420, damping: 34, mass: 0.72 };
 const PILL_INSTANT: Transition = { duration: 0 };
 
+// Entrada del dock: oculto durante el intro del hero, sube desde abajo (slide-up
+// + fade) cuando el hero termina. Tunables.
+const DOCK_HIDDEN_Y = 80;
+const DOCK_REVEAL_SECONDS = 0.5;
+const DOCK_REVEAL_EASE: [number, number, number, number] = [0.22, 1, 0.36, 1];
+
+// ---- Compresión/descompresión del dock (tunables de animación) ----
+// Cambio de tamaño/forma del contenedor, ítems y CTA. Subí DOCK_RESIZE_SECONDS para
+// una compresión aún más lenta; el easing es un cubic-bezier suave (entra/sale tranquilo).
+const DOCK_RESIZE_SECONDS = 0.52;
+const DOCK_EASE: [number, number, number, number] = [0.4, 0, 0.2, 1];
+
+// Fade progresivo de los textos (labels de ítems, "develOP" del logo, "Acceder" del CTA).
+const TEXT_FADE_SECONDS = 0.26;
+
+// Coreografía por delays relativos (sin timeouts sueltos):
+//  - Comprimir: los textos se van primero; el colapso de tamaño arranca apenas después.
+//  - Expandir: el ancho crece primero; los textos entran con un leve retardo.
+const SIZE_COLLAPSE_DELAY = 0.12; // s — retardo del colapso de tamaño al comprimir
+const TEXT_ENTER_DELAY = 0.2; // s — retardo del fade-in de textos al expandir
+
+// Refuerzo "desvanecer" de los textos (muy leve, tunable; poné 0 para desactivar).
+const TEXT_FADE_Y = 4; // px de translateY en el fade
+const TEXT_FADE_BLUR = 2; // px de blur en el fade
+
 export function DynamicDock() {
     const pathname = usePathname();
+    const { phase } = usePreloader();
+
+    // Visible en no-home siempre (ahí el preloader no corre y phase no llega a
+    // 'done'); en home, solo cuando el intro terminó. Se despliega desde abajo.
+    const dockVisible = pathname !== "/" || phase === "done";
 
     const lastScrollY = useRef(0);
     const collapseTimeoutRef = useRef<number | null>(null);
@@ -304,6 +385,33 @@ export function DynamicDock() {
     const isExpanded = scrollDirection === "up" || hoverExpanded;
     const highlightedTab = hoveredTab ?? activeTab;
     const lightLevel = getLightLevel(scrollPosition, viewportHeight);
+
+    // Animación de compresión/descompresión: el tamaño (contenedor/ítems/CTA) y el fade
+    // de textos comparten easing pero difieren en duración y delay para coreografiar el
+    // movimiento (al comprimir, los textos se van primero; al expandir, el ancho crece
+    // antes que entren). Bajo prefers-reduced-motion: crossfade corto, sin slide ni
+    // colapso largo.
+    const reduceMotion = useReducedMotion() ?? false;
+
+    const sizeTransition: Transition = reduceMotion
+        ? { duration: 0 }
+        : {
+              duration: DOCK_RESIZE_SECONDS,
+              ease: DOCK_EASE,
+              delay: isExpanded ? 0 : SIZE_COLLAPSE_DELAY,
+          };
+
+    const textTransition: Transition = reduceMotion
+        ? { duration: 0.12 }
+        : {
+              duration: TEXT_FADE_SECONDS,
+              ease: DOCK_EASE,
+              delay: isExpanded ? TEXT_ENTER_DELAY : 0,
+          };
+
+    const swapTransition: Transition = reduceMotion
+        ? { duration: 0.12 }
+        : { duration: TEXT_FADE_SECONDS * 0.7, ease: DOCK_EASE };
 
     useEffect(() => {
         if (typeof window === "undefined") return;
@@ -398,12 +506,13 @@ export function DynamicDock() {
     };
 
     return (
-        <motion.div
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.28, ease: "easeOut" }}
-            className="fixed bottom-8 left-1/2 z-[9990] hidden -translate-x-1/2 md:block"
-        >
+        <div className="fixed bottom-8 left-1/2 z-[9990] hidden -translate-x-1/2 md:block">
+            <motion.div
+                initial={false}
+                animate={{ opacity: dockVisible ? 1 : 0, y: dockVisible ? 0 : DOCK_HIDDEN_Y }}
+                transition={{ duration: DOCK_REVEAL_SECONDS, ease: DOCK_REVEAL_EASE }}
+                style={{ pointerEvents: dockVisible ? "auto" : "none" }}
+            >
             <motion.nav
                 onMouseEnter={handleDockMouseEnter}
                 onMouseLeave={handleDockMouseLeave}
@@ -416,28 +525,59 @@ export function DynamicDock() {
                     borderColor: lightLevel === "light" ? "rgba(0,0,0,0.12)" : "rgba(255,255,255,0.10)",
                 }}
                 transition={{
-                    height: { type: "spring", stiffness: 380, damping: 38, mass: 0.9 },
-                    borderRadius: { type: "spring", stiffness: 380, damping: 38, mass: 0.9 },
-                    paddingLeft: { type: "spring", stiffness: 380, damping: 38, mass: 0.9 },
-                    paddingRight: { type: "spring", stiffness: 380, damping: 38, mass: 0.9 },
+                    height: sizeTransition,
+                    borderRadius: sizeTransition,
+                    paddingLeft: sizeTransition,
+                    paddingRight: sizeTransition,
                     backgroundColor: { duration: 0.8, ease: "easeInOut" },
                     borderColor: { duration: 0.8, ease: "easeInOut" },
                 }}
                 className="relative flex items-center gap-1.5 border shadow-2xl shadow-black/50"
                 style={{ backdropFilter: "blur(48px) saturate(180%)" }}
             >
-                <div className="mr-1 flex items-center gap-2.5">
+                <div className="mr-1 flex items-center">
                     <BrandLogo />
 
                     <AnimatePresence initial={false}>
                         {isExpanded ? (
                             <motion.span
                                 key="ecosistema"
-                                initial={{ opacity: 0, x: -6 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                exit={{ opacity: 0, x: -6 }}
-                                transition={{ duration: 0.16 }}
-                                className="whitespace-nowrap text-[10px] font-semibold tracking-[0.22em] text-white/42"
+                                initial={
+                                    reduceMotion
+                                        ? { opacity: 0, width: 0, marginLeft: 0 }
+                                        : {
+                                              opacity: 0,
+                                              width: 0,
+                                              marginLeft: 0,
+                                              x: -6,
+                                              filter: `blur(${TEXT_FADE_BLUR}px)`,
+                                          }
+                                }
+                                animate={
+                                    reduceMotion
+                                        ? { opacity: 1, width: "auto", marginLeft: 10 }
+                                        : {
+                                              opacity: 1,
+                                              width: "auto",
+                                              marginLeft: 10,
+                                              x: 0,
+                                              filter: "blur(0px)",
+                                          }
+                                }
+                                exit={
+                                    reduceMotion
+                                        ? { opacity: 0, width: 0, marginLeft: 0 }
+                                        : {
+                                              opacity: 0,
+                                              width: 0,
+                                              marginLeft: 0,
+                                              x: -6,
+                                              filter: `blur(${TEXT_FADE_BLUR}px)`,
+                                          }
+                                }
+                                transition={textTransition}
+                                className="overflow-hidden whitespace-nowrap text-[10px] font-semibold tracking-[0.22em] text-white/42"
+                                style={{ willChange: "opacity, transform, filter" }}
                             >
                                 develOP
                             </motion.span>
@@ -453,6 +593,9 @@ export function DynamicDock() {
                             isExpanded={isExpanded}
                             isHighlighted={highlightedTab === item.label}
                             pillTransition={pillTransition}
+                            sizeTransition={sizeTransition}
+                            textTransition={textTransition}
+                            reduceMotion={reduceMotion}
                             onActivate={handleTabActivate}
                             onHoverStart={() => setHoveredTab(item.label)}
                             onHoverEnd={() => setHoveredTab(null)}
@@ -461,10 +604,15 @@ export function DynamicDock() {
                 </div>
 
                 <div className="pl-1.5">
-                    <DockCta isExpanded={isExpanded} />
+                    <DockCta
+                        isExpanded={isExpanded}
+                        sizeTransition={sizeTransition}
+                        swapTransition={swapTransition}
+                    />
                 </div>
             </motion.nav>
-        </motion.div>
+            </motion.div>
+        </div>
     );
 }
 

@@ -1,27 +1,54 @@
 "use client"
 
-import { Canvas, useThree } from '@react-three/fiber'
-import { Suspense, useEffect, useLayoutEffect, useRef, useState, type RefObject } from 'react'
-import { motion } from 'motion/react'
-import { Environment, ContactShadows } from '@react-three/drei'
+import { Canvas, useThree, useFrame, useLoader } from '@react-three/fiber'
+import { Suspense, useEffect, useLayoutEffect, useMemo, useRef, useState, type RefObject } from 'react'
+import { motion, useTransform, type MotionValue } from 'motion/react'
+import * as THREE from 'three'
+import { SVGLoader } from 'three-stdlib'
+import { Environment } from '@react-three/drei'
 import { EffectComposer, ChromaticAberration, Noise, Vignette } from '@react-three/postprocessing'
 import { HeroArtifact } from '@/components/3d/HeroArtifact'
 import { DotMatrixMesh } from '@/components/canvas/DotMatrix'
+import { LogoStrokeOverlay } from '@/components/ui/LogoStrokeOverlay'
+import { IntroLockupText } from '@/components/ui/IntroLockupText'
 import { TypewriterText } from '@/components/ui/TypewriterText'
 import { MagneticCta } from '@/components/ui/buttons/MagneticCta'
-import { type PreloaderPhase, usePreloader } from '@/context/PreloaderContext'
+import { usePreloader } from '@/context/PreloaderContext'
+import { useLenis } from '@/components/layout/SmoothScroll'
 
 const HERO_KEYWORDS = [
     "las 24 horas",
     "sin perder clientes",
-    "mientras dorm\u00EDs",
-    "en piloto autom\u00E1tico",
+    "mientras dormís",
+    "en piloto automático",
 ]
 
 const HERO_REVEAL_EASE: [number, number, number, number] = [0.25, 0.46, 0.45, 0.94]
 
 const HERO_CONTENT_HIDDEN = { opacity: 0, y: 24 }
 const HERO_CONTENT_VISIBLE = { opacity: 1, y: 0 }
+
+// Fracción del ancho que el logo se traslada del centro → columna derecha.
+// La comparten: targetX del logo, la sombra (que lo sigue) y la normalización
+// relativa del puntero. Single source.
+const LOGO_RIGHT_FRACTION = 0.25
+
+// Sombra del logo (drop-shadow radial que SIGUE su X). Tunables.
+const SHADOW_WIDTH = 4.6
+const SHADOW_HEIGHT = 1.5
+const SHADOW_Y = -1.7
+const SHADOW_Z = -0.35
+const SHADOW_OPACITY = 0.5
+
+// Aberración cromática: bajada para que los puntos (chicos) no se partan en RGB,
+// conservando una aberración SUTIL en el logo. Tunable.
+const CHROMATIC_ABERRATION_OFFSET: [number, number] = [0.0006, 0.0006]
+
+// R3 — colores del trazado 2D del logo en el HOME (fondo BLANCO del intro): el
+// stroke/relleno son NEGROS; la mask = blanco (= el velo blanco → invisible, tapa
+// el chrome asentado detrás hasta el crossfade). Tunables.
+const HOME_MASK_COLOR = '#ffffff'
+const HOME_STROKE_COLOR = '#09090b'
 
 function useMediaQuery(query: string) {
     const [matches, setMatches] = useState(false)
@@ -105,6 +132,64 @@ function MobileInputHandler() {
     return null
 }
 
+// Feed global de puntero para desktop. El canvas full-bleed va con
+// pointer-events:none, así que r3f no actualiza state.pointer por sí solo; esto
+// deja al logo (HeroArtifact en 'done') siguiendo al mouse en TODA la pantalla.
+// No se monta en reduced-motion (sin parallax).
+function DesktopPointerSync({ introProgress, layerOpacity }: { introProgress: MotionValue<number>; layerOpacity: MotionValue<number> }) {
+    const { pointer } = useThree()
+
+    useEffect(() => {
+        const handlePointerMove = (event: PointerEvent) => {
+            // Normalizar RELATIVO al centro-X actual del logo en pantalla (no al del
+            // viewport): el logo va de centro → columna derecha según introProgress,
+            // su centro en px es innerWidth*(0.5 + LOGO_RIGHT_FRACTION*p). Restarlo
+            // antes de normalizar hace que oriente hacia el cursor desde donde está.
+            const p = introProgress.get()
+            const logoCenterX = window.innerWidth * (0.5 + LOGO_RIGHT_FRACTION * p)
+            pointer.x = (event.clientX - logoCenterX) / (window.innerWidth / 2)
+            pointer.y = -(event.clientY / window.innerHeight) * 2 + 1
+        }
+
+        window.addEventListener('pointermove', handlePointerMove, { passive: true })
+        return () => window.removeEventListener('pointermove', handlePointerMove)
+    }, [pointer, introProgress])
+
+    // R3: mientras la overlay 2D tapa (layerOpacity>0), forzar el 3D HEAD-ON
+    // (state.pointer 0,0) → su silueta inclinada no asoma por los huecos del trazo.
+    // Este useFrame corre ANTES que el de HeroArtifact (montado luego, en Suspense).
+    // Se muta el state.pointer del callback (no el `pointer` del hook → lint-clean).
+    useFrame((state) => {
+        if (layerOpacity.get() > 0.001) {
+            state.pointer.x = 0
+            state.pointer.y = 0
+        }
+    })
+
+    return null
+}
+
+// Señal de readiness del logo: comparte el cache de useLoader con HeroArtifact
+// (mismo SVG) → suspende hasta que está cargado. Al montar (post-Suspense) espera
+// 2 frames (logo extruido + pintado) y avisa al orquestador vía onReady.
+function LogoReadySignal({ onReady }: { onReady: () => void }) {
+    useLoader(SVGLoader, '/logodevelOP.svg')
+
+    useEffect(() => {
+        let raf1 = 0
+        let raf2 = 0
+        raf1 = window.requestAnimationFrame(() => {
+            raf2 = window.requestAnimationFrame(() => onReady())
+        })
+        return () => {
+            window.cancelAnimationFrame(raf1)
+            window.cancelAnimationFrame(raf2)
+        }
+    }, [onReady])
+
+    return null
+}
+
 function HeroCanvasSizeSync({
     active,
     targetRef,
@@ -165,15 +250,25 @@ function HeroCanvasSizeSync({
     return null
 }
 
-function ResponsiveHeroArtifact({
-    phase,
+// Logo: SIEMPRE phase='done' (escala 1 constante + sigue al mouse, sin escalar).
+// La escala exterior se DESACOPLA del ancho usando la referencia de columna
+// derecha ((width/2)/height en desktop) para que el tamaño sea idéntico al actual
+// aunque el canvas sea full-bleed (la altura no cambia entre layouts). El group
+// exterior traslada en X de centro→derecha según introProgress — solo desktop
+// (mobile targetX=0, el logo solo aparece en su lugar). La sombra es un mesh
+// aparte (HeroLogoShadow) que sigue la misma X.
+function HeroLogo({
     isSplitLayout,
+    introProgress,
 }: {
-    phase: PreloaderPhase
     isSplitLayout: boolean
+    introProgress: MotionValue<number>
 }) {
-    const { size } = useThree()
-    const aspect = size.width / Math.max(size.height, 1)
+    const { size, viewport } = useThree()
+    const outerRef = useRef<THREE.Group>(null)
+
+    const refWidth = isSplitLayout ? size.width / 2 : size.width
+    const aspect = refWidth / Math.max(size.height, 1)
     const scale = isSplitLayout
         ? aspect < 0.8
             ? Math.max(0.52, aspect * 0.96)
@@ -181,77 +276,204 @@ function ResponsiveHeroArtifact({
         : Math.min(1.28, Math.max(1.02, aspect * 0.78))
     const y = isSplitLayout ? 0.08 : 0.02
 
+    useFrame(() => {
+        if (!outerRef.current) return
+        const targetX = isSplitLayout ? viewport.width * LOGO_RIGHT_FRACTION : 0
+        outerRef.current.position.x = introProgress.get() * targetX
+    })
+
     return (
-        <group scale={scale} position={[0, y, 0]}>
-            <HeroArtifact phase={phase} />
+        <group ref={outerRef}>
+            <group scale={scale} position={[0, y, 0]}>
+                <HeroArtifact phase="done" />
+            </group>
         </group>
     )
 }
 
+// Textura radial (oscuro al centro → transparente) para la sombra. Se crea una
+// vez en cliente (el canvas r3f no corre en SSR, así que `document` existe).
+function createRadialShadowTexture(): THREE.CanvasTexture {
+    const size = 128
+    const canvas = document.createElement('canvas')
+    canvas.width = size
+    canvas.height = size
+    const ctx = canvas.getContext('2d')
+    if (ctx) {
+        const gradient = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2)
+        gradient.addColorStop(0, 'rgba(0,0,0,0.6)')
+        gradient.addColorStop(0.55, 'rgba(0,0,0,0.2)')
+        gradient.addColorStop(1, 'rgba(0,0,0,0)')
+        ctx.fillStyle = gradient
+        ctx.fillRect(0, 0, size, size)
+    }
+    return new THREE.CanvasTexture(canvas)
+}
+
+// UNA sola sombra del logo: plano radial (encarado a cámara) DEBAJO del logo, que
+// sigue su X cada frame con el MISMO valor (introProgress * viewport.width *
+// LOGO_RIGHT_FRACTION). Mesh independiente → NO hereda la rotación del mouse-follow.
+// No usa drei ContactShadows: su shadow no trackeaba el traslado y además capturaba
+// los puntos (sombra fantasma al centro/izquierda).
+function HeroLogoShadow({ introProgress }: { introProgress: MotionValue<number> }) {
+    const { viewport } = useThree()
+    const meshRef = useRef<THREE.Mesh>(null)
+    const texture = useMemo(() => createRadialShadowTexture(), [])
+
+    useEffect(() => () => texture.dispose(), [texture])
+
+    useFrame(() => {
+        if (!meshRef.current) return
+        meshRef.current.position.x = introProgress.get() * viewport.width * LOGO_RIGHT_FRACTION
+    })
+
+    return (
+        <mesh ref={meshRef} position={[0, SHADOW_Y, SHADOW_Z]}>
+            <planeGeometry args={[SHADOW_WIDTH, SHADOW_HEIGHT]} />
+            <meshBasicMaterial map={texture} transparent opacity={SHADOW_OPACITY} depthWrite={false} />
+        </mesh>
+    )
+}
+
+// Único canvas del Hero (logo + puntos). Full-bleed en desktop, in-box en mobile
+// (lo decide quién lo monta vía targetRef). dpr estático, sin toggles.
+function HeroCanvas({
+    active,
+    isSplitLayout,
+    targetRef,
+    introProgress,
+    layerOpacity,
+    dotsReveal,
+    prefersReducedMotion,
+    onLogoReady,
+}: {
+    active: boolean
+    isSplitLayout: boolean
+    targetRef: RefObject<HTMLDivElement | null>
+    introProgress: MotionValue<number>
+    layerOpacity: MotionValue<number>
+    dotsReveal: MotionValue<number>
+    prefersReducedMotion: boolean
+    onLogoReady: () => void
+}) {
+    return (
+        <Canvas className="relative z-10 h-full w-full" camera={{ position: [0, 0, isSplitLayout ? 15 : 13], fov: isSplitLayout ? 35 : 30 }} gl={{ alpha: true, powerPreference: "high-performance", antialias: false, stencil: false, depth: true }} dpr={[1, 1.5]}>
+            <HeroCanvasSizeSync active={active} targetRef={targetRef} />
+            <MobileInputHandler />
+            {isSplitLayout && !prefersReducedMotion ? <DesktopPointerSync introProgress={introProgress} layerOpacity={layerOpacity} /> : null}
+            <Suspense fallback={null}>
+                {/* Readiness gate: avisa al orquestador cuando el SVG está listo */}
+                <LogoReadySignal onReady={onLogoReady} />
+
+                {/* Background Dot Matrix — solo desktop y sin reduced-motion.
+                    progress = introProgress (migración); revealProgress = dotsReveal
+                    (aparición random R3). Componen: ambos multiplican el scale. */}
+                {isSplitLayout && !prefersReducedMotion ? <DotMatrixMesh progress={introProgress} revealProgress={dotsReveal} /> : null}
+
+                {/* Lighting Setup */}
+                <ambientLight intensity={1.5} />
+                <Environment preset="studio" />
+
+                {/* 3D Logo (siempre 'done') */}
+                <HeroLogo isSplitLayout={isSplitLayout} introProgress={introProgress} />
+
+                {/* Sombra del logo que lo sigue en X (solo desktop) */}
+                {isSplitLayout ? <HeroLogoShadow introProgress={introProgress} /> : null}
+
+                {/* Post-Processing Effects */}
+                <EffectComposer enableNormalPass={false}>
+                    <ChromaticAberration offset={CHROMATIC_ABERRATION_OFFSET} />
+                    <Noise opacity={0.05} premultiply />
+                    <Vignette eskil={false} offset={0.1} darkness={0.5} />
+                </EffectComposer>
+            </Suspense>
+        </Canvas>
+    )
+}
+
 export function Hero() {
-    const { phase, setHeroCanvasRect, setPhase } = usePreloader()
+    const {
+        phase,
+        setPhase,
+        introProgress,
+        canvasReveal,
+        logoStrokeProgress,
+        logoFillProgress,
+        logoLayerOpacity,
+        dotsReveal,
+        textReveal,
+        markLogoReady,
+    } = usePreloader()
     const canvasWrapperRef = useRef<HTMLDivElement>(null)
+    const fullBleedRef = useRef<HTMLDivElement>(null)
+    // Tamaño real del canvas in-box de mobile: la overlay lo necesita para que el SVG
+    // matchee el footprint del 3D (window.innerHeight daría un SVG mucho más grande).
+    const [mobileCanvasPx, setMobileCanvasPx] = useState<{ w: number; h: number } | null>(null)
     const isSplitLayout = useMediaQuery('(min-width: 768px)')
+    const prefersReducedMotion = useMediaQuery('(prefers-reduced-motion: reduce)')
+    const lenis = useLenis()
 
-    const canvasVisible = phase === 'swapping' || phase === 'done'
-    const isSwapping = phase === 'swapping'
-    const textVisible = phase === 'done'
+    // El contenido (izquierda) y el bottom-fade entran al comprimir (swapping||done).
+    const contentVisible = phase === 'swapping' || phase === 'done'
+    // Capa intro blanca: comprime de full-screen a mitad derecha con introProgress.
+    const whiteScaleX = useTransform(introProgress, [0, 1], [1, 0.5])
 
+    // GUARD: si el hero se monta/queda con phase ya en 'done' (fin del intro,
+    // nav-in desde otra página, o skip de automation), forzar el estado FINAL
+    // visible — canvas a opacidad 1, logo a la derecha, dots densos. Nunca en blanco.
     useEffect(() => {
-        const reportRect = () => {
-            if (canvasWrapperRef.current) {
-                const originalTransform = canvasWrapperRef.current.style.transform
-                canvasWrapperRef.current.style.transform = 'none'
-                const rect = canvasWrapperRef.current.getBoundingClientRect()
-                canvasWrapperRef.current.style.transform = originalTransform
-                setHeroCanvasRect(rect)
-            }
+        if (phase === 'done') {
+            introProgress.set(1)
+            canvasReveal.set(1)
+            // R3: estado final del reveal (overlay ausente + puntos visibles), por si
+            // el hero queda en 'done' sin pasar por el reveal (automation, nav-in, safety).
+            logoStrokeProgress.set(1)
+            logoFillProgress.set(1)
+            logoLayerOpacity.set(0)
+            dotsReveal.set(1)
+            textReveal.set(0) // hero final SIN texto del lockup (es solo del intro)
         }
+    }, [phase, introProgress, canvasReveal, logoStrokeProgress, logoFillProgress, logoLayerOpacity, dotsReveal, textReveal])
 
-        const reportAcrossFrames = () => {
-            reportRect()
-            const firstFrame = window.requestAnimationFrame(() => {
-                reportRect()
-                window.requestAnimationFrame(reportRect)
-            })
-
-            return firstFrame
-        }
-
-        reportRect()
-        const frameId = reportAcrossFrames()
-        const resizeObserver =
-            typeof ResizeObserver !== 'undefined' && canvasWrapperRef.current
-                ? new ResizeObserver(reportRect)
-                : null
-
-        if (resizeObserver && canvasWrapperRef.current) {
-            resizeObserver.observe(canvasWrapperRef.current)
-        }
-
-        window.addEventListener('resize', reportRect)
-        window.addEventListener('orientationchange', reportAcrossFrames)
-
-        return () => {
-            window.cancelAnimationFrame(frameId)
-            resizeObserver?.disconnect()
-            window.removeEventListener('resize', reportRect)
-            window.removeEventListener('orientationchange', reportAcrossFrames)
-        }
-    }, [canvasVisible, isSplitLayout, phase, setHeroCanvasRect])
-
+    // Medir el canvas wrapper mobile para que la LogoStrokeOverlay sepa sus dimensiones
+    // reales (window.innerHeight daría un SVG ~3× más grande que el logo in-box).
     useEffect(() => {
-        if (!canvasVisible) return
-
-        const frameId = window.requestAnimationFrame(() => {
-            window.dispatchEvent(new Event('resize'))
-        })
-
-        return () => {
-            window.cancelAnimationFrame(frameId)
+        if (isSplitLayout) return
+        const ref = canvasWrapperRef.current
+        if (!ref) return
+        const r = ref.getBoundingClientRect()
+        if (r.width > 0 && r.height > 0) {
+            setMobileCanvasPx({ w: r.width, h: r.height })
         }
-    }, [canvasVisible, isSplitLayout, phase])
+    }, [isSplitLayout])
 
+    // Scroll lock REAL durante todo el intro: html + body overflow hidden + lenis.stop().
+    // Se libera SOLO en 'done'. El Hero es home-only y vive dentro de SmoothScroll, así
+    // que es el dueño del lock. No se reinicia por fase: stop() en toda fase != done,
+    // start() solo en done.
+    useEffect(() => {
+        const html = document.documentElement
+        const body = document.body
+        if (phase === 'done') {
+            html.style.overflow = ''
+            body.style.overflow = ''
+            lenis?.start()
+        } else {
+            html.style.overflow = 'hidden'
+            body.style.overflow = 'hidden'
+            lenis?.stop()
+        }
+    }, [lenis, phase])
+
+    // Si el Hero se desmonta a mitad del intro (navegación), liberar el scroll.
+    useEffect(() => {
+        return () => {
+            document.documentElement.style.overflow = ''
+            document.body.style.overflow = ''
+        }
+    }, [])
+
+    // Red de seguridad: nunca dejar al usuario varado en el intro si el timeline cuelga.
     useEffect(() => {
         const safety = window.setTimeout(() => {
             if (phase !== 'done') {
@@ -266,12 +488,9 @@ export function Hero() {
     }, [phase, setPhase])
 
     return (
-        <motion.section
+        <section
             className="relative flex min-h-[100svh] flex-col overflow-hidden bg-[#f1f2f4] pb-12 pt-5 md:grid md:min-h-screen md:grid-cols-2 md:items-stretch md:pb-0 md:pt-0"
             id="inicio"
-            initial={false}
-            animate={{ opacity: canvasVisible ? 1 : 0 }}
-            transition={{ duration: 0.3, ease: "easeOut" }}
         >
             <div
                 aria-hidden="true"
@@ -347,6 +566,67 @@ export function Hero() {
                 }}
             />
 
+            {/* DESKTOP: capa intro blanca (debajo del canvas) que comprime full-screen → mitad derecha */}
+            {isSplitLayout ? (
+                <motion.div
+                    aria-hidden="true"
+                    className="absolute inset-0 z-[5] origin-right bg-white pointer-events-none"
+                    style={{ scaleX: whiteScaleX }}
+                    initial={false}
+                    animate={{ opacity: phase === 'done' ? 0 : 1 }}
+                    transition={{ duration: 0.5, ease: HERO_REVEAL_EASE }}
+                />
+            ) : null}
+
+            {/* DESKTOP: canvas full-bleed (logo + puntos), pointer-events:none, debajo del contenido */}
+            {isSplitLayout ? (
+                <motion.div
+                    ref={fullBleedRef}
+                    className="absolute inset-0 z-[6] pointer-events-none"
+                    style={{ opacity: canvasReveal }}
+                >
+                    <HeroCanvas
+                        active
+                        isSplitLayout
+                        targetRef={fullBleedRef}
+                        introProgress={introProgress}
+                        layerOpacity={logoLayerOpacity}
+                        dotsReveal={dotsReveal}
+                        prefersReducedMotion={prefersReducedMotion}
+                        onLogoReady={markLogoReady}
+                    />
+                </motion.div>
+            ) : null}
+
+            {/* DESKTOP: trazado 2D del logo (NEGRO) sobre el canvas full-bleed. Se
+                dibuja → rellena negro → crossfade al chrome (R3). Client-only
+                (se auto-gatea); centrado (introProgress=0 durante el reveal). */}
+            {isSplitLayout && !prefersReducedMotion ? (
+                <div aria-hidden="true" className="absolute inset-0 z-[7] pointer-events-none">
+                    <LogoStrokeOverlay
+                        isSplitLayout
+                        strokeColor={HOME_STROKE_COLOR}
+                        maskColor={HOME_MASK_COLOR}
+                        strokeProgress={logoStrokeProgress}
+                        fillProgress={logoFillProgress}
+                        layerOpacity={logoLayerOpacity}
+                    />
+                </div>
+            ) : null}
+
+            {/* DESKTOP: lockup de texto del intro ("develOP" + slogan, NEGRO) sobre
+                el logo. Se escribe junto al dibujado y se BORRA antes del flying
+                (no sigue al logo). Mismo footprint → centrado sobre la marca. */}
+            {isSplitLayout && !prefersReducedMotion ? (
+                <div className="absolute inset-0 z-[8] pointer-events-none">
+                    <IntroLockupText
+                        isSplitLayout
+                        color={HOME_STROKE_COLOR}
+                        reveal={textReveal}
+                    />
+                </div>
+            ) : null}
+
             <div className="contents md:relative md:z-10 md:col-start-1 md:row-start-1 md:flex md:min-h-screen md:flex-col md:justify-center md:px-[clamp(2.25rem,4.6vw,6rem)] md:pb-[clamp(6rem,11vh,9rem)] md:pt-[clamp(4.75rem,9vh,7.5rem)]">
                 {/* INTRO */}
                 <div className="relative z-10 order-1 px-6 text-center text-zinc-900 sm:px-8 md:px-0 md:text-left">
@@ -354,19 +634,19 @@ export function Hero() {
                         {/* Badge */}
                         <motion.div
                             initial={HERO_CONTENT_HIDDEN}
-                            animate={textVisible ? HERO_CONTENT_VISIBLE : HERO_CONTENT_HIDDEN}
+                            animate={contentVisible ? HERO_CONTENT_VISIBLE : HERO_CONTENT_HIDDEN}
                             transition={{ duration: 0.7, delay: 0, ease: HERO_REVEAL_EASE }}
                             className="flex max-w-full items-center justify-center gap-2 font-mono text-[8px] uppercase leading-relaxed tracking-[0.28em] text-zinc-700 sm:text-[9px] sm:tracking-[0.34em] md:justify-start md:text-[10px] md:tracking-[0.46em]"
                         >
                             <span className="w-1 h-1 bg-zinc-900 rounded-full shadow-[0_0_8px_rgba(24,24,27,0.4)]" />
-                            {"\u2726"} AGENCIA DIGITAL {"\u2014"} {"TUCUM\u00C1N, ARGENTINA"}
+                            {"✦"} AGENCIA DIGITAL {"—"} {"TUCUMÁN, ARGENTINA"}
                         </motion.div>
 
                         {/* H1 Metallic Upgrade with Reveal Animation */}
                         <h1 className="mx-auto max-w-full py-1 text-[clamp(2rem,9.6vw,3rem)] font-black leading-[1.02] tracking-tighter md:mx-0 md:max-w-none md:py-2 md:text-[clamp(2.15rem,3.7vw,4.5rem)] md:leading-[1.04] lg:max-w-3xl lg:text-[clamp(2.3rem,4vw,4.5rem)]">
                             <motion.div
                                 initial={HERO_CONTENT_HIDDEN}
-                                animate={textVisible ? HERO_CONTENT_VISIBLE : HERO_CONTENT_HIDDEN}
+                                animate={contentVisible ? HERO_CONTENT_VISIBLE : HERO_CONTENT_HIDDEN}
                                 transition={{ duration: 0.7, delay: 0.08, ease: HERO_REVEAL_EASE }}
                                 className="overflow-visible"
                             >
@@ -376,12 +656,12 @@ export function Hero() {
                             </motion.div>
                             <motion.div
                                 initial={HERO_CONTENT_HIDDEN}
-                                animate={textVisible ? HERO_CONTENT_VISIBLE : HERO_CONTENT_HIDDEN}
+                                animate={contentVisible ? HERO_CONTENT_VISIBLE : HERO_CONTENT_HIDDEN}
                                 transition={{ duration: 0.7, delay: 0.16, ease: HERO_REVEAL_EASE }}
                                 className="overflow-visible"
                             >
                                 <span className="block min-h-[2.12em] px-[0.42em] pb-[0.12em] leading-[1.02] text-center [filter:none] [text-shadow:none] md:min-h-[2.16em] md:px-0 md:pr-[0.7em] md:text-left md:leading-[1.04] xl:min-h-[1.2em]">
-                                    {textVisible ? (
+                                    {contentVisible ? (
                                         <TypewriterText
                                             words={HERO_KEYWORDS}
                                             typingSpeed={70}
@@ -403,7 +683,7 @@ export function Hero() {
                     <div className="space-y-4 md:space-y-5 xl:space-y-7">
                         <motion.p
                             initial={HERO_CONTENT_HIDDEN}
-                            animate={textVisible ? HERO_CONTENT_VISIBLE : HERO_CONTENT_HIDDEN}
+                            animate={contentVisible ? HERO_CONTENT_VISIBLE : HERO_CONTENT_HIDDEN}
                             transition={{ duration: 0.7, delay: 0.28, ease: HERO_REVEAL_EASE }}
                             className="mx-auto max-w-md text-[0.95rem] font-light leading-[1.48] tracking-wide text-zinc-500 sm:text-lg md:mx-0 md:max-w-xl md:text-base md:leading-relaxed lg:text-lg xl:text-xl"
                         >
@@ -415,7 +695,7 @@ export function Hero() {
                         {/* CTA Buttons */}
                         <motion.div
                             initial={HERO_CONTENT_HIDDEN}
-                            animate={textVisible ? HERO_CONTENT_VISIBLE : HERO_CONTENT_HIDDEN}
+                            animate={contentVisible ? HERO_CONTENT_VISIBLE : HERO_CONTENT_HIDDEN}
                             transition={{ duration: 0.7, delay: 0.42, ease: HERO_REVEAL_EASE }}
                             className="mx-auto flex w-full max-w-md flex-col gap-3 pt-0 md:mx-0 md:w-auto md:max-w-none md:gap-2 md:pt-2 lg:flex-row xl:gap-4 xl:pt-4"
                         >
@@ -430,31 +710,22 @@ export function Hero() {
                         {/* Micro-copy */}
                         <motion.p
                             initial={HERO_CONTENT_HIDDEN}
-                            animate={textVisible ? HERO_CONTENT_VISIBLE : HERO_CONTENT_HIDDEN}
+                            animate={contentVisible ? HERO_CONTENT_VISIBLE : HERO_CONTENT_HIDDEN}
                             transition={{ duration: 0.7, delay: 0.56, ease: HERO_REVEAL_EASE }}
                             className="mx-auto max-w-md text-[11px] tracking-wide text-zinc-500 md:mx-0 md:max-w-none md:text-xs"
                         >
-                            {"\u2726"} Primera consulta sin costo {"\u2014"} respondemos en menos de 24hs
+                            {"✦"} Primera consulta sin costo {"—"} respondemos en menos de 24hs
                         </motion.p>
                     </div>
                 </div>
             </div>
 
-            {/* COLUMN RIGHT: 3D ARTIFACT */}
-            <motion.div
+            {/* COLUMN RIGHT: panel bg-zinc-50 (+ canvas in-box en mobile). El canvas
+                desktop es full-bleed (arriba); este panel queda DEBAJO del canvas
+                (z-0) y se revela cuando la capa blanca hace fade-out en 'done'. */}
+            <div
                 ref={canvasWrapperRef}
-                animate={{
-                    opacity: canvasVisible ? 1 : 0,
-                    scale: isSwapping ? 1.035 : canvasVisible ? 1 : 0.88,
-                    y: isSwapping ? 10 : canvasVisible ? 0 : 28,
-                    filter: canvasVisible ? 'blur(0px)' : 'blur(12px)',
-                }}
-                transition={{
-                    duration: 0.7,
-                    ease: HERO_REVEAL_EASE,
-                    filter: { duration: 0.5 },
-                }}
-                className="relative z-10 order-2 mx-auto mt-1 flex h-[clamp(12rem,32svh,18rem)] w-[calc(100%-3rem)] max-w-[28rem] items-center justify-center overflow-visible bg-transparent sm:w-[calc(100%-4rem)] md:col-start-2 md:row-start-1 md:m-0 md:h-screen md:w-full md:max-w-none md:overflow-hidden md:bg-zinc-50"
+                className="relative z-0 order-2 mx-auto mt-1 flex h-[clamp(12rem,32svh,18rem)] w-[calc(100%-3rem)] max-w-[28rem] items-center justify-center overflow-visible bg-transparent sm:w-[calc(100%-4rem)] md:col-start-2 md:row-start-1 md:m-0 md:h-screen md:w-full md:max-w-none md:overflow-hidden md:bg-zinc-50"
             >
                 <div
                     aria-hidden="true"
@@ -464,40 +735,63 @@ export function Hero() {
                     aria-hidden="true"
                     className="absolute bottom-[18%] left-1/2 z-0 h-10 w-[74%] -translate-x-1/2 rounded-full bg-black/20 blur-2xl pointer-events-none md:hidden"
                 />
-                <Canvas className="relative z-10 h-full w-full" camera={{ position: [0, 0, isSplitLayout ? 15 : 13], fov: isSplitLayout ? 35 : 30 }} gl={{ alpha: true, powerPreference: "high-performance", antialias: false, stencil: false, depth: true }} dpr={[1, 1.5]}>
-                    <HeroCanvasSizeSync active={canvasVisible} targetRef={canvasWrapperRef} />
-                    <MobileInputHandler />
-                    <Suspense fallback={null}>
-                        {/* Background Dot Matrix */}
-                        {isSplitLayout ? <DotMatrixMesh /> : null}
+                {!isSplitLayout ? (
+                    <motion.div className="absolute inset-0" style={{ opacity: canvasReveal }}>
+                        <HeroCanvas
+                            active
+                            isSplitLayout={false}
+                            targetRef={canvasWrapperRef}
+                            introProgress={introProgress}
+                            layerOpacity={logoLayerOpacity}
+                            dotsReveal={dotsReveal}
+                            prefersReducedMotion={prefersReducedMotion}
+                            onLogoReady={markLogoReady}
+                        />
+                    </motion.div>
+                ) : null}
 
-                        {/* Lighting Setup */}
-                        <ambientLight intensity={1.5} />
-                        <Environment preset="studio" />
+                {/* MOBILE: overlay 2D del pintado (NEGRO). Se monta cuando se conoce
+                    el tamaño del canvas in-box (mobileCanvasPx). La overlay tapa el 3D
+                    hasta el crossfade instantáneo → chrome + contenido aparecen juntos. */}
+                {!isSplitLayout && !prefersReducedMotion && mobileCanvasPx ? (
+                    <div aria-hidden="true" className="absolute inset-0 z-10 pointer-events-none">
+                        <LogoStrokeOverlay
+                            isSplitLayout={false}
+                            strokeColor={HOME_STROKE_COLOR}
+                            maskColor={HOME_MASK_COLOR}
+                            strokeProgress={logoStrokeProgress}
+                            fillProgress={logoFillProgress}
+                            layerOpacity={logoLayerOpacity}
+                            canvasSizePx={mobileCanvasPx}
+                        />
+                    </div>
+                ) : null}
 
-                        {/* 3D Logo (Front) */}
-                        <ResponsiveHeroArtifact phase={phase} isSplitLayout={isSplitLayout} />
+                {/* MOBILE: lockup de texto del intro ("develOP" + slogan, NEGRO).
+                    El wrapper es overflow-visible → el texto sobresale del box del
+                    logo sin desbordar la pantalla. Se borra antes del swap (no
+                    persiste sobre el hero real). */}
+                {!isSplitLayout && !prefersReducedMotion && mobileCanvasPx ? (
+                    <div className="absolute inset-0 z-20 pointer-events-none">
+                        <IntroLockupText
+                            isSplitLayout={false}
+                            color={HOME_STROKE_COLOR}
+                            reveal={textReveal}
+                            canvasSizePx={mobileCanvasPx}
+                        />
+                    </div>
+                ) : null}
+            </div>
 
-                        {/* Contact Shadows for depth */}
-                        {isSplitLayout ? (
-                            <ContactShadows position={[0, -2.5, 0]} opacity={0.4} scale={15} blur={2} far={4} color="#000000" />
-                        ) : null}
-
-                        {/* Post-Processing Effects */}
-                        <EffectComposer enableNormalPass={false}>
-                            <ChromaticAberration offset={[0.0015, 0.0015]} />
-                            <Noise opacity={0.05} premultiply />
-                            <Vignette eskil={false} offset={0.1} darkness={0.5} />
-                        </EffectComposer>
-                    </Suspense>
-                </Canvas>
-            </motion.div>
-
-            {/* Bottom Fade (Integration with Dark Section) */}
-            <div
+            {/* Bottom Fade (Integration with Dark Section) — entra con el contenido */}
+            <motion.div
+                aria-hidden="true"
                 className="absolute bottom-0 left-0 z-20 h-44 w-full pointer-events-none md:h-80"
                 style={{ background: 'linear-gradient(to top, rgb(9,9,11) 0%, rgba(24,24,27,0.7) 35%, rgba(24,24,27,0.28) 58%, transparent 100%)' }}
+                initial={false}
+                animate={{ opacity: contentVisible ? 1 : 0 }}
+                transition={{ duration: 0.5, ease: HERO_REVEAL_EASE }}
             />
-        </motion.section>
+        </section>
     )
 }

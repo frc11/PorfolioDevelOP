@@ -57,6 +57,15 @@ export default function RootLayout({
       <head>
         <link rel="preconnect" href="https://grainy-gradients.vercel.app" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://placehold.co" crossOrigin="anonymous" />
+        {/* Scroll lock temprano (pre-hidratación) SOLO en home: el intro del hero
+            arranca bloqueado desde el primer frame. El Hero lo libera en phase 'done'.
+            Se omite bajo automation (visual-qa necesita scrollear). */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "try{if(location.pathname==='/'&&navigator.webdriver!==true){document.documentElement.style.overflow='hidden'}}catch(e){}",
+          }}
+        />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}

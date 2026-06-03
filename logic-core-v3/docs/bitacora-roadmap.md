@@ -10272,3 +10272,108 @@ Considerado y **descartado**. El único contenido genuinamente útil sería list
 - ✅ Densidad / progressive disclosure: auditadas las 5 pantallas, 4/5 ya tenían B13.3 aplicado (dejadas), 1/5 migrada (conversations). Settings NO densificado por decisión explícita de Franco.
 - ✅ Espacio para Franco: el sprint le mostró los hallazgos antes de actuar, Franco eligió prioridades, las ❓ subjetivas (módulos seed, hydration, greeting calibrando) quedan listadas para que él arbitre como sprints propios.
 
+---
+
+## ✅ REVEAL-FIX.1 — Ajustes de coreografía del intro (marketing desktop/mobile + home mobile)
+
+**Fecha:** 2026-06-02
+**Autor:** Claude Opus 4.8
+**Alcance:** SOLO `src/components/ui/MarketingIntro.tsx`. El reveal (trazo→relleno→crossfade 2D→3D, puntos random, toldo) YA funcionaba; esto son 3 ajustes puntuales pedidos tras grabación. NO se tocó `HeroArtifact` (frozen), ni el gate de disparo, ni el flujo flying/compresión del home desktop, ni `PreloaderContext`.
+
+### Contexto (fuente de verdad = comentarios de código; no existe un .md dedicado del reveal)
+Las dos intros comparten `LogoStrokeOverlay` (2D) y la mecánica trazo→relleno (el COLOR del fill anima `maskColor`→`strokeColor`)→crossfade al 3D. Marketing = `MarketingIntro` (velo `#0a0a0a`; 3D `BrandedIntroCanvas` SOLO desktop; toldo `translateY 0→-100%`). Home = `Preloader`+`Hero` (velo negro→blanco; chrome `HeroArtifact`; flying desktop). Los tiempos son consts tunables; el humano afina los valores finales.
+
+### Fixes aplicados
+1. **Marketing desktop tardaba demasiado en irse** → `MARKETING_INTERACT_MS` 2000 → **1000** (la ventana interactiva mouse-follow post-crossfade era el hold dominante; recorta ~1 s del total). Resto de consts intactas y tunables (settle/stroke/fill/crossfade/lift). Marketing desktop NO se tocó en nada más (regla del brief).
+2. **Marketing mobile (a) jank:** confirmado que en mobile NO se monta ningún canvas/3D/puntos — `BrandedIntroCanvas` está gateado por `isSplitLayout` (solo desktop); mobile monta SOLO el 2D (`LogoStrokeOverlay`). Para asegurar que el lift del toldo componga en GPU se agregó `will-change: transform` al contenedor `fixed inset-0 z-[9999]` (el `y` ya es translateY por MotionValue) → su propia capa de composición, sin jank. Hint de perf benigno; no altera la coreografía de desktop.
+3. **Marketing mobile (b) el 2D relleno desaparecía ANTES de subir el toldo:** se eliminó el `overlayOpacity.set(0)` del branch mobile non-reduced. Ahora el logo 2D relleno (blanco) queda SÓLIDO (`overlayOpacity=1`) y SUBE JUNTO con el toldo (es hijo del contenedor que hace el lift). Sin fade-out separado del 2D.
+
+### Fix 3 (home mobile relleno NEGRO) — YA estaba correcto en el working tree (NO requirió cambio)
+El brief pedía pasar NEGRO al trazo+relleno del `LogoStrokeOverlay` mobile del home (supuestamente usaba el blanco de marketing). **Verificado: ya pasa los colores del home** (`HOME_STROKE_COLOR = #09090b` negro / `HOME_MASK_COLOR = #ffffff`), idénticos al home desktop. Los 3 (y únicos) call-sites de `LogoStrokeOverlay`:
+- `MarketingIntro.tsx:301` → blanco `#f4f4f5` sobre velo oscuro (correcto, marketing).
+- `Hero.tsx:603` (home **desktop**) → `HOME_STROKE_COLOR`/`HOME_MASK_COLOR` (negro).
+- `Hero.tsx:742` (home **mobile**) → mismos `HOME_STROKE_COLOR`/`HOME_MASK_COLOR` (negro).
+
+`fillColor = useTransform(fillProgress,[0,1],[maskColor,strokeColor])` → en mobile home el relleno anima blanco→**negro**. No se hizo edición redundante. 🚩 Si en la grabación el logo mobile home se ve "blanco", el candidato es el chrome 3D post-crossfade (`HeroArtifact`, metálico/claro bajo luz studio), NO el relleno 2D — confirmar con el humano.
+
+### Archivos tocados
+- `src/components/ui/MarketingIntro.tsx` — 3 ediciones (const INTERACT 2000→1000; quitar `overlayOpacity.set(0)` mobile; `will-change:transform` en contenedor).
+- Este log (`docs/bitacora-roadmap.md`).
+
+### Verificación (gate del brief; el build sigue rojo por baseline ajeno `@googleapis/webmasters`, no es "build verde")
+- ✅ `npx eslint src/components/ui/MarketingIntro.tsx` → limpio (exit 0).
+- ✅ `npx tsc --noEmit` → único error = baseline conocido `searchconsole.ts(2,43) TS2307 @googleapis/webmasters`. Cero errores nuevos, cero en MarketingIntro.
+- ✅ visual-qa en REPOSO (intro auto-skipea bajo automation/`?e2e=1`): `/web-development` y `/` en desktop+mobile → contenido visible, **sin overlay `z-9999` atascado** en ninguna superficie, estado final del home correcto. Único error de consola = hydration mismatch pre-existente del scroll-lock pre-hidratación del `<html>` (ya documentado en CC.2/CC.3, no es regresión). Server QA: `next-dev-qa` :3002.
+- ⏳ **COREOGRAFÍA (humano, por grabación):** verificar (1) marketing desktop más corto, (2) mobile marketing sin jank + el logo 2D queda sólido hasta que sube el toldo, (3) home mobile relleno negro (ver 🚩), (4) home desktop sin regresión. El intro NO es observable por visual-qa (skip de automation).
+
+### Pendientes / Out-of-scope flagged
+- 🚩 Fix 3 ya satisfecho — confirmar contra la grabación si lo que se veía "blanco" era el chrome 3D y no el 2D.
+- Valores de duración tunables: si 1000 ms aún se siente largo (o corto) en marketing desktop, ajustar `MARKETING_INTERACT_MS` (y opcionalmente `MARKETING_SETTLE_MS`, no tocado por riesgo de que asome el chrome).
+
+---
+
+## ✅ REVEAL-FIX.2 — Eliminar el sticker blanco detrás del logo en el home
+
+**Fecha:** 2026-06-02
+**Autor:** Claude Sonnet 4.6
+**Alcance:** SOLO `src/components/ui/LogoStrokeOverlay.tsx` (1 línea de constante + 3 props del mask path).
+
+### Diagnóstico
+La máscara del `LogoStrokeOverlay` tenía `stroke={maskColor} strokeWidth={MASK_STROKE_WIDTH}` (44 unidades en un viewBox 1024 → ~17px de halo en pantalla) con `overflow: visible` en el SVG. Esto creaba un halo blanco (`#ffffff`) alrededor del logo que se extendía FUERA del footprint del path, visible sobre el canvas del home porque:
+1. El `EffectComposer` (Vignette + Noise) crea un campo visual no-uniforme bajo el halo.
+2. En desktop el canvas es alpha=true sobre la capa blanca (z-5), pero la vignette oscurece los bordes → contraste visible.
+3. En mobile el canvas es alpha=true sobre `#f1f2f4` (gris claro) → el halo blanco contrasta aún más.
+
+En marketing el efecto era invisible porque `maskColor = #0a0a0a` (oscuro) ← matchea el fondo oscuro. En home `maskColor = #ffffff` sobre canvas+vignette → "sticker blanco con sombra suave".
+
+### Fix
+Removida la propiedad `stroke`/`strokeWidth` del mask path — solo se mantiene el `fill`. El fill cubre exactamente el footprint del logo (igual que el path animado que también arranca en `maskColor`). El chrome no asoma porque: (a) `DesktopPointerSync.useFrame` fuerza `state.pointer=(0,0)` mientras `layerOpacity>0.001`; (b) el path animado (`fillColor`) también arranca en `maskColor` tapando el interior desde el frame 0. Eliminada la constante `MASK_STROKE_WIDTH = 44` (sin usos tras el fix → ESLint lo habría marcado).
+
+### Archivos tocados
+- `src/components/ui/LogoStrokeOverlay.tsx` — removida constante `MASK_STROKE_WIDTH`, removidas props `stroke`/`strokeWidth`/`strokeLinejoin`/`strokeLinecap` del mask path.
+
+### Verificación
+- ✅ `eslint` en `LogoStrokeOverlay.tsx` → limpio (exit 0).
+- ✅ `tsc --noEmit` → único error = baseline `@googleapis/webmasters`. Cero errores nuevos.
+- ✅ Visual-qa at rest (`:3002`, `?e2e=1`): `/web-development` mobile+desktop y `/` → `stuckCount: 0`, `logoSvgPresent: true`, sin `MASK_STROKE_WIDTH is not defined`. Solo el hydration mismatch pre-existente.
+- ⏳ Coreografía (humano, grabación): el sticker blanco ya no debe aparecer detrás del logo en hard-load de "/" desktop y mobile. Chrome no debe asomar durante el trazo. Marketing sin regresión.
+
+---
+
+## ✅ REVEAL-TEXT — Lockup "develOP" + slogan con efecto de escritura (home + marketing)
+
+**Fecha:** 2026-06-02
+**Autor:** Claude Opus 4.8
+**Alcance:** componente nuevo compartido + un MotionValue aditivo en el contexto + orquestación en las dos intros. NO toca el logo (posición/tamaño), HeroArtifact, el gate, ni el resto del reveal (trazo/relleno/crossfade/flying/toldo).
+
+### Qué se agregó
+"develOP" ARRIBA del logo y el slogan "Construimos lo que imaginas" ABAJO, escritos con un **wipe izq→derecha (`clip-path: inset`) + cursor**, todo **MotionValue-driven (sin setState por frame)** — NO se reusó el `TypewriterText` viejo (era setState-por-char). Un solo driver `reveal` (0→1 escribe, 1→0 borra) maneja ambas líneas con leve stagger (develOP primero) vía sub-rangos; el borrado es el mismo wipe en reversa. Color: home = negro (`#09090b`), marketing = blanco (`#f4f4f5`). Tipografía = Geist Sans heredada del body (matchea el wordmark del Navbar): wordmark 600 / tracking 0.14em, slogan 300 / tracking 0.045em, ambos `clamp()` + `nowrap` (develOP nunca wrapea; el slogan entra en 1 renglón hasta ≥320px).
+
+### Posición (sin mover el logo)
+`IntroLockupText` reusa la MISMA matemática de footprint que `LogoStrokeOverlay` (`computeLogoOuterScale`/`logoHvis`/`LOGO_BOX_WORLD`) → ancla 0×0 en el centro del logo (mismo `translateY`), wordmark colgado por encima (`bottom: boxPx*0.40`) y slogan por debajo (`top: boxPx*0.42`). Tunables `WORDMARK_OFFSET_FRAC`/`SLOGAN_OFFSET_FRAC`/rangos de stagger en el componente.
+
+### Timing (no alarga el total de forma notable)
+- Escribe EN PARALELO al dibujado (mismo arranque), termina ~con el relleno → legible durante crossfade + hold/ventana interactiva existentes.
+- **HOME:** tras el hold se BORRA (wipe reversa, `HOME_TEXT_ERASE_SECONDS=0.5`) y RECIÉN ahí ocurre el flying — el texto NO sigue al logo. Mobile-home también borra antes del swap (no persiste sobre el hero real).
+- **MARKETING:** NO se borra → queda sólido y SUBE con el toldo (es hijo del root que hace el lift).
+- reduced-motion: home saltea el texto (default 0); marketing lo muestra estático (`textReveal=1`, sin escritura) y sube con el toldo.
+
+### Archivos tocados
+- `src/components/ui/IntroLockupText.tsx` — **NUEVO** (componente compartido).
+- `src/context/PreloaderContext.tsx` — `textReveal: MotionValue<number>` (aditivo, default 0 = sin texto; NO toca el enum/flujo).
+- `src/components/ui/Preloader.tsx` — home desktop+mobile: escribe en paralelo al trazo, borra antes del flying/swap. Tunables `HOME_TEXT_WRITE_SECONDS`/`HOME_TEXT_ERASE_SECONDS`.
+- `src/components/layout/Hero.tsx` — render del lockup (desktop z-[8], mobile z-20) color negro + reset en el guard `phase==='done'`.
+- `src/components/ui/MarketingIntro.tsx` — `textReveal` local, escribe en paralelo al trazo (sin borrado), color blanco, render dentro del root que sube con el toldo. Tunable `MARKETING_TEXT_WRITE_SECONDS`.
+
+### Verificación
+- ✅ `eslint` en los 5 archivos → único error = baseline `set-state-in-effect` del skip de automation en `PreloaderContext` (intencional). Cero nuevos.
+- ✅ `tsc --noEmit` → único error = baseline `@googleapis/webmasters`. Cero nuevos. Cero `any`.
+- ✅ Geometría at rest (`:3002`, `?e2e=1`; el lockup montea aunque clippeado en `reveal=0` → medible por `getBoundingClientRect`):
+  - **Desktop 1280×820:** develOP `cx=640` (centrado), slogan `cx=640`; ambos `nowrap` 1 renglón; negro `rgb(9,9,11)`; pesos 600/300; ~206px arriba / ~201px abajo del centro (simétrico); dentro del viewport (194→619 de 820).
+  - **Mobile 375×812:** develOP + slogan `cx=188` (centrados sobre el wrapper del logo, `cy=309`); 1 renglón; negro; slogan `w=158 < 375`; dentro del viewport (178→441).
+- ✅ Consola: sin errores nuevos (solo el hydration mismatch pre-existente del scroll-lock del `<html>`). Sin `ReferenceError` del componente/MotionValue nuevos.
+- ⏳ **COREOGRAFÍA (humano, por grabación):** el intro NO es observable por automation (skip con `?e2e=1`). Verificar: (1) home (negro) y marketing (blanco) escriben develOP arriba + slogan abajo junto al dibujado, legibles, SIN mover el logo; (2) mobile: develOP en 1 renglón y todo entra en pantalla; (3) HOME borra el texto ANTES del flying; (4) MARKETING el texto sube con el toldo; (5) el total no se alargó de forma notable; (6) home desktop/mobile y marketing sin regresión.
+
+### Pendientes / tunables
+- Offsets `WORDMARK_OFFSET_FRAC=0.40` / `SLOGAN_OFFSET_FRAC=0.42`, stagger (`WORDMARK_RANGE`/`SLOGAN_RANGE`), `HOME_TEXT_ERASE_SECONDS=0.5` y tamaños/tracking del `WipeLine`: ajustar contra la grabación si hace falta más aire o más tiempo de lectura.
+
