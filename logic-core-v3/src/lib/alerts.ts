@@ -248,7 +248,7 @@ export async function runPeriodicAgencyAlerts(): Promise<{
       },
       orderBy: { renewalDate: 'asc' },
       select: {
-        planName: true,
+        plan: { select: { name: true } },
         renewalDate: true,
         organization: {
           select: {
@@ -284,7 +284,7 @@ export async function runPeriodicAgencyAlerts(): Promise<{
         sendAgencyAlert({
           type: 'SUBSCRIPTION_EXPIRING',
           clientName: subscription.organization.companyName,
-          detail: `El plan ${subscription.planName} vence el ${subscription.renewalDate?.toLocaleDateString('es-AR')}.`,
+          detail: `El plan ${subscription.plan?.name ?? 'contratado'} vence el ${subscription.renewalDate?.toLocaleDateString('es-AR')}.`,
           link: `/admin/clients/${subscription.organization.id}`,
         })
       ),

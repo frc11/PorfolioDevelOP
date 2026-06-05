@@ -106,7 +106,7 @@ export default async function AgencyOsProjectOverviewPage({
     include: {
       organization: {
         include: {
-          subscription: true,
+          subscription: { include: { plan: { select: { name: true } } } },
           services: {
             where: {
               status: ServiceStatus.ACTIVE,
@@ -221,7 +221,7 @@ export default async function AgencyOsProjectOverviewPage({
                 Sitio: {project.organization.siteUrl ?? 'Sin sitio configurado'}
               </p>
               <p className="mt-1 text-sm text-zinc-400">
-                Suscripcion: {project.organization.subscription?.planName ?? 'Sin plan'}
+                Suscripcion: {project.organization.subscription?.plan?.name ?? 'Sin plan'}
               </p>
             </div>
           ) : (

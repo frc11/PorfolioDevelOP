@@ -6,7 +6,6 @@ export const getSubscriptionForOrg = cache(async (orgId: string) => {
     where: { organizationId: orgId },
     select: {
       status: true,
-      planName: true,
       renewalDate: true,
     },
   })

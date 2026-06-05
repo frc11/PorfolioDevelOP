@@ -12,7 +12,7 @@ export async function OverviewTab({ clientId }: OverviewTabProps) {
   const client = await prisma.organization.findUnique({
     where: { id: clientId },
     include: {
-      subscription: true,
+      subscription: { include: { plan: { select: { name: true } } } },
       members: {
         orderBy: { joinedAt: 'asc' },
         take: 1,
@@ -34,7 +34,7 @@ export async function OverviewTab({ clientId }: OverviewTabProps) {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
           label="Plan"
-          value={client.subscription?.planName ?? 'Sin plan'}
+          value={client.subscription?.plan?.name ?? 'Sin plan'}
           color="cyan"
         />
         <StatCard

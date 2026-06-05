@@ -10,7 +10,7 @@ const getClients = unstable_cache(
     prisma.organization.findMany({
       include: {
         botConfig: { select: { isActive: true, monthlyQuota: true } },
-        subscription: { select: { status: true, planName: true } },
+        subscription: { select: { status: true, plan: { select: { name: true } } } },
         _count: {
           select: { projects: true, tickets: true, messages: true },
         },

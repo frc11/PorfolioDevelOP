@@ -15,7 +15,7 @@ interface ClientHeaderProps {
       botName: string
       _count?: { conversations: number; leads: number }
     } | null
-    subscription: { status: string; planName: string } | null
+    subscription: { status: string; plan: { name: string } | null } | null
     _count: {
       projects: number
       clientAssets: number
@@ -63,7 +63,7 @@ export function ClientHeader({ client, allClients }: ClientHeaderProps) {
                 <>
                   <span className="text-zinc-700">/</span>
                   <span>
-                    {client.subscription.planName} ({client.subscription.status})
+                    {client.subscription.plan?.name ?? 'Sin plan'} ({client.subscription.status})
                   </span>
                 </>
               )}
