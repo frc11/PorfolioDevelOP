@@ -3,6 +3,8 @@ import { Building2, LogIn } from 'lucide-react'
 import { ProjectStatus, ServiceStatus, ServiceType } from '@prisma/client'
 import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
+import { auth } from '@/auth'
+import { callerCanAccessOrg } from '@/lib/auth/assert-ownership'
 import { startImpersonationAction } from '@/lib/actions/impersonation'
 import { ProjectForm } from '../_components/project-form'
 import { updateProjectStatus } from '../_actions/project.actions'
@@ -105,6 +107,11 @@ function normalizeServiceType(
 }
 
 export default async function AgencyOsProjectLayout({ children, params }: ProjectLayoutProps) {
+  const session = await auth()
+  if (!session?.user) {
+    redirect('/login')
+  }
+
   const { projectId } = await params
 
   const [project, organizations] = await Promise.all([
@@ -146,7 +153,11 @@ export default async function AgencyOsProjectLayout({ children, params }: Projec
     }),
   ])
 
-  if (!project) {
+  // P0-6 (3ra instancia): scoping defensivo, mismo criterio que la page.
+  // SUPER_ADMIN ve cualquier proyecto (incl. internos con organizationId null);
+  // cualquier otro rol futuro queda atado a su org. redirect (no notFound) para
+  // no leakear la existencia del proyecto entre orgs.
+  if (!project || !callerCanAccessOrg(session.user, project.organizationId)) {
     redirect('/admin/projects')
   }
 

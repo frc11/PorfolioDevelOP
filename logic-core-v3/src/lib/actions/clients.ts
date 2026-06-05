@@ -4,7 +4,7 @@ import bcrypt from 'bcryptjs'
 import { Role } from '@prisma/client'
 import { redirect } from 'next/navigation'
 import { revalidatePath, revalidateTag } from 'next/cache'
-import { auth } from '@/auth'
+import { requireSuperAdmin } from '@/lib/auth-guards'
 import { prisma } from '@/lib/prisma'
 import { seedOnboardingTasksForOrg } from '@/lib/onboarding/seed-tasks-for-org'
 import { z } from 'zod'
@@ -73,6 +73,13 @@ export async function createClientAction(
   _prevState: string | null,
   formData: FormData
 ): Promise<string | null> {
+  // FIX 1 — guard de auth. createClientAction crea org+user+member: mutación
+  // exclusiva de SUPER_ADMIN. Una server action es un POST público, así que el
+  // gate del layout no alcanza; validamos rol ANTES de procesar el input.
+  // requireSuperAdmin() lanza 'Unauthorized' si el caller no es super-admin
+  // (mismo patrón que lead/ticket/demo/inbound/activity actions).
+  await requireSuperAdmin()
+
   const parsed = CreateClientSchema.safeParse({
     companyName: formString(formData.get('companyName')).trim(),
     email: formString(formData.get('email')).trim(),
@@ -85,7 +92,12 @@ export async function createClientAction(
     return parsed.error.issues[0]?.message ?? REQUIRED_FIELDS_MSG
   }
 
-  const { companyName, email, password, name } = parsed.data
+  const { companyName, password, name } = parsed.data
+  // FIX 3 — email casing. Normalizamos a lowercase para alinear con el login
+  // (auth.ts lowercasea el email al autenticar). Sin esto, un cliente creado
+  // con mayúsculas nunca podría loguear: el findUnique del login no matchearía.
+  // Solo afecta usuarios NUEVOS; no toca registros existentes.
+  const email = parsed.data.email.toLowerCase()
   const logoUrl = parsed.data.logoUrl ?? null
 
   const existing = await prisma.user.findUnique({ where: { email } })
