@@ -33,6 +33,12 @@ export const RATE_LIMIT_PRESETS = {
   // del cliente. Identifica por orgId (no sensible — no se hashea).
   crmRetryPerOrg: { limit: 10, windowMs: 60_000 },
   crmTestPerOrg: { limit: 5, windowMs: 60_000 },
+
+  // ── Formulario de contacto público (landing) ─────────────────────────────
+  // Protege contra spam de leads. Un visitante real nunca necesita enviar el
+  // form más de 5 veces en 15 minutos. Clave: IP hasheada (no controlable
+  // por el atacante — no se expone ningún campo del FormData).
+  contactFormPerIp: { limit: 5, windowMs: 15 * 60_000 },
 } as const
 
 export type RateLimitScope = keyof typeof RATE_LIMIT_PRESETS

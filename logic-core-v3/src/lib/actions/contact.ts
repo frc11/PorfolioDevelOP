@@ -5,6 +5,9 @@ import { revalidatePath } from 'next/cache'
 import { sendLeadToN8n } from '@/lib/n8n'
 import { sendAgencyAlert } from '@/lib/alerts'
 import { requireSuperAdmin } from '@/lib/auth-guards'
+import { checkRateLimit } from '@/lib/rate-limit/limiter'
+import { RATE_LIMIT_PRESETS } from '@/lib/rate-limit/presets'
+import { getClientIpHash } from '@/lib/security/auth-rate-limit'
 import { ContactFormSchema, type ActionResult } from './schemas'
 
 export type ContactFormState = ActionResult | null
@@ -13,6 +16,21 @@ export async function contactFormAction(
   _prevState: ContactFormState,
   formData: FormData
 ): Promise<ActionResult> {
+  // Rate-limit por IP — protege el form público (landing) contra spam y abuso.
+  // Se aplica ANTES del parsing para bloquear sin costo de DB.
+  // Clave no controlable por el atacante: IP hasheada, no un campo del FormData.
+  const ipHash = await getClientIpHash()
+  const rl = await checkRateLimit({
+    key: `contactFormPerIp:${ipHash}`,
+    ...RATE_LIMIT_PRESETS.contactFormPerIp,
+  })
+  if (!rl.allowed) {
+    return {
+      success: false,
+      error: 'Demasiados intentos. Por favor, esperá unos minutos antes de reenviar.',
+    }
+  }
+
   const parsed = ContactFormSchema.safeParse({
     name: formData.get('name'),
     email: formData.get('email'),
