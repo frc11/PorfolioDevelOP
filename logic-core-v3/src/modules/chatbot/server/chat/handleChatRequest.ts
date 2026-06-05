@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto'
 import { streamText, stepCountIs, type ModelMessage } from 'ai'
 import { z } from 'zod'
 import * as Sentry from '@sentry/nextjs'
@@ -561,17 +562,32 @@ export async function handleChatRequest(
   //   ni encadenamiento. H2/H3 documentados en bitácora B3.3-B3.6.
   let stepCount = 0
 
+  // SEC-LLM-01 — Spotlighting del input no confiable del visitante.
+  // Cada mensaje del visitante se envuelve en <vmsg_{nonce}>…</vmsg_{nonce}>
+  // con un nonce aleatorio por request: el visitante no lo conoce, así que no
+  // puede cerrar el delimitador para "escaparse" e inyectar instrucciones.
+  // La regla que le dice al modelo que ese contenido es DATO (no órdenes) vive
+  // en la sección 6 del system prompt (buildAntiHallucination).
+  const visitorTag = `vmsg_${randomUUID().replace(/-/g, '').slice(0, 12)}`
+  const wrapUntrusted = (text: string): string => {
+    // Anti delimiter-escape: removemos cualquier intento del visitante de
+    // inyectar la etiqueta (con o sin el nonce real) antes de envolver.
+    const stripped = text.replace(/<\/?vmsg_[a-z0-9]*>/gi, '')
+    return `<${visitorTag}>\n${stripped}\n</${visitorTag}>`
+  }
+
   const result = streamText({
     model,
     system: enrichedSystemPrompt,
     messages: body.messages.map((m): ModelMessage => {
-      if (m.role === 'user') {
-        return { role: 'user', content: [{ type: 'text', text: m.content }] }
-      }
+      // El historial del asistente (sus propios outputs) va tal cual. Todo lo
+      // demás —mensajes 'user' y, defensivamente, cualquier 'system' que un
+      // cliente intente colar— se trata como input NO confiable y se envuelve
+      // con spotlighting. Así el delimitador no es esquivable mandando role:system.
       if (m.role === 'assistant') {
         return { role: 'assistant', content: [{ type: 'text', text: m.content }] }
       }
-      return { role: 'system', content: m.content }
+      return { role: 'user', content: [{ type: 'text', text: wrapUntrusted(m.content) }] }
     }),
     tools,
     temperature: 0.7,

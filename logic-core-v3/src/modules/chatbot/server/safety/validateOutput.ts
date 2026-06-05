@@ -64,6 +64,15 @@ const PATTERNS: ValidationPattern[] = [
     severity: 'low',
     description: 'Time-frame claim — verify it matches the KB',
   },
+  {
+    // SEC-LLM-01 — el modelo nunca debería repetir el delimitador <vmsg_…> del
+    // spotlighting. Si aparece en el output es eco/fuga del andamiaje de prompt.
+    // No bloquea (igual que el resto de la capa): solo warning para los logs.
+    id: 'delimiter_echo',
+    regex: /<\/?vmsg_[a-z0-9]*>/i,
+    severity: 'medium',
+    description: 'Visitor-input delimiter (vmsg_) echoed into output',
+  },
 ]
 
 export function validateAssistantOutput(text: string): ValidationWarning[] {
