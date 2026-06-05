@@ -2,6 +2,8 @@ import Link from 'next/link'
 import { Prisma, ServiceStatus, TaskStatus } from '@prisma/client'
 import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
+import { auth } from '@/auth'
+import { callerCanAccessOrg } from '@/lib/auth/assert-ownership'
 
 type ProjectOverviewPageProps = {
   params: Promise<{
@@ -92,6 +94,11 @@ function isMaintenanceUpToDate(project: {
 export default async function AgencyOsProjectOverviewPage({
   params,
 }: ProjectOverviewPageProps) {
+  const session = await auth()
+  if (!session?.user) {
+    redirect('/login')
+  }
+
   const { projectId } = await params
 
   const project = await prisma.project.findUnique({
@@ -151,7 +158,9 @@ export default async function AgencyOsProjectOverviewPage({
     },
   })
 
-  if (!project) {
+  // P0-6: scoping defensivo. SUPER_ADMIN ve cualquier proyecto (incl. internos
+  // con organizationId null); cualquier otro rol futuro queda atado a su org.
+  if (!project || !callerCanAccessOrg(session.user, project.organizationId)) {
     redirect('/admin/projects')
   }
 

@@ -1,6 +1,7 @@
 import { auth } from '@/auth'
 import { redirect, notFound } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
+import { callerCanAccessOrg } from '@/lib/auth/assert-ownership'
 import {
   listRecentEvents,
   getMonthlyUsageForBot,
@@ -57,7 +58,12 @@ export default async function BotDetailPage({ params, searchParams }: Props) {
     listConversationsForBot(botId, 100),
   ])
 
-  if (!bot) notFound()
+  // P0-6: scoping defensivo. SUPER_ADMIN ve cualquier org (no-op); cualquier
+  // otro rol futuro queda atado a su propia org. notFound() para no leakear la
+  // existencia del bot a otra org.
+  if (!bot || !callerCanAccessOrg(session.user, bot.organization.id)) {
+    notFound()
+  }
 
   const activeTab: TabId = (VALID_TABS as readonly string[]).includes(tab ?? '')
     ? (tab as TabId)

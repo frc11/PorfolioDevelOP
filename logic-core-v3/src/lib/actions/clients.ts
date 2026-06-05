@@ -7,6 +7,37 @@ import { revalidatePath, revalidateTag } from 'next/cache'
 import { auth } from '@/auth'
 import { prisma } from '@/lib/prisma'
 import { seedOnboardingTasksForOrg } from '@/lib/onboarding/seed-tasks-for-org'
+import { z } from 'zod'
+
+// P1-12: convierte el valor de FormData a string sin un `as` que enmascare el
+// tipo real (FormDataEntryValue puede ser File). No-string → ''.
+function formString(value: FormDataEntryValue | null): string {
+  return typeof value === 'string' ? value : ''
+}
+
+const emptyToUndefined = (value: unknown) =>
+  typeof value === 'string' && value.trim() === '' ? undefined : value
+
+const REQUIRED_FIELDS_MSG = 'Todos los campos obligatorios deben estar completos.'
+
+// P1-12: reemplaza el regex manual de email por Zod. Mensajes en español para
+// preservar el contrato del form (useActionState muestra el string devuelto).
+const CreateClientSchema = z.object({
+  companyName: z.string().min(1, REQUIRED_FIELDS_MSG),
+  email: z
+    .string()
+    .min(1, REQUIRED_FIELDS_MSG)
+    .email('El email no tiene un formato valido.'),
+  password: z
+    .string()
+    .min(1, REQUIRED_FIELDS_MSG)
+    .min(8, 'La contraseña debe tener al menos 8 caracteres.'),
+  name: z.string().min(1, REQUIRED_FIELDS_MSG),
+  logoUrl: z.preprocess(
+    emptyToUndefined,
+    z.string().url('La URL del logo no es válida.').optional()
+  ),
+})
 
 function slugify(text: string): string {
   return text
@@ -42,24 +73,20 @@ export async function createClientAction(
   _prevState: string | null,
   formData: FormData
 ): Promise<string | null> {
-  const companyName = (formData.get('companyName') as string | null)?.trim() ?? ''
-  const email = (formData.get('email') as string | null)?.trim() ?? ''
-  const password = (formData.get('password') as string | null) ?? ''
-  const name = (formData.get('name') as string | null)?.trim() ?? ''
-  const logoUrl = (formData.get('logoUrl') as string | null)?.trim() || null
+  const parsed = CreateClientSchema.safeParse({
+    companyName: formString(formData.get('companyName')).trim(),
+    email: formString(formData.get('email')).trim(),
+    password: formString(formData.get('password')),
+    name: formString(formData.get('name')).trim(),
+    logoUrl: formString(formData.get('logoUrl')).trim(),
+  })
 
-  if (!companyName || !email || !password || !name) {
-    return 'Todos los campos obligatorios deben estar completos.'
+  if (!parsed.success) {
+    return parsed.error.issues[0]?.message ?? REQUIRED_FIELDS_MSG
   }
 
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-  if (!emailRegex.test(email)) {
-    return 'El email no tiene un formato valido.'
-  }
-
-  if (password.length < 8) {
-    return 'La contraseña debe tener al menos 8 caracteres.'
-  }
+  const { companyName, email, password, name } = parsed.data
+  const logoUrl = parsed.data.logoUrl ?? null
 
   const existing = await prisma.user.findUnique({ where: { email } })
   if (existing) {

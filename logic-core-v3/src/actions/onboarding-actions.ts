@@ -5,6 +5,24 @@ import { prisma } from '@/lib/prisma'
 import { resolveOrgId } from '@/lib/preview'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
+import { z } from 'zod'
+
+// P1-12: convierte el valor de FormData a string sin un `as` que enmascare el
+// tipo real (FormDataEntryValue puede ser File). No-string → ''.
+function formString(value: FormDataEntryValue | null): string {
+  return typeof value === 'string' ? value : ''
+}
+
+const emptyToUndefined = (value: unknown) =>
+  typeof value === 'string' && value.trim() === '' ? undefined : value
+
+const OnboardingProfileSchema = z.object({
+  companyName: z.string().min(1, 'El nombre de empresa es requerido.'),
+  logoUrl: z.preprocess(
+    emptyToUndefined,
+    z.string().url('La URL del logo no es válida.').optional()
+  ),
+})
 
 interface OnboardingData {
   primaryColor?: string
@@ -27,10 +45,16 @@ export async function saveOnboardingProfile(
     return 'Sesión inválida. Por favor ingresá de nuevo.'
   }
 
-  const companyName = (formData.get('companyName') as string | null)?.trim() ?? ''
-  const logoUrl = (formData.get('logoUrl') as string | null)?.trim() ?? ''
+  const parsed = OnboardingProfileSchema.safeParse({
+    companyName: formString(formData.get('companyName')).trim(),
+    logoUrl: formString(formData.get('logoUrl')).trim(),
+  })
 
-  if (!companyName) return 'El nombre de empresa es requerido.'
+  if (!parsed.success) {
+    return parsed.error.issues[0]?.message ?? 'Datos inválidos.'
+  }
+
+  const { companyName, logoUrl } = parsed.data
 
   try {
     await prisma.organization.update({
