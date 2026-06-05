@@ -10,7 +10,7 @@ import {
 } from '../conversation'
 import { buildSystemPrompt, formatDateTimeArgentina } from '../prompts'
 import { getTools } from '../tools'
-import { getLLMProvider } from '../llm'
+import { getLLMProvider, normalizeLlmProvider } from '../llm'
 import { calculateCost } from '../pricing'
 import {
   checkQuota,
@@ -24,7 +24,7 @@ import { hashIp, validateAssistantOutput } from '../safety'
 import { chatbotLog } from '../logging'
 import { chatbotDebug, chatbotError } from '../logging'
 import { logChatbotEvent } from '../logging'
-import type { LLMProviderName } from '../../shared/types'
+// LLMProviderName is used only through normalizeLlmProvider — no direct import needed here.
 import { getPlanForOrg, type EffectivePlan } from '@/lib/plan'
 import { originMatchesAllowed } from '@/lib/security/origin-matcher'
 
@@ -521,7 +521,7 @@ export async function handleChatRequest(
   //   plan.llmModel ya es 'gemini-2.5-flash' en los 3 planes sembrados.
   //   bot.llmProvider sigue siendo del BotConfig (no hay dimensión
   //   provider en Plan todavía — toda la flota usa 'google' hoy).
-  const provider = getLLMProvider(bot.llmProvider as LLMProviderName)
+  const provider = getLLMProvider(normalizeLlmProvider(bot.llmProvider))
   const model = provider.getModel(plan.llmModel)
 
   chatbotLog('chat.llm_request_start', {
@@ -639,7 +639,7 @@ export async function handleChatRequest(
         const tokensIn = totalIn
         const tokensOut = totalOut
         const costBreakdown = calculateCost(
-          resolvedBot.llmProvider as LLMProviderName,
+          normalizeLlmProvider(resolvedBot.llmProvider),
           resolvedBot.llmModel,
           tokensIn,
           tokensOut

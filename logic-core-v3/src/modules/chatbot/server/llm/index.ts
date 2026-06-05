@@ -14,3 +14,4 @@ export {
   ModelNotSupportedError,
 } from './types'
 export { getLLMProvider, resetProviderCache } from './factory'
+export { normalizeLlmProvider } from './providerMapper'

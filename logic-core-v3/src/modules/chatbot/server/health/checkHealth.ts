@@ -35,24 +35,25 @@ export async function checkChatbotHealth(slug: string = 'develop'): Promise<Heal
     chatbotError('health_check.db_failed', error)
   }
 
-  // 3. LLM Provider (check if its own API key is present)
+  // 3. LLM Provider — verify the runtime can instantiate the configured provider.
+  //    The provider (currently Vertex AI / GoogleProvider) requires either
+  //    GOOGLE_APPLICATION_CREDENTIALS (file path, local dev) or
+  //    GOOGLE_VERTEX_CREDENTIALS_JSON (inline JSON, Netlify/production), plus
+  //    CHATBOT_GCP_PROJECT_ID.  The legacy CHATBOT_GOOGLE_API_KEY is NOT used.
+  //    getLLMProvider() → new GoogleProvider() → throws with a clear message if
+  //    credentials are absent, so the try/catch gives us truthful health data.
   let llmCheck: HealthCheckResult['checks']['llmProvider'] = { ok: false }
-  const llmKeyPresent = envResult.vars.find(v => v.name === 'CHATBOT_GOOGLE_API_KEY')?.present ?? false
-  if (llmKeyPresent) {
-    try {
-      const provider = getLLMProvider()
-      const models = provider.listModels()
-      llmCheck = {
-        ok: true,
-        provider: provider.name,
-        modelsAvailable: models.length,
-      }
-    } catch (error) {
-      llmCheck = { ok: false, error: error instanceof Error ? error.message : 'unknown' }
-      chatbotError('health_check.llm_failed', error)
+  try {
+    const provider = getLLMProvider()
+    const models = provider.listModels()
+    llmCheck = {
+      ok: true,
+      provider: provider.name,
+      modelsAvailable: models.length,
     }
-  } else {
-    llmCheck = { ok: false, error: 'CHATBOT_GOOGLE_API_KEY missing — cannot initialize provider' }
+  } catch (error) {
+    llmCheck = { ok: false, error: error instanceof Error ? error.message : 'unknown' }
+    chatbotError('health_check.llm_failed', error)
   }
 
   // 4. Bot config
