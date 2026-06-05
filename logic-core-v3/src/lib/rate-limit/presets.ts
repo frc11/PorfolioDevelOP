@@ -16,8 +16,9 @@ export const RATE_LIMIT_PRESETS = {
   resendCredentialsPerAdmin: { limit: 10, windowMs: 60 * 60_000 },
 
   // ── Chatbot ─────────────────────────────────────────────────────────────
-  // Capa CORS (route handler) — clave: origin + sessionId. Frena al visitante
-  // antes de entrar al handler interno. Cubre el costo Vertex.
+  // Capa CORS (route handler) — clave: origin + IP hasheada (no sessionId,
+  // que era controlable por el atacante — SEC-RATELIMIT-02). Frena al
+  // visitante antes de entrar al handler interno. Cubre el costo Vertex.
   // Complementa (no reemplaza) el SOFT_CAP_THRESHOLD de turnos en el prompt.
   chatbotPerSession: { limit: 30, windowMs: 60_000 },
   // Capa handler interno (handleChatRequest) — clave: slug + sessionId.

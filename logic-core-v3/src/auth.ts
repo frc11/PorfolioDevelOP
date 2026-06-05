@@ -80,6 +80,24 @@ const nextAuthResult = NextAuth({
     maxAge: 8 * 60 * 60,
     updateAge: 60 * 60,
   },
+  // SEC-MISC-02: explicit cookie config so a future Auth.js upgrade cannot
+  // silently change defaults.  Values mirror the Auth.js v5 production
+  // defaults exactly — this is intentionally a no-op on the current app.
+  // The __Secure- prefix is added in production to match the Auth.js default.
+  cookies: {
+    sessionToken: {
+      name:
+        process.env.NODE_ENV === 'production'
+          ? '__Secure-authjs.session-token'
+          : 'authjs.session-token',
+      options: {
+        httpOnly: true,
+        sameSite: 'lax' as const,
+        secure: process.env.NODE_ENV === 'production',
+        path: '/',
+      },
+    },
+  },
   pages: { signIn: LOGIN_PATH },
   providers: [
     Resend({
