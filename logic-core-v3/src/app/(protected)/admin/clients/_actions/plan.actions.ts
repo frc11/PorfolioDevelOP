@@ -187,7 +187,6 @@ export async function assignPlanToOrg(
       await prisma.subscription.create({
         data: {
           organizationId,
-          planName: targetPlan.name,
           planId: targetPlan.id,
           status: SubscriptionStatus.ACTIVE,
           price: targetPlan.monthlyPrice.toNumber(),

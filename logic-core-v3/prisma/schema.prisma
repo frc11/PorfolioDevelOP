@@ -574,7 +574,6 @@ model Subscription {
   id             String       @id @default(cuid())
   organizationId String       @unique
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  planName       String
   planId         String?
   plan           Plan?        @relation(fields: [planId], references: [id])
 
