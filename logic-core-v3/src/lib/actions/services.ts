@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { ServiceType, ServiceStatus } from '@prisma/client'
+import { requireSuperAdmin } from '@/lib/auth-guards'
 
 // ─── Guards ───────────────────────────────────────────────────────────────────
 
@@ -21,6 +22,11 @@ export async function createServiceAction(
   _prevState: string | null,
   formData: FormData
 ): Promise<string | null> {
+  // Auth guard — createServiceAction crea service con organizationId del FormData
+  // (solo existence-check → escalación de privilegios). SUPER_ADMIN exclusivo.
+  // Server action = POST público.
+  await requireSuperAdmin()
+
   const organizationId = (formData.get('organizationId') as string | null) ?? ''
   const typeRaw = formData.get('type') as string | null
   const statusRaw = formData.get('status') as string | null
@@ -50,6 +56,9 @@ export async function createServiceAction(
 // ─── Update status (inline) ───────────────────────────────────────────────────
 
 export async function updateServiceStatusAction(formData: FormData): Promise<void> {
+  // Auth guard — muta status de service: SUPER_ADMIN exclusivo. Server action = POST público.
+  await requireSuperAdmin()
+
   const serviceId = (formData.get('serviceId') as string | null) ?? ''
   const organizationId = (formData.get('organizationId') as string | null) ?? ''
   const statusRaw = formData.get('status') as string | null
@@ -67,6 +76,10 @@ export async function updateServiceStatusAction(formData: FormData): Promise<voi
 // ─── Delete ───────────────────────────────────────────────────────────────────
 
 export async function deleteServiceAction(formData: FormData): Promise<void> {
+  // Auth guard — deleteServiceAction borra service: SUPER_ADMIN exclusivo.
+  // Server action = POST público.
+  await requireSuperAdmin()
+
   const serviceId = (formData.get('serviceId') as string | null) ?? ''
   const organizationId = (formData.get('organizationId') as string | null) ?? ''
   if (!serviceId) return

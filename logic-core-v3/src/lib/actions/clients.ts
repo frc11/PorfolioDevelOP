@@ -150,6 +150,10 @@ export async function updateClientAction(
   _prevState: string | null,
   formData: FormData
 ): Promise<string | null> {
+  // Auth guard — updateClientAction muta org+user: SUPER_ADMIN exclusivo.
+  // Server action = POST público; el gate del layout no alcanza.
+  await requireSuperAdmin()
+
   const clientId = (formData.get('clientId') as string | null) ?? ''
   const companyName = (formData.get('companyName') as string | null)?.trim() ?? ''
   const name = (formData.get('name') as string | null)?.trim() ?? ''
@@ -220,6 +224,10 @@ export async function updateClientAction(
 }
 
 export async function deleteClientAction(formData: FormData): Promise<void> {
+  // Auth guard — deleteClientAction borra org: SUPER_ADMIN exclusivo.
+  // Server action = POST público; el gate del layout no alcanza.
+  await requireSuperAdmin()
+
   const clientId = (formData.get('clientId') as string | null) ?? ''
   if (!clientId) return
 
