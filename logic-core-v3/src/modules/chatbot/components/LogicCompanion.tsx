@@ -103,7 +103,13 @@ export function LogicCompanion({ slug }: LogicCompanionProps) {
           background: 'transparent',
           cursor: 'pointer',
         }}
-        initial={reducedMotion ? { scale: 1, opacity: 1 } : { scale: 0, opacity: 0 }}
+        // The launcher renders directly at its resting state. We deliberately do
+        // NOT use a Framer Motion `initial → animate` mount transition: under the
+        // app's heavy first paint that one-shot enter animation was being dropped,
+        // leaving the bubble frozen at its initial scale(0)/opacity:0 — it showed
+        // as a tiny dot instead of the 56px button. `initial={false}` paints the
+        // `animate` resting state immediately; hover/tap springs still work.
+        initial={false}
         animate={{ scale: 1, opacity: 1 }}
         whileHover={reducedMotion ? undefined : { scale: 1.08 }}
         whileTap={reducedMotion ? undefined : { scale: 0.95 }}
