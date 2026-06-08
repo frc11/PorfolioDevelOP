@@ -4,6 +4,10 @@ Last updated: May 2026 | Stack: Next.js 16 · TypeScript strict · Tailwind 4 ·
 
 ---
 
+> El método de trabajo de develOP (WF) vive en `WF/`. Comportamiento: `WF/cimiento.md`. Referencia: `WF/manual-resumido.md` (+ `WF/manual.md` completo). Apertura/cierre de chats: `WF/kit-continuidad.md`.
+
+---
+
 ## Non-negotiable rules
 
 Never run `prisma migrate reset` — stop and report to user instead.
