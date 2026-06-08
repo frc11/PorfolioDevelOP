@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { AvatarRenderer } from '../avatar'
+import { AvatarRenderer, getAvatarRenderSize } from '../avatar'
 import type { AvatarCoreState } from '../avatar/types'
 import { deriveBusinessInitials } from '../../shared/businessInitials'
 import type { BotPreviewState } from './types'
@@ -95,6 +95,11 @@ export function BotConfigPreview({ state }: BotConfigPreviewProps) {
         .padStart(2, '0')}`
     : `rgba(24,24,27,${surfaceOpacity})`
 
+  // Mirror the live surfaces' per-avatar sizing so this preview stays WYSIWYG
+  // (heavy avatars render a larger box; light avatars resolve to the base size).
+  const previewLauncherSize = getAvatarRenderSize(state.avatarStyle, 56)
+  const previewHeaderSize = getAvatarRenderSize(state.avatarStyle, 40)
+
   return (
     <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02]">
       <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
@@ -143,15 +148,15 @@ export function BotConfigPreview({ state }: BotConfigPreviewProps) {
               bottom: 20,
               left: isLeft ? 20 : undefined,
               right: isLeft ? undefined : 20,
-              width: 56,
-              height: 56,
+              width: previewLauncherSize,
+              height: previewLauncherSize,
             }}
           >
             <AvatarRenderer
               style={state.avatarStyle}
               state={avatarState}
               accentColor={state.accentColor}
-              size={56}
+              size={previewLauncherSize}
               avatarImageUrl={state.avatarImageUrl}
               avatarEmoji={state.avatarEmoji}
               businessInitials={initials}
@@ -167,12 +172,12 @@ export function BotConfigPreview({ state }: BotConfigPreviewProps) {
             }}
           >
             <div className="mb-3 flex items-center gap-3">
-              <div style={{ width: 40, height: 40 }} className="shrink-0">
+              <div style={{ width: previewHeaderSize, height: previewHeaderSize }} className="shrink-0">
                 <AvatarRenderer
                   style={state.avatarStyle}
                   state={avatarState}
                   accentColor={state.accentColor}
-                  size={40}
+                  size={previewHeaderSize}
                   avatarImageUrl={state.avatarImageUrl}
                   avatarEmoji={state.avatarEmoji}
                   businessInitials={initials}

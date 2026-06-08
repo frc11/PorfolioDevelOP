@@ -45,6 +45,7 @@ import { PreloaderProvider } from "@/context/PreloaderContext";
 import { TransitionProvider } from "@/context/TransitionContext";
 import { Shutter } from "@/components/layout/Shutter";
 import { PublicOnlyComponents } from "@/components/layout/PublicOnlyComponents";
+import { ChatWidgetMount } from "@/components/layout/ChatWidgetMount";
 import { Toaster } from "sonner";
 
 export default function RootLayout({
@@ -99,6 +100,7 @@ export default function RootLayout({
               className: 'shadow-[0_4px_24px_rgba(0,0,0,0.4)] backdrop-blur-xl',
             }} 
           />
+          <ChatWidgetMount />
         </PreloaderProvider>
       </body>
     </html>

@@ -3,7 +3,7 @@
 import { useEffect, useRef, useCallback } from 'react'
 import { usePathname } from 'next/navigation'
 import { motion, AnimatePresence, useReducedMotion } from 'motion/react'
-import { AvatarRenderer } from './avatar'
+import { AvatarRenderer, getAvatarRenderSize } from './avatar'
 import { deriveBusinessInitials } from '../shared/businessInitials'
 import { CHATBOT_Z_INDEX } from '../shared/zIndex'
 import { ChatWindow } from './chat/ChatWindow'
@@ -59,6 +59,11 @@ export function LogicCompanion({ slug }: LogicCompanionProps) {
           right: 'max(24px, env(safe-area-inset-right))',
         }
 
+  // Per-avatar sizing: heavy 3D avatars frame their subject with margin, so we
+  // render them in a larger box to match the light avatars' visible size. The
+  // launcher button grows with the avatar (light avatars resolve to 56 → no-op).
+  const launcherSize = getAvatarRenderSize(chatbot.config.avatarStyle, 56)
+
   return (
     <>
       <AnimatePresence>
@@ -95,8 +100,8 @@ export function LogicCompanion({ slug }: LogicCompanionProps) {
           position: 'fixed',
           ...position,
           zIndex: CHATBOT_Z_INDEX.bubble,
-          width: 56,
-          height: 56,
+          width: launcherSize,
+          height: launcherSize,
           borderRadius: '50%',
           padding: 0,
           border: 'none',
@@ -124,7 +129,7 @@ export function LogicCompanion({ slug }: LogicCompanionProps) {
             style={chatbot.config.avatarStyle}
             state={chatbot.avatarState}
             accentColor={chatbot.config.accentColor}
-            size={56}
+            size={launcherSize}
             avatarImageUrl={chatbot.config.avatarImageUrl}
             avatarEmoji={chatbot.config.avatarEmoji}
             businessInitials={deriveBusinessInitials(chatbot.config.botName)}

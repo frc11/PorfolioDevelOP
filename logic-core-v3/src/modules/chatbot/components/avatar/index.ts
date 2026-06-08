@@ -19,6 +19,7 @@ export {
   DEFAULT_AVATAR_ID,
   getAvatar,
   getAvatarOrDefault,
+  getAvatarRenderSize,
 } from './registry'
 export type {
   AvatarCoreState,

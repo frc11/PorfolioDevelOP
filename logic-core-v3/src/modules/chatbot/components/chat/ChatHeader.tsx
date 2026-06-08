@@ -2,7 +2,7 @@
 
 import { X, Volume2, VolumeX } from 'lucide-react'
 import { motion } from 'motion/react'
-import { AvatarRenderer, type AvatarCoreState } from '../avatar'
+import { AvatarRenderer, getAvatarRenderSize, type AvatarCoreState } from '../avatar'
 import { deriveBusinessInitials } from '../../shared/businessInitials'
 import type { PublicBotConfig } from '../../shared/publicConfig'
 
@@ -34,7 +34,7 @@ export function ChatHeader({
         style={config.avatarStyle}
         state={avatarState}
         accentColor={config.accentColor}
-        size={36}
+        size={getAvatarRenderSize(config.avatarStyle, 36)}
         avatarImageUrl={config.avatarImageUrl}
         avatarEmoji={config.avatarEmoji}
         businessInitials={deriveBusinessInitials(config.botName)}

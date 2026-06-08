@@ -6,6 +6,7 @@ import { motion } from 'motion/react'
 import { ParticleSphere } from './ParticleSphere'
 import { CentralCore } from './CentralCore'
 import { STATE_CONFIG, type NeuroAvatarProps } from './types'
+import { CanvasAutoResize } from './CanvasAutoResize'
 
 /**
  * NeuroAvatar — heavy 3D avatar ("Orbe Neural" in the registry).
@@ -46,6 +47,7 @@ export function NeuroAvatar({
         dpr={[1, 1.5]}
         frameloop={frameloop}
       >
+        <CanvasAutoResize />
         <ambientLight intensity={0.4} />
         <pointLight position={[3, 3, 3]} intensity={1} />
         <ParticleSphere count={120} accentColor={accentColor} state={state} />

@@ -40,6 +40,10 @@ export const AVATAR_REGISTRY: readonly AvatarRegistryEntry[] = [
     description: 'Cara 3D con micro-expresiones. Vibe asistente con presencia.',
     weight: 'heavy',
     component: LegacyNeuroAvatarAdapter,
+    // The face is framed with margin + an idle bob, so at rest it fills ~77% of
+    // its box vs the Geometric avatar's 100%. Render its box ~1/0.77 larger so
+    // the face reads the same physical size as the light avatars. Tune by eye.
+    fillScale: 1.3,
   },
   {
     id: 'monograma',
@@ -93,3 +97,21 @@ export function getAvatarOrDefault(id: string | null | undefined): AvatarRegistr
  * All registered ids — convenience for the picker UI and validation.
  */
 export const AVATAR_IDS: readonly string[] = AVATAR_REGISTRY.map((e) => e.id)
+
+/**
+ * Per-avatar render size. Multiplies `baseSize` by the entry's `fillScale`
+ * (default 1) so heavy avatars that frame their subject with margin render a
+ * larger box — making their visible content match the light avatars at the
+ * same nominal size. Unknown ids and the 'image' / 'emoji' escape hatches are
+ * not in the registry → scale 1 (rendered at `baseSize`). Returns integer px.
+ *
+ * Call this at the site that owns the avatar's container (so the container and
+ * the avatar grow together), not inside the avatar component.
+ */
+export function getAvatarRenderSize(
+  styleId: string | null | undefined,
+  baseSize: number
+): number {
+  const scale = getAvatar(styleId)?.fillScale ?? 1
+  return Math.round(baseSize * scale)
+}

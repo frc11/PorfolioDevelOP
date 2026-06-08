@@ -80,6 +80,15 @@ export interface AvatarRegistryEntry {
   weight: AvatarWeight
   /** The React component that implements AvatarComponentProps. */
   component: AvatarComponent
+  /**
+   * Optional render-size multiplier. Heavy 3D avatars frame their subject with
+   * margin (the model never fills the canvas the way a flat SVG disc does), so
+   * at a given box size their visible content reads smaller than the light
+   * avatars'. `fillScale` enlarges this avatar's rendered box so its *content*
+   * matches the others at the same nominal size. Default 1 (no scaling).
+   * Applied via `getAvatarRenderSize` at the call sites that own the container.
+   */
+  fillScale?: number
 }
 
 /**
