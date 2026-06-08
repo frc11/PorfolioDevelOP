@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test'
 import { loginAsAdmin } from '../helpers/auth'
 
-test.describe('Admin login', () => {
+test.describe('Admin login @smoke', () => {
   test('admin puede loguearse y ver dashboard', async ({ page }) => {
     await loginAsAdmin(page)
 

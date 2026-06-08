@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test'
 
-test('landing page loads with chatbot avatar visible', async ({ page }) => {
+test('landing page loads with chatbot avatar visible @smoke', async ({ page }) => {
   await page.goto('/', { waitUntil: 'domcontentloaded' })
   await expect(page).toHaveTitle(/develOP/i)
 

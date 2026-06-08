@@ -10377,3 +10377,122 @@ Removida la propiedad `stroke`/`strokeWidth` del mask path — solo se mantiene 
 ### Pendientes / tunables
 - Offsets `WORDMARK_OFFSET_FRAC=0.40` / `SLOGAN_OFFSET_FRAC=0.42`, stagger (`WORDMARK_RANGE`/`SLOGAN_RANGE`), `HOME_TEXT_ERASE_SECONDS=0.5` y tamaños/tracking del `WipeLine`: ajustar contra la grabación si hace falta más aire o más tiempo de lectura.
 
+
+
+---
+
+## B16 — Dead Code Sweep: Toolchain + Baseline + Mapa (2026-06-08)
+
+**Rama:** `chore/dead-code-sweep` (desde `origin/main`, commit `31dc948`).
+**Objetivo único:** diagnóstico. Este sprint **no borró nada**.
+
+---
+
+### 1) Toolchain instalado (devDependencies)
+
+| Paquete | Versión |
+|---|---|
+| `knip` | ^6.16.1 |
+| `dependency-cruiser` | ^17.4.3 |
+| `eslint-plugin-unused-imports` | ^4.4.1 |
+| `@next/bundle-analyzer` | ^16.2.7 |
+
+Archivos de config creados: `knip.ts`, `.dependency-cruiser.cjs`.
+
+---
+
+### 2) Baseline — Gate de entrada
+
+| Check | Resultado |
+|---|---|
+| `npm ci` (+ postinstall `prisma generate`) | OK — 1022 paquetes |
+| `npx tsc --noEmit` | OK — Cero errores |
+| `npm run build --webpack` | OK — 30/30 rutas compiladas, cero errores |
+| `npx prisma migrate status` | OK — 57 migrations, DB up to date |
+
+---
+
+### 3) Smoke baseline (@smoke tags agregados a 8 specs)
+
+Tests etiquetados: `01-landing`, `02-chat-flow`, `03-lead-capture`, `06-admin-login`, `11-client-login`, `14-e2e-critical-flow`, `19-security`, `22-visual-regression` (2 describe blocks).
+
+**Resultado `npx playwright test --grep @smoke` (20 tests):**
+
+| Estado | Count | Detalle |
+|---|---|---|
+| PASSED | 5 | Auth-redirect guards + API cron secret |
+| SKIPPED | 5 | Chatbot widget no montado en build local (01, 02, 03) + 2 API security (404 endpoint) |
+| FAILED | 10 | 3 login tests (creds no disponibles) + 7 visual regression |
+
+Visual regression drift Valentino (NO regenerar snapshots — decision humana):
+- 4 admin snapshots: login no disponible en este contexto
+- 3 dashboard snapshots: layout height cambio 720px a 741px, 17-20% pixels distintos
+
+---
+
+### 4) Knip — Mapa de codigo muerto
+
+Config: `knip.ts` minimo — Next.js plugin + Playwright plugin auto-detectados; manual entries: `src/auth.ts`, `src/auth.config.ts`, `prisma/seed*.ts`, `prisma/migrate*.ts`.
+
+Total archivos fuente: 878 `.ts/.tsx`
+
+#### 4.1) Archivos huerfanos (67 / 878 = 7.6% — bajo el umbral 20%)
+
+NO TOCAR / confirmar con planificacion:
+- `src/components/canvas/AuroraBackground.tsx` — Three.js/R3F
+- `src/components/canvas/Interactive3DNetwork.tsx` — Three.js/R3F
+- `src/components/canvas/LiquidProject.tsx` — Three.js/R3F
+- `src/components/canvas/NeuralNetwork.tsx` — Three.js/R3F
+- `src/components/canvas/ReactiveBackground.tsx` — Three.js/R3F
+- `src/components/dashboard/CurrentMilestone.tsx` — Deferred B9.3 (ProjectMilestone)
+
+Grupos candidatos (decision humana por bloque):
+- Admin clients refactor (8 files): `src/app/(protected)/admin/clients/_components/` — client-card, client-detail-panels, client-list, client-overview, client-projects, client-support, health-score-display, module-toggle.
+- Public sections redesign Valentino (~28 files): sections/AI*.tsx, automation/*.tsx, ia/*.tsx, software/*.tsx, sections/web-development/*.tsx, home/PortalDemo.tsx.
+- Dashboard components (~6): AnalyticsPeriodSelector, AnimatedTaskList, DownloadReportButton, ExecutiveReportTemplate, LeakMeter, UpsellCard.
+- Server actions lib (~10): `src/lib/actions/` clients, invitations, leads, leads-constants, services, settings, tickets + metrics-actions, onboarding-actions, task-approvals.
+- Utilitarios (~11): `src/lib/cn.ts` (DUPLICADO EXACTO de utils.ts — genuino dead), design-patterns, premium-modules, HeroTitle.tsx, HyperText.tsx, SectionTransition.tsx, onboarding-tasks, chatbot/prisma/seed.ts, OnboardingWizard.tsx, convert-lead-dialog.tsx.
+
+Hallazgo confirmado: `src/lib/cn.ts` es copia exacta de `src/lib/utils.ts` (mismo contenido). Borrado seguro en Bloque post-sprint.
+
+#### 4.2) Dependencias no usadas (modo normal — 9 prod + 4 dev)
+
+Prod: `@hookform/resolvers`, `@next/swc-win32-x64-msvc`, `html2canvas`, `jspdf`, `maath`, `postprocessing`, `react-day-picker`, `react-hook-form`, `zustand` (SOSPECHOSO — verificar que sus stores no esten en archivos huerfanos).
+Dev: `@next/bundle-analyzer`, `eslint-plugin-unused-imports` (recien instalados sin configurar), `@types/bcryptjs`, `@types/diff`.
+
+Modo --production --strict: 34 deps flagueadas — inflado por los 5 canvas huerfanos que arrastran toda la cadena R3F/Three. No usar este numero para borrar.
+
+#### 4.3) Dependencias unlisted (importadas pero NO en package.json)
+
+- `three-stdlib`: importada en `src/components/3d/BrandedLogoWhite.tsx`, `HeroArtifact.tsx` (FROZEN), `Hero.tsx`, `BrandedIntroCanvas.tsx`. Agregar explicitamente o usar `@react-three/drei` que la reexporta.
+- `framer-motion`: importada en `sections/home/About.tsx`, `Portfolio.tsx`, `ui/KineticText.tsx`. El paquete instalado es `motion` v12. Migrar import a `motion`.
+- `jose`: importada en `src/lib/impersonation.ts`. Dep transitiva de `next-auth`. Agregar explicitamente.
+
+#### 4.4) Exports sin uso (253)
+
+La mayoria proviene de archivos huerfanos. Notables en archivos NO huerfanos:
+- `getPendingInsightsByOrgSlug`, `getInsightsCountForBot`, `getInsightHistoryByOrgSlug` en `src/modules/chatbot/server/insights/` — DEFERRED B9.3, NO TOCAR.
+- Varios Zod schemas (`*IdSchema`, `*StatusSchema`) — tipico de Server Actions, posibles falsos positivos.
+
+---
+
+### 5) Dependency-cruiser — Ciclos
+
+878 modulos, 1803 dependencias cruised. 16 warnings, 0 errors.
+
+Ciclos (todos warn, no bloquean build):
+- kb-templates barrel (10 ciclos): `src/modules/chatbot/components/admin/onboarding/kb-templates/index.ts` con cada template individual. Patron barrel circular clasico. Fix: mover tipos compartidos a `types.ts` separado.
+- BotDetailClient y tabs (6 ciclos): `BotDetailClient.tsx` con OverviewTab, LeadsTab, KnowledgeTab, ConversationsTab, ConfigTab, ActivityTab. Los tabs importan algo del parent.
+
+---
+
+### 6) Declaracion de cierre
+
+Este sprint no borro nada. No se uso `knip --fix`. No se toco codigo de producto.
+
+El borrado en bloques posteriores requiere:
+- (a) Reconciliar trabajo del polish local (chore/wf-home, experimento) contra origin/main.
+- (b) Decision humana candidato por candidato.
+- Orden sugerido: Bloque 1 = deps unlisted (three-stdlib/framer-motion/jose) — Bloque 2 = `src/lib/cn.ts` (duplicado confirmado) — Bloque 3 = public sections Valentino (28 archivos) — Bloque 4 = admin clients refactor (8 archivos). Confirmar con Franco cada bloque.
+
+Verificacion humana pendiente: revisar el mapa de knip + candidatos marcados en el chat de planificacion antes de arrancar cualquier borrado.

@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test'
 
-test.describe('Security', () => {
+test.describe('Security @smoke', () => {
   test('usuario sin auth no puede acceder a /admin', async ({ page }) => {
     await page.context().clearCookies()
     await page.goto('/admin')
