@@ -3,6 +3,7 @@
 import dynamic from 'next/dynamic'
 import { usePathname } from 'next/navigation'
 import { isPortalRoute } from './publicRoute'
+import { useChromeRevealed } from './useChromeRevealed'
 
 const LogicCompanion = dynamic(
   () => import('@/modules/chatbot').then((m) => ({ default: m.LogicCompanion })),
@@ -20,6 +21,7 @@ const LogicCompanion = dynamic(
  */
 export function ChatWidgetMount() {
   const pathname = usePathname() ?? '/'
-  if (isPortalRoute(pathname)) return null
+  const revealed = useChromeRevealed()
+  if (isPortalRoute(pathname) || !revealed) return null
   return <LogicCompanion slug="develop" />
 }

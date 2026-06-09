@@ -84,7 +84,7 @@ export function ProactiveTooltip({
           className={`absolute bottom-full mb-3 ${isLeftAligned ? 'left-0' : 'right-0'}`}
           style={{
             zIndex: CHATBOT_Z_INDEX.tooltip,
-            maxWidth: 'min(280px, calc(100vw - 32px))',
+            maxWidth: 'min(340px, calc(100vw - 32px))',
           }}
         >
           <div

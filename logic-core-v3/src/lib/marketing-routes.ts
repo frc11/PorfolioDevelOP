@@ -64,3 +64,21 @@ export function shouldRunMarketingIntro(pathname: string): boolean {
 export function markIntroConsumed(): void {
     introConsumed = true;
 }
+
+// ── Reveal del chrome post-intro ──────────────────────────────────────────────
+// El intro de marketing corre una secuencia LOCAL (no toca PreloaderContext).
+// Cuando su toldo termina de subir, avisa que el chrome (dock + widget de chat)
+// ya puede aparecer. Flag sticky (cubre el caso en que el intro terminó antes de
+// que un consumer montara — p.ej. el skip de automation) + evento para reactividad.
+let marketingIntroDone = false;
+
+export function markMarketingIntroDone(): void {
+    marketingIntroDone = true;
+    if (typeof window !== "undefined") {
+        window.dispatchEvent(new Event("chrome:revealed"));
+    }
+}
+
+export function isMarketingIntroDone(): boolean {
+    return marketingIntroDone;
+}

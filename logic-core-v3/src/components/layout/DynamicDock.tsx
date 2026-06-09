@@ -17,7 +17,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 
 import { useTransitionContext } from "@/context/TransitionContext";
-import { usePreloader } from "@/context/PreloaderContext";
+import { useChromeRevealed } from "@/components/layout/useChromeRevealed";
 
 type NavItem = {
     href: string;
@@ -366,11 +366,10 @@ const TEXT_FADE_BLUR = 2; // px de blur en el fade
 
 export function DynamicDock() {
     const pathname = usePathname();
-    const { phase } = usePreloader();
-
-    // Visible en no-home siempre (ahí el preloader no corre y phase no llega a
-    // 'done'); en home, solo cuando el intro terminó. Se despliega desde abajo.
-    const dockVisible = pathname !== "/" || phase === "done";
+    // Revelado del chrome (compartido con el widget de chat vía useChromeRevealed):
+    // home espera el intro (phase 'done'); marketing espera su propio intro local
+    // (evento 'chrome:revealed'); demás rutas, inmediato. Dock + widget al mismo tiempo.
+    const dockVisible = useChromeRevealed();
 
     const lastScrollY = useRef(0);
     const collapseTimeoutRef = useRef<number | null>(null);
