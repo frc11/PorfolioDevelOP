@@ -61,6 +61,12 @@ export interface UseChatbotReturn {
   close: () => void
   toggle: () => void
   messages: UIChatMessage[]
+  /**
+   * True when at least one REAL message exists in the current session
+   * (proactive-* teaser bubbles don't count). In-memory only — resets on reload.
+   * Drives the teaser↔retomar gate and the launcher badge.
+   */
+  hasConversation: boolean
   isStreaming: boolean
   avatarState: NeuroAvatarState
   degradedMode: boolean
@@ -356,9 +362,14 @@ export function useChatbot({ slug, currentPath }: UseChatbotOptions): UseChatbot
   // entero para armar el handoff a WhatsApp.
   const degradedMode = degradedInfo !== null
 
+  // "Conversación activa" = al menos un mensaje REAL en la sesión actual (en
+  // memoria, se reinicia al recargar). Las burbujas proactive-* son el teaser
+  // efímero y NO cuentan (si contaran, el teaser se auto-bloquearía).
+  const hasConversation = messages.some((m) => !m.id.startsWith('proactive-'))
+
   return {
     config, isLoading, isOpen, open, close, toggle,
-    messages, isStreaming, avatarState, degradedMode, degradedInfo,
+    messages, hasConversation, isStreaming, avatarState, degradedMode, degradedInfo,
     sendMessage, acceptProactivePrompt,
     triggerWhatsappHandoff, triggerCallbackHandoff, navigateTo,
   }

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useCallback } from 'react'
+import { useEffect, useRef, useCallback, useMemo } from 'react'
 import { usePathname } from 'next/navigation'
 import { motion, AnimatePresence, useReducedMotion } from 'motion/react'
 import { AvatarRenderer, getAvatarRenderSize } from './avatar'
@@ -66,6 +66,19 @@ export function LogicCompanion({ slug }: LogicCompanionProps) {
     }
   }, [chatbot, sounds])
 
+  // Mensajes de la burbuja "retomar" (cuando ya hay conversación). Rotan igual
+  // que el teaser. El 1º usa el nombre configurado del bot (fuente de verdad,
+  // nunca hardcodeado); si no hay nombre, cae a un texto sin nombre.
+  const resumeMessages = useMemo(() => {
+    const name = chatbot.config?.botName?.trim()
+    return [
+      name ? `Tu charla con ${name} sigue acá 👋` : 'Tu charla sigue acá 👋',
+      '¿Seguimos donde lo dejamos?',
+      'Retomemos la conversación',
+      '¿Terminamos de organizar?',
+    ]
+  }, [chatbot.config?.botName])
+
   if (chatbot.isLoading || !chatbot.config) return null
 
   // Respect safe-area-inset on iPhone notch / Android gesture nav. The bubble
@@ -120,7 +133,13 @@ export function LogicCompanion({ slug }: LogicCompanionProps) {
         role="button"
         tabIndex={0}
         onClick={handleToggle}
-        aria-label={chatbot.isOpen ? 'Cerrar chat' : 'Abrir chat'}
+        aria-label={
+          chatbot.isOpen
+            ? 'Cerrar chat'
+            : chatbot.hasConversation
+              ? 'Abrir chat (conversación activa)'
+              : 'Abrir chat'
+        }
         style={{
           position: 'fixed',
           ...position,
@@ -164,14 +183,54 @@ export function LogicCompanion({ slug }: LogicCompanionProps) {
             avatarEmoji={chatbot.config.avatarEmoji}
             businessInitials={deriveBusinessInitials(chatbot.config.botName)}
           />
-          {!chatbot.isOpen && (
-            <ProactiveTooltip
-              config={chatbot.config}
-              currentPath={pathname}
-              onAccept={chatbot.acceptProactivePrompt}
-              onDismiss={() => {}}
+          {/* Badge: punto discreto de "conversación activa". Color = accentColor
+              configurado (fuente de verdad). Persiste mientras haya conversación,
+              esté la burbuja visible o cerrada; desaparece tras "Nueva conversación"
+              (chat vacío). Decorativo → aria-hidden (el estado lo anuncia el
+              aria-label del launcher); pointer-events none para no robar el click. */}
+          {chatbot.hasConversation && (
+            <span
+              aria-hidden="true"
+              style={{
+                position: 'absolute',
+                top: '-1px',
+                right: '-1px',
+                width: '13px',
+                height: '13px',
+                borderRadius: '50%',
+                background: chatbot.config.accentColor,
+                border: '2px solid rgba(6,8,18,0.92)',
+                boxShadow: `0 0 8px ${chatbot.config.accentColor}aa`,
+                pointerEvents: 'none',
+                zIndex: 2,
+              }}
             />
           )}
+
+          {/* Burbuja sobre el launcher — EXCLUYENTES por el gate hasConversation:
+              chat vacío → teaser de preguntas (config.proactivePrompts, opener);
+              con conversación → burbuja "retomar" (mismos mecánica/estilo, otro set
+              de mensajes que rota igual; al click solo abre, no inyecta opener).
+              `key` distinto fuerza remontaje limpio al alternar de modo. */}
+          {!chatbot.isOpen &&
+            (chatbot.hasConversation ? (
+              <ProactiveTooltip
+                key="resume"
+                config={chatbot.config}
+                currentPath={pathname}
+                prompts={resumeMessages}
+                onAccept={() => chatbot.open()}
+                onDismiss={() => {}}
+              />
+            ) : (
+              <ProactiveTooltip
+                key="teaser"
+                config={chatbot.config}
+                currentPath={pathname}
+                onAccept={chatbot.acceptProactivePrompt}
+                onDismiss={() => {}}
+              />
+            ))}
         </div>
       </motion.div>
 

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useMemo, useState, useCallback } from 'react'
 import { motion, AnimatePresence, useReducedMotion } from 'motion/react'
 import { X } from 'lucide-react'
 import type { ProactiveTooltipProps } from './types'
@@ -9,7 +9,7 @@ import { CHATBOT_Z_INDEX } from '../../shared/zIndex'
 
 // Cada cuánto rota la pregunta del teaser si el visitante no la cierra ni responde
 // (le da dinámica). En el rango 8–10s pedido.
-const TEASER_ROTATE_MS = 9000
+const TEASER_ROTATE_MS = 7000
 
 // Lista de prompts de la sección actual (o el fallback `default`). FUENTE: la
 // config (DB) — por eso TODA pregunta mostrada o rotada es un prompt configurado y
@@ -21,14 +21,6 @@ function listForPath(
   if (proactivePrompts[currentPath]?.length) return proactivePrompts[currentPath]
   if (proactivePrompts['default']?.length) return proactivePrompts['default']
   return []
-}
-
-function pickPromptForPath(
-  proactivePrompts: Record<string, string[]>,
-  currentPath: string
-): string | null {
-  const list = listForPath(proactivePrompts, currentPath)
-  return list.length ? list[Math.floor(Math.random() * list.length)] : null
 }
 
 // Elige una pregunta DISTINTA a la actual de la misma lista (para la rotación).
@@ -45,11 +37,24 @@ export function ProactiveTooltip({
   currentPath,
   onAccept,
   onDismiss,
+  prompts,
 }: ProactiveTooltipProps) {
   const { trigger, reset } = useTooltipTriggers({ enabled: true })
   const [visible, setVisible] = useState(false)
   const [currentPrompt, setCurrentPrompt] = useState<string | null>(null)
   const reducedMotion = useReducedMotion()
+
+  // Lista activa de mensajes. Si viene `prompts` (override "retomar"), se usa esa;
+  // si no, los prompts configurados de la sección (teaser de preguntas, como antes,
+  // que siguen siendo openers válidos server-side). Una sola fuente para mostrar y
+  // rotar — misma mecánica para ambos modos.
+  const list = useMemo(
+    () =>
+      prompts && prompts.length > 0
+        ? prompts
+        : listForPath(config.proactivePrompts as Record<string, string[]>, currentPath),
+    [prompts, config.proactivePrompts, currentPath]
+  )
 
   const handleDismiss = useCallback(() => {
     setVisible(false)
@@ -66,35 +71,27 @@ export function ProactiveTooltip({
   useEffect(() => {
     if (!trigger) return
     if (visible) return
-    const prompt = pickPromptForPath(
-      config.proactivePrompts as Record<string, string[]>,
-      currentPath
-    )
+    const prompt = list.length ? list[Math.floor(Math.random() * list.length)] : null
     if (!prompt) {
       reset()
       return
     }
     setCurrentPrompt(prompt)
     setVisible(true)
-  }, [trigger, visible, config.proactivePrompts, currentPath, reset])
+  }, [trigger, visible, list, reset])
 
-  // Rotación: mientras el teaser está visible, cambia a otra pregunta de la MISMA
-  // sección cada TEASER_ROTATE_MS. La nueva sale de `listForPath` (config) → sigue
-  // siendo un opener válido server-side. Se PAUSA si el panel abre: este componente
-  // se desmonta (LogicCompanion lo gatea con `!isOpen`) → el cleanup limpia el
-  // interval. El fade del cambio respeta prefers-reduced-motion (ver el texto).
+  // Rotación: mientras está visible, cambia a otro mensaje de la MISMA lista cada
+  // TEASER_ROTATE_MS. Se PAUSA si el panel abre: este componente se desmonta
+  // (LogicCompanion lo gatea con `!isOpen`) → el cleanup limpia el interval. El
+  // fade del cambio respeta prefers-reduced-motion (ver el texto).
   useEffect(() => {
     if (!visible) return
-    const list = listForPath(
-      config.proactivePrompts as Record<string, string[]>,
-      currentPath
-    )
     if (list.length <= 1) return
     const id = setInterval(() => {
       setCurrentPrompt((cur) => pickNextPrompt(list, cur))
     }, TEASER_ROTATE_MS)
     return () => clearInterval(id)
-  }, [visible, config.proactivePrompts, currentPath])
+  }, [visible, list])
 
   const isLeftAligned = config.position === 'bottom_left'
 
@@ -119,7 +116,7 @@ export function ProactiveTooltip({
             // sizes it to the text instead; maxWidth then caps it so the prompt
             // wraps to a few comfortable lines.
             width: 'max-content',
-            maxWidth: 'min(380px, calc(100vw - 32px))',
+            maxWidth: 'min(190px, 38vw)',
           }}
         >
           <div

@@ -13,6 +13,12 @@ interface ChatHeaderProps {
   onClose: () => void
   muted?: boolean
   onToggleMute?: () => void
+  /**
+   * Fase typewriter del panel: true mientras se REVELA texto (no durante
+   * "pensando"). El header muestra "Escribiendo…" + avatar hablando SOLO en
+   * esta fase. Si se omite (p. ej. el embed), cae a `isStreaming`.
+   */
+  isTyping?: boolean
 }
 
 export function ChatHeader({
@@ -22,7 +28,22 @@ export function ChatHeader({
   onClose,
   muted,
   onToggleMute,
+  isTyping,
 }: ChatHeaderProps) {
+  // Fase real: si el panel reporta el typewriter (`isTyping`) lo usamos como
+  // fuente de verdad; si no, retrocompatibilidad con el viejo `isStreaming`.
+  const typing = isTyping ?? isStreaming
+  // Avatar del header: hablando solo mientras se revela texto; idle en reposo y
+  // mientras PIENSA (el "pensando" vive en el indicador inline). Sin `isTyping`
+  // (embed) conservamos el comportamiento previo basado en `avatarState`.
+  const headerAvatarState: AvatarCoreState =
+    isTyping !== undefined
+      ? isTyping
+        ? 'speaking'
+        : 'idle'
+      : avatarState === 'speaking'
+        ? 'speaking'
+        : 'idle'
   return (
     <div
       className="flex items-center gap-3 px-4 h-14 border-b"
@@ -32,7 +53,10 @@ export function ChatHeader({
     >
       <AvatarRenderer
         style={config.avatarStyle}
-        state={avatarState}
+        // El header se mantiene en reposo (idle) mientras el bot PIENSA — el
+        // estado "pensando" vive solo en el indicador inline (los tres puntos).
+        // Acá únicamente reaccionamos al responder: speaking durante el tipeo.
+        state={headerAvatarState}
         accentColor={config.accentColor}
         size={getAvatarRenderSize(config.avatarStyle, 36)}
         avatarImageUrl={config.avatarImageUrl}
@@ -46,13 +70,13 @@ export function ChatHeader({
         <div className="flex items-center gap-1.5 text-[11px] text-white/60">
           <motion.span
             animate={{
-              backgroundColor: isStreaming
+              backgroundColor: typing
                 ? config.accentColor
                 : 'rgba(34,197,94,0.9)',
             }}
             className="w-1.5 h-1.5 rounded-full"
           />
-          <span>{isStreaming ? 'Escribiendo…' : 'En línea'}</span>
+          <span>{typing ? 'Escribiendo…' : 'En línea'}</span>
         </div>
       </div>
       {onToggleMute && (
@@ -79,4 +103,3 @@ export function ChatHeader({
     </div>
   )
 }
-
