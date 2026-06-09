@@ -92,7 +92,9 @@ export function ChatWindow({
               exit={{ opacity: 0 }}
               onClick={onClose}
               className="fixed inset-0 bg-black/60 backdrop-blur-md"
-              style={{ pointerEvents: 'auto', cursor: 'auto', zIndex: CHATBOT_Z_INDEX.backdrop }}
+              // No `cursor: auto`: the surface inherits `cursor: none` on desktop
+              // so the site's custom cursor stays visible over it (see CustomCursor).
+              style={{ pointerEvents: 'auto', zIndex: CHATBOT_Z_INDEX.backdrop }}
               aria-hidden="true"
             />
 
@@ -106,7 +108,8 @@ export function ChatWindow({
               className="fixed bottom-4 left-4 right-4 flex flex-col md:bottom-[6.5rem] md:left-auto md:right-6 md:w-[420px]"
               style={{
                 pointerEvents: 'auto',
-                cursor: 'auto',
+                // Inherit `cursor: none` on desktop so the custom cursor is kept
+                // over the whole panel instead of reverting to the OS pointer.
                 zIndex: CHATBOT_Z_INDEX.panel,
                 background: 'linear-gradient(180deg, rgba(11, 14, 28, 0.92) 0%, rgba(6, 8, 18, 0.9) 100%)',
                 backdropFilter: 'blur(32px)',
@@ -451,41 +454,43 @@ export function ChatWindow({
                       overflow: 'auto',
                     }}
                   />
-                </div>
 
-                {/* Hint Enter debajo del input — aparece solo si hay texto */}
-                <AnimatePresence>
-                  {input.trim().length > 0 && !isThinking && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 4 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0 }}
-                      style={{
-                        position: 'absolute',
-                        bottom: '6px',
-                        right: '58px',
-                        fontSize: '9px',
-                        color: 'rgba(255,255,255,0.2)',
-                        fontFamily: 'ui-monospace, monospace',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '3px',
-                        pointerEvents: 'none',
-                      }}
-                    >
-                      <span style={{
-                        background: 'rgba(255,255,255,0.06)',
-                        border: '1px solid rgba(255,255,255,0.1)',
-                        borderRadius: '3px',
-                        padding: '1px 4px',
-                        fontSize: '8px',
-                      }}>
-                        Enter
-                      </span>
-                      para enviar
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                  {/* Hint Enter — en flujo normal DEBAJO del texto y alineado a la
+                      derecha, para no superponerse nunca con lo que se escribe. */}
+                  <AnimatePresence>
+                    {input.trim().length > 0 && !isThinking && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ duration: 0.18 }}
+                        style={{
+                          display: 'flex',
+                          justifyContent: 'flex-end',
+                          alignItems: 'center',
+                          gap: '3px',
+                          marginTop: '4px',
+                          fontSize: '9px',
+                          color: 'rgba(255,255,255,0.25)',
+                          fontFamily: 'ui-monospace, monospace',
+                          pointerEvents: 'none',
+                          overflow: 'hidden',
+                        }}
+                      >
+                        <span style={{
+                          background: 'rgba(255,255,255,0.06)',
+                          border: '1px solid rgba(255,255,255,0.1)',
+                          borderRadius: '3px',
+                          padding: '1px 4px',
+                          fontSize: '8px',
+                        }}>
+                          Enter
+                        </span>
+                        para enviar
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
 
                 {/* Botón enviar */}
                 <motion.button
@@ -498,7 +503,9 @@ export function ChatWindow({
                     width: '40px', height: '40px',
                     borderRadius: '50%',
                     border: '1px solid rgba(6,182,212,0.2)',
-                    cursor: isThinking || degraded || !input.trim() ? 'not-allowed' : 'pointer',
+                    // No inline cursor: falls back to the global `button { cursor: none }`
+                    // on desktop so the custom cursor shows (disabled state is conveyed
+                    // by the dimmed background, not an OS not-allowed cursor).
                     background: isThinking || degraded || !input.trim()
                       ? 'rgba(255,255,255,0.05)'
                       : 'linear-gradient(135deg, rgba(6,182,212,0.85), rgba(6,182,212,0.65))',

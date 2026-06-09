@@ -119,7 +119,11 @@ function DashboardStoryBackground() {
         <path d="M0 426C182 356 274 502 430 452C570 406 692 320 860 344" stroke="rgba(56,189,248,0.18)" strokeWidth="1" />
         {Array.from({ length: 46 }).map((_, index) => {
           const cx = 24 + index * 18
-          const cy = 366 + Math.sin(index * 0.62) * 42 + (index % 5) * 3
+          // Math.sin es implementation-defined en sus últimos bits → SSR (Node) y
+          // cliente (browser) pueden diferir en el último decimal y romper la
+          // hidratación del <circle cy>. Redondeamos a 2 decimales para que
+          // server y cliente coincidan exacto (el wave se preserva).
+          const cy = Math.round((366 + Math.sin(index * 0.62) * 42 + (index % 5) * 3) * 100) / 100
 
           return (
             <circle

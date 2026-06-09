@@ -12,6 +12,7 @@
  */
 
 import { PrismaClient } from '@prisma/client'
+import { DEVELOP_PROACTIVE_PROMPTS } from './developProactivePrompts'
 
 const prisma = new PrismaClient()
 
@@ -208,38 +209,11 @@ const DEVELOP_BOT_CONFIG = {
   tone: 'informal_rioplatense',
   welcomeMessage: 'Hola, soy Lucia de develOP. Contame qué buscás resolver y vemos cómo te puedo ayudar.',
 
-  proactivePrompts: {
-    '/web-development': [
-      '¿Cómo están encontrándote tus clientes hoy?',
-      'Si alguien busca lo que hacés en Google, ¿aparecés?',
-      '¿Qué estarías resolviendo si tu web trajera consultas sola?',
-    ],
-    '/ai-implementations': [
-      '¿Qué tarea repetitiva le roba más tiempo a tu equipo?',
-      'La IA bien implementada resuelve un problema concreto.',
-      '¿Querés entender si esto aplica a tu operación?',
-    ],
-    '/software-development': [
-      '¿Cuántos sistemas distintos usa tu equipo en un día?',
-      '¿Hay procesos que dependen de que alguien esté disponible?',
-      'Contame cómo opera tu negocio hoy.',
-    ],
-    '/process-automation': [
-      '¿Qué tarea de tu empresa se repite más de 10 veces por semana?',
-      '¿Hay algo que siempre queda sin hacer por falta de tiempo?',
-      'Un flujo bien armado trabaja aunque nadie esté mirando.',
-    ],
-    '/contact': [
-      '¿Tenés en mente qué necesitás? Podemos charlar antes del formulario.',
-      '¿Alguna duda antes de escribirnos?',
-      'Si querés, adelantamos la conversación por acá.',
-    ],
-    default: [
-      '¿Cuál es el principal desafío de tu negocio hoy?',
-      '¿Qué estarías mejorando si tuvieras más tiempo?',
-      'Contame sobre tu operación, sin apuro.',
-    ],
-  },
+  // Preguntas proactivas POR SECCIÓN — fuente única en developProactivePrompts.ts
+  // (la comparte el script update-proactive-prompts.ts). Front y server leen el
+  // mismo campo BotConfig.proactivePrompts → consistencia estructural; ver el
+  // comentario de cabecera de ese archivo para la garantía de seguridad.
+  proactivePrompts: DEVELOP_PROACTIVE_PROMPTS,
 
   quickReplies: [
     { emoji: '🌐', label: 'Quiero un sitio', promptToSend: 'Quiero saber sobre desarrollo de sitios web' },

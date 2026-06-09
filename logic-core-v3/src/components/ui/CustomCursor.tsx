@@ -3,6 +3,13 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion, useMotionValue, useSpring } from 'motion/react';
 
+// The custom cursor must paint above ALL site UI — including the chatbot widget,
+// whose surfaces deliberately sit near int32-max (see CHATBOT_Z_INDEX). Because
+// the cursor is purely decorative (`pointer-events: none`) it can safely take
+// the very top stacking index without trapping clicks or shadowing host overlays
+// — unlike the widget, which must NOT max out (it would block legitimate host UI).
+const CURSOR_Z_INDEX = 2_147_483_647;
+
 export const CustomCursor = () => {
     const cursorX = useMotionValue(-100);
     const cursorY = useMotionValue(-100);
@@ -135,12 +142,22 @@ export const CustomCursor = () => {
             cursor: pointer !important;
           }
 
+          /* El avatar del launcher del chatbot puede ser un <canvas> R3F
+             (legacy_neuro lo pinta con \`cursor-pointer\`; un <canvas> pelado no
+             hereda \`cursor:none\` de forma confiable). Forzamos el cursor custom
+             en todo el subárbol del launcher para que nunca vuelva el del sistema
+             sobre la carita/avatar. */
+          [data-chatbot-avatar],
+          [data-chatbot-avatar] * {
+            cursor: none !important;
+          }
+
         }
       `}</style>
 
             {/* Primary Cursor (Fast Dot) */}
             <motion.div
-                className="hidden md:block fixed top-0 left-0 w-2.5 h-2.5 bg-white rounded-full pointer-events-none z-[9999] shadow-[0_0_10px_rgba(0,0,0,0.1)]"
+                className="hidden md:block fixed top-0 left-0 w-2.5 h-2.5 bg-white rounded-full pointer-events-none shadow-[0_0_10px_rgba(0,0,0,0.1)]"
                 style={{
                     x: cursorX,
                     y: cursorY,
@@ -149,12 +166,13 @@ export const CustomCursor = () => {
                     mixBlendMode: 'difference',
                     opacity: isHidden ? 0 : 1,
                     visibility: isHidden ? 'hidden' : 'visible',
+                    zIndex: CURSOR_Z_INDEX,
                 }}
             />
 
             {/* Aura Cursor (Slow/Fluid) */}
             <motion.div
-                className="hidden md:block fixed top-0 left-0 w-8 h-8 border border-white/50 rounded-full pointer-events-none z-[9998] shadow-[0_0_20px_rgba(0,0,0,0.05)]"
+                className="hidden md:block fixed top-0 left-0 w-8 h-8 border border-white/50 rounded-full pointer-events-none shadow-[0_0_20px_rgba(0,0,0,0.05)]"
                 style={{
                     x: cursorXSpring,
                     y: cursorYSpring,
@@ -162,6 +180,7 @@ export const CustomCursor = () => {
                     translateY: '-50%',
                     mixBlendMode: 'difference',
                     visibility: isHidden ? 'hidden' : 'visible',
+                    zIndex: CURSOR_Z_INDEX - 1,
                 }}
                 animate={{
                     scale: isHovering ? 2.5 : 1,

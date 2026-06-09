@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { useChat } from '@ai-sdk/react'
 import { DefaultChatTransport, type UIMessage } from 'ai'
 import type { PublicBotConfig } from '../shared/publicConfig'
+import { prefetchBotConfig } from '../shared/configCache'
 import type { UIChatMessage, ToolCallInUIMessage } from '../components/chat/types'
 import type { NeuroAvatarState } from '../components/avatar'
 
@@ -81,6 +82,10 @@ export function useChatbot({ slug, currentPath }: UseChatbotOptions): UseChatbot
   // Sent to the backend with the visitor's FIRST reply only (then cleared), so
   // the model gets the context once without re-applying it to every later turn.
   const proactiveOpenerRef = useRef<string | null>(null)
+  // Id of the UI-only bubble injected by `acceptProactivePrompt`. Tracked so we
+  // can strip exactly THAT bubble if the visitor closes without replying — never
+  // an older proactive bubble that was already answered (legitimate history).
+  const proactiveBubbleIdRef = useRef<string | null>(null)
   // Mirror of `config` for use inside the transport's `fetch` (whose closure
   // is created once and would otherwise capture a stale `null` config).
   const configRef = useRef<PublicBotConfig | null>(null)
@@ -90,9 +95,10 @@ export function useChatbot({ slug, currentPath }: UseChatbotOptions): UseChatbot
 
   useEffect(() => {
     let cancelled = false
-    fetch(`/api/chatbot/${slug}/config`)
-      .then((r) => (r.ok ? r.json() : null))
-      .then((data: PublicBotConfig | null) => {
+    // Reuse the config warmed by ChatWidgetMount during the intro (shared cache,
+    // dedup'd by slug) so the launcher isn't blocked on a cold fetch at reveal.
+    prefetchBotConfig(slug)
+      .then((data) => {
         if (cancelled) return
         setConfig(data)
         // B8.3 — bot pausado llega vía config.paused (en lugar del viejo 404
@@ -290,12 +296,14 @@ export function useChatbot({ slug, currentPath }: UseChatbotOptions): UseChatbot
       // out of the outgoing request by the transport). Remember it as the opener
       // so the visitor's first reply carries the context to the model via the
       // system prompt — without ever sending the bubble as a real turn.
+      const bubbleId = `proactive-${crypto.randomUUID()}`
       proactiveOpenerRef.current = prompt
+      proactiveBubbleIdRef.current = bubbleId
       setIsOpen(true)
       setMessages((prev) => [
         ...prev,
         {
-          id: `proactive-${crypto.randomUUID()}`,
+          id: bubbleId,
           role: 'assistant',
           parts: [{ type: 'text', text: prompt }],
         } satisfies UIMessage,
@@ -326,11 +334,21 @@ export function useChatbot({ slug, currentPath }: UseChatbotOptions): UseChatbot
   // hasta que el cliente recargue la página o el admin reactive el bot.
   const close = useCallback(() => {
     setIsOpen(false)
+    // If the visitor accepted a teaser but closed WITHOUT replying, the opener is
+    // still pending (a real reply read-and-clears it in the transport). In that
+    // case strip the UI-only bubble we injected so unanswered questions don't pile
+    // up across re-opens. Remove ONLY that bubble — an older proactive bubble that
+    // was answered is legitimate history and must stay.
+    if (proactiveOpenerRef.current !== null && proactiveBubbleIdRef.current !== null) {
+      const staleId = proactiveBubbleIdRef.current
+      setMessages((prev) => prev.filter((m) => m.id !== staleId))
+    }
     // Drop a pending proactive opener if the visitor closes without replying —
     // it must not later attach to an unrelated message.
     proactiveOpenerRef.current = null
+    proactiveBubbleIdRef.current = null
     setDegradedInfo((prev) => (prev?.reason === 'bot_paused' ? prev : null))
-  }, [])
+  }, [setMessages])
   const toggle = useCallback(() => setIsOpen((v) => !v), [])
 
   // `degradedMode` se deriva de `degradedInfo` para que cualquier consumer

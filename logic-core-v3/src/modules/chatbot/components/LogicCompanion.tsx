@@ -12,6 +12,24 @@ import { renderToolCall } from './tool-cards'
 import { useChatbot } from '../hooks/useChatbot'
 import { useChatbotSounds } from '../hooks/useChatbotSounds'
 import type { ToolCallInUIMessage } from './chat/types'
+import {
+  CHROME_REVEAL_OFFSET_PX,
+  CHROME_REVEAL_DURATION_MS,
+  CHROME_REVEAL_EASE_CSS,
+} from '@/lib/chromeReveal'
+
+// ── Widget reveal (post-preloader / post-intro entrance) ────────────────────
+// The launcher fades + slides up the first time the site chrome is revealed,
+// using the SHARED reveal tokens (@/lib/chromeReveal) so it appears IDENTICALLY
+// and at the same time as the dock (DynamicDock). Driven by a CSS keyframe rather
+// than a Framer mount transition on purpose: under the app's heavy first paint a
+// one-shot Framer `initial → animate` enter gets dropped, leaving the bubble stuck
+// at its initial frame (see the `initial={false}` note on the launcher below). A
+// CSS animation runs on the compositor independent of React's commit timing, so it
+// can't get stuck. GPU-friendly: animates only `opacity` + the standalone
+// `translate` property (never width/height), which composes with the launcher's
+// Framer `scale` (a `transform`) without the two fighting over one property.
+// Honors prefers-reduced-motion via `useReducedMotion()`.
 
 interface LogicCompanionProps {
   slug: string
@@ -35,11 +53,17 @@ export function LogicCompanion({ slug }: LogicCompanionProps) {
   }, [chatbot.isStreaming, sounds])
 
   const handleToggle = useCallback(() => {
-    // Play the open chime BEFORE flipping state so the AudioContext is created
-    // inside the user gesture frame (some browsers — notably Safari — are
-    // strict about this).
-    if (!chatbot.isOpen) sounds.playOpen()
-    chatbot.toggle()
+    if (chatbot.isOpen) {
+      // Route the launcher's close through close() (NOT toggle) so it runs the
+      // same cleanup as the X / backdrop — clearing a pending proactive opener
+      // and stripping its unanswered bubble instead of letting them pile up.
+      chatbot.close()
+    } else {
+      // Play the open chime BEFORE flipping state so the AudioContext is created
+      // inside the user-gesture frame (Safari is strict about this).
+      sounds.playOpen()
+      chatbot.open()
+    }
   }, [chatbot, sounds])
 
   if (chatbot.isLoading || !chatbot.config) return null
@@ -92,6 +116,7 @@ export function LogicCompanion({ slug }: LogicCompanionProps) {
 
       <motion.div
         data-chatbot-avatar
+        data-cursor="hover"
         role="button"
         tabIndex={0}
         onClick={handleToggle}
@@ -106,7 +131,12 @@ export function LogicCompanion({ slug }: LogicCompanionProps) {
           padding: 0,
           border: 'none',
           background: 'transparent',
-          cursor: 'pointer',
+          // No `cursor: pointer`: inherits `cursor: none` on desktop so the site's
+          // custom cursor stays over the bubble; `data-cursor="hover"` grows its aura.
+          // One-shot CSS reveal on first appearance (skipped under reduced motion).
+          animation: reducedMotion
+            ? undefined
+            : `chatbotLauncherReveal ${CHROME_REVEAL_DURATION_MS}ms ${CHROME_REVEAL_EASE_CSS} both`,
         }}
         // The launcher renders directly at its resting state. We deliberately do
         // NOT use a Framer Motion `initial → animate` mount transition: under the
@@ -144,6 +174,19 @@ export function LogicCompanion({ slug }: LogicCompanionProps) {
           )}
         </div>
       </motion.div>
+
+      <style jsx global>{`
+        @keyframes chatbotLauncherReveal {
+          from {
+            opacity: 0;
+            translate: 0 ${CHROME_REVEAL_OFFSET_PX}px;
+          }
+          to {
+            opacity: 1;
+            translate: 0 0;
+          }
+        }
+      `}</style>
     </>
   )
 }
