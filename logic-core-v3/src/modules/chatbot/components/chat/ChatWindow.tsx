@@ -56,6 +56,17 @@ function buildPanelBackground(config: PublicBotConfig): string {
   return `${config.chatSurfaceTint}${alphaHex}`
 }
 
+// Parsea hex #rrggbb → componentes RGB. Devuelve null si el formato no matchea.
+function hexToRgb(hex: string): [number, number, number] | null {
+  const m = /^#([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})$/.exec(hex)
+  if (!m) return null
+  return [parseInt(m[1], 16), parseInt(m[2], 16), parseInt(m[3], 16)]
+}
+
+// #06b6d4 cyan — color original hardcodeado; actúa de fallback si accentColor
+// viene malformado (cero regresión para bots sin accent configurado).
+const ACCENT_FALLBACK: [number, number, number] = [6, 182, 212]
+
 export interface ChatWindowProps {
   config: PublicBotConfig
   messages: UIChatMessage[]
@@ -85,6 +96,7 @@ export function ChatWindow({
   onToggleMute,
 }: ChatWindowProps) {
   const degraded = !!degradedInfo
+  const [ar, ag, ab] = hexToRgb(config.accentColor) ?? ACCENT_FALLBACK
   const [input, setInput] = useState('')
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const scrollAreaRef = useRef<HTMLDivElement>(null)
@@ -197,7 +209,7 @@ export function ChatWindow({
                 boxShadow: `
                     0 0 0 1px rgba(255,255,255,0.04),
                     0 32px 80px rgba(0,0,0,0.7),
-                    0 0 120px rgba(68,100,255,0.08),
+                    0 0 120px rgba(${ar},${ag},${ab},0.08),
                     inset 0 1px 0 rgba(255,255,255,0.08),
                     inset 0 -1px 0 rgba(0,0,0,0.4)
                 `,
@@ -296,11 +308,11 @@ export function ChatWindow({
                             lineHeight: 1.68,
                             fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
                             boxShadow: m.role === 'user'
-                              ? '0 4px 16px rgba(6,182,212,0.12), 0 2px 8px rgba(0,0,0,0.25)'
+                              ? `0 4px 16px rgba(${ar},${ag},${ab},0.12), 0 2px 8px rgba(0,0,0,0.25)`
                               : '0 2px 12px rgba(0,0,0,0.2)',
                             ...(m.role === 'user' ? {
-                              background: 'linear-gradient(135deg, rgba(6,182,212,0.18) 0%, rgba(124,58,237,0.12) 100%)',
-                              border: '1px solid rgba(6,182,212,0.28)',
+                              background: `linear-gradient(135deg, rgba(${ar},${ag},${ab},0.18) 0%, rgba(${ar},${ag},${ab},0.08) 100%)`,
+                              border: `1px solid rgba(${ar},${ag},${ab},0.28)`,
                               borderRadius: '18px 6px 18px 18px',
                               color: 'rgba(255,255,255,0.94)',
                             } : {
@@ -308,7 +320,7 @@ export function ChatWindow({
                               borderTop: '1px solid rgba(255,255,255,0.08)',
                               borderRight: '1px solid rgba(255,255,255,0.08)',
                               borderBottom: '1px solid rgba(255,255,255,0.08)',
-                              borderLeft: '2px solid rgba(6,182,212,0.38)',
+                              borderLeft: `2px solid rgba(${ar},${ag},${ab},0.38)`,
                               borderTopLeftRadius: '6px',
                               borderTopRightRadius: '18px',
                               borderBottomRightRadius: '18px',
@@ -383,8 +395,8 @@ export function ChatWindow({
                                 width: '5px',
                                 height: '5px',
                                 borderRadius: '50%',
-                                background: `rgba(6,182,212,${0.5 + i * 0.15})`,
-                                boxShadow: '0 0 4px rgba(6,182,212,0.4)',
+                                background: `rgba(${ar},${ag},${ab},${0.5 + i * 0.15})`,
+                                boxShadow: `0 0 4px rgba(${ar},${ag},${ab},0.4)`,
                               }}
                               animate={{
                                 scale: [1, 1.5, 1],
@@ -401,7 +413,7 @@ export function ChatWindow({
                         </div>
                         <span style={{
                           fontSize: '10px',
-                          color: 'rgba(6,182,212,0.55)',
+                          color: `rgba(${ar},${ag},${ab},0.55)`,
                           fontFamily: 'ui-monospace, monospace',
                           letterSpacing: '0.1em',
                         }}>
@@ -456,8 +468,8 @@ export function ChatWindow({
                     boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.03)',
                   }}
                   onFocusCapture={(e) => {
-                    e.currentTarget.style.borderColor = 'rgba(6,182,212,0.35)'
-                    e.currentTarget.style.boxShadow = '0 0 0 3px rgba(6,182,212,0.08), inset 0 1px 0 rgba(255,255,255,0.03)'
+                    e.currentTarget.style.borderColor = `rgba(${ar},${ag},${ab},0.35)`
+                    e.currentTarget.style.boxShadow = `0 0 0 3px rgba(${ar},${ag},${ab},0.08), inset 0 1px 0 rgba(255,255,255,0.03)`
                   }}
                   onBlurCapture={(e) => {
                     e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'
