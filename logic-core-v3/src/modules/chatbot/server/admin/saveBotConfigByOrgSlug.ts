@@ -56,8 +56,17 @@ const SaveBotConfigInputSchema = z.object({
   allowedDomains: z.array(z.string().max(253)).max(50),
 })
 
+// Mismo override que BotConfigInput: INPUT lowercase para la UI; .transform() convierte a UPPER antes de Prisma.
+type SaveBotConfigByOrgSlugInput = Omit<
+  z.infer<typeof SaveBotConfigInputSchema>,
+  'intensityLevel' | 'llmProvider'
+> & {
+  intensityLevel: 'low' | 'medium' | 'high'
+  llmProvider: 'google' | 'anthropic' | 'openai'
+}
+
 export async function saveBotConfigByOrgSlug(
-  input: z.infer<typeof SaveBotConfigInputSchema>
+  input: SaveBotConfigByOrgSlugInput
 ): Promise<{ success: boolean; error?: string }> {
   const user = await requireSuperAdmin()
   const parsed = SaveBotConfigInputSchema.safeParse(input)

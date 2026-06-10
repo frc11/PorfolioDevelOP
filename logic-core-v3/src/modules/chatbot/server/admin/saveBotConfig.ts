@@ -63,7 +63,16 @@ const botConfigInputSchema = z.object({
   allowedDomains: z.array(z.string().max(253)).max(50),
 })
 
-export type BotConfigInput = z.infer<typeof botConfigInputSchema>
+// z.infer da el tipo OUTPUT (post-.transform → UPPERCASE). Sobreescribimos a INPUT lowercase
+// para que el estado del form, el parámetro del action y el call site sean consistentes.
+// El .transform() sigue siendo el único lugar que convierte a UPPERCASE antes de Prisma.
+export type BotConfigInput = Omit<
+  z.infer<typeof botConfigInputSchema>,
+  'intensityLevel' | 'llmProvider'
+> & {
+  intensityLevel: 'low' | 'medium' | 'high'
+  llmProvider: 'google' | 'anthropic' | 'openai'
+}
 
 export async function saveBotConfig(input: BotConfigInput): Promise<{ success: boolean; error?: string }> {
   const user = await requireSuperAdmin()
