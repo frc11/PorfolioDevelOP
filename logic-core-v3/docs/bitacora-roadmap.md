@@ -10495,4 +10495,286 @@ El borrado en bloques posteriores requiere:
 - (b) Decision humana candidato por candidato.
 - Orden sugerido: Bloque 1 = deps unlisted (three-stdlib/framer-motion/jose) — Bloque 2 = `src/lib/cn.ts` (duplicado confirmado) — Bloque 3 = public sections Valentino (28 archivos) — Bloque 4 = admin clients refactor (8 archivos). Confirmar con Franco cada bloque.
 
+---
+## ✅ 0.2 — Mapa confiable y clasificado (config cerrada, cero borrado)   ·   2026-06-09
+
+**Objetivo**: cerrar la config de knip, resolver la cascada zustand, aclarar la contradiccion de canvas/, validar con ts-prune y muestra manual, y producir el mapa clasificado por riesgo con prueba-de-muerte por tipo. No se borro nada.
+
+**Pre-check**:
+- Branch: `chore/dead-code-sweep` (sobre origin/main) ✅
+- Toolchain: knip 6.16, ts-prune 0.10.3, dependency-cruiser 17.4 ✅
+- `knip` regular: exit 1 (68 archivos huerfanos, 9 prod deps, 4 dev deps) — baseline estable
+
+---
+
+### 1) Cascada zustand — RESUELTO
+
+**Veredicto: MUERTO REAL. No habia falso positivo.**
+
+Grep completo de `from 'zustand'` y `from "zustand"` en todo `src/`: **cero resultados**.
+No existe `src/store/` ni `src/stores/`. Zustand esta instalado pero nunca se importo.
+La sospecha del Sprint 0.1 estaba bien apuntada — la respuesta es que es codigo muerto, no falso positivo.
+
+**Accion de config**: ninguna. knip estaba correcto.
+
+---
+
+### 2) Config cerrada — Estado del mapa regular vs strict
+
+**`knip` (regular)** → FIABLE. 68 archivos + 9 prod deps + 4 dev deps. Config actual es correcta.
+
+**`knip --production --strict`** → NO FIABLE para este proyecto. Reporta 34 deps "unused" incluyendo `clsx`, `tailwind-merge`, `recharts`, `lenis`, `@ai-sdk/*`, `resend`, `@react-email/components` — que SI son importados en server components, rutas, y providers. Causa: modo strict excluye codigo server-side de ciertos paths y no resuelve bien las entradas SSR del plugin Next.js.
+
+**Decision**: el modo de referencia es `knip` regular. No usar `--production --strict` para decisiones de borrado.
+
+**Configuration hint** (`Add entry and/or refine project files (68 unused files)`): NO es un error de config. Confirma que los 68 archivos son genuinamente inalcanzables. No se agrega ni ignora nada — la config esta cerrada.
+
+**knip.ts: sin cambios.** La config del Sprint 0.1 es estable y correcta.
+
+---
+
+### 3) Canvas/ — Contradiccion aclarada
+
+Listado real de `src/components/canvas/`:
+| Archivo | Estado | Evidencia |
+|---|---|---|
+| `DotMatrix.tsx` | **VIVO** | Importado en login, forgot-password, accept-invite (dynamic), BrandedIntroCanvas, Hero.tsx |
+| `HeroBackground.tsx` | **VIVO** | Importado en `app/web-development/page.tsx` (dynamic) |
+| `AuroraBackground.tsx` | MUERTO | Cero imports externos |
+| `Interactive3DNetwork.tsx` | MUERTO | Cero imports externos |
+| `LiquidProject.tsx` | MUERTO | Cero imports externos |
+| `NeuralNetwork.tsx` | MUERTO | Cero imports externos |
+| `ReactiveBackground.tsx` | MUERTO | Cero imports externos |
+
+**Three.js / R3F**: `three`, `@react-three/drei`, `@react-three/fiber` NO estan en la lista de unused deps del knip regular porque DotMatrix y HeroBackground (vivos) + HeroArtifact y BrandedLogoWhite (3d/, frozen/alive) los consumen. La cadena Three esta viva.
+
+`maath` SI esta en unused deps — cero imports en src/. Era usado solo por los 5 canvas muertos.
+
+`postprocessing` (bare) esta en unused deps — correcto. Los imports son `from '@react-three/postprocessing'`, no del paquete bare. Es dep transitiva redundante en package.json.
+
+---
+
+### 4) Validacion cruzada: ts-prune vs knip
+
+ts-prune (instalado via npx 0.10.3) concuerda en todos los huerfanos clave:
+- Confirma canvas orphans (AuroraBackground, Interactive3DNetwork, LiquidProject, NeuralNetwork, ReactiveBackground)
+- Confirma admin dashboard orphans (AnalyticsPeriodSelector, AnimatedTaskList, CurrentMilestone, LeakMeter, UpsellCard)
+- Confirma lib/actions orphans
+- Agrega ~140 tipos sin uso en barrels del modulo chatbot (`src/modules/chatbot/index.server.ts`, scoring, tools, prompts, etc.) — estas son re-exportaciones de barrel que ninguna otra capa consume directamente. No contradicen a knip; son una capa adicional de limpieza posible.
+
+**Diferencias knip vs ts-prune:**
+- ts-prune NO detecta archivos completos sin uso — solo exports dentro de archivos. knip detecta ambos.
+- ts-prune reporta `(used in module)` en ~60 exports que son usados internamente pero no re-exportados hacia fuera — no son problemas reales.
+- **Sin contradicciones verdaderas.** Donde ts-prune marca algo que knip no marca, es porque pertenece a un archivo vivo con un export que nadie consume externamente (normal en barrels grandes).
+
+---
+
+### 5) Muestra manual — 10 items verificados
+
+| Item | Tipo | Prueba-de-muerte | Veredicto |
+|---|---|---|---|
+| `src/lib/cn.ts` | util | `grep "from '@/lib/cn'"` → 0 resultados; archivo identico a utils.ts (6 lineas) | SEGURO |
+| `zustand` dep | dep | `grep "from 'zustand'"` en src/ → 0 resultados | SEGURO |
+| `maath` dep | dep | `grep "from 'maath'"` en src/ → 0 resultados | SEGURO |
+| `client-card.tsx` (admin) | componente | grep del nombre → solo refs internas al bloque orphan | SEGURO |
+| `AuroraBackground.tsx` | componente 3D | grep del nombre → solo definicion propia | NO-TOCAR (zona 3D) |
+| `CurrentMilestone.tsx` | componente | grep del nombre → solo definicion propia | NO-TOCAR (B9.3 deferred) |
+| `metrics-actions.ts` | server action | grep del nombre → 0 imports | VERIFICAR |
+| `lib/actions/clients.ts` | server action | grep del nombre → 0 imports externos (cascade: importa seed-tasks-for-org orphan) | VERIFICAR |
+| `onboarding-actions.ts` | server action | importado solo por `OnboardingWizard.tsx` (tambien orphan) — cascade | VERIFICAR |
+| `Interactive3DNetwork.tsx` | componente 3D | grep del nombre → solo definicion propia | NO-TOCAR (zona 3D) |
+
+---
+
+### 6) Mapa clasificado — 68 archivos + 13 deps
+
+#### SEGURO (9 archivos + 10 deps) — prueba-de-muerte pasada sin ambiguedad
+
+**Archivos:**
+- `src/lib/cn.ts` — duplicado exacto de utils.ts (mismas 6 lineas), cero imports desde `@/lib/cn`
+- `src/app/(protected)/admin/clients/_components/client-card.tsx`
+- `src/app/(protected)/admin/clients/_components/client-detail-panels.tsx`
+- `src/app/(protected)/admin/clients/_components/client-list.tsx`
+- `src/app/(protected)/admin/clients/_components/client-overview.tsx`
+- `src/app/(protected)/admin/clients/_components/client-projects.tsx`
+- `src/app/(protected)/admin/clients/_components/client-support.tsx`
+- `src/app/(protected)/admin/clients/_components/health-score-display.tsx`
+- `src/app/(protected)/admin/clients/_components/module-toggle.tsx`
+
+**Deps prod (7):**
+- `zustand` — cero imports en src/
+- `maath` — cero imports en src/
+- `react-hook-form` — cero imports
+- `@hookform/resolvers` — par de react-hook-form, cero imports
+- `html2canvas` — cero imports (par de DownloadReportButton orphan)
+- `jspdf` — cero imports (par de DownloadReportButton orphan)
+- `react-day-picker` — cero imports
+
+**Deps dev (3):**
+- `@types/bcryptjs` — cero uso de tipos en src/
+- `@types/diff` — cero uso de tipos en src/
+- `eslint-plugin-unused-imports` — no referenciado en `eslint.config.mjs`
+
+---
+
+#### NO-TOCAR (6 archivos + 2 deps) — pendiente decision humana o feature diferida
+
+**Archivos:**
+- `src/components/canvas/AuroraBackground.tsx` — zona animada/3D, muerto pero NO tocar sin decision con Valentino
+- `src/components/canvas/Interactive3DNetwork.tsx` — idem
+- `src/components/canvas/LiquidProject.tsx` — idem
+- `src/components/canvas/NeuralNetwork.tsx` — idem
+- `src/components/canvas/ReactiveBackground.tsx` — idem
+- `src/components/dashboard/CurrentMilestone.tsx` — feature diferida B9.3, NO borrar
+
+**Deps (2):**
+- `@next/swc-win32-x64-msvc` — dep de build para entorno Windows/CI, no importada directamente pero necesaria para compilar en este SO
+- `@next/bundle-analyzer` — instalado en anticipacion al Sprint 0.3 (bundle baseline), no wired aun en next.config.ts
+
+---
+
+#### VERIFICAR (53 archivos + 1 dep) — knip confirma orphan, requieren decision de negocio/contenido antes de borrar
+
+**Server actions (11 archivos):**
+- `src/actions/admin/onboarding-tasks.ts`
+- `src/actions/metrics-actions.ts`
+- `src/actions/onboarding-actions.ts` (cascade: importado solo por OnboardingWizard orphan)
+- `src/actions/task-approvals.ts`
+- `src/lib/actions/clients.ts` (cascade interna con seed-tasks-for-org)
+- `src/lib/actions/invitations.ts` (cascade interna con seed-tasks-for-org)
+- `src/lib/actions/leads-constants.ts`
+- `src/lib/actions/leads.ts`
+- `src/lib/actions/services.ts`
+- `src/lib/actions/settings.ts`
+- `src/lib/actions/tickets.ts`
+
+**Sections publicas + marketing (25 archivos):**
+- `src/components/automation/ComparativaAutomation.tsx`
+- `src/components/automation/SocialProofAutomation.tsx`
+- `src/components/ia/BentoIA.tsx`
+- `src/components/ia/CalculadorIA.tsx`
+- `src/components/ia/VaultIA.tsx`
+- `src/components/software/ProcesoSoftware.tsx`
+- `src/components/software/ShowcaseSoftware.tsx`
+- `src/components/software/VaultSoftware.tsx`
+- `src/components/sections/AIBentoGrid.tsx`
+- `src/components/sections/AILargeCta.tsx`
+- `src/components/sections/AIPipelineSection.tsx`
+- `src/components/sections/AITechMarquee.tsx`
+- `src/components/sections/EnterpriseStandards.tsx`
+- `src/components/sections/FeedbackLoop.tsx`
+- `src/components/sections/home/PortalDemo.tsx`
+- `src/components/sections/ProcessAutomationCta.tsx`
+- `src/components/sections/ProcessAutomationMetrics.tsx`
+- `src/components/sections/ROICalculator.tsx`
+- `src/components/sections/SoftwareArchitecture.tsx`
+- `src/components/sections/TeamSection.tsx`
+- `src/components/sections/TemplateWarehouse.tsx`
+- `src/components/sections/web-development/PortfolioWebCases.tsx`
+- `src/components/sections/web-development/ShowcaseSection.tsx`
+- `src/components/sections/web-development/WebDevelopmentObjections.tsx`
+- `src/components/sections/web-development/WebDevelopmentSensory.tsx`
+
+**Dashboard + UI + onboarding (11 archivos):**
+- `src/components/dashboard/AnalyticsPeriodSelector.tsx`
+- `src/components/dashboard/AnimatedTaskList.tsx`
+- `src/components/dashboard/DownloadReportButton.tsx`
+- `src/components/dashboard/ExecutiveReportTemplate.tsx`
+- `src/components/dashboard/LeakMeter.tsx`
+- `src/components/dashboard/UpsellCard.tsx`
+- `src/components/layout/SectionTransition.tsx`
+- `src/components/onboarding/OnboardingWizard.tsx`
+- `src/components/ui/HeroTitle.tsx`
+- `src/components/ui/HyperText.tsx`
+- `src/app/(protected)/admin/projects/_components/convert-lead-dialog.tsx`
+
+**Libs + datos (6 archivos):**
+- `src/lib/data/onboarding-tasks.ts` (cascade de lib/actions orphans)
+- `src/lib/design-patterns.ts`
+- `src/lib/onboarding/seed-tasks-for-org.ts` (cascade de lib/actions orphans)
+- `src/lib/premium-modules.ts`
+- `src/modules/chatbot/prisma/seed.ts`
+- `tests/integration/alerts-detector.spec.ts`
+
+**Dep (1):**
+- `postprocessing` (bare) — dep transitiva de `@react-three/postprocessing`, no importada directamente; npm la instala automaticamente como peer dep
+
+---
+
+### 6b) Hallazgos adicionales (verificacion 2026-06-10)
+
+**Unlisted binary — VERIFICAR:**
+- `tsx` (binary) — `prisma.config.ts:seed` usa `'npx tsx prisma/seed.ts'` pero `tsx` no esta en `package.json` (solo `ts-node`). El `npx` lo descarga on-demand; falla si el registry es inaccesible o se quiere pin de version. Accion sugerida: agregar `tsx` a devDependencies o cambiar el comando a `ts-node --esm`.
+
+**Duplicate exports (13) — NO son dead code:**
+Los 13 archivos vivos exportan el mismo simbolo tanto named como default (`export function Foo` + `export default Foo`). Knip lo flaguea como duplicado. No es codigo muerto — es un patron de compatibilidad (algunos importadores usan named, otros default). No incluir en sprints de borrado. Archivos: BrandedLogoWhite, DotMatrix, DynamicDock, Navbar, BrandedIntroCanvas, IntroLockupText, LogoStrokeOverlay, MarketingIntro, ActionRequiredEmail, TicketReplyEmail, y 3 schemas de admin (ClientOrganizationIdSchema, MessageOrganizationIdSchema, TicketIdSchema).
+
+---
+
+### 7) Cascadas identificadas
+
+- **cascade-onboarding**: `OnboardingWizard.tsx` → `onboarding-actions.ts` → cascade muerta completa
+- **cascade-lib-actions**: `lib/actions/clients.ts` + `lib/actions/invitations.ts` → `lib/onboarding/seed-tasks-for-org.ts` → `lib/data/onboarding-tasks.ts` → cascade muerta completa
+- **cascade-admin-clients**: 8 archivos en `admin/clients/_components/` con refs cruzadas internas → muertos juntos
+- **cascade-canvas**: 5 canvas orphans que importan `@react-three/*` y `maath` — los imports de estas deps no cuentan porque los archivos son inalcanzables
+
+---
+
+### 8) Declaracion de cierre
+
+Este sprint no borro nada. No se uso `knip --fix`. No se toco codigo de producto ni config de aplicacion.
+
+Producido: mapa confiable con prueba-de-muerte por tipo, config knip.ts estabilizada (sin cambios necesarios), cascadas documentadas, falsos positivos eliminados.
+
+Verificado en segunda corrida el 2026-06-10: knip fresco confirma exactamente 68 archivos + 9 prod + 4 dev deps. Dos items adicionales documentados en §6b (tsx binary + duplicate exports). Sin contradicciones con la corrida anterior.
+
+**Pendiente para sprints de borrado (NOT de este sprint):**
+- Decision humana sobre zona animada/3D (canvas 5 orphans) antes de cualquier toque
+- Coordinacion con Valentino para sections publicas (Bloque 3)
+- Sprint 0.3: bundle baseline (activar `@next/bundle-analyzer` en next.config.ts)
+- Sprint 0.6: canary — verificar que nada roto tras el primer bloque de borrado
+- Orden de borrado sugerido: deps SEGURO → cn.ts → admin clients → lib/actions cascade → sections (con Valentino) → canvas (con decision humana) → deps NO-TOCAR en ese momento
+
 Verificacion humana pendiente: revisar el mapa de knip + candidatos marcados en el chat de planificacion antes de arrancar cualquier borrado.
+
+---
+## ✅ Sprint 0.2 — rm deps muertas zustand + react-day-picker   ·   2026-06-10
+
+**Objetivo:** ciclo borrar → gate → commit → revert validado. Eliminar las 2 deps con cero imports confirmados.
+
+**Paso 0 — Drift en origin/main:**
+`git fetch origin` reveló 3 commits nuevos en origin/main (chatbot estético: cdf690c, f25f6d6, 3bc2349).
+`git grep "from 'zustand'\|react-day-picker" origin/main -- src/` → 0 resultados. Deps siguen muertas.
+
+**Paso 1 — Prueba-de-muerte fresca (rama chore/dead-code-sweep):**
+- `git grep -n "from 'zustand'..." src/` → 0 matches
+- `git grep -n "react-day-picker" src/` → 0 matches
+
+**Paso 2 — Desinstalación:**
+`npm uninstall zustand react-day-picker` → removed 4 packages (zustand + react-day-picker + deps transitivas).
+
+**Paso 3 — Reinstalar limpio:**
+`npm ci` → 1074 packages, Prisma generado. Exit 0.
+
+**Paso 4 — Gate:**
+- `npx tsc --noEmit` → sin output (exit 0) ✓
+- `npm run build` → "Compiled successfully in 80s", 30/30 páginas generadas ✓
+
+**Paso 5 — Commit atómico:**
+SHA `0f57d75` — solo package.json + package-lock.json (49 ins / 52 del). Reversible.
+
+**Paso 6 — Canary (reversibilidad):**
+Rama temporal `canary/revert-test`:
+- `git revert --no-edit HEAD` → OK, package.json/lockfile restaurados a pre-borrado.
+- `npm install` → zustand y react-day-picker volvieron (`node -e "require('zustand')"` → OK).
+- `npx tsc --noEmit` → exit 0 ✓.
+Nota: `npm ci` falló en el canary por drift de @emnapi en el lockfile pre-borrado (sub-dep de sharp/wasm ajeno a estas deps). Se usó `npm install` — el comportamiento de restauración es correcto.
+Rama temporal descartada. Commit `0f57d75` se mantiene en chore/dead-code-sweep.
+
+**Declaración:**
+Solo se borraron `zustand` y `react-day-picker`. El resto de las deps huérfanas (`react-hook-form`, `@hookform/resolvers`, `html2canvas`, `jspdf`, `maath`) NO se tocaron — caen como consecuencia de decidir sus orphans (OnboardingWizard, DownloadReportButton, los 5 canvas).
+
+**Pendiente humano antes de seguir:**
+- Freeze con Valentino para los batches grandes.
+- Decision sobre zona animada/3D (los 5 canvas orphans).
+- Confirmacion de Valentino sobre admin/clients y las sections publicas.
