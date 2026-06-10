@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState, type MouseEvent as ReactMouseEvent } from 'react';
+import { useEffect, useRef, useState, useSyncExternalStore, type MouseEvent as ReactMouseEvent } from 'react';
 import Image from 'next/image';
 import {
   AnimatePresence,
@@ -188,6 +188,23 @@ function useIsMobileViewport() {
   }, []);
 
   return isMobile;
+}
+
+function subscribeReducedMotion(cb: () => void): () => void {
+  const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+  mq.addEventListener('change', cb);
+  return () => mq.removeEventListener('change', cb);
+}
+
+// Server snapshot and first client render both return false (deterministic),
+// preventing SSR/client mismatch when prefers-reduced-motion is ON.
+// Post-hydration reflects the real matchMedia value via useSyncExternalStore.
+function useHydratedReducedMotion(): boolean {
+  return useSyncExternalStore(
+    subscribeReducedMotion,
+    () => window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+    () => false,
+  );
 }
 
 const TABBED_DIMENSIONS: TabbedDimension[] = [
@@ -415,7 +432,7 @@ function useCardSpotlight(enabled = true) {
 }
 
 function AgencyComparisonVisual() {
-  const shouldReduceMotion = useReducedMotion();
+  const shouldReduceMotion = useHydratedReducedMotion();
   const isMobile = useIsMobileViewport();
   const shouldSimplify = shouldReduceMotion || isMobile;
 
@@ -769,7 +786,7 @@ function OwnershipVisual({ accent }: { accent: AccentKey }) {
 }
 
 function MainNodesVisual() {
-  const shouldReduceMotion = useReducedMotion();
+  const shouldReduceMotion = useHydratedReducedMotion();
   const isMobile = useIsMobileViewport();
   const shouldSimplify = shouldReduceMotion || isMobile;
   const countRef = useRef<HTMLDivElement | null>(null);
@@ -900,7 +917,7 @@ function MainNodesVisual() {
 }
 
 function MainAIVisual() {
-  const shouldReduceMotion = useReducedMotion();
+  const shouldReduceMotion = useHydratedReducedMotion();
   const isMobile = useIsMobileViewport();
   const shouldSimplify = shouldReduceMotion || isMobile;
   const inputs = ['Mensaje 3:14 AM', 'Dato Suelto', 'Lead Frío'] as const;
