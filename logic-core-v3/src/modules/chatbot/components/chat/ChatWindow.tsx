@@ -39,6 +39,23 @@ const MARKDOWN_COMPONENTS: Components = {
   ),
 }
 
+// Fondo del panel — paridad WYSIWYG con la preview del admin (BotConfigPreview,
+// `surfaceBg`): mismo mapeo intensityLevel → opacidad y mismo `tint + alpha hex`.
+// Si esa fórmula cambia allá, cambiar acá también. `intensityLevel` llega crudo
+// de DB (enum UPPERCASE) — se normaliza local, sin tocar el shape público.
+function buildPanelBackground(config: PublicBotConfig): string {
+  if (!config.chatSurfaceTint) {
+    // Sin tinte configurado: el gradient original, intacto.
+    return 'linear-gradient(180deg, rgba(11, 14, 28, 0.92) 0%, rgba(6, 8, 18, 0.9) 100%)'
+  }
+  const intensity = config.intensityLevel.toUpperCase()
+  const surfaceOpacity = intensity === 'LOW' ? 0.72 : intensity === 'HIGH' ? 0.95 : 0.84
+  const alphaHex = Math.round(surfaceOpacity * 255)
+    .toString(16)
+    .padStart(2, '0')
+  return `${config.chatSurfaceTint}${alphaHex}`
+}
+
 export interface ChatWindowProps {
   config: PublicBotConfig
   messages: UIChatMessage[]
@@ -173,7 +190,7 @@ export function ChatWindow({
                 // Inherit `cursor: none` on desktop so the custom cursor is kept
                 // over the whole panel instead of reverting to the OS pointer.
                 zIndex: CHATBOT_Z_INDEX.panel,
-                background: 'linear-gradient(180deg, rgba(11, 14, 28, 0.92) 0%, rgba(6, 8, 18, 0.9) 100%)',
+                background: buildPanelBackground(config),
                 backdropFilter: 'blur(32px)',
                 WebkitBackdropFilter: 'blur(32px)',
                 border: '1px solid rgba(255,255,255,0.09)',
