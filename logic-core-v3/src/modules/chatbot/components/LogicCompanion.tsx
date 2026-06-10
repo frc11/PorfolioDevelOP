@@ -211,8 +211,11 @@ export function LogicCompanion({ slug }: LogicCompanionProps) {
               chat vacío → teaser de preguntas (config.proactivePrompts, opener);
               con conversación → burbuja "retomar" (mismos mecánica/estilo, otro set
               de mensajes que rota igual; al click solo abre, no inyecta opener).
-              `key` distinto fuerza remontaje limpio al alternar de modo. */}
+              `key` distinto fuerza remontaje limpio al alternar de modo.
+              NUNCA en degradado/offline (bot_paused & co.): el teaser invita a
+              conversar/inyecta un opener que un bot caído no puede responder. */}
           {!chatbot.isOpen &&
+            !chatbot.degradedInfo &&
             (chatbot.hasConversation ? (
               <ProactiveTooltip
                 key="resume"

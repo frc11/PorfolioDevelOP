@@ -224,7 +224,10 @@ export function ChatWindow({
               >
                 {degradedInfo && <DegradedBanner info={degradedInfo} />}
                 <AnimatePresence initial={false}>
-                  {messages.length === 0 ? (
+                  {/* Offline/degradado con chat vacío: el card de WhatsApp (DegradedBanner,
+                      arriba) es el ÚNICO contenido — sin saludo "Sistema listo". El else
+                      mapea [] → no renderiza nada. */}
+                  {messages.length === 0 && !degraded ? (
                     <div key="__empty__" className="flex h-full flex-col items-center justify-center space-y-4 py-6 text-center opacity-75">
                       <div className="flex h-16 w-16 items-center justify-center rounded-[1.35rem] border border-white/6 bg-gradient-to-br from-cyan-500/10 to-purple-500/10 shadow-[0_0_30px_rgba(6,182,212,0.1)]">
                         <Sparkles className="w-6 h-6 text-cyan-400/80" />
@@ -392,8 +395,9 @@ export function ChatWindow({
                   )}
                 </AnimatePresence>
                 
-                {/* Quick replies */}
-                {config.quickReplies && config.quickReplies.length > 0 && messages.length === 0 && (
+                {/* Quick replies — nunca en degradado/offline: dispararían sendMessage
+                    contra un bot que no puede responder (el único CTA es WhatsApp). */}
+                {!degraded && config.quickReplies && config.quickReplies.length > 0 && messages.length === 0 && (
                   <div className="flex flex-wrap gap-2 mt-2 justify-center">
                     {config.quickReplies.map((qr) => (
                       <button
