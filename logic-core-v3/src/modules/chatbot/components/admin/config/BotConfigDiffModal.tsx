@@ -1,7 +1,9 @@
 'use client'
 
 import { AnimatePresence, motion } from 'motion/react'
+import { createPortal } from 'react-dom'
 import { Save, X } from 'lucide-react'
+import { useIsClient } from '../useIsClient'
 import type { BotConfigEditorState } from './types'
 
 const FIELD_LABELS: Partial<Record<keyof BotConfigEditorState, string>> = {
@@ -56,18 +58,27 @@ interface Props {
 }
 
 export function BotConfigDiffModal({ open, onClose, onConfirm, before, after, loading }: Props) {
+  // Gate de hidratación: montar el portal solo en cliente (evita document en SSR y mismatch).
+  const mounted = useIsClient()
+  if (!mounted) return null
+
   const changedKeys = (Object.keys(after) as (keyof BotConfigEditorState)[]).filter(
     key => !SKIP_FIELDS.has(key) && JSON.stringify(before[key]) !== JSON.stringify(after[key]),
   )
 
-  return (
+  // createPortal envuelve a AnimatePresence (NO al revés): AnimatePresence.onlyElements() filtra sus
+  // children con React.isValidElement, y un portal NO es un element (es react.portal) → lo descartaba y
+  // el modal nunca montaba. Con AnimatePresence adentro y un <motion.div> como hijo (sí element), enter y
+  // exit funcionan. El portal va a <body> para escapar del backdrop-filter del <main> admin (que atrapa
+  // position:fixed); queda montado siempre (gate `mounted`), el `open` vive DENTRO → el exit no se corta.
+  return createPortal(
     <AnimatePresence>
       {open && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"
+          className="fixed inset-0 z-[200] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"
           onClick={onClose}
         >
           <motion.div
@@ -146,6 +157,7 @@ export function BotConfigDiffModal({ open, onClose, onConfirm, before, after, lo
           </motion.div>
         </motion.div>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body,
   )
 }

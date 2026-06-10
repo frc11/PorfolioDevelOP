@@ -1,7 +1,9 @@
 'use client'
 
 import { AnimatePresence, motion } from 'motion/react'
+import { createPortal } from 'react-dom'
 import { AlertTriangle, Check, X, Zap } from 'lucide-react'
+import { useIsClient } from '../useIsClient'
 import type { PreflightCheck } from '@/modules/chatbot/server/admin/preflightChecks'
 
 interface ActivationModalProps {
@@ -27,14 +29,22 @@ export function ActivationModal({
   const warnings = checks.filter((check) => check.status === 'warn')
   const canActivate = failures.length === 0
 
-  return (
+  // Gate de hidratación: montar el portal solo en cliente (evita document en SSR y mismatch).
+  const mounted = useIsClient()
+  if (!mounted) return null
+
+  // createPortal envuelve a AnimatePresence (NO al revés): onlyElements() de AnimatePresence filtra con
+  // React.isValidElement y un portal NO es element (es react.portal) → lo descarta y el modal no monta.
+  // Con AnimatePresence adentro y un <motion.div> como hijo, enter y exit funcionan. El portal va a <body>
+  // para escapar del backdrop-filter del <main> admin; queda montado siempre, el `open` vive DENTRO.
+  return createPortal(
     <AnimatePresence>
       {open && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"
+          className="fixed inset-0 z-[200] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"
           onClick={onClose}
         >
           <motion.div
@@ -134,7 +144,8 @@ export function ActivationModal({
           </motion.div>
         </motion.div>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body,
   )
 }
 
