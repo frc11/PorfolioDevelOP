@@ -169,9 +169,9 @@ export function BotConfigEditor({ initial, orgSlug, onSave }: BotConfigEditorPro
 
   return (
     <>
-      <div className="grid grid-cols-1 gap-6 pb-32 lg:grid-cols-[minmax(0,1fr)_380px]">
+      <div className="grid grid-cols-1 gap-6 pb-8 lg:grid-cols-[minmax(0,1fr)_380px]">
         <div className="space-y-6">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div>
               <h1 className="text-2xl font-semibold text-zinc-100">
                 Configuracion del bot
@@ -181,15 +181,42 @@ export function BotConfigEditor({ initial, orgSlug, onSave }: BotConfigEditorPro
                 <span className="ml-3 text-xs text-zinc-600">{exposedCount} campos editables expuestos</span>
               </p>
             </div>
-            <button
-              type="button"
-              onClick={handleSendTest}
-              disabled={saving || !state.leadNotificationEmail}
-              className="inline-flex items-center gap-2 rounded-2xl border border-white/10 px-4 py-2 text-sm text-zinc-300 hover:bg-white/[0.04] disabled:opacity-50"
-            >
-              <Mail className="h-4 w-4" strokeWidth={1.5} />
-              Test email
-            </button>
+            <div className="flex flex-wrap items-center gap-2">
+              {/* Barra de cambios sin guardar — inline en el header. Antes era `fixed bottom-6`,
+                  pero el <main> de AdminLayoutClient tiene backdrop-filter y atrapa el position:fixed. */}
+              {hasChanges && (
+                <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-cyan-400/30 bg-cyan-400/[0.06] px-3 py-2">
+                  <p className="text-sm text-cyan-300">Tenés cambios sin guardar</p>
+                  <button
+                    type="button"
+                    onClick={() => setState(initialState)}
+                    disabled={saving}
+                    className="inline-flex items-center gap-2 rounded-xl border border-white/10 px-3 py-1.5 text-sm text-zinc-300 hover:bg-white/[0.06] disabled:opacity-50"
+                  >
+                    <RotateCcw className="h-3.5 w-3.5" strokeWidth={1.5} />
+                    Descartar
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowDiff(true)}
+                    disabled={saving}
+                    className="inline-flex items-center gap-2 rounded-xl bg-cyan-400 px-4 py-1.5 text-sm font-medium text-zinc-950 hover:bg-cyan-300 disabled:opacity-50"
+                  >
+                    <Save className="h-3.5 w-3.5" strokeWidth={1.5} />
+                    Revisar y guardar
+                  </button>
+                </div>
+              )}
+              <button
+                type="button"
+                onClick={handleSendTest}
+                disabled={saving || !state.leadNotificationEmail}
+                className="inline-flex items-center gap-2 rounded-2xl border border-white/10 px-4 py-2 text-sm text-zinc-300 hover:bg-white/[0.04] disabled:opacity-50"
+              >
+                <Mail className="h-4 w-4" strokeWidth={1.5} />
+                Test email
+              </button>
+            </div>
           </div>
 
           <ConfigTabs active={activeTab} onChange={setActiveTab} />
@@ -213,35 +240,6 @@ export function BotConfigEditor({ initial, orgSlug, onSave }: BotConfigEditorPro
           <BotConfigPreview state={adminStateToPreview(state)} />
         </aside>
       </div>
-
-      {/* Sticky save bar */}
-      {hasChanges && (
-        <div className="fixed bottom-6 left-1/2 z-20 w-full max-w-2xl -translate-x-1/2 px-4">
-          <div className="flex items-center justify-between rounded-2xl border border-cyan-400/30 bg-zinc-950/95 px-5 py-3.5 shadow-2xl backdrop-blur">
-            <p className="text-sm text-cyan-300">Tenés cambios sin guardar</p>
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={() => setState(initialState)}
-                disabled={saving}
-                className="inline-flex items-center gap-2 rounded-xl border border-white/10 px-4 py-2 text-sm text-zinc-300 hover:bg-white/[0.06] disabled:opacity-50"
-              >
-                <RotateCcw className="h-3.5 w-3.5" strokeWidth={1.5} />
-                Descartar
-              </button>
-              <button
-                type="button"
-                onClick={() => setShowDiff(true)}
-                disabled={saving}
-                className="inline-flex items-center gap-2 rounded-xl bg-cyan-400 px-5 py-2 text-sm font-medium text-zinc-950 hover:bg-cyan-300 disabled:opacity-50"
-              >
-                <Save className="h-3.5 w-3.5" strokeWidth={1.5} />
-                Revisar y guardar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       <ActivationModal
         open={showActivationModal}
