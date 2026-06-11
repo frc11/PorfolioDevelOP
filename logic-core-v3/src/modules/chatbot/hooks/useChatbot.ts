@@ -2,8 +2,9 @@
 
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { useChat } from '@ai-sdk/react'
-import { DefaultChatTransport } from 'ai'
+import { DefaultChatTransport, type UIMessage } from 'ai'
 import type { PublicBotConfig } from '../shared/publicConfig'
+import { prefetchBotConfig } from '../shared/configCache'
 import type { UIChatMessage, ToolCallInUIMessage } from '../components/chat/types'
 import type { NeuroAvatarState } from '../components/avatar'
 
@@ -60,6 +61,12 @@ export interface UseChatbotReturn {
   close: () => void
   toggle: () => void
   messages: UIChatMessage[]
+  /**
+   * True when at least one REAL message exists in the current session
+   * (proactive-* teaser bubbles don't count). In-memory only — resets on reload.
+   * Drives the teaser↔retomar gate and the launcher badge.
+   */
+  hasConversation: boolean
   isStreaming: boolean
   avatarState: NeuroAvatarState
   degradedMode: boolean
@@ -77,6 +84,14 @@ export function useChatbot({ slug, currentPath }: UseChatbotOptions): UseChatbot
   const [isOpen, setIsOpen] = useState(false)
   const [degradedInfo, setDegradedInfo] = useState<DegradedInfo | null>(null)
   const sessionIdRef = useRef<string>(getOrCreateSessionId())
+  // Proactive teaser opener: the question text the bot "asked" via the tooltip.
+  // Sent to the backend with the visitor's FIRST reply only (then cleared), so
+  // the model gets the context once without re-applying it to every later turn.
+  const proactiveOpenerRef = useRef<string | null>(null)
+  // Id of the UI-only bubble injected by `acceptProactivePrompt`. Tracked so we
+  // can strip exactly THAT bubble if the visitor closes without replying — never
+  // an older proactive bubble that was already answered (legitimate history).
+  const proactiveBubbleIdRef = useRef<string | null>(null)
   // Mirror of `config` for use inside the transport's `fetch` (whose closure
   // is created once and would otherwise capture a stale `null` config).
   const configRef = useRef<PublicBotConfig | null>(null)
@@ -86,9 +101,10 @@ export function useChatbot({ slug, currentPath }: UseChatbotOptions): UseChatbot
 
   useEffect(() => {
     let cancelled = false
-    fetch(`/api/chatbot/${slug}/config`)
-      .then((r) => (r.ok ? r.json() : null))
-      .then((data: PublicBotConfig | null) => {
+    // Reuse the config warmed by ChatWidgetMount during the intro (shared cache,
+    // dedup'd by slug) so the launcher isn't blocked on a cold fetch at reveal.
+    prefetchBotConfig(slug)
+      .then((data) => {
         if (cancelled) return
         setConfig(data)
         // B8.3 — bot pausado llega vía config.paused (en lugar del viejo 404
@@ -189,22 +205,33 @@ export function useChatbot({ slug, currentPath }: UseChatbotOptions): UseChatbot
           }
           return response
         },
-        prepareSendMessagesRequest: ({ messages: msgs, body }) => ({
-          body: {
-            ...body,
-            messages: msgs.map((m) => ({
-              role: m.role,
-              content: m.parts.map((p) => (p.type === 'text' ? p.text : '')).join(''),
-            })),
-            sessionId: sessionIdRef.current,
-            currentPath,
-          },
-        }),
+        prepareSendMessagesRequest: ({ messages: msgs, body }) => {
+          // The proactive teaser bubble is UI-only — it must NEVER be sent as a
+          // turn (keeps the array user-led, which Gemini/Vertex requires). Its
+          // context reaches the model via `proactiveOpener` on the FIRST reply
+          // only; read-and-clear here so later turns don't re-apply it.
+          const opener = proactiveOpenerRef.current
+          proactiveOpenerRef.current = null
+          return {
+            body: {
+              ...body,
+              messages: msgs
+                .filter((m) => !m.id.startsWith('proactive-'))
+                .map((m) => ({
+                  role: m.role,
+                  content: m.parts.map((p) => (p.type === 'text' ? p.text : '')).join(''),
+                })),
+              sessionId: sessionIdRef.current,
+              currentPath,
+              ...(opener ? { proactiveOpener: opener } : {}),
+            },
+          }
+        },
       }),
     [slug, currentPath]
   )
 
-  const { messages: sdkMessages, sendMessage: sdkSendMessage, status } = useChat({ transport })
+  const { messages: sdkMessages, sendMessage: sdkSendMessage, setMessages, status } = useChat({ transport })
 
   // B3.7 — pendingSubmit hace que el estado "Pensando" reaccione en el mismo
   // frame en que el usuario presiona Enter, sin esperar al microtick del SDK
@@ -270,10 +297,25 @@ export function useChatbot({ slug, currentPath }: UseChatbotOptions): UseChatbot
 
   const acceptProactivePrompt = useCallback(
     (prompt: string) => {
+      // The teaser is a question the BOT asked, not the visitor. Open the panel
+      // and inject it as a UI-only assistant bubble (id `proactive-*`, filtered
+      // out of the outgoing request by the transport). Remember it as the opener
+      // so the visitor's first reply carries the context to the model via the
+      // system prompt — without ever sending the bubble as a real turn.
+      const bubbleId = `proactive-${crypto.randomUUID()}`
+      proactiveOpenerRef.current = prompt
+      proactiveBubbleIdRef.current = bubbleId
       setIsOpen(true)
-      setTimeout(() => sendMessage(prompt), 50)
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: bubbleId,
+          role: 'assistant',
+          parts: [{ type: 'text', text: prompt }],
+        } satisfies UIMessage,
+      ])
     },
-    [sendMessage]
+    [setMessages]
   )
 
   const triggerWhatsappHandoff = useCallback(() => {
@@ -298,8 +340,21 @@ export function useChatbot({ slug, currentPath }: UseChatbotOptions): UseChatbot
   // hasta que el cliente recargue la página o el admin reactive el bot.
   const close = useCallback(() => {
     setIsOpen(false)
+    // If the visitor accepted a teaser but closed WITHOUT replying, the opener is
+    // still pending (a real reply read-and-clears it in the transport). In that
+    // case strip the UI-only bubble we injected so unanswered questions don't pile
+    // up across re-opens. Remove ONLY that bubble — an older proactive bubble that
+    // was answered is legitimate history and must stay.
+    if (proactiveOpenerRef.current !== null && proactiveBubbleIdRef.current !== null) {
+      const staleId = proactiveBubbleIdRef.current
+      setMessages((prev) => prev.filter((m) => m.id !== staleId))
+    }
+    // Drop a pending proactive opener if the visitor closes without replying —
+    // it must not later attach to an unrelated message.
+    proactiveOpenerRef.current = null
+    proactiveBubbleIdRef.current = null
     setDegradedInfo((prev) => (prev?.reason === 'bot_paused' ? prev : null))
-  }, [])
+  }, [setMessages])
   const toggle = useCallback(() => setIsOpen((v) => !v), [])
 
   // `degradedMode` se deriva de `degradedInfo` para que cualquier consumer
@@ -307,9 +362,14 @@ export function useChatbot({ slug, currentPath }: UseChatbotOptions): UseChatbot
   // entero para armar el handoff a WhatsApp.
   const degradedMode = degradedInfo !== null
 
+  // "Conversación activa" = al menos un mensaje REAL en la sesión actual (en
+  // memoria, se reinicia al recargar). Las burbujas proactive-* son el teaser
+  // efímero y NO cuentan (si contaran, el teaser se auto-bloquearía).
+  const hasConversation = messages.some((m) => !m.id.startsWith('proactive-'))
+
   return {
     config, isLoading, isOpen, open, close, toggle,
-    messages, isStreaming, avatarState, degradedMode, degradedInfo,
+    messages, hasConversation, isStreaming, avatarState, degradedMode, degradedInfo,
     sendMessage, acceptProactivePrompt,
     triggerWhatsappHandoff, triggerCallbackHandoff, navigateTo,
   }

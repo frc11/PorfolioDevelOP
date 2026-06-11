@@ -4,6 +4,7 @@ import { useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 import { STATE_CONFIG, type NeuroAvatarState } from './types'
+import { clampDelta } from './frameDelta'
 
 interface CentralCoreProps {
   accentColor: string
@@ -18,7 +19,8 @@ export function CentralCore({ accentColor, state }: CentralCoreProps) {
   const meshRef = useRef<THREE.Mesh>(null)
   const time = useRef(0)
 
-  useFrame((_, delta) => {
+  useFrame((_, rawDelta) => {
+    const delta = clampDelta(rawDelta)
     if (!meshRef.current) return
     time.current += delta
     const config = STATE_CONFIG[state]

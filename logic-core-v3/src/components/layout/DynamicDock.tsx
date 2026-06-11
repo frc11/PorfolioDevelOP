@@ -17,7 +17,12 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 
 import { useTransitionContext } from "@/context/TransitionContext";
-import { usePreloader } from "@/context/PreloaderContext";
+import { useChromeRevealed } from "@/components/layout/useChromeRevealed";
+import {
+    CHROME_REVEAL_OFFSET_PX,
+    CHROME_REVEAL_DURATION_S,
+    CHROME_REVEAL_EASE,
+} from "@/lib/chromeReveal";
 
 type NavItem = {
     href: string;
@@ -339,11 +344,10 @@ function DockItem({
 const PILL_SPRING: Transition = { type: "spring", stiffness: 420, damping: 34, mass: 0.72 };
 const PILL_INSTANT: Transition = { duration: 0 };
 
-// Entrada del dock: oculto durante el intro del hero, sube desde abajo (slide-up
-// + fade) cuando el hero termina. Tunables.
-const DOCK_HIDDEN_Y = 80;
-const DOCK_REVEAL_SECONDS = 0.5;
-const DOCK_REVEAL_EASE: [number, number, number, number] = [0.22, 1, 0.36, 1];
+// Entrada del dock: oculto durante el intro, sube desde abajo (slide-up + fade)
+// cuando el chrome se revela. Timing/easing/offset COMPARTIDOS con el widget de
+// chat (ver @/lib/chromeReveal) para que dock + widget aparezcan idénticos y al
+// mismo tiempo. Respeta prefers-reduced-motion (sin slide, sin duración).
 
 // ---- Compresión/descompresión del dock (tunables de animación) ----
 // Cambio de tamaño/forma del contenedor, ítems y CTA. Subí DOCK_RESIZE_SECONDS para
@@ -366,11 +370,10 @@ const TEXT_FADE_BLUR = 2; // px de blur en el fade
 
 export function DynamicDock() {
     const pathname = usePathname();
-    const { phase } = usePreloader();
-
-    // Visible en no-home siempre (ahí el preloader no corre y phase no llega a
-    // 'done'); en home, solo cuando el intro terminó. Se despliega desde abajo.
-    const dockVisible = pathname !== "/" || phase === "done";
+    // Revelado del chrome (compartido con el widget de chat vía useChromeRevealed):
+    // home espera el intro (phase 'done'); marketing espera su propio intro local
+    // (evento 'chrome:revealed'); demás rutas, inmediato. Dock + widget al mismo tiempo.
+    const dockVisible = useChromeRevealed();
 
     const lastScrollY = useRef(0);
     const collapseTimeoutRef = useRef<number | null>(null);
@@ -509,8 +512,15 @@ export function DynamicDock() {
         <div className="fixed bottom-8 left-1/2 z-[9990] hidden -translate-x-1/2 md:block">
             <motion.div
                 initial={false}
-                animate={{ opacity: dockVisible ? 1 : 0, y: dockVisible ? 0 : DOCK_HIDDEN_Y }}
-                transition={{ duration: DOCK_REVEAL_SECONDS, ease: DOCK_REVEAL_EASE }}
+                animate={{
+                    opacity: dockVisible ? 1 : 0,
+                    y: dockVisible ? 0 : reduceMotion ? 0 : CHROME_REVEAL_OFFSET_PX,
+                }}
+                transition={
+                    reduceMotion
+                        ? { duration: 0 }
+                        : { duration: CHROME_REVEAL_DURATION_S, ease: CHROME_REVEAL_EASE }
+                }
                 style={{ pointerEvents: dockVisible ? "auto" : "none" }}
             >
             <motion.nav

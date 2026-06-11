@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useCallback } from 'react'
+import { useEffect, useRef, useCallback, useMemo } from 'react'
 import { usePathname } from 'next/navigation'
 import { motion, AnimatePresence, useReducedMotion } from 'motion/react'
 import { AvatarRenderer, getAvatarRenderSize } from './avatar'
@@ -12,6 +12,24 @@ import { renderToolCall } from './tool-cards'
 import { useChatbot } from '../hooks/useChatbot'
 import { useChatbotSounds } from '../hooks/useChatbotSounds'
 import type { ToolCallInUIMessage } from './chat/types'
+import {
+  CHROME_REVEAL_OFFSET_PX,
+  CHROME_REVEAL_DURATION_MS,
+  CHROME_REVEAL_EASE_CSS,
+} from '@/lib/chromeReveal'
+
+// ── Widget reveal (post-preloader / post-intro entrance) ────────────────────
+// The launcher fades + slides up the first time the site chrome is revealed,
+// using the SHARED reveal tokens (@/lib/chromeReveal) so it appears IDENTICALLY
+// and at the same time as the dock (DynamicDock). Driven by a CSS keyframe rather
+// than a Framer mount transition on purpose: under the app's heavy first paint a
+// one-shot Framer `initial → animate` enter gets dropped, leaving the bubble stuck
+// at its initial frame (see the `initial={false}` note on the launcher below). A
+// CSS animation runs on the compositor independent of React's commit timing, so it
+// can't get stuck. GPU-friendly: animates only `opacity` + the standalone
+// `translate` property (never width/height), which composes with the launcher's
+// Framer `scale` (a `transform`) without the two fighting over one property.
+// Honors prefers-reduced-motion via `useReducedMotion()`.
 
 interface LogicCompanionProps {
   slug: string
@@ -35,12 +53,31 @@ export function LogicCompanion({ slug }: LogicCompanionProps) {
   }, [chatbot.isStreaming, sounds])
 
   const handleToggle = useCallback(() => {
-    // Play the open chime BEFORE flipping state so the AudioContext is created
-    // inside the user gesture frame (some browsers — notably Safari — are
-    // strict about this).
-    if (!chatbot.isOpen) sounds.playOpen()
-    chatbot.toggle()
+    if (chatbot.isOpen) {
+      // Route the launcher's close through close() (NOT toggle) so it runs the
+      // same cleanup as the X / backdrop — clearing a pending proactive opener
+      // and stripping its unanswered bubble instead of letting them pile up.
+      chatbot.close()
+    } else {
+      // Play the open chime BEFORE flipping state so the AudioContext is created
+      // inside the user-gesture frame (Safari is strict about this).
+      sounds.playOpen()
+      chatbot.open()
+    }
   }, [chatbot, sounds])
+
+  // Mensajes de la burbuja "retomar" (cuando ya hay conversación). Rotan igual
+  // que el teaser. El 1º usa el nombre configurado del bot (fuente de verdad,
+  // nunca hardcodeado); si no hay nombre, cae a un texto sin nombre.
+  const resumeMessages = useMemo(() => {
+    const name = chatbot.config?.botName?.trim()
+    return [
+      name ? `Tu charla con ${name} sigue acá 👋` : 'Tu charla sigue acá 👋',
+      '¿Seguimos donde lo dejamos?',
+      'Retomemos la conversación',
+      '¿Terminamos de organizar?',
+    ]
+  }, [chatbot.config?.botName])
 
   if (chatbot.isLoading || !chatbot.config) return null
 
@@ -92,10 +129,17 @@ export function LogicCompanion({ slug }: LogicCompanionProps) {
 
       <motion.div
         data-chatbot-avatar
+        data-cursor="hover"
         role="button"
         tabIndex={0}
         onClick={handleToggle}
-        aria-label={chatbot.isOpen ? 'Cerrar chat' : 'Abrir chat'}
+        aria-label={
+          chatbot.isOpen
+            ? 'Cerrar chat'
+            : chatbot.hasConversation
+              ? 'Abrir chat (conversación activa)'
+              : 'Abrir chat'
+        }
         style={{
           position: 'fixed',
           ...position,
@@ -106,7 +150,12 @@ export function LogicCompanion({ slug }: LogicCompanionProps) {
           padding: 0,
           border: 'none',
           background: 'transparent',
-          cursor: 'pointer',
+          // No `cursor: pointer`: inherits `cursor: none` on desktop so the site's
+          // custom cursor stays over the bubble; `data-cursor="hover"` grows its aura.
+          // One-shot CSS reveal on first appearance (skipped under reduced motion).
+          animation: reducedMotion
+            ? undefined
+            : `chatbotLauncherReveal ${CHROME_REVEAL_DURATION_MS}ms ${CHROME_REVEAL_EASE_CSS} both`,
         }}
         // The launcher renders directly at its resting state. We deliberately do
         // NOT use a Framer Motion `initial → animate` mount transition: under the
@@ -134,16 +183,69 @@ export function LogicCompanion({ slug }: LogicCompanionProps) {
             avatarEmoji={chatbot.config.avatarEmoji}
             businessInitials={deriveBusinessInitials(chatbot.config.botName)}
           />
-          {!chatbot.isOpen && (
-            <ProactiveTooltip
-              config={chatbot.config}
-              currentPath={pathname}
-              onAccept={chatbot.acceptProactivePrompt}
-              onDismiss={() => {}}
+          {/* Badge: punto discreto de "conversación activa". Color = accentColor
+              configurado (fuente de verdad). Persiste mientras haya conversación,
+              esté la burbuja visible o cerrada; desaparece tras "Nueva conversación"
+              (chat vacío). Decorativo → aria-hidden (el estado lo anuncia el
+              aria-label del launcher); pointer-events none para no robar el click. */}
+          {chatbot.hasConversation && (
+            <span
+              aria-hidden="true"
+              style={{
+                position: 'absolute',
+                top: '-1px',
+                right: '-1px',
+                width: '13px',
+                height: '13px',
+                borderRadius: '50%',
+                background: chatbot.config.accentColor,
+                border: '2px solid rgba(6,8,18,0.92)',
+                boxShadow: `0 0 8px ${chatbot.config.accentColor}aa`,
+                pointerEvents: 'none',
+                zIndex: 2,
+              }}
             />
           )}
+
+          {/* Burbuja sobre el launcher — EXCLUYENTES por el gate hasConversation:
+              chat vacío → teaser de preguntas (config.proactivePrompts, opener);
+              con conversación → burbuja "retomar" (mismos mecánica/estilo, otro set
+              de mensajes que rota igual; al click solo abre, no inyecta opener).
+              `key` distinto fuerza remontaje limpio al alternar de modo. */}
+          {!chatbot.isOpen &&
+            (chatbot.hasConversation ? (
+              <ProactiveTooltip
+                key="resume"
+                config={chatbot.config}
+                currentPath={pathname}
+                prompts={resumeMessages}
+                onAccept={() => chatbot.open()}
+                onDismiss={() => {}}
+              />
+            ) : (
+              <ProactiveTooltip
+                key="teaser"
+                config={chatbot.config}
+                currentPath={pathname}
+                onAccept={chatbot.acceptProactivePrompt}
+                onDismiss={() => {}}
+              />
+            ))}
         </div>
       </motion.div>
+
+      <style jsx global>{`
+        @keyframes chatbotLauncherReveal {
+          from {
+            opacity: 0;
+            translate: 0 ${CHROME_REVEAL_OFFSET_PX}px;
+          }
+          to {
+            opacity: 1;
+            translate: 0 0;
+          }
+        }
+      `}</style>
     </>
   )
 }

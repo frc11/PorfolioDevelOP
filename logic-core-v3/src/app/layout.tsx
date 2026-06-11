@@ -54,7 +54,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    // suppressHydrationWarning: el <script> de abajo setea overflow:hidden en el
+    // <html> ANTES de hidratar (scroll-lock temprano del intro en home), mientras
+    // el SSR no lo trae → mismatch legítimo y esperado SOLO en el style del <html>.
+    // Es shallow (un nivel): no enmascara mismatches de los hijos.
+    <html lang="en" suppressHydrationWarning>
       <head>
         <link rel="preconnect" href="https://grainy-gradients.vercel.app" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://placehold.co" crossOrigin="anonymous" />

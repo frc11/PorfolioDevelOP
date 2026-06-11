@@ -6,7 +6,7 @@ import { animate, motion, useMotionValue, useTransform } from "motion/react";
 import { useLenis } from "@/components/layout/SmoothScroll";
 
 import { isAutomationEnvironment } from "@/context/PreloaderContext";
-import { markIntroConsumed } from "@/lib/marketing-routes";
+import { markIntroConsumed, markMarketingIntroDone } from "@/lib/marketing-routes";
 import { BrandedIntroCanvas } from "@/components/ui/BrandedIntroCanvas";
 import { LogoStrokeOverlay } from "@/components/ui/LogoStrokeOverlay";
 import { IntroLockupText, WRITE_MS, TEXT_LEAD_MS } from "@/components/ui/IntroLockupText";
@@ -127,6 +127,7 @@ export function MarketingIntro() {
 
         const finish = () => {
             markIntroConsumed();
+            markMarketingIntroDone();
             setDone(true);
         };
 
