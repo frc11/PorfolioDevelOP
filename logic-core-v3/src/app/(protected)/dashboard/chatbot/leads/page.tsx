@@ -7,6 +7,8 @@ import {
 import { ClientLeadsTable } from '@/modules/chatbot/components/dashboard/ClientLeadsTable'
 import { getEffectiveScore, getScoreExplanation } from '@/modules/chatbot/server/scoring'
 import type { ScoredSignal, LeadScoreClassification } from '@/modules/chatbot/server/scoring'
+import { getPlanForOrg } from '@/lib/plan/get-plan-for-org'
+import { planAllows } from '@/lib/plan/plan-allows'
 import type { ChatbotLeadStatus } from '@prisma/client'
 import type { DateRange } from '@/lib/tz-ar'
 import { redirect } from 'next/navigation'
@@ -50,10 +52,17 @@ export default async function ClientLeadsPage({ searchParams }: PageProps) {
 
   // El conteo DQ es global a la org (no respeta filtros) — sirve para que el
   // chip "Descartados (N)" muestre siempre el total real disponible.
-  const [rawLeads, dqCount] = await Promise.all([
+  const [rawLeads, dqCount, plan] = await Promise.all([
     listLeadsForDashboard(session.organization.id, filters, 200),
     countDqLeadsForOrg(session.organization.id),
+    getPlanForOrg(session.organization.id),
   ])
+
+  // P0.3 — Gate de PRESENTACIÓN de la priorización caliente/tibio/frío. El
+  // scoring se computa igual abajo (un Starter que sube a Pro ve su historial
+  // clasificado al instante); este flag solo decide si la UI muestra los chips
+  // o el teaser. Decisión única vía `planAllows` (mapea a insightEnabled).
+  const showScoring = planAllows(plan, 'leadScoring')
 
   // Si la org no captura aún ninguno (incluyendo DQ), el empty state base
   // ofrece CTA al chatbot. `hadOnlyDq` solo aplica a la vista no-DQ.
@@ -109,6 +118,7 @@ export default async function ClientLeadsPage({ searchParams }: PageProps) {
       hadOnlyDq={hadOnlyDq}
       dqCount={dqCount}
       showingDq={showingDq}
+      showScoring={showScoring}
       initialStatus={statusFilter ?? 'all'}
       initialRange={rangeFilter}
     />

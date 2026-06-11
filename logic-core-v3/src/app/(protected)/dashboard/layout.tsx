@@ -9,6 +9,8 @@ import { SubscriptionBanner } from '@/components/dashboard/SubscriptionBanner'
 import { DashboardLayoutClient } from '@/components/dashboard/DashboardLayoutClient'
 import { unstable_noStore as noStore, unstable_cache } from 'next/cache'
 import { countHotNewLeadsForOrg } from '@/modules/chatbot/index.server'
+import { getPlanForOrg } from '@/lib/plan/get-plan-for-org'
+import { planAllows } from '@/lib/plan/plan-allows'
 
 export const dynamic = 'force-dynamic'
 
@@ -88,7 +90,7 @@ export default async function DashboardLayout({
     redirect(session?.user?.role === 'SUPER_ADMIN' ? '/admin/clients' : '/login')
   }
 
-  const [client, unreadMessages, hotLeadsCount, notifications, activeModulesData] = await Promise.all([
+  const [client, unreadMessages, hotLeadsCount, notifications, activeModulesData, plan] = await Promise.all([
     getCachedOrgMeta(organizationId),
     getCachedUnreadMessages(organizationId),
     getCachedHotLeadsCount(organizationId),
@@ -98,9 +100,14 @@ export default async function DashboardLayout({
       take: 5,
     }),
     getCachedActiveModules(organizationId),
+    getPlanForOrg(organizationId),
   ])
 
   const activeModuleSlugs = activeModulesData.map((m) => m.module.slug)
+
+  // P0.3 — El badge "X calientes" del sidebar es clasificación. Gateado por el
+  // mismo helper de plan: si no incluye priorización, no se muestra.
+  const visibleHotLeadsCount = planAllows(plan, 'leadScoring') ? hotLeadsCount : 0
 
   if (!client) redirect('/login')
 
@@ -116,7 +123,7 @@ export default async function DashboardLayout({
     <DashboardLayoutClient
       companyName={client.companyName}
       unreadMessages={unreadMessages}
-      hotLeadsCount={hotLeadsCount}
+      hotLeadsCount={visibleHotLeadsCount}
       activeModuleSlugs={activeModuleSlugs}
       notifications={notifications}
       userDisplayName={

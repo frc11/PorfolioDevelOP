@@ -12,7 +12,7 @@
  */
 import type { EffectivePlan } from './fallback'
 
-export type PlanFeatureKey = 'reports' | 'insight' | 'crm'
+export type PlanFeatureKey = 'reports' | 'insight' | 'crm' | 'leadScoring'
 
 export function planAllows(plan: EffectivePlan, feature: PlanFeatureKey): boolean {
   switch (feature) {
@@ -22,5 +22,15 @@ export function planAllows(plan: EffectivePlan, feature: PlanFeatureKey): boolea
       return plan.insightEnabled
     case 'crm':
       return plan.crmEnabled
+    // P0.3 — La clasificación de leads (caliente/tibio/frío + score) se vende
+    // como feature de Pro y Business. NO existe una columna dedicada en el modelo
+    // `Plan` y este sprint NO agrega migraciones: la dimensión se mapea sobre el
+    // flag `insightEnabled`, que ya es exactamente {Starter:false, Pro:true,
+    // Business:true} — la misma población comercial. Es presentación, no cómputo:
+    // el scoring se sigue computando y guardando para todos los planes; este gate
+    // solo decide si se MUESTRA. Si en el futuro hay que desacoplarla de "insight",
+    // se cambia esta única línea (o se agrega la columna en su propia migración).
+    case 'leadScoring':
+      return plan.insightEnabled
   }
 }

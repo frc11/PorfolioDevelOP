@@ -9,6 +9,7 @@ import { staggerContainer, staggerItem } from '@/lib/motion-variants'
 import { useReducedMotion } from '@/lib/use-reduced-motion'
 import { BusinessLeadCard } from './BusinessLeadCard'
 import { ExportLeadsButton } from './ExportLeadsButton'
+import { LeadScoringTeaser } from './LeadScoringTeaser'
 import { withinDateRange, type DateRange } from '@/lib/tz-ar'
 import type { ChatbotLead, ChatbotLeadStatus } from '@prisma/client'
 
@@ -65,6 +66,9 @@ interface ClientLeadsTableProps {
   dqCount: number
   /** True si la vista activa muestra SOLO descartados. */
   showingDq: boolean
+  /** P0.3 — El plan incluye la priorización caliente/tibio/frío. Si false,
+   *  se ocultan chips/score/filtro-de-calidad y va un teaser en su lugar. */
+  showScoring: boolean
   /** Filtros server-side ya aplicados, para sincronizar la UI. */
   initialStatus: ChatbotLeadStatus | 'all'
   initialRange: DateRange
@@ -75,6 +79,7 @@ export function ClientLeadsTable({
   hadOnlyDq = false,
   dqCount,
   showingDq,
+  showScoring,
   initialStatus,
   initialRange,
 }: ClientLeadsTableProps) {
@@ -261,8 +266,9 @@ export function ClientLeadsTable({
           </div>
 
           {/* Filtro por calidad — CLIENTE (efectivo post-decay). Solo en modo
-              comercial: descartados no tienen clase. */}
-          {!showingDq && (
+              comercial: descartados no tienen clase. P0.3: gateado por plan —
+              si el plan no incluye priorización, en su lugar va el teaser. */}
+          {!showingDq && showScoring && (
             <div className="flex flex-wrap gap-2">
               <button
                 onClick={() => setClassFilter('all')}
@@ -288,6 +294,11 @@ export function ClientLeadsTable({
               })}
             </div>
           )}
+
+          {/* P0.3 — Plan sin priorización: una línea de teaser donde irían los
+              chips de calidad. Solo en modo comercial (los descartados no son
+              la feature vendida). */}
+          {!showingDq && !showScoring && <LeadScoringTeaser />}
 
           {/* Filtro por estado CRM — va a URL. Solo en modo comercial. */}
           {!showingDq && (
@@ -340,18 +351,23 @@ export function ClientLeadsTable({
             >
               {filtered.map((lead) => {
                 const isHotNew = lead.effectiveClassification === 'hot' && lead.status === 'NEW'
+                // P0.3 — sin plan de priorización: la card no recibe clase/score
+                // ni decay ni highlight (el badge XL y el anillo rose son la
+                // feature gateada). El resto del lead se ve completo igual.
                 const classForCard =
-                  lead.effectiveClassification === 'dq' || lead.effectiveClassification === null
+                  !showScoring ||
+                  lead.effectiveClassification === 'dq' ||
+                  lead.effectiveClassification === null
                     ? null
                     : lead.effectiveClassification
                 return (
                   <motion.div key={lead.id} variants={reduced ? undefined : staggerItem}>
                     <BusinessLeadCard
                       lead={lead}
-                      effectiveScore={lead.effectiveScore}
+                      effectiveScore={showScoring ? lead.effectiveScore : null}
                       effectiveClassification={classForCard}
-                      decayTierLabel={lead.decayTierLabel}
-                      highlight={isHotNew && !showingDq}
+                      decayTierLabel={showScoring ? lead.decayTierLabel : null}
+                      highlight={isHotNew && !showingDq && showScoring}
                       isFresh={freshIds.has(lead.id)}
                       isDq={showingDq}
                       href={`/dashboard/chatbot/leads/${lead.id}`}

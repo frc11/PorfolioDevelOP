@@ -107,6 +107,13 @@ export interface LeadForCsv {
 export interface BuildLeadsCsvOptions {
   /** Si true, se asume que `leads` son DQ y se usa el header alternativo. */
   includesDq: boolean
+  /**
+   * P0.3 — Si false, se omite la columna "Qué tan listo está" (clasificación
+   * caliente/tibio/frío) — para planes sin la feature de priorización. Solo
+   * aplica al header comercial; en modo DQ no hay columna de clasificación de
+   * todas formas. Default true (retro-compatible).
+   */
+  includeClassification?: boolean
 }
 
 /**
@@ -117,6 +124,9 @@ export function buildLeadsCsv(
   leads: LeadForCsv[],
   opts: BuildLeadsCsvOptions = { includesDq: false },
 ): string {
+  // P0.3 — default true: si no se pasa, mantiene el comportamiento histórico.
+  const includeClassification = opts.includeClassification ?? true
+
   const headers = opts.includesDq
     ? [
         'Nombre',
@@ -133,7 +143,8 @@ export function buildLeadsCsv(
         'Teléfono',
         'Qué pidió',
         'Mensaje',
-        'Qué tan listo está',
+        // Columna de priorización solo si el plan la incluye.
+        ...(includeClassification ? ['Qué tan listo está'] : []),
         'Estado',
         'Fecha de contacto',
       ]
@@ -161,7 +172,9 @@ export function buildLeadsCsv(
           lead.phone,
           labelIntent(lead.intent),
           lead.message,
-          labelClassification(lead.effectiveClassification),
+          ...(includeClassification
+            ? [labelClassification(lead.effectiveClassification)]
+            : []),
           labelStatus(lead.status),
           formatCapturedAt(lead.capturedAt),
         ]),

@@ -24,6 +24,7 @@ import { Badge } from '@/components/ui/Badge'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { EmptyState, Select } from '@/components/ui'
+import { LeadScoringTeaser } from './LeadScoringTeaser'
 import { updateLeadStatus } from '@/modules/chatbot/server/admin/updateLeadStatus'
 import type { ChatbotLead, ChatbotLeadStatus } from '@prisma/client'
 import type { LucideIcon } from 'lucide-react'
@@ -60,6 +61,11 @@ interface LeadDetailProps {
   }
   messages: Message[]
   botSlug: string
+  /** P0.3 — El plan incluye la priorización caliente/tibio/frío. Si false, el
+   *  badge de clase y el desglose "por qué está calificado" se reemplazan por
+   *  un teaser. El bloque DQ ("descartado") se muestra siempre — no es la
+   *  feature vendida, sino higiene de bandeja. */
+  showScoring: boolean
 }
 
 const STATUS_BADGE: Record<ChatbotLeadStatus, { variant: 'default' | 'warning' | 'success' | 'info' | 'danger' | 'brand'; label: string }> = {
@@ -125,7 +131,7 @@ const INTENT_LABELS: Record<string, string> = {
   unknown: 'Consulta general',
 }
 
-export function LeadDetail({ lead, enriched, messages, botSlug }: LeadDetailProps) {
+export function LeadDetail({ lead, enriched, messages, botSlug, showScoring }: LeadDetailProps) {
   const [status, setStatus] = useState<ChatbotLeadStatus>(lead.status)
   const [notes, setNotes] = useState(lead.internalNotes ?? '')
   const [isPending, startTransition] = useTransition()
@@ -194,8 +200,21 @@ export function LeadDetail({ lead, enriched, messages, botSlug }: LeadDetailProp
         </div>
 
         {/* Protagonista del detalle: badge XL de clase (hot/warm/cold) o variante
-            gris "Descartado" cuando el lead es DQ. Número 0-100 secundario. */}
-        {cardCls ? (
+            gris "Descartado" cuando el lead es DQ. Número 0-100 secundario.
+            P0.3: DQ siempre se muestra; el badge de clase está gateado por plan
+            (si no, va el teaser en su lugar). */}
+        {isDq ? (
+          <div
+            className="mb-4 flex items-center gap-3 rounded-xl border border-zinc-700/50 bg-zinc-800/40 px-4 py-3"
+            aria-label="Descartado por el bot — no es una consulta comercial"
+          >
+            <Ban className="h-8 w-8 shrink-0 text-zinc-500" strokeWidth={1.5} aria-hidden />
+            <div className="min-w-0 flex-1">
+              <p className="text-lg font-semibold leading-tight text-zinc-300">Descartado</p>
+              <p className="text-xs text-zinc-500">No es una consulta comercial</p>
+            </div>
+          </div>
+        ) : showScoring && cardCls ? (
           <div
             className={`mb-4 flex items-center gap-3 rounded-xl border px-4 py-3 ${cardCls.containerClass}`}
             aria-label={`Nivel de interés: ${cardCls.label}${enriched.effectiveScore != null ? `, ${enriched.effectiveScore} de 100` : ''}`}
@@ -216,17 +235,8 @@ export function LeadDetail({ lead, enriched, messages, botSlug }: LeadDetailProp
               </span>
             )}
           </div>
-        ) : isDq ? (
-          <div
-            className="mb-4 flex items-center gap-3 rounded-xl border border-zinc-700/50 bg-zinc-800/40 px-4 py-3"
-            aria-label="Descartado por el bot — no es una consulta comercial"
-          >
-            <Ban className="h-8 w-8 shrink-0 text-zinc-500" strokeWidth={1.5} aria-hidden />
-            <div className="min-w-0 flex-1">
-              <p className="text-lg font-semibold leading-tight text-zinc-300">Descartado</p>
-              <p className="text-xs text-zinc-500">No es una consulta comercial</p>
-            </div>
-          </div>
+        ) : !showScoring ? (
+          <LeadScoringTeaser className="mb-4" />
         ) : null}
 
         {/* Qué quiere */}
@@ -317,7 +327,7 @@ export function LeadDetail({ lead, enriched, messages, botSlug }: LeadDetailProp
             propuesta de proveedor o spam). No aparece en la lista principal.
           </p>
         </Card>
-      ) : (visibleSignals.length > 0 || enriched.effectiveScore != null) ? (
+      ) : (showScoring && (visibleSignals.length > 0 || enriched.effectiveScore != null)) ? (
         <Card padding="lg">
           <h2 className="mb-3 text-sm font-semibold text-zinc-200">
             Por qué está calificado así

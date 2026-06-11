@@ -8,6 +8,8 @@ import {
   type LeadScoreClassification,
 } from '@/modules/chatbot/server/scoring'
 import { buildLeadsCsv, type LeadForCsv } from '@/modules/chatbot/server/leads/csv'
+import { getPlanForOrg } from '@/lib/plan/get-plan-for-org'
+import { planAllows } from '@/lib/plan/plan-allows'
 import type { DateRange } from '@/lib/tz-ar'
 
 /**
@@ -85,6 +87,12 @@ export async function GET(request: NextRequest) {
 
   const orgId = session.organization.id
 
+  // P0.3 — Mismo gate que la vista: si el plan no incluye priorización, el CSV
+  // se exporta SIN la columna de clasificación. El resto del CSV (datos del
+  // contacto) y el audit-log quedan intactos.
+  const plan = await getPlanForOrg(orgId)
+  const showScoring = planAllows(plan, 'leadScoring')
+
   const params = new URL(request.url).searchParams
   const statusFilter = parseStatus(params.get('status'))
   const rangeFilter = parseRange(params.get('range'))
@@ -143,7 +151,10 @@ export async function GET(request: NextRequest) {
     category: l.category,
   }))
 
-  const csv = buildLeadsCsv(csvRows, { includesDq: showingDq })
+  const csv = buildLeadsCsv(csvRows, {
+    includesDq: showingDq,
+    includeClassification: showScoring,
+  })
 
   // Audit log de PII export — trazabilidad. Quién, cuándo, qué filtros, cuántos.
   // El audit NO incluye los datos en sí (sería duplicar PII).

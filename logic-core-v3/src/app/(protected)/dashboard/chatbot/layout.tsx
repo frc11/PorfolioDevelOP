@@ -3,6 +3,8 @@ import { unstable_cache } from 'next/cache'
 import { Bot } from 'lucide-react'
 import { getClientChatbotSession, countHotNewLeadsForOrg } from '@/modules/chatbot/index.server'
 import { ClientDashboardTabs } from '@/modules/chatbot/components/dashboard/ClientDashboardTabs'
+import { getPlanForOrg } from '@/lib/plan/get-plan-for-org'
+import { planAllows } from '@/lib/plan/plan-allows'
 import { PageHeader } from '@/components/ui'
 
 // B5.7 — comparte cache-key con el layout padre (`dashboard-hot-leads-count`)
@@ -27,7 +29,14 @@ export default async function ChatbotDashboardLayout({
     redirect('/dashboard')
   }
 
-  const hotLeadsCount = await getCachedHotLeadsCount(session.organization.id)
+  const [hotLeadsCount, plan] = await Promise.all([
+    getCachedHotLeadsCount(session.organization.id),
+    getPlanForOrg(session.organization.id),
+  ])
+
+  // P0.3 — El dot rosa "X calientes" es una señal de clasificación. Si el plan
+  // no incluye priorización, no se muestra (mismo gate que los chips de la lista).
+  const visibleHotLeadsCount = planAllows(plan, 'leadScoring') ? hotLeadsCount : 0
 
   return (
     <div className="flex flex-col gap-6">
@@ -42,7 +51,7 @@ export default async function ChatbotDashboardLayout({
         icon={Bot}
       />
 
-      <ClientDashboardTabs hotLeadsCount={hotLeadsCount} />
+      <ClientDashboardTabs hotLeadsCount={visibleHotLeadsCount} />
 
       {children}
     </div>

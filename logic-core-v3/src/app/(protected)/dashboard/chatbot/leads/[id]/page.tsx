@@ -13,6 +13,8 @@ import type {
   ScoredSignal,
 } from '@/modules/chatbot/server/scoring'
 import { LeadDetail } from '@/modules/chatbot/components/dashboard/LeadDetail'
+import { getPlanForOrg } from '@/lib/plan/get-plan-for-org'
+import { planAllows } from '@/lib/plan/plan-allows'
 
 export const dynamic = 'force-dynamic'
 
@@ -30,6 +32,11 @@ export default async function LeadDetailPage({ params }: PageProps) {
   // Si el id no existe o pertenece a otra org → null → notFound.
   const lead = await getLeadByIdForOrg(id, session.organization.id)
   if (!lead) notFound()
+
+  // P0.3 — Gate de presentación de la priorización (mismo helper que la lista).
+  // El score se computa igual abajo; el flag solo decide si se muestra.
+  const plan = await getPlanForOrg(session.organization.id)
+  const showScoring = planAllows(plan, 'leadScoring')
 
   // Score efectivo + explicación se computan en lectura (mismo patrón que la lista).
   const now = new Date()
@@ -74,6 +81,7 @@ export default async function LeadDetailPage({ params }: PageProps) {
       enriched={enriched}
       messages={messages}
       botSlug={session.organization.slug}
+      showScoring={showScoring}
     />
   )
 }
