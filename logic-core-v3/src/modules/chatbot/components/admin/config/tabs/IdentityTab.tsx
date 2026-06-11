@@ -30,10 +30,6 @@ const TONES = [
   { value: 'informal_rioplatense', label: 'Informal rioplatense' },
   { value: 'formal', label: 'Formal' },
   { value: 'neutral', label: 'Neutral' },
-  { value: 'formal_neutral', label: 'Formal neutro' },
-  { value: 'professional', label: 'Profesional' },
-  { value: 'friendly', label: 'Amigable' },
-  { value: 'casual', label: 'Casual' },
 ]
 
 export function IdentityTab({ state, update }: BotConfigTabProps) {
