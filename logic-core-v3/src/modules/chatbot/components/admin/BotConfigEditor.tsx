@@ -367,6 +367,7 @@ function adminStateToPreview(state: BotConfigEditorState): BotPreviewState {
     botName: state.botName,
     isActive: state.isActive,
     accentColor: state.accentColor,
+    accentSecondary: state.accentSecondary,
     chatSurfaceTint: state.chatSurfaceTint,
     position: state.position,
     avatarStyle: state.avatarStyle,

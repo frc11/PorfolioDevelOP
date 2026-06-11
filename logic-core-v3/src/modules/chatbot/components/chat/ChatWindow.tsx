@@ -97,6 +97,15 @@ export function ChatWindow({
 }: ChatWindowProps) {
   const degraded = !!degradedInfo
   const [ar, ag, ab] = hexToRgb(config.accentColor) ?? ACCENT_FALLBACK
+  const secondaryRgb = config.accentSecondary ? hexToRgb(config.accentSecondary) : null
+  // Chips: secundario si existe, accent si no — paridad con BotConfigPreview.
+  const chipColor = config.accentSecondary ?? config.accentColor
+  // ── accentSecondary visual knobs — recalibrar en un toque ──────────────────
+  const CHIP_BG_ALPHA = '2E'     // hex ~18% — fondo del chip
+  const CHIP_BORDER_ALPHA = '66' // hex ~40% — borde del chip
+  const GLOW_OPACITY = 0.14      // halo exterior del panel
+  const GLOW_RADIUS = '90px'
+  // ───────────────────────────────────────────────────────────────────────────
   const [input, setInput] = useState('')
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const scrollAreaRef = useRef<HTMLDivElement>(null)
@@ -206,13 +215,16 @@ export function ChatWindow({
                 backdropFilter: 'blur(32px)',
                 WebkitBackdropFilter: 'blur(32px)',
                 border: '1px solid rgba(255,255,255,0.09)',
-                boxShadow: `
-                    0 0 0 1px rgba(255,255,255,0.04),
-                    0 32px 80px rgba(0,0,0,0.7),
-                    0 0 120px rgba(${ar},${ag},${ab},0.08),
-                    inset 0 1px 0 rgba(255,255,255,0.08),
-                    inset 0 -1px 0 rgba(0,0,0,0.4)
-                `,
+                boxShadow: [
+                  '0 0 0 1px rgba(255,255,255,0.04)',
+                  '0 32px 80px rgba(0,0,0,0.7)',
+                  `0 0 120px rgba(${ar},${ag},${ab},0.08)`,
+                  ...(secondaryRgb
+                    ? [`0 0 ${GLOW_RADIUS} rgba(${secondaryRgb[0]},${secondaryRgb[1]},${secondaryRgb[2]},${GLOW_OPACITY})`]
+                    : []),
+                  'inset 0 1px 0 rgba(255,255,255,0.08)',
+                  'inset 0 -1px 0 rgba(0,0,0,0.4)',
+                ].join(', '),
                 borderRadius: '24px',
                 overflow: 'hidden',
                 // 72dvh: dynamic viewport — the sheet shrinks when the virtual
@@ -432,7 +444,17 @@ export function ChatWindow({
                       <button
                         key={qr.label}
                         onClick={() => onQuickReply(qr.promptToSend)}
-                        className="bg-cyan-900/20 border border-cyan-800/40 text-cyan-100 hover:bg-cyan-800/30 text-xs px-3 py-1.5 rounded-full transition-colors text-left"
+                        // hover vía brightness: un hover:bg-* perdería contra el
+                        // backgroundColor inline (inline > clase, siempre).
+                        // color: chipColor sólido — contraste ~5-8:1 sobre el fondo
+                        // al ~18% en el panel oscuro; colores muy claros pueden no
+                        // cumplir WCAG AA (el admin elige la paleta).
+                        className="text-xs px-3 py-1.5 rounded-full border text-left transition-all hover:brightness-125"
+                        style={{
+                          backgroundColor: `${chipColor}${CHIP_BG_ALPHA}`,
+                          borderColor: `${chipColor}${CHIP_BORDER_ALPHA}`,
+                          color: chipColor,
+                        }}
                       >
                         {qr.emoji && <span className="mr-2">{qr.emoji}</span>}{qr.label}
                       </button>

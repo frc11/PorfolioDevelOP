@@ -89,6 +89,13 @@ export function BotConfigPreview({ state }: BotConfigPreviewProps) {
   const initials = deriveBusinessInitials(state.botName)
   const isLeft = isLeftPosition(state.position)
 
+  // ── accentSecondary visual knobs — mismos valores que ChatWindow ──────────
+  const CHIP_BG_ALPHA = '2E'           // hex ~18%
+  const CHIP_BORDER_ALPHA = '66'       // hex ~40%
+  const SECONDARY_GLOW_ALPHA = '24'    // hex ~14% — paridad con GLOW_OPACITY=0.14 widget
+  const SECONDARY_GLOW_RADIUS = '40px' // proporcional al panel del preview (< 420px widget)
+  // ──────────────────────────────────────────────────────────────────────────
+
   const surfaceBg = state.chatSurfaceTint
     ? `${state.chatSurfaceTint}${Math.round(surfaceOpacity * 255)
         .toString(16)
@@ -164,11 +171,14 @@ export function BotConfigPreview({ state }: BotConfigPreviewProps) {
           </div>
         ) : (
           <div
-            className={`absolute bottom-4 ${isLeft ? 'left-4 right-10' : 'left-10 right-4'} border p-4 shadow-2xl backdrop-blur`}
+            className={`absolute bottom-4 ${isLeft ? 'left-4 right-10' : 'left-10 right-4'} border p-4 backdrop-blur`}
             style={{
               borderColor: `${state.accentColor}30`,
               backgroundColor: surfaceBg,
               borderRadius: radius,
+              boxShadow: state.accentSecondary
+                ? `0 25px 50px -12px rgba(0,0,0,0.25), 0 0 ${SECONDARY_GLOW_RADIUS} ${state.accentSecondary}${SECONDARY_GLOW_ALPHA}`
+                : '0 25px 50px -12px rgba(0,0,0,0.25)',
             }}
           >
             <div className="mb-3 flex items-center gap-3">
@@ -213,10 +223,11 @@ export function BotConfigPreview({ state }: BotConfigPreviewProps) {
                 {state.quickReplies.slice(0, 3).map((reply, index) => (
                   <span
                     key={reply.id ?? index}
-                    className="rounded-full border px-2.5 py-1 text-[11px] text-zinc-100"
+                    className="rounded-full border px-2.5 py-1 text-[11px]"
                     style={{
-                      borderColor: `${state.accentColor}35`,
-                      backgroundColor: `${state.accentColor}18`,
+                      borderColor: `${state.accentSecondary ?? state.accentColor}${CHIP_BORDER_ALPHA}`,
+                      backgroundColor: `${state.accentSecondary ?? state.accentColor}${CHIP_BG_ALPHA}`,
+                      color: state.accentSecondary ?? state.accentColor,
                     }}
                   >
                     {reply.emoji ? `${reply.emoji} ` : ''}

@@ -47,6 +47,7 @@ interface BotPersonalizationProps {
      * Vienen crudos de Prisma como `string` (los enums no se preservan en el query). */
     isActive: boolean
     avatarImageUrl: string | null
+    accentSecondary: string | null
     chatSurfaceTint: string | null
     borderRadius: string
     bubbleStyle: string
@@ -433,6 +434,7 @@ function buildPreviewState(
 
   return {
     accentColor: state.accentColor,
+    accentSecondary: bot.accentSecondary,
     position: state.position,
     avatarStyle: state.avatarStyle,
     welcomeMessage: state.welcomeMessage,

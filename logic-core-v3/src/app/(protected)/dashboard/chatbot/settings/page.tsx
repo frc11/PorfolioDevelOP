@@ -35,6 +35,7 @@ export default async function ChatbotSettingsPage() {
           // para ser un espejo fiel del widget real (no se editan acá).
           isActive: true,
           avatarImageUrl: true,
+          accentSecondary: true,
           chatSurfaceTint: true,
           borderRadius: true,
           bubbleStyle: true,

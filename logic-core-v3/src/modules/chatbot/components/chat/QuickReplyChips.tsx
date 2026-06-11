@@ -10,6 +10,7 @@ interface QuickReplyChipsProps {
 
 export function QuickReplyChips({ config, onSelect }: QuickReplyChipsProps) {
   if (!config.quickReplies || config.quickReplies.length === 0) return null
+  const chipColor = config.accentSecondary ?? config.accentColor
   return (
     <div className="px-4 pb-2 flex flex-wrap gap-2">
       {config.quickReplies.map((qr, i) => (
@@ -21,8 +22,8 @@ export function QuickReplyChips({ config, onSelect }: QuickReplyChipsProps) {
           onClick={() => onSelect(qr.promptToSend)}
           className="px-3 py-1.5 text-xs rounded-full border transition-all hover:scale-[1.03]"
           style={{
-            background: `${config.accentColor}1A`,
-            borderColor: `${config.accentColor}33`,
+            background: `${chipColor}1A`,
+            borderColor: `${chipColor}33`,
             color: 'white',
           }}
         >

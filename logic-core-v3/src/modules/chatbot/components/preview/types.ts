@@ -20,6 +20,7 @@ export interface BotPreviewState {
   botName: string
   isActive: boolean
   accentColor: string
+  accentSecondary: string | null
   chatSurfaceTint: string | null
   position: string
   avatarStyle: string
