@@ -33,6 +33,11 @@ export const AVATAR_REGISTRY: readonly AvatarRegistryEntry[] = [
     description: 'Esfera de partículas con núcleo pulsante. Vibe tech / innovador.',
     weight: 'heavy',
     component: NeuroAvatar,
+    // The particle shell spans ~85% of its canvas and the speaking-state
+    // radius peaks past the camera frustum (particles clip at the box edge).
+    // Render the box ~1.15 larger so the visible orb reads at nominal size,
+    // with headroom for the bloom halo. Tune by eye.
+    fillScale: 1.15,
   },
   {
     id: 'legacy_neuro',

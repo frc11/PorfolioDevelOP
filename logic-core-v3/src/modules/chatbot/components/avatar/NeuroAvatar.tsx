@@ -1,5 +1,6 @@
 'use client'
 
+import { useMemo } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { EffectComposer, Bloom } from '@react-three/postprocessing'
 import { motion } from 'motion/react'
@@ -7,6 +8,7 @@ import { ParticleSphere } from './ParticleSphere'
 import { CentralCore } from './CentralCore'
 import { STATE_CONFIG, type NeuroAvatarProps } from './types'
 import { CanvasAutoResize } from './CanvasAutoResize'
+import { SceneAlphaEffect } from './SceneAlphaEffect'
 
 /**
  * NeuroAvatar — heavy 3D avatar ("Orbe Neural" in the registry).
@@ -28,6 +30,7 @@ export function NeuroAvatar({
   className,
 }: NeuroAvatarProps) {
   const config = STATE_CONFIG[state]
+  const sceneAlpha = useMemo(() => new SceneAlphaEffect(), [])
 
   return (
     <motion.div
@@ -58,6 +61,7 @@ export function NeuroAvatar({
             luminanceThreshold={0.2}
             luminanceSmoothing={0.9}
           />
+          <primitive object={sceneAlpha} />
         </EffectComposer>
       </Canvas>
     </motion.div>
