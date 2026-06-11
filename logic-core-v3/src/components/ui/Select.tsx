@@ -21,7 +21,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
         ref={ref}
         {...props}
         className={cn(
-          'w-full appearance-none rounded-xl border bg-white/[0.02] pl-3 py-2 text-sm text-zinc-200 transition-colors focus:outline-none',
+          'w-full appearance-none rounded-xl border bg-white/[0.02] pl-3 py-2 text-sm text-zinc-200 transition-colors focus:outline-none [color-scheme:dark]',
           invalid
             ? 'border-red-400/40 focus:border-red-400/60'
             : 'border-white/10 focus:border-cyan-400/30',
@@ -31,7 +31,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
       >
         {options
           ? options.map((opt) => (
-              <option key={opt.value} value={opt.value}>
+              <option key={opt.value} value={opt.value} className="bg-zinc-900 text-zinc-100">
                 {opt.label}
               </option>
             ))
