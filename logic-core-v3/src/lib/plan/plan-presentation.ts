@@ -146,7 +146,7 @@ export const PLAN_PRESENTATIONS: readonly PlanPresentation[] = [
     key: 'STARTER',
     name: 'Starter',
     tagline: 'Para arrancar y validar',
-    monthlyPriceUsd: 50,
+    monthlyPriceUsd: 49,
     customersPerMonth: 500,
     benefits: STARTER_BENEFITS,
     nextTierTeaser: [

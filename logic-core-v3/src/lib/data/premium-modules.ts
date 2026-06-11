@@ -108,20 +108,7 @@ export const PREMIUM_MODULES_CATALOG: PremiumModuleSeed[] = [
     status: 'COMING_SOON',
     sortOrder: 11,
   },
-  {
-    slug: 'mini-crm',
-    name: 'Mini-CRM Comercial',
-    shortDescription:
-      'Pipeline de ventas, seguimiento de leads y historial de cada cliente en un solo lugar.',
-    longDescription:
-      'CRM diseñado para PyMEs argentinas. Sin la complejidad de HubSpot ni el caos del Excel. Pipeline visual, recordatorios de seguimiento, integración con WhatsApp y email.',
-    tier: 'TIER_1_OPERATION',
-    priceMonthlyUsd: 80,
-    iconName: 'Users',
-    accentColor: '#3b82f6',
-    status: 'COMING_SOON',
-    sortOrder: 12,
-  },
+
   {
     slug: 'cobranzas-automatizadas',
     name: 'Cobranzas Automatizadas',

@@ -51,7 +51,7 @@ export const PLANS_CATALOG: readonly PlanWrite[] = [
   {
     key: PlanKey.STARTER,
     name: 'Starter',
-    monthlyPrice: new Prisma.Decimal('50'),
+    monthlyPrice: new Prisma.Decimal('49'),
     setupFloorPrice: new Prisma.Decimal('700'),
     quota: 500,
     llmModel: 'gemini-2.5-flash',
