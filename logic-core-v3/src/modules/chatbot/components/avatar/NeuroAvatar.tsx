@@ -1,14 +1,12 @@
 'use client'
 
-import { useMemo } from 'react'
 import { Canvas } from '@react-three/fiber'
-import { EffectComposer, Bloom } from '@react-three/postprocessing'
 import { motion } from 'motion/react'
 import { ParticleSphere } from './ParticleSphere'
 import { CentralCore } from './CentralCore'
-import { STATE_CONFIG, type NeuroAvatarProps } from './types'
+import { CoreHalo } from './CoreHalo'
+import { NEURO_ORB_SCALE, STATE_CONFIG, type NeuroAvatarProps } from './types'
 import { CanvasAutoResize } from './CanvasAutoResize'
-import { SceneAlphaEffect } from './SceneAlphaEffect'
 
 /**
  * NeuroAvatar — heavy 3D avatar ("Orbe Neural" in the registry).
@@ -17,7 +15,13 @@ import { SceneAlphaEffect } from './SceneAlphaEffect'
  * The 3 canonical states (idle / thinking / speaking) drive rotation
  * speed, radius variation, core scale and glow.
  *
- * Optimized for small sizes (~56px). Performant on mobile.
+ * SIN post-processing a propósito: el EffectComposer opacaba el alfa del
+ * canvas (cuadrado oscuro detrás del orbe) y dos fixes a nivel shader no lo
+ * resolvieron en runtime. El glow lo aporta CoreHalo (sprites additive).
+ * El <group scale> mete todo el orbe dentro del frustum con margen — ver
+ * los knobs NEURO_* en types.ts.
+ *
+ * Optimized for small sizes (~45-80px). Performant on mobile.
  *
  * `businessInitials` is part of the canonical contract but ignored here
  * (the orb has no text). The Monogram avatar (B7.2) is the consumer.
@@ -30,7 +34,6 @@ export function NeuroAvatar({
   className,
 }: NeuroAvatarProps) {
   const config = STATE_CONFIG[state]
-  const sceneAlpha = useMemo(() => new SceneAlphaEffect(), [])
 
   return (
     <motion.div
@@ -53,16 +56,11 @@ export function NeuroAvatar({
         <CanvasAutoResize />
         <ambientLight intensity={0.4} />
         <pointLight position={[3, 3, 3]} intensity={1} />
-        <ParticleSphere count={120} accentColor={accentColor} state={state} />
-        <CentralCore accentColor={accentColor} state={state} />
-        <EffectComposer>
-          <Bloom
-            intensity={config.bloomIntensity}
-            luminanceThreshold={0.2}
-            luminanceSmoothing={0.9}
-          />
-          <primitive object={sceneAlpha} />
-        </EffectComposer>
+        <group scale={NEURO_ORB_SCALE}>
+          <ParticleSphere count={120} accentColor={accentColor} state={state} />
+          <CentralCore accentColor={accentColor} state={state} />
+          <CoreHalo accentColor={accentColor} state={state} />
+        </group>
       </Canvas>
     </motion.div>
   )

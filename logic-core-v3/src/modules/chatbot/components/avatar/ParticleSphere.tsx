@@ -4,13 +4,8 @@ import { useMemo, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 import { fibonacciSphere } from './fibonacciSphere'
-import { STATE_CONFIG, type NeuroAvatarState } from './types'
+import { NEURO_PARTICLE_SCALE, STATE_CONFIG, type NeuroAvatarState } from './types'
 import { clampDelta } from './frameDelta'
-
-// Particle radius in world units. The avatar renders in ~36–80px boxes, so
-// particles must stay ≥2px on screen to read as an orb (antialias is off).
-// Tune by eye.
-const PARTICLE_SCALE = 0.06
 
 interface ParticleSphereProps {
   count: number
@@ -46,7 +41,7 @@ export function ParticleSphere({ count, accentColor, state }: ParticleSphereProp
         config.particleRadiusBase + wave * config.particleRadiusJitter
       const pos = basePos.clone().multiplyScalar(radius)
       dummy.position.copy(pos)
-      dummy.scale.setScalar(PARTICLE_SCALE)
+      dummy.scale.setScalar(NEURO_PARTICLE_SCALE)
       dummy.updateMatrix()
       ref.current!.setMatrixAt(i, dummy.matrix)
     })

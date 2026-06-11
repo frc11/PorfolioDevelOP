@@ -158,6 +158,9 @@ Too expensive on high-point paths. Fix: use `strokeDashoffset` with native `getT
 **Select compartido con chevron — special cases [Jun 2026]**
 `ticket-chat.tsx:110` y `TicketStatusSelector.tsx:31` NO fueron migrados al `<Select>` compartido. Ambos usan un `<Loader2>` condicional dentro de su propio `<div className="relative">` que ocupa el mismo espacio donde `<Select>` pondría el `<ChevronDown>` permanente — dos íconos se superponen cuando `isPending`. Patrón diferente al select de formulario: son status selectors con feedback de pending. Mantener como `<select>` nativo; si se mejora, considerar prop `icon` o un componente `StatusSelect` separado.
 
+**EffectComposer sobre canvas transparente — cuadrado oscuro [Jun 2026]**
+EffectComposer/Bloom sobre un `<Canvas>` con `gl={{ alpha: true }}` pinta un cuadrado oscuro del tamaño del canvas. Dos fixes a nivel shader, ambos correctos contra el GLSL instalado (restore de alfa post-blend y bloom con alfa 0), NO lo resolvieron en runtime — el alfa muere en los buffers internos del composer (Windows/ANGLE), inalcanzable desde shaders. Regla: en canvas chicos transparentes (avatares, widgets) NO usar EffectComposer — glow fingido con sprites additive (`CoreHalo.tsx` es el patrón de referencia). El composer queda solo para canvas opacos de página (Hero). Regla 2: si un fix es correcto en estático pero falla en runtime, buscar un discriminador empírico (acá: el avatar legacy sin composer era transparente) antes de re-intentar en la misma capa.
+
 ---
 
 *Update this file when Claude makes a correctable mistake. Add the rule that prevents it. Prune entries that no longer apply.*

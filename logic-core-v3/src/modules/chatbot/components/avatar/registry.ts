@@ -3,7 +3,7 @@ import { LegacyNeuroAvatarAdapter } from './LegacyNeuroAvatarAdapter'
 import { MonogramAvatar } from './MonogramAvatar'
 import { PulseAvatar } from './PulseAvatar'
 import { GeometricAvatar } from './GeometricAvatar'
-import type { AvatarRegistryEntry } from './types'
+import { NEURO_FILL_SCALE, type AvatarRegistryEntry } from './types'
 
 /**
  * Default avatar id when none is set or the stored id is unknown.
@@ -33,11 +33,12 @@ export const AVATAR_REGISTRY: readonly AvatarRegistryEntry[] = [
     description: 'Esfera de partículas con núcleo pulsante. Vibe tech / innovador.',
     weight: 'heavy',
     component: NeuroAvatar,
-    // The particle shell spans ~85% of its canvas and the speaking-state
-    // radius peaks past the camera frustum (particles clip at the box edge).
-    // Render the box ~1.15 larger so the visible orb reads at nominal size,
-    // with headroom for the bloom halo. Tune by eye.
-    fillScale: 1.15,
+    // The orb intentionally leaves margin inside its frustum (no state may
+    // clip particles at the box edge — see NEURO_ORB_SCALE in types.ts), so
+    // render the box larger for the visible orb to read at nominal size.
+    // Value lives with the rest of the orb's calibration knobs in types.ts;
+    // picker base 64px must stay under its 80px container (h-20).
+    fillScale: NEURO_FILL_SCALE,
   },
   {
     id: 'legacy_neuro',

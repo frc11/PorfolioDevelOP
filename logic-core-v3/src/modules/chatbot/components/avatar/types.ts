@@ -91,6 +91,15 @@ export interface AvatarRegistryEntry {
   fillScale?: number
 }
 
+// ── Orbe Neural — knobs de calibración visual (tune by eye) ────────────────
+// Half-frustum en z=0 (cámara z=3, FOV 45): 3·tan(22.5°) ≈ 1.2426 world units.
+// Extensión radial pico = (particleRadiusBase + jitter + PARTICLE_SCALE) × ORB_SCALE.
+// Peor caso (speaking): (1.02 + 0.16 + 0.09) × 0.9 ≈ 1.14 → ~8% de margen;
+// ningún estado clipea partículas contra el borde del canvas.
+export const NEURO_ORB_SCALE = 0.9 // escala del grupo entero: 1 = roza bordes en picos
+export const NEURO_PARTICLE_SCALE = 0.09 // radio de cada partícula (world units)
+export const NEURO_FILL_SCALE = 1.2 // multiplicador del box (registry fillScale)
+
 /**
  * Per-state visual config for NeuroAvatar S7. Internal to the heavy
  * 3D avatar; not part of the public contract.
@@ -102,7 +111,8 @@ export interface StateVisualConfig {
   coreScale: number
   coreEmissive: number
   opacity: number
-  bloomIntensity: number
+  /** Intensidad del halo additive (CoreHalo) — antes manejaba el Bloom del composer. */
+  glowIntensity: number
 }
 
 /**
@@ -118,28 +128,28 @@ export const STATE_CONFIG: Record<AvatarCoreState, StateVisualConfig> = {
     rotationSpeed: 0.003,
     particleRadiusBase: 1.0,
     particleRadiusJitter: 0.04,
-    coreScale: 0.22,
+    coreScale: 0.28,
     coreEmissive: 1.5,
     opacity: 1,
-    bloomIntensity: 1.0,
+    glowIntensity: 1.0,
   },
   thinking: {
     rotationSpeed: 0.012,
     particleRadiusBase: 1.05,
     particleRadiusJitter: 0.12,
-    coreScale: 0.26,
+    coreScale: 0.32,
     coreEmissive: 2.5,
     opacity: 1,
-    bloomIntensity: 1.5,
+    glowIntensity: 1.5,
   },
   speaking: {
     rotationSpeed: 0.008,
     particleRadiusBase: 1.02,
     particleRadiusJitter: 0.16,
-    coreScale: 0.28,
+    coreScale: 0.34,
     coreEmissive: 3.0,
     opacity: 1,
-    bloomIntensity: 1.8,
+    glowIntensity: 1.8,
   },
 }
 
