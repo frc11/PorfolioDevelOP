@@ -10377,3 +10377,10 @@ Removida la propiedad `stroke`/`strokeWidth` del mask path — solo se mantiene 
 ### Pendientes / tunables
 - Offsets `WORDMARK_OFFSET_FRAC=0.40` / `SLOGAN_OFFSET_FRAC=0.42`, stagger (`WORDMARK_RANGE`/`SLOGAN_RANGE`), `HOME_TEXT_ERASE_SECONDS=0.5` y tamaños/tracking del `WipeLine`: ajustar contra la grabación si hace falta más aire o más tiempo de lectura.
 
+
+
+---
+
+## ✅ P0.2 — Tab "Análisis de tu negocio" en /dashboard/resultados
+
+Tab "Análisis" (Sparkles) incorporada a `ResultadosTabs.tsx`. Vista server-rendered en `/dashboard/resultados/analisis` con tres secciones: "Lo que descubrimos este mes" (`DiscoveriesSection` — `ChatbotInsight` PENDING/APPLIED rankeados por accionabilidad y fecha), "Cómo viene tu mes" (`MonthTrendSection` + `MonthlyConversationsChart` — `QuotaUsage.conversationsCount`, sin tokens ni costo), "Qué pregunta tu gente" (`CategoriesSection` — top-5 de `ChatbotLead.category` últimos 30d vía `startOfDateRange`). Gate Pro+: `planAllows(plan, 'insight')` — Starter ve un teaser con link a `/dashboard/plan`; org sin bot ve estado de activación. Lib pura `monthly-analysis.ts`: serie mensual con variación ±%, top-5 con "X de cada 10", ranking de insights — 47 asserts verdes. Scoping vía org→botConfig, idéntico al patrón de `multiTenantQueries`. Build exit 0, `prisma migrate status` up-to-date (sin schema changes).

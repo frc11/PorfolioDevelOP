@@ -64,3 +64,6 @@ backups/
 *.gpg
 # Excepción: las migrations de Prisma son código del repo, no dumps con PII.
 !prisma/migrations/**/*.sql
+
+# Scripts efímeros de QA/seed/probe por sprint (_p02-*, _p03-*, etc.)
+scripts/_p[0-9][0-9]-*

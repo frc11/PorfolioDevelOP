@@ -90,6 +90,10 @@ export { listLeadsForBot, listConversationsForBot, getMonthlyUsageForBot } from 
 export { getBotByOrgSlug, listLeadsByOrgSlug, listLeadsForDashboard, countDqLeadsForOrg, listConversationsByOrgSlug, getUsageByOrgSlug, listRecentHandoffsByOrgSlug, getLeadByIdForOrg, getConversationMessagesForOrg, countHotNewLeadsForOrg } from './server/admin/multiTenantQueries'
 export type { HandoffEvent, LeadDashboardFilters } from './server/admin/multiTenantQueries'
 
+// Análisis mensual del negocio (P0.2)
+export { getMonthlyAnalysisForOrg } from './server/analysis/getMonthlyAnalysisForOrg'
+export type { MonthlyAnalysisData } from './server/analysis/getMonthlyAnalysisForOrg'
+
 // Health (Sprint S20)
 export { checkChatbotHealth, runLLMSmokeTest } from './server/health'
 export type { HealthCheckResult, SmokeTestResult } from './server/health'
