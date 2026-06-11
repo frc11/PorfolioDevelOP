@@ -16,8 +16,9 @@ export const RATE_LIMIT_PRESETS = {
   resendCredentialsPerAdmin: { limit: 10, windowMs: 60 * 60_000 },
 
   // ── Chatbot ─────────────────────────────────────────────────────────────
-  // Capa CORS (route handler) — clave: origin + sessionId. Frena al visitante
-  // antes de entrar al handler interno. Cubre el costo Vertex.
+  // Capa CORS (route handler) — clave: origin + IP hasheada (no sessionId,
+  // que era controlable por el atacante — SEC-RATELIMIT-02). Frena al
+  // visitante antes de entrar al handler interno. Cubre el costo Vertex.
   // Complementa (no reemplaza) el SOFT_CAP_THRESHOLD de turnos en el prompt.
   chatbotPerSession: { limit: 30, windowMs: 60_000 },
   // Capa handler interno (handleChatRequest) — clave: slug + sessionId.
@@ -32,6 +33,12 @@ export const RATE_LIMIT_PRESETS = {
   // del cliente. Identifica por orgId (no sensible — no se hashea).
   crmRetryPerOrg: { limit: 10, windowMs: 60_000 },
   crmTestPerOrg: { limit: 5, windowMs: 60_000 },
+
+  // ── Formulario de contacto público (landing) ─────────────────────────────
+  // Protege contra spam de leads. Un visitante real nunca necesita enviar el
+  // form más de 5 veces en 15 minutos. Clave: IP hasheada (no controlable
+  // por el atacante — no se expone ningún campo del FormData).
+  contactFormPerIp: { limit: 5, windowMs: 15 * 60_000 },
 } as const
 
 export type RateLimitScope = keyof typeof RATE_LIMIT_PRESETS

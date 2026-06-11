@@ -5,7 +5,7 @@ import { setControlledSelect, typeControlledInput } from '../helpers/form'
 
 const prisma = new PrismaClient()
 
-test.describe('Critical end-to-end flow', () => {
+test.describe('Critical end-to-end flow @smoke', () => {
   test.setTimeout(90_000)
 
   test('admin crea cliente nuevo y cliente puede ver upsell', async ({ page }) => {

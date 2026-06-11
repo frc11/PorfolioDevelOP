@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test'
 import { PrismaClient } from '@prisma/client'
 
-test('lead is captured when user provides name and email', async ({ page }) => {
+test('lead is captured when user provides name and email @smoke', async ({ page }) => {
   const uniqueEmail = `playwright-test-${Date.now()}@example.com`
 
   await page.goto('/', { waitUntil: 'domcontentloaded' })

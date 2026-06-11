@@ -59,11 +59,21 @@ export async function notifyClientOfNewMessage(params: NotifyParams) {
       }),
     })
 
-    console.log(`[notify-message] Email sent to ${member.user.email}`)
+    console.log(`[notify-message] Email sent to ${obfuscateEmail(member.user.email)}`)
   } catch (err) {
     console.error('[notify-message] Failed to send email:', err)
     // No re-throw — esto es best-effort, no debe romper el flow del mensaje
   }
+}
+
+/** Redact the middle of the local-part: "juan@ex.com" → "j***n@ex.com". */
+function obfuscateEmail(email: string): string {
+  const atIdx = email.indexOf('@')
+  if (atIdx <= 0) return '[redacted]'
+  const local = email.slice(0, atIdx)
+  const domain = email.slice(atIdx) // includes '@'
+  if (local.length <= 2) return `${local[0]}***${domain}`
+  return `${local[0]}***${local[local.length - 1]}${domain}`
 }
 
 function buildEmailHtml(params: {

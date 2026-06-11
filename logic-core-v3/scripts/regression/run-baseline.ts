@@ -212,7 +212,9 @@ async function waitForAssistantMessage(
         include: {
           messages: {
             orderBy: { createdAt: 'asc' },
-            where: { role: 'assistant' },
+            // Fix: ChatMessageRole es enum UPPERCASE. 'assistant' lowercase rompía el
+            // query (drift schema↔runner). Los roles del payload HTTP sí son lowercase.
+            where: { role: 'ASSISTANT' },
           },
         },
       }),

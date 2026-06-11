@@ -5,6 +5,7 @@ import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 import { fibonacciSphere } from './fibonacciSphere'
 import { STATE_CONFIG, type NeuroAvatarState } from './types'
+import { clampDelta } from './frameDelta'
 
 interface ParticleSphereProps {
   count: number
@@ -25,7 +26,8 @@ export function ParticleSphere({ count, accentColor, state }: ParticleSphereProp
   const dummy = useMemo(() => new THREE.Object3D(), [])
   const time = useRef(0)
 
-  useFrame((_, delta) => {
+  useFrame((_, rawDelta) => {
+    const delta = clampDelta(rawDelta)
     if (!ref.current) return
     const config = STATE_CONFIG[state]
     time.current += delta

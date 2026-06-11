@@ -18,7 +18,7 @@ interface ClientItem {
   siteUrl: string | null
   whatsapp: string | null
   botConfig: { isActive: boolean; monthlyQuota: number } | null
-  subscription: { status: string; planName: string } | null
+  subscription: { status: string; plan: { name: string } | null } | null
   _count: { projects: number; tickets: number; messages: number }
   createdAt: string
 }
@@ -386,7 +386,7 @@ function ClientCard({
           <p className="mb-3 text-xs font-mono text-zinc-500">{client.slug}</p>
 
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] text-zinc-500">
-            <span>{client.subscription?.planName ?? 'Sin plan'}</span>
+            <span>{client.subscription?.plan?.name ?? 'Sin plan'}</span>
             {client.siteUrl && <span>{client.siteUrl}</span>}
           </div>
 

@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto'
 import { streamText, stepCountIs, type ModelMessage } from 'ai'
 import { z } from 'zod'
 import * as Sentry from '@sentry/nextjs'
@@ -10,7 +11,7 @@ import {
 } from '../conversation'
 import { buildSystemPrompt, formatDateTimeArgentina } from '../prompts'
 import { getTools } from '../tools'
-import { getLLMProvider } from '../llm'
+import { getLLMProvider, normalizeLlmProvider } from '../llm'
 import { calculateCost } from '../pricing'
 import {
   checkQuota,
@@ -24,7 +25,7 @@ import { hashIp, validateAssistantOutput } from '../safety'
 import { chatbotLog } from '../logging'
 import { chatbotDebug, chatbotError } from '../logging'
 import { logChatbotEvent } from '../logging'
-import type { LLMProviderName } from '../../shared/types'
+// LLMProviderName is used only through normalizeLlmProvider — no direct import needed here.
 import { getPlanForOrg, type EffectivePlan } from '@/lib/plan'
 import { originMatchesAllowed } from '@/lib/security/origin-matcher'
 
@@ -45,9 +46,34 @@ const requestBodySchema = z.object({
   sessionId: z.string().min(1).max(200),
   currentPath: z.string().max(500).optional(),
   referrer: z.string().max(500).optional(),
+  // Proactive teaser question the bot "asked" via the tooltip. Client-supplied →
+  // VALIDATED server-side against the bot's configured proactivePrompts before it
+  // is trusted into the system prompt. Never enters the conversation as a turn.
+  proactiveOpener: z.string().max(500).optional(),
 })
 
 type RequestBody = z.infer<typeof requestBodySchema>
+
+/**
+ * Safely extracts the set of admin-configured proactive-prompt strings from the
+ * `BotConfig.proactivePrompts` JSON (shape: Record<string, string[]>). Defensive
+ * against malformed JSON. Used to validate a client-supplied `proactiveOpener`
+ * before it is trusted into the system prompt — only an EXACT match with a
+ * configured prompt is accepted, so a forged opener can never inject text.
+ */
+function collectProactivePrompts(raw: unknown): Set<string> {
+  const out = new Set<string>()
+  if (raw && typeof raw === 'object') {
+    for (const value of Object.values(raw as Record<string, unknown>)) {
+      if (Array.isArray(value)) {
+        for (const item of value) {
+          if (typeof item === 'string') out.add(item)
+        }
+      }
+    }
+  }
+  return out
+}
 
 /**
  * Best-effort extraction of client IP from request headers.
@@ -521,7 +547,7 @@ export async function handleChatRequest(
   //   plan.llmModel ya es 'gemini-2.5-flash' en los 3 planes sembrados.
   //   bot.llmProvider sigue siendo del BotConfig (no hay dimensión
   //   provider en Plan todavía — toda la flota usa 'google' hoy).
-  const provider = getLLMProvider(bot.llmProvider as LLMProviderName)
+  const provider = getLLMProvider(normalizeLlmProvider(bot.llmProvider))
   const model = provider.getModel(plan.llmModel)
 
   chatbotLog('chat.llm_request_start', {
@@ -543,9 +569,28 @@ export async function handleChatRequest(
     toolCount: Object.keys(tools).length,
   })
 
-  const enrichedSystemPrompt = intentResult.guidance
-    ? `${systemPrompt}\n\n---\n\n# CONTEXTO DEL TURNO ACTUAL\n\nIntención detectada: ${intentResult.intent}\n\n${intentResult.guidance}`
-    : systemPrompt
+  // SEC: el opener viene del cliente → solo se confía si coincide EXACTAMENTE con
+  // un prompt proactivo configurado por el admin (config.proactivePrompts). Validado
+  // así, es contenido de confianza y va como sección del system prompt (NO se
+  // spotlightea como el input del visitante; el hardening SEC-LLM-01 sobre los
+  // mensajes 'user' y las secciones del Bloque 1 quedan intactos).
+  const validatedOpener = (() => {
+    const opener = body.proactiveOpener?.trim()
+    if (!opener) return null
+    return collectProactivePrompts(bot.proactivePrompts).has(opener) ? opener : null
+  })()
+
+  const enrichedSystemPrompt = [
+    systemPrompt,
+    intentResult.guidance
+      ? `# CONTEXTO DEL TURNO ACTUAL\n\nIntención detectada: ${intentResult.intent}\n\n${intentResult.guidance}`
+      : null,
+    validatedOpener
+      ? `# APERTURA PROACTIVA\n\nVos (el asistente) abriste esta conversación enviándole proactivamente al visitante la pregunta: «${validatedOpener}». Su próximo mensaje responde a esa pregunta — continuá con coherencia y NO vuelvas a hacer la misma pregunta.`
+      : null,
+  ]
+    .filter((section): section is string => section !== null)
+    .join('\n\n---\n\n')
 
   // LLM call boundary — used to compute TTFB (first token from Vertex) and
   // separate Vertex time from post-LLM persistence time.
@@ -561,17 +606,32 @@ export async function handleChatRequest(
   //   ni encadenamiento. H2/H3 documentados en bitácora B3.3-B3.6.
   let stepCount = 0
 
+  // SEC-LLM-01 — Spotlighting del input no confiable del visitante.
+  // Cada mensaje del visitante se envuelve en <vmsg_{nonce}>…</vmsg_{nonce}>
+  // con un nonce aleatorio por request: el visitante no lo conoce, así que no
+  // puede cerrar el delimitador para "escaparse" e inyectar instrucciones.
+  // La regla que le dice al modelo que ese contenido es DATO (no órdenes) vive
+  // en la sección 6 del system prompt (buildAntiHallucination).
+  const visitorTag = `vmsg_${randomUUID().replace(/-/g, '').slice(0, 12)}`
+  const wrapUntrusted = (text: string): string => {
+    // Anti delimiter-escape: removemos cualquier intento del visitante de
+    // inyectar la etiqueta (con o sin el nonce real) antes de envolver.
+    const stripped = text.replace(/<\/?vmsg_[a-z0-9]*>/gi, '')
+    return `<${visitorTag}>\n${stripped}\n</${visitorTag}>`
+  }
+
   const result = streamText({
     model,
     system: enrichedSystemPrompt,
     messages: body.messages.map((m): ModelMessage => {
-      if (m.role === 'user') {
-        return { role: 'user', content: [{ type: 'text', text: m.content }] }
-      }
+      // El historial del asistente (sus propios outputs) va tal cual. Todo lo
+      // demás —mensajes 'user' y, defensivamente, cualquier 'system' que un
+      // cliente intente colar— se trata como input NO confiable y se envuelve
+      // con spotlighting. Así el delimitador no es esquivable mandando role:system.
       if (m.role === 'assistant') {
         return { role: 'assistant', content: [{ type: 'text', text: m.content }] }
       }
-      return { role: 'system', content: m.content }
+      return { role: 'user', content: [{ type: 'text', text: wrapUntrusted(m.content) }] }
     }),
     tools,
     temperature: 0.7,
@@ -639,7 +699,7 @@ export async function handleChatRequest(
         const tokensIn = totalIn
         const tokensOut = totalOut
         const costBreakdown = calculateCost(
-          resolvedBot.llmProvider as LLMProviderName,
+          normalizeLlmProvider(resolvedBot.llmProvider),
           resolvedBot.llmModel,
           tokensIn,
           tokensOut

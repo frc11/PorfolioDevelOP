@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { Check, ImagePlus, Smile } from 'lucide-react'
 import { AvatarRenderer } from './AvatarRenderer'
-import { AVATAR_REGISTRY } from './registry'
+import { AVATAR_REGISTRY, getAvatarRenderSize } from './registry'
 import type { AvatarRegistryEntry, AvatarWeight } from './types'
 
 export interface AvatarPickerProps {
@@ -201,7 +201,7 @@ function RegistryCard({
           style={entry.id}
           state={previewState}
           accentColor={accentColor}
-          size={64}
+          size={getAvatarRenderSize(entry.id, 64)}
           businessInitials={businessInitials}
         />
       </div>

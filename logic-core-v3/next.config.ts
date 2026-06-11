@@ -17,6 +17,53 @@ const nextConfig: NextConfig = {
   },
   async headers() {
     return [
+      // ── Global security headers (SEC-MISC-01) ──────────────────────────────
+      // Applied to every response. Does NOT include X-Frame-Options globally
+      // because /embed/* routes must be embeddable — that header lives in the
+      // admin/dashboard block below.
+      {
+        source: '/:path*',
+        headers: [
+          // HSTS: instruct browsers to always use HTTPS (Netlify enforces it
+          // server-side, this declares it to the browser for preload eligibility).
+          { key: 'Strict-Transport-Security', value: 'max-age=31536000; includeSubDomains' },
+          // Prevent MIME-type sniffing attacks.
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
+          // Avoid leaking internal URL paths in Referer headers to third parties.
+          { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+          // Disable browser features the app does not use.
+          { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
+          // CSP in report-only mode while we audit violations.
+          // Tighten to enforcement (Content-Security-Policy) after 1–2 weeks
+          // of confirming no unexpected blocks in the browser console.
+          // 'unsafe-inline' + 'unsafe-eval' are required by Next.js 16 without
+          // nonce — remove them once nonce injection is in place.
+          {
+            key: 'Content-Security-Policy-Report-Only',
+            value: [
+              "default-src 'self'",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+              "style-src 'self' 'unsafe-inline'",
+              "img-src 'self' data: blob: https:",
+              "connect-src 'self' https: wss:",
+              "font-src 'self' data: https:",
+              "frame-ancestors 'none'",
+              "object-src 'none'",
+              "base-uri 'self'",
+              "form-action 'self'",
+            ].join('; '),
+          },
+        ],
+      },
+      // ── Clickjacking protection for authenticated routes ───────────────────
+      // /embed/* is intentionally excluded — those routes must be iframeable.
+      {
+        source: '/(admin|dashboard)(.*)',
+        headers: [
+          { key: 'X-Frame-Options', value: 'DENY' },
+        ],
+      },
+      // ── Widget JS ─────────────────────────────────────────────────────────
       {
         source: '/widget.js',
         headers: [
@@ -25,6 +72,7 @@ const nextConfig: NextConfig = {
           { key: 'Access-Control-Allow-Origin', value: '*' },
         ],
       },
+      // ── Chatbot embed iframe ───────────────────────────────────────────────
       {
         // Allow any site to embed the chatbot in an iframe.
         // R18 will restrict to a whitelist of allowed origins.

@@ -1,0 +1,15 @@
+.fit {
+  position: relative;
+  overflow: hidden;
+}
+
+/* The FROZEN LegacyNeuroAvatar hardcodes its root wrapper to h-28/md:h-56
+   (112/224px) and renders its own R3F <Canvas> sized to that wrapper. Force the
+   wrapper to fill this `size`-d box so the canvas measures `size` (not 224) and
+   renders at the correct buffer. No CSS transform here — an earlier
+   `transform: scale()` approach prevented R3F from measuring the canvas at all,
+   leaving it stuck at the 300x150 browser default. */
+.fit > [aria-label="AI Assistant Avatar"] {
+  width: 100% !important;
+  height: 100% !important;
+}

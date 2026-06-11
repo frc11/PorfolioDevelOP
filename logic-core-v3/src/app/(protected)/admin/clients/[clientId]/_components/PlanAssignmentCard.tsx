@@ -23,13 +23,11 @@ export async function PlanAssignmentCard({ clientId }: Props) {
         pendingPlan: { select: { key: true, name: true } },
         pendingPlanEffectiveAt: true,
         lastPlanChangedAt: true,
-        planName: true,
       },
     }),
   ])
 
   const currentPlanKey: PlanKey | null = subscription?.plan?.key ?? null
-  const legacyPlanName = subscription?.planName ?? null
 
   const planOptions = plans.map((p) => ({
     key: p.key,
@@ -53,12 +51,6 @@ export async function PlanAssignmentCard({ clientId }: Props) {
               </span>
             )}
           </p>
-          {legacyPlanName && (
-            <p className="mt-1 text-xs text-zinc-500">
-              planName legacy en DB:{' '}
-              <span className="text-zinc-400">{legacyPlanName}</span>
-            </p>
-          )}
           {subscription?.lastPlanChangedAt && (
             <p className="mt-1 text-xs text-zinc-500">
               Último cambio:{' '}

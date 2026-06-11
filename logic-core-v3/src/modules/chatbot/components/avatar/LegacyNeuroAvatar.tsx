@@ -3,6 +3,8 @@
 import { type ComponentRef, useEffect, useRef, useMemo } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { Float, MeshDistortMaterial } from '@react-three/drei';
+import { CanvasAutoResize } from './CanvasAutoResize';
+import { clampDelta } from './frameDelta';
 
 import * as THREE from 'three';
 
@@ -105,7 +107,8 @@ function ColorController({
         }
     }, [contextColor]);
 
-    useFrame((state, delta) => {
+    useFrame((state, rawDelta) => {
+        const delta = clampDelta(rawDelta);
         const time = state.clock.elapsedTime;
 
         // Avanzar transici├│n de contexto
@@ -204,7 +207,8 @@ function QuantumEye({
         }
     }, [hoverPulse]);
 
-    useFrame((_, delta) => {
+    useFrame((_, rawDelta) => {
+        const delta = clampDelta(rawDelta);
         if (!meshRef.current) {
             return;
         }
@@ -316,7 +320,8 @@ function Eyebrow({
         }
     }, [hoverPulse]);
 
-    useFrame((state, delta) => {
+    useFrame((state, rawDelta) => {
+        const delta = clampDelta(rawDelta);
         if (!meshRef.current) {
             return;
         }
@@ -418,7 +423,8 @@ function Mouth({
         }
     }, [hoverPulse]);
 
-    useFrame((_, delta) => {
+    useFrame((_, rawDelta) => {
+        const delta = clampDelta(rawDelta);
         if (!meshRef.current) {
             return;
         }
@@ -533,7 +539,8 @@ function OrbitalParticles({
 
     const positionsRef = useRef(positions);
 
-    useFrame((state, delta) => {
+    useFrame((state, rawDelta) => {
+        const delta = clampDelta(rawDelta);
         if (!groupRef.current || !matRef.current) return;
         frameRef.current++;
 
@@ -662,7 +669,8 @@ function JellyBody({
         }
     }, [hoverPulse]);
 
-    useFrame((state, delta) => {
+    useFrame((state, rawDelta) => {
+        const delta = clampDelta(rawDelta);
         if (!meshRef.current) {
             return;
         }
@@ -928,10 +936,11 @@ export function LegacyNeuroAvatar({
             <Canvas
                 className={isVisible ? 'h-full w-full pointer-events-auto cursor-pointer' : 'h-full w-full pointer-events-none'}
                 style={{ background: 'transparent' }}
-                camera={{ position: [0, 0, 4.5], fov: 45 }}
+                camera={{ position: [0, 0.07, 4.5], fov: 28 /* Framing for the small avatar box. Narrow fov = telephoto zoom (fills like the Geometric avatar; no perspective bulge since the camera stays back). camera y=+0.07 lifts the optical axis so the upper-set face (faceGroup at y≈0.12) reads ~centered. Tuned so the idle peak (Float bob ±0.085 + breathing ×1.058) just reaches the frame edge without clipping the body. */ }}
                 dpr={[1, 2]}
                 gl={{ alpha: true, powerPreference: 'high-performance' }}
             >
+                <CanvasAutoResize />
                 <ColorController
                     isThinking={isThinking}
                     isBooped={isBooped}

@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useState, ReactNode, useEffect, useRef } from 'react';
+import { createContext, useContext, useState, ReactNode, useEffect, useRef, useTransition } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useLenis } from '@/components/layout/SmoothScroll'; // Asegúrate que la ruta sea correcta
 
@@ -17,6 +17,9 @@ export function TransitionProvider({ children }: { children: ReactNode }) {
     const router = useRouter();
     const pathname = usePathname();
     const lenis = useLenis();
+
+    const [isPending, startTransition] = useTransition();
+    const pendingRouteReveal = useRef(false);
 
     const executeScroll = (targetId: string) => {
         const element = document.getElementById(targetId);
@@ -103,20 +106,26 @@ export function TransitionProvider({ children }: { children: ReactNode }) {
 
         // SCENARIO 2: ROUTE NAVIGATION (e.g. "/contact", "/web-development")
         if (target.startsWith('/')) {
-            // If we are already on this page, do nothing (or simple scroll to top)
             if (pathname === target) return;
 
-            setIsAnimating(true);
+            setIsAnimating(true);                 // cierra shutter (0.3s)
+            pendingRouteReveal.current = true;
 
-            // 1. Shutter Close
+            // navega cuando el shutter ya cerró; isPending queda true hasta que
+            // la ruta nueva esté lista, y el effect de abajo abre el shutter ahí.
             setTimeout(() => {
-                router.push(target);
-
-                // 2. Shutter Open (after delay)
-                setTimeout(() => {
-                    setIsAnimating(false);
-                }, 400);
+                startTransition(() => {
+                    router.push(target);
+                });
             }, 300);
+
+            // red de seguridad: nunca quedarse cerrado para siempre si algo se cuelga
+            setTimeout(() => {
+                if (pendingRouteReveal.current) {
+                    pendingRouteReveal.current = false;
+                    setIsAnimating(false);
+                }
+            }, 8000);
             return;
         }
 
@@ -135,6 +144,20 @@ export function TransitionProvider({ children }: { children: ReactNode }) {
         // Browser Back/Forward: Do nothing (Instant Transition)
         // This prevents the "jarring" effect of seeing the new page before the shutter closes.
     }, [pathname]);
+
+    // Route reveal: open the shutter only once the new route has finished loading
+    // (Suspense-aware via useTransition's isPending — waits for dev compile / RSC).
+    // The reveal is deferred to the next frame so the new route has painted before the
+    // shutter fades, and so setState isn't called synchronously inside the effect body.
+    useEffect(() => {
+        if (!pendingRouteReveal.current || isPending) return;
+
+        const frame = requestAnimationFrame(() => {
+            pendingRouteReveal.current = false;
+            setIsAnimating(false);
+        });
+        return () => cancelAnimationFrame(frame);
+    }, [isPending]);
 
     return (
         <TransitionContext.Provider value={{ isAnimating, triggerTransition }}>

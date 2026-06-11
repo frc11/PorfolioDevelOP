@@ -1,0 +1,4 @@
+# Tooling local de Claude Code / agentes — no es código del proyecto
+.claude/
+.agents/
+skills-lock.json

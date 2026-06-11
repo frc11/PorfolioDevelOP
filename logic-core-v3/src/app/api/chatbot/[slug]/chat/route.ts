@@ -1,3 +1,4 @@
+import { createHash } from 'crypto'
 import { handleChatRequest } from '@/modules/chatbot/index.server'
 import { validateOrigin } from '@/lib/security/validate-origin'
 import { checkRateLimit } from '@/lib/rate-limit/limiter'
@@ -66,16 +67,13 @@ export async function POST(
     })
   }
 
-  // Rate limit por origin + sessionId
-  let sessionId = 'unknown'
-  try {
-    const body = await request.clone().json()
-    sessionId = typeof body?.sessionId === 'string' ? body.sessionId : 'unknown'
-  } catch {
-    // body parse fail → use fallback key
-  }
-
-  const rateKey = `chatbotPerSession:${origin ?? 'no-origin'}:${sessionId}`
+  // Rate-limit per origin + IP hash (SEC-RATELIMIT-02).
+  // sessionId was attacker-controllable — trivially bypassed by rotating it.
+  // IP is set by the Netlify edge and is not spoofeble from the outside.
+  const fwd = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
+  const real = request.headers.get('x-real-ip')?.trim()
+  const ipHash = createHash('sha256').update(fwd ?? real ?? 'no-ip').digest('hex').slice(0, 24)
+  const rateKey = `chatbotPerSession:${origin ?? 'no-origin'}:${ipHash}`
   const rate = await checkRateLimit({
     key: rateKey,
     limit: RATE_LIMIT_PRESETS.chatbotPerSession.limit,

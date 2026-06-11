@@ -6,6 +6,7 @@ import {
   MilestoneType,
   OrgRole,
   OsServiceType,
+  PlanKey,
   Prisma,
   PrismaClient,
   ProjectStatus,
@@ -212,7 +213,7 @@ type OrganizationSeed = {
   notificationPrefs?: Record<string, unknown>
   serviceType: ServiceType
   subscription: {
-    planName: string
+    planKey: PlanKey
     status: SubscriptionStatus
     price: number
     currency: string
@@ -397,7 +398,7 @@ const organizationSeeds: OrganizationSeed[] = [
     },
     serviceType: ServiceType.WEB_DEV,
     subscription: {
-      planName: 'Plan Growth Commerce',
+      planKey: PlanKey.BUSINESS,
       status: SubscriptionStatus.ACTIVE,
       price: 180,
       currency: 'USD',
@@ -416,7 +417,7 @@ const organizationSeeds: OrganizationSeed[] = [
     },
     serviceType: ServiceType.AI,
     subscription: {
-      planName: 'Plan AI Care',
+      planKey: PlanKey.PRO,
       status: SubscriptionStatus.ACTIVE,
       price: 140,
       currency: 'USD',
@@ -435,7 +436,7 @@ const organizationSeeds: OrganizationSeed[] = [
     },
     serviceType: ServiceType.WEB_DEV,
     subscription: {
-      planName: 'Plan Maintenance',
+      planKey: PlanKey.STARTER,
       status: SubscriptionStatus.PAST_DUE,
       price: 95,
       currency: 'USD',
@@ -1520,11 +1521,20 @@ async function ensureSubscription(organizationId: string, seed: OrganizationSeed
     return existing
   }
 
+  // El plan se resuelve por key (planId FK). Si el catálogo no está sembrado
+  // (sync-plans.ts), planId queda null y el runtime usa PLAN_FALLBACK (Starter).
+  const plan = await prisma.plan.findUnique({ where: { key: seed.planKey } })
+  if (!plan) {
+    console.warn(
+      `[seed-agency-os] Plan ${seed.planKey} no existe. Corré sync-plans.ts antes. Subscription queda con planId=null (fallback Starter en runtime).`,
+    )
+  }
+
   return prisma.subscription.create({
     data: {
       id: seedId('subscription', organizationId),
       organizationId,
-      planName: seed.planName,
+      planId: plan?.id ?? null,
       status: seed.status,
       price: seed.price,
       currency: seed.currency,

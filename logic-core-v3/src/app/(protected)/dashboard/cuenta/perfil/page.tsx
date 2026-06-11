@@ -103,7 +103,7 @@ export default async function ProfilePage() {
       notificationPrefs: true,
       subscription: {
         select: {
-          planName: true,
+          plan: { select: { name: true } },
           price: true,
           currency: true,
           renewalDate: true,
@@ -214,7 +214,7 @@ export default async function ProfilePage() {
   // Serialize plan data (no Date objects to client)
   const plan = org.subscription
     ? {
-        planName: org.subscription.planName,
+        planName: org.subscription.plan?.name ?? 'Sin plan asignado',
         price: org.subscription.price,
         currency: org.subscription.currency,
         renewalDate: org.subscription.renewalDate?.toISOString() ?? null,
@@ -230,7 +230,7 @@ export default async function ProfilePage() {
           companyName={org.companyName}
           email={user.email ?? ''}
           logoUrl={org.logoUrl}
-          planName={org.subscription?.planName ?? null}
+          planName={org.subscription?.plan?.name ?? null}
         />
       </FadeIn>
 

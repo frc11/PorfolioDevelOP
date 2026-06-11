@@ -5,7 +5,7 @@ import { revalidateTag } from 'next/cache'
 import { prisma } from '@/lib/prisma'
 import { logChatbotEvent } from '../logging'
 import { sendLeadNotificationEmail } from '../notifications'
-import { calculateLeadScore } from '../scoring'
+import { calculateLeadScore, isValidArgentinePhone } from '../scoring'
 import { syncLeadToCrm } from '../crm'
 import { notifyTelegramOptional } from '@/lib/notifications/telegram'
 import type { ToolCallContext, CaptureLeadResult, ToolExecuteResult } from './types'
@@ -51,11 +51,15 @@ export const captureLeadInputSchema = z
     name: z.string().min(2).max(100).describe(
       'Nombre del usuario como se identificó'
     ),
-    phone: z.string().min(5).max(50).optional().describe(
-      'Teléfono del usuario (con código de país si está disponible, ej: +54 9 11 ...). Omitir si el usuario no lo dio.'
+    // SEC-LLM-03 / invalid-phone — formato y pertenencia se validan en el execute,
+    // NO en Zod: un dato inválido no debe romper el stream del SDK. Acá phone/email
+    // son strings laxos (solo cota de longitud defensiva); el execute decide si
+    // descarta el canal o repregunta.
+    phone: z.string().max(50).optional().describe(
+      'Teléfono del usuario tal como lo escribió (ej: +54 9 11 ...). Pasá EXACTAMENTE lo que dio el visitante; no lo inventes ni lo completes. Omitir si no lo dio.'
     ),
-    email: z.string().email().max(200).optional().describe(
-      'Email del usuario. Omitir si el usuario no lo dio.'
+    email: z.string().max(200).optional().describe(
+      'Email del usuario tal como lo escribió. Pasá EXACTAMENTE lo que dio el visitante; no lo inventes. Omitir si no lo dio.'
     ),
     intent: z.enum(LEAD_INTENTS).describe(
       'Intención principal: purchase_ready=lo quiere/pide retirar; schedule_visit=quiere agendar visita/test drive; quote_request=pide cotización formal; human_request=pide humano sin urgencia; support=problema con servicio actual; other=otro.'
@@ -81,10 +85,10 @@ export const captureLeadInputSchema = z
       'true SOLO si nombró un modelo concreto (ej. "Corolla XEi", "Hilux SRV"). false si fue genérico ("un 0KM", "algo familiar").'
     ),
   })
-  .refine((data) => Boolean(data.phone) || Boolean(data.email), {
-    message: 'Se requiere al menos teléfono o email.',
-    path: ['phone'],
-  })
+// SEC-LLM-03 / invalid-phone — SIN `.refine(phone || email)` a propósito: la
+// exigencia de "al menos un canal de contacto usable" se evalúa dentro del
+// execute (formato + pertenencia). Si falla, el execute devuelve un re-ask
+// graceful en lugar de dejar que Zod rechace el input y rompa el stream del SDK.
 
 export type CaptureLeadInput = z.infer<typeof captureLeadInputSchema>
 
@@ -102,6 +106,78 @@ NO USAR si:
 - El usuario solo está consultando información sin intención de seguir
 - No proporcionó nombre o no proporcionó ningún canal de contacto
 - Ya se invocó esta tool exitosamente en esta conversación (no duplicar)`
+
+// ─── SEC-LLM-03 + invalid-phone — pertenencia y formato de canales ──────────
+//
+// El LLM podría (a) FABRICAR un dato de contacto que el visitante nunca dio, o
+// (b) pasar un teléfono/email con formato inválido. En ambos casos ese canal NO
+// se persiste. Helpers puros, server-side.
+
+type ChannelReason = 'absent' | 'invalid_format' | 'not_owned' | 'ok'
+
+/**
+ * Clasifica un canal de contacto. Simétrico para phone/email (misma forma):
+ *   absent       → el LLM no lo pasó
+ *   invalid_format → no pasa el validador de formato
+ *   not_owned    → no aparece en lo que el visitante escribió (posible fabricación)
+ *   ok           → usable (se persiste)
+ */
+function classifyChannel(
+  raw: string | null,
+  isValidFormat: (value: string) => boolean,
+  appearsInVisitor: (value: string) => boolean,
+): ChannelReason {
+  if (!raw) return 'absent'
+  if (!isValidFormat(raw)) return 'invalid_format'
+  if (!appearsInVisitor(raw)) return 'not_owned'
+  return 'ok'
+}
+
+/**
+ * Cola de dígitos para comparar pertenencia de teléfono. 7 (no 8-10) a propósito:
+ * el prefijo móvil local "15" (2 díg.) vs el internacional "9" (1 díg.) corre la
+ * ventana un dígito, así que con 8+ el reformateo AR más común (15↔9) daría
+ * FALSO-NEGATIVO = lead perdido. 7 = cola del número de abonado, invariante al
+ * reformateo. Verificado por simulación: 0 falsos-negativos / 0 falsos-positivos.
+ */
+const OWNERSHIP_PHONE_TAIL = 7
+
+const digitsOnly = (value: string): string => value.replace(/\D/g, '')
+
+/**
+ * ¿El teléfono que pasó el LLM aparece (normalizado) en algún turno del visitante?
+ * Compara por cola de dígitos en ambas direcciones para tolerar +54/9/0, espacios
+ * y guiones sin descartar números reformateados (anti falso-negativo).
+ */
+function phoneAppearsInVisitorText(
+  modelPhone: string,
+  visitorMessages: readonly string[],
+): boolean {
+  const md = digitsOnly(modelPhone)
+  if (md.length < OWNERSHIP_PHONE_TAIL) return false
+  const mdTail = md.slice(-OWNERSHIP_PHONE_TAIL)
+  for (const message of visitorMessages) {
+    const vd = digitsOnly(message)
+    if (vd.length < OWNERSHIP_PHONE_TAIL) continue
+    if (vd.includes(mdTail) || md.includes(vd.slice(-OWNERSHIP_PHONE_TAIL))) return true
+  }
+  return false
+}
+
+/** ¿El email aparece (lowercased) textualmente en algún turno del visitante? */
+function emailAppearsInVisitorText(
+  modelEmail: string,
+  visitorMessages: readonly string[],
+): boolean {
+  const needle = modelEmail.trim().toLowerCase()
+  if (needle.length === 0) return false
+  return visitorMessages.some((message) => message.toLowerCase().includes(needle))
+}
+
+/** Formato de email — Zod via safeParse (no throw, no dependencia nueva). */
+const emailFormatSchema = z.string().email()
+const isValidEmailFormat = (raw: string): boolean =>
+  emailFormatSchema.safeParse(raw.trim()).success
 
 /**
  * Execute function for capture_lead. Performs the DB write and
@@ -134,9 +210,82 @@ async function captureLeadExecute(
       }
     }
 
-    // 2. Normalize phone/email lightly (trim). Both channels persist if both came.
-    const email = input.email?.trim() || null
-    const phone = input.phone?.trim() || null
+    // 2. SEC-LLM-03 + invalid-phone — resolver canales USABLES antes de persistir.
+    //    Un canal (phone/email) es usable solo si su FORMATO es válido Y APARECE en
+    //    lo que el visitante realmente escribió (anti-fabricación del LLM). Los no
+    //    usables se descartan; híbrido SIMÉTRICO: si queda al menos uno, persistimos
+    //    por ése (no perdemos el lead). Si no queda ninguno → re-ask graceful (el bot
+    //    repregunta en vez de enmudecer por un throw del SDK).
+    const visitorMessages = (
+      await prisma.chatMessage.findMany({
+        where: { conversationId: ctx.conversationId, role: 'USER' },
+        select: { content: true },
+      })
+    ).map((m) => m.content)
+
+    const rawPhone = input.phone?.trim() || null
+    const rawEmail = input.email?.trim() || null
+
+    const phoneReason = classifyChannel(rawPhone, isValidArgentinePhone, (v) =>
+      phoneAppearsInVisitorText(v, visitorMessages),
+    )
+    const emailReason = classifyChannel(rawEmail, isValidEmailFormat, (v) =>
+      emailAppearsInVisitorText(v, visitorMessages),
+    )
+
+    const phone = phoneReason === 'ok' ? rawPhone : null
+    const email = emailReason === 'ok' ? rawEmail : null
+
+    // Trazabilidad de canales descartados — SOLO el motivo, nunca el valor (PII).
+    for (const [channel, reason] of [
+      ['phone', phoneReason],
+      ['email', emailReason],
+    ] as const) {
+      if (reason !== 'ok' && reason !== 'absent') {
+        console.warn(
+          JSON.stringify({
+            type: 'capture_lead.channel_dropped',
+            conversationId: ctx.conversationId,
+            channel,
+            reason,
+          }),
+        )
+      }
+    }
+
+    // 2b. Ningún canal usable → NO persistir basura ni enmudecer: devolver un
+    //     ToolExecuteResult que haga al modelo REPREGUNTAR el dato. Mismo mecanismo
+    //     graceful tanto para pertenencia (fabricación) como para formato inválido.
+    if (!phone && !email) {
+      let hint: string
+      if (rawPhone && !rawEmail) hint = 'el teléfono no parece válido o completo'
+      else if (rawEmail && !rawPhone) hint = 'el email no parece válido'
+      else if (rawPhone && rawEmail) hint = 'los datos de contacto no parecen válidos'
+      else hint = 'todavía no tengo un teléfono o email del visitante'
+
+      console.warn(
+        JSON.stringify({
+          type: 'capture_lead.reask_no_usable_channel',
+          conversationId: ctx.conversationId,
+          phoneReason,
+          emailReason,
+        }),
+      )
+      await logChatbotEvent({
+        botConfigId: ctx.botConfigId,
+        type: 'tool.lead_reask',
+        level: 'warn',
+        message: `capture_lead repreguntó contacto (phone=${phoneReason}, email=${emailReason})`,
+        conversationId: ctx.conversationId,
+        metadata: { phoneReason, emailReason },
+      })
+
+      return {
+        success: false,
+        error: `No pude registrar el contacto porque ${hint}. Pedile amablemente al visitante que te reconfirme un teléfono o email válido —no inventes ni completes datos vos—. No reintentes esta herramienta hasta que el visitante lo dé.`,
+      }
+    }
+
     const channels = [phone ? 'phone' : null, email ? 'email' : null].filter(
       (c): c is 'phone' | 'email' => c !== null,
     )
@@ -145,7 +294,9 @@ async function captureLeadExecute(
     //    sin LLM. Mismas señales → mismo score (predecible y auditable).
     //    B5.3 también aplica:
     //      - DQ por categoría (employment/provider/spam) → classification='dq', score=0
-    //      - Penalty postventa (−50) y phone inválido (−20)
+    //      - Penalty postventa (−50).
+    //    Nota: el penalty "phone inválido (−20)" del motor ya NO se alcanza desde
+    //    este call-site — en el paso 2 `phone` quedó válido-o-null (nunca inválido).
     //    `scoreSignals` incluye penalties (points negativos) para explicabilidad B5.4.
     const providedPhone = Boolean(phone)
     const providedEmail = Boolean(email)

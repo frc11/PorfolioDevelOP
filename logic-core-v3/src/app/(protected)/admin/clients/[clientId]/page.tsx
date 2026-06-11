@@ -50,7 +50,7 @@ export default async function ClientDetailPage({
           },
         },
         subscription: {
-          select: { status: true, planName: true },
+          select: { status: true, plan: { select: { name: true } } },
         },
         _count: {
           select: {

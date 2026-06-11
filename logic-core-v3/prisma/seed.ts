@@ -335,8 +335,8 @@ async function main() {
 
   // CC.5 — Suscripción a plan BUSINESS para que San Miguel pueda usar CRM.
   // El subscription apunta al Plan creado por prisma/seeds/sync-plans.ts.
-  // Si el plan no existe (sync-plans no se corrió), seguimos con planName plano
-  // y log de warning — el dashboard renderiza igual, solo CRM queda locked.
+  // Si el plan no existe (sync-plans no se corrió), planId queda null y el
+  // runtime usa PLAN_FALLBACK (Starter) — el dashboard renderiza igual.
   const businessPlan = await prisma.plan.findUnique({ where: { key: 'BUSINESS' } })
 
   if (!businessPlan) {
@@ -348,7 +348,6 @@ async function main() {
   await prisma.subscription.upsert({
     where: { organizationId: organization.id },
     update: {
-      planName: businessPlan?.name ?? 'Plan Profesional',
       planId: businessPlan?.id ?? null,
       status: SubscriptionStatus.ACTIVE,
       price: businessPlan ? Number(businessPlan.monthlyPrice) : 150,
@@ -358,7 +357,6 @@ async function main() {
     create: {
       id: IDS.subscription,
       organizationId: organization.id,
-      planName: businessPlan?.name ?? 'Plan Profesional',
       planId: businessPlan?.id ?? null,
       status: SubscriptionStatus.ACTIVE,
       price: businessPlan ? Number(businessPlan.monthlyPrice) : 150,

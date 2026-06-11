@@ -245,13 +245,49 @@ export const REGRESSION_CASES: RegressionCase[] = [
   },
   {
     id: 'lead-capture-invalid-phone',
-    name: 'B5.3 — Teléfono inválido → penalty −20',
+    name: 'SEC-LLM-03/invalid-phone — Teléfono inválido sin otro canal → re-ask graceful (no timeout, no persiste basura)',
     rationale:
-      'B5.3 — visitante da un teléfono con formato inválido (123). El motor aplica penalty −20 al score. Validamos que el lead se crea pero con penalty_invalid_phone en scoreSignals.',
+      'invalid-phone (folded en Sub-sprint B) — el visitante da un teléfono inválido ("123") y NINGÚN otro canal. ' +
+      'ANTES: Zod (.min(5)) rechazaba el tool-input y rompía el stream → el bot enmudecía (Turn 2 timeout). ' +
+      'AHORA: capture_lead corre, detecta que no hay canal usable y devuelve un re-ask graceful; el bot RESPONDE ' +
+      'pidiendo reconfirmar el teléfono. Validamos: (a) el turno COMPLETA (no timeout), (b) NO se persiste lead ' +
+      '(leadSnapshot ausente). Cambió la premisa B5.3: ya no se guarda "123" con penalty_invalid_phone — no se ' +
+      'persiste basura.',
     currentPath: '/',
     userTurns: [
       'Hola, me interesa un Corolla. ¿Me podés contactar?',
       'Soy Carlos Suárez, mi teléfono es 123',
+    ],
+  },
+  {
+    id: 'lead-capture-fabricated-contact',
+    name: 'SEC-LLM-03 — Dato fabricado por el modelo → NO persiste (anti-fabricación)',
+    rationale:
+      'SEC-LLM-03 — el visitante muestra interés y da su NOMBRE pero NINGÚN teléfono ni email. Si el modelo ' +
+      'fabricara un contacto para "completar" capture_lead, el guard de pertenencia lo descarta (no aparece en los ' +
+      'turnos del visitante) y, sin canal usable, devuelve re-ask. Invariante: NO se persiste un lead con contacto ' +
+      'inventado — leadSnapshot DEBE estar ausente (o, si existiera, su phone/email tiene que aparecer textualmente ' +
+      'en la transcripción del visitante). El bot responde pidiendo el dato (no timeout).',
+    currentPath: '/',
+    userTurns: [
+      'Hola, me re copó un Corolla 0KM. ¿Me pueden contactar para avanzar?',
+      'Soy Diego Sosa, dale.',
+    ],
+  },
+  {
+    id: 'lead-capture-reformatted-phone',
+    name: 'SEC-LLM-03 — Teléfono del visitante reformateado por el modelo → SÍ persiste (anti falso-negativo)',
+    rationale:
+      'SEC-LLM-03 anti falso-negativo — el visitante da un teléfono REAL en formato local sin +54 ("381 555-2424"). ' +
+      'El modelo lo normaliza (típicamente le antepone +54 9). El guard de pertenencia compara por COLA DE DÍGITOS, ' +
+      'así que reconoce que el número normalizado ES el del visitante y NO lo descarta. Validamos: capture_lead ' +
+      'persiste el lead (leadSnapshot presente con phone, providedPhone=true). Es la contracara de fabricated: la ' +
+      'pertenencia real no se pierde por reformateo. (Si el modelo lo pasara verbatim, igual valida que un formato ' +
+      'local válido se persiste.)',
+    currentPath: '/',
+    userTurns: [
+      'Buenas, quiero un 0KM y que me contacten.',
+      'Soy Sofía Núñez, mi número es 381 555-2424',
     ],
     expectedTools: ['capture_lead'],
   },

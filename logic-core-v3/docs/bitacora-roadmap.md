@@ -10272,6 +10272,7 @@ Considerado y **descartado**. El único contenido genuinamente útil sería list
 - ✅ Densidad / progressive disclosure: auditadas las 5 pantallas, 4/5 ya tenían B13.3 aplicado (dejadas), 1/5 migrada (conversations). Settings NO densificado por decisión explícita de Franco.
 - ✅ Espacio para Franco: el sprint le mostró los hallazgos antes de actuar, Franco eligió prioridades, las ❓ subjetivas (módulos seed, hydration, greeting calibrando) quedan listadas para que él arbitre como sprints propios.
 
+<<<<<<< HEAD
 
 ---
 
@@ -10331,3 +10332,511 @@ Considerado y **descartado**. El único contenido genuinamente útil sería list
 - ✅ Aplicar-no-inventar respetado: el único intento de "inventar" (migrar admin a tokens del dashboard, V4) fue cazado y revertido; el resto de decisiones de dirección quedan anotadas para Franco, no ejecutadas.
 
 **Conclusión honesta:** el portal ya estaba en buena forma (dashboard consolidado en B13.2/CC.5; admin coherente consigo mismo). B15 sumó, dentro de las reglas: consolidación de typografía/headers donde había outliers intra-módulo (V1 home, V6 admin titles) + **animación con propósito pareja en todo el portal** (4 listas del admin llevadas al estándar animado del dashboard). Y igual de importante: **disciplina** — cazar y revertir el intento de Frankenstein (V4, migrar admin a tokens del dashboard) y dejar la unificación admin↔dashboard como decisión estratégica de Franco en vez de ejecutarla a ciegas. Lo único que falta para "TODO el portal 100% parejo" es esa unificación de lenguaje de superficie, que es deliberadamente tuya (decisión #3): cada módulo quedó coherente consigo mismo y la animación quedó pareja entre ambos.
+=======
+---
+
+## ✅ REVEAL-FIX.1 — Ajustes de coreografía del intro (marketing desktop/mobile + home mobile)
+
+**Fecha:** 2026-06-02
+**Autor:** Claude Opus 4.8
+**Alcance:** SOLO `src/components/ui/MarketingIntro.tsx`. El reveal (trazo→relleno→crossfade 2D→3D, puntos random, toldo) YA funcionaba; esto son 3 ajustes puntuales pedidos tras grabación. NO se tocó `HeroArtifact` (frozen), ni el gate de disparo, ni el flujo flying/compresión del home desktop, ni `PreloaderContext`.
+
+### Contexto (fuente de verdad = comentarios de código; no existe un .md dedicado del reveal)
+Las dos intros comparten `LogoStrokeOverlay` (2D) y la mecánica trazo→relleno (el COLOR del fill anima `maskColor`→`strokeColor`)→crossfade al 3D. Marketing = `MarketingIntro` (velo `#0a0a0a`; 3D `BrandedIntroCanvas` SOLO desktop; toldo `translateY 0→-100%`). Home = `Preloader`+`Hero` (velo negro→blanco; chrome `HeroArtifact`; flying desktop). Los tiempos son consts tunables; el humano afina los valores finales.
+
+### Fixes aplicados
+1. **Marketing desktop tardaba demasiado en irse** → `MARKETING_INTERACT_MS` 2000 → **1000** (la ventana interactiva mouse-follow post-crossfade era el hold dominante; recorta ~1 s del total). Resto de consts intactas y tunables (settle/stroke/fill/crossfade/lift). Marketing desktop NO se tocó en nada más (regla del brief).
+2. **Marketing mobile (a) jank:** confirmado que en mobile NO se monta ningún canvas/3D/puntos — `BrandedIntroCanvas` está gateado por `isSplitLayout` (solo desktop); mobile monta SOLO el 2D (`LogoStrokeOverlay`). Para asegurar que el lift del toldo componga en GPU se agregó `will-change: transform` al contenedor `fixed inset-0 z-[9999]` (el `y` ya es translateY por MotionValue) → su propia capa de composición, sin jank. Hint de perf benigno; no altera la coreografía de desktop.
+3. **Marketing mobile (b) el 2D relleno desaparecía ANTES de subir el toldo:** se eliminó el `overlayOpacity.set(0)` del branch mobile non-reduced. Ahora el logo 2D relleno (blanco) queda SÓLIDO (`overlayOpacity=1`) y SUBE JUNTO con el toldo (es hijo del contenedor que hace el lift). Sin fade-out separado del 2D.
+
+### Fix 3 (home mobile relleno NEGRO) — YA estaba correcto en el working tree (NO requirió cambio)
+El brief pedía pasar NEGRO al trazo+relleno del `LogoStrokeOverlay` mobile del home (supuestamente usaba el blanco de marketing). **Verificado: ya pasa los colores del home** (`HOME_STROKE_COLOR = #09090b` negro / `HOME_MASK_COLOR = #ffffff`), idénticos al home desktop. Los 3 (y únicos) call-sites de `LogoStrokeOverlay`:
+- `MarketingIntro.tsx:301` → blanco `#f4f4f5` sobre velo oscuro (correcto, marketing).
+- `Hero.tsx:603` (home **desktop**) → `HOME_STROKE_COLOR`/`HOME_MASK_COLOR` (negro).
+- `Hero.tsx:742` (home **mobile**) → mismos `HOME_STROKE_COLOR`/`HOME_MASK_COLOR` (negro).
+
+`fillColor = useTransform(fillProgress,[0,1],[maskColor,strokeColor])` → en mobile home el relleno anima blanco→**negro**. No se hizo edición redundante. 🚩 Si en la grabación el logo mobile home se ve "blanco", el candidato es el chrome 3D post-crossfade (`HeroArtifact`, metálico/claro bajo luz studio), NO el relleno 2D — confirmar con el humano.
+
+### Archivos tocados
+- `src/components/ui/MarketingIntro.tsx` — 3 ediciones (const INTERACT 2000→1000; quitar `overlayOpacity.set(0)` mobile; `will-change:transform` en contenedor).
+- Este log (`docs/bitacora-roadmap.md`).
+
+### Verificación (gate del brief; el build sigue rojo por baseline ajeno `@googleapis/webmasters`, no es "build verde")
+- ✅ `npx eslint src/components/ui/MarketingIntro.tsx` → limpio (exit 0).
+- ✅ `npx tsc --noEmit` → único error = baseline conocido `searchconsole.ts(2,43) TS2307 @googleapis/webmasters`. Cero errores nuevos, cero en MarketingIntro.
+- ✅ visual-qa en REPOSO (intro auto-skipea bajo automation/`?e2e=1`): `/web-development` y `/` en desktop+mobile → contenido visible, **sin overlay `z-9999` atascado** en ninguna superficie, estado final del home correcto. Único error de consola = hydration mismatch pre-existente del scroll-lock pre-hidratación del `<html>` (ya documentado en CC.2/CC.3, no es regresión). Server QA: `next-dev-qa` :3002.
+- ⏳ **COREOGRAFÍA (humano, por grabación):** verificar (1) marketing desktop más corto, (2) mobile marketing sin jank + el logo 2D queda sólido hasta que sube el toldo, (3) home mobile relleno negro (ver 🚩), (4) home desktop sin regresión. El intro NO es observable por visual-qa (skip de automation).
+
+### Pendientes / Out-of-scope flagged
+- 🚩 Fix 3 ya satisfecho — confirmar contra la grabación si lo que se veía "blanco" era el chrome 3D y no el 2D.
+- Valores de duración tunables: si 1000 ms aún se siente largo (o corto) en marketing desktop, ajustar `MARKETING_INTERACT_MS` (y opcionalmente `MARKETING_SETTLE_MS`, no tocado por riesgo de que asome el chrome).
+
+---
+
+## ✅ REVEAL-FIX.2 — Eliminar el sticker blanco detrás del logo en el home
+
+**Fecha:** 2026-06-02
+**Autor:** Claude Sonnet 4.6
+**Alcance:** SOLO `src/components/ui/LogoStrokeOverlay.tsx` (1 línea de constante + 3 props del mask path).
+
+### Diagnóstico
+La máscara del `LogoStrokeOverlay` tenía `stroke={maskColor} strokeWidth={MASK_STROKE_WIDTH}` (44 unidades en un viewBox 1024 → ~17px de halo en pantalla) con `overflow: visible` en el SVG. Esto creaba un halo blanco (`#ffffff`) alrededor del logo que se extendía FUERA del footprint del path, visible sobre el canvas del home porque:
+1. El `EffectComposer` (Vignette + Noise) crea un campo visual no-uniforme bajo el halo.
+2. En desktop el canvas es alpha=true sobre la capa blanca (z-5), pero la vignette oscurece los bordes → contraste visible.
+3. En mobile el canvas es alpha=true sobre `#f1f2f4` (gris claro) → el halo blanco contrasta aún más.
+
+En marketing el efecto era invisible porque `maskColor = #0a0a0a` (oscuro) ← matchea el fondo oscuro. En home `maskColor = #ffffff` sobre canvas+vignette → "sticker blanco con sombra suave".
+
+### Fix
+Removida la propiedad `stroke`/`strokeWidth` del mask path — solo se mantiene el `fill`. El fill cubre exactamente el footprint del logo (igual que el path animado que también arranca en `maskColor`). El chrome no asoma porque: (a) `DesktopPointerSync.useFrame` fuerza `state.pointer=(0,0)` mientras `layerOpacity>0.001`; (b) el path animado (`fillColor`) también arranca en `maskColor` tapando el interior desde el frame 0. Eliminada la constante `MASK_STROKE_WIDTH = 44` (sin usos tras el fix → ESLint lo habría marcado).
+
+### Archivos tocados
+- `src/components/ui/LogoStrokeOverlay.tsx` — removida constante `MASK_STROKE_WIDTH`, removidas props `stroke`/`strokeWidth`/`strokeLinejoin`/`strokeLinecap` del mask path.
+
+### Verificación
+- ✅ `eslint` en `LogoStrokeOverlay.tsx` → limpio (exit 0).
+- ✅ `tsc --noEmit` → único error = baseline `@googleapis/webmasters`. Cero errores nuevos.
+- ✅ Visual-qa at rest (`:3002`, `?e2e=1`): `/web-development` mobile+desktop y `/` → `stuckCount: 0`, `logoSvgPresent: true`, sin `MASK_STROKE_WIDTH is not defined`. Solo el hydration mismatch pre-existente.
+- ⏳ Coreografía (humano, grabación): el sticker blanco ya no debe aparecer detrás del logo en hard-load de "/" desktop y mobile. Chrome no debe asomar durante el trazo. Marketing sin regresión.
+
+---
+
+## ✅ REVEAL-TEXT — Lockup "develOP" + slogan con efecto de escritura (home + marketing)
+
+**Fecha:** 2026-06-02
+**Autor:** Claude Opus 4.8
+**Alcance:** componente nuevo compartido + un MotionValue aditivo en el contexto + orquestación en las dos intros. NO toca el logo (posición/tamaño), HeroArtifact, el gate, ni el resto del reveal (trazo/relleno/crossfade/flying/toldo).
+
+### Qué se agregó
+"develOP" ARRIBA del logo y el slogan "Construimos lo que imaginas" ABAJO, escritos con un **wipe izq→derecha (`clip-path: inset`) + cursor**, todo **MotionValue-driven (sin setState por frame)** — NO se reusó el `TypewriterText` viejo (era setState-por-char). Un solo driver `reveal` (0→1 escribe, 1→0 borra) maneja ambas líneas con leve stagger (develOP primero) vía sub-rangos; el borrado es el mismo wipe en reversa. Color: home = negro (`#09090b`), marketing = blanco (`#f4f4f5`). Tipografía = Geist Sans heredada del body (matchea el wordmark del Navbar): wordmark 600 / tracking 0.14em, slogan 300 / tracking 0.045em, ambos `clamp()` + `nowrap` (develOP nunca wrapea; el slogan entra en 1 renglón hasta ≥320px).
+
+### Posición (sin mover el logo)
+`IntroLockupText` reusa la MISMA matemática de footprint que `LogoStrokeOverlay` (`computeLogoOuterScale`/`logoHvis`/`LOGO_BOX_WORLD`) → ancla 0×0 en el centro del logo (mismo `translateY`), wordmark colgado por encima (`bottom: boxPx*0.40`) y slogan por debajo (`top: boxPx*0.42`). Tunables `WORDMARK_OFFSET_FRAC`/`SLOGAN_OFFSET_FRAC`/rangos de stagger en el componente.
+
+### Timing (no alarga el total de forma notable)
+- Escribe EN PARALELO al dibujado (mismo arranque), termina ~con el relleno → legible durante crossfade + hold/ventana interactiva existentes.
+- **HOME:** tras el hold se BORRA (wipe reversa, `HOME_TEXT_ERASE_SECONDS=0.5`) y RECIÉN ahí ocurre el flying — el texto NO sigue al logo. Mobile-home también borra antes del swap (no persiste sobre el hero real).
+- **MARKETING:** NO se borra → queda sólido y SUBE con el toldo (es hijo del root que hace el lift).
+- reduced-motion: home saltea el texto (default 0); marketing lo muestra estático (`textReveal=1`, sin escritura) y sube con el toldo.
+
+### Archivos tocados
+- `src/components/ui/IntroLockupText.tsx` — **NUEVO** (componente compartido).
+- `src/context/PreloaderContext.tsx` — `textReveal: MotionValue<number>` (aditivo, default 0 = sin texto; NO toca el enum/flujo).
+- `src/components/ui/Preloader.tsx` — home desktop+mobile: escribe en paralelo al trazo, borra antes del flying/swap. Tunables `HOME_TEXT_WRITE_SECONDS`/`HOME_TEXT_ERASE_SECONDS`.
+- `src/components/layout/Hero.tsx` — render del lockup (desktop z-[8], mobile z-20) color negro + reset en el guard `phase==='done'`.
+- `src/components/ui/MarketingIntro.tsx` — `textReveal` local, escribe en paralelo al trazo (sin borrado), color blanco, render dentro del root que sube con el toldo. Tunable `MARKETING_TEXT_WRITE_SECONDS`.
+
+### Verificación
+- ✅ `eslint` en los 5 archivos → único error = baseline `set-state-in-effect` del skip de automation en `PreloaderContext` (intencional). Cero nuevos.
+- ✅ `tsc --noEmit` → único error = baseline `@googleapis/webmasters`. Cero nuevos. Cero `any`.
+- ✅ Geometría at rest (`:3002`, `?e2e=1`; el lockup montea aunque clippeado en `reveal=0` → medible por `getBoundingClientRect`):
+  - **Desktop 1280×820:** develOP `cx=640` (centrado), slogan `cx=640`; ambos `nowrap` 1 renglón; negro `rgb(9,9,11)`; pesos 600/300; ~206px arriba / ~201px abajo del centro (simétrico); dentro del viewport (194→619 de 820).
+  - **Mobile 375×812:** develOP + slogan `cx=188` (centrados sobre el wrapper del logo, `cy=309`); 1 renglón; negro; slogan `w=158 < 375`; dentro del viewport (178→441).
+- ✅ Consola: sin errores nuevos (solo el hydration mismatch pre-existente del scroll-lock del `<html>`). Sin `ReferenceError` del componente/MotionValue nuevos.
+- ⏳ **COREOGRAFÍA (humano, por grabación):** el intro NO es observable por automation (skip con `?e2e=1`). Verificar: (1) home (negro) y marketing (blanco) escriben develOP arriba + slogan abajo junto al dibujado, legibles, SIN mover el logo; (2) mobile: develOP en 1 renglón y todo entra en pantalla; (3) HOME borra el texto ANTES del flying; (4) MARKETING el texto sube con el toldo; (5) el total no se alargó de forma notable; (6) home desktop/mobile y marketing sin regresión.
+
+### Pendientes / tunables
+- Offsets `WORDMARK_OFFSET_FRAC=0.40` / `SLOGAN_OFFSET_FRAC=0.42`, stagger (`WORDMARK_RANGE`/`SLOGAN_RANGE`), `HOME_TEXT_ERASE_SECONDS=0.5` y tamaños/tracking del `WipeLine`: ajustar contra la grabación si hace falta más aire o más tiempo de lectura.
+
+
+
+---
+
+## B16 — Dead Code Sweep: Toolchain + Baseline + Mapa (2026-06-08)
+
+**Rama:** `chore/dead-code-sweep` (desde `origin/main`, commit `31dc948`).
+**Objetivo único:** diagnóstico. Este sprint **no borró nada**.
+
+---
+
+### 1) Toolchain instalado (devDependencies)
+
+| Paquete | Versión |
+|---|---|
+| `knip` | ^6.16.1 |
+| `dependency-cruiser` | ^17.4.3 |
+| `eslint-plugin-unused-imports` | ^4.4.1 |
+| `@next/bundle-analyzer` | ^16.2.7 |
+
+Archivos de config creados: `knip.ts`, `.dependency-cruiser.cjs`.
+
+---
+
+### 2) Baseline — Gate de entrada
+
+| Check | Resultado |
+|---|---|
+| `npm ci` (+ postinstall `prisma generate`) | OK — 1022 paquetes |
+| `npx tsc --noEmit` | OK — Cero errores |
+| `npm run build --webpack` | OK — 30/30 rutas compiladas, cero errores |
+| `npx prisma migrate status` | OK — 57 migrations, DB up to date |
+
+---
+
+### 3) Smoke baseline (@smoke tags agregados a 8 specs)
+
+Tests etiquetados: `01-landing`, `02-chat-flow`, `03-lead-capture`, `06-admin-login`, `11-client-login`, `14-e2e-critical-flow`, `19-security`, `22-visual-regression` (2 describe blocks).
+
+**Resultado `npx playwright test --grep @smoke` (20 tests):**
+
+| Estado | Count | Detalle |
+|---|---|---|
+| PASSED | 5 | Auth-redirect guards + API cron secret |
+| SKIPPED | 5 | Chatbot widget no montado en build local (01, 02, 03) + 2 API security (404 endpoint) |
+| FAILED | 10 | 3 login tests (creds no disponibles) + 7 visual regression |
+
+Visual regression drift Valentino (NO regenerar snapshots — decision humana):
+- 4 admin snapshots: login no disponible en este contexto
+- 3 dashboard snapshots: layout height cambio 720px a 741px, 17-20% pixels distintos
+
+---
+
+### 4) Knip — Mapa de codigo muerto
+
+Config: `knip.ts` minimo — Next.js plugin + Playwright plugin auto-detectados; manual entries: `src/auth.ts`, `src/auth.config.ts`, `prisma/seed*.ts`, `prisma/migrate*.ts`.
+
+Total archivos fuente: 878 `.ts/.tsx`
+
+#### 4.1) Archivos huerfanos (67 / 878 = 7.6% — bajo el umbral 20%)
+
+NO TOCAR / confirmar con planificacion:
+- `src/components/canvas/AuroraBackground.tsx` — Three.js/R3F
+- `src/components/canvas/Interactive3DNetwork.tsx` — Three.js/R3F
+- `src/components/canvas/LiquidProject.tsx` — Three.js/R3F
+- `src/components/canvas/NeuralNetwork.tsx` — Three.js/R3F
+- `src/components/canvas/ReactiveBackground.tsx` — Three.js/R3F
+- `src/components/dashboard/CurrentMilestone.tsx` — Deferred B9.3 (ProjectMilestone)
+
+Grupos candidatos (decision humana por bloque):
+- Admin clients refactor (8 files): `src/app/(protected)/admin/clients/_components/` — client-card, client-detail-panels, client-list, client-overview, client-projects, client-support, health-score-display, module-toggle.
+- Public sections redesign Valentino (~28 files): sections/AI*.tsx, automation/*.tsx, ia/*.tsx, software/*.tsx, sections/web-development/*.tsx, home/PortalDemo.tsx.
+- Dashboard components (~6): AnalyticsPeriodSelector, AnimatedTaskList, DownloadReportButton, ExecutiveReportTemplate, LeakMeter, UpsellCard.
+- Server actions lib (~10): `src/lib/actions/` clients, invitations, leads, leads-constants, services, settings, tickets + metrics-actions, onboarding-actions, task-approvals.
+- Utilitarios (~11): `src/lib/cn.ts` (DUPLICADO EXACTO de utils.ts — genuino dead), design-patterns, premium-modules, HeroTitle.tsx, HyperText.tsx, SectionTransition.tsx, onboarding-tasks, chatbot/prisma/seed.ts, OnboardingWizard.tsx, convert-lead-dialog.tsx.
+
+Hallazgo confirmado: `src/lib/cn.ts` es copia exacta de `src/lib/utils.ts` (mismo contenido). Borrado seguro en Bloque post-sprint.
+
+#### 4.2) Dependencias no usadas (modo normal — 9 prod + 4 dev)
+
+Prod: `@hookform/resolvers`, `@next/swc-win32-x64-msvc`, `html2canvas`, `jspdf`, `maath`, `postprocessing`, `react-day-picker`, `react-hook-form`, `zustand` (SOSPECHOSO — verificar que sus stores no esten en archivos huerfanos).
+Dev: `@next/bundle-analyzer`, `eslint-plugin-unused-imports` (recien instalados sin configurar), `@types/bcryptjs`, `@types/diff`.
+
+Modo --production --strict: 34 deps flagueadas — inflado por los 5 canvas huerfanos que arrastran toda la cadena R3F/Three. No usar este numero para borrar.
+
+#### 4.3) Dependencias unlisted (importadas pero NO en package.json)
+
+- `three-stdlib`: importada en `src/components/3d/BrandedLogoWhite.tsx`, `HeroArtifact.tsx` (FROZEN), `Hero.tsx`, `BrandedIntroCanvas.tsx`. Agregar explicitamente o usar `@react-three/drei` que la reexporta.
+- `framer-motion`: importada en `sections/home/About.tsx`, `Portfolio.tsx`, `ui/KineticText.tsx`. El paquete instalado es `motion` v12. Migrar import a `motion`.
+- `jose`: importada en `src/lib/impersonation.ts`. Dep transitiva de `next-auth`. Agregar explicitamente.
+
+#### 4.4) Exports sin uso (253)
+
+La mayoria proviene de archivos huerfanos. Notables en archivos NO huerfanos:
+- `getPendingInsightsByOrgSlug`, `getInsightsCountForBot`, `getInsightHistoryByOrgSlug` en `src/modules/chatbot/server/insights/` — DEFERRED B9.3, NO TOCAR.
+- Varios Zod schemas (`*IdSchema`, `*StatusSchema`) — tipico de Server Actions, posibles falsos positivos.
+
+---
+
+### 5) Dependency-cruiser — Ciclos
+
+878 modulos, 1803 dependencias cruised. 16 warnings, 0 errors.
+
+Ciclos (todos warn, no bloquean build):
+- kb-templates barrel (10 ciclos): `src/modules/chatbot/components/admin/onboarding/kb-templates/index.ts` con cada template individual. Patron barrel circular clasico. Fix: mover tipos compartidos a `types.ts` separado.
+- BotDetailClient y tabs (6 ciclos): `BotDetailClient.tsx` con OverviewTab, LeadsTab, KnowledgeTab, ConversationsTab, ConfigTab, ActivityTab. Los tabs importan algo del parent.
+
+---
+
+### 6) Declaracion de cierre
+
+Este sprint no borro nada. No se uso `knip --fix`. No se toco codigo de producto.
+
+El borrado en bloques posteriores requiere:
+- (a) Reconciliar trabajo del polish local (chore/wf-home, experimento) contra origin/main.
+- (b) Decision humana candidato por candidato.
+- Orden sugerido: Bloque 1 = deps unlisted (three-stdlib/framer-motion/jose) — Bloque 2 = `src/lib/cn.ts` (duplicado confirmado) — Bloque 3 = public sections Valentino (28 archivos) — Bloque 4 = admin clients refactor (8 archivos). Confirmar con Franco cada bloque.
+
+---
+## ✅ 0.2 — Mapa confiable y clasificado (config cerrada, cero borrado)   ·   2026-06-09
+
+**Objetivo**: cerrar la config de knip, resolver la cascada zustand, aclarar la contradiccion de canvas/, validar con ts-prune y muestra manual, y producir el mapa clasificado por riesgo con prueba-de-muerte por tipo. No se borro nada.
+
+**Pre-check**:
+- Branch: `chore/dead-code-sweep` (sobre origin/main) ✅
+- Toolchain: knip 6.16, ts-prune 0.10.3, dependency-cruiser 17.4 ✅
+- `knip` regular: exit 1 (68 archivos huerfanos, 9 prod deps, 4 dev deps) — baseline estable
+
+---
+
+### 1) Cascada zustand — RESUELTO
+
+**Veredicto: MUERTO REAL. No habia falso positivo.**
+
+Grep completo de `from 'zustand'` y `from "zustand"` en todo `src/`: **cero resultados**.
+No existe `src/store/` ni `src/stores/`. Zustand esta instalado pero nunca se importo.
+La sospecha del Sprint 0.1 estaba bien apuntada — la respuesta es que es codigo muerto, no falso positivo.
+
+**Accion de config**: ninguna. knip estaba correcto.
+
+---
+
+### 2) Config cerrada — Estado del mapa regular vs strict
+
+**`knip` (regular)** → FIABLE. 68 archivos + 9 prod deps + 4 dev deps. Config actual es correcta.
+
+**`knip --production --strict`** → NO FIABLE para este proyecto. Reporta 34 deps "unused" incluyendo `clsx`, `tailwind-merge`, `recharts`, `lenis`, `@ai-sdk/*`, `resend`, `@react-email/components` — que SI son importados en server components, rutas, y providers. Causa: modo strict excluye codigo server-side de ciertos paths y no resuelve bien las entradas SSR del plugin Next.js.
+
+**Decision**: el modo de referencia es `knip` regular. No usar `--production --strict` para decisiones de borrado.
+
+**Configuration hint** (`Add entry and/or refine project files (68 unused files)`): NO es un error de config. Confirma que los 68 archivos son genuinamente inalcanzables. No se agrega ni ignora nada — la config esta cerrada.
+
+**knip.ts: sin cambios.** La config del Sprint 0.1 es estable y correcta.
+
+---
+
+### 3) Canvas/ — Contradiccion aclarada
+
+Listado real de `src/components/canvas/`:
+| Archivo | Estado | Evidencia |
+|---|---|---|
+| `DotMatrix.tsx` | **VIVO** | Importado en login, forgot-password, accept-invite (dynamic), BrandedIntroCanvas, Hero.tsx |
+| `HeroBackground.tsx` | **VIVO** | Importado en `app/web-development/page.tsx` (dynamic) |
+| `AuroraBackground.tsx` | MUERTO | Cero imports externos |
+| `Interactive3DNetwork.tsx` | MUERTO | Cero imports externos |
+| `LiquidProject.tsx` | MUERTO | Cero imports externos |
+| `NeuralNetwork.tsx` | MUERTO | Cero imports externos |
+| `ReactiveBackground.tsx` | MUERTO | Cero imports externos |
+
+**Three.js / R3F**: `three`, `@react-three/drei`, `@react-three/fiber` NO estan en la lista de unused deps del knip regular porque DotMatrix y HeroBackground (vivos) + HeroArtifact y BrandedLogoWhite (3d/, frozen/alive) los consumen. La cadena Three esta viva.
+
+`maath` SI esta en unused deps — cero imports en src/. Era usado solo por los 5 canvas muertos.
+
+`postprocessing` (bare) esta en unused deps — correcto. Los imports son `from '@react-three/postprocessing'`, no del paquete bare. Es dep transitiva redundante en package.json.
+
+---
+
+### 4) Validacion cruzada: ts-prune vs knip
+
+ts-prune (instalado via npx 0.10.3) concuerda en todos los huerfanos clave:
+- Confirma canvas orphans (AuroraBackground, Interactive3DNetwork, LiquidProject, NeuralNetwork, ReactiveBackground)
+- Confirma admin dashboard orphans (AnalyticsPeriodSelector, AnimatedTaskList, CurrentMilestone, LeakMeter, UpsellCard)
+- Confirma lib/actions orphans
+- Agrega ~140 tipos sin uso en barrels del modulo chatbot (`src/modules/chatbot/index.server.ts`, scoring, tools, prompts, etc.) — estas son re-exportaciones de barrel que ninguna otra capa consume directamente. No contradicen a knip; son una capa adicional de limpieza posible.
+
+**Diferencias knip vs ts-prune:**
+- ts-prune NO detecta archivos completos sin uso — solo exports dentro de archivos. knip detecta ambos.
+- ts-prune reporta `(used in module)` en ~60 exports que son usados internamente pero no re-exportados hacia fuera — no son problemas reales.
+- **Sin contradicciones verdaderas.** Donde ts-prune marca algo que knip no marca, es porque pertenece a un archivo vivo con un export que nadie consume externamente (normal en barrels grandes).
+
+---
+
+### 5) Muestra manual — 10 items verificados
+
+| Item | Tipo | Prueba-de-muerte | Veredicto |
+|---|---|---|---|
+| `src/lib/cn.ts` | util | `grep "from '@/lib/cn'"` → 0 resultados; archivo identico a utils.ts (6 lineas) | SEGURO |
+| `zustand` dep | dep | `grep "from 'zustand'"` en src/ → 0 resultados | SEGURO |
+| `maath` dep | dep | `grep "from 'maath'"` en src/ → 0 resultados | SEGURO |
+| `client-card.tsx` (admin) | componente | grep del nombre → solo refs internas al bloque orphan | SEGURO |
+| `AuroraBackground.tsx` | componente 3D | grep del nombre → solo definicion propia | NO-TOCAR (zona 3D) |
+| `CurrentMilestone.tsx` | componente | grep del nombre → solo definicion propia | NO-TOCAR (B9.3 deferred) |
+| `metrics-actions.ts` | server action | grep del nombre → 0 imports | VERIFICAR |
+| `lib/actions/clients.ts` | server action | grep del nombre → 0 imports externos (cascade: importa seed-tasks-for-org orphan) | VERIFICAR |
+| `onboarding-actions.ts` | server action | importado solo por `OnboardingWizard.tsx` (tambien orphan) — cascade | VERIFICAR |
+| `Interactive3DNetwork.tsx` | componente 3D | grep del nombre → solo definicion propia | NO-TOCAR (zona 3D) |
+
+---
+
+### 6) Mapa clasificado — 68 archivos + 13 deps
+
+#### SEGURO (9 archivos + 10 deps) — prueba-de-muerte pasada sin ambiguedad
+
+**Archivos:**
+- `src/lib/cn.ts` — duplicado exacto de utils.ts (mismas 6 lineas), cero imports desde `@/lib/cn`
+- `src/app/(protected)/admin/clients/_components/client-card.tsx`
+- `src/app/(protected)/admin/clients/_components/client-detail-panels.tsx`
+- `src/app/(protected)/admin/clients/_components/client-list.tsx`
+- `src/app/(protected)/admin/clients/_components/client-overview.tsx`
+- `src/app/(protected)/admin/clients/_components/client-projects.tsx`
+- `src/app/(protected)/admin/clients/_components/client-support.tsx`
+- `src/app/(protected)/admin/clients/_components/health-score-display.tsx`
+- `src/app/(protected)/admin/clients/_components/module-toggle.tsx`
+
+**Deps prod (7):**
+- `zustand` — cero imports en src/
+- `maath` — cero imports en src/
+- `react-hook-form` — cero imports
+- `@hookform/resolvers` — par de react-hook-form, cero imports
+- `html2canvas` — cero imports (par de DownloadReportButton orphan)
+- `jspdf` — cero imports (par de DownloadReportButton orphan)
+- `react-day-picker` — cero imports
+
+**Deps dev (3):**
+- `@types/bcryptjs` — cero uso de tipos en src/
+- `@types/diff` — cero uso de tipos en src/
+- `eslint-plugin-unused-imports` — no referenciado en `eslint.config.mjs`
+
+---
+
+#### NO-TOCAR (6 archivos + 2 deps) — pendiente decision humana o feature diferida
+
+**Archivos:**
+- `src/components/canvas/AuroraBackground.tsx` — zona animada/3D, muerto pero NO tocar sin decision con Valentino
+- `src/components/canvas/Interactive3DNetwork.tsx` — idem
+- `src/components/canvas/LiquidProject.tsx` — idem
+- `src/components/canvas/NeuralNetwork.tsx` — idem
+- `src/components/canvas/ReactiveBackground.tsx` — idem
+- `src/components/dashboard/CurrentMilestone.tsx` — feature diferida B9.3, NO borrar
+
+**Deps (2):**
+- `@next/swc-win32-x64-msvc` — dep de build para entorno Windows/CI, no importada directamente pero necesaria para compilar en este SO
+- `@next/bundle-analyzer` — instalado en anticipacion al Sprint 0.3 (bundle baseline), no wired aun en next.config.ts
+
+---
+
+#### VERIFICAR (53 archivos + 1 dep) — knip confirma orphan, requieren decision de negocio/contenido antes de borrar
+
+**Server actions (11 archivos):**
+- `src/actions/admin/onboarding-tasks.ts`
+- `src/actions/metrics-actions.ts`
+- `src/actions/onboarding-actions.ts` (cascade: importado solo por OnboardingWizard orphan)
+- `src/actions/task-approvals.ts`
+- `src/lib/actions/clients.ts` (cascade interna con seed-tasks-for-org)
+- `src/lib/actions/invitations.ts` (cascade interna con seed-tasks-for-org)
+- `src/lib/actions/leads-constants.ts`
+- `src/lib/actions/leads.ts`
+- `src/lib/actions/services.ts`
+- `src/lib/actions/settings.ts`
+- `src/lib/actions/tickets.ts`
+
+**Sections publicas + marketing (25 archivos):**
+- `src/components/automation/ComparativaAutomation.tsx`
+- `src/components/automation/SocialProofAutomation.tsx`
+- `src/components/ia/BentoIA.tsx`
+- `src/components/ia/CalculadorIA.tsx`
+- `src/components/ia/VaultIA.tsx`
+- `src/components/software/ProcesoSoftware.tsx`
+- `src/components/software/ShowcaseSoftware.tsx`
+- `src/components/software/VaultSoftware.tsx`
+- `src/components/sections/AIBentoGrid.tsx`
+- `src/components/sections/AILargeCta.tsx`
+- `src/components/sections/AIPipelineSection.tsx`
+- `src/components/sections/AITechMarquee.tsx`
+- `src/components/sections/EnterpriseStandards.tsx`
+- `src/components/sections/FeedbackLoop.tsx`
+- `src/components/sections/home/PortalDemo.tsx`
+- `src/components/sections/ProcessAutomationCta.tsx`
+- `src/components/sections/ProcessAutomationMetrics.tsx`
+- `src/components/sections/ROICalculator.tsx`
+- `src/components/sections/SoftwareArchitecture.tsx`
+- `src/components/sections/TeamSection.tsx`
+- `src/components/sections/TemplateWarehouse.tsx`
+- `src/components/sections/web-development/PortfolioWebCases.tsx`
+- `src/components/sections/web-development/ShowcaseSection.tsx`
+- `src/components/sections/web-development/WebDevelopmentObjections.tsx`
+- `src/components/sections/web-development/WebDevelopmentSensory.tsx`
+
+**Dashboard + UI + onboarding (11 archivos):**
+- `src/components/dashboard/AnalyticsPeriodSelector.tsx`
+- `src/components/dashboard/AnimatedTaskList.tsx`
+- `src/components/dashboard/DownloadReportButton.tsx`
+- `src/components/dashboard/ExecutiveReportTemplate.tsx`
+- `src/components/dashboard/LeakMeter.tsx`
+- `src/components/dashboard/UpsellCard.tsx`
+- `src/components/layout/SectionTransition.tsx`
+- `src/components/onboarding/OnboardingWizard.tsx`
+- `src/components/ui/HeroTitle.tsx`
+- `src/components/ui/HyperText.tsx`
+- `src/app/(protected)/admin/projects/_components/convert-lead-dialog.tsx`
+
+**Libs + datos (6 archivos):**
+- `src/lib/data/onboarding-tasks.ts` (cascade de lib/actions orphans)
+- `src/lib/design-patterns.ts`
+- `src/lib/onboarding/seed-tasks-for-org.ts` (cascade de lib/actions orphans)
+- `src/lib/premium-modules.ts`
+- `src/modules/chatbot/prisma/seed.ts`
+- `tests/integration/alerts-detector.spec.ts`
+
+**Dep (1):**
+- `postprocessing` (bare) — dep transitiva de `@react-three/postprocessing`, no importada directamente; npm la instala automaticamente como peer dep
+
+---
+
+### 6b) Hallazgos adicionales (verificacion 2026-06-10)
+
+**Unlisted binary — VERIFICAR:**
+- `tsx` (binary) — `prisma.config.ts:seed` usa `'npx tsx prisma/seed.ts'` pero `tsx` no esta en `package.json` (solo `ts-node`). El `npx` lo descarga on-demand; falla si el registry es inaccesible o se quiere pin de version. Accion sugerida: agregar `tsx` a devDependencies o cambiar el comando a `ts-node --esm`.
+
+**Duplicate exports (13) — NO son dead code:**
+Los 13 archivos vivos exportan el mismo simbolo tanto named como default (`export function Foo` + `export default Foo`). Knip lo flaguea como duplicado. No es codigo muerto — es un patron de compatibilidad (algunos importadores usan named, otros default). No incluir en sprints de borrado. Archivos: BrandedLogoWhite, DotMatrix, DynamicDock, Navbar, BrandedIntroCanvas, IntroLockupText, LogoStrokeOverlay, MarketingIntro, ActionRequiredEmail, TicketReplyEmail, y 3 schemas de admin (ClientOrganizationIdSchema, MessageOrganizationIdSchema, TicketIdSchema).
+
+---
+
+### 7) Cascadas identificadas
+
+- **cascade-onboarding**: `OnboardingWizard.tsx` → `onboarding-actions.ts` → cascade muerta completa
+- **cascade-lib-actions**: `lib/actions/clients.ts` + `lib/actions/invitations.ts` → `lib/onboarding/seed-tasks-for-org.ts` → `lib/data/onboarding-tasks.ts` → cascade muerta completa
+- **cascade-admin-clients**: 8 archivos en `admin/clients/_components/` con refs cruzadas internas → muertos juntos
+- **cascade-canvas**: 5 canvas orphans que importan `@react-three/*` y `maath` — los imports de estas deps no cuentan porque los archivos son inalcanzables
+
+---
+
+### 8) Declaracion de cierre
+
+Este sprint no borro nada. No se uso `knip --fix`. No se toco codigo de producto ni config de aplicacion.
+
+Producido: mapa confiable con prueba-de-muerte por tipo, config knip.ts estabilizada (sin cambios necesarios), cascadas documentadas, falsos positivos eliminados.
+
+Verificado en segunda corrida el 2026-06-10: knip fresco confirma exactamente 68 archivos + 9 prod + 4 dev deps. Dos items adicionales documentados en §6b (tsx binary + duplicate exports). Sin contradicciones con la corrida anterior.
+
+**Pendiente para sprints de borrado (NOT de este sprint):**
+- Decision humana sobre zona animada/3D (canvas 5 orphans) antes de cualquier toque
+- Coordinacion con Valentino para sections publicas (Bloque 3)
+- Sprint 0.3: bundle baseline (activar `@next/bundle-analyzer` en next.config.ts)
+- Sprint 0.6: canary — verificar que nada roto tras el primer bloque de borrado
+- Orden de borrado sugerido: deps SEGURO → cn.ts → admin clients → lib/actions cascade → sections (con Valentino) → canvas (con decision humana) → deps NO-TOCAR en ese momento
+
+Verificacion humana pendiente: revisar el mapa de knip + candidatos marcados en el chat de planificacion antes de arrancar cualquier borrado.
+
+---
+## ✅ Sprint 0.2 — rm deps muertas zustand + react-day-picker   ·   2026-06-10
+
+**Objetivo:** ciclo borrar → gate → commit → revert validado. Eliminar las 2 deps con cero imports confirmados.
+
+**Paso 0 — Drift en origin/main:**
+`git fetch origin` reveló 3 commits nuevos en origin/main (chatbot estético: cdf690c, f25f6d6, 3bc2349).
+`git grep "from 'zustand'\|react-day-picker" origin/main -- src/` → 0 resultados. Deps siguen muertas.
+
+**Paso 1 — Prueba-de-muerte fresca (rama chore/dead-code-sweep):**
+- `git grep -n "from 'zustand'..." src/` → 0 matches
+- `git grep -n "react-day-picker" src/` → 0 matches
+
+**Paso 2 — Desinstalación:**
+`npm uninstall zustand react-day-picker` → removed 4 packages (zustand + react-day-picker + deps transitivas).
+
+**Paso 3 — Reinstalar limpio:**
+`npm ci` → 1074 packages, Prisma generado. Exit 0.
+
+**Paso 4 — Gate:**
+- `npx tsc --noEmit` → sin output (exit 0) ✓
+- `npm run build` → "Compiled successfully in 80s", 30/30 páginas generadas ✓
+
+**Paso 5 — Commit atómico:**
+SHA `0f57d75` — solo package.json + package-lock.json (49 ins / 52 del). Reversible.
+
+**Paso 6 — Canary (reversibilidad):**
+Rama temporal `canary/revert-test`:
+- `git revert --no-edit HEAD` → OK, package.json/lockfile restaurados a pre-borrado.
+- `npm install` → zustand y react-day-picker volvieron (`node -e "require('zustand')"` → OK).
+- `npx tsc --noEmit` → exit 0 ✓.
+Nota: `npm ci` falló en el canary por drift de @emnapi en el lockfile pre-borrado (sub-dep de sharp/wasm ajeno a estas deps). Se usó `npm install` — el comportamiento de restauración es correcto.
+Rama temporal descartada. Commit `0f57d75` se mantiene en chore/dead-code-sweep.
+
+**Declaración:**
+Solo se borraron `zustand` y `react-day-picker`. El resto de las deps huérfanas (`react-hook-form`, `@hookform/resolvers`, `html2canvas`, `jspdf`, `maath`) NO se tocaron — caen como consecuencia de decidir sus orphans (OnboardingWizard, DownloadReportButton, los 5 canvas).
+
+**Pendiente humano antes de seguir:**
+- Freeze con Valentino para los batches grandes.
+- Decision sobre zona animada/3D (los 5 canvas orphans).
+- Confirmacion de Valentino sobre admin/clients y las sections publicas.
+>>>>>>> 249bddb79309d081848768fa22a8327f5cd3f67b

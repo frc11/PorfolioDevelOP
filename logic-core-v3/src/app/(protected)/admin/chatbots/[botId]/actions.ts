@@ -7,6 +7,15 @@ import { logAdminAction } from '@/lib/audit-log'
 import { sendTransactionalEmail } from '@/lib/email/brevo-service'
 import { botActivatedEmail } from '@/lib/email/templates/bot-activated'
 import { invalidateBotCache } from '@/modules/chatbot/server/conversation'
+import { z } from 'zod'
+
+// P1-12: validación server-side de los args (un POST crafteado podría mandar
+// un botId vacío o un newActive no-booleano — los args de una server action
+// se deserializan sin garantías de tipo en runtime).
+const ToggleBotActiveSchema = z.object({
+  botId: z.string().min(1, 'Bot inválido.'),
+  newActive: z.boolean(),
+})
 
 export async function toggleBotActiveAction(
   botId: string,
@@ -18,6 +27,11 @@ export async function toggleBotActiveAction(
   }
   const userId = session.user.id
   if (!userId) return { ok: false, error: 'Forbidden' }
+
+  const parsed = ToggleBotActiveSchema.safeParse({ botId, newActive })
+  if (!parsed.success) {
+    return { ok: false, error: parsed.error.issues[0]?.message ?? 'Datos inválidos.' }
+  }
 
   try {
     const bot = await prisma.botConfig.update({
