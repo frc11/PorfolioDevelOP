@@ -1,14 +1,18 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import { createPortal } from 'react-dom'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { motion, AnimatePresence } from 'motion/react'
-import { ChevronLeft, Play, Pause, ExternalLink, Bot } from 'lucide-react'
+import { ChevronLeft, Play, Pause, ExternalLink, Bot, X } from 'lucide-react'
 import Link from 'next/link'
 import { toast } from 'sonner'
 import type { Prisma } from '@prisma/client'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
+import { useIsClient } from '@/lib/use-is-client'
+import { ActivationModal } from '@/modules/chatbot/components/admin/activation/ActivationModal'
+import { runPreflightChecks, type PreflightCheck } from '@/modules/chatbot/server/admin/preflightChecks'
 import { toggleBotActiveAction } from './actions'
 import { OverviewTab } from './tabs/OverviewTab'
 import { ConfigTab } from './tabs/ConfigTab'
@@ -109,6 +113,11 @@ export function BotDetailClient({ bot, initialTab, initialEvents, monthlyUsage, 
   const [activeTab, setActiveTab] = useState<TabId>(initialTab)
   const [isActive, setIsActive] = useState(bot.isActive)
   const [togglePending, startToggle] = useTransition()
+  const [showPauseConfirm, setShowPauseConfirm] = useState(false)
+  const [showActivationModal, setShowActivationModal] = useState(false)
+  const [activationChecks, setActivationChecks] = useState<PreflightCheck[]>([])
+  const [activating, setActivating] = useState(false)
+  const mounted = useIsClient()
 
   function changeTab(tab: TabId) {
     setActiveTab(tab)
@@ -118,18 +127,49 @@ export function BotDetailClient({ bot, initialTab, initialEvents, monthlyUsage, 
   }
 
   function handleToggleActive() {
+    if (isActive) {
+      setShowPauseConfirm(true)
+    } else {
+      startToggle(async () => {
+        try {
+          const checks = await runPreflightChecks(bot.id)
+          setActivationChecks(checks)
+          setShowActivationModal(true)
+        } catch (error) {
+          toast.error(`No se pudieron correr los checks: ${String(error)}`)
+        }
+      })
+    }
+  }
+
+  function handleConfirmPause() {
+    setShowPauseConfirm(false)
     startToggle(async () => {
-      const result = await toggleBotActiveAction(bot.id, !isActive)
+      const result = await toggleBotActiveAction(bot.id, false)
       if (result.ok) {
-        setIsActive(prev => !prev)
-        toast.success(isActive ? 'Bot pausado' : 'Bot activado')
+        setIsActive(false)
+        toast.success('Bot pausado')
       } else {
         toast.error(result.error)
       }
     })
   }
 
+  async function handleConfirmActivation(): Promise<void> {
+    setActivating(true)
+    const result = await toggleBotActiveAction(bot.id, true)
+    setActivating(false)
+    if (result.ok) {
+      setIsActive(true)
+      setShowActivationModal(false)
+      toast.success('Bot activado')
+    } else {
+      toast.error(result.error)
+    }
+  }
+
   return (
+    <>
     <div className="space-y-6">
       {/* Header */}
       <div>
@@ -248,5 +288,73 @@ export function BotDetailClient({ bot, initialTab, initialEvents, monthlyUsage, 
         </motion.div>
       </AnimatePresence>
     </div>
+
+    <ActivationModal
+      open={showActivationModal}
+      onClose={() => setShowActivationModal(false)}
+      onConfirm={handleConfirmActivation}
+      checks={activationChecks}
+      loading={activating}
+      botName={bot.botName}
+      botSlug={bot.slug}
+    />
+
+    {mounted && createPortal(
+      <AnimatePresence>
+        {showPauseConfirm && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[200] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"
+            onClick={() => setShowPauseConfirm(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="w-full max-w-sm rounded-3xl border border-white/10 bg-zinc-950 p-6"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-start justify-between gap-4 mb-4">
+                <div>
+                  <h2 className="text-base font-semibold text-zinc-100">Pausar bot</h2>
+                  <p className="mt-1 text-sm text-zinc-400">
+                    El bot dejará de responder en producción. Podés reactivarlo en cualquier momento.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowPauseConfirm(false)}
+                  className="shrink-0 rounded-xl p-1.5 hover:bg-white/[0.05]"
+                >
+                  <X className="h-4 w-4 text-zinc-400" strokeWidth={1.5} />
+                </button>
+              </div>
+              <div className="flex justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => setShowPauseConfirm(false)}
+                  disabled={togglePending}
+                  className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-2 text-sm text-zinc-300 hover:bg-white/[0.08] disabled:opacity-50"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  onClick={handleConfirmPause}
+                  disabled={togglePending}
+                  className="rounded-2xl bg-red-500/90 px-4 py-2 text-sm font-medium text-white hover:bg-red-500 disabled:opacity-50"
+                >
+                  {togglePending ? 'Pausando...' : 'Pausar bot'}
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>,
+      document.body,
+    )}
+    </>
   )
 }

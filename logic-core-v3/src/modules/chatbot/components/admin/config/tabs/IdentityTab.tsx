@@ -3,7 +3,6 @@
 import { Field } from '../Field'
 import { Input } from '../Input'
 import { Select } from '@/components/ui'
-import { Toggle } from '../Toggle'
 import type { BotConfigTabProps } from '../types'
 
 const INDUSTRIES = [
@@ -37,11 +36,7 @@ const TONES = [
   { value: 'casual', label: 'Casual' },
 ]
 
-interface IdentityTabProps extends BotConfigTabProps {
-  onRequestActivation: () => void
-}
-
-export function IdentityTab({ state, update, onRequestActivation }: IdentityTabProps) {
+export function IdentityTab({ state, update }: BotConfigTabProps) {
   return (
     <div className="space-y-6">
       <Field label="Nombre del bot" required hint="Como se presenta al usuario">
@@ -68,28 +63,6 @@ export function IdentityTab({ state, update, onRequestActivation }: IdentityTabP
           options={TONES}
         />
       </Field>
-
-      <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-4">
-        <div className="flex items-center justify-between gap-4">
-          <div>
-            <p className="text-sm font-medium text-zinc-200">Bot activo</p>
-            <p className="mt-0.5 text-xs text-zinc-500">
-              Cuando esta activo, responde en produccion
-            </p>
-          </div>
-          <Toggle
-            checked={state.isActive}
-            onChange={(value) => {
-              if (value) {
-                onRequestActivation()
-              } else {
-                update('isActive', false)
-              }
-            }}
-            label="Bot activo"
-          />
-        </div>
-      </div>
     </div>
   )
 }

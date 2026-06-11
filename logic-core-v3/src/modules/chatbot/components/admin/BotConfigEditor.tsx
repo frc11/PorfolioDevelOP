@@ -8,9 +8,7 @@ import { useIsClient } from './useIsClient'
 import { toast } from 'sonner'
 import { saveBotConfig, type BotConfigInput } from '../../server/admin/saveBotConfig'
 import { saveBotConfigByOrgSlug } from '../../server/admin/saveBotConfigByOrgSlug'
-import { runPreflightChecks, type PreflightCheck } from '../../server/admin/preflightChecks'
 import { sendTestNotification } from '../../server/admin/sendTestNotification'
-import { ActivationModal } from './activation/ActivationModal'
 import { BotConfigDiffModal } from './config/BotConfigDiffModal'
 import { BotConfigPreview, type BotPreviewState } from '../preview'
 import { ConfigTabs, type ConfigTab } from './config/ConfigTabs'
@@ -23,6 +21,7 @@ import type { BotConfigEditorState } from './config/types'
 
 type BotConfigEditorInitial = BotConfigInput & {
   slug?: string
+  isActive: boolean
 }
 
 interface BotConfigEditorProps {
@@ -53,8 +52,6 @@ export function BotConfigEditor({ initial, orgSlug, onSave }: BotConfigEditorPro
   const [initialState, setInitialState] = useState<BotConfigEditorState>(() => normalizeInitial(initial))
   const [state, setState] = useState<BotConfigEditorState>(() => normalizeInitial(initial))
   const [activeTab, setActiveTab] = useState<ConfigTab>('identity')
-  const [activationChecks, setActivationChecks] = useState<PreflightCheck[]>([])
-  const [showActivationModal, setShowActivationModal] = useState(false)
   const [showDiff, setShowDiff] = useState(false)
   const [saving, setSaving] = useState(false)
   const slug = initial.slug ?? orgSlug ?? 'sin-slug'
@@ -100,45 +97,6 @@ export function BotConfigEditor({ initial, orgSlug, onSave }: BotConfigEditorPro
     toast.promise(promise, {
       loading: 'Guardando configuracion...',
       success: 'Cambios guardados',
-      error: (error: Error) => `Error: ${error.message}`,
-    })
-
-    try {
-      await promise
-    } catch {
-      // toast.promise muestra el error.
-    } finally {
-      setSaving(false)
-    }
-  }
-
-  async function handleRequestActivation() {
-    setSaving(true)
-    try {
-      const checks = await runPreflightChecks(state.botConfigId)
-      setActivationChecks(checks)
-      setShowActivationModal(true)
-    } catch (error) {
-      toast.error(`No se pudieron correr los checks: ${String(error)}`)
-    } finally {
-      setSaving(false)
-    }
-  }
-
-  async function handleConfirmActivation() {
-    const nextState = { ...state, isActive: true }
-    setSaving(true)
-
-    const promise = saveState(nextState).then((result) => {
-      setState(nextState)
-      setInitialState(nextState)
-      setShowActivationModal(false)
-      return result
-    })
-
-    toast.promise(promise, {
-      loading: 'Activando bot...',
-      success: 'Bot activado',
       error: (error: Error) => `Error: ${error.message}`,
     })
 
@@ -201,11 +159,7 @@ export function BotConfigEditor({ initial, orgSlug, onSave }: BotConfigEditorPro
 
           <div className="rounded-3xl border border-white/10 bg-white/[0.02] p-6">
             {activeTab === 'identity' && (
-              <IdentityTab
-                state={state}
-                update={update}
-                onRequestActivation={handleRequestActivation}
-              />
+              <IdentityTab state={state} update={update} />
             )}
             {activeTab === 'appearance' && <AppearanceTab state={state} update={update} />}
             {activeTab === 'style' && <StyleTab state={state} update={update} />}
@@ -215,19 +169,9 @@ export function BotConfigEditor({ initial, orgSlug, onSave }: BotConfigEditorPro
         </div>
 
         <aside className="lg:sticky lg:top-6 lg:self-start">
-          <BotConfigPreview state={adminStateToPreview(state)} />
+          <BotConfigPreview state={adminStateToPreview(state, initial.isActive)} />
         </aside>
       </div>
-
-      <ActivationModal
-        open={showActivationModal}
-        onClose={() => setShowActivationModal(false)}
-        onConfirm={handleConfirmActivation}
-        checks={activationChecks}
-        loading={saving}
-        botName={state.botName}
-        botSlug={slug}
-      />
 
       <BotConfigDiffModal
         open={showDiff}
@@ -282,7 +226,6 @@ function normalizeInitial(initial: BotConfigEditorInitial): BotConfigEditorState
   return {
     botConfigId: initial.botConfigId,
     botName: initial.botName ?? 'Asistente',
-    isActive: Boolean(initial.isActive),
     industry: initial.industry ?? DEFAULTS.industry,
     tone: initial.tone ?? DEFAULTS.tone,
     welcomeMessage: initial.welcomeMessage ?? '',
@@ -362,10 +305,10 @@ function countExposedEditableFields(_state: BotConfigEditorState): number {
 }
 
 /** CC.4 — Adapta el state del editor admin al subset que consume el preview compartido. */
-function adminStateToPreview(state: BotConfigEditorState): BotPreviewState {
+function adminStateToPreview(state: BotConfigEditorState, isActive: boolean): BotPreviewState {
   return {
     botName: state.botName,
-    isActive: state.isActive,
+    isActive,
     accentColor: state.accentColor,
     accentSecondary: state.accentSecondary,
     chatSurfaceTint: state.chatSurfaceTint,

@@ -18,7 +18,6 @@ const quickReplySchema = z.object({
 const SaveBotConfigInputSchema = z.object({
   orgSlug: z.string().min(1),
   botName: z.string().min(1).max(50),
-  isActive: z.boolean(),
   industry: z.string().min(1).max(50),
   tone: z.string().min(1).max(50),
   welcomeMessage: z.string().max(500),
@@ -114,11 +113,7 @@ export async function saveBotConfigByOrgSlug(
       userId: user.id ?? 'unknown',
       userEmail: user.email,
       userName: user.name,
-      actionType: before.isActive !== after.isActive
-        ? after.isActive
-          ? 'BOT_ACTIVATED'
-          : 'BOT_DEACTIVATED'
-        : 'BOT_CONFIG_UPDATED',
+      actionType: 'BOT_CONFIG_UPDATED',
       action: `Actualizo config del bot "${after.botName}"`,
       targetType: 'BotConfig',
       targetId: after.id,

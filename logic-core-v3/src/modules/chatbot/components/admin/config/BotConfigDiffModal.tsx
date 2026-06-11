@@ -8,7 +8,6 @@ import type { BotConfigEditorState } from './types'
 
 const FIELD_LABELS: Partial<Record<keyof BotConfigEditorState, string>> = {
   botName: 'Nombre del bot',
-  isActive: 'Estado',
   industry: 'Industria',
   tone: 'Tono',
   welcomeMessage: 'Mensaje de bienvenida',
