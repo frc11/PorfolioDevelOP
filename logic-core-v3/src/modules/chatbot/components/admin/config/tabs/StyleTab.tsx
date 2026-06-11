@@ -1,7 +1,7 @@
 'use client'
 
 import { Field } from '../Field'
-import { Select } from '../Select'
+import { Select } from '@/components/ui'
 import type { BotConfigTabProps } from '../types'
 
 export function StyleTab({ state, update }: BotConfigTabProps) {

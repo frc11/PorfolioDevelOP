@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { X } from 'lucide-react'
-import { Button, Input } from '@/components/ui'
+import { Button, Input, Select } from '@/components/ui'
 import {
   createLead,
   updateLead,
@@ -250,7 +250,7 @@ export function LeadForm({ lead, triggerLabel = 'Nuevo lead' }: LeadFormProps) {
 
                 <div>
                   <label className="mb-2 block text-sm font-medium text-zinc-200">Origen</label>
-                  <select
+                  <Select
                     value={formState.source}
                     onChange={(event) => updateField('source', event.target.value)}
                     className={inputClassName}
@@ -261,12 +261,12 @@ export function LeadForm({ lead, triggerLabel = 'Nuevo lead' }: LeadFormProps) {
                         {option}
                       </option>
                     ))}
-                  </select>
+                  </Select>
                 </div>
 
                 <div>
                   <label className="mb-2 block text-sm font-medium text-zinc-200">Servicio</label>
-                  <select
+                  <Select
                     value={formState.serviceType}
                     onChange={(event) =>
                       updateField('serviceType', event.target.value as LeadFormState['serviceType'])
@@ -279,7 +279,7 @@ export function LeadForm({ lead, triggerLabel = 'Nuevo lead' }: LeadFormProps) {
                         {option.label}
                       </option>
                     ))}
-                  </select>
+                  </Select>
                 </div>
 
                 <div>

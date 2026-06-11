@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
+import { Select } from '@/components/ui'
 import type { StepProps, OnboardingState } from './types'
 
 export function Step4Appearance({ state, update, onNext, onBack }: StepProps) {
@@ -40,7 +41,7 @@ export function Step4Appearance({ state, update, onNext, onBack }: StepProps) {
 
       <div>
         <label className="block text-sm text-zinc-400 mb-1">Estilo de Avatar</label>
-        <select
+        <Select
           value={state.avatarStyle}
           onChange={(e) => update({ avatarStyle: e.target.value as OnboardingState['avatarStyle'] })}
           className="w-full px-3 py-2 bg-zinc-900 border border-zinc-800 rounded text-zinc-100"
@@ -49,19 +50,19 @@ export function Step4Appearance({ state, update, onNext, onBack }: StepProps) {
           <option value="legacy_neuro">Legacy Neuro (Avatar 3D)</option>
           <option value="image">Imagen</option>
           <option value="emoji">Emoji</option>
-        </select>
+        </Select>
       </div>
 
       <div>
         <label className="block text-sm text-zinc-400 mb-1">Posición en la pantalla</label>
-        <select
+        <Select
           value={state.position}
           onChange={(e) => update({ position: e.target.value as OnboardingState['position'] })}
           className="w-full px-3 py-2 bg-zinc-900 border border-zinc-800 rounded text-zinc-100"
         >
           <option value="bottom_right">Abajo a la derecha</option>
           <option value="bottom_left">Abajo a la izquierda</option>
-        </select>
+        </Select>
       </div>
 
       <div>

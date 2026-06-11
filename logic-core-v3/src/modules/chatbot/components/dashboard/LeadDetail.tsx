@@ -23,7 +23,7 @@ import {
 import { Badge } from '@/components/ui/Badge'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
-import { EmptyState } from '@/components/ui'
+import { EmptyState, Select } from '@/components/ui'
 import { updateLeadStatus } from '@/modules/chatbot/server/admin/updateLeadStatus'
 import type { ChatbotLead, ChatbotLeadStatus } from '@prisma/client'
 import type { LucideIcon } from 'lucide-react'
@@ -408,7 +408,7 @@ export function LeadDetail({ lead, enriched, messages, botSlug }: LeadDetailProp
           {!isDq && (
             <div>
               <label className="mb-1 block text-xs text-zinc-500">Estado</label>
-              <select
+              <Select
                 value={status}
                 onChange={(e) => setStatus(e.target.value as ChatbotLeadStatus)}
                 className="w-full rounded-xl border border-white/10 bg-zinc-900 px-3 py-2 text-sm text-zinc-100"
@@ -418,7 +418,7 @@ export function LeadDetail({ lead, enriched, messages, botSlug }: LeadDetailProp
                     {STATUS_LABELS[key]}
                   </option>
                 ))}
-              </select>
+              </Select>
             </div>
           )}
 

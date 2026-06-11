@@ -20,7 +20,7 @@ import {
   updateTask,
 } from '@/app/(protected)/admin/team/_actions/task.actions'
 import { ConfirmDialog } from '@/app/(protected)/admin/_components/confirm-dialog'
-import { EmptyState } from '@/components/ui'
+import { EmptyState, Select } from '@/components/ui'
 import { sendTaskForApprovalAction } from '@/lib/actions/projects'
 import { TaskForm } from './task-form'
 
@@ -578,7 +578,7 @@ function ProjectStatusQuickChange({
   onSelect,
 }: ProjectStatusQuickChangeProps) {
   return (
-    <select
+    <Select
       value={task.status}
       disabled={isPending}
       onChange={(event) => onSelect(task.id, event.target.value as TaskStatus)}
@@ -587,6 +587,6 @@ function ProjectStatusQuickChange({
       <option value="TODO">Pendiente</option>
       <option value="IN_PROGRESS">En progreso</option>
       <option value="DONE">Completada</option>
-    </select>
+    </Select>
   )
 }

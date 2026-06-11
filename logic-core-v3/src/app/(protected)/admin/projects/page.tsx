@@ -14,6 +14,7 @@ const getOrganizationsForDropdown = unstable_cache(
   ['admin-orgs'],
   { revalidate: 60, tags: ['admin-orgs', 'admin-clients'] }
 )
+import { Select } from '@/components/ui'
 import { ProjectForm } from './_components/project-form'
 import { ProjectList, type ProjectListItem } from './_components/project-list'
 
@@ -201,7 +202,7 @@ export default async function AgencyOsProjectsPage({ searchParams }: ProjectsPag
               <input type="hidden" name="visibility" value={selectedVisibility} />
             ) : null}
 
-            <select
+            <Select
               name="serviceType"
               defaultValue={selectedServiceType ?? 'ALL'}
               className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white outline-none"
@@ -211,7 +212,7 @@ export default async function AgencyOsProjectsPage({ searchParams }: ProjectsPag
                   {option.label}
                 </option>
               ))}
-            </select>
+            </Select>
 
             <button
               type="submit"

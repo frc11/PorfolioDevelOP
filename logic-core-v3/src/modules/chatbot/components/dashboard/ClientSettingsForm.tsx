@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { Select } from '@/components/ui'
 import { saveClientSettings } from '@/modules/chatbot/server/admin/saveClientSettings'
 import type { BotConfig } from '@prisma/client'
 import { toast } from 'sonner'
@@ -118,14 +119,14 @@ export function ClientSettingsForm({ bot }: { bot: BotConfig }) {
 
       <div>
         <h2 className="text-lg font-semibold text-zinc-100 mb-4">Posición</h2>
-        <select
+        <Select
           value={position}
           onChange={(e) => setPosition(e.target.value)}
           className="w-full px-3 py-2 bg-zinc-900 border border-zinc-800 rounded text-zinc-100 text-sm"
         >
           <option value="bottom_right">Abajo a la derecha</option>
           <option value="bottom_left">Abajo a la izquierda</option>
-        </select>
+        </Select>
       </div>
 
       <div>

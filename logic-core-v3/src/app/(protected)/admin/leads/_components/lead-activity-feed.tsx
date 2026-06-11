@@ -12,7 +12,7 @@ import {
   PhoneCall,
   Video,
 } from 'lucide-react'
-import { EmptyState } from '@/components/ui'
+import { EmptyState, Select } from '@/components/ui'
 import { createActivity } from '../_actions/activity.actions'
 
 type ActivityChannel =
@@ -234,7 +234,7 @@ export function LeadActivityFeed({
           <div className="grid gap-4 md:grid-cols-2">
             <div>
               <label className="mb-2 block text-sm font-medium text-zinc-200">Canal</label>
-              <select
+              <Select
                 value={channel}
                 onChange={(event) => setChannel(event.target.value as ActivityChannel)}
                 className={inputClassName}
@@ -244,12 +244,12 @@ export function LeadActivityFeed({
                     {option.label}
                   </option>
                 ))}
-              </select>
+              </Select>
             </div>
 
             <div>
               <label className="mb-2 block text-sm font-medium text-zinc-200">Resultado</label>
-              <select
+              <Select
                 value={result}
                 onChange={(event) => setResult(event.target.value as ActivityResult | '')}
                 className={inputClassName}
@@ -260,7 +260,7 @@ export function LeadActivityFeed({
                     {option.label}
                   </option>
                 ))}
-              </select>
+              </Select>
             </div>
 
             <div className="md:col-span-2">

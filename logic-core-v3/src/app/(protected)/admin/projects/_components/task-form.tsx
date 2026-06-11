@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState, useTransition } from 'react'
 import { X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import type { TaskStatus } from '@prisma/client'
-import { Button, Input } from '@/components/ui'
+import { Button, Input, Select } from '@/components/ui'
 import {
   createTask,
   updateTask,
@@ -221,7 +221,7 @@ export function TaskForm({
               <div className="grid gap-4 md:grid-cols-2">
                 <div>
                   <label className="mb-2 block text-sm font-medium text-zinc-200">Asignado a</label>
-                  <select
+                  <Select
                     value={formState.assignedToId}
                     onChange={(event) => updateField('assignedToId', event.target.value)}
                     className={inputClassName}
@@ -232,7 +232,7 @@ export function TaskForm({
                         {assignee.name ?? assignee.email ?? 'Super Admin'}
                       </option>
                     ))}
-                  </select>
+                  </Select>
                 </div>
 
                 <div>
@@ -252,7 +252,7 @@ export function TaskForm({
                 {isEditMode ? (
                   <div className="md:col-span-2">
                     <label className="mb-2 block text-sm font-medium text-zinc-200">Estado</label>
-                    <select
+                    <Select
                       value={formState.status}
                       onChange={(event) =>
                         updateField('status', event.target.value as TaskFormState['status'])
@@ -262,7 +262,7 @@ export function TaskForm({
                       <option value="TODO">Pendiente</option>
                       <option value="IN_PROGRESS">En progreso</option>
                       <option value="DONE">Completada</option>
-                    </select>
+                    </Select>
                   </div>
                 ) : null}
               </div>

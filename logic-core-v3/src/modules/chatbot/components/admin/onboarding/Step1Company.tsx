@@ -1,5 +1,6 @@
 'use client'
 
+import { Select } from '@/components/ui'
 import type { StepProps } from './types'
 import type { Industry } from '../../../server/admin/createClientWithBot'
 import { INDUSTRIES_LABELS } from './industries'
@@ -46,7 +47,7 @@ export function Step1Company({ state, update, onNext }: StepProps) {
 
       <div>
         <label className="block text-sm text-zinc-400 mb-1">Industria</label>
-        <select
+        <Select
           value={state.industry}
           onChange={(e) => update({ industry: e.target.value as Industry })}
           className="w-full px-3 py-2 bg-zinc-900 border border-zinc-800 rounded text-zinc-100"
@@ -54,7 +55,7 @@ export function Step1Company({ state, update, onNext }: StepProps) {
           {Object.entries(INDUSTRIES_LABELS).map(([value, label]) => (
             <option key={value} value={value}>{label}</option>
           ))}
-        </select>
+        </Select>
       </div>
 
       <div>

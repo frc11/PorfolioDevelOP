@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { Clock3, Plus, Trash2 } from 'lucide-react'
-import { Button, Card, EmptyState } from '@/components/ui'
+import { Button, Card, EmptyState, Select } from '@/components/ui'
 import {
   createTimeEntry,
   deleteTimeEntry,
@@ -214,7 +214,7 @@ export function TimeEntryPanel({
             <div className="grid gap-4 lg:grid-cols-[minmax(0,1.5fr)_160px_180px]">
               <div>
                 <label className="mb-2 block text-sm font-medium text-zinc-200">Tarea</label>
-                <select
+                <Select
                   value={formState.taskId}
                   onChange={(event) =>
                     setFormState((current) => ({ ...current, taskId: event.target.value }))
@@ -228,7 +228,7 @@ export function TimeEntryPanel({
                       {task.title}
                     </option>
                   ))}
-                </select>
+                </Select>
               </div>
 
               <div>

@@ -155,6 +155,9 @@ Returns incorrect coordinates when transforms are applied. Fix: temporarily rese
 **Framer Motion pathLength on complex SVGs [Apr 2026]**
 Too expensive on high-point paths. Fix: use `strokeDashoffset` with native `getTotalLength()`.
 
+**Select compartido con chevron — special cases [Jun 2026]**
+`ticket-chat.tsx:110` y `TicketStatusSelector.tsx:31` NO fueron migrados al `<Select>` compartido. Ambos usan un `<Loader2>` condicional dentro de su propio `<div className="relative">` que ocupa el mismo espacio donde `<Select>` pondría el `<ChevronDown>` permanente — dos íconos se superponen cuando `isPending`. Patrón diferente al select de formulario: son status selectors con feedback de pending. Mantener como `<select>` nativo; si se mejora, considerar prop `icon` o un componente `StatusSelect` separado.
+
 ---
 
 *Update this file when Claude makes a correctable mistake. Add the rule that prevents it. Prune entries that no longer apply.*

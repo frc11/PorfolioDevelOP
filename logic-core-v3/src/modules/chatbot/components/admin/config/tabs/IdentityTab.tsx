@@ -2,7 +2,7 @@
 
 import { Field } from '../Field'
 import { Input } from '../Input'
-import { Select } from '../Select'
+import { Select } from '@/components/ui'
 import { Toggle } from '../Toggle'
 import type { BotConfigTabProps } from '../types'
 

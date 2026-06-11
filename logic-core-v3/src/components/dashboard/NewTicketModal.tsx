@@ -8,6 +8,7 @@ import { createTicketAction } from '@/actions/ticket-actions'
 import { TicketCategory, TicketPriority } from '@/lib/prisma-enums'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
+import { Select } from '@/components/ui'
 
 const ticketSchema = z.object({
   title: z.string().min(5, 'El titulo debe tener al menos 5 caracteres.'),
@@ -152,31 +153,31 @@ export function NewTicketModal() {
                       <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-zinc-400">
                         Categoria
                       </label>
-                      <select
+                      <Select
                         name="category"
                         defaultValue="TECHNICAL"
-                        className="w-full cursor-pointer appearance-none rounded-lg border border-white/10 bg-[#080a0c] px-4 py-3 text-sm text-white transition-all focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+                        className="w-full cursor-pointer rounded-lg border border-white/10 bg-[#080a0c] px-4 py-3 text-sm text-white transition-all focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
                       >
                         <option value="TECHNICAL">Soporte Tecnico</option>
                         <option value="BILLING">Facturacion</option>
                         <option value="FEATURE_REQUEST">Nuevo Requerimiento</option>
                         <option value="OTHER">Otro</option>
-                      </select>
+                      </Select>
                     </div>
                     <div>
                       <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-zinc-400">
                         Prioridad
                       </label>
-                      <select
+                      <Select
                         name="priority"
                         defaultValue="MEDIUM"
-                        className="w-full cursor-pointer appearance-none rounded-lg border border-white/10 bg-[#080a0c] px-4 py-3 text-sm text-white transition-all focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+                        className="w-full cursor-pointer rounded-lg border border-white/10 bg-[#080a0c] px-4 py-3 text-sm text-white transition-all focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
                       >
                         <option value="LOW">Baja (Mantenimiento)</option>
                         <option value="MEDIUM">Media (Estandar)</option>
                         <option value="HIGH">Alta (Bloqueante)</option>
                         <option value="URGENT">Urgente (Critico)</option>
-                      </select>
+                      </Select>
                     </div>
                   </div>
 

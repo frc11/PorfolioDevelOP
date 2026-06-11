@@ -3,7 +3,7 @@
 import { Plus, Trash2 } from 'lucide-react'
 import { Field } from '../Field'
 import { Input } from '../Input'
-import { Select } from '../Select'
+import { Select } from '@/components/ui'
 import { Slider } from '../Slider'
 import type { BotConfigTabProps } from '../types'
 

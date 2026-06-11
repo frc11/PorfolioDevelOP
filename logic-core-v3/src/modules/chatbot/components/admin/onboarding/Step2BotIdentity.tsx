@@ -1,5 +1,6 @@
 'use client'
 
+import { Select } from '@/components/ui'
 import type { StepProps, OnboardingState } from './types'
 import { getBotNameSuggestions, getWelcomeSuggestions } from './suggestions'
 
@@ -78,7 +79,7 @@ export function Step2BotIdentity({ state, update, onNext, onBack }: StepProps) {
 
       <div>
         <label className="block text-sm text-zinc-400 mb-1">Tono de conversación</label>
-        <select
+        <Select
           value={state.tone}
           onChange={(e) => update({ tone: e.target.value as OnboardingState['tone'] })}
           className="w-full px-3 py-2 bg-zinc-900 border border-zinc-800 rounded text-zinc-100"
@@ -86,7 +87,7 @@ export function Step2BotIdentity({ state, update, onNext, onBack }: StepProps) {
           <option value="informal_rioplatense">Informal Rioplatense (vos)</option>
           <option value="formal">Formal (usted)</option>
           <option value="neutral">Neutral (tú)</option>
-        </select>
+        </Select>
       </div>
 
       <div className="flex justify-between pt-4">

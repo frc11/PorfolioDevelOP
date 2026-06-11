@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState, useTransition } from 'react'
 import { AlertTriangle, X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import type { ServiceType } from '@prisma/client'
-import { Button, Input } from '@/components/ui'
+import { Button, Input, Select } from '@/components/ui'
 import { createProject, updateProject } from '../_actions/project.actions'
 import { CreateProjectSchema } from '../_actions/project.schemas'
 
@@ -225,7 +225,7 @@ export function ProjectForm({
                   <label className="mb-2 block text-sm font-medium text-zinc-200">
                     Vincular a cliente del portal (opcional)
                   </label>
-                  <select
+                  <Select
                     value={formState.organizationId}
                     onChange={(event) => updateField('organizationId', event.target.value)}
                     className={inputClassName}
@@ -236,7 +236,7 @@ export function ProjectForm({
                         {organization.companyName}
                       </option>
                     ))}
-                  </select>
+                  </Select>
                   {selectedOrganization ? (
                     <div className="mt-3 flex items-start gap-3 rounded-2xl border border-amber-400/20 bg-amber-400/10 px-4 py-3 text-sm text-amber-100">
                       <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
@@ -282,7 +282,7 @@ export function ProjectForm({
 
                 <div>
                   <label className="mb-2 block text-sm font-medium text-zinc-200">Servicio</label>
-                  <select
+                  <Select
                     value={formState.serviceType}
                     onChange={(event) =>
                       updateField('serviceType', event.target.value as ProjectFormState['serviceType'])
@@ -295,7 +295,7 @@ export function ProjectForm({
                         {option.label}
                       </option>
                     ))}
-                  </select>
+                  </Select>
                   {formErrors.serviceType ? (
                     <p className="mt-2 text-xs text-rose-300">{formErrors.serviceType}</p>
                   ) : null}

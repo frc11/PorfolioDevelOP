@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import { Select } from '@/components/ui'
 import { createClientAssetAction } from '@/actions/agency-actions'
 import { UploadCloud, Loader2 } from 'lucide-react'
 import type { AssetType } from '@prisma/client'
@@ -50,7 +51,7 @@ export function VaultManager({ organizationId }: { organizationId: string }) {
 
         <div className="flex flex-col gap-1.5">
           <label className="text-xs font-medium text-zinc-400">Tipo de Asset</label>
-          <select
+          <Select
             value={type}
             onChange={(e) => setType(e.target.value as AssetType)}
             disabled={isPending}
@@ -59,7 +60,7 @@ export function VaultManager({ organizationId }: { organizationId: string }) {
             {ASSET_TYPES.map((t) => (
               <option key={t} value={t}>{t}</option>
             ))}
-          </select>
+          </Select>
         </div>
       </div>
 
