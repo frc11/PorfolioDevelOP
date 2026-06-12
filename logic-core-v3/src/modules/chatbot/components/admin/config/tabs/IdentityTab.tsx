@@ -3,28 +3,13 @@
 import { Field } from '../Field'
 import { Input } from '../Input'
 import { Select } from '@/components/ui'
+import { INDUSTRIES_LABELS } from '../../onboarding/industries'
 import type { BotConfigTabProps } from '../types'
 
-const INDUSTRIES = [
-  { value: 'generic', label: 'Generico' },
-  { value: 'agency', label: 'Agencia' },
-  { value: 'legal', label: 'Legal / Estudio juridico' },
-  { value: 'medical', label: 'Medico / Consultorio' },
-  { value: 'dental', label: 'Dental' },
-  { value: 'automotive', label: 'Automotriz' },
-  { value: 'gym', label: 'Gimnasio' },
-  { value: 'restaurant', label: 'Restaurante' },
-  { value: 'real_estate', label: 'Inmobiliaria' },
-  { value: 'ecommerce', label: 'E-commerce' },
-  { value: 'beauty', label: 'Belleza' },
-  { value: 'education', label: 'Educacion' },
-  { value: 'concesionaria_autos', label: 'Concesionaria autos' },
-  { value: 'clinica_medica', label: 'Clinica medica' },
-  { value: 'odontologia', label: 'Odontologia' },
-  { value: 'distribuidora', label: 'Distribuidora' },
-  { value: 'constructora', label: 'Constructora' },
-  { value: 'contable', label: 'Contable' },
-]
+// Vocabulario canónico compartido con onboarding/creación/templates — el
+// Select de edición debe emitir EXACTAMENTE los valores que esperan
+// KB_TEMPLATES y los flujos de creación (un solo vocabulario en el sistema).
+const INDUSTRIES = Object.entries(INDUSTRIES_LABELS).map(([value, label]) => ({ value, label }))
 
 const TONES = [
   { value: 'informal_rioplatense', label: 'Informal rioplatense' },
@@ -44,7 +29,7 @@ export function IdentityTab({ state, update }: BotConfigTabProps) {
         />
       </Field>
 
-      <Field label="Industria" hint="Define templates y comportamiento por defecto">
+      <Field label="Industria" hint="Se usó para preparar el bot al crearlo. Cambiarla no regenera la KB.">
         <Select
           value={state.industry}
           onChange={(event) => update('industry', event.target.value)}

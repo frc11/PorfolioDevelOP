@@ -242,8 +242,9 @@ const DEVELOP_BOT_CONFIG = {
   // Cuota
   monthlyQuota: 1000,
 
-  // Rubro
-  industry: 'agency',
+  // Rubro — vocabulario canónico (type Industry); el canónico no tiene
+  // "agencia" todavía, develOP queda en generico (fichado para roadmap).
+  industry: 'generico',
 }
 
 // ────────────────────────────────────────────────────────────────
