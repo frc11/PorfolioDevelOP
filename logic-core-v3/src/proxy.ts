@@ -9,8 +9,10 @@ const ADMIN_PATH = '/admin'
 const ADMIN_OS_PATH = '/admin'
 const DASHBOARD_PATH = '/dashboard'
 const ONBOARDING_PATH = '/bienvenida'
+const SETTER_PATH = '/setter'
 const ADMIN_ROLE = 'SUPER_ADMIN'
 const USER_ROLE = 'ORG_MEMBER'
+const SETTER_ROLE = 'SETTER'
 const IMPERSONATION_COOKIE = 'impersonation-token'
 
 function isSafeCallbackUrl(value: string | null) {
@@ -97,8 +99,9 @@ export default auth((req) => {
   const isAdminRoute = pathname.startsWith(ADMIN_PATH)
   const isDashboardRoute = pathname.startsWith(DASHBOARD_PATH)
   const isOnboardingRoute = pathname.startsWith(ONBOARDING_PATH)
+  const isSetterRoute = pathname.startsWith(SETTER_PATH)
 
-  if (!isAuthenticated && (isAdminRoute || isDashboardRoute || isOnboardingRoute)) {
+  if (!isAuthenticated && (isAdminRoute || isDashboardRoute || isOnboardingRoute || isSetterRoute)) {
     const loginUrl = new URL(LOGIN_PATH, nextUrl)
     loginUrl.searchParams.set('callbackUrl', `${pathname}${nextUrl.search}`)
     return NextResponse.redirect(loginUrl)
@@ -106,6 +109,26 @@ export default auth((req) => {
 
   if (!isAuthenticated) {
     return NextResponse.next()
+  }
+
+  // LeadOS B1 — rama SETTER con retorno temprano: un setter no tiene org
+  // membership, así que NUNCA debe caer en el camino ORG_MEMBER de abajo
+  // (/dashboard → /bienvenida). Su única zona es /setter.
+  if (role === SETTER_ROLE) {
+    if (isAdminRoute || isDashboardRoute || isOnboardingRoute || isLoginRoute) {
+      return NextResponse.redirect(new URL(SETTER_PATH, nextUrl))
+    }
+    return NextResponse.next()
+  }
+
+  // No-SETTER intentando /setter → a su zona habitual.
+  if (isSetterRoute) {
+    if (role === ADMIN_ROLE) {
+      return NextResponse.redirect(new URL(ADMIN_PATH, nextUrl))
+    }
+    return NextResponse.redirect(
+      new URL(onboardingCompleted ? DASHBOARD_PATH : ONBOARDING_PATH, nextUrl)
+    )
   }
 
   if (isLoginRoute) {
@@ -146,5 +169,5 @@ export default auth((req) => {
 })
 
 export const config = {
-  matcher: ['/admin/:path*', '/dashboard/:path*', '/login', '/bienvenida', '/cambiar-password'],
+  matcher: ['/admin/:path*', '/dashboard/:path*', '/setter/:path*', '/login', '/bienvenida', '/cambiar-password'],
 }

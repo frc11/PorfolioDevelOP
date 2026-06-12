@@ -222,7 +222,13 @@ const nextAuthResult = NextAuth({
       }
 
       const accessState = await getUserAccessState(user.id)
-      if (accessState.role !== 'SUPER_ADMIN' && !accessState.organizationId) {
+      // LeadOS B1: el SETTER opera sin org membership a propósito — su
+      // aislamiento es por OsLead.assignedToId, no por organizationId.
+      if (
+        accessState.role !== 'SUPER_ADMIN' &&
+        accessState.role !== 'SETTER' &&
+        !accessState.organizationId
+      ) {
         return `${LOGIN_PATH}?error=unauthorized`
       }
 

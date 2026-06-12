@@ -6,7 +6,7 @@ import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
 import { requireSuperAdmin } from '@/lib/auth-guards'
 import { fail, ok, type ActionResult } from '@/lib/action-utils'
-import { calculateNextFollowUp } from '@/lib/follow-up'
+import { crearDemoComercial } from '@/lib/os-commercial'
 
 const emptyStringToUndefined = (value: unknown) => {
   if (typeof value !== 'string') {
@@ -54,39 +54,9 @@ export async function createDemo(
     await requireSuperAdmin()
     const parsed = CreateDemoSchema.parse(input)
 
-    const demo = await prisma.osDemo.create({
-      data: parsed,
-      select: {
-        id: true,
-        leadId: true,
-        lead: {
-          select: {
-            status: true,
-          },
-        },
-      },
-    })
-
-    const nextFollowUpAt = calculateNextFollowUp(0) ?? calculateNextFollowUp(1)
-    const leadData: {
-      status?: LeadStatus
-      nextFollowUpAt?: Date
-    } = {}
-
-    if (demo.lead.status === LeadStatus.PROSPECTO) {
-      leadData.status = LeadStatus.DEMO_ENVIADA
-    }
-
-    if (nextFollowUpAt) {
-      leadData.nextFollowUpAt = nextFollowUpAt
-    }
-
-    if (leadData.status || leadData.nextFollowUpAt) {
-      await prisma.osLead.update({
-        where: { id: demo.leadId },
-        data: leadData,
-      })
-    }
+    // B6: la lógica de negocio (OsDemo + status + follow-up) vive en
+    // lib/os-commercial, compartida con el envío del setter. Mismo cuerpo.
+    const demo = await crearDemoComercial(parsed)
 
     revalidatePath('/admin/leads')
     revalidatePath(`/admin/leads/${parsed.leadId}`)

@@ -69,10 +69,11 @@ function daysFromNow(days: number) {
 }
 
 async function main() {
-  const [adminPassword, clientPassword, clientBPassword] = await Promise.all([
+  const [adminPassword, clientPassword, clientBPassword, setterPassword] = await Promise.all([
     bcrypt.hash('Admin1234!', 12),
     bcrypt.hash('Cliente1234!', 12),
     bcrypt.hash('ClienteB1234!', 12),
+    bcrypt.hash('Setter1234!', 12),
   ])
 
   const admin = await prisma.user.upsert({
@@ -126,6 +127,29 @@ async function main() {
       password: clientBPassword,
       role: Role.ORG_MEMBER,
       emailVerified: new Date(),
+    },
+  })
+
+  // LeadOS B1 — setter de prueba. SIN OrgMember a propósito: el setter opera
+  // fuera del modelo multi-tenant (su aislamiento es OsLead.assignedToId, no
+  // organizationId). passwordResetRequired: true replica el alta real
+  // (ver docs/leados-alta-setter.md). Alta por Google PROHIBIDA para setters.
+  await prisma.user.upsert({
+    where: { email: 'setter-qa@develop.test' },
+    update: {
+      name: 'QA Setter',
+      password: setterPassword,
+      role: Role.SETTER,
+      emailVerified: new Date(),
+      passwordResetRequired: true,
+    },
+    create: {
+      name: 'QA Setter',
+      email: 'setter-qa@develop.test',
+      password: setterPassword,
+      role: Role.SETTER,
+      emailVerified: new Date(),
+      passwordResetRequired: true,
     },
   })
 
@@ -814,6 +838,7 @@ async function main() {
       '- admin@develop.com / Admin1234!',
       '- cliente@sanmiguel.com / Cliente1234!',
       '- qa-cliente-b@develop.test / ClienteB1234! (QA, aislamiento)',
+      '- setter-qa@develop.test / Setter1234! (SETTER, fuerza cambio de password al primer login)',
       'Notas de compatibilidad del schema:',
       '- service.name no existe; se sembraron 2 servicios por tipo.',
       '- project.deadline no existe; se agregó al description.',

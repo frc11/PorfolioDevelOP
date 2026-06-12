@@ -9,3 +9,13 @@ export async function requireSuperAdmin(): Promise<string> {
 
   return session.user.id
 }
+
+export async function requireSetter(): Promise<string> {
+  const session = await auth()
+
+  if (session?.user?.role !== 'SETTER' || !session.user.id) {
+    throw new Error('Unauthorized')
+  }
+
+  return session.user.id
+}

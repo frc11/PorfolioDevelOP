@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation'
 import { motion } from 'motion/react'
 import {
   Building2,
+  ClipboardCheck,
   FolderKanban,
   LayoutDashboard,
   LifeBuoy,
@@ -48,6 +49,7 @@ const NAV_SECTIONS: NavSection[] = [
       { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
       { href: '/admin/chatbots', label: 'Chatbots', icon: Bot },
       { href: '/admin/leads', label: 'Leads', icon: Users },
+      { href: '/admin/leados', label: 'Revisión demos', icon: ClipboardCheck },
       { href: '/admin/projects', label: 'Proyectos', icon: FolderKanban },
       { href: '/admin/team', label: 'Equipo', icon: UserCog },
     ],

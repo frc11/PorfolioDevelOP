@@ -15,9 +15,13 @@ import {
 } from './_components/lead-pipeline'
 import { listInboundLeads } from './_actions/inbound.actions'
 
+// Fix Next 16 + unstable_cache (hallazgo B3): el cache serializa los Date a
+// strings, así que `.toISOString()` explotaba en los hits. La serialización
+// ahora vive DENTRO del callback (corre solo en el miss, con Dates reales) y
+// lo cacheado ya es plano — misma regla que aplica el resto del repo.
 const getLeads = unstable_cache(
-  async () =>
-    prisma.osLead.findMany({
+  async () => {
+    const leads = await prisma.osLead.findMany({
       include: {
         _count: {
           select: {
@@ -34,11 +38,19 @@ const getLeads = unstable_cache(
           },
           take: 1,
         },
+        assignedTo: {
+          select: {
+            name: true,
+            email: true,
+          },
+        },
       },
       orderBy: {
         updatedAt: 'desc',
       },
-    }),
+    })
+    return leads.map(serializeLead)
+  },
   ['admin-leads'],
   { revalidate: 60, tags: ['admin-leads'] }
 )
@@ -58,6 +70,12 @@ type LeadRow = Prisma.OsLeadGetPayload<{
     activities: {
       select: {
         createdAt: true
+      }
+    }
+    assignedTo: {
+      select: {
+        name: true
+        email: true
       }
     }
   }
@@ -88,6 +106,7 @@ function serializeLead(lead: LeadRow): LeadPipelineLead {
     nextFollowUpAt: lead.nextFollowUpAt?.toISOString() ?? null,
     lastActivityAt: lead.activities[0]?.createdAt.toISOString() ?? null,
     createdAt: lead.createdAt.toISOString(),
+    assignedToName: lead.assignedTo?.name ?? lead.assignedTo?.email ?? null,
     _count: {
       activities: lead._count.activities,
       demos: lead._count.demos,
@@ -109,8 +128,7 @@ export default async function AgencyOsLeadsPage({
   ])
 
   const groupedLeads = leads.reduce<GroupedLeads>((accumulator, lead) => {
-    const serializedLead = serializeLead(lead)
-    accumulator[serializedLead.status].push(serializedLead)
+    accumulator[lead.status].push(lead)
     return accumulator
   }, createEmptyGroups())
 

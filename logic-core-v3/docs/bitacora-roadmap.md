@@ -7814,6 +7814,95 @@ CVEs cerrados por `npm audit fix` (transitives, los principales):
 - **prisma** + **@prisma/config** (high, via `effect`).
 - **dompurify**, **qs**, **nanoid**, **brace-expansion**, **uuid**, **svix**, **resend** (moderate).
 
+---
+
+## ✅ B1 (LeadOS) — Fundación: capa de acceso del setter
+
+**Contexto.** Primer bloque de LeadOS: existe el actor `SETTER` de punta a punta (rol, guard, middleware, zona `/setter`, infraestructura de ownership), sin panel todavía. Perímetro de seguridad: el setter solo ve leads con `OsLead.assignedToId = su userId`, y no puede pisar `/admin` ni `/dashboard`.
+
+### 1) Qué se construyó
+
+| Archivo | Cambio |
+|---|---|
+| `prisma/schema.prisma` | `SETTER` agregado al enum `Role` |
+| `prisma/migrations/20260611210802_add_setter_role/` | `ALTER TYPE "Role" ADD VALUE 'SETTER';` — aditiva pura, aplicada contra la branch Neon dev (`ep-quiet-waterfall-*`, confirmada como separada de prod) |
+| `src/lib/auth-guards.ts` | `requireSetter()` — patrón exacto de `requireSuperAdmin` |
+| `src/proxy.ts` | Rama SETTER con retorno temprano ANTES de la lógica admin/dashboard (un setter sin membership nunca cae en el camino ORG_MEMBER); no-SETTER en `/setter` → su zona; `/setter/:path*` en el matcher; `/setter` en el check de no-autenticado |
+| `src/auth.ts` | Fix mínimo en callback `signIn`: el rechazo "no-admin sin organizationId" ahora exime a SETTER (sin esto el setter no podía loguearse) |
+| `src/auth.config.ts` | `'SETTER'` en el type union local de Role (edge config del middleware) |
+| `src/app/login/actions.ts` | `redirectTo` de setter → `/setter` (evita el doble salto /bienvenida → /setter) |
+| `src/app/(protected)/setter/layout.tsx` | Guard server-side propio (patrón del layout admin): sin sesión → /login; rol ≠ SETTER → su zona |
+| `src/app/(protected)/setter/page.tsx` + `_components/SetterWelcome.tsx` | Home mínima con `EmptyState` del kit UI. El icono Lucide se pasa desde un client wrapper (`_components/`) — pasarlo desde el Server Component rompía RSC ("Functions cannot be passed to Client Components") |
+| `src/lib/leados/ownership.ts` | `getOwnedLead(leadId, userId)` — `findFirst({ id, assignedToId })`, null si no es suyo. Regla de oro documentada en el header: listas filtran por `assignedToId`, actions llaman `requireSetter()` + re-verifican ownership |
+| `prisma/seed.ts` | Caso setter: `setter-qa@develop.test / Setter1234!` (SETTER, sin membership, `passwordResetRequired: true`) |
+| `docs/leados-alta-setter.md` | Procedimiento de alta (credentials only; Google PROHIBIDO — su `profile()` hardcodea ORG_MEMBER) |
+| `scripts/b1-verify-setter-ownership.ts` | Verificación del helper contra dev (host check anti-prod, lead temporal con cleanup en finally) |
+| `admin/tickets/_actions/ticket.actions.ts` + `_components/ticket-chat.tsx` | Fix colateral de TIPOS (cero comportamiento): tenían el union de Role hardcodeado `'SUPER_ADMIN' \| 'ORG_MEMBER' \| 'CLIENT'` que rompió el build al extender el enum → ahora `import type { Role } from '@prisma/client'` |
+
+**Decisión:** NO se agregó `requireSetterOrAdmin()` — sin consumidor actual, y una superficie compartida va a necesitar acceso a datos distinto por rol (admin ve todo, setter lo suyo); se diseña cuando exista.
+
+### 2) Verificación propia (script + browser real contra dev)
+
+- `scripts/b1-verify-setter-ownership.ts`: **4/4** — lead ajeno → null, lead propio → lo retorna, lead propio con otro userId → null, leadId inexistente → null.
+- Browser (dev server): login setter → forzado `/cambiar-password` → cambio → aterriza `/setter` ✅. Como setter: `/admin`, `/admin/leads`, `/dashboard`, `/dashboard/cuenta`, `/bienvenida`, `/login` → todos rebotan a `/setter`, status 200 final, **sin loops** ✅. Como SUPER_ADMIN: `/admin` intacto (shell completo), `/admin/leads` 200, `/setter` → `/admin` ✅. Como ORG_MEMBER: login → `/dashboard`, `/setter` → `/dashboard` ✅.
+- `npm run build` ✅ (ruta `/setter` registrada) + `npx prisma migrate status` ✅ (58 migraciones, schema up to date).
+
+---
+
+## ✅ B2 (LeadOS) — Modelo de producción del dossier   ·   2026-06-12
+
+**Contexto.** Segunda máquina de estado de LeadOS: el ciclo de PRODUCCIÓN del activo demo (ficha → evaluación → brief → construcción → revisión del admin → aprobada), 1:1 con `OsLead`. Convive con la máquina COMERCIAL (`LeadStatus` + cron de follow-up) sin mezclarse: de `OsLead` solo se lee `status` para el gate de BRIEF, jamás se escribe. Sin UI ni server actions de páginas — schema + lib de dominio + verificación (el wizard del setter es B3/B4, la cola del admin es B5).
+
+### 1) Qué se construyó
+
+| Archivo | Cambio |
+|---|---|
+| `prisma/schema.prisma` | Enum `DossierStage` (8 valores) + modelo `OsLeadDossier`: `leadId @unique` (la 1:1 la garantiza la DB), `stage @default(FICHA)` con `@@index([stage])`, 4 blobs Json nullables (`fichaJson`/`evaluacionJson`/`briefJson`/`selfCheckJson`), `draftUrl`, `rechazos` (historial Json), timestamps, `onDelete: Cascade` al lead. En `OsLead` solo la back-relation `dossier OsLeadDossier?` — línea obligatoria de Prisma para validar la relación, **cero impacto SQL sobre la tabla existente** |
+| `prisma/migrations/20260612121536_add_os_lead_dossier/` | Aditiva pura: `CREATE TYPE "DossierStage"` + `CREATE TABLE "OsLeadDossier"` + unique/index + FK. Nada toca tablas existentes. Aplicada contra la branch Neon dev (`ep-quiet-waterfall-*`) |
+| `src/lib/leados/contracts.ts` | Contratos zod base de los blobs (minimales a propósito, B3/B4 los extienden): `FichaSchema` (identidad con `igManejadoPor: DUENO\|CM\|NO_SABE`, presencia digital, reseñas, contenido real, señales operativas, catch-all), `EvaluacionSchema` (score 1–5 int, veredicto `DESCARTAR\|AVANZAR\|CALIENTE`, razonamiento, motivoDescarte opcional), `BriefSchema` (título, concepto, secciones[], notas de marca, CTA, referencias a la ficha), `SelfCheckSchema` (itemsDuros `{nombre, ok}[]` + softFlags[]), `RechazoSchema`/`RechazosSchema` (`{fecha ISO, motivo, detalle?}[]`). Regla en el header: todo write a un blob se parsea ANTES de tocar Prisma |
+| `src/lib/leados/dossier.ts` | La única puerta del stage: `transitionDossier(leadId, input)` valida transiciones legales + reglas (regla de oro en el header: setear `stage` directo con Prisma fuera de esta lib está PROHIBIDO). Acceso por ownership: `getOwnedDossier` / `ensureOwnedDossier` (creación idempotente vía upsert) derivan de `getOwnedLead` — el dossier nunca se busca por su propio id desde código de setter. Guard optimista en el update (`updateMany where { leadId, stage: from }`) — una carrera no pisa stage. Errores: `DossierTransitionError` |
+| `scripts/b2-verify-dossier.ts` | Verificación reproducible contra dev (host check anti-prod, 3 leads temporales, cleanup en finally): unicidad/idempotencia, P2002 en create crudo, cross-user → null, transiciones ilegales, contrato inválido, los 2 caminos del gate, loop de rechazo completo, cascade |
+
+### 2) Máquina de stage (tal como quedó implementada)
+
+```
+FICHA → EVALUADA → BRIEF → CONSTRUCCION → EN_REVISION → APROBADA
+           │                     ▲              │
+           ▼                     └── RECHAZADA ◄┘
+       DESCARTADA
+```
+
+- `FICHA→EVALUADA` exige el payload de evaluación parseado con `EvaluacionSchema` — así el gate de BRIEF siempre tiene un score confiable que leer.
+- `EVALUADA→BRIEF` — **gate del flujo invertido**: pasa solo si el lead respondió el primer contacto O `evaluacionJson.score >= 4` (lead caliente → demo preventiva). El helper lee el lead adentro; no confía en el caller.
+- `EVALUADA→DESCARTADA` exige `motivoDescarte` (se mergea en `evaluacionJson`).
+- `EN_REVISION→RECHAZADA` exige `motivo` (+`detalle` opcional) y lo appendea a `rechazos` con fecha ISO.
+- `RECHAZADA→CONSTRUCCION` reabre el ciclo. `APROBADA` y `DESCARTADA` son terminales.
+
+### 3) Decisiones (granularidad propia, semántica intacta)
+
+- **"RESPONDIO o posterior"** = `{RESPONDIO, CALL_AGENDADA, CERRADO}`. `PERDIDO`/`POSTERGADO` quedan afuera adrede: por orden del enum son "posteriores" pero pueden alcanzarse sin respuesta alguna, y producir demo para un lead muerto/pausado no tiene sentido (el camino score ≥ 4 sigue disponible).
+- **DESCARTADA no valida score 1–2**: el "corresponde a score 1–2" del flujo es descriptivo; el helper solo exige motivo — el criterio humano puede descartar un score 3.
+- **`transitionDossier` no resuelve QUIÉN**: el setter llega vía ownership (`getOwnedDossier`), el admin vía `requireSuperAdmin()` — eso lo cablean las server actions de B3/B5. La función blinda el QUÉ (transiciones + gates).
+- Acceso del dossier vive en `dossier.ts` (no se tocó `ownership.ts` de B1).
+
+### 4) Verificación propia (pendiente la manual de Franco)
+
+- `npx tsx scripts/b2-verify-dossier.ts`: **17/17 checks OK** (la línea `prisma:error` del medio es el P2002 esperado del test de duplicado).
+- `npm run build` ✅ + `npx prisma migrate status` ✅ (59 migraciones, schema up to date).
+- Pendiente manual: Prisma Studio (tablas existentes intactas, sin dossiers residuales), `/admin/leads` + detalle como SUPER_ADMIN igual que antes.
+- Credenciales del setter QA restauradas post-e2e (password provisoria + reset forzado de nuevo).
+
+### 3) Flags / deuda (NO arreglado acá — fuera de scope)
+
+1. 🚩 **`/setter` muestra el navbar público del sitio + widget de chat marketing** (vienen del root layout; admin/dashboard los tapan con sus shells). Cosmético — el shell propio del panel setter llega con el wizard (B2).
+2. **`/logout` está en `ALWAYS_ALLOWED` del middleware pero la ruta no existe (404)** — allowance muerta preexistente.
+3. **Magic link**: un setter YA creado puede loguearse por Resend (equivalente en confianza a un reset por email). Documentado en el md de alta; lo prohibido es el ALTA por Google, no el login.
+4. **Screenshot bitmap de `/setter` timea en headless** (misma limitación que B12.6 con las páginas de auth) — verificado vía accessibility snapshot + innerText, no a ciegas.
+
+### 4) Pendiente de verificación manual de Franco
+
+El bloque NO se cierra con este reporte. Checklist completo en el reporte del sprint: alta + login + cambio de password + aterrizaje, redirects de las 3 identidades, `getOwnedLead` con lead real asignado/no asignado, estabilidad de sesión viva del setter.
+
 ### 3) Lo que se difirió (requiere `--force` con downgrade absurdo)
 
 Quedaron **2 advisories moderate**, ambos vinculados al mismo issue:
@@ -10840,3 +10929,268 @@ Solo se borraron `zustand` y `react-day-picker`. El resto de las deps huérfanas
 - Decision sobre zona animada/3D (los 5 canvas orphans).
 - Confirmacion de Valentino sobre admin/clients y las sections publicas.
 >>>>>>> 249bddb79309d081848768fa22a8327f5cd3f67b
+
+---
+
+## ✅ B3 — LeadOS: wizard del setter, pasos 0–3 (home-hub + ficha + evaluación + brief)   ·   2026-06-12
+
+**Objetivo:** superficie guiada del setter de punta a punta hasta el brief: shell propio de `/setter`, home-hub con vistas agrupadas y próxima acción explícita, ficha de observación guiada, transcripción de la evaluación externa (con descarte automático score 1–2) y captura del brief gateada por el flujo invertido.
+
+### Qué se construyó
+
+**Lib pura nueva (`src/lib/leados/`):**
+- `flow.ts` — reglas puras compartidas server/client: `RESPONDED_STATUSES` (movido acá desde dossier.ts, única copia), `gateBriefAbierto()`, señal mínima de la ficha (`fichaFaltantes`), labels ES de status/stage, y el mapeo de vistas del home (`agruparParaHome` + próxima acción por lead).
+- `copy-blocks.ts` — builders de los bloques copiables para los Gems externos (ficha → Evaluador; ficha+evaluación → Gem de diseño).
+
+**Extensiones quirúrgicas a B2 (cero migraciones):**
+- `ownership.ts` + `listOwnedLeads(userId)` — única puerta de listas del setter (include dossier, orden antigüedad).
+- `dossier.ts` + `saveOwnedFicha` / `saveOwnedBrief` — writes de Json con ownership y guard optimista; NUNCA tocan `stage` (eso sigue siendo solo `transitionDossier`).
+- `contracts.ts`: `BriefSchema` + campo opcional `pegadoGem` (respuesta cruda del Gem, extensión prevista por el propio contrato).
+
+**Shell:** `/setter` agregado a `PORTAL_PREFIXES` (publicRoute.ts) → chau navbar pública + chat widget (cierra el flag de B1). Layout propio con header mínimo (LeadOS / usuario / logout vía `signOutAction`).
+
+**Home-hub (`setter/page.tsx`):** mapeo exacto del brief con precedencia: PERDIDO/DESCARTADA → archivo colapsado (`<details>`); CALL_AGENDADA → Agendadas; EN_REVISION → Esperando revisión; POSTERGADO y EVALUADA-gate-cerrado (y APROBADA hasta B6) → En seguimiento; resto → Para trabajar ahora (orden: respondieron > calientes > antigüedad). "Tus números" = 5 StatCards (conteos + demos aprobadas). Onboarding descartable (localStorage). Estados vacío/carga/error/not-found propios.
+
+**Wizard (`setter/leads/[leadId]/`):** página server con `getOwnedLead` → `notFound()` anti-IDOR; stepper de 5 pasos (4–5 lockeados "próximo bloque"); FichaStep (micro-instrucciones de observación entrenada, guardado parcial, gate de señal con faltantes exactos, bloque copiable para el Evaluador, ficha congelada post-evaluación); EvaluacionStep (transcripción manual score/veredicto/razonamiento, criterios didácticos, score≤2 = modal de confirmación + motivo + descarte automático encadenado, mensaje "descarte honesto = trabajo bien hecho"); BriefStep (bloque copiable ficha+evaluación, pegado libre + campos mínimos, gate cerrado explicado sin frustrar, sanity-check visual con re-pegado).
+
+**Actions (`setter/_actions/dossier.actions.ts`):** `guardarFicha` / `registrarEvaluacion` / `guardarBrief` — todas `requireSetter()` + helpers de ownership + zod + `ActionResult` + revalidate. Transiciones SOLO vía `transitionDossier`. Cero exposición de APROBADA/RECHAZADA (verificado por grep: solo aparecen como labels de lectura).
+
+**QA tooling:** persona `setter` agregada a `/api/qa/login` (mismo triple guard MS-8; evita pisar la password seedeada del setter) + `scripts/b3-qa-assign-leads.ts` (idempotente, dev-only: 3 leads QA-B3 asignados al setter — la UI de asignación real llega en B5).
+
+### Verificación corrida (dev QA :3002, persona setter)
+- Shell sin navbar/chat ✅ · home con 4 grupos + archivo ✅ · onboarding primera vez ✅
+- Flujo feliz (Café La Esquina): ficha → señal en vivo → bloque Evaluador → score 4 CALIENTE → brief habilitado por gate caliente → brief guardado → sanity-check ✅. Home lo reordena con badges CALIENTE+BRIEF ✅
+- Descarte (Ferretería): score 2 → modal exige motivo → EVALUADA→DESCARTADA encadenado → archivo colapsado ✅
+- Score 3 (Panadería): avanza, brief bloqueado con la explicación del gate → "En seguimiento" / "Esperando respuesta del negocio" ✅
+- Ownership: `/setter/leads/<id-ajeno>` → not-found propio, cero leak ✅ · `/admin/*` como setter redirige ✅
+- Admin: detalle de lead con dossier intacto ✅ · mobile (480px) layout OK ✅ · build + migrate status ✅
+
+### Hallazgos out-of-scope (NO tocados)
+1. **`/admin/leads` (lista) roto pre-B3:** `unstable_cache` + Next 16 devuelve los `Date` serializados como strings → `lead.createdAt.toISOString is not a function` en `serializeLead` (page.tsx:90). Reproducido con server fresco y cache purgada; Prisma devuelve Date real; el detalle (sin unstable_cache) anda. No es del dossier ni de B3 — afecta cualquier `unstable_cache` que devuelva Dates desde el upgrade a Next 16.
+2. **Bitácora con marcadores de conflicto residuales** del merge `11b2d85` (líneas ~10364 `<<<<<<< HEAD` y ~10931 `>>>>>>>`, sin `=======`): contenido de sprints ajenos, lo resuelve Franco.
+3. Middleware: la rama SETTER no fuerza `/cambiar-password` con `passwordResetRequired: true` (retorno temprano en proxy.ts) — conducta heredada de B1, anotada para B5/hardening.
+
+**Pendiente de verificación humana (Franco):** residuales B1/B2 (diff de la exención de signIn en `src/auth.ts`; Neon prod SIN las migraciones add_setter_role/add_os_lead_dossier), login real del setter con credenciales seedeadas, y el walk-through del checklist completo del brief. Los 3 leads QA-B3 quedan en dev como evidencia de los tres caminos (BRIEF / DESCARTADA / EVALUADA-gate-cerrado); para re-caminar el flujo desde cero, crear un lead nuevo vía Prisma Studio o duplicar la entrada en el script.
+
+---
+
+## ✅ B5 — LeadOS: cola de revisión del admin (asignación + revisión ~2 min + Telegram calientes + métrica anti-rubber-stamp)   ·   2026-06-12
+
+**Objetivo:** cerrar el ciclo de revisión. El admin asigna leads al setter desde la UI, ve la cola priorizada de demos EN_REVISION (calientes primero, después antigüedad), juzga cada una en UNA pantalla y aprueba (registra la `finalUrl` permanente — el envío queda listo para B6) o rechaza con dirección accionable (qué/dónde/arreglo) que el setter ve en su panel.
+
+### Pre-tareas de terreno
+
+1. **Fix crash `/admin/leads` (hallazgo 1 de B3):** la serialización ahora vive DENTRO del callback de `unstable_cache` — corre solo en el cache-miss con Dates reales de Prisma, y lo cacheado ya es plano (strings). Sin refactors: `serializeLead` quedó igual, solo se movió la llamada. Verificado en runtime: `GET /admin/leads` 200, pipeline intacto, cero `toISOString is not a function`. De paso el query incluye `assignedTo` (lo necesita el badge nuevo del card).
+2. **Gap `/cambiar-password` para SETTER (hallazgo 3 de B3): NO EXISTE en el código actual.** El check global de `passwordResetRequired` (proxy.ts líneas 84–90) corre ANTES de la rama SETTER con early-return (línea ~117) y la cubre como a todos los roles. La nota de B3 leyó el early-return sin trazar el orden de ejecución; la propia verificación de B1 ya había observado el redirect forzado del setter en runtime ("login setter → forzado /cambiar-password ✅", esta bitácora ~línea 7847). **Cero cambios en el middleware** — cambiarlo "para alinear" habría sido ruido. El setter QA de dev conserva `passwordResetRequired: true`, así que el punto del checklist se puede confirmar con login real de credenciales.
+
+### Qué se construyó
+
+**Migración aditiva (la única):** `20260612140852_add_dossier_b5_revision_fields` — 3 columnas nullable en `OsLeadDossier`: `finalUrl TEXT`, `aprobadaAt TIMESTAMP(3)`, `enviadaAt TIMESTAMP(3)` (queda null; lo setea B6). Aplicada en branch dev de Neon. SQL completo: `ALTER TABLE "OsLeadDossier" ADD COLUMN "aprobadaAt" TIMESTAMP(3), ADD COLUMN "enviadaAt" TIMESTAMP(3), ADD COLUMN "finalUrl" TEXT;`
+
+**Contratos y puerta de stage (extensiones aditivas, retrocompatibles):**
+- `contracts.ts`: `EvaluacionSchema` + `fecha` (estampa de cuándo se registró — alimenta la ventana 30d de la métrica) y `calienteNotificadaAt` (marca de Telegram enviado, una vez por dossier). `RechazoSchema` + `donde` y `arreglo` opcionales (los rechazos pre-B5 siguen parseando).
+- `dossier.ts` / `transitionDossier` (sigue siendo LA única puerta): EVALUADA estampa `fecha`; APROBADA estampa `aprobadaAt` y registra `finalUrl` (opcional en el input para no romper `b2-verify`, pero la action admin la exige SIEMPRE por zod); RECHAZADA acepta `donde`/`arreglo` y los appendea al historial `rechazos`.
+- `flow.ts`: `parseSelfCheck`, `parseRechazos`, `ultimoRechazo` + campo `ultimoRechazo` en `HomeLeadInput`.
+- `revision.ts` (nuevo, puro como flow.ts): orden de la cola (caliente primero → antigüedad por `updatedAt`, que es el proxy de entrada a revisión porque la transición es el último write del dossier), `formatEspera`, métrica `calcularRatioSetters` (descarte = veredicto DESCARTAR; ventana 30d por `evaluacion.fecha`; las pre-B5 sin fecha cuentan en el total y se reportan aparte), `alarmaNuncaDescarta` (≥5 evaluadas y 0 descartes).
+- `notify.ts` (nuevo): `notificarEvaluacionCaliente` — Telegram al admin con el patrón del cron os-follow-up (TELEGRAM_BOT_TOKEN/CHAT_ID, HTML simple). NUNCA lanza (config faltante o error de Telegram → log y el flujo del setter sigue); marca `calienteNotificadaAt` SOLO tras envío exitoso y la chequea antes de enviar. Hook en `registrarEvaluacion` (B3): score >= 4 → notificar.
+
+**Asignación (curaduría del admin):** action `assignLeadSetter` en `admin/leads/_actions` (requireSuperAdmin + zod `AssignLeadSetterSchema`; valida que el target sea rol SETTER; `setterId: null` desasigna) + panel "Setter asignado" (`assign-setter-control.tsx`, client) en el detalle de lead admin — el `LeadForm` existente no exponía `assignedToId`, así que fue control propio. Badge discreto con el setter en el card del pipeline (`assignedToName` en `LeadPipelineLead`).
+
+**Cola de revisión (`/admin/leados`):** página admin nueva (force-dynamic, sin unstable_cache a propósito) — lista EN_REVISION con negocio/setter/badge Caliente/score/espera, contadores, empty state, loading/error propios. Métrica descarte/avance del setter en la misma página con alarma "Nunca descarta". Entrada "Revisión demos" en el sidebar admin (sin colisión de active-state con `/admin/leads`: el prefijo no matchea).
+
+**Superficie de revisión (`/admin/leados/[leadId]`):** TODO en una pantalla — iframe del `draftUrl` (70vh) + botón "Abrir en pestaña nueva" como fallback permanente (sin pelear contra X-Frame-Options); columna derecha: barra de veredicto + evaluación (score/veredicto/razonamiento/fecha) + brief (con pegadoGem colapsable) + self-check (maneja su ausencia: "lo puebla B4") + historial de rechazos (si hay) + ficha colapsable por bloques. Si el dossier ya no está EN_REVISION: banner con el estado actual y sin botones (maneja navegación a ítems resueltos). Navegación rápida: "Volver a la cola" + "Siguiente en la cola →" (el más prioritario excluyendo el actual) y al resolver salta al siguiente (o vuelve a la cola) en un click.
+
+**Actions de revisión (`/admin/leados/_actions/revision.actions.ts`):** el ÚNICO lugar del repo que expone EN_REVISION→APROBADA/RECHAZADA (verificado por grep). Ambas `requireSuperAdmin()` + zod + `transitionDossier` + revalidate de admin y setter.
+
+**Lado setter (guía de retrabajo):** el card RECHAZADA del home muestra el último rechazo completo (qué/dónde/arreglo) y el wizard abre con un panel "Franco pidió correcciones" con los tres campos. Cero lecturas nuevas del lado setter (el rechazo ya viajaba en `dossier.rechazos` vía `listOwnedLeads`/`getOwnedDossier`).
+
+**QA tooling:** `scripts/b5-qa-review-queue.ts` (dev-only, idempotente) — empuja Café (caliente) y Panadería (normal, abre el gate con RESPONDIO + brief mínimo) a EN_REVISION con draftUrl; estampa fechas de evaluación (2d/10d/40d) para que la métrica muestre total vs 30d; re-empuja RECHAZADA→CONSTRUCCION→EN_REVISION si se re-corre tras un rechazo del checklist; crea "QA-B5 Vivero Las Talitas" (sin dossier) para verificar el Telegram score 4 desde la UI.
+
+### Semántica de aprobar/rechazar tal como quedó
+
+- **APROBAR** = modal exige pegar la `finalUrl` (https obligatorio — el admin ya publicó a mano en Netlify; el panel NO publica, registra) → `transitionDossier(EN_REVISION→APROBADA)` guarda `finalUrl` + `aprobadaAt` en el mismo update atómico. NO crea OsDemo, NO toca LeadStatus, NO envía nada (B6).
+- **RECHAZAR** = modal con tres campos obligatorios (qué está mal / dónde / arreglo concreto) → `transitionDossier(EN_REVISION→RECHAZADA)` appendea `{fecha, motivo, donde, arreglo}` al historial. El dossier cae en "Para trabajar ahora" del setter con el rechazo completo visible.
+
+### Verificación corrida (dev QA :3002, personas super-admin y setter)
+
+- `npm run build` ✅ · `npx prisma migrate status` al día ✅ · migración aplicada limpia (3 ADD COLUMN nullable) ✅
+- `/admin/leads` carga sin crash, pipeline como siempre, badge "QA Setter" en los cards asignados ✅
+- Detalle de lead: panel "Setter asignado" con select + guardar ✅ (la asignación real la confirma Franco)
+- `/admin/leados`: 2 ítems, café CALIENTE+Score 4/5 ARRIBA de panadería Score 3/5, setter y espera visibles ✅ · métrica exacta: Total "3 evaluadas · 1 descartes · 2 avances (33% descarte)", 30d "2 evaluadas · 0 descartes · 2 avances" (la ferretería de hace 40 días queda fuera de la ventana) ✅ · mobile 480 sin overflow ✅
+- Superficie del café: header completo, iframe example.com + fallback, paneles evaluación/brief/self-check-ausente/ficha, "Siguiente en la cola →" ✅ · modal RECHAZAR vacío → los 3 errores de campo ✅ · modal APROBAR con "no-es-url" → error de validación ✅ · ambos cancelados SIN mutar estado (la cola sigue en 2) ✅ · mobile 480 ✅
+- Como setter: home con "Esperando revisión: 2" (café+panadería) y vivero en "Para trabajar ahora" ✅ · `/admin/leados` y `/admin/leados/[id]` como setter → redirect del middleware (opaqueredirect, cero 200 servidos) ✅ · grep: APROBADA/RECHAZADA solo alcanzables desde `admin/leados/_actions` ✅
+- Nota de QA visual: el primer contexto del browser headless quedó con suspense sin patchear (quirk del harness heredado del subagente, no de la app — el SSR entregaba el HTML completo vía fetch); con contexto fresco todo renderizó normal.
+
+### Pendiente de verificación humana (Franco)
+
+- Residuales B1/B2 (gate de merge): diff de la exención signIn en `src/auth.ts` exclusiva de SETTER; Neon prod SIN las TRES migraciones nuevas (rol, dossier, campos B5).
+- Pre-task 2 en runtime real: login con credenciales del setter (passwordResetRequired: true en dev) → forzado a /cambiar-password en cualquier ruta.
+- Asignar un lead al setter QA desde la UI → aparece en el home del setter.
+- RECHAZAR el café con qué/dónde/arreglo → verlo como setter en "Para trabajar ahora" con el rechazo completo; re-correr `b5-qa-review-queue.ts` lo re-empuja a la cola.
+- APROBAR (URL https de prueba) → stage APROBADA, finalUrl+aprobadaAt guardados, SIN OsDemo nuevo, LeadStatus intacto.
+- Evaluar el Vivero con score 4 desde la UI → llega UN Telegram (requiere TELEGRAM_BOT_TOKEN/CHAT_ID en el server); re-guardar no re-notifica.
+- Walk-through completo del checklist del brief en browser real.
+
+---
+
+## B4 — Wizard del setter, pasos 4–6: construcción, draft, self-check (LeadOS) [12 Jun 2026]
+
+Cierra el tramo de producción del setter: brief aprobado → construcción guiada en Claude Design → draft en Netlify Drop → self-check de dos niveles → cola de revisión del admin (B5). Cero migraciones (draftUrl y selfCheckJson ya existían de B2). Cero librerías nuevas.
+
+### Dónde vive cada cosa
+
+- `src/lib/leados/flow.ts`: **`SHELL_CONSTRUCCION`** — la secuencia guiada del Paso 4 (6 fases: Estructura → Personalización → Assets reales → CTA WhatsApp → Calidad/motion → Mobile), constante exportada con comentario `// PROVISORIO: refinar tras el test de Claude Design (registro v0.4)`. La UI la consume tal cual: **para reemplazar la secuencia por la validada se edita SOLO este array**, sin tocar componentes. Ahí mismo: `HARD_CHECKS` (6 dealbreakers con id/nombre/cómo-verificar/arreglo), `SOFT_CHECKS` (4 delatores del Ojo de diseño), `buildSelfCheck` (server arma el blob desde ids — los nombres que ve B5 nunca vienen del cliente) y `selfCheckAprobado` (valida contra la lista VIGENTE: si HARD_CHECKS cambia, los self-checks viejos dejan de aprobar). Próximas acciones del home actualizadas: BRIEF/CONSTRUCCION/RECHAZADA ahora accionables.
+- `src/lib/leados/dossier.ts`: `saveOwnedDraftUrl` y `saveOwnedSelfCheck` — solo en stage CONSTRUCCION, guard optimista, mismo patrón que saveOwnedFicha/Brief. Stage SIEMPRE vía `transitionDossier` (sin cambios en la máquina: las transiciones ya existían de B2).
+- `src/lib/leados/notify.ts`: `notificarEscalamientoConstruccion` — Telegram "setter trabado" con contexto (negocio, etapa, draft, descripción). Fire-and-forget, nunca lanza, devuelve `enviado` para que la UI diga "escribile directo" si falló. Se extrajo helper `enviarTelegram` compartido con el aviso de caliente.
+- `src/lib/leados/copy-blocks.ts`: `buildConstruccionBlock` — el brief en bloque pegable, primer mensaje para Claude Design.
+- `setter/_actions/dossier.schemas.ts`: `DraftUrlInputSchema` (URL https + `confirmoCarga: z.literal(true)` — la confirmación humana de que el link carga se exige también server-side), `SelfCheckInputSchema` (ids + booleanos), `EscalamientoInputSchema`.
+- `setter/_actions/dossier.actions.ts`: `iniciarConstruccion` (BRIEF→CONSTRUCCION), `reabrirConstruccion` (RECHAZADA→CONSTRUCCION), `guardarDraftUrl`, `guardarSelfCheck` (devuelve `aprobado`), `enviarARevision`, `escalarConstruccion`. Todas requireSetter() + ownership vía helpers + zod safeParse + ActionResult. `enviarARevision` revalida también `/admin/leados` (la cola de B5 se refresca al toque).
+- Componentes nuevos en `setter/leads/[leadId]/_components/`: `construccion-step.tsx` (shell con badge "Guía preliminar — en validación", banner de urgencia si el lead respondió, guía de retrabajo con el último rechazo, copy-block, recordatorio "guardá antes de cambiar", escalamiento), `draft-step.tsx` (instrucciones exactas Export → index.html → Netlify Drop, nota publicar≠enviar), `self-check-step.tsx` (gate de dos niveles), `escalar-modal.tsx`. Integrados en `lead-wizard.tsx`; `dossier-stepper.tsx` sin "próximo bloque" (mecanismo `futuro` eliminado: los 5 pasos existen).
+
+### El self-check tal como quedó (dos niveles, con dientes)
+
+- **Hard-blocks (bloquean):** carga / se ve bien en TU celular (ítem estrella) / sin lorem ipsum / links + WhatsApp funcionan / datos y assets reales / fidelidad al brief (muestra las secciones del brief al lado). Cada ítem en falla muestra el arreglo concreto y re-engancha al Paso 4. "Enviar a revisión" deshabilitado en UI hasta todos en verde, y **re-validado server-side**: `enviarARevision` exige stage CONSTRUCCION + draftUrl + `selfCheckAprobado(selfCheckJson de la DB)` — llamar la action por devtools con un hard en falla rebota igual.
+- **Soft-flags (no bloquean):** >3 colores / fuente default / glassmorphism en navbar / imágenes deformadas. Viajan en `selfCheckJson.softFlags` y B5 ya los muestra ("Flags del setter").
+- El envío guarda el self-check actual y recién ahí transiciona: soft-flags siempre frescos en la cola.
+
+### Loop de rechazo y escalamiento
+
+- **Loop cerrado:** RECHAZADA → card del home accionable + panel "Franco pidió correcciones" (B3/B5) → botón "Reabrir construcción" (RECHAZADA→CONSTRUCCION) → el Paso 4 muestra el último rechazo completo como guía de retrabajo → draft + self-check de nuevo → reenviar. El historial `rechazos` lo appendea solo transitionDossier; nada lo pisa.
+- **Escalamiento:** botón "Me trabé — avisar a Franco" en el Paso 4 → modal → Telegram con contexto. NO se persiste en DB: OsLeadActivity quedó descartado a propósito (el cron os-follow-up usa `activities[0].createdAt` como "último contacto" — una actividad de escalamiento corrompería el timing del follow-up) y el dossier no tiene campo libre sin migrar. **Pendiente anotado:** si se quiere historial de escalamientos, va con campo propio en una migración futura.
+
+### QA y verificación corrida
+
+- `scripts/b4-qa-construccion.ts` (dev-only, idempotente): deja "QA-B4 Barbería El Faro" asignada al setter QA, status RESPONDIO (gate abierto + urgencia visible), dossier en BRIEF con ficha/evaluación(3, con fecha)/brief. Desde ahí se recorre todo el checklist.
+- `npm run build` ✅ (x2, incluido el fix de abajo) · `migrate status` al día, 60 migraciones, cero nuevas ✅
+- visual-qa (2 pasadas, dev QA :3002, persona setter, desktop 1600 + mobile 480/390): home con card accionable ✅ · stepper sin "próximo bloque" ✅ · Paso 4 en BRIEF (badge provisorio + urgencia + arrancar) ✅ · shell completo en CONSTRUCCION (6 fases, copy-block, recordatorio, escalamiento con modal abre/cierra) ✅ · Paso 5: URL inválida → error; URL válida sin confirmar → error; válida + confirmación → "Draft publicado" y Paso 6 se habilita ✅ · Paso 6: enviar deshabilitado con hard en falla, arreglos en rosa, todos en verde habilita, soft-flag no bloquea ✅ · enviar → EN_REVISION, stepper en "Revisión", resúmenes colapsados, home "Esperando revisión" ✅ · mobile sin roturas ✅ · consola limpia tras fix.
+- **Bug encontrado y arreglado en el sprint:** hydration mismatch en `UrgenciaBanner` (tiempo relativo "hace X min" difería entre SSR y cliente) → el "hace X" ahora se calcula en useEffect, solo client-side.
+
+### Pendiente de verificación humana (Franco)
+
+- Residuales B1/B2 (gate de merge): diff de la exención signIn en `src/auth.ts` exclusiva de SETTER; Neon prod sin las migraciones de LeadOS.
+- Editar `SHELL_CONSTRUCCION` en flow.ts → confirmar que la UI cambia sin tocar nada más.
+- Forzado server-side real: con un hard-block en falla, disparar `enviarARevision` por devtools → rechazada server-side (el código está, falta el fogueo).
+- Loop completo contra B5: el QA-B4 quedó EN_REVISION → rechazar como admin con qué/dónde/arreglo → como setter reabrir, rehacer, reenviar → historial de rechazos conservado y selfCheckJson (duros + flags) visible en la superficie de revisión.
+- Escalamiento con TELEGRAM_BOT_TOKEN/CHAT_ID reales → llega el mensaje; sin config el flujo no se rompe (toast de fallback).
+- Ownership cruzado: wizard de un lead ajeno → 404; actions con lead ajeno → "Lead no encontrado".
+
+
+---
+
+## ✅ B6 — LeadOS: outreach y seguimiento, pasos 7 y 9 (opener sin link + cadencia + envío del link de la demo)   ·   2026-06-12
+
+**Objetivo:** cablear el flujo invertido de punta a punta desde el panel del setter: opener dolor-first SIN link (Paso 7) → la maquinaria de follow-up existente reagenda sola → "respondió" abre el gate del brief (cableado en B2) → producir/aprobar (B3–B5) → recién ahí el segundo mensaje con la `finalUrl` (Paso 9) — todo REUSANDO `createActivity`/`createDemo`/el cron, sin reescribirlos. Envío 100% manual (copiar/pegar en Instagram): el panel guía y registra; cero APIs de mensajería, cero migraciones, cero librerías nuevas.
+
+### Reuso de la maquinaria comercial (la decisión central)
+
+- **`src/lib/os-commercial.ts` (nuevo):** la lógica de negocio de `createActivity` y `createDemo` EXTRAÍDA tal cual a helpers compartidos (`registrarContactoComercial`, `crearDemoComercial`). Se eligió **helper compartido** (no duplicación) porque el cuerpo era extraíble 1:1 sin tocar guard/schema/revalidates de las actions admin — que ahora delegan al helper con el mismo cuerpo de siempre. En el helper NO hay auth ni revalidación: cada caller pone su guard (admin: requireSuperAdmin; setter: requireSetter + ownership) y revalida sus rutas.
+- **`postergarLead`** (mismo archivo): espejo EXACTO de la rama POSTERGADO de `updateLeadStatus` (status POSTERGADO + reactivateAt). Acá SÍ duplicación mínima, anotada en el código: refactorizar una action que maneja TODOS los status para compartir dos líneas arriesgaba la versión admin.
+- Actions admin (`activity.actions.ts`, `demo.actions.ts`): solo el cuerpo delega; `markDemoViewed`, el cron `os-follow-up` y `calculateNextFollowUp`: CERO cambios.
+
+### Paso 7 — Opener (`opener-step.tsx` + `registrarOpener`)
+
+- `setter/_actions/outreach.actions.ts` + `outreach.schemas.ts`: `requireSetter()` + `getOwnedLead`/`getOwnedDossier`; exige dossier evaluado no-descartado; rechaza si el lead ya respondió o ya hay contactos (el opener es UNA vez — después la conversación vive en el Paso 9). Registra INSTAGRAM_DM + SIN_RESPUESTA (la convención existente: eso dispara `countFollowUps` → `calculateNextFollowUp` y arma el follow-up solo) con el texto del opener en `notes` (evidencia de qué se mandó).
+- **Hard-block de links** (acá la UI sí hace imposible): `contieneLink` (flow.ts) en el schema (rebota server-side) y en vivo en la UI (error rojo + botón deshabilitado). El link viaja recién con la demo.
+- UI: input del Gem de outreach (`buildOpenerInputBlock`, ficha+evaluación — patrón B3), textarea con umbral de largo (aviso informativo, no bloqueo), bloque copiable del opener, capa de canal, guardrail compacto, nota del camino preventivo si es caliente.
+
+### Paso 9 — Seguimiento y envío del link (`seguimiento-step.tsx`)
+
+- **Registrar resultados:** no respondió / respondió / agendó reunión / postergar (+fecha) / rechazó — todos vía `registrarContactoComercial`: la maquinaria mueve status y cadencia, el setter JAMÁS calcula fechas. POSTERGADO suma `postergarLead` (lo que el cron lee para reactivar). RECHAZADO solo registra — el cierre PERDIDO lo decide Franco (paridad con la semántica admin; la UI lo dice). **CALL_AGENDADA se incluyó** aunque el scope no lo enumeraba: es el objetivo del rol, la maquinaria ya lo manejaba (mueve a CALL_AGENDADA + limpia follow-up) y sin él la victoria no se podía registrar hasta B7 — la agenda/Cal.com/confirmación/traspaso SIGUE siendo B7.
+- **Envío del link — condiciones exactas:** `gateEnvioDemo` (flow.ts) = `stage === 'APROBADA' && finalUrl && gateBriefAbierto(status, score)` — es decir, respondió O caliente score >= 4 (camino preventivo habilitado sin forzarse). La UI no ofrece el envío antes; la action lo re-valida server-side igual.
+- **Idempotencia:** claim atómico `marcarDemoEnviadaOwned` (dossier.ts) — `updateMany` condicional sobre `enviadaAt: null` en stage APROBADA: dos clicks simultáneos = UN solo 'marcada'. Solo con claim se llama `crearDemoComercial` (OsDemo + status + follow-up). Si la creación falla post-claim, `revertirDemoEnviadaOwned` libera la marca (reintentable). 'ya-enviada' → ok sin crear OsDemo ni re-disparar nada.
+- El envío NO genera OsLeadActivity (paridad exacta con createDemo admin: `OsDemo.sentAt` es el registro) — el "último contacto" que lee el cron no se ensucia.
+- Cadencia visible: "toques X de 3", próximo toque (`nextFollowUpAt`), corte cuando el cálculo da null (`cadenciaInfo` deriva el stop del MISMO `calculateNextFollowUp`); plantillas de follow-up copiables por toque (`PLANTILLAS_FOLLOW_UP`).
+
+### Capa de canal + guardrail de rol
+
+- **`CANAL_INSTAGRAM` en flow.ts** (patrón SHELL_CONSTRUCCION, comentada como derivada del research y AJUSTABLE editando SOLO esa constante — la UI la consume tal cual): tope diario 30, aviso desde 24, ritmo/hora 6, warm-up por semanas, umbral de largo del opener 300, recordatorios de disciplina (carpeta de solicitudes, ritmo humano, link siempre en 2º mensaje). `PLANTILLAS_FOLLOW_UP` y `GUARDRAIL_ROL` ídem (mismo archivo, mismo patrón).
+- Conteo de DMs de hoy: **derivado** — `contarDmsHoy` en `lib/leados/outreach.ts` (OsLeadActivity INSTAGRAM_DM del propio setter, día argentino con el mismo criterio del cron; SIN tabla nueva). `canal-seguridad.tsx` avisa al acercarse/pasar el tope y **NUNCA bloquea** (decisión registrada de Franco).
+- `guardrail-rol.tsx`: visible y repetido — compacto en el Paso 7, completo en el Paso 9 con el guion fijo copiable ("de los números se encarga el equipo — te coordino una reunión…") + input del Gem de objeciones (`buildObjecionInputBlock`, deflect-a-reunión).
+
+### Home-hub consciente del outreach
+
+`listOwnedLeads` ahora incluye `_count.activities`; `HomeLeadInput` suma `contactos`/`followUpVencido`/`demoEnviada`. Próximas acciones nuevas: EVALUADA gate-cerrado sin contactos → "Mandá el opener (Paso 7)" (trabajar, accionable); toque vencido → "Toca el follow-up (Paso 9)"; APROBADA sin enviar con gate → "Demo aprobada — enviá el link (Paso 9)"; enviada → seguimiento. Los textos viejos "el envío llega en un próximo bloque" quedaron actualizados (flow.ts, lead-wizard, brief-step).
+
+### Archivos
+
+**Nuevos:** `src/lib/os-commercial.ts` (maquinaria compartida) · `src/lib/leados/outreach.ts` (lecturas con aislamiento: actividades del lead propio + DMs de hoy) · `setter/_actions/outreach.actions.ts` / `outreach.schemas.ts` · `setter/_components/canal-seguridad.tsx` / `guardrail-rol.tsx` · `setter/leads/[leadId]/_components/opener-step.tsx` / `seguimiento-step.tsx` · `scripts/b6-qa-outreach.ts`.
+**Modificados:** `admin/leads/_actions/activity.actions.ts` y `demo.actions.ts` (delegan al helper, comportamiento idéntico) · `lib/leados/flow.ts` (CANAL_INSTAGRAM, GUARDRAIL_ROL, PLANTILLAS_FOLLOW_UP, contieneLink, cadenciaInfo, gateEnvioDemo, formatFechaCorta, home B6) · `lib/leados/copy-blocks.ts` (3 builders B6) · `lib/leados/dossier.ts` (marcar/revertir enviadaAt) · `lib/leados/ownership.ts` (`_count.activities`) · `setter/page.tsx` · `setter/leads/[leadId]/page.tsx` · `lead-wizard.tsx` · `brief-step.tsx` (texto del gate).
+
+### Semánticas pre-existentes observadas (NO tocadas — decisión de Franco si molestan)
+
+1. **createDemo solo mueve PROSPECTO→DEMO_ENVIADA:** un lead RESPONDIO conserva su status al enviar la demo (verificado en smoke). El checklist del brief decía "lead en DEMO_ENVIADA" — eso solo ocurre en el camino preventivo (caliente aún PROSPECTO). Cambiarlo = cambiar createDemo (prohibido en B6); el panel refleja el envío vía `dossier.enviadaAt` igual.
+2. **El stop de la cadencia no limpia `nextFollowUpAt`:** tras el 4º SIN_RESPUESTA el cálculo da null y no se reagenda, pero la fecha vieja queda — el cron sigue listando ese lead como vencido hasta cerrarlo (PERDIDO) o postergarlo. Conducta pre-existente de la action admin, reusada tal cual.
+3. **RECHAZADO no frena el follow-up** (solo registra): paridad con la maquinaria admin; la UI avisa que el cierre lo decide Franco.
+
+### Verificación corrida
+
+- `npm run build` ✅ · `npx prisma migrate status`: 60 migraciones, al día, CERO nuevas ✅
+- Smoke de maquinaria (script temporal borrado tras correr; lead descartable + cleanup en cascada): cadencia +2/+2/+3/stop ✅ · RESPONDIO mueve status y limpia follow-up ✅ · claim enviadaAt 'marcada'/'ya-enviada' ✅ · un solo OsDemo + semántica PROSPECTO intacta ✅ · postergarLead ✅ · claim con userId ajeno → null (anti-IDOR) ✅ — 15/15.
+- visual-qa (server QA, persona setter, desktop 1600 + mobile 480): home con las dos próximas acciones nuevas ✅ · Pizzería: Paso 7 activo (Gem + canal "0/30" + guardrail), bloque copiable en vivo, Paso 9 apagado, CERO superficie de envío, gate del brief con texto nuevo ✅ · Gimnasio: caliente, Paso 9 con bloque verde + finalUrl en el segundo mensaje + nota preventiva + "toques 0 de 3" + Gem de objeciones ✅ · consola limpia, mobile sin roturas ✅.
+- ⚠️ A CONFIRMAR (artefacto probable del harness): el error de link del Paso 7 no apareció al setear el value por JS en el test headless — la validación es síncrona en render y `contieneLink` pasó 8/8 casos (incluidos los dos strings exactos del test). Confirmar tipeando un link a mano.
+- `scripts/b6-qa-outreach.ts` (dev-only, idempotente) dejó el terreno: "QA-B6 Pizzería Don Carlo" (score 3, EVALUADA, sin actividades — el camino completo del flujo invertido) y "QA-B6 Gimnasio Atlas" (caliente, APROBADA + finalUrl, sin actividades — camino preventivo + idempotencia). Los flujos que MUTAN quedaron vírgenes a propósito para el checklist.
+
+### Pendiente de verificación humana (Franco)
+
+- Residuales B1/B2 (gate de merge): diff de la exención signIn exclusiva de SETTER; Neon prod sin las migraciones de LeadOS.
+- Walk-through del checklist del brief sobre los dos leads QA: opener (sin link, sin demo posible) → "mandé el opener" → follow-up agendado → "no respondió" reagenda solo → "respondió" abre el gate → producir/aprobar → enviar el link → marcar de nuevo (idempotente) → camino preventivo en el Gimnasio → conteo de DMs → guardrail visible.
+- Confirmar el validador de link tipeando a mano (⚠️ de arriba).
+- Editar `CANAL_INSTAGRAM` en flow.ts → la UI refleja el cambio sin tocar componentes.
+- createActivity admin sigue igual (registrar una actividad desde /admin/leads).
+- Decidir sobre las 3 semánticas pre-existentes observadas (sección anterior).
+
+---
+
+## BLOQUE B7 — Agenda y traspaso, Paso 10 (LeadOS) — 12/jun/2026
+
+Último bloque de construcción antes del piloto: el setter cierra el ciclo — cuando el prospecto acepta reunirse, ofrece 3 horarios REALES de la agenda de Franco (Cal.com v2), confirma el booking (escribe en el Google Calendar conectado + mails nativos de confirmación/recordatorio de Cal.com), registra las notas de traspaso OBLIGATORIAS y el lead queda en CALL_AGENDADA por la puerta existente. Más el cierre de loop post-reunión (admin-only) y la métrica "realizada" para B8.
+
+### Integración Cal.com v2 (escritura real, sin API key)
+
+- **`src/lib/integrations/cal-com-v2.ts`** (NUEVO — no toca el v1 muerto): `getSlots` (GET /v2/slots, header 2024-09-04, TZ fija America/Argentina/Buenos_Aires), `createBooking` (POST /v2/bookings, header 2026-02-25, attendee + `metadata.leadId` para cerrar el loop), `cancelBooking` (reversión). Errores tipados `CalComV2Error` (slot_ocupado/validacion/no_encontrado/red) con mensaje seguro — el cuerpo crudo va al log del server, jamás al cliente. Cliente validado en vivo contra la cuenta pública del probe (10 días de slots, parsing OK).
+- **Config en la org** (`getCalConfigLeadOS` en `lib/leados/agenda.ts`): lee `calComUsername` + slug del event type en `calComEmbedUrl` (acepta slug pelado o URL completa). Lectura ESTRICTA: 0 orgs con username → mensaje "Setup B7.0 pendiente"; >1 → reporta ambigüedad y NO agenda (los mismos campos los usa agenda-inteligente de clientes — nunca arriesgar un booking en el calendario equivocado).
+- **Smoke crear→cancelar**: `scripts/b7-smoke-calcom.ts` (dev-only, host-check Neon dev). Pide slots reales → crea booking de prueba (`B7_SMOKE_EMAIL` opcional) → lo cancela. **Ejecutado: BLOQUEADO limpio por falta de setup B7.0** (org sin username, esperado — reporta y sale exit 0). El crear→cancelar real queda para Franco post-setup.
+
+### Persistencia: UN campo aditivo (migración `20260612202545_add_dossier_b7_agenda`)
+
+`OsLeadDossier.agendaJson Json?` — patrón blob+contrato de B2/B3 (`AgendaSchema` en contracts.ts): `{estado: AGENDANDO|AGENDADA, calBookingUid, slotStart, attendee, notasTraspaso, agendadaAt, realizadaAt?, resultado? {tipo GANADO|PERDIDO|RE_SEGUIMIENTO, fecha, nota}}`. SQL: `ALTER TABLE "OsLeadDossier" ADD COLUMN "agendaJson" JSONB;`. Un solo campo cubre uid + traspaso + realizada + resultado (el presupuesto del bloque era 1–2 campos).
+
+### Cableado booking→CALL_AGENDADA (Paso 10 del wizard)
+
+`setter/_actions/agenda.actions.ts`: `ofrecerHorarios` (solo lectura: gate lead propio + RESPONDIO + sin agenda → 3 slots de días distintos vía `elegirTresSlots`) y `confirmarReunion`. Orden de `confirmarReunion`: guard+zod (notas de traspaso min 30 chars OBLIGATORIAS, checkbox decisor, email del attendee) → config → **re-fetch de slots del día y validación de que el elegido sigue libre** (jamás se confía en la oferta vieja) → **claim atómico** `marcarAgendandoOwned` (updateMany sobre agendaJson NULL, patrón enviadaAt de B6: doble click = UN booking) → `createBooking` → SOLO con el OK: `guardarAgendaOwned` (AGENDADA + uid + traspaso) + `registrarContactoComercial(CALL_AGENDADA)` (la puerta existente mueve el status y frena follow-ups) → Telegram a Franco (`notificarReunionAgendada`, fire-and-forget, negocio+horario+traspaso) → revalidates.
+**Si Cal.com falla**: se revierte el claim y el lead NO avanza (el setter ve el error real: slot pisado / setup faltante / red). **Si el registro local falla DESPUÉS del booking**: compensación — se cancela el booking en Cal.com y se libera el claim; nada queda mentiroso.
+UI `agenda-step.tsx`: recordatorio del decisor enganchado a la ficha del Paso 1 (DUENO/CM/no sabe → hint distinto), bloque copiable con los 3 horarios en huso BA (`buildHorariosMensajeBlock`), form attendee+traspaso, y resumen verde post-booking. El atajo manual "Agendó reunión" del Paso 9 SE CERRÓ (UI + rechazo server-side en `registrarResultado`): el estado solo lo mueve un booking confirmado — invariante del bloque.
+
+### Cierre de loop post-reunión (GANADO admin-only) + métrica del piloto
+
+`admin/leads/_actions/reunion.actions.ts` (requireSuperAdmin): `marcarReunionRealizada` (estampa `realizadaAt` — **la métrica real del piloto es reuniones realizadas, B8 la mide**; no-show = no marcarla, sin detección automática) y `registrarResultadoReunion` (una sola vez): GANADO → status CERRADO (queda consultable en `agendaJson.resultado` para el cálculo del 20% POST-piloto — acá no se calcula nada) · PERDIDO → PERDIDO · RE_SEGUIMIENTO → vuelve a RESPONDIO (la conversación sigue por la maquinaria existente). Panel `reunion-panel.tsx` en `/admin/leads/[leadId]` (lenguaje visual admin): traspaso completo + realizada + resultado con confirmación en dos pasos. **El setter NO tiene estas acciones** — agenda y traspasa, la venta la cierra Franco.
+
+### Archivos
+
+**Nuevos:** `src/lib/integrations/cal-com-v2.ts` · `src/lib/leados/agenda.ts` (config org, elegirTresSlots, claim/guardar/revertir, writes admin) · `setter/_actions/agenda.actions.ts` / `agenda.schemas.ts` · `setter/leads/[leadId]/_components/agenda-step.tsx` · `admin/leads/_actions/reunion.actions.ts` / `reunion.schemas.ts` · `admin/leads/_components/reunion-panel.tsx` · `scripts/b7-smoke-calcom.ts` · `scripts/b7-qa-agenda.ts` · migración `20260612202545_add_dossier_b7_agenda`.
+**Modificados:** `prisma/schema.prisma` (agendaJson) · `lib/leados/contracts.ts` (AgendaSchema) · `lib/leados/flow.ts` (parseAgenda, reunionAgendada, formatFechaHora) · `lib/leados/notify.ts` (notificarReunionAgendada) · `lib/leados/copy-blocks.ts` (buildHorariosMensajeBlock) · `setter/_actions/outreach.actions.ts` (rechazo de CALL_AGENDADA manual) · `seguimiento-step.tsx` (opción quitada + puntero al Paso 10) · `lead-wizard.tsx` / `setter/leads/[leadId]/page.tsx` (agenda + email) · `admin/leads/[leadId]/page.tsx` (dossier.agendaJson + panel).
+
+### Verificación corrida
+
+- `npm run build` ✅ · `npx prisma migrate status`: 61 migraciones, al día ✅ (la nueva: solo el ALTER TABLE aditivo).
+- Smoke Cal.com: camino "sin setup B7.0" ✅ (reporta y sale limpio). `getSlots`+`elegirTresSlots` validados contra la API real (cuenta pública del probe, solo lectura) ✅.
+- `scripts/b7-qa-agenda.ts` (dev-only, idempotente): "QA-B7 Estética Bella Vista" (RESPONDIO + EVALUADA + conversación — el Paso 10 listo para agendar) y "QA-B7 Vivero El Aromo" (CALL_AGENDADA + booking SIMULADO `qa-b7-booking-demo` — resumen Paso 10 + panel admin SIN necesitar Cal.com). El flujo de resultado quedó VIRGEN para el checklist.
+- Visual (server dev-QA, desktop 1600 + mobile 480, hecho por el padre — ver residual abajo): Paso 10 con checkbox decisor (hint según ficha) y botón deshabilitado hasta confirmar ✅ · click en buscar sin setup → error claro "Setup B7.0 pendiente" en toast e inline ✅ · Paso 9 sin la opción "Agendó reunión" (4 opciones, "Respondió" apunta al Paso 10) ✅ · resumen verde de agendada con fecha BA, attendee, traspaso y uid ✅ · panel admin con traspaso + "Marcar realizada" + Ganado/Perdido/Re-seguimiento ✅ · lead sin booking → panel ausente ✅ · consola y server sin errores ✅ · mobile sin overflow ✅.
+
+### Residuales observados (fuera de alcance, NO tocados)
+
+1. **QA bypass vs `passwordResetRequired`**: el jwt callback re-deriva `passwordResetRequired` de la DB en cada refresh; setter-qa estaba seedeado `true` → tras cualquier refresh el middleware manda a /cambiar-password y el bypass QA muere. Workaround aplicado SOLO en DB dev: `passwordResetRequired=false` para setter-qa@develop.test (el seed sigue creando `true` — decidir si el seed QA debería crearlo en false).
+2. **Redirects del middleware salen al origin de `AUTH_URL` (puerto 3000)**: con el server QA en 3001/3002, todo redirect de proxy.ts va a localhost:3000 (ERR_CONNECTION_REFUSED en headless). Afecta solo QA headless multi-puerto.
+3. **El bypass QA no funciona en `start:qa` (build prod)**: NODE_ENV=production → NextAuth espera cookie `__Secure-` que el bypass http no puede setear. La verificación headless va por `dev:qa` (3002), como en B6.
+4. La deuda v1 (`getCalSummary`/agenda-inteligente del cliente) sigue intacta, como pide el bloque.
+
+### Pendiente de verificación humana (Franco) — checklist B7
+
+- **Gate de merge**: residuales B1/B2 (diff exención signIn SETTER; Neon prod sin migraciones LeadOS — ahora incluye `add_dossier_b7_agenda`).
+- **Setup B7.0** (manual, una vez): cuenta Cal.com + Google Calendar conectado + event type + cargar `calComUsername` y el slug (en `calComEmbedUrl`) en UNA sola org.
+- `npx tsx scripts/b7-smoke-calcom.ts` → slots reales visibles, booking de prueba creado y cancelado; confirmar en Google Calendar que el evento apareció y desapareció + mails nativos.
+- Con la Estética (o lead real) en RESPONDIO: Paso 10 → 3 slots reales en huso BA copiables → confirmar con notas → booking en Google Calendar con leadId en metadata, lead en CALL_AGENDADA, Telegram con traspaso, mail nativo al attendee. Sin notas de traspaso NO deja confirmar.
+- Doble click en confirmar → UN solo booking (claim atómico).
+- Forzar fallo (slug inválido en la org, o slot pisado) → el lead NO pasa a CALL_AGENDADA y el error se ve.
+- Como admin sobre el Vivero (o el lead real): marcar "reunión realizada" y resultado GANADO → lead CERRADO; verificar que el setter NO tiene esas acciones.
+- Ownership: lead ajeno → 404 en el wizard; acciones de agenda inalcanzables.
