@@ -34,6 +34,11 @@ export const RATE_LIMIT_PRESETS = {
   crmRetryPerOrg: { limit: 10, windowMs: 60_000 },
   crmTestPerOrg: { limit: 5, windowMs: 60_000 },
 
+  // ── Admin: test de notificación de leads (config del bot) ────────────────
+  // Antispam del botón "Test email" — cada click manda un mail real por
+  // Resend. Clave: id del admin (precedente: resendCredentialsPerAdmin).
+  testNotificationPerAdmin: { limit: 3, windowMs: 60_000 },
+
   // ── Formulario de contacto público (landing) ─────────────────────────────
   // Protege contra spam de leads. Un visitante real nunca necesita enviar el
   // form más de 5 veces en 15 minutos. Clave: IP hasheada (no controlable

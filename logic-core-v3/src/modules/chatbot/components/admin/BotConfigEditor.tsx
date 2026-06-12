@@ -144,15 +144,25 @@ export function BotConfigEditor({ initial, orgSlug, onSave }: BotConfigEditorPro
                 <span className="ml-3 text-xs text-zinc-600">{exposedCount} campos editables expuestos</span>
               </p>
             </div>
-            <button
-              type="button"
-              onClick={handleSendTest}
-              disabled={saving || !state.leadNotificationEmail}
-              className="inline-flex items-center gap-2 rounded-2xl border border-white/10 px-4 py-2 text-sm text-zinc-300 hover:bg-white/[0.04] disabled:opacity-50"
+            {/* Tooltip en el span: los title sobre botones disabled no son confiables cross-browser */}
+            <span
+              className="flex"
+              title={
+                state.leadNotificationEmail
+                  ? 'Manda un email de prueba de notificación de lead'
+                  : 'Para habilitarlo: tab Avanzado → "Email de notificaciones"'
+              }
             >
-              <Mail className="h-4 w-4" strokeWidth={1.5} />
-              Test email
-            </button>
+              <button
+                type="button"
+                onClick={handleSendTest}
+                disabled={saving || !state.leadNotificationEmail}
+                className="inline-flex flex-1 items-center gap-2 rounded-2xl border border-white/10 px-4 py-2 text-sm text-zinc-300 hover:bg-white/[0.04] disabled:opacity-50"
+              >
+                <Mail className="h-4 w-4" strokeWidth={1.5} />
+                Test email
+              </button>
+            </span>
           </div>
 
           <ConfigTabs active={activeTab} onChange={setActiveTab} />
