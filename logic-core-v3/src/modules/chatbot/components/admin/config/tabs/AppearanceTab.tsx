@@ -1,6 +1,7 @@
 'use client'
 
 import { ColorPicker } from '../ColorPicker'
+import { EmojiPickerField } from '../EmojiPickerField'
 import { Field } from '../Field'
 import { Input } from '../Input'
 import { AvatarPicker } from '@/modules/chatbot/components/avatar'
@@ -59,11 +60,9 @@ export function AppearanceTab({ state, update }: BotConfigTabProps) {
 
       {state.avatarStyle === 'emoji' && (
         <Field label="Emoji del avatar" hint="Un solo emoji">
-          <Input
-            value={state.avatarEmoji ?? ''}
-            onChange={(event) => update('avatarEmoji', event.target.value || null)}
-            placeholder="🤖"
-            maxLength={8}
+          <EmojiPickerField
+            value={state.avatarEmoji}
+            onChange={(value) => update('avatarEmoji', value)}
           />
         </Field>
       )}
