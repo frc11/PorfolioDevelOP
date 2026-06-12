@@ -4,7 +4,7 @@ import { useState, useTransition } from 'react'
 import { createPortal } from 'react-dom'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { motion, AnimatePresence } from 'motion/react'
-import { ChevronLeft, Play, Pause, ExternalLink, Bot, X } from 'lucide-react'
+import { ChevronLeft, Play, Pause, Code, Copy, Check, Bot, X } from 'lucide-react'
 import Link from 'next/link'
 import { toast } from 'sonner'
 import type { Prisma } from '@prisma/client'
@@ -115,6 +115,7 @@ export function BotDetailClient({ bot, initialTab, initialEvents, monthlyUsage, 
   const [togglePending, startToggle] = useTransition()
   const [showPauseConfirm, setShowPauseConfirm] = useState(false)
   const [showActivationModal, setShowActivationModal] = useState(false)
+  const [showTestModal, setShowTestModal] = useState(false)
   const [activationChecks, setActivationChecks] = useState<PreflightCheck[]>([])
   const [activating, setActivating] = useState(false)
   const mounted = useIsClient()
@@ -218,15 +219,14 @@ export function BotDetailClient({ bot, initialTab, initialEvents, monthlyUsage, 
             >
               {isActive ? 'Pausar bot' : 'Activar bot'}
             </Button>
-            <Link href={`/api/chatbot/${bot.slug}/chat`} target="_blank">
-              <Button
-                variant="ghost"
-                size="sm"
-                icon={<ExternalLink className="h-3 w-3" strokeWidth={1.5} />}
-              >
-                Test endpoint
-              </Button>
-            </Link>
+            <Button
+              variant="ghost"
+              size="sm"
+              icon={<Code className="h-3 w-3" strokeWidth={1.5} />}
+              onClick={() => setShowTestModal(true)}
+            >
+              Test endpoint
+            </Button>
           </div>
         </div>
       </div>
@@ -355,6 +355,133 @@ export function BotDetailClient({ bot, initialTab, initialEvents, monthlyUsage, 
       </AnimatePresence>,
       document.body,
     )}
+    {mounted && createPortal(
+      <AnimatePresence>
+        {showTestModal && (
+          <TestEndpointModal
+            slug={bot.slug}
+            allowedDomains={bot.allowedDomains}
+            onClose={() => setShowTestModal(false)}
+          />
+        )}
+      </AnimatePresence>,
+      document.body,
+    )}
     </>
+  )
+}
+
+function TestEndpointModal({
+  slug,
+  allowedDomains,
+  onClose,
+}: {
+  slug: string
+  allowedDomains: string[]
+  onClose: () => void
+}) {
+  const [copied, setCopied] = useState(false)
+  const domain = allowedDomains[0]
+  const urlBase = domain ? `https://${domain}` : 'https://[your-domain]'
+  const curlExample = [
+    `curl -X POST ${urlBase}/api/chatbot/${slug}/chat \\`,
+    `  -H "Content-Type: application/json" \\`,
+    `  -H "Origin: ${urlBase}" \\`,
+    `  -d '{`,
+    `  "messages": [{ "role": "user", "content": "Hola" }],`,
+    `  "sessionId": "test-session-001"`,
+    `}'`,
+  ].join('\n')
+
+  function handleCopy() {
+    void navigator.clipboard.writeText(curlExample).then(() => {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    })
+  }
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-[200] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"
+      onClick={onClose}
+    >
+      <motion.div
+        initial={{ scale: 0.95, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.95, opacity: 0 }}
+        className="w-full max-w-lg rounded-3xl border border-white/10 bg-zinc-950 p-6"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="mb-5 flex items-start justify-between gap-4">
+          <div>
+            <h2 className="text-base font-semibold text-zinc-100">Test endpoint</h2>
+            <p className="mt-1 text-sm text-zinc-400">Endpoint REST — solo acepta POST</p>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Cerrar"
+            className="shrink-0 rounded-xl p-1.5 hover:bg-white/[0.05]"
+          >
+            <X className="h-4 w-4 text-zinc-400" strokeWidth={1.5} />
+          </button>
+        </div>
+
+        <div className="mb-4">
+          <p className="mb-1.5 text-xs text-zinc-500">Endpoint</p>
+          <div className="flex items-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.04] px-3 py-2 font-mono text-sm">
+            <span className="shrink-0 text-xs font-medium text-violet-400">POST</span>
+            <span className="truncate text-zinc-300">/api/chatbot/{slug}/chat</span>
+          </div>
+        </div>
+
+        <div className="mb-4">
+          <p className="mb-1.5 text-xs text-zinc-500">Headers requeridos</p>
+          <div className="space-y-1 rounded-xl border border-white/[0.08] bg-white/[0.04] px-3 py-2.5 font-mono text-xs">
+            <div>
+              <span className="text-zinc-500">Content-Type: </span>
+              <span className="text-zinc-300">application/json</span>
+            </div>
+            <div>
+              <span className="text-zinc-500">Origin: </span>
+              <span className="text-zinc-300">{urlBase}</span>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div className="mb-1.5 flex items-center justify-between gap-3">
+            <p className="min-w-0 text-xs text-zinc-500">
+              Campos opcionales:{' '}
+              <span className="font-mono">currentPath</span>,{' '}
+              <span className="font-mono">referrer</span>
+              {!domain && (
+                <span className="ml-2 text-amber-400">
+                  · reemplazá [your-domain] por un dominio permitido del bot
+                </span>
+              )}
+            </p>
+            <button
+              type="button"
+              onClick={handleCopy}
+              className="flex shrink-0 items-center gap-1.5 rounded-lg border border-white/[0.08] bg-white/[0.04] px-2.5 py-1 text-xs text-zinc-300 transition-colors hover:bg-white/[0.08]"
+            >
+              {copied ? (
+                <Check className="h-3 w-3 text-cyan-400" strokeWidth={1.5} />
+              ) : (
+                <Copy className="h-3 w-3" strokeWidth={1.5} />
+              )}
+              {copied ? 'Copiado' : 'Copiar'}
+            </button>
+          </div>
+          <pre className="overflow-x-auto rounded-xl border border-white/[0.08] bg-white/[0.04] px-4 py-3 font-mono text-xs leading-relaxed text-zinc-300">
+            {curlExample}
+          </pre>
+        </div>
+      </motion.div>
+    </motion.div>
   )
 }
