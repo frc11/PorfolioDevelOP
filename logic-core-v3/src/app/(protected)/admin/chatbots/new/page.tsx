@@ -16,7 +16,7 @@ export default async function NewBotPage() {
   })
 
   return (
-    <div className="space-y-6 max-w-3xl">
+    <div className="space-y-6">
       <div>
         <p className="text-[10px] uppercase tracking-[0.24em] text-zinc-500">Chatbots</p>
         <h1 className="text-3xl font-semibold tracking-tight text-zinc-100">
