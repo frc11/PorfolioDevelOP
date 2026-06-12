@@ -132,7 +132,8 @@ export function BotConfigEditor({ initial, orgSlug, onSave }: BotConfigEditorPro
 
   return (
     <>
-      <div className="grid grid-cols-1 gap-6 pb-8 lg:grid-cols-[minmax(0,1fr)_380px]">
+      {/* preview-col: 380px en lg (1024–1279, el form queda angosto si se ensancha), 460px en xl — el ancho del widget acompaña 1:1 (insets fijos 56px en BotConfigPreview) */}
+      <div className="grid grid-cols-1 gap-6 pb-8 lg:grid-cols-[minmax(0,1fr)_380px] xl:grid-cols-[minmax(0,1fr)_460px]">
         <div className="space-y-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>

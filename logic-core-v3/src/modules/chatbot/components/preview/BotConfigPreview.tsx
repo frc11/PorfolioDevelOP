@@ -23,6 +23,17 @@ const AVATAR_STATES: { value: AvatarCoreState; label: string }[] = [
   { value: 'speaking', label: 'Hablando' },
 ]
 
+// ── Dimensiones de la preview — calibrar a ojo acá ─────────────────────────
+// Techo: CANVAS_HEIGHT > ~460 hace que el card desborde el aside centrado del
+// admin en laptops de 768px de alto (el sticky corta el tope, inalcanzable).
+// El ancho NUNCA se fija acá — lo hereda de la columna (admin: BotConfigEditor
+// grid 380/460px; dashboard cliente: BotPersonalization 380px).
+const CANVAS_HEIGHT = 448       // alto de la página simulada (antes h-96 = 384)
+const WIDGET_MIN_HEIGHT = 300   // alto mínimo del widget abierto — anclado abajo, crece hacia arriba
+const LAUNCHER_AVATAR_BASE = 56 // espejo del launcher real — NO subir sin subir el widget real
+const HEADER_AVATAR_BASE = 40   // espejo del header del widget real — ídem
+// ────────────────────────────────────────────────────────────────────────────
+
 function normalizeIntensity(value: string): 'LOW' | 'MEDIUM' | 'HIGH' {
   const upper = value.toUpperCase()
   if (upper === 'LOW' || upper === 'HIGH') return upper
@@ -104,8 +115,8 @@ export function BotConfigPreview({ state }: BotConfigPreviewProps) {
 
   // Mirror the live surfaces' per-avatar sizing so this preview stays WYSIWYG
   // (heavy avatars render a larger box; light avatars resolve to the base size).
-  const previewLauncherSize = getAvatarRenderSize(state.avatarStyle, 56)
-  const previewHeaderSize = getAvatarRenderSize(state.avatarStyle, 40)
+  const previewLauncherSize = getAvatarRenderSize(state.avatarStyle, LAUNCHER_AVATAR_BASE)
+  const previewHeaderSize = getAvatarRenderSize(state.avatarStyle, HEADER_AVATAR_BASE)
 
   return (
     <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02]">
@@ -130,8 +141,8 @@ export function BotConfigPreview({ state }: BotConfigPreviewProps) {
       </div>
 
       <div
-        className="relative h-96 overflow-hidden bg-gradient-to-br from-zinc-950 via-zinc-900 to-zinc-950"
-        style={{ fontFamily }}
+        className="relative overflow-hidden bg-gradient-to-br from-zinc-950 via-zinc-900 to-zinc-950"
+        style={{ fontFamily, height: CANVAS_HEIGHT }}
       >
         {/* Página simulada: líneas difuminadas para sugerir contenido del sitio del cliente */}
         <div aria-hidden="true" className="pointer-events-none absolute inset-0 opacity-[0.06]">
@@ -173,6 +184,7 @@ export function BotConfigPreview({ state }: BotConfigPreviewProps) {
           <div
             className={`absolute bottom-4 ${isLeft ? 'left-4 right-10' : 'left-10 right-4'} border p-4 backdrop-blur`}
             style={{
+              minHeight: WIDGET_MIN_HEIGHT,
               borderColor: `${state.accentColor}30`,
               backgroundColor: surfaceBg,
               borderRadius: radius,
