@@ -108,7 +108,7 @@ export function BotConfigPreview({ state }: BotConfigPreviewProps) {
   const previewHeaderSize = getAvatarRenderSize(state.avatarStyle, 40)
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02]">
+    <div className="flex h-full flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02]">
       <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
         <p className="text-xs font-medium tracking-tight text-zinc-400">Preview</p>
         <p className="text-[10px] tracking-tight text-zinc-600">Lo que ve el visitante</p>
@@ -129,115 +129,117 @@ export function BotConfigPreview({ state }: BotConfigPreviewProps) {
         />
       </div>
 
-      <div
-        className="relative h-96 overflow-hidden bg-gradient-to-br from-zinc-950 via-zinc-900 to-zinc-950"
-        style={{ fontFamily }}
-      >
-        {/* Página simulada: líneas difuminadas para sugerir contenido del sitio del cliente */}
-        <div aria-hidden="true" className="pointer-events-none absolute inset-0 opacity-[0.06]">
-          <div className="space-y-3 p-5">
-            <div className="h-1.5 w-1/3 rounded-full bg-white" />
-            <div className="h-1.5 w-3/4 rounded-full bg-white" />
-            <div className="h-1.5 w-2/3 rounded-full bg-white" />
-            <div className="mt-4 h-1.5 w-1/2 rounded-full bg-white" />
-            <div className="h-1.5 w-4/5 rounded-full bg-white" />
-            <div className="h-1.5 w-3/5 rounded-full bg-white" />
-            <div className="mt-4 h-12 w-full rounded-md bg-white" />
-            <div className="mt-3 h-1.5 w-2/3 rounded-full bg-white" />
-            <div className="h-1.5 w-3/5 rounded-full bg-white" />
-          </div>
-        </div>
-
-        {viewMode === 'floating' ? (
-          <div
-            className="absolute"
-            style={{
-              bottom: 20,
-              left: isLeft ? 20 : undefined,
-              right: isLeft ? undefined : 20,
-              width: previewLauncherSize,
-              height: previewLauncherSize,
-            }}
-          >
-            <AvatarRenderer
-              style={state.avatarStyle}
-              state={avatarState}
-              accentColor={state.accentColor}
-              size={previewLauncherSize}
-              avatarImageUrl={state.avatarImageUrl}
-              avatarEmoji={state.avatarEmoji}
-              businessInitials={initials}
-            />
-          </div>
-        ) : (
-          <div
-            className={`absolute bottom-4 ${isLeft ? 'left-4 right-10' : 'left-10 right-4'} border p-4 backdrop-blur`}
-            style={{
-              borderColor: `${state.accentColor}30`,
-              backgroundColor: surfaceBg,
-              borderRadius: radius,
-              boxShadow: state.accentSecondary
-                ? `0 25px 50px -12px rgba(0,0,0,0.25), 0 0 ${SECONDARY_GLOW_RADIUS} ${state.accentSecondary}${SECONDARY_GLOW_ALPHA}`
-                : '0 25px 50px -12px rgba(0,0,0,0.25)',
-            }}
-          >
-            <div className="mb-3 flex items-center gap-3">
-              <div style={{ width: previewHeaderSize, height: previewHeaderSize }} className="shrink-0">
-                <AvatarRenderer
-                  style={state.avatarStyle}
-                  state={avatarState}
-                  accentColor={state.accentColor}
-                  size={previewHeaderSize}
-                  avatarImageUrl={state.avatarImageUrl}
-                  avatarEmoji={state.avatarEmoji}
-                  businessInitials={initials}
-                />
-              </div>
-              <div className="min-w-0">
-                <p className="truncate text-sm font-medium text-zinc-100">
-                  {state.botName || 'Asistente'}
-                </p>
-                <p className="text-xs text-zinc-500">
-                  {state.isActive ? 'En línea' : 'Pausado'}
-                </p>
-              </div>
+      <div className="flex flex-1 items-center">
+        <div
+          className="relative h-96 w-full overflow-hidden bg-gradient-to-br from-zinc-950 via-zinc-900 to-zinc-950"
+          style={{ fontFamily }}
+        >
+          {/* Página simulada: líneas difuminadas para sugerir contenido del sitio del cliente */}
+          <div aria-hidden="true" className="pointer-events-none absolute inset-0 opacity-[0.06]">
+            <div className="space-y-3 p-5">
+              <div className="h-1.5 w-1/3 rounded-full bg-white" />
+              <div className="h-1.5 w-3/4 rounded-full bg-white" />
+              <div className="h-1.5 w-2/3 rounded-full bg-white" />
+              <div className="mt-4 h-1.5 w-1/2 rounded-full bg-white" />
+              <div className="h-1.5 w-4/5 rounded-full bg-white" />
+              <div className="h-1.5 w-3/5 rounded-full bg-white" />
+              <div className="mt-4 h-12 w-full rounded-md bg-white" />
+              <div className="mt-3 h-1.5 w-2/3 rounded-full bg-white" />
+              <div className="h-1.5 w-3/5 rounded-full bg-white" />
             </div>
+          </div>
 
+          {viewMode === 'floating' ? (
             <div
-              className="p-3 text-sm leading-relaxed text-zinc-200"
+              className="absolute"
               style={{
-                background:
-                  surfaceStyleToken === 'minimal' ? 'transparent' : 'rgba(255,255,255,0.05)',
-                border:
-                  surfaceStyleToken === 'solid'
-                    ? `1px solid ${state.accentColor}30`
-                    : '1px solid rgba(255,255,255,0.06)',
-                borderRadius: bubbleRadius,
+                bottom: 20,
+                left: isLeft ? 20 : undefined,
+                right: isLeft ? undefined : 20,
+                width: previewLauncherSize,
+                height: previewLauncherSize,
               }}
             >
-              {state.welcomeMessage || 'Mensaje de bienvenida'}
+              <AvatarRenderer
+                style={state.avatarStyle}
+                state={avatarState}
+                accentColor={state.accentColor}
+                size={previewLauncherSize}
+                avatarImageUrl={state.avatarImageUrl}
+                avatarEmoji={state.avatarEmoji}
+                businessInitials={initials}
+              />
             </div>
-
-            {state.quickReplies.length > 0 && (
-              <div className="mt-3 flex flex-wrap gap-2">
-                {state.quickReplies.slice(0, 3).map((reply, index) => (
-                  <span
-                    key={reply.id ?? index}
-                    className="rounded-full border px-2.5 py-1 text-[11px]"
-                    style={{
-                      borderColor: `${state.accentSecondary ?? state.accentColor}${CHIP_BORDER_ALPHA}`,
-                      backgroundColor: `${state.accentSecondary ?? state.accentColor}${CHIP_BG_ALPHA}`,
-                      color: state.accentSecondary ?? state.accentColor,
-                    }}
-                  >
-                    {reply.emoji ? `${reply.emoji} ` : ''}
-                    {reply.label || 'Quick reply'}
-                  </span>
-                ))}
+          ) : (
+            <div
+              className={`absolute bottom-4 ${isLeft ? 'left-4 right-10' : 'left-10 right-4'} border p-4 backdrop-blur`}
+              style={{
+                borderColor: `${state.accentColor}30`,
+                backgroundColor: surfaceBg,
+                borderRadius: radius,
+                boxShadow: state.accentSecondary
+                  ? `0 25px 50px -12px rgba(0,0,0,0.25), 0 0 ${SECONDARY_GLOW_RADIUS} ${state.accentSecondary}${SECONDARY_GLOW_ALPHA}`
+                  : '0 25px 50px -12px rgba(0,0,0,0.25)',
+              }}
+            >
+              <div className="mb-3 flex items-center gap-3">
+                <div style={{ width: previewHeaderSize, height: previewHeaderSize }} className="shrink-0">
+                  <AvatarRenderer
+                    style={state.avatarStyle}
+                    state={avatarState}
+                    accentColor={state.accentColor}
+                    size={previewHeaderSize}
+                    avatarImageUrl={state.avatarImageUrl}
+                    avatarEmoji={state.avatarEmoji}
+                    businessInitials={initials}
+                  />
+                </div>
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-medium text-zinc-100">
+                    {state.botName || 'Asistente'}
+                  </p>
+                  <p className="text-xs text-zinc-500">
+                    {state.isActive ? 'En línea' : 'Pausado'}
+                  </p>
+                </div>
               </div>
-            )}
-          </div>
-        )}
+
+              <div
+                className="p-3 text-sm leading-relaxed text-zinc-200"
+                style={{
+                  background:
+                    surfaceStyleToken === 'minimal' ? 'transparent' : 'rgba(255,255,255,0.05)',
+                  border:
+                    surfaceStyleToken === 'solid'
+                      ? `1px solid ${state.accentColor}30`
+                      : '1px solid rgba(255,255,255,0.06)',
+                  borderRadius: bubbleRadius,
+                }}
+              >
+                {state.welcomeMessage || 'Mensaje de bienvenida'}
+              </div>
+
+              {state.quickReplies.length > 0 && (
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {state.quickReplies.slice(0, 3).map((reply, index) => (
+                    <span
+                      key={reply.id ?? index}
+                      className="rounded-full border px-2.5 py-1 text-[11px]"
+                      style={{
+                        borderColor: `${state.accentSecondary ?? state.accentColor}${CHIP_BORDER_ALPHA}`,
+                        backgroundColor: `${state.accentSecondary ?? state.accentColor}${CHIP_BG_ALPHA}`,
+                        color: state.accentSecondary ?? state.accentColor,
+                      }}
+                    >
+                      {reply.emoji ? `${reply.emoji} ` : ''}
+                      {reply.label || 'Quick reply'}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )
