@@ -7,7 +7,7 @@
  * (gates the single chatbot mount) so the prefix list lives in exactly one
  * place instead of being duplicated per call site.
  */
-export const PORTAL_PREFIXES = ['/admin', '/dashboard', '/embed'] as const
+export const PORTAL_PREFIXES = ['/admin', '/dashboard', '/embed', '/setter'] as const
 
 export function isPortalRoute(pathname: string): boolean {
   return PORTAL_PREFIXES.some((prefix) => pathname.startsWith(prefix))

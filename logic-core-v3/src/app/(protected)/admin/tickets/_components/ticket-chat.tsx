@@ -3,7 +3,7 @@
 import { useEffect, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { Loader2, MessageSquareText } from 'lucide-react'
-import type { TicketStatus } from '@prisma/client'
+import type { Role, TicketStatus } from '@prisma/client'
 import { updateTicketStatus } from '../_actions/ticket.actions'
 import { TicketReplyForm } from './ticket-reply-form'
 
@@ -33,7 +33,7 @@ type TicketChatProps = {
       isAdmin: boolean
       user: {
         name: string | null
-        role: 'SUPER_ADMIN' | 'ORG_MEMBER' | 'CLIENT'
+        role: Role
       }
     }>
   }

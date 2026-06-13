@@ -1,9 +1,13 @@
 import type { ActivityChannel, ActivityResult, LeadStatus, OsServiceType, Prisma } from '@prisma/client'
+import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
+import { parseAgenda, reunionAgendada } from '@/lib/leados/flow'
 import { LeadForm } from '../_components/lead-form'
 import { LeadActivityFeed } from '../_components/lead-activity-feed'
 import { LeadDemosPanel } from '../_components/demo-form'
+import { AssignSetterControl } from '../_components/assign-setter-control'
+import { ReunionPanel } from '../_components/reunion-panel'
 import { updateLeadStatus } from '../_actions/lead.actions'
 
 type LeadPageProps = {
@@ -27,6 +31,9 @@ type LeadRecord = Prisma.OsLeadGetPayload<{
     }
     demos: true
     project: true
+    dossier: {
+      select: { agendaJson: true }
+    }
   }
 }>
 
@@ -175,37 +182,51 @@ const STATUS_OPTIONS: LeadStatus[] = [
 export default async function AgencyOsLeadDetailPage({ params }: LeadPageProps) {
   const { leadId } = await params
 
-  const lead = await prisma.osLead.findUnique({
-    where: { id: leadId },
-    include: {
-      activities: {
-        include: {
-          performedBy: {
-            select: {
-              id: true,
-              name: true,
-              email: true,
+  const [lead, setters] = await Promise.all([
+    prisma.osLead.findUnique({
+      where: { id: leadId },
+      include: {
+        activities: {
+          include: {
+            performedBy: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+              },
             },
           },
+          orderBy: {
+            createdAt: 'desc',
+          },
         },
-        orderBy: {
-          createdAt: 'desc',
+        demos: {
+          orderBy: {
+            sentAt: 'desc',
+          },
+        },
+        project: true,
+        // B7: la reunión agendada por el setter (booking + traspaso).
+        dossier: {
+          select: { agendaJson: true },
         },
       },
-      demos: {
-        orderBy: {
-          sentAt: 'desc',
-        },
-      },
-      project: true,
-    },
-  })
+    }),
+    prisma.user.findMany({
+      where: { role: 'SETTER' },
+      select: { id: true, name: true, email: true },
+      orderBy: { name: 'asc' },
+    }),
+  ])
 
   if (!lead) {
     redirect('/admin/leads')
   }
 
   const canConvertToProject = lead.status === 'CERRADO' && !lead.project
+  // B7: la reunión agendada vía Cal.com — el panel solo aparece con booking real.
+  const agenda = parseAgenda(lead.dossier?.agendaJson ?? null)
+  const reunion = reunionAgendada(agenda) ? agenda : null
 
   return (
     <section className="space-y-6">
@@ -215,6 +236,16 @@ export default async function AgencyOsLeadDetailPage({ params }: LeadPageProps) 
             <p className="text-xs tracking-tight text-zinc-500">
               develOP / Leads / Ficha
             </p>
+            {/* B8A/H5: si el lead tiene dossier LeadOS, puente a la superficie de
+                revisión de demo (B5) — antes las dos páginas no se enlazaban. */}
+            {lead.dossier ? (
+              <Link
+                href={`/admin/leados/${lead.id}`}
+                className="mt-1 inline-flex text-xs font-medium text-cyan-300/80 transition-colors hover:text-cyan-200"
+              >
+                Ver revisión de la demo (LeadOS) →
+              </Link>
+            ) : null}
             <h2 className="mt-2 text-3xl font-semibold tracking-tight text-white">
               {lead.businessName}
             </h2>
@@ -380,6 +411,17 @@ export default async function AgencyOsLeadDetailPage({ params }: LeadPageProps) 
         </div>
 
         <div className="space-y-6">
+          {reunion ? <ReunionPanel leadId={lead.id} agenda={reunion} /> : null}
+
+          <AssignSetterControl
+            leadId={lead.id}
+            assignedToId={lead.assignedToId}
+            setters={setters.map((setter) => ({
+              id: setter.id,
+              label: setter.name ?? setter.email,
+            }))}
+          />
+
           <LeadDemosPanel leadId={lead.id} demos={serializeDemos(lead)} />
 
           <section className="rounded-[28px] border border-white/10 bg-white/5 p-5 backdrop-blur-xl">

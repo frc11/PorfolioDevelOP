@@ -6,6 +6,7 @@ import { prisma } from '@/lib/prisma'
 import { requireSuperAdmin } from '@/lib/auth-guards'
 import { fail, ok, type ActionResult } from '@/lib/action-utils'
 import {
+  AssignLeadSetterSchema,
   CreateLeadSchema,
   LeadIdSchema,
   UpdateLeadSchema,
@@ -110,6 +111,43 @@ export async function updateLeadStatus(
     return fail(
       error instanceof Error ? error.message : 'Failed to update lead status'
     )
+  }
+}
+
+/**
+ * B5 (LeadOS) — Asigna/desasigna el lead a un setter. La asignación es la
+ * curaduría del admin: define qué leads ve el setter en su panel (ownership
+ * por `assignedToId`).
+ */
+export async function assignLeadSetter(
+  input: unknown
+): Promise<ActionResult<{ id: string }>> {
+  try {
+    await requireSuperAdmin()
+    const parsed = AssignLeadSetterSchema.parse(input)
+
+    if (parsed.setterId !== null) {
+      const setter = await prisma.user.findUnique({
+        where: { id: parsed.setterId },
+        select: { role: true },
+      })
+      if (!setter || setter.role !== 'SETTER') {
+        return fail('El usuario elegido no es un setter')
+      }
+    }
+
+    const lead = await prisma.osLead.update({
+      where: { id: parsed.leadId },
+      data: { assignedToId: parsed.setterId },
+      select: { id: true },
+    })
+
+    revalidatePath('/admin/leads')
+    revalidatePath(`/admin/leads/${parsed.leadId}`)
+    revalidateTag('admin-leads', {})
+    return ok({ id: lead.id })
+  } catch (error) {
+    return fail(error instanceof Error ? error.message : 'Failed to assign lead')
   }
 }
 

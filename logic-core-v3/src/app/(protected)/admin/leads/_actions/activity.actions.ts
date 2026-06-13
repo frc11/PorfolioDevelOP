@@ -1,12 +1,11 @@
 'use server'
 
-import { ActivityChannel, ActivityResult, LeadStatus } from '@prisma/client'
+import { ActivityChannel, ActivityResult } from '@prisma/client'
 import { revalidatePath, revalidateTag } from 'next/cache'
 import { z } from 'zod'
-import { prisma } from '@/lib/prisma'
 import { requireSuperAdmin } from '@/lib/auth-guards'
 import { fail, ok, type ActionResult } from '@/lib/action-utils'
-import { calculateNextFollowUp, countFollowUps } from '@/lib/follow-up'
+import { registrarContactoComercial } from '@/lib/os-commercial'
 
 const emptyStringToUndefined = (value: unknown) => {
   if (typeof value !== 'string') {
@@ -43,53 +42,15 @@ export async function createActivity(
     const userId = await requireSuperAdmin()
     const parsed = CreateActivitySchema.parse(input)
 
-    const activity = await prisma.osLeadActivity.create({
-      data: {
-        leadId: parsed.leadId,
-        channel: parsed.channel,
-        result: parsed.result,
-        notes: parsed.notes,
-        performedById: userId,
-      },
-      select: { id: true },
+    // B6: la lógica de negocio (activity + efectos por resultado) vive en
+    // lib/os-commercial, compartida con el panel del setter. Mismo cuerpo.
+    const activity = await registrarContactoComercial({
+      leadId: parsed.leadId,
+      channel: parsed.channel,
+      result: parsed.result,
+      notes: parsed.notes,
+      performedById: userId,
     })
-
-    if (parsed.result === ActivityResult.SIN_RESPUESTA) {
-      const activities = await prisma.osLeadActivity.findMany({
-        where: { leadId: parsed.leadId },
-        select: { result: true },
-      })
-
-      const followUpCount = countFollowUps(activities)
-      const nextFollowUpAt = calculateNextFollowUp(followUpCount)
-
-      if (nextFollowUpAt) {
-        await prisma.osLead.update({
-          where: { id: parsed.leadId },
-          data: { nextFollowUpAt },
-        })
-      }
-    }
-
-    if (parsed.result === ActivityResult.RESPONDIO) {
-      await prisma.osLead.update({
-        where: { id: parsed.leadId },
-        data: {
-          status: LeadStatus.RESPONDIO,
-          nextFollowUpAt: null,
-        },
-      })
-    }
-
-    if (parsed.result === ActivityResult.CALL_AGENDADA) {
-      await prisma.osLead.update({
-        where: { id: parsed.leadId },
-        data: {
-          status: LeadStatus.CALL_AGENDADA,
-          nextFollowUpAt: null,
-        },
-      })
-    }
 
     revalidatePath('/admin/leads')
     revalidatePath(`/admin/leads/${parsed.leadId}`)

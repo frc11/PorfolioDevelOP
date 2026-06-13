@@ -30,6 +30,8 @@ export type LeadPipelineLead = {
   nextFollowUpAt: string | null
   lastActivityAt: string | null
   createdAt: string
+  /** B5: setter asignado (LeadOS) — null si el lead no está asignado. */
+  assignedToName: string | null
   _count: {
     activities: number
     demos: number

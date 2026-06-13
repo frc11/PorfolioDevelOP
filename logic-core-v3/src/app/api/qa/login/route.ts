@@ -30,12 +30,15 @@ import { prisma } from '@/lib/prisma'
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 
-type QaPersona = 'super-admin' | 'client-a' | 'client-b'
+type QaPersona = 'super-admin' | 'client-a' | 'client-b' | 'setter'
 
 const PERSONA_EMAIL: Record<QaPersona, string> = {
   'super-admin': 'admin@develop.com',
   'client-a': 'cliente@sanmiguel.com',
   'client-b': 'qa-cliente-b@develop.test',
+  // LeadOS B3: persona para verificar /setter/* sin pisar la password seedeada
+  // (el setter real tiene passwordResetRequired: true; el token QA lo saltea).
+  setter: 'setter-qa@develop.test',
 }
 
 const SESSION_MAX_AGE_SECONDS = 8 * 60 * 60
@@ -69,7 +72,12 @@ function tripleGuardCheck(request: NextRequest): GuardResult {
 }
 
 function isQaPersona(value: unknown): value is QaPersona {
-  return value === 'super-admin' || value === 'client-a' || value === 'client-b'
+  return (
+    value === 'super-admin' ||
+    value === 'client-a' ||
+    value === 'client-b' ||
+    value === 'setter'
+  )
 }
 
 function getSessionCookieName(request: NextRequest): string {
@@ -202,7 +210,8 @@ export function GET(request: NextRequest): NextResponse {
       persona,
       email: PERSONA_EMAIL[persona],
     })),
-    usage: "POST /api/qa/login con { persona: 'super-admin' | 'client-a' | 'client-b' }",
+    usage:
+      "POST /api/qa/login con { persona: 'super-admin' | 'client-a' | 'client-b' | 'setter' }",
   })
 }
 
