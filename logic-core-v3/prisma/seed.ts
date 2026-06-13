@@ -132,8 +132,18 @@ async function main() {
 
   // LeadOS B1 — setter de prueba. SIN OrgMember a propósito: el setter opera
   // fuera del modelo multi-tenant (su aislamiento es OsLead.assignedToId, no
-  // organizationId). passwordResetRequired: true replica el alta real
-  // (ver docs/leados-alta-setter.md). Alta por Google PROHIBIDA para setters.
+  // organizationId). Alta por Google PROHIBIDA para setters.
+  //
+  // B8A/H8 — passwordResetRequired: FALSE a propósito (no replica el alta real).
+  // El alta REAL del setter fuerza el cambio de password (passwordResetRequired:
+  // true, ver docs/leados-alta-setter.md) y NO pasa por este seed. Este usuario
+  // existe SOLO para verificación headless vía /api/qa/login, que mintea un token
+  // qa-bypass con passwordResetRequired: false. Causa raíz del bypass roto (B7):
+  // el callback jwt de src/auth.ts re-deriva este campo de la DB en cada refresh,
+  // así que con el seed en `true` el token qa-bypass (false) se pisaba y el
+  // middleware mandaba a /cambiar-password, matando la sesión QA. Seedearlo en
+  // `false` alinea el dato de test con la intención del bypass, sin tocar el path
+  // de auth real ni el alta real del setter.
   await prisma.user.upsert({
     where: { email: 'setter-qa@develop.test' },
     update: {
@@ -141,7 +151,7 @@ async function main() {
       password: setterPassword,
       role: Role.SETTER,
       emailVerified: new Date(),
-      passwordResetRequired: true,
+      passwordResetRequired: false,
     },
     create: {
       name: 'QA Setter',
@@ -149,7 +159,7 @@ async function main() {
       password: setterPassword,
       role: Role.SETTER,
       emailVerified: new Date(),
-      passwordResetRequired: true,
+      passwordResetRequired: false,
     },
   })
 
@@ -838,7 +848,7 @@ async function main() {
       '- admin@develop.com / Admin1234!',
       '- cliente@sanmiguel.com / Cliente1234!',
       '- qa-cliente-b@develop.test / ClienteB1234! (QA, aislamiento)',
-      '- setter-qa@develop.test / Setter1234! (SETTER, fuerza cambio de password al primer login)',
+      '- setter-qa@develop.test / Setter1234! (SETTER QA; passwordResetRequired: false a propósito — ver B8A/H8)',
       'Notas de compatibilidad del schema:',
       '- service.name no existe; se sembraron 2 servicios por tipo.',
       '- project.deadline no existe; se agregó al description.',
