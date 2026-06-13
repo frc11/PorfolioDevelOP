@@ -169,6 +169,34 @@ export async function revertirAgendandoOwned(leadId: string, userId: string): Pr
 }
 
 /**
+ * B8A/H1 — Compensación del registro local fallido DESPUÉS del booking: borra
+ * la agenda recién escrita por ESTE flujo cuando ya quedó en AGENDADA (el caso
+ * que `revertirAgendandoOwned` NO cubre, porque filtra por AGENDANDO). Se filtra
+ * por `calBookingUid` puntual para no pisar JAMÁS una agenda ajena — y como el
+ * claim exigió `agendaJson` NULL, no puede haber una previa distinta. Sin esto,
+ * un fallo entre `guardarAgendaOwned` y `registrarContactoComercial` dejaba al
+ * lead con una reunión "AGENDADA" cuyo booking ya se canceló en Cal.com.
+ */
+export async function revertirAgendaConfirmadaOwned(
+  leadId: string,
+  userId: string,
+  bookingUid: string,
+): Promise<void> {
+  const dossier = await getOwnedDossier(leadId, userId)
+  if (!dossier) return
+  await prisma.osLeadDossier.updateMany({
+    where: {
+      leadId: dossier.leadId,
+      AND: [
+        { agendaJson: { path: ['estado'], equals: 'AGENDADA' } },
+        { agendaJson: { path: ['calBookingUid'], equals: bookingUid } },
+      ],
+    },
+    data: { agendaJson: Prisma.DbNull },
+  })
+}
+
+/**
  * Write final tras el OK de Cal.com: AGENDANDO → AGENDADA con uid, slot,
  * attendee y notas de traspaso (obligatorias — las valida la action antes).
  * Solo pisa el claim propio: si no está AGENDANDO, lanza.

@@ -32,6 +32,7 @@ import {
   guardarAgendaOwned,
   marcarAgendandoOwned,
   rangoOferta,
+  revertirAgendaConfirmadaOwned,
   revertirAgendandoOwned,
   slotSigueLibre,
 } from '@/lib/leados/agenda'
@@ -222,10 +223,15 @@ export async function confirmarReunion(
     } catch (error) {
       // El booking existe pero el registro local falló: se compensa en
       // Cal.com (cancela + mail nativo de cancelación) y se libera el claim.
+      // B8A/H1: se revierte tanto el claim AGENDANDO (si guardarAgendaOwned no
+      // llegó a escribir) como la agenda ya AGENDADA con ESTE uid (si falló
+      // recién en registrarContactoComercial) — antes la segunda quedaba sin
+      // limpiar y el lead exhibía una reunión mentirosa.
       await cancelBooking(bookingUid, 'LeadOS no pudo registrar la reunión — reintentar').catch(
         () => undefined,
       )
       await revertirAgendandoOwned(leadId, userId).catch(() => undefined)
+      await revertirAgendaConfirmadaOwned(leadId, userId, bookingUid).catch(() => undefined)
       console.error('[b7 confirmarReunion] registro local falló, booking compensado:', error)
       return fail('No se pudo registrar la reunión — el booking se canceló solo, reintentá')
     }
