@@ -139,8 +139,28 @@ export function buildHorariosMensajeBlock(slots: string[]): string {
   ].join('\n\n')
 }
 
-/** B4 — El brief en un bloque pegable: el primer mensaje para Claude Design. */
-export function buildConstruccionBlock(lead: CopyBlockLead, brief: Brief): string {
+/**
+ * B4 — El brief en un bloque pegable: el primer mensaje para Claude Design.
+ *
+ * B8A-II: incluye también los MATERIALES REALES del negocio (reseñas textuales
+ * como prueba social, tono/contenido, y de dónde bajar el logo y las fotos).
+ * El shell de construcción pide usarlos, pero antes vivían sólo en la ficha
+ * (lejos del paso) y NO viajaban en este bloque — el setter quedaba pegando un
+ * plano sin la materia prima. Ahora el bloque es auto-suficiente.
+ */
+export function buildConstruccionBlock(
+  lead: CopyBlockLead,
+  brief: Brief,
+  ficha: Ficha | null,
+): string {
+  const assets = [
+    lead.instagramUrl ? `Instagram: ${lead.instagramUrl}` : null,
+    lead.googleMapsUrl ? `Google Maps: ${lead.googleMapsUrl}` : null,
+    lead.currentWebUrl ? `Web actual: ${lead.currentWebUrl}` : null,
+  ]
+    .filter(Boolean)
+    .join('\n')
+
   const partes = [
     `BRIEF DE DEMO — ${lead.businessName}`,
     [
@@ -155,6 +175,9 @@ export function buildConstruccionBlock(lead: CopyBlockLead, brief: Brief): strin
       : null,
     seccion('LLAMADO A LA ACCIÓN', brief.cta),
     seccion('NOTAS DE MARCA', brief.notasMarca),
+    seccion('RESEÑAS REALES (usalas textuales como prueba social)', ficha?.resenas),
+    seccion('CONTENIDO Y TONO REAL (logo / fotos / estilo)', ficha?.contenidoReal),
+    seccion('DE DÓNDE BAJAR EL LOGO Y LAS FOTOS REALES', assets || undefined),
     seccion('BRIEF COMPLETO DEL GEM DE DISEÑO', brief.pegadoGem),
   ]
 

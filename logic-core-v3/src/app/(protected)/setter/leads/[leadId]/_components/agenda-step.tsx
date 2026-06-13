@@ -188,8 +188,10 @@ export function AgendaStep({
     <Card padding="lg" className="space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-base font-semibold text-zinc-100">Paso 10 — Agendar la reunión</h2>
+        {/* B8A-II: el paso se abre con RESPONDIO, no con un "aceptó" confirmado.
+            La etiqueta dice disponibilidad, no afirma un hecho que no verificamos. */}
         <Badge tone="cyan" variant="soft">
-          Aceptó reunirse
+          Listo para agendar
         </Badge>
       </div>
 

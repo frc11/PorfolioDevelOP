@@ -194,6 +194,7 @@ export function LeadWizard({ data }: { data: WizardData }) {
           lead={lead}
           stage={stage}
           brief={brief}
+          ficha={ficha}
           ultimoRechazo={ultimoRechazo}
           respondioDesde={respondioDesde}
         />
