@@ -162,11 +162,14 @@ export function ConstruccionStep({
 }: ConstruccionStepProps) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
+  const [serverError, setServerError] = useState<string | null>(null)
 
   const transicionar = (action: typeof iniciarConstruccion, mensajeOk: string) => {
+    setServerError(null)
     startTransition(async () => {
       const result = await action(leadId)
       if (!result.success) {
+        setServerError(result.error)
         toast.error(result.error)
         return
       }
@@ -205,6 +208,11 @@ export function ConstruccionStep({
           arranques, el dossier pasa a &quot;Construcción&quot; y se abren los pasos de draft y
           self-check.
         </p>
+        {serverError && (
+          <p className="rounded-xl border border-red-400/20 bg-red-500/[0.06] p-3 text-xs leading-relaxed text-red-300">
+            {serverError}
+          </p>
+        )}
         <Button
           onClick={() => transicionar(iniciarConstruccion, 'Construcción arrancada — seguí la guía.')}
           loading={isPending}
@@ -229,6 +237,11 @@ export function ConstruccionStep({
           a publicar el draft y a pasar el self-check antes de reenviar — el historial de rechazos
           se conserva.
         </p>
+        {serverError && (
+          <p className="rounded-xl border border-red-400/20 bg-red-500/[0.06] p-3 text-xs leading-relaxed text-red-300">
+            {serverError}
+          </p>
+        )}
         <Button
           onClick={() =>
             transicionar(reabrirConstruccion, 'Construcción reabierta — guiate por el rechazo.')

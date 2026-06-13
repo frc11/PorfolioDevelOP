@@ -20,8 +20,8 @@ const PASOS = [
     detalle: 'Con luz verde (respondió o está caliente), armá el input del Gem de diseño y pegá el brief.',
   },
   {
-    titulo: '4 · Lo que sigue',
-    detalle: 'Construcción de la demo, revisión y envío llegan en los próximos pasos del panel.',
+    titulo: '4 · Construí, revisá y enviá',
+    detalle: 'El panel te guía la construcción de la demo fase por fase y el self-check antes de mandarla a Franco; el link sale recién cuando el negocio responde.',
   },
 ] as const
 

@@ -174,6 +174,14 @@ export function AgendaStep({
         if (result.error.includes('se acaba de ocupar')) {
           setSlots(null)
           setSlotElegido(null)
+        } else if (
+          // Conflicto de concurrencia/stale: el server ya rechazó el duplicado
+          // (idempotencia intacta). Refrescar para que el paso pase a su
+          // tarjeta-resumen "Reunión agendada" en vez de dejar el form mintiendo.
+          result.error.includes('ya tiene la reunión agendada') ||
+          result.error.includes('confirmación en curso')
+        ) {
+          router.refresh()
         }
         return
       }

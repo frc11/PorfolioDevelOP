@@ -42,15 +42,18 @@ export function SelfCheckStep({ leadId, stage, draftUrl, selfCheck, brief }: Sel
   const router = useRouter()
   const [duros, setDuros] = useState<Record<string, boolean>>(() => durosIniciales(selfCheck))
   const [softIds, setSoftIds] = useState<string[]>(() => softIniciales(selfCheck))
+  const [serverError, setServerError] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
 
   const todosDurosOk = HARD_CHECKS.every((check) => duros[check.id])
   const payload = () => ({ duros, softIds })
 
   const guardar = () => {
+    setServerError(null)
     startTransition(async () => {
       const result = await guardarSelfCheck(leadId, payload())
       if (!result.success) {
+        setServerError(result.error)
         toast.error(result.error)
         return
       }
@@ -64,16 +67,19 @@ export function SelfCheckStep({ leadId, stage, draftUrl, selfCheck, brief }: Sel
   }
 
   const enviar = () => {
+    setServerError(null)
     startTransition(async () => {
       // Guarda el estado actual primero (soft-flags frescos) y después envía:
       // el server re-valida los hard-blocks contra la DB, no contra la UI.
       const guardado = await guardarSelfCheck(leadId, payload())
       if (!guardado.success) {
+        setServerError(guardado.error)
         toast.error(guardado.error)
         return
       }
       const result = await enviarARevision(leadId)
       if (!result.success) {
+        setServerError(result.error)
         toast.error(result.error)
         return
       }
@@ -224,6 +230,12 @@ export function SelfCheckStep({ leadId, stage, draftUrl, selfCheck, brief }: Sel
         <p className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-3 text-xs leading-relaxed text-zinc-500">
           El envío se habilita cuando TODOS los obligatorios estén en verde. Si algo falla, el
           arreglo concreto está debajo de cada punto.
+        </p>
+      )}
+
+      {serverError && (
+        <p className="rounded-xl border border-red-400/20 bg-red-500/[0.06] p-3 text-xs leading-relaxed text-red-300">
+          {serverError}
         </p>
       )}
 

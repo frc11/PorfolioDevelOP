@@ -134,7 +134,7 @@ export const SHELL_CONSTRUCCION: ShellFase[] = [
     titulo: 'Estructura',
     detalle: 'Generá el esqueleto de la demo en Claude Design a partir del brief.',
     items: [
-      'Copiá el bloque del brief (está acá abajo) y pegalo en Claude Design como primer mensaje.',
+      'Copiá el «Bloque para Claude Design» (acá arriba) y pegalo como primer mensaje.',
       'Pedile una landing de una sola página con las secciones del brief, en ese orden.',
       'No agregues secciones que el brief no pide — el brief es el plano.',
     ],
@@ -235,9 +235,10 @@ export const HARD_CHECKS: HardCheck[] = [
   },
   {
     id: 'fielAlBrief',
-    nombre: 'La demo dice lo que el brief pedía',
-    comoVerificar: 'Compará sección por sección contra el brief: ¿está todo lo que pedía?',
-    arreglo: 'Volvé al Paso 4 con el brief al lado y completá lo que falta.',
+    nombre: 'La demo dice lo que el brief pedía — ni de más ni de menos',
+    comoVerificar:
+      'Compará sección por sección contra el brief: ¿está TODO lo que pedía y NADA que no pidiera? Si Claude Design agregó secciones de su cuenta (Galería, Equipo, FAQ…), sacalas — el brief es el plano.',
+    arreglo: 'Volvé al Paso 4 con el brief al lado: completá lo que falta y sacá lo que sobra.',
   },
 ]
 

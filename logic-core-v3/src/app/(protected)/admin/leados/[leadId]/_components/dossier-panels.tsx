@@ -154,34 +154,68 @@ export function SelfCheckPanel({
           <Vacio>Sin self-check — lo puebla el paso de construcción (B4).</Vacio>
         )
       ) : (
-        <div className="space-y-3">
-          <ul className="space-y-1.5">
-            {selfCheck.itemsDuros.map((item) => (
-              <li key={item.nombre} className="flex items-center gap-2 text-sm">
-                {item.ok ? (
-                  <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-400" strokeWidth={1.5} />
-                ) : (
-                  <XCircle className="h-4 w-4 shrink-0 text-rose-400" strokeWidth={1.5} />
-                )}
-                <span className={item.ok ? 'text-zinc-300' : 'text-rose-200'}>
-                  {item.nombre}
-                </span>
-              </li>
-            ))}
-          </ul>
-          {selfCheck.softFlags.length > 0 ? (
-            <div className="rounded-2xl border border-amber-400/15 bg-amber-400/5 p-3">
-              <p className="text-[10px] uppercase tracking-[0.22em] text-amber-200/70">
-                Flags del setter
-              </p>
-              <ul className="mt-1.5 space-y-1 text-xs leading-5 text-amber-100/80">
-                {selfCheck.softFlags.map((flag) => (
-                  <li key={flag}>• {flag}</li>
-                ))}
-              </ul>
+        (() => {
+          // B8A-III/NIII-6: la lista de duros llega 100% verde por construcción
+          // del gate (selfCheckAprobado), así que aporta poco al escaneo de
+          // Franco; los softFlags son la señal discriminante. Se lideran los
+          // softFlags y se condensan los duros a un resumen expandible. La rama
+          // roja no es código muerto: si HARD_CHECKS cambió tras guardar, un
+          // self-check viejo deja de aprobar → se abre el detalle y se marca.
+          const durosTotal = selfCheck.itemsDuros.length
+          const durosOk = selfCheck.itemsDuros.filter((item) => item.ok).length
+          const todosOk = durosOk === durosTotal
+          return (
+            <div className="space-y-3">
+              {selfCheck.softFlags.length > 0 ? (
+                <div className="rounded-2xl border border-amber-400/30 bg-amber-400/[0.08] p-3">
+                  <p className="text-[10px] uppercase tracking-[0.22em] text-amber-200/80">
+                    Reparos que levantó el setter — miralos
+                  </p>
+                  <ul className="mt-1.5 space-y-1 text-sm leading-6 text-amber-100/90">
+                    {selfCheck.softFlags.map((flag) => (
+                      <li key={flag}>• {flag}</li>
+                    ))}
+                  </ul>
+                </div>
+              ) : (
+                <p className="rounded-2xl border border-dashed border-white/10 bg-black/10 px-4 py-3 text-sm text-zinc-400">
+                  El setter no levantó reparos de diseño.
+                </p>
+              )}
+
+              <details
+                open={!todosOk}
+                className="group rounded-2xl border border-white/10 bg-black/20 p-3"
+              >
+                <summary className="flex cursor-pointer list-none items-center gap-2 text-xs font-medium transition-colors [&::-webkit-details-marker]:hidden">
+                  {todosOk ? (
+                    <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-400" strokeWidth={1.5} />
+                  ) : (
+                    <XCircle className="h-4 w-4 shrink-0 text-rose-400" strokeWidth={1.5} />
+                  )}
+                  <span className={todosOk ? 'text-zinc-400 hover:text-zinc-200' : 'text-rose-200'}>
+                    {durosOk}/{durosTotal} obligatorios verificados
+                    {todosOk ? '' : ' — ⚠ revisá los que faltan'} ›
+                  </span>
+                </summary>
+                <ul className="mt-2 space-y-1.5">
+                  {selfCheck.itemsDuros.map((item) => (
+                    <li key={item.nombre} className="flex items-center gap-2 text-sm">
+                      {item.ok ? (
+                        <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-400" strokeWidth={1.5} />
+                      ) : (
+                        <XCircle className="h-4 w-4 shrink-0 text-rose-400" strokeWidth={1.5} />
+                      )}
+                      <span className={item.ok ? 'text-zinc-300' : 'text-rose-200'}>
+                        {item.nombre}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </details>
             </div>
-          ) : null}
-        </div>
+          )
+        })()
       )}
     </Panel>
   )
