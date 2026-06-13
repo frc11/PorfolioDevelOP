@@ -159,6 +159,17 @@ export async function registrarResultado(
     const lead = await getOwnedLead(leadId.data, userId)
     if (!lead) return fail('Lead no encontrado')
 
+    // B8A-III/NIII-1: guard de ENTRADA faltante. Un lead con reunión YA
+    // agendada lo cierra Franco; el setter no debe poder bajarlo a
+    // POSTERGADO/RESPONDIO/SIN_RESPUESTA desde el Paso 9 — pisaría el
+    // CALL_AGENDADA, dejaría el booking de Cal.com huérfano y crearía una
+    // OsLeadActivity que ensucia el orden de "último contacto" que lee el cron.
+    // Espeja el guard del camino de agenda (gateAgenda, agenda.actions). El
+    // ciclo post-reunión (GANADO/PERDIDO/realizada) es admin-only.
+    if (lead.status === 'CALL_AGENDADA') {
+      return fail('Este lead ya tiene la reunión agendada — la cierra Franco')
+    }
+
     const actividades = await listOwnedLeadActivities(leadId.data, userId)
     if (actividades === null) return fail('Lead no encontrado')
     if (actividades.length === 0) {

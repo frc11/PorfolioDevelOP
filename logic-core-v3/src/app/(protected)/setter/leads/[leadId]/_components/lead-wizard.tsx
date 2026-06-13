@@ -76,7 +76,12 @@ export function LeadWizard({ data }: { data: WizardData }) {
     outreach,
   } = data
   const gateAbierto = gateBriefAbierto(lead.status, evaluacion?.score ?? null)
-  const fichaEditable = stage === null || stage === 'FICHA'
+  // B8A-III/NIII-2: una reunión ya agendada la cierra Franco — el wizard no debe
+  // invitar al setter a "completá la ficha"/re-evaluar un lead que ya está en
+  // CALL_AGENDADA (incoherencia con el home, que ya dice "la cierra Franco").
+  // Read-only, en el mismo espíritu que el short-circuit de DESCARTADA.
+  const fichaEditable =
+    (stage === null || stage === 'FICHA') && lead.status !== 'CALL_AGENDADA'
   const descartado = stage === 'DESCARTADA'
   const notaPostBrief = stage ? POST_BRIEF_NOTAS[stage] : undefined
 

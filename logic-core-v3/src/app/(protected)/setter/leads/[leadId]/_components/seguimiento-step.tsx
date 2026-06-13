@@ -128,6 +128,10 @@ export function SeguimientoStep({
 
   const score = evaluacion?.score ?? null
   const respondio = leadRespondio(status)
+  // B8A-III/NIII-1: reunión ya agendada → el ciclo lo cierra Franco. No se
+  // ofrecen los botones de resultado (bajarían el estado y dejarían el booking
+  // huérfano); el server lo re-valida en registrarResultado.
+  const agendada = status === 'CALL_AGENDADA'
   const demoEnviada = Boolean(demoEnviadaAt)
   const puedeEnviar =
     !demoEnviada && gateEnvioDemo({ status, score, stage, finalUrl })
@@ -282,7 +286,16 @@ export function SeguimientoStep({
       )}
 
       {/* ── Registrar lo que pasó ────────────────────────────────────────────── */}
-      {contactos > 0 ? (
+      {agendada ? (
+        <p className="flex items-start gap-2 rounded-xl border border-emerald-400/20 bg-emerald-500/[0.05] p-3 text-xs leading-relaxed text-emerald-200/90">
+          <CheckCircle2 size={14} strokeWidth={1.5} className="mt-0.5 shrink-0 text-emerald-400" />
+          <span>
+            Reunión agendada — la cierra Franco. No registres más resultados acá: el seguimiento
+            de esta reunión lo maneja el equipo. (Si se reabre la conversación, Franco la vuelve a
+            poner en juego desde el pipeline.)
+          </span>
+        </p>
+      ) : contactos > 0 ? (
         <div className="space-y-3">
           <p className="text-xs font-semibold text-zinc-300">Registrá lo que pasó</p>
           <div className="grid gap-2 sm:grid-cols-2">
