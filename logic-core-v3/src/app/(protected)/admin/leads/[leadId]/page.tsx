@@ -1,4 +1,5 @@
 import type { ActivityChannel, ActivityResult, LeadStatus, OsServiceType, Prisma } from '@prisma/client'
+import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import { parseAgenda, reunionAgendada } from '@/lib/leados/flow'
@@ -235,6 +236,16 @@ export default async function AgencyOsLeadDetailPage({ params }: LeadPageProps) 
             <p className="text-xs tracking-tight text-zinc-500">
               develOP / Leads / Ficha
             </p>
+            {/* B8A/H5: si el lead tiene dossier LeadOS, puente a la superficie de
+                revisión de demo (B5) — antes las dos páginas no se enlazaban. */}
+            {lead.dossier ? (
+              <Link
+                href={`/admin/leados/${lead.id}`}
+                className="mt-1 inline-flex text-xs font-medium text-cyan-300/80 transition-colors hover:text-cyan-200"
+              >
+                Ver revisión de la demo (LeadOS) →
+              </Link>
+            ) : null}
             <h2 className="mt-2 text-3xl font-semibold tracking-tight text-white">
               {lead.businessName}
             </h2>

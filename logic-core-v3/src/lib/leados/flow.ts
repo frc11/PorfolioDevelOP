@@ -563,6 +563,13 @@ function proximaAccionPara(
   if (input.status === 'POSTERGADO') {
     return { proximaAccion: 'Postergado — se retoma cuando se reactive', accionable: false }
   }
+  // B8A/H3: el lead con reunión agendada lo cierra Franco — la próxima acción
+  // es la reunión, no el paso del dossier (que puede estar atrás). Sin este
+  // caso, un CALL_AGENDADA en stage FICHA mostraba "Completá la ficha" dentro
+  // de "Agendadas" (incoherencia observada en runtime).
+  if (input.status === 'CALL_AGENDADA') {
+    return { proximaAccion: 'Reunión agendada — la cierra Franco', accionable: false }
+  }
 
   switch (input.stage) {
     case 'EN_REVISION':

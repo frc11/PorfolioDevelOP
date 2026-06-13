@@ -98,14 +98,24 @@ export default async function LeadOsRevisionDetailPage({ params }: RevisionPageP
             <ArrowLeft className="h-3.5 w-3.5" strokeWidth={1.5} />
             Volver a la cola
           </Link>
-          {nextLeadId ? (
+          <div className="flex flex-wrap items-center gap-4">
+            {/* B8A/H5: puente a la otra superficie admin del mismo lead
+                (pipeline + cierre de reunión B7), que antes no estaba enlazada. */}
             <Link
-              href={`/admin/leados/${nextLeadId}`}
-              className="text-xs font-medium text-cyan-300 transition-colors hover:text-cyan-200"
+              href={`/admin/leads/${leadId}`}
+              className="text-xs font-medium text-zinc-500 transition-colors hover:text-zinc-300"
             >
-              Siguiente en la cola →
+              Ver ficha completa del lead →
             </Link>
-          ) : null}
+            {nextLeadId ? (
+              <Link
+                href={`/admin/leados/${nextLeadId}`}
+                className="text-xs font-medium text-cyan-300 transition-colors hover:text-cyan-200"
+              >
+                Siguiente en la cola →
+              </Link>
+            ) : null}
+          </div>
         </div>
 
         <div className="mt-3 flex flex-wrap items-center gap-3">
