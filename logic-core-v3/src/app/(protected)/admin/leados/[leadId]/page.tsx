@@ -238,7 +238,10 @@ export default async function LeadOsRevisionDetailPage({ params }: RevisionPageP
 
           <EvaluacionPanel evaluacion={evaluacion} />
           <BriefPanel brief={brief} />
-          <SelfCheckPanel selfCheck={selfCheck} />
+          <SelfCheckPanel
+            selfCheck={selfCheck}
+            exigible={dossier.stage === 'EN_REVISION' || dossier.stage === 'APROBADA'}
+          />
           <RechazosPanel rechazos={rechazos} />
           <FichaPanel ficha={ficha} />
         </div>

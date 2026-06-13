@@ -129,11 +129,30 @@ export function BriefPanel({ brief }: { brief: Brief | null }) {
   )
 }
 
-export function SelfCheckPanel({ selfCheck }: { selfCheck: SelfCheck | null }) {
+export function SelfCheckPanel({
+  selfCheck,
+  exigible = false,
+}: {
+  selfCheck: SelfCheck | null
+  /** B8A/H7: en EN_REVISION/APROBADA el self-check es obligatorio (el gate de
+   * envío a revisión lo exige). Si falta, es una anomalía — avisar, no tranquilizar. */
+  exigible?: boolean
+}) {
   return (
     <Panel title="Self-check del setter">
       {!selfCheck ? (
-        <Vacio>Sin self-check — lo puebla el paso de construcción (B4).</Vacio>
+        exigible ? (
+          <div className="rounded-2xl border border-rose-400/25 bg-rose-500/[0.06] p-3">
+            <p className="text-sm font-medium text-rose-200">
+              ⚠ Esta demo llegó a revisión sin self-check registrado.
+            </p>
+            <p className="mt-1 text-xs leading-5 text-rose-100/70">
+              El flujo normal no lo permite — revisala con más cuidado antes de aprobar.
+            </p>
+          </div>
+        ) : (
+          <Vacio>Sin self-check — lo puebla el paso de construcción (B4).</Vacio>
+        )
       ) : (
         <div className="space-y-3">
           <ul className="space-y-1.5">

@@ -20,6 +20,13 @@ Verificación transversal: `npx tsc --noEmit` → exit 0 después de cada tanda;
 **Riesgo:** nulo. No toca puertas ni status; solo el texto/accionabilidad derivados para el home-hub. No altera el agrupamiento (`grupoPara` ya mandaba CALL_AGENDADA a "agendadas").
 **Verificado:** runtime — la tarjeta de Vivero El Aromo (CALL_AGENDADA + stage FICHA) ahora lee "Reunión agendada — la cierra Franco".
 
+### S3 — H7: la superficie de revisión avisa si la demo llegó sin self-check
+**Archivos:** `admin/leados/[leadId]/_components/dossier-panels.tsx` (`SelfCheckPanel`, nueva prop `exigible`) · `admin/leados/[leadId]/page.tsx` (pasa `exigible` cuando stage ∈ EN_REVISION/APROBADA).
+**Qué:** cuando el dossier está EN_REVISION/APROBADA y NO hay self-check, el panel muestra un aviso rosa ("⚠ Esta demo llegó a revisión sin self-check registrado — el flujo normal no lo permite, revisala con más cuidado") en vez del texto neutro "lo puebla el paso de construcción (B4)". En stages tempranos sigue el texto neutro.
+**Por qué:** un lead no puede llegar a EN_REVISION sin `selfCheckAprobado` (`dossier.actions.ts:345-350`); si la superficie lo muestra vacío es una anomalía que debería alertar a Franco, no tranquilizarlo. Hace la herramienta más difícil de usar mal (Franco no aprueba a ciegas una demo que salteó el gate).
+**Riesgo:** nulo. Prop aditiva con default `false`; solo cambia un texto de estado vacío. `tsc` limpio.
+**Verificado:** runtime — sobre Café La Esquina (EN_REVISION sin self-check, dato QA) la superficie ahora muestra el aviso rosa; el texto neutro desapareció para ese caso.
+
 ### S2 — H5: cross-link entre las dos superficies admin del mismo lead
 **Archivos:** `src/app/(protected)/admin/leados/[leadId]/page.tsx` (revisión B5) · `src/app/(protected)/admin/leads/[leadId]/page.tsx` (pipeline + reunión B7).
 **Qué:** en la superficie de revisión de demo se agregó "Ver ficha completa del lead →" (a `/admin/leads/[leadId]`); en el detalle de pipeline se agregó, solo si el lead tiene dossier LeadOS, "Ver revisión de la demo (LeadOS) →" (a `/admin/leados/[leadId]`). Importé `Link` en la página de pipeline (no estaba).
@@ -61,9 +68,6 @@ Verificación transversal: `npx tsc --noEmit` → exit 0 después de cada tanda;
 
 ### P2 — H4: el stepper superior no representa la mitad de outreach/agenda
 `DossierStepper` tiene 5 pasos fijos (Ficha→Revisión) y para un lead EVALUADA en outreach marca "Brief" como actual, aunque el setter esté en opener/seguimiento. **No lo toqué** porque cambiar `pasoActual` para el caso EVALUADA-en-outreach requiere pensarlo con cuidado (no empeorar el resto). **Recomendación:** primero la versión barata — re-etiquetar el stepper para que se lea como "progreso de la DEMO" (no "tu próximo paso"), dejando la guía del "próximo paso" al home-hub y a la tarjeta activa del wizard. Versión completa (journey-aware con hito de Contacto/Agenda) en sprint de pulida.
-
-### P3 — H7: la superficie de revisión muestra "Sin self-check" como estado normal
-Un lead no puede llegar a EN_REVISION sin `selfCheckAprobado`; si la superficie lo muestra vacío es una anomalía, no un estado normal. **Recomendación (SEGURO, menor):** cambiar el copy del panel a un aviso ("⚠ Esta demo no tiene self-check registrado — revisá con más cuidado") cuando el dossier esté EN_REVISION/APROBADA sin self-check. No lo ejecuté en esta tanda por presupuesto; es un cambio chico y de bajo riesgo para una próxima.
 
 ### P4 — H6: numeración de pasos en zigzag (1,2,7,9,10,3,4,5,6)
 Mitigado por el diseño (la tarjeta activa domina). Renumerar es ancho (los números aparecen en copy de muchos lados). **Recomendación:** baja prioridad; si se aborda, en vez de pelear con el número, que cada tarjeta colapsada explique "qué desbloquea".

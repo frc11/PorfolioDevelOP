@@ -89,7 +89,7 @@ Conclusión: las **líneas rojas están firmes**. Los hallazgos de abajo son, ca
 | H3 | CALL_AGENDADA muestra acción de dossier | fricción seria | SEGURO | **Ejecutar** |
 | H5 | Superficies admin sin cross-link | pulido alto | SEGURO | **Ejecutar** (si entra) |
 | H4 | Stepper omite outreach/agenda | coherencia | SEGURO | Ejecutar mínimo (re-etiquetar) o proponer |
-| H7 | "Sin self-check" se ve normal | menor | SEGURO | Ejecutar si entra |
+| H7 | "Sin self-check" se ve normal | menor | SEGURO | **Ejecutado** (aviso rosa) |
 | H2 | RE_SEGUIMIENTO no deja re-agendar | fricción seria | PROPUESTA | **No ejecutar** (tradeoffs de invariante) |
 | H6 | Numeración en zigzag | pulido | SEGURO | Documentar, baja prioridad |
 
