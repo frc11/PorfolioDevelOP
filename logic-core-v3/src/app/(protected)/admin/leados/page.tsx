@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { ChevronRight, Flame, UserRound } from 'lucide-react'
+import { cn } from '@/lib/utils'
 import { prisma } from '@/lib/prisma'
 import { parseEvaluacion } from '@/lib/leados/flow'
 import {
@@ -83,7 +84,7 @@ export default async function LeadOsRevisionPage() {
 
   return (
     <section className="space-y-6">
-      <div className="flex flex-col gap-4 rounded-[28px] border border-white/10 bg-white/5 p-5 backdrop-blur-xl sm:flex-row sm:items-end sm:justify-between">
+      <div className="flex flex-col gap-4 rounded-3xl border border-white/10 bg-white/5 p-5 backdrop-blur-xl sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-xs tracking-tight text-zinc-500">develOP / LeadOS</p>
           <h2 className="mt-2 text-3xl font-semibold tracking-tight text-white">
@@ -113,7 +114,7 @@ export default async function LeadOsRevisionPage() {
       </div>
 
       {cola.length === 0 ? (
-        <p className="rounded-[28px] border border-dashed border-white/10 bg-white/[0.02] px-6 py-10 text-center text-sm text-zinc-500">
+        <p className="rounded-3xl border border-dashed border-white/10 bg-white/[0.02] px-6 py-10 text-center text-sm text-zinc-500">
           No hay demos esperando revisión. Cuando el setter mande una a
           revisión, aparece acá.
         </p>
@@ -123,8 +124,16 @@ export default async function LeadOsRevisionPage() {
             <Link
               key={item.leadId}
               href={`/admin/leados/${item.leadId}`}
-              className="group flex items-center justify-between gap-4 rounded-[22px] border border-white/10 bg-white/5 p-4 transition-all hover:border-cyan-400/20 hover:bg-white/[0.07]"
+              className={cn(
+                'group relative flex items-center justify-between gap-4 overflow-hidden rounded-2xl border p-4 transition-all',
+                item.caliente
+                  ? 'border-amber-400/30 bg-amber-500/[0.05] hover:bg-amber-500/[0.08]'
+                  : 'border-white/10 bg-white/5 hover:border-cyan-400/20 hover:bg-white/[0.07]',
+              )}
             >
+              {item.caliente && (
+                <span aria-hidden className="absolute inset-y-0 left-0 w-1 bg-amber-400" />
+              )}
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
                   <h3 className="truncate text-base font-semibold text-white">
@@ -160,7 +169,7 @@ export default async function LeadOsRevisionPage() {
         </div>
       )}
 
-      <div className="rounded-[28px] border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
+      <div className="rounded-3xl border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
         <h3 className="text-lg font-semibold text-white">
           Filtro del setter — descarte vs avance
         </h3>

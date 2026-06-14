@@ -238,7 +238,7 @@ export default async function AgencyOsLeadDetailPage({ params }: LeadPageProps) 
             {lead.dossier ? (
               <Link
                 href={`/admin/leados/${lead.id}`}
-                className="mt-1 inline-flex text-xs font-medium text-cyan-300/80 transition-colors hover:text-cyan-200"
+                className="mt-2 inline-flex items-center gap-1.5 rounded-full border border-cyan-400/30 bg-cyan-500/10 px-3 py-1 text-xs font-medium text-cyan-200 transition-colors hover:bg-cyan-500/20"
               >
                 Ver revisión de la demo (LeadOS) →
               </Link>

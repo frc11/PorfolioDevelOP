@@ -5,7 +5,8 @@
  * puebla B4.
  */
 import type { ReactNode } from 'react'
-import { CheckCircle2, XCircle } from 'lucide-react'
+import { AlertTriangle, CheckCircle2, XCircle } from 'lucide-react'
+import { Callout } from '@/components/ui'
 import type { Brief, Evaluacion, Ficha, Rechazo, SelfCheck } from '@/lib/leados/contracts'
 import { IG_MANEJADO_POR_VALUES } from '@/lib/leados/contracts'
 
@@ -29,7 +30,7 @@ function formatFecha(iso: string): string {
 
 function Panel({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <section className="rounded-[28px] border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
+    <section className="rounded-3xl border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
       <h3 className="text-base font-semibold text-white">{title}</h3>
       <div className="mt-3">{children}</div>
     </section>
@@ -44,9 +45,10 @@ function Vacio({ children }: { children: ReactNode }) {
   )
 }
 
+// Disciplina B9: el veredicto es informativo → cyan queda reservado para acción.
 const VEREDICTO_TONES: Record<Evaluacion['veredicto'], string> = {
   DESCARTAR: 'border-rose-400/20 bg-rose-500/10 text-rose-200',
-  AVANZAR: 'border-cyan-400/20 bg-cyan-400/10 text-cyan-200',
+  AVANZAR: 'border-blue-400/20 bg-blue-500/10 text-blue-200',
   CALIENTE: 'border-amber-400/20 bg-amber-400/10 text-amber-200',
 }
 
@@ -142,14 +144,13 @@ export function SelfCheckPanel({
     <Panel title="Self-check del setter">
       {!selfCheck ? (
         exigible ? (
-          <div className="rounded-2xl border border-rose-400/25 bg-rose-500/[0.06] p-3">
-            <p className="text-sm font-medium text-rose-200">
-              ⚠ Esta demo llegó a revisión sin self-check registrado.
-            </p>
-            <p className="mt-1 text-xs leading-5 text-rose-100/70">
-              El flujo normal no lo permite — revisala con más cuidado antes de aprobar.
-            </p>
-          </div>
+          <Callout
+            tone="danger"
+            icon={AlertTriangle}
+            title="Esta demo llegó a revisión sin self-check registrado."
+          >
+            El flujo normal no lo permite — revisala con más cuidado antes de aprobar.
+          </Callout>
         ) : (
           <Vacio>Sin self-check — lo puebla el paso de construcción (B4).</Vacio>
         )
@@ -170,16 +171,13 @@ export function SelfCheckPanel({
             ))}
           </ul>
           {selfCheck.softFlags.length > 0 ? (
-            <div className="rounded-2xl border border-amber-400/15 bg-amber-400/5 p-3">
-              <p className="text-[10px] uppercase tracking-[0.22em] text-amber-200/70">
-                Flags del setter
-              </p>
-              <ul className="mt-1.5 space-y-1 text-xs leading-5 text-amber-100/80">
+            <Callout tone="warning" title="Flags del setter">
+              <ul className="space-y-1 text-xs leading-5">
                 {selfCheck.softFlags.map((flag) => (
                   <li key={flag}>• {flag}</li>
                 ))}
               </ul>
-            </div>
+            </Callout>
           ) : null}
         </div>
       )}

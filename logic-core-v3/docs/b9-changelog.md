@@ -45,3 +45,22 @@ Diagnóstico (plan §5): el control más usado (copy-block) no destacaba; labels
 - **`self-check-step.tsx`:** los checks **obligatorios** ahora tienen su propio contenedor (paralelo al de "Ojo de diseño"), con icono `ShieldCheck` — duros vs blandos claramente separados. Estados de cierre → `Callout` (success/neutral).
 
 `tsc --noEmit` limpio. Rechazo/materiales/self-check reutilizan el `Callout` ya verificado en la cartera; estados por-stage (RECHAZADA/CONSTRUCCION) quedan para el barrido visual final + verificación de Franco.
+
+---
+
+## Superficies 3 y 4 — admin de Franco · **SEGURO** · commit `feat(b9/seguro): admin leados/leads…`
+
+Diagnóstico (plan §4.2): la cola no rankeaba visualmente; el panel de reunión —el resultado del negocio— vestía ámbar (warning); el veredicto AVANZAR en cyan diluía lo accionable; el cross-link a LeadOS era texto chico fácil de perder.
+
+- **`admin/leados/page.tsx` (cola):** las filas **rankean** — los Calientes ganan fondo+borde ámbar y barra de acento izquierda; "revisá esto primero" salta. Radios `[28px]/[22px]` → tokens (`rounded-3xl`/`rounded-2xl`). _Verificado: la fila caliente se distingue de las neutras._
+- **`dossier-panels.tsx` (paneles de revisión):** radio del panel a token (`rounded-3xl`); veredicto **AVANZAR cyan → blue** (informativo, no acción); "sin self-check exigible" y "flags del setter" → `Callout` (danger / warning).
+- **`decision-bar.tsx` (veredicto):** los modales Aprobar/Rechazar pasan a `surface="glass"` (alinea al lenguaje del resto). _Verificado: dialog `bg-zinc-900/80 backdrop-blur-2xl`._
+- **`reunion-panel.tsx` (cierre B7):** **ámbar → emerald** + icono `CalendarCheck2` — la reunión es el resultado/objetivo, no una precaución. Radio a token. _Code+tsc; live pendiente (no encontré un lead LeadOS con reunión booked en la sesión QA)._
+- **`admin/leads/[leadId]/page.tsx`:** cross-link a la revisión LeadOS de texto chico → **chip descubrible** (pill cyan con borde). _Verificado: chip `rounded-full` borde cyan-400/30._
+
+`tsc --noEmit` limpio.
+
+### ⚠ Hallazgos para Franco (no resueltos en B9)
+
+1. **Centrado del modal de veredicto (PRE-EXISTENTE).** El `Modal` compartido no usa portal: su backdrop `fixed inset-0` queda confinado al contenedor del layout en la pantalla de revisión, así que el modal aparece en la columna derecha en vez de centrado sobre el viewport. **No lo introdujo B9** (solo agregué la prop `surface`; el render estructural es el de antes). **Probé el fix correcto (portal a `document.body`) y lo revertí:** este app tiene capas de z-index altas (preloader `z-80`, cursor custom `z-max`, overlay de transición) y el `iframe` de la demo queda por encima del modal portaleado a `z-50` — el fix necesita reordenar el z-index del Modal por encima de esas capas, con verificación de TODOS los modales del app (dashboard, etc.). Es una tarea propia, no un detalle de refresh. **Recomendación:** portal + `z` por encima de la pila de transición, como cambio SENSIBLE dedicado.
+2. **Reunión emerald — verificación visual pendiente.** El recolor es trivial y tsc-limpio, pero no pude abrirlo en vivo (sin lead LeadOS con reunión agendada a mano). Revisalo en un lead con reunión booked.

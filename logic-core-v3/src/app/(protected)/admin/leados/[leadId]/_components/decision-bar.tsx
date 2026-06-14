@@ -137,6 +137,7 @@ export function DecisionBar({ leadId, businessName, nextLeadId }: DecisionBarPro
         title="Aprobar demo"
         description={`Publicaste la demo de ${businessName} a mano (Netlify, bajo develOP). Pegá acá la URL permanente — el panel solo la registra.`}
         size="md"
+        surface="glass"
         closeOnBackdrop={!isPending}
         footer={
           <>
@@ -191,6 +192,7 @@ export function DecisionBar({ leadId, businessName, nextLeadId }: DecisionBarPro
         title="Rechazar con dirección"
         description={`El setter va a ver esto tal cual en su panel como guía de retrabajo de ${businessName}.`}
         size="md"
+        surface="glass"
         closeOnBackdrop={!isPending}
         footer={
           <>
