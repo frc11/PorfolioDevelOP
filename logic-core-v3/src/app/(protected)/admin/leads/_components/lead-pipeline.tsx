@@ -1,32 +1,36 @@
 'use client'
 
-import { useRef, useState, useTransition } from 'react'
+import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { motion } from 'motion/react'
-import { cn } from '@/lib/utils'
+import { createPortal } from 'react-dom'
+import {
+  DndContext,
+  DragOverlay,
+  KeyboardSensor,
+  PointerSensor,
+  closestCorners,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+  type DragStartEvent,
+} from '@dnd-kit/core'
+import { sortableKeyboardCoordinates } from '@dnd-kit/sortable'
 import { useReducedMotion } from '@/lib/use-reduced-motion'
+import { useIsClient } from '@/lib/use-is-client'
 import { deleteLead, updateLeadStatus } from '../_actions/lead.actions'
 import {
   ALL_PIPELINE_STATUSES,
-  PIPELINE_GROUPS,
   type GroupedLeads,
   type LeadPipelineLead,
   type PipelineStatus,
 } from './lead-pipeline.shared'
-import { PipelineColumn } from './pipeline-column'
+import { LeadCard } from './lead-card'
+import { PipelineBoard } from './pipeline-board'
 import { ColumnOverview } from './column-overview'
-import { useScrollFade } from './use-scroll-fade'
 
 // === TUNABLES (calibrá por ojo) ===
-const STAGE_HEIGHT = 600 // alto visible del módulo, en px (compacto, no crece)
-const SCROLL_TRACK_HEIGHT = 2200 // alto del track interno que genera el recorrido de scroll
-const COLUMN_BODY_MAX_H = 460 // alto máx del cuerpo de cada columna (~3 cards) antes de scroll interno
-const FADE_BAND = 0.16 // ancho del solape de cross-fade, como fracción del progreso 0..1
-const REVEAL_SHIFT = 18 // translateY (px) del grupo que entra/sale durante el cross-fade
-// Nota: REVEAL_DURATION/easing NO aplican acá — el cross-fade es lineal-dirigido-por-scroll
-// (sin duración). Esos tunables viven en el overlay discreto del Bloque 2.
-
 const POSTPONE_DAYS = 7 // a cuántos días se reactiva un lead postergado
+const DRAG_ACTIVATION_DISTANCE = 8 // px a mover antes de iniciar un drag (un click no arrastra)
 
 type LeadPipelineProps = {
   groupedLeads: GroupedLeads
@@ -73,12 +77,12 @@ function removeLead(groups: GroupedLeads, leadId: string): GroupedLeads {
 export function LeadPipeline({ groupedLeads }: LeadPipelineProps) {
   const router = useRouter()
   const reduced = useReducedMotion()
-  const moduleRef = useRef<HTMLDivElement>(null)
-  const fade = useScrollFade(moduleRef, FADE_BAND, REVEAL_SHIFT)
+  const isClient = useIsClient()
 
   const [error, setError] = useState<string | null>(null)
   const [pendingLeadId, setPendingLeadId] = useState<string | null>(null)
   const [overviewStatus, setOverviewStatus] = useState<PipelineStatus | null>(null)
+  const [activeDragLead, setActiveDragLead] = useState<LeadPipelineLead | null>(null)
   const [, startTransition] = useTransition()
 
   // Sync optimista ↔ props del server con el patrón "reset state on prop change"
@@ -91,6 +95,17 @@ export function LeadPipeline({ groupedLeads }: LeadPipelineProps) {
     setSyncedFrom(groupedLeads)
     setLocalGroupedLeads(cloneGroups(groupedLeads))
   }
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: { distance: DRAG_ACTIVATION_DISTANCE },
+    }),
+    useSensor(KeyboardSensor, {
+      // Space levanta/suelta; Enter queda libre para navegar al detalle (DnD por teclado).
+      keyboardCodes: { start: ['Space'], cancel: ['Escape'], end: ['Space'] },
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
+  )
 
   const handleMoveStatus = (lead: LeadPipelineLead, status: PipelineStatus) => {
     const previousGroups = cloneGroups(localGroupedLeads)
@@ -141,147 +156,82 @@ export function LeadPipeline({ groupedLeads }: LeadPipelineProps) {
     })
   }
 
-  const scrollToGroup = (index: number) => {
-    const el = moduleRef.current
-    if (!el) {
+  const handleDragStart = (event: DragStartEvent) => {
+    const lead = event.active.data.current?.lead as LeadPipelineLead | undefined
+    setActiveDragLead(lead ?? null)
+  }
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    setActiveDragLead(null)
+    const { active, over } = event
+    if (!over) {
       return
     }
-    const maxScroll = el.scrollHeight - el.clientHeight
-    const target = (index / (PIPELINE_GROUPS.length - 1)) * maxScroll
-    el.scrollTo({ top: target, behavior: 'smooth' })
+    const lead = active.data.current?.lead as LeadPipelineLead | undefined
+    const targetStatus = over.id as PipelineStatus
+    // Mover sólo si cambia de columna. Misma columna = no-op (no hay orden persistente).
+    if (lead && lead.status !== targetStatus) {
+      handleMoveStatus(lead, targetStatus)
+    }
   }
 
-  const errorBanner = error ? (
-    <div
-      role="alert"
-      className="rounded-[24px] border border-rose-400/20 bg-rose-500/10 px-4 py-3 text-sm text-rose-200"
-    >
-      {error}
-    </div>
-  ) : null
-
-  const overview = (
-    <ColumnOverview
-      status={overviewStatus}
-      leads={overviewStatus ? localGroupedLeads[overviewStatus] : []}
-      pendingLeadId={pendingLeadId}
-      onMoveStatus={handleMoveStatus}
-      onDelete={handleDelete}
-      onClose={() => setOverviewStatus(null)}
-    />
-  )
-
-  // --- Rama prefers-reduced-motion: sin coreografía. Los 3 grupos apilados,
-  //     cada columna con su scroll interno. Sin sticky / useScroll / opacity. ---
-  if (reduced) {
-    return (
-      <>
-        <div className="space-y-5">
-          {errorBanner}
-          <div className="space-y-6">
-            {PIPELINE_GROUPS.map((group) => (
-              <div key={group.id} className="space-y-3">
-                <p className="text-[10px] uppercase tracking-[0.22em] text-zinc-500">
-                  {group.label}
-                </p>
-                <div className="flex gap-4">
-                  {group.statuses.map((status) => (
-                    <PipelineColumn
-                      key={status}
-                      status={status}
-                      leads={localGroupedLeads[status]}
-                      pendingLeadId={pendingLeadId}
-                      bodyMaxHeight={COLUMN_BODY_MAX_H}
-                      onMoveStatus={handleMoveStatus}
-                      onDelete={handleDelete}
-                      onOpenOverview={setOverviewStatus}
-                    />
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-        {overview}
-      </>
-    )
+  const handleDragCancel = () => {
+    setActiveDragLead(null)
   }
 
-  // --- Rama animada: módulo self-contained de alto fijo con scroll propio.
-  //     Track alto + stage sticky con los 3 grupos superpuestos en cross-fade. ---
   return (
-    <>
-      <div className="space-y-4">
-        {errorBanner}
-
+    <div className="space-y-4">
+      {error ? (
         <div
-          className="flex flex-wrap items-center gap-2"
-          role="tablist"
-          aria-label="Grupos del pipeline"
+          role="alert"
+          className="rounded-[24px] border border-rose-400/20 bg-rose-500/10 px-4 py-3 text-sm text-rose-200"
         >
-          {PIPELINE_GROUPS.map((group, index) => {
-            const isActive = fade.activeIndex === index
-            return (
-              <button
-                key={group.id}
-                type="button"
-                role="tab"
-                aria-selected={isActive}
-                onClick={() => scrollToGroup(index)}
-                className={cn(
-                  'rounded-full border px-3.5 py-1.5 text-xs font-medium transition-colors',
-                  isActive
-                    ? 'border-cyan-400/30 bg-cyan-400/10 text-cyan-100'
-                    : 'border-white/10 bg-black/20 text-zinc-400 hover:text-zinc-200',
-                )}
-              >
-                {group.label}
-              </button>
+          {error}
+        </div>
+      ) : null}
+
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCorners}
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
+        onDragCancel={handleDragCancel}
+      >
+        <PipelineBoard
+          groupedLeads={localGroupedLeads}
+          pendingLeadId={pendingLeadId}
+          reduced={reduced}
+          dragging={activeDragLead !== null}
+          onMoveStatus={handleMoveStatus}
+          onDelete={handleDelete}
+          onOpenOverview={setOverviewStatus}
+        />
+
+        {isClient
+          ? createPortal(
+              <DragOverlay dropAnimation={reduced ? null : undefined}>
+                {activeDragLead ? (
+                  <LeadCard
+                    lead={activeDragLead}
+                    isPending={false}
+                    onMoveStatus={handleMoveStatus}
+                    onDelete={handleDelete}
+                  />
+                ) : null}
+              </DragOverlay>,
+              document.body,
             )
-          })}
-        </div>
+          : null}
+      </DndContext>
 
-        <div
-          ref={moduleRef}
-          className="relative overflow-y-auto rounded-[28px] border border-white/10 bg-white/[0.02]"
-          style={{ height: STAGE_HEIGHT }}
-        >
-          <div className="relative" style={{ height: SCROLL_TRACK_HEIGHT }}>
-            <div className="sticky top-0" style={{ height: STAGE_HEIGHT }}>
-              {PIPELINE_GROUPS.map((group, index) => {
-                const isActive = fade.activeIndex === index
-                return (
-                  <motion.div
-                    key={group.id}
-                    aria-hidden={!isActive}
-                    inert={!isActive}
-                    style={{
-                      opacity: fade.groups[index].opacity,
-                      y: fade.groups[index].y,
-                      pointerEvents: isActive ? 'auto' : 'none',
-                    }}
-                    className="absolute inset-3 flex gap-4"
-                  >
-                    {group.statuses.map((status) => (
-                      <PipelineColumn
-                        key={status}
-                        status={status}
-                        leads={localGroupedLeads[status]}
-                        pendingLeadId={pendingLeadId}
-                        bodyMaxHeight={COLUMN_BODY_MAX_H}
-                        onMoveStatus={handleMoveStatus}
-                        onDelete={handleDelete}
-                        onOpenOverview={setOverviewStatus}
-                      />
-                    ))}
-                  </motion.div>
-                )
-              })}
-            </div>
-          </div>
-        </div>
-      </div>
-      {overview}
-    </>
+      <ColumnOverview
+        status={overviewStatus}
+        leads={overviewStatus ? localGroupedLeads[overviewStatus] : []}
+        pendingLeadId={pendingLeadId}
+        onMoveStatus={handleMoveStatus}
+        onDelete={handleDelete}
+        onClose={() => setOverviewStatus(null)}
+      />
+    </div>
   )
 }

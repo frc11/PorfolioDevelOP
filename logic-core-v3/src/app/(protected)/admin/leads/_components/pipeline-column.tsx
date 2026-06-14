@@ -1,5 +1,6 @@
 'use client'
 
+import type { ReactNode } from 'react'
 import { Inbox } from 'lucide-react'
 import { EmptyState } from '@/components/ui'
 import { cn } from '@/lib/utils'
@@ -21,6 +22,14 @@ type PipelineColumnProps = {
   onDelete: (lead: LeadPipelineLead) => void
   /** Click en el header → abre la vista fullscreen de la columna (Bloque 2). */
   onOpenOverview?: (status: PipelineStatus) => void
+  /** Render de cada card (Bloque 3: inyecta la versión draggable). Default: LeadCard. */
+  renderCard?: (lead: LeadPipelineLead) => ReactNode
+  /** Ref del droppable de dnd-kit (Bloque 3). Sin él, la columna no es drop target. */
+  dropRef?: (element: HTMLElement | null) => void
+  /** La card arrastrada está sobre esta columna (Bloque 3) → highlight. */
+  isOver?: boolean
+  /** Ancho fijo (px) para la grilla plana del modo arrastre. Sin él, fluido (flex-1). */
+  width?: number
 }
 
 /**
@@ -35,9 +44,21 @@ export function PipelineColumn({
   onMoveStatus,
   onDelete,
   onOpenOverview,
+  renderCard,
+  dropRef,
+  isOver = false,
+  width,
 }: PipelineColumnProps) {
   return (
-    <section className="flex h-full min-w-0 flex-1 flex-col rounded-[26px] border border-white/10 bg-white/[0.04] p-4 backdrop-blur-xl">
+    <section
+      ref={dropRef}
+      style={width ? { width } : undefined}
+      className={cn(
+        'flex h-full flex-col rounded-[26px] border bg-white/[0.04] p-4 backdrop-blur-xl transition-colors',
+        width ? 'shrink-0' : 'min-w-0 flex-1',
+        isOver ? 'border-cyan-400/40 bg-cyan-400/[0.06]' : 'border-white/10',
+      )}
+    >
       <button
         type="button"
         onClick={() => onOpenOverview?.(status)}
@@ -66,15 +87,19 @@ export function PipelineColumn({
         style={{ maxHeight: bodyMaxHeight }}
       >
         {leads.length > 0 ? (
-          leads.map((lead) => (
-            <LeadCard
-              key={lead.id}
-              lead={lead}
-              isPending={pendingLeadId === lead.id}
-              onMoveStatus={onMoveStatus}
-              onDelete={onDelete}
-            />
-          ))
+          leads.map((lead) =>
+            renderCard ? (
+              renderCard(lead)
+            ) : (
+              <LeadCard
+                key={lead.id}
+                lead={lead}
+                isPending={pendingLeadId === lead.id}
+                onMoveStatus={onMoveStatus}
+                onDelete={onDelete}
+              />
+            ),
+          )
         ) : (
           <EmptyState
             icon={Inbox}

@@ -1,6 +1,7 @@
 'use client'
 
 import { useMemo, useState } from 'react'
+import type { CSSProperties, KeyboardEvent as ReactKeyboardEvent, MouseEvent as ReactMouseEvent } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   Clock3,
@@ -11,7 +12,9 @@ import {
   Trash2,
   UserRound,
 } from 'lucide-react'
+import type { DraggableAttributes, DraggableSyntheticListeners } from '@dnd-kit/core'
 import { ConfirmDialog } from '@/app/(protected)/admin/_components/confirm-dialog'
+import { cn } from '@/lib/utils'
 import type {
   LeadPipelineLead,
   PipelineServiceType,
@@ -23,6 +26,13 @@ type LeadCardProps = {
   isPending?: boolean
   onMoveStatus: (lead: LeadPipelineLead, status: PipelineStatus) => void
   onDelete: (lead: LeadPipelineLead) => void
+  // DnD (Bloque 3) — todos opcionales: la card sigue siendo usable sin DnD (overview).
+  dragSetNodeRef?: (element: HTMLElement | null) => void
+  dragAttributes?: DraggableAttributes
+  dragListeners?: DraggableSyntheticListeners
+  isDragging?: boolean
+  dragStyle?: CSSProperties
+  onClickCapture?: (event: ReactMouseEvent<HTMLElement>) => void
 }
 
 const MOVE_STATUS_OPTIONS: Array<{ label: string; status: PipelineStatus }> = [
@@ -101,10 +111,17 @@ export function LeadCard({
   isPending = false,
   onMoveStatus,
   onDelete,
+  dragSetNodeRef,
+  dragAttributes,
+  dragListeners,
+  isDragging = false,
+  dragStyle,
+  onClickCapture,
 }: LeadCardProps) {
   const router = useRouter()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const isDraggable = Boolean(dragListeners)
 
   const followUpPending = useMemo(() => {
     if (!lead.nextFollowUpAt) {
@@ -117,16 +134,36 @@ export function LeadCard({
   return (
     <>
       <article
+        ref={dragSetNodeRef}
+        {...dragAttributes}
+        {...dragListeners}
         role="button"
         tabIndex={0}
+        style={dragStyle}
+        onClickCapture={onClickCapture}
         onClick={() => router.push(`/admin/leads/${lead.id}`)}
         onKeyDown={(event) => {
-          if (event.key === 'Enter' || event.key === ' ') {
+          // El KeyboardSensor de dnd usa Space para levantar la card; dejamos Enter
+          // libre para navegar al detalle (evita doble acción en el mismo evento).
+          const dragKeyDown = dragListeners?.onKeyDown as
+            | ((event: ReactKeyboardEvent<HTMLElement>) => void)
+            | undefined
+          dragKeyDown?.(event)
+          if (event.key === 'Enter') {
             event.preventDefault()
             router.push(`/admin/leads/${lead.id}`)
           }
         }}
-        className="group relative rounded-[22px] border border-white/10 bg-white/5 p-4 text-left shadow-[0_18px_40px_rgba(0,0,0,0.22)] transition-all hover:border-cyan-400/20 hover:bg-white/[0.07]"
+        className={cn(
+          'group relative block rounded-[22px] border bg-white/5 p-4 text-left shadow-[0_18px_40px_rgba(0,0,0,0.22)]',
+          // Sin transition mientras se arrastra: el transform debe seguir al puntero 1:1.
+          isDragging
+            ? 'cursor-grabbing border-cyan-400/30'
+            : cn(
+                'border-white/10 transition-all hover:border-cyan-400/20 hover:bg-white/[0.07]',
+                isDraggable && 'cursor-grab',
+              ),
+        )}
       >
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
