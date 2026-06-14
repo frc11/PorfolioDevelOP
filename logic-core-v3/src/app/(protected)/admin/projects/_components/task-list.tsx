@@ -289,6 +289,15 @@ export function TaskList({
                 setDragOverStatus(group.status)
               }
             }}
+            onDragLeave={(event) => {
+              // Solo limpiar al salir de la sección de verdad, no al cruzar hijos.
+              if (
+                canDropHere &&
+                !event.currentTarget.contains(event.relatedTarget as Node | null)
+              ) {
+                setDragOverStatus(null)
+              }
+            }}
             onDrop={(event) => {
               event.preventDefault()
               handleDropOnStatus(group.status)
@@ -459,6 +468,9 @@ export function TaskList({
                               onClick={() =>
                                 setOpenMenuTaskId((current) => (current === task.id ? null : task.id))
                               }
+                              aria-label="Abrir menú de la tarea"
+                              aria-haspopup="menu"
+                              aria-expanded={openMenuTaskId === task.id}
                               className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/5 text-zinc-300 transition-colors hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-60"
                             >
                               {isPending ? (
