@@ -19,6 +19,8 @@ type PipelineColumnProps = {
   bodyMaxHeight: number
   onMoveStatus: (lead: LeadPipelineLead, status: PipelineStatus) => void
   onDelete: (lead: LeadPipelineLead) => void
+  /** Click en el header → abre la vista fullscreen de la columna (Bloque 2). */
+  onOpenOverview?: (status: PipelineStatus) => void
 }
 
 /**
@@ -32,12 +34,16 @@ export function PipelineColumn({
   bodyMaxHeight,
   onMoveStatus,
   onDelete,
+  onOpenOverview,
 }: PipelineColumnProps) {
   return (
     <section className="flex h-full min-w-0 flex-1 flex-col rounded-[26px] border border-white/10 bg-white/[0.04] p-4 backdrop-blur-xl">
-      <div
+      <button
+        type="button"
+        onClick={() => onOpenOverview?.(status)}
+        aria-label={`Ver todos los leads de ${STATUS_LABELS[status]}`}
         className={cn(
-          'rounded-2xl border border-white/10 bg-gradient-to-br px-4 py-3',
+          'block w-full rounded-2xl border border-white/10 bg-gradient-to-br px-4 py-3 text-left transition-[filter] hover:brightness-110',
           statusTone(status),
         )}
       >
@@ -53,7 +59,7 @@ export function PipelineColumn({
             {leads.length}
           </div>
         </div>
-      </div>
+      </button>
 
       <div
         className="mt-4 flex-1 space-y-3 overflow-y-auto pr-1"
