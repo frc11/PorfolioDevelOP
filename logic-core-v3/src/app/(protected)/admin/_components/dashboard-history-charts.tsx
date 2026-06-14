@@ -17,6 +17,7 @@ import {
   YAxis,
 } from 'recharts'
 import { ChartCard } from './chart-card'
+import { useReducedMotion } from '@/lib/use-reduced-motion'
 
 type DemosByWeekItem = {
   label: string
@@ -113,6 +114,7 @@ export function DashboardHistoryCharts({
   hoursByMemberByWeek,
   memberSeries,
 }: DashboardHistoryChartsProps) {
+  const reduced = useReducedMotion()
   const objectiveLine = demosByWeek[0]?.objective ?? 0
   const hasDemos = demosByWeek.some((item) => item.demos > 0)
   const hasCloseData = closeRateByMonth.some((item) => item.closeRate > 0)
@@ -151,7 +153,13 @@ export function DashboardHistoryCharts({
                 strokeDasharray="4 4"
                 ifOverflow="extendDomain"
               />
-              <Bar dataKey="demos" fill="#22d3ee" radius={[8, 8, 0, 0]} maxBarSize={34} />
+              <Bar
+                dataKey="demos"
+                fill="#22d3ee"
+                radius={[8, 8, 0, 0]}
+                maxBarSize={34}
+                isAnimationActive={!reduced}
+              />
             </BarChart>
           </ResponsiveContainer>
         ) : (
@@ -193,6 +201,7 @@ export function DashboardHistoryCharts({
                 strokeWidth={3}
                 dot={{ r: 4, strokeWidth: 0, fill: '#e879f9' }}
                 activeDot={{ r: 6, strokeWidth: 0, fill: '#f0abfc' }}
+                isAnimationActive={!reduced}
               />
             </LineChart>
           </ResponsiveContainer>
@@ -240,6 +249,7 @@ export function DashboardHistoryCharts({
                 stroke="#34d399"
                 strokeWidth={3}
                 fill="url(#osRevenueFill)"
+                isAnimationActive={!reduced}
               />
             </AreaChart>
           </ResponsiveContainer>
@@ -297,6 +307,7 @@ export function DashboardHistoryCharts({
                   fill={member.color}
                   radius={[6, 6, 0, 0]}
                   maxBarSize={24}
+                  isAnimationActive={!reduced}
                 />
               ))}
             </BarChart>

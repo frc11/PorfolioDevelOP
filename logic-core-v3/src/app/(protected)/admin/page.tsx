@@ -729,7 +729,7 @@ function DualMetricCard({
   icon: typeof BarChart3
 }) {
   return (
-    <article className="rounded-2xl border border-white/10 bg-white/[0.02] p-5 backdrop-blur-xl transition-colors">
+    <article className="rounded-2xl border border-white/10 bg-white/[0.02] p-5 backdrop-blur-xl">
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
           <p className="text-xs tracking-tight text-zinc-500">{label}</p>
@@ -782,7 +782,7 @@ function MemberHoursCard({
       : 1
 
   return (
-    <article className="rounded-2xl border border-white/10 bg-white/5 p-5 backdrop-blur-xl transition-colors">
+    <article className="rounded-2xl border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
           <p className="text-xs tracking-tight text-zinc-500">
@@ -813,7 +813,7 @@ function MemberHoursCard({
               </div>
               <div className="h-2 overflow-hidden rounded-full bg-white/10">
                 <div
-                  className="h-full rounded-full bg-cyan-300 transition-[width]"
+                  className="h-full rounded-full bg-cyan-300"
                   style={{
                     width: `${clampPercentage((member.totalWeekHours / denominator) * 100)}%`,
                   }}
