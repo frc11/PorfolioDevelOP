@@ -64,3 +64,25 @@ Diagnóstico (plan §4.2): la cola no rankeaba visualmente; el panel de reunión
 
 1. **Centrado del modal de veredicto (PRE-EXISTENTE).** El `Modal` compartido no usa portal: su backdrop `fixed inset-0` queda confinado al contenedor del layout en la pantalla de revisión, así que el modal aparece en la columna derecha en vez de centrado sobre el viewport. **No lo introdujo B9** (solo agregué la prop `surface`; el render estructural es el de antes). **Probé el fix correcto (portal a `document.body`) y lo revertí:** este app tiene capas de z-index altas (preloader `z-80`, cursor custom `z-max`, overlay de transición) y el `iframe` de la demo queda por encima del modal portaleado a `z-50` — el fix necesita reordenar el z-index del Modal por encima de esas capas, con verificación de TODOS los modales del app (dashboard, etc.). Es una tarea propia, no un detalle de refresh. **Recomendación:** portal + `z` por encima de la pila de transición, como cambio SENSIBLE dedicado.
 2. **Reunión emerald — verificación visual pendiente.** El recolor es trivial y tsc-limpio, pero no pude abrirlo en vivo (sin lead LeadOS con reunión agendada a mano). Revisalo en un lead con reunión booked.
+
+---
+
+## Cierre
+
+**Build / tsc / migraciones:**
+- `npm run build` → **verde** (todas las rutas LeadOS + dashboard compilan).
+- `npx tsc --noEmit` → **limpio** en cada tanda.
+- `npx prisma migrate status` → **"Database schema is up to date!"** — **cero cambios de schema** (esto es presentación).
+
+**SEGURO vs SENSIBLE:** una sola tanda SENSIBLE (foundations, `src/components/ui/*`). El cambio de `Modal` es backward-compatible (default `solid` byte-idéntico al original) → sin regresión posible en dashboard/admin/marketing por el refactor. `Callout` y `leados-ui` son nuevos (aditivos). El resto, todo SEGURO (archivos de LeadOS).
+
+**Verificado en vivo** (instancia de preview fresca, desktop 1600 + mobile 480):
+- Cartera: pill de próxima acción (cyan), lane prioritario, onboarding sin gradiente promo (desktop + mobile).
+- Wizard: stepper con labels completos, copy-block con borde de acción reforzado.
+- Cola admin: fila caliente rankeada vs neutras.
+- Modal de veredicto: superficie glass.
+- Cross-link LeadOS: chip descubrible.
+
+**Verificado por código + tsc + build** (live pendiente de Franco, por falta del estado exacto en la sesión QA): rechazo/materiales/self-check del wizard en stage RECHAZADA/CONSTRUCCION; reunión emerald.
+
+**Lectura honesta:** el piso de las tres zonas subió y se sienten el mismo producto — la próxima acción del setter salta sola, la cola de Franco rankea de un vistazo, y las cajas de alerta dejaron de ser "siete bloques pegados" (un `Callout`, un `STAGE_TONE`, una escala de radios). La superficie que quedó **mejor**: la cartera del setter (cambio de jerarquía real, verificado en los dos breakpoints). La que quedó **menos cerrada**: la pantalla de revisión de Franco — el refresh estético entró (glass, ranking, tonos), pero destapó el bug pre-existente de centrado del modal, que es una tarea propia. Nada entró pretendiendo estar verificado a ciegas: lo que vio el ojo está marcado como tal, y lo que falta ver está flagueado arriba.
