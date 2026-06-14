@@ -396,7 +396,6 @@ export default async function AgencyOsPage() {
       key: string
       label: string
       totalWeekHours: number
-      totalRangeHours: number
     }
   >()
 
@@ -407,10 +406,7 @@ export default async function AgencyOsPage() {
       key: entry.userId,
       label,
       totalWeekHours: 0,
-      totalRangeHours: 0,
     }
-
-    existingMember.totalRangeHours += entry.hours
 
     if (entry.date >= weekStart) {
       existingMember.totalWeekHours += entry.hours
@@ -488,8 +484,6 @@ export default async function AgencyOsPage() {
         bucket.responded > 0
           ? Number(((bucket.closed / bucket.responded) * 100).toFixed(1))
           : 0,
-      closed: bucket.closed,
-      responded: bucket.responded,
     }
   })
 
@@ -500,7 +494,6 @@ export default async function AgencyOsPage() {
 
     return {
       label: formatMonthLabel(date),
-      revenue,
       cumulative: cumulativeRevenue,
     }
   })
@@ -772,7 +765,6 @@ function MemberHoursCard({
     key: string
     label: string
     totalWeekHours: number
-    totalRangeHours: number
   }>
 }) {
   const visibleMembers = members.slice(0, 5)

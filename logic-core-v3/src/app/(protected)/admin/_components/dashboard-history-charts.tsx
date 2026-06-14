@@ -27,13 +27,10 @@ type DemosByWeekItem = {
 type CloseRateByMonthItem = {
   label: string
   closeRate: number
-  closed: number
-  responded: number
 }
 
 type RevenueByMonthItem = {
   label: string
-  revenue: number
   cumulative: number
 }
 
@@ -212,15 +209,7 @@ export function DashboardHistoryCharts({
             <Tooltip
               cursor={{ stroke: 'rgba(52,211,153,0.35)', strokeWidth: 1 }}
               contentStyle={tooltipStyle}
-              formatter={(value, name) => {
-                const numericValue = toNumericValue(value)
-
-                if (name === 'revenue') {
-                  return [formatCurrency(numericValue), 'Ingreso del mes']
-                }
-
-                return [formatCurrency(numericValue), 'Acumulado']
-              }}
+              formatter={(value) => [formatCurrency(toNumericValue(value)), 'Acumulado']}
               labelStyle={{ color: '#ffffff', fontWeight: 600 }}
             />
             <Area
