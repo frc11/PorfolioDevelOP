@@ -96,9 +96,16 @@ export async function loginAction(
     },
   })
   const isSuperAdmin = userRecord?.role === 'SUPER_ADMIN'
+  const isSetter = userRecord?.role === 'SETTER'
   const org = userRecord?.orgMemberships?.[0]?.organization
-  const needsOnboarding = !isSuperAdmin && (!org?.onboardingCompleted || !org?.companyName)
-  const redirectTo = isSuperAdmin ? '/admin' : (needsOnboarding ? '/bienvenida' : '/dashboard')
+  const needsOnboarding = !isSuperAdmin && !isSetter && (!org?.onboardingCompleted || !org?.companyName)
+  const redirectTo = isSuperAdmin
+    ? '/admin'
+    : isSetter
+      ? '/setter'
+      : needsOnboarding
+        ? '/bienvenida'
+        : '/dashboard'
 
   try {
     await signIn('credentials', { email, password, redirectTo })

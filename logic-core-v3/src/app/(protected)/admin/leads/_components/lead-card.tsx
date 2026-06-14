@@ -222,6 +222,13 @@ export function LeadCard({
               Follow-up pendiente
             </span>
           ) : null}
+
+          {lead.assignedToName ? (
+            <span className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] font-medium text-zinc-400">
+              <UserRound className="h-3 w-3" />
+              {lead.assignedToName}
+            </span>
+          ) : null}
         </div>
 
         <div className="mt-4 space-y-3 text-sm text-zinc-300">

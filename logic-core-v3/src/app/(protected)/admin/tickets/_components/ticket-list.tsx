@@ -2,9 +2,11 @@
 
 import Link from 'next/link'
 import { useMemo, useState } from 'react'
+import { motion, useReducedMotion } from 'motion/react'
 import { LifeBuoy, MessageSquareText } from 'lucide-react'
 import type { TicketStatus } from '@prisma/client'
 import { EmptyState } from '@/components/ui'
+import { staggerContainer, staggerItem } from '@/lib/motion-variants'
 
 type TicketListItem = {
   id: string
@@ -58,6 +60,7 @@ function formatDate(value: string) {
 
 export function TicketList({ tickets }: TicketListProps) {
   const [activeTab, setActiveTab] = useState<TicketTab>('ALL')
+  const reduce = useReducedMotion()
 
   const filteredTickets = useMemo(() => {
     if (activeTab === 'ALL') {
@@ -113,12 +116,18 @@ export function TicketList({ tickets }: TicketListProps) {
           description="Cuando entren nuevas conversaciones de soporte para este estado, van a aparecer aca."
         />
       ) : (
-        <div className="grid gap-4">
+        <motion.div
+          key={activeTab}
+          className="grid gap-4"
+          variants={staggerContainer}
+          initial={reduce ? false : 'hidden'}
+          animate="visible"
+        >
           {filteredTickets.map((ticket) => (
+            <motion.div key={ticket.id} variants={staggerItem}>
             <Link
-              key={ticket.id}
               href={`/admin/tickets/${ticket.id}`}
-              className="group rounded-[28px] border border-white/10 bg-white/5 p-5 shadow-[0_20px_50px_rgba(0,0,0,0.28)] backdrop-blur-xl transition-all duration-200 hover:border-cyan-400/20 hover:bg-white/[0.07]"
+              className="group block rounded-[28px] border border-white/10 bg-white/5 p-5 shadow-[0_20px_50px_rgba(0,0,0,0.28)] backdrop-blur-xl transition-all duration-200 hover:border-cyan-400/20 hover:bg-white/[0.07]"
             >
               <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                 <div className="min-w-0 flex-1">
@@ -153,8 +162,9 @@ export function TicketList({ tickets }: TicketListProps) {
                 </div>
               </div>
             </Link>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       )}
     </section>
   )

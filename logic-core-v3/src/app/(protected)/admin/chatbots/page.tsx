@@ -22,7 +22,7 @@ export default async function ChatbotsPage() {
       <div className="flex items-start justify-between gap-4">
         <div>
           <p className="text-xs tracking-tight text-zinc-500">Operaciones</p>
-          <h1 className="text-3xl font-medium tracking-tight text-zinc-100">Chatbots</h1>
+          <h1 className="text-3xl font-semibold tracking-tight text-zinc-100">Chatbots</h1>
           <p className="text-sm text-zinc-400 mt-1">
             {stats.totalBots} bots configurados · {stats.activeBots} activos
           </p>

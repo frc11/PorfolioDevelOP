@@ -1,0 +1,315 @@
+'use client'
+
+import { useState, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
+import { CheckCircle2, Hourglass, Lock, PencilLine } from 'lucide-react'
+import type { DossierStage } from '@prisma/client'
+import { Badge, Button, Card, Field, Input } from '@/components/ui'
+import type { Brief, Evaluacion, Ficha } from '@/lib/leados/contracts'
+import { buildBriefInputBlock, type CopyBlockLead } from '@/lib/leados/copy-blocks'
+import { guardarBrief } from '@/app/(protected)/setter/_actions/dossier.actions'
+import { BriefInputSchema } from '@/app/(protected)/setter/_actions/dossier.schemas'
+import { CopyBlock } from '@/app/(protected)/setter/_components/copy-block'
+import { TextArea } from '@/app/(protected)/setter/_components/text-area'
+
+type BriefStepProps = {
+  leadId: string
+  lead: CopyBlockLead
+  stage: DossierStage | null
+  ficha: Ficha | null
+  evaluacion: Evaluacion | null
+  brief: Brief | null
+  gateAbierto: boolean
+}
+
+type FormErrors = Partial<Record<'titulo' | 'secciones' | 'pegadoGem', string>>
+
+type BriefFormState = {
+  pegadoGem: string
+  titulo: string
+  concepto: string
+  seccionesTexto: string
+  notasMarca: string
+  cta: string
+}
+
+function estadoInicial(brief: Brief | null, businessName: string): BriefFormState {
+  return {
+    pegadoGem: brief?.pegadoGem ?? '',
+    titulo: brief?.titulo ?? businessName,
+    concepto: brief?.concepto ?? '',
+    seccionesTexto: brief?.secciones.join('\n') ?? '',
+    notasMarca: brief?.notasMarca ?? '',
+    cta: brief?.cta ?? '',
+  }
+}
+
+export function BriefStep({
+  leadId,
+  lead,
+  stage,
+  ficha,
+  evaluacion,
+  brief,
+  gateAbierto,
+}: BriefStepProps) {
+  const router = useRouter()
+  const [form, setForm] = useState<BriefFormState>(() => estadoInicial(brief, lead.businessName))
+  const [errors, setErrors] = useState<FormErrors>({})
+  const [serverError, setServerError] = useState<string | null>(null)
+  const [editando, setEditando] = useState(false)
+  const [sanityOk, setSanityOk] = useState(false)
+  const [isPending, startTransition] = useTransition()
+
+  const set = <Campo extends keyof BriefFormState>(campo: Campo, valor: string) => {
+    setForm((actual) => ({ ...actual, [campo]: valor }))
+  }
+
+  const guardar = () => {
+    setServerError(null)
+    const payload = {
+      pegadoGem: form.pegadoGem,
+      titulo: form.titulo,
+      concepto: form.concepto || undefined,
+      secciones: form.seccionesTexto
+        .split('\n')
+        .map((linea) => linea.trim())
+        .filter(Boolean),
+      notasMarca: form.notasMarca || undefined,
+      cta: form.cta || undefined,
+    }
+    const parsed = BriefInputSchema.safeParse(payload)
+    if (!parsed.success) {
+      const nuevos: FormErrors = {}
+      for (const issue of parsed.error.issues) {
+        const campo = issue.path[0] as keyof FormErrors | undefined
+        if (campo && !nuevos[campo]) nuevos[campo] = issue.message
+      }
+      setErrors(nuevos)
+      return
+    }
+    setErrors({})
+    startTransition(async () => {
+      const result = await guardarBrief(leadId, parsed.data)
+      if (!result.success) {
+        setServerError(result.error)
+        toast.error(result.error)
+        return
+      }
+      toast.success('Brief guardado — dale una leída antes de seguir.')
+      setEditando(false)
+      setSanityOk(false)
+      router.refresh()
+    })
+  }
+
+  // ── Antes de la evaluación: paso apagado ───────────────────────────────────
+  if (stage === null || stage === 'FICHA') {
+    return (
+      <Card variant="subtle" padding="lg">
+        <div className="flex items-center gap-2.5">
+          <Lock size={15} strokeWidth={1.5} className="text-zinc-600" />
+          <h2 className="text-base font-semibold text-zinc-400">Paso 3 — Brief de diseño</h2>
+        </div>
+        <p className="mt-2 text-xs leading-relaxed text-zinc-600">
+          Se habilita después de registrar la evaluación.
+        </p>
+      </Card>
+    )
+  }
+
+  // ── EVALUADA con gate cerrado: explicar, no frustrar ───────────────────────
+  if (stage === 'EVALUADA' && !gateAbierto) {
+    return (
+      <Card variant="subtle" padding="lg">
+        <div className="flex items-center gap-2.5">
+          <Hourglass size={15} strokeWidth={1.5} className="text-zinc-500" />
+          <h2 className="text-base font-semibold text-zinc-300">Paso 3 — Brief de diseño</h2>
+        </div>
+        <p className="mt-2 max-w-xl text-xs leading-relaxed text-zinc-500">
+          Este lead avanza — falta que responda el primer contacto para arrancar la demo. Mandá
+          el opener desde el Paso 7 y registrá la conversación en el Paso 9: cuando responda
+          (o si la evaluación hubiera dado 4–5), este paso se abre solo.
+        </p>
+      </Card>
+    )
+  }
+
+  const mostrarFormulario = stage === 'EVALUADA' || editando
+
+  // ── Captura (EVALUADA con gate abierto) o re-pegado (BRIEF + editar) ───────
+  if (mostrarFormulario) {
+    return (
+      <Card padding="lg" className="space-y-5">
+        <div>
+          <h2 className="text-base font-semibold text-zinc-100">Paso 3 — Brief de diseño</h2>
+          <p className="mt-1 max-w-xl text-xs leading-relaxed text-zinc-500">
+            Copiá el bloque de abajo, pegalo en el Gem de diseño, y traé la respuesta acá. El
+            brief es el plano de la demo: cuanto más concreto, mejor sale.
+          </p>
+        </div>
+
+        {ficha && evaluacion && (
+          <CopyBlock
+            titulo="Bloque para el Gem de diseño"
+            instruccion="Ficha + evaluación juntas: el input completo del Gem."
+            texto={buildBriefInputBlock(lead, ficha, evaluacion)}
+          />
+        )}
+
+        <Field
+          label="Respuesta del Gem (pegado completo)"
+          required
+          error={errors.pegadoGem}
+          hint="Pegala entera, sin editar. Los campos de abajo son el resumen estructurado."
+        >
+          <TextArea
+            value={form.pegadoGem}
+            onChange={(event) => set('pegadoGem', event.target.value)}
+            invalid={Boolean(errors.pegadoGem)}
+            rows={8}
+          />
+        </Field>
+
+        <div className="grid gap-4 lg:grid-cols-2">
+          <Field label="Título del brief" required error={errors.titulo}>
+            <Input
+              value={form.titulo}
+              onChange={(event) => set('titulo', event.target.value)}
+              invalid={Boolean(errors.titulo)}
+            />
+          </Field>
+
+          <Field label="Llamado a la acción (CTA)" hint="Ej: 'Pedí tu turno por WhatsApp'.">
+            <Input value={form.cta} onChange={(event) => set('cta', event.target.value)} />
+          </Field>
+        </div>
+
+        <Field
+          label="Secciones de la demo"
+          required
+          error={errors.secciones}
+          hint="Una por línea, en orden. Ej: Hero / Menú / Reseñas / Cómo pedir / Contacto."
+        >
+          <TextArea
+            value={form.seccionesTexto}
+            onChange={(event) => set('seccionesTexto', event.target.value)}
+            invalid={Boolean(errors.secciones)}
+            rows={5}
+          />
+        </Field>
+
+        <div className="grid gap-4 lg:grid-cols-2">
+          <Field label="Concepto" hint="La idea central que propone el Gem, en una o dos líneas.">
+            <TextArea
+              value={form.concepto}
+              onChange={(event) => set('concepto', event.target.value)}
+              rows={3}
+            />
+          </Field>
+
+          <Field label="Notas de marca" hint="Colores, tono, logo: lo que la demo tiene que respetar.">
+            <TextArea
+              value={form.notasMarca}
+              onChange={(event) => set('notasMarca', event.target.value)}
+              rows={3}
+            />
+          </Field>
+        </div>
+
+        {serverError && <p className="text-xs text-red-400">{serverError}</p>}
+
+        <div className="flex items-center gap-3">
+          <Button onClick={guardar} loading={isPending}>
+            Guardar brief
+          </Button>
+          {editando && (
+            <Button variant="ghost" onClick={() => setEditando(false)} disabled={isPending}>
+              Cancelar
+            </Button>
+          )}
+        </div>
+      </Card>
+    )
+  }
+
+  // ── BRIEF guardado: sanity-check visual ────────────────────────────────────
+  if (stage === 'BRIEF' && brief) {
+    return (
+      <Card padding="lg" className="space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 className="text-base font-semibold text-zinc-100">Paso 3 — Brief de diseño</h2>
+          <Badge tone="violet" variant="soft" size="md">
+            Brief guardado
+          </Badge>
+        </div>
+
+        <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
+          <p className="text-sm font-semibold text-zinc-200">{brief.titulo}</p>
+          {brief.concepto && <p className="mt-1 text-xs text-zinc-500">{brief.concepto}</p>}
+          {brief.secciones.length > 0 && (
+            <p className="mt-2 text-xs text-zinc-500">
+              <span className="font-semibold text-zinc-400">Secciones:</span>{' '}
+              {brief.secciones.join(' · ')}
+            </p>
+          )}
+          {brief.cta && (
+            <p className="mt-1 text-xs text-zinc-500">
+              <span className="font-semibold text-zinc-400">CTA:</span> {brief.cta}
+            </p>
+          )}
+          {brief.pegadoGem && (
+            <details className="mt-3">
+              <summary className="cursor-pointer text-xs text-zinc-500 hover:text-zinc-300">
+                Ver respuesta completa del Gem
+              </summary>
+              <pre className="mt-2 max-h-56 overflow-y-auto whitespace-pre-wrap rounded-lg border border-white/[0.06] bg-black/30 p-3 font-mono text-[11px] leading-relaxed text-zinc-500">
+                {brief.pegadoGem}
+              </pre>
+            </details>
+          )}
+        </div>
+
+        {sanityOk ? (
+          <p className="flex items-center gap-2 rounded-xl border border-emerald-400/20 bg-emerald-500/[0.06] p-3 text-xs font-medium text-emerald-300">
+            <CheckCircle2 size={14} strokeWidth={1.5} />
+            Brief verificado. Seguí con el Paso 4 — Construcción de la demo.
+          </p>
+        ) : (
+          <div className="rounded-xl border border-amber-400/20 bg-amber-500/[0.06] p-4">
+            <p className="text-xs font-semibold text-amber-300">Chequeo rápido antes de seguir</p>
+            <p className="mt-1 text-xs leading-relaxed text-amber-200/80">
+              ¿El brief menciona el negocio real y sus dolores concretos (los de las reseñas que
+              copiaste), o quedó genérico? Un brief genérico produce una demo genérica.
+            </p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <Button variant="secondary" size="sm" onClick={() => setSanityOk(true)}>
+                Menciona lo concreto — está bien
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                icon={<PencilLine size={13} strokeWidth={1.5} />}
+                onClick={() => setEditando(true)}
+              >
+                Quedó genérico — re-pegar
+              </Button>
+            </div>
+          </div>
+        )}
+      </Card>
+    )
+  }
+
+  // ── Stages posteriores (CONSTRUCCION+): resumen mínimo ─────────────────────
+  return (
+    <Card variant="subtle" padding="lg">
+      <h2 className="text-base font-semibold text-zinc-300">Paso 3 — Brief de diseño</h2>
+      <p className="mt-2 text-xs leading-relaxed text-zinc-500">
+        {brief ? `Brief "${brief.titulo}" guardado.` : 'Brief guardado.'} El dossier ya avanzó a
+        la etapa siguiente.
+      </p>
+    </Card>
+  )
+}

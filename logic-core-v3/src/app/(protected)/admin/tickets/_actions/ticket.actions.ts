@@ -1,6 +1,6 @@
 'use server'
 
-import { TicketStatus } from '@prisma/client'
+import { TicketStatus, type Role } from '@prisma/client'
 import { revalidatePath } from 'next/cache'
 import { prisma } from '@/lib/prisma'
 import { requireSuperAdmin } from '@/lib/auth-guards'
@@ -140,7 +140,7 @@ export async function getTicketById(
       isAdmin: boolean
       user: {
         name: string | null
-        role: 'SUPER_ADMIN' | 'ORG_MEMBER' | 'CLIENT'
+        role: Role
       }
     }>
   }>

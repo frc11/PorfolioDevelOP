@@ -63,6 +63,12 @@ export const UpdateLeadSchema = CreateLeadSchema.partial().extend({
   leadId: LeadIdSchema,
 })
 
+// B5 (LeadOS): asignación de leads a setters. `setterId: null` desasigna.
+export const AssignLeadSetterSchema = z.object({
+  leadId: LeadIdSchema,
+  setterId: z.string().trim().min(1).nullable(),
+})
+
 export const UpdateLeadStatusSchema = z
   .object({
     leadId: LeadIdSchema,

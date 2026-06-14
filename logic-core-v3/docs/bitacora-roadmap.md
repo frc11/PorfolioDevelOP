@@ -7814,6 +7814,95 @@ CVEs cerrados por `npm audit fix` (transitives, los principales):
 - **prisma** + **@prisma/config** (high, via `effect`).
 - **dompurify**, **qs**, **nanoid**, **brace-expansion**, **uuid**, **svix**, **resend** (moderate).
 
+---
+
+## ✅ B1 (LeadOS) — Fundación: capa de acceso del setter
+
+**Contexto.** Primer bloque de LeadOS: existe el actor `SETTER` de punta a punta (rol, guard, middleware, zona `/setter`, infraestructura de ownership), sin panel todavía. Perímetro de seguridad: el setter solo ve leads con `OsLead.assignedToId = su userId`, y no puede pisar `/admin` ni `/dashboard`.
+
+### 1) Qué se construyó
+
+| Archivo | Cambio |
+|---|---|
+| `prisma/schema.prisma` | `SETTER` agregado al enum `Role` |
+| `prisma/migrations/20260611210802_add_setter_role/` | `ALTER TYPE "Role" ADD VALUE 'SETTER';` — aditiva pura, aplicada contra la branch Neon dev (`ep-quiet-waterfall-*`, confirmada como separada de prod) |
+| `src/lib/auth-guards.ts` | `requireSetter()` — patrón exacto de `requireSuperAdmin` |
+| `src/proxy.ts` | Rama SETTER con retorno temprano ANTES de la lógica admin/dashboard (un setter sin membership nunca cae en el camino ORG_MEMBER); no-SETTER en `/setter` → su zona; `/setter/:path*` en el matcher; `/setter` en el check de no-autenticado |
+| `src/auth.ts` | Fix mínimo en callback `signIn`: el rechazo "no-admin sin organizationId" ahora exime a SETTER (sin esto el setter no podía loguearse) |
+| `src/auth.config.ts` | `'SETTER'` en el type union local de Role (edge config del middleware) |
+| `src/app/login/actions.ts` | `redirectTo` de setter → `/setter` (evita el doble salto /bienvenida → /setter) |
+| `src/app/(protected)/setter/layout.tsx` | Guard server-side propio (patrón del layout admin): sin sesión → /login; rol ≠ SETTER → su zona |
+| `src/app/(protected)/setter/page.tsx` + `_components/SetterWelcome.tsx` | Home mínima con `EmptyState` del kit UI. El icono Lucide se pasa desde un client wrapper (`_components/`) — pasarlo desde el Server Component rompía RSC ("Functions cannot be passed to Client Components") |
+| `src/lib/leados/ownership.ts` | `getOwnedLead(leadId, userId)` — `findFirst({ id, assignedToId })`, null si no es suyo. Regla de oro documentada en el header: listas filtran por `assignedToId`, actions llaman `requireSetter()` + re-verifican ownership |
+| `prisma/seed.ts` | Caso setter: `setter-qa@develop.test / Setter1234!` (SETTER, sin membership, `passwordResetRequired: true`) |
+| `docs/leados-alta-setter.md` | Procedimiento de alta (credentials only; Google PROHIBIDO — su `profile()` hardcodea ORG_MEMBER) |
+| `scripts/b1-verify-setter-ownership.ts` | Verificación del helper contra dev (host check anti-prod, lead temporal con cleanup en finally) |
+| `admin/tickets/_actions/ticket.actions.ts` + `_components/ticket-chat.tsx` | Fix colateral de TIPOS (cero comportamiento): tenían el union de Role hardcodeado `'SUPER_ADMIN' \| 'ORG_MEMBER' \| 'CLIENT'` que rompió el build al extender el enum → ahora `import type { Role } from '@prisma/client'` |
+
+**Decisión:** NO se agregó `requireSetterOrAdmin()` — sin consumidor actual, y una superficie compartida va a necesitar acceso a datos distinto por rol (admin ve todo, setter lo suyo); se diseña cuando exista.
+
+### 2) Verificación propia (script + browser real contra dev)
+
+- `scripts/b1-verify-setter-ownership.ts`: **4/4** — lead ajeno → null, lead propio → lo retorna, lead propio con otro userId → null, leadId inexistente → null.
+- Browser (dev server): login setter → forzado `/cambiar-password` → cambio → aterriza `/setter` ✅. Como setter: `/admin`, `/admin/leads`, `/dashboard`, `/dashboard/cuenta`, `/bienvenida`, `/login` → todos rebotan a `/setter`, status 200 final, **sin loops** ✅. Como SUPER_ADMIN: `/admin` intacto (shell completo), `/admin/leads` 200, `/setter` → `/admin` ✅. Como ORG_MEMBER: login → `/dashboard`, `/setter` → `/dashboard` ✅.
+- `npm run build` ✅ (ruta `/setter` registrada) + `npx prisma migrate status` ✅ (58 migraciones, schema up to date).
+
+---
+
+## ✅ B2 (LeadOS) — Modelo de producción del dossier   ·   2026-06-12
+
+**Contexto.** Segunda máquina de estado de LeadOS: el ciclo de PRODUCCIÓN del activo demo (ficha → evaluación → brief → construcción → revisión del admin → aprobada), 1:1 con `OsLead`. Convive con la máquina COMERCIAL (`LeadStatus` + cron de follow-up) sin mezclarse: de `OsLead` solo se lee `status` para el gate de BRIEF, jamás se escribe. Sin UI ni server actions de páginas — schema + lib de dominio + verificación (el wizard del setter es B3/B4, la cola del admin es B5).
+
+### 1) Qué se construyó
+
+| Archivo | Cambio |
+|---|---|
+| `prisma/schema.prisma` | Enum `DossierStage` (8 valores) + modelo `OsLeadDossier`: `leadId @unique` (la 1:1 la garantiza la DB), `stage @default(FICHA)` con `@@index([stage])`, 4 blobs Json nullables (`fichaJson`/`evaluacionJson`/`briefJson`/`selfCheckJson`), `draftUrl`, `rechazos` (historial Json), timestamps, `onDelete: Cascade` al lead. En `OsLead` solo la back-relation `dossier OsLeadDossier?` — línea obligatoria de Prisma para validar la relación, **cero impacto SQL sobre la tabla existente** |
+| `prisma/migrations/20260612121536_add_os_lead_dossier/` | Aditiva pura: `CREATE TYPE "DossierStage"` + `CREATE TABLE "OsLeadDossier"` + unique/index + FK. Nada toca tablas existentes. Aplicada contra la branch Neon dev (`ep-quiet-waterfall-*`) |
+| `src/lib/leados/contracts.ts` | Contratos zod base de los blobs (minimales a propósito, B3/B4 los extienden): `FichaSchema` (identidad con `igManejadoPor: DUENO\|CM\|NO_SABE`, presencia digital, reseñas, contenido real, señales operativas, catch-all), `EvaluacionSchema` (score 1–5 int, veredicto `DESCARTAR\|AVANZAR\|CALIENTE`, razonamiento, motivoDescarte opcional), `BriefSchema` (título, concepto, secciones[], notas de marca, CTA, referencias a la ficha), `SelfCheckSchema` (itemsDuros `{nombre, ok}[]` + softFlags[]), `RechazoSchema`/`RechazosSchema` (`{fecha ISO, motivo, detalle?}[]`). Regla en el header: todo write a un blob se parsea ANTES de tocar Prisma |
+| `src/lib/leados/dossier.ts` | La única puerta del stage: `transitionDossier(leadId, input)` valida transiciones legales + reglas (regla de oro en el header: setear `stage` directo con Prisma fuera de esta lib está PROHIBIDO). Acceso por ownership: `getOwnedDossier` / `ensureOwnedDossier` (creación idempotente vía upsert) derivan de `getOwnedLead` — el dossier nunca se busca por su propio id desde código de setter. Guard optimista en el update (`updateMany where { leadId, stage: from }`) — una carrera no pisa stage. Errores: `DossierTransitionError` |
+| `scripts/b2-verify-dossier.ts` | Verificación reproducible contra dev (host check anti-prod, 3 leads temporales, cleanup en finally): unicidad/idempotencia, P2002 en create crudo, cross-user → null, transiciones ilegales, contrato inválido, los 2 caminos del gate, loop de rechazo completo, cascade |
+
+### 2) Máquina de stage (tal como quedó implementada)
+
+```
+FICHA → EVALUADA → BRIEF → CONSTRUCCION → EN_REVISION → APROBADA
+           │                     ▲              │
+           ▼                     └── RECHAZADA ◄┘
+       DESCARTADA
+```
+
+- `FICHA→EVALUADA` exige el payload de evaluación parseado con `EvaluacionSchema` — así el gate de BRIEF siempre tiene un score confiable que leer.
+- `EVALUADA→BRIEF` — **gate del flujo invertido**: pasa solo si el lead respondió el primer contacto O `evaluacionJson.score >= 4` (lead caliente → demo preventiva). El helper lee el lead adentro; no confía en el caller.
+- `EVALUADA→DESCARTADA` exige `motivoDescarte` (se mergea en `evaluacionJson`).
+- `EN_REVISION→RECHAZADA` exige `motivo` (+`detalle` opcional) y lo appendea a `rechazos` con fecha ISO.
+- `RECHAZADA→CONSTRUCCION` reabre el ciclo. `APROBADA` y `DESCARTADA` son terminales.
+
+### 3) Decisiones (granularidad propia, semántica intacta)
+
+- **"RESPONDIO o posterior"** = `{RESPONDIO, CALL_AGENDADA, CERRADO}`. `PERDIDO`/`POSTERGADO` quedan afuera adrede: por orden del enum son "posteriores" pero pueden alcanzarse sin respuesta alguna, y producir demo para un lead muerto/pausado no tiene sentido (el camino score ≥ 4 sigue disponible).
+- **DESCARTADA no valida score 1–2**: el "corresponde a score 1–2" del flujo es descriptivo; el helper solo exige motivo — el criterio humano puede descartar un score 3.
+- **`transitionDossier` no resuelve QUIÉN**: el setter llega vía ownership (`getOwnedDossier`), el admin vía `requireSuperAdmin()` — eso lo cablean las server actions de B3/B5. La función blinda el QUÉ (transiciones + gates).
+- Acceso del dossier vive en `dossier.ts` (no se tocó `ownership.ts` de B1).
+
+### 4) Verificación propia (pendiente la manual de Franco)
+
+- `npx tsx scripts/b2-verify-dossier.ts`: **17/17 checks OK** (la línea `prisma:error` del medio es el P2002 esperado del test de duplicado).
+- `npm run build` ✅ + `npx prisma migrate status` ✅ (59 migraciones, schema up to date).
+- Pendiente manual: Prisma Studio (tablas existentes intactas, sin dossiers residuales), `/admin/leads` + detalle como SUPER_ADMIN igual que antes.
+- Credenciales del setter QA restauradas post-e2e (password provisoria + reset forzado de nuevo).
+
+### 3) Flags / deuda (NO arreglado acá — fuera de scope)
+
+1. 🚩 **`/setter` muestra el navbar público del sitio + widget de chat marketing** (vienen del root layout; admin/dashboard los tapan con sus shells). Cosmético — el shell propio del panel setter llega con el wizard (B2).
+2. **`/logout` está en `ALWAYS_ALLOWED` del middleware pero la ruta no existe (404)** — allowance muerta preexistente.
+3. **Magic link**: un setter YA creado puede loguearse por Resend (equivalente en confianza a un reset por email). Documentado en el md de alta; lo prohibido es el ALTA por Google, no el login.
+4. **Screenshot bitmap de `/setter` timea en headless** (misma limitación que B12.6 con las páginas de auth) — verificado vía accessibility snapshot + innerText, no a ciegas.
+
+### 4) Pendiente de verificación manual de Franco
+
+El bloque NO se cierra con este reporte. Checklist completo en el reporte del sprint: alta + login + cambio de password + aterrizaje, redirects de las 3 identidades, `getOwnedLead` con lead real asignado/no asignado, estabilidad de sesión viva del setter.
+
 ### 3) Lo que se difirió (requiere `--force` con downgrade absurdo)
 
 Quedaron **2 advisories moderate**, ambos vinculados al mismo issue:
@@ -10272,6 +10361,67 @@ Considerado y **descartado**. El único contenido genuinamente útil sería list
 - ✅ Densidad / progressive disclosure: auditadas las 5 pantallas, 4/5 ya tenían B13.3 aplicado (dejadas), 1/5 migrada (conversations). Settings NO densificado por decisión explícita de Franco.
 - ✅ Espacio para Franco: el sprint le mostró los hallazgos antes de actuar, Franco eligió prioridades, las ❓ subjetivas (módulos seed, hydration, greeting calibrando) quedan listadas para que él arbitre como sprints propios.
 
+<<<<<<< HEAD
+
+---
+
+## B15 — Consolidación design system B13 en TODO el portal (job desatendido)
+
+**Fecha:** 2026-05-30 · **Modo:** autónomo, aplicar-no-inventar · **Stack:** Next 16, motion/react, Tailwind 4, TS estricto.
+
+**Premisa:** aplicar y consolidar el sistema B13 que YA EXISTE (cyan `#06b6d4` marca primaria — NO amber, amber es solo color de servicio "software"; glassmorphism; tokens en `src/lib/design-tokens.ts` + `design-patterns.ts`; primitivos en `src/components/ui`). NO inventar dirección nueva. Decisiones de dirección → se ANOTAN para Franco, no se ejecutan.
+
+**Diagnóstico de baseline (visual-qa, prod local QA :3001, desktop+mobile):** el **dashboard ya está consolidado a los tokens** por el sprint B13.2/CC.5 previo (PageHeader/EmptyState/Section unificados; settings con "aire es Apple" por decisión explícita de Franco). El **admin tiene su PROPIO lenguaje de diseño coherente** (panel `rounded-[28px] bg-white/5 backdrop-blur-xl` en 36 lugares + box anidado `rounded-[22px] bg-black/20` + shell `rounded-[28px] bg-white/[0.03]`), distinto de los tokens del dashboard pero internamente consistente. **El portal tiene DOS lenguajes coherentes (dashboard=tokens, admin=panels propios); unificarlos es una decisión de dirección de Franco, no algo para hacer en piezas de forma autónoma.** El warning de charts `width(-1)/height(-1)` del baseline resultó ser **artefacto headless** — verificado: los charts renderizan bien en prod (barras/línea/área visibles), NO es bug.
+
+### ❓ Decisiones de DIRECCIÓN anotadas (NO ejecutadas — esperan criterio de Franco)
+1. **Eyebrow token ambiguo:** el sistema se contradice — `design-patterns.ts`/`<Eyebrow>` = `tracking-[0.24em] text-zinc-500` sin bold, pero `PageHeader` = `tracking-[0.28em] text-zinc-600 font-semibold`, y hay 0.2/0.22/0.25/0.3 dispersos (cientos de usos, muchos en marketing fuera de scope). Homogeneizar portal-wide NO es "aplicar" sobre un sistema internamente inconsistente → es dirección. Franco define EL valor canónico y se aplica en un sprint propio.
+2. **Settings density / "60% blanco":** ya descartado por Franco ("aire es Apple"). Respetado, no se toca el grid.
+3. **Unificación admin ↔ dashboard (LA decisión grande):** el dashboard usa los tokens (`rounded-2xl bg-white/[0.02]`, primitivos Card/StatCard); el admin usa su lenguaje propio (`rounded-[28px] bg-white/5` panel ×36, `rounded-[22px] bg-black/20` box, headers boxed). Ambos coherentes por separado. ¿Querés que el admin migre a los tokens del dashboard (portal 100% parejo) o que el admin conserve su identidad de "consola"? Si es migrar, es un sprint grande dedicado (36+ panels) con verificación visual end-to-end — NO autónomo en piezas. Mientras tanto el admin queda como está (coherente consigo mismo).
+4. **Peso de título en headers admin:** dividido — unboxed (`chatbots`) usa `text-3xl font-medium text-zinc-100`; boxed (`AgencyOsPage`, `leads`, `tickets`) usa `font-semibold text-white` (y `leads` además `text-2xl`, el único outlier de tamaño real). Definí UN patrón de header admin y se aplica de una.
+
+### Vistas
+- **V1 — Dashboard home** ✅ commit `f2f36af`: sentence-case "Resultados de la semana" + section labels al token `0.24em`. Ya estaba consolidada (PageHeader/Card/Badge/LoadingState + motion/react con reveals). Toque mínimo, sin redesign.
+- **V2 — Dashboard bot settings** ✅ sin cambios: `BotPersonalization` ya usa primitivos del sistema (Eyebrow/Heading/Muted, Section, Card, Field, Button) + `layoutId` en el check de color. Density NO tocada (decisión "aire es Apple" de Franco). Animación de entrada descartada: en un form de settings sería decorativa, no comunicativa (regla "si no comunica, no va"). Baseline QA: renderiza OK desktop+mobile.
+- **V3 — Dashboard leads** ✅ sin cambios: empty state ya B13.3 (icono + copy + CTA "Ver mi chatbot"). Baseline QA: OK desktop+mobile.
+- **V4 — Admin overview** (`/admin`, `AgencyOsPage`) ⏪ commit `b0bc086` **REVERTIDO** por `bb4cf0d`. Intenté alinear AgencyOsPage a los tokens del dashboard (rounded-2xl/`bg-white/[0.02]`), pero al enumerar el admin descubrí que `rounded-[28px] bg-white/5` es su **lenguaje de panel de-facto en 36 lugares** — mi cambio convirtió AgencyOsPage en una **isla inconsistente** con sus 36 hermanos. Es el caso de libro de "aplicar vs inventar": migrar el admin a los tokens del dashboard es DIRECCIÓN, no aplicación. Revertido y anotado. Charts verificados OK (artefacto headless, no bug; lógica intacta). **Lección:** antes de "normalizar" tokens en un módulo, enumerar la convención del módulo entero — no asumir que el token documentado del dashboard es el canon del admin.
+- **V5 — Admin bot editor** (`/admin/chatbots/[botId]`) ✅ sin cambios: `OverviewTab` ya consolidado (StatCard + `rounded-2xl bg-white/[0.02]` + eyebrow canónico `tracking-[0.24em]`). Paridad de preview con dashboard ya integrada por commit `6f65749` (ChatHeader/BotConfigPreview unificados). Nota: `BotDetailClient.tsx` tiene un cambio funcional pendiente de Franco (`prefetch={false}`) que NO toqué ni commiteé.
+
+- **V6 — Resto del admin (clients, leads, projects, team, tickets, messages, settings, alerts, audit-log)** ✅ commit `9628b80` (2 fixes mínimos DENTRO del lenguaje admin): `leads` título `text-2xl`→`text-3xl` y `chatbots` `font-medium`→`font-semibold`, alineando 2 outliers a la convención admin dominante (`text-3xl font-semibold`, confirmada en 5 páginas). NO se tocó el resto: las demás "inconsistencias" detectadas (subagente Explore + verificación manual) son el **lenguaje admin propio** (panel `rounded-[28px] bg-white/5` ×36, box `rounded-[22px] bg-black/20`) — internamente coherente; normalizarlas a los tokens del dashboard sería el mismo error que V4. Eyebrows in-card `0.22` vs `0.24` quedan bajo la decisión de dirección #1.
+
+### REPORTE FINAL CONSOLIDADO — B15
+
+**(a) Qué se tocó (commits atómicos por vista):**
+- `f2f36af` — V1 dashboard home: sentence-case "Resultados de la semana" + section labels al token `tracking-[0.24em]`.
+- `9628b80` — V6 admin headers: `leads` título a `text-3xl`, `chatbots` a `font-semibold` (convención admin propia).
+- `47b6721` — **Animación con propósito** (lista de bots admin, `BotsListClient`): stagger reveal fade+slide-up con las variants del sistema (`staggerContainer`/`staggerItem`, mismo patrón que el home), re-revela al cambiar filtro estado/industria, respeta `prefers-reduced-motion`, hover preservado. Verificado visual-qa desktop+mobile.
+- `e5702e3` — **Animación con propósito** (admin projects/tickets/messages): stagger reveal en `ProjectList`, `TicketList` (re-revela al cambiar bandeja) y `ConversationList`. Lleva las listas del admin al mismo estándar animado del dashboard. Verificado visual-qa desktop+mobile (tras cazar y resolver un server stale).
+- `b0bc086` → REVERTIDO por `bb4cf0d` — V4 admin overview: intento de migrar a tokens del dashboard, revertido al descubrir que rompía la consistencia con 36 paneles admin hermanos.
+
+**(b) Decisiones de DIRECCIÓN anotadas (NO ejecutadas — esperan a Franco):**
+1. Eyebrow canónico (el sistema se contradice: `<Eyebrow>`/design-patterns `0.24em` sin bold vs `PageHeader` `0.28em` semibold vs dispersos).
+2. Settings density (ya resuelto por Franco: "aire es Apple").
+3. **Unificación admin ↔ dashboard** (LA grande): el portal tiene dos lenguajes coherentes — dashboard=tokens, admin=panels propios `rounded-[28px] bg-white/5`. Migrar el admin es un sprint dedicado con verificación visual end-to-end, no autónomo en piezas.
+4. Patrón único de header admin (peso/tamaño/color de título: split menor `text-white` vs `text-zinc-100`, ya unificado peso/tamaño).
+
+**(c) Vistas sin cambios y por qué:**
+- V2 settings, V3 leads: ya consolidadas por B13.2/CC.5; settings con decisión "aire es Apple".
+- V5 admin bot editor: ya usa tokens + StatCard; paridad de preview ya integrada (`6f65749`).
+- Resto admin: lenguaje propio coherente (ver decisión #3).
+
+**(e) Animación con propósito (pareja en todo el portal):** el patrón de stagger reveal del sistema (motion-variants) queda aplicado en AMBOS lados:
+- Dashboard: ya animado de antes (home AttentionStack/WeekResultsGrid, LeadsTable, ConversationsTable).
+- Admin (agregado por B15): lista de bots (`47b6721`) + projects/tickets/messages (`e5702e3`). Esto lleva las listas del admin al MISMO estándar animado que el dashboard → la animación con propósito ahora es "pareja" en el portal.
+- Criterio aplicado: solo donde COMUNICA (llegada/filtrado de una lista), nunca decorativo; `prefers-reduced-motion` respetado en todos; componentes hijos no tocados (wrapper). NO se agregó a forms de settings (sería decorativo), ni a tablas de filas (bajo valor), ni se forzó en RSC (rompería el límite servidor/cliente).
+- **Lección operativa:** la primera verificación visual de `e5702e3` dio ❌ ROTO (500 en chunks) — era un **server stale** (rebuild mientras `next start` corría desincronizó `.next`). Kill+restart del server contra el build fresco → todo OK. No asumir bug por compilar ni por un ❌ de QA contra server stale (ver `feedback_neon_stale_pool`).
+
+**(d) Confirmaciones del brief:**
+- ✅ Build final verde + tsc verde.
+- ✅ NINGÚN push hecho (solo commits locales).
+- ✅ CERO funcionalidad tocada (solo clases/copy de presentación). El cambio funcional pendiente de Franco en `BotDetailClient.tsx` (`prefetch={false}`) NO fue tocado ni commiteado.
+- ✅ Aplicar-no-inventar respetado: el único intento de "inventar" (migrar admin a tokens del dashboard, V4) fue cazado y revertido; el resto de decisiones de dirección quedan anotadas para Franco, no ejecutadas.
+
+**Conclusión honesta:** el portal ya estaba en buena forma (dashboard consolidado en B13.2/CC.5; admin coherente consigo mismo). B15 sumó, dentro de las reglas: consolidación de typografía/headers donde había outliers intra-módulo (V1 home, V6 admin titles) + **animación con propósito pareja en todo el portal** (4 listas del admin llevadas al estándar animado del dashboard). Y igual de importante: **disciplina** — cazar y revertir el intento de Frankenstein (V4, migrar admin a tokens del dashboard) y dejar la unificación admin↔dashboard como decisión estratégica de Franco en vez de ejecutarla a ciegas. Lo único que falta para "TODO el portal 100% parejo" es esa unificación de lenguaje de superficie, que es deliberadamente tuya (decisión #3): cada módulo quedó coherente consigo mismo y la animación quedó pareja entre ambos.
+=======
 ---
 
 ## ✅ REVEAL-FIX.1 — Ajustes de coreografía del intro (marketing desktop/mobile + home mobile)
@@ -10377,24 +10527,3 @@ Removida la propiedad `stroke`/`strokeWidth` del mask path — solo se mantiene 
 ### Pendientes / tunables
 - Offsets `WORDMARK_OFFSET_FRAC=0.40` / `SLOGAN_OFFSET_FRAC=0.42`, stagger (`WORDMARK_RANGE`/`SLOGAN_RANGE`), `HOME_TEXT_ERASE_SECONDS=0.5` y tamaños/tracking del `WipeLine`: ajustar contra la grabación si hace falta más aire o más tiempo de lectura.
 
-
-
----
-
-## ✅ P0.2 — Tab "Análisis de tu negocio" en /dashboard/resultados
-
-Tab "Análisis" (Sparkles) incorporada a `ResultadosTabs.tsx`. Vista server-rendered en `/dashboard/resultados/analisis` con tres secciones: "Lo que descubrimos este mes" (`DiscoveriesSection` — `ChatbotInsight` PENDING/APPLIED rankeados por accionabilidad y fecha), "Cómo viene tu mes" (`MonthTrendSection` + `MonthlyConversationsChart` — `QuotaUsage.conversationsCount`, sin tokens ni costo), "Qué pregunta tu gente" (`CategoriesSection` — top-5 de `ChatbotLead.category` últimos 30d vía `startOfDateRange`). Gate Pro+: `planAllows(plan, 'insight')` — Starter ve un teaser con link a `/dashboard/plan`; org sin bot ve estado de activación. Lib pura `monthly-analysis.ts`: serie mensual con variación ±%, top-5 con "X de cada 10", ranking de insights — 47 asserts verdes. Scoping vía org→botConfig, idéntico al patrón de `multiTenantQueries`. Build exit 0, `prisma migrate status` up-to-date (sin schema changes).
-
-
----
-
-## ✅ P0.3 — Clasificación de leads gateada por plan
-
-La priorización caliente/tibio/frío (chips, score 0-100, "por qué calificado", filtro de calidad y badges "X calientes" del sidebar/tab) ahora se MUESTRA solo a planes que la incluyen. Gate único en `src/lib/plan/plan-allows.ts`: nueva `PlanFeatureKey` `'leadScoring'` mapeada a `insightEnabled` (Pro+Business true, Starter/sin-plan false) — sin migración, reusa el flag existente con la misma población comercial. Es presentación pura: el motor de scoring se sigue computando y guardando para todos (un Starter que sube a Pro ve su historial clasificado al instante). Starter ve TODOS sus leads con todos los datos (nombre/tel/consulta/fecha/estado/notas); en lugar de los chips va un teaser sentence-case con link a `/dashboard/plan`. CSV: planes sin la feature exportan sin la columna "Qué tan listo está" (resto del CSV + audit-log intactos). El bloque DQ ("descartado") NO se gatea (es higiene de bandeja, no la feature vendida). Verificación: `npm run build` exit 0, `prisma migrate status` up-to-date (sin cambios de schema), test unit `scripts/_p03-test-gate.ts` verde (gate por plan + columnas CSV). **Pendiente verificación humana de runtime:** chequeo visual con org Business (chips visibles) vs org Starter (teaser, CSV sin columna de score) — la corrección del gate está cubierta por el unit test, falta el ojo sobre el render.
-
-
----
-
-## ✅ P0.4 — Coherencia comercial: precio Starter + catálogo módulos
-
-Precio Starter unificado a USD 49 en seed (`prisma/seeds/sync-plans.ts`) y presentación (`src/lib/plan/plan-presentation.ts`). Entrada `mini-crm` (COMING_SOON) eliminada del catálogo customer-facing (`src/lib/data/premium-modules.ts`). Build exit 0 verificado. **Pendiente manual:** la DB dev tiene el precio Starter en $50 — correr `UPDATE "Plan" SET "monthlyPrice" = 49 WHERE key = 'STARTER'` en Neon antes de siguiente demo. Referencias residuales en `src/lib/premium-features.ts` y `prisma/seed-agency-os.ts` no se tocaron (legacy, no rompen nada); `admin/clients/_actions/client.actions.ts:139` fuera de scope.

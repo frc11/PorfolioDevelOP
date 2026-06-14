@@ -1,6 +1,6 @@
 import type { NextAuthConfig } from 'next-auth'
 
-type Role = 'SUPER_ADMIN' | 'ORG_MEMBER' | 'CLIENT'
+type Role = 'SUPER_ADMIN' | 'ORG_MEMBER' | 'CLIENT' | 'SETTER'
 type OrgRole = 'ADMIN' | 'MEMBER' | 'VIEWER'
 
 // Edge-compatible auth config — no Prisma or Node.js-only imports here.

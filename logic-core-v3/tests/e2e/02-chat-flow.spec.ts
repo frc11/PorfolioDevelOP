@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test'
 
-test('user can open chat, send a message, and receive a streamed response', async ({ page }) => {
+test('user can open chat, send a message, and receive a streamed response @smoke', async ({ page }) => {
   await page.goto('/', { waitUntil: 'domcontentloaded' })
 
   const avatar = page.locator('[data-chatbot-avatar]').first()

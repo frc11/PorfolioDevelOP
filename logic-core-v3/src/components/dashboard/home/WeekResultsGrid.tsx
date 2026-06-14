@@ -20,8 +20,8 @@ export function WeekResultsGrid({ data }: WeekResultsGridProps) {
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between gap-4">
-        <h2 className="text-[10px] font-bold uppercase tracking-[0.22em] text-zinc-500">
-          Resultados de la Semana
+        <h2 className="text-[10px] font-bold uppercase tracking-[0.24em] text-zinc-500">
+          Resultados de la semana
         </h2>
         <span className="shrink-0 text-[10px] text-zinc-600">vs semana anterior</span>
       </div>

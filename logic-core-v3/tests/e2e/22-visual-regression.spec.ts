@@ -37,7 +37,7 @@ function stableMasks(page: Page) {
   ]
 }
 
-test.describe('Visual regression - admin', () => {
+test.describe('Visual regression - admin @smoke', () => {
   test.setTimeout(60_000)
 
   test.beforeEach(async ({ page }) => {
@@ -81,7 +81,7 @@ test.describe('Visual regression - admin', () => {
   })
 })
 
-test.describe('Visual regression - dashboard cliente', () => {
+test.describe('Visual regression - dashboard cliente @smoke', () => {
   test.setTimeout(60_000)
 
   test.beforeAll(async () => {

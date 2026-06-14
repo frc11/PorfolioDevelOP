@@ -1,8 +1,10 @@
 'use client'
 
 import Link from 'next/link'
+import { motion, useReducedMotion } from 'motion/react'
 import { MessageCircleMore } from 'lucide-react'
 import { EmptyState } from '@/components/ui'
+import { staggerContainer, staggerItem } from '@/lib/motion-variants'
 
 type Conversation = {
   organizationId: string
@@ -39,6 +41,8 @@ export function ConversationList({
   title = 'Conversaciones',
   compact = false,
 }: ConversationListProps) {
+  const reduce = useReducedMotion()
+
   if (conversations.length === 0) {
     return (
       <EmptyState
@@ -58,14 +62,19 @@ export function ConversationList({
         </p>
       </div>
 
-      <div className={compact ? 'max-h-[70vh] overflow-y-auto' : undefined}>
+      <motion.div
+        className={compact ? 'max-h-[70vh] overflow-y-auto' : undefined}
+        variants={staggerContainer}
+        initial={reduce ? false : 'hidden'}
+        animate="visible"
+      >
         {conversations.map((conversation, index) => {
           const isActive = activeOrganizationId === conversation.organizationId
           const isLast = index === conversations.length - 1
 
           return (
+            <motion.div key={conversation.organizationId} variants={staggerItem}>
             <Link
-              key={conversation.organizationId}
               href={`/admin/messages/${conversation.organizationId}`}
               className={[
                 'group flex items-center gap-4 px-5 py-4 transition-colors hover:bg-white/5',
@@ -112,9 +121,10 @@ export function ConversationList({
                 </span>
               ) : null}
             </Link>
+            </motion.div>
           )
         })}
-      </div>
+      </motion.div>
     </section>
   )
 }

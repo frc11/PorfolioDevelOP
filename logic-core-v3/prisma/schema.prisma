@@ -13,6 +13,7 @@ enum Role {
   SUPER_ADMIN
   ORG_MEMBER
   CLIENT
+  SETTER
 }
 
 enum OrgRole {
@@ -811,6 +812,7 @@ model OsLead {
   assignedTo User?            @relation("OsLeadAssignee", fields: [assignedToId], references: [id])
   activities OsLeadActivity[]
   demos      OsDemo[]
+  dossier    OsLeadDossier?
   project    Project?
 
   @@index([status])
@@ -848,6 +850,28 @@ model OsDemo {
   lead OsLead @relation(fields: [leadId], references: [id], onDelete: Cascade)
 
   @@index([leadId])
+}
+
+model OsLeadDossier {
+  id             String       @id @default(cuid())
+  leadId         String       @unique
+  stage          DossierStage @default(FICHA)
+  fichaJson      Json?
+  evaluacionJson Json?
+  briefJson      Json?
+  selfCheckJson  Json?
+  draftUrl       String?
+  rechazos       Json?
+  finalUrl       String? // B5: URL permanente que registra el admin al aprobar (el panel no publica)
+  aprobadaAt     DateTime?
+  enviadaAt      DateTime? // B5: queda null — lo setea el envío (B6)
+  agendaJson     Json? // B7: reunión Cal.com (uid, notas de traspaso, realizada, resultado) — contrato AgendaSchema
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  lead OsLead @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  @@index([stage])
 }
 
 model OsPaymentMilestone {
@@ -938,6 +962,17 @@ enum ActivityResult {
 enum MilestoneType {
   INICIO
   ENTREGA
+}
+
+enum DossierStage {
+  FICHA
+  EVALUADA
+  BRIEF
+  CONSTRUCCION
+  EN_REVISION
+  APROBADA
+  RECHAZADA
+  DESCARTADA
 }
 
 enum EmailCampaignStatus {
