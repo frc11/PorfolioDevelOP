@@ -9,6 +9,7 @@ import {
   ChevronRight,
   Clock3,
   FolderKanban,
+  GripVertical,
   LoaderCircle,
   MoreHorizontal,
   Send,
@@ -20,7 +21,7 @@ import {
   updateTask,
 } from '@/app/(protected)/admin/team/_actions/task.actions'
 import { ConfirmDialog } from '@/app/(protected)/admin/_components/confirm-dialog'
-import { EmptyState, Select } from '@/components/ui'
+import { EmptyState } from '@/components/ui'
 import { sendTaskForApprovalAction } from '@/lib/actions/projects'
 import { TaskForm } from './task-form'
 
@@ -169,6 +170,8 @@ export function TaskList({
   const [pendingTaskId, setPendingTaskId] = useState<string | null>(null)
   const [taskToDelete, setTaskToDelete] = useState<TaskListItem | null>(null)
   const [localTasks, setLocalTasks] = useState<TaskListItem[]>(tasks)
+  const [draggingTaskId, setDraggingTaskId] = useState<string | null>(null)
+  const [dragOverStatus, setDragOverStatus] = useState<TaskStatus | null>(null)
   const [, startTransition] = useTransition()
 
   useEffect(() => {
@@ -209,6 +212,23 @@ export function TaskList({
       setPendingTaskId(null)
       router.refresh()
     })
+  }
+
+  const handleDropOnStatus = (status: TaskStatus) => {
+    const taskId = draggingTaskId
+    setDraggingTaskId(null)
+    setDragOverStatus(null)
+
+    if (!taskId) {
+      return
+    }
+
+    const task = localTasks.find((item) => item.id === taskId)
+    if (!task || task.status === status) {
+      return
+    }
+
+    handleQuickStatusChange(taskId, status)
   }
 
   const handleDelete = (task: TaskListItem) => {
@@ -253,10 +273,30 @@ export function TaskList({
           </div>
         ) : null}
 
-        {groupedTasks.map((group) => (
+        {groupedTasks.map((group) => {
+          const draggingTask = draggingTaskId
+            ? localTasks.find((item) => item.id === draggingTaskId)
+            : undefined
+          const canDropHere = draggingTask !== undefined && draggingTask.status !== group.status
+          const showDropHint = canDropHere && dragOverStatus === group.status
+
+          return (
           <section
             key={group.status}
-            className="rounded-[28px] border border-white/10 bg-white/5 p-5 backdrop-blur-xl"
+            onDragOver={(event) => {
+              if (canDropHere) {
+                event.preventDefault()
+                setDragOverStatus(group.status)
+              }
+            }}
+            onDrop={(event) => {
+              event.preventDefault()
+              handleDropOnStatus(group.status)
+            }}
+            className={[
+              'rounded-[28px] border bg-white/5 p-5 backdrop-blur-xl transition-colors',
+              showDropHint ? 'border-cyan-400/40 bg-cyan-400/[0.06]' : 'border-white/10',
+            ].join(' ')}
           >
             <div className="flex items-center justify-between gap-3">
               <div>
@@ -274,7 +314,10 @@ export function TaskList({
                   return (
                     <article
                       key={task.id}
-                      className="rounded-[24px] border border-white/10 bg-black/20 p-4"
+                      className={[
+                        'rounded-[24px] border border-white/10 bg-black/20 p-4 transition-opacity',
+                        draggingTaskId === task.id ? 'opacity-50' : '',
+                      ].join(' ')}
                     >
                       <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
                         <button
@@ -380,15 +423,27 @@ export function TaskList({
                         </button>
 
                         <div className="flex items-center gap-2">
+                          <span
+                            draggable={!isPending}
+                            onDragStart={(event) => {
+                              setDraggingTaskId(task.id)
+                              event.dataTransfer.effectAllowed = 'move'
+                              event.dataTransfer.setData('text/plain', task.id)
+                            }}
+                            onDragEnd={() => {
+                              setDraggingTaskId(null)
+                              setDragOverStatus(null)
+                            }}
+                            aria-hidden="true"
+                            title="Arrastrar para cambiar de estado"
+                            className="hidden h-10 cursor-grab items-center text-zinc-600 transition-colors hover:text-zinc-400 active:cursor-grabbing sm:flex"
+                          >
+                            <GripVertical className="h-4 w-4" strokeWidth={1.5} />
+                          </span>
+
                           {showApprovalFlow ? (
                             <TaskApprovalControl task={task} projectId={projectId} />
                           ) : null}
-
-                          <ProjectStatusQuickChange
-                            task={task}
-                            isPending={isPending}
-                            onSelect={handleQuickStatusChange}
-                          />
 
                           <TaskForm
                             projectId={projectId}
@@ -414,7 +469,31 @@ export function TaskList({
                             </button>
 
                             {openMenuTaskId === task.id ? (
-                              <div className="absolute right-0 top-12 z-20 min-w-[160px] rounded-2xl border border-white/10 bg-[#11161d]/95 p-2 shadow-2xl backdrop-blur-xl">
+                              <div className="absolute right-0 top-12 z-20 min-w-[190px] rounded-2xl border border-white/10 bg-[#11161d]/95 p-2 shadow-2xl backdrop-blur-xl">
+                                <p className="px-3 pb-1 pt-1.5 text-[10px] uppercase tracking-[0.18em] text-zinc-500">
+                                  Cambiar estado
+                                </p>
+                                {GROUPS.filter((group) => group.status !== task.status).map(
+                                  (group) => (
+                                    <button
+                                      key={group.status}
+                                      type="button"
+                                      disabled={isPending}
+                                      onClick={() => handleQuickStatusChange(task.id, group.status)}
+                                      className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm text-zinc-200 transition-colors hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-60"
+                                    >
+                                      <span
+                                        className={[
+                                          'inline-flex rounded-full border px-2 py-0.5 text-[10px] font-medium',
+                                          statusTone(group.status),
+                                        ].join(' ')}
+                                      >
+                                        {group.label}
+                                      </span>
+                                    </button>
+                                  )
+                                )}
+                                <div className="my-1 h-px bg-white/10" />
                                 <button
                                   type="button"
                                   disabled={isPending}
@@ -498,7 +577,8 @@ export function TaskList({
               )}
             </div>
           </section>
-        ))}
+          )
+        })}
       </div>
 
       <ConfirmDialog
@@ -563,30 +643,5 @@ function TaskApprovalControl({ task, projectId }: TaskApprovalControlProps) {
       )}
       Enviar a aprobacion
     </button>
-  )
-}
-
-type ProjectStatusQuickChangeProps = {
-  task: TaskListItem
-  isPending: boolean
-  onSelect: (taskId: string, status: TaskStatus) => void
-}
-
-function ProjectStatusQuickChange({
-  task,
-  isPending,
-  onSelect,
-}: ProjectStatusQuickChangeProps) {
-  return (
-    <Select
-      value={task.status}
-      disabled={isPending}
-      onChange={(event) => onSelect(task.id, event.target.value as TaskStatus)}
-      className="rounded-2xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-zinc-100 outline-none transition-colors focus:border-cyan-400/35 disabled:cursor-not-allowed disabled:opacity-60"
-    >
-      <option value="TODO">Pendiente</option>
-      <option value="IN_PROGRESS">En progreso</option>
-      <option value="DONE">Completada</option>
-    </Select>
   )
 }
