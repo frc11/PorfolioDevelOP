@@ -391,6 +391,28 @@ function deriveProjectActivityAt(project: ProjectListRecord): number {
   return Math.max(...timestamps, 0)
 }
 
+// "Última actividad" en sentido pasado para el filtro de período: Project no
+// tiene createdAt/updatedAt (schema FROZEN), así que se deriva del máximo de las
+// fechas reales de actividad. A diferencia de deriveProjectActivityAt (orden de
+// la lista), EXCLUYE estimatedEndDate por ser una fecha futura (deadline), que
+// inflaría la ventana. Devuelve null si no hay ninguna señal de actividad.
+function deriveProjectLastActivityAt(project: ProjectListRecord): Date | null {
+  const timestamps = [
+    project.deliveredAt?.getTime(),
+    project.maintenanceStartDate?.getTime(),
+    project.osLead?.updatedAt.getTime(),
+    ...project.paymentMilestones.map((milestone) => milestone.createdAt.getTime()),
+    ...project.maintenancePayments.map((payment) => payment.createdAt.getTime()),
+    ...project.timeEntries.flatMap((entry) => [entry.date.getTime(), entry.createdAt.getTime()]),
+  ].filter((value): value is number => typeof value === 'number')
+
+  if (timestamps.length === 0) {
+    return null
+  }
+
+  return new Date(Math.max(...timestamps))
+}
+
 function buildProjectRevalidationPaths(input: {
   projectId: string
   leadId?: string | null
@@ -443,6 +465,7 @@ function serializeProjectListItem(project: ProjectListRecord) {
     startDate: serializeDate(deriveProjectStartDate(project)),
     estimatedEndDate: serializeDate(project.estimatedEndDate),
     deliveredAt: serializeDate(project.deliveredAt),
+    lastActivityAt: serializeDate(deriveProjectLastActivityAt(project)),
     _count: {
       tasks: project._count.tasks,
       timeEntries: project._count.timeEntries,

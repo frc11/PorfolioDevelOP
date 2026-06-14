@@ -22,6 +22,7 @@ export type ProjectCardData = {
   startDate: string | null
   estimatedEndDate: string | null
   deliveredAt: string | null
+  lastActivityAt: string | null
   _count: {
     tasks: number
     timeEntries?: number

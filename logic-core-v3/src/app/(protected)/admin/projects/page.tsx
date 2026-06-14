@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { Building2 } from 'lucide-react'
-import { ProjectStatus, ServiceType } from '@prisma/client'
+import { ServiceType } from '@prisma/client'
 import { prisma } from '@/lib/prisma'
 import { unstable_cache } from 'next/cache'
 import { listProjects } from './_actions/project.actions'
@@ -17,22 +17,21 @@ const getOrganizationsForDropdown = unstable_cache(
 import { ProjectForm } from './_components/project-form'
 import { ProjectList, type ProjectListItem } from './_components/project-list'
 import { ProjectsFilterSelect } from './_components/projects-filter-select'
+import {
+  PERIOD_OPTIONS,
+  ProjectsPeriodFilter,
+  type PeriodFilter,
+} from './_components/projects-period-filter'
 
 type ProjectsPageProps = {
   searchParams?: Promise<{
-    status?: string | string[]
     serviceType?: string | string[]
     visibility?: string | string[]
+    period?: string | string[]
+    from?: string | string[]
+    to?: string | string[]
   }>
 }
-
-const STATUS_OPTIONS: Array<{ value: 'ALL' | ProjectStatus; label: string }> = [
-  { value: 'ALL', label: 'Todos' },
-  { value: 'PLANNING', label: 'Planning' },
-  { value: 'IN_PROGRESS', label: 'En progreso' },
-  { value: 'REVIEW', label: 'Revision' },
-  { value: 'COMPLETED', label: 'Completado' },
-]
 
 const SERVICE_OPTIONS: Array<{ value: 'ALL' | ServiceType; label: string }> = [
   { value: 'ALL', label: 'Todos los servicios' },
@@ -50,16 +49,14 @@ const VISIBILITY_OPTIONS = [
 
 type VisibilityFilter = (typeof VISIBILITY_OPTIONS)[number]['value']
 
+const DEFAULT_PERIOD: PeriodFilter = '1m'
+
 function getSingleValue(value?: string | string[]): string | undefined {
   if (Array.isArray(value)) {
     return value[0]
   }
 
   return value
-}
-
-function isProjectStatus(value: string | undefined): value is ProjectStatus {
-  return STATUS_OPTIONS.some((option) => option.value === value && option.value !== 'ALL')
 }
 
 function isServiceType(value: string | undefined): value is ServiceType {
@@ -70,16 +67,72 @@ function isVisibilityFilter(value: string | undefined): value is VisibilityFilte
   return VISIBILITY_OPTIONS.some((option) => option.value === value)
 }
 
+function isPeriodFilter(value: string | undefined): value is PeriodFilter {
+  return PERIOD_OPTIONS.some((option) => option.value === value)
+}
+
+function periodStart(period: PeriodFilter): Date | null {
+  const start = new Date()
+
+  switch (period) {
+    case '1w':
+      start.setDate(start.getDate() - 7)
+      return start
+    case '1m':
+      start.setMonth(start.getMonth() - 1)
+      return start
+    case '6m':
+      start.setMonth(start.getMonth() - 6)
+      return start
+    case '1y':
+      start.setFullYear(start.getFullYear() - 1)
+      return start
+    case 'custom':
+      return null
+  }
+}
+
+function matchesPeriod(
+  lastActivityAt: string | null,
+  period: PeriodFilter,
+  from: string,
+  to: string
+): boolean {
+  // Sin señal de actividad → no se filtra por período (no se oculta el proyecto).
+  if (!lastActivityAt) {
+    return true
+  }
+
+  const activity = new Date(lastActivityAt).getTime()
+
+  if (period === 'custom') {
+    if (from) {
+      const fromTime = new Date(from).getTime()
+      if (Number.isFinite(fromTime) && activity < fromTime) {
+        return false
+      }
+    }
+    if (to) {
+      const toTime = new Date(`${to}T23:59:59.999`).getTime()
+      if (Number.isFinite(toTime) && activity > toTime) {
+        return false
+      }
+    }
+    return true
+  }
+
+  const start = periodStart(period)
+  return start ? activity >= start.getTime() : true
+}
+
 function buildProjectsHref(input: {
-  status?: 'ALL' | ProjectStatus
   serviceType?: 'ALL' | ServiceType
   visibility?: VisibilityFilter
+  period?: PeriodFilter
+  from?: string
+  to?: string
 }) {
   const params = new URLSearchParams()
-
-  if (input.status && input.status !== 'ALL') {
-    params.set('status', input.status)
-  }
 
   if (input.serviceType && input.serviceType !== 'ALL') {
     params.set('serviceType', input.serviceType)
@@ -89,19 +142,36 @@ function buildProjectsHref(input: {
     params.set('visibility', input.visibility)
   }
 
+  if (input.period && input.period !== DEFAULT_PERIOD) {
+    params.set('period', input.period)
+
+    if (input.period === 'custom') {
+      if (input.from) {
+        params.set('from', input.from)
+      }
+      if (input.to) {
+        params.set('to', input.to)
+      }
+    }
+  }
+
   const query = params.toString()
   return query ? `/admin/projects?${query}` : '/admin/projects'
 }
 
 export default async function AgencyOsProjectsPage({ searchParams }: ProjectsPageProps) {
   const resolvedSearchParams = searchParams ? await searchParams : undefined
-  const rawStatus = getSingleValue(resolvedSearchParams?.status)
   const rawServiceType = getSingleValue(resolvedSearchParams?.serviceType)
   const rawVisibility = getSingleValue(resolvedSearchParams?.visibility)
+  const rawPeriod = getSingleValue(resolvedSearchParams?.period)
 
-  const selectedStatus = isProjectStatus(rawStatus) ? rawStatus : undefined
   const selectedServiceType = isServiceType(rawServiceType) ? rawServiceType : undefined
   const selectedVisibility = isVisibilityFilter(rawVisibility) ? rawVisibility : 'ALL'
+  const selectedPeriod = isPeriodFilter(rawPeriod) ? rawPeriod : DEFAULT_PERIOD
+  const customFrom =
+    selectedPeriod === 'custom' ? getSingleValue(resolvedSearchParams?.from) ?? '' : ''
+  const customTo =
+    selectedPeriod === 'custom' ? getSingleValue(resolvedSearchParams?.to) ?? '' : ''
 
   const [result, organizations] = await Promise.all([
     listProjects(),
@@ -111,7 +181,6 @@ export default async function AgencyOsProjectsPage({ searchParams }: ProjectsPag
   const projects: ProjectListItem[] = result.success ? result.data : []
 
   const filteredProjects = projects.filter((project) => {
-    const matchesStatus = selectedStatus ? project.status === selectedStatus : true
     const matchesServiceType = selectedServiceType
       ? project.serviceType === selectedServiceType
       : true
@@ -122,7 +191,11 @@ export default async function AgencyOsProjectsPage({ searchParams }: ProjectsPag
           ? project.organizationId !== null
           : project.organizationId === null
 
-    return matchesStatus && matchesServiceType && matchesVisibility
+    return (
+      matchesServiceType &&
+      matchesVisibility &&
+      matchesPeriod(project.lastActivityAt, selectedPeriod, customFrom, customTo)
+    )
   })
 
   return (
@@ -153,35 +226,11 @@ export default async function AgencyOsProjectsPage({ searchParams }: ProjectsPag
                 <Link
                   key={option.value}
                   href={buildProjectsHref({
-                    status: selectedStatus ?? 'ALL',
                     serviceType: selectedServiceType ?? 'ALL',
                     visibility: option.value,
-                  })}
-                  className={[
-                    'inline-flex rounded-full border px-3 py-2 text-xs font-medium transition-colors',
-                    isActive
-                      ? 'border-cyan-400/20 bg-cyan-400/10 text-cyan-100'
-                      : 'border-white/10 bg-black/20 text-zinc-300 hover:bg-white/5',
-                  ].join(' ')}
-                >
-                  {option.label}
-                </Link>
-              )
-            })}
-
-            <div className="mx-1 hidden h-6 w-px bg-white/10 xl:block" />
-
-            {STATUS_OPTIONS.map((option) => {
-              const isActive =
-                option.value === 'ALL' ? !selectedStatus : option.value === selectedStatus
-
-              return (
-                <Link
-                  key={option.value}
-                  href={buildProjectsHref({
-                    status: option.value,
-                    serviceType: selectedServiceType ?? 'ALL',
-                    visibility: selectedVisibility,
+                    period: selectedPeriod,
+                    from: customFrom,
+                    to: customTo,
                   })}
                   className={[
                     'inline-flex rounded-full border px-3 py-2 text-xs font-medium transition-colors',
@@ -197,7 +246,6 @@ export default async function AgencyOsProjectsPage({ searchParams }: ProjectsPag
           </div>
 
           <form className="flex flex-wrap items-center gap-3" action="/admin/projects">
-            {selectedStatus ? <input type="hidden" name="status" value={selectedStatus} /> : null}
             {selectedVisibility !== 'ALL' ? (
               <input type="hidden" name="visibility" value={selectedVisibility} />
             ) : null}
@@ -214,6 +262,8 @@ export default async function AgencyOsProjectsPage({ searchParams }: ProjectsPag
                 </option>
               ))}
             </ProjectsFilterSelect>
+
+            <ProjectsPeriodFilter period={selectedPeriod} from={customFrom} to={customTo} />
 
             <Link
               href="/admin/projects"
