@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useMemo, useState, useTransition } from 'react'
-import { X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import type { TaskStatus } from '@prisma/client'
 import { Button, Input, Select } from '@/components/ui'
@@ -9,6 +8,7 @@ import {
   createTask,
   updateTask,
 } from '@/app/(protected)/admin/team/_actions/task.actions'
+import { OverlayModal } from './overlay-modal'
 
 type TaskAssignee = {
   id: string
@@ -174,125 +174,110 @@ export function TaskForm({
         {triggerLabel}
       </Button>
 
-      {isOpen ? (
-        <div className="fixed inset-0 z-[140] flex items-center justify-center bg-[#05070a]/80 p-4 backdrop-blur-md">
-          <div className="relative max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-[28px] border border-white/10 bg-[#0c1016]/95 p-6 shadow-[0_30px_120px_rgba(0,0,0,0.55)] backdrop-blur-xl">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <p className="text-xs tracking-tight text-zinc-500">
-                  develOP / Proyectos / Tareas
-                </p>
-                <h3 className="mt-2 text-2xl font-semibold tracking-tight text-white">{title}</h3>
-              </div>
+      <OverlayModal
+        open={isOpen}
+        onClose={closeModal}
+        title={title}
+        eyebrow="develOP / Proyectos / Tareas"
+        panelClassName="max-w-2xl"
+      >
+        <form className="mt-6 space-y-5" onSubmit={handleSubmit}>
+          <div>
+            <label className="mb-2 block text-sm font-medium text-zinc-200">Título</label>
+            <Input
+              value={formState.title}
+              onChange={(event) => updateField('title', event.target.value)}
+              className={inputClassName}
+              placeholder="Home QA, automatización onboarding, mejoras CRM..."
+            />
+            {formErrors.title ? (
+              <p className="mt-2 text-xs text-rose-300">{formErrors.title}</p>
+            ) : null}
+          </div>
 
-              <button
-                type="button"
-                onClick={closeModal}
-                className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-black/20 text-zinc-400 transition-colors hover:text-white"
+          <div>
+            <label className="mb-2 block text-sm font-medium text-zinc-200">Descripción</label>
+            <textarea
+              value={formState.description}
+              onChange={(event) => updateField('description', event.target.value)}
+              className={`${inputClassName} min-h-28 resize-none`}
+              placeholder="Qué hay que resolver, criterios de cierre, dependencias..."
+            />
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2">
+            <div>
+              <label className="mb-2 block text-sm font-medium text-zinc-200">Asignado a</label>
+              <Select
+                value={formState.assignedToId}
+                onChange={(event) => updateField('assignedToId', event.target.value)}
+                className={inputClassName}
               >
-                <X className="h-4 w-4" />
-              </button>
+                <option value="">Sin asignar</option>
+                {assignees.map((assignee) => (
+                  <option key={assignee.id} value={assignee.id}>
+                    {assignee.name ?? assignee.email ?? 'Super Admin'}
+                  </option>
+                ))}
+              </Select>
             </div>
 
-            <form className="mt-6 space-y-5" onSubmit={handleSubmit}>
-              <div>
-                <label className="mb-2 block text-sm font-medium text-zinc-200">Título</label>
-                <Input
-                  value={formState.title}
-                  onChange={(event) => updateField('title', event.target.value)}
-                  className={inputClassName}
-                  placeholder="Home QA, automatización onboarding, mejoras CRM..."
-                />
-                {formErrors.title ? (
-                  <p className="mt-2 text-xs text-rose-300">{formErrors.title}</p>
-                ) : null}
-              </div>
-
-              <div>
-                <label className="mb-2 block text-sm font-medium text-zinc-200">Descripción</label>
-                <textarea
-                  value={formState.description}
-                  onChange={(event) => updateField('description', event.target.value)}
-                  className={`${inputClassName} min-h-28 resize-none`}
-                  placeholder="Qué hay que resolver, criterios de cierre, dependencias..."
-                />
-              </div>
-
-              <div className="grid gap-4 md:grid-cols-2">
-                <div>
-                  <label className="mb-2 block text-sm font-medium text-zinc-200">Asignado a</label>
-                  <Select
-                    value={formState.assignedToId}
-                    onChange={(event) => updateField('assignedToId', event.target.value)}
-                    className={inputClassName}
-                  >
-                    <option value="">Sin asignar</option>
-                    {assignees.map((assignee) => (
-                      <option key={assignee.id} value={assignee.id}>
-                        {assignee.name ?? assignee.email ?? 'Super Admin'}
-                      </option>
-                    ))}
-                  </Select>
-                </div>
-
-                <div>
-                  <label className="mb-2 block text-sm font-medium text-zinc-200">Horas estimadas</label>
-                  <Input
-                    inputMode="decimal"
-                    value={formState.estimatedHours}
-                    onChange={(event) => updateField('estimatedHours', event.target.value)}
-                    className={inputClassName}
-                    placeholder="4"
-                  />
-                  {formErrors.estimatedHours ? (
-                    <p className="mt-2 text-xs text-rose-300">{formErrors.estimatedHours}</p>
-                  ) : null}
-                </div>
-
-                {isEditMode ? (
-                  <div className="md:col-span-2">
-                    <label className="mb-2 block text-sm font-medium text-zinc-200">Estado</label>
-                    <Select
-                      value={formState.status}
-                      onChange={(event) =>
-                        updateField('status', event.target.value as TaskFormState['status'])
-                      }
-                      className={inputClassName}
-                    >
-                      <option value="TODO">Pendiente</option>
-                      <option value="IN_PROGRESS">En progreso</option>
-                      <option value="DONE">Completada</option>
-                    </Select>
-                  </div>
-                ) : null}
-              </div>
-
-              {serverError ? (
-                <div className="rounded-2xl border border-rose-400/20 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
-                  {serverError}
-                </div>
+            <div>
+              <label className="mb-2 block text-sm font-medium text-zinc-200">Horas estimadas</label>
+              <Input
+                inputMode="decimal"
+                value={formState.estimatedHours}
+                onChange={(event) => updateField('estimatedHours', event.target.value)}
+                className={inputClassName}
+                placeholder="4"
+              />
+              {formErrors.estimatedHours ? (
+                <p className="mt-2 text-xs text-rose-300">{formErrors.estimatedHours}</p>
               ) : null}
+            </div>
 
-              <div className="flex items-center justify-end gap-3 border-t border-white/10 pt-5">
-                <Button
-                  type="button"
-                  onClick={closeModal}
-                  variant="secondary"
+            {isEditMode ? (
+              <div className="md:col-span-2">
+                <label className="mb-2 block text-sm font-medium text-zinc-200">Estado</label>
+                <Select
+                  value={formState.status}
+                  onChange={(event) =>
+                    updateField('status', event.target.value as TaskFormState['status'])
+                  }
+                  className={inputClassName}
                 >
-                  Cancelar
-                </Button>
-                <Button
-                  type="submit"
-                  loading={isPending}
-                  className="border border-cyan-400/20 bg-cyan-400/10 text-cyan-100 hover:bg-cyan-400/15"
-                >
-                  <span>{isPending ? 'Guardando...' : isEditMode ? 'Guardar cambios' : 'Crear tarea'}</span>
-                </Button>
+                  <option value="TODO">Pendiente</option>
+                  <option value="IN_PROGRESS">En progreso</option>
+                  <option value="DONE">Completada</option>
+                </Select>
               </div>
-            </form>
+            ) : null}
           </div>
-        </div>
-      ) : null}
+
+          {serverError ? (
+            <div className="rounded-2xl border border-rose-400/20 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
+              {serverError}
+            </div>
+          ) : null}
+
+          <div className="flex items-center justify-end gap-3 border-t border-white/10 pt-5">
+            <Button
+              type="button"
+              onClick={closeModal}
+              variant="secondary"
+            >
+              Cancelar
+            </Button>
+            <Button
+              type="submit"
+              loading={isPending}
+              className="border border-cyan-400/20 bg-cyan-400/10 text-cyan-100 hover:bg-cyan-400/15"
+            >
+              <span>{isPending ? 'Guardando...' : isEditMode ? 'Guardar cambios' : 'Crear tarea'}</span>
+            </Button>
+          </div>
+        </form>
+      </OverlayModal>
     </>
   )
 }
