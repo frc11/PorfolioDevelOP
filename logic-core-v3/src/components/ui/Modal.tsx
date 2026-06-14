@@ -14,6 +14,11 @@ interface ModalProps {
   footer?: ReactNode
   size?: 'sm' | 'md' | 'lg' | 'xl'
   closeOnBackdrop?: boolean
+  /**
+   * `solid` (default) = panel zinc-950 opaco.
+   * `glass` = mismo lenguaje glass que los paneles de LeadOS/admin (translúcido + blur).
+   */
+  surface?: 'solid' | 'glass'
 }
 
 export function Modal({
@@ -25,6 +30,7 @@ export function Modal({
   footer,
   size = 'md',
   closeOnBackdrop = true,
+  surface = 'solid',
 }: ModalProps) {
   const sizeClasses = {
     sm: 'max-w-md',
@@ -32,6 +38,11 @@ export function Modal({
     lg: 'max-w-3xl',
     xl: 'max-w-5xl',
   }
+
+  const surfaceClass =
+    surface === 'glass'
+      ? 'border-white/10 bg-zinc-900/80 backdrop-blur-2xl backdrop-saturate-150'
+      : 'border-white/10 bg-zinc-950'
 
   return (
     <AnimatePresence>
@@ -50,7 +61,8 @@ export function Modal({
             exit={{ scale: 0.95, opacity: 0 }}
             transition={{ duration: 0.15 }}
             className={cn(
-              'flex max-h-[85vh] w-full flex-col overflow-hidden rounded-3xl border border-white/10 bg-zinc-950',
+              'flex max-h-[85vh] w-full flex-col overflow-hidden rounded-3xl border',
+              surfaceClass,
               sizeClasses[size],
             )}
             onClick={(event) => event.stopPropagation()}

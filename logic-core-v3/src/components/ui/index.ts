@@ -1,5 +1,6 @@
 export { Badge } from './Badge'
 export { Button } from './Button'
+export { Callout, type CalloutTone } from './Callout'
 export { Card, CardHeader, CardTitle, CardDescription } from './Card'
 export { EmptyState } from './EmptyState'
 export { ErrorState } from './ErrorState'
