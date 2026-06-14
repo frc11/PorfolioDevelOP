@@ -14,9 +14,9 @@ const getOrganizationsForDropdown = unstable_cache(
   ['admin-orgs'],
   { revalidate: 60, tags: ['admin-orgs', 'admin-clients'] }
 )
-import { Select } from '@/components/ui'
 import { ProjectForm } from './_components/project-form'
 import { ProjectList, type ProjectListItem } from './_components/project-list'
+import { ProjectsFilterSelect } from './_components/projects-filter-select'
 
 type ProjectsPageProps = {
   searchParams?: Promise<{
@@ -202,9 +202,10 @@ export default async function AgencyOsProjectsPage({ searchParams }: ProjectsPag
               <input type="hidden" name="visibility" value={selectedVisibility} />
             ) : null}
 
-            <Select
+            <ProjectsFilterSelect
               name="serviceType"
               defaultValue={selectedServiceType ?? 'ALL'}
+              ariaLabel="Filtrar por tipo de servicio"
               className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white outline-none"
             >
               {SERVICE_OPTIONS.map((option) => (
@@ -212,14 +213,7 @@ export default async function AgencyOsProjectsPage({ searchParams }: ProjectsPag
                   {option.label}
                 </option>
               ))}
-            </Select>
-
-            <button
-              type="submit"
-              className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-medium text-zinc-200 transition-colors hover:bg-white/10"
-            >
-              Aplicar filtro
-            </button>
+            </ProjectsFilterSelect>
 
             <Link
               href="/admin/projects"
