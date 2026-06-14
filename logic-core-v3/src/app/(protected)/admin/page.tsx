@@ -548,7 +548,7 @@ export default async function AgencyOsPage() {
               KPIs comerciales, operativos y financieros
             </h2>
             <p className="mt-3 max-w-3xl text-sm leading-6 text-zinc-400">
-              Unifica el pulso comercial de la OS con la operacion real del portal y la
+              Unifica el pulso comercial de la OS con la operación real del portal y la
               rentabilidad del trabajo entregado.
             </p>
           </div>
@@ -815,7 +815,7 @@ function MemberHoursCard({
           ))
         ) : (
           <div className="rounded-2xl border border-dashed border-white/10 bg-black/10 px-4 py-6 text-sm text-zinc-500">
-            Cuando el equipo registre horas, aca vas a ver la distribucion semanal por miembro.
+            Cuando el equipo registre horas, acá vas a ver la distribución semanal por miembro.
           </div>
         )}
       </div>

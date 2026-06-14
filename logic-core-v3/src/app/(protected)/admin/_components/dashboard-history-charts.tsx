@@ -275,7 +275,7 @@ export function DashboardHistoryCharts({
           </ResponsiveContainer>
         ) : (
           <div className="flex h-full items-center justify-center rounded-[22px] border border-dashed border-white/10 bg-black/10 px-6 text-center text-sm text-zinc-500">
-            Todavia no hay horas suficientes para dibujar la serie semanal por miembro.
+            Todavía no hay horas suficientes para dibujar la serie semanal por miembro.
           </div>
         )}
       </ChartCard>
