@@ -68,12 +68,26 @@ export default async function SetterHomePage() {
         <HomeEmpty />
       ) : (
         <>
+          {/* Cuatro colas de trabajo + un marcador de resultado, separados por un divisor sutil. */}
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
             <StatCard label="Para trabajar" value={grupos.trabajar.length} accent="cyan" icon={ListTodo} />
             <StatCard label="En seguimiento" value={grupos.seguimiento.length} accent="zinc" icon={Clock3} />
             <StatCard label="Esperando revisión" value={grupos.revision.length} accent="violet" icon={Eye} />
             <StatCard label="Agendadas" value={grupos.agendadas.length} accent="amber" icon={CalendarCheck2} />
-            <StatCard label="Demos aprobadas" value={demosAprobadas} accent="emerald" icon={Trophy} />
+            <div className="relative flex">
+              <span
+                aria-hidden
+                className="absolute inset-y-2 -left-1.5 hidden w-px bg-white/10 lg:block"
+              />
+              <StatCard
+                className="w-full"
+                label="Demos aprobadas"
+                value={demosAprobadas}
+                subtitle="tu marcador"
+                accent="emerald"
+                icon={Trophy}
+              />
+            </div>
           </div>
 
           <GroupSection
