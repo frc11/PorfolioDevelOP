@@ -2,7 +2,7 @@
 
 import type { DossierStage, LeadStatus } from '@prisma/client'
 import { Hammer, OctagonAlert } from 'lucide-react'
-import { Card } from '@/components/ui'
+import { Callout, Card } from '@/components/ui'
 import type { Agenda, Brief, Evaluacion, Ficha, Rechazo, SelfCheck } from '@/lib/leados/contracts'
 import type { CopyBlockLead } from '@/lib/leados/copy-blocks'
 import { gateBriefAbierto } from '@/lib/leados/flow'
@@ -85,36 +85,36 @@ export function LeadWizard({ data }: { data: WizardData }) {
       <DossierStepper stage={stage} />
 
       {stage === 'RECHAZADA' && ultimoRechazo && (
-        <Card variant="subtle" padding="lg" className="border-rose-400/20 bg-rose-500/[0.04]">
-          <div className="flex items-center gap-2.5">
-            <OctagonAlert size={15} strokeWidth={1.5} className="text-rose-400" />
-            <h2 className="text-base font-semibold text-rose-200">
-              Franco pidió correcciones
-            </h2>
-          </div>
-          <div className="mt-3 space-y-1.5 text-sm leading-relaxed">
-            <p className="text-zinc-200">
-              <span className="font-semibold text-rose-300">Qué está mal:</span>{' '}
+        <Callout
+          tone="danger"
+          accent
+          icon={OctagonAlert}
+          title="Franco pidió correcciones"
+          className="p-4 text-sm"
+        >
+          <div className="space-y-1.5 leading-relaxed text-zinc-200">
+            <p>
+              <span className="font-semibold text-rose-200">Qué está mal:</span>{' '}
               {ultimoRechazo.motivo}
             </p>
             {ultimoRechazo.donde && (
-              <p className="text-zinc-200">
-                <span className="font-semibold text-rose-300">Dónde:</span>{' '}
+              <p>
+                <span className="font-semibold text-rose-200">Dónde:</span>{' '}
                 {ultimoRechazo.donde}
               </p>
             )}
             {ultimoRechazo.arreglo && (
-              <p className="whitespace-pre-wrap text-zinc-200">
-                <span className="font-semibold text-rose-300">Arreglo concreto:</span>{' '}
+              <p className="whitespace-pre-wrap">
+                <span className="font-semibold text-rose-200">Arreglo concreto:</span>{' '}
                 {ultimoRechazo.arreglo}
               </p>
             )}
           </div>
-          <p className="mt-3 text-xs leading-relaxed text-zinc-500">
+          <p className="mt-3 text-xs leading-relaxed text-zinc-400">
             Usalo como guía de retrabajo — reabrí la construcción en el Paso 4 de abajo,
             rehacé lo marcado y volvé a pasar por draft y self-check.
           </p>
-        </Card>
+        </Callout>
       )}
 
       <FichaStep leadId={lead.id} lead={lead} ficha={ficha} editable={fichaEditable} />

@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Check, Copy } from 'lucide-react'
 import { Button } from '@/components/ui'
+import { cn } from '@/lib/utils'
 
 type CopyBlockProps = {
   titulo: string
@@ -37,7 +38,7 @@ export function CopyBlock({ titulo, instruccion, texto }: CopyBlockProps) {
   }
 
   return (
-    <div className="rounded-2xl border border-cyan-500/20 bg-cyan-500/[0.04] p-4">
+    <div className="rounded-2xl border border-cyan-400/30 bg-cyan-500/[0.05] p-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="min-w-0">
           <p className="text-xs font-semibold text-cyan-300">{titulo}</p>
@@ -58,7 +59,14 @@ export function CopyBlock({ titulo, instruccion, texto }: CopyBlockProps) {
           {copiado ? 'Copiado' : 'Copiar bloque'}
         </Button>
       </div>
-      <pre className="mt-3 max-h-56 overflow-y-auto whitespace-pre-wrap rounded-xl border border-white/[0.06] bg-black/30 p-3 font-mono text-[11px] leading-relaxed text-zinc-400">
+      <pre
+        className={cn(
+          'mt-3 max-h-56 overflow-y-auto whitespace-pre-wrap rounded-xl border p-3 font-mono text-[11px] leading-relaxed transition-colors duration-300 motion-reduce:transition-none',
+          copiado
+            ? 'border-emerald-400/40 bg-emerald-500/[0.06] text-zinc-300'
+            : 'border-white/[0.06] bg-black/30 text-zinc-400',
+        )}
+      >
         {texto}
       </pre>
     </div>

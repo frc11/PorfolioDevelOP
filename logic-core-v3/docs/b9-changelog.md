@@ -31,3 +31,17 @@ Diagnóstico (plan §2.1): la próxima-acción se susurraba (caption `text-xs` p
 - **`page.tsx`:** las 4 colas y el marcador de resultado ("Demos aprobadas", + subtítulo "tu marcador") separados por un divisor sutil en `lg`.
 
 Estados/responsive: mobile impecable (capturado 480px) — stats 2-col, onboarding con acento, todo apilado limpio. `tsc --noEmit` limpio.
+
+---
+
+## Superficie 2 — `/setter/leads/[id]` wizard · **SEGURO** · commit `feat(b9/seguro): setter wizard…`
+
+Diagnóstico (plan §5): el control más usado (copy-block) no destacaba; labels del stepper se truncaban ("Const…"); cajitas de alerta inline inconsistentes; el panel de materiales en cyan parecía accionable.
+
+- **`dossier-stepper.tsx`:** labels sin truncar (`min-w-max` + `whitespace-nowrap`) — "Construcción" entero, no "Const…". En mobile el stepper scrollea horizontal en vez de cortar. _Verificado: labels completos._
+- **`copy-block.tsx`:** borde de zona-de-acción más fuerte (`border-cyan-400/30 bg-cyan-500/[0.05]`) — la zona que el setter copia 10+ veces por lead ahora salta. **Flash de copiado:** al copiar, el bloque pre destella emerald 300ms (confirma la acción en el bloque, no solo en el botón). _Verificado: `border-cyan-400/30`._
+- **`lead-wizard.tsx`:** banner de rechazo inline → `Callout` danger con acento (consistente con la cartera).
+- **`construccion-step.tsx`:** `UrgenciaBanner` y `GuiaRetrabajo` inline → `Callout` (warning / danger-acento). **Panel de materiales (NII-1) cyan → neutro:** era referencia disfrazada de accionable; ahora `border-white/10 bg-white/[0.04]`, énfasis por copy ("usalos, nada de placeholders"), no por color. Disciplina: cyan = acción.
+- **`self-check-step.tsx`:** los checks **obligatorios** ahora tienen su propio contenedor (paralelo al de "Ojo de diseño"), con icono `ShieldCheck` — duros vs blandos claramente separados. Estados de cierre → `Callout` (success/neutral).
+
+`tsc --noEmit` limpio. Rechazo/materiales/self-check reutilizan el `Callout` ya verificado en la cartera; estados por-stage (RECHAZADA/CONSTRUCCION) quedan para el barrido visual final + verificación de Franco.

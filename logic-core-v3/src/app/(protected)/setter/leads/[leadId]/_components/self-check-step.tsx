@@ -3,9 +3,9 @@
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { CheckCircle2, Eye, Lock, Save, SendHorizonal, Wrench } from 'lucide-react'
+import { CheckCircle2, Eye, Lock, Save, SendHorizonal, ShieldCheck, Wrench } from 'lucide-react'
 import type { DossierStage } from '@prisma/client'
-import { Badge, Button, Card, Toggle } from '@/components/ui'
+import { Badge, Button, Callout, Card, Toggle } from '@/components/ui'
 import type { Brief, SelfCheck } from '@/lib/leados/contracts'
 import { HARD_CHECKS, SOFT_CHECKS } from '@/lib/leados/flow'
 import {
@@ -144,8 +144,9 @@ export function SelfCheckStep({ leadId, stage, draftUrl, selfCheck, brief }: Sel
         </p>
       </div>
 
-      <div className="space-y-2">
-        <p className="text-xs font-semibold uppercase tracking-wider text-zinc-400">
+      <div className="space-y-2 rounded-2xl border border-white/[0.07] bg-white/[0.01] p-4">
+        <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-zinc-300">
+          <ShieldCheck size={13} strokeWidth={1.5} />
           Obligatorios — bloquean el envío
         </p>
         {HARD_CHECKS.map((check) => {
@@ -216,15 +217,16 @@ export function SelfCheckStep({ leadId, stage, draftUrl, selfCheck, brief }: Sel
       </div>
 
       {todosDurosOk ? (
-        <p className="flex items-center gap-2 rounded-xl border border-emerald-400/20 bg-emerald-500/[0.06] p-3 text-xs font-medium text-emerald-300">
-          <CheckCircle2 size={14} strokeWidth={1.5} />
-          Todos los obligatorios en verde — podés enviar a revisión.
-        </p>
+        <Callout tone="success" icon={CheckCircle2}>
+          <span className="font-medium">
+            Todos los obligatorios en verde — podés enviar a revisión.
+          </span>
+        </Callout>
       ) : (
-        <p className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-3 text-xs leading-relaxed text-zinc-500">
+        <Callout tone="neutral">
           El envío se habilita cuando TODOS los obligatorios estén en verde. Si algo falla, el
           arreglo concreto está debajo de cada punto.
-        </p>
+        </Callout>
       )}
 
       <div className="flex flex-wrap items-center gap-3">

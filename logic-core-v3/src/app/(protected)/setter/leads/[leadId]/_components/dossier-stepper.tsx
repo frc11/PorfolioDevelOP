@@ -46,7 +46,7 @@ export function DossierStepper({ stage }: { stage: DossierStage | null }) {
               : 'pendiente'
 
         return (
-          <li key={paso} className="flex min-w-0 flex-1 flex-col items-center gap-1.5">
+          <li key={paso} className="flex min-w-max flex-1 flex-col items-center gap-1.5">
             <div className="flex w-full items-center">
               <span
                 className={cn(
@@ -80,8 +80,12 @@ export function DossierStepper({ stage }: { stage: DossierStage | null }) {
             </div>
             <span
               className={cn(
-                'truncate text-[10px] font-medium uppercase tracking-wider',
-                estado === 'actual' ? 'text-cyan-300' : estado === 'hecho' ? 'text-zinc-400' : 'text-zinc-600',
+                'whitespace-nowrap px-1 text-[10px] font-medium uppercase tracking-wider',
+                estado === 'actual'
+                  ? 'text-cyan-300'
+                  : estado === 'hecho'
+                    ? 'text-zinc-400'
+                    : 'text-zinc-600',
               )}
             >
               {paso}
