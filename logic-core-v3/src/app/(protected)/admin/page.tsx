@@ -592,9 +592,11 @@ export default async function AgencyOsPage() {
             label="Respuesta y cierre"
             primaryValue={responseRate}
             primaryLabel="Tasa de respuesta"
+            primaryHint="Sobre leads en etapa demo o posterior, según su estado actual"
             secondaryValue={closeRate}
             secondaryLabel="Tasa de cierre"
-            subtitle={`${respondedCount} leads respondieron y ${closedCount} terminaron cerrando`}
+            secondaryHint="Cerrados / respondidos, histórico total (distinto del chart mensual)"
+            subtitle={`${respondedCount} en estado respondido o posterior · ${closedCount} cerrados`}
             icon={BarChart3}
           />
         </div>
@@ -709,16 +711,20 @@ function DualMetricCard({
   label,
   primaryValue,
   primaryLabel,
+  primaryHint,
   secondaryValue,
   secondaryLabel,
+  secondaryHint,
   subtitle,
   icon: Icon,
 }: {
   label: string
   primaryValue: string
   primaryLabel: string
+  primaryHint: string
   secondaryValue: string
   secondaryLabel: string
+  secondaryHint: string
   subtitle: string
   icon: typeof BarChart3
 }) {
@@ -738,10 +744,12 @@ function DualMetricCard({
         <div className="rounded-md border border-white/10 bg-black/20 px-4 py-4">
           <p className="text-xs tracking-tight text-zinc-500">{primaryLabel}</p>
           <p className="mt-2 text-3xl font-medium tracking-tight text-white">{primaryValue}</p>
+          <p className="mt-1.5 text-[11px] leading-snug text-zinc-500">{primaryHint}</p>
         </div>
         <div className="rounded-md border border-white/10 bg-black/20 px-4 py-4">
           <p className="text-xs tracking-tight text-zinc-500">{secondaryLabel}</p>
           <p className="mt-2 text-3xl font-medium tracking-tight text-white">{secondaryValue}</p>
+          <p className="mt-1.5 text-[11px] leading-snug text-zinc-500">{secondaryHint}</p>
         </div>
       </div>
 
