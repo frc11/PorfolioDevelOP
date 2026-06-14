@@ -38,16 +38,31 @@ Nuevo `projects/_components/overlay-modal.tsx`: shell lane-local con `createPort
 ### ✅ B (#7) — Overlay form de tarea
 `task-form.tsx` consume el mismo shell (nueva y editar). Gate: eslint OK + tsc OK.
 
-### ⏳ C (#8) — Diálogo de borrar → COORDINACIÓN (ver abajo)
-### ⏳ D (#2) — Filtro de servicio dinámico
-### ⏳ E (#5) — Grid parejo overview
-### ⏳ F (#3) — Secciones por estado + filtro de período
-### ⏳ G (#9) — DnD tareas + kebab
-### ⏳ H (#4) — Ver-como-cliente → diagnóstico + COORDINACIÓN
+### ⛔ C (#8) — Diálogo de borrar → PENDIENTE DE COORDINACIÓN (sin código, ver abajo)
+
+### ✅ D (#2) — Filtro de servicio dinámico
+Nuevo `projects-filter-select.tsx` (client) que consume el `<Select>` compartido y hace `form.requestSubmit()` en `onChange`. En `page.tsx` reemplaza el select de servicio y se elimina el botón "Aplicar filtro"; "Limpiar" se mantiene; `aria-label` agregado. El `<Select>` lleva un `<select>` nativo oculto con `name` dentro del form, así que el submit on-change funciona sin botón. Gate: eslint OK + tsc OK.
+
+### ✅ E (#5) — Grid parejo overview
+`[projectId]/page.tsx`: los 3 cuadros pasan a un solo grid `md:grid-cols-2 md:items-stretch`; Proyecto y Fechas con `h-full` (igual altura), "Cliente vinculado" con `md:col-span-2` (full width). "Lead original" queda como card aparte abajo. Gate: eslint OK + tsc OK.
+
+### ✅ F (#3) — Secciones por estado + filtro de período
+- `project-list.tsx` reescrito: siempre 4 secciones por estado (Planning → En progreso → Revision → Completado), fila horizontal con `overflow-x-auto`, empty state por sección.
+- Chips de filtro por estado eliminados de `page.tsx`. Se mantienen visibility (chips Link) y servicio (select on-change).
+- Filtro de período nuevo (`projects-period-filter.tsx`, client): 1 semana / 1 mes / 6 meses / 1 año / custom (from-to), **default 1 mes**, on-change vía el form GET. Filtros combinados con AND, server-side por URL.
+- **Proxy de fecha (decisión + reporte):** Project no tiene createdAt/updatedAt → nuevo `deriveProjectLastActivityAt` (pasado: max de deliveredAt, maintenanceStartDate, osLead.updatedAt, milestones/mantenimiento/time-entries; **excluye estimatedEndDate** por futura), expuesto como `lastActivityAt`. Proyectos sin señal de actividad NO se ocultan. `listProjects` se consume solo en page.tsx (sin impacto cross-lane). Limitación conocida: el proxy es imperfecto vs un updatedAt real; el humano valida.
+- Warning baseline conocido en project.actions.ts: `sortTimestamp` destructurado-y-descartado en el strip de `listProjects` (línea no tocada). Gate: eslint OK (1 warning baseline) + tsc OK.
+
+### ✅ G (#9) — DnD tareas + kebab
+`task-list.tsx`: handle `GripVertical` `draggable` por card (DnD nativo HTML5, sin deps); cada `<section>` de estado es drop zone (`onDragOver`/`onDrop`) y resalta al pasar por encima un drag de otro estado; el drop llama `handleQuickStatusChange(taskId, statusDestino)` → misma action `updateTask` con update optimista + rollback. Se quitó el `<Select>` inline (`ProjectStatusQuickChange` borrado). El cambio de estado se movió al kebab "..." (opciones de los otros estados) → camino accesible para teclado/touch. Gate: eslint OK + tsc OK.
+
+### ⛔ H (#4) — Ver-como-cliente → DIAGNÓSTICO + PENDIENTE DE COORDINACIÓN (sin código)
+Verificado in-scope: el trigger en `[projectId]/layout.tsx:217` es `<form action={startImpersonationAction.bind(null, org.id)}>` — Server Action que hace `redirect('/dashboard')`. **NO usa `router.push`**, no deja scroll-lock ni estado de transición; `layout.tsx` es Server Component. La condición del pedido ("si navega con router.push o deja lock") NO aplica → no hay nada que arreglar in-scope. El freeze AL VOLVER es out-of-scope (ver abajo).
 
 ---
 
-## PENDIENTE DE COORDINACIÓN (consolidar al cierre)
+## PENDIENTE DE COORDINACIÓN (consolidado)
 
-- **(#8) confirm-dialog.tsx** necesita el mismo fix de portal/centrado: el diálogo de borrar tarea (y borrar registro de horas) usa la primitiva PROHIBIDA `confirm-dialog.tsx`, que renderiza `fixed` inline dentro del `<main>` → mismo trap. No editable desde este lane.
-- **(#4) freeze post-impersonación** involucra `lib/actions/impersonation.ts` (`stopImpersonationAction` con `redirect`) y `AdminLayoutClient.mobileOpen` (no se resetea en hard-redirect). Patch sugerido fuera de scope: `useEffect(() => setMobileOpen(false), [pathname])` en AdminLayoutClient.
+1. **(#8) confirm-dialog.tsx — portal/centrado del diálogo de borrar.** El diálogo de borrar tarea (`task-list.tsx`) y borrar registro de horas (`time-entry-panel.tsx`) usan la primitiva PROHIBIDA `src/app/(protected)/admin/_components/confirm-dialog.tsx`, que renderiza `fixed inset-0 z-[180]` inline dentro del `<main>` con `backdrop-filter` → mismo containing-block trap que arreglamos en los forms. Fix requerido: portalear `ConfirmDialog` a `document.body` (mismo patrón que el `overlay-modal.tsx` del lane). No editable desde este lane. (Borrar proyecto no tiene UI: `deleteProjectAction` es dead code.)
+
+2. **(#4) Freeze post-impersonación.** El trigger in-scope está OK. El freeze al SALIR de "Ver como cliente" y volver al admin involucra: (a) `lib/actions/impersonation.ts` → `stopImpersonationAction` hace `redirect('/admin/clients')` (hard nav, PROHIBIDO); (b) `AdminLayoutClient.tsx` → estado `mobileOpen` del sidebar no se resetea en hard-redirect (PROHIBIDO). Patch sugerido fuera de scope: `useEffect(() => setMobileOpen(false), [pathname])` en `AdminLayoutClient`, y/o revisar si la impersonación debe limpiar estado antes del redirect. Requiere coordinación con los dueños de auth/impersonación y del layout admin (lane Dashboard).
