@@ -114,113 +114,128 @@ export function DashboardHistoryCharts({
   memberSeries,
 }: DashboardHistoryChartsProps) {
   const objectiveLine = demosByWeek[0]?.objective ?? 0
+  const hasDemos = demosByWeek.some((item) => item.demos > 0)
+  const hasCloseData = closeRateByMonth.some((item) => item.closeRate > 0)
+  const hasRevenue = revenueByMonth.some((item) => item.cumulative > 0)
 
   return (
     <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
       <ChartCard title="Demos enviadas por semana">
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={demosByWeek} margin={{ top: 8, right: 12, left: -12, bottom: 0 }}>
-            <CartesianGrid stroke={chartGridStroke} strokeDasharray="3 3" vertical={false} />
-            <XAxis
-              dataKey="label"
-              axisLine={{ stroke: chartAxisStroke }}
-              tickLine={false}
-              tick={{ fill: chartAxisText, fontSize: 12 }}
-            />
-            <YAxis
-              allowDecimals={false}
-              axisLine={false}
-              tickLine={false}
-              tick={{ fill: chartAxisText, fontSize: 12 }}
-            />
-            <Tooltip
-              cursor={{ fill: 'rgba(255,255,255,0.03)' }}
-              contentStyle={tooltipStyle}
-              labelStyle={{ color: '#ffffff', fontWeight: 600 }}
-            />
-            <ReferenceLine
-              y={objectiveLine}
-              stroke="rgba(255,255,255,0.35)"
-              strokeDasharray="4 4"
-              ifOverflow="extendDomain"
-            />
-            <Bar dataKey="demos" fill="#22d3ee" radius={[8, 8, 0, 0]} maxBarSize={34} />
-          </BarChart>
-        </ResponsiveContainer>
+        {hasDemos ? (
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={demosByWeek} margin={{ top: 8, right: 12, left: -12, bottom: 0 }}>
+              <CartesianGrid stroke={chartGridStroke} strokeDasharray="3 3" vertical={false} />
+              <XAxis
+                dataKey="label"
+                axisLine={{ stroke: chartAxisStroke }}
+                tickLine={false}
+                tick={{ fill: chartAxisText, fontSize: 12 }}
+              />
+              <YAxis
+                allowDecimals={false}
+                axisLine={false}
+                tickLine={false}
+                tick={{ fill: chartAxisText, fontSize: 12 }}
+              />
+              <Tooltip
+                cursor={{ fill: 'rgba(255,255,255,0.03)' }}
+                contentStyle={tooltipStyle}
+                labelStyle={{ color: '#ffffff', fontWeight: 600 }}
+              />
+              <ReferenceLine
+                y={objectiveLine}
+                stroke="rgba(255,255,255,0.35)"
+                strokeDasharray="4 4"
+                ifOverflow="extendDomain"
+              />
+              <Bar dataKey="demos" fill="#22d3ee" radius={[8, 8, 0, 0]} maxBarSize={34} />
+            </BarChart>
+          </ResponsiveContainer>
+        ) : (
+          <ChartEmptyState message="Todavía no hay demos enviadas en las últimas semanas." />
+        )}
       </ChartCard>
 
       <ChartCard title="Tasa de cierre por mes">
-        <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={closeRateByMonth} margin={{ top: 8, right: 12, left: -12, bottom: 0 }}>
-            <CartesianGrid stroke={chartGridStroke} strokeDasharray="3 3" vertical={false} />
-            <XAxis
-              dataKey="label"
-              axisLine={{ stroke: chartAxisStroke }}
-              tickLine={false}
-              tick={{ fill: chartAxisText, fontSize: 12 }}
-            />
-            <YAxis
-              domain={[0, 100]}
-              tickFormatter={formatPercentTick}
-              axisLine={false}
-              tickLine={false}
-              tick={{ fill: chartAxisText, fontSize: 12 }}
-            />
-            <Tooltip
-              cursor={{ stroke: 'rgba(217,70,239,0.35)', strokeWidth: 1 }}
-              contentStyle={tooltipStyle}
-              formatter={(value) => [`${toNumericValue(value)}%`, 'Tasa de cierre']}
-              labelStyle={{ color: '#ffffff', fontWeight: 600 }}
-            />
-            <Line
-              type="monotone"
-              dataKey="closeRate"
-              stroke="#d946ef"
-              strokeWidth={3}
-              dot={{ r: 4, strokeWidth: 0, fill: '#e879f9' }}
-              activeDot={{ r: 6, strokeWidth: 0, fill: '#f0abfc' }}
-            />
-          </LineChart>
-        </ResponsiveContainer>
+        {hasCloseData ? (
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={closeRateByMonth} margin={{ top: 8, right: 12, left: -12, bottom: 0 }}>
+              <CartesianGrid stroke={chartGridStroke} strokeDasharray="3 3" vertical={false} />
+              <XAxis
+                dataKey="label"
+                axisLine={{ stroke: chartAxisStroke }}
+                tickLine={false}
+                tick={{ fill: chartAxisText, fontSize: 12 }}
+              />
+              <YAxis
+                domain={[0, 100]}
+                tickFormatter={formatPercentTick}
+                axisLine={false}
+                tickLine={false}
+                tick={{ fill: chartAxisText, fontSize: 12 }}
+              />
+              <Tooltip
+                cursor={{ stroke: 'rgba(217,70,239,0.35)', strokeWidth: 1 }}
+                contentStyle={tooltipStyle}
+                formatter={(value) => [`${toNumericValue(value)}%`, 'Tasa de cierre']}
+                labelStyle={{ color: '#ffffff', fontWeight: 600 }}
+              />
+              <Line
+                type="monotone"
+                dataKey="closeRate"
+                stroke="#d946ef"
+                strokeWidth={3}
+                dot={{ r: 4, strokeWidth: 0, fill: '#e879f9' }}
+                activeDot={{ r: 6, strokeWidth: 0, fill: '#f0abfc' }}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        ) : (
+          <ChartEmptyState message="Todavía no hay cierres registrados para graficar la tasa mensual." />
+        )}
       </ChartCard>
 
       <ChartCard title="Ingresos mensuales acumulados">
-        <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={revenueByMonth} margin={{ top: 8, right: 12, left: -12, bottom: 0 }}>
-            <defs>
-              <linearGradient id="osRevenueFill" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#34d399" stopOpacity={0.42} />
-                <stop offset="100%" stopColor="#34d399" stopOpacity={0.02} />
-              </linearGradient>
-            </defs>
-            <CartesianGrid stroke={chartGridStroke} strokeDasharray="3 3" vertical={false} />
-            <XAxis
-              dataKey="label"
-              axisLine={{ stroke: chartAxisStroke }}
-              tickLine={false}
-              tick={{ fill: chartAxisText, fontSize: 12 }}
-            />
-            <YAxis
-              tickFormatter={formatCurrency}
-              axisLine={false}
-              tickLine={false}
-              tick={{ fill: chartAxisText, fontSize: 12 }}
-            />
-            <Tooltip
-              cursor={{ stroke: 'rgba(52,211,153,0.35)', strokeWidth: 1 }}
-              contentStyle={tooltipStyle}
-              formatter={(value) => [formatCurrency(toNumericValue(value)), 'Acumulado']}
-              labelStyle={{ color: '#ffffff', fontWeight: 600 }}
-            />
-            <Area
-              type="monotone"
-              dataKey="cumulative"
-              stroke="#34d399"
-              strokeWidth={3}
-              fill="url(#osRevenueFill)"
-            />
-          </AreaChart>
-        </ResponsiveContainer>
+        {hasRevenue ? (
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={revenueByMonth} margin={{ top: 8, right: 12, left: -12, bottom: 0 }}>
+              <defs>
+                <linearGradient id="osRevenueFill" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#34d399" stopOpacity={0.42} />
+                  <stop offset="100%" stopColor="#34d399" stopOpacity={0.02} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid stroke={chartGridStroke} strokeDasharray="3 3" vertical={false} />
+              <XAxis
+                dataKey="label"
+                axisLine={{ stroke: chartAxisStroke }}
+                tickLine={false}
+                tick={{ fill: chartAxisText, fontSize: 12 }}
+              />
+              <YAxis
+                tickFormatter={formatCurrency}
+                axisLine={false}
+                tickLine={false}
+                tick={{ fill: chartAxisText, fontSize: 12 }}
+              />
+              <Tooltip
+                cursor={{ stroke: 'rgba(52,211,153,0.35)', strokeWidth: 1 }}
+                contentStyle={tooltipStyle}
+                formatter={(value) => [formatCurrency(toNumericValue(value)), 'Acumulado']}
+                labelStyle={{ color: '#ffffff', fontWeight: 600 }}
+              />
+              <Area
+                type="monotone"
+                dataKey="cumulative"
+                stroke="#34d399"
+                strokeWidth={3}
+                fill="url(#osRevenueFill)"
+              />
+            </AreaChart>
+          </ResponsiveContainer>
+        ) : (
+          <ChartEmptyState message="Todavía no hay ingresos registrados en el período." />
+        )}
       </ChartCard>
 
       <ChartCard title="Horas trabajadas por miembro por semana">
@@ -274,11 +289,17 @@ export function DashboardHistoryCharts({
             </BarChart>
           </ResponsiveContainer>
         ) : (
-          <div className="flex h-full items-center justify-center rounded-[22px] border border-dashed border-white/10 bg-black/10 px-6 text-center text-sm text-zinc-500">
-            Todavía no hay horas suficientes para dibujar la serie semanal por miembro.
-          </div>
+          <ChartEmptyState message="Todavía no hay horas suficientes para dibujar la serie semanal por miembro." />
         )}
       </ChartCard>
+    </div>
+  )
+}
+
+function ChartEmptyState({ message }: { message: string }) {
+  return (
+    <div className="flex h-full items-center justify-center rounded-[22px] border border-dashed border-white/10 bg-black/10 px-6 text-center text-sm text-zinc-500">
+      {message}
     </div>
   )
 }
