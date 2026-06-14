@@ -2,7 +2,9 @@
 
 import { AnimatePresence, motion } from 'motion/react'
 import { X } from 'lucide-react'
-import type { ReactNode } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
+import { createPortal } from 'react-dom'
+import { zIndex } from '@/lib/design-tokens'
 import { cn } from '@/lib/utils'
 
 interface ModalProps {
@@ -44,7 +46,15 @@ export function Modal({
       ? 'border-white/10 bg-zinc-900/80 backdrop-blur-2xl backdrop-saturate-150'
       : 'border-white/10 bg-zinc-950'
 
-  return (
+  // Portal a <body>: el backdrop `fixed inset-0` debe medir contra el viewport,
+  // no contra el contenedor del layout (p. ej. admin es `fixed inset-0 z-[80]`,
+  // que confina el modal a su columna y lo deja debajo del propio contenido /
+  // del iframe de la demo). Guard de mount para no tocar `document` en SSR.
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => setMounted(true), [])
+  if (!mounted) return null
+
+  return createPortal(
     <AnimatePresence>
       {open && (
         <motion.div
@@ -52,7 +62,8 @@ export function Modal({
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.15 }}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"
+          style={{ zIndex: zIndex.modal }}
+          className="fixed inset-0 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"
           onClick={closeOnBackdrop ? onClose : undefined}
         >
           <motion.div
@@ -94,6 +105,7 @@ export function Modal({
           </motion.div>
         </motion.div>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body,
   )
 }

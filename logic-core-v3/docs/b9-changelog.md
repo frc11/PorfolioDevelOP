@@ -62,8 +62,24 @@ Diagnóstico (plan §4.2): la cola no rankeaba visualmente; el panel de reunión
 
 ### ⚠ Hallazgos para Franco (no resueltos en B9)
 
-1. **Centrado del modal de veredicto (PRE-EXISTENTE).** El `Modal` compartido no usa portal: su backdrop `fixed inset-0` queda confinado al contenedor del layout en la pantalla de revisión, así que el modal aparece en la columna derecha en vez de centrado sobre el viewport. **No lo introdujo B9** (solo agregué la prop `surface`; el render estructural es el de antes). **Probé el fix correcto (portal a `document.body`) y lo revertí:** este app tiene capas de z-index altas (preloader `z-80`, cursor custom `z-max`, overlay de transición) y el `iframe` de la demo queda por encima del modal portaleado a `z-50` — el fix necesita reordenar el z-index del Modal por encima de esas capas, con verificación de TODOS los modales del app (dashboard, etc.). Es una tarea propia, no un detalle de refresh. **Recomendación:** portal + `z` por encima de la pila de transición, como cambio SENSIBLE dedicado.
+1. **Centrado del modal de veredicto (PRE-EXISTENTE). ✅ RESUELTO** — ver _Tanda 7_ abajo. El `Modal` compartido no usaba portal: su backdrop `fixed inset-0` quedaba confinado al contenedor del layout en la pantalla de revisión, así que el modal aparecía en la columna derecha en vez de centrado sobre el viewport. **No lo introdujo B9** (solo se agregó la prop `surface`; el render estructural era el de antes). El primer intento (portal a `document.body` con `z-50`) se había revertido porque el app tiene capas `fixed` muy altas (preloader/marketing/navbar `z-[9999]`, dock/noise/shutter `9985–9995`, cursor custom `2_147_483_647`) y, sobre todo, el layout de admin es `fixed inset-0 z-[80]`: un modal portaleado a `z-50` quedaba **debajo** del propio contenido de admin y del `iframe` de la demo. El fix correcto (portal + token `zIndex.modal = 10000`, sobre el chrome y bajo el cursor) ya está aplicado y verificado.
 2. **Reunión emerald — verificación visual pendiente.** El recolor es trivial y tsc-limpio, pero no pude abrirlo en vivo (sin lead LeadOS con reunión agendada a mano). Revisalo en un lead con reunión booked.
+
+---
+
+## Tanda 7 — Modal centrado (fix del hallazgo #1) · **SENSIBLE** · commit `fix(b9/sensible): modal portal…`
+
+Toca el kit compartido (`src/components/ui/Modal.tsx` + token `zIndex` en `src/lib/design-tokens.ts`). Lo usan dashboard/admin/setter/design-system, así que es backward-compatible por diseño.
+
+- **`Modal.tsx`:** ahora `createPortal(…, document.body)` con guard de mount (`useState(false)` + `useEffect` → `null` en SSR/primer render, sin mismatch). El backdrop ya no se mide contra el contenedor del layout sino contra el viewport. El `z-index` deja de ser la clase `z-50` y pasa al token vía `style={{ zIndex: zIndex.modal }}`.
+- **`design-tokens.ts`:** `zIndex.modal 50 → 10000` (+ `toast 10010`, `tooltip 10020`), documentado: las capas full-viewport viven **sobre** el chrome `fixed` del app (preloader/marketing/navbar `9999`, dock/noise/shutter `9985–9995`, layout de admin `z-[80]`) y **bajo** el cursor custom (`2_147_483_647`). _Nota: en Tailwind v4 el `tailwind.config.ts` legacy no se carga (no hay `@config`), así que estos tokens no generan utilidades `z-*`; por eso el Modal consume el valor del token directo por `style`, no por clase._
+- **`iframe` de la demo** (`admin/leados/[leadId]/page.tsx`): **no se tocó**. Con el backdrop a `z-10000` portaleado a `<body>`, cubre todo el layout de admin (`z-[80]`) y por lo tanto el iframe — el ordenamiento de stacking lo resuelve solo.
+
+**Verificación (server prod-QA fresco, `next-prod-qa` 3001):**
+- _Prueba determinística_ (medición por `eval`) sobre la **pantalla real del bug** (revisión LeadOS, modal **glass** "Aprobar demo", con el iframe detrás): backdrop `parentElement === document.body` ✅ · `zIndex` computado `10000` ✅ · backdrop cubre el viewport completo `(0,0 → vw×vh)` ✅ · dialog centrado X e Y ✅ · `elementFromPoint(centro)` cae **dentro del modal, NO en el iframe** (el centro del viewport está dentro del rect del iframe, antes el iframe ganaba) ✅ · superficie `oklab(… / 0.8)` (glass intacto) ✅.
+- _Screenshots_: glass centrado en **desktop** (1280×800) y **mobile** (375×812) ✅.
+- _Prueba determinística_ sobre un modal **solid** (design system `/admin/_design`): portal→body ✅ · `z 10000` ✅ · viewport completo ✅ · centrado X/Y ✅ · superficie `oklch(0.141 …)` **opaca** (solid intacto) ✅.
+- _No verificado en vivo_: el `escalar-modal` del setter (solid) sólo renderiza en stage CONSTRUCCION y los leads-seed alcanzables estaban en contacto/revisión — es el **mismo** componente compartido con `surface="solid"` (ya probado geométricamente) en un layout **más simple** que el de admin (sin `z-[80]` + iframe, que es el caso difícil y pasó). `tsc --noEmit` y `npm run build` verdes.
 
 ---
 
