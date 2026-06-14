@@ -736,7 +736,7 @@ function DualMetricCard({
         </div>
 
         <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md bg-white/[0.04] text-zinc-400">
-          <Icon className="h-5 w-5" strokeWidth={1.5} />
+          <Icon className="h-5 w-5" strokeWidth={1.5} aria-hidden="true" />
         </div>
       </div>
 
@@ -756,7 +756,7 @@ function DualMetricCard({
       <div className="mt-4 flex items-center justify-between gap-3">
         <p className="min-h-[20px] text-sm text-zinc-400">{subtitle}</p>
         <div className="inline-flex items-center gap-1 text-xs font-medium text-zinc-400">
-          <BarChart3 className="h-3.5 w-3.5" strokeWidth={1.5} />
+          <BarChart3 className="h-3.5 w-3.5" strokeWidth={1.5} aria-hidden="true" />
           <span>Conversión</span>
         </div>
       </div>
@@ -799,7 +799,7 @@ function MemberHoursCard({
         </div>
 
         <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-zinc-200">
-          <CalendarCheck2 className="h-5 w-5" />
+          <CalendarCheck2 className="h-5 w-5" strokeWidth={1.5} aria-hidden="true" />
         </div>
       </div>
 

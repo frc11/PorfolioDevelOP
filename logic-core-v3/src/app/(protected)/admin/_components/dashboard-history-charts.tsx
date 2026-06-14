@@ -66,9 +66,9 @@ const tooltipStyle: CSSProperties = {
 }
 
 function formatCurrency(value: number): string {
-  return `$${new Intl.NumberFormat('es-AR', {
+  return `USD ${new Intl.NumberFormat('es-AR', {
     minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
+    maximumFractionDigits: value < 1000 ? 2 : 0,
   }).format(value)}`
 }
 
@@ -120,7 +120,10 @@ export function DashboardHistoryCharts({
 
   return (
     <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
-      <ChartCard title="Demos enviadas por semana">
+      <ChartCard
+        title="Demos enviadas por semana"
+        summary="Gráfico de barras: demos enviadas por semana en las últimas 8 semanas, con línea de objetivo semanal."
+      >
         {hasDemos ? (
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={demosByWeek} margin={{ top: 8, right: 12, left: -12, bottom: 0 }}>
@@ -156,7 +159,10 @@ export function DashboardHistoryCharts({
         )}
       </ChartCard>
 
-      <ChartCard title="Tasa de cierre por mes">
+      <ChartCard
+        title="Tasa de cierre por mes"
+        summary="Gráfico de línea: tasa de cierre mensual de los últimos 6 meses."
+      >
         {hasCloseData ? (
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={closeRateByMonth} margin={{ top: 8, right: 12, left: -12, bottom: 0 }}>
@@ -195,10 +201,13 @@ export function DashboardHistoryCharts({
         )}
       </ChartCard>
 
-      <ChartCard title="Ingresos mensuales acumulados">
+      <ChartCard
+        title="Ingresos mensuales acumulados"
+        summary="Gráfico de área: ingresos mensuales acumulados de los últimos 6 meses."
+      >
         {hasRevenue ? (
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={revenueByMonth} margin={{ top: 8, right: 12, left: -12, bottom: 0 }}>
+            <AreaChart data={revenueByMonth} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
               <defs>
                 <linearGradient id="osRevenueFill" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" stopColor="#34d399" stopOpacity={0.42} />
@@ -214,6 +223,7 @@ export function DashboardHistoryCharts({
               />
               <YAxis
                 tickFormatter={formatCurrency}
+                width={80}
                 axisLine={false}
                 tickLine={false}
                 tick={{ fill: chartAxisText, fontSize: 12 }}
@@ -238,7 +248,10 @@ export function DashboardHistoryCharts({
         )}
       </ChartCard>
 
-      <ChartCard title="Horas trabajadas por miembro por semana">
+      <ChartCard
+        title="Horas trabajadas por miembro por semana"
+        summary="Gráfico de barras: horas trabajadas por miembro por semana en las últimas 8 semanas."
+      >
         {memberSeries.length ? (
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
