@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useCallback, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { createPortal } from 'react-dom'
 import {
@@ -14,7 +14,6 @@ import {
   type DragEndEvent,
   type DragStartEvent,
 } from '@dnd-kit/core'
-import { sortableKeyboardCoordinates } from '@dnd-kit/sortable'
 import { useReducedMotion } from '@/lib/use-reduced-motion'
 import { useIsClient } from '@/lib/use-is-client'
 import { deleteLead, updateLeadStatus } from '../_actions/lead.actions'
@@ -102,8 +101,10 @@ export function LeadPipeline({ groupedLeads }: LeadPipelineProps) {
     }),
     useSensor(KeyboardSensor, {
       // Space levanta/suelta; Enter queda libre para navegar al detalle (DnD por teclado).
+      // Sin coordinateGetter custom: usamos el default de dnd-kit (paso fijo por flechas +
+      // collision detection) — el de @dnd-kit/sortable NO traversa entre columnas porque la
+      // card es un draggable plano, no un sortable registrado como droppable.
       keyboardCodes: { start: ['Space'], cancel: ['Escape'], end: ['Space'] },
-      coordinateGetter: sortableKeyboardCoordinates,
     }),
   )
 
@@ -168,9 +169,10 @@ export function LeadPipeline({ groupedLeads }: LeadPipelineProps) {
       return
     }
     const lead = active.data.current?.lead as LeadPipelineLead | undefined
-    const targetStatus = over.id as PipelineStatus
+    // Sin cast: el droppable id es un status sólo si matchea ALL_PIPELINE_STATUSES.
+    const targetStatus = ALL_PIPELINE_STATUSES.find((status) => status === over.id)
     // Mover sólo si cambia de columna. Misma columna = no-op (no hay orden persistente).
-    if (lead && lead.status !== targetStatus) {
+    if (lead && targetStatus && lead.status !== targetStatus) {
       handleMoveStatus(lead, targetStatus)
     }
   }
@@ -178,6 +180,8 @@ export function LeadPipeline({ groupedLeads }: LeadPipelineProps) {
   const handleDragCancel = () => {
     setActiveDragLead(null)
   }
+
+  const handleCloseOverview = useCallback(() => setOverviewStatus(null), [])
 
   return (
     <div className="space-y-4">
@@ -216,6 +220,7 @@ export function LeadPipeline({ groupedLeads }: LeadPipelineProps) {
                     isPending={false}
                     onMoveStatus={handleMoveStatus}
                     onDelete={handleDelete}
+                    presentational
                   />
                 ) : null}
               </DragOverlay>,
@@ -230,7 +235,7 @@ export function LeadPipeline({ groupedLeads }: LeadPipelineProps) {
         pendingLeadId={pendingLeadId}
         onMoveStatus={handleMoveStatus}
         onDelete={handleDelete}
-        onClose={() => setOverviewStatus(null)}
+        onClose={handleCloseOverview}
       />
     </div>
   )

@@ -33,6 +33,8 @@ type LeadCardProps = {
   isDragging?: boolean
   dragStyle?: CSSProperties
   onClickCapture?: (event: ReactMouseEvent<HTMLElement>) => void
+  /** Clon no interactivo para el DragOverlay: sin navegación, sin menú, fuera del tab order. */
+  presentational?: boolean
 }
 
 const MOVE_STATUS_OPTIONS: Array<{ label: string; status: PipelineStatus }> = [
@@ -117,6 +119,7 @@ export function LeadCard({
   isDragging = false,
   dragStyle,
   onClickCapture,
+  presentational = false,
 }: LeadCardProps) {
   const router = useRouter()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -138,22 +141,27 @@ export function LeadCard({
         {...dragAttributes}
         {...dragListeners}
         role="button"
-        tabIndex={0}
+        tabIndex={presentational ? -1 : 0}
+        aria-hidden={presentational || undefined}
         style={dragStyle}
         onClickCapture={onClickCapture}
-        onClick={() => router.push(`/admin/leads/${lead.id}`)}
-        onKeyDown={(event) => {
-          // El KeyboardSensor de dnd usa Space para levantar la card; dejamos Enter
-          // libre para navegar al detalle (evita doble acción en el mismo evento).
-          const dragKeyDown = dragListeners?.onKeyDown as
-            | ((event: ReactKeyboardEvent<HTMLElement>) => void)
-            | undefined
-          dragKeyDown?.(event)
-          if (event.key === 'Enter') {
-            event.preventDefault()
-            router.push(`/admin/leads/${lead.id}`)
-          }
-        }}
+        onClick={presentational ? undefined : () => router.push(`/admin/leads/${lead.id}`)}
+        onKeyDown={
+          presentational
+            ? undefined
+            : (event) => {
+                // El KeyboardSensor de dnd usa Space para levantar la card; dejamos Enter
+                // libre para navegar al detalle (evita doble acción en el mismo evento).
+                const dragKeyDown = dragListeners?.onKeyDown as
+                  | ((event: ReactKeyboardEvent<HTMLElement>) => void)
+                  | undefined
+                dragKeyDown?.(event)
+                if (event.key === 'Enter') {
+                  event.preventDefault()
+                  router.push(`/admin/leads/${lead.id}`)
+                }
+              }
+        }
         className={cn(
           'group relative block rounded-[22px] border bg-white/5 p-4 text-left shadow-[0_18px_40px_rgba(0,0,0,0.22)]',
           // Sin transition mientras se arrastra: el transform debe seguir al puntero 1:1.
@@ -180,10 +188,14 @@ export function LeadCard({
             </div>
           </div>
 
+          {presentational ? null : (
           <div className="relative">
             <button
               type="button"
               disabled={isPending}
+              aria-label="Acciones del lead"
+              aria-haspopup="menu"
+              aria-expanded={isMenuOpen}
               onClick={(event) => {
                 event.stopPropagation()
                 setIsMenuOpen((current) => !current)
@@ -242,6 +254,7 @@ export function LeadCard({
               </div>
             ) : null}
           </div>
+          )}
         </div>
 
         <div className="mt-4 flex flex-wrap items-center gap-2">
@@ -293,19 +306,21 @@ export function LeadCard({
         </div>
       </article>
 
-      <ConfirmDialog
-        open={showDeleteDialog}
-        onClose={() => setShowDeleteDialog(false)}
-        onConfirm={() => {
-          setShowDeleteDialog(false)
-          onDelete(lead)
-        }}
-        title="Eliminar lead"
-        description={`Se eliminara "${lead.businessName}" junto con sus actividades y demos.`}
-        confirmLabel="Eliminar lead"
-        variant="danger"
-        isPending={isPending}
-      />
+      {presentational ? null : (
+        <ConfirmDialog
+          open={showDeleteDialog}
+          onClose={() => setShowDeleteDialog(false)}
+          onConfirm={() => {
+            setShowDeleteDialog(false)
+            onDelete(lead)
+          }}
+          title="Eliminar lead"
+          description={`Se eliminara "${lead.businessName}" junto con sus actividades y demos.`}
+          confirmLabel="Eliminar lead"
+          variant="danger"
+          isPending={isPending}
+        />
+      )}
     </>
   )
 }

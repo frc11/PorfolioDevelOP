@@ -34,15 +34,18 @@ export function useScrollFade(
   const { scrollYProgress } = useScroll({ container: containerRef })
 
   const t = useMemo(() => {
-    // Tres mesetas iguales separadas por dos bandas de cross-fade de ancho `fadeBand`.
-    const plateau = (1 - 2 * fadeBand) / 3
+    // Tres mesetas iguales separadas por dos bandas de cross-fade de ancho `band`.
+    // Clamp a [0, 1/3): garantiza meseta > 0 y rangos de useTransform estrictamente
+    // crecientes aunque alguien suba el TUNABLE FADE_BAND fuera de rango.
+    const band = Math.min(Math.max(fadeBand, 0), 1 / 3 - 0.001)
+    const plateau = (1 - 2 * band) / 3
     return {
       g1PlateauEnd: plateau,
-      band1End: plateau + fadeBand,
-      g2PlateauEnd: 2 * plateau + fadeBand,
-      band2End: 2 * plateau + 2 * fadeBand,
-      switch1: plateau + fadeBand / 2,
-      switch2: 2 * plateau + 1.5 * fadeBand,
+      band1End: plateau + band,
+      g2PlateauEnd: 2 * plateau + band,
+      band2End: 2 * plateau + 2 * band,
+      switch1: plateau + band / 2,
+      switch2: 2 * plateau + 1.5 * band,
     }
   }, [fadeBand])
 

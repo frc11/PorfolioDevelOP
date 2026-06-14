@@ -104,7 +104,12 @@ export function PipelineBoard({
   // --- Modo arrastre: grilla plana de las 8 columnas como drop targets, scrolleable. ---
   if (dragging) {
     return (
-      <div className="overflow-x-auto pb-2" style={{ height: STAGE_HEIGHT }}>
+      <div
+        className="overflow-x-auto pb-2"
+        style={{ height: STAGE_HEIGHT }}
+        role="group"
+        aria-label="Columnas del pipeline"
+      >
         <div className="flex h-full min-w-max gap-4">
           {ALL_PIPELINE_STATUSES.map((status) => (
             <DroppableColumn
@@ -130,7 +135,7 @@ export function PipelineBoard({
     <div className="space-y-4">
       <div
         className="flex flex-wrap items-center gap-2"
-        role="tablist"
+        role="group"
         aria-label="Grupos del pipeline"
       >
         {PIPELINE_GROUPS.map((group, index) => {
@@ -139,8 +144,7 @@ export function PipelineBoard({
             <button
               key={group.id}
               type="button"
-              role="tab"
-              aria-selected={isActive}
+              aria-current={isActive ? 'true' : undefined}
               onClick={() => scrollToGroup(index)}
               className={cn(
                 'rounded-full border px-3.5 py-1.5 text-xs font-medium transition-colors',
