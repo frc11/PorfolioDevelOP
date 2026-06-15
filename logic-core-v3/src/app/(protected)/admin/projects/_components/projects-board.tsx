@@ -1,9 +1,12 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
 import { Building2 } from 'lucide-react'
+import type { ProjectStatus } from '@prisma/client'
+import { updateProjectStatus } from '../_actions/project.actions'
 import { ProjectForm } from './project-form'
-import { ProjectList, type ProjectListItem } from './project-list'
+import { ProjectList, type ProjectDnd, type ProjectListItem } from './project-list'
 import { ProjectsFilterBar } from './projects-filter-bar'
 import { DEFAULT_FILTERS, filterProjects, type ProjectFilters } from './projects-filters'
 
@@ -26,18 +29,80 @@ type ProjectsBoardProps = {
  * completa, nunca sobre la filtrada, para que no salten al cambiar filtros.
  */
 export function ProjectsBoard({ projects, organizations, errorMessage }: ProjectsBoardProps) {
+  const router = useRouter()
   const [filters, setFilters] = useState<ProjectFilters>(DEFAULT_FILTERS)
 
+  // Espejo optimista de la lista del server para el DnD; se re-sincroniza tras
+  // cada router.refresh (mismo patrón que task-list).
+  const [localProjects, setLocalProjects] = useState<ProjectListItem[]>(projects)
+  const [draggingId, setDraggingId] = useState<string | null>(null)
+  const [dragOverStatus, setDragOverStatus] = useState<ProjectStatus | null>(null)
+  const [dndError, setDndError] = useState<string | null>(null)
+  const [, startTransition] = useTransition()
+
+  useEffect(() => {
+    setLocalProjects(projects)
+  }, [projects])
+
   const filteredProjects = useMemo(
-    () => filterProjects(projects, filters),
-    [projects, filters]
+    () => filterProjects(localProjects, filters),
+    [localProjects, filters]
   )
 
   const clientCount = useMemo(
-    () => projects.filter((project) => project.organizationId !== null).length,
-    [projects]
+    () => localProjects.filter((project) => project.organizationId !== null).length,
+    [localProjects]
   )
-  const internalCount = projects.length - clientCount
+  const internalCount = localProjects.length - clientCount
+
+  const handleDropOnStatus = (status: ProjectStatus) => {
+    const projectId = draggingId
+    setDraggingId(null)
+    setDragOverStatus(null)
+
+    if (!projectId) {
+      return
+    }
+
+    const project = localProjects.find((item) => item.id === projectId)
+    if (!project || project.status === status) {
+      return
+    }
+
+    const previousProjects = localProjects
+    setDndError(null)
+    // Optimista: COMPLETED sella deliveredAt en el server; acá sólo se mueve el
+    // estado y el refresh reconcilia el resto.
+    setLocalProjects((current) =>
+      current.map((item) => (item.id === projectId ? { ...item, status } : item))
+    )
+
+    startTransition(async () => {
+      const result = await updateProjectStatus({ projectId, status })
+
+      if (!result.success) {
+        setLocalProjects(previousProjects)
+        setDndError(result.error)
+        return
+      }
+
+      router.refresh()
+    })
+  }
+
+  const dnd: ProjectDnd = {
+    draggingId,
+    dragOverStatus,
+    onCardDragStart: (project) => setDraggingId(project.id),
+    onCardDragEnd: () => {
+      setDraggingId(null)
+      setDragOverStatus(null)
+    },
+    onSectionDragOver: (status) => setDragOverStatus(status),
+    onSectionDragLeave: (status) =>
+      setDragOverStatus((current) => (current === status ? null : current)),
+    onSectionDrop: handleDropOnStatus,
+  }
 
   const isDefault =
     filters.service === DEFAULT_FILTERS.service &&
@@ -89,13 +154,13 @@ export function ProjectsBoard({ projects, organizations, errorMessage }: Project
         </div>
       </div>
 
-      {errorMessage ? (
+      {(errorMessage ?? dndError) ? (
         <div className="rounded-[28px] border border-rose-400/20 bg-rose-500/10 p-5 text-sm text-rose-200">
-          {errorMessage}
+          {errorMessage ?? dndError}
         </div>
       ) : null}
 
-      <ProjectList projects={filteredProjects} />
+      <ProjectList projects={filteredProjects} dnd={dnd} />
     </section>
   )
 }

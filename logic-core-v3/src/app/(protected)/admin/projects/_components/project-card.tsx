@@ -135,6 +135,9 @@ export function ProjectCard({ project }: ProjectCardProps) {
   return (
     <Link
       href={`/admin/projects/${project.id}`}
+      // El drag entre estados lo maneja el wrapper de project-list; el ancla no
+      // debe iniciar su propio drag (arrastraría la URL) ni competir con él.
+      draggable={false}
       className="group flex h-full w-full flex-col rounded-[26px] border border-white/10 bg-white/5 p-5 shadow-[0_20px_45px_rgba(0,0,0,0.22)] backdrop-blur-xl transition-all hover:border-cyan-400/20 hover:bg-white/[0.07]"
     >
       <div className="flex flex-wrap items-start justify-between gap-3">
