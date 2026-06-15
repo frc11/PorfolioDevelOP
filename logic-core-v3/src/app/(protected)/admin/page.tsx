@@ -545,7 +545,7 @@ export default async function AgencyOsPage() {
 
   return (
     <section className="space-y-8">
-      <div className="rounded-[28px] border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
+      <div className="rounded-[28px] border border-white/10 bg-white/5 p-5 backdrop-blur-xl dash-reveal">
         <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
           <div>
             <p className="text-xs tracking-tight text-zinc-500">
@@ -566,7 +566,7 @@ export default async function AgencyOsPage() {
         </div>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-4 dash-reveal" style={{ animationDelay: '0.06s' }}>
         <SectionHeader
           title="KPIs comerciales"
           description="Datos del panel para velocidad de venta, seguimiento y conversión."
@@ -615,7 +615,7 @@ export default async function AgencyOsPage() {
         </div>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-4 dash-reveal" style={{ animationDelay: '0.12s' }}>
         <SectionHeader
           title="KPIs operativos"
           description="Salud del portal de clientes, soporte y delivery sobre los modelos base del SaaS."
@@ -665,7 +665,7 @@ export default async function AgencyOsPage() {
         </div>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-4 dash-reveal" style={{ animationDelay: '0.18s' }}>
         <SectionHeader
           title="Ingresos y financiero"
           description="Cruza revenue comprometido, mantenimiento cobrado y esfuerzo real del equipo."
@@ -701,7 +701,7 @@ export default async function AgencyOsPage() {
         </div>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-4 dash-reveal" style={{ animationDelay: '0.24s' }}>
         <SectionHeader
           title="Tendencias últimas semanas y meses"
           description="Series históricas para demos, cierre, revenue acumulado y capacidad del equipo."
@@ -715,6 +715,8 @@ export default async function AgencyOsPage() {
           memberSeries={memberSeries}
         />
       </div>
+
+      <style>{`@keyframes dashReveal{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}.dash-reveal{animation:dashReveal .4s cubic-bezier(0.25,0.46,0.45,0.94) backwards}@media (prefers-reduced-motion:reduce){.dash-reveal{animation:none}}`}</style>
     </section>
   )
 }
