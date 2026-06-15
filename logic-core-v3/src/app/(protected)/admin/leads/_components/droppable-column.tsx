@@ -10,7 +10,6 @@ type DroppableColumnProps = {
   leads: LeadPipelineLead[]
   pendingLeadId: string | null
   bodyMaxHeight: number
-  width?: number
   onMoveStatus: (lead: LeadPipelineLead, status: PipelineStatus) => void
   onDelete: (lead: LeadPipelineLead) => void
   onOpenOverview?: (status: PipelineStatus) => void

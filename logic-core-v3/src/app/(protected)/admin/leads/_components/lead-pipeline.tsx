@@ -204,8 +204,6 @@ export function LeadPipeline({ groupedLeads }: LeadPipelineProps) {
         <PipelineBoard
           groupedLeads={localGroupedLeads}
           pendingLeadId={pendingLeadId}
-          reduced={reduced}
-          dragging={activeDragLead !== null}
           onMoveStatus={handleMoveStatus}
           onDelete={handleDelete}
           onOpenOverview={setOverviewStatus}

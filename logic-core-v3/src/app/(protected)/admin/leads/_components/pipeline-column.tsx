@@ -24,17 +24,16 @@ type PipelineColumnProps = {
   onOpenOverview?: (status: PipelineStatus) => void
   /** Render de cada card (Bloque 3: inyecta la versión draggable). Default: LeadCard. */
   renderCard?: (lead: LeadPipelineLead) => ReactNode
-  /** Ref del droppable de dnd-kit (Bloque 3). Sin él, la columna no es drop target. */
+  /** Ref del droppable de dnd-kit. Sin él, la columna no es drop target. */
   dropRef?: (element: HTMLElement | null) => void
-  /** La card arrastrada está sobre esta columna (Bloque 3) → highlight. */
+  /** La card arrastrada está sobre esta columna → highlight. */
   isOver?: boolean
-  /** Ancho fijo (px) para la grilla plana del modo arrastre. Sin él, fluido (flex-1). */
-  width?: number
 }
 
 /**
  * Columna presentacional del pipeline: header (tono + label + count) + cuerpo con
- * scroll interno. No conoce ni el fade ni el DnD; el padre los compone alrededor.
+ * scroll interno. Fluida (llena su celda de la grilla). No conoce el DnD; el padre
+ * lo compone alrededor.
  */
 export function PipelineColumn({
   status,
@@ -47,15 +46,12 @@ export function PipelineColumn({
   renderCard,
   dropRef,
   isOver = false,
-  width,
 }: PipelineColumnProps) {
   return (
     <section
       ref={dropRef}
-      style={width ? { width } : undefined}
       className={cn(
-        'flex h-full flex-col rounded-[26px] border bg-white/[0.04] p-4 backdrop-blur-xl transition-colors',
-        width ? 'shrink-0' : 'min-w-0 flex-1',
+        'flex h-full min-w-0 flex-col rounded-[26px] border bg-white/[0.04] p-4 backdrop-blur-xl transition-colors',
         isOver ? 'border-cyan-400/40 bg-cyan-400/[0.06]' : 'border-white/10',
       )}
     >
