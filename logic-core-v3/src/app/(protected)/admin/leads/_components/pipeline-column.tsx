@@ -11,10 +11,17 @@ import {
   type PipelineStatus,
 } from './lead-pipeline.shared'
 
+// === TUNABLES (calibrá por ojo) ===
+const COLUMN_FADE_HEIGHT = 48 // alto del desvanecimiento inferior del cuerpo (px)
+
+// El cuerpo NO scrollea (la rueda siempre scrollea la página); muestra ~3 cards y la
+// última se desvanece con mask-image. Para ver todos los leads → overview (click header).
+const COLUMN_BODY_FADE = `linear-gradient(to bottom, #000 calc(100% - ${COLUMN_FADE_HEIGHT}px), transparent)`
+
 type PipelineColumnProps = {
   status: PipelineStatus
   leads: LeadPipelineLead[]
-  /** Alto máx del cuerpo scrolleable (px). TUNABLE provisto por el padre. */
+  /** Alto fijo del cuerpo (px) — sin scroll interno. TUNABLE provisto por el padre. */
   bodyMaxHeight: number
   /** Click en el header → abre la vista fullscreen de la columna. */
   onOpenOverview?: (status: PipelineStatus) => void
@@ -72,8 +79,14 @@ export function PipelineColumn({
       </button>
 
       <div
-        className="mt-4 flex-1 space-y-3 overflow-y-auto pr-1"
-        style={{ maxHeight: bodyMaxHeight }}
+        // Altura FIJA + overflow-hidden: sin scroll interno → la rueda scrollea la página.
+        // px-2/py-1 dan aire para que el hover:scale de la card no se recorte contra el clip.
+        className="mt-4 space-y-3 overflow-hidden px-2 py-1"
+        style={{
+          height: bodyMaxHeight,
+          maskImage: COLUMN_BODY_FADE,
+          WebkitMaskImage: COLUMN_BODY_FADE,
+        }}
       >
         {leads.length > 0 ? (
           leads.map((lead) => renderCard(lead))
