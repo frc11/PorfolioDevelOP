@@ -544,7 +544,7 @@ export default async function AgencyOsPage() {
   const averageHourlyValue = monthHoursTotal > 0 ? monthlyRevenue / monthHoursTotal : 0
 
   return (
-    <section className="space-y-8">
+    <section className="space-y-10">
       <div className="rounded-[28px] border border-white/10 bg-white/5 p-5 backdrop-blur-xl dash-reveal">
         <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
           <div>
@@ -735,7 +735,7 @@ function SectionHeader({
   return (
     <div>
       <h3 className="text-2xl font-medium tracking-tight text-white">{title}</h3>
-      <p className="mt-2 max-w-3xl text-sm leading-6 text-zinc-400">{description}</p>
+      <p className="mt-2 max-w-3xl text-sm leading-6 text-zinc-500">{description}</p>
     </div>
   )
 }
@@ -774,12 +774,12 @@ function DualMetricCard({
       </div>
 
       <div className="mt-4 grid gap-3 sm:grid-cols-2">
-        <div className="rounded-md border border-white/10 bg-black/20 px-4 py-4">
+        <div className="rounded-xl border border-white/10 bg-black/20 px-4 py-4">
           <p className="text-xs tracking-tight text-zinc-500">{primaryLabel}</p>
           <p className="mt-2 text-3xl font-medium tracking-tight text-white">{primaryValue}</p>
           <p className="mt-1.5 text-[11px] leading-snug text-zinc-500">{primaryHint}</p>
         </div>
-        <div className="rounded-md border border-white/10 bg-black/20 px-4 py-4">
+        <div className="rounded-xl border border-white/10 bg-black/20 px-4 py-4">
           <p className="text-xs tracking-tight text-zinc-500">{secondaryLabel}</p>
           <p className="mt-2 text-3xl font-medium tracking-tight text-white">{secondaryValue}</p>
           <p className="mt-1.5 text-[11px] leading-snug text-zinc-500">{secondaryHint}</p>
