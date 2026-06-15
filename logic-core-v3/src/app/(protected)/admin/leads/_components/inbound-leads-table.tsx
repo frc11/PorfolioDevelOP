@@ -103,7 +103,7 @@ export function InboundLeadsTable({ leads }: InboundLeadsTableProps) {
   }
 
   return (
-    <Card padding="none" className="rounded-[28px] bg-white/5 backdrop-blur-xl">
+    <Card padding="none" className="overflow-hidden rounded-[28px] bg-white/5 backdrop-blur-xl">
       <div className="border-b border-white/10 px-5 py-4">
         <p className="text-[10px] uppercase tracking-[0.24em] text-zinc-500">
           Leads inbound
