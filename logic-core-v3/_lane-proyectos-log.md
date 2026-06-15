@@ -108,3 +108,31 @@ Estado: **A–H implementados y commiteados** (8 commits, uno por cambio). Gate 
 Rutas a revisar en `:3000`: `/admin/projects` (filtros client-side + dropdown período + secciones con scroll horizontal + DnD de cards entre estados), `/admin/projects/[id]` overview (cards parejas), `/admin/projects/[id]/tasks` (tacho directo, borrar por OverlayModal, drag de card entera).
 
 PENDIENTE de coordinación que sigue abierto: borrar **registro de horas** en `time-entry-panel.tsx` aún usa `ConfirmDialog` (prohibido) — mismo trap; CAMBIO F sólo migró tareas. Freeze post-impersonación (#4) sin cambios (out-of-scope).
+
+---
+
+# Sprint C — Dropdown período, filtro por fecha de inicio, scroll/wrap, layout cards, overview 50/50 (CAMBIO 1–7)
+
+## FASE 0 — Hallazgos
+
+1. **Form de proyecto NO tiene input de fecha de inicio.** Campos del form: organización, nombre, descripción, servicio, **estimatedEndDate**, agreedAmount, monthlyRate. NINGÚN start.
+2. **🚨 `Project` NO tiene columna de fecha de inicio.** Schema (FROZEN) sólo tiene `maintenanceStartDate`, `deliveredAt`, `estimatedEndDate` (líneas 489-510). El "Inicio" de la card es **DERIVADO** (`deriveProjectStartDate` = min de osLead.createdAt, milestones.createdAt, timeEntries, maintenancePayments). → La premisa del brief ("la columna sigue nullable") es incorrecta: **no existe ninguna columna**. Filtrar/editar/backfillear una fecha de inicio REAL requiere agregar `startDate DateTime?` a `Project` (schema PROHIBIDO).
+3. **Filtro de período hoy** usa `lastActivityAt` (derivado max), comparación en `projects-filters.ts:matchesPeriod`. (El brief dice "updatedAt" pero no existe en Project; era lastActivityAt.)
+4. **Scroll horizontal:** el row ya trae `overflow-x-auto min-w-0 max-w-full` (Sprint B). El scrollbar aparece pero la **rueda vertical no panea horizontal** (comportamiento nativo) → se percibe "no scrollea". El brief pre-aprueba fallback **WRAP**.
+5. **OverlayModal sirve** para borrado de horas (mismo patrón F). `time-entry-panel.tsx:408-423` usa `ConfirmDialog` (prohibido).
+6. **Dropdown servicio (referencia):** es el `<Select>` compartido, **PORTALEADO a `document.body`** → su panel `bg-zinc-900/95` queda sobre el bg sólido del root → sólido. Mi dropdown de período es `absolute` DENTRO del `<main>`/header (translúcidos con backdrop-blur) → su `bg-[#11161d]/95 backdrop-blur` deja pasar el fondo (el "0"). Fix in-scope: **panel opaco** (`bg-zinc-900`, sin /95 ni backdrop-blur), radio/borde/ítems igual al Select.
+
+## Decisiones por cambio
+
+- **1:** panel del dropdown de período opaco (`bg-zinc-900`), `rounded-xl`, ítems con activo cyan como el `<Select>`. Adiós bleed.
+- **2:** el filtro pasa de `lastActivityAt` → `startDate` (derivado, ya en el item). `startDate` nulo → **EXCLUIDO** de los filtros de fecha (return false). Rango custom inclusivo con bordes de día LOCAL consistentes (sin mezclar UTC/local). Default `1m` → **`6m`**. **Forward-compatible:** cuando exista `Project.startDate`, el serializer hace `project.startDate ?? deriveProjectStartDate(project)` y el filtro no cambia.
+- **3:** ⛔ **PENDIENTE DE COORDINACIÓN** — no hay columna para persistir. Agregar input + Zod required sin columna guardaría un "required" que el server descarta (engañoso). Reporto el diff de schema + el wiring.
+- **4:** **WRAP** (no scroll). Motivo: rueda vertical no panea overflow-x nativo; el scrollbar-only es frágil. `flex flex-wrap` → cards a 2º/3º renglón, ninguna cortada (acepta opción 2 del brief). Pre-aprobado.
+- **5:** card de proyecto — los 3 datos (Monto/Inicio/Pagos) pasan de `sm:grid-cols-3` (3 columnas cramped en 340px → precio cortado) a **3 filas verticales** full-width; badge "Cliente portal"/"Interno" a su **propio renglón** (2º), siempre.
+- **6:** borrado de horas → `OverlayModal` (igual que F). No se toca `ConfirmDialog`. → **cierra el PENDIENTE #1** (tareas + horas migradas; queda sólo el `confirm-dialog.tsx` compartido para otros lanes).
+- **7:** overview top-level → fila1 Resumen 50% + Tareas 50% (`lg:grid-cols-2 lg:items-stretch`, `h-full`, Tareas distribuye con `auto-rows-fr`), fila2 Finanzas 100%. Las cards internas de Resumen NO se tocan.
+
+## Flags / coordinación (Sprint C)
+
+- **CAMBIO 3 + TAREA DE DATOS + "filtro por fecha real":** todo depende de agregar `startDate DateTime?` a `Project` (schema PROHIBIDO en este lane). Diff: `startDate DateTime?` en `model Project`. Después: (a) serializer `startDate: serializeDate(project.startDate ?? deriveProjectStartDate(project))`; (b) form input `type=date` required (Zod client+server, `CreateProjectSchema.startDate: z.coerce.date()`); (c) `createProject`/`updateProject` setean `startDate`; (d) correr el script de backfill (provisto en el reporte). NOT NULL en DB = paso aparte después del backfill.
+- **CAMBIO 2 hoy filtra el `startDate` DERIVADO** (no editable). Demuestra la aceptación con la data actual, pero el script/form recién conectan cuando exista la columna.
