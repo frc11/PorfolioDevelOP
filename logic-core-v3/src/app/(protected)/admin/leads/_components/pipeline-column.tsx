@@ -50,7 +50,9 @@ export function PipelineColumn({
   isOver = false,
 }: PipelineColumnProps) {
   const visibleLeads = leads.slice(0, MAX_VISIBLE_CARDS)
-  const hasOverflow = leads.length > MAX_VISIBLE_CARDS
+  // Fade siempre que haya cards: suaviza cualquier corte por el alto fijo (no solo cuando
+  // sobran del slice) y NO se aplica sobre el EmptyState. Sólo afecta lo que llega al fondo.
+  const showFade = leads.length > 0
 
   return (
     <section
@@ -90,7 +92,7 @@ export function PipelineColumn({
         className="mt-4 space-y-3 overflow-hidden px-2 py-1"
         style={{
           height: bodyMaxHeight,
-          ...(hasOverflow
+          ...(showFade
             ? { maskImage: COLUMN_BODY_FADE, WebkitMaskImage: COLUMN_BODY_FADE }
             : null),
         }}
