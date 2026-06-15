@@ -86,13 +86,14 @@ export function LeadCard({
         }
         className={cn(
           'group relative block rounded-[22px] border bg-white/5 p-4 text-left shadow-[0_18px_40px_rgba(0,0,0,0.22)]',
-          // Sin transition mientras se arrastra: el transform debe seguir al puntero 1:1.
-          isDragging
-            ? 'cursor-grabbing border-cyan-400/30'
-            : cn(
-                'border-white/10 transition-all hover:border-cyan-400/20 hover:bg-white/[0.07]',
-                isDraggable && 'cursor-grab',
-              ),
+          isDragging ? 'cursor-grabbing border-cyan-400/30' : 'border-white/10',
+          // Hover marcado (scale-up leve) SOLO en cards reales: ni el clon del DragOverlay
+          // (presentational) ni la card que se arrastra (isDragging) escalan, para no pelear
+          // con el transform de @dnd-kit. reduced-motion: sin escala.
+          !presentational &&
+            !isDragging &&
+            'transition-all hover:scale-[1.02] hover:border-cyan-400/20 hover:bg-white/[0.07] motion-reduce:hover:scale-100',
+          !presentational && !isDragging && isDraggable && 'cursor-grab',
         )}
       >
         <div className="flex items-start justify-between gap-3">
