@@ -8,7 +8,7 @@ import { LeadActivityFeed } from '../_components/lead-activity-feed'
 import { LeadDemosPanel } from '../_components/demo-form'
 import { AssignSetterControl } from '../_components/assign-setter-control'
 import { ReunionPanel } from '../_components/reunion-panel'
-import { updateLeadStatus } from '../_actions/lead.actions'
+import { ChangeStatusSelect } from '../_components/change-status-select'
 
 type LeadPageProps = {
   params: Promise<{
@@ -168,17 +168,6 @@ function serializeDemos(lead: LeadRecord) {
   }))
 }
 
-const STATUS_OPTIONS: LeadStatus[] = [
-  'PROSPECTO',
-  'DEMO_ENVIADA',
-  'VIO_VIDEO',
-  'RESPONDIO',
-  'CALL_AGENDADA',
-  'CERRADO',
-  'PERDIDO',
-  'POSTERGADO',
-]
-
 export default async function AgencyOsLeadDetailPage({ params }: LeadPageProps) {
   const { leadId } = await params
 
@@ -273,37 +262,7 @@ export default async function AgencyOsLeadDetailPage({ params }: LeadPageProps) 
           <div className="flex flex-wrap items-center gap-3">
             <LeadForm lead={buildLeadFormData(lead)} triggerLabel="Editar" />
 
-            <details className="relative">
-              <summary className="list-none rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-zinc-200 transition-colors hover:bg-black/30">
-                Cambiar estado
-              </summary>
-
-              <div className="absolute right-0 top-14 z-20 min-w-[220px] rounded-2xl border border-white/10 bg-[#11161d]/95 p-2 shadow-2xl backdrop-blur-xl">
-                {STATUS_OPTIONS.filter((status) => status !== lead.status).map((status) => (
-                  <form
-                    key={status}
-                    action={async () => {
-                      'use server'
-                      await updateLeadStatus({
-                        leadId: lead.id,
-                        status,
-                        reactivateAt:
-                          status === 'POSTERGADO'
-                            ? new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
-                            : undefined,
-                      })
-                    }}
-                  >
-                    <button
-                      type="submit"
-                      className="flex w-full rounded-xl px-3 py-2 text-left text-sm text-zinc-200 transition-colors hover:bg-white/5"
-                    >
-                      {statusLabel(status)}
-                    </button>
-                  </form>
-                ))}
-              </div>
-            </details>
+            <ChangeStatusSelect leadId={lead.id} status={lead.status} />
 
             {canConvertToProject ? (
               <button
