@@ -41,7 +41,7 @@ export function ProjectList({ projects }: ProjectListProps) {
 
             {sectionProjects.length > 0 ? (
               <motion.div
-                className="mt-5 flex gap-4 overflow-x-auto pb-2"
+                className="mt-5 flex min-w-0 max-w-full items-stretch gap-4 overflow-x-auto overflow-y-hidden pb-2"
                 variants={staggerContainer}
                 initial={reduce ? false : 'hidden'}
                 animate="visible"
@@ -50,7 +50,7 @@ export function ProjectList({ projects }: ProjectListProps) {
                   <motion.div
                     key={project.id}
                     variants={staggerItem}
-                    className="w-[340px] shrink-0"
+                    className="flex w-[340px] shrink-0"
                   >
                     <ProjectCard project={project} />
                   </motion.div>

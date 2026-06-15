@@ -135,7 +135,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
   return (
     <Link
       href={`/admin/projects/${project.id}`}
-      className="group block rounded-[26px] border border-white/10 bg-white/5 p-5 shadow-[0_20px_45px_rgba(0,0,0,0.22)] backdrop-blur-xl transition-all hover:border-cyan-400/20 hover:bg-white/[0.07]"
+      className="group flex h-full w-full flex-col rounded-[26px] border border-white/10 bg-white/5 p-5 shadow-[0_20px_45px_rgba(0,0,0,0.22)] backdrop-blur-xl transition-all hover:border-cyan-400/20 hover:bg-white/[0.07]"
     >
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
@@ -202,7 +202,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
         </div>
       </div>
 
-      <div className="mt-5 rounded-2xl border border-white/10 bg-black/20 p-4">
+      <div className="mt-auto rounded-2xl border border-white/10 bg-black/20 p-4">
         <div className="flex items-center justify-between gap-3 text-sm">
           <div className="flex items-center gap-2 text-zinc-200">
             <FolderKanban className="h-4 w-4 text-zinc-500" />
