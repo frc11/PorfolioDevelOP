@@ -11,7 +11,6 @@ import {
   FolderKanban,
   GripVertical,
   LoaderCircle,
-  MoreHorizontal,
   Send,
   Trash2,
 } from 'lucide-react'
@@ -165,7 +164,6 @@ export function TaskList({
 }: TaskListProps) {
   const router = useRouter()
   const [expandedTaskId, setExpandedTaskId] = useState<string | null>(null)
-  const [openMenuTaskId, setOpenMenuTaskId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [pendingTaskId, setPendingTaskId] = useState<string | null>(null)
   const [taskToDelete, setTaskToDelete] = useState<TaskListItem | null>(null)
@@ -190,7 +188,6 @@ export function TaskList({
   const handleQuickStatusChange = (taskId: string, status: TaskStatus) => {
     const previousTasks = localTasks
     setError(null)
-    setOpenMenuTaskId(null)
     setPendingTaskId(taskId)
     setLocalTasks((current) =>
       current.map((task) => (task.id === taskId ? { ...task, status } : task))
@@ -236,7 +233,6 @@ export function TaskList({
     setError(null)
     setPendingTaskId(task.id)
     setTaskToDelete(null)
-    setOpenMenuTaskId(null)
     setLocalTasks((current) => current.filter((item) => item.id !== task.id))
 
     startTransition(async () => {
@@ -461,63 +457,19 @@ export function TaskList({
                             triggerLabel="Editar"
                           />
 
-                          <div className="relative">
-                            <button
-                              type="button"
-                              disabled={isPending}
-                              onClick={() =>
-                                setOpenMenuTaskId((current) => (current === task.id ? null : task.id))
-                              }
-                              aria-label="Abrir menú de la tarea"
-                              aria-haspopup="menu"
-                              aria-expanded={openMenuTaskId === task.id}
-                              className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/5 text-zinc-300 transition-colors hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-60"
-                            >
-                              {isPending ? (
-                                <LoaderCircle className="h-4 w-4 animate-spin" />
-                              ) : (
-                                <MoreHorizontal className="h-4 w-4" />
-                              )}
-                            </button>
-
-                            {openMenuTaskId === task.id ? (
-                              <div className="absolute right-0 top-12 z-20 min-w-[190px] rounded-2xl border border-white/10 bg-[#11161d]/95 p-2 shadow-2xl backdrop-blur-xl">
-                                <p className="px-3 pb-1 pt-1.5 text-[10px] uppercase tracking-[0.18em] text-zinc-500">
-                                  Cambiar estado
-                                </p>
-                                {GROUPS.filter((group) => group.status !== task.status).map(
-                                  (group) => (
-                                    <button
-                                      key={group.status}
-                                      type="button"
-                                      disabled={isPending}
-                                      onClick={() => handleQuickStatusChange(task.id, group.status)}
-                                      className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm text-zinc-200 transition-colors hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-60"
-                                    >
-                                      <span
-                                        className={[
-                                          'inline-flex rounded-full border px-2 py-0.5 text-[10px] font-medium',
-                                          statusTone(group.status),
-                                        ].join(' ')}
-                                      >
-                                        {group.label}
-                                      </span>
-                                    </button>
-                                  )
-                                )}
-                                <div className="my-1 h-px bg-white/10" />
-                                <button
-                                  type="button"
-                                  disabled={isPending}
-                                  onClick={() => setTaskToDelete(task)}
-                                  className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm text-rose-300 transition-colors hover:bg-rose-500/10 disabled:cursor-not-allowed disabled:opacity-60"
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                  Eliminar
-                                </button>
-                              </div>
-                            ) : null}
-                          </div>
+                          <button
+                            type="button"
+                            disabled={isPending}
+                            onClick={() => setTaskToDelete(task)}
+                            aria-label={`Eliminar tarea ${task.title}`}
+                            className="flex h-10 w-10 items-center justify-center rounded-full border border-rose-400/20 bg-rose-500/10 text-rose-300 transition-colors hover:bg-rose-500/15 disabled:cursor-not-allowed disabled:opacity-60"
+                          >
+                            {isPending ? (
+                              <LoaderCircle className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <Trash2 className="h-4 w-4" strokeWidth={1.5} />
+                            )}
+                          </button>
                         </div>
                       </div>
 
