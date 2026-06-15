@@ -136,3 +136,13 @@ PENDIENTE de coordinación que sigue abierto: borrar **registro de horas** en `t
 
 - **CAMBIO 3 + TAREA DE DATOS + "filtro por fecha real":** todo depende de agregar `startDate DateTime?` a `Project` (schema PROHIBIDO en este lane). Diff: `startDate DateTime?` en `model Project`. Después: (a) serializer `startDate: serializeDate(project.startDate ?? deriveProjectStartDate(project))`; (b) form input `type=date` required (Zod client+server, `CreateProjectSchema.startDate: z.coerce.date()`); (c) `createProject`/`updateProject` setean `startDate`; (d) correr el script de backfill (provisto en el reporte). NOT NULL en DB = paso aparte después del backfill.
 - **CAMBIO 2 hoy filtra el `startDate` DERIVADO** (no editable). Demuestra la aceptación con la data actual, pero el script/form recién conectan cuando exista la columna.
+
+## Cierre Sprint C
+
+Estado: **1, 2, 4, 5, 6, 7 implementados y commiteados** (gate por cambio: eslint por archivo + `tsc --noEmit` de todo el proyecto = verde). **CAMBIO 3 = PENDIENTE DE COORDINACIÓN** (no hay columna `Project.startDate` para persistir; agregar un input "required" que el server descarta sería engañoso). `prisma migrate status` quedó verde en Sprint B; `npm run build` no se corre acá (lock de `.next` del dev server en `:3000` + OOM del host) → verificación runtime del humano en `:3000`.
+
+PENDIENTE DE COORDINACIÓN (Sprint C):
+1. **`Project.startDate DateTime?` (schema).** Habilita CAMBIO 3 (form required + persistir), el filtro por fecha REAL (serializer pasa a `project.startDate ?? deriveProjectStartDate(project)`) y el backfill. NOT NULL en DB = paso posterior al backfill.
+2. **Script de backfill** (one-off, NO commiteado) — entregado en el reporte; corre recién con la columna.
+
+CAMBIO F+6 cerraron el uso de `ConfirmDialog` en el lane (tareas + horas migradas a `OverlayModal`). `confirm-dialog.tsx` sigue prohibido/compartido para otros lanes.
