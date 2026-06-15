@@ -97,3 +97,14 @@ Branch `lane/proyectos`. Workflow FASE 0 = 5 subagentes read-only (status-action
 - A: filtros sin estado en URL (back-button/deeplink ya no reflejan filtro). Confirmar que es aceptable.
 - E/G: cambio de estado de tarea SOLO por drag → sin camino teclado/mobile (decisión explícita del humano). a11y reducida asumida.
 - D: arrastrar a "Completado" sella `deliveredAt`; sacar de Completado NO lo limpia (la action sólo setea). Comportamiento heredado.
+- B: el panel del dropdown de período se posiciona `absolute` (no portaleado). En la barra arriba de la página no lo recorta el scroll de `<main>`; si en mobile/scroll se viera cortado, portalear como `<Select>`.
+
+## Cierre Sprint B
+
+Estado: **A–H implementados y commiteados** (8 commits, uno por cambio). Gate por cambio: `eslint` por archivo + `tsc --noEmit` de todo el proyecto = **verde** en cada commit. `prisma migrate status` = "Database schema is up to date!".
+
+**Build full no se pudo correr acá:** `next build` aborta porque el `next dev` del usuario en `:3000` tiene tomado el lock de `.next` (Next 16) — exit 9 ni bien arranca, antes de compilar archivos del lane; el único intento que esquivó el lock se quedó sin heap (OOM, memoria del host). No es regresión de código (tsc/eslint verdes, sin imports colgados de los archivos borrados). **Verificación runtime del humano sobre `:3000`** (HMR levanta los cambios commiteados). Visual-qa subagente NO corrido (no puede levantar un 2º dev server por el lock; memoria `preview-mcp-untracked`).
+
+Rutas a revisar en `:3000`: `/admin/projects` (filtros client-side + dropdown período + secciones con scroll horizontal + DnD de cards entre estados), `/admin/projects/[id]` overview (cards parejas), `/admin/projects/[id]/tasks` (tacho directo, borrar por OverlayModal, drag de card entera).
+
+PENDIENTE de coordinación que sigue abierto: borrar **registro de horas** en `time-entry-panel.tsx` aún usa `ConfirmDialog` (prohibido) — mismo trap; CAMBIO F sólo migró tareas. Freeze post-impersonación (#4) sin cambios (out-of-scope).
