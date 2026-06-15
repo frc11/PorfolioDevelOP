@@ -166,3 +166,14 @@ NOTA: "fecha de inicio obligatoria" CANCELADO → se cae la coordinación de `Pr
 - **2:** `min-w-[180px]` al select de servicio (y min-w a los dropdowns de fecha) para que no se achiquen con valores cortos.
 - **3:** card — tile "Entrega estimada" debajo de "Inicio" (orden Monto/Inicio/Entrega/Pagos); gaps uniformes (gap-4 entre tiles + mt-4 al footer, se saca `mt-auto` que dejaba Pagos pegado al footer en la card más alta).
 - **4:** `project-list.tsx` — el carril de cada sección con `max-h-[Nrem]` (constante calibrable) + `overflow-y-auto overflow-x-hidden`: ~2 renglones visibles, el resto scrollea vertical (la rueda sí panea).
+
+## Cierre Sprint D
+
+Estado: **1, 2, 3, 4 implementados y commiteados** (gate por cambio: eslint por archivo + `tsc --noEmit` de todo el proyecto = verde; sweep final verde). `npm run build` no se corre acá (lock de `.next` del dev server en `:3000`) → verificación runtime del humano en `:3000`.
+
+Notas para calibrar/verificar:
+- **CAMBIO 1:** el filtro de **entrega** es sobre `estimatedEndDate` (columna real); el de **inicio** sigue sobre el `startDate` DERIVADO (la obligatoriedad/columna quedó cancelada). "Reestablecer filtros" aparece cuando algo está fuera del default.
+- **CAMBIO 4:** `SECTION_MAX_HEIGHT = 'max-h-[48rem]'` en `project-list.tsx` — las cards quedaron altas (4 tiles + footer), así que ~2 renglones reales ≈ 70rem; 48rem es un cap más compacto. **Subir/bajar ese rem ajusta el umbral** (está aislado en una constante).
+
+PENDIENTE DE COORDINACIÓN (consolidado, post Sprint D):
+- **Freeze post-impersonación (#4)** — único pendiente real; out-of-scope (auth/impersonation + layout admin). El de `Project.startDate` se cae (requisito de inicio obligatorio cancelado).
