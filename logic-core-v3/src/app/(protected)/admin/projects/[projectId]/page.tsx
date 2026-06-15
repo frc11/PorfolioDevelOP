@@ -183,7 +183,7 @@ export default async function AgencyOsProjectOverviewPage({
           </p>
 
           <div className="mt-5 grid gap-4 md:grid-cols-2 md:items-stretch">
-            <div className="h-full rounded-2xl border border-white/10 bg-black/20 p-4">
+            <div className="flex h-full flex-col rounded-2xl border border-white/10 bg-black/20 p-4">
               <p className="text-[10px] uppercase tracking-[0.22em] text-zinc-500">Proyecto</p>
               <p className="mt-2 text-sm text-zinc-100">{project.name}</p>
               <p className="mt-1 text-sm text-zinc-400">
@@ -194,7 +194,7 @@ export default async function AgencyOsProjectOverviewPage({
               </p>
             </div>
 
-            <div className="h-full rounded-2xl border border-white/10 bg-black/20 p-4">
+            <div className="flex h-full flex-col rounded-2xl border border-white/10 bg-black/20 p-4">
               <p className="text-[10px] uppercase tracking-[0.22em] text-zinc-500">Fechas</p>
               <p className="mt-2 text-sm text-zinc-100">
                 Entrega estimada: {formatDate(project.estimatedEndDate)}
@@ -206,33 +206,34 @@ export default async function AgencyOsProjectOverviewPage({
                 Mantenimiento: {formatDate(project.maintenanceStartDate)}
               </p>
             </div>
-            {!isInternalProject && project.organization ? (
-              <div className="rounded-2xl border border-cyan-400/15 bg-cyan-400/5 p-4 md:col-span-2">
-                <p className="text-[10px] uppercase tracking-[0.22em] text-cyan-300/80">
-                  Cliente vinculado
-                </p>
-                <p className="mt-2 text-sm font-medium text-zinc-100">
-                  {project.organization.companyName}
-                </p>
-                <p className="mt-1 text-sm text-zinc-400">slug: {project.organization.slug}</p>
-                <p className="mt-1 text-sm text-zinc-400">
-                  Sitio: {project.organization.siteUrl ?? 'Sin sitio configurado'}
-                </p>
-                <p className="mt-1 text-sm text-zinc-400">
-                  Suscripcion: {project.organization.subscription?.plan?.name ?? 'Sin plan'}
-                </p>
-              </div>
-            ) : (
-              <div className="rounded-2xl border border-white/10 bg-black/20 p-4 md:col-span-2">
-                <p className="text-[10px] uppercase tracking-[0.22em] text-zinc-500">
-                  Cliente vinculado
-                </p>
-                <p className="mt-2 text-sm text-zinc-400">
-                  Este proyecto es interno y no se muestra en el dashboard del portal.
-                </p>
-              </div>
-            )}
           </div>
+
+          {!isInternalProject && project.organization ? (
+            <div className="mt-4 rounded-2xl border border-cyan-400/15 bg-cyan-400/5 p-4">
+              <p className="text-[10px] uppercase tracking-[0.22em] text-cyan-300/80">
+                Cliente vinculado
+              </p>
+              <p className="mt-2 text-sm font-medium text-zinc-100">
+                {project.organization.companyName}
+              </p>
+              <p className="mt-1 text-sm text-zinc-400">slug: {project.organization.slug}</p>
+              <p className="mt-1 text-sm text-zinc-400">
+                Sitio: {project.organization.siteUrl ?? 'Sin sitio configurado'}
+              </p>
+              <p className="mt-1 text-sm text-zinc-400">
+                Suscripcion: {project.organization.subscription?.plan?.name ?? 'Sin plan'}
+              </p>
+            </div>
+          ) : (
+            <div className="mt-4 rounded-2xl border border-white/10 bg-black/20 p-4">
+              <p className="text-[10px] uppercase tracking-[0.22em] text-zinc-500">
+                Cliente vinculado
+              </p>
+              <p className="mt-2 text-sm text-zinc-400">
+                Este proyecto es interno y no se muestra en el dashboard del portal.
+              </p>
+            </div>
+          )}
 
           {project.osLead ? (
             <div className="mt-4 rounded-2xl border border-white/10 bg-black/20 p-4">
