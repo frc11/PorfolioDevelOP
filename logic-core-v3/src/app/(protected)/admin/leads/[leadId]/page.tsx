@@ -121,6 +121,11 @@ function formatDate(value: Date | null): string {
   }).format(value)
 }
 
+// Calculado acá (función de módulo, no en el render) para no disparar react-hooks/purity.
+function isFollowUpPending(value: Date | null): boolean {
+  return value ? value.getTime() <= Date.now() : false
+}
+
 function buildLeadFormData(lead: LeadRecord) {
   return {
     id: lead.id,
@@ -277,8 +282,12 @@ export default async function AgencyOsLeadDetailPage({ params }: LeadPageProps) 
         </div>
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.6fr)_minmax(320px,1fr)]">
-        <div className="space-y-6">
+      <div className="grid items-stretch gap-6 xl:grid-cols-[minmax(0,1.6fr)_minmax(320px,1fr)]">
+        {/* P9: a xl la columna izq alinea su alto al de la derecha (Acciones rápidas).
+            "Datos" queda fijo (auto) y "Actividad comercial" toma el 1fr restante,
+            scrolleando ADENTRO con fade inferior. El feed va absolute para no inflar el
+            alto intrínseco de la columna (así el alto lo manda la columna derecha). */}
+        <div className="space-y-6 xl:grid xl:h-full xl:min-h-0 xl:grid-rows-[auto_minmax(0,1fr)] xl:gap-6 xl:space-y-0">
           <section className="rounded-[28px] border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
             <h3 className="text-lg font-semibold text-white">Datos del lead</h3>
 
@@ -362,11 +371,16 @@ export default async function AgencyOsLeadDetailPage({ params }: LeadPageProps) 
             ) : null}
           </section>
 
-          <LeadActivityFeed
-            leadId={lead.id}
-            nextFollowUpAt={lead.nextFollowUpAt?.toISOString() ?? null}
-            activities={serializeActivities(lead)}
-          />
+          <div className="relative xl:min-h-0">
+            <div className="xl:absolute xl:inset-0 xl:overflow-y-auto xl:[mask-image:linear-gradient(to_bottom,#000_calc(100%_-_48px),transparent)] xl:[-webkit-mask-image:linear-gradient(to_bottom,#000_calc(100%_-_48px),transparent)]">
+              <LeadActivityFeed
+                leadId={lead.id}
+                nextFollowUpAt={lead.nextFollowUpAt?.toISOString() ?? null}
+                followUpPending={isFollowUpPending(lead.nextFollowUpAt)}
+                activities={serializeActivities(lead)}
+              />
+            </div>
+          </div>
         </div>
 
         <div className="space-y-6">

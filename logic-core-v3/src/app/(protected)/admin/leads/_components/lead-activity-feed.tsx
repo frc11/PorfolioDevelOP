@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState, useTransition } from 'react'
+import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   CircleDashed,
@@ -46,6 +46,8 @@ type FeedActivity = {
 type LeadActivityFeedProps = {
   leadId: string
   nextFollowUpAt: string | null
+  /** Calculado en el server (evita Date.now en render). */
+  followUpPending: boolean
   activities: FeedActivity[]
 }
 
@@ -149,6 +151,7 @@ function resultLabel(result: ActivityResult | null): string {
 export function LeadActivityFeed({
   leadId,
   nextFollowUpAt,
+  followUpPending,
   activities,
 }: LeadActivityFeedProps) {
   const router = useRouter()
@@ -158,14 +161,6 @@ export function LeadActivityFeed({
   const [result, setResult] = useState<ActivityResult | ''>('')
   const [notes, setNotes] = useState('')
   const [error, setError] = useState<string | null>(null)
-
-  const followUpPending = useMemo(() => {
-    if (!nextFollowUpAt) {
-      return false
-    }
-
-    return new Date(nextFollowUpAt).getTime() <= Date.now()
-  }, [nextFollowUpAt])
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
