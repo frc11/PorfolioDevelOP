@@ -217,4 +217,55 @@ Commit `1ded1c7`. Gate: `tsc --noEmit` **exit 0**; `eslint` (page.tsx + chart-ca
   En Chromium/Edge moderno es fluido, pero **confirmá 60fps** en tu máquina (sobre todo en la fila de charts).
 - `rounded-2xl` en el wrapper de KPI; los charts usan su `rounded-[28px]` propio → el ring/glow calza con cada forma.
 
-> Estado: Fase 2 commiteada en `lane/dashboard`. Esperando tu verificación visual + OK para Fase 3.
+> Fase 2 cerrada con OK del humano.
+
+---
+
+## FASE 3 — MÁS VIDA + ESTÉTICA MÍNIMA (commiteada, esperando verificación visual)
+
+Commits `a9739cc` (A — vida) y `3240425` (B — estética). Gate: `tsc --noEmit` **exit 0**;
+`eslint` **0 errores nuevos** (sigue el baseline `cumulativeRevenue`). Revisión adversarial
+(workflow, 2 lentes): **0 blocking issues** — entrada vs hover sin conflicto, reduced-motion
+cubierto en las 3 animaciones, solo opacity/transform, `<style>`/space-y OK, sin hydration mismatch,
+StatCard intacto, sin elementos nuevos, paleta y orden intactos.
+
+### A) MÁS VIDA
+- **Entrada al montar**: reveal a nivel **sección** (header + 4 bloques) — fade-in + `translateY(8px)→0`,
+  stagger `0 / 0.06 / 0.12 / 0.18 / 0.24s`, `0.4s`, easing `cubic-bezier(0.25,0.46,0.45,0.94)`.
+  - Solo opacity + transform (GPU). Una sola vez al montar (CSS `animation`, sin JS/re-render).
+  - Va en los **contenedores de sección**, no en las cards → **no conflictúa** con el hover de Fase 2
+    (elementos distintos; verificado).
+  - `animation-fill-mode: backwards` → invisible solo durante su delay, luego vuelve a base (sin FOUC,
+    sin quedar invisible, sin transform permanente).
+  - reduced-motion: `@media (prefers-reduced-motion:reduce){.dash-reveal{animation:none}}` → aparecen directo.
+  - Keyframe en un `<style>` inline (último hijo del `<section>`, `display:none` → no afecta el layout;
+    sin libs nuevas, sin tocar globals.css). Contenido estático → sin hydration mismatch.
+- **Count-up de KPIs: NO** (descartado a propósito). Motivos: StatCard es frozen y no deja animar su `value`;
+  los números son chicos (2/3/5/8) o strings con formato (`USD …`, `%`, `3 / 8`) donde un count-up no aporta
+  y se vería forzado. (No se sumó `motion/react` por esto.)
+
+### B) ESTÉTICA — old→new (todo en page.tsx, mínimo)
+| Cambio | old → new | Por qué |
+|---|---|---|
+| Ritmo entre secciones | `space-y-8` → `space-y-10` | respiración entre los 4 bloques |
+| Descripción de SectionHeader | `text-zinc-400` → `text-zinc-500` | jerarquía: los títulos lideran, la descripción recede |
+| Boxes internos de DualMetricCard (×2) | `rounded-md` → `rounded-xl` | menos cuadrado (único elemento interno duro in-scope) |
+
+- **No** se tocó la paleta ni los acentos (el único color tocado es un tono neutro de texto).
+- **No** se agregaron elementos (el `<style>` es infra de animación, no decoración).
+- **No** se reordenaron KPIs ni se movieron secciones. StatCard intacto.
+
+### Decisiones conscientes (NO ejecutadas, te las dejo por si querés)
+- **bg de MemberHoursCard** (`bg-white/5`) es más brillante que sus vecinas StatCard (`bg-white/[0.02]`)
+  en la fila financiera (lo marcó el audit de Fase 0). NO lo igualé: es un cambio de brillo visible y puede
+  ser énfasis intencional. Si querés uniformar la fila → 1 línea (`bg-white/[0.02]`).
+- **Radios de card**: KPI cards `rounded-2xl` (StatCard, frozen) vs ChartCards/header `rounded-[28px]`.
+  Son 2 tiers intencionales (cards chicas vs contenedores grandes); el wrapper de hover quedó `rounded-2xl`
+  para calzar con StatCard. No los toqué.
+
+### Para tu verificación visual
+- La entrada debe sentirse rápida y sutil (≈0.64s el último bloque), una sola vez al cargar, sin competir con el skeleton.
+- Con `prefers-reduced-motion` activo: sin entrada (aparecen directo), sin hover-scale (solo ring), charts sin animar.
+- El dashboard tiene que ser **reconociblemente el mismo**, solo con más aire y menos rígido.
+
+> Estado: Fase 3 commiteada en `lane/dashboard`. Las 3 fases cerradas a falta de tu verificación visual final.
