@@ -2,11 +2,10 @@
 
 import type { ChangeEvent } from 'react'
 import { Select } from '@/components/ui'
+import { ProjectsPeriodDropdown } from './projects-period-dropdown'
 import {
-  PERIOD_OPTIONS,
   SERVICE_OPTIONS,
   VISIBILITY_OPTIONS,
-  isPeriodFilter,
   isServiceFilter,
   type PeriodFilter,
   type ProjectFilters,
@@ -44,16 +43,6 @@ export function ProjectsFilterBar({
     const value = event.currentTarget.value
     if (isServiceFilter(value)) {
       onServiceChange(value)
-    }
-  }
-
-  const handlePeriod = (event: ChangeEvent<HTMLSelectElement>) => {
-    const value = event.currentTarget.value
-    if (isPeriodFilter(value)) {
-      // Al salir de "custom" se limpian las fechas; al entrar se conservan.
-      const from = value === 'custom' ? filters.from : ''
-      const to = value === 'custom' ? filters.to : ''
-      onPeriodChange(value, from, to)
     }
   }
 
@@ -96,40 +85,12 @@ export function ProjectsFilterBar({
           ))}
         </Select>
 
-        <Select
-          aria-label="Filtrar por período de última actividad"
-          value={filters.period}
-          onChange={handlePeriod}
-          className={controlClassName}
-        >
-          {PERIOD_OPTIONS.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </Select>
-
-        {filters.period === 'custom' ? (
-          <div className="flex flex-wrap items-center gap-2">
-            <input
-              type="date"
-              aria-label="Desde"
-              value={filters.from}
-              max={filters.to || undefined}
-              onChange={(event) => onPeriodChange('custom', event.currentTarget.value, filters.to)}
-              className={controlClassName}
-            />
-            <span className="text-sm text-zinc-500">→</span>
-            <input
-              type="date"
-              aria-label="Hasta"
-              value={filters.to}
-              min={filters.from || undefined}
-              onChange={(event) => onPeriodChange('custom', filters.from, event.currentTarget.value)}
-              className={controlClassName}
-            />
-          </div>
-        ) : null}
+        <ProjectsPeriodDropdown
+          period={filters.period}
+          from={filters.from}
+          to={filters.to}
+          onChange={onPeriodChange}
+        />
 
         {!isDefault ? (
           <button
