@@ -2,6 +2,7 @@
 
 import { Select } from '@/components/ui'
 import { ThemedDateInput } from './themed-date-input'
+import { LocationTypeahead } from './location-typeahead'
 import {
   EMPTY_LEAD_FILTERS,
   type LeadFilterOptions,
@@ -89,11 +90,10 @@ export function LeadFiltersBar({
         </Field>
 
         <Field label="Ubicacion">
-          <Select
-            aria-label="Filtrar por ubicacion"
+          <LocationTypeahead
             value={filters.zone}
-            onChange={(event) => onChange({ zone: event.target.value })}
             options={options.zone}
+            onChange={(zone) => onChange({ zone })}
           />
         </Field>
 
