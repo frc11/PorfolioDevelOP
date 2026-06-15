@@ -1,9 +1,11 @@
 'use client'
 
 import { useEffect, useMemo, useState, useTransition } from 'react'
+import { createPortal } from 'react-dom'
 import { useRouter } from 'next/navigation'
 import { X } from 'lucide-react'
 import { Button, Input, Select } from '@/components/ui'
+import { useIsClient } from '@/lib/use-is-client'
 import {
   createLead,
   updateLead,
@@ -91,6 +93,7 @@ function collectErrors(
 
 export function LeadForm({ lead, triggerLabel = 'Nuevo lead' }: LeadFormProps) {
   const router = useRouter()
+  const isClient = useIsClient()
   const [isOpen, setIsOpen] = useState(false)
   const [formState, setFormState] = useState<LeadFormState>(() => createInitialState(lead))
   const [formErrors, setFormErrors] = useState<FormErrors>({})
@@ -158,8 +161,9 @@ export function LeadForm({ lead, triggerLabel = 'Nuevo lead' }: LeadFormProps) {
         {triggerLabel}
       </Button>
 
-      {isOpen ? (
-        <div className="fixed inset-0 z-[130] flex items-center justify-center bg-[#05070a]/80 p-4 backdrop-blur-md">
+      {isClient && isOpen
+        ? createPortal(
+            <div className="fixed inset-0 z-[130] flex items-center justify-center bg-[#05070a]/80 p-4 backdrop-blur-md">
           <div className="relative max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-[28px] border border-white/10 bg-[#0c1016]/95 p-6 shadow-[0_30px_120px_rgba(0,0,0,0.55)] backdrop-blur-xl">
             <div className="flex items-start justify-between gap-4">
               <div>
@@ -359,8 +363,10 @@ export function LeadForm({ lead, triggerLabel = 'Nuevo lead' }: LeadFormProps) {
               </div>
             </form>
           </div>
-        </div>
-      ) : null}
+            </div>,
+            document.body,
+          )
+        : null}
     </>
   )
 }
