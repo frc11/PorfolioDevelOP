@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import {
   BarChart3,
   CalendarCheck2,
@@ -28,6 +29,12 @@ const MEMBER_BAR_COLORS = [
   '#f59e0b',
   '#f472b6',
 ]
+
+// Hover uniforme para las cards. Va en el wrapper externo (HoverCard) porque
+// StatCard es frozen; el mismo set se aplica al <article> de ChartCard.
+// Solo transform/box-shadow/ring (sin layout). reduced-motion: sin escala ni glow.
+const cardHoverClass =
+  'grid rounded-2xl transition duration-200 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] will-change-transform hover:scale-[1.015] hover:shadow-[0_12px_32px_-12px_rgba(255,255,255,0.12)] hover:ring-1 hover:ring-white/15 motion-reduce:transition-none motion-reduce:hover:scale-100 motion-reduce:hover:shadow-none'
 
 const DEMO_PIPELINE_STATUSES: LeadStatus[] = [
   LeadStatus.DEMO_ENVIADA,
@@ -566,39 +573,45 @@ export default async function AgencyOsPage() {
         />
 
         <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
-          <StatCard
-            label="Demos enviadas esta semana"
-            value={`${demosThisWeek} / ${weeklyDemoGoal}`}
-            subtitle="Seguimiento contra objetivo semanal"
-            trend={demosThisWeek >= weeklyDemoGoal ? 'up' : 'neutral'}
-            icon={Target}
-            progress={demosProgress}
-          />
+          <HoverCard>
+            <StatCard
+              label="Demos enviadas esta semana"
+              value={`${demosThisWeek} / ${weeklyDemoGoal}`}
+              subtitle="Seguimiento contra objetivo semanal"
+              trend={demosThisWeek >= weeklyDemoGoal ? 'up' : 'neutral'}
+              icon={Target}
+              progress={demosProgress}
+            />
+          </HoverCard>
 
-          <StatCard
-            label="Leads pendientes de follow-up hoy"
-            value={String(pendingFollowUps)}
-            subtitle={
-              pendingFollowUps > 0
-                ? 'Hay conversaciones que requieren acción hoy'
-                : 'Bandeja comercial al día'
-            }
-            trend={pendingFollowUps > 0 ? 'down' : 'neutral'}
-            color={pendingFollowUps > 0 ? 'alert' : undefined}
-            icon={CalendarCheck2}
-          />
+          <HoverCard>
+            <StatCard
+              label="Leads pendientes de follow-up hoy"
+              value={String(pendingFollowUps)}
+              subtitle={
+                pendingFollowUps > 0
+                  ? 'Hay conversaciones que requieren acción hoy'
+                  : 'Bandeja comercial al día'
+              }
+              trend={pendingFollowUps > 0 ? 'down' : 'neutral'}
+              color={pendingFollowUps > 0 ? 'alert' : undefined}
+              icon={CalendarCheck2}
+            />
+          </HoverCard>
 
-          <DualMetricCard
-            label="Respuesta y cierre"
-            primaryValue={responseRate}
-            primaryLabel="Tasa de respuesta"
-            primaryHint="Sobre leads en etapa demo o posterior, según su estado actual"
-            secondaryValue={closeRate}
-            secondaryLabel="Tasa de cierre"
-            secondaryHint="Cerrados / respondidos, histórico total (distinto del chart mensual)"
-            subtitle={`${respondedCount} en estado respondido o posterior · ${closedCount} cerrados`}
-            icon={BarChart3}
-          />
+          <HoverCard>
+            <DualMetricCard
+              label="Respuesta y cierre"
+              primaryValue={responseRate}
+              primaryLabel="Tasa de respuesta"
+              primaryHint="Sobre leads en etapa demo o posterior, según su estado actual"
+              secondaryValue={closeRate}
+              secondaryLabel="Tasa de cierre"
+              secondaryHint="Cerrados / respondidos, histórico total (distinto del chart mensual)"
+              subtitle={`${respondedCount} en estado respondido o posterior · ${closedCount} cerrados`}
+              icon={BarChart3}
+            />
+          </HoverCard>
         </div>
       </div>
 
@@ -609,38 +622,46 @@ export default async function AgencyOsPage() {
         />
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 2xl:grid-cols-4">
-          <StatCard
-            label="MRR"
-            value={formatCurrency(mrr)}
-            subtitle="Suma de suscripciones activas"
-            trend={mrr > 0 ? 'up' : 'neutral'}
-            icon={Wallet}
-          />
+          <HoverCard>
+            <StatCard
+              label="MRR"
+              value={formatCurrency(mrr)}
+              subtitle="Suma de suscripciones activas"
+              trend={mrr > 0 ? 'up' : 'neutral'}
+              icon={Wallet}
+            />
+          </HoverCard>
 
-          <StatCard
-            label="Clientes activos"
-            value={String(activeClients)}
-            subtitle="Organizaciones con suscripción activa"
-            trend={activeClients > 0 ? 'up' : 'neutral'}
-            icon={UsersRound}
-          />
+          <HoverCard>
+            <StatCard
+              label="Clientes activos"
+              value={String(activeClients)}
+              subtitle="Organizaciones con suscripción activa"
+              trend={activeClients > 0 ? 'up' : 'neutral'}
+              icon={UsersRound}
+            />
+          </HoverCard>
 
-          <StatCard
-            label="Tickets abiertos"
-            value={String(openTickets)}
-            subtitle="Tickets sin resolver"
-            trend={openTickets > 0 ? 'down' : 'neutral'}
-            color={openTickets > 0 ? 'alert' : undefined}
-            icon={LifeBuoy}
-          />
+          <HoverCard>
+            <StatCard
+              label="Tickets abiertos"
+              value={String(openTickets)}
+              subtitle="Tickets sin resolver"
+              trend={openTickets > 0 ? 'down' : 'neutral'}
+              color={openTickets > 0 ? 'alert' : undefined}
+              icon={LifeBuoy}
+            />
+          </HoverCard>
 
-          <StatCard
-            label="Proyectos en curso"
-            value={String(projectsInProgress)}
-            subtitle="En desarrollo"
-            trend={projectsInProgress > 0 ? 'up' : 'neutral'}
-            icon={FolderKanban}
-          />
+          <HoverCard>
+            <StatCard
+              label="Proyectos en curso"
+              value={String(projectsInProgress)}
+              subtitle="En desarrollo"
+              trend={projectsInProgress > 0 ? 'up' : 'neutral'}
+              icon={FolderKanban}
+            />
+          </HoverCard>
         </div>
       </div>
 
@@ -651,26 +672,32 @@ export default async function AgencyOsPage() {
         />
 
         <div className="grid grid-cols-1 gap-4 xl:grid-cols-[0.95fr_1.1fr_0.95fr]">
-          <StatCard
-            label="Ingresos del mes"
-            value={formatCurrency(monthlyRevenue)}
-            subtitle={`${formatCurrency(projectRevenueThisMonth)} en proyectos + ${formatCurrency(maintenanceRevenueThisMonth)} en mantenimiento`}
-            trend={monthlyRevenue > 0 ? 'up' : 'neutral'}
-            icon={DollarSign}
-          />
+          <HoverCard>
+            <StatCard
+              label="Ingresos del mes"
+              value={formatCurrency(monthlyRevenue)}
+              subtitle={`${formatCurrency(projectRevenueThisMonth)} en proyectos + ${formatCurrency(maintenanceRevenueThisMonth)} en mantenimiento`}
+              trend={monthlyRevenue > 0 ? 'up' : 'neutral'}
+              icon={DollarSign}
+            />
+          </HoverCard>
 
-          <MemberHoursCard
-            totalHours={memberTotals.reduce((accumulator, member) => accumulator + member.totalWeekHours, 0)}
-            members={memberTotals}
-          />
+          <HoverCard>
+            <MemberHoursCard
+              totalHours={memberTotals.reduce((accumulator, member) => accumulator + member.totalWeekHours, 0)}
+              members={memberTotals}
+            />
+          </HoverCard>
 
-          <StatCard
-            label="Valor hora promedio del mes"
-            value={formatCurrency(averageHourlyValue)}
-            subtitle={`${formatHours(monthHoursTotal)} registradas en el mes actual`}
-            trend={averageHourlyValue > 0 ? 'up' : 'neutral'}
-            icon={Gauge}
-          />
+          <HoverCard>
+            <StatCard
+              label="Valor hora promedio del mes"
+              value={formatCurrency(averageHourlyValue)}
+              subtitle={`${formatHours(monthHoursTotal)} registradas en el mes actual`}
+              trend={averageHourlyValue > 0 ? 'up' : 'neutral'}
+              icon={Gauge}
+            />
+          </HoverCard>
         </div>
       </div>
 
@@ -690,6 +717,10 @@ export default async function AgencyOsPage() {
       </div>
     </section>
   )
+}
+
+function HoverCard({ children }: { children: ReactNode }) {
+  return <div className={cardHoverClass}>{children}</div>
 }
 
 function SectionHeader({
