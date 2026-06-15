@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useCallback, useEffect, useRef, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   CircleDashed,
@@ -70,6 +70,10 @@ const RESULT_OPTIONS: Array<{ value: ActivityResult; label: string }> = [
 
 const inputClassName =
   'w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white outline-none transition-colors focus:border-cyan-400/35'
+
+// === TUNABLES (calibrá por ojo) ===
+const ACTIVITY_FADE_HEIGHT = 48 // alto del fade superior/inferior del timeline (px)
+const SCROLL_FADE_THRESHOLD = 4 // px de margen para considerar "se puede scrollear" arriba/abajo
 
 function relativeTime(value: string): string {
   const date = new Date(value)
@@ -162,6 +166,39 @@ export function LeadActivityFeed({
   const [notes, setNotes] = useState('')
   const [error, setError] = useState<string | null>(null)
 
+  // Fades SCROLL-AWARE del timeline: arriba sólo si se puede subir, abajo sólo si se
+  // puede bajar (sin overflow → ninguno). Trackea scroll + mount/resize (ResizeObserver).
+  const timelineRef = useRef<HTMLDivElement>(null)
+  const [canScrollUp, setCanScrollUp] = useState(false)
+  const [canScrollDown, setCanScrollDown] = useState(false)
+
+  const updateScrollFades = useCallback(() => {
+    const el = timelineRef.current
+    if (!el) {
+      return
+    }
+    setCanScrollUp(el.scrollTop > SCROLL_FADE_THRESHOLD)
+    setCanScrollDown(el.scrollTop + el.clientHeight < el.scrollHeight - SCROLL_FADE_THRESHOLD)
+  }, [])
+
+  useEffect(() => {
+    const el = timelineRef.current
+    if (!el) {
+      return
+    }
+    // observe() dispara el callback al montar y en cada resize (sin setState síncrono en
+    // el effect). El dep activities.length re-corre el effect cuando cambia el contenido.
+    const observer = new ResizeObserver(updateScrollFades)
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [updateScrollFades, activities.length])
+
+  const timelineFadeMask = `linear-gradient(to bottom, ${
+    canScrollUp ? 'transparent' : '#000'
+  }, #000 ${ACTIVITY_FADE_HEIGHT}px, #000 calc(100% - ${ACTIVITY_FADE_HEIGHT}px), ${
+    canScrollDown ? 'transparent' : '#000'
+  })`
+
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     setError(null)
@@ -187,8 +224,8 @@ export function LeadActivityFeed({
   }
 
   return (
-    <section className="rounded-[28px] border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+    <section className="rounded-[28px] border border-white/10 bg-white/5 p-5 backdrop-blur-xl xl:flex xl:h-full xl:flex-col">
+      <div className="flex shrink-0 flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h3 className="text-lg font-semibold text-white">Actividad comercial</h3>
           <p className="mt-2 text-sm text-zinc-400">
@@ -209,7 +246,7 @@ export function LeadActivityFeed({
       {nextFollowUpAt ? (
         <div
           className={[
-            'mt-5 rounded-2xl border px-4 py-3 text-sm',
+            'mt-5 shrink-0 rounded-2xl border px-4 py-3 text-sm',
             followUpPending
               ? 'border-rose-400/20 bg-rose-500/10 text-rose-200'
               : 'border-amber-400/20 bg-amber-500/10 text-amber-200',
@@ -224,7 +261,7 @@ export function LeadActivityFeed({
       {showForm ? (
         <form
           onSubmit={handleSubmit}
-          className="mt-5 rounded-[24px] border border-white/10 bg-black/20 p-4"
+          className="mt-5 shrink-0 rounded-[24px] border border-white/10 bg-black/20 p-4"
         >
           <div className="grid gap-4 md:grid-cols-2">
             <div>
@@ -295,11 +332,17 @@ export function LeadActivityFeed({
         </form>
       ) : null}
 
-      <div className="relative mt-6 pl-6">
-        <div className="absolute bottom-0 left-[11px] top-0 w-px bg-white/10" />
+      <div
+        ref={timelineRef}
+        onScroll={updateScrollFades}
+        className="mt-6 xl:min-h-0 xl:flex-1 xl:overflow-y-auto"
+        style={{ maskImage: timelineFadeMask, WebkitMaskImage: timelineFadeMask }}
+      >
+        <div className="relative pl-6">
+          <div className="absolute bottom-0 left-[11px] top-0 w-px bg-white/10" />
 
-        <div className="space-y-5">
-          {activities.length > 0 ? (
+          <div className="space-y-5">
+            {activities.length > 0 ? (
             activities.map((activity) => {
               const Icon = channelIcon(activity.channel)
 
@@ -358,6 +401,7 @@ export function LeadActivityFeed({
               }
             />
           )}
+          </div>
         </div>
       </div>
     </section>

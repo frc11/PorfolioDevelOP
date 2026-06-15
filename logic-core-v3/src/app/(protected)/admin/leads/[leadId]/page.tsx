@@ -376,7 +376,9 @@ export default async function AgencyOsLeadDetailPage({ params }: LeadPageProps) 
           </section>
 
           <div className="relative xl:min-h-0">
-            <div className="xl:absolute xl:inset-0 xl:overflow-y-auto xl:[mask-image:linear-gradient(to_bottom,#000_calc(100%_-_48px),transparent)] xl:[-webkit-mask-image:linear-gradient(to_bottom,#000_calc(100%_-_48px),transparent)]">
+            {/* El feed ocupa el alto disponible (1fr); su timeline scrollea adentro con
+                fades scroll-aware (P4). El wrapper sólo le da el alto definido a xl. */}
+            <div className="xl:absolute xl:inset-0">
               <LeadActivityFeed
                 leadId={lead.id}
                 nextFollowUpAt={lead.nextFollowUpAt?.toISOString() ?? null}
