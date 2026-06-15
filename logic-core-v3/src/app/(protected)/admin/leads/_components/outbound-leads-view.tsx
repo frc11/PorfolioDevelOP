@@ -30,7 +30,16 @@ export function OutboundLeadsView({ leads }: OutboundLeadsViewProps) {
   const activeCount = useMemo(() => countActiveLeads(filtered), [filtered])
 
   const handleChange = (patch: Partial<LeadFilters>) =>
-    setFilters((current) => ({ ...current, ...patch }))
+    setFilters((current) => {
+      const next = { ...current, ...patch }
+      // Al salir de 'custom' limpiamos el rango colgado (evita que "Limpiar" quede
+      // oculto y que reabrir 'custom' restaure fechas viejas).
+      if (next.period !== 'custom') {
+        next.from = ''
+        next.to = ''
+      }
+      return next
+    })
   const handleReset = () => setFilters(EMPTY_LEAD_FILTERS)
 
   return (

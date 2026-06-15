@@ -11,7 +11,7 @@ import { DroppableColumn } from './droppable-column'
 import { DraggableLeadCard } from './draggable-lead-card'
 
 // === TUNABLES (calibrá por ojo) ===
-const COLUMN_BODY_MAX_H = 460 // alto máx del cuerpo de cada columna (~3 cards) antes de scroll interno
+const COLUMN_BODY_MAX_H = 460 // alto fijo del cuerpo de cada columna (px) — sin scroll interno
 
 type PipelineBoardProps = {
   groupedLeads: GroupedLeads
@@ -22,10 +22,10 @@ type PipelineBoardProps = {
 
 /**
  * Tablero del pipeline: grilla ESTÁTICA 3+3+2 (PIPELINE_GROUPS), columnas fluidas
- * (sin ancho fijo → sin scroll horizontal a ningún ancho). Cada columna es droppable
- * y scrollea adentro a partir de ~3 cards. Las cards son draggables; el DnD entre
- * columnas (mouse + teclado) lo maneja el DndContext del padre. Mismo layout para
- * todos: la grilla ya es estática, no hace falta rama de reduced-motion.
+ * (sin ancho fijo → sin scroll horizontal a ningún ancho). Cada columna es droppable y
+ * muestra como mucho ~3 cards (el resto en el overview); no scrollea adentro. Las cards
+ * son draggables; el DnD entre columnas (mouse + teclado) lo maneja el DndContext del
+ * padre. Mismo layout para todos: la grilla ya es estática, sin rama de reduced-motion.
  */
 export function PipelineBoard({
   groupedLeads,

@@ -68,7 +68,13 @@ export function LeadFiltersBar({
           <Select
             aria-label="Filtrar por periodo"
             value={filters.period}
-            onChange={(event) => onChange({ period: event.target.value as LeadPeriod })}
+            onChange={(event) => {
+              // Sin cast: el valor sale del set fijo de PERIOD_OPTIONS.
+              const next = PERIOD_OPTIONS.find((option) => option.value === event.target.value)
+              if (next) {
+                onChange({ period: next.value })
+              }
+            }}
             options={PERIOD_OPTIONS}
           />
         </Field>

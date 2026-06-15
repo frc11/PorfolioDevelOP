@@ -7,7 +7,7 @@ import { AnimatePresence, motion } from 'motion/react'
 import { cn } from '@/lib/utils'
 import { useReducedMotion } from '@/lib/use-reduced-motion'
 import { ThemedDateInput } from './themed-date-input'
-import type { InboundPeriod } from '../_actions/inbound.schemas'
+import { INBOUND_DEFAULT_PERIOD, type InboundPeriod } from '../_actions/inbound.schemas'
 
 // === TUNABLES (calibrá por ojo) ===
 const SLIDE_DURATION = 0.2 // s — slide vertical (alto+opacidad) de los campos custom
@@ -49,7 +49,7 @@ const periodChipClass = (active: boolean) =>
 export function InboundPeriodFilter() {
   const searchParams = useSearchParams()
   const reduced = useReducedMotion()
-  const currentPeriod = searchParams.get('period') ?? '1m'
+  const currentPeriod = searchParams.get('period') ?? INBOUND_DEFAULT_PERIOD
   const [customFrom, setCustomFrom] = useState(searchParams.get('from') ?? '')
   const [customTo, setCustomTo] = useState(searchParams.get('to') ?? '')
   const [showCustom, setShowCustom] = useState(currentPeriod === 'custom')

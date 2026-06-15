@@ -109,8 +109,8 @@ function periodBounds(filters: LeadFilters): { gte: Date; lte?: Date } | null {
       if (!filters.from || !filters.to) {
         return null
       }
-      const gte = new Date(`${filters.from}T00:00:00`)
-      const lte = new Date(`${filters.to}T23:59:59`)
+      const gte = new Date(`${filters.from}T00:00:00.000`)
+      const lte = new Date(`${filters.to}T23:59:59.999`)
       if (Number.isNaN(gte.getTime()) || Number.isNaN(lte.getTime())) {
         return null
       }

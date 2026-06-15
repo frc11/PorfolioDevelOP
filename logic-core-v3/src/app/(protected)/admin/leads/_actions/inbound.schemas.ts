@@ -8,9 +8,12 @@ export const ConvertInboundToLeadSchema = z.object({
   contactSubmissionId: ContactSubmissionIdSchema,
 })
 
-/** Períodos del filtro de Inbound. '1m' (último mes) es el default. */
+/** Períodos del filtro de Inbound. */
 export const INBOUND_PERIODS = ['1w', '1m', '6m', '1y', 'custom'] as const
 export type InboundPeriod = (typeof INBOUND_PERIODS)[number]
+
+/** Default único del período inbound (último mes) — referenciado donde haga falta. */
+export const INBOUND_DEFAULT_PERIOD: InboundPeriod = '1m'
 
 /**
  * Rango temporal del listado inbound (server-driven via searchParams). En 'custom'
@@ -18,12 +21,12 @@ export type InboundPeriod = (typeof INBOUND_PERIODS)[number]
  */
 export const InboundRangeSchema = z
   .object({
-    // Acepta el string crudo de searchParams; un período inválido cae al default '1m'.
+    // Acepta el string crudo de searchParams; un período inválido cae al default.
     period: z
       .string()
       .optional()
-      .transform((value) => value ?? '1m')
-      .pipe(z.enum(INBOUND_PERIODS).catch('1m')),
+      .transform((value) => value ?? INBOUND_DEFAULT_PERIOD)
+      .pipe(z.enum(INBOUND_PERIODS).catch(INBOUND_DEFAULT_PERIOD)),
     from: z.string().trim().min(1).optional(),
     to: z.string().trim().min(1).optional(),
   })

@@ -13,9 +13,11 @@ import {
 
 // === TUNABLES (calibrá por ojo) ===
 const COLUMN_FADE_HEIGHT = 48 // alto del desvanecimiento inferior del cuerpo (px)
+const MAX_VISIBLE_CARDS = 3 // máx de cards RENDERIZADAS por columna (el resto vive en el overview)
 
-// El cuerpo NO scrollea (la rueda siempre scrollea la página); muestra ~3 cards y la
-// última se desvanece con mask-image. Para ver todos los leads → overview (click header).
+// El cuerpo NO scrollea (la rueda siempre scrollea la página). Se renderizan como mucho
+// MAX_VISIBLE_CARDS cards — el resto NO se monta (no quedan targets invisibles tabbables) y
+// se ven en el overview (click en el header). Si hay más, la última se desvanece (mask-image).
 const COLUMN_BODY_FADE = `linear-gradient(to bottom, #000 calc(100% - ${COLUMN_FADE_HEIGHT}px), transparent)`
 
 type PipelineColumnProps = {
@@ -34,9 +36,9 @@ type PipelineColumnProps = {
 }
 
 /**
- * Columna presentacional del pipeline: header (tono + label + count) + cuerpo con
- * scroll interno. Fluida (llena su celda de la grilla). No conoce el DnD; el padre
- * lo compone alrededor.
+ * Columna presentacional del pipeline: header (tono + label + count) + cuerpo de alto
+ * fijo SIN scroll interno (máx MAX_VISIBLE_CARDS; el resto en el overview). Fluida (llena
+ * su celda de la grilla). No conoce el DnD; el padre lo compone alrededor.
  */
 export function PipelineColumn({
   status,
@@ -47,6 +49,9 @@ export function PipelineColumn({
   dropRef,
   isOver = false,
 }: PipelineColumnProps) {
+  const visibleLeads = leads.slice(0, MAX_VISIBLE_CARDS)
+  const hasOverflow = leads.length > MAX_VISIBLE_CARDS
+
   return (
     <section
       ref={dropRef}
@@ -80,16 +85,18 @@ export function PipelineColumn({
 
       <div
         // Altura FIJA + overflow-hidden: sin scroll interno → la rueda scrollea la página.
-        // px-2/py-1 dan aire para que el hover:scale de la card no se recorte contra el clip.
+        // px-2/py-1 dan aire lateral para que el hover:scale de la card no se recorte.
+        // El fade (mask) sólo cuando hay más cards que las visibles (no sobre el EmptyState).
         className="mt-4 space-y-3 overflow-hidden px-2 py-1"
         style={{
           height: bodyMaxHeight,
-          maskImage: COLUMN_BODY_FADE,
-          WebkitMaskImage: COLUMN_BODY_FADE,
+          ...(hasOverflow
+            ? { maskImage: COLUMN_BODY_FADE, WebkitMaskImage: COLUMN_BODY_FADE }
+            : null),
         }}
       >
         {leads.length > 0 ? (
-          leads.map((lead) => renderCard(lead))
+          visibleLeads.map((lead) => renderCard(lead))
         ) : (
           <EmptyState
             icon={Inbox}
