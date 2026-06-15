@@ -9,7 +9,6 @@ import {
   ChevronRight,
   Clock3,
   FolderKanban,
-  GripVertical,
   LoaderCircle,
   Send,
   Trash2,
@@ -319,17 +318,43 @@ export function TaskList({
                   return (
                     <article
                       key={task.id}
+                      draggable={!isPending}
+                      onDragStart={(event) => {
+                        // El cuerpo de la card arrastra; los controles marcados
+                        // con data-no-drag (Editar/borrar/aprobación) no inician
+                        // drag y siguen clickeables.
+                        if ((event.target as HTMLElement).closest('[data-no-drag]')) {
+                          event.preventDefault()
+                          return
+                        }
+                        setDraggingTaskId(task.id)
+                        event.dataTransfer.effectAllowed = 'move'
+                        event.dataTransfer.setData('text/plain', task.id)
+                      }}
+                      onDragEnd={() => {
+                        setDraggingTaskId(null)
+                        setDragOverStatus(null)
+                      }}
                       className={[
                         'rounded-[24px] border border-white/10 bg-black/20 p-4 transition-opacity',
+                        isPending ? '' : 'cursor-grab active:cursor-grabbing',
                         draggingTaskId === task.id ? 'opacity-50' : '',
                       ].join(' ')}
                     >
                       <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
-                        <button
-                          type="button"
+                        <div
+                          role="button"
+                          tabIndex={0}
+                          aria-expanded={isExpanded}
                           onClick={() =>
                             setExpandedTaskId((current) => (current === task.id ? null : task.id))
                           }
+                          onKeyDown={(event) => {
+                            if (event.key === 'Enter' || event.key === ' ') {
+                              event.preventDefault()
+                              setExpandedTaskId((current) => (current === task.id ? null : task.id))
+                            }
+                          }}
                           className="flex min-w-0 flex-1 items-start gap-3 text-left"
                         >
                           <span className="mt-0.5 text-zinc-500">
@@ -425,27 +450,9 @@ export function TaskList({
                               </div>
                             ) : null}
                           </div>
-                        </button>
+                        </div>
 
-                        <div className="flex items-center gap-2">
-                          <span
-                            draggable={!isPending}
-                            onDragStart={(event) => {
-                              setDraggingTaskId(task.id)
-                              event.dataTransfer.effectAllowed = 'move'
-                              event.dataTransfer.setData('text/plain', task.id)
-                            }}
-                            onDragEnd={() => {
-                              setDraggingTaskId(null)
-                              setDragOverStatus(null)
-                            }}
-                            aria-hidden="true"
-                            title="Arrastrar para cambiar de estado"
-                            className="hidden h-10 cursor-grab items-center text-zinc-600 transition-colors hover:text-zinc-400 active:cursor-grabbing sm:flex"
-                          >
-                            <GripVertical className="h-4 w-4" strokeWidth={1.5} />
-                          </span>
-
+                        <div className="flex items-center gap-2" data-no-drag>
                           {showApprovalFlow ? (
                             <TaskApprovalControl task={task} projectId={projectId} />
                           ) : null}
