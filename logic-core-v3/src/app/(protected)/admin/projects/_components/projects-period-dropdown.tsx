@@ -133,7 +133,11 @@ export function ProjectsPeriodDropdown({
           id={panelId}
           role="dialog"
           aria-label="Opciones de período"
-          className="absolute right-0 top-full z-30 mt-2 w-[260px] rounded-2xl border border-white/10 bg-[#11161d]/95 p-2 shadow-2xl backdrop-blur-xl"
+          // Panel SÓLIDO/opaco (mismo criterio que el <Select> de servicio, que
+          // portalea a body sobre el bg sólido): acá es absolute dentro del
+          // <main> translúcido, así que un /95 + backdrop-blur dejaba pasar el
+          // fondo. bg-zinc-900 sin alpha lo corta.
+          className="absolute right-0 top-full z-30 mt-2 w-[260px] overflow-hidden rounded-xl border border-white/[0.08] bg-zinc-900 p-1.5 shadow-2xl"
         >
           {PERIOD_OPTIONS.map((option) => {
             const isActive =
@@ -144,10 +148,15 @@ export function ProjectsPeriodDropdown({
                 key={option.value}
                 type="button"
                 onClick={() => selectPeriod(option.value)}
-                className="flex w-full items-center justify-between gap-2 rounded-xl px-3 py-2 text-left text-sm text-zinc-200 transition-colors hover:bg-white/5"
+                className={[
+                  'flex w-full items-center justify-between gap-2 rounded-lg px-3 py-2 text-left text-sm transition-colors',
+                  isActive
+                    ? 'bg-cyan-400/10 text-cyan-300'
+                    : 'text-zinc-200 hover:bg-cyan-400/10 hover:text-cyan-300',
+                ].join(' ')}
               >
                 <span>{option.label}</span>
-                {isActive ? <Check className="h-4 w-4 text-cyan-300" strokeWidth={1.5} /> : null}
+                {isActive ? <Check className="h-4 w-4 text-cyan-400" strokeWidth={1.5} /> : null}
               </button>
             )
           })}
