@@ -178,4 +178,43 @@ DualMetricCard "Respuesta y cierre" — sin tocar cálculos ni renombrar KPIs. S
 - `animate-pulse` de Skeleton sin motion-reduce — shared Skeleton.tsx.
 - Lint baseline `cumulativeRevenue` (immutability) — pre-existente, decisión del humano.
 
-> Estado: Fase 1 commiteada en `lane/dashboard`. Esperando tu verificación visual + OK para Fase 2.
+> Fase 1 cerrada con OK del humano.
+
+---
+
+## FASE 2 — HOVER EN LAS CARDS (commiteada, esperando verificación visual)
+
+Commit `1ded1c7`. Gate: `tsc --noEmit` **exit 0**; `eslint` (page.tsx + chart-card.tsx) **0 errores nuevos**
+(sigue el único baseline `cumulativeRevenue`).
+
+### Diseño
+- **`<HoverCard>`** (nuevo, en page.tsx): `<div className={cardHoverClass}>{children}</div>`.
+  El div es `display: grid` a propósito → la card interna se estira a la altura de la celda
+  (preserva la fila financiera donde las StatCards laterales igualan a MemberHoursCard).
+  El efecto va 100% en este wrapper externo → **StatCard (frozen) no se toca**.
+- **ChartCard** (chart-card.tsx, in-scope): mismas clases sobre su `<article>` (que ya es el
+  borde externo de la card) → efecto idéntico sin wrapper extra.
+
+### Wrappers tocados (14 cards)
+- page.tsx: 10 cards de KPI envueltas en `<HoverCard>`:
+  comercial (Demos, Leads pendientes, Respuesta y cierre), operativo (MRR, Clientes,
+  Tickets, Proyectos), financiero (Ingresos, MemberHours, Valor hora).
+- chart-card.tsx: los 4 charts (Demos, Cierre, Ingresos, Horas) por su `<article>`.
+
+### Valores finales
+| Propiedad | Valor |
+|---|---|
+| scale | `1.015` (dentro de 1.01–1.02) |
+| glow | `box-shadow 0 12px 32px -12px rgba(255,255,255,0.12)` + `ring-1 ring-white/15` |
+| duración | `200ms` (≤200) |
+| easing | `cubic-bezier(0.25, 0.46, 0.45, 0.94)` (el de la guía, no el default CSS) |
+| propiedades animadas | transform + box-shadow + ring → **sin layout** |
+| reduced-motion | `scale-100` + `shadow-none` + `transition-none`; queda solo el `ring` sutil (cambio de borde) |
+
+### Notas para tu verificación visual
+- El efecto debe sentirse **idéntico** en las 14 cards (va por el borde externo en todas).
+- Las cards son glass (`backdrop-blur-xl`); al escalar, el blur se recomputa por frame.
+  En Chromium/Edge moderno es fluido, pero **confirmá 60fps** en tu máquina (sobre todo en la fila de charts).
+- `rounded-2xl` en el wrapper de KPI; los charts usan su `rounded-[28px]` propio → el ring/glow calza con cada forma.
+
+> Estado: Fase 2 commiteada en `lane/dashboard`. Esperando tu verificación visual + OK para Fase 3.
