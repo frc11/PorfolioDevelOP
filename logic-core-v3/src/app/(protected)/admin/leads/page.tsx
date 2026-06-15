@@ -117,14 +117,16 @@ function serializeLead(lead: LeadRow): LeadPipelineLead {
 export default async function AgencyOsLeadsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ tab?: string }>
+  searchParams: Promise<{ tab?: string; period?: string; from?: string; to?: string }>
 }) {
-  const { tab } = await searchParams
+  const { tab, period, from, to } = await searchParams
   const activeTab: LeadTab = tab === 'inbound' ? 'inbound' : 'outbound'
 
   const [leads, inboundResult] = await Promise.all([
     getLeads(),
-    activeTab === 'inbound' ? listInboundLeads() : Promise.resolve(null),
+    activeTab === 'inbound'
+      ? listInboundLeads({ period, from, to })
+      : Promise.resolve(null),
   ])
 
   const groupedLeads = leads.reduce<GroupedLeads>((accumulator, lead) => {

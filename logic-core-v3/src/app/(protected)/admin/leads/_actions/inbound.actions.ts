@@ -1,12 +1,42 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
+import { endOfDay, startOfDay, subMonths, subWeeks, subYears } from 'date-fns'
 import { prisma } from '@/lib/prisma'
 import { requireSuperAdmin } from '@/lib/auth-guards'
 import { fail, ok, type ActionResult } from '@/lib/action-utils'
-import { ConvertInboundToLeadSchema } from './inbound.schemas'
+import {
+  ConvertInboundToLeadSchema,
+  InboundRangeSchema,
+  type InboundRange,
+  type InboundRangeInput,
+} from './inbound.schemas'
 
-export async function listInboundLeads(): Promise<
+/** Traduce el período validado a un rango { gte, lte? } sobre createdAt. */
+function resolveRange(range: InboundRange): { gte: Date; lte?: Date } {
+  const now = new Date()
+
+  switch (range.period) {
+    case '1w':
+      return { gte: subWeeks(now, 1) }
+    case '6m':
+      return { gte: subMonths(now, 6) }
+    case '1y':
+      return { gte: subYears(now, 1) }
+    case 'custom': {
+      // El schema garantiza from/to válidos con from <= to cuando period === 'custom';
+      // el fallback sólo existe para satisfacer el tipo sin casts.
+      const from = range.from ? startOfDay(new Date(range.from)) : subMonths(now, 1)
+      const to = range.to ? endOfDay(new Date(range.to)) : now
+      return { gte: from, lte: to }
+    }
+    case '1m':
+    default:
+      return { gte: subMonths(now, 1) }
+  }
+}
+
+export async function listInboundLeads(rangeInput: InboundRangeInput = {}): Promise<
   ActionResult<
     Array<{
       id: string
@@ -24,7 +54,15 @@ export async function listInboundLeads(): Promise<
   try {
     await requireSuperAdmin()
 
+    const range = InboundRangeSchema.parse(rangeInput)
+    const { gte, lte } = resolveRange(range)
+
+    // ContactSubmission es global (sin organizationId): no hay tenant scoping que preservar;
+    // el acceso ya está acotado por requireSuperAdmin().
     const submissions = await prisma.contactSubmission.findMany({
+      where: {
+        createdAt: { gte, ...(lte ? { lte } : {}) },
+      },
       orderBy: {
         createdAt: 'desc',
       },
