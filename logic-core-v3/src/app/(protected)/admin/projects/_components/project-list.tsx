@@ -33,6 +33,11 @@ const STATUS_SECTIONS: Array<{ status: ProjectStatus; label: string }> = [
   { status: 'COMPLETED', label: 'Completado' },
 ]
 
+// Alto máximo del carril de cada sección antes de scrollear VERTICAL (la rueda
+// sí panea). Calibrado a ~2 renglones de cards; subir/bajar este rem ajusta el
+// umbral. Si una sección supera esto, scrollea en vez de estirar la página.
+const SECTION_MAX_HEIGHT = 'max-h-[48rem]'
+
 export function ProjectList({ projects, dnd }: ProjectListProps) {
   const reduce = useReducedMotion()
 
@@ -86,10 +91,11 @@ export function ProjectList({ projects, dnd }: ProjectListProps) {
 
             {sectionProjects.length > 0 ? (
               <motion.div
-                // Fallback WRAP (pre-aprobado): la rueda vertical no panea
-                // overflow-x nativo, así que en vez de scroll horizontal frágil,
-                // las cards envuelven a varios renglones; ninguna queda cortada.
-                className="mt-5 flex flex-wrap items-stretch gap-4"
+                // Las cards envuelven a varios renglones (la rueda no panea
+                // overflow-x nativo); si la sección supera ~2 renglones se
+                // vuelve scrolleable VERTICAL (max-h + overflow-y) en vez de
+                // estirar la página. overflow-x-hidden: nunca scroll horizontal.
+                className={`mt-5 flex flex-wrap items-stretch gap-4 overflow-y-auto overflow-x-hidden pr-1 ${SECTION_MAX_HEIGHT}`}
                 variants={staggerContainer}
                 initial={reduce ? false : 'hidden'}
                 animate="visible"
