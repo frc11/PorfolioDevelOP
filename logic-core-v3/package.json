@@ -24,7 +24,6 @@
     "@anthropic-ai/sdk": "^0.95.2",
     "@auth/prisma-adapter": "^2.11.1",
     "@dnd-kit/core": "^6.3.1",
-    "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
     "@getbrevo/brevo": "^5.0.4",
     "@google-analytics/data": "^5.2.1",
