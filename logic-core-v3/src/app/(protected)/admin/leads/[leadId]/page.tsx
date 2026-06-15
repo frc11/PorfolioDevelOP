@@ -282,6 +282,10 @@ export default async function AgencyOsLeadDetailPage({ params }: LeadPageProps) 
         </div>
       </div>
 
+      {/* P3: la reunión agendada va full-width al tope, empujando el grid hacia abajo.
+          Sin reunión no se renderiza y el grid queda como siempre. */}
+      {reunion ? <ReunionPanel leadId={lead.id} agenda={reunion} /> : null}
+
       <div className="grid items-stretch gap-6 xl:grid-cols-[minmax(0,1.6fr)_minmax(320px,1fr)]">
         {/* P9: a xl la columna izq alinea su alto al de la derecha (Acciones rápidas).
             "Datos" queda fijo (auto) y "Actividad comercial" toma el 1fr restante,
@@ -384,8 +388,6 @@ export default async function AgencyOsLeadDetailPage({ params }: LeadPageProps) 
         </div>
 
         <div className="space-y-6">
-          {reunion ? <ReunionPanel leadId={lead.id} agenda={reunion} /> : null}
-
           <AssignSetterControl
             leadId={lead.id}
             assignedToId={lead.assignedToId}
