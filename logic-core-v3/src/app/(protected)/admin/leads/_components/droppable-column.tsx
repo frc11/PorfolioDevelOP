@@ -8,10 +8,7 @@ import type { LeadPipelineLead, PipelineStatus } from './lead-pipeline.shared'
 type DroppableColumnProps = {
   status: PipelineStatus
   leads: LeadPipelineLead[]
-  pendingLeadId: string | null
   bodyMaxHeight: number
-  onMoveStatus: (lead: LeadPipelineLead, status: PipelineStatus) => void
-  onDelete: (lead: LeadPipelineLead) => void
   onOpenOverview?: (status: PipelineStatus) => void
   renderCard: (lead: LeadPipelineLead) => ReactNode
 }

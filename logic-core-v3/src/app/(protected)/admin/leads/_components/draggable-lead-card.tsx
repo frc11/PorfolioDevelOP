@@ -5,12 +5,11 @@ import type { MouseEvent as ReactMouseEvent } from 'react'
 import { useDraggable } from '@dnd-kit/core'
 import { CSS } from '@dnd-kit/utilities'
 import { LeadCard } from './lead-card'
-import type { LeadPipelineLead, PipelineStatus } from './lead-pipeline.shared'
+import type { LeadPipelineLead } from './lead-pipeline.shared'
 
 type DraggableLeadCardProps = {
   lead: LeadPipelineLead
   isPending: boolean
-  onMoveStatus: (lead: LeadPipelineLead, status: PipelineStatus) => void
   onDelete: (lead: LeadPipelineLead) => void
 }
 
@@ -22,7 +21,6 @@ type DraggableLeadCardProps = {
 export function DraggableLeadCard({
   lead,
   isPending,
-  onMoveStatus,
   onDelete,
 }: DraggableLeadCardProps) {
   const { setNodeRef, attributes, listeners, transform, isDragging } = useDraggable({
@@ -56,7 +54,6 @@ export function DraggableLeadCard({
     <LeadCard
       lead={lead}
       isPending={isPending}
-      onMoveStatus={onMoveStatus}
       onDelete={onDelete}
       dragSetNodeRef={setNodeRef}
       dragAttributes={attributes}

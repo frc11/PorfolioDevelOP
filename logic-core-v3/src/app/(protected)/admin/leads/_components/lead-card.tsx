@@ -8,25 +8,18 @@ import {
   FlaskConical,
   LoaderCircle,
   MapPin,
-  MoreHorizontal,
   Trash2,
   UserRound,
 } from 'lucide-react'
 import type { DraggableAttributes, DraggableSyntheticListeners } from '@dnd-kit/core'
 import { ConfirmDialog } from '@/app/(protected)/admin/_components/confirm-dialog'
 import { cn } from '@/lib/utils'
-import type { LeadPipelineLead, PipelineStatus } from './lead-pipeline.shared'
-import {
-  MOVE_STATUS_OPTIONS,
-  formatRelativeTime,
-  serviceBadgeTone,
-  serviceLabel,
-} from './lead-card.helpers'
+import type { LeadPipelineLead } from './lead-pipeline.shared'
+import { formatRelativeTime, serviceBadgeTone, serviceLabel } from './lead-card.helpers'
 
 type LeadCardProps = {
   lead: LeadPipelineLead
   isPending?: boolean
-  onMoveStatus: (lead: LeadPipelineLead, status: PipelineStatus) => void
   onDelete: (lead: LeadPipelineLead) => void
   // DnD (Bloque 3) — todos opcionales: la card sigue siendo usable sin DnD (overview).
   dragSetNodeRef?: (element: HTMLElement | null) => void
@@ -42,7 +35,6 @@ type LeadCardProps = {
 export function LeadCard({
   lead,
   isPending = false,
-  onMoveStatus,
   onDelete,
   dragSetNodeRef,
   dragAttributes,
@@ -53,7 +45,6 @@ export function LeadCard({
   presentational = false,
 }: LeadCardProps) {
   const router = useRouter()
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const isDraggable = Boolean(dragListeners)
 
@@ -120,71 +111,22 @@ export function LeadCard({
           </div>
 
           {presentational ? null : (
-          <div className="relative">
             <button
               type="button"
               disabled={isPending}
-              aria-label="Acciones del lead"
-              aria-haspopup="menu"
-              aria-expanded={isMenuOpen}
+              aria-label="Eliminar lead"
               onClick={(event) => {
                 event.stopPropagation()
-                setIsMenuOpen((current) => !current)
+                setShowDeleteDialog(true)
               }}
-              className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-black/20 text-zinc-400 transition-colors hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/10 bg-black/20 text-zinc-400 transition-colors hover:border-rose-400/30 hover:text-rose-300 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {isPending ? (
                 <LoaderCircle className="h-4 w-4 animate-spin" />
               ) : (
-                <MoreHorizontal className="h-4 w-4" />
+                <Trash2 className="h-4 w-4" strokeWidth={1.5} />
               )}
             </button>
-
-            {isMenuOpen ? (
-              <div
-                className="absolute right-0 top-11 z-20 w-56 rounded-2xl border border-white/10 bg-[#11161d]/95 p-2 shadow-2xl backdrop-blur-xl"
-                onClick={(event) => event.stopPropagation()}
-              >
-                <p className="px-2 pb-2 pt-1 text-[10px] uppercase tracking-[0.22em] text-zinc-500">
-                  Mover a estado
-                </p>
-
-                <div className="space-y-1">
-                  {MOVE_STATUS_OPTIONS.filter((option) => option.status !== lead.status).map(
-                    (option) => (
-                      <button
-                        key={option.status}
-                        type="button"
-                        disabled={isPending}
-                        onClick={() => {
-                          setIsMenuOpen(false)
-                          onMoveStatus(lead, option.status)
-                        }}
-                        className="flex w-full items-center rounded-xl px-3 py-2 text-left text-sm text-zinc-200 transition-colors hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-60"
-                      >
-                        {option.label}
-                      </button>
-                    )
-                  )}
-                </div>
-
-                <div className="my-2 h-px bg-white/10" />
-
-                <button
-                  type="button"
-                  disabled={isPending}
-                  onClick={() => {
-                    setIsMenuOpen(false)
-                    setShowDeleteDialog(true)
-                  }}
-                  className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm text-rose-300 transition-colors hover:bg-rose-500/10 disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  <Trash2 className="h-4 w-4" />
-                  Eliminar
-                </button>
-              </div>
-            ) : null}
-          </div>
           )}
         </div>
 

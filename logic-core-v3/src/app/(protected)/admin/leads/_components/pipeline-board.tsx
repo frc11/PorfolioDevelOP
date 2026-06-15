@@ -16,7 +16,6 @@ const COLUMN_BODY_MAX_H = 460 // alto máx del cuerpo de cada columna (~3 cards)
 type PipelineBoardProps = {
   groupedLeads: GroupedLeads
   pendingLeadId: string | null
-  onMoveStatus: (lead: LeadPipelineLead, status: PipelineStatus) => void
   onDelete: (lead: LeadPipelineLead) => void
   onOpenOverview: (status: PipelineStatus) => void
 }
@@ -31,7 +30,6 @@ type PipelineBoardProps = {
 export function PipelineBoard({
   groupedLeads,
   pendingLeadId,
-  onMoveStatus,
   onDelete,
   onOpenOverview,
 }: PipelineBoardProps) {
@@ -40,7 +38,6 @@ export function PipelineBoard({
       key={lead.id}
       lead={lead}
       isPending={pendingLeadId === lead.id}
-      onMoveStatus={onMoveStatus}
       onDelete={onDelete}
     />
   )
@@ -61,10 +58,7 @@ export function PipelineBoard({
               key={status}
               status={status}
               leads={groupedLeads[status]}
-              pendingLeadId={pendingLeadId}
               bodyMaxHeight={COLUMN_BODY_MAX_H}
-              onMoveStatus={onMoveStatus}
-              onDelete={onDelete}
               onOpenOverview={onOpenOverview}
               renderCard={renderCard}
             />

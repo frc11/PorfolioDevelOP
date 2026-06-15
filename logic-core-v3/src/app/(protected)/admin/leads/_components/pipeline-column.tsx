@@ -4,7 +4,6 @@ import type { ReactNode } from 'react'
 import { Inbox } from 'lucide-react'
 import { EmptyState } from '@/components/ui'
 import { cn } from '@/lib/utils'
-import { LeadCard } from './lead-card'
 import {
   STATUS_LABELS,
   statusTone,
@@ -15,15 +14,12 @@ import {
 type PipelineColumnProps = {
   status: PipelineStatus
   leads: LeadPipelineLead[]
-  pendingLeadId: string | null
   /** Alto máx del cuerpo scrolleable (px). TUNABLE provisto por el padre. */
   bodyMaxHeight: number
-  onMoveStatus: (lead: LeadPipelineLead, status: PipelineStatus) => void
-  onDelete: (lead: LeadPipelineLead) => void
-  /** Click en el header → abre la vista fullscreen de la columna (Bloque 2). */
+  /** Click en el header → abre la vista fullscreen de la columna. */
   onOpenOverview?: (status: PipelineStatus) => void
-  /** Render de cada card (Bloque 3: inyecta la versión draggable). Default: LeadCard. */
-  renderCard?: (lead: LeadPipelineLead) => ReactNode
+  /** Render de cada card (inyecta la versión draggable desde el board). */
+  renderCard: (lead: LeadPipelineLead) => ReactNode
   /** Ref del droppable de dnd-kit. Sin él, la columna no es drop target. */
   dropRef?: (element: HTMLElement | null) => void
   /** La card arrastrada está sobre esta columna → highlight. */
@@ -38,10 +34,7 @@ type PipelineColumnProps = {
 export function PipelineColumn({
   status,
   leads,
-  pendingLeadId,
   bodyMaxHeight,
-  onMoveStatus,
-  onDelete,
   onOpenOverview,
   renderCard,
   dropRef,
@@ -83,19 +76,7 @@ export function PipelineColumn({
         style={{ maxHeight: bodyMaxHeight }}
       >
         {leads.length > 0 ? (
-          leads.map((lead) =>
-            renderCard ? (
-              renderCard(lead)
-            ) : (
-              <LeadCard
-                key={lead.id}
-                lead={lead}
-                isPending={pendingLeadId === lead.id}
-                onMoveStatus={onMoveStatus}
-                onDelete={onDelete}
-              />
-            ),
-          )
+          leads.map((lead) => renderCard(lead))
         ) : (
           <EmptyState
             icon={Inbox}

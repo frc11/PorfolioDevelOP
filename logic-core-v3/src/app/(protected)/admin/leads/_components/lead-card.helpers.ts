@@ -1,16 +1,4 @@
-import type { PipelineServiceType, PipelineStatus } from './lead-pipeline.shared'
-
-/** Opciones del menú "Mover a estado" de la card. */
-export const MOVE_STATUS_OPTIONS: Array<{ label: string; status: PipelineStatus }> = [
-  { label: 'Prospecto', status: 'PROSPECTO' },
-  { label: 'Demo enviada', status: 'DEMO_ENVIADA' },
-  { label: 'Vio video', status: 'VIO_VIDEO' },
-  { label: 'Respondio', status: 'RESPONDIO' },
-  { label: 'Call agendada', status: 'CALL_AGENDADA' },
-  { label: 'Cerrado', status: 'CERRADO' },
-  { label: 'Perdido', status: 'PERDIDO' },
-  { label: 'Postergado', status: 'POSTERGADO' },
-]
+import type { PipelineServiceType } from './lead-pipeline.shared'
 
 export function formatRelativeTime(value: string | null): string {
   if (!value) {

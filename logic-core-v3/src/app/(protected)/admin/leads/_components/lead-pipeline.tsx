@@ -204,7 +204,6 @@ export function LeadPipeline({ groupedLeads }: LeadPipelineProps) {
         <PipelineBoard
           groupedLeads={localGroupedLeads}
           pendingLeadId={pendingLeadId}
-          onMoveStatus={handleMoveStatus}
           onDelete={handleDelete}
           onOpenOverview={setOverviewStatus}
         />
@@ -216,7 +215,6 @@ export function LeadPipeline({ groupedLeads }: LeadPipelineProps) {
                   <LeadCard
                     lead={activeDragLead}
                     isPending={false}
-                    onMoveStatus={handleMoveStatus}
                     onDelete={handleDelete}
                     presentational
                   />
@@ -231,7 +229,6 @@ export function LeadPipeline({ groupedLeads }: LeadPipelineProps) {
         status={overviewStatus}
         leads={overviewStatus ? localGroupedLeads[overviewStatus] : []}
         pendingLeadId={pendingLeadId}
-        onMoveStatus={handleMoveStatus}
         onDelete={handleDelete}
         onClose={handleCloseOverview}
       />

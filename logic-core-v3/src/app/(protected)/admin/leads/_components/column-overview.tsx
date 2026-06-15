@@ -30,7 +30,6 @@ type ColumnOverviewProps = {
   status: PipelineStatus | null
   leads: LeadPipelineLead[]
   pendingLeadId: string | null
-  onMoveStatus: (lead: LeadPipelineLead, status: PipelineStatus) => void
   onDelete: (lead: LeadPipelineLead) => void
   onClose: () => void
 }
@@ -41,13 +40,12 @@ type ColumnOverviewProps = {
  * Portalizado a document.body (createPortal + gate useIsClient) para escapar el
  * containing block del <main> admin (backdrop-blur) que atraparía un position:fixed.
  * Cierra con X, click en el backdrop y Esc; foco inicial + trap + restore. El DnD
- * no vive acá: las cards mantienen su menú (mover/eliminar) como única interacción.
+ * no vive acá: las cards sólo tienen el tacho de eliminar.
  */
 export function ColumnOverview({
   status,
   leads,
   pendingLeadId,
-  onMoveStatus,
   onDelete,
   onClose,
 }: ColumnOverviewProps) {
@@ -174,7 +172,6 @@ export function ColumnOverview({
                       key={lead.id}
                       lead={lead}
                       isPending={pendingLeadId === lead.id}
-                      onMoveStatus={onMoveStatus}
                       onDelete={onDelete}
                     />
                   ))}
