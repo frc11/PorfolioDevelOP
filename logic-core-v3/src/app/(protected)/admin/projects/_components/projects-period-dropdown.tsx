@@ -124,7 +124,7 @@ export function ProjectsPeriodDropdown({
         aria-expanded={open}
         aria-controls={panelId}
         aria-label={ariaLabel}
-        className="inline-flex w-full items-center gap-2 rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white outline-none transition-colors hover:bg-white/5"
+        className="inline-flex w-full min-w-[210px] items-center gap-2 rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white outline-none transition-colors hover:bg-white/5"
       >
         <Calendar className="h-4 w-4 shrink-0 text-zinc-400" strokeWidth={1.5} />
         <span className="text-zinc-500">{label}</span>

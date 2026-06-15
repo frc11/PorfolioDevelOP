@@ -16,8 +16,11 @@ import {
   type VisibilityFilter,
 } from './projects-filters'
 
+// min-w fijo: el <Select> compartido pone w-full en su botón dentro de un
+// wrapper que hace shrink-wrap al contenido, así que sin esto el ancho cambia
+// según el valor (ej. "AI" lo achica). Con min-w queda estable.
 const controlClassName =
-  'rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white outline-none'
+  'min-w-[200px] rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white outline-none'
 
 type ProjectsFilterBarProps = {
   filters: ProjectFilters
