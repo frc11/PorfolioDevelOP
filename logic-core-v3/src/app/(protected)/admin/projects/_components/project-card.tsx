@@ -182,7 +182,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
         )}
       </div>
 
-      <div className="mt-5 grid gap-3">
+      <div className="mt-5 grid gap-4">
         <div className="rounded-2xl border border-white/10 bg-black/20 p-3">
           <p className="text-[10px] uppercase tracking-[0.22em] text-zinc-500">Monto acordado</p>
           <p className="mt-2 text-sm font-medium text-zinc-100">{formatCurrency(project.agreedAmount)}</p>
@@ -197,6 +197,14 @@ export function ProjectCard({ project }: ProjectCardProps) {
         </div>
 
         <div className="rounded-2xl border border-white/10 bg-black/20 p-3">
+          <p className="text-[10px] uppercase tracking-[0.22em] text-zinc-500">Entrega estimada</p>
+          <div className="mt-2 flex items-center gap-2 text-sm text-zinc-300">
+            <CalendarDays className="h-4 w-4 text-zinc-500" />
+            <span>{formatDate(project.estimatedEndDate)}</span>
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-white/10 bg-black/20 p-3">
           <p className="text-[10px] uppercase tracking-[0.22em] text-zinc-500">Pagos</p>
           <div className="mt-2 flex items-center gap-2 text-sm text-zinc-300">
             <CircleDollarSign className="h-4 w-4 text-zinc-500" />
@@ -207,7 +215,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
         </div>
       </div>
 
-      <div className="mt-auto rounded-2xl border border-white/10 bg-black/20 p-4">
+      <div className="mt-4 rounded-2xl border border-white/10 bg-black/20 p-4">
         <div className="flex items-center justify-between gap-3 text-sm">
           <div className="flex items-center gap-2 text-zinc-200">
             <FolderKanban className="h-4 w-4 text-zinc-500" />
