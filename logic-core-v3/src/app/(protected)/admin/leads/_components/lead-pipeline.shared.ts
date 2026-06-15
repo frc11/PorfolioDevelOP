@@ -98,3 +98,26 @@ export type LeadPipelineLead = {
 }
 
 export type GroupedLeads = Record<PipelineStatus, LeadPipelineLead[]>
+
+/** Grupos vacíos (las 8 columnas). Fuente única para agrupar leads. */
+export function emptyGroupedLeads(): GroupedLeads {
+  return {
+    PROSPECTO: [],
+    DEMO_ENVIADA: [],
+    VIO_VIDEO: [],
+    RESPONDIO: [],
+    CALL_AGENDADA: [],
+    CERRADO: [],
+    PERDIDO: [],
+    POSTERGADO: [],
+  }
+}
+
+/** Agrupa una lista plana de leads por estado, preservando el orden de entrada. */
+export function groupLeads(leads: LeadPipelineLead[]): GroupedLeads {
+  const groups = emptyGroupedLeads()
+  for (const lead of leads) {
+    groups[lead.status].push(lead)
+  }
+  return groups
+}
