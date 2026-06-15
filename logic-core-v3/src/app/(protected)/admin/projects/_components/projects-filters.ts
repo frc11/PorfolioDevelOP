@@ -33,7 +33,7 @@ export const PERIOD_OPTIONS: ReadonlyArray<{ value: PeriodFilter; label: string 
   { value: 'custom', label: 'Personalizado' },
 ]
 
-export const DEFAULT_PERIOD: PeriodFilter = '1m'
+export const DEFAULT_PERIOD: PeriodFilter = '6m'
 
 export type ProjectFilters = {
   service: ServiceFilter
@@ -84,40 +84,58 @@ export function periodStart(period: PeriodFilter): Date | null {
   }
 }
 
+// 'YYYY-MM-DD' → borde de día LOCAL (start o end) en ms. Mismo criterio para
+// `from`/`to`, así no se mezclan UTC y local en la comparación del rango.
+function localDayBoundary(value: string, edge: 'start' | 'end'): number | null {
+  const [year, month, day] = value.split('-').map(Number)
+  if (!year || !month || !day) {
+    return null
+  }
+
+  return edge === 'start'
+    ? new Date(year, month - 1, day, 0, 0, 0, 0).getTime()
+    : new Date(year, month - 1, day, 23, 59, 59, 999).getTime()
+}
+
+// Filtra por la FECHA DE INICIO del proyecto. Inicio dentro de [desde, hasta]
+// inclusive entra; el resto no. Inicio nulo queda EXCLUIDO de los filtros de
+// fecha (hasta que exista la columna real + backfill).
 export function matchesPeriod(
-  lastActivityAt: string | null,
+  startDate: string | null,
   period: PeriodFilter,
   from: string,
   to: string
 ): boolean {
-  // Sin señal de actividad → no se filtra por período (no se oculta el proyecto).
-  if (!lastActivityAt) {
-    return true
+  if (!startDate) {
+    return false
   }
 
-  const activity = new Date(lastActivityAt).getTime()
+  const start = new Date(startDate).getTime()
+  if (!Number.isFinite(start)) {
+    return false
+  }
 
   if (period === 'custom') {
     if (from) {
-      const fromTime = new Date(from).getTime()
-      if (Number.isFinite(fromTime) && activity < fromTime) {
+      const fromMs = localDayBoundary(from, 'start')
+      if (fromMs !== null && start < fromMs) {
         return false
       }
     }
     if (to) {
-      const toTime = new Date(`${to}T23:59:59.999`).getTime()
-      if (Number.isFinite(toTime) && activity > toTime) {
+      const toMs = localDayBoundary(to, 'end')
+      if (toMs !== null && start > toMs) {
         return false
       }
     }
     return true
   }
 
-  const start = periodStart(period)
-  return start ? activity >= start.getTime() : true
+  const windowStart = periodStart(period)
+  return windowStart ? start >= windowStart.getTime() : true
 }
 
-type FilterableProject = Pick<ProjectCardData, 'serviceType' | 'organizationId' | 'lastActivityAt'>
+type FilterableProject = Pick<ProjectCardData, 'serviceType' | 'organizationId' | 'startDate'>
 
 // Combina servicio AND visibilidad AND período sobre la lista completa.
 export function filterProjects<T extends FilterableProject>(
@@ -138,7 +156,7 @@ export function filterProjects<T extends FilterableProject>(
     return (
       matchesService &&
       matchesVisibility &&
-      matchesPeriod(project.lastActivityAt, filters.period, filters.from, filters.to)
+      matchesPeriod(project.startDate, filters.period, filters.from, filters.to)
     )
   })
 }
