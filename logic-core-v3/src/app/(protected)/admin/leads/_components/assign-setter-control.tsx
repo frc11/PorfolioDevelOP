@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { LoaderCircle, UserRound } from 'lucide-react'
+import { Select } from '@/components/ui'
 import { assignLeadSetter } from '../_actions/lead.actions'
 
 type SetterOption = {
@@ -66,7 +67,7 @@ export function AssignSetterControl({
         </p>
       ) : (
         <div className="mt-4 space-y-3">
-          <select
+          <Select
             value={selected}
             onChange={(event) => {
               setSelected(event.target.value)
@@ -75,15 +76,11 @@ export function AssignSetterControl({
             }}
             disabled={isPending}
             aria-label="Setter asignado"
-            className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white outline-none transition-colors focus:border-cyan-400/35 disabled:opacity-60"
-          >
-            <option value="">Sin asignar</option>
-            {setters.map((setter) => (
-              <option key={setter.id} value={setter.id}>
-                {setter.label}
-              </option>
-            ))}
-          </select>
+            options={[
+              { value: '', label: 'Sin asignar' },
+              ...setters.map((setter) => ({ value: setter.id, label: setter.label })),
+            ]}
+          />
 
           <div className="flex items-center gap-3">
             <button
