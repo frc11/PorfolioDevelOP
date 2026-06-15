@@ -2,13 +2,17 @@
 
 import { useEffect, useId, useRef, useState } from 'react'
 import { Calendar, Check, ChevronDown } from 'lucide-react'
-import { PERIOD_OPTIONS, type PeriodFilter } from './projects-filters'
+import type { PeriodValue } from './projects-filters'
 
 type ProjectsPeriodDropdownProps = {
-  period: PeriodFilter
+  /** Prefijo del trigger para distinguir el filtro, ej. "Inicio" / "Entrega". */
+  label: string
+  ariaLabel: string
+  options: ReadonlyArray<{ value: PeriodValue; label: string }>
+  period: PeriodValue
   from: string
   to: string
-  onChange: (period: PeriodFilter, from: string, to: string) => void
+  onChange: (period: PeriodValue, from: string, to: string) => void
 }
 
 function formatShortDate(value: string): string {
@@ -28,14 +32,16 @@ const dateInputClassName =
   'rounded-xl border border-white/10 bg-black/30 px-3 py-2 text-sm text-white outline-none [color-scheme:dark] focus:border-cyan-400/40'
 
 /**
- * Dropdown lane-local del filtro de período (sin librería de date-picker). Al
- * elegir "Personalizado" los 2 selectores de fecha aparecen DENTRO del mismo
- * panel (sin recargar) y el rango se aplica recién con "Aplicar" (ambas fechas
- * puestas). El resto de las opciones aplican al instante. Panel posicionado
- * `absolute` bajo el trigger: la barra vive arriba de la página, así que no lo
- * recorta el scroll del `<main>`.
+ * Dropdown lane-local de filtro de fecha (sin librería de date-picker),
+ * reutilizado por Inicio y Entrega. Al elegir "Personalizado" los 2 selectores
+ * aparecen DENTRO del panel (sin recargar) y el rango se aplica recién con
+ * "Aplicar" (ambas fechas puestas). El resto aplica al instante. Panel SÓLIDO
+ * (bg-zinc-900 opaco) como el `<Select>` de servicio, sin bleed del fondo.
  */
 export function ProjectsPeriodDropdown({
+  label,
+  ariaLabel,
+  options,
   period,
   from,
   to,
@@ -81,7 +87,7 @@ export function ProjectsPeriodDropdown({
     setOpen(true)
   }
 
-  const selectPeriod = (value: PeriodFilter) => {
+  const selectPeriod = (value: PeriodValue) => {
     if (value === 'custom') {
       setShowCustom(true)
       return
@@ -102,12 +108,12 @@ export function ProjectsPeriodDropdown({
     setOpen(false)
   }
 
-  const triggerLabel =
+  const selectionLabel =
     period === 'custom'
       ? from && to
         ? `${formatShortDate(from)} → ${formatShortDate(to)}`
         : 'Personalizado'
-      : PERIOD_OPTIONS.find((option) => option.value === period)?.label ?? 'Período'
+      : options.find((option) => option.value === period)?.label ?? 'Todos'
 
   return (
     <div ref={containerRef} className="relative">
@@ -117,13 +123,14 @@ export function ProjectsPeriodDropdown({
         aria-haspopup="dialog"
         aria-expanded={open}
         aria-controls={panelId}
-        aria-label="Filtrar por período de última actividad"
-        className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white outline-none transition-colors hover:bg-white/5"
+        aria-label={ariaLabel}
+        className="inline-flex w-full items-center gap-2 rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white outline-none transition-colors hover:bg-white/5"
       >
-        <Calendar className="h-4 w-4 text-zinc-400" strokeWidth={1.5} />
-        <span>{triggerLabel}</span>
+        <Calendar className="h-4 w-4 shrink-0 text-zinc-400" strokeWidth={1.5} />
+        <span className="text-zinc-500">{label}</span>
+        <span className="truncate">{selectionLabel}</span>
         <ChevronDown
-          className={`h-4 w-4 text-zinc-500 transition-transform ${open ? 'rotate-180' : ''}`}
+          className={`ml-auto h-4 w-4 shrink-0 text-zinc-500 transition-transform ${open ? 'rotate-180' : ''}`}
           strokeWidth={1.5}
         />
       </button>
@@ -132,14 +139,13 @@ export function ProjectsPeriodDropdown({
         <div
           id={panelId}
           role="dialog"
-          aria-label="Opciones de período"
-          // Panel SÓLIDO/opaco (mismo criterio que el <Select> de servicio, que
-          // portalea a body sobre el bg sólido): acá es absolute dentro del
-          // <main> translúcido, así que un /95 + backdrop-blur dejaba pasar el
-          // fondo. bg-zinc-900 sin alpha lo corta.
+          aria-label={ariaLabel}
+          // Panel SÓLIDO/opaco (mismo criterio que el <Select> de servicio): acá
+          // es absolute dentro del <main> translúcido, así que bg-zinc-900 sin
+          // alpha ni backdrop-blur evita que se cuele el fondo.
           className="absolute right-0 top-full z-30 mt-2 w-[260px] overflow-hidden rounded-xl border border-white/[0.08] bg-zinc-900 p-1.5 shadow-2xl"
         >
-          {PERIOD_OPTIONS.map((option) => {
+          {options.map((option) => {
             const isActive =
               option.value === 'custom' ? showCustom : option.value === period
 

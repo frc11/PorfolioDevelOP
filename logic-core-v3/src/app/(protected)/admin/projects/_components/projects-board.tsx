@@ -107,9 +107,12 @@ export function ProjectsBoard({ projects, organizations, errorMessage }: Project
   const isDefault =
     filters.service === DEFAULT_FILTERS.service &&
     filters.visibility === DEFAULT_FILTERS.visibility &&
-    filters.period === DEFAULT_FILTERS.period &&
-    filters.from === '' &&
-    filters.to === ''
+    filters.start.period === DEFAULT_FILTERS.start.period &&
+    filters.start.from === '' &&
+    filters.start.to === '' &&
+    filters.delivery.period === DEFAULT_FILTERS.delivery.period &&
+    filters.delivery.from === '' &&
+    filters.delivery.to === ''
 
   return (
     <section className="space-y-6">
@@ -136,8 +139,11 @@ export function ProjectsBoard({ projects, organizations, errorMessage }: Project
             onVisibilityChange={(visibility) =>
               setFilters((current) => ({ ...current, visibility }))
             }
-            onPeriodChange={(period, from, to) =>
-              setFilters((current) => ({ ...current, period, from, to }))
+            onStartChange={(period, from, to) =>
+              setFilters((current) => ({ ...current, start: { period, from, to } }))
+            }
+            onDeliveryChange={(period, from, to) =>
+              setFilters((current) => ({ ...current, delivery: { period, from, to } }))
             }
             onReset={() => setFilters(DEFAULT_FILTERS)}
           />

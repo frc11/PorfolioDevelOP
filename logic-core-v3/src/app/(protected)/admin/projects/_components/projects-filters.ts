@@ -1,9 +1,10 @@
 import type { ServiceType } from '@prisma/client'
 import type { ProjectCardData } from './project-card'
 
-// Vocabulario canónico de filtros del lane (servicio / visibilidad / período) +
-// helpers puros de filtrado en memoria. Todo client-side: la página ya no navega
-// por searchParams; el board mantiene el estado en useState y filtra acá.
+// Vocabulario canónico de filtros del lane + helpers puros de filtrado en
+// memoria. Dos filtros de fecha: INICIO (ventana hacia atrás sobre el startDate
+// derivado) y ENTREGA (ventana hacia adelante sobre estimatedEndDate, columna
+// real). Todo client-side: el board mantiene el estado y filtra acá.
 
 export type ServiceFilter = 'ALL' | ServiceType
 
@@ -23,9 +24,13 @@ export const VISIBILITY_OPTIONS: ReadonlyArray<{ value: VisibilityFilter; label:
   { value: 'INTERNAL', label: 'Internos' },
 ]
 
-export type PeriodFilter = '1w' | '1m' | '6m' | '1y' | 'custom'
+// Unión compartida por los dos filtros de fecha. Las option-lists de abajo
+// limitan qué valores ofrece cada uno; las funciones de match interpretan el
+// período según el filtro (inicio hacia atrás, entrega hacia adelante).
+export type PeriodValue = 'all' | '1w' | '1m' | '3m' | '6m' | '1y' | 'custom'
 
-export const PERIOD_OPTIONS: ReadonlyArray<{ value: PeriodFilter; label: string }> = [
+export const START_PERIOD_OPTIONS: ReadonlyArray<{ value: PeriodValue; label: string }> = [
+  { value: 'all', label: 'Todos' },
   { value: '1w', label: 'Última semana' },
   { value: '1m', label: 'Último mes' },
   { value: '6m', label: 'Últimos 6 meses' },
@@ -33,22 +38,32 @@ export const PERIOD_OPTIONS: ReadonlyArray<{ value: PeriodFilter; label: string 
   { value: 'custom', label: 'Personalizado' },
 ]
 
-export const DEFAULT_PERIOD: PeriodFilter = '6m'
+export const DELIVERY_PERIOD_OPTIONS: ReadonlyArray<{ value: PeriodValue; label: string }> = [
+  { value: 'all', label: 'Todos' },
+  { value: '1w', label: 'Próxima semana' },
+  { value: '1m', label: 'Próximo mes' },
+  { value: '3m', label: 'Próximos 3 meses' },
+  { value: 'custom', label: 'Personalizado' },
+]
+
+export type DateFilter = {
+  period: PeriodValue
+  from: string
+  to: string
+}
 
 export type ProjectFilters = {
   service: ServiceFilter
   visibility: VisibilityFilter
-  period: PeriodFilter
-  from: string
-  to: string
+  start: DateFilter
+  delivery: DateFilter
 }
 
 export const DEFAULT_FILTERS: ProjectFilters = {
   service: 'ALL',
   visibility: 'ALL',
-  period: DEFAULT_PERIOD,
-  from: '',
-  to: '',
+  start: { period: '6m', from: '', to: '' },
+  delivery: { period: 'all', from: '', to: '' },
 }
 
 export function isServiceFilter(value: string): value is ServiceFilter {
@@ -57,31 +72,6 @@ export function isServiceFilter(value: string): value is ServiceFilter {
 
 export function isVisibilityFilter(value: string): value is VisibilityFilter {
   return VISIBILITY_OPTIONS.some((option) => option.value === value)
-}
-
-export function isPeriodFilter(value: string): value is PeriodFilter {
-  return PERIOD_OPTIONS.some((option) => option.value === value)
-}
-
-export function periodStart(period: PeriodFilter): Date | null {
-  const start = new Date()
-
-  switch (period) {
-    case '1w':
-      start.setDate(start.getDate() - 7)
-      return start
-    case '1m':
-      start.setMonth(start.getMonth() - 1)
-      return start
-    case '6m':
-      start.setMonth(start.getMonth() - 6)
-      return start
-    case '1y':
-      start.setFullYear(start.getFullYear() - 1)
-      return start
-    case 'custom':
-      return null
-  }
 }
 
 // 'YYYY-MM-DD' → borde de día LOCAL (start o end) en ms. Mismo criterio para
@@ -97,47 +87,124 @@ function localDayBoundary(value: string, edge: 'start' | 'end'): number | null {
     : new Date(year, month - 1, day, 23, 59, 59, 999).getTime()
 }
 
-// Filtra por la FECHA DE INICIO del proyecto. Inicio dentro de [desde, hasta]
-// inclusive entra; el resto no. Inicio nulo queda EXCLUIDO de los filtros de
-// fecha (hasta que exista la columna real + backfill).
-export function matchesPeriod(
-  startDate: string | null,
-  period: PeriodFilter,
-  from: string,
-  to: string
-): boolean {
+function withinCustomRange(time: number, from: string, to: string): boolean {
+  if (from) {
+    const fromMs = localDayBoundary(from, 'start')
+    if (fromMs !== null && time < fromMs) {
+      return false
+    }
+  }
+  if (to) {
+    const toMs = localDayBoundary(to, 'end')
+    if (toMs !== null && time > toMs) {
+      return false
+    }
+  }
+  return true
+}
+
+function startOfToday(): Date {
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  return today
+}
+
+// Inicio del rango hacia ATRÁS desde hoy (filtro de inicio).
+function backwardWindowStart(period: PeriodValue): Date | null {
+  const start = new Date()
+
+  switch (period) {
+    case '1w':
+      start.setDate(start.getDate() - 7)
+      return start
+    case '1m':
+      start.setMonth(start.getMonth() - 1)
+      return start
+    case '6m':
+      start.setMonth(start.getMonth() - 6)
+      return start
+    case '1y':
+      start.setFullYear(start.getFullYear() - 1)
+      return start
+    default:
+      return null
+  }
+}
+
+// Fin del rango hacia ADELANTE desde hoy (filtro de entrega).
+function forwardWindowEnd(period: PeriodValue): Date | null {
+  const end = startOfToday()
+
+  switch (period) {
+    case '1w':
+      end.setDate(end.getDate() + 7)
+      break
+    case '1m':
+      end.setMonth(end.getMonth() + 1)
+      break
+    case '3m':
+      end.setMonth(end.getMonth() + 3)
+      break
+    default:
+      return null
+  }
+
+  end.setHours(23, 59, 59, 999)
+  return end
+}
+
+// INICIO: ventana hacia atrás sobre el startDate (derivado). 'all' → no filtra;
+// inicio nulo queda EXCLUIDO de los rangos (visible sólo en 'all').
+export function matchesStart(startDate: string | null, filter: DateFilter): boolean {
+  if (filter.period === 'all') {
+    return true
+  }
   if (!startDate) {
     return false
   }
 
-  const start = new Date(startDate).getTime()
-  if (!Number.isFinite(start)) {
+  const time = new Date(startDate).getTime()
+  if (!Number.isFinite(time)) {
     return false
   }
 
-  if (period === 'custom') {
-    if (from) {
-      const fromMs = localDayBoundary(from, 'start')
-      if (fromMs !== null && start < fromMs) {
-        return false
-      }
-    }
-    if (to) {
-      const toMs = localDayBoundary(to, 'end')
-      if (toMs !== null && start > toMs) {
-        return false
-      }
-    }
-    return true
+  if (filter.period === 'custom') {
+    return withinCustomRange(time, filter.from, filter.to)
   }
 
-  const windowStart = periodStart(period)
-  return windowStart ? start >= windowStart.getTime() : true
+  const windowStart = backwardWindowStart(filter.period)
+  return windowStart ? time >= windowStart.getTime() : true
 }
 
-type FilterableProject = Pick<ProjectCardData, 'serviceType' | 'organizationId' | 'startDate'>
+// ENTREGA: ventana hacia adelante [hoy, hoy+ventana] sobre estimatedEndDate
+// (columna real). 'all' → no filtra; entrega nula EXCLUIDA de los rangos.
+export function matchesDelivery(estimatedEndDate: string | null, filter: DateFilter): boolean {
+  if (filter.period === 'all') {
+    return true
+  }
+  if (!estimatedEndDate) {
+    return false
+  }
 
-// Combina servicio AND visibilidad AND período sobre la lista completa.
+  const time = new Date(estimatedEndDate).getTime()
+  if (!Number.isFinite(time)) {
+    return false
+  }
+
+  if (filter.period === 'custom') {
+    return withinCustomRange(time, filter.from, filter.to)
+  }
+
+  const windowEnd = forwardWindowEnd(filter.period)
+  return time >= startOfToday().getTime() && (windowEnd ? time <= windowEnd.getTime() : true)
+}
+
+type FilterableProject = Pick<
+  ProjectCardData,
+  'serviceType' | 'organizationId' | 'startDate' | 'estimatedEndDate'
+>
+
+// Combina servicio AND visibilidad AND inicio AND entrega sobre la lista completa.
 export function filterProjects<T extends FilterableProject>(
   projects: T[],
   filters: ProjectFilters
@@ -156,7 +223,8 @@ export function filterProjects<T extends FilterableProject>(
     return (
       matchesService &&
       matchesVisibility &&
-      matchesPeriod(project.startDate, filters.period, filters.from, filters.to)
+      matchesStart(project.startDate, filters.start) &&
+      matchesDelivery(project.estimatedEndDate, filters.delivery)
     )
   })
 }

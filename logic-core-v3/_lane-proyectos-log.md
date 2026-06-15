@@ -146,3 +146,23 @@ PENDIENTE DE COORDINACIÓN (Sprint C):
 2. **Script de backfill** (one-off, NO commiteado) — entregado en el reporte; corre recién con la columna.
 
 CAMBIO F+6 cerraron el uso de `ConfirmDialog` en el lane (tareas + horas migradas a `OverlayModal`). `confirm-dialog.tsx` sigue prohibido/compartido para otros lanes.
+
+---
+
+# Sprint D — 2º filtro (entrega) + Todos/reset, ancho fijo select, entrega en card, scroll vertical secciones (CAMBIO 1–4)
+
+NOTA: "fecha de inicio obligatoria" CANCELADO → se cae la coordinación de `Project.startDate` del Sprint C. El filtro de inicio sigue sobre el `startDate` derivado.
+
+## FASE 0 — Hallazgos
+
+1. **Entrega = `estimatedEndDate`** (columna REAL en `Project`, schema:498). La card ya trae `estimatedEndDate: string | null` y el serializer la expone. El filtro de entrega va sobre esa columna real (a diferencia de inicio, que es derivado).
+2. **Estado de filtros** vive en `ProjectsBoard` (`filters: ProjectFilters` useState) → `ProjectsFilterBar` (controles) → `ProjectsPeriodDropdown` (período). Para el 2º filtro extiendo `ProjectFilters` a `{ service, visibility, start:{period,from,to}, delivery:{period,from,to} }`.
+3. **Select de servicio se achica**: el `<Select>` compartido pone `w-full` en su botón dentro de un wrapper `relative` sin ancho → shrink-wrap al contenido → ancho = label. Fix: `min-w` en el control.
+4. **Carril de wrap** = `motion.div` (`flex flex-wrap`) en `project-list.tsx`. Sumarle `max-h` calibrable + `overflow-y-auto overflow-x-hidden`.
+
+## Decisiones por cambio
+
+- **1:** `projects-filters.ts` reescrito a 2 filtros de fecha. Unión compartida `PeriodValue = 'all'|'1w'|'1m'|'3m'|'6m'|'1y'|'custom'`; option-lists distintas por filtro (inicio: all/1w/1m/6m/1y/custom; entrega: all/1w/1m/3m/custom). `matchesStart` (hacia atrás sobre startDate, 'all'→no filtra, null→excluido salvo 'all') y `matchesDelivery` (hacia adelante `[hoy, hoy+ventana]` sobre estimatedEndDate, 'all'→no filtra, null→excluido salvo 'all'). Custom inclusivo con bordes de día local. `ProjectsPeriodDropdown` se generaliza (label + ariaLabel + options). Reset → `DEFAULT_FILTERS` (servicio Todos, visibilidad Todos, inicio 6m, entrega Todos); el botón "Limpiar" pasa a "Reestablecer filtros".
+- **2:** `min-w-[180px]` al select de servicio (y min-w a los dropdowns de fecha) para que no se achiquen con valores cortos.
+- **3:** card — tile "Entrega estimada" debajo de "Inicio" (orden Monto/Inicio/Entrega/Pagos); gaps uniformes (gap-4 entre tiles + mt-4 al footer, se saca `mt-auto` que dejaba Pagos pegado al footer en la card más alta).
+- **4:** `project-list.tsx` — el carril de cada sección con `max-h-[Nrem]` (constante calibrable) + `overflow-y-auto overflow-x-hidden`: ~2 renglones visibles, el resto scrollea vertical (la rueda sí panea).

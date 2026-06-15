@@ -1,13 +1,16 @@
 'use client'
 
 import type { ChangeEvent } from 'react'
+import { RotateCcw } from 'lucide-react'
 import { Select } from '@/components/ui'
 import { ProjectsPeriodDropdown } from './projects-period-dropdown'
 import {
+  DELIVERY_PERIOD_OPTIONS,
   SERVICE_OPTIONS,
+  START_PERIOD_OPTIONS,
   VISIBILITY_OPTIONS,
   isServiceFilter,
-  type PeriodFilter,
+  type PeriodValue,
   type ProjectFilters,
   type ServiceFilter,
   type VisibilityFilter,
@@ -21,22 +24,24 @@ type ProjectsFilterBarProps = {
   isDefault: boolean
   onServiceChange: (value: ServiceFilter) => void
   onVisibilityChange: (value: VisibilityFilter) => void
-  onPeriodChange: (period: PeriodFilter, from: string, to: string) => void
+  onStartChange: (period: PeriodValue, from: string, to: string) => void
+  onDeliveryChange: (period: PeriodValue, from: string, to: string) => void
   onReset: () => void
 }
 
 /**
- * Barra de filtros 100% client-side: visibilidad (botones), servicio y período
- * (controlados) filtran al instante vía estado del board, sin navegación ni
- * recarga. El control de período acá es básico (select + fechas inline para
- * "Personalizado"); CAMBIO B lo reemplaza por un dropdown con "Aplicar".
+ * Barra de filtros 100% client-side: visibilidad (botones), servicio (select),
+ * inicio y entrega (dropdowns de fecha) filtran al instante vía estado del
+ * board, sin navegación ni recarga. "Reestablecer filtros" vuelve todo a su
+ * default. Todos combinan AND.
  */
 export function ProjectsFilterBar({
   filters,
   isDefault,
   onServiceChange,
   onVisibilityChange,
-  onPeriodChange,
+  onStartChange,
+  onDeliveryChange,
   onReset,
 }: ProjectsFilterBarProps) {
   const handleService = (event: ChangeEvent<HTMLSelectElement>) => {
@@ -86,19 +91,33 @@ export function ProjectsFilterBar({
         </Select>
 
         <ProjectsPeriodDropdown
-          period={filters.period}
-          from={filters.from}
-          to={filters.to}
-          onChange={onPeriodChange}
+          label="Inicio"
+          ariaLabel="Filtrar por fecha de inicio"
+          options={START_PERIOD_OPTIONS}
+          period={filters.start.period}
+          from={filters.start.from}
+          to={filters.start.to}
+          onChange={onStartChange}
+        />
+
+        <ProjectsPeriodDropdown
+          label="Entrega"
+          ariaLabel="Filtrar por fecha de entrega estimada"
+          options={DELIVERY_PERIOD_OPTIONS}
+          period={filters.delivery.period}
+          from={filters.delivery.from}
+          to={filters.delivery.to}
+          onChange={onDeliveryChange}
         />
 
         {!isDefault ? (
           <button
             type="button"
             onClick={onReset}
-            className="text-sm text-zinc-500 transition-colors hover:text-zinc-300"
+            className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-zinc-300 transition-colors hover:bg-white/5 hover:text-white"
           >
-            Limpiar
+            <RotateCcw className="h-4 w-4" strokeWidth={1.5} />
+            Reestablecer filtros
           </button>
         ) : null}
       </div>
