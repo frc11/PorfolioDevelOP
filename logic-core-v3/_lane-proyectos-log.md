@@ -66,3 +66,34 @@ Verificado in-scope: el trigger en `[projectId]/layout.tsx:217` es `<form action
 1. **(#8) confirm-dialog.tsx — portal/centrado del diálogo de borrar.** El diálogo de borrar tarea (`task-list.tsx`) y borrar registro de horas (`time-entry-panel.tsx`) usan la primitiva PROHIBIDA `src/app/(protected)/admin/_components/confirm-dialog.tsx`, que renderiza `fixed inset-0 z-[180]` inline dentro del `<main>` con `backdrop-filter` → mismo containing-block trap que arreglamos en los forms. Fix requerido: portalear `ConfirmDialog` a `document.body` (mismo patrón que el `overlay-modal.tsx` del lane). No editable desde este lane. (Borrar proyecto no tiene UI: `deleteProjectAction` es dead code.)
 
 2. **(#4) Freeze post-impersonación.** El trigger in-scope está OK. El freeze al SALIR de "Ver como cliente" y volver al admin involucra: (a) `lib/actions/impersonation.ts` → `stopImpersonationAction` hace `redirect('/admin/clients')` (hard nav, PROHIBIDO); (b) `AdminLayoutClient.tsx` → estado `mobileOpen` del sidebar no se resetea en hard-redirect (PROHIBIDO). Patch sugerido fuera de scope: `useEffect(() => setMobileOpen(false), [pathname])` en `AdminLayoutClient`, y/o revisar si la impersonación debe limpiar estado antes del redirect. Requiere coordinación con los dueños de auth/impersonación y del layout admin (lane Dashboard).
+
+---
+
+# Sprint B — Filtros client-side + DnD proyectos + tareas (CAMBIO A–H)
+
+Branch `lane/proyectos`. Workflow FASE 0 = 5 subagentes read-only (status-action, overview, tasks, scroll-cards, filters-clientization). Resumen de hallazgos + decisiones por cambio. Commit POR CAMBIO.
+
+## FASE 0 — Hallazgos
+
+- **#1 Filtros recargan (CONFIRMADO):** hoy `page.tsx` (server) lee `searchParams`, `listProjects()` trae todo, filtra in-memory SERVER-SIDE y pasa `filteredProjects` a `ProjectList`. Cada cambio de filtro es NAVEGACIÓN: las chips de visibilidad son `<Link>` (la premisa del brief de que cliente/interno ya eran useState es ERRÓNEA), servicio+período viven en un `<form action="/admin/projects">` con `requestSubmit()` on-change, "Limpiar" es `<Link>`. → CAMBIO A convierte LOS TRES a useState client-side.
+- **#2 Action de estado de PROYECTO (EXISTE):** `updateProjectStatus({projectId, status})` en `project.actions.ts:710` — `requireSuperAdmin` + Zod `UpdateProjectStatusSchema` + `prisma.project.update` por PK. COMPLETED auto-sella `deliveredAt = new Date()` (y NO lo limpia al salir de COMPLETED). Scope por `requireSuperAdmin`, no por `organizationId` (convención del archivo). → CAMBIO D la reusa tal cual; NO crear action nueva, NO tocar schema.
+- **#3 Overview (componente REAL):** único renderer `[projectId]/page.tsx:185-235`. Es el index del segmento `[projectId]` (tabs = rutas anidadas, no estado). El fix previo (commit `2a95ced`) YA está en disco y commiteado (`md:grid-cols-2 md:items-stretch` + `h-full` + `md:col-span-2`). El "no se reflejó" es cache/rebuild/breakpoint `md`, NO archivo equivocado. → CAMBIO H endurece la estructura (2-up grid de altura pareja + Cliente vinculado como hermano full-width) y se reporta que el markup previo ya estaba vivo.
+- **#4 Scroll horizontal (causa):** el markup del row (`flex gap-4 overflow-x-auto` + cards `w-[340px] shrink-0`) es correcto pero el row puede crecer porque nada lo clampa, y `<main>` (`overflow-y-auto`, PROHIBIDO) se roba el gesto vertical. Fix lane-side: row con `min-w-0 max-w-full items-stretch overflow-y-hidden`; altura pareja real = `h-full` en el `<Link>` de la card (hoy solo estira el wrapper, no el Link) + card `flex flex-col` con footer `mt-auto`. MONTO ACORDADO no se corta hoy; mantener body `flex-col` (sin max-height duro). → CAMBIO C.
+- **#5 Tareas (E/F/G):** `updateTask({taskId,status})` + `deleteTask(taskId: string)` con optimista+rollback. Borrado usa `ConfirmDialog` (PROHIBIDO) en `task-list.tsx:596`. `OverlayModal` (lane shell) NO trae footer ni isPending → se arma como children. Drag hoy sólo desde el grip `GripVertical` (oculto sm:flex, aria-hidden).
+
+## Decisiones por cambio
+
+- **A:** nuevo `projects-board.tsx` (client) dueño de todo el `<section>` (header + ProjectForm + filter bar + counts + lista). `page.tsx` queda como wrapper server (fetch + pasa la lista COMPLETA). Counts ("con cliente/internos") SIEMPRE sobre la lista completa, nunca filtrada. Vocab + helpers puros (`SERVICE/VISIBILITY/PERIOD_OPTIONS`, `matchesPeriod`, `periodStart`, `filterProjects`) centralizados en `projects-filters.ts`. Se borran `projects-filter-select.tsx` y `projects-period-filter.tsx` (quedan muertos). `matchesPeriod` mantiene: `lastActivityAt === null` → no se oculta. Default período `1m`. **Cambio de comportamiento:** se pierde el estado en URL / back-button (aceptado por el objetivo in-memory) → flag al humano.
+- **B:** `projects-period-dropdown.tsx` (client) popover: las 5 opciones + al elegir "Personalizado" aparecen los 2 date inputs DENTRO del dropdown + botón "Aplicar" (el rango aplica recién con ambas fechas). Date inputs estilados dark/glass. Sin dep nueva.
+- **C:** `project-card.tsx` → `flex h-full w-full flex-col`, footer `mt-auto`; `project-list.tsx` row → `min-w-0 max-w-full items-stretch overflow-x-auto overflow-y-hidden`, wrapper de card flex para que el Link estire.
+- **D:** DnD nativo HTML5 de la CARD ENTERA entre las 4 secciones; reusa `updateProjectStatus`, optimista+rollback. La card es un `<Link>` → `draggable={false}` en el Link, wrapper `draggable` que arrastra; click navega, drag mueve. Convive con el scroll horizontal.
+- **E:** kebab "..." de tarea → se elimina; queda un ícono de tacho directo. Cambio de estado SOLO por drag (decisión explícita del humano; NO re-agregar vía de estado en menú).
+- **F:** borrado de tarea sale de `ConfirmDialog` y pasa por `OverlayModal` (portaleado, centrado, cubre todo). NO se edita `confirm-dialog.tsx` (sólo se deja de importar en `task-list.tsx`); `time-entry-panel.tsx` sigue usándolo (out-of-scope este cambio) → **PENDIENTE #1 queda parcialmente resuelto** (tareas sí, horas no).
+- **G:** drag de tarea pasa al `<article>` entero; controles internos (expandir, Editar, tacho) con `draggable={false}` + `stopPropagation`/`preventDefault` para no iniciar drag y seguir clickeables.
+- **H:** ver arriba — hardening + reporte de que ya estaba vivo.
+
+## A confirmar / flags al humano (Sprint B)
+
+- A: filtros sin estado en URL (back-button/deeplink ya no reflejan filtro). Confirmar que es aceptable.
+- E/G: cambio de estado de tarea SOLO por drag → sin camino teclado/mobile (decisión explícita del humano). a11y reducida asumida.
+- D: arrastrar a "Completado" sella `deliveredAt`; sacar de Completado NO lo limpia (la action sólo setea). Comportamiento heredado.
