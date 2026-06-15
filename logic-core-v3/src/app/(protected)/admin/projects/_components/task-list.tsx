@@ -19,9 +19,9 @@ import {
   deleteTask,
   updateTask,
 } from '@/app/(protected)/admin/team/_actions/task.actions'
-import { ConfirmDialog } from '@/app/(protected)/admin/_components/confirm-dialog'
 import { EmptyState } from '@/components/ui'
 import { sendTaskForApprovalAction } from '@/lib/actions/projects'
+import { OverlayModal } from './overlay-modal'
 import { TaskForm } from './task-form'
 
 export type TaskAssignee = {
@@ -545,26 +545,44 @@ export function TaskList({
         })}
       </div>
 
-      <ConfirmDialog
+      <OverlayModal
         open={taskToDelete !== null}
         onClose={() => setTaskToDelete(null)}
-        onConfirm={() => {
-          if (!taskToDelete) {
-            return
-          }
-
-          handleDelete(taskToDelete)
-        }}
         title="Eliminar tarea"
-        description={
-          taskToDelete
-            ? `Se eliminara "${taskToDelete.title}" junto con sus registros de tiempo.`
-            : ''
-        }
-        confirmLabel="Eliminar tarea"
-        variant="danger"
-        isPending={taskToDelete ? pendingTaskId === taskToDelete.id : false}
-      />
+        eyebrow="develOP / Proyectos / Tareas"
+        panelClassName="max-w-md"
+      >
+        <div className="mt-5 space-y-5">
+          <div className="flex items-start gap-3 rounded-2xl border border-rose-400/20 bg-rose-500/10 p-4 text-sm leading-6 text-rose-100">
+            <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-rose-300" strokeWidth={1.5} />
+            <p>
+              Se eliminará <span className="font-semibold">{taskToDelete?.title}</span> junto con sus
+              registros de tiempo. Esta acción no se puede deshacer.
+            </p>
+          </div>
+
+          <div className="flex justify-end gap-3">
+            <button
+              type="button"
+              onClick={() => setTaskToDelete(null)}
+              className="rounded-2xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-medium text-zinc-200 transition-colors hover:bg-white/10"
+            >
+              Cancelar
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                if (taskToDelete) {
+                  handleDelete(taskToDelete)
+                }
+              }}
+              className="rounded-2xl border border-rose-400/20 bg-rose-500/15 px-4 py-2.5 text-sm font-medium text-rose-100 transition-colors hover:bg-rose-500/25"
+            >
+              Eliminar tarea
+            </button>
+          </div>
+        </div>
+      </OverlayModal>
     </>
   )
 }
