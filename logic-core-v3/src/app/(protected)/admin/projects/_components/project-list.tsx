@@ -86,7 +86,10 @@ export function ProjectList({ projects, dnd }: ProjectListProps) {
 
             {sectionProjects.length > 0 ? (
               <motion.div
-                className="mt-5 flex min-w-0 max-w-full items-stretch gap-4 overflow-x-auto overflow-y-hidden pb-2"
+                // Fallback WRAP (pre-aprobado): la rueda vertical no panea
+                // overflow-x nativo, así que en vez de scroll horizontal frágil,
+                // las cards envuelven a varios renglones; ninguna queda cortada.
+                className="mt-5 flex flex-wrap items-stretch gap-4"
                 variants={staggerContainer}
                 initial={reduce ? false : 'hidden'}
                 animate="visible"
