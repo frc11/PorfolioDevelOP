@@ -174,9 +174,9 @@ export default async function AgencyOsProjectOverviewPage({
   const paidMilestones = project.paymentMilestones.filter((milestone) => milestone.paidAt).length
 
   return (
-    <div className="grid gap-6 xl:grid-cols-[minmax(0,1.4fr)_minmax(320px,1fr)]">
-      <div className="space-y-6">
-        <section className="rounded-[28px] border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
+    <div className="space-y-6">
+      <div className="grid gap-6 lg:grid-cols-2 lg:items-stretch">
+        <section className="flex h-full flex-col rounded-[28px] border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
           <h3 className="text-lg font-semibold text-white">Resumen del proyecto</h3>
           <p className="mt-2 text-sm leading-6 text-zinc-400">
             {project.description ?? 'Todavia no hay una descripcion detallada para este proyecto.'}
@@ -250,12 +250,10 @@ export default async function AgencyOsProjectOverviewPage({
             </div>
           ) : null}
         </section>
-      </div>
 
-      <div className="space-y-6">
-        <section className="rounded-[28px] border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
+        <section className="flex h-full flex-col rounded-[28px] border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
           <h3 className="text-lg font-semibold text-white">Tareas</h3>
-          <div className="mt-4 grid gap-3">
+          <div className="mt-4 grid flex-1 auto-rows-fr gap-3">
             <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
               <p className="text-[10px] uppercase tracking-[0.22em] text-zinc-500">Pendientes</p>
               <p className="mt-2 text-2xl font-semibold text-white">{todoTasks}</p>
@@ -270,33 +268,33 @@ export default async function AgencyOsProjectOverviewPage({
             </div>
           </div>
         </section>
-
-        <section className="rounded-[28px] border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
-          <h3 className="text-lg font-semibold text-white">Finanzas</h3>
-          <div className="mt-4 grid gap-3">
-            <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
-              <p className="text-[10px] uppercase tracking-[0.22em] text-zinc-500">Monto acordado</p>
-              <p className="mt-2 text-xl font-semibold text-white">
-                {formatCurrency(project.agreedAmount)}
-              </p>
-            </div>
-
-            <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
-              <p className="text-[10px] uppercase tracking-[0.22em] text-zinc-500">Hitos pagados</p>
-              <p className="mt-2 text-xl font-semibold text-white">
-                {paidMilestones}/{project.paymentMilestones.length}
-              </p>
-            </div>
-
-            <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
-              <p className="text-[10px] uppercase tracking-[0.22em] text-zinc-500">Mantenimiento</p>
-              <p className="mt-2 text-sm font-medium text-zinc-100">
-                {isMaintenanceUpToDate(project)}
-              </p>
-            </div>
-          </div>
-        </section>
       </div>
+
+      <section className="rounded-[28px] border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
+        <h3 className="text-lg font-semibold text-white">Finanzas</h3>
+        <div className="mt-4 grid gap-3 sm:grid-cols-3">
+          <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
+            <p className="text-[10px] uppercase tracking-[0.22em] text-zinc-500">Monto acordado</p>
+            <p className="mt-2 text-xl font-semibold text-white">
+              {formatCurrency(project.agreedAmount)}
+            </p>
+          </div>
+
+          <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
+            <p className="text-[10px] uppercase tracking-[0.22em] text-zinc-500">Hitos pagados</p>
+            <p className="mt-2 text-xl font-semibold text-white">
+              {paidMilestones}/{project.paymentMilestones.length}
+            </p>
+          </div>
+
+          <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
+            <p className="text-[10px] uppercase tracking-[0.22em] text-zinc-500">Mantenimiento</p>
+            <p className="mt-2 text-sm font-medium text-zinc-100">
+              {isMaintenanceUpToDate(project)}
+            </p>
+          </div>
+        </div>
+      </section>
     </div>
   )
 }
