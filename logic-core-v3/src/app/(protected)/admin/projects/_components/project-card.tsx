@@ -143,19 +143,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="truncate text-lg font-semibold text-white">{project.name}</p>
-          <div className="mt-1 flex flex-wrap items-center gap-2">
-            <p className="truncate text-sm text-zinc-400">{project.businessName}</p>
-            {hasClientLinked ? (
-              <span className="inline-flex items-center gap-1 rounded-full border border-cyan-400/20 bg-cyan-400/10 px-2.5 py-1 text-[11px] font-medium text-cyan-100">
-                <Building2 className="h-3.5 w-3.5" />
-                Cliente portal
-              </span>
-            ) : (
-              <span className="inline-flex rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] font-medium text-zinc-300">
-                Interno
-              </span>
-            )}
-          </div>
+          <p className="mt-1 truncate text-sm text-zinc-400">{project.businessName}</p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
@@ -180,7 +168,21 @@ export function ProjectCard({ project }: ProjectCardProps) {
         </div>
       </div>
 
-      <div className="mt-5 grid gap-3 sm:grid-cols-3">
+      {/* El badge de visibilidad va SIEMPRE en su propio renglón, en todas las cards. */}
+      <div className="mt-2">
+        {hasClientLinked ? (
+          <span className="inline-flex items-center gap-1 rounded-full border border-cyan-400/20 bg-cyan-400/10 px-2.5 py-1 text-[11px] font-medium text-cyan-100">
+            <Building2 className="h-3.5 w-3.5" strokeWidth={1.5} />
+            Cliente portal
+          </span>
+        ) : (
+          <span className="inline-flex rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] font-medium text-zinc-300">
+            Interno
+          </span>
+        )}
+      </div>
+
+      <div className="mt-5 grid gap-3">
         <div className="rounded-2xl border border-white/10 bg-black/20 p-3">
           <p className="text-[10px] uppercase tracking-[0.22em] text-zinc-500">Monto acordado</p>
           <p className="mt-2 text-sm font-medium text-zinc-100">{formatCurrency(project.agreedAmount)}</p>
