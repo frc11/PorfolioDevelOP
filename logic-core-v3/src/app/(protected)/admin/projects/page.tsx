@@ -17,11 +17,7 @@ const getOrganizationsForDropdown = unstable_cache(
 import { ProjectForm } from './_components/project-form'
 import { ProjectList, type ProjectListItem } from './_components/project-list'
 import { ProjectsFilterSelect } from './_components/projects-filter-select'
-import {
-  PERIOD_OPTIONS,
-  ProjectsPeriodFilter,
-  type PeriodFilter,
-} from './_components/projects-period-filter'
+import { ProjectsPeriodFilter, type PeriodFilter } from './_components/projects-period-filter'
 
 type ProjectsPageProps = {
   searchParams?: Promise<{
@@ -48,6 +44,16 @@ const VISIBILITY_OPTIONS = [
 ] as const
 
 type VisibilityFilter = (typeof VISIBILITY_OPTIONS)[number]['value']
+
+// Server-side copy — importing the value from a 'use client' file would give a
+// module-reference stub instead of an array, breaking .some() at runtime.
+const PERIOD_OPTIONS: ReadonlyArray<{ value: PeriodFilter; label: string }> = [
+  { value: '1w', label: 'Última semana' },
+  { value: '1m', label: 'Último mes' },
+  { value: '6m', label: 'Últimos 6 meses' },
+  { value: '1y', label: 'Último año' },
+  { value: 'custom', label: 'Personalizado' },
+]
 
 const DEFAULT_PERIOD: PeriodFilter = '1m'
 
