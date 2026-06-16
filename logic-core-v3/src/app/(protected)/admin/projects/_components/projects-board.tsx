@@ -45,6 +45,52 @@ export function ProjectsBoard({ projects, organizations, errorMessage }: Project
     setLocalProjects(projects)
   }, [projects])
 
+  // Auto-scroll del board mientras se arrastra una card: el scroll container real
+  // es el <main> del admin. Si el cursor entra en la zona de borde sup/inf,
+  // scrollea (velocidad proporcional a la proximidad) para alcanzar secciones
+  // lejanas (Planning ↔ Completado) que no entran juntas en pantalla.
+  useEffect(() => {
+    if (!draggingId) {
+      return
+    }
+    const scroller = document.querySelector('main')
+    if (!scroller) {
+      return
+    }
+
+    const EDGE = 90
+    const MAX_SPEED = 20
+    let pointerY = -1
+    let frame = 0
+
+    const handleDragOver = (event: DragEvent) => {
+      pointerY = event.clientY
+    }
+
+    const tick = () => {
+      if (pointerY >= 0) {
+        const rect = scroller.getBoundingClientRect()
+        const topDistance = pointerY - rect.top
+        const bottomDistance = rect.bottom - pointerY
+
+        if (topDistance < EDGE) {
+          scroller.scrollTop -= MAX_SPEED * (1 - Math.max(0, topDistance) / EDGE)
+        } else if (bottomDistance < EDGE) {
+          scroller.scrollTop += MAX_SPEED * (1 - Math.max(0, bottomDistance) / EDGE)
+        }
+      }
+      frame = requestAnimationFrame(tick)
+    }
+
+    window.addEventListener('dragover', handleDragOver, true)
+    frame = requestAnimationFrame(tick)
+
+    return () => {
+      window.removeEventListener('dragover', handleDragOver, true)
+      cancelAnimationFrame(frame)
+    }
+  }, [draggingId])
+
   const filteredProjects = useMemo(
     () => filterProjects(localProjects, filters),
     [localProjects, filters]
