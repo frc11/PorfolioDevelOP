@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import {
   BarChart3,
   CalendarCheck2,
@@ -28,6 +29,12 @@ const MEMBER_BAR_COLORS = [
   '#f59e0b',
   '#f472b6',
 ]
+
+// Hover uniforme para las cards. Va en el wrapper externo (HoverCard) porque
+// StatCard es frozen; el mismo set se aplica al <article> de ChartCard.
+// Solo transform/box-shadow/ring (sin layout). reduced-motion: sin escala ni glow.
+const cardHoverClass =
+  'grid rounded-2xl transition duration-200 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] will-change-transform hover:scale-[1.015] hover:shadow-[0_12px_32px_-12px_rgba(255,255,255,0.12)] hover:ring-1 hover:ring-white/15 motion-reduce:transition-none motion-reduce:hover:scale-100 motion-reduce:hover:shadow-none'
 
 const DEMO_PIPELINE_STATUSES: LeadStatus[] = [
   LeadStatus.DEMO_ENVIADA,
@@ -396,7 +403,6 @@ export default async function AgencyOsPage() {
       key: string
       label: string
       totalWeekHours: number
-      totalRangeHours: number
     }
   >()
 
@@ -407,10 +413,7 @@ export default async function AgencyOsPage() {
       key: entry.userId,
       label,
       totalWeekHours: 0,
-      totalRangeHours: 0,
     }
-
-    existingMember.totalRangeHours += entry.hours
 
     if (entry.date >= weekStart) {
       existingMember.totalWeekHours += entry.hours
@@ -488,8 +491,6 @@ export default async function AgencyOsPage() {
         bucket.responded > 0
           ? Number(((bucket.closed / bucket.responded) * 100).toFixed(1))
           : 0,
-      closed: bucket.closed,
-      responded: bucket.responded,
     }
   })
 
@@ -500,7 +501,6 @@ export default async function AgencyOsPage() {
 
     return {
       label: formatMonthLabel(date),
-      revenue,
       cumulative: cumulativeRevenue,
     }
   })
@@ -544,8 +544,8 @@ export default async function AgencyOsPage() {
   const averageHourlyValue = monthHoursTotal > 0 ? monthlyRevenue / monthHoursTotal : 0
 
   return (
-    <section className="space-y-8">
-      <div className="rounded-[28px] border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
+    <section className="space-y-10">
+      <div className="rounded-[28px] border border-white/10 bg-white/5 p-5 backdrop-blur-xl dash-reveal">
         <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
           <div>
             <p className="text-xs tracking-tight text-zinc-500">
@@ -555,7 +555,7 @@ export default async function AgencyOsPage() {
               KPIs comerciales, operativos y financieros
             </h2>
             <p className="mt-3 max-w-3xl text-sm leading-6 text-zinc-400">
-              Unifica el pulso comercial de la OS con la operacion real del portal y la
+              Unifica el pulso comercial de la OS con la operación real del portal y la
               rentabilidad del trabajo entregado.
             </p>
           </div>
@@ -566,120 +566,142 @@ export default async function AgencyOsPage() {
         </div>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-4 dash-reveal" style={{ animationDelay: '0.06s' }}>
         <SectionHeader
           title="KPIs comerciales"
           description="Datos del panel para velocidad de venta, seguimiento y conversión."
         />
 
         <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
-          <StatCard
-            label="Demos enviadas esta semana"
-            value={`${demosThisWeek} / ${weeklyDemoGoal}`}
-            subtitle="Seguimiento contra objetivo semanal"
-            trend={demosThisWeek >= weeklyDemoGoal ? 'up' : 'neutral'}
-            icon={Target}
-            progress={demosProgress}
-          />
+          <HoverCard>
+            <StatCard
+              label="Demos enviadas esta semana"
+              value={`${demosThisWeek} / ${weeklyDemoGoal}`}
+              subtitle="Seguimiento contra objetivo semanal"
+              trend={demosThisWeek >= weeklyDemoGoal ? 'up' : 'neutral'}
+              icon={Target}
+              progress={demosProgress}
+            />
+          </HoverCard>
 
-          <StatCard
-            label="Leads pendientes de follow-up hoy"
-            value={String(pendingFollowUps)}
-            subtitle={
-              pendingFollowUps > 0
-                ? 'Hay conversaciones que requieren acción hoy'
-                : 'Bandeja comercial al día'
-            }
-            trend={pendingFollowUps > 0 ? 'down' : 'neutral'}
-            color={pendingFollowUps > 0 ? 'alert' : undefined}
-            icon={CalendarCheck2}
-          />
+          <HoverCard>
+            <StatCard
+              label="Leads pendientes de follow-up hoy"
+              value={String(pendingFollowUps)}
+              subtitle={
+                pendingFollowUps > 0
+                  ? 'Hay conversaciones que requieren acción hoy'
+                  : 'Bandeja comercial al día'
+              }
+              trend={pendingFollowUps > 0 ? 'down' : 'neutral'}
+              color={pendingFollowUps > 0 ? 'alert' : undefined}
+              icon={CalendarCheck2}
+            />
+          </HoverCard>
 
-          <DualMetricCard
-            label="Respuesta y cierre"
-            primaryValue={responseRate}
-            primaryLabel="Tasa de respuesta"
-            secondaryValue={closeRate}
-            secondaryLabel="Tasa de cierre"
-            subtitle={`${respondedCount} leads respondieron y ${closedCount} terminaron cerrando`}
-            icon={BarChart3}
-          />
+          <HoverCard>
+            <DualMetricCard
+              label="Respuesta y cierre"
+              primaryValue={responseRate}
+              primaryLabel="Tasa de respuesta"
+              primaryHint="Sobre leads en etapa demo o posterior, según su estado actual"
+              secondaryValue={closeRate}
+              secondaryLabel="Tasa de cierre"
+              secondaryHint="Cerrados / respondidos, histórico total (distinto del chart mensual)"
+              subtitle={`${respondedCount} en estado respondido o posterior · ${closedCount} cerrados`}
+              icon={BarChart3}
+            />
+          </HoverCard>
         </div>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-4 dash-reveal" style={{ animationDelay: '0.12s' }}>
         <SectionHeader
           title="KPIs operativos"
           description="Salud del portal de clientes, soporte y delivery sobre los modelos base del SaaS."
         />
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 2xl:grid-cols-4">
-          <StatCard
-            label="MRR"
-            value={formatCurrency(mrr)}
-            subtitle="Suma de suscripciones activas"
-            trend={mrr > 0 ? 'up' : 'neutral'}
-            icon={Wallet}
-          />
+          <HoverCard>
+            <StatCard
+              label="MRR"
+              value={formatCurrency(mrr)}
+              subtitle="Suma de suscripciones activas"
+              trend={mrr > 0 ? 'up' : 'neutral'}
+              icon={Wallet}
+            />
+          </HoverCard>
 
-          <StatCard
-            label="Clientes activos"
-            value={String(activeClients)}
-            subtitle="Organizaciones con suscripción activa"
-            trend={activeClients > 0 ? 'up' : 'neutral'}
-            icon={UsersRound}
-          />
+          <HoverCard>
+            <StatCard
+              label="Clientes activos"
+              value={String(activeClients)}
+              subtitle="Organizaciones con suscripción activa"
+              trend={activeClients > 0 ? 'up' : 'neutral'}
+              icon={UsersRound}
+            />
+          </HoverCard>
 
-          <StatCard
-            label="Tickets abiertos"
-            value={String(openTickets)}
-            subtitle="Tickets sin resolver"
-            trend={openTickets > 0 ? 'down' : 'neutral'}
-            color={openTickets > 0 ? 'alert' : undefined}
-            icon={LifeBuoy}
-          />
+          <HoverCard>
+            <StatCard
+              label="Tickets abiertos"
+              value={String(openTickets)}
+              subtitle="Tickets sin resolver"
+              trend={openTickets > 0 ? 'down' : 'neutral'}
+              color={openTickets > 0 ? 'alert' : undefined}
+              icon={LifeBuoy}
+            />
+          </HoverCard>
 
-          <StatCard
-            label="Proyectos en curso"
-            value={String(projectsInProgress)}
-            subtitle="En desarrollo"
-            trend={projectsInProgress > 0 ? 'up' : 'neutral'}
-            icon={FolderKanban}
-          />
+          <HoverCard>
+            <StatCard
+              label="Proyectos en curso"
+              value={String(projectsInProgress)}
+              subtitle="En desarrollo"
+              trend={projectsInProgress > 0 ? 'up' : 'neutral'}
+              icon={FolderKanban}
+            />
+          </HoverCard>
         </div>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-4 dash-reveal" style={{ animationDelay: '0.18s' }}>
         <SectionHeader
           title="Ingresos y financiero"
           description="Cruza revenue comprometido, mantenimiento cobrado y esfuerzo real del equipo."
         />
 
         <div className="grid grid-cols-1 gap-4 xl:grid-cols-[0.95fr_1.1fr_0.95fr]">
-          <StatCard
-            label="Ingresos del mes"
-            value={formatCurrency(monthlyRevenue)}
-            subtitle={`${formatCurrency(projectRevenueThisMonth)} en proyectos + ${formatCurrency(maintenanceRevenueThisMonth)} en mantenimiento`}
-            trend={monthlyRevenue > 0 ? 'up' : 'neutral'}
-            icon={DollarSign}
-          />
+          <HoverCard>
+            <StatCard
+              label="Ingresos del mes"
+              value={formatCurrency(monthlyRevenue)}
+              subtitle={`${formatCurrency(projectRevenueThisMonth)} en proyectos + ${formatCurrency(maintenanceRevenueThisMonth)} en mantenimiento`}
+              trend={monthlyRevenue > 0 ? 'up' : 'neutral'}
+              icon={DollarSign}
+            />
+          </HoverCard>
 
-          <MemberHoursCard
-            totalHours={memberTotals.reduce((accumulator, member) => accumulator + member.totalWeekHours, 0)}
-            members={memberTotals}
-          />
+          <HoverCard>
+            <MemberHoursCard
+              totalHours={memberTotals.reduce((accumulator, member) => accumulator + member.totalWeekHours, 0)}
+              members={memberTotals}
+            />
+          </HoverCard>
 
-          <StatCard
-            label="Valor hora promedio del mes"
-            value={formatCurrency(averageHourlyValue)}
-            subtitle={`${formatHours(monthHoursTotal)} registradas en el mes actual`}
-            trend={averageHourlyValue > 0 ? 'up' : 'neutral'}
-            icon={Gauge}
-          />
+          <HoverCard>
+            <StatCard
+              label="Valor hora promedio del mes"
+              value={formatCurrency(averageHourlyValue)}
+              subtitle={`${formatHours(monthHoursTotal)} registradas en el mes actual`}
+              trend={averageHourlyValue > 0 ? 'up' : 'neutral'}
+              icon={Gauge}
+            />
+          </HoverCard>
         </div>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-4 dash-reveal" style={{ animationDelay: '0.24s' }}>
         <SectionHeader
           title="Tendencias últimas semanas y meses"
           description="Series históricas para demos, cierre, revenue acumulado y capacidad del equipo."
@@ -693,8 +715,14 @@ export default async function AgencyOsPage() {
           memberSeries={memberSeries}
         />
       </div>
+
+      <style>{`@keyframes dashReveal{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}.dash-reveal{animation:dashReveal .4s cubic-bezier(0.25,0.46,0.45,0.94) backwards}@media (prefers-reduced-motion:reduce){.dash-reveal{animation:none}}`}</style>
     </section>
   )
+}
+
+function HoverCard({ children }: { children: ReactNode }) {
+  return <div className={cardHoverClass}>{children}</div>
 }
 
 function SectionHeader({
@@ -707,7 +735,7 @@ function SectionHeader({
   return (
     <div>
       <h3 className="text-2xl font-medium tracking-tight text-white">{title}</h3>
-      <p className="mt-2 max-w-3xl text-sm leading-6 text-zinc-400">{description}</p>
+      <p className="mt-2 max-w-3xl text-sm leading-6 text-zinc-500">{description}</p>
     </div>
   )
 }
@@ -716,46 +744,52 @@ function DualMetricCard({
   label,
   primaryValue,
   primaryLabel,
+  primaryHint,
   secondaryValue,
   secondaryLabel,
+  secondaryHint,
   subtitle,
   icon: Icon,
 }: {
   label: string
   primaryValue: string
   primaryLabel: string
+  primaryHint: string
   secondaryValue: string
   secondaryLabel: string
+  secondaryHint: string
   subtitle: string
   icon: typeof BarChart3
 }) {
   return (
-    <article className="rounded-2xl border border-white/10 bg-white/[0.02] p-5 backdrop-blur-xl transition-colors">
+    <article className="rounded-2xl border border-white/10 bg-white/[0.02] p-5 backdrop-blur-xl">
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
           <p className="text-xs tracking-tight text-zinc-500">{label}</p>
         </div>
 
         <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md bg-white/[0.04] text-zinc-400">
-          <Icon className="h-5 w-5" strokeWidth={1.5} />
+          <Icon className="h-5 w-5" strokeWidth={1.5} aria-hidden="true" />
         </div>
       </div>
 
       <div className="mt-4 grid gap-3 sm:grid-cols-2">
-        <div className="rounded-md border border-white/10 bg-black/20 px-4 py-4">
+        <div className="rounded-xl border border-white/10 bg-black/20 px-4 py-4">
           <p className="text-xs tracking-tight text-zinc-500">{primaryLabel}</p>
           <p className="mt-2 text-3xl font-medium tracking-tight text-white">{primaryValue}</p>
+          <p className="mt-1.5 text-[11px] leading-snug text-zinc-500">{primaryHint}</p>
         </div>
-        <div className="rounded-md border border-white/10 bg-black/20 px-4 py-4">
+        <div className="rounded-xl border border-white/10 bg-black/20 px-4 py-4">
           <p className="text-xs tracking-tight text-zinc-500">{secondaryLabel}</p>
           <p className="mt-2 text-3xl font-medium tracking-tight text-white">{secondaryValue}</p>
+          <p className="mt-1.5 text-[11px] leading-snug text-zinc-500">{secondaryHint}</p>
         </div>
       </div>
 
       <div className="mt-4 flex items-center justify-between gap-3">
         <p className="min-h-[20px] text-sm text-zinc-400">{subtitle}</p>
         <div className="inline-flex items-center gap-1 text-xs font-medium text-zinc-400">
-          <BarChart3 className="h-3.5 w-3.5" strokeWidth={1.5} />
+          <BarChart3 className="h-3.5 w-3.5" strokeWidth={1.5} aria-hidden="true" />
           <span>Conversión</span>
         </div>
       </div>
@@ -772,7 +806,6 @@ function MemberHoursCard({
     key: string
     label: string
     totalWeekHours: number
-    totalRangeHours: number
   }>
 }) {
   const visibleMembers = members.slice(0, 5)
@@ -782,7 +815,7 @@ function MemberHoursCard({
       : 1
 
   return (
-    <article className="rounded-2xl border border-white/10 bg-white/5 p-5 backdrop-blur-xl transition-colors">
+    <article className="rounded-2xl border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
           <p className="text-xs tracking-tight text-zinc-500">
@@ -799,7 +832,7 @@ function MemberHoursCard({
         </div>
 
         <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-zinc-200">
-          <CalendarCheck2 className="h-5 w-5" />
+          <CalendarCheck2 className="h-5 w-5" strokeWidth={1.5} aria-hidden="true" />
         </div>
       </div>
 
@@ -813,7 +846,7 @@ function MemberHoursCard({
               </div>
               <div className="h-2 overflow-hidden rounded-full bg-white/10">
                 <div
-                  className="h-full rounded-full bg-cyan-300 transition-[width]"
+                  className="h-full rounded-full bg-cyan-300"
                   style={{
                     width: `${clampPercentage((member.totalWeekHours / denominator) * 100)}%`,
                   }}
@@ -823,7 +856,7 @@ function MemberHoursCard({
           ))
         ) : (
           <div className="rounded-2xl border border-dashed border-white/10 bg-black/10 px-4 py-6 text-sm text-zinc-500">
-            Cuando el equipo registre horas, aca vas a ver la distribucion semanal por miembro.
+            Cuando el equipo registre horas, acá vas a ver la distribución semanal por miembro.
           </div>
         )}
       </div>

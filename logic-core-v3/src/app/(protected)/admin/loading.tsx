@@ -51,10 +51,10 @@ export default function AdminLoading() {
           <Skeleton className="h-6 w-52 mb-1" />
           <Skeleton className="h-3.5 w-96" />
         </div>
-        <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <StatCardSkeleton key={i} />
-          ))}
+        <div className="grid grid-cols-1 gap-4 xl:grid-cols-[0.95fr_1.1fr_0.95fr]">
+          <StatCardSkeleton />
+          <Skeleton className="h-full min-h-[240px] rounded-[26px]" />
+          <StatCardSkeleton />
         </div>
       </div>
 
@@ -65,9 +65,9 @@ export default function AdminLoading() {
           <Skeleton className="h-6 w-64 mb-1" />
           <Skeleton className="h-3.5 w-80" />
         </div>
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
           {Array.from({ length: 4 }).map((_, i) => (
-            <Skeleton key={i} className="h-64 rounded-[28px]" />
+            <Skeleton key={i} className="h-[400px] rounded-[28px]" />
           ))}
         </div>
       </div>
