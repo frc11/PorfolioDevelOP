@@ -1,6 +1,9 @@
 'use client'
 
+import { createPortal } from 'react-dom'
 import { LoaderCircle, TriangleAlert, X } from 'lucide-react'
+
+import { useIsClient } from '@/lib/use-is-client'
 
 type ConfirmDialogProps = {
   open: boolean
@@ -23,7 +26,9 @@ export function ConfirmDialog({
   variant = 'default',
   isPending = false,
 }: ConfirmDialogProps) {
-  if (!open) {
+  const mounted = useIsClient()
+
+  if (!open || !mounted) {
     return null
   }
 
@@ -34,7 +39,7 @@ export function ConfirmDialog({
         ? 'border-amber-400/25 bg-amber-500/10 text-amber-100 hover:bg-amber-500/15'
       : 'border-cyan-400/20 bg-cyan-400/10 text-cyan-100 hover:bg-cyan-400/15'
 
-  return (
+  return createPortal(
     <div
       className="fixed inset-0 z-[180] flex items-center justify-center bg-[#05070a]/80 p-4 backdrop-blur-md"
       onClick={isPending ? undefined : onClose}
@@ -42,7 +47,7 @@ export function ConfirmDialog({
       <div
         role="dialog"
         aria-modal="true"
-        className="w-full max-w-md rounded-[28px] border border-white/10 bg-[#0c1016]/95 p-6 shadow-[0_30px_120px_rgba(0,0,0,0.55)] backdrop-blur-xl"
+        className="w-full max-w-md overflow-hidden rounded-[28px] border border-white/10 bg-[#0c1016]/95 p-6 shadow-[0_30px_120px_rgba(0,0,0,0.55)] backdrop-blur-xl"
         onClick={(event) => event.stopPropagation()}
       >
         <div className="flex items-start justify-between gap-4">
@@ -90,6 +95,7 @@ export function ConfirmDialog({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   )
 }
