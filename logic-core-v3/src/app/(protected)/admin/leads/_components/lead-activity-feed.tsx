@@ -1,34 +1,23 @@
 'use client'
 
-import { useCallback, useEffect, useRef, useState, useTransition } from 'react'
+import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import {
-  CircleDashed,
-  Inbox,
-  Instagram,
-  LoaderCircle,
-  Mail,
-  MessageCircleMore,
-  PhoneCall,
-  Video,
-} from 'lucide-react'
+import { Inbox, LoaderCircle } from 'lucide-react'
 import { EmptyState, Select } from '@/components/ui'
 import { createActivity } from '../_actions/activity.actions'
-
-type ActivityChannel =
-  | 'INSTAGRAM_DM'
-  | 'WHATSAPP'
-  | 'EMAIL'
-  | 'LLAMADA'
-  | 'LOOM_VIDEO'
-  | 'OTRO'
-
-type ActivityResult =
-  | 'SIN_RESPUESTA'
-  | 'RESPONDIO'
-  | 'CALL_AGENDADA'
-  | 'RECHAZADO'
-  | 'POSTERGADO'
+import { useScrollFades } from './use-scroll-fades'
+import {
+  CHANNEL_OPTIONS,
+  RESULT_OPTIONS,
+  activityInputClass,
+  channelIcon,
+  formatFollowUp,
+  relativeTime,
+  resultLabel,
+  resultTone,
+  type ActivityChannel,
+  type ActivityResult,
+} from './lead-activity.helpers'
 
 type FeedActivity = {
   id: string
@@ -51,106 +40,8 @@ type LeadActivityFeedProps = {
   activities: FeedActivity[]
 }
 
-const CHANNEL_OPTIONS: Array<{ value: ActivityChannel; label: string }> = [
-  { value: 'INSTAGRAM_DM', label: 'Instagram DM' },
-  { value: 'WHATSAPP', label: 'WhatsApp' },
-  { value: 'EMAIL', label: 'Email' },
-  { value: 'LLAMADA', label: 'Llamada' },
-  { value: 'LOOM_VIDEO', label: 'Loom video' },
-  { value: 'OTRO', label: 'Otro' },
-]
-
-const RESULT_OPTIONS: Array<{ value: ActivityResult; label: string }> = [
-  { value: 'SIN_RESPUESTA', label: 'Sin respuesta' },
-  { value: 'RESPONDIO', label: 'Respondio' },
-  { value: 'CALL_AGENDADA', label: 'Call agendada' },
-  { value: 'RECHAZADO', label: 'Rechazado' },
-  { value: 'POSTERGADO', label: 'Postergado' },
-]
-
-const inputClassName =
-  'w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white outline-none transition-colors focus:border-cyan-400/35'
-
 // === TUNABLES (calibrá por ojo) ===
 const ACTIVITY_FADE_HEIGHT = 48 // alto del fade superior/inferior del timeline (px)
-const SCROLL_FADE_THRESHOLD = 4 // px de margen para considerar "se puede scrollear" arriba/abajo
-
-function relativeTime(value: string): string {
-  const date = new Date(value)
-  const diffMs = Date.now() - date.getTime()
-  const minute = 60 * 1000
-  const hour = 60 * minute
-  const day = 24 * hour
-
-  if (diffMs < hour) {
-    return `Hace ${Math.max(1, Math.floor(diffMs / minute))} min`
-  }
-
-  if (diffMs < day) {
-    return `Hace ${Math.floor(diffMs / hour)} h`
-  }
-
-  return `Hace ${Math.floor(diffMs / day)} dias`
-}
-
-function formatFollowUp(value: string): string {
-  return new Intl.DateTimeFormat('es-AR', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-  }).format(new Date(value))
-}
-
-function channelIcon(channel: ActivityChannel) {
-  switch (channel) {
-    case 'INSTAGRAM_DM':
-      return Instagram
-    case 'WHATSAPP':
-      return MessageCircleMore
-    case 'EMAIL':
-      return Mail
-    case 'LLAMADA':
-      return PhoneCall
-    case 'LOOM_VIDEO':
-      return Video
-    case 'OTRO':
-      return CircleDashed
-  }
-}
-
-function resultTone(result: ActivityResult | null): string {
-  switch (result) {
-    case 'SIN_RESPUESTA':
-      return 'border-rose-400/20 bg-rose-500/10 text-rose-200'
-    case 'RESPONDIO':
-      return 'border-emerald-400/20 bg-emerald-500/10 text-emerald-200'
-    case 'CALL_AGENDADA':
-      return 'border-amber-400/20 bg-amber-500/10 text-amber-200'
-    case 'RECHAZADO':
-      return 'border-zinc-400/20 bg-zinc-500/10 text-zinc-200'
-    case 'POSTERGADO':
-      return 'border-sky-400/20 bg-sky-500/10 text-sky-200'
-    default:
-      return 'border-white/10 bg-white/5 text-zinc-300'
-  }
-}
-
-function resultLabel(result: ActivityResult | null): string {
-  switch (result) {
-    case 'SIN_RESPUESTA':
-      return 'Sin respuesta'
-    case 'RESPONDIO':
-      return 'Respondio'
-    case 'CALL_AGENDADA':
-      return 'Call agendada'
-    case 'RECHAZADO':
-      return 'Rechazado'
-    case 'POSTERGADO':
-      return 'Postergado'
-    default:
-      return 'Sin resultado'
-  }
-}
 
 export function LeadActivityFeed({
   leadId,
@@ -166,38 +57,12 @@ export function LeadActivityFeed({
   const [notes, setNotes] = useState('')
   const [error, setError] = useState<string | null>(null)
 
-  // Fades SCROLL-AWARE del timeline: arriba sólo si se puede subir, abajo sólo si se
-  // puede bajar (sin overflow → ninguno). Trackea scroll + mount/resize (ResizeObserver).
-  const timelineRef = useRef<HTMLDivElement>(null)
-  const [canScrollUp, setCanScrollUp] = useState(false)
-  const [canScrollDown, setCanScrollDown] = useState(false)
-
-  const updateScrollFades = useCallback(() => {
-    const el = timelineRef.current
-    if (!el) {
-      return
-    }
-    setCanScrollUp(el.scrollTop > SCROLL_FADE_THRESHOLD)
-    setCanScrollDown(el.scrollTop + el.clientHeight < el.scrollHeight - SCROLL_FADE_THRESHOLD)
-  }, [])
-
-  useEffect(() => {
-    const el = timelineRef.current
-    if (!el) {
-      return
-    }
-    // observe() dispara el callback al montar y en cada resize (sin setState síncrono en
-    // el effect). El dep activities.length re-corre el effect cuando cambia el contenido.
-    const observer = new ResizeObserver(updateScrollFades)
-    observer.observe(el)
-    return () => observer.disconnect()
-  }, [updateScrollFades, activities.length])
-
-  const timelineFadeMask = `linear-gradient(to bottom, ${
-    canScrollUp ? 'transparent' : '#000'
-  }, #000 ${ACTIVITY_FADE_HEIGHT}px, #000 calc(100% - ${ACTIVITY_FADE_HEIGHT}px), ${
-    canScrollDown ? 'transparent' : '#000'
-  })`
+  // Fades scroll-aware del timeline (hook reutilizable).
+  const {
+    scrollRef: timelineRef,
+    onScroll: onTimelineScroll,
+    maskImage: timelineFadeMask,
+  } = useScrollFades(activities.length, ACTIVITY_FADE_HEIGHT)
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -269,7 +134,7 @@ export function LeadActivityFeed({
               <Select
                 value={channel}
                 onChange={(event) => setChannel(event.target.value as ActivityChannel)}
-                className={inputClassName}
+                className={activityInputClass}
               >
                 {CHANNEL_OPTIONS.map((option) => (
                   <option key={option.value} value={option.value}>
@@ -284,7 +149,7 @@ export function LeadActivityFeed({
               <Select
                 value={result}
                 onChange={(event) => setResult(event.target.value as ActivityResult | '')}
-                className={inputClassName}
+                className={activityInputClass}
               >
                 <option value="">Sin resultado</option>
                 {RESULT_OPTIONS.map((option) => (
@@ -300,7 +165,7 @@ export function LeadActivityFeed({
               <textarea
                 value={notes}
                 onChange={(event) => setNotes(event.target.value)}
-                className={`${inputClassName} min-h-28`}
+                className={`${activityInputClass} min-h-28`}
                 placeholder="Resumen de la conversacion, objeciones, proximos pasos..."
               />
             </div>
@@ -334,7 +199,7 @@ export function LeadActivityFeed({
 
       <div
         ref={timelineRef}
-        onScroll={updateScrollFades}
+        onScroll={onTimelineScroll}
         className="mt-6 xl:min-h-0 xl:flex-1 xl:overflow-y-auto"
         style={{ maskImage: timelineFadeMask, WebkitMaskImage: timelineFadeMask }}
       >
