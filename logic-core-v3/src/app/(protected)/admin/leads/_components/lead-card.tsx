@@ -86,6 +86,8 @@ export function LeadCard({
         }
         className={cn(
           'group relative block rounded-[22px] border bg-white/5 p-4 text-left shadow-[0_18px_40px_rgba(0,0,0,0.22)]',
+          // select-none en cards draggables: el hold/drag no debe seleccionar texto.
+          isDraggable && 'select-none',
           isDragging ? 'cursor-grabbing border-cyan-400/30' : 'border-white/10',
           // Hover marcado (scale-up leve) SOLO en cards reales: ni el clon del DragOverlay
           // (presentational) ni la card que se arrastra (isDragging) escalan, para no pelear

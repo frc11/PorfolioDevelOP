@@ -1,6 +1,7 @@
 'use client'
 
 import type { ReactNode } from 'react'
+import { Hand } from 'lucide-react'
 import {
   PIPELINE_GROUPS,
   type GroupedLeads,
@@ -29,6 +30,11 @@ type PipelineBoardProps = {
 export function PipelineBoard({ groupedLeads, onOpenOverview, renderCard }: PipelineBoardProps) {
   return (
     <div className="space-y-4">
+      <p className="flex items-center gap-1.5 text-[11px] text-zinc-500">
+        <Hand className="h-3.5 w-3.5" strokeWidth={1.5} aria-hidden />
+        Mantené apretada una card para moverla de estado
+      </p>
+
       {PIPELINE_GROUPS.map((group) => (
         <div
           key={group.id}
