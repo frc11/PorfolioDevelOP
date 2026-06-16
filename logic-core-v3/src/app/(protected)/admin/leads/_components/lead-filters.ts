@@ -1,5 +1,6 @@
 import { subMonths, subWeeks, subYears } from 'date-fns'
 import { serviceLabel } from './lead-card.helpers'
+import { normalizeZone } from './lead-zone.helpers'
 import { ACTIVE_PIPELINE_STATUSES, type LeadPipelineLead } from './lead-pipeline.shared'
 
 /** Valor centinela para "todos" (sin filtrar) y "sin valor" (campo null en el lead). */
@@ -42,7 +43,9 @@ export type LeadFilterOptions = {
 export function deriveFilterOptions(leads: LeadPipelineLead[]): LeadFilterOptions {
   const services = new Set<string>()
   const setters = new Set<string>()
-  const zones = new Set<string>()
+  // Zonas agrupadas por clave normalizada para dedup insensible a mayús/tildes.
+  // value = clave normalizada; label = variante canónica (más frecuente, desempate: más tildes).
+  const zoneGroups = new Map<string, { label: string; count: number }[]>()
   let hasNullService = false
   let hasNullSetter = false
   let hasNullZone = false
@@ -59,7 +62,15 @@ export function deriveFilterOptions(leads: LeadPipelineLead[]): LeadFilterOption
       hasNullSetter = true
     }
     if (lead.zone) {
-      zones.add(lead.zone)
+      const key = normalizeZone(lead.zone)
+      const group = zoneGroups.get(key) ?? []
+      const existing = group.find((v) => v.label === lead.zone)
+      if (existing) {
+        existing.count++
+      } else {
+        group.push({ label: lead.zone, count: 1 })
+      }
+      zoneGroups.set(key, group)
     } else {
       hasNullZone = true
     }
@@ -81,6 +92,23 @@ export function deriveFilterOptions(leads: LeadPipelineLead[]): LeadFilterOption
     return options
   }
 
+  // Zona: value = clave normalizada, label = variante más frecuente del grupo.
+  // Desempate: mayor longitud NFD (= más diacríticos, variante más completa).
+  const zoneOptions: FilterOption[] = [{ value: FILTER_ALL, label: 'Todos' }]
+  ;[...zoneGroups.entries()]
+    .sort(([keyA], [keyB]) => keyA.localeCompare(keyB, 'es'))
+    .forEach(([key, variants]) => {
+      const canonical = [...variants].sort((a, b) =>
+        b.count !== a.count
+          ? b.count - a.count
+          : b.label.normalize('NFD').length - a.label.normalize('NFD').length,
+      )[0].label
+      zoneOptions.push({ value: key, label: canonical })
+    })
+  if (hasNullZone) {
+    zoneOptions.push({ value: FILTER_NONE, label: 'Sin ubicacion' })
+  }
+
   return {
     service: withAllAndNone(
       [...services],
@@ -89,7 +117,7 @@ export function deriveFilterOptions(leads: LeadPipelineLead[]): LeadFilterOption
       (value) => serviceLabel(value as LeadPipelineLead['serviceType']),
     ),
     setter: withAllAndNone([...setters], hasNullSetter, 'Sin asignar', (value) => value),
-    zone: withAllAndNone([...zones], hasNullZone, 'Sin ubicacion', (value) => value),
+    zone: zoneOptions,
   }
 }
 
@@ -141,7 +169,10 @@ export function applyLeadFilters(
       }
     }
     if (filters.zone !== FILTER_ALL) {
-      if (filters.zone === FILTER_NONE ? lead.zone !== null : lead.zone !== filters.zone) {
+      if (filters.zone === FILTER_NONE) {
+        if (lead.zone !== null) return false
+      } else if (!lead.zone || normalizeZone(lead.zone) !== filters.zone) {
+        // filters.zone es una clave normalizada; compara contra la zona del lead normalizada.
         return false
       }
     }

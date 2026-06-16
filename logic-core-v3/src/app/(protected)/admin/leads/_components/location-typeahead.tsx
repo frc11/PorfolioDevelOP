@@ -7,6 +7,7 @@ import { Search } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useIsClient } from '@/lib/use-is-client'
 import { FILTER_ALL, type FilterOption } from './lead-filters'
+import { normalizeZone } from './lead-zone.helpers'
 
 const MAX_MATCHES = 8
 const PANEL_GAP = 4 // px entre el input y el panel
@@ -46,10 +47,10 @@ export function LocationTypeahead({ value, options, onChange }: LocationTypeahea
   const listId = `loc-${rawId.replace(/:/g, '')}`
 
   const displayValue = editing ? query : selectedLabel
-  const normalizedQuery = query.trim().toLowerCase()
+  const normalizedQuery = normalizeZone(query)
   const matches = (
     normalizedQuery
-      ? candidates.filter((option) => option.label.toLowerCase().includes(normalizedQuery))
+      ? candidates.filter((option) => normalizeZone(option.label).includes(normalizedQuery))
       : candidates
   ).slice(0, MAX_MATCHES)
 
@@ -140,6 +141,7 @@ export function LocationTypeahead({ value, options, onChange }: LocationTypeahea
         break
       case 'ArrowUp':
         event.preventDefault()
+        openPanel()
         setActiveIndex((current) => Math.max(current - 1, 0))
         break
       case 'Enter':
