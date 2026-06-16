@@ -190,16 +190,19 @@ export function LeadPipeline({ groupedLeads }: LeadPipelineProps) {
   )
 
   const handleDragEnd = (event: DragEndEvent) => {
+    // Usar el lead capturado en estado al iniciar el drag, NO event.active.data: cuando el
+    // drag viene del overview, la card fuente se desmonta al cerrarse el overview y dnd-kit
+    // deja active.data vacío (nodo borrado del registro) → el drop se perdía en silencio.
+    const lead = activeDragLead
     setActiveDragLead(null)
-    const { active, over } = event
-    if (!over) {
+    const { over } = event
+    if (!over || !lead) {
       return
     }
-    const lead = active.data.current?.lead as LeadPipelineLead | undefined
-    // Sin cast: el droppable id es un status sólo si matchea ALL_PIPELINE_STATUSES.
+    // El droppable id es un status sólo si matchea ALL_PIPELINE_STATUSES (sin cast).
     const targetStatus = ALL_PIPELINE_STATUSES.find((status) => status === over.id)
     // Mover sólo si cambia de columna. Misma columna = no-op (no hay orden persistente).
-    if (lead && targetStatus && lead.status !== targetStatus) {
+    if (targetStatus && lead.status !== targetStatus) {
       handleMoveStatus(lead, targetStatus)
     }
   }

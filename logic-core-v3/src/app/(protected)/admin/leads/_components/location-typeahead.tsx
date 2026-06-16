@@ -31,6 +31,7 @@ export function LocationTypeahead({ value, options, onChange }: LocationTypeahea
   const [activeIndex, setActiveIndex] = useState(-1)
 
   const wrapperRef = useRef<HTMLDivElement>(null)
+  const listRef = useRef<HTMLUListElement>(null)
   const rawId = useId()
   const listId = `loc-${rawId.replace(/:/g, '')}`
 
@@ -56,6 +57,15 @@ export function LocationTypeahead({ value, options, onChange }: LocationTypeahea
     document.addEventListener('mousedown', handler)
     return () => document.removeEventListener('mousedown', handler)
   }, [open])
+
+  // Mantener visible la opción activa al navegar con teclado (la lista tiene scroll).
+  useEffect(() => {
+    if (!open || activeIndex < 0) {
+      return
+    }
+    const optEl = listRef.current?.children[activeIndex] as HTMLElement | undefined
+    optEl?.scrollIntoView({ block: 'nearest' })
+  }, [activeIndex, open])
 
   const select = (option: FilterOption) => {
     onChange(option.value)
@@ -128,6 +138,7 @@ export function LocationTypeahead({ value, options, onChange }: LocationTypeahea
 
       {open && matches.length > 0 ? (
         <ul
+          ref={listRef}
           id={listId}
           role="listbox"
           className="absolute z-30 mt-1 max-h-60 w-full overflow-y-auto rounded-xl border border-white/10 bg-zinc-900/95 p-1 shadow-2xl backdrop-blur-[20px]"
