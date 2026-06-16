@@ -1,29 +1,39 @@
 'use client'
 
-import { useEffect, useMemo, useState, useTransition } from 'react'
+import { useCallback, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { ChevronDown, Inbox } from 'lucide-react'
-import { EmptyState } from '@/components/ui'
+import { createPortal } from 'react-dom'
+import {
+  DndContext,
+  DragOverlay,
+  KeyboardSensor,
+  PointerSensor,
+  closestCorners,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+  type DragStartEvent,
+} from '@dnd-kit/core'
+import { useReducedMotion } from '@/lib/use-reduced-motion'
+import { useIsClient } from '@/lib/use-is-client'
 import { deleteLead, updateLeadStatus } from '../_actions/lead.actions'
 import {
-  ACTIVE_PIPELINE_STATUSES,
-  ARCHIVED_PIPELINE_STATUSES,
+  ALL_PIPELINE_STATUSES,
   type GroupedLeads,
   type LeadPipelineLead,
   type PipelineStatus,
 } from './lead-pipeline.shared'
 import { LeadCard } from './lead-card'
+import { DraggableLeadCard } from './draggable-lead-card'
+import { PipelineBoard } from './pipeline-board'
+import { ColumnOverview } from './column-overview'
 
-const STATUS_LABELS: Record<PipelineStatus, string> = {
-  PROSPECTO: 'Prospecto',
-  DEMO_ENVIADA: 'Demo enviada',
-  VIO_VIDEO: 'Vio video',
-  RESPONDIO: 'Respondio',
-  CALL_AGENDADA: 'Call agendada',
-  CERRADO: 'Cerrado',
-  PERDIDO: 'Perdido',
-  POSTERGADO: 'Postergado',
-}
+// === TUNABLES (calibrá por ojo) ===
+const POSTPONE_DAYS = 7 // a cuántos días se reactiva un lead postergado
+// Drag por HOLD (no por distancia): un swipe rápido scrollea el overview y mantener
+// apretado ~DRAG_HOLD_DELAY ms levanta la card. tolerance = px tolerados durante el hold.
+const DRAG_HOLD_DELAY = 200
+const DRAG_HOLD_TOLERANCE = 5
 
 type LeadPipelineProps = {
   groupedLeads: GroupedLeads
@@ -42,10 +52,14 @@ function cloneGroups(groups: GroupedLeads): GroupedLeads {
   }
 }
 
-function moveLead(groups: GroupedLeads, lead: LeadPipelineLead, nextStatus: PipelineStatus): GroupedLeads {
+function moveLead(
+  groups: GroupedLeads,
+  lead: LeadPipelineLead,
+  nextStatus: PipelineStatus,
+): GroupedLeads {
   const nextGroups = cloneGroups(groups)
 
-  for (const status of [...ACTIVE_PIPELINE_STATUSES, ...ARCHIVED_PIPELINE_STATUSES]) {
+  for (const status of ALL_PIPELINE_STATUSES) {
     nextGroups[status] = nextGroups[status].filter((item) => item.id !== lead.id)
   }
 
@@ -56,53 +70,46 @@ function moveLead(groups: GroupedLeads, lead: LeadPipelineLead, nextStatus: Pipe
 function removeLead(groups: GroupedLeads, leadId: string): GroupedLeads {
   const nextGroups = cloneGroups(groups)
 
-  for (const status of [...ACTIVE_PIPELINE_STATUSES, ...ARCHIVED_PIPELINE_STATUSES]) {
+  for (const status of ALL_PIPELINE_STATUSES) {
     nextGroups[status] = nextGroups[status].filter((item) => item.id !== leadId)
   }
 
   return nextGroups
 }
 
-function statusTone(status: PipelineStatus): string {
-  switch (status) {
-    case 'PROSPECTO':
-      return 'from-cyan-400/20 to-cyan-400/5 text-cyan-100'
-    case 'DEMO_ENVIADA':
-      return 'from-violet-400/20 to-violet-400/5 text-violet-100'
-    case 'VIO_VIDEO':
-      return 'from-emerald-400/20 to-emerald-400/5 text-emerald-100'
-    case 'RESPONDIO':
-      return 'from-sky-400/20 to-sky-400/5 text-sky-100'
-    case 'CALL_AGENDADA':
-      return 'from-amber-400/20 to-amber-400/5 text-amber-100'
-    case 'CERRADO':
-      return 'from-emerald-500/20 to-emerald-500/5 text-emerald-100'
-    case 'PERDIDO':
-      return 'from-rose-400/20 to-rose-400/5 text-rose-100'
-    case 'POSTERGADO':
-      return 'from-zinc-400/20 to-zinc-400/5 text-zinc-100'
-  }
-}
-
 export function LeadPipeline({ groupedLeads }: LeadPipelineProps) {
   const router = useRouter()
-  const [showArchived, setShowArchived] = useState(false)
+  const reduced = useReducedMotion()
+  const isClient = useIsClient()
+
   const [error, setError] = useState<string | null>(null)
   const [pendingLeadId, setPendingLeadId] = useState<string | null>(null)
-  const [localGroupedLeads, setLocalGroupedLeads] = useState<GroupedLeads>(() => cloneGroups(groupedLeads))
+  const [overviewStatus, setOverviewStatus] = useState<PipelineStatus | null>(null)
+  const [activeDragLead, setActiveDragLead] = useState<LeadPipelineLead | null>(null)
   const [, startTransition] = useTransition()
 
-  useEffect(() => {
+  // Sync optimista ↔ props del server con el patrón "reset state on prop change"
+  // EN RENDER (no en effect), para no disparar react-hooks/set-state-in-effect.
+  const [syncedFrom, setSyncedFrom] = useState(groupedLeads)
+  const [localGroupedLeads, setLocalGroupedLeads] = useState<GroupedLeads>(() =>
+    cloneGroups(groupedLeads),
+  )
+  if (syncedFrom !== groupedLeads) {
+    setSyncedFrom(groupedLeads)
     setLocalGroupedLeads(cloneGroups(groupedLeads))
-  }, [groupedLeads])
+  }
 
-  const archivedCount = useMemo(
-    () =>
-      ARCHIVED_PIPELINE_STATUSES.reduce(
-        (count, status) => count + localGroupedLeads[status].length,
-        0
-      ),
-    [localGroupedLeads]
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: { delay: DRAG_HOLD_DELAY, tolerance: DRAG_HOLD_TOLERANCE },
+    }),
+    useSensor(KeyboardSensor, {
+      // Space levanta/suelta; Enter queda libre para navegar al detalle (DnD por teclado).
+      // Sin coordinateGetter custom: usamos el default de dnd-kit (paso fijo por flechas +
+      // collision detection) — el de @dnd-kit/sortable NO traversa entre columnas porque la
+      // card es un draggable plano, no un sortable registrado como droppable.
+      keyboardCodes: { start: ['Space'], cancel: ['Escape'], end: ['Space'] },
+    }),
   )
 
   const handleMoveStatus = (lead: LeadPipelineLead, status: PipelineStatus) => {
@@ -117,7 +124,7 @@ export function LeadPipeline({ groupedLeads }: LeadPipelineProps) {
         status,
         reactivateAt:
           status === 'POSTERGADO'
-            ? new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+            ? new Date(Date.now() + POSTPONE_DAYS * 24 * 60 * 60 * 1000)
             : undefined,
       })
 
@@ -154,140 +161,107 @@ export function LeadPipeline({ groupedLeads }: LeadPipelineProps) {
     })
   }
 
+  const handleDragStart = (event: DragStartEvent) => {
+    const lead = event.active.data.current?.lead as LeadPipelineLead | undefined
+    setActiveDragLead(lead ?? null)
+    // Si el drag arrancó desde el overview, cerralo: revela el board 3+3+2 (columnas
+    // droppables). El DragOverlay + nodo cacheado mantienen la card en arrastre.
+    setOverviewStatus(null)
+  }
+
+  // Cards draggables. El overview usa un dragId propio (prefijo) para no colisionar con
+  // las del board cuando el lead también está entre los visibles de su columna.
+  const renderBoardCard = (lead: LeadPipelineLead) => (
+    <DraggableLeadCard
+      key={lead.id}
+      lead={lead}
+      isPending={pendingLeadId === lead.id}
+      onDelete={handleDelete}
+    />
+  )
+  const renderOverviewCard = (lead: LeadPipelineLead) => (
+    <DraggableLeadCard
+      key={lead.id}
+      lead={lead}
+      dragId={`overview-${lead.id}`}
+      isPending={pendingLeadId === lead.id}
+      onDelete={handleDelete}
+    />
+  )
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    // Usar el lead capturado en estado al iniciar el drag, NO event.active.data: cuando el
+    // drag viene del overview, la card fuente se desmonta al cerrarse el overview y dnd-kit
+    // deja active.data vacío (nodo borrado del registro) → el drop se perdía en silencio.
+    const lead = activeDragLead
+    setActiveDragLead(null)
+    const { over } = event
+    if (!over || !lead) {
+      return
+    }
+    // El droppable id es un status sólo si matchea ALL_PIPELINE_STATUSES (sin cast).
+    const targetStatus = ALL_PIPELINE_STATUSES.find((status) => status === over.id)
+    // Mover sólo si cambia de columna. Misma columna = no-op (no hay orden persistente).
+    if (targetStatus && lead.status !== targetStatus) {
+      handleMoveStatus(lead, targetStatus)
+    }
+  }
+
+  const handleDragCancel = () => {
+    setActiveDragLead(null)
+  }
+
+  const handleCloseOverview = useCallback(() => setOverviewStatus(null), [])
+
   return (
-    <div className="space-y-5">
+    <div className="space-y-4">
       {error ? (
-        <div className="rounded-[24px] border border-rose-400/20 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
+        <div
+          role="alert"
+          className="rounded-[24px] border border-rose-400/20 bg-rose-500/10 px-4 py-3 text-sm text-rose-200"
+        >
           {error}
         </div>
       ) : null}
 
-      <div className="overflow-x-auto pb-2">
-        <div className="flex min-w-max gap-4">
-          {ACTIVE_PIPELINE_STATUSES.map((status) => (
-            <section
-              key={status}
-              className="flex min-h-[420px] w-[320px] flex-col rounded-[26px] border border-white/10 bg-white/[0.04] p-4 backdrop-blur-xl"
-            >
-              <div
-                className={[
-                  'rounded-2xl border border-white/10 bg-gradient-to-br px-4 py-3',
-                  statusTone(status),
-                ].join(' ')}
-              >
-                <div className="flex items-center justify-between gap-3">
-                  <div>
-                    <p className="text-[10px] uppercase tracking-[0.22em] text-white/55">
-                      Pipeline
-                    </p>
-                    <h3 className="mt-1 text-sm font-semibold text-white">
-                      {STATUS_LABELS[status]}
-                    </h3>
-                  </div>
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCorners}
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
+        onDragCancel={handleDragCancel}
+      >
+        <PipelineBoard
+          groupedLeads={localGroupedLeads}
+          onOpenOverview={setOverviewStatus}
+          renderCard={renderBoardCard}
+        />
 
-                  <div className="rounded-full border border-white/10 bg-black/20 px-2.5 py-1 text-xs font-medium text-white/85">
-                    {localGroupedLeads[status].length}
-                  </div>
-                </div>
-              </div>
+        {/* Dentro del MISMO DndContext que el board → las cards del overview son
+            draggables y, al iniciar el drag, el overview se cierra (handleDragStart). */}
+        <ColumnOverview
+          status={overviewStatus}
+          leads={overviewStatus ? localGroupedLeads[overviewStatus] : []}
+          renderCard={renderOverviewCard}
+          onClose={handleCloseOverview}
+        />
 
-              <div className="mt-4 flex-1 space-y-3">
-                {localGroupedLeads[status].length > 0 ? (
-                  localGroupedLeads[status].map((lead) => (
-                    <LeadCard
-                      key={lead.id}
-                      lead={lead}
-                      isPending={pendingLeadId === lead.id}
-                      onMoveStatus={handleMoveStatus}
-                      onDelete={handleDelete}
-                    />
-                  ))
-                ) : (
-                  <EmptyState
-                    icon={Inbox}
-                    title="Sin leads en esta etapa"
-                    description="Cuando muevas prospectos por el pipeline van a aparecer aca."
+        {isClient
+          ? createPortal(
+              <DragOverlay dropAnimation={reduced ? null : undefined}>
+                {activeDragLead ? (
+                  <LeadCard
+                    lead={activeDragLead}
+                    isPending={false}
+                    onDelete={handleDelete}
+                    presentational
                   />
-                )}
-              </div>
-            </section>
-          ))}
-        </div>
-      </div>
-
-      <section className="rounded-[26px] border border-white/10 bg-white/[0.04] p-4 backdrop-blur-xl">
-        <button
-          type="button"
-          onClick={() => setShowArchived((current) => !current)}
-          className="flex w-full items-center justify-between rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-left transition-colors hover:bg-black/30"
-        >
-          <div>
-            <p className="text-[10px] uppercase tracking-[0.22em] text-zinc-500">
-              Seccion secundaria
-            </p>
-            <h3 className="mt-1 text-sm font-semibold text-white">Perdidos y postergados</h3>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-xs font-medium text-zinc-200">
-              {archivedCount}
-            </span>
-            <ChevronDown
-              className={[
-                'h-4 w-4 text-zinc-400 transition-transform duration-200',
-                showArchived ? 'rotate-180' : '',
-              ].join(' ')}
-            />
-          </div>
-        </button>
-
-        {showArchived ? (
-          <div className="mt-4 overflow-x-auto pb-2">
-            <div className="flex min-w-max gap-4">
-              {ARCHIVED_PIPELINE_STATUSES.map((status) => (
-                <section
-                  key={status}
-                  className="flex min-h-[300px] w-[320px] flex-col rounded-[24px] border border-white/10 bg-black/20 p-4"
-                >
-                  <div
-                    className={[
-                      'rounded-2xl border border-white/10 bg-gradient-to-br px-4 py-3',
-                      statusTone(status),
-                    ].join(' ')}
-                  >
-                    <div className="flex items-center justify-between gap-3">
-                      <h4 className="text-sm font-semibold text-white">{STATUS_LABELS[status]}</h4>
-                      <span className="rounded-full border border-white/10 bg-black/20 px-2.5 py-1 text-xs text-white/85">
-                        {localGroupedLeads[status].length}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="mt-4 flex-1 space-y-3">
-                    {localGroupedLeads[status].length > 0 ? (
-                      localGroupedLeads[status].map((lead) => (
-                        <LeadCard
-                          key={lead.id}
-                          lead={lead}
-                          isPending={pendingLeadId === lead.id}
-                          onMoveStatus={handleMoveStatus}
-                          onDelete={handleDelete}
-                        />
-                      ))
-                    ) : (
-                      <EmptyState
-                        icon={Inbox}
-                        title="Sin leads archivados"
-                        description="Esta columna va a mostrar los leads perdidos o postergados."
-                      />
-                    )}
-                  </div>
-                </section>
-              ))}
-            </div>
-          </div>
-        ) : null}
-      </section>
+                ) : null}
+              </DragOverlay>,
+              document.body,
+            )
+          : null}
+      </DndContext>
     </div>
   )
 }

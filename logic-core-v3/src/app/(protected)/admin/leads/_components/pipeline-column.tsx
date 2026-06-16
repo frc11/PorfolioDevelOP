@@ -1,0 +1,125 @@
+'use client'
+
+import type { ReactNode } from 'react'
+import { Inbox } from 'lucide-react'
+import { EmptyState } from '@/components/ui'
+import { cn } from '@/lib/utils'
+import {
+  STATUS_LABELS,
+  statusTone,
+  type LeadPipelineLead,
+  type PipelineStatus,
+} from './lead-pipeline.shared'
+
+// === TUNABLES (calibrá por ojo) ===
+const COLUMN_FADE_HEIGHT = 48 // alto del desvanecimiento inferior del cuerpo (px)
+const MAX_VISIBLE_CARDS = 3 // máx de cards RENDERIZADAS por columna (el resto vive en el overview)
+const HINT_MIN_LEADS = 2 // desde cuántos leads se muestra el hint de "ver todas" (con ~1 entera visible)
+
+// El cuerpo NO scrollea (la rueda siempre scrollea la página). Se renderizan como mucho
+// MAX_VISIBLE_CARDS cards — el resto NO se monta (no quedan targets invisibles tabbables) y
+// se ven en el overview (click en el header). Si hay más, la última se desvanece (mask-image).
+const COLUMN_BODY_FADE = `linear-gradient(to bottom, #000 calc(100% - ${COLUMN_FADE_HEIGHT}px), transparent)`
+
+type PipelineColumnProps = {
+  status: PipelineStatus
+  leads: LeadPipelineLead[]
+  /** Alto fijo del cuerpo (px) — sin scroll interno. TUNABLE provisto por el padre. */
+  bodyMaxHeight: number
+  /** Click en el header → abre la vista fullscreen de la columna. */
+  onOpenOverview?: (status: PipelineStatus) => void
+  /** Render de cada card (inyecta la versión draggable desde el board). */
+  renderCard: (lead: LeadPipelineLead) => ReactNode
+  /** Ref del droppable de dnd-kit. Sin él, la columna no es drop target. */
+  dropRef?: (element: HTMLElement | null) => void
+  /** La card arrastrada está sobre esta columna → highlight. */
+  isOver?: boolean
+}
+
+/**
+ * Columna presentacional del pipeline: header (tono + label + count) + cuerpo de alto
+ * fijo SIN scroll interno (máx MAX_VISIBLE_CARDS; el resto en el overview). Fluida (llena
+ * su celda de la grilla). No conoce el DnD; el padre lo compone alrededor.
+ */
+export function PipelineColumn({
+  status,
+  leads,
+  bodyMaxHeight,
+  onOpenOverview,
+  renderCard,
+  dropRef,
+  isOver = false,
+}: PipelineColumnProps) {
+  const visibleLeads = leads.slice(0, MAX_VISIBLE_CARDS)
+  // Fade siempre que haya cards: suaviza cualquier corte por el alto fijo (no solo cuando
+  // sobran del slice) y NO se aplica sobre el EmptyState. Sólo afecta lo que llega al fondo.
+  const showFade = leads.length > 0
+  // Desde 2 leads ya se invita a expandir: la columna sólo muestra ~1 card entera antes del fade.
+  const showExpandHint = leads.length >= HINT_MIN_LEADS
+
+  return (
+    <section
+      ref={dropRef}
+      className={cn(
+        'flex h-full min-w-0 flex-col rounded-[26px] border bg-white/[0.04] p-4 backdrop-blur-xl transition-colors',
+        isOver ? 'border-cyan-400/40 bg-cyan-400/[0.06]' : 'border-white/10',
+      )}
+    >
+      <button
+        type="button"
+        onClick={() => onOpenOverview?.(status)}
+        aria-label={`Ver todos los leads de ${STATUS_LABELS[status]}`}
+        className={cn(
+          'block w-full rounded-2xl border border-white/10 bg-gradient-to-br px-4 py-3 text-left transition-[filter] hover:brightness-110',
+          statusTone(status),
+        )}
+      >
+        <div className="flex items-center justify-between gap-3">
+          <div className="min-w-0">
+            <p className="text-[10px] uppercase tracking-[0.22em] text-white/55">Pipeline</p>
+            <h3 className="mt-1 truncate text-sm font-semibold text-white">
+              {STATUS_LABELS[status]}
+            </h3>
+          </div>
+
+          <div className="rounded-full border border-white/10 bg-black/20 px-2.5 py-1 text-xs font-medium text-white/85">
+            {leads.length}
+          </div>
+        </div>
+      </button>
+
+      <div
+        // Altura FIJA + overflow-hidden: sin scroll interno → la rueda scrollea la página.
+        // px-2/py-1 dan aire lateral para que el hover:scale de la card no se recorte.
+        // El fade (mask) sólo cuando hay más cards que las visibles (no sobre el EmptyState).
+        className="mt-4 space-y-3 overflow-hidden px-2 py-1"
+        style={{
+          height: bodyMaxHeight,
+          ...(showFade
+            ? { maskImage: COLUMN_BODY_FADE, WebkitMaskImage: COLUMN_BODY_FADE }
+            : null),
+        }}
+      >
+        {leads.length > 0 ? (
+          visibleLeads.map((lead) => renderCard(lead))
+        ) : (
+          <EmptyState
+            icon={Inbox}
+            title="Sin leads en esta etapa"
+            description="Cuando muevas prospectos por el pipeline van a aparecer aca."
+          />
+        )}
+      </div>
+
+      {showExpandHint ? (
+        <button
+          type="button"
+          onClick={() => onOpenOverview?.(status)}
+          className="mt-1 w-full rounded-xl px-3 py-1.5 text-center text-[11px] font-medium text-cyan-300/80 transition-colors hover:bg-cyan-400/10 hover:text-cyan-200"
+        >
+          Clic para ver las {leads.length} →
+        </button>
+      ) : null}
+    </section>
+  )
+}

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { CheckCircle2, Sparkles, Users } from 'lucide-react'
 import { Button, Card, EmptyState } from '@/components/ui'
 import { convertInboundToLead } from '../_actions/inbound.actions'
+import { InboundPeriodFilter } from './inbound-period-filter'
 
 type InboundLeadRow = {
   id: string
@@ -67,7 +68,7 @@ export function InboundLeadsTable({ leads }: InboundLeadsTableProps) {
   }
 
   return (
-    <Card padding="none" className="rounded-[28px] bg-white/5 backdrop-blur-xl">
+    <Card padding="none" className="overflow-hidden rounded-[28px] bg-white/5 backdrop-blur-xl">
       <div className="border-b border-white/10 px-5 py-4">
         <p className="text-[10px] uppercase tracking-[0.24em] text-zinc-500">
           Leads inbound
@@ -75,6 +76,8 @@ export function InboundLeadsTable({ leads }: InboundLeadsTableProps) {
         <p className="mt-2 text-sm text-zinc-400">
           Formularios que entraron desde el portal y pueden convertirse al CRM interno.
         </p>
+
+        <InboundPeriodFilter />
       </div>
 
       {error ? (

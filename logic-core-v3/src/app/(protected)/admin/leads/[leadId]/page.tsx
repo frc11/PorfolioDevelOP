@@ -8,7 +8,7 @@ import { LeadActivityFeed } from '../_components/lead-activity-feed'
 import { LeadDemosPanel } from '../_components/demo-form'
 import { AssignSetterControl } from '../_components/assign-setter-control'
 import { ReunionPanel } from '../_components/reunion-panel'
-import { updateLeadStatus } from '../_actions/lead.actions'
+import { ChangeStatusSelect } from '../_components/change-status-select'
 
 type LeadPageProps = {
   params: Promise<{
@@ -121,6 +121,11 @@ function formatDate(value: Date | null): string {
   }).format(value)
 }
 
+// Calculado acá (función de módulo, no en el render) para no disparar react-hooks/purity.
+function isFollowUpPending(value: Date | null): boolean {
+  return value ? value.getTime() <= Date.now() : false
+}
+
 function buildLeadFormData(lead: LeadRecord) {
   return {
     id: lead.id,
@@ -167,17 +172,6 @@ function serializeDemos(lead: LeadRecord) {
     notes: demo.notes,
   }))
 }
-
-const STATUS_OPTIONS: LeadStatus[] = [
-  'PROSPECTO',
-  'DEMO_ENVIADA',
-  'VIO_VIDEO',
-  'RESPONDIO',
-  'CALL_AGENDADA',
-  'CERRADO',
-  'PERDIDO',
-  'POSTERGADO',
-]
 
 export default async function AgencyOsLeadDetailPage({ params }: LeadPageProps) {
   const { leadId } = await params
@@ -273,37 +267,7 @@ export default async function AgencyOsLeadDetailPage({ params }: LeadPageProps) 
           <div className="flex flex-wrap items-center gap-3">
             <LeadForm lead={buildLeadFormData(lead)} triggerLabel="Editar" />
 
-            <details className="relative">
-              <summary className="list-none rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-zinc-200 transition-colors hover:bg-black/30">
-                Cambiar estado
-              </summary>
-
-              <div className="absolute right-0 top-14 z-20 min-w-[220px] rounded-2xl border border-white/10 bg-[#11161d]/95 p-2 shadow-2xl backdrop-blur-xl">
-                {STATUS_OPTIONS.filter((status) => status !== lead.status).map((status) => (
-                  <form
-                    key={status}
-                    action={async () => {
-                      'use server'
-                      await updateLeadStatus({
-                        leadId: lead.id,
-                        status,
-                        reactivateAt:
-                          status === 'POSTERGADO'
-                            ? new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
-                            : undefined,
-                      })
-                    }}
-                  >
-                    <button
-                      type="submit"
-                      className="flex w-full rounded-xl px-3 py-2 text-left text-sm text-zinc-200 transition-colors hover:bg-white/5"
-                    >
-                      {statusLabel(status)}
-                    </button>
-                  </form>
-                ))}
-              </div>
-            </details>
+            <ChangeStatusSelect leadId={lead.id} status={lead.status} />
 
             {canConvertToProject ? (
               <button
@@ -318,8 +282,16 @@ export default async function AgencyOsLeadDetailPage({ params }: LeadPageProps) 
         </div>
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.6fr)_minmax(320px,1fr)]">
-        <div className="space-y-6">
+      {/* P3: la reunión agendada va full-width al tope, empujando el grid hacia abajo.
+          Sin reunión no se renderiza y el grid queda como siempre. */}
+      {reunion ? <ReunionPanel leadId={lead.id} agenda={reunion} /> : null}
+
+      <div className="grid items-stretch gap-6 xl:grid-cols-[minmax(0,1.6fr)_minmax(320px,1fr)]">
+        {/* P9: a xl la columna izq alinea su alto al de la derecha (Acciones rápidas).
+            "Datos" queda fijo (auto) y "Actividad comercial" toma el 1fr restante,
+            scrolleando ADENTRO con fade inferior. El feed va absolute para no inflar el
+            alto intrínseco de la columna (así el alto lo manda la columna derecha). */}
+        <div className="space-y-6 xl:grid xl:h-full xl:min-h-0 xl:grid-rows-[auto_minmax(0,1fr)] xl:gap-6 xl:space-y-0">
           <section className="rounded-[28px] border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
             <h3 className="text-lg font-semibold text-white">Datos del lead</h3>
 
@@ -403,16 +375,21 @@ export default async function AgencyOsLeadDetailPage({ params }: LeadPageProps) 
             ) : null}
           </section>
 
-          <LeadActivityFeed
-            leadId={lead.id}
-            nextFollowUpAt={lead.nextFollowUpAt?.toISOString() ?? null}
-            activities={serializeActivities(lead)}
-          />
+          <div className="relative xl:min-h-0">
+            {/* El feed ocupa el alto disponible (1fr); su timeline scrollea adentro con
+                fades scroll-aware (P4). El wrapper sólo le da el alto definido a xl. */}
+            <div className="xl:absolute xl:inset-0">
+              <LeadActivityFeed
+                leadId={lead.id}
+                nextFollowUpAt={lead.nextFollowUpAt?.toISOString() ?? null}
+                followUpPending={isFollowUpPending(lead.nextFollowUpAt)}
+                activities={serializeActivities(lead)}
+              />
+            </div>
+          </div>
         </div>
 
         <div className="space-y-6">
-          {reunion ? <ReunionPanel leadId={lead.id} agenda={reunion} /> : null}
-
           <AssignSetterControl
             leadId={lead.id}
             assignedToId={lead.assignedToId}

@@ -5,14 +5,10 @@ import { prisma } from '@/lib/prisma'
 import { LeadForm } from './_components/lead-form'
 import { InboundLeadsTable } from './_components/inbound-leads-table'
 import {
-  ACTIVE_PIPELINE_STATUSES,
-  type GroupedLeads,
   type LeadPipelineLead,
   type PipelineStatus,
 } from './_components/lead-pipeline.shared'
-import {
-  LeadPipeline,
-} from './_components/lead-pipeline'
+import { OutboundLeadsView } from './_components/outbound-leads-view'
 import { listInboundLeads } from './_actions/inbound.actions'
 
 // Fix Next 16 + unstable_cache (hallazgo B3): el cache serializa los Date a
@@ -81,19 +77,6 @@ type LeadRow = Prisma.OsLeadGetPayload<{
   }
 }>
 
-function createEmptyGroups(): GroupedLeads {
-  return {
-    PROSPECTO: [],
-    DEMO_ENVIADA: [],
-    VIO_VIDEO: [],
-    RESPONDIO: [],
-    CALL_AGENDADA: [],
-    CERRADO: [],
-    PERDIDO: [],
-    POSTERGADO: [],
-  }
-}
-
 function serializeLead(lead: LeadRow): LeadPipelineLead {
   return {
     id: lead.id,
@@ -117,25 +100,18 @@ function serializeLead(lead: LeadRow): LeadPipelineLead {
 export default async function AgencyOsLeadsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ tab?: string }>
+  searchParams: Promise<{ tab?: string; period?: string; from?: string; to?: string }>
 }) {
-  const { tab } = await searchParams
+  const { tab, period, from, to } = await searchParams
   const activeTab: LeadTab = tab === 'inbound' ? 'inbound' : 'outbound'
 
   const [leads, inboundResult] = await Promise.all([
     getLeads(),
-    activeTab === 'inbound' ? listInboundLeads() : Promise.resolve(null),
+    activeTab === 'inbound'
+      ? listInboundLeads({ period, from, to })
+      : Promise.resolve(null),
   ])
 
-  const groupedLeads = leads.reduce<GroupedLeads>((accumulator, lead) => {
-    accumulator[lead.status].push(lead)
-    return accumulator
-  }, createEmptyGroups())
-
-  const totalOutboundLeads = ACTIVE_PIPELINE_STATUSES.reduce(
-    (count, status) => count + groupedLeads[status].length,
-    0
-  )
   const inboundLeads = inboundResult?.success ? inboundResult.data : []
   const totalInboundLeads = inboundLeads.length
 
@@ -157,14 +133,12 @@ export default async function AgencyOsLeadsPage({
         </div>
 
         <div className="flex items-center gap-3">
-          <div className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-right">
-            <p className="text-[10px] uppercase tracking-[0.22em] text-zinc-500">
-              {activeTab === 'outbound' ? 'Leads activos' : 'Leads inbound'}
-            </p>
-            <p className="mt-1 text-xl font-semibold text-white">
-              {activeTab === 'outbound' ? totalOutboundLeads : totalInboundLeads}
-            </p>
-          </div>
+          {activeTab === 'inbound' ? (
+            <div className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-right">
+              <p className="text-[10px] uppercase tracking-[0.22em] text-zinc-500">Leads inbound</p>
+              <p className="mt-1 text-xl font-semibold text-white">{totalInboundLeads}</p>
+            </div>
+          ) : null}
           {activeTab === 'outbound' ? <LeadForm /> : null}
         </div>
       </div>
@@ -197,7 +171,7 @@ export default async function AgencyOsLeadsPage({
       </div>
 
       {activeTab === 'outbound' ? (
-        <LeadPipeline groupedLeads={groupedLeads} />
+        <OutboundLeadsView leads={leads} />
       ) : inboundResult?.success ? (
         <InboundLeadsTable leads={inboundResult.data} />
       ) : (
