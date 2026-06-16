@@ -114,7 +114,9 @@ export function ProjectCard({ project }: ProjectCardProps) {
       draggable={false}
       className="group flex h-full w-full flex-col rounded-[26px] border border-white/10 bg-white/5 p-5 shadow-[0_20px_45px_rgba(0,0,0,0.22)] backdrop-blur-xl transition-all hover:border-cyan-400/20 hover:bg-white/[0.07]"
     >
-      <div className="min-w-0">
+      {/* pr-10 reserva la esquina sup. derecha para el tacho que project-list
+          superpone, así un título largo no queda debajo. */}
+      <div className="min-w-0 pr-10">
         <p className="truncate text-lg font-semibold text-white">{project.name}</p>
         <p className="mt-1 truncate text-sm text-zinc-400">{project.businessName}</p>
       </div>

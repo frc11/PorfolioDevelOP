@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { Building2 } from 'lucide-react'
 import type { ProjectStatus } from '@prisma/client'
-import { updateProjectStatus } from '../_actions/project.actions'
+import { deleteProject, updateProjectStatus } from '../_actions/project.actions'
 import { ProjectForm } from './project-form'
 import { ProjectList, type ProjectDnd, type ProjectListItem } from './project-list'
 import { ProjectsFilterBar } from './projects-filter-bar'
@@ -38,6 +38,7 @@ export function ProjectsBoard({ projects, organizations, errorMessage }: Project
   const [draggingId, setDraggingId] = useState<string | null>(null)
   const [dragOverStatus, setDragOverStatus] = useState<ProjectStatus | null>(null)
   const [dndError, setDndError] = useState<string | null>(null)
+  const [deleteError, setDeleteError] = useState<string | null>(null)
   const [, startTransition] = useTransition()
 
   useEffect(() => {
@@ -83,6 +84,25 @@ export function ProjectsBoard({ projects, organizations, errorMessage }: Project
       if (!result.success) {
         setLocalProjects(previousProjects)
         setDndError(result.error)
+        return
+      }
+
+      router.refresh()
+    })
+  }
+
+  const handleDeleteProject = (projectId: string) => {
+    const previousProjects = localProjects
+    setDeleteError(null)
+    // Optimista: la card desaparece al confirmar; rollback si la action falla.
+    setLocalProjects((current) => current.filter((item) => item.id !== projectId))
+
+    startTransition(async () => {
+      const result = await deleteProject(projectId)
+
+      if (!result.success) {
+        setLocalProjects(previousProjects)
+        setDeleteError(result.error)
         return
       }
 
@@ -160,13 +180,17 @@ export function ProjectsBoard({ projects, organizations, errorMessage }: Project
         </div>
       </div>
 
-      {(errorMessage ?? dndError) ? (
+      {(errorMessage ?? dndError ?? deleteError) ? (
         <div className="rounded-[28px] border border-rose-400/20 bg-rose-500/10 p-5 text-sm text-rose-200">
-          {errorMessage ?? dndError}
+          {errorMessage ?? dndError ?? deleteError}
         </div>
       ) : null}
 
-      <ProjectList projects={filteredProjects} dnd={dnd} />
+      <ProjectList
+        projects={filteredProjects}
+        dnd={dnd}
+        onDeleteProject={handleDeleteProject}
+      />
     </section>
   )
 }

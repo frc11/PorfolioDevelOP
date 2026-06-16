@@ -1,7 +1,8 @@
 'use client'
 
-import type { DragEvent } from 'react'
+import { useState, type DragEvent } from 'react'
 import { motion, useReducedMotion } from 'motion/react'
+import { Trash2 } from 'lucide-react'
 import type { ProjectStatus } from '@prisma/client'
 import { staggerContainer, staggerItem } from '@/lib/motion-variants'
 import { ProjectCard, type ProjectCardData } from './project-card'
@@ -23,6 +24,7 @@ export type ProjectDnd = {
 type ProjectListProps = {
   projects: ProjectListItem[]
   dnd?: ProjectDnd
+  onDeleteProject?: (projectId: string) => void
 }
 
 // Siempre visibles, en este orden, aunque la sección esté vacía.
@@ -38,8 +40,9 @@ const STATUS_SECTIONS: Array<{ status: ProjectStatus; label: string }> = [
 // umbral. Si una sección supera esto, scrollea en vez de estirar la página.
 const SECTION_MAX_HEIGHT = 'max-h-[48rem]'
 
-export function ProjectList({ projects, dnd }: ProjectListProps) {
+export function ProjectList({ projects, dnd, onDeleteProject }: ProjectListProps) {
   const reduce = useReducedMotion()
+  const [confirmingId, setConfirmingId] = useState<string | null>(null)
 
   const draggingProject =
     dnd && dnd.draggingId ? projects.find((project) => project.id === dnd.draggingId) : undefined
@@ -100,37 +103,122 @@ export function ProjectList({ projects, dnd }: ProjectListProps) {
                 initial={reduce ? false : 'hidden'}
                 animate="visible"
               >
-                {sectionProjects.map((project) => (
-                  // motion.div hace el stagger; el drag nativo HTML5 va en un
-                  // <div> plano interno (motion reinterpreta onDragStart como su
-                  // propio gesto de pan, sin dataTransfer).
-                  <motion.div
-                    key={project.id}
-                    variants={staggerItem}
-                    className="flex w-[340px] shrink-0"
-                  >
-                    <div
-                      draggable={dnd ? true : undefined}
-                      onDragStart={
-                        dnd
-                          ? (event) => {
-                              dnd.onCardDragStart(project)
-                              event.dataTransfer.effectAllowed = 'move'
-                              event.dataTransfer.setData('text/plain', project.id)
-                            }
-                          : undefined
-                      }
-                      onDragEnd={dnd ? () => dnd.onCardDragEnd() : undefined}
-                      className={[
-                        'flex w-full transition-opacity',
-                        dnd ? 'cursor-grab active:cursor-grabbing' : '',
-                        dnd?.draggingId === project.id ? 'opacity-50' : '',
-                      ].join(' ')}
+                {sectionProjects.map((project) => {
+                  const confirming = confirmingId === project.id
+
+                  return (
+                    // motion.div hace el stagger; el drag nativo HTML5 va en un
+                    // <div> plano interno (motion reinterpreta onDragStart como su
+                    // propio gesto de pan, sin dataTransfer).
+                    <motion.div
+                      key={project.id}
+                      variants={staggerItem}
+                      className="flex w-[340px] shrink-0"
                     >
-                      <ProjectCard project={project} />
-                    </div>
-                  </motion.div>
-                ))}
+                      <div
+                        draggable={dnd ? true : undefined}
+                        onDragStart={
+                          dnd
+                            ? (event) => {
+                                // No iniciar drag desde el tacho / la confirmación.
+                                if ((event.target as HTMLElement).closest('[data-no-drag]')) {
+                                  event.preventDefault()
+                                  return
+                                }
+                                dnd.onCardDragStart(project)
+                                event.dataTransfer.effectAllowed = 'move'
+                                event.dataTransfer.setData('text/plain', project.id)
+                              }
+                            : undefined
+                        }
+                        onDragEnd={dnd ? () => dnd.onCardDragEnd() : undefined}
+                        className={[
+                          'relative flex w-full transition-opacity',
+                          dnd ? 'cursor-grab active:cursor-grabbing' : '',
+                          dnd?.draggingId === project.id ? 'opacity-50' : '',
+                        ].join(' ')}
+                      >
+                        <ProjectCard project={project} />
+
+                        {onDeleteProject ? (
+                          <button
+                            type="button"
+                            data-no-drag
+                            onClick={(event) => {
+                              event.preventDefault()
+                              event.stopPropagation()
+                              setConfirmingId(project.id)
+                            }}
+                            aria-label={`Eliminar proyecto ${project.name}`}
+                            className="absolute right-4 top-4 z-10 flex h-9 w-9 items-center justify-center rounded-full border border-rose-400/20 bg-rose-500/10 text-rose-300 backdrop-blur-sm transition-colors hover:bg-rose-500/20"
+                          >
+                            <Trash2 className="h-4 w-4" strokeWidth={1.5} />
+                          </button>
+                        ) : null}
+
+                        {confirming && onDeleteProject ? (
+                          // Confirmación scoped (estilo Leads): overlay absolute
+                          // inset-0 → blur SÓLO sobre esta card, diálogo centrado.
+                          // rounded propio (sin overflow-hidden en el wrapper para
+                          // no cortar la sombra de la card). Todo data-no-drag +
+                          // stopPropagation (la card navega por <Link>).
+                          <div
+                            data-no-drag
+                            onClick={(event) => {
+                              event.preventDefault()
+                              event.stopPropagation()
+                              setConfirmingId(null)
+                            }}
+                            className="absolute inset-0 z-20 flex items-center justify-center rounded-[26px] bg-[#05070a]/70 p-4 backdrop-blur-md"
+                          >
+                            <div
+                              role="dialog"
+                              aria-modal="true"
+                              aria-label="Eliminar proyecto"
+                              onClick={(event) => {
+                                event.preventDefault()
+                                event.stopPropagation()
+                              }}
+                              className="w-full max-w-[260px] rounded-2xl border border-white/10 bg-[#11161d] p-4 shadow-2xl"
+                            >
+                              <p className="text-sm font-semibold text-white">Eliminar proyecto</p>
+                              <p className="mt-2 text-sm leading-6 text-zinc-300">
+                                ¿Seguro que querés eliminar{' '}
+                                <span className="font-medium text-white">{project.name}</span>? Se
+                                eliminará junto con sus tareas, registros de tiempo e hitos.
+                              </p>
+                              <div className="mt-4 flex justify-end gap-2">
+                                <button
+                                  type="button"
+                                  onClick={(event) => {
+                                    event.preventDefault()
+                                    event.stopPropagation()
+                                    setConfirmingId(null)
+                                  }}
+                                  className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-zinc-200 transition-colors hover:bg-white/10"
+                                >
+                                  Cancelar
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={(event) => {
+                                    event.preventDefault()
+                                    event.stopPropagation()
+                                    setConfirmingId(null)
+                                    onDeleteProject(project.id)
+                                  }}
+                                  className="rounded-xl border border-rose-400/20 bg-rose-500/15 px-3 py-2 text-sm font-medium text-rose-100 transition-colors hover:bg-rose-500/25"
+                                >
+                                  Eliminar
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        ) : null}
+                      </div>
+                    </motion.div>
+                  )
+                })}
               </motion.div>
             ) : (
               <p

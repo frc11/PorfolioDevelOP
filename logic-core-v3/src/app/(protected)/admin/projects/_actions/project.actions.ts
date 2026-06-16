@@ -767,6 +767,57 @@ export async function updateProjectStatus(
   }
 }
 
+export async function deleteProject(input: unknown): Promise<ActionResult<{ id: string }>> {
+  try {
+    await requireSuperAdmin()
+    const projectId = ProjectIdSchema.parse(input)
+
+    const project = await prisma.$transaction(async (tx) => {
+      const current = await tx.project.findUnique({
+        where: {
+          id: projectId,
+        },
+        select: {
+          id: true,
+          osLeadId: true,
+          organizationId: true,
+        },
+      })
+
+      if (!current) {
+        throw new Error('Project not found')
+      }
+
+      // Todas las relaciones de Project tienen onDelete: Cascade, pero borramos
+      // los dependientes explícitamente y en orden dentro de la transacción
+      // (defensivo + atómico) antes del proyecto. El osLead NO se toca.
+      await tx.osTimeEntry.deleteMany({ where: { projectId } })
+      await tx.osPaymentMilestone.deleteMany({ where: { projectId } })
+      await tx.osMaintenancePayment.deleteMany({ where: { projectId } })
+      await tx.task.deleteMany({ where: { projectId } })
+      await tx.project.delete({ where: { id: projectId } })
+
+      return {
+        id: current.id,
+        leadId: current.osLeadId,
+        organizationId: current.organizationId,
+      }
+    })
+
+    for (const path of buildProjectRevalidationPaths({
+      projectId: project.id,
+      leadId: project.leadId,
+      organizationId: project.organizationId,
+    })) {
+      revalidatePath(path)
+    }
+
+    return ok({ id: project.id })
+  } catch (error) {
+    return fail(error instanceof Error ? error.message : 'Failed to delete project')
+  }
+}
+
 export async function convertLeadToProject(
   input: unknown
 ): Promise<ActionResult<{ id: string }>> {
