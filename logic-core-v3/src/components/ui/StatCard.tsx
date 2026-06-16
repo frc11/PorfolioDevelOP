@@ -76,6 +76,7 @@ export function StatCard({
             <Icon
               className={cn('h-4 w-4', colors?.text ?? 'text-zinc-400')}
               strokeWidth={1.5}
+              aria-hidden="true"
             />
           </div>
         )}
@@ -90,7 +91,7 @@ export function StatCard({
       {typeof progress === 'number' && (
         <div className="mt-4 h-2 overflow-hidden rounded-full bg-white/10">
           <div
-            className={cn('h-full rounded-full transition-[width]', colors?.bg ?? 'bg-zinc-300')}
+            className={cn('h-full rounded-full transition-[width] motion-reduce:transition-none', colors?.bg ?? 'bg-zinc-300')}
             style={{ width: `${Math.min(100, Math.max(0, progress))}%` }}
           />
         </div>
@@ -123,7 +124,7 @@ function normalizeTrend(trend?: StatTrend): { direction: 'up' | 'down' | 'flat';
     case 'up':
       return { direction: 'up', value: 'En alza' }
     case 'down':
-      return { direction: 'down', value: 'Requiere atencion' }
+      return { direction: 'down', value: 'Requiere atención' }
     case 'neutral':
       return { direction: 'flat', value: 'Estable' }
   }
