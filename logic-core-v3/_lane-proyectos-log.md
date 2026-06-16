@@ -210,3 +210,31 @@ PENDIENTE DE COORDINACIÓN (consolidado, post Sprint E):
 Notas de verificación en `:3000`:
 - CAMBIO 2: inicio y entrega ahora portalean (sólidos como servicio); cierran al scrollear (igual que el `<Select>`).
 - CAMBIO 5: el tacho convive con DnD (data-no-drag) y con la navegación del `<Link>` (stopPropagation); la confirmación blurea sólo su card.
+
+---
+
+# Sprint F — Preview capado + popup por estado + auto-scroll (CAMBIO 1–4)
+
+## FASE 0 — 🚨 Hallazgo crítico: el patrón de Leads NO EXISTE
+
+Leí TODO el lane de Leads (read-only). **Leads NO tiene popup full-screen por columna NI drag-and-drop.**
+- `lead-pipeline.tsx`: kanban **horizontal** (`overflow-x-auto` + `min-w-max`, columnas `w-[320px]`) con las cards listadas verticalmente. Sin popup, sin drag.
+- `lead-card.tsx`: la card es `<article role="button" onClick={router.push(...)}>`; el cambio de estado es por **menú kebab "Mover a estado"** (líneas 163-205, botones que llaman `onMoveStatus`), NO por drag. Borrado por `ConfirmDialog` full-screen.
+- grep en todo `admin/leads` de `draggable|onDragStart|dataTransfer|createPortal|onDrop|popup`: único hit = `lead-form.tsx:162` (`fixed inset-0`), que es el **modal del formulario** de lead, no un popup por columna ni drag.
+
+**Conclusión sobre CAMBIO 3 (drag-cierra-popup):** la premisa del brief ("replicá EXACTAMENTE lo que hace Leads") es imposible — Leads no implementa nada de esto. Y el mecanismo en sí (native HTML5 drag que sobrevive al UNMOUNT de la card cuando el popup se cierra) es **posible en Chrome/Firefox pero NO robusto**: depende de comportamiento no especificado y del timing (históricamente flaky cuando se desmonta el source en el mismo tick del dragstart). Sin una referencia probada para copiar, **NO se construye CAMBIO 3** (instrucción explícita del brief). 
+- **Mitigación:** el cambio de estado de cualquier card SIGUE disponible de forma robusta vía el **Select "Estado" de la ficha** (Sprint E): popup → click card → ficha → Estado. 
+- **Alternativa robusta propuesta** (si se quiere cambiar estado desde el popup sin abrir la ficha): replicar el patrón REAL de Leads — un menú/Select "Mover a estado" en las cards del popup (como `lead-card.tsx`). A confirmar con el humano; NO se construye sin OK.
+
+## FASE 0 — Resto
+
+2. **OverlayModal reusable** (`overlay-modal.tsx`): portalea a body, centra, blurea backdrop, panel `max-h-[90vh] overflow-y-auto`, header (eyebrow+title+X). Escala a "full-screen" con `panelClassName="max-w-6xl"`. → base del popup (CAMBIO 2).
+3. **Secciones actuales** (`project-list.tsx`): el carril es `motion.div` con `SECTION_MAX_HEIGHT='max-h-[48rem]' overflow-y-auto overflow-x-hidden pr-1` (scroll interno de Sprint D). CAMBIO 1 lo reemplaza por cap (~1 fila) + fade, SIN scroll interno.
+4. **Drag handler** (`projects-board.tsx`): `draggingId` state + `handleDropOnStatus` + `dnd`. Para CAMBIO 4 engancho un auto-scroll del `<main>` (scroll container) por proximidad al borde mientras `draggingId != null` (listener `dragover` + rAF loop). No se edita el layout admin; sólo se scrollea el `<main>` programáticamente.
+
+## Decisiones por cambio
+
+- **1:** `project-list.tsx` — saco `SECTION_MAX_HEIGHT`/`overflow-y-auto`. Cada carril: si `length > PREVIEW_VISIBLE_COUNT` (~4, calibrable) → `max-h-[42rem] overflow-hidden` + `mask-image` que desvanece el borde inferior (asomo de la fila siguiente). El conteo se mantiene.
+- **2:** título de sección → botón que abre `OverlayModal` (`max-w-6xl`) con el `STATUS_LABELS` + conteo en el eyebrow y la grilla de TODAS las cards del estado (`ProjectCard`, navegables). Estado del popup en `project-list` (`popupStatus`).
+- **3:** ⛔ NO se construye (ver arriba). Reportado + alternativa propuesta.
+- **4:** `projects-board.tsx` — `useEffect` keyed en `draggingId`: mientras hay drag, listener `dragover` (capture) guarda `clientY` y un loop `requestAnimationFrame` scrollea el `<main>` cuando el cursor entra en la zona de borde (sup/inf), con velocidad proporcional a la proximidad. Cleanup al terminar el drag.
