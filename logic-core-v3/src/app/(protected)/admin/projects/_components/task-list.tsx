@@ -10,7 +10,6 @@ import {
   Clock3,
   FolderKanban,
   LoaderCircle,
-  MoreHorizontal,
   Send,
   Trash2,
 } from 'lucide-react'
@@ -19,9 +18,9 @@ import {
   deleteTask,
   updateTask,
 } from '@/app/(protected)/admin/team/_actions/task.actions'
-import { ConfirmDialog } from '@/app/(protected)/admin/_components/confirm-dialog'
-import { EmptyState, Select } from '@/components/ui'
+import { EmptyState } from '@/components/ui'
 import { sendTaskForApprovalAction } from '@/lib/actions/projects'
+import { OverlayModal } from './overlay-modal'
 import { TaskForm } from './task-form'
 
 export type TaskAssignee = {
@@ -164,11 +163,12 @@ export function TaskList({
 }: TaskListProps) {
   const router = useRouter()
   const [expandedTaskId, setExpandedTaskId] = useState<string | null>(null)
-  const [openMenuTaskId, setOpenMenuTaskId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [pendingTaskId, setPendingTaskId] = useState<string | null>(null)
   const [taskToDelete, setTaskToDelete] = useState<TaskListItem | null>(null)
   const [localTasks, setLocalTasks] = useState<TaskListItem[]>(tasks)
+  const [draggingTaskId, setDraggingTaskId] = useState<string | null>(null)
+  const [dragOverStatus, setDragOverStatus] = useState<TaskStatus | null>(null)
   const [, startTransition] = useTransition()
 
   useEffect(() => {
@@ -187,7 +187,6 @@ export function TaskList({
   const handleQuickStatusChange = (taskId: string, status: TaskStatus) => {
     const previousTasks = localTasks
     setError(null)
-    setOpenMenuTaskId(null)
     setPendingTaskId(taskId)
     setLocalTasks((current) =>
       current.map((task) => (task.id === taskId ? { ...task, status } : task))
@@ -211,12 +210,28 @@ export function TaskList({
     })
   }
 
+  const handleDropOnStatus = (status: TaskStatus) => {
+    const taskId = draggingTaskId
+    setDraggingTaskId(null)
+    setDragOverStatus(null)
+
+    if (!taskId) {
+      return
+    }
+
+    const task = localTasks.find((item) => item.id === taskId)
+    if (!task || task.status === status) {
+      return
+    }
+
+    handleQuickStatusChange(taskId, status)
+  }
+
   const handleDelete = (task: TaskListItem) => {
     const previousTasks = localTasks
     setError(null)
     setPendingTaskId(task.id)
     setTaskToDelete(null)
-    setOpenMenuTaskId(null)
     setLocalTasks((current) => current.filter((item) => item.id !== task.id))
 
     startTransition(async () => {
@@ -253,10 +268,39 @@ export function TaskList({
           </div>
         ) : null}
 
-        {groupedTasks.map((group) => (
+        {groupedTasks.map((group) => {
+          const draggingTask = draggingTaskId
+            ? localTasks.find((item) => item.id === draggingTaskId)
+            : undefined
+          const canDropHere = draggingTask !== undefined && draggingTask.status !== group.status
+          const showDropHint = canDropHere && dragOverStatus === group.status
+
+          return (
           <section
             key={group.status}
-            className="rounded-[28px] border border-white/10 bg-white/5 p-5 backdrop-blur-xl"
+            onDragOver={(event) => {
+              if (canDropHere) {
+                event.preventDefault()
+                setDragOverStatus(group.status)
+              }
+            }}
+            onDragLeave={(event) => {
+              // Solo limpiar al salir de la sección de verdad, no al cruzar hijos.
+              if (
+                canDropHere &&
+                !event.currentTarget.contains(event.relatedTarget as Node | null)
+              ) {
+                setDragOverStatus(null)
+              }
+            }}
+            onDrop={(event) => {
+              event.preventDefault()
+              handleDropOnStatus(group.status)
+            }}
+            className={[
+              'rounded-[28px] border bg-white/5 p-5 backdrop-blur-xl transition-colors',
+              showDropHint ? 'border-cyan-400/40 bg-cyan-400/[0.06]' : 'border-white/10',
+            ].join(' ')}
           >
             <div className="flex items-center justify-between gap-3">
               <div>
@@ -274,14 +318,43 @@ export function TaskList({
                   return (
                     <article
                       key={task.id}
-                      className="rounded-[24px] border border-white/10 bg-black/20 p-4"
+                      draggable={!isPending}
+                      onDragStart={(event) => {
+                        // El cuerpo de la card arrastra; los controles marcados
+                        // con data-no-drag (Editar/borrar/aprobación) no inician
+                        // drag y siguen clickeables.
+                        if ((event.target as HTMLElement).closest('[data-no-drag]')) {
+                          event.preventDefault()
+                          return
+                        }
+                        setDraggingTaskId(task.id)
+                        event.dataTransfer.effectAllowed = 'move'
+                        event.dataTransfer.setData('text/plain', task.id)
+                      }}
+                      onDragEnd={() => {
+                        setDraggingTaskId(null)
+                        setDragOverStatus(null)
+                      }}
+                      className={[
+                        'rounded-[24px] border border-white/10 bg-black/20 p-4 transition-opacity',
+                        isPending ? '' : 'cursor-grab active:cursor-grabbing',
+                        draggingTaskId === task.id ? 'opacity-50' : '',
+                      ].join(' ')}
                     >
                       <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
-                        <button
-                          type="button"
+                        <div
+                          role="button"
+                          tabIndex={0}
+                          aria-expanded={isExpanded}
                           onClick={() =>
                             setExpandedTaskId((current) => (current === task.id ? null : task.id))
                           }
+                          onKeyDown={(event) => {
+                            if (event.key === 'Enter' || event.key === ' ') {
+                              event.preventDefault()
+                              setExpandedTaskId((current) => (current === task.id ? null : task.id))
+                            }
+                          }}
                           className="flex min-w-0 flex-1 items-start gap-3 text-left"
                         >
                           <span className="mt-0.5 text-zinc-500">
@@ -377,18 +450,12 @@ export function TaskList({
                               </div>
                             ) : null}
                           </div>
-                        </button>
+                        </div>
 
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2" data-no-drag>
                           {showApprovalFlow ? (
                             <TaskApprovalControl task={task} projectId={projectId} />
                           ) : null}
-
-                          <ProjectStatusQuickChange
-                            task={task}
-                            isPending={isPending}
-                            onSelect={handleQuickStatusChange}
-                          />
 
                           <TaskForm
                             projectId={projectId}
@@ -397,36 +464,19 @@ export function TaskList({
                             triggerLabel="Editar"
                           />
 
-                          <div className="relative">
-                            <button
-                              type="button"
-                              disabled={isPending}
-                              onClick={() =>
-                                setOpenMenuTaskId((current) => (current === task.id ? null : task.id))
-                              }
-                              className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/5 text-zinc-300 transition-colors hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-60"
-                            >
-                              {isPending ? (
-                                <LoaderCircle className="h-4 w-4 animate-spin" />
-                              ) : (
-                                <MoreHorizontal className="h-4 w-4" />
-                              )}
-                            </button>
-
-                            {openMenuTaskId === task.id ? (
-                              <div className="absolute right-0 top-12 z-20 min-w-[160px] rounded-2xl border border-white/10 bg-[#11161d]/95 p-2 shadow-2xl backdrop-blur-xl">
-                                <button
-                                  type="button"
-                                  disabled={isPending}
-                                  onClick={() => setTaskToDelete(task)}
-                                  className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm text-rose-300 transition-colors hover:bg-rose-500/10 disabled:cursor-not-allowed disabled:opacity-60"
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                  Eliminar
-                                </button>
-                              </div>
-                            ) : null}
-                          </div>
+                          <button
+                            type="button"
+                            disabled={isPending}
+                            onClick={() => setTaskToDelete(task)}
+                            aria-label={`Eliminar tarea ${task.title}`}
+                            className="flex h-10 w-10 items-center justify-center rounded-full border border-rose-400/20 bg-rose-500/10 text-rose-300 transition-colors hover:bg-rose-500/15 disabled:cursor-not-allowed disabled:opacity-60"
+                          >
+                            {isPending ? (
+                              <LoaderCircle className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <Trash2 className="h-4 w-4" strokeWidth={1.5} />
+                            )}
+                          </button>
                         </div>
                       </div>
 
@@ -498,29 +548,48 @@ export function TaskList({
               )}
             </div>
           </section>
-        ))}
+          )
+        })}
       </div>
 
-      <ConfirmDialog
+      <OverlayModal
         open={taskToDelete !== null}
         onClose={() => setTaskToDelete(null)}
-        onConfirm={() => {
-          if (!taskToDelete) {
-            return
-          }
-
-          handleDelete(taskToDelete)
-        }}
         title="Eliminar tarea"
-        description={
-          taskToDelete
-            ? `Se eliminara "${taskToDelete.title}" junto con sus registros de tiempo.`
-            : ''
-        }
-        confirmLabel="Eliminar tarea"
-        variant="danger"
-        isPending={taskToDelete ? pendingTaskId === taskToDelete.id : false}
-      />
+        eyebrow="develOP / Proyectos / Tareas"
+        panelClassName="max-w-md"
+      >
+        <div className="mt-5 space-y-5">
+          <div className="flex items-start gap-3 rounded-2xl border border-rose-400/20 bg-rose-500/10 p-4 text-sm leading-6 text-rose-100">
+            <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-rose-300" strokeWidth={1.5} />
+            <p>
+              Se eliminará <span className="font-semibold">{taskToDelete?.title}</span> junto con sus
+              registros de tiempo. Esta acción no se puede deshacer.
+            </p>
+          </div>
+
+          <div className="flex justify-end gap-3">
+            <button
+              type="button"
+              onClick={() => setTaskToDelete(null)}
+              className="rounded-2xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-medium text-zinc-200 transition-colors hover:bg-white/10"
+            >
+              Cancelar
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                if (taskToDelete) {
+                  handleDelete(taskToDelete)
+                }
+              }}
+              className="rounded-2xl border border-rose-400/20 bg-rose-500/15 px-4 py-2.5 text-sm font-medium text-rose-100 transition-colors hover:bg-rose-500/25"
+            >
+              Eliminar tarea
+            </button>
+          </div>
+        </div>
+      </OverlayModal>
     </>
   )
 }
@@ -563,30 +632,5 @@ function TaskApprovalControl({ task, projectId }: TaskApprovalControlProps) {
       )}
       Enviar a aprobacion
     </button>
-  )
-}
-
-type ProjectStatusQuickChangeProps = {
-  task: TaskListItem
-  isPending: boolean
-  onSelect: (taskId: string, status: TaskStatus) => void
-}
-
-function ProjectStatusQuickChange({
-  task,
-  isPending,
-  onSelect,
-}: ProjectStatusQuickChangeProps) {
-  return (
-    <Select
-      value={task.status}
-      disabled={isPending}
-      onChange={(event) => onSelect(task.id, event.target.value as TaskStatus)}
-      className="rounded-2xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-zinc-100 outline-none transition-colors focus:border-cyan-400/35 disabled:cursor-not-allowed disabled:opacity-60"
-    >
-      <option value="TODO">Pendiente</option>
-      <option value="IN_PROGRESS">En progreso</option>
-      <option value="DONE">Completada</option>
-    </Select>
   )
 }

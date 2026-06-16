@@ -22,6 +22,7 @@ export type ProjectCardData = {
   startDate: string | null
   estimatedEndDate: string | null
   deliveredAt: string | null
+  lastActivityAt: string | null
   _count: {
     tasks: number
     timeEntries?: number
@@ -44,32 +45,6 @@ export type ProjectCardData = {
 
 type ProjectCardProps = {
   project: ProjectCardData
-}
-
-function statusTone(status: ProjectStatus): string {
-  switch (status) {
-    case 'PLANNING':
-      return 'border-zinc-400/20 bg-zinc-400/10 text-zinc-200'
-    case 'IN_PROGRESS':
-      return 'border-sky-400/20 bg-sky-400/10 text-sky-200'
-    case 'REVIEW':
-      return 'border-amber-400/20 bg-amber-400/10 text-amber-200'
-    case 'COMPLETED':
-      return 'border-emerald-400/20 bg-emerald-400/10 text-emerald-200'
-  }
-}
-
-function statusLabel(status: ProjectStatus): string {
-  switch (status) {
-    case 'PLANNING':
-      return 'Planning'
-    case 'IN_PROGRESS':
-      return 'En progreso'
-    case 'REVIEW':
-      return 'Revision'
-    case 'COMPLETED':
-      return 'Completado'
-  }
 }
 
 function serviceTone(serviceType: ServiceType): string {
@@ -134,49 +109,46 @@ export function ProjectCard({ project }: ProjectCardProps) {
   return (
     <Link
       href={`/admin/projects/${project.id}`}
-      className="group block rounded-[26px] border border-white/10 bg-white/5 p-5 shadow-[0_20px_45px_rgba(0,0,0,0.22)] backdrop-blur-xl transition-all hover:border-cyan-400/20 hover:bg-white/[0.07]"
+      // El drag entre estados lo maneja el wrapper de project-list; el ancla no
+      // debe iniciar su propio drag (arrastraría la URL) ni competir con él.
+      draggable={false}
+      className="group flex h-full w-full flex-col rounded-[26px] border border-white/10 bg-white/5 p-5 shadow-[0_20px_45px_rgba(0,0,0,0.22)] backdrop-blur-xl transition-all hover:border-cyan-400/20 hover:bg-white/[0.07]"
     >
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div className="min-w-0">
-          <p className="truncate text-lg font-semibold text-white">{project.name}</p>
-          <div className="mt-1 flex flex-wrap items-center gap-2">
-            <p className="truncate text-sm text-zinc-400">{project.businessName}</p>
-            {hasClientLinked ? (
-              <span className="inline-flex items-center gap-1 rounded-full border border-cyan-400/20 bg-cyan-400/10 px-2.5 py-1 text-[11px] font-medium text-cyan-100">
-                <Building2 className="h-3.5 w-3.5" />
-                Cliente portal
-              </span>
-            ) : (
-              <span className="inline-flex rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] font-medium text-zinc-300">
-                Interno
-              </span>
-            )}
-          </div>
-        </div>
+      {/* pr-10 reserva la esquina sup. derecha para el tacho que project-list
+          superpone, así un título largo no queda debajo. */}
+      <div className="min-w-0 pr-10">
+        <p className="truncate text-lg font-semibold text-white">{project.name}</p>
+        <p className="mt-1 truncate text-sm text-zinc-400">{project.businessName}</p>
+      </div>
 
-        <div className="flex flex-wrap items-center gap-2">
+      {/* Todos los badges (servicio + visibilidad) juntos debajo del título. min-h
+          fijo para que las tiles arranquen alineadas entre cards sin importar
+          cuántos badges tenga cada una. Sin badge de estado: la card ya vive en
+          su sección de estado. */}
+      <div className="mt-3 flex min-h-[28px] flex-wrap items-center gap-2">
+        {project.serviceType ? (
           <span
             className={[
               'inline-flex rounded-full border px-2.5 py-1 text-[11px] font-medium',
-              statusTone(project.status),
+              serviceTone(project.serviceType),
             ].join(' ')}
           >
-            {statusLabel(project.status)}
+            {serviceLabel(project.serviceType)}
           </span>
-          {project.serviceType ? (
-            <span
-              className={[
-                'inline-flex rounded-full border px-2.5 py-1 text-[11px] font-medium',
-                serviceTone(project.serviceType),
-              ].join(' ')}
-            >
-              {serviceLabel(project.serviceType)}
-            </span>
-          ) : null}
-        </div>
+        ) : null}
+        {hasClientLinked ? (
+          <span className="inline-flex items-center gap-1 rounded-full border border-cyan-400/20 bg-cyan-400/10 px-2.5 py-1 text-[11px] font-medium text-cyan-100">
+            <Building2 className="h-3.5 w-3.5" strokeWidth={1.5} />
+            Cliente portal
+          </span>
+        ) : (
+          <span className="inline-flex rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] font-medium text-zinc-300">
+            Interno
+          </span>
+        )}
       </div>
 
-      <div className="mt-5 grid gap-3 sm:grid-cols-3">
+      <div className="mt-5 grid gap-4">
         <div className="rounded-2xl border border-white/10 bg-black/20 p-3">
           <p className="text-[10px] uppercase tracking-[0.22em] text-zinc-500">Monto acordado</p>
           <p className="mt-2 text-sm font-medium text-zinc-100">{formatCurrency(project.agreedAmount)}</p>
@@ -191,6 +163,14 @@ export function ProjectCard({ project }: ProjectCardProps) {
         </div>
 
         <div className="rounded-2xl border border-white/10 bg-black/20 p-3">
+          <p className="text-[10px] uppercase tracking-[0.22em] text-zinc-500">Entrega estimada</p>
+          <div className="mt-2 flex items-center gap-2 text-sm text-zinc-300">
+            <CalendarDays className="h-4 w-4 text-zinc-500" />
+            <span>{formatDate(project.estimatedEndDate)}</span>
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-white/10 bg-black/20 p-3">
           <p className="text-[10px] uppercase tracking-[0.22em] text-zinc-500">Pagos</p>
           <div className="mt-2 flex items-center gap-2 text-sm text-zinc-300">
             <CircleDollarSign className="h-4 w-4 text-zinc-500" />
@@ -201,7 +181,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
         </div>
       </div>
 
-      <div className="mt-5 rounded-2xl border border-white/10 bg-black/20 p-4">
+      <div className="mt-4 rounded-2xl border border-white/10 bg-black/20 p-4">
         <div className="flex items-center justify-between gap-3 text-sm">
           <div className="flex items-center gap-2 text-zinc-200">
             <FolderKanban className="h-4 w-4 text-zinc-500" />

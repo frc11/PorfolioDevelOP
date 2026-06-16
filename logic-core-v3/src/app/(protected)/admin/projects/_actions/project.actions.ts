@@ -391,6 +391,28 @@ function deriveProjectActivityAt(project: ProjectListRecord): number {
   return Math.max(...timestamps, 0)
 }
 
+// "Última actividad" en sentido pasado para el filtro de período: Project no
+// tiene createdAt/updatedAt (schema FROZEN), así que se deriva del máximo de las
+// fechas reales de actividad. A diferencia de deriveProjectActivityAt (orden de
+// la lista), EXCLUYE estimatedEndDate por ser una fecha futura (deadline), que
+// inflaría la ventana. Devuelve null si no hay ninguna señal de actividad.
+function deriveProjectLastActivityAt(project: ProjectListRecord): Date | null {
+  const timestamps = [
+    project.deliveredAt?.getTime(),
+    project.maintenanceStartDate?.getTime(),
+    project.osLead?.updatedAt.getTime(),
+    ...project.paymentMilestones.map((milestone) => milestone.createdAt.getTime()),
+    ...project.maintenancePayments.map((payment) => payment.createdAt.getTime()),
+    ...project.timeEntries.flatMap((entry) => [entry.date.getTime(), entry.createdAt.getTime()]),
+  ].filter((value): value is number => typeof value === 'number')
+
+  if (timestamps.length === 0) {
+    return null
+  }
+
+  return new Date(Math.max(...timestamps))
+}
+
 function buildProjectRevalidationPaths(input: {
   projectId: string
   leadId?: string | null
@@ -443,6 +465,7 @@ function serializeProjectListItem(project: ProjectListRecord) {
     startDate: serializeDate(deriveProjectStartDate(project)),
     estimatedEndDate: serializeDate(project.estimatedEndDate),
     deliveredAt: serializeDate(project.deliveredAt),
+    lastActivityAt: serializeDate(deriveProjectLastActivityAt(project)),
     _count: {
       tasks: project._count.tasks,
       timeEntries: project._count.timeEntries,
@@ -741,6 +764,57 @@ export async function updateProjectStatus(
     return ok({ id: project.id })
   } catch (error) {
     return fail(error instanceof Error ? error.message : 'Failed to update project status')
+  }
+}
+
+export async function deleteProject(input: unknown): Promise<ActionResult<{ id: string }>> {
+  try {
+    await requireSuperAdmin()
+    const projectId = ProjectIdSchema.parse(input)
+
+    const project = await prisma.$transaction(async (tx) => {
+      const current = await tx.project.findUnique({
+        where: {
+          id: projectId,
+        },
+        select: {
+          id: true,
+          osLeadId: true,
+          organizationId: true,
+        },
+      })
+
+      if (!current) {
+        throw new Error('Project not found')
+      }
+
+      // Todas las relaciones de Project tienen onDelete: Cascade, pero borramos
+      // los dependientes explícitamente y en orden dentro de la transacción
+      // (defensivo + atómico) antes del proyecto. El osLead NO se toca.
+      await tx.osTimeEntry.deleteMany({ where: { projectId } })
+      await tx.osPaymentMilestone.deleteMany({ where: { projectId } })
+      await tx.osMaintenancePayment.deleteMany({ where: { projectId } })
+      await tx.task.deleteMany({ where: { projectId } })
+      await tx.project.delete({ where: { id: projectId } })
+
+      return {
+        id: current.id,
+        leadId: current.osLeadId,
+        organizationId: current.organizationId,
+      }
+    })
+
+    for (const path of buildProjectRevalidationPaths({
+      projectId: project.id,
+      leadId: project.leadId,
+      organizationId: project.organizationId,
+    })) {
+      revalidatePath(path)
+    }
+
+    return ok({ id: project.id })
+  } catch (error) {
+    return fail(error instanceof Error ? error.message : 'Failed to delete project')
   }
 }
 
