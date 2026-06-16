@@ -8,16 +8,15 @@ import {
   type PipelineStatus,
 } from './lead-pipeline.shared'
 import { DroppableColumn } from './droppable-column'
-import { DraggableLeadCard } from './draggable-lead-card'
 
 // === TUNABLES (calibrá por ojo) ===
 const COLUMN_BODY_MAX_H = 460 // alto fijo del cuerpo de cada columna (px) — sin scroll interno
 
 type PipelineBoardProps = {
   groupedLeads: GroupedLeads
-  pendingLeadId: string | null
-  onDelete: (lead: LeadPipelineLead) => void
   onOpenOverview: (status: PipelineStatus) => void
+  /** Render de cada card (draggable). Lo provee el padre para compartirlo con el overview. */
+  renderCard: (lead: LeadPipelineLead) => ReactNode
 }
 
 /**
@@ -27,21 +26,7 @@ type PipelineBoardProps = {
  * son draggables; el DnD entre columnas (mouse + teclado) lo maneja el DndContext del
  * padre. Mismo layout para todos: la grilla ya es estática, sin rama de reduced-motion.
  */
-export function PipelineBoard({
-  groupedLeads,
-  pendingLeadId,
-  onDelete,
-  onOpenOverview,
-}: PipelineBoardProps) {
-  const renderCard = (lead: LeadPipelineLead): ReactNode => (
-    <DraggableLeadCard
-      key={lead.id}
-      lead={lead}
-      isPending={pendingLeadId === lead.id}
-      onDelete={onDelete}
-    />
-  )
-
+export function PipelineBoard({ groupedLeads, onOpenOverview, renderCard }: PipelineBoardProps) {
   return (
     <div className="space-y-4">
       {PIPELINE_GROUPS.map((group) => (

@@ -11,6 +11,9 @@ type DraggableLeadCardProps = {
   lead: LeadPipelineLead
   isPending: boolean
   onDelete: (lead: LeadPipelineLead) => void
+  /** id de drag (default lead.id). El overview usa uno propio para no colisionar con el
+   *  board, que monta la misma card cuando el lead está entre los visibles. */
+  dragId?: string
 }
 
 /**
@@ -22,9 +25,10 @@ export function DraggableLeadCard({
   lead,
   isPending,
   onDelete,
+  dragId,
 }: DraggableLeadCardProps) {
   const { setNodeRef, attributes, listeners, transform, isDragging } = useDraggable({
-    id: lead.id,
+    id: dragId ?? lead.id,
     data: { lead },
   })
 

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { AnimatePresence, motion } from 'motion/react'
 import { Inbox, X } from 'lucide-react'
@@ -8,7 +8,6 @@ import { EmptyState } from '@/components/ui'
 import { cn } from '@/lib/utils'
 import { useIsClient } from '@/lib/use-is-client'
 import { useReducedMotion } from '@/lib/use-reduced-motion'
-import { LeadCard } from './lead-card'
 import {
   STATUS_LABELS,
   statusTone,
@@ -29,26 +28,19 @@ type ColumnOverviewProps = {
   /** Estado de la columna abierta, o null si el overlay está cerrado. */
   status: PipelineStatus | null
   leads: LeadPipelineLead[]
-  pendingLeadId: string | null
-  onDelete: (lead: LeadPipelineLead) => void
+  /** Render de cada card (draggable, igual que el board). Provisto por el padre. */
+  renderCard: (lead: LeadPipelineLead) => ReactNode
   onClose: () => void
 }
 
 /**
- * Overlay fullscreen con TODOS los leads de una columna (Tanda 2 · Bloque 2).
- *
- * Portalizado a document.body (createPortal + gate useIsClient) para escapar el
- * containing block del <main> admin (backdrop-blur) que atraparía un position:fixed.
- * Cierra con X, click en el backdrop y Esc; foco inicial + trap + restore. El DnD
- * no vive acá: las cards sólo tienen el tacho de eliminar.
+ * Overlay fullscreen con TODOS los leads de una columna, scrolleable. Portalizado a
+ * document.body (createPortal + gate useIsClient) para escapar el containing block del
+ * <main> admin. Cierra con X, click en el backdrop y Esc; foco inicial + trap + restore.
+ * Las cards son draggables (mismo DndContext que el board): mantené apretada una card →
+ * se cierra el overview y quedás arrastrándola sobre el board (P1).
  */
-export function ColumnOverview({
-  status,
-  leads,
-  pendingLeadId,
-  onDelete,
-  onClose,
-}: ColumnOverviewProps) {
+export function ColumnOverview({ status, leads, renderCard, onClose }: ColumnOverviewProps) {
   const isClient = useIsClient()
   const reduced = useReducedMotion()
   const panelRef = useRef<HTMLDivElement>(null)
@@ -167,14 +159,7 @@ export function ColumnOverview({
                   className="grid gap-4"
                   style={{ gridTemplateColumns: `repeat(${OVERVIEW_COLS}, minmax(0, 1fr))` }}
                 >
-                  {leads.map((lead) => (
-                    <LeadCard
-                      key={lead.id}
-                      lead={lead}
-                      isPending={pendingLeadId === lead.id}
-                      onDelete={onDelete}
-                    />
-                  ))}
+                  {leads.map((lead) => renderCard(lead))}
                 </div>
               ) : (
                 <EmptyState

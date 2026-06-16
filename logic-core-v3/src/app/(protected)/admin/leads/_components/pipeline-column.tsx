@@ -53,6 +53,7 @@ export function PipelineColumn({
   // Fade siempre que haya cards: suaviza cualquier corte por el alto fijo (no solo cuando
   // sobran del slice) y NO se aplica sobre el EmptyState. Sólo afecta lo que llega al fondo.
   const showFade = leads.length > 0
+  const hasOverflow = leads.length > MAX_VISIBLE_CARDS
 
   return (
     <section
@@ -107,6 +108,16 @@ export function PipelineColumn({
           />
         )}
       </div>
+
+      {hasOverflow ? (
+        <button
+          type="button"
+          onClick={() => onOpenOverview?.(status)}
+          className="mt-1 w-full rounded-xl px-3 py-1.5 text-center text-[11px] font-medium text-cyan-300/80 transition-colors hover:bg-cyan-400/10 hover:text-cyan-200"
+        >
+          Clic para ver las {leads.length} →
+        </button>
+      ) : null}
     </section>
   )
 }

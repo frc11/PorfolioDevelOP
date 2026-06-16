@@ -24,12 +24,16 @@ import {
   type PipelineStatus,
 } from './lead-pipeline.shared'
 import { LeadCard } from './lead-card'
+import { DraggableLeadCard } from './draggable-lead-card'
 import { PipelineBoard } from './pipeline-board'
 import { ColumnOverview } from './column-overview'
 
 // === TUNABLES (calibrá por ojo) ===
 const POSTPONE_DAYS = 7 // a cuántos días se reactiva un lead postergado
-const DRAG_ACTIVATION_DISTANCE = 8 // px a mover antes de iniciar un drag (un click no arrastra)
+// Drag por HOLD (no por distancia): un swipe rápido scrollea el overview y mantener
+// apretado ~DRAG_HOLD_DELAY ms levanta la card. tolerance = px tolerados durante el hold.
+const DRAG_HOLD_DELAY = 200
+const DRAG_HOLD_TOLERANCE = 5
 
 type LeadPipelineProps = {
   groupedLeads: GroupedLeads
@@ -97,7 +101,7 @@ export function LeadPipeline({ groupedLeads }: LeadPipelineProps) {
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
-      activationConstraint: { distance: DRAG_ACTIVATION_DISTANCE },
+      activationConstraint: { delay: DRAG_HOLD_DELAY, tolerance: DRAG_HOLD_TOLERANCE },
     }),
     useSensor(KeyboardSensor, {
       // Space levanta/suelta; Enter queda libre para navegar al detalle (DnD por teclado).
@@ -160,7 +164,30 @@ export function LeadPipeline({ groupedLeads }: LeadPipelineProps) {
   const handleDragStart = (event: DragStartEvent) => {
     const lead = event.active.data.current?.lead as LeadPipelineLead | undefined
     setActiveDragLead(lead ?? null)
+    // Si el drag arrancó desde el overview, cerralo: revela el board 3+3+2 (columnas
+    // droppables). El DragOverlay + nodo cacheado mantienen la card en arrastre.
+    setOverviewStatus(null)
   }
+
+  // Cards draggables. El overview usa un dragId propio (prefijo) para no colisionar con
+  // las del board cuando el lead también está entre los visibles de su columna.
+  const renderBoardCard = (lead: LeadPipelineLead) => (
+    <DraggableLeadCard
+      key={lead.id}
+      lead={lead}
+      isPending={pendingLeadId === lead.id}
+      onDelete={handleDelete}
+    />
+  )
+  const renderOverviewCard = (lead: LeadPipelineLead) => (
+    <DraggableLeadCard
+      key={lead.id}
+      lead={lead}
+      dragId={`overview-${lead.id}`}
+      isPending={pendingLeadId === lead.id}
+      onDelete={handleDelete}
+    />
+  )
 
   const handleDragEnd = (event: DragEndEvent) => {
     setActiveDragLead(null)
@@ -203,9 +230,17 @@ export function LeadPipeline({ groupedLeads }: LeadPipelineProps) {
       >
         <PipelineBoard
           groupedLeads={localGroupedLeads}
-          pendingLeadId={pendingLeadId}
-          onDelete={handleDelete}
           onOpenOverview={setOverviewStatus}
+          renderCard={renderBoardCard}
+        />
+
+        {/* Dentro del MISMO DndContext que el board → las cards del overview son
+            draggables y, al iniciar el drag, el overview se cierra (handleDragStart). */}
+        <ColumnOverview
+          status={overviewStatus}
+          leads={overviewStatus ? localGroupedLeads[overviewStatus] : []}
+          renderCard={renderOverviewCard}
+          onClose={handleCloseOverview}
         />
 
         {isClient
@@ -224,14 +259,6 @@ export function LeadPipeline({ groupedLeads }: LeadPipelineProps) {
             )
           : null}
       </DndContext>
-
-      <ColumnOverview
-        status={overviewStatus}
-        leads={overviewStatus ? localGroupedLeads[overviewStatus] : []}
-        pendingLeadId={pendingLeadId}
-        onDelete={handleDelete}
-        onClose={handleCloseOverview}
-      />
     </div>
   )
 }
