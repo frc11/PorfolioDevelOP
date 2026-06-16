@@ -2,11 +2,26 @@
 
 import { useEffect, useMemo, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
+import { createPortal } from 'react-dom'
+import {
+  DndContext,
+  DragOverlay,
+  KeyboardSensor,
+  PointerSensor,
+  closestCorners,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+  type DragStartEvent,
+} from '@dnd-kit/core'
 import { Building2 } from 'lucide-react'
 import type { ProjectStatus } from '@prisma/client'
+import { useReducedMotion } from '@/lib/use-reduced-motion'
+import { useIsClient } from '@/lib/use-is-client'
 import { deleteProject, updateProjectStatus } from '../_actions/project.actions'
 import { ProjectForm } from './project-form'
-import { ProjectList, type ProjectDnd, type ProjectListItem } from './project-list'
+import { ProjectCard } from './project-card'
+import { ProjectList, PROJECT_STATUS_ORDER, type ProjectListItem } from './project-list'
 import { ProjectsFilterBar } from './projects-filter-bar'
 import { DEFAULT_FILTERS, filterProjects, type ProjectFilters } from './projects-filters'
 
@@ -21,22 +36,38 @@ type ProjectsBoardProps = {
   errorMessage: string | null
 }
 
+// Drag por HOLD (no por distancia): un swipe rápido scrollea la página y mantener apretado
+// ~DRAG_HOLD_DELAY ms levanta la card. tolerance = px tolerados durante el hold (evita que un
+// micro-temblor del dedo dispare/cancele el drag). Mismos valores que el pipeline de Leads.
+const DRAG_HOLD_DELAY = 200
+const DRAG_HOLD_TOLERANCE = 5
+
 /**
  * Raíz client-side de la vista de proyectos. Es dueña del estado de los filtros
  * (servicio / visibilidad / período) y filtra en memoria sin navegar ni recargar.
  * `page.tsx` queda como wrapper server que sólo trae la lista completa. Los
  * contadores ("con cliente / internos") se calculan SIEMPRE sobre la lista
  * completa, nunca sobre la filtrada, para que no salten al cambiar filtros.
+ *
+ * El DnD entre columnas usa @dnd-kit (mismo motor que Leads): captura el proyecto en estado al
+ * iniciar el drag y lo usa en onDragEnd (cuando el drag viene del overview, la card fuente se
+ * desmonta al cerrarse el modal y dnd-kit deja `active.data` vacío). El cambio de estado va por
+ * la server action existente `updateProjectStatus` (Zod + requireSuperAdmin + revalidate).
  */
 export function ProjectsBoard({ projects, organizations, errorMessage }: ProjectsBoardProps) {
   const router = useRouter()
+  const reduced = useReducedMotion()
+  const isClient = useIsClient()
   const [filters, setFilters] = useState<ProjectFilters>(DEFAULT_FILTERS)
 
   // Espejo optimista de la lista del server para el DnD; se re-sincroniza tras
   // cada router.refresh (mismo patrón que task-list).
   const [localProjects, setLocalProjects] = useState<ProjectListItem[]>(projects)
-  const [draggingId, setDraggingId] = useState<string | null>(null)
-  const [dragOverStatus, setDragOverStatus] = useState<ProjectStatus | null>(null)
+  // Proyecto en arrastre, capturado al iniciar (NO se lee de event.active.data en onDragEnd:
+  // se vacía cuando la card fuente se desmonta al cerrarse el overview).
+  const [activeDragProject, setActiveDragProject] = useState<ProjectListItem | null>(null)
+  // Overview controlado acá (lift desde project-list) para poder cerrarlo en handleDragStart.
+  const [popupStatus, setPopupStatus] = useState<ProjectStatus | null>(null)
   const [dndError, setDndError] = useState<string | null>(null)
   const [deleteError, setDeleteError] = useState<string | null>(null)
   const [, startTransition] = useTransition()
@@ -45,51 +76,15 @@ export function ProjectsBoard({ projects, organizations, errorMessage }: Project
     setLocalProjects(projects)
   }, [projects])
 
-  // Auto-scroll del board mientras se arrastra una card: el scroll container real
-  // es el <main> del admin. Si el cursor entra en la zona de borde sup/inf,
-  // scrollea (velocidad proporcional a la proximidad) para alcanzar secciones
-  // lejanas (Planning ↔ Completado) que no entran juntas en pantalla.
-  useEffect(() => {
-    if (!draggingId) {
-      return
-    }
-    const scroller = document.querySelector('main')
-    if (!scroller) {
-      return
-    }
-
-    const EDGE = 90
-    const MAX_SPEED = 20
-    let pointerY = -1
-    let frame = 0
-
-    const handleDragOver = (event: DragEvent) => {
-      pointerY = event.clientY
-    }
-
-    const tick = () => {
-      if (pointerY >= 0) {
-        const rect = scroller.getBoundingClientRect()
-        const topDistance = pointerY - rect.top
-        const bottomDistance = rect.bottom - pointerY
-
-        if (topDistance < EDGE) {
-          scroller.scrollTop -= MAX_SPEED * (1 - Math.max(0, topDistance) / EDGE)
-        } else if (bottomDistance < EDGE) {
-          scroller.scrollTop += MAX_SPEED * (1 - Math.max(0, bottomDistance) / EDGE)
-        }
-      }
-      frame = requestAnimationFrame(tick)
-    }
-
-    window.addEventListener('dragover', handleDragOver, true)
-    frame = requestAnimationFrame(tick)
-
-    return () => {
-      window.removeEventListener('dragover', handleDragOver, true)
-      cancelAnimationFrame(frame)
-    }
-  }, [draggingId])
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: { delay: DRAG_HOLD_DELAY, tolerance: DRAG_HOLD_TOLERANCE },
+    }),
+    useSensor(KeyboardSensor, {
+      // Space levanta/suelta; Enter queda libre para que el <Link> navegue al detalle.
+      keyboardCodes: { start: ['Space'], cancel: ['Escape'], end: ['Space'] },
+    }),
+  )
 
   const filteredProjects = useMemo(
     () => filterProjects(localProjects, filters),
@@ -102,30 +97,17 @@ export function ProjectsBoard({ projects, organizations, errorMessage }: Project
   )
   const internalCount = localProjects.length - clientCount
 
-  const handleDropOnStatus = (status: ProjectStatus) => {
-    const projectId = draggingId
-    setDraggingId(null)
-    setDragOverStatus(null)
-
-    if (!projectId) {
-      return
-    }
-
-    const project = localProjects.find((item) => item.id === projectId)
-    if (!project || project.status === status) {
-      return
-    }
-
+  const moveProjectToStatus = (project: ProjectListItem, status: ProjectStatus) => {
     const previousProjects = localProjects
     setDndError(null)
     // Optimista: COMPLETED sella deliveredAt en el server; acá sólo se mueve el
     // estado y el refresh reconcilia el resto.
     setLocalProjects((current) =>
-      current.map((item) => (item.id === projectId ? { ...item, status } : item))
+      current.map((item) => (item.id === project.id ? { ...item, status } : item))
     )
 
     startTransition(async () => {
-      const result = await updateProjectStatus({ projectId, status })
+      const result = await updateProjectStatus({ projectId: project.id, status })
 
       if (!result.success) {
         setLocalProjects(previousProjects)
@@ -135,6 +117,33 @@ export function ProjectsBoard({ projects, organizations, errorMessage }: Project
 
       router.refresh()
     })
+  }
+
+  const handleDragStart = (event: DragStartEvent) => {
+    const project = event.active.data.current?.project as ProjectListItem | undefined
+    setActiveDragProject(project ?? null)
+    // Si el drag arrancó desde el overview, cerralo: revela las columnas droppables del board.
+    // El DragOverlay + nodo cacheado mantienen la card en arrastre.
+    setPopupStatus(null)
+  }
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const project = activeDragProject
+    setActiveDragProject(null)
+    const { over } = event
+    if (!over || !project) {
+      return
+    }
+    // El droppable id es un ProjectStatus sólo si matchea el orden canónico (sin cast inseguro).
+    const targetStatus = PROJECT_STATUS_ORDER.find((status) => status === over.id)
+    // Mover sólo si cambia de columna. Misma columna = no-op (no hay orden persistente).
+    if (targetStatus && project.status !== targetStatus) {
+      moveProjectToStatus(project, targetStatus)
+    }
+  }
+
+  const handleDragCancel = () => {
+    setActiveDragProject(null)
   }
 
   const handleDeleteProject = (projectId: string) => {
@@ -154,20 +163,6 @@ export function ProjectsBoard({ projects, organizations, errorMessage }: Project
 
       router.refresh()
     })
-  }
-
-  const dnd: ProjectDnd = {
-    draggingId,
-    dragOverStatus,
-    onCardDragStart: (project) => setDraggingId(project.id),
-    onCardDragEnd: () => {
-      setDraggingId(null)
-      setDragOverStatus(null)
-    },
-    onSectionDragOver: (status) => setDragOverStatus(status),
-    onSectionDragLeave: (status) =>
-      setDragOverStatus((current) => (current === status ? null : current)),
-    onSectionDrop: handleDropOnStatus,
   }
 
   const isDefault =
@@ -232,11 +227,36 @@ export function ProjectsBoard({ projects, organizations, errorMessage }: Project
         </div>
       ) : null}
 
-      <ProjectList
-        projects={filteredProjects}
-        dnd={dnd}
-        onDeleteProject={handleDeleteProject}
-      />
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCorners}
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
+        onDragCancel={handleDragCancel}
+      >
+        <ProjectList
+          projects={filteredProjects}
+          activeDragStatus={activeDragProject?.status ?? null}
+          popupStatus={popupStatus}
+          onPopupStatusChange={setPopupStatus}
+          onDeleteProject={handleDeleteProject}
+        />
+
+        {/* DragOverlay portaleado a body: escapa el containing-block del backdrop-filter del
+            <main> admin y mantiene visible la card cuando el overview (su fuente) se desmonta. */}
+        {isClient
+          ? createPortal(
+              <DragOverlay dropAnimation={reduced ? null : undefined}>
+                {activeDragProject ? (
+                  <div className="w-[340px]">
+                    <ProjectCard project={activeDragProject} presentational />
+                  </div>
+                ) : null}
+              </DragOverlay>,
+              document.body,
+            )
+          : null}
+      </DndContext>
     </section>
   )
 }
