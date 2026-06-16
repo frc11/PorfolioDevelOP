@@ -227,7 +227,16 @@ async function resolveProjectOrganization(
   organizationId: string | null | undefined
 ): Promise<ProjectOrganization> {
   if (!organizationId) {
-    throw new Error('organizationId is required — Project must belong to an organization (B11.1)')
+    // Sin cliente vinculado: el proyecto es interno → cae bajo la org de la agencia.
+    // Siempre existe por seed; si por algún motivo faltara, error descriptivo.
+    const agencyOrg = await tx.organization.findUnique({
+      where: { slug: 'develop' },
+      select: { id: true, companyName: true, slug: true },
+    })
+    if (!agencyOrg) {
+      throw new Error('No se encontró la organización de la agencia (slug: develop) — ejecutá el seed para crearla')
+    }
+    return agencyOrg
   }
 
   const organization = await tx.organization.findUnique({

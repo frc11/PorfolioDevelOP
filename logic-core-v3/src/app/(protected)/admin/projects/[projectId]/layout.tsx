@@ -156,7 +156,7 @@ export default async function AgencyOsProjectLayout({ children, params }: Projec
     redirect('/admin/projects')
   }
 
-  const isInternalProject = project.organizationId === null
+  const isInternalProject = project.organization?.slug === 'develop'
   const serviceType = normalizeServiceType(project)
   const companyName = isInternalProject
     ? 'Proyecto interno develOP'

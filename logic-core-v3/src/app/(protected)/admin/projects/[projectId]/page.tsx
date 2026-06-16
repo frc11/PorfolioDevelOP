@@ -164,7 +164,7 @@ export default async function AgencyOsProjectOverviewPage({
     redirect('/admin/projects')
   }
 
-  const isInternalProject = project.organizationId === null
+  const isInternalProject = project.organization?.slug === 'develop'
   const startDate = deriveStartDate(project)
   const todoTasks = project.tasks.filter((task) => task.status === TaskStatus.TODO).length
   const inProgressTasks = project.tasks.filter(
