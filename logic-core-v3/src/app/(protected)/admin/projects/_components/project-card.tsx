@@ -1,8 +1,11 @@
 'use client'
 
 import Link from 'next/link'
+import type { MouseEvent as ReactMouseEvent } from 'react'
 import { Building2, CalendarDays, CheckCircle2, CircleDollarSign, FolderKanban } from 'lucide-react'
+import type { DraggableAttributes, DraggableSyntheticListeners } from '@dnd-kit/core'
 import type { ProjectStatus, ServiceType } from '@prisma/client'
+import { cn } from '@/lib/utils'
 
 export type ProjectCardData = {
   id: string
@@ -45,6 +48,14 @@ export type ProjectCardData = {
 
 type ProjectCardProps = {
   project: ProjectCardData
+  // DnD (dnd-kit) — todos opcionales: la card sigue usable sin DnD (overview legacy / clon).
+  // El wrapper draggable los forwardea sobre el <Link> (que es el nodo de drag).
+  dragSetNodeRef?: (element: HTMLElement | null) => void
+  dragAttributes?: DraggableAttributes
+  dragListeners?: DraggableSyntheticListeners
+  onClickCapture?: (event: ReactMouseEvent<HTMLElement>) => void
+  /** Clon no interactivo para el DragOverlay: sin navegación, fuera del tab order. */
+  presentational?: boolean
 }
 
 function serviceTone(serviceType: ServiceType): string {
@@ -99,21 +110,30 @@ function formatDate(value: string | null): string {
   }).format(new Date(value))
 }
 
-export function ProjectCard({ project }: ProjectCardProps) {
+export function ProjectCard({
+  project,
+  dragSetNodeRef,
+  dragAttributes,
+  dragListeners,
+  onClickCapture,
+  presentational = false,
+}: ProjectCardProps) {
   const totalTasks = project._count.tasks
   const completedTasks = project.completedTasks
   const progressPercentage =
     totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0
   const hasClientLinked = project.organizationId !== null
+  const isDraggable = Boolean(dragListeners)
 
-  return (
-    <Link
-      href={`/admin/projects/${project.id}`}
-      // El drag entre estados lo maneja el wrapper de project-list; el ancla no
-      // debe iniciar su propio drag (arrastraría la URL) ni competir con él.
-      draggable={false}
-      className="group flex h-full w-full flex-col rounded-[26px] border border-white/10 bg-white/5 p-5 shadow-[0_20px_45px_rgba(0,0,0,0.22)] backdrop-blur-xl transition-all hover:border-cyan-400/20 hover:bg-white/[0.07]"
-    >
+  const cardClassName = cn(
+    'group flex h-full w-full flex-col rounded-[26px] border border-white/10 bg-white/5 p-5 shadow-[0_20px_45px_rgba(0,0,0,0.22)] backdrop-blur-xl transition-all',
+    !presentational && 'hover:border-cyan-400/20 hover:bg-white/[0.07]',
+    // select-none: el hold/drag no debe seleccionar texto. cursor-grab sólo en la card real.
+    isDraggable && !presentational && 'cursor-grab select-none active:cursor-grabbing',
+  )
+
+  const content = (
+    <>
       {/* pr-10 reserva la esquina sup. derecha para el tacho que project-list
           superpone, así un título largo no queda debajo. */}
       <div className="min-w-0 pr-10">
@@ -211,6 +231,31 @@ export function ProjectCard({ project }: ProjectCardProps) {
           )}
         </div>
       </div>
+    </>
+  )
+
+  if (presentational) {
+    // Clon del DragOverlay: sin <Link> (no navega), aria-hidden, fuera del tab order.
+    return (
+      <div aria-hidden tabIndex={-1} className={cardClassName}>
+        {content}
+      </div>
+    )
+  }
+
+  return (
+    <Link
+      href={`/admin/projects/${project.id}`}
+      // El <Link> ES el nodo draggable de dnd-kit (ref + listeners). draggable={false}
+      // evita el drag nativo del ancla (arrastraría la URL) y que compita con dnd-kit.
+      draggable={false}
+      ref={dragSetNodeRef}
+      onClickCapture={onClickCapture}
+      {...dragAttributes}
+      {...dragListeners}
+      className={cardClassName}
+    >
+      {content}
     </Link>
   )
 }
