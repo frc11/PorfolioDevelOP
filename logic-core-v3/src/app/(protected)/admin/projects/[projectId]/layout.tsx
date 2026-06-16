@@ -7,8 +7,8 @@ import { auth } from '@/auth'
 import { callerCanAccessOrg } from '@/lib/auth/assert-ownership'
 import { startImpersonationAction } from '@/lib/actions/impersonation'
 import { ProjectForm } from '../_components/project-form'
-import { updateProjectStatus } from '../_actions/project.actions'
 import { ProjectTabs } from './_components/project-tabs'
+import { ProjectStatusControl } from './_components/project-status-control'
 import { ScrollReset } from './_components/scroll-reset'
 
 type ProjectLayoutProps = {
@@ -17,13 +17,6 @@ type ProjectLayoutProps = {
     projectId: string
   }>
 }
-
-const STATUS_OPTIONS: ProjectStatus[] = [
-  'PLANNING',
-  'IN_PROGRESS',
-  'REVIEW',
-  'COMPLETED',
-]
 
 function statusTone(status: ProjectStatus): string {
   switch (status) {
@@ -227,33 +220,7 @@ export default async function AgencyOsProjectLayout({ children, params }: Projec
               </form>
             ) : null}
 
-            <details className="relative">
-              <summary className="list-none rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-zinc-200 transition-colors hover:bg-black/30">
-                Cambiar estado
-              </summary>
-
-              <div className="absolute right-0 top-14 z-20 min-w-[220px] rounded-2xl border border-white/10 bg-[#11161d]/95 p-2 shadow-2xl backdrop-blur-xl">
-                {STATUS_OPTIONS.filter((status) => status !== project.status).map((status) => (
-                  <form
-                    key={status}
-                    action={async () => {
-                      'use server'
-                      await updateProjectStatus({
-                        projectId: project.id,
-                        status,
-                      })
-                    }}
-                  >
-                    <button
-                      type="submit"
-                      className="flex w-full rounded-xl px-3 py-2 text-left text-sm text-zinc-200 transition-colors hover:bg-white/5"
-                    >
-                      {statusLabel(status)}
-                    </button>
-                  </form>
-                ))}
-              </div>
-            </details>
+            <ProjectStatusControl projectId={project.id} status={project.status} />
 
             <ProjectForm
               triggerLabel="Editar"
