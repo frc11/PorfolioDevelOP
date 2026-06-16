@@ -14,6 +14,7 @@ import {
 // === TUNABLES (calibrá por ojo) ===
 const COLUMN_FADE_HEIGHT = 48 // alto del desvanecimiento inferior del cuerpo (px)
 const MAX_VISIBLE_CARDS = 3 // máx de cards RENDERIZADAS por columna (el resto vive en el overview)
+const HINT_MIN_LEADS = 2 // desde cuántos leads se muestra el hint de "ver todas" (con ~1 entera visible)
 
 // El cuerpo NO scrollea (la rueda siempre scrollea la página). Se renderizan como mucho
 // MAX_VISIBLE_CARDS cards — el resto NO se monta (no quedan targets invisibles tabbables) y
@@ -53,7 +54,8 @@ export function PipelineColumn({
   // Fade siempre que haya cards: suaviza cualquier corte por el alto fijo (no solo cuando
   // sobran del slice) y NO se aplica sobre el EmptyState. Sólo afecta lo que llega al fondo.
   const showFade = leads.length > 0
-  const hasOverflow = leads.length > MAX_VISIBLE_CARDS
+  // Desde 2 leads ya se invita a expandir: la columna sólo muestra ~1 card entera antes del fade.
+  const showExpandHint = leads.length >= HINT_MIN_LEADS
 
   return (
     <section
@@ -109,7 +111,7 @@ export function PipelineColumn({
         )}
       </div>
 
-      {hasOverflow ? (
+      {showExpandHint ? (
         <button
           type="button"
           onClick={() => onOpenOverview?.(status)}
