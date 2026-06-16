@@ -53,6 +53,7 @@ type ProjectCardProps = {
   dragSetNodeRef?: (element: HTMLElement | null) => void
   dragAttributes?: DraggableAttributes
   dragListeners?: DraggableSyntheticListeners
+  isDragging?: boolean
   onClickCapture?: (event: ReactMouseEvent<HTMLElement>) => void
   /** Clon no interactivo para el DragOverlay: sin navegación, fuera del tab order. */
   presentational?: boolean
@@ -115,6 +116,7 @@ export function ProjectCard({
   dragSetNodeRef,
   dragAttributes,
   dragListeners,
+  isDragging = false,
   onClickCapture,
   presentational = false,
 }: ProjectCardProps) {
@@ -128,8 +130,9 @@ export function ProjectCard({
   const cardClassName = cn(
     'group flex h-full w-full flex-col rounded-[26px] border border-white/10 bg-white/5 p-5 shadow-[0_20px_45px_rgba(0,0,0,0.22)] backdrop-blur-xl transition-all',
     !presentational && 'hover:border-cyan-400/20 hover:bg-white/[0.07]',
-    // select-none: el hold/drag no debe seleccionar texto. cursor-grab sólo en la card real.
-    isDraggable && !presentational && 'cursor-grab select-none active:cursor-grabbing',
+    // select-none: el hold/drag no debe seleccionar texto. cursor-grab/grabbing como en Leads.
+    isDraggable && !presentational && 'select-none',
+    isDraggable && !presentational && (isDragging ? 'cursor-grabbing' : 'cursor-grab'),
   )
 
   const content = (

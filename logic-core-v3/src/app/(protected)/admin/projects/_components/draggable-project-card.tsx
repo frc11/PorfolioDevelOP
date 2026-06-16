@@ -75,6 +75,7 @@ export function DraggableProjectCard({
         dragSetNodeRef={setNodeRef}
         dragAttributes={attributes}
         dragListeners={listeners}
+        isDragging={isDragging}
         onClickCapture={handleClickCapture}
       />
 
@@ -87,7 +88,7 @@ export function DraggableProjectCard({
             onConfirmOpen()
           }}
           aria-label={`Eliminar proyecto ${project.name}`}
-          className="absolute right-4 top-4 z-10 flex h-9 w-9 items-center justify-center rounded-full border border-rose-400/20 bg-rose-500/10 text-rose-300 backdrop-blur-sm transition-colors hover:bg-rose-500/20"
+          className="absolute right-4 top-4 z-10 flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border border-rose-400/20 bg-rose-500/10 text-rose-300 backdrop-blur-sm transition-colors hover:bg-rose-500/20"
         >
           <Trash2 className="h-4 w-4" strokeWidth={1.5} />
         </button>

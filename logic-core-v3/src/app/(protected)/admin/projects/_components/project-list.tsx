@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { motion, useReducedMotion } from 'motion/react'
-import { Maximize2 } from 'lucide-react'
+import { Hand, Maximize2 } from 'lucide-react'
 import type { ProjectStatus } from '@prisma/client'
 import { staggerContainer, staggerItem } from '@/lib/motion-variants'
 import { OverlayModal } from './overlay-modal'
@@ -65,6 +65,11 @@ export function ProjectList({
 
   return (
     <div className="space-y-6">
+      <p className="flex items-center gap-1.5 text-[11px] text-zinc-500">
+        <Hand className="h-3.5 w-3.5" strokeWidth={1.5} aria-hidden />
+        Mantené apretada una card para moverla de estado
+      </p>
+
       {STATUS_SECTIONS.map((section) => {
         const sectionProjects = projects.filter((project) => project.status === section.status)
         const canDrop = activeDragStatus !== null && activeDragStatus !== section.status
