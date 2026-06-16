@@ -142,6 +142,11 @@ export default async function AgencyOsProjectLayout({ children, params }: Projec
         id: true,
         companyName: true,
       },
+      where: {
+        slug: {
+          not: 'develop',
+        },
+      },
       orderBy: {
         companyName: 'asc',
       },
@@ -159,7 +164,7 @@ export default async function AgencyOsProjectLayout({ children, params }: Projec
   const isInternalProject = project.organization?.slug === 'develop'
   const serviceType = normalizeServiceType(project)
   const companyName = isInternalProject
-    ? 'Proyecto interno develOP'
+    ? 'Proyecto interno de develOP'
     : project.organization?.companyName ?? 'Cliente sin nombre'
 
   return (
@@ -229,7 +234,7 @@ export default async function AgencyOsProjectLayout({ children, params }: Projec
               organizations={organizations}
               project={{
                 id: project.id,
-                organizationId: project.organizationId,
+                organizationId: isInternalProject ? null : project.organizationId,
                 name: project.name,
                 description: project.description,
                 serviceType,

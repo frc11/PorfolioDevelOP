@@ -8,6 +8,7 @@ const getOrganizationsForDropdown = unstable_cache(
   async () =>
     prisma.organization.findMany({
       select: { id: true, companyName: true },
+      where: { slug: { not: 'develop' } },
       orderBy: { companyName: 'asc' },
     }),
   ['admin-orgs'],
