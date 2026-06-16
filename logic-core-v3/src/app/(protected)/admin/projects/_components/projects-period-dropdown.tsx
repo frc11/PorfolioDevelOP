@@ -1,7 +1,9 @@
 'use client'
 
 import { useEffect, useId, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { Calendar, Check, ChevronDown } from 'lucide-react'
+import { useIsClient } from '@/lib/use-is-client'
 import type { PeriodValue } from './projects-filters'
 
 type ProjectsPeriodDropdownProps = {
@@ -13,6 +15,36 @@ type ProjectsPeriodDropdownProps = {
   from: string
   to: string
   onChange: (period: PeriodValue, from: string, to: string) => void
+}
+
+type PanelPosition = {
+  top?: number
+  bottom?: number
+  left: number
+}
+
+const GAP = 4
+const PANEL_WIDTH = 260
+const PANEL_MAX_H = 380
+
+// Misma técnica que el <Select> de ui: el panel se portalea a document.body con
+// posición fixed calculada desde el trigger, así escapa el stacking del <main>
+// (backdrop-blur) y queda SÓLIDO. Right-align (el filtro vive a la derecha de la
+// barra) + clamp al viewport, con flip-up si no hay espacio abajo.
+function calcPosition(trigger: HTMLElement): PanelPosition {
+  const rect = trigger.getBoundingClientRect()
+  const spaceBelow = window.innerHeight - rect.bottom - GAP
+  const flipUp = spaceBelow < PANEL_MAX_H && rect.top > spaceBelow
+  const left = Math.min(
+    Math.max(8, rect.right - PANEL_WIDTH),
+    window.innerWidth - PANEL_WIDTH - 8
+  )
+
+  return {
+    top: flipUp ? undefined : rect.bottom + GAP,
+    bottom: flipUp ? window.innerHeight - rect.top + GAP : undefined,
+    left,
+  }
 }
 
 function formatShortDate(value: string): string {
@@ -33,10 +65,10 @@ const dateInputClassName =
 
 /**
  * Dropdown lane-local de filtro de fecha (sin librería de date-picker),
- * reutilizado por Inicio y Entrega. Al elegir "Personalizado" los 2 selectores
- * aparecen DENTRO del panel (sin recargar) y el rango se aplica recién con
- * "Aplicar" (ambas fechas puestas). El resto aplica al instante. Panel SÓLIDO
- * (bg-zinc-900 opaco) como el `<Select>` de servicio, sin bleed del fondo.
+ * reutilizado por Inicio y Entrega. El panel se PORTALEA a document.body
+ * (técnica del <Select> de servicio) → sólido, sin fade ni bleed del fondo. Al
+ * elegir "Personalizado" los 2 selectores aparecen dentro del panel y el rango
+ * aplica con "Aplicar"; el resto aplica al instante.
  */
 export function ProjectsPeriodDropdown({
   label,
@@ -47,11 +79,15 @@ export function ProjectsPeriodDropdown({
   to,
   onChange,
 }: ProjectsPeriodDropdownProps) {
+  const mounted = useIsClient()
   const [open, setOpen] = useState(false)
+  const [panelPos, setPanelPos] = useState<PanelPosition | null>(null)
   const [showCustom, setShowCustom] = useState(period === 'custom')
   const [draftFrom, setDraftFrom] = useState(from)
   const [draftTo, setDraftTo] = useState(to)
-  const containerRef = useRef<HTMLDivElement | null>(null)
+  const wrapperRef = useRef<HTMLDivElement | null>(null)
+  const triggerRef = useRef<HTMLButtonElement | null>(null)
+  const panelRef = useRef<HTMLDivElement | null>(null)
   const panelId = useId()
 
   useEffect(() => {
@@ -59,28 +95,48 @@ export function ProjectsPeriodDropdown({
       return
     }
 
+    // El portal rompe el containment del DOM: el click-outside debe chequear el
+    // wrapper Y el panel.
     const handlePointerDown = (event: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
-        setOpen(false)
+      const target = event.target as Node
+      if (wrapperRef.current?.contains(target) || panelRef.current?.contains(target)) {
+        return
       }
+      setOpen(false)
     }
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         setOpen(false)
       }
     }
+    // El trigger se mueve con el scroll del <main>; el panel es fixed → se cierra
+    // (mismo criterio que el <Select>).
+    const handleScroll = (event: Event) => {
+      if (panelRef.current?.contains(event.target as Node)) {
+        return
+      }
+      setOpen(false)
+    }
+    const handleResize = () => setOpen(false)
 
     document.addEventListener('mousedown', handlePointerDown)
     document.addEventListener('keydown', handleKeyDown)
+    window.addEventListener('scroll', handleScroll, true)
+    window.addEventListener('resize', handleResize)
 
     return () => {
       document.removeEventListener('mousedown', handlePointerDown)
       document.removeEventListener('keydown', handleKeyDown)
+      window.removeEventListener('scroll', handleScroll, true)
+      window.removeEventListener('resize', handleResize)
     }
   }, [open])
 
   const openPanel = () => {
-    // Seed de los drafts con el rango aplicado al abrir (sin effect → sin lint).
+    if (!triggerRef.current) {
+      return
+    }
+    setPanelPos(calcPosition(triggerRef.current))
     setShowCustom(period === 'custom')
     setDraftFrom(from)
     setDraftTo(to)
@@ -116,8 +172,9 @@ export function ProjectsPeriodDropdown({
       : options.find((option) => option.value === period)?.label ?? 'Todos'
 
   return (
-    <div ref={containerRef} className="relative">
+    <div ref={wrapperRef} className="relative">
       <button
+        ref={triggerRef}
         type="button"
         onClick={() => (open ? setOpen(false) : openPanel())}
         aria-haspopup="dialog"
@@ -135,78 +192,87 @@ export function ProjectsPeriodDropdown({
         />
       </button>
 
-      {open ? (
-        <div
-          id={panelId}
-          role="dialog"
-          aria-label={ariaLabel}
-          // Panel SÓLIDO/opaco (mismo criterio que el <Select> de servicio): acá
-          // es absolute dentro del <main> translúcido, así que bg-zinc-900 sin
-          // alpha ni backdrop-blur evita que se cuele el fondo.
-          className="absolute right-0 top-full z-30 mt-2 w-[260px] overflow-hidden rounded-xl border border-white/[0.08] bg-zinc-900 p-1.5 shadow-2xl"
-        >
-          {options.map((option) => {
-            const isActive =
-              option.value === 'custom' ? showCustom : option.value === period
+      {mounted && open && panelPos
+        ? createPortal(
+            <div
+              ref={panelRef}
+              id={panelId}
+              role="dialog"
+              aria-label={ariaLabel}
+              style={{
+                position: 'fixed',
+                top: panelPos.top,
+                bottom: panelPos.bottom,
+                left: panelPos.left,
+                width: PANEL_WIDTH,
+                zIndex: 210,
+              }}
+              className="overflow-hidden rounded-xl border border-white/[0.08] bg-zinc-900/95 p-1.5 shadow-2xl backdrop-blur-[20px] backdrop-saturate-[180%]"
+            >
+              {options.map((option) => {
+                const isActive =
+                  option.value === 'custom' ? showCustom : option.value === period
 
-            return (
-              <button
-                key={option.value}
-                type="button"
-                onClick={() => selectPeriod(option.value)}
-                className={[
-                  'flex w-full items-center justify-between gap-2 rounded-lg px-3 py-2 text-left text-sm transition-colors',
-                  isActive
-                    ? 'bg-cyan-400/10 text-cyan-300'
-                    : 'text-zinc-200 hover:bg-cyan-400/10 hover:text-cyan-300',
-                ].join(' ')}
-              >
-                <span>{option.label}</span>
-                {isActive ? <Check className="h-4 w-4 text-cyan-400" strokeWidth={1.5} /> : null}
-              </button>
-            )
-          })}
+                return (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={() => selectPeriod(option.value)}
+                    className={[
+                      'flex w-full items-center justify-between gap-2 rounded-lg px-3 py-2 text-left text-sm transition-colors',
+                      isActive
+                        ? 'bg-cyan-400/10 text-cyan-300'
+                        : 'text-zinc-200 hover:bg-cyan-400/10 hover:text-cyan-300',
+                    ].join(' ')}
+                  >
+                    <span>{option.label}</span>
+                    {isActive ? <Check className="h-4 w-4 text-cyan-400" strokeWidth={1.5} /> : null}
+                  </button>
+                )
+              })}
 
-          {showCustom ? (
-            <div className="mt-2 space-y-3 border-t border-white/10 px-1 pt-3">
-              <div className="flex flex-col gap-1">
-                <label className="text-[10px] uppercase tracking-[0.18em] text-zinc-500">
-                  Desde
-                </label>
-                <input
-                  type="date"
-                  value={draftFrom}
-                  max={draftTo || undefined}
-                  onChange={(event) => setDraftFrom(event.currentTarget.value)}
-                  className={dateInputClassName}
-                />
-              </div>
+              {showCustom ? (
+                <div className="mt-2 space-y-3 border-t border-white/10 px-1 pt-3">
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[10px] uppercase tracking-[0.18em] text-zinc-500">
+                      Desde
+                    </label>
+                    <input
+                      type="date"
+                      value={draftFrom}
+                      max={draftTo || undefined}
+                      onChange={(event) => setDraftFrom(event.currentTarget.value)}
+                      className={dateInputClassName}
+                    />
+                  </div>
 
-              <div className="flex flex-col gap-1">
-                <label className="text-[10px] uppercase tracking-[0.18em] text-zinc-500">
-                  Hasta
-                </label>
-                <input
-                  type="date"
-                  value={draftTo}
-                  min={draftFrom || undefined}
-                  onChange={(event) => setDraftTo(event.currentTarget.value)}
-                  className={dateInputClassName}
-                />
-              </div>
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[10px] uppercase tracking-[0.18em] text-zinc-500">
+                      Hasta
+                    </label>
+                    <input
+                      type="date"
+                      value={draftTo}
+                      min={draftFrom || undefined}
+                      onChange={(event) => setDraftTo(event.currentTarget.value)}
+                      className={dateInputClassName}
+                    />
+                  </div>
 
-              <button
-                type="button"
-                onClick={applyCustom}
-                disabled={!canApply}
-                className="w-full rounded-xl border border-cyan-400/20 bg-cyan-400/10 px-3 py-2 text-sm font-medium text-cyan-100 transition-colors hover:bg-cyan-400/15 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                Aplicar
-              </button>
-            </div>
-          ) : null}
-        </div>
-      ) : null}
+                  <button
+                    type="button"
+                    onClick={applyCustom}
+                    disabled={!canApply}
+                    className="w-full rounded-xl border border-cyan-400/20 bg-cyan-400/10 px-3 py-2 text-sm font-medium text-cyan-100 transition-colors hover:bg-cyan-400/15 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    Aplicar
+                  </button>
+                </div>
+              ) : null}
+            </div>,
+            document.body
+          )
+        : null}
     </div>
   )
 }
