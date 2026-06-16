@@ -51,24 +51,25 @@ export function ConfirmDialog({
         onClick={(event) => event.stopPropagation()}
       >
         <div className="flex items-start justify-between gap-4">
-          <div className="flex items-start gap-3">
-            <div className="mt-1 flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-zinc-200">
-              <TriangleAlert className="h-5 w-5" />
+          <div className="flex items-start gap-3.5">
+            <div className="mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-zinc-200">
+              <TriangleAlert className="h-6 w-6" strokeWidth={1.5} />
             </div>
 
             <div>
-              <p className="text-lg font-semibold text-white">{title}</p>
+              <p className="text-lg font-semibold tracking-tight text-white">{title}</p>
               <p className="mt-2 text-sm leading-6 text-zinc-400">{description}</p>
             </div>
           </div>
 
           <button
             type="button"
+            aria-label="Cerrar"
             disabled={isPending}
             onClick={onClose}
-            className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-black/20 text-zinc-400 transition-colors hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/10 bg-black/20 text-zinc-300 transition-colors hover:bg-white/5 hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
           >
-            <X className="h-4 w-4" />
+            <X className="h-5 w-5" strokeWidth={1.5} />
           </button>
         </div>
 
@@ -77,7 +78,7 @@ export function ConfirmDialog({
             type="button"
             disabled={isPending}
             onClick={onClose}
-            className="rounded-2xl border border-white/10 px-4 py-3 text-sm text-zinc-300 transition-colors hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-60"
+            className="rounded-2xl border border-white/10 px-4 py-2.5 text-sm text-zinc-300 transition-colors hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-60"
           >
             Cancelar
           </button>
@@ -86,11 +87,11 @@ export function ConfirmDialog({
             disabled={isPending}
             onClick={onConfirm}
             className={[
-              'inline-flex items-center gap-2 rounded-2xl border px-4 py-3 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-60',
+              'inline-flex items-center gap-2 rounded-2xl border px-4 py-2.5 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-60',
               confirmClassName,
             ].join(' ')}
           >
-            {isPending ? <LoaderCircle className="h-4 w-4 animate-spin" /> : null}
+            {isPending ? <LoaderCircle className="h-4 w-4 animate-spin" strokeWidth={1.5} /> : null}
             <span>{isPending ? 'Procesando...' : confirmLabel}</span>
           </button>
         </div>
