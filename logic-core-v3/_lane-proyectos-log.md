@@ -177,3 +177,23 @@ Notas para calibrar/verificar:
 
 PENDIENTE DE COORDINACIÓN (consolidado, post Sprint D):
 - **Freeze post-impersonación (#4)** — único pendiente real; out-of-scope (auth/impersonation + layout admin). El de `Project.startDate` se cae (requisito de inicio obligatorio cancelado).
+
+---
+
+# Sprint E — Badges en card, dropdowns portaleados, scroll reset, control Estado, eliminar proyecto (CAMBIO 1–5)
+
+## FASE 0 — Hallazgos (workflow 4 agentes read-only)
+
+1. **Select portalea a body** (`Select.tsx`): `useIsClient` (`@/lib/use-is-client`, importable) + `calcPosition(trigger)` (getBoundingClientRect → fixed top/bottom/left/width, flip-up) + `createPortal(panel, document.body)` con `position:fixed`, `zIndex:210`, `bg-zinc-900/95`. Sólido porque vive en `body` (escapa el stacking del `<main>` con backdrop-blur). Click-outside chequea wrapper **y** panel ref (el portal rompe containment). Listeners de scroll/resize en Select CIERRAN (no reposicionan).
+2. **El dropdown de fecha NO tiene fade/máscara** — el lavado es el stacking del `<main>` (absolute dentro de un backdrop-blur). Portalear a body lo resuelve definitivo (memoria `admin-fixed-backdrop-trap`).
+3. **deleteProject NO existe**; relaciones de Project TODAS `onDelete: Cascade` (Task L527, OsPaymentMilestone L886, OsMaintenancePayment L900, OsTimeEntry.project L919, OsTimeEntry.task L918). `Project.osLead` sin onDelete (FK en Project, no bloquea; el lead NO se borra). → `tx.project.delete` cascadea todo; igual hago `$transaction` con deleteMany explícito (defensivo + lo pide el brief). Mirror: `requireSuperAdmin` + `ProjectIdSchema` + `buildProjectRevalidationPaths`.
+4. **Confirmación scoped estilo Leads NO existe** (Leads usa ConfirmDialog full-screen). Receta: `useState` por card; wrapper `relative overflow-hidden` con el radio de la card; overlay `absolute inset-0 z-30 ... backdrop-blur-md` (NO fixed, NO portal) centrado; diálogo `max-w-[260px]`; TODO con `stopPropagation` (la card navega).
+5. **Ficha:** "Cambiar estado" = `<details>` + forms server-action por estado (`layout.tsx:228-254`). `<main>` (AdminLayoutClient:82, `overflow-y-auto`) es el scroll container; resetear con client child `usePathname` → `document.querySelector('main')?.scrollTo(0,0)`. `TransitionContext` (frozen) NO resetea el scroll del main.
+
+## Decisiones por cambio
+
+- **1:** card — saco el badge de estado; servicio + visibilidad van juntos DEBAJO del título en una zona con `min-h` (las tiles arrancan alineadas entre cards sin importar la cantidad de badges). Libera el top-right para el tacho (CAMBIO 5).
+- **2:** reescribo `projects-period-dropdown.tsx` para portalear el panel a `document.body` (técnica del Select: useIsClient + calcPosition local + fixed + z-210, right-align + clamp; cierra en scroll/resize; click-outside chequea wrapper y panel). Sólido como el de servicio.
+- **3:** nuevo client `[projectId]/_components/scroll-reset.tsx` (`usePathname` + effect → `main.scrollTo(0,0)`), montado en `[projectId]/layout.tsx`. Sin tocar AdminLayoutClient ni TransitionContext. La card sigue con `<Link>` (no router.push).
+- **4:** nuevo client `[projectId]/_components/project-status-control.tsx` con el `<Select>` de ui (portaleado/sólido), value = estado actual, onChange → `updateProjectStatus` (optimista + rollback + router.refresh). Reemplaza el `<details>` "Cambiar estado".
+- **5:** `deleteProject` nuevo en `project.actions.ts` (`requireSuperAdmin` + `ProjectIdSchema` + `$transaction` deleteMany[timeEntries, milestones, maintenance, tasks] + project.delete + revalidate). Tacho top-right en cada card (en el wrapper de project-list, absolute) + confirmación scoped (overlay absolute inset-0 con blur sólo en esa card). Board provee `onDeleteProject` (optimista + rollback). data-no-drag para no iniciar drag/navegación.
