@@ -201,7 +201,7 @@ export function matchesDelivery(estimatedEndDate: string | null, filter: DateFil
 
 type FilterableProject = Pick<
   ProjectCardData,
-  'serviceType' | 'organizationId' | 'startDate' | 'estimatedEndDate'
+  'serviceType' | 'isInternal' | 'startDate' | 'estimatedEndDate'
 >
 
 // Combina servicio AND visibilidad AND inicio AND entrega sobre la lista completa.
@@ -217,8 +217,8 @@ export function filterProjects<T extends FilterableProject>(
       filters.visibility === 'ALL'
         ? true
         : filters.visibility === 'CLIENT'
-          ? project.organizationId !== null
-          : project.organizationId === null
+          ? !project.isInternal
+          : project.isInternal === true
 
     return (
       matchesService &&

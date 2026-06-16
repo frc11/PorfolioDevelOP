@@ -92,7 +92,7 @@ export function ProjectsBoard({ projects, organizations, errorMessage }: Project
   )
 
   const clientCount = useMemo(
-    () => localProjects.filter((project) => project.organizationId !== null).length,
+    () => localProjects.filter((project) => !project.isInternal).length,
     [localProjects]
   )
   const internalCount = localProjects.length - clientCount

@@ -18,7 +18,11 @@ export default async function AgencyOsProjectTasksPage({ params }: ProjectTasksP
     where: { id: projectId },
     select: {
       id: true,
-      organizationId: true,
+      organization: {
+        select: {
+          slug: true,
+        },
+      },
     },
   })
 
@@ -50,7 +54,7 @@ export default async function AgencyOsProjectTasksPage({ params }: ProjectTasksP
 
   const tasks: TaskListItem[] = taskResult.success ? taskResult.data : []
   const assignees: TaskAssignee[] = superAdmins
-  const showApprovalFlow = project.organizationId !== null
+  const showApprovalFlow = project.organization?.slug !== 'develop'
 
   return (
     <section className="space-y-6">

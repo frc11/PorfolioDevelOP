@@ -494,7 +494,7 @@ function serializeProjectListItem(project: ProjectListRecord) {
           serviceType: mapLegacyServiceTypeToPortal(project.osLead.serviceType),
         }
       : null,
-    isInternal: false,
+    isInternal: project.organization?.slug === 'develop',
     sortTimestamp: deriveProjectActivityAt(project),
   }
 }

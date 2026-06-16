@@ -124,7 +124,7 @@ export function ProjectCard({
   const completedTasks = project.completedTasks
   const progressPercentage =
     totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0
-  const hasClientLinked = project.organizationId !== null
+  const hasClientLinked = !project.isInternal
   const isDraggable = Boolean(dragListeners)
 
   const cardClassName = cn(
