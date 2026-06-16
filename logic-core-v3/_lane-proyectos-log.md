@@ -238,3 +238,15 @@ Leí TODO el lane de Leads (read-only). **Leads NO tiene popup full-screen por c
 - **2:** título de sección → botón que abre `OverlayModal` (`max-w-6xl`) con el `STATUS_LABELS` + conteo en el eyebrow y la grilla de TODAS las cards del estado (`ProjectCard`, navegables). Estado del popup en `project-list` (`popupStatus`).
 - **3:** ⛔ NO se construye (ver arriba). Reportado + alternativa propuesta.
 - **4:** `projects-board.tsx` — `useEffect` keyed en `draggingId`: mientras hay drag, listener `dragover` (capture) guarda `clientY` y un loop `requestAnimationFrame` scrollea el `<main>` cuando el cursor entra en la zona de borde (sup/inf), con velocidad proporcional a la proximidad. Cleanup al terminar el drag.
+
+## Cierre Sprint F
+
+Estado: **1, 2, 4 implementados y commiteados** (gate por cambio: eslint por archivo + `tsc --noEmit` de todo el proyecto = verde; sweep final verde). **CAMBIO 3 NO se construyó** (decisión de FASE 0, instrucción explícita del brief). `npm run build` no se corre acá (lock de `.next` del dev server en `:3000`) → verificación runtime del humano en `:3000`.
+
+🚨 **CAMBIO 3 = reportado, no construido.** Leads no tiene popup ni drag (es kanban horizontal + menú "Mover a estado"), así que no hay nada que "replicar exactamente". El mecanismo native-drag-sobrevive-unmount no es robusto (no-spec, flaky). Mitigación: el estado de cualquier proyecto se cambia robustamente vía el Select "Estado" de la ficha (popup → click card → ficha). Alternativa robusta propuesta (a confirmar con el humano): menú/Select "Mover a estado" en las cards del popup (patrón REAL de Leads).
+
+Calibrables (constantes aisladas en `project-list.tsx`): `PREVIEW_VISIBLE_COUNT=4`, `PREVIEW_MAX_HEIGHT='42rem'`, `PREVIEW_MASK`. Auto-scroll en `projects-board.tsx`: `EDGE=90`, `MAX_SPEED=20`.
+
+PENDIENTE DE COORDINACIÓN (consolidado, post Sprint F):
+- **Decisión humana sobre CAMBIO 3**: ¿alcanza con el Select de la ficha, o se agrega "Mover a estado" en el popup (robusto, estilo Leads real)? El drag-desde-popup no se hace.
+- **Freeze post-impersonación (#4 histórico)** — sigue out-of-scope (auth/impersonation + layout admin).
