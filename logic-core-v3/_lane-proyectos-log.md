@@ -197,3 +197,16 @@ PENDIENTE DE COORDINACIÓN (consolidado, post Sprint D):
 - **3:** nuevo client `[projectId]/_components/scroll-reset.tsx` (`usePathname` + effect → `main.scrollTo(0,0)`), montado en `[projectId]/layout.tsx`. Sin tocar AdminLayoutClient ni TransitionContext. La card sigue con `<Link>` (no router.push).
 - **4:** nuevo client `[projectId]/_components/project-status-control.tsx` con el `<Select>` de ui (portaleado/sólido), value = estado actual, onChange → `updateProjectStatus` (optimista + rollback + router.refresh). Reemplaza el `<details>` "Cambiar estado".
 - **5:** `deleteProject` nuevo en `project.actions.ts` (`requireSuperAdmin` + `ProjectIdSchema` + `$transaction` deleteMany[timeEntries, milestones, maintenance, tasks] + project.delete + revalidate). Tacho top-right en cada card (en el wrapper de project-list, absolute) + confirmación scoped (overlay absolute inset-0 con blur sólo en esa card). Board provee `onDeleteProject` (optimista + rollback). data-no-drag para no iniciar drag/navegación.
+
+## Cierre Sprint E
+
+Estado: **1–5 implementados y commiteados** (gate por cambio: eslint por archivo + `tsc --noEmit` de todo el proyecto = verde; sweep final verde). `prisma migrate status` = "Database schema is up to date!". `npm run build` no se corre acá (lock de `.next` del dev server en `:3000`) → verificación runtime del humano en `:3000`.
+
+**Sin coordinación de schema:** las relaciones de Project ya son `onDelete: Cascade`, así que `deleteProject` no necesita tocar schema. El `osLead` queda intacto (no se borra; su FK vive en Project).
+
+PENDIENTE DE COORDINACIÓN (consolidado, post Sprint E):
+- **Freeze post-impersonación (#4)** — sigue siendo el único pendiente real; out-of-scope (auth/impersonation + layout admin).
+
+Notas de verificación en `:3000`:
+- CAMBIO 2: inicio y entrega ahora portalean (sólidos como servicio); cierran al scrollear (igual que el `<Select>`).
+- CAMBIO 5: el tacho convive con DnD (data-no-drag) y con la navegación del `<Link>` (stopPropagation); la confirmación blurea sólo su card.
