@@ -228,6 +228,7 @@ export function ProjectsBoard({ projects, organizations, errorMessage }: Project
       ) : null}
 
       <DndContext
+        id="projects-board-dnd"
         sensors={sensors}
         collisionDetection={closestCorners}
         onDragStart={handleDragStart}
