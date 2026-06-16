@@ -9,6 +9,7 @@ import { startImpersonationAction } from '@/lib/actions/impersonation'
 import { ProjectForm } from '../_components/project-form'
 import { updateProjectStatus } from '../_actions/project.actions'
 import { ProjectTabs } from './_components/project-tabs'
+import { ScrollReset } from './_components/scroll-reset'
 
 type ProjectLayoutProps = {
   children: ReactNode
@@ -169,6 +170,7 @@ export default async function AgencyOsProjectLayout({ children, params }: Projec
 
   return (
     <section className="space-y-6">
+      <ScrollReset />
       <div className="rounded-[28px] border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
         <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
           <div>
