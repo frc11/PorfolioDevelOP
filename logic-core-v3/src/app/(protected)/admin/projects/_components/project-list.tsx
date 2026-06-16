@@ -2,9 +2,10 @@
 
 import { useState, type DragEvent } from 'react'
 import { motion, useReducedMotion } from 'motion/react'
-import { Trash2 } from 'lucide-react'
+import { Maximize2, Trash2 } from 'lucide-react'
 import type { ProjectStatus } from '@prisma/client'
 import { staggerContainer, staggerItem } from '@/lib/motion-variants'
+import { OverlayModal } from './overlay-modal'
 import { ProjectCard, type ProjectCardData } from './project-card'
 
 export type ProjectListItem = ProjectCardData
@@ -171,6 +172,14 @@ function ProjectCardItem({
 export function ProjectList({ projects, dnd, onDeleteProject }: ProjectListProps) {
   const reduce = useReducedMotion()
   const [confirmingId, setConfirmingId] = useState<string | null>(null)
+  const [popupStatus, setPopupStatus] = useState<ProjectStatus | null>(null)
+
+  const popupSection = popupStatus
+    ? STATUS_SECTIONS.find((section) => section.status === popupStatus)
+    : undefined
+  const popupProjects = popupStatus
+    ? projects.filter((project) => project.status === popupStatus)
+    : []
 
   const draggingProject =
     dnd && dnd.draggingId ? projects.find((project) => project.id === dnd.draggingId) : undefined
@@ -215,7 +224,18 @@ export function ProjectList({ projects, dnd, onDeleteProject }: ProjectListProps
             ].join(' ')}
           >
             <div className="flex items-center justify-between gap-3">
-              <h3 className="text-lg font-semibold tracking-tight text-white">{section.label}</h3>
+              <button
+                type="button"
+                onClick={() => setPopupStatus(section.status)}
+                aria-label={`Ver todos los proyectos en ${section.label}`}
+                className="group inline-flex items-center gap-2 text-lg font-semibold tracking-tight text-white transition-colors hover:text-cyan-200"
+              >
+                {section.label}
+                <Maximize2
+                  className="h-4 w-4 text-zinc-500 transition-colors group-hover:text-cyan-300"
+                  strokeWidth={1.5}
+                />
+              </button>
               <span className="rounded-full border border-white/10 bg-black/20 px-3 py-1 text-xs font-medium text-zinc-400">
                 {sectionProjects.length}
               </span>
@@ -278,6 +298,38 @@ export function ProjectList({ projects, dnd, onDeleteProject }: ProjectListProps
           </section>
         )
       })}
+
+      {popupStatus && popupSection ? (
+        <OverlayModal
+          open
+          onClose={() => setPopupStatus(null)}
+          title={popupSection.label}
+          eyebrow={`develOP / Proyectos · ${popupProjects.length} ${
+            popupProjects.length === 1 ? 'proyecto' : 'proyectos'
+          }`}
+          panelClassName="max-w-6xl"
+        >
+          {popupProjects.length > 0 ? (
+            <div
+              className="mt-6 grid gap-4"
+              style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))' }}
+            >
+              {popupProjects.map((project) => (
+                <ProjectCardItem
+                  key={project.id}
+                  project={project}
+                  onDeleteProject={onDeleteProject}
+                  confirming={confirmingId === project.id}
+                  onConfirmOpen={() => setConfirmingId(project.id)}
+                  onConfirmClose={() => setConfirmingId(null)}
+                />
+              ))}
+            </div>
+          ) : (
+            <p className="mt-6 text-sm text-zinc-400">Sin proyectos en este estado.</p>
+          )}
+        </OverlayModal>
+      ) : null}
     </div>
   )
 }
