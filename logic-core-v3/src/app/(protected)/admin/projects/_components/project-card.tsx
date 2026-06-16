@@ -130,9 +130,9 @@ export function ProjectCard({
   const cardClassName = cn(
     'group flex h-full w-full flex-col rounded-[26px] border border-white/10 bg-white/5 p-5 shadow-[0_20px_45px_rgba(0,0,0,0.22)] backdrop-blur-xl transition-all',
     !presentational && 'hover:border-cyan-400/20 hover:bg-white/[0.07]',
-    // select-none: el hold/drag no debe seleccionar texto. cursor-grab/grabbing como en Leads.
     isDraggable && !presentational && 'select-none',
-    isDraggable && !presentational && (isDragging ? 'cursor-grabbing' : 'cursor-grab'),
+    // cursor con !important para ganarle al cursor-pointer del <a> y que los hijos hereden
+    isDraggable && !presentational && (isDragging ? '!cursor-grabbing' : '!cursor-grab'),
   )
 
   const content = (
