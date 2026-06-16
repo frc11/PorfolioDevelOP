@@ -4,7 +4,8 @@ import { useState, useTransition } from 'react'
 import { createPortal } from 'react-dom'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { motion, AnimatePresence } from 'motion/react'
-import { ChevronLeft, Play, Pause, Code, Copy, Check, Bot, X } from 'lucide-react'
+import { Play, Pause, Code, Copy, Check, Bot, X } from 'lucide-react'
+import { AdminBackButton } from '../../_components/AdminBackButton'
 import Link from 'next/link'
 import { toast } from 'sonner'
 import type { Prisma } from '@prisma/client'
@@ -174,13 +175,7 @@ export function BotDetailClient({ bot, initialTab, initialEvents, monthlyUsage, 
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <Link
-          href="/admin/chatbots"
-          className="inline-flex items-center gap-1 text-xs text-zinc-500 hover:text-zinc-300 mb-3"
-        >
-          <ChevronLeft className="h-3 w-3" strokeWidth={1.5} />
-          Volver a chatbots
-        </Link>
+        <AdminBackButton href="/admin/chatbots" label="Volver a chatbots" />
 
         <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
           <div className="flex items-start gap-3">

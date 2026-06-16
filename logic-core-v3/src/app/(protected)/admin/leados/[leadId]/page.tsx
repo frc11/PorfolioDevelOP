@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import { ArrowLeft, ExternalLink, Flame, UserRound } from 'lucide-react'
+import { ExternalLink, Flame, UserRound } from 'lucide-react'
+import { AdminBackButton } from '../../_components/AdminBackButton'
 import { prisma } from '@/lib/prisma'
 import {
   parseBrief,
@@ -91,13 +92,7 @@ export default async function LeadOsRevisionDetailPage({ params }: RevisionPageP
     <section className="space-y-6">
       <div className="rounded-[28px] border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <Link
-            href="/admin/leados"
-            className="inline-flex items-center gap-1.5 text-xs font-medium text-zinc-500 transition-colors hover:text-zinc-300"
-          >
-            <ArrowLeft className="h-3.5 w-3.5" strokeWidth={1.5} />
-            Volver a la cola
-          </Link>
+          <AdminBackButton href="/admin/leados" label="Volver a la cola" />
           <div className="flex flex-wrap items-center gap-4">
             {/* B8A/H5: puente a la otra superficie admin del mismo lead
                 (pipeline + cierre de reunión B7), que antes no estaba enlazada. */}

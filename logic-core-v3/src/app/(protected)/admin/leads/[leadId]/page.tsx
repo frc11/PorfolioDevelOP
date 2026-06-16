@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import { parseAgenda, reunionAgendada } from '@/lib/leados/flow'
+import { AdminBackButton } from '../../_components/AdminBackButton'
 import { LeadForm } from '../_components/lead-form'
 import { LeadActivityFeed } from '../_components/lead-activity-feed'
 import { LeadDemosPanel } from '../_components/demo-form'
@@ -224,6 +225,8 @@ export default async function AgencyOsLeadDetailPage({ params }: LeadPageProps) 
 
   return (
     <section className="space-y-6">
+      <AdminBackButton href="/admin/leads" label="Volver a leads" />
+
       <div className="rounded-[28px] border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
           <div>

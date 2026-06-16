@@ -1,6 +1,5 @@
-import Link from 'next/link'
-import { ChevronLeft } from 'lucide-react'
 import { notFound } from 'next/navigation'
+import { AdminBackButton } from '../../_components/AdminBackButton'
 import { getTicketById } from '../_actions/ticket.actions'
 import { TicketChat } from '../_components/ticket-chat'
 
@@ -20,13 +19,7 @@ export default async function AgencyOsTicketDetailPage({ params }: TicketDetailP
 
   return (
     <section className="space-y-5">
-      <Link
-        href="/admin/tickets"
-        className="inline-flex items-center gap-2 text-sm text-zinc-500 transition-colors hover:text-zinc-300"
-      >
-        <ChevronLeft className="h-4 w-4" />
-        Volver a tickets
-      </Link>
+      <AdminBackButton href="/admin/tickets" label="Volver a tickets" />
 
       <TicketChat ticket={ticketResult.data} />
     </section>

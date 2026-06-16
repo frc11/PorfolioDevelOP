@@ -1,5 +1,5 @@
-import Link from 'next/link'
-import { ChevronLeft, MessageSquareText } from 'lucide-react'
+import { MessageSquareText } from 'lucide-react'
+import { AdminBackButton } from '../../_components/AdminBackButton'
 import { notFound } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import { ConversationList } from '../_components/conversation-list'
@@ -39,14 +39,8 @@ export default async function AgencyOsMessageConversationPage({
 
   return (
     <section className="space-y-5">
-      <div className="flex items-center gap-3 lg:hidden">
-        <Link
-          href="/admin/messages"
-          className="inline-flex items-center gap-2 text-sm text-zinc-500 transition-colors hover:text-zinc-300"
-        >
-          <ChevronLeft className="h-4 w-4" />
-          Volver a mensajes
-        </Link>
+      <div className="lg:hidden">
+        <AdminBackButton href="/admin/messages" label="Volver a mensajes" />
       </div>
 
       <div className="grid gap-5 lg:grid-cols-[360px_minmax(0,1fr)]">
