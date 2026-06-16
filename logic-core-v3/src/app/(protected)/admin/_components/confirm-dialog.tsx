@@ -41,7 +41,7 @@ export function ConfirmDialog({
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[180] flex items-center justify-center bg-[#05070a]/80 p-4 backdrop-blur-md"
+      className="fixed inset-0 z-[210] flex items-center justify-center bg-[#05070a]/80 p-4 backdrop-blur-md"
       onClick={isPending ? undefined : onClose}
     >
       <div
