@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { AlarmClock, ExternalLink, Hammer, Images, Lock, OctagonAlert, Save } from 'lucide-react'
 import type { DossierStage } from '@prisma/client'
-import { Badge, Button, Card } from '@/components/ui'
+import { Badge, Button, Callout, Card } from '@/components/ui'
 import type { Brief, Ficha, Rechazo } from '@/lib/leados/contracts'
 import { buildConstruccionBlock, type CopyBlockLead } from '@/lib/leados/copy-blocks'
 import { SHELL_CONSTRUCCION } from '@/lib/leados/flow'
@@ -55,36 +55,40 @@ function UrgenciaBanner({ respondioDesde }: { respondioDesde: string | null }) {
 
   if (!respondioDesde) return null
   return (
-    <p className="flex items-center gap-2 rounded-xl border border-amber-400/25 bg-amber-500/[0.07] p-3 text-xs font-medium text-amber-200">
-      <AlarmClock size={14} strokeWidth={1.5} className="shrink-0" />
-      El negocio respondió y está esperando{espera ? ` (última movida ${espera})` : ''}. Este
-      tramo se resuelve en horas, no días.
-    </p>
+    <Callout tone="warning" icon={AlarmClock}>
+      <span className="font-medium">
+        El negocio respondió y está esperando{espera ? ` (última movida ${espera})` : ''}. Este
+        tramo se resuelve en horas, no días.
+      </span>
+    </Callout>
   )
 }
 
 /** Último rechazo completo como guía de retrabajo dentro del paso. */
 function GuiaRetrabajo({ rechazo }: { rechazo: Rechazo }) {
   return (
-    <div className="space-y-1.5 rounded-xl border border-rose-400/15 bg-rose-500/[0.04] p-4 text-xs leading-relaxed">
-      <p className="flex items-center gap-1.5 font-semibold text-rose-300">
-        <OctagonAlert size={13} strokeWidth={1.5} />
-        Guía de retrabajo — lo que Franco pidió corregir
-      </p>
-      <p className="text-zinc-300">
-        <span className="font-semibold text-rose-300/90">Qué:</span> {rechazo.motivo}
-      </p>
-      {rechazo.donde && (
-        <p className="text-zinc-300">
-          <span className="font-semibold text-rose-300/90">Dónde:</span> {rechazo.donde}
+    <Callout
+      tone="danger"
+      accent
+      icon={OctagonAlert}
+      title="Guía de retrabajo — lo que Franco pidió corregir"
+    >
+      <div className="space-y-1.5 text-zinc-300">
+        <p>
+          <span className="font-semibold text-rose-200">Qué:</span> {rechazo.motivo}
         </p>
-      )}
-      {rechazo.arreglo && (
-        <p className="whitespace-pre-wrap text-zinc-300">
-          <span className="font-semibold text-rose-300/90">Arreglo:</span> {rechazo.arreglo}
-        </p>
-      )}
-    </div>
+        {rechazo.donde && (
+          <p>
+            <span className="font-semibold text-rose-200">Dónde:</span> {rechazo.donde}
+          </p>
+        )}
+        {rechazo.arreglo && (
+          <p className="whitespace-pre-wrap">
+            <span className="font-semibold text-rose-200">Arreglo:</span> {rechazo.arreglo}
+          </p>
+        )}
+      </div>
+    </Callout>
   )
 }
 
@@ -104,9 +108,9 @@ function MaterialesNegocio({ lead, ficha }: { lead: CopyBlockLead; ficha: Ficha 
   if (assets.length === 0 && !ficha?.resenas && !ficha?.contenidoReal) return null
 
   return (
-    <div className="space-y-3 rounded-xl border border-cyan-400/15 bg-cyan-500/[0.03] p-4">
-      <p className="flex items-center gap-1.5 text-xs font-semibold text-cyan-300">
-        <Images size={13} strokeWidth={1.5} className="shrink-0" />
+    <div className="space-y-3 rounded-xl border border-white/10 bg-white/[0.04] p-4">
+      <p className="flex items-center gap-1.5 text-xs font-semibold text-zinc-100">
+        <Images size={14} strokeWidth={1.5} className="shrink-0 text-zinc-400" />
         Materiales reales del negocio — usalos, nada de placeholders
       </p>
 

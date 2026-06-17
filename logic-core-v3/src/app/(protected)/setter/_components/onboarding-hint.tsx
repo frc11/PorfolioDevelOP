@@ -52,7 +52,9 @@ export function OnboardingHint() {
   }
 
   return (
-    <Card variant="highlighted" padding="lg">
+    <Card variant="default" padding="lg" className="relative overflow-hidden">
+      {/* Guía, no promo: acento izquierdo en vez del gradiente que la hacía parecer un CTA. */}
+      <span aria-hidden className="absolute inset-y-0 left-0 w-1 bg-cyan-400/60" />
       <div className="flex items-start justify-between gap-4">
         <div>
           <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-cyan-400">
@@ -78,7 +80,7 @@ export function OnboardingHint() {
             key={paso.titulo}
             className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-3"
           >
-            <p className="text-xs font-semibold text-cyan-300">{paso.titulo}</p>
+            <p className="text-xs font-semibold text-zinc-200">{paso.titulo}</p>
             <p className="mt-1 text-xs leading-relaxed text-zinc-500">{paso.detalle}</p>
           </div>
         ))}

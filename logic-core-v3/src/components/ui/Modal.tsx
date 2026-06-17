@@ -2,7 +2,9 @@
 
 import { AnimatePresence, motion } from 'motion/react'
 import { X } from 'lucide-react'
-import type { ReactNode } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
+import { createPortal } from 'react-dom'
+import { zIndex } from '@/lib/design-tokens'
 import { cn } from '@/lib/utils'
 
 interface ModalProps {
@@ -14,6 +16,11 @@ interface ModalProps {
   footer?: ReactNode
   size?: 'sm' | 'md' | 'lg' | 'xl'
   closeOnBackdrop?: boolean
+  /**
+   * `solid` (default) = panel zinc-950 opaco.
+   * `glass` = mismo lenguaje glass que los paneles de LeadOS/admin (translúcido + blur).
+   */
+  surface?: 'solid' | 'glass'
 }
 
 export function Modal({
@@ -25,6 +32,7 @@ export function Modal({
   footer,
   size = 'md',
   closeOnBackdrop = true,
+  surface = 'solid',
 }: ModalProps) {
   const sizeClasses = {
     sm: 'max-w-md',
@@ -33,7 +41,20 @@ export function Modal({
     xl: 'max-w-5xl',
   }
 
-  return (
+  const surfaceClass =
+    surface === 'glass'
+      ? 'border-white/10 bg-zinc-900/80 backdrop-blur-2xl backdrop-saturate-150'
+      : 'border-white/10 bg-zinc-950'
+
+  // Portal a <body>: el backdrop `fixed inset-0` debe medir contra el viewport,
+  // no contra el contenedor del layout (p. ej. admin es `fixed inset-0 z-[80]`,
+  // que confina el modal a su columna y lo deja debajo del propio contenido /
+  // del iframe de la demo). Guard de mount para no tocar `document` en SSR.
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => setMounted(true), [])
+  if (!mounted) return null
+
+  return createPortal(
     <AnimatePresence>
       {open && (
         <motion.div
@@ -41,7 +62,8 @@ export function Modal({
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.15 }}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"
+          style={{ zIndex: zIndex.modal }}
+          className="fixed inset-0 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"
           onClick={closeOnBackdrop ? onClose : undefined}
         >
           <motion.div
@@ -50,7 +72,8 @@ export function Modal({
             exit={{ scale: 0.95, opacity: 0 }}
             transition={{ duration: 0.15 }}
             className={cn(
-              'flex max-h-[85vh] w-full flex-col overflow-hidden rounded-3xl border border-white/10 bg-zinc-950',
+              'flex max-h-[85vh] w-full flex-col overflow-hidden rounded-3xl border',
+              surfaceClass,
               sizeClasses[size],
             )}
             onClick={(event) => event.stopPropagation()}
@@ -82,6 +105,7 @@ export function Modal({
           </motion.div>
         </motion.div>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body,
   )
 }

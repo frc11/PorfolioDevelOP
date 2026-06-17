@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
+import { CalendarCheck2 } from 'lucide-react'
 import type { Agenda, ResultadoReunion } from '@/lib/leados/contracts'
 import { formatFechaHora } from '@/lib/leados/flow'
 import {
@@ -81,8 +82,11 @@ export function ReunionPanel({ leadId, agenda }: ReunionPanelProps) {
   }
 
   return (
-    <section className="rounded-[28px] border border-amber-400/20 bg-white/5 p-5 backdrop-blur-xl">
-      <h3 className="text-lg font-semibold text-white">Reunión agendada</h3>
+    <section className="rounded-3xl border border-emerald-400/25 bg-emerald-500/[0.02] p-5 backdrop-blur-xl">
+      <h3 className="flex items-center gap-2 text-lg font-semibold text-white">
+        <CalendarCheck2 size={18} strokeWidth={1.5} className="text-emerald-300" />
+        Reunión agendada
+      </h3>
       <p className="mt-1 text-sm text-zinc-400">
         {agenda.slotStart ? formatFechaHora(agenda.slotStart) : 'Sin horario registrado'}
         {agenda.attendee ? ` · con ${agenda.attendee.nombre}` : ''}

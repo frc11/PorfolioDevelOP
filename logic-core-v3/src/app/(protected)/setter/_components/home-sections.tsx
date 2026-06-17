@@ -1,20 +1,10 @@
 import Link from 'next/link'
 import type { LucideIcon } from 'lucide-react'
-import { ArrowRight, Archive, Flame } from 'lucide-react'
-import type { DossierStage } from '@prisma/client'
-import { Badge, Card } from '@/components/ui'
+import { ArrowRight, Archive, Flame, OctagonAlert } from 'lucide-react'
+import { Badge, Callout, Card } from '@/components/ui'
+import { cn } from '@/lib/utils'
+import { stageTone } from '@/lib/leados-ui'
 import { STAGE_LABELS, STATUS_LABELS, type HomeLead } from '@/lib/leados/flow'
-
-const STAGE_TONES: Record<DossierStage, 'cyan' | 'emerald' | 'amber' | 'rose' | 'violet' | 'zinc' | 'blue'> = {
-  FICHA: 'zinc',
-  EVALUADA: 'blue',
-  BRIEF: 'violet',
-  CONSTRUCCION: 'amber',
-  EN_REVISION: 'cyan',
-  APROBADA: 'emerald',
-  RECHAZADA: 'rose',
-  DESCARTADA: 'zinc',
-}
 
 function diasDesde(fecha: Date): string {
   const dias = Math.floor((Date.now() - fecha.getTime()) / 86_400_000)
@@ -30,7 +20,23 @@ export function LeadCard({ lead }: { lead: HomeLead }) {
 
   return (
     <Link href={`/setter/leads/${lead.id}`} className="block">
-      <Card variant="interactive" padding="md" className="h-full">
+      <Card
+        variant="interactive"
+        padding="md"
+        className={cn(
+          'h-full overflow-hidden',
+          lead.accionable && 'border-cyan-400/25 hover:border-cyan-400/40',
+        )}
+      >
+        {/* Acento de accionabilidad: cyan = hacé esto ahora · neutro = esperando. */}
+        <span
+          aria-hidden
+          className={cn(
+            'absolute inset-y-0 left-0 w-1',
+            lead.accionable ? 'bg-cyan-400/80' : 'bg-white/[0.06]',
+          )}
+        />
+
         <div className="flex items-start justify-between gap-3">
           <h3 className="min-w-0 truncate text-sm font-semibold text-zinc-100">
             {lead.businessName}
@@ -44,7 +50,7 @@ export function LeadCard({ lead }: { lead: HomeLead }) {
             {lead.status === 'PERDIDO' ? (
               <Badge tone="rose" variant="soft">{STATUS_LABELS.PERDIDO}</Badge>
             ) : lead.stage ? (
-              <Badge tone={STAGE_TONES[lead.stage]} variant="soft">
+              <Badge tone={stageTone(lead.stage)} variant="soft">
                 {STAGE_LABELS[lead.stage]}
               </Badge>
             ) : (
@@ -55,34 +61,40 @@ export function LeadCard({ lead }: { lead: HomeLead }) {
 
         {meta && <p className="mt-1 truncate text-xs text-zinc-600">{meta}</p>}
 
-        <p
-          className={`mt-3 flex items-center gap-1.5 text-xs font-medium ${
-            lead.accionable ? 'text-cyan-300' : 'text-zinc-500'
-          }`}
+        {/* Próxima acción: el elemento más fuerte de la card — qué hacer ahora salta solo. */}
+        <div
+          className={cn(
+            'mt-3 flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium',
+            lead.accionable
+              ? 'bg-cyan-500/10 text-cyan-200'
+              : 'bg-white/[0.03] text-zinc-400',
+          )}
         >
-          <ArrowRight size={13} strokeWidth={1.5} className="shrink-0" />
-          {lead.proximaAccion}
-        </p>
+          <ArrowRight size={14} strokeWidth={1.5} className="shrink-0" />
+          <span className="min-w-0">{lead.proximaAccion}</span>
+        </div>
 
         {lead.stage === 'RECHAZADA' && lead.ultimoRechazo && (
-          <div className="mt-3 space-y-1 rounded-xl border border-rose-400/15 bg-rose-500/5 p-3 text-xs leading-5">
-            <p className="text-zinc-300">
-              <span className="font-semibold text-rose-300">Qué:</span>{' '}
-              {lead.ultimoRechazo.motivo}
-            </p>
-            {lead.ultimoRechazo.donde && (
-              <p className="text-zinc-300">
-                <span className="font-semibold text-rose-300">Dónde:</span>{' '}
-                {lead.ultimoRechazo.donde}
+          <Callout tone="danger" accent icon={OctagonAlert} title="Franco pidió cambios" className="mt-3">
+            <div className="space-y-1 text-zinc-300">
+              <p>
+                <span className="font-semibold text-rose-200">Qué:</span>{' '}
+                {lead.ultimoRechazo.motivo}
               </p>
-            )}
-            {lead.ultimoRechazo.arreglo && (
-              <p className="text-zinc-300">
-                <span className="font-semibold text-rose-300">Arreglo:</span>{' '}
-                {lead.ultimoRechazo.arreglo}
-              </p>
-            )}
-          </div>
+              {lead.ultimoRechazo.donde && (
+                <p>
+                  <span className="font-semibold text-rose-200">Dónde:</span>{' '}
+                  {lead.ultimoRechazo.donde}
+                </p>
+              )}
+              {lead.ultimoRechazo.arreglo && (
+                <p>
+                  <span className="font-semibold text-rose-200">Arreglo:</span>{' '}
+                  {lead.ultimoRechazo.arreglo}
+                </p>
+              )}
+            </div>
+          </Callout>
         )}
       </Card>
     </Link>
@@ -107,7 +119,13 @@ export function GroupSection({
   destacado = false,
 }: GroupSectionProps) {
   return (
-    <section aria-label={titulo}>
+    <section
+      aria-label={titulo}
+      className={cn(
+        // "Para trabajar ahora" es el carril prioritario: un lane sutil lo separa de las esperas.
+        destacado && 'rounded-2xl bg-cyan-400/[0.03] p-4 ring-1 ring-inset ring-cyan-400/15 sm:p-5',
+      )}
+    >
       <div className="mb-3 flex items-center gap-2.5">
         <Icon
           size={16}

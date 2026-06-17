@@ -215,13 +215,21 @@ export const breakpoints = {
 // ===========================================
 // Z-INDEX SCALE
 // ===========================================
+// Dos rangos. Los primeros tiers (base..overlay) son para stacking LOCAL dentro
+// del flujo de la página. `modal`/`toast`/`tooltip` son capas full-viewport:
+// cuando un overlay se portalea a <body> compite en el stacking context RAÍZ
+// contra el chrome fijo del app — transición/Shutter (~9985), dock·noise·navbar
+// (~9990–9995) y preloader·marketing (9999). Por eso viven por ENCIMA de 9999, y
+// por DEBAJO del cursor custom (CustomCursor.tsx → 2_147_483_647), que siempre
+// va arriba de todo. Un `modal: 50` quedaba debajo del propio layout de admin
+// (fixed z-[80]) al portalearse → aparecía detrás del contenido / del iframe.
 export const zIndex = {
   base: 0,
   raised: 10,
   sticky: 20,
   dropdown: 30,
   overlay: 40,
-  modal: 50,
-  toast: 60,
-  tooltip: 70,
+  modal: 10000, // diálogos portaleados a <body> — sobre el preloader (9999), bajo el cursor
+  toast: 10010, // notificaciones — sobre el modal
+  tooltip: 10020, // tooltips — lo más alto salvo el cursor del sistema
 } as const
