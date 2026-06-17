@@ -1,5 +1,6 @@
 'use server'
 
+import { z } from 'zod'
 import { auth } from '@/auth'
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
@@ -11,6 +12,8 @@ interface BulkResult {
   failed: number
   failures: Array<{ botId: string; error: string }>
 }
+
+const BulkBotIdsSchema = z.array(z.string().min(1)).min(1, 'Sin bots seleccionados.')
 
 export async function bulkPauseBotsAction(botIds: string[]): Promise<BulkResult> {
   const session = await auth()
@@ -152,4 +155,82 @@ export async function exportLeadsBulkAction(botIds: string[]) {
   })
 
   return { ok: true as const, csv, totalLeads: leads.length }
+}
+
+// Borrado bulk. Cada bot se elimina con un único delete que arrastra todo su
+// subárbol vía onDelete: Cascade (mismas relaciones que deleteBotAction),
+// scopeado por id; nunca toca otras orgs. Loop tolerante a fallos parciales.
+export async function bulkDeleteBotsAction(botIds: string[]): Promise<BulkResult> {
+  const session = await auth()
+  if (!session?.user || session.user.role !== 'SUPER_ADMIN') {
+    return { success: 0, failed: botIds.length, failures: [] }
+  }
+  const userId = session.user.id
+  if (!userId) return { success: 0, failed: botIds.length, failures: [] }
+
+  const parsed = BulkBotIdsSchema.safeParse(botIds)
+  if (!parsed.success) {
+    return { success: 0, failed: botIds.length, failures: [] }
+  }
+  const ids = parsed.data
+
+  let success = 0
+  let failed = 0
+  const failures: Array<{ botId: string; error: string }> = []
+
+  for (const botId of ids) {
+    try {
+      const bot = await prisma.botConfig.findUnique({
+        where: { id: botId },
+        select: {
+          slug: true,
+          botName: true,
+          organizationId: true,
+          _count: { select: { conversations: true, leads: true, events: true } },
+        },
+      })
+      if (!bot) {
+        failed++
+        failures.push({ botId, error: 'El bot no existe o ya fue eliminado.' })
+        continue
+      }
+
+      await prisma.botConfig.delete({ where: { id: botId } })
+      invalidateBotCache(bot.slug)
+
+      await logAdminAction({
+        userId,
+        userEmail: session.user.email,
+        userName: session.user.name,
+        // Ver deleteBotAction: OTHER + metadata.subAction porque el enum
+        // AuditActionType (schema FROZEN) no tiene BOT_DELETED.
+        actionType: 'OTHER',
+        action: `Eliminó el bot ${bot.botName} (${bot.slug}) y todos sus datos (acción bulk)`,
+        targetType: 'BotConfig',
+        targetId: botId,
+        metadata: {
+          subAction: 'BOT_DELETED',
+          botSlug: bot.slug,
+          organizationId: bot.organizationId,
+          deletedCounts: {
+            conversations: bot._count.conversations,
+            leads: bot._count.leads,
+            events: bot._count.events,
+          },
+          bulk: true,
+        },
+      })
+
+      success++
+    } catch (error) {
+      failed++
+      failures.push({
+        botId,
+        error: error instanceof Error ? error.message : 'unknown',
+      })
+    }
+  }
+
+  revalidatePath('/admin/chatbots')
+  return { success, failed, failures }
 }

@@ -1,12 +1,18 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
 import { motion } from 'motion/react'
-import { Pause, Play, Download, X } from 'lucide-react'
+import { Pause, Play, Download, Trash2, X } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/Button'
 import { ConfirmDialog } from '@/app/(protected)/admin/_components/confirm-dialog'
-import { bulkPauseBotsAction, bulkActivateBotsAction, exportLeadsBulkAction } from './bulk-actions'
+import {
+  bulkPauseBotsAction,
+  bulkActivateBotsAction,
+  bulkDeleteBotsAction,
+  exportLeadsBulkAction,
+} from './bulk-actions'
 
 interface Props {
   selectedIds: string[]
@@ -15,9 +21,10 @@ interface Props {
   onClear: () => void
 }
 
-type BulkConfirm = 'pause' | 'activate'
+type BulkConfirm = 'pause' | 'activate' | 'delete'
 
 export function BulkActionBar({ selectedIds, totalBots, onSelectAll, onClear }: Props) {
+  const router = useRouter()
   const [pending, startTransition] = useTransition()
   const [confirm, setConfirm] = useState<BulkConfirm | null>(null)
   const count = selectedIds.length
@@ -46,6 +53,20 @@ export function BulkActionBar({ selectedIds, totalBots, onSelectAll, onClear }: 
       if (result.failed > 0) console.error('Bulk activate failures:', result.failures)
       setConfirm(null)
       onClear()
+    })
+  }
+
+  function runDelete() {
+    startTransition(async () => {
+      const result = await bulkDeleteBotsAction(selectedIds)
+      const s = result.success
+      toast.success(
+        `${s} bot${s !== 1 ? 's' : ''} eliminado${s !== 1 ? 's' : ''}${result.failed > 0 ? `. ${result.failed} fallaron.` : '.'}`,
+      )
+      if (result.failed > 0) console.error('Bulk delete failures:', result.failures)
+      setConfirm(null)
+      onClear()
+      router.refresh()
     })
   }
 
@@ -118,6 +139,15 @@ export function BulkActionBar({ selectedIds, totalBots, onSelectAll, onClear }: 
           >
             Exportar leads
           </Button>
+          <Button
+            size="sm"
+            variant="danger"
+            icon={<Trash2 className="h-3 w-3" strokeWidth={1.5} />}
+            onClick={() => setConfirm('delete')}
+            disabled={pending}
+          >
+            Eliminar
+          </Button>
           <button
             onClick={onClear}
             aria-label="Limpiar selección"
@@ -148,6 +178,17 @@ export function BulkActionBar({ selectedIds, totalBots, onSelectAll, onClear }: 
         description="Los bots seleccionados vuelven a responder en producción."
         confirmLabel={plural ? `Activar ${count} bots` : 'Activar bot'}
         variant="default"
+        isPending={pending}
+      />
+
+      <ConfirmDialog
+        open={confirm === 'delete'}
+        onClose={() => setConfirm(null)}
+        onConfirm={runDelete}
+        title={`¿Eliminar ${count} bot${plural ? 's' : ''}?`}
+        description="Esto elimina los bots seleccionados y todos sus datos (conversaciones, leads, eventos) de forma permanente. No se puede deshacer."
+        confirmLabel={plural ? `Eliminar ${count} bots` : 'Eliminar bot'}
+        variant="danger"
         isPending={pending}
       />
     </>
