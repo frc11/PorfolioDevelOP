@@ -3,18 +3,44 @@
 import { useRef, useState } from 'react'
 import { Loader2, UploadCloud } from 'lucide-react'
 
-// Mismas reglas que valida la ruta /api/admin/chatbot/avatar-upload — acá es
-// solo para feedback inmediato; el server es la fuente de verdad.
+// Sin servicio externo: la imagen se recorta/comprime EN EL NAVEGADOR a un
+// cuadrado <=200x200 (WebP) y se devuelve como data URL base64 para guardar en
+// avatarImageUrl (Postgres TEXT). Así no inflamos la DB ni dependemos de infra.
 const ACCEPTED_TYPES = ['image/jpeg', 'image/png', 'image/webp']
-const MAX_BYTES = 5 * 1024 * 1024 // 5 MB
+const MAX_INPUT_BYTES = 8 * 1024 * 1024 // 8 MB de archivo de entrada (antes de comprimir)
+const MAX_DIMENSION = 200 // px (lado del cuadrado de salida)
+const OUTPUT_QUALITY = 0.82
 
 interface AvatarUploaderProps {
-  onUploaded: (url: string) => void
+  onUploaded: (dataUrl: string) => void
+}
+
+// Recorta al cuadrado central y escala a <=200x200, devolviendo un data URL WebP.
+async function compressToDataUrl(file: File): Promise<string> {
+  const bitmap = await createImageBitmap(file)
+  try {
+    const side = Math.min(bitmap.width, bitmap.height)
+    const sx = (bitmap.width - side) / 2
+    const sy = (bitmap.height - side) / 2
+    const target = Math.min(MAX_DIMENSION, side)
+
+    const canvas = document.createElement('canvas')
+    canvas.width = target
+    canvas.height = target
+    const ctx = canvas.getContext('2d')
+    if (!ctx) {
+      throw new Error('canvas no disponible')
+    }
+    ctx.drawImage(bitmap, sx, sy, side, side, 0, 0, target, target)
+    return canvas.toDataURL('image/webp', OUTPUT_QUALITY)
+  } finally {
+    bitmap.close()
+  }
 }
 
 export function AvatarUploader({ onUploaded }: AvatarUploaderProps) {
   const inputRef = useRef<HTMLInputElement>(null)
-  const [uploading, setUploading] = useState(false)
+  const [processing, setProcessing] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   async function handleFile(file: File) {
@@ -23,32 +49,19 @@ export function AvatarUploader({ onUploaded }: AvatarUploaderProps) {
       setError('Formato no permitido. Usá una imagen JPG, PNG o WebP.')
       return
     }
-    if (file.size > MAX_BYTES) {
-      setError('La imagen supera el límite de 5 MB.')
+    if (file.size > MAX_INPUT_BYTES) {
+      setError('La imagen es muy pesada (máx 8 MB). Probá con una más chica.')
       return
     }
 
-    setUploading(true)
+    setProcessing(true)
     try {
-      const body = new FormData()
-      body.append('file', file)
-      const res = await fetch('/api/admin/chatbot/avatar-upload', {
-        method: 'POST',
-        body,
-      })
-      const data = (await res.json().catch(() => ({}))) as {
-        url?: string
-        error?: string
-      }
-      if (!res.ok || !data.url) {
-        setError(data.error ?? 'No se pudo subir la imagen. Intentá de nuevo.')
-        return
-      }
-      onUploaded(data.url)
+      const dataUrl = await compressToDataUrl(file)
+      onUploaded(dataUrl)
     } catch {
-      setError('No se pudo subir la imagen. Revisá tu conexión e intentá de nuevo.')
+      setError('No se pudo procesar la imagen. Probá con otro archivo.')
     } finally {
-      setUploading(false)
+      setProcessing(false)
     }
   }
 
@@ -70,15 +83,15 @@ export function AvatarUploader({ onUploaded }: AvatarUploaderProps) {
       <button
         type="button"
         onClick={() => inputRef.current?.click()}
-        disabled={uploading}
+        disabled={processing}
         className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2 text-sm text-zinc-200 transition-colors hover:bg-white/[0.08] disabled:cursor-not-allowed disabled:opacity-60"
       >
-        {uploading ? (
+        {processing ? (
           <Loader2 className="h-4 w-4 animate-spin" strokeWidth={1.5} />
         ) : (
           <UploadCloud className="h-4 w-4" strokeWidth={1.5} />
         )}
-        {uploading ? 'Subiendo…' : 'Subir imagen'}
+        {processing ? 'Procesando…' : 'Subir imagen'}
       </button>
       {error && <p className="mt-1.5 text-xs text-red-400">{error}</p>}
     </div>

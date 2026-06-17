@@ -7,6 +7,7 @@ import { AVATAR_STYLE_SCHEMA } from '@/modules/chatbot/components/avatar'
 import { chatbotLog } from '../logging'
 import { invalidateBotCache } from '../conversation'
 import { requireSuperAdmin } from './requireSuperAdmin'
+import { avatarImageUrlSchema } from './avatarImageUrlSchema'
 
 const quickReplySchema = z.object({
   id: z.string().optional(),
@@ -27,7 +28,7 @@ const botConfigInputSchema = z.object({
   accentSecondary: z.string().regex(/^#[0-9a-fA-F]{6}$/).nullable(),
   chatSurfaceTint: z.string().regex(/^#[0-9a-fA-F]{6}$/).nullable(),
   avatarStyle: AVATAR_STYLE_SCHEMA,
-  avatarImageUrl: z.string().url().nullable(),
+  avatarImageUrl: avatarImageUrlSchema,
   avatarEmoji: z.string().max(8).nullable(),
   borderRadius: z.enum(['small', 'medium', 'large']),
   surfaceStyle: z.enum(['glass', 'solid', 'minimal']),
