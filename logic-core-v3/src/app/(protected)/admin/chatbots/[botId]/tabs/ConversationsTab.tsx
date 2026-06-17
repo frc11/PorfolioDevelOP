@@ -1,6 +1,7 @@
 'use client'
 
 import { ConversationsTable } from '@/modules/chatbot/components/dashboards/ConversationsTable'
+import { getConversationTranscriptAction } from '../transcript-action'
 import type { ConversationItem } from '../BotDetailClient'
 
 interface Props {
@@ -9,5 +10,16 @@ interface Props {
 }
 
 export function ConversationsTab({ conversations, totalCount }: Props) {
-  return <ConversationsTable conversations={conversations} totalCount={totalCount} />
+  return (
+    <ConversationsTable
+      conversations={conversations}
+      totalCount={totalCount}
+      expandable
+      fetchTranscript={async (conversationId) => {
+        const result = await getConversationTranscriptAction(conversationId)
+        if (!result.ok) throw new Error(result.error)
+        return result.messages
+      }}
+    />
+  )
 }
