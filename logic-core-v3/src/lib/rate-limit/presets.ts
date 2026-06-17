@@ -39,6 +39,11 @@ export const RATE_LIMIT_PRESETS = {
   // Resend. Clave: id del admin (precedente: resendCredentialsPerAdmin).
   testNotificationPerAdmin: { limit: 3, windowMs: 60_000 },
 
+  // ── Admin: subida de imagen de avatar del bot a Vercel Blob ──────────────
+  // Antispam de la subida (cada una escribe en el blob store). Clave: id del
+  // admin (precedente: resendCredentialsPerAdmin).
+  avatarUploadPerAdmin: { limit: 20, windowMs: 60_000 },
+
   // ── Formulario de contacto público (landing) ─────────────────────────────
   // Protege contra spam de leads. Un visitante real nunca necesita enviar el
   // form más de 5 veces en 15 minutos. Clave: IP hasheada (no controlable

@@ -4,6 +4,7 @@ import { ColorPicker } from '../ColorPicker'
 import { EmojiPickerField } from '../EmojiPickerField'
 import { Field } from '../Field'
 import { Input } from '../Input'
+import { AvatarUploader } from './AvatarUploader'
 import { AvatarPicker } from '@/modules/chatbot/components/avatar'
 import { deriveBusinessInitials } from '@/modules/chatbot/shared/businessInitials'
 import type { BotConfigTabProps } from '../types'
@@ -50,19 +51,24 @@ export function AppearanceTab({ state, update }: BotConfigTabProps) {
 
       {state.avatarStyle === 'image' && (
         <Field
-          label="URL de imagen del avatar"
-          hint="Pegá la URL pública de una imagen cuadrada (256×256+). La subida directa de archivos todavía no está disponible."
+          label="Imagen del avatar"
+          hint="Subí una imagen cuadrada (256×256+) en JPG, PNG o WebP, o pegá una URL pública. El preview se ve arriba, en el avatar."
         >
-          <Input
-            value={state.avatarImageUrl ?? ''}
-            onChange={(event) => update('avatarImageUrl', event.target.value || null)}
-            placeholder="https://..."
-          />
-          {state.avatarImageUrl && !/^https?:\/\/.+/i.test(state.avatarImageUrl) && (
-            <p className="mt-1 text-xs text-amber-400">
-              Debe ser una URL absoluta que empiece con http:// o https://
-            </p>
-          )}
+          <div className="space-y-3">
+            <AvatarUploader onUploaded={(url) => update('avatarImageUrl', url)} />
+            <div>
+              <Input
+                value={state.avatarImageUrl ?? ''}
+                onChange={(event) => update('avatarImageUrl', event.target.value || null)}
+                placeholder="https://..."
+              />
+              {state.avatarImageUrl && !/^https?:\/\/.+/i.test(state.avatarImageUrl) && (
+                <p className="mt-1 text-xs text-amber-400">
+                  Debe ser una URL absoluta que empiece con http:// o https://
+                </p>
+              )}
+            </div>
+          </div>
         </Field>
       )}
 
