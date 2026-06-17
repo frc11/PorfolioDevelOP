@@ -164,6 +164,7 @@ export function BotsListClient({ bots }: Props) {
               bot={bot}
               selected={selected.has(bot.id)}
               onToggleSelect={() => toggleSelected(bot.id)}
+              selectionMode={selected.size > 0}
               reduce={Boolean(reduce)}
             />
           ))}
@@ -177,11 +178,13 @@ function BotCard({
   bot,
   selected,
   onToggleSelect,
+  selectionMode,
   reduce,
 }: {
   bot: BotListItem
   selected: boolean
   onToggleSelect: () => void
+  selectionMode: boolean
   reduce: boolean
 }) {
   return (
@@ -209,7 +212,25 @@ function BotCard({
           <Check className="h-3.5 w-3.5" strokeWidth={1.5} />
         </span>
       </label>
-      <Link href={`/admin/chatbots/${bot.id}`}>
+      {/* En modo selección (≥1 seleccionado) el click togglea ESTA card y no
+          navega (preventDefault corta la navegación del Link de Next). Sin
+          selección activa, navega normal. El checkbox sigue funcionando aparte. */}
+      <Link
+        href={`/admin/chatbots/${bot.id}`}
+        onClick={
+          selectionMode
+            ? (e) => {
+                e.preventDefault()
+                onToggleSelect()
+              }
+            : undefined
+        }
+        aria-label={
+          selectionMode
+            ? `${selected ? 'Deseleccionar' : 'Seleccionar'} ${bot.botName}`
+            : undefined
+        }
+      >
         <Card
           variant="interactive"
           padding="lg"
