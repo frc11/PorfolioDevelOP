@@ -93,3 +93,72 @@ Issue real PRE-EXISTENTE (no introducido por el lane → no corregido, fuera de 
 - `b386b6c` style(chatbots): selects estilizados acordes a la UI (F3)
 - `dedcc8a` feat(chatbots): overview del bot con hover y layout a ancho completo (F4)
 - `ae7a89a` fix(chatbots): toasts de error y selección bulk acotada al filtro (review)
+
+---
+
+# LOTE 2 (9 cambios) — sobre `6fa0bca`
+
+Discovery read-only (8 subagentes) mapeó cada feature antes de tocar código. Gate por feature: `tsc --noEmit` exit 0 + `eslint` exit 0 en lo tocado. Solo se editaron archivos del scope exclusivo + los 3 compartidos autorizados (ActivityLog, LeadsTable, ConversationsTable), siempre de forma ADITIVA; ningún archivo forbidden ni `schema.prisma`.
+
+## F1 — Checkbox de selección · `5cf8163` (style)
+`BotsListClient.tsx`. Viejo: `<input type=checkbox>` nativo con `accent-cyan`. Nuevo: checkbox custom dark (input `sr-only peer` + caja `peer-checked` con Check de lucide, focus ring, aria-label). Mantiene checked/onChange y la selección bulk; accesible (label, teclado, foco). Presentación.
+
+## F2 — Card de validación de KB · `eb99ccc` (style)
+`kb/KBValidation.tsx`. Viejo: cards de issues con fills planos `bg-{sev}-500/[0.06]`, `rounded-xl`, sin glass. Nuevo: glassmorphism (`backdrop-blur-[20px] backdrop-saturate-[180%]`, `rounded-2xl`), tintes por severidad atenuados (red/amber/white /0.04), color semántico conservado en texto/ícono. Empty-state también con glass. Sin tocar `validateKB.ts` (lógica/texto de warnings).
+
+## F3 — Emoji picker en respuestas rápidas · `5bede50` (feat)
+`config/tabs/BehaviorTab.tsx`. Viejo: input de texto "Icono" por chip. Nuevo: reusa el `EmojiPickerField` del tab Apariencia (mismo UX + límite 8 unidades). Mantiene el campo de datos `emoji` (string) y su persistencia; adapta el contrato `null<->''` del picker. Grid ensanchado (`minmax(140px,190px)`). Sin tocar el Zod de enums.
+
+## F4 — Preview alineado al título · `18c6d53` (style)
+`BotConfigEditor.tsx` (1 línea + comentario). Viejo: aside `lg:flex lg:h-[calc(...)] lg:items-center lg:justify-center` → centraba el preview y en tabs cortos (Identidad) lo empujaba abajo. Nuevo: `lg:sticky lg:top-6 lg:self-start` → en tabs cortos el top del preview se alinea al título; sticky preservado en tabs con scroll. Pura CSS.
+
+## F5 — Color por ruta · DIAGNÓSTICO (sin commit, PENDIENTE)
+Trace completo: (a) admin save **funciona** (saveBotConfig valida y persiste `routeColorMap`, invalida cache); (b) API **funciona** (`getPublicConfig` devuelve `routeColorMap`, está en `PublicBotConfig`); (c) **widget runtime ROTO**: `useChatbot.ts`/`LogicCompanion.tsx`/`ChatWindow.tsx` nunca leen `routeColorMap` — siempre pintan `config.accentColor`. El eslabón roto está en la capa del widget, **fuera del scope del lane** (chat/**, hooks/**, LogicCompanion). El admin-save (lo que sí es del lane) ya está correcto → no hay nada que arreglar in-lane. Síntoma "el preview del admin no cambia" = **esperado** (el preview es estático, no simula ruta). Ver PENDIENTE abajo.
+
+## F6 — Subidor de foto de avatar · `29cd541` (feat, parcial) + PENDIENTE
+No existe infra de storage reutilizable en el repo (sin SDK de Blob/S3/Cloudinary, sin route de upload, package.json sin deps de storage). Sin inventar storage ni agregar dependencia. **Hecho in-scope (mejora opcional del campo URL):** `AppearanceTab.tsx` — hint más claro + feedback de validación client-side (avisa si la URL no es http/https absoluta, que fallaría en el Zod de guardado). El subidor real queda PENDIENTE.
+
+## F7 — Toggle de metadata por banner completo · `14ffbf1` (feat)
+`components/admin/ActivityLog.tsx` (compartido autorizado, cambio interno). Viejo: metadata abría solo desde el `<summary>` del `<details>`. Nuevo: todo el banner es el target del toggle cuando hay metadata — `role=button`, `tabIndex`, `aria-expanded`, Enter/Espacio, focus ring; estado `Set<string>` por id; `<details>` reemplazado por render controlado. Sin cambio de contrato → ActivityTab y la página legacy quedan byte-idénticas. Comentario documentando la convención `stopPropagation` para futuros controles.
+
+## F8 — Convertir lead del bot → Lead CRM · `d6d4d7b` (feat)
+- Nueva server action `convertChatbotLeadToOsLead` (scope exclusivo, `_actions/`): `requireSuperAdmin` + Zod + `$transaction`; **verifica `slug='develop'` server-side** (no solo UI); idempotencia por email (`source='Chatbot'`); crea `OsLead` espejando `convertInboundToLead`.
+- `LeadsTable.tsx` (compartido autorizado): prop ADITIVA opcional `renderRowAction?` (default ausente) → el cliente (`dashboard/leads/page.tsx`) que solo pasa `leads` queda byte-idéntico.
+- `LeadsTab.tsx` recibe `slug` y solo si `='develop'` pasa `ConvertChatbotLeadButton` por fila (estado optimista "Ya convertido"). `BotDetailClient` pasa `bot.slug`.
+
+## F9 — Expandir conversación → transcript · `9655a42` (feat)
+- `ConversationsTable.tsx` (compartido autorizado): props ADITIVAS `expandable?`/`fetchTranscript?` (default off) → fila expandible con transcript (burbujas user/bot, loading/error/empty). Cliente (`dashboard/chatbot/conversations/page.tsx`) byte-idéntico. De paso, se eliminó el `any` preexistente de `estimatedCostUsd` → `number | string | Prisma.Decimal`.
+- Nueva server action `getConversationTranscriptAction` (scope exclusivo): auth SUPER_ADMIN + Zod + reutiliza `getConversationMessagesForOrg` (org-scopeada; sin tocar `queries.ts`). Rol normalizado a MAYÚSCULAS (no se replica el bug lowercase de `LeadDetail`).
+- `ConversationsTab` (admin) habilita `expandable` y adapta la action.
+
+## PENDIENTE DE COORDINACIÓN (lote 2)
+1. **F5 — color por ruta (widget runtime, fuera de lane).** Falta el "último tramo": resolver el color por ruta y aplicarlo en el widget. Spec:
+   - Nuevo helper `resolveAccentColor(config, currentPath)` en `shared/` → `config.routeColorMap[currentPath] ?? config.routeColorMap['/'] ?? config.accentColor` (misma política de match que `ProactiveTooltip.listForPath`; el editor seedea la key `'/'`).
+   - `hooks/useChatbot.ts`: derivar `accentColor` con ese helper desde `config` + `currentPath` (ya disponibles) y exponerlo.
+   - Reemplazar los reads fijos de `config.accentColor` por el resuelto en `components/chat/ChatWindow.tsx` (líneas ~99/102/221/326/410/493) y `LogicCompanion.tsx` (~182/201/203). `hexToRgb`/`ACCENT_FALLBACK` quedan igual.
+   - (Opcional) que el `BotConfigPreview` del admin simule color por ruta: requiere sumar `routeColorMap` + selector de ruta simulada a `BotPreviewState`/`BotConfigPreview` (preview/** es editable, pero es mejora separada).
+2. **F6 — subidor de avatar.** Requiere backend de storage: proveedor (Cloudinary, o S3/R2 vía `@aws-sdk/client-s3`) + **dependencia nueva** (necesita aprobación) + env vars. Implementación sugerida: route `POST /api/admin/chatbot/avatar-upload` con `requireSuperAdmin` + validación tipo/peso (~2MB) + rate-limit (presets existentes), y un uploader client en `AppearanceTab` (patrón `ImportCSVButton`) que deje la URL pública en `avatarImageUrl`.
+3. **F8 — "Ya convertido" persistente entre recargas.** Hoy el badge es optimista in-session (la idempotencia de datos sí persiste por email). Para un badge fiable al recargar: o `ChatbotLead.convertedToOsLeadId String?` (schema FROZEN → migración aditiva) + exponerlo en `listLeadsForBot`/`LeadItem` (`queries.ts`, fuera de scope), o left-join contra `OsLead source='Chatbot'` por email (también `queries.ts`). Leads sin email no son deduplicables de forma persistente.
+
+## Nice-to-have (lote 2)
+- F8: convertir muestra "Ya convertido" solo in-session; ver PENDIENTE 3.
+- F9: el transcript se trae on-demand (lazy) por fila — bien para no inflar el payload; cachea por sesión.
+- Pre-existente (no del lote): bug lowercase de roles en `LeadDetail.tsx:470` (filtra `'user'/'assistant'` contra enum MAYÚSCULAS) — el transcript de leads probablemente cae al fallback "mensajes técnicos". Fuera de scope; el nuevo transcript NO lo replica.
+
+## Review adversaria (lote 2)
+5 agentes read-only (4 dimensiones + adjudicador) sobre `git diff 6fa0bca..HEAD`. Veredicto: **ship**. Verificó OK: cero `any` nuevo; ningún archivo forbidden tocado; gates Zod+rol en las 2 actions nuevas; **regla develop-only enforced server-side** en la convert action; consumidores no-admin de los 3 compartidos byte-idénticos (props opcionales default-off); el cambio de tipo `estimatedCostUsd → Prisma.Decimal` no rompe ni compila ni runtime.
+Corregido (commit de fixes):
+- **LOW** ActivityLog: el `select-none` del banner lo heredaba el `<pre>` → JSON no copiable. Fix: `select-text` + `stopPropagation` en el `<pre>`.
+- **LOW** BehaviorTab: respuesta rápida nueva (`emoji ''`) mostraba placeholder + "Quitar" a la vez. Fix: `value={reply.emoji || null}`.
+Reconocidos sin cambio (documentados): dedupe por email solo (leads sin email re-convertibles tras recarga → PENDIENTE 3); `error.message` al cliente en las actions (convención repo-wide, ambas SUPER_ADMIN-gated — endurecer repo-wide en commit aparte).
+
+## Commits del lote 2 (sobre `6fa0bca`)
+- `5cf8163` style(chatbots): checkbox de selección acorde a la UI (F1)
+- `eb99ccc` style(chatbots): card de validación de KB integrada a la UI (F2)
+- `5bede50` feat(chatbots): selector de emojis en iconos de respuestas rápidas (F3)
+- `18c6d53` style(chatbots): preview alineado al título en tabs sin scroll (F4)
+- `29cd541` feat(chatbots): claridad del campo URL de avatar (subida directa pendiente) (F6)
+- `14ffbf1` feat(chatbots): toggle de metadata por banner completo en Actividad (F7)
+- `d6d4d7b` feat(chatbots): convertir lead del bot a Lead CRM (solo develop, admin) (F8)
+- `9655a42` feat(chatbots): expandir conversación para ver transcript (F9)
+- `(review-fix)` fix(chatbots): metadata copiable y emoji vacío sin Quitar (review)
