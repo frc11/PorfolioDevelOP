@@ -189,6 +189,7 @@ enum LlmProvider {
 
 enum AuditActionType {
   BOT_CREATED
+  BOT_DELETED
   CLIENT_CREATED
   CLIENT_UPDATED
   CLIENT_DELETED
@@ -1309,6 +1310,13 @@ model ChatbotLead {
   status             ChatbotLeadStatus @default(NEW)
   internalNotes      String?           @db.Text
   lastStatusChangeAt DateTime?
+
+  // Vínculo de conversión → OsLead (flujo de operación/ventas, otro módulo).
+  // Guarda el id del OsLead creado al convertir este lead. String simple (sin FK):
+  // el badge "Ya convertido" debe ser PERSISTENTE por id — sobrevive cambios o
+  // borrado del OsLead — y funciona para leads sin email. No cruza el boundary
+  // del módulo chatbot con una relación dura. null = todavía no convertido.
+  convertedToOsLeadId String?
 
   capturedAt DateTime @default(now())
   updatedAt  DateTime @updatedAt
