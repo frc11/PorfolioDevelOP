@@ -8,6 +8,7 @@ import type { ReactNode } from 'react'
 import { CheckCircle2, XCircle } from 'lucide-react'
 import type { Brief, Evaluacion, Ficha, Rechazo, SelfCheck } from '@/lib/leados/contracts'
 import { IG_MANEJADO_POR_VALUES } from '@/lib/leados/contracts'
+import { FichaAccordion } from './ficha-accordion'
 
 const IG_MANEJADO_LABELS: Record<(typeof IG_MANEJADO_POR_VALUES)[number], string> = {
   DUENO: 'Lo maneja el dueño',
@@ -246,27 +247,22 @@ function fichaBloqueTexto(ficha: Ficha, key: keyof Ficha): string | null {
 }
 
 export function FichaPanel({ ficha }: { ficha: Ficha | null }) {
+  // El server arma los bloques con contenido; el acordeón (client) maneja el
+  // hover/animación. Solo viajan strings serializables.
+  const items = ficha
+    ? FICHA_BLOQUES.flatMap(({ key, label }) => {
+        const texto = fichaBloqueTexto(ficha, key)
+        return texto ? [{ key, label, texto }] : []
+      })
+    : []
   return (
     <Panel title="Ficha de observación">
       {!ficha ? (
         <Vacio>Sin ficha guardada.</Vacio>
+      ) : items.length === 0 ? (
+        <Vacio>La ficha está guardada pero sin contenido en sus bloques.</Vacio>
       ) : (
-        <div className="space-y-2">
-          {FICHA_BLOQUES.map(({ key, label }) => {
-            const texto = fichaBloqueTexto(ficha, key)
-            if (!texto) return null
-            return (
-              <details key={key} className="group rounded-2xl border border-white/10 bg-black/20 p-3">
-                <summary className="cursor-pointer list-none text-xs font-medium text-zinc-400 transition-colors hover:text-zinc-200 [&::-webkit-details-marker]:hidden">
-                  {label} ›
-                </summary>
-                <p className="mt-2 whitespace-pre-wrap text-xs leading-5 text-zinc-300">
-                  {texto}
-                </p>
-              </details>
-            )
-          })}
-        </div>
+        <FichaAccordion items={items} />
       )}
     </Panel>
   )

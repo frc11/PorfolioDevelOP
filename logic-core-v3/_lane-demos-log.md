@@ -86,7 +86,7 @@ Usa el mismo backbone (useTransition, botones `disabled={isPending}`, `closeOnBa
 ### Sprint 3 — Ficha de observación: acordeón hover, one-at-a-time
 **Objetivo:** las sub-secciones de la ficha se despliegan al hover, exactamente una abierta, con intención (debounce ~90-120ms), lock anti-cascada durante la transición, sin colapsar todo en mouse-leave, headers estables, body animado con grid-rows 0fr↔1fr + opacity (ease-out, <300ms), reduced-motion instantáneo, click+teclado operativos (aria-expanded).
 **Aceptación:** hover abre esa sección y cierra la previa, suave; mover el mouse entre headers no genera flicker ni aperturas espurias; reduced-motion no anima; click/teclado andan.
-**Estado:** _(se completa al cerrar)_
+**Estado:** ✅ hecho · gate eslint 0 + tsc 0.
 
 ### Sprint 4 — Layout del detalle: aprovechar el alto (preview sticky)
 **Objetivo:** eliminar el hueco vertical bajo el preview; preview sticky que llena el alto disponible mientras se scrollea la columna derecha; arranca arriba; responsive a 1 columna en pantallas chicas.
@@ -130,3 +130,16 @@ Esperado: "Cola de revisión: N dossier(s) EN_REVISION · M placeholder(s) migra
 **No tocado:** `revision.actions.ts`/`revision.schemas.ts` (el fix es 100% client), `Modal.tsx`, `requireSuperAdmin`/autorización.
 **Gate:** eslint 0 (decision-bar.tsx + page.tsx) + `tsc --noEmit` exit 0.
 **Nota UX para el humano:** verificar que tras aprobar/rechazar el modal cierra al toque y la vista refresca mostrando el estado nuevo; el avance a la próxima demo ahora es un click en "Siguiente en la cola" (no auto-salto).
+
+### ✅ Sprint 3 — Ficha de observación: acordeón hover, one-at-a-time
+**`old → new`:** los bloques de la ficha eran `<details>` independientes (click-toggle; podían quedar todos abiertos o todos cerrados) **→** nuevo componente client `[leadId]/_components/ficha-accordion.tsx`, controlado, **exactamente una sección abierta** (default la primera), que se abre al **hover**. `FichaPanel` (server, en `dossier-panels.tsx`) arma los bloques con contenido y le pasa `items: {key,label,texto}[]` (solo strings serializables).
+**Valores elegidos:**
+- **Animación:** `260ms` (< 300), ease `cubic-bezier(0.25, 0.46, 0.45, 0.94)` (la firma del proyecto; ease-out, nunca ease-in/linear). Sólo anima el **body** vía `grid-template-rows 0fr↔1fr` + `opacity` (header de altura estable; el chevron rota con `transform`/`will-change`).
+- **Hover con intención:** debounce `110ms` — pasar el mouse de largo entre headers no abre nada (anti-flicker de pass-through).
+- **Lock anti-cascada (lo que pidió el usuario):** al confirmar una apertura, `locked=true` por `ANIM + 60ms` (= `320ms`); mientras está locked se **ignoran los `mouseenter`**. Así, cuando el reflow del abrir/cerrar mueve los headers bajo el cursor quieto, los `mouseenter` espurios del reflow no disparan toggles. Tras el lock el layout ya está estable y, sin un movimiento real del mouse, no se emite otro `mouseenter` → cero aperturas espurias.
+- **Sin colapsar todo en mouse-leave:** salir del panel sólo cancela una intención pendiente; la sección abierta queda abierta (evita flicker). Siempre hay una abierta.
+- **reduced-motion:** `transition: none` (instantáneo), lock reducido a `60ms`. (El hover-intent de 110ms se mantiene en ambos modos: es intención, no animación; fácil de quitar para reduced si el humano lo prefiere.)
+- **A11y:** headers son `<button>` con `aria-expanded`; `onClick` y `onFocus` abren igual (teclado: tabular a un header lo abre) — el hover es enhancement, no el único camino.
+**No tocado:** `contracts.ts` (solo se leen tipos de `Ficha`), los otros 4 paneles de `dossier-panels.tsx`, Modal, libs compartidas.
+**Gate:** eslint 0 (ficha-accordion.tsx + dossier-panels.tsx) + `tsc --noEmit` exit 0.
+**Nota para el humano:** la animación de `grid-template-rows` es la técnica canónica de height-auto (Chrome 107+/FF/Safari 16+); en un browser viejo haría snap (sigue funcional). Verificar a ojo: hover suave, cero flicker entre headers, reduced-motion instantáneo, click/teclado.
