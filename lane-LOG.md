@@ -161,4 +161,31 @@ Reconocidos sin cambio (documentados): dedupe por email solo (leads sin email re
 - `14ffbf1` feat(chatbots): toggle de metadata por banner completo en Actividad (F7)
 - `d6d4d7b` feat(chatbots): convertir lead del bot a Lead CRM (solo develop, admin) (F8)
 - `9655a42` feat(chatbots): expandir conversación para ver transcript (F9)
-- `(review-fix)` fix(chatbots): metadata copiable y emoji vacío sin Quitar (review)
+- `db3414c` fix(chatbots): metadata copiable y emoji vacío sin Quitar (review)
+
+---
+
+# LOTE 2.1 — correcciones (3 cambios) — sobre `23adf6c`
+
+Trabajo inline (sin workflow; ultracode off). Gate por feature: `tsc --noEmit` + `eslint` exit 0 en lo tocado. Las 3 son in-lane, sin PENDIENTEs.
+
+## A — Hydration mismatch de fecha en LeadsTable · `60bb425` (fix)
+`components/dashboards/LeadsTable.tsx` (compartido autorizado).
+- **Causa diagnosticada:** `formatDate` usaba `toLocaleString('es-AR', {dateStyle,timeStyle})` **sin `timeZone`** → el server (Netlify functions = **UTC**) y el cliente (**UTC-3 AR**) formateaban horas distintas para el mismo instante (timezone), **compuesto** por el espacio angosto **U+202F** antes de "p. m." (token 12h) cuyo encoding difiere entre el ICU de Node y el del browser. El locale (es-AR) es el mismo en ambos → no era el locale.
+- **Fix (en el sitio, sin tocar utils compartidos):** (1) `timeZone: 'America/Argentina/Buenos_Aires'` en el `formatDate` local → determinista y valor AR correcto (alineado a la convención del repo); (2) `suppressHydrationWarning` en el `<span>` de la fecha como catch-all del residual ICU.
+- **Valor mostrado:** para los consumidores reales (AR) es idéntico al de antes (su browser ya era AR). El mismo bug existía en el dashboard del cliente (usa la misma `LeadsTable`) → también queda arreglado ahí. `F8`/`renderRowAction` intacto.
+
+## B — Click en card togglea selección en modo selección · `dabc45b` (feat)
+`app/(protected)/admin/chatbots/BotsListClient.tsx` (exclusivo).
+- **Viejo:** con ≥1 bot seleccionado, solo el checkbox toggleaba; click en el resto de la card navegaba.
+- **Nuevo:** `selectionMode = selected.size > 0` se pasa a `BotCard`; en modo selección el `onClick` del `<Link>` hace `preventDefault()` (corta la navegación de Next) + `onToggleSelect()` → click en cualquier parte togglea esa card. Sin selección, navega normal. Checkbox sigue funcionando (sibling, no doble toggle); Enter sobre el Link togglea en modo selección; `aria-label` dinámico (Seleccionar/Deseleccionar). La navegación vuelve al limpiar (0 seleccionados).
+
+## C — Banner header de KB reformulado + sticky · `1864d96` (style)
+`components/admin/KnowledgeBaseEditor.tsx` (exclusivo). **(No es la card de validación de F2/KBValidation — es el header del tab: título + tokens + "Probar prompt"/"Guardar cambios".)**
+- **Viejo:** barra negra plana cuadrada (`bg-zinc-950/90` + solo `border-b`, `py-4`), translucidez que dejaba colar el contenido al scrollear, sticky `top-0 z-10`.
+- **Nuevo:** card glassmorphism — `rounded-2xl` + borde completo `border-white/[0.08]` + bg frosted oscuro `bg-zinc-950/75` + `backdrop-blur-[20px] backdrop-saturate-[180%]` + `shadow-lg shadow-black/30`. Sticky **retenido** (la toolbar Guardar siempre visible aporta) con `z-20`; el blur fuerte + bg más opaco evitan que el contenido se lea por detrás/encima del borde. El `top` offset es la perilla de calibración visual si hiciera falta.
+
+## Commits del lote 2.1 (sobre `23adf6c`)
+- `60bb425` fix(chatbots): hydration mismatch de fecha en LeadsTable (A)
+- `dabc45b` feat(chatbots): click en card togglea selección en modo selección (B)
+- `1864d96` style(chatbots): banner header de KB reformulado + sticky arreglado (C)
