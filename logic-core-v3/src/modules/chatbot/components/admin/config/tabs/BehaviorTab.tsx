@@ -82,7 +82,7 @@ function QuickRepliesEditor({
         <div key={reply.id ?? index} className="rounded-2xl border border-white/10 bg-zinc-950/50 p-3">
           <div className="grid grid-cols-[minmax(140px,190px)_minmax(0,1fr)_auto] gap-2">
             <EmojiPickerField
-              value={reply.emoji ?? null}
+              value={reply.emoji || null}
               onChange={(value) => handleUpdate(index, { emoji: value ?? '' })}
             />
             <Input

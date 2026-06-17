@@ -249,7 +249,12 @@ export function ActivityLog({ initialEvents, slug }: ActivityLogProps) {
                         {isOpen ? '▾ metadata' : '▸ metadata'}
                       </div>
                       {isOpen && (
-                        <pre className="text-[10px] mt-1 opacity-60 overflow-x-auto">
+                        // select-text: el banner usa select-none para el toggle;
+                        // el JSON debe seguir siendo seleccionable/copiable.
+                        <pre
+                          className="text-[10px] mt-1 opacity-60 overflow-x-auto select-text"
+                          onClick={(e) => e.stopPropagation()}
+                        >
                           {JSON.stringify(event.metadata, null, 2)}
                         </pre>
                       )}
