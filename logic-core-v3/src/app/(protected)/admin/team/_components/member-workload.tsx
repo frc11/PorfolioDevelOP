@@ -1,15 +1,28 @@
 'use client'
 
+import { useState } from 'react'
 import Link from 'next/link'
-import { AlertTriangle, Clock3, FolderKanban, Inbox, UserRound, type LucideIcon } from 'lucide-react'
+import {
+  AlertTriangle,
+  ChevronDown,
+  Clock3,
+  FolderKanban,
+  Inbox,
+  ListChecks,
+  UserRound,
+  type LucideIcon,
+} from 'lucide-react'
 import type { TaskStatus } from '@prisma/client'
 import { EmptyState } from '@/components/ui'
 
-type WorkloadTask = {
+export type WorkloadTask = {
   id: string
   projectId: string
   title: string
   status: TaskStatus
+  estimatedHours: number | null
+  totalHours: number
+  entryCount: number
   project: {
     id: string
     name: string
@@ -17,7 +30,7 @@ type WorkloadTask = {
   }
 }
 
-type GroupedProjectTasks = {
+export type GroupedProjectTasks = {
   projectId: string
   projectName: string
   tasks: WorkloadTask[]
@@ -94,6 +107,108 @@ function MetricPill({
   )
 }
 
+function TaskCard({ task }: { task: WorkloadTask }) {
+  const overBudget = task.estimatedHours != null && task.totalHours > task.estimatedHours
+
+  return (
+    <div className="rounded-xl border border-white/10 bg-black/20 p-3 transition-colors hover:border-white/15">
+      <div className="flex items-start justify-between gap-3">
+        <p className="text-sm font-medium leading-5 text-white">{task.title}</p>
+        <span
+          className={[
+            'inline-flex shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-medium',
+            statusTone(task.status),
+          ].join(' ')}
+        >
+          {statusLabel(task.status)}
+        </span>
+      </div>
+
+      <div className="mt-2.5 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-zinc-400">
+        <span className="inline-flex items-center gap-1.5">
+          <Clock3 className="h-3.5 w-3.5 text-zinc-500" strokeWidth={1.5} />
+          <span className="tabular-nums">
+            <span className={overBudget ? 'text-rose-300' : 'text-zinc-200'}>
+              {formatHours(task.totalHours)}
+            </span>
+            {' / '}
+            {task.estimatedHours != null ? `${formatHours(task.estimatedHours)} est.` : 'sin estimado'}
+          </span>
+        </span>
+        <span className="inline-flex items-center gap-1.5">
+          <ListChecks className="h-3.5 w-3.5 text-zinc-500" strokeWidth={1.5} />
+          <span className="tabular-nums">
+            {task.entryCount} {task.entryCount === 1 ? 'registro' : 'registros'}
+          </span>
+        </span>
+      </div>
+    </div>
+  )
+}
+
+function ProjectSection({ group }: { group: GroupedProjectTasks }) {
+  const [open, setOpen] = useState(false)
+  const projectHours = group.tasks.reduce((sum, task) => sum + task.totalHours, 0)
+  const regionId = `member-project-${group.projectId}`
+
+  return (
+    <section className="overflow-hidden rounded-[24px] border border-white/10 bg-black/20">
+      <button
+        type="button"
+        onClick={() => setOpen((value) => !value)}
+        aria-expanded={open}
+        aria-controls={regionId}
+        className="flex w-full items-center justify-between gap-3 p-4 text-left transition-colors hover:bg-white/[0.03]"
+      >
+        <span className="inline-flex min-w-0 items-center gap-2">
+          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-cyan-200">
+            <FolderKanban className="h-3.5 w-3.5" strokeWidth={1.5} />
+          </span>
+          <span className="truncate text-base font-semibold text-zinc-100">{group.projectName}</span>
+        </span>
+
+        <span className="flex shrink-0 items-center gap-3">
+          <span className="hidden tabular-nums text-xs text-zinc-500 sm:inline">
+            {formatHours(projectHours)} · {group.tasks.length}{' '}
+            {group.tasks.length === 1 ? 'tarea' : 'tareas'}
+          </span>
+          <ChevronDown
+            className={[
+              'h-4 w-4 text-zinc-400 transition-transform duration-200',
+              open ? 'rotate-180' : '',
+            ].join(' ')}
+            strokeWidth={1.5}
+          />
+        </span>
+      </button>
+
+      <div
+        id={regionId}
+        role="region"
+        aria-hidden={!open}
+        className={[
+          'grid transition-[grid-template-rows] duration-300 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] motion-reduce:transition-none',
+          open ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]',
+        ].join(' ')}
+      >
+        <div className="overflow-hidden">
+          <div className="space-y-2 px-4 pb-4">
+            {group.tasks.map((task) => (
+              <TaskCard key={task.id} task={task} />
+            ))}
+            <Link
+              href={`/admin/projects/${group.projectId}/tasks`}
+              className="inline-flex items-center gap-1 pt-1 text-xs font-medium text-cyan-300 transition-colors hover:text-cyan-200"
+            >
+              Ver tareas en Proyectos →
+            </Link>
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
+
 export function MemberWorkload({
   user,
   activeTasksCount,
@@ -135,47 +250,7 @@ export function MemberWorkload({
 
       <div className="mt-5 space-y-3">
         {groupedTasks.length > 0 ? (
-          groupedTasks.map((group) => (
-            <section
-              key={group.projectId}
-              className="rounded-[24px] border border-white/10 bg-black/20 p-4 transition-colors hover:border-white/15"
-            >
-              <div className="flex items-center justify-between gap-3">
-                <Link
-                  href={`/admin/projects/${group.projectId}/tasks`}
-                  className="inline-flex min-w-0 items-center gap-2 text-base font-semibold text-zinc-100 transition-colors hover:text-cyan-200"
-                >
-                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-cyan-200">
-                    <FolderKanban className="h-3.5 w-3.5" strokeWidth={1.5} />
-                  </span>
-                  <span className="truncate">{group.projectName}</span>
-                </Link>
-                <span className="shrink-0 rounded-full border border-white/10 bg-white/5 px-2.5 py-0.5 text-[11px] font-medium text-zinc-400">
-                  {group.tasks.length} {group.tasks.length === 1 ? 'tarea' : 'tareas'}
-                </span>
-              </div>
-
-              <div className="mt-4 flex flex-wrap gap-2.5">
-                {group.tasks.map((task) => (
-                  <Link
-                    key={task.id}
-                    href={`/admin/projects/${task.projectId}/tasks`}
-                    className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2 transition-colors hover:border-cyan-400/20 hover:bg-white/10"
-                  >
-                    <span className="text-sm text-zinc-100">{task.title}</span>
-                    <span
-                      className={[
-                        'inline-flex rounded-full border px-2 py-0.5 text-[10px] font-medium',
-                        statusTone(task.status),
-                      ].join(' ')}
-                    >
-                      {statusLabel(task.status)}
-                    </span>
-                  </Link>
-                ))}
-              </div>
-            </section>
-          ))
+          groupedTasks.map((group) => <ProjectSection key={group.projectId} group={group} />)
         ) : (
           <EmptyState
             icon={Inbox}

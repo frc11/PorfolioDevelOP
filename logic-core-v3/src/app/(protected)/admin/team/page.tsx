@@ -1,6 +1,6 @@
 import { Role, TaskStatus } from '@prisma/client'
 import { prisma } from '@/lib/prisma'
-import { MemberWorkload } from './_components/member-workload'
+import { MemberWorkload, type GroupedProjectTasks } from './_components/member-workload'
 
 function startOfWeek(date: Date): Date {
   const current = new Date(date)
@@ -53,6 +53,12 @@ export default async function AgencyOsTeamPage() {
         title: true,
         status: true,
         assignedToId: true,
+        estimatedHours: true,
+        osTimeEntries: {
+          select: {
+            hours: true,
+          },
+        },
         project: {
           select: {
             id: true,
@@ -120,51 +126,30 @@ export default async function AgencyOsTeamPage() {
 
   const workloadData = users.map((user) => {
     const tasks = tasksByUser.get(user.id) ?? []
-    const groupedTasksMap = new Map<
-      string,
-      {
-        projectId: string
-        projectName: string
-        tasks: Array<{
-          id: string
-          projectId: string
-          title: string
-          status: TaskStatus
-          project: {
-            id: string
-            name: string
-            status: string
-          }
-        }>
-      }
-    >()
+    const groupedTasksMap = new Map<string, GroupedProjectTasks>()
 
     for (const task of tasks) {
-      const existingGroup = groupedTasksMap.get(task.project.id)
+      const workloadTask = {
+        id: task.id,
+        projectId: task.projectId,
+        title: task.title,
+        status: task.status,
+        estimatedHours: task.estimatedHours,
+        totalHours: task.osTimeEntries.reduce((sum, entry) => sum + entry.hours, 0),
+        entryCount: task.osTimeEntries.length,
+        project: task.project,
+      }
 
+      const existingGroup = groupedTasksMap.get(task.project.id)
       if (existingGroup) {
-        existingGroup.tasks.push({
-          id: task.id,
-          projectId: task.projectId,
-          title: task.title,
-          status: task.status,
-          project: task.project,
-        })
+        existingGroup.tasks.push(workloadTask)
         continue
       }
 
       groupedTasksMap.set(task.project.id, {
         projectId: task.project.id,
         projectName: task.project.name,
-        tasks: [
-          {
-            id: task.id,
-            projectId: task.projectId,
-            title: task.title,
-            status: task.status,
-            project: task.project,
-          },
-        ],
+        tasks: [workloadTask],
       })
     }
 
