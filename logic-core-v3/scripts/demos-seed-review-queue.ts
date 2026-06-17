@@ -304,6 +304,10 @@ async function main() {
     }
 
     let stage = dossier.stage
+    // El snapshot `dossier` sólo es confiable para el patch idempotente si la
+    // fila YA estaba EN_REVISION al entrar; si la caminamos en esta pasada, los
+    // bloques del walk ya dejaron todo escrito (no re-leemos = no doble write).
+    const startedEnRevision = stage === 'EN_REVISION'
     if (stage === 'APROBADA' || stage === 'DESCARTADA') {
       console.log(`⏭️  ${demo.businessName}: stage terminal ${stage} — no se toca`)
       continue
@@ -349,8 +353,9 @@ async function main() {
       console.log(`✨ ${demo.businessName}: EN_REVISION + draftUrl real (${demo.draftUrl})`)
       stage = 'EN_REVISION'
     }
-    if (stage === 'EN_REVISION') {
-      // Idempotencia: garantizar URL real + blobs en re-corridas.
+    if (startedEnRevision) {
+      // Idempotencia: garantizar URL real + blobs en re-corridas (la fila ya
+      // estaba EN_REVISION; `dossier` refleja su estado actual en la DB).
       const patch: Prisma.OsLeadDossierUpdateInput = {}
       if (!dossier.draftUrl || PLACEHOLDER_RE.test(dossier.draftUrl)) patch.draftUrl = demo.draftUrl
       if (!dossier.briefJson) patch.briefJson = BriefSchema.parse(demo.brief) as Prisma.InputJsonValue

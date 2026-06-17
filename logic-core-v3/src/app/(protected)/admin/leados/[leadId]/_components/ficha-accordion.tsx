@@ -11,8 +11,14 @@
  *     sección abierta hasta que se hoverea/activa otra.
  *   - Headers de altura estable; sólo anima el body (grid-rows 0fr↔1fr +
  *     opacity, ease del proyecto, <300ms). `prefers-reduced-motion`: instantáneo.
- *   - A11y: headers son `<button>` focusables con `aria-expanded`; click y foco
- *     de teclado abren igual — el hover es un extra, no el único camino.
+ *   - A11y: headers son `<button>` (disclosure) con `aria-expanded` +
+ *     `aria-controls` apuntando al region; el body colapsado sale del árbol de
+ *     accesibilidad (`aria-hidden`). Click y foco de teclado abren igual — el
+ *     hover es un extra, no el único camino.
+ *
+ * La sección abierta se trackea por `key` (no por índice): si el set de bloques
+ * con contenido cambia, sigue habiendo exactamente una abierta (la primera como
+ * fallback) en lugar de quedar cero abiertas.
  */
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { ChevronDown } from 'lucide-react'
@@ -27,15 +33,28 @@ export type FichaAccordionItem = {
 
 const HOVER_INTENT_MS = 110
 const ANIM_MS = 260
+// Margen sobre la animación: el lock se libera a ANIM_MS + buffer para absorber
+// el jitter de scheduling y el offset hasta que la transición empieza a pintar.
+const LOCK_BUFFER_MS = 60
 // Ease firma del proyecto (CLAUDE.md) — ease-out suave, nunca ease-in/linear.
 const EASE = 'cubic-bezier(0.25, 0.46, 0.45, 0.94)'
 
 export function FichaAccordion({ items }: { items: FichaAccordionItem[] }) {
   const reduced = useReducedMotion()
-  const [openIndex, setOpenIndex] = useState(0)
+  const [openKey, setOpenKey] = useState<string>(() => items[0]?.key ?? '')
+  // Ref espejo del openKey, para dedupe sincrónico ante eventos rápidos (sin
+  // closures viejas). Se mantiene al día SÓLO en `commitOpen` —único lugar que
+  // cambia openKey— así no se escribe el ref durante el render.
+  const openKeyRef = useRef(openKey)
+
   const intentTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const lockTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const locked = useRef(false)
+
+  // Si el openKey quedó viejo (cambió el set de bloques), abrir el primero —
+  // garantiza que SIEMPRE haya exactamente una sección abierta.
+  const openExists = items.some((item) => item.key === openKey)
+  const effectiveOpenKey = openExists ? openKey : (items[0]?.key ?? '')
 
   const clearIntent = useCallback(() => {
     if (intentTimer.current) {
@@ -45,31 +64,30 @@ export function FichaAccordion({ items }: { items: FichaAccordionItem[] }) {
   }, [])
 
   const commitOpen = useCallback(
-    (index: number) => {
+    (key: string) => {
       clearIntent()
-      setOpenIndex((current) => {
-        if (current === index) return current
-        // Lock por la duración de la transición (+buffer): mientras corre, el
-        // reflow no puede disparar un cambio de sección no pedido.
-        locked.current = true
-        if (lockTimer.current) clearTimeout(lockTimer.current)
-        lockTimer.current = setTimeout(
-          () => {
-            locked.current = false
-          },
-          (reduced ? 0 : ANIM_MS) + 60,
-        )
-        return index
-      })
+      if (openKeyRef.current === key) return // no-op: no lockea ni agenda
+      openKeyRef.current = key
+      setOpenKey(key)
+      // Lock por la duración de la transición (+buffer): mientras corre, el
+      // reflow no puede disparar un cambio de sección no pedido.
+      locked.current = true
+      if (lockTimer.current) clearTimeout(lockTimer.current)
+      lockTimer.current = setTimeout(
+        () => {
+          locked.current = false
+        },
+        (reduced ? 0 : ANIM_MS) + LOCK_BUFFER_MS,
+      )
     },
     [clearIntent, reduced],
   )
 
   const handleEnter = useCallback(
-    (index: number) => {
+    (key: string) => {
       if (locked.current) return // anti-cascada: ignorar hover durante la transición
       clearIntent()
-      intentTimer.current = setTimeout(() => commitOpen(index), HOVER_INTENT_MS)
+      intentTimer.current = setTimeout(() => commitOpen(key), HOVER_INTENT_MS)
     },
     [clearIntent, commitOpen],
   )
@@ -79,7 +97,7 @@ export function FichaAccordion({ items }: { items: FichaAccordionItem[] }) {
   const handleLeave = useCallback(() => clearIntent(), [clearIntent])
 
   // Click / foco de teclado: apertura inmediata, sin pasar por el hover-intent.
-  const handleActivate = useCallback((index: number) => commitOpen(index), [commitOpen])
+  const handleActivate = useCallback((key: string) => commitOpen(key), [commitOpen])
 
   useEffect(
     () => () => {
@@ -91,8 +109,9 @@ export function FichaAccordion({ items }: { items: FichaAccordionItem[] }) {
 
   return (
     <div className="space-y-2">
-      {items.map((item, index) => {
-        const isOpen = index === openIndex
+      {items.map((item) => {
+        const isOpen = item.key === effectiveOpenKey
+        const regionId = `ficha-acc-${item.key}`
         return (
           <div
             key={item.key}
@@ -101,10 +120,11 @@ export function FichaAccordion({ items }: { items: FichaAccordionItem[] }) {
             <button
               type="button"
               aria-expanded={isOpen}
-              onMouseEnter={() => handleEnter(index)}
+              aria-controls={regionId}
+              onMouseEnter={() => handleEnter(item.key)}
               onMouseLeave={handleLeave}
-              onFocus={() => handleActivate(index)}
-              onClick={() => handleActivate(index)}
+              onFocus={() => handleActivate(item.key)}
+              onClick={() => handleActivate(item.key)}
               className="flex w-full items-center justify-between gap-2 px-3 py-2.5 text-left text-xs font-medium text-zinc-400 transition-colors hover:text-zinc-100 focus-visible:text-zinc-100 focus-visible:outline-none"
             >
               <span>{item.label}</span>
@@ -119,6 +139,9 @@ export function FichaAccordion({ items }: { items: FichaAccordionItem[] }) {
               />
             </button>
             <div
+              id={regionId}
+              role="region"
+              aria-hidden={!isOpen}
               className="grid"
               style={{
                 gridTemplateRows: isOpen ? '1fr' : '0fr',
