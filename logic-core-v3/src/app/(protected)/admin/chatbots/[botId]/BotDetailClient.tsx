@@ -69,6 +69,7 @@ export type LeadItem = {
   message: string | null
   status: string
   capturedAt: Date
+  convertedToOsLeadId: string | null
   conversation: { sessionId: string; currentPath: string | null } | null
 }
 

@@ -19,6 +19,7 @@ export function LeadsTab({ leads, slug }: Props) {
     message: l.message ?? '',
     status: l.status,
     capturedAt: l.capturedAt,
+    convertedToOsLeadId: l.convertedToOsLeadId,
     conversation: l.conversation,
   }))
 
@@ -30,7 +31,14 @@ export function LeadsTab({ leads, slug }: Props) {
     <LeadsTable
       leads={mapped}
       renderRowAction={
-        canConvert ? lead => <ConvertChatbotLeadButton leadId={lead.id} /> : undefined
+        canConvert
+          ? lead => (
+              <ConvertChatbotLeadButton
+                leadId={lead.id}
+                convertedToOsLeadId={lead.convertedToOsLeadId ?? null}
+              />
+            )
+          : undefined
       }
     />
   )

@@ -14,6 +14,7 @@ interface Lead {
   message: string
   status: string
   capturedAt: Date | string
+  convertedToOsLeadId?: string | null
   conversation?: { sessionId: string; currentPath: string | null } | null
 }
 

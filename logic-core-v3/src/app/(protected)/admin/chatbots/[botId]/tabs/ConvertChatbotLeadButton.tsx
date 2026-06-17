@@ -6,11 +6,20 @@ import { toast } from 'sonner'
 import { Button } from '@/components/ui/Button'
 import { convertChatbotLeadToOsLead } from '../../_actions/convert-chatbot-lead.actions'
 
-export function ConvertChatbotLeadButton({ leadId }: { leadId: string }) {
+export function ConvertChatbotLeadButton({
+  leadId,
+  convertedToOsLeadId,
+}: {
+  leadId: string
+  convertedToOsLeadId: string | null
+}) {
   const [pending, startTransition] = useTransition()
-  const [done, setDone] = useState(false)
+  // Feedback instantáneo tras convertir en esta sesión; la persistencia real
+  // (tras recargar / sin email) la da convertedToOsLeadId desde la DB.
+  const [justConverted, setJustConverted] = useState(false)
+  const isConverted = convertedToOsLeadId != null || justConverted
 
-  if (done) {
+  if (isConverted) {
     return (
       <span className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-400/20 bg-emerald-500/10 px-3 py-1.5 text-xs text-emerald-300">
         <CheckCircle2 className="h-4 w-4" strokeWidth={1.5} />
@@ -23,7 +32,7 @@ export function ConvertChatbotLeadButton({ leadId }: { leadId: string }) {
     startTransition(async () => {
       const result = await convertChatbotLeadToOsLead(leadId)
       if (result.success) {
-        setDone(true)
+        setJustConverted(true)
         toast.success('Lead convertido a Lead CRM')
       } else {
         toast.error(result.error)

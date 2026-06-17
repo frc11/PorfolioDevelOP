@@ -10,9 +10,10 @@ import { ConvertChatbotLeadSchema } from './convert-chatbot-lead.schemas'
 // (OsLead), espejando convertInboundToLead. Solo para el bot propio de develOP
 // (slug='develop'), verificado server-side además del gate de UI.
 //
-// Idempotencia: ChatbotLead no tiene FK a OsLead y el schema está FROZEN, así que
-// se deduplica por email (source='Chatbot'); si ya existe, se reusa ese OsLead.
-// Leads sin email no se pueden deduplicar de forma persistente — ver lane-LOG.md.
+// Idempotencia: el vínculo persistente vive en ChatbotLead.convertedToOsLeadId
+// (id del OsLead). Es fiable por ID — sobrevive recargas/cierre de sesión y aplica
+// también a leads sin email. Al crear, además se deduplica por email
+// (source='Chatbot') para no generar OsLeads duplicados del mismo contacto.
 export async function convertChatbotLeadToOsLead(
   chatbotLeadId: string,
 ): Promise<ActionResult<{ id: string }>> {
@@ -33,27 +34,44 @@ export async function convertChatbotLeadToOsLead(
         throw new Error('La conversión a Lead CRM solo está disponible para el bot de develOP.')
       }
 
+      // Idempotencia por ID: si este lead ya quedó vinculado a un OsLead, lo
+      // devolvemos sin recrear (funciona también para leads sin email).
+      if (lead.convertedToOsLeadId) {
+        return { id: lead.convertedToOsLeadId }
+      }
+
       const email = lead.email?.trim() || null
 
+      let osLead: { id: string } | null = null
       if (email) {
-        const existing = await tx.osLead.findFirst({
+        osLead = await tx.osLead.findFirst({
           where: { source: 'Chatbot', email: { equals: email, mode: 'insensitive' } },
           select: { id: true },
         })
-        if (existing) return existing
       }
 
-      return tx.osLead.create({
-        data: {
-          businessName: lead.name?.trim() || email || 'Lead chatbot',
-          contactName: lead.name?.trim() || null,
-          email,
-          phone: lead.phone?.trim() || null,
-          source: 'Chatbot',
-          notes: lead.message,
-        },
-        select: { id: true },
+      if (!osLead) {
+        osLead = await tx.osLead.create({
+          data: {
+            businessName: lead.name?.trim() || email || 'Lead chatbot',
+            contactName: lead.name?.trim() || null,
+            email,
+            phone: lead.phone?.trim() || null,
+            source: 'Chatbot',
+            notes: lead.message,
+          },
+          select: { id: true },
+        })
+      }
+
+      // Vínculo persistente por ID → el badge "Ya convertido" sobrevive recargas
+      // y cierre de sesión, y aplica también a leads sin email.
+      await tx.chatbotLead.update({
+        where: { id },
+        data: { convertedToOsLeadId: osLead.id },
       })
+
+      return { id: osLead.id }
     })
 
     revalidatePath('/admin/chatbots')

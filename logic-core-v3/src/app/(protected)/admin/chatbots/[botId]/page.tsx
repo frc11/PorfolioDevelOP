@@ -89,6 +89,7 @@ export default async function BotDetailPage({ params, searchParams }: Props) {
     message: l.message,
     status: l.status,
     capturedAt: l.capturedAt,
+    convertedToOsLeadId: l.convertedToOsLeadId,
     conversation: l.conversation ?? null,
   }))
 
