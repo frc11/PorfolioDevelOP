@@ -4,7 +4,7 @@ import { useState, useMemo } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import { staggerContainer, staggerItem } from '@/lib/motion-variants'
 import Link from 'next/link'
-import { Bot, MessageSquare, Users, Search } from 'lucide-react'
+import { Bot, MessageSquare, Users, Search, Check } from 'lucide-react'
 import { Card } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
 import { Input } from '@/components/ui/Input'
@@ -191,13 +191,24 @@ function BotCard({
       whileHover={reduce ? undefined : { y: -2 }}
       transition={{ duration: 0.2 }}
     >
-      <input
-        type="checkbox"
-        checked={selected}
-        onChange={onToggleSelect}
+      <label
+        className="absolute left-3 top-3 z-10 inline-flex cursor-pointer"
         onClick={e => e.stopPropagation()}
-        className="absolute top-3 left-3 z-10 h-4 w-4 rounded border-white/20 bg-zinc-950 cursor-pointer accent-cyan-400"
-      />
+      >
+        <input
+          type="checkbox"
+          checked={selected}
+          onChange={onToggleSelect}
+          aria-label={`Seleccionar ${bot.botName}`}
+          className="peer sr-only"
+        />
+        <span
+          aria-hidden="true"
+          className="flex h-5 w-5 items-center justify-center rounded-md border border-white/20 bg-zinc-950/80 text-transparent shadow-sm backdrop-blur transition-colors peer-hover:border-white/40 peer-checked:border-cyan-400 peer-checked:bg-cyan-400 peer-checked:text-zinc-950 peer-focus-visible:ring-2 peer-focus-visible:ring-cyan-400/60 peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-zinc-950"
+        >
+          <Check className="h-3.5 w-3.5" strokeWidth={1.5} />
+        </span>
+      </label>
       <Link href={`/admin/chatbots/${bot.id}`}>
         <Card
           variant="interactive"
