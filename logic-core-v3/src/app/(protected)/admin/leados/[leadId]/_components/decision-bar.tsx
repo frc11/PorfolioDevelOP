@@ -18,7 +18,6 @@ import {
 type DecisionBarProps = {
   leadId: string
   businessName: string
-  nextLeadId: string | null
 }
 
 type RechazoFields = {
@@ -35,7 +34,7 @@ function FieldError({ message }: { message?: string }) {
   return <p className="mt-1 text-xs text-rose-300">{message}</p>
 }
 
-export function DecisionBar({ leadId, businessName, nextLeadId }: DecisionBarProps) {
+export function DecisionBar({ leadId, businessName }: DecisionBarProps) {
   const router = useRouter()
   const [modal, setModal] = useState<'aprobar' | 'rechazar' | null>(null)
   const [finalUrl, setFinalUrl] = useState('')
@@ -44,19 +43,33 @@ export function DecisionBar({ leadId, businessName, nextLeadId }: DecisionBarPro
   const [serverError, setServerError] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
 
-  const closeModal = () => {
-    if (isPending) return
+  // Reset completo del modal (cierra + limpia inputs + limpia errores). Sin
+  // guard de isPending: lo usa también el camino de éxito (que corre pending).
+  const resetAndClose = () => {
     setModal(null)
+    setFinalUrl('')
+    setRechazo({ motivo: '', donde: '', arreglo: '' })
     setFieldErrors({})
     setServerError(null)
   }
 
-  const irAlSiguiente = () => {
-    router.push(nextLeadId ? `/admin/leados/${nextLeadId}` : '/admin/leados')
+  // Cierre manual (Cancelar / X / backdrop): no interrumpe una acción en curso.
+  const closeModal = () => {
+    if (isPending) return
+    resetAndClose()
+  }
+
+  // Tras un veredicto: cerrar+resetear el modal y refrescar en el lugar. Regla
+  // del lane: en admin nunca router.push directo → router.refresh(). La demo
+  // deja de estar EN_REVISION, así que la página re-renderiza sin esta barra y
+  // muestra el estado nuevo; "Siguiente en la cola" (link del header) avanza.
+  const resolverYRefrescar = () => {
+    resetAndClose()
     router.refresh()
   }
 
   const handleAprobar = () => {
+    if (isPending) return
     setServerError(null)
     const parsed = AprobarRevisionSchema.safeParse({ leadId, finalUrl })
     if (!parsed.success) {
@@ -70,11 +83,12 @@ export function DecisionBar({ leadId, businessName, nextLeadId }: DecisionBarPro
         setServerError(result.error)
         return
       }
-      irAlSiguiente()
+      resolverYRefrescar()
     })
   }
 
   const handleRechazar = () => {
+    if (isPending) return
     setServerError(null)
     const parsed = RechazarRevisionSchema.safeParse({ leadId, ...rechazo })
     if (!parsed.success) {
@@ -95,7 +109,7 @@ export function DecisionBar({ leadId, businessName, nextLeadId }: DecisionBarPro
         setServerError(result.error)
         return
       }
-      irAlSiguiente()
+      resolverYRefrescar()
     })
   }
 

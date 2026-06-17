@@ -224,11 +224,7 @@ export default async function LeadOsRevisionDetailPage({ params }: RevisionPageP
 
         <div className="space-y-6">
           {enRevision ? (
-            <DecisionBar
-              leadId={leadId}
-              businessName={dossier.lead.businessName}
-              nextLeadId={nextLeadId}
-            />
+            <DecisionBar leadId={leadId} businessName={dossier.lead.businessName} />
           ) : null}
 
           <EvaluacionPanel evaluacion={evaluacion} />

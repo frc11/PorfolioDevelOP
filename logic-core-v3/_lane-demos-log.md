@@ -81,7 +81,7 @@ Usa el mismo backbone (useTransition, botones `disabled={isPending}`, `closeOnBa
 ### Sprint 2 — Fix Aprobar/Rechazar (patrón nuevo-lead/nuevo-proyecto)
 **Objetivo:** ambos flujos end-to-end con robustez: deshabilitado mientras pending, sin doble submit, error visible sin stack, modal cierra+resetea al éxito, navegación con `router.refresh()` (sin `router.push`).
 **Aceptación:** Aprobar → URL → confirmar una vez → APROBADA, modal cierra+resetea, vista refresca; idem Rechazar con los 3 campos → RECHAZADA; error visible si falla.
-**Estado:** _(se completa al cerrar)_
+**Estado:** ✅ hecho · gate eslint 0 + tsc 0.
 
 ### Sprint 3 — Ficha de observación: acordeón hover, one-at-a-time
 **Objetivo:** las sub-secciones de la ficha se despliegan al hover, exactamente una abierta, con intención (debounce ~90-120ms), lock anti-cascada durante la transición, sin colapsar todo en mouse-leave, headers estables, body animado con grid-rows 0fr↔1fr + opacity (ease-out, <300ms), reduced-motion instantáneo, click+teclado operativos (aria-expanded).
@@ -119,3 +119,14 @@ cd logic-core-v3
 npx tsx scripts/demos-seed-review-queue.ts
 ```
 Esperado: "Cola de revisión: N dossier(s) EN_REVISION · M placeholder(s) migrado(s) · 0 con example.* restante(s)".
+
+### ✅ Sprint 2 — Fix Aprobar/Rechazar (patrón nuevo-lead)
+**El bug:** en el camino de ÉXITO, `decision-bar.tsx` solo llamaba `irAlSiguiente()` y **nunca cerraba ni reseteaba el modal**: el modal se desmontaba como efecto colateral de la navegación → si la nav tardaba quedaba colgado con el input viejo; `finalUrl`/`rechazo` nunca se limpiaban. Además `irAlSiguiente()` usaba **`router.push`** (viola la regla del lane: en admin va `router.refresh()`).
+**El fix (patrón lead-form/project-form: cerrar+resetear y DESPUÉS refrescar):**
+- `old → new` (navegación): `router.push(next || '/admin/leados') + router.refresh()` **→** `router.refresh()` en el lugar. La demo deja de estar EN_REVISION, la página re-renderiza sin la barra y muestra el banner "ya no está en revisión"; **"Siguiente en la cola"** (link del header, que ya existía) avanza a mano. Se eliminó el auto-salto a la URL del siguiente (era lo que requería `router.push`).
+- `old → new` (cierre/reset): nuevo `resetAndClose()` = `setModal(null)` + limpia `finalUrl`/`rechazo` + limpia errores. Lo usa el éxito (`resolverYRefrescar` = `resetAndClose(); router.refresh()`) y también el cierre manual `closeModal` (guardado con `if (isPending) return`). Antes el cierre manual NO reseteaba los campos; ahora reabrir el modal arranca limpio.
+- Doble-submit: se agregó `if (isPending) return` al tope de `handleAprobar`/`handleRechazar` (defensivo; además los botones de confirmar ya eran `disabled={isPending}` y el `closeOnBackdrop={!isPending}` y el guard de cierre ya estaban).
+- Prop muerta: se quitó `nextLeadId` de `DecisionBar` (props + el call en `[leadId]/page.tsx`). `nextLeadId` sigue calculándose en la page para el link del header.
+**No tocado:** `revision.actions.ts`/`revision.schemas.ts` (el fix es 100% client), `Modal.tsx`, `requireSuperAdmin`/autorización.
+**Gate:** eslint 0 (decision-bar.tsx + page.tsx) + `tsc --noEmit` exit 0.
+**Nota UX para el humano:** verificar que tras aprobar/rechazar el modal cierra al toque y la vista refresca mostrando el estado nuevo; el avance a la próxima demo ahora es un click en "Siguiente en la cola" (no auto-salto).
