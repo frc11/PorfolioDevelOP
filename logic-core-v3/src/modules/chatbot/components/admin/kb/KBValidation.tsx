@@ -10,7 +10,7 @@ interface KBValidationProps {
 export function KBValidation({ issues }: KBValidationProps) {
   if (issues.length === 0) {
     return (
-      <div className="flex items-center gap-2 rounded-2xl border border-emerald-400/20 bg-emerald-500/[0.04] p-4 text-sm text-emerald-200">
+      <div className="flex items-center gap-2 rounded-2xl border border-emerald-400/20 bg-emerald-500/[0.04] p-4 text-sm text-emerald-200 backdrop-blur-[20px] backdrop-saturate-[180%]">
         <Check className="h-4 w-4" strokeWidth={1.5} />
         Sin issues detectados en la KB
       </div>
@@ -42,22 +42,22 @@ function IssueRow({ issue }: { issue: KBValidationIssue }) {
   const config = {
     error: {
       icon: AlertCircle,
-      borderColor: 'border-red-400/30',
-      bgColor: 'bg-red-500/[0.06]',
+      borderColor: 'border-red-400/20',
+      bgColor: 'bg-red-500/[0.04]',
       textColor: 'text-red-200',
       iconColor: 'text-red-400',
     },
     warning: {
       icon: AlertTriangle,
-      borderColor: 'border-amber-400/30',
-      bgColor: 'bg-amber-500/[0.06]',
+      borderColor: 'border-amber-400/20',
+      bgColor: 'bg-amber-500/[0.04]',
       textColor: 'text-amber-200',
       iconColor: 'text-amber-400',
     },
     info: {
       icon: Info,
-      borderColor: 'border-zinc-400/30',
-      bgColor: 'bg-zinc-500/[0.04]',
+      borderColor: 'border-white/[0.08]',
+      bgColor: 'bg-white/[0.04]',
       textColor: 'text-zinc-300',
       iconColor: 'text-zinc-400',
     },
@@ -66,7 +66,7 @@ function IssueRow({ issue }: { issue: KBValidationIssue }) {
   const Icon = config.icon
 
   return (
-    <div className={`flex items-start gap-3 rounded-xl border ${config.borderColor} ${config.bgColor} p-3`}>
+    <div className={`flex items-start gap-3 rounded-2xl border ${config.borderColor} ${config.bgColor} p-3 backdrop-blur-[20px] backdrop-saturate-[180%]`}>
       <Icon className={`mt-0.5 h-4 w-4 flex-shrink-0 ${config.iconColor}`} strokeWidth={1.5} />
       <div className="flex-1">
         <p className={`text-sm ${config.textColor}`}>{issue.message}</p>
