@@ -86,6 +86,16 @@ export function ActivityLog({ initialEvents, slug }: ActivityLogProps) {
   const [fromDate, setFromDate] = useState('')
   const [toDate, setToDate] = useState('')
   const lastFetchRef = useRef<string>(new Date().toISOString())
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set())
+
+  function toggleExpanded(id: string) {
+    setExpandedIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
 
   useEffect(() => {
     if (paused) return
@@ -177,15 +187,41 @@ export function ActivityLog({ initialEvents, slug }: ActivityLogProps) {
               Sin eventos para los filtros seleccionados
             </div>
           ) : (
-            visibleEvents.map((event) => (
+            visibleEvents.map((event) => {
+              const hasMeta = !!event.metadata && Object.keys(event.metadata).length > 0
+              const isOpen = expandedIds.has(event.id)
+              return (
               <motion.div
                 key={event.id}
                 initial={{ opacity: 0, y: -8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.18 }}
+                role={hasMeta ? 'button' : undefined}
+                tabIndex={hasMeta ? 0 : undefined}
+                aria-expanded={hasMeta ? isOpen : undefined}
+                aria-label={
+                  hasMeta
+                    ? `Evento ${event.type}: ${isOpen ? 'ocultar' : 'mostrar'} metadata`
+                    : undefined
+                }
+                onClick={hasMeta ? () => toggleExpanded(event.id) : undefined}
+                onKeyDown={
+                  hasMeta
+                    ? (e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault()
+                          toggleExpanded(event.id)
+                        }
+                      }
+                    : undefined
+                }
                 className={`flex items-start gap-3 rounded-2xl border px-3 py-2.5 ${
                   LEVEL_STYLES[event.level] ?? LEVEL_STYLES.info
+                } ${
+                  hasMeta
+                    ? 'cursor-pointer select-none transition-colors hover:brightness-110 focus:outline-none focus-visible:ring-1 focus-visible:ring-cyan-400/40'
+                    : ''
                 }`}
               >
                 <span className="text-xs mt-0.5 shrink-0 opacity-70">
@@ -203,19 +239,31 @@ export function ActivityLog({ initialEvents, slug }: ActivityLogProps) {
                       {event.conversationSession?.slice(0, 12)}…
                     </div>
                   )}
-                  {event.metadata && Object.keys(event.metadata).length > 0 && (
-                    <details className="mt-1">
-                      <summary className="text-[10px] opacity-40 cursor-pointer select-none">
-                        metadata
-                      </summary>
-                      <pre className="text-[10px] mt-1 opacity-60 overflow-x-auto">
-                        {JSON.stringify(event.metadata, null, 2)}
-                      </pre>
-                    </details>
+                  {/* Toggle por banner completo. Cualquier control interactivo que
+                      se agregue dentro del banner DEBE llamar e.stopPropagation()
+                      en onClick (y onKeyDown Enter/Espacio) para no disparar el
+                      toggle de metadata. Hoy no hay controles interactivos acá. */}
+                  {hasMeta && (
+                    <>
+                      <div className="text-[10px] opacity-40 mt-1 select-none">
+                        {isOpen ? '▾ metadata' : '▸ metadata'}
+                      </div>
+                      {isOpen && (
+                        // select-text: el banner usa select-none para el toggle;
+                        // el JSON debe seguir siendo seleccionable/copiable.
+                        <pre
+                          className="text-[10px] mt-1 opacity-60 overflow-x-auto select-text"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          {JSON.stringify(event.metadata, null, 2)}
+                        </pre>
+                      )}
+                    </>
                   )}
                 </div>
               </motion.div>
-            ))
+              )
+            })
           )}
         </AnimatePresence>
       </div>

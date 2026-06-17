@@ -4,7 +4,7 @@ import { useState, useMemo } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import { staggerContainer, staggerItem } from '@/lib/motion-variants'
 import Link from 'next/link'
-import { Bot, MessageSquare, Users, Search } from 'lucide-react'
+import { Bot, MessageSquare, Users, Search, Check } from 'lucide-react'
 import { Card } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
 import { Input } from '@/components/ui/Input'
@@ -15,6 +15,16 @@ import type { BotListItem } from '@/modules/chatbot/server/admin/listAllBots'
 
 interface Props {
   bots: BotListItem[]
+}
+
+// Solo presentación: el value de cada opción sigue siendo el slug crudo de la
+// industria (el filtro no cambia); únicamente se humaniza la etiqueta visible
+// ('medico_odontologico' → 'Medico Odontologico').
+function formatIndustry(value: string): string {
+  return value
+    .split('_')
+    .map(word => (word ? word.charAt(0).toUpperCase() + word.slice(1) : word))
+    .join(' ')
 }
 
 export function BotsListClient({ bots }: Props) {
@@ -44,6 +54,14 @@ export function BotsListClient({ bots }: Props) {
   const industries = useMemo(
     () => Array.from(new Set(bots.map(b => b.industry))).filter(Boolean),
     [bots],
+  )
+
+  // Selección efectiva = lo seleccionado QUE además está visible en el filtro
+  // actual. Evita que una acción bulk (sobre todo Eliminar, irreversible) toque
+  // bots que el filtro dejó fuera de vista.
+  const visibleSelectedIds = useMemo(
+    () => filtered.filter(b => selected.has(b.id)).map(b => b.id),
+    [filtered, selected],
   )
 
   function toggleSelected(botId: string) {
@@ -79,6 +97,8 @@ export function BotsListClient({ bots }: Props) {
           />
         </div>
         <Select
+          aria-label="Filtrar por estado"
+          className="sm:w-44"
           value={statusFilter}
           onChange={e => setStatusFilter(e.target.value as 'all' | 'active' | 'inactive')}
           options={[
@@ -88,11 +108,13 @@ export function BotsListClient({ bots }: Props) {
           ]}
         />
         <Select
+          aria-label="Filtrar por industria"
+          className="sm:w-52"
           value={industryFilter}
           onChange={e => setIndustryFilter(e.target.value)}
           options={[
             { value: 'all', label: 'Todas las industrias' },
-            ...industries.map(i => ({ value: i, label: i })),
+            ...industries.map(i => ({ value: i, label: formatIndustry(i) })),
           ]}
         />
       </div>
@@ -102,10 +124,10 @@ export function BotsListClient({ bots }: Props) {
       </p>
 
       <AnimatePresence>
-        {selected.size > 0 && (
+        {visibleSelectedIds.length > 0 && (
           <BulkActionBar
             key="bulk-bar"
-            selectedIds={Array.from(selected)}
+            selectedIds={visibleSelectedIds}
             totalBots={filtered.length}
             onSelectAll={selectAll}
             onClear={clearSelection}
@@ -142,6 +164,7 @@ export function BotsListClient({ bots }: Props) {
               bot={bot}
               selected={selected.has(bot.id)}
               onToggleSelect={() => toggleSelected(bot.id)}
+              selectionMode={selected.size > 0}
               reduce={Boolean(reduce)}
             />
           ))}
@@ -155,11 +178,13 @@ function BotCard({
   bot,
   selected,
   onToggleSelect,
+  selectionMode,
   reduce,
 }: {
   bot: BotListItem
   selected: boolean
   onToggleSelect: () => void
+  selectionMode: boolean
   reduce: boolean
 }) {
   return (
@@ -169,14 +194,43 @@ function BotCard({
       whileHover={reduce ? undefined : { y: -2 }}
       transition={{ duration: 0.2 }}
     >
-      <input
-        type="checkbox"
-        checked={selected}
-        onChange={onToggleSelect}
+      <label
+        className="absolute left-3 top-3 z-10 inline-flex cursor-pointer"
         onClick={e => e.stopPropagation()}
-        className="absolute top-3 left-3 z-10 h-4 w-4 rounded border-white/20 bg-zinc-950 cursor-pointer accent-cyan-400"
-      />
-      <Link href={`/admin/chatbots/${bot.id}`}>
+      >
+        <input
+          type="checkbox"
+          checked={selected}
+          onChange={onToggleSelect}
+          aria-label={`Seleccionar ${bot.botName}`}
+          className="peer sr-only"
+        />
+        <span
+          aria-hidden="true"
+          className="flex h-5 w-5 items-center justify-center rounded-md border border-white/20 bg-zinc-950/80 text-transparent shadow-sm backdrop-blur transition-colors peer-hover:border-white/40 peer-checked:border-cyan-400 peer-checked:bg-cyan-400 peer-checked:text-zinc-950 peer-focus-visible:ring-2 peer-focus-visible:ring-cyan-400/60 peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-zinc-950"
+        >
+          <Check className="h-3.5 w-3.5" strokeWidth={1.5} />
+        </span>
+      </label>
+      {/* En modo selección (≥1 seleccionado) el click togglea ESTA card y no
+          navega (preventDefault corta la navegación del Link de Next). Sin
+          selección activa, navega normal. El checkbox sigue funcionando aparte. */}
+      <Link
+        href={`/admin/chatbots/${bot.id}`}
+        onClick={
+          selectionMode
+            ? (e) => {
+                e.preventDefault()
+                onToggleSelect()
+              }
+            : undefined
+        }
+        aria-label={
+          selectionMode
+            ? `${selected ? 'Deseleccionar' : 'Seleccionar'} ${bot.botName}`
+            : undefined
+        }
+      >
         <Card
           variant="interactive"
           padding="lg"

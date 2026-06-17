@@ -1,5 +1,6 @@
 'use client'
 
+import { type ReactNode } from 'react'
 import { motion } from 'motion/react'
 import { Users } from 'lucide-react'
 import { EmptyState } from '@/components/ui'
@@ -18,6 +19,9 @@ interface Lead {
 
 interface LeadsTableProps {
   leads: Lead[]
+  // Acción opcional por fila (default ausente). El admin la pasa; los demás
+  // consumidores (dashboard del cliente) la omiten → su vista queda idéntica.
+  renderRowAction?: (lead: Lead) => ReactNode
 }
 
 const INTENT_COLORS: Record<string, string> = {
@@ -29,10 +33,16 @@ const INTENT_COLORS: Record<string, string> = {
 }
 
 function formatDate(d: Date | string): string {
-  return new Date(d).toLocaleString('es-AR', { dateStyle: 'short', timeStyle: 'short' })
+  // timeZone fijo (AR): sin esto el server (Netlify = UTC) y el cliente (UTC-3)
+  // formatean horas distintas para el mismo instante → hydration mismatch.
+  return new Date(d).toLocaleString('es-AR', {
+    dateStyle: 'short',
+    timeStyle: 'short',
+    timeZone: 'America/Argentina/Buenos_Aires',
+  })
 }
 
-export function LeadsTable({ leads }: LeadsTableProps) {
+export function LeadsTable({ leads, renderRowAction }: LeadsTableProps) {
   if (leads.length === 0) {
     return (
       <EmptyState
@@ -70,10 +80,13 @@ export function LeadsTable({ leads }: LeadsTableProps) {
             <div className="text-sm text-zinc-300 leading-relaxed">{lead.message}</div>
           </div>
           <div className="text-[11px] text-zinc-500 text-right shrink-0">
-            {formatDate(lead.capturedAt)}
+            {/* suppressHydrationWarning: catch-all para diferencias ICU (espacio
+                angosto U+202F antes de "p. m.") entre el ICU de Node y el del browser. */}
+            <span suppressHydrationWarning>{formatDate(lead.capturedAt)}</span>
             {lead.conversation?.currentPath && (
               <div className="mt-1 text-zinc-600">desde {lead.conversation.currentPath}</div>
             )}
+            {renderRowAction && <div className="mt-2 flex justify-end">{renderRowAction(lead)}</div>}
           </div>
         </motion.div>
       ))}

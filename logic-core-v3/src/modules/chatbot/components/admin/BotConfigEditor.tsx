@@ -179,7 +179,10 @@ export function BotConfigEditor({ initial, orgSlug, onSave }: BotConfigEditorPro
         </div>
 
         {/* 10.625rem = outer-p4(1) + topbar-h16(4) + main-mt4(1) + main-border(0.125) + top-6(1.5) + footer(2) + outer-p4(1) — ajustá si cambia el chrome del admin */}
-        <aside className="lg:sticky lg:top-6 lg:flex lg:h-[calc(100dvh-10.625rem)] lg:items-center lg:justify-center">
+        {/* self-start: en tabs cortos (sin scroll) el top del preview queda
+            alineado al título; sticky top-6 preserva el comportamiento en tabs
+            con scroll (antes items-center forzaba el preview hacia abajo). */}
+        <aside className="lg:sticky lg:top-6 lg:self-start">
           <BotConfigPreview state={adminStateToPreview(state, initial.isActive)} />
         </aside>
       </div>

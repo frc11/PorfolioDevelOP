@@ -1,13 +1,15 @@
 'use client'
 
 import { LeadsTable } from '@/modules/chatbot/components/dashboards/LeadsTable'
+import { ConvertChatbotLeadButton } from './ConvertChatbotLeadButton'
 import type { LeadItem } from '../BotDetailClient'
 
 interface Props {
   leads: LeadItem[]
+  slug: string
 }
 
-export function LeadsTab({ leads }: Props) {
+export function LeadsTab({ leads, slug }: Props) {
   const mapped = leads.map(l => ({
     id: l.id,
     name: l.name ?? '',
@@ -20,5 +22,16 @@ export function LeadsTab({ leads }: Props) {
     conversation: l.conversation,
   }))
 
-  return <LeadsTable leads={mapped} />
+  // Convertir a Lead CRM solo para el bot propio de develOP (criterio decidido)
+  // y solo en admin (este wrapper solo se monta en el detalle admin).
+  const canConvert = slug === 'develop'
+
+  return (
+    <LeadsTable
+      leads={mapped}
+      renderRowAction={
+        canConvert ? lead => <ConvertChatbotLeadButton leadId={lead.id} /> : undefined
+      }
+    />
+  )
 }

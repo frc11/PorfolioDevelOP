@@ -4,9 +4,9 @@ import { useState, useTransition } from 'react'
 import { createPortal } from 'react-dom'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { motion, AnimatePresence } from 'motion/react'
-import { Play, Pause, Code, Copy, Check, Bot, X } from 'lucide-react'
+import { Play, Pause, Code, Copy, Check, Bot, X, Trash2 } from 'lucide-react'
 import { AdminBackButton } from '../../_components/AdminBackButton'
-import Link from 'next/link'
+import { ConfirmDialog } from '../../_components/confirm-dialog'
 import { toast } from 'sonner'
 import type { Prisma } from '@prisma/client'
 import { Badge } from '@/components/ui/Badge'
@@ -14,7 +14,7 @@ import { Button } from '@/components/ui/Button'
 import { useIsClient } from '@/lib/use-is-client'
 import { ActivationModal } from '@/modules/chatbot/components/admin/activation/ActivationModal'
 import { runPreflightChecks, type PreflightCheck } from '@/modules/chatbot/server/admin/preflightChecks'
-import { toggleBotActiveAction } from './actions'
+import { toggleBotActiveAction, deleteBotAction } from './actions'
 import { OverviewTab } from './tabs/OverviewTab'
 import { ConfigTab } from './tabs/ConfigTab'
 import { KnowledgeTab } from './tabs/KnowledgeTab'
@@ -119,6 +119,8 @@ export function BotDetailClient({ bot, initialTab, initialEvents, monthlyUsage, 
   const [showTestModal, setShowTestModal] = useState(false)
   const [activationChecks, setActivationChecks] = useState<PreflightCheck[]>([])
   const [activating, setActivating] = useState(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [deletePending, startDelete] = useTransition()
   const mounted = useIsClient()
 
   function changeTab(tab: TabId) {
@@ -168,6 +170,18 @@ export function BotDetailClient({ bot, initialTab, initialEvents, monthlyUsage, 
     } else {
       toast.error(result.error)
     }
+  }
+
+  function handleConfirmDelete() {
+    startDelete(async () => {
+      const result = await deleteBotAction(bot.id)
+      // En éxito la server action hace redirect server-side a /admin/chatbots;
+      // solo llegamos acá si el borrado falló (forbidden / inexistente / error).
+      if (result && !result.ok) {
+        toast.error(result.error)
+        setShowDeleteConfirm(false)
+      }
+    })
   }
 
   return (
@@ -222,6 +236,15 @@ export function BotDetailClient({ bot, initialTab, initialEvents, monthlyUsage, 
             >
               Test endpoint
             </Button>
+            <Button
+              variant="danger"
+              size="sm"
+              icon={<Trash2 className="h-3 w-3" strokeWidth={1.5} />}
+              onClick={() => setShowDeleteConfirm(true)}
+              disabled={deletePending}
+            >
+              Eliminar bot
+            </Button>
           </div>
         </div>
       </div>
@@ -265,7 +288,7 @@ export function BotDetailClient({ bot, initialTab, initialEvents, monthlyUsage, 
           {activeTab === 'activity' && (
             <ActivityTab slug={bot.slug} initialEvents={initialEvents} />
           )}
-          {activeTab === 'leads' && <LeadsTab leads={leads} />}
+          {activeTab === 'leads' && <LeadsTab leads={leads} slug={bot.slug} />}
           {activeTab === 'conversations' && (
             <ConversationsTab conversations={conversations} totalCount={bot._count.conversations} />
           )}
@@ -292,6 +315,17 @@ export function BotDetailClient({ bot, initialTab, initialEvents, monthlyUsage, 
       loading={activating}
       botName={bot.botName}
       botSlug={bot.slug}
+    />
+
+    <ConfirmDialog
+      open={showDeleteConfirm}
+      onClose={() => setShowDeleteConfirm(false)}
+      onConfirm={handleConfirmDelete}
+      title={`¿Eliminar ${bot.botName}?`}
+      description="Esto elimina el bot y todos sus datos (conversaciones, leads, eventos, knowledge base) de forma permanente. No se puede deshacer."
+      confirmLabel="Eliminar bot"
+      variant="danger"
+      isPending={deletePending}
     />
 
     {mounted && createPortal(

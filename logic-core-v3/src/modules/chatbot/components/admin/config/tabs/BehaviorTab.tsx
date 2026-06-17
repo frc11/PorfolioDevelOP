@@ -2,6 +2,7 @@
 
 import { Plus, Trash2 } from 'lucide-react'
 import { ColorPicker } from '../ColorPicker'
+import { EmojiPickerField } from '../EmojiPickerField'
 import { Field } from '../Field'
 import { Input } from '../Input'
 import type { BotConfigEditorState, BotConfigTabProps, QuickReplyItem } from '../types'
@@ -79,12 +80,10 @@ function QuickRepliesEditor({
     <div className="space-y-3">
       {value.map((reply, index) => (
         <div key={reply.id ?? index} className="rounded-2xl border border-white/10 bg-zinc-950/50 p-3">
-          <div className="grid grid-cols-[80px_minmax(0,1fr)_auto] gap-2">
-            <Input
-              value={reply.emoji ?? ''}
-              onChange={(event) => handleUpdate(index, { emoji: event.target.value })}
-              placeholder="Icono"
-              maxLength={8}
+          <div className="grid grid-cols-[minmax(140px,190px)_minmax(0,1fr)_auto] gap-2">
+            <EmojiPickerField
+              value={reply.emoji || null}
+              onChange={(value) => handleUpdate(index, { emoji: value ?? '' })}
             />
             <Input
               value={reply.label}

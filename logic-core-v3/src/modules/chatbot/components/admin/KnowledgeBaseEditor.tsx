@@ -159,7 +159,11 @@ export function KnowledgeBaseEditor({
     <div className="space-y-6">
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
         <div className="space-y-6">
-          <div className="sticky top-0 z-10 flex flex-col gap-4 border-b border-white/5 bg-zinc-950/90 py-4 backdrop-blur sm:flex-row sm:items-center sm:justify-between">
+          {/* Card glass (no barra negra plana): bg frosted oscuro + blur fuerte
+              para que el contenido al scrollear se lea como vidrio esmerilado y
+              no "se cuele" detrás; borde completo + rounded + shadow para
+              separarla al quedar sticky. z-20 sobre las secciones. */}
+          <div className="sticky top-0 z-20 flex flex-col gap-4 rounded-2xl border border-white/[0.08] bg-zinc-950/75 px-4 py-3 shadow-lg shadow-black/30 backdrop-blur-[20px] backdrop-saturate-[180%] sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h1 className="text-2xl font-light text-zinc-100">
                 Knowledge Base

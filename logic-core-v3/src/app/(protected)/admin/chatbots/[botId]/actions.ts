@@ -3,6 +3,7 @@
 import { auth } from '@/auth'
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
+import { redirect } from 'next/navigation'
 import { logAdminAction } from '@/lib/audit-log'
 import { sendTransactionalEmail } from '@/lib/email/brevo-service'
 import { botActivatedEmail } from '@/lib/email/templates/bot-activated'
@@ -15,6 +16,10 @@ import { z } from 'zod'
 const ToggleBotActiveSchema = z.object({
   botId: z.string().min(1, 'Bot inválido.'),
   newActive: z.boolean(),
+})
+
+const DeleteBotSchema = z.object({
+  botId: z.string().min(1, 'Bot inválido.'),
 })
 
 export async function toggleBotActiveAction(
@@ -91,4 +96,83 @@ export async function toggleBotActiveAction(
       error: error instanceof Error ? error.message : 'unknown',
     }
   }
+}
+
+// Borra un bot y TODO su subárbol de datos. Todas las relaciones hijas de
+// BotConfig son onDelete: Cascade (KnowledgeBase, Conversation→ChatMessage,
+// ChatbotLead→CrmSyncAttempt, QuotaUsage, ChatbotEvent, ChatbotInsight,
+// BotAlert), así que un único delete arrastra todo el subárbol del bot —
+// scopeado a este bot, sin tocar otras orgs ni la CrmIntegration (que cuelga
+// de Organization, no de BotConfig).
+//
+// Devuelve { ok: false } solo en error/forbidden; en éxito hace redirect
+// server-side a la lista (la ruta /admin/chatbots/[botId] deja de existir).
+export async function deleteBotAction(
+  botId: string,
+): Promise<{ ok: false; error: string }> {
+  const session = await auth()
+  if (!session?.user || session.user.role !== 'SUPER_ADMIN') {
+    return { ok: false, error: 'Forbidden' }
+  }
+  const userId = session.user.id
+  if (!userId) return { ok: false, error: 'Forbidden' }
+
+  const parsed = DeleteBotSchema.safeParse({ botId })
+  if (!parsed.success) {
+    return { ok: false, error: parsed.error.issues[0]?.message ?? 'Datos inválidos.' }
+  }
+
+  try {
+    // Identidad + conteos ANTES del cascade (para dejarlos en el audit trail).
+    const bot = await prisma.botConfig.findUnique({
+      where: { id: botId },
+      select: {
+        slug: true,
+        botName: true,
+        organizationId: true,
+        _count: { select: { conversations: true, leads: true, events: true } },
+      },
+    })
+    if (!bot) {
+      return { ok: false, error: 'El bot no existe o ya fue eliminado.' }
+    }
+
+    await prisma.botConfig.delete({ where: { id: botId } })
+
+    await logAdminAction({
+      userId,
+      userEmail: session.user.email,
+      userName: session.user.name,
+      // No existe un valor BOT_DELETED en el enum AuditActionType y el schema
+      // está FROZEN → se audita con OTHER + metadata.subAction (ver lane-LOG.md,
+      // PENDIENTE DE COORDINACIÓN para sumar el valor de enum dedicado).
+      actionType: 'OTHER',
+      action: `Eliminó el bot ${bot.botName} (${bot.slug}) y todos sus datos`,
+      targetType: 'BotConfig',
+      targetId: botId,
+      metadata: {
+        subAction: 'BOT_DELETED',
+        botSlug: bot.slug,
+        organizationId: bot.organizationId,
+        deletedCounts: {
+          conversations: bot._count.conversations,
+          leads: bot._count.leads,
+          events: bot._count.events,
+        },
+        source: 'detail_page',
+      },
+    })
+
+    invalidateBotCache(bot.slug)
+    revalidatePath('/admin/chatbots')
+  } catch (error) {
+    return {
+      ok: false,
+      error: error instanceof Error ? error.message : 'No se pudo eliminar el bot.',
+    }
+  }
+
+  // Éxito: fuera del try para que el throw interno de redirect() no sea
+  // capturado por el catch.
+  redirect('/admin/chatbots')
 }
