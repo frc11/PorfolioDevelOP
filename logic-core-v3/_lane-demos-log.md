@@ -76,7 +76,7 @@ Usa el mismo backbone (useTransition, botones `disabled={isPending}`, `closeOnBa
 ### Sprint 1 — Seed cola con URLs reales + verificación del preview
 **Objetivo:** la cola EN_REVISION muestra demos con `draftUrl` = URLs reales; el iframe del detalle carga la demo real (o fallback limpio). Cero `example.com`/`example.org`.
 **Aceptación (a ojo, humano en :3000):** cola lista demos de prueba → URLs reales; detalle carga la demo real en el iframe; cero placeholders.
-**Estado:** _(se completa al cerrar)_
+**Estado:** ✅ script escrito · ⛔ correrlo = PENDIENTE 1 (sin env/DB en el worktree).
 
 ### Sprint 2 — Fix Aprobar/Rechazar (patrón nuevo-lead/nuevo-proyecto)
 **Objetivo:** ambos flujos end-to-end con robustez: deshabilitado mientras pending, sin doble submit, error visible sin stack, modal cierra+resetea al éxito, navegación con `router.refresh()` (sin `router.push`).
@@ -108,4 +108,14 @@ Usa el mismo backbone (useTransition, botones `disabled={isPending}`, `closeOnBa
 
 ## Ejecución por sprint
 
-_(se completa a medida que se cierran)_
+### ✅/⛔ Sprint 1 — Seed cola con URLs reales + preview
+**Hecho:** nuevo script `scripts/demos-seed-review-queue.ts` (dedicado, idempotente, no destructivo). Siembra 6 leads `DEMO Web · <Template>` (Zero/Ethereal/Noir/Skyline/Bold/Nebula), cada uno con un dossier caminado por el **camino legal** (`transitionDossier`: FICHA→EVALUADA→BRIEF→CONSTRUCCION→EN_REVISION), con ficha + evaluación (score 5 CALIENTE → abre el gate del brief sin tocar `status`) + brief + self-check en verde + `draftUrl` = URL real del template. Asigna al setter QA si existe (`setter-qa@develop.test` o cualquier `SETTER`), si no deja sin asignar. Migra placeholders: todo dossier EN_REVISION con `draftUrl` `example.*` (las filas QA de `b5-qa-review-queue.ts`) pasa a una URL real → **cero example.* en la cola**.
+**No tocado / por qué:** el iframe del detalle (`[leadId]/page.tsx`) ya tiene fallback limpio ("Abrir en pestaña nueva" + nota de hosts que bloquean embed + empty state sin draftUrl) y las 6 URLs son embebibles (Netlify, sin X-Frame/CSP) → **no se tocó el iframe** (la regla dice mejorarlo solo si está roto; no lo está). No se editó ninguna lib compartida ni schema; `transitionDossier` se **llama** (uso, permitido), no se edita.
+**Gate:** `scripts/**` está EXCLUIDO de tsc (`tsconfig.exclude`) y de eslint (igual que los `b5-qa-*`/`b3-qa-*` existentes) → el script no pasa por los gates del proyecto; se escribió siguiendo verbatim los idioms del `b5-qa-review-queue.ts` (template probado) y verificado a mano: cero `any`, tipos contra las firmas reales. Ningún archivo `src/` incluido cambió → **tsc sigue en baseline (exit 0)**.
+**Cómo correrlo (PENDIENTE — lo corre el humano con el env de dev):**
+```
+cd logic-core-v3
+# requiere .env.local con DATABASE_URL apuntando a la branch Neon dev (ep-quiet-waterfall-acv0fpll)
+npx tsx scripts/demos-seed-review-queue.ts
+```
+Esperado: "Cola de revisión: N dossier(s) EN_REVISION · M placeholder(s) migrado(s) · 0 con example.* restante(s)".
