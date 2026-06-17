@@ -234,6 +234,7 @@ function ActionBadge({ type }: { type: string }) {
     BOT_ACTIVATED: 'border-emerald-400/30 bg-emerald-500/15 text-emerald-300',
     BOT_DEACTIVATED: 'border-amber-400/30 bg-amber-500/15 text-amber-300',
     BOT_CONFIG_UPDATED: 'border-cyan-400/30 bg-cyan-500/15 text-cyan-300',
+    BOT_DELETED: 'border-red-400/30 bg-red-500/15 text-red-300',
     KB_UPDATED: 'border-violet-400/30 bg-violet-500/15 text-violet-300',
     IMPERSONATION_STARTED:
       'border-orange-400/30 bg-orange-500/15 text-orange-300',

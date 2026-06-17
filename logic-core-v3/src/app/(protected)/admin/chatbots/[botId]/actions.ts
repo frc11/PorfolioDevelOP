@@ -143,15 +143,11 @@ export async function deleteBotAction(
       userId,
       userEmail: session.user.email,
       userName: session.user.name,
-      // No existe un valor BOT_DELETED en el enum AuditActionType y el schema
-      // está FROZEN → se audita con OTHER + metadata.subAction (ver lane-LOG.md,
-      // PENDIENTE DE COORDINACIÓN para sumar el valor de enum dedicado).
-      actionType: 'OTHER',
+      actionType: 'BOT_DELETED',
       action: `Eliminó el bot ${bot.botName} (${bot.slug}) y todos sus datos`,
       targetType: 'BotConfig',
       targetId: botId,
       metadata: {
-        subAction: 'BOT_DELETED',
         botSlug: bot.slug,
         organizationId: bot.organizationId,
         deletedCounts: {

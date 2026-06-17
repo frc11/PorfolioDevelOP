@@ -202,14 +202,11 @@ export async function bulkDeleteBotsAction(botIds: string[]): Promise<BulkResult
         userId,
         userEmail: session.user.email,
         userName: session.user.name,
-        // Ver deleteBotAction: OTHER + metadata.subAction porque el enum
-        // AuditActionType (schema FROZEN) no tiene BOT_DELETED.
-        actionType: 'OTHER',
+        actionType: 'BOT_DELETED',
         action: `Eliminó el bot ${bot.botName} (${bot.slug}) y todos sus datos (acción bulk)`,
         targetType: 'BotConfig',
         targetId: botId,
         metadata: {
-          subAction: 'BOT_DELETED',
           botSlug: bot.slug,
           organizationId: bot.organizationId,
           deletedCounts: {
