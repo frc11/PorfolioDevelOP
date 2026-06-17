@@ -5,6 +5,7 @@ import type { MouseEvent as ReactMouseEvent } from 'react'
 import { useDraggable } from '@dnd-kit/core'
 import { Trash2 } from 'lucide-react'
 import { ProjectCard, type ProjectCardData } from './project-card'
+import { InlineConfirm } from '../../_components/inline-confirm'
 
 type DraggableProjectCardProps = {
   project: ProjectCardData
@@ -94,61 +95,24 @@ export function DraggableProjectCard({
         </button>
       ) : null}
 
-      {confirming && onDeleteProject ? (
-        // Confirmación scoped (estilo Leads): overlay absolute inset-0 → blur SÓLO sobre esta
-        // card, diálogo centrado. rounded propio (sin overflow-hidden en el wrapper para no
-        // cortar la sombra de la card).
-        <div
-          onClick={(event) => {
-            event.preventDefault()
-            event.stopPropagation()
+      {onDeleteProject ? (
+        <InlineConfirm
+          open={confirming}
+          onClose={onConfirmClose}
+          onConfirm={() => {
             onConfirmClose()
+            onDeleteProject(project.id)
           }}
-          className="absolute inset-0 z-20 flex items-center justify-center rounded-[26px] bg-[#05070a]/70 p-4 backdrop-blur-md"
-        >
-          <div
-            role="dialog"
-            aria-modal="true"
-            aria-label="Eliminar proyecto"
-            onClick={(event) => {
-              event.preventDefault()
-              event.stopPropagation()
-            }}
-            className="w-full max-w-[260px] rounded-2xl border border-white/10 bg-[#11161d] p-4 shadow-2xl"
-          >
-            <p className="text-sm font-semibold text-white">Eliminar proyecto</p>
-            <p className="mt-2 text-sm leading-6 text-zinc-300">
+          title="Eliminar proyecto"
+          description={
+            <>
               ¿Seguro que querés eliminar{' '}
               <span className="font-medium text-white">{project.name}</span>? Se eliminará junto con
               sus tareas, registros de tiempo e hitos.
-            </p>
-            <div className="mt-4 flex justify-end gap-2">
-              <button
-                type="button"
-                onClick={(event) => {
-                  event.preventDefault()
-                  event.stopPropagation()
-                  onConfirmClose()
-                }}
-                className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-zinc-200 transition-colors hover:bg-white/10"
-              >
-                Cancelar
-              </button>
-              <button
-                type="button"
-                onClick={(event) => {
-                  event.preventDefault()
-                  event.stopPropagation()
-                  onConfirmClose()
-                  onDeleteProject(project.id)
-                }}
-                className="rounded-xl border border-rose-400/20 bg-rose-500/15 px-3 py-2 text-sm font-medium text-rose-100 transition-colors hover:bg-rose-500/25"
-              >
-                Eliminar
-              </button>
-            </div>
-          </div>
-        </div>
+            </>
+          }
+          confirmLabel="Eliminar"
+        />
       ) : null}
     </div>
   )

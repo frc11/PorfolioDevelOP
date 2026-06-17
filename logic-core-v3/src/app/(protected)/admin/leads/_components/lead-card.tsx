@@ -12,7 +12,7 @@ import {
   UserRound,
 } from 'lucide-react'
 import type { DraggableAttributes, DraggableSyntheticListeners } from '@dnd-kit/core'
-import { ConfirmDialog } from '@/app/(protected)/admin/_components/confirm-dialog'
+import { InlineConfirm } from '@/app/(protected)/admin/_components/inline-confirm'
 import { cn } from '@/lib/utils'
 import type { LeadPipelineLead } from './lead-pipeline.shared'
 import { formatRelativeTime, serviceBadgeTone, serviceLabel } from './lead-card.helpers'
@@ -57,8 +57,7 @@ export function LeadCard({
   }, [lead.nextFollowUpAt])
 
   return (
-    <>
-      <article
+    <article
         ref={dragSetNodeRef}
         {...dragAttributes}
         {...dragListeners}
@@ -180,23 +179,21 @@ export function LeadCard({
           <span>{lead._count.activities} actividades</span>
           <span className="text-zinc-400">Abrir detalle</span>
         </div>
-      </article>
 
-      {presentational ? null : (
-        <ConfirmDialog
-          open={showDeleteDialog}
-          onClose={() => setShowDeleteDialog(false)}
-          onConfirm={() => {
-            setShowDeleteDialog(false)
-            onDelete(lead)
-          }}
-          title="Eliminar lead"
-          description={`Se eliminara "${lead.businessName}" junto con sus actividades y demos.`}
-          confirmLabel="Eliminar lead"
-          variant="danger"
-          isPending={isPending}
-        />
-      )}
-    </>
+        {presentational ? null : (
+          <InlineConfirm
+            open={showDeleteDialog}
+            onClose={() => setShowDeleteDialog(false)}
+            onConfirm={() => {
+              setShowDeleteDialog(false)
+              onDelete(lead)
+            }}
+            title="Eliminar lead"
+            description={`Se eliminará "${lead.businessName}" junto con sus actividades y demos.`}
+            confirmLabel="Eliminar lead"
+            isPending={isPending}
+          />
+        )}
+      </article>
   )
 }
