@@ -237,7 +237,7 @@ export default async function AgencyOsLeadDetailPage({ params }: LeadPageProps) 
                 revisión de demo (B5) — antes las dos páginas no se enlazaban. */}
             {lead.dossier ? (
               <Link
-                href={`/admin/leados/${lead.id}`}
+                href={`/admin/leados/${lead.id}?from=${encodeURIComponent(`/admin/leads/${lead.id}`)}`}
                 className="mt-2 inline-flex items-center gap-1.5 rounded-full border border-cyan-400/30 bg-cyan-500/10 px-3 py-1 text-xs font-medium text-cyan-200 transition-colors hover:bg-cyan-500/20"
               >
                 Ver revisión de la demo (LeadOS) →

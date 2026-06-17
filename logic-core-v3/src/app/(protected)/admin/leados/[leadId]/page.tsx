@@ -97,7 +97,7 @@ export default async function LeadOsRevisionDetailPage({ params }: RevisionPageP
             {/* B8A/H5: puente a la otra superficie admin del mismo lead
                 (pipeline + cierre de reunión B7), que antes no estaba enlazada. */}
             <Link
-              href={`/admin/leads/${leadId}`}
+              href={`/admin/leads/${leadId}?from=${encodeURIComponent(`/admin/leados/${leadId}`)}`}
               className="text-xs font-medium text-zinc-500 transition-colors hover:text-zinc-300"
             >
               Ver ficha completa del lead →

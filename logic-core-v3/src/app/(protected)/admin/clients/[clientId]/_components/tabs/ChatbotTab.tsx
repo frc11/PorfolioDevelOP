@@ -56,6 +56,11 @@ export async function ChatbotTab({ clientId }: ChatbotTabProps) {
     )
   }
 
+  // El "Volver" del detalle del bot regresa a esta ficha de cliente (cross-section).
+  const botId = org.botConfig.id
+  const botHref = (tab: string) =>
+    `/admin/chatbots/${botId}?tab=${tab}&from=${encodeURIComponent(`/admin/clients/${clientId}`)}`
+
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -109,38 +114,38 @@ export async function ChatbotTab({ clientId }: ChatbotTabProps) {
 
       <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
         <QuickActionCard
-          href={`/admin/chatbots/${org.botConfig.id}?tab=overview`}
+          href={botHref('overview')}
           icon={Bot}
           title="Overview completo"
           description="Metricas y datos del bot"
         />
         <QuickActionCard
-          href={`/admin/chatbots/${org.botConfig.id}?tab=config`}
+          href={botHref('config')}
           icon={Settings}
           title="Configurar bot"
           description="Identidad, apariencia, comportamiento"
           accent="cyan"
         />
         <QuickActionCard
-          href={`/admin/chatbots/${org.botConfig.id}?tab=knowledge`}
+          href={botHref('knowledge')}
           icon={BookOpen}
           title="Knowledge Base"
           description="Editar lo que sabe el bot"
         />
         <QuickActionCard
-          href={`/admin/chatbots/${org.botConfig.id}?tab=conversations`}
+          href={botHref('conversations')}
           icon={MessageSquare}
           title="Conversaciones"
           description="Historial completo"
         />
         <QuickActionCard
-          href={`/admin/chatbots/${org.botConfig.id}?tab=leads`}
+          href={botHref('leads')}
           icon={Users}
           title="Leads"
           description="Oportunidades capturadas"
         />
         <QuickActionCard
-          href={`/admin/chatbots/${org.botConfig.id}?tab=activity`}
+          href={botHref('activity')}
           icon={Activity}
           title="Activity log"
           description="Eventos en tiempo real"
