@@ -49,12 +49,20 @@ export function AppearanceTab({ state, update }: BotConfigTabProps) {
       </Field>
 
       {state.avatarStyle === 'image' && (
-        <Field label="URL de imagen del avatar" hint="Imagen cuadrada recomendada, 256x256+">
+        <Field
+          label="URL de imagen del avatar"
+          hint="Pegá la URL pública de una imagen cuadrada (256×256+). La subida directa de archivos todavía no está disponible."
+        >
           <Input
             value={state.avatarImageUrl ?? ''}
             onChange={(event) => update('avatarImageUrl', event.target.value || null)}
             placeholder="https://..."
           />
+          {state.avatarImageUrl && !/^https?:\/\/.+/i.test(state.avatarImageUrl) && (
+            <p className="mt-1 text-xs text-amber-400">
+              Debe ser una URL absoluta que empiece con http:// o https://
+            </p>
+          )}
         </Field>
       )}
 
