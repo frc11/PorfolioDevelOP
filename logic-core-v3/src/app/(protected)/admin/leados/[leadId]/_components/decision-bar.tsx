@@ -207,47 +207,28 @@ export function DecisionBar({ leadId, businessName }: DecisionBarProps) {
         eyebrow="develOP / LeadOS"
         title="Aprobar demo"
         description={`Publicaste la demo de ${businessName} a mano (Netlify, bajo develOP). Pegá acá la URL permanente — el panel solo la registra.`}
-        size="md"
-        closeOnBackdrop={!isPending}
-        footer={
-          <>
-            <button
-              type="button"
-              onClick={closeModal}
-              disabled={isPending}
-              className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm text-zinc-300 transition-colors hover:bg-white/[0.08] disabled:opacity-50"
-            >
-              Cancelar
-            </button>
-            <button
-              type="button"
-              onClick={handleAprobar}
-              disabled={isPending}
-              className="inline-flex items-center gap-2 rounded-2xl border border-emerald-400/25 bg-emerald-400/15 px-4 py-2.5 text-sm font-medium text-emerald-100 transition-colors hover:bg-emerald-400/25 disabled:opacity-50"
-            >
-              {isPending ? <LoaderCircle className="h-4 w-4 animate-spin" /> : null}
-              Confirmar aprobación
-            </button>
-          </>
-        }
       >
-        <div className="space-y-2">
-          <label htmlFor="final-url" className="text-xs font-medium text-zinc-400">
-            URL permanente
-          </label>
-          <input
-            id="final-url"
-            type="url"
-            value={finalUrl}
-            onChange={(event) => {
-              setFinalUrl(event.target.value)
-              setFieldErrors((current) => ({ ...current, finalUrl: '' }))
-            }}
-            placeholder="https://demo-negocio.develop.com.ar"
-            disabled={isPending}
-            className={inputClassName}
-          />
-          <FieldError message={fieldErrors.finalUrl} />
+        <form className="mt-6 space-y-5" onSubmit={handleAprobar}>
+          <div>
+            <label htmlFor="final-url" className="mb-2 block text-sm font-medium text-zinc-200">
+              URL permanente
+            </label>
+            <Input
+              id="final-url"
+              type="url"
+              value={finalUrl}
+              onChange={(event) => {
+                setFinalUrl(event.target.value)
+                setFieldErrors((current) => ({ ...current, finalUrl: '' }))
+              }}
+              placeholder="https://demo-negocio.develop.com.ar"
+              className={inputClassName}
+            />
+            {fieldErrors.finalUrl ? (
+              <p className="mt-2 text-xs text-rose-300">{fieldErrors.finalUrl}</p>
+            ) : null}
+          </div>
+
           {serverError ? (
             <div className="rounded-2xl border border-rose-400/20 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
               {serverError}
@@ -275,31 +256,8 @@ export function DecisionBar({ leadId, businessName }: DecisionBarProps) {
         eyebrow="develOP / LeadOS"
         title="Rechazar con dirección"
         description={`El setter va a ver esto tal cual en su panel como guía de retrabajo de ${businessName}.`}
-        size="md"
-        closeOnBackdrop={!isPending}
-        footer={
-          <>
-            <button
-              type="button"
-              onClick={closeModal}
-              disabled={isPending}
-              className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm text-zinc-300 transition-colors hover:bg-white/[0.08] disabled:opacity-50"
-            >
-              Cancelar
-            </button>
-            <button
-              type="button"
-              onClick={handleRechazar}
-              disabled={isPending}
-              className="inline-flex items-center gap-2 rounded-2xl border border-rose-400/25 bg-rose-500/15 px-4 py-2.5 text-sm font-medium text-rose-200 transition-colors hover:bg-rose-500/25 disabled:opacity-50"
-            >
-              {isPending ? <LoaderCircle className="h-4 w-4 animate-spin" /> : null}
-              Confirmar rechazo
-            </button>
-          </>
-        }
       >
-        <div className="space-y-4">
+        <form className="mt-6 space-y-5" onSubmit={handleRechazar}>
           <div>
             <label htmlFor="rechazo-motivo" className="mb-2 block text-sm font-medium text-zinc-200">
               Qué está mal (corto)
