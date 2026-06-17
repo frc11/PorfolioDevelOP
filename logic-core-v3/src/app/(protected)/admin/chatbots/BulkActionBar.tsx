@@ -23,6 +23,30 @@ interface Props {
 
 type BulkConfirm = 'pause' | 'activate' | 'delete'
 
+interface BulkOutcome {
+  success: number
+  failed: number
+  failures: Array<{ botId: string; error: string }>
+}
+
+// Elige toast de éxito o error según el resultado. Antes siempre se mostraba
+// toast.success, así que un fallo total (p.ej. forbidden → success:0) se
+// reportaba en verde. Ahora success:0 con fallos → toast.error.
+function announceBulk(result: BulkOutcome, noun: { sing: string; plur: string }) {
+  const s = result.success
+  if (s === 0) {
+    toast.error(
+      result.failures.length === 0
+        ? 'No se pudo completar la acción: sin permisos o la sesión expiró.'
+        : `No se pudo completar la acción. ${result.failed} ${result.failed !== 1 ? 'fallaron' : 'falló'}.`,
+    )
+    return
+  }
+  toast.success(
+    `${s} bot${s !== 1 ? 's' : ''} ${s !== 1 ? noun.plur : noun.sing}${result.failed > 0 ? `. ${result.failed} fallaron.` : '.'}`,
+  )
+}
+
 export function BulkActionBar({ selectedIds, totalBots, onSelectAll, onClear }: Props) {
   const router = useRouter()
   const [pending, startTransition] = useTransition()
@@ -33,39 +57,33 @@ export function BulkActionBar({ selectedIds, totalBots, onSelectAll, onClear }: 
   function runPause() {
     startTransition(async () => {
       const result = await bulkPauseBotsAction(selectedIds)
-      const s = result.success
-      toast.success(
-        `${s} bot${s !== 1 ? 's' : ''} pausado${s !== 1 ? 's' : ''}${result.failed > 0 ? `. ${result.failed} fallaron.` : '.'}`,
-      )
+      announceBulk(result, { sing: 'pausado', plur: 'pausados' })
       if (result.failed > 0) console.error('Bulk pause failures:', result.failures)
       setConfirm(null)
-      onClear()
+      // Solo limpiamos en éxito total; si algo falló, los que fallaron quedan
+      // seleccionados para reintentar.
+      if (result.failed === 0) onClear()
     })
   }
 
   function runActivate() {
     startTransition(async () => {
       const result = await bulkActivateBotsAction(selectedIds)
-      const s = result.success
-      toast.success(
-        `${s} bot${s !== 1 ? 's' : ''} activado${s !== 1 ? 's' : ''}${result.failed > 0 ? `. ${result.failed} fallaron.` : '.'}`,
-      )
+      announceBulk(result, { sing: 'activado', plur: 'activados' })
       if (result.failed > 0) console.error('Bulk activate failures:', result.failures)
       setConfirm(null)
-      onClear()
+      if (result.failed === 0) onClear()
     })
   }
 
   function runDelete() {
     startTransition(async () => {
       const result = await bulkDeleteBotsAction(selectedIds)
-      const s = result.success
-      toast.success(
-        `${s} bot${s !== 1 ? 's' : ''} eliminado${s !== 1 ? 's' : ''}${result.failed > 0 ? `. ${result.failed} fallaron.` : '.'}`,
-      )
+      announceBulk(result, { sing: 'eliminado', plur: 'eliminados' })
       if (result.failed > 0) console.error('Bulk delete failures:', result.failures)
       setConfirm(null)
-      onClear()
+      if (result.failed === 0) onClear()
+      // Refresca la lista para reflejar los borrados (incluso parciales).
       router.refresh()
     })
   }

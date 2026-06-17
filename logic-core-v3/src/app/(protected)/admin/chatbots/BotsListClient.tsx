@@ -56,6 +56,14 @@ export function BotsListClient({ bots }: Props) {
     [bots],
   )
 
+  // Selección efectiva = lo seleccionado QUE además está visible en el filtro
+  // actual. Evita que una acción bulk (sobre todo Eliminar, irreversible) toque
+  // bots que el filtro dejó fuera de vista.
+  const visibleSelectedIds = useMemo(
+    () => filtered.filter(b => selected.has(b.id)).map(b => b.id),
+    [filtered, selected],
+  )
+
   function toggleSelected(botId: string) {
     setSelected(prev => {
       const next = new Set(prev)
@@ -116,10 +124,10 @@ export function BotsListClient({ bots }: Props) {
       </p>
 
       <AnimatePresence>
-        {selected.size > 0 && (
+        {visibleSelectedIds.length > 0 && (
           <BulkActionBar
             key="bulk-bar"
-            selectedIds={Array.from(selected)}
+            selectedIds={visibleSelectedIds}
             totalBots={filtered.length}
             onSelectAll={selectAll}
             onClear={clearSelection}
