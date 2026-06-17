@@ -153,27 +153,36 @@ export async function createTimeEntry(
       return fail('Task not found')
     }
 
-    // Regla: cada usuario registra horas SOLO en tareas asignadas a él mismo.
-    // El userId viene de la sesión (no del cliente), y además exigimos que la
-    // tarea esté asignada a ese usuario. Tareas sin asignar o asignadas a otra
-    // persona se rechazan — nadie registra horas en nombre de otro.
-    if (task.assignedToId !== userId) {
+    // Regla: nadie registra horas en nombre de otro. La time entry siempre se
+    // graba contra el userId de la sesión. Una tarea asignada a OTRA persona se
+    // rechaza; una tarea SIN asignar se autoasigna al usuario (si registra horas
+    // la está trabajando → es suya); una tarea propia procede normal.
+    if (task.assignedToId !== null && task.assignedToId !== userId) {
       return fail('Solo podés registrar horas en tareas asignadas a vos.')
     }
 
-    const entry = await prisma.osTimeEntry.create({
-      data: {
-        taskId: task.id,
-        projectId: task.projectId,
-        userId,
-        hours: parsed.hours,
-        date: parsed.date,
-        notes: parsed.notes,
-      },
-      select: {
-        id: true,
-        projectId: true,
-      },
+    const entry = await prisma.$transaction(async (tx) => {
+      if (task.assignedToId === null) {
+        await tx.task.update({
+          where: { id: task.id },
+          data: { assignedToId: userId },
+        })
+      }
+
+      return tx.osTimeEntry.create({
+        data: {
+          taskId: task.id,
+          projectId: task.projectId,
+          userId,
+          hours: parsed.hours,
+          date: parsed.date,
+          notes: parsed.notes,
+        },
+        select: {
+          id: true,
+          projectId: true,
+        },
+      })
     })
 
     revalidateTimeEntryPaths(entry.projectId ?? task.projectId)

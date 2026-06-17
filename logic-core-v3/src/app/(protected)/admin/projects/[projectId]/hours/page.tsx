@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
+import { requireSuperAdmin } from '@/lib/auth-guards'
 import { listTimeEntriesByProject } from '@/app/(protected)/admin/team/_actions/time-entry.actions'
 import { TimeEntryPanel } from '../../_components/time-entry-panel'
 
@@ -23,6 +24,7 @@ function formatHours(value: number): string {
 
 export default async function AgencyOsProjectHoursPage({ params }: ProjectHoursPageProps) {
   const { projectId } = await params
+  const userId = await requireSuperAdmin()
 
   const project = await prisma.project.findUnique({
     where: { id: projectId },
@@ -34,6 +36,7 @@ export default async function AgencyOsProjectHoursPage({ params }: ProjectHoursP
           id: true,
           title: true,
           estimatedHours: true,
+          assignedToId: true,
         },
         orderBy: [
           {
@@ -108,10 +111,14 @@ export default async function AgencyOsProjectHoursPage({ params }: ProjectHoursP
       ) : null}
 
       <TimeEntryPanel
-        tasks={project.tasks.map((task) => ({
-          id: task.id,
-          title: task.title,
-        }))}
+        tasks={project.tasks
+          .filter(
+            (task) => task.assignedToId === userId || task.assignedToId === null,
+          )
+          .map((task) => ({
+            id: task.id,
+            title: task.title,
+          }))}
         groupedEntries={groupedEntries}
       />
     </section>
