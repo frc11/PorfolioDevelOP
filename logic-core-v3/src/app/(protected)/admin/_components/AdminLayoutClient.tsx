@@ -79,9 +79,21 @@ export function AdminLayoutClient({
         <div className="flex h-full flex-col p-3 pt-16 sm:p-4 lg:pt-4">
           <AdminTopbar />
 
-          <main className="relative mt-4 min-h-0 flex-1 overflow-y-auto rounded-[28px] border border-white/10 bg-white/[0.03] p-4 shadow-[0_24px_80px_rgba(0,0,0,0.35)] backdrop-blur-md sm:p-6">
-            {children}
-          </main>
+          {/* Superficie principal. El backdrop-filter vive en una capa hermana
+              (no en <main>): aplicado sobre <main> lo convertía en containing
+              block de todo position:fixed descendiente, obligando a portalear
+              cada modal al body. Al moverlo fuera del árbol de {children}, los
+              fixed vuelven a anclarse al viewport. El efecto visual es idéntico:
+              misma card con borde, tinte, sombra y blur del fondo. */}
+          <div className="relative mt-4 min-h-0 flex-1">
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 rounded-[28px] border border-white/10 bg-white/[0.03] shadow-[0_24px_80px_rgba(0,0,0,0.35)] backdrop-blur-md"
+            />
+            <main className="absolute inset-0 overflow-y-auto rounded-[28px] p-4 sm:p-6">
+              {children}
+            </main>
+          </div>
 
           <footer className="flex items-center justify-between px-1 py-2 text-xs text-zinc-700">
             <span>develOP Admin</span>
