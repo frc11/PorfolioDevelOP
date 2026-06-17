@@ -91,7 +91,7 @@ Usa el mismo backbone (useTransition, botones `disabled={isPending}`, `closeOnBa
 ### Sprint 4 — Layout del detalle: aprovechar el alto (preview sticky)
 **Objetivo:** eliminar el hueco vertical bajo el preview; preview sticky que llena el alto disponible mientras se scrollea la columna derecha; arranca arriba; responsive a 1 columna en pantallas chicas.
 **Aceptación:** sin hueco muerto; alto aprovechado; preview grande/usable; arranca arriba; responsive ok.
-**Estado:** _(se completa al cerrar)_
+**Estado:** ✅ hecho · gate eslint 0 + tsc 0.
 
 ---
 
@@ -143,3 +143,17 @@ Esperado: "Cola de revisión: N dossier(s) EN_REVISION · M placeholder(s) migra
 **No tocado:** `contracts.ts` (solo se leen tipos de `Ficha`), los otros 4 paneles de `dossier-panels.tsx`, Modal, libs compartidas.
 **Gate:** eslint 0 (ficha-accordion.tsx + dossier-panels.tsx) + `tsc --noEmit` exit 0.
 **Nota para el humano:** la animación de `grid-template-rows` es la técnica canónica de height-auto (Chrome 107+/FF/Safari 16+); en un browser viejo haría snap (sigue funcional). Verificar a ojo: hover suave, cero flicker entre headers, reduced-motion instantáneo, click/teclado.
+
+### ✅ Sprint 4 — Layout del detalle: aprovechar el alto (preview sticky)
+**Causa del hueco (diagnóstico):** el grid (`xl:grid-cols-[1.55fr_1fr]`) usa `align-items: stretch` por default → la columna izquierda (la demo) se estiraba a la altura de la columna derecha (paneles, mucho más alta), dejando un hueco enorme **debajo** del iframe `h-[70vh]` fijo.
+**Estrategia (la preferida del pedido):** preview **sticky** que llena el alto del viewport mientras se scrollea la derecha; arranca arriba.
+**`old → new`:**
+- Grid item izquierdo: stretch (estirado) **→** `xl:self-start` (corta el stretch — esto solo ya mata el hueco).
+- Sección "La demo": estática **→** `xl:sticky xl:top-0` (se ancla al tope del scroll-container, que es el `<main>` del admin, una vez que el header card scrollea) + `xl:flex xl:flex-col` con **altura definida** `xl:h-[calc(100vh-12.5rem)]` (12.5rem ≈ topbar `h-16` 4rem + paddings del contenedor 2rem + `mt-4` 1rem + footer ~2rem + padding del `<main>` p-6 3rem + colchón). Tunable si el humano ve clip/gap.
+- Wrapper del iframe: `xl:flex-1 xl:min-h-0` (crece para llenar el alto restante de la sección).
+- Iframe: `h-[70vh]` fijo **→** `h-[60vh] w-full xl:h-full` (en xl llena el wrapper sticky; en pantallas chicas baja a 60vh, "no queda gigante").
+- Empty state (sin draftUrl): crece con `xl:flex-1` + centrado, así no deja gap en la sección sticky (caso borde; el seed garantiza draftUrl).
+- Responsive: el grid ya colapsa a 1 columna < xl; sin sticky, iframe 60vh.
+**No tocado:** `AdminLayoutClient`/`<main>` (se LEYÓ para fundamentar el offset; no se editó), libs, Modal, schema.
+**Gate:** eslint 0 (page.tsx) + `tsc --noEmit` exit 0.
+**Nota para el humano:** el valor `calc(100vh-12.5rem)` está calculado contra el alto real del `<main>`; si en tu pantalla el preview clippea el pie ("Si el embed no carga…") o deja un gap, ajustar ese rem. Verificar a ojo: scrollear la derecha con el preview grande y fijo, sin hueco, arrancando arriba; y el colapso a 1 columna en mobile.

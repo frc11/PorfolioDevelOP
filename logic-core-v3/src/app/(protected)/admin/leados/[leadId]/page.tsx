@@ -183,7 +183,11 @@ export default async function LeadOsRevisionDetailPage({ params }: RevisionPageP
       ) : null}
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.55fr)_minmax(340px,1fr)]">
-        <section className="rounded-[28px] border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
+        {/* El preview es sticky y llena el alto del viewport mientras se
+            scrollea la columna de paneles (más alta). `self-start` corta el
+            stretch del grid (era la causa del hueco: la columna izquierda se
+            estiraba a la altura de la derecha). Arranca arriba (top-0). */}
+        <section className="rounded-[28px] border border-white/10 bg-white/5 p-5 backdrop-blur-xl xl:sticky xl:top-0 xl:flex xl:h-[calc(100vh-12.5rem)] xl:flex-col xl:self-start">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h3 className="text-base font-semibold text-white">La demo</h3>
             {dossier.draftUrl ? (
@@ -201,11 +205,11 @@ export default async function LeadOsRevisionDetailPage({ params }: RevisionPageP
 
           {dossier.draftUrl ? (
             <>
-              <div className="mt-4 overflow-hidden rounded-2xl border border-white/10 bg-black/40">
+              <div className="mt-4 overflow-hidden rounded-2xl border border-white/10 bg-black/40 xl:min-h-0 xl:flex-1">
                 <iframe
                   src={dossier.draftUrl}
                   title={`Demo de ${dossier.lead.businessName}`}
-                  className="h-[70vh] w-full"
+                  className="h-[60vh] w-full xl:h-full"
                   loading="lazy"
                 />
               </div>
@@ -215,7 +219,7 @@ export default async function LeadOsRevisionDetailPage({ params }: RevisionPageP
               </p>
             </>
           ) : (
-            <p className="mt-4 rounded-2xl border border-dashed border-white/10 bg-black/10 px-4 py-8 text-center text-sm text-zinc-500">
+            <p className="mt-4 flex items-center justify-center rounded-2xl border border-dashed border-white/10 bg-black/10 px-4 py-8 text-center text-sm text-zinc-500 xl:min-h-0 xl:flex-1">
               Este dossier no tiene draft URL cargada — no hay demo para
               embeber.
             </p>
