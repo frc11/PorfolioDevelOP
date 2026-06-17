@@ -80,8 +80,8 @@ Usa el mismo backbone (useTransition, botones `disabled={isPending}`, `closeOnBa
 
 ### Sprint 2 — Fix Aprobar/Rechazar (patrón nuevo-lead/nuevo-proyecto)
 **Objetivo:** ambos flujos end-to-end con robustez: deshabilitado mientras pending, sin doble submit, error visible sin stack, modal cierra+resetea al éxito, navegación con `router.refresh()` (sin `router.push`).
-**Aceptación:** Aprobar → URL → confirmar una vez → APROBADA, modal cierra+resetea, vista refresca; idem Rechazar con los 3 campos → RECHAZADA; error visible si falla.
-**Estado:** ✅ hecho · gate eslint 0 + tsc 0.
+**Aceptación:** Aprobar → URL → confirmar una vez → APROBADA, modal cierra+resetea, vista refresca; idem Rechazar con los 3 campos → RECHAZADA; error visible si falla. **+ el modal aparece como overlay centrado con backdrop sobre TODO (no atrapado en el `<main>`).**
+**Estado:** ✅ hecho (re-fix: ver "Corrección Sprint 2") · gate eslint 0 + tsc 0.
 
 ### Sprint 3 — Ficha de observación: acordeón hover, one-at-a-time
 **Objetivo:** las sub-secciones de la ficha se despliegan al hover, exactamente una abierta, con intención (debounce ~90-120ms), lock anti-cascada durante la transición, sin colapsar todo en mouse-leave, headers estables, body animado con grid-rows 0fr↔1fr + opacity (ease-out, <300ms), reduced-motion instantáneo, click+teclado operativos (aria-expanded).
@@ -164,3 +164,14 @@ Se corrió una review adversaria (3 reviewers: correctness UI, romper el acorde�
 - **seed:** el patch idempotente EN_REVISION ahora corre sólo si la fila **ya estaba** EN_REVISION al entrar (`startedEnRevision`) → elimina un UPDATE redundante (inofensivo, mismos valores) en la primera corrida de una fila nueva.
 - **Se dejó como está (cosmético, validado por el humano):** el `calc(100vh-12.5rem)` del preview sticky (no afecta correctness; el iframe `flex-1` lo absorbe) y el mapeo URL↔nombre de las filas legacy migradas (el objetivo es sólo "cero example.*").
 **Gate:** eslint 0 + `tsc --noEmit` exit 0.
+
+### 🔧 Corrección Sprint 2 — alinear forms Aprobar/Rechazar con nuevo-lead/proyecto
+**El bug REAL (el de Sprint 2 era una hipótesis equivocada — el cierre/reset NO era la causa):** `decision-bar.tsx` usaba el `<Modal>` compartido (`@/components/ui`), que renderiza `fixed inset-0` **INLINE, sin portal**. El `<main>` del admin (`AdminLayoutClient.tsx:82`) tiene `backdrop-blur-md` → ese `backdrop-filter` crea un **containing block** que re-ancla cualquier `position:fixed` descendiente. Resultado: el modal no se centraba sobre el viewport — quedaba atrapado/desplazado dentro del `<main>`, tapando los paneles a la derecha. Es exactamente la trampa de la memoria `admin-fixed-backdrop-trap`; los forms que andan (`lead-form`, `project-form`) la esquivan **portaleando a `document.body`**.
+**`old → new` (diff estructural concreto vs lead-form/project-form):**
+1. **Render del modal:** `<Modal>` compartido (NO portalea) **→** overlay **portaleado a `document.body`** con `createPortal` + `useIsClient` (gate SSR-safe), réplica local de la estructura de `lead-form` (mismo overlay `fixed inset-0 z-[130] flex items-center justify-center bg-[#05070a]/80 backdrop-blur-md` y panel `bg-[#0c1016]/95 … backdrop-blur-xl`). Se escapa el trap del `<main>` → overlay centrado sobre TODO.
+2. **Mecanismo de submit:** botones con `onClick` imperativo en el footer del Modal **→** `<form onSubmit={handle}>` con `<Button type="submit" loading={isPending}>` (Enter submitea, igual que los forms).
+3. **Pending/loading:** `<LoaderCircle>` manual **→** prop `loading` del `<Button>` compartido (deshabilita + spinner).
+4. **Inputs:** `<input>`/`<textarea>` nativos **→** `<Input>` compartido (+ textarea nativo para el arreglo, igual que lead-form). Validación Zod doble, `serverError` en banner, reset+`router.refresh()` se mantienen.
+**Por qué local y no el `OverlayModal` del lane Proyectos:** aislamiento entre lanes (ese archivo lo posee Proyectos; importarlo acopla las branches). Se replicó la **estructura** de `lead-form` dentro de `decision-bar.tsx` — sin tocar `Modal.tsx`, sin tocar los forms de referencia, sin tocar el layout admin.
+**No tocado:** `Modal.tsx` (compartido, intacto), `lead-form`/`project-form` (referencia read-only), `AdminLayoutClient`/`<main>` (la causa es su `backdrop-filter`, pero el fix correcto vive en scope = portalear, no editar el layout). Actions/schemas sin cambios (el fix es client).
+**Gate:** eslint 0 (decision-bar.tsx) + `tsc --noEmit` exit 0. **Lo visual lo verifica el humano en :3000** (preview MCP flaky / visual-qa no puede bootear un 2º `next dev`).
