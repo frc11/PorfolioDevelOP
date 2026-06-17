@@ -1,5 +1,6 @@
 'use client'
 
+import { type ReactNode } from 'react'
 import { motion } from 'motion/react'
 import { Users } from 'lucide-react'
 import { EmptyState } from '@/components/ui'
@@ -18,6 +19,9 @@ interface Lead {
 
 interface LeadsTableProps {
   leads: Lead[]
+  // Acción opcional por fila (default ausente). El admin la pasa; los demás
+  // consumidores (dashboard del cliente) la omiten → su vista queda idéntica.
+  renderRowAction?: (lead: Lead) => ReactNode
 }
 
 const INTENT_COLORS: Record<string, string> = {
@@ -32,7 +36,7 @@ function formatDate(d: Date | string): string {
   return new Date(d).toLocaleString('es-AR', { dateStyle: 'short', timeStyle: 'short' })
 }
 
-export function LeadsTable({ leads }: LeadsTableProps) {
+export function LeadsTable({ leads, renderRowAction }: LeadsTableProps) {
   if (leads.length === 0) {
     return (
       <EmptyState
@@ -74,6 +78,7 @@ export function LeadsTable({ leads }: LeadsTableProps) {
             {lead.conversation?.currentPath && (
               <div className="mt-1 text-zinc-600">desde {lead.conversation.currentPath}</div>
             )}
+            {renderRowAction && <div className="mt-2 flex justify-end">{renderRowAction(lead)}</div>}
           </div>
         </motion.div>
       ))}

@@ -288,7 +288,7 @@ export function BotDetailClient({ bot, initialTab, initialEvents, monthlyUsage, 
           {activeTab === 'activity' && (
             <ActivityTab slug={bot.slug} initialEvents={initialEvents} />
           )}
-          {activeTab === 'leads' && <LeadsTab leads={leads} />}
+          {activeTab === 'leads' && <LeadsTab leads={leads} slug={bot.slug} />}
           {activeTab === 'conversations' && (
             <ConversationsTab conversations={conversations} totalCount={bot._count.conversations} />
           )}
