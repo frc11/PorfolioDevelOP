@@ -145,11 +145,20 @@ export async function createTimeEntry(
       select: {
         id: true,
         projectId: true,
+        assignedToId: true,
       },
     })
 
     if (!task) {
       return fail('Task not found')
+    }
+
+    // Regla: cada usuario registra horas SOLO en tareas asignadas a él mismo.
+    // El userId viene de la sesión (no del cliente), y además exigimos que la
+    // tarea esté asignada a ese usuario. Tareas sin asignar o asignadas a otra
+    // persona se rechazan — nadie registra horas en nombre de otro.
+    if (task.assignedToId !== userId) {
+      return fail('Solo podés registrar horas en tareas asignadas a vos.')
     }
 
     const entry = await prisma.osTimeEntry.create({
