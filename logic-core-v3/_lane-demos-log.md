@@ -175,3 +175,124 @@ Se corrió una review adversaria (3 reviewers: correctness UI, romper el acorde�
 **Por qué local y no el `OverlayModal` del lane Proyectos:** aislamiento entre lanes (ese archivo lo posee Proyectos; importarlo acopla las branches). Se replicó la **estructura** de `lead-form` dentro de `decision-bar.tsx` — sin tocar `Modal.tsx`, sin tocar los forms de referencia, sin tocar el layout admin.
 **No tocado:** `Modal.tsx` (compartido, intacto), `lead-form`/`project-form` (referencia read-only), `AdminLayoutClient`/`<main>` (la causa es su `backdrop-filter`, pero el fix correcto vive en scope = portalear, no editar el layout). Actions/schemas sin cambios (el fix es client).
 **Gate:** eslint 0 (decision-bar.tsx) + `tsc --noEmit` exit 0. **Lo visual lo verifica el humano en :3000** (preview MCP flaky / visual-qa no puede bootear un 2º `next dev`).
+
+---
+
+## CIERRE DEL LANE — Auditoría y notas de merge
+
+Fecha: 2026-06-17 · Branch: `lane/demos` · Gate final: tsc exit 0 · eslint exit 0
+
+---
+
+### 1 · AUDITORÍA DE LO HECHO (desde git)
+
+#### Commits (`git log --oneline main..HEAD`)
+
+| SHA | Mensaje | Qué resolvió (deducido del diff) |
+|---|---|---|
+| `ec561ff` | chore(demos): plan + log del lane | Creó `_lane-demos-log.md`: scope, lista prohibidos, discovery (URLs reales, mecanismo seed, patrón forms, gap de decision-bar), 4 sprints con criterios. Paso 0 del super-prompt. |
+| `58458f8` | feat(demos): seed cola de revisión con URLs reales + verificación del preview | Creó `scripts/demos-seed-review-queue.ts` (395 líneas): 6 leads `DEMO Web · *` con URLs Netlify reales, camino legal FICHA→EN_REVISION vía `transitionDossier`, migración de filas legacy `example.*`. Sprint 1. |
+| `45bf684` | fix(demos): robustez de Aprobar/Rechazar (patrón nuevo-lead) | **SUPERSEDED.** Diagnosticó mal: arregló el cierre/reset del modal en el camino de éxito y sustituyó `router.push` por `router.refresh()`. El bug visual del modal (pegado a la derecha, no centrado) PERSISTÍA. Sprint 2 — primer intento. |
+| `9265791` | feat(demos): ficha de observación con acordeón hover (one-at-a-time) | Creó `ficha-accordion.tsx` (142 líneas): acordeón hover debounce 110ms, lock anti-cascada, grid-rows 0fr↔1fr, reduced-motion, a11y. Modificó `dossier-panels.tsx` para pasar items. Sprint 3 — versión inicial (tracking por índice; corregida en 284f897). |
+| `c2a6c66` | feat(demos): layout del detalle aprovecha el alto (preview sticky) | Modificó `[leadId]/page.tsx`: `xl:self-start` + `xl:sticky xl:top-0` + `h-[calc(100vh-12.5rem)]` en la sección preview; iframe `xl:h-full`; empty state con `xl:flex-1`. Eliminó el hueco. Sprint 4. |
+| `284f897` | refactor(demos): hardening del acordeón y seed (post-review adversaria) | Hardening post review: `ficha-accordion` pasó a tracking por `key` (no índice) + fallback al primero → siempre exactamente una abierta; side-effects fuera del setState updater (pureza React); `aria-controls`+`id`+`aria-hidden`. Seed: guard `startedEnRevision` elimina UPDATE redundante. |
+| `be48efa` | fix(demos): alinear forms Aprobar/Rechazar con estructura de nuevo-lead/proyecto | **FIX CORRECTO.** Reescribió `decision-bar.tsx`: overlay portaleado a `document.body` con `createPortal` + `useIsClient`; `<form onSubmit>`; `<Button loading={isPending}>` / `<Input>` compartidos; serverError en banner. Sprint 2 — corrección definitiva. |
+
+#### Archivos tocados (`git diff --stat main...HEAD`)
+
+```
+logic-core-v3/_lane-demos-log.md                        +177  (plan + log — propio)
+logic-core-v3/scripts/demos-seed-review-queue.ts        +400  (seed nuevo — propio)
+admin/leados/[leadId]/_components/decision-bar.tsx      +267 / -129  (fix Aprobar/Rechazar)
+admin/leados/[leadId]/_components/dossier-panels.tsx     +28  (integración FichaAccordion)
+admin/leados/[leadId]/_components/ficha-accordion.tsx   +165  (nuevo — acordeón hover)
+admin/leados/[leadId]/page.tsx                           +18  (sticky preview)
+```
+
+6 archivos · +926 inserciones / -129 borrados.
+
+#### Desviaciones del plan
+
+**Desviación 1 — Sprint 2 necesitó dos commits (45bf684 → be48efa).**
+El primer diagnóstico era incorrecto: el bug no era el cierre/reset. La causa real era estructural: `decision-bar` usaba el `<Modal>` compartido, que renderiza `position:fixed` inline sin portal; el `<main>` del admin tiene `backdrop-blur-md` → ese `backdrop-filter` crea un containing block que atrapa `position:fixed` → modal anclado al `<main>`, no al viewport. La corrección replicó la estructura de `lead-form.tsx` (portal a `document.body`). Las mejoras del commit superseded (reset+router.refresh) se conservaron en el re-fix.
+
+**Desviación 2 — `ficha-accordion.tsx` inicial (9265791) requirió hardening (284f897).**
+La primera versión trackeaba por índice numérico y ejecutaba side-effects dentro del setState updater. La review adversaria detectó: (a) cambio en `items` podía dejar cero secciones abiertas; (b) React StrictMode puede llamar updaters dos veces → timers duplicados; (c) `react-hooks/refs` prohíbe escribir refs durante render. Hardening: tracking por `key` + fallback, side-effects fuera del updater, aria semántico completo.
+
+---
+
+### 2 · PILA DE PENDIENTES DE COORDINACIÓN
+
+**Sin pendientes de coordinación.** Ningún cambio requirió tocar archivos compartidos, schema, o libs prohibidas.
+
+**Pendiente OPERATIVO (no afecta el merge):**
+Correr el seed contra la DB dev. El worktree no tiene `.env.local` / `DATABASE_URL` / `tsx`. Comando:
+```
+cd logic-core-v3
+# requiere .env.local con DATABASE_URL → ep-quiet-waterfall-acv0fpll
+npx tsx scripts/demos-seed-review-queue.ts
+```
+
+---
+
+### 3 · CHECK DE DISCIPLINA DE AISLAMIENTO
+
+| Archivo | Clasificación |
+|---|---|
+| `_lane-demos-log.md` | Propio del lane ✅ |
+| `scripts/demos-seed-review-queue.ts` | Nuevo, propio del lane ✅ |
+| `admin/leados/[leadId]/_components/decision-bar.tsx` | Exclusivo leados ✅ |
+| `admin/leados/[leadId]/_components/dossier-panels.tsx` | Exclusivo leados ✅ |
+| `admin/leados/[leadId]/_components/ficha-accordion.tsx` | Nuevo, exclusivo leados ✅ |
+| `admin/leados/[leadId]/page.tsx` | Exclusivo leados ✅ |
+
+Archivos prohibidos — check negativo: `dossier.ts` · `flow.ts` · `contracts.ts` · `revision.ts` · `auth-guards.ts` · `action-utils.ts` · `Modal.tsx` · `AdminBackButton.tsx` · `AdminErrorBoundary.tsx` · `AdminLayoutClient.tsx` · `prisma/schema.prisma` → **todos ausentes del diff** ✅
+
+`schema.prisma` no está en el diff. Seed y actions usan solo columnas existentes de `OsLeadDossier` (`leadId`, `stage`, `draftUrl`, `finalUrl`, `aprobadaAt`, `rechazos`) y `OsLead` (read-only join) ✅
+
+**VEREDICTO: cero violaciones de scope. Cero archivos prohibidos tocados.**
+
+---
+
+### 4 · ESTADO DEL GATE
+
+```
+.\node_modules\.bin\tsc.cmd --noEmit   →  EXIT: 0  (0 errores)
+npx eslint [4 src files]               →  EXIT: 0  (0 errores)
+```
+
+Build completo no corrido en la auditoría (el gate del lane es tsc+eslint; el build puede tener deuda baseline ajena preexistente al lane).
+
+---
+
+### 5 · VERIFICACIÓN FUNCIONAL/VISUAL PENDIENTE
+
+**✅ Verificado técnico:** tsc exit 0 · eslint exit 0 · cero archivos fuera de scope · cero `any` · cero `router.push` en admin · cero imports de `Modal.tsx`.
+
+**👁 A probar por el humano en :3000:**
+
+**APROBAR / RECHAZAR** — actions: `aprobarRevision` + `rechazarRevision` (`_actions/revision.actions.ts`). Confirmar: modal aparece centrado con backdrop sobre TODO el viewport (no pegado al panel); submit con spinner una sola vez; transición EN_REVISION→APROBADA/RECHAZADA persistida; modal cierra y limpia campos; vista refresca. Campo vacío → error inline. Reabrir modal → campos limpios. **UX nueva:** ya no hay auto-salto; la vista queda en la demo procesada; avanzar con "Siguiente en la cola" (header).
+
+**DEMOS REALES** (post-seed): iframe carga las URLs Netlify reales; fallback "Abrir en pestaña nueva" disponible si un host bloquea framing.
+
+**FICHA ACORDEÓN** — hover >110ms abre la sección suave (260ms), la previa cierra. Pasar el mouse rápido: sin flicker. Reflow del layout al abrir/cerrar: sin apertura espuria (lock 320ms). Mouse fuera del panel: sección abierta queda abierta. `prefers-reduced-motion`: instantáneo. Click + Tab+Enter: andan.
+
+**LAYOUT STICKY** — en xl: iframe llena el alto, sin hueco, sticky mientras se scrollea la columna derecha, arranca arriba. En mobile: 1 columna, iframe 60vh. Si clippea: ajustar `calc(100vh-12.5rem)`.
+
+---
+
+### 6 · NOTAS PARA EL MERGE
+
+**Dependencias:** `package.json` y `package-lock.json` (logic-core-v3) — no tocados ✅. El `package-lock.json` en la raíz del repo es preexistente al lane (untracked), no cuenta.
+
+**Archivos nuevos del lane** (cruzar contra lane/chatbots):
+- `src/app/(protected)/admin/leados/[leadId]/_components/ficha-accordion.tsx`
+- `scripts/demos-seed-review-queue.ts`
+- `_lane-demos-log.md`
+
+No puedo ver la branch chatbots → el orquestador debe cruzar estos 3 paths. Si Chatbots no tocó `admin/leados/` ni creó `scripts/demos-seed-*`, el merge es limpio.
+
+**DEUDA COMPARTIDA LATENTE — `AdminLayoutClient.tsx:82` (SHARED, no tocado):**
+El `<main>` del admin tiene `backdrop-blur-md` → CSS containing block que atrapa `position:fixed` de todos los descendientes. El fix de este lane portaleó los modales de `decision-bar` a `document.body` para escapar la trampa. **La causa raíz vive en el archivo compartido.** Si otros lanes tienen o crean modales sin portal bajo `/admin/` (usando el `<Modal>` compartido u otro componente que no portalee), sufrirán el mismo síntoma. Recomendación al orquestador: coordinar un fix centralizado de `AdminLayoutClient` (sacar el `backdrop-filter` del `<main>` o moverlo a un pseudo-elemento) para que el `<Modal>` compartido funcione sin necesidad de portalear caso por caso. Al menos 5 modales admin potencialmente afectados (memoria `admin-fixed-backdrop-trap`).
+
+**Riesgos de merge:** ninguno detectado. Sin cambios de schema, sin deps nuevas, sin archivos compartidos tocados.
