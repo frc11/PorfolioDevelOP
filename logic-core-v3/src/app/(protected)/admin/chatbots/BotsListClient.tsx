@@ -17,6 +17,16 @@ interface Props {
   bots: BotListItem[]
 }
 
+// Solo presentación: el value de cada opción sigue siendo el slug crudo de la
+// industria (el filtro no cambia); únicamente se humaniza la etiqueta visible
+// ('medico_odontologico' → 'Medico Odontologico').
+function formatIndustry(value: string): string {
+  return value
+    .split('_')
+    .map(word => (word ? word.charAt(0).toUpperCase() + word.slice(1) : word))
+    .join(' ')
+}
+
 export function BotsListClient({ bots }: Props) {
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all')
@@ -79,6 +89,8 @@ export function BotsListClient({ bots }: Props) {
           />
         </div>
         <Select
+          aria-label="Filtrar por estado"
+          className="sm:w-44"
           value={statusFilter}
           onChange={e => setStatusFilter(e.target.value as 'all' | 'active' | 'inactive')}
           options={[
@@ -88,11 +100,13 @@ export function BotsListClient({ bots }: Props) {
           ]}
         />
         <Select
+          aria-label="Filtrar por industria"
+          className="sm:w-52"
           value={industryFilter}
           onChange={e => setIndustryFilter(e.target.value)}
           options={[
             { value: 'all', label: 'Todas las industrias' },
-            ...industries.map(i => ({ value: i, label: i })),
+            ...industries.map(i => ({ value: i, label: formatIndustry(i) })),
           ]}
         />
       </div>
