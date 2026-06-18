@@ -22,10 +22,6 @@ const emptyStringToUndefined = (value: unknown) => {
   return trimmed === '' ? undefined : trimmed
 }
 
-export const AgencySettingsIdSchema = z
-  .string()
-  .trim()
-  .min(1, 'ID de configuracion invalido.')
 export const UpdateSettingsSchema = z.object({
   contactEmail: z.preprocess(emptyStringToNull, z.string().email().nullable()),
   contactWhatsapp: z.preprocess(emptyStringToNull, z.string().nullable()),

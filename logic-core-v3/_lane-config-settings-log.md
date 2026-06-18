@@ -63,17 +63,30 @@ Verificado: el `<Input>` compartido (`@/components/ui/Input.tsx`) reenvía `clas
 
 **Gate Sprint 2**: `tsc --noEmit` exit 0 · ESLint `settings-console.tsx` exit 0.
 
-## SPRINT 3 — checkeo + limpieza segura  (pendiente)
-- Remover import muerto `PREMIUM_FEATURE_KEYS` en `settings.actions.ts` (L12) — sin uso en el cuerpo.
-- Remover schema huérfano `AgencySettingsIdSchema` (`settings.schemas.ts` L25) — grep global = 0 importadores → seguro.
+## SPRINT 3 — checkeo + limpieza segura  ✅ HECHO
 
-### Parada — DECISIÓN DE VALENTINO (no tocar, solo reportar)
-- (a) `updateModulePricing`: `updateMany({ where: { slug } })` puede dar "éxito" silencioso (count 0) si `moduleKey` no matchea un slug real.
-- (b) Máscara del token Telegram duplicada cliente/server: `maskFromInput` (console L58) vs `maskSecret` (actions L21).
+### Revisión de rutina (todo OK, nada roto)
+- `loading.tsx`: `<LoadingState variant="skeleton-card" />` + `skeleton-list` → estado loading presente.
+- `error.tsx`: delega a `AdminErrorBoundary` (context="settings") → estado error presente.
+- `page.tsx`: maneja `!settingsResult.success` (bloque de error rojo con header estático) y `!teamMembersResult.success` (warning ámbar + pasa `[]` → degradación grácil). Empty-state de equipo: "No hay miembros internos cargados.".
+- Handlers `saveAllSettings` / `saveModulePricing`: `useTransition`, toasts de error/success, limpian token, usan `router.refresh()` (NO `router.push` → cumple regla). OK.
+
+### Limpieza segura aplicada
+- `settings.actions.ts`: removido import muerto `PREMIUM_FEATURE_KEYS` (sin uso en el cuerpo; grep confirmó solo la línea de import).
+- `settings.schemas.ts`: removido schema huérfano `AgencySettingsIdSchema` (grep global = **0 importadores** → seguro).
+
+**Gate Sprint 3**: `tsc --noEmit` exit 0 · ESLint `settings.actions.ts` + `settings.schemas.ts` exit 0.
+
+### ⛔ Parada — DECISIÓN DE VALENTINO (NO tocado, solo reporte)
+- **(a) `updateModulePricing` — éxito silencioso + contrato moduleKey/slug enredado.**
+  `prisma.premiumModule.updateMany({ where: { slug: moduleSlug }, data })` ignora el `count` y siempre devuelve `ok(...)`. Si `moduleSlug` no matchea ninguna fila → count 0 pero "Precio actualizado" igual.
+  Además hay un desfase de contrato: `getSettings` emite `moduleKey = mod.slug` (slug de DB, casteado `as PremiumFeatureKey`), pero `UpdateModulePricingSchema` valida `moduleKey` contra `PREMIUM_FEATURE_KEYS` (keys del **catálogo**, no slugs) y `updateModulePricing` re-mapea catálogo→slug vía `LEGACY_TO_SLUG`. Para módulos donde slug ≠ key de catálogo (`ecommerce`→`tienda-conectada`, `motor-resenias`→`motor-resenas`, `email-*`→`email-marketing-pro`) el cliente manda el slug de DB, que NO es key válida → puede fallar la validación ("Modulo invalido") o caer en el camino silencioso. **Es lógica de pricing/data-contract → no se toca.**
+- **(b) Máscara del token Telegram duplicada cliente/server.**
+  `maskFromInput` (cliente, `settings-console.tsx`) y `maskSecret` (server, `settings.actions.ts`) implementan la MISMA máscara `••••••••<last4>` por separado. Riesgo de divergencia. **No se toca (decisión de negocio/UX).**
 
 ---
 
 ## Log de ejecución
 - [✅] Sprint 1 — hover canónico (commit `b1000cc`)
-- [✅] Sprint 2 — spinners (commit)
-- [ ] Sprint 3 — checkeo + limpieza
+- [✅] Sprint 2 — spinners (commit `78e7d86`)
+- [✅] Sprint 3 — checkeo + limpieza (commit)
