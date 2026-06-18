@@ -201,7 +201,7 @@ export function LeadActivityFeed({
       <div
         ref={timelineRef}
         onScroll={onTimelineScroll}
-        className="mt-6 xl:min-h-0 xl:flex-1 xl:overflow-y-auto xl:px-1 xl:py-1"
+        className="mt-6 xl:min-h-0 xl:flex-1 xl:overflow-y-auto xl:pl-1 xl:pr-3 xl:py-1"
         style={{ maskImage: timelineFadeMask, WebkitMaskImage: timelineFadeMask }}
       >
         <div className="relative pl-6">
