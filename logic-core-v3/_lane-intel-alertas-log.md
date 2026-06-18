@@ -66,7 +66,41 @@ Borra solo las filas con `metadata._seed = 'intel-alertas'` y no recrea. (Run no
 
 ---
 
+# LOTE 3 — filtro fecha + difuminado/overview + hover de cards
+
+PASO 0 (read-only, 2 subagentes Explore): mapeo de Leads/Proyectos. Veredicto reuse-vs-replicate:
+- **Filtro de fecha:** los componentes (`ProjectsPeriodDropdown`, `LeadFiltersBar`) están ACOPLADOS a su panel → se **replica el patrón**. `ThemedDateInput` (leads/_components) es genérico pero vive en el lane Leads → se **replica su styling** (~6 líneas) en vez de importar cross-lane, para mantener Alertas self-contained.
+- **Overview + difuminado:** el sistema de Leads (`pipeline-column.tsx` + `column-overview.tsx`) está ACOPLADO (tipos lead, dnd-kit, server actions) → se **replica**. Los hooks `@/lib/use-is-client` y `@/lib/use-reduced-motion` SÍ son compartidos → se **importan**.
+
+## Sprint 1 — Filtro de fecha (client-side)
+**Commit:** `8be5a26`
+**Archivos:** `_components/alerts-filters.ts` (lógica pura, nuevo) + `_components/alerts-date-filter.tsx` (UI, nuevo) + `AlertsClient.tsx`.
+- old→new: nuevo estado `dateFilter` (default `{ period: '1w' }` = última semana). Presets Todas/Última semana/1 mes/6 meses/1 año + Personalizado (2 `<input type=date>`). `matchesDateFilter(createdAt, filter, now)` (date-fns `subWeeks`/`subMonths`/`subYears`). Se combina con severidad en un único `passesFilters` → **consolidé la chequera de severidad que estaba duplicada ×3** en las 3 columnas. 100% client-side; NO toca listAlerts/manageAlerts.
+- Decisión: las stat cards siguen sobre el total (igual que el filtro de severidad preexistente, que tampoco las toca). Nota: las 14 alertas seed caen todas dentro de la última semana → con el default todas se ven; los presets no las reducen visiblemente, el rango "Personalizado" sí.
+- Gate: tsc 0 · eslint 0.
+
+## Sprint 2 — Difuminado + overview de columna (umbral 5)
+**Commit:** `31cdda7`
+**Archivos:** `AlertsClient.tsx` + `_components/alert-card.tsx` (card extraída, nuevo) + `_components/alert-column-overview.tsx` (nuevo) + `_components/alert-types.ts` (nuevo).
+- old→new: cuando una columna tiene `>= 5` alertas filtradas → renderiza las primeras 5, header clickable + hint "Ver todas (N) →" → abre overview en portal (replica 1:1 de `column-overview.tsx`: createPortal a body, AnimatePresence, focus-trap, scroll-lock, Escape, backdrop, `z-[200]`, `useIsClient`, `useReducedMotion`). El overview muestra TODAS las (filtradas) de la categoría — consistente con el count del trigger.
+- Refactor anti-duplicación: la card se extrajo a `AlertCard` y se reusa en columna y overview (mismo `renderAlertCard`).
+- **Tensión difuminado↔hover (resuelta acá por el orden del lote):** Leads difumina con `maskImage` sobre un body con `overflow-hidden` + altura fija — eso SÍ recortaría un hover, y el lote lo prohíbe. → Implementé el difuminado como **overlay absoluto `pointer-events-none` (z-10), fade a `#141618`, en los últimos 64px**, SIN `overflow-hidden` ni altura fija en la columna/lista. (El `#141618` es la superficie COMPUESTA de la columna: root `#080a0c` + panel `white/[0.03]` de AdminLayoutClient:91 + columna `white/[0.02]` ≈ rgb(20,22,24); fadear a `#080a0c` pelado dejaría una banda más oscura.) Así el Sprint 3 puede escalar la card y subirla por z-index sobre el overlay sin recorte. Trade-off vs Leads: el "hay más" es algo más suave (no hay corte duro de la 5ª); a cambio el hover nunca se clippea. El overlay es `pointer-events-none` → la 5ª card debajo sigue hovereable/clickable.
+- Gate: tsc 0 · eslint 0.
+
+## Sprint 3 — Hover por card
+**Commit:** `991e13c`
+**Archivo:** `_components/alert-card.tsx`.
+- old→new: hover por card (mismo visual que las stat cards: scale 1.015 + shadow + ring). Restricciones: (1) por card en `AlertCard`, nunca por la columna; (2) sin recorte → `relative z-0 hover:z-30` sube la card sobre el gradiente (z-10) y columnas vecinas; las columnas no tienen `overflow-hidden`. Con scale 1.015 + `p-4` de la columna, el crecimiento (~2px/lado) ni llega al borde → no se corta.
+- **Mecanismo (divergencia documentada):** la card es `motion.div` con `layout`; un `hover:scale` CSS (como adminHoverCls) sería pisado por el `transform` inline de Framer → el scale va por **`whileHover`** (Framer) y ring/shadow/z-index por CSS. Visual idéntico a las stat cards. <300ms, GPU, `useReducedMotion` + `motion-reduce`.
+- Gate: tsc 0 · eslint 0.
+
+---
+
 ## Estado / pendiente humano
-- **visual-qa** `/admin/alerts`: despachado 2× (Lote 1 y Lote 2). **El preview/browser MCP NO está conectado esta sesión** (`preview_start`/`preview_screenshot` ausentes — coincide con memoria `preview-mcp-untracked`), así que el agente solo pudo hacer **análisis estático**: estructura correcta, los 4 wrappers de hover aplicados, grids responsive intactos (`grid-cols-1 sm:grid-cols-2 lg:grid-cols-4` y `lg:grid-cols-3`), sin riesgo de clip, sin errores obvios. **NO hubo screenshot real** → la confirmación visual queda en manos del humano en `:3000` (que además es el criterio de aceptación del lote).
-- **Verificación humana (Lote 1):** tras "Visto"/"Resolver" sobre una PENDING, el badge rojo del sidebar debe bajar SIN esperar ~30s y sin re-navegar (captura antes/después). Si no refresca → aplicar contingencia `router.refresh()` en AlertsClient.
-- **Verificación humana (Lote 2):** las 4 cards pobladas (2 / 6 / 5 / Xm) y el hover a ojo (scale + shadow + ring, sin clip).
+- **visual-qa** `/admin/alerts`: despachado 3× (Lotes 1, 2 y 3). **El preview/browser MCP NO está conectado esta sesión** (`preview_start`/`preview_screenshot` ausentes — coincide con memoria `preview-mcp-untracked`), así que el agente solo pudo hacer **análisis/auditoría de código** (sin screenshot real). Lote 3: auditoría limpia (z-index z-0→z-30 > overlay z-10 correcto; `relative` sin `overflow-hidden`; portal/trap/AnimatePresence OK) → veredicto **❓ A CONFIRMAR** render visual. La confirmación queda en manos del humano en `:3000` (criterio de aceptación del lote).
+- **Verificación humana (Lote 1):** tras "Visto"/"Resolver" sobre una PENDING, el badge rojo del sidebar debe bajar SIN esperar ~30s y sin re-navegar. Si no refresca → contingencia `router.refresh()` en AlertsClient.
+- **Verificación humana (Lote 2):** las 4 stat cards pobladas (2 / 6 / 5 / Xm) y su hover a ojo (scale + shadow + ring, sin clip).
+- **Verificación humana (Lote 3):**
+  - Filtro de fecha: default "Última semana" aplicado (chip cyan); "Personalizado" abre los inputs desde/hasta; combina con severidad. (Nota: las 14 seed caen todas en la última semana → para ver el filtro recortar, usar "Personalizado".)
+  - Difuminado/overview: PENDING (6) y RESOLVED (5) muestran difuminado + "Ver todas (N) →"; click en header o hint abre el overview en portal con todas; cierra con X/Esc/backdrop. VISTAS (3) sin difuminado.
+  - Hover por card: scale + shadow + ring solo en la card hovereada; la 5ª (difuminada) al hover sube completa sobre el gradiente, sin recortarse en ningún costado. **Confirmar el color del fade** (`#141618`): si quedara una banda visible al pie, es un one-liner.
