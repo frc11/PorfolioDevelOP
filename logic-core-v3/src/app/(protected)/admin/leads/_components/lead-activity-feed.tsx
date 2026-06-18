@@ -4,6 +4,7 @@ import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { Inbox, LoaderCircle } from 'lucide-react'
 import { EmptyState, Select } from '@/components/ui'
+import { adminHoverCls } from '@/lib/hover'
 import { createActivity } from '../_actions/activity.actions'
 import { useScrollFades } from './use-scroll-fades'
 import {
@@ -212,8 +213,8 @@ export function LeadActivityFeed({
               const Icon = channelIcon(activity.channel)
 
               return (
+                <div key={activity.id} className={'rounded-[24px] ' + adminHoverCls}>
                 <article
-                  key={activity.id}
                   className="relative rounded-[24px] border border-white/10 bg-black/20 p-4"
                 >
                   <div className="absolute -left-[19px] top-5 flex h-5 w-5 items-center justify-center rounded-full border border-white/10 bg-[#0f141b] text-zinc-300">
@@ -249,6 +250,7 @@ export function LeadActivityFeed({
                     {activity.performedBy?.name ?? activity.performedBy?.email ?? 'Super Admin'}
                   </p>
                 </article>
+                </div>
               )
             })
           ) : (

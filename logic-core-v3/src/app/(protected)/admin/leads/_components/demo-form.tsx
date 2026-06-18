@@ -4,6 +4,7 @@ import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { ExternalLink, Eye, Inbox, PlayCircle } from 'lucide-react'
 import { Button, EmptyState, Field, Input, Select } from '@/components/ui'
+import { adminHoverCls } from '@/lib/hover'
 import { createDemo, markDemoViewed } from '../_actions/demo.actions'
 
 type DemoServiceType = 'WEB' | 'AI_AGENT' | 'AUTOMATION' | 'CUSTOM_SOFTWARE' | null
@@ -128,7 +129,8 @@ export function DemoForm({ leadId }: DemoFormProps) {
   }
 
   return (
-    <div className="rounded-[24px] border border-white/10 bg-black/20 p-4">
+    <div className={'rounded-[24px] ' + adminHoverCls}>
+      <div className="rounded-[24px] border border-white/10 bg-black/20 p-4">
       <div className="flex items-center justify-between gap-3">
         <div>
           <p className="text-sm font-medium text-white">Nueva demo</p>
@@ -226,6 +228,7 @@ export function DemoForm({ leadId }: DemoFormProps) {
           </div>
         </form>
       ) : null}
+      </div>
     </div>
   )
 }
@@ -271,8 +274,8 @@ export function LeadDemosPanel({ leadId, demos }: LeadDemosPanelProps) {
       <div className="space-y-3">
         {demos.length > 0 ? (
           demos.map((demo) => (
+            <div key={demo.id} className={'rounded-[24px] ' + adminHoverCls}>
             <article
-              key={demo.id}
               className="rounded-[24px] border border-white/10 bg-black/20 p-4"
             >
               <div className="flex flex-wrap items-start justify-between gap-3">
@@ -341,6 +344,7 @@ export function LeadDemosPanel({ leadId, demos }: LeadDemosPanelProps) {
                 ) : null}
               </div>
             </article>
+            </div>
           ))
         ) : (
           <EmptyState
