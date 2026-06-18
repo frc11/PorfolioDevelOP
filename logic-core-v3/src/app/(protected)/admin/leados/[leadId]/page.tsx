@@ -13,6 +13,7 @@ import {
   STATUS_LABELS,
 } from '@/lib/leados/flow'
 import { esCaliente, formatEspera, ordenarCola } from '@/lib/leados/revision'
+import { adminHoverCls } from '@/lib/hover'
 import { DecisionBar } from './_components/decision-bar'
 import {
   BriefPanel,
@@ -90,7 +91,7 @@ export default async function LeadOsRevisionDetailPage({ params }: RevisionPageP
 
   return (
     <section className="space-y-6">
-      <div className="rounded-[28px] border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
+      <div className={'rounded-[28px] border border-white/10 bg-white/5 p-5 backdrop-blur-xl ' + adminHoverCls}>
         <div className="flex flex-wrap items-center justify-between gap-3">
           <AdminBackButton href="/admin/leados" label="Volver a la cola" />
           <div className="flex flex-wrap items-center gap-4">

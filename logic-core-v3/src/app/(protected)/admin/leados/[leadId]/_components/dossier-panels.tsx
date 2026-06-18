@@ -6,6 +6,7 @@
  */
 import type { ReactNode } from 'react'
 import { AlertTriangle, CheckCircle2, XCircle } from 'lucide-react'
+import { adminHoverCls } from '@/lib/hover'
 import { Callout } from '@/components/ui'
 import type { Brief, Evaluacion, Ficha, Rechazo, SelfCheck } from '@/lib/leados/contracts'
 import { IG_MANEJADO_POR_VALUES } from '@/lib/leados/contracts'
@@ -31,7 +32,7 @@ function formatFecha(iso: string): string {
 
 function Panel({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <section className="rounded-3xl border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
+    <section className={'rounded-3xl border border-white/10 bg-white/5 p-5 backdrop-blur-xl ' + adminHoverCls}>
       <h3 className="text-base font-semibold text-white">{title}</h3>
       <div className="mt-3">{children}</div>
     </section>

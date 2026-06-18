@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { ChevronRight, Flame, UserRound } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { adminHoverCls } from '@/lib/hover'
 import { prisma } from '@/lib/prisma'
 import { parseEvaluacion } from '@/lib/leados/flow'
 import {
@@ -98,13 +99,13 @@ export default async function LeadOsRevisionPage() {
         </div>
 
         <div className="flex items-center gap-3">
-          <div className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-right">
+          <div className={'rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-right ' + adminHoverCls}>
             <p className="text-[10px] uppercase tracking-[0.22em] text-zinc-500">
               En revisión
             </p>
             <p className="mt-1 text-xl font-semibold text-white">{cola.length}</p>
           </div>
-          <div className="rounded-2xl border border-amber-400/20 bg-amber-400/10 px-4 py-3 text-right">
+          <div className={'rounded-2xl border border-amber-400/20 bg-amber-400/10 px-4 py-3 text-right ' + adminHoverCls}>
             <p className="text-[10px] uppercase tracking-[0.22em] text-amber-200/70">
               Calientes
             </p>
@@ -125,7 +126,7 @@ export default async function LeadOsRevisionPage() {
               key={item.leadId}
               href={`/admin/leados/${item.leadId}`}
               className={cn(
-                'group relative flex items-center justify-between gap-4 overflow-hidden rounded-2xl border p-4 transition-all',
+                'group relative flex items-center justify-between gap-4 overflow-hidden rounded-2xl border p-4 transition-all will-change-transform hover:scale-[1.02] hover:shadow-[0_12px_32px_-12px_rgba(255,255,255,0.12)] hover:ring-1 hover:ring-white/15 motion-reduce:hover:scale-100 motion-reduce:hover:shadow-none',
                 item.caliente
                   ? 'border-amber-400/30 bg-amber-500/[0.05] hover:bg-amber-500/[0.08]'
                   : 'border-white/10 bg-white/5 hover:border-cyan-400/20 hover:bg-white/[0.07]',
