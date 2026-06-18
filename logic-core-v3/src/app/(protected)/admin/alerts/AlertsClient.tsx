@@ -13,6 +13,7 @@ import {
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button, EmptyState, StatCard } from '@/components/ui'
+import { adminHoverCls } from '@/lib/hover'
 import { acknowledgeAlert, resolveAlert } from '@/modules/chatbot/server/admin/manageAlerts'
 import type { listAlerts } from '@/modules/chatbot/server/admin/manageAlerts'
 
@@ -120,31 +121,39 @@ export function AlertsClient({ initialAlerts }: AlertsClientProps) {
     <div className="space-y-6">
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-        <StatCard
-          label="Críticas pendientes"
-          value={pendingCritical}
-          icon={AlertTriangle}
-          accent={pendingCritical > 0 ? 'red' : 'zinc'}
-        />
-        <StatCard
-          label="Totales pendientes"
-          value={totalPending}
-          icon={Inbox}
-          accent="amber"
-        />
-        <StatCard
-          label="Resueltas esta semana"
-          value={resolvedThisWeek}
-          icon={CheckCircle}
-          accent="emerald"
-        />
-        <StatCard
-          label="Tiempo prom. resolución"
-          value={avgResolutionMin > 0 ? `${avgResolutionMin}m` : '—'}
-          icon={Clock}
-          accent="cyan"
-          subtitle={avgResolutionMin > 0 ? 'minutos' : 'sin datos'}
-        />
+        <div className={'grid rounded-2xl ' + adminHoverCls}>
+          <StatCard
+            label="Críticas pendientes"
+            value={pendingCritical}
+            icon={AlertTriangle}
+            accent={pendingCritical > 0 ? 'red' : 'zinc'}
+          />
+        </div>
+        <div className={'grid rounded-2xl ' + adminHoverCls}>
+          <StatCard
+            label="Totales pendientes"
+            value={totalPending}
+            icon={Inbox}
+            accent="amber"
+          />
+        </div>
+        <div className={'grid rounded-2xl ' + adminHoverCls}>
+          <StatCard
+            label="Resueltas esta semana"
+            value={resolvedThisWeek}
+            icon={CheckCircle}
+            accent="emerald"
+          />
+        </div>
+        <div className={'grid rounded-2xl ' + adminHoverCls}>
+          <StatCard
+            label="Tiempo prom. resolución"
+            value={avgResolutionMin > 0 ? `${avgResolutionMin}m` : '—'}
+            icon={Clock}
+            accent="cyan"
+            subtitle={avgResolutionMin > 0 ? 'minutos' : 'sin datos'}
+          />
+        </div>
       </div>
 
       {/* Severity filter */}
