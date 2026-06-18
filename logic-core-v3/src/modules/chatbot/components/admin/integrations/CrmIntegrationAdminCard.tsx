@@ -1,4 +1,5 @@
 import { Lock, Send } from 'lucide-react'
+import { adminHoverCls } from '@/lib/hover'
 import { prisma } from '@/lib/prisma'
 import { getPlanForOrg } from '@/lib/plan/get-plan-for-org'
 import { planAllows } from '@/lib/plan/plan-allows'
@@ -33,6 +34,7 @@ export async function CrmIntegrationAdminCard({
         title="Integración con CRM"
         description={`El plan de ${organizationName} no incluye CRM. Para habilitar, el cliente debe upgradear (o develOP forzar el plan desde admin de clientes).`}
       >
+        <div className={'rounded-2xl ' + adminHoverCls}>
         <Card padding="lg">
           <div className="flex items-start gap-4">
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-amber-400/30 bg-amber-500/10">
@@ -53,6 +55,7 @@ export async function CrmIntegrationAdminCard({
             </div>
           </div>
         </Card>
+        </div>
       </Section>
     )
   }
@@ -87,6 +90,7 @@ export async function CrmIntegrationAdminCard({
         title="Webhook n8n"
         description={`Cada lead capturado por el bot de ${organizationName} se manda automáticamente a este webhook. Configurá la URL, el header de auth (opcional) y activá el sync.`}
       >
+        <div className={'rounded-2xl ' + adminHoverCls}>
         <Card padding="lg">
           <div className="mb-5 flex items-center gap-3 border-b border-white/[0.06] pb-4">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-cyan-400/30 bg-cyan-500/10">
@@ -109,6 +113,7 @@ export async function CrmIntegrationAdminCard({
             encryptionAvailable={encryptionAvailable}
           />
         </Card>
+        </div>
       </Section>
 
       {integration && (
@@ -116,6 +121,7 @@ export async function CrmIntegrationAdminCard({
           title="Historial de sincronizaciones"
           description="Últimos intentos de sync. Si alguno falló, podés reintentarlo manualmente."
         >
+          <div className={'rounded-2xl ' + adminHoverCls}>
           <Card padding="md">
             {history.ok ? (
               <CrmSyncHistoryList
@@ -128,6 +134,7 @@ export async function CrmIntegrationAdminCard({
               </div>
             )}
           </Card>
+          </div>
         </Section>
       )}
     </div>

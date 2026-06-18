@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { motion, AnimatePresence } from 'motion/react'
+import { motion, AnimatePresence, useReducedMotion } from 'motion/react'
 import { Select } from '@/components/ui'
 
 interface ActivityEvent {
@@ -79,6 +79,7 @@ function formatTime(timestamp: string | Date): string {
 }
 
 export function ActivityLog({ initialEvents, slug }: ActivityLogProps) {
+  const reduce = Boolean(useReducedMotion())
   const [events, setEvents] = useState<ActivityEvent[]>(initialEvents)
   const [paused, setPaused] = useState(false)
   const [levelFilter, setLevelFilter] = useState('')
@@ -197,6 +198,7 @@ export function ActivityLog({ initialEvents, slug }: ActivityLogProps) {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.18 }}
+                whileHover={reduce ? undefined : { scale: 1.015, transition: { duration: 0.2, ease: [0.25, 0.46, 0.45, 0.94] } }}
                 role={hasMeta ? 'button' : undefined}
                 tabIndex={hasMeta ? 0 : undefined}
                 aria-expanded={hasMeta ? isOpen : undefined}
@@ -216,7 +218,7 @@ export function ActivityLog({ initialEvents, slug }: ActivityLogProps) {
                       }
                     : undefined
                 }
-                className={`flex items-start gap-3 rounded-2xl border px-3 py-2.5 ${
+                className={`flex items-start gap-3 rounded-2xl border px-3 py-2.5 hover:shadow-[0_12px_32px_-12px_rgba(255,255,255,0.12)] hover:ring-1 hover:ring-white/15 motion-reduce:hover:shadow-none ${
                   LEVEL_STYLES[event.level] ?? LEVEL_STYLES.info
                 } ${
                   hasMeta

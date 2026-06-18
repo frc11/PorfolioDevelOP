@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { ExternalLink, AlertCircle } from 'lucide-react'
 import { Card } from '@/components/ui/Card'
+import { adminHoverCls } from '@/lib/hover'
 import {
   INSTALL_PLATFORMS,
   buildEmbedSnippet,
@@ -55,70 +56,76 @@ export function InstallTab({ bot }: Props) {
       )}
 
       {/* Paso 1 — Snippet */}
-      <Card padding="lg">
-        <p className="text-[10px] uppercase tracking-[0.24em] text-zinc-500 mb-2">Paso 1</p>
-        <h3 className="text-base font-medium text-zinc-200 mb-3">Snippet a copiar</h3>
+      <div className={'rounded-2xl ' + adminHoverCls}>
+        <Card padding="lg">
+          <p className="text-[10px] uppercase tracking-[0.24em] text-zinc-500 mb-2">Paso 1</p>
+          <h3 className="text-base font-medium text-zinc-200 mb-3">Snippet a copiar</h3>
 
-        <SnippetCopyBlock snippet={snippet} />
+          <SnippetCopyBlock snippet={snippet} />
 
-        <p className="text-xs text-zinc-500 mt-3">
-          Va antes del cierre de <code className="text-cyan-400">&lt;/body&gt;</code>
-        </p>
-      </Card>
+          <p className="text-xs text-zinc-500 mt-3">
+            Va antes del cierre de <code className="text-cyan-400">&lt;/body&gt;</code>
+          </p>
+        </Card>
+      </div>
 
       {/* Paso 2 — Instrucciones por plataforma */}
-      <Card padding="lg">
-        <p className="text-[10px] uppercase tracking-[0.24em] text-zinc-500 mb-2">Paso 2</p>
-        <h3 className="text-base font-medium text-zinc-200 mb-4">Instrucciones por plataforma</h3>
+      <div className={'rounded-2xl ' + adminHoverCls}>
+        <Card padding="lg">
+          <p className="text-[10px] uppercase tracking-[0.24em] text-zinc-500 mb-2">Paso 2</p>
+          <h3 className="text-base font-medium text-zinc-200 mb-4">Instrucciones por plataforma</h3>
 
-        <div className="flex flex-wrap gap-2 mb-4">
-          {INSTALL_PLATFORMS.map((p) => (
-            <button
-              key={p.id}
-              onClick={() => setPlatform(p.id)}
-              className={`flex items-center gap-2 rounded-xl border px-3 py-2 text-sm transition-colors ${
-                platform === p.id
-                  ? 'border-cyan-400/40 bg-cyan-400/10 text-cyan-300'
-                  : 'border-white/10 bg-white/[0.02] text-zinc-300 hover:bg-white/[0.04]'
-              }`}
-            >
-              <span>{p.icon}</span>
-              {p.label}
-            </button>
-          ))}
-        </div>
+          <div className="flex flex-wrap gap-2 mb-4">
+            {INSTALL_PLATFORMS.map((p) => (
+              <button
+                key={p.id}
+                onClick={() => setPlatform(p.id)}
+                className={`flex items-center gap-2 rounded-xl border px-3 py-2 text-sm transition-colors ${
+                  platform === p.id
+                    ? 'border-cyan-400/40 bg-cyan-400/10 text-cyan-300'
+                    : 'border-white/10 bg-white/[0.02] text-zinc-300 hover:bg-white/[0.04]'
+                }`}
+              >
+                <span>{p.icon}</span>
+                {p.label}
+              </button>
+            ))}
+          </div>
 
-        <div className="rounded-xl border border-white/10 bg-white/[0.02] p-4">
-          <PlatformInstructions platform={platform} />
-        </div>
-      </Card>
+          <div className="rounded-xl border border-white/10 bg-white/[0.02] p-4">
+            <PlatformInstructions platform={platform} />
+          </div>
+        </Card>
+      </div>
 
       {/* Paso 3 — Verificar */}
-      <Card padding="lg">
-        <p className="text-[10px] uppercase tracking-[0.24em] text-zinc-500 mb-2">Paso 3</p>
-        <h3 className="text-base font-medium text-zinc-200 mb-3">Verificar instalación</h3>
-        <p className="text-sm text-zinc-400 mb-4">
-          Una vez que el cliente pegó el snippet, podés abrir su sitio para confirmar que el widget carga.
-        </p>
+      <div className={'rounded-2xl ' + adminHoverCls}>
+        <Card padding="lg">
+          <p className="text-[10px] uppercase tracking-[0.24em] text-zinc-500 mb-2">Paso 3</p>
+          <h3 className="text-base font-medium text-zinc-200 mb-3">Verificar instalación</h3>
+          <p className="text-sm text-zinc-400 mb-4">
+            Una vez que el cliente pegó el snippet, podés abrir su sitio para confirmar que el widget carga.
+          </p>
 
-        <div className="flex flex-wrap gap-2">
-          {bot.allowedDomains.map((domain) => (
-            <a
-              key={domain}
-              href={`https://${domain.replace(/^https?:\/\//, '')}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.02] px-3 py-2 text-sm text-zinc-300 hover:bg-white/[0.04]"
-            >
-              <ExternalLink className="h-3 w-3" strokeWidth={1.5} />
-              {domain}
-            </a>
-          ))}
-          {bot.allowedDomains.length === 0 && (
-            <p className="text-xs text-zinc-500 italic">Configurá dominios primero</p>
-          )}
-        </div>
-      </Card>
+          <div className="flex flex-wrap gap-2">
+            {bot.allowedDomains.map((domain) => (
+              <a
+                key={domain}
+                href={`https://${domain.replace(/^https?:\/\//, '')}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.02] px-3 py-2 text-sm text-zinc-300 hover:bg-white/[0.04]"
+              >
+                <ExternalLink className="h-3 w-3" strokeWidth={1.5} />
+                {domain}
+              </a>
+            ))}
+            {bot.allowedDomains.length === 0 && (
+              <p className="text-xs text-zinc-500 italic">Configurá dominios primero</p>
+            )}
+          </div>
+        </Card>
+      </div>
     </div>
   )
 }

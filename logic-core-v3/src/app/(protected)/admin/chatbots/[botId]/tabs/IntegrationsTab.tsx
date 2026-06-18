@@ -1,5 +1,6 @@
 import { Zap } from 'lucide-react'
 import { CrmIntegrationAdminCard } from '@/modules/chatbot/components/admin/integrations/CrmIntegrationAdminCard'
+import { adminHoverCls } from '@/lib/hover'
 
 interface IntegrationsTabProps {
   organizationId: string
@@ -17,7 +18,7 @@ interface IntegrationsTabProps {
 export function IntegrationsTab({ organizationId, organizationName }: IntegrationsTabProps) {
   return (
     <div className="space-y-8">
-      <div className="flex items-start gap-3 rounded-2xl border border-cyan-400/15 bg-cyan-500/[0.04] p-4">
+      <div className={'flex items-start gap-3 rounded-2xl border border-cyan-400/15 bg-cyan-500/[0.04] p-4 ' + adminHoverCls}>
         <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-cyan-400/25 bg-cyan-500/10">
           <Zap className="h-4 w-4 text-cyan-300" strokeWidth={1.5} aria-hidden="true" />
         </div>

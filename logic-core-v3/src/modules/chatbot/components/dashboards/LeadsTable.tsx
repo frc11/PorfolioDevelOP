@@ -1,7 +1,7 @@
 'use client'
 
 import { type ReactNode } from 'react'
-import { motion } from 'motion/react'
+import { motion, useReducedMotion } from 'motion/react'
 import { Users } from 'lucide-react'
 import { EmptyState } from '@/components/ui'
 
@@ -44,6 +44,7 @@ function formatDate(d: Date | string): string {
 }
 
 export function LeadsTable({ leads, renderRowAction }: LeadsTableProps) {
+  const reduce = Boolean(useReducedMotion())
   if (leads.length === 0) {
     return (
       <EmptyState
@@ -61,7 +62,8 @@ export function LeadsTable({ leads, renderRowAction }: LeadsTableProps) {
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: i * 0.03 }}
-          className="flex items-start justify-between gap-4 p-4 rounded-xl border border-zinc-800 bg-zinc-900/40 hover:border-zinc-700 transition"
+          whileHover={reduce ? undefined : { scale: 1.02, transition: { duration: 0.2, ease: [0.25, 0.46, 0.45, 0.94] } }}
+          className="flex items-start justify-between gap-4 p-4 rounded-xl border border-zinc-800 bg-zinc-900/40 hover:border-zinc-700 transition hover:shadow-[0_12px_32px_-12px_rgba(255,255,255,0.12)] hover:ring-1 hover:ring-white/15 motion-reduce:hover:shadow-none"
         >
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1">
