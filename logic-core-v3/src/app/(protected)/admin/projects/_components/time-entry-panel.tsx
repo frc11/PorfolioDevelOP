@@ -8,6 +8,7 @@ import {
   createTimeEntry,
   deleteTimeEntry,
 } from '@/app/(protected)/admin/team/_actions/time-entry.actions'
+import { adminHoverCls } from '@/lib/hover'
 import { OverlayModal } from './overlay-modal'
 
 type TaskOption = {
@@ -302,8 +303,8 @@ export function TimeEntryPanel({
         ) : (
           <section className="space-y-4">
             {localGroups.map((group) => (
+              <div key={group.taskId} className={'rounded-[28px] ' + adminHoverCls}>
               <Card
-                key={group.taskId}
                 padding="none"
                 className="overflow-hidden rounded-[28px] bg-white/5 backdrop-blur-xl"
               >
@@ -400,6 +401,7 @@ export function TimeEntryPanel({
                   ))}
                 </div>
               </Card>
+              </div>
             ))}
           </section>
         )}

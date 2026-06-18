@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import { auth } from '@/auth'
 import { callerCanAccessOrg } from '@/lib/auth/assert-ownership'
+import { adminHoverCls } from '@/lib/hover'
 
 type ProjectOverviewPageProps = {
   params: Promise<{
@@ -176,7 +177,7 @@ export default async function AgencyOsProjectOverviewPage({
   return (
     <div className="space-y-6">
       <div className="grid gap-6 lg:grid-cols-2 lg:items-stretch">
-        <section className="flex h-full flex-col rounded-[28px] border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
+        <section className={'flex h-full flex-col rounded-[28px] border border-white/10 bg-white/5 p-5 backdrop-blur-xl ' + adminHoverCls}>
           <h3 className="text-lg font-semibold text-white">Resumen del proyecto</h3>
           <p className="mt-2 text-sm leading-6 text-zinc-400">
             {project.description ?? 'Todavia no hay una descripcion detallada para este proyecto.'}
@@ -251,7 +252,7 @@ export default async function AgencyOsProjectOverviewPage({
           ) : null}
         </section>
 
-        <section className="flex h-full flex-col rounded-[28px] border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
+        <section className={'flex h-full flex-col rounded-[28px] border border-white/10 bg-white/5 p-5 backdrop-blur-xl ' + adminHoverCls}>
           <h3 className="text-lg font-semibold text-white">Tareas</h3>
           <div className="mt-4 grid flex-1 auto-rows-fr gap-3">
             <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
@@ -270,7 +271,7 @@ export default async function AgencyOsProjectOverviewPage({
         </section>
       </div>
 
-      <section className="rounded-[28px] border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
+      <section className={'rounded-[28px] border border-white/10 bg-white/5 p-5 backdrop-blur-xl ' + adminHoverCls}>
         <h3 className="text-lg font-semibold text-white">Finanzas</h3>
         <div className="mt-4 grid gap-3 sm:grid-cols-3">
           <div className="rounded-2xl border border-white/10 bg-black/20 p-4">

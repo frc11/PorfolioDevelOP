@@ -1,6 +1,7 @@
 import { Prisma, ProjectStatus } from '@prisma/client'
 import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
+import { adminHoverCls } from '@/lib/hover'
 import {
   generatePendingMaintenance,
   markMaintenancePaid,
@@ -127,7 +128,7 @@ export default async function AgencyOsProjectPaymentsPage({
           {project.milestones.map((milestone) => (
             <article
               key={milestone.id}
-              className="rounded-[26px] border border-white/10 bg-black/20 p-5"
+              className={'rounded-[26px] border border-white/10 bg-black/20 p-5 ' + adminHoverCls}
             >
               <div className="flex items-start justify-between gap-3">
                 <div>
@@ -170,7 +171,7 @@ export default async function AgencyOsProjectPaymentsPage({
         </div>
       </section>
 
-      <section className="rounded-[28px] border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
+      <section className={'rounded-[28px] border border-white/10 bg-white/5 p-5 backdrop-blur-xl ' + adminHoverCls}>
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <h3 className="text-lg font-semibold text-white">Mantenimiento mensual</h3>

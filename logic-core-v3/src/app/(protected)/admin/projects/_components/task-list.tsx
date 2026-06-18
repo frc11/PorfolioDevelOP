@@ -336,7 +336,7 @@ export function TaskList({
                         setDragOverStatus(null)
                       }}
                       className={[
-                        'rounded-[24px] border border-white/10 bg-black/20 p-4 transition-opacity',
+                        'rounded-[24px] border border-white/10 bg-black/20 p-4 transition-[opacity,transform,box-shadow] duration-200 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] will-change-transform hover:scale-[1.015] hover:shadow-[0_12px_32px_-12px_rgba(255,255,255,0.12)] hover:ring-1 hover:ring-white/15 motion-reduce:hover:scale-100 motion-reduce:hover:shadow-none',
                         isPending ? '' : 'cursor-grab active:cursor-grabbing',
                         draggingTaskId === task.id ? 'opacity-50' : '',
                       ].join(' ')}

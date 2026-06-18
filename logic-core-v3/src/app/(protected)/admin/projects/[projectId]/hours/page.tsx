@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
+import { adminHoverCls } from '@/lib/hover'
 import { requireSuperAdmin } from '@/lib/auth-guards'
 import { listTimeEntriesByProject } from '@/app/(protected)/admin/team/_actions/time-entry.actions'
 import { TimeEntryPanel } from '../../_components/time-entry-panel'
@@ -69,17 +70,17 @@ export default async function AgencyOsProjectHoursPage({ params }: ProjectHoursP
   return (
     <section className="space-y-6">
       <div className="grid gap-4 lg:grid-cols-4">
-        <div className="rounded-[28px] border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
+        <div className={'rounded-[28px] border border-white/10 bg-white/5 p-5 backdrop-blur-xl ' + adminHoverCls}>
           <p className="text-[10px] uppercase tracking-[0.22em] text-zinc-500">Horas totales</p>
           <p className="mt-3 text-3xl font-semibold text-white">{formatHours(totalHours)}</p>
         </div>
 
-        <div className="rounded-[28px] border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
+        <div className={'rounded-[28px] border border-white/10 bg-white/5 p-5 backdrop-blur-xl ' + adminHoverCls}>
           <p className="text-[10px] uppercase tracking-[0.22em] text-zinc-500">Horas estimadas</p>
           <p className="mt-3 text-3xl font-semibold text-white">{formatHours(estimatedHours)}</p>
         </div>
 
-        <div className="rounded-[28px] border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
+        <div className={'rounded-[28px] border border-white/10 bg-white/5 p-5 backdrop-blur-xl ' + adminHoverCls}>
           <p className="text-[10px] uppercase tracking-[0.22em] text-zinc-500">Diferencia</p>
           <p
             className={[
@@ -96,7 +97,7 @@ export default async function AgencyOsProjectHoursPage({ params }: ProjectHoursP
           </p>
         </div>
 
-        <div className="rounded-[28px] border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
+        <div className={'rounded-[28px] border border-white/10 bg-white/5 p-5 backdrop-blur-xl ' + adminHoverCls}>
           <p className="text-[10px] uppercase tracking-[0.22em] text-zinc-500">Valor hora</p>
           <p className="mt-3 text-3xl font-semibold text-white">
             {hourlyValue ? formatCurrency(hourlyValue) : '—'}
