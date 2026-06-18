@@ -232,9 +232,12 @@ export function AlertsClient({ initialAlerts }: AlertsClientProps) {
                   <div className="relative space-y-2">
                     {visible.map((alert) => renderAlertCard(alert))}
                     {hasOverview && (
+                      // Fade a #141618 = superficie compuesta de la columna
+                      // (root #080a0c + panel white/[0.03] + columna white/[0.02]),
+                      // para que el degradado matchee el fondo y no deje banda.
                       <div
                         aria-hidden
-                        className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-16 bg-gradient-to-b from-transparent to-[#080a0c]"
+                        className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-16 bg-gradient-to-b from-transparent to-[#141618]"
                       />
                     )}
                   </div>
