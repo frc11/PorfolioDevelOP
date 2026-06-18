@@ -126,9 +126,9 @@ export default async function AgencyOsProjectPaymentsPage({
 
         <div className="mt-5 grid gap-4 lg:grid-cols-2">
           {project.milestones.map((milestone) => (
+            <div key={milestone.id} className={'rounded-[26px] ' + adminHoverCls}>
             <article
-              key={milestone.id}
-              className={'rounded-[26px] border border-white/10 bg-black/20 p-5 ' + adminHoverCls}
+              className="rounded-[26px] border border-white/10 bg-black/20 p-5"
             >
               <div className="flex items-start justify-between gap-3">
                 <div>
@@ -167,11 +167,12 @@ export default async function AgencyOsProjectPaymentsPage({
                 </form>
               ) : null}
             </article>
+            </div>
           ))}
         </div>
       </section>
 
-      <section className={'rounded-[28px] border border-white/10 bg-white/5 p-5 backdrop-blur-xl ' + adminHoverCls}>
+      <section className="rounded-[28px] border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <h3 className="text-lg font-semibold text-white">Mantenimiento mensual</h3>
@@ -198,8 +199,10 @@ export default async function AgencyOsProjectPaymentsPage({
         </div>
 
         {!isInMaintenance ? (
-          <div className="mt-5 rounded-2xl border border-white/10 bg-black/20 p-4 text-sm text-zinc-400">
-            El proyecto pasara a mantenimiento cuando tenga una fecha de inicio de mantenimiento.
+          <div className={'mt-5 rounded-2xl ' + adminHoverCls}>
+            <div className="rounded-2xl border border-white/10 bg-black/20 p-4 text-sm text-zinc-400">
+              El proyecto pasara a mantenimiento cuando tenga una fecha de inicio de mantenimiento.
+            </div>
           </div>
         ) : (
           <div className="mt-5 overflow-hidden rounded-[24px] border border-white/10">

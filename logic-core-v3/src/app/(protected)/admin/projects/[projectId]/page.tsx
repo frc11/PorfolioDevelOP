@@ -177,122 +177,144 @@ export default async function AgencyOsProjectOverviewPage({
   return (
     <div className="space-y-6">
       <div className="grid gap-6 lg:grid-cols-2 lg:items-stretch">
-        <section className={'flex h-full flex-col rounded-[28px] border border-white/10 bg-white/5 p-5 backdrop-blur-xl ' + adminHoverCls}>
+        <section className="flex h-full flex-col rounded-[28px] border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
           <h3 className="text-lg font-semibold text-white">Resumen del proyecto</h3>
           <p className="mt-2 text-sm leading-6 text-zinc-400">
             {project.description ?? 'Todavia no hay una descripcion detallada para este proyecto.'}
           </p>
 
           <div className="mt-5 grid gap-4 md:grid-cols-2 md:items-stretch">
-            <div className="flex h-full flex-col rounded-2xl border border-white/10 bg-black/20 p-4">
-              <p className="text-[10px] uppercase tracking-[0.22em] text-zinc-500">Proyecto</p>
-              <p className="mt-2 text-sm text-zinc-100">{project.name}</p>
-              <p className="mt-1 text-sm text-zinc-400">
-                Estado actual: {project.status.replaceAll('_', ' ')}
-              </p>
-              <p className="mt-1 text-sm text-zinc-400">
-                Inicio estimado: {formatDate(startDate)}
-              </p>
+            <div className={'grid rounded-2xl ' + adminHoverCls}>
+              <div className="flex flex-col rounded-2xl border border-white/10 bg-black/20 p-4">
+                <p className="text-[10px] uppercase tracking-[0.22em] text-zinc-500">Proyecto</p>
+                <p className="mt-2 text-sm text-zinc-100">{project.name}</p>
+                <p className="mt-1 text-sm text-zinc-400">
+                  Estado actual: {project.status.replaceAll('_', ' ')}
+                </p>
+                <p className="mt-1 text-sm text-zinc-400">
+                  Inicio estimado: {formatDate(startDate)}
+                </p>
+              </div>
             </div>
 
-            <div className="flex h-full flex-col rounded-2xl border border-white/10 bg-black/20 p-4">
-              <p className="text-[10px] uppercase tracking-[0.22em] text-zinc-500">Fechas</p>
-              <p className="mt-2 text-sm text-zinc-100">
-                Entrega estimada: {formatDate(project.estimatedEndDate)}
-              </p>
-              <p className="mt-1 text-sm text-zinc-400">
-                Entregado: {formatDate(project.deliveredAt)}
-              </p>
-              <p className="mt-1 text-sm text-zinc-400">
-                Mantenimiento: {formatDate(project.maintenanceStartDate)}
-              </p>
+            <div className={'grid rounded-2xl ' + adminHoverCls}>
+              <div className="flex flex-col rounded-2xl border border-white/10 bg-black/20 p-4">
+                <p className="text-[10px] uppercase tracking-[0.22em] text-zinc-500">Fechas</p>
+                <p className="mt-2 text-sm text-zinc-100">
+                  Entrega estimada: {formatDate(project.estimatedEndDate)}
+                </p>
+                <p className="mt-1 text-sm text-zinc-400">
+                  Entregado: {formatDate(project.deliveredAt)}
+                </p>
+                <p className="mt-1 text-sm text-zinc-400">
+                  Mantenimiento: {formatDate(project.maintenanceStartDate)}
+                </p>
+              </div>
             </div>
           </div>
 
           {!isInternalProject && project.organization ? (
-            <div className="mt-4 rounded-2xl border border-cyan-400/15 bg-cyan-400/5 p-4">
-              <p className="text-[10px] uppercase tracking-[0.22em] text-cyan-300/80">
-                Cliente vinculado
-              </p>
-              <p className="mt-2 text-sm font-medium text-zinc-100">
-                {project.organization.companyName}
-              </p>
-              <p className="mt-1 text-sm text-zinc-400">slug: {project.organization.slug}</p>
-              <p className="mt-1 text-sm text-zinc-400">
-                Sitio: {project.organization.siteUrl ?? 'Sin sitio configurado'}
-              </p>
-              <p className="mt-1 text-sm text-zinc-400">
-                Suscripcion: {project.organization.subscription?.plan?.name ?? 'Sin plan'}
-              </p>
+            <div className={'mt-4 rounded-2xl ' + adminHoverCls}>
+              <div className="rounded-2xl border border-cyan-400/15 bg-cyan-400/5 p-4">
+                <p className="text-[10px] uppercase tracking-[0.22em] text-cyan-300/80">
+                  Cliente vinculado
+                </p>
+                <p className="mt-2 text-sm font-medium text-zinc-100">
+                  {project.organization.companyName}
+                </p>
+                <p className="mt-1 text-sm text-zinc-400">slug: {project.organization.slug}</p>
+                <p className="mt-1 text-sm text-zinc-400">
+                  Sitio: {project.organization.siteUrl ?? 'Sin sitio configurado'}
+                </p>
+                <p className="mt-1 text-sm text-zinc-400">
+                  Suscripcion: {project.organization.subscription?.plan?.name ?? 'Sin plan'}
+                </p>
+              </div>
             </div>
           ) : (
-            <div className="mt-4 rounded-2xl border border-white/10 bg-black/20 p-4">
-              <p className="text-[10px] uppercase tracking-[0.22em] text-zinc-500">
-                Cliente vinculado
-              </p>
-              <p className="mt-2 text-sm text-zinc-400">
-                Este proyecto es interno y no se muestra en el dashboard del portal.
-              </p>
+            <div className={'mt-4 rounded-2xl ' + adminHoverCls}>
+              <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
+                <p className="text-[10px] uppercase tracking-[0.22em] text-zinc-500">
+                  Cliente vinculado
+                </p>
+                <p className="mt-2 text-sm text-zinc-400">
+                  Este proyecto es interno y no se muestra en el dashboard del portal.
+                </p>
+              </div>
             </div>
           )}
 
           {project.osLead ? (
-            <div className="mt-4 rounded-2xl border border-white/10 bg-black/20 p-4">
-              <p className="text-[10px] uppercase tracking-[0.22em] text-zinc-500">Lead original</p>
-              <Link
-                href={`/admin/leads/${project.osLead.id}`}
-                className="mt-2 inline-flex text-sm font-medium text-cyan-200 transition-colors hover:text-cyan-100 hover:underline"
-              >
-                Abrir ficha de {project.osLead.businessName}
-              </Link>
-              <p className="mt-2 text-sm text-zinc-400">
-                {project.osLead.contactName ?? 'Sin contacto'} · {project.osLead.email ?? 'Sin email'}
-              </p>
+            <div className={'mt-4 rounded-2xl ' + adminHoverCls}>
+              <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
+                <p className="text-[10px] uppercase tracking-[0.22em] text-zinc-500">Lead original</p>
+                <Link
+                  href={`/admin/leads/${project.osLead.id}`}
+                  className="mt-2 inline-flex text-sm font-medium text-cyan-200 transition-colors hover:text-cyan-100 hover:underline"
+                >
+                  Abrir ficha de {project.osLead.businessName}
+                </Link>
+                <p className="mt-2 text-sm text-zinc-400">
+                  {project.osLead.contactName ?? 'Sin contacto'} · {project.osLead.email ?? 'Sin email'}
+                </p>
+              </div>
             </div>
           ) : null}
         </section>
 
-        <section className={'flex h-full flex-col rounded-[28px] border border-white/10 bg-white/5 p-5 backdrop-blur-xl ' + adminHoverCls}>
+        <section className="flex h-full flex-col rounded-[28px] border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
           <h3 className="text-lg font-semibold text-white">Tareas</h3>
           <div className="mt-4 grid flex-1 auto-rows-fr gap-3">
-            <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
-              <p className="text-[10px] uppercase tracking-[0.22em] text-zinc-500">Pendientes</p>
-              <p className="mt-2 text-2xl font-semibold text-white">{todoTasks}</p>
+            <div className={'grid rounded-2xl ' + adminHoverCls}>
+              <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
+                <p className="text-[10px] uppercase tracking-[0.22em] text-zinc-500">Pendientes</p>
+                <p className="mt-2 text-2xl font-semibold text-white">{todoTasks}</p>
+              </div>
             </div>
-            <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
-              <p className="text-[10px] uppercase tracking-[0.22em] text-zinc-500">En progreso</p>
-              <p className="mt-2 text-2xl font-semibold text-white">{inProgressTasks}</p>
+            <div className={'grid rounded-2xl ' + adminHoverCls}>
+              <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
+                <p className="text-[10px] uppercase tracking-[0.22em] text-zinc-500">En progreso</p>
+                <p className="mt-2 text-2xl font-semibold text-white">{inProgressTasks}</p>
+              </div>
             </div>
-            <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
-              <p className="text-[10px] uppercase tracking-[0.22em] text-zinc-500">Completadas</p>
-              <p className="mt-2 text-2xl font-semibold text-white">{completedTasks}</p>
+            <div className={'grid rounded-2xl ' + adminHoverCls}>
+              <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
+                <p className="text-[10px] uppercase tracking-[0.22em] text-zinc-500">Completadas</p>
+                <p className="mt-2 text-2xl font-semibold text-white">{completedTasks}</p>
+              </div>
             </div>
           </div>
         </section>
       </div>
 
-      <section className={'rounded-[28px] border border-white/10 bg-white/5 p-5 backdrop-blur-xl ' + adminHoverCls}>
+      <section className="rounded-[28px] border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
         <h3 className="text-lg font-semibold text-white">Finanzas</h3>
         <div className="mt-4 grid gap-3 sm:grid-cols-3">
-          <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
-            <p className="text-[10px] uppercase tracking-[0.22em] text-zinc-500">Monto acordado</p>
-            <p className="mt-2 text-xl font-semibold text-white">
-              {formatCurrency(project.agreedAmount)}
-            </p>
+          <div className={'grid rounded-2xl ' + adminHoverCls}>
+            <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
+              <p className="text-[10px] uppercase tracking-[0.22em] text-zinc-500">Monto acordado</p>
+              <p className="mt-2 text-xl font-semibold text-white">
+                {formatCurrency(project.agreedAmount)}
+              </p>
+            </div>
           </div>
 
-          <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
-            <p className="text-[10px] uppercase tracking-[0.22em] text-zinc-500">Hitos pagados</p>
-            <p className="mt-2 text-xl font-semibold text-white">
-              {paidMilestones}/{project.paymentMilestones.length}
-            </p>
+          <div className={'grid rounded-2xl ' + adminHoverCls}>
+            <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
+              <p className="text-[10px] uppercase tracking-[0.22em] text-zinc-500">Hitos pagados</p>
+              <p className="mt-2 text-xl font-semibold text-white">
+                {paidMilestones}/{project.paymentMilestones.length}
+              </p>
+            </div>
           </div>
 
-          <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
-            <p className="text-[10px] uppercase tracking-[0.22em] text-zinc-500">Mantenimiento</p>
-            <p className="mt-2 text-sm font-medium text-zinc-100">
-              {isMaintenanceUpToDate(project)}
-            </p>
+          <div className={'grid rounded-2xl ' + adminHoverCls}>
+            <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
+              <p className="text-[10px] uppercase tracking-[0.22em] text-zinc-500">Mantenimiento</p>
+              <p className="mt-2 text-sm font-medium text-zinc-100">
+                {isMaintenanceUpToDate(project)}
+              </p>
+            </div>
           </div>
         </div>
       </section>
