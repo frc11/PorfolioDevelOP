@@ -130,7 +130,7 @@ export default async function LeadOsRevisionPage() {
               key={item.leadId}
               href={`/admin/leados/${item.leadId}`}
               className={cn(
-                'group relative flex items-center justify-between gap-4 overflow-hidden rounded-2xl border p-4 transition-all will-change-transform hover:scale-[1.02] hover:shadow-[0_12px_32px_-12px_rgba(255,255,255,0.12)] hover:ring-1 hover:ring-white/15 motion-reduce:hover:scale-100 motion-reduce:hover:shadow-none',
+                'group relative flex items-center justify-between gap-4 overflow-hidden rounded-2xl border p-4 transition-all hover:scale-[1.02] hover:shadow-[0_12px_32px_-12px_rgba(255,255,255,0.12)] hover:ring-1 hover:ring-white/15 motion-reduce:hover:scale-100 motion-reduce:hover:shadow-none',
                 item.caliente
                   ? 'border-amber-400/30 bg-amber-500/[0.05] hover:bg-amber-500/[0.08]'
                   : 'border-white/10 bg-white/5 hover:border-cyan-400/20 hover:bg-white/[0.07]',
