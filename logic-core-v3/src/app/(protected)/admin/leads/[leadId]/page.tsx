@@ -10,6 +10,7 @@ import { LeadDemosPanel } from '../_components/demo-form'
 import { AssignSetterControl } from '../_components/assign-setter-control'
 import { ReunionPanel } from '../_components/reunion-panel'
 import { ChangeStatusSelect } from '../_components/change-status-select'
+import { adminHoverCls } from '@/lib/hover'
 
 type LeadPageProps = {
   params: Promise<{
@@ -227,7 +228,7 @@ export default async function AgencyOsLeadDetailPage({ params }: LeadPageProps) 
     <section className="space-y-6">
       <AdminBackButton href="/admin/leads" label="Volver a leads" />
 
-      <div className="rounded-[28px] border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
+      <div className={'rounded-[28px] border border-white/10 bg-white/5 p-5 backdrop-blur-xl ' + adminHoverCls}>
         <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
           <div>
             <p className="text-xs tracking-tight text-zinc-500">
@@ -295,7 +296,7 @@ export default async function AgencyOsLeadDetailPage({ params }: LeadPageProps) 
             scrolleando ADENTRO con fade inferior. El feed va absolute para no inflar el
             alto intrínseco de la columna (así el alto lo manda la columna derecha). */}
         <div className="space-y-6 xl:grid xl:h-full xl:min-h-0 xl:grid-rows-[auto_minmax(0,1fr)] xl:gap-6 xl:space-y-0">
-          <section className="rounded-[28px] border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
+          <section className={'rounded-[28px] border border-white/10 bg-white/5 p-5 backdrop-blur-xl ' + adminHoverCls}>
             <h3 className="text-lg font-semibold text-white">Datos del lead</h3>
 
             <div className="mt-5 grid gap-4 md:grid-cols-2">
@@ -393,18 +394,22 @@ export default async function AgencyOsLeadDetailPage({ params }: LeadPageProps) 
         </div>
 
         <div className="space-y-6">
-          <AssignSetterControl
-            leadId={lead.id}
-            assignedToId={lead.assignedToId}
-            setters={setters.map((setter) => ({
-              id: setter.id,
-              label: setter.name ?? setter.email,
-            }))}
-          />
+          <div className={'rounded-[28px] ' + adminHoverCls}>
+            <AssignSetterControl
+              leadId={lead.id}
+              assignedToId={lead.assignedToId}
+              setters={setters.map((setter) => ({
+                id: setter.id,
+                label: setter.name ?? setter.email,
+              }))}
+            />
+          </div>
 
-          <LeadDemosPanel leadId={lead.id} demos={serializeDemos(lead)} />
+          <div className={'rounded-[28px] ' + adminHoverCls}>
+            <LeadDemosPanel leadId={lead.id} demos={serializeDemos(lead)} />
+          </div>
 
-          <section className="rounded-[28px] border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
+          <section className={'rounded-[28px] border border-white/10 bg-white/5 p-5 backdrop-blur-xl ' + adminHoverCls}>
             <h3 className="text-lg font-semibold text-white">Acciones rápidas</h3>
 
             <div className="mt-4 grid gap-3">
