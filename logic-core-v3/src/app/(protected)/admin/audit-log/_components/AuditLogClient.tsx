@@ -6,6 +6,7 @@ import { Building2, ChevronDown, Clock, Filter, History, User } from 'lucide-rea
 import { Badge, Card, EmptyState, Select } from '@/components/ui'
 import { staggerContainer, staggerItem } from '@/lib/motion-variants'
 import { useReducedMotion } from '@/lib/use-reduced-motion'
+import { adminHoverCls } from '@/lib/hover'
 
 type DiffValue = Record<string, { before: unknown; after: unknown }>
 
@@ -112,7 +113,7 @@ export function AuditLogClient({ initialEntries, stats }: AuditLogClientProps) {
               >
                 <Card
                   padding="none"
-                  className="overflow-hidden"
+                  className={`overflow-hidden ${adminHoverCls}`}
                 >
                   <button
                     type="button"
