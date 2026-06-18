@@ -13,6 +13,7 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 import type { TaskStatus } from '@prisma/client'
+import { adminHoverCls } from '@/lib/hover'
 import { EmptyState } from '@/components/ui'
 
 export type WorkloadTask = {
@@ -95,7 +96,7 @@ function MetricPill({
   value: string | number
 }) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-black/20 p-4 transition-colors hover:border-white/15">
+    <div className={'rounded-2xl border border-white/10 bg-black/20 p-4 ' + adminHoverCls}>
       <div className="flex items-center gap-2 text-zinc-400">
         <span className="flex h-7 w-7 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-cyan-200">
           <Icon className="h-3.5 w-3.5" strokeWidth={1.5} />
@@ -192,7 +193,7 @@ function ProjectSection({ group }: { group: GroupedProjectTasks }) {
         ].join(' ')}
       >
         <div className="overflow-hidden">
-          <div className="space-y-2 px-4 pb-4">
+          <div className="space-y-2 px-4 pb-4 pt-2">
             {group.tasks.map((task) => (
               <TaskCard key={task.id} task={task} />
             ))}
