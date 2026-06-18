@@ -1,6 +1,6 @@
 'use server'
 
-import { revalidatePath } from 'next/cache'
+import { revalidatePath, revalidateTag } from 'next/cache'
 import { prisma } from '@/lib/prisma'
 import { computeDiff, logAdminAction, omitAuditNoise } from '@/lib/audit-log'
 import { requireSuperAdmin } from './requireSuperAdmin'
@@ -54,6 +54,7 @@ export async function acknowledgeAlert(alertId: string) {
   }
 
   revalidatePath('/admin/alerts')
+  revalidateTag('admin-alerts-count', {})
   return { ok: true }
 }
 
@@ -88,5 +89,6 @@ export async function resolveAlert(alertId: string) {
   }
 
   revalidatePath('/admin/alerts')
+  revalidateTag('admin-alerts-count', {})
   return { ok: true }
 }
