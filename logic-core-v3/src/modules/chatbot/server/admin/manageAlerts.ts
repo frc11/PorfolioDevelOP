@@ -4,6 +4,7 @@ import { revalidatePath, revalidateTag } from 'next/cache'
 import { prisma } from '@/lib/prisma'
 import { computeDiff, logAdminAction, omitAuditNoise } from '@/lib/audit-log'
 import { requireSuperAdmin } from './requireSuperAdmin'
+import { alertIdSchema } from './manageAlerts.schemas'
 
 export async function listAlerts(filter?: { status?: string; severity?: string }) {
   await requireSuperAdmin()
@@ -24,11 +25,12 @@ export async function listAlerts(filter?: { status?: string; severity?: string }
 }
 
 export async function acknowledgeAlert(alertId: string) {
+  const id = alertIdSchema.parse(alertId)
   const user = await requireSuperAdmin()
 
-  const before = await prisma.botAlert.findUnique({ where: { id: alertId } })
+  const before = await prisma.botAlert.findUnique({ where: { id } })
   const after = await prisma.botAlert.update({
-    where: { id: alertId },
+    where: { id },
     data: {
       status: 'ACKNOWLEDGED',
       acknowledgedAt: new Date(),
@@ -59,11 +61,12 @@ export async function acknowledgeAlert(alertId: string) {
 }
 
 export async function resolveAlert(alertId: string) {
+  const id = alertIdSchema.parse(alertId)
   const user = await requireSuperAdmin()
 
-  const before = await prisma.botAlert.findUnique({ where: { id: alertId } })
+  const before = await prisma.botAlert.findUnique({ where: { id } })
   const after = await prisma.botAlert.update({
-    where: { id: alertId },
+    where: { id },
     data: {
       status: 'RESOLVED',
       resolvedAt: new Date(),
