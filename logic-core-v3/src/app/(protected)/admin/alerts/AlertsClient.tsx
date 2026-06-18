@@ -14,6 +14,8 @@ import {
 import { toast } from 'sonner'
 import { Button, EmptyState, StatCard } from '@/components/ui'
 import { adminHoverCls } from '@/lib/hover'
+import { AlertsDateFilter } from './_components/alerts-date-filter'
+import { DEFAULT_DATE_FILTER, matchesDateFilter, type DateFilterState } from './_components/alerts-filters'
 import { acknowledgeAlert, resolveAlert } from '@/modules/chatbot/server/admin/manageAlerts'
 import type { listAlerts } from '@/modules/chatbot/server/admin/manageAlerts'
 
@@ -35,8 +37,10 @@ export function AlertsClient({ initialAlerts }: AlertsClientProps) {
   const [alerts, setAlerts] = useState(initialAlerts)
   const [pendingAction, setPendingAction] = useState<string | null>(null)
   const [severityFilter, setSeverityFilter] = useState<string>('all')
+  const [dateFilter, setDateFilter] = useState<DateFilterState>(DEFAULT_DATE_FILTER)
 
-  const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+  const now = new Date()
+  const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
 
   const pendingCritical = alerts.filter(
     (a) => a.status === 'PENDING' && a.severity === 'CRITICAL',
@@ -59,22 +63,16 @@ export function AlertsClient({ initialAlerts }: AlertsClientProps) {
         )
       : 0
 
+  const passesFilters = (a: AlertRow): boolean => {
+    if (severityFilter !== 'all' && a.severity !== severityFilter) return false
+    if (!matchesDateFilter(a.createdAt, dateFilter, now)) return false
+    return true
+  }
+
   const grouped: Record<ColumnId, AlertRow[]> = {
-    PENDING: alerts.filter((a) => {
-      if (a.status !== 'PENDING') return false
-      if (severityFilter !== 'all' && a.severity !== severityFilter) return false
-      return true
-    }),
-    ACKNOWLEDGED: alerts.filter((a) => {
-      if (a.status !== 'ACKNOWLEDGED') return false
-      if (severityFilter !== 'all' && a.severity !== severityFilter) return false
-      return true
-    }),
-    RESOLVED: alerts.filter((a) => {
-      if (a.status !== 'RESOLVED') return false
-      if (severityFilter !== 'all' && a.severity !== severityFilter) return false
-      return true
-    }),
+    PENDING: alerts.filter((a) => a.status === 'PENDING' && passesFilters(a)),
+    ACKNOWLEDGED: alerts.filter((a) => a.status === 'ACKNOWLEDGED' && passesFilters(a)),
+    RESOLVED: alerts.filter((a) => a.status === 'RESOLVED' && passesFilters(a)),
   }
 
   async function handleAck(id: string) {
@@ -156,23 +154,30 @@ export function AlertsClient({ initialAlerts }: AlertsClientProps) {
         </div>
       </div>
 
-      {/* Severity filter */}
-      <div className="flex items-center gap-2">
-        <p className="text-[10px] uppercase tracking-[0.24em] text-zinc-600 mr-1">Severidad</p>
-        {(['all', 'CRITICAL', 'HIGH', 'WARNING', 'INFO'] as const).map((sev) => (
-          <button
-            key={sev}
-            type="button"
-            onClick={() => setSeverityFilter(sev)}
-            className={`rounded-xl px-3 py-1.5 text-xs font-medium border transition-colors ${
-              severityFilter === sev
-                ? 'border-cyan-400/30 bg-cyan-400/10 text-cyan-300'
-                : 'border-white/10 bg-white/[0.02] text-zinc-400 hover:text-zinc-200'
-            }`}
-          >
-            {sev === 'all' ? 'Todas' : sev === 'CRITICAL' ? 'Crítica' : sev === 'HIGH' ? 'Alta' : sev === 'WARNING' ? 'Warning' : 'Info'}
-          </button>
-        ))}
+      {/* Filters: severidad + período (ambos client-side, se combinan) */}
+      <div className="flex flex-wrap items-start gap-x-8 gap-y-3">
+        <div className="flex items-center gap-2">
+          <p className="text-[10px] uppercase tracking-[0.24em] text-zinc-600 mr-1">Severidad</p>
+          {(['all', 'CRITICAL', 'HIGH', 'WARNING', 'INFO'] as const).map((sev) => (
+            <button
+              key={sev}
+              type="button"
+              onClick={() => setSeverityFilter(sev)}
+              className={`rounded-xl px-3 py-1.5 text-xs font-medium border transition-colors ${
+                severityFilter === sev
+                  ? 'border-cyan-400/30 bg-cyan-400/10 text-cyan-300'
+                  : 'border-white/10 bg-white/[0.02] text-zinc-400 hover:text-zinc-200'
+              }`}
+            >
+              {sev === 'all' ? 'Todas' : sev === 'CRITICAL' ? 'Crítica' : sev === 'HIGH' ? 'Alta' : sev === 'WARNING' ? 'Warning' : 'Info'}
+            </button>
+          ))}
+        </div>
+
+        <AlertsDateFilter
+          value={dateFilter}
+          onChange={(patch) => setDateFilter((prev) => ({ ...prev, ...patch }))}
+        />
       </div>
 
       {/* Triage columns */}
