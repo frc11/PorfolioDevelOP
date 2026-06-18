@@ -33,7 +33,7 @@ export default async function ActivityPage() {
         initialEvents={events.map((e) => ({
           id: e.id,
           type: e.type,
-          level: e.level as 'info' | 'warn' | 'error' | 'debug',
+          level: e.level.toLowerCase() as 'info' | 'warn' | 'error' | 'debug',
           message: e.message,
           createdAt: e.createdAt.toISOString(),
           conversationSession: e.conversation?.sessionId ?? null,
