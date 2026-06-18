@@ -8,6 +8,7 @@ import { StatCard } from '@/components/ui/StatCard'
 import { Button } from '@/components/ui/Button'
 import { Plus, Bot, Users, MessageSquare, Zap } from 'lucide-react'
 import Link from 'next/link'
+import { adminHoverCls } from '@/lib/hover'
 
 export default async function ChatbotsPage() {
   const session = await auth()
@@ -33,31 +34,39 @@ export default async function ChatbotsPage() {
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard
-          label="Bots activos"
-          value={stats.activeBots}
-          subtitle={`de ${stats.totalBots} totales`}
-          icon={Bot}
-        />
-        <StatCard
-          label="Bots pausados"
-          value={stats.inactiveBots}
-          subtitle="no responden"
-          icon={Zap}
-          accent={stats.inactiveBots > 0 ? 'amber' : undefined}
-        />
-        <StatCard
-          label="Conversaciones"
-          value={stats.conversationsLast30d}
-          subtitle="últimos 30 días"
-          icon={MessageSquare}
-        />
-        <StatCard
-          label="Leads capturados"
-          value={stats.leadsLast30d}
-          subtitle="últimos 30 días"
-          icon={Users}
-        />
+        <div className={'grid rounded-2xl ' + adminHoverCls}>
+          <StatCard
+            label="Bots activos"
+            value={stats.activeBots}
+            subtitle={`de ${stats.totalBots} totales`}
+            icon={Bot}
+          />
+        </div>
+        <div className={'grid rounded-2xl ' + adminHoverCls}>
+          <StatCard
+            label="Bots pausados"
+            value={stats.inactiveBots}
+            subtitle="no responden"
+            icon={Zap}
+            accent={stats.inactiveBots > 0 ? 'amber' : undefined}
+          />
+        </div>
+        <div className={'grid rounded-2xl ' + adminHoverCls}>
+          <StatCard
+            label="Conversaciones"
+            value={stats.conversationsLast30d}
+            subtitle="últimos 30 días"
+            icon={MessageSquare}
+          />
+        </div>
+        <div className={'grid rounded-2xl ' + adminHoverCls}>
+          <StatCard
+            label="Leads capturados"
+            value={stats.leadsLast30d}
+            subtitle="últimos 30 días"
+            icon={Users}
+          />
+        </div>
       </div>
 
       <Suspense fallback={<BotsListSkeleton />}>

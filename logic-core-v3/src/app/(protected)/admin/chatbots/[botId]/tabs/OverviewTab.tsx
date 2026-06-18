@@ -181,5 +181,5 @@ export function OverviewTab({ bot, monthlyUsage }: Props) {
 }
 
 function HoverCard({ children }: { children: ReactNode }) {
-  return <div className={'rounded-2xl ' + adminHoverCls}>{children}</div>
+  return <div className={'grid rounded-2xl ' + adminHoverCls}>{children}</div>
 }
