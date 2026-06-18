@@ -49,9 +49,19 @@ Empty-state de equipo (dashed, L528): NO recibe hover (placeholder, no es card i
 
 ---
 
-## SPRINT 2 — spinners de inputs number  (pendiente)
-Inputs: "Objetivo semanal de demos" (L448, vía `<Input>` compartido) + precio de módulos (L385, `<input>` nativo).
-CSS localizado vía Tailwind arbitrary variants: `[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none`. Sin tocar CSS global, type ni coerción.
+## SPRINT 2 — spinners de inputs number  ✅ HECHO
+
+Const DRY a nivel módulo: `NUMBER_INPUT_NO_SPINNER = '[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none'`. Tailwind 4 + Lightning CSS auto-prefijan `appearance`. CSS localizado al input (no global). No se tocó `type`, `min`, `step`, value ni coerción.
+
+Verificado: el `<Input>` compartido (`@/components/ui/Input.tsx`) reenvía `className` **directo al `<input>`** (`cn(base, …, className)`), así que los selectores de pseudo-elemento matchean.
+
+### Inputs tocados
+| Input | Ubicación | Tipo | Cambio |
+|-------|-----------|------|--------|
+| "Objetivo semanal de demos" | `settings-console.tsx` (sección Operación comercial) | `<Input>` compartido `type="number"` | `className` → `cn(base, NUMBER_INPUT_NO_SPINNER)` |
+| Precio USD de cada módulo premium | fila de módulo, `<input type="number">` nativo | nativo | `className` → `cn(base, NUMBER_INPUT_NO_SPINNER)` |
+
+**Gate Sprint 2**: `tsc --noEmit` exit 0 · ESLint `settings-console.tsx` exit 0.
 
 ## SPRINT 3 — checkeo + limpieza segura  (pendiente)
 - Remover import muerto `PREMIUM_FEATURE_KEYS` en `settings.actions.ts` (L12) — sin uso en el cuerpo.
@@ -64,6 +74,6 @@ CSS localizado vía Tailwind arbitrary variants: `[appearance:textfield] [&::-we
 ---
 
 ## Log de ejecución
-- [✅] Sprint 1 — hover canónico (commit)
-- [ ] Sprint 2 — spinners
+- [✅] Sprint 1 — hover canónico (commit `b1000cc`)
+- [✅] Sprint 2 — spinners (commit)
 - [ ] Sprint 3 — checkeo + limpieza

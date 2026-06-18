@@ -64,6 +64,10 @@ function maskFromInput(value: string) {
   return `••••••••${value.slice(-4)}`
 }
 
+// Oculta las flechas (spin buttons) nativas de los inputs number, localizado.
+const NUMBER_INPUT_NO_SPINNER =
+  '[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none'
+
 export function SettingsConsole({
   agencyName,
   updatedAt,
@@ -397,7 +401,10 @@ export function SettingsConsole({
                                 [row.moduleKey]: event.target.value,
                               }))
                             }
-                            className="h-11 w-full rounded-2xl border border-white/10 bg-white/5 pl-14 pr-4 text-sm text-white outline-none transition-colors focus:border-cyan-400/35 sm:w-[150px]"
+                            className={cn(
+                              'h-11 w-full rounded-2xl border border-white/10 bg-white/5 pl-14 pr-4 text-sm text-white outline-none transition-colors focus:border-cyan-400/35 sm:w-[150px]',
+                              NUMBER_INPUT_NO_SPINNER
+                            )}
                           />
                         </div>
 
@@ -450,7 +457,10 @@ export function SettingsConsole({
             <div className="mt-6 grid gap-4 lg:grid-cols-2">
               <Field label="Objetivo semanal de demos">
                 <Input
-                  className="h-12 rounded-2xl bg-black/20 px-4 text-white"
+                  className={cn(
+                    'h-12 rounded-2xl bg-black/20 px-4 text-white',
+                    NUMBER_INPUT_NO_SPINNER
+                  )}
                   type="number"
                   min="0"
                   step="1"
