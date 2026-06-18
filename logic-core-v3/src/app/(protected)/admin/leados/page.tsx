@@ -99,17 +99,21 @@ export default async function LeadOsRevisionPage() {
         </div>
 
         <div className="flex items-center gap-3">
-          <div className={'rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-right ' + adminHoverCls}>
-            <p className="text-[10px] uppercase tracking-[0.22em] text-zinc-500">
-              En revisión
-            </p>
-            <p className="mt-1 text-xl font-semibold text-white">{cola.length}</p>
+          <div className={'rounded-2xl ' + adminHoverCls}>
+            <div className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-right">
+              <p className="text-[10px] uppercase tracking-[0.22em] text-zinc-500">
+                En revisión
+              </p>
+              <p className="mt-1 text-xl font-semibold text-white">{cola.length}</p>
+            </div>
           </div>
-          <div className={'rounded-2xl border border-amber-400/20 bg-amber-400/10 px-4 py-3 text-right ' + adminHoverCls}>
-            <p className="text-[10px] uppercase tracking-[0.22em] text-amber-200/70">
-              Calientes
-            </p>
-            <p className="mt-1 text-xl font-semibold text-amber-100">{calientes}</p>
+          <div className={'rounded-2xl ' + adminHoverCls}>
+            <div className="rounded-2xl border border-amber-400/20 bg-amber-400/10 px-4 py-3 text-right">
+              <p className="text-[10px] uppercase tracking-[0.22em] text-amber-200/70">
+                Calientes
+              </p>
+              <p className="mt-1 text-xl font-semibold text-amber-100">{calientes}</p>
+            </div>
           </div>
         </div>
       </div>

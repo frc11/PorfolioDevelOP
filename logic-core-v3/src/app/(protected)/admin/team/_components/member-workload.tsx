@@ -96,14 +96,16 @@ function MetricPill({
   value: string | number
 }) {
   return (
-    <div className={'rounded-2xl border border-white/10 bg-black/20 p-4 ' + adminHoverCls}>
-      <div className="flex items-center gap-2 text-zinc-400">
-        <span className="flex h-7 w-7 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-cyan-200">
-          <Icon className="h-3.5 w-3.5" strokeWidth={1.5} />
-        </span>
-        <span className="text-[10px] uppercase tracking-[0.22em]">{label}</span>
+    <div className={'rounded-2xl ' + adminHoverCls}>
+      <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
+        <div className="flex items-center gap-2 text-zinc-400">
+          <span className="flex h-7 w-7 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-cyan-200">
+            <Icon className="h-3.5 w-3.5" strokeWidth={1.5} />
+          </span>
+          <span className="text-[10px] uppercase tracking-[0.22em]">{label}</span>
+        </div>
+        <p className="mt-3 text-2xl font-semibold tabular-nums text-white">{value}</p>
       </div>
-      <p className="mt-3 text-2xl font-semibold tabular-nums text-white">{value}</p>
     </div>
   )
 }
