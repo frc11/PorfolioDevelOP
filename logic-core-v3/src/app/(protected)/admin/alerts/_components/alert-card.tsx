@@ -4,6 +4,8 @@ import Link from 'next/link'
 import { motion } from 'motion/react'
 import { AlertTriangle, CheckCircle, ExternalLink, Eye } from 'lucide-react'
 import { Button } from '@/components/ui'
+import { cn } from '@/lib/utils'
+import { useReducedMotion } from '@/lib/use-reduced-motion'
 import type { AlertRow } from './alert-types'
 
 interface AlertCardProps {
@@ -13,11 +15,26 @@ interface AlertCardProps {
   onResolve: (id: string) => void
 }
 
+const HOVER_EASE: [number, number, number, number] = [0.25, 0.46, 0.45, 0.94]
+
 export function AlertCard({ alert, pendingAction, onAck, onResolve }: AlertCardProps) {
+  const reduced = useReducedMotion()
+
   return (
+    // Hover POR card (mismo visual que las stat cards: scale 1.015 + shadow + ring).
+    // El scale va por whileHover (Framer) y no por CSS: la card es motion.div con
+    // `layout`, y un `hover:scale` CSS sería pisado por el transform inline de Framer.
+    // `relative z-0 hover:z-30` la sube sobre el gradiente de difuminado (z-10) y sobre
+    // las columnas vecinas → no se recorta en ningún costado (las columnas no clippean).
     <motion.div
       layout
-      className="rounded-2xl border border-white/10 bg-white/[0.02] p-3"
+      whileHover={reduced ? undefined : { scale: 1.015 }}
+      transition={{ duration: 0.2, ease: HOVER_EASE }}
+      className={cn(
+        'relative z-0 rounded-2xl border border-white/10 bg-white/[0.02] p-3',
+        'transition-shadow duration-200 hover:z-30 hover:shadow-[0_12px_32px_-12px_rgba(255,255,255,0.12)] hover:ring-1 hover:ring-white/15',
+        'motion-reduce:transition-none motion-reduce:hover:shadow-none',
+      )}
     >
       <div className="mb-2 flex items-start justify-between gap-2">
         <SeverityBadge severity={alert.severity} />
