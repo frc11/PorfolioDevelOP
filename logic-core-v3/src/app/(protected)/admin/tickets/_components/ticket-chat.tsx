@@ -2,12 +2,12 @@
 
 import { useEffect, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { motion, useReducedMotion } from 'motion/react'
 import { Loader2, MessageSquareText } from 'lucide-react'
 import type { Role, TicketStatus } from '@prisma/client'
 import { Select } from '@/components/ui'
 import { updateTicketStatus } from '../_actions/ticket.actions'
 import { TicketReplyForm } from './ticket-reply-form'
+import { HoverScale } from './hover-scale'
 
 type TicketChatProps = {
   ticket: {
@@ -64,7 +64,6 @@ function formatMessageDate(value: string) {
 
 export function TicketChat({ ticket }: TicketChatProps) {
   const router = useRouter()
-  const reduce = Boolean(useReducedMotion())
   const [status, setStatus] = useState<TicketStatus>(ticket.status)
   const [error, setError] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
@@ -152,15 +151,9 @@ export function TicketChat({ ticket }: TicketChatProps) {
                 key={message.id}
                 className={`flex ${message.isAdmin ? 'justify-end' : 'justify-start'}`}
               >
-                <motion.div
-                  whileHover={
-                    reduce
-                      ? undefined
-                      : { scale: 1.015, transition: { duration: 0.2, ease: [0.25, 0.46, 0.45, 0.94] } }
-                  }
+                <HoverScale
                   className={[
                     'max-w-[85%] rounded-[24px] px-4 py-3 shadow-[0_16px_40px_rgba(0,0,0,0.18)] sm:max-w-[70%]',
-                    'hover:ring-1 hover:ring-white/15',
                     message.isAdmin
                       ? 'border border-cyan-400/20 bg-cyan-500/10 text-cyan-50'
                       : 'border border-white/10 bg-black/20 text-zinc-100',
@@ -172,7 +165,7 @@ export function TicketChat({ ticket }: TicketChatProps) {
                     <span className="text-zinc-500">{formatMessageDate(message.createdAt)}</span>
                   </div>
                   <p className="mt-2 whitespace-pre-wrap text-sm leading-6">{message.content}</p>
-                </motion.div>
+                </HoverScale>
               </div>
             ))
           ) : (
