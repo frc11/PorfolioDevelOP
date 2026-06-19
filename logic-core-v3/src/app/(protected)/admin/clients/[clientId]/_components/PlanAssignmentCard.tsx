@@ -1,6 +1,5 @@
 import { prisma } from '@/lib/prisma'
 import { Card, CardTitle } from '@/components/ui'
-import { hoverTint } from '@/app/(protected)/admin/clients/_components/HoverScaleCard'
 import { PlanAssignmentForm } from './PlanAssignmentForm'
 import type { PlanKey, SupportTier } from '@prisma/client'
 
@@ -98,7 +97,7 @@ export async function PlanAssignmentCard({ clientId }: Props) {
                 ))}
               </tr>
             </thead>
-            <tbody className="text-zinc-300">
+            <tbody className="divide-y divide-white/5 bg-white/[0.02] text-zinc-300">
               <Row label="Precio/mes" values={plans.map((p) => `$${p.monthlyPrice.toNumber()}`)} />
               <Row label="Setup (piso)" values={plans.map((p) => `$${p.setupFloorPrice.toNumber()}`)} />
               <Row label="Cuota conv/mes" values={plans.map((p) => p.quota.toLocaleString('es-AR'))} />
@@ -136,10 +135,10 @@ export async function PlanAssignmentCard({ clientId }: Props) {
 
 function Row({ label, values }: { label: string; values: string[] }) {
   return (
-    <tr className={`border-b border-white/5 ${hoverTint}`}>
-      <td className="py-1.5 pr-4 text-zinc-500">{label}</td>
+    <tr className="transition-colors duration-200 hover:bg-white/10">
+      <td className="py-2 pr-4 text-zinc-500">{label}</td>
       {values.map((v, i) => (
-        <td key={i} className="py-1.5 pr-4">
+        <td key={i} className="py-2 pr-4">
           {v}
         </td>
       ))}
