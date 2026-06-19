@@ -89,7 +89,10 @@ function ChartBody({ data }: { data: LatencyPoint[] }) {
               color: '#e4e4e7',
               fontSize: '12px',
             }}
-            formatter={(value) => [value === null || value === undefined ? '—' : `${value}ms`]}
+            formatter={(value, name) => [
+              value === null || value === undefined ? '—' : `${value}ms`,
+              name,
+            ]}
           />
           <Legend wrapperStyle={{ fontSize: 11, color: '#a1a1aa', paddingTop: 10 }} iconType="line" />
           <Line
