@@ -1,4 +1,5 @@
 import type { Industry } from '../../../server/admin/createClientWithBot'
+import type { AvatarKindId } from '@/modules/chatbot/components/avatar'
 
 export interface QuickReply {
   id: string
@@ -32,7 +33,11 @@ export interface OnboardingState {
 
   // Paso 4
   accentColor: string
-  avatarStyle: 'neuro' | 'legacy_neuro' | 'image' | 'emoji'
+  accentSecondary: string | null
+  chatSurfaceTint: string | null
+  avatarStyle: AvatarKindId
+  avatarImageUrl: string | null
+  avatarEmoji: string | null
   position: 'bottom_right' | 'bottom_left'
   quickReplies: QuickReply[]
   whatsappNumber: string | null
