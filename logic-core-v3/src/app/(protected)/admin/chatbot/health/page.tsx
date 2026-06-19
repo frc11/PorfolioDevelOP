@@ -2,6 +2,7 @@ import { checkChatbotHealth, buildHealthVerdict } from '@/modules/chatbot/server
 import type { HealthVerdict, VerdictLevel } from '@/modules/chatbot/server/health'
 import { getLatencyHistory } from '@/modules/chatbot/server/admin/getLatencyHistory'
 import { LatencyChart } from '@/modules/chatbot/components/admin/health/LatencyChart'
+import { adminHoverCls } from '@/lib/hover'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -34,12 +35,16 @@ export default async function HealthPage() {
           ok={health.checks.env.ok}
           errors={health.checks.env.details.errors}
           warnings={health.checks.env.details.warnings}
+          cardHover={false}
         >
           <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2">
             {health.checks.env.details.vars.map((v) => (
               <div
                 key={v.name}
-                className="flex items-center gap-2 rounded-xl border border-white/5 bg-white/[0.02] px-3 py-2 text-sm"
+                className={
+                  'flex items-center gap-2 rounded-xl border border-white/5 bg-white/[0.02] px-3 py-2 text-sm ' +
+                  adminHoverCls
+                }
               >
                 <span
                   className={
@@ -161,7 +166,7 @@ export default async function HealthPage() {
 function VerdictHero({ verdict }: { verdict: HealthVerdict }) {
   const styles = verdictStyles(verdict.level)
   return (
-    <div className={`rounded-[28px] border p-6 ${styles.container}`}>
+    <div className={`rounded-[28px] border p-6 ${styles.container} ${adminHoverCls}`}>
       <div className="flex items-start gap-4">
         <div className={`shrink-0 text-4xl ${styles.icon}`} aria-hidden="true">
           {verdictIcon(verdict.level)}
@@ -250,6 +255,7 @@ function HealthSection({
   errors,
   warnings,
   children,
+  cardHover = true,
 }: {
   title: string
   ok: boolean
@@ -257,9 +263,15 @@ function HealthSection({
   errors?: string[]
   warnings?: string[]
   children?: React.ReactNode
+  cardHover?: boolean
 }) {
   return (
-    <div className="rounded-[28px] border border-white/10 bg-white/[0.02] p-5">
+    <div
+      className={
+        'rounded-[28px] border border-white/10 bg-white/[0.02] p-5' +
+        (cardHover ? ' ' + adminHoverCls : '')
+      }
+    >
       <div className="flex items-center gap-2">
         <span className={ok ? 'text-emerald-400' : 'text-red-400'}>●</span>
         <h2 className="text-sm font-medium text-zinc-200">{title}</h2>
