@@ -84,6 +84,7 @@ export async function BillingOverrideCard({ clientId }: Props) {
         currentPriceOverride={overrideValue}
         currentOverrideUntil={overrideUntilRaw?.toISOString() ?? null}
         currentOverrideReason={sub?.overrideReason ?? null}
+        overrideActive={overrideActive}
       />
     </Card>
   )
