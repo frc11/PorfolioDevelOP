@@ -96,11 +96,37 @@ PASO 0 (read-only, 2 subagentes Explore): mapeo de Leads/Proyectos. Veredicto re
 
 ---
 
+# LOTE 4 — botón "Ver bot" + popover fecha + altura uniforme
+
+PASO 0: confirmé que el admin NO usa `triggerTransition` (grep en `app/(protected)/admin` = 0 matches; vive solo en el sitio público: Navbar, Dock, home, dashboard card, onboarding). El admin navega con `<Link>` + `PageTransition` (fadeUp por ruta). `Button` (ui) es `motion.button` puro (sin `asChild`/`href`).
+
+## Sprint 1 — "Ver bot" como botón
+**Commit:** `e415b51` · **Archivo:** `_components/alert-card.tsx`.
+- old→new: `<Link className="text-cyan… hover:underline">Ver bot ↗</Link>` (texto) → `<Link href={…}><Button variant="ghost" size="sm" className="text-cyan-400 …">Ver bot ↗</Button></Link>`. Reusa el `Button` del sistema (no se modifica); patrón = `chatbots/page.tsx` (`<Link><Button/>`).
+- Comportamiento PRESERVADO: nav IN-APP a `/admin/chatbots/{id}?tab=overview` (NO nueva pestaña; el ↗ era decorativo). NO `router.push`, NO `triggerTransition` (no aplica en admin). Aplica en columna y overview (AlertCard es el único render).
+
+## Sprint 2 — "Personalizado" en popover a la derecha
+**Commit:** `4d2f516` · **Archivo:** `_components/alerts-date-filter.tsx`.
+- old→new: los inputs Desde/Hasta dejaron de abrirse inline (empujaban el layout). Ahora el chip "Personalizado" ancla un popover `absolute left-full top-0 ml-2 z-50 w-64` (a su derecha, glass `bg-[#0c1016]/95`) que flota sobre el contenido. Cierra con click afuera (`mousedown` fuera del anchor) + Escape. Lógica de filtrado intacta (`alerts-filters.ts` sin cambios).
+- Riesgo conocido (a ojo): en pantallas angostas el popover a la derecha podría acercarse al borde; el grupo Período es el más a la derecha de la fila → suele haber lugar. Tuneable si molesta.
+
+## Sprint 3 — Altura uniforme de columnas + cap calibrado
+**Commit:** `a9f2d7b` · **Archivo:** `AlertsClient.tsx`.
+- old→new: `OVERVIEW_THRESHOLD/MAX_VISIBLE = 5` → `VISIBLE_CAP: Record<ColumnId, number> = { PENDING:4, ACKNOWLEDGED:4, RESOLVED:4 }`; difuminado/overview con `items.length > cap`; render `slice(0, cap)`. Columnas con `lg:min-h-[40rem]` + grid `align:stretch` (ya presente) → misma altura ≈ 4 cards.
+- **Interacción Sprint 1 ↔ 3 (decisión clave documentada):** el lote pedía "~4 en Pendientes/Vistas, ~5-6 en Resueltas" asumiendo resueltas más bajas (sin botones Visto/Resolver). Pero el Sprint 1 volvió "Ver bot" un botón → la fila de acción de las RESUELTAS pasó a tener altura de botón igual que las otras → cards de altura PAREJA entre estados. Con cards parejas, un cap de 6 en Resueltas haría esa columna más alta (y el grid stretch estiraría las otras a esa altura), rompiendo el objetivo "≈4 cards". Por eso el cap es 4 para las tres = calibrar a la altura REAL (como pide el lote). `VISIBLE_CAP` queda como config por columna: subir RESOLVED es un one-liner (sabiendo que entonces la altura uniforme será la del cap más alto). `lg:min-h-[40rem]` es valor calibrable a ojo.
+- **Restricción dura respetada:** NO se reintrodujo `overflow-hidden` ni altura fija que recorte; el difuminado sigue siendo overlay gradiente + `z-30` en hover. El min-h solo agrega piso, no clippea.
+
+---
+
 ## Estado / pendiente humano
-- **visual-qa** `/admin/alerts`: despachado 3× (Lotes 1, 2 y 3). **El preview/browser MCP NO está conectado esta sesión** (`preview_start`/`preview_screenshot` ausentes — coincide con memoria `preview-mcp-untracked`), así que el agente solo pudo hacer **análisis/auditoría de código** (sin screenshot real). Lote 3: auditoría limpia (z-index z-0→z-30 > overlay z-10 correcto; `relative` sin `overflow-hidden`; portal/trap/AnimatePresence OK) → veredicto **❓ A CONFIRMAR** render visual. La confirmación queda en manos del humano en `:3000` (criterio de aceptación del lote).
+- **visual-qa** `/admin/alerts`: despachado 4× (Lotes 1–4; el preview MCP estuvo ausente todas las veces). **El preview/browser MCP NO está conectado esta sesión** (`preview_start`/`preview_screenshot` ausentes — coincide con memoria `preview-mcp-untracked`), así que el agente solo pudo hacer **análisis/auditoría de código** (sin screenshot real). Lote 3: auditoría limpia (z-index z-0→z-30 > overlay z-10 correcto; `relative` sin `overflow-hidden`; portal/trap/AnimatePresence OK) → veredicto **❓ A CONFIRMAR** render visual. La confirmación queda en manos del humano en `:3000` (criterio de aceptación del lote).
 - **Verificación humana (Lote 1):** tras "Visto"/"Resolver" sobre una PENDING, el badge rojo del sidebar debe bajar SIN esperar ~30s y sin re-navegar. Si no refresca → contingencia `router.refresh()` en AlertsClient.
 - **Verificación humana (Lote 2):** las 4 stat cards pobladas (2 / 6 / 5 / Xm) y su hover a ojo (scale + shadow + ring, sin clip).
 - **Verificación humana (Lote 3):**
   - Filtro de fecha: default "Última semana" aplicado (chip cyan); "Personalizado" abre los inputs desde/hasta; combina con severidad. (Nota: las 14 seed caen todas en la última semana → para ver el filtro recortar, usar "Personalizado".)
   - Difuminado/overview: PENDING (6) y RESOLVED (5) muestran difuminado + "Ver todas (N) →"; click en header o hint abre el overview en portal con todas; cierra con X/Esc/backdrop. VISTAS (3) sin difuminado.
   - Hover por card: scale + shadow + ring solo en la card hovereada; la 5ª (difuminada) al hover sube completa sobre el gradiente, sin recortarse en ningún costado. **Confirmar el color del fade** (`#141618`): si quedara una banda visible al pie, es un one-liner.
+- **Verificación humana (Lote 4):**
+  - "Ver bot": se ve como botón (ghost, cyan) y navega in-app al detalle del bot (no nueva pestaña, sin recargar todo).
+  - "Personalizado": abre el popover a la DERECHA del chip, flotando sobre el contenido; cierra con click afuera/Escape; confirmar que no se sale del viewport por la derecha.
+  - Altura: las 3 columnas a la misma altura (~4 cards); difuminado en Pendientes(6) y Resueltas(5), no en Vistas(3); hover por card SIN corte. Calibrables a ojo: `lg:min-h-[40rem]` y `VISIBLE_CAP`. (Si querés ver MÁS Resueltas de un vistazo, subí su cap — pero entonces la altura uniforme pasa a ser la del cap más alto, porque tras el Sprint 1 las cards quedaron de altura pareja.)
