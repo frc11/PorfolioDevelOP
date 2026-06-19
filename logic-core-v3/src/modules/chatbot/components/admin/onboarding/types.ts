@@ -7,6 +7,9 @@ export interface QuickReply {
 }
 
 export interface OnboardingState {
+  // Toggle de alta: con chatbot (flujo completo) o sin chatbot (solo cliente)
+  withBot: boolean
+
   // Paso 1
   orgName: string
   industry: Industry

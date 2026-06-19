@@ -12,9 +12,22 @@ import { DraftBanner } from './DraftBanner'
 import { useOnboardingDraft } from './useOnboardingDraft'
 import type { OnboardingState } from './types'
 
-const STEPS = ['Empresa', 'Bot', 'KB', 'Apariencia', 'Review'] as const
+const STEP_LABELS = {
+  company: 'Empresa',
+  bot: 'Bot',
+  kb: 'KB',
+  appearance: 'Apariencia',
+  review: 'Review',
+} as const
+
+type StepKey = keyof typeof STEP_LABELS
+
+// La secuencia de pasos depende del toggle con/sin bot. Sin bot: solo empresa + review.
+const WITH_BOT_STEPS: readonly StepKey[] = ['company', 'bot', 'kb', 'appearance', 'review']
+const NO_BOT_STEPS: readonly StepKey[] = ['company', 'review']
 
 const INITIAL_STATE: OnboardingState = {
+  withBot: true,
   orgName: '',
   industry: 'generico',
   city: '',
@@ -56,7 +69,13 @@ export function OnboardingWizard() {
     setState((prev) => ({ ...prev, ...updates }))
   }
 
-  const next = () => setStep((s) => Math.min(s + 1, STEPS.length - 1))
+  const stepKeys = state.withBot ? WITH_BOT_STEPS : NO_BOT_STEPS
+  const stepNames = stepKeys.map((key) => STEP_LABELS[key])
+  // Clamp defensivo: si el toggle reduce los pasos estando en uno posterior.
+  const safeStep = Math.min(step, stepKeys.length - 1)
+  const currentKey = stepKeys[safeStep]
+
+  const next = () => setStep((s) => Math.min(s + 1, stepKeys.length - 1))
   const back = () => setStep((s) => Math.max(s - 1, 0))
 
   return (
@@ -69,24 +88,24 @@ export function OnboardingWizard() {
         />
       )}
 
-      <ProgressBar currentStep={step} totalSteps={STEPS.length} stepNames={STEPS} />
+      <ProgressBar currentStep={safeStep} totalSteps={stepKeys.length} stepNames={stepNames} />
 
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-8">
+      <div className={state.withBot ? 'grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-8' : ''}>
         {/* Steps */}
         <div>
           <AnimatePresence mode="wait">
             <motion.div
-              key={STEPS[step]}
+              key={currentKey}
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
               transition={{ duration: 0.25 }}
             >
-              {step === 0 && <Step1Company state={state} update={updateState} onNext={next} />}
-              {step === 1 && <Step2BotIdentity state={state} update={updateState} onNext={next} onBack={back} />}
-              {step === 2 && <Step3KnowledgeBase state={state} update={updateState} onNext={next} onBack={back} />}
-              {step === 3 && <Step4Appearance state={state} update={updateState} onNext={next} onBack={back} />}
-              {step === 4 && <Step5Review state={state} onBack={back} onCreated={clearDraft} />}
+              {currentKey === 'company' && <Step1Company state={state} update={updateState} onNext={next} />}
+              {currentKey === 'bot' && <Step2BotIdentity state={state} update={updateState} onNext={next} onBack={back} />}
+              {currentKey === 'kb' && <Step3KnowledgeBase state={state} update={updateState} onNext={next} onBack={back} />}
+              {currentKey === 'appearance' && <Step4Appearance state={state} update={updateState} onNext={next} onBack={back} />}
+              {currentKey === 'review' && <Step5Review state={state} onBack={back} onCreated={clearDraft} />}
             </motion.div>
           </AnimatePresence>
 
@@ -98,10 +117,12 @@ export function OnboardingWizard() {
           )}
         </div>
 
-        {/* Live preview — desktop only */}
-        <aside className="hidden lg:block">
-          <BotPreview state={state} />
-        </aside>
+        {/* Live preview — solo con bot, desktop only */}
+        {state.withBot && (
+          <aside className="hidden lg:block">
+            <BotPreview state={state} />
+          </aside>
+        )}
       </div>
     </div>
   )
