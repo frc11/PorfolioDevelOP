@@ -14,6 +14,7 @@
     "seed:agency-os": "ts-node prisma/seed-agency-os.ts",
     "seed:agency-os-v2": "ts-node prisma/seed-agency-os.ts",
     "migrate:os-v2": "ts-node prisma/migrate-os-to-unified.ts",
+    "seed:latency": "ts-node --transpile-only scripts/dev/seed-latency.ts",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:debug": "playwright test --debug"

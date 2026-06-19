@@ -9,6 +9,7 @@ import {
   Tooltip,
   CartesianGrid,
 } from 'recharts'
+import { adminHoverCls } from '@/lib/hover'
 
 interface ActivityChartProps {
   data: Array<{ hour: string; count: number }>
@@ -16,7 +17,7 @@ interface ActivityChartProps {
 
 export function ActivityChart({ data }: ActivityChartProps) {
   return (
-    <div className="rounded-[28px] border border-white/10 bg-white/[0.02] p-6">
+    <div className={`rounded-[28px] border border-white/10 bg-white/[0.02] p-6 ${adminHoverCls}`}>
       <div className="mb-4">
         <p className="text-[10px] uppercase tracking-[0.24em] text-zinc-500">
           Actividad última semana

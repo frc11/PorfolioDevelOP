@@ -19,12 +19,18 @@ interface LatencyChartProps {
   history: LatencyHistoryResult
 }
 
+// Hover del bloque SIN scale: recharts posiciona el tooltip con coordenadas del
+// contenedor y un `transform: scale` lo desfasa del cursor. Solo ring + shadow.
+// Variante local del lane — no se agrega export a src/lib/hover.ts (compartido).
+const chartCardHoverCls =
+  'transition duration-200 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] hover:shadow-[0_12px_32px_-12px_rgba(255,255,255,0.12)] hover:ring-1 hover:ring-white/15 motion-reduce:transition-none motion-reduce:hover:shadow-none'
+
 export function LatencyChart({ history }: LatencyChartProps) {
   const { status, data, totalSamples, minSamplesNeeded, hoursWithData, p50Overall, p95Overall } =
     history
 
   return (
-    <div className="rounded-[28px] border border-white/10 bg-white/[0.02] p-6">
+    <div className={'rounded-[28px] border border-white/10 bg-white/[0.02] p-6 ' + chartCardHoverCls}>
       <div className="mb-4 flex items-start justify-between gap-4">
         <div>
           <p className="text-[10px] uppercase tracking-[0.24em] text-zinc-500">
@@ -83,7 +89,10 @@ function ChartBody({ data }: { data: LatencyPoint[] }) {
               color: '#e4e4e7',
               fontSize: '12px',
             }}
-            formatter={(value) => [value === null || value === undefined ? '—' : `${value}ms`]}
+            formatter={(value, name) => [
+              value === null || value === undefined ? '—' : `${value}ms`,
+              name,
+            ]}
           />
           <Legend wrapperStyle={{ fontSize: 11, color: '#a1a1aa', paddingTop: 10 }} iconType="line" />
           <Line
