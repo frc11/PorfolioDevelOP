@@ -1,11 +1,18 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 import { Building2, ChevronDown, Clock, Filter, History, User } from 'lucide-react'
-import { Badge, Card, EmptyState, Select } from '@/components/ui'
+import { Badge, Button, Callout, Card, EmptyState, Select } from '@/components/ui'
 import { staggerContainer, staggerItem } from '@/lib/motion-variants'
 import { useReducedMotion } from '@/lib/use-reduced-motion'
+import { useIsClient } from '@/lib/use-is-client'
+import { adminHoverCls } from '@/lib/hover'
+import { listAuditLog } from '@/lib/audit-log-queries'
+import { AuditPeriodFilter } from './audit-period-filter'
+import { periodToRange, type AuditPeriod } from './audit-filters'
+
+const PAGE_SIZE = 10
 
 type DiffValue = Record<string, { before: unknown; after: unknown }>
 
@@ -26,6 +33,8 @@ interface AuditEntry {
 
 interface AuditLogClientProps {
   initialEntries: AuditEntry[]
+  initialHasMore: boolean
+  actionTypes: string[]
   stats: {
     total: number
     last7Days: number
@@ -33,16 +42,87 @@ interface AuditLogClientProps {
   }
 }
 
-export function AuditLogClient({ initialEntries, stats }: AuditLogClientProps) {
+export function AuditLogClient({
+  initialEntries,
+  initialHasMore,
+  actionTypes,
+  stats,
+}: AuditLogClientProps) {
   const reduced = useReducedMotion()
-  const [entries] = useState(initialEntries)
+  const mounted = useIsClient()
+  const [entries, setEntries] = useState(initialEntries)
+  const [hasMore, setHasMore] = useState(initialHasMore)
+  const [page, setPage] = useState(0)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const [expanded, setExpanded] = useState<Set<string>>(new Set())
-  const [filter, setFilter] = useState('all')
-  const [mounted, setMounted] = useState(false)
+  const [actionFilter, setActionFilter] = useState('all')
+  const [period, setPeriod] = useState<AuditPeriod>('all')
+  const [dateFrom, setDateFrom] = useState('')
+  const [dateTo, setDateTo] = useState('')
+  // Ignora respuestas viejas si se cambia el filtro rapido (out-of-order).
+  const requestSeq = useRef(0)
 
-  useEffect(() => {
-    setMounted(true)
-  }, [])
+  async function runQuery(
+    next: { action: string; period: AuditPeriod; from: string; to: string },
+    targetPage: number,
+    mode: 'replace' | 'append',
+  ) {
+    const seq = ++requestSeq.current
+    setLoading(true)
+    setError(null)
+    try {
+      const { fromDate, toDate } = periodToRange(next.period, next.from, next.to)
+      const result = await listAuditLog(
+        {
+          ...(next.action !== 'all' && { actionType: next.action }),
+          ...(fromDate && { fromDate }),
+          ...(toDate && { toDate }),
+        },
+        targetPage,
+        PAGE_SIZE,
+      )
+      if (seq !== requestSeq.current) {
+        return
+      }
+      setEntries((prev) =>
+        mode === 'append' ? [...prev, ...result.entries] : result.entries,
+      )
+      setHasMore(result.hasMore)
+      setPage(targetPage)
+    } catch {
+      if (seq !== requestSeq.current) {
+        return
+      }
+      setError('No se pudieron cargar los registros.')
+    } finally {
+      if (seq === requestSeq.current) {
+        setLoading(false)
+      }
+    }
+  }
+
+  function changeAction(value: string) {
+    setActionFilter(value)
+    setExpanded(new Set())
+    runQuery({ action: value, period, from: dateFrom, to: dateTo }, 0, 'replace')
+  }
+
+  function changeDate(nextPeriod: AuditPeriod, nextFrom: string, nextTo: string) {
+    setPeriod(nextPeriod)
+    setDateFrom(nextFrom)
+    setDateTo(nextTo)
+    setExpanded(new Set())
+    runQuery(
+      { action: actionFilter, period: nextPeriod, from: nextFrom, to: nextTo },
+      0,
+      'replace',
+    )
+  }
+
+  function loadMore() {
+    runQuery({ action: actionFilter, period, from: dateFrom, to: dateTo }, page + 1, 'append')
+  }
 
   function toggleExpand(id: string) {
     const next = new Set(expanded)
@@ -54,14 +134,13 @@ export function AuditLogClient({ initialEntries, stats }: AuditLogClientProps) {
     setExpanded(next)
   }
 
-  const actionTypes = useMemo(
-    () => ['all', ...new Set(entries.map((entry) => entry.actionType))],
-    [entries],
+  const actionOptions = useMemo(
+    () => [
+      { value: 'all', label: 'Todas las acciones' },
+      ...[...actionTypes].sort().map((type) => ({ value: type, label: type })),
+    ],
+    [actionTypes],
   )
-  const filtered =
-    filter === 'all'
-      ? entries
-      : entries.filter((entry) => entry.actionType === filter)
 
   return (
     <div className="space-y-6">
@@ -74,33 +153,43 @@ export function AuditLogClient({ initialEntries, stats }: AuditLogClientProps) {
       <div className="flex flex-wrap items-center gap-3">
         <Filter className="h-4 w-4 text-zinc-500" strokeWidth={1.5} />
         <Select
-          value={filter}
-          onChange={(event) => setFilter(event.target.value)}
+          value={actionFilter}
+          onChange={(event) => changeAction(event.target.value)}
           className="w-auto py-1.5"
-          options={actionTypes.map((type) => ({
-            value: type,
-            label: type === 'all' ? 'Todas las acciones' : type,
-          }))}
+          options={actionOptions}
+        />
+        <AuditPeriodFilter
+          period={period}
+          from={dateFrom}
+          to={dateTo}
+          onChange={changeDate}
         />
         <span className="text-xs text-zinc-500">
-          Mostrando {filtered.length} entries
+          {loading ? 'Cargando...' : `Mostrando ${entries.length} registros`}
         </span>
       </div>
 
-      {filtered.length === 0 ? (
-        <EmptyState
-          icon={History}
-          title="Sin registros para este filtro"
-          description="Cuando haya acciones administrativas que coincidan, van a aparecer aca."
-        />
+      {entries.length === 0 ? (
+        loading ? (
+          <div className="py-12 text-center text-sm text-zinc-500">
+            Cargando registros...
+          </div>
+        ) : (
+          <EmptyState
+            icon={History}
+            title="Sin registros para este filtro"
+            description="Cuando haya acciones administrativas que coincidan, van a aparecer aca."
+          />
+        )
       ) : (
         <motion.div
           className="space-y-2"
           variants={reduced ? undefined : staggerContainer}
           initial={reduced || mounted ? false : 'hidden'}
           animate={reduced ? undefined : 'visible'}
+          aria-busy={loading}
         >
-          {filtered.map((entry) => {
+          {entries.map((entry) => {
             const diff = normalizeDiff(entry.diff)
             const isExpanded = expanded.has(entry.id)
             const hasDiff = Object.keys(diff).length > 0
@@ -112,7 +201,7 @@ export function AuditLogClient({ initialEntries, stats }: AuditLogClientProps) {
               >
                 <Card
                   padding="none"
-                  className="overflow-hidden"
+                  className={`overflow-hidden ${adminHoverCls}`}
                 >
                   <button
                     type="button"
@@ -190,13 +279,20 @@ export function AuditLogClient({ initialEntries, stats }: AuditLogClientProps) {
         </motion.div>
       )}
 
-      {entries.length === 50 && (
+      {error ? <Callout tone="danger">{error}</Callout> : null}
+
+      {hasMore ? (
         <div className="text-center">
-          <button type="button" className="text-sm text-cyan-400 hover:underline">
-            Cargar mas
-          </button>
+          <Button
+            variant="secondary"
+            size="sm"
+            loading={loading}
+            onClick={loadMore}
+          >
+            {loading ? 'Cargando...' : 'Cargar mas'}
+          </Button>
         </div>
-      )}
+      ) : null}
     </div>
   )
 }
@@ -211,7 +307,7 @@ function StatBox({
   accent?: 'cyan'
 }) {
   return (
-    <Card padding="sm">
+    <Card padding="sm" className={adminHoverCls}>
       <p className="text-[10px] uppercase tracking-[0.24em] text-zinc-500">
         {label}
       </p>

@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation'
+import { AuditActionType } from '@prisma/client'
 import { auth } from '@/auth'
 import { getAuditLogStats, listAuditLog } from '@/lib/audit-log-queries'
 import { AuditLogClient } from './_components/AuditLogClient'
@@ -9,8 +10,8 @@ export default async function AuditLogPage() {
     redirect('/login')
   }
 
-  const [entries, stats] = await Promise.all([
-    listAuditLog(undefined, 0, 50),
+  const [initial, stats] = await Promise.all([
+    listAuditLog(undefined, 0, 10),
     getAuditLogStats(),
   ])
 
@@ -28,7 +29,12 @@ export default async function AuditLogPage() {
         </p>
       </div>
 
-      <AuditLogClient initialEntries={entries} stats={stats} />
+      <AuditLogClient
+        initialEntries={initial.entries}
+        initialHasMore={initial.hasMore}
+        actionTypes={Object.values(AuditActionType)}
+        stats={stats}
+      />
     </div>
   )
 }

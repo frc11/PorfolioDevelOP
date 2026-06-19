@@ -1,5 +1,6 @@
 'use server'
 
+import { ZodError } from 'zod'
 import { revalidatePath } from 'next/cache'
 import { prisma } from '@/lib/prisma'
 import { requireSuperAdmin } from '@/lib/auth-guards'
@@ -7,11 +8,7 @@ import { fail, ok, type ActionResult } from '@/lib/action-utils'
 import {
   DEFAULT_AGENCY_SETTINGS,
 } from '@/lib/agency-settings'
-import {
-  PREMIUM_FEATURE_DEFAULTS,
-  PREMIUM_FEATURE_KEYS,
-  type PremiumFeatureKey,
-} from '@/lib/premium-features'
+import { type PremiumFeatureKey } from '@/lib/premium-features'
 
 import {
   UpdateModulePricingSchema,
@@ -195,29 +192,31 @@ export async function updateModulePricing(
   try {
     await requireSuperAdmin()
     const parsed = UpdateModulePricingSchema.parse({ moduleKey, price })
-    const featureKey = parsed.moduleKey as PremiumFeatureKey
 
-    // Map legacy featureKey → new catalog slug
-    const LEGACY_TO_SLUG: Partial<Record<PremiumFeatureKey, string>> = {
-        'ecommerce': 'tienda-conectada',
-        'motor-resenias': 'motor-resenas',
-        'email-automation': 'email-marketing-pro',
-        'email-nurturing': 'email-marketing-pro',
+    // moduleKey ES el slug real de la tabla PremiumModule (getSettings emite mod.slug).
+    // La existencia se chequea aca: si no existe, falla en vez de un exito silencioso.
+    const moduleRow = await prisma.premiumModule.findUnique({
+      where: { slug: parsed.moduleKey },
+    })
+
+    if (!moduleRow) {
+      return fail('No se encontro el modulo.')
     }
-    const moduleSlug = LEGACY_TO_SLUG[featureKey] ?? featureKey
 
-    const defaults = PREMIUM_FEATURE_DEFAULTS[featureKey]
-
-    await prisma.premiumModule.updateMany({
-      where: { slug: moduleSlug },
+    await prisma.premiumModule.update({
+      where: { id: moduleRow.id },
       data: { priceMonthlyUsd: parsed.price },
     })
 
     revalidateSettingsPaths()
     revalidatePath('/dashboard/services')
 
-    return ok({ message: `Precio actualizado para ${defaults.name}.` })
+    return ok({ message: `Precio actualizado para ${moduleRow.name}.` })
   } catch (error) {
+    if (error instanceof ZodError) {
+      return fail(error.issues[0]?.message ?? 'Datos invalidos.')
+    }
+
     return fail(
       error instanceof Error ? error.message : 'No se pudo actualizar el precio.'
     )
