@@ -106,7 +106,7 @@ export function BillingOverrideForm({
             value={price}
             onChange={(e) => setPrice(e.target.value)}
             disabled={pending}
-            className="w-full rounded-xl border border-white/10 bg-white/[0.02] px-3 py-2 text-sm text-zinc-200 focus:border-cyan-500/40 focus:outline-none disabled:opacity-50"
+            className="w-full rounded-xl border border-white/10 bg-white/[0.02] px-3 py-2 text-sm text-zinc-200 focus:border-cyan-500/40 focus:outline-none disabled:opacity-50 [-moz-appearance:textfield] [&::-webkit-inner-spin-button]:m-0 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:m-0 [&::-webkit-outer-spin-button]:appearance-none"
           />
         </div>
         <div className="space-y-1.5">
