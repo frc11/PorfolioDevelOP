@@ -5,6 +5,7 @@ import { CheckCircle2, Copy, Check, Mail, AlertTriangle } from 'lucide-react'
 import type { OnboardingState } from './types'
 import { createClientWithBot } from '../../../server/admin/createClientWithBot'
 import { createClientOnly } from '../../../server/admin/createClientOnly'
+import { getAvatar } from '@/modules/chatbot/components/avatar'
 import { INDUSTRIES_LABELS } from './industries'
 import { slugify } from '@/lib/slugify'
 import { useTransitionContext } from '@/context/TransitionContext'
@@ -32,11 +33,12 @@ const TONE_LABELS: Record<OnboardingState['tone'], string> = {
   neutral: 'Neutral (tú)',
 }
 
-const AVATAR_LABELS: Record<OnboardingState['avatarStyle'], string> = {
-  neuro: 'Neuro (Esfera de partículas)',
-  legacy_neuro: 'Legacy Neuro (Avatar 3D)',
-  image: 'Imagen',
-  emoji: 'Emoji',
+// avatarStyle es AvatarKindId (string): los ids del registry + escape hatches.
+// El label sale del registry; los hatches tienen su propio texto.
+function avatarLabel(style: string): string {
+  if (style === 'image') return 'Imagen custom'
+  if (style === 'emoji') return 'Emoji'
+  return getAvatar(style)?.label ?? style
 }
 
 const POSITION_LABELS: Record<OnboardingState['position'], string> = {
@@ -224,19 +226,24 @@ export function Step5Review({ state, onBack, onCreated }: Step5Props) {
         <ReviewSection title="Identidad del bot">
           <ReviewRow label="Nombre" value={state.botName} />
           <ReviewRow label="Tono" value={TONE_LABELS[state.tone]} />
-          <ReviewRow label="Avatar" value={AVATAR_LABELS[state.avatarStyle]} />
           <ReviewRow
-            label="Color"
+            label="Avatar"
             value={
               <span className="flex items-center gap-2">
-                <span
-                  className="inline-block h-4 w-4 rounded-full border border-white/10"
-                  style={{ backgroundColor: state.accentColor }}
-                />
-                <span className="font-mono text-xs">{state.accentColor}</span>
+                {avatarLabel(state.avatarStyle)}
+                {state.avatarStyle === 'emoji' && state.avatarEmoji && (
+                  <span className="text-base leading-none">{state.avatarEmoji}</span>
+                )}
               </span>
             }
           />
+          <ReviewRow label="Color" value={<ColorValue hex={state.accentColor} />} />
+          {state.accentSecondary && (
+            <ReviewRow label="Color secundario" value={<ColorValue hex={state.accentSecondary} />} />
+          )}
+          {state.chatSurfaceTint && (
+            <ReviewRow label="Tinte surface" value={<ColorValue hex={state.chatSurfaceTint} />} />
+          )}
           <ReviewRow label="Posición" value={POSITION_LABELS[state.position]} />
         </ReviewSection>
 
@@ -367,5 +374,17 @@ function ReviewRow({
         {value}
       </span>
     </div>
+  )
+}
+
+function ColorValue({ hex }: { hex: string }) {
+  return (
+    <span className="flex items-center gap-2">
+      <span
+        className="inline-block h-4 w-4 rounded-full border border-white/10"
+        style={{ backgroundColor: hex }}
+      />
+      <span className="font-mono text-xs">{hex}</span>
+    </span>
   )
 }
