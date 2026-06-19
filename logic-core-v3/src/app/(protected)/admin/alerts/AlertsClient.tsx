@@ -36,6 +36,13 @@ const VISIBLE_CAP: Record<ColumnId, number> = {
   RESOLVED: 4,
 }
 
+// Header de columna full-bleed: -mx-4/-mt-4 cancelan el p-4 de la columna para que
+// el highlight (cuando hay overview) cubra TODO el header de borde a borde (no solo
+// la franja del título). px-4/pt-4 dejan el contenido en la misma posición; el layout
+// (ícono+título · conteo) va en un wrapper flex interno. Mismo base con o sin overview
+// → las 3 columnas alinean su header; solo el clickable agrega el hover/rounded-t.
+const HEADER_BASE = '-mx-4 -mt-4 mb-3 block px-4 pt-4 pb-3'
+
 export function AlertsClient({ initialAlerts }: AlertsClientProps) {
   const [alerts, setAlerts] = useState(initialAlerts)
   const [pendingAction, setPendingAction] = useState<string | null>(null)
@@ -226,12 +233,14 @@ export function AlertsClient({ initialAlerts }: AlertsClientProps) {
                   type="button"
                   onClick={() => setOverviewCol(col.id)}
                   aria-label={`Ver todas las alertas de ${col.label}`}
-                  className="mb-4 flex w-full items-center justify-between rounded-xl px-1 py-1 text-left transition-colors hover:bg-white/[0.04]"
+                  className={HEADER_BASE + ' rounded-t-[28px] text-left transition-colors hover:bg-white/[0.04]'}
                 >
-                  {header}
+                  <div className="flex items-center justify-between">{header}</div>
                 </button>
               ) : (
-                <div className="mb-4 flex items-center justify-between px-1 py-1">{header}</div>
+                <div className={HEADER_BASE}>
+                  <div className="flex items-center justify-between">{header}</div>
+                </div>
               )}
 
               {items.length === 0 ? (
