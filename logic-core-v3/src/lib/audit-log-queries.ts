@@ -16,7 +16,7 @@ interface ListAuditLogFilter {
 export async function listAuditLog(
   filter?: ListAuditLogFilter,
   page = 0,
-  pageSize = 50,
+  pageSize = 10,
 ) {
   await requireSuperAdmin()
 
@@ -28,7 +28,8 @@ export async function listAuditLog(
         }
       : undefined
 
-  return prisma.adminAuditLog.findMany({
+  // Se pide pageSize + 1 para saber si existe una página siguiente sin un count() extra.
+  const rows = await prisma.adminAuditLog.findMany({
     where: {
       ...(filter?.userId && { userId: filter.userId }),
       ...(filter?.actionType && {
@@ -40,8 +41,13 @@ export async function listAuditLog(
     },
     orderBy: { createdAt: 'desc' },
     skip: page * pageSize,
-    take: pageSize,
+    take: pageSize + 1,
   })
+
+  return {
+    entries: rows.slice(0, pageSize),
+    hasMore: rows.length > pageSize,
+  }
 }
 
 export async function getAuditLogStats() {

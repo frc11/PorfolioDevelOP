@@ -1,12 +1,16 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 import { Building2, ChevronDown, Clock, Filter, History, User } from 'lucide-react'
-import { Badge, Card, EmptyState, Select } from '@/components/ui'
+import { Badge, Button, Callout, Card, EmptyState, Select } from '@/components/ui'
 import { staggerContainer, staggerItem } from '@/lib/motion-variants'
 import { useReducedMotion } from '@/lib/use-reduced-motion'
+import { useIsClient } from '@/lib/use-is-client'
 import { adminHoverCls } from '@/lib/hover'
+import { listAuditLog } from '@/lib/audit-log-queries'
+
+const PAGE_SIZE = 10
 
 type DiffValue = Record<string, { before: unknown; after: unknown }>
 
@@ -27,6 +31,7 @@ interface AuditEntry {
 
 interface AuditLogClientProps {
   initialEntries: AuditEntry[]
+  initialHasMore: boolean
   stats: {
     total: number
     last7Days: number
@@ -34,16 +39,36 @@ interface AuditLogClientProps {
   }
 }
 
-export function AuditLogClient({ initialEntries, stats }: AuditLogClientProps) {
+export function AuditLogClient({
+  initialEntries,
+  initialHasMore,
+  stats,
+}: AuditLogClientProps) {
   const reduced = useReducedMotion()
-  const [entries] = useState(initialEntries)
+  const mounted = useIsClient()
+  const [entries, setEntries] = useState(initialEntries)
+  const [hasMore, setHasMore] = useState(initialHasMore)
+  const [page, setPage] = useState(0)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const [expanded, setExpanded] = useState<Set<string>>(new Set())
   const [filter, setFilter] = useState('all')
-  const [mounted, setMounted] = useState(false)
 
-  useEffect(() => {
-    setMounted(true)
-  }, [])
+  async function loadMore() {
+    setLoading(true)
+    setError(null)
+    try {
+      const next = page + 1
+      const result = await listAuditLog(undefined, next, PAGE_SIZE)
+      setEntries((prev) => [...prev, ...result.entries])
+      setHasMore(result.hasMore)
+      setPage(next)
+    } catch {
+      setError('No se pudieron cargar mas registros.')
+    } finally {
+      setLoading(false)
+    }
+  }
 
   function toggleExpand(id: string) {
     const next = new Set(expanded)
@@ -191,13 +216,20 @@ export function AuditLogClient({ initialEntries, stats }: AuditLogClientProps) {
         </motion.div>
       )}
 
-      {entries.length === 50 && (
+      {error ? <Callout tone="danger">{error}</Callout> : null}
+
+      {hasMore ? (
         <div className="text-center">
-          <button type="button" className="text-sm text-cyan-400 hover:underline">
-            Cargar mas
-          </button>
+          <Button
+            variant="secondary"
+            size="sm"
+            loading={loading}
+            onClick={loadMore}
+          >
+            {loading ? 'Cargando...' : 'Cargar mas'}
+          </Button>
         </div>
-      )}
+      ) : null}
     </div>
   )
 }

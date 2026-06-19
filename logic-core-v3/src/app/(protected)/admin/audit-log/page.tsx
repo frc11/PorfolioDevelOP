@@ -9,8 +9,8 @@ export default async function AuditLogPage() {
     redirect('/login')
   }
 
-  const [entries, stats] = await Promise.all([
-    listAuditLog(undefined, 0, 50),
+  const [initial, stats] = await Promise.all([
+    listAuditLog(undefined, 0, 10),
     getAuditLogStats(),
   ])
 
@@ -28,7 +28,11 @@ export default async function AuditLogPage() {
         </p>
       </div>
 
-      <AuditLogClient initialEntries={entries} stats={stats} />
+      <AuditLogClient
+        initialEntries={initial.entries}
+        initialHasMore={initial.hasMore}
+        stats={stats}
+      />
     </div>
   )
 }
