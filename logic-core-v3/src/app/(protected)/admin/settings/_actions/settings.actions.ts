@@ -1,5 +1,6 @@
 'use server'
 
+import { ZodError } from 'zod'
 import { revalidatePath } from 'next/cache'
 import { prisma } from '@/lib/prisma'
 import { requireSuperAdmin } from '@/lib/auth-guards'
@@ -212,6 +213,10 @@ export async function updateModulePricing(
 
     return ok({ message: `Precio actualizado para ${moduleRow.name}.` })
   } catch (error) {
+    if (error instanceof ZodError) {
+      return fail(error.issues[0]?.message ?? 'Datos invalidos.')
+    }
+
     return fail(
       error instanceof Error ? error.message : 'No se pudo actualizar el precio.'
     )
