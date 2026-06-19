@@ -178,3 +178,57 @@ Conceptualmente sano; el gap "entregable sin contenido" es el smell que conviene
 - `/admin/clients/[id]?tab=projects` — cards navegan a `/admin/projects/[id]`.
 - `/admin/clients/[id]?tab=vault` — hover en cards de asset.
 - `/admin/clients/[id]?tab=support` — ticket/mensaje navegan; "Ver todos" cómodos.
+
+---
+---
+
+# LOTE 2 — Sección CLIENTES · log de cierre (cosmético, sobre lo ya commiteado)
+
+**Worktree/Branch:** mismos (`C:\develop-clientes-clients` · `lane/clientes-clients`) · **Scope:** `src/app/(protected)/admin/clients/**` · **Fecha:** 2026-06-19
+**Gate:** `.\node_modules\.bin\tsc.cmd --noEmit` desde `logic-core-v3` → **EXIT 0**; baseline previo (antes de tocar nada) también **EXIT 0** ⇒ regresión de tipos atribuible a estos cambios = **ninguna**.
+**Verificación visual:** la hace el humano en `:3000` (directiva del goal). **No** auto-confirmado por compilar.
+**Self-review:** workflow adversarial de **5 revisores** (1 por ajuste + auditoría de scope/forbidden) → **5/5 pass, 0 issues**.
+
+> Cero ediciones a shared/forbidden/schema. **4 archivos** tocados, todos bajo `clients/`. `HoverScaleCard`/`hoverTint` (lote 1) se **reusan**; no se creó otro wrapper ni se movió a shared.
+
+## Commits por bloque (LOTE 2)
+
+| Commit | Pedido | Archivo | Qué |
+|--------|--------|---------|-----|
+| `6aeb750` | 1 | `ClientsListClient.tsx` | checkbox de selección re-estilado 1:1 con `BotsListClient` |
+| `709de62` | 3 | `BillingOverrideCard.tsx` | hover **scale** (`HoverScaleCard`) en las 3 cards de billing override |
+| `9605637` | 5 | `PlanAssignmentCard.tsx` | hover de **color** (`hoverTint`, sin transform) en filas de la tabla de gating |
+| `f991c01` | 6 | `BillingOverrideForm.tsx` | quitar flechas ↑↓ del input number "Precio override" (CSS local) |
+
+## Log por ajuste
+
+**Ajuste 1 (pedido 1) — Estética del checkbox de la lista.** El toggle-on-click ya existía (lote 1, Sprint 1); faltaba el **look**. El `<input type=checkbox>` nativo (`h-4 w-4 … accent-cyan-400`) se reemplazó por el patrón de `BotsListClient`: `<label>` (absolute left-3 top-3 z-10 inline-flex cursor-pointer, `stopPropagation`) › `<input class="peer sr-only">` + `<span>` estilado (h-5 w-5, rounded-md, border-white/20, bg-zinc-950/80, backdrop-blur, `peer-checked:bg-cyan-400 peer-checked:text-zinc-950`, `peer-focus-visible:ring-2`) con `<Check>` (lucide, strokeWidth 1.5). Markup **byte-for-byte = Bots**. Comportamiento intacto (`checked`/`onChange`/`aria-label`; sigue siendo sibling del `<Link>` → no navega; en modo selección la card togglea sin navegar). `Check` agregado al import de lucide. A11y: el input real es `sr-only` (focusable, no `hidden`) y suma `peer-focus-visible:ring`.
+
+**Ajuste 2 (pedido 3) — Contacto + billing.** *Contacto:* las 4 filas (Email primario, WhatsApp, Website, Creado) **YA** pasan por `InfoRow` con `hoverTint` desde lote 1 (Sprint 2) ⇒ **ya completo, sin cambio nuevo**. *Billing:* las 3 cards del helper `Stat` (Precio del plan / Override vigente / Se factura) ahora se envuelven en `<HoverScaleCard className="h-full rounded-xl">` (scale 1.015 + ring). El `rounded-xl` pisa el default `rounded-2xl` vía `cn`/twMerge para que el **ring matchee** la card interna; `h-full` (wrapper + div interno) preserva alturas iguales en el grid `sm:grid-cols-3`. `BillingOverrideCard` es server component que renderiza el client `HoverScaleCard` con children server-rendered (mismo patrón RSC que OverviewTab con `<StatCard>`).
+
+**Ajuste 3 (pedido 5) — Tabla de gating.** En el helper `Row` de `PlanAssignmentCard` (dentro del `<details>` "Comparación de las 7 dimensiones de gating"), el `<tr>` de cada fila de datos recibió `hoverTint` (`transition-colors hover:border-white/20 hover:bg-white/[0.05]`) ⇒ coloreo bg/border en hover, **sin transform** (no se agranda — lectura literal del pedido). El `<thead>` queda igual. El bg del `<tr>` pinta detrás de las celdas transparentes (precedente en el mismo stylesheet: `.admin-table tbody tr:hover` en `globals.css`). `hoverTint` es un `const` string importado en server component → resuelve al **valor real** (no a un client-reference proxy): mismo patrón ya probado en `OverviewTab` (server) / lote 1.
+
+**Ajuste 4 (pedido 6) — Spinners del input precio.** Al `<input type=number>` "Precio override (USD/mes)" se le agregaron 5 clases locales: `[-moz-appearance:textfield]` (Firefox) + `[&::-webkit-inner-spin-button]:appearance-none` · `:m-0` y `[&::-webkit-outer-spin-button]:appearance-none` · `:m-0` (Chromium). `type`, `min/max/step` y la validación (`Number()`/`Number.isNaN`/`< 0` en `handleSet`) **sin tocar**. Cambio local a ese único input (el date y el text no se tocan).
+
+## PENDIENTE — Ajuste 5 (pedido 7): BLOQUEADO por forbidden
+
+**Pedido:** hover **scale** en 3 cards del "ChatbotTab" — la card del **nombre del bot** (fila "Lucia · develop · gemini-2.5-flash" + estado Activo), **"Consumo (Este mes)"** y **"Actividad reciente"**.
+
+**Por qué no se hizo:** esas 3 cards **NO** están en `ChatbotTab.tsx` (ahí sólo hay 4 StatCards, que ya tienen `HoverScaleCard` desde lote 1). Las renderiza `src/components/admin/managers/ChatbotManager.tsx` — la del bot en líneas **65-80**, "Consumo" en **83-100**, "Actividad reciente" en **102-121** — **módulo de la lista forbidden** ("CONSUMIR sí; EDITAR no"). No hay forma de darle scale+ring **individual** a esas 3 cards sin editar el módulo: envolver el `<ChatbotManager>` entero desde `ChatbotTab` escalaría también los 3 botones y la lista "Últimos Leads" (rompe la aceptación "esas 3 cards reaccionan con scale+ring, consistente con las StatCards"). Importar el `HoverScaleCard` local-al-worktree dentro de un módulo shared sería, además, un cross-boundary incorrecto. **Hermano de PENDIENTE #12** (los 3 botones redundantes, también en `ChatbotManager`).
+
+**Decisión del humano:** ¿autorizar una edición puntual a `ChatbotManager.tsx` (como se autorizó `ActivityLog.tsx` en otra lane) para envolver esas 3 cards en hover? Si **sí** → commit propio, explícitamente fuera de scope clientes. Si **no** → post-merge. No se asumió.
+
+## old → new (LOTE 2)
+
+| Lugar | Antes | Después |
+|------|-------|---------|
+| Lista — checkbox de selección | `<input>` nativo (`h-4 w-4 rounded border-white/20 bg-white/[0.05] accent-cyan-400`) | `<label>` + `<input peer sr-only>` + `<span>` estilado h-5 w-5 con `<Check>` — idéntico a `/admin/chatbots` |
+| Overview/Billing — 3 cards de override (Precio del plan / Override vigente / Se factura) | sin hover | hover **scale 1.015 + ring** (`HoverScaleCard`, `rounded-xl`, `h-full`) |
+| Gating — filas `<tr>` de la tabla de 7 dimensiones | sin hover | hover **color** `hoverTint` (bg + border; **sin** agrandar) |
+| Billing form — input "Precio override" | flechas ↑↓ del navegador | sin flechas (`appearance-none` webkit inner/outer + `[-moz-appearance:textfield]`) |
+| ChatbotTab — 3 cards (bot / Consumo / Actividad) | sin hover | **sin cambio** → BLOQUEADO (viven en `ChatbotManager`, forbidden) |
+
+## Rutas a verificar en `:3000` (humano) — LOTE 2
+- `/admin/clients` — el checkbox de cada card ahora se ve **igual** al de `/admin/chatbots` (cuadrado redondeado, check cyan al marcar). Conviene compararlas lado a lado.
+- `/admin/clients/[id]?tab=overview` — **Billing override:** las 3 cards (Precio del plan / Override vigente / Se factura) hacen **scale+ring** en hover; el input "Precio override (USD/mes)" **no** muestra flechas ↑↓. Abrir el `<details>` "Comparación de las 7 dimensiones de gating": cada **fila** se colorea en hover **sin agrandarse**.
+- `/admin/clients/[id]?tab=chatbot` — (Ajuste 5 **no** aplicado) las cards de bot/Consumo/Actividad siguen sin hover; pendiente de decisión sobre `ChatbotManager`.
