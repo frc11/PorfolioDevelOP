@@ -143,19 +143,25 @@ export function ActivityLog({ initialEvents, slug }: ActivityLogProps) {
             </button>
           )}
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <Select
-            aria-label="Filtrar por tipo"
-            value={filters.type}
-            onChange={(e) => patchFilters({ type: e.target.value })}
-            options={ACTIVITY_TYPE_OPTIONS}
-          />
-          <Select
-            aria-label="Filtrar por nivel"
-            value={filters.level}
-            onChange={(e) => patchFilters({ level: e.target.value })}
-            options={ACTIVITY_LEVEL_OPTIONS}
-          />
+        {/* Barra inline: 3 selects angostos + espacio libre; al elegir "Personalizado"
+            los inputs desde/hasta aparecen inline a la derecha y llenan la barra. */}
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="w-full sm:w-44 sm:flex-none">
+            <Select
+              aria-label="Filtrar por tipo"
+              value={filters.type}
+              onChange={(e) => patchFilters({ type: e.target.value })}
+              options={ACTIVITY_TYPE_OPTIONS}
+            />
+          </div>
+          <div className="w-full sm:w-44 sm:flex-none">
+            <Select
+              aria-label="Filtrar por nivel"
+              value={filters.level}
+              onChange={(e) => patchFilters({ level: e.target.value })}
+              options={ACTIVITY_LEVEL_OPTIONS}
+            />
+          </div>
           <ActivityDateFilter
             preset={filters.period}
             from={filters.from}
