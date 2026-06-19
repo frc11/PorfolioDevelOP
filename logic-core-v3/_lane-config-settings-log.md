@@ -80,13 +80,39 @@ Verificado: el `<Input>` compartido (`@/components/ui/Input.tsx`) reenvía `clas
 ### ⛔ Parada — DECISIÓN DE VALENTINO (NO tocado, solo reporte)
 - **(a) `updateModulePricing` — éxito silencioso + contrato moduleKey/slug enredado.**
   `prisma.premiumModule.updateMany({ where: { slug: moduleSlug }, data })` ignora el `count` y siempre devuelve `ok(...)`. Si `moduleSlug` no matchea ninguna fila → count 0 pero "Precio actualizado" igual.
-  Además hay un desfase de contrato: `getSettings` emite `moduleKey = mod.slug` (slug de DB, casteado `as PremiumFeatureKey`), pero `UpdateModulePricingSchema` valida `moduleKey` contra `PREMIUM_FEATURE_KEYS` (keys del **catálogo**, no slugs) y `updateModulePricing` re-mapea catálogo→slug vía `LEGACY_TO_SLUG`. Para módulos donde slug ≠ key de catálogo (`ecommerce`→`tienda-conectada`, `motor-resenias`→`motor-resenas`, `email-*`→`email-marketing-pro`) el cliente manda el slug de DB, que NO es key válida → puede fallar la validación ("Modulo invalido") o caer en el camino silencioso. **Es lógica de pricing/data-contract → no se toca.**
+  Además hay un desfase de contrato: `getSettings` emite `moduleKey = mod.slug` (slug de DB, casteado `as PremiumFeatureKey`), pero `UpdateModulePricingSchema` valida `moduleKey` contra `PREMIUM_FEATURE_KEYS` (keys del **catálogo**, no slugs) y `updateModulePricing` re-mapea catálogo→slug vía `LEGACY_TO_SLUG`. Para módulos donde slug ≠ key de catálogo (`ecommerce`→`tienda-conectada`, `motor-resenias`→`motor-resenas`, `email-*`→`email-marketing-pro`) el cliente manda el slug de DB, que NO es key válida → puede fallar la validación ("Modulo invalido") o caer en el camino silencioso. **Es lógica de pricing/data-contract → no se toca.** → **✅ RESUELTO 2026-06-18** (ver sección "FIX post-sprints" abajo).
 - **(b) Máscara del token Telegram duplicada cliente/server.**
   `maskFromInput` (cliente, `settings-console.tsx`) y `maskSecret` (server, `settings.actions.ts`) implementan la MISMA máscara `••••••••<last4>` por separado. Riesgo de divergencia. **No se toca (decisión de negocio/UX).**
+
+---
+
+## FIX post-sprints — Pricing de módulos premium (validación rota + éxito silencioso + leak)
+
+Bug verificado en pantalla por Valentino: guardar el precio de un módulo cuyo slug ≠ key de catálogo (Facturación AFIP, E-commerce, Motor de Reseñas, Email Marketing) tiraba "Modulo invalido." con el **ZodError crudo** en el toast.
+
+Gate de coordinación (antes de tocar contrato): `updateModulePricing` solo lo llama `settings-console.tsx`; `UpdateModulePricingSchema` solo lo usa `settings.actions.ts`. `updateModulePricingAction` (`src/lib/actions/settings.ts`) es el admin **clásico legacy**, función aparte (input `{ featureKey, … }`), sin interferencia → fuera de scope.
+
+Hallazgo clave: el catálogo legacy `premium-features.ts` ni siquiera contiene AFIP/Facturación, pero la tabla `PremiumModule` sí → validar contra `PREMIUM_FEATURE_KEYS` era estructuralmente incorrecto. Fuente de verdad real = `PremiumModule.slug` (`@unique`).
+
+### Commit `20dd783` — contract fix (puntos 1 + 2 + 3, atómicos)
+- `settings.schemas.ts`: `moduleKey` deja de validar contra `PREMIUM_FEATURE_KEYS`; pasa a `z.string().trim().min(1)`. Removido el import de premium-features (quedó muerto).
+- `settings.actions.ts`: `findUnique({ where: { slug } })`; si no existe → `fail('No se encontro el modulo.')` (NUNCA `ok` silencioso); `update` por id; mensaje con el **nombre real** `moduleRow.name`. Removidos `LEGACY_TO_SLUG` y `PREMIUM_FEATURE_DEFAULTS` (muertos tras el cambio).
+- Contrato de `getSettings` y `revalidatePath('/dashboard/services')` **intactos**. Cliente sin cambios.
+
+### Commit `8f93de3` — leak fix (punto 4)
+- Catch de `updateModulePricing`: `ZodError` → `fail(issues[0]?.message ?? 'Datos invalidos.')` antes del `Error` genérico. Nunca más el JSON crudo al cliente.
+
+**Gate FIX**: `tsc --noEmit` exit 0 · ESLint (actions + schemas + console) exit 0.
+
+### ⚠️ Reportado, FUERA DE SCOPE (no tocado — DECISIÓN DE VALENTINO)
+- `updateSettings` (mismo archivo) tiene el **mismo leak de ZodError** en su catch (`error.message` de un ZodError = JSON crudo). La tarea scopeaba solo `updateModulePricing`. Recomendación: mismo fix, o un helper `toErrorMessage(error)` compartido por los 4 catches del archivo.
+- `updateModulePricingAction` legacy (`src/lib/actions/settings.ts`) conserva el patrón viejo (updateMany silencioso + validación por catálogo). Otro dueño/lane.
+- (b) Máscara Telegram duplicada cliente/server: sigue **sin tocar** (decisión pendiente).
 
 ---
 
 ## Log de ejecución
 - [✅] Sprint 1 — hover canónico (commit `b1000cc`)
 - [✅] Sprint 2 — spinners (commit `78e7d86`)
-- [✅] Sprint 3 — checkeo + limpieza (commit)
+- [✅] Sprint 3 — checkeo + limpieza (commit `b0a8ea5`)
+- [✅] FIX pricing — contract (`20dd783`) + leak (`8f93de3`)
