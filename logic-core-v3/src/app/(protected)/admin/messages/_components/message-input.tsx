@@ -57,8 +57,10 @@ export function MessageInput({ organizationId }: MessageInputProps) {
   }
 
   function handleKeyDown(event: React.KeyboardEvent<HTMLTextAreaElement>) {
-    // Enter envía; Shift+Enter inserta salto de línea.
-    if (event.key === 'Enter' && !event.shiftKey) {
+    // Enter envía; Shift+Enter inserta salto de línea. No enviar mientras se
+    // compone con IME / dead-keys (acentos del teclado español): isComposing
+    // evita el envío prematuro al confirmar la composición con Enter.
+    if (event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing) {
       event.preventDefault()
       submit()
     }
