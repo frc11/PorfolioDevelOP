@@ -33,7 +33,9 @@ export function ClientTabsNav({ clientId, activeTab }: ClientTabsNavProps) {
             key={tab.id}
             href={`/admin/clients/${clientId}?tab=${tab.id}`}
             scroll={false}
-            className="relative inline-flex items-center gap-2 whitespace-nowrap rounded-xl px-3 py-2 text-xs font-medium transition-colors"
+            className={`group relative inline-flex items-center gap-2 whitespace-nowrap rounded-xl px-3 py-2 text-xs font-medium transition-colors ${
+              isActive ? '' : 'hover:bg-white/[0.05]'
+            }`}
           >
             {isActive && reduced && (
               <div className="absolute inset-0 rounded-xl bg-cyan-400/15" />
@@ -47,10 +49,16 @@ export function ClientTabsNav({ clientId, activeTab }: ClientTabsNavProps) {
             )}
             <span className="relative flex items-center gap-2">
               <Icon
-                className={`h-4 w-4 ${isActive ? 'text-cyan-300' : 'text-zinc-400'}`}
+                className={`h-4 w-4 ${isActive ? 'text-cyan-300' : 'text-zinc-400 group-hover:text-zinc-200'}`}
                 strokeWidth={1.5}
               />
-              <span className={isActive ? 'text-cyan-300' : 'text-zinc-400'}>
+              <span
+                className={
+                  isActive
+                    ? 'text-cyan-300'
+                    : 'text-zinc-400 group-hover:text-zinc-200'
+                }
+              >
                 {tab.label}
               </span>
             </span>

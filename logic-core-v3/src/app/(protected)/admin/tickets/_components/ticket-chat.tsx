@@ -4,8 +4,10 @@ import { useEffect, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { Loader2, MessageSquareText } from 'lucide-react'
 import type { Role, TicketStatus } from '@prisma/client'
+import { Select } from '@/components/ui'
 import { updateTicketStatus } from '../_actions/ticket.actions'
 import { TicketReplyForm } from './ticket-reply-form'
+import { HoverScale } from './hover-scale'
 
 type TicketChatProps = {
   ticket: {
@@ -89,8 +91,8 @@ export function TicketChat({ ticket }: TicketChatProps) {
   }
 
   return (
-    <section className="space-y-5">
-      <div className="rounded-[28px] border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
+    <section className="flex min-h-0 flex-1 flex-col gap-4">
+      <div className="shrink-0 rounded-[28px] border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div className="min-w-0">
             <p className="text-xs tracking-tight text-zinc-500">
@@ -106,27 +108,24 @@ export function TicketChat({ ticket }: TicketChatProps) {
           </div>
 
           <div className="flex items-center gap-3">
-            <div className="relative">
-              <select
-                value={status}
-                disabled={isPending}
-                onChange={(event) => handleStatusChange(event.target.value as TicketStatus)}
-                className={[
-                  'rounded-2xl border px-4 py-3 text-sm font-medium outline-none transition-colors',
-                  STATUS_TONES[status],
-                  isPending ? 'cursor-wait opacity-80' : 'cursor-pointer',
-                ].join(' ')}
-              >
-                {(Object.keys(STATUS_LABELS) as TicketStatus[]).map((option) => (
-                  <option key={option} value={option} className="bg-[#0d1117] text-zinc-100">
-                    {STATUS_LABELS[option]}
-                  </option>
-                ))}
-              </select>
-              {isPending ? (
-                <Loader2 className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-zinc-300" />
-              ) : null}
-            </div>
+            {isPending ? (
+              <Loader2
+                className="h-4 w-4 animate-spin text-zinc-300"
+                strokeWidth={1.5}
+                aria-label="Actualizando estado"
+              />
+            ) : null}
+            <Select
+              value={status}
+              disabled={isPending}
+              onChange={(event) => handleStatusChange(event.target.value as TicketStatus)}
+              options={(Object.keys(STATUS_LABELS) as TicketStatus[]).map((option) => ({
+                value: option,
+                label: STATUS_LABELS[option],
+              }))}
+              aria-label="Cambiar estado del ticket"
+              className={`min-w-[168px] rounded-2xl ${STATUS_TONES[status]}`}
+            />
           </div>
         </div>
 
@@ -137,22 +136,22 @@ export function TicketChat({ ticket }: TicketChatProps) {
         ) : null}
       </div>
 
-      <div className="rounded-[28px] border border-white/10 bg-white/5 backdrop-blur-xl">
-        <div className="border-b border-white/10 px-5 py-4">
+      <div className="flex min-h-0 flex-1 flex-col rounded-[28px] border border-white/10 bg-white/5 backdrop-blur-xl">
+        <div className="shrink-0 border-b border-white/10 px-5 py-4">
           <div className="flex items-center gap-2 text-sm text-zinc-400">
             <MessageSquareText className="h-4 w-4 text-cyan-300" />
             <span>{ticket.messages.length} mensajes en la conversación</span>
           </div>
         </div>
 
-        <div className="max-h-[60vh] space-y-4 overflow-y-auto px-5 py-5">
+        <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-5 py-5">
           {ticket.messages.length > 0 ? (
             ticket.messages.map((message) => (
               <div
                 key={message.id}
                 className={`flex ${message.isAdmin ? 'justify-end' : 'justify-start'}`}
               >
-                <div
+                <HoverScale
                   className={[
                     'max-w-[85%] rounded-[24px] px-4 py-3 shadow-[0_16px_40px_rgba(0,0,0,0.18)] sm:max-w-[70%]',
                     message.isAdmin
@@ -166,7 +165,7 @@ export function TicketChat({ ticket }: TicketChatProps) {
                     <span className="text-zinc-500">{formatMessageDate(message.createdAt)}</span>
                   </div>
                   <p className="mt-2 whitespace-pre-wrap text-sm leading-6">{message.content}</p>
-                </div>
+                </HoverScale>
               </div>
             ))
           ) : (

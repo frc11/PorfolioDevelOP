@@ -9,6 +9,7 @@ import { requireSuperAdmin } from './requireSuperAdmin'
 import { generateTempPassword } from '@/lib/security/generate-temp-password'
 import { sendTransactionalEmail } from '@/lib/email/brevo-service'
 import { welcomeClientEmail } from '@/lib/email/templates/welcome-client'
+import { normalizeWebsiteUrl, normalizeWhatsapp, zodErrorToMessage } from '@/modules/chatbot/shared/field-normalize'
 
 const INDUSTRIES = [
   'legal', 'contable', 'medico_odontologico', 'gimnasio', 'restaurant',
@@ -45,7 +46,11 @@ const CreateClientInputSchema = z.object({
 
   // Paso 4: Apariencia
   accentColor: z.string().regex(/^#[0-9a-fA-F]{6}$/),
+  accentSecondary: z.string().regex(/^#[0-9a-fA-F]{6}$/).nullable(),
+  chatSurfaceTint: z.string().regex(/^#[0-9a-fA-F]{6}$/).nullable(),
   avatarStyle: AVATAR_STYLE_SCHEMA,
+  avatarImageUrl: z.string().nullable(),
+  avatarEmoji: z.string().max(8).nullable(),
   position: z.enum(['bottom_right', 'bottom_left']),
   quickReplies: z.array(z.object({
     id: z.string(),
@@ -80,7 +85,15 @@ async function findUniqueSlug(base: string): Promise<string> {
 
 export async function createClientWithBot(input: z.infer<typeof CreateClientInputSchema>) {
   const admin = await requireSuperAdmin()
-  const parsed = CreateClientInputSchema.parse(input)
+  // Normaliza antes de validar (dominio pelado → https://, whatsapp → solo
+  // dígitos) y mapea cualquier error de Zod a un mensaje legible, nunca el array crudo.
+  const result = CreateClientInputSchema.safeParse({
+    ...input,
+    websiteUrl: normalizeWebsiteUrl(input.websiteUrl),
+    whatsappNumber: normalizeWhatsapp(input.whatsappNumber),
+  })
+  if (!result.success) throw new Error(zodErrorToMessage(result.error))
+  const parsed = result.data
 
   const baseSlug = slugify(parsed.orgName)
   const uniqueSlug = await findUniqueSlug(baseSlug)
@@ -129,10 +142,10 @@ export async function createClientWithBot(input: z.infer<typeof CreateClientInpu
         welcomeMessage: parsed.welcomeMessage,
         isActive: true,
         accentColor: parsed.accentColor,
-        accentSecondary: null,
+        accentSecondary: parsed.accentSecondary,
         avatarStyle: parsed.avatarStyle,
-        avatarImageUrl: null,
-        avatarEmoji: null,
+        avatarImageUrl: parsed.avatarImageUrl,
+        avatarEmoji: parsed.avatarEmoji,
         borderRadius: 'medium',
         surfaceStyle: 'glass',
         position: parsed.position,
@@ -145,7 +158,7 @@ export async function createClientWithBot(input: z.infer<typeof CreateClientInpu
           default: ['¿En qué puedo ayudarte?'],
         },
         routeColorMap: {},
-        chatSurfaceTint: null,
+        chatSurfaceTint: parsed.chatSurfaceTint,
         llmProvider: 'GOOGLE',
         llmModel: 'gemini-2.5-flash',
         monthlyQuota: 1000,

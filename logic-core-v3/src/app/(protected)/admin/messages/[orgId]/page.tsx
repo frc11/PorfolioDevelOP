@@ -1,11 +1,9 @@
 import { MessageSquareText } from 'lucide-react'
-import { AdminBackButton } from '../../_components/AdminBackButton'
 import { notFound } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
-import { ConversationList } from '../_components/conversation-list'
 import { MessageInput } from '../_components/message-input'
 import { MessageThread } from '../_components/message-thread'
-import { getConversation, listConversations, markAsRead } from '../_actions/message.actions'
+import { getConversation, markAsRead } from '../_actions/message.actions'
 
 type MessageConversationPageProps = {
   params: Promise<{
@@ -13,6 +11,11 @@ type MessageConversationPageProps = {
   }>
 }
 
+/**
+ * Detalle de conversación = panel derecho (thread + composer). La lista la pone
+ * el layout persistente; acá solo cambia el children al navegar. markAsRead
+ * sigue corriendo server-side (el badge se limpia optimista en la lista).
+ */
 export default async function AgencyOsMessageConversationPage({
   params,
 }: MessageConversationPageProps) {
@@ -20,16 +23,14 @@ export default async function AgencyOsMessageConversationPage({
 
   await markAsRead(orgId)
 
-  const [organization, conversationsResult, conversationResult] = await Promise.all([
+  const [organization, conversationResult] = await Promise.all([
     prisma.organization.findUnique({
       where: { id: orgId },
       select: {
         id: true,
         companyName: true,
-        slug: true,
       },
     }),
-    listConversations(),
     getConversation(orgId),
   ])
 
@@ -38,62 +39,40 @@ export default async function AgencyOsMessageConversationPage({
   }
 
   return (
-    <section className="space-y-5">
-      <div className="lg:hidden">
-        <AdminBackButton href="/admin/messages" label="Volver a mensajes" />
-      </div>
-
-      <div className="grid gap-5 lg:grid-cols-[360px_minmax(0,1fr)]">
-        <div className="hidden lg:block">
-          {conversationsResult.success ? (
-            <ConversationList
-              conversations={conversationsResult.data}
-              activeOrganizationId={orgId}
-              compact
-            />
-          ) : (
-            <div className="rounded-[28px] border border-rose-400/20 bg-rose-500/10 p-5 text-sm text-rose-200">
-              {conversationsResult.error}
-            </div>
-          )}
-        </div>
-
-        <div className="space-y-5">
-          <div className="rounded-[28px] border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
-            <div className="flex items-start gap-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-[18px] border border-cyan-400/20 bg-cyan-400/10 text-cyan-100">
-                <MessageSquareText className="h-6 w-6" />
-              </div>
-
-              <div>
-                <p className="text-[10px] uppercase tracking-[0.24em] text-zinc-500">
-                  Conversacion activa
-                </p>
-                <h1 className="mt-2 text-3xl font-semibold tracking-tight text-white">
-                  {organization.companyName}
-                </h1>
-                <p className="mt-2 text-sm text-zinc-400">
-                  Canal directo con el cliente, sin estado de ticket y con historial cronológico.
-                </p>
-              </div>
-            </div>
+    <div className="flex min-h-0 flex-1 flex-col gap-3">
+      <div className="shrink-0 rounded-[24px] border border-white/10 bg-white/5 px-5 py-3 backdrop-blur-xl">
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-[14px] border border-cyan-400/20 bg-cyan-400/10 text-cyan-100">
+            <MessageSquareText className="h-5 w-5" strokeWidth={1.5} />
           </div>
-
-          {!conversationResult.success ? (
-            <div className="rounded-[28px] border border-rose-400/20 bg-rose-500/10 p-5 text-sm text-rose-200">
-              {conversationResult.error}
-            </div>
-          ) : (
-            <>
-              <MessageThread
-                companyName={organization.companyName}
-                messages={conversationResult.data}
-              />
-              <MessageInput organizationId={organization.id} />
-            </>
-          )}
+          <div>
+            <p className="text-[10px] uppercase tracking-[0.24em] text-zinc-500">
+              Conversación activa
+            </p>
+            <h1 className="text-xl font-semibold tracking-tight text-white">
+              {organization.companyName}
+            </h1>
+          </div>
         </div>
       </div>
-    </section>
+
+      {!conversationResult.success ? (
+        <div className="rounded-[24px] border border-rose-400/20 bg-rose-500/10 p-5 text-sm text-rose-200">
+          {conversationResult.error}
+        </div>
+      ) : (
+        <>
+          {/* key={orgId}: fuerza remount del thread por conversación para que el
+              auto-scroll-to-bottom (MessagesScrollAnchor, scroll on mount) corra
+              al cambiar de chat, ya que la lista/layout persisten. */}
+          <MessageThread
+            key={orgId}
+            companyName={organization.companyName}
+            messages={conversationResult.data}
+          />
+          <MessageInput organizationId={organization.id} />
+        </>
+      )}
+    </div>
   )
 }

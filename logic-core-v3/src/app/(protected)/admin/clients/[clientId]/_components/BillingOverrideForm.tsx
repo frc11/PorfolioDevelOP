@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from 'react'
 import { Button } from '@/components/ui'
+import { ConfirmDialog } from '@/app/(protected)/admin/_components/confirm-dialog'
 import {
   setBillingOverride,
   clearBillingOverride,
@@ -12,6 +13,8 @@ interface Props {
   currentPriceOverride: number | null
   currentOverrideUntil: string | null
   currentOverrideReason: string | null
+  /** Override con precio seteado y aún vigente (no vencido). Calculado en la card. */
+  overrideActive: boolean
 }
 
 function defaultDate90DaysFromNow(): string {
@@ -25,6 +28,7 @@ export function BillingOverrideForm({
   currentPriceOverride,
   currentOverrideUntil,
   currentOverrideReason,
+  overrideActive,
 }: Props) {
   const [price, setPrice] = useState<string>(
     currentPriceOverride !== null ? String(currentPriceOverride) : '0',
@@ -36,6 +40,7 @@ export function BillingOverrideForm({
   )
   const [reason, setReason] = useState(currentOverrideReason ?? '')
   const [pending, startTransition] = useTransition()
+  const [showClearConfirm, setShowClearConfirm] = useState(false)
   const [feedback, setFeedback] = useState<
     | { type: 'success'; message: string }
     | { type: 'error'; message: string }
@@ -67,19 +72,20 @@ export function BillingOverrideForm({
     })
   }
 
-  const handleClear = () => {
+  const handleClearConfirmed = () => {
     setFeedback(null)
-    if (!confirm('¿Quitar el billing override? Vuelve al precio del plan.')) return
     startTransition(async () => {
       const result = await clearBillingOverride({ organizationId })
       if (!result.success) {
         setFeedback({ type: 'error', message: result.error })
+        setShowClearConfirm(false)
         return
       }
       setFeedback({ type: 'success', message: 'Override quitado.' })
       setPrice('0')
       setReason('')
       setUntilDate(defaultDate90DaysFromNow())
+      setShowClearConfirm(false)
     })
   }
 
@@ -100,7 +106,7 @@ export function BillingOverrideForm({
             value={price}
             onChange={(e) => setPrice(e.target.value)}
             disabled={pending}
-            className="w-full rounded-xl border border-white/10 bg-white/[0.02] px-3 py-2 text-sm text-zinc-200 focus:border-cyan-500/40 focus:outline-none disabled:opacity-50"
+            className="w-full rounded-xl border border-white/10 bg-white/[0.02] px-3 py-2 text-sm text-zinc-200 focus:border-cyan-500/40 focus:outline-none disabled:opacity-50 [-moz-appearance:textfield] [&::-webkit-inner-spin-button]:m-0 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:m-0 [&::-webkit-outer-spin-button]:appearance-none"
           />
         </div>
         <div className="space-y-1.5">
@@ -112,7 +118,7 @@ export function BillingOverrideForm({
             value={untilDate}
             onChange={(e) => setUntilDate(e.target.value)}
             disabled={pending}
-            className="w-full rounded-xl border border-white/10 bg-white/[0.02] px-3 py-2 text-sm text-zinc-200 focus:border-cyan-500/40 focus:outline-none disabled:opacity-50"
+            className="w-full rounded-xl border border-white/10 bg-white/[0.02] px-3 py-2 text-sm text-zinc-200 [color-scheme:dark] focus:border-cyan-500/40 focus:outline-none disabled:opacity-50"
           />
         </div>
       </div>
@@ -135,11 +141,14 @@ export function BillingOverrideForm({
         <Button onClick={handleSet} loading={pending} disabled={pending} variant="primary" size="md">
           {hasActiveOverride ? 'Actualizar override' : 'Aplicar override'}
         </Button>
-        {hasActiveOverride && (
-          <Button onClick={handleClear} disabled={pending} variant="ghost" size="md">
-            Quitar override
-          </Button>
-        )}
+        <Button
+          onClick={() => setShowClearConfirm(true)}
+          disabled={pending || !overrideActive}
+          variant="ghost"
+          size="md"
+        >
+          Quitar override
+        </Button>
       </div>
 
       {feedback && (
@@ -153,6 +162,17 @@ export function BillingOverrideForm({
           {feedback.message}
         </div>
       )}
+
+      <ConfirmDialog
+        open={showClearConfirm}
+        onClose={() => setShowClearConfirm(false)}
+        onConfirm={handleClearConfirmed}
+        title="¿Quitar el billing override?"
+        description="Vuelve al precio del plan. El gating del bot no se ve afectado."
+        confirmLabel="Quitar override"
+        isPending={pending}
+        variant="warning"
+      />
     </div>
   )
 }

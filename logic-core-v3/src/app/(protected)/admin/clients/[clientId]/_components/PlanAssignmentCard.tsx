@@ -81,15 +81,15 @@ export async function PlanAssignmentCard({ clientId }: Props) {
         planOptions={planOptions}
       />
 
-      <details className="rounded-xl border border-white/5 bg-zinc-950/30">
+      <details className="overflow-hidden rounded-xl border border-white/5 bg-zinc-950/30">
         <summary className="cursor-pointer select-none px-4 py-3 text-xs uppercase tracking-[0.2em] text-zinc-400 hover:bg-white/[0.02]">
           Comparación de las 7 dimensiones de gating
         </summary>
-        <div className="overflow-x-auto px-4 pb-4">
+        <div className="overflow-x-auto">
           <table className="min-w-full text-xs">
             <thead>
               <tr className="border-b border-white/5 text-zinc-500">
-                <th className="py-2 text-left font-normal">Dimensión</th>
+                <th className="py-2 pl-4 text-left font-normal">Dimensión</th>
                 {plans.map((p) => (
                   <th key={p.key} className="py-2 text-left font-normal">
                     {p.name}
@@ -97,7 +97,7 @@ export async function PlanAssignmentCard({ clientId }: Props) {
                 ))}
               </tr>
             </thead>
-            <tbody className="text-zinc-300">
+            <tbody className="divide-y divide-white/5 bg-white/[0.02] text-zinc-300">
               <Row label="Precio/mes" values={plans.map((p) => `$${p.monthlyPrice.toNumber()}`)} />
               <Row label="Setup (piso)" values={plans.map((p) => `$${p.setupFloorPrice.toNumber()}`)} />
               <Row label="Cuota conv/mes" values={plans.map((p) => p.quota.toLocaleString('es-AR'))} />
@@ -135,10 +135,10 @@ export async function PlanAssignmentCard({ clientId }: Props) {
 
 function Row({ label, values }: { label: string; values: string[] }) {
   return (
-    <tr className="border-b border-white/5">
-      <td className="py-1.5 pr-4 text-zinc-500">{label}</td>
+    <tr className="transition-colors duration-200 hover:bg-white/10">
+      <td className="py-2 pl-4 pr-4 text-zinc-500">{label}</td>
       {values.map((v, i) => (
-        <td key={i} className="py-1.5 pr-4">
+        <td key={i} className="py-2 pr-4">
           {v}
         </td>
       ))}

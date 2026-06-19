@@ -44,7 +44,9 @@ export function useOnboardingDraft(initialState: OnboardingState) {
         return
       }
 
-      setState(draft.state)
+      // Merge sobre initialState: drafts viejos pueden carecer de campos nuevos
+      // (withBot, apariencia rica) → caen al default en vez de quedar undefined.
+      setState({ ...initialState, ...draft.state })
       setStep(draft.step)
       setDraftSavedAt(savedAt)
       setHasDraft(true)

@@ -4,6 +4,8 @@ import { useState } from 'react'
 import { CheckCircle2, Copy, Check, Mail, AlertTriangle } from 'lucide-react'
 import type { OnboardingState } from './types'
 import { createClientWithBot } from '../../../server/admin/createClientWithBot'
+import { createClientOnly } from '../../../server/admin/createClientOnly'
+import { getAvatar } from '@/modules/chatbot/components/avatar'
 import { INDUSTRIES_LABELS } from './industries'
 import { slugify } from '@/lib/slugify'
 import { useTransitionContext } from '@/context/TransitionContext'
@@ -15,8 +17,9 @@ interface Step5Props {
 }
 
 interface CreatedResult {
+  withBot: boolean
   tempPassword: string
-  botId: string
+  botId: string | null
   orgSlug: string
   userName: string
   userEmail: string
@@ -30,11 +33,12 @@ const TONE_LABELS: Record<OnboardingState['tone'], string> = {
   neutral: 'Neutral (tú)',
 }
 
-const AVATAR_LABELS: Record<OnboardingState['avatarStyle'], string> = {
-  neuro: 'Neuro (Esfera de partículas)',
-  legacy_neuro: 'Legacy Neuro (Avatar 3D)',
-  image: 'Imagen',
-  emoji: 'Emoji',
+// avatarStyle es AvatarKindId (string): los ids del registry + escape hatches.
+// El label sale del registry; los hatches tienen su propio texto.
+function avatarLabel(style: string): string {
+  if (style === 'image') return 'Imagen custom'
+  if (style === 'emoji') return 'Emoji'
+  return getAvatar(style)?.label ?? style
 }
 
 const POSITION_LABELS: Record<OnboardingState['position'], string> = {
@@ -63,22 +67,45 @@ export function Step5Review({ state, onBack, onCreated }: Step5Props) {
     setIsSubmitting(true)
     setError(null)
     try {
-      const result = await createClientWithBot({
-        ...state,
-        position: state.position as 'bottom_right' | 'bottom_left',
-      })
-      onCreated()
-      setCreated({
-        tempPassword: result.tempPassword,
-        botId: result.botId,
-        orgSlug: result.orgSlug,
-        userName: result.userName,
-        userEmail: result.userEmail,
-        orgName: result.orgName,
-        emailSent: result.emailSent,
-      })
+      if (state.withBot) {
+        const result = await createClientWithBot({
+          ...state,
+          position: state.position as 'bottom_right' | 'bottom_left',
+        })
+        onCreated()
+        setCreated({
+          withBot: true,
+          tempPassword: result.tempPassword,
+          botId: result.botId,
+          orgSlug: result.orgSlug,
+          userName: result.userName,
+          userEmail: result.userEmail,
+          orgName: result.orgName,
+          emailSent: result.emailSent,
+        })
+      } else {
+        const result = await createClientOnly({
+          orgName: state.orgName,
+          city: state.city,
+          websiteUrl: state.websiteUrl,
+          userEmail: state.userEmail,
+          userName: state.userName,
+          userPhone: state.userPhone || null,
+        })
+        onCreated()
+        setCreated({
+          withBot: false,
+          tempPassword: result.tempPassword,
+          botId: null,
+          orgSlug: result.orgSlug,
+          userName: result.userName,
+          userEmail: result.userEmail,
+          orgName: result.orgName,
+          emailSent: result.emailSent,
+        })
+      }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error al crear el cliente y bot.')
+      setError(err instanceof Error ? err.message : 'Error al crear el cliente.')
       setIsSubmitting(false)
     }
   }
@@ -98,7 +125,8 @@ export function Step5Review({ state, onBack, onCreated }: Step5Props) {
           <div>
             <h2 className="text-xl font-semibold text-zinc-100">Cliente creado: {created.userName}</h2>
             <p className="text-sm text-zinc-400">
-              {created.orgName} · {created.userEmail} · bot: {created.orgSlug}
+              {created.orgName} · {created.userEmail}
+              {created.withBot && ` · bot: ${created.orgSlug}`}
             </p>
           </div>
         </div>
@@ -148,10 +176,16 @@ export function Step5Review({ state, onBack, onCreated }: Step5Props) {
         )}
 
         <button
-          onClick={() => triggerTransition(`/admin/chatbots/${created.botId}?tab=overview`)}
+          onClick={() =>
+            triggerTransition(
+              created.withBot && created.botId
+                ? `/admin/chatbots/${created.botId}?tab=overview`
+                : '/admin/clients',
+            )
+          }
           className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-cyan-400 px-6 py-3 text-sm font-medium text-zinc-950 hover:bg-cyan-300 transition-colors"
         >
-          Ir al panel del cliente →
+          {created.withBot ? 'Ir al panel del cliente →' : 'Ir a la lista de clientes →'}
         </button>
       </div>
     )
@@ -173,10 +207,12 @@ export function Step5Review({ state, onBack, onCreated }: Step5Props) {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <ReviewSection title="Empresa">
           <ReviewRow label="Nombre" value={state.orgName} />
-          <ReviewRow label="Industria" value={INDUSTRIES_LABELS[state.industry] ?? state.industry} />
+          {state.withBot && (
+            <ReviewRow label="Industria" value={INDUSTRIES_LABELS[state.industry] ?? state.industry} />
+          )}
           <ReviewRow label="Ciudad" value={state.city} />
           <ReviewRow label="Website" value={state.websiteUrl || '—'} />
-          <ReviewRow label="Slug del bot" value={derivedSlug} mono />
+          {state.withBot && <ReviewRow label="Slug del bot" value={derivedSlug} mono />}
         </ReviewSection>
 
         <ReviewSection title="Usuario administrador">
@@ -185,22 +221,29 @@ export function Step5Review({ state, onBack, onCreated }: Step5Props) {
           <ReviewRow label="Teléfono" value={state.userPhone || '—'} />
         </ReviewSection>
 
+        {state.withBot && (
+          <>
         <ReviewSection title="Identidad del bot">
           <ReviewRow label="Nombre" value={state.botName} />
           <ReviewRow label="Tono" value={TONE_LABELS[state.tone]} />
-          <ReviewRow label="Avatar" value={AVATAR_LABELS[state.avatarStyle]} />
           <ReviewRow
-            label="Color"
+            label="Avatar"
             value={
               <span className="flex items-center gap-2">
-                <span
-                  className="inline-block h-4 w-4 rounded-full border border-white/10"
-                  style={{ backgroundColor: state.accentColor }}
-                />
-                <span className="font-mono text-xs">{state.accentColor}</span>
+                {avatarLabel(state.avatarStyle)}
+                {state.avatarStyle === 'emoji' && state.avatarEmoji && (
+                  <span className="text-base leading-none">{state.avatarEmoji}</span>
+                )}
               </span>
             }
           />
+          <ReviewRow label="Color" value={<ColorValue hex={state.accentColor} />} />
+          {state.accentSecondary && (
+            <ReviewRow label="Color secundario" value={<ColorValue hex={state.accentSecondary} />} />
+          )}
+          {state.chatSurfaceTint && (
+            <ReviewRow label="Tinte surface" value={<ColorValue hex={state.chatSurfaceTint} />} />
+          )}
           <ReviewRow label="Posición" value={POSITION_LABELS[state.position]} />
         </ReviewSection>
 
@@ -239,11 +282,15 @@ export function Step5Review({ state, onBack, onCreated }: Step5Props) {
           </div>
         </ReviewSection>
 
-        <ReviewSection title="LLM">
-          <ReviewRow label="Provider" value="Google (Vertex AI)" />
-          <ReviewRow label="Modelo" value="gemini-2.5-flash" />
-          <ReviewRow label="Quota" value="1000 conv/mes" mono />
+        <ReviewSection title="LLM" full>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <LlmFact label="Provider" value="Google (Vertex AI)" />
+            <LlmFact label="Modelo" value="gemini-2.5-flash" mono />
+            <LlmFact label="Quota" value="1000 conv/mes" />
+          </div>
         </ReviewSection>
+          </>
+        )}
       </div>
 
       {error && (
@@ -277,14 +324,16 @@ export function Step5Review({ state, onBack, onCreated }: Step5Props) {
           ) : (
             <>
               <CheckCircle2 className="h-4 w-4" strokeWidth={1.5} />
-              Crear cliente y activar bot
+              {state.withBot ? 'Crear cliente y activar bot' : 'Crear cliente'}
             </>
           )}
         </button>
       </div>
 
       <p className="text-xs text-zinc-500 text-center">
-        El cliente se creará y el bot quedará activo inmediatamente.
+        {state.withBot
+          ? 'El cliente se creará y el bot quedará activo inmediatamente.'
+          : 'El cliente se creará y recibirá sus credenciales por email.'}
       </p>
     </div>
   )
@@ -324,6 +373,31 @@ function ReviewRow({
       <span className={`text-zinc-200 ${mono ? 'font-mono text-xs' : ''}`}>
         {value}
       </span>
+    </div>
+  )
+}
+
+function ColorValue({ hex }: { hex: string }) {
+  return (
+    <span className="flex items-center gap-2">
+      <span
+        className="inline-block h-4 w-4 rounded-full border border-white/10"
+        style={{ backgroundColor: hex }}
+      />
+      <span className="font-mono text-xs">{hex}</span>
+    </span>
+  )
+}
+
+// Dato del LLM apilado (label arriba / valor abajo): en el grid de 3 columnas el
+// justify-between de ReviewRow encimaba label y valor en celdas angostas.
+function LlmFact({ label, value, mono = false }: { label: string; value: string; mono?: boolean }) {
+  return (
+    <div className="min-w-0">
+      <p className="text-[11px] uppercase tracking-wider text-zinc-500">{label}</p>
+      <p className={`mt-0.5 truncate text-sm text-zinc-200 ${mono ? 'font-mono text-xs' : ''}`}>
+        {value}
+      </p>
     </div>
   )
 }

@@ -2,6 +2,10 @@ import Link from 'next/link'
 import { ExternalLink } from 'lucide-react'
 import { prisma } from '@/lib/prisma'
 import { Card } from '@/components/ui'
+import {
+  HoverScaleCard,
+  hoverTint,
+} from '@/app/(protected)/admin/clients/_components/HoverScaleCard'
 
 interface SupportTabProps {
   clientId: string
@@ -29,12 +33,20 @@ export async function SupportTab({ clientId }: SupportTabProps) {
         ) : (
           <div className="space-y-2">
             {tickets.map((ticket) => (
-              <Card key={ticket.id} padding="sm" className="rounded-xl">
-                <p className="text-sm text-zinc-200">{ticket.title}</p>
-                <p className="mt-1 text-xs text-zinc-500">
-                  Estado: {ticket.status} · {ticket.createdAt.toLocaleDateString('es-AR')}
-                </p>
-              </Card>
+              <Link
+                key={ticket.id}
+                href={`/admin/tickets/${ticket.id}`}
+                className="block"
+              >
+                <HoverScaleCard className="rounded-xl">
+                  <Card padding="sm" className={`rounded-xl ${hoverTint}`}>
+                    <p className="text-sm text-zinc-200">{ticket.title}</p>
+                    <p className="mt-1 text-xs text-zinc-400">
+                      Estado: {ticket.status} · {ticket.createdAt.toLocaleDateString('es-AR')}
+                    </p>
+                  </Card>
+                </HoverScaleCard>
+              </Link>
             ))}
           </div>
         )}
@@ -46,18 +58,26 @@ export async function SupportTab({ clientId }: SupportTabProps) {
         ) : (
           <div className="space-y-2">
             {recentMessages.map((message) => (
-              <Card key={message.id} padding="sm" className="rounded-xl">
-                <p className="line-clamp-2 text-sm text-zinc-200">{message.content}</p>
-                <p className="mt-1 text-xs text-zinc-500">
-                  {message.createdAt.toLocaleString('es-AR', {
-                    day: '2-digit',
-                    month: '2-digit',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    hour12: false,
-                  })}
-                </p>
-              </Card>
+              <Link
+                key={message.id}
+                href={`/admin/messages/${clientId}`}
+                className="block"
+              >
+                <HoverScaleCard className="rounded-xl">
+                  <Card padding="sm" className={`rounded-xl ${hoverTint}`}>
+                    <p className="line-clamp-2 text-sm text-zinc-200">{message.content}</p>
+                    <p className="mt-1 text-xs text-zinc-400">
+                      {message.createdAt.toLocaleString('es-AR', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        hour12: false,
+                      })}
+                    </p>
+                  </Card>
+                </HoverScaleCard>
+              </Link>
             ))}
           </div>
         )}
@@ -81,10 +101,10 @@ function SupportSection({
         <h3 className="text-base font-medium text-zinc-200">{title}</h3>
         <Link
           href={href}
-          className="inline-flex items-center gap-1 text-xs text-cyan-400 hover:underline"
+          className="inline-flex items-center gap-1.5 rounded-lg border border-cyan-400/20 bg-cyan-400/[0.06] px-3 py-1.5 text-xs font-medium text-cyan-300 transition-colors hover:bg-cyan-400/[0.12]"
         >
           Ver todos
-          <ExternalLink className="h-3 w-3" strokeWidth={1.5} />
+          <ExternalLink className="h-3.5 w-3.5" strokeWidth={1.5} />
         </Link>
       </div>
       {children}
