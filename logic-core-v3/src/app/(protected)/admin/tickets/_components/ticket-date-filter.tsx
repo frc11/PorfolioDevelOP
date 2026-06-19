@@ -23,7 +23,7 @@ const PRESET_MONTHS: Record<Exclude<Preset, 'custom'>, number> = { '1m': 1, '3m'
 
 const MS_PER_DAY = 86_400_000
 
-// Tunables del slide custom — matchea InboundPeriodFilter de leads (patrón replicado).
+// Tunables del reveal inline de los campos custom (fade + leve x, no height).
 const SLIDE_DURATION = 0.2
 const SLIDE_EASE: [number, number, number, number] = [0.25, 0.46, 0.45, 0.94]
 
@@ -54,8 +54,8 @@ type ThemedDateFieldProps = {
 // pinta el date-picker nativo acorde al tema.
 function ThemedDateField({ label, value, min, max, onChange }: ThemedDateFieldProps) {
   return (
-    <label className="flex flex-col gap-1 text-[11px] text-zinc-400">
-      {label}
+    <label className="flex items-center gap-1.5 text-[11px] text-zinc-400">
+      <span>{label}</span>
       <input
         type="date"
         value={value}
@@ -63,7 +63,7 @@ function ThemedDateField({ label, value, min, max, onChange }: ThemedDateFieldPr
         max={max}
         onChange={(event) => onChange(event.target.value)}
         style={{ colorScheme: 'dark' }}
-        className="rounded-xl border border-white/10 bg-black/20 px-3 py-2 text-sm text-white outline-none transition-colors focus:border-cyan-400/35"
+        className="rounded-xl border border-white/10 bg-black/20 px-2.5 py-1.5 text-xs text-white outline-none transition-colors focus:border-cyan-400/35"
       />
     </label>
   )
@@ -75,10 +75,11 @@ type TicketDateFilterProps = {
 }
 
 /**
- * Filtro de fechas client-side, ubicado a la derecha de los tabs de estado. Replica el
- * patron visual del filtro de leads (chips de preset + "Personalizado" con slide) pero
- * filtra en memoria (sin server/URL). Default: ultimo mes ('1m'). Emite el rango activo
- * al padre via onChange; el padre lo aplica sobre los tickets ya traidos.
+ * Filtro de fechas client-side, contiguo a los tabs de estado en el mismo renglon.
+ * Chips de preset + "Personalizado" (que despliega Desde/Hasta INLINE a la derecha, en el
+ * espacio sobrante del renglon — no hacia abajo). Filtra en memoria (sin server/URL).
+ * Default: ultimo mes ('1m'). Emite el rango activo al padre via onChange; el padre lo
+ * aplica sobre los tickets ya traidos.
  */
 export function TicketDateFilter({ onChange }: TicketDateFilterProps) {
   const reduce = useReducedMotion()
@@ -119,45 +120,41 @@ export function TicketDateFilter({ onChange }: TicketDateFilterProps) {
   const showCustom = preset === 'custom'
 
   return (
-    <div className="flex flex-col items-start gap-2 sm:items-end">
-      <div className="flex flex-wrap items-center gap-2 sm:justify-end">
-        <span className="text-[10px] uppercase tracking-[0.18em] text-zinc-500">Periodo</span>
-        {PRESET_ORDER.map((option) => (
-          <button
-            key={option}
-            type="button"
-            onClick={() => setPreset(option)}
-            aria-pressed={preset === option}
-            className={chipClass(preset === option)}
-          >
-            {PRESET_LABELS[option]}
-          </button>
-        ))}
+    <div className="flex flex-wrap items-center gap-2">
+      <span className="text-[10px] uppercase tracking-[0.18em] text-zinc-500">Periodo</span>
+      {PRESET_ORDER.map((option) => (
         <button
+          key={option}
           type="button"
-          onClick={() => setPreset('custom')}
-          aria-pressed={showCustom}
-          aria-expanded={showCustom}
-          className={chipClass(showCustom)}
+          onClick={() => setPreset(option)}
+          aria-pressed={preset === option}
+          className={chipClass(preset === option)}
         >
-          {PRESET_LABELS.custom}
+          {PRESET_LABELS[option]}
         </button>
-      </div>
+      ))}
+      <button
+        type="button"
+        onClick={() => setPreset('custom')}
+        aria-pressed={showCustom}
+        aria-expanded={showCustom}
+        className={chipClass(showCustom)}
+      >
+        {PRESET_LABELS.custom}
+      </button>
 
       <AnimatePresence initial={false}>
         {showCustom ? (
           <motion.div
             key="custom-range"
-            initial={reduce ? false : { height: 0, opacity: 0 }}
-            animate={reduce ? { opacity: 1 } : { height: 'auto', opacity: 1 }}
-            exit={reduce ? { opacity: 0 } : { height: 0, opacity: 0 }}
+            initial={reduce ? false : { opacity: 0, x: -4 }}
+            animate={reduce ? { opacity: 1 } : { opacity: 1, x: 0 }}
+            exit={reduce ? { opacity: 0 } : { opacity: 0, x: -4 }}
             transition={reduce ? { duration: 0 } : { duration: SLIDE_DURATION, ease: SLIDE_EASE }}
-            className="overflow-hidden"
+            className="flex flex-wrap items-center gap-3"
           >
-            <div className="flex flex-wrap items-end gap-3 pt-1">
-              <ThemedDateField label="Desde" value={from} max={to || undefined} onChange={setFrom} />
-              <ThemedDateField label="Hasta" value={to} min={from || undefined} onChange={setTo} />
-            </div>
+            <ThemedDateField label="Desde" value={from} max={to || undefined} onChange={setFrom} />
+            <ThemedDateField label="Hasta" value={to} min={from || undefined} onChange={setTo} />
           </motion.div>
         ) : null}
       </AnimatePresence>

@@ -98,7 +98,7 @@ export function TicketList({ tickets }: TicketListProps) {
   return (
     <section className="space-y-5">
       <div className="rounded-[28px] border border-white/10 bg-white/5 p-2 backdrop-blur-xl">
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-3">
           <div className="flex flex-wrap gap-2">
             {TABS.map((tab) => {
               const isActive = activeTab === tab.id
