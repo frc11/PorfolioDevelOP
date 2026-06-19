@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma'
 import { Card, CardTitle } from '@/components/ui'
+import { HoverScaleCard } from '@/app/(protected)/admin/clients/_components/HoverScaleCard'
 import { BillingOverrideForm } from './BillingOverrideForm'
 
 interface Props {
@@ -106,11 +107,13 @@ function Stat({
     amber: 'text-amber-300',
   }[accent]
   return (
-    <div className="rounded-xl border border-white/5 bg-white/[0.015] px-3 py-2.5">
-      <p className="text-[10px] uppercase tracking-[0.24em] text-zinc-500">
-        {label}
-      </p>
-      <p className={`mt-1 text-base font-semibold ${accentClass}`}>{value}</p>
-    </div>
+    <HoverScaleCard className="h-full rounded-xl">
+      <div className="h-full rounded-xl border border-white/5 bg-white/[0.015] px-3 py-2.5">
+        <p className="text-[10px] uppercase tracking-[0.24em] text-zinc-500">
+          {label}
+        </p>
+        <p className={`mt-1 text-base font-semibold ${accentClass}`}>{value}</p>
+      </div>
+    </HoverScaleCard>
   )
 }
