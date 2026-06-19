@@ -94,7 +94,7 @@ export function OnboardingWizard() {
 
       <ProgressBar currentStep={safeStep} totalSteps={stepKeys.length} stepNames={stepNames} />
 
-      <div className={state.withBot ? 'grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-8' : ''}>
+      <div className={state.withBot ? 'grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_380px] gap-8' : ''}>
         {/* Steps */}
         <div>
           <AnimatePresence mode="wait">
@@ -123,7 +123,7 @@ export function OnboardingWizard() {
 
         {/* Live preview — solo con bot, desktop only */}
         {state.withBot && (
-          <aside className="hidden lg:block">
+          <aside className="hidden lg:block lg:sticky lg:top-6 lg:self-start">
             <BotPreview state={state} />
           </aside>
         )}

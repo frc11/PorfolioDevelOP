@@ -2,7 +2,7 @@ import { OnboardingWizard } from '@/modules/chatbot/components/admin/onboarding/
 
 export default function NewClientPage() {
   return (
-    <div className="max-w-5xl mx-auto py-8 px-4">
+    <div className="pb-8">
       <header className="mb-8">
         <p className="text-xs text-zinc-500 uppercase tracking-widest">Onboarding</p>
         <h1 className="text-3xl font-semibold text-zinc-100">Nuevo cliente</h1>
