@@ -8,9 +8,11 @@ import { cn } from '@/lib/utils'
 // pre-mount (gate de hidratación) o "Personalizado" incompleto/invalido.
 export type TicketDateRange = { fromMs: number; toMs: number } | null
 
-type Preset = '1m' | '3m' | '6m' | '1y' | 'custom'
+type RangePreset = '1m' | '3m' | '6m' | '1y'
+type Preset = 'all' | RangePreset | 'custom'
 
 const PRESET_LABELS: Record<Preset, string> = {
+  all: 'Todos',
   '1m': '1 mes',
   '3m': '3 meses',
   '6m': '6 meses',
@@ -18,8 +20,8 @@ const PRESET_LABELS: Record<Preset, string> = {
   custom: 'Personalizado',
 }
 
-const PRESET_ORDER: ReadonlyArray<Exclude<Preset, 'custom'>> = ['1m', '3m', '6m', '1y']
-const PRESET_MONTHS: Record<Exclude<Preset, 'custom'>, number> = { '1m': 1, '3m': 3, '6m': 6, '1y': 12 }
+const RANGE_PRESETS: ReadonlyArray<RangePreset> = ['1m', '3m', '6m', '1y']
+const PRESET_MONTHS: Record<RangePreset, number> = { '1m': 1, '3m': 3, '6m': 6, '1y': 12 }
 
 const MS_PER_DAY = 86_400_000
 
@@ -27,7 +29,7 @@ const MS_PER_DAY = 86_400_000
 const SLIDE_DURATION = 0.2
 const SLIDE_EASE: [number, number, number, number] = [0.25, 0.46, 0.45, 0.94]
 
-function presetCutoff(nowMs: number, preset: Exclude<Preset, 'custom'>): number {
+function presetCutoff(nowMs: number, preset: RangePreset): number {
   const date = new Date(nowMs)
   date.setMonth(date.getMonth() - PRESET_MONTHS[preset])
   return date.getTime()
@@ -78,8 +80,8 @@ type TicketDateFilterProps = {
  * Filtro de fechas client-side, contiguo a los tabs de estado en el mismo renglon.
  * Chips de preset + "Personalizado" (que despliega Desde/Hasta INLINE a la derecha, en el
  * espacio sobrante del renglon — no hacia abajo). Filtra en memoria (sin server/URL).
- * Default: ultimo mes ('1m'). Emite el rango activo al padre via onChange; el padre lo
- * aplica sobre los tickets ya traidos.
+ * Default: ultimo mes ('1m'); "Todos" emite null (sin filtro de fecha). Emite el rango
+ * activo al padre via onChange; el padre lo aplica sobre los tickets ya traidos.
  */
 export function TicketDateFilter({ onChange }: TicketDateFilterProps) {
   const reduce = useReducedMotion()
@@ -96,6 +98,10 @@ export function TicketDateFilter({ onChange }: TicketDateFilterProps) {
   }, [])
 
   useEffect(() => {
+    if (preset === 'all') {
+      onChange(null)
+      return
+    }
     if (nowMs === null) {
       onChange(null)
       return
@@ -122,7 +128,15 @@ export function TicketDateFilter({ onChange }: TicketDateFilterProps) {
   return (
     <div className="flex flex-wrap items-center gap-2">
       <span className="text-[10px] uppercase tracking-[0.18em] text-zinc-500">Periodo</span>
-      {PRESET_ORDER.map((option) => (
+      <button
+        type="button"
+        onClick={() => setPreset('all')}
+        aria-pressed={preset === 'all'}
+        className={chipClass(preset === 'all')}
+      >
+        {PRESET_LABELS.all}
+      </button>
+      {RANGE_PRESETS.map((option) => (
         <button
           key={option}
           type="button"
