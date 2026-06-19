@@ -3,7 +3,7 @@
 import { useEffect } from 'react'
 import type { StepProps } from './types'
 import { getTemplate } from './kb-templates'
-import { TEXTAREA_CLASS } from './field-styles'
+import { ExpandableTextField } from './ExpandableTextField'
 
 export function Step3KnowledgeBase({ state, update, onNext, onBack }: StepProps) {
   useEffect(() => {
@@ -35,75 +35,54 @@ export function Step3KnowledgeBase({ state, update, onNext, onBack }: StepProps)
     <div className="space-y-6">
       <h2 className="text-xl font-semibold text-zinc-100">3. Base de Conocimiento</h2>
 
-      <div>
-        <label className="block text-sm text-zinc-400 mb-1">Información de negocio</label>
-        <textarea
-          value={state.businessInfo}
-          onChange={(e) => update({ businessInfo: e.target.value })}
-          className={TEXTAREA_CLASS}
-          rows={4}
-        />
-      </div>
+      <ExpandableTextField
+        label="Información de negocio"
+        value={state.businessInfo}
+        onChange={(value) => update({ businessInfo: value })}
+        rows={4}
+      />
 
-      <div>
-        <label className="block text-sm text-zinc-400 mb-1">Servicios o Productos</label>
-        <textarea
-          value={state.servicesOrProducts}
-          onChange={(e) => update({ servicesOrProducts: e.target.value })}
-          className={TEXTAREA_CLASS}
-          rows={4}
-        />
-      </div>
+      <ExpandableTextField
+        label="Servicios o Productos"
+        value={state.servicesOrProducts}
+        onChange={(value) => update({ servicesOrProducts: value })}
+        rows={4}
+      />
 
-      <div>
-        <label className="block text-sm text-zinc-400 mb-1">Preguntas Frecuentes (FAQ)</label>
-        <textarea
-          value={state.faq}
-          onChange={(e) => update({ faq: e.target.value })}
-          className={TEXTAREA_CLASS}
-          rows={3}
-        />
-      </div>
+      <ExpandableTextField
+        label="Preguntas Frecuentes (FAQ)"
+        value={state.faq}
+        onChange={(value) => update({ faq: value })}
+        rows={3}
+      />
 
-      <div>
-        <label className="block text-sm text-zinc-400 mb-1">Políticas</label>
-        <textarea
-          value={state.policies}
-          onChange={(e) => update({ policies: e.target.value })}
-          className={TEXTAREA_CLASS}
-          rows={2}
-        />
-      </div>
+      <ExpandableTextField
+        label="Políticas"
+        value={state.policies}
+        onChange={(value) => update({ policies: value })}
+        rows={2}
+      />
 
-      <div>
-        <label className="block text-sm text-zinc-400 mb-1">Guía de Ventas (Derivación)</label>
-        <textarea
-          value={state.salesGuidance}
-          onChange={(e) => update({ salesGuidance: e.target.value })}
-          className={TEXTAREA_CLASS}
-          rows={2}
-        />
-      </div>
+      <ExpandableTextField
+        label="Guía de Ventas (Derivación)"
+        value={state.salesGuidance}
+        onChange={(value) => update({ salesGuidance: value })}
+        rows={2}
+      />
 
-      <div>
-        <label className="block text-sm text-zinc-400 mb-1">Ejemplos de Tono</label>
-        <textarea
-          value={state.toneExamples}
-          onChange={(e) => update({ toneExamples: e.target.value })}
-          className={TEXTAREA_CLASS}
-          rows={2}
-        />
-      </div>
+      <ExpandableTextField
+        label="Ejemplos de Tono"
+        value={state.toneExamples}
+        onChange={(value) => update({ toneExamples: value })}
+        rows={2}
+      />
 
-      <div>
-        <label className="block text-sm text-zinc-400 mb-1">Frases Prohibidas</label>
-        <textarea
-          value={state.forbiddenStatements}
-          onChange={(e) => update({ forbiddenStatements: e.target.value })}
-          className={TEXTAREA_CLASS}
-          rows={2}
-        />
-      </div>
+      <ExpandableTextField
+        label="Frases Prohibidas"
+        value={state.forbiddenStatements}
+        onChange={(value) => update({ forbiddenStatements: value })}
+        rows={2}
+      />
 
       <div className="flex justify-between pt-4">
         <button
