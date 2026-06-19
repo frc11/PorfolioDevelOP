@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
-import { Select } from '@/components/ui'
+import { Input, Select } from '@/components/ui'
 import type { StepProps, OnboardingState } from './types'
 
 export function Step4Appearance({ state, update, onNext, onBack }: StepProps) {
@@ -58,7 +58,7 @@ export function Step4Appearance({ state, update, onNext, onBack }: StepProps) {
         <Select
           value={state.position}
           onChange={(e) => update({ position: e.target.value as OnboardingState['position'] })}
-          className="w-full px-3 py-2 bg-zinc-900 border border-zinc-800 rounded text-zinc-100"
+          aria-label="Posición en la pantalla"
         >
           <option value="bottom_right">Abajo a la derecha</option>
           <option value="bottom_left">Abajo a la izquierda</option>
@@ -67,11 +67,10 @@ export function Step4Appearance({ state, update, onNext, onBack }: StepProps) {
 
       <div>
         <label className="block text-sm text-zinc-400 mb-1">Número de WhatsApp</label>
-        <input
+        <Input
           type="text"
           value={state.whatsappNumber ?? ''}
           onChange={(e) => update({ whatsappNumber: e.target.value || null })}
-          className="w-full px-3 py-2 bg-zinc-900 border border-zinc-800 rounded text-zinc-100"
           placeholder="Ej: 5493815555555"
         />
         <p className="text-xs text-zinc-500 mt-1">Con código de país, sin el +. Pre-llenado con 549 (Argentina).</p>
@@ -80,14 +79,14 @@ export function Step4Appearance({ state, update, onNext, onBack }: StepProps) {
       <div className="flex justify-between pt-4">
         <button
           onClick={onBack}
-          className="px-6 py-2 bg-zinc-800 text-zinc-300 rounded font-medium hover:bg-zinc-700"
+          className="px-6 py-2 bg-zinc-800 text-zinc-300 rounded-xl font-medium hover:bg-zinc-700"
         >
           ← Volver
         </button>
         <button
           onClick={onNext}
           disabled={!canContinue}
-          className="px-6 py-2 bg-cyan-500 text-zinc-950 rounded font-medium disabled:opacity-40"
+          className="px-6 py-2 bg-cyan-500 text-zinc-950 rounded-xl font-medium disabled:opacity-40"
         >
           Continuar →
         </button>

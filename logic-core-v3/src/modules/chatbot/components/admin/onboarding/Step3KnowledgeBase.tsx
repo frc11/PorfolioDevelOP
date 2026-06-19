@@ -3,6 +3,7 @@
 import { useEffect } from 'react'
 import type { StepProps } from './types'
 import { getTemplate } from './kb-templates'
+import { TEXTAREA_CLASS } from './field-styles'
 
 export function Step3KnowledgeBase({ state, update, onNext, onBack }: StepProps) {
   useEffect(() => {
@@ -39,7 +40,7 @@ export function Step3KnowledgeBase({ state, update, onNext, onBack }: StepProps)
         <textarea
           value={state.businessInfo}
           onChange={(e) => update({ businessInfo: e.target.value })}
-          className="w-full px-3 py-2 bg-zinc-900 border border-zinc-800 rounded text-zinc-100"
+          className={TEXTAREA_CLASS}
           rows={4}
         />
       </div>
@@ -49,7 +50,7 @@ export function Step3KnowledgeBase({ state, update, onNext, onBack }: StepProps)
         <textarea
           value={state.servicesOrProducts}
           onChange={(e) => update({ servicesOrProducts: e.target.value })}
-          className="w-full px-3 py-2 bg-zinc-900 border border-zinc-800 rounded text-zinc-100"
+          className={TEXTAREA_CLASS}
           rows={4}
         />
       </div>
@@ -59,7 +60,7 @@ export function Step3KnowledgeBase({ state, update, onNext, onBack }: StepProps)
         <textarea
           value={state.faq}
           onChange={(e) => update({ faq: e.target.value })}
-          className="w-full px-3 py-2 bg-zinc-900 border border-zinc-800 rounded text-zinc-100"
+          className={TEXTAREA_CLASS}
           rows={3}
         />
       </div>
@@ -69,7 +70,7 @@ export function Step3KnowledgeBase({ state, update, onNext, onBack }: StepProps)
         <textarea
           value={state.policies}
           onChange={(e) => update({ policies: e.target.value })}
-          className="w-full px-3 py-2 bg-zinc-900 border border-zinc-800 rounded text-zinc-100"
+          className={TEXTAREA_CLASS}
           rows={2}
         />
       </div>
@@ -79,7 +80,7 @@ export function Step3KnowledgeBase({ state, update, onNext, onBack }: StepProps)
         <textarea
           value={state.salesGuidance}
           onChange={(e) => update({ salesGuidance: e.target.value })}
-          className="w-full px-3 py-2 bg-zinc-900 border border-zinc-800 rounded text-zinc-100"
+          className={TEXTAREA_CLASS}
           rows={2}
         />
       </div>
@@ -89,7 +90,7 @@ export function Step3KnowledgeBase({ state, update, onNext, onBack }: StepProps)
         <textarea
           value={state.toneExamples}
           onChange={(e) => update({ toneExamples: e.target.value })}
-          className="w-full px-3 py-2 bg-zinc-900 border border-zinc-800 rounded text-zinc-100"
+          className={TEXTAREA_CLASS}
           rows={2}
         />
       </div>
@@ -99,7 +100,7 @@ export function Step3KnowledgeBase({ state, update, onNext, onBack }: StepProps)
         <textarea
           value={state.forbiddenStatements}
           onChange={(e) => update({ forbiddenStatements: e.target.value })}
-          className="w-full px-3 py-2 bg-zinc-900 border border-zinc-800 rounded text-zinc-100"
+          className={TEXTAREA_CLASS}
           rows={2}
         />
       </div>
@@ -107,14 +108,14 @@ export function Step3KnowledgeBase({ state, update, onNext, onBack }: StepProps)
       <div className="flex justify-between pt-4">
         <button
           onClick={onBack}
-          className="px-6 py-2 bg-zinc-800 text-zinc-300 rounded font-medium hover:bg-zinc-700"
+          className="px-6 py-2 bg-zinc-800 text-zinc-300 rounded-xl font-medium hover:bg-zinc-700"
         >
           ← Volver
         </button>
         <button
           onClick={onNext}
           disabled={!canContinue}
-          className="px-6 py-2 bg-cyan-500 text-zinc-950 rounded font-medium disabled:opacity-40"
+          className="px-6 py-2 bg-cyan-500 text-zinc-950 rounded-xl font-medium disabled:opacity-40"
         >
           Continuar →
         </button>
