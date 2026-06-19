@@ -297,3 +297,67 @@ Dentro de `clients/`: `PlanAssignmentCard.tsx` (#1), `tabs/OverviewTab.tsx` (#2)
 - `/admin/clients/[id]?tab=chatbot` — **#7:** las cards de nombre del bot, "Consumo (Este mes)" y "Actividad reciente" hacen scale+ring. **#12:** ya **no** están los 3 botones de arriba (Configurar bot / Editar conocimiento / Ver detalle completo); el panel de QuickActionCards de abajo sigue llevando a los mismos destinos. **#8:** desde un cliente **sin bot**, "Configurar chatbot" abre `/admin/chatbots/new` con **esa** org ya seleccionada.
 - `/admin/projects/[id]/hours` — referencia visual del hover de tabla que se replicó (para comparar con #1).
 - `/admin/audit-log` — **#9:** una entrada de cambio de plan con motivo cargado muestra la línea "Motivo: …".
+
+---
+
+# Lote — Refactor del creador de clientes (con/sin bot) · log de cierre
+
+**Worktree:** `C:\develop-clientes-clients` · **Branch:** `lane/clientes-clients` · **Fecha:** 2026-06-19
+**Gate:** `.\node_modules\.bin\tsc.cmd --noEmit` → **EXIT 0** tras cada commit. `npm run build` final → **EXIT 0** (ver nota al pie).
+**Verificación visual:** humano en `:3000` (el subagente `visual-qa` / Preview MCP no está disponible esta sesión).
+
+> ⚠️ **Scope distinto a los lotes visuales:** la mayoría del trabajo cae **FUERA** de `clients/` — vive en
+> `src/modules/chatbot/` (módulo) y `src/lib/email/templates/` (infra compartida). El usuario autorizó
+> explícitamente este refactor del módulo onboarding. El "creador de clientes" **ES** el `OnboardingWizard`
+> del módulo chatbot, montado en `/admin/clients/new`.
+
+## Decisión de producto
+Alta con **toggle con bot / sin bot**. Sin bot = solo Organization + User admin (sin BotConfig/KB).
+4 decisiones tomadas esta sesión: industria **omitida** sin-bot (evita migración) · email **variante**
+sin-bot · post-alta sin-bot → **`/admin/clients`** · apariencia rica **se persiste** al crear.
+
+## Commits por bloque (9)
+
+| Commit | Sprint | Qué |
+|--------|--------|-----|
+| `2074bfd` | 1a | `createClientOnly` (alta sin bot) + variante sin-bot del email (`welcome-client`, flag `withBot`) |
+| `64ae22e` | 1b | toggle `withBot` + step machine dinámico (render por clave) + draft backward-compat + toggle UI en Step1 |
+| `f467c8a` | 1c | review/submit condicionales: oculta secciones de bot, ramifica a `createClientOnly`, nav a `/admin/clients` |
+| `24119f1` | 2a | page full-width (`max-w-3xl`→`max-w-5xl`) + copy bot-agnóstico |
+| `f78f6d1` | 2b | campos redondeados: inputs→`Input`, `Select` sin override, textareas con `TEXTAREA_CLASS`, botones `rounded-xl` |
+| `7b42446` | 3 | layout del review sin celda vacía (LLM full-width con grid interno) |
+| `7688985` | 4a | estado + action: 4 campos de apariencia (Zod valida + `BotConfig.create` persiste, **sin migración**) |
+| `0983a1f` | 4b | Step4 con `ColorPicker`×3 + `AvatarPicker` + `AvatarUploader` + `EmojiPickerField`; review los refleja |
+| `71376a7` | 5 | `ExpandableTextField` (Modal glass + `MarkdownEditor`) en las 7 textareas de KB |
+
+## Archivos FUERA de `clients/` (coordinación de merge)
+- `src/modules/chatbot/components/admin/onboarding/*` — wizard + 5 steps + `types.ts` + `useOnboardingDraft.ts` + 2 nuevos (`field-styles.ts`, `ExpandableTextField.tsx`).
+- `src/modules/chatbot/server/admin/createClientOnly.ts` (**nuevo**) + `createClientWithBot.ts` (extensión apariencia, sin tocar la transacción base).
+- `src/lib/email/templates/welcome-client.ts` — **infra compartida** (flag `withBot`, default `true` = sin regresión al con-bot).
+- Único bajo la lane: `src/app/(protected)/admin/clients/new/page.tsx`.
+- Se **consumen** (no editan): `@/components/ui/{Modal,Input,Select,Field}`, `kb/MarkdownEditor`, `config/{ColorPicker,AvatarUploader,EmojiPickerField}`, `avatar/AvatarPicker`.
+
+## Paradas (resueltas)
+- **#1 schema/migración:** NO hace falta. `Organization.botConfig` ya es opcional; `createClientWithBot` ni crea `Subscription`; la apariencia rica usa columnas **ya existentes** en `BotConfig`. Verificado read-only.
+- **#2 negocio:** las 4 decisiones de producto de arriba.
+
+## old → new
+| Lugar | Antes | Después |
+|------|-------|---------|
+| Alta | siempre crea cliente **con** bot | toggle con/sin bot; sin-bot = `createClientOnly` (org + admin) |
+| Pasos | 5 fijos (Empresa→Bot→KB→Apariencia→Review) | dinámicos: sin-bot = Empresa→Review |
+| Email bienvenida | menciona el chatbot siempre | variante sin-bot omite las líneas del bot |
+| Form | `max-w-3xl`, inputs `rounded` (4px) | `max-w-5xl`, `Input`/`Select`/textarea del sistema (`rounded-xl`) |
+| Apariencia | color hex + select de avatar; `accentSecondary/chatSurfaceTint/avatar*` → `null` | ColorPicker×3 + AvatarPicker (preview vivo) + uploader/emoji; los 4 campos **se persisten** |
+| Review | grid con celda vacía al final | LLM full-width → sin huecos; refleja apariencia rica |
+| KB (Step3) | 7 textareas planas | cada una con "Expandir" → modal glass con MarkdownEditor (Editar/Split/Preview) |
+
+## Rutas a verificar en `:3000` (humano)
+- `/admin/clients/new` **con bot:** alta end-to-end **igual que antes** (no regresión); la apariencia rica **persiste** (crear → abrir config del bot → ver color secundario, tinte, avatar imagen/emoji).
+- `/admin/clients/new` **sin bot:** toggle OFF → solo **Empresa + Review**; crea cliente sin bot; el email **no** menciona bot; redirige a **`/admin/clients`**; el cliente aparece en la lista; su tab Chatbot muestra el empty state.
+- **cambio 3:** en KB, "Expandir" de cualquier textarea → modal **centrado con fondo blurreado** (Editar/Split/Preview); lo editado se refleja en el campo inline.
+- **cambios 2/5/6:** form full-width, campos `rounded-xl`, review **sin celda vacía**, responsive sin overflow.
+
+> **Nota build:** `npm run build` (Next 16, webpack) → **EXIT 0**. Requiere subir el heap de Node
+> (`NODE_OPTIONS=--max-old-space-size=8192`): con el default (~2GB) el webpack build hace OOM
+> (`heap out of memory`, exit 134) — es un techo de memoria del entorno, no del código (tsc verde).
