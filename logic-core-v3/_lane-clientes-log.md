@@ -361,3 +361,50 @@ sin-bot · post-alta sin-bot → **`/admin/clients`** · apariencia rica **se pe
 > **Nota build:** `npm run build` (Next 16, webpack) → **EXIT 0**. Requiere subir el heap de Node
 > (`NODE_OPTIONS=--max-old-space-size=8192`): con el default (~2GB) el webpack build hace OOM
 > (`heap out of memory`, exit 134) — es un techo de memoria del entorno, no del código (tsc verde).
+
+---
+
+# Lote — Correcciones del creador de clientes · log de cierre
+
+**Worktree:** `C:\develop-clientes-clients` · **Branch:** `lane/clientes-clients` · **Fecha:** 2026-06-19
+**Gate:** `.\node_modules\.bin\tsc.cmd --noEmit` → **EXIT 0** tras cada commit. `npm run build` → ver nota al pie.
+**Verificación visual:** humano en `:3000`.
+
+5 correcciones sobre el creador ya implementado (módulo onboarding, edición autorizada).
+
+## Commits por bloque (5)
+
+| Commit | Sprint | Qué |
+|--------|--------|-----|
+| `d235239` | 1 (#5) | wizard full-width: el `max-w-5xl mx-auto px-4` del page centraba + duplicaba el padding del `<main>` admin → franjas muertas. page = `pb-8` (llena la zona); grid `minmax(0,1fr)_380px`; preview lateral sticky |
+| `ed3e858` | 2 (#2) | creación CON bot: normaliza websiteUrl (prepend `https://`) y whatsapp (solo dígitos), validación inline por campo, `safeParse` + mensaje legible (nunca JSON Zod). Saca el prefill `549` |
+| `02b6b62` | 3 (#3) | preview rico: reusa `BotConfigPreview` (idle/pensando/hablando, flotando/abierto, avatar+colores en vivo); mapper `onboardingToPreview`; borra el `BotPreview.tsx` pobre |
+| `25b97ae` | 4 (#4) | `ExpandableTextField`: "Expandir" como botón bordeado; auto-abre el modal al focus del textarea; guard (timeout 300ms) anti-loop de reapertura |
+| `fbcce55` | 5 (#1) | card LLM del review: `Provider/Modelo/Quota` con `LlmFact` (label arriba/valor abajo + truncate) en vez de `ReviewRow` justify-between que se encimaba |
+
+## old → new
+| Lugar | Antes | Después |
+|------|-------|---------|
+| `/admin/clients/new` ancho | `max-w-5xl mx-auto` → franjas muertas a los costados | llena toda la zona del `<main>` admin (grid `minmax(0,1fr)_380px`) |
+| websiteUrl | `z.string().url()` rechazaba `empresa.com.ar` (sin protocolo) | se normaliza a `https://empresa.com.ar`; valida inline; acepta dominio pelado |
+| whatsappNumber | prefill `549` (3 díg.) rompía `^\d{10,15}$` en submit | sin prefill; solo dígitos; valida 10–15 inline; vacío permitido |
+| errores de creación | array Zod crudo en pantalla | mensaje legible por campo (`zodErrorToMessage`), inline antes del Review |
+| preview de Apariencia | `BotPreview` (emoji 🤖 estático, no reflejaba avatar/colores) | `BotConfigPreview` (mismo de la config): avatar real, colores, modos, flotando/abierto |
+| "Expandir" KB | texto plano | botón bordeado con ícono + auto-expand al enfocar el textarea |
+| card LLM en review | label y valor encimados en 3 columnas | apilado (label arriba / valor abajo), legible |
+
+## Archivos fuera de `admin/clients/` (coordinación de merge)
+- `src/modules/chatbot/components/admin/onboarding/` — `OnboardingWizard.tsx`, `Step1Company.tsx`, `Step4Appearance.tsx`, `Step5Review.tsx`, `ExpandableTextField.tsx`, **borrado** `BotPreview.tsx`.
+- `src/modules/chatbot/shared/field-normalize.ts` (**nuevo**, compartido client+server).
+- `src/modules/chatbot/server/admin/createClientWithBot.ts` + `createClientOnly.ts` (normalize + safeParse).
+- Único bajo la lane: `src/app/(protected)/admin/clients/new/page.tsx`.
+- Se **consume** (no se edita): `@/modules/chatbot/components/preview` (`BotConfigPreview`), `Modal`, `MarkdownEditor`, `ColorPicker`/`AvatarPicker`/`AvatarUploader`/`EmojiPickerField`.
+
+## Rutas a verificar en `:3000` (humano)
+- **#5:** `/admin/clients/new` — el wizard llena toda la zona, sin franjas muertas a izquierda/derecha (con bot: form + preview; sin bot: full-width).
+- **#2:** alta CON bot — dominio pelado (`empresa.com.ar`) y whatsapp según el hint → crea end-to-end; errores legibles inline, nunca JSON. Sin-bot sigue OK.
+- **#3:** paso Apariencia — cambiar color/avatar se refleja en el preview; toggles Flotando/Abierto e Idle/Pensando/Hablando.
+- **#4:** KB — el botón "Expandir" abre el modal; enfocar el textarea también; cerrar no lo reabre solo.
+- **#1:** Review — card LLM con Provider/Modelo/Quota legibles, sin encimarse.
+
+> **Nota build:** `npm run build` (Next 16, webpack) con `NODE_OPTIONS=--max-old-space-size=8192` → **EXIT 0** (árbol de rutas completo). Con el heap default (~2GB) el webpack build hace OOM (exit 134) — techo de memoria del entorno, no del código (tsc verde en los 5 commits).
