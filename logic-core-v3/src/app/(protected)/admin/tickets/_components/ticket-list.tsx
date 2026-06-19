@@ -7,6 +7,7 @@ import { LifeBuoy, MessageSquareText } from 'lucide-react'
 import type { TicketStatus } from '@prisma/client'
 import { EmptyState } from '@/components/ui'
 import { staggerContainer, staggerItem } from '@/lib/motion-variants'
+import { TicketDateFilter, type TicketDateRange } from './ticket-date-filter'
 
 type TicketListItem = {
   id: string
@@ -60,52 +61,70 @@ function formatDate(value: string) {
 
 export function TicketList({ tickets }: TicketListProps) {
   const [activeTab, setActiveTab] = useState<TicketTab>('ALL')
+  const [dateRange, setDateRange] = useState<TicketDateRange>(null)
   const reduce = useReducedMotion()
 
-  const filteredTickets = useMemo(() => {
-    if (activeTab === 'ALL') {
+  // Filtro de fecha primero (por updatedAt = ultima actividad, el campo que la lista
+  // muestra y ordena); luego el tab de estado. Los counts reflejan el periodo activo.
+  const dateFilteredTickets = useMemo(() => {
+    if (!dateRange) {
       return tickets
     }
 
-    return tickets.filter((ticket) => ticket.status === activeTab)
-  }, [activeTab, tickets])
+    return tickets.filter((ticket) => {
+      const updatedMs = new Date(ticket.updatedAt).getTime()
+      return updatedMs >= dateRange.fromMs && updatedMs <= dateRange.toMs
+    })
+  }, [dateRange, tickets])
+
+  const filteredTickets = useMemo(() => {
+    if (activeTab === 'ALL') {
+      return dateFilteredTickets
+    }
+
+    return dateFilteredTickets.filter((ticket) => ticket.status === activeTab)
+  }, [activeTab, dateFilteredTickets])
 
   const counts = useMemo(
     () => ({
-      ALL: tickets.length,
-      OPEN: tickets.filter((ticket) => ticket.status === 'OPEN').length,
-      IN_PROGRESS: tickets.filter((ticket) => ticket.status === 'IN_PROGRESS').length,
-      RESOLVED: tickets.filter((ticket) => ticket.status === 'RESOLVED').length,
+      ALL: dateFilteredTickets.length,
+      OPEN: dateFilteredTickets.filter((ticket) => ticket.status === 'OPEN').length,
+      IN_PROGRESS: dateFilteredTickets.filter((ticket) => ticket.status === 'IN_PROGRESS').length,
+      RESOLVED: dateFilteredTickets.filter((ticket) => ticket.status === 'RESOLVED').length,
     }),
-    [tickets]
+    [dateFilteredTickets]
   )
 
   return (
     <section className="space-y-5">
       <div className="rounded-[28px] border border-white/10 bg-white/5 p-2 backdrop-blur-xl">
-        <div className="flex flex-wrap gap-2">
-          {TABS.map((tab) => {
-            const isActive = activeTab === tab.id
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-3">
+          <div className="flex flex-wrap gap-2">
+            {TABS.map((tab) => {
+              const isActive = activeTab === tab.id
 
-            return (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => setActiveTab(tab.id)}
-                className={[
-                  'inline-flex items-center gap-2 rounded-2xl px-4 py-3 text-sm font-medium transition-colors',
-                  isActive
-                    ? 'bg-cyan-500/15 text-cyan-100'
-                    : 'text-zinc-400 hover:bg-white/5 hover:text-zinc-200',
-                ].join(' ')}
-              >
-                <span>{tab.label}</span>
-                <span className="rounded-full border border-white/10 bg-black/20 px-2 py-0.5 text-[11px]">
-                  {counts[tab.id]}
-                </span>
-              </button>
-            )
-          })}
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setActiveTab(tab.id)}
+                  className={[
+                    'inline-flex items-center gap-2 rounded-2xl px-4 py-3 text-sm font-medium transition-colors',
+                    isActive
+                      ? 'bg-cyan-500/15 text-cyan-100'
+                      : 'text-zinc-400 hover:bg-white/5 hover:text-zinc-200',
+                  ].join(' ')}
+                >
+                  <span>{tab.label}</span>
+                  <span className="rounded-full border border-white/10 bg-black/20 px-2 py-0.5 text-[11px]">
+                    {counts[tab.id]}
+                  </span>
+                </button>
+              )
+            })}
+          </div>
+
+          <TicketDateFilter onChange={setDateRange} />
         </div>
       </div>
 
