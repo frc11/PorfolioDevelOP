@@ -6,7 +6,7 @@ import { subMonths, subWeeks, subYears } from 'date-fns'
  * NO importa de leads/_components ni de alerts/_components.
  */
 
-export type ActivityDatePreset = '1w' | '1m' | '6m' | '1y' | 'custom'
+export type ActivityDatePreset = 'all' | '1w' | '1m' | '6m' | '1y' | 'custom'
 
 export interface ActivityFilters {
   type: string
@@ -42,6 +42,7 @@ export const ACTIVITY_LEVEL_OPTIONS: { value: string; label: string }[] = [
 ]
 
 export const ACTIVITY_PERIOD_OPTIONS: { value: ActivityDatePreset; label: string }[] = [
+  { value: 'all', label: 'Todos' },
   { value: '1w', label: 'Última semana' },
   { value: '1m', label: 'Último mes' },
   { value: '6m', label: 'Últimos 6 meses' },
@@ -53,6 +54,8 @@ export const ACTIVITY_PERIOD_OPTIONS: { value: ActivityDatePreset; label: string
 export function activityPeriodBounds(filters: ActivityFilters): { gte: Date; lte?: Date } | null {
   const now = new Date()
   switch (filters.period) {
+    case 'all':
+      return null // sin filtro de fecha — muestra todo
     case '1w':
       return { gte: subWeeks(now, 1) }
     case '1m':
