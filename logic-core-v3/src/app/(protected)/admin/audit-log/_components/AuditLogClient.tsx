@@ -307,7 +307,7 @@ function StatBox({
   accent?: 'cyan'
 }) {
   return (
-    <Card padding="sm">
+    <Card padding="sm" className={adminHoverCls}>
       <p className="text-[10px] uppercase tracking-[0.24em] text-zinc-500">
         {label}
       </p>
