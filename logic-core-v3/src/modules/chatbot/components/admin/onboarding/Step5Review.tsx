@@ -283,10 +283,10 @@ export function Step5Review({ state, onBack, onCreated }: Step5Props) {
         </ReviewSection>
 
         <ReviewSection title="LLM" full>
-          <div className="grid grid-cols-1 gap-x-8 gap-y-2 sm:grid-cols-3">
-            <ReviewRow label="Provider" value="Google (Vertex AI)" />
-            <ReviewRow label="Modelo" value="gemini-2.5-flash" />
-            <ReviewRow label="Quota" value="1000 conv/mes" mono />
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <LlmFact label="Provider" value="Google (Vertex AI)" />
+            <LlmFact label="Modelo" value="gemini-2.5-flash" mono />
+            <LlmFact label="Quota" value="1000 conv/mes" />
           </div>
         </ReviewSection>
           </>
@@ -386,5 +386,18 @@ function ColorValue({ hex }: { hex: string }) {
       />
       <span className="font-mono text-xs">{hex}</span>
     </span>
+  )
+}
+
+// Dato del LLM apilado (label arriba / valor abajo): en el grid de 3 columnas el
+// justify-between de ReviewRow encimaba label y valor en celdas angostas.
+function LlmFact({ label, value, mono = false }: { label: string; value: string; mono?: boolean }) {
+  return (
+    <div className="min-w-0">
+      <p className="text-[11px] uppercase tracking-wider text-zinc-500">{label}</p>
+      <p className={`mt-0.5 truncate text-sm text-zinc-200 ${mono ? 'font-mono text-xs' : ''}`}>
+        {value}
+      </p>
+    </div>
   )
 }
