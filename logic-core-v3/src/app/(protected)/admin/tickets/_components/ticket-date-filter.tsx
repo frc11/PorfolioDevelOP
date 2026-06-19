@@ -1,0 +1,166 @@
+'use client'
+
+import { useEffect, useState } from 'react'
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
+import { cn } from '@/lib/utils'
+
+// Rango activo que el filtro emite al padre. null = sin filtro de fecha (mostrar todo):
+// pre-mount (gate de hidratación) o "Personalizado" incompleto/invalido.
+export type TicketDateRange = { fromMs: number; toMs: number } | null
+
+type Preset = '1m' | '3m' | '6m' | '1y' | 'custom'
+
+const PRESET_LABELS: Record<Preset, string> = {
+  '1m': '1 mes',
+  '3m': '3 meses',
+  '6m': '6 meses',
+  '1y': '1 año',
+  custom: 'Personalizado',
+}
+
+const PRESET_ORDER: ReadonlyArray<Exclude<Preset, 'custom'>> = ['1m', '3m', '6m', '1y']
+const PRESET_MONTHS: Record<Exclude<Preset, 'custom'>, number> = { '1m': 1, '3m': 3, '6m': 6, '1y': 12 }
+
+const MS_PER_DAY = 86_400_000
+
+// Tunables del slide custom — matchea InboundPeriodFilter de leads (patrón replicado).
+const SLIDE_DURATION = 0.2
+const SLIDE_EASE: [number, number, number, number] = [0.25, 0.46, 0.45, 0.94]
+
+function presetCutoff(nowMs: number, preset: Exclude<Preset, 'custom'>): number {
+  const date = new Date(nowMs)
+  date.setMonth(date.getMonth() - PRESET_MONTHS[preset])
+  return date.getTime()
+}
+
+const chipClass = (active: boolean) =>
+  cn(
+    'rounded-full border px-3 py-1.5 text-xs font-medium transition-colors',
+    active
+      ? 'border-cyan-400/30 bg-cyan-400/10 text-cyan-100'
+      : 'border-white/10 bg-black/20 text-zinc-400 hover:text-zinc-200',
+  )
+
+type ThemedDateFieldProps = {
+  label: string
+  value: string
+  min?: string
+  max?: string
+  onChange: (value: string) => void
+}
+
+// Replica local del ThemedDateInput de leads. NO se importa: vive en _components privado
+// de otra seccion y tickets se mantiene aislado (replicar, no importar). `color-scheme: dark`
+// pinta el date-picker nativo acorde al tema.
+function ThemedDateField({ label, value, min, max, onChange }: ThemedDateFieldProps) {
+  return (
+    <label className="flex flex-col gap-1 text-[11px] text-zinc-400">
+      {label}
+      <input
+        type="date"
+        value={value}
+        min={min}
+        max={max}
+        onChange={(event) => onChange(event.target.value)}
+        style={{ colorScheme: 'dark' }}
+        className="rounded-xl border border-white/10 bg-black/20 px-3 py-2 text-sm text-white outline-none transition-colors focus:border-cyan-400/35"
+      />
+    </label>
+  )
+}
+
+type TicketDateFilterProps = {
+  /** Pasar un setter estable (p. ej. el de useState) para evitar re-emisiones en loop. */
+  onChange: (range: TicketDateRange) => void
+}
+
+/**
+ * Filtro de fechas client-side, ubicado a la derecha de los tabs de estado. Replica el
+ * patron visual del filtro de leads (chips de preset + "Personalizado" con slide) pero
+ * filtra en memoria (sin server/URL). Default: ultimo mes ('1m'). Emite el rango activo
+ * al padre via onChange; el padre lo aplica sobre los tickets ya traidos.
+ */
+export function TicketDateFilter({ onChange }: TicketDateFilterProps) {
+  const reduce = useReducedMotion()
+  const [preset, setPreset] = useState<Preset>('1m')
+  const [from, setFrom] = useState('')
+  const [to, setTo] = useState('')
+  // nowMs se resuelve solo en cliente (post-mount): comparar contra un "ahora" distinto en
+  // server vs cliente provocaria mismatch de hidratacion. Hasta entonces el rango es null
+  // (el padre muestra todo) y el primer paint coincide con el SSR.
+  const [nowMs, setNowMs] = useState<number | null>(null)
+
+  useEffect(() => {
+    setNowMs(Date.now())
+  }, [])
+
+  useEffect(() => {
+    if (nowMs === null) {
+      onChange(null)
+      return
+    }
+    if (preset === 'custom') {
+      if (!from || !to) {
+        onChange(null)
+        return
+      }
+      const fromMs = new Date(from).getTime()
+      const toMs = new Date(to).getTime() + MS_PER_DAY - 1 // incluir el dia "hasta" completo
+      if (Number.isNaN(fromMs) || Number.isNaN(toMs) || fromMs > toMs) {
+        onChange(null)
+        return
+      }
+      onChange({ fromMs, toMs })
+      return
+    }
+    onChange({ fromMs: presetCutoff(nowMs, preset), toMs: nowMs })
+  }, [nowMs, preset, from, to, onChange])
+
+  const showCustom = preset === 'custom'
+
+  return (
+    <div className="flex flex-col items-start gap-2 sm:items-end">
+      <div className="flex flex-wrap items-center gap-2 sm:justify-end">
+        <span className="text-[10px] uppercase tracking-[0.18em] text-zinc-500">Periodo</span>
+        {PRESET_ORDER.map((option) => (
+          <button
+            key={option}
+            type="button"
+            onClick={() => setPreset(option)}
+            aria-pressed={preset === option}
+            className={chipClass(preset === option)}
+          >
+            {PRESET_LABELS[option]}
+          </button>
+        ))}
+        <button
+          type="button"
+          onClick={() => setPreset('custom')}
+          aria-pressed={showCustom}
+          aria-expanded={showCustom}
+          className={chipClass(showCustom)}
+        >
+          {PRESET_LABELS.custom}
+        </button>
+      </div>
+
+      <AnimatePresence initial={false}>
+        {showCustom ? (
+          <motion.div
+            key="custom-range"
+            initial={reduce ? false : { height: 0, opacity: 0 }}
+            animate={reduce ? { opacity: 1 } : { height: 'auto', opacity: 1 }}
+            exit={reduce ? { opacity: 0 } : { height: 0, opacity: 0 }}
+            transition={reduce ? { duration: 0 } : { duration: SLIDE_DURATION, ease: SLIDE_EASE }}
+            className="overflow-hidden"
+          >
+            <div className="flex flex-wrap items-end gap-3 pt-1">
+              <ThemedDateField label="Desde" value={from} max={to || undefined} onChange={setFrom} />
+              <ThemedDateField label="Hasta" value={to} min={from || undefined} onChange={setTo} />
+            </div>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
+    </div>
+  )
+}
