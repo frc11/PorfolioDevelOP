@@ -53,12 +53,19 @@ export function AlertCard({ alert, pendingAction, onAck, onResolve }: AlertCardP
       <p className="mb-3 line-clamp-2 text-xs text-zinc-500">{alert.description}</p>
 
       <div className="flex items-center justify-between gap-2">
-        <Link
-          href={`/admin/chatbots/${alert.botConfig.id}?tab=overview`}
-          className="inline-flex items-center gap-1 text-[11px] text-cyan-400 hover:underline"
-        >
-          Ver bot
-          <ExternalLink className="h-3 w-3" strokeWidth={1.5} />
+        {/* Nav in-app (mismo patrón que chatbots/page.tsx: <Link><Button/>); el admin
+            navega con <Link> + PageTransition, NO con router.push ni triggerTransition
+            (eso es del sitio público). Reusa el Button del sistema, no lo modifica. */}
+        <Link href={`/admin/chatbots/${alert.botConfig.id}?tab=overview`}>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="text-cyan-400 hover:bg-cyan-400/10 hover:text-cyan-300"
+          >
+            Ver bot
+            <ExternalLink className="h-3 w-3" strokeWidth={1.5} />
+          </Button>
         </Link>
 
         <div className="flex gap-1.5">
