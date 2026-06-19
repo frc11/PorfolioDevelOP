@@ -7,9 +7,9 @@ import { Step3KnowledgeBase } from './Step3KnowledgeBase'
 import { Step4Appearance } from './Step4Appearance'
 import { Step5Review } from './Step5Review'
 import { ProgressBar } from './ProgressBar'
-import { BotPreview } from './BotPreview'
 import { DraftBanner } from './DraftBanner'
 import { useOnboardingDraft } from './useOnboardingDraft'
+import { BotConfigPreview, type BotPreviewState } from '@/modules/chatbot/components/preview'
 import type { OnboardingState } from './types'
 
 const STEP_LABELS = {
@@ -25,6 +25,31 @@ type StepKey = keyof typeof STEP_LABELS
 // La secuencia de pasos depende del toggle con/sin bot. Sin bot: solo empresa + review.
 const WITH_BOT_STEPS: readonly StepKey[] = ['company', 'bot', 'kb', 'appearance', 'review']
 const NO_BOT_STEPS: readonly StepKey[] = ['company', 'review']
+
+// Mapea el estado del wizard al subset que consume el preview compartido del bot
+// (mismo componente que la config). Los tokens que el wizard no edita
+// (radio/burbuja/superficie/fuente/intensidad) usan los MISMOS defaults con que
+// createClientWithBot crea el BotConfig → el preview es WYSIWYG con lo que se crea.
+function onboardingToPreview(state: OnboardingState): BotPreviewState {
+  return {
+    botName: state.botName,
+    isActive: true,
+    accentColor: state.accentColor,
+    accentSecondary: state.accentSecondary,
+    chatSurfaceTint: state.chatSurfaceTint,
+    position: state.position,
+    avatarStyle: state.avatarStyle,
+    avatarImageUrl: state.avatarImageUrl,
+    avatarEmoji: state.avatarEmoji,
+    borderRadius: 'medium',
+    bubbleStyle: 'rounded',
+    surfaceStyle: 'glass',
+    intensityLevel: 'MEDIUM',
+    fontStyle: 'sans',
+    welcomeMessage: state.welcomeMessage,
+    quickReplies: state.quickReplies.map((reply) => ({ id: reply.id, label: reply.label })),
+  }
+}
 
 const INITIAL_STATE: OnboardingState = {
   withBot: true,
@@ -124,7 +149,7 @@ export function OnboardingWizard() {
         {/* Live preview — solo con bot, desktop only */}
         {state.withBot && (
           <aside className="hidden lg:block lg:sticky lg:top-6 lg:self-start">
-            <BotPreview state={state} />
+            <BotConfigPreview state={onboardingToPreview(state)} />
           </aside>
         )}
       </div>
