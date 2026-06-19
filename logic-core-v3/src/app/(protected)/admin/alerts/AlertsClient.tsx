@@ -36,12 +36,10 @@ const VISIBLE_CAP: Record<ColumnId, number> = {
   RESOLVED: 4,
 }
 
-// Header de columna full-bleed: -mx-4/-mt-4 cancelan el p-4 de la columna para que
-// el highlight (cuando hay overview) cubra TODO el header de borde a borde (no solo
-// la franja del título). px-4/pt-4 dejan el contenido en la misma posición; el layout
-// (ícono+título · conteo) va en un wrapper flex interno. Mismo base con o sin overview
-// → las 3 columnas alinean su header; solo el clickable agrega el hover/rounded-t.
-const HEADER_BASE = '-mx-4 -mt-4 mb-3 block px-4 pt-4 pb-3'
+// button[display:block] con márgenes negativos no auto-expande de forma confiable en
+// todos los browsers; un div sí. El wrapper toma el full-bleed; el botón interior usa
+// w-full para cubrir el ancho completo del wrapper.
+const HEADER_WRAPPER = '-mx-4 -mt-4 mb-3'
 
 export function AlertsClient({ initialAlerts }: AlertsClientProps) {
   const [alerts, setAlerts] = useState(initialAlerts)
@@ -229,16 +227,18 @@ export function AlertsClient({ initialAlerts }: AlertsClientProps) {
               className="rounded-[28px] border border-white/10 bg-white/[0.02] p-4 lg:min-h-[40rem]"
             >
               {hasOverview ? (
-                <button
-                  type="button"
-                  onClick={() => setOverviewCol(col.id)}
-                  aria-label={`Ver todas las alertas de ${col.label}`}
-                  className={HEADER_BASE + ' rounded-t-[28px] text-left transition-colors hover:bg-white/[0.04]'}
-                >
-                  <div className="flex items-center justify-between">{header}</div>
-                </button>
+                <div className={HEADER_WRAPPER}>
+                  <button
+                    type="button"
+                    onClick={() => setOverviewCol(col.id)}
+                    aria-label={`Ver todas las alertas de ${col.label}`}
+                    className="block w-full rounded-t-[28px] px-4 pt-4 pb-3 text-left transition-colors hover:bg-white/[0.04]"
+                  >
+                    <div className="flex items-center justify-between">{header}</div>
+                  </button>
+                </div>
               ) : (
-                <div className={HEADER_BASE}>
+                <div className={`${HEADER_WRAPPER} px-4 pt-4 pb-3`}>
                   <div className="flex items-center justify-between">{header}</div>
                 </div>
               )}
