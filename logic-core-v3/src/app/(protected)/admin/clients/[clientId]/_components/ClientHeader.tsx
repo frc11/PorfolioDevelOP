@@ -1,4 +1,5 @@
-import { Building2 } from 'lucide-react'
+import Link from 'next/link'
+import { Building2, Pencil } from 'lucide-react'
 import { AdminBreadcrumbs } from '@/app/(protected)/admin/_components/AdminBreadcrumbs'
 import { HoverScaleCard } from '@/app/(protected)/admin/clients/_components/HoverScaleCard'
 import { ClientSwitcher } from './ClientSwitcher'
@@ -121,7 +122,14 @@ export function ClientHeader({ client, allClients }: ClientHeaderProps) {
             />
             <StatChip label="Leads" value={client.botConfig?._count?.leads ?? 0} />
           </div>
-          <div className="lg:self-end">
+          <div className="flex items-center justify-end gap-2 lg:self-end">
+            <Link
+              href={`/admin/clients/${client.id}/edit`}
+              className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.02] px-3 py-2 text-sm text-zinc-300 transition-colors hover:border-cyan-400/30 hover:bg-white/[0.06] hover:text-cyan-300"
+            >
+              <Pencil className="h-4 w-4" strokeWidth={1.5} />
+              Editar datos
+            </Link>
             <ImpersonateButton clientId={client.id} clientName={client.companyName} />
           </div>
         </div>

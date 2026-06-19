@@ -1,5 +1,3 @@
-import Link from 'next/link'
-import { Pencil } from 'lucide-react'
 import { prisma } from '@/lib/prisma'
 import { Card, StatCard } from '@/components/ui'
 import { HoverScaleCard } from '@/app/(protected)/admin/clients/_components/HoverScaleCard'
@@ -74,18 +72,9 @@ export async function OverviewTab({ clientId }: OverviewTabProps) {
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <Card variant="elevated" padding="lg">
-          <div className="mb-4 flex items-center justify-between gap-3">
-            <p className="text-[10px] uppercase tracking-[0.24em] text-zinc-500">
-              Informacion de contacto
-            </p>
-            <Link
-              href={`/admin/clients/${clientId}/edit`}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.02] px-2.5 py-1 text-xs text-zinc-300 transition-colors hover:border-cyan-400/30 hover:bg-white/[0.06] hover:text-cyan-300"
-            >
-              <Pencil className="h-3.5 w-3.5" strokeWidth={1.5} />
-              Editar datos
-            </Link>
-          </div>
+          <p className="mb-4 text-[10px] uppercase tracking-[0.24em] text-zinc-500">
+            Informacion de contacto
+          </p>
           <div className="space-y-3">
             <InfoRow label="Email primario" value={primaryMember?.user.email ?? '-'} />
             <InfoRow label="WhatsApp" value={client.whatsapp ?? '-'} />
