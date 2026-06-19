@@ -1,6 +1,8 @@
 import { ProjectStatus } from '@prisma/client'
+import Link from 'next/link'
 import { prisma } from '@/lib/prisma'
 import { Card } from '@/components/ui'
+import { HoverScaleCard } from '@/app/(protected)/admin/clients/_components/HoverScaleCard'
 import { ProjectManager } from '@/components/admin/managers/ProjectManager'
 
 interface ProjectsTabProps {
@@ -34,23 +36,31 @@ export async function ProjectsTab({ clientId }: ProjectsTabProps) {
         ) : (
           <div className="space-y-3">
             {projects.map((project) => (
-              <Card key={project.id} padding="sm">
-                <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div>
-                    <h3 className="text-sm font-medium text-zinc-100">{project.name}</h3>
-                    {project.description && (
-                      <p className="mt-1 text-xs text-zinc-500">{project.description}</p>
-                    )}
-                  </div>
-                  <span className="rounded-lg border border-white/10 bg-white/[0.04] px-2 py-1 text-[10px] text-zinc-400">
-                    {project.status}
-                  </span>
-                </div>
-                <div className="mt-3 flex gap-3 text-xs text-zinc-500">
-                  <span>{project.tasks.length} tareas</span>
-                  <span>{project.tasks.filter((task) => task.approvalStatus === 'PENDING_APPROVAL').length} pendientes de aprobacion</span>
-                </div>
-              </Card>
+              <Link
+                key={project.id}
+                href={`/admin/projects/${project.id}`}
+                className="block"
+              >
+                <HoverScaleCard>
+                  <Card padding="sm">
+                    <div className="flex flex-wrap items-start justify-between gap-3">
+                      <div>
+                        <h3 className="text-sm font-medium text-zinc-100">{project.name}</h3>
+                        {project.description && (
+                          <p className="mt-1 text-xs text-zinc-400">{project.description}</p>
+                        )}
+                      </div>
+                      <span className="rounded-lg border border-white/10 bg-white/[0.04] px-2 py-1 text-[10px] text-zinc-300">
+                        {project.status}
+                      </span>
+                    </div>
+                    <div className="mt-3 flex gap-3 text-xs text-zinc-400">
+                      <span>{project.tasks.length} tareas</span>
+                      <span>{project.tasks.filter((task) => task.approvalStatus === 'PENDING_APPROVAL').length} pendientes de aprobacion</span>
+                    </div>
+                  </Card>
+                </HoverScaleCard>
+              </Link>
             ))}
           </div>
         )}

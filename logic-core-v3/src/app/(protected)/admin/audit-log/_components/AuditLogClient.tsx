@@ -104,6 +104,7 @@ export function AuditLogClient({ initialEntries, stats }: AuditLogClientProps) {
             const diff = normalizeDiff(entry.diff)
             const isExpanded = expanded.has(entry.id)
             const hasDiff = Object.keys(diff).length > 0
+            const reason = extractReason(entry.metadata)
 
             return (
               <motion.div
@@ -138,6 +139,11 @@ export function AuditLogClient({ initialEntries, stats }: AuditLogClientProps) {
                           </span>
                         </div>
                         <p className="text-sm text-zinc-200">{entry.action}</p>
+                        {reason && (
+                          <p className="mt-1.5 text-xs text-zinc-300">
+                            <span className="text-zinc-500">Motivo:</span> {reason}
+                          </p>
+                        )}
                         <div className="mt-1.5 flex flex-wrap items-center gap-3 text-xs text-zinc-500">
                           <span className="flex items-center gap-1">
                             <User className="h-3 w-3" strokeWidth={1.5} />
@@ -294,6 +300,16 @@ function DiffCell({
 function normalizeDiff(value: unknown): DiffValue {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return {}
   return value as DiffValue
+}
+
+// El motivo de un cambio (ej. cambio de plan) se persiste en
+// AdminAuditLog.metadata.reason (Json). Se lee de forma segura, sin `any`.
+function extractReason(metadata: unknown): string | null {
+  if (!metadata || typeof metadata !== 'object' || Array.isArray(metadata)) {
+    return null
+  }
+  const reason = (metadata as Record<string, unknown>).reason
+  return typeof reason === 'string' && reason.trim() !== '' ? reason : null
 }
 
 function formatDiffValue(value: unknown): string {

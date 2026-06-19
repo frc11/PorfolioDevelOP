@@ -1,8 +1,9 @@
 'use client'
 
-import { Select } from '@/components/ui'
+import { Input, Select } from '@/components/ui'
 import type { StepProps, OnboardingState } from './types'
 import { getBotNameSuggestions, getWelcomeSuggestions } from './suggestions'
+import { TEXTAREA_CLASS } from './field-styles'
 
 export function Step2BotIdentity({ state, update, onNext, onBack }: StepProps) {
   const canContinue = state.botName.length >= 2 && state.welcomeMessage.length >= 10
@@ -16,11 +17,10 @@ export function Step2BotIdentity({ state, update, onNext, onBack }: StepProps) {
 
       <div>
         <label className="block text-sm text-zinc-400 mb-1">Nombre del bot</label>
-        <input
+        <Input
           type="text"
           value={state.botName}
           onChange={(e) => update({ botName: e.target.value })}
-          className="w-full px-3 py-2 bg-zinc-900 border border-zinc-800 rounded text-zinc-100"
           placeholder="Ej: Asistente Virtual"
         />
         {nameSuggestions.length > 0 && (
@@ -49,7 +49,7 @@ export function Step2BotIdentity({ state, update, onNext, onBack }: StepProps) {
         <textarea
           value={state.welcomeMessage}
           onChange={(e) => update({ welcomeMessage: e.target.value })}
-          className="w-full px-3 py-2 bg-zinc-900 border border-zinc-800 rounded text-zinc-100 resize-y"
+          className={TEXTAREA_CLASS}
           placeholder="Hola, ¿en qué puedo ayudarte hoy?"
           rows={3}
         />
@@ -82,7 +82,7 @@ export function Step2BotIdentity({ state, update, onNext, onBack }: StepProps) {
         <Select
           value={state.tone}
           onChange={(e) => update({ tone: e.target.value as OnboardingState['tone'] })}
-          className="w-full px-3 py-2 bg-zinc-900 border border-zinc-800 rounded text-zinc-100"
+          aria-label="Tono de conversación"
         >
           <option value="informal_rioplatense">Informal Rioplatense (vos)</option>
           <option value="formal">Formal (usted)</option>
@@ -93,14 +93,14 @@ export function Step2BotIdentity({ state, update, onNext, onBack }: StepProps) {
       <div className="flex justify-between pt-4">
         <button
           onClick={onBack}
-          className="px-6 py-2 bg-zinc-800 text-zinc-300 rounded font-medium hover:bg-zinc-700"
+          className="px-6 py-2 bg-zinc-800 text-zinc-300 rounded-xl font-medium hover:bg-zinc-700"
         >
           ← Volver
         </button>
         <button
           onClick={onNext}
           disabled={!canContinue}
-          className="px-6 py-2 bg-cyan-500 text-zinc-950 rounded font-medium disabled:opacity-40"
+          className="px-6 py-2 bg-cyan-500 text-zinc-950 rounded-xl font-medium disabled:opacity-40"
         >
           Continuar →
         </button>

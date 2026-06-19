@@ -1,4 +1,5 @@
 import type { Industry } from '../../../server/admin/createClientWithBot'
+import type { AvatarKindId } from '@/modules/chatbot/components/avatar'
 
 export interface QuickReply {
   id: string
@@ -7,6 +8,9 @@ export interface QuickReply {
 }
 
 export interface OnboardingState {
+  // Toggle de alta: con chatbot (flujo completo) o sin chatbot (solo cliente)
+  withBot: boolean
+
   // Paso 1
   orgName: string
   industry: Industry
@@ -29,7 +33,11 @@ export interface OnboardingState {
 
   // Paso 4
   accentColor: string
-  avatarStyle: 'neuro' | 'legacy_neuro' | 'image' | 'emoji'
+  accentSecondary: string | null
+  chatSurfaceTint: string | null
+  avatarStyle: AvatarKindId
+  avatarImageUrl: string | null
+  avatarEmoji: string | null
   position: 'bottom_right' | 'bottom_left'
   quickReplies: QuickReply[]
   whatsappNumber: string | null

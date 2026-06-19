@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { motion } from 'motion/react'
 import { toast } from 'sonner'
-import { Bot, Building2, Download, Pause, Pin, PinOff, Plus, Search } from 'lucide-react'
+import { Bot, Building2, Check, Download, Pause, Pin, PinOff, Plus, Search, X } from 'lucide-react'
 import { Button, Card, EmptyState, Input, Select } from '@/components/ui'
 import { bulkExportLeads, bulkPauseBots } from '@/lib/bulk-actions'
 import { hoverLift, staggerContainer, staggerItem } from '@/lib/motion-variants'
@@ -250,13 +250,6 @@ export function ClientsListClient({ clients }: ClientsListClientProps) {
               {selected.size} cliente{selected.size !== 1 ? 's' : ''}{' '}
               seleccionado{selected.size !== 1 ? 's' : ''}
             </span>
-            <button
-              type="button"
-              onClick={deselectAll}
-              className="text-xs text-zinc-400 hover:text-zinc-200"
-            >
-              Deseleccionar
-            </button>
             {selected.size < filtered.length && (
               <button
                 type="button"
@@ -290,6 +283,15 @@ export function ClientsListClient({ clients }: ClientsListClientProps) {
             >
               Pausar bots
             </Button>
+            <button
+              type="button"
+              onClick={deselectAll}
+              aria-label="Limpiar selección"
+              title="Limpiar selección"
+              className="ml-1 rounded-lg p-1.5 text-zinc-400 transition-colors hover:bg-white/[0.05] hover:text-zinc-100"
+            >
+              <X className="h-4 w-4" strokeWidth={1.5} />
+            </button>
           </div>
         </motion.div>
       )}
@@ -318,6 +320,7 @@ export function ClientsListClient({ clients }: ClientsListClientProps) {
                 client={client}
                 pinned={pinned.has(client.id)}
                 selected={selected.has(client.id)}
+                selectionMode={selected.size > 0}
                 reduced={reduced}
                 onTogglePin={() => togglePin(client.id)}
                 onToggleSelect={() => toggleSelected(client.id)}
@@ -334,6 +337,7 @@ function ClientCard({
   client,
   pinned,
   selected,
+  selectionMode,
   reduced,
   onTogglePin,
   onToggleSelect,
@@ -341,6 +345,7 @@ function ClientCard({
   client: ClientItem
   pinned: boolean
   selected: boolean
+  selectionMode: boolean
   reduced: boolean
   onTogglePin: () => void
   onToggleSelect: () => void
@@ -353,15 +358,41 @@ function ClientCard({
           selected ? 'border-cyan-400/40' : 'border-white/10'
         }`}
       >
-        <input
-          type="checkbox"
-          checked={selected}
-          onChange={onToggleSelect}
+        <label
+          className="absolute left-3 top-3 z-10 inline-flex cursor-pointer"
           onClick={(event) => event.stopPropagation()}
-          className="absolute left-3 top-3 z-10 h-4 w-4 rounded border-white/20 bg-white/[0.05] accent-cyan-400"
-          aria-label={`Seleccionar ${client.companyName}`}
-        />
-        <Link href={`/admin/clients/${client.id}`} className="block p-5">
+        >
+          <input
+            type="checkbox"
+            checked={selected}
+            onChange={onToggleSelect}
+            aria-label={`Seleccionar ${client.companyName}`}
+            className="peer sr-only"
+          />
+          <span
+            aria-hidden="true"
+            className="flex h-5 w-5 items-center justify-center rounded-md border border-white/20 bg-zinc-950/80 text-transparent shadow-sm backdrop-blur transition-colors peer-hover:border-white/40 peer-checked:border-cyan-400 peer-checked:bg-cyan-400 peer-checked:text-zinc-950 peer-focus-visible:ring-2 peer-focus-visible:ring-cyan-400/60 peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-zinc-950"
+          >
+            <Check className="h-3.5 w-3.5" strokeWidth={1.5} />
+          </span>
+        </label>
+        <Link
+          href={`/admin/clients/${client.id}`}
+          className="block p-5"
+          onClick={
+            selectionMode
+              ? (event) => {
+                  event.preventDefault()
+                  onToggleSelect()
+                }
+              : undefined
+          }
+          aria-label={
+            selectionMode
+              ? `${selected ? 'Deseleccionar' : 'Seleccionar'} ${client.companyName}`
+              : undefined
+          }
+        >
           <div className="mb-3 flex items-start justify-between gap-3 pl-6 pr-8">
             <div className="rounded-xl bg-cyan-400/10 p-2 transition-colors group-hover:bg-cyan-400/15">
               <Building2 className="h-4 w-4 text-cyan-300" strokeWidth={1.5} />

@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { Activity, ArrowRight, BookOpen, Bot, MessageSquare, Settings, Users } from 'lucide-react'
 import { prisma } from '@/lib/prisma'
 import { Card, StatCard } from '@/components/ui'
+import { HoverScaleCard } from '@/app/(protected)/admin/clients/_components/HoverScaleCard'
 import { ChatbotManager } from '@/components/admin/managers/ChatbotManager'
 import { QuickActionMotion } from '../QuickActionMotion'
 
@@ -46,7 +47,7 @@ export async function ChatbotTab({ clientId }: ChatbotTabProps) {
           Configura un bot personalizado para empezar a capturar leads.
         </p>
         <Link
-          href={`/admin/clients/new?prefillOrgSlug=${org.slug}`}
+          href={`/admin/chatbots/new?organizationId=${clientId}`}
           className="inline-flex items-center gap-2 rounded-2xl bg-cyan-400/15 px-5 py-2.5 text-sm text-cyan-300 hover:bg-cyan-400/25"
         >
           Configurar chatbot
@@ -64,27 +65,39 @@ export async function ChatbotTab({ clientId }: ChatbotTabProps) {
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard
-          label="Bot"
-          value={org.botConfig.botName}
-          subtitle={org.botConfig.isActive ? 'Activo' : 'Pausado'}
-          color={org.botConfig.isActive ? 'emerald' : 'zinc'}
-        />
-        <StatCard
-          label="Conversaciones (total)"
-          value={org.botConfig._count.conversations}
-          color="cyan"
-        />
-        <StatCard
-          label="Leads (total)"
-          value={org.botConfig._count.leads}
-          color="violet"
-        />
-        <StatCard
-          label="Quota mensual"
-          value={`${org.botConfig.monthlyQuota.toLocaleString('es-AR')} conv`}
-          color="zinc"
-        />
+        <HoverScaleCard className="h-full">
+          <StatCard
+            label="Bot"
+            value={org.botConfig.botName}
+            subtitle={org.botConfig.isActive ? 'Activo' : 'Pausado'}
+            color={org.botConfig.isActive ? 'emerald' : 'zinc'}
+            className="h-full"
+          />
+        </HoverScaleCard>
+        <HoverScaleCard className="h-full">
+          <StatCard
+            label="Conversaciones (total)"
+            value={org.botConfig._count.conversations}
+            color="cyan"
+            className="h-full"
+          />
+        </HoverScaleCard>
+        <HoverScaleCard className="h-full">
+          <StatCard
+            label="Leads (total)"
+            value={org.botConfig._count.leads}
+            color="violet"
+            className="h-full"
+          />
+        </HoverScaleCard>
+        <HoverScaleCard className="h-full">
+          <StatCard
+            label="Quota mensual"
+            value={`${org.botConfig.monthlyQuota.toLocaleString('es-AR')} conv`}
+            color="zinc"
+            className="h-full"
+          />
+        </HoverScaleCard>
       </div>
 
       <ChatbotManager
@@ -178,13 +191,9 @@ function QuickActionCard({
           variant="interactive"
           className={accent === 'cyan' ? 'h-full border-cyan-400/20 hover:border-cyan-400/30' : 'h-full hover:border-white/20'}
         >
-          <div className="mb-3 flex items-start justify-between">
+          <div className="mb-3 flex items-start">
             <Icon
               className={`h-5 w-5 ${accent === 'cyan' ? 'text-cyan-400' : 'text-zinc-400'}`}
-              strokeWidth={1.5}
-            />
-            <ArrowRight
-              className="h-4 w-4 text-zinc-600 transition-colors group-hover:text-cyan-400"
               strokeWidth={1.5}
             />
           </div>

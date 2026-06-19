@@ -1,5 +1,7 @@
-import { Building2 } from 'lucide-react'
+import Link from 'next/link'
+import { Building2, Pencil } from 'lucide-react'
 import { AdminBreadcrumbs } from '@/app/(protected)/admin/_components/AdminBreadcrumbs'
+import { HoverScaleCard } from '@/app/(protected)/admin/clients/_components/HoverScaleCard'
 import { ClientSwitcher } from './ClientSwitcher'
 import { ImpersonateButton } from './ImpersonateButton'
 
@@ -49,7 +51,7 @@ export function ClientHeader({ client, allClients }: ClientHeaderProps) {
                 clients={allClients}
               />
             </div>
-            <p className="text-[10px] uppercase tracking-[0.24em] text-zinc-500">
+            <p className="text-[10px] uppercase tracking-[0.24em] text-zinc-400">
               Cliente
             </p>
             <h1 className="text-2xl font-semibold tracking-tight text-zinc-100 sm:text-3xl">
@@ -61,7 +63,7 @@ export function ClientHeader({ client, allClients }: ClientHeaderProps) {
               </span>
               {client.subscription && (
                 <>
-                  <span className="text-zinc-700">/</span>
+                  <span className="text-zinc-600">/</span>
                   <span>
                     {client.subscription.plan?.name ?? 'Sin plan'} ({client.subscription.status})
                   </span>
@@ -69,7 +71,7 @@ export function ClientHeader({ client, allClients }: ClientHeaderProps) {
               )}
               {client.siteUrl && (
                 <>
-                  <span className="text-zinc-700">/</span>
+                  <span className="text-zinc-600">/</span>
                   <a
                     href={client.siteUrl}
                     target="_blank"
@@ -82,13 +84,13 @@ export function ClientHeader({ client, allClients }: ClientHeaderProps) {
               )}
               {client.whatsapp && (
                 <>
-                  <span className="text-zinc-700">/</span>
+                  <span className="text-zinc-600">/</span>
                   <span>WhatsApp: {client.whatsapp}</span>
                 </>
               )}
               {client.botConfig && (
                 <>
-                  <span className="text-zinc-700">/</span>
+                  <span className="text-zinc-600">/</span>
                   <span>
                     Bot:{' '}
                     <span
@@ -120,7 +122,14 @@ export function ClientHeader({ client, allClients }: ClientHeaderProps) {
             />
             <StatChip label="Leads" value={client.botConfig?._count?.leads ?? 0} />
           </div>
-          <div className="lg:self-end">
+          <div className="flex items-center justify-end gap-2 lg:self-end">
+            <Link
+              href={`/admin/clients/${client.id}/edit`}
+              className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.02] px-3 py-2 text-sm text-zinc-300 transition-colors hover:border-cyan-400/30 hover:bg-white/[0.06] hover:text-cyan-300"
+            >
+              <Pencil className="h-4 w-4" strokeWidth={1.5} />
+              Editar datos
+            </Link>
             <ImpersonateButton clientId={client.id} clientName={client.companyName} />
           </div>
         </div>
@@ -131,11 +140,13 @@ export function ClientHeader({ client, allClients }: ClientHeaderProps) {
 
 function StatChip({ label, value }: { label: string; value: number }) {
   return (
-    <div className="rounded-xl border border-white/10 bg-white/[0.02] px-3 py-2 text-center">
-      <p className="text-[10px] uppercase tracking-wider text-zinc-500">
-        {label}
-      </p>
-      <p className="mt-0.5 text-sm font-medium text-zinc-100">{value}</p>
-    </div>
+    <HoverScaleCard className="h-full rounded-xl">
+      <div className="h-full rounded-xl border border-white/10 bg-white/[0.02] px-3 py-2 text-center">
+        <p className="text-[10px] uppercase tracking-wider text-zinc-400">
+          {label}
+        </p>
+        <p className="mt-0.5 text-sm font-medium text-zinc-100">{value}</p>
+      </div>
+    </HoverScaleCard>
   )
 }

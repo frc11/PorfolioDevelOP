@@ -3,11 +3,17 @@ import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import { CreateBotForm } from './CreateBotForm'
 
-export default async function NewBotPage() {
+export default async function NewBotPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ organizationId?: string }>
+}) {
   const session = await auth()
   if (!session?.user || session.user.role !== 'SUPER_ADMIN') {
     redirect('/login')
   }
+
+  const { organizationId } = await searchParams
 
   const orgsAvailable = await prisma.organization.findMany({
     where: { botConfig: null },
@@ -27,7 +33,7 @@ export default async function NewBotPage() {
         </p>
       </div>
 
-      <CreateBotForm orgsAvailable={orgsAvailable} />
+      <CreateBotForm orgsAvailable={orgsAvailable} preselectedOrgId={organizationId} />
     </div>
   )
 }
