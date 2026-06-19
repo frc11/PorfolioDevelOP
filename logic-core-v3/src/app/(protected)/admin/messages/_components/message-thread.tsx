@@ -1,5 +1,6 @@
 import { MessageSquareText } from 'lucide-react'
 import { MessagesScrollAnchor } from '@/components/admin/MessagesScrollAnchor'
+import { MessageBubble } from './message-bubble'
 
 type MessageThreadProps = {
   companyName: string
@@ -11,15 +12,6 @@ type MessageThreadProps = {
     createdAt: string
     organizationId: string
   }>
-}
-
-function formatMessageDate(value: string) {
-  return new Intl.DateTimeFormat('es-AR', {
-    day: '2-digit',
-    month: 'short',
-    hour: '2-digit',
-    minute: '2-digit',
-  }).format(new Date(value))
 }
 
 export function MessageThread({ companyName, messages }: MessageThreadProps) {
@@ -36,26 +28,13 @@ export function MessageThread({ companyName, messages }: MessageThreadProps) {
         {messages.length > 0 ? (
           <>
             {messages.map((message) => (
-              <div
+              <MessageBubble
                 key={message.id}
-                className={`flex ${message.fromAdmin ? 'justify-end' : 'justify-start'}`}
-              >
-                <div
-                  className={[
-                    'max-w-[85%] rounded-[24px] px-4 py-3 shadow-[0_16px_40px_rgba(0,0,0,0.18)] sm:max-w-[70%]',
-                    message.fromAdmin
-                      ? 'border border-cyan-400/20 bg-cyan-500/10 text-cyan-50'
-                      : 'border border-white/10 bg-black/20 text-zinc-100',
-                  ].join(' ')}
-                >
-                  <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] text-zinc-400">
-                    <span>{message.fromAdmin ? 'Admin' : companyName}</span>
-                    <span className="text-zinc-600">•</span>
-                    <span className="text-zinc-500">{formatMessageDate(message.createdAt)}</span>
-                  </div>
-                  <p className="mt-2 whitespace-pre-wrap text-sm leading-6">{message.content}</p>
-                </div>
-              </div>
+                fromAdmin={message.fromAdmin}
+                companyName={companyName}
+                content={message.content}
+                createdAt={message.createdAt}
+              />
             ))}
             <MessagesScrollAnchor />
           </>
