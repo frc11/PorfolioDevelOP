@@ -383,6 +383,21 @@ model Organization {
   // flag antes de mandar.
   executiveReportOptOut Boolean @default(false)
 
+  // Client profile (admin-managed). city la captura el creador pero hoy la
+  // action no la persiste; internalNotes se muestra en OverviewTab (hoy placeholder).
+  city          String?
+  internalNotes String?
+
+  // Avatar del cliente. avatarInitials es editable a mano (máx 2 chars validados
+  // en la app), NO se deriva del companyName; null cae al fallback de la app.
+  avatarEmoji    String?
+  avatarImageUrl String?
+  avatarInitials String?
+
+  // Soft-delete de cliente. null = activo; con fecha = archivado/eliminado
+  // (recuperable). Nunca hard delete.
+  deletedAt DateTime?
+
   members           OrgMember[]
   services          Service[]
   projects          Project[]
