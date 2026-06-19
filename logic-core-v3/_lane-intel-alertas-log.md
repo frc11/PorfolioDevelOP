@@ -118,8 +118,21 @@ PASO 0: confirmé que el admin NO usa `triggerTransition` (grep en `app/(protect
 
 ---
 
+# LOTE 5 — hover del header de columna de borde a borde
+
+PASO 0: la referencia "Motor interno de automatización operativa" NO está en el código (es del sitio público, no del admin); se usó solo como intención visual. Diagnóstico real: el header YA era un `<button>` con `hover:bg-white/[0.04]` sobre ícono+título+conteo, pero **inset por el `p-4` de la columna** y como franja fina (`px-1 py-1`) → el highlight no llegaba a los bordes.
+
+## Sprint único — header full-bleed
+**Commit:** `7034c34` · **Archivo:** `AlertsClient.tsx`.
+- old→new: el header pasó de `mb-4 flex w-full … rounded-xl px-1 py-1 hover:bg-white/[0.04]` a `HEADER_BASE = '-mx-4 -mt-4 mb-3 block px-4 pt-4 pb-3'` + (solo el clickable) `rounded-t-[28px] text-left transition-colors hover:bg-white/[0.04]`. Los `-mx-4/-mt-4` cancelan el `p-4` de la columna → el highlight cubre el header de borde a borde (y hasta el tope); `px-4/pt-4` dejan el contenido en su posición; el layout ícono+título·conteo va en un **wrapper flex interno** (el botón es `block` para el full-bleed, así que el flex no puede ir en él mismo).
+- Mismo `HEADER_BASE` con y sin overview → las 3 columnas alinean su header; **solo el clickable** suma hover + `rounded-t` → las columnas sin overview NO quedan con aspecto clickable. No cambió CUÁNDO aparece (sigue solo cuando hay overview).
+- El "hint" del bottom ("Ver todas (N) →") ya tenía su propio `w-full hover:bg-cyan-400/10` → se dejó como está (es otro trigger, físicamente separado bajo las cards).
+- Gate: tsc 0 · eslint 0.
+
+---
+
 ## Estado / pendiente humano
-- **visual-qa** `/admin/alerts`: despachado 4× (Lotes 1–4; el preview MCP estuvo ausente todas las veces). **El preview/browser MCP NO está conectado esta sesión** (`preview_start`/`preview_screenshot` ausentes — coincide con memoria `preview-mcp-untracked`), así que el agente solo pudo hacer **análisis/auditoría de código** (sin screenshot real). Lote 3: auditoría limpia (z-index z-0→z-30 > overlay z-10 correcto; `relative` sin `overflow-hidden`; portal/trap/AnimatePresence OK) → veredicto **❓ A CONFIRMAR** render visual. La confirmación queda en manos del humano en `:3000` (criterio de aceptación del lote).
+- **visual-qa** `/admin/alerts`: despachado 4× (Lotes 1–4; el preview MCP estuvo ausente todas las veces). Lote 5 (cambio chico de CSS en el header) NO se re-despachó por ese motivo → va directo a verificación humana. **El preview/browser MCP NO está conectado esta sesión** (`preview_start`/`preview_screenshot` ausentes — coincide con memoria `preview-mcp-untracked`), así que el agente solo pudo hacer **análisis/auditoría de código** (sin screenshot real). Lote 3: auditoría limpia (z-index z-0→z-30 > overlay z-10 correcto; `relative` sin `overflow-hidden`; portal/trap/AnimatePresence OK) → veredicto **❓ A CONFIRMAR** render visual. La confirmación queda en manos del humano en `:3000` (criterio de aceptación del lote).
 - **Verificación humana (Lote 1):** tras "Visto"/"Resolver" sobre una PENDING, el badge rojo del sidebar debe bajar SIN esperar ~30s y sin re-navegar. Si no refresca → contingencia `router.refresh()` en AlertsClient.
 - **Verificación humana (Lote 2):** las 4 stat cards pobladas (2 / 6 / 5 / Xm) y su hover a ojo (scale + shadow + ring, sin clip).
 - **Verificación humana (Lote 3):**
@@ -130,3 +143,4 @@ PASO 0: confirmé que el admin NO usa `triggerTransition` (grep en `app/(protect
   - "Ver bot": se ve como botón (ghost, cyan) y navega in-app al detalle del bot (no nueva pestaña, sin recargar todo).
   - "Personalizado": abre el popover a la DERECHA del chip, flotando sobre el contenido; cierra con click afuera/Escape; confirmar que no se sale del viewport por la derecha.
   - Altura: las 3 columnas a la misma altura (~4 cards); difuminado en Pendientes(6) y Resueltas(5), no en Vistas(3); hover por card SIN corte. Calibrables a ojo: `lg:min-h-[40rem]` y `VISIBLE_CAP`. (Si querés ver MÁS Resueltas de un vistazo, subí su cap — pero entonces la altura uniforme pasa a ser la del cap más alto, porque tras el Sprint 1 las cards quedaron de altura pareja.)
+- **Verificación humana (Lote 5):** en las columnas CON overview (Pendientes/Resueltas con el seed), pasar el mouse por el header lo resalta completo, de borde a borde (ícono+título+conteo), no solo la franja del título. En Vistas (sin overview) el header NO se resalta ni parece clickable. Confirmar que el `rounded-t-[28px]` del highlight matchea la esquina de la columna (si asoma ~1px, bajar a `rounded-t-[24px]`).
