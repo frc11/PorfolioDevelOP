@@ -1,9 +1,6 @@
 import { prisma } from '@/lib/prisma'
 import { Card, StatCard } from '@/components/ui'
-import {
-  HoverScaleCard,
-  hoverTint,
-} from '@/app/(protected)/admin/clients/_components/HoverScaleCard'
+import { HoverScaleCard } from '@/app/(protected)/admin/clients/_components/HoverScaleCard'
 import { ResendCredentialsButton } from '../ResendCredentialsButton'
 import { PlanAssignmentCard } from '../PlanAssignmentCard'
 import { BillingOverrideCard } from '../BillingOverrideCard'
@@ -118,7 +115,7 @@ function InfoRow({
 }) {
   return (
     <div
-      className={`-mx-2 flex items-center justify-between gap-4 rounded-lg border border-transparent px-2 py-1 text-sm ${hoverTint}`}
+      className="-mx-2 flex items-center justify-between gap-4 rounded-lg border border-transparent px-2 py-1.5 text-sm transition-colors hover:border-white/15 hover:bg-white/10"
     >
       <span className="text-zinc-400">{label}</span>
       {link && value !== '-' ? (
