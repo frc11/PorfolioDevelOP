@@ -91,8 +91,8 @@ export function TicketChat({ ticket }: TicketChatProps) {
   }
 
   return (
-    <section className="space-y-5">
-      <div className="rounded-[28px] border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
+    <section className="flex min-h-0 flex-1 flex-col gap-4">
+      <div className="shrink-0 rounded-[28px] border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div className="min-w-0">
             <p className="text-xs tracking-tight text-zinc-500">
@@ -136,15 +136,15 @@ export function TicketChat({ ticket }: TicketChatProps) {
         ) : null}
       </div>
 
-      <div className="rounded-[28px] border border-white/10 bg-white/5 backdrop-blur-xl">
-        <div className="border-b border-white/10 px-5 py-4">
+      <div className="flex min-h-0 flex-1 flex-col rounded-[28px] border border-white/10 bg-white/5 backdrop-blur-xl">
+        <div className="shrink-0 border-b border-white/10 px-5 py-4">
           <div className="flex items-center gap-2 text-sm text-zinc-400">
             <MessageSquareText className="h-4 w-4 text-cyan-300" />
             <span>{ticket.messages.length} mensajes en la conversación</span>
           </div>
         </div>
 
-        <div className="max-h-[60vh] space-y-4 overflow-y-auto px-5 py-5">
+        <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-5 py-5">
           {ticket.messages.length > 0 ? (
             ticket.messages.map((message) => (
               <div

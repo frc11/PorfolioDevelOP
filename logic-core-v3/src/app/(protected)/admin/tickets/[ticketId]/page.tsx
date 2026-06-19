@@ -18,7 +18,7 @@ export default async function AgencyOsTicketDetailPage({ params }: TicketDetailP
   }
 
   return (
-    <section className="space-y-5">
+    <section className="flex h-[calc(100svh-14rem)] min-h-0 flex-col gap-4 sm:h-[calc(100svh-12.5rem)]">
       <AdminBackButton href="/admin/tickets" label="Volver a tickets" />
 
       <TicketChat ticket={ticketResult.data} />
