@@ -4,6 +4,7 @@ import { useEffect, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { Loader2, MessageSquareText } from 'lucide-react'
 import type { Role, TicketStatus } from '@prisma/client'
+import { Select } from '@/components/ui'
 import { updateTicketStatus } from '../_actions/ticket.actions'
 import { TicketReplyForm } from './ticket-reply-form'
 
@@ -106,27 +107,24 @@ export function TicketChat({ ticket }: TicketChatProps) {
           </div>
 
           <div className="flex items-center gap-3">
-            <div className="relative">
-              <select
-                value={status}
-                disabled={isPending}
-                onChange={(event) => handleStatusChange(event.target.value as TicketStatus)}
-                className={[
-                  'rounded-2xl border px-4 py-3 text-sm font-medium outline-none transition-colors',
-                  STATUS_TONES[status],
-                  isPending ? 'cursor-wait opacity-80' : 'cursor-pointer',
-                ].join(' ')}
-              >
-                {(Object.keys(STATUS_LABELS) as TicketStatus[]).map((option) => (
-                  <option key={option} value={option} className="bg-[#0d1117] text-zinc-100">
-                    {STATUS_LABELS[option]}
-                  </option>
-                ))}
-              </select>
-              {isPending ? (
-                <Loader2 className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-zinc-300" />
-              ) : null}
-            </div>
+            {isPending ? (
+              <Loader2
+                className="h-4 w-4 animate-spin text-zinc-300"
+                strokeWidth={1.5}
+                aria-label="Actualizando estado"
+              />
+            ) : null}
+            <Select
+              value={status}
+              disabled={isPending}
+              onChange={(event) => handleStatusChange(event.target.value as TicketStatus)}
+              options={(Object.keys(STATUS_LABELS) as TicketStatus[]).map((option) => ({
+                value: option,
+                label: STATUS_LABELS[option],
+              }))}
+              aria-label="Cambiar estado del ticket"
+              className={`min-w-[168px] rounded-2xl ${STATUS_TONES[status]}`}
+            />
           </div>
         </div>
 
