@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import dynamic from 'next/dynamic'
-import { AnimatePresence, motion } from 'motion/react'
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import { Loader2, Smile } from 'lucide-react'
 import { useIsClient } from '@/lib/use-is-client'
 
@@ -69,6 +69,7 @@ type EmojiPickerButtonProps = {
  */
 export function EmojiPickerButton({ onPick, disabled }: EmojiPickerButtonProps) {
   const mounted = useIsClient()
+  const reduce = Boolean(useReducedMotion())
   const [open, setOpen] = useState(false)
   const [panelPos, setPanelPos] = useState<PanelPosition | null>(null)
   const triggerRef = useRef<HTMLButtonElement>(null)
@@ -107,7 +108,11 @@ export function EmojiPickerButton({ onPick, disabled }: EmojiPickerButtonProps) 
       if (panelRef.current?.contains(event.target as Node)) return
       setOpen(false)
     }
-    const handleResize = () => setOpen(false)
+    // Resize REPOSICIONA (no cierra): en mobile, tocar el buscador del picker abre el
+    // teclado virtual -> dispara resize; cerrar aca dejaria la busqueda inutilizable.
+    const handleResize = () => {
+      if (triggerRef.current) setPanelPos(calcPosition(triggerRef.current))
+    }
     const handleKey = (event: KeyboardEvent) => {
       if (event.key === 'Escape') setOpen(false)
     }
@@ -144,10 +149,10 @@ export function EmojiPickerButton({ onPick, disabled }: EmojiPickerButtonProps) 
                 ref={panelRef}
                 role="dialog"
                 aria-label="Selector de emoji"
-                initial={{ opacity: 0, y: 4 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 4 }}
-                transition={{ duration: 0.12, ease: 'easeOut' }}
+                initial={reduce ? false : { opacity: 0, y: 4 }}
+                animate={reduce ? { opacity: 1 } : { opacity: 1, y: 0 }}
+                exit={reduce ? { opacity: 0 } : { opacity: 0, y: 4 }}
+                transition={reduce ? { duration: 0 } : { duration: 0.12, ease: 'easeOut' }}
                 style={{
                   position: 'fixed',
                   top: panelPos.top,
