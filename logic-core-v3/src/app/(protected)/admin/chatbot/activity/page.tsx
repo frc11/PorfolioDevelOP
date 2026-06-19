@@ -14,7 +14,9 @@ export default async function ActivityPage() {
 
   if (!bot) return <div className="p-8 text-red-400">Bot no encontrado.</div>
 
-  const events = await listRecentEvents(bot.id, 50)
+  // Pool client-side para "Cargar más" (se muestran 50 y se revelan +50). Solo el arg;
+  // queries.ts no se toca. La tab por-bot de chatbots/[botId] mantiene su propio take.
+  const events = await listRecentEvents(bot.id, 250)
 
   return (
     <div className="space-y-6">
@@ -33,7 +35,7 @@ export default async function ActivityPage() {
         initialEvents={events.map((e) => ({
           id: e.id,
           type: e.type,
-          level: e.level as 'info' | 'warn' | 'error' | 'debug',
+          level: e.level.toLowerCase() as 'info' | 'warn' | 'error' | 'debug',
           message: e.message,
           createdAt: e.createdAt.toISOString(),
           conversationSession: e.conversation?.sessionId ?? null,

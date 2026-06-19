@@ -25,7 +25,7 @@ export async function GET(request: Request) {
     events: events.map((e) => ({
       id: e.id,
       type: e.type,
-      level: e.level,
+      level: e.level.toLowerCase(),
       message: e.message,
       createdAt: e.createdAt.toISOString(),
       conversationSession: e.conversation?.sessionId ?? null,
