@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation'
+import { AuditActionType } from '@prisma/client'
 import { auth } from '@/auth'
 import { getAuditLogStats, listAuditLog } from '@/lib/audit-log-queries'
 import { AuditLogClient } from './_components/AuditLogClient'
@@ -31,6 +32,7 @@ export default async function AuditLogPage() {
       <AuditLogClient
         initialEntries={initial.entries}
         initialHasMore={initial.hasMore}
+        actionTypes={Object.values(AuditActionType)}
         stats={stats}
       />
     </div>
