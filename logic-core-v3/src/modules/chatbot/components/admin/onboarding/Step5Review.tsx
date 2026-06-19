@@ -275,10 +275,12 @@ export function Step5Review({ state, onBack, onCreated }: Step5Props) {
           </div>
         </ReviewSection>
 
-        <ReviewSection title="LLM">
-          <ReviewRow label="Provider" value="Google (Vertex AI)" />
-          <ReviewRow label="Modelo" value="gemini-2.5-flash" />
-          <ReviewRow label="Quota" value="1000 conv/mes" mono />
+        <ReviewSection title="LLM" full>
+          <div className="grid grid-cols-1 gap-x-8 gap-y-2 sm:grid-cols-3">
+            <ReviewRow label="Provider" value="Google (Vertex AI)" />
+            <ReviewRow label="Modelo" value="gemini-2.5-flash" />
+            <ReviewRow label="Quota" value="1000 conv/mes" mono />
+          </div>
         </ReviewSection>
           </>
         )}
