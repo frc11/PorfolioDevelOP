@@ -4,6 +4,8 @@ interface WelcomeClientEmailInput {
   email: string
   tempPassword: string
   loginUrl: string
+  /** Si el alta incluye chatbot. Por defecto true (preserva el copy histórico). */
+  withBot?: boolean
 }
 
 export function welcomeClientEmail(input: WelcomeClientEmailInput): {
@@ -11,6 +13,17 @@ export function welcomeClientEmail(input: WelcomeClientEmailInput): {
   htmlContent: string
   textContent: string
 } {
+  const withBot = input.withBot ?? true
+  const introTail = withBot
+    ? ' Ya podés entrar a tu panel y ver tu chatbot funcionando.'
+    : ' Ya podés entrar a tu panel.'
+  const botBulletHtml = withBot
+    ? '<li>Mi Chatbot: métricas en tiempo real de tu bot</li>\n                '
+    : ''
+  const botBulletText = withBot
+    ? '- Mi Chatbot: métricas de tu bot en tiempo real\n'
+    : ''
+
   return {
     subject: `Bienvenido/a a develOP, ${input.clientName}`,
     htmlContent: `
@@ -33,7 +46,7 @@ export function welcomeClientEmail(input: WelcomeClientEmailInput): {
                 Hola ${input.clientName}, tu cuenta está lista
               </h1>
               <p style="margin:0 0 24px 0; font-size:15px; line-height:1.6; color:#a1a1aa;">
-                Acabamos de armar todo para <strong style="color:#e4e4e7;">${input.organizationName}</strong>. Ya podés entrar a tu panel y ver tu chatbot funcionando.
+                Acabamos de armar todo para <strong style="color:#e4e4e7;">${input.organizationName}</strong>.${introTail}
               </p>
 
               <div style="background-color:#27272a; border-radius:12px; padding:20px; margin:0 0 24px 0; border:1px solid #3f3f46;">
@@ -60,8 +73,7 @@ export function welcomeClientEmail(input: WelcomeClientEmailInput): {
 
               <p style="margin:0 0 8px 0; font-size:13px; color:#e4e4e7; font-weight:600;">¿Qué vas a encontrar adentro?</p>
               <ul style="margin:0 0 24px 0; padding-left:20px; color:#a1a1aa; font-size:13px; line-height:1.8;">
-                <li>Mi Chatbot: métricas en tiempo real de tu bot</li>
-                <li>Mis Leads: oportunidades capturadas automáticamente</li>
+                ${botBulletHtml}<li>Mis Leads: oportunidades capturadas automáticamente</li>
                 <li>Mensajes: contacto directo con nuestro equipo</li>
               </ul>
 
@@ -95,8 +107,7 @@ Contraseña temporal: ${input.tempPassword}
 Entrá acá: ${input.loginUrl}
 
 QUÉ VAS A ENCONTRAR:
-- Mi Chatbot: métricas de tu bot en tiempo real
-- Mis Leads: oportunidades capturadas automáticamente
+${botBulletText}- Mis Leads: oportunidades capturadas automáticamente
 - Mensajes: contacto directo con develOP
 
 Cualquier duda, respondé este email o escribime por WhatsApp.
