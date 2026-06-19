@@ -408,3 +408,48 @@ sin-bot · post-alta sin-bot → **`/admin/clients`** · apariencia rica **se pe
 - **#1:** Review — card LLM con Provider/Modelo/Quota legibles, sin encimarse.
 
 > **Nota build:** `npm run build` (Next 16, webpack) con `NODE_OPTIONS=--max-old-space-size=8192` → **EXIT 0** (árbol de rutas completo). Con el heap default (~2GB) el webpack build hace OOM (exit 134) — techo de memoria del entorno, no del código (tsc verde en los 5 commits).
+
+---
+
+# Lote — Editor de datos del cliente · log de cierre
+
+**Worktree:** `C:\develop-clientes-clients` · **Branch:** `lane/clientes-clients` · **Fecha:** 2026-06-19
+**Gate:** `.\node_modules\.bin\tsc.cmd --noEmit` → **EXIT 0** tras cada commit. `npm run build` → ver nota al pie.
+**Verificación visual:** humano en `:3000`.
+
+Editor de los datos de un cliente existente (Organization + User admin), estilo del creador, **sin bot**.
+
+## Commits por bloque (3)
+
+| Commit | Bloque | Qué |
+|--------|--------|-----|
+| `2864d3a` | 1 | `updateClient` (action en el módulo): requireSuperAdmin + Zod, update transaccional de Organization (companyName, siteUrl) + User admin (email/name/phone), normaliza websiteUrl, valida unicidad de email, audit `CLIENT_UPDATED`, revalidatePath. NO re-sluggea (identificador estable) |
+| `216a8cb` | 2 | ruta `/admin/clients/[clientId]/edit`: page server (auth, resuelve id\|slug, prefill) + `EditClientForm` client (1 pantalla, Card+Field/Input, full-width 2 columnas, validación inline, submit→`updateClient`→`triggerTransition` al detalle) |
+| `99f0493` | 3 | Link "Editar datos" en el header del card "Información de contacto" del OverviewTab → `/edit` |
+
+## PARADA — `city` (resuelta: omitido)
+`Organization` **no tiene columna `city`** (0 matches en schema.prisma). El creador lo pide pero lo
+**descarta** (nunca se persiste). Editarlo requeriría migración (prohibida en este lote). Decisión
+tomada: **omitir `city`** del editor; se difiere junto con el avatar del cliente (ambos necesitan
+schema), post-merge.
+
+## old → new
+| Lugar | Antes | Después |
+|------|-------|---------|
+| Editar datos del cliente | no existía (solo `updateClientAction` legacy FormData, solo `name`, sin uso) | ruta `/edit` dedicada + `updateClient` (empresa + admin email/nombre/teléfono) |
+| Entrada | — | botón "Editar datos" en el card de contacto del detalle |
+| Validación | — | website (dominio pelado→https://) y email inline; errores legibles (nunca JSON Zod) |
+
+## Archivos fuera de `admin/clients/` (coordinación de merge)
+- `src/modules/chatbot/server/admin/updateClient.ts` (**nuevo**) — módulo server.
+- Reusa (no edita): `field-normalize.ts`, `@/components/ui` (Card/Field/Input), `TransitionContext`, `logAdminAction`, `requireSuperAdmin`.
+- Bajo la lane: `admin/clients/[clientId]/edit/page.tsx` + `EditClientForm.tsx` (nuevos) y `OverviewTab.tsx` (Link).
+
+## Rutas a verificar en `:3000` (humano)
+- Detalle de un cliente → card "Información de contacto" → botón **"Editar datos"**.
+- `/admin/clients/[id]/edit`: form full-width de una pantalla; prefill correcto; cambiar nombre/website/email/nombre/teléfono y **Guardar** → vuelve al detalle con los datos actualizados.
+- Email a uno **ya usado** por otro usuario → error legible inline (no crash, no JSON).
+- Website como dominio pelado (`empresa.com.ar`) → guarda `https://empresa.com.ar`.
+- `city` NO aparece (diferido con avatar).
+
+> **Nota build:** `npm run build` (Next 16, webpack) con `NODE_OPTIONS=--max-old-space-size=8192` → **EXIT 0**. Con el heap default (~2GB) el webpack build hace OOM (exit 134) — techo de memoria del entorno, no del código (tsc verde en los 3 commits).
