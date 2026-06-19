@@ -232,3 +232,68 @@ Conceptualmente sano; el gap "entregable sin contenido" es el smell que conviene
 - `/admin/clients` — el checkbox de cada card ahora se ve **igual** al de `/admin/chatbots` (cuadrado redondeado, check cyan al marcar). Conviene compararlas lado a lado.
 - `/admin/clients/[id]?tab=overview` — **Billing override:** las 3 cards (Precio del plan / Override vigente / Se factura) hacen **scale+ring** en hover; el input "Precio override (USD/mes)" **no** muestra flechas ↑↓. Abrir el `<details>` "Comparación de las 7 dimensiones de gating": cada **fila** se colorea en hover **sin agrandarse**.
 - `/admin/clients/[id]?tab=chatbot` — (Ajuste 5 **no** aplicado) las cards de bot/Consumo/Actividad siguen sin hover; pendiente de decisión sobre `ChatbotManager`.
+
+---
+---
+
+# LOTE 3 — CLIENTES · log de cierre (fixes de hover + ediciones de módulo AUTORIZADAS)
+
+**Worktree/Branch:** mismos (`C:\develop-clientes-clients` · `lane/clientes-clients`) · **Fecha:** 2026-06-19
+**Gate:** `.\node_modules\.bin\tsc.cmd --noEmit` desde `logic-core-v3` → **EXIT 0** tras cada bloque (baseline previo también 0).
+**Verificación visual:** la hace el humano en `:3000`. Para los hovers (#1, #2) el criterio es que se **VEAN**, no que compilen.
+**Self-review:** workflow adversarial de **6 revisores** (1 por ajuste + auditoría de scope/forbidden) → **6/6 pass**. Único hallazgo: un `any` **preexistente** en ChatbotManager (no introducido por este lote) → lo limpié de paso (ver #7/#12).
+**Autorización:** este lote tenía OK explícito del humano para editar `ChatbotManager` (#7,#12), `chatbots/new/*` y el viewer del audit log (#9), que antes eran forbidden/fuera de scope.
+
+## Archivos tocados FUERA de `admin/clients/` (para coordinación de merge)
+
+| Archivo | Ajuste | Por qué |
+|---------|--------|---------|
+| `src/components/admin/managers/ChatbotManager.tsx` | #7, #12 | hover en 3 cards + borrar 3 botones + limpiar `any` (módulo, edición autorizada) |
+| `src/app/(protected)/admin/chatbots/new/page.tsx` | #8 | leer `searchParams.organizationId` y pasarlo al form |
+| `src/app/(protected)/admin/chatbots/new/CreateBotForm.tsx` | #8 | prop `preselectedOrgId` + init de org validado |
+| `src/app/(protected)/admin/audit-log/_components/AuditLogClient.tsx` | #9 | render de `metadata.reason` en cada entrada (solo viewer) |
+
+Dentro de `clients/`: `PlanAssignmentCard.tsx` (#1), `tabs/OverviewTab.tsx` (#2), `tabs/ChatbotTab.tsx` (#8, el CTA).
+
+## Commits por bloque (LOTE 3)
+
+| Commit | # | Archivo(s) | Qué |
+|--------|---|-----------|-----|
+| `89a307b` | 1 | `PlanAssignmentCard.tsx` | hover de fila **VISIBLE** en la tabla de gating (replica la tabla de horas) |
+| `56de07b` | 2 | `OverviewTab.tsx` | hover **visible** en filas de info de contacto (inline, sin tocar `hoverTint`) |
+| `57203c8` | 7, 12 | `ChatbotManager.tsx` | hover scale+ring en 3 cards + borrar 3 botones redundantes + `any` cleanup |
+| `0060243` | 8 | `chatbots/new/page.tsx` · `CreateBotForm.tsx` · `ChatbotTab.tsx` | preselección de org por `?organizationId=` |
+| `156c090` | 9 | `AuditLogClient.tsx` | `metadata.reason` visible en el viewer |
+
+## Log por ajuste
+
+**#1 — Hover VISIBLE en la tabla de gating (URGENTE, falló 2 veces).** *Causa raíz del fallo:* el `hoverTint` previo era `hover:bg-white/[0.05]` (5%) sobre un `<tbody>` **sin superficie base** (className solo `text-zinc-300`) y filas compactas → delta imperceptible. *Fix:* repliqué el mecanismo de la tabla que SÍ se ve, "registros de horas" (`time-entry-panel.tsx:321-362`): `<tbody>` con superficie + divisores (`divide-y divide-white/5 bg-white/[0.02]`) y `<tr>` con `transition-colors duration-200 hover:bg-white/10`. La referencia prueba que el bg del `<tr>` pinta en esta app (lo hace con delta de apenas +1%); acá el delta es +8% (base 2% → hover 10%), claramente perceptible. Padding de celda `py-1.5 → py-2`. **Sin transform** (no se agranda). Quité el import de `hoverTint` (ya no se usa en este archivo). *El humano confirma en `:3000` que ahora se ve.*
+
+**#2 — Hover VISIBLE en Información de contacto.** Las 4 filas (`InfoRow` en `OverviewTab`) usaban `hoverTint` (5%, no se notaba). Las pasé a hover **inline** `transition-colors hover:border-white/15 hover:bg-white/10` (mismo white/10 que #1, consistente). **Decisión de scope:** NO toqué la constante compartida `hoverTint` (la consumen también las cards de `SupportTab`); de haberla subido habría cambiado Soporte sin pedirlo. Por eso el cambio es inline en `InfoRow`. Quité el import de `hoverTint` de `OverviewTab` (sigue importando `HoverScaleCard` para las StatCards). Padding `py-1 → py-1.5`.
+
+**#7 — Hover en las 3 cards del ChatbotManager (módulo, AUTORIZADO).** Las 3 cards (nombre del bot, "Consumo (Este mes)", "Actividad reciente") ahora son `<motion.div>` con `whileHover` scale `1.015` + ring (`HOVER_RING`) + gate `useReducedMotion()`, replicando **inline** el patrón de `ActivityLog`/`HoverScaleCard` (NO se importó el `HoverScaleCard` local de clients → sería cross-boundary; está documentado en el comentario). `useReducedMotion()` se llama **antes** del early-return `if (!botConfig)` (regla de hooks). `motion` viene de `motion/react`.
+
+**#12 — Borrar los 3 botones redundantes (AUTORIZADO).** Removí el bloque `<div className="mt-6 flex flex-wrap gap-3">` con "Configurar bot" / "Editar conocimiento" / "Ver detalle completo" (redundantes con las QuickActionCards del panel del `ChatbotTab`: `?tab=config|knowledge|overview`). Quedan la lista "Últimos Leads" y el empty-state. Quité los imports lucide que quedaron sin uso (`Settings`, `BookOpen`, `ArrowRight`); `Link`/`clientPath`/`Sparkles` siguen usándose en el empty-state. **Bonus:** limpié un `any` **preexistente** (`leads.map((lead: any)` → `(lead)`, el tipo se infiere de `ChatbotManagerBotConfig`) por la regla "Cero any, sin excepciones"; no cambia comportamiento.
+
+**#8 — Preselección de org en el form de bot (AUTORIZADO).** `chatbots/new/page.tsx`: firma con `searchParams: Promise<{ organizationId?: string }>` (Next 16), se `await`-ea y se pasa `preselectedOrgId`. `CreateBotForm`: nuevo prop opcional `preselectedOrgId`; `initialOrgId` = ese id **solo si existe en `orgsAvailable`** (`.some(...)`), si no cae al default `orgsAvailable[0]`. `ChatbotTab` (clients): el CTA del empty-state ahora es `/admin/chatbots/new?organizationId=${clientId}`. Org inválida/stale nunca llega al estado (la valida contra las opciones del Select). Sin `any`; el `router.push` del submit es **preexistente** (no es uno nuevo).
+
+**#9 — Reason visible en el audit log (AUTORIZADO, solo viewer).** El `reason` ya se persiste en `AdminAuditLog.metadata.reason` (Json) y `listAuditLog` ya devuelve `metadata` (sin `select` restrictivo) → **no hizo falta tocar query ni schema**. En `AuditLogClient` agregué `extractReason(metadata: unknown): string | null` (narrowing seguro, **sin `any`**) y una línea "Motivo: …" que se muestra cuando hay reason. Cambio 100% en el viewer.
+
+## old → new (LOTE 3)
+
+| Lugar | Antes | Después |
+|------|-------|---------|
+| Gating — filas de la tabla de 7 dimensiones | `<tr>` con `hoverTint` 5% sobre tbody sin base → **no se veía** | `<tbody>` con base `bg-white/[0.02]` + `divide-y`, `<tr>` `hover:bg-white/10` (delta +8%); `py-1.5→py-2` |
+| Overview — filas de info de contacto | `hoverTint` 5% → no se notaba | inline `hover:border-white/15 hover:bg-white/10`; `py-1→py-1.5` |
+| ChatbotManager — 3 cards (bot/Consumo/Actividad) | sin hover | `motion.div` hover **scale 1.015 + ring** (gate reduced-motion) |
+| ChatbotManager — 3 botones de arriba | Configurar bot / Editar conocimiento / Ver detalle completo | **eliminados** (redundantes con el panel) |
+| ChatbotManager — `leads.map((lead: any))` | `any` preexistente | `(lead)` (tipo inferido) |
+| chatbots/new — selección de org | siempre `orgsAvailable[0]` | preselecciona la org de `?organizationId=` si es válida |
+| ChatbotTab — CTA empty-state | `/admin/chatbots/new` | `/admin/chatbots/new?organizationId=${clientId}` |
+| Audit log — entrada | sin motivo visible | línea "Motivo: …" leída de `metadata.reason` cuando existe |
+
+## Rutas a verificar en `:3000` (humano) — LOTE 3
+- `/admin/clients/[id]?tab=overview` — **#1:** abrir el `<details>` "Comparación de las 7 dimensiones de gating"; pasar el mouse por una fila debe **colorearla de forma evidente** (como la tabla de horas), sin agrandar. **#2:** las filas de "Información de contacto" deben colorearse claramente al hover.
+- `/admin/clients/[id]?tab=chatbot` — **#7:** las cards de nombre del bot, "Consumo (Este mes)" y "Actividad reciente" hacen scale+ring. **#12:** ya **no** están los 3 botones de arriba (Configurar bot / Editar conocimiento / Ver detalle completo); el panel de QuickActionCards de abajo sigue llevando a los mismos destinos. **#8:** desde un cliente **sin bot**, "Configurar chatbot" abre `/admin/chatbots/new` con **esa** org ya seleccionada.
+- `/admin/projects/[id]/hours` — referencia visual del hover de tabla que se replicó (para comparar con #1).
+- `/admin/audit-log` — **#9:** una entrada de cambio de plan con motivo cargado muestra la línea "Motivo: …".
