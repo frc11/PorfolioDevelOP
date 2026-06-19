@@ -4,6 +4,7 @@ import { Input, Select } from '@/components/ui'
 import type { StepProps } from './types'
 import type { Industry } from '../../../server/admin/createClientWithBot'
 import { INDUSTRIES_LABELS } from './industries'
+import { normalizeWebsiteUrl, isValidWebsiteUrl } from '@/modules/chatbot/shared/field-normalize'
 import { slugify } from '@/lib/slugify'
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -12,11 +13,18 @@ export function Step1Company({ state, update, onNext }: StepProps) {
   const emailValid = EMAIL_RE.test(state.userEmail)
   const emailTouched = state.userEmail.length > 0
 
+  // Web opcional: se acepta el dominio pelado (le agregamos https:// al normalizar).
+  const websiteRaw = state.websiteUrl ?? ''
+  const websiteNormalized = normalizeWebsiteUrl(websiteRaw)
+  const websiteValid =
+    websiteRaw.trim() === '' || (websiteNormalized !== null && isValidWebsiteUrl(websiteNormalized))
+
   const canContinue =
     state.orgName.length >= 2 &&
     state.city.length >= 2 &&
     emailValid &&
-    state.userName.length >= 2
+    state.userName.length >= 2 &&
+    websiteValid
 
   const handleOrgNameChange = (value: string) => {
     update({ orgName: value })
@@ -108,8 +116,15 @@ export function Step1Company({ state, update, onNext }: StepProps) {
           type="url"
           value={state.websiteUrl ?? ''}
           onChange={(e) => update({ websiteUrl: e.target.value || null })}
-          placeholder="https://..."
+          onBlur={() => update({ websiteUrl: normalizeWebsiteUrl(state.websiteUrl) })}
+          invalid={websiteRaw.trim() !== '' && !websiteValid}
+          placeholder="empresa.com.ar"
         />
+        {websiteRaw.trim() !== '' && !websiteValid ? (
+          <p className="text-xs text-red-400 mt-1">URL inválida. Ej: empresa.com.ar</p>
+        ) : (
+          <p className="text-xs text-zinc-500 mt-1">Podés escribir el dominio solo; le agregamos https:// automáticamente.</p>
+        )}
       </div>
 
       <div className="pt-4 border-t border-zinc-800">

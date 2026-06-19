@@ -9,6 +9,7 @@ import { requireSuperAdmin } from './requireSuperAdmin'
 import { generateTempPassword } from '@/lib/security/generate-temp-password'
 import { sendTransactionalEmail } from '@/lib/email/brevo-service'
 import { welcomeClientEmail } from '@/lib/email/templates/welcome-client'
+import { normalizeWebsiteUrl, normalizeWhatsapp, zodErrorToMessage } from '@/modules/chatbot/shared/field-normalize'
 
 const INDUSTRIES = [
   'legal', 'contable', 'medico_odontologico', 'gimnasio', 'restaurant',
@@ -84,7 +85,15 @@ async function findUniqueSlug(base: string): Promise<string> {
 
 export async function createClientWithBot(input: z.infer<typeof CreateClientInputSchema>) {
   const admin = await requireSuperAdmin()
-  const parsed = CreateClientInputSchema.parse(input)
+  // Normaliza antes de validar (dominio pelado → https://, whatsapp → solo
+  // dígitos) y mapea cualquier error de Zod a un mensaje legible, nunca el array crudo.
+  const result = CreateClientInputSchema.safeParse({
+    ...input,
+    websiteUrl: normalizeWebsiteUrl(input.websiteUrl),
+    whatsappNumber: normalizeWhatsapp(input.whatsappNumber),
+  })
+  if (!result.success) throw new Error(zodErrorToMessage(result.error))
+  const parsed = result.data
 
   const baseSlug = slugify(parsed.orgName)
   const uniqueSlug = await findUniqueSlug(baseSlug)

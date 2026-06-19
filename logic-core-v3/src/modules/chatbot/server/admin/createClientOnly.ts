@@ -9,6 +9,7 @@ import { generateTempPassword } from '@/lib/security/generate-temp-password'
 import { sendTransactionalEmail } from '@/lib/email/brevo-service'
 import { welcomeClientEmail } from '@/lib/email/templates/welcome-client'
 import { slugify } from '@/lib/slugify'
+import { normalizeWebsiteUrl, zodErrorToMessage } from '@/modules/chatbot/shared/field-normalize'
 
 // Alta de cliente SIN chatbot: crea Organization + User admin + OrgMember.
 // Espeja el bloque org+user de createClientWithBot (no se toca esa action), pero
@@ -37,7 +38,14 @@ async function findUniqueSlug(base: string): Promise<string> {
 
 export async function createClientOnly(input: z.infer<typeof CreateClientOnlyInputSchema>) {
   const admin = await requireSuperAdmin()
-  const parsed = CreateClientOnlyInputSchema.parse(input)
+  // Normaliza el dominio pelado (→ https://) antes de validar; errores de Zod a
+  // mensaje legible, nunca el array crudo.
+  const result = CreateClientOnlyInputSchema.safeParse({
+    ...input,
+    websiteUrl: normalizeWebsiteUrl(input.websiteUrl),
+  })
+  if (!result.success) throw new Error(zodErrorToMessage(result.error))
+  const parsed = result.data
 
   const uniqueSlug = await findUniqueSlug(slugify(parsed.orgName))
 

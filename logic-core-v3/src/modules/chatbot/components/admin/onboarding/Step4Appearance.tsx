@@ -1,12 +1,12 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
 import { Field, Input, Select } from '@/components/ui'
 import { ColorPicker } from '../config/ColorPicker'
 import { EmojiPickerField } from '../config/EmojiPickerField'
 import { AvatarUploader } from '../config/tabs/AvatarUploader'
 import { AvatarPicker } from '@/modules/chatbot/components/avatar'
 import { deriveBusinessInitials } from '@/modules/chatbot/shared/businessInitials'
+import { normalizeWhatsapp, isValidWhatsapp } from '@/modules/chatbot/shared/field-normalize'
 import type { StepProps, OnboardingState } from './types'
 
 const HEX_RE = /^#[0-9a-fA-F]{6}$/
@@ -16,19 +16,16 @@ const HEX_RE = /^#[0-9a-fA-F]{6}$/
 const optHexValid = (color: string | null) => !color || HEX_RE.test(color)
 
 export function Step4Appearance({ state, update, onNext, onBack }: StepProps) {
+  // WhatsApp opcional: vacío vale; si hay valor, deben ser 10–15 dígitos (el
+  // campo guarda solo dígitos). Sin prefill: '549' solo rompía la validación.
+  const waDigits = state.whatsappNumber ?? ''
+  const waValid = waDigits === '' || isValidWhatsapp(waDigits)
+
   const canContinue =
     HEX_RE.test(state.accentColor) &&
     optHexValid(state.accentSecondary) &&
-    optHexValid(state.chatSurfaceTint)
-  const didPrefill = useRef(false)
-
-  // Pre-fill WhatsApp with Argentina country code
-  useEffect(() => {
-    if (!didPrefill.current && !state.whatsappNumber) {
-      update({ whatsappNumber: '549' })
-      didPrefill.current = true
-    }
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+    optHexValid(state.chatSurfaceTint) &&
+    waValid
 
   return (
     <div className="space-y-6">
@@ -100,13 +97,16 @@ export function Step4Appearance({ state, update, onNext, onBack }: StepProps) {
 
       <Field
         label="Número de WhatsApp"
-        hint="Con código de país, sin el +. Pre-llenado con 549 (Argentina)."
+        hint="Solo números, con código de país, sin + ni espacios. Ej: 5491155551234. Dejalo vacío si no aplica."
+        error={waDigits !== '' && !waValid ? 'Ingresá entre 10 y 15 dígitos (con código de país).' : undefined}
       >
         <Input
-          type="text"
+          type="tel"
+          inputMode="numeric"
           value={state.whatsappNumber ?? ''}
-          onChange={(e) => update({ whatsappNumber: e.target.value || null })}
-          placeholder="Ej: 5493815555555"
+          onChange={(e) => update({ whatsappNumber: normalizeWhatsapp(e.target.value) })}
+          invalid={waDigits !== '' && !waValid}
+          placeholder="Ej: 5491155551234"
         />
       </Field>
 
