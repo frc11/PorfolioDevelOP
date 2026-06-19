@@ -1,5 +1,9 @@
 import { prisma } from '@/lib/prisma'
 import { Card, StatCard } from '@/components/ui'
+import {
+  HoverScaleCard,
+  hoverTint,
+} from '@/app/(protected)/admin/clients/_components/HoverScaleCard'
 import { ResendCredentialsButton } from '../ResendCredentialsButton'
 import { PlanAssignmentCard } from '../PlanAssignmentCard'
 import { BillingOverrideCard } from '../BillingOverrideCard'
@@ -32,26 +36,38 @@ export async function OverviewTab({ clientId }: OverviewTabProps) {
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard
-          label="Plan"
-          value={client.subscription?.plan?.name ?? 'Sin plan'}
-          color="cyan"
-        />
-        <StatCard
-          label="Estado suscripcion"
-          value={client.subscription?.status ?? 'Sin suscripcion'}
-          color={client.subscription?.status === 'ACTIVE' ? 'emerald' : 'zinc'}
-        />
-        <StatCard
-          label="Usuario primario"
-          value={primaryMember?.user.name ?? primaryMember?.user.email ?? 'Sin usuario'}
-          color="zinc"
-        />
-        <StatCard
-          label="Modulos activos"
-          value={activeServices}
-          color="violet"
-        />
+        <HoverScaleCard className="h-full">
+          <StatCard
+            label="Plan"
+            value={client.subscription?.plan?.name ?? 'Sin plan'}
+            color="cyan"
+            className="h-full"
+          />
+        </HoverScaleCard>
+        <HoverScaleCard className="h-full">
+          <StatCard
+            label="Estado suscripcion"
+            value={client.subscription?.status ?? 'Sin suscripcion'}
+            color={client.subscription?.status === 'ACTIVE' ? 'emerald' : 'zinc'}
+            className="h-full"
+          />
+        </HoverScaleCard>
+        <HoverScaleCard className="h-full">
+          <StatCard
+            label="Usuario primario"
+            value={primaryMember?.user.name ?? primaryMember?.user.email ?? 'Sin usuario'}
+            color="zinc"
+            className="h-full"
+          />
+        </HoverScaleCard>
+        <HoverScaleCard className="h-full">
+          <StatCard
+            label="Modulos activos"
+            value={activeServices}
+            color="violet"
+            className="h-full"
+          />
+        </HoverScaleCard>
       </div>
 
       <PlanAssignmentCard clientId={clientId} />
@@ -101,8 +117,10 @@ function InfoRow({
   link?: boolean
 }) {
   return (
-    <div className="flex items-center justify-between gap-4 text-sm">
-      <span className="text-zinc-500">{label}</span>
+    <div
+      className={`-mx-2 flex items-center justify-between gap-4 rounded-lg border border-transparent px-2 py-1 text-sm ${hoverTint}`}
+    >
+      <span className="text-zinc-400">{label}</span>
       {link && value !== '-' ? (
         <a
           href={value}
