@@ -20,6 +20,9 @@ interface OrgAvailable {
 
 interface Props {
   orgsAvailable: OrgAvailable[]
+  /** Org a preseleccionar (llega por ?organizationId= en la URL). Se valida contra
+   *  orgsAvailable; si no está disponible, cae al default (primera org sin bot). */
+  preselectedOrgId?: string
 }
 
 const INDUSTRIES = [
@@ -35,15 +38,20 @@ const INDUSTRIES = [
   { value: 'generico', label: 'Otro / Genérico' },
 ]
 
-export function CreateBotForm({ orgsAvailable }: Props) {
+export function CreateBotForm({ orgsAvailable, preselectedOrgId }: Props) {
   const router = useRouter()
   const [pending, startTransition] = useTransition()
   const [mode, setMode] = useState<'existing_org' | 'new_org'>(
     orgsAvailable.length > 0 ? 'existing_org' : 'new_org',
   )
 
+  const initialOrgId =
+    (preselectedOrgId && orgsAvailable.some((o) => o.id === preselectedOrgId)
+      ? preselectedOrgId
+      : orgsAvailable[0]?.id) ?? ''
+
   const [existingData, setExistingData] = useState({
-    organizationId: orgsAvailable[0]?.id ?? '',
+    organizationId: initialOrgId,
     botName: '',
     industry: 'medico_odontologico',
     accentColor: '#06b6d4',

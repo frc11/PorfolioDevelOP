@@ -47,7 +47,7 @@ export async function ChatbotTab({ clientId }: ChatbotTabProps) {
           Configura un bot personalizado para empezar a capturar leads.
         </p>
         <Link
-          href="/admin/chatbots/new"
+          href={`/admin/chatbots/new?organizationId=${clientId}`}
           className="inline-flex items-center gap-2 rounded-2xl bg-cyan-400/15 px-5 py-2.5 text-sm text-cyan-300 hover:bg-cyan-400/25"
         >
           Configurar chatbot
