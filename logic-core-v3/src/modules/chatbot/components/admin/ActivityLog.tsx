@@ -3,6 +3,15 @@
 import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence, useReducedMotion } from 'motion/react'
 import { Select } from '@/components/ui'
+import { ActivityDateFilter } from './activity/ActivityDateFilter'
+import {
+  ACTIVITY_LEVEL_OPTIONS,
+  ACTIVITY_TYPE_OPTIONS,
+  DEFAULT_ACTIVITY_FILTERS,
+  filterActivityEvents,
+  isDefaultActivityFilters,
+  type ActivityFilters,
+} from './activity/activityFilters'
 
 interface ActivityEvent {
   id: string
@@ -33,23 +42,6 @@ const LEVEL_ICONS: Record<string, string> = {
   error: '✕',
   debug: '○',
 }
-
-const EVENT_TYPES = [
-  { value: '', label: 'Todos los tipos' },
-  { value: 'chat', label: 'Chat' },
-  { value: 'lead', label: 'Lead' },
-  { value: 'error', label: 'Errores' },
-  { value: 'quota', label: 'Quota' },
-  { value: 'config', label: 'Config' },
-]
-
-const SEVERITY_OPTIONS = [
-  { value: '', label: 'Todos' },
-  { value: 'info', label: 'Info' },
-  { value: 'warn', label: 'Warning' },
-  { value: 'error', label: 'Error' },
-  { value: 'debug', label: 'Debug' },
-]
 
 function formatTime(timestamp: string | Date): string {
   const date = new Date(timestamp)
@@ -82,12 +74,20 @@ export function ActivityLog({ initialEvents, slug }: ActivityLogProps) {
   const reduce = Boolean(useReducedMotion())
   const [events, setEvents] = useState<ActivityEvent[]>(initialEvents)
   const [paused, setPaused] = useState(false)
-  const [levelFilter, setLevelFilter] = useState('')
-  const [typeFilter, setTypeFilter] = useState('')
-  const [fromDate, setFromDate] = useState('')
-  const [toDate, setToDate] = useState('')
+  const [filters, setFilters] = useState<ActivityFilters>(DEFAULT_ACTIVITY_FILTERS)
+  const [visibleCount, setVisibleCount] = useState(50)
   const lastFetchRef = useRef<string>(new Date().toISOString())
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set())
+
+  function patchFilters(patch: Partial<ActivityFilters>) {
+    setFilters((prev) => ({ ...prev, ...patch }))
+    setVisibleCount(50)
+  }
+
+  function resetFilters() {
+    setFilters(DEFAULT_ACTIVITY_FILTERS)
+    setVisibleCount(50)
+  }
 
   function toggleExpanded(id: string) {
     setExpandedIds((prev) => {
@@ -110,7 +110,8 @@ export function ActivityLog({ initialEvents, slug }: ActivityLogProps) {
           setEvents((prev) => {
             const seen = new Set(prev.map((e) => e.id))
             const newOnes = data.events!.filter((e) => !seen.has(e.id))
-            return [...newOnes.reverse(), ...prev].slice(0, 200)
+            // 300 > el take de 250 de activity/page.tsx → el polling no recorta el pool de "Cargar más".
+            return [...newOnes.reverse(), ...prev].slice(0, 300)
           })
           lastFetchRef.current = data.serverTime ?? new Date().toISOString()
         } else {
@@ -123,41 +124,45 @@ export function ActivityLog({ initialEvents, slug }: ActivityLogProps) {
     return () => clearInterval(interval)
   }, [paused, slug])
 
-  const visibleEvents = events.filter((e) => {
-    if (levelFilter && e.level !== levelFilter) return false
-    if (typeFilter && !e.type.toLowerCase().includes(typeFilter)) return false
-    if (fromDate && new Date(e.createdAt) < new Date(fromDate)) return false
-    if (toDate && new Date(e.createdAt) > new Date(`${toDate}T23:59:59`)) return false
-    return true
-  })
+  const filtered = filterActivityEvents(events, filters)
+  const shown = filtered.slice(0, visibleCount)
+  const hasMore = filtered.length > visibleCount
 
   return (
     <div className="space-y-4">
       {/* Filter bar */}
       <div className="rounded-[28px] border border-white/10 bg-white/[0.02] p-4">
-        <p className="text-[10px] uppercase tracking-[0.24em] text-zinc-500 mb-3">Filtros</p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        <div className="mb-3 flex items-center justify-between gap-3">
+          <p className="text-[10px] uppercase tracking-[0.24em] text-zinc-500">Filtros</p>
+          {!isDefaultActivityFilters(filters) && (
+            <button
+              onClick={resetFilters}
+              className="rounded-lg px-2 py-1 text-[11px] font-medium text-zinc-400 transition-colors hover:bg-white/[0.04] hover:text-zinc-200"
+            >
+              Limpiar filtros
+            </button>
+          )}
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <Select
-            value={typeFilter}
-            onChange={(e) => setTypeFilter(e.target.value)}
-            options={EVENT_TYPES}
+            aria-label="Filtrar por tipo"
+            value={filters.type}
+            onChange={(e) => patchFilters({ type: e.target.value })}
+            options={ACTIVITY_TYPE_OPTIONS}
           />
           <Select
-            value={levelFilter}
-            onChange={(e) => setLevelFilter(e.target.value)}
-            options={SEVERITY_OPTIONS}
+            aria-label="Filtrar por nivel"
+            value={filters.level}
+            onChange={(e) => patchFilters({ level: e.target.value })}
+            options={ACTIVITY_LEVEL_OPTIONS}
           />
-          <input
-            type="date"
-            value={fromDate}
-            onChange={(e) => setFromDate(e.target.value)}
-            className="w-full rounded-xl border border-white/10 bg-white/[0.02] px-3 py-2 text-sm text-zinc-200 focus:border-cyan-400/30 focus:outline-none [color-scheme:dark]"
-          />
-          <input
-            type="date"
-            value={toDate}
-            onChange={(e) => setToDate(e.target.value)}
-            className="w-full rounded-xl border border-white/10 bg-white/[0.02] px-3 py-2 text-sm text-zinc-200 focus:border-cyan-400/30 focus:outline-none [color-scheme:dark]"
+          <ActivityDateFilter
+            preset={filters.period}
+            from={filters.from}
+            to={filters.to}
+            onPresetChange={(period) => patchFilters({ period })}
+            onFromChange={(from) => patchFilters({ from })}
+            onToChange={(to) => patchFilters({ to })}
           />
         </div>
       </div>
@@ -166,6 +171,12 @@ export function ActivityLog({ initialEvents, slug }: ActivityLogProps) {
       <div className="flex items-center gap-3">
         <button
           onClick={() => setPaused(!paused)}
+          title="Pausa la actualización automática del stream de eventos en vivo. El polling se detiene hasta que reanudes."
+          aria-label={
+            paused
+              ? 'Reanudar la actualización automática del stream de eventos en vivo'
+              : 'Pausar la actualización automática del stream de eventos en vivo'
+          }
           className={`rounded-xl px-3 py-1.5 text-xs font-medium border transition-colors ${
             paused
               ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300'
@@ -174,21 +185,26 @@ export function ActivityLog({ initialEvents, slug }: ActivityLogProps) {
         >
           {paused ? '▶ Reanudar' : '⏸ Pausar'}
         </button>
+        <span className="hidden text-[11px] text-zinc-600 sm:inline">
+          {paused
+            ? 'Stream pausado — no entran eventos nuevos'
+            : 'Pausa la actualización automática del stream en vivo'}
+        </span>
 
         <div className="ml-auto text-xs text-zinc-600 font-mono">
-          {visibleEvents.length} eventos{paused ? ' (pausado)' : ''}
+          {shown.length} de {filtered.length} eventos{paused ? ' (pausado)' : ''}
         </div>
       </div>
 
       {/* Event stream */}
       <div className="flex flex-col gap-1.5">
         <AnimatePresence initial={false}>
-          {visibleEvents.length === 0 ? (
+          {shown.length === 0 ? (
             <div className="rounded-[28px] border border-white/10 bg-white/[0.02] py-16 text-center text-sm text-zinc-600">
               Sin eventos para los filtros seleccionados
             </div>
           ) : (
-            visibleEvents.map((event) => {
+            shown.map((event) => {
               const hasMeta = !!event.metadata && Object.keys(event.metadata).length > 0
               const isOpen = expandedIds.has(event.id)
               return (
@@ -219,7 +235,7 @@ export function ActivityLog({ initialEvents, slug }: ActivityLogProps) {
                     : undefined
                 }
                 className={`flex items-start gap-3 rounded-2xl border px-3 py-2.5 hover:shadow-[0_12px_32px_-12px_rgba(255,255,255,0.12)] hover:ring-1 hover:ring-white/15 motion-reduce:hover:shadow-none ${
-                  LEVEL_STYLES[event.level] ?? LEVEL_STYLES.info
+                  LEVEL_STYLES[event.level.toLowerCase()] ?? LEVEL_STYLES.info
                 } ${
                   hasMeta
                     ? 'cursor-pointer select-none transition-colors hover:brightness-110 focus:outline-none focus-visible:ring-1 focus-visible:ring-cyan-400/40'
@@ -227,7 +243,7 @@ export function ActivityLog({ initialEvents, slug }: ActivityLogProps) {
                 }`}
               >
                 <span className="text-xs mt-0.5 shrink-0 opacity-70">
-                  {LEVEL_ICONS[event.level]}
+                  {LEVEL_ICONS[event.level.toLowerCase()]}
                 </span>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 text-[10px] uppercase tracking-wider opacity-50">
@@ -269,6 +285,15 @@ export function ActivityLog({ initialEvents, slug }: ActivityLogProps) {
           )}
         </AnimatePresence>
       </div>
+
+      {hasMore && (
+        <button
+          onClick={() => setVisibleCount((c) => c + 50)}
+          className="w-full rounded-2xl border border-white/10 bg-white/[0.02] px-4 py-3 text-sm font-medium text-zinc-300 transition-colors hover:bg-white/[0.05] hover:text-zinc-100"
+        >
+          Cargar más ({filtered.length - shown.length} restantes)
+        </button>
+      )}
     </div>
   )
 }
