@@ -14,6 +14,7 @@ import {
 import { toast } from 'sonner'
 import { Field, Input } from '@/components/ui'
 import type { PremiumFeatureKey } from '@/lib/premium-features'
+import { adminHoverCls } from '@/lib/hover'
 import {
   updateModulePricing,
   updateSettings,
@@ -62,6 +63,10 @@ function maskFromInput(value: string) {
 
   return `••••••••${value.slice(-4)}`
 }
+
+// Oculta las flechas (spin buttons) nativas de los inputs number, localizado.
+const NUMBER_INPUT_NO_SPINNER =
+  '[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none'
 
 export function SettingsConsole({
   agencyName,
@@ -352,7 +357,10 @@ export function SettingsConsole({
                 return (
                   <div
                     key={row.moduleKey}
-                    className="rounded-[24px] border border-white/10 bg-black/20 p-4"
+                    className={cn(
+                      'rounded-[24px] border border-white/10 bg-black/20 p-4',
+                      adminHoverCls
+                    )}
                   >
                     <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
                       <div className="min-w-0">
@@ -393,7 +401,10 @@ export function SettingsConsole({
                                 [row.moduleKey]: event.target.value,
                               }))
                             }
-                            className="h-11 w-full rounded-2xl border border-white/10 bg-white/5 pl-14 pr-4 text-sm text-white outline-none transition-colors focus:border-cyan-400/35 sm:w-[150px]"
+                            className={cn(
+                              'h-11 w-full rounded-2xl border border-white/10 bg-white/5 pl-14 pr-4 text-sm text-white outline-none transition-colors focus:border-cyan-400/35 sm:w-[150px]',
+                              NUMBER_INPUT_NO_SPINNER
+                            )}
                           />
                         </div>
 
@@ -446,7 +457,10 @@ export function SettingsConsole({
             <div className="mt-6 grid gap-4 lg:grid-cols-2">
               <Field label="Objetivo semanal de demos">
                 <Input
-                  className="h-12 rounded-2xl bg-black/20 px-4 text-white"
+                  className={cn(
+                    'h-12 rounded-2xl bg-black/20 px-4 text-white',
+                    NUMBER_INPUT_NO_SPINNER
+                  )}
                   type="number"
                   min="0"
                   step="1"
@@ -460,7 +474,12 @@ export function SettingsConsole({
                 />
               </Field>
 
-              <div className="rounded-[24px] border border-white/10 bg-black/20 p-4">
+              <div
+                className={cn(
+                  'rounded-[24px] border border-white/10 bg-black/20 p-4',
+                  adminHoverCls
+                )}
+              >
                 <div className="flex items-center gap-3">
                   <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-cyan-400/20 bg-cyan-400/10 text-cyan-100">
                     <Target className="h-5 w-5" />
@@ -475,7 +494,12 @@ export function SettingsConsole({
               </div>
             </div>
 
-            <div className="mt-6 rounded-[24px] border border-white/10 bg-black/20 p-5">
+            <div
+              className={cn(
+                'mt-6 rounded-[24px] border border-white/10 bg-black/20 p-5',
+                adminHoverCls
+              )}
+            >
               <p className="text-sm font-medium text-white">Intervalos de follow-up</p>
               <p className="mt-1 text-sm leading-6 text-zinc-400">
                 Referencia informativa. La logica vive en <code>lib/follow-up.ts</code>.
@@ -484,7 +508,10 @@ export function SettingsConsole({
                 {['Dia 2', 'Dia 4', 'Dia 7'].map((label) => (
                   <span
                     key={label}
-                    className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-zinc-200"
+                    className={cn(
+                      'rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-zinc-200',
+                      adminHoverCls
+                    )}
                   >
                     {label}
                   </span>
@@ -511,7 +538,10 @@ export function SettingsConsole({
                 teamMembers.map((member) => (
                   <div
                     key={member.id}
-                    className="grid gap-2 rounded-[24px] border border-white/10 bg-black/20 px-4 py-4 md:grid-cols-[1fr_auto]"
+                    className={cn(
+                      'grid gap-2 rounded-[24px] border border-white/10 bg-black/20 px-4 py-4 md:grid-cols-[1fr_auto]',
+                      adminHoverCls
+                    )}
                   >
                     <div>
                       <p className="text-sm font-medium text-white">{member.name}</p>
@@ -591,7 +621,12 @@ export function SettingsConsole({
               />
             </Field>
 
-            <div className="rounded-[24px] border border-white/10 bg-black/20 p-5">
+            <div
+              className={cn(
+                'rounded-[24px] border border-white/10 bg-black/20 p-5',
+                adminHoverCls
+              )}
+            >
               <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-cyan-400/20 bg-cyan-400/10 text-cyan-100">
                 <BellRing className="h-5 w-5" />
               </div>
@@ -690,6 +725,7 @@ function ToggleRow({
     <div
       className={cn(
         'flex items-start justify-between gap-4 rounded-[24px] border border-white/10 bg-black/20 p-4',
+        adminHoverCls,
         className
       )}
     >

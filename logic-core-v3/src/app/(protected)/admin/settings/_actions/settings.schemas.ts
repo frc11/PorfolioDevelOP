@@ -1,8 +1,4 @@
 import { z } from 'zod'
-import {
-  PREMIUM_FEATURE_KEYS,
-  type PremiumFeatureKey,
-} from '@/lib/premium-features'
 
 const emptyStringToNull = (value: unknown) => {
   if (typeof value !== 'string') {
@@ -22,10 +18,6 @@ const emptyStringToUndefined = (value: unknown) => {
   return trimmed === '' ? undefined : trimmed
 }
 
-export const AgencySettingsIdSchema = z
-  .string()
-  .trim()
-  .min(1, 'ID de configuracion invalido.')
 export const UpdateSettingsSchema = z.object({
   contactEmail: z.preprocess(emptyStringToNull, z.string().email().nullable()),
   contactWhatsapp: z.preprocess(emptyStringToNull, z.string().nullable()),
@@ -41,10 +33,8 @@ export const UpdateSettingsSchema = z.object({
   osTelegramChatId: z.preprocess(emptyStringToNull, z.string().nullable()),
 })
 export const UpdateModulePricingSchema = z.object({
-  moduleKey: z.custom<PremiumFeatureKey>(
-    (value) =>
-      typeof value === 'string' && PREMIUM_FEATURE_KEYS.includes(value as PremiumFeatureKey),
-    { message: 'Modulo invalido.' }
-  ),
+  // moduleKey es el slug real de la tabla PremiumModule (getSettings emite mod.slug).
+  // Aca solo validamos formato (string no vacio); la existencia se chequea en la action.
+  moduleKey: z.string().trim().min(1, 'Modulo invalido.'),
   price: z.coerce.number().min(0, 'Ingresa un precio valido.'),
 })
