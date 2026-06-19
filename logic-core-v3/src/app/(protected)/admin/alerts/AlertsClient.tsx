@@ -22,10 +22,19 @@ const COLUMNS = [
   { id: 'RESOLVED', label: 'Resueltas', icon: CheckCircle, colorClass: 'text-emerald-400' },
 ] as const
 
-// Umbral del difuminado + overview de columna (en Leads es 2; acá 5 por pedido).
-// Se evalúa sobre las alertas YA filtradas (severidad + fecha).
-const OVERVIEW_THRESHOLD = 5
-const MAX_VISIBLE = 5
+// Cap de cards visibles por columna; el resto va al overview ("Ver todas").
+// Objetivo: altura uniforme ≈ 4 cards-con-acciones. Tras el Sprint 1 ("Ver bot"
+// pasó a ser botón) las cards RESUELTAS dejaron de ser más bajas — su fila de
+// acción tiene altura de botón igual que Pendientes/Vistas — así que el cap es el
+// mismo para las tres (el "4 vs 6" del lote asumía resueltas más bajas). La
+// uniformidad la garantiza el grid (align: stretch) + el min-h de la columna; este
+// cap solo decide cuándo aparece el difuminado/overview. Config por columna para
+// calibrar a ojo sin tocar el resto.
+const VISIBLE_CAP: Record<ColumnId, number> = {
+  PENDING: 4,
+  ACKNOWLEDGED: 4,
+  RESOLVED: 4,
+}
 
 export function AlertsClient({ initialAlerts }: AlertsClientProps) {
   const [alerts, setAlerts] = useState(initialAlerts)
@@ -188,8 +197,9 @@ export function AlertsClient({ initialAlerts }: AlertsClientProps) {
         {COLUMNS.map((col) => {
           const items = grouped[col.id]
           const Icon = col.icon
-          const hasOverview = items.length >= OVERVIEW_THRESHOLD
-          const visible = items.slice(0, MAX_VISIBLE)
+          const cap = VISIBLE_CAP[col.id]
+          const hasOverview = items.length > cap
+          const visible = items.slice(0, cap)
 
           const header = (
             <>
@@ -206,7 +216,10 @@ export function AlertsClient({ initialAlerts }: AlertsClientProps) {
           return (
             <div
               key={col.id}
-              className="rounded-[28px] border border-white/10 bg-white/[0.02] p-4"
+              // min-h uniforme (≈4 cards-con-acciones) + grid align:stretch → las 3
+              // columnas a la misma altura. SIN overflow-hidden: el hover por card no
+              // se recorta (el difuminado es el overlay gradiente, no un clip).
+              className="rounded-[28px] border border-white/10 bg-white/[0.02] p-4 lg:min-h-[40rem]"
             >
               {hasOverview ? (
                 <button
