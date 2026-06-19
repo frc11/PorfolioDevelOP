@@ -24,15 +24,15 @@ function formatMessageDate(value: string) {
 
 export function MessageThread({ companyName, messages }: MessageThreadProps) {
   return (
-    <section className="rounded-[28px] border border-white/10 bg-white/5 backdrop-blur-xl">
-      <div className="border-b border-white/10 px-5 py-4">
+    <section className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-[28px] border border-white/10 bg-white/5 backdrop-blur-xl">
+      <div className="shrink-0 border-b border-white/10 px-5 py-4">
         <div className="flex items-center gap-2 text-sm text-zinc-400">
           <MessageSquareText className="h-4 w-4 text-cyan-300" />
           <span>{messages.length} mensajes en la conversación</span>
         </div>
       </div>
 
-      <div className="max-h-[60vh] space-y-4 overflow-y-auto px-5 py-5">
+      <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-5 py-5">
         {messages.length > 0 ? (
           <>
             {messages.map((message) => (

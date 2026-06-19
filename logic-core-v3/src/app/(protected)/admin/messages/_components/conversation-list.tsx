@@ -25,7 +25,6 @@ type ConversationListProps = {
   conversations: Conversation[]
   activeOrganizationId?: string | null
   title?: string
-  compact?: boolean
 }
 
 function formatDate(value: string) {
@@ -39,23 +38,24 @@ export function ConversationList({
   conversations,
   activeOrganizationId,
   title = 'Conversaciones',
-  compact = false,
 }: ConversationListProps) {
   const reduce = useReducedMotion()
 
   if (conversations.length === 0) {
     return (
-      <EmptyState
-        icon={MessageCircleMore}
-        title="No hay conversaciones activas"
-        description="Cuando los clientes escriban desde el portal, sus mensajes aparecerán acá."
-      />
+      <div className="flex h-full min-h-0 items-center justify-center">
+        <EmptyState
+          icon={MessageCircleMore}
+          title="No hay conversaciones activas"
+          description="Cuando los clientes escriban desde el portal, sus mensajes aparecerán acá."
+        />
+      </div>
     )
   }
 
   return (
-    <section className="rounded-[28px] border border-white/10 bg-white/5 backdrop-blur-xl">
-      <div className="border-b border-white/10 px-5 py-4">
+    <section className="flex h-full min-h-0 flex-col overflow-hidden rounded-[28px] border border-white/10 bg-white/5 backdrop-blur-xl">
+      <div className="shrink-0 border-b border-white/10 px-5 py-4">
         <p className="text-[10px] uppercase tracking-[0.24em] text-zinc-500">{title}</p>
         <p className="mt-2 text-sm text-zinc-400">
           {conversations.length} conversaciones con historial
@@ -63,7 +63,7 @@ export function ConversationList({
       </div>
 
       <motion.div
-        className={compact ? 'max-h-[70vh] overflow-y-auto' : undefined}
+        className="min-h-0 flex-1 overflow-y-auto"
         variants={staggerContainer}
         initial={reduce ? false : 'hidden'}
         animate="visible"
