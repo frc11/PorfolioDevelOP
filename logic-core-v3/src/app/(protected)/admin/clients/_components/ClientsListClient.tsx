@@ -5,8 +5,10 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { motion } from 'motion/react'
 import { toast } from 'sonner'
-import { Bot, Building2, Check, Download, Pause, Pin, PinOff, Plus, Search, X } from 'lucide-react'
+import { Archive, ArchiveRestore, Bot, Building2, Check, Download, Loader2, Pause, Pin, PinOff, Plus, Search, X } from 'lucide-react'
 import { Button, Card, EmptyState, Input, Select } from '@/components/ui'
+import { InlineConfirm } from '@/app/(protected)/admin/_components/inline-confirm'
+import { archiveClient, unarchiveClient } from '@/modules/chatbot/server/admin/archiveClient'
 import { bulkExportLeads, bulkPauseBots } from '@/lib/bulk-actions'
 import { hoverLift, staggerContainer, staggerItem } from '@/lib/motion-variants'
 import { useReducedMotion } from '@/lib/use-reduced-motion'
@@ -25,11 +27,12 @@ interface ClientItem {
 
 interface ClientsListClientProps {
   clients: ClientItem[]
+  archivedClients: ClientItem[]
 }
 
 const PIN_KEY = 'develop:admin:pinned-clients'
 
-export function ClientsListClient({ clients }: ClientsListClientProps) {
+export function ClientsListClient({ clients, archivedClients }: ClientsListClientProps) {
   const router = useRouter()
   const reduced = useReducedMotion()
   const [search, setSearch] = useState('')
@@ -45,6 +48,8 @@ export function ClientsListClient({ clients }: ClientsListClientProps) {
   const [bulkLoading, setBulkLoading] = useState<'export' | 'pause' | null>(
     null,
   )
+  const [showArchived, setShowArchived] = useState(false)
+  const [pendingId, setPendingId] = useState<string | null>(null)
 
   useEffect(() => {
     try {
@@ -131,8 +136,39 @@ export function ClientsListClient({ clients }: ClientsListClientProps) {
     }
   }
 
+  function switchView(archived: boolean) {
+    setShowArchived(archived)
+    setSelected(new Set())
+  }
+
+  async function handleArchive(id: string) {
+    setPendingId(id)
+    try {
+      await archiveClient({ organizationId: id })
+      toast.success('Cliente archivado')
+      router.refresh()
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'No se pudo archivar el cliente')
+    } finally {
+      setPendingId(null)
+    }
+  }
+
+  async function handleUnarchive(id: string) {
+    setPendingId(id)
+    try {
+      await unarchiveClient({ organizationId: id })
+      toast.success('Cliente desarchivado')
+      router.refresh()
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'No se pudo desarchivar el cliente')
+    } finally {
+      setPendingId(null)
+    }
+  }
+
   const filtered = useMemo(() => {
-    let result = clients
+    let result = showArchived ? archivedClients : clients
 
     if (search.trim()) {
       const s = search.trim().toLowerCase()
@@ -177,7 +213,7 @@ export function ClientsListClient({ clients }: ClientsListClientProps) {
       ...sorted.filter((client) => pinned.has(client.id)),
       ...sorted.filter((client) => !pinned.has(client.id)),
     ]
-  }, [clients, filterBot, pinned, search, sortBy])
+  }, [archivedClients, clients, filterBot, pinned, search, showArchived, sortBy])
 
   return (
     <div className="space-y-4">
@@ -234,9 +270,36 @@ export function ClientsListClient({ clients }: ClientsListClientProps) {
         </Link>
       </div>
 
-      <p className="text-xs text-zinc-500">
-        Mostrando {filtered.length} de {clients.length}
-      </p>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="inline-flex rounded-xl border border-white/10 bg-white/[0.02] p-0.5">
+          <button
+            type="button"
+            onClick={() => switchView(false)}
+            className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
+              !showArchived
+                ? 'bg-white/10 text-zinc-100'
+                : 'text-zinc-500 hover:text-zinc-300'
+            }`}
+          >
+            Activos
+          </button>
+          <button
+            type="button"
+            onClick={() => switchView(true)}
+            className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
+              showArchived
+                ? 'bg-white/10 text-zinc-100'
+                : 'text-zinc-500 hover:text-zinc-300'
+            }`}
+          >
+            Archivados{archivedClients.length > 0 ? ` (${archivedClients.length})` : ''}
+          </button>
+        </div>
+        <p className="text-xs text-zinc-500">
+          Mostrando {filtered.length} de{' '}
+          {(showArchived ? archivedClients : clients).length}
+        </p>
+      </div>
 
       {selected.size > 0 && (
         <motion.div
@@ -298,10 +361,24 @@ export function ClientsListClient({ clients }: ClientsListClientProps) {
 
       {filtered.length === 0 ? (
         <EmptyState
-          icon={Building2}
-          title={search ? `Sin resultados para "${search}"` : 'Sin clientes'}
-          description="Ajusta la busqueda o los filtros para encontrar clientes."
-          cta={{ label: 'Nuevo cliente', href: '/admin/clients/new' }}
+          icon={showArchived ? Archive : Building2}
+          title={
+            search
+              ? `Sin resultados para "${search}"`
+              : showArchived
+                ? 'Sin clientes archivados'
+                : 'Sin clientes'
+          }
+          description={
+            showArchived
+              ? 'Los clientes que archives van a aparecer aca.'
+              : 'Ajusta la busqueda o los filtros para encontrar clientes.'
+          }
+          cta={
+            showArchived
+              ? undefined
+              : { label: 'Nuevo cliente', href: '/admin/clients/new' }
+          }
         />
       ) : (
         <motion.div
@@ -320,10 +397,14 @@ export function ClientsListClient({ clients }: ClientsListClientProps) {
                 client={client}
                 pinned={pinned.has(client.id)}
                 selected={selected.has(client.id)}
-                selectionMode={selected.size > 0}
+                selectionMode={!showArchived && selected.size > 0}
                 reduced={reduced}
+                archived={showArchived}
+                actionPending={pendingId === client.id}
                 onTogglePin={() => togglePin(client.id)}
                 onToggleSelect={() => toggleSelected(client.id)}
+                onArchive={() => handleArchive(client.id)}
+                onUnarchive={() => handleUnarchive(client.id)}
               />
             </motion.div>
           ))}
@@ -339,17 +420,27 @@ function ClientCard({
   selected,
   selectionMode,
   reduced,
+  archived,
+  actionPending,
   onTogglePin,
   onToggleSelect,
+  onArchive,
+  onUnarchive,
 }: {
   client: ClientItem
   pinned: boolean
   selected: boolean
   selectionMode: boolean
   reduced: boolean
+  archived: boolean
+  actionPending: boolean
   onTogglePin: () => void
   onToggleSelect: () => void
+  onArchive: () => void
+  onUnarchive: () => void
 }) {
+  const [confirmOpen, setConfirmOpen] = useState(false)
+
   return (
     <motion.div className="h-full" {...(reduced ? {} : hoverLift)}>
       <Card
@@ -358,24 +449,26 @@ function ClientCard({
           selected ? 'border-cyan-400/40' : 'border-white/10'
         }`}
       >
-        <label
-          className="absolute left-3 top-3 z-10 inline-flex cursor-pointer"
-          onClick={(event) => event.stopPropagation()}
-        >
-          <input
-            type="checkbox"
-            checked={selected}
-            onChange={onToggleSelect}
-            aria-label={`Seleccionar ${client.companyName}`}
-            className="peer sr-only"
-          />
-          <span
-            aria-hidden="true"
-            className="flex h-5 w-5 items-center justify-center rounded-md border border-white/20 bg-zinc-950/80 text-transparent shadow-sm backdrop-blur transition-colors peer-hover:border-white/40 peer-checked:border-cyan-400 peer-checked:bg-cyan-400 peer-checked:text-zinc-950 peer-focus-visible:ring-2 peer-focus-visible:ring-cyan-400/60 peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-zinc-950"
+        {!archived && (
+          <label
+            className="absolute left-3 top-3 z-10 inline-flex cursor-pointer"
+            onClick={(event) => event.stopPropagation()}
           >
-            <Check className="h-3.5 w-3.5" strokeWidth={1.5} />
-          </span>
-        </label>
+            <input
+              type="checkbox"
+              checked={selected}
+              onChange={onToggleSelect}
+              aria-label={`Seleccionar ${client.companyName}`}
+              className="peer sr-only"
+            />
+            <span
+              aria-hidden="true"
+              className="flex h-5 w-5 items-center justify-center rounded-md border border-white/20 bg-zinc-950/80 text-transparent shadow-sm backdrop-blur transition-colors peer-hover:border-white/40 peer-checked:border-cyan-400 peer-checked:bg-cyan-400 peer-checked:text-zinc-950 peer-focus-visible:ring-2 peer-focus-visible:ring-cyan-400/60 peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-zinc-950"
+            >
+              <Check className="h-3.5 w-3.5" strokeWidth={1.5} />
+            </span>
+          </label>
+        )}
         <Link
           href={`/admin/clients/${client.id}`}
           className="block p-5"
@@ -393,11 +486,11 @@ function ClientCard({
               : undefined
           }
         >
-          <div className="mb-3 flex items-start justify-between gap-3 pl-6 pr-8">
+          <div className="mb-3 flex items-start justify-between gap-3 pl-6 pr-20">
             <div className="rounded-xl bg-cyan-400/10 p-2 transition-colors group-hover:bg-cyan-400/15">
               <Building2 className="h-4 w-4 text-cyan-300" strokeWidth={1.5} />
             </div>
-            {client.botConfig && (
+            {!archived && client.botConfig && (
               <span
                 className={`inline-flex items-center gap-1 rounded-lg border px-2 py-0.5 text-[10px] uppercase tracking-wider ${
                   client.botConfig.isActive
@@ -449,18 +542,69 @@ function ClientCard({
           </div>
         </Link>
 
-        <button
-          type="button"
-          onClick={onTogglePin}
-          className="absolute right-3 top-3 rounded-lg p-1.5 opacity-0 transition-opacity hover:bg-white/[0.05] group-hover:opacity-100"
-          aria-label={pinned ? 'Despinear' : 'Pinear'}
-        >
-          {pinned ? (
-            <Pin className="h-3.5 w-3.5 text-cyan-400" strokeWidth={2} />
-          ) : (
-            <PinOff className="h-3.5 w-3.5 text-zinc-500" strokeWidth={1.5} />
-          )}
-        </button>
+        {!archived && (
+          <div className="absolute right-3 top-3 flex items-center gap-1">
+            <button
+              type="button"
+              onClick={() => setConfirmOpen(true)}
+              disabled={actionPending}
+              className="rounded-lg p-1.5 text-zinc-500 opacity-0 transition-opacity hover:bg-white/[0.05] hover:text-amber-300 group-hover:opacity-100 disabled:opacity-50"
+              aria-label={`Archivar ${client.companyName}`}
+              title="Archivar cliente"
+            >
+              <Archive className="h-3.5 w-3.5" strokeWidth={1.5} />
+            </button>
+            <button
+              type="button"
+              onClick={onTogglePin}
+              className="rounded-lg p-1.5 opacity-0 transition-opacity hover:bg-white/[0.05] group-hover:opacity-100"
+              aria-label={pinned ? 'Despinear' : 'Pinear'}
+            >
+              {pinned ? (
+                <Pin className="h-3.5 w-3.5 text-cyan-400" strokeWidth={2} />
+              ) : (
+                <PinOff className="h-3.5 w-3.5 text-zinc-500" strokeWidth={1.5} />
+              )}
+            </button>
+          </div>
+        )}
+
+        {archived && (
+          <button
+            type="button"
+            onClick={onUnarchive}
+            disabled={actionPending}
+            className="absolute right-3 top-3 inline-flex items-center gap-1.5 rounded-lg border border-emerald-400/20 bg-emerald-500/10 px-2.5 py-1.5 text-xs font-medium text-emerald-200 transition-colors hover:bg-emerald-500/20 disabled:opacity-50"
+            aria-label={`Desarchivar ${client.companyName}`}
+          >
+            {actionPending ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" strokeWidth={1.5} />
+            ) : (
+              <ArchiveRestore className="h-3.5 w-3.5" strokeWidth={1.5} />
+            )}
+            Desarchivar
+          </button>
+        )}
+
+        <InlineConfirm
+          open={confirmOpen}
+          onClose={() => setConfirmOpen(false)}
+          onConfirm={() => {
+            setConfirmOpen(false)
+            onArchive()
+          }}
+          title="Archivar cliente"
+          description={
+            <>
+              Se archiva{' '}
+              <span className="font-medium text-zinc-100">{client.companyName}</span>{' '}
+              y deja de aparecer en la lista de activos. Es reversible: su bot,
+              proyectos y tickets quedan intactos.
+            </>
+          }
+          confirmLabel="Archivar"
+          isPending={actionPending}
+        />
       </Card>
     </motion.div>
   )

@@ -1,29 +1,48 @@
 import { Suspense } from 'react'
+import { Prisma } from '@prisma/client'
 import { auth } from '@/auth'
 import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import { unstable_cache } from 'next/cache'
 import { ClientsListClient } from './_components/ClientsListClient'
 
+const clientInclude = {
+  botConfig: { select: { isActive: true, monthlyQuota: true } },
+  subscription: { select: { status: true, plan: { select: { name: true } } } },
+  _count: {
+    select: { projects: true, tickets: true, messages: true },
+  },
+} satisfies Prisma.OrganizationInclude
+
+// Activos: deletedAt IS NULL por default. Los archivados (soft-delete) salen en
+// una query aparte para el toggle "Archivados". Misma tag → un revalidateTag
+// busca ambas cuando se archiva/desarchiva.
 const getClients = unstable_cache(
   async () =>
     prisma.organization.findMany({
-      include: {
-        botConfig: { select: { isActive: true, monthlyQuota: true } },
-        subscription: { select: { status: true, plan: { select: { name: true } } } },
-        _count: {
-          select: { projects: true, tickets: true, messages: true },
-        },
-      },
+      where: { deletedAt: null },
+      include: clientInclude,
       orderBy: { createdAt: 'desc' },
     }),
-  ['admin-clients'],
+  ['admin-clients-active'],
   { revalidate: 60, tags: ['admin-clients'] }
 )
 
-async function ClientsList() {
-  const clients = await getClients()
-  const listClients = clients.map((client) => ({
+const getArchivedClients = unstable_cache(
+  async () =>
+    prisma.organization.findMany({
+      where: { deletedAt: { not: null } },
+      include: clientInclude,
+      orderBy: { deletedAt: 'desc' },
+    }),
+  ['admin-clients-archived'],
+  { revalidate: 60, tags: ['admin-clients'] }
+)
+
+type ClientRow = Awaited<ReturnType<typeof getClients>>[number]
+
+function toListItem(client: ClientRow) {
+  return {
     id: client.id,
     companyName: client.companyName,
     slug: client.slug,
@@ -33,11 +52,23 @@ async function ClientsList() {
     subscription: client.subscription,
     _count: client._count,
     createdAt: new Date(client.createdAt).toISOString(),
-  }))
+  }
+}
+
+async function ClientsList() {
+  const [clients, archivedClients] = await Promise.all([
+    getClients(),
+    getArchivedClients(),
+  ])
   return (
     <>
-      <p className="text-sm text-zinc-400">{clients.length} clientes en el sistema</p>
-      <ClientsListClient clients={listClients} />
+      <p className="text-sm text-zinc-400">
+        {clients.length} clientes activos en el sistema
+      </p>
+      <ClientsListClient
+        clients={clients.map(toListItem)}
+        archivedClients={archivedClients.map(toListItem)}
+      />
     </>
   )
 }
