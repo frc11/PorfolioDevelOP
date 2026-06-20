@@ -12,6 +12,7 @@ import {
   RESULT_OPTIONS,
   activityInputClass,
   channelIcon,
+  channelLabel,
   formatFollowUp,
   relativeTime,
   resultLabel,
@@ -224,20 +225,23 @@ export function LeadActivityFeed({
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                     <div>
                       <p className="text-sm font-medium text-white">
-                        {CHANNEL_OPTIONS.find((option) => option.value === activity.channel)?.label ??
-                          activity.channel}
+                        {channelLabel(activity.channel)}
                       </p>
                       <p className="mt-1 text-xs text-zinc-500">{relativeTime(activity.createdAt)}</p>
                     </div>
 
-                    <span
-                      className={[
-                        'inline-flex rounded-full border px-2.5 py-1 text-[11px] font-medium',
-                        resultTone(activity.result),
-                      ].join(' ')}
-                    >
-                      {resultLabel(activity.result)}
-                    </span>
+                    {/* SISTEMA (reasignación) no tiene resultado comercial:
+                        el detalle vive en las notas, sin badge "Sin resultado". */}
+                    {activity.channel !== 'SISTEMA' && (
+                      <span
+                        className={[
+                          'inline-flex rounded-full border px-2.5 py-1 text-[11px] font-medium',
+                          resultTone(activity.result),
+                        ].join(' ')}
+                      >
+                        {resultLabel(activity.result)}
+                      </span>
+                    )}
                   </div>
 
                   {activity.notes ? (

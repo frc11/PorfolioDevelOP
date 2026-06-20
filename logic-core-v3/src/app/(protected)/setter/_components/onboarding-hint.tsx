@@ -6,22 +6,24 @@ import { Card } from '@/components/ui'
 
 const STORAGE_KEY = 'leados-onboarding-v1'
 
-const PASOS = [
+// Orientación, no un índice de pasos: la numeración real vive en el panel del
+// lead (su stepper de etapas). Acá NO se numera ni se reenumera el flujo —
+// eso duplicaría (y contradeciría) al stepper. Solo se explica cómo moverse.
+const ORIENTACION = [
   {
-    titulo: '1 · Observá y fichá',
-    detalle: 'Mirá el negocio como cliente y anotá lo que VES en la ficha. Observación pura, sin diagnóstico.',
+    titulo: 'Trabajá tu cartera de arriba para abajo',
+    detalle:
+      'Cada grupo de abajo es una cola: arriba va lo más urgente. El marcador "De un vistazo" es solo lectura — para entrar a un lead, clickeá su card.',
   },
   {
-    titulo: '2 · Pasalo por el Evaluador',
-    detalle: 'Copiá el bloque que arma el panel, pegalo en el Evaluador y transcribí score y veredicto.',
+    titulo: 'Abrí un lead y seguí el panel',
+    detalle:
+      'Adentro, el panel marca tu etapa y tu próximo paso. Andá de arriba para abajo: cada paso se abre cuando el anterior queda listo.',
   },
   {
-    titulo: '3 · Generá el brief',
-    detalle: 'Con luz verde (respondió o está caliente), armá el input del Gem de diseño y pegá el brief.',
-  },
-  {
-    titulo: '4 · Lo que sigue',
-    detalle: 'Construcción de la demo, revisión y envío llegan en los próximos pasos del panel.',
+    titulo: 'El estado del lead manda',
+    detalle:
+      'No salteás etapas ni elegís el orden: el flujo habilita cada cosa a su tiempo. Si un paso está apagado, todavía no es su momento.',
   },
 ] as const
 
@@ -61,7 +63,7 @@ export function OnboardingHint() {
             Cómo funciona
           </p>
           <h2 className="mt-1 text-base font-semibold text-zinc-100">
-            Tu laburo en LeadOS, en cuatro pasos
+            Cómo moverte en LeadOS
           </h2>
         </div>
         <button
@@ -74,14 +76,14 @@ export function OnboardingHint() {
         </button>
       </div>
 
-      <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        {PASOS.map((paso) => (
+      <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {ORIENTACION.map((item) => (
           <div
-            key={paso.titulo}
+            key={item.titulo}
             className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-3"
           >
-            <p className="text-xs font-semibold text-zinc-200">{paso.titulo}</p>
-            <p className="mt-1 text-xs leading-relaxed text-zinc-500">{paso.detalle}</p>
+            <p className="text-xs font-semibold text-zinc-200">{item.titulo}</p>
+            <p className="mt-1 text-xs leading-relaxed text-zinc-500">{item.detalle}</p>
           </div>
         ))}
       </div>

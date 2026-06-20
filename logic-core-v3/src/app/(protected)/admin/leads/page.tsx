@@ -2,6 +2,7 @@ import type { Prisma } from '@prisma/client'
 import Link from 'next/link'
 import { unstable_cache } from 'next/cache'
 import { prisma } from '@/lib/prisma'
+import { SOLO_CONTACTOS_COMERCIALES } from '@/lib/leados/isolation'
 import { LeadForm } from './_components/lead-form'
 import { InboundLeadsTable } from './_components/inbound-leads-table'
 import {
@@ -21,11 +22,14 @@ const getLeads = unstable_cache(
       include: {
         _count: {
           select: {
-            activities: true,
+            // Contactos comerciales: el rastro de reasignación (SISTEMA) no
+            // cuenta como actividad ni como "último contacto".
+            activities: { where: SOLO_CONTACTOS_COMERCIALES },
             demos: true,
           },
         },
         activities: {
+          where: SOLO_CONTACTOS_COMERCIALES,
           select: {
             createdAt: true,
           },

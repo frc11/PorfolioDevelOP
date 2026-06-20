@@ -11,6 +11,7 @@ import { fichaFaltantes, gateBriefAbierto } from '@/lib/leados/flow'
 import { registrarEvaluacion } from '@/app/(protected)/setter/_actions/dossier.actions'
 import { EvaluacionInputSchema } from '@/app/(protected)/setter/_actions/dossier.schemas'
 import { TextArea } from '@/app/(protected)/setter/_components/text-area'
+import { ToolGuide } from '@/app/(protected)/setter/_components/tool-guide'
 import { cn } from '@/lib/utils'
 
 const CRITERIOS = [
@@ -200,6 +201,8 @@ export function EvaluacionStep({
           acá tal cual: score, veredicto y razonamiento. No hace falta interpretarla.
         </p>
       </div>
+
+      <ToolGuide id="evaluador" />
 
       <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-3">
         <p className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500">

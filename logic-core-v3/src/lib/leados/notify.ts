@@ -1,7 +1,7 @@
 /**
- * LeadOS B5/B4 — Notificaciones Telegram al admin. Mismo patrón que el cron
- * de follow-up (src/app/api/cron/os-follow-up/route.ts): TELEGRAM_BOT_TOKEN +
- * TELEGRAM_CHAT_ID, HTML simple.
+ * LeadOS B5/B4 — Notificaciones Telegram al admin. Envían vía el sender único
+ * `sendTelegram` (src/lib/notifications/telegram.ts), que resuelve credenciales
+ * config-first (AgencySettings) con fallback a env. Formato HTML.
  *
  * Contrato: fire-and-forget. NUNCA lanzan — si Telegram (o la config) falla
  * se loguea y el flujo del setter sigue intacto.
@@ -16,35 +16,10 @@ import type { Prisma } from '@prisma/client'
 import { prisma } from '@/lib/prisma'
 import { AgendaSchema, EvaluacionSchema } from '@/lib/leados/contracts'
 import { formatFechaHora, STAGE_LABELS } from '@/lib/leados/flow'
+import { sendTelegram } from '@/lib/notifications/telegram'
 
 function escapeHtml(value: string): string {
   return value.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;')
-}
-
-async function enviarTelegram(message: string): Promise<boolean> {
-  const telegramBotToken = process.env.TELEGRAM_BOT_TOKEN?.trim()
-  const telegramChatId = process.env.TELEGRAM_CHAT_ID?.trim()
-  if (!telegramBotToken || !telegramChatId) {
-    console.warn('[leados notify] Telegram no configurado — aviso sin enviar')
-    return false
-  }
-  const telegramResponse = await fetch(
-    `https://api.telegram.org/bot${telegramBotToken}/sendMessage`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        chat_id: telegramChatId,
-        text: message,
-        parse_mode: 'HTML',
-      }),
-    },
-  )
-  if (!telegramResponse.ok) {
-    console.error('[leados notify] telegram error:', await telegramResponse.text())
-    return false
-  }
-  return true
 }
 
 /**
@@ -84,7 +59,7 @@ export async function notificarEscalamientoConstruccion(params: {
       `"${escapeHtml(params.descripcion.slice(0, 800))}"`,
     ].join('\n')
 
-    return await enviarTelegram(message)
+    return await sendTelegram(message, { parseMode: 'HTML' })
   } catch (error) {
     console.error('[leados notify] fallo no fatal:', error)
     return false
@@ -131,7 +106,7 @@ export async function notificarReunionAgendada(leadId: string): Promise<void> {
       `"${escapeHtml((agenda.data.notasTraspaso ?? '').slice(0, 800))}"`,
     ].join('\n')
 
-    await enviarTelegram(message)
+    await sendTelegram(message, { parseMode: 'HTML' })
   } catch (error) {
     console.error('[leados notify] fallo no fatal:', error)
   }
@@ -167,7 +142,7 @@ export async function notificarEvaluacionCaliente(leadId: string): Promise<void>
       `${escapeHtml(evaluacion.data.razonamiento.slice(0, 300))}`,
     ].join('\n')
 
-    const enviado = await enviarTelegram(message)
+    const enviado = await sendTelegram(message, { parseMode: 'HTML' })
     if (!enviado) return
 
     // Marca de notificado — solo tras envío exitoso. Merge sobre la evaluación

@@ -15,6 +15,7 @@ import {
   reabrirConstruccion,
 } from '@/app/(protected)/setter/_actions/dossier.actions'
 import { CopyBlock } from '@/app/(protected)/setter/_components/copy-block'
+import { ToolGuide } from '@/app/(protected)/setter/_components/tool-guide'
 import { EscalarModal } from './escalar-modal'
 
 type ConstruccionStepProps = {
@@ -209,6 +210,7 @@ export function ConstruccionStep({
           arranques, el dossier pasa a &quot;Construcción&quot; y se abren los pasos de draft y
           self-check.
         </p>
+        <ToolGuide id="claudeDesign" />
         <Button
           onClick={() => transicionar(iniciarConstruccion, 'Construcción arrancada — seguí la guía.')}
           loading={isPending}
@@ -263,6 +265,8 @@ export function ConstruccionStep({
           Construí en Claude Design siguiendo estas fases en orden. La secuencia es preliminar:
           se va a refinar cuando se validen las primeras demos reales.
         </p>
+
+        <ToolGuide id="claudeDesign" />
 
         {brief && (
           <CopyBlock

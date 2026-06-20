@@ -1,4 +1,5 @@
 import {
+  ArrowLeftRight,
   CircleDashed,
   Instagram,
   Mail,
@@ -15,6 +16,9 @@ export type ActivityChannel =
   | 'LLAMADA'
   | 'LOOM_VIDEO'
   | 'OTRO'
+  // Evento interno del sistema (reasignación). No es opción de alta manual
+  // (no está en CHANNEL_OPTIONS) — solo se renderiza en el historial.
+  | 'SISTEMA'
 
 export type ActivityResult =
   | 'SIN_RESPUESTA'
@@ -83,7 +87,20 @@ export function channelIcon(channel: ActivityChannel): LucideIcon {
       return Video
     case 'OTRO':
       return CircleDashed
+    case 'SISTEMA':
+      return ArrowLeftRight
   }
+}
+
+/**
+ * Etiqueta del canal en el historial. Reusa CHANNEL_OPTIONS para los canales
+ * comerciales; SISTEMA (evento interno) no está ahí y se rotula aparte.
+ */
+export function channelLabel(channel: ActivityChannel): string {
+  const option = CHANNEL_OPTIONS.find((item) => item.value === channel)
+  if (option) return option.label
+  if (channel === 'SISTEMA') return 'Reasignación'
+  return channel
 }
 
 export function resultTone(result: ActivityResult | null): string {

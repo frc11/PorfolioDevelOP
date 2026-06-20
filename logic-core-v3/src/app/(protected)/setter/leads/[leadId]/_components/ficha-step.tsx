@@ -8,7 +8,10 @@ import { Button, Card, Field, Select } from '@/components/ui'
 import { FichaSchema, type Ficha } from '@/lib/leados/contracts'
 import { buildFichaCopyBlock, type CopyBlockLead } from '@/lib/leados/copy-blocks'
 import { fichaFaltantes } from '@/lib/leados/flow'
+import { useAutosave } from '@/lib/use-autosave'
+import { useUnsavedGuard } from '@/lib/use-unsaved-guard'
 import { guardarFicha } from '@/app/(protected)/setter/_actions/dossier.actions'
+import { AutosaveStatus } from '@/app/(protected)/setter/_components/autosave-status'
 import { CopyBlock } from '@/app/(protected)/setter/_components/copy-block'
 import { TextArea } from '@/app/(protected)/setter/_components/text-area'
 
@@ -63,6 +66,16 @@ export function FichaStep({ leadId, lead, ficha, editable }: FichaStepProps) {
   const [serverError, setServerError] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
 
+  // Autosave del trabajo escrito: reusa `guardarFicha` (parcial-safe, NUNCA
+  // transiciona de stage, ownership por `assignedToId` dentro de la action).
+  // Inerte una vez congelada la ficha (`editable` false).
+  const autosave = useAutosave<FichaFormState>({
+    value: form,
+    enabled: editable,
+    save: (estado) => guardarFicha(leadId, aPayload(estado)),
+  })
+  useUnsavedGuard(autosave.isDirty)
+
   const faltantesEnVivo = useMemo(() => fichaFaltantes(aPayload(form)), [form])
   const faltantesGuardados = fichaFaltantes(ficha)
 
@@ -84,6 +97,7 @@ export function FichaStep({ leadId, lead, ficha, editable }: FichaStepProps) {
           ? 'Ficha guardada — ya tenés señal para pasar al Evaluador'
           : 'Borrador guardado — podés volver cuando quieras',
       )
+      autosave.markSaved()
       router.refresh()
     })
   }
@@ -235,7 +249,7 @@ export function FichaStep({ leadId, lead, ficha, editable }: FichaStepProps) {
 
       {serverError && <p className="text-xs text-red-400">{serverError}</p>}
 
-      <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
         <Button
           onClick={guardar}
           loading={isPending}
@@ -243,8 +257,9 @@ export function FichaStep({ leadId, lead, ficha, editable }: FichaStepProps) {
         >
           Guardar ficha
         </Button>
+        <AutosaveStatus phase={autosave.phase} isDirty={autosave.isDirty} busy={isPending} />
         <p className="text-[11px] text-zinc-600">
-          Guardado parcial: podés cerrar y seguir después.
+          Se guarda solo mientras escribís. Podés cerrar y seguir después.
         </p>
       </div>
 

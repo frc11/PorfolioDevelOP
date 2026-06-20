@@ -507,6 +507,14 @@ export type HomeLeadInput = {
   followUpVencido: boolean
   /** B6: la demo aprobada ya se envió (dossier.enviadaAt). */
   demoEnviada: boolean
+  /** B-beta: el setter fijó este lead en su cartera (organización propia, privada). */
+  pinned: boolean
+  /** B-beta: pausa personal del setter vigente (snoozedUntil > ahora), ya resuelta. */
+  snoozed: boolean
+  /** B-beta: hasta cuándo dura la pausa personal — para mostrar "pausado hasta X". */
+  snoozedUntil: Date | null
+  /** B-beta: nota privada del setter (NO es lead.notes del admin). null = sin nota. */
+  note: string | null
 }
 
 export type HomeLead = HomeLeadInput & {
@@ -630,6 +638,26 @@ function proximaAccionPara(
   }
 }
 
+/**
+ * B-beta — Rótulo INFORMATIVO de por qué una card ocupa su lugar en el carril
+ * "trabajar". NO recalcula el orden: lee los MISMOS tres tiers que la función
+ * `urgencia` de agruparParaHome (respondió → caliente → resto), traducidos al
+ * idioma del setter. Solo aplica a "trabajar" — el único lane ordenado por
+ * urgencia; los demás van por antigüedad, ya visible en la meta "hace X días".
+ * Devuelve null cuando no hay rótulo que mostrar.
+ *
+ * MANTENER EN SINCRONÍA con `urgencia`: si cambian los tiers del sort, cambian
+ * estas ramas. Es deliberado que el criterio (el sort) y su traducción (este
+ * rótulo) sean dos lecturas de la misma regla, no una sola: tocar el sort está
+ * fuera de alcance acá.
+ */
+export function motivoOrden(lead: HomeLead): string | null {
+  if (lead.grupo !== 'trabajar') return null
+  if (leadRespondio(lead.status)) return 'Respondió — va primero'
+  if (lead.caliente) return 'Caliente — va antes del resto'
+  return 'Por orden de llegada'
+}
+
 export function clasificarLead(input: HomeLeadInput): HomeLead {
   const score = input.evaluacion?.score ?? null
   const caliente = score !== null && score >= 4 && input.stage !== 'DESCARTADA'
@@ -664,13 +692,132 @@ export function agruparParaHome(inputs: HomeLeadInput[]): Record<HomeGroupKey, H
     const lead = clasificarLead(input)
     grupos[lead.grupo].push(lead)
   }
-  const urgencia = (lead: HomeLead): number => {
-    if (leadRespondio(lead.status)) return 0
-    if (lead.caliente) return 1
-    return 2
-  }
-  grupos.trabajar.sort(
-    (a, b) => urgencia(a) - urgencia(b) || a.createdAt.getTime() - b.createdAt.getTime(),
-  )
+  grupos.trabajar.sort(ordenUrgencia)
   return grupos
+}
+
+// ── B-beta: palancas de organización propia del setter sobre la cartera ──────
+
+/** Tier de urgencia del carril "trabajar": respondió → caliente → resto. */
+function urgenciaTier(lead: HomeLead): number {
+  if (leadRespondio(lead.status)) return 0
+  if (lead.caliente) return 1
+  return 2
+}
+
+/** Comparador de urgencia (tier, y a igualdad, antigüedad). Única copia. */
+function ordenUrgencia(a: HomeLead, b: HomeLead): number {
+  return urgenciaTier(a) - urgenciaTier(b) || a.createdAt.getTime() - b.createdAt.getTime()
+}
+
+/** Partición de la cartera con la organización propia del setter por encima. */
+export type CarteraParticion = {
+  /** Fijados por el setter — flotan arriba, sacados de su cola natural. */
+  fijados: HomeLead[]
+  /** Pausados por el setter (snooze personal vigente) — fuera de las colas. */
+  pausados: HomeLead[]
+  /** Las cinco colas de trabajo, sin fijados/pausados (salvo archivo). */
+  grupos: Record<HomeGroupKey, HomeLead[]>
+}
+
+/**
+ * Reordena la cartera YA clasificada con las palancas propias del setter. La
+ * precedencia es deliberada:
+ *   - archivo (perdido/descartada) manda: ni pin ni snooze lo rescatan de ahí;
+ *   - fijado → fijados (flota arriba: prioridad explícita del setter);
+ *   - pausado → pausados (lo escondió hasta una fecha que él eligió);
+ *   - el resto cae en su cola natural.
+ * Puro: no mira el reloj — `snoozed`/`pinned` ya vienen resueltos en el input.
+ */
+export function particionarCartera(leads: HomeLead[]): CarteraParticion {
+  const fijados: HomeLead[] = []
+  const pausados: HomeLead[] = []
+  const grupos: Record<HomeGroupKey, HomeLead[]> = {
+    trabajar: [],
+    revision: [],
+    seguimiento: [],
+    agendadas: [],
+    archivo: [],
+  }
+  for (const lead of leads) {
+    if (lead.grupo === 'archivo') {
+      grupos.archivo.push(lead)
+    } else if (lead.pinned) {
+      fijados.push(lead)
+    } else if (lead.snoozed) {
+      pausados.push(lead)
+    } else {
+      grupos[lead.grupo].push(lead)
+    }
+  }
+  fijados.sort(ordenUrgencia)
+  grupos.trabajar.sort(ordenUrgencia)
+  // Pausados: el que despierta antes, primero.
+  pausados.sort(
+    (a, b) => (a.snoozedUntil?.getTime() ?? 0) - (b.snoozedUntil?.getTime() ?? 0),
+  )
+  return { fijados, pausados, grupos }
+}
+
+/** Órdenes elegibles. `colas` = vista agrupada por defecto; el resto, lista plana. */
+export type OrdenCartera = 'colas' | 'urgencia' | 'reciente' | 'antiguo' | 'alfabetico'
+
+/** Vista de un lead para el filtro por estado (la cola que el setter ve). */
+export type VistaCartera = HomeGroupKey | 'pausados'
+export type EstadoFiltro = 'todos' | VistaCartera
+
+/** En qué cola cae el lead a ojos del setter (snooze pesa sobre la cola natural). */
+export function vistaDeLead(lead: HomeLead): VistaCartera {
+  if (lead.grupo === 'archivo') return 'archivo'
+  if (lead.snoozed) return 'pausados'
+  return lead.grupo
+}
+
+/** Normaliza para búsqueda: sin acentos, minúsculas (es-AR escribe con y sin tilde). */
+function normalizar(texto: string): string {
+  return texto
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+    .toLowerCase()
+}
+
+/** El lead matchea la búsqueda por nombre, rubro, zona o su nota propia. */
+export function leadCoincideBusqueda(lead: HomeLead, queryNorm: string): boolean {
+  if (queryNorm === '') return true
+  const campos = [lead.businessName, lead.industry, lead.zone, lead.note]
+  return campos.some((campo) => campo != null && normalizar(campo).includes(queryNorm))
+}
+
+const COMPARADORES: Record<
+  Exclude<OrdenCartera, 'colas'>,
+  (a: HomeLead, b: HomeLead) => number
+> = {
+  urgencia: ordenUrgencia,
+  reciente: (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
+  antiguo: (a, b) => a.createdAt.getTime() - b.createdAt.getTime(),
+  alfabetico: (a, b) => a.businessName.localeCompare(b.businessName, 'es'),
+}
+
+/**
+ * Lista plana de la cartera para el modo "lista" (cuando el setter busca,
+ * filtra o elige un orden): aplica búsqueda + filtro de estado + orden. Los
+ * fijados SIEMPRE flotan arriba — pin = "mostrámelo primero", gana al orden
+ * elegido. Devuelve un array nuevo; no muta el input.
+ */
+export function filtrarYOrdenarCartera(
+  leads: HomeLead[],
+  query: string,
+  estado: EstadoFiltro,
+  orden: Exclude<OrdenCartera, 'colas'>,
+): HomeLead[] {
+  const queryNorm = normalizar(query.trim())
+  const filtrados = leads.filter(
+    (lead) =>
+      leadCoincideBusqueda(lead, queryNorm) &&
+      (estado === 'todos' || vistaDeLead(lead) === estado),
+  )
+  const comparar = COMPARADORES[orden]
+  return filtrados.sort(
+    (a, b) => Number(b.pinned) - Number(a.pinned) || comparar(a, b),
+  )
 }

@@ -196,6 +196,7 @@ enum AuditActionType {
   BOT_ACTIVATED
   BOT_DEACTIVATED
   BOT_CONFIG_UPDATED
+  BOT_DELETED
   KB_UPDATED
   QUOTA_CHANGED
   LEAD_STATUS_CHANGED
@@ -298,17 +299,18 @@ model User {
   updatedAt             DateTime  @updatedAt
   lastDashboardVisit    DateTime?
 
-  accounts        Account[]
-  sessions        Session[]
-  orgMemberships  OrgMember[]
-  resetTokens     PasswordResetToken[]
-  notifications   Notification[]
-  tickets         Ticket[]
-  ticketMessages  TicketMessage[]
-  assignedTasks   Task[]               @relation("TaskAssignee")
-  osAssignedLeads OsLead[]             @relation("OsLeadAssignee")
-  osActivities    OsLeadActivity[]     @relation("OsActivityPerformer")
-  osTimeEntries   OsTimeEntry[]        @relation("OsTimeEntryUser")
+  accounts          Account[]
+  sessions          Session[]
+  orgMemberships    OrgMember[]
+  resetTokens       PasswordResetToken[]
+  notifications     Notification[]
+  tickets           Ticket[]
+  ticketMessages    TicketMessage[]
+  assignedTasks     Task[]               @relation("TaskAssignee")
+  osAssignedLeads   OsLead[]             @relation("OsLeadAssignee")
+  osActivities      OsLeadActivity[]     @relation("OsActivityPerformer")
+  osTimeEntries     OsTimeEntry[]        @relation("OsTimeEntryUser")
+  osLeadSetterMetas OsLeadSetterMeta[]   @relation("OsLeadSetterMetaOwner")
 }
 
 model PasswordResetToken {
@@ -826,16 +828,42 @@ model OsLead {
   createdAt      DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
 
-  assignedTo User?            @relation("OsLeadAssignee", fields: [assignedToId], references: [id])
-  activities OsLeadActivity[]
-  demos      OsDemo[]
-  dossier    OsLeadDossier?
-  project    Project?
+  assignedTo  User?              @relation("OsLeadAssignee", fields: [assignedToId], references: [id])
+  activities  OsLeadActivity[]
+  demos       OsDemo[]
+  dossier     OsLeadDossier?
+  project     Project?
+  setterMetas OsLeadSetterMeta[]
 
   @@index([status])
   @@index([nextFollowUpAt])
   @@index([status, nextFollowUpAt])
   @@index([assignedToId])
+  @@index([assignedToId, nextFollowUpAt])
+}
+
+/// Organización PRIVADA del setter sobre un lead de SU cartera: fijado, pausa
+/// personal y nota propia. Dato nuevo, suyo y aislado — la clave (leadId,
+/// setterId) garantiza que otro setter NUNCA lee la nota/pin/snooze de este
+/// (toda lectura filtra por setterId). NO es `OsLead.notes` (campo del admin,
+/// otro dueño): este vive separado y muere con el lead o el usuario (cascade).
+/// Si un lead se reasigna, el nuevo setter no hereda la fila del anterior.
+model OsLeadSetterMeta {
+  id           String    @id @default(cuid())
+  leadId       String
+  setterId     String
+  pinned       Boolean   @default(false)
+  snoozedUntil DateTime?
+  note         String?   @db.Text
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  lead   OsLead @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  setter User   @relation("OsLeadSetterMetaOwner", fields: [setterId], references: [id], onDelete: Cascade)
+
+  @@unique([leadId, setterId])
+  @@index([setterId, pinned])
+  @@index([setterId, snoozedUntil])
 }
 
 model OsLeadActivity {
@@ -851,6 +879,7 @@ model OsLeadActivity {
   performedBy User?  @relation("OsActivityPerformer", fields: [performedById], references: [id])
 
   @@index([leadId, createdAt])
+  @@index([performedById, createdAt])
 }
 
 model OsDemo {
@@ -966,6 +995,11 @@ enum ActivityChannel {
   LLAMADA
   LOOM_VIDEO
   OTRO
+  // Evento interno del sistema (reasignación de lead), NO un contacto
+  // comercial. Las lecturas comerciales (cron "último contacto", `contactos`,
+  // `_count.activities`) lo EXCLUYEN vía SOLO_CONTACTOS_COMERCIALES
+  // (src/lib/leados/isolation.ts). Solo aparece en los timelines de historial.
+  SISTEMA
 }
 
 enum ActivityResult {
@@ -1144,11 +1178,11 @@ model BotConfig {
   avatarEmoji    String?
 
   // Estilo visual extendido
-  borderRadius   String @default("medium")
-  surfaceStyle   String @default("glass")
-  position       String @default("bottom_right")
-  fontStyle      String @default("sans")
-  bubbleStyle    String @default("rounded")
+  borderRadius   String            @default("medium")
+  surfaceStyle   String            @default("glass")
+  position       String            @default("bottom_right")
+  fontStyle      String            @default("sans")
+  bubbleStyle    String            @default("rounded")
   intensityLevel BotIntensityLevel @default(MEDIUM)
 
   // Comportamiento conversacional
@@ -1164,9 +1198,9 @@ model BotConfig {
 
   // LLM
   llmProvider     LlmProvider @default(GOOGLE)
-  llmModel        String @default("gemini-2.5-flash")
-  temperature     Float  @default(0.7)
-  maxOutputTokens Int    @default(800)
+  llmModel        String      @default("gemini-2.5-flash")
+  temperature     Float       @default(0.7)
+  maxOutputTokens Int         @default(800)
 
   // Cuota mensual
   monthlyQuota Int @default(1000)
@@ -1261,7 +1295,7 @@ model ChatMessage {
   conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
 
   role    ChatMessageRole
-  content String @db.Text
+  content String          @db.Text
 
   // Solo para mensajes de assistant
   toolCalls Json?
@@ -1292,7 +1326,7 @@ model ChatbotLead {
   // (PURCHASE_READY/SCHEDULE_VISIT/QUOTE_REQUEST/HUMAN_REQUEST/SUPPORT/OTHER)
   // para no romper rows pre-existentes (backfill via UPPER(intent)).
   intent  ChatbotLeadIntent?
-  message String? @db.Text
+  message String?            @db.Text
 
   // B5.1 — Categoría DQ. Llenada por el bot al capturar; B5.3 la usa para descalificar.
   category LeadCategory @default(sales)
@@ -1422,14 +1456,14 @@ model QuotaUsage {
 }
 
 model ChatbotEvent {
-  id             String   @id @default(cuid())
+  id             String            @id @default(cuid())
   botConfigId    String
   type           String // ej: "chat.message_received", "chat.lead_captured", "error.llm_failed"
   level          ChatbotEventLevel
   conversationId String?
-  message        String   @db.Text
+  message        String            @db.Text
   metadata       Json?
-  createdAt      DateTime @default(now())
+  createdAt      DateTime          @default(now())
 
   botConfig    BotConfig     @relation(fields: [botConfigId], references: [id], onDelete: Cascade)
   conversation Conversation? @relation(fields: [conversationId], references: [id], onDelete: SetNull)

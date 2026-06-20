@@ -22,6 +22,7 @@ import {
   type User,
 } from '@prisma/client'
 import * as bcrypt from 'bcryptjs'
+import { assertDevSeedTarget, requireSeedPassword } from './seed-guard.ts'
 
 const prisma = new PrismaClient()
 
@@ -339,7 +340,7 @@ async function getAgencyMembers(): Promise<Record<MemberKey, User>> {
     orderBy: [{ createdAt: 'asc' }],
   })
 
-  const adminPassword = await bcrypt.hash('Admin1234!', 12)
+  const adminPassword = await bcrypt.hash(requireSeedPassword('SEED_ADMIN_PASSWORD'), 12)
 
   const franco =
     superAdmins.find((user) => preferredMatch(user, 'franco')) ??
@@ -1988,8 +1989,10 @@ async function ensureContactSubmissions() {
 }
 
 async function main() {
+  assertDevSeedTarget('seed-agency-os.ts')
+
   const members = await getAgencyMembers()
-  const clientPassword = await bcrypt.hash('Cliente1234!', 12)
+  const clientPassword = await bcrypt.hash(requireSeedPassword('SEED_CLIENT_PASSWORD'), 12)
   const organizationIdBySlug = new Map<string, string>()
   const clientUserIdByOrgSlug = new Map<string, string>()
   const leadIdByBusinessName = new Map<string, string>()

@@ -14,18 +14,28 @@
  */
 import type { OsLead, Prisma } from '@prisma/client'
 import { prisma } from '@/lib/prisma'
+import {
+  ownedLeadWhere,
+  ownedListWhere,
+  ownSetterMetaWhere,
+  SOLO_CONTACTOS_COMERCIALES,
+} from '@/lib/leados/isolation'
 
 export async function getOwnedLead(
   leadId: string,
   userId: string,
 ): Promise<OsLead | null> {
   return prisma.osLead.findFirst({
-    where: { id: leadId, assignedToId: userId },
+    where: ownedLeadWhere(leadId, userId),
   })
 }
 
 export type OwnedLeadWithDossier = Prisma.OsLeadGetPayload<{
-  include: { dossier: true; _count: { select: { activities: true } } }
+  include: {
+    dossier: true
+    _count: { select: { activities: true } }
+    setterMetas: true
+  }
 }>
 
 /**
@@ -33,11 +43,23 @@ export type OwnedLeadWithDossier = Prisma.OsLeadGetPayload<{
  * `assignedToId` vive acá, no en el caller; orden por antigüedad asc (el
  * agrupado del home asume ese orden de base). B6 suma el conteo de
  * actividades (contactos reales) para las próximas acciones de outreach.
+ *
+ * B-beta — adjunta el meta PRIVADO del setter (pin / snooze / nota propia)
+ * filtrado por `ownSetterMetaWhere(userId)`: cada lead trae como máximo UNA fila,
+ * la de este setter. Es la privacidad a nivel lectura — un lead reasignado no
+ * arrastra la nota del setter anterior, porque sólo se incluye la fila propia.
  */
 export async function listOwnedLeads(userId: string): Promise<OwnedLeadWithDossier[]> {
   return prisma.osLead.findMany({
-    where: { assignedToId: userId },
-    include: { dossier: true, _count: { select: { activities: true } } },
+    where: ownedListWhere(userId),
+    include: {
+      dossier: true,
+      // `contactos` del home (agrupado) = contactos comerciales reales; el
+      // rastro de reasignación (SISTEMA) NO cuenta — si lo contara, un lead
+      // recién reasignado saltaría de grupo sin que el setter lo trabajara.
+      _count: { select: { activities: { where: SOLO_CONTACTOS_COMERCIALES } } },
+      setterMetas: { where: ownSetterMetaWhere(userId) },
+    },
     orderBy: { createdAt: 'asc' },
   })
 }

@@ -10527,3 +10527,279 @@ Removida la propiedad `stroke`/`strokeWidth` del mask path — solo se mantiene 
 ### Pendientes / tunables
 - Offsets `WORDMARK_OFFSET_FRAC=0.40` / `SLOGAN_OFFSET_FRAC=0.42`, stagger (`WORDMARK_RANGE`/`SLOGAN_RANGE`), `HOME_TEXT_ERASE_SECONDS=0.5` y tamaños/tracking del `WipeLine`: ajustar contra la grabación si hace falta más aire o más tiempo de lectura.
 
+
+
+## Sprint C.0 — Blindar seeds contra prod · 2026-06-17
+
+**Estado real encontrado:**
+- Seeds que mutan con `main()` incondicional: `prisma/seed.ts` (L862) y `prisma/seed-agency-os.ts` (L2059). Ambos SIN guard anti-prod previo.
+- Passwords hardcodeadas: `seed-agency-os.ts` → `Admin1234!` (franco/valentino SUPER_ADMIN, L342) + `Cliente1234!` (L1992). `seed.ts` → `Admin1234!`/`Cliente1234!`/`ClienteB1234!`/`Setter1234!` (L72-77) + echo en texto plano (L848-851).
+- Guards previos a reutilizar: `scripts/seed-matsu.ts` (host equality), `scripts/demos-seed-review-queue.ts` (includes host dev), `scripts/_b14-2-seed-bench-prod.ts` (dirección prod). Host dev: `ep-quiet-waterfall-acv0fpll-*`.
+- `sync-plans.ts` / `sync-premium-modules.ts`: intencionalmente prod-runnables (`DATABASE_URL=<prod>`), run-if-main → NO reciben guard. `migrate-os-to-unified.ts`: read-only.
+- Flag QA del setter (`passwordResetRequired: false`, fix B8A/H8): intacto.
+- Mecánica de env: `@prisma/client` carga `.env` completo al importarse (verificado empíricamente); Prisma NO carga `.env.local`. `.env`/`.env.local` gitignored.
+
+**Qué se hizo (A + B, scope cerrado):**
+- A) Guard anti-prod compartido en `prisma/seed-guard.ts` (`assertDevSeedTarget`): aborta con mensaje claro si `DATABASE_URL` falta, si `NODE_ENV=production`, o si el host no parece dev/local (dev branch / localhost / 127.0.0.1). Override explícito `ALLOW_PROD_SEED=1`. Llamado como primera línea de `main()` en ambos seeds.
+- B) Passwords → env var sin default (`requireSeedPassword`): `SEED_ADMIN_PASSWORD`, `SEED_CLIENT_PASSWORD`, `SEED_CLIENT_B_PASSWORD`, `SEED_SETTER_PASSWORD`. Falla claro si faltan. Echo de credenciales de `seed.ts` ya no imprime literales (referencia el nombre de la var).
+- Import con extensión `.ts` (`./seed-guard.ts`) — requerido por el runner `ts-node` de `seed:agency-os` (reparse ESM); permitido por `allowImportingTsExtensions`; compatible con `tsx` y `tsc`.
+
+**Archivos tocados:**
+- `prisma/seed-guard.ts` (nuevo)
+- `prisma/seed.ts`
+- `prisma/seed-agency-os.ts`
+- `.env.example` (sección SEEDS documentada)
+- `.env` (gitignored, local: valores dev de las 4 vars para que el seed de dev siga corriendo)
+
+**Verificación:**
+- ✅ `tsc --noEmit`: `prisma/` type-clean; total de errores sin cambios (10, todos pre-existentes por módulos ausentes `@dnd-kit/*`, `emoji-picker-react` — no relacionados).
+- ✅ Guard probado bajo `ts-node` Y `tsx` (sin correr seeds, solo el helper): URL prod → ABORT exit 1; URL dev/localhost → PROCEED exit 0; `ALLOW_PROD_SEED=1` sobre URL prod → PROCEED; `requireSeedPassword` ausente → ABORT exit 1, presente → devuelve valor.
+- ✅ Flag QA del setter (`passwordResetRequired: false`) intacto (ahora L157/L165 por el shift del import + guard).
+- ✅ Cero passwords hardcodeadas restantes en ambos seeds.
+- ⚠️ No se corrió ningún seed (invariante del sprint).
+
+**Notas:**
+- `sync-plans.ts` / `sync-premium-modules.ts` quedan SIN guard a propósito (son prod-runnables por diseño). Fuera de scope.
+- Si en el futuro se agregan más seeds mutadores, reusar `assertDevSeedTarget` + `requireSeedPassword` de `prisma/seed-guard.ts`.
+
+
+
+## Sprint B0.1 — Shell del setter: rail + contenido · 2026-06-18
+
+**Estado real encontrado:**
+- `setter/layout.tsx` era un Server Component header-only: `min-h-screen` con una única columna `max-w-6xl` centrada (header `h-16` + `<main>`). Sin región para barra lateral.
+- Admin (modelo a espejar) NO usa CSS grid: arma la geometría con `fixed inset-0 z-[80]` + `<aside fixed left-0 w-[240px]>` (drawer por `translate-x` en mobile, `lg:translate-x-0`) + columna de contenido `lg:pl-[240px]` con `<main overflow-y-auto>`. El drawer exige estado de cliente → split server-layout (`admin/layout.tsx`) → client-shell (`AdminLayoutClient.tsx`).
+- Stacking del chrome admin: root `z-[80]`, backdrop `z-[100]`, aside `z-[110]`, botón hamburguesa `z-[120]`, botón cerrar `z-[130]`.
+- Modales: el `<Modal>` compartido portalea a `<body>` con `zIndex.modal = 10000` (token en `design-tokens.ts`) — por diseño explícito vive por encima de cualquier layout `fixed inset-0 z-[80]`. Compatible sin tocar nada.
+- El route group `(protected)` NO tiene layout compartido: cada zona (admin/setter/dashboard) monta su propio shell.
+- Vistas internas (`setter/page.tsx`, `leads/[leadId]/page.tsx`, wizard) NO fijan ancho propio: heredan el ancho del contenedor del layout (dependían del `max-w-6xl` viejo).
+
+**Qué se hizo (SOLO contenedor visual, cero lógica):**
+- Nuevo `setter/_components/setter-shell.tsx` (Client Component, `'use client'`): espeja la geometría del admin — `fixed inset-0 z-[80]`, rail `<aside>` de 240px con drawer en mobile (mismo patrón `translate-x` + backdrop + botones hamburguesa/cerrar, mismos z-index que admin), columna de contenido `lg:pl-[240px]` con `<main overflow-y-auto>`. Único estado: `mobileOpen` (toggle del drawer). Sin datos, sin sesión, sin queries.
+- Rail dejado como **placeholder rotulado** ("Navegación · 0.2") — el contenido de navegación lo monta el sprint 0.2.
+- `setter/layout.tsx` sigue siendo Server Component (auth/redirect/`noStore` intactos): ahora arma el topbar (marca + usuario + logout, el `<form action={signOutAction}>` sin tocar) y lo pasa como prop `topbar` al shell. El logout queda server-renderizado (no migra a cliente).
+- **Conflicto `max-w-6xl` resuelto:** el rail toma los 240px de la izquierda; la columna de contenido (topbar + `<main>`) se mantiene centrada como columna de lectura con `mx-auto w-full max-w-6xl`, preservando el ancho de las vistas internas. El scroll ahora vive dentro de `<main>` (topbar/rail fijos), igual que admin.
+
+**Archivos tocados:**
+- `src/app/(protected)/setter/_components/setter-shell.tsx` (nuevo)
+- `src/app/(protected)/setter/layout.tsx` (header → prop `topbar` del shell; cero cambios de auth/lógica)
+
+**Verificación (quality-gate ECC):**
+- ✅ `eslint` en los 2 archivos → limpio, cero warnings.
+- ✅ Formato: el proyecto NO usa Prettier (no es dependencia ni hay config); el formateador canónico es ESLint (pasa). El `npx prettier` transitorio marca comillas dobles + punto y coma — el estilo OPUESTO al del repo (comillas simples, sin `;`), que los archivos sí respetan espejando los de admin. No se aplicó `--write` (corrompería el estilo del repo).
+- ✅ `tsc --noEmit` → mis 2 archivos type-clean, cero `any`. Total de errores sin cambios: 10, TODOS pre-existentes y ajenos (módulos ausentes `@dnd-kit/core`, `@dnd-kit/utilities`, `emoji-picker-react` en admin/chatbot — no toqué ninguno). Mismos 10 que registró el sprint C.0.
+
+**Verificación humana declarada (Franco, perceptual — no la doy por buena yo):**
+- `/setter` carga con el rail (placeholder) a la izquierda + contenido sin descentrar (home y detalle de lead renderizan igual que antes).
+- En mobile colapsa a drawer: hamburguesa arriba-izquierda abre el rail, backdrop + botón cerrar lo cierran.
+- Los modales existentes (ej. "Me trabé — avisar a Franco") aparecen por encima del chrome nuevo.
+- `/admin` sigue intacto (no se tocó ninguno de sus archivos).
+
+**Pendientes:**
+- Sprint 0.2: montar la navegación del setter dentro del rail placeholder (espejar `admin-sidebar.tsx`, navegación por `triggerTransition()` según decisión cerrada).
+
+---
+
+## Sprint B0.2 — Navegación del setter: rail con destinos · 2026-06-18
+
+**Estado real encontrado (descubrimiento):**
+- Patrón a espejar (`admin/_components/admin-sidebar.tsx`): `NAV_SECTIONS` (array de secciones con items `{href,label,icon}`), activo por `usePathname` (exacto para el índice `/admin`, `startsWith` para el resto), pill cyan `motion.div layoutId="sidebar-active-pill"` (spring `380/38/0.9`), íconos lucide `strokeWidth={1.5}`. Admin navega con `<Link>`.
+- **Destinos REALES de la zona setter (rutas que existen, no se inventó ninguna):** solo hay UN hub de nivel superior con `page.tsx` → `/setter` (la cartera). La otra ruta es la dinámica `/setter/leads/[leadId]` (detalle de lead) — NO es destino de barra: se llega clickeando una card y cuelga del mismo hub. No existen `/setter/agenda`, `/setter/settings`, etc. (verificado por `find` sobre el árbol setter).
+- `TransitionProvider` está montado en el root `app/layout.tsx`, envolviendo todo el árbol → `useTransitionContext()`/`triggerTransition()` están disponibles dentro de `/setter`. Para navegación de ruta (`target.startsWith('/')`), `triggerTransition` no usa `lenis` y guardea misma-ruta (`if (pathname === target) return`).
+- El drawer mobile ya vive en `SetterShell` (estado `mobileOpen`, B0.1). El rail era un placeholder rotulado.
+
+**Qué se hizo (SOLO la barra de navegación; cero StatCards/numeración → eso es 0.3):**
+- Nuevo `setter/_components/setter-nav.tsx` (Client Component): espeja el *mecanismo* del admin pero adaptado a la regla cerrada y al contenido real:
+  - **Navegación SOLO por `triggerTransition()`** — los destinos son `<button type="button">` que llaman `handleNavigate(href)` → `triggerTransition(href)` + `onNavigate?.()`. **NO hay `<Link>` ni `router.push` ni `useRouter`** (verificado por grep, abajo).
+  - Activo por `usePathname` + `startsWith`: `pathname === href || pathname.startsWith(href + "/")`. Con un único hub raíz, la Cartera queda activa en todo el subárbol `/setter` (incluido el detalle de lead, que es su drill-down) → pill siempre visible en la zona.
+  - Pill cyan `motion.div` con `layoutId="setter-sidebar-active-pill"` (**namespaced**, NO el `sidebar-active-pill` de admin/dashboard) para evitar cualquier bleed de layout-animation compartido entre el overlay del setter y un árbol admin/dashboard previo durante la transición. Mismo spring `380/38/0.9`, mismas clases visuales que admin. `prefers-reduced-motion` respetado (`useReducedMotion`).
+  - `aria-current="page"` en el activo. `NAV_ITEMS` es un array (un solo destino real hoy: `{ /setter, "Cartera", LayoutDashboard }`) para que 0.3+ agregue destinos sin reescribir la barra. **No se listan rutas inexistentes.**
+  - Grouping adaptado al contenido: lista plana bajo un único label "Trabajo" (espejar las *secciones* del admin con un solo item daría un header huérfano). Se mirroreó el mecanismo, no la cantidad de secciones.
+- `setter-shell.tsx`: el placeholder del rail se reemplazó por `<SetterNav onNavigate={() => setMobileOpen(false)} />` (cierra el drawer al navegar). El shell sigue siendo dueño solo de la geometría y del estado del drawer; doc-comment de cabecera actualizado.
+
+**Archivos tocados:**
+- `src/app/(protected)/setter/_components/setter-nav.tsx` (nuevo)
+- `src/app/(protected)/setter/_components/setter-shell.tsx` (placeholder → `<SetterNav>` + comentarios)
+
+**Verificación (quality-gate ECC):**
+- ✅ `eslint` en los 2 archivos → exit 0, cero warnings.
+- ✅ `tsc --noEmit` → cero `any`, mis archivos type-clean. **Total de errores TS del proyecto ahora: 0** (los 10 pre-existentes por módulos ausentes `@dnd-kit/*` se resolvieron al sincronizar `node_modules` con `npm install` — estaban declarados en `package.json` pero sin instalar; no se agregó ninguna dependencia nueva).
+- ✅ `npm run build` → **verde** (`/setter` y `/setter/leads/[leadId]` compilan). El build había fallado por el `node_modules` desincronizado (admin, ajeno al sprint); `npm install` lo dejó verde.
+- ✅ **Grep de la regla cerrada:** `grep -nE "next/link|<Link|router\.push|useRouter"` sobre `setter-nav.tsx` + `setter-shell.tsx` → **0 matches**. La barra navega exclusivamente por `triggerTransition`.
+
+**Aislamiento por ownership (punto explícito — NO se da por obvio):**
+- La barra de navegación **no consulta datos ni recibe `leadId`**: solo renderiza hrefs estáticos (`/setter`) y llama `triggerTransition(href)`. No hace `prisma`, no lista leads, no resuelve un lead puntual. **Por eso no aplica un test de aislamiento sobre la barra** — no hay superficie de datos que aislar acá.
+- El gating real de `assignedToId` vive en las **vistas destino**, no en la barra, y ya está cerrado desde B1/B3 (sin tocar en este sprint):
+  - LISTA — `/setter` (`page.tsx`) → `listOwnedLeads(userId)` filtra `where: { assignedToId: userId }` (`src/lib/leados/ownership.ts`). Un setter solo ve su cartera.
+  - PUNTUAL — `/setter/leads/[leadId]` (`page.tsx:48-54`) → `requireSetter()` + `getOwnedLead(leadId, userId)` (`findFirst({ where: { id, assignedToId: userId } })`); si es `null` (ajeno o inexistente) → `notFound()` 404 sin leakear existencia (anti-IDOR).
+- **Conclusión:** 0.2 no abre ninguna superficie nueva que pueda exponer leads ajenos — la barra es enrutado puro. Cualquier test de invariante de aislamiento corresponde a las vistas destino / a la capa `ownership.ts`, no a la navegación. (Infra de test del repo: solo Playwright e2e en `tests/e2e`; no hay runner unitario. Un test de aislamiento DB-bound de `ownership.ts` exige sembrar 2 setters con leads cruzados — fuera del scope de 0.2, que es la barra.)
+
+**Verificación en runtime (hecha por mí — dev-QA, no a ciegas):**
+- dev-QA (`next dev`, port 3002, `QA_ALLOW_LOCALHOST=1`) + `POST /api/qa/login {persona:'setter'}` (rol SETTER, `setter-qa@develop.test`). `/setter` probe con credenciales → 200, sin redirect.
+- Desktop (1600px): rail muestra label "Trabajo" + item "Cartera" con pill cyan activa (`aria-current="page"`, borde inset cyan + texto/tint cyan). Topbar (marca LeadOS + "QA Setter" + logout) y home cartera intactos. **Cero errores de consola.**
+- Mobile (480px): drawer cerrado por defecto (rail off-canvas a `left:-240`, hamburguesa visible). Click en hamburguesa → rail entra (`left:0`) + backdrop + botón cerrar. Click en "Cartera" (misma ruta) → drawer cierra (`onNavigate` dispara aunque `triggerTransition` sea no-op en misma ruta) y backdrop desaparece.
+
+**Verificación humana declarada (Franco, perceptual):**
+- Que el destino "Cartera" aparezca en el rail y se resalte (pill cyan) estando en `/setter` y en un detalle de lead.
+- Que en mobile la hamburguesa abra el rail y backdrop/cerrar/navegar lo cierren.
+- Caveat conocido (NO scope 0.2): el click-nav cliente-side por `triggerTransition` depende del comportamiento pre-existente de `TransitionContext` (hydration mismatch reportado en CC.2/CC.5 que afecta dev; prod funciona). Con un único destino no hay cross-route desde la barra para ejercitarlo; cuando 0.3+ agregue destinos, ahí se valida el salto entre rutas.
+
+**Pendientes:**
+- Sprint 0.3: StatCards + numeración del setter (fuera de scope de 0.2 por decisión).
+- Cuando existan ≥2 destinos: validar en runtime el salto entre rutas por `triggerTransition` (y revisar el caveat de hydration de `TransitionContext` si el click-nav se siente trabado en dev).
+
+---
+
+## ✅ B0.3 — Reconciliación visual con la nav nueva: scoreboard + numeración única + hint   ·   2026-06-18
+
+**Estado real encontrado (descubrimiento, los 3 elementos + su relación con 0.2):**
+- **Stepper (`dossier-stepper.tsx`) — ya es la verdad canónica.** 5 etapas `Ficha · Evaluación · Brief · Construcción · Revisión` mapeadas 1:1 a `DossierStage` (sin hueco, `pasoActual` fiel al stage). **Outreach y agenda NO están en el stepper** — ya estaban modelados como acciones dentro de su etapa, no como pasos sueltos. → No requirió edición: es el ancla a la que los otros dos elementos se reconcilian.
+- **StatCards (`page.tsx`) — `<div>` no clickeables pero leídos como tabs.** `StatCard` (compartido) ya renderiza un `<div>` estático sin `onClick`/hover/cursor — el problema era 100% perceptual: una tira de 5 tiles que espeja los títulos de las secciones de abajo se lee como barra de tabs. **No existe ruta por-cola** (`setter-nav` de 0.2 cierra "NO se inventan rutas"; solo existe `/setter`), así que `triggerTransition()` no aplica → la opción honesta es **scoreboard claramente no-clickeable**, no nav falsa.
+- **OnboardingHint — numeración paralela que contradecía al stepper.** 4 cards `1·2·3·4` con un paso 4 "Lo que sigue" placeholder ("…llegan en los próximos pasos del panel") que quedó stale: Construcción y Revisión YA existen como etapas 4 y 5 del stepper. Ese 4-vs-5 + el placeholder era **el hueco dentro del scope**.
+
+**Qué se hizo (presentación pura — cero gates/lógica de dossier; tipado estricto):**
+1. **`page.tsx` — scoreboard declarado de solo lectura.** Envolví la grilla de 5 StatCards en `<section aria-label="Resumen de tu cartera, de solo lectura">` con eyebrow **"De un vistazo"**. Sin tocar `StatCard` (compartido). No se agregó ninguna afordancia clickeable: la cartera se trabaja en las secciones de abajo y cada lead se abre clickeando su card, no estas tarjetas.
+2. **`onboarding-hint.tsx` — de-numerado, deja de duplicar.** `PASOS` (4 cards `1·2·3·4` + placeholder) → `ORIENTACION` (3 cards SIN numeración): "Trabajá tu cartera de arriba para abajo" / "Abrí un lead y seguí el panel" / "El estado del lead manda". Explica *cómo moverse* (defiriendo al panel/stepper como única fuente numerada y al scoreboard como solo-lectura) en vez de re-enumerar el flujo. H2 "Tu laburo en LeadOS, en cuatro pasos" → **"Cómo moverte en LeadOS"** (el viejo H2 afirmaba un conteo competidor). Grid `lg:grid-cols-4`→`lg:grid-cols-3`. Sigue siendo first-run descartable (localStorage intacto).
+3. **`dossier-stepper.tsx` — sin cambios.** Es el canónico; los otros dos defieren a él.
+
+**Archivos tocados:**
+- `src/app/(protected)/setter/page.tsx` (scoreboard envuelto + eyebrow)
+- `src/app/(protected)/setter/_components/onboarding-hint.tsx` (`PASOS`→`ORIENTACION`, H2, grid)
+- (`dossier-stepper.tsx` revisado, NO editado — canónico)
+
+**Verificación (quality-gate ECC):**
+- ✅ `npm run build` → **verde** (`/setter` y `/setter/leads/[leadId]` compilan).
+- ✅ `eslint` en los 2 archivos editados → **0 findings nuevos**. (El repo NO usa Prettier — sin dep ni config; el estilo lo enforcea ESLint 9. Un `npx prettier --check` inicial fue ruido de config default, descartado.)
+- ⚠️ 2 errores ESLint **pre-existentes** en líneas que NO toqué (verificado: no aparecen como `+` en mi diff) → fuera de scope, no tocados:
+  - `page.tsx:34` `react-hooks/purity` — `Date.now()` en el bloque de carga de datos.
+  - `onboarding-hint.tsx:39` `react-hooks/set-state-in-effect` — el `setVisible` del gate first-run de localStorage (patrón original).
+
+**Verificación en runtime (hecha por mí — dev-QA, no a ciegas):**
+- dev-QA (`next-dev-qa`, port 3002, `QA_ALLOW_LOCALHOST=1`) + `POST /api/qa/login {persona:'setter'}` → 200, rol SETTER. `/setter` renderiza (`h1 "Tu cartera"`), persona sembrada con leads (3/1/7/0/1) → el scoreboard se muestra.
+- **Scoreboard no-clickeable (probe DOM):** dentro de `section[aria-label^="Resumen"]` → `a,button,[role=button],[onclick]` = **0**; elementos con `cursor:pointer` = **0**. Eyebrow "De un vistazo" presente, 5 cards.
+- **Numeración única (probe DOM):** `/(1|2|3|4)\s*·/` sobre `body.innerText` = **false** (cero numeración `N·` en el home). El stepper queda como única fuente numerada (vive en el detalle de lead).
+- **Hint:** H2 = "Cómo moverte en LeadOS", 3 cards de orientación sin número.
+- **Responsive:** mobile 390px → scoreboard a 2 columnas, `scrollWidth == innerWidth` (sin overflow horizontal).
+- Screenshots desktop (≈1600) y mobile (390) capturados: nav nueva (Cartera activa) + hint de-numerado + eyebrow "De un vistazo" + scoreboard + worklist, coherentes.
+
+**Verificación humana declarada (Franco, perceptual — es su sign-off por diseño del task):**
+- Ninguna tarjeta clickeable-muerta: el scoreboard se lee como marcador de solo lectura, no como tabs.
+- Una sola numeración sin hueco: el panel (stepper de 5 etapas) manda; el home no compite con "Paso N".
+- El hint orienta sin duplicar la nav ni re-enumerar el flujo.
+
+**Hallazgo FUERA DE SCOPE (reportado, NO implementado — son 9 archivos ajenos a los 3 del task):**
+- Los **headers `Paso N` de los step-components** del detalle de lead siguen una numeración de **metodología de 10 pasos** que contradice al stepper canónico de 5 etapas: `ficha(1) · evaluacion(2) · brief(3) · construccion(4) · draft(5) · self-check(6) · opener(7) · seguimiento(9) · agenda(10)` → **hueco en "Paso 8"** y, en el orden de render del wizard, los números salen desordenados (1,2,7,9,10,3,4,5,6). Outreach (opener/seguimiento) y agenda aparecen ahí como **"Pasos" sueltos** — exactamente lo que el stepper ya evita. Reconciliarlos (de-numerar o realinear a las 5 etapas) toca `opener-step.tsx`, `seguimiento-step.tsx`, `agenda-step.tsx`, `brief-step.tsx`, `construccion-step.tsx`, `draft-step.tsx`, `self-check-step.tsx`, `ficha-step.tsx`, `evaluacion-step.tsx` + las notas de `lead-wizard.tsx`. **Sprint aparte** (cambia copy visible en todo el wizard; fuera de los 3 archivos de B0.3).
+
+**Pendientes:**
+- Sprint aparte: reconciliar los headers `Paso N` de los step-components con el stepper de 5 etapas (de-numerar outreach/agenda como acciones-dentro-de-etapa; cerrar el hueco del "Paso 8"). → **Cerrado en B0.4 (abajo).**
+- Limpieza opcional: los 2 errores ESLint pre-existentes (`react-hooks/purity` en `page.tsx:34`, `set-state-in-effect` en `onboarding-hint.tsx:39`) — ajenos a B0.3.
+
+---
+
+## ✅ B0.4 — Headers `Paso N` de los step-components reconciliados con el stepper de 5 etapas   ·   2026-06-18
+
+Follow-up declarado en B0.3. **Solo presentación**: copy visible de headers + cross-refs. NO se tocaron gates de transición, server-actions, schemas ni la lógica del dossier. Tipado estricto, cero `any`.
+
+**Problema (heredado de la metodología de 10 pasos):** los headers de los step-components numeraban `ficha(1) · evaluacion(2) · brief(3) · construccion(4) · draft(5) · self-check(6) · opener(7) · seguimiento(9) · agenda(10)` → **hueco en "Paso 8"**, y en el orden de render del wizard (`lead-wizard.tsx`) salían desordenados (1,2,7,9,10,3,4,5,6). Outreach (opener/seguimiento) y agenda figuraban como "Pasos" sueltos — justo lo que el stepper de 5 etapas (`dossier-stepper.tsx`, canónico) ya excluye.
+
+**Decisión (de-numerar, no realinear):** el stepper de 5 etapas (`Ficha · Evaluación · Brief · Construcción · Revisión`, 1:1 a `DossierStage`) es la verdad. Se conservó la numeración `Paso 1–4` SOLO en los cuatro componentes que mapean 1:1 a una etapa del stepper (ficha · evaluacion · brief · construccion). La 5.ª etapa (Revisión) es de Franco — no tiene step-component del setter; se sigue surfaceando vía la nota "Lo que sigue" (`POST_BRIEF_NOTAS`). Las **acciones-dentro-de-etapa** (opener, seguimiento, agenda, draft, self-check) quedaron **sin `Paso N`**, con título de acción limpio. Mismo patrón que B0.3 aplicó al `onboarding-hint`: deferir al stepper como única fuente numerada.
+
+**Cambios (9 archivos del scope declarado + `lead-wizard.tsx`):**
+1. **De-numerados (headers → título de acción):** `opener-step.tsx` "Primer contacto (opener)", `seguimiento-step.tsx` "Seguimiento y envío de la demo", `agenda-step.tsx` "Agendar la reunión" / "Reunión agendada", `draft-step.tsx` "Publicar el draft", `self-check-step.tsx` "Self-check". Incluye los JSDoc/comentarios de cada uno.
+2. **Cross-refs en copy realineadas** (ya no apuntan a números muertos): "Paso 9"→«Seguimiento», "Paso 7"→"el opener", "Paso 10"→«Agendar la reunión», "Paso 5"→"el draft", "Pasos 3–6"→"brief, construcción y self-check". Tocó copy en opener, seguimiento, agenda, brief y las notas/comentarios de `lead-wizard.tsx` (incl. `POST_BRIEF_NOTAS` y el comentario del bloque de outreach).
+3. **Sin cambios:** `ficha-step.tsx` (Paso 1) y `evaluacion-step.tsx` (Paso 2) — ya canónicos; las refs "ficha del Paso 1" / "Paso 3" / "Paso 4" en otros archivos se conservaron (apuntan a etapas reales del stepper).
+
+**Resultado:** la única numeración visible en todo el wizard es `Paso 2 → 3 → 4` (Paso 1 sólo cuando la ficha está editable; con ficha congelada colapsa a summary sin h2). Hueco "Paso 8" eliminado; números ascendentes en pantalla; outreach/agenda/draft/self-check como acciones sin número.
+
+**Verificación (dev-QA :3002 + `POST /api/qa/login {persona:'setter'}`):**
+- Probe DOM sobre el detalle de lead `QA-B6 Gimnasio Atlas` (stage APROBADA): `body.innerText` contiene únicamente `["Paso 2","Paso 3","Paso 4"]` como refs numeradas — cero 5/6/7/8/9/10.
+- h2 visibles en orden de render (desktop y mobile 390): `Paso 2 — Evaluación · Primer contacto (opener) · Seguimiento y envío de la demo · Agendar la reunión · Paso 3 — Brief · Paso 4 — Construcción · Publicar el draft · Self-check · Lo que sigue`.
+- Cross-refs renderizadas en vivo: opener → "…desde «Seguimiento»"; agenda lock → "…respondió (en «Seguimiento»)"; "Lo que sigue" → "…el envío del link vive en «Seguimiento»".
+- Screenshots desktop (1600) y mobile (390) capturados; sin errores de consola. (Nota: el wizard se duplica en el DOM por variantes responsive desktop/mobile — una con ancestro `display:none`; pre-existente, ajeno a este sprint.)
+
+**Quality-gate ECC:**
+- `tsc --noEmit`: limpio (exit 0).
+- `eslint` sobre los 7 archivos editados: limpio salvo **1 error pre-existente** `react-hooks/purity` (`Date.now()` en `seguimiento-step.tsx:198`) — línea NO tocada por este sprint (hunks en 66/98/141/203/276/344); es de la misma familia que los pendientes de B0.3.
+- `prisma migrate status`: up to date (61 migraciones). `npm run build`: exit 0, `/setter/leads/[leadId]` compila.
+
+**Verificación humana declarada (Franco, perceptual — sign-off por diseño):**
+- En el detalle de lead, los números visibles van 1→2→3→4 sin hueco; outreach/agenda/draft/self-check no muestran "Paso N".
+- El copy ya no menciona pasos inexistentes (5/6/7/8/9/10): las referencias apuntan a nombres de acción/etapa.
+
+**Pendiente (heredado, opcional):** los errores ESLint `react-hooks/purity` (`page.tsx:34`, `seguimiento-step.tsx:198`) y `set-state-in-effect` (`onboarding-hint.tsx:39`) — ajenos a la presentación; limpieza aparte.
+
+---
+
+## ✅ FG-0 · cierre — Chrome asentado (z-index tokens) + regresiones B9 corregidas   ·   2026-06-18
+
+Pasada final del bloque FG-0. **Solo presentación**: z-index, sombras, superficies, jerarquía y un cableado de tono. NO se tocó lógica, gates, server-actions, schemas ni datos. Tipado estricto, cero `any`. Dos tandas.
+
+### Tanda 1 — z-index del chrome nuevo a tokens
+
+**Problema:** el shell/drawer del setter (B0.1) usaba z-index arbitrarios hardcodeados (`z-[80]`, `z-[100..130]`) — números mágicos sin trazabilidad de que son una escala compartida con el chrome admin (`AdminLayoutClient`).
+
+**Qué se hizo:**
+- `design-tokens.ts` — nuevo tier de chrome en la escala `zIndex`, ENTRE `overlay (40)` y `modal (10000)`, espejando los números del admin: `appShell: 80`, `appDrawerBackdrop: 100`, `appDrawer: 110`, `appNavTrigger: 120`, `appDrawerClose: 130`. Todos por DEBAJO de `modal: 10000` → cualquier diálogo portaleado a `<body>` tapa el shell/drawer (regla absoluta del task respetada).
+- `setter-shell.tsx` — los `z-[80..130]` arbitrarios pasan a consumirse vía `style={{ zIndex: zIndex.* }}` desde los tokens. Motivo del inline-style: Tailwind v4 no emite utilidades `z-*` desde un objeto TS (no está en el theme), así que el token se aplica por estilo, no por clase.
+
+### Tanda 2 — regresiones visuales B9
+
+Disciplina de color B9 conservada (decisión cerrada): el "plano" se ataca con **ELEVACIÓN** (sombra / contraste de superficie) y **jerarquía** (tamaño), NUNCA re-saturando.
+
+1. **Banner de rechazo del wizard** (`lead-wizard.tsx`) — recupera la prominencia que perdió en e26eec9 (era una `Card padding="lg"` con h2 `text-base`; quedó como `Callout` con título colapsado a `text-sm`). Sigue siendo el `Callout danger` de B9 (no se revierte el primitivo), pero el título vuelve a `text-base` y el banner SE ELEVA con sombra (`shadow-[0_16px_40px_...]`) + más aire (`p-5`). Sin re-saturar el rojo.
+2. **Cyan-sobre-cyan del lane prioritario** (`home-sections.tsx`) — el carril `destacado` "Para trabajar ahora" estaba teñido de cyan (`bg-cyan-400/[0.03]` + `ring-cyan-400/15`), lavando las cards accionables (también cyan) que viven dentro. Ahora el lane se separa por **elevación**: superficie neutra (`bg-white/[0.02]` + `ring-white/[0.08]` + sombra). El cyan queda libre para las cards → las accionables vuelven a saltar.
+3. **Elevación del paso activo** (`dossier-stepper.tsx`) — el dot `actual` se eleva sobre el rail con sombra + un `ring` del color del fondo (`ring-[var(--color-void)]`) que abre un hueco contra las líneas conectoras (contraste de superficie). Sin sumar color al cyan que ya tenía.
+4. **Elevación del DecisionBar** (`decision-bar.tsx`) — el panel primario "Tu veredicto" estaba a la misma altura visual que los paneles informativos hermanos (todos `bg-white/5`). Ahora se eleva: superficie más alta (`bg-white/[0.07]`), borde apenas más fuerte (`/15`) y sombra grande. Profundidad por elevación, sin color.
+5. **STAGE_TONE cableado en el admin** (`admin/leados/[leadId]/page.tsx`) — la pill de stage del header del detalle estaba hardcodeada en **cyan**, violando la disciplina B9 (el stage es INFORMATIVO, nunca cyan — reservado a lo accionable). Ahora se cablea a `stageTone(dossier.stage)` vía un map local `STAGE_PILL` (mantiene el lenguaje propio del admin: pills `rounded-full`, borde /20 sobre fondo /10 — NO migra al `<Badge>` del dashboard). Reasigna hue por semántica (EN_REVISION→violet, APROBADA→emerald, RECHAZADA→rose, …); no agrega color, saca un cyan mal usado.
+
+**Archivos tocados (7):**
+- `src/lib/design-tokens.ts` (tier `app*` en `zIndex`)
+- `src/app/(protected)/setter/_components/setter-shell.tsx` (`z-[..]` → `style={{ zIndex }}`)
+- `src/app/(protected)/setter/leads/[leadId]/_components/lead-wizard.tsx` (banner: jerarquía + elevación)
+- `src/app/(protected)/setter/_components/home-sections.tsx` (lane: neutro + elevación)
+- `src/app/(protected)/setter/leads/[leadId]/_components/dossier-stepper.tsx` (paso activo: elevación)
+- `src/app/(protected)/admin/leados/[leadId]/page.tsx` (pill stage → STAGE_TONE + map local)
+- `src/app/(protected)/admin/leados/[leadId]/_components/decision-bar.tsx` (panel primario: elevación)
+
+**Quality-gate ECC:**
+- ✅ `tsc --noEmit` → exit 0 (cero `any`; total errores TS del proyecto: 0).
+- ✅ `eslint` sobre los 7 archivos → exit 0, **cero findings**.
+- ✅ `npm run build` → **verde** (`/setter`, `/setter/leads/[leadId]` y `/admin/leados/[leadId]` compilan).
+- ✅ `prisma migrate status` → up to date (61 migraciones; sprint no toca schema).
+- Formatter: el repo **no usa Prettier** (sin dep ni config) — ESLint 9 es la autoridad de estilo. Un `npx prettier --check` inicial marcó los 7 archivos por su config default (semicolons vs estilo no-semicolon del repo): **ruido descartado**, igual que en B0.3/B0.4. NO se corrió `prettier --write` (rompería la convención + ESLint).
+
+**Reglas absolutas del task (verificadas):**
+- Nada del chrome nuevo por encima de `modal: 10000` → el máximo es `appDrawerClose: 130`. ✅
+- Desaturación B9 conservada: el plano se atacó con elevación + jerarquía; cero re-saturación. El cableado de STAGE_TONE reasigna hue por semántica (saca cyan), no suma color. ✅
+- Solo presentación; tipado estricto. ✅
+
+**Verificación humana declarada (Franco, perceptual — sign-off por diseño del task):**
+- Abrir cada modal del setter → aparece SOBRE el sidebar/drawer (chrome ≤130 < modal 10000).
+- El banner de rechazo recuperó peso en el momento de máximo golpe.
+- Sin cyan-sobre-cyan en el lane prioritario; las cards accionables vuelven a saltar.
+- El paso activo y el DecisionBar se sienten elevados sin más color.
+
+---
+
+## 🏁 CIERRE DE BLOQUE — FG-0 (chrome del setter + reconciliación visual)   ·   2026-06-18
+
+Resumen para el postmortem del próximo bloque. FG-0 dejó la zona `/setter` con chrome propio coherente con el admin y la capa de presentación de LeadOS reconciliada (numeración única + disciplina de color B9 asentada). **Todo el bloque fue presentación**: cero lógica, gates, schemas o datos tocados.
+
+**Los 4 sprints + la pasada de cierre:**
+- **B0.1 — Shell visual del setter.** Geometría rail+contenido espejando el admin (`fixed inset-0`, rail 240px, contenido scrolleable, drawer mobile). Dueño solo de geometría y estado del drawer.
+- **B0.2 — Barra de navegación (`setter-nav`).** Destinos REALES (hoy un único hub `/setter`), navegación SOLO por `triggerTransition()` (sin `<Link>`/`router.push`), pill activa `layoutId` namespaced, `aria-current`. No se inventan rutas.
+- **B0.3 — Reconciliación visual.** Scoreboard declarado de solo lectura (mató la lectura "tabs falsas"), numeración única (el stepper de 5 etapas manda; el home no compite con "Paso N"), hint de-numerado que orienta sin duplicar.
+- **B0.4 — Headers `Paso N` reconciliados.** De-numeró outreach/agenda/draft/self-check como acciones-dentro-de-etapa; conservó `Paso 1–4` solo en los que mapean 1:1 al stepper; eliminó el hueco "Paso 8". Única numeración visible: 1→2→3→4.
+- **FG-0 · cierre (este).** Chrome asentado (z-index del shell/drawer a tokens compartidos con el admin, bajo `modal`) + 5 regresiones visuales B9 corregidas por elevación/jerarquía (banner de rechazo, cyan-sobre-cyan del lane, paso activo, DecisionBar) + STAGE_TONE cableado en la pill del admin.
+
+**Estado al cierre:** `tsc` 0 errores · `eslint` limpio en lo tocado · `build` verde · `migrate status` up to date (61). Chrome del setter ≤ z-index 130, siempre bajo `modal: 10000`.
+
+**Deuda heredada que cruza el límite del bloque (NO de FG-0, limpieza aparte):**
+- Errores ESLint pre-existentes `react-hooks/purity` (`setter/page.tsx:34` `Date.now()` en carga de datos; `seguimiento-step.tsx:198`) y `react-hooks/set-state-in-effect` (`onboarding-hint.tsx:39`, gate first-run de localStorage). Ninguno es presentación; ninguno introducido por FG-0.
+- Caveat de `TransitionContext` (hydration mismatch en dev, prod OK) para el click-nav cuando existan ≥2 destinos de barra (hoy hay uno solo).
+
+**Para el próximo bloque (FG-1):** la base de chrome + presentación queda estable y verificada en static + build. El postmortem entra con disciplina de color B9 asentada y numeración única — cualquier superficie nueva del setter debe deferir al stepper canónico (5 etapas) y a la regla "cyan = accionable, el resto informativo por semántica".
+
+---
+
+> **La fase beta de LeadOS continúa en [`bitacora-beta.md`](./bitacora-beta.md).** De acá en más, todas las entradas de bloque de la fase beta van en ese documento. Este archivo queda como histórico (versiones previas y otros bloques/proyectos).

@@ -19,9 +19,17 @@ const optionalActivityResultSchema = z.preprocess(
   z.nativeEnum(ActivityResult).optional(),
 )
 
+// SISTEMA es un evento interno (reasignación) — solo lo escribe la maquinaria
+// de assignment-trail, nunca el alta manual de actividad comercial.
+const CommercialChannelSchema = z
+  .nativeEnum(ActivityChannel)
+  .refine((channel) => channel !== ActivityChannel.SISTEMA, {
+    message: 'Canal inválido',
+  })
+
 export const CreateActivitySchema = z.object({
   leadId: LeadIdSchema,
-  channel: z.nativeEnum(ActivityChannel),
+  channel: CommercialChannelSchema,
   result: optionalActivityResultSchema,
   notes: optionalNotesSchema,
 })

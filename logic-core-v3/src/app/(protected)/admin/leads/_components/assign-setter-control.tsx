@@ -2,19 +2,35 @@
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { LoaderCircle, UserRound } from 'lucide-react'
+import { LoaderCircle, TriangleAlert, UserRound } from 'lucide-react'
 import { Select } from '@/components/ui'
+import { cn } from '@/lib/utils'
 import { assignLeadSetter } from '../_actions/lead.actions'
+
+/** Espejo del `RatioResumen` de `@/lib/leados/setter-carga` (server-side). */
+type SetterRatio = {
+  evaluadas: number
+  pctDescarte: number | null
+  alarma: boolean
+}
 
 type SetterOption = {
   id: string
   label: string
+  /** Leads activos (no terminales) asignados a este setter. */
+  activos: number
+  /** Ratio descarte/avance; null si todavía no evaluó nada. */
+  ratio: SetterRatio | null
 }
 
 type AssignSetterControlProps = {
   leadId: string
   setters: SetterOption[]
   assignedToId: string | null
+}
+
+function formatActivos(activos: number): string {
+  return `${activos} ${activos === 1 ? 'activo' : 'activos'}`
 }
 
 /**
@@ -78,9 +94,66 @@ export function AssignSetterControl({
             aria-label="Setter asignado"
             options={[
               { value: '', label: 'Sin asignar' },
-              ...setters.map((setter) => ({ value: setter.id, label: setter.label })),
+              ...setters.map((setter) => ({
+                value: setter.id,
+                label: `${setter.label} · ${formatActivos(setter.activos)}`,
+              })),
             ]}
           />
+
+          {/* Carga del equipo: para no asignar a ciegas. Reusa lo que ya se
+              calcula en /admin/leados (carga viva + ratio descarte/avance). */}
+          <div className="space-y-2">
+            <p className="text-[10px] uppercase tracking-[0.22em] text-zinc-500">
+              Carga del equipo
+            </p>
+            {setters.map((setter) => {
+              const isAssigned = setter.id === assignedToId
+              const tieneRatio = setter.ratio !== null && setter.ratio.evaluadas > 0
+              return (
+                <div
+                  key={setter.id}
+                  className={cn(
+                    'flex items-center justify-between gap-3 rounded-2xl border px-3 py-2.5',
+                    isAssigned
+                      ? 'border-cyan-400/25 bg-cyan-400/[0.06]'
+                      : 'border-white/10 bg-black/20',
+                  )}
+                >
+                  <span className="truncate text-sm text-zinc-200">{setter.label}</span>
+                  <div className="flex shrink-0 items-center gap-1.5">
+                    <span className="inline-flex rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[11px] font-medium text-zinc-300">
+                      {formatActivos(setter.activos)}
+                    </span>
+                    {tieneRatio ? (
+                      <span
+                        className={cn(
+                          'inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-medium',
+                          setter.ratio!.alarma
+                            ? 'border-rose-400/25 bg-rose-500/10 text-rose-200'
+                            : 'border-white/10 bg-white/5 text-zinc-400',
+                        )}
+                        title={
+                          setter.ratio!.alarma
+                            ? 'Nunca descarta con volumen suficiente — revisar criterio'
+                            : `${setter.ratio!.evaluadas} evaluadas`
+                        }
+                      >
+                        {setter.ratio!.alarma ? (
+                          <TriangleAlert className="h-3 w-3" strokeWidth={1.5} aria-hidden />
+                        ) : null}
+                        {setter.ratio!.pctDescarte}% desc
+                      </span>
+                    ) : (
+                      <span className="inline-flex rounded-full border border-white/10 bg-black/20 px-2 py-0.5 text-[11px] text-zinc-600">
+                        sin evaluar
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
 
           <div className="flex items-center gap-3">
             <button

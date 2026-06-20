@@ -1,6 +1,8 @@
 import { LeadStatus, NotificationType, Role } from '@prisma/client'
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { SOLO_CONTACTOS_COMERCIALES } from '@/lib/leados/isolation'
+import { sendTelegram } from '@/lib/notifications/telegram'
 
 const ARGENTINA_TIME_ZONE = 'America/Argentina/Buenos_Aires'
 const CRON_MARKER_PREFIX = '[os-follow-up]'
@@ -156,16 +158,6 @@ export async function GET(request: Request) {
     return NextResponse.json({ ok: false, error: 'Unauthorized' }, { status: 401 })
   }
 
-  const telegramBotToken = process.env.TELEGRAM_BOT_TOKEN?.trim()
-  const telegramChatId = process.env.TELEGRAM_CHAT_ID?.trim()
-
-  if (!telegramBotToken || !telegramChatId) {
-    return NextResponse.json(
-      { ok: false, error: 'Telegram is not configured' },
-      { status: 500 }
-    )
-  }
-
   try {
     const now = new Date()
     const { startOfDay, endOfDay } = getArgentinaDayBounds(now)
@@ -206,6 +198,10 @@ export async function GET(request: Request) {
           status: true,
           reactivateAt: true,
           activities: {
+            // "Último contacto" = último contacto COMERCIAL. El rastro de
+            // reasignación (SISTEMA) no es contacto: se excluye para no
+            // ensuciar el digest. (Único cambio acá; el calendario no se toca.)
+            where: SOLO_CONTACTOS_COMERCIALES,
             select: {
               createdAt: true,
             },
@@ -266,25 +262,11 @@ export async function GET(request: Request) {
     }
 
     const message = buildTelegramMessage(leads, now, endOfDay)
-    const telegramResponse = await fetch(
-      `https://api.telegram.org/bot${telegramBotToken}/sendMessage`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          chat_id: telegramChatId,
-          text: message,
-          parse_mode: 'HTML',
-        }),
-      }
-    )
+    const sent = await sendTelegram(message, { parseMode: 'HTML' })
 
-    if (!telegramResponse.ok) {
-      const telegramError = await telegramResponse.text()
-      console.error('[cron os-follow-up] telegram error:', telegramError)
-
+    if (!sent) {
+      // sendTelegram ya logueó el detalle (sin credenciales o error de envío).
+      // No creamos el marker de idempotencia → la próxima corrida reintenta.
       return NextResponse.json(
         { ok: false, error: 'Telegram send failed' },
         { status: 500 }

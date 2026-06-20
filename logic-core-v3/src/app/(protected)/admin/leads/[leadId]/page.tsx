@@ -8,6 +8,7 @@ import { LeadForm } from '../_components/lead-form'
 import { LeadActivityFeed } from '../_components/lead-activity-feed'
 import { LeadDemosPanel } from '../_components/demo-form'
 import { AssignSetterControl } from '../_components/assign-setter-control'
+import { cargarCargaSetters } from '@/lib/leados/setter-carga'
 import { ReunionPanel } from '../_components/reunion-panel'
 import { ChangeStatusSelect } from '../_components/change-status-select'
 import { adminHoverCls } from '@/lib/hover'
@@ -219,6 +220,10 @@ export default async function AgencyOsLeadDetailPage({ params }: LeadPageProps) 
     redirect('/admin/leads')
   }
 
+  // Carga viva + ratio por setter, para que la asignación no sea a ciegas
+  // (reusa el cálculo de /admin/leados; `ahora` se estampa dentro del helper).
+  const cargaSetters = await cargarCargaSetters(setters.map((setter) => setter.id))
+
   const canConvertToProject = lead.status === 'CERRADO' && !lead.project
   // B7: la reunión agendada vía Cal.com — el panel solo aparece con booking real.
   const agenda = parseAgenda(lead.dossier?.agendaJson ?? null)
@@ -407,10 +412,15 @@ export default async function AgencyOsLeadDetailPage({ params }: LeadPageProps) 
           <AssignSetterControl
             leadId={lead.id}
             assignedToId={lead.assignedToId}
-            setters={setters.map((setter) => ({
-              id: setter.id,
-              label: setter.name ?? setter.email,
-            }))}
+            setters={setters.map((setter) => {
+              const carga = cargaSetters.get(setter.id)
+              return {
+                id: setter.id,
+                label: setter.name ?? setter.email,
+                activos: carga?.activos ?? 0,
+                ratio: carga?.ratio ?? null,
+              }
+            })}
           />
 
           <LeadDemosPanel leadId={lead.id} demos={serializeDemos(lead)} />

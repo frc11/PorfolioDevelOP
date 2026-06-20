@@ -32,6 +32,7 @@ import { CanalSeguridad } from '@/app/(protected)/setter/_components/canal-segur
 import { CopyBlock } from '@/app/(protected)/setter/_components/copy-block'
 import { GuardrailRol } from '@/app/(protected)/setter/_components/guardrail-rol'
 import { TextArea } from '@/app/(protected)/setter/_components/text-area'
+import { HerramientaLauncher } from '@/app/(protected)/setter/_components/tool-guide'
 
 type SeguimientoStepProps = {
   leadId: string
@@ -66,10 +67,10 @@ const OPCIONES: OpcionResultado[] = [
     valor: 'RESPONDIO',
     etiqueta: 'Respondió',
     detalle:
-      'Abre la producción de la demo (Paso 3) y frena el follow-up. ¿Aceptó reunirse? Eso se agenda en el Paso 10.',
+      'Abre la producción de la demo (Paso 3 — Brief) y frena el follow-up. ¿Aceptó reunirse? Eso se agenda más abajo, en «Agendar la reunión».',
   },
-  // B7: 'CALL_AGENDADA' ya no se registra a mano — la reunión se agenda en el
-  // Paso 10 con horarios reales, y el booking confirmado mueve el estado.
+  // B7: 'CALL_AGENDADA' ya no se registra a mano — la reunión se agenda en
+  // «Agendar la reunión» con horarios reales, y el booking confirmado mueve el estado.
   {
     valor: 'POSTERGADO',
     etiqueta: 'Postergar',
@@ -98,7 +99,7 @@ function toastDeResultado(resultado: string, proximoToque: string | null): strin
 }
 
 /**
- * Paso 9 — La conversación después del opener: registrar cada toque (la
+ * La conversación después del opener: registrar cada toque (la
  * maquinaria mueve status y cadencia, el setter nunca calcula fechas) y el
  * momento clave del flujo invertido: enviar el link de la demo aprobada —
  * SOLO cuando el lead respondió (o es caliente) y Franco aprobó con URL
@@ -141,11 +142,11 @@ export function SeguimientoStep({
         <div className="flex items-center gap-2.5">
           <Lock size={15} strokeWidth={1.5} className="text-zinc-600" />
           <h2 className="text-base font-semibold text-zinc-400">
-            Paso 9 — Seguimiento y envío de la demo
+            Seguimiento y envío de la demo
           </h2>
         </div>
         <p className="mt-2 text-xs leading-relaxed text-zinc-600">
-          Se abre cuando registrás el primer contacto (Paso 7). Acá vas a seguir la
+          Se abre cuando registrás el primer contacto (el opener). Acá vas a seguir la
           conversación, registrar lo que pase y — en el momento correcto — enviar la demo.
         </p>
       </Card>
@@ -203,7 +204,7 @@ export function SeguimientoStep({
     <Card padding="lg" className="space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-base font-semibold text-zinc-100">
-          Paso 9 — Seguimiento y envío de la demo
+          Seguimiento y envío de la demo
         </h2>
         <Badge tone="zinc" variant="outline">
           {STATUS_LABELS[status]}
@@ -276,7 +277,7 @@ export function SeguimientoStep({
           {stage === 'APROBADA'
             ? 'La demo está aprobada — el link se libera cuando el negocio responda (o si el lead fuera caliente).'
             : respondio
-              ? 'El link se envía cuando Franco apruebe la demo (la producción va por los Pasos 3–6). Hasta ahí, este paso no lo ofrece.'
+              ? 'El link se envía cuando Franco apruebe la demo (la producción pasa por brief, construcción y self-check). Hasta ahí, este paso no lo ofrece.'
               : 'El link de la demo se envía recién cuando el negocio responde Y Franco la aprueba — nunca antes. Mientras tanto: seguí la cadencia.'}
         </p>
       )}
@@ -344,7 +345,7 @@ export function SeguimientoStep({
         </div>
       ) : (
         <p className="text-xs leading-relaxed text-zinc-600">
-          Cuando registres el opener (Paso 7) vas a poder registrar acá cada toque de la
+          Cuando registres el opener vas a poder registrar acá cada toque de la
           conversación.
         </p>
       )}
@@ -370,12 +371,16 @@ export function SeguimientoStep({
         <summary className="cursor-pointer text-xs font-medium text-zinc-500 hover:text-zinc-300">
           ¿Te tiraron una objeción? Armá el input del Gem
         </summary>
-        <div className="mt-3">
+        <div className="mt-3 space-y-3">
           <CopyBlock
             titulo="Bloque para el Gem de outreach — objeciones"
             instruccion="Pegale la objeción al final. El Gem deflecta a reunión: nunca cotiza."
             texto={buildObjecionInputBlock(lead)}
           />
+          <div className="flex items-center gap-2">
+            <span className="text-[11px] text-zinc-600">Abrí el Gem para pegarlo:</span>
+            <HerramientaLauncher id="gemOutreach" />
+          </div>
         </div>
       </details>
     </Card>

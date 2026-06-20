@@ -20,6 +20,7 @@ import { CanalSeguridad } from '@/app/(protected)/setter/_components/canal-segur
 import { CopyBlock } from '@/app/(protected)/setter/_components/copy-block'
 import { GuardrailRol } from '@/app/(protected)/setter/_components/guardrail-rol'
 import { TextArea } from '@/app/(protected)/setter/_components/text-area'
+import { ToolGuide } from '@/app/(protected)/setter/_components/tool-guide'
 
 type OpenerStepProps = {
   leadId: string
@@ -36,7 +37,7 @@ type OpenerStepProps = {
 }
 
 /**
- * Paso 7 — El primer mensaje del flujo invertido: opener dolor-first, solo
+ * El opener — primer mensaje del flujo invertido: dolor-first, solo
  * texto, SIN link (acá la UI sí lo hace imposible: el schema rebota cualquier
  * link, en vivo y server-side). El envío es 100% manual — copiar y pegar en
  * Instagram — y al marcarlo se registra el contacto y la maquinaria arma el
@@ -66,7 +67,7 @@ export function OpenerStep({
         <div className="flex items-center gap-2.5">
           <Lock size={15} strokeWidth={1.5} className="text-zinc-600" />
           <h2 className="text-base font-semibold text-zinc-400">
-            Paso 7 — Primer contacto (opener)
+            Primer contacto (opener)
           </h2>
         </div>
         <p className="mt-2 text-xs leading-relaxed text-zinc-600">
@@ -84,7 +85,7 @@ export function OpenerStep({
           <div className="flex items-center gap-2.5">
             <MessageCircle size={15} strokeWidth={1.5} className="text-zinc-500" />
             <h2 className="text-base font-semibold text-zinc-300">
-              Paso 7 — Primer contacto (opener)
+              Primer contacto (opener)
             </h2>
           </div>
           <Badge tone="emerald" variant="soft">
@@ -96,7 +97,7 @@ export function OpenerStep({
           {proximoToque
             ? ` Próximo toque: ${formatFechaCorta(proximoToque)}.`
             : ''}{' '}
-          La conversación sigue en el Paso 9.
+          La conversación sigue en «Seguimiento».
         </p>
       </Card>
     )
@@ -107,11 +108,11 @@ export function OpenerStep({
     return (
       <Card variant="subtle" padding="lg">
         <h2 className="text-base font-semibold text-zinc-300">
-          Paso 7 — Primer contacto (opener)
+          Primer contacto (opener)
         </h2>
         <p className="mt-2 text-xs leading-relaxed text-zinc-500">
-          Este lead ya respondió — no hace falta opener. Registrá la conversación en el
-          Paso 9 y seguí con la producción de la demo.
+          Este lead ya respondió — no hace falta opener. Registrá la conversación en
+          «Seguimiento» y seguí con la producción de la demo.
         </p>
       </Card>
     )
@@ -152,7 +153,7 @@ export function OpenerStep({
       <div>
         <div className="flex flex-wrap items-center gap-2.5">
           <h2 className="text-base font-semibold text-zinc-100">
-            Paso 7 — Primer contacto (opener)
+            Primer contacto (opener)
           </h2>
           {caliente && (
             <Badge tone="amber" variant="soft" icon={<Flame size={10} strokeWidth={1.5} />}>
@@ -169,12 +170,14 @@ export function OpenerStep({
           <p className="mt-2 max-w-xl rounded-xl border border-amber-400/20 bg-amber-500/[0.05] p-3 text-xs leading-relaxed text-amber-200/90">
             Lead caliente: tenés el camino preventivo disponible — podés producir la demo
             sin esperar respuesta y, cuando esté aprobada, acompañar el opener con el
-            link desde el Paso 9. No es obligación: si el opener solo alcanza, mejor.
+            link desde «Seguimiento». No es obligación: si el opener solo alcanza, mejor.
           </p>
         )}
       </div>
 
       <CanalSeguridad dmsHoy={dmsHoy} />
+
+      <ToolGuide id="gemOutreach" />
 
       {ficha && evaluacion && (
         <CopyBlock
@@ -205,7 +208,7 @@ export function OpenerStep({
       {tieneLink && (
         <p className="text-xs font-medium text-rose-400">
           El opener va SIN link — sacalo. El link viaja recién con la demo aprobada
-          (segundo mensaje, Paso 9).
+          (segundo mensaje, en «Seguimiento»).
         </p>
       )}
 

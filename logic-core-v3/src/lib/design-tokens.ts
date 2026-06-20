@@ -229,6 +229,18 @@ export const zIndex = {
   sticky: 20,
   dropdown: 30,
   overlay: 40,
+  // Chrome del app (shells fijos del portal). Vive MUY por encima del stacking
+  // LOCAL de la página pero por DEBAJO de `modal` (10000): así cualquier diálogo
+  // portaleado a <body> tapa el shell/drawer. Los números espejan el layout
+  // admin (AdminLayoutClient): shell fijo + capas del drawer mobile. Se consumen
+  // vía `style={{ zIndex }}` porque Tailwind v4 no emite utilidades `z-*` desde
+  // este objeto TS (no está en el theme), y `z-[80]` hardcodeado pierde la
+  // trazabilidad de que estos números son una escala compartida con el admin.
+  appShell: 80, // shell fijo (fixed inset-0)
+  appDrawerBackdrop: 100, // scrim del drawer mobile
+  appDrawer: 110, // panel del rail en mobile
+  appNavTrigger: 120, // botón hamburguesa (sobre el panel, para reabrir)
+  appDrawerClose: 130, // botón cerrar dentro del drawer
   modal: 10000, // diálogos portaleados a <body> — sobre el preloader (9999), bajo el cursor
   toast: 10010, // notificaciones — sobre el modal
   tooltip: 10020, // tooltips — lo más alto salvo el cursor del sistema

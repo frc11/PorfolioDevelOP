@@ -8,6 +8,7 @@ import type { DossierStage } from '@prisma/client'
 import { Badge, Button, Card, Field, Input, Toggle } from '@/components/ui'
 import { guardarDraftUrl } from '@/app/(protected)/setter/_actions/dossier.actions'
 import { DraftUrlInputSchema } from '@/app/(protected)/setter/_actions/dossier.schemas'
+import { ToolGuide } from '@/app/(protected)/setter/_components/tool-guide'
 
 type DraftStepProps = {
   leadId: string
@@ -18,7 +19,7 @@ type DraftStepProps = {
 const INSTRUCCIONES = [
   'En Claude Design: Export → HTML standalone (o el .zip si lo ofrece).',
   'Asegurate de que el archivo se llame index.html (si bajó un .zip, que lo tenga adentro).',
-  'Abrí app.netlify.com/drop y arrastrá el archivo (o la carpeta) ahí.',
+  'Abrí Netlify Drop (el botón de acá arriba) y arrastrá el archivo (o la carpeta) ahí.',
   'Copiá la URL que te da Netlify y pegala acá abajo.',
 ] as const
 
@@ -57,7 +58,7 @@ export function DraftStep({ leadId, stage, draftUrl }: DraftStepProps) {
       <Card variant="subtle" padding="lg">
         <div className="flex items-center gap-2.5">
           <Lock size={15} strokeWidth={1.5} className="text-zinc-600" />
-          <h2 className="text-base font-semibold text-zinc-400">Paso 5 — Publicar el draft</h2>
+          <h2 className="text-base font-semibold text-zinc-400">Publicar el draft</h2>
         </div>
         <p className="mt-2 text-xs leading-relaxed text-zinc-600">
           Se habilita cuando arranques la construcción.
@@ -70,7 +71,7 @@ export function DraftStep({ leadId, stage, draftUrl }: DraftStepProps) {
   if (stage !== 'CONSTRUCCION' && draftUrl) {
     return (
       <Card variant="subtle" padding="lg">
-        <h2 className="text-base font-semibold text-zinc-300">Paso 5 — Publicar el draft</h2>
+        <h2 className="text-base font-semibold text-zinc-300">Publicar el draft</h2>
         <a
           href={draftUrl}
           target="_blank"
@@ -89,7 +90,7 @@ export function DraftStep({ leadId, stage, draftUrl }: DraftStepProps) {
     return (
       <Card padding="lg" className="space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="text-base font-semibold text-zinc-100">Paso 5 — Publicar el draft</h2>
+          <h2 className="text-base font-semibold text-zinc-100">Publicar el draft</h2>
           <Badge tone="emerald" variant="soft">Draft publicado</Badge>
         </div>
         <a
@@ -124,12 +125,14 @@ export function DraftStep({ leadId, stage, draftUrl }: DraftStepProps) {
   return (
     <Card padding="lg" className="space-y-5">
       <div>
-        <h2 className="text-base font-semibold text-zinc-100">Paso 5 — Publicar el draft</h2>
+        <h2 className="text-base font-semibold text-zinc-100">Publicar el draft</h2>
         <p className="mt-1 max-w-xl text-xs leading-relaxed text-zinc-500">
           Publicás un borrador para que Franco lo revise. Publicar acá NO es enviárselo al
           negocio: la versión permanente la publica Franco cuando aprueba.
         </p>
       </div>
+
+      <ToolGuide id="netlifyDrop" />
 
       <ol className="space-y-1.5 text-xs leading-relaxed text-zinc-400">
         {INSTRUCCIONES.map((paso, index) => (

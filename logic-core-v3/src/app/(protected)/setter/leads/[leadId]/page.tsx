@@ -1,14 +1,16 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { ArrowLeft, ExternalLink, Flame } from 'lucide-react'
+import { ArrowLeft, ArrowLeftRight, ExternalLink, Flame } from 'lucide-react'
 import type { LeadStatus } from '@prisma/client'
 import { Badge } from '@/components/ui'
 import { requireSetter } from '@/lib/auth-guards'
 import { countFollowUps } from '@/lib/follow-up'
+import { getUltimaAsignacion } from '@/lib/leados/assignment-trail'
 import { getOwnedDossier } from '@/lib/leados/dossier'
+import { buildHomeLeads } from '@/lib/leados/home'
 import { contarDmsHoy, listOwnedLeadActivities } from '@/lib/leados/outreach'
-import { getOwnedLead } from '@/lib/leados/ownership'
+import { getOwnedLead, listOwnedLeads } from '@/lib/leados/ownership'
 import {
   leadRespondio,
   parseAgenda,
@@ -16,11 +18,18 @@ import {
   parseEvaluacion,
   parseFicha,
   parseSelfCheck,
+  particionarCartera,
   ultimoRechazo,
   STAGE_LABELS,
   STATUS_LABELS,
 } from '@/lib/leados/flow'
+import {
+  construirRecorrido,
+  esColaKey,
+  type RecorridoView,
+} from '@/lib/leados/recorrido'
 import { LeadWizard, type WizardData } from './_components/lead-wizard'
+import { RecorridoStrip } from './_components/recorrido-strip'
 
 export const metadata: Metadata = {
   title: 'Lead · LeadOS · develOP',
@@ -41,10 +50,12 @@ const STATUS_TONES: Record<LeadStatus, 'cyan' | 'emerald' | 'amber' | 'rose' | '
 
 type SetterLeadPageProps = {
   params: Promise<{ leadId: string }>
+  searchParams: Promise<{ cola?: string }>
 }
 
-export default async function SetterLeadPage({ params }: SetterLeadPageProps) {
+export default async function SetterLeadPage({ params, searchParams }: SetterLeadPageProps) {
   const { leadId } = await params
+  const { cola } = await searchParams
   const userId = await requireSetter()
 
   // Regla de oro de ownership: lead ajeno o inexistente → 404, sin leakear.
@@ -53,11 +64,32 @@ export default async function SetterLeadPage({ params }: SetterLeadPageProps) {
     notFound()
   }
 
-  const [dossier, actividades, dmsHoy] = await Promise.all([
+  // Recorrido de cola (B-beta): solo si se entró desde una cola (`?cola=…`).
+  // Recomputa la cartera propia (aislada por assignedToId) con la MISMA
+  // clasificación del home → prev/next sigue el orden exacto de "Mi día".
+  // No toca gates: cada lead abre su wizard completo igual que en modo isla.
+  let recorrido: RecorridoView | null = null
+  if (esColaKey(cola)) {
+    const particion = particionarCartera(buildHomeLeads(await listOwnedLeads(userId)))
+    recorrido = construirRecorrido(particion, cola, leadId)
+  }
+
+  const [dossier, actividades, dmsHoy, ultimaAsignacion] = await Promise.all([
     getOwnedDossier(leadId, userId),
     listOwnedLeadActivities(leadId, userId),
     contarDmsHoy(userId),
+    getUltimaAsignacion(leadId, userId),
   ])
+  // Por qué este lead está en tu cartera: el rastro de la última reasignación.
+  // Que no aparezca mudo. (Solo "entró"; el aviso de "salió" al setter que lo
+  // perdió es el 0.5.8 — sin acceso al lead ya no puede verlo en su historial.)
+  const fechaAsignacion = ultimaAsignacion
+    ? new Intl.DateTimeFormat('es-AR', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+      }).format(ultimaAsignacion.createdAt)
+    : null
   const evaluacion = parseEvaluacion(dossier?.evaluacionJson ?? null)
   const caliente =
     evaluacion !== null && evaluacion.score >= 4 && dossier?.stage !== 'DESCARTADA'
@@ -112,6 +144,8 @@ export default async function SetterLeadPage({ params }: SetterLeadPageProps) {
 
   return (
     <div className="space-y-6">
+      {recorrido && <RecorridoStrip recorrido={recorrido} />}
+
       <header className="space-y-3">
         <Link
           href="/setter"
@@ -164,6 +198,21 @@ export default async function SetterLeadPage({ params }: SetterLeadPageProps) {
         {lead.notes && (
           <p className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-3 text-xs leading-relaxed text-zinc-500">
             <span className="font-semibold text-zinc-400">Notas del lead:</span> {lead.notes}
+          </p>
+        )}
+
+        {fechaAsignacion && (
+          <p className="flex items-center gap-2 rounded-xl border border-cyan-400/15 bg-cyan-500/[0.05] px-3 py-2 text-xs text-cyan-200/90">
+            <ArrowLeftRight
+              size={13}
+              strokeWidth={1.5}
+              aria-hidden
+              className="shrink-0 text-cyan-300"
+            />
+            <span>
+              Te asignaron este lead{' '}
+              <span className="font-semibold text-cyan-100">el {fechaAsignacion}</span>
+            </span>
           </p>
         )}
       </header>

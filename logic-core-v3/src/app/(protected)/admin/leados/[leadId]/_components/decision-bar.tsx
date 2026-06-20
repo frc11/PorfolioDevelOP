@@ -175,7 +175,10 @@ export function DecisionBar({ leadId, businessName }: DecisionBarProps) {
   }
 
   return (
-    <section className="rounded-[28px] border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
+    // Panel primario de la revisión: se ELEVA sobre los paneles informativos
+    // hermanos (misma superficie white/5) con una superficie más alta + sombra
+    // + borde apenas más fuerte. Profundidad por elevación, sin sumar color.
+    <section className="rounded-[28px] border border-white/15 bg-white/[0.07] p-5 shadow-[0_20px_60px_rgba(0,0,0,0.45)] backdrop-blur-xl">
       <h3 className="text-base font-semibold text-white">Tu veredicto</h3>
       <p className="mt-1 text-sm text-zinc-400">
         Aprobar registra la URL permanente que ya publicaste. Rechazar le da al

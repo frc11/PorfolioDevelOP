@@ -58,7 +58,11 @@ export function DossierStepper({ stage }: { stage: DossierStage | null }) {
                 className={cn(
                   'flex h-7 w-7 shrink-0 items-center justify-center rounded-full border text-[11px] font-semibold',
                   estado === 'hecho' && 'border-cyan-500/40 bg-cyan-500/15 text-cyan-300',
-                  estado === 'actual' && 'border-cyan-400 bg-cyan-400 text-zinc-950',
+                  // El paso actual se ELEVA sobre el rail: sombra + un ring del
+                  // color del fondo que abre un hueco contra las líneas conectoras
+                  // (contraste de superficie, sin sumar color).
+                  estado === 'actual' &&
+                    'border-cyan-400 bg-cyan-400 text-zinc-950 shadow-[0_4px_12px_rgba(0,0,0,0.5)] ring-2 ring-[var(--color-void)]',
                   estado === 'pendiente' && 'border-white/10 bg-white/[0.03] text-zinc-500',
                   estado === 'bloqueado' && 'border-white/[0.06] bg-transparent text-zinc-700',
                 )}

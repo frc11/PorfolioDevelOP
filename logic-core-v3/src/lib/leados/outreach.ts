@@ -9,6 +9,7 @@
  */
 import type { OsLeadActivity } from '@prisma/client'
 import { prisma } from '@/lib/prisma'
+import { SOLO_CONTACTOS_COMERCIALES } from '@/lib/leados/isolation'
 import { getOwnedLead } from '@/lib/leados/ownership'
 
 const ARGENTINA_TIME_ZONE = 'America/Argentina/Buenos_Aires'
@@ -42,8 +43,11 @@ export async function listOwnedLeadActivities(
 ): Promise<OsLeadActivity[] | null> {
   const lead = await getOwnedLead(leadId, userId)
   if (!lead) return null
+  // Solo contactos comerciales reales: el rastro de reasignación (SISTEMA)
+  // queda fuera para no inflar `contactos`/`ultimoContacto` ni abrir el paso
+  // de seguimiento antes del primer contacto real.
   return prisma.osLeadActivity.findMany({
-    where: { leadId: lead.id },
+    where: { leadId: lead.id, ...SOLO_CONTACTOS_COMERCIALES },
     orderBy: { createdAt: 'desc' },
   })
 }

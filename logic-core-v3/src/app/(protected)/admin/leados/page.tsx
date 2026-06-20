@@ -13,6 +13,12 @@ import {
   pctDescarte,
   type EvaluacionDeSetter,
 } from '@/lib/leados/revision'
+import {
+  detectarAtascos,
+  resumirPipeline,
+  type DossierPipelineInput,
+} from '@/lib/leados/pipeline'
+import { PipelineCockpit } from './_components/pipeline-board'
 
 export const dynamic = 'force-dynamic'
 
@@ -23,7 +29,7 @@ function setterLabel(assignedTo: { name: string | null; email: string } | null):
 export default async function LeadOsRevisionPage() {
   // Sin unstable_cache a propósito: la cola es operativa y chica (un setter);
   // datos frescos en cada carga evitan revisar sobre un estado viejo.
-  const [enRevision, dossiersEvaluados] = await Promise.all([
+  const [enRevision, dossiersEvaluados, pipelineDossiers] = await Promise.all([
     prisma.osLeadDossier.findMany({
       where: { stage: 'EN_REVISION' },
       select: {
@@ -49,9 +55,40 @@ export default async function LeadOsRevisionPage() {
         },
       },
     }),
+    // Panorama de producción: el tramo en vuelo (FICHA→EN_REVISION) + RECHAZADA
+    // (loop-back que se vigila como atasco). Sólo presentación: lee el `stage`
+    // que ya existe, jamás lo escribe. `updatedAt` es el proxy de antigüedad.
+    prisma.osLeadDossier.findMany({
+      where: {
+        stage: {
+          in: ['FICHA', 'EVALUADA', 'BRIEF', 'CONSTRUCCION', 'EN_REVISION', 'RECHAZADA'],
+        },
+      },
+      select: {
+        leadId: true,
+        stage: true,
+        updatedAt: true,
+        lead: {
+          select: {
+            businessName: true,
+            assignedTo: { select: { name: true, email: true } },
+          },
+        },
+      },
+    }),
   ])
 
   const ahora = new Date()
+
+  const pipelineInputs = pipelineDossiers.map<DossierPipelineInput>((dossier) => ({
+    leadId: dossier.leadId,
+    stage: dossier.stage,
+    businessName: dossier.lead.businessName,
+    setter: setterLabel(dossier.lead.assignedTo),
+    desde: dossier.updatedAt,
+  }))
+  const resumenPipeline = resumirPipeline(pipelineInputs, ahora)
+  const atascos = detectarAtascos(pipelineInputs, ahora)
 
   const cola = ordenarCola(
     enRevision.map((dossier) => {
@@ -85,10 +122,11 @@ export default async function LeadOsRevisionPage() {
 
   return (
     <section className="space-y-6">
+      <PipelineCockpit resumen={resumenPipeline} atascos={atascos} ahora={ahora} />
+
       <div className="flex flex-col gap-4 rounded-3xl border border-white/10 bg-white/5 p-5 backdrop-blur-xl sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="text-xs tracking-tight text-zinc-500">develOP / LeadOS</p>
-          <h2 className="mt-2 text-3xl font-semibold tracking-tight text-white">
+          <h2 className="text-3xl font-semibold tracking-tight text-white">
             Cola de revisión
           </h2>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-400">
@@ -193,9 +231,10 @@ export default async function LeadOsRevisionPage() {
               const pct30d = pctDescarte(ratio.ultimos30d)
               const alarma = alarmaNuncaDescarta(ratio.total)
               return (
-                <div
+                <Link
                   key={ratio.setterId}
-                  className="rounded-2xl border border-white/10 bg-black/20 p-4"
+                  href={`/admin/leados/setter/${ratio.setterId}`}
+                  className="group block rounded-2xl border border-white/10 bg-black/20 p-4 transition-all hover:border-cyan-400/20 hover:bg-black/30"
                 >
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <p className="text-sm font-medium text-zinc-100">
@@ -243,7 +282,12 @@ export default async function LeadOsRevisionPage() {
                       en el total, no en los 30 días.
                     </p>
                   ) : null}
-                </div>
+
+                  <div className="mt-3 flex items-center gap-1.5 text-xs font-medium text-zinc-500 transition-colors group-hover:text-cyan-300">
+                    Ver últimas evaluaciones
+                    <ChevronRight className="h-3.5 w-3.5" strokeWidth={1.5} />
+                  </div>
+                </Link>
               )
             })}
           </div>

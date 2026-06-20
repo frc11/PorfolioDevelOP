@@ -32,16 +32,16 @@ export type WizardData = {
   ficha: Ficha | null
   evaluacion: Evaluacion | null
   brief: Brief | null
-  /** B4: draft publicado y self-check guardado (pasos 5–6). */
+  /** B4: draft publicado y self-check guardado (acciones de la construcción). */
   draftUrl: string | null
   selfCheck: SelfCheck | null
   /** B4: ISO de la última movida comercial si el lead respondió; null si no. */
   respondioDesde: string | null
   /** B5: último rechazo del admin — guía de retrabajo cuando stage=RECHAZADA. */
   ultimoRechazo: Rechazo | null
-  /** B7: reunión agendada vía Cal.com (uid + traspaso) — Paso 10. */
+  /** B7: reunión agendada vía Cal.com (uid + traspaso) — acción «Agendar la reunión». */
   agenda: Agenda | null
-  /** B6: la conversación de outreach (pasos 7 y 9). */
+  /** B6: la conversación de outreach (opener + seguimiento). */
   outreach: {
     contactos: number
     followUpCount: number
@@ -58,7 +58,7 @@ const POST_BRIEF_NOTAS: Partial<Record<DossierStage, string>> = {
   EN_REVISION:
     'La demo está en revisión de Franco. Cuando la apruebe o pida correcciones, lo ves acá y en tu cartera.',
   APROBADA:
-    'Demo aprobada 🎉 — el envío del link vive en el Paso 9: el panel arma el mensaje cuando el flujo lo habilita.',
+    'Demo aprobada 🎉 — el envío del link vive en «Seguimiento»: el panel arma el mensaje cuando el flujo lo habilita.',
 }
 
 export function LeadWizard({ data }: { data: WizardData }) {
@@ -89,8 +89,11 @@ export function LeadWizard({ data }: { data: WizardData }) {
           tone="danger"
           accent
           icon={OctagonAlert}
-          title="Franco pidió correcciones"
-          className="p-4 text-sm"
+          title={<span className="text-base">Franco pidió correcciones</span>}
+          // Momento de máximo golpe del setter: recupera la jerarquía que tenía
+          // como Card (título text-base + más aire) y SE ELEVA con sombra —
+          // sigue siendo el Callout danger de B9, sin re-saturar el rojo.
+          className="p-5 text-sm shadow-[0_16px_40px_rgba(0,0,0,0.4)]"
         >
           <div className="space-y-1.5 leading-relaxed text-zinc-200">
             <p>
@@ -128,9 +131,10 @@ export function LeadWizard({ data }: { data: WizardData }) {
         descartado={descartado}
       />
 
-      {/* B6: la conversación (pasos 7 y 9 de la metodología) va pegada a la
+      {/* B6: la conversación (opener + seguimiento) va pegada a la
           evaluación — el opener sale apenas hay veredicto, y la producción
-          (pasos 3–6) se abre recién cuando la conversación lo habilita. */}
+          (brief → construcción → draft → self-check) se abre recién cuando la
+          conversación lo habilita. */}
       {!descartado && (
         <OpenerStep
           leadId={lead.id}

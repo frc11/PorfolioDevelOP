@@ -88,7 +88,7 @@ export function SelfCheckStep({ leadId, stage, draftUrl, selfCheck, brief }: Sel
       <Card variant="subtle" padding="lg">
         <div className="flex items-center gap-2.5">
           <Lock size={15} strokeWidth={1.5} className="text-zinc-600" />
-          <h2 className="text-base font-semibold text-zinc-400">Paso 6 — Self-check</h2>
+          <h2 className="text-base font-semibold text-zinc-400">Self-check</h2>
         </div>
         <p className="mt-2 text-xs leading-relaxed text-zinc-600">
           Se habilita con la demo construida y el draft publicado.
@@ -102,10 +102,10 @@ export function SelfCheckStep({ leadId, stage, draftUrl, selfCheck, brief }: Sel
       <Card variant="subtle" padding="lg">
         <div className="flex items-center gap-2.5">
           <Lock size={15} strokeWidth={1.5} className="text-zinc-500" />
-          <h2 className="text-base font-semibold text-zinc-300">Paso 6 — Self-check</h2>
+          <h2 className="text-base font-semibold text-zinc-300">Self-check</h2>
         </div>
         <p className="mt-2 text-xs leading-relaxed text-zinc-500">
-          Publicá el draft (Paso 5) primero: el self-check se hace mirando la demo publicada.
+          Publicá el draft primero: el self-check se hace mirando la demo publicada.
         </p>
       </Card>
     )
@@ -116,7 +116,7 @@ export function SelfCheckStep({ leadId, stage, draftUrl, selfCheck, brief }: Sel
     return (
       <Card variant="subtle" padding="lg" className="space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="text-base font-semibold text-zinc-300">Paso 6 — Self-check</h2>
+          <h2 className="text-base font-semibold text-zinc-300">Self-check</h2>
           <Badge tone="emerald" variant="soft">Enviado a revisión</Badge>
         </div>
         {selfCheck && (
@@ -136,7 +136,7 @@ export function SelfCheckStep({ leadId, stage, draftUrl, selfCheck, brief }: Sel
   return (
     <Card padding="lg" className="space-y-5">
       <div>
-        <h2 className="text-base font-semibold text-zinc-100">Paso 6 — Self-check</h2>
+        <h2 className="text-base font-semibold text-zinc-100">Self-check</h2>
         <p className="mt-1 max-w-xl text-xs leading-relaxed text-zinc-500">
           Revisá la demo publicada punto por punto. Los obligatorios bloquean el envío si fallan;
           los de la sección &quot;Ojo de diseño&quot; no bloquean, pero viajan a la revisión de

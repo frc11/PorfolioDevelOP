@@ -17,6 +17,7 @@ import {
 } from '@prisma/client'
 import bcrypt from 'bcryptjs'
 import { DEFAULT_AGENCY_SETTINGS, DEFAULT_AGENCY_SETTINGS_ID } from '../src/lib/agency-settings'
+import { assertDevSeedTarget, requireSeedPassword } from './seed-guard.ts'
 
 
 const prisma = new PrismaClient()
@@ -69,11 +70,13 @@ function daysFromNow(days: number) {
 }
 
 async function main() {
+  assertDevSeedTarget('seed.ts')
+
   const [adminPassword, clientPassword, clientBPassword, setterPassword] = await Promise.all([
-    bcrypt.hash('Admin1234!', 12),
-    bcrypt.hash('Cliente1234!', 12),
-    bcrypt.hash('ClienteB1234!', 12),
-    bcrypt.hash('Setter1234!', 12),
+    bcrypt.hash(requireSeedPassword('SEED_ADMIN_PASSWORD'), 12),
+    bcrypt.hash(requireSeedPassword('SEED_CLIENT_PASSWORD'), 12),
+    bcrypt.hash(requireSeedPassword('SEED_CLIENT_B_PASSWORD'), 12),
+    bcrypt.hash(requireSeedPassword('SEED_SETTER_PASSWORD'), 12),
   ])
 
   const admin = await prisma.user.upsert({
@@ -844,11 +847,11 @@ async function main() {
       `- Notificaciones: ${notifications.length}`,
       `- Modulos premium: ver tabla premium_module en BD`,
 
-      'Credenciales:',
-      '- admin@develop.com / Admin1234!',
-      '- cliente@sanmiguel.com / Cliente1234!',
-      '- qa-cliente-b@develop.test / ClienteB1234! (QA, aislamiento)',
-      '- setter-qa@develop.test / Setter1234! (SETTER QA; passwordResetRequired: false a propósito — ver B8A/H8)',
+      'Credenciales (valores en las env vars correspondientes — ver .env):',
+      '- admin@develop.com / $SEED_ADMIN_PASSWORD',
+      '- cliente@sanmiguel.com / $SEED_CLIENT_PASSWORD',
+      '- qa-cliente-b@develop.test / $SEED_CLIENT_B_PASSWORD (QA, aislamiento)',
+      '- setter-qa@develop.test / $SEED_SETTER_PASSWORD (SETTER QA; passwordResetRequired: false a propósito — ver B8A/H8)',
       'Notas de compatibilidad del schema:',
       '- service.name no existe; se sembraron 2 servicios por tipo.',
       '- project.deadline no existe; se agregó al description.',

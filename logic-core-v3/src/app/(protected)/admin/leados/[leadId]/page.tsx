@@ -3,6 +3,8 @@ import { redirect } from 'next/navigation'
 import { ExternalLink, Flame, UserRound } from 'lucide-react'
 import { AdminBackButton } from '../../_components/AdminBackButton'
 import { prisma } from '@/lib/prisma'
+import { cn } from '@/lib/utils'
+import { stageTone, type LeadosTone } from '@/lib/leados-ui'
 import {
   parseBrief,
   parseEvaluacion,
@@ -23,6 +25,23 @@ import {
 } from './_components/dossier-panels'
 
 export const dynamic = 'force-dynamic'
+
+/**
+ * Pill de stage del admin, cableada a la disciplina de color B9 (`STAGE_TONE`):
+ * el stage es INFORMATIVO, nunca cyan (reservado a lo accionable). Mantiene el
+ * lenguaje propio del admin (pills `rounded-full`, borde /20 sobre fondo /10),
+ * no migra al `<Badge>` del dashboard. Clases completas y estáticas para que
+ * Tailwind no las purgue.
+ */
+const STAGE_PILL: Record<LeadosTone, string> = {
+  cyan: 'border-cyan-400/20 bg-cyan-400/10 text-cyan-200',
+  emerald: 'border-emerald-400/20 bg-emerald-500/10 text-emerald-200',
+  amber: 'border-amber-400/20 bg-amber-400/10 text-amber-200',
+  rose: 'border-rose-400/20 bg-rose-500/10 text-rose-200',
+  violet: 'border-violet-400/20 bg-violet-500/10 text-violet-200',
+  blue: 'border-blue-400/20 bg-blue-500/10 text-blue-200',
+  zinc: 'border-white/10 bg-black/20 text-zinc-300',
+}
 
 type RevisionPageProps = {
   params: Promise<{ leadId: string }>
@@ -124,7 +143,12 @@ export default async function LeadOsRevisionDetailPage({ params }: RevisionPageP
                 Caliente
               </span>
             ) : null}
-            <span className="inline-flex rounded-full border border-cyan-400/20 bg-cyan-400/10 px-2.5 py-1 text-[11px] font-medium text-cyan-200">
+            <span
+              className={cn(
+                'inline-flex rounded-full border px-2.5 py-1 text-[11px] font-medium',
+                STAGE_PILL[stageTone(dossier.stage)],
+              )}
+            >
               {STAGE_LABELS[dossier.stage]}
             </span>
             <span className="inline-flex rounded-full border border-white/10 bg-black/20 px-2.5 py-1 text-[11px] font-medium text-zinc-300">

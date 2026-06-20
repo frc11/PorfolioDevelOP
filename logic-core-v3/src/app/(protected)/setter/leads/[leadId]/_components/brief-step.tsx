@@ -1,17 +1,22 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useMemo, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { CheckCircle2, Hourglass, Lock, PencilLine } from 'lucide-react'
 import type { DossierStage } from '@prisma/client'
 import { Badge, Button, Card, Field, Input } from '@/components/ui'
+import { fail } from '@/lib/action-utils'
 import type { Brief, Evaluacion, Ficha } from '@/lib/leados/contracts'
 import { buildBriefInputBlock, type CopyBlockLead } from '@/lib/leados/copy-blocks'
+import { useAutosave } from '@/lib/use-autosave'
+import { useUnsavedGuard } from '@/lib/use-unsaved-guard'
 import { guardarBrief } from '@/app/(protected)/setter/_actions/dossier.actions'
-import { BriefInputSchema } from '@/app/(protected)/setter/_actions/dossier.schemas'
+import { BriefInputSchema, type BriefInput } from '@/app/(protected)/setter/_actions/dossier.schemas'
+import { AutosaveStatus } from '@/app/(protected)/setter/_components/autosave-status'
 import { CopyBlock } from '@/app/(protected)/setter/_components/copy-block'
 import { TextArea } from '@/app/(protected)/setter/_components/text-area'
+import { ToolGuide } from '@/app/(protected)/setter/_components/tool-guide'
 
 type BriefStepProps = {
   leadId: string
@@ -45,6 +50,21 @@ function estadoInicial(brief: Brief | null, businessName: string): BriefFormStat
   }
 }
 
+/** Form → input del brief: mismo mapeo para el guardado manual y el autosave. */
+function aPayloadBrief(state: BriefFormState): BriefInput {
+  return {
+    pegadoGem: state.pegadoGem,
+    titulo: state.titulo,
+    concepto: state.concepto || undefined,
+    secciones: state.seccionesTexto
+      .split('\n')
+      .map((linea) => linea.trim())
+      .filter(Boolean),
+    notasMarca: state.notasMarca || undefined,
+    cta: state.cta || undefined,
+  }
+}
+
 export function BriefStep({
   leadId,
   lead,
@@ -62,24 +82,38 @@ export function BriefStep({
   const [sanityOk, setSanityOk] = useState(false)
   const [isPending, startTransition] = useTransition()
 
+  // El form se muestra en la captura inicial (EVALUADA con gate abierto) o al
+  // re-pegar desde el sanity-check (BRIEF + editando).
+  const formVisible = (stage === 'EVALUADA' && gateAbierto) || editando
+  const briefValido = useMemo(() => BriefInputSchema.safeParse(aPayloadBrief(form)).success, [form])
+
+  // Autosave SOLO en el re-pegado (BRIEF + editando): ahí `guardarBrief`
+  // re-escribe `briefJson` SIN transición — el bloque EVALUADA→BRIEF de la
+  // action queda muerto porque el stage ya es BRIEF. La captura inicial en
+  // EVALUADA NO se autoguarda a propósito: ese primer guardado ES la transición
+  // deliberada de stage, y la cubre la guardia de salida (no el autosave).
+  // Ownership intacto: reusa la misma action (assignedToId server-side).
+  const autosave = useAutosave<BriefFormState>({
+    value: form,
+    enabled: stage === 'BRIEF' && editando && briefValido,
+    save: async (estado) => {
+      const parsed = BriefInputSchema.safeParse(aPayloadBrief(estado))
+      if (!parsed.success) return fail('Borrador incompleto')
+      return guardarBrief(leadId, parsed.data)
+    },
+  })
+
+  // Avisar ante cambios sin guardar siempre que el form esté visible — incluida
+  // la captura inicial en EVALUADA, que el autosave no cubre.
+  useUnsavedGuard(formVisible && autosave.isDirty)
+
   const set = <Campo extends keyof BriefFormState>(campo: Campo, valor: string) => {
     setForm((actual) => ({ ...actual, [campo]: valor }))
   }
 
   const guardar = () => {
     setServerError(null)
-    const payload = {
-      pegadoGem: form.pegadoGem,
-      titulo: form.titulo,
-      concepto: form.concepto || undefined,
-      secciones: form.seccionesTexto
-        .split('\n')
-        .map((linea) => linea.trim())
-        .filter(Boolean),
-      notasMarca: form.notasMarca || undefined,
-      cta: form.cta || undefined,
-    }
-    const parsed = BriefInputSchema.safeParse(payload)
+    const parsed = BriefInputSchema.safeParse(aPayloadBrief(form))
     if (!parsed.success) {
       const nuevos: FormErrors = {}
       for (const issue of parsed.error.issues) {
@@ -98,6 +132,7 @@ export function BriefStep({
         return
       }
       toast.success('Brief guardado — dale una leída antes de seguir.')
+      autosave.markSaved()
       setEditando(false)
       setSanityOk(false)
       router.refresh()
@@ -129,7 +164,7 @@ export function BriefStep({
         </div>
         <p className="mt-2 max-w-xl text-xs leading-relaxed text-zinc-500">
           Este lead avanza — falta que responda el primer contacto para arrancar la demo. Mandá
-          el opener desde el Paso 7 y registrá la conversación en el Paso 9: cuando responda
+          el opener y registrá la conversación en «Seguimiento»: cuando responda
           (o si la evaluación hubiera dado 4–5), este paso se abre solo.
         </p>
       </Card>
@@ -149,6 +184,8 @@ export function BriefStep({
             brief es el plano de la demo: cuanto más concreto, mejor sale.
           </p>
         </div>
+
+        <ToolGuide id="gemDiseno" />
 
         {ficha && evaluacion && (
           <CopyBlock
@@ -220,7 +257,7 @@ export function BriefStep({
 
         {serverError && <p className="text-xs text-red-400">{serverError}</p>}
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
           <Button onClick={guardar} loading={isPending}>
             Guardar brief
           </Button>
@@ -229,6 +266,7 @@ export function BriefStep({
               Cancelar
             </Button>
           )}
+          <AutosaveStatus phase={autosave.phase} isDirty={autosave.isDirty} busy={isPending} />
         </div>
       </Card>
     )

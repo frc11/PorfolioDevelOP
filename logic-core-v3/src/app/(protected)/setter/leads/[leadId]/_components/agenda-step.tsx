@@ -47,7 +47,7 @@ function hintDecisor(ficha: Ficha | null): string {
 }
 
 /**
- * Paso 10 — Agendar la reunión: cuando la conversación llega a "sí,
+ * Agendar la reunión: cuando la conversación llega a "sí,
  * reunámonos", el setter confirma que habla con el decisor, ofrece 3
  * horarios REALES de la agenda de Franco (Cal.com, huso BA) y confirma el
  * booking con las notas de traspaso obligatorias. La confirmación al
@@ -82,7 +82,7 @@ export function AgendaStep({
           <div className="flex items-center gap-2.5">
             <CalendarCheck2 size={15} strokeWidth={1.5} className="text-emerald-400" />
             <h2 className="text-base font-semibold text-zinc-100">
-              Paso 10 — Reunión agendada
+              Reunión agendada
             </h2>
           </div>
           <Badge tone="emerald" variant="soft">
@@ -126,12 +126,12 @@ export function AgendaStep({
       <Card variant="subtle" padding="lg">
         <div className="flex items-center gap-2.5">
           <Lock size={15} strokeWidth={1.5} className="text-zinc-600" />
-          <h2 className="text-base font-semibold text-zinc-400">Paso 10 — Agendar la reunión</h2>
+          <h2 className="text-base font-semibold text-zinc-400">Agendar la reunión</h2>
         </div>
         <p className="mt-2 text-xs leading-relaxed text-zinc-600">
           {status === 'CALL_AGENDADA'
             ? 'Este lead figura con reunión agendada (registrada por otra vía). El booking con horarios reales vive en este paso para los próximos.'
-            : 'Se abre cuando el negocio respondió (Paso 9) y en la conversación acepta reunirse. Acá le ofrecés horarios reales de la agenda de Franco y confirmás el booking.'}
+            : 'Se abre cuando el negocio respondió (en «Seguimiento») y en la conversación acepta reunirse. Acá le ofrecés horarios reales de la agenda de Franco y confirmás el booking.'}
         </p>
       </Card>
     )
@@ -187,7 +187,7 @@ export function AgendaStep({
   return (
     <Card padding="lg" className="space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h2 className="text-base font-semibold text-zinc-100">Paso 10 — Agendar la reunión</h2>
+        <h2 className="text-base font-semibold text-zinc-100">Agendar la reunión</h2>
         {/* B8A-II: el paso se abre con RESPONDIO, no con un "aceptó" confirmado.
             La etiqueta dice disponibilidad, no afirma un hecho que no verificamos. */}
         <Badge tone="cyan" variant="soft">
