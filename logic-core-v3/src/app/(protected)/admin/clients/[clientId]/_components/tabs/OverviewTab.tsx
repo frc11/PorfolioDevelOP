@@ -2,6 +2,7 @@ import { prisma } from '@/lib/prisma'
 import { Card, StatCard } from '@/components/ui'
 import { HoverScaleCard } from '@/app/(protected)/admin/clients/_components/HoverScaleCard'
 import { ResendCredentialsButton } from '../ResendCredentialsButton'
+import { InternalNotesCard } from '../InternalNotesCard'
 import { PlanAssignmentCard } from '../PlanAssignmentCard'
 import { BillingOverrideCard } from '../BillingOverrideCard'
 
@@ -92,20 +93,7 @@ export async function OverviewTab({ clientId }: OverviewTabProps) {
           )}
         </Card>
 
-        <Card variant="elevated" padding="lg">
-          <p className="mb-4 text-[10px] uppercase tracking-[0.24em] text-zinc-500">
-            Notas internas
-          </p>
-          {client.internalNotes ? (
-            <p className="whitespace-pre-wrap text-sm leading-6 text-zinc-200">
-              {client.internalNotes}
-            </p>
-          ) : (
-            <p className="text-sm italic text-zinc-500">
-              Sin notas internas. Agregalas desde &quot;Editar datos&quot;.
-            </p>
-          )}
-        </Card>
+        <InternalNotesCard clientId={clientId} initialNotes={client.internalNotes} />
       </div>
     </div>
   )
