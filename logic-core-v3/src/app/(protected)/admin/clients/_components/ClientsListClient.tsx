@@ -5,10 +5,12 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { motion } from 'motion/react'
 import { toast } from 'sonner'
-import { Archive, ArchiveRestore, Bot, Building2, Check, Download, Loader2, Pause, Pin, PinOff, Plus, Search, X } from 'lucide-react'
+import { Archive, ArchiveRestore, Bot, Building2, Check, Download, Loader2, Pause, Pin, PinOff, Plus, Search, Trash2, X } from 'lucide-react'
 import { Button, Card, EmptyState, Input, Select } from '@/components/ui'
 import { InlineConfirm } from '@/app/(protected)/admin/_components/inline-confirm'
+import { TypeToConfirmDialog } from '@/app/(protected)/admin/_components/type-to-confirm-dialog'
 import { archiveClient, unarchiveClient } from '@/modules/chatbot/server/admin/archiveClient'
+import { getClientDeletionSummary, hardDeleteClient } from '@/modules/chatbot/server/admin/hardDeleteClient'
 import { ClientAvatar } from '@/modules/chatbot/components/admin/client-avatar/ClientAvatar'
 import { bulkExportLeads, bulkPauseBots } from '@/lib/bulk-actions'
 import { hoverLift, staggerContainer, staggerItem } from '@/lib/motion-variants'
@@ -36,6 +38,10 @@ interface ClientsListClientProps {
 
 const PIN_KEY = 'develop:admin:pinned-clients'
 
+// El detalle de borrado se deriva del retorno de la action (un archivo 'use server'
+// exporta solo funciones async, así que no exportamos el tipo nombrado).
+type DeletionSummary = Awaited<ReturnType<typeof getClientDeletionSummary>>['summary']
+
 export function ClientsListClient({ clients, archivedClients }: ClientsListClientProps) {
   const router = useRouter()
   const reduced = useReducedMotion()
@@ -54,6 +60,10 @@ export function ClientsListClient({ clients, archivedClients }: ClientsListClien
   )
   const [showArchived, setShowArchived] = useState(false)
   const [pendingId, setPendingId] = useState<string | null>(null)
+  const [deleteOpen, setDeleteOpen] = useState(false)
+  const [deleteSummary, setDeleteSummary] = useState<DeletionSummary | null>(null)
+  const [deleteLoading, setDeleteLoading] = useState(false)
+  const [deletePending, setDeletePending] = useState(false)
 
   useEffect(() => {
     try {
@@ -168,6 +178,53 @@ export function ClientsListClient({ clients, archivedClients }: ClientsListClien
       toast.error(err instanceof Error ? err.message : 'No se pudo desarchivar el cliente')
     } finally {
       setPendingId(null)
+    }
+  }
+
+  // Hard-delete: SOLO con 1 cliente seleccionado. Trae el detalle (counts) para
+  // el modal, exige escribir "ELIMINAR", y al confirmar borra (cascada) + audit.
+  async function openDelete() {
+    if (selected.size !== 1) return
+    const [id] = [...selected]
+    setDeleteLoading(true)
+    try {
+      const res = await getClientDeletionSummary({ organizationId: id })
+      setDeleteSummary(res.summary)
+      setDeleteOpen(true)
+    } catch (err) {
+      toast.error(
+        err instanceof Error ? err.message : 'No se pudo cargar el detalle del cliente',
+      )
+    } finally {
+      setDeleteLoading(false)
+    }
+  }
+
+  function closeDelete() {
+    if (deletePending) return
+    setDeleteOpen(false)
+    setDeleteSummary(null)
+  }
+
+  async function confirmDelete() {
+    if (selected.size !== 1) return
+    const [id] = [...selected]
+    setDeletePending(true)
+    try {
+      const res = await hardDeleteClient({ organizationId: id })
+      toast.success(
+        `Cliente eliminado · ${res.preservedLeads} lead${
+          res.preservedLeads === 1 ? '' : 's'
+        } preservado${res.preservedLeads === 1 ? '' : 's'} en el pipeline`,
+      )
+      setDeleteOpen(false)
+      setDeleteSummary(null)
+      deselectAll()
+      router.refresh()
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'No se pudo eliminar el cliente')
+    } finally {
+      setDeletePending(false)
     }
   }
 
@@ -352,6 +409,24 @@ export function ClientsListClient({ clients, archivedClients }: ClientsListClien
             </Button>
             <button
               type="button"
+              onClick={openDelete}
+              disabled={selected.size !== 1 || deleteLoading}
+              title={
+                selected.size !== 1
+                  ? 'Seleccioná un solo cliente para eliminar'
+                  : 'Eliminar cliente (irreversible)'
+              }
+              className="inline-flex items-center gap-1.5 rounded-xl border border-rose-400/30 bg-rose-500/15 px-3 py-1.5 text-sm font-medium text-rose-200 transition-colors hover:bg-rose-500/25 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              {deleteLoading ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" strokeWidth={1.5} />
+              ) : (
+                <Trash2 className="h-3.5 w-3.5" strokeWidth={1.5} />
+              )}
+              Eliminar
+            </button>
+            <button
+              type="button"
               onClick={deselectAll}
               aria-label="Limpiar selección"
               title="Limpiar selección"
@@ -414,6 +489,56 @@ export function ClientsListClient({ clients, archivedClients }: ClientsListClien
           ))}
         </motion.div>
       )}
+
+      {deleteOpen && deleteSummary && (
+        <TypeToConfirmDialog
+          open
+          onClose={closeDelete}
+          onConfirm={confirmDelete}
+          title="Eliminar cliente"
+          confirmPhrase="ELIMINAR"
+          confirmLabel="Eliminar definitivamente"
+          isPending={deletePending}
+          description={<DeleteSummaryDetail summary={deleteSummary} />}
+        />
+      )}
+    </div>
+  )
+}
+
+function DeleteSummaryDetail({ summary }: { summary: DeletionSummary }) {
+  const items: string[] = [
+    `${summary.projects} proyecto${summary.projects === 1 ? '' : 's'}`,
+    `${summary.tickets} ticket${summary.tickets === 1 ? '' : 's'}`,
+    `${summary.messages} mensaje${summary.messages === 1 ? '' : 's'}`,
+    `${summary.assets} archivo${summary.assets === 1 ? '' : 's'}`,
+  ]
+  if (summary.hasBot) {
+    items.push(
+      `el bot${summary.botName ? ` "${summary.botName}"` : ''} (${summary.deletedConversations} conversaciones, ${summary.deletedBotLeads} leads del bot no convertidos)`,
+    )
+  }
+  if (summary.hasSubscription) {
+    items.push('su suscripción')
+  }
+
+  return (
+    <div className="space-y-3">
+      <p>
+        Vas a eliminar{' '}
+        <span className="font-medium text-zinc-100">{summary.companyName}</span> y todo
+        lo suyo de forma{' '}
+        <span className="font-semibold text-rose-300">irreversible</span>:
+      </p>
+      <ul className="list-disc space-y-0.5 pl-5 text-zinc-300">
+        {items.map((item, index) => (
+          <li key={index}>{item}</li>
+        ))}
+      </ul>
+      <p className="rounded-lg border border-emerald-400/20 bg-emerald-500/[0.06] px-3 py-2 text-emerald-200">
+        Se preservan {summary.preservedLeads} lead
+        {summary.preservedLeads === 1 ? '' : 's'} en el pipeline de ventas (no se borran).
+      </p>
     </div>
   )
 }

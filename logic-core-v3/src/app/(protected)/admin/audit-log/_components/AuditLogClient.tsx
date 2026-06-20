@@ -194,6 +194,8 @@ export function AuditLogClient({
             const isExpanded = expanded.has(entry.id)
             const hasDiff = Object.keys(diff).length > 0
             const reason = extractReason(entry.metadata)
+            const deletion = extractDeletionDetail(entry.metadata)
+            const expandable = hasDiff || deletion !== null
 
             return (
               <motion.div
@@ -206,8 +208,8 @@ export function AuditLogClient({
                 >
                   <button
                     type="button"
-                    onClick={() => hasDiff && toggleExpand(entry.id)}
-                    disabled={!hasDiff}
+                    onClick={() => expandable && toggleExpand(entry.id)}
+                    disabled={!expandable}
                     className="w-full p-4 text-left transition-colors hover:bg-white/[0.02] disabled:cursor-default"
                   >
                     <div className="flex items-start justify-between gap-4">
@@ -245,7 +247,7 @@ export function AuditLogClient({
                         </div>
                       </div>
 
-                      {hasDiff && (
+                      {expandable && (
                         <motion.div
                           animate={reduced ? undefined : { rotate: isExpanded ? 180 : 0 }}
                           transition={{ duration: 0.15 }}
@@ -261,7 +263,7 @@ export function AuditLogClient({
                   </button>
 
                   <AnimatePresence initial={false}>
-                    {isExpanded && hasDiff && (
+                    {isExpanded && expandable && (
                       <motion.div
                         initial={reduced ? false : { height: 0 }}
                         animate={{ height: 'auto' }}
@@ -270,10 +272,16 @@ export function AuditLogClient({
                         className="overflow-hidden border-t border-white/10"
                       >
                         <div className="bg-zinc-950/50 p-4">
-                          <p className="mb-3 text-[10px] uppercase tracking-[0.24em] text-zinc-500">
-                            Cambios
-                          </p>
-                          <DiffDisplay diff={diff} />
+                          {deletion ? (
+                            <DeletionDetail detail={deletion} />
+                          ) : (
+                            <>
+                              <p className="mb-3 text-[10px] uppercase tracking-[0.24em] text-zinc-500">
+                                Cambios
+                              </p>
+                              <DiffDisplay diff={diff} />
+                            </>
+                          )}
                         </div>
                       </motion.div>
                     )}
@@ -406,6 +414,62 @@ function extractReason(metadata: unknown): string | null {
   }
   const reason = (metadata as Record<string, unknown>).reason
   return typeof reason === 'string' && reason.trim() !== '' ? reason : null
+}
+
+interface DeletionInfo {
+  deleted: Array<{ label: string; value: string }>
+  preservedLeads: number | null
+}
+
+// Metadata del hard-delete de cliente (hardDeleteClient): { hardDelete:true,
+// deleted:{label->count}, preservedLeads }. Se lee de forma segura, sin `any`.
+function extractDeletionDetail(metadata: unknown): DeletionInfo | null {
+  if (!metadata || typeof metadata !== 'object' || Array.isArray(metadata)) {
+    return null
+  }
+  const m = metadata as Record<string, unknown>
+  if (m.hardDelete !== true) return null
+
+  const deletedRaw =
+    m.deleted && typeof m.deleted === 'object' && !Array.isArray(m.deleted)
+      ? (m.deleted as Record<string, unknown>)
+      : {}
+  const deleted = Object.entries(deletedRaw)
+    .filter(([, value]) => value !== null && value !== false)
+    .map(([label, value]) => ({ label, value: String(value) }))
+
+  const preservedLeads =
+    typeof m.preservedLeads === 'number' ? m.preservedLeads : null
+  return { deleted, preservedLeads }
+}
+
+function DeletionDetail({ detail }: { detail: DeletionInfo }) {
+  return (
+    <div className="space-y-3">
+      <div>
+        <p className="mb-2 text-[10px] uppercase tracking-[0.24em] text-zinc-500">
+          Se elimino
+        </p>
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+          {detail.deleted.map((item) => (
+            <div
+              key={item.label}
+              className="rounded-lg border border-rose-400/20 bg-rose-500/[0.06] px-2.5 py-1.5"
+            >
+              <p className="text-[9px] uppercase tracking-wider text-rose-200/70">
+                {item.label}
+              </p>
+              <p className="text-sm font-medium text-rose-100">{item.value}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+      <p className="rounded-lg border border-emerald-400/20 bg-emerald-500/[0.06] px-3 py-2 text-xs text-emerald-200">
+        Se preservaron {detail.preservedLeads ?? 0} lead
+        {detail.preservedLeads === 1 ? '' : 's'} en el pipeline de ventas.
+      </p>
+    </div>
+  )
 }
 
 function formatDiffValue(value: unknown): string {
