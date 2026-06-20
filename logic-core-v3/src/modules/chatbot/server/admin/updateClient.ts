@@ -8,12 +8,12 @@ import { requireSuperAdmin } from './requireSuperAdmin'
 import { normalizeWebsiteUrl, zodErrorToMessage } from '@/modules/chatbot/shared/field-normalize'
 
 // Edición de los datos de un cliente existente: Organization (companyName,
-// siteUrl) + User administrador (email, name, phone). NO toca el bot ni la
-// industria (se editan en la config del bot). `city` se omite a propósito: no
-// existe columna en Organization (requeriría migración, fuera de este lote).
+// city, siteUrl) + User administrador (email, name, phone). NO toca el bot ni
+// la industria (se editan en la config del bot).
 const UpdateClientInputSchema = z.object({
   organizationId: z.string().min(1),
   orgName: z.string().min(2).max(100),
+  city: z.string().min(2).max(60).nullable(),
   websiteUrl: z.string().url().nullable(),
   userEmail: z.string().email(),
   userName: z.string().min(2).max(100),
@@ -37,6 +37,7 @@ export async function updateClient(input: z.infer<typeof UpdateClientInputSchema
     select: {
       id: true,
       companyName: true,
+      city: true,
       siteUrl: true,
       members: {
         where: { role: 'ADMIN' },
@@ -68,9 +69,10 @@ export async function updateClient(input: z.infer<typeof UpdateClientInputSchema
       where: { id: org.id },
       data: {
         companyName: parsed.orgName,
+        city: parsed.city,
         siteUrl: parsed.websiteUrl,
       },
-      select: { id: true, companyName: true, siteUrl: true },
+      select: { id: true, companyName: true, city: true, siteUrl: true },
     })
     const nextUser = await tx.user.update({
       where: { id: adminUser.id },
@@ -94,6 +96,7 @@ export async function updateClient(input: z.infer<typeof UpdateClientInputSchema
     targetId: org.id,
     diff: {
       companyName: { before: org.companyName, after: updated.nextOrg.companyName },
+      city: { before: org.city, after: updated.nextOrg.city },
       siteUrl: { before: org.siteUrl, after: updated.nextOrg.siteUrl },
       userEmail: { before: adminUser.email, after: updated.nextUser.email },
       userName: { before: adminUser.name, after: updated.nextUser.name },

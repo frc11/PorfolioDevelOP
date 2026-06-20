@@ -14,6 +14,7 @@ interface EditClientFormProps {
   hasAdminUser: boolean
   initial: {
     orgName: string
+    city: string
     websiteUrl: string | null
     userEmail: string
     userName: string
@@ -27,6 +28,7 @@ interface EditClientFormProps {
 export function EditClientForm({ clientId, hasAdminUser, initial }: EditClientFormProps) {
   const { triggerTransition } = useTransitionContext()
   const [orgName, setOrgName] = useState(initial.orgName)
+  const [city, setCity] = useState(initial.city)
   const [websiteUrl, setWebsiteUrl] = useState(initial.websiteUrl ?? '')
   const [userEmail, setUserEmail] = useState(initial.userEmail)
   const [userName, setUserName] = useState(initial.userName)
@@ -40,6 +42,7 @@ export function EditClientForm({ clientId, hasAdminUser, initial }: EditClientFo
   const websiteNormalized = normalizeWebsiteUrl(websiteUrl)
   const websiteValid =
     websiteUrl.trim() === '' || (websiteNormalized !== null && isValidWebsiteUrl(websiteNormalized))
+  const cityValid = city.trim() === '' || city.trim().length >= 2
 
   const canSubmit =
     hasAdminUser &&
@@ -47,6 +50,7 @@ export function EditClientForm({ clientId, hasAdminUser, initial }: EditClientFo
     userName.trim().length >= 2 &&
     emailValid &&
     websiteValid &&
+    cityValid &&
     !submitting
 
   async function handleSubmit(event: React.FormEvent) {
@@ -58,6 +62,7 @@ export function EditClientForm({ clientId, hasAdminUser, initial }: EditClientFo
       await updateClient({
         organizationId: clientId,
         orgName: orgName.trim(),
+        city: city.trim() || null,
         websiteUrl: websiteNormalized,
         userEmail: userEmail.trim(),
         userName: userName.trim(),
@@ -88,6 +93,18 @@ export function EditClientForm({ clientId, hasAdminUser, initial }: EditClientFo
                 value={orgName}
                 onChange={(event) => setOrgName(event.target.value)}
                 placeholder="Ej: Concesionaria San Miguel"
+              />
+            </Field>
+            <Field
+              label="Ciudad"
+              hint="Opcional"
+              error={city.trim() !== '' && !cityValid ? 'La ciudad debe tener al menos 2 caracteres.' : undefined}
+            >
+              <Input
+                value={city}
+                onChange={(event) => setCity(event.target.value)}
+                invalid={city.trim() !== '' && !cityValid}
+                placeholder="Ej: Tucumán"
               />
             </Field>
             <Field

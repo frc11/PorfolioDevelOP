@@ -108,6 +108,7 @@ export async function createClientWithBot(input: z.infer<typeof CreateClientInpu
     const org = await tx.organization.create({
       data: {
         companyName: parsed.orgName,
+        city: parsed.city,
         slug: uniqueSlug,
         siteUrl: parsed.websiteUrl,
         onboardingCompleted: true,

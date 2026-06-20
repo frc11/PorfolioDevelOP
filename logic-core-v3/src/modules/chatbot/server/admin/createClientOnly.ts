@@ -62,6 +62,7 @@ export async function createClientOnly(input: z.infer<typeof CreateClientOnlyInp
     const org = await tx.organization.create({
       data: {
         companyName: parsed.orgName,
+        city: parsed.city,
         slug: uniqueSlug,
         siteUrl: parsed.websiteUrl,
         onboardingCompleted: true,

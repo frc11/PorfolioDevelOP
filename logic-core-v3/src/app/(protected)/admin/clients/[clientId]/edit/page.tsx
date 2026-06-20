@@ -21,6 +21,7 @@ export default async function EditClientPage({ params }: PageProps) {
     select: {
       id: true,
       companyName: true,
+      city: true,
       siteUrl: true,
       members: {
         where: { role: 'ADMIN' },
@@ -50,6 +51,7 @@ export default async function EditClientPage({ params }: PageProps) {
         hasAdminUser={adminUser !== null}
         initial={{
           orgName: org.companyName,
+          city: org.city ?? '',
           websiteUrl: org.siteUrl,
           userEmail: adminUser?.email ?? '',
           userName: adminUser?.name ?? '',

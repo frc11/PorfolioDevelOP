@@ -77,6 +77,7 @@ export async function OverviewTab({ clientId }: OverviewTabProps) {
           </p>
           <div className="space-y-3">
             <InfoRow label="Email primario" value={primaryMember?.user.email ?? '-'} />
+            <InfoRow label="Ciudad" value={client.city ?? '-'} />
             <InfoRow label="WhatsApp" value={client.whatsapp ?? '-'} />
             <InfoRow label="Website" value={client.siteUrl ?? '-'} link />
             <InfoRow label="Creado" value={client.createdAt.toLocaleDateString('es-AR')} />
