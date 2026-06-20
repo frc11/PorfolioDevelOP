@@ -1,10 +1,9 @@
 'use server'
 
-import { ZodError } from 'zod'
 import { revalidatePath } from 'next/cache'
 import { prisma } from '@/lib/prisma'
 import { requireSuperAdmin } from '@/lib/auth-guards'
-import { fail, ok, type ActionResult } from '@/lib/action-utils'
+import { fail, ok, toErrorMessage, type ActionResult } from '@/lib/action-utils'
 import {
   DEFAULT_AGENCY_SETTINGS,
 } from '@/lib/agency-settings'
@@ -129,9 +128,7 @@ export async function getSettings(): Promise<
       })),
     })
   } catch (error) {
-    return fail(
-      error instanceof Error ? error.message : 'No se pudo cargar la configuracion.'
-    )
+    return fail(toErrorMessage(error, 'No se pudo cargar la configuracion.'))
   }
 }
 
@@ -179,9 +176,7 @@ export async function updateSettings(data: {
     revalidateSettingsPaths()
     return ok({ message: 'Configuracion actualizada.' })
   } catch (error) {
-    return fail(
-      error instanceof Error ? error.message : 'No se pudo actualizar la configuracion.'
-    )
+    return fail(toErrorMessage(error, 'No se pudo actualizar la configuracion.'))
   }
 }
 
@@ -213,13 +208,7 @@ export async function updateModulePricing(
 
     return ok({ message: `Precio actualizado para ${moduleRow.name}.` })
   } catch (error) {
-    if (error instanceof ZodError) {
-      return fail(error.issues[0]?.message ?? 'Datos invalidos.')
-    }
-
-    return fail(
-      error instanceof Error ? error.message : 'No se pudo actualizar el precio.'
-    )
+    return fail(toErrorMessage(error, 'No se pudo actualizar el precio.'))
   }
 }
 
@@ -253,8 +242,6 @@ export async function listTeamMembers(): Promise<
       }))
     )
   } catch (error) {
-    return fail(
-      error instanceof Error ? error.message : 'No se pudo listar el equipo.'
-    )
+    return fail(toErrorMessage(error, 'No se pudo listar el equipo.'))
   }
 }
