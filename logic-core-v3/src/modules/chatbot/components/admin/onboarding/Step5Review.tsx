@@ -87,6 +87,9 @@ export function Step5Review({ state, onBack, onCreated }: Step5Props) {
         const result = await createClientOnly({
           orgName: state.orgName,
           city: state.city,
+          clientAvatarImageUrl: state.clientAvatarImageUrl,
+          clientAvatarEmoji: state.clientAvatarEmoji,
+          clientAvatarInitials: state.clientAvatarInitials,
           websiteUrl: state.websiteUrl,
           userEmail: state.userEmail,
           userName: state.userName,
@@ -211,6 +214,18 @@ export function Step5Review({ state, onBack, onCreated }: Step5Props) {
             <ReviewRow label="Industria" value={INDUSTRIES_LABELS[state.industry] ?? state.industry} />
           )}
           <ReviewRow label="Ciudad" value={state.city} />
+          <ReviewRow
+            label="Avatar"
+            value={
+              state.clientAvatarImageUrl
+                ? 'Imagen'
+                : state.clientAvatarEmoji
+                  ? state.clientAvatarEmoji
+                  : state.clientAvatarInitials
+                    ? state.clientAvatarInitials
+                    : '—'
+            }
+          />
           <ReviewRow label="Website" value={state.websiteUrl || '—'} />
           {state.withBot && <ReviewRow label="Slug del bot" value={derivedSlug} mono />}
         </ReviewSection>

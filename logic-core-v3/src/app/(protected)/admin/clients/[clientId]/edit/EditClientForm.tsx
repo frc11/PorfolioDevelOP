@@ -7,6 +7,10 @@ import { useTransitionContext } from '@/context/TransitionContext'
 import { updateClient } from '@/modules/chatbot/server/admin/updateClient'
 import { normalizeWebsiteUrl, isValidWebsiteUrl } from '@/modules/chatbot/shared/field-normalize'
 import { TEXTAREA_CLASS } from '@/modules/chatbot/components/admin/onboarding/field-styles'
+import {
+  ClientAvatarField,
+  type ClientAvatarValue,
+} from '@/modules/chatbot/components/admin/client-avatar/ClientAvatarField'
 
 const INTERNAL_NOTES_MAX = 5000
 
@@ -19,6 +23,9 @@ interface EditClientFormProps {
     orgName: string
     city: string
     internalNotes: string
+    avatarImageUrl: string | null
+    avatarEmoji: string | null
+    avatarInitials: string | null
     websiteUrl: string | null
     userEmail: string
     userName: string
@@ -34,6 +41,11 @@ export function EditClientForm({ clientId, hasAdminUser, initial }: EditClientFo
   const [orgName, setOrgName] = useState(initial.orgName)
   const [city, setCity] = useState(initial.city)
   const [internalNotes, setInternalNotes] = useState(initial.internalNotes)
+  const [avatar, setAvatar] = useState<ClientAvatarValue>({
+    avatarImageUrl: initial.avatarImageUrl,
+    avatarEmoji: initial.avatarEmoji,
+    avatarInitials: initial.avatarInitials,
+  })
   const [websiteUrl, setWebsiteUrl] = useState(initial.websiteUrl ?? '')
   const [userEmail, setUserEmail] = useState(initial.userEmail)
   const [userName, setUserName] = useState(initial.userName)
@@ -69,6 +81,9 @@ export function EditClientForm({ clientId, hasAdminUser, initial }: EditClientFo
         orgName: orgName.trim(),
         city: city.trim() || null,
         internalNotes: internalNotes.trim() || null,
+        avatarImageUrl: avatar.avatarImageUrl,
+        avatarEmoji: avatar.avatarEmoji,
+        avatarInitials: avatar.avatarInitials,
         websiteUrl: websiteNormalized,
         userEmail: userEmail.trim(),
         userName: userName.trim(),
@@ -167,6 +182,17 @@ export function EditClientForm({ clientId, hasAdminUser, initial }: EditClientFo
           </div>
         </Card>
       </div>
+
+      <Card variant="elevated" padding="lg">
+        <div className="space-y-4">
+          <h2 className="text-sm font-semibold text-zinc-100">Avatar del cliente</h2>
+          <ClientAvatarField
+            value={avatar}
+            onChange={setAvatar}
+            companyName={orgName}
+          />
+        </div>
+      </Card>
 
       <Card variant="elevated" padding="lg">
         <div className="space-y-3">

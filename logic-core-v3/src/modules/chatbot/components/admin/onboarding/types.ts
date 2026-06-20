@@ -16,6 +16,10 @@ export interface OnboardingState {
   industry: Industry
   city: string
   websiteUrl: string | null
+  // Avatar del cliente (Organization) — distinto del avatar del bot (Paso 4)
+  clientAvatarImageUrl: string | null
+  clientAvatarEmoji: string | null
+  clientAvatarInitials: string | null
 
   // Paso 2
   botName: string

@@ -1,6 +1,7 @@
 'use client'
 
 import { Input, Select } from '@/components/ui'
+import { ClientAvatarField } from '@/modules/chatbot/components/admin/client-avatar/ClientAvatarField'
 import type { StepProps } from './types'
 import type { Industry } from '../../../server/admin/createClientWithBot'
 import { INDUSTRIES_LABELS } from './industries'
@@ -125,6 +126,25 @@ export function Step1Company({ state, update, onNext }: StepProps) {
         ) : (
           <p className="text-xs text-zinc-500 mt-1">Podés escribir el dominio solo; le agregamos https:// automáticamente.</p>
         )}
+      </div>
+
+      <div>
+        <label className="block text-sm text-zinc-400 mb-2">Avatar del cliente (opcional)</label>
+        <ClientAvatarField
+          value={{
+            avatarImageUrl: state.clientAvatarImageUrl,
+            avatarEmoji: state.clientAvatarEmoji,
+            avatarInitials: state.clientAvatarInitials,
+          }}
+          onChange={(next) =>
+            update({
+              clientAvatarImageUrl: next.avatarImageUrl,
+              clientAvatarEmoji: next.avatarEmoji,
+              clientAvatarInitials: next.avatarInitials,
+            })
+          }
+          companyName={state.orgName}
+        />
       </div>
 
       <div className="pt-4 border-t border-zinc-800">

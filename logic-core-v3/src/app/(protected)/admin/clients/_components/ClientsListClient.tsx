@@ -9,6 +9,7 @@ import { Archive, ArchiveRestore, Bot, Building2, Check, Download, Loader2, Paus
 import { Button, Card, EmptyState, Input, Select } from '@/components/ui'
 import { InlineConfirm } from '@/app/(protected)/admin/_components/inline-confirm'
 import { archiveClient, unarchiveClient } from '@/modules/chatbot/server/admin/archiveClient'
+import { ClientAvatar } from '@/modules/chatbot/components/admin/client-avatar/ClientAvatar'
 import { bulkExportLeads, bulkPauseBots } from '@/lib/bulk-actions'
 import { hoverLift, staggerContainer, staggerItem } from '@/lib/motion-variants'
 import { useReducedMotion } from '@/lib/use-reduced-motion'
@@ -19,6 +20,9 @@ interface ClientItem {
   slug: string
   siteUrl: string | null
   whatsapp: string | null
+  avatarImageUrl: string | null
+  avatarEmoji: string | null
+  avatarInitials: string | null
   botConfig: { isActive: boolean; monthlyQuota: number } | null
   subscription: { status: string; plan: { name: string } | null } | null
   _count: { projects: number; tickets: number; messages: number }
@@ -487,9 +491,13 @@ function ClientCard({
           }
         >
           <div className="mb-3 flex items-start justify-between gap-3 pl-6 pr-20">
-            <div className="rounded-xl bg-cyan-400/10 p-2 transition-colors group-hover:bg-cyan-400/15">
-              <Building2 className="h-4 w-4 text-cyan-300" strokeWidth={1.5} />
-            </div>
+            <ClientAvatar
+              companyName={client.companyName}
+              avatarImageUrl={client.avatarImageUrl}
+              avatarEmoji={client.avatarEmoji}
+              avatarInitials={client.avatarInitials}
+              size={36}
+            />
             {!archived && client.botConfig && (
               <span
                 className={`inline-flex items-center gap-1 rounded-lg border px-2 py-0.5 text-[10px] uppercase tracking-wider ${

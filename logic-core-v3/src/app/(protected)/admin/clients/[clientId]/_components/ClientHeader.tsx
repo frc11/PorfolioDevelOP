@@ -1,7 +1,8 @@
 import Link from 'next/link'
-import { Building2, Pencil } from 'lucide-react'
+import { Pencil } from 'lucide-react'
 import { AdminBreadcrumbs } from '@/app/(protected)/admin/_components/AdminBreadcrumbs'
 import { HoverScaleCard } from '@/app/(protected)/admin/clients/_components/HoverScaleCard'
+import { ClientAvatar } from '@/modules/chatbot/components/admin/client-avatar/ClientAvatar'
 import { ClientSwitcher } from './ClientSwitcher'
 import { ImpersonateButton } from './ImpersonateButton'
 
@@ -12,6 +13,9 @@ interface ClientHeaderProps {
     slug: string
     siteUrl: string | null
     whatsapp: string | null
+    avatarImageUrl: string | null
+    avatarEmoji: string | null
+    avatarInitials: string | null
     botConfig: {
       isActive: boolean
       botName: string
@@ -40,9 +44,14 @@ export function ClientHeader({ client, allClients }: ClientHeaderProps) {
 
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div className="flex min-w-0 items-start gap-4">
-          <div className="hidden rounded-2xl bg-cyan-400/10 p-3 sm:block">
-            <Building2 className="h-6 w-6 text-cyan-300" strokeWidth={1.5} />
-          </div>
+          <ClientAvatar
+            companyName={client.companyName}
+            avatarImageUrl={client.avatarImageUrl}
+            avatarEmoji={client.avatarEmoji}
+            avatarInitials={client.avatarInitials}
+            size={56}
+            className="hidden border border-white/10 sm:inline-flex"
+          />
           <div className="min-w-0">
             <div className="mb-3">
               <ClientSwitcher

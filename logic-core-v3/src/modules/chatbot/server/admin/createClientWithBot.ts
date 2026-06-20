@@ -6,6 +6,7 @@ import { prisma } from '@/lib/prisma'
 import { logAdminAction } from '@/lib/audit-log'
 import { AVATAR_STYLE_SCHEMA } from '@/modules/chatbot/components/avatar'
 import { requireSuperAdmin } from './requireSuperAdmin'
+import { avatarImageUrlSchema } from './avatarImageUrlSchema'
 import { generateTempPassword } from '@/lib/security/generate-temp-password'
 import { sendTransactionalEmail } from '@/lib/email/brevo-service'
 import { welcomeClientEmail } from '@/lib/email/templates/welcome-client'
@@ -23,6 +24,10 @@ const CreateClientInputSchema = z.object({
   orgName: z.string().min(2).max(100),
   industry: z.enum(INDUSTRIES),
   city: z.string().min(2).max(60),
+  // Avatar del cliente (Organization) — distinto del avatar del bot (Paso 4)
+  clientAvatarImageUrl: avatarImageUrlSchema,
+  clientAvatarEmoji: z.string().trim().max(8).nullable(),
+  clientAvatarInitials: z.string().trim().max(2).nullable(),
   websiteUrl: z.string().url().nullable(),
 
   // Paso 1: Usuario administrador
@@ -109,6 +114,9 @@ export async function createClientWithBot(input: z.infer<typeof CreateClientInpu
       data: {
         companyName: parsed.orgName,
         city: parsed.city,
+        avatarImageUrl: parsed.clientAvatarImageUrl,
+        avatarEmoji: parsed.clientAvatarEmoji,
+        avatarInitials: parsed.clientAvatarInitials,
         slug: uniqueSlug,
         siteUrl: parsed.websiteUrl,
         onboardingCompleted: true,

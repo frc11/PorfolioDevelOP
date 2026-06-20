@@ -5,6 +5,7 @@ import bcrypt from 'bcryptjs'
 import { prisma } from '@/lib/prisma'
 import { logAdminAction } from '@/lib/audit-log'
 import { requireSuperAdmin } from './requireSuperAdmin'
+import { avatarImageUrlSchema } from './avatarImageUrlSchema'
 import { generateTempPassword } from '@/lib/security/generate-temp-password'
 import { sendTransactionalEmail } from '@/lib/email/brevo-service'
 import { welcomeClientEmail } from '@/lib/email/templates/welcome-client'
@@ -18,6 +19,9 @@ import { normalizeWebsiteUrl, zodErrorToMessage } from '@/modules/chatbot/shared
 const CreateClientOnlyInputSchema = z.object({
   orgName: z.string().min(2).max(100),
   city: z.string().min(2).max(60),
+  clientAvatarImageUrl: avatarImageUrlSchema,
+  clientAvatarEmoji: z.string().trim().max(8).nullable(),
+  clientAvatarInitials: z.string().trim().max(2).nullable(),
   websiteUrl: z.string().url().nullable(),
   userEmail: z.string().email(),
   userName: z.string().min(2).max(100),
@@ -63,6 +67,9 @@ export async function createClientOnly(input: z.infer<typeof CreateClientOnlyInp
       data: {
         companyName: parsed.orgName,
         city: parsed.city,
+        avatarImageUrl: parsed.clientAvatarImageUrl,
+        avatarEmoji: parsed.clientAvatarEmoji,
+        avatarInitials: parsed.clientAvatarInitials,
         slug: uniqueSlug,
         siteUrl: parsed.websiteUrl,
         onboardingCompleted: true,
