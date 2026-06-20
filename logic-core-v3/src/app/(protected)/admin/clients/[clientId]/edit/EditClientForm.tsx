@@ -6,6 +6,9 @@ import { Card, Field, Input } from '@/components/ui'
 import { useTransitionContext } from '@/context/TransitionContext'
 import { updateClient } from '@/modules/chatbot/server/admin/updateClient'
 import { normalizeWebsiteUrl, isValidWebsiteUrl } from '@/modules/chatbot/shared/field-normalize'
+import { TEXTAREA_CLASS } from '@/modules/chatbot/components/admin/onboarding/field-styles'
+
+const INTERNAL_NOTES_MAX = 5000
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
@@ -15,6 +18,7 @@ interface EditClientFormProps {
   initial: {
     orgName: string
     city: string
+    internalNotes: string
     websiteUrl: string | null
     userEmail: string
     userName: string
@@ -29,6 +33,7 @@ export function EditClientForm({ clientId, hasAdminUser, initial }: EditClientFo
   const { triggerTransition } = useTransitionContext()
   const [orgName, setOrgName] = useState(initial.orgName)
   const [city, setCity] = useState(initial.city)
+  const [internalNotes, setInternalNotes] = useState(initial.internalNotes)
   const [websiteUrl, setWebsiteUrl] = useState(initial.websiteUrl ?? '')
   const [userEmail, setUserEmail] = useState(initial.userEmail)
   const [userName, setUserName] = useState(initial.userName)
@@ -63,6 +68,7 @@ export function EditClientForm({ clientId, hasAdminUser, initial }: EditClientFo
         organizationId: clientId,
         orgName: orgName.trim(),
         city: city.trim() || null,
+        internalNotes: internalNotes.trim() || null,
         websiteUrl: websiteNormalized,
         userEmail: userEmail.trim(),
         userName: userName.trim(),
@@ -161,6 +167,28 @@ export function EditClientForm({ clientId, hasAdminUser, initial }: EditClientFo
           </div>
         </Card>
       </div>
+
+      <Card variant="elevated" padding="lg">
+        <div className="space-y-3">
+          <h2 className="text-sm font-semibold text-zinc-100">Notas internas</h2>
+          <Field
+            label="Notas del equipo develOP"
+            hint="Solo visibles para el equipo. El cliente no las ve."
+          >
+            <textarea
+              value={internalNotes}
+              onChange={(event) => setInternalNotes(event.target.value)}
+              className={TEXTAREA_CLASS}
+              rows={4}
+              maxLength={INTERNAL_NOTES_MAX}
+              placeholder="Contexto, acuerdos o recordatorios internos sobre este cliente..."
+            />
+          </Field>
+          <p className="text-right text-xs text-zinc-600">
+            {internalNotes.length}/{INTERNAL_NOTES_MAX}
+          </p>
+        </div>
+      </Card>
 
       {error && (
         <div className="flex items-start gap-2 rounded-2xl border border-red-400/30 bg-red-500/10 px-4 py-3 text-sm text-red-200">

@@ -96,9 +96,15 @@ export async function OverviewTab({ clientId }: OverviewTabProps) {
           <p className="mb-4 text-[10px] uppercase tracking-[0.24em] text-zinc-500">
             Notas internas
           </p>
-          <p className="text-sm italic text-zinc-400">
-            Proximamente: notas editables del equipo develOP.
-          </p>
+          {client.internalNotes ? (
+            <p className="whitespace-pre-wrap text-sm leading-6 text-zinc-200">
+              {client.internalNotes}
+            </p>
+          ) : (
+            <p className="text-sm italic text-zinc-500">
+              Sin notas internas. Agregalas desde &quot;Editar datos&quot;.
+            </p>
+          )}
         </Card>
       </div>
     </div>
