@@ -766,6 +766,7 @@ model PageView {
 
 model AgencySettings {
   id                           String   @id @default(cuid())
+  singleton                    Boolean  @default(true) @unique
   agencyName                   String   @default("develOP")
   contactEmail                 String?
   contactWhatsapp              String?
