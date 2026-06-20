@@ -223,21 +223,5 @@ export async function updateClientAction(
   redirect(`/admin/clients/${clientId}`)
 }
 
-export async function deleteClientAction(formData: FormData): Promise<void> {
-  // Auth guard — deleteClientAction borra org: SUPER_ADMIN exclusivo.
-  // Server action = POST público; el gate del layout no alcanza.
-  await requireSuperAdmin()
 
-  const clientId = (formData.get('clientId') as string | null) ?? ''
-  if (!clientId) return
-
-  const org = await prisma.organization.findUnique({ where: { id: clientId } })
-  if (!org) return
-
-  await prisma.organization.delete({ where: { id: clientId } })
-
-  revalidatePath('/admin/clients')
-  revalidateTag('admin-clients', {})
-  redirect('/admin/clients')
-}
 
