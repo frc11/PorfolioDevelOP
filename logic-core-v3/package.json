@@ -17,6 +17,10 @@
     "seed:latency": "ts-node --transpile-only scripts/dev/seed-latency.ts",
     "check:invariant": "ts-node src/lib/leados/assignment-trail.invariant.ts",
     "check:invariant:setter-meta": "ts-node src/lib/leados/setter-meta.invariant.ts",
+    "check:invariant:escalamiento": "ts-node src/lib/leados/escalamiento.invariant.ts",
+    "check:invariant:novedades": "ts-node src/lib/leados/novedades.invariant.ts",
+    "check:invariant:mis-numeros": "ts-node src/lib/leados/mis-numeros.invariant.ts",
+    "check:invariant:timeline": "ts-node src/lib/leados/timeline.invariant.ts",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:debug": "playwright test --debug"

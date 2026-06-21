@@ -12,6 +12,8 @@ interface AdminLayoutClientProps {
   userName: string
   userRole: string
   pendingAlerts: number
+  revisionPendientes: number
+  revisionCalientes: number
 }
 
 export function AdminLayoutClient({
@@ -19,6 +21,8 @@ export function AdminLayoutClient({
   userName,
   userRole,
   pendingAlerts,
+  revisionPendientes,
+  revisionCalientes,
 }: AdminLayoutClientProps) {
   const [mobileOpen, setMobileOpen] = useState(false)
 
@@ -71,6 +75,8 @@ export function AdminLayoutClient({
           userName={userName}
           userRole={userRole}
           pendingAlerts={pendingAlerts}
+          revisionPendientes={revisionPendientes}
+          revisionCalientes={revisionCalientes}
           onNavigate={() => setMobileOpen(false)}
         />
       </aside>

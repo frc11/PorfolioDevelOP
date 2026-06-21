@@ -12,9 +12,11 @@
  *     toca LeadStatus, no envía — el envío es B6.
  */
 import { revalidatePath } from 'next/cache'
+import { prisma } from '@/lib/prisma'
 import { requireSuperAdmin } from '@/lib/auth-guards'
 import { fail, ok, type ActionResult } from '@/lib/action-utils'
 import { DossierTransitionError, transitionDossier } from '@/lib/leados/dossier'
+import { emitirNovedadSetter } from '@/lib/leados/novedades'
 import { AprobarRevisionSchema, RechazarRevisionSchema } from './revision.schemas'
 
 function revalidarRevision(leadId: string) {
@@ -23,6 +25,32 @@ function revalidarRevision(leadId: string) {
   // El setter ve el resultado en su panel (RECHAZADA cae en "Para trabajar").
   revalidatePath('/setter')
   revalidatePath(`/setter/leads/${leadId}`)
+}
+
+/**
+ * 0.5.8 — Aviso DIRIGIDO al setter dueño de la demo tras la decisión de Franco.
+ * El destinatario es el dueño ACTUAL del lead (`destinatarioNovedad` dentro de
+ * emitirNovedadSetter): sin dueño, no hay a quién avisar. Fire-and-forget — la
+ * transición ya ocurrió; un fallo del aviso jamás la revierte.
+ */
+async function avisarDecisionAlSetter(
+  leadId: string,
+  kind: 'DEMO_APROBADA' | 'DEMO_RECHAZADA',
+): Promise<void> {
+  try {
+    const lead = await prisma.osLead.findUnique({
+      where: { id: leadId },
+      select: { assignedToId: true, businessName: true },
+    })
+    if (!lead) return
+    await emitirNovedadSetter({
+      evento: { kind, ownerActual: lead.assignedToId },
+      leadId,
+      businessName: lead.businessName,
+    })
+  } catch (error) {
+    console.error('[revision] aviso al setter no fatal:', error)
+  }
 }
 
 function mapError(error: unknown, fallback: string): ActionResult<never> {
@@ -52,6 +80,10 @@ export async function aprobarRevision(
       finalUrl: input.data.finalUrl,
     })
 
+    // El momento caliente del flujo invertido: que el setter no tarde horas en
+    // enviar el link por no enterarse de la aprobación.
+    await avisarDecisionAlSetter(input.data.leadId, 'DEMO_APROBADA')
+
     revalidarRevision(input.data.leadId)
     return ok({ stage: 'APROBADA' })
   } catch (error) {
@@ -77,6 +109,8 @@ export async function rechazarRevision(
       donde,
       arreglo,
     })
+
+    await avisarDecisionAlSetter(leadId, 'DEMO_RECHAZADA')
 
     revalidarRevision(leadId)
     return ok({ stage: 'RECHAZADA' })

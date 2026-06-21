@@ -19,6 +19,7 @@
  *     parada, sin importar el instante exacto en que entró al stage).
  */
 import type { DossierStage } from '@prisma/client'
+import { estaEscalado } from '@/lib/leados/escalamiento'
 
 /**
  * Etapas de PRODUCCIÓN en orden de flujo. La máquina real (dossier.ts) es
@@ -71,6 +72,11 @@ export type DossierPipelineInput = {
   businessName: string
   setter: string
   desde: Date
+  /** B-beta: marca del escalamiento "me trabé" del setter (vigente solo en
+   *  CONSTRUCCION). `null` = sin pedido de ayuda. */
+  escaladoAt: Date | null
+  /** B-beta: contexto que dejó el setter al escalar (para el panel del admin). */
+  escaladoNota: string | null
 }
 
 /** Horas transcurridas desde `desde` hasta `ahora` (nunca negativo). */
@@ -139,4 +145,40 @@ export function detectarAtascos(
 /** Total de demos en el tramo en vuelo del tablero (suma de los carriles). */
 export function totalEnPipeline(resumen: readonly ResumenStage[]): number {
   return resumen.reduce((acc, r) => acc + r.total, 0)
+}
+
+/** Un escalamiento "me trabé" vigente, con las horas desde el pedido de ayuda. */
+export type Escalada = {
+  leadId: string
+  businessName: string
+  setter: string
+  escaladoAt: Date
+  escaladoNota: string | null
+  horas: number
+}
+
+/**
+ * Los escalamientos VIGENTES (el setter pidió ayuda y la demo sigue en
+ * CONSTRUCCION), del más viejo al más nuevo — el que más espera, primero. Un
+ * pedido EXPLÍCITO de ayuda es más urgente que un atasco por SLA: el setter está
+ * bloqueado AHORA, no solo quieto. El predicado puro único es `estaEscalado`
+ * (escalamiento.ts), el mismo que el marcador del detalle.
+ */
+export function detectarEscaladas(
+  inputs: readonly DossierPipelineInput[],
+  ahora: Date,
+): Escalada[] {
+  return inputs
+    .filter((d): d is DossierPipelineInput & { escaladoAt: Date } =>
+      estaEscalado({ stage: d.stage, escaladoAt: d.escaladoAt }),
+    )
+    .map((d) => ({
+      leadId: d.leadId,
+      businessName: d.businessName,
+      setter: d.setter,
+      escaladoAt: d.escaladoAt,
+      escaladoNota: d.escaladoNota,
+      horas: horasDesde(d.escaladoAt, ahora),
+    }))
+    .sort((a, b) => b.horas - a.horas)
 }

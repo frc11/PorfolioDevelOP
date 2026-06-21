@@ -99,6 +99,17 @@ export async function sendTelegram(
 }
 
 /**
+ * ¿Hay credenciales de Telegram (config o env)? Reusa EXACTAMENTE la misma
+ * resolución que `sendTelegram` (config-first / env-fallback, el par como
+ * unidad) pero SIN enviar nada — para que la UI del admin avise cuando los
+ * avisos automáticos (calientes, setters trabados, reuniones) no están saliendo.
+ * No expone token ni chatId: solo el booleano. Nunca lanza (el resolver tampoco).
+ */
+export async function isTelegramConfigured(): Promise<boolean> {
+  return (await resolveTelegramCredentials()) !== null
+}
+
+/**
  * Back-compat: notificación fire-and-forget en Markdown usada por el módulo
  * chatbot. Wrapper fino sobre `sendTelegram` — un solo sender real por debajo.
  */

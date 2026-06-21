@@ -11,9 +11,25 @@
  *     cada setter (veredicto DESCARTAR vs AVANZAR/CALIENTE), total y últimos
  *     30 días (ventana por `evaluacion.fecha`, estampada desde B5).
  */
+import type { LeadStatus } from '@prisma/client'
 import type { Evaluacion } from '@/lib/leados/contracts'
 
 export const SCORE_CALIENTE = 4
+
+/**
+ * Estados donde el lead YA salió del trabajo activo del setter: no suma carga ni
+ * cuenta como "lead activo" de la cartera. ÚNICA copia — la consumen la carga de
+ * asignación del admin (`setter-carga.ts`) y los números propios del setter
+ * (`mis-numeros.ts`), así "activo" significa lo mismo en los dos lados. Vive acá
+ * (módulo de métricas puro, sin deps de runtime) para que el chequeo de
+ * invariante lo alcance sin arrastrar `@/`.
+ */
+export const ESTADOS_TERMINALES: LeadStatus[] = ['CERRADO', 'PERDIDO']
+
+/** El lead sigue vivo en la cartera (no terminal) — espejo de la carga activa. */
+export function leadActivo(status: LeadStatus): boolean {
+  return !ESTADOS_TERMINALES.includes(status)
+}
 
 export function esCaliente(score: number | null): boolean {
   return score !== null && score >= SCORE_CALIENTE

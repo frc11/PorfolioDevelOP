@@ -6,6 +6,7 @@ import { motion } from 'motion/react'
 import {
   Building2,
   ClipboardCheck,
+  Flame,
   FolderKanban,
   LayoutDashboard,
   LifeBuoy,
@@ -20,13 +21,21 @@ import {
   AlertTriangle,
   Palette,
 } from 'lucide-react'
+import { cn } from '@/lib/utils'
 import { useReducedMotion } from '@/lib/use-reduced-motion'
 import { BrandMark } from '@/components/brand/BrandMark'
+
+type BadgeKey = 'pendingAlerts' | 'revisionPendientes'
+type HotKey = 'revisionCalientes'
 
 type AdminSidebarProps = {
   userName: string
   userRole: string
   pendingAlerts?: number
+  /** B-beta: demos esperando veredicto (badge de "Revisión demos"). */
+  revisionPendientes?: number
+  /** B-beta: cuántas de esas son calientes (flama ámbar sobre el badge). */
+  revisionCalientes?: number
   onNavigate?: () => void
 }
 
@@ -34,7 +43,9 @@ type NavItem = {
   href: string
   label: string
   icon: LucideIcon
-  badgeKey?: 'pendingAlerts'
+  badgeKey?: BadgeKey
+  /** Marca "hay calientes": flama ámbar sobre el badge numérico de revisión. */
+  hotKey?: HotKey
 }
 
 type NavSection = {
@@ -49,7 +60,13 @@ const NAV_SECTIONS: NavSection[] = [
       { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
       { href: '/admin/chatbots', label: 'Chatbots', icon: Bot },
       { href: '/admin/leads', label: 'Leads', icon: Users },
-      { href: '/admin/leados', label: 'Revisión demos', icon: ClipboardCheck },
+      {
+        href: '/admin/leados',
+        label: 'Revisión demos',
+        icon: ClipboardCheck,
+        badgeKey: 'revisionPendientes',
+        hotKey: 'revisionCalientes',
+      },
       { href: '/admin/projects', label: 'Proyectos', icon: FolderKanban },
       { href: '/admin/team', label: 'Equipo', icon: UserCog },
     ],
@@ -84,11 +101,14 @@ export function AdminSidebar({
   userName,
   userRole,
   pendingAlerts = 0,
+  revisionPendientes = 0,
+  revisionCalientes = 0,
   onNavigate,
 }: AdminSidebarProps) {
   const pathname = usePathname()
   const reduced = useReducedMotion()
-  const badges = { pendingAlerts }
+  const badges: Record<BadgeKey, number> = { pendingAlerts, revisionPendientes }
+  const hots: Record<HotKey, number> = { revisionCalientes }
 
   return (
     <div className="flex h-full w-[240px] flex-col border-r border-white/10 bg-white/5 backdrop-blur-xl">
@@ -114,6 +134,8 @@ export function AdminSidebar({
 
                 const Icon = item.icon
                 const badgeValue = item.badgeKey ? badges[item.badgeKey] : 0
+                const hotValue = item.hotKey ? hots[item.hotKey] : 0
+                const isRevision = item.badgeKey === 'revisionPendientes'
 
                 return (
                   <Link
@@ -143,7 +165,28 @@ export function AdminSidebar({
                     />
                     <span className="relative font-medium">{item.label}</span>
                     {badgeValue > 0 && (
-                      <span className="relative ml-auto inline-flex min-w-[20px] items-center justify-center rounded-full border border-red-400/30 bg-red-500/20 px-1.5 py-0.5 text-[10px] font-medium text-red-300">
+                      <span
+                        className={cn(
+                          'relative ml-auto inline-flex min-w-[20px] items-center justify-center gap-0.5 rounded-full border px-1.5 py-0.5 text-[10px] font-medium',
+                          !isRevision
+                            ? 'border-red-400/30 bg-red-500/20 text-red-300'
+                            : hotValue > 0
+                              ? 'border-amber-400/40 bg-amber-500/20 text-amber-200'
+                              : 'border-cyan-400/30 bg-cyan-500/15 text-cyan-200',
+                        )}
+                        aria-label={
+                          isRevision
+                            ? `${badgeValue} ${badgeValue === 1 ? 'demo' : 'demos'} en revisión${
+                                hotValue > 0
+                                  ? `, ${hotValue} ${hotValue === 1 ? 'caliente' : 'calientes'}`
+                                  : ''
+                              }`
+                            : `${badgeValue} pendientes`
+                        }
+                      >
+                        {isRevision && hotValue > 0 && (
+                          <Flame className="h-2.5 w-2.5" strokeWidth={1.5} aria-hidden />
+                        )}
                         {badgeValue > 99 ? '99+' : badgeValue}
                       </span>
                     )}

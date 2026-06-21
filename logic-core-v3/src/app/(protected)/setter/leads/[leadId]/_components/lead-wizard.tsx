@@ -9,13 +9,14 @@ import { gateBriefAbierto } from '@/lib/leados/flow'
 import { AgendaStep } from './agenda-step'
 import { BriefStep } from './brief-step'
 import { ConstruccionStep } from './construccion-step'
-import { DossierStepper } from './dossier-stepper'
+import { DossierStepper, pasoActual } from './dossier-stepper'
 import { DraftStep } from './draft-step'
 import { EvaluacionStep } from './evaluacion-step'
 import { FichaStep } from './ficha-step'
 import { OpenerStep } from './opener-step'
 import { SeguimientoStep } from './seguimiento-step'
 import { SelfCheckStep } from './self-check-step'
+import { StepAnchor } from './step-anchor'
 
 export type WizardLead = CopyBlockLead & {
   id: string
@@ -37,6 +38,8 @@ export type WizardData = {
   selfCheck: SelfCheck | null
   /** B4: ISO de la última movida comercial si el lead respondió; null si no. */
   respondioDesde: string | null
+  /** B-beta: ISO del escalamiento "me trabé" vigente; null si no escaló. */
+  escaladoAt: string | null
   /** B5: último rechazo del admin — guía de retrabajo cuando stage=RECHAZADA. */
   ultimoRechazo: Rechazo | null
   /** B7: reunión agendada vía Cal.com (uid + traspaso) — acción «Agendar la reunión». */
@@ -51,6 +54,39 @@ export type WizardData = {
     finalUrl: string | null
     demoEnviadaAt: string | null
     dmsHoy: number
+  }
+}
+
+/** Secciones del wizard a las que se puede aterrizar el foco al abrir el lead. */
+type StepAnchorId = 'evaluacion' | 'brief' | 'construccion' | 'seguimiento'
+
+/**
+ * Qué sección enfocar al abrir, derivado del paso canónico (`pasoActual`) — sin
+ * re-implementar el flujo. `null` = no scrollear (lead nuevo o sin sección útil):
+ * se queda en el tope natural, con la cabecera del lead a la vista.
+ *
+ * Mapa índice→sección (índice = SIGUIENTE paso accionable, ver `pasoActual`):
+ *  0 Ficha → null (lead nuevo, tope natural)   ·   2 Brief → «brief»
+ *  3 Construcción → «construccion»   ·   4 Revisión (EN_REVISION) → «construccion»
+ *    (no hay step del setter; su build entregado vive ahí)
+ *  5 (APROBADA) → «seguimiento» (el envío del link vive ahí)
+ * Descartado: brief/construcción/seguimiento no se renderizan → el foco útil es
+ * el veredicto («evaluacion»).
+ */
+function anchorActivo(stage: DossierStage | null): StepAnchorId | null {
+  if (stage === 'DESCARTADA') return 'evaluacion'
+  switch (pasoActual(stage)) {
+    // DESCARTADA también cae en 2 vía `pasoActual`, pero se intercepta arriba
+    // (su «brief» no se renderiza) — acá el 2 es solo EVALUADA.
+    case 2:
+      return 'brief'
+    case 3:
+    case 4:
+      return 'construccion'
+    case 5:
+      return 'seguimiento'
+    default:
+      return null
   }
 }
 
@@ -71,6 +107,7 @@ export function LeadWizard({ data }: { data: WizardData }) {
     draftUrl,
     selfCheck,
     respondioDesde,
+    escaladoAt,
     ultimoRechazo,
     agenda,
     outreach,
@@ -79,6 +116,9 @@ export function LeadWizard({ data }: { data: WizardData }) {
   const fichaEditable = stage === null || stage === 'FICHA'
   const descartado = stage === 'DESCARTADA'
   const notaPostBrief = stage ? POST_BRIEF_NOTAS[stage] : undefined
+  // Al abrir, caer en el paso activo (no arriba de todo). El paso lo decide el
+  // stepper canónico; acá solo se aterriza el foco (ver `StepAnchor`).
+  const anchor = anchorActivo(stage)
 
   return (
     <div className="space-y-5">
@@ -122,14 +162,16 @@ export function LeadWizard({ data }: { data: WizardData }) {
 
       <FichaStep leadId={lead.id} lead={lead} ficha={ficha} editable={fichaEditable} />
 
-      <EvaluacionStep
-        leadId={lead.id}
-        leadStatus={lead.status}
-        ficha={ficha}
-        evaluacion={evaluacion}
-        habilitado={fichaEditable}
-        descartado={descartado}
-      />
+      <StepAnchor active={anchor === 'evaluacion'} leadId={lead.id}>
+        <EvaluacionStep
+          leadId={lead.id}
+          leadStatus={lead.status}
+          ficha={ficha}
+          evaluacion={evaluacion}
+          habilitado={fichaEditable}
+          descartado={descartado}
+        />
+      </StepAnchor>
 
       {/* B6: la conversación (opener + seguimiento) va pegada a la
           evaluación — el opener sale apenas hay veredicto, y la producción
@@ -151,20 +193,22 @@ export function LeadWizard({ data }: { data: WizardData }) {
       )}
 
       {!descartado && (
-        <SeguimientoStep
-          leadId={lead.id}
-          lead={lead}
-          stage={stage}
-          status={lead.status}
-          evaluacion={evaluacion}
-          contactos={outreach.contactos}
-          followUpCount={outreach.followUpCount}
-          proximoToque={outreach.proximoToque}
-          reactivateAt={outreach.reactivateAt}
-          finalUrl={outreach.finalUrl}
-          demoEnviadaAt={outreach.demoEnviadaAt}
-          dmsHoy={outreach.dmsHoy}
-        />
+        <StepAnchor active={anchor === 'seguimiento'} leadId={lead.id}>
+          <SeguimientoStep
+            leadId={lead.id}
+            lead={lead}
+            stage={stage}
+            status={lead.status}
+            evaluacion={evaluacion}
+            contactos={outreach.contactos}
+            followUpCount={outreach.followUpCount}
+            proximoToque={outreach.proximoToque}
+            reactivateAt={outreach.reactivateAt}
+            finalUrl={outreach.finalUrl}
+            demoEnviadaAt={outreach.demoEnviadaAt}
+            dmsHoy={outreach.dmsHoy}
+          />
+        </StepAnchor>
       )}
 
       {/* B7: el cierre del ciclo del setter — cuando la conversación llega a
@@ -181,27 +225,32 @@ export function LeadWizard({ data }: { data: WizardData }) {
       )}
 
       {!descartado && (
-        <BriefStep
-          leadId={lead.id}
-          lead={lead}
-          stage={stage}
-          ficha={ficha}
-          evaluacion={evaluacion}
-          brief={brief}
-          gateAbierto={gateAbierto}
-        />
+        <StepAnchor active={anchor === 'brief'} leadId={lead.id}>
+          <BriefStep
+            leadId={lead.id}
+            lead={lead}
+            stage={stage}
+            ficha={ficha}
+            evaluacion={evaluacion}
+            brief={brief}
+            gateAbierto={gateAbierto}
+          />
+        </StepAnchor>
       )}
 
       {!descartado && (
-        <ConstruccionStep
-          leadId={lead.id}
-          lead={lead}
-          stage={stage}
-          brief={brief}
-          ficha={ficha}
-          ultimoRechazo={ultimoRechazo}
-          respondioDesde={respondioDesde}
-        />
+        <StepAnchor active={anchor === 'construccion'} leadId={lead.id}>
+          <ConstruccionStep
+            leadId={lead.id}
+            lead={lead}
+            stage={stage}
+            brief={brief}
+            ficha={ficha}
+            ultimoRechazo={ultimoRechazo}
+            respondioDesde={respondioDesde}
+            escaladoAt={escaladoAt}
+          />
+        </StepAnchor>
       )}
 
       {!descartado && <DraftStep leadId={lead.id} stage={stage} draftUrl={draftUrl} />}

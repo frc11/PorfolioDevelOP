@@ -911,3 +911,682 @@ Con 10–15 leads el setter **no podía organizar el volumen a su modo**: no bus
 **Pendientes / Verificación humana (Franco — perceptual, tu sign-off):**
 - Entrá a `/admin/leados`: el panorama de producción está arriba de la cola. Verificá de un vistazo **cuántas demos hay en cada etapa y hace cuánto**, y que los **atascos** (carriles ámbar + lista ordenada por antigüedad, rechazadas en rosa) salten a la vista. Lo confirmé funcional en runtime con datos reales (9 en producción, 11 atascadas, números reconciliando); tu chequeo es el **perceptual** sobre la superficie real (glassmorphism oscuro): que el tablero "se lea como pipeline" y los atascos griten lo justo. Desktop + mobile.
 - No pude sacar screenshot con el MCP de preview (el `:3002` dev-QA ya estaba corriendo y no se adjunta a un server ajeno; `next-prod-qa :3001` rebota a `:3000` por el `AUTH_URL` del build). El mock estructural del chat refleja los números reales pero en tema claro del host, no el oscuro real.
+
+---
+
+## ✅ FG-beta · Señal in-app de las 3 alarmas + el "me trabé" deja de ser invisible   ·   2026-06-20
+
+🔴 **Las 3 señales (caliente · setter trabado · reunión) sólo viajaban por Telegram fire-and-forget.** Dos fragilidades: (a) si Franco no mira Telegram, se entera recién al abrir la página; (b) el "me trabé" del setter **no se persistía** — el lead quedaba en CONSTRUCCION sin marca, y como la cola sólo muestra EN_REVISION, ese lead trabado **ni aparecía** en el admin. Este sprint: cablea el badge del sidebar a la cola (señal in-app), persiste el escalamiento como dato del dossier (deja de ser invisible) y avisa visible cuando Telegram no está configurado. Aditivo, tipado estricto, cero `any`, un objetivo.
+
+**1 · Badge del sidebar → cola de revisión + calientes (señal in-app, no sólo Telegram):**
+- Reusa la **infra de badge existente** (no se duplicó): el `admin/layout.tsx` (Server Component) ya tenía `getPendingAlerts` con `unstable_cache(…, {revalidate:30})`. Se sumó **`getRevisionResumen`** con el mismo patrón (key + tag propios) — un `findMany` chico de `EN_REVISION` que devuelve `{pendientes, calientes}` (sólo números, nada de Dates que rompan el cache de Next 16). `calientes` reusa `parseEvaluacion` + `esCaliente` (score ≥ 4). Awaited en paralelo con `getPendingAlerts`.
+- Props cableadas server→shell→sidebar: `layout.tsx` → `AdminLayoutClient` (props nuevas `revisionPendientes`/`revisionCalientes`) → `AdminSidebar`. El render del badge ya era genérico (`badges[badgeKey]`); se amplió la unión `BadgeKey` y se agregó `hotKey`. El item **"Revisión demos"** ahora muestra el conteo (cyan = demos esperando) y **vira a ámbar con una flama** cuando hay calientes. `aria-label` describe ambas dimensiones; la flama es `aria-hidden`. El badge rojo de `pendingAlerts` queda intacto.
+- Lag ≤ 30 s (timer del cache, igual que `pendingAlerts` — su tag tampoco se invalida en mutaciones). La página `/admin/leados` en sí sigue `force-dynamic` (fresca); sólo el badge tiene ese lag.
+
+**2 · El escalamiento "me trabé" ahora PERSISTE (deja de ser invisible) — migración aditiva:**
+- **Migración** `20260620180000_add_dossier_escalado`: dos columnas nullable en `OsLeadDossier` — `escaladoAt DateTime?` (la marca) + `escaladoNota Text?` (el contexto que dejó el setter, para verlo in-app). **Aditiva, sin tocar datos ni otras tablas.**
+- **Dueño = el DOSSIER, no el meta privado del setter** (decisión clave): el escalamiento es una señal OPERATIVA que el admin debe ver y que **sobrevive a una reasignación** del lead — no es organización personal del setter (`OsLeadSetterMeta`, keyed por `setterId`, muere al reasignar). Por eso su patch **nunca lleva `setterId`**: no roza el aislamiento.
+- **Módulo puro** `lib/leados/escalamiento.ts` (espejo de `pipeline.ts`/`revision.ts`: sin Prisma, testeable en frío): `buildEscaladoPatch` (trim + cap 1000, **sin clave `stage`** → persistir nunca es transición), `estaEscalado` (predicado: vigente sólo en CONSTRUCCION) y `ESCALADO_RESET`.
+- **Write** vía `marcarEscaladoOwned` en `dossier.ts` (mirror de `saveOwnedDraftUrl`: ownership + guard de stage + `updateMany` optimista scopeado a CONSTRUCCION). La action `escalarConstruccion` ahora **persiste PRIMERO** y empuja el Telegram después: el registro durable no depende de Telegram.
+- **Limpieza de la marca, aditiva, en el chokepoint:** `transitionDossier` mergea `ESCALADO_RESET` en el `data` de **toda** transición — el escalamiento es de la construcción vigente, así que cualquier movida de stage lo resuelve/invalida. Esto + el gate por stage de `estaEscalado` (doble cinturón) evita el falso positivo en el re-loop RECHAZADA→CONSTRUCCION. No altera ninguna transición legal.
+- **Marca visible en el admin:** `/admin/leados` rendea un **`EscaladasPanel`** nuevo en el cockpit (pure `detectarEscaladas` sobre la query de pipeline, que sumó `escaladoAt`/`escaladoNota` al select) — rosa + salvavidas (más urgente que un atasco por SLA: el setter está bloqueado AHORA), con nota, "escaló hace X" y link al lead. Un lead trabado ya no es invisible.
+- **Marca visible para el setter (simetría):** `construccion-step.tsx` muestra un estado persistente "**Ya avisaste a Franco** (hace X) — está al tanto" cuando hay `escaladoAt`, y el botón pasa a "Avisar de nuevo" — evita que re-escale a ciegas. `escaladoAt` viaja como ISO por `WizardData` (page→wizard→step), igual que `respondioDesde`.
+
+**3 · Aviso visible si Telegram no está configurado (antes se evaporaba en silencio):**
+- Nuevo export **`isTelegramConfigured()`** en `telegram.ts`: reusa el resolver privado existente (config-first / env-fallback, par como unidad) **sin enviar nada**. Devuelve sólo el booleano — **no expone token ni chatId**.
+- `/admin/leados` lo llama (sumado al `Promise.all`) y, si es `false`, muestra un **banner ámbar** arriba del panel: "Telegram sin configurar — no te llegan los avisos de calientes, setters trabados ni reuniones", con link a `/admin/settings`. La señal deja de evaporarse.
+- En el setter, el toast del escalamiento ahora refleja la persistencia: aunque Telegram falle, "**Guardamos tu pedido — Franco lo ve en el panel**" (antes daba a entender que se perdía).
+
+**4 · ESLint pre-existente limpiado (toqué `construccion-step.tsx`):**
+- Había un error real `react-hooks/set-state-in-effect` en `UrgenciaBanner` (`setEspera` dentro de un `useEffect` → cascading renders). Se reemplazó por **`useSyncExternalStore` con snapshots estables** (`true` cliente / `false` server): la forma hidratación-safe de diferir el "hace X" (que depende del reloj del cliente) **sin** setState-en-effect y **sin** hydration mismatch. No se suprimió la regla — se corrigió el patrón. El mismo `useHidratado` alimenta el "hace X" del indicador de escalado.
+
+**Arquitectura / Archivos:**
+- **Nuevo:** `lib/leados/escalamiento.ts` (módulo puro), `lib/leados/escalamiento.invariant.ts` (+ script `check:invariant:escalamiento`), `prisma/migrations/20260620180000_add_dossier_escalado/`.
+- **Editado:** `prisma/schema.prisma` (2 columnas), `lib/leados/dossier.ts` (reset en transición + `marcarEscaladoOwned`), `lib/leados/pipeline.ts` (`detectarEscaladas` + 2 campos), `lib/leados/notify.ts` (docstring), `lib/notifications/telegram.ts` (`isTelegramConfigured`), `admin/leados/page.tsx` (escaladas + banner Telegram), `admin/leados/_components/pipeline-board.tsx` (`EscaladasPanel` + stat), `admin/layout.tsx` (`getRevisionResumen`), `admin/_components/AdminLayoutClient.tsx` + `admin-sidebar.tsx` (badge), setter `[leadId]/page.tsx` + `lead-wizard.tsx` + `construccion-step.tsx` + `escalar-modal.tsx`.
+- **Sin tocar:** las transiciones legales (sólo se mergea el reset aditivo), el aislamiento del setter, el canal SISTEMA, la métrica comercial, `HeroArtifact`/contextos frozen.
+
+**Verificación:**
+- ✅ **Test de invariante** (`check:invariant:escalamiento`, DB-free, no "es obvio"): prueba ejecutablemente que persistir el escalamiento **(1) no dispara transiciones** (patch sin `stage`; la marca no es un `DossierStage`; `ESCALADO_RESET` sólo limpia; gate por CONSTRUCCION) **y (2) no toca el aislamiento del setter** (patch sin `setterId`/`assignedToId`; los filtros `ownSetterMetaWhere`/`ownedLeadWhere`/`ownedListWhere` quedan idénticos). **PASA.**
+- ✅ **ESLint** limpio sobre los 16 archivos tocados (incluido el error pre-existente de `construccion-step.tsx`, ahora resuelto).
+- ✅ `npm run build` **verde** (type-check estricto incluido; client de Prisma regenerado con los campos nuevos).
+- ✅ **`prisma migrate status` limpio** (67 migraciones, schema up to date). La migración se aplicó **sin reset** (ver flag abajo).
+- ⏳ **Verificación visual/funcional → Franco** (la consigna la asignó a él explícitamente): por qué no la corrí yo, abajo.
+
+**⚠️ Flag de migración (PRE-EXISTENTE, no causado por este sprint — Franco, importante):**
+- `prisma migrate dev` quería **`migrate reset`** (PROHIBIDO). Causa: el **Neon dev compartido está ADELANTE de `main`** — tiene 3 migraciones aplicadas que **faltan en el repo local**: `20260617184913_add_converted_lead_link_and_bot_deleted_audit`, `20260619234252_add_organization_city_avatar_notes_softdelete`, `20260620173833_add_agency_settings_singleton_unique` (tocan `AgencySettings.singleton`, `Organization.avatar*/city/deletedAt/internalNotes`, `chatbot_lead.convertedToOsLeadId` — todo de otras ramas, ajeno a este sprint). El `schema.prisma` de `main` tampoco tiene esas columnas.
+- **NO reseteé.** Apliqué SÓLO mis 2 `ADD COLUMN` de forma quirúrgica: `prisma db execute` del `migration.sql` (aditivo, sin DROPs, sin tocar las tablas driftadas) + `prisma migrate resolve --applied` para registrarla + `prisma generate`. `migrate status` quedó limpio.
+- **Acción para Franco:** reconciliar `main` con esas 3 migraciones (traer los archivos al repo / mergear las ramas) antes del próximo `migrate dev` en `main`, o `migrate dev` volverá a pedir reset. El `migration.sql` de este sprint ya está en git para cuando se reconcilie.
+
+**Reglas absolutas del task (verificadas):**
+- Admin-only (badge + paneles bajo el guard `SUPER_ADMIN` del layout). El write del escalamiento lo hace el setter sobre su propio lead (ownership), que es correcto. ✅
+- Persistir es **aditivo** — no rompe el flujo del setter ni `transitionDossier` (sólo se mergea `ESCALADO_RESET`, columnas nullable). ✅
+- Se **reusó** `sendTelegram`/`resolveTelegramCredentials` (vía `isTelegramConfigured`) y la infra de badge; nada duplicado. ✅
+- Migración aditiva, **nunca reset**. ✅ Tipado estricto, cero `any`, un objetivo. ✅
+
+**Pendientes / Verificación humana (Franco — funcional/visual, tu sign-off):**
+- **Sidebar:** abrí cualquier página `/admin/*` con demos en revisión — el item "Revisión demos" muestra **cuántas esperan**; si alguna es caliente, el badge vira a **ámbar con flama**. Desktop + mobile.
+- **Setter trabado visible:** con un lead en CONSTRUCCION, entrá como setter y tocá **"Me trabé"** → en `/admin/leados` aparece el panel **"Setters trabados"** (rosa) con el negocio, la nota y "escaló hace X"; del lado del setter, el paso 4 muestra **"Ya avisaste a Franco"**. Confirmá que un trabado deja **marca visible** en el admin.
+- **Telegram:** con `AgencySettings.osTelegram*` y env `TELEGRAM_*` vacíos, `/admin/leados` muestra el **banner ámbar** "Telegram sin configurar" con link a Ajustes. Configuralo y confirmá que desaparece.
+- No corrí visual-qa con browser: ver el `EscaladasPanel`/indicador poblados exige **sembrar un lead escalado** en CONSTRUCCION sobre el **Neon dev compartido y driftado** — preferí no mutarlo más tras el lío de migración de arriba. Lo cubierto por mí: build + ESLint + invariante + migración aplicada limpia. Lo perceptual/funcional es tu sign-off (la consigna lo asignó así).
+
+---
+
+## Sprint 0.5.8 — Novedades dirigidas al setter (deja de volver a ciegas) · 2026-06-20
+
+**El agujero:** el sistema notificaba SOLO a Franco. El setter volvía a ciegas a los handoffs del flujo invertido — (a) le asignaron un lead (modelo 100% pull, nada se lo avisaba), (b) Franco aprobó/rechazó su demo (no le llegaba nada → un lead aprobado podía quedar horas sin link, el momento caliente), (c) le **sacaron** un lead por reasignación (cabo que el sprint 0.5.3 dejó declarado para el setter saliente). Este sprint agrega a QUIÉN se avisa (el setter) + una superficie de novedades; **NO** cambia CUÁNDO se disparan los eventos.
+
+**1 · Disparadores REUSADOS — no se tocó CUÁNDO (SENSIBLE-lite):**
+- Los tres gates ya existían y quedaron intactos: la asignación es `assignLeadSetter` (admin, `requireSuperAdmin`); la aprobación/rechazo son `aprobarRevision`/`rechazarRevision` (admin, vía `transitionDossier` — el único chokepoint de stage); la reasignación deja su `OsLeadActivity` canal `SISTEMA` (rastro de 0.5.3, `registrarReasignacion`). **Cero líneas de transición/gate modificadas** — solo se agregó, después del write que ya persistía, una emisión de novedad dirigida.
+
+**2 · Cómo se dirige al setter — modelo addressed `OsSetterNotice` (in-app), no Telegram:**
+- **Por qué in-app y no Telegram al setter:** `sendTelegram` (sender ÚNICO, config-first/env-fallback) resuelve a UN solo chat (Franco). No hay chatId por setter, así que Telegram no puede alcanzarlo; el canal dirigido al setter es **in-app**. NO se duplicó el sender ni se dispararon Telegrams redundantes por handoffs que Franco mismo ejecuta. (Desbloquear Telegram-al-setter requeriría chatId por usuario — fuera de scope, anotado abajo.)
+- **Modelo nuevo `OsSetterNotice`** (`setterId`, `leadId?`, `kind`, `title`, `body`, `read`, `createdAt`) + enum `OsSetterNoticeKind` (`LEAD_ASIGNADO`, `DEMO_APROBADA`, `DEMO_RECHAZADA`, `LEAD_REASIGNADO_SALIENTE`). **Addressed por `setterId`**, no derivado de la cartera: es la única forma de alcanzar al setter saliente (ver §3). Sibling de `OsLeadActivity`/`OsLeadSetterMeta`; **NO es un `OsLeadActivity`** → no toca el historial comercial del lead ni cuenta como contacto.
+- **`title`/`body` se SNAPSHOTEAN al crear** (incluyen el nombre del negocio): el lector NUNCA re-lee el lead — clave para el saliente, que ya no puede verlo.
+- Emisión fire-and-forget vía `emitirNovedadSetter` (NUNCA lanza): un fallo del aviso jamás revierte el handoff (ya persistido). El destinatario sale de la **regla única `destinatarioNovedad`** (no de un id pasado a mano), la MISMA que verifica el invariante.
+
+**3 · El cabo 0.5.3 → 0.5.8 cerrado (el setter SALIENTE):**
+- Al reasignar A→B, el lead deja de ser `assignedToId` de A: A ya **no lo ve en su cartera** ni en su historial (lo decía el comentario de `[leadId]/page.tsx`). Underivable por ownership → por eso el modelo es **addressed**. `assignLeadSetter` ahora emite, en el mismo bloque del rastro (solo si el dueño cambió de verdad): **entrante** → al nuevo dueño (`LEAD_ASIGNADO`), **saliente** → al dueño previo (`LEAD_REASIGNADO_SALIENTE`, `leadId: null`, sin link — no puede abrirlo). Cada extremo nulo (unassign / asignar desde nadie) se ignora solo.
+
+**4 · La superficie de novedades en `/setter` (+ badge + demo en cola):**
+- **`NovedadesPanel`** (server component, arriba de la cartera, incluso con cartera vacía: un setter que perdió su único lead igual ve el aviso de salida). Dos cosas distintas:
+  - **Avisos dirigidos sin leer** = "qué cambió desde tu última visita" (el flag `read` ES el cursor de "última visita"); cada uno con ícono/color semántico (cyan asignación, esmeralda aprobada, rosa rechazada, zinc saliente), "hace X" y "Abrir" (salvo el saliente). Botón **"Marcar como vistas"** (server action `requireSetter`, sin id del cliente).
+  - **"Tus demos esperando a Franco"** = `derivarDemosEnCola` (LIVE, cero campos nuevos) sobre los leads EN_REVISION de su cartera, "en cola hace X" con el MISMO `formatEspera` que ve Franco del otro lado. Es el dato que él ya tiene y el setter no veía.
+- **Badge persistente en el topbar** (`contarNovedadesSinLeer`, lectura indexada y resiliente): el setter ve el conteo de pendientes desde cualquier ruta `/setter`, no solo el home.
+
+**5 · El punto de aislamiento (lo central) + invariante ejecutable:**
+- **Dos ejes, cada uno limpio:** el feed dirigido se filtra por **DESTINATARIO** (`ownSetterNoticeWhere` = `{ setterId }`); la cola en revisión por **DUEÑO ACTUAL** (`ownedListWhere` = `{ assignedToId }`). Son dimensiones distintas a propósito: el saliente ya no es dueño pero sí destinatario. La regla de a-quién-va (`destinatarioNovedad`) es ÚNICA, compartida por las actions y el invariante.
+- **`SISTEMA` sigue EXCLUIDO de lo comercial:** mostrar novedades no reclasifica nada; la reasignación `SISTEMA` queda intacta y una `OsSetterNotice` ni siquiera es un canal de actividad (conjuntos disjuntos) → no puede inflar `_count.activities`, "último contacto" ni cadencia.
+- **`check:invariant:novedades`** (DB-free, no "es obvio"): prueba ejecutablemente (1) aislamiento por `setterId` (A nunca alcanza a B), (2) dirección correcta — actual para asignar/aprobar/rechazar, **previo para el saliente** (en A→B el entrante B y el saliente A no se cruzan; extremo nulo → sin fila), (3) `esContactoComercial(SISTEMA)===false` + `SOLO_CONTACTOS_COMERCIALES` sin cambios + novedad-≠-canal. **PASA.**
+
+**6 · ESLint + review adversarial:**
+- **ESLint** limpio sobre los 10 archivos tocados (incluido el `aria-hidden` faltante en el `LogOut` pre-existente de `setter/layout.tsx`, corregido de paso). Cero `any`, cero `console.log` (el `console.error '… fallo no fatal'` espeja el patrón de `notify.ts`).
+- **Review multi-lente (5 revisores, adversarial):** 0 CRITICAL, 1 HIGH confirmado → aplicado: `assignLeadSetter` ahora `revalidatePath('/setter')` (mismo contrato de invalidación que `revalidarRevision`). MEDIUMs aplicados: casts del invariante tipados, `aria-hidden` del LogOut. Rechazados con razón: import `.ts` (es la convención de los `*.invariant.ts` ejecutados por ts-node) y `router.refresh()` (espeja `lead-card-actions`/`cartera.actions`, que hacen revalidatePath + refresh).
+
+**Arquitectura / Archivos:**
+- **Nuevo:** `lib/leados/novedades.ts` (copy pura + writer addressed + lectores resilientes + `derivarDemosEnCola`), `lib/leados/novedades.invariant.ts` (+ script `check:invariant:novedades`), `setter/_actions/novedades.actions.ts` (marcar vistas), `setter/_components/novedades-panel.tsx` (server) + `novedades-marcar-visto.tsx` (client), `prisma/migrations/20260620190000_add_setter_novedades/`.
+- **Editado:** `prisma/schema.prisma` (modelo `OsSetterNotice` + enum + relaciones virtuales en User/OsLead), `lib/leados/isolation.ts` (`ownSetterNoticeWhere` + `destinatarioNovedad` puros), admin `lead.actions.ts` (emite IN/OUT + revalida setter) y `revision.actions.ts` (emite al dueño), setter `page.tsx` (panel, reusa los leads ya cargados) + `layout.tsx` (badge topbar), `package.json`.
+- **Sin tocar:** transiciones/gates (`transitionDossier`, `dossier.ts`), el rastro `SISTEMA` (`assignment-trail.ts`), la métrica comercial, el aislamiento existente, `sendTelegram` (no se duplicó), `HeroArtifact`/contextos frozen.
+
+**Verificación:**
+- ✅ **Invariante** `check:invariant:novedades` PASA (+ los otros 3 siguen verdes).
+- ✅ **ESLint** limpio (10 archivos) · **`npm run build` verde** (type-check estricto, client de Prisma regenerado) · **`prisma migrate status` limpio** (68 migraciones).
+- ✅ **Migración aditiva** `20260620190000_add_setter_novedades`: `CREATE TYPE` + `CREATE TABLE` + 2 índices + 2 FKs (setter Cascade, lead SetNull). **Sin ALTER/DROP sobre tablas existentes** (las relaciones en User/OsLead son virtuales). Aplicada sin reset (`db execute` + `migrate resolve --applied` + `generate`). `migrate status` lo confirmó limpio.
+- ✅ **Verificación visual/runtime corrida POR MÍ** (dev:qa 3002, QA-login persona `setter`, novedades sembradas y luego purgadas): el panel rendea los 3 avisos con copy + acentos correctos, el **saliente sin link "Abrir"** (no puede abrirlo), la cola "esperando a Franco" con "en cola hace X días", el **badge "3"** en panel y topbar, y **"Marcar como vistas"** vacía avisos + ambos badges mientras la cola (live) persiste. Desktop + mobile, sin errores de cliente. (Bonus: cuando Neon hizo cold-start, el `error.tsx` del setter atrapó el fallo — la resiliencia del lector funciona.)
+
+**Reglas absolutas del task (verificadas):**
+- SENSIBLE-lite: **no se cambió CUÁNDO** (gates/transiciones intactos), solo a QUIÉN se avisa + la superficie. ✅
+- Aislamiento #1: cada setter ve SOLO lo suyo (feed por `setterId`, cola por `assignedToId`); el saliente se alcanza por addressed, no por cartera. ✅
+- `SISTEMA` excluido de lecturas comerciales; las novedades lo LEEN/derivan sin que cuente como contacto. ✅
+- Se **reusó** `sendTelegram` (no se creó otro sender) — el canal al setter es in-app por el límite de chat único. ✅ Tipado estricto, cero `any`, un objetivo. ✅
+
+**Pendientes / Verificación humana (Franco — funcional, tu sign-off):**
+- **Asignar:** asigná un lead a un setter de test → en su `/setter` aparece "Te asignaron un lead" + badge.
+- **Aprobar/Rechazar:** aprobá/rechazá su demo → ve "Franco aprobó tu demo — enviá el link ya" / "Franco pidió cambios" dirigido a él (no a ciegas).
+- **Reasignar A→B:** el setter B ve "te asignaron"; el setter A (saliente) ve **"Te reasignaron un lead — ya no está en tu cartera"** (el cabo 0.5.3 cerrado), sin link.
+- **Demo en cola:** con una demo suya EN_REVISION, ve "tu demo en cola hace X" (lo que vos ves del otro lado).
+- **Desbloqueo futuro (fuera de scope):** para que estos avisos también lleguen por Telegram AL setter haría falta un chatId por setter (hoy `sendTelegram` es un único chat tuyo). Anotado por si lo querés en un próximo sprint.
+
+---
+
+## 0.5.9 — Carril de re-entrada "Continuá donde dejaste" (home del setter)
+
+**Objetivo (uno):** el setter que vuelve no debería reconstruir mentalmente en qué andaba. Un carril/CTA arriba del home que lleva directo al lead correcto. **Solo presentación** — reusa el motor existente, cero motor nuevo de prioridad.
+
+**1 · La señal elegida y por qué — `próxima acción más urgente`, NO `último lead tocado`:**
+- El motor ya calcula el punto de re-entrada: `particionarCartera(leads).grupos.trabajar[0]`, el tope del carril "trabajar" ya ordenado por `ordenUrgencia` (respondió → caliente → resto, y a igualdad antigüedad). Por construcción ese tope es **siempre `accionable`** (el grupo "trabajar" es, por definición, lo que hay para hacer ahora).
+- **Descarté "último lead tocado" por dos razones concretas:**
+  - **No existe en los datos cargados.** `listOwnedLeads` no trae `updatedAt` del lead ni timestamps de actividad — solo `_count.activities`. Derivar recencia = query + orden nuevos = **motor nuevo de prioridad**, prohibido por el task.
+  - **Recencia ≠ utilidad.** El último lead tocado puede ser uno recién parkeado ("esperando respuesta del negocio"), que es justo donde NO conviene retomar. La urgencia ya calculada apunta a "qué hacer ahora", que es lo que un setter que vuelve necesita.
+- **Un solo origen:** el mismo `particion.grupos.trabajar[0]` alimenta el carril nuevo, el atajo de teclado `r` y el ancla oculta de "Recorrer". Los tres apuntan al MISMO lead → coherencia total.
+
+**2 · Cómo se presenta:**
+- Componente nuevo `continuar-cta.tsx` (presentacional puro): un `<Link>` a `/setter/leads/[id]?cola=trabajar` — el **MISMO destino que "Recorrer"/`r`**, así retomar **encadena el recorrido** en vez de cortarlo (entrás al lead y seguís con prev/next).
+- Ubicado **arriba de todo** en `CarteraView`, antes de "De un vistazo". Render condicional: solo aparece si hay al menos un lead en "trabajar" (cartera calma sin urgencias → sin carril, sin ruido).
+- Muestra: eyebrow "Continuá donde dejaste", `businessName` (truncado), `proximaAccion`, y el rótulo de motivo de orden (`motivoOrden`) como chip — oculto en mobile (`hidden sm:inline-flex`). Ícono `PlayCircle` + `ArrowRight` con micro-hover.
+- **Disciplina B9:** es un CTA (navega, accionable) → **cyan justificado** (borde `cyan-400/25`, fondo `cyan-500/[0.06]`, barra de acento cyan a la izquierda — los mismos tokens que ya viven en las cards accionables de esta página). El chip de motivo va **neutro** (zinc): es informativo, no compite con la acción.
+
+**Arquitectura / Archivos:**
+- **Nuevo:** `setter/_components/continuar-cta.tsx` (presentacional, recibe el `HomeLead` ya elegido por el padre).
+- **Editado:** `setter/_components/cartera-view.tsx` (deriva `const continuar = particion.grupos.trabajar[0]` — reusa el mismo tope que `r`/Recorrer — y renderiza el carril arriba de todo).
+- **Sin tocar:** el motor (`flow.ts`: `particionarCartera`, `ordenUrgencia`, `proximaAccionPara`, `motivoOrden`), `listOwnedLeads`/aislamiento, `home.ts`, contextos/HeroArtifact frozen. Cero campos nuevos, cero query nueva.
+
+**Reglas absolutas del task (verificadas):**
+- **Solo presentación, cero motor nuevo:** el carril no calcula prioridad — consume `grupos.trabajar[0]` que el motor ya ordena. ✅
+- **Aislamiento #1:** el lead sale de `particionarCartera` sobre `listOwnedLeads` (`assignedToId = userId`) — solo la cartera de este setter. ✅
+- **B9:** CTA → cyan; rótulo informativo → neutro. ✅
+- **Tipado estricto, un objetivo:** cero `any`, un solo objetivo. ✅
+
+**Verificación:**
+- ✅ **`npm run build` verde** (type-check estricto) · **ESLint limpio** sobre los 2 archivos (es el gate de formato real del repo — NO hay config de prettier; `npx prettier` corre con defaults y corrompe el estilo single-quote/no-semicolon, error detectado y revertido).
+- ✅ **Render server-side confirmado por HTTP** (dev:qa 3002, QA-login persona `setter`, `/setter` → 200): el carril es el **primer hijo** del contenedor, arriba de "De un vistazo"; eligió **QA-B6 Gimnasio Atlas** con acción accionable "Demo aprobada — enviá el link (Paso 9)" (= tope de "trabajar"); `href` correcto a `…?cola=trabajar`; aria-label completo; todos los tokens cyan/glass presentes. (Bonus, esperado: primer hit a Neon fue cold-start 500, el retry dio 200.)
+
+**Pendiente / Verificación humana (Franco — perceptual, tu sign-off):**
+- **Capa de píxeles NO capturada:** el MCP `Claude_Preview` no está conectado en esta sesión (ni padre ni subagente `visual-qa` tienen browser). No cierro la perceptual a ciegas — queda para tu confirmación, que el task ya te asignaba ("Perceptual: lo confirmo yo").
+- **Qué mirar:** volvé al home → el carril cyan "Continuá donde dejaste" arriba de todo lleva al lead correcto; contraste del eyebrow cyan legible; en mobile el nombre + acción truncan sin romper layout y el chip de motivo queda oculto.
+
+---
+
+## 0.5.10 — Señal de avance del setter "Tu semana" (home)
+
+**Objetivo (uno):** el setter no tenía ninguna señal de que avanza — el laburo se sentía sin recompensa, aunque los datos del avance ya existían. Una señal **sobria** de progreso en el home (no gamificación, no ranking, no métrica de presión). **Solo presentación** de datos existentes.
+
+**1 · Datos elegidos y por qué — 3 métricas event-timestamped, ventana móvil de 7 días:**
+- **Contactos** → `OsLeadActivity.count` con `performedById = userId` + `SOLO_CONTACTOS_COMERCIALES` (excluye `SISTEMA`) + `createdAt ≥ desde`. Es la atribución **más fuerte de "suyo"**: lo hizo él (vale aunque el lead se haya reasignado después — el contacto fue suyo). Única lectura nueva (un `count` indexado por `[performedById, createdAt]`).
+- **Demos enviadas** → derivada en memoria de `dossier.enviadaAt` (la marca canónica del envío B6) dentro de la ventana. **Cero query nueva** — ya viene en `listOwnedLeads`.
+- **Reuniones agendadas** → derivada en memoria de `dossier.agendaJson` (`AgendaSchema`: `estado === 'AGENDADA'` + `agendadaAt ≥ desde`). `agendadaAt` lo estampa el propio setter al confirmar (`agenda.actions.ts:211`), así que la ventana es real. **Cero query nueva.**
+- **Ventana MÓVIL de 7 días, no semana calendario:** decisión de bienestar — la semana calendario resetea a 0·0·0 cada lunes (vacío/castigador); la ventana móvil siempre refleja el laburo reciente.
+
+**2 · Cómo se presenta (sobrio por diseño, cuidado del operador):**
+- Componente nuevo `progreso-semana.tsx` (server component presentacional puro). Tira fina, **no** un dashboard de números grandes: eyebrow "Tu semana", chips `ícono · número · label` y "últimos 7 días" al margen. Glass de la página (`border-white/[0.06] bg-white/[0.02]`), un solo acento `emerald-300/70` (semántica "positivo/logro" ya usada para "Demos aprobadas"). Lucide `strokeWidth={1.5}`.
+- **Sin metas, sin racha, sin comparación, sin trend** — solo un acuse de "esto laburaste".
+- **Anti-presión:** se **oculta entera** si `total === 0` (setter nuevo ⇒ sin ceros que culpen); muestra **solo las métricas con valor > 0** (un "0 reuniones" no aparece, no naguea).
+- Ubicado en `page.tsx` después de `NovedadesPanel`, antes de `OnboardingHint` — momento de "volviste, esto venís haciendo". Va a nivel de page (no dentro de `CarteraView`), así aparece aun con cartera vacía si el setter hizo contactos en la ventana.
+
+**3 · ESLint limpiado (lo pedía el task) — `onboarding-hint.tsx:39` `set-state-in-effect`:**
+- El patrón viejo `useState(false)` + `useEffect(() => setVisible(localStorage…))` disparaba la regla. **No** se puede arreglar con inicializador lazy de `useState`: leería `window` en SSR y rompería.
+- Fix correcto: `useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot)` — la lectura idiomática de un store externo (localStorage). El server-snapshot (`false`, oculto) evita el desajuste de hidratación; tras hidratar pasa al valor real. `dismiss` ahora hace `setItem` + notifica a los listeners. Misma UX, regla satisfecha, sin efecto.
+
+**Arquitectura / Archivos:**
+- **Nuevo:** `src/lib/leados/progreso.ts` — `derivarProgresoSemana` (pura, `ahora` inyectado, espejo de `derivarDemosEnCola`) + `getProgresoSemana(userId, leads)` (1 count resiliente, reusa los leads ya cargados). Reusa `SOLO_CONTACTOS_COMERCIALES` (isolation) y `AgendaSchema` (contracts).
+- **Nuevo:** `src/app/(protected)/setter/_components/progreso-semana.tsx` (presentacional).
+- **Editado:** `setter/page.tsx` (carga `getProgresoSemana` en `Promise.all` junto a novedades — ambas reusan `leads`, son independientes — y renderiza `<ProgresoSemana>`).
+- **Editado:** `setter/_components/onboarding-hint.tsx` (fix ESLint `set-state-in-effect`).
+- **Sin tocar:** schema (cero campos/migración nuevos), aislamiento, motor, frozen files.
+
+**Reglas absolutas del task (verificadas):**
+- **Solo presentación de datos existentes, cero motor/campo nuevo:** ✅ (3 fuentes ya existían; 1 sola lectura `count`, resto derivado).
+- **Aislamiento #1 — la señal es del propio setter:** contactos por `performedById = userId`; demos/reuniones derivadas de `listOwnedLeads` (`assignedToId = userId`). ✅
+- **Sin gamificación intrusiva / sin vanidad / bienestar del operador:** sin metas, sin ranking, sin racha; se oculta en cero; solo métricas positivas. ✅
+- **Tipado estricto, un objetivo:** cero `any`, un solo objetivo. ✅
+
+**Verificación:**
+- ✅ **`npm run build` verde** (type-check estricto del proyecto) · **ESLint limpio y estricto** (`--max-warnings 0`) sobre los 4 archivos. El `set-state-in-effect` de `onboarding-hint.tsx` ya no aparece.
+
+**Pendiente / Verificación humana (Franco — perceptual, tu sign-off):**
+- **Capa de píxeles NO capturada.** Además, la tira **solo aparece con actividad del setter en los últimos 7 días** (por diseño se oculta en cero) — una captura significativa exige sesión de setter autenticada + datos sembrados recientes. El task ya te asignaba la perceptual ("lo confirmo yo").
+- **Qué mirar:** con un setter que hizo contactos/demos/reuniones esta semana → la tira "Tu semana" aparece después de Novedades, sobria, sin sensación de presión ni vacío; un setter nuevo (sin actividad) **no** ve la tira ni ceros; contraste emerald/zinc legible; en mobile los chips envuelven sin romper layout.
+
+---
+
+## 0.5.11 — "Mis números" del setter (home)
+
+**Objetivo (uno):** el setter no podía ver sus propios números — cuántos leads trabaja, su ratio descarte/avance — esos datos vivían solo del lado admin (`/admin/leados`). Darle al setter **SUS** métricas, scope propio: leads activos + ratio (la actividad ya la cubre "Tu semana"). **Solo presentación**, **reusando el cálculo existente**.
+
+**1 · Qué cálculo se reusó — `calcularRatioSetters` tal cual (cero recálculo):**
+- El ratio descarte/avance (total + ventana 30d) sale de `calcularRatioSetters(filas, ahora)` de `revision.ts` — **la misma función pura** que alimenta la cola de revisión del admin (`/admin/leados`) y la carga de asignación (`setter-carga.ts`). No se duplicó la lógica: se le pasan las filas del propio setter y se toma el único bucket que puede producir. `pctDescarte` también reusado.
+- **De dónde salen las filas:** de los leads **ya cargados** por `listOwnedLeads(userId)` (filtrados por `assignedToId = userId`), parseando `dossier.evaluacionJson` con `EvaluacionSchema`. **Cero queries nuevas** — se deriva en memoria de la cartera que el home ya trae.
+
+**2 · Qué métricas se muestran (sobrio, no comparativo):**
+- **Leads activos** → conteo de leads **no terminales** (`leadActivo` = `status ∉ {CERRADO, PERDIDO}`), con el total de cartera como contexto ("3 de 5 en tu cartera").
+- **Mi criterio · descarte vs avance** → evaluadas, % descarte, desglose descartes/avances + barra estática de proporción, sub-línea de últimos 30 días, y nota de "sin fecha" (pre-B5) cuando aplica. Si todavía no evaluó nada → hint sobrio, no ceros.
+- **Decisión de diseño:** **NO** se muestra la alarma `alarmaNuncaDescarta` ("nunca descarta — revisar criterio"). Esa es una lectura de **gestión del admin**; al setter se le muestra su número, no un juicio. Mismo criterio anti-presión que "Tu semana".
+
+**3 · Aislamiento (regla #1, doble candado — verificado por invariante ejecutable):**
+- **Entrada (nivel query):** las filas vienen de `listOwnedLeads(userId)` = `ownedListWhere` = `{ assignedToId: userId }`. La cartera de A nunca alcanza la de B.
+- **Atribución (nivel cálculo):** `filasCriterioPropio` etiqueta **cada** fila con el `userId` de la sesión, **nunca** con un id leído del lead — así `calcularRatioSetters` solo puede bucketear bajo el setter propio (a lo sumo UN setter, y es él). Aunque entrara una fila ajena, no hay camino para verla. Atribución por dueño ACTUAL, idéntica al admin.
+
+**Arquitectura / Archivos:**
+- **Nuevo:** `src/lib/leados/mis-numeros.ts` — módulo **puro y liviano** (sin `@/` en runtime, para que el chequeo de invariante lo alcance sin Neon): `calcularMisNumeros(leads, userId, ahora)` (core puro) + `derivarMisNumeros(leads, userId)` (estampa `ahora`, espejo de `buildHomeLeads`) + `filasCriterioPropio` (la garantía de atribución). Reusa `calcularRatioSetters`/`pctDescarte`/`leadActivo` de `revision.ts` y `EvaluacionSchema` de `contracts.ts`.
+- **Nuevo:** `src/app/(protected)/setter/_components/mis-numeros.tsx` (presentacional puro, glass de la página, acento cyan, Lucide `strokeWidth={1.5}`, `role="img"` + aria en la barra). Se oculta si la cartera está vacía y sin criterio.
+- **Nuevo:** `src/lib/leados/mis-numeros.invariant.ts` + script `check:invariant:mis-numeros` — chequeo ejecutable del aislamiento (doble candado) + correctitud del reuso (activos no terminales; ratio idéntico a `calcularRatioSetters`; ventana 30d; sin-fecha; cartera vacía).
+- **Editado:** `revision.ts` — se movió acá `ESTADOS_TERMINALES` + `leadActivo` (única copia, módulo de métricas puro) para que tanto la carga del admin como los números del setter cuenten "activo" igual, **y** para que el invariante no arrastre `flow.ts` (que importa `@/lib/follow-up`).
+- **Editado:** `setter-carga.ts` — ahora importa `ESTADOS_TERMINALES` de `revision.ts` (DRY; antes lo definía local).
+- **Editado:** `setter/page.tsx` — `derivarMisNumeros(leads, userId)` (reusa los leads ya cargados) + `<MisNumeros>` **al pie** del home (reflexivo y secundario: no compite con el trabajo "de arriba para abajo"), solo en la rama con cartera.
+- **Sin tocar:** schema (cero campos/migración), motor, frozen files, nav/shell.
+
+**Reglas absolutas del task (verificadas):**
+- **Aislamiento #1 — el setter ve SOLO sus números:** doble candado (entrada `assignedToId` + atribución por sesión), constatado por `check:invariant:mis-numeros`. ✅
+- **Reusar `calcularRatioSetters`, no duplicar:** el ratio sale de la misma función pura; el invariante asserta `numeros.criterio.total === calcularRatioSetters(...).total`. ✅
+- **Tipado estricto, un objetivo:** cero `any`, un solo objetivo. ✅
+
+**Verificación:**
+- ✅ **`npm run build` verde** (type-check estricto, compila `/setter`) · **ESLint limpio** sobre los 6 archivos del scope · **`check:invariant:mis-numeros` verde** + los 3 invariantes hermanos (novedades / escalamiento / setter-meta) siguen verdes tras mover `ESTADOS_TERMINALES`.
+
+**Pendiente / Verificación humana (Franco — funcional, tu sign-off):**
+- **Capa de píxeles NO capturada** (la sección con datos reales exige sesión de setter autenticada + cartera con evaluaciones sembradas). El task ya te asignaba la funcional ("lo confirmo yo").
+- **Qué mirar:** el setter ve SUS leads activos y SU ratio al pie del home; **no aparece nada de otro setter** (logueá con dos setters distintos: cada uno ve solo lo suyo); un setter sin evaluaciones ve el hint, no ceros; en mobile las dos tiles apilan sin romper layout.
+
+---
+
+## ✅ 0.5.12 — Al abrir el lead, caer en el paso activo (no arriba de todo)   ·   2026-06-20
+
+**Problema:** al abrir un lead, el setter caía en el tope del wizard y tenía que scrollear/buscar en qué paso estaba — pero el estado real ya lo sabe el dossier (`stage`) y el stepper canónico de 5 etapas. Este sprint **lleva el foco a la sección del paso activo al abrir**. **Solo presentación/navegación interna:** cero cambio de gates, stage, server-actions, schemas. Tipado estricto, cero `any`. Un objetivo.
+
+**Cómo se determina el paso activo (deferir al stepper, no re-derivar):**
+- La verdad de "dónde está el lead" es `pasoActual(stage)` (`dossier-stepper.tsx`, canónico FG-0) — se **exportó** para reusarla como **fuente única**. El `stage` nombra el hito cumplido; el índice apunta al SIGUIENTE paso accionable: `null/FICHA→0` · `EVALUADA/DESCARTADA→2` · `BRIEF/CONSTRUCCION/RECHAZADA→3` · `EN_REVISION→4` · `APROBADA→5` (el `1` no ocurre: no hay stage "en evaluación").
+- `anchorActivo(stage)` en `lead-wizard.tsx` es **glue de presentación** sobre ese índice → a qué sección del wizard aterrizar:
+  - `0` (lead nuevo) → `null` = **no scrollea**, se queda en el tope natural con la cabecera del lead a la vista.
+  - `2` (EVALUADA) → «brief». `3` y `4` (BRIEF/CONSTRUCCION/RECHAZADA · EN_REVISION) → «construccion» (la 5.ª etapa Revisión es de Franco, sin step del setter: su build entregado vive en construcción).
+  - `5` (APROBADA) → «seguimiento» (ahí vive el envío del link).
+  - `DESCARTADA` → «evaluacion» (brief/construcción/seguimiento no se renderizan; el foco útil es el veredicto).
+- **No se re-implementa el flujo:** el "paso activo" lo decide siempre `pasoActual`; `anchorActivo` solo traduce índice→sección. No toca `gateBriefAbierto` ni ninguna transición.
+
+**Cómo se aterriza (`step-anchor.tsx`, nuevo):**
+- `StepAnchor` envuelve la sección y, si es la activa, se trae a sí misma al viewport con `ref.scrollIntoView({ block:'start', behavior:'auto' })` (salto instantáneo en el mount, sin pelear con la restauración de scroll). Se envuelven 4 secciones: evaluación, brief, construcción, seguimiento. Ficha queda sin envolver (lead nuevo = tope natural).
+- **Robusto a la duplicación responsive del wizard** (documentada en B0.4: una copia vive bajo un ancestro `display:none`): el guard `el.offsetParent === null` detecta esa copia y la saltea (su scroll sería no-op) → **solo enfoca la copia visible**. No depende de `id`/`getElementById` (que podría resolver la copia oculta). El scroll-container es `<main className="relative overflow-y-auto">` (ancestro posicionado) → la copia visible siempre tiene `offsetParent` no-null.
+- `scroll-mt-24` en el wrapper deja la cabecera por debajo del recorrido sticky (modo cola) y da aire en modo isla. El wrapper es un `div` de bloque sin margen propio → el `space-y-5` del wizard no cambia (sigue espaciando entre hijos directos).
+
+**Compatibilidad (sin romper recorrido 0.5.6 ni atajos 0.5.7):**
+- **Recorrido de cola (`?cola=`):** las deps del efecto son `[active, leadId]` → re-enfoca al **cambiar de lead** (prev/next, `leadId` cambia) y al **avanzar de stage** en sesión (`active` cambia). **NO** re-scrollea en cada `router.refresh()` de autosave (mismo `leadId`/`active`). Modo isla (sin `?cola=`): funciona igual, sin recorrido sticky.
+- **Atajos de teclado (`j/k/→/←/b`, `?`):** intactos — viven en `recorrido-strip.tsx` y `cartera-view.tsx`; este sprint **no agrega ningún keyhandler** ni toca esos componentes. El aterrizaje es por efecto de mount/nav, independiente del teclado.
+
+**Matiz declarado (deferencia estricta al stepper):** para `EVALUADA` el paso canónico es «Brief» (gated hasta que el lead responda), con el opener/seguimiento **justo arriba** en el DOM. Se aterriza en «brief» por deferir al stepper (no re-interpretar el flujo). Si en la verificación humana se prefiere que los leads en outreach (EVALUADA) caigan en el **opener**, es un ajuste de 1 línea en `anchorActivo` — pero es una decisión de interpretación del flujo, tuya, no la asumo.
+
+**Arquitectura / Archivos:**
+- **Nuevo:** `step-anchor.tsx` — wrapper cliente, puro de presentación (scroll + guard de copia oculta).
+- **Editado:** `lead-wizard.tsx` — `anchorActivo` + 4 secciones envueltas en `<StepAnchor>`; import de `pasoActual`/`StepAnchor`.
+- **Editado:** `dossier-stepper.tsx` — `export` de `pasoActual` (antes module-private); cero cambio de comportamiento del stepper.
+
+**Verificación (gate ECC — tooling real del repo es ESLint, no Prettier):**
+- ✅ `tsc --noEmit` limpio · ✅ `eslint` limpio sobre los 3 archivos · ✅ `npm run build` verde (`/setter/leads/[leadId]` compila) · ✅ `prisma migrate status` up to date (68 migs).
+- ✅ **react-reviewer**: *Approve*, sin CRITICAL/HIGH. Confirmó: el truco `offsetParent` para la copia `display:none`; deps `[active, leadId]` disparan en open/prev-next/avance y bailan en refresh; reglas de hooks y SSR OK; el wrapper no rompe `space-y-5`; switch de `anchorActivo` exhaustivo. Las 2 notas LOW (maintainability) se aplicaron como comentarios.
+
+**Pendiente / Verificación humana (Franco — funcional, tu sign-off; el task ya te la asignaba: "lo confirmo yo"):**
+- **Capa de runtime NO capturada** acá (exige sesión de setter autenticada + leads sembrados en cada stage; en pantallas pesadas de LeadOS el dev:qa tiene hidratación inestable → mirar sobre prod-QA).
+- **Qué mirar:** abrir un lead a mitad de proceso (BRIEF/CONSTRUCCION → cae en «Construcción»; APROBADA → «Seguimiento»; EVALUADA → «Brief», con el opener apenas arriba; DESCARTADA → el veredicto) → **cae en el paso activo, no arriba de todo**; un lead nuevo (FICHA) se queda en el tope con la cabecera visible; el **recorrido de cola** (prev/next) re-enfoca al lead nuevo; los **atajos** (`j/k/→/←/b/?`) siguen andando; modo isla (sin `?cola=`) aterriza igual.
+
+---
+
+## ✅ 0.5.13 — Timeline del lead: la "memoria del lead" en el detalle del setter   ·   2026-06-21
+
+**El agujero (lo que esta bitácora ya anotaba):** el setter no tenía vista cronológica de qué le pasó a un lead. La memoria estaba dispersa en conteos derivados (`contactos`, `ultimoContacto`) y un banner de "te asignaron" que solo muestra la ÚLTIMA reasignación. Los eventos YA viven en `OsLeadActivity` (contactos comerciales + el canal `SISTEMA` de reasignación, 0.5.3). Este sprint los **PRESENTA** como timeline. **Solo presentación: cero eventos nuevos, cero cambios de conteos/gates.** Un objetivo, tipado estricto, cero `any`.
+
+**Cómo se arma el timeline (lectura NUEVA y SEPARADA):**
+- `listOwnedLeadTimeline(leadId, userId)` (`lib/leados/timeline.ts`, nuevo) trae TODO el historial del lead, del más nuevo al más viejo, **sin** el filtro `SOLO_CONTACTOS_COMERCIALES` → incluye los eventos `SISTEMA`. Es deliberadamente SEPARADA de `listOwnedLeadActivities` (que sigue filtrando comercial porque alimenta `contactos`/cadencia/gate — esa NO se tocó).
+- En `page.tsx` se suma como 5.º fetch del `Promise.all`. `outreach.contactos` (= `actividades.length`), `countFollowUps` y `ultimoContacto` **siguen leyendo `actividades`** (solo comercial) — el timeline no toca esas derivaciones.
+- `lead-timeline.tsx` es un **Server Component puro de presentación**: rinde la cronología debajo del wizard. Sin estado ni client JS; fechas absolutas es-AR (`Intl.DateTimeFormat`, evita `Date.now()` en render).
+
+**Distinción sistema vs. comercial (visual y explícita):**
+- **Contacto comercial:** nodo sólido + ícono de canal, etiqueta del canal, badge de resultado tonal (Respondió / Sin respuesta / …), nota, y quién lo registró.
+- **Evento de sistema (`SISTEMA`):** nodo de **anillo punteado**, ícono `Repeat2`, etiqueta "Reasignación" + pill **"Sistema"**, la nota ("Reasignado: X → Y"), **sin** badge de resultado, y caption explícito *"Evento del sistema — no cuenta como contacto comercial."* Se lee de un vistazo y deja escrito que no es un contacto. El criterio sistema/comercial NO se duplica: sale de `esContactoComercial` (isolation.ts), la misma fuente que usan los conteos.
+
+**El uso del índice — y una corrección honesta a la nota de Parte 1:**
+- El timeline per-lead lo sirve **`@@index([leadId, createdAt])`** (range por lead + orden por fecha), NO el índice "T6" `@@index([performedById, createdAt])`.
+- **Por qué NO T6:** la nota de FG-0.5 Parte 1 (más arriba: *"el timeline ordena OsLeadActivity por performedById + createdAt"*) imaginaba un timeline **por-performer** (la actividad propia del operador). Pero ESTE timeline es **per-lead** y DEBE mostrar la reasignación (`SISTEMA`), que la registra el **admin** (`performedById` = admin, no el setter). Un timeline keyed por el `performedById` del setter dejaría AFUERA justo la reasignación → la consigna no se cumpliría. Por eso keyea por `leadId`.
+- **T6 igual gana su lugar:** sirve las lecturas **por-performer** que sí existen — `contarDmsHoy` (capa de seguridad de canal) y "Mis números" (0.5.11). El par `[leadId, createdAt]` + `[performedById, createdAt]` cubre los dos ejes; el timeline usa el primero. **Sin cambio de schema** (ambos índices ya existían). Anotado para no atribuir mal el índice — es una decisión de lectura, no de Franco.
+
+**Punto de aislamiento (#1):**
+- `listOwnedLeadTimeline` pasa por **`getOwnedLead`** (= `ownedLeadWhere(leadId, userId)` = `{ id, assignedToId }`): un lead ajeno o inexistente → `null` (404-style, sin leakear), igual que toda superficie del setter. El where del historial (`timelineActivityWhere`, nuevo en isolation.ts) es **lead-scoped** (`{ leadId }`) y se aplica DESPUÉS del gate. Mostrar el historial no abre ninguna puerta nueva.
+
+**Test de invariante (con el check, no "es obvio") — `npm run check:invariant:timeline`** (`lib/leados/timeline.invariant.ts`, puro, sin DB):
+- **(a) Aislamiento:** el gate `ownedLeadWhere` restringe al dueño; el where del timeline keyea por `leadId` y **NO** por `performedById` (pin explícito: keyear por performer perdería la reasignación SISTEMA — el caso que el timeline debe mostrar).
+- **(b) SISTEMA se muestra pero NO cuenta:** `SOLO_CONTACTOS_COMERCIALES` sigue intacto y excluye SISTEMA; el where del timeline NO lleva filtro de canal (incluye SISTEMA); y el conteo que abre Seguimiento da IGUAL con o sin la fila SISTEMA (la reasignación aporta 0; un lead con solo eventos de sistema cuenta 0). → **PASA.** Los otros 5 invariantes de `lib/leados` siguen verdes (el módulo puro `isolation.ts` se extendió, no se rompió).
+
+**Verificación (gate ECC + build + smoke autenticado):**
+- ✅ `eslint --max-warnings 0` sobre el scope → cero findings (el `react-hooks/static-components` que pega contra `const Icon = fn()` se resolvió con `<IconoCanal>` de JSX estático).
+- ✅ `tsc --noEmit` limpio · ✅ `npm run build` verde (`/setter/leads/[leadId]` compila).
+- ✅ **Smoke HTTP autenticado sobre dev:qa** (curl, sin depender de hidratación — patrón documentado): login persona `setter`; 7 leads → **HTTP 200** con la sección "Historial del lead". Con una fila `SISTEMA` sembrada (idéntica a la que crea `registrarReasignacion`, borrada después), el HTML mostró el contacto **Instagram DM** Y la **"Reasignación"** con pill "Sistema" + el caption "no cuenta como contacto".
+- ✅ **Prueba del gate en runtime (la mitad funcional que pedía la consigna):** sobre un lead limpio (0 contactos, Seguimiento bloqueado), sembrar un ÚNICO evento `SISTEMA` → el timeline lo muestra (deja de estar vacío) **y Seguimiento sigue BLOQUEADO** ("Se abre cuando registrás el primer contacto"). El evento de sistema se ve pero no abrió el paso. Datos de prueba borrados; DB dev restaurada (el lead limpio vuelve a vacío, 0 filas test).
+
+**Reglas absolutas del task (verificadas):**
+- Solo presentación: muestra eventos existentes, no crea ninguno (el único write fue la fila de prueba, ya borrada). ✅
+- Aislamiento #1: el timeline pasa por `getOwnedLead`. ✅
+- `SISTEMA` se MUESTRA pero NO cuenta como contacto (conteos/gates intactos) — constatado ejecutable + en runtime. ✅
+- Tipado estricto, cero `any`, un objetivo. ✅
+
+**Arquitectura / Archivos:**
+- **Nuevos:** `lib/leados/timeline.ts` (lectura), `lib/leados/timeline.invariant.ts` (check), `setter/leads/[leadId]/_components/lead-timeline.tsx` (componente), `.../lead-timeline.helpers.ts` (etiquetas/tonos LOCALES — no se importan los del admin: superficies con lenguaje de diseño propio, y el helper del admin está fuera de scope).
+- **Editados:** `lib/leados/isolation.ts` (+`timelineActivityWhere`, puro), `setter/leads/[leadId]/page.tsx` (5.º fetch + serialización + render), `package.json` (script del invariante).
+
+**Verificación humana (Franco — funcional, tu sign-off; el task: "lo confirmo yo"):**
+- Abrir un lead con historial → ver la cronología: contactos (canal/resultado) y reasignaciones (pill "Sistema", anillo punteado) **distinguibles de un vistazo**.
+- Confirmar que un evento de sistema **no** abre Seguimiento (ya verificado en runtime arriba; tu sign-off perceptual cierra).
+
+---
+
+## 🏁 FG-0.5 COMPLETO — cierre del bloque (cabina del operador + handoffs del flujo invertido)   ·   2026-06-21
+
+Cierra el **BLOQUE FG-0.5** entero, para el postmortem de FG-1. El bloque llevó la cabina del setter de "modelo 100% pull, vuelve a ciegas" a una superficie con orientación, memoria y aislamiento testeado.
+
+**Las piezas (Parte 1 + 3 admin + 7 del setter):**
+- **Parte 1 — Índices** (cabina del operador): 2 compuestos aditivos (`OsLead[assignedToId, nextFollowUpAt]` + `OsLeadActivity[performedById, createdAt]`). El de actividad sirve las lecturas **por-performer** (cadencia / "mis números"), no el timeline per-lead — corregido y documentado en 0.5.13.
+- **3 admin** (commit `feat(fg-0.5 admin)`): pipeline de producción (A1) · drill-down de métrica (A4) · carga del setter visible en la asignación (A2).
+- **7 del setter:** rastro de reasignación visible (`SISTEMA`, 0.5.3) · sender único de Telegram (prep) · novedades dirigidas al setter (0.5.8, cierra el cabo del saliente) · "Continuá donde dejaste" (0.5.9) · "Tu semana" (0.5.10) · "Mis números" (0.5.11) · caer en el paso activo (0.5.12) · **timeline del lead (0.5.13)**.
+
+**El hilo conductor (lo que el bloque protegió, invariante por invariante):**
+- **Un solo eje de aislamiento, en un solo lugar.** `lib/leados/isolation.ts` quedó como fuente única: `ownedLeadWhere`/`ownedListWhere` (cartera por `assignedToId`), `ownSetterMetaWhere`/`ownSetterNoticeWhere` (dato dirigido por `setterId`), `SOLO_CONTACTOS_COMERCIALES`/`esContactoComercial`/`timelineActivityWhere` (separación sistema/comercial). Cada feature nueva pinchó de acá, no reinventó el filtro.
+- **El evento `SISTEMA` es memoria, no contacto.** Se introdujo en 0.5.3 y atravesó todo el bloque sin contaminar un solo conteo: `_count.activities` filtrado, cron "último contacto", el gate `activo = contactos > 0`, y ahora el timeline (lo MUESTRA sin contarlo). **6 invariantes ejecutables** (`assignment-trail`, `setter-meta`, `escalamiento`, `novedades`, `mis-numeros`, `timeline`) lo constatan **sin DB** — no es "obvio", es chequeable.
+- **Disciplina de color B9 y numeración única** (heredadas de FG-0): cyan = accionable; el resto informativo por semántica. El timeline es informativo (zinc/punteado), no compite con el wizard.
+
+**Para el postmortem de FG-1:**
+- **Deuda declarada que entra a FG-1:** (1) el **drift DB↔schema** pre-existente (`chatbot_lead.convertedToOsLeadId`, enum `AuditActionType`) que haría que un `migrate dev` quiera resetear — reconciliar con migración aditiva ANTES de cualquier `migrate dev`; (2) **FG-1.0 fuente única de contenido** — los textos del setter quedaron localizados a propósito, a migrar cuando exista.
+- **Patrón que FG-1 hereda:** descubrimiento con subagente `Explore` → módulo puro + invariante ejecutable por cada regla de aislamiento → verificación por **smoke HTTP autenticado** (dev:qa, sin hidratación) cuando la pantalla es auth-gated. Es lo que mantuvo el bloque honesto.
+- **Estado:** las 11 piezas compilan (build verde), tipado estricto, 6 invariantes verdes. La verificación **perceptual** de cada superficie queda en la cola de sign-off de Franco — declarada pieza por pieza, nunca cerrada a ciegas.
+
+---
+
+## ✅ FG-1.pre — Cierre del drift DB↔schema (la deuda que un `migrate dev` resetearía)   ·   2026-06-21
+
+**Por qué primero:** FG-0.5 dejó declarado un drift pre-existente que haría que un `prisma migrate dev` quisiera RESETEAR la DB dev (la catástrofe prohibida). FG-0.5 lo esquivó usando siempre `migrate deploy`, pero no lo cerró. FG-1 puede tocar migraciones → esto va ANTES.
+
+**Diagnóstico (read-only primero — no asumir que el drift declarado sigue vivo):**
+- `migrate status` daba **verde** (68 migs, "up to date") — pero eso solo compara archivos vs `_prisma_migrations`, **esconde** el drift físico.
+- El detector real, `migrate diff --from-schema-datasource → --to-schema-datamodel`, mostró **9 divergencias**, todas del tipo "la DB tiene algo que el schema ya NO declara":
+  - `AgencySettings.singleton` (+ índice único `AgencySettings_singleton_key`)
+  - `Organization`: `avatarEmoji`, `avatarImageUrl`, `avatarInitials`, `city`, `deletedAt`, `internalNotes` (6 columnas)
+  - `chatbot_lead.convertedToOsLeadId`
+- **El enum `AuditActionType` ya NO aparece** → esa mitad del drift FG-0.5 sí la había cerrado (reconciliación `BOT_DELETED`). El resto seguía vivo, y **el drift era MÁS grande de lo declarado** (las 6 de Organization + el singleton no estaban en la nota original).
+
+**Por qué seguían (las dos causas raíz):**
+- **`convertedToOsLeadId`:** ya existía la migración `20260619140100_drop_chatbot_lead_converted_column` y estaba **marcada como aplicada** — pero el diff la seguía mostrando física. Causa: se resolvió con `migrate resolve --applied` **sin ejecutar el SQL** (para no disparar el shadow-DB) → el DROP nunca corrió.
+- **Las 6 de Organization + el singleton:** ninguna migración de la historia las **agrega** (grep en `prisma/migrations`) → entraron out-of-band (db push temprano / migración squasheada). Son vestigios pre-refactor: avatar migró a `BotConfig`, `city` a la creación de bot, `internalNotes` a `OnboardingTask`/`chatbot_lead` (ahí el schema SÍ las define y el código las usa); el soft-delete (`deletedAt`) nunca se adoptó en este modelo.
+
+**Decisión por divergencia (criterio: DB tiene algo que el schema no quiere → DROP):** las 9 son DROP. Ninguna es ADD (el schema no quiere ninguna). Confirmado que **ningún código las lee**: los tipos del client salen del schema y el **build estaba verde** → un `organization.avatarEmoji` sería error TS. (Las refs en `src` a esos nombres son a OTRAS entidades: BotConfig, OnboardingTask, chatbot_lead — desambiguadas por grep.)
+
+**Cambio de datos consciente (reportado ANTES del drop — regla del task):** conteo read-only sobre la DB dev (`ep-quiet-waterfall`, branch dev, NUNCA prod): 4 columnas con dato — `Organization.avatarEmoji`×1, `Organization.city`×1, `Organization.internalNotes`×1 (sobre 9 orgs) y `AgencySettings.singleton`×1 (flag). `deletedAt`×0 (no se perdió ningún registro soft-deleted), `convertedToOsLeadId`×0, el resto 0. Todo dev/seed muerto (ni schema ni código lo alcanzan). **Franco aprobó "DROP todo (alinear)"** antes de ejecutar.
+
+**La reconciliación (1 migración aditiva, idempotente, aplicada SIN reset):**
+- `20260621120000_reconcile_dev_drift_schema_align`: `DROP INDEX IF EXISTS` + `DROP COLUMN IF EXISTS` para las 9 divergencias.
+- **Idempotente → correcta en ambos sentidos:** DB dev driftada (las columnas existen → las dropea) Y DB reconstruida desde la historia (la historia nunca las agrega → el DROP es no-op por el guard `IF EXISTS`). El drop de `convertedToOsLeadId` repite el de `20260619140100` a propósito: ese quedó resuelto sin ejecutar; este lo cierra física.
+- Aplicada con **`migrate deploy`** (no usa shadow-DB, no puede resetear). **Nunca** `migrate dev`/`reset`.
+
+**Cierre (criterio: diff live→schema VACÍO):**
+- ✅ `migrate diff --from-schema-datasource → --to-schema-datamodel` ahora **VACÍO** (`-- This is an empty migration.`).
+- ✅ `migrate status` up to date (69 migraciones) · ✅ `prisma generate` OK · ✅ `npm run build` verde.
+
+**Verificación humana (Franco):** un futuro `prisma migrate dev` ya **no querrá resetear por este drift** (la causa física desapareció: schema y DB dev coinciden 1:1). Queda como deuda separada de FG-1.0 la fuente única de contenido del setter (sin relación con migraciones).
+
+---
+
+## ✅ FG-1.1 — Onboarding del setter: enseñar el flujo INVERTIDO (que no choque contra el gate score-3)   ·   2026-06-21
+
+**El agujero:** el card "Cómo funciona" del home del setter (`setter/_components/onboarding-hint.tsx`) era el único lugar que forma el modelo mental inicial, y era **silencioso sobre la pieza más contraintuitiva del sistema**: el flujo es INVERTIDO (opener ANTES que demo; esperás la respuesta; recién si el negocio responde se construye la demo — excepción: caliente score 4–5 produce preventivo). Resultado: un setter nuevo llegaba a su primer lead score-3 esperando construir la demo y chocaba contra un gate que su mapa no le anticipó.
+
+**Diagnóstico (releer antes de tocar — la nota lo pedía):** el contenido literal de "4 pasos lineales / paso 4: «Construcción, revisión y envío llegan en los próximos pasos»" YA no existía: **0.5.10 lo había reemplazado** por 3 tarjetas de orientación de navegación ("trabajá de arriba para abajo", "seguí el panel", "el estado manda") al arreglar el ESLint con `useSyncExternalStore`. Pero esas 3 tarjetas, siendo correctas, **no nombraban el opener ni la espera** → el agujero del modelo mental seguía abierto. El problema era real aunque el síntoma textual ya no.
+
+**Fuente de verdad del flujo invertido (no se reinventó — se leyó):**
+- `lib/leados/flow.ts` → `gateBriefAbierto(status, score) = leadRespondio(status) || score >= 4`: la producción (brief→construcción) se abre solo si el negocio respondió **o** el lead es caliente (4–5). Score 1–3 sin respuesta = gate cerrado (el caso que sorprende).
+- `lead-wizard.tsx` (comentario líneas 176–179): "el opener sale apenas hay veredicto, y la producción se abre recién cuando la conversación lo habilita". El orden real del DOM: Ficha → Evaluación → **Opener** → Seguimiento (espera) → Agenda → Brief (gated) → Construcción → Draft.
+- La cadencia de follow-up la calcula la maquinaria (`calculateNextFollowUp` + cron), no el setter; el link va SIEMPRE en el 2.º mensaje, nunca en el opener (`contieneLink` hard-block).
+
+**Qué enseña ahora (4 tarjetas honestas, sin tour, SIN numerar el flujo — regla heredada de 0.5.10 para no duplicar/contradecir al stepper):**
+1. **El score del Evaluador marca el camino** — puntaje 1–5; decide frío (la mayoría) vs caliente (4–5), y eso cambia el ORDEN.
+2. **Frío: primero el opener, no la demo** — opener corto sin link ni precio; la demo todavía NO se construye; la producción se abre recién si responde.
+3. **La espera es parte del laburo** — esperás; la maquinaria avisa el próximo seguimiento (vos no llevás fechas); si un paso del panel está apagado, no es su momento (absorbe la orientación de navegación de 0.5.10).
+4. **Caliente (4–5): podés adelantar la demo** — la excepción; preventivo sin esperar; para el resto (1–3), primero la conversación (cierra la sorpresa del score-3).
+- **Línea clave (alto retorno), banda dedicada con ícono `Megaphone`:** *"Ojo: la demo se construye DESPUÉS de que el negocio responde — primero va el opener."*
+
+**Disciplina B9 (heredada FG-0):** cyan = accionable. La banda clave se enfatiza por **layout/peso** (borde + ícono + negritas en "Ojo/DESPUÉS"), NO por color — cyan queda solo en el acento izquierdo + eyebrow (identidad de guía existente del card). Nada acá es un CTA falso.
+
+**Reglas absolutas del task (verificadas):**
+- Solo contenido + estructura: cero lógica/gates/datos. El mecanismo first-run (`useSyncExternalStore`/localStorage/`dismissOnboarding`) NO se tocó. ✅
+- El onboarding refleja el flujo REAL invertido, no el viejo lineal. ✅
+- Tipado estricto, cero `any`, un objetivo. ✅
+
+**Arquitectura / Archivos:**
+- **Editado (único):** `onboarding-hint.tsx` — array `ORIENTACION` (3) → `FLUJO` (4, contenido del flujo invertido); eyebrow "Antes de tu primer lead" + h2 "Cómo funciona el flujo invertido"; grid `sm:grid-cols-2` (2×2, antes 3-col); banda clave nueva con `Megaphone`; import del ícono; comentarios reescritos (mantienen la regla "no numerar el flujo"). Mecanismo first-run intacto.
+
+**Verificación (gate ECC + build + runtime visual):**
+- ✅ `eslint --max-warnings 0` sobre el archivo → cero findings · ✅ `tsc --noEmit` limpio · ✅ `npm run build` verde.
+- ✅ **Runtime sobre dev:qa (3002)**, sesión `setter` por `/api/qa/login`: el card renderiza en `/setter` con el h2 "Cómo funciona el flujo invertido", las 4 tarjetas y la banda "Ojo:". **Desktop (1600)**: grid 2×2 + banda full-width + dismiss, coherente. **Mobile (480)**: las 4 tarjetas apilan a 1 columna, textos completos sin desbordar, la banda clave legible. Cero errores de consola.
+- ✅ **Mecanismo first-run constatado en runtime:** click en "Entendido, no lo muestres más" → la card desaparece (re-render) y `localStorage['leados-onboarding-v1'] === '1'`. El `useSyncExternalStore` que dejó 0.5.10 sigue andando.
+
+**Verificación humana (Franco — perceptual, "lo confirmo yo"):** leer el card como setter nuevo → se entiende que el opener va antes que la demo y que un score-3 espera la conversación antes de producir; el first-run sigue ocultándose al cerrarlo.
+
+---
+
+## ✅ FG-1.0 — Fuente única del contenido de guía (`guidance-content.ts`) + ficha del Paso 1 migrada como prueba   ·   2026-06-21
+
+El cimiento que faltaba: si cada paso de guía hardcodea su contenido, diverge de la capacitación cuando se actualice — el problema al revés. Este sprint crea **UN módulo de contenido tipado y editable**, separado de los componentes, y lo prueba migrando la ficha del Paso 1 (el modelo de guía bien hecha). **Solo contenido + presentación**: cero lógica, gates, queries. Tipado estricto, cero `any`, un objetivo.
+
+**Estado real encontrado (descubrimiento — los precedentes que la nota pedía mirar):**
+- **Patrón "única copia editable" ya establecido** (a clonar): `herramientas.ts` (FG-1.AI) y `flow.ts` (`SHELL_CONSTRUCCION`, `CANAL_INSTAGRAM`, `HARD_CHECKS`) — constantes puras, sin Prisma ni `'use server'`, importables por client y server; "la UI lo consume tal cual, Franco edita SOLO la constante". `herramientas.ts` se declara explícitamente **hermano** de este 1.0: aquel registra las herramientas EXTERNAS (qué son / dónde se abren / URLs), este la guía del PASO. No se fusionan.
+- **Modelo de guía bien hecha** (a clonar en calidad): `ficha-step.tsx` (Paso 1) — jerarquía clara, hints concretos, ejemplos esto-sí en los placeholders, lenguaje sin jerga, modo congelado `<details>`. Hardcodeaba ~30 strings de guía: título, encuadre (con «ves» en negrita), duración, 7 labels + 7 hints + 5 ejemplos + 4 labels de opción, mensajes de validación, copy del bloque y del modo congelado.
+- **Consumidores futuros que el esquema debe cubrir:** 1.1 (teach/porqués), 1.2 (ejemplos esto-sí/esto-no), 1.3 (validación de calidad), FG-4 (razones de self-check).
+
+**Esquema elegido (`src/lib/leados/guidance-content.ts`, nuevo) — tipos + registro:**
+- **Primitivas:** `Segmento`/`LineaRica` (copy con fragmentos enfatizados — la primitiva que preserva el «ves» en negrita sin volver a meter markup en el componente; la reusa el teach de 1.1). `CampoOpcion` (value del dominio + label).
+- **`CampoGuia`** (label + `hint` [teach] + `ejemplo` [esto-sí] + `opciones`) — lo que usa la ficha hoy.
+- **`PasoGuia`** (guía completa de un paso): `titulo` + `intro` mínimos; opcionales `porque` [teach·1.1], `campos`, `ejemplos: EjemploContrastado[]` [1.2], `validacion: ValidacionGuia` [1.3], `selfCheckRazones: SelfCheckRazon[]` [FG-4], `copyBlock`, `congelada`.
+- **Cobertura por sprint:** `LineaRica`/`porque` → **1.1**; `EjemploContrastado` (tema + asiSi + asiNo + porque) → **1.2**; `ValidacionGuia` → **1.3**; `SelfCheckRazon` (checkId casa con `HARD_CHECKS`/`SOFT_CHECKS`) → **FG-4**. Cada tipo tiene un consumidor nombrado — sin abstracción especulativa (no CMS, no i18n, no DB).
+- **Registro `GUIA_PASOS: Partial<Record<GuiaPasoId, PasoGuia>>`** — hoy solo `{ ficha }`. `Partial` deliberado: declara honestamente qué pasos YA tienen guía, sin claves vacías (misma disciplina "no inventar destinos" de la nav del setter). `GuiaPasoId` enumera los pasos REALES (ficha, evaluacion, brief, construccion, opener, seguimiento, draft, selfCheck, agenda).
+- **Límite de capas (explícito en el doc):** acá viven las PALABRAS; el CRITERIO (qué falta, qué gate abre) sigue en `flow.ts`/`contracts.ts`; la ESTRUCTURA (qué controles, autosave) en el componente. Este módulo nunca decide ni dibuja.
+
+**Ficha migrada como prueba (`ficha-step.tsx`):** los ~30 strings ahora se leen de `GUIA_FICHA` (29 sitios). `satisfies PasoGuia` valida la forma pero conserva las claves de `campos` para acceso tipado (`GUIA_FICHA.campos.resenas.hint`, sin `| undefined`). El «ves» en negrita se preserva con `intro.map` sobre los segmentos. El `otros` sigue sin placeholder (sin `ejemplo`). Render **idéntico**: solo se extrajeron literales, cero cambio de className/estructura. Quedó en el componente, a propósito, el *chrome de interacción* (botón "Guardar ficha", footer de autosave, toasts, aria-label) — no es contenido de guía.
+
+**Hardening tras review (1 hallazgo MEDIUM aplicado):** `CampoOpcion.value` queda como `string` (primitiva genérica correcta), pero las opciones de `igManejadoPor` se **atan por tipo** al enum del dominio vía `satisfies readonly { value: '' | (typeof IG_MANEJADO_POR_VALUES)[number]; label }[]` (único import del archivo: el const de valores de `contracts.ts`, dato puro). Antes el contrato "los value espejan el enum" era prosa; ahora un typo (`'DUEÑO'`, `'OWNER'`) **no compila** — justo la divergencia que este módulo existe para evitar.
+
+**Archivos tocados (2):**
+- `src/lib/leados/guidance-content.ts` (nuevo — tipos + `GUIA_FICHA` + `GUIA_PASOS`).
+- `src/app/(protected)/setter/leads/[leadId]/_components/ficha-step.tsx` (lee de `GUIA_FICHA`; cero cambio de estructura).
+
+**Verificación (quality-gate ECC):**
+- ✅ `tsc --noEmit` exit 0, cero `any` · ✅ `eslint` sobre los 2 archivos limpio · ✅ `npm run build` verde (`/setter/leads/[leadId]` compila) · ✅ `prisma migrate status` up to date (69, no toca schema).
+- ✅ **Review adversarial (workflow, 3 revisores read-only):** *Fidelidad* PASS — 30 strings verbatim byte-a-byte (✓, …, ★☆, `\n` y el «ves» en negrita preservados), nada hardcodeado quedó en el componente. *TS/React* PASS — el único cast es sano, el spread `[...opciones]` es correcto (readonly→mutable de Select), `satisfies` hace seguro el acceso. *Esquema* PASS_WITH_NOTES — el MEDIUM (value sin atar al enum) **ya aplicado**; las notas LOW son confirmaciones de forma para sprints futuros (ver abajo).
+
+**Notas para sprints que consumen 1.0 (de la review, sin acción ahora):**
+- **FG-4:** `SelfCheckRazon.checkId` es `string` (no unión a los ids reales) — decoupling deliberado "la lista vigente de `flow.ts` manda" (igual que `buildSelfCheck`). Es la primera fricción que verá FG-4; consciente.
+- **1.3:** `ValidacionGuia` modela encabezado + completo; el detalle por-faltante lo da `fichaFaltantes` (lógica). Si 1.3 quiere copy de calidad por-campo, falta un tipo — confirmar alcance antes de construir.
+- **1.2:** `EjemploContrastado` es 1 asiSi + 1 asiNo por `tema` (lista por paso, soporta varios pares). Validar contra contenido real que el formato 1:1 por tema alcanza (lo hace el propio 1.2).
+
+**Pendiente declarado (deuda heredada, NO de 1.0):** la guía del onboarding de **FG-1.1** (`onboarding-hint.tsx`) y el registro de **`herramientas.ts`** siguen localizados — podrían consumir este módulo más adelante (misma nota de migración diferida). Fuera de alcance acá.
+
+**Verificación humana (Franco — perceptual, "lo confirmo yo"):** editar una entrada de `guidance-content.ts` (ej. un hint de la ficha) → se refleja en la ficha del Paso 1; la ficha se ve y funciona idéntica a antes (mismos textos, mismo «ves» en negrita, mismos ejemplos en los placeholders).
+
+---
+
+## ✅ FG-1.2 — Componente teach reutilizable («¿por qué importa?» + esto-sí/esto-no) aplicado a los 5 pasos que no enseñaban   ·   2026-06-21
+
+Va DESPUÉS de 1.0 verificado. La ficha del Paso 1 era el único paso que enseñaba *por qué*; en construcción, self-check, opener, objeciones y traspaso el mentor "se adelgazaba o desaparecía". Este sprint **productiza el patrón de la ficha** como un componente reutilizable que consume el contenido de 1.0 y lo aplica a esos 5 pasos. **Solo presentación**: el componente enseña, no toca lógica/gates/datos. Consume 1.0, NO hardcodea texto. Disciplina B9, tipado estricto, un objetivo.
+
+**Estado real encontrado (descubrimiento — precedentes y dónde falta el porqué):**
+- **Patrón a clonar (calidad):** la ficha (`ficha-step.tsx`, ya sobre 1.0) — porqué + ejemplo concreto. **Patrón a clonar (mecánica colapsable):** `ToolGuide` (`tool-guide.tsx`, FG-1.AI) — `<details>` nativo SSR-safe, marker oculto, header neutro, contenido del registro editable.
+- **Los 5 pasos son funcionales sin guía** (tienen estados locked/empty/activo, hints inline, reglas duras visibles): el opener rebota links por schema, el self-check muestra el arreglo de cada hard-check, el seguimiento embebe `GuardrailRol`, la agenda exige notas de traspaso. Lo que les **falta es el PORQUÉ** y el contraste esto-sí/esto-no — qué hace *bueno* a cada paso. Ahí entra el teach, como complemento.
+
+**Componente nuevo (`_components/teach-panel.tsx`):** `TeachPanel` — header «¿Por qué importa?» (Lightbulb) + el `porque` (líneas con énfasis) + el contraste «esto sí / esto no» (`EjemploContraste`), colapsable por `<details>` clonando a `ToolGuide`. Color **semántico** (esto-sí emerald, esto-no rosa) reforzado con ícono **y** texto (no depende del color solo — WCAG 1.4.1); **cero cyan** (B9: el cyan es para lo accionable). Prop `collapsible={false}` para cuando ya vive dentro de un `<details>` (objeciones) → renderiza un `<div>`, **sin anidar colapsables**. `return null` si no hay porqué ni ejemplos (nunca un panel vacío). Sin `'use client'` (sin hooks, presentacional puro). Íconos `aria-hidden` (el significado vive en el texto), `strokeWidth={1.5}`.
+
+**Qué consumió de 1.0:** los tipos `PasoGuia.porque` (teach) y `PasoGuia.ejemplos: EjemploContrastado[]` (esto-sí/esto-no) — los puntos de extensión que 1.0 dejó listos. Se sumaron 5 entradas al registro `GUIA_PASOS` (`GUIA_CONSTRUCCION`, `GUIA_SELF_CHECK`, `GUIA_OPENER`, `GUIA_OBJECIONES`, `GUIA_TRASPASO`), cada una con su `porque` + `ejemplos`, editables por Franco en un solo archivo. **Evolución de esquema (aditiva, no rompe la ficha):** `PasoGuia.intro` pasó a **opcional** (las superficies solo-teach no tienen intro de formulario) y `GuiaPasoId` sumó `objeciones`/`traspaso` (momentos de enseñanza ⊂ seguimiento/agenda — el step amplio queda libre para su propia guía). La ficha sigue intacta (lee `GUIA_FICHA.intro` vía `satisfies`, presente).
+
+**Aplicado a los 5 pasos (un `<TeachPanel>` por paso, colapsado salvo objeciones):**
+- **Construcción** (`construccion-step.tsx`, vista CONSTRUCCION) — `id="construccion"` tras el intro, antes del `ToolGuide`. Porqué: la demo es la carnada; genérica no genera respuesta. Ejemplos: assets reales vs stock, fidelidad al brief vs ruido.
+- **Self-check** (`self-check-step.tsx`, vista activa) — `id="selfCheck"` tras el intro, antes de los obligatorios. Porqué: último filtro antes de Franco; cada rechazo enfría. Ejemplos: probar de verdad vs suponer, honestidad en los flags.
+- **Opener** (`opener-step.tsx`, vista activa) — `id="opener"` tras el encuadre, antes de `CanalSeguridad`. Porqué: abre conversación, no vende; sin link ni precio. Ejemplo: opener dolor-first vs folleto genérico.
+- **Objeciones** (`seguimiento-step.tsx`, dentro del `<details>` de objeciones) — `id="objeciones" collapsible={false}`. Porqué: nunca cotizás; toda objeción → agendar. Ejemplo: deflectar a reunión vs tirar un número.
+- **Traspaso** (`agenda-step.tsx`, vista activa) — `id="traspaso"` tras el header, antes de confirmar decisor. Porqué: la reunión es el handoff; sin notas Franco entra a ciegas. Ejemplo: nota rica vs «quiere una web».
+
+**🔎 HALLAZGO (invariante del task — la guía es complemento, no muleta):** **la pantalla de CONSTRUCCIÓN (vista CONSTRUCCION) está sobre-guiada**, y el problema es del **diseño base, no del teach**. Apila 10+ bloques verticales: `BadgeProvisorio` + `UrgenciaBanner` + `GuiaRetrabajo` + intro + `TeachPanel` + `ToolGuide` + `CopyBlock` + `MaterialesNegocio` + la lista de 6 fases de `SHELL_CONSTRUCCION` (~24 líneas de instrucción) + aviso de guardado + bloque de escalado. El `TeachPanel` es complemento legítimo (colapsado, solo el porqué), pero aterriza sobre una pantalla que ya se apoya demasiado en prosa para entenderse. Además hay **cuasi-duplicación**: el ejemplo «Assets del negocio» repite la fase 3 del shell («Assets reales») y el cartel de `MaterialesNegocio`; «Fidelidad al brief» repite la fase 1. **Recomendación (sprint aparte, NO acá):** rediseñar la base — el shell de 6 fases podría ser un stepper/acordeón, y `MaterialesNegocio` plegarse dentro de la fase que lo usa. No se tapó con más guía: se deja anotado. Los otros 4 pasos pasan el invariante limpio (base auto-explicativa, teach como complemento colapsado).
+
+**Notas menores de la review (no bloqueantes, criterio de Franco):** opener y objeciones traen 1 par esto-sí/no (vs 2 en construcción/self-check) — asimetría **deliberada**: un contraste filoso alcanza donde alcanza, y sumar más juega en contra del invariante "complemento, no muleta". El self-check podría sumar un 2.º par (datosReales/fielAlBrief) si Franco lo quiere.
+
+**Archivos tocados (8):**
+- `src/app/(protected)/setter/_components/teach-panel.tsx` (nuevo — `TeachPanel` + `EjemploContraste` + `LineaRicaText`).
+- `src/lib/leados/guidance-content.ts` (5 entradas teach + `intro` opcional + `GuiaPasoId` ampliado).
+- `construccion-step.tsx`, `self-check-step.tsx`, `opener-step.tsx`, `seguimiento-step.tsx`, `agenda-step.tsx` (import + un `<TeachPanel>` cada uno).
+
+**Verificación (quality-gate ECC):**
+- ✅ `tsc --noEmit` exit 0, cero `any` · ✅ `eslint` sobre `teach-panel.tsx` + `guidance-content.ts` limpio · ✅ `npm run build` verde (`/setter/leads/[leadId]` compila) · ✅ schema sin tocar (69 migraciones, `guidance-content.ts` no es Prisma).
+- ⚠️ **1 error ESLint PRE-EXISTENTE** en `seguimiento-step.tsx:200` (`react-hooks/purity`, `Date.now()` en `minReactivacion`) — **NO introducido por este sprint** (verificado por `git diff`: mi diff es solo el import + el `<TeachPanel>`; el `Date.now()` estaba en L199, +1 por mi import). Es la deuda heredada ya registrada en B0.4 / cierre FG-0.
+- ✅ **Review adversarial (workflow, 3 revisores read-only):** *Diseño/B9* PASS_WITH_NOTES — sin cyan, emerald/rosa semántico, nested-`<details>` evitado, íconos `strokeWidth 1.5` + `aria-hidden` aplicado. *Contenido/invariante* PASS_WITH_NOTES — ejemplos concretos en voz «vos», **cero contradicciones** contra la lógica del flujo (`gateEnvioDemo`, `contieneLink`, `HARD_CHECKS`, `GUARDRAIL_ROL`, notas de traspaso); HALLAZGO de construcción registrado arriba. *TS/wiring* PASS — sin texto hardcodeado, sin `any`, `undefined` guardado, `intro` opcional no rompió la ficha, boundary client/server seguro.
+
+**Verificación humana (Franco — perceptual, "lo confirmo yo"):** abrir cada paso (construcción, self-check, opener, objeciones en seguimiento, traspaso en agenda) → cada uno muestra su «¿Por qué importa?» colapsable + el contraste esto-sí/esto-no; un setter sin contexto entiende qué hace *bueno* a cada paso. Pendiente de QA visual en runtime (desktop + mobile) sobre las 5 pantallas con leads en el stage correspondiente — los gates de stage exigen sembrar leads en construcción/en-revisión/respondió, por eso queda para tu pasada perceptual.
+
+---
+
+## ✅ FG-1.4 — Ejemplo del estado ideal en las pantallas vacías del setter (ficha buena / self-check bueno)   ·   2026-06-21
+
+Va DESPUÉS de 1.0. **Una pantalla en blanco no enseña:** el setter abre la ficha (Paso 1) o el self-check y no tiene un «así se ve bien» contra qué comparar lo suyo. Este sprint llena ese hueco: cada pantalla vacía relevante ofrece un **«Ver ejemplo»** que despliega un artefacto modelo —una ficha buena de verdad, un self-check bien hecho— para contrastar. **Solo presentación**: consume 1.0, no hardcodea. Disciplina B9, tipado estricto, un objetivo.
+
+**Estado encontrado (descubrimiento — 2 subagentes `Explore` en paralelo):**
+- **Empty states de la zona setter:** los de *lista vacía* (sin leads asignados, búsqueda sin resultados, colas vacías, timeline sin movimientos) usan el `EmptyState` compartido o un `<p>` inline neutro. **No aplican** acá: no hay un "artefacto gold-standard" que mostrar en una lista vacía — mostrar una ficha buena ahí sería ruido. Fuera de alcance a propósito (el task nombra «ficha buena, self-check bueno» = los artefactos que el setter PRODUCE).
+- **Ejemplos gold-standard en 1.0:** `guidance-content.ts` tenía hints por-campo (`CampoGuia.ejemplo`) y contrastes esto-sí/esto-no (`EjemploContrastado`, vía `TeachPanel`), pero **NINGÚN ejemplar COMPLETO** de una ficha o un self-check terminados. Ese era el faltante → se agrega a 1.0 (lo que el task autoriza: "o agregalos a 1.0 si faltan").
+- **Idioma a clonar:** `TeachPanel` — `<details>` neutro SSR-safe, marker oculto, **cero cyan** (B9: el cyan es para lo accionable; el ejemplo es enseñanza).
+
+**Contenido nuevo en 1.0 (`guidance-content.ts`):** dos ejemplares COMPLETOS, editables por Franco en un solo archivo:
+- **`FichaEjemplar` + `GUIA_FICHA_EJEMPLAR`** — una ficha modelo (café de barrio con IG activo que pierde consultas). **Tipo atado al dominio:** `campos: Record<keyof typeof GUIA_FICHA.campos, string>` → el tipo **obliga a cubrir los 7 campos** y el componente **reusa los labels de `GUIA_FICHA.campos`** (no se duplican). `igManejadoPor` guarda el value del enum; el componente resuelve su label. `satisfies` valida la forma.
+- **`SelfCheckEjemplar` + `GUIA_SELF_CHECK_EJEMPLAR`** — un self-check modelo. **No re-lista el checklist** (ese vive en `flow.ts: HARD_CHECKS/SOFT_CHECKS` y el step ya lo dibuja): modela la FORMA del artefacto terminado y el criterio único que los `EjemploContrastado` no dan — *un sheet impecable sin un solo flag suele ser señal de que NO se miró en serio; un buen self-check casi siempre deja algún flag*. Referencia los 6 obligatorios reales y 2 soft-flags reales en prosa, sin acoplar al data-structure.
+
+**Componente nuevo (`_components/ejemplo-ideal.tsx`):** `EjemploIdealShell` (chrome `<details>` colapsable, neutro, clonando a `TeachPanel`) + dos consumidores finos:
+- **`FichaEjemplo`** — recorre `GUIA_FICHA.campos` (labels) × `GUIA_FICHA_EJEMPLAR.campos` (valores) en un `<dl>`; `whitespace-pre-line` preserva el formato multilínea de las reseñas. Resuelve el label del select desde las opciones.
+- **`SelfCheckEjemplo`** — lista las líneas del ejemplar con check emerald (verde = verificado, semántico, no decorativo).
+- Sin `'use client'` (presentacional puro, sin hooks). Íconos `aria-hidden` + `strokeWidth 1.5`. Contenido 100% de 1.0.
+
+**Wiring (un componente por paso, colapsado):**
+- **Ficha** (`ficha-step.tsx`, rama editable) — `<FichaEjemplo />` tras el header (título/intro/duración), antes de los campos. **Decisión de alcance:** se muestra siempre que la ficha es editable (no solo cuando está 100% vacía) — cubre el caso vacío (el momento de aprendizaje) y queda a mano para comparar mientras se llena, sin aparecer/desaparecer al tipear la primera letra. Mejor UX que el literal "solo si vacío", mismo objetivo del task.
+- **Self-check** (`self-check-step.tsx`, vista activa CONSTRUCCION+draft) — `<SelfCheckEjemplo />` justo después del `<TeachPanel id="selfCheck">`. El ejemplo (artefacto terminado) complementa al teach (porqué por-principio), no lo duplica.
+
+**Archivos tocados (4):**
+- `src/lib/leados/guidance-content.ts` (+`FichaEjemplar`/`GUIA_FICHA_EJEMPLAR` + `SelfCheckEjemplar`/`GUIA_SELF_CHECK_EJEMPLAR`; no toca lo existente).
+- `src/app/(protected)/setter/_components/ejemplo-ideal.tsx` (nuevo — shell + `FichaEjemplo` + `SelfCheckEjemplo`).
+- `src/app/(protected)/setter/leads/[leadId]/_components/ficha-step.tsx` (import + `<FichaEjemplo/>`).
+- `src/app/(protected)/setter/leads/[leadId]/_components/self-check-step.tsx` (import + `<SelfCheckEjemplo/>`).
+
+**Verificación (quality-gate ECC):**
+- ✅ `npm run build` verde (type-check de todo el proyecto; `/setter/leads/[leadId]` compila) — prueba que el `satisfies` + `keyof typeof GUIA_FICHA.campos` tipan bien y que los componentes (estáticos, sin data/hooks) renderizan sin error.
+- ✅ `eslint` sobre los 4 archivos limpio (exit 0). Sin Prettier en el proyecto (formato lo gobierna ESLint).
+- ✅ `prisma migrate status` up to date (69 migraciones; no toca schema).
+
+**Verificación humana (Franco — perceptual, "lo confirmo yo"):** abrir un lead en **FICHA** (ficha editable) → arriba aparece «Ver ejemplo de una ficha bien hecha»; al desplegarlo se ve la ficha modelo campo por campo. Abrir un lead en **CONSTRUCCION con draft publicado** (self-check activo) → bajo el «¿Por qué importa?» aparece «Ver ejemplo de un self-check bien hecho». En ambos: se puede comparar el trabajo propio contra el ejemplo. ⚠️ **No capturé screenshots** — las dos pantallas están detrás de auth de setter + leads sembrados en el stage exacto (mismo motivo de gate que FG-1.2); la pasada perceptual (desktop + mobile, que el bloque no rompa el spacing del form) queda para vos, como pediste.
+
+---
+
+## ✅ FG-1.3 — Validación de CALIDAD del input de la ficha (orienta al salir del campo, NO gatea)   ·   2026-06-21
+
+Va DESPUÉS de 1.0. Cuando el setter carga algo pobre («tiene Instagram» sin más), **nada le señalaba el estándar ni cómo mejorarlo**: el form aceptaba el input flojo en silencio. Este sprint suma una validación de CALIDAD que enseña, **al salir del campo (onBlur)**, sin ser hostil. **Solo presentación + contenido de 1.0.** Disciplina B9, tipado estricto, un objetivo.
+
+**🔴 SENSIBLE-lite — el límite que define el sprint:** esto es validación de **calidad del input**, NO un gate de transición. **ORIENTA, no bloquea.** Los gates (`fichaFaltantes`, `transitionDossier`) deciden si el lead AVANZA; esta capa solo decide si vale la pena SUGERIR más detalle. Jamás habilita/deshabilita el submit ni dispara una transición.
+
+**Estado encontrado (descubrimiento — forms del setter + autosave 0.5.1 + 1.0):**
+- **Ficha** (`ficha-step.tsx`): `useState`+zod, 7 campos. El **autosave de 0.5.1** (`useAutosave`) observa `form` (debounce trailing, coalescing, `maxWaitMs`); guarda con `guardarFicha` (parcial-safe, **nunca** transiciona). La señal de "todavía falta" (`fichaFaltantes` → caja amber) es **gate-level** (habilita la evaluación): presencia, no calidad. El submit (`guardar`) **no está gateado** por nada — guarda siempre.
+- **1.0**: `CampoGuia` tenía `label`/`hint`/`ejemplo`/`opciones`, pero **faltaba** el copy de calidad por-campo (ya anotado como pendiente al cierre de 1.0: «si 1.3 quiere copy de calidad por-campo, falta un tipo»). Se agrega ahora.
+- **`TextArea`** reenvía props nativas (`{...props}`) → `onBlur` directo; tiene un flag `invalid` (rojo) que **NO se usa** (esto no es error). **`Field`** renderiza `label → children → hint`; su prop `error` es roja y **tapa el hint** → tampoco se usa. El nudge va como hijo del `Field` (grid-safe, **sin tocar el primitivo compartido** — disciplina "compartidos = SENSIBLE").
+
+**Qué validan (5 campos sustantivos de la ficha):** `identidadNotas`, `presenciaDigital`, `resenas`, `contenidoReal`, `senalesOperativas`. **Excluidos a propósito:** `igManejadoPor` (es un select, no puede quedar "flojo") y `otros` (catch-all, «mejor que sobre» — no se nag-uea).
+
+**Cómo orienta (no hostil):** al salir de un campo flojo aparece, debajo del input, un mensaje **neutro** (`CampoMejora`, tono ayuda — nada de amber/rojo que acá significan gate/error, ni cyan accionable) que explica el arreglo **con contexto**, p.ej. presencia digital → *«Eso queda corto. Bajá lo que se ve: ¿cuántos seguidores? ¿cada cuánto postean? ¿tienen web, Maps, WhatsApp? ¿responden mensajes y comentarios?»*. El texto vive en `GUIA_FICHA.campos[campo].mejora` (1.0, editable por Franco).
+
+**Reglas de disparo (nunca mientras tipea):**
+- **onBlur** evalúa `campoFichaFlojo(valor)` (heurística pura) y marca el nudge.
+- **onChange** lo apaga al instante (`set` limpia el nudge del campo) → el mensaje desaparece apenas el setter empieza a mejorar, nunca molesta tipeando; se re-evalúa recién en el próximo blur.
+- **Vacío → sin nudge**: de "falta llenar esto" se ocupa la guía de faltantes/gate; este nudge es para ENRIQUECER, no exigir.
+
+**Criterio en lógica pura (módulo nuevo `src/lib/leados/ficha-calidad.ts`):** `campoFichaFlojo()` + `FICHA_MIN_DETALLE = 40` (umbral SUAVE: «tiene Instagram» (15) cae; una o dos cláusulas lo superan — y como el mensaje INVITA, un falso positivo en una respuesta corta-pero-ok no molesta y igual no bloquea). **Vive FUERA de `flow.ts` a propósito**, para que la frontera advisory-vs-gate sea explícita: este módulo nunca decide si el lead avanza. Sin Prisma, sin React, sin `'use server'` — testeable e importable como `flow.ts`.
+
+**Compatibilidad con el autosave (0.5.1) — intacto:** el estado de nudges es **separado** de `form`; `set` mantiene EXACTO el `setForm((actual) => ({ ...actual, [campo]: valor }))` que el autosave observa (solo suma un `setNudges` al lado). El `onBlur` no escribe en `form` → cero guardados extra, timing de autosave idéntico. La guardia de salida (`useUnsavedGuard`) y `markSaved` sin tocar.
+
+**✅ Check de no-tocar-gates (pedido del task, verificado):**
+- `grep transitionDossier|disabled=` en `ficha-step.tsx` → **0 calls / 0 `disabled`**: el botón «Guardar ficha» no quedó gateado por nada, y no hay transición. Los únicos matches de "gate" son **comentarios míos** declarando el límite.
+- `fichaFaltantes` (gate-level) **sin tocar** (L87-88 idénticas); la caja amber/emerald y la visibilidad del `CopyBlock` siguen dependiendo SOLO de los faltantes, no de los nudges.
+- El único `transitionDossier` en `ficha-calidad.ts` está **dentro del doc-comment** que explica lo que NO hace.
+
+**Archivos tocados (4):**
+- `src/lib/leados/ficha-calidad.ts` (nuevo — heurística pura advisory; `campoFichaFlojo` + `FICHA_MIN_DETALLE`).
+- `src/app/(protected)/setter/_components/campo-mejora.tsx` (nuevo — nudge neutro `role="status"`, presentación pura).
+- `src/lib/leados/guidance-content.ts` (+`CampoGuia.mejora` + copy de calidad en los 5 campos; no toca lo existente).
+- `src/app/(protected)/setter/leads/[leadId]/_components/ficha-step.tsx` (estado `nudges` + `evaluarCalidad` onBlur + `set` limpia el nudge + `<CampoMejora>` en los 5 campos; **el flujo de gate/submit/autosave sin cambios**).
+
+**Verificación (quality-gate ECC):**
+- ✅ `npm run build` verde (type-check de todo el proyecto; `/setter/leads/[leadId]` compila) — valida el tipado del `nudges` Record, el `mejora?` opcional y la heurística.
+- ✅ `eslint` sobre los 4 archivos limpio (exit 0). Sin Prettier (lo gobierna ESLint).
+- ✅ Schema sin tocar (no es Prisma; 69 migraciones).
+
+**Verificación humana (Franco — funcional, "lo confirmo yo"):** en un lead en FICHA, escribir «tiene Instagram» en Presencia digital y **salir del campo** → aparece debajo el mensaje que explica cómo mejorarlo (¿cuántos seguidores?, etc.), sin bloquear ni teñir de rojo. Empezar a escribir de nuevo → el mensaje desaparece (no molesta tipeando). El **autosave sigue andando** (el indicador de guardado se mueve igual que antes). El botón «Guardar ficha» y el pase al Evaluador **no cambian** por la calidad del texto.
+
+---
+
+## 🏁 BLOQUE FG-1 — CERRADO (capa de mentoría del setter) · recap para el postmortem de FG-2   ·   2026-06-21
+
+El bloque **FG-1** instaló la **capa de guía/mentoría** del flujo del setter: que un setter sin contexto entienda *qué hacer, por qué, cómo se ve bien, y cómo mejorar lo flojo* — sin tocar la lógica del dossier. Entradas (orden de ejecución):
+
+| Sprint | Qué dejó | Capa |
+|---|---|---|
+| **FG-1.pre** | Cerró el drift DB↔schema que un `migrate dev` habría reseteado (pre-requisito limpio). | infra |
+| **FG-1.0** | `guidance-content.ts` — **fuente única tipada** del contenido de guía (hermano de `herramientas.ts`); ficha del Paso 1 migrada como prueba. | contenido |
+| **FG-1.1** | Onboarding del setter: enseña el flujo INVERTIDO sin chocar contra el gate score-3. | contenido |
+| **FG-1.2** | `TeachPanel` — «¿por qué importa?» + esto-sí/esto-no, aplicado a los 5 pasos que no enseñaban. | presentación |
+| **FG-1.4** | «Ver ejemplo» del estado ideal (ficha buena / self-check bueno) en las pantallas vacías. | presentación |
+| **FG-1.3** | Validación de CALIDAD inline (orienta al blur, no gatea). | presentación |
+
+**Arquitectura que quedó (la que hereda FG-2):**
+- **Una fuente de contenido:** todo el copy de guía vive en `guidance-content.ts` (1.0). Tipos extensibles ya probados: `CampoGuia` (label/hint/ejemplo/**mejora**), `PasoGuia` (porque/ejemplos/validacion/congelada), `EjemploContrastado`, `FichaEjemplar`/`SelfCheckEjemplar`. Franco corrige una palabra editando un solo archivo.
+- **Frontera dura contenido / criterio / estructura:** las PALABRAS en 1.0; el CRITERIO en lógica pura (`flow.ts` para gates, **`ficha-calidad.ts` para calidad advisory** — separados a propósito); la ESTRUCTURA en los componentes. Ningún componente hardcodea copy.
+- **Disciplina B9 sostenida en todo el bloque:** cyan = accionable; enseñanza/ejemplo/nudge = neutro; amber/rojo reservados para gate-pendiente/error; verde = verificado. Sin tocar primitivos compartidos.
+
+**Invariante del bloque, mantenido entrada por entrada:** la guía es **complemento, no muleta**, y **nunca toca los gates** ni el autosave. FG-1.3 lo formaliza (advisory ≠ gate). 
+
+**Deuda/decisiones abiertas que FG-2 debería mirar (heredadas, NO de FG-1):**
+- 🔎 **Pantalla de CONSTRUCCIÓN sobre-guiada** (registrado en FG-1.2): apila 10+ bloques verticales — el problema es el **diseño base**, no la guía. Candidato a rediseño (shell de 6 fases → stepper/acordeón). No se tapó con más guía.
+- ⚠️ **`react-hooks/purity` pre-existente** en `seguimiento-step.tsx` (`Date.now()` en `minReactivacion`) — deuda de B0.4, sigue viva.
+- **Otros forms del setter** (brief/construcción) podrían adoptar la validación de calidad de FG-1.3 (la infra es reusable: `mejora` en 1.0 + `campoFichaFlojo`/uno análogo + `CampoMejora`). Quedó fuera de alcance (un objetivo = la ficha).
+- **QA visual en runtime pendiente** para todo el bloque: las pantallas del setter están detrás de auth + leads sembrados por stage; las verificaciones perceptuales quedaron delegadas a Franco (ver cada entrada). FG-2 podría montar el harness de seed para automatizarlo.
+
+**Estado: BLOQUE FG-1 COMPLETO.** Capa de mentoría instalada (contenido único + teach + ejemplos + validación de calidad), gates y autosave intactos, verificación funcional/perceptual en manos de Franco.
+
+---
+
+## 🧪 FG-2.0 — Prototipo + harness para validar la hipótesis del formulario estructurado · 2026-06-21
+
+**GATE ABIERTO.** El supuesto central de FG-2 — *«un formulario estructurado produce mejores demos que el prompteo libre»* — **nadie lo probó en este stack** (Claude Design + rubros reales de develOP). Hoy es una apuesta. Este sprint NO construye el formulario definitivo: arma un **prototipo descartable** que pone la hipótesis a prueba con **un** rubro, de forma acotada, **antes** de invertir en los 4 rubros. **El bloque FG-2 (2.1 → 2.3) no se deriva hasta que Franco corra el experimento.**
+
+**Descubrimiento (cómo se arma hoy el prompt — la vía «a-mano» que se compara):** en `CONSTRUCCION`, `construccion-step.tsx` muestra `buildConstruccionBlock(lead, brief, ficha)` (`copy-blocks.ts:151`): **texto libre** ensamblado desde el `brief`, y el brief lo produce un **Gem de diseño externo** (prompteo libre) que el setter pega crudo en `brief.pegadoGem`. Ese es el baseline. Datos de ficha ya a mano: `businessName/industry/zone/instagramUrl/googleMapsUrl/currentWebUrl` (lead) + `ficha.resenas` (prueba social) + `ficha.contenidoReal` (logo/fotos/tono).
+
+**Rubro elegido: gastronomía.** Criterio: es el rubro más común para demos de PyME local y tiene la estructura de landing más canónica (hero del plato → menú → reseñas → ubicación → CTA WhatsApp) — el mayor margen de mejora del formulario sobre el prompteo libre, o sea el mejor caso para ver señal clara.
+
+**Qué construyó el prototipo:**
+- **Core puro** (`src/lib/leados/_experimental/fg2-brief-lab.ts`): catálogo de rubro tipado (4 estilos visuales, 3 tonos, 7 secciones, 4 CTAs — cada opción carga su **directiva** opinada que viaja al prompt: ahí vive el conocimiento de rubro que el formulario codifica y el prompteo libre deja a la memoria del setter). `assembleGastroPrompt` ensambla un prompt **más prescriptivo** que el bloque libre (orden canónico de secciones + dirección visual + guardrails de calidad/mobile como parte del brief). Sin Prisma/'use server'/React.
+- **Lab** (`/admin/fg2-lab`, gated SUPER_ADMIN por el layout admin, **NO linkeado en el sidebar** — se entra por URL): formulario estructurado + vista del prompt (copiar) + panel de medición. Autocompleta desde fichas reales (**read-only**) o se carga a mano.
+
+**Harness de medición (qué se instrumenta y qué no — sin sobre-vender):**
+| Métrica | Cómo |
+|---|---|
+| Tokens del prompt (input) | **Auto** — estimación heurística (~4 car/token), no exacta |
+| Tiempo de generación | **Auto** — cronómetro del lab (`performance.now()`, arrancar/frenar) |
+| Cuota/créditos consumidos | **Manual** — Claude Design es externo, no se puede instrumentar su medidor; Franco lo carga |
+| Calidad de la demo | **Manual** — juicio humano 1–5 |
+
+El botón **«Copiar fila de log»** emite un TSV (negocio · método · estilo · secciones · tokens · tiempo · cuota · calidad · notas) para pegar en la tabla del experimento. **Esto alimenta la economía unitaria que pedía el roadmap: costo por demo = tiempo + cuota.**
+
+**🔴 Límites respetados (es EXPERIMENTO + JUICIO, no construcción definitiva):**
+- NO escala a 4 rubros, NO productiza — código marcado **EXPERIMENTAL/DESCARTABLE** en cada archivo, a borrar tras la decisión.
+- **SENSIBLE-lite:** el prototipo SOLO LEE la ficha; no escribe lógica de dossier ni toca gates/transiciones. Datos que entran al prompt = todos de cara pública (nombre, zona, reseñas ya públicas, links de assets, **WhatsApp comercial cargado a mano** — NO se auto-toma el `phone` posiblemente privado del lead).
+- NO conectado al flujo real del setter — es un lab aparte para medir.
+
+**Protocolo del experimento (lo corre Franco) → `docs/experimentos/fg2-brief-experimento.md`:** 5 demos con el formulario + 5 a mano (prompteo libre, mismos 5 negocios, setter capacitado), comparar calidad (Franco + setter juzgan), registrar costo por demo. Decisión: ¿el formulario mejora la calidad? ¿cuánto cuesta una demo? → destraba/ajusta/replantea 2.1→2.3. La tabla de log (5-vs-5, encabezado + filas pre-armadas) está en ese doc.
+
+**Archivos creados (5, todos nuevos — cero archivos de producción tocados):**
+- `src/lib/leados/_experimental/fg2-brief-lab.ts` (core puro: catálogo + `assembleGastroPrompt` + `estimarCostoPrompt` + `buildLogRowTsv`).
+- `src/app/(protected)/admin/fg2-lab/page.tsx` (server: lee fichas read-only para autocompletar + banner experimental).
+- `src/app/(protected)/admin/fg2-lab/_components/fg2-lab-client.tsx` (formulario estructurado).
+- `src/app/(protected)/admin/fg2-lab/_components/medicion-panel.tsx` (cronómetro + captura manual + copiar-fila).
+- `docs/experimentos/fg2-brief-experimento.md` (protocolo + tabla de log del experimento).
+
+**Verificación (quality-gate ECC):**
+- ✅ `npm run build` verde (type-check de todo el proyecto; `/admin/fg2-lab` compila — confirmado en `.next/server/app/(protected)/admin/fg2-lab/page.js`).
+- ✅ `eslint` sobre los 4 archivos de código limpio (exit 0). Sin Prettier (lo gobierna ESLint).
+- ✅ **Los 6 invariantes existentes verdes** (`check:invariant`, `:setter-meta`, `:escalamiento`, `:novedades`, `:mis-numeros`, `:timeline`) — prueba de que el prototipo no rozó la lógica del setter.
+- ⚠️ **QA visual en runtime pendiente para Franco:** `/admin/fg2-lab` está detrás de auth SUPER_ADMIN; no se verificó perceptualmente en browser. Bajo riesgo (reusa primitivos ya verificados: `Card/Field/Input/Select/Toggle/Button/Callout`), pero **no cerrar a ciegas** — Franco lo ve al abrir el lab para correr el experimento.
+
+**Verificación humana (Franco — el experimento es tuyo):** build verde + invariantes verdes = el prototipo no cambió comportamiento del flujo. Lo que **destraba** (o replantea) 2.1→2.3 es el resultado del experimento: correr las 5 vs 5, juzgar calidad, registrar costo por demo. Sin ese resultado, el resto del bloque NO se deriva.
+
+**Estado: FG-2.0 COMPLETO (prototipo + harness listos). GATE ABIERTO hasta el resultado del experimento.**
+
+---
+
+## 🧹 Refactor preparatorio FG-2 — partir `flow.ts` (contenido → `flow-content.ts`) · 2026-06-21
+
+**Movimiento PURO.** La Auditoría 4 marcó `flow.ts` como módulo-dios. Antes de que FG-2 vuelva data-driven el constructor de prompts (`SHELL_CONSTRUCCION` es el ancla), editar copy obligaba a navegar un archivo que mezcla **gates de SEGURIDAD con copy**. Este refactor saca el contenido editable; NO cambia ningún comportamiento.
+
+**PROBE-FIRST — estado real medido (antes de tocar nada):**
+- `flow.ts` = **824 líneas** — **creció** desde las ~677 de la Auditoría 4 (B-beta le sumó las palancas de cartera). Seguía siendo módulo-dios: ~12 grupos de responsabilidad. FG-0.5 (`home.ts`) y FG-1 (`guidance-content.ts`/`ficha-calidad.ts`) NO lo habían aliviado.
+- `SHELL_CONSTRUCCION` seguía en `flow.ts` con su `// PROVISORIO: refinar tras el test de Claude Design` — el ancla de FG-2.
+- **Decisión: SÍ partir** (no era "partir por partir": 824 líneas, copy enterrado entre gates). Extraer **solo CONTENIDO**; los gates **no se mueven**.
+
+**Qué se movió a `src/lib/leados/flow-content.ts` (módulo nuevo, hermano de `guidance-content.ts`/`herramientas.ts`):** 8 grupos de copy/datos editables — `ShellFase`+`SHELL_CONSTRUCCION`, `HardCheck`+`HARD_CHECKS`, `SoftCheck`+`SOFT_CHECKS`, `CanalParams`+`CANAL_INSTAGRAM`, `GUARDRAIL_ROL`, `PLANTILLAS_FOLLOW_UP`, `STATUS_LABELS`, `STAGE_LABELS`. Misma frontera que codificó FG-1: **acá las PALABRAS; el CRITERIO se queda**.
+
+**Qué se quedó en `flow.ts` (SOLO reglas/gates/clasificación), idéntico:** gates del flujo invertido (`gateBriefAbierto`/`gateEnvioDemo`/`leadRespondio`), parsers Json, `buildSelfCheck`/`selfCheckAprobado` (gate), `contieneLink` (hard-block), `cadenciaInfo`, formatters de fecha, `fichaFaltantes`/`fichaTieneSenal` (gate de señal), y toda la clasificación del home-hub + palancas de cartera. **La clasificación del home NO se movió a `home.ts`: es lógica, no contenido — moverla sería un refactor de lógica fuera de alcance.**
+
+**Técnica (diff mínimo, cero churn en call-sites):**
+- `flow.ts` **re-exporta** los 8 símbolos desde `flow-content.ts` → los ~12 call-sites que importan desde `@/lib/leados/flow` siguen intactos (incluidos los imports mixtos contenido+lógica como `notify.ts` `{ formatFechaHora, STAGE_LABELS }`).
+- Única dependencia gate→dato: `flow.ts` **importa de vuelta** `HARD_CHECKS`/`SOFT_CHECKS` porque `buildSelfCheck`/`selfCheckAprobado` los consumen (la lógica depende del dato/config, dirección correcta).
+- Resultado: `flow.ts` **824 → 614 líneas** (−210); `flow-content.ts` = 265.
+
+**Verificación (quality-gate ECC):**
+- ✅ `tsc --noEmit` exit 0 (señal autoritativa del movimiento de tipos/imports: el barrel re-export compila, el import-back es válido, todos los call-sites resuelven).
+- ✅ `npm run build` verde (route table completa, `/setter` y `/admin/leados` incluidos). *Nota: hubo contención del lock de build de Next — había builds externos corriendo; el lock OS solo reintenta 1 s. Se resolvió con reintento; no es problema del refactor.*
+- ✅ `eslint` sobre los 2 archivos limpio (exit 0; `unused-imports` no marcó ni el import-back ni el barrel). Sin Prettier (lo gobierna ESLint).
+- ✅ **Los 6 invariantes verdes** (`check:invariant`, `:setter-meta`, `:escalamiento`, `:novedades`, `:mis-numeros`, `:timeline`) — verdes en baseline Y post-refactor: prueba de que el movimiento no rompió nada.
+
+**Dónde quedó `SHELL_CONSTRUCCION`:** en `flow-content.ts`, con su comentario `PROVISORIO` intacto — listo como **ancla editable del constructor de FG-2**: ahora FG-2 edita copy sin navegar gates de seguridad. Objetivo del refactor cumplido.
+
+**Verificación humana (Franco):** build verde + invariantes verdes = el refactor no cambió comportamiento. Solo se movió copy entre archivos; ninguna pantalla cambia (re-export mantiene la salida byte-idéntica).
+
+**Estado: REFACTOR COMPLETO.** `flow.ts` aliviado y data-clean para FG-2; comportamiento intacto.

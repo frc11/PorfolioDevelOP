@@ -12,6 +12,8 @@ import {
   enviarARevision,
   guardarSelfCheck,
 } from '@/app/(protected)/setter/_actions/dossier.actions'
+import { SelfCheckEjemplo } from '@/app/(protected)/setter/_components/ejemplo-ideal'
+import { TeachPanel } from '@/app/(protected)/setter/_components/teach-panel'
 
 type SelfCheckStepProps = {
   leadId: string
@@ -143,6 +145,11 @@ export function SelfCheckStep({ leadId, stage, draftUrl, selfCheck, brief }: Sel
           Franco tal como los marques.
         </p>
       </div>
+
+      <TeachPanel id="selfCheck" />
+
+      {/* Referencia: cómo queda un self-check terminado bien hecho, para comparar. */}
+      <SelfCheckEjemplo />
 
       <div className="space-y-2 rounded-2xl border border-white/[0.07] bg-white/[0.01] p-4">
         <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-zinc-300">

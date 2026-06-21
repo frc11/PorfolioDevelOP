@@ -22,6 +22,7 @@ import {
 } from '@/app/(protected)/setter/_actions/agenda.actions'
 import { ConfirmarReunionSchema } from '@/app/(protected)/setter/_actions/agenda.schemas'
 import { CopyBlock } from '@/app/(protected)/setter/_components/copy-block'
+import { TeachPanel } from '@/app/(protected)/setter/_components/teach-panel'
 import { TextArea } from '@/app/(protected)/setter/_components/text-area'
 
 type AgendaStepProps = {
@@ -194,6 +195,8 @@ export function AgendaStep({
           Listo para agendar
         </Badge>
       </div>
+
+      <TeachPanel id="traspaso" />
 
       {/* ── Primero: confirmar que habla con el decisor (ficha del Paso 1) ── */}
       <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-white/[0.08] bg-white/[0.02] p-3 transition-colors hover:bg-white/[0.05]">

@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { AlertTriangle, ChevronRight, UserRound } from 'lucide-react'
+import { AlertTriangle, ChevronRight, LifeBuoy, UserRound } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { stageTone, type LeadosTone } from '@/lib/leados-ui'
 import { STAGE_LABELS } from '@/lib/leados/flow'
@@ -7,6 +7,7 @@ import { formatEspera } from '@/lib/leados/revision'
 import {
   totalEnPipeline,
   type Atasco,
+  type Escalada,
   type ResumenStage,
 } from '@/lib/leados/pipeline'
 
@@ -34,10 +35,11 @@ const STAGE_PILL: Record<LeadosTone, string> = {
 type CockpitProps = {
   resumen: ResumenStage[]
   atascos: Atasco[]
+  escaladas: Escalada[]
   ahora: Date
 }
 
-export function PipelineCockpit({ resumen, atascos, ahora }: CockpitProps) {
+export function PipelineCockpit({ resumen, atascos, escaladas, ahora }: CockpitProps) {
   const enProduccion = totalEnPipeline(resumen)
 
   return (
@@ -93,12 +95,103 @@ export function PipelineCockpit({ resumen, atascos, ahora }: CockpitProps) {
               {atascos.length}
             </p>
           </div>
+          <div
+            className={cn(
+              'rounded-2xl border px-4 py-3 text-right',
+              escaladas.length > 0
+                ? 'border-rose-400/20 bg-rose-500/10'
+                : 'border-white/10 bg-black/20',
+            )}
+          >
+            <p
+              className={cn(
+                'text-[10px] uppercase tracking-[0.22em]',
+                escaladas.length > 0 ? 'text-rose-200' : 'text-zinc-400',
+              )}
+            >
+              Escaladas
+            </p>
+            <p
+              className={cn(
+                'mt-1 text-xl font-semibold',
+                escaladas.length > 0 ? 'text-rose-100' : 'text-white',
+              )}
+            >
+              {escaladas.length}
+            </p>
+          </div>
         </div>
       </div>
 
       <PipelineBoard resumen={resumen} ahora={ahora} />
+      <EscaladasPanel escaladas={escaladas} ahora={ahora} />
       <AtascosPanel atascos={atascos} ahora={ahora} />
     </section>
+  )
+}
+
+/**
+ * Setters que pidieron ayuda explícita ("me trabé") y siguen en construcción.
+ * Más urgente que un atasco por SLA (el setter está bloqueado AHORA, no solo
+ * quieto) → rosa + salvavidas, el mismo ícono del botón del setter. Si no hay
+ * ninguno no renderiza nada: es una alerta excepcional, no un estado de calma.
+ */
+function EscaladasPanel({ escaladas, ahora }: { escaladas: Escalada[]; ahora: Date }) {
+  if (escaladas.length === 0) return null
+
+  return (
+    <div className="space-y-3">
+      <h3 className="flex items-center gap-2 text-sm font-semibold text-rose-100">
+        <LifeBuoy className="h-4 w-4" strokeWidth={1.5} />
+        Setters trabados — {escaladas.length}{' '}
+        {escaladas.length === 1 ? 'pidió' : 'pidieron'} ayuda
+      </h3>
+      <p className="text-xs text-zinc-400">
+        Pedido explícito durante la construcción. Más urgente que un atasco por
+        tiempo: están bloqueados ahora, esperándote.
+      </p>
+      <ul className="space-y-2">
+        {escaladas.map((escalada) => (
+          <li key={escalada.leadId}>
+            <Link
+              href={`/admin/leados/${escalada.leadId}`}
+              className="group relative flex items-start justify-between gap-4 overflow-hidden rounded-2xl border border-rose-400/30 bg-rose-500/[0.06] p-4 transition-colors hover:bg-rose-500/[0.10]"
+            >
+              <span aria-hidden className="absolute inset-y-0 left-0 w-1 bg-rose-400" />
+              <div className="min-w-0">
+                <div className="flex flex-wrap items-center gap-2">
+                  <h4 className="truncate text-base font-semibold text-white">
+                    {escalada.businessName}
+                  </h4>
+                  <span className="inline-flex items-center gap-1 rounded-full border border-rose-400/20 bg-rose-500/10 px-2.5 py-1 text-[11px] font-medium text-rose-200">
+                    <LifeBuoy className="h-3 w-3" strokeWidth={1.5} />
+                    Pidió ayuda
+                  </span>
+                </div>
+                {escalada.escaladoNota ? (
+                  <p className="mt-1.5 line-clamp-2 text-xs leading-relaxed text-zinc-300">
+                    “{escalada.escaladoNota}”
+                  </p>
+                ) : null}
+                <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-zinc-400">
+                  <span className="inline-flex items-center gap-1">
+                    <UserRound className="h-3 w-3" strokeWidth={1.5} />
+                    {escalada.setter}
+                  </span>
+                  <span>Escaló {formatEspera(escalada.escaladoAt, ahora)}</span>
+                </div>
+              </div>
+
+              <ChevronRight
+                aria-hidden
+                className="h-5 w-5 shrink-0 self-center text-zinc-600 transition-colors group-hover:text-rose-200"
+                strokeWidth={1.5}
+              />
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </div>
   )
 }
 

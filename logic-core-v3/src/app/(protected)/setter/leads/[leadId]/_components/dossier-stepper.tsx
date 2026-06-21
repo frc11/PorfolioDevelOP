@@ -8,8 +8,13 @@ type PasoEstado = 'hecho' | 'actual' | 'pendiente' | 'bloqueado'
 // revisión B5) — se acabaron los "próximo bloque".
 const PASOS = ['Ficha', 'Evaluación', 'Brief', 'Construcción', 'Revisión'] as const
 
-/** Índice del paso "actual" según el stage del dossier. */
-function pasoActual(stage: DossierStage | null): number {
+/**
+ * Índice del paso "actual" según el stage del dossier. El `stage` nombra el hito
+ * cumplido; el índice apunta al SIGUIENTE paso accionable. Fuente única de "dónde
+ * está el lead" — la reusa el aterrizaje al abrir (`step-anchor`) para no re-derivar
+ * el flujo ni tocar gates.
+ */
+export function pasoActual(stage: DossierStage | null): number {
   switch (stage) {
     case null:
     case 'FICHA':

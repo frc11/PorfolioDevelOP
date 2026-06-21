@@ -19,6 +19,7 @@ import { OpenerInputSchema } from '@/app/(protected)/setter/_actions/outreach.sc
 import { CanalSeguridad } from '@/app/(protected)/setter/_components/canal-seguridad'
 import { CopyBlock } from '@/app/(protected)/setter/_components/copy-block'
 import { GuardrailRol } from '@/app/(protected)/setter/_components/guardrail-rol'
+import { TeachPanel } from '@/app/(protected)/setter/_components/teach-panel'
 import { TextArea } from '@/app/(protected)/setter/_components/text-area'
 import { ToolGuide } from '@/app/(protected)/setter/_components/tool-guide'
 
@@ -174,6 +175,8 @@ export function OpenerStep({
           </p>
         )}
       </div>
+
+      <TeachPanel id="opener" />
 
       <CanalSeguridad dmsHoy={dmsHoy} />
 

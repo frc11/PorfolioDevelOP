@@ -20,6 +20,7 @@ import { FichaSchema, type Brief } from '@/lib/leados/contracts'
 import {
   DossierTransitionError,
   getOwnedDossier,
+  marcarEscaladoOwned,
   saveOwnedBrief,
   saveOwnedDraftUrl,
   saveOwnedFicha,
@@ -360,10 +361,11 @@ export async function enviarARevision(
 }
 
 /**
- * Capa "si se traba" — Escalamiento a Franco por Telegram. Fire-and-forget:
- * si Telegram falla, el flujo no se rompe y la UI le dice al setter que
- * escriba directo. No persiste en DB (no hay campo sin migrar — pendiente
- * anotado en bitácora).
+ * Capa "si se traba" — Escalamiento del setter. Persiste la marca en el dossier
+ * (B-beta: `escaladoAt`/`escaladoNota` vía `marcarEscaladoOwned`) Y empuja un
+ * Telegram a Franco. El registro durable es la DB: si Telegram falla, el flujo
+ * no se rompe, el escalamiento ya quedó visible en el panel del admin y la UI le
+ * dice al setter que escriba directo.
  */
 export async function escalarConstruccion(
   leadIdRaw: unknown,
@@ -380,10 +382,14 @@ export async function escalarConstruccion(
       return fail(input.error.issues[0]?.message ?? 'Contá qué te trabó')
     }
 
-    // Ownership primero: nunca se escala (ni se leakea) un lead ajeno.
-    const dossier = await getOwnedDossier(leadId.data, userId)
+    // Persistir PRIMERO: el escalamiento queda marcado en el dossier (Franco lo
+    // ve en el panel) AUNQUE Telegram falle. marcarEscaladoOwned hace ownership
+    // (nunca se escala ni se leakea un lead ajeno) + guard de stage adentro.
+    const dossier = await marcarEscaladoOwned(leadId.data, userId, input.data.descripcion)
     if (!dossier) return fail('Lead no encontrado')
 
+    // Push opcional a Franco. Ya está persistido: el boolean solo decide el copy
+    // del toast (aviso instantáneo vs "escribile directo").
     const enviado = await notificarEscalamientoConstruccion({
       leadId: leadId.data,
       descripcion: input.data.descripcion,

@@ -23,10 +23,12 @@ function escapeHtml(value: string): string {
 }
 
 /**
- * B4 — El setter se trabó en la construcción y pide ayuda. Captura el estado
- * actual (negocio, stage, draft si hay) + lo que el setter describe. No se
- * persiste en DB (no hay campo sin migrar — registrado como pendiente en la
- * bitácora): el Telegram ES el registro. Nunca lanza; devuelve si se envió.
+ * B4 — El setter se trabó en la construcción y pide ayuda. Esta capa SOLO empuja
+ * el Telegram con el contexto (negocio, stage, draft si hay) + lo que el setter
+ * describe. La PERSISTENCIA del escalamiento (marca `escaladoAt`/`escaladoNota`
+ * en el dossier) la hace la action `escalarConstruccion` vía `marcarEscaladoOwned`
+ * ANTES de llamar acá — así el registro durable no depende de Telegram. Nunca
+ * lanza; devuelve si el push salió.
  */
 export async function notificarEscalamientoConstruccion(params: {
   leadId: string

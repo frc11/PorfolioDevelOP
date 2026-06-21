@@ -1,29 +1,71 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { X } from 'lucide-react'
+import { useSyncExternalStore } from 'react'
+import { Megaphone, X } from 'lucide-react'
 import { Card } from '@/components/ui'
 
 const STORAGE_KEY = 'leados-onboarding-v1'
 
-// Orientación, no un índice de pasos: la numeración real vive en el panel del
-// lead (su stepper de etapas). Acá NO se numera ni se reenumera el flujo —
-// eso duplicaría (y contradeciría) al stepper. Solo se explica cómo moverse.
-const ORIENTACION = [
+// Store mínimo sobre localStorage. `useSyncExternalStore` es la lectura correcta
+// de un store externo: el server (y el primer render del cliente) devuelven el
+// snapshot de server (oculto) — sin desajuste de hidratación — y recién después
+// se pasa al valor real. Reemplaza al patrón useState(false)+useEffect, que
+// disparaba `set-state-in-effect` (no se puede usar un inicializador lazy de
+// useState: leería `window` en SSR y rompería).
+const listeners = new Set<() => void>()
+
+function subscribe(onChange: () => void): () => void {
+  listeners.add(onChange)
+  return () => listeners.delete(onChange)
+}
+
+function getVisibleSnapshot(): boolean {
+  try {
+    return window.localStorage.getItem(STORAGE_KEY) !== '1'
+  } catch {
+    return true
+  }
+}
+
+/** Server + primer render del cliente: oculto, para no desajustar la hidratación. */
+function getVisibleServerSnapshot(): boolean {
+  return false
+}
+
+function dismissOnboarding(): void {
+  try {
+    window.localStorage.setItem(STORAGE_KEY, '1')
+  } catch {
+    // sin localStorage (modo privado): se oculta solo por esta sesión
+  }
+  listeners.forEach((onChange) => onChange())
+}
+
+// Enseña el FLUJO INVERTIDO (lo más contraintuitivo del sistema: el opener va
+// antes que la demo), no un índice de pasos. La numeración real vive en el
+// panel del lead (su stepper de 5 etapas). Acá NO se numera ni se reenumera el
+// flujo — eso duplicaría (y contradeciría) al stepper. Se explica la LÓGICA:
+// frío → opener y esperás; caliente (4–5) → podés adelantar la demo.
+const FLUJO = [
   {
-    titulo: 'Trabajá tu cartera de arriba para abajo',
+    titulo: 'El score del Evaluador marca el camino',
     detalle:
-      'Cada grupo de abajo es una cola: arriba va lo más urgente. El marcador "De un vistazo" es solo lectura — para entrar a un lead, clickeá su card.',
+      'Armás la ficha y el Evaluador le pone un puntaje de 1 a 5. Ese puntaje decide si el lead es frío (la mayoría) o caliente (4–5) — y eso cambia el ORDEN de lo que hacés.',
   },
   {
-    titulo: 'Abrí un lead y seguí el panel',
+    titulo: 'Frío: primero el opener, no la demo',
     detalle:
-      'Adentro, el panel marca tu etapa y tu próximo paso. Andá de arriba para abajo: cada paso se abre cuando el anterior queda listo.',
+      'Para casi todos los leads mandás el opener (un mensaje corto, sin link ni precio) y esperás. La demo todavía NO se construye: la producción se abre recién si el negocio responde.',
   },
   {
-    titulo: 'El estado del lead manda',
+    titulo: 'La espera es parte del laburo',
     detalle:
-      'No salteás etapas ni elegís el orden: el flujo habilita cada cosa a su tiempo. Si un paso está apagado, todavía no es su momento.',
+      'Mandado el opener, esperás respuesta. La maquinaria calcula y te avisa cuándo toca el próximo seguimiento — vos no llevás fechas. Si un paso del panel está apagado, todavía no es su momento.',
+  },
+  {
+    titulo: 'Caliente (4–5): podés adelantar la demo',
+    detalle:
+      'La excepción: un lead que el Evaluador marca 4 o 5 te habilita a construir la demo preventiva sin esperar respuesta. Para todo el resto (1–3), primero va la conversación.',
   },
 ] as const
 
@@ -32,26 +74,15 @@ const ORIENTACION = [
  * localStorage — se muestra solo hasta que el setter lo cierra.
  */
 export function OnboardingHint() {
-  const [visible, setVisible] = useState(false)
-
-  useEffect(() => {
-    try {
-      setVisible(window.localStorage.getItem(STORAGE_KEY) !== '1')
-    } catch {
-      setVisible(true)
-    }
-  }, [])
+  const visible = useSyncExternalStore(
+    subscribe,
+    getVisibleSnapshot,
+    getVisibleServerSnapshot,
+  )
 
   if (!visible) return null
 
-  const dismiss = () => {
-    try {
-      window.localStorage.setItem(STORAGE_KEY, '1')
-    } catch {
-      // sin localStorage (modo privado): se oculta solo por esta sesión
-    }
-    setVisible(false)
-  }
+  const dismiss = dismissOnboarding
 
   return (
     <Card variant="default" padding="lg" className="relative overflow-hidden">
@@ -60,10 +91,10 @@ export function OnboardingHint() {
       <div className="flex items-start justify-between gap-4">
         <div>
           <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-cyan-400">
-            Cómo funciona
+            Antes de tu primer lead
           </p>
           <h2 className="mt-1 text-base font-semibold text-zinc-100">
-            Cómo moverte en LeadOS
+            Cómo funciona el flujo invertido
           </h2>
         </div>
         <button
@@ -76,8 +107,8 @@ export function OnboardingHint() {
         </button>
       </div>
 
-      <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {ORIENTACION.map((item) => (
+      <div className="mt-4 grid gap-3 sm:grid-cols-2">
+        {FLUJO.map((item) => (
           <div
             key={item.titulo}
             className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-3"
@@ -86,6 +117,22 @@ export function OnboardingHint() {
             <p className="mt-1 text-xs leading-relaxed text-zinc-500">{item.detalle}</p>
           </div>
         ))}
+      </div>
+
+      {/* La línea clave del flujo invertido — emphasis por layout/peso, NO por
+          color: cyan queda reservado a lo accionable (disciplina B9). */}
+      <div className="mt-3 flex items-start gap-2.5 rounded-xl border border-white/[0.08] bg-white/[0.03] p-3">
+        <Megaphone
+          size={15}
+          strokeWidth={1.5}
+          aria-hidden
+          className="mt-0.5 shrink-0 text-zinc-300"
+        />
+        <p className="text-xs leading-relaxed text-zinc-200">
+          <span className="font-semibold text-zinc-100">Ojo:</span> la demo se construye{' '}
+          <span className="font-semibold text-zinc-100">DESPUÉS</span> de que el negocio
+          responde — primero va el opener.
+        </p>
       </div>
 
       <button

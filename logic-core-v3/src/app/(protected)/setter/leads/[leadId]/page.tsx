@@ -11,6 +11,7 @@ import { getOwnedDossier } from '@/lib/leados/dossier'
 import { buildHomeLeads } from '@/lib/leados/home'
 import { contarDmsHoy, listOwnedLeadActivities } from '@/lib/leados/outreach'
 import { getOwnedLead, listOwnedLeads } from '@/lib/leados/ownership'
+import { listOwnedLeadTimeline } from '@/lib/leados/timeline'
 import {
   leadRespondio,
   parseAgenda,
@@ -28,6 +29,7 @@ import {
   esColaKey,
   type RecorridoView,
 } from '@/lib/leados/recorrido'
+import { LeadTimeline, type LeadTimelineEvent } from './_components/lead-timeline'
 import { LeadWizard, type WizardData } from './_components/lead-wizard'
 import { RecorridoStrip } from './_components/recorrido-strip'
 
@@ -74,11 +76,15 @@ export default async function SetterLeadPage({ params, searchParams }: SetterLea
     recorrido = construirRecorrido(particion, cola, leadId)
   }
 
-  const [dossier, actividades, dmsHoy, ultimaAsignacion] = await Promise.all([
+  const [dossier, actividades, dmsHoy, ultimaAsignacion, timeline] = await Promise.all([
     getOwnedDossier(leadId, userId),
     listOwnedLeadActivities(leadId, userId),
     contarDmsHoy(userId),
     getUltimaAsignacion(leadId, userId),
+    // Lectura NUEVA y separada: el historial COMPLETO (incluye SISTEMA) para el
+    // timeline. NO alimenta `contactos`/cadencia — esos siguen leyendo `actividades`
+    // (solo comercial). Mostrar la reasignación acá no abre el paso de Seguimiento.
+    listOwnedLeadTimeline(leadId, userId),
   ])
   // Por qué este lead está en tu cartera: el rastro de la última reasignación.
   // Que no aparezca mudo. (Solo "entró"; el aviso de "salió" al setter que lo
@@ -117,6 +123,9 @@ export default async function SetterLeadPage({ params, searchParams }: SetterLea
     // B4: proxy de "desde cuándo espera" = último write comercial del lead
     // (mismo criterio que B5 usa updatedAt del dossier para la cola).
     respondioDesde: leadRespondio(lead.status) ? lead.updatedAt.toISOString() : null,
+    // B-beta: marca del escalamiento "me trabé" — para que el setter vea que ya
+    // avisó a Franco y no re-escale. null = sin pedido vigente.
+    escaladoAt: dossier?.escaladoAt?.toISOString() ?? null,
     ultimoRechazo: ultimoRechazo(dossier?.rechazos ?? null),
     // B7: la reunión agendada (booking Cal.com + traspaso) — Paso 10.
     agenda: parseAgenda(dossier?.agendaJson ?? null),
@@ -133,6 +142,16 @@ export default async function SetterLeadPage({ params, searchParams }: SetterLea
       dmsHoy,
     },
   }
+
+  // Serialización para el client boundary (Dates → ISO; sin email del performer).
+  const timelineEvents: LeadTimelineEvent[] = (timeline ?? []).map((evento) => ({
+    id: evento.id,
+    channel: evento.channel,
+    result: evento.result,
+    notes: evento.notes,
+    createdAt: evento.createdAt.toISOString(),
+    performedByName: evento.performedBy?.name ?? null,
+  }))
 
   const links = [
     { label: 'Instagram', href: lead.instagramUrl },
@@ -218,6 +237,8 @@ export default async function SetterLeadPage({ params, searchParams }: SetterLea
       </header>
 
       <LeadWizard data={data} />
+
+      <LeadTimeline events={timelineEvents} />
     </div>
   )
 }

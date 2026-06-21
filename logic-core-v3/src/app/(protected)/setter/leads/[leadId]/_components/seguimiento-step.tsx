@@ -31,6 +31,7 @@ import {
 import { CanalSeguridad } from '@/app/(protected)/setter/_components/canal-seguridad'
 import { CopyBlock } from '@/app/(protected)/setter/_components/copy-block'
 import { GuardrailRol } from '@/app/(protected)/setter/_components/guardrail-rol'
+import { TeachPanel } from '@/app/(protected)/setter/_components/teach-panel'
 import { TextArea } from '@/app/(protected)/setter/_components/text-area'
 import { HerramientaLauncher } from '@/app/(protected)/setter/_components/tool-guide'
 
@@ -372,6 +373,7 @@ export function SeguimientoStep({
           ¿Te tiraron una objeción? Armá el input del Gem
         </summary>
         <div className="mt-3 space-y-3">
+          <TeachPanel id="objeciones" collapsible={false} />
           <CopyBlock
             titulo="Bloque para el Gem de outreach — objeciones"
             instruccion="Pegale la objeción al final. El Gem deflecta a reunión: nunca cotiza."

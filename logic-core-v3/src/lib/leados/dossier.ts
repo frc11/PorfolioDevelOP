@@ -30,6 +30,7 @@ import {
   type SelfCheck,
 } from '@/lib/leados/contracts'
 import { leadRespondio as leadYaRespondio } from '@/lib/leados/flow'
+import { buildEscaladoPatch, ESCALADO_RESET } from '@/lib/leados/escalamiento'
 
 /**
  * Transiciones legales de la máquina de producción. Ninguna otra existe.
@@ -138,7 +139,13 @@ export async function transitionDossier(
     throw new DossierTransitionError(`Transición ilegal: ${from} → ${input.to}`)
   }
 
-  const data: Prisma.OsLeadDossierUpdateManyMutationInput = { stage: input.to }
+  // El escalamiento "me trabé" es de la CONSTRUCCION vigente: cualquier cambio
+  // de stage lo resuelve/invalida (ESCALADO_RESET — aditivo, no altera ninguna
+  // transición legal). Así no sobrevive a un re-loop RECHAZADA→CONSTRUCCION.
+  const data: Prisma.OsLeadDossierUpdateManyMutationInput = {
+    stage: input.to,
+    ...ESCALADO_RESET,
+  }
 
   switch (input.to) {
     case 'EVALUADA': {
@@ -285,6 +292,34 @@ export async function saveOwnedDraftUrl(
   })
   if (updated.count === 0) {
     throw new DossierTransitionError('El dossier cambió de stage durante el guardado — recargá')
+  }
+  return prisma.osLeadDossier.findUnique({ where: { leadId: dossier.leadId } })
+}
+
+/**
+ * B-beta — Persiste el escalamiento "me trabé" en el dossier. Aditivo y
+ * stage-guarded: solo durante CONSTRUCCION (única etapa donde el setter escala)
+ * y NUNCA toca `stage` (no es una transición — el patch viene de
+ * `buildEscaladoPatch`, que no incluye `stage`). Mirror de `saveOwnedDraftUrl`:
+ * ownership arriba + guard optimista. Persistir acá hace que Franco lo vea en el
+ * panel aunque el Telegram falle. `null` si el lead no es del setter.
+ */
+export async function marcarEscaladoOwned(
+  leadId: string,
+  userId: string,
+  descripcion: string,
+): Promise<OsLeadDossier | null> {
+  const dossier = await getOwnedDossier(leadId, userId)
+  if (!dossier) return null
+  if (dossier.stage !== 'CONSTRUCCION') {
+    throw new DossierTransitionError('El escalamiento es de la construcción en curso')
+  }
+  const updated = await prisma.osLeadDossier.updateMany({
+    where: { leadId: dossier.leadId, stage: 'CONSTRUCCION' },
+    data: buildEscaladoPatch(descripcion, new Date()),
+  })
+  if (updated.count === 0) {
+    throw new DossierTransitionError('El dossier cambió de stage durante el escalamiento — recargá')
   }
   return prisma.osLeadDossier.findUnique({ where: { leadId: dossier.leadId } })
 }

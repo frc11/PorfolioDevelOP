@@ -311,6 +311,7 @@ model User {
   osActivities      OsLeadActivity[]     @relation("OsActivityPerformer")
   osTimeEntries     OsTimeEntry[]        @relation("OsTimeEntryUser")
   osLeadSetterMetas OsLeadSetterMeta[]   @relation("OsLeadSetterMetaOwner")
+  osSetterNotices   OsSetterNotice[]     @relation("OsSetterNoticeRecipient")
 }
 
 model PasswordResetToken {
@@ -828,12 +829,13 @@ model OsLead {
   createdAt      DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
 
-  assignedTo  User?              @relation("OsLeadAssignee", fields: [assignedToId], references: [id])
-  activities  OsLeadActivity[]
-  demos       OsDemo[]
-  dossier     OsLeadDossier?
-  project     Project?
-  setterMetas OsLeadSetterMeta[]
+  assignedTo    User?              @relation("OsLeadAssignee", fields: [assignedToId], references: [id])
+  activities    OsLeadActivity[]
+  demos         OsDemo[]
+  dossier       OsLeadDossier?
+  project       Project?
+  setterMetas   OsLeadSetterMeta[]
+  setterNotices OsSetterNotice[]
 
   @@index([status])
   @@index([nextFollowUpAt])
@@ -864,6 +866,35 @@ model OsLeadSetterMeta {
   @@unique([leadId, setterId])
   @@index([setterId, pinned])
   @@index([setterId, snoozedUntil])
+}
+
+/// Novedad DIRIGIDA a un setter (in-app): el sistema dejó de avisarle SOLO a
+/// Franco. Cada fila es un evento de handoff que el setter debe ver al volver:
+/// le asignaron un lead, Franco aprobó/rechazó su demo, o le SACARON un lead por
+/// reasignación. Esta última es la razón de ser del modelo addressed: una vez
+/// reasignado, el lead deja de ser `assignedToId` del setter saliente — no se
+/// puede derivar de su cartera; la novedad SÍ, porque está direccionada por
+/// `setterId`. Aislamiento: toda lectura filtra `setterId` (cada setter ve SOLO
+/// las suyas). NO es un OsLeadActivity — no toca el historial comercial del lead
+/// ni cuenta como contacto (los eventos SISTEMA siguen siendo el rastro del lead).
+/// `title`/`body` se SNAPSHOTEAN al crear (incluyen el nombre del negocio) para no
+/// releer un lead que el saliente ya no puede ver. `leadId` es nullable y onDelete
+/// SetNull (referencia para los casos abribles; en el saliente no se linkea).
+model OsSetterNotice {
+  id        String             @id @default(cuid())
+  setterId  String
+  leadId    String?
+  kind      OsSetterNoticeKind
+  title     String
+  body      String             @db.Text
+  read      Boolean            @default(false)
+  createdAt DateTime           @default(now())
+
+  setter User    @relation("OsSetterNoticeRecipient", fields: [setterId], references: [id], onDelete: Cascade)
+  lead   OsLead? @relation(fields: [leadId], references: [id], onDelete: SetNull)
+
+  @@index([setterId, read, createdAt(sort: Desc)])
+  @@index([leadId])
 }
 
 model OsLeadActivity {
@@ -912,6 +943,12 @@ model OsLeadDossier {
   aprobadaAt     DateTime?
   enviadaAt      DateTime? // B5: queda null — lo setea el envío (B6)
   agendaJson     Json? // B7: reunión Cal.com (uid, notas de traspaso, realizada, resultado) — contrato AgendaSchema
+  // B-beta: el setter pidió ayuda durante CONSTRUCCION (marca operativa para el
+  // admin, antes solo viajaba por Telegram fire-and-forget). `escaladoAt` null =
+  // sin escalamiento vigente; se LIMPIA en cada transición de stage (escalamiento.ts
+  // ESCALADO_RESET), así no sobrevive a un re-loop RECHAZADA→CONSTRUCCION.
+  escaladoAt     DateTime?
+  escaladoNota   String?   @db.Text
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
 
@@ -1024,6 +1061,19 @@ enum DossierStage {
   APROBADA
   RECHAZADA
   DESCARTADA
+}
+
+/// Tipo de novedad dirigida al setter (OsSetterNotice). Cada valor mapea a un
+/// handoff donde antes el setter quedaba a ciegas:
+///   - LEAD_ASIGNADO            → te asignaron un lead (entra a tu cartera).
+///   - DEMO_APROBADA            → Franco aprobó tu demo (enviá el link — caliente).
+///   - DEMO_RECHAZADA           → Franco pidió cambios.
+///   - LEAD_REASIGNADO_SALIENTE → te SACARON un lead (ya no es tuyo — el cabo 0.5.8).
+enum OsSetterNoticeKind {
+  LEAD_ASIGNADO
+  DEMO_APROBADA
+  DEMO_RECHAZADA
+  LEAD_REASIGNADO_SALIENTE
 }
 
 enum EmailCampaignStatus {

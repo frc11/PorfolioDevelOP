@@ -10,6 +10,7 @@ import {
   registrarReasignacion,
 } from '@/lib/leados/assignment-trail'
 import { SOLO_CONTACTOS_COMERCIALES } from '@/lib/leados/isolation'
+import { emitirNovedadSetter } from '@/lib/leados/novedades'
 import {
   AssignLeadSetterSchema,
   CreateLeadSchema,
@@ -132,9 +133,10 @@ export async function assignLeadSetter(
     const parsed = AssignLeadSetterSchema.parse(input)
 
     // Dueño previo: para detectar el cambio real y etiquetar el rastro.
+    // `businessName` se snapshotea en las novedades dirigidas (in-app).
     const previo = await prisma.osLead.findUnique({
       where: { id: parsed.leadId },
-      select: { assignedToId: true },
+      select: { assignedToId: true, businessName: true },
     })
     if (!previo) {
       return fail('Lead not found')
@@ -176,6 +178,30 @@ export async function assignLeadSetter(
         toLabel: etiquetaSetter(toName),
         performedById: adminId,
       })
+
+      // 0.5.8 — Novedades DIRIGIDAS al setter (in-app): el handoff dejó de ser
+      // mudo. El destinatario sale de la regla única `destinatarioNovedad`
+      // (dentro de emitirNovedadSetter); cada extremo nulo se ignora solo.
+      //   - entrante → al NUEVO dueño ("te asignaron este lead");
+      //   - saliente → al dueño PREVIO ("te sacaron un lead") — el cabo que
+      //     dejó declarado 0.5.3: ya no es `assignedToId`, no lo ve en su cartera.
+      // Fire-and-forget: nunca rompe la asignación (ya persistida arriba).
+      await emitirNovedadSetter({
+        evento: { kind: 'LEAD_ASIGNADO', ownerActual: parsed.setterId },
+        leadId: parsed.leadId,
+        businessName: previo.businessName,
+      })
+      await emitirNovedadSetter({
+        evento: { kind: 'LEAD_REASIGNADO_SALIENTE', ownerPrevio: fromId },
+        leadId: null,
+        businessName: previo.businessName,
+      })
+
+      // Contrato de invalidación: el handoff cambió datos visibles del setter
+      // (su feed de novedades). Mismo gesto que `revalidarRevision` del lado de
+      // la revisión — así la superficie del setter no queda atada al caché.
+      revalidatePath('/setter')
+      revalidatePath(`/setter/leads/${parsed.leadId}`)
     }
 
     revalidatePath('/admin/leads')

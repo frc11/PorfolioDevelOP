@@ -17,18 +17,15 @@
  * `ahora` se estampa ACÁ (función async de lib, no en el render del Server
  * Component) para no disparar `react-hooks/purity` en la página que lo consume.
  */
-import type { LeadStatus } from '@prisma/client'
 import { prisma } from '@/lib/prisma'
 import { parseEvaluacion } from '@/lib/leados/flow'
 import {
   alarmaNuncaDescarta,
   calcularRatioSetters,
+  ESTADOS_TERMINALES,
   pctDescarte,
   type EvaluacionDeSetter,
 } from '@/lib/leados/revision'
-
-/** Estados donde el lead ya salió del trabajo activo del setter (no suma carga). */
-const ESTADOS_TERMINALES: LeadStatus[] = ['CERRADO', 'PERDIDO']
 
 export type RatioResumen = {
   evaluadas: number

@@ -1,9 +1,10 @@
 import Link from 'next/link'
-import { ChevronRight, Flame, UserRound } from 'lucide-react'
+import { BellOff, ChevronRight, Flame, UserRound } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { adminHoverCls } from '@/lib/hover'
 import { prisma } from '@/lib/prisma'
 import { parseEvaluacion } from '@/lib/leados/flow'
+import { isTelegramConfigured } from '@/lib/notifications/telegram'
 import {
   alarmaNuncaDescarta,
   calcularRatioSetters,
@@ -15,6 +16,7 @@ import {
 } from '@/lib/leados/revision'
 import {
   detectarAtascos,
+  detectarEscaladas,
   resumirPipeline,
   type DossierPipelineInput,
 } from '@/lib/leados/pipeline'
@@ -29,7 +31,7 @@ function setterLabel(assignedTo: { name: string | null; email: string } | null):
 export default async function LeadOsRevisionPage() {
   // Sin unstable_cache a propósito: la cola es operativa y chica (un setter);
   // datos frescos en cada carga evitan revisar sobre un estado viejo.
-  const [enRevision, dossiersEvaluados, pipelineDossiers] = await Promise.all([
+  const [enRevision, dossiersEvaluados, pipelineDossiers, telegramOk] = await Promise.all([
     prisma.osLeadDossier.findMany({
       where: { stage: 'EN_REVISION' },
       select: {
@@ -68,6 +70,9 @@ export default async function LeadOsRevisionPage() {
         leadId: true,
         stage: true,
         updatedAt: true,
+        // B-beta: marca + contexto del escalamiento "me trabé" (solo CONSTRUCCION).
+        escaladoAt: true,
+        escaladoNota: true,
         lead: {
           select: {
             businessName: true,
@@ -76,6 +81,9 @@ export default async function LeadOsRevisionPage() {
         },
       },
     }),
+    // B-beta: ¿salen los avisos de Telegram? Si no, el panel avisa que las
+    // señales (calientes / trabados / reuniones) no están llegando a Franco.
+    isTelegramConfigured(),
   ])
 
   const ahora = new Date()
@@ -86,9 +94,12 @@ export default async function LeadOsRevisionPage() {
     businessName: dossier.lead.businessName,
     setter: setterLabel(dossier.lead.assignedTo),
     desde: dossier.updatedAt,
+    escaladoAt: dossier.escaladoAt,
+    escaladoNota: dossier.escaladoNota,
   }))
   const resumenPipeline = resumirPipeline(pipelineInputs, ahora)
   const atascos = detectarAtascos(pipelineInputs, ahora)
+  const escaladas = detectarEscaladas(pipelineInputs, ahora)
 
   const cola = ordenarCola(
     enRevision.map((dossier) => {
@@ -122,7 +133,35 @@ export default async function LeadOsRevisionPage() {
 
   return (
     <section className="space-y-6">
-      <PipelineCockpit resumen={resumenPipeline} atascos={atascos} ahora={ahora} />
+      {!telegramOk && (
+        <div className="flex flex-col gap-3 rounded-2xl border border-amber-400/30 bg-amber-500/[0.08] p-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-start gap-2.5">
+            <BellOff className="mt-0.5 h-4 w-4 shrink-0 text-amber-300" strokeWidth={1.5} />
+            <div>
+              <p className="text-sm font-semibold text-amber-100">Telegram sin configurar</p>
+              <p className="mt-0.5 max-w-2xl text-xs leading-relaxed text-amber-200/80">
+                No te llegan los avisos automáticos de leads calientes, setters
+                trabados ni reuniones. El panel los muestra igual, pero configurá
+                el bot para recibirlos al instante en el celular.
+              </p>
+            </div>
+          </div>
+          <Link
+            href="/admin/settings"
+            className="inline-flex shrink-0 items-center gap-1.5 self-start rounded-full border border-amber-400/30 bg-amber-500/10 px-3.5 py-1.5 text-xs font-medium text-amber-100 transition-colors hover:bg-amber-500/20 sm:self-center"
+          >
+            Configurar Telegram
+            <ChevronRight className="h-3.5 w-3.5" strokeWidth={1.5} />
+          </Link>
+        </div>
+      )}
+
+      <PipelineCockpit
+        resumen={resumenPipeline}
+        atascos={atascos}
+        escaladas={escaladas}
+        ahora={ahora}
+      />
 
       <div className="flex flex-col gap-4 rounded-3xl border border-white/10 bg-white/5 p-5 backdrop-blur-xl sm:flex-row sm:items-end sm:justify-between">
         <div>

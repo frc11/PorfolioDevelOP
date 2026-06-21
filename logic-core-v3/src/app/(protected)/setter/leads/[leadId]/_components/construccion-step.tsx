@@ -1,9 +1,18 @@
 'use client'
 
-import { useEffect, useState, useTransition } from 'react'
+import { useSyncExternalStore, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { AlarmClock, ExternalLink, Hammer, Images, Lock, OctagonAlert, Save } from 'lucide-react'
+import {
+  AlarmClock,
+  ExternalLink,
+  Hammer,
+  Images,
+  LifeBuoy,
+  Lock,
+  OctagonAlert,
+  Save,
+} from 'lucide-react'
 import type { DossierStage } from '@prisma/client'
 import { Badge, Button, Callout, Card } from '@/components/ui'
 import type { Brief, Ficha, Rechazo } from '@/lib/leados/contracts'
@@ -15,6 +24,7 @@ import {
   reabrirConstruccion,
 } from '@/app/(protected)/setter/_actions/dossier.actions'
 import { CopyBlock } from '@/app/(protected)/setter/_components/copy-block'
+import { TeachPanel } from '@/app/(protected)/setter/_components/teach-panel'
 import { ToolGuide } from '@/app/(protected)/setter/_components/tool-guide'
 import { EscalarModal } from './escalar-modal'
 
@@ -29,6 +39,8 @@ type ConstruccionStepProps = {
   ultimoRechazo: Rechazo | null
   /** ISO de la última movida comercial del lead; null si todavía no respondió. */
   respondioDesde: string | null
+  /** B-beta: ISO del escalamiento "me trabé" vigente; null si no escaló. */
+  escaladoAt: string | null
 }
 
 /** Badge fijo del paso: la secuencia del shell es provisoria por diseño. */
@@ -41,20 +53,31 @@ function BadgeProvisorio() {
 }
 
 /**
+ * "Ya montó" hidratación-safe vía `useSyncExternalStore` con snapshots estables
+ * (true en cliente, false en server). Es la forma correcta de diferir un cálculo
+ * dependiente del reloj del cliente SIN setState-dentro-de-effect (que dispara
+ * cascading renders — regla `react-hooks/set-state-in-effect`). Server y primer
+ * render de cliente coinciden en `false` (sin hydration mismatch); recién después
+ * de hidratar pasa a `true` y se calcula el "hace X".
+ */
+const subscribeNoop = () => () => {}
+function useHidratado(): boolean {
+  return useSyncExternalStore(
+    subscribeNoop,
+    () => true,
+    () => false,
+  )
+}
+
+/**
  * Turnaround visible: el lead respondió y está esperando la demo. La condición
- * de diseño del tramo es resolverse en horas, no días. El "hace X" se calcula
- * recién montado: depende del reloj del cliente y en SSR produce hydration
- * mismatch (lo detectó el visual-qa de este sprint).
+ * de diseño del tramo es resolverse en horas, no días. El "hace X" depende del
+ * reloj del cliente → se difiere a post-hidratación con `useHidratado`.
  */
 function UrgenciaBanner({ respondioDesde }: { respondioDesde: string | null }) {
-  const [espera, setEspera] = useState<string | null>(null)
-  useEffect(() => {
-    if (respondioDesde) {
-      setEspera(formatEspera(new Date(respondioDesde), new Date()))
-    }
-  }, [respondioDesde])
-
+  const hidratado = useHidratado()
   if (!respondioDesde) return null
+  const espera = hidratado ? formatEspera(new Date(respondioDesde), new Date()) : null
   return (
     <Callout tone="warning" icon={AlarmClock}>
       <span className="font-medium">
@@ -164,9 +187,11 @@ export function ConstruccionStep({
   ficha,
   ultimoRechazo,
   respondioDesde,
+  escaladoAt,
 }: ConstruccionStepProps) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
+  const hidratado = useHidratado()
 
   const transicionar = (action: typeof iniciarConstruccion, mensajeOk: string) => {
     startTransition(async () => {
@@ -250,6 +275,8 @@ export function ConstruccionStep({
 
   // ── CONSTRUCCION: el shell guiado ──────────────────────────────────────────
   if (stage === 'CONSTRUCCION') {
+    const esperaEscalado =
+      escaladoAt && hidratado ? formatEspera(new Date(escaladoAt), new Date()) : null
     return (
       <Card padding="lg" className="space-y-5">
         <div className="flex flex-wrap items-center justify-between gap-3">
@@ -265,6 +292,8 @@ export function ConstruccionStep({
           Construí en Claude Design siguiendo estas fases en orden. La secuencia es preliminar:
           se va a refinar cuando se validen las primeras demos reales.
         </p>
+
+        <TeachPanel id="construccion" />
 
         <ToolGuide id="claudeDesign" />
 
@@ -309,10 +338,24 @@ export function ConstruccionStep({
           que llevás hecho.
         </p>
 
-        <div className="flex items-center justify-between gap-3 border-t border-white/[0.06] pt-4">
-          <p className="text-xs text-zinc-600">¿Algo no sale como la guía dice?</p>
-          <EscalarModal leadId={leadId} />
-        </div>
+        {escaladoAt ? (
+          <div className="flex flex-col gap-3 rounded-xl border border-rose-400/20 bg-rose-500/[0.06] p-4 sm:flex-row sm:items-center sm:justify-between">
+            <p className="flex items-start gap-2 text-xs leading-relaxed text-rose-100">
+              <LifeBuoy size={14} strokeWidth={1.5} className="mt-0.5 shrink-0 text-rose-300" />
+              <span>
+                <span className="font-semibold">Ya avisaste a Franco</span>
+                {esperaEscalado ? ` (hace ${esperaEscalado})` : ''}. Está al tanto — seguí con
+                otro lead mientras te responde.
+              </span>
+            </p>
+            <EscalarModal leadId={leadId} reescalar />
+          </div>
+        ) : (
+          <div className="flex items-center justify-between gap-3 border-t border-white/[0.06] pt-4">
+            <p className="text-xs text-zinc-600">¿Algo no sale como la guía dice?</p>
+            <EscalarModal leadId={leadId} />
+          </div>
+        )}
       </Card>
     )
   }

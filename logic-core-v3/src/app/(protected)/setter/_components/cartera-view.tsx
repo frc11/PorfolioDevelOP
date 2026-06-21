@@ -26,6 +26,7 @@ import {
   LeadCard,
 } from './home-sections'
 import { CarteraToolbar } from './cartera-toolbar'
+import { ContinuarCta } from './continuar-cta'
 import { ShortcutsHelp, type Atajo } from './shortcuts-help'
 import { useKeyboardShortcuts, type ShortcutMap } from './use-keyboard-shortcuts'
 
@@ -104,7 +105,11 @@ export function CarteraView({ leads }: { leads: HomeLead[] }) {
   // Atajos de teclado del operador de volumen (j/k mover, Enter abrir, r recorrer).
   // `r` dispara EXACTAMENTE el mismo `<Link>` que el botón "Recorrer" por click.
   const recorrerTrabajarRef = useRef<HTMLAnchorElement>(null)
-  const trabajarFirstId = particion.grupos.trabajar[0]?.id
+  // Punto de re-entrada: el tope del carril "trabajar" (ya ordenado por urgencia).
+  // Un solo origen para el carril "Continuá donde dejaste", el atajo `r` y el
+  // ancla oculta de abajo — todos apuntan al MISMO lead.
+  const continuar = particion.grupos.trabajar[0]
+  const trabajarFirstId = continuar?.id
   const bindings = useMemo<ShortcutMap>(
     () => ({
       j: () => moverFocoCard(1),
@@ -130,6 +135,10 @@ export function CarteraView({ leads }: { leads: HomeLead[] }) {
 
   return (
     <div className="space-y-8">
+      {/* Re-entrada: lleva directo a lo más urgente que hay para trabajar. Arriba
+          de todo para que el setter que vuelve no tenga que reconstruir su día. */}
+      {continuar && <ContinuarCta lead={continuar} />}
+
       {/* Marcador de solo lectura — resumen de un vistazo, no navega ni filtra. */}
       <section aria-label="Resumen de tu cartera, de solo lectura" className="space-y-3">
         <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-zinc-600">

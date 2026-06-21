@@ -9,12 +9,20 @@ import { EscalamientoInputSchema } from '@/app/(protected)/setter/_actions/dossi
 import { TextArea } from '@/app/(protected)/setter/_components/text-area'
 
 /**
- * B4 — Capa "si se traba": botón + modal de escalamiento a Franco. Manda un
- * Telegram con el contexto del lead (negocio, etapa, draft si hay) y lo que
- * el setter describe. Si Telegram falla, el flujo sigue: el mensaje le dice
- * al setter qué hacer (escribir directo), nunca un error crudo.
+ * B4 — Capa "si se traba": botón + modal de escalamiento a Franco. La action
+ * persiste la marca en el dossier (Franco la ve en el panel) y además manda un
+ * Telegram con el contexto del lead (negocio, etapa, draft si hay) + lo que el
+ * setter describe. Si Telegram falla, el flujo sigue: el pedido ya quedó
+ * registrado y el toast le dice al setter que escriba directo, nunca un error
+ * crudo. `reescalar` solo cambia el rótulo cuando ya hay un escalamiento vigente.
  */
-export function EscalarModal({ leadId }: { leadId: string }) {
+export function EscalarModal({
+  leadId,
+  reescalar = false,
+}: {
+  leadId: string
+  reescalar?: boolean
+}) {
   const [open, setOpen] = useState(false)
   const [descripcion, setDescripcion] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -37,10 +45,12 @@ export function EscalarModal({ leadId }: { leadId: string }) {
       setOpen(false)
       setDescripcion('')
       if (result.data.enviado) {
-        toast.success('Le avisamos a Franco por Telegram. Seguí con otro lead mientras te responde.')
+        toast.success(
+          'Le avisamos a Franco por Telegram y quedó registrado en el panel. Seguí con otro lead mientras te responde.',
+        )
       } else {
         toast.warning(
-          'No salió el aviso automático — escribile directo a Franco por WhatsApp con lo que contaste acá.',
+          'Guardamos tu pedido — Franco lo ve en el panel. El aviso por Telegram no salió: si es urgente, escribile directo.',
         )
       }
     })
@@ -54,7 +64,7 @@ export function EscalarModal({ leadId }: { leadId: string }) {
         icon={<LifeBuoy size={13} strokeWidth={1.5} />}
         onClick={() => setOpen(true)}
       >
-        Me trabé — avisar a Franco
+        {reescalar ? 'Avisar de nuevo' : 'Me trabé — avisar a Franco'}
       </Button>
 
       <Modal
