@@ -4,6 +4,7 @@ import bcrypt from 'bcryptjs'
 import { auth, unstable_update } from '@/auth'
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
+import { toErrorMessage } from '@/lib/action-utils'
 import {
   type ActionResult,
   UpdatePasswordSchema,
@@ -66,7 +67,7 @@ export async function updateProfileAction(
     return { success: true }
   } catch (error) {
     console.error('updateProfileAction error:', error)
-    return { success: false, error: 'No se pudo actualizar el perfil.' }
+    return { success: false, error: toErrorMessage(error, 'No se pudo actualizar el perfil.') }
   }
 }
 
@@ -93,7 +94,7 @@ export async function updateContactAction(
     return { success: true }
   } catch (error) {
     console.error('updateContactAction error:', error)
-    return { success: false, error: 'No se pudo actualizar el contacto.' }
+    return { success: false, error: toErrorMessage(error, 'No se pudo actualizar el contacto.') }
   }
 }
 
@@ -141,7 +142,7 @@ export async function updateNotificationPrefsAction(
     return { success: true }
   } catch (error) {
     console.error('updateNotificationPrefsAction error:', error)
-    return { success: false, error: 'No se pudieron guardar las preferencias.' }
+    return { success: false, error: toErrorMessage(error, 'No se pudieron guardar las preferencias.') }
   }
 }
 
@@ -178,7 +179,7 @@ export async function requestAccountDeletionAction(): Promise<ActionResult> {
     return { success: true }
   } catch (error) {
     console.error('requestAccountDeletionAction error:', error)
-    return { success: false, error: 'No se pudo crear la solicitud de eliminación.' }
+    return { success: false, error: toErrorMessage(error, 'No se pudo crear la solicitud de eliminación.') }
   }
 }
 
