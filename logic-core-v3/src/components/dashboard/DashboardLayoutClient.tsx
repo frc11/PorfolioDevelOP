@@ -1,13 +1,13 @@
 'use client'
 
 import { useState } from 'react'
-import { motion, AnimatePresence } from 'motion/react'
-import { Menu, LogOut } from 'lucide-react'
+import { Menu, X, LogOut } from 'lucide-react'
 import { SidebarNav } from './SidebarNav'
 import { NotificationCenter } from './NotificationCenter'
 import { PageTransition } from './PageTransition'
 import { signOutAction } from '@/actions/auth-actions'
 import { VersionBadge } from '@/components/layout/VersionBadge'
+import { zIndex } from '@/lib/design-tokens'
 import type { Notification } from '@prisma/client'
 
 interface DashboardLayoutClientProps {
@@ -40,144 +40,136 @@ export function DashboardLayoutClient({
     .join('') || companyName.slice(0, 2).toUpperCase()
 
   return (
-    <div className="flex h-screen bg-[#040506] text-zinc-100 selection:bg-cyan-500/30">
-      {/* Noise Texture */}
+    <div
+      className="fixed inset-0 bg-[#080a0c] text-zinc-100 selection:bg-cyan-500/30"
+      style={{ zIndex: zIndex.appShell }}
+    >
+      {/* Ambient glow — mismas capas que el admin (AdminLayoutClient) */}
       <div
-        className="pointer-events-none fixed inset-0 z-0 opacity-[0.015]"
-        style={{
-          backgroundImage:
-            'url("data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E")',
-        }}
-      />
-      {/* Ambient Glow */}
-      <div
-        className="pointer-events-none fixed inset-0 z-0"
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0"
         style={{
           background: [
-            'radial-gradient(circle at 15% 0%, rgba(6,182,212,0.08) 0%, transparent 40%)',
-            'radial-gradient(circle at 85% 100%, rgba(16,185,129,0.05) 0%, transparent 40%)',
+            'radial-gradient(ellipse 85% 48% at 20% 0%, rgba(6,182,212,0.08) 0%, transparent 60%)',
+            'radial-gradient(ellipse 40% 34% at 100% 100%, rgba(16,185,129,0.05) 0%, transparent 64%)',
+            'linear-gradient(180deg, rgba(255,255,255,0.02) 0%, rgba(255,255,255,0) 22%)',
           ].join(', '),
         }}
       />
 
-      {/* Desktop Sidebar */}
-      <div className="relative z-10 hidden md:flex">
+      {/* Scrim del drawer mobile */}
+      {mobileSidebarOpen && (
+        <button
+          type="button"
+          aria-label="Cerrar menú"
+          className="fixed inset-0 bg-black/70 backdrop-blur-sm lg:hidden"
+          style={{ zIndex: zIndex.appDrawerBackdrop }}
+          onClick={() => setMobileSidebarOpen(false)}
+        />
+      )}
+
+      {/* Sidebar — fijo, siempre montado; se desliza en mobile (patrón CSS del admin) */}
+      <aside
+        className={`fixed left-0 top-0 h-screen w-[240px] transition-transform lg:translate-x-0 ${
+          mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
+        style={{ zIndex: zIndex.appDrawer }}
+      >
+        <button
+          type="button"
+          onClick={() => setMobileSidebarOpen(false)}
+          className="absolute right-3 top-3 rounded-xl p-2 text-zinc-400 hover:bg-white/[0.05] lg:hidden"
+          style={{ zIndex: zIndex.appDrawerClose }}
+          aria-label="Cerrar menú"
+        >
+          <X className="h-5 w-5" strokeWidth={1.5} />
+        </button>
         <SidebarNav
           companyName={companyName}
           unreadMessages={unreadMessages}
           hotLeadsCount={hotLeadsCount}
           activeModuleSlugs={activeModuleSlugs}
         />
-      </div>
+      </aside>
 
-      {/* Mobile Sidebar Overlay */}
-      <AnimatePresence>
-        {mobileSidebarOpen && (
-          <>
-            <motion.div
-              key="backdrop"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="fixed inset-0 z-40 bg-black/70 backdrop-blur-sm md:hidden"
-              onClick={() => setMobileSidebarOpen(false)}
-            />
-            <motion.div
-              key="mobile-sidebar"
-              initial={{ x: -260 }}
-              animate={{ x: 0 }}
-              exit={{ x: -260 }}
-              transition={{ type: 'spring', stiffness: 320, damping: 32 }}
-              className="fixed left-0 top-0 bottom-0 z-50 md:hidden"
-            >
-              <SidebarNav
-                companyName={companyName}
-                unreadMessages={unreadMessages}
-                hotLeadsCount={hotLeadsCount}
-                activeModuleSlugs={activeModuleSlugs}
-                showCloseButton
-                onClose={() => setMobileSidebarOpen(false)}
-              />
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+      {/* Columna de contenido */}
+      <div className="relative flex h-full flex-col lg:pl-[240px]">
+        {banners && <div className="flex-shrink-0">{banners}</div>}
 
-      {/* Main column */}
-      <div className="relative z-10 flex flex-1 flex-col min-h-0 min-w-0 overflow-x-hidden">
-        {banners}
-
-        {/* Header */}
-        <header
-          className="relative z-20 flex h-14 sm:h-16 flex-shrink-0 items-center justify-between px-4 sm:px-8 gap-4"
-          style={{
-            borderBottom: '1px solid rgba(255,255,255,0.04)',
-            background: 'rgba(4,5,6,0.75)',
-            backdropFilter: 'blur(20px)',
-            WebkitBackdropFilter: 'blur(20px)',
-          }}
-        >
-          {/* Left: hamburger (mobile) + company info */}
-          <div className="flex items-center gap-3 min-w-0">
-            <button
-              onClick={() => setMobileSidebarOpen(true)}
-              aria-label="Abrir menú"
-              className="md:hidden flex h-9 w-9 items-center justify-center rounded-lg border border-white/[0.07] bg-zinc-800/40 text-zinc-400 hover:text-zinc-200 transition-colors flex-shrink-0"
-            >
-              <Menu size={18} strokeWidth={1.5} />
-            </button>
-
-            {/* Company avatar + name */}
-            <div className="flex items-center gap-2.5 min-w-0">
-              <div
-                className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-[11px] font-black tracking-wider text-cyan-400"
-                style={{
-                  background: 'rgba(6,182,212,0.12)',
-                  border: '1.5px solid rgba(6,182,212,0.28)',
-                  boxShadow: '0 0 16px rgba(6,182,212,0.12)',
-                }}
-              >
-                {initials}
-              </div>
-              <span className="truncate text-sm font-semibold tracking-wide text-zinc-200 hidden sm:block">
-                {companyName}
-              </span>
-            </div>
-          </div>
-
-          {/* Right: user + notifications + sign out */}
-          <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
-            {userDisplayName && (
-              <span className="hidden lg:block text-xs text-zinc-500 max-w-[160px] truncate">
-                {userDisplayName}
-              </span>
-            )}
-
-            <NotificationCenter initialNotifications={notifications} />
-
-            <form action={signOutAction}>
+        <div className="flex min-h-0 flex-1 flex-col p-3 sm:p-4">
+          {/* Topbar — card glass estilo AdminTopbar */}
+          <header className="flex h-16 flex-shrink-0 items-center justify-between gap-4 rounded-2xl border border-white/10 bg-white/5 px-4 backdrop-blur-xl sm:px-5">
+            {/* Left: hamburguesa (mobile) + empresa */}
+            <div className="flex min-w-0 items-center gap-3">
               <button
-                type="submit"
-                title="Cerrar sesión"
-                className="flex h-9 w-9 items-center justify-center rounded-lg text-zinc-500 transition-all hover:text-red-400 hover:bg-red-500/10 active:scale-95"
-                style={{ border: '1px solid rgba(255,255,255,0.06)' }}
+                type="button"
+                onClick={() => setMobileSidebarOpen(true)}
+                aria-label="Abrir menú"
+                className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg border border-white/[0.07] bg-zinc-800/40 text-zinc-400 transition-colors hover:text-zinc-200 lg:hidden"
               >
-                <LogOut size={14} strokeWidth={1.5} />
+                <Menu size={18} strokeWidth={1.5} />
               </button>
-            </form>
+
+              <div className="flex min-w-0 items-center gap-2.5">
+                <div
+                  className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-[11px] font-black tracking-wider text-cyan-400"
+                  style={{
+                    background: 'rgba(6,182,212,0.12)',
+                    border: '1.5px solid rgba(6,182,212,0.28)',
+                    boxShadow: '0 0 16px rgba(6,182,212,0.12)',
+                  }}
+                >
+                  {initials}
+                </div>
+                <span className="hidden truncate text-sm font-semibold tracking-wide text-zinc-200 sm:block">
+                  {companyName}
+                </span>
+              </div>
+            </div>
+
+            {/* Right: usuario + notificaciones + sign-out */}
+            <div className="flex flex-shrink-0 items-center gap-2 sm:gap-3">
+              {userDisplayName && (
+                <span className="hidden max-w-[160px] truncate text-xs text-zinc-500 lg:block">
+                  {userDisplayName}
+                </span>
+              )}
+
+              <NotificationCenter initialNotifications={notifications} />
+
+              <form action={signOutAction}>
+                <button
+                  type="submit"
+                  title="Cerrar sesión"
+                  className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-black/20 text-zinc-500 transition-all hover:bg-red-500/10 hover:text-red-400 active:scale-95"
+                >
+                  <LogOut size={15} strokeWidth={1.5} />
+                </button>
+              </form>
+            </div>
+          </header>
+
+          {/* Superficie principal. El backdrop-filter vive en una capa hermana
+              (no en <main>): aplicado sobre <main> lo convertiría en containing
+              block de todo position:fixed descendiente, atrapando los modales del
+              portal cliente dentro de la card en vez de anclarse al viewport. Al
+              mantenerlo fuera del árbol de {children}, los fixed vuelven al
+              viewport. Mismo patrón que el admin (AdminLayoutClient). */}
+          <div className="relative mt-4 min-h-0 flex-1">
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 rounded-[28px] border border-white/10 bg-white/[0.03] shadow-[0_24px_80px_rgba(0,0,0,0.35)] backdrop-blur-md"
+            />
+            <main className="absolute inset-0 overflow-y-auto overflow-x-hidden rounded-[28px] p-4 sm:p-6">
+              <PageTransition>{children}</PageTransition>
+            </main>
           </div>
-        </header>
 
-        {/* Content */}
-        <main className="relative flex-1 min-h-0 overflow-x-hidden overflow-y-auto w-full p-3 sm:p-6 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
-          <PageTransition>{children}</PageTransition>
-        </main>
-
-        <footer className="flex items-center justify-between border-t border-white/[0.05] px-4 py-2 text-xs text-zinc-600">
-          <span>© 2026 develOP</span>
-          <VersionBadge />
-        </footer>
+          <footer className="flex items-center justify-between px-1 py-2 text-xs text-zinc-700">
+            <span>develOP Portal</span>
+            <VersionBadge />
+          </footer>
+        </div>
       </div>
     </div>
   )
