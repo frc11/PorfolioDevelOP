@@ -89,6 +89,7 @@ export function DashboardLayoutClient({
           unreadMessages={unreadMessages}
           hotLeadsCount={hotLeadsCount}
           activeModuleSlugs={activeModuleSlugs}
+          onNavigate={() => setMobileSidebarOpen(false)}
         />
       </aside>
 
