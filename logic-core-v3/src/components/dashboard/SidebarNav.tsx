@@ -20,6 +20,7 @@ import {
 } from 'lucide-react'
 import { motion } from 'motion/react'
 import { BrandMark } from '@/components/brand/BrandMark'
+import { useReducedMotion } from '@/lib/use-reduced-motion'
 
 type NavItem = {
   href: string
@@ -84,6 +85,7 @@ export function SidebarNav({
   onNavigate,
 }: SidebarNavProps) {
   const pathname = usePathname()
+  const reduced = useReducedMotion()
   const hasPremium = activeModuleSlugs.some((slug) => PREMIUM_SLUGS.includes(slug))
 
   return (
@@ -122,14 +124,20 @@ export function SidebarNav({
                     <Link
                       href={href}
                       onClick={onNavigate}
-                      className={`group relative z-10 flex items-center gap-3 rounded-md px-3 py-2.5 text-sm transition-colors duration-200 ${
+                      className={`group relative z-10 flex items-center gap-3 rounded-md px-3 py-2.5 text-sm transition-colors duration-200 motion-reduce:transition-none ${
                         isActive
-                          ? 'font-medium text-cyan-400'
+                          ? 'text-cyan-400'
                           : 'text-zinc-400 hover:bg-white/[0.04] hover:text-zinc-100'
                       }`}
                     >
-                      <Icon size={16} strokeWidth={1.5} className="relative z-10 shrink-0" />
-                      <span className="relative z-10 flex-1">{label}</span>
+                      <Icon
+                        size={16}
+                        strokeWidth={1.5}
+                        className={`relative z-10 shrink-0 transition-transform motion-reduce:transition-none ${
+                          reduced ? '' : 'group-hover:scale-105'
+                        }`}
+                      />
+                      <span className="relative z-10 flex-1 font-medium">{label}</span>
 
                       {isMessages && unreadMessages > 0 && (
                         <span className="relative z-10 flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-cyan-500 px-1.5 text-[10px] font-bold text-black shadow-[0_0_10px_rgba(6,182,212,0.4)]">
