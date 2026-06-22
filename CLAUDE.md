@@ -9,7 +9,15 @@ Last updated: May 2026 | Stack: Next.js 16 · TypeScript strict · Tailwind 4 ·
 Never run `prisma migrate reset` — stop and report to user instead.
 Never use `any` in TypeScript. Zero exceptions.
 Never modify `src/components/3d/HeroArtifact.tsx`. It is frozen.
-Never use `router.push()` directly — always use `triggerTransition()` from TransitionContext.
+**Navegación:**
+- **Sitio público** (landing + marketing): usar siempre `triggerTransition()`
+  de `TransitionContext`. Nunca `router.push()` en el sitio público.
+- **Portales** (admin `/admin/*` y cliente `/dashboard/*`): usar `<Link>`
+  cuando sea posible; `router.refresh()` para revalidar tras mutaciones;
+  `redirect()` en server actions. `router.push()` en client component solo
+  cuando la navegación es imperativa post-submit y no hay alternativa; en ese
+  caso, documentar con un comentario inline el motivo. `triggerTransition()`
+  no aplica en portales (el Shutter no existe ahí).
 Never self-confirm a sprint works because it compiles. User verifies.
 Never touch files outside the current sprint scope.
 Never hardcode secrets, API keys, or credentials in code.
