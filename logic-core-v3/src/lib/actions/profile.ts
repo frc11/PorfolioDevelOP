@@ -236,6 +236,6 @@ export async function updatePasswordAction(
     return { success: true }
   } catch (error) {
     console.error('updatePasswordAction error:', error)
-    return { success: false, error: 'No se pudo actualizar la contraseña.' }
+    return { success: false, error: toErrorMessage(error, 'No se pudo actualizar la contraseña.') }
   }
 }
