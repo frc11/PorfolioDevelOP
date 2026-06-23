@@ -14,7 +14,12 @@ import {
   CURATED_COLORS,
 } from '@/modules/chatbot/shared/appearance'
 
-const quickReplyTextSchema = z.string().trim().min(1).max(40)
+// Cada quick reply lleva label + emoji opcional (espeja el shape del admin en
+// saveBotConfig). El cliente no expone promptToSend: se sintetiza = label.
+const quickReplySchema = z.object({
+  label: z.string().trim().min(1).max(40),
+  emoji: z.string().trim().max(8).optional(),
+})
 
 const UpdateBotAppearanceSchema = z
   .object({
@@ -33,16 +38,17 @@ const UpdateBotAppearanceSchema = z
     // mismo schema que el admin (saveBotConfig); el uploader comprime a ≤200×200.
     avatarImageUrl: avatarImageUrlSchema.optional(),
     welcomeMessage: z.string().trim().min(10).max(200).optional(),
-    quickReplies: z.array(quickReplyTextSchema).max(4).optional(),
+    quickReplies: z.array(quickReplySchema).max(4).optional(),
   })
   .strict()
 
 type UpdateBotAppearanceInput = z.infer<typeof UpdateBotAppearanceSchema>
 
-function toPublicQuickReplies(replies: string[]) {
+function toPublicQuickReplies(replies: { label: string; emoji?: string }[]) {
   return replies.map((reply) => ({
-    label: reply,
-    promptToSend: reply,
+    label: reply.label,
+    ...(reply.emoji ? { emoji: reply.emoji } : {}),
+    promptToSend: reply.label,
   }))
 }
 

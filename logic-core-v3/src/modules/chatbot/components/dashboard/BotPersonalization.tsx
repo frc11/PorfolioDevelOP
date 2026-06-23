@@ -60,6 +60,8 @@ interface BotPersonalizationProps {
   }
 }
 
+type ClientQuickReply = { label: string; emoji?: string }
+
 type BotPersonalizationState = {
   accentColor: CuratedColor
   accentSecondary: string | null
@@ -69,7 +71,7 @@ type BotPersonalizationState = {
   avatarEmoji: string | null
   avatarImageUrl: string | null
   welcomeMessage: string
-  quickReplies: string[]
+  quickReplies: ClientQuickReply[]
 }
 
 const COLOR_LABELS: Record<CuratedColor, string> = {
@@ -91,26 +93,24 @@ function isClientAvatarStyle(value: string): value is ClientAvatarStyle {
   return (CLIENT_AVATAR_STYLES as readonly string[]).includes(value)
 }
 
-function normalizeQuickReplyTexts(value: unknown): string[] {
+function normalizeQuickReplies(value: unknown): ClientQuickReply[] {
   if (!Array.isArray(value)) return []
 
-  const replies: string[] = []
+  const replies: ClientQuickReply[] = []
 
   for (const item of value) {
-    const text =
+    const record =
+      item && typeof item === 'object' ? (item as Record<string, unknown>) : null
+    const rawLabel =
       typeof item === 'string'
         ? item
-        : item && typeof item === 'object'
-          ? String(
-              (item as Record<string, unknown>).label ??
-                (item as Record<string, unknown>).promptToSend ??
-                (item as Record<string, unknown>).prompt ??
-                '',
-            )
-          : ''
+        : String(record?.label ?? record?.promptToSend ?? record?.prompt ?? '')
 
-    const trimmed = text.trim()
-    if (trimmed) replies.push(trimmed.slice(0, 40))
+    const label = rawLabel.trim().slice(0, 40)
+    if (!label) continue
+
+    const rawEmoji = typeof record?.emoji === 'string' ? record.emoji.trim() : ''
+    replies.push(rawEmoji ? { label, emoji: rawEmoji } : { label })
     if (replies.length >= 4) break
   }
 
@@ -127,7 +127,7 @@ function normalizeBotState(bot: BotPersonalizationProps['bot']): BotPersonalizat
     avatarEmoji: bot.avatarEmoji,
     avatarImageUrl: bot.avatarImageUrl,
     welcomeMessage: bot.welcomeMessage.slice(0, 200),
-    quickReplies: normalizeQuickReplyTexts(bot.quickReplies),
+    quickReplies: normalizeQuickReplies(bot.quickReplies),
   }
 }
 
@@ -386,20 +386,30 @@ function QuickRepliesEditor({
   quickReplies,
   onChange,
 }: {
-  quickReplies: string[]
-  onChange: (replies: string[]) => void
+  quickReplies: ClientQuickReply[]
+  onChange: (replies: ClientQuickReply[]) => void
 }) {
   const [newReply, setNewReply] = useState('')
 
   function addReply() {
     const trimmed = newReply.trim().slice(0, 40)
     if (!trimmed || quickReplies.length >= 4) return
-    onChange([...quickReplies, trimmed])
+    onChange([...quickReplies, { label: trimmed }])
     setNewReply('')
   }
 
-  function updateReply(index: number, value: string) {
-    onChange(quickReplies.map((reply, i) => (i === index ? value.slice(0, 40) : reply)))
+  function updateLabel(index: number, value: string) {
+    const label = value.slice(0, 40)
+    onChange(quickReplies.map((reply, i) => (i === index ? { ...reply, label } : reply)))
+  }
+
+  function updateEmoji(index: number, value: string | null) {
+    onChange(
+      quickReplies.map((reply, i) =>
+        // emoji '' / null → undefined: mantiene el JSON estable para el dirty-state.
+        i === index ? { label: reply.label, emoji: value || undefined } : reply,
+      ),
+    )
   }
 
   function removeReply(index: number) {
@@ -411,10 +421,17 @@ function QuickRepliesEditor({
       {quickReplies.length > 0 && (
         <div className="space-y-2">
           {quickReplies.map((reply, index) => (
-            <div key={`${reply}-${index}`} className="grid grid-cols-[minmax(0,1fr)_40px] gap-2">
+            <div
+              key={index}
+              className="grid grid-cols-[minmax(140px,180px)_minmax(0,1fr)_40px] gap-2"
+            >
+              <EmojiPickerField
+                value={reply.emoji ?? null}
+                onChange={(value) => updateEmoji(index, value)}
+              />
               <Input
-                value={reply}
-                onChange={(event) => updateReply(index, event.target.value)}
+                value={reply.label}
+                onChange={(event) => updateLabel(index, event.target.value)}
                 maxLength={40}
                 aria-label={`Respuesta rapida ${index + 1}`}
               />
@@ -459,7 +476,9 @@ function QuickRepliesEditor({
         </div>
       )}
 
-      <p className="text-xs text-zinc-500">{quickReplies.length}/4 respuestas rapidas</p>
+      <p className="text-xs text-zinc-500">
+        {quickReplies.length}/4 respuestas rapidas. Sumá un emoji con el selector de la izquierda.
+      </p>
     </div>
   )
 }
@@ -467,28 +486,28 @@ function QuickRepliesEditor({
 /**
  * CC.4 — Arma el `BotPreviewState` para alimentar el preview compartido.
  *
- * Merge: cambios en vivo del cliente (state) + campos visuales que el admin
- * ya configuró (bot prop). El cliente NUNCA edita los del admin, pero sí los
- * VE reflejados en el preview para que sea espejo fiel del widget real.
+ * Merge: cambios en vivo del cliente (state) + los campos visuales que solo el
+ * admin configura (borderRadius, fontStyle, etc., vía bot prop). El cliente no
+ * edita esos, pero los VE en el preview para que sea espejo fiel del widget.
  *
- * Quick replies: si el cliente NO los modificó (state coincide con el original
- * normalizado de DB), mostramos el JSON original con emojis incluidos —
- * paridad fiel con el admin. Si SÍ los modificó, mostramos sus strings sin
- * emoji (refleja lo que va a guardarse — el update borra emojis por diseño
- * de `toPublicQuickReplies` en `updateBotAppearance`).
+ * Quick replies: el cliente edita label + emoji por respuesta. Si no los
+ * modificó (state coincide con el original normalizado de DB) mostramos el JSON
+ * original; si los modificó, mostramos sus {label, emoji} — lo mismo que se
+ * guarda (toPublicQuickReplies ahora preserva el emoji).
  */
 function buildPreviewState(
   state: BotPersonalizationState,
   bot: BotPersonalizationProps['bot'],
 ): BotPreviewState {
-  const originalNormalized = normalizeQuickReplyTexts(bot.quickReplies)
+  const originalNormalized = normalizeQuickReplies(bot.quickReplies)
   const clientEditedReplies =
     JSON.stringify(state.quickReplies) !== JSON.stringify(originalNormalized)
 
   const quickReplies: BotPreviewState['quickReplies'] = clientEditedReplies
-    ? state.quickReplies.map((label, index) => ({
-        id: `${index}-${label}`,
-        label,
+    ? state.quickReplies.map((reply, index) => ({
+        id: `${index}-${reply.label}`,
+        label: reply.label,
+        emoji: reply.emoji,
       }))
     : extractQuickRepliesFromJson(bot.quickReplies)
 
