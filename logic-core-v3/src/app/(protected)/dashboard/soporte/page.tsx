@@ -5,7 +5,7 @@ import { redirect } from 'next/navigation'
 import { resolveOrgId } from '@/lib/preview'
 import { Clock, Headphones, Users } from 'lucide-react'
 import { NewTicketModal } from '@/components/dashboard/NewTicketModal'
-import { SoporteTabsClient } from '@/components/dashboard/SoporteTabsClient'
+import { SoporteBoard } from '@/components/dashboard/SoporteBoard'
 import { PageHeader, StatCard } from '@/components/ui'
 import { adminHoverCls } from '@/lib/hover'
 
@@ -54,8 +54,8 @@ export default async function SoportePage() {
   const resolvedTickets = serialized.filter((t) => t.status === 'RESOLVED')
 
   return (
-    <div className="flex flex-col gap-6 w-full">
-      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+    <div className="flex w-full flex-col gap-5">
+      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
         <PageHeader
           eyebrow="Soporte"
           title="Centro de Soporte"
@@ -67,7 +67,7 @@ export default async function SoportePage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <StatCard
           label="Tickets abiertos"
           value={openTicketsCount}
@@ -93,7 +93,7 @@ export default async function SoportePage() {
         />
       </div>
 
-      <SoporteTabsClient activeTickets={activeTickets} resolvedTickets={resolvedTickets} />
+      <SoporteBoard activeTickets={activeTickets} resolvedTickets={resolvedTickets} />
     </div>
   )
 }
