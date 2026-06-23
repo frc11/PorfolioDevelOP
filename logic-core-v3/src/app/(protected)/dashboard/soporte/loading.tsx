@@ -3,7 +3,7 @@ import { StatCardSkeleton, CardSkeleton } from '@/components/ui/skeletons'
 
 export default function SoporteLoading() {
   return (
-    <div className="flex flex-col gap-6 max-w-5xl mx-auto w-full">
+    <div className="flex flex-col gap-6 w-full">
       <div className="flex items-center gap-3 pt-2">
         <Skeleton className="h-11 w-11 rounded-xl" />
         <div>

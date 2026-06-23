@@ -108,7 +108,7 @@ export default async function TicketDetailPage({
   const status = STATUS_MAP[ticket.status] ?? STATUS_MAP.OPEN
 
   return (
-    <div className="flex flex-col max-w-5xl mx-auto w-full gap-5">
+    <div className="flex flex-col w-full gap-5">
       {/* ── Header ──────────────────────────────────────────── */}
       <div className="flex flex-col sm:flex-row sm:items-center gap-4">
         <Link
