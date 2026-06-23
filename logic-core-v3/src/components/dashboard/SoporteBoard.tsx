@@ -126,7 +126,7 @@ function TicketCard({ ticket, idx }: { ticket: TicketListItem; idx: number }) {
 
         {/* Footer: tiempo · mensajes */}
         <div className="mt-4 flex items-center gap-2 border-t border-white/10 pt-3 text-[10px] font-medium text-zinc-500">
-          <Clock size={9} />
+          <Clock size={9} strokeWidth={1.5} />
           <span>{timeAgo(ticket.createdAt)}</span>
           <span>·</span>
           <span>
@@ -134,6 +134,7 @@ function TicketCard({ ticket, idx }: { ticket: TicketListItem; idx: number }) {
           </span>
           <ChevronRight
             size={12}
+            strokeWidth={1.5}
             className="ml-auto transition-colors group-hover:text-cyan-400"
           />
         </div>
@@ -197,7 +198,7 @@ export function SoporteBoard({ activeTickets, resolvedTickets }: Props) {
     <div className="flex min-h-0 flex-1 flex-col gap-5">
       {/* Tablero de 3 columnas. En desktop llena el alto disponible (cada columna
           scrollea internamente); en mobile (<lg) las columnas se apilan y la página scrollea. */}
-      <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 lg:grid-cols-3">
+      <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 lg:grid-cols-3 lg:grid-rows-1">
         {COLUMNS.map((column) => (
           <TicketColumn key={column.key} column={column} tickets={byStatus[column.key]} />
         ))}
@@ -241,7 +242,7 @@ export function SoporteBoard({ activeTickets, resolvedTickets }: Props) {
               <div
                 className={`shrink-0 rounded-xl border border-white/5 bg-black/20 p-2.5 transition-transform group-hover:scale-110 ${item.color}`}
               >
-                <item.Icon size={18} />
+                <item.Icon size={18} strokeWidth={1.5} />
               </div>
               <div className="min-w-0">
                 <span className="block text-xs font-bold text-zinc-200 transition-colors group-hover:text-white">
