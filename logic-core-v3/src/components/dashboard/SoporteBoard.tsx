@@ -73,6 +73,10 @@ const COLUMNS: ColumnDef[] = [
 
 // Máx de cards mostradas en la vista de columna; el resto vive en el overview.
 const MAX_VISIBLE = 2
+// Alto máximo del cuerpo de cada columna (px). Mantiene las columnas bajas para que los
+// recursos de autogestión entren completos dentro del fold; muestra ~1 card entera + la 2da
+// desvaneciéndose. Tunable: subir/bajar si en una pantalla puntual sobra/falta lugar.
+const COLUMN_BODY_MAX_H = 220
 // Fade del cuerpo: réplica EXACTA del pipeline admin — mask-image que desvanece el contenido
 // a transparente revelando el fondo REAL de la columna (se funde con la superficie, sin color
 // arbitrario tipo #141618). Sólo se aplica cuando hay overflow (2+ tickets).
@@ -197,11 +201,12 @@ function TicketColumn({
           los recursos en el fold. */}
       <div
         className="mt-3 space-y-2.5 overflow-hidden px-2 py-1"
-        style={
-          overflows
+        style={{
+          maxHeight: COLUMN_BODY_MAX_H,
+          ...(overflows
             ? { maskImage: COLUMN_BODY_FADE, WebkitMaskImage: COLUMN_BODY_FADE }
-            : undefined
-        }
+            : null),
+        }}
       >
         {tickets.length > 0 ? (
           visibleTickets.map((ticket, idx) => (
