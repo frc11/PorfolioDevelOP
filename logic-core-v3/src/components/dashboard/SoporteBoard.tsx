@@ -162,7 +162,7 @@ function TicketColumn({
   const hasMore = tickets.length > MAX_VISIBLE
 
   return (
-    <section className="flex min-w-0 flex-col rounded-[26px] border border-white/10 bg-white/[0.04] p-4 backdrop-blur-xl">
+    <section className="relative flex min-w-0 flex-col rounded-[26px] border border-white/10 bg-white/[0.04] p-4 backdrop-blur-xl">
       {/* Header de columna con tinte por estado — click abre el overview de la categoría */}
       <button
         type="button"
@@ -188,7 +188,7 @@ function TicketColumn({
           el 2do ticket. El overlay NO recorta el ring del hover de la card (el problema del
           mask-image, que clipeaba el borde): la card conserva su ring completo. px-1 da aire
           al hover. */}
-      <div className="relative mt-3 flex-1 px-1">
+      <div className="mt-3 flex-1 px-1">
         <div className="space-y-2.5 pb-1">
           {tickets.length > 0 ? (
             visibleTickets.map((ticket, idx) => (
@@ -204,27 +204,28 @@ function TicketColumn({
             />
           )}
         </div>
-
-        {hasMore && (
-          <>
-            {/* Overlay del fade — capa absoluta SOBRE la 2da card (no la enmascara), así el
-                ring del hover queda completo. Funde al color compuesto de la columna. */}
-            <div
-              aria-hidden
-              className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[#141618] via-[#141618]/80 to-transparent"
-            />
-            <div className="pointer-events-none absolute inset-x-0 bottom-0 flex justify-center pb-1">
-              <button
-                type="button"
-                onClick={onOpenOverview}
-                className="pointer-events-auto rounded-full border border-white/10 bg-white/[0.06] px-3 py-1.5 text-[11px] font-semibold text-cyan-300/90 shadow-lg backdrop-blur-md transition-colors hover:bg-cyan-400/10 hover:text-cyan-200"
-              >
-                Ver más ({tickets.length})
-              </button>
-            </div>
-          </>
-        )}
       </div>
+
+      {/* Fade del "Ver más": gradiente SUAVE hacia la superficie de la columna, anclado al
+          fondo de la <section> y con sus mismas esquinas redondeadas (rounded-b-[26px]) — sin
+          rectángulo duro. Capa aparte que NO enmascara la card → ring del hover completo. */}
+      {hasMore && (
+        <>
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-x-0 bottom-0 h-20 rounded-b-[26px] bg-gradient-to-t from-[#141618] to-transparent"
+          />
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 flex justify-center pb-3">
+            <button
+              type="button"
+              onClick={onOpenOverview}
+              className="pointer-events-auto rounded-full border border-white/10 bg-white/[0.06] px-3 py-1.5 text-[11px] font-semibold text-cyan-300/90 shadow-lg backdrop-blur-md transition-colors hover:bg-cyan-400/10 hover:text-cyan-200"
+            >
+              Ver más ({tickets.length})
+            </button>
+          </div>
+        </>
+      )}
     </section>
   )
 }
