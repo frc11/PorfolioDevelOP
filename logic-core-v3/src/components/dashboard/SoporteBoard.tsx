@@ -243,7 +243,7 @@ export function SoporteBoard({ activeTickets, resolvedTickets }: Props) {
   const overviewTickets = overview ? byStatus[overview] : []
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-3">
       {/* Tablero de 3 columnas (Abiertos · En curso · Resueltos). Columnas de igual alto
           (grid stretch); cada una muestra máx 2 tickets. En mobile (<lg) se apilan. */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
@@ -316,7 +316,7 @@ export function SoporteBoard({ activeTickets, resolvedTickets }: Props) {
           ].map((item) => (
             <button
               key={item.label}
-              className={`group flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.04] p-3.5 text-left shadow-lg backdrop-blur-xl hover:border-white/20 hover:bg-white/[0.07] ${adminHoverCls}`}
+              className={`group flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.04] p-3 text-left shadow-lg backdrop-blur-xl hover:border-white/20 hover:bg-white/[0.07] ${adminHoverCls}`}
             >
               <div
                 className={`shrink-0 rounded-xl border border-white/5 bg-black/20 p-2.5 transition-transform group-hover:scale-110 ${item.color}`}

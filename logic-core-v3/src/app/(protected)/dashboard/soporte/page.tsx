@@ -76,7 +76,7 @@ export default async function SoportePage() {
           value={openTicketsCount}
           icon={Headphones}
           accent="cyan"
-          className={`${adminHoverCls} p-4`}
+          className={`${adminHoverCls} p-3.5`}
         />
         <StatCard
           label="SLA horario laboral"
@@ -84,7 +84,7 @@ export default async function SoportePage() {
           icon={Clock}
           accent="emerald"
           subtitle="Lun-Vie 9-19hs ART"
-          className={`${adminHoverCls} p-4`}
+          className={`${adminHoverCls} p-3.5`}
         />
         <StatCard
           label="Tu equipo de soporte"
@@ -92,7 +92,7 @@ export default async function SoportePage() {
           icon={Users}
           accent="zinc"
           subtitle="Mensajes, tickets o WhatsApp"
-          className={`${adminHoverCls} p-4`}
+          className={`${adminHoverCls} p-3.5`}
         />
       </div>
 
