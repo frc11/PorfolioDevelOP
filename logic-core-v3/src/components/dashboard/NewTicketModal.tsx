@@ -8,7 +8,7 @@ import { createTicketAction } from '@/lib/tickets/actions'
 import { TicketCategory, TicketPriority } from '@/lib/prisma-enums'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { Select } from '@/components/ui'
+import { Button, Select } from '@/components/ui'
 
 const ticketSchema = z.object({
   title: z.string().min(5, 'El titulo debe tener al menos 5 caracteres.'),
@@ -70,26 +70,13 @@ export function NewTicketModal() {
 
   return (
     <>
-      <motion.button
+      <Button
+        variant="primary"
         onClick={() => setIsOpen(true)}
-        whileHover="hover"
-        whileTap={{ scale: 0.98 }}
-        variants={{
-          hover: { scale: 1.05 },
-        }}
-        className="group relative flex items-center gap-2.5 overflow-hidden rounded-xl bg-gradient-to-br from-cyan-400 to-blue-600 px-6 py-3 text-[11px] font-black uppercase tracking-[0.2em] text-black shadow-[0_0_20px_rgba(6,182,212,0.4)] transition-all duration-300 hover:shadow-[0_0_35px_rgba(6,182,212,0.6)] hover:brightness-110"
+        icon={<MessageSquarePlus size={16} strokeWidth={1.5} />}
       >
-        <motion.div
-          variants={{
-            hover: { rotate: 90 },
-          }}
-          transition={{ type: 'spring', stiffness: 200 }}
-        >
-          <MessageSquarePlus size={18} />
-        </motion.div>
-        <span>Abrir Nuevo Ticket</span>
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-[35deg] -translate-x-full group-hover:animate-[shine_1.5s_infinite]" />
-      </motion.button>
+        Abrir Nuevo Ticket
+      </Button>
 
       <AnimatePresence>
         {isOpen && (
