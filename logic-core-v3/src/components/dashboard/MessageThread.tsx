@@ -37,7 +37,7 @@ function formatTime(date: Date) {
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const TEXTAREA_MAX_ROWS = 4
+const TEXTAREA_MAX_ROWS = 3
 
 const QUICK_REPLIES = [
   {
