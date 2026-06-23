@@ -242,7 +242,7 @@ export function MessageThread({ messages, organizationName }: MessageThreadProps
                 initial={{ opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3 }}
-                className="flex justify-start"
+                className={`flex ${msg.fromAdmin ? 'justify-start' : 'justify-end'}`}
               >
                 <motion.div
                   whileHover={
