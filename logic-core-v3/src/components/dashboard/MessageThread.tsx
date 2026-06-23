@@ -298,7 +298,8 @@ export function MessageThread({ messages }: MessageThreadProps) {
             type="submit"
             disabled={isPending || !inputValue.trim()}
             animate={inputValue.trim() ? { y: [0, -3, 0], scale: [1, 1.08, 1] } : {}}
-            transition={{ duration: 0.3, type: 'spring', stiffness: 300 }}
+            // tween soporta multi-keyframe; spring solo soporta 2 keyframes en motion/react
+            transition={{ duration: 0.3, type: 'tween', ease: 'easeInOut' }}
             className={`flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl transition-all disabled:opacity-30 disabled:grayscale ${
               inputValue.trim()
                 ? 'bg-cyan-500 text-black shadow-[0_0_15px_rgba(6,182,212,0.4)] hover:scale-105'
