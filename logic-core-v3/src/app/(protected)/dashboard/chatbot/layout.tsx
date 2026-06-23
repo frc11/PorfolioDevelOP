@@ -1,4 +1,3 @@
-import { redirect } from 'next/navigation'
 import { unstable_cache } from 'next/cache'
 import { Bot } from 'lucide-react'
 import { getClientChatbotSession, countHotNewLeadsForOrg } from '@/modules/chatbot/index.server'
@@ -25,8 +24,12 @@ export default async function ChatbotDashboardLayout({
 }) {
   const session = await getClientChatbotSession()
 
+  // Sin bot configurado NO redirigimos: dejamos que la page muestre el estado de
+  // activación (ChatbotUpsellLanding, una landing full-section autónoma). No
+  // renderizamos las tabs porque no hay bot al que apunten. Si tampoco hay
+  // org/sesión, la propia page hace redirect('/login').
   if (!session) {
-    redirect('/dashboard')
+    return <div className="flex flex-col gap-6">{children}</div>
   }
 
   const [hotLeadsCount, plan] = await Promise.all([
