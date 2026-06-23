@@ -3,6 +3,7 @@ import Link from 'next/link'
 import type { KnowledgeBase } from '@prisma/client'
 import { Card } from '@/components/ui/Card'
 import { Section } from '@/components/ui/Section'
+import { adminHoverCls } from '@/lib/hover'
 
 interface ClientKnowledgeViewProps {
   kb: KnowledgeBase
@@ -76,7 +77,7 @@ function FieldBlock({ field, content }: { field: FieldDef; content: string }) {
   const isEmpty = content.trim().length === 0
 
   return (
-    <Card padding="lg" className="space-y-3">
+    <Card padding="lg" className={`space-y-3 ${adminHoverCls}`}>
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <div className="min-w-0 space-y-0.5">
           <h3 className="text-sm font-semibold text-zinc-100">{field.title}</h3>
