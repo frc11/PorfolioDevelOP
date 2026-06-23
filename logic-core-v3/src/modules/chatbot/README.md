@@ -46,7 +46,7 @@ This module follows strict boundary rules to enable future extraction:
 - `/admin/chatbot/config` — bot config editor per org
 
 ### Dashboard pages (in Logic Core)
-- `/dashboard/leads` — captured leads view
+- `/dashboard/chatbot/leads` — captured leads view
 
 ## How to Extract This Module (Phase 1.5+)
 
