@@ -71,6 +71,12 @@ const COLUMNS: ColumnDef[] = [
   },
 ]
 
+// Máx de cards mostradas en la vista de columna; el resto vive en el overview.
+const MAX_VISIBLE = 2
+// Fade del 2do ticket: desvanece el contenido (no un bloque opaco) revelando el fondo
+// de la columna. Mismo mecanismo (mask-image) que la columna del pipeline admin.
+const COLUMN_FADE = 'linear-gradient(to bottom, #000 calc(100% - 56px), transparent)'
+
 function timeAgo(iso: string): string {
   const secs = Math.floor((Date.now() - new Date(iso).getTime()) / 1000)
   if (secs < 60) return 'hace un momento'
@@ -153,8 +159,11 @@ function TicketColumn({
   tickets: TicketListItem[]
   onOpenOverview: () => void
 }) {
+  const visibleTickets = tickets.slice(0, MAX_VISIBLE)
+  const hasMore = tickets.length > MAX_VISIBLE
+
   return (
-    <section className="flex h-full min-h-0 min-w-0 flex-col rounded-[26px] border border-white/10 bg-white/[0.04] p-4 backdrop-blur-xl">
+    <section className="flex min-w-0 flex-col rounded-[26px] border border-white/10 bg-white/[0.04] p-4 backdrop-blur-xl">
       {/* Header de columna con tinte por estado — click abre el overview de la categoría */}
       <button
         type="button"
@@ -176,18 +185,38 @@ function TicketColumn({
         </div>
       </button>
 
-      {/* Cuerpo: altura fija (flex-1) con scroll interno. px-1 da aire al hover:scale. */}
-      <div className="mt-4 min-h-0 flex-1 space-y-3 overflow-y-auto px-1 pb-1">
-        {tickets.length > 0 ? (
-          tickets.map((ticket, idx) => <TicketCard key={ticket.id} ticket={ticket} idx={idx} />)
-        ) : (
-          <EmptyState
-            icon={Inbox}
-            title={column.emptyTitle}
-            description={column.emptyDescription}
-            variant="subtle"
-            size="sm"
-          />
+      {/* Cuerpo: máx 2 cards. Si hay más, el 2do se desvanece (mask) y aparece "Ver más".
+          px-1 da aire al hover de la card. */}
+      <div className="relative mt-4 flex-1 px-1">
+        <div
+          className="space-y-3 pb-1"
+          style={hasMore ? { maskImage: COLUMN_FADE, WebkitMaskImage: COLUMN_FADE } : undefined}
+        >
+          {tickets.length > 0 ? (
+            visibleTickets.map((ticket, idx) => (
+              <TicketCard key={ticket.id} ticket={ticket} idx={idx} />
+            ))
+          ) : (
+            <EmptyState
+              icon={Inbox}
+              title={column.emptyTitle}
+              description={column.emptyDescription}
+              variant="subtle"
+              size="sm"
+            />
+          )}
+        </div>
+
+        {hasMore && (
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 flex justify-center pb-1">
+            <button
+              type="button"
+              onClick={onOpenOverview}
+              className="pointer-events-auto rounded-full border border-white/10 bg-white/[0.06] px-3 py-1.5 text-[11px] font-semibold text-cyan-300/90 shadow-lg backdrop-blur-md transition-colors hover:bg-cyan-400/10 hover:text-cyan-200"
+            >
+              Ver más ({tickets.length})
+            </button>
+          </div>
         )}
       </div>
     </section>
@@ -212,10 +241,10 @@ export function SoporteBoard({ activeTickets, resolvedTickets }: Props) {
   const overviewTickets = overview ? byStatus[overview] : []
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col gap-5">
-      {/* Tablero de 3 columnas. En desktop llena el alto disponible (cada columna
-          scrollea internamente); en mobile (<lg) las columnas se apilan y la página scrollea. */}
-      <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 lg:grid-cols-3 lg:grid-rows-1">
+    <div className="flex flex-col gap-5">
+      {/* Tablero de 3 columnas (Abiertos · En curso · Resueltos). Columnas de igual alto
+          (grid stretch); cada una muestra máx 2 tickets. En mobile (<lg) se apilan. */}
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         {COLUMNS.map((column) => (
           <TicketColumn
             key={column.key}
@@ -253,12 +282,11 @@ export function SoporteBoard({ activeTickets, resolvedTickets }: Props) {
         )}
       </Modal>
 
-      {/* Recursos de autogestión — fijo al pie, siempre visible (no obliga a scrollear). */}
+      {/* Recursos de autogestión */}
       <motion.div
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.25 }}
-        className="shrink-0"
       >
         <h4 className="mb-3 px-1 text-[10px] font-medium uppercase tracking-[0.2em] text-zinc-500">
           Recursos de Autogestión
