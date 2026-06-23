@@ -99,7 +99,9 @@ function TicketCard({ ticket, idx }: { ticket: TicketListItem; idx: number }) {
     >
       <Link
         href={`/dashboard/soporte/${ticket.id}`}
-        className="group block rounded-[22px] border border-white/10 bg-white/5 p-4 shadow-[0_18px_40px_rgba(0,0,0,0.22)] transition-all hover:scale-[1.02] hover:border-cyan-400/20 hover:bg-white/[0.07] motion-reduce:hover:scale-100"
+        // Hover acotado del admin (adminHoverCls: scale 1.015 + shadow + ring, contenido
+        // dentro del padding de la columna) — sin el scale grande que desbordaba el borde.
+        className={`group block rounded-[22px] border border-white/10 bg-white/5 p-4 shadow-[0_18px_40px_rgba(0,0,0,0.22)] hover:border-cyan-400/20 hover:bg-white/[0.07] ${adminHoverCls}`}
       >
         {/* Badges: prioridad + categoría + id */}
         <div className="flex flex-wrap items-center gap-1.5">
