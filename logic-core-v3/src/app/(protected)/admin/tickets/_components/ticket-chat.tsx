@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Loader2, MessageSquareText } from 'lucide-react'
 import type { Role, TicketStatus } from '@prisma/client'
 import { Select } from '@/components/ui'
-import { updateTicketStatus } from '../_actions/ticket.actions'
+import { updateTicketStatusAction } from '@/lib/tickets/actions'
 import { TicketReplyForm } from './ticket-reply-form'
 import { HoverScale } from './hover-scale'
 
@@ -78,7 +78,7 @@ export function TicketChat({ ticket }: TicketChatProps) {
     setStatus(nextStatus)
 
     startTransition(async () => {
-      const result = await updateTicketStatus(ticket.id, nextStatus)
+      const result = await updateTicketStatusAction(ticket.id, nextStatus)
 
       if (!result.success) {
         setStatus(previousStatus)

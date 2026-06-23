@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { CheckCircle2, Loader2 } from 'lucide-react'
-import { resolveTicketClientAction } from '@/actions/ticket-actions'
+import { resolveTicketClientAction } from '@/lib/tickets/actions'
 import { useRouter } from 'next/navigation'
 
 export function ResolveTicketButton({ ticketId }: { ticketId: string }) {

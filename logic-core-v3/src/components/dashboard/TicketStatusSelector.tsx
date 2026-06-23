@@ -2,7 +2,7 @@
 
 import { useTransition } from 'react'
 import { Loader2 } from 'lucide-react'
-import { updateTicketStatusDashboardAction } from '@/actions/ticket-actions'
+import { updateTicketStatusAction } from '@/lib/tickets/actions'
 
 type TicketStatus = 'OPEN' | 'IN_PROGRESS' | 'RESOLVED'
 
@@ -18,7 +18,7 @@ export function TicketStatusSelector({
   const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const next = e.target.value as TicketStatus
     startTransition(async () => {
-      await updateTicketStatusDashboardAction(ticketId, next)
+      await updateTicketStatusAction(ticketId, next)
     })
   }
 

@@ -1,15 +1,12 @@
 'use server'
 
 import { TicketStatus, type Role } from '@prisma/client'
-import { revalidatePath } from 'next/cache'
 import { prisma } from '@/lib/prisma'
 import { requireSuperAdmin } from '@/lib/auth-guards'
 import { fail, ok, type ActionResult } from '@/lib/action-utils'
 import {
   GetTicketByIdSchema,
   ListTicketsSchema,
-  ReplyToTicketSchema,
-  UpdateTicketStatusSchema,
 } from './ticket.schemas'
 
 type TicketStatusFilter = TicketStatus | 'CLOSED' | null | undefined
@@ -26,18 +23,6 @@ function normalizeTicketStatus(status: TicketStatusFilter): TicketStatus | undef
   return Object.values(TicketStatus).includes(status as TicketStatus)
     ? (status as TicketStatus)
     : undefined
-}
-
-function revalidateTicketPaths(ticketId?: string) {
-  revalidatePath('/admin/tickets')
-
-  if (ticketId) {
-    revalidatePath(`/admin/tickets/${ticketId}`)
-    revalidatePath(`/dashboard/soporte/${ticketId}`)
-  }
-
-  revalidatePath('/dashboard')
-  revalidatePath('/dashboard/soporte')
 }
 
 export async function listTickets(filters?: {
@@ -202,78 +187,3 @@ export async function getTicketById(
   }
 }
 
-export async function replyToTicket(
-  ticketId: string,
-  content: string
-): Promise<ActionResult<{ id: string }>> {
-  try {
-    const userId = await requireSuperAdmin()
-    const parsed = ReplyToTicketSchema.parse({ ticketId, content })
-
-    const message = await prisma.$transaction(async (tx) => {
-      const ticket = await tx.ticket.findUnique({
-        where: { id: parsed.ticketId },
-        select: { id: true },
-      })
-
-      if (!ticket) {
-        throw new Error('Ticket not found')
-      }
-
-      const createdMessage = await tx.ticketMessage.create({
-        data: {
-          ticketId: parsed.ticketId,
-          userId,
-          content: parsed.content.trim(),
-          isAdmin: true,
-        },
-        select: {
-          id: true,
-        },
-      })
-
-      await tx.ticket.update({
-        where: { id: parsed.ticketId },
-        data: {
-          updatedAt: new Date(),
-        },
-      })
-
-      return createdMessage
-    })
-
-    revalidateTicketPaths(parsed.ticketId)
-    return ok({ id: message.id })
-  } catch (error) {
-    return fail(error instanceof Error ? error.message : 'Failed to reply to ticket')
-  }
-}
-
-export async function updateTicketStatus(
-  ticketId: string,
-  status: TicketStatus | 'CLOSED'
-): Promise<ActionResult<{ id: string }>> {
-  try {
-    await requireSuperAdmin()
-    const parsed = UpdateTicketStatusSchema.parse({ ticketId, status })
-    const normalizedStatus = normalizeTicketStatus(parsed.status)
-    if (!normalizedStatus) {
-      return fail('Invalid ticket status')
-    }
-
-    const ticket = await prisma.ticket.update({
-      where: { id: parsed.ticketId },
-      data: {
-        status: normalizedStatus,
-      },
-      select: {
-        id: true,
-      },
-    })
-
-    revalidateTicketPaths(parsed.ticketId)
-    return ok({ id: ticket.id })
-  } catch (error) {
-    return fail(error instanceof Error ? error.message : 'Failed to update ticket status')
-  }
-}

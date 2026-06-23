@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { X, MessageSquarePlus, AlertCircle, Loader2 } from 'lucide-react'
 import * as z from 'zod'
-import { createTicketAction } from '@/actions/ticket-actions'
+import { createTicketAction } from '@/lib/tickets/actions'
 import { TicketCategory, TicketPriority } from '@/lib/prisma-enums'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
@@ -56,7 +56,7 @@ export function NewTicketModal() {
 
     setIsSubmitting(false)
 
-    if (res.success && res.data && typeof res.data === 'object' && 'ticketId' in res.data) {
+    if (res.success) {
       setIsOpen(false)
       formElement.reset()
       toast.success('Ticket creado exitosamente')
