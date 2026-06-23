@@ -73,6 +73,11 @@ const COLUMNS: ColumnDef[] = [
 
 // Máx de cards mostradas en la vista de columna; el resto vive en el overview.
 const MAX_VISIBLE = 2
+// Fade del cuerpo: réplica EXACTA del pipeline admin — mask-image que desvanece el contenido
+// a transparente revelando el fondo REAL de la columna (se funde con la superficie, sin color
+// arbitrario tipo #141618). Sólo se aplica cuando hay overflow (2+ tickets).
+const COLUMN_FADE_HEIGHT = 48
+const COLUMN_BODY_FADE = `linear-gradient(to bottom, #000 calc(100% - ${COLUMN_FADE_HEIGHT}px), transparent)`
 
 function timeAgo(iso: string): string {
   const secs = Math.floor((Date.now() - new Date(iso).getTime()) / 1000)
@@ -96,9 +101,9 @@ function TicketCard({ ticket, idx }: { ticket: TicketListItem; idx: number }) {
     >
       <Link
         href={`/dashboard/soporte/${ticket.id}`}
-        // Hover acotado del admin (adminHoverCls: scale 1.015 + shadow + ring, contenido
-        // dentro del padding de la columna) — sin el scale grande que desbordaba el borde.
-        className={`group block rounded-[22px] border border-white/10 bg-white/5 p-3.5 shadow-[0_18px_40px_rgba(0,0,0,0.22)] hover:border-cyan-400/20 hover:bg-white/[0.07] ${adminHoverCls}`}
+        // Hover idéntico a la card del pipeline admin: scale + border + bg, SIN ring. Con el
+        // mask del fade no queda ningún ring recortado ni oscurecimiento raro en la 2da card.
+        className="group block rounded-[22px] border border-white/10 bg-white/5 p-3.5 shadow-[0_18px_40px_rgba(0,0,0,0.22)] transition-all hover:scale-[1.02] hover:border-cyan-400/20 hover:bg-white/[0.07] motion-reduce:hover:scale-100"
       >
         {/* Badges: prioridad + categoría + id */}
         <div className="flex flex-wrap items-center gap-1.5">
@@ -159,7 +164,8 @@ function TicketColumn({
   onOpenOverview: () => void
 }) {
   const visibleTickets = tickets.slice(0, MAX_VISIBLE)
-  const hasMore = tickets.length > MAX_VISIBLE
+  // 2+ tickets: la 2da card se desvanece (mask) y aparece "Ver más" para abrir el overview.
+  const overflows = tickets.length >= MAX_VISIBLE
 
   return (
     <section className="flex min-w-0 flex-col rounded-[26px] border border-white/10 bg-white/[0.04] p-4 backdrop-blur-xl">
@@ -184,49 +190,45 @@ function TicketColumn({
         </div>
       </button>
 
-      {/* Cuerpo: máx 2 cards. El cuerpo es content-height (sin flex-1): si la columna se
-          estira por grid stretch, el sobrante queda DEBAJO del cuerpo, no entre las cards y
-          el fade. px-1 da aire al hover. */}
-      <div className="mt-3 px-1">
-        {/* Contenedor de cards = contexto de posición del fade. Anclar el fade acá (no a la
-            <section>) hace que SIEMPRE abrace la 2da card aunque la columna se estire. */}
-        <div className="relative space-y-2.5 pb-1">
-          {tickets.length > 0 ? (
-            visibleTickets.map((ticket, idx) => (
-              <TicketCard key={ticket.id} ticket={ticket} idx={idx} />
-            ))
-          ) : (
-            <EmptyState
-              icon={Inbox}
-              title={column.emptyTitle}
-              description={column.emptyDescription}
-              variant="subtle"
-              size="sm"
-            />
-          )}
-
-          {/* Fade del "Ver más": gradiente SUAVE hacia la superficie de la columna, sobre la
-              2da card, con sus mismas esquinas redondeadas (rounded-b-[22px]). Capa aparte
-              (sin mask) → ring del hover completo. El pill va centrado sobre el gradiente. */}
-          {hasMore && (
-            <>
-              <div
-                aria-hidden
-                className="pointer-events-none absolute inset-x-0 bottom-0 h-20 rounded-b-[22px] bg-gradient-to-t from-[#141618] to-transparent"
-              />
-              <div className="pointer-events-none absolute inset-x-0 bottom-0 flex justify-center pb-2">
-                <button
-                  type="button"
-                  onClick={onOpenOverview}
-                  className="pointer-events-auto rounded-full border border-white/10 bg-white/[0.06] px-3 py-1.5 text-[11px] font-semibold text-cyan-300/90 shadow-lg backdrop-blur-md transition-colors hover:bg-cyan-400/10 hover:text-cyan-200"
-                >
-                  Ver más ({tickets.length})
-                </button>
-              </div>
-            </>
-          )}
-        </div>
+      {/* Cuerpo de alto acotado + mask-image — réplica EXACTA de la columna del pipeline admin:
+          el contenido se desvanece a transparente revelando el fondo REAL de la columna (se
+          funde con la superficie, sin color arbitrario). overflow-hidden + px-2 py-1 para que el
+          hover:scale de la card no se recorte. El max-height mantiene la columna baja → entran
+          los recursos en el fold. */}
+      <div
+        className="mt-3 space-y-2.5 overflow-hidden px-2 py-1"
+        style={
+          overflows
+            ? { maskImage: COLUMN_BODY_FADE, WebkitMaskImage: COLUMN_BODY_FADE }
+            : undefined
+        }
+      >
+        {tickets.length > 0 ? (
+          visibleTickets.map((ticket, idx) => (
+            <TicketCard key={ticket.id} ticket={ticket} idx={idx} />
+          ))
+        ) : (
+          <EmptyState
+            icon={Inbox}
+            title={column.emptyTitle}
+            description={column.emptyDescription}
+            variant="subtle"
+            size="sm"
+          />
+        )}
       </div>
+
+      {/* "Ver más (N)" integrado bajo el fade (igual que "Clic para ver las N →" del admin):
+          el cuerpo se desvanece hacia este botón. Abre el overview con todos los tickets. */}
+      {overflows ? (
+        <button
+          type="button"
+          onClick={onOpenOverview}
+          className="mt-1 w-full rounded-xl px-3 py-1.5 text-center text-[11px] font-medium text-cyan-300/80 transition-colors hover:bg-cyan-400/10 hover:text-cyan-200"
+        >
+          Ver más ({tickets.length}) →
+        </button>
+      ) : null}
     </section>
   )
 }
