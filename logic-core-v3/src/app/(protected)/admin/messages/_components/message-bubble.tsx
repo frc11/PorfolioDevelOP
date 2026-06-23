@@ -49,7 +49,7 @@ export function MessageBubble({ fromAdmin, companyName, content, createdAt }: Me
           <span className="text-zinc-600">•</span>
           <span className="text-zinc-500">{formatMessageDate(createdAt)}</span>
         </div>
-        <p className="mt-2 whitespace-pre-wrap text-sm leading-6">{content}</p>
+        <p className="mt-2 break-words whitespace-pre-wrap text-sm leading-6">{content}</p>
       </motion.div>
     </div>
   )

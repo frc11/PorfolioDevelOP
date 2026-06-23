@@ -193,7 +193,7 @@ export function MessageThread({ messages, organizationName }: MessageThreadProps
                   <span className="text-zinc-600">•</span>
                   <span className="text-zinc-500">Ahora mismo</span>
                 </div>
-                <p className="mt-2 whitespace-pre-wrap text-sm leading-6">{WELCOME_MESSAGE}</p>
+                <p className="mt-2 break-words whitespace-pre-wrap text-sm leading-6">{WELCOME_MESSAGE}</p>
               </motion.div>
             </motion.div>
           )}
@@ -227,7 +227,7 @@ export function MessageThread({ messages, organizationName }: MessageThreadProps
                     <span className="text-zinc-600">•</span>
                     <span className="text-zinc-500">{formatTime(msg.createdAt)}</span>
                   </div>
-                  <p className="mt-2 whitespace-pre-wrap text-sm leading-6">{msg.content}</p>
+                  <p className="mt-2 break-words whitespace-pre-wrap text-sm leading-6">{msg.content}</p>
                 </motion.div>
               </motion.div>
             ))}
