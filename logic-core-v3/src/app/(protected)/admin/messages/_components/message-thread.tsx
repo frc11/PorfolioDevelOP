@@ -36,7 +36,7 @@ export function MessageThread({ companyName, messages }: MessageThreadProps) {
                 createdAt={message.createdAt}
               />
             ))}
-            <MessagesScrollAnchor />
+            <MessagesScrollAnchor scrollTrigger={messages.length} />
           </>
         ) : (
           <div className="flex min-h-[260px] items-center justify-center px-6 text-center text-sm text-zinc-500">
