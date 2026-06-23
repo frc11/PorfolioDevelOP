@@ -17,10 +17,9 @@ export const BOT_POSITIONS = ['bottom_right', 'bottom_left'] as const
  * literals so this shared module stays free of UI component imports
  * (avoids circular dep with the registry).
  *
- * 'emoji' is the one escape hatch the client may pick (avatar = a single
- * emoji on a brand-tinted disc). It is NOT a registry entry — AvatarRenderer
- * handles it directly. 'image' stays admin-only (reserved for the post-B-SEC
- * custom-photo flow).
+ * 'emoji' and 'image' are escape hatches the client may pick (a single emoji
+ * on a brand-tinted disc, or a custom uploaded photo). Neither is a registry
+ * entry — AvatarRenderer handles them directly.
  *
  * Source of truth for runtime validation lives in
  * src/modules/chatbot/components/avatar/avatarStyleSchema.ts.
@@ -32,6 +31,7 @@ export const CLIENT_AVATAR_STYLES = [
   'onda',
   'geometrico',
   'emoji',
+  'image',
 ] as const
 
 export type CuratedColor = (typeof CURATED_COLORS)[number]

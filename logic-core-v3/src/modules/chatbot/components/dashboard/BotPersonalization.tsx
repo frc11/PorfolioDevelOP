@@ -22,6 +22,7 @@ import { updateBotAppearance } from '@/modules/chatbot/server/dashboard/updateBo
 import { AvatarPicker } from '@/modules/chatbot/components/avatar'
 import { EmojiPickerField } from '@/modules/chatbot/components/admin/config/EmojiPickerField'
 import { ColorPicker } from '@/modules/chatbot/components/admin/config/ColorPicker'
+import { AvatarUploader } from '@/modules/chatbot/components/admin/config/tabs/AvatarUploader'
 import { deriveBusinessInitials } from '@/modules/chatbot/shared/businessInitials'
 import { BotConfigPreview, type BotPreviewState } from '@/modules/chatbot/components/preview'
 import {
@@ -66,6 +67,7 @@ type BotPersonalizationState = {
   position: BotPosition
   avatarStyle: ClientAvatarStyle
   avatarEmoji: string | null
+  avatarImageUrl: string | null
   welcomeMessage: string
   quickReplies: string[]
 }
@@ -123,6 +125,7 @@ function normalizeBotState(bot: BotPersonalizationProps['bot']): BotPersonalizat
     position: isBotPosition(bot.position) ? bot.position : 'bottom_right',
     avatarStyle: isClientAvatarStyle(bot.avatarStyle) ? bot.avatarStyle : 'neuro',
     avatarEmoji: bot.avatarEmoji,
+    avatarImageUrl: bot.avatarImageUrl,
     welcomeMessage: bot.welcomeMessage.slice(0, 200),
     quickReplies: normalizeQuickReplyTexts(bot.quickReplies),
   }
@@ -152,6 +155,7 @@ export function BotPersonalization({ bot }: BotPersonalizationProps) {
         position: state.position,
         avatarStyle: state.avatarStyle,
         avatarEmoji: state.avatarEmoji,
+        avatarImageUrl: state.avatarImageUrl,
         welcomeMessage: state.welcomeMessage,
         quickReplies: state.quickReplies,
       })
@@ -271,7 +275,8 @@ export function BotPersonalization({ bot }: BotPersonalizationProps) {
               }}
               accentColor={state.accentColor}
               businessInitials={deriveBusinessInitials(bot.botName)}
-              escapeHatches={['emoji']}
+              escapeHatches={['image', 'emoji']}
+              avatarImageUrl={state.avatarImageUrl}
               avatarEmoji={state.avatarEmoji}
             />
             {state.avatarStyle === 'emoji' && (
@@ -281,6 +286,16 @@ export function BotPersonalization({ bot }: BotPersonalizationProps) {
                     value={state.avatarEmoji}
                     onChange={(value) => update('avatarEmoji', value)}
                   />
+                </Field>
+              </div>
+            )}
+            {state.avatarStyle === 'image' && (
+              <div className="mt-4">
+                <Field
+                  label="Imagen del avatar"
+                  hint="JPG, PNG o WebP. Se recorta y comprime a 200×200 en tu navegador."
+                >
+                  <AvatarUploader onUploaded={(dataUrl) => update('avatarImageUrl', dataUrl)} />
                 </Field>
               </div>
             )}
@@ -486,7 +501,7 @@ function buildPreviewState(
     quickReplies,
     botName: bot.botName,
     isActive: bot.isActive,
-    avatarImageUrl: bot.avatarImageUrl,
+    avatarImageUrl: state.avatarImageUrl,
     avatarEmoji: state.avatarEmoji,
     chatSurfaceTint: state.chatSurfaceTint,
     borderRadius: bot.borderRadius,

@@ -8,6 +8,7 @@ import { prisma } from '@/lib/prisma'
 import { resolveOrgId } from '@/lib/preview'
 import { invalidateBotCache } from '@/modules/chatbot/server/conversation'
 import { CLIENT_AVATAR_STYLE_SCHEMA } from '@/modules/chatbot/components/avatar'
+import { avatarImageUrlSchema } from '@/modules/chatbot/server/admin/avatarImageUrlSchema'
 import {
   BOT_POSITIONS,
   CURATED_COLORS,
@@ -28,6 +29,9 @@ const UpdateBotAppearanceSchema = z
     // server actions del admin (saveBotConfig). nullable: el "Quitar" del
     // picker envía null para limpiar el emoji.
     avatarEmoji: z.string().trim().max(8).nullable().optional(),
+    // Foto custom del avatar: data URL base64 (o URL http(s)) ≤600KB. Reusa el
+    // mismo schema que el admin (saveBotConfig); el uploader comprime a ≤200×200.
+    avatarImageUrl: avatarImageUrlSchema.optional(),
     welcomeMessage: z.string().trim().min(10).max(200).optional(),
     quickReplies: z.array(quickReplyTextSchema).max(4).optional(),
   })
@@ -91,6 +95,7 @@ export async function updateBotAppearance(input: UpdateBotAppearanceInput) {
       ...(data.position !== undefined ? { position: data.position } : {}),
       ...(data.avatarStyle !== undefined ? { avatarStyle: data.avatarStyle } : {}),
       ...(data.avatarEmoji !== undefined ? { avatarEmoji: data.avatarEmoji || null } : {}),
+      ...(data.avatarImageUrl !== undefined ? { avatarImageUrl: data.avatarImageUrl } : {}),
       ...(data.welcomeMessage !== undefined ? { welcomeMessage: data.welcomeMessage } : {}),
       ...(data.quickReplies !== undefined
         ? { quickReplies: toPublicQuickReplies(data.quickReplies) as object }
