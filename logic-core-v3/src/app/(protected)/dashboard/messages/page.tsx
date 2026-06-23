@@ -17,10 +17,16 @@ export default async function ClientMessagesPage() {
     data: { read: true },
   })
 
-  const messages = await prisma.message.findMany({
-    where: { organizationId },
-    orderBy: { createdAt: 'asc' },
-  })
+  const [messages, org] = await Promise.all([
+    prisma.message.findMany({
+      where: { organizationId },
+      orderBy: { createdAt: 'asc' },
+    }),
+    prisma.organization.findUnique({
+      where: { id: organizationId },
+      select: { companyName: true },
+    }),
+  ])
 
   return (
     <div className="flex h-full flex-col gap-4">
@@ -34,7 +40,7 @@ export default async function ClientMessagesPage() {
       </FadeIn>
 
       <FadeIn delay={0.1} className="flex min-h-0 flex-1 flex-col">
-        <MessageThread messages={messages} />
+        <MessageThread messages={messages} organizationName={org?.companyName ?? ''} />
       </FadeIn>
     </div>
   )

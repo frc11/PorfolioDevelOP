@@ -3,10 +3,11 @@
 import { useActionState, useEffect, useRef, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { sendClientMessageAction } from '@/lib/actions/messages'
-import { Loader2, CheckCheck, ArrowUp } from 'lucide-react'
-import { motion, AnimatePresence } from 'motion/react'
+import { Loader2, MessageSquareText, SendHorizontal } from 'lucide-react'
+import { motion, AnimatePresence, useReducedMotion } from 'motion/react'
 import type { ActionResult } from '@/lib/actions/schemas'
 import { getMessageForContext } from '@/lib/data/message-context'
+import { EmojiPopover } from './EmojiPopover'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -20,6 +21,7 @@ interface Message {
 
 interface MessageThreadProps {
   messages: Message[]
+  organizationName: string
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -75,7 +77,7 @@ const WELCOME_MESSAGE =
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-export function MessageThread({ messages }: MessageThreadProps) {
+export function MessageThread({ messages, organizationName }: MessageThreadProps) {
   const [state, action, isPending] = useActionState<ActionResult | null, FormData>(sendClientMessageAction, null)
   const [inputValue, setInputValue] = useState('')
   const bottomRef = useRef<HTMLDivElement>(null)
@@ -83,6 +85,7 @@ export function MessageThread({ messages }: MessageThreadProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const router = useRouter()
   const searchParams = useSearchParams()
+  const reduce = useReducedMotion()
 
   const status = getTeamStatus()
 
@@ -128,151 +131,158 @@ export function MessageThread({ messages }: MessageThreadProps) {
     el.style.overflowY = el.scrollHeight > maxHeight ? 'auto' : 'hidden'
   }, [inputValue])
 
-  return (
-    <div
-      className="flex flex-1 flex-col gap-0 overflow-hidden rounded-xl"
-      style={{
-        border: '1px solid rgba(6,182,212,0.2)',
-        background: 'rgba(255,255,255,0.05)',
-        backdropFilter: 'blur(24px)',
-        WebkitBackdropFilter: 'blur(24px)',
-      }}
-    >
-      {/* ── Status header ───────────────────────────────────────────────── */}
-      <div
-        className="flex items-center justify-between gap-3 px-5 py-2.5"
-        style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}
-      >
-        <p className="text-xs font-medium text-zinc-300">develOP — Soporte</p>
+  function insertEmoji(emoji: string) {
+    const el = textareaRef.current
+    if (!el) {
+      setInputValue((v) => v + emoji)
+      return
+    }
+    // Inserta en la posición del cursor y restaura el caret tras el re-render
+    const start = el.selectionStart ?? inputValue.length
+    const end = el.selectionEnd ?? inputValue.length
+    setInputValue(inputValue.slice(0, start) + emoji + inputValue.slice(end))
+    requestAnimationFrame(() => {
+      el.focus()
+      const caret = start + emoji.length
+      el.setSelectionRange(caret, caret)
+    })
+  }
 
-        <div className="flex items-center gap-3">
-          <div
-            className={`flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest ${
-              status.online
-                ? 'bg-emerald-500/10 text-emerald-400'
-                : 'bg-amber-500/10 text-amber-400'
-            }`}
-          >
-            <span className="relative flex h-1.5 w-1.5">
-              {status.online && (
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-              )}
-              <span
-                className={`relative inline-flex h-1.5 w-1.5 rounded-full ${
-                  status.online ? 'bg-emerald-500' : 'bg-amber-500'
-                }`}
-              />
-            </span>
-            {status.label}
+  return (
+    <div className="flex min-h-0 flex-1 flex-col gap-3">
+      {/* ── Header card ─────────────────────────────────────────────────── */}
+      <div className="shrink-0 rounded-[24px] border border-white/10 bg-white/5 px-5 py-3 backdrop-blur-xl">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-[14px] border border-cyan-400/20 bg-cyan-400/10 text-cyan-100">
+              <MessageSquareText className="h-5 w-5" strokeWidth={1.5} />
+            </div>
+            <div>
+              <p className="text-[10px] uppercase tracking-[0.24em] text-zinc-500">
+                Conversación activa
+              </p>
+              <p className="text-base font-semibold tracking-tight text-white">
+                develOP — Soporte
+              </p>
+            </div>
           </div>
 
-          <span className="text-[10px] text-zinc-500">
-            Resp. promedio:{' '}
-            <span className="text-zinc-300">{'< 15 min'}</span>
-          </span>
+          <div className="flex items-center gap-3">
+            <div
+              className={`flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest ${
+                status.online
+                  ? 'bg-emerald-500/10 text-emerald-400'
+                  : 'bg-amber-500/10 text-amber-400'
+              }`}
+            >
+              <span className="relative flex h-1.5 w-1.5">
+                {status.online && (
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                )}
+                <span
+                  className={`relative inline-flex h-1.5 w-1.5 rounded-full ${
+                    status.online ? 'bg-emerald-500' : 'bg-amber-500'
+                  }`}
+                />
+              </span>
+              {status.label}
+            </div>
+
+            <span className="hidden text-[10px] text-zinc-500 sm:inline">
+              Resp. promedio:{' '}
+              <span className="text-zinc-300">{'< 15 min'}</span>
+            </span>
+          </div>
         </div>
       </div>
 
-      {/* ── Message list ────────────────────────────────────────────────── */}
-      <div className="relative flex flex-1 flex-col gap-3 overflow-y-auto p-5">
-        {/* Welcome message (always shown when thread is empty) */}
-        {messages.length === 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-            className="flex justify-start"
-          >
-            <div
-              className="max-w-[78%] rounded-xl rounded-tl-sm px-4 py-3"
-              style={{
-                border: '1px solid rgba(6,182,212,0.25)',
-                background:
-                  'linear-gradient(135deg, rgba(6,182,212,0.12) 0%, rgba(6,182,212,0.05) 100%)',
-              }}
-            >
-              <p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-cyan-400">
-                DevelOP
-              </p>
-              <p className="text-sm leading-relaxed text-zinc-100">
-                {WELCOME_MESSAGE}
-              </p>
-              <p className="mt-1.5 text-[10px] text-zinc-500">Ahora mismo</p>
-            </div>
-          </motion.div>
-        )}
+      {/* ── Thread section ──────────────────────────────────────────────── */}
+      <section className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-[28px] border border-white/10 bg-white/5 backdrop-blur-xl">
+        {/* Sub-header: message count */}
+        <div className="shrink-0 border-b border-white/10 px-5 py-4">
+          <div className="flex items-center gap-2 text-sm text-zinc-400">
+            <MessageSquareText className="h-4 w-4 text-cyan-300" strokeWidth={1.5} />
+            <span>{messages.length} mensajes en la conversación</span>
+          </div>
+        </div>
 
-        {/* Real messages */}
-        <AnimatePresence initial={false}>
-          {messages.map((msg, i) => (
+        {/* Scrollable messages */}
+        <div className="min-h-0 flex-1 space-y-4 overflow-y-auto overflow-x-hidden px-5 py-5">
+          {/* Welcome message (shown when thread is empty) */}
+          {messages.length === 0 && (
             <motion.div
-              key={msg.id}
-              initial={{ opacity: 0, y: 6 }}
+              initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: i === messages.length - 1 ? 0 : 0 }}
-              className={`flex ${msg.fromAdmin ? 'justify-start' : 'justify-end'}`}
+              transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+              className="flex justify-start"
             >
-              <div
-                className={[
-                  'max-w-[75%] rounded-xl px-4 py-2.5',
-                  msg.fromAdmin
-                    ? 'rounded-tl-sm text-zinc-100'
-                    : 'rounded-tr-sm text-white',
-                ].join(' ')}
-                style={
-                  msg.fromAdmin
-                    ? {
-                        border: '1px solid rgba(255,255,255,0.08)',
-                        background: 'rgba(255,255,255,0.06)',
-                        backdropFilter: 'blur(4px)',
-                      }
-                    : {
-                        border: '1px solid rgba(6,182,212,0.3)',
-                        background: 'rgba(6,182,212,0.15)',
-                      }
+              <motion.div
+                whileHover={
+                  reduce
+                    ? undefined
+                    : { scale: 1.015, transition: { duration: 0.2, ease: [0.25, 0.46, 0.45, 0.94] } }
                 }
+                className="max-w-[85%] rounded-[24px] border border-cyan-400/20 bg-cyan-500/10 px-4 py-3 text-cyan-50 shadow-[0_16px_40px_rgba(0,0,0,0.18)] transition-shadow hover:ring-1 hover:ring-white/15 sm:max-w-[70%]"
               >
-                {msg.fromAdmin && (
-                  <p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-cyan-400">
-                    DevelOP
-                  </p>
-                )}
-                <p className="text-sm leading-relaxed">{msg.content}</p>
-
-                {/* Timestamp + read indicator */}
-                <div
-                  className={`mt-1 flex items-center gap-1.5 ${
-                    msg.fromAdmin ? 'justify-start' : 'justify-end'
-                  }`}
-                >
-                  <p
-                    className={`text-[10px] ${
-                      msg.fromAdmin ? 'text-zinc-500' : 'text-cyan-200/70'
-                    }`}
-                  >
-                    {formatTime(msg.createdAt)}
-                  </p>
-                  {msg.fromAdmin && msg.read && (
-                    <span className="flex items-center gap-0.5 text-[10px] text-cyan-400/70">
-                      <CheckCheck size={11} />
-                      Visto
-                    </span>
-                  )}
+                <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] text-zinc-400">
+                  <span>DevelOP</span>
+                  <span className="text-zinc-600">•</span>
+                  <span className="text-zinc-500">Ahora mismo</span>
                 </div>
-              </div>
+                <p className="mt-2 whitespace-pre-wrap text-sm leading-6">{WELCOME_MESSAGE}</p>
+              </motion.div>
             </motion.div>
-          ))}
-        </AnimatePresence>
+          )}
 
-        {/* Auto-scroll anchor */}
-        <div ref={bottomRef} />
-      </div>
+          {/* Real messages */}
+          <AnimatePresence initial={false}>
+            {messages.map((msg) => (
+              <motion.div
+                key={msg.id}
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+                className="flex justify-start"
+              >
+                <motion.div
+                  whileHover={
+                    reduce
+                      ? undefined
+                      : { scale: 1.015, transition: { duration: 0.2, ease: [0.25, 0.46, 0.45, 0.94] } }
+                  }
+                  className={[
+                    'max-w-[85%] rounded-[24px] px-4 py-3 shadow-[0_16px_40px_rgba(0,0,0,0.18)] transition-shadow sm:max-w-[70%]',
+                    'hover:ring-1 hover:ring-white/15',
+                    msg.fromAdmin
+                      ? 'border border-cyan-400/20 bg-cyan-500/10 text-cyan-50'
+                      : 'border border-white/10 bg-black/20 text-zinc-100',
+                  ].join(' ')}
+                >
+                  <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] text-zinc-400">
+                    <span>{msg.fromAdmin ? 'DevelOP' : organizationName}</span>
+                    <span className="text-zinc-600">•</span>
+                    <span className="text-zinc-500">{formatTime(msg.createdAt)}</span>
+                  </div>
+                  <p className="mt-2 whitespace-pre-wrap text-sm leading-6">{msg.content}</p>
+                </motion.div>
+              </motion.div>
+            ))}
+          </AnimatePresence>
+
+          {/* Auto-scroll anchor */}
+          <div ref={bottomRef} />
+        </div>
+      </section>
 
       {/* ── Input area ──────────────────────────────────────────────────── */}
-      <div className="p-4" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-        {state?.error && <p className="mb-2 text-xs text-red-400">{state.error}</p>}
+      <div className="shrink-0 rounded-[24px] border border-white/10 bg-white/5 p-3 backdrop-blur-xl">
+        {state?.error && (
+          <div className="mb-2 rounded-2xl border border-rose-400/20 bg-rose-500/10 px-4 py-2.5 text-sm text-rose-200">
+            {state.error}
+          </div>
+        )}
 
-        {/* Quick reply buttons */}
+        {/* Quick reply buttons — conservados */}
         <div className="mb-3 flex flex-wrap gap-2">
           {QUICK_REPLIES.map((qr) => (
             <motion.button
@@ -289,47 +299,41 @@ export function MessageThread({ messages }: MessageThreadProps) {
           ))}
         </div>
 
-        {/* Text input + send */}
-        <form
-          ref={formRef}
-          action={action}
-          className="flex items-end gap-3 rounded-2xl border border-white/[0.06] bg-white/[0.02] p-2 shadow-2xl backdrop-blur-md transition-all focus-within:border-cyan-500/30 focus-within:ring-2 focus-within:ring-cyan-500/20"
-        >
-          <textarea
-            ref={textareaRef}
-            name="content"
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            placeholder="Escribí tu mensaje..."
-            rows={1}
-            disabled={isPending}
-            className="max-h-32 min-h-[44px] flex-1 resize-none bg-transparent px-3 py-3 text-sm text-zinc-100 placeholder-zinc-500 outline-none transition-all disabled:opacity-50"
-            onKeyDown={(e) => {
-              // isComposing: no enviar mientras se confirma la composición IME (acentos, dead-keys)
-              if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) {
-                e.preventDefault()
-                e.currentTarget.form?.requestSubmit()
-              }
-            }}
-          />
-          <motion.button
-            type="submit"
-            disabled={isPending || !inputValue.trim()}
-            animate={inputValue.trim() ? { y: [0, -3, 0], scale: [1, 1.08, 1] } : {}}
-            // tween soporta multi-keyframe; spring solo soporta 2 keyframes en motion/react
-            transition={{ duration: 0.3, type: 'tween', ease: 'easeInOut' }}
-            className={`flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl transition-all disabled:opacity-30 disabled:grayscale ${
-              inputValue.trim()
-                ? 'bg-cyan-500 text-black shadow-[0_0_15px_rgba(6,182,212,0.4)] hover:scale-105'
-                : 'bg-white/5 text-zinc-600'
-            }`}
-          >
-            {isPending ? (
-              <Loader2 size={18} className="animate-spin" />
-            ) : (
-              <ArrowUp size={18} className="stroke-[3]" />
-            )}
-          </motion.button>
+        {/* Composer */}
+        <form ref={formRef} action={action}>
+          <div className="flex items-end gap-2">
+            <EmojiPopover onPick={insertEmoji} disabled={isPending} />
+            <textarea
+              ref={textareaRef}
+              name="content"
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              placeholder="Escribí tu mensaje..."
+              rows={1}
+              disabled={isPending}
+              className="max-h-32 min-h-[44px] flex-1 resize-none rounded-2xl border border-white/10 bg-black/20 px-4 py-2.5 text-sm leading-6 text-white outline-none transition-colors placeholder:text-zinc-500 focus:border-cyan-400/35 disabled:cursor-not-allowed disabled:opacity-60"
+              onKeyDown={(e) => {
+                // isComposing: no enviar mientras se confirma la composición IME (acentos, dead-keys)
+                if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) {
+                  e.preventDefault()
+                  e.currentTarget.form?.requestSubmit()
+                }
+              }}
+            />
+            <button
+              type="submit"
+              disabled={isPending || !inputValue.trim()}
+              aria-label="Enviar mensaje"
+              className="inline-flex h-11 shrink-0 items-center gap-2 rounded-2xl border border-cyan-400/20 bg-cyan-400/10 px-4 text-sm font-medium text-cyan-100 transition-colors hover:bg-cyan-400/15 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin" strokeWidth={1.5} />
+              ) : (
+                <SendHorizontal className="h-4 w-4" strokeWidth={1.5} />
+              )}
+              <span className="hidden sm:inline">{isPending ? 'Enviando...' : 'Enviar'}</span>
+            </button>
+          </div>
         </form>
 
         <p className="mt-1.5 text-[10px] text-zinc-600">
