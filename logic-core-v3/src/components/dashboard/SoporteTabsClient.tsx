@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 import {
   Book,
@@ -73,9 +73,17 @@ interface Props {
   resolvedTickets: TicketListItem[]
 }
 
+const VISIBLE_COUNT = 6
+
 export function SoporteTabsClient({ activeTickets, resolvedTickets }: Props) {
   const [activeTab, setActiveTab] = useState<'active' | 'resolved'>('active')
+  const [showAll, setShowAll] = useState(false)
   const tickets = activeTab === 'active' ? activeTickets : resolvedTickets
+
+  useEffect(() => { setShowAll(false) }, [activeTab])
+
+  const displayTickets = showAll ? tickets : tickets.slice(0, VISIBLE_COUNT)
+  const hasMore = tickets.length > VISIBLE_COUNT
 
   return (
     <div className="flex flex-col gap-8">
@@ -137,25 +145,26 @@ export function SoporteTabsClient({ activeTickets, resolvedTickets }: Props) {
                   />
                 )
               ) : (
-                <div className="divide-y divide-white/5">
-                  {tickets.map((ticket, idx) => {
-                    const priority = PRIORITY_MAP[ticket.priority]
-                    const status = STATUS_MAP[ticket.status]
+                <div>
+                  <div className="relative p-4 sm:p-5">
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                      {displayTickets.map((ticket, idx) => {
+                        const priority = PRIORITY_MAP[ticket.priority]
+                        const status = STATUS_MAP[ticket.status]
 
-                    return (
-                      <motion.div
-                        key={ticket.id}
-                        initial={{ opacity: 0, y: 6 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: idx * 0.04 }}
-                      >
-                        <Link
-                          href={`/dashboard/soporte/${ticket.id}`}
-                          className="group block cursor-pointer p-5 transition-all duration-300 hover:bg-white/[0.03]"
-                        >
-                          <div className="flex items-start justify-between gap-3">
-                            <div className="min-w-0 flex-1">
-                              <div className="mb-2 flex flex-wrap items-center gap-1.5">
+                        return (
+                          <motion.div
+                            key={ticket.id}
+                            initial={{ opacity: 0, y: 6 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: idx * 0.04 }}
+                          >
+                            <Link
+                              href={`/dashboard/soporte/${ticket.id}`}
+                              className="group flex h-full flex-col rounded-2xl border border-white/10 bg-[#0c0e12]/40 p-4 backdrop-blur-xl transition-all duration-200 hover:border-white/20 hover:bg-white/[0.04]"
+                            >
+                              {/* Badges */}
+                              <div className="mb-3 flex flex-wrap items-center gap-1.5">
                                 <span
                                   className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[9px] font-black uppercase tracking-wider ${priority.cls}`}
                                 >
@@ -169,44 +178,66 @@ export function SoporteTabsClient({ activeTickets, resolvedTickets }: Props) {
                                 >
                                   {status.label}
                                 </span>
-                                <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-zinc-400">
-                                  {CATEGORY_MAP[ticket.category]}
-                                </span>
                                 <span className="ml-auto font-mono text-[10px] text-zinc-600">
                                   #{ticket.id.slice(-6).toUpperCase()}
                                 </span>
                               </div>
 
-                              <h4 className="truncate pr-4 text-[15px] font-semibold text-zinc-200 transition-colors group-hover:text-white">
+                              {/* Title */}
+                              <h4 className="mb-2 line-clamp-2 text-sm font-semibold leading-snug text-zinc-200 transition-colors group-hover:text-white">
                                 {ticket.title}
                               </h4>
 
+                              {/* Category */}
+                              <span className="mb-3 self-start rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-zinc-400">
+                                {CATEGORY_MAP[ticket.category]}
+                              </span>
+
+                              {/* Last message */}
                               {ticket.lastMessage && (
-                                <p className="mt-1 truncate pr-8 text-xs leading-relaxed text-zinc-500">
+                                <p className="mb-3 line-clamp-2 flex-1 text-xs leading-relaxed text-zinc-500">
                                   {ticket.lastMessage}
                                 </p>
                               )}
 
-                              <div className="mt-2 flex items-center gap-2 text-[10px] font-medium text-zinc-600">
-                                <Clock size={10} />
+                              {/* Footer */}
+                              <div className="mt-auto flex items-center gap-2 border-t border-white/5 pt-3 text-[10px] font-medium text-zinc-600">
+                                <Clock size={9} />
                                 <span>{timeAgo(ticket.createdAt)}</span>
-                                <span>•</span>
+                                <span>·</span>
                                 <span>
                                   {ticket.messageCount}{' '}
-                                  {ticket.messageCount === 1 ? 'mensaje' : 'mensajes'}
+                                  {ticket.messageCount === 1 ? 'msg' : 'msgs'}
                                 </span>
+                                <ChevronRight
+                                  size={12}
+                                  className="ml-auto transition-colors group-hover:text-cyan-400"
+                                />
                               </div>
-                            </div>
+                            </Link>
+                          </motion.div>
+                        )
+                      })}
+                    </div>
 
-                            <ChevronRight
-                              size={18}
-                              className="mt-1 shrink-0 text-zinc-600 transition-all duration-300 group-hover:translate-x-1 group-hover:text-cyan-400"
-                            />
-                          </div>
-                        </Link>
-                      </motion.div>
-                    )
-                  })}
+                    {/* Fade mask when collapsed */}
+                    {!showAll && hasMore && (
+                      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-[#0c0e12] to-transparent" />
+                    )}
+                  </div>
+
+                  {/* Ver todos */}
+                  {hasMore && (
+                    <div className="flex justify-center border-t border-white/5 py-4">
+                      <button
+                        type="button"
+                        onClick={() => setShowAll((prev) => !prev)}
+                        className="flex items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.04] px-5 py-2.5 text-sm text-zinc-400 transition-colors hover:bg-white/[0.08] hover:text-white"
+                      >
+                        {showAll ? 'Mostrar menos' : `Ver todos (${tickets.length})`}
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
             </motion.div>
