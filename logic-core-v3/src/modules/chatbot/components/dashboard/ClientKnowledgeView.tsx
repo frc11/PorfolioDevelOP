@@ -76,7 +76,7 @@ function FieldBlock({ field, content }: { field: FieldDef; content: string }) {
   const isEmpty = content.trim().length === 0
 
   return (
-    <div className="space-y-3">
+    <Card padding="lg" className="space-y-3">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <div className="min-w-0 space-y-0.5">
           <h3 className="text-sm font-semibold text-zinc-100">{field.title}</h3>
@@ -90,20 +90,14 @@ function FieldBlock({ field, content }: { field: FieldDef; content: string }) {
         )}
       </div>
 
-      <div
-        className={`rounded-2xl border px-4 py-3 text-sm leading-relaxed ${
-          isEmpty
-            ? 'border-white/[0.04] bg-white/[0.015] italic text-zinc-500'
-            : 'border-white/[0.06] bg-white/[0.02] text-zinc-200'
-        }`}
-      >
-        {isEmpty ? (
-          field.emptyHint
-        ) : (
-          <pre className="whitespace-pre-wrap break-words font-sans text-sm">{content}</pre>
-        )}
-      </div>
-    </div>
+      {isEmpty ? (
+        <p className="text-sm italic leading-relaxed text-zinc-500">{field.emptyHint}</p>
+      ) : (
+        <pre className="whitespace-pre-wrap break-words font-sans text-sm leading-relaxed text-zinc-200">
+          {content}
+        </pre>
+      )}
+    </Card>
   )
 }
 
@@ -120,7 +114,7 @@ function FieldBlock({ field, content }: { field: FieldDef; content: string }) {
  */
 export function ClientKnowledgeView({ kb }: ClientKnowledgeViewProps) {
   return (
-    <div className="max-w-3xl space-y-8">
+    <div className="max-w-5xl space-y-8">
       {/* Header */}
       <div className="flex items-start gap-3">
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-cyan-400/25 bg-cyan-500/10">
