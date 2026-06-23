@@ -144,7 +144,7 @@ function TicketCard({ ticket, idx }: { ticket: TicketListItem; idx: number }) {
 
 function TicketColumn({ column, tickets }: { column: ColumnDef; tickets: TicketListItem[] }) {
   return (
-    <section className="flex min-w-0 flex-col rounded-[26px] border border-white/10 bg-white/[0.04] p-4 backdrop-blur-xl">
+    <section className="flex h-full min-h-0 min-w-0 flex-col rounded-[26px] border border-white/10 bg-white/[0.04] p-4 backdrop-blur-xl">
       {/* Header de columna con tinte por estado (label + nombre + contador) */}
       <div
         className={cn(
@@ -163,8 +163,8 @@ function TicketColumn({ column, tickets }: { column: ColumnDef; tickets: TicketL
         </div>
       </div>
 
-      {/* Cuerpo: una card por fila. px-1 da aire al hover:scale. */}
-      <div className="mt-4 space-y-3 px-1 pb-1">
+      {/* Cuerpo: altura fija (flex-1) con scroll interno. px-1 da aire al hover:scale. */}
+      <div className="mt-4 min-h-0 flex-1 space-y-3 overflow-y-auto px-1 pb-1">
         {tickets.length > 0 ? (
           tickets.map((ticket, idx) => <TicketCard key={ticket.id} ticket={ticket} idx={idx} />)
         ) : (
@@ -194,19 +194,21 @@ export function SoporteBoard({ activeTickets, resolvedTickets }: Props) {
   }
 
   return (
-    <div className="flex flex-col gap-5">
-      {/* Tablero de 3 columnas (Abiertos · En curso · Resueltos). En mobile (<lg) se apilan. */}
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+    <div className="flex min-h-0 flex-1 flex-col gap-5">
+      {/* Tablero de 3 columnas. En desktop llena el alto disponible (cada columna
+          scrollea internamente); en mobile (<lg) las columnas se apilan y la página scrollea. */}
+      <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 lg:grid-cols-3">
         {COLUMNS.map((column) => (
           <TicketColumn key={column.key} column={column} tickets={byStatus[column.key]} />
         ))}
       </div>
 
-      {/* Recursos de autogestión */}
+      {/* Recursos de autogestión — fijo al pie, siempre visible (no obliga a scrollear). */}
       <motion.div
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.25 }}
+        className="shrink-0"
       >
         <h4 className="mb-3 px-1 text-[10px] font-medium uppercase tracking-[0.2em] text-zinc-500">
           Recursos de Autogestión

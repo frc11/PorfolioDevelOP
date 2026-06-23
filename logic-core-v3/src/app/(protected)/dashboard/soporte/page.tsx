@@ -54,8 +54,10 @@ export default async function SoportePage() {
   const resolvedTickets = serialized.filter((t) => t.status === 'RESOLVED')
 
   return (
-    <div className="flex w-full flex-col gap-5">
-      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
+    // Fold de una pantalla en desktop: header + stats (shrink-0) + board (flex-1, columnas
+    // con scroll interno) entran sin scroll de página. En mobile (<lg) fluye natural.
+    <div className="flex w-full flex-col gap-5 lg:h-[calc(100svh-12.5rem)] lg:min-h-0">
+      <div className="flex shrink-0 flex-col justify-between gap-4 sm:flex-row sm:items-start">
         <PageHeader
           eyebrow="Soporte"
           title="Centro de Soporte"
@@ -67,7 +69,7 @@ export default async function SoportePage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <div className="grid shrink-0 grid-cols-1 gap-4 sm:grid-cols-3">
         <StatCard
           label="Tickets abiertos"
           value={openTicketsCount}
