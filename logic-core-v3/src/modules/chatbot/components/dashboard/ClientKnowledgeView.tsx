@@ -114,7 +114,7 @@ function FieldBlock({ field, content }: { field: FieldDef; content: string }) {
  */
 export function ClientKnowledgeView({ kb }: ClientKnowledgeViewProps) {
   return (
-    <div className="max-w-5xl space-y-8">
+    <div className="space-y-8">
       {/* Header */}
       <div className="flex items-start gap-3">
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-cyan-400/25 bg-cyan-500/10">
