@@ -35,24 +35,6 @@ function formatTime(date: Date) {
   })
 }
 
-/** Returns team online status based on Argentina time (UTC-3, Mon-Fri 9-18hs) */
-function getTeamStatus(): { online: boolean; label: string } {
-  // Argentina is UTC-3 (no DST)
-  const now = new Date()
-  const argOffset = -3 * 60 // minutes
-  const argMs = now.getTime() + (now.getTimezoneOffset() + argOffset) * 60_000
-  const arg = new Date(argMs)
-  const day = arg.getDay()  // 0=Sun … 6=Sat
-  const hour = arg.getHours()
-
-  const isWeekday = day >= 1 && day <= 5
-  const isWorkHours = hour >= 9 && hour < 18
-
-  return isWeekday && isWorkHours
-    ? { online: true, label: 'Equipo en línea' }
-    : { online: false, label: 'Respondemos en < 4 horas' }
-}
-
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const TEXTAREA_MAX_ROWS = 4
@@ -86,8 +68,6 @@ export function MessageThread({ messages, organizationName }: MessageThreadProps
   const router = useRouter()
   const searchParams = useSearchParams()
   const reduce = useReducedMotion()
-
-  const status = getTeamStatus()
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -168,29 +148,13 @@ export function MessageThread({ messages, organizationName }: MessageThreadProps
           </div>
 
           <div className="flex items-center gap-3">
-            <div
-              className={`flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest ${
-                status.online
-                  ? 'bg-emerald-500/10 text-emerald-400'
-                  : 'bg-amber-500/10 text-amber-400'
-              }`}
-            >
-              <span className="relative flex h-1.5 w-1.5">
-                {status.online && (
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-                )}
-                <span
-                  className={`relative inline-flex h-1.5 w-1.5 rounded-full ${
-                    status.online ? 'bg-emerald-500' : 'bg-amber-500'
-                  }`}
-                />
-              </span>
-              {status.label}
+            <div className="flex items-center gap-1.5 rounded-full bg-zinc-500/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest text-zinc-400">
+              Respondemos en {'< 4 hs'}
             </div>
 
             <span className="hidden text-[10px] text-zinc-500 sm:inline">
-              Resp. promedio:{' '}
-              <span className="text-zinc-300">{'< 15 min'}</span>
+              Lun–Vie{' '}
+              <span className="text-zinc-300">9–18hs</span>
             </span>
           </div>
         </div>
