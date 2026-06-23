@@ -54,12 +54,13 @@ export default async function SoportePage() {
   const resolvedTickets = serialized.filter((t) => t.status === 'RESOLVED')
 
   return (
-    // Sprint O2: no-scroll DEFINITIVO. En desktop (lg+) la página se acota al viewport con
-    // calc — mismo enfoque que la página de detalle de soporte (h-[calc(100svh-12.5rem)],
-    // el alto exacto del área visible de <main>) — y overflow-hidden corta cualquier excedente
-    // en vez de scrollear. Header + stats (shrink-0) + board (flex-1) entran sí o sí. En mobile
-    // (<lg) fluye natural. El ritmo comprimido de M/N evita que se recorte nada en pantalla normal.
-    <div className="flex w-full flex-col gap-4 lg:h-[calc(100svh-12.5rem)] lg:min-h-0 lg:overflow-hidden">
+    // No-scroll en pantallas normales/altas: en desktop (lg+) la página tiene min-height igual
+    // al área visible de <main> (mismo calc que la página de detalle), y con las columnas
+    // acotadas (COLUMN_BODY_MAX_H) todo el contenido entra dentro de ese alto → sin scroll.
+    // Uso min-h (no h + overflow-hidden): en un viewport BAJO de ancho lg (p.ej. 1366×768) el
+    // contenido excede el fold y la página scrollea para ALCANZAR los recursos, en vez de
+    // recortarlos sin retorno (lo que hacía overflow-hidden). En mobile (<lg) fluye natural.
+    <div className="flex w-full flex-col gap-4 lg:min-h-[calc(100svh-12.5rem)]">
       <div className="flex shrink-0 flex-col justify-between gap-4 sm:flex-row sm:items-start">
         <PageHeader
           eyebrow="Soporte"
