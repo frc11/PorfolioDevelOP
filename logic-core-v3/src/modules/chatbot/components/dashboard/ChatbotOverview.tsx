@@ -16,13 +16,19 @@ import {
 import type { BotConfig, Organization, QuotaUsage, ChatbotLead } from '@prisma/client'
 import type { HandoffEvent } from '@/modules/chatbot/index.server'
 
+/**
+ * QuotaUsage tal como llega al cliente: costUsd (Prisma.Decimal) se serializa
+ * a number en el server antes de cruzar el límite RSC (ver chatbot/page.tsx).
+ */
+type SerializedQuotaUsage = Omit<QuotaUsage, 'costUsd'> & { costUsd: number }
+
 interface ChatbotOverviewProps {
   session: {
     user: { name?: string | null }
     organization: Organization & { botConfig: BotConfig | null }
     bot: BotConfig
   }
-  usage: QuotaUsage | null
+  usage: SerializedQuotaUsage | null
   recentLeads: ChatbotLead[]
   recentHandoffs: HandoffEvent[]
 }

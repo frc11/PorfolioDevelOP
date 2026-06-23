@@ -31,5 +31,18 @@ export default async function ChatbotDashboardPage() {
     listRecentHandoffsByOrgSlug(orgSlug, 10),
   ])
 
-  return <ChatbotOverview session={session} usage={usage} recentLeads={recentLeads} recentHandoffs={recentHandoffs} />
+  // Prisma.Decimal no es serializable a través del límite server→client (RSC).
+  // costUsd es el único Decimal de QuotaUsage; lo convertimos a number acá,
+  // en el boundary, antes de pasarlo al client component. El resto de los
+  // campos (Int/Boolean/DateTime) ya serializan bien.
+  const usageSerialized = usage ? { ...usage, costUsd: usage.costUsd.toNumber() } : null
+
+  return (
+    <ChatbotOverview
+      session={session}
+      usage={usageSerialized}
+      recentLeads={recentLeads}
+      recentHandoffs={recentHandoffs}
+    />
+  )
 }
