@@ -162,7 +162,7 @@ function TicketColumn({
   const hasMore = tickets.length > MAX_VISIBLE
 
   return (
-    <section className="relative flex min-w-0 flex-col rounded-[26px] border border-white/10 bg-white/[0.04] p-4 backdrop-blur-xl">
+    <section className="flex min-w-0 flex-col rounded-[26px] border border-white/10 bg-white/[0.04] p-4 backdrop-blur-xl">
       {/* Header de columna con tinte por estado — click abre el overview de la categoría */}
       <button
         type="button"
@@ -184,12 +184,13 @@ function TicketColumn({
         </div>
       </button>
 
-      {/* Cuerpo: máx 2 cards. Si hay más, un overlay con gradiente (capa aparte) desvanece
-          el 2do ticket. El overlay NO recorta el ring del hover de la card (el problema del
-          mask-image, que clipeaba el borde): la card conserva su ring completo. px-1 da aire
-          al hover. */}
-      <div className="mt-3 flex-1 px-1">
-        <div className="space-y-2.5 pb-1">
+      {/* Cuerpo: máx 2 cards. El cuerpo es content-height (sin flex-1): si la columna se
+          estira por grid stretch, el sobrante queda DEBAJO del cuerpo, no entre las cards y
+          el fade. px-1 da aire al hover. */}
+      <div className="mt-3 px-1">
+        {/* Contenedor de cards = contexto de posición del fade. Anclar el fade acá (no a la
+            <section>) hace que SIEMPRE abrace la 2da card aunque la columna se estire. */}
+        <div className="relative space-y-2.5 pb-1">
           {tickets.length > 0 ? (
             visibleTickets.map((ticket, idx) => (
               <TicketCard key={ticket.id} ticket={ticket} idx={idx} />
@@ -203,29 +204,29 @@ function TicketColumn({
               size="sm"
             />
           )}
+
+          {/* Fade del "Ver más": gradiente SUAVE hacia la superficie de la columna, sobre la
+              2da card, con sus mismas esquinas redondeadas (rounded-b-[22px]). Capa aparte
+              (sin mask) → ring del hover completo. El pill va centrado sobre el gradiente. */}
+          {hasMore && (
+            <>
+              <div
+                aria-hidden
+                className="pointer-events-none absolute inset-x-0 bottom-0 h-20 rounded-b-[22px] bg-gradient-to-t from-[#141618] to-transparent"
+              />
+              <div className="pointer-events-none absolute inset-x-0 bottom-0 flex justify-center pb-2">
+                <button
+                  type="button"
+                  onClick={onOpenOverview}
+                  className="pointer-events-auto rounded-full border border-white/10 bg-white/[0.06] px-3 py-1.5 text-[11px] font-semibold text-cyan-300/90 shadow-lg backdrop-blur-md transition-colors hover:bg-cyan-400/10 hover:text-cyan-200"
+                >
+                  Ver más ({tickets.length})
+                </button>
+              </div>
+            </>
+          )}
         </div>
       </div>
-
-      {/* Fade del "Ver más": gradiente SUAVE hacia la superficie de la columna, anclado al
-          fondo de la <section> y con sus mismas esquinas redondeadas (rounded-b-[26px]) — sin
-          rectángulo duro. Capa aparte que NO enmascara la card → ring del hover completo. */}
-      {hasMore && (
-        <>
-          <div
-            aria-hidden
-            className="pointer-events-none absolute inset-x-0 bottom-0 h-20 rounded-b-[26px] bg-gradient-to-t from-[#141618] to-transparent"
-          />
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 flex justify-center pb-3">
-            <button
-              type="button"
-              onClick={onOpenOverview}
-              className="pointer-events-auto rounded-full border border-white/10 bg-white/[0.06] px-3 py-1.5 text-[11px] font-semibold text-cyan-300/90 shadow-lg backdrop-blur-md transition-colors hover:bg-cyan-400/10 hover:text-cyan-200"
-            >
-              Ver más ({tickets.length})
-            </button>
-          </div>
-        </>
-      )}
     </section>
   )
 }
