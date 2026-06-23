@@ -29,7 +29,7 @@ export default async function ClientMessagesPage() {
   ])
 
   return (
-    <div className="flex h-full flex-col gap-4">
+    <div className="flex h-[calc(100dvh_-_168px)] flex-col gap-4 overflow-hidden sm:h-[calc(100dvh_-_192px)]">
       <FadeIn>
         <PageHeader
           eyebrow="Comunicación"
