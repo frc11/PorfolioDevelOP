@@ -20,6 +20,7 @@ import { Eyebrow, Heading, Muted } from '@/components/ui/Typography'
 import { cn } from '@/lib/utils'
 import { updateBotAppearance } from '@/modules/chatbot/server/dashboard/updateBotAppearance'
 import { AvatarPicker } from '@/modules/chatbot/components/avatar'
+import { EmojiPickerField } from '@/modules/chatbot/components/admin/config/EmojiPickerField'
 import { deriveBusinessInitials } from '@/modules/chatbot/shared/businessInitials'
 import { BotConfigPreview, type BotPreviewState } from '@/modules/chatbot/components/preview'
 import {
@@ -61,6 +62,7 @@ type BotPersonalizationState = {
   accentColor: CuratedColor
   position: BotPosition
   avatarStyle: ClientAvatarStyle
+  avatarEmoji: string | null
   welcomeMessage: string
   quickReplies: string[]
 }
@@ -115,6 +117,7 @@ function normalizeBotState(bot: BotPersonalizationProps['bot']): BotPersonalizat
     accentColor: isCuratedColor(bot.accentColor) ? bot.accentColor : CURATED_COLORS[0],
     position: isBotPosition(bot.position) ? bot.position : 'bottom_right',
     avatarStyle: isClientAvatarStyle(bot.avatarStyle) ? bot.avatarStyle : 'neuro',
+    avatarEmoji: bot.avatarEmoji,
     welcomeMessage: bot.welcomeMessage.slice(0, 200),
     quickReplies: normalizeQuickReplyTexts(bot.quickReplies),
   }
@@ -141,6 +144,7 @@ export function BotPersonalization({ bot }: BotPersonalizationProps) {
         accentColor: state.accentColor,
         position: state.position,
         avatarStyle: state.avatarStyle,
+        avatarEmoji: state.avatarEmoji,
         welcomeMessage: state.welcomeMessage,
         quickReplies: state.quickReplies,
       })
@@ -238,7 +242,19 @@ export function BotPersonalization({ bot }: BotPersonalizationProps) {
               }}
               accentColor={state.accentColor}
               businessInitials={deriveBusinessInitials(bot.botName)}
+              escapeHatches={['emoji']}
+              avatarEmoji={state.avatarEmoji}
             />
+            {state.avatarStyle === 'emoji' && (
+              <div className="mt-4">
+                <Field label="Emoji del avatar" hint="Un solo emoji sobre fondo de marca">
+                  <EmojiPickerField
+                    value={state.avatarEmoji}
+                    onChange={(value) => update('avatarEmoji', value)}
+                  />
+                </Field>
+              </div>
+            )}
           </Card>
         </Section>
 
@@ -442,7 +458,7 @@ function buildPreviewState(
     botName: bot.botName,
     isActive: bot.isActive,
     avatarImageUrl: bot.avatarImageUrl,
-    avatarEmoji: bot.avatarEmoji,
+    avatarEmoji: state.avatarEmoji,
     chatSurfaceTint: bot.chatSurfaceTint,
     borderRadius: bot.borderRadius,
     bubbleStyle: bot.bubbleStyle,

@@ -19,13 +19,17 @@ function allAdminStyles(): string[] {
 }
 
 /**
- * Set of styles the CLIENT dashboard exposes — only the 5 registry
- * avatars, no escape hatches. The 'image' style is reserved for the
- * custom-photo flow (post-B-SEC). 'emoji' is intentionally excluded:
- * Monograma covers the "letters on a disc" use case more coherently.
+ * Set of styles the CLIENT dashboard exposes — the 5 registry avatars plus
+ * the 'emoji' escape hatch (avatar = a single emoji on a brand-tinted disc).
+ * The 'image' style stays admin-only (reserved for the post-B-SEC
+ * custom-photo flow).
+ *
+ * NOTE: 'emoji' was previously excluded here (Monograma was considered to
+ * cover the "letters on a disc" case). Product reversed that decision — the
+ * client now gets the emoji avatar + picker too (lane/client-chatbot).
  */
 function allClientStyles(): string[] {
-  return [...AVATAR_IDS]
+  return [...AVATAR_IDS, 'emoji']
 }
 
 /**

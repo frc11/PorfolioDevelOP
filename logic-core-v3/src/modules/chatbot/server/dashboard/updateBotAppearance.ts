@@ -20,7 +20,10 @@ const UpdateBotAppearanceSchema = z
     accentColor: z.enum(CURATED_COLORS).optional(),
     position: z.enum(BOT_POSITIONS).optional(),
     avatarStyle: CLIENT_AVATAR_STYLE_SCHEMA.optional(),
-    avatarEmoji: z.string().trim().max(2).optional(),
+    // max(8) UTF-16 units: paridad con el cap del EmojiPickerField y con las
+    // server actions del admin (saveBotConfig). nullable: el "Quitar" del
+    // picker envía null para limpiar el emoji.
+    avatarEmoji: z.string().trim().max(8).nullable().optional(),
     welcomeMessage: z.string().trim().min(10).max(200).optional(),
     quickReplies: z.array(quickReplyTextSchema).max(4).optional(),
   })
