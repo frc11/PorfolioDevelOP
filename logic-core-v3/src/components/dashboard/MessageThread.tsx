@@ -53,6 +53,8 @@ function getTeamStatus(): { online: boolean; label: string } {
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
+const TEXTAREA_MAX_ROWS = 4
+
 const QUICK_REPLIES = [
   {
     label: 'Solicitar actualización del proyecto',
@@ -78,6 +80,7 @@ export function MessageThread({ messages }: MessageThreadProps) {
   const [inputValue, setInputValue] = useState('')
   const bottomRef = useRef<HTMLDivElement>(null)
   const formRef = useRef<HTMLFormElement>(null)
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
   const router = useRouter()
   const searchParams = useSearchParams()
 
@@ -111,6 +114,19 @@ export function MessageThread({ messages }: MessageThreadProps) {
       setInputValue('')
     }
   }, [isPending, state])
+
+  // Auto-expand: crece con el contenido hasta TEXTAREA_MAX_ROWS, luego scrollea
+  useEffect(() => {
+    const el = textareaRef.current
+    if (!el) return
+    el.style.height = 'auto'
+    const styles = window.getComputedStyle(el)
+    const lineHeight = parseFloat(styles.lineHeight) || 24
+    const paddingY = parseFloat(styles.paddingTop) + parseFloat(styles.paddingBottom)
+    const maxHeight = lineHeight * TEXTAREA_MAX_ROWS + paddingY
+    el.style.height = `${Math.min(el.scrollHeight, maxHeight)}px`
+    el.style.overflowY = el.scrollHeight > maxHeight ? 'auto' : 'hidden'
+  }, [inputValue])
 
   return (
     <div
@@ -280,6 +296,7 @@ export function MessageThread({ messages }: MessageThreadProps) {
           className="flex items-end gap-3 rounded-2xl border border-white/[0.06] bg-white/[0.02] p-2 shadow-2xl backdrop-blur-md transition-all focus-within:border-cyan-500/30 focus-within:ring-2 focus-within:ring-cyan-500/20"
         >
           <textarea
+            ref={textareaRef}
             name="content"
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
