@@ -21,6 +21,7 @@ import { cn } from '@/lib/utils'
 import { updateBotAppearance } from '@/modules/chatbot/server/dashboard/updateBotAppearance'
 import { AvatarPicker } from '@/modules/chatbot/components/avatar'
 import { EmojiPickerField } from '@/modules/chatbot/components/admin/config/EmojiPickerField'
+import { ColorPicker } from '@/modules/chatbot/components/admin/config/ColorPicker'
 import { deriveBusinessInitials } from '@/modules/chatbot/shared/businessInitials'
 import { BotConfigPreview, type BotPreviewState } from '@/modules/chatbot/components/preview'
 import {
@@ -60,6 +61,8 @@ interface BotPersonalizationProps {
 
 type BotPersonalizationState = {
   accentColor: CuratedColor
+  accentSecondary: string | null
+  chatSurfaceTint: string | null
   position: BotPosition
   avatarStyle: ClientAvatarStyle
   avatarEmoji: string | null
@@ -115,6 +118,8 @@ function normalizeQuickReplyTexts(value: unknown): string[] {
 function normalizeBotState(bot: BotPersonalizationProps['bot']): BotPersonalizationState {
   return {
     accentColor: isCuratedColor(bot.accentColor) ? bot.accentColor : CURATED_COLORS[0],
+    accentSecondary: bot.accentSecondary,
+    chatSurfaceTint: bot.chatSurfaceTint,
     position: isBotPosition(bot.position) ? bot.position : 'bottom_right',
     avatarStyle: isClientAvatarStyle(bot.avatarStyle) ? bot.avatarStyle : 'neuro',
     avatarEmoji: bot.avatarEmoji,
@@ -142,6 +147,8 @@ export function BotPersonalization({ bot }: BotPersonalizationProps) {
     startTransition(async () => {
       const result = await updateBotAppearance({
         accentColor: state.accentColor,
+        accentSecondary: state.accentSecondary,
+        chatSurfaceTint: state.chatSurfaceTint,
         position: state.position,
         avatarStyle: state.avatarStyle,
         avatarEmoji: state.avatarEmoji,
@@ -208,6 +215,28 @@ export function BotPersonalization({ bot }: BotPersonalizationProps) {
               {' - '}
               <span className="text-zinc-400">{COLOR_LABELS[state.accentColor]}</span>
             </p>
+          </Card>
+        </Section>
+
+        <Section
+          title="Colores avanzados"
+          description="Opcionales. Color secundario para gradientes y un tinte sutil para el fondo del chat."
+        >
+          <Card padding="lg" className="space-y-5">
+            <Field label="Color secundario" hint="Opcional, para gradientes y acentos secundarios">
+              <ColorPicker
+                value={state.accentSecondary ?? ''}
+                onChange={(value) => update('accentSecondary', value || null)}
+                nullable
+              />
+            </Field>
+            <Field label="Tinte del chat surface" hint="Color sutil del fondo del chat, opcional">
+              <ColorPicker
+                value={state.chatSurfaceTint ?? ''}
+                onChange={(value) => update('chatSurfaceTint', value || null)}
+                nullable
+              />
+            </Field>
           </Card>
         </Section>
 
@@ -450,7 +479,7 @@ function buildPreviewState(
 
   return {
     accentColor: state.accentColor,
-    accentSecondary: bot.accentSecondary,
+    accentSecondary: state.accentSecondary,
     position: state.position,
     avatarStyle: state.avatarStyle,
     welcomeMessage: state.welcomeMessage,
@@ -459,7 +488,7 @@ function buildPreviewState(
     isActive: bot.isActive,
     avatarImageUrl: bot.avatarImageUrl,
     avatarEmoji: state.avatarEmoji,
-    chatSurfaceTint: bot.chatSurfaceTint,
+    chatSurfaceTint: state.chatSurfaceTint,
     borderRadius: bot.borderRadius,
     bubbleStyle: bot.bubbleStyle,
     surfaceStyle: bot.surfaceStyle,

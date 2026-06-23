@@ -18,6 +18,10 @@ const quickReplyTextSchema = z.string().trim().min(1).max(40)
 const UpdateBotAppearanceSchema = z
   .object({
     accentColor: z.enum(CURATED_COLORS).optional(),
+    // accentSecondary + chatSurfaceTint: hex libre nullable (espeja saveBotConfig
+    // del admin). El "Limpiar" del ColorPicker manda '' y el cliente lo pasa a null.
+    accentSecondary: z.string().regex(/^#[0-9a-fA-F]{6}$/).nullable().optional(),
+    chatSurfaceTint: z.string().regex(/^#[0-9a-fA-F]{6}$/).nullable().optional(),
     position: z.enum(BOT_POSITIONS).optional(),
     avatarStyle: CLIENT_AVATAR_STYLE_SCHEMA.optional(),
     // max(8) UTF-16 units: paridad con el cap del EmojiPickerField y con las
@@ -68,6 +72,8 @@ export async function updateBotAppearance(input: UpdateBotAppearanceInput) {
 
   const before = {
     accentColor: bot.accentColor,
+    accentSecondary: bot.accentSecondary,
+    chatSurfaceTint: bot.chatSurfaceTint,
     position: bot.position,
     avatarStyle: bot.avatarStyle,
     avatarEmoji: bot.avatarEmoji,
@@ -80,6 +86,8 @@ export async function updateBotAppearance(input: UpdateBotAppearanceInput) {
     where: { id: bot.id },
     data: {
       ...(data.accentColor !== undefined ? { accentColor: data.accentColor } : {}),
+      ...(data.accentSecondary !== undefined ? { accentSecondary: data.accentSecondary } : {}),
+      ...(data.chatSurfaceTint !== undefined ? { chatSurfaceTint: data.chatSurfaceTint } : {}),
       ...(data.position !== undefined ? { position: data.position } : {}),
       ...(data.avatarStyle !== undefined ? { avatarStyle: data.avatarStyle } : {}),
       ...(data.avatarEmoji !== undefined ? { avatarEmoji: data.avatarEmoji || null } : {}),
@@ -104,6 +112,8 @@ export async function updateBotAppearance(input: UpdateBotAppearanceInput) {
       before,
       after: {
         accentColor: updated.accentColor,
+        accentSecondary: updated.accentSecondary,
+        chatSurfaceTint: updated.chatSurfaceTint,
         position: updated.position,
         avatarStyle: updated.avatarStyle,
         avatarEmoji: updated.avatarEmoji,
