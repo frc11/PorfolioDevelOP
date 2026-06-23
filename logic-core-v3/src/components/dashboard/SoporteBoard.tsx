@@ -73,9 +73,6 @@ const COLUMNS: ColumnDef[] = [
 
 // Máx de cards mostradas en la vista de columna; el resto vive en el overview.
 const MAX_VISIBLE = 2
-// Fade del 2do ticket: desvanece el contenido (no un bloque opaco) revelando el fondo
-// de la columna. Mismo mecanismo (mask-image) que la columna del pipeline admin.
-const COLUMN_FADE = 'linear-gradient(to bottom, #000 calc(100% - 48px), transparent)'
 
 function timeAgo(iso: string): string {
   const secs = Math.floor((Date.now() - new Date(iso).getTime()) / 1000)
@@ -187,13 +184,12 @@ function TicketColumn({
         </div>
       </button>
 
-      {/* Cuerpo: máx 2 cards. Si hay más, el 2do se desvanece (mask) y aparece "Ver más".
-          px-1 da aire al hover de la card. */}
+      {/* Cuerpo: máx 2 cards. Si hay más, un overlay con gradiente (capa aparte) desvanece
+          el 2do ticket. El overlay NO recorta el ring del hover de la card (el problema del
+          mask-image, que clipeaba el borde): la card conserva su ring completo. px-1 da aire
+          al hover. */}
       <div className="relative mt-3 flex-1 px-1">
-        <div
-          className="space-y-2.5 pb-1"
-          style={hasMore ? { maskImage: COLUMN_FADE, WebkitMaskImage: COLUMN_FADE } : undefined}
-        >
+        <div className="space-y-2.5 pb-1">
           {tickets.length > 0 ? (
             visibleTickets.map((ticket, idx) => (
               <TicketCard key={ticket.id} ticket={ticket} idx={idx} />
@@ -210,15 +206,23 @@ function TicketColumn({
         </div>
 
         {hasMore && (
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 flex justify-center pb-1">
-            <button
-              type="button"
-              onClick={onOpenOverview}
-              className="pointer-events-auto rounded-full border border-white/10 bg-white/[0.06] px-3 py-1.5 text-[11px] font-semibold text-cyan-300/90 shadow-lg backdrop-blur-md transition-colors hover:bg-cyan-400/10 hover:text-cyan-200"
-            >
-              Ver más ({tickets.length})
-            </button>
-          </div>
+          <>
+            {/* Overlay del fade — capa absoluta SOBRE la 2da card (no la enmascara), así el
+                ring del hover queda completo. Funde al color compuesto de la columna. */}
+            <div
+              aria-hidden
+              className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[#141618] via-[#141618]/80 to-transparent"
+            />
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 flex justify-center pb-1">
+              <button
+                type="button"
+                onClick={onOpenOverview}
+                className="pointer-events-auto rounded-full border border-white/10 bg-white/[0.06] px-3 py-1.5 text-[11px] font-semibold text-cyan-300/90 shadow-lg backdrop-blur-md transition-colors hover:bg-cyan-400/10 hover:text-cyan-200"
+              >
+                Ver más ({tickets.length})
+              </button>
+            </div>
+          </>
         )}
       </div>
     </section>
