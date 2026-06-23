@@ -2,10 +2,12 @@
 
 import { resolveOrgId } from '@/lib/preview'
 import { prisma } from '@/lib/prisma'
-import { revalidateTag } from 'next/cache'
+import { revalidatePath, revalidateTag } from 'next/cache'
 
-// Marca los mensajes de admin como leídos e invalida el unstable_cache del
-// badge de mensajes no leídos en el layout del dashboard.
+// Marca los mensajes de admin como leídos e invalida el badge del sidebar.
+// revalidateTag busta el data cache (unstable_cache); revalidatePath busta el
+// Router Cache del layout — necesario para que router.refresh() re-renderice el
+// layout (no solo el page segment) y el badge desaparezca en el mismo ciclo.
 export async function markClientMessagesRead(): Promise<void> {
   const organizationId = await resolveOrgId()
   if (!organizationId) return
@@ -16,4 +18,5 @@ export async function markClientMessagesRead(): Promise<void> {
   })
 
   revalidateTag(`unread-messages:${organizationId}`, {})
+  revalidatePath('/dashboard/messages')
 }
