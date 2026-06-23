@@ -54,10 +54,13 @@ export default async function SoportePage() {
   const resolvedTickets = serialized.filter((t) => t.status === 'RESOLVED')
 
   return (
-    // Sprint M: todo en una pantalla sin scroll de página. Ritmo vertical comprimido
-    // (gap-4, paddings reducidos) en lugar del scroll interno de columna.
-    <div className="flex w-full flex-col gap-4">
-      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
+    // Sprint O2: no-scroll DEFINITIVO. En desktop (lg+) la página se acota al viewport con
+    // calc — mismo enfoque que la página de detalle de soporte (h-[calc(100svh-12.5rem)],
+    // el alto exacto del área visible de <main>) — y overflow-hidden corta cualquier excedente
+    // en vez de scrollear. Header + stats (shrink-0) + board (flex-1) entran sí o sí. En mobile
+    // (<lg) fluye natural. El ritmo comprimido de M/N evita que se recorte nada en pantalla normal.
+    <div className="flex w-full flex-col gap-4 lg:h-[calc(100svh-12.5rem)] lg:min-h-0 lg:overflow-hidden">
+      <div className="flex shrink-0 flex-col justify-between gap-4 sm:flex-row sm:items-start">
         <PageHeader
           eyebrow="Soporte"
           title="Centro de Soporte"
@@ -70,7 +73,7 @@ export default async function SoportePage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <div className="grid shrink-0 grid-cols-1 gap-4 sm:grid-cols-3">
         <StatCard
           label="Tickets abiertos"
           value={openTicketsCount}

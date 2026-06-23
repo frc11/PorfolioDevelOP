@@ -248,7 +248,9 @@ export function SoporteBoard({ activeTickets, resolvedTickets }: Props) {
   const overviewTickets = overview ? byStatus[overview] : []
 
   return (
-    <div className="flex flex-col gap-3">
+    // En desktop llena el alto acotado del fold (lg:flex-1): columnas + recursos arriba,
+    // el sobrante queda abajo. El board no scrollea (cada columna muestra máx 2 + "Ver más").
+    <div className="flex flex-col gap-3 lg:min-h-0 lg:flex-1">
       {/* Tablero de 3 columnas (Abiertos · En curso · Resueltos). Columnas de igual alto
           (grid stretch); cada una muestra máx 2 tickets. En mobile (<lg) se apilan. */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
