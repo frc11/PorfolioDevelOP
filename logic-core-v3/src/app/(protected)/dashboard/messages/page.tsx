@@ -5,17 +5,14 @@ import { MessageThread } from '@/components/dashboard/MessageThread'
 import { FadeIn } from '@/components/dashboard/FadeIn'
 import { PageHeader } from '@/components/ui'
 import { MessageSquare } from 'lucide-react'
+import { MarkReadOnMount } from './_components/MarkReadOnMount'
+import { markClientMessagesRead } from './_actions/mark-read'
 
 export const dynamic = 'force-dynamic'
 
 export default async function ClientMessagesPage() {
   const organizationId = await resolveOrgId()
   if (!organizationId) redirect('/login')
-
-  await prisma.message.updateMany({
-    where: { organizationId, fromAdmin: true, read: false },
-    data: { read: true },
-  })
 
   const [messages, org] = await Promise.all([
     prisma.message.findMany({
@@ -30,6 +27,8 @@ export default async function ClientMessagesPage() {
 
   return (
     <div className="flex h-[calc(100dvh_-_168px)] flex-col gap-4 overflow-hidden sm:h-[calc(100dvh_-_192px)]">
+      <MarkReadOnMount action={markClientMessagesRead} />
+
       <FadeIn>
         <PageHeader
           eyebrow="Comunicación"
