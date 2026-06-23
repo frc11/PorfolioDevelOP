@@ -47,8 +47,8 @@ function getTeamStatus(): { online: boolean; label: string } {
   const isWorkHours = hour >= 9 && hour < 18
 
   return isWeekday && isWorkHours
-    ? { online: true, label: 'Respondemos en minutos' }
-    : { online: false, label: 'Respondemos en < 4hs' }
+    ? { online: true, label: 'Equipo en línea' }
+    : { online: false, label: 'Respondemos en < 4 horas' }
 }
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -151,8 +151,8 @@ export function MessageThread({ messages }: MessageThreadProps) {
           </div>
 
           <span className="text-[10px] text-zinc-500">
-            Atención:{' '}
-            <span className="text-zinc-300">Lun–Vie 9–19hs ART</span>
+            Resp. promedio:{' '}
+            <span className="text-zinc-300">{'< 15 min'}</span>
           </span>
         </div>
       </div>
