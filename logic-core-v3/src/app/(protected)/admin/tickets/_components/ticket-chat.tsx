@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useTransition } from 'react'
+import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { Loader2, MessageSquareText } from 'lucide-react'
 import type { Role, TicketStatus } from '@prisma/client'
@@ -84,10 +84,6 @@ export function TicketChat({ ticket }: TicketChatProps) {
   const [status, setStatus] = useState<TicketStatus>(ticket.status)
   const [error, setError] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
-
-  useEffect(() => {
-    setStatus(ticket.status)
-  }, [ticket.status])
 
   function handleStatusChange(nextStatus: TicketStatus) {
     const previousStatus = status
