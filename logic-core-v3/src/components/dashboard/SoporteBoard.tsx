@@ -1,9 +1,10 @@
 'use client'
 
 import Link from 'next/link'
+import { useState } from 'react'
 import { motion } from 'motion/react'
 import { Book, ChevronRight, Clock, HelpCircle, Inbox, Zap } from 'lucide-react'
-import { EmptyState } from '@/components/ui'
+import { EmptyState, Modal } from '@/components/ui'
 import { adminHoverCls } from '@/lib/hover'
 import { cn } from '@/lib/utils'
 
@@ -143,13 +144,24 @@ function TicketCard({ ticket, idx }: { ticket: TicketListItem; idx: number }) {
   )
 }
 
-function TicketColumn({ column, tickets }: { column: ColumnDef; tickets: TicketListItem[] }) {
+function TicketColumn({
+  column,
+  tickets,
+  onOpenOverview,
+}: {
+  column: ColumnDef
+  tickets: TicketListItem[]
+  onOpenOverview: () => void
+}) {
   return (
     <section className="flex h-full min-h-0 min-w-0 flex-col rounded-[26px] border border-white/10 bg-white/[0.04] p-4 backdrop-blur-xl">
-      {/* Header de columna con tinte por estado (label + nombre + contador) */}
-      <div
+      {/* Header de columna con tinte por estado — click abre el overview de la categoría */}
+      <button
+        type="button"
+        onClick={onOpenOverview}
+        aria-label={`Ver todos los tickets de ${column.label} (${tickets.length})`}
         className={cn(
-          'shrink-0 rounded-2xl border border-white/10 bg-gradient-to-br px-4 py-3',
+          'block w-full shrink-0 rounded-2xl border border-white/10 bg-gradient-to-br px-4 py-3 text-left transition-[filter] hover:brightness-110',
           column.tone,
         )}
       >
@@ -162,7 +174,7 @@ function TicketColumn({ column, tickets }: { column: ColumnDef; tickets: TicketL
             {tickets.length}
           </div>
         </div>
-      </div>
+      </button>
 
       {/* Cuerpo: altura fija (flex-1) con scroll interno. px-1 da aire al hover:scale. */}
       <div className="mt-4 min-h-0 flex-1 space-y-3 overflow-y-auto px-1 pb-1">
@@ -188,11 +200,16 @@ interface Props {
 }
 
 export function SoporteBoard({ activeTickets, resolvedTickets }: Props) {
+  const [overview, setOverview] = useState<TicketStatus | null>(null)
+
   const byStatus: Record<TicketStatus, TicketListItem[]> = {
     OPEN: activeTickets.filter((t) => t.status === 'OPEN'),
     IN_PROGRESS: activeTickets.filter((t) => t.status === 'IN_PROGRESS'),
     RESOLVED: resolvedTickets,
   }
+
+  const openColumn = overview ? COLUMNS.find((c) => c.key === overview) ?? null : null
+  const overviewTickets = overview ? byStatus[overview] : []
 
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-5">
@@ -200,9 +217,41 @@ export function SoporteBoard({ activeTickets, resolvedTickets }: Props) {
           scrollea internamente); en mobile (<lg) las columnas se apilan y la página scrollea. */}
       <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 lg:grid-cols-3 lg:grid-rows-1">
         {COLUMNS.map((column) => (
-          <TicketColumn key={column.key} column={column} tickets={byStatus[column.key]} />
+          <TicketColumn
+            key={column.key}
+            column={column}
+            tickets={byStatus[column.key]}
+            onOpenOverview={() => setOverview(column.key)}
+          />
         ))}
       </div>
+
+      {/* Overview de categoría — modal portaleado a body (mismo patrón que el resto del lane).
+          Scrollea internamente; click en un ticket → su detalle. */}
+      <Modal
+        open={overview !== null}
+        onClose={() => setOverview(null)}
+        title={openColumn?.label}
+        description={`${overviewTickets.length} ticket${overviewTickets.length !== 1 ? 's' : ''}`}
+        size="xl"
+        surface="glass"
+      >
+        {overviewTickets.length > 0 ? (
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            {overviewTickets.map((ticket, idx) => (
+              <TicketCard key={ticket.id} ticket={ticket} idx={idx} />
+            ))}
+          </div>
+        ) : (
+          <EmptyState
+            icon={Inbox}
+            title={openColumn?.emptyTitle ?? 'Sin tickets'}
+            description={openColumn?.emptyDescription ?? ''}
+            variant="subtle"
+            size="sm"
+          />
+        )}
+      </Modal>
 
       {/* Recursos de autogestión — fijo al pie, siempre visible (no obliga a scrollear). */}
       <motion.div
