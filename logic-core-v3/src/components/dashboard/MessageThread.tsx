@@ -288,7 +288,8 @@ export function MessageThread({ messages }: MessageThreadProps) {
             disabled={isPending}
             className="max-h-32 min-h-[44px] flex-1 resize-none bg-transparent px-3 py-3 text-sm text-zinc-100 placeholder-zinc-500 outline-none transition-all disabled:opacity-50"
             onKeyDown={(e) => {
-              if (e.key === 'Enter' && !e.shiftKey) {
+              // isComposing: no enviar mientras se confirma la composición IME (acentos, dead-keys)
+              if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) {
                 e.preventDefault()
                 e.currentTarget.form?.requestSubmit()
               }
