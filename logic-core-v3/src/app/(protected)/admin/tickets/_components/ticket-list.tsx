@@ -51,6 +51,23 @@ const STATUS_TONES: Record<TicketStatus, string> = {
   RESOLVED: 'border-emerald-400/20 bg-emerald-500/10 text-emerald-200',
 }
 
+type TicketPriority = 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT'
+type TicketCategory = 'TECHNICAL' | 'BILLING' | 'FEATURE_REQUEST' | 'OTHER'
+
+const PRIORITY_MAP: Record<TicketPriority, { label: string; cls: string; pulse?: boolean }> = {
+  LOW: { label: 'Baja', cls: 'text-zinc-400 bg-zinc-500/10 border-zinc-500/20' },
+  MEDIUM: { label: 'Media', cls: 'text-yellow-400 bg-yellow-500/10 border-yellow-500/20' },
+  HIGH: { label: 'Alta', cls: 'text-orange-400 bg-orange-500/10 border-orange-500/20' },
+  URGENT: { label: 'Urgente', cls: 'text-red-400 bg-red-500/10 border-red-500/20', pulse: true },
+}
+
+const CATEGORY_MAP: Record<TicketCategory, string> = {
+  TECHNICAL: 'Técnico',
+  BILLING: 'Facturación',
+  FEATURE_REQUEST: 'Requerimiento',
+  OTHER: 'Otro',
+}
+
 function formatDate(value: string) {
   return new Intl.DateTimeFormat('es-AR', {
     day: '2-digit',
@@ -142,7 +159,9 @@ export function TicketList({ tickets }: TicketListProps) {
           initial={reduce ? false : 'hidden'}
           animate="visible"
         >
-          {filteredTickets.map((ticket) => (
+          {filteredTickets.map((ticket) => {
+            const priority = PRIORITY_MAP[ticket.priority]
+            return (
             <motion.div key={ticket.id} variants={staggerItem}>
             <Link
               href={`/admin/tickets/${ticket.id}`}
@@ -160,11 +179,25 @@ export function TicketList({ tickets }: TicketListProps) {
                     >
                       {STATUS_LABELS[ticket.status]}
                     </span>
+                    <span
+                      className={[
+                        'inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-medium',
+                        priority.cls,
+                      ].join(' ')}
+                    >
+                      {priority.pulse && (
+                        <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-red-500" />
+                      )}
+                      {priority.label}
+                    </span>
                   </div>
 
                   <div className="mt-3 flex flex-wrap items-center gap-3 text-sm text-zinc-400">
                     <span className="rounded-full border border-white/10 bg-black/20 px-2.5 py-1">
                       {ticket.organization.companyName}
+                    </span>
+                    <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] text-zinc-400">
+                      {CATEGORY_MAP[ticket.category]}
                     </span>
                     <span>Actualizado {formatDate(ticket.updatedAt)}</span>
                   </div>
@@ -182,7 +215,8 @@ export function TicketList({ tickets }: TicketListProps) {
               </div>
             </Link>
             </motion.div>
-          ))}
+          )
+          })}
         </motion.div>
       )}
     </section>
