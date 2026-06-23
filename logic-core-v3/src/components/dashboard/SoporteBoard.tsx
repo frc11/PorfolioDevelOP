@@ -75,7 +75,7 @@ const COLUMNS: ColumnDef[] = [
 const MAX_VISIBLE = 2
 // Fade del 2do ticket: desvanece el contenido (no un bloque opaco) revelando el fondo
 // de la columna. Mismo mecanismo (mask-image) que la columna del pipeline admin.
-const COLUMN_FADE = 'linear-gradient(to bottom, #000 calc(100% - 56px), transparent)'
+const COLUMN_FADE = 'linear-gradient(to bottom, #000 calc(100% - 48px), transparent)'
 
 function timeAgo(iso: string): string {
   const secs = Math.floor((Date.now() - new Date(iso).getTime()) / 1000)
@@ -101,7 +101,7 @@ function TicketCard({ ticket, idx }: { ticket: TicketListItem; idx: number }) {
         href={`/dashboard/soporte/${ticket.id}`}
         // Hover acotado del admin (adminHoverCls: scale 1.015 + shadow + ring, contenido
         // dentro del padding de la columna) — sin el scale grande que desbordaba el borde.
-        className={`group block rounded-[22px] border border-white/10 bg-white/5 p-4 shadow-[0_18px_40px_rgba(0,0,0,0.22)] hover:border-cyan-400/20 hover:bg-white/[0.07] ${adminHoverCls}`}
+        className={`group block rounded-[22px] border border-white/10 bg-white/5 p-3.5 shadow-[0_18px_40px_rgba(0,0,0,0.22)] hover:border-cyan-400/20 hover:bg-white/[0.07] ${adminHoverCls}`}
       >
         {/* Badges: prioridad + categoría + id */}
         <div className="flex flex-wrap items-center gap-1.5">
@@ -122,19 +122,19 @@ function TicketCard({ ticket, idx }: { ticket: TicketListItem; idx: number }) {
         </div>
 
         {/* Título */}
-        <h4 className="mt-3 line-clamp-2 text-sm font-semibold leading-snug text-zinc-100 transition-colors group-hover:text-white">
+        <h4 className="mt-2 line-clamp-2 text-sm font-semibold leading-snug text-zinc-100 transition-colors group-hover:text-white">
           {ticket.title}
         </h4>
 
         {/* Preview del último mensaje */}
         {ticket.lastMessage && (
-          <p className="mt-2 line-clamp-2 text-xs leading-relaxed text-zinc-400">
+          <p className="mt-1.5 line-clamp-1 text-xs leading-relaxed text-zinc-400">
             {ticket.lastMessage}
           </p>
         )}
 
         {/* Footer: tiempo · mensajes */}
-        <div className="mt-4 flex items-center gap-2 border-t border-white/10 pt-3 text-[10px] font-medium text-zinc-500">
+        <div className="mt-3 flex items-center gap-2 border-t border-white/10 pt-2.5 text-[10px] font-medium text-zinc-500">
           <Clock size={9} strokeWidth={1.5} />
           <span>{timeAgo(ticket.createdAt)}</span>
           <span>·</span>
@@ -172,7 +172,7 @@ function TicketColumn({
         onClick={onOpenOverview}
         aria-label={`Ver todos los tickets de ${column.label} (${tickets.length})`}
         className={cn(
-          'block w-full shrink-0 rounded-2xl border border-white/10 bg-gradient-to-br px-4 py-3 text-left transition-[filter] hover:brightness-110',
+          'block w-full shrink-0 rounded-2xl border border-white/10 bg-gradient-to-br px-4 py-2.5 text-left transition-[filter] hover:brightness-110',
           column.tone,
         )}
       >
@@ -189,9 +189,9 @@ function TicketColumn({
 
       {/* Cuerpo: máx 2 cards. Si hay más, el 2do se desvanece (mask) y aparece "Ver más".
           px-1 da aire al hover de la card. */}
-      <div className="relative mt-4 flex-1 px-1">
+      <div className="relative mt-3 flex-1 px-1">
         <div
-          className="space-y-3 pb-1"
+          className="space-y-2.5 pb-1"
           style={hasMore ? { maskImage: COLUMN_FADE, WebkitMaskImage: COLUMN_FADE } : undefined}
         >
           {tickets.length > 0 ? (
@@ -243,7 +243,7 @@ export function SoporteBoard({ activeTickets, resolvedTickets }: Props) {
   const overviewTickets = overview ? byStatus[overview] : []
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-4">
       {/* Tablero de 3 columnas (Abiertos · En curso · Resueltos). Columnas de igual alto
           (grid stretch); cada una muestra máx 2 tickets. En mobile (<lg) se apilan. */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
@@ -290,10 +290,10 @@ export function SoporteBoard({ activeTickets, resolvedTickets }: Props) {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.25 }}
       >
-        <h4 className="mb-3 px-1 text-[10px] font-medium uppercase tracking-[0.2em] text-zinc-500">
+        <h4 className="mb-2 px-1 text-[10px] font-medium uppercase tracking-[0.2em] text-zinc-500">
           Recursos de Autogestión
         </h4>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
           {[
             {
               label: 'Guía del Usuario',
@@ -316,7 +316,7 @@ export function SoporteBoard({ activeTickets, resolvedTickets }: Props) {
           ].map((item) => (
             <button
               key={item.label}
-              className={`group flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.04] p-4 text-left shadow-lg backdrop-blur-xl hover:border-white/20 hover:bg-white/[0.07] ${adminHoverCls}`}
+              className={`group flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.04] p-3.5 text-left shadow-lg backdrop-blur-xl hover:border-white/20 hover:bg-white/[0.07] ${adminHoverCls}`}
             >
               <div
                 className={`shrink-0 rounded-xl border border-white/5 bg-black/20 p-2.5 transition-transform group-hover:scale-110 ${item.color}`}

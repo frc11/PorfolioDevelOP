@@ -54,13 +54,16 @@ export default async function SoportePage() {
   const resolvedTickets = serialized.filter((t) => t.status === 'RESOLVED')
 
   return (
-    <div className="flex w-full flex-col gap-5">
+    // Sprint M: todo en una pantalla sin scroll de página. Ritmo vertical comprimido
+    // (gap-4, paddings reducidos) en lugar del scroll interno de columna.
+    <div className="flex w-full flex-col gap-4">
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
         <PageHeader
           eyebrow="Soporte"
           title="Centro de Soporte"
           description="Un canal directo para ordenar consultas, prioridades y próximos pasos con el equipo."
           icon={Headphones}
+          className="pt-0 sm:pt-1"
         />
         <div className="shrink-0 sm:mt-3">
           <NewTicketModal />
@@ -73,7 +76,7 @@ export default async function SoportePage() {
           value={openTicketsCount}
           icon={Headphones}
           accent="cyan"
-          className={adminHoverCls}
+          className={`${adminHoverCls} p-4`}
         />
         <StatCard
           label="SLA horario laboral"
@@ -81,7 +84,7 @@ export default async function SoportePage() {
           icon={Clock}
           accent="emerald"
           subtitle="Lun-Vie 9-19hs ART"
-          className={adminHoverCls}
+          className={`${adminHoverCls} p-4`}
         />
         <StatCard
           label="Tu equipo de soporte"
@@ -89,7 +92,7 @@ export default async function SoportePage() {
           icon={Users}
           accent="zinc"
           subtitle="Mensajes, tickets o WhatsApp"
-          className={adminHoverCls}
+          className={`${adminHoverCls} p-4`}
         />
       </div>
 
