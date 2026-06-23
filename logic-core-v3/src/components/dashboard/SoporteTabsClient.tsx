@@ -13,6 +13,7 @@ import {
   Zap,
 } from 'lucide-react'
 import { EmptyState, Tabs } from '@/components/ui'
+import { adminHoverCls } from '@/lib/hover'
 
 type TicketStatus = 'OPEN' | 'IN_PROGRESS' | 'RESOLVED'
 type TicketPriority = 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT'
@@ -104,10 +105,10 @@ export function SoporteTabsClient({ activeTickets, resolvedTickets }: Props) {
                   <div className="flex flex-col items-center justify-center py-16 text-center">
                     <div className="relative mb-6 flex items-center justify-center">
                       <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="h-24 w-24 animate-ping rounded-full bg-emerald-500/20 opacity-20" />
-                        <div className="h-32 w-32 animate-[ping_3s_linear_infinite] rounded-full bg-emerald-500/10 opacity-10" />
+                        <div className="h-24 w-24 animate-ping rounded-full bg-emerald-500/10 opacity-10" />
+                        <div className="h-32 w-32 animate-[ping_3s_linear_infinite] rounded-full bg-emerald-500/5 opacity-5" />
                       </div>
-                      <div className="absolute h-20 w-20 rounded-full bg-emerald-500/20 blur-2xl" />
+                      <div className="absolute h-20 w-20 rounded-full bg-emerald-500/10 blur-2xl" />
                       <div className="relative flex h-20 w-20 items-center justify-center rounded-2xl border border-white/5 bg-white/[0.02] shadow-2xl backdrop-blur-md">
                         <CheckCircle2 size={32} className="text-emerald-400" />
                       </div>
@@ -247,7 +248,7 @@ export function SoporteTabsClient({ activeTickets, resolvedTickets }: Props) {
           ].map((item) => (
             <button
               key={item.label}
-              className={`group flex flex-col items-start gap-4 rounded-2xl border border-white/10 bg-[#0c0e12]/40 p-6 text-left shadow-lg backdrop-blur-xl transition-all duration-300 hover:border-white/20 hover:bg-white/[0.04] ${item.glow}`}
+              className={`group flex flex-col items-start gap-4 rounded-2xl border border-white/10 bg-[#0c0e12]/40 p-6 text-left shadow-lg backdrop-blur-xl hover:border-white/20 hover:bg-white/[0.04] ${adminHoverCls}`}
             >
               <div
                 className={`rounded-xl border border-white/5 bg-black/20 p-3 transition-transform group-hover:scale-110 ${item.color}`}

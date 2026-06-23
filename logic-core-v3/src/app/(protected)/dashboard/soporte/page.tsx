@@ -7,6 +7,7 @@ import { Clock, Headphones, Users } from 'lucide-react'
 import { NewTicketModal } from '@/components/dashboard/NewTicketModal'
 import { SoporteTabsClient } from '@/components/dashboard/SoporteTabsClient'
 import { PageHeader, StatCard } from '@/components/ui'
+import { adminHoverCls } from '@/lib/hover'
 
 export const metadata = { title: 'Soporte B2B | develOP Dashboard' }
 
@@ -72,6 +73,7 @@ export default async function SoportePage() {
           value={openTicketsCount}
           icon={Headphones}
           accent="cyan"
+          className={adminHoverCls}
         />
         <StatCard
           label="SLA horario laboral"
@@ -79,6 +81,7 @@ export default async function SoportePage() {
           icon={Clock}
           accent="emerald"
           subtitle="Lun-Vie 9-19hs ART"
+          className={adminHoverCls}
         />
         <StatCard
           label="Tu equipo de soporte"
@@ -86,6 +89,7 @@ export default async function SoportePage() {
           icon={Users}
           accent="zinc"
           subtitle="Mensajes, tickets o WhatsApp"
+          className={adminHoverCls}
         />
       </div>
 
