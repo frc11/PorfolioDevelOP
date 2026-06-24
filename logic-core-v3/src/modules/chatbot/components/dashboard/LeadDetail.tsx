@@ -397,7 +397,13 @@ export function LeadDetail({ lead, enriched, messages, botSlug, showScoring }: L
             size="sm"
           />
         ) : (
-          <ConversationThread messages={messages} botSlug={botSlug} />
+          <div className="space-y-2">
+            <p className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.24em] text-zinc-500">
+              <MessageSquare className="h-3 w-3 shrink-0" strokeWidth={1.5} aria-hidden />
+              Conversación origen
+            </p>
+            <ConversationThread messages={messages} botSlug={botSlug} />
+          </div>
         )}
 
         {lead.conversation?.currentPath && (
