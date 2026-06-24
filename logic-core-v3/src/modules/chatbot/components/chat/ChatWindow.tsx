@@ -270,8 +270,20 @@ export function ChatWindow({
                       mapea [] → no renderiza nada. */}
                   {messages.length === 0 && !degraded ? (
                     <div key="__empty__" className="flex h-full flex-col items-center justify-center space-y-4 py-6 text-center opacity-75">
-                      <div className="flex h-16 w-16 items-center justify-center rounded-[1.35rem] border border-white/6 bg-gradient-to-br from-cyan-500/10 to-purple-500/10 shadow-[0_0_30px_rgba(6,182,212,0.1)]">
-                        <Sparkles className="w-6 h-6 text-cyan-400/80" />
+                      <div
+                        className="flex h-16 w-16 items-center justify-center rounded-[1.35rem] border border-white/6"
+                        style={{
+                          // Cyan hardcodeado → accent del runtime (ar,ag,ab). El stop
+                          // púrpura es decorativo fijo (no es el accent del tenant).
+                          background: `linear-gradient(to bottom right, rgba(${ar},${ag},${ab},0.10), rgba(168,85,247,0.10))`,
+                          boxShadow: `0 0 30px rgba(${ar},${ag},${ab},0.10)`,
+                        }}
+                      >
+                        <Sparkles
+                          className="w-6 h-6"
+                          strokeWidth={1.5}
+                          style={{ color: `rgba(${ar},${ag},${ab},0.8)` }}
+                        />
                       </div>
                       <div>
                         <p style={{
@@ -611,18 +623,18 @@ export function ChatWindow({
                   style={{
                     width: '40px', height: '40px',
                     borderRadius: '50%',
-                    border: '1px solid rgba(6,182,212,0.2)',
+                    border: `1px solid rgba(${ar},${ag},${ab},0.2)`,
                     // No inline cursor: falls back to the global `button { cursor: none }`
                     // on desktop so the custom cursor shows (disabled state is conveyed
                     // by the dimmed background, not an OS not-allowed cursor).
                     background: botBusy || degraded || !input.trim()
                       ? 'rgba(255,255,255,0.05)'
-                      : 'linear-gradient(135deg, rgba(6,182,212,0.85), rgba(6,182,212,0.65))',
+                      : `linear-gradient(135deg, rgba(${ar},${ag},${ab},0.85), rgba(${ar},${ag},${ab},0.65))`,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     flexShrink: 0,
-                    boxShadow: botBusy || degraded || !input.trim() ? 'none' : '0 0 16px rgba(6,182,212,0.3), 0 2px 8px rgba(0,0,0,0.3)',
+                    boxShadow: botBusy || degraded || !input.trim() ? 'none' : `0 0 16px rgba(${ar},${ag},${ab},0.3), 0 2px 8px rgba(0,0,0,0.3)`,
                     transition: 'all 200ms',
                     color: botBusy || degraded || !input.trim() ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.95)',
                   }}
@@ -636,10 +648,6 @@ export function ChatWindow({
         )}
       </AnimatePresence>
       <style jsx global>{`
-        @keyframes thinkPulse {
-          0%, 100% { transform: scale(1); box-shadow: 0 0 10px rgba(6,182,212,0.2); }
-          50% { transform: scale(1.08); box-shadow: 0 0 18px rgba(6,182,212,0.45); }
-        }
         @keyframes chatbotCaretBlink {
           0%, 49% { opacity: 0.85; }
           50%, 100% { opacity: 0; }
