@@ -87,6 +87,15 @@ export function TicketReplyForm({ ticketId }: TicketReplyFormProps) {
           onChange={(event) => setContent(event.target.value)}
           rows={1}
           disabled={isPending}
+          onKeyDown={(event) => {
+            // Enter envía, Shift+Enter = nueva línea. IME guard
+            // (!isComposing): no enviar a medias al confirmar la composición
+            // de acentos/dead-keys. Mismo patrón que el composer del cliente.
+            if (event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing) {
+              event.preventDefault()
+              event.currentTarget.form?.requestSubmit()
+            }
+          }}
           className="min-w-0 flex-1 resize-none overflow-y-auto rounded-[24px] border border-white/10 bg-black/20 px-4 py-3 text-sm leading-6 text-white outline-none transition-colors placeholder:text-zinc-500 focus:border-cyan-400/35 disabled:cursor-not-allowed disabled:opacity-60"
           placeholder="Escribí una respuesta clara, concreta y accionable para el cliente..."
         />
