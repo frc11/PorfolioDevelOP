@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { Loader2, SendHorizontal } from 'lucide-react'
-import { replyToTicket } from '../_actions/ticket.actions'
+import { replyToTicketAction } from '@/lib/tickets/actions'
 import { EmojiPickerButton } from './emoji-picker-button'
 
 type TicketReplyFormProps = {
@@ -55,7 +55,7 @@ export function TicketReplyForm({ ticketId }: TicketReplyFormProps) {
     setError(null)
 
     startTransition(async () => {
-      const result = await replyToTicket(ticketId, content)
+      const result = await replyToTicketAction({ ticketId, content })
 
       if (!result.success) {
         setError(result.error)

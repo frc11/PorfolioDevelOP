@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { replyTicketAction } from '@/actions/ticket-actions'
+import { replyToTicketAction } from '@/lib/tickets/actions'
 import { Send, Loader2, AlertCircle } from 'lucide-react'
 
 export function TicketReplyForm({ ticketId }: { ticketId: string }) {
@@ -19,7 +19,7 @@ export function TicketReplyForm({ ticketId }: { ticketId: string }) {
     setIsSubmitting(true)
     setErrorMsg('')
 
-    const res = await replyTicketAction({ ticketId, content })
+    const res = await replyToTicketAction({ ticketId, content })
     setIsSubmitting(false)
 
     if (res.success) {

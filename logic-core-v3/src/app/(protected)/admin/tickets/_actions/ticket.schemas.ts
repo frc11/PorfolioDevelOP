@@ -23,14 +23,3 @@ export const ListTicketsSchema = z.object({
   ),
 })
 export const GetTicketByIdSchema = TicketIdSchema
-export const ReplyToTicketSchema = z.object({
-  ticketId: TicketIdSchema,
-  content: z.preprocess(
-    emptyStringToUndefined,
-    z.string().min(1, 'La respuesta no puede estar vacia.')
-  ),
-})
-export const UpdateTicketStatusSchema = z.object({
-  ticketId: TicketIdSchema,
-  status: z.union([z.nativeEnum(TicketStatus), z.literal('CLOSED')]),
-})
