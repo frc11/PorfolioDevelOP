@@ -3,19 +3,18 @@ import { auth } from '@/auth'
 import { redirect } from 'next/navigation'
 import { resolveOrgId } from '@/lib/preview'
 import {
-  ArrowLeft,
   CheckCircle2,
   Circle,
   Clock,
   Hash,
   MessageSquare,
+  MessageSquareText,
   Shield,
   Tag,
 } from 'lucide-react'
 import Link from 'next/link'
 import { TicketReplyForm } from '@/components/dashboard/TicketReplyForm'
-import { AnimatedChatBubble } from '@/components/dashboard/AnimatedChatBubble'
-import { TicketStatusSelector } from '@/components/dashboard/TicketStatusSelector'
+import { ClientChatThread, type ChatMessage } from '@/components/dashboard/ClientChatThread'
 import { ResolveTicketButton } from '@/components/dashboard/ResolveTicketButton'
 
 const CATEGORY_MAP: Record<string, string> = {
@@ -38,15 +37,6 @@ const PRIORITY_MAP: Record<string, { label: string; cls: string; pulse?: boolean
   URGENT: { label: 'Urgente', cls: 'text-red-400 bg-red-500/10 border-red-500/20', pulse: true },
 }
 
-function fmtDate(d: Date) {
-  return d.toLocaleString('es-AR', {
-    hour: '2-digit',
-    minute: '2-digit',
-    day: '2-digit',
-    month: 'short',
-  })
-}
-
 function fmtShort(d: Date) {
   return d.toLocaleDateString('es-AR', {
     day: '2-digit',
@@ -66,8 +56,6 @@ export default async function TicketDetailPage({
   const organizationId = await resolveOrgId()
 
   if (!session?.user?.id || !organizationId) redirect('/login')
-
-  const isSuperAdmin = session.user.role === 'SUPER_ADMIN'
 
   const ticket = await prisma.ticket.findUnique({
     where: { id: ticketId, organizationId },
@@ -112,97 +100,91 @@ export default async function TicketDetailPage({
   const priority = PRIORITY_MAP[ticket.priority] ?? PRIORITY_MAP.MEDIUM
   const status = STATUS_MAP[ticket.status] ?? STATUS_MAP.OPEN
 
+  // Mapeo al molde compartido (mismo que Mensajes). Datos del Ticket
+  // (tabla TicketMessage) — NO se mezclan con los de Mensajes.
+  // isAdmin → isAgency: develOP a la izquierda, cliente a la derecha.
+  const chatMessages: ChatMessage[] = ticket.messages.map((m) => ({
+    id: m.id,
+    content: m.content,
+    isAgency: m.isAdmin,
+    authorLabel: m.isAdmin ? 'develOP' : (m.user.name ?? 'Tú'),
+    createdAt: m.createdAt,
+  }))
+
   return (
     <div className="flex h-[calc(100svh-14rem)] min-h-0 w-full flex-col gap-5 sm:h-[calc(100svh-12.5rem)]">
-      {/* ── Header ──────────────────────────────────────────── */}
-      <div className="flex shrink-0 flex-col gap-4 sm:flex-row sm:items-center">
-        <Link
-          href="/dashboard/soporte"
-          className="w-fit rounded-lg border border-white/10 bg-white/5 p-2 text-zinc-400 transition-colors hover:bg-white/10 hover:text-white"
-        >
-          <ArrowLeft size={18} />
-        </Link>
-
-        <div className="min-w-0 flex-1">
-          <h1 className="mb-1 truncate text-xl font-bold tracking-tight text-white">
-            {ticket.title}
-          </h1>
-          <div className="flex flex-wrap items-center gap-2">
-            <span
-              className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[9px] font-black uppercase tracking-wider ${priority.cls}`}
-            >
-              {priority.pulse && (
-                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-red-500" />
-              )}
-              {priority.label}
-            </span>
-            <span
-              className={`rounded-full border px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider ${status.cls}`}
-            >
-              {status.label}
-            </span>
-            <span className="font-mono text-xs text-zinc-500">
-              {CATEGORY_MAP[ticket.category]} · #{ticket.id.slice(-6).toUpperCase()}
-            </span>
+      {/* ── Header (estilo admin: breadcrumb + título + badges) ─────────── */}
+      <div className="shrink-0 rounded-[28px] border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div className="min-w-0">
+            <p className="text-xs tracking-tight text-zinc-500">
+              develOP /{' '}
+              <Link
+                href="/dashboard/soporte"
+                className="transition-colors hover:text-zinc-300"
+              >
+                Tickets
+              </Link>
+            </p>
+            <h1 className="mt-2 truncate text-3xl font-semibold tracking-tight text-white">
+              {ticket.title}
+            </h1>
+            <div className="mt-3 flex flex-wrap items-center gap-3 text-sm text-zinc-400">
+              <span
+                className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-medium ${priority.cls}`}
+              >
+                {priority.pulse && (
+                  <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-red-500" />
+                )}
+                {priority.label}
+              </span>
+              <span
+                className={`rounded-full border px-2.5 py-1 text-[11px] font-medium ${status.cls}`}
+              >
+                {status.label}
+              </span>
+              <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] text-zinc-400">
+                {CATEGORY_MAP[ticket.category]}
+              </span>
+              <span className="font-mono text-[11px] text-zinc-500">
+                #{ticket.id.slice(-6).toUpperCase()}
+              </span>
+            </div>
           </div>
+
+          {/* En el lugar donde el admin tiene el toggle de estado, el cliente
+              ve "Marcar como resuelto" (centrado vertical). El toggle es
+              exclusivo del admin. */}
+          {ticket.status !== 'RESOLVED' && (
+            <div className="flex items-center gap-3">
+              <ResolveTicketButton ticketId={ticket.id} />
+            </div>
+          )}
         </div>
-
-        {isSuperAdmin && (
-          <div className="shrink-0">
-            <TicketStatusSelector
-              ticketId={ticket.id}
-              currentStatus={ticket.status as 'OPEN' | 'IN_PROGRESS' | 'RESOLVED'}
-            />
-          </div>
-        )}
       </div>
 
       {/* ── Main layout ─────────────────────────────────────── */}
       <div className="flex flex-1 min-h-0 flex-col gap-5 lg:flex-row">
-        {/* Chat area */}
-        <div className="flex flex-1 min-h-0 flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#0c0e12]/80 shadow-2xl backdrop-blur-xl">
-          {/* Messages */}
-          <div className="flex-1 min-h-0 overflow-y-auto p-5 sm:p-6 space-y-4">
-            {ticket.messages.length === 0 ? (
-              <div className="flex min-h-[260px] items-center justify-center px-6 text-center text-sm text-zinc-500">
-                Todavía no hay mensajes en este ticket.
+        {/* Chat area — molde compartido ClientChatThread (mismo que Mensajes) */}
+        <ClientChatThread
+          messages={chatMessages}
+          scrollTrigger={ticket.messages.length}
+          subHeader={
+            <div className="shrink-0 border-b border-white/10 px-5 py-4">
+              <div className="flex items-center gap-2 text-sm text-zinc-400">
+                <MessageSquareText className="h-4 w-4 text-cyan-300" strokeWidth={1.5} />
+                <span>{ticket.messages.length} mensajes en la conversación</span>
               </div>
-            ) : (
-              ticket.messages.map((message) => {
-                const isAgency = message.isAdmin
-                return (
-                  <div
-                    key={message.id}
-                    className={`flex ${isAgency ? 'justify-start' : 'justify-end'}`}
-                  >
-                    <AnimatedChatBubble
-                      isAgency={isAgency}
-                      className={[
-                        'max-w-[85%] rounded-[24px] px-4 py-3 shadow-[0_16px_40px_rgba(0,0,0,0.18)] sm:max-w-[72%]',
-                        isAgency
-                          ? 'border border-cyan-400/20 bg-cyan-500/10 text-cyan-50'
-                          : 'border border-white/10 bg-black/20 text-zinc-100',
-                      ].join(' ')}
-                    >
-                      <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] text-zinc-400">
-                        <span>{isAgency ? 'develOP' : (message.user.name ?? 'Tú')}</span>
-                        <span className="text-zinc-600">•</span>
-                        <span className="text-zinc-500">{fmtDate(message.createdAt)}</span>
-                      </div>
-                      <p className="mt-2 whitespace-pre-wrap text-sm leading-6">
-                        {message.content}
-                      </p>
-                    </AnimatedChatBubble>
-                  </div>
-                )
-              })
-            )}
-          </div>
-
-          {/* Input area */}
-          <div className="shrink-0 border-t border-white/5 bg-[#0a0c0f] p-4 sm:p-6">
-            {ticket.status === 'RESOLVED' ? (
-              <div className="flex flex-col items-center justify-center rounded-xl border border-emerald-500/10 bg-emerald-500/5 py-4 text-emerald-400">
+            </div>
+          }
+          emptyState={
+            <div className="flex min-h-[260px] items-center justify-center px-6 text-center text-sm text-zinc-500">
+              Todavía no hay mensajes en este ticket.
+            </div>
+          }
+          composer={
+            ticket.status === 'RESOLVED' ? (
+              <div className="flex shrink-0 flex-col items-center justify-center rounded-xl border border-emerald-500/10 bg-emerald-500/5 py-4 text-emerald-400">
                 <CheckCircle2 size={22} className="mb-2 opacity-80" />
                 <p className="text-sm font-semibold">Este ticket ha sido marcado como resuelto.</p>
                 <p className="mt-1 text-xs text-emerald-500/60">
@@ -210,15 +192,10 @@ export default async function TicketDetailPage({
                 </p>
               </div>
             ) : (
-              <div className="flex flex-col gap-3">
-                <TicketReplyForm ticketId={ticket.id} />
-                <div className="flex justify-end">
-                  <ResolveTicketButton ticketId={ticket.id} />
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
+              <TicketReplyForm ticketId={ticket.id} />
+            )
+          }
+        />
 
         {/* ── Timeline sidebar ──────────────────────────────── */}
         <div className="flex flex-col min-h-0 shrink-0 overflow-y-auto rounded-2xl border border-white/10 bg-[#0c0e12]/60 p-5 shadow-xl backdrop-blur-xl lg:w-52 xl:w-56">

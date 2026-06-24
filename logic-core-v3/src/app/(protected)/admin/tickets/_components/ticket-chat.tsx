@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useEffect, useRef, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { Loader2, MessageSquareText } from 'lucide-react'
 import type { Role, TicketStatus } from '@prisma/client'
@@ -84,6 +84,15 @@ export function TicketChat({ ticket }: TicketChatProps) {
   const [status, setStatus] = useState<TicketStatus>(ticket.status)
   const [error, setError] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
+  const bottomRef = useRef<HTMLDivElement>(null)
+
+  // Auto-scroll al último mensaje cuando cambia la cantidad. Incluye el envío:
+  // replyToTicketAction revalida y router.refresh() refresca este server
+  // component con el mensaje nuevo. Mismo patrón que el chat del cliente
+  // (ClientChatThread) y el auto-scroll del admin de Mensajes.
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [ticket.messages.length])
 
   function handleStatusChange(nextStatus: TicketStatus) {
     const previousStatus = status
@@ -108,7 +117,7 @@ export function TicketChat({ ticket }: TicketChatProps) {
   return (
     <section className="flex min-h-0 flex-1 flex-col gap-4">
       <div className="shrink-0 rounded-[28px] border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div className="min-w-0">
             <p className="text-xs tracking-tight text-zinc-500">
               develOP / Tickets
@@ -202,6 +211,9 @@ export function TicketChat({ ticket }: TicketChatProps) {
               Todavía no hay mensajes en este ticket.
             </div>
           )}
+
+          {/* Ancla de auto-scroll al fondo */}
+          <div ref={bottomRef} />
         </div>
       </div>
 
