@@ -194,7 +194,15 @@ export function ClientLeadsTable({
     : byDate.filter((l) => l.effectiveClassification === classFilter)
   const filtered = byClass
 
-  const hasNoLeads = leads.length === 0
+  // Distinguí "bandeja vacía" de "filtro sin resultados". `leads` ya viene
+  // filtrado server-side por status/range/view → length 0 CON filtros activos =
+  // un filtro vació la vista, no que el tenant no tenga contactos. En ese caso
+  // hay que mantener la barra de filtros montada (si no, desaparecen las chips y
+  // el usuario queda atrapado sin forma de limpiar el filtro) y mostrar el empty
+  // "sin resultados con estos filtros". Cubre fecha Y estado (ambos server-side).
+  const hasActiveFilters =
+    initialStatus !== 'all' || initialRange !== 'all' || classFilter !== 'all'
+  const isTrulyEmpty = leads.length === 0 && !hasActiveFilters
   const headerTitle = showingDq ? 'Contactos descartados' : 'Mis contactos'
   const headerDescription = showingDq
     ? 'Consultas que el bot identificó como no comerciales (postventa, empleo, spam o proveedores).'
@@ -229,12 +237,12 @@ export function ClientLeadsTable({
         </div>
       )}
 
-      {hasNoLeads ? (
+      {isTrulyEmpty ? (
         showingDq ? (
           <EmptyState
-            icon={Filter}
-            title="No hay contactos descartados con estos filtros"
-            description="Probá cambiar la fecha o volver a 'Contactos a seguir' para ver los activos."
+            icon={Ban}
+            title="Todavía no hay contactos descartados"
+            description="Cuando el bot marque una consulta como no comercial (postventa, empleo, spam o proveedores), vas a verla acá."
           />
         ) : hadOnlyDq ? (
           <EmptyState
@@ -338,7 +346,11 @@ export function ClientLeadsTable({
             <EmptyState
               icon={Filter}
               title="No hay contactos con esos filtros"
-              description="Probá cambiar la fecha, la calidad o el estado para ver otros contactos."
+              description={
+                showingDq
+                  ? "Probá cambiar la fecha o volver a 'Contactos a seguir' para ver los activos."
+                  : 'Probá cambiar la fecha, la calidad o el estado para ver otros contactos.'
+              }
               variant="subtle"
               size="sm"
             />
