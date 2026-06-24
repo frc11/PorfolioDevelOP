@@ -8,6 +8,7 @@ interface BusinessStatCardProps {
   icon?: LucideIcon
   accent?: 'cyan' | 'emerald' | 'violet' | 'amber'
   context?: string
+  className?: string
 }
 
 const ACCENT: Record<string, { text: string; bg: string }> = {
@@ -24,11 +25,12 @@ export function BusinessStatCard({
   icon: Icon,
   accent = 'cyan',
   context,
+  className,
 }: BusinessStatCardProps) {
   const colors = ACCENT[accent]
 
   return (
-    <Card padding="lg">
+    <Card padding="lg" className={className}>
       <div className="mb-3 flex items-start justify-between">
         <p className="text-[10px] uppercase tracking-[0.24em] text-zinc-500">{label}</p>
         {Icon && (

@@ -43,6 +43,6 @@ export async function saveClientSettings(input: z.infer<typeof ClientSettingsSch
     avatarStyle: parsed.data.avatarStyle,
     avatarEmoji: parsed.data.avatarEmoji ?? undefined,
     welcomeMessage: parsed.data.welcomeMessage,
-    quickReplies: parsed.data.quickReplies.map(quickReplyToText),
+    quickReplies: parsed.data.quickReplies.map((reply) => ({ label: quickReplyToText(reply) })),
   })
 }

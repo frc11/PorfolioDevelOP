@@ -16,10 +16,16 @@ export interface AvatarPickerProps {
   /** Business initials piped to the Monogram preview. Derived in the parent. */
   businessInitials?: string
   /**
-   * When true, also render the two escape-hatch cards (image / emoji).
-   * Admin = true. Client dashboard = false.
+   * When true, render both escape-hatch cards (image + emoji). Admin = true.
+   * Backward-compat shortcut for `escapeHatches={['image', 'emoji']}`.
    */
   includeEscapeHatches?: boolean
+  /**
+   * Explicit list of escape-hatch cards to render. Takes precedence over
+   * `includeEscapeHatches`. Lets the client expose ONLY 'emoji' without
+   * 'image' (reserved for the admin custom-photo flow).
+   */
+  escapeHatches?: ReadonlyArray<'image' | 'emoji'>
   /** Optional URL backing the 'image' option preview. */
   avatarImageUrl?: string | null
   /** Optional emoji backing the 'emoji' option preview. */
@@ -55,11 +61,16 @@ export function AvatarPicker({
   accentColor,
   businessInitials,
   includeEscapeHatches = false,
+  escapeHatches,
   avatarImageUrl,
   avatarEmoji,
   className,
 }: AvatarPickerProps) {
   const [hoveredId, setHoveredId] = useState<string | null>(null)
+
+  // `escapeHatches` wins; else fall back to the legacy boolean (both cards).
+  const hatches: ReadonlyArray<'image' | 'emoji'> =
+    escapeHatches ?? (includeEscapeHatches ? ['image', 'emoji'] : [])
 
   return (
     <div
@@ -83,67 +94,67 @@ export function AvatarPicker({
         />
       ))}
 
-      {includeEscapeHatches && (
-        <>
-          <EscapeHatchCard
-            id="image"
-            label="Imagen custom"
-            description="Subí una foto. Cuadrada, 256x256+ recomendado."
-            isActive={value === 'image'}
-            accentColor={accentColor}
-            onSelect={() => onChange('image')}
-            preview={
-              avatarImageUrl ? (
-                <img
-                  src={avatarImageUrl}
-                  alt=""
-                  style={{
-                    width: 56,
-                    height: 56,
-                    borderRadius: '50%',
-                    objectFit: 'cover',
-                    border: `2px solid ${accentColor}`,
-                  }}
-                />
-              ) : (
-                <PreviewPlaceholder accentColor={accentColor}>
-                  <ImagePlus className="h-6 w-6 text-white/70" strokeWidth={1.5} />
-                </PreviewPlaceholder>
-              )
-            }
-          />
-          <EscapeHatchCard
-            id="emoji"
-            label="Emoji"
-            description="Un emoji corto sobre fondo de marca."
-            isActive={value === 'emoji'}
-            accentColor={accentColor}
-            onSelect={() => onChange('emoji')}
-            preview={
-              avatarEmoji ? (
-                <div
-                  style={{
-                    width: 56,
-                    height: 56,
-                    borderRadius: '50%',
-                    background: `${accentColor}1A`,
-                    border: `2px solid ${accentColor}33`,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: 28,
-                  }}
-                >
-                  {avatarEmoji}
-                </div>
-              ) : (
-                <PreviewPlaceholder accentColor={accentColor}>
-                  <Smile className="h-6 w-6 text-white/70" strokeWidth={1.5} />
-                </PreviewPlaceholder>
-              )
-            }
-          />
-        </>
+      {hatches.includes('image') && (
+        <EscapeHatchCard
+          id="image"
+          label="Imagen custom"
+          description="Subí una foto. Cuadrada, 256x256+ recomendado."
+          isActive={value === 'image'}
+          accentColor={accentColor}
+          onSelect={() => onChange('image')}
+          preview={
+            avatarImageUrl ? (
+              <img
+                src={avatarImageUrl}
+                alt=""
+                style={{
+                  width: 56,
+                  height: 56,
+                  borderRadius: '50%',
+                  objectFit: 'cover',
+                  border: `2px solid ${accentColor}`,
+                }}
+              />
+            ) : (
+              <PreviewPlaceholder accentColor={accentColor}>
+                <ImagePlus className="h-6 w-6 text-white/70" strokeWidth={1.5} />
+              </PreviewPlaceholder>
+            )
+          }
+        />
+      )}
+      {hatches.includes('emoji') && (
+        <EscapeHatchCard
+          id="emoji"
+          label="Emoji"
+          description="Un emoji corto sobre fondo de marca."
+          isActive={value === 'emoji'}
+          accentColor={accentColor}
+          onSelect={() => onChange('emoji')}
+          preview={
+            avatarEmoji ? (
+              <div
+                style={{
+                  width: 56,
+                  height: 56,
+                  borderRadius: '50%',
+                  background: `${accentColor}1A`,
+                  border: `2px solid ${accentColor}33`,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: 28,
+                }}
+              >
+                {avatarEmoji}
+              </div>
+            ) : (
+              <PreviewPlaceholder accentColor={accentColor}>
+                <Smile className="h-6 w-6 text-white/70" strokeWidth={1.5} />
+              </PreviewPlaceholder>
+            )
+          }
+        />
       )}
     </div>
   )
