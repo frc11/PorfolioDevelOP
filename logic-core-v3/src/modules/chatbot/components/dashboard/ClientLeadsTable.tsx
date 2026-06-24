@@ -1,13 +1,14 @@
 'use client'
 
-import { useState, useEffect, useMemo, useCallback, useRef, useTransition } from 'react'
+import { useState, useEffect, useMemo, useCallback, useRef, useTransition, type ReactNode } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { motion } from 'motion/react'
-import { Users, Flame, TrendingUp, Minus, Filter, Ban } from 'lucide-react'
+import { Users, Filter, Ban } from 'lucide-react'
 import { PageHeader, EmptyState } from '@/components/ui'
 import { staggerContainer, staggerItem } from '@/lib/motion-variants'
 import { useReducedMotion } from '@/lib/use-reduced-motion'
 import { BusinessLeadCard } from './BusinessLeadCard'
+import { LeadPipeline } from './lead-pipeline/LeadPipeline'
 import { ExportLeadsButton } from './ExportLeadsButton'
 import { LeadScoringTeaser } from './LeadScoringTeaser'
 import { withinDateRange, type DateRange } from '@/lib/tz-ar'
@@ -23,14 +24,6 @@ export type LeadWithScore = ChatbotLead & {
   decayTierLabel: string | null
   scoreExplanation: ExplanationLine[]
 }
-
-const CLASS_CONFIG: Record<'hot' | 'warm' | 'cold', { label: string; activeClass: string }> = {
-  hot:  { label: 'Calientes', activeClass: 'border-rose-500/30 bg-rose-500/15 text-rose-300' },
-  warm: { label: 'Tibios',    activeClass: 'border-amber-500/30 bg-amber-500/15 text-amber-300' },
-  cold: { label: 'Fríos',     activeClass: 'border-sky-500/30 bg-sky-500/15 text-sky-400' },
-}
-
-const CLASS_ICONS = { hot: Flame, warm: TrendingUp, cold: Minus }
 
 const STATUS_LABELS: Record<ChatbotLeadStatus, string> = {
   NEW: 'Sin contactar',
@@ -56,6 +49,24 @@ const DATE_LABELS: Record<DateRange, string> = {
   today: 'Hoy',
   '7d': 'Últimos 7 días',
   '30d': 'Últimos 30 días',
+}
+
+// Estilo base de las chips de filtro (fecha/estado), re-skinneadas dentro del
+// contenedor glass del pipeline admin. `active` aplica el acento; inactivo, sobrio.
+const CHIP_BASE = 'min-h-[44px] rounded-xl border px-3 py-1 text-xs font-medium transition-colors'
+function chipClass(active: boolean, accent: string = FILTER_ACCENT.all): string {
+  return `${CHIP_BASE} ${active ? accent : FILTER_INACTIVE}`
+}
+
+// Campo etiquetado de la barra de filtros: caption uppercase (estilo admin) + fila
+// de chips que envuelve.
+function FilterField({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <div className="flex flex-col gap-2">
+      <span className="text-[10px] uppercase tracking-[0.18em] text-zinc-500">{label}</span>
+      <div className="flex flex-wrap gap-2">{children}</div>
+    </div>
+  )
 }
 
 interface ClientLeadsTableProps {
@@ -87,10 +98,6 @@ export function ClientLeadsTable({
   const router = useRouter()
   const pathname = usePathname()
   const [, startTransition] = useTransition()
-
-  // Filtro por clase es CLIENTE: depende del score efectivo (post-decay), que
-  // no está en DB. status/range/view sí van por URL (server filters).
-  const [classFilter, setClassFilter] = useState<'all' | 'hot' | 'warm' | 'cold'>('all')
 
   // B5.7 v2 — Detección de leads nuevos llegados durante el polling. El primer
   // render establece baseline (no marca nada como nuevo). En refresh siguientes,
@@ -154,12 +161,6 @@ export function ClientLeadsTable({
     }
   }, [router])
 
-  // Cuando el server cambia el set (filtros), el filtro de clase puede quedar
-  // sobre una clase sin matches. Reseteo a 'all' al cambiar la fuente.
-  useEffect(() => {
-    setClassFilter('all')
-  }, [showingDq, initialStatus, initialRange])
-
   const updateParams = useCallback(
     (patch: Record<string, string | undefined>) => {
       const params = new URLSearchParams()
@@ -178,21 +179,14 @@ export function ClientLeadsTable({
     [pathname, router, initialStatus, initialRange, showingDq],
   )
 
-  // Conteos del set actual para chips. En modo DQ el set ya es solo DQ → los
-  // chips de clase no se muestran.
+  // Set filtrado por fecha (TZ AR) sobre el ya filtrado server-side. `now` ancla
+  // el extremo del rango.
   const now = useMemo(() => new Date(), [leads])
   const byDate = useMemo(
     () => leads.filter((l) => withinDateRange(l.capturedAt, initialRange, now)),
     [leads, initialRange, now],
   )
-  const hotCount  = byDate.filter((l) => l.effectiveClassification === 'hot').length
-  const warmCount = byDate.filter((l) => l.effectiveClassification === 'warm').length
-  const coldCount = byDate.filter((l) => l.effectiveClassification === 'cold').length
-
-  const byClass = showingDq || classFilter === 'all'
-    ? byDate
-    : byDate.filter((l) => l.effectiveClassification === classFilter)
-  const filtered = byClass
+  const filtered = byDate
 
   // Distinguí "bandeja vacía" de "filtro sin resultados". `leads` ya viene
   // filtrado server-side por status/range/view → length 0 CON filtros activos =
@@ -200,16 +194,18 @@ export function ClientLeadsTable({
   // hay que mantener la barra de filtros montada (si no, desaparecen las chips y
   // el usuario queda atrapado sin forma de limpiar el filtro) y mostrar el empty
   // "sin resultados con estos filtros". Cubre fecha Y estado (ambos server-side).
-  const hasActiveFilters =
-    initialStatus !== 'all' || initialRange !== 'all' || classFilter !== 'all'
+  const hasActiveFilters = initialStatus !== 'all' || initialRange !== 'all'
   const isTrulyEmpty = leads.length === 0 && !hasActiveFilters
+  // Modo comercial + plan con scoring → pipeline por clasificación. Los descartados
+  // y el plan sin scoring siguen en grilla plana (no hay clasificación que columnizar).
+  const usePipeline = !showingDq && showScoring
   const headerTitle = showingDq ? 'Contactos descartados' : 'Mis contactos'
   const headerDescription = showingDq
     ? 'Consultas que el bot identificó como no comerciales (postventa, empleo, spam o proveedores).'
     : 'Personas que charlaron con tu bot y dejaron sus datos'
 
   return (
-    <div className="mx-auto max-w-5xl space-y-6">
+    <div className="space-y-6">
       <PageHeader
         eyebrow="Mi Chatbot"
         title={headerTitle}
@@ -260,88 +256,64 @@ export function ClientLeadsTable({
         )
       ) : (
         <>
-          {/* Filtro por fecha — TZ AR. Va a URL. */}
-          <div className="flex flex-wrap gap-2">
-            {(Object.keys(DATE_LABELS) as DateRange[]).map((key) => (
-              <button
-                key={key}
-                onClick={() => updateParams({ range: key === 'all' ? undefined : key })}
-                className={`min-h-[44px] rounded-xl border px-3 py-1 text-xs font-medium transition-colors ${initialRange === key ? FILTER_ACCENT.all : FILTER_INACTIVE}`}
-              >
-                {DATE_LABELS[key]}
-              </button>
-            ))}
+          {/* Barra de filtros — re-skin dentro del contenedor glass del pipeline
+              admin. Chips (no Select: decisión de producto). Fecha siempre; estado
+              sólo en modo comercial (los descartados no tienen estado CRM). La
+              clasificación ya no es un chip: la expresan las columnas del pipeline. */}
+          <div className="rounded-[28px] border border-white/10 bg-white/5 p-4 backdrop-blur-xl">
+            <div className="flex flex-col gap-4">
+              <FilterField label="Fecha">
+                {(Object.keys(DATE_LABELS) as DateRange[]).map((key) => (
+                  <button
+                    key={key}
+                    onClick={() => updateParams({ range: key === 'all' ? undefined : key })}
+                    className={chipClass(initialRange === key)}
+                  >
+                    {DATE_LABELS[key]}
+                  </button>
+                ))}
+              </FilterField>
+
+              {!showingDq && (
+                <FilterField label="Estado">
+                  <button
+                    onClick={() => updateParams({ status: undefined })}
+                    className={chipClass(initialStatus === 'all')}
+                  >
+                    Todos
+                  </button>
+                  {(Object.keys(STATUS_LABELS) as ChatbotLeadStatus[]).map((key) => (
+                    <button
+                      key={key}
+                      onClick={() => updateParams({ status: key })}
+                      className={chipClass(initialStatus === key, FILTER_ACCENT[key])}
+                    >
+                      {STATUS_LABELS[key]}
+                    </button>
+                  ))}
+                </FilterField>
+              )}
+            </div>
           </div>
 
-          {/* Filtro por calidad — CLIENTE (efectivo post-decay). Solo en modo
-              comercial: descartados no tienen clase. P0.3: gateado por plan —
-              si el plan no incluye priorización, en su lugar va el teaser. */}
-          {!showingDq && showScoring && (
-            <div className="flex flex-wrap gap-2">
-              <button
-                onClick={() => setClassFilter('all')}
-                className={`min-h-[44px] rounded-xl border px-3 py-1 text-xs font-medium transition-colors ${classFilter === 'all' ? FILTER_ACCENT.all : FILTER_INACTIVE}`}
-              >
-                Todos ({byDate.length})
-              </button>
-              {(['hot', 'warm', 'cold'] as const).map((cls) => {
-                const count = cls === 'hot' ? hotCount : cls === 'warm' ? warmCount : coldCount
-                if (count === 0) return null
-                const cfg = CLASS_CONFIG[cls]
-                const Icon = CLASS_ICONS[cls]
-                return (
-                  <button
-                    key={cls}
-                    onClick={() => setClassFilter(cls)}
-                    className={`inline-flex min-h-[44px] items-center gap-1.5 rounded-xl border px-3 py-1 text-xs font-medium transition-colors ${classFilter === cls ? cfg.activeClass : FILTER_INACTIVE}`}
-                  >
-                    <Icon className="h-3.5 w-3.5" strokeWidth={1.5} />
-                    {cfg.label} ({count})
-                  </button>
-                )
-              })}
-            </div>
-          )}
-
-          {/* P0.3 — Plan sin priorización: una línea de teaser donde irían los
-              chips de calidad. Solo en modo comercial (los descartados no son
-              la feature vendida). */}
+          {/* P0.3 — Plan sin priorización: teaser donde iría la priorización. Solo
+              en modo comercial (los descartados no son la feature vendida). */}
           {!showingDq && !showScoring && <LeadScoringTeaser />}
 
-          {/* Filtro por estado CRM — va a URL. Solo en modo comercial. */}
-          {!showingDq && (
-            <div className="flex flex-wrap gap-2">
-              <button
-                onClick={() => updateParams({ status: undefined })}
-                className={`min-h-[44px] rounded-xl border px-3 py-1 text-xs font-medium transition-colors ${initialStatus === 'all' ? FILTER_ACCENT.all : FILTER_INACTIVE}`}
-              >
-                Todos los estados
-              </button>
-              {(Object.keys(STATUS_LABELS) as ChatbotLeadStatus[]).map((key) => (
-                <button
-                  key={key}
-                  onClick={() => updateParams({ status: key })}
-                  className={`min-h-[44px] rounded-xl border px-3 py-1 text-xs font-medium transition-colors ${initialStatus === key ? FILTER_ACCENT[key] : FILTER_INACTIVE}`}
-                >
-                  {STATUS_LABELS[key]}
-                </button>
-              ))}
-            </div>
-          )}
-
-          {/* B5.9 — Exportar lo que está filtrado en pantalla. Respeta status,
-              range, view=dq y classFilter (cliente, post-decay). */}
+          {/* B5.9 — Exportar lo que está filtrado en pantalla (status, range, view=dq).
+              Sin filtro por clase: el pipeline muestra todas las clases a la vez. */}
           <div className="flex justify-end">
             <ExportLeadsButton
               status={initialStatus}
               range={initialRange}
               showingDq={showingDq}
-              classFilter={classFilter}
+              classFilter="all"
               hasLeads={filtered.length > 0}
             />
           </div>
 
-          {/* Lista */}
+          {/* Lista — pipeline por clasificación (plan con scoring, modo comercial)
+              o grilla plana (descartados / plan sin scoring). */}
           {filtered.length === 0 ? (
             <EmptyState
               icon={Filter}
@@ -349,14 +321,16 @@ export function ClientLeadsTable({
               description={
                 showingDq
                   ? "Probá cambiar la fecha o volver a 'Contactos a seguir' para ver los activos."
-                  : 'Probá cambiar la fecha, la calidad o el estado para ver otros contactos.'
+                  : 'Probá cambiar la fecha o el estado para ver otros contactos.'
               }
               variant="subtle"
               size="sm"
             />
+          ) : usePipeline ? (
+            <LeadPipeline leads={filtered} freshIds={freshIds} />
           ) : (
             <motion.div
-              className="grid grid-cols-1 gap-4 sm:grid-cols-2"
+              className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"
               variants={reduced ? undefined : staggerContainer}
               initial={reduced ? undefined : 'hidden'}
               animate={reduced ? undefined : 'visible'}
