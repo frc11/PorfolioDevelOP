@@ -3,7 +3,6 @@ import { auth } from '@/auth'
 import { redirect } from 'next/navigation'
 import { resolveOrgId } from '@/lib/preview'
 import {
-  ArrowLeft,
   CheckCircle2,
   Circle,
   Clock,
@@ -16,7 +15,6 @@ import {
 import Link from 'next/link'
 import { TicketReplyForm } from '@/components/dashboard/TicketReplyForm'
 import { ClientChatThread, type ChatMessage } from '@/components/dashboard/ClientChatThread'
-import { TicketStatusSelector } from '@/components/dashboard/TicketStatusSelector'
 import { ResolveTicketButton } from '@/components/dashboard/ResolveTicketButton'
 
 const CATEGORY_MAP: Record<string, string> = {
@@ -58,8 +56,6 @@ export default async function TicketDetailPage({
   const organizationId = await resolveOrgId()
 
   if (!session?.user?.id || !organizationId) redirect('/login')
-
-  const isSuperAdmin = session.user.role === 'SUPER_ADMIN'
 
   const ticket = await prisma.ticket.findUnique({
     where: { id: ticketId, organizationId },
@@ -117,47 +113,54 @@ export default async function TicketDetailPage({
 
   return (
     <div className="flex h-[calc(100svh-14rem)] min-h-0 w-full flex-col gap-5 sm:h-[calc(100svh-12.5rem)]">
-      {/* ── Header (info-bar del ticket) ────────────────────── */}
-      <div className="flex shrink-0 flex-col gap-4 sm:flex-row sm:items-center">
-        <Link
-          href="/dashboard/soporte"
-          className="w-fit rounded-lg border border-white/10 bg-white/5 p-2 text-zinc-400 transition-colors hover:bg-white/10 hover:text-white"
-        >
-          <ArrowLeft size={18} />
-        </Link>
-
-        <div className="min-w-0 flex-1">
-          <h1 className="mb-1 truncate text-xl font-bold tracking-tight text-white">
-            {ticket.title}
-          </h1>
-          <div className="flex flex-wrap items-center gap-2">
-            <span
-              className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[9px] font-black uppercase tracking-wider ${priority.cls}`}
-            >
-              {priority.pulse && (
-                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-red-500" />
-              )}
-              {priority.label}
-            </span>
-            <span
-              className={`rounded-full border px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider ${status.cls}`}
-            >
-              {status.label}
-            </span>
-            <span className="font-mono text-xs text-zinc-500">
-              {CATEGORY_MAP[ticket.category]} · #{ticket.id.slice(-6).toUpperCase()}
-            </span>
+      {/* ── Header (estilo admin: breadcrumb + título + badges) ─────────── */}
+      <div className="shrink-0 rounded-[28px] border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div className="min-w-0">
+            <p className="text-xs tracking-tight text-zinc-500">
+              develOP /{' '}
+              <Link
+                href="/dashboard/soporte"
+                className="transition-colors hover:text-zinc-300"
+              >
+                Tickets
+              </Link>
+            </p>
+            <h1 className="mt-2 truncate text-3xl font-semibold tracking-tight text-white">
+              {ticket.title}
+            </h1>
+            <div className="mt-3 flex flex-wrap items-center gap-3 text-sm text-zinc-400">
+              <span
+                className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-medium ${priority.cls}`}
+              >
+                {priority.pulse && (
+                  <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-red-500" />
+                )}
+                {priority.label}
+              </span>
+              <span
+                className={`rounded-full border px-2.5 py-1 text-[11px] font-medium ${status.cls}`}
+              >
+                {status.label}
+              </span>
+              <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] text-zinc-400">
+                {CATEGORY_MAP[ticket.category]}
+              </span>
+              <span className="font-mono text-[11px] text-zinc-500">
+                #{ticket.id.slice(-6).toUpperCase()}
+              </span>
+            </div>
           </div>
+
+          {/* En el lugar donde el admin tiene el toggle de estado, el cliente
+              ve "Marcar como resuelto" (centrado vertical). El toggle es
+              exclusivo del admin. */}
+          {ticket.status !== 'RESOLVED' && (
+            <div className="flex items-center gap-3">
+              <ResolveTicketButton ticketId={ticket.id} />
+            </div>
+          )}
         </div>
-
-        {isSuperAdmin && (
-          <div className="shrink-0">
-            <TicketStatusSelector
-              ticketId={ticket.id}
-              currentStatus={ticket.status as 'OPEN' | 'IN_PROGRESS' | 'RESOLVED'}
-            />
-          </div>
-        )}
       </div>
 
       {/* ── Main layout ─────────────────────────────────────── */}
@@ -189,12 +192,7 @@ export default async function TicketDetailPage({
                 </p>
               </div>
             ) : (
-              <div className="flex shrink-0 flex-col gap-3">
-                <TicketReplyForm ticketId={ticket.id} />
-                <div className="flex justify-end">
-                  <ResolveTicketButton ticketId={ticket.id} />
-                </div>
-              </div>
+              <TicketReplyForm ticketId={ticket.id} />
             )
           }
         />

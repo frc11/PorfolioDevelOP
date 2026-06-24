@@ -108,7 +108,7 @@ export function TicketChat({ ticket }: TicketChatProps) {
   return (
     <section className="flex min-h-0 flex-1 flex-col gap-4">
       <div className="shrink-0 rounded-[28px] border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div className="min-w-0">
             <p className="text-xs tracking-tight text-zinc-500">
               develOP / Tickets
