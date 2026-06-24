@@ -9,12 +9,13 @@ import {
   Clock,
   Hash,
   MessageSquare,
+  MessageSquareText,
   Shield,
   Tag,
 } from 'lucide-react'
 import Link from 'next/link'
 import { TicketReplyForm } from '@/components/dashboard/TicketReplyForm'
-import { AnimatedChatBubble } from '@/components/dashboard/AnimatedChatBubble'
+import { ClientChatThread, type ChatMessage } from '@/components/dashboard/ClientChatThread'
 import { TicketStatusSelector } from '@/components/dashboard/TicketStatusSelector'
 import { ResolveTicketButton } from '@/components/dashboard/ResolveTicketButton'
 
@@ -36,15 +37,6 @@ const PRIORITY_MAP: Record<string, { label: string; cls: string; pulse?: boolean
   MEDIUM: { label: 'Media', cls: 'text-yellow-400 bg-yellow-500/10 border-yellow-500/20' },
   HIGH: { label: 'Alta', cls: 'text-orange-400 bg-orange-500/10 border-orange-500/20' },
   URGENT: { label: 'Urgente', cls: 'text-red-400 bg-red-500/10 border-red-500/20', pulse: true },
-}
-
-function fmtDate(d: Date) {
-  return d.toLocaleString('es-AR', {
-    hour: '2-digit',
-    minute: '2-digit',
-    day: '2-digit',
-    month: 'short',
-  })
 }
 
 function fmtShort(d: Date) {
@@ -112,9 +104,20 @@ export default async function TicketDetailPage({
   const priority = PRIORITY_MAP[ticket.priority] ?? PRIORITY_MAP.MEDIUM
   const status = STATUS_MAP[ticket.status] ?? STATUS_MAP.OPEN
 
+  // Mapeo al molde compartido (mismo que Mensajes). Datos del Ticket
+  // (tabla TicketMessage) — NO se mezclan con los de Mensajes.
+  // isAdmin → isAgency: develOP a la izquierda, cliente a la derecha.
+  const chatMessages: ChatMessage[] = ticket.messages.map((m) => ({
+    id: m.id,
+    content: m.content,
+    isAgency: m.isAdmin,
+    authorLabel: m.isAdmin ? 'develOP' : (m.user.name ?? 'Tú'),
+    createdAt: m.createdAt,
+  }))
+
   return (
     <div className="flex h-[calc(100svh-14rem)] min-h-0 w-full flex-col gap-5 sm:h-[calc(100svh-12.5rem)]">
-      {/* ── Header ──────────────────────────────────────────── */}
+      {/* ── Header (info-bar del ticket) ────────────────────── */}
       <div className="flex shrink-0 flex-col gap-4 sm:flex-row sm:items-center">
         <Link
           href="/dashboard/soporte"
@@ -159,50 +162,26 @@ export default async function TicketDetailPage({
 
       {/* ── Main layout ─────────────────────────────────────── */}
       <div className="flex flex-1 min-h-0 flex-col gap-5 lg:flex-row">
-        {/* Chat area */}
-        <div className="flex flex-1 min-h-0 flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#0c0e12]/80 shadow-2xl backdrop-blur-xl">
-          {/* Messages */}
-          <div className="flex-1 min-h-0 overflow-y-auto p-5 sm:p-6 space-y-4">
-            {ticket.messages.length === 0 ? (
-              <div className="flex min-h-[260px] items-center justify-center px-6 text-center text-sm text-zinc-500">
-                Todavía no hay mensajes en este ticket.
+        {/* Chat area — molde compartido ClientChatThread (mismo que Mensajes) */}
+        <ClientChatThread
+          messages={chatMessages}
+          scrollTrigger={ticket.messages.length}
+          subHeader={
+            <div className="shrink-0 border-b border-white/10 px-5 py-4">
+              <div className="flex items-center gap-2 text-sm text-zinc-400">
+                <MessageSquareText className="h-4 w-4 text-cyan-300" strokeWidth={1.5} />
+                <span>{ticket.messages.length} mensajes en la conversación</span>
               </div>
-            ) : (
-              ticket.messages.map((message) => {
-                const isAgency = message.isAdmin
-                return (
-                  <div
-                    key={message.id}
-                    className={`flex ${isAgency ? 'justify-start' : 'justify-end'}`}
-                  >
-                    <AnimatedChatBubble
-                      isAgency={isAgency}
-                      className={[
-                        'max-w-[85%] rounded-[24px] px-4 py-3 shadow-[0_16px_40px_rgba(0,0,0,0.18)] sm:max-w-[72%]',
-                        isAgency
-                          ? 'border border-cyan-400/20 bg-cyan-500/10 text-cyan-50'
-                          : 'border border-white/10 bg-black/20 text-zinc-100',
-                      ].join(' ')}
-                    >
-                      <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] text-zinc-400">
-                        <span>{isAgency ? 'develOP' : (message.user.name ?? 'Tú')}</span>
-                        <span className="text-zinc-600">•</span>
-                        <span className="text-zinc-500">{fmtDate(message.createdAt)}</span>
-                      </div>
-                      <p className="mt-2 whitespace-pre-wrap text-sm leading-6">
-                        {message.content}
-                      </p>
-                    </AnimatedChatBubble>
-                  </div>
-                )
-              })
-            )}
-          </div>
-
-          {/* Input area */}
-          <div className="shrink-0 border-t border-white/5 bg-[#0a0c0f] p-4 sm:p-6">
-            {ticket.status === 'RESOLVED' ? (
-              <div className="flex flex-col items-center justify-center rounded-xl border border-emerald-500/10 bg-emerald-500/5 py-4 text-emerald-400">
+            </div>
+          }
+          emptyState={
+            <div className="flex min-h-[260px] items-center justify-center px-6 text-center text-sm text-zinc-500">
+              Todavía no hay mensajes en este ticket.
+            </div>
+          }
+          composer={
+            ticket.status === 'RESOLVED' ? (
+              <div className="flex shrink-0 flex-col items-center justify-center rounded-xl border border-emerald-500/10 bg-emerald-500/5 py-4 text-emerald-400">
                 <CheckCircle2 size={22} className="mb-2 opacity-80" />
                 <p className="text-sm font-semibold">Este ticket ha sido marcado como resuelto.</p>
                 <p className="mt-1 text-xs text-emerald-500/60">
@@ -210,15 +189,15 @@ export default async function TicketDetailPage({
                 </p>
               </div>
             ) : (
-              <div className="flex flex-col gap-3">
+              <div className="flex shrink-0 flex-col gap-3">
                 <TicketReplyForm ticketId={ticket.id} />
                 <div className="flex justify-end">
                   <ResolveTicketButton ticketId={ticket.id} />
                 </div>
               </div>
-            )}
-          </div>
-        </div>
+            )
+          }
+        />
 
         {/* ── Timeline sidebar ──────────────────────────────── */}
         <div className="flex flex-col min-h-0 shrink-0 overflow-y-auto rounded-2xl border border-white/10 bg-[#0c0e12]/60 p-5 shadow-xl backdrop-blur-xl lg:w-52 xl:w-56">

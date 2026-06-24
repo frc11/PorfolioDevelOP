@@ -1,14 +1,14 @@
 'use client'
 
-import { useActionState, useEffect, useMemo, useRef, useState } from 'react'
+import { useActionState, useEffect, useMemo, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { sendClientMessageAction } from '@/lib/actions/messages'
-import { Loader2, MessageSquareText, SendHorizontal } from 'lucide-react'
+import { MessageSquareText } from 'lucide-react'
 import { motion, useReducedMotion } from 'motion/react'
 import type { ActionResult } from '@/lib/actions/schemas'
 import { getMessageForContext } from '@/lib/data/message-context'
-import { EmojiPopover } from './EmojiPopover'
 import { ClientChatThread, type ChatMessage } from './ClientChatThread'
+import { ClientChatComposer } from './ClientChatComposer'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -26,8 +26,6 @@ interface MessageThreadProps {
 }
 
 // ─── Constants ────────────────────────────────────────────────────────────────
-
-const TEXTAREA_MAX_ROWS = 3
 
 const QUICK_REPLIES = [
   {
@@ -52,8 +50,6 @@ const WELCOME_MESSAGE =
 export function MessageThread({ messages, organizationName }: MessageThreadProps) {
   const [state, action, isPending] = useActionState<ActionResult | null, FormData>(sendClientMessageAction, null)
   const [inputValue, setInputValue] = useState('')
-  const formRef = useRef<HTMLFormElement>(null)
-  const textareaRef = useRef<HTMLTextAreaElement>(null)
   const router = useRouter()
   const searchParams = useSearchParams()
   const reduce = useReducedMotion()
@@ -90,43 +86,6 @@ export function MessageThread({ messages, organizationName }: MessageThreadProps
 
     router.replace('/dashboard/messages', { scroll: false })
   }, [router, searchParams])
-
-  useEffect(() => {
-    if (!isPending && state?.success) {
-      formRef.current?.reset()
-      setInputValue('')
-    }
-  }, [isPending, state])
-
-  // Auto-expand: crece con el contenido hasta TEXTAREA_MAX_ROWS, luego scrollea
-  useEffect(() => {
-    const el = textareaRef.current
-    if (!el) return
-    el.style.height = 'auto'
-    const styles = window.getComputedStyle(el)
-    const lineHeight = parseFloat(styles.lineHeight) || 24
-    const paddingY = parseFloat(styles.paddingTop) + parseFloat(styles.paddingBottom)
-    const maxHeight = lineHeight * TEXTAREA_MAX_ROWS + paddingY
-    el.style.height = `${Math.min(el.scrollHeight, maxHeight)}px`
-    el.style.overflowY = el.scrollHeight > maxHeight ? 'auto' : 'hidden'
-  }, [inputValue])
-
-  function insertEmoji(emoji: string) {
-    const el = textareaRef.current
-    if (!el) {
-      setInputValue((v) => v + emoji)
-      return
-    }
-    // Inserta en la posición del cursor y restaura el caret tras el re-render
-    const start = el.selectionStart ?? inputValue.length
-    const end = el.selectionEnd ?? inputValue.length
-    setInputValue(inputValue.slice(0, start) + emoji + inputValue.slice(end))
-    requestAnimationFrame(() => {
-      el.focus()
-      const caret = start + emoji.length
-      el.setSelectionRange(caret, caret)
-    })
-  }
 
   return (
     <ClientChatThread
@@ -198,72 +157,31 @@ export function MessageThread({ messages, organizationName }: MessageThreadProps
         </motion.div>
       }
       composer={
-        /* ── Input area ──────────────────────────────────────────────────── */
-        <div className="shrink-0 rounded-[24px] border border-white/10 bg-white/5 p-3 backdrop-blur-xl">
-          {state?.error && (
-            <div className="mb-2 rounded-2xl border border-rose-400/20 bg-rose-500/10 px-4 py-2.5 text-sm text-rose-200">
-              {state.error}
+        <ClientChatComposer
+          value={inputValue}
+          onValueChange={setInputValue}
+          action={action}
+          isPending={isPending}
+          state={state}
+          aboveForm={
+            /* Quick reply buttons — conservados (exclusivos de Mensajes) */
+            <div className="mb-3 flex flex-wrap gap-2">
+              {QUICK_REPLIES.map((qr) => (
+                <motion.button
+                  key={qr.label}
+                  type="button"
+                  onClick={() => setInputValue(getMessageForContext(qr.context))}
+                  whileHover={{ scale: 1.04, y: -1 }}
+                  whileTap={{ scale: 0.96 }}
+                  transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+                  className="flex items-center gap-1.5 rounded-full border border-white/[0.07] bg-white/[0.03] px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-zinc-400 backdrop-blur-sm transition-colors hover:border-cyan-500/25 hover:bg-cyan-500/10 hover:text-cyan-300"
+                >
+                  {qr.label}
+                </motion.button>
+              ))}
             </div>
-          )}
-
-          {/* Quick reply buttons — conservados */}
-          <div className="mb-3 flex flex-wrap gap-2">
-            {QUICK_REPLIES.map((qr) => (
-              <motion.button
-                key={qr.label}
-                type="button"
-                onClick={() => setInputValue(getMessageForContext(qr.context))}
-                whileHover={{ scale: 1.04, y: -1 }}
-                whileTap={{ scale: 0.96 }}
-                transition={{ type: 'spring', stiffness: 400, damping: 20 }}
-                className="flex items-center gap-1.5 rounded-full border border-white/[0.07] bg-white/[0.03] px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-zinc-400 backdrop-blur-sm transition-colors hover:border-cyan-500/25 hover:bg-cyan-500/10 hover:text-cyan-300"
-              >
-                {qr.label}
-              </motion.button>
-            ))}
-          </div>
-
-          {/* Composer */}
-          <form ref={formRef} action={action}>
-            <div className="flex items-end gap-2">
-              <EmojiPopover onPick={insertEmoji} disabled={isPending} />
-              <textarea
-                ref={textareaRef}
-                name="content"
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                placeholder="Escribí tu mensaje..."
-                rows={1}
-                disabled={isPending}
-                className="max-h-32 min-h-[44px] flex-1 resize-none rounded-2xl border border-white/10 bg-black/20 px-4 py-2.5 text-sm leading-6 text-white outline-none transition-colors placeholder:text-zinc-500 focus:border-cyan-400/35 disabled:cursor-not-allowed disabled:opacity-60"
-                onKeyDown={(e) => {
-                  // isComposing: no enviar mientras se confirma la composición IME (acentos, dead-keys)
-                  if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) {
-                    e.preventDefault()
-                    e.currentTarget.form?.requestSubmit()
-                  }
-                }}
-              />
-              <button
-                type="submit"
-                disabled={isPending || !inputValue.trim()}
-                aria-label="Enviar mensaje"
-                className="inline-flex h-11 shrink-0 items-center gap-2 rounded-2xl border border-cyan-400/20 bg-cyan-400/10 px-4 text-sm font-medium text-cyan-100 transition-colors hover:bg-cyan-400/15 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {isPending ? (
-                  <Loader2 className="h-4 w-4 animate-spin" strokeWidth={1.5} />
-                ) : (
-                  <SendHorizontal className="h-4 w-4" strokeWidth={1.5} />
-                )}
-                <span className="hidden sm:inline">{isPending ? 'Enviando...' : 'Enviar'}</span>
-              </button>
-            </div>
-          </form>
-
-          <p className="mt-1.5 text-[10px] text-zinc-600">
-            Enter para enviar · Shift+Enter para nueva línea
-          </p>
-        </div>
+          }
+        />
       }
     />
   )
