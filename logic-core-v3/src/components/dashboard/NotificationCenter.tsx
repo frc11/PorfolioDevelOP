@@ -3,69 +3,13 @@
 import { useState, useTransition, useRef, useEffect, useCallback } from 'react'
 import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'motion/react'
-import {
-  Bell,
-  Check,
-  CheckCheck,
-  CheckCircle2,
-  AlertTriangle,
-  Info,
-  AlertCircle,
-  ChevronRight,
-} from 'lucide-react'
+import { Bell, Check, CheckCheck, ChevronRight } from 'lucide-react'
 import { markNotificationAsRead } from '@/actions/dashboard-actions'
 import { markAllNotificationsReadAction } from '@/lib/actions/notifications'
 import type { Notification } from '@prisma/client'
-import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-function timeAgo(date: Date): string {
-  const diffMs = Date.now() - new Date(date).getTime()
-  const mins = Math.floor(diffMs / 60_000)
-  if (mins < 1) return 'ahora mismo'
-  if (mins < 60) return `hace ${mins} min`
-  const hours = Math.floor(mins / 60)
-  if (hours < 24) return `hace ${hours}h`
-  const days = Math.floor(hours / 24)
-  if (days === 1) return 'ayer'
-  if (days < 7) return `hace ${days} días`
-  return new Date(date).toLocaleDateString('es-AR', { day: '2-digit', month: 'short' })
-}
-
-// ─── Type config ──────────────────────────────────────────────────────────────
-
-const TYPE_CONFIG = {
-  SUCCESS: {
-    icon: <CheckCircle2 size={13} />,
-    dot: 'bg-emerald-500',
-    iconClass: 'text-emerald-400',
-    bg: 'rgba(34,197,94,0.06)',
-  },
-  WARNING: {
-    icon: <AlertTriangle size={13} />,
-    dot: 'bg-amber-500',
-    iconClass: 'text-amber-400',
-    bg: 'rgba(245,158,11,0.06)',
-  },
-  INFO: {
-    icon: <Info size={13} />,
-    dot: 'bg-cyan-500',
-    iconClass: 'text-cyan-400',
-    bg: 'rgba(6,182,212,0.06)',
-  },
-  ACTION_REQUIRED: {
-    icon: <AlertCircle size={13} />,
-    dot: 'bg-orange-500',
-    iconClass: 'text-orange-400',
-    bg: 'rgba(249,115,22,0.06)',
-  },
-} as const satisfies Record<string, { icon: React.ReactNode; dot: string; iconClass: string; bg: string }>
-
-function getTypeConfig(type: string) {
-  return TYPE_CONFIG[type as keyof typeof TYPE_CONFIG] ?? TYPE_CONFIG.INFO
-}
+import { NotificationRowContent, unreadRowBg } from './notification-shared'
+import { NotificationHistoryModal } from './NotificationHistoryModal'
 
 // ─── Posición del panel ─────────────────────────────────────────────────────
 // El panel se portalea a document.body con position:fixed. El <header> del
@@ -100,6 +44,7 @@ export function NotificationCenter({
   initialNotifications: Notification[]
 }) {
   const [isOpen, setIsOpen] = useState(false)
+  const [historyOpen, setHistoryOpen] = useState(false)
   const [pos, setPos] = useState<PanelPosition | null>(null)
   const [mounted, setMounted] = useState(false)
   const [notifications, setNotifications] = useState(initialNotifications)
@@ -173,6 +118,8 @@ export function NotificationCenter({
 
   const handleNotifClick = (notif: Notification) => {
     if (!notif.read) handleMarkOne(notif.id)
+    // Navegación imperativa tras marcar leída: la fila es un div con efecto
+    // colateral previo, no un <Link>.
     if (notif.actionUrl) {
       setIsOpen(false)
       router.push(notif.actionUrl)
@@ -287,80 +234,47 @@ export function NotificationCenter({
                   ) : (
                     <div className="flex flex-col">
                       <AnimatePresence initial={false}>
-                        {notifications.map((notif) => {
-                          const cfg = getTypeConfig(notif.type)
-                          return (
-                            <motion.div
-                              layout
-                              key={notif.id}
-                              initial={{ opacity: 0, x: 16 }}
-                              animate={{ opacity: 1, x: 0 }}
-                              exit={{ opacity: 0, height: 0, paddingTop: 0, paddingBottom: 0 }}
-                              transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-                              onClick={() => handleNotifClick(notif)}
-                              className="relative flex cursor-pointer gap-3 px-4 py-3 transition-colors hover:bg-white/[0.03]"
-                              style={!notif.read ? { background: cfg.bg } : undefined}
-                            >
-                              {/* Unread dot */}
-                              {!notif.read && (
-                                <span
-                                  className={`absolute left-1.5 top-4 h-1.5 w-1.5 rounded-full ${cfg.dot} shadow-[0_0_6px_currentColor]`}
-                                />
-                              )}
-
-                              {/* Type icon */}
-                              <div
-                                className={`mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-md bg-white/[0.04] ${cfg.iconClass}`}
-                              >
-                                {cfg.icon}
-                              </div>
-
-                              {/* Content */}
-                              <div className="min-w-0 flex-1">
-                                <div className="flex items-start justify-between gap-2">
-                                  <p
-                                    className={`text-xs font-semibold leading-snug ${
-                                      !notif.read ? 'text-zinc-100' : 'text-zinc-400'
-                                    }`}
-                                  >
-                                    {notif.title}
-                                  </p>
-                                  <span className="flex-shrink-0 text-[10px] text-zinc-600">
-                                    {timeAgo(notif.createdAt)}
-                                  </span>
-                                </div>
-                                <p className="mt-0.5 line-clamp-2 text-[11px] leading-relaxed text-zinc-500">
-                                  {notif.message}
-                                </p>
-                                {notif.actionUrl && (
-                                  <p className="mt-1.5 text-[10px] font-semibold uppercase tracking-wider text-zinc-600">
-                                    Ir al enlace →
-                                  </p>
-                                )}
-                              </div>
-                            </motion.div>
-                          )
-                        })}
+                        {notifications.map((notif) => (
+                          <motion.div
+                            layout
+                            key={notif.id}
+                            initial={{ opacity: 0, x: 16 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, height: 0, paddingTop: 0, paddingBottom: 0 }}
+                            transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                            onClick={() => handleNotifClick(notif)}
+                            className="relative flex cursor-pointer gap-3 px-4 py-3 transition-colors hover:bg-white/[0.03]"
+                            style={unreadRowBg(notif)}
+                          >
+                            <NotificationRowContent notif={notif} />
+                          </motion.div>
+                        ))}
                       </AnimatePresence>
                     </div>
                   )}
                 </div>
 
-                {/* Footer */}
-                <Link
-                  href="/dashboard"
-                  onClick={() => setIsOpen(false)}
+                {/* Footer → abre el historial completo en un modal */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsOpen(false)
+                    setHistoryOpen(true)
+                  }}
                   className="flex items-center justify-center gap-1.5 py-3 text-[10px] font-semibold uppercase tracking-widest text-zinc-500 transition-colors hover:text-cyan-400"
                   style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}
                 >
                   Ver todas las notificaciones
                   <ChevronRight size={11} />
-                </Link>
+                </button>
               </motion.div>
             )}
           </AnimatePresence>,
           document.body,
         )}
+
+      {/* Historial completo */}
+      <NotificationHistoryModal open={historyOpen} onClose={() => setHistoryOpen(false)} />
     </>
   )
 }
