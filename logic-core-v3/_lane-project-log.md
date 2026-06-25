@@ -205,9 +205,24 @@ con S2.
   que reescribe el bloque de selección, no en un commit de reskin).
 - Gate: tsc exit 0 + lint exit 0.
 
+### S4b — hero reskin — CERRADO
+- Card hero → token panel admin `rounded-[28px] border border-white/10 bg-white/5 p-5
+  backdrop-blur-xl`. Removidos: `rounded-[2rem]` + borde t/l + `bg-[#07080a]/60` +
+  `shadow-2xl backdrop-blur-3xl` + `group hover:border-cyan-500/20`, los 2 blobs cyan
+  blur y el wrapper `relative z-10`.
+- `AnimatedCounter` reestilado SOLO por className → `text-3xl font-semibold tracking-tight
+  text-white` (erradicado `text-5xl/6xl font-black` + `drop-shadow` cyan; el drop-shadow
+  vivía en MI className en page.tsx, no en el primitivo → overrideable). "%" → `text-xl
+  font-semibold text-zinc-500`. Subcopy "x/y tareas" → micro-label `text-[10px] uppercase
+  tracking-[0.22em] text-zinc-500`.
+- Nombre proyecto `font-bold`→`font-semibold tracking-tight`; descripción zinc-500→zinc-400.
+- `AnimatedProgressBar` INTACTA (cyan + spring + sweep + copy, no tocada).
+- Gate: tsc exit 0 + lint exit 0.
+
 ### Estado por sprint
 - **S1** ✅ commit `e644e55`
 - **S2 + S3** ✅ commit `92f1218` (S3 no-op foldeado)
-- **S4a** ✅ (este commit) · **S4b** ⏳ hero · **S4c** ⏳ detail-fields
+- **S4a** ✅ commit `be6aa4c`
+- **S4b** ✅ (este commit) · **S4c** ⏳ detail-fields
 - **S5** ⏳ pendiente (hover adminHoverCls split)
 - **S6** ⏳ pendiente (delete en detalle admin)

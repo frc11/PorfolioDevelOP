@@ -202,44 +202,39 @@ export default async function ProjectPage({
 
       {/* ── 2. HERO — progress card ────────────────────────────────────────── */}
       <FadeIn delay={0.06}>
-        <div className="relative overflow-hidden rounded-[2rem] border-t border-l border-white/10 bg-[#07080a]/60 p-7 sm:p-8 shadow-2xl backdrop-blur-3xl group transition-all duration-500 hover:border-cyan-500/20">
-          <div className="absolute -right-16 -top-16 h-64 w-64 rounded-full bg-cyan-500/5 blur-[80px] pointer-events-none group-hover:bg-cyan-500/8 transition-colors" />
-          <div className="absolute left-0 bottom-0 h-32 w-32 rounded-full bg-cyan-500/5 blur-[60px] pointer-events-none" />
-
-          <div className="relative z-10">
-            {/* Project name + description + big % */}
-            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-5 mb-8">
-              <div className="flex-1 min-w-0">
-                <h2 className="text-lg font-bold text-white truncate">{project.name}</h2>
-                {project.description && (
-                  <p className="mt-1 text-sm text-zinc-500 max-w-xl leading-relaxed">
-                    {project.description}
-                  </p>
-                )}
-              </div>
-
-              {totalCount > 0 && (
-                <div className="flex flex-col items-start sm:items-end gap-1 flex-shrink-0">
-                  <div className="flex items-baseline gap-1">
-                    <AnimatedCounter
-                      value={progressPct}
-                      className="text-5xl sm:text-6xl font-black tracking-tighter text-white drop-shadow-[0_0_20px_rgba(6,182,212,0.25)]"
-                    />
-                    <span className="text-2xl sm:text-3xl font-bold text-zinc-600">%</span>
-                  </div>
-                  <p className="text-[10px] font-semibold uppercase tracking-widest text-zinc-600">
-                    {doneCount}/{totalCount} tareas completadas
-                  </p>
-                </div>
+        <div className="rounded-[28px] border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
+          {/* Project name + description + big % */}
+          <div className="mb-8 flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
+            <div className="min-w-0 flex-1">
+              <h2 className="truncate text-lg font-semibold tracking-tight text-white">{project.name}</h2>
+              {project.description && (
+                <p className="mt-1 max-w-xl text-sm leading-relaxed text-zinc-400">
+                  {project.description}
+                </p>
               )}
             </div>
 
-            {/* Progress bar — solo si hay tareas. El estado vacío vive en el
-                EmptyState de abajo (B12.2) para evitar duplicar copy. */}
             {totalCount > 0 && (
-              <AnimatedProgressBar progressPct={progressPct} />
+              <div className="flex flex-shrink-0 flex-col items-start gap-1 sm:items-end">
+                <div className="flex items-baseline gap-1">
+                  <AnimatedCounter
+                    value={progressPct}
+                    className="text-3xl font-semibold tracking-tight text-white"
+                  />
+                  <span className="text-xl font-semibold text-zinc-500">%</span>
+                </div>
+                <p className="text-[10px] uppercase tracking-[0.22em] text-zinc-500">
+                  {doneCount}/{totalCount} tareas completadas
+                </p>
+              </div>
             )}
           </div>
+
+          {/* Progress bar — INTACTA (cyan + spring + sweep + copy). Solo si hay
+              tareas; el estado vacío vive en el EmptyState de abajo. */}
+          {totalCount > 0 && (
+            <AnimatedProgressBar progressPct={progressPct} />
+          )}
         </div>
       </FadeIn>
 
