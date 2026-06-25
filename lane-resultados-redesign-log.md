@@ -211,5 +211,24 @@ La sección Resultados del portal cliente funciona end-to-end pero su estética 
 - `/trafico` y `/analisis`: ya tenían su `PageHeader` propio (`eyebrow="Resultados"` + title + description + icon). Sin cambios.
 - **AGREGADO** `PageHeader` a `/seo` (`title="SEO & Posicionamiento"`, icon `Search`) y `/reputacion` (`title="Reputación Online"`, icon `Star`), mismo patrón `eyebrow="Resultados"`. Resultado: los 4 tabs con exactamente un header propio, ninguno con doble header ni sin header.
 - Gate: tsc exit 0 (sin errores nuevos); eslint exit 0 en los 2 archivos tocados. **1 warning pre-existente** en `seo/page.tsx:120` (`isMockData` asignado y nunca usado) — NO introducido por mí, vive en `SeoPage` que es scope de Sprint 5 → diferido a Sprint 5 (donde `seo/page.tsx` se reescribe). No es error, eslint exit 0.
-- visual-qa: pendiente al cierre del bloque (ver nota de disponibilidad del MCP).
-- Commits: bitácora en commit propio + headers en commit de reskin.
+- visual-qa: **DIFERIDO A VERIFICACIÓN HUMANA (todos los sprints)**. El subagente visual-qa confirmó que el preview MCP existe pero el único `next dev` corriendo es el del checkout PRINCIPAL (`C:\PorfolioDevelOP`), que NO tiene los cambios del lane. Next 16 no permite un 2º `next dev` con :3000 tomado, y matar el server del usuario en una corrida desatendida es inapropiado. Verificar contra :3000 mostraría código viejo (inútil). Además las rutas son auth-gated (`/dashboard/*`) y `/analisis` necesita sesión Pro+ sembrada. → No es falla de gate (carve-out explícito del anti-loop). El humano verifica el visual mañana levantando `next dev` desde el worktree del lane.
+- Commits: bitácora en commit propio (9e692fc) + headers en commit de reskin (90a202e).
+
+### Sprint A — Datos de QA — ✅ COMPLETADO
+**Read-first (mapa de datos, vía subagente Explore):**
+- **/analisis** (Franco P0.2, gated Pro+, data EN DB): `getMonthlyAnalysisForOrg(orgId)` (`src/modules/chatbot/server/analysis/getMonthlyAnalysisForOrg.ts`) lee 3 modelos vía `BotConfig` (1:1 con Organization):
+  - `hasBot` = la org tiene `botConfig`.
+  - `insights` → `ChatbotInsight` (filtra status PENDING|APPLIED, top 6 por status/createdAt/evidenceCount). Enum `InsightCategory` = KB_GAP|CONVERSION_LEAK|CONTENT_OPPORTUNITY|CONFIG_TWEAK|COMPETITIVE_INTEL; `InsightStatus` = PENDING|APPLIED|DISMISSED|IGNORED.
+  - `series` → `QuotaUsage` (year/month/conversationsCount; `@@unique([botConfigId,year,month])`; últimos 6 meses).
+  - `categories` → `ChatbotLead` groupBy `category` (enum LeadCategory sales|postventa|employment|provider|spam|other), ventana 30d sobre `capturedAt`, `CATEGORY_MIN_SAMPLE=10` p/ `sufficient`.
+  - Gate: `getPlanForOrg` → `Subscription.plan.insightEnabled`. PRO+BUSINESS = true, STARTER = false.
+- **/reputacion** (GBP): `getGBPMetrics(orgId)` (`src/lib/integrations/google-business-profile.ts`) es **100% OAuth live de Google** — NO lee DB, NO tiene mock/demo mode, NO hay env flag. Lee tokens de `Organization` (gbpAccessToken/gbpRefreshToken/gbpLocationId); si faltan → `null` → empty state. **No se puede sembrar sin una conexión OAuth real.**
+
+**Seed /analisis (escrito + CORRIDO + idempotente):**
+- Archivo: `scripts/dev/_seed-resultados-qa.ts` (**gitignored** — efímero, no se mergea; entry agregada al `.gitignore`).
+- Resuelve en runtime una org **que YA es Pro+ con bot** (insightEnabled=true), prefiere slug `san-miguel`/`matsu`, si ninguna califica → **aborta sin escribir** (NUNCA cambia un plan). Corrido contra la branch Neon dev: resolvió **"Matsu" (slug=matsu, BUSINESS)** → la org real Pro+ con bot del dev DB.
+- Insertó: **+6 ChatbotInsight, +4 QuotaUsage** (2 de 6 meses ya tenían data real → skipDuplicates los preservó, NO pisó), **+14 ChatbotLead** (≥10 en 30d → `categories.sufficient=true`). Re-corrida → +0/+0/+0 (idempotente confirmado). Ids deterministas `qa-seed-*`.
+- **Clean**: `npx ts-node --transpile-only scripts/dev/_seed-resultados-qa.ts clean` (borra solo `qa-seed-*`).
+- **Runner**: `npx ts-node --transpile-only` (tsx NO está instalado en este worktree, confirmado en `node_modules/.bin`). Carga `.env.local` explícitamente (Prisma no la carga sola; no hay `.env` plano). Guard anti-prod inlineado (espejo de `prisma/seed-guard.ts`; ts-node corre en ESM y el import relativo `.ts` no resuelve). NO toca schema, NO migra.
+- **Gotcha resuelto**: el run desde Bash necesita `dangerouslyDisableSandbox` (egress a Neon bloqueado por el sandbox) — el humano lo corre desde un shell normal sin problema. Campo `Organization.companyName` (no `name`).
+- **/reputacion**: sin seed posible. Camino de verificación para el humano: (a) dejar el empty state canon (lo más realista en dev), o (b) conectar una cuenta GBP real vía el flujo OAuth de settings. NO se mockea OAuth.
