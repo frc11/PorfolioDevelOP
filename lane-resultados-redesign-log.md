@@ -290,3 +290,27 @@ La sección Resultados del portal cliente funciona end-to-end pero su estética 
 - `SeoAlertas.tsx` = sólo lógica (delega a AlertaMetrica ya canon) → sin cambios. `AlertaMetrica`/`InsightsBlock`/`TrendBadge` ya canon desde Sprint 4 → re-verificados como consumidores de /seo.
 - **PARADA upsell.ts**: NO hizo falta tocarla (el empty es un panel inline que sólo llama la acción; se restyló el panel, no la acción). Firma/slug/side-effects intactos.
 - Gate: tsc exit 0 (zero-any); eslint exit 0 en los 5 archivos del reskin.
+
+---
+
+## 8) CIERRE — corrida desatendida completa (1→A→2→3→4→5) ✅
+
+**Estado final:** los 6 sprints corrieron de corrido. Gate técnico verde en cada uno (`tsc --noEmit` exit 0 + eslint exit 0 en tocados). Worktree `lane/resultados` limpio y commiteado. **NO se hizo merge, NO se tocó main.** Ninguna PARADA OBLIGATORIA se disparó (schema/ui/shell intactos; Franco P0.2 y `upsell.ts` no tocados; sin drift de Franco). Anti-loop nunca activado.
+
+**Commits por sprint (16 commits sobre base `dd0a3c4`; `583a3ee`/`e6578b6` ya existían pre-corrida):**
+- Sprint 1: `9e692fc` (bitácora) · `90a202e` (headers /seo+/reputacion). [+ `583a3ee`/`e6578b6` previos]
+- Sprint A: `d1a2380` (gitignore del seed + bitácora; seed corrido contra Neon dev → Matsu BUSINESS).
+- Sprint 2: `2b51858` (infra HoverCard+ResultEmptyState) · `37609b5` (reskin /reputacion).
+- Sprint 3: `36bb208` (infra chartTheme+chartHover) · `3ee97f0` (reskin /analisis).
+- Sprint 4: `69ea796` (a: quitar Google Ads) · `ee24347` (b: tipar tooltip) · `15b1d21` (c: skeleton determinístico) · `df4fbe8` (reskin /trafico+compartidos).
+- Sprint 5: `df4854e` (cleanup isMockData) · `0e1d35f` (D4 fuga de error) · `5f7989e` (reskin /seo).
+- Total: **30 archivos, +1478/−1196**.
+
+**Verificación que queda para el humano (despierto):**
+1. **Visual** (no autoconfirmado por compilación): levantar `next dev` DESDE el worktree del lane (`cd C:\lane-resultados\logic-core-v3`) — requiere bajar el :3000 del checkout principal primero (Next 16 no corre 2 dev a la vez). visual-qa automatizado quedó DIFERIDO (ver §7 Sprint 1) porque el único server vivo era el del checkout principal sin los cambios del lane.
+2. **/analisis con datos**: correr `npx ts-node --transpile-only scripts/dev/_seed-resultados-qa.ts` (desde un shell con red a Neon; el seed es idempotente y resolvió Matsu=BUSINESS) y entrar como esa org Pro+. Clean: el mismo script con `clean`.
+3. **Google tabs**: /trafico y /seo se ven con `?demo=true` (mock). /reputacion (GBP) NO se puede sembrar (OAuth live, sin mock) → se ve el empty canon, salvo conectar una cuenta GBP real.
+4. **Coreografía** (hover scale/ring, animaciones recharts, reveals): verificar por grabación.
+5. **Merge**: lo hace el humano. El seed `scripts/dev/_seed-resultados-qa.ts` es gitignored → NO se mergea (vive sólo en este worktree).
+
+**Deuda de datos PRESERVADA (flaggeada con `// FIXME(data-truth)`, NO tocada, por diseño):** deltas de tendencia hardcodeados (/trafico, /seo); `performance.*` de GBP stubbeado 0 (bloque nunca renderiza); CTA muerto "ACTIVAR AHORA" (/trafico); demo property id hardcodeado. Fixes de seguridad/correctitud SÍ aplicados (blessed): D2 (Google Ads), D4 (fuga de error /seo), tipado `any` SessionsChart, `Math.random()` skeleton, probe muerto isMockData.
