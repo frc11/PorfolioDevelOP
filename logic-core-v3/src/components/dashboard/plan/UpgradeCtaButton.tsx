@@ -32,6 +32,7 @@
  * una falla de telemetría).
  */
 
+import { Loader2 } from 'lucide-react'
 import { useTransition } from 'react'
 import { requestUpsellAction } from '@/lib/actions/upsell'
 
@@ -92,7 +93,15 @@ export function UpgradeCtaButton({
       aria-busy={isPending}
       aria-label={label}
     >
-      {children}
+      {/* Pending visible: el spinner reemplaza el ícono líder (Sparkles del
+          variant highlighted) o se antepone al label (variant default), in-place
+          y al mismo tamaño (13px) para no desalinear. El disabled + cursor-wait
+          + opacity-60 los aporta el className del caller. */}
+      {isPending ? (
+        <Loader2 size={13} strokeWidth={1.5} className="animate-spin" aria-hidden="true" />
+      ) : (
+        children
+      )}
       {label}
     </button>
   )
