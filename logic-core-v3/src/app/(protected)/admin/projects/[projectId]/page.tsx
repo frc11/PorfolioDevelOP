@@ -5,6 +5,7 @@ import { prisma } from '@/lib/prisma'
 import { auth } from '@/auth'
 import { callerCanAccessOrg } from '@/lib/auth/assert-ownership'
 import { adminHoverCls } from '@/lib/hover'
+import { DeleteProjectButton } from './_components/delete-project-button'
 
 type ProjectOverviewPageProps = {
   params: Promise<{
@@ -316,6 +317,19 @@ export default async function AgencyOsProjectOverviewPage({
               </p>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* Zona de peligro (S6) — eliminar proyecto. Consume deleteProjectAction
+          (guard SUPER_ADMIN + redirect server-side a la lista). */}
+      <section className="rounded-[28px] border border-rose-400/15 bg-rose-500/[0.04] p-5 backdrop-blur-xl">
+        <h3 className="text-lg font-semibold text-white">Zona de peligro</h3>
+        <p className="mt-1 max-w-2xl text-sm leading-6 text-zinc-400">
+          Eliminar este proyecto borra de forma permanente sus tareas, hitos de pago,
+          mantenimiento y registros de tiempo. El lead original no se modifica.
+        </p>
+        <div className="mt-4">
+          <DeleteProjectButton projectId={project.id} projectName={project.name} />
         </div>
       </section>
     </div>

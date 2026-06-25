@@ -255,9 +255,52 @@ con S2.
   (border+shadow condicionales) siguen en el inner.
 - Gate: tsc exit 0 + lint exit 0.
 
-### Estado por sprint
-- **S1** ✅ commit `e644e55`
-- **S2 + S3** ✅ commit `92f1218` (S3 no-op foldeado)
-- **S4a** ✅ commit `be6aa4c` · **S4b** ✅ commit `e86ae3d` · **S4c** ✅ commit `7876c02`
-- **S5** ✅ (este commit)
-- **S6** ⏳ pendiente (delete en detalle admin)
+## S6 — Eliminar dentro del detalle admin — CERRADO (sin parada)
+
+READ-FIRST (ver READ-FIRST consolidado arriba): `deleteProjectAction(formData)` en
+`lib/actions/projects.ts:108` — `'use server'`, guard `requireSuperAdmin()` claro,
+`prisma.project.delete` (cascade por schema) + `revalidatePath('/admin/projects')` +
+`redirect('/admin/projects')` server-side. Invocada hoy desde el board (lista) vía la OTRA
+action (`_actions/project.actions.ts::deleteProject`, ActionResult, sin redirect). Para S6
+se consume la NOMBRADA (`deleteProjectAction`) tal cual — guard claro + redirect limpio →
+NO hubo parada obligatoria.
+
+Implementación (adición mínima, sin refactor del resto):
+- Nuevo client island `[projectId]/_components/delete-project-button.tsx`: botón destructivo
+  + `OverlayModal` (consumido del patrón existente, portaleado a body) + `<form
+  action={deleteProjectAction}>` con hidden `projectId` + `useFormStatus` (pending/spinner).
+  El submit dispara la action y su `redirect` server-side (sin router.push).
+- `[projectId]/page.tsx` (Overview): +1 import y +1 `<section>` "Zona de peligro" al final.
+  NO se tocó el `layout.tsx` (header shared, posible trabajo de otro lane admin).
+- Guard SUPER_ADMIN: lo enforce la action (`requireSuperAdmin`) además del shell /admin/* y
+  el `callerCanAccessOrg` de la page → defensa en profundidad. No se creó action ni permiso.
+- Gate: tsc exit 0 + lint exit 0 (page.tsx + delete-project-button.tsx, brackets escapados
+  en el glob de eslint: `[[]projectId[]]`).
+
+---
+
+## LANE COMPLETO — S1→S6 cerrados, gate técnico verde en cada uno
+
+Todos los sprints commiteados, working tree limpio, sin paradas obligatorias disparadas,
+sin schema/frozen/main tocados. Verificación VISUAL pendiente de Valentino (MCP de browser
+ausente en headless — ver nota arriba) sobre `/dashboard/project` (con/sin tareas, sin
+proyectos, switcher, reject-form) y el detalle admin `admin/projects/[projectId]` (Zona de
+peligro + confirm de borrado).
+
+### Estado por sprint (final)
+- **S1** ✅ `e644e55` — chrome/header + fix EmptyState boundary
+- **S2 + S3** ✅ `92f1218` — cards reskin (+ S3 Tabs no-op)
+- **S4a** ✅ `be6aa4c` — query `?p` + switcher + drop `any`
+- **S4b** ✅ `e86ae3d` — hero reskin
+- **S4c** ✅ `7876c02` — detail-fields read-only
+- **S5** ✅ `8c71ec1` — hover adminHoverCls split
+- **S6** ✅ (este commit) — eliminar en detalle admin
+
+### Para Valentino (post-merge / verificación)
+- Switcher multi-proyecto: probar con un org de >1 proyecto y un `?p=<id>` ajeno (debe caer
+  al fallback, no leakear). Con 1 proyecto el switcher no se muestra.
+- S4c: `Inicio` y `Tipo` son DERIVADOS (no columnas). Si se quiere otra semántica de "inicio",
+  es decisión de producto (hoy = mín de createdAt de lead/hitos/mantenimiento, igual al admin).
+- S6: el borrado redirige a `/admin/projects`. La action consumida usa `prisma.project.delete`
+  (cascade del schema); la otra `deleteProject` (board) borra dependientes explícitos en tx —
+  ambas válidas, no se unificaron (fuera de scope).
