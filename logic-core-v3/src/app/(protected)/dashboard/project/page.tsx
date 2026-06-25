@@ -1,7 +1,7 @@
 import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import { resolveOrgId } from '@/lib/preview'
-import { ProjectStatus } from '@prisma/client'
+import { ProjectStatus, ServiceStatus, ServiceType, OsServiceType, Prisma } from '@prisma/client'
 import { MessageSquare, FolderOpen } from 'lucide-react'
 import { ProjectEmptyState } from '@/components/dashboard/ProjectEmptyState'
 import Link from 'next/link'
@@ -55,6 +55,70 @@ function serializeTask(task: {
   }
 }
 
+// ─── Detail-field helpers (S4c) — mismo criterio que el admin ────────────────────
+
+function formatCurrency(value: Prisma.Decimal): string {
+  return new Intl.NumberFormat('es-AR', {
+    style: 'currency',
+    currency: 'USD',
+    maximumFractionDigits: 2,
+  }).format(Number(value.toString()))
+}
+
+function formatDate(value: Date): string {
+  return new Intl.DateTimeFormat('es-AR', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  }).format(value)
+}
+
+// Tipo de proyecto: NO es columna de Project. Se deriva como el admin —
+// osLead.serviceType (legacy) mapeado, si no organization.services[0].type activo.
+function mapOsServiceType(type: OsServiceType | null): ServiceType | null {
+  switch (type) {
+    case OsServiceType.WEB:             return ServiceType.WEB_DEV
+    case OsServiceType.AI_AGENT:        return ServiceType.AI
+    case OsServiceType.AUTOMATION:      return ServiceType.AUTOMATION
+    case OsServiceType.CUSTOM_SOFTWARE: return ServiceType.SOFTWARE
+    default:                            return null
+  }
+}
+
+const SERVICE_LABEL: Record<ServiceType, string> = {
+  WEB_DEV:    'Web',
+  AI:         'AI',
+  AUTOMATION: 'Automation',
+  SOFTWARE:   'Software',
+}
+
+function deriveServiceLabel(project: {
+  organization: { services: { type: ServiceType }[] } | null
+  osLead: { serviceType: OsServiceType | null } | null
+}): string | null {
+  const serviceType =
+    mapOsServiceType(project.osLead?.serviceType ?? null) ??
+    project.organization?.services[0]?.type ??
+    null
+  return serviceType ? SERVICE_LABEL[serviceType] : null
+}
+
+// Fecha de inicio: NO es columna. Se deriva (mín de osLead.createdAt + milestones +
+// maintenance), mismo criterio que el admin (page.tsx deriveStartDate).
+function deriveStartDate(project: {
+  osLead: { createdAt: Date } | null
+  paymentMilestones: { createdAt: Date }[]
+  maintenancePayments: { createdAt: Date }[]
+}): Date | null {
+  const candidates = [
+    project.osLead?.createdAt,
+    ...project.paymentMilestones.map((m) => m.createdAt),
+    ...project.maintenancePayments.map((m) => m.createdAt),
+  ].filter((v): v is Date => Boolean(v))
+  if (candidates.length === 0) return null
+  return new Date(Math.min(...candidates.map((c) => c.getTime())))
+}
+
 // ─── Page ──────────────────────────────────────────────────────────────────────
 
 export default async function ProjectPage({
@@ -68,7 +132,24 @@ export default async function ProjectPage({
   const projects = await prisma.project.findMany({
     where: { organizationId },
     orderBy: [{ status: 'asc' }, { id: 'desc' }],
-    include: { tasks: { orderBy: { id: 'asc' } } },
+    include: {
+      tasks: { orderBy: { id: 'asc' } },
+      // S4c: el tipo de proyecto y la fecha de inicio NO son columnas de Project;
+      // se derivan vía relaciones, mismo criterio que el admin. Selects mínimos.
+      organization: {
+        select: {
+          services: {
+            where: { status: ServiceStatus.ACTIVE },
+            orderBy: { startDate: 'desc' },
+            take: 1,
+            select: { type: true },
+          },
+        },
+      },
+      osLead: { select: { serviceType: true, createdAt: true } },
+      paymentMilestones: { select: { createdAt: true } },
+      maintenancePayments: { select: { createdAt: true } },
+    },
   })
 
   // ── Empty state ────────────────────────────────────────────────────────────
@@ -143,6 +224,20 @@ export default async function ProjectPage({
     todo:       tasks.filter((t) => t.status === 'TODO').map(serializeTask),
     done:       tasks.filter((t) => t.status === 'DONE').map(serializeTask),
   }
+
+  // ── Detail fields (S4c) — solo los presentes; campo null → tile oculto ───────
+  const serviceLabel = deriveServiceLabel(project)
+  const startDate = deriveStartDate(project)
+  const detailFields: { label: string; value: string }[] = [
+    ...(serviceLabel ? [{ label: 'Tipo', value: serviceLabel }] : []),
+    ...(project.agreedAmount
+      ? [{ label: 'Monto acordado', value: formatCurrency(project.agreedAmount) }]
+      : []),
+    ...(startDate ? [{ label: 'Inicio', value: formatDate(startDate) }] : []),
+    ...(project.estimatedEndDate
+      ? [{ label: 'Entrega estimada', value: formatDate(project.estimatedEndDate) }]
+      : []),
+  ]
 
   return (
     <div className="flex flex-col gap-8 max-w-5xl mx-auto pb-20">
@@ -234,6 +329,23 @@ export default async function ProjectPage({
               tareas; el estado vacío vive en el EmptyState de abajo. */}
           {totalCount > 0 && (
             <AnimatedProgressBar progressPct={progressPct} />
+          )}
+
+          {/* Detail fields (S4c) — tiles read-only del proyecto seleccionado */}
+          {detailFields.length > 0 && (
+            <div className="mt-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
+              {detailFields.map((field) => (
+                <div
+                  key={field.label}
+                  className="rounded-2xl border border-white/10 bg-black/20 p-4"
+                >
+                  <p className="text-[10px] uppercase tracking-[0.22em] text-zinc-500">
+                    {field.label}
+                  </p>
+                  <p className="mt-2 text-sm text-white">{field.value}</p>
+                </div>
+              ))}
+            </div>
           )}
         </div>
       </FadeIn>

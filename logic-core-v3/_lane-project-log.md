@@ -219,10 +219,27 @@ con S2.
 - `AnimatedProgressBar` INTACTA (cyan + spring + sweep + copy, no tocada).
 - Gate: tsc exit 0 + lint exit 0.
 
+### S4c — detail-fields read-only en el hero — CERRADO
+- READ-FIRST (campos reales del modelo `Project`): `agreedAmount` (Decimal?) y
+  `estimatedEndDate` (DateTime?) son **columnas directas** (ya las devolvía el query, sin
+  `select` restrictivo). `tipo de proyecto` y `fecha de inicio` **NO son columnas** →
+  se **derivan** igual que el admin, SIN cambio de schema (no es parada obligatoria):
+  - tipo: `mapOsServiceType(osLead.serviceType) ?? organization.services[0].type` →
+    label Web/AI/Automation/Software.
+  - inicio: `min(osLead.createdAt, paymentMilestones.createdAt, maintenancePayments.createdAt)`.
+- Query: agregados includes mínimos (`organization.services` activos take 1 `select type`,
+  `osLead {serviceType,createdAt}`, `paymentMilestones {createdAt}`, `maintenancePayments
+  {createdAt}`). El `where: { organizationId }` intacto → multi-tenant preservado.
+- Render: grid de tiles token admin `rounded-2xl border-white/10 bg-black/20 p-4`, micro-label
+  `text-[10px] uppercase tracking-[0.22em] text-zinc-500` + valor `text-white`. Fecha es-AR
+  legible, monto USD como el admin. **Campo null → tile OCULTO** (sin "null"/vacío); si los
+  4 son null no se renderiza el grid.
+- NO hubo PARADA: ningún campo requirió columna nueva ni migración.
+- Gate: tsc exit 0 + lint exit 0.
+
 ### Estado por sprint
 - **S1** ✅ commit `e644e55`
 - **S2 + S3** ✅ commit `92f1218` (S3 no-op foldeado)
-- **S4a** ✅ commit `be6aa4c`
-- **S4b** ✅ (este commit) · **S4c** ⏳ detail-fields
+- **S4a** ✅ commit `be6aa4c` · **S4b** ✅ commit `e86ae3d` · **S4c** ✅ (este commit)
 - **S5** ⏳ pendiente (hover adminHoverCls split)
 - **S6** ⏳ pendiente (delete en detalle admin)
