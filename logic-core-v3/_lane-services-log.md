@@ -142,3 +142,58 @@
 - **Fix (caso frozen):** empty **hand-rolled inline** en `page.tsx`, con `FolderOpen` renderizado en JSX **server** (nunca cruza), replicando el look `EmptyState` lg/default (rounded-3xl dashed, icon chip cyan, título/desc, CTA `<Link>`), full-width, dentro de `<FadeIn>`. Se quitó el import de `EmptyState`. Sin tocar el frozen, sin volver client la page.
 - **Hallazgo fuera de scope:** el mismo bug es **latente** en toda server page que pase un Lucide a `EmptyState` (project/agenda/tienda/motor-resenas/email-marketing/chatbot-settings) — reportado, no corregido (fuera de los 3 archivos).
 - **Gate:** tsc 0 / eslint 0 (page.tsx) / diff = solo page.tsx + log. Único cruce de función al cliente eliminado (verificado estáticamente). Render real → confirma el humano en :3000 con org vacía.
+
+## Sprint 5 — botón "Ver detalles" + modal de detalle del módulo (corrida desatendida 2026-06-25)
+**Objetivo:** "Ver detalles" en las module-cards que abre un modal con la descripción general del módulo premium. Componente propio, reusable, portalizado a body.
+
+**Archivos tocados (2 código + log):**
+- **NUEVO** `components/dashboard/ServiceDetailModal.tsx` (`'use client'`, presentacional puro).
+- `components/dashboard/PremiumModuleCard.tsx` (estado de apertura + botón(es) + preset + render del modal).
+- `loading.tsx` → **NO tocado** (decisión documentada abajo: el alto de la card *available* no cambia).
+
+**ServiceDetailModal.tsx (presentacional):**
+- Props: `{ open, onClose, name, longDescription, icon: LucideIcon, accentColor, priceMonthlyUsd, tierLabel, isComingSoon }`. NO importa Prisma, NO server action, NO upsell — la card resuelve los datos y se los pasa listos. Recibe el `icon` ya resuelto (no duplica el `ICON_MAP`).
+- **Portal a `document.body`** vía `createPortal` + gate `useIsClient` (escapa el `backdrop-filter` del `<main>` que atrapa `position:fixed`). Patrón copiado 1:1 de `LeadColumnOverview` (lead-pipeline): backdrop `fixed inset-0 z-[200] bg-[#05070a]/80 backdrop-blur-md`; panel `rounded-[30px] border-white/10 bg-[#0c1016]/95 backdrop-blur-xl` (misma superficie de modal que la hermana, más legible que `bg-white/5` sobre el backdrop oscuro).
+- **Cierre:** botón X, click en backdrop (`onClick` en overlay + `stopPropagation` en panel), Esc. **Focus:** foco inicial al botón cerrar, trap básico (Tab/Shift+Tab ciclan dentro del panel), restore al cerrar; `body.overflow='hidden'` mientras está abierto. `role="dialog"`, `aria-modal`, `aria-label`.
+- **AnimatePresence** entrada/salida (scale+opacity 0.24s ease de la ola) con `useReducedMotion` → sin animación si `prefers-reduced-motion`.
+- **Contenido:** header = icon-chip accentColor + tier eyebrow + nombre (`text-lg font-semibold`, voz liviana) + badge (Premium neutral / "Próximamente Q3 2026" amber, igual que la card); cuerpo = eyebrow "Descripción general" + `longDescription` (`text-sm leading-7 text-zinc-300`); footer = precio "Desde $X USD/mes" (`tabular-nums`) o, si `isComingSoon`, nota "preparando para el catálogo comercial" (sin precio, coherente con la card que NO surfacea precio vendible en próximamente).
+
+**Descripción = preset (decisión determinista, NO parada):**
+- `PremiumModuleCard` **NO recibe** `longDescription` como prop hoy (la query no lo pasa y **ampliar el select queda fuera de scope** → no se tocó). Por lo tanto se usa el fallback diseñado: dict local `PRESET_MODULE_DETAILS` keyeado por slug + `GENERIC_MODULE_DETAIL` para slugs desconocidos. Marcado `// PLACEHOLDER — editar copy real luego`.
+- El copy del preset refleja el catálogo vivo `@/lib/data/premium-modules.ts` (los `longDescription` reales del producto), así el humano ve copy correcto mañana, NO lorem. Si se quiere mostrar el `longDescription` real **de la DB**, hay que pasarlo como prop desde la page en un sprint aparte (no se hizo: implicaría tocar page.tsx/query, fuera de scope de Sprint 5).
+- **NO** se importó `getModuleBySlug` ni se acopló la card al módulo de datos: el brief pidió explícitamente "dict local PRESET_MODULE_DETAILS". Se respetó la letra.
+
+**Botones — DOS lado a lado (decisión de layout, clave):**
+- **Available:** fila `flex items-stretch gap-2.5` = `[Ver detalles: botón icono `Info`, `w-11` `flex-shrink-0`, `aria-label`+`title`]` + `[Desbloquear: CTA intacto]`. El CTA cambió SOLO sus clases de ancho (`w-full` → `min-w-0 flex-1`) para compartir la fila; **comportamiento/estados/acción INTACTOS** (`requestUpsellAction(slug, name)` + `triggerTransition` + 4 estados idle/pending/success/error + `whileTap` + `AnimatePresence`, sin tocar).
+- **Por qué "Ver detalles" es ICONO (no etiquetado) en available:** medí el ancho real. Sidebar `w-[240px]` + `<main>` `p-6` + panel `p-6` + grid `lg:grid-cols-3 gap-4` → en el tramo **lg (1024–1280px, 3 columnas)** la card baja a **~178px de ancho interno**, donde el label "DESBLOQUEAR MÓDULO" (~166px) ya usa casi todo el ancho del botón actual. Un segundo botón **etiquetado** forzaría stacking en casi todos los anchos (rompiendo "lado a lado") o haría wrappear el CTA. El botón **icono** (≈44px) es lo único que mantiene los dos **genuinamente lado a lado en todos los anchos reales**, con impacto de alto SOLO en el tramo lg (el label del CTA puede ir a 2 líneas ahí; `min-w-0` evita overflow). En mobile/2-col/xl entra en una línea. → **`loading.tsx` NO necesita cambio** (el alto de la card available no cambia salvo el tramo lg angosto, dentro del `min-h-[260px]` del skeleton genérico).
+- **Coming-soon:** sin CTA Desbloquear (comportamiento actual intacto) → "Ver detalles" va **etiquetado full-width** debajo de la nota amber (hay lugar de sobra). Leve asimetría con el icono de available, justificada por el espacio disponible.
+
+**Gate (corrida desatendida):**
+- `tsc --noEmit` desde `logic-core-v3/` → **exit 0** (baseline 0 → 0 nuevos). ✓
+- `eslint` sobre `ServiceDetailModal.tsx` + `PremiumModuleCard.tsx` → **exit 0**, cero `any`. ✓
+- `git diff` → SOLO `PremiumModuleCard.tsx` (mod) + `ServiceDetailModal.tsx` (nuevo) + este log. Cero toques a schema/ui/shell/frozen/page.tsx/loading.tsx/upsell. ✓
+- **visual-qa: NO ejecutable en esta sesión.** El único preview corre con `cwd: C:\PorfolioDevelOP` (= **main**, no el worktree) y la ruta es auth-gated; Next 16 no levanta un 2º dev server con :3000 activo. El preview no refleja el código de Sprint 5 → verificar contra él sería ver *main* sin estos cambios. Revisión hecha **estáticamente** (estructura del portal/focus-trap/props/scope, espejo de `LeadColumnOverview`). El humano hace la revisión visual mañana sobre el commit (gate 1–3 + commit ya gatean; el brief autoriza seguir si visual-qa no es ejecutable).
+- **Commit del sprint.** ✓
+
+**Reglas duras verificadas:** cero `any`; multi-tenant intacto (no se tocó `resolveOrgId`/queries/page.tsx); sin secrets; sin `router.push` (el modal no navega; el CTA sigue con `triggerTransition`); page.tsx sigue server, modal + card son client. Ninguna PARADA OBLIGATORIA gatillada (todo en scope propio).
+
+---
+
+## Cierre de la lane `lane/services`
+**Estado:** Sprints 0–5 + hotfix commiteados en el worktree `C:\lane-services\logic-core-v3` (branch `lane/services`). **NO** merge, **NO** main — la integración la hace el humano. Working tree limpio.
+
+| Commit | Sprint | Qué |
+|---|---|---|
+| `5d97587` | 0 | doc fuente de verdad (`_lane-services-log.md`). |
+| `97c02c1` | 1 | reskin `PremiumModuleCard` al lenguaje del admin (chrome 24px, `adminHoverCls`, tipografía liviana, badge Premium→neutral, precio `tabular-nums`, accent intacto, `<></>` muerto fuera). |
+| `ab86804` | 2 | reskin `ServiceCard` + chrome de sección. |
+| `a6550e9` | 3 | `loading.tsx` espeja la page. |
+| `7fda87c` | 4 | full-width + 3 paneles glass (Contratados/Disponibles/Próximamente) + superficie anidada + grids que llenan. |
+| `91b3b20` | hotfix | empty state hand-rolled inline en page.tsx (boundary server/client de `EmptyState`). |
+| (este) | 5 | botón "Ver detalles" + `ServiceDetailModal` portalizado a body, con preset de `longDescription` + 2 botones lado a lado. |
+
+**Pendientes post-merge fichados (NO ejecutar en esta lane):**
+1. **Modal de detalle de SERVICIOS CONTRATADOS** (el "Ver detalles" del `ServiceCard`, hoy `<Link>` a `/dashboard/messages`). Idea: "1 cuadro por servicio + N entidades por tipo de servicio". Es feature con relevamiento de `Project` + posible schema → fuera de un lane visual. El `<Link>` del `ServiceCard` quedó **como estaba** (sin tocar).
+2. **Bug latente `EmptyState` + Lucide en server pages** (`project`, `modules/{agenda-inteligente,tienda-conectada,motor-resenas,email-marketing/*}`, `chatbot/settings`): pasar un `LucideIcon` a `EmptyState` ('use client', FROZEN) cruza una función por el boundary y la página no renderiza con data vacía. Mismo patrón que el hotfix de Sprint 5 anterior. NO tocado acá; **sigue fichado**.
+
+**Mejora opcional futura (no bloqueante):** mostrar el `longDescription` real de la DB en el modal pasándolo como prop desde `page.tsx` (la query ya lo devuelve, no haría falta tocar el select) — reemplazaría el preset. Queda como mini-lane si se quiere copy 100% data-driven.

@@ -8,6 +8,7 @@ import {
   Calendar,
   CheckCircle2,
   DollarSign,
+  Info,
   Loader2,
   Lock,
   Mail,
@@ -24,6 +25,7 @@ import type { LucideIcon } from 'lucide-react'
 import { requestUpsellAction } from '@/lib/actions/upsell'
 import { adminHoverCls } from '@/lib/hover'
 import { useTransitionContext } from '@/context/TransitionContext'
+import { ServiceDetailModal } from './ServiceDetailModal'
 
 const ICON_MAP: Record<string, LucideIcon> = {
   Bot,
@@ -43,6 +45,34 @@ const TIER_LABELS: Record<PremiumModuleTier, string> = {
   TIER_2_GROWTH: 'Crecimiento',
   TIER_3_VERTICAL: 'Vertical',
 }
+
+// PLACEHOLDER — editar copy real luego.
+// La card NO recibe `longDescription` como prop (la query de la page no lo pasa y
+// ampliar el select queda fuera de scope), así que el modal usa esta descripción
+// general de fallback keyeada por slug. El copy refleja el catálogo vivo
+// (`@/lib/data/premium-modules.ts`); si se quiere mostrar el `longDescription` real
+// de la DB, hay que pasarlo como prop desde la page en un sprint aparte.
+const PRESET_MODULE_DETAILS: Record<string, string> = {
+  'motor-resenas':
+    'Conectamos tu Google Business Profile y monitoreamos las reseñas que llegan. La IA genera respuestas profesionales que vos aprobás con un click. Además te ayudamos a pedir reseñas a clientes satisfechos automáticamente, para que tu reputación crezca sin seguimiento manual.',
+  'email-marketing-pro':
+    'Plataforma completa de email marketing white-label. Diseñá campañas con templates, segmentá tu audiencia, mandá newsletters automáticos y medí aperturas y clicks. Todo desde tu panel develOP, conectado a tu base de clientes.',
+  'agenda-inteligente':
+    'Sistema de reservas integrado a tu sitio. Tus clientes ven tu disponibilidad real, eligen horario y reservan solos, en cualquier momento. Recordatorios automáticos y sincronización con Google Calendar para que no se te escape ningún turno.',
+  'tienda-conectada':
+    'Integración completa con Tiendanube. Ventas, productos, stock, abandonos de carrito y métricas comerciales aparecen en tu panel develOP. Alertas automáticas cuando un producto se queda sin stock, para que tu tienda y tu operación hablen el mismo idioma.',
+  'whatsapp-autopilot':
+    'Agente de IA conectado directamente a WhatsApp Business. Responde 24/7 con la voz de tu marca, califica leads automáticamente y agenda turnos en tu calendario, sin que tengas que estar pendiente del teléfono.',
+  'facturacion-afip':
+    'Conectamos tu certificado AFIP y emitís facturas electrónicas A, B y C en 30 segundos desde tu panel. Validación de CUIT en tiempo real y padrón actualizado automáticamente, sin Excel ni intermediarios.',
+  'cobranzas-automatizadas':
+    'Detectamos facturas vencidas y enviamos recordatorios escalonados a tus deudores por WhatsApp y email. Reportes semanales de cobranzas pendientes y proyección de cobros para que persigas menos y cobres más.',
+  'reactivacion-clientes':
+    'Análisis automático de tu base para identificar clientes inactivos. Generamos campañas personalizadas con ofertas relevantes para cada segmento de churn y recuperamos a quienes dejaron de comprar.',
+}
+
+const GENERIC_MODULE_DETAIL =
+  'Un módulo premium de develOP pensado para potenciar tu operación. Escribinos para conocer todos los detalles, casos de uso y cómo se integra con lo que ya tenés activo.'
 
 export interface PremiumModuleCardProps {
   slug: string
@@ -69,12 +99,14 @@ export function PremiumModuleCard({
 }: PremiumModuleCardProps) {
   const [reqStatus, setReqStatus] = useState<ReqStatus>('idle')
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
+  const [detailOpen, setDetailOpen] = useState(false)
   const [isPending, startTransition] = useTransition()
   const { triggerTransition } = useTransitionContext()
 
   const Icon = ICON_MAP[iconName] ?? Bot
   const isComingSoon = status === 'COMING_SOON'
   const isSuccess = reqStatus === 'success'
+  const longDescription = PRESET_MODULE_DETAILS[slug] ?? GENERIC_MODULE_DETAIL
 
   const handleUnlock = () => {
     if (isPending || isSuccess || isComingSoon) return
@@ -152,8 +184,18 @@ export function PremiumModuleCard({
       <p className="relative z-10 text-sm leading-6 text-zinc-400">{shortDescription}</p>
 
       {isComingSoon ? (
-        <div className="relative z-10 mt-auto rounded-xl border border-amber-500/15 bg-amber-500/[0.05] px-3.5 py-3 text-xs font-medium text-amber-200">
-          Estamos preparando este módulo para el catálogo comercial.
+        <div className="relative z-10 mt-auto flex flex-col gap-2.5">
+          <div className="rounded-xl border border-amber-500/15 bg-amber-500/[0.05] px-3.5 py-3 text-xs font-medium text-amber-200">
+            Estamos preparando este módulo para el catálogo comercial.
+          </div>
+          <button
+            type="button"
+            onClick={() => setDetailOpen(true)}
+            className="flex w-full items-center justify-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.03] py-2.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-zinc-300 transition-colors hover:border-white/15 hover:bg-white/[0.06] hover:text-white"
+          >
+            <Info size={11} strokeWidth={1.5} />
+            Ver detalles
+          </button>
         </div>
       ) : (
         <>
@@ -186,55 +228,83 @@ export function PremiumModuleCard({
             </p>
           )}
 
-          <motion.button
-            onClick={handleUnlock}
-            disabled={isPending || isSuccess}
-            whileTap={!isPending && !isSuccess ? { scale: 0.97 } : undefined}
-            className={[
-              'relative z-10 flex w-full items-center justify-center gap-2 overflow-hidden rounded-xl border py-2.5 text-[11px] font-semibold uppercase tracking-[0.16em] transition-all duration-300',
-              isSuccess
-                ? 'cursor-default border-emerald-500/25 bg-emerald-500/10 text-emerald-400'
-                : 'border-white/[0.08] bg-white/[0.03] text-zinc-300 hover:border-white/15 hover:bg-white/[0.06] hover:text-white disabled:cursor-not-allowed disabled:opacity-50',
-            ].join(' ')}
-          >
-            <AnimatePresence mode="wait">
-              {isPending ? (
-                <motion.span
-                  key="loading"
-                  initial={{ opacity: 0, y: 6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -6 }}
-                  className="flex items-center gap-2"
-                >
-                  <Loader2 size={11} className="animate-spin" />
-                  Enviando solicitud...
-                </motion.span>
-              ) : isSuccess ? (
-                <motion.span
-                  key="success"
-                  initial={{ opacity: 0, y: 6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="flex items-center gap-2"
-                >
-                  <CheckCircle2 size={11} />
-                  Solicitud enviada
-                </motion.span>
-              ) : (
-                <motion.span
-                  key="idle"
-                  initial={{ opacity: 0, y: 6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -6 }}
-                  className="flex items-center gap-2"
-                >
-                  <Unlock size={11} />
-                  Desbloquear Módulo
-                </motion.span>
-              )}
-            </AnimatePresence>
-          </motion.button>
+          {/* Fila de 2: "Ver detalles" (icono, secundario) + "Desbloquear" (CTA intacto).
+              Ver detalles es compacto a propósito: en el tramo angosto (3 columnas a ~1024px)
+              la card baja a ~178px y un botón etiquetado dejaría sin lugar al label del CTA. */}
+          <div className="relative z-10 flex items-stretch gap-2.5">
+            <button
+              type="button"
+              onClick={() => setDetailOpen(true)}
+              aria-label={`Ver detalles de ${name}`}
+              title="Ver detalles"
+              className="flex w-11 flex-shrink-0 items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.03] text-zinc-400 transition-colors hover:border-white/15 hover:bg-white/[0.06] hover:text-white"
+            >
+              <Info size={15} strokeWidth={1.5} />
+            </button>
+
+            <motion.button
+              onClick={handleUnlock}
+              disabled={isPending || isSuccess}
+              whileTap={!isPending && !isSuccess ? { scale: 0.97 } : undefined}
+              className={[
+                'flex min-w-0 flex-1 items-center justify-center gap-2 overflow-hidden rounded-xl border py-2.5 text-[11px] font-semibold uppercase tracking-[0.16em] transition-all duration-300',
+                isSuccess
+                  ? 'cursor-default border-emerald-500/25 bg-emerald-500/10 text-emerald-400'
+                  : 'border-white/[0.08] bg-white/[0.03] text-zinc-300 hover:border-white/15 hover:bg-white/[0.06] hover:text-white disabled:cursor-not-allowed disabled:opacity-50',
+              ].join(' ')}
+            >
+              <AnimatePresence mode="wait">
+                {isPending ? (
+                  <motion.span
+                    key="loading"
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -6 }}
+                    className="flex items-center gap-2"
+                  >
+                    <Loader2 size={11} className="animate-spin" />
+                    Enviando solicitud...
+                  </motion.span>
+                ) : isSuccess ? (
+                  <motion.span
+                    key="success"
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="flex items-center gap-2"
+                  >
+                    <CheckCircle2 size={11} />
+                    Solicitud enviada
+                  </motion.span>
+                ) : (
+                  <motion.span
+                    key="idle"
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -6 }}
+                    className="flex items-center gap-2"
+                  >
+                    <Unlock size={11} />
+                    Desbloquear Módulo
+                  </motion.span>
+                )}
+              </AnimatePresence>
+            </motion.button>
+          </div>
         </>
       )}
+
+      {/* Modal de detalle — portalizado a body desde el propio componente. */}
+      <ServiceDetailModal
+        open={detailOpen}
+        onClose={() => setDetailOpen(false)}
+        name={name}
+        longDescription={longDescription}
+        icon={Icon}
+        accentColor={accentColor}
+        priceMonthlyUsd={priceMonthlyUsd}
+        tierLabel={TIER_LABELS[tier]}
+        isComingSoon={isComingSoon}
+      />
     </div>
   )
 }
