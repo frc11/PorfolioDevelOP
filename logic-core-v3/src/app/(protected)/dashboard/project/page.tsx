@@ -2,8 +2,8 @@ import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import { resolveOrgId } from '@/lib/preview'
 import { ProjectStatus } from '@prisma/client'
-import { MessageSquare, FolderOpen, FolderKanban } from 'lucide-react'
-import { EmptyState, PageHeader } from '@/components/ui'
+import { MessageSquare, FolderOpen } from 'lucide-react'
+import { ProjectEmptyState } from '@/components/dashboard/ProjectEmptyState'
 import Link from 'next/link'
 import { FadeIn } from '@/components/dashboard/FadeIn'
 import { AnimatedProgressBar } from '@/components/dashboard/AnimatedProgressBar'
@@ -13,11 +13,13 @@ import type { SerializedTask } from '@/components/dashboard/ProjectTaskTabs'
 
 // ─── Status badge config ───────────────────────────────────────────────────────
 
+// Tokens del status pill alineados al statusTone del admin
+// (admin/projects/[projectId]/layout.tsx): IN_PROGRESS = sky, texto *-200.
 const PROJECT_STATUS_STYLE: Record<ProjectStatus, string> = {
-  PLANNING:    'bg-zinc-500/10 text-zinc-400 border-zinc-500/20',
-  IN_PROGRESS: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
-  REVIEW:      'bg-amber-500/10 text-amber-400 border-amber-500/20',
-  COMPLETED:   'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+  PLANNING:    'border-zinc-400/20 bg-zinc-400/10 text-zinc-200',
+  IN_PROGRESS: 'border-sky-400/20 bg-sky-400/10 text-sky-200',
+  REVIEW:      'border-amber-400/20 bg-amber-400/10 text-amber-200',
+  COMPLETED:   'border-emerald-400/20 bg-emerald-400/10 text-emerald-200',
 }
 
 const PROJECT_STATUS_LABEL: Record<ProjectStatus, string> = {
@@ -70,25 +72,26 @@ export default async function ProjectPage() {
     return (
       <div className="flex flex-col gap-6 max-w-4xl mx-auto">
         <FadeIn>
-          <PageHeader
-            eyebrow="Tablero"
-            title="Mi proyecto"
-            description="Estado actual y hoja de ruta estratégica"
-            icon={FolderOpen}
-          />
+          <header className="rounded-[28px] border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
+            <p className="text-xs tracking-tight text-zinc-500">Tablero</p>
+            <h1 className="mt-2 text-3xl font-semibold tracking-tight text-white">Mi proyecto</h1>
+            <p className="mt-2 max-w-2xl text-sm text-zinc-400">
+              Estado actual y hoja de ruta estratégica
+            </p>
+          </header>
         </FadeIn>
 
         <FadeIn delay={0.08}>
-          <div className="relative flex flex-col items-center gap-6 rounded-[2rem] border border-white/8 bg-[#0a0c0f]/60 backdrop-blur-xl py-20 px-8 text-center overflow-hidden">
+          <div className="relative flex flex-col items-center gap-6 rounded-[28px] border border-white/10 bg-white/5 backdrop-blur-xl py-20 px-8 text-center overflow-hidden">
             <div className="absolute -top-20 left-1/2 -translate-x-1/2 h-40 w-40 rounded-full bg-cyan-500/5 blur-3xl pointer-events-none" />
 
-            <div className="relative flex h-20 w-20 items-center justify-center rounded-2xl border border-white/8 bg-white/[0.03] shadow-2xl">
+            <div className="relative flex h-20 w-20 items-center justify-center rounded-2xl border border-white/10 bg-black/20 shadow-2xl">
               <div className="absolute inset-0 rounded-2xl bg-cyan-500/5 animate-pulse" />
               <FolderOpen size={32} className="text-zinc-500 relative z-10" />
             </div>
 
             <div className="max-w-sm space-y-2">
-              <h2 className="text-lg font-black tracking-tight text-white uppercase italic">
+              <h2 className="text-lg font-semibold tracking-tight text-white">
                 Tu proyecto está siendo preparado
               </h2>
               <p className="text-sm font-medium text-zinc-400 leading-relaxed">
@@ -132,28 +135,29 @@ export default async function ProjectPage() {
 
       {/* ── 1. HEADER ─────────────────────────────────────────────────────── */}
       <FadeIn delay={0}>
-        <PageHeader
-          eyebrow="Tablero"
-          title="Mi proyecto"
-          description="Estado actual y hoja de ruta estratégica"
-          icon={FolderOpen}
-          action={
-            <div
-              className={`inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-[10px] font-black uppercase tracking-widest ${PROJECT_STATUS_STYLE[project.status]}`}
+        <header className="rounded-[28px] border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
+          <p className="text-xs tracking-tight text-zinc-500">Tablero</p>
+          <h1 className="mt-2 text-3xl font-semibold tracking-tight text-white">Mi proyecto</h1>
+          <p className="mt-2 max-w-2xl text-sm text-zinc-400">
+            Estado actual y hoja de ruta estratégica
+          </p>
+          <div className="mt-4 flex flex-wrap items-center gap-2">
+            <span
+              className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium ${PROJECT_STATUS_STYLE[project.status]}`}
             >
               {project.status === 'IN_PROGRESS' && (
                 <span className="relative flex h-2 w-2 flex-shrink-0">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-blue-400 opacity-60" />
-                  <span className="relative inline-flex h-2 w-2 rounded-full bg-blue-400" />
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-sky-400 opacity-60" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-sky-400" />
                 </span>
               )}
               {project.status === 'COMPLETED' && (
                 <span className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.8)]" />
               )}
               {PROJECT_STATUS_LABEL[project.status]}
-            </div>
-          }
-        />
+            </span>
+          </div>
+        </header>
       </FadeIn>
 
       {/* ── 2. HERO — progress card ────────────────────────────────────────── */}
@@ -202,12 +206,7 @@ export default async function ProjectPage() {
       {/* ── 3. TASK TABS ──────────────────────────────────────────────────── */}
       <FadeIn delay={0.14}>
         {totalCount === 0 ? (
-          <EmptyState
-            icon={FolderKanban}
-            title="develOP está armando tu hoja de ruta"
-            description="Cuando el equipo asigne tareas y entregables a tu proyecto, los vas a ver acá. Recibís una notificación al iniciar la actividad."
-            cta={{ label: 'Hablar con el equipo', href: '/dashboard/messages?context=proyecto' }}
-          />
+          <ProjectEmptyState />
         ) : (
           <ProjectTaskTabs
             inProgress={serialized.inProgress}
