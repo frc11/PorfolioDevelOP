@@ -36,10 +36,6 @@ const CustomTooltip = ({ active, payload, label }: any) => {
             <div className="h-2 w-2 rounded-full bg-cyan-500 shadow-[0_0_8px_rgba(6,182,212,0.6)]" />
             <span className="text-sm font-black text-white">{payload[0].value} <span className="text-[10px] text-zinc-400 font-bold uppercase">Visitas</span></span>
           </div>
-          <div className="flex items-center gap-2 mt-1 pt-2 border-t border-white/5">
-            <span className="text-[10px] font-bold text-cyan-400 uppercase tracking-tight">Fuente Principal:</span>
-            <span className="text-[10px] font-black text-zinc-300 uppercase italic">Google Ads</span>
-          </div>
         </div>
       </div>
     )
