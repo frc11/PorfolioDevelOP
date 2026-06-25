@@ -203,3 +203,84 @@ viejos hasta refresh manual) y "Ver facturación" da 404. Y un char roto ("Ocurr
 - `visual-qa` (subagente, desktop + mobile) sobre `/dashboard/cuenta/perfil` y `/dashboard/cuenta/facturacion` → **✅ OK** ambas: resuelven y renderizan sin romper (redirect a login = ruta viva, no 404), sin errores de consola. Nota de infra: por el lock de single-dev-server de Next 16 (con `:3000` del repo principal arriba) no se pudo levantar server del worktree; se verificó contra `:3000` (archivos de ruta idénticos main↔worktree; el diff es solo strings → válido como no-regresión de carga). Verificación fina + prueba manual de revalidación quedan para el humano (designadas como tarea humana en el plan).
 
 **Cierre:** commiteado en el worktree (`lane/cuenta`); **NO** se tocó `main` ni se hizo merge. Sin paradas obligatorias disparadas (no se tocó frozen/schema/negocio). DETENIDO — no hay más sprints en esta corrida.
+
+---
+
+## Log de ejecución — Sprints 1·2·3 (corrida visual, 2026-06-25)
+
+> Corrida de los 3 sprints visuales de corrido, commit por sprint, gate
+> (tsc + lint-on-touched + visual-qa) entre cada uno. Worktree `C:\lane-cuenta\logic-core-v3\`.
+
+### Sprint 1 — Perfil — commit `a5d511c`
+**Archivos:** `cuenta/layout.tsx`, `cuenta/perfil/page.tsx`, `cuenta/perfil/loading.tsx`, `components/dashboard/ProfileForms.tsx`.
+
+**Full-width:** confirmado contra hermanas (Explore): el `<main>` del `DashboardLayoutClient` da `p-4 sm:p-6` + frame redondeado y **no** impone ancho; Soporte usa `w-full`, Chatbot `flex flex-col gap-6` sin cap. → `layout.tsx`: `max-w-7xl mx-auto w-full` → `w-full`. `perfil/page.tsx`: soltado `max-w-3xl` (también en la rama preview).
+
+**Section→Card:** borradas las 3 consts `GLASS*` y `Section()`; nuevo helper local `SectionCard` = `<Card variant="elevated" padding="lg">` + `<CardTitle>` + icono. Tinte rojo por override `className` (twMerge): Seguridad `border-red-500/20` (suave, sin bg), Zona de peligro `border-red-500/30 bg-red-500/[0.03]` (fuerte).
+
+**Decisión de grilla (DELEGADA):** banner `ProfileHeader` full-width arriba → fila 2-col `[Datos de empresa | Datos de contacto]` → fila 2-col `[Seguridad (rojo suave) | Preferencias de notificaciones]` → `Información del plan` full (stat-row de 4 celdas) → `Zona de peligro` full. 2-col para que los forms no queden estirados de borde a borde; Preferencias en media-columna evita que los toggles se vayan al borde. `SectionCard` lleva `h-full` para emparejar alturas por fila.
+
+**ProfileForms (paleta zinc-800 → admin):**
+- Inputs simples → primitivo `<Input>` de `ui/*` (`rounded-xl border-white/10 bg-white/[0.02] focus:border-cyan-400/30`); readOnly = `Input` + `className="cursor-not-allowed text-zinc-500"`. Borradas `INPUT_BASE`/`INPUT_READONLY`.
+- Composites (whatsapp + 3 password) y preview de logo: wrappers reestilados al espejo del primitivo (`rounded-xl border-white/10 bg-white/[0.02] focus-within:border-cyan-400/30`).
+- **Fix toggles:** migrados al primitivo `<Toggle>` (`h-6 w-11` track, thumb `h-5 w-5` con `items-center` → centrado vertical robusto, `translate-x-5/1`). Elimina el thumb desbordado/"bulge". Se mantienen los `<input type="hidden">` que cargan el estado al submit; `onChange={() => toggle(key)}`.
+- `PlanInfoSection`: las 4 stats → celdas admin (`rounded-xl border-white/5 bg-white/[0.015] px-3 py-2.5` + `adminHoverCls`); valor a `text-sm` (no `text-base`) para que entre la fecha de vencimiento. Links "Ver facturación" + cancel de DangerZone → fila admin (`border-white/10 bg-white/[0.02] hover:border-white/15 hover:bg-white/10`).
+- Filas de notificaciones: superficie admin + `hover:border-white/15 hover:bg-white/[0.04]` (color-only).
+- **Preservado:** Zod intacto (no se tocaron actions), strength meter, feedback success/error, los 5 toggles, y la rama `isAdminPreview()` (banner ámbar + datos en `SectionCard` sin forms; full-width).
+
+`perfil/loading.tsx`: skeleton al chrome nuevo (`rounded-3xl`, grid full-width 2-col).
+
+**Gate:** `tsc.cmd --noEmit` → exit 0 (sin errores nuevos). Lint sobre los 4 tocados → limpio. **visual-qa → ❓ A CONFIRMAR (infra-limited):** el subagente (Read/Grep + preview-MCP, sin Bash) no pudo bootear server — `npm run build` rojo por deuda ajena (motivo por el que el gate usa tsc, no build), ruta tras auth, y lock de single-`next dev` con `:3000` del repo principal. Es la limitación de infra prevista por el plan + Sprint 0 → **flag al humano** para verificación visual fina (no-regresión de carga confirmada por tsc+lint). No se reintentó en loop (guard anti-loop).
+
+### Sprint 2 — Facturación — commit `26026df`
+**Archivos:** `cuenta/facturacion/page.tsx`, `components/dashboard/CurrentPlanCard.tsx`, `cuenta/facturacion/loading.tsx`.
+
+**Full-width:** `page.tsx` soltó `mx-auto max-w-5xl` → `w-full`; `gap-8` → `gap-6` (espaciado admin).
+
+**Receta admin + tipografía:**
+- Cards `bg-[#0c0e12]/80 shadow-2xl backdrop-blur-xl rounded-2xl` → `bg-white/[0.02] rounded-3xl border-white/10` (invoice card como div con la receta; billing-info sobre el primitivo `<Card variant="elevated" padding="lg">`).
+- `font-black uppercase tracking-widest` → sobrio: labels `text-[10px] font-semibold tracking-[0.24em]/[0.2em] text-zinc-500`, headings/valores `text-zinc-100/200`. Banners de renovación: span `font-black`→`font-semibold`, link `font-bold`→`font-semibold` (semántica red/amber intacta).
+- Tabla invoices: dividers `border-white/5`, th `font-semibold tracking-[0.2em]`, status badge `font-semibold tracking-[0.16em]` con `cfg.pill` (emerald/amber/red) INTACTO; row hover color-only `hover:bg-white/[0.04]` (sin scale en filas de tabla — el scale rompe `<tr>`).
+
+**Hover admin (`adminHoverCls`):** stat cells de "Información de facturación" (email + próxima fecha) y filas de servicios/módulos + celda "Próxima facturación" de `CurrentPlanCard` (ancla: admin `BillingOverrideCard`/`HoverScaleCard`, replicado vía `adminHoverCls` string, NO se importó `HoverScaleCard`). El ring no desborda (padding propio de cada celda).
+
+**CurrentPlanCard:** reescrito sobre `<Card variant="elevated" padding="none">` (secciones con `p-6` + footer `border-t`); `overflow-hidden` para clip de esquinas; `StatusBadge` semántico (cyan=configurando, emerald=activo) preservado; total mensual `font-mono font-bold tracking-tight`; icons `strokeWidth={1.5}`.
+
+**Decisión (billing-info):** la grilla `divide-x/divide-y` opaca → grid de 4 celdas admin (`sm:grid-cols-2 lg:grid-cols-4`): email + próxima-fecha = stat cells con hover; métodos de pago = celda estática con pills; "Actualizar datos" = botón-link admin. Se quitó la nota redundante "Aceptamos transferencia…" (de-noise cosmético).
+
+**Gate:** `tsc.cmd --noEmit` → exit 0; lint sobre los 3 tocados → limpio. **visual-qa → infra-limited** (mismo blocker; sin Bash/build/port → análisis estático). Flag accionado: (1) tooltip "Generando…" `bg-[#0c0e12]` hardcodeado → token `bg-zinc-900` (un tooltip debe quedar OPACO/legible — NO se translucidó); (2) `InvoiceStatusIcon` sin `strokeWidth` → `strokeWidth={1.5}` (convención CLAUDE.md). Re-gate verde tras los fixes. **Pre-existente NO tocado (fuera de scope):** el tooltip flota en `<table overflow-x-auto>` y puede clipearse en el borde derecho (necesitaría portal; bug de layout previo al reskin, edge-case PAID-sin-pdfUrl) → fichado para el humano.
+
+### Sprint 3 — Bóveda — commit `17a9e0a`
+**Archivos:** `cuenta/boveda/page.tsx`, `components/dashboard/VaultRevealButton.tsx`, `components/dashboard/VaultRequestModal.tsx`, `cuenta/boveda/loading.tsx`.
+
+**Full-width:** `page.tsx` soltó `mx-auto max-w-6xl`; `gap-8` → `gap-6`.
+
+**De-noise (quitado):** dot-grid overlay, scanlines, glow ambiental de hover, glow por-tipo (`glowRgb` + `hoverBorder` borrados del `TypeConfig` y de los 6 entries), sombra negra de hover (`hover:shadow-[…rgba(0,0,0,…)]`), títulos `italic uppercase`, nota italic del timeline, `font-black` varios.
+
+**Asset cards:** `<div>` glass artesanal → primitivo `<Card variant="interactive" padding="lg">` + `adminHoverCls` (scale 1.015 + ring blanco; `variant` ya da `hover:bg-white/[0.04]`). Color por tipo = **acento puntual** (ícono + pill `cfg.bg/border/color`), NO tema; superficie del ícono neutra `bg-white/[0.02]`. `isAccess` suma `border-red-500/15` (override twMerge sobre el `border-white/10` del variant). Footer con `mt-auto` (alturas parejas). Acceder: hover neutro cyan (antes glow por-tipo); swap Lock→LockOpen preservado.
+
+**Conservado:** badge AES-256 (restyle sutil emerald, ping con `motion-reduce:animate-none`), `VaultRevealButton` (rojo semántico, máscara→link, auto-hide 30s — sólo de-noise tipográfico), flujo de `VaultRequestModal` (fixed inset-0 SIN portal — NO atrapado por el backdrop del layout cliente; migración a `Modal` primitivo = OPCIONAL, se omitió). **Timeline "Registro de integridad y accesos" = PLACEHOLDER:** `ACTIVITY_LOG` sigue hardcodeado/fake; sólo se re-skineó el chrome al idioma admin (`<Card variant="elevated">`, fonts sobrias, dot con `ring-2 ring-zinc-950`). El modelo real = schema → parada aparte (decisión cerrada).
+
+**Empty state:** hand-rolled en server (`<Card variant="dashed">` + ShieldCheck) — NO se usó el primitivo `EmptyState` (es `'use client'` y recibe `icon` como componente → cruzar un Lucide desde una server page rompe el boundary).
+
+`boveda/loading.tsx`: skeleton full-width (header + grid 3-col `rounded-2xl` + timeline `rounded-3xl`).
+
+**Gate:** `tsc.cmd --noEmit` → exit 0. Lint sobre los 4 tocados → **limpio salvo 1 baseline pre-existente:** `react-hooks/set-state-in-effect` en `VaultRevealButton.tsx:21` — el `setRemaining(HIDE_AFTER_SECONDS)` del `useEffect` que YA estaba en HEAD (confirmado: mi diff no toca el effect, líneas 19-32 intactas). Es la clase de error de baseline documentada; fix = cambio de comportamiento en effect no tocado → **fuera de scope** de un lane visual (iría en commit propio). **visual-qa → ✅ OK estático / ❓ render infra-limited:** sin red flags estructurales/TS/iconos/JSX/hex/mojibake; timeline placeholder reconocido como intencional; render gráfico fino (hover percibible, mobile 390px, contraste) → **humano**.
+
+---
+
+## CIERRE — corrida visual completa (2026-06-25)
+
+**Los 3 commits quedan separados en el worktree `lane/cuenta` para revisión humana:**
+- `a5d511c` — redesign(cuenta/perfil): full-width grid + card admin + fix toggles
+- `26026df` — redesign(cuenta/facturacion): full-width + receta admin + hover
+- `17a9e0a` — redesign(cuenta/boveda): full-width + de-noise + receta admin
+- (+ este `docs(cuenta)` con los logs de ejecución)
+
+**Disciplina:** trabajado SÓLO en `C:\lane-cuenta\logic-core-v3\`; **NADA** en `C:\PorfolioDevelOP`; **cero merges**, **`main` intacto**. Commit por sprint. Sin paradas obligatorias disparadas (no se tocó `schema.prisma` / `ui/*` / shell admin / drift de Franco; no hubo decisión de negocio/auth ni cambio de firma de actions — los gates de sesión/rol + Zod de `lib/actions/profile.ts` y `messages.ts` quedaron INTACTOS, el lane no tocó ninguna action). Read-only de impersonation preservado en Perfil. Guard anti-loop: el blocker de visual-qa (server no booteable en worktree) es de infra constante → no se reintentó en loop; verificación visual fina designada al humano.
+
+**Pendientes fichados para el humano (NO bugs del reskin):**
+1. **Verificación visual fina** de las 3 vistas (desktop + mobile): hover percibible (scale 1.015 + ring), grid/espaciado, contraste, mobile 390px. El gate automático sólo confirmó no-regresión de carga (tsc + lint + análisis estático visual-qa).
+2. **Tooltip "Generando…"** (Facturación) flota en `<table overflow-x-auto>` → puede clipearse en el borde derecho (necesita portal). Pre-existente, edge-case PAID-sin-pdfUrl.
+3. **`react-hooks/set-state-in-effect`** en `VaultRevealButton.tsx:21` — baseline pre-existente; fix = cambio de comportamiento (commit propio, fuera de este lane visual).
+4. **Timeline real de la Bóveda** = modelo de actividad en `schema.prisma` (parada aparte ya fichada).
