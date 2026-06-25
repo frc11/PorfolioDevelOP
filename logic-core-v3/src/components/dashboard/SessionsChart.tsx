@@ -24,8 +24,16 @@ function formatDate(dateStr: string) {
   return `${day}/${month}`
 }
 
-const CustomTooltip = ({ active, payload, label }: any) => {
-  if (active && payload && payload.length) {
+/** Shape mínimo que recharts inyecta al content del Tooltip — tipado propio
+ *  (la firma de `TooltipProps` cambió en recharts 3 y no expone `payload`). */
+interface SessionsTooltipProps {
+  active?: boolean
+  payload?: ReadonlyArray<{ value: number; payload: DataPoint }>
+  label?: string
+}
+
+function CustomTooltip({ active, payload, label }: SessionsTooltipProps) {
+  if (active && payload && payload.length && label) {
     return (
       <div className="rounded-xl border border-cyan-500/30 bg-[#0c0e12]/80 p-4 backdrop-blur-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
         <p className="text-[10px] font-black uppercase tracking-widest text-zinc-500 mb-2">
