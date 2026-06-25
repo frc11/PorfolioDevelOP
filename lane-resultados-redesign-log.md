@@ -243,3 +243,17 @@ La sección Resultados del portal cliente funciona end-to-end pero su estética 
 - `reputacion/page.tsx`: `ReputationEmptyState` → `ResultEmptyState` (ícono Star muted) conservando el CTA `<Link href="/dashboard/messages?context=activacion">` (ahora con `resultEmptyCtaCls`) + el info "Setup manual por ahora". Header de Sprint 1 intacto.
 - `reputacion/loading.tsx`: grid 0.8fr/1.2fr de 2 `skeleton-card` (matchea la nueva forma rating+reseñas), gap-5.
 - Gate: tsc exit 0; eslint exit 0 en los 5 archivos tocados.
+
+### Sprint 3 — /analisis — ✅ COMPLETADO
+**Infra (commit propio):**
+- `results/_shared/chartHover.ts`: `chartCardHoverCls` (no-scale, D3) — espejo del const local de LatencyChart; ring+shadow sin scale.
+- `results/_shared/chartTheme.ts`: `chartTooltipContentStyle` (glass `rgba(9,9,11,0.95)`), `CHART_GRID_STROKE`, `CHART_AXIS_STROKE`, `CHART_AXIS_TICK`, `chartCursorLine`/`chartCursorFill`, + re-export de `useReducedMotion`. Extraído de LatencyChart/ActivityChart.
+
+**Reskin (visual only — Franco P0.2 data contract INTACTO: no se tocó getMonthlyAnalysisForOrg, monthly-analysis.ts, el gate planAllows, la rama teaser, thresholds ni ventana 30d):**
+- `MonthlyConversationsChart.tsx`: recharts canon — tooltip glass (fuera cyan-500/30 font-black), ejes/grid de chartTheme, `isAnimationActive={!reduced}`, **div altura fija `h-48`** (fuera `height={180}` prop), `maxBarSize 32` (era 48), `role="img" aria-label`.
+- `CalibratingBlock.tsx`: ahora delega en `ResultEmptyState` (D1) — fuera el borde sólido + halo cyan pulsante → dashed/muted. Las 3 secciones (MonthTrend/Categories/Discoveries) lo consumen sin cambiar su API.
+- `MonthTrendSection.tsx`: header eyebrow (`tracking-[0.24em]`) + título `font-medium`; valor `text-3xl font-black`→`font-medium`; eyebrow interno `tracking-[0.2em]`→`[0.24em]`; VariationBadge tints `500/30`→`400/20` triples; **la card del chart usa `chartCardHoverCls` (no-scale)**.
+- `CategoriesSection.tsx`: header eyebrow+título font-medium; card envuelta en `HoverCard`; valores `text-cyan-400/80`→zinc; lead `font-semibold text-white`→`font-medium zinc-100`; barra `gradient+glow`→plana `bg-cyan-400/70`.
+- `DiscoveriesSection.tsx`: header eyebrow+título font-medium; cada insight envuelto en `HoverCard`; `TONE_CHIP` y "Ya aplicado" emerald a triples `400/20·/10·300`; h3 `font-semibold`→`font-medium`; eyebrow interno `tracking-[0.2em]`→`[0.24em]`; box "Qué podés hacer" a `cyan-400/15·[0.06]`.
+- `analisis/page.tsx`: `NoBotState` → `ResultEmptyState` conservando el CTA de activación. `loading.tsx` ya matchea (header + 3 card skeletons).
+- Gate: tsc exit 0 (recharts tipado sin `any`); eslint exit 0 en los 8 archivos tocados.
