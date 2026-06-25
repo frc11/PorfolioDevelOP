@@ -232,3 +232,14 @@ La sección Resultados del portal cliente funciona end-to-end pero su estética 
 - **Runner**: `npx ts-node --transpile-only` (tsx NO está instalado en este worktree, confirmado en `node_modules/.bin`). Carga `.env.local` explícitamente (Prisma no la carga sola; no hay `.env` plano). Guard anti-prod inlineado (espejo de `prisma/seed-guard.ts`; ts-node corre en ESM y el import relativo `.ts` no resuelve). NO toca schema, NO migra.
 - **Gotcha resuelto**: el run desde Bash necesita `dangerouslyDisableSandbox` (egress a Neon bloqueado por el sandbox) — el humano lo corre desde un shell normal sin problema. Campo `Organization.companyName` (no `name`).
 - **/reputacion**: sin seed posible. Camino de verificación para el humano: (a) dejar el empty state canon (lo más realista en dev), o (b) conectar una cuenta GBP real vía el flujo OAuth de settings. NO se mockea OAuth.
+
+### Sprint 2 — /reputacion — ✅ COMPLETADO
+**Infra (commit propio 2b51858):**
+- `results/_shared/HoverCard.tsx`: `<div className={cn('grid', adminHoverCls, className)}>` — hover del admin afuera, el caller pasa el `rounded-*` que matchea al hijo. (La variante no-scale para charts queda para Sprint 3.)
+- `results/_shared/ResultEmptyState.tsx`: empty canon dashed/muted (border-dashed border-white/10, bg-white/[0.01], título font-medium text-zinc-300, hint text-zinc-500, ícono muted). Slot `children` para el CTA (acción FROZEN intacta). Exporta `resultEmptyCtaCls` / `resultEmptyCtaSecondaryCls`.
+
+**Reskin:**
+- `GBPMetricsCard.tsx`: reconstruido sobre tokens canon. Rating = tile canon (rounded-2xl border-white/10 bg-white/[0.02], valor `text-3xl font-medium tabular-nums text-amber-300`, ícono en chip rounded-md amber-400, eyebrow tracking-[0.24em]) envuelto en HoverCard. Reseñas = surface canon + tiles inset `bg-black/20 border-white/10`; "Sin responder" → chip triple amber-400/10·/20·300; nombre `font-medium`. Chips de performance = `StatCard` consumido (accent cyan) envuelto en HoverCard. **Fuera `font-black`/`font-mono`/`text-6xl`/`uppercase tracking-[0.2em]`.** `performance.*` stubbeado 0 → `// FIXME(data-truth)`, NO se cablea (integración FROZEN).
+- `reputacion/page.tsx`: `ReputationEmptyState` → `ResultEmptyState` (ícono Star muted) conservando el CTA `<Link href="/dashboard/messages?context=activacion">` (ahora con `resultEmptyCtaCls`) + el info "Setup manual por ahora". Header de Sprint 1 intacto.
+- `reputacion/loading.tsx`: grid 0.8fr/1.2fr de 2 `skeleton-card` (matchea la nueva forma rating+reseñas), gap-5.
+- Gate: tsc exit 0; eslint exit 0 en los 5 archivos tocados.
