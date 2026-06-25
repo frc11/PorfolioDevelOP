@@ -89,3 +89,71 @@ visual-qa) haya pasado alguna vez. Commitearlos bajo el lane y construir S2–S6
      autoriza; por eso detuve).
 
 Lane DETENIDO en pre-S2. Sin loops, sin reintentos.
+
+---
+
+## 2026-06-25 — CORRIDA AUTÓNOMA AUTORIZADA: S1 adoptado + commiteado
+
+El nuevo brief de arranque **autoriza explícitamente** adoptar y commitear el S1
+encontrado en el working tree (estado idéntico al de la corrida anterior). Se
+desbloquea el lane y se ejecuta S1→S6 de corrido.
+
+**S1 — CERRADO (commit `e644e55`).**
+- Gate: `tsc --noEmit` exit 0 (sin errores; baseline `@googleapis/webmasters` NO
+  apareció — árbol limpio). Lint exit 0 en los 3 archivos.
+- Commit único `feat(dashboard/project): S1 — chrome/header reskin + fix EmptyState
+  boundary`. Working tree limpio.
+- 1 deuda fichada para S4a: `page.tsx:117-118` tiene `const tasks = project.tasks
+  as any[]` con `eslint-disable`. NO se toca en S1 (unidad pre-aprobada). Se elimina
+  en S4a (commit de comportamiento que reescribe ese bloque de selección): el
+  `include: { tasks }` ya tipa `project.tasks`, el cast es innecesario.
+
+### READ-FIRST consolidado (anclas reales, leídas read-only)
+
+**Modelo `Project` (schema FROZEN, líneas 507-528):** campos directos =
+`name, description, status, agreedAmount (Decimal?), monthlyRate (Decimal?),
+maintenanceStartDate (DateTime?), deliveredAt (DateTime?), estimatedEndDate
+(DateTime?), osLeadId, organizationId`. **NO existen** columnas `startDate` ni
+`serviceType` directas.
+
+**S4c detail-fields — mapeo a campos reales:**
+- `monto/valor acordado` → `agreedAmount` (directo). ✓
+- `entrega estimada` → `estimatedEndDate` (directo). ✓
+- `tipo de proyecto` → **derivado** (NO columna): el admin lo deriva de
+  `organization.services[0].type` (ACTIVE) o `osLead.serviceType` mapeado
+  (`mapLegacyServiceTypeToPortal`). Se replica esa derivación SIN cambio de schema
+  → NO es parada obligatoria (no inventa columna).
+- `fecha de inicio` → **derivado** (NO columna): el admin (`page.tsx deriveStartDate`)
+  toma `min(osLead.createdAt, paymentMilestones.createdAt, maintenancePayments.createdAt)`.
+  Se replica igual SIN cambio de schema.
+- Conclusión: los 4 campos son renderizables sin tocar schema. tipo/inicio se
+  derivan (no son columnas) → se documenta; los directos van por select.
+
+**S4a — selección actual:** la query YA es `findMany({ where: { organizationId } })`
+(multi-fetch presente desde S1). Selección hoy = `projects.find(p => p.status ===
+'IN_PROGRESS') ?? projects[0]` (por estado, no por param). S4a cambia a selección
+por `?p=<id>` con guard `find(id) ?? fallback` (fallback = in-progress-first), id
+fuera del set scopeado cae al fallback → cero leak multi-tenant.
+
+**S6 — `deleteProjectAction` (RESUELTO, NO es parada):** hay DOS actions de borrado:
+1. `admin/projects/_actions/project.actions.ts::deleteProject(input)` → `ActionResult`,
+   guard `requireSuperAdmin()`, NO redirige, lo usa `projects-board.tsx:156` (lista).
+2. `lib/actions/projects.ts:108::deleteProjectAction(formData)` → **la nombrada por el
+   brief**: `'use server'`, guard `requireSuperAdmin()` ✓, `prisma.project.delete`
+   (cascade por schema) + `revalidatePath('/admin/projects')` + **`redirect('/admin/projects')`
+   server-side**. Encaja exacto con `<form action={deleteProjectAction}>` + hidden
+   `projectId`. Guard SUPER_ADMIN claro + redirect limpio → S6 DESBLOQUEADO, se consume
+   tal cual (no se edita).
+- Placement decidido: sección "Zona de peligro" al final del Overview
+  `admin/projects/[projectId]/page.tsx` (mínimo blast-radius; NO toco el `layout.tsx`
+  shared header que puede estar bajo otro lane). Confirm via `OverlayModal` (mismo
+  patrón destructivo que `task-list.tsx`), nuevo client island `_components/
+  delete-project-button.tsx`. `useFormStatus` para pending.
+
+**S3 — Tabs:** `ui/Tabs` (FROZEN, consumir) YA = admin: underline `bg-cyan-400`,
+sizing md `px-4 py-3 text-sm`, badges de conteo. cyan-locked. → **S3 = no-op**, sin
+diff; se cierra documentado (no fuerzo color).
+
+### Estado por sprint
+- **S1** ✅ commit `e644e55`
+- **S2** ⏳ en curso
