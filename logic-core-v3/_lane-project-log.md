@@ -189,10 +189,25 @@ hover NO se tocó (queda para S5), hero/tabs sin tocar.
 → no se fuerza color; labels/badges correctos. Sin cambios → cerrado en doc, foldeado
 con S2.
 
+## S4 — page.tsx: datos + hero (PESADO) — commits separados
+
+### S4a — query multi + switcher — CERRADO
+- READ-FIRST: la query YA era `findMany({ where: { organizationId } })` (multi-fetch).
+  Selección previa = por estado (`IN_PROGRESS ?? [0]`). Ahora por searchParam `?p=<id>`
+  con guard `find(id) ?? fallback` (fallback = in-progress-first). Id ajeno al set
+  scopeado → fallback → cero leak multi-tenant. Nunca `findUnique({id:param})`.
+- `searchParams: Promise<{ p?: string }>` (Next 16, awaited).
+- Switcher: `<nav>` de pills `<Link href="?p=id">` (portal nav, sin router.push), activo
+  cyan (`border-cyan-400/30 bg-cyan-400/10 text-cyan-100`), `max-w-[14rem] truncate`,
+  oculto si ≤1 proyecto. 0 proyectos → empty intacto (rama previa al switcher).
+- Eliminado `const tasks = project.tasks as any[]` + eslint-disable → `project.tasks` ya
+  tipado por el include (CERO any; deuda de S1 saldada en este commit de comportamiento
+  que reescribe el bloque de selección, no en un commit de reskin).
+- Gate: tsc exit 0 + lint exit 0.
+
 ### Estado por sprint
 - **S1** ✅ commit `e644e55`
-- **S2** ✅ (este commit)
-- **S3** ✅ no-op (cerrado en doc, sin diff)
-- **S4** ⏳ pendiente (4a query+switcher · 4b hero · 4c detail-fields)
+- **S2 + S3** ✅ commit `92f1218` (S3 no-op foldeado)
+- **S4a** ✅ (este commit) · **S4b** ⏳ hero · **S4c** ⏳ detail-fields
 - **S5** ⏳ pendiente (hover adminHoverCls split)
 - **S6** ⏳ pendiente (delete en detalle admin)

@@ -57,7 +57,11 @@ function serializeTask(task: {
 
 // ─── Page ──────────────────────────────────────────────────────────────────────
 
-export default async function ProjectPage() {
+export default async function ProjectPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ p?: string }>
+}) {
   const organizationId = await resolveOrgId()
   if (!organizationId) redirect('/login')
 
@@ -112,10 +116,20 @@ export default async function ProjectPage() {
     )
   }
 
+  // ── Project selection ────────────────────────────────────────────────────────
+  // Multi-tenant: `projects` ya viene scopeado por organizationId de la SESIÓN. El
+  // searchParam `?p=<id>` solo ELIGE dentro de ese set; un id ajeno cae al fallback
+  // (proyecto en curso, o el primero) → cero leak cross-tenant. Nunca findUnique(id).
+  const { p: selectedId } = await searchParams
+  const fallback = projects.find((p) => p.status === 'IN_PROGRESS') ?? projects[0]
+  const project =
+    (typeof selectedId === 'string'
+      ? projects.find((p) => p.id === selectedId)
+      : undefined) ?? fallback
+
   // ── Data prep ──────────────────────────────────────────────────────────────
-  const project = projects.find((p) => p.status === 'IN_PROGRESS') ?? projects[0]
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const tasks = project.tasks as any[]
+  // `project.tasks` viene tipado por el `include` — sin `any`.
+  const tasks = project.tasks
 
   const doneCount   = tasks.filter((t) => t.status === 'DONE').length
   const totalCount  = tasks.length
@@ -159,6 +173,32 @@ export default async function ProjectPage() {
           </div>
         </header>
       </FadeIn>
+
+      {/* ── PROJECT SWITCHER — solo si el org tiene >1 proyecto ───────────────── */}
+      {projects.length > 1 && (
+        <FadeIn delay={0.03}>
+          <nav aria-label="Seleccionar proyecto" className="flex flex-wrap items-center gap-2">
+            {projects.map((p) => {
+              const active = p.id === project.id
+              return (
+                <Link
+                  key={p.id}
+                  href={`?p=${p.id}`}
+                  aria-current={active ? 'page' : undefined}
+                  className={[
+                    'inline-flex max-w-[14rem] items-center rounded-full border px-3.5 py-1.5 text-xs font-medium transition-colors',
+                    active
+                      ? 'border-cyan-400/30 bg-cyan-400/10 text-cyan-100'
+                      : 'border-white/10 bg-white/5 text-zinc-400 hover:bg-white/10 hover:text-zinc-200',
+                  ].join(' ')}
+                >
+                  <span className="truncate">{p.name}</span>
+                </Link>
+              )
+            })}
+          </nav>
+        </FadeIn>
+      )}
 
       {/* ── 2. HERO — progress card ────────────────────────────────────────── */}
       <FadeIn delay={0.06}>
