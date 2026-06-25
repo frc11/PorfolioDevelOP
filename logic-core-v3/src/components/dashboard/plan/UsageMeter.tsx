@@ -81,7 +81,7 @@ export function UsageMeter({ snapshot, hideUpgradeHint = false }: UsageMeterProp
   return (
     <section
       aria-labelledby="usage-meter-title"
-      className="overflow-hidden rounded-2xl border border-white/10 bg-[#0c0e12]/80 shadow-2xl backdrop-blur-xl"
+      className="overflow-hidden rounded-[30px] border border-white/10 bg-white/5 shadow-2xl backdrop-blur-xl transition-colors hover:border-white/20"
     >
       <div className="flex flex-col gap-5 p-5 sm:gap-6 sm:p-6">
         <header className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
@@ -140,7 +140,7 @@ export function UsageMeter({ snapshot, hideUpgradeHint = false }: UsageMeterProp
           </div>
         </div>
 
-        <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
+        <div className="rounded-[24px] border border-white/10 bg-black/20 p-4">
           <div className="flex items-start gap-3">
             <Sparkles size={16} strokeWidth={1.5} className={`mt-0.5 flex-shrink-0 ${tone.textTint}`} />
             <div className="space-y-1">
@@ -153,7 +153,7 @@ export function UsageMeter({ snapshot, hideUpgradeHint = false }: UsageMeterProp
         {shouldShowUpgrade && nextPlan && (
           <Link
             href="/dashboard/plan"
-            className="group flex items-center justify-between gap-3 rounded-xl border border-amber-500/25 bg-gradient-to-br from-amber-500/[0.12] via-amber-500/[0.04] to-transparent p-4 transition-all hover:border-amber-400/40 hover:from-amber-500/[0.18]"
+            className="group flex items-center justify-between gap-3 rounded-[24px] border border-amber-500/25 bg-gradient-to-br from-amber-500/[0.12] via-amber-500/[0.04] to-transparent p-4 transition-all hover:border-amber-400/40 hover:from-amber-500/[0.18]"
           >
             <div className="space-y-0.5">
               <p className="text-[10px] font-black uppercase tracking-widest text-amber-400">
