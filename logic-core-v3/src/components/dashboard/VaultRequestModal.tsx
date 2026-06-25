@@ -64,9 +64,9 @@ export function VaultRequestModal() {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="flex items-center gap-2 rounded-xl border border-cyan-500/20 bg-cyan-500/10 px-4 py-2.5 text-[10px] font-black uppercase tracking-widest text-cyan-400 transition-all hover:bg-cyan-500/20 hover:border-cyan-500/35 active:scale-95 flex-shrink-0"
+        className="flex flex-shrink-0 items-center gap-2 rounded-xl border border-cyan-500/20 bg-cyan-500/10 px-4 py-2.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-cyan-400 transition-colors hover:border-cyan-500/35 hover:bg-cyan-500/20"
       >
-        <PlusCircle size={14} />
+        <PlusCircle size={14} strokeWidth={1.5} />
         <span className="hidden sm:inline">Solicitar documento</span>
         <span className="sm:hidden">Solicitar</span>
       </button>
@@ -161,12 +161,12 @@ export function VaultRequestModal() {
                       <button
                         onClick={handleSubmit}
                         disabled={isPending || !text.trim()}
-                        className="flex items-center gap-2 rounded-xl bg-cyan-500 px-5 py-2 text-[11px] font-black uppercase tracking-widest text-black transition-all hover:bg-cyan-400 disabled:opacity-40 disabled:cursor-not-allowed active:scale-95"
+                        className="flex items-center gap-2 rounded-xl bg-cyan-500 px-5 py-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-black transition-colors hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-40"
                       >
                         {isPending ? (
                           <Loader2 size={13} className="animate-spin" />
                         ) : (
-                          <Send size={13} />
+                          <Send size={13} strokeWidth={1.5} />
                         )}
                         Enviar solicitud
                       </button>
