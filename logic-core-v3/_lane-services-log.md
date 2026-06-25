@@ -134,3 +134,11 @@
 - **loading.tsx:** re-espejado full-width + dos paneles GlassCard con headers + grids 2/3-col anidados a `rounded-[24px]`, skeletons `border-white/[0.06] bg-white/[0.015]`. Sin layout shift.
 - **NO tocado:** schema, ui/*, shell, frozen, `lib/preview`, contrato `upsell.ts`, `resolveOrgId`, las 2 queries, los 4 estados de upsell, `triggerTransition`, gradiente del header upsell, accent por módulo/servicio, tipografía liviana.
 - **Gate:** tsc 0 / eslint 0 (3 archivos) / diff acotado. visual-qa → humano en :3000 (preview/browser MCP ausente en sesión).
+
+## Hotfix — boundary server/client del empty state
+- **Síntoma:** "Functions cannot be passed directly to Client Components" → la page no renderiza con org sin servicios.
+- **Causa raíz:** `EmptyState` (`@/components/ui/*`, **FROZEN**) es **`'use client'`** y su API exige `icon: LucideIcon` (referencia de componente). La page server le pasa `icon={FolderOpen}` → la función cruza el boundary al serializar el client component. **No es FadeIn** el boundary — es el propio `EmptyState`; sacar el wrapper no alcanzaba.
+- **Convención confirmada:** `PageHeader` (server) puede recibir `icon` (lo renderiza server-side); los client components reciben **string** y mapean adentro (`PremiumModuleCard.iconName`); las hermanas rediseñadas `resultados/{trafico,reputacion}` **hand-rollean** su empty inline.
+- **Fix (caso frozen):** empty **hand-rolled inline** en `page.tsx`, con `FolderOpen` renderizado en JSX **server** (nunca cruza), replicando el look `EmptyState` lg/default (rounded-3xl dashed, icon chip cyan, título/desc, CTA `<Link>`), full-width, dentro de `<FadeIn>`. Se quitó el import de `EmptyState`. Sin tocar el frozen, sin volver client la page.
+- **Hallazgo fuera de scope:** el mismo bug es **latente** en toda server page que pase un Lucide a `EmptyState` (project/agenda/tienda/motor-resenas/email-marketing/chatbot-settings) — reportado, no corregido (fuera de los 3 archivos).
+- **Gate:** tsc 0 / eslint 0 (page.tsx) / diff = solo page.tsx + log. Único cruce de función al cliente eliminado (verificado estáticamente). Render real → confirma el humano en :3000 con org vacía.
