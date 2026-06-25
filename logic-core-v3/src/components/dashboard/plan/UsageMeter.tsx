@@ -16,7 +16,7 @@
  * los números son siempre full-width en mobile.
  */
 import Link from 'next/link'
-import { Sparkles, ArrowUpRight, Users } from 'lucide-react'
+import { Sparkles, ArrowUpRight, Users, Bot } from 'lucide-react'
 import type { OrgUsageSnapshot } from '@/lib/plan/get-org-usage'
 import {
   formatNumberEs,
@@ -72,6 +72,47 @@ const TONE_STYLES: Record<UsageMessage['tone'], ToneStyles> = {
 }
 
 export function UsageMeter({ snapshot, hideUpgradeHint = false }: UsageMeterProps) {
+  // Sin bot configurado todavía: no hay consumo que medir. Mostramos un estado
+  // vacío de onboarding en vez de un "0 / tope" que confunde (no atendió a
+  // nadie porque el vendedor virtual ni siquiera está activo).
+  if (!snapshot.hasBotConfigured) {
+    return (
+      <section
+        aria-labelledby="usage-meter-title"
+        className="overflow-hidden rounded-[30px] border border-white/10 bg-white/5 shadow-2xl backdrop-blur-xl transition-colors hover:border-white/20"
+      >
+        <div className="flex flex-col gap-4 p-5 sm:gap-5 sm:p-6">
+          <div className="flex items-start gap-3">
+            <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl border border-cyan-500/20 bg-cyan-500/10 text-cyan-400">
+              <Bot size={20} strokeWidth={1.5} />
+            </div>
+            <div>
+              <h2
+                id="usage-meter-title"
+                className="text-base font-bold tracking-tight text-zinc-100 sm:text-lg"
+              >
+                Tu vendedor virtual todavía no está activo
+              </h2>
+              <p className="mt-0.5 text-xs capitalize text-zinc-500">
+                Período: {snapshot.periodLabel}
+              </p>
+            </div>
+          </div>
+
+          <div className="rounded-[24px] border border-white/10 bg-black/20 p-4">
+            <div className="flex items-start gap-3">
+              <Sparkles size={16} strokeWidth={1.5} className="mt-0.5 flex-shrink-0 text-cyan-400" />
+              <p className="text-sm leading-relaxed text-zinc-300">
+                Configurá tu bot para empezar a atender clientes este mes. Cuando esté activo, vas a
+                ver acá cuántos clientes atendiste y cuánto te queda de tu plan.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+    )
+  }
+
   const message = getUsageMessage(snapshot.percentage, snapshot.plan.key, snapshot.plan.isFallback)
   const tone = TONE_STYLES[message.tone]
   const nextPlan = getNextPlan(snapshot.plan.key)
