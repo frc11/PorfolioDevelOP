@@ -1,7 +1,5 @@
 'use client'
 
-import type { ReactNode } from 'react'
-
 import {
   ComposedChart,
   Line,
@@ -13,6 +11,13 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts'
+import {
+  CHART_AXIS_STROKE,
+  CHART_AXIS_TICK,
+  CHART_GRID_STROKE,
+  chartTooltipContentStyle,
+  useReducedMotion,
+} from '@/components/dashboard/results/_shared/chartTheme'
 
 interface DataPoint {
   date: string
@@ -29,74 +34,76 @@ function formatDate(dateStr: string) {
   return `${day}/${month}`
 }
 
-function formatTooltipLabel(label: string | number) {
-  return typeof label === 'string' ? formatDate(label) : String(label)
-}
-
 export function ClicksImpressionsChart({ data }: ClicksImpressionsChartProps) {
+  const reduced = useReducedMotion()
+
   return (
-    <ResponsiveContainer width="100%" height={200}>
-      <ComposedChart data={data} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
-        <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
-        <XAxis
-          dataKey="date"
-          tickFormatter={formatDate}
-          tick={{ fontSize: 10, fill: '#71717a' }}
-          axisLine={false}
-          tickLine={false}
-          interval="preserveStartEnd"
-        />
-        <YAxis
-          yAxisId="impressions"
-          orientation="right"
-          tick={{ fontSize: 10, fill: '#71717a' }}
-          axisLine={false}
-          tickLine={false}
-          allowDecimals={false}
-          width={40}
-        />
-        <YAxis
-          yAxisId="clicks"
-          tick={{ fontSize: 10, fill: '#71717a' }}
-          axisLine={false}
-          tickLine={false}
-          allowDecimals={false}
-        />
-        <Tooltip
-          contentStyle={{
-            background: '#18181b',
-            border: '1px solid #3f3f46',
-            borderRadius: '6px',
-            fontSize: '12px',
-            color: '#e4e4e7',
-          }}
-          labelFormatter={(label: ReactNode) =>
-            formatTooltipLabel(
-              typeof label === 'string' || typeof label === 'number' ? label : ''
-            )
-          }
-        />
-        <Legend
-          wrapperStyle={{ fontSize: '11px', color: '#71717a', paddingTop: '8px' }}
-          formatter={(value) => (value === 'clicks' ? 'Clicks' : 'Impresiones')}
-        />
-        <Bar
-          yAxisId="impressions"
-          dataKey="impressions"
-          fill="#3f3f46"
-          radius={[2, 2, 0, 0]}
-          maxBarSize={20}
-        />
-        <Line
-          yAxisId="clicks"
-          type="monotone"
-          dataKey="clicks"
-          stroke="#06b6d4"
-          strokeWidth={2}
-          dot={false}
-          activeDot={{ r: 4, fill: '#06b6d4', strokeWidth: 0 }}
-        />
-      </ComposedChart>
-    </ResponsiveContainer>
+    <div className="h-52" role="img" aria-label="Clicks e impresiones diarias en Google Search">
+      <ResponsiveContainer width="100%" height="100%">
+        <ComposedChart data={data} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
+          <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID_STROKE} vertical={false} />
+          <XAxis
+            dataKey="date"
+            tickFormatter={formatDate}
+            stroke={CHART_AXIS_STROKE}
+            tick={CHART_AXIS_TICK}
+            axisLine={false}
+            tickLine={false}
+            interval="preserveStartEnd"
+          />
+          <YAxis
+            yAxisId="impressions"
+            orientation="right"
+            stroke={CHART_AXIS_STROKE}
+            tick={CHART_AXIS_TICK}
+            axisLine={false}
+            tickLine={false}
+            allowDecimals={false}
+            width={40}
+          />
+          <YAxis
+            yAxisId="clicks"
+            stroke={CHART_AXIS_STROKE}
+            tick={CHART_AXIS_TICK}
+            axisLine={false}
+            tickLine={false}
+            allowDecimals={false}
+          />
+          <Tooltip
+            contentStyle={chartTooltipContentStyle}
+            cursor={{ fill: 'rgba(6, 182, 212, 0.06)' }}
+            labelFormatter={(label) =>
+              typeof label === 'string' || typeof label === 'number'
+                ? formatDate(String(label))
+                : ''
+            }
+            formatter={(value, name) => [value, name === 'clicks' ? 'Clicks' : 'Impresiones']}
+          />
+          <Legend
+            wrapperStyle={{ fontSize: '11px', color: '#a1a1aa', paddingTop: '8px' }}
+            formatter={(value) => (value === 'clicks' ? 'Clicks' : 'Impresiones')}
+          />
+          <Bar
+            yAxisId="impressions"
+            dataKey="impressions"
+            fill="#22d3ee"
+            fillOpacity={0.32}
+            radius={[6, 6, 0, 0]}
+            maxBarSize={24}
+            isAnimationActive={!reduced}
+          />
+          <Line
+            yAxisId="clicks"
+            type="monotone"
+            dataKey="clicks"
+            stroke="#06b6d4"
+            strokeWidth={2}
+            dot={false}
+            activeDot={{ r: 4, fill: '#06b6d4', strokeWidth: 0 }}
+            isAnimationActive={!reduced}
+          />
+        </ComposedChart>
+      </ResponsiveContainer>
+    </div>
   )
 }

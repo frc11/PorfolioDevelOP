@@ -275,3 +275,18 @@ La sección Resultados del portal cliente funciona end-to-end pero su estética 
 - `AnalyticsSkeleton.tsx`: tokens canon (`rounded-3xl`→`2xl`, `border-white/5`→`/10`, `bg-[#0c0e12]/40`→`bg-white/[0.02]`, fuera backdrop-blur, gap-6).
 - `trafico/loading.tsx`: ya usaba shared StatCardSkeleton/CardSkeleton (deterministas) → sin cambios. `AnalyticsAlertas` = sólo lógica → sin cambios.
 - Gate: tsc exit 0 (zero-any); eslint exit 0 en los 8 archivos del reskin. /seo re-verificado por los compartidos en Sprint 5.
+
+### Sprint 5 — /seo — ✅ COMPLETADO
+**Fixes en commits propios (separados del reskin):**
+- commit `refactor(...): quitar probe muerto de isMockData` — `SeoPage` computaba `isMockData` con un `getSearchConsoleData()` extra que nunca se leía → fetch redundante + var muerta eliminados (resuelve el warning no-unused-vars que venía deferido desde Sprint 1).
+- commit `fix(...): no exponer result.error al cliente (D4, blessed)` — `SeoContent` renderizaba `result.error` directo en el DOM (viola CLAUDE.md "never expose internal error messages"). Ahora: `console.error` server-side + mensaje genérico accionable al cliente.
+
+**Reskin cosmético (commit aparte) — upsell.ts FROZEN intacto:**
+- `seo/page.tsx`: `CARD_STYLE` inline eliminado → tokens canon. `MetricCard` reconstruida (prop `accent` en vez de color/border/bg rgba; valor `text-2xl font-bold` coloreado → `font-medium` zinc; **fuera hover pelado `scale-[1.01]`** → `HoverCard`). `TopQueriesTable`/`TopPagesCard` → tokens canon + `HoverCard` (bordes rgba inline → `border-white/10`/`/[0.06]`, chips rounded-md, clicks color zinc, numeral `font-mono font-black` → tabular zinc, barra plana `bg-cyan-400/70`). `PositionBadge` → triples `400/20·/10·300` font-medium. Card del chart → `chartCardHoverCls` (no-scale) + leyenda recoloreada a cyan. Zero-data notice → tokens canon. **Empty upsell → `ResultEmptyState`** conservando INTACTO `<form action={activarSeo}>` → `requestUpsellAction('seo-avanzado','SEO Avanzado')` (sólo se restyla el botón con `resultEmptyCtaCls`; "VER DEMO VISUAL" preservado). Deltas de tendencia hardcodeados preservados con `// FIXME(data-truth)`.
+- `ClicksImpressionsChart.tsx`: recharts canon — tooltip `chartTooltipContentStyle` (era `#18181b`/`#3f3f46`/radius 6), ejes/grid de chartTheme (era `#27272a`/`#71717a`), reduced-motion en ambas series, **div `h-52`** (fuera `height={200}`), barras acento `#22d3ee` radius `[6,6,0,0]` maxBarSize 24 (eran gris `#3f3f46` radius `[2,2,0,0]`), `role=img`.
+- `OportunidadSEO.tsx`: rgba inline → triples por impacto (URGENTE rose / ALTO emerald / MEDIO amber); badge `font-black`→`font-medium`; fuera la línea de acento gradiente + FM (curva off-canon) → server-render del card; **acción `sendClientMessageAction` + form INTACTOS**.
+- `OportunidadesSEO.tsx`: header chip `rounded-lg`→`rounded-md` canon + eyebrow `tracking-[0.24em]`.
+- `seo/loading.tsx`: gap-4 + fila de 2 card skeletons (tablas) para matchear la forma.
+- `SeoAlertas.tsx` = sólo lógica (delega a AlertaMetrica ya canon) → sin cambios. `AlertaMetrica`/`InsightsBlock`/`TrendBadge` ya canon desde Sprint 4 → re-verificados como consumidores de /seo.
+- **PARADA upsell.ts**: NO hizo falta tocarla (el empty es un panel inline que sólo llama la acción; se restyló el panel, no la acción). Firma/slug/side-effects intactos.
+- Gate: tsc exit 0 (zero-any); eslint exit 0 en los 5 archivos del reskin.
