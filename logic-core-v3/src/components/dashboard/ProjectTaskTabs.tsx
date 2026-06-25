@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'motion/react'
 import { CheckCircle2, Clock, Loader2, Calendar, AlertTriangle, MessageSquare, ArrowRight } from 'lucide-react'
 import Link from 'next/link'
 import { Tabs, type ValueTabItem } from '@/components/ui'
+import { adminHoverCls } from '@/lib/hover'
 import { TaskApprovalButtons } from './TaskApprovalButtons'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -69,23 +70,24 @@ function TaskCard({ task, index }: { task: SerializedTask; index: number }) {
   const isDone = task.status === 'DONE'
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 12, scale: 0.98 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ type: 'spring', stiffness: 300, damping: 26, delay: index * 0.04 }}
-      className={[
-        // Tile token admin (S2): rounded-[24px] border-white/10 bg-black/20.
-        // El hover queda como estaba — se reescribe en S5 (adminHoverCls split).
-        'group relative rounded-[24px] border border-white/10 bg-black/20 px-5 sm:px-6 py-5 transition-all duration-300',
-        'hover:bg-white/[0.05] hover:border-white/15 hover:translate-x-0.5',
-        task.isUrgent && !isDone
-          ? 'border-red-500/20 shadow-[0_0_20px_rgba(239,68,68,0.06)]'
-          : '',
-        isPendingApproval
-          ? 'border-amber-500/15 shadow-[0_0_20px_rgba(245,158,11,0.06)]'
-          : '',
-      ].join(' ')}
-    >
+    // S5 — split wrapper: el lift (scale/ring/shadow de adminHoverCls) va en este div
+    // NO-Framer; el inner es motion.div (entrance) y el CSS hover:scale no pelea con su
+    // transform inline. Mismo patrón que los tiles del admin (task-list / overview).
+    <div className={['grid rounded-[24px]', adminHoverCls].join(' ')}>
+      <motion.div
+        initial={{ opacity: 0, y: 12, scale: 0.98 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ type: 'spring', stiffness: 300, damping: 26, delay: index * 0.04 }}
+        className={[
+          'group relative rounded-[24px] border border-white/10 bg-black/20 px-5 sm:px-6 py-5 transition-colors',
+          task.isUrgent && !isDone
+            ? 'border-red-500/20 shadow-[0_0_20px_rgba(239,68,68,0.06)]'
+            : '',
+          isPendingApproval
+            ? 'border-amber-500/15 shadow-[0_0_20px_rgba(245,158,11,0.06)]'
+            : '',
+        ].join(' ')}
+      >
       <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-5">
         {/* Left: title + badges + description */}
         <div className="min-w-0 flex-1">
@@ -160,7 +162,8 @@ function TaskCard({ task, index }: { task: SerializedTask; index: number }) {
           )}
         </div>
       </div>
-    </motion.div>
+      </motion.div>
+    </div>
   )
 }
 

@@ -237,9 +237,27 @@ con S2.
 - NO hubo PARADA: ningún campo requirió columna nueva ni migración.
 - Gate: tsc exit 0 + lint exit 0.
 
+## S5 — Hover / no-regresión — CERRADO
+
+`ProjectTaskTabs.tsx` (`TaskCard`). Importado `adminHoverCls` de `src/lib/hover.ts`
+(no reescrito). Split wrapper:
+- Outer NO-Framer `<div className={['grid rounded-[24px]', adminHoverCls]}>` lleva el lift
+  (scale/ring/shadow + motion-reduce). Inner = `motion.div` (entrance spring intacta) con
+  el tile `rounded-[24px] border-white/10 bg-black/20 ... transition-colors`.
+- GOTCHA resuelto: el `hover:scale` de adminHoverCls NO pelea con el transform inline de
+  Framer porque vive en el div NO-Framer. Mismo patrón que el admin (overview/task-list).
+- Removida la línea de hover vieja (`hover:bg-white/[0.05] hover:border-white/15
+  hover:translate-x-0.5` — esta última era un transform que Framer pisaba). `group` queda
+  en el inner → el reveal de descripción y el `group-hover` del título siguen.
+- `motion-reduce` preservado (viene dentro de `adminHoverCls`).
+- No-regresión: aprobar/rechazar + reject-form inline (motivo obligatorio en
+  `TaskApprovalButtons`, no tocado) y loading/error/empty intactos. Acentos urgente/aprobación
+  (border+shadow condicionales) siguen en el inner.
+- Gate: tsc exit 0 + lint exit 0.
+
 ### Estado por sprint
 - **S1** ✅ commit `e644e55`
 - **S2 + S3** ✅ commit `92f1218` (S3 no-op foldeado)
-- **S4a** ✅ commit `be6aa4c` · **S4b** ✅ commit `e86ae3d` · **S4c** ✅ (este commit)
-- **S5** ⏳ pendiente (hover adminHoverCls split)
+- **S4a** ✅ commit `be6aa4c` · **S4b** ✅ commit `e86ae3d` · **S4c** ✅ commit `7876c02`
+- **S5** ✅ (este commit)
 - **S6** ⏳ pendiente (delete en detalle admin)
