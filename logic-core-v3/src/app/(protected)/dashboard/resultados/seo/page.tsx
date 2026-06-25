@@ -114,12 +114,6 @@ export default async function SeoPage({
 
   if (!client) redirect('/login')
 
-  let isMockData = false
-  if (client.siteUrl && !isDemo) {
-    const probe = await getSearchConsoleData(client.siteUrl)
-    if (probe.ok) isMockData = probe.data.isMockData
-  }
-
   const activarSeo = async () => {
     'use server'
     await requestUpsellAction('seo-avanzado', 'SEO Avanzado')
