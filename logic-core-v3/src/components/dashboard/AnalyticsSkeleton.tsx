@@ -35,13 +35,15 @@ export function AnalyticsSkeleton() {
           </div>
         </div>
         
-        {/* Mocking the chart lines with blurred bars */}
+        {/* Mocking the chart lines with blurred bars.
+            Alturas DETERMINÍSTICAS (no Math.random): un patrón estable evita el
+            hydration mismatch entre el HTML del server y el primer render del cliente. */}
         <div className="absolute inset-x-8 bottom-8 top-32 flex items-end gap-2">
           {[...Array(30)].map((_, i) => (
-            <div 
-              key={i} 
-              className="flex-1 bg-white/[0.03] rounded-t-sm" 
-              style={{ height: `${Math.random() * 60 + 20}%` }}
+            <div
+              key={i}
+              className="flex-1 bg-white/[0.03] rounded-t-sm"
+              style={{ height: `${28 + ((i * 41) % 53)}%` }}
             />
           ))}
         </div>
