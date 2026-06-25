@@ -74,7 +74,9 @@ function TaskCard({ task, index }: { task: SerializedTask; index: number }) {
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ type: 'spring', stiffness: 300, damping: 26, delay: index * 0.04 }}
       className={[
-        'group relative rounded-2xl border border-t-white/10 border-l-white/10 border-white/5 bg-white/[0.02] px-5 sm:px-6 py-5 backdrop-blur-2xl shadow-lg transition-all duration-300',
+        // Tile token admin (S2): rounded-[24px] border-white/10 bg-black/20.
+        // El hover queda como estaba — se reescribe en S5 (adminHoverCls split).
+        'group relative rounded-[24px] border border-white/10 bg-black/20 px-5 sm:px-6 py-5 transition-all duration-300',
         'hover:bg-white/[0.05] hover:border-white/15 hover:translate-x-0.5',
         task.isUrgent && !isDone
           ? 'border-red-500/20 shadow-[0_0_20px_rgba(239,68,68,0.06)]'
@@ -91,20 +93,20 @@ function TaskCard({ task, index }: { task: SerializedTask; index: number }) {
             <TaskStatusIcon status={task.status} />
 
             <p className={[
-              'text-sm font-bold tracking-tight transition-colors',
+              'text-sm font-semibold tracking-tight transition-colors',
               isDone ? 'text-zinc-500 line-through decoration-zinc-700/80' : 'text-zinc-100 group-hover:text-white',
             ].join(' ')}>
               {task.title}
             </p>
 
             {isPendingApproval && (
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-0.5 text-[9px] font-black uppercase tracking-widest text-amber-400">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-400/20 bg-amber-500/10 px-2.5 py-1 text-[11px] font-medium text-amber-200">
                 <span className="h-1.5 w-1.5 rounded-full bg-amber-400 animate-pulse" />
                 Requiere aprobación
               </span>
             )}
             {isApproved && (
-              <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/20 bg-emerald-500/5 px-2.5 py-0.5 text-[9px] font-black uppercase tracking-widest text-emerald-500">
+              <span className="inline-flex items-center gap-1 rounded-full border border-emerald-400/20 bg-emerald-500/10 px-2.5 py-1 text-[11px] font-medium text-emerald-200">
                 ✓ Aprobado
               </span>
             )}
@@ -132,10 +134,10 @@ function TaskCard({ task, index }: { task: SerializedTask; index: number }) {
         <div className="flex flex-col items-start lg:items-end gap-3 shrink-0">
           {task.dueDate && (
             <div className={[
-              'flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[10px] font-black tracking-[0.15em] uppercase border',
+              'flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-[11px] font-medium',
               task.isUrgent && !isDone
                 ? 'bg-red-500/10 border-red-500/30 text-red-400 shadow-[0_0_12px_rgba(239,68,68,0.12)]'
-                : 'bg-black/20 border-white/5 text-zinc-600',
+                : 'bg-black/20 border-white/10 text-zinc-400',
             ].join(' ')}>
               {task.isUrgent && !isDone ? (
                 <AlertTriangle size={11} className="flex-shrink-0" />
@@ -146,7 +148,7 @@ function TaskCard({ task, index }: { task: SerializedTask; index: number }) {
                 {new Date(task.dueDate).toLocaleDateString('es-AR', { day: '2-digit', month: 'short' })}
               </span>
               {task.isUrgent && !isDone && task.daysUntilDue !== null && (
-                <span className="font-bold">
+                <span className="font-semibold">
                   · {task.daysUntilDue <= 0 ? 'Hoy' : `${task.daysUntilDue}d`}
                 </span>
               )}
@@ -204,7 +206,7 @@ export function ProjectTaskTabs({
                   <MessageSquare size={16} className="text-amber-400" />
                 </div>
                 <div>
-                  <p className="text-sm font-bold text-amber-300">
+                  <p className="text-sm font-semibold text-amber-300">
                     {pendingApprovalCount}{' '}
                     {pendingApprovalCount === 1 ? 'entrega esperando' : 'entregas esperando'} tu aprobación
                   </p>
@@ -215,7 +217,7 @@ export function ProjectTaskTabs({
               </div>
               <button
                 onClick={() => setActiveTab('IN_PROGRESS')}
-                className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-amber-400 hover:text-amber-300 transition-colors flex-shrink-0"
+                className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-amber-400 hover:text-amber-300 transition-colors flex-shrink-0"
               >
                 Ver ahora
                 <ArrowRight size={11} />
@@ -267,7 +269,7 @@ export function ProjectTaskTabs({
         <div className="flex justify-end">
           <Link
             href="/dashboard/messages?context=proyecto"
-            className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-widest text-zinc-600 hover:text-cyan-400 transition-colors"
+            className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-zinc-500 hover:text-cyan-400 transition-colors"
           >
             Hablar con el equipo
             <ArrowRight size={10} />

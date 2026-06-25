@@ -154,6 +154,45 @@ fuera del set scopeado cae al fallback → cero leak multi-tenant.
 sizing md `px-4 py-3 text-sm`, badges de conteo. cyan-locked. → **S3 = no-op**, sin
 diff; se cierra documentado (no fuerzo color).
 
+### Gate visual (visual-qa) — INFRA AUSENTE en corrida headless
+
+El subagente `visual-qa` depende del MCP `Claude_Preview` (preview_start/screenshot),
+que NO está registrado en este entorno headless (ToolSearch → "No matching deferred
+tools"; coincide con la memoria preview-mcp-untracked). Sin server :3000 ni MCP de
+browser no hay screenshots automáticos. Decisión (anti-loop + alineado al brief "la
+verificación visual la hace Valentino al día siguiente"): el gate VISUAL se delega a
+Valentino sobre lo commiteado; el gate TÉCNICO (`tsc --noEmit` exit 0 + lint exit 0 en
+archivos tocados) se aplica estricto en cada sprint. No despacho visual-qa (sin tools
+sería ruido).
+
+## S2 — Cards / lista de entregas — CERRADO
+
+`ProjectTaskTabs.tsx` (`TaskCard` inline + banner + link). Solo tokens estáticos; el
+hover NO se tocó (queda para S5), hero/tabs sin tocar.
+- TaskCard tile → token admin `rounded-[24px] border border-white/10 bg-black/20`
+  (antes `rounded-2xl` + borde t/l split + `bg-white/[0.02]` + `backdrop-blur-2xl
+  shadow-lg`). La línea de hover (`hover:bg-white/[0.05]…translate-x-0.5`) intacta.
+- Badges "Requiere aprobación"/"✓ Aprobado" → pill base admin `rounded-full border
+  px-2.5 py-1 text-[11px] font-medium`, tonos admin (amber-200/emerald-200).
+  Erradicado `text-[9px] font-black uppercase tracking-widest`.
+- Chip de fecha → `rounded-lg border px-2.5 py-1 text-[11px] font-medium` (erradicado
+  `font-black tracking-[0.15em] uppercase`); no-urgente a `border-white/10 text-zinc-400`.
+- Título `font-bold`→`font-semibold`. Banner: heading `font-bold`→`font-semibold`,
+  "Ver ahora" `font-black tracking-widest`→`font-semibold tracking-[0.18em]`. Link
+  "Hablar con el equipo": `tracking-widest`→`tracking-[0.22em]`, zinc-600→zinc-500.
+- Gate: tsc exit 0 + lint exit 0. Visual → Valentino.
+
+## S3 — Tabs — CERRADO (no-op, sin diff)
+
+`ui/Tabs` (FROZEN, consumir) ya = admin: underline `bg-cyan-400`, sizing md
+`px-4 py-3 text-sm`, badges de conteo (`bg-cyan-500 text-zinc-950` activo). cyan-locked
+→ no se fuerza color; labels/badges correctos. Sin cambios → cerrado en doc, foldeado
+con S2.
+
 ### Estado por sprint
 - **S1** ✅ commit `e644e55`
-- **S2** ⏳ en curso
+- **S2** ✅ (este commit)
+- **S3** ✅ no-op (cerrado en doc, sin diff)
+- **S4** ⏳ pendiente (4a query+switcher · 4b hero · 4c detail-fields)
+- **S5** ⏳ pendiente (hover adminHoverCls split)
+- **S6** ⏳ pendiente (delete en detalle admin)
