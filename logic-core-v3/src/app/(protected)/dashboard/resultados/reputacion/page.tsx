@@ -5,6 +5,7 @@ import { GBPMetricsCard } from '@/components/dashboard/results/GBPMetricsCard'
 import { getGBPMetrics } from '@/lib/integrations/google-business-profile'
 import type { GBPLocationMetrics } from '@/lib/integrations/google-business-profile'
 import { resolveOrgId } from '@/lib/preview'
+import { PageHeader } from '@/components/ui'
 
 export default async function ReputacionPage() {
   const organizationId = await resolveOrgId()
@@ -19,6 +20,13 @@ export default async function ReputacionPage() {
 
   return (
     <div className="flex flex-col gap-6">
+      <PageHeader
+        eyebrow="Resultados"
+        title="Reputación Online"
+        description="Tu perfil de Google Business: rating, reseñas y actividad"
+        icon={Star}
+      />
+
       {metrics ? <GBPMetricsCard metrics={metrics} /> : <ReputationEmptyState />}
     </div>
   )

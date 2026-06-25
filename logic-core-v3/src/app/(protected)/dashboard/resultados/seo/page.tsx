@@ -10,6 +10,7 @@ import { OportunidadesSEO } from '@/components/dashboard/OportunidadesSEO'
 import { TrendBadge } from '@/components/dashboard/TrendBadge'
 import { PreviewBanner } from '@/components/dashboard/PreviewBanner'
 import { InsightsBlock } from '@/components/dashboard/results/InsightsBlock'
+import { PageHeader } from '@/components/ui'
 import { requestUpsellAction } from '@/lib/actions/upsell'
 import { getSeoInsights } from '@/lib/ai/results-insights'
 import type { SearchConsoleData } from '@/lib/searchconsole'
@@ -126,6 +127,12 @@ export default async function SeoPage({
 
   return (
     <div className="flex flex-col gap-6">
+      <PageHeader
+        eyebrow="Resultados"
+        title="SEO & Posicionamiento"
+        description="Tu visibilidad en Google Search en los últimos 28 días"
+        icon={Search}
+      />
 
       {isDemo ? (
         <PreviewBanner context="seo" />
