@@ -257,3 +257,21 @@ La sección Resultados del portal cliente funciona end-to-end pero su estética 
 - `DiscoveriesSection.tsx`: header eyebrow+título font-medium; cada insight envuelto en `HoverCard`; `TONE_CHIP` y "Ya aplicado" emerald a triples `400/20·/10·300`; h3 `font-semibold`→`font-medium`; eyebrow interno `tracking-[0.2em]`→`[0.24em]`; box "Qué podés hacer" a `cyan-400/15·[0.06]`.
 - `analisis/page.tsx`: `NoBotState` → `ResultEmptyState` conservando el CTA de activación. `loading.tsx` ya matchea (header + 3 card skeletons).
 - Gate: tsc exit 0 (recharts tipado sin `any`); eslint exit 0 en los 8 archivos tocados.
+
+### Sprint 4 — /trafico (+ compartidos) — ✅ COMPLETADO
+**3 fixes de comportamiento (D5/D6 — commits propios y separados del reskin):**
+- (a) commit `fix(...): quitar fuente de tráfico falsa` — SessionsChart: eliminada la fila "Fuente Principal: Google Ads" hardcodeada del tooltip (D2, blessed).
+- (b) commit `fix(...): tipar CustomTooltip` — SessionsChart: el content del tooltip era `:any` → `SessionsTooltipProps` + guarda de `label`. Zero-any.
+- (c) commit `fix(...): AnalyticsSkeleton determinístico` — alturas de barras con `Math.random()` (hydration mismatch) → patrón determinístico por índice `28 + ((i*41)%53)`.
+
+**Reskin cosmético (commit aparte):**
+- `trafico/page.tsx`: `CARD_STYLE` inline eliminado → tokens canon; metric grid envuelto en `FadeIn` + cada `AnalyticsMetricCard` en `HoverCard` (delays FM removidos); card del chart `border-white/10 bg-white/[0.02]` + `chartCardHoverCls` (no-scale); `TopPagesCard` → tokens canon + HoverCard + barra plana `bg-cyan-400/70`; `AnalyticsEmptyState` → `ResultEmptyState` conservando "VER DEMO VISUAL" (+ CTA muerto "ACTIVAR AHORA" preservado con `// FIXME(data-truth)`). Deltas de tendencia hardcodeados intactos (D6). Error de /trafico NO tocado (gating fuera de scope, D4 es sólo /seo).
+- `AnalyticsMetricCard.tsx`: semántica StatCard — `rounded-2xl border-white/10 bg-white/[0.02] p-5`, valor `text-5xl font-black`→`text-2xl font-medium` zinc, label canon, **fuera FM/shadow-2xl/hover propio** (hover vía HoverCard). Mantiene AnimatedCounter + TrendBadge.
+- `SessionsChart.tsx`: recharts canon (tooltip glass de chartTheme, ejes/grid, `chartCursorLine`, `isAnimationActive={!reduced}`, **div `h-48`** fuera `height={180}`, `role=img`, fuera el filtro cyanGlow).
+- `TrendBadge.tsx` *(compartido /seo)*: convención admin — flecha Lucide + color (emerald-400 bueno / amber-300 malo / zinc-500 flat), **sin pill**; fuera FM → server component.
+- `AlertaMetrica.tsx` *(compartido /seo)*: `rgba` inline → tokens `border-{c}-400/20 bg-{c}-400/10`; DANGER `red`→`rose`; fuera la línea de acento gradiente; títulos `font-semibold`→`font-medium`.
+- `InsightsBlock.tsx` *(compartido /seo)*: surface canon (fuera backdrop-blur), header `font-black uppercase`→eyebrow `tracking-[0.24em]`, tones a triples `400/20·/10`, ícono chip rounded-md, envuelto en HoverCard.
+- `PageSpeedCard.tsx` *(sólo /trafico)*: tones a `400/20·/10`, numerales `font-mono text-5xl font-black`→`text-3xl font-medium tabular-nums`, headers eyebrow, envuelto en HoverCard.
+- `AnalyticsSkeleton.tsx`: tokens canon (`rounded-3xl`→`2xl`, `border-white/5`→`/10`, `bg-[#0c0e12]/40`→`bg-white/[0.02]`, fuera backdrop-blur, gap-6).
+- `trafico/loading.tsx`: ya usaba shared StatCardSkeleton/CardSkeleton (deterministas) → sin cambios. `AnalyticsAlertas` = sólo lógica → sin cambios.
+- Gate: tsc exit 0 (zero-any); eslint exit 0 en los 8 archivos del reskin. /seo re-verificado por los compartidos en Sprint 5.

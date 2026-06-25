@@ -20,48 +20,43 @@ export interface AlertaMetricaProps {
 
 const CONFIG: Record<AlertType, {
   icon: React.ReactNode
-  borderColor: string
+  border: string
   bg: string
   iconClass: string
   titleClass: string
   descClass: string
-  accentGradient: string
 }> = {
   DANGER: {
-    icon: <AlertOctagon size={15} />,
-    borderColor: 'rgba(239,68,68,0.28)',
-    bg: 'rgba(239,68,68,0.07)',
-    iconClass: 'text-red-400',
-    titleClass: 'text-red-300',
-    descClass: 'text-red-400/65',
-    accentGradient: 'from-transparent via-red-500/50 to-transparent',
+    icon: <AlertOctagon size={15} strokeWidth={1.5} />,
+    border: 'border-rose-400/20',
+    bg: 'bg-rose-400/10',
+    iconClass: 'text-rose-300',
+    titleClass: 'text-rose-300',
+    descClass: 'text-rose-300/70',
   },
   WARNING: {
-    icon: <AlertTriangle size={15} />,
-    borderColor: 'rgba(245,158,11,0.28)',
-    bg: 'rgba(245,158,11,0.07)',
-    iconClass: 'text-amber-400',
+    icon: <AlertTriangle size={15} strokeWidth={1.5} />,
+    border: 'border-amber-400/20',
+    bg: 'bg-amber-400/10',
+    iconClass: 'text-amber-300',
     titleClass: 'text-amber-300',
-    descClass: 'text-amber-400/65',
-    accentGradient: 'from-transparent via-amber-500/50 to-transparent',
+    descClass: 'text-amber-300/70',
   },
   SUCCESS: {
-    icon: <CheckCircle2 size={15} />,
-    borderColor: 'rgba(34,197,94,0.28)',
-    bg: 'rgba(34,197,94,0.07)',
-    iconClass: 'text-emerald-400',
+    icon: <CheckCircle2 size={15} strokeWidth={1.5} />,
+    border: 'border-emerald-400/20',
+    bg: 'bg-emerald-400/10',
+    iconClass: 'text-emerald-300',
     titleClass: 'text-emerald-300',
-    descClass: 'text-emerald-400/65',
-    accentGradient: 'from-transparent via-emerald-500/50 to-transparent',
+    descClass: 'text-emerald-300/70',
   },
   INFO: {
-    icon: <Info size={15} />,
-    borderColor: 'rgba(6,182,212,0.28)',
-    bg: 'rgba(6,182,212,0.07)',
-    iconClass: 'text-cyan-400',
+    icon: <Info size={15} strokeWidth={1.5} />,
+    border: 'border-cyan-400/20',
+    bg: 'bg-cyan-400/10',
+    iconClass: 'text-cyan-300',
     titleClass: 'text-cyan-300',
-    descClass: 'text-cyan-400/65',
-    accentGradient: 'from-transparent via-cyan-500/50 to-transparent',
+    descClass: 'text-cyan-300/70',
   },
 }
 
@@ -77,22 +72,13 @@ export function AlertaMetrica({ tipo, titulo, descripcion, accion }: AlertaMetri
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: -6, scale: 0.97 }}
           transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
-          className="relative overflow-hidden rounded-xl px-5 py-4 backdrop-blur-sm"
-          style={{
-            border: `1px solid ${c.borderColor}`,
-            background: c.bg,
-          }}
+          className={`relative overflow-hidden rounded-xl border px-5 py-4 ${c.border} ${c.bg}`}
         >
-          {/* Top accent line */}
-          <div
-            className={`absolute inset-x-0 top-0 h-px bg-gradient-to-r ${c.accentGradient}`}
-          />
-
           <div className="flex items-start gap-3">
             <span className={`mt-0.5 flex-shrink-0 ${c.iconClass}`}>{c.icon}</span>
 
             <div className="flex-1 min-w-0">
-              <p className={`text-sm font-semibold leading-tight ${c.titleClass}`}>
+              <p className={`text-sm font-medium leading-tight ${c.titleClass}`}>
                 {titulo}
               </p>
               <p className={`mt-1 text-xs leading-relaxed ${c.descClass}`}>
@@ -103,14 +89,14 @@ export function AlertaMetrica({ tipo, titulo, descripcion, accion }: AlertaMetri
                   <button
                     onClick={accion.onAction}
                     disabled={accion.disabled}
-                    className={`mt-2 inline-block text-xs font-semibold underline underline-offset-2 ${c.titleClass} opacity-80 hover:opacity-100 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed`}
+                    className={`mt-2 inline-block text-xs font-medium underline underline-offset-2 ${c.titleClass} opacity-80 hover:opacity-100 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed`}
                   >
                     {accion.label} →
                   </button>
                 ) : accion.href ? (
                   <a
                     href={accion.href}
-                    className={`mt-2 inline-block text-xs font-semibold underline underline-offset-2 ${c.titleClass} opacity-80 hover:opacity-100 transition-opacity`}
+                    className={`mt-2 inline-block text-xs font-medium underline underline-offset-2 ${c.titleClass} opacity-80 hover:opacity-100 transition-opacity`}
                   >
                     {accion.label} →
                   </a>
