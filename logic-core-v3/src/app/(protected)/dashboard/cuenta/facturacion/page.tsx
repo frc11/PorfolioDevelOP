@@ -16,6 +16,9 @@ import Link from 'next/link'
 import { FadeIn } from '@/components/dashboard/FadeIn'
 import { CurrentPlanCard } from '@/components/dashboard/CurrentPlanCard'
 import { getCurrentPlan } from '@/lib/billing/get-current-plan'
+import { Card } from '@/components/ui'
+import { cn } from '@/lib/utils'
+import { adminHoverCls } from '@/lib/hover'
 import type { InvoiceStatus } from '@prisma/client'
 
 export const metadata = { title: 'Facturación | develOP Dashboard' }
@@ -47,9 +50,9 @@ const INVOICE_STATUS_CONFIG: Record<InvoiceStatus, InvoiceStatusCfg> = {
 }
 
 function InvoiceStatusIcon({ name }: { name: InvoiceStatusCfg['iconName'] }) {
-  if (name === 'check') return <CheckCircle2 size={11} />
-  if (name === 'clock') return <Clock size={11} />
-  return <XCircle size={11} />
+  if (name === 'check') return <CheckCircle2 size={11} strokeWidth={1.5} />
+  if (name === 'clock') return <Clock size={11} strokeWidth={1.5} />
+  return <XCircle size={11} strokeWidth={1.5} />
 }
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
@@ -103,8 +106,7 @@ export default async function BillingPage() {
   const billingEmail = session?.user?.email ?? ''
 
   return (
-    <div className="mx-auto flex w-full max-w-5xl flex-col gap-8 pb-20">
-
+    <div className="flex w-full flex-col gap-6 pb-20">
 
       {/* ── Renewal alert banner ──────────────────────────────────────────── */}
       {alertType && (
@@ -116,7 +118,7 @@ export default async function BillingPage() {
                 Tu suscripción está vencida.{' '}
                 <Link
                   href="/dashboard/messages?context=facturacion"
-                  className="font-bold underline underline-offset-2 transition-colors hover:text-red-200"
+                  className="font-semibold underline underline-offset-2 transition-colors hover:text-red-200"
                 >
                   Contactanos para regularizar.
                 </Link>
@@ -127,7 +129,7 @@ export default async function BillingPage() {
               <AlertTriangle size={17} className="mt-0.5 shrink-0 text-amber-400" />
               <p className="text-sm font-semibold text-amber-300">
                 Tu suscripción vence en{' '}
-                <span className="font-black">
+                <span className="font-semibold">
                   {daysUntilRenewal === 0 ? 'hoy' : `${daysUntilRenewal} días`}
                 </span>
                 . Coordiná el pago para no interrumpir el servicio.
@@ -145,10 +147,10 @@ export default async function BillingPage() {
           <CurrentPlanCard plan={currentPlan} />
 
           {/* Invoice history */}
-          <div className="flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#0c0e12]/80 shadow-2xl backdrop-blur-xl lg:col-span-2">
+          <div className="flex flex-col overflow-hidden rounded-3xl border border-white/10 bg-white/[0.02] lg:col-span-2">
             <div className="border-b border-white/5 px-6 py-5">
-              <h3 className="text-xs font-black uppercase tracking-widest text-zinc-300">
-                Historial de Pagos
+              <h3 className="text-[10px] font-semibold uppercase tracking-[0.24em] text-zinc-500">
+                Historial de pagos
               </h3>
             </div>
 
@@ -167,16 +169,16 @@ export default async function BillingPage() {
                 <table className="w-full whitespace-nowrap text-left text-sm">
                   <thead>
                     <tr className="border-b border-white/5 bg-white/[0.02]">
-                      <th className="px-6 py-4 text-[10px] font-black uppercase tracking-wider text-zinc-500">
+                      <th className="px-6 py-4 text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
                         Período
                       </th>
-                      <th className="px-6 py-4 text-[10px] font-black uppercase tracking-wider text-zinc-500">
+                      <th className="px-6 py-4 text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
                         Monto
                       </th>
-                      <th className="px-6 py-4 text-[10px] font-black uppercase tracking-wider text-zinc-500">
+                      <th className="px-6 py-4 text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
                         Estado
                       </th>
-                      <th className="px-6 py-4 text-right text-[10px] font-black uppercase tracking-wider text-zinc-500">
+                      <th className="px-6 py-4 text-right text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
                         Comprobante
                       </th>
                     </tr>
@@ -192,7 +194,7 @@ export default async function BillingPage() {
                       return (
                         <tr
                           key={invoice.id}
-                          className="group/row transition-colors duration-150 hover:bg-white/[0.03]"
+                          className="group/row transition-colors duration-150 hover:bg-white/[0.04]"
                         >
                           {/* Period */}
                           <td className="px-6 py-4">
@@ -214,7 +216,7 @@ export default async function BillingPage() {
                           {/* Status badge */}
                           <td className="px-6 py-4">
                             <span
-                              className={`inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-[10px] font-black uppercase tracking-wider ${cfg.pill}`}
+                              className={`inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] ${cfg.pill}`}
                             >
                               <InvoiceStatusIcon name={cfg.iconName} />
                               {cfg.label}
@@ -245,9 +247,9 @@ export default async function BillingPage() {
                                   PDF
                                 </button>
                                 {/* Tooltip */}
-                                <div className="pointer-events-none absolute -top-9 right-0 z-20 translate-y-1 whitespace-nowrap rounded-lg border border-white/10 bg-[#0c0e12] px-3 py-1.5 text-[10px] font-bold text-zinc-400 opacity-0 shadow-xl backdrop-blur-xl transition-all duration-200 group-hover/tip:translate-y-0 group-hover/tip:opacity-100">
+                                <div className="pointer-events-none absolute -top-9 right-0 z-20 translate-y-1 whitespace-nowrap rounded-lg border border-white/10 bg-zinc-900 px-3 py-1.5 text-[10px] font-medium text-zinc-400 opacity-0 shadow-xl transition-all duration-200 group-hover/tip:translate-y-0 group-hover/tip:opacity-100">
                                   Generando...
-                                  <div className="absolute -bottom-[5px] right-4 h-2 w-2 rotate-45 border-b border-r border-white/10 bg-[#0c0e12]" />
+                                  <div className="absolute -bottom-[5px] right-4 h-2 w-2 rotate-45 border-b border-r border-white/10 bg-zinc-900" />
                                 </div>
                               </div>
                             ) : invoice.paymentLink ? (
@@ -275,67 +277,60 @@ export default async function BillingPage() {
 
       {/* ── Billing info section ──────────────────────────────────────────── */}
       <FadeIn delay={0.1}>
-        <div className="overflow-hidden rounded-2xl border border-white/10 bg-[#0c0e12]/80 shadow-2xl backdrop-blur-xl">
-          <div className="border-b border-white/5 px-6 py-5">
-            <h3 className="text-xs font-black uppercase tracking-widest text-zinc-300">
-              Información de Facturación
-            </h3>
-          </div>
+        <Card variant="elevated" padding="lg">
+          <p className="mb-4 text-[10px] font-semibold uppercase tracking-[0.24em] text-zinc-500">
+            Información de facturación
+          </p>
 
-          <div className="grid grid-cols-1 divide-y divide-white/5 sm:grid-cols-2 sm:divide-x sm:divide-y-0 lg:grid-cols-4">
-
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {/* Billing email */}
-            <div className="flex flex-col gap-1.5 px-6 py-5">
-              <p className="text-[9px] font-black uppercase tracking-widest text-zinc-600">
+            <div className={cn('rounded-xl border border-white/5 bg-white/[0.015] px-4 py-3.5', adminHoverCls)}>
+              <p className="text-[10px] uppercase tracking-[0.24em] text-zinc-500">
                 Email de facturación
               </p>
-              <p className="truncate text-xs font-semibold text-zinc-300">
+              <p className="mt-1.5 truncate text-sm font-semibold text-zinc-200">
                 {billingEmail || '—'}
               </p>
             </div>
 
             {/* Next billing date */}
-            <div className="flex flex-col gap-1.5 px-6 py-5">
-              <p className="text-[9px] font-black uppercase tracking-widest text-zinc-600">
+            <div className={cn('rounded-xl border border-white/5 bg-white/[0.015] px-4 py-3.5', adminHoverCls)}>
+              <p className="text-[10px] uppercase tracking-[0.24em] text-zinc-500">
                 Próxima fecha de cobro
               </p>
-              <p className="text-xs font-semibold capitalize text-zinc-300">
+              <p className="mt-1.5 text-sm font-semibold capitalize text-zinc-200">
                 {nextBillingFormatted ?? '—'}
               </p>
             </div>
 
             {/* Payment methods */}
-            <div className="flex flex-col gap-2 px-6 py-5">
-              <p className="text-[9px] font-black uppercase tracking-widest text-zinc-600">
+            <div className="rounded-xl border border-white/5 bg-white/[0.015] px-4 py-3.5">
+              <p className="text-[10px] uppercase tracking-[0.24em] text-zinc-500">
                 Métodos de pago
               </p>
-              <div className="flex flex-wrap items-center gap-3">
+              <div className="mt-2 flex flex-wrap items-center gap-2">
                 <div className="flex items-center gap-1.5 rounded-lg border border-white/5 bg-white/[0.03] px-2.5 py-1.5">
-                  <Landmark size={13} className="text-blue-400" />
-                  <span className="text-[10px] font-semibold text-zinc-400">Transferencia</span>
+                  <Landmark size={13} strokeWidth={1.5} className="text-blue-400" />
+                  <span className="text-[10px] font-medium text-zinc-400">Transferencia</span>
                 </div>
                 <div className="flex items-center gap-1.5 rounded-lg border border-white/5 bg-white/[0.03] px-2.5 py-1.5">
-                  <Wallet size={13} className="text-sky-400" />
-                  <span className="text-[10px] font-semibold text-zinc-400">MercadoPago</span>
+                  <Wallet size={13} strokeWidth={1.5} className="text-sky-400" />
+                  <span className="text-[10px] font-medium text-zinc-400">MercadoPago</span>
                 </div>
               </div>
-              <p className="text-[9px] text-zinc-700">
-                Aceptamos transferencia bancaria y MercadoPago
-              </p>
             </div>
 
             {/* Update billing data */}
-            <div className="flex flex-col justify-center px-6 py-5">
+            <div className="flex items-center">
               <Link
                 href="/dashboard/messages?context=facturacion"
-                className="flex w-full items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2.5 text-[10px] font-black uppercase tracking-widest text-zinc-400 transition-all hover:border-white/20 hover:bg-white/[0.06] hover:text-zinc-200 active:scale-95"
+                className="flex w-full items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.02] px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-400 transition-colors hover:border-white/15 hover:bg-white/10 hover:text-zinc-200"
               >
-                Actualizar datos de facturación
+                Actualizar datos
               </Link>
             </div>
-
           </div>
-        </div>
+        </Card>
       </FadeIn>
 
     </div>
