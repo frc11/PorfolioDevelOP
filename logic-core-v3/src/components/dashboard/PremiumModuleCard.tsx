@@ -106,8 +106,8 @@ export function PremiumModuleCard({
         isSuccess
           ? 'border-emerald-500/25 bg-emerald-500/[0.03]'
           : isComingSoon
-            ? 'border-white/10 bg-white/[0.04] opacity-90'
-            : `border-white/10 bg-white/5 ${adminHoverCls}`,
+            ? 'border-white/10 bg-black/20 opacity-90'
+            : `border-white/10 bg-black/20 ${adminHoverCls}`,
       ].join(' ')}
     >
       <div

@@ -115,4 +115,22 @@
 ---
 
 ## Bitácora de ejecución
-- **Sprint 0** — doc persistido. _(en progreso)_
+- **Sprint 0** (`5d97587`) — doc persistido como fuente de verdad.
+- **Sprint 1** (`97c02c1`) — PremiumModuleCard reskin (chrome 24px, adminHoverCls, tipografía liviana, badge Premium→neutral, precio tabular-nums, accent intacto, `<></>` muerto fuera).
+- **Sprint 2** (`ab86804`) — ServiceCard + chrome de sección al lenguaje admin.
+- **Sprint 3** (`a6550e9`) — loading.tsx espeja la page.
+
+## Sprint 4 — refinamiento full-width + paridad de paneles
+- **Anclas:** ancho → secciones del portal (`dashboard/soporte/page.tsx` usa `flex w-full flex-col gap-4`, el padding lo da `<main>`); estructura de panel → admin `settings-console` (GlassCard + superficie anidada).
+- **page.tsx:**
+  - Container full-width `flex w-full flex-col gap-6` (fuera `mx-auto max-w-5xl pb-20`). Header flush izq / badge "N servicio activo" flush der (vía `PageHeader action`, ya estaba).
+  - "Contratados", "Disponibles" y "Próximamente" envueltos cada uno en GlassCard `rounded-[30px] border-white/10 bg-white/5 p-6 backdrop-blur-xl`.
+  - El eyebrow de sección pasa a **header del panel** (`text-[11px] font-semibold uppercase tracking-[0.24em] text-zinc-400` + grid `mt-5`); **eliminados los hairline dividers flotantes** (`h-px bg-white/[0.05]`).
+  - **Superficie anidada:** las cards DENTRO del panel bajan a `bg-black/20` (contrastan con el `bg-white/5` del panel); se mantiene `border-white/10`, `rounded-[24px]`, `adminHoverCls`.
+  - **Upsell header "Subí al Siguiente Nivel" standalone** entre Contratados y Disponibles, gradiente preservado.
+  - **Grids que llenan:** Contratados `sm:grid-cols-2 xl:grid-cols-3`; Disponibles/Próximamente `sm:grid-cols-2 lg:grid-cols-3`. Con 1 card queda flush-izq y las celdas vacías no renderizan nada (no había orphan/spinner que sacar). Paneles hugean el contenido (sin alto fijo).
+  - **Decisión menor:** "Próximamente" sigue el MISMO patrón de panel (3er GlassCard) por consistencia — no estaba nombrado explícito en el brief; extensión natural del patrón, sin estética nueva.
+- **PremiumModuleCard.tsx:** solo el token de superficie (available + coming-soon → `bg-black/20`). Sin tocar estados/accent/upsell/tipografía.
+- **loading.tsx:** re-espejado full-width + dos paneles GlassCard con headers + grids 2/3-col anidados a `rounded-[24px]`, skeletons `border-white/[0.06] bg-white/[0.015]`. Sin layout shift.
+- **NO tocado:** schema, ui/*, shell, frozen, `lib/preview`, contrato `upsell.ts`, `resolveOrgId`, las 2 queries, los 4 estados de upsell, `triggerTransition`, gradiente del header upsell, accent por módulo/servicio, tipografía liviana.
+- **Gate:** tsc 0 / eslint 0 (3 archivos) / diff acotado. visual-qa → humano en :3000 (preview/browser MCP ausente en sesión).

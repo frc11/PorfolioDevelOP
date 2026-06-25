@@ -2,7 +2,7 @@ import { Skeleton } from '@/components/ui/Skeleton'
 
 export default function ServicesLoading() {
   return (
-    <div className="mx-auto flex max-w-5xl flex-col gap-8 pb-20">
+    <div className="flex w-full flex-col gap-6">
       {/* PageHeader */}
       <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:items-end sm:justify-between sm:pt-4">
         <div className="flex items-center gap-3">
@@ -10,46 +10,40 @@ export default function ServicesLoading() {
           <div>
             <Skeleton className="mb-2 h-2.5 w-24" />
             <Skeleton className="h-7 w-56" />
-            <Skeleton className="mt-2 h-3 w-72" />
+            <Skeleton className="mt-2 h-3 w-72 max-w-full" />
           </div>
         </div>
         <Skeleton className="h-9 w-36 rounded-full" />
       </div>
 
-      {/* Contratados */}
-      <div className="flex flex-col gap-4">
-        <div className="flex items-center gap-3">
-          <Skeleton className="h-3 w-24" />
-          <div className="h-px flex-1 bg-white/[0.05]" />
-        </div>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      {/* Panel: Contratados */}
+      <section className="rounded-[30px] border border-white/10 bg-white/5 p-6 backdrop-blur-xl">
+        <Skeleton className="h-3 w-28" />
+        <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          <ServiceCardSkeleton />
           <ServiceCardSkeleton />
           <ServiceCardSkeleton />
         </div>
+      </section>
+
+      {/* Upsell header (standalone) */}
+      <div className="flex flex-col gap-1.5">
+        <div className="flex items-center gap-2.5">
+          <Skeleton className="h-4 w-4 rounded" />
+          <Skeleton className="h-6 w-52" />
+        </div>
+        <Skeleton className="ml-7 h-3.5 w-80 max-w-full" />
       </div>
 
-      {/* Upsell */}
-      <div className="flex flex-col gap-6">
-        <div className="flex flex-col gap-1.5">
-          <div className="flex items-center gap-2.5">
-            <Skeleton className="h-4 w-4 rounded" />
-            <Skeleton className="h-6 w-52" />
-          </div>
-          <Skeleton className="ml-7 h-3.5 w-80 max-w-full" />
+      {/* Panel: Disponibles */}
+      <section className="rounded-[30px] border border-white/10 bg-white/5 p-6 backdrop-blur-xl">
+        <Skeleton className="h-3 w-28" />
+        <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <ModuleCardSkeleton />
+          <ModuleCardSkeleton />
+          <ModuleCardSkeleton />
         </div>
-
-        <div className="flex flex-col gap-4">
-          <div className="flex items-center gap-3">
-            <Skeleton className="h-3 w-24" />
-            <div className="h-px flex-1 bg-white/[0.05]" />
-          </div>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <ModuleCardSkeleton />
-            <ModuleCardSkeleton />
-            <ModuleCardSkeleton />
-          </div>
-        </div>
-      </div>
+      </section>
     </div>
   )
 }

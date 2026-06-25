@@ -94,7 +94,7 @@ function ServiceCard({
 
   return (
     <div
-      className={`group relative flex flex-col gap-5 overflow-hidden rounded-[24px] border border-white/10 bg-white/[0.04] p-6 shadow-xl backdrop-blur-xl ${adminHoverCls}`}
+      className={`group relative flex flex-col gap-5 overflow-hidden rounded-[24px] border border-white/10 bg-black/20 p-6 shadow-xl backdrop-blur-xl ${adminHoverCls}`}
     >
       <div
         className="pointer-events-none absolute -right-10 -top-10 h-36 w-36 rounded-full blur-[60px] opacity-10 transition-opacity duration-500 group-hover:opacity-25"
@@ -185,7 +185,7 @@ export default async function ServicesPage() {
   const comingSoonModules = catalogModules.filter((moduleData) => moduleData.status === 'COMING_SOON')
 
   return (
-    <div className="mx-auto flex max-w-5xl flex-col gap-8 pb-20">
+    <div className="flex w-full flex-col gap-6">
       <FadeIn delay={0}>
         <PageHeader
           eyebrow="Mis servicios"
@@ -220,14 +220,11 @@ export default async function ServicesPage() {
         </FadeIn>
       ) : (
         <FadeIn delay={0.06}>
-          <div className="flex flex-col gap-4">
-            <div className="flex items-center gap-3">
-              <p className="text-xs font-bold uppercase tracking-widest text-zinc-600">
-                Contratados
-              </p>
-              <div className="h-px flex-1 bg-white/[0.05]" />
-            </div>
-            <StaggerContainer className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <section className="rounded-[30px] border border-white/10 bg-white/5 p-6 backdrop-blur-xl">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-zinc-400">
+              Contratados
+            </p>
+            <StaggerContainer className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
               {services.map((service) => (
                 <StaggerItem key={service.id}>
                   <ServiceCard
@@ -238,87 +235,83 @@ export default async function ServicesPage() {
                 </StaggerItem>
               ))}
             </StaggerContainer>
-          </div>
+          </section>
         </FadeIn>
       )}
 
       <FadeIn delay={0.12}>
-        <div className="flex flex-col gap-6">
-          <div className="flex flex-col gap-1.5">
-            <div className="flex items-center gap-2.5">
-              <Sparkles size={17} className="flex-shrink-0 text-cyan-400" />
-              <h2
-                className="text-xl font-black uppercase tracking-tight"
-                style={{
-                  background: 'linear-gradient(90deg, #06b6d4 0%, #818cf8 50%, #c084fc 100%)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text',
-                }}
-              >
-                Subí al Siguiente Nivel
-              </h2>
-            </div>
-            <p className="pl-7 text-sm text-zinc-400">
-              Potenciá tu negocio con nuestras soluciones premium exclusivas
-            </p>
+        <div className="flex flex-col gap-1.5">
+          <div className="flex items-center gap-2.5">
+            <Sparkles size={17} className="flex-shrink-0 text-cyan-400" />
+            <h2
+              className="text-xl font-black uppercase tracking-tight"
+              style={{
+                background: 'linear-gradient(90deg, #06b6d4 0%, #818cf8 50%, #c084fc 100%)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
+              }}
+            >
+              Subí al Siguiente Nivel
+            </h2>
           </div>
-
-          {activeModules.length > 0 && (
-            <div className="flex flex-col gap-4">
-              <div className="flex items-center gap-3">
-                <p className="text-xs font-bold uppercase tracking-widest text-zinc-600">
-                  Disponibles
-                </p>
-                <div className="h-px flex-1 bg-white/[0.05]" />
-              </div>
-              <StaggerContainer className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {activeModules.map((moduleData) => (
-                  <StaggerItem key={moduleData.slug}>
-                    <PremiumModuleCard
-                      slug={moduleData.slug}
-                      name={moduleData.name}
-                      shortDescription={moduleData.shortDescription}
-                      tier={moduleData.tier}
-                      priceMonthlyUsd={moduleData.priceMonthlyUsd}
-                      iconName={moduleData.iconName}
-                      accentColor={moduleData.accentColor}
-                      status={moduleData.status}
-                    />
-                  </StaggerItem>
-                ))}
-              </StaggerContainer>
-            </div>
-          )}
-
-          {comingSoonModules.length > 0 && (
-            <div className="flex flex-col gap-4">
-              <div className="flex items-center gap-3">
-                <p className="text-xs font-bold uppercase tracking-widest text-zinc-600">
-                  Próximamente
-                </p>
-                <div className="h-px flex-1 bg-white/[0.05]" />
-              </div>
-              <StaggerContainer className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {comingSoonModules.map((moduleData) => (
-                  <StaggerItem key={moduleData.slug}>
-                    <PremiumModuleCard
-                      slug={moduleData.slug}
-                      name={moduleData.name}
-                      shortDescription={moduleData.shortDescription}
-                      tier={moduleData.tier}
-                      priceMonthlyUsd={moduleData.priceMonthlyUsd}
-                      iconName={moduleData.iconName}
-                      accentColor={moduleData.accentColor}
-                      status={moduleData.status}
-                    />
-                  </StaggerItem>
-                ))}
-              </StaggerContainer>
-            </div>
-          )}
+          <p className="pl-7 text-sm text-zinc-400">
+            Potenciá tu negocio con nuestras soluciones premium exclusivas
+          </p>
         </div>
       </FadeIn>
+
+      {activeModules.length > 0 && (
+        <FadeIn delay={0.18}>
+          <section className="rounded-[30px] border border-white/10 bg-white/5 p-6 backdrop-blur-xl">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-zinc-400">
+              Disponibles
+            </p>
+            <StaggerContainer className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {activeModules.map((moduleData) => (
+                <StaggerItem key={moduleData.slug}>
+                  <PremiumModuleCard
+                    slug={moduleData.slug}
+                    name={moduleData.name}
+                    shortDescription={moduleData.shortDescription}
+                    tier={moduleData.tier}
+                    priceMonthlyUsd={moduleData.priceMonthlyUsd}
+                    iconName={moduleData.iconName}
+                    accentColor={moduleData.accentColor}
+                    status={moduleData.status}
+                  />
+                </StaggerItem>
+              ))}
+            </StaggerContainer>
+          </section>
+        </FadeIn>
+      )}
+
+      {comingSoonModules.length > 0 && (
+        <FadeIn delay={0.24}>
+          <section className="rounded-[30px] border border-white/10 bg-white/5 p-6 backdrop-blur-xl">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-zinc-400">
+              Próximamente
+            </p>
+            <StaggerContainer className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {comingSoonModules.map((moduleData) => (
+                <StaggerItem key={moduleData.slug}>
+                  <PremiumModuleCard
+                    slug={moduleData.slug}
+                    name={moduleData.name}
+                    shortDescription={moduleData.shortDescription}
+                    tier={moduleData.tier}
+                    priceMonthlyUsd={moduleData.priceMonthlyUsd}
+                    iconName={moduleData.iconName}
+                    accentColor={moduleData.accentColor}
+                    status={moduleData.status}
+                  />
+                </StaggerItem>
+              ))}
+            </StaggerContainer>
+          </section>
+        </FadeIn>
+      )}
     </div>
   )
 }
