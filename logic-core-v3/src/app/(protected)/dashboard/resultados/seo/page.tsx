@@ -212,15 +212,20 @@ async function SeoContent({
   const result = await getSearchConsoleData(siteUrl)
 
   if (!result.ok) {
+    // D4 — NO exponer el detalle interno al cliente (CLAUDE.md: "never expose
+    // internal error messages"). Se loguea server-side y se muestra un mensaje genérico.
+    console.error('[SEO] getSearchConsoleData failed:', result.error)
     return (
       <FadeIn delay={0.1}>
-        <div className="flex items-start gap-3 rounded-xl border border-amber-500/20 bg-amber-500/[0.06] px-5 py-4 backdrop-blur-sm">
-          <AlertTriangle size={16} className="mt-0.5 flex-shrink-0 text-amber-400" />
+        <div className="flex items-start gap-3 rounded-xl border border-amber-400/20 bg-amber-400/10 px-5 py-4">
+          <AlertTriangle size={16} className="mt-0.5 flex-shrink-0 text-amber-300" strokeWidth={1.5} />
           <div>
             <p className="text-sm font-medium text-amber-300">
               No se pudieron cargar los datos de SEO
             </p>
-            <p className="mt-1 text-xs text-amber-400/70">{result.error}</p>
+            <p className="mt-1 text-xs text-amber-300/70">
+              Probá de nuevo en unos minutos. Si el problema persiste, hablá con tu equipo de develOP.
+            </p>
           </div>
         </div>
       </FadeIn>
