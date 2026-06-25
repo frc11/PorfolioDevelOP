@@ -24,6 +24,7 @@ import {
   getUsageMessage,
   type UsageMessage,
 } from '@/lib/plan/plan-presentation'
+import { UpgradeCtaButton } from './UpgradeCtaButton'
 
 interface UsageMeterProps {
   snapshot: OrgUsageSnapshot
@@ -108,6 +109,18 @@ export function UsageMeter({ snapshot, hideUpgradeHint = false }: UsageMeterProp
               </p>
             </div>
           </div>
+
+          {/* CTA de activación: reusa requestUpsellAction (vía UpgradeCtaButton)
+              con featureKey/featureName propios del bot — registra el lead y
+              lleva a /dashboard/messages, igual flujo que el upsell de plan.
+              Acento CYAN (no es upsell de plan). Visible SIEMPRE en el empty:
+              no lo gobierna hideUpgradeHint. */}
+          <UpgradeCtaButton
+            featureKey="bot-activation"
+            featureName="Activación de tu vendedor virtual"
+            label="Activá tu vendedor virtual"
+            className="group flex w-full items-center justify-center gap-2 rounded-xl border border-cyan-500/30 bg-cyan-500/10 px-4 py-3 text-[10px] font-black uppercase tracking-widest text-cyan-300 transition-all hover:border-cyan-400/50 hover:bg-cyan-500/20 disabled:cursor-wait disabled:opacity-60"
+          />
         </div>
       </section>
     )
