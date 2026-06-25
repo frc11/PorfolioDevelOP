@@ -46,16 +46,21 @@ El build está **ROJO por baseline ajeno** (`@googleapis/webmasters` faltante + 
 
 ## Sprint log
 
-| # | Archivo | Cambio | Commits | tsc | lint | visual-qa | Estado |
+Sprints canónicos = los 5 del plan aprobado (este table reemplaza la numeración stale previa: el viejo S4/S5 (loading + page) se fusionó en **S4 FULLWIDTH**, y entró un **S5 nuevo** = CTA en el estado sin-bot).
+
+| # | Archivo(s) | Cambio | Commits | tsc | lint | visual-qa | Estado |
 |---|---|---|---|---|---|---|---|
 | 1 | `UsageMeter.tsx` | reskin frosted + estado vacío | `bedbda8` reskin · `40c37a7` empty-state | ✅ 0 | ✅ | ⏸ humano | code OK, esperando verif. visual |
-| 2 | `PlansShowcase.tsx` | reskin tier cards + adminHoverCls | 1 (cosmético) | — | — | — | pendiente |
-| 3 | `UpgradeCtaButton.tsx` | spinner pending visible | 1 | — | — | — | pendiente |
-| 4 | `loading.tsx` | fix max-w-7xl + formas nuevas | 1 | — | — | — | pendiente |
-| 5 | `page.tsx` | alinear skeletons de Suspense | 1 | — | — | — | pendiente |
+| 2 | `PlansShowcase.tsx` | reskin tier cards frosted + adminHoverCls + footer rounded-[24px] | `c15b740` (cosmético) | ✅ 0 nuevos | ✅ touched (1 warn pre-exist. `isUpgrade`) | ⛔ entorno bloqueado | **CERRADO** (gate técnico ✅; reposo lo verifica Valentino) |
+| 3 | `UpgradeCtaButton.tsx` | spinner pending visible | — | — | — | — | pendiente |
+| 4 | `page.tsx` + `loading.tsx` + 2 skeletons inline | FULLWIDTH (quitar max-w-7xl) + skeletons al mismo ancho/formas | — | — | — | — | pendiente |
+| 5 | `UpgradeCtaButton.tsx` (+ `UsageMeter.tsx`) | CTA en estado sin-bot (reusa requestUpsellAction) | — | — | — | — | pendiente |
 
 > Se actualiza al cerrar cada sprint (commit hash + resultado de gates).
 
 ### Notas de ejecución
-- **visual-qa NO corre automáticamente** en esta sesión: el preview/browser MCP está **ausente** (`ToolSearch` no encuentra `mcp__Claude_Preview__*`) y las rutas tienen auth-wall de cliente. `:3000` está arriba (HMR toma los cambios) → la verificación visual la hace Valentino por grabación contra `:3000`.
+- **Corrida DESATENDIDA (2026-06-25, nocturna).** Ejecuta sprints de corrido, commit por sprint, sin checkpoints humanos. Gate técnico (tsc solo + lint touched) corre igual; la verif. visual de reposo + coreografía la hace Valentino contra `:3000`.
+- **tsc baseline del worktree = limpio (exit 0, 0 errores).** Cualquier error nuevo es visible. (Distinto de la main checkout que puede estar stale; este worktree tiene su node_modules y Prisma generado.)
+- **visual-qa = ENTORNO BLOQUEADO en desatendido.** El subagente `visual-qa` no puede renderizar `/dashboard/plan`: la ruta tiene auth-wall de cliente y el endpoint documentado `/api/qa/login` lo bloquea el clasificador de auto-mode (lo lee como burlar auth). Confirmado 1 intento en S2 → NO se re-dispara por sprint (guard anti-loop: mismo bloqueo, gastaría cuota). Verif. visual la hace Valentino por grabación contra `:3000`.
+- **Lint baseline ajeno en archivos del scope:** `PlansShowcase.tsx` ya traía warning `isUpgrade` sin uso (prop de `PlanCta`, pre-existente, NO introducido por el reskin). Removerlo es refactor fuera del scope cosmético → se deja como deuda baseline, no se mezcla en el commit de reskin.
 - **Blast radius `UsageMeter`:** se monta en `/dashboard/plan` (con `hideUpgradeHint`) **y** en `/dashboard` (home, sin `hideUpgradeHint`). El reskin + el estado vacío propagan a ambas (componente compartido, DRY-correcto). Verif. visual debe cubrir las 2 rutas.
