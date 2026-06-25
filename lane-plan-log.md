@@ -52,9 +52,9 @@ Sprints canónicos = los 5 del plan aprobado (este table reemplaza la numeració
 |---|---|---|---|---|---|---|---|
 | 1 | `UsageMeter.tsx` | reskin frosted + estado vacío | `bedbda8` reskin · `40c37a7` empty-state | ✅ 0 | ✅ | ⏸ humano | code OK, esperando verif. visual |
 | 2 | `PlansShowcase.tsx` | reskin tier cards frosted + adminHoverCls + footer rounded-[24px] | `c15b740` (cosmético) | ✅ 0 nuevos | ✅ touched (1 warn pre-exist. `isUpgrade`) | ⛔ entorno bloqueado | **CERRADO** (gate técnico ✅; reposo lo verifica Valentino) |
-| 3 | `UpgradeCtaButton.tsx` | spinner pending visible | — | — | — | — | pendiente |
-| 4 | `page.tsx` + `loading.tsx` + 2 skeletons inline | FULLWIDTH (quitar max-w-7xl) + skeletons al mismo ancho/formas | — | — | — | — | pendiente |
-| 5 | `UpgradeCtaButton.tsx` (+ `UsageMeter.tsx`) | CTA en estado sin-bot (reusa requestUpsellAction) | — | — | — | — | pendiente |
+| 3 | `UpgradeCtaButton.tsx` | spinner pending visible (Loader2, sw 1.5, animate-spin) | `4387cc1` | ✅ 0 nuevos | ✅ touched limpio | ⛔ entorno bloqueado | **CERRADO** (gate técnico ✅) |
+| 4 | `page.tsx` + `loading.tsx` (+ 2 skeletons inline) | FULLWIDTH (quitar max-w-7xl, padding del shell) + skeletons al mismo ancho/formas (rounded-[30px], grid lg:grid-cols-3) | `ba584ac` | ✅ 0 nuevos | ✅ touched limpio | ⛔ entorno bloqueado | **CERRADO** (gate técnico ✅) |
+| 5 | `UpgradeCtaButton.tsx` + `UsageMeter.tsx` | CTA "Activá tu vendedor virtual" en estado sin-bot (extiende UpgradeCtaButton con featureKey?/featureName? opcionales, reusa requestUpsellAction 'bot-activation') | `3fbbfe2` | ✅ 0 nuevos | ✅ touched limpio | ⛔ entorno bloqueado | **CERRADO** (gate técnico ✅) |
 
 > Se actualiza al cerrar cada sprint (commit hash + resultado de gates).
 
@@ -63,4 +63,40 @@ Sprints canónicos = los 5 del plan aprobado (este table reemplaza la numeració
 - **tsc baseline del worktree = limpio (exit 0, 0 errores).** Cualquier error nuevo es visible. (Distinto de la main checkout que puede estar stale; este worktree tiene su node_modules y Prisma generado.)
 - **visual-qa = ENTORNO BLOQUEADO en desatendido.** El subagente `visual-qa` no puede renderizar `/dashboard/plan`: la ruta tiene auth-wall de cliente y el endpoint documentado `/api/qa/login` lo bloquea el clasificador de auto-mode (lo lee como burlar auth). Confirmado 1 intento en S2 → NO se re-dispara por sprint (guard anti-loop: mismo bloqueo, gastaría cuota). Verif. visual la hace Valentino por grabación contra `:3000`.
 - **Lint baseline ajeno en archivos del scope:** `PlansShowcase.tsx` ya traía warning `isUpgrade` sin uso (prop de `PlanCta`, pre-existente, NO introducido por el reskin). Removerlo es refactor fuera del scope cosmético → se deja como deuda baseline, no se mezcla en el commit de reskin.
-- **Blast radius `UsageMeter`:** se monta en `/dashboard/plan` (con `hideUpgradeHint`) **y** en `/dashboard` (home, sin `hideUpgradeHint`). El reskin + el estado vacío propagan a ambas (componente compartido, DRY-correcto). Verif. visual debe cubrir las 2 rutas.
+- **Blast radius `UsageMeter`:** se monta en `/dashboard/plan` (con `hideUpgradeHint`) **y** en `/dashboard` (home, sin `hideUpgradeHint`). El reskin + el estado vacío + el CTA de activación propagan a ambas (componente compartido, DRY-correcto). Verif. visual debe cubrir las 2 rutas.
+
+---
+
+## CIERRE (corrida desatendida 2026-06-25)
+
+**Estado: los 5 sprints del plan están CERRADOS y commiteados en el worktree `C:\lane-plan\logic-core-v3` (branch `lane/plan`). SIN merges. main intacto.**
+
+### Commits del lane (base `dd0a3c4` → HEAD)
+| Sprint | Commit | Tipo |
+|---|---|---|
+| 1 (reskin) | `bedbda8` | style |
+| 1 (empty state) | `40c37a7` | feat |
+| 1 (docs) | `3711d9a` | docs |
+| 2 | `c15b740` | style |
+| 2 (docs) | `c0a7d9e` | docs |
+| 3 | `4387cc1` | feat |
+| 4 | `ba584ac` | style |
+| 5 | `3fbbfe2` | feat |
+
+Diff total: 5 archivos de scope + `lane-plan-log.md`. **0 archivos frozen tocados. 0 `any`.** tsc `--noEmit` = exit 0 (0 errores nuevos) en cada sprint; lint touched limpio (única deuda = warning `isUpgrade` pre-existente en `PlansShowcase`, no introducido por el lane).
+
+### Revisión adversarial (workflow, no-visual) — VERDE
+Como visual-qa quedó bloqueado, se corrió un workflow de review adversarial (3 dimensiones, con verificación-para-refutar) sobre el diff final del lane. Resultado: **0 hallazgos confirmados (`confirmed: []`)**.
+- **Regresión:** los callers de PlansShowcase resuelven featureKey/featureName/targetHref IDÉNTICOS a pre-lane → cero regresión. El fallback `?? ''` es inalcanzable (cada caller pasa un par válido; y Zod `min(1)` lo rechazaría server-side igual). Firmas de `requestUpsellAction` / `window.location.assign` sin cambios.
+- **Frozen/scope/any/multi-tenant:** sólo los 5 archivos de scope + el log; 0 frozen editado (todo consumido); 0 `any`; org sigue derivando de sesión; sin secretos ni leaks. `hasBotConfigured`/`periodLabel` ya existen en el `OrgUsageSnapshot` frozen.
+- **Aceptación/tokens:** los 5 criterios se cumplen en el markup. El reviewer COMPILÓ Tailwind v4 y confirmó que en reposo el glow de acento gana sobre `shadow-2xl` (no-op en cards con acento; la default conserva shadow-2xl), y que ese par `shadow-2xl`+`shadow-[…]` es **PRE-EXISTENTE** (base `dd0a3c4`), no introducido por el lane. El `border` sin color de la base SIEMPRE recibe color (3 ramas exhaustivas).
+- **Nota LOW (no es finding, es decisión visual de Valentino):** en los 2 variants de CTA sin ícono líder (upgrade cyan y bot-activation), el spinner de pending corre el label ~21px mientras está pending. Dentro del spec del Sprint 3 ("en lugar de / junto al children"). Si molesta, reservar slot de ícono — pero eso descentra el label en reposo (peor trade). Se deja como está.
+
+### Lo que NO se hizo (omitido en desatendido, por diseño)
+- **Verificación visual de reposo + grabación de coreografía/hover:** la hace Valentino despierto contra `:3000`. visual-qa quedó bloqueado por auth-wall (ver Notas de ejecución).
+
+### Findings out-of-scope / PENDIENTES post-merge (NO se construyeron acá)
+1. **Panel "servicios + CTA a más servicios" → DIFERIDO a post-merge.** Toca otra sección (`/dashboard/services`) y posible data fuera de `OrgUsageSnapshot`. NO es sprint de este lane (decisión locked de Valentino).
+2. **`/dashboard/plan` no tiene `error.tsx`.** Rediseño visual ≠ construcción → pendiente para un lane futuro.
+3. **Warning lint `isUpgrade` sin uso en `PlansShowcase.tsx`** (prop de `PlanCta`, pre-existente). Limpieza fuera del scope cosmético; si se toca, va en commit de refactor propio.
+4. **Doble fetch de `getOrgUsageSnapshot`** (1 por Suspense): costo del streaming independiente; `lib/plan` frozen. Se conserva a propósito.
