@@ -7,6 +7,7 @@ import { FadeIn } from '@/components/dashboard/FadeIn'
 import { PremiumModuleCard } from '@/components/dashboard/PremiumModuleCard'
 import { StaggerContainer, StaggerItem } from '@/components/dashboard/StaggerWrapper'
 import { EmptyState, PageHeader } from '@/components/ui'
+import { adminHoverCls } from '@/lib/hover'
 import { prisma } from '@/lib/prisma'
 import { resolveOrgId } from '@/lib/preview'
 
@@ -92,7 +93,9 @@ function ServiceCard({
   const { Icon } = cfg
 
   return (
-    <div className="group relative flex flex-col gap-5 overflow-hidden rounded-2xl border border-white/5 bg-[#07080a]/70 p-6 shadow-xl backdrop-blur-2xl transition-all duration-300 hover:border-white/10">
+    <div
+      className={`group relative flex flex-col gap-5 overflow-hidden rounded-[24px] border border-white/10 bg-white/[0.04] p-6 shadow-xl backdrop-blur-xl ${adminHoverCls}`}
+    >
       <div
         className="pointer-events-none absolute -right-10 -top-10 h-36 w-36 rounded-full blur-[60px] opacity-10 transition-opacity duration-500 group-hover:opacity-25"
         style={{ background: `rgb(${cfg.glowRgb})` }}
@@ -112,7 +115,7 @@ function ServiceCard({
         </div>
 
         <span
-          className={`flex flex-shrink-0 items-center gap-2 rounded-full border px-3.5 py-1.5 text-[10px] font-black uppercase tracking-widest ${statusCfg.pill}`}
+          className={`flex flex-shrink-0 items-center gap-2 rounded-full border px-3.5 py-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] ${statusCfg.pill}`}
         >
           <span className="relative flex h-1.5 w-1.5">
             {statusCfg.ping && (
@@ -127,20 +130,20 @@ function ServiceCard({
       </div>
 
       <div className="relative z-10">
-        <h3 className="text-xl font-black uppercase tracking-tight text-white">{cfg.label}</h3>
-        <p className="mt-0.5 text-[10px] font-bold uppercase tracking-widest text-zinc-600">
+        <h3 className="text-lg font-semibold text-white">{cfg.label}</h3>
+        <p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.24em] text-zinc-600">
           Servicio Principal
         </p>
       </div>
 
-      <p className="relative z-10 text-xs leading-relaxed text-zinc-500">{cfg.description}</p>
+      <p className="relative z-10 text-sm leading-6 text-zinc-400">{cfg.description}</p>
 
-      <div className="relative z-10 mt-auto flex items-end justify-between gap-3 border-t border-white/5 pt-5">
+      <div className="relative z-10 mt-auto flex items-end justify-between gap-3 border-t border-white/10 pt-5">
         <div>
-          <p className="text-[9px] font-bold uppercase tracking-widest text-zinc-700">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-zinc-600">
             Activo desde
           </p>
-          <p className="mt-0.5 text-[11px] font-bold tabular-nums text-zinc-400">
+          <p className="mt-1 text-xs font-medium tabular-nums text-zinc-300">
             {startDate.toLocaleDateString('es-AR', {
               day: '2-digit',
               month: 'long',
@@ -150,7 +153,7 @@ function ServiceCard({
         </div>
         <Link
           href="/dashboard/messages?context=default"
-          className="flex items-center gap-1.5 rounded-xl border border-white/5 bg-white/[0.02] px-4 py-2 text-[10px] font-black uppercase tracking-widest text-zinc-500 transition-all hover:border-white/10 hover:bg-white/[0.05] hover:text-zinc-200 active:scale-95"
+          className="flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/[0.02] px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-zinc-400 transition-all hover:border-white/15 hover:bg-white/[0.05] hover:text-zinc-200 active:scale-95"
         >
           <MessageSquare size={11} />
           Ver detalles
@@ -196,7 +199,7 @@ export default async function ServicesPage() {
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
                   <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400" />
                 </span>
-                <span className="text-[10px] font-black uppercase tracking-widest text-emerald-400">
+                <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-emerald-400">
                   {activeCount} {activeCount === 1 ? 'servicio activo' : 'servicios activos'}
                 </span>
               </div>
@@ -256,7 +259,7 @@ export default async function ServicesPage() {
                 Subí al Siguiente Nivel
               </h2>
             </div>
-            <p className="pl-7 text-sm font-medium text-zinc-500">
+            <p className="pl-7 text-sm text-zinc-400">
               Potenciá tu negocio con nuestras soluciones premium exclusivas
             </p>
           </div>
