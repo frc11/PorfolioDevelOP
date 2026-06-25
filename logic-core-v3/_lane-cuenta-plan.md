@@ -179,3 +179,27 @@ viejos hasta refresh manual) y "Ver facturación" da 404. Y un char roto ("Ocurr
 - Sólo `C:\lane-cuenta`. **Nada** en `C:\PorfolioDevelOP`.
 - Esta sesión de relevamiento **no commitea código**; sólo el `.md` del plan (en `logic-core-v3\_lane-cuenta-plan.md`).
 - Checkpoints humanos dentro de cada sprint (no avanzar sin OK).
+
+---
+
+## Log de ejecución — Sprint 0 (corrida DESATENDIDA, 2026-06-25)
+
+> Corrida automática de un solo sprint (Sprint 0 — cleanup funcional, sin estética).
+> Sin checkpoints humanos. Branch `lane/cuenta`, worktree `C:\lane-cuenta\logic-core-v3\`.
+
+**Read-first — números de línea reales confirmados antes de tocar** (coincidían con el plan):
+- `src/lib/actions/profile.ts`: 4 ocurrencias de `revalidatePath('/dashboard/profile')` (ruta MUERTA) en líneas **64, 93, 140, 235**. La acción `updateNotificationPrefsAction` ya tenía además el path correcto en **141**.
+- `src/components/dashboard/ProfileForms.tsx`: `href="/dashboard/facturacion"` (ruta MUERTA) en **616 y 674**; mojibake `'Ocurri?'` (×2 en la misma línea, `?` = byte ASCII `0x3F`) en **698**.
+- `src/components/dashboard/SubscriptionBanner.tsx`: `href="/dashboard/facturacion"` en **19**.
+
+**Cambios aplicados (solo strings; cero cambio de firma/lógica):**
+- `profile.ts` — líneas 64, 93, 235: `'/dashboard/profile'` → `'/dashboard/cuenta/perfil'`. Línea 140: **deduplicada** (eliminada la no-op; la 141 ya revalidaba el path correcto). `revalidatePath('/dashboard')`, `'/dashboard/soporte'` intactos. Tras dedupe, la última quedó en línea 234.
+- `ProfileForms.tsx` — líneas 616 y 674: `href` → `'/dashboard/cuenta/facturacion'`. Línea 698: `'Ocurri?'` → `'Ocurrió'` (×2). Encoding verificado UTF-8 (`ó` = `c3 b3`); sin mojibake nuevo.
+- `SubscriptionBanner.tsx` — línea 19: `href` → `'/dashboard/cuenta/facturacion'`.
+
+**Gate (verde):**
+- `.\node_modules\.bin\tsc.cmd --noEmit` → **exit 0, sin errores** (baseline igual; mis cambios son swaps de string, no pueden tipar mal).
+- Lint sobre los 3 archivos tocados → **exit 0, limpio**.
+- `visual-qa` (subagente, desktop + mobile) sobre `/dashboard/cuenta/perfil` y `/dashboard/cuenta/facturacion` → **✅ OK** ambas: resuelven y renderizan sin romper (redirect a login = ruta viva, no 404), sin errores de consola. Nota de infra: por el lock de single-dev-server de Next 16 (con `:3000` del repo principal arriba) no se pudo levantar server del worktree; se verificó contra `:3000` (archivos de ruta idénticos main↔worktree; el diff es solo strings → válido como no-regresión de carga). Verificación fina + prueba manual de revalidación quedan para el humano (designadas como tarea humana en el plan).
+
+**Cierre:** commiteado en el worktree (`lane/cuenta`); **NO** se tocó `main` ni se hizo merge. Sin paradas obligatorias disparadas (no se tocó frozen/schema/negocio). DETENIDO — no hay más sprints en esta corrida.

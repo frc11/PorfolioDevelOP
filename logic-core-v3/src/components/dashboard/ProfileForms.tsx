@@ -613,7 +613,7 @@ export function PlanInfoSection({ plan }: { plan: PlanInfo | null }) {
       <div className="flex flex-col gap-3">
         <p className="text-sm text-zinc-500">No hay información de plan disponible.</p>
         <Link
-          href="/dashboard/facturacion"
+          href="/dashboard/cuenta/facturacion"
           className="flex w-fit items-center gap-1.5 rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-xs text-zinc-400 transition-colors hover:border-cyan-500/30 hover:text-cyan-400"
         >
           <CreditCard size={12} />
@@ -671,7 +671,7 @@ export function PlanInfoSection({ plan }: { plan: PlanInfo | null }) {
       </div>
 
       <Link
-        href="/dashboard/facturacion"
+        href="/dashboard/cuenta/facturacion"
         className="flex w-fit items-center gap-1.5 rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-xs text-zinc-400 transition-colors hover:border-cyan-500/30 hover:text-cyan-400"
       >
         <CreditCard size={12} />
@@ -695,7 +695,7 @@ export function DangerZone() {
       if (result?.success) {
         setStep('done')
       } else {
-        setError(result && !result.success ? result.error ?? 'Ocurri? un error inesperado.' : 'Ocurri? un error inesperado.')
+        setError(result && !result.success ? result.error ?? 'Ocurrió un error inesperado.' : 'Ocurrió un error inesperado.')
         setStep('idle')
       }
     })

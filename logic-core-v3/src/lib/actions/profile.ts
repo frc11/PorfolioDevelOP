@@ -61,7 +61,7 @@ export async function updateProfileAction(
       }),
     ])
 
-    revalidatePath('/dashboard/profile')
+    revalidatePath('/dashboard/cuenta/perfil')
     revalidatePath('/dashboard')
 
     return { success: true }
@@ -90,7 +90,7 @@ export async function updateContactAction(
       data: { whatsapp },
     })
 
-    revalidatePath('/dashboard/profile')
+    revalidatePath('/dashboard/cuenta/perfil')
     return { success: true }
   } catch (error) {
     console.error('updateContactAction error:', error)
@@ -137,7 +137,6 @@ export async function updateNotificationPrefsAction(
       }),
     ])
 
-    revalidatePath('/dashboard/profile')
     revalidatePath('/dashboard/cuenta/perfil')
     return { success: true }
   } catch (error) {
@@ -232,7 +231,7 @@ export async function updatePasswordAction(
 
     await unstable_update({})
 
-    revalidatePath('/dashboard/profile')
+    revalidatePath('/dashboard/cuenta/perfil')
     return { success: true }
   } catch (error) {
     console.error('updatePasswordAction error:', error)
