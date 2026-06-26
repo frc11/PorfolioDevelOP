@@ -304,7 +304,7 @@ export default async function BillingPage() {
             </div>
 
             {/* Payment methods */}
-            <div className="rounded-xl border border-white/5 bg-white/[0.015] px-4 py-3.5">
+            <div className={cn('rounded-xl border border-white/5 bg-white/[0.015] px-4 py-3.5', adminHoverCls)}>
               <p className="text-[10px] uppercase tracking-[0.24em] text-zinc-500">
                 Métodos de pago
               </p>
@@ -321,10 +321,10 @@ export default async function BillingPage() {
             </div>
 
             {/* Update billing data */}
-            <div className="flex items-center">
+            <div className="flex">
               <Link
                 href="/dashboard/messages?context=facturacion"
-                className="flex w-full items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.02] px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-400 transition-colors hover:border-white/15 hover:bg-white/10 hover:text-zinc-200"
+                className="flex h-full w-full items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.02] px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-400 transition-colors hover:border-white/15 hover:bg-white/10 hover:text-zinc-200"
               >
                 Actualizar datos
               </Link>
