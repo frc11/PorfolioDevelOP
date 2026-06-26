@@ -2,7 +2,8 @@
 
 import { useEffect, useRef, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { Loader2, MessageSquareText } from 'lucide-react'
+import Link from 'next/link'
+import { AlertTriangle, Loader2, MessageSquareText, Trash2 } from 'lucide-react'
 import type { Role, TicketStatus } from '@prisma/client'
 import { Select } from '@/components/ui'
 import { updateTicketStatusAction } from '@/lib/tickets/actions'
@@ -84,6 +85,7 @@ export function TicketChat({ ticket }: TicketChatProps) {
   const [status, setStatus] = useState<TicketStatus>(ticket.status)
   const [error, setError] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
+  const [deletionDismissed, setDeletionDismissed] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
 
   // Auto-scroll al último mensaje cuando cambia la cantidad. Incluye el envío:
@@ -113,6 +115,8 @@ export function TicketChat({ ticket }: TicketChatProps) {
   }
 
   const priority = PRIORITY_MAP[ticket.priority]
+  // Solo los tickets que genera requestAccountDeletionAction llevan este título exacto.
+  const isDeletionRequest = ticket.title === 'Solicitud de eliminación de cuenta'
 
   return (
     <section className="flex min-h-0 flex-1 flex-col gap-4">
@@ -216,6 +220,43 @@ export function TicketChat({ ticket }: TicketChatProps) {
           <div ref={bottomRef} />
         </div>
       </div>
+
+      {isDeletionRequest && !deletionDismissed ? (
+        <div className="shrink-0 rounded-[28px] border border-red-500/30 bg-red-500/[0.06] p-5 backdrop-blur-xl">
+          <div className="flex items-start gap-3">
+            <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-red-400" strokeWidth={1.5} />
+            <div className="flex-1">
+              <h3 className="text-sm font-semibold text-red-200">
+                ¿Aprobar solicitud de eliminación?
+              </h3>
+              <p className="mt-1 text-xs leading-relaxed text-zinc-400">
+                El cliente{' '}
+                <span className="font-medium text-zinc-200">
+                  {ticket.organization.companyName}
+                </span>{' '}
+                solicitó eliminar su cuenta y todos los datos asociados. «Ir a borrar» te lleva
+                al borrado definitivo (con confirmación tipeada); no elimina nada por sí solo.
+              </p>
+              <div className="mt-4 flex flex-wrap items-center gap-3">
+                <Link
+                  href={`/admin/clients?delete=${ticket.organizationId}`}
+                  className="inline-flex items-center gap-2 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-2 text-xs font-semibold text-red-300 transition-colors hover:bg-red-500/20"
+                >
+                  <Trash2 className="h-4 w-4" strokeWidth={1.5} />
+                  Ir a borrar
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => setDeletionDismissed(true)}
+                  className="rounded-xl px-4 py-2 text-xs font-medium text-zinc-400 transition-colors hover:text-zinc-200"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
 
       <TicketReplyForm ticketId={ticket.id} />
     </section>
