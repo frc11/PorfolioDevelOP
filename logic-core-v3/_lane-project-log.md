@@ -344,3 +344,18 @@ visual a cargo de Valentino. Gate técnico (tsc+lint) estricto por commit.
 - dashboard-actions (aprobar/rechazar) NO tocado — solo el destino del link.
 - Comportamiento, no cosmético → commit propio.
 - Gate: tsc exit 0 + lint exit 0.
+
+### A7.4 — Empty por-tab "sin tareas": doble redondeo — CERRADO
+- El empty por-tab (`ProjectTaskTabs.tsx`, "Sin tareas en esta categoría", PROPIO, NO el
+  `EmptyState` ui/* frozen) tenía DOS formas redondeadas anidadas con radios distintos: el
+  box transparente `rounded-xl bg-white/[0.015]` + un círculo `rounded-full bg-zinc-900
+  border` alrededor del ícono. Se sacó el círculo → queda UNA sola forma transparente limpia
+  (box) con el ícono (size 20→28) y el texto.
+- NOTA p/Valentino (preview MCP ausente, no pude ver el render): el brief describía la 2da
+  capa como "tinte verde". En el CÓDIGO no hay clase verde en ese empty (el círculo era
+  `bg-zinc-900`; el único verde cercano es el glow ambiente del shell `rgba(16,185,129,.05)`
+  que se filtra por el box casi-transparente). Interpreté "sacá la capa/redondeo extra,
+  dejá solo la transparente" = remover el círculo anidado. Si la capa que molestaba era otra,
+  es 1 línea ajustar.
+- Cosmético → commit propio (separado del A7.2 de comportamiento aunque ambos en el mismo file).
+- Gate: tsc exit 0 + lint exit 0.

@@ -264,9 +264,10 @@ export function ProjectTaskTabs({
         >
           {currentTasks.length === 0 ? (
             <div className="flex flex-col items-center gap-3 py-14 text-center rounded-xl border border-white/5 bg-white/[0.015]">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-zinc-900 border border-white/5">
-                <CheckCircle2 size={20} className="text-zinc-700" />
-              </div>
+              {/* A7.4: una sola forma redondeada limpia (la transparente). Antes había
+                  un segundo redondeo anidado — el círculo `rounded-full bg-zinc-900` del
+                  ícono, radio distinto al box — que se sacó. */}
+              <CheckCircle2 size={28} className="text-zinc-700" />
               <p className="text-sm text-zinc-600">Sin tareas en esta categoría</p>
             </div>
           ) : (
