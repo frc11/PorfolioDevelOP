@@ -351,3 +351,24 @@ Gate por fase: `tsc.cmd --noEmit` exit 0 + lint-on-touched limpio + visual-qa (�
 - **El borrado real lo sigue ejecutando el flujo existente** (TypeToConfirmDialog, tipear ELIMINAR, `hardDeleteClient` SUPER_ADMIN). Fase 5 sólo deposita al admin ahí.
 - Trabajado SÓLO en `C:\lane-cuenta\logic-core-v3\`; **`main` intacto, sin merges**. Commit por fase (6 commits: `f0b6c77` relevamiento + 5 de fase). Ninguna parada obligatoria; no se tocó `schema.prisma`/`ui/*`/shell/`auth.ts`/drift de Franco/`hardDeleteClient`/`TypeToConfirmDialog`.
 - **Para el humano:** verificación visual+comportamiento (server authenticado) de: contraseña (no-pantalla-negra, preservar campos al fallar, validación), avatar (subir imagen/emoji/iniciales + persistencia + fit en la card), modal bóveda (backdrop), y el flujo admin ticket→borrar end-to-end.
+
+---
+
+# Re-fix pantalla negra al cambiar password (2026-06-26) — el fix previo NO alcanzó
+
+## FASE 0 — Re-diagnóstico (read-only; lectura propia de auth.ts/proxy.ts/cambiar-password, NO subagente)
+
+**Estado tras el intento previo (`8b641a0`):** `updatePasswordAction` (profile.ts) sube `sessionVersion: {increment:1}` + `await unstable_update({ user: { passwordResetRequired: false } })` + return (SIN revalidatePath). **El bug sigue.**
+
+**Por qué el fix previo NO alcanzó — la diferencia real es el CALL SITE, no la action:**
+- `updatePasswordAction` y `cambiarPasswordAction` (/cambiar-password) son **idénticos** en el manejo de sesión (ambos incrementan `sessionVersion` + el MISMO `unstable_update({ user: { passwordResetRequired: false } })`). El intento previo espejó la ACTION, no la INVOCACIÓN.
+- **`/cambiar-password` (anda)** llama la action **DIRECTO**: `startTransition(async () => { const r = await cambiarPasswordAction(...); if (r.ok) router.push('/dashboard') })` (`CambiarPasswordForm.tsx:46-55`). Llamada directa = Next NO auto-refresca; la navegación explícita ocurre DESPUÉS del `await` (cuando el Set-Cookie con `sessionVersion` N+1 ya está aplicado) → el request nuevo lleva N+1 → no hay kill.
+- **`PasswordForm` (rompe)** usa **`<form action={action}>` + `useActionState`** (`ProfileForms.tsx`). El form-action de Next dispara un **re-render same-response del route con el cookie VIEJO (N)** — el Set-Cookie de `unstable_update` (N+1) está en los headers de respuesta pero **todavía no es un request-cookie** → ese render corre `auth()` con N.
+- **El kill** (auth.ts:247-254, FROZEN, SOLO LECTURA): el jwt callback hace `shouldRefreshFromDb` con `... || !user`, así que **en CADA request normal** (no signIn/update) re-lee la DB y, si `token.sessionVersion (N) !== DB (N+1)`, **devuelve `null`** (mata la sesión). El re-render del form-action con cookie N dispara exactamente eso.
+- **El "redirige a /dashboard"** (no a /login) lo explica `proxy.ts` (middleware): sesión muerta en `/dashboard/...` → redirect a `/login` (`:104-108`); pero el cookie ya quedó N+1, así que `/login` re-evalúa autenticado y rebota a `DASHBOARD_PATH` (`:143-145`). El preloader "Rendering…" cuelga en ese baile de redirects.
+
+**No hay `SessionProvider`/`useSession` en el app** (auth 100% server-side: `auth()` en RSC + `proxy.ts`). → el kill lo dispara un **request del server**, no un poll del cliente; el request culpable es el re-render del form-action.
+
+**Conclusión:** **se arregla SIN tocar `auth.ts`.** El jwt callback es correcto; el problema es que `PasswordForm` invoca la action vía form-action (re-render same-response con cookie viejo) en vez de llamarla directo y navegar después como `/cambiar-password`. → **NO parada.** Fix en `PasswordForm` (call site): `<form onSubmit>` + `startTransition` + `await updatePasswordAction(null, fd)` directo + `router.refresh()` on success (request separado, ya con cookie N+1). `profile.ts` queda como está (su `unstable_update` setea el cookie; estaba bien).
+
+**Commit Fase 0:** `chore(cuenta): re-diagnóstico pantalla negra password`.
