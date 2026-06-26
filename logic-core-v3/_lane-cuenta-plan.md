@@ -379,3 +379,19 @@ Gate por fase: `tsc.cmd --noEmit` exit 0 + lint-on-touched limpio + visual-qa (�
 **Gate:** `tsc.cmd --noEmit` exit 0; lint ProfileForms.tsx limpio; visual-qa **✅ OK estático** (estructura correcta, todo preservado, sin regresión). **NO declarado resuelto:** el bug sólo se reproduce con sesión autenticada y un cambio real de password → el gate no lo puede probar. **PENDIENTE de verificación humana** (Valentino, logueado): cambiar el password y confirmar que NO hay pantalla negra, NO desloguea, NO rebota a /dashboard, y se queda en /perfil con la contraseña ya cambiada.
 **Parada obligatoria:** NO disparada — el fix vive en el call site (PasswordForm), `auth.ts` quedó intacto.
 **Pre-existente NO tocado:** los íconos de ojo del visor (`<Eye/>`/`<EyeOff/>`) no llevan `strokeWidth={1.5}` (estilo pre-existente del archivo, no es regresión de este fix).
+
+---
+
+# Reorden de layout Perfil (2 columnas) — commit `layout(cuenta/perfil)…` (2026-06-26)
+
+**Problema:** "Datos de empresa" (izq) y "Datos de contacto" (der) iban lado a lado en un `lg:grid-cols-2` con `SectionCard` `h-full` → se igualaban en altura → Contacto (poca info) quedaba con un hueco vertical enorme.
+
+**Cambio (SOLO layout, cero contenido/lógica):**
+- `SectionCard`: quitado `h-full` (era el que forzaba alturas iguales); con eso `cn` quedó sin uso → removido el import.
+- Los DOS `lg:grid-cols-2` (empresa|contacto y seguridad|prefs) → UN `grid grid-cols-1 gap-6 lg:grid-cols-2 lg:items-start` con DOS columnas reales (`<div className="flex flex-col gap-6">`): **izq = Datos de empresa + Seguridad**; **der = Datos de contacto + Preferencias + Información del plan**. `lg:items-start` (sin stretch) + flujo vertical natural → cada panel a su altura real; Contacto comprimido y Preferencias sube directo abajo, sin hueco.
+- **Zona de peligro** queda FUERA del grid, como bloque full-width al fondo (sobre las 2 columnas).
+- Mobile (`grid-cols-1`): una sola columna apilada (empresa → seguridad → contacto → preferencias → plan → zona de peligro).
+- `perfil/loading.tsx`: skeleton alineado al nuevo layout (2 col `items-start`, contacto corto, danger full-width).
+- **Preservado:** estética admin, tinte rojo Seguridad/Zona, avatar uploader, toggles, hover, loading/error/empty, y el branch `isAdminPreview()` (return aparte, intacto). Spacing gap-6/space-y-6 (sin inventar).
+
+**Gate:** `tsc.cmd --noEmit` exit 0; lint (page+loading) limpio; visual-qa **✅ OK estático** (2 columnas, sin hueco bajo Contacto, danger full-width, mobile apilado). Render fino = eyeball humano. Sin parada (todo en archivos del lane; nada frozen/shell).

@@ -13,7 +13,6 @@ import {
 } from '@/components/dashboard/ProfileForms'
 import { FadeIn } from '@/components/dashboard/FadeIn'
 import { Card, CardTitle } from '@/components/ui'
-import { cn } from '@/lib/utils'
 import Link from 'next/link'
 import {
   Building2,
@@ -44,7 +43,7 @@ function SectionCard({
   className?: string
 }) {
   return (
-    <Card variant="elevated" padding="lg" className={cn('h-full', className)}>
+    <Card variant="elevated" padding="lg" className={className}>
       <div className="mb-5 flex items-center gap-2">
         {icon}
         <CardTitle>{title}</CardTitle>
@@ -204,78 +203,82 @@ export default async function ProfilePage() {
         />
       </FadeIn>
 
-      {/* Datos de empresa | Datos de contacto */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <FadeIn delay={0.08}>
-          <SectionCard
-            title="Datos de empresa"
-            icon={<Building2 size={14} strokeWidth={1.5} className="text-cyan-400" />}
-          >
-            <CompanyDataForm
-              name={user.name ?? ''}
-              email={user.email ?? ''}
-              companyName={org.companyName}
-              avatarImageUrl={org.avatarImageUrl}
-              avatarEmoji={org.avatarEmoji}
-              avatarInitials={org.avatarInitials}
-            />
-          </SectionCard>
-        </FadeIn>
+      {/* 2 columnas reales: cada panel a su altura natural (lg:items-start → sin
+          stretch) para que NO queden huecos. Izquierda: empresa + seguridad.
+          Derecha: contacto (comprimido) + preferencias + plan. */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:items-start">
+        {/* Columna izquierda */}
+        <div className="flex flex-col gap-6">
+          <FadeIn delay={0.08}>
+            <SectionCard
+              title="Datos de empresa"
+              icon={<Building2 size={14} strokeWidth={1.5} className="text-cyan-400" />}
+            >
+              <CompanyDataForm
+                name={user.name ?? ''}
+                email={user.email ?? ''}
+                companyName={org.companyName}
+                avatarImageUrl={org.avatarImageUrl}
+                avatarEmoji={org.avatarEmoji}
+                avatarInitials={org.avatarInitials}
+              />
+            </SectionCard>
+          </FadeIn>
 
-        <FadeIn delay={0.12}>
-          <SectionCard
-            title="Datos de contacto"
-            icon={<Phone size={14} strokeWidth={1.5} className="text-cyan-400" />}
-          >
-            <ContactSection email={user.email ?? ''} whatsapp={org.whatsapp ?? null} />
-          </SectionCard>
-        </FadeIn>
-      </div>
-
-      {/* Seguridad (rojo suave) | Preferencias de notificaciones */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <FadeIn delay={0.16}>
-          <SectionCard
-            title="Seguridad"
-            icon={<Lock size={14} strokeWidth={1.5} className="text-red-400/80" />}
-            className="border-red-500/20"
-          >
-            <div className="flex flex-col gap-4">
-              <PasswordForm />
-              <div className="border-t border-white/5 pt-4">
-                <Link
-                  href="/cambiar-password"
-                  className="flex items-center justify-between rounded-lg px-3 py-2.5 text-sm text-zinc-400 transition-colors hover:bg-white/[0.03] hover:text-zinc-200"
-                >
-                  <span>Cambiar mi contraseña desde el asistente</span>
-                  <ChevronRight size={14} strokeWidth={1.5} className="text-zinc-600" />
-                </Link>
+          <FadeIn delay={0.16}>
+            <SectionCard
+              title="Seguridad"
+              icon={<Lock size={14} strokeWidth={1.5} className="text-red-400/80" />}
+              className="border-red-500/20"
+            >
+              <div className="flex flex-col gap-4">
+                <PasswordForm />
+                <div className="border-t border-white/5 pt-4">
+                  <Link
+                    href="/cambiar-password"
+                    className="flex items-center justify-between rounded-lg px-3 py-2.5 text-sm text-zinc-400 transition-colors hover:bg-white/[0.03] hover:text-zinc-200"
+                  >
+                    <span>Cambiar mi contraseña desde el asistente</span>
+                    <ChevronRight size={14} strokeWidth={1.5} className="text-zinc-600" />
+                  </Link>
+                </div>
               </div>
-            </div>
-          </SectionCard>
-        </FadeIn>
+            </SectionCard>
+          </FadeIn>
+        </div>
 
-        <FadeIn delay={0.2}>
-          <SectionCard
-            title="Preferencias de notificaciones"
-            icon={<Bell size={14} strokeWidth={1.5} className="text-cyan-400" />}
-          >
-            <NotificationPrefsForm initialPrefs={notifPrefs} />
-          </SectionCard>
-        </FadeIn>
+        {/* Columna derecha */}
+        <div className="flex flex-col gap-6">
+          <FadeIn delay={0.12}>
+            <SectionCard
+              title="Datos de contacto"
+              icon={<Phone size={14} strokeWidth={1.5} className="text-cyan-400" />}
+            >
+              <ContactSection email={user.email ?? ''} whatsapp={org.whatsapp ?? null} />
+            </SectionCard>
+          </FadeIn>
+
+          <FadeIn delay={0.2}>
+            <SectionCard
+              title="Preferencias de notificaciones"
+              icon={<Bell size={14} strokeWidth={1.5} className="text-cyan-400" />}
+            >
+              <NotificationPrefsForm initialPrefs={notifPrefs} />
+            </SectionCard>
+          </FadeIn>
+
+          <FadeIn delay={0.24}>
+            <SectionCard
+              title="Información del plan"
+              icon={<CreditCard size={14} strokeWidth={1.5} className="text-cyan-400" />}
+            >
+              <PlanInfoSection plan={plan} />
+            </SectionCard>
+          </FadeIn>
+        </div>
       </div>
 
-      {/* Información del plan — full-width stat-row */}
-      <FadeIn delay={0.24}>
-        <SectionCard
-          title="Información del plan"
-          icon={<CreditCard size={14} strokeWidth={1.5} className="text-cyan-400" />}
-        >
-          <PlanInfoSection plan={plan} />
-        </SectionCard>
-      </FadeIn>
-
-      {/* Zona de peligro (rojo fuerte) — full-width */}
+      {/* Zona de peligro (rojo fuerte) — full-width al fondo, sobre las 2 columnas */}
       <FadeIn delay={0.28}>
         <SectionCard
           title="Zona de peligro"
