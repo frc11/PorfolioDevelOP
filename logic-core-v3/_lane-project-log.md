@@ -332,3 +332,15 @@ visual a cargo de Valentino. Gate técnico (tsc+lint) estricto por commit.
   de aesthetic, no de negocio; si Valentino la quiere fullwidth también, es 1 línea.
 - `ProjectTaskTabs.tsx` no necesitó cambios de ancho (no tenía max-w propio).
 - Gate: tsc exit 0 + lint exit 0.
+
+### A7.2 — Banner "Ver ahora" al tab correcto (bug de lógica) — CERRADO
+- Antes: `setActiveTab('IN_PROGRESS')` hardcodeado, pero la entrega pendiente de aprobación
+  tiene status DONE (una tarea pasa a aprobación con status Completada) → se renderiza en
+  "Completadas", no en "En curso". El banner llevaba al tab equivocado.
+- Tabs por ESTADO (`useState activeTab`), no searchParam → el fix es el target del
+  `setActiveTab` (sigue siendo botón, sin router.push). Se deriva `pendingApprovalTab` del
+  tab que CONTIENE la tarea pendiente (`taskMap[status].some(approvalStatus ===
+  'PENDING_APPROVAL')`, prioridad DONE, fallback DONE).
+- dashboard-actions (aprobar/rechazar) NO tocado — solo el destino del link.
+- Comportamiento, no cosmético → commit propio.
+- Gate: tsc exit 0 + lint exit 0.

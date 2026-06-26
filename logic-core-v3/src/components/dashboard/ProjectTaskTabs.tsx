@@ -183,6 +183,16 @@ export function ProjectTaskTabs({
     DONE: done,
   }
 
+  // A7.2: el banner "Ver ahora" debe llevar al tab donde REALMENTE está la entrega
+  // pendiente de aprobación (una entrega pasa a aprobación con status DONE → cae en
+  // "Completadas"). Se deriva del tab que la contiene, no se hardcodea a "En curso".
+  // Se prioriza DONE (su estado real); fallback DONE por type-safety (el banner solo
+  // se muestra cuando existe al menos una pendiente).
+  const pendingApprovalTab: TaskStatus =
+    (['DONE', 'IN_PROGRESS', 'TODO'] as TaskStatus[]).find((status) =>
+      taskMap[status].some((task) => task.approvalStatus === 'PENDING_APPROVAL')
+    ) ?? 'DONE'
+
   const currentTasks = taskMap[activeTab]
 
   return (
@@ -219,7 +229,7 @@ export function ProjectTaskTabs({
                 </div>
               </div>
               <button
-                onClick={() => setActiveTab('IN_PROGRESS')}
+                onClick={() => setActiveTab(pendingApprovalTab)}
                 className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-amber-400 hover:text-amber-300 transition-colors flex-shrink-0"
               >
                 Ver ahora
