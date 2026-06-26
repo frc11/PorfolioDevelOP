@@ -3,6 +3,7 @@
 import React, { useActionState, useState, useTransition } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import {
   Loader2,
   CheckCircle,
@@ -356,10 +357,9 @@ const STRENGTH_TEXT: Record<number, string> = {
 // ─── Password Form ────────────────────────────────────────────────────────────
 
 export function PasswordForm() {
-  const [state, action, isPending] = useActionState<ProfileActionState, FormData>(
-    updatePasswordAction,
-    null
-  )
+  const router = useRouter()
+  const [state, setState] = useState<ProfileActionState>(null)
+  const [isPending, startTransition] = useTransition()
   const [currentPw, setCurrentPw] = useState('')
   const [newPw, setNewPw] = useState('')
   const [showCurrent, setShowCurrent] = useState(false)
@@ -372,8 +372,32 @@ export function PasswordForm() {
     !strength.hasNumber && 'un número',
   ].filter(Boolean) as string[]
 
+  // Invocación DIRECTA (no `<form action>`): el form-action de useActionState dispara
+  // un re-render same-response del route con el cookie VIEJO (sessionVersion N) antes
+  // de que `unstable_update` aplique el N+1 → el jwt callback de auth.ts mata la sesión
+  // → pantalla negra + bounce a /dashboard. /cambiar-password lo evita llamando la
+  // action directo y navegando DESPUÉS del await (cookie ya N+1). Espejamos ese patrón.
+  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    if (isPending || strength.score < 3) return
+    const form = event.currentTarget
+    const formData = new FormData(form)
+    startTransition(async () => {
+      const result = await updatePasswordAction(null, formData)
+      setState(result)
+      if (result?.success) {
+        setCurrentPw('')
+        setNewPw('')
+        form.reset()
+        // Request separado, ya con el cookie N+1 aplicado → re-sincroniza sin matar
+        // la sesión (a diferencia del revalidate in-action que usaba el cookie viejo).
+        router.refresh()
+      }
+    })
+  }
+
   return (
-    <form action={action} className="flex flex-col gap-5">
+    <form onSubmit={handleSubmit} className="flex flex-col gap-5">
       <Feedback state={state} />
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
