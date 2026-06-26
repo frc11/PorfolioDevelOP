@@ -229,9 +229,13 @@ export async function updatePasswordAction(
       },
     })
 
-    await unstable_update({})
+    // Espejá el flujo que funciona (/cambiar-password): payload NO vacío para que
+    // unstable_update refresque el cookie con la sessionVersion nueva. NO revalidar
+    // esta ruta: la contraseña no se muestra acá, y revalidar re-renderiza con el
+    // cookie viejo (sessionVersion N) contra la DB (N+1) → el jwt callback invalida
+    // la sesión → pantalla negra.
+    await unstable_update({ user: { passwordResetRequired: false } })
 
-    revalidatePath('/dashboard/cuenta/perfil')
     return { success: true }
   } catch (error) {
     console.error('updatePasswordAction error:', error)

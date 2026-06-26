@@ -19,7 +19,11 @@ export const UpdateProfileSchema = z.object({
 export const UpdatePasswordSchema = z
   .object({
     currentPassword: z.string().min(1, 'Ingresá tu contraseña actual.'),
-    newPassword: z.string().min(8, 'La nueva contraseña debe tener al menos 8 caracteres.'),
+    newPassword: z
+      .string()
+      .min(8, 'La nueva contraseña debe tener al menos 8 caracteres.')
+      .regex(/[A-Z]/, 'La nueva contraseña debe incluir al menos una mayúscula.')
+      .regex(/[0-9]/, 'La nueva contraseña debe incluir al menos un número.'),
     confirmPassword: z.string().min(1, 'Confirmá tu nueva contraseña.'),
   })
   .refine((data) => data.newPassword === data.confirmPassword, {

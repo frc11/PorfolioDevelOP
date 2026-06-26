@@ -97,12 +97,20 @@ function InputField({
   )
 }
 
-function SaveButton({ isPending, label = 'Guardar cambios' }: { isPending: boolean; label?: string }) {
+function SaveButton({
+  isPending,
+  label = 'Guardar cambios',
+  disabled = false,
+}: {
+  isPending: boolean
+  label?: string
+  disabled?: boolean
+}) {
   return (
     <button
       type="submit"
-      disabled={isPending}
-      className="flex items-center gap-2 self-start rounded-lg bg-cyan-600 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-cyan-500 disabled:opacity-50"
+      disabled={isPending || disabled}
+      className="flex items-center gap-2 self-start rounded-lg bg-cyan-600 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-cyan-500 disabled:cursor-not-allowed disabled:opacity-50"
     >
       {isPending ? <Loader2 size={13} className="animate-spin" /> : <Check size={13} />}
       {label}
@@ -371,11 +379,17 @@ export function PasswordForm() {
     updatePasswordAction,
     null
   )
+  const [currentPw, setCurrentPw] = useState('')
   const [newPw, setNewPw] = useState('')
   const [showCurrent, setShowCurrent] = useState(false)
   const [showNew, setShowNew] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
   const strength = checkStrength(newPw)
+  const missing = [
+    !strength.hasLength && '8+ caracteres',
+    !strength.hasUpper && 'una mayúscula',
+    !strength.hasNumber && 'un número',
+  ].filter(Boolean) as string[]
 
   return (
     <form action={action} className="flex flex-col gap-5">
@@ -390,15 +404,18 @@ export function PasswordForm() {
               type={showCurrent ? 'text' : 'password'}
               name="currentPassword"
               autoComplete="current-password"
+              value={currentPw}
+              onChange={(e) => setCurrentPw(e.target.value)}
               className="flex-1 bg-transparent px-3 py-2 text-sm text-zinc-100 outline-none"
             />
             <button
               type="button"
               onClick={() => setShowCurrent((v) => !v)}
               tabIndex={-1}
+              aria-label={showCurrent ? 'Ocultar contraseña actual' : 'Mostrar contraseña actual'}
               className="flex items-center px-3 text-zinc-500 transition-colors hover:text-zinc-300"
             >
-              {showCurrent ? <EyeOff size={14} /> : <Eye size={14} />}
+              {showCurrent ? <Eye size={14} /> : <EyeOff size={14} />}
             </button>
           </div>
         </div>
@@ -419,9 +436,10 @@ export function PasswordForm() {
               type="button"
               onClick={() => setShowNew((v) => !v)}
               tabIndex={-1}
+              aria-label={showNew ? 'Ocultar nueva contraseña' : 'Mostrar nueva contraseña'}
               className="flex items-center px-3 text-zinc-500 transition-colors hover:text-zinc-300"
             >
-              {showNew ? <EyeOff size={14} /> : <Eye size={14} />}
+              {showNew ? <Eye size={14} /> : <EyeOff size={14} />}
             </button>
           </div>
 
@@ -474,15 +492,21 @@ export function PasswordForm() {
               type="button"
               onClick={() => setShowConfirm((v) => !v)}
               tabIndex={-1}
+              aria-label={showConfirm ? 'Ocultar confirmación' : 'Mostrar confirmación'}
               className="flex items-center px-3 text-zinc-500 transition-colors hover:text-zinc-300"
             >
-              {showConfirm ? <EyeOff size={14} /> : <Eye size={14} />}
+              {showConfirm ? <Eye size={14} /> : <EyeOff size={14} />}
             </button>
           </div>
         </div>
       </div>
 
-      {/* Requirements checklist */}
+      {/* Requirements: missing summary + per-req chips */}
+      {newPw.length > 0 && missing.length > 0 && (
+        <p className="text-[11px] font-medium text-amber-400">
+          Falta: {missing.join(', ')}.
+        </p>
+      )}
       <div className="flex flex-wrap gap-x-5 gap-y-1.5">
         {[
           { ok: strength.hasLength, label: '8+ caracteres' },
@@ -500,7 +524,7 @@ export function PasswordForm() {
         ))}
       </div>
 
-      <SaveButton isPending={isPending} label="Cambiar contraseña" />
+      <SaveButton isPending={isPending} label="Cambiar contraseña" disabled={strength.score < 3} />
     </form>
   )
 }
