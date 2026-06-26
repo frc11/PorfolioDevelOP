@@ -70,7 +70,7 @@ export default async function VaultPage() {
   const totalCount = assets.length
 
   return (
-    <div className="flex w-full flex-col gap-6 pb-20">
+    <div className="flex w-full flex-col gap-6">
 
       {/* ── HEADER ──────────────────────────────────────────────────────────── */}
       <FadeIn delay={0}>

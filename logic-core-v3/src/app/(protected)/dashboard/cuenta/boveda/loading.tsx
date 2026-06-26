@@ -2,7 +2,7 @@ import { Skeleton } from '@/components/ui/Skeleton'
 
 export default function BovedaLoading() {
   return (
-    <div className="flex w-full flex-col gap-6 pb-20">
+    <div className="flex w-full flex-col gap-6">
       {/* Header: badges + request button */}
       <div className="flex items-center justify-between gap-4">
         <Skeleton className="h-7 w-40 rounded-full" />

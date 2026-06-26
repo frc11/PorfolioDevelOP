@@ -106,7 +106,7 @@ export default async function BillingPage() {
   const billingEmail = session?.user?.email ?? ''
 
   return (
-    <div className="flex w-full flex-col gap-6 pb-20">
+    <div className="flex w-full flex-col gap-6">
 
       {/* ── Renewal alert banner ──────────────────────────────────────────── */}
       {alertType && (

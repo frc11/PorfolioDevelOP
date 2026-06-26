@@ -284,3 +284,25 @@ viejos hasta refresh manual) y "Ver facturación" da 404. Y un char roto ("Ocurr
 2. **Tooltip "Generando…"** (Facturación) flota en `<table overflow-x-auto>` → puede clipearse en el borde derecho (necesita portal). Pre-existente, edge-case PAID-sin-pdfUrl.
 3. **`react-hooks/set-state-in-effect`** en `VaultRevealButton.tsx:21` — baseline pre-existente; fix = cambio de comportamiento (commit propio, fuera de este lane visual).
 4. **Timeline real de la Bóveda** = modelo de actividad en `schema.prisma` (parada aparte ya fichada).
+
+---
+
+## Sprint de ajuste — espacio muerto inferior en las 3 tabs (2026-06-25)
+
+### FASE 0 — Relevamiento (read-only, antes de tocar)
+Grep `pb-|min-h-|flex-1|h-screen|h-full` sobre `cuenta/**` + lectura del shell. **Causa real diagnosticada:**
+
+- **Atribuible al contenedor de cuenta (MÍO) → la banda a eliminar:** `pb-20` **apilado**. El wrapper de `layout.tsx:7` lleva `pb-20` (5rem) **Y ADEMÁS** las pages de facturación (`page.tsx:109`) y bóveda (`page.tsx:73`) agregan **otro** `pb-20`, igual sus loadings (`facturacion/loading.tsx:5`, `boveda/loading.tsx:5`). Resultado: ~10rem de padding-bottom muerto al final del scroll en facturación/bóveda, 5rem en perfil (su page no tiene pb). **NO hay `min-h` en ningún archivo de cuenta** (los `flex-1`/`h-full` son internos: centrado del empty state, alturas de cards). → fix 100% en archivos propios.
+- **Shell (FROZEN, NO tocar, esperado):** el área de contenido del `DashboardLayoutClient` es `<div className="relative mt-4 min-h-0 flex-1">` con una capa hermana frosted (`bg-white/[0.03] backdrop-blur-md`) y el `<main className="absolute inset-0 overflow-y-auto … p-4 sm:p-6">`, ambos `absolute inset-0`. Al ser el área `flex-1`, **siempre llena el alto del viewport**; con contenido corto, la card frosted del shell se ve debajo. Eso es el **marco-card de altura completa del portal (intencional)** — el goal lo declara aceptable ("el fondo del shell ocupa el resto"). NO es banda atribuible a cuenta → **NO se toca** (no disparó la parada obligatoria porque la causa atribuible es mía, no el shell).
+- **Fuera de scope (no tocado):** `cuenta/loading.tsx` (loading del route padre que sólo redirige a perfil → prácticamente nunca se renderiza) tiene el mismo `pb-20` + un `max-w-5xl` stale; latente menor, fichado, no es una de las 3 tabs.
+
+### FIX aplicado
+El padding-bottom queda **una sola fuente** (el layout), alineado al ritmo `gap-6` del portal (las hermanas Chatbot/Soporte no agregan pb propio; usan el `p-4 sm:p-6` del `<main>`). Cambios (1 línea c/u, sólo `className`):
+- `cuenta/layout.tsx:7`: `pb-20` → **`pb-6`** (1.5rem; respira sin banda muerta; + el `p-6` del `<main>` da ~3rem al fondo).
+- `cuenta/facturacion/page.tsx:109`, `cuenta/boveda/page.tsx:73`: **eliminado** `pb-20` (el wrapper de page no aporta pb; el layout es el dueño del espacio inferior).
+- `cuenta/facturacion/loading.tsx:5`, `cuenta/boveda/loading.tsx:5`: **eliminado** `pb-20` (mismo hueco en estado de carga).
+- `cuenta/perfil/page.tsx` + `perfil/loading.tsx`: sin cambios (nunca tuvieron pb; su banda era sólo el `pb-20` del layout, ya reducido a `pb-6`).
+
+**NO se tocó el shell** (no se disparó la parada obligatoria: la causa atribuible era mía). Full-width / grid / estética / hover / toggles / read-only de impersonation / loading-error-empty: intactos (cambio puramente de espaciado).
+
+**Gate:** `.\node_modules\.bin\tsc.cmd --noEmit` → exit 0 (sin errores nuevos). Lint sobre los 5 tocados → limpio. **visual-qa → ✅ PASS estático / ❓ render infra-limited:** confirmó estáticamente que el apilado `pb-20`+`pb-20` desapareció (sólo `pb-6` en el layout, 0 pb en pages/loadings); el render fino (no-banda en contenido corto, scroll en largo) queda para eyeball humano (mismo blocker de server-en-worktree de toda la corrida). **Commit:** `fix(cuenta): elimina espacio muerto inferior en las 3 tabs`.
