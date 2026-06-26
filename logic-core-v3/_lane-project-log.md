@@ -359,3 +359,24 @@ visual a cargo de Valentino. Gate técnico (tsc+lint) estricto por commit.
   es 1 línea ajustar.
 - Cosmético → commit propio (separado del A7.2 de comportamiento aunque ambos en el mismo file).
 - Gate: tsc exit 0 + lint exit 0.
+
+### A7.3 — Loading admin fullwidth en los 4 tabs — CERRADO
+- `admin/projects/[projectId]/loading.tsx`: removido `mx-auto max-w-7xl` del wrapper →
+  `flex w-full flex-col gap-6 pb-20`. El skeleton ahora espeja fullwidth el contenido real
+  (que no tiene max-w). Es el ÚNICO loading del segmento → cubre Overview/Tareas/Horas/Pagos.
+- El skeleton es PROPIO del detalle admin (consume `LoadingState` ui/* por `variant`, no se
+  edita el primitivo). El ancho lo imponía el propio loading, NO el shell → fix local, sin parada.
+- Gate: tsc exit 0 + lint exit 0 (loading.tsx).
+
+---
+
+## S7 COMPLETO — 4 ajustes, gate verde por commit
+
+- **A7.1** `fe89c1b` — fullwidth /dashboard/project (empty centrado a propósito)
+- **A7.2** `32caad8` — banner "Ver ahora" → tab real de la entrega pendiente (bug lógica)
+- **A7.4** `0c7daed` — empty por-tab: una sola forma transparente (sacado el círculo anidado)
+- **A7.3** (este commit) — loading admin fullwidth en los 4 tabs
+
+Working tree limpio. Sin tocar shell/ui/schema/primitivos/main. Sin paradas disparadas.
+Verificación visual → Valentino. Pendiente que confirme A7.4 (interpreté la "capa verde"
+como el círculo anidado; preview MCP ausente).
