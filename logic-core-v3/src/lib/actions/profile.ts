@@ -36,7 +36,10 @@ export async function updateProfileAction(
   const parsed = UpdateProfileSchema.safeParse({
     name: formData.get('name'),
     companyName: formData.get('companyName'),
-    logoUrl: formData.get('logoUrl'),
+    avatarImageUrl: (formData.get('avatarImageUrl') as string) || null,
+    avatarEmoji: ((formData.get('avatarEmoji') as string) ?? '').trim() || null,
+    avatarInitials:
+      ((formData.get('avatarInitials') as string) ?? '').trim().toUpperCase().slice(0, 2) || null,
   })
 
   if (!parsed.success) {
@@ -44,9 +47,6 @@ export async function updateProfileAction(
   }
 
   try {
-    const logoUrl =
-      parsed.data.logoUrl && parsed.data.logoUrl !== '' ? parsed.data.logoUrl : null
-
     await prisma.$transaction([
       prisma.user.update({
         where: { id: userId },
@@ -56,7 +56,9 @@ export async function updateProfileAction(
         where: { id: organizationId },
         data: {
           companyName: parsed.data.companyName,
-          logoUrl,
+          avatarImageUrl: parsed.data.avatarImageUrl,
+          avatarEmoji: parsed.data.avatarEmoji,
+          avatarInitials: parsed.data.avatarInitials,
         },
       }),
     ])

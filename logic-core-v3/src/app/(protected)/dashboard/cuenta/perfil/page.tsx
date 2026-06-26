@@ -77,7 +77,9 @@ export default async function ProfilePage() {
     where: { id: organizationId },
     select: {
       companyName: true,
-      logoUrl: true,
+      avatarImageUrl: true,
+      avatarEmoji: true,
+      avatarInitials: true,
       whatsapp: true,
       notificationPrefs: true,
       subscription: {
@@ -195,7 +197,9 @@ export default async function ProfilePage() {
         <ProfileHeader
           companyName={org.companyName}
           email={user.email ?? ''}
-          logoUrl={org.logoUrl}
+          avatarImageUrl={org.avatarImageUrl}
+          avatarEmoji={org.avatarEmoji}
+          avatarInitials={org.avatarInitials}
           planName={org.subscription?.plan?.name ?? null}
         />
       </FadeIn>
@@ -211,7 +215,9 @@ export default async function ProfilePage() {
               name={user.name ?? ''}
               email={user.email ?? ''}
               companyName={org.companyName}
-              logoUrl={org.logoUrl}
+              avatarImageUrl={org.avatarImageUrl}
+              avatarEmoji={org.avatarEmoji}
+              avatarInitials={org.avatarInitials}
             />
           </SectionCard>
         </FadeIn>

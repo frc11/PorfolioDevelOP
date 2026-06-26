@@ -28,6 +28,11 @@ import {
 import { Input, Toggle } from '@/components/ui'
 import { cn } from '@/lib/utils'
 import { adminHoverCls } from '@/lib/hover'
+import { ClientAvatar } from '@/modules/chatbot/components/admin/client-avatar/ClientAvatar'
+import {
+  ClientAvatarField,
+  type ClientAvatarValue,
+} from '@/modules/chatbot/components/admin/client-avatar/ClientAvatarField'
 
 // ─── Shared UI ────────────────────────────────────────────────────────────────
 
@@ -120,25 +125,23 @@ function SaveButton({
 
 // ─── Profile Header ───────────────────────────────────────────────────────────
 
-function getInitials(name: string): string {
-  return name
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((w) => w[0].toUpperCase())
-    .join('')
-}
-
 interface ProfileHeaderProps {
   companyName: string
   email: string
-  logoUrl: string | null
+  avatarImageUrl: string | null
+  avatarEmoji: string | null
+  avatarInitials: string | null
   planName: string | null
 }
 
-export function ProfileHeader({ companyName, email, logoUrl, planName }: ProfileHeaderProps) {
-  const initials = getInitials(companyName) || '?'
-
+export function ProfileHeader({
+  companyName,
+  email,
+  avatarImageUrl,
+  avatarEmoji,
+  avatarInitials,
+  planName,
+}: ProfileHeaderProps) {
   return (
     <motion.div
       initial={{ opacity: 0, y: -12 }}
@@ -152,23 +155,22 @@ export function ProfileHeader({ companyName, email, logoUrl, planName }: Profile
         WebkitBackdropFilter: 'blur(24px)',
       }}
     >
-      {/* Avatar */}
+      {/* Avatar — resolución compartida con el admin (imagen > emoji > iniciales > ícono) */}
       <div
         className="flex h-24 w-24 flex-shrink-0 items-center justify-center overflow-hidden rounded-full"
         style={{
           border: '2px solid rgba(6,182,212,0.35)',
-          background: logoUrl
-            ? 'transparent'
-            : 'linear-gradient(135deg, rgba(6,182,212,0.18) 0%, rgba(6,182,212,0.04) 100%)',
+          background: 'linear-gradient(135deg, rgba(6,182,212,0.18) 0%, rgba(6,182,212,0.04) 100%)',
           boxShadow: '0 0 28px rgba(6,182,212,0.12)',
         }}
       >
-        {logoUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={logoUrl} alt={companyName} className="h-full w-full object-cover" />
-        ) : (
-          <span className="text-3xl font-bold tracking-tight text-cyan-400">{initials}</span>
-        )}
+        <ClientAvatar
+          companyName={companyName}
+          avatarImageUrl={avatarImageUrl}
+          avatarEmoji={avatarEmoji}
+          avatarInitials={avatarInitials}
+          size={96}
+        />
       </div>
 
       {/* Info */}
@@ -197,28 +199,42 @@ interface CompanyDataFormProps {
   name: string
   email: string
   companyName: string
-  logoUrl: string | null
+  avatarImageUrl: string | null
+  avatarEmoji: string | null
+  avatarInitials: string | null
 }
 
-export function CompanyDataForm({ name, email, companyName, logoUrl }: CompanyDataFormProps) {
+export function CompanyDataForm({
+  name,
+  email,
+  companyName,
+  avatarImageUrl,
+  avatarEmoji,
+  avatarInitials,
+}: CompanyDataFormProps) {
   const [state, action, isPending] = useActionState<ProfileActionState, FormData>(
     updateProfileAction,
     null
   )
-  const [previewUrl, setPreviewUrl] = useState(logoUrl ?? '')
-
-  const isValidUrl = (url: string) => {
-    try {
-      new URL(url)
-      return true
-    } catch {
-      return false
-    }
-  }
+  const [avatar, setAvatar] = useState<ClientAvatarValue>({
+    avatarImageUrl,
+    avatarEmoji,
+    avatarInitials,
+  })
 
   return (
     <form action={action} className="flex flex-col gap-5">
       <Feedback state={state} />
+
+      {/* Avatar de la empresa — imagen (base64) / emoji / iniciales, mismo uploader
+          que el admin. Los hidden inputs cargan el estado al submit. */}
+      <div className="flex flex-col gap-2">
+        <FieldLabel>Avatar de la empresa</FieldLabel>
+        <ClientAvatarField value={avatar} onChange={setAvatar} companyName={companyName} />
+        <input type="hidden" name="avatarImageUrl" value={avatar.avatarImageUrl ?? ''} />
+        <input type="hidden" name="avatarEmoji" value={avatar.avatarEmoji ?? ''} />
+        <input type="hidden" name="avatarInitials" value={avatar.avatarInitials ?? ''} />
+      </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <InputField
@@ -227,41 +243,6 @@ export function CompanyDataForm({ name, email, companyName, logoUrl }: CompanyDa
           defaultValue={companyName}
           placeholder="Acme Corp"
         />
-
-        {/* Logo URL with live preview */}
-        <div className="flex flex-col gap-1.5">
-          <FieldLabel>URL del logo</FieldLabel>
-          <Input
-            type="text"
-            name="logoUrl"
-            value={previewUrl}
-            onChange={(e) => setPreviewUrl(e.target.value)}
-            placeholder="https://ejemplo.com/logo.png"
-          />
-          <AnimatePresence>
-            {previewUrl && isValidUrl(previewUrl) && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                className="overflow-hidden"
-              >
-                <div className="mt-1 flex items-center gap-2.5 rounded-lg border border-white/10 bg-white/[0.02] p-2">
-                  <div className="h-9 w-9 flex-shrink-0 overflow-hidden rounded-md bg-white/[0.04]">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={previewUrl}
-                      alt="Logo preview"
-                      className="h-full w-full object-contain"
-                    />
-                  </div>
-                  <span className="text-xs text-zinc-500">Preview del logo</span>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-
         <InputField
           label="Nombre de contacto *"
           name="name"
