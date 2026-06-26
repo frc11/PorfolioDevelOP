@@ -380,3 +380,19 @@ visual a cargo de Valentino. Gate técnico (tsc+lint) estricto por commit.
 Working tree limpio. Sin tocar shell/ui/schema/primitivos/main. Sin paradas disparadas.
 Verificación visual → Valentino. Pendiente que confirme A7.4 (interpreté la "capa verde"
 como el círculo anidado; preview MCP ausente).
+
+### A7.5 — Empty por-tab: matar el bleed verde del shell — CERRADO
+- CONFIRMADO el diagnóstico de A7.4: el "verde" era glow ambiente del shell filtrándose por
+  el box casi-transparente, NO una clase de color del componente.
+- READ-FIRST: el box tras A7.4 era `rounded-xl border border-white/5 bg-white/[0.015]` —
+  `bg-white/[0.015]` (~1.5% opaco) deja pasar el `radial-gradient(... rgba(16,185,129,0.05)
+  ...)` del shell (`DashboardLayoutClient`).
+- FIX: fondo NEUTRO opaco on-token → `rounded-2xl border border-white/10 bg-zinc-950/70`
+  (antes rounded-xl / border-white/5 / bg-white/[0.015]). zinc-950 = neutro near-black; /70
+  transmite ~30% → el bleed verde (~5%) cae a ~1.5%, imperceptible. Elegí /70 (por encima del
+  ej. /60 del brief) como margen, porque no puedo verificar visualmente (preview MCP ausente)
+  y prefiero matarlo en un solo intento. SIN acento nuevo (zinc/black). Una forma, un radio.
+- ALCANCE: solo el empty por-tab en `ProjectTaskTabs.tsx`. Shell NO tocado (de ahí viene el
+  glow, pero es cross-portal). Sin parada.
+- Gate: tsc exit 0 + lint exit 0.
+- Si /70 quedara muy oscuro o aún se notara algo, ajuste de 1 token (subir/bajar opacidad).

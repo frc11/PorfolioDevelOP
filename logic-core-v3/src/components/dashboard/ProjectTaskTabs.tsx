@@ -263,10 +263,12 @@ export function ProjectTaskTabs({
           className="flex flex-col gap-3"
         >
           {currentTasks.length === 0 ? (
-            <div className="flex flex-col items-center gap-3 py-14 text-center rounded-xl border border-white/5 bg-white/[0.015]">
-              {/* A7.4: una sola forma redondeada limpia (la transparente). Antes había
-                  un segundo redondeo anidado — el círculo `rounded-full bg-zinc-900` del
-                  ícono, radio distinto al box — que se sacó. */}
+            <div className="flex flex-col items-center gap-3 py-14 text-center rounded-2xl border border-white/10 bg-zinc-950/70">
+              {/* A7.4: una sola forma (se sacó el círculo anidado del ícono).
+                  A7.5: fondo NEUTRO opaco (zinc-950/70) para que el glow verde ambiente
+                  del shell del dashboard NO se filtre por el box — no hay clase verde acá,
+                  era bleed del fondo a través de un bg casi-transparente (bg-white/[0.015]).
+                  On-token admin (rounded-2xl + border-white/10), sin acento nuevo. */}
               <CheckCircle2 size={28} className="text-zinc-700" />
               <p className="text-sm text-zinc-600">Sin tareas en esta categoría</p>
             </div>
