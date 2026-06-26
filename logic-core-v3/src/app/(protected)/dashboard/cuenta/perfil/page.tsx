@@ -203,10 +203,12 @@ export default async function ProfilePage() {
         />
       </FadeIn>
 
-      {/* 2 columnas reales: cada panel a su altura natural (lg:items-start → sin
-          stretch) para que NO queden huecos. Izquierda: empresa + seguridad.
-          Derecha: contacto (comprimido) + preferencias + plan. */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:items-start">
+      {/* 2 columnas: las CELDAS comparten altura (grid items-stretch por defecto) →
+          ambas columnas terminan en el MISMO borde inferior. Las CARDS adentro NO
+          llevan h-full → mantienen su altura natural (Contacto no se estira); el
+          sobrante cae como espacio al fondo de la columna más corta, no como hueco
+          intermedio. Izquierda: empresa + seguridad. Derecha: contacto + prefs + plan. */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {/* Columna izquierda */}
         <div className="flex flex-col gap-6">
           <FadeIn delay={0.08}>
