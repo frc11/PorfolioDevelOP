@@ -227,11 +227,11 @@ export default async function ProfilePage() {
             </SectionCard>
           </FadeIn>
 
-          <FadeIn delay={0.16}>
+          <FadeIn delay={0.16} className="lg:flex-1">
             <SectionCard
               title="Seguridad"
               icon={<Lock size={14} strokeWidth={1.5} className="text-red-400/80" />}
-              className="border-red-500/20"
+              className="border-red-500/20 lg:h-full"
             >
               <div className="flex flex-col gap-4">
                 <PasswordForm />
@@ -269,10 +269,11 @@ export default async function ProfilePage() {
             </SectionCard>
           </FadeIn>
 
-          <FadeIn delay={0.24}>
+          <FadeIn delay={0.24} className="lg:flex-1">
             <SectionCard
               title="Información del plan"
               icon={<CreditCard size={14} strokeWidth={1.5} className="text-cyan-400" />}
+              className="lg:h-full"
             >
               <PlanInfoSection plan={plan} />
             </SectionCard>
