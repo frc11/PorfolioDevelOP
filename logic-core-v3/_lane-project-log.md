@@ -304,3 +304,31 @@ peligro + confirm de borrado).
 - S6: el borrado redirige a `/admin/projects`. La action consumida usa `prisma.project.delete`
   (cascade del schema); la otra `deleteProject` (board) borra dependientes explícitos en tx —
   ambas válidas, no se unificaron (fuera de scope).
+
+---
+
+## 2026-06-25 — S7 (PULIDA, atendido) — 4 ajustes sobre S1–S6 ya verificados
+
+Visual-qa: el MCP `Claude_Preview` SIGUE ausente (ToolSearch sin match) → verificación
+visual a cargo de Valentino. Gate técnico (tsc+lint) estricto por commit.
+
+### READ-FIRST (ancho — A7.1 / A7.3)
+- **Ancho de `/dashboard/project`:** el shell del dashboard NO impone max-width. En
+  `DashboardLayoutClient`, `<main>` es `absolute inset-0 ... p-4 sm:p-6` (sin `max-w-*`) y
+  `PageTransition` es `min-h-full w-full`. El ÚNICO constraint vive LOCAL en
+  `project/page.tsx`: rama poblada `max-w-5xl mx-auto`, rama empty `max-w-4xl mx-auto`. →
+  Fullwidth con override local, SIN tocar shell. NO hubo parada.
+- **Loading admin (A7.3):** `admin/projects/[projectId]/loading.tsx` (NO shell) envuelve en
+  `mx-auto max-w-7xl`, pero el contenido real (`layout.tsx` `<section space-y-6>` + Overview
+  `<div space-y-6>`) es fullwidth. Es el ÚNICO loading del segmento (no hay loading.tsx por
+  tab) → cubre los 4 tabs. Constraint local en el propio loading → fix local, sin parada.
+
+### A7.1 — Fullwidth en /dashboard/project — CERRADO
+- `page.tsx` rama poblada: removido `max-w-5xl mx-auto` → usa todo el ancho del `<main>`.
+  Tiles del hero (`grid-cols-2 lg:grid-cols-4`) y task-list respiran sin cap, igual que el
+  detalle admin (también fullwidth).
+- **Rama EMPTY (0 proyectos) se DEJÓ centrada** (`max-w-4xl mx-auto`): único mensaje centrado
+  sin grids/tiles → fullwidth ahí sería "estirado feo" (guarda explícita del brief). Decisión
+  de aesthetic, no de negocio; si Valentino la quiere fullwidth también, es 1 línea.
+- `ProjectTaskTabs.tsx` no necesitó cambios de ancho (no tenía max-w propio).
+- Gate: tsc exit 0 + lint exit 0.

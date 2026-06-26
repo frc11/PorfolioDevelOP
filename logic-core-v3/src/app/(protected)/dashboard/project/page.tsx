@@ -240,7 +240,7 @@ export default async function ProjectPage({
   ]
 
   return (
-    <div className="flex flex-col gap-8 max-w-5xl mx-auto pb-20">
+    <div className="flex flex-col gap-8 pb-20">
 
       {/* ── 1. HEADER ─────────────────────────────────────────────────────── */}
       <FadeIn delay={0}>
