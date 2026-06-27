@@ -17,7 +17,7 @@
 
 import { motion, useSpring } from 'motion/react'
 import { useEffect, useState } from 'react'
-import { ArrowUp, ArrowDown, Minus, Sparkles } from 'lucide-react'
+import { Sparkles } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { HealthScoreResult, HealthScoreDimension } from '@/lib/health-score'
 
@@ -94,7 +94,10 @@ function HealthScoreActive({ data }: { data: HealthScoreResult }) {
               <span className="text-[11px] font-bold uppercase tracking-[0.25em] text-cyan-400">
                 Health Score
               </span>
-              <TrendChip value={data.trend.value} />
+              {/* S4 — TrendChip oculto (Opción B): computeTrend() en
+                  lib/health-score.ts es un hash del orgId (dato FALSO), no se
+                  muestra como métrica real. Revivir cuando exista history real
+                  (HealthScoreSnapshot, lane de datos aparte). */}
             </div>
             <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
               {scoreToTitle(data.total)}
@@ -375,30 +378,6 @@ function DimensionMini({ dim, index }: { dim: HealthScoreDimension; index: numbe
         </p>
       )}
     </motion.div>
-  )
-}
-
-// ─── Trend chip ───────────────────────────────────────────────────────────────
-
-function TrendChip({ value }: { value: number }) {
-  if (value === 0 || (value > -2 && value < 2)) {
-    return (
-      <span className="inline-flex items-center gap-1 text-[10px] font-bold text-zinc-500">
-        <Minus size={10} />
-        sin cambio
-      </span>
-    )
-  }
-
-  const isUp = value > 0
-  const Icon = isUp ? ArrowUp : ArrowDown
-  const colorClass = isUp ? 'text-emerald-400' : 'text-rose-400'
-
-  return (
-    <span className={cn('inline-flex items-center gap-0.5 text-[10px] font-bold', colorClass)}>
-      <Icon size={10} strokeWidth={2.5} />
-      {isUp ? '+' : ''}{value} esta semana
-    </span>
   )
 }
 
