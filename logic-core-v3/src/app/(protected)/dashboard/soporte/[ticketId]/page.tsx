@@ -12,7 +12,7 @@ import {
   Shield,
   Tag,
 } from 'lucide-react'
-import Link from 'next/link'
+import { BackLink } from '@/components/dashboard/BackLink'
 import { TicketReplyForm } from '@/components/dashboard/TicketReplyForm'
 import { ClientChatThread, type ChatMessage } from '@/components/dashboard/ClientChatThread'
 import { ResolveTicketButton } from '@/components/dashboard/ResolveTicketButton'
@@ -117,15 +117,7 @@ export default async function TicketDetailPage({
       <div className="shrink-0 rounded-[28px] border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div className="min-w-0">
-            <p className="text-xs tracking-tight text-zinc-500">
-              develOP /{' '}
-              <Link
-                href="/dashboard/soporte"
-                className="transition-colors hover:text-zinc-300"
-              >
-                Tickets
-              </Link>
-            </p>
+            <BackLink href="/dashboard/soporte" label="Volver a soporte" />
             <h1 className="mt-2 truncate text-3xl font-semibold tracking-tight text-white">
               {ticket.title}
             </h1>

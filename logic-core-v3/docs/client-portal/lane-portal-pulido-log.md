@@ -64,7 +64,8 @@ Guías: `relevamiento-empties.md`, `relevamiento-back-button.md`, plan #3 (sideb
   `cn` desde `@/lib/utils` (canónico). href SIEMPRE estático.
 
 ### 2-B) Insertar BackLink (ALTA del relevamiento)
-- **soporte/[ticketId]** → "Volver a soporte" (upgrade del breadcrumb): EN CURSO.
+- **soporte/[ticketId]** → "Volver a soporte" (upgrade del breadcrumb): ✅ HECHO (tsc+lint verde).
+  Reemplazó el breadcrumb "develOP / Tickets" y se quitó el import `Link` (quedaba sin uso).
 - **email-marketing/campaigns + contactos** → ⚠️ HALLAZGO, NO implementado pendiente decisión:
   (1) `email-marketing/page.tsx` (root) es `redirect('…/campaigns')` → "Volver al módulo" sería
   un no-op en campaigns y redundante en contactos; (2) el layout ya tiene tab bar (Campañas|Contactos)
@@ -87,4 +88,5 @@ Guías: `relevamiento-empties.md`, `relevamiento-back-button.md`, plan #3 (sideb
 - `6bd00a6` — fix(dashboard): páginas de módulo premium a fullwidth (sacar max-w local) (1-B)
 - `94efb7c` — docs: log Tarea 1 (verificación adversarial all-pass)
 - `9699eaa` — fix(dashboard): módulos del sidebar como items normales de "Servicios" (1-A bis)
-- 2-A — feat(dashboard): componente BackLink (este commit)
+- `e6155f5` — feat(dashboard): componente BackLink (2-A)
+- 2-B — feat(soporte): BackLink en detalle de ticket (este commit)
