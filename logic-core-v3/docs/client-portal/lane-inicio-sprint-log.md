@@ -64,3 +64,23 @@ Gate: tsc `--noEmit` exit 0 · eslint archivo tocado exit 0
 Commit: `6e19f7e`
 
 ---
+
+## S3a — WeekResultsGrid: hover (mecánico) + eyebrow canon
+
+**Archivo:** `src/components/dashboard/home/WeekResultsGrid.tsx` ('use client', motion.div)
+**Estado:** ✅ código commiteado (`f9eb475`) · gate verde · ⏳ esperando OK visual de Valentino en :3000
+
+Cambios:
+- Cada card gana hover vía **split-wrapper** (`<div className={cn('grid rounded-2xl', adminHoverCls)}>`
+  externo, `motion.div` adentro). Antes estaban planas, sin hover. `rounded-2xl` matchea la Card default.
+- `key` movida al div externo.
+- Label de sección: removido `font-bold` → eyebrow canon (`text-[10px] uppercase tracking-[0.24em]
+  text-zinc-500`). Se mantiene el eyebrow, NO se migra al SectionHeader h3 del admin.
+
+NO tocado: queries/datos (`week-results.ts`), `Stat`/`Card` (ui frozen), trend, animación de entrada.
+Señales honestas de visits/leads → **S3b**.
+
+Gate: tsc `--noEmit` exit 0 · eslint archivo tocado exit 0
+Commit: `f9eb475`
+
+---
