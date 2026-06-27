@@ -146,3 +146,51 @@ Validado: tsc standalone exit 0, eslint exit 0. **Sin commitear** — lo corre V
 Run: `npx tsx scripts/seed-matsu-week-results.ts [--clean]` (runner = **tsx**, NO ts-node).
 
 ---
+
+## S5 — Full-width + sweep cosmético
+
+**Archivos:** `dashboard/page.tsx`, `dashboard/loading.tsx`, `components/dashboard/home/AttentionStack.tsx`
+**Estado:** ✅ código commiteado (`7b8aa4f`) · gate verde · ⏳ esperando OK visual de Valentino en :3000
+
+Cambios:
+- `page.tsx` + `loading.tsx`: `mx-auto … max-w-7xl` → `w-full` (paridad con cuenta/plan/project/resultados;
+  el `<main>` del shell ya da el padding lateral). loading.tsx alineado para que el skeleton no salte de ancho.
+- `AttentionStack` (sweep): eyebrow sin `font-bold` (canon); `strokeWidth={1.5}` en el Icon (era 1.75) y en
+  los dos `ArrowRight` (faltaba).
+
+NO tocado por FROZEN: `HealthScore` (hero/anillos) y `AIExecutiveBriefV2` ("NO tocar"). `WeekResultsGrid`
+ya canon en S3a. Solo className/props cosméticas, cero lógica.
+
+**⚠️ FLAG visual:** el hero de anillos puede verse estirado en desktop muy ancho con el container full-width.
+Si Valentino lo veta → revertir solo la línea de `page.tsx`.
+
+Gate: tsc `--noEmit` exit 0 · eslint archivos tocados exit 0
+Commit: `7b8aa4f`
+
+---
+
+## Review adversarial (workflow `wlvi9iu9w`, 3 reviewers read-only sobre `f42218a..HEAD`)
+
+**Resultado: SIN BLOCKERS.** canon-ui APROBADO · presentation-only/multi-tenant APROBADO · seed-safety PASS.
+- ✅ Split-wrapper correcto en AttentionStack + WeekResultsGrid (sin doble scale, rounded matchea Card,
+  hover percibible). OnboardingStatusCard server hover CSS puro. Sin variants nuevas de Card.
+- ✅ Presentation-only: cero cambios de query/datos; ningún frozen tocado; `data.trend` ya no se consume;
+  `lib/health-score.ts` intacto; captions S3b honestos/neutros (no filtran el leak); sin `any`; tenant por sesión.
+- ✅ Seeds: guard primero, abort sin escritura, marker, `--clean` scopeado, insert-only, no toca
+  ContactSubmission/schema/drift Franco, sortOrder sin colisión.
+
+**Warning resuelto:** AttentionStack eyebrow con `font-bold` → corregido en S5.
+
+**Decisiones abiertas (al humano):**
+1. `OnboardingStatusCard` glass: S1 puso `backdrop-blur-xl` (24px) y dropeó `saturate(180%)`; el canon
+   CLAUDE.md es `backdrop-blur-[20px] backdrop-saturate-[180%]` (y el inline original tenía saturate).
+   Recomendado: restaurar el recipe canónico. **Pendiente OK** (contradice el string explícito de S1).
+2. `OnboardingStatusCard` eyebrow `font-semibold` (zona gris; el color cyan es intencional). Dejar o normalizar.
+3. `HealthScore` (hero) NO entró al reskin (hover/eyebrow) por estar FROZEN → confirmar que queda fuera (documentado).
+4. Leads: el número sigue agency-wide (deuda de schema, fuera de scope); el caption "En calibración" es la
+   mitigación visual. Confirmar que es aceptable como interino.
+
+**Nits aceptados (no se tocan):** marker visible en Message/Task del seed week-results hasta `--clean`
+(dev QA); `process.exit(1)` antes del `finally`/$disconnect en los seeds (inocuo, patrón del repo).
+
+---
