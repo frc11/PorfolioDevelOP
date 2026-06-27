@@ -72,7 +72,10 @@ Guías: `relevamiento-empties.md`, `relevamiento-back-button.md`, plan #3 (sideb
   → son tab-navegadas como `resultados/*`/`cuenta/*` (que NO llevan back por regla). Recomiendo SKIP.
 
 ### 2-C) Violaciones de navegación
-- **send/[id]**: `router.back()` (Cancelar) → `<Link>` al padre `/campaigns`: EN CURSO.
+- **send/[id]**: `router.back()` (Cancelar) → `<Link>` al padre `/campaigns`: ✅ HECHO (tsc+lint verde).
+  Botón Cancelar → `<Link>` con `pointer-events-none`+`opacity-40`+`aria-disabled`/`tabIndex` durante
+  el envío (preserva el "disabled mientras loading"). El `router.push` post-envío (línea 23) queda
+  (navegación imperativa post-acción, sancionada por CLAUDE.md).
 - **campaigns/new**: los `router.push` son navegación POST-ACCIÓN (corren un server action y después
   navegan) → no pueden ser `<Link>`; `redirect()` server-side rompería la secuencia create→send→error
   de `handleSendNow`. CLAUDE.md permite `router.push` imperativo post-submit CON comentario inline.
@@ -89,4 +92,5 @@ Guías: `relevamiento-empties.md`, `relevamiento-back-button.md`, plan #3 (sideb
 - `94efb7c` — docs: log Tarea 1 (verificación adversarial all-pass)
 - `9699eaa` — fix(dashboard): módulos del sidebar como items normales de "Servicios" (1-A bis)
 - `e6155f5` — feat(dashboard): componente BackLink (2-A)
-- 2-B — feat(soporte): BackLink en detalle de ticket (este commit)
+- `841425c` — feat(soporte): BackLink en detalle de ticket (2-B)
+- 2-C (parcial) — fix(email-marketing): Cancelar de send usa Link, no router.back (este commit)
