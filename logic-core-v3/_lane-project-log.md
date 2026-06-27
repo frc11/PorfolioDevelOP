@@ -420,3 +420,42 @@ como el círculo anidado; preview MCP ausente).
 - NOTA p/Valentino: el empty "Sin proyectos" (page.tsx) tiene el MISMO patrón de tinte (overlay
   `bg-cyan-500/5 animate-pulse` sobre el FolderOpen). NO lo toqué (no era el que señalaste). Si
   también lo querés sin tinte, decímelo y lo limpio igual (es mi archivo, 1 línea).
+
+### A7.7 — Tinte del ícono en empties de columnas del detalle admin — **PARADA OBLIGATORIA**
+
+READ-FIRST (hecho ANTES de tocar, read-only):
+- **Path/nombre:** `src/app/(protected)/admin/projects/_components/task-list.tsx`. El empty
+  por-columna (title `Sin tareas {pendiente/en progreso/completada}`, copy "Cuando cambies el
+  estado de una tarea va a aparecer en esta columna", líneas ~543-547) es
+  `<EmptyState icon={FolderKanban} … />` importado de `@/components/ui` → es el **FROZEN
+  `ui/EmptyState`** (mismo primitivo que disparó A7.6). Único archivo con esa copy (grep).
+- **De dónde sale el tinte:** el glow `bg-cyan-500/[0.08]` HORNEADO dentro de `ui/EmptyState`
+  (`EmptyState.tsx:60`, `<div className="absolute inset-0 rounded-full bg-cyan-500/[0.08]" />`
+  detrás del cuadradito del ícono). Sobre el glow verde ambiente del shell admin lee teal.
+- **¿Viene de una prop?** NO. Props de `ui/EmptyState` = icon/title/description/action/cta/
+  className/size/variant. Ninguna controla ese glow: `variant` solo cambia el bg EXTERNO,
+  `className` llega al wrapper externo (no al cuadradito del ícono). → NO se puede neutralizar
+  cambiando una prop en el punto de consumo admin.
+
+**Por qué PARO (regla READ-FIRST #2 del brief):** "si el tinte viene de una prop, cambiá solo
+la prop … si NO se puede sin editar ui/* → PARÁ y anotá." Acá el tinte NO viene de prop y solo
+se mata editando el frozen `ui/EmptyState` (144 importadores) → PARADA. NO edité nada.
+
+**NO hice:** ni editar `ui/EmptyState`, ni hand-rollear el empty en `task-list.tsx` (el brief
+ruteó este caso a PARADA, no a hand-roll; además `task-list.tsx` es admin compartido, posible
+trabajo de otro lane). Working tree solo con este `.md`.
+
+**Opciones para desbloquear (decisión de Valentino):**
+1. **Hand-roll del empty admin en `task-list.tsx`** (igual que A7.6 en el cliente): reemplazar
+   ese `<EmptyState>` por JSX inline con el contenedor del ícono transparente. NO toca frozen,
+   pero el brief lo ruteó a PARADA y `task-list.tsx` puede estar bajo otro lane admin → necesito
+   tu OK explícito. (Es lo más paralelo a lo que ya hicimos en cliente; el resto del archivo no
+   se toca.)
+2. **Prop opt-in en `ui/EmptyState`** (ej. `iconGlow={false}`, default = comportamiento actual)
+   y pasarla solo en el consumo admin. Arregla sin cambiar los 144 sitios, PERO edita el frozen
+   `ui/EmptyState` → necesito tu OK para tocar frozen.
+3. **Sacar el glow de `ui/EmptyState` app-wide** → arregla cliente+admin+todo, pero cambia los
+   144 empties del proyecto. Mayor blast-radius; probablemente no querido.
+
+Recomendación: opción 1 (hand-roll en `task-list.tsx`) — no toca frozen, mínimo, espejo del
+cliente. Espera tu OK.
