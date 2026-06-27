@@ -18,7 +18,7 @@ Canon (verificado en código, no inventado):
 ## S1 — OnboardingStatusCard: glass inline → tokens + hover
 
 **Archivo:** `src/components/dashboard/OnboardingStatusCard.tsx` (server component)
-**Estado:** ⏳ EN CURSO — esperando OK visual de Valentino
+**Estado:** ✅ código commiteado (`2725caf`) · gate verde · ⏳ esperando OK visual de Valentino en :3000
 
 Cambios:
 - `style={{ background, backdropFilter, border, borderRadius }}` inline → className con tokens:
@@ -29,7 +29,38 @@ Cambios:
 
 NO tocado: query Prisma, lógica de tareas, copy, link, returns null (empty preservado).
 
-Gate: _pendiente_
-Commit: _pendiente_
+Gate: tsc `--noEmit` exit 0 (limpio, sin baseline tampoco) · eslint archivo tocado exit 0
+Commit: `2725caf`
+
+### Helper de QA (no es parte del commit S1)
+`scripts/seed-matsu-onboarding.ts` — deja a Matsu con onboarding incompleto (3 tareas
+marcadas, 2 PENDING + 1 IN_PROGRESS) para que la card renderice. INSERT-only, guard
+`assertDevSeedTarget`, slug `matsu`, marcador en `internalNotes`, `--clean` revierte solo
+lo marcado. NO toca tareas reales/otras orgs/schema/drift Franco. Validado: tsc standalone
+exit 0 (scripts/** está excluido del tsconfig del proyecto), eslint exit 0. **Sin commitear
+y sin ejecutar** — lo corre Valentino. Guard confirmado contra `.env.local` (host
+`ep-quiet-waterfall-acv0fpll` = Neon dev). Run: `npx ts-node --transpile-only
+scripts/seed-matsu-onboarding.ts [--clean]` desde logic-core-v3/.
+
+---
+
+## S2 — AttentionStack: hover paridad (split-wrapper)
+
+**Archivo:** `src/components/dashboard/home/AttentionStack.tsx` ('use client', motion.div)
+**Estado:** ✅ código commiteado (`6e19f7e`) · gate verde · ⏳ esperando OK visual de Valentino en :3000
+
+Cambios:
+- Cada ítem: `hover:scale-[1.005]` (en la Card) → `adminHoverCls` (scale 1.015 + ring-white/15
+  + shadow, motion-reduce-safe).
+- **Split-wrapper**: hover en un `<div className={cn('grid rounded-2xl', adminHoverCls)}>` externo
+  NO-Framer; el `motion.div` queda adentro (su transform de entrada pisaría un scale CSS aplicado
+  sobre él). `rounded-2xl` matchea la Card → ring/shadow siguen el radio.
+- `key` movida al div externo. Removido `hover:scale-[1.005]` de la Card.
+
+NO tocado: queries/datos, lógica de armado, severidades/colores, link CTA, `group-hover` del arrow,
+`return null` si no hay ítems. strokeWidth de íconos se deja para el sweep S5.
+
+Gate: tsc `--noEmit` exit 0 · eslint archivo tocado exit 0
+Commit: `6e19f7e`
 
 ---
