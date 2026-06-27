@@ -84,3 +84,28 @@ Gate: tsc `--noEmit` exit 0 · eslint archivo tocado exit 0
 Commit: `f9eb475`
 
 ---
+
+## S3b — WeekResultsGrid: señales honestas (presentación)
+
+**Archivo:** `src/components/dashboard/home/WeekResultsGrid.tsx` (solo render)
+**Estado:** ✅ código commiteado (`b735b3f`) · gate verde · ⏳ esperando OK visual de Valentino en :3000
+
+Análisis previo (requerido por el sprint):
+- **Deltas reales**: `calcTrend()` en `week-results.ts` calcula week-over-week real; ninguno hardcodeado.
+  visits = `0/0` → `null` (no muestra delta). leads = real pero sobre conteo agency-wide. msgs/tasks =
+  reales org-scoped. → Se dejan (no hay delta fake que flaggear).
+- `Stat` (ui/) tiene prop **`caption`** (`text-[10px] text-zinc-600`) → se usa, sin hand-roll.
+
+Cambios (SOLO presentación):
+- **visits**: cuando `value === '—'` (sin GA4) → caption "Sin integración aún".
+- **leads**: caption neutro **"En calibración"** (no revela que es agency-wide; alinea con el "Calibrando"
+  del HealthScore). _Wording elegido por mí; alternativa ofrecida: "Estimado"._
+- `h-full` en las Card: con caption solo en 2 de 4, iguala altura por fila (grid stretch) para que el
+  ring/shadow del hover siga el borde real de cada card y no flote.
+
+NO tocado: `week-results.ts`, queries, `Stat`/`Card` (ui frozen), trend, animación de entrada.
+
+Gate: tsc `--noEmit` exit 0 · eslint archivo tocado exit 0
+Commit: `b735b3f`
+
+---
