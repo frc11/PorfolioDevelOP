@@ -396,3 +396,27 @@ como el círculo anidado; preview MCP ausente).
   glow, pero es cross-portal). Sin parada.
 - Gate: tsc exit 0 + lint exit 0.
 - Si /70 quedara muy oscuro o aún se notara algo, ajuste de 1 token (subir/bajar opacidad).
+
+### A7.6 — Tinte teal del contenedor del ícono (empty "sin tareas") — CERRADO (vía no-frozen)
+- DISCREPANCIA con el brief (anotada y consultada, NO forzada): el brief apuntaba al "empty
+  por-tab ('sin tareas en X')" de `ProjectTaskTabs.tsx`, pero ESE empty NO tiene contenedor
+  de ícono tinteado — desde A7.4 es un `CheckCircle2` suelto (no carpeta) en el box neutro de
+  A7.5. El "ícono de carpeta en cuadrado-redondeado con tinte teal" estaba en OTRO empty.
+- READ-FIRST: candidatos reales = (a) empty "Sin proyectos" en `page.tsx` (FolderOpen + overlay
+  `bg-cyan-500/5 animate-pulse`, editable) y (b) empty "Sin tareas / develOP armando tu hoja de
+  ruta" = `ProjectEmptyState` → `ui/EmptyState` (FROZEN), que hornea un glow `bg-cyan-500/[0.08]`
+  detrás del cuadradito del ícono (`rounded-2xl bg-white/[0.04]`). Ese glow lee teal sobre el
+  glow verde ambiente del shell y NO es override-able por className.
+- Pregunté a Valentino cuál veía → respondió: **(b) el ProjectEmptyState (frozen)**.
+- FIX sin tocar frozen ("otra vía"): `ProjectEmptyState.tsx` es archivo PROPIO (wrapper de S1 que
+  consumía `ui/EmptyState`). Se HAND-ROLLEA el mismo layout/copy/CTA pero con el contenedor del
+  ícono en TRANSPARENTE (sin glow cyan, sin `bg-white/[0.04]`, borde neutro `border-white/10`,
+  forma `rounded-2xl` mantenida). FolderKanban y copy intactos. Fade de entrada lo da el
+  `<FadeIn>` padre (por eso sin motion interno). Se quitó el import de `EmptyState`. NO se tocó
+  `ui/*` (frozen), ni el shell, ni el empty por-tab, ni el de "sin proyectos".
+- Precedente en el repo (memoria empty-state-client-boundary): "empties rediseñados se
+  hand-rollean" cuando el primitivo frozen no encaja.
+- Gate: tsc exit 0 + lint exit 0.
+- NOTA p/Valentino: el empty "Sin proyectos" (page.tsx) tiene el MISMO patrón de tinte (overlay
+  `bg-cyan-500/5 animate-pulse` sobre el FolderOpen). NO lo toqué (no era el que señalaste). Si
+  también lo querés sin tinte, decímelo y lo limpio igual (es mi archivo, 1 línea).
