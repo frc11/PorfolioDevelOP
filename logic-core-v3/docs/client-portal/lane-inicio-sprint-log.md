@@ -194,3 +194,26 @@ Commit: `7b8aa4f`
 (dev QA); `process.exit(1)` antes del `finally`/$disconnect en los seeds (inocuo, patrón del repo).
 
 ---
+
+## Deuda de datos — WeekResults (FICHADA, NO acción en este lane)
+
+Lane de rediseño = presentación. Estas dos son de datos/schema y van en un lane aparte. Verificado
+read-only contra `lib/dashboard/week-results.ts` (FROZEN): los 4 deltas salen de `calcTrend()` real
+week-over-week, ninguno hardcodeado ni literal. Quedan fichadas, no se tocan acá:
+
+1. **Leads agency-wide.** `contactSubmission.count` se hace SIN `organizationId` (`week-results.ts:43-52`),
+   así que tanto el número como su delta incluyen leads de otros tenants. **Mitigado visualmente** con el
+   caption neutro **"En calibración"** (S3b, no revela el leak). **Fix real:** scopear `ContactSubmission`
+   por `organizationId` (schema + query) → lane de datos/schema. Mismo origen en `computeLeadsScore` del
+   HealthScore (lib).
+
+2. **Centinela `↑100%` desde base 0.** `calcTrend(current, 0)` con `current>0` devuelve `100`
+   (`week-results.ts:109`). Es correcto/computado, pero **ambiguo a la lectura**: significa "la semana
+   pasada hubo 0, esta hay algo", no un crecimiento real del 100%. Cambiarlo a un rótulo tipo "nuevo"
+   tocaría `calcTrend` en `lib/dashboard/*` (**FROZEN**) → parada de datos, no presentación.
+
+(También latente, no es delta: `visits` tiene inputs hardcodeados en 0 — `Promise.resolve(0)`,
+`week-results.ts:41-42` — sin fuente GA4; ya rotulado honesto con `'—'` + "Sin integración aún" en S3b.
+Fix real = cablear GA4, lane de datos.)
+
+---
