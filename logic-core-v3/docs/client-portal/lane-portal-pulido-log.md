@@ -29,6 +29,13 @@ Guías: `relevamiento-empties.md`, `relevamiento-back-button.md`, plan #3 (sideb
   - `modules/tienda-conectada/page.tsx:309` (max-w-3xl)
 - `<main>` (DashboardLayoutClient:164) ya es fullwidth (`absolute inset-0 … p-4 sm:p-6`, sin max-w).
 
+### Verificación adversarial Tarea 1 (workflow read-only, 4 lentes) — ✅ ALL PASS
+- **scope/frozen:** exactamente 6 archivos cambiados, todos autorizados; ningún frozen tocado.
+- **sidebar-fidelity:** relocación byte-fiel (condición por slug, href, ícono, color, pill `layoutId`, `onNavigate`, `pl-6` idénticos; solo cambió montaje + indent, wrapper `div`→fragment). JSX balanceado.
+- **hard-rules:** sin `any`, sin `router.push/back`, sin secrets, estados loading/error/empty intactos, tenancy por sesión.
+- **fullwidth:** 4 caps removidos OK; `<main>` sin max-w y ningún ancestro re-capea (`PageTransition` = `w-full`, no hay `modules/layout.tsx`) → fullwidth real.
+- **PENDIENTE:** OK visual del humano (Tarea 1) antes de arrancar Tarea 2.
+
 ---
 
 ## TAREA 2 — Botón volver atrás
@@ -41,4 +48,4 @@ Guías: `relevamiento-empties.md`, `relevamiento-back-button.md`, plan #3 (sideb
 
 ## Bitácora de commits
 - `7cfe4a4` — feat(dashboard): agrupar módulos premium dentro de "Servicios" en el sidebar (1-A)
-- 1-B — fix(dashboard): páginas de módulo a fullwidth (sacar max-w local) (este commit)
+- `6bd00a6` — fix(dashboard): páginas de módulo premium a fullwidth (sacar max-w local) (1-B)
