@@ -197,3 +197,53 @@
 2. **Bug latente `EmptyState` + Lucide en server pages** (`project`, `modules/{agenda-inteligente,tienda-conectada,motor-resenas,email-marketing/*}`, `chatbot/settings`): pasar un `LucideIcon` a `EmptyState` ('use client', FROZEN) cruza una función por el boundary y la página no renderiza con data vacía. Mismo patrón que el hotfix de Sprint 5 anterior. NO tocado acá; **sigue fichado**.
 
 **Mejora opcional futura (no bloqueante):** mostrar el `longDescription` real de la DB en el modal pasándolo como prop desde `page.tsx` (la query ya lo devuelve, no haría falta tocar el select) — reemplazaría el preset. Queda como mini-lane si se quiere copy 100% data-driven.
+
+---
+
+## REGISTRO DE CAMBIOS — cierre de lane
+
+**Lane:** `lane/services` · **Ruta:** `/dashboard/services` (portal cliente)
+**Branch:** `lane/services` · **HEAD:** `bded0be3f37b15186e76f653377492cb55250230`
+**Estado:** cerrado, sin mergear. La integración a main la hace el humano.
+
+### Resumen
+
+Rediseño visual de `/dashboard/services` a paridad con el admin: cards/pricing al chrome del `settings-console` (glass frosted, `adminHoverCls`, tipografía liviana) y paneles glass de la ola. Sin construcción nueva — la sección ya andaba end-to-end.
+
+### Commits
+
+| Commit | Sprint | Cambio |
+|---|---|---|
+| `5d97587` | 0 — doc | Fuente de verdad del lane (`_lane-services-log.md`). |
+| `97c02c1` | 1 — `PremiumModuleCard.tsx` | Chrome `rounded-[24px]`/`border-white/10`/`bg-white/5`; `adminHoverCls` (drop Framer `whileHover`); tipografía liviana; badge "Premium" → neutral; precio `tabular-nums`; accent por módulo intacto; `<></>` muerto eliminado; 4 estados de upsell preservados. |
+| `ab86804` | 2 — `page.tsx` | `ServiceCard` al mismo chrome + `adminHoverCls`; tipografía liviana; queries/`resolveOrgId` sin tocar. |
+| `a6550e9` | 3 — `loading.tsx` | Skeleton espejando la page rediseñada (formas, radios, grids). |
+| `7fda87c` | 4 — full-width | Container full-width; 3 paneles glass (`rounded-[30px] bg-white/5`): Contratados/Disponibles/Próximamente; superficie anidada `bg-black/20`; grids que llenan; upsell header standalone con gradiente preservado. |
+| `91b3b20` | hotfix — `page.tsx` | Empty state hand-rolled inline (`FolderOpen` en JSX server) — `EmptyState` (ui/*, frozen, `'use client'`) no acepta `LucideIcon` cruzando el boundary server→client. |
+| `bded0be` | 5 — `ServiceDetailModal.tsx` (nuevo) + `PremiumModuleCard.tsx` | Botón "Ver detalles" (ícono `Info`) en module-cards; `ServiceDetailModal` portalizado a `body` (patrón `LeadColumnOverview`); `longDescription` vía preset `PRESET_MODULE_DETAILS` (placeholder); CTA Desbloquear intacto con sus 4 estados. Re-confirmación: modal de servicio contratado = CASO C (Service es 5 escalares, sin relación a Project) → no implementado en este lane. |
+
+### Decisiones cerradas
+
+- **Tipografía total-admin:** liviana (`font-medium`/`text-sm`/`text-zinc-400`); drop uppercase + font-black en service-cards y module-cards.
+- **Accent por módulo mantenido:** ícono/glow/pill por `accentColor`; no se unifica a cyan.
+- **Badge "Premium" → neutral:** `border-white/10 bg-white/5 text-zinc-300` (calma del admin); el rojo+Lock era una alarma innecesaria.
+- **"Ver detalles" como ícono en módulos disponibles:** a 3 columnas (lg), la card cae a ~178px de ancho interno y un label rompe el lado a lado con el CTA "Desbloquear". El ícono (`w-11`, `aria-label`) mantiene los dos botones side by side en todos los anchos reales.
+- **`longDescription` por preset:** la query ya devuelve el campo, pero ampliar el select y pasarlo como prop queda para un mini-lane futuro. El preset usa el copy real del catálogo (`@/lib/data/premium-modules.ts`), no lorem.
+- **`loading.tsx` sin cambios en Sprint 5:** el alto de la card *available* no cambia; el skeleton existente sigue válido.
+
+### Frozen y shared — solo consumidos, nunca editados
+
+`@/components/ui/*` · `@/lib/hover` (adminHoverCls) · `FadeIn`/`StaggerWrapper` · `lib/preview` · `lib/actions/upsell.ts` · `prisma/schema.prisma` · shell del portal (DashboardLayoutClient)
+
+### Gate final
+
+- **tsc** (`.\node_modules\.bin\tsc.cmd --noEmit`, corrido solo) → exit 0, 0 errores nuevos por sprint. Nunca `npx tsc`.
+- **eslint** en los archivos tocados por sprint → exit 0, cero `any`.
+- **`git diff --name-only`** → acotado al scope por sprint; cero toques a frozen.
+- **visual-qa** → no ejecutable en las sesiones de este lane (el único preview apunta a main, no al worktree; la ruta es auth-gated; Next 16 no levanta un 2º dev). La revisión visual la hace el humano contra `:3000` commit a commit. La coreografía y los estados de upsell (idle→pending→success→error) los valida el humano por grabación.
+
+### Pendientes post-merge
+
+1. **Modal de detalle de servicios contratados** — "1 cuadro por servicio + N entidades por tipo" requiere relevar la relación `Service → Project` (hoy inexistente) y posiblemente tocar el schema. El `<Link>` del `ServiceCard` a `/dashboard/messages` quedó como estaba.
+2. **Bug latente `EmptyState` + Lucide en server pages** — mismo boundary server/client del hotfix: afecta `project`, `modules/{agenda-inteligente,tienda-conectada,motor-resenas,email-marketing/*}`, `chatbot/settings`. Fichado, no corregido.
+3. **Copy real en el modal** — reemplazar `PRESET_MODULE_DETAILS` con el `longDescription` de la DB pasándolo como prop desde `page.tsx`. La query ya lo devuelve; es un mini-lane de una línea de select + una prop.
