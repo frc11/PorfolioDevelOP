@@ -13,6 +13,13 @@ import { PreviewBanner } from '@/components/dashboard/PreviewBanner'
 import { SessionsChart } from '@/components/dashboard/SessionsChart'
 import { InsightsBlock } from '@/components/dashboard/results/InsightsBlock'
 import { PageSpeedCard } from '@/components/dashboard/results/PageSpeedCard'
+import { HoverCard } from '@/components/dashboard/results/_shared/HoverCard'
+import { chartCardHoverCls } from '@/components/dashboard/results/_shared/chartHover'
+import {
+  ResultEmptyState,
+  resultEmptyCtaCls,
+  resultEmptyCtaSecondaryCls,
+} from '@/components/dashboard/results/_shared/ResultEmptyState'
 import { LoadingState, PageHeader } from '@/components/ui'
 import {
   AlertTriangle,
@@ -23,13 +30,6 @@ import {
   TrendingUp,
   Users,
 } from 'lucide-react'
-
-const CARD_STYLE = {
-  border: '1px solid rgba(255,255,255,0.07)',
-  background: 'rgba(255,255,255,0.025)',
-  backdropFilter: 'blur(24px)',
-  WebkitBackdropFilter: 'blur(24px)',
-} as const
 
 function formatDuration(seconds: number): string {
   if (seconds < 60) return `${seconds}s`
@@ -105,43 +105,20 @@ export default async function AnalyticsPage({
 
 function AnalyticsEmptyState() {
   return (
-    <div className="group relative flex flex-col items-center gap-6 overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.02] py-24 text-center shadow-2xl backdrop-blur-xl">
-      <div className="absolute inset-0 bg-gradient-to-b from-cyan-500/5 via-transparent to-transparent opacity-0 transition-opacity duration-700 group-hover:opacity-100" />
-
-      <div className="relative z-10 flex flex-col items-center gap-5">
-        <div className="relative">
-          <div className="absolute inset-0 scale-150 rounded-2xl bg-cyan-500/10 opacity-0 blur-xl transition-opacity duration-700 group-hover:opacity-100" />
-          <div className="relative mx-auto flex h-16 w-16 items-center justify-center rounded-2xl border border-white/10 bg-[#0c0e12] shadow-inner transition-colors duration-500 group-hover:border-cyan-500/25">
-            <BarChart
-              size={28}
-              className="text-zinc-600 transition-colors duration-500 group-hover:text-cyan-500"
-            />
-          </div>
-        </div>
-
-        <div className="space-y-2">
-          <p className="text-base font-bold tracking-tight text-white">
-            Activá el seguimiento profesional
-          </p>
-          <p className="mx-auto max-w-sm text-sm font-medium leading-relaxed text-zinc-500">
-            Visualizá el rendimiento real de tu ecosistema digital con métricas de Google
-            Analytics integradas.
-          </p>
-        </div>
-
-        <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
-          <button className="rounded-xl bg-cyan-500 px-6 py-2.5 text-xs font-black uppercase tracking-widest text-black shadow-lg shadow-cyan-500/20 transition-all hover:bg-cyan-400 active:scale-95">
-            ACTIVAR AHORA
-          </button>
-          <a
-            href="?demo=true"
-            className="rounded-xl border border-white/[0.08] bg-white/[0.04] px-6 py-2.5 text-xs font-black uppercase tracking-widest text-zinc-400 backdrop-blur-md transition-all hover:bg-white/[0.08] hover:text-white active:scale-95"
-          >
-            VER DEMO VISUAL
-          </a>
-        </div>
-      </div>
-    </div>
+    <ResultEmptyState
+      icon={BarChart}
+      title="Activá el seguimiento profesional"
+      description="Visualizá el rendimiento real de tu ecosistema digital con métricas de Google Analytics integradas."
+    >
+      {/* FIXME(data-truth): "ACTIVAR AHORA" no tiene handler (CTA muerto). Se
+          preserva tal cual por scope — no se cablea ni se cambia su comportamiento. */}
+      <button type="button" className={resultEmptyCtaCls}>
+        ACTIVAR AHORA
+      </button>
+      <a href="?demo=true" className={resultEmptyCtaSecondaryCls}>
+        VER DEMO VISUAL
+      </a>
+    </ResultEmptyState>
   )
 }
 
@@ -214,58 +191,64 @@ async function AnalyticsContent({
         <AnalyticsAlertas data={data} />
       </FadeIn>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <AnalyticsMetricCard
-          label="Sesiones totales"
-          tooltip="Cuántas veces entraron a tu sitio en los últimos 30 días"
-          displayValue={data.sessions.toLocaleString('es-AR')}
-          rawValue={data.sessions}
-          icon={<BarChart2 size={18} />}
-          color="cyan"
-          trend={{ value: 12.3 }}
-          delay={0.1}
-        />
-        <AnalyticsMetricCard
-          label="Usuarios activos"
-          tooltip="Personas únicas que visitaron tu sitio este mes"
-          displayValue={data.activeUsers.toLocaleString('es-AR')}
-          rawValue={data.activeUsers}
-          icon={<Users size={18} />}
-          color="green"
-          trend={{ value: 8.1 }}
-          delay={0.15}
-        />
-        <AnalyticsMetricCard
-          label="Tasa de rebote"
-          tooltip="% de visitantes que se fueron sin hacer nada (menor es mejor)"
-          displayValue={`${data.bounceRate}%`}
-          rawValue={data.bounceRate}
-          suffix="%"
-          icon={<TrendingDown size={18} />}
-          color="red"
-          trend={{ value: -2.4 }}
-          invertColors
-          delay={0.2}
-        />
-        <AnalyticsMetricCard
-          label="Duración promedio"
-          tooltip="Tiempo que pasa cada visitante en tu sitio por sesión"
-          displayValue={formatDuration(data.avgSessionDurationSec)}
-          icon={<Clock size={18} />}
-          color="violet"
-          trend={{ value: 23, displayValue: '0:23' }}
-          delay={0.25}
-        />
-      </div>
+      <FadeIn delay={0.1}>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <HoverCard className="rounded-2xl">
+            <AnalyticsMetricCard
+              label="Sesiones totales"
+              tooltip="Cuántas veces entraron a tu sitio en los últimos 30 días"
+              displayValue={data.sessions.toLocaleString('es-AR')}
+              rawValue={data.sessions}
+              icon={<BarChart2 size={18} />}
+              color="cyan"
+              trend={{ value: 12.3 }}
+            />
+          </HoverCard>
+          <HoverCard className="rounded-2xl">
+            <AnalyticsMetricCard
+              label="Usuarios activos"
+              tooltip="Personas únicas que visitaron tu sitio este mes"
+              displayValue={data.activeUsers.toLocaleString('es-AR')}
+              rawValue={data.activeUsers}
+              icon={<Users size={18} />}
+              color="green"
+              trend={{ value: 8.1 }}
+            />
+          </HoverCard>
+          <HoverCard className="rounded-2xl">
+            <AnalyticsMetricCard
+              label="Tasa de rebote"
+              tooltip="% de visitantes que se fueron sin hacer nada (menor es mejor)"
+              displayValue={`${data.bounceRate}%`}
+              rawValue={data.bounceRate}
+              suffix="%"
+              icon={<TrendingDown size={18} />}
+              color="red"
+              trend={{ value: -2.4 }}
+              invertColors
+            />
+          </HoverCard>
+          <HoverCard className="rounded-2xl">
+            <AnalyticsMetricCard
+              label="Duración promedio"
+              tooltip="Tiempo que pasa cada visitante en tu sitio por sesión"
+              displayValue={formatDuration(data.avgSessionDurationSec)}
+              icon={<Clock size={18} />}
+              color="violet"
+              trend={{ value: 23, displayValue: '0:23' }}
+            />
+          </HoverCard>
+        </div>
+      </FadeIn>
 
       {data.dailySessions.length > 0 && (
         <FadeIn delay={0.3}>
-          <div className="rounded-2xl p-6" style={CARD_STYLE}>
+          <div className={'rounded-2xl border border-white/10 bg-white/[0.02] p-6 ' + chartCardHoverCls}>
             <div className="mb-5 flex items-center gap-2.5">
-              <div className="rounded-lg border border-cyan-500/20 bg-cyan-500/10 p-1.5">
-                <TrendingUp size={13} className="text-cyan-400" />
+              <div className="rounded-md border border-cyan-400/20 bg-cyan-400/10 p-1.5">
+                <TrendingUp size={13} className="text-cyan-300" />
               </div>
-              <h2 className="text-sm font-semibold text-zinc-300">
+              <h2 className="text-sm font-medium text-zinc-200">
                 Sesiones diarias — últimos 30 días
               </h2>
             </div>
@@ -297,48 +280,50 @@ function TopPagesCard({
   const maxSessions = pages[0]?.sessions ?? 1
 
   return (
-    <div className="rounded-2xl p-6" style={CARD_STYLE}>
-      <div className="mb-5 flex items-center gap-2.5">
-        <div className="rounded-lg border border-cyan-500/20 bg-cyan-500/10 p-1.5">
-          <BarChart2 size={13} className="text-cyan-400" />
+    <HoverCard className="rounded-2xl">
+      <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-6">
+        <div className="mb-5 flex items-center gap-2.5">
+          <div className="rounded-md border border-cyan-400/20 bg-cyan-400/10 p-1.5">
+            <BarChart2 size={13} className="text-cyan-300" />
+          </div>
+          <h2 className="text-sm font-medium text-zinc-200">Páginas más visitadas</h2>
         </div>
-        <h2 className="text-sm font-semibold text-zinc-300">Páginas más visitadas</h2>
+
+        <ul className="flex flex-col gap-1.5">
+          {pages.map((page, index) => {
+            const pct = Math.round((page.sessions / maxSessions) * 100)
+
+            return (
+              <li
+                key={page.page}
+                className="group flex items-center gap-4 rounded-xl border border-transparent px-3 py-2.5 transition-colors hover:border-white/10 hover:bg-white/[0.03]"
+              >
+                <span className="w-5 shrink-0 text-center text-[11px] tabular-nums text-zinc-500">
+                  {index + 1}
+                </span>
+
+                <div className="min-w-0 flex-1">
+                  <div className="mb-2 flex items-center justify-between gap-3">
+                    <span className="truncate text-[13px] text-zinc-400 transition-colors group-hover:text-zinc-100">
+                      {page.page}
+                    </span>
+                    <span className="shrink-0 text-xs tabular-nums text-zinc-300">
+                      {page.sessions.toLocaleString('es-AR')}
+                    </span>
+                  </div>
+                  <div className="h-1 w-full overflow-hidden rounded-full bg-white/[0.06]">
+                    <div
+                      className="h-full rounded-full bg-cyan-400/70"
+                      style={{ width: `${pct}%` }}
+                    />
+                  </div>
+                </div>
+              </li>
+            )
+          })}
+        </ul>
       </div>
-
-      <ul className="flex flex-col gap-1.5">
-        {pages.map((page, index) => {
-          const pct = Math.round((page.sessions / maxSessions) * 100)
-
-          return (
-            <li
-              key={page.page}
-              className="group flex items-center gap-4 rounded-xl border border-transparent px-3 py-2.5 transition-all duration-300 hover:border-white/[0.04] hover:bg-white/[0.03]"
-            >
-              <span className="w-5 shrink-0 text-center font-mono text-[10px] font-black text-zinc-700 transition-colors group-hover:text-zinc-500">
-                {index + 1}
-              </span>
-
-              <div className="min-w-0 flex-1">
-                <div className="mb-2 flex items-center justify-between gap-3">
-                  <span className="truncate text-[13px] font-medium text-zinc-400 transition-colors group-hover:text-white">
-                    {page.page}
-                  </span>
-                  <span className="shrink-0 text-xs font-bold tabular-nums text-cyan-400/70 transition-colors group-hover:text-cyan-400">
-                    {page.sessions.toLocaleString('es-AR')}
-                  </span>
-                </div>
-                <div className="h-1 w-full overflow-hidden rounded-full bg-white/[0.04]">
-                  <div
-                    className="h-full rounded-full bg-gradient-to-r from-cyan-500/80 to-cyan-400 shadow-[0_0_8px_rgba(6,182,212,0.4)] transition-all duration-700"
-                    style={{ width: `${pct}%` }}
-                  />
-                </div>
-              </div>
-            </li>
-          )
-        })}
-      </ul>
-    </div>
+    </HoverCard>
   )
 }
 

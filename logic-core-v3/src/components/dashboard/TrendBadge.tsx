@@ -1,6 +1,4 @@
-'use client'
-
-import { motion } from 'motion/react'
+import { ArrowDownRight, ArrowRight, ArrowUpRight } from 'lucide-react'
 
 interface TrendBadgeProps {
   /** Numeric change — positive = up, negative = down */
@@ -13,6 +11,11 @@ interface TrendBadgeProps {
   invertColors?: boolean
 }
 
+/**
+ * Convención de tendencia del admin (StatCard): flecha Lucide + color, SIN pill.
+ * Sube bueno = emerald-400 · baja/malo = amber-300 · sin cambio = zinc-500.
+ * `invertColors` mantiene la semántica bueno/malo (ej. rebote que baja = bueno).
+ */
 export function TrendBadge({
   value,
   displayValue,
@@ -21,36 +24,29 @@ export function TrendBadge({
 }: TrendBadgeProps) {
   if (value === 0) {
     return (
-      <motion.span
-        initial={{ opacity: 0, scale: 0.85 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.3, ease: 'easeOut' }}
+      <span
         title="vs mes anterior"
-        className="inline-flex items-center gap-1 rounded-full border border-zinc-600/30 bg-zinc-700/20 px-2 py-0.5 text-[10px] font-bold tracking-tight text-zinc-500"
+        className="inline-flex items-center gap-1 text-[11px] tabular-nums text-zinc-500"
       >
-        — 0{suffix}
-      </motion.span>
+        <ArrowRight className="h-3.5 w-3.5" strokeWidth={1.75} aria-hidden />0{suffix}
+      </span>
     )
   }
 
   const isRising = value > 0
   const isGood = invertColors ? !isRising : isRising
-  const arrow = isRising ? '↑' : '↓'
+  const Icon = isRising ? ArrowUpRight : ArrowDownRight
   const formatted = displayValue ?? `${Math.abs(value).toFixed(1)}${suffix}`
 
   return (
-    <motion.span
-      initial={{ opacity: 0, y: 5 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.35, ease: 'easeOut' }}
+    <span
       title="vs mes anterior"
-      className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-bold tracking-tight ${
-        isGood
-          ? 'border-emerald-500/20 bg-emerald-500/10 text-emerald-400'
-          : 'border-rose-500/20 bg-rose-500/10 text-rose-400'
+      className={`inline-flex items-center gap-1 text-[11px] tabular-nums ${
+        isGood ? 'text-emerald-400' : 'text-amber-300'
       }`}
     >
-      {arrow} {formatted}
-    </motion.span>
+      <Icon className="h-3.5 w-3.5" strokeWidth={1.75} aria-hidden />
+      {formatted}
+    </span>
   )
 }

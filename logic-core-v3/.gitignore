@@ -67,3 +67,5 @@ backups/
 
 # Scripts efímeros de QA/seed/probe por sprint (_p02-*, _p03-*, etc.)
 scripts/_p[0-9][0-9]-*
+# Lane Resultados — seed efímero de QA para /analisis (no se mergea)
+scripts/dev/_seed-resultados-qa.ts
