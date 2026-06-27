@@ -124,13 +124,11 @@ Cambios (solo presentación, dentro del componente; lib NO tocada):
 NO tocado: `lib/health-score.ts` (`computeTrend` sigue devolviendo trend; el componente lo ignora
 para el chip), gradiente/anillos del hero.
 
-### ⚠️ PENDIENTE/PARADA fichado (decisión de copy, NO implementado)
-`scoreToSubtitle(data.total, data.trend.value)` (HealthScore.tsx) sigue usando el **mismo trend falso**
-para generar prosa: "Subió fuerte esta semana" / "Sube esta semana" / "Estable esta semana" / etc.
-Ocultar el chip NO resuelve esto — el subtítulo presenta el dato falso en palabras. Es cambio de
-**copy** → requiere OK de Valentino. Opciones: (a) sacar la parte de trend del subtítulo (quedaría
-"Estás por encima del promedio." sin la coletilla semanal); (b) dejarlo hasta el lane de datos.
-También latente: `rounded-3xl` del hero (alineación opcional a `rounded-[28px]`, no tocada).
+### ✅ Subtítulo resuelto en S4b
+`scoreToSubtitle` usaba el mismo trend falso para la prosa ("Subió/Estable esta semana"). Valentino
+eligió **(a)**: se quitó la coletilla semanal, queda solo la lectura del score real (`data.total`).
+Tras S4b, `data.trend` ya no se consume en el componente. Commit `8c7f12b`.
+Latente (no tocado): `rounded-3xl` del hero (alineación opcional a `rounded-[28px]`).
 
 Gate: tsc `--noEmit` exit 0 · eslint archivo tocado exit 0
 Commit: `7777cdc`
