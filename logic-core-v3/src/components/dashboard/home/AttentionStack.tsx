@@ -80,7 +80,7 @@ export function AttentionStack({ items }: AttentionStackProps) {
     <div className="space-y-3">
       <div className="flex items-center gap-2">
         <span className="h-1.5 w-1.5 rounded-full bg-amber-400 animate-pulse" />
-        <h2 className="text-[10px] font-bold uppercase tracking-[0.24em] text-zinc-500">
+        <h2 className="text-[10px] uppercase tracking-[0.24em] text-zinc-500">
           Atencion hoy · {items.length}
         </h2>
       </div>
@@ -120,7 +120,7 @@ export function AttentionStack({ items }: AttentionStackProps) {
                           styles.iconBg,
                         )}
                       >
-                        <Icon size={18} strokeWidth={1.75} />
+                        <Icon size={18} strokeWidth={1.5} />
                       </div>
 
                       <div className="min-w-0 flex-1">
@@ -138,6 +138,7 @@ export function AttentionStack({ items }: AttentionStackProps) {
                         {item.ctaLabel}
                         <ArrowRight
                           size={14}
+                          strokeWidth={1.5}
                           className="transition-transform group-hover:translate-x-0.5"
                         />
                       </div>
@@ -145,7 +146,7 @@ export function AttentionStack({ items }: AttentionStackProps) {
 
                     <div className="mt-3 flex items-center gap-1.5 text-xs font-semibold text-zinc-300 sm:hidden">
                       {item.ctaLabel}
-                      <ArrowRight size={13} />
+                      <ArrowRight size={13} strokeWidth={1.5} />
                     </div>
                   </Card>
                 </Link>
