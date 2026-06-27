@@ -103,7 +103,7 @@ function HealthScoreActive({ data }: { data: HealthScoreResult }) {
               {scoreToTitle(data.total)}
             </h2>
             <p className="text-sm text-zinc-500 mt-1.5 leading-relaxed">
-              {scoreToSubtitle(data.total, data.trend.value)}
+              {scoreToSubtitle(data.total)}
             </p>
           </div>
 
@@ -391,19 +391,11 @@ function scoreToTitle(score: number): string {
   return 'Tu negocio digital tiene oportunidades urgentes.'
 }
 
-function scoreToSubtitle(score: number, trend: number): string {
-  const trendText =
-    trend > 5
-      ? 'Subió fuerte esta semana.'
-      : trend > 1
-        ? 'Sube esta semana.'
-        : trend < -5
-          ? 'Bajó esta semana.'
-          : trend < -1
-            ? 'Baja levemente esta semana.'
-            : 'Estable esta semana.'
-
-  if (score >= 75) return `Estás por encima del promedio. ${trendText}`
-  if (score >= 60) return `Performance sólida con áreas de mejora. ${trendText}`
-  return `Hay puntos críticos para revisar. ${trendText}`
+// S4b — El subtítulo ya no usa data.trend.value: computeTrend() es un hash del
+// orgId (dato FALSO). Queda solo la lectura del score real (data.total). La
+// coletilla semanal ("Subió/Estable esta semana") se revive con history real.
+function scoreToSubtitle(score: number): string {
+  if (score >= 75) return 'Estás por encima del promedio.'
+  if (score >= 60) return 'Performance sólida con áreas de mejora.'
+  return 'Hay puntos críticos para revisar.'
 }
