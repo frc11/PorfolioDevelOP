@@ -159,119 +159,120 @@ export function SidebarNav({
                   </div>
                 )
               })}
+
+              {section.label === 'Servicios' && hasPremium && (
+                <>
+                  {/* Módulos premium activos — agrupados dentro de "Servicios", debajo de
+                      "Mi Chatbot". Identidad por servicio (amber / cyan / violet / emerald);
+                      markup, colores, pill (layoutId) e indentación (pl-6) idénticos al bloque
+                      previo: sólo cambió el punto de montaje. */}
+                  {activeModuleSlugs.includes('motor-resenas') && (() => {
+                    const href = '/dashboard/modules/motor-resenas'
+                    const isActive = pathname.startsWith(href)
+                    return (
+                      <div className="relative">
+                        {isActive && (
+                          <motion.div
+                            layoutId="sidebar-active-pill"
+                            className="absolute inset-0 rounded-md bg-amber-500/10 shadow-[inset_2px_0_0_0_rgba(245,158,11,1)]"
+                            transition={{ type: 'spring', stiffness: 380, damping: 38, mass: 0.9 }}
+                          />
+                        )}
+                        <Link
+                          href={href}
+                          onClick={onNavigate}
+                          className={`group relative z-10 flex items-center gap-3 rounded-md py-2 pl-6 pr-3 text-sm transition-colors duration-200 ${
+                            isActive ? 'font-medium text-amber-400' : 'text-zinc-500 hover:bg-white/[0.04] hover:text-zinc-200'
+                          }`}
+                        >
+                          <Star size={14} strokeWidth={1.5} className="relative z-10 shrink-0" />
+                          <span className="relative z-10 flex-1 text-xs">Motor de reseñas</span>
+                        </Link>
+                      </div>
+                    )
+                  })()}
+
+                  {activeModuleSlugs.includes('email-marketing') && (() => {
+                    const href = '/dashboard/modules/email-marketing'
+                    const isActive = pathname.startsWith(href)
+                    return (
+                      <div className="relative">
+                        {isActive && (
+                          <motion.div
+                            layoutId="sidebar-active-pill"
+                            className="absolute inset-0 rounded-md bg-cyan-500/10 shadow-[inset_2px_0_0_0_rgba(6,182,212,1)]"
+                            transition={{ type: 'spring', stiffness: 380, damping: 38, mass: 0.9 }}
+                          />
+                        )}
+                        <Link
+                          href={href}
+                          onClick={onNavigate}
+                          className={`group relative z-10 flex items-center gap-3 rounded-md py-2 pl-6 pr-3 text-sm transition-colors duration-200 ${
+                            isActive ? 'font-medium text-cyan-400' : 'text-zinc-500 hover:bg-white/[0.04] hover:text-zinc-200'
+                          }`}
+                        >
+                          <Mail size={14} strokeWidth={1.5} className="relative z-10 shrink-0" />
+                          <span className="relative z-10 flex-1 text-xs">Email marketing</span>
+                        </Link>
+                      </div>
+                    )
+                  })()}
+
+                  {activeModuleSlugs.includes('tienda-conectada') && (() => {
+                    const href = '/dashboard/modules/tienda-conectada'
+                    const isActive = pathname.startsWith(href)
+                    return (
+                      <div className="relative">
+                        {isActive && (
+                          <motion.div
+                            layoutId="sidebar-active-pill"
+                            className="absolute inset-0 rounded-md bg-violet-500/10 shadow-[inset_2px_0_0_0_rgba(139,92,246,1)]"
+                            transition={{ type: 'spring', stiffness: 380, damping: 38, mass: 0.9 }}
+                          />
+                        )}
+                        <Link
+                          href={href}
+                          onClick={onNavigate}
+                          className={`group relative z-10 flex items-center gap-3 rounded-md py-2 pl-6 pr-3 text-sm transition-colors duration-200 ${
+                            isActive ? 'font-medium text-violet-400' : 'text-zinc-500 hover:bg-white/[0.04] hover:text-zinc-200'
+                          }`}
+                        >
+                          <ShoppingBag size={14} strokeWidth={1.5} className="relative z-10 shrink-0" />
+                          <span className="relative z-10 flex-1 text-xs">Tienda online</span>
+                        </Link>
+                      </div>
+                    )
+                  })()}
+
+                  {activeModuleSlugs.includes('agenda-inteligente') && (() => {
+                    const href = '/dashboard/modules/agenda-inteligente'
+                    const isActive = pathname.startsWith(href)
+                    return (
+                      <div className="relative">
+                        {isActive && (
+                          <motion.div
+                            layoutId="sidebar-active-pill"
+                            className="absolute inset-0 rounded-md bg-emerald-500/10 shadow-[inset_2px_0_0_0_rgba(16,185,129,1)]"
+                            transition={{ type: 'spring', stiffness: 380, damping: 38, mass: 0.9 }}
+                          />
+                        )}
+                        <Link
+                          href={href}
+                          onClick={onNavigate}
+                          className={`group relative z-10 flex items-center gap-3 rounded-md py-2 pl-6 pr-3 text-sm transition-colors duration-200 ${
+                            isActive ? 'font-medium text-emerald-400' : 'text-zinc-500 hover:bg-white/[0.04] hover:text-zinc-200'
+                          }`}
+                        >
+                          <CalendarDays size={14} strokeWidth={1.5} className="relative z-10 shrink-0" />
+                          <span className="relative z-10 flex-1 text-xs">Agenda inteligente</span>
+                        </Link>
+                      </div>
+                    )
+                  })()}
+                </>
+              )}
             </div>
           ))}
-
-          {/* Premium modules — identidad por servicio (cyan / violet / emerald / amber).
-              Markup, colores, pill e indentación sin cambios; sólo el wrapper pasó a
-              <div> y se agregó el cierre de drawer en mobile (onNavigate). */}
-          {hasPremium && (
-            <div className="space-y-1">
-              {activeModuleSlugs.includes('motor-resenas') && (() => {
-                const href = '/dashboard/modules/motor-resenas'
-                const isActive = pathname.startsWith(href)
-                return (
-                  <div className="relative">
-                    {isActive && (
-                      <motion.div
-                        layoutId="sidebar-active-pill"
-                        className="absolute inset-0 rounded-md bg-amber-500/10 shadow-[inset_2px_0_0_0_rgba(245,158,11,1)]"
-                        transition={{ type: 'spring', stiffness: 380, damping: 38, mass: 0.9 }}
-                      />
-                    )}
-                    <Link
-                      href={href}
-                      onClick={onNavigate}
-                      className={`group relative z-10 flex items-center gap-3 rounded-md py-2 pl-6 pr-3 text-sm transition-colors duration-200 ${
-                        isActive ? 'font-medium text-amber-400' : 'text-zinc-500 hover:bg-white/[0.04] hover:text-zinc-200'
-                      }`}
-                    >
-                      <Star size={14} strokeWidth={1.5} className="relative z-10 shrink-0" />
-                      <span className="relative z-10 flex-1 text-xs">Motor de reseñas</span>
-                    </Link>
-                  </div>
-                )
-              })()}
-
-              {activeModuleSlugs.includes('email-marketing') && (() => {
-                const href = '/dashboard/modules/email-marketing'
-                const isActive = pathname.startsWith(href)
-                return (
-                  <div className="relative">
-                    {isActive && (
-                      <motion.div
-                        layoutId="sidebar-active-pill"
-                        className="absolute inset-0 rounded-md bg-cyan-500/10 shadow-[inset_2px_0_0_0_rgba(6,182,212,1)]"
-                        transition={{ type: 'spring', stiffness: 380, damping: 38, mass: 0.9 }}
-                      />
-                    )}
-                    <Link
-                      href={href}
-                      onClick={onNavigate}
-                      className={`group relative z-10 flex items-center gap-3 rounded-md py-2 pl-6 pr-3 text-sm transition-colors duration-200 ${
-                        isActive ? 'font-medium text-cyan-400' : 'text-zinc-500 hover:bg-white/[0.04] hover:text-zinc-200'
-                      }`}
-                    >
-                      <Mail size={14} strokeWidth={1.5} className="relative z-10 shrink-0" />
-                      <span className="relative z-10 flex-1 text-xs">Email marketing</span>
-                    </Link>
-                  </div>
-                )
-              })()}
-
-              {activeModuleSlugs.includes('tienda-conectada') && (() => {
-                const href = '/dashboard/modules/tienda-conectada'
-                const isActive = pathname.startsWith(href)
-                return (
-                  <div className="relative">
-                    {isActive && (
-                      <motion.div
-                        layoutId="sidebar-active-pill"
-                        className="absolute inset-0 rounded-md bg-violet-500/10 shadow-[inset_2px_0_0_0_rgba(139,92,246,1)]"
-                        transition={{ type: 'spring', stiffness: 380, damping: 38, mass: 0.9 }}
-                      />
-                    )}
-                    <Link
-                      href={href}
-                      onClick={onNavigate}
-                      className={`group relative z-10 flex items-center gap-3 rounded-md py-2 pl-6 pr-3 text-sm transition-colors duration-200 ${
-                        isActive ? 'font-medium text-violet-400' : 'text-zinc-500 hover:bg-white/[0.04] hover:text-zinc-200'
-                      }`}
-                    >
-                      <ShoppingBag size={14} strokeWidth={1.5} className="relative z-10 shrink-0" />
-                      <span className="relative z-10 flex-1 text-xs">Tienda online</span>
-                    </Link>
-                  </div>
-                )
-              })()}
-
-              {activeModuleSlugs.includes('agenda-inteligente') && (() => {
-                const href = '/dashboard/modules/agenda-inteligente'
-                const isActive = pathname.startsWith(href)
-                return (
-                  <div className="relative">
-                    {isActive && (
-                      <motion.div
-                        layoutId="sidebar-active-pill"
-                        className="absolute inset-0 rounded-md bg-emerald-500/10 shadow-[inset_2px_0_0_0_rgba(16,185,129,1)]"
-                        transition={{ type: 'spring', stiffness: 380, damping: 38, mass: 0.9 }}
-                      />
-                    )}
-                    <Link
-                      href={href}
-                      onClick={onNavigate}
-                      className={`group relative z-10 flex items-center gap-3 rounded-md py-2 pl-6 pr-3 text-sm transition-colors duration-200 ${
-                        isActive ? 'font-medium text-emerald-400' : 'text-zinc-500 hover:bg-white/[0.04] hover:text-zinc-200'
-                      }`}
-                    >
-                      <CalendarDays size={14} strokeWidth={1.5} className="relative z-10 shrink-0" />
-                      <span className="relative z-10 flex-1 text-xs">Agenda inteligente</span>
-                    </Link>
-                  </div>
-                )
-              })()}
-            </div>
-          )}
         </div>
       </div>
     </nav>
