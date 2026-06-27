@@ -38,6 +38,22 @@ export function WeekResultsGrid({ data }: WeekResultsGridProps) {
                 ? { value: stat.trend }
                 : { value: stat.trend, invertColors: stat.invertColors }
 
+          // S3b — Señales honestas (SOLO presentación; los datos NO se tocan acá):
+          //  · visits: está hardcodeado en 0 (sin integración GA4) y la card muestra
+          //    '—'. Avisamos que falta la fuente en vez de simular un dato.
+          //  · leads: el conteo es agency-wide (ContactSubmission sin organizationId,
+          //    deuda de schema ya fichada en el explore). Hedge NEUTRO "En calibración"
+          //    para no presentarlo como dato cerrado del cliente — sin revelar que es
+          //    global. El número y su delta real quedan cubiertos por este hedge.
+          const caption =
+            item.key === 'visits'
+              ? stat.value === '—'
+                ? 'Sin integración aún'
+                : undefined
+              : item.key === 'leads'
+                ? 'En calibración'
+                : undefined
+
           return (
             // Split-wrapper: hover (scale 1.015 + ring + shadow) en div externo
             // NO-Framer; el motion.div queda adentro (su transform de entrada
@@ -48,7 +64,10 @@ export function WeekResultsGrid({ data }: WeekResultsGridProps) {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.08, duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
               >
-                <Card>
+                {/* h-full: con caption solo en 2 de 4 cards, igualamos altura por
+                    fila (grid stretch) para que el ring/shadow del hover siga el
+                    borde real de cada card y no flote sobre espacio vacío. */}
+                <Card className="h-full">
                   <Stat
                     label={stat.label}
                     value={stat.value}
@@ -56,6 +75,7 @@ export function WeekResultsGrid({ data }: WeekResultsGridProps) {
                     tone={item.tone}
                     size="lg"
                     trend={trend}
+                    caption={caption}
                   />
                 </Card>
               </motion.div>
