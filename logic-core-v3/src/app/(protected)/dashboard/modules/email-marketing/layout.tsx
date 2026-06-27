@@ -24,7 +24,7 @@ export default async function EmailMarketingLayout({ children }: { children: Rea
   const pathname = headersList.get('x-pathname') ?? ''
 
   return (
-    <div className="flex flex-col gap-6 max-w-3xl">
+    <div className="flex flex-col gap-6">
       <PageHeader
         eyebrow="Módulo"
         title="Email marketing"

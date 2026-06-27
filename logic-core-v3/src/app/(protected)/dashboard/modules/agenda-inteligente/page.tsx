@@ -328,7 +328,7 @@ export default async function AgendaInteligentePage() {
   const isConnected = Boolean(org.calComApiKey)
 
   return (
-    <div className="flex flex-col gap-6 max-w-2xl">
+    <div className="flex flex-col gap-6">
       <PageHeader
         eyebrow="Módulo"
         title="Agenda inteligente"

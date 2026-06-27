@@ -306,7 +306,7 @@ export default async function TiendaConectadaPage({
   const justConnected = params.connected === 'true'
 
   return (
-    <div className="flex flex-col gap-6 max-w-3xl">
+    <div className="flex flex-col gap-6">
       <PageHeader
         eyebrow="Módulo"
         title="Tienda conectada"

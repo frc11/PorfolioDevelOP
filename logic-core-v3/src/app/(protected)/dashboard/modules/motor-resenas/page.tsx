@@ -156,7 +156,7 @@ export default async function MotorResenasPage() {
   const gbpConnected = !!(org.gbpAccessToken && org.gbpRefreshToken)
 
   return (
-    <div className="flex flex-col gap-6 max-w-2xl">
+    <div className="flex flex-col gap-6">
       <PageHeader
         eyebrow="Módulo"
         title="Motor de reseñas"

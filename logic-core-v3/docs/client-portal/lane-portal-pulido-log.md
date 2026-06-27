@@ -21,7 +21,7 @@ Guías: `relevamiento-empties.md`, `relevamiento-back-button.md`, plan #3 (sideb
 - Cero cambio de lógica/datos (el prop `activeModuleSlugs` ya llega).
 
 ### 1-B) Fullwidth de páginas de módulo (NO toca frozen)
-- **Estado:** PENDIENTE
+- **Estado:** ✅ HECHO · gate: tsc verde + eslint verde en los 4 archivos
 - Sacar el cap local `max-w-Nxl` (mantener `flex flex-col gap-6`) en:
   - `modules/motor-resenas/page.tsx:159` (max-w-2xl)
   - `modules/agenda-inteligente/page.tsx:331` (max-w-2xl)
@@ -40,4 +40,5 @@ Guías: `relevamiento-empties.md`, `relevamiento-back-button.md`, plan #3 (sideb
 ---
 
 ## Bitácora de commits
-_(se completa a medida que se commitea)_
+- `7cfe4a4` — feat(dashboard): agrupar módulos premium dentro de "Servicios" en el sidebar (1-A)
+- 1-B — fix(dashboard): páginas de módulo a fullwidth (sacar max-w local) (este commit)
