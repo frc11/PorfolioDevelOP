@@ -35,6 +35,7 @@ import {
   type PlanPresentation,
 } from '@/lib/plan/plan-presentation'
 import { UpgradeCtaButton } from './UpgradeCtaButton'
+import { adminHoverCls } from '@/lib/hover'
 
 interface PlansShowcaseProps {
   currentPlanKey: PlanKey
@@ -92,8 +93,14 @@ function PlanCard({ plan, currentPlanKey, isFallback }: PlanCardProps) {
   const isDowngrade = tier === 'downgrade'
   const isHighlighted = plan.highlight
 
+  // Base frosted = paridad con la GlassCard del admin (settings-console):
+  // `rounded-[30px] border border-white/10 bg-white/5 backdrop-blur-xl`.
+  // El `border` queda SIN color en la base a propósito: el color lo aporta
+  // siempre la rama de acento (current/highlighted/default), así el override
+  // gana sin pelear por orden de compilación de Tailwind.
   const cardClasses = [
-    'relative flex flex-col overflow-hidden rounded-2xl border bg-[#0c0e12]/80 p-6 shadow-2xl backdrop-blur-xl transition-all',
+    'relative flex flex-col overflow-hidden rounded-[30px] border bg-white/5 p-6 shadow-2xl backdrop-blur-xl',
+    adminHoverCls,
     isCurrent && 'border-cyan-500/40 shadow-[0_0_30px_rgba(6,182,212,0.15)]',
     !isCurrent && isHighlighted &&
       'border-amber-500/40 shadow-[0_0_30px_rgba(245,158,11,0.18)]',
@@ -240,7 +247,7 @@ function LockedCelebrationFooter({ currentPlanKey }: { currentPlanKey: PlanKey }
 
   if (!nextPlan || !teaser || teaser.length === 0) {
     return (
-      <div className="rounded-2xl border border-cyan-500/20 bg-gradient-to-br from-cyan-500/[0.08] via-white/[0.02] to-transparent p-5 backdrop-blur-xl">
+      <div className="rounded-[24px] border border-cyan-500/20 bg-gradient-to-br from-cyan-500/[0.08] via-white/[0.02] to-transparent p-5 backdrop-blur-xl">
         <div className="flex items-start gap-3">
           <Crown size={18} strokeWidth={1.5} className="mt-0.5 flex-shrink-0 text-cyan-300" />
           <div className="space-y-1">
@@ -258,7 +265,7 @@ function LockedCelebrationFooter({ currentPlanKey }: { currentPlanKey: PlanKey }
   }
 
   return (
-    <div className="rounded-2xl border border-amber-500/25 bg-gradient-to-br from-amber-500/[0.08] via-white/[0.02] to-transparent p-5 backdrop-blur-xl sm:p-6">
+    <div className="rounded-[24px] border border-amber-500/25 bg-gradient-to-br from-amber-500/[0.08] via-white/[0.02] to-transparent p-5 backdrop-blur-xl sm:p-6">
       <div className="flex items-start gap-3">
         <Sparkles size={18} strokeWidth={1.5} className="mt-0.5 flex-shrink-0 text-amber-300" />
         <div className="flex-1 space-y-3">
