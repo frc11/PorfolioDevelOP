@@ -39,8 +39,9 @@ marcadas, 2 PENDING + 1 IN_PROGRESS) para que la card renderice. INSERT-only, gu
 lo marcado. NO toca tareas reales/otras orgs/schema/drift Franco. Validado: tsc standalone
 exit 0 (scripts/** está excluido del tsconfig del proyecto), eslint exit 0. **Sin commitear
 y sin ejecutar** — lo corre Valentino. Guard confirmado contra `.env.local` (host
-`ep-quiet-waterfall-acv0fpll` = Neon dev). Run: `npx ts-node --transpile-only
-scripts/seed-matsu-onboarding.ts [--clean]` desde logic-core-v3/.
+`ep-quiet-waterfall-acv0fpll` = Neon dev). Run: `npx tsx scripts/seed-matsu-onboarding.ts [--clean]`
+desde logic-core-v3/. (Runner = **tsx**, NO ts-node: en Node 24 ts-node corre como ESM y no
+resuelve el import relativo sin extensión de `../prisma/seed-guard`.)
 
 ---
 
@@ -107,5 +108,43 @@ NO tocado: `week-results.ts`, queries, `Stat`/`Card` (ui frozen), trend, animaci
 
 Gate: tsc `--noEmit` exit 0 · eslint archivo tocado exit 0
 Commit: `b735b3f`
+
+---
+
+## S4 — HealthScore: ocultar TrendChip (Opción B)
+
+**Archivo:** `src/components/dashboard/home/HealthScore.tsx`
+**Estado:** ✅ código commiteado (`7777cdc`) · gate verde · ⏳ esperando OK visual de Valentino en :3000
+
+Cambios (solo presentación, dentro del componente; lib NO tocada):
+- Removido `<TrendChip value={data.trend.value} />` del header (breadcrumb comment en su lugar).
+- Removida la función `TrendChip` (código en git para revivir cuando haya history real).
+- Limpiados imports sin uso: `ArrowUp`, `ArrowDown`, `Minus` (queda `Sparkles`).
+
+NO tocado: `lib/health-score.ts` (`computeTrend` sigue devolviendo trend; el componente lo ignora
+para el chip), gradiente/anillos del hero.
+
+### ⚠️ PENDIENTE/PARADA fichado (decisión de copy, NO implementado)
+`scoreToSubtitle(data.total, data.trend.value)` (HealthScore.tsx) sigue usando el **mismo trend falso**
+para generar prosa: "Subió fuerte esta semana" / "Sube esta semana" / "Estable esta semana" / etc.
+Ocultar el chip NO resuelve esto — el subtítulo presenta el dato falso en palabras. Es cambio de
+**copy** → requiere OK de Valentino. Opciones: (a) sacar la parte de trend del subtítulo (quedaría
+"Estás por encima del promedio." sin la coletilla semanal); (b) dejarlo hasta el lane de datos.
+También latente: `rounded-3xl` del hero (alineación opcional a `rounded-[28px]`, no tocada).
+
+Gate: tsc `--noEmit` exit 0 · eslint archivo tocado exit 0
+Commit: `7777cdc`
+
+---
+
+### Helper de QA (no commiteado)
+`scripts/seed-matsu-week-results.ts` — da números realistas al grid: Message fromAdmin
+(8 esta semana + 5 anterior → "Respondidos" 8, ↑60%) + Task DONE bajo el primer proyecto
+de matsu (→ "Completadas" 4, ↑100%). INSERT-only org-scoped, marcador en `content`/`description`,
+`--clean` revierte solo lo marcado. NO toca ContactSubmission (global → "Leads" queda con su
+número + caption "En calibración") ni visits (hardcoded → '—' + "Sin integración aún").
+⚠️ `getWeekResults` cachea 30 min (unstable_cache) → **reiniciar dev server** tras correr.
+Validado: tsc standalone exit 0, eslint exit 0. **Sin commitear** — lo corre Valentino.
+Run: `npx tsx scripts/seed-matsu-week-results.ts [--clean]` (runner = **tsx**, NO ts-node).
 
 ---
