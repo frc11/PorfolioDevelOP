@@ -52,8 +52,30 @@ Guías: `relevamiento-empties.md`, `relevamiento-back-button.md`, plan #3 (sideb
 
 ---
 
+## TAREA 1 — OK VISUAL de Valentino ✅ (incluye 1-A bis)
+
 ## TAREA 2 — Botón volver atrás
-- **Estado:** PENDIENTE (arranca tras OK visual de Tarea 1)
+- **Estado:** EN CURSO
+
+### 2-A) `src/components/dashboard/BackLink.tsx` (NUEVO)
+- **Estado:** ✅ HECHO · gate tsc + eslint verde.
+- Presentacional universal (sin hooks/'use client'): `<Link href>` + `ArrowLeft` (strokeWidth 1.5,
+  `h-3.5 w-3.5`) + label. Props `href`/`label`/`className?`. Clases del patrón LeadDetail.
+  `cn` desde `@/lib/utils` (canónico). href SIEMPRE estático.
+
+### 2-B) Insertar BackLink (ALTA del relevamiento)
+- **soporte/[ticketId]** → "Volver a soporte" (upgrade del breadcrumb): EN CURSO.
+- **email-marketing/campaigns + contactos** → ⚠️ HALLAZGO, NO implementado pendiente decisión:
+  (1) `email-marketing/page.tsx` (root) es `redirect('…/campaigns')` → "Volver al módulo" sería
+  un no-op en campaigns y redundante en contactos; (2) el layout ya tiene tab bar (Campañas|Contactos)
+  → son tab-navegadas como `resultados/*`/`cuenta/*` (que NO llevan back por regla). Recomiendo SKIP.
+
+### 2-C) Violaciones de navegación
+- **send/[id]**: `router.back()` (Cancelar) → `<Link>` al padre `/campaigns`: EN CURSO.
+- **campaigns/new**: los `router.push` son navegación POST-ACCIÓN (corren un server action y después
+  navegan) → no pueden ser `<Link>`; `redirect()` server-side rompería la secuencia create→send→error
+  de `handleSendNow`. CLAUDE.md permite `router.push` imperativo post-submit CON comentario inline.
+  Fix = documentarlos (compliant), NO forzar redirect. Reportado a Valentino.
 
 ## TAREA 3 — Empties: aplanar solo listas vacías, canon único
 - **Estado:** PENDIENTE (arranca tras OK visual de Tarea 2)
@@ -64,4 +86,5 @@ Guías: `relevamiento-empties.md`, `relevamiento-back-button.md`, plan #3 (sideb
 - `7cfe4a4` — feat(dashboard): agrupar módulos premium dentro de "Servicios" en el sidebar (1-A)
 - `6bd00a6` — fix(dashboard): páginas de módulo premium a fullwidth (sacar max-w local) (1-B)
 - `94efb7c` — docs: log Tarea 1 (verificación adversarial all-pass)
-- 1-A bis — fix(dashboard): módulos del sidebar como items normales de "Servicios" (este commit)
+- `9699eaa` — fix(dashboard): módulos del sidebar como items normales de "Servicios" (1-A bis)
+- 2-A — feat(dashboard): componente BackLink (este commit)
