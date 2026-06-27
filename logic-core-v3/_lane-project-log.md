@@ -459,3 +459,16 @@ trabajo de otro lane). Working tree solo con este `.md`.
 
 Recomendación: opción 1 (hand-roll en `task-list.tsx`) — no toca frozen, mínimo, espejo del
 cliente. Espera tu OK.
+
+**RESUELTO — Valentino eligió opción 1 (hand-roll).** Implementado en `task-list.tsx`:
+- Reemplazado SOLO el empty por-columna (`Sin tareas {label}` / "Cuando cambies el estado…")
+  por JSX inline: contenedor del ícono `rounded-2xl border border-white/10` TRANSPARENTE (sin
+  glow cyan, sin fill), `FolderKanban` neutro, mismo copy/layout. Espejo del empty del cliente.
+- Los OTROS dos `<EmptyState>` del archivo (whole-list "Todavia no hay tareas" + time-entries
+  "Sin registros de tiempo") quedan en `ui/EmptyState` (NO eran columnas; fuera de scope) → el
+  import de `EmptyState` sigue usado. Cambio quirúrgico: solo ese bloque, resto del archivo intacto.
+- NO se tocó `ui/*` (frozen), ni el shell, ni el cliente, ni schema.
+- Gate: tsc exit 0 + lint exit 0.
+- NOTA p/Valentino: los otros 2 empties de `task-list.tsx` (whole-list + time-entries) tienen el
+  MISMO glow teal de `ui/EmptyState`. No los toqué (no eran columnas). Si los querés iguales,
+  aviso y los hand-rolleo también (mismo patrón).

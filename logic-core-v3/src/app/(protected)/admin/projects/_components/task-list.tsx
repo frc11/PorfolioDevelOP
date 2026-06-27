@@ -540,11 +540,22 @@ export function TaskList({
                   )
                 })
               ) : (
-                <EmptyState
-                  icon={FolderKanban}
-                  title={`Sin tareas ${group.label.toLowerCase()}`}
-                  description="Cuando cambies el estado de una tarea va a aparecer en esta columna."
-                />
+                // A7.7: empty por-columna hand-rolled (autorizado por Valentino) en vez de
+                // `ui/EmptyState` (frozen), cuyo cuadradito del ícono hornea un glow
+                // `bg-cyan-500/[0.08]` que sobre el glow ambiente lee teal y no es
+                // override-able por prop. Mismo layout/copy, contenedor del ícono
+                // TRANSPARENTE (sin glow, borde neutro). Espejo del empty del cliente.
+                <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-white/10 bg-white/[0.02] px-6 py-12 text-center">
+                  <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 text-zinc-500">
+                    <FolderKanban className="h-5 w-5" strokeWidth={1.5} />
+                  </div>
+                  <h3 className="text-base font-semibold text-zinc-300">
+                    Sin tareas {group.label.toLowerCase()}
+                  </h3>
+                  <p className="mt-1 max-w-sm text-xs leading-relaxed text-zinc-600">
+                    Cuando cambies el estado de una tarea va a aparecer en esta columna.
+                  </p>
+                </div>
               )}
             </div>
           </section>
