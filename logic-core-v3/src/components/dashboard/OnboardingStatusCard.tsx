@@ -44,7 +44,7 @@ export async function OnboardingStatusCard({ organizationId }: { organizationId:
   return (
     <div
       className={cn(
-        'rounded-[24px] border border-cyan-500/[0.12] bg-cyan-500/[0.04] p-6 backdrop-blur-xl sm:p-8',
+        'rounded-[24px] border border-cyan-500/[0.12] bg-cyan-500/[0.04] p-6 backdrop-blur-[20px] backdrop-saturate-[180%] sm:p-8',
         adminHoverCls,
       )}
     >
