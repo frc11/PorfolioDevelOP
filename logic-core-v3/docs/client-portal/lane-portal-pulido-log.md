@@ -36,6 +36,20 @@ Guías: `relevamiento-empties.md`, `relevamiento-back-button.md`, plan #3 (sideb
 - **fullwidth:** 4 caps removidos OK; `<main>` sin max-w y ningún ancestro re-capea (`PageTransition` = `w-full`, no hay `modules/layout.tsx`) → fullwidth real.
 - **PENDIENTE:** OK visual del humano (Tarea 1) antes de arrancar Tarea 2.
 
+### 1-A bis) Fix visual: módulos como hermanos (no sub-ítems) — feedback de Valentino
+- **Síntoma (verde ≠ se ve):** tras 1-A los módulos quedaron en "Servicios" pero con el
+  markup atenuado heredado del bloque suelto: ícono `size={14}`, texto `text-xs text-zinc-500`,
+  `pl-6` (indentado), pill/color por servicio (amber/violet/emerald). Parecían sub-ítems.
+- **Causa raíz:** 1-A copió el markup viejo (fiel pero atenuado). La verificación adversarial
+  validó "relocación byte-fiel" → correcto contra el spec de 1-A, pero el spec producía un
+  visual malo. Una verificación de *diff-fidelity* NO detecta un problema de *diseño del spec*.
+- **Fix:** los módulos activos se convierten en `NavItem[]` (`PREMIUM_MODULES`, orden fijo) y se
+  inyectan en `section.items` de "Servicios" → se renderizan por el MISMO `.map` que los items
+  normales. Visualmente indistinguibles de "Mi Chatbot" (size 16, `text-sm font-medium`,
+  `text-zinc-400`/`hover:text-zinc-100`, indent cero, **pill cyan activo** en `/dashboard/modules/<x>`).
+  Lo único propio: ícono + label. Se eliminó el bloque IIFE atenuado y `hasPremium`.
+- Gate: tsc verde + eslint verde. **PENDIENTE:** re-verificación visual del humano.
+
 ---
 
 ## TAREA 2 — Botón volver atrás
@@ -49,3 +63,5 @@ Guías: `relevamiento-empties.md`, `relevamiento-back-button.md`, plan #3 (sideb
 ## Bitácora de commits
 - `7cfe4a4` — feat(dashboard): agrupar módulos premium dentro de "Servicios" en el sidebar (1-A)
 - `6bd00a6` — fix(dashboard): páginas de módulo premium a fullwidth (sacar max-w local) (1-B)
+- `94efb7c` — docs: log Tarea 1 (verificación adversarial all-pass)
+- 1-A bis — fix(dashboard): módulos del sidebar como items normales de "Servicios" (este commit)
