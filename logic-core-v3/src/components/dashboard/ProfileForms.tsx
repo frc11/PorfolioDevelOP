@@ -3,6 +3,7 @@
 import React, { useActionState, useState, useTransition } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import {
   Loader2,
   CheckCircle,
@@ -25,6 +26,14 @@ import {
   type ProfileActionState,
   type NotificationPrefs,
 } from '@/lib/actions/profile'
+import { Input, Toggle } from '@/components/ui'
+import { cn } from '@/lib/utils'
+import { adminHoverCls } from '@/lib/hover'
+import { ClientAvatar } from '@/modules/chatbot/components/admin/client-avatar/ClientAvatar'
+import {
+  ClientAvatarField,
+  type ClientAvatarValue,
+} from '@/modules/chatbot/components/admin/client-avatar/ClientAvatarField'
 
 // ─── Shared UI ────────────────────────────────────────────────────────────────
 
@@ -58,11 +67,6 @@ function FieldHint({ children }: { children: React.ReactNode }) {
   return <p className="text-[10px] text-zinc-600">{children}</p>
 }
 
-const INPUT_BASE =
-  'rounded-lg border border-zinc-700/80 bg-zinc-800/60 px-3 py-2 text-sm text-zinc-100 placeholder-zinc-600 outline-none transition-colors focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/20'
-const INPUT_READONLY =
-  'rounded-lg border border-zinc-800 bg-zinc-800/40 px-3 py-2 text-sm text-zinc-500 cursor-not-allowed outline-none'
-
 function InputField({
   label,
   name,
@@ -85,26 +89,34 @@ function InputField({
   return (
     <div className="flex flex-col gap-1.5">
       <FieldLabel>{label}</FieldLabel>
-      <input
+      <Input
         type={type}
         name={name}
         defaultValue={defaultValue}
         readOnly={readOnly}
         placeholder={placeholder}
         autoComplete={autoComplete}
-        className={readOnly ? INPUT_READONLY : INPUT_BASE}
+        className={readOnly ? 'cursor-not-allowed text-zinc-500' : undefined}
       />
       {hint && <FieldHint>{hint}</FieldHint>}
     </div>
   )
 }
 
-function SaveButton({ isPending, label = 'Guardar cambios' }: { isPending: boolean; label?: string }) {
+function SaveButton({
+  isPending,
+  label = 'Guardar cambios',
+  disabled = false,
+}: {
+  isPending: boolean
+  label?: string
+  disabled?: boolean
+}) {
   return (
     <button
       type="submit"
-      disabled={isPending}
-      className="flex items-center gap-2 self-start rounded-lg bg-cyan-600 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-cyan-500 disabled:opacity-50"
+      disabled={isPending || disabled}
+      className="flex items-center gap-2 self-start rounded-lg bg-cyan-600 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-cyan-500 disabled:cursor-not-allowed disabled:opacity-50"
     >
       {isPending ? <Loader2 size={13} className="animate-spin" /> : <Check size={13} />}
       {label}
@@ -114,25 +126,23 @@ function SaveButton({ isPending, label = 'Guardar cambios' }: { isPending: boole
 
 // ─── Profile Header ───────────────────────────────────────────────────────────
 
-function getInitials(name: string): string {
-  return name
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((w) => w[0].toUpperCase())
-    .join('')
-}
-
 interface ProfileHeaderProps {
   companyName: string
   email: string
-  logoUrl: string | null
+  avatarImageUrl: string | null
+  avatarEmoji: string | null
+  avatarInitials: string | null
   planName: string | null
 }
 
-export function ProfileHeader({ companyName, email, logoUrl, planName }: ProfileHeaderProps) {
-  const initials = getInitials(companyName) || '?'
-
+export function ProfileHeader({
+  companyName,
+  email,
+  avatarImageUrl,
+  avatarEmoji,
+  avatarInitials,
+  planName,
+}: ProfileHeaderProps) {
   return (
     <motion.div
       initial={{ opacity: 0, y: -12 }}
@@ -146,23 +156,22 @@ export function ProfileHeader({ companyName, email, logoUrl, planName }: Profile
         WebkitBackdropFilter: 'blur(24px)',
       }}
     >
-      {/* Avatar */}
+      {/* Avatar — resolución compartida con el admin (imagen > emoji > iniciales > ícono) */}
       <div
         className="flex h-24 w-24 flex-shrink-0 items-center justify-center overflow-hidden rounded-full"
         style={{
           border: '2px solid rgba(6,182,212,0.35)',
-          background: logoUrl
-            ? 'transparent'
-            : 'linear-gradient(135deg, rgba(6,182,212,0.18) 0%, rgba(6,182,212,0.04) 100%)',
+          background: 'linear-gradient(135deg, rgba(6,182,212,0.18) 0%, rgba(6,182,212,0.04) 100%)',
           boxShadow: '0 0 28px rgba(6,182,212,0.12)',
         }}
       >
-        {logoUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={logoUrl} alt={companyName} className="h-full w-full object-cover" />
-        ) : (
-          <span className="text-3xl font-bold tracking-tight text-cyan-400">{initials}</span>
-        )}
+        <ClientAvatar
+          companyName={companyName}
+          avatarImageUrl={avatarImageUrl}
+          avatarEmoji={avatarEmoji}
+          avatarInitials={avatarInitials}
+          size={96}
+        />
       </div>
 
       {/* Info */}
@@ -191,28 +200,42 @@ interface CompanyDataFormProps {
   name: string
   email: string
   companyName: string
-  logoUrl: string | null
+  avatarImageUrl: string | null
+  avatarEmoji: string | null
+  avatarInitials: string | null
 }
 
-export function CompanyDataForm({ name, email, companyName, logoUrl }: CompanyDataFormProps) {
+export function CompanyDataForm({
+  name,
+  email,
+  companyName,
+  avatarImageUrl,
+  avatarEmoji,
+  avatarInitials,
+}: CompanyDataFormProps) {
   const [state, action, isPending] = useActionState<ProfileActionState, FormData>(
     updateProfileAction,
     null
   )
-  const [previewUrl, setPreviewUrl] = useState(logoUrl ?? '')
-
-  const isValidUrl = (url: string) => {
-    try {
-      new URL(url)
-      return true
-    } catch {
-      return false
-    }
-  }
+  const [avatar, setAvatar] = useState<ClientAvatarValue>({
+    avatarImageUrl,
+    avatarEmoji,
+    avatarInitials,
+  })
 
   return (
     <form action={action} className="flex flex-col gap-5">
       <Feedback state={state} />
+
+      {/* Avatar de la empresa — imagen (base64) / emoji / iniciales, mismo uploader
+          que el admin. Los hidden inputs cargan el estado al submit. */}
+      <div className="flex flex-col gap-2">
+        <FieldLabel>Avatar de la empresa</FieldLabel>
+        <ClientAvatarField value={avatar} onChange={setAvatar} companyName={companyName} />
+        <input type="hidden" name="avatarImageUrl" value={avatar.avatarImageUrl ?? ''} />
+        <input type="hidden" name="avatarEmoji" value={avatar.avatarEmoji ?? ''} />
+        <input type="hidden" name="avatarInitials" value={avatar.avatarInitials ?? ''} />
+      </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <InputField
@@ -221,42 +244,6 @@ export function CompanyDataForm({ name, email, companyName, logoUrl }: CompanyDa
           defaultValue={companyName}
           placeholder="Acme Corp"
         />
-
-        {/* Logo URL with live preview */}
-        <div className="flex flex-col gap-1.5">
-          <FieldLabel>URL del logo</FieldLabel>
-          <input
-            type="text"
-            name="logoUrl"
-            value={previewUrl}
-            onChange={(e) => setPreviewUrl(e.target.value)}
-            placeholder="https://ejemplo.com/logo.png"
-            className={INPUT_BASE}
-          />
-          <AnimatePresence>
-            {previewUrl && isValidUrl(previewUrl) && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                className="overflow-hidden"
-              >
-                <div className="mt-1 flex items-center gap-2.5 rounded-lg border border-zinc-700/40 bg-zinc-800/40 p-2">
-                  <div className="h-9 w-9 flex-shrink-0 overflow-hidden rounded-md bg-zinc-700/60">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={previewUrl}
-                      alt="Logo preview"
-                      className="h-full w-full object-contain"
-                    />
-                  </div>
-                  <span className="text-xs text-zinc-500">Preview del logo</span>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-
         <InputField
           label="Nombre de contacto *"
           name="name"
@@ -310,8 +297,8 @@ export function ContactSection({
         {/* WhatsApp */}
         <div className="flex flex-col gap-1.5">
           <FieldLabel>WhatsApp</FieldLabel>
-          <div className="flex overflow-hidden rounded-lg border border-zinc-700/80 bg-zinc-800/60 transition-colors focus-within:border-cyan-500/50 focus-within:ring-1 focus-within:ring-cyan-500/20">
-            <span className="flex select-none items-center border-r border-zinc-700/60 bg-zinc-800/80 px-3 text-xs text-zinc-500">
+          <div className="flex overflow-hidden rounded-xl border border-white/10 bg-white/[0.02] transition-colors focus-within:border-cyan-400/30">
+            <span className="flex select-none items-center border-r border-white/10 bg-white/[0.03] px-3 text-xs text-zinc-500">
               +
             </span>
             <input
@@ -370,38 +357,70 @@ const STRENGTH_TEXT: Record<number, string> = {
 // ─── Password Form ────────────────────────────────────────────────────────────
 
 export function PasswordForm() {
-  const [state, action, isPending] = useActionState<ProfileActionState, FormData>(
-    updatePasswordAction,
-    null
-  )
+  const router = useRouter()
+  const [state, setState] = useState<ProfileActionState>(null)
+  const [isPending, startTransition] = useTransition()
+  const [currentPw, setCurrentPw] = useState('')
   const [newPw, setNewPw] = useState('')
   const [showCurrent, setShowCurrent] = useState(false)
   const [showNew, setShowNew] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
   const strength = checkStrength(newPw)
+  const missing = [
+    !strength.hasLength && '8+ caracteres',
+    !strength.hasUpper && 'una mayúscula',
+    !strength.hasNumber && 'un número',
+  ].filter(Boolean) as string[]
+
+  // Invocación DIRECTA (no `<form action>`): el form-action de useActionState dispara
+  // un re-render same-response del route con el cookie VIEJO (sessionVersion N) antes
+  // de que `unstable_update` aplique el N+1 → el jwt callback de auth.ts mata la sesión
+  // → pantalla negra + bounce a /dashboard. /cambiar-password lo evita llamando la
+  // action directo y navegando DESPUÉS del await (cookie ya N+1). Espejamos ese patrón.
+  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    if (isPending || strength.score < 3) return
+    const form = event.currentTarget
+    const formData = new FormData(form)
+    startTransition(async () => {
+      const result = await updatePasswordAction(null, formData)
+      setState(result)
+      if (result?.success) {
+        setCurrentPw('')
+        setNewPw('')
+        form.reset()
+        // Request separado, ya con el cookie N+1 aplicado → re-sincroniza sin matar
+        // la sesión (a diferencia del revalidate in-action que usaba el cookie viejo).
+        router.refresh()
+      }
+    })
+  }
 
   return (
-    <form action={action} className="flex flex-col gap-5">
+    <form onSubmit={handleSubmit} className="flex flex-col gap-5">
       <Feedback state={state} />
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         {/* Current password */}
         <div className="flex flex-col gap-1.5">
           <FieldLabel>Contraseña actual *</FieldLabel>
-          <div className="flex overflow-hidden rounded-lg border border-zinc-700/80 bg-zinc-800/60 transition-colors focus-within:border-cyan-500/50 focus-within:ring-1 focus-within:ring-cyan-500/20">
+          <div className="flex overflow-hidden rounded-xl border border-white/10 bg-white/[0.02] transition-colors focus-within:border-cyan-400/30">
             <input
               type={showCurrent ? 'text' : 'password'}
               name="currentPassword"
               autoComplete="current-password"
+              value={currentPw}
+              onChange={(e) => setCurrentPw(e.target.value)}
               className="flex-1 bg-transparent px-3 py-2 text-sm text-zinc-100 outline-none"
             />
             <button
               type="button"
               onClick={() => setShowCurrent((v) => !v)}
               tabIndex={-1}
+              aria-label={showCurrent ? 'Ocultar contraseña actual' : 'Mostrar contraseña actual'}
               className="flex items-center px-3 text-zinc-500 transition-colors hover:text-zinc-300"
             >
-              {showCurrent ? <EyeOff size={14} /> : <Eye size={14} />}
+              {showCurrent ? <Eye size={14} /> : <EyeOff size={14} />}
             </button>
           </div>
         </div>
@@ -409,7 +428,7 @@ export function PasswordForm() {
         {/* New password + strength */}
         <div className="flex flex-col gap-1.5">
           <FieldLabel>Nueva contraseña *</FieldLabel>
-          <div className="flex overflow-hidden rounded-lg border border-zinc-700/80 bg-zinc-800/60 transition-colors focus-within:border-cyan-500/50 focus-within:ring-1 focus-within:ring-cyan-500/20">
+          <div className="flex overflow-hidden rounded-xl border border-white/10 bg-white/[0.02] transition-colors focus-within:border-cyan-400/30">
             <input
               type={showNew ? 'text' : 'password'}
               name="newPassword"
@@ -422,9 +441,10 @@ export function PasswordForm() {
               type="button"
               onClick={() => setShowNew((v) => !v)}
               tabIndex={-1}
+              aria-label={showNew ? 'Ocultar nueva contraseña' : 'Mostrar nueva contraseña'}
               className="flex items-center px-3 text-zinc-500 transition-colors hover:text-zinc-300"
             >
-              {showNew ? <EyeOff size={14} /> : <Eye size={14} />}
+              {showNew ? <Eye size={14} /> : <EyeOff size={14} />}
             </button>
           </div>
 
@@ -466,7 +486,7 @@ export function PasswordForm() {
         {/* Confirm password */}
         <div className="flex flex-col gap-1.5">
           <FieldLabel>Confirmar contraseña *</FieldLabel>
-          <div className="flex overflow-hidden rounded-lg border border-zinc-700/80 bg-zinc-800/60 transition-colors focus-within:border-cyan-500/50 focus-within:ring-1 focus-within:ring-cyan-500/20">
+          <div className="flex overflow-hidden rounded-xl border border-white/10 bg-white/[0.02] transition-colors focus-within:border-cyan-400/30">
             <input
               type={showConfirm ? 'text' : 'password'}
               name="confirmPassword"
@@ -477,15 +497,21 @@ export function PasswordForm() {
               type="button"
               onClick={() => setShowConfirm((v) => !v)}
               tabIndex={-1}
+              aria-label={showConfirm ? 'Ocultar confirmación' : 'Mostrar confirmación'}
               className="flex items-center px-3 text-zinc-500 transition-colors hover:text-zinc-300"
             >
-              {showConfirm ? <EyeOff size={14} /> : <Eye size={14} />}
+              {showConfirm ? <Eye size={14} /> : <EyeOff size={14} />}
             </button>
           </div>
         </div>
       </div>
 
-      {/* Requirements checklist */}
+      {/* Requirements: missing summary + per-req chips */}
+      {newPw.length > 0 && missing.length > 0 && (
+        <p className="text-[11px] font-medium text-amber-400">
+          Falta: {missing.join(', ')}.
+        </p>
+      )}
       <div className="flex flex-wrap gap-x-5 gap-y-1.5">
         {[
           { ok: strength.hasLength, label: '8+ caracteres' },
@@ -503,7 +529,7 @@ export function PasswordForm() {
         ))}
       </div>
 
-      <SaveButton isPending={isPending} label="Cambiar contraseña" />
+      <SaveButton isPending={isPending} label="Cambiar contraseña" disabled={strength.score < 3} />
     </form>
   )
 }
@@ -565,29 +591,13 @@ export function NotificationPrefsForm({ initialPrefs }: { initialPrefs: Notifica
         {NOTIF_CONFIG.map(({ key, label, desc }) => (
           <div
             key={key}
-            className="flex items-center justify-between rounded-lg border border-zinc-700/40 bg-zinc-800/30 px-4 py-3"
+            className="flex items-center justify-between rounded-xl border border-white/10 bg-white/[0.02] px-4 py-3 transition-colors hover:border-white/15 hover:bg-white/[0.04]"
           >
             <div className="flex flex-col gap-0.5 pr-4">
               <span className="text-sm font-medium text-zinc-200">{label}</span>
               <span className="text-xs text-zinc-500">{desc}</span>
             </div>
-            {/* Toggle switch */}
-            <button
-              type="button"
-              onClick={() => toggle(key)}
-              aria-label={`Toggle ${label}`}
-              className={`relative flex-shrink-0 rounded-full transition-colors duration-200 ${
-                prefs[key] ? 'bg-cyan-600' : 'bg-zinc-700'
-              }`}
-              style={{ width: 44, height: 24 }}
-            >
-              <motion.span
-                animate={{ x: prefs[key] ? 22 : 3 }}
-                transition={{ type: 'spring', stiffness: 320, damping: 22 }}
-                className="absolute rounded-full bg-white shadow-sm"
-                style={{ width: 18, height: 18, top: 3 }}
-              />
-            </button>
+            <Toggle checked={prefs[key]} onChange={() => toggle(key)} label={label} />
           </div>
         ))}
       </div>
@@ -613,8 +623,8 @@ export function PlanInfoSection({ plan }: { plan: PlanInfo | null }) {
       <div className="flex flex-col gap-3">
         <p className="text-sm text-zinc-500">No hay información de plan disponible.</p>
         <Link
-          href="/dashboard/facturacion"
-          className="flex w-fit items-center gap-1.5 rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-xs text-zinc-400 transition-colors hover:border-cyan-500/30 hover:text-cyan-400"
+          href="/dashboard/cuenta/facturacion"
+          className="flex w-fit items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.02] px-3 py-2 text-xs text-zinc-400 transition-colors hover:border-white/15 hover:bg-white/10 hover:text-cyan-400"
         >
           <CreditCard size={12} />
           Ver facturación
@@ -641,38 +651,30 @@ export function PlanInfoSection({ plan }: { plan: PlanInfo | null }) {
 
   return (
     <div className="flex flex-col gap-5">
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <div className="flex flex-col gap-1">
-          <span className="text-[10px] font-semibold uppercase tracking-wider text-zinc-600">
-            Plan
-          </span>
-          <span className="text-sm font-semibold text-white">{plan.planName}</span>
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <div className={cn('rounded-xl border border-white/5 bg-white/[0.015] px-3 py-2.5', adminHoverCls)}>
+          <p className="text-[10px] uppercase tracking-[0.24em] text-zinc-500">Plan</p>
+          <p className="mt-1 text-sm font-semibold text-zinc-100">{plan.planName}</p>
         </div>
-        <div className="flex flex-col gap-1">
-          <span className="text-[10px] font-semibold uppercase tracking-wider text-zinc-600">
-            Precio / mes
-          </span>
-          <span className="text-sm font-semibold text-white">
+        <div className={cn('rounded-xl border border-white/5 bg-white/[0.015] px-3 py-2.5', adminHoverCls)}>
+          <p className="text-[10px] uppercase tracking-[0.24em] text-zinc-500">Precio / mes</p>
+          <p className="mt-1 text-sm font-semibold text-zinc-100">
             {plan.currency} {plan.price.toLocaleString('es-AR')}
-          </span>
+          </p>
         </div>
-        <div className="flex flex-col gap-1">
-          <span className="text-[10px] font-semibold uppercase tracking-wider text-zinc-600">
-            Próximo vencimiento
-          </span>
-          <span className="text-sm text-zinc-300">{renewalLabel}</span>
+        <div className={cn('rounded-xl border border-white/5 bg-white/[0.015] px-3 py-2.5', adminHoverCls)}>
+          <p className="text-[10px] uppercase tracking-[0.24em] text-zinc-500">Próximo vencimiento</p>
+          <p className="mt-1 text-sm font-semibold text-zinc-300">{renewalLabel}</p>
         </div>
-        <div className="flex flex-col gap-1">
-          <span className="text-[10px] font-semibold uppercase tracking-wider text-zinc-600">
-            Estado
-          </span>
-          <span className={`text-sm font-semibold ${statusInfo.color}`}>{statusInfo.label}</span>
+        <div className={cn('rounded-xl border border-white/5 bg-white/[0.015] px-3 py-2.5', adminHoverCls)}>
+          <p className="text-[10px] uppercase tracking-[0.24em] text-zinc-500">Estado</p>
+          <p className={cn('mt-1 text-sm font-semibold', statusInfo.color)}>{statusInfo.label}</p>
         </div>
       </div>
 
       <Link
-        href="/dashboard/facturacion"
-        className="flex w-fit items-center gap-1.5 rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-xs text-zinc-400 transition-colors hover:border-cyan-500/30 hover:text-cyan-400"
+        href="/dashboard/cuenta/facturacion"
+        className="flex w-fit items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.02] px-3 py-2 text-xs text-zinc-400 transition-colors hover:border-white/15 hover:bg-white/10 hover:text-cyan-400"
       >
         <CreditCard size={12} />
         Ver facturación completa
@@ -695,7 +697,7 @@ export function DangerZone() {
       if (result?.success) {
         setStep('done')
       } else {
-        setError(result && !result.success ? result.error ?? 'Ocurri? un error inesperado.' : 'Ocurri? un error inesperado.')
+        setError(result && !result.success ? result.error ?? 'Ocurrió un error inesperado.' : 'Ocurrió un error inesperado.')
         setStep('idle')
       }
     })
@@ -776,7 +778,7 @@ export function DangerZone() {
               <button
                 type="button"
                 onClick={() => setStep('idle')}
-                className="rounded-lg border border-zinc-700 px-3 py-1.5 text-xs text-zinc-400 transition-colors hover:text-zinc-200"
+                className="rounded-lg border border-white/10 px-3 py-1.5 text-xs text-zinc-400 transition-colors hover:bg-white/[0.04] hover:text-zinc-200"
               >
                 Cancelar
               </button>

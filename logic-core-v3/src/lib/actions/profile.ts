@@ -36,7 +36,10 @@ export async function updateProfileAction(
   const parsed = UpdateProfileSchema.safeParse({
     name: formData.get('name'),
     companyName: formData.get('companyName'),
-    logoUrl: formData.get('logoUrl'),
+    avatarImageUrl: (formData.get('avatarImageUrl') as string) || null,
+    avatarEmoji: ((formData.get('avatarEmoji') as string) ?? '').trim() || null,
+    avatarInitials:
+      ((formData.get('avatarInitials') as string) ?? '').trim().toUpperCase().slice(0, 2) || null,
   })
 
   if (!parsed.success) {
@@ -44,9 +47,6 @@ export async function updateProfileAction(
   }
 
   try {
-    const logoUrl =
-      parsed.data.logoUrl && parsed.data.logoUrl !== '' ? parsed.data.logoUrl : null
-
     await prisma.$transaction([
       prisma.user.update({
         where: { id: userId },
@@ -56,12 +56,14 @@ export async function updateProfileAction(
         where: { id: organizationId },
         data: {
           companyName: parsed.data.companyName,
-          logoUrl,
+          avatarImageUrl: parsed.data.avatarImageUrl,
+          avatarEmoji: parsed.data.avatarEmoji,
+          avatarInitials: parsed.data.avatarInitials,
         },
       }),
     ])
 
-    revalidatePath('/dashboard/profile')
+    revalidatePath('/dashboard/cuenta/perfil')
     revalidatePath('/dashboard')
 
     return { success: true }
@@ -90,7 +92,7 @@ export async function updateContactAction(
       data: { whatsapp },
     })
 
-    revalidatePath('/dashboard/profile')
+    revalidatePath('/dashboard/cuenta/perfil')
     return { success: true }
   } catch (error) {
     console.error('updateContactAction error:', error)
@@ -137,7 +139,6 @@ export async function updateNotificationPrefsAction(
       }),
     ])
 
-    revalidatePath('/dashboard/profile')
     revalidatePath('/dashboard/cuenta/perfil')
     return { success: true }
   } catch (error) {
@@ -230,9 +231,13 @@ export async function updatePasswordAction(
       },
     })
 
-    await unstable_update({})
+    // Espejá el flujo que funciona (/cambiar-password): payload NO vacío para que
+    // unstable_update refresque el cookie con la sessionVersion nueva. NO revalidar
+    // esta ruta: la contraseña no se muestra acá, y revalidar re-renderiza con el
+    // cookie viejo (sessionVersion N) contra la DB (N+1) → el jwt callback invalida
+    // la sesión → pantalla negra.
+    await unstable_update({ user: { passwordResetRequired: false } })
 
-    revalidatePath('/dashboard/profile')
     return { success: true }
   } catch (error) {
     console.error('updatePasswordAction error:', error)

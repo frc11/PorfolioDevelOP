@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { avatarImageUrlSchema } from '@/modules/chatbot/server/admin/avatarImageUrlSchema'
 
 export type ActionResult<T = unknown> = {
   success: boolean
@@ -13,13 +14,19 @@ export const SendMessageSchema = z.object({
 export const UpdateProfileSchema = z.object({
   name: z.string().trim().min(2, 'El nombre debe tener al menos 2 caracteres.'),
   companyName: z.string().trim().min(2, 'La empresa debe tener al menos 2 caracteres.'),
-  logoUrl: z.union([z.string().trim().url('La URL del logo no es válida.'), z.literal(''), z.null()]).optional(),
+  avatarImageUrl: avatarImageUrlSchema,
+  avatarEmoji: z.string().trim().max(8, 'Emoji inválido.').nullable(),
+  avatarInitials: z.string().trim().max(2, 'Máximo 2 caracteres.').nullable(),
 })
 
 export const UpdatePasswordSchema = z
   .object({
     currentPassword: z.string().min(1, 'Ingresá tu contraseña actual.'),
-    newPassword: z.string().min(8, 'La nueva contraseña debe tener al menos 8 caracteres.'),
+    newPassword: z
+      .string()
+      .min(8, 'La nueva contraseña debe tener al menos 8 caracteres.')
+      .regex(/[A-Z]/, 'La nueva contraseña debe incluir al menos una mayúscula.')
+      .regex(/[0-9]/, 'La nueva contraseña debe incluir al menos un número.'),
     confirmPassword: z.string().min(1, 'Confirmá tu nueva contraseña.'),
   })
   .refine((data) => data.newPassword === data.confirmPassword, {

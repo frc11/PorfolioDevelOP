@@ -16,7 +16,7 @@ export async function SubscriptionBanner({ orgId }: { orgId: string }) {
         El pago de tu suscripción se encuentra vencido. Por favor, regulariza tu situación para evitar interrupciones en el servicio.
       </p>
       <Link 
-        href="/dashboard/facturacion"
+        href="/dashboard/cuenta/facturacion"
         className="text-xs ml-2 font-bold text-red-400 hover:text-red-300 transition-colors uppercase tracking-wider flex items-center gap-1 bg-red-500/10 px-3 py-1 rounded border border-red-500/20"
       >
         Ir a Facturación <ExternalLink size={12} />

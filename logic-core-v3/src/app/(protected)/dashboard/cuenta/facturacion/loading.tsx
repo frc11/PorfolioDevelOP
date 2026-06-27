@@ -1,15 +1,16 @@
-import { LoadingState } from '@/components/ui'
+import { Skeleton } from '@/components/ui/Skeleton'
 
 export default function FacturacionLoading() {
   return (
-    <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 pb-20">
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <LoadingState variant="skeleton-stat" />
-        <LoadingState variant="skeleton-stat" />
-        <LoadingState variant="skeleton-stat" />
+    <div className="flex w-full flex-col gap-6">
+      {/* Plan card + invoice history */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <Skeleton className="h-96 w-full rounded-3xl" />
+        <Skeleton className="h-96 w-full rounded-3xl lg:col-span-2" />
       </div>
-      <LoadingState variant="skeleton-card" />
-      <LoadingState variant="skeleton-list" count={5} />
+
+      {/* Billing info */}
+      <Skeleton className="h-40 w-full rounded-3xl" />
     </div>
   )
 }
