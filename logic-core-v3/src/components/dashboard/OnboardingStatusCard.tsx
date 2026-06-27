@@ -1,6 +1,8 @@
 import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
+import { adminHoverCls } from '@/lib/hover'
 import { prisma } from '@/lib/prisma'
+import { cn } from '@/lib/utils'
 import type { OnboardingTaskCategory } from '@prisma/client'
 
 const CATEGORY_ICONS: Record<OnboardingTaskCategory, string> = {
@@ -41,16 +43,12 @@ export async function OnboardingStatusCard({ organizationId }: { organizationId:
 
   return (
     <div
-      style={{
-        background: 'rgba(6,182,212,0.04)',
-        backdropFilter: 'blur(20px) saturate(180%)',
-        WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-        border: '1px solid rgba(6,182,212,0.12)',
-        borderRadius: '24px',
-      }}
-      className="p-6 sm:p-8"
+      className={cn(
+        'rounded-[24px] border border-cyan-500/[0.12] bg-cyan-500/[0.04] p-6 backdrop-blur-xl sm:p-8',
+        adminHoverCls,
+      )}
     >
-      <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-cyan-400/75">
+      <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-cyan-400/75">
         Estamos configurando tu negocio
       </p>
 
