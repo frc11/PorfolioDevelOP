@@ -222,7 +222,10 @@ Guías: `relevamiento-empties.md`, `relevamiento-back-button.md`, plan #3 (sideb
   - disabled-until-valid: botón `disabled={!canSubmit}` (score 3) + chips por requisito + "Falta: …" (espejo PasswordForm).
   - Preserve-on-fail conservado (campos en useState, no se limpian en error). Mecanismo INTACTO (direct+await+push).
     auth.ts NO tocado. (Cancelar sigue con `router.back()` pre-existente; es página de auth, no portal, fuera de scope.)
-- **B3) visor /login**: PENDIENTE.
+- **B3) visor /login**: ✅ HECHO (tsc+lint verde).
+  `FloatingField` (componente LOCAL) ahora tiene visor Eye/EyeOff (strokeWidth 1.5, ojo abierto=muestra) SOLO
+  cuando `type==='password'`: toggle del `type` (password↔text), botón `tabIndex={-1}` + aria-label, absoluto a la
+  derecha (input con `pr-11`). NO toca auth/sign-in/loginAction — el campo sigue siendo el mismo `name`.
 
 ## Bitácora batch 2
 - `f3c2b32` — fix(dashboard): loading.tsx de módulos+proyecto a fullwidth (A1)
@@ -233,7 +236,8 @@ Guías: `relevamiento-empties.md`, `relevamiento-back-button.md`, plan #3 (sideb
 - `4f770eb`..`713c203` = Bloque A (verificado ALL PASS, OK visual de Valentino)
 - `3ea12d0` — docs: Bloque A verdict + decisión A5
 - `9a1d841` — docs: B1 read-first report (sin tocar código)
-- B2 — feat(cambiar-password): visor + disabled-until-valid + reqs 8+mayúscula+número (este commit)
+- `f22f8d6` — feat(cambiar-password): visor + disabled-until-valid + reqs 8+mayúscula+número (B2)
+- B3 — feat(login): visor Eye/EyeOff en el campo password (este commit)
 - NO TOCAR (heroes de venta/conexión): ChatbotUpsellLanding, ConnectStoreCard, ConnectAgendaCard,
   GBP-connect (motor-resenas), MessageThread welcome, AnalysisTeaser, BriefEmptyState.
 
