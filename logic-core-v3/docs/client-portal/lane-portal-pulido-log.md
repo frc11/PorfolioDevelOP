@@ -135,8 +135,12 @@ Guías: `relevamiento-empties.md`, `relevamiento-back-button.md`, plan #3 (sideb
     reconciliación; NO tocado por mí — mismo rule que el baseline PreloaderContext). Mi diff = solo import+empty.
   - **chatbot-admin** ✅: CrmSyncHistoryList (sm→py-10), LeadsTable (admin bot tab).
     **LatencyChart**: su `<EmptyState>` es un componente LOCAL (props status/totalSamples), NO el de ui → SKIP.
-  - **Card variant="dashed"** (VaultTab/ProjectsTab/ChatbotTab): PENDIENTE.
+  - **Card variant="dashed"** ✅: VaultTab + ProjectsTab (empties de texto → `EmptyStateMuted` title-only),
+    ChatbotTab (zero-state con icon Bot + CTA → children Link). ProjectsTab:76 (card roja "se debe crear
+    proyecto") = error/instrucción, NO lista-vacía → SKIP. tsc+lint verde.
   - **boveda (cliente)** tiene `Card variant="dashed"` pero NO es lista-vacía flagged → fuera de scope (no tocar).
+
+**TAREA 3 — TODOS los bloques migrados.** Falta: verificación adversarial + OK visual del humano.
 - NO TOCAR (heroes de venta/conexión): ChatbotUpsellLanding, ConnectStoreCard, ConnectAgendaCard,
   GBP-connect (motor-resenas), MessageThread welcome, AnalysisTeaser, BriefEmptyState.
 
@@ -158,4 +162,5 @@ Guías: `relevamiento-empties.md`, `relevamiento-back-button.md`, plan #3 (sideb
 - `565afb1` — refactor(dashboard): empties project+services → EmptyStateMuted (3-B dashboard)
 - `ea8c5ff` — refactor(chatbot): empties cliente → EmptyStateMuted (3-B chatbot)
 - `7e1ac3d` — refactor(admin): empties de leads → EmptyStateMuted (3-B admin/leads)
-- 3-B admin resto — refactor(admin): empties projects/team/misc/chatbot-admin → EmptyStateMuted (este commit)
+- `75c27f7` — refactor(admin): empties projects/team/misc/chatbot-admin → EmptyStateMuted (3-B admin resto)
+- 3-B card-dashed — refactor(admin): Card variant="dashed" empties → EmptyStateMuted (este commit)

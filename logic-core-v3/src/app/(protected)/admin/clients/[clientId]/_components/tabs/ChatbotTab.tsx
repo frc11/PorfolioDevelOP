@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { Activity, ArrowRight, BookOpen, Bot, MessageSquare, Settings, Users } from 'lucide-react'
 import { prisma } from '@/lib/prisma'
 import { Card, StatCard } from '@/components/ui'
+import { EmptyStateMuted, emptyMutedCtaCls } from '@/components/ui/EmptyStateMuted'
 import { HoverScaleCard } from '@/app/(protected)/admin/clients/_components/HoverScaleCard'
 import { ChatbotManager } from '@/components/admin/managers/ChatbotManager'
 import { QuickActionMotion } from '../QuickActionMotion'
@@ -38,22 +39,19 @@ export async function ChatbotTab({ clientId }: ChatbotTabProps) {
 
   if (!org.botConfig) {
     return (
-      <Card variant="dashed" padding="xl" className="text-center">
-        <Bot className="mx-auto mb-4 h-12 w-12 text-zinc-600" strokeWidth={1.5} />
-        <p className="mb-2 text-base font-medium text-zinc-300">
-          Este cliente todavia no tiene chatbot
-        </p>
-        <p className="mb-6 text-sm text-zinc-500">
-          Configura un bot personalizado para empezar a capturar leads.
-        </p>
+      <EmptyStateMuted
+        icon={Bot}
+        title="Este cliente todavia no tiene chatbot"
+        description="Configura un bot personalizado para empezar a capturar leads."
+      >
         <Link
           href={`/admin/chatbots/new?organizationId=${clientId}`}
-          className="inline-flex items-center gap-2 rounded-2xl bg-cyan-400/15 px-5 py-2.5 text-sm text-cyan-300 hover:bg-cyan-400/25"
+          className={emptyMutedCtaCls}
         >
           Configurar chatbot
           <ArrowRight className="h-4 w-4" strokeWidth={1.5} />
         </Link>
-      </Card>
+      </EmptyStateMuted>
     )
   }
 

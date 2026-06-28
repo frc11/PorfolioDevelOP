@@ -2,6 +2,7 @@ import { ProjectStatus } from '@prisma/client'
 import Link from 'next/link'
 import { prisma } from '@/lib/prisma'
 import { Card } from '@/components/ui'
+import { EmptyStateMuted } from '@/components/ui/EmptyStateMuted'
 import { HoverScaleCard } from '@/app/(protected)/admin/clients/_components/HoverScaleCard'
 import { ProjectManager } from '@/components/admin/managers/ProjectManager'
 
@@ -30,9 +31,7 @@ export async function ProjectsTab({ clientId }: ProjectsTabProps) {
           Proyectos
         </p>
         {projects.length === 0 ? (
-          <Card variant="dashed" padding="xl" className="text-center text-sm text-zinc-500">
-            Este cliente no tiene proyectos cargados.
-          </Card>
+          <EmptyStateMuted title="Este cliente no tiene proyectos cargados." />
         ) : (
           <div className="space-y-3">
             {projects.map((project) => (
