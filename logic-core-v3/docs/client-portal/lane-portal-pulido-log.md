@@ -173,7 +173,9 @@ Guías: `relevamiento-empties.md`, `relevamiento-back-button.md`, plan #3 (sideb
 - **A2) empty "sin proyectos" fullwidth** (dashboard/project): ✅ HECHO (tsc+lint verde).
   Sacado `max-w-4xl mx-auto` del wrapper de la rama empty (línea 159) → fullwidth como el main render
   (`flex flex-col gap-8 pb-20`). EmptyStateMuted NO tocado.
-- **A3) hover en tiles TIPO/MONTO/INICIO/ENTREGA** (project): PENDIENTE.
+- **A3) hover en tiles TIPO/MONTO/INICIO/ENTREGA** (project): ✅ HECHO (tsc+lint verde).
+  Tiles `detailFields.map` son server/estáticos (divs) → `adminHoverCls` directo en className (template literal).
+  No HoverScaleCard (no es motion). `@/lib/hover` consumido, NO modificado.
 - **A4) empties Chatbot "Leads recientes" + "Derivaciones WhatsApp"** → EmptyStateMuted: PENDIENTE.
 - **A5) padding-bottom muerto en /dashboard/plan**: PENDIENTE.
 
@@ -184,7 +186,8 @@ Guías: `relevamiento-empties.md`, `relevamiento-back-button.md`, plan #3 (sideb
 
 ## Bitácora batch 2
 - `f3c2b32` — fix(dashboard): loading.tsx de módulos+proyecto a fullwidth (A1)
-- B2-A2 — fix(project): empty "sin proyectos" a fullwidth (este commit)
+- `ab111c4` — fix(project): empty "sin proyectos" a fullwidth (A2)
+- B2-A3 — feat(project): hover en tiles de detalle del hero (este commit)
 - NO TOCAR (heroes de venta/conexión): ChatbotUpsellLanding, ConnectStoreCard, ConnectAgendaCard,
   GBP-connect (motor-resenas), MessageThread welcome, AnalysisTeaser, BriefEmptyState.
 
