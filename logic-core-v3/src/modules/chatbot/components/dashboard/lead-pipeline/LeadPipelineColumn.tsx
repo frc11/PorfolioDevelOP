@@ -2,7 +2,7 @@
 
 import type { ReactNode } from 'react'
 import { Inbox } from 'lucide-react'
-import { EmptyState } from '@/components/ui'
+import { EmptyStateMuted } from '@/components/ui/EmptyStateMuted'
 import { cn } from '@/lib/utils'
 import { CLASS_META, type LeadClass } from './classes'
 import type { LeadWithScore } from '../ClientLeadsTable'
@@ -87,12 +87,11 @@ export function LeadPipelineColumn({
         {leads.length > 0 ? (
           visibleLeads.map((lead) => renderCard(lead))
         ) : (
-          <EmptyState
+          <EmptyStateMuted
             icon={Inbox}
             title="Sin contactos"
             description="No hay contactos de este nivel con los filtros actuales."
-            variant="subtle"
-            size="sm"
+            className="py-10"
           />
         )}
       </div>

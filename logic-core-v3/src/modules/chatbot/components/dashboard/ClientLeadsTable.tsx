@@ -4,7 +4,9 @@ import { useState, useEffect, useMemo, useCallback, useRef, useTransition, type 
 import { useRouter, usePathname } from 'next/navigation'
 import { motion } from 'motion/react'
 import { Users, Filter, Ban } from 'lucide-react'
-import { PageHeader, EmptyState } from '@/components/ui'
+import Link from 'next/link'
+import { PageHeader } from '@/components/ui'
+import { EmptyStateMuted, emptyMutedCtaCls } from '@/components/ui/EmptyStateMuted'
 import { staggerContainer, staggerItem } from '@/lib/motion-variants'
 import { useReducedMotion } from '@/lib/use-reduced-motion'
 import { BusinessLeadCard } from './BusinessLeadCard'
@@ -235,24 +237,27 @@ export function ClientLeadsTable({
 
       {isTrulyEmpty ? (
         showingDq ? (
-          <EmptyState
+          <EmptyStateMuted
             icon={Ban}
             title="Todavía no hay contactos descartados"
             description="Cuando el bot marque una consulta como no comercial (postventa, empleo, spam o proveedores), vas a verla acá."
           />
         ) : hadOnlyDq ? (
-          <EmptyState
+          <EmptyStateMuted
             icon={Filter}
             title="Tu bot capturó contactos, pero ninguno requiere seguimiento"
             description="Las consultas recibidas fueron de postventa, propuestas de empleo o spam. Tocá 'Descartados' arriba si querés verlas."
           />
         ) : (
-          <EmptyState
+          <EmptyStateMuted
             icon={Users}
             title="Tu bot todavía no capturó contactos"
             description="Cuando alguien charle con tu chatbot y deje sus datos, vas a verlos acá. Compartí tu sitio para que empiecen a llegar."
-            cta={{ label: 'Ver mi chatbot', href: '/dashboard/chatbot' }}
-          />
+          >
+            <Link href="/dashboard/chatbot" className={emptyMutedCtaCls}>
+              Ver mi chatbot
+            </Link>
+          </EmptyStateMuted>
         )
       ) : (
         <>
@@ -315,7 +320,7 @@ export function ClientLeadsTable({
           {/* Lista — pipeline por clasificación (plan con scoring, modo comercial)
               o grilla plana (descartados / plan sin scoring). */}
           {filtered.length === 0 ? (
-            <EmptyState
+            <EmptyStateMuted
               icon={Filter}
               title="No hay contactos con esos filtros"
               description={
@@ -323,8 +328,7 @@ export function ClientLeadsTable({
                   ? "Probá cambiar la fecha o volver a 'Contactos a seguir' para ver los activos."
                   : 'Probá cambiar la fecha o el estado para ver otros contactos.'
               }
-              variant="subtle"
-              size="sm"
+              className="py-10"
             />
           ) : usePipeline ? (
             <LeadPipeline leads={filtered} freshIds={freshIds} />

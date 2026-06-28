@@ -23,7 +23,8 @@ import {
 import { Badge } from '@/components/ui/Badge'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
-import { EmptyState, Select } from '@/components/ui'
+import { Select } from '@/components/ui'
+import { EmptyStateMuted } from '@/components/ui/EmptyStateMuted'
 import { LeadScoringTeaser } from './LeadScoringTeaser'
 import { updateLeadStatus } from '@/modules/chatbot/server/admin/updateLeadStatus'
 import type { ChatbotLead, ChatbotLeadStatus } from '@prisma/client'
@@ -389,12 +390,11 @@ export function LeadDetail({ lead, enriched, messages, botSlug, showScoring }: L
         )}
 
         {messages.length === 0 ? (
-          <EmptyState
+          <EmptyStateMuted
             icon={MessageSquare}
             title="Sin conversación guardada"
             description="No tenemos los mensajes anteriores de esta persona. Igual podés contactarla con los datos de arriba."
-            variant="subtle"
-            size="sm"
+            className="py-10"
           />
         ) : (
           <div className="space-y-2">

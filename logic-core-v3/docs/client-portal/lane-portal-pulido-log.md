@@ -118,7 +118,13 @@ Guías: `relevamiento-empties.md`, `relevamiento-back-button.md`, plan #3 (sideb
   - project "siendo preparado": glow card → `EmptyStateMuted` (icon FolderOpen, CTA "Hablar con el equipo").
   - services "sin servicios activos": hand-roll → canon (se elimina el workaround de boundary: el canon es
     universal, el ícono ya no cruza el RSC boundary). CTA ahora con ícono MessageSquare (consistente c/ project).
-- **chatbot / admin**: PENDIENTE.
+- **chatbot** (cliente): ✅ HECHO (tsc verde; 1 warning lint PRE-EXISTENTE en ClientLeadsTable:186
+  useMemo deps, NO introducido acá). Archivos: ConversationsTable, ClientLeadsTable (4 empties: 2 swap,
+  1 con CTA→children Link, 1 sm→py-10), LeadColumnOverview + LeadPipelineColumn (columnas→py-10),
+  LeadDetail "sin conversación" (sm→py-10), chatbot/settings server page (Bot).
+  - **CalibratingBlock**: ya usaba `ResultEmptyState` (relevamiento #8 desactualizado) → nada que hacer.
+  - **LeadsTable.tsx** (dashboards/): es de ADMIN (lo usa admin/chatbots/[botId]/tabs/LeadsTab) → va en admin.
+- **admin**: PENDIENTE (incluye LeadsTable, CrmSyncHistoryList, LatencyChart + Card variant="dashed").
 - NO TOCAR (heroes de venta/conexión): ChatbotUpsellLanding, ConnectStoreCard, ConnectAgendaCard,
   GBP-connect (motor-resenas), MessageThread welcome, AnalysisTeaser, BriefEmptyState.
 
@@ -137,4 +143,5 @@ Guías: `relevamiento-empties.md`, `relevamiento-back-button.md`, plan #3 (sideb
 - `63c455f` — feat(ui): EmptyStateMuted (canon único de empty LIST) (3-A)
 - `79ce485` — refactor(modules): empties LIST → EmptyStateMuted (3-B modules)
 - `211672f` — refactor(soporte): empties de columna → EmptyStateMuted (3-B soporte)
-- 3-B dashboard — refactor(dashboard): empties project+services → EmptyStateMuted (este commit)
+- `565afb1` — refactor(dashboard): empties project+services → EmptyStateMuted (3-B dashboard)
+- 3-B chatbot — refactor(chatbot): empties cliente → EmptyStateMuted (este commit)

@@ -4,7 +4,8 @@ import { Fragment, useState } from 'react'
 import type { Prisma } from '@prisma/client'
 import { motion } from 'motion/react'
 import { MessagesSquare, ChevronDown, Bot, User as UserIcon, Loader2 } from 'lucide-react'
-import { EmptyState } from '@/components/ui'
+import Link from 'next/link'
+import { EmptyStateMuted, emptyMutedCtaCls } from '@/components/ui/EmptyStateMuted'
 
 interface ConversationRow {
   id: string
@@ -73,12 +74,15 @@ export function ConversationsTable({
 
   if (conversations.length === 0) {
     return (
-      <EmptyState
+      <EmptyStateMuted
         icon={MessagesSquare}
         title="Todavía no hay conversaciones"
         description="Cuando alguien hable con tu chatbot en el sitio, el historial completo va a aparecer acá."
-        cta={{ label: 'Ver cómo se instala', href: '/dashboard/chatbot/install' }}
-      />
+      >
+        <Link href="/dashboard/chatbot/install" className={emptyMutedCtaCls}>
+          Ver cómo se instala
+        </Link>
+      </EmptyStateMuted>
     )
   }
   const visible = conversations.length

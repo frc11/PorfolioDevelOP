@@ -4,7 +4,7 @@ import { useEffect, useRef, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { AnimatePresence, motion } from 'motion/react'
 import { Inbox, X } from 'lucide-react'
-import { EmptyState } from '@/components/ui'
+import { EmptyStateMuted } from '@/components/ui/EmptyStateMuted'
 import { cn } from '@/lib/utils'
 import { useIsClient } from '@/lib/use-is-client'
 import { useReducedMotion } from '@/lib/use-reduced-motion'
@@ -151,10 +151,11 @@ export function LeadColumnOverview({ leadClass, leads, renderCard, onClose }: Le
                   {leads.map((lead) => renderCard(lead))}
                 </div>
               ) : (
-                <EmptyState
+                <EmptyStateMuted
                   icon={Inbox}
                   title="Sin contactos en esta columna"
                   description="Cuando lleguen contactos de este nivel van a aparecer acá."
+                  className="py-10"
                 />
               )}
             </div>
