@@ -3,7 +3,8 @@
 import { useState } from 'react'
 import { AlertTriangle, CheckCircle, Clock, Eye, Inbox } from 'lucide-react'
 import { toast } from 'sonner'
-import { EmptyState, StatCard } from '@/components/ui'
+import { StatCard } from '@/components/ui'
+import { EmptyStateMuted } from '@/components/ui/EmptyStateMuted'
 import { adminHoverCls } from '@/lib/hover'
 import { AlertsDateFilter } from './_components/alerts-date-filter'
 import { DEFAULT_DATE_FILTER, matchesDateFilter, type DateFilterState } from './_components/alerts-filters'
@@ -280,7 +281,7 @@ export function AlertsClient({ initialAlerts }: AlertsClientProps) {
       </div>
 
       {alerts.length === 0 && (
-        <EmptyState
+        <EmptyStateMuted
           icon={CheckCircle}
           title="Sin alertas"
           description="Todo está funcionando correctamente"

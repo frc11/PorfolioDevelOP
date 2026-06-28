@@ -5,7 +5,7 @@ import { useMemo, useState } from 'react'
 import { motion, useReducedMotion } from 'motion/react'
 import { LifeBuoy, MessageSquareText } from 'lucide-react'
 import type { TicketStatus } from '@prisma/client'
-import { EmptyState } from '@/components/ui'
+import { EmptyStateMuted } from '@/components/ui/EmptyStateMuted'
 import { staggerContainer, staggerItem } from '@/lib/motion-variants'
 import { TicketDateFilter, type TicketDateRange } from './ticket-date-filter'
 
@@ -146,7 +146,7 @@ export function TicketList({ tickets }: TicketListProps) {
       </div>
 
       {filteredTickets.length === 0 ? (
-        <EmptyState
+        <EmptyStateMuted
           icon={LifeBuoy}
           title="No hay tickets en esta bandeja"
           description="Cuando entren nuevas conversaciones de soporte para este estado, van a aparecer aca."

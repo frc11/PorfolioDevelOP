@@ -9,7 +9,7 @@ import { Card } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
 import { Input } from '@/components/ui/Input'
 import { Select } from '@/components/ui/Select'
-import { EmptyState } from '@/components/ui/EmptyState'
+import { EmptyStateMuted, emptyMutedCtaCls } from '@/components/ui/EmptyStateMuted'
 import { BulkActionBar } from './BulkActionBar'
 import type { BotListItem } from '@/modules/chatbot/server/admin/listAllBots'
 
@@ -136,7 +136,7 @@ export function BotsListClient({ bots }: Props) {
       </AnimatePresence>
 
       {filtered.length === 0 ? (
-        <EmptyState
+        <EmptyStateMuted
           icon={Bot}
           title={search || statusFilter !== 'all' ? 'Sin resultados' : 'Sin chatbots todavía'}
           description={
@@ -144,12 +144,13 @@ export function BotsListClient({ bots }: Props) {
               ? 'Probá ajustar los filtros'
               : 'Creá tu primer chatbot para empezar'
           }
-          cta={
-            !search && statusFilter === 'all'
-              ? { label: 'Crear chatbot', href: '/admin/chatbots/new' }
-              : undefined
-          }
-        />
+        >
+          {!search && statusFilter === 'all' && (
+            <Link href="/admin/chatbots/new" className={emptyMutedCtaCls}>
+              Crear chatbot
+            </Link>
+          )}
+        </EmptyStateMuted>
       ) : (
         <motion.div
           key={`${statusFilter}-${industryFilter}`}

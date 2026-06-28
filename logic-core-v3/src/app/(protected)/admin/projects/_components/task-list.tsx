@@ -18,7 +18,7 @@ import {
   deleteTask,
   updateTask,
 } from '@/app/(protected)/admin/team/_actions/task.actions'
-import { EmptyState } from '@/components/ui'
+import { EmptyStateMuted } from '@/components/ui/EmptyStateMuted'
 import { sendTaskForApprovalAction } from '@/lib/actions/projects'
 import { OverlayModal } from './overlay-modal'
 import { TaskForm } from './task-form'
@@ -251,7 +251,7 @@ export function TaskList({
 
   if (localTasks.length === 0) {
     return (
-      <EmptyState
+      <EmptyStateMuted
         icon={FolderKanban}
         title="Todavia no hay tareas"
         description="Crea la primera tarea para empezar a ordenar backlog, responsables y tiempos del proyecto."
@@ -526,10 +526,11 @@ export function TaskList({
                                   </div>
                                 ))
                               ) : (
-                                <EmptyState
+                                <EmptyStateMuted
                                   icon={Clock3}
                                   title="Sin registros de tiempo"
                                   description="Todavia no hay horas cargadas para esta tarea."
+                                  className="py-10"
                                 />
                               )}
                             </div>

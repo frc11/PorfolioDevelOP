@@ -3,7 +3,8 @@
 import { useMemo, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 import { Building2, ChevronDown, Clock, Filter, History, User } from 'lucide-react'
-import { Badge, Button, Callout, Card, EmptyState, Select } from '@/components/ui'
+import { Badge, Button, Callout, Card, Select } from '@/components/ui'
+import { EmptyStateMuted } from '@/components/ui/EmptyStateMuted'
 import { staggerContainer, staggerItem } from '@/lib/motion-variants'
 import { useReducedMotion } from '@/lib/use-reduced-motion'
 import { useIsClient } from '@/lib/use-is-client'
@@ -175,7 +176,7 @@ export function AuditLogClient({
             Cargando registros...
           </div>
         ) : (
-          <EmptyState
+          <EmptyStateMuted
             icon={History}
             title="Sin registros para este filtro"
             description="Cuando haya acciones administrativas que coincidan, van a aparecer aca."

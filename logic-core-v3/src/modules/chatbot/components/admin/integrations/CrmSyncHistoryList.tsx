@@ -1,5 +1,5 @@
 import { History } from 'lucide-react'
-import { EmptyState } from '@/components/ui/EmptyState'
+import { EmptyStateMuted } from '@/components/ui/EmptyStateMuted'
 import type { SyncHistoryEntry } from '@/modules/chatbot/server/admin/integrations/getCrmSyncHistory'
 import { CrmSyncBadge } from './CrmSyncBadge'
 import { RetrySyncButton } from './RetrySyncButton'
@@ -25,11 +25,11 @@ function formatAttemptedAt(date: Date): string {
 export function CrmSyncHistoryList({ organizationId, entries }: CrmSyncHistoryListProps) {
   if (entries.length === 0) {
     return (
-      <EmptyState
+      <EmptyStateMuted
         icon={History}
         title="Todavía no hay sincronizaciones"
         description="Cuando el chatbot capture un lead, va a aparecer acá el resultado del sync al CRM."
-        size="sm"
+        className="py-10"
       />
     )
   }

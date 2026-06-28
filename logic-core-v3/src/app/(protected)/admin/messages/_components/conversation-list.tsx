@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { motion, useReducedMotion } from 'motion/react'
 import { MessageCircleMore } from 'lucide-react'
-import { EmptyState } from '@/components/ui'
+import { EmptyStateMuted } from '@/components/ui/EmptyStateMuted'
 import { staggerContainer, staggerItem } from '@/lib/motion-variants'
 import { activeOrgIdFromPath } from './active-org'
 
@@ -65,7 +65,7 @@ export function ConversationList({ conversations }: ConversationListProps) {
   if (conversations.length === 0) {
     return (
       <div className="flex h-full min-h-0 items-center justify-center">
-        <EmptyState
+        <EmptyStateMuted
           icon={MessageCircleMore}
           title="No hay conversaciones activas"
           description="Cuando los clientes escriban desde el portal, sus mensajes aparecerán acá."

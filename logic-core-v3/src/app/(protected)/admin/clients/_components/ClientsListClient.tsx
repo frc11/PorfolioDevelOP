@@ -6,7 +6,8 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { motion } from 'motion/react'
 import { toast } from 'sonner'
 import { Archive, ArchiveRestore, Bot, Building2, Check, Download, Loader2, Pause, Pin, PinOff, Plus, Search, Trash2, X } from 'lucide-react'
-import { Button, Card, EmptyState, Input, Select } from '@/components/ui'
+import { Button, Card, Input, Select } from '@/components/ui'
+import { EmptyStateMuted, emptyMutedCtaCls } from '@/components/ui/EmptyStateMuted'
 import { InlineConfirm } from '@/app/(protected)/admin/_components/inline-confirm'
 import { TypeToConfirmDialog } from '@/app/(protected)/admin/_components/type-to-confirm-dialog'
 import { archiveClient, unarchiveClient } from '@/modules/chatbot/server/admin/archiveClient'
@@ -465,7 +466,7 @@ export function ClientsListClient({ clients, archivedClients }: ClientsListClien
       )}
 
       {filtered.length === 0 ? (
-        <EmptyState
+        <EmptyStateMuted
           icon={showArchived ? Archive : Building2}
           title={
             search
@@ -479,12 +480,13 @@ export function ClientsListClient({ clients, archivedClients }: ClientsListClien
               ? 'Los clientes que archives van a aparecer aca.'
               : 'Ajusta la busqueda o los filtros para encontrar clientes.'
           }
-          cta={
-            showArchived
-              ? undefined
-              : { label: 'Nuevo cliente', href: '/admin/clients/new' }
-          }
-        />
+        >
+          {!showArchived && (
+            <Link href="/admin/clients/new" className={emptyMutedCtaCls}>
+              Nuevo cliente
+            </Link>
+          )}
+        </EmptyStateMuted>
       ) : (
         <motion.div
           className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3"

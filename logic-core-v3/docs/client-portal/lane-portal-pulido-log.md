@@ -127,8 +127,16 @@ Guías: `relevamiento-empties.md`, `relevamiento-back-button.md`, plan #3 (sideb
 - **admin** (EN CURSO, por sub-área; `_design/*` EXCLUIDO = playground):
   - **admin/leads** ✅: pipeline-column + column-overview (py-10), inbound-leads-table (drop size=md),
     demo-form, lead-activity-feed (cta onClick→`<button>` con `!showForm`). tsc+lint verde.
-  - **admin/projects+team, admin/misc (clients/bots/audit/tickets/messages/alerts), chatbot-admin
-    (CrmSyncHistoryList/LatencyChart/LeadsTable), Card variant="dashed" (VaultTab/ProjectsTab/ChatbotTab)**: PENDIENTE.
+  - **admin/projects+team** ✅: task-list (×2: lista + nested "sin registros" py-10), time-entry-panel,
+    member-workload.
+  - **admin/misc** ✅: AuditLogClient, ticket-list, messages/conversation-list, AlertsClient,
+    alert-column-overview (py-10), ClientsListClient (ternary+cta→Link), BotsListClient (ternary+cta→Link).
+    ⚠️ **conversation-list** arrastra error lint PRE-EXISTENTE `set-state-in-effect` (línea 57, useEffect de
+    reconciliación; NO tocado por mí — mismo rule que el baseline PreloaderContext). Mi diff = solo import+empty.
+  - **chatbot-admin** ✅: CrmSyncHistoryList (sm→py-10), LeadsTable (admin bot tab).
+    **LatencyChart**: su `<EmptyState>` es un componente LOCAL (props status/totalSamples), NO el de ui → SKIP.
+  - **Card variant="dashed"** (VaultTab/ProjectsTab/ChatbotTab): PENDIENTE.
+  - **boveda (cliente)** tiene `Card variant="dashed"` pero NO es lista-vacía flagged → fuera de scope (no tocar).
 - NO TOCAR (heroes de venta/conexión): ChatbotUpsellLanding, ConnectStoreCard, ConnectAgendaCard,
   GBP-connect (motor-resenas), MessageThread welcome, AnalysisTeaser, BriefEmptyState.
 
@@ -149,4 +157,5 @@ Guías: `relevamiento-empties.md`, `relevamiento-back-button.md`, plan #3 (sideb
 - `211672f` — refactor(soporte): empties de columna → EmptyStateMuted (3-B soporte)
 - `565afb1` — refactor(dashboard): empties project+services → EmptyStateMuted (3-B dashboard)
 - `ea8c5ff` — refactor(chatbot): empties cliente → EmptyStateMuted (3-B chatbot)
-- 3-B admin/leads — refactor(admin): empties de leads → EmptyStateMuted (este commit)
+- `7e1ac3d` — refactor(admin): empties de leads → EmptyStateMuted (3-B admin/leads)
+- 3-B admin resto — refactor(admin): empties projects/team/misc/chatbot-admin → EmptyStateMuted (este commit)
