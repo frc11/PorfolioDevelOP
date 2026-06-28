@@ -196,7 +196,24 @@ Guías: `relevamiento-empties.md`, `relevamiento-back-button.md`, plan #3 (sideb
 - **PENDIENTE:** OK visual del humano (Bloque A) antes de arrancar Bloque B.
 
 ## BLOQUE B — password (read-first obligatorio)
-- **B1) READ-FIRST report** (/cambiar-password + /login): PENDIENTE.
+- **B1) READ-FIRST report** (/cambiar-password + /login): ✅ ENTREGADO (read-only, sin tocar código). Hallazgos:
+  - **/cambiar-password** (`app/cambiar-password/{page,CambiarPasswordForm,actions}.tsx`): YA usa el patrón canónico
+    SEGURO — **invocación DIRECTA** (`startTransition`+`await cambiarPasswordAction`) y navega `router.push('/dashboard')`
+    DESPUÉS del await; NO usa `<form action>`. La action incrementa `sessionVersion` Y llama `unstable_update`
+    (trigger='update' → auth.ts SKIPea el kill-check y refresca el token a N+1). → **NO tiene riesgo de pantalla negra.**
+    Validación: client `validate()` on-submit + server Zod = **8 + letras + números** (difiere de cuenta = MAYÚSCULA).
+    **Preserve-on-fail: SÍ** (campos en useState, no se limpian en error). **Disabled-until-valid: NO** (valida on-submit).
+    **Visor: NO** (usa `<Input type="password">`).
+  - **/login** (`app/login/page.tsx`): el input de password es `FloatingField` (componente LOCAL, no frozen) con `<input
+    type="password">`. Mecanismo `<form action>`+useActionState (sign-in, no tocar lógica). **Visor: NO.**
+  - **Canon (PasswordForm, ProfileForms.tsx)**: direct+await+`router.refresh()` después; visor Eye/EyeOff (raw input +
+    botón tabIndex=-1, ojo-abierto=muestra, SIN strokeWidth → B2/B3 lo ponen en 1.5); reqs 8+MAYÚSCULA+número;
+    disabled-until-score-3; preserve-on-fail.
+  - **PARADAS: ninguna.** El visor NO requiere tocar `ui/Input` frozen (ui/Input no tiene slot de adorno → se usa el
+    patrón raw-input+botón de PasswordForm). No hay que tocar auth.ts. B2 = solo visor (+ opcional disabled-until-valid);
+    NO migrar mecanismo. B3 = visor en FloatingField. **DECISIÓN pendiente Valentino:** reqs de /cambiar-password
+    ¿quedan en letras+números (como pide B2) o se unifican con cuenta (MAYÚSCULA)?
+  - **FRENO** — no se toca password hasta OK de Valentino sobre este reporte.
 - **B2) visor + validaciones /cambiar-password**: PENDIENTE.
 - **B3) visor /login**: PENDIENTE.
 
