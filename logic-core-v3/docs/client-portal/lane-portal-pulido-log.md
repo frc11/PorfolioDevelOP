@@ -184,8 +184,16 @@ Guías: `relevamiento-empties.md`, `relevamiento-back-button.md`, plan #3 (sideb
   es IDÉNTICO al home y a TODO el portal (resultados/modules/chatbot/project/soporte todos usan `pb-20`).
   La ÚNICA página con pb reducido es **cuenta** (layout `pb-6`, pages sin pb) — ese fue su fix puntual.
   Decisión tomada (alineado al precedente cuenta que vos citaste): plan page+loading `pb-20`→`pb-6`.
-  CONSECUENCIA: plan queda como cuenta pero DISTINTO del resto del portal (aún en `pb-20`). Si querés
-  uniformidad total = sweep portal-wide `pb-20`→`pb-6` (su propio lane, fuera de A5). A confirmar en checkpoint.
+  CONSECUENCIA: plan queda como cuenta pero DISTINTO del resto del portal (aún en `pb-20`).
+  **DECISIÓN Valentino (2026-06-28): dejar plan en `pb-6`** (como cuenta). Sweep portal-wide `pb-20`→`pb-6`
+  = fichado para un lane aparte si se quiere uniformidad total.
+
+### Verificación adversarial Bloque A (workflow read-only, 3 lentes) — ✅ ALL PASS
+- **scope/frozen:** 8 archivos en scope; ningún frozen modificado (hover.ts, EmptyStateMuted, ui/*, shell,
+  primitivos solo consumidos vía import).
+- **correctness:** A1-A5 matchean el spec exacto; `EmptyStateMuted` + `adminHoverCls` sin modificar.
+- **hard-rules:** sin `any`/`router.push`/`router.back` nuevos; A4 importa del path canon; ramas intactas.
+- **PENDIENTE:** OK visual del humano (Bloque A) antes de arrancar Bloque B.
 
 ## BLOQUE B — password (read-first obligatorio)
 - **B1) READ-FIRST report** (/cambiar-password + /login): PENDIENTE.
@@ -197,7 +205,8 @@ Guías: `relevamiento-empties.md`, `relevamiento-back-button.md`, plan #3 (sideb
 - `ab111c4` — fix(project): empty "sin proyectos" a fullwidth (A2)
 - `82aed0e` — feat(project): hover en tiles de detalle del hero (A3)
 - `6ea7df9` — refactor(chatbot): empties del overview → EmptyStateMuted (A4)
-- B2-A5 — fix(plan): bottom padding pb-20→pb-6 alineado a cuenta (este commit)
+- `713c203` — fix(plan): bottom padding pb-20→pb-6 alineado a cuenta (A5)
+- `4f770eb`..`713c203` = Bloque A (verificado ALL PASS, pendiente OK visual)
 - NO TOCAR (heroes de venta/conexión): ChatbotUpsellLanding, ConnectStoreCard, ConnectAgendaCard,
   GBP-connect (motor-resenas), MessageThread welcome, AnalysisTeaser, BriefEmptyState.
 
