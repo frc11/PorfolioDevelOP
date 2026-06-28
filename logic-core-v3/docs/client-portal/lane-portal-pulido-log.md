@@ -108,7 +108,11 @@ Guías: `relevamiento-empties.md`, `relevamiento-back-button.md`, plan #3 (sideb
   (agenda "sin turnos", tienda "sin pedidos") se baja el padding vía `className` (twMerge pisa `py-16`).
 
 ### 3-B) Migración LIST → EmptyStateMuted (por área, commit por bloque)
-- **modules** (email-marketing campaigns+contactos, motor-resenas, agenda, tienda): EN CURSO.
+- **modules** (email-marketing campaigns+contactos, motor-resenas, agenda, tienda): ✅ HECHO (tsc+lint verde).
+  - campaigns: `cta` → `children` `<Link className={emptyMutedCtaCls}>` (+ ícono Plus, espejo del toolbar).
+  - contactos / motor-resenas "sin reseñas": swap directo (sin CTA).
+  - agenda "sin turnos" + tienda "sin pedidos": eran `size="sm"` (tienda además `variant="subtle"` = texto plano)
+    → canon con `className="py-10"`. ⚠️ tienda pasa de texto-plano a caja punteada (más prominente) — revisar visual.
 - **soporte / chatbot / project+services / admin**: PENDIENTE.
 - NO TOCAR (heroes de venta/conexión): ChatbotUpsellLanding, ConnectStoreCard, ConnectAgendaCard,
   GBP-connect (motor-resenas), MessageThread welcome, AnalysisTeaser, BriefEmptyState.
@@ -125,4 +129,5 @@ Guías: `relevamiento-empties.md`, `relevamiento-back-button.md`, plan #3 (sideb
 - `2e6dc93` — fix(email-marketing): Cancelar de send usa Link, no router.back (2-C send)
 - `461824d` — docs(email-marketing): documentar router.push post-acción en campaigns/new (2-C new)
 - `e6a24a9` — docs: log Tarea 2 (verificación adversarial all-pass)
-- 3-A — feat(ui): EmptyStateMuted (canon único de empty LIST) (este commit)
+- `63c455f` — feat(ui): EmptyStateMuted (canon único de empty LIST) (3-A)
+- 3-B modules — refactor(modules): empties LIST → EmptyStateMuted (este commit)

@@ -13,7 +13,8 @@ import { resolveOrgId } from '@/lib/preview'
 import { isModuleActive } from '@/lib/modules/check-activation'
 import { getStoreSummary, type TiendanubeStoreSummary } from '@/lib/integrations/tiendanube'
 import { prisma } from '@/lib/prisma'
-import { EmptyState, PageHeader } from '@/components/ui'
+import { PageHeader } from '@/components/ui'
+import { EmptyStateMuted } from '@/components/ui/EmptyStateMuted'
 import { ConnectStoreCard } from './_components/ConnectStoreCard'
 
 export const dynamic = 'force-dynamic'
@@ -154,12 +155,11 @@ async function TiendanubeOverview({ organizationId }: { organizationId: string }
         </h2>
 
         {data.topProducts.length === 0 ? (
-          <EmptyState
+          <EmptyStateMuted
             icon={ShoppingCart}
             title="Sin pedidos este mes"
             description="Cuando se hagan compras en tu tienda van a aparecer acá los productos más vendidos del mes."
-            size="sm"
-            variant="subtle"
+            className="py-10"
           />
         ) : (
           <ol className="flex flex-col gap-3">

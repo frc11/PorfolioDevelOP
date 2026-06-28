@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation'
 import { Plus, Send, FileText, AlertCircle, Mail } from 'lucide-react'
 import { resolveOrgId } from '@/lib/preview'
 import { prisma } from '@/lib/prisma'
-import { EmptyState } from '@/components/ui'
+import { EmptyStateMuted, emptyMutedCtaCls } from '@/components/ui/EmptyStateMuted'
 import type { EmailCampaignStatus } from '@prisma/client'
 
 export const dynamic = 'force-dynamic'
@@ -54,14 +54,18 @@ export default async function CampaignsPage() {
         </Link>
       </div>
 
-      {/* Empty state — B12.2: unificado al EmptyState compartido */}
+      {/* Empty state — canon único EmptyStateMuted (punteado/muted) */}
       {campaigns.length === 0 && (
-        <EmptyState
+        <EmptyStateMuted
           icon={Mail}
           title="Todavía no hay campañas"
           description="Creá tu primera campaña de email y empezá a conectar con tus contactos."
-          cta={{ label: 'Nueva campaña', href: '/dashboard/modules/email-marketing/campaigns/new' }}
-        />
+        >
+          <Link href="/dashboard/modules/email-marketing/campaigns/new" className={emptyMutedCtaCls}>
+            <Plus size={13} strokeWidth={1.5} />
+            Nueva campaña
+          </Link>
+        </EmptyStateMuted>
       )}
 
       {/* Campaign list */}
