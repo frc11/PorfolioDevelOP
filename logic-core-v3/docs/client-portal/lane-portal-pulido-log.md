@@ -237,7 +237,18 @@ Guías: `relevamiento-empties.md`, `relevamiento-back-button.md`, plan #3 (sideb
 - `3ea12d0` — docs: Bloque A verdict + decisión A5
 - `9a1d841` — docs: B1 read-first report (sin tocar código)
 - `f22f8d6` — feat(cambiar-password): visor + disabled-until-valid + reqs 8+mayúscula+número (B2)
-- B3 — feat(login): visor Eye/EyeOff en el campo password (este commit)
+- `e3740a2` — feat(login): visor Eye/EyeOff en el campo password (B3)
+
+### Verificación adversarial Bloque B (workflow read-only, 4 lentes) — ✅ ALL PASS
+- **scope/frozen/auth:** 4 archivos; `auth.ts`/`prisma.ts`/`schema`/`ui/*` SIN tocar (import de ui/Input removido
+  de CambiarPasswordForm, pero el primitivo no se edita).
+- **cambiar-password:** visor no-invertido; reqs 8+mayúscula+número unificados y SINCRONIZADOS client↔server;
+  disabled-until-valid + chips; preserve-on-fail conservado; mecanismo seguro + sessionVersion/unstable_update intactos.
+- **login:** visor solo en password; lógica de sign-in sin tocar.
+- **hard-rules:** sin `any`/secrets/`router.push`/`router.back` nuevos; aria-labels + strokeWidth 1.5.
+- **Nota (no-blocker):** `<Field>` no cablea `htmlFor` al input — PRE-EXISTENTE (el viejo ui/Input igual no se asociaba),
+  no es regresión de este batch.
+- **PENDIENTE:** OK visual del humano (Bloque B). Sin merge — lo hace Valentino.
 - NO TOCAR (heroes de venta/conexión): ChatbotUpsellLanding, ConnectStoreCard, ConnectAgendaCard,
   GBP-connect (motor-resenas), MessageThread welcome, AnalysisTeaser, BriefEmptyState.
 
