@@ -124,7 +124,11 @@ Guías: `relevamiento-empties.md`, `relevamiento-back-button.md`, plan #3 (sideb
   LeadDetail "sin conversación" (sm→py-10), chatbot/settings server page (Bot).
   - **CalibratingBlock**: ya usaba `ResultEmptyState` (relevamiento #8 desactualizado) → nada que hacer.
   - **LeadsTable.tsx** (dashboards/): es de ADMIN (lo usa admin/chatbots/[botId]/tabs/LeadsTab) → va en admin.
-- **admin**: PENDIENTE (incluye LeadsTable, CrmSyncHistoryList, LatencyChart + Card variant="dashed").
+- **admin** (EN CURSO, por sub-área; `_design/*` EXCLUIDO = playground):
+  - **admin/leads** ✅: pipeline-column + column-overview (py-10), inbound-leads-table (drop size=md),
+    demo-form, lead-activity-feed (cta onClick→`<button>` con `!showForm`). tsc+lint verde.
+  - **admin/projects+team, admin/misc (clients/bots/audit/tickets/messages/alerts), chatbot-admin
+    (CrmSyncHistoryList/LatencyChart/LeadsTable), Card variant="dashed" (VaultTab/ProjectsTab/ChatbotTab)**: PENDIENTE.
 - NO TOCAR (heroes de venta/conexión): ChatbotUpsellLanding, ConnectStoreCard, ConnectAgendaCard,
   GBP-connect (motor-resenas), MessageThread welcome, AnalysisTeaser, BriefEmptyState.
 
@@ -144,4 +148,5 @@ Guías: `relevamiento-empties.md`, `relevamiento-back-button.md`, plan #3 (sideb
 - `79ce485` — refactor(modules): empties LIST → EmptyStateMuted (3-B modules)
 - `211672f` — refactor(soporte): empties de columna → EmptyStateMuted (3-B soporte)
 - `565afb1` — refactor(dashboard): empties project+services → EmptyStateMuted (3-B dashboard)
-- 3-B chatbot — refactor(chatbot): empties cliente → EmptyStateMuted (este commit)
+- `ea8c5ff` — refactor(chatbot): empties cliente → EmptyStateMuted (3-B chatbot)
+- 3-B admin/leads — refactor(admin): empties de leads → EmptyStateMuted (este commit)

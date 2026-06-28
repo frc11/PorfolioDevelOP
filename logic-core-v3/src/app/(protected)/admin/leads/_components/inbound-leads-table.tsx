@@ -3,7 +3,8 @@
 import { useEffect, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { CheckCircle2, Sparkles, Users } from 'lucide-react'
-import { Button, Card, EmptyState } from '@/components/ui'
+import { Button, Card } from '@/components/ui'
+import { EmptyStateMuted } from '@/components/ui/EmptyStateMuted'
 import { convertInboundToLead } from '../_actions/inbound.actions'
 import { InboundPeriodFilter } from './inbound-period-filter'
 
@@ -89,11 +90,10 @@ export function InboundLeadsTable({ leads }: InboundLeadsTableProps) {
       ) : null}
 
       {localLeads.length === 0 ? (
-        <EmptyState
+        <EmptyStateMuted
           icon={Users}
           title="Todavia no hay leads inbound"
           description="Cuando entren formularios desde el portal, van a aparecer aca para convertirlos al CRM."
-          size="md"
         />
       ) : (
         <>

@@ -2,7 +2,7 @@
 
 import type { ReactNode } from 'react'
 import { Inbox } from 'lucide-react'
-import { EmptyState } from '@/components/ui'
+import { EmptyStateMuted } from '@/components/ui/EmptyStateMuted'
 import { cn } from '@/lib/utils'
 import {
   STATUS_LABELS,
@@ -103,10 +103,11 @@ export function PipelineColumn({
         {leads.length > 0 ? (
           visibleLeads.map((lead) => renderCard(lead))
         ) : (
-          <EmptyState
+          <EmptyStateMuted
             icon={Inbox}
             title="Sin leads en esta etapa"
             description="Cuando muevas prospectos por el pipeline van a aparecer aca."
+            className="py-10"
           />
         )}
       </div>
