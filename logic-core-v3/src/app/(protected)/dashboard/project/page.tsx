@@ -4,6 +4,7 @@ import { resolveOrgId } from '@/lib/preview'
 import { ProjectStatus, ServiceStatus, ServiceType, OsServiceType, Prisma } from '@prisma/client'
 import { MessageSquare, FolderOpen } from 'lucide-react'
 import { ProjectEmptyState } from '@/components/dashboard/ProjectEmptyState'
+import { EmptyStateMuted, emptyMutedCtaCls } from '@/components/ui/EmptyStateMuted'
 import Link from 'next/link'
 import { FadeIn } from '@/components/dashboard/FadeIn'
 import { AnimatedProgressBar } from '@/components/dashboard/AnimatedProgressBar'
@@ -167,31 +168,16 @@ export default async function ProjectPage({
         </FadeIn>
 
         <FadeIn delay={0.08}>
-          <div className="relative flex flex-col items-center gap-6 rounded-[28px] border border-white/10 bg-white/5 backdrop-blur-xl py-20 px-8 text-center overflow-hidden">
-            <div className="absolute -top-20 left-1/2 -translate-x-1/2 h-40 w-40 rounded-full bg-cyan-500/5 blur-3xl pointer-events-none" />
-
-            <div className="relative flex h-20 w-20 items-center justify-center rounded-2xl border border-white/10 bg-black/20 shadow-2xl">
-              <div className="absolute inset-0 rounded-2xl bg-cyan-500/5 animate-pulse" />
-              <FolderOpen size={32} className="text-zinc-500 relative z-10" />
-            </div>
-
-            <div className="max-w-sm space-y-2">
-              <h2 className="text-lg font-semibold tracking-tight text-white">
-                Tu proyecto está siendo preparado
-              </h2>
-              <p className="text-sm font-medium text-zinc-400 leading-relaxed">
-                En breve verás toda la hoja de ruta acá. El equipo de develOP está trabajando en los detalles.
-              </p>
-            </div>
-
-            <Link
-              href="/dashboard/messages?context=proyecto"
-              className="inline-flex items-center gap-2 rounded-xl border border-cyan-500/20 bg-cyan-500/10 px-6 py-3 text-sm font-semibold text-cyan-400 transition-all hover:bg-cyan-500/20 hover:border-cyan-500/30 active:scale-95"
-            >
-              <MessageSquare size={16} />
+          <EmptyStateMuted
+            icon={FolderOpen}
+            title="Tu proyecto está siendo preparado"
+            description="En breve verás toda la hoja de ruta acá. El equipo de develOP está trabajando en los detalles."
+          >
+            <Link href="/dashboard/messages?context=proyecto" className={emptyMutedCtaCls}>
+              <MessageSquare size={16} strokeWidth={1.5} />
               Hablar con el equipo
             </Link>
-          </div>
+          </EmptyStateMuted>
         </FadeIn>
       </div>
     )

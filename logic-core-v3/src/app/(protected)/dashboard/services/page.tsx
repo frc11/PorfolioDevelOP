@@ -7,6 +7,7 @@ import { FadeIn } from '@/components/dashboard/FadeIn'
 import { PremiumModuleCard } from '@/components/dashboard/PremiumModuleCard'
 import { StaggerContainer, StaggerItem } from '@/components/dashboard/StaggerWrapper'
 import { PageHeader } from '@/components/ui'
+import { EmptyStateMuted, emptyMutedCtaCls } from '@/components/ui/EmptyStateMuted'
 import { adminHoverCls } from '@/lib/hover'
 import { prisma } from '@/lib/prisma'
 import { resolveOrgId } from '@/lib/preview'
@@ -210,31 +211,16 @@ export default async function ServicesPage() {
 
       {services.length === 0 ? (
         <FadeIn delay={0.06}>
-          {/* Empty hand-rolled en JSX server (mismo look que el EmptyState lg/default):
-              EmptyState es 'use client' y recibe icon como componente, así que pasarle
-              FolderOpen desde la page server cruza una función por el boundary. Acá el
-              ícono se renderiza server-side y nunca cruza. */}
-          <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-white/10 bg-white/[0.02] px-6 py-16 text-center">
-            <div className="relative mb-4">
-              <div className="absolute inset-0 rounded-full bg-cyan-500/[0.08]" />
-              <div className="relative flex h-12 w-12 items-center justify-center rounded-2xl border border-white/[0.08] bg-white/[0.04] text-zinc-500">
-                <FolderOpen size={24} strokeWidth={1.5} />
-              </div>
-            </div>
-            <h3 className="text-lg font-semibold text-zinc-300">
-              Todavía no tenés servicios activos
-            </h3>
-            <p className="mt-1 max-w-sm text-xs leading-relaxed text-zinc-600">
-              Contactanos para empezar tu proyecto con develOP. Apenas activemos un servicio, lo
-              vas a ver acá.
-            </p>
-            <Link
-              href="/dashboard/messages?context=default"
-              className="mt-5 inline-flex items-center gap-2 rounded-2xl bg-cyan-400/15 px-5 py-2.5 text-sm text-cyan-300 transition-colors hover:bg-cyan-400/25"
-            >
+          <EmptyStateMuted
+            icon={FolderOpen}
+            title="Todavía no tenés servicios activos"
+            description="Contactanos para empezar tu proyecto con develOP. Apenas activemos un servicio, lo vas a ver acá."
+          >
+            <Link href="/dashboard/messages?context=default" className={emptyMutedCtaCls}>
+              <MessageSquare size={16} strokeWidth={1.5} />
               Hablar con el equipo
             </Link>
-          </div>
+          </EmptyStateMuted>
         </FadeIn>
       ) : (
         <FadeIn delay={0.06}>

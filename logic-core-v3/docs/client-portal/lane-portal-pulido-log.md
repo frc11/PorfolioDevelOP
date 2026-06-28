@@ -136,4 +136,5 @@ Guías: `relevamiento-empties.md`, `relevamiento-back-button.md`, plan #3 (sideb
 - `e6a24a9` — docs: log Tarea 2 (verificación adversarial all-pass)
 - `63c455f` — feat(ui): EmptyStateMuted (canon único de empty LIST) (3-A)
 - `79ce485` — refactor(modules): empties LIST → EmptyStateMuted (3-B modules)
-- 3-B soporte — refactor(soporte): empties de columna → EmptyStateMuted (este commit)
+- `211672f` — refactor(soporte): empties de columna → EmptyStateMuted (3-B soporte)
+- 3-B dashboard — refactor(dashboard): empties project+services → EmptyStateMuted (este commit)
