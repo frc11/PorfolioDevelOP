@@ -140,7 +140,28 @@ Guías: `relevamiento-empties.md`, `relevamiento-back-button.md`, plan #3 (sideb
     proyecto") = error/instrucción, NO lista-vacía → SKIP. tsc+lint verde.
   - **boveda (cliente)** tiene `Card variant="dashed"` pero NO es lista-vacía flagged → fuera de scope (no tocar).
 
-**TAREA 3 — TODOS los bloques migrados.** Falta: verificación adversarial + OK visual del humano.
+**TAREA 3 — TODOS los bloques migrados.**
+
+### Verificación adversarial Tarea 3 (workflow read-only, 4 lentes) — ✅ ALL PASS
+- **scope/frozen/heroes:** único archivo nuevo = `EmptyStateMuted.tsx`; ningún frozen editado; ningún hero
+  aplanado; el re-export compila y es RSC-safe.
+- **canon-correctness:** las 36 refs importan del path canon; sin `cta=/size=/variant=` sobrante; íconos como
+  componente; toda CTA preservada (condicional→children condicional, onClick→`<button>`); `py-10` en los chicos.
+- **hard-rules:** sin `any`/`router.push`/`router.back`/secrets nuevos; ramas de empty intactas; imports OK.
+- **completeness:** el portal CLIENTE no tiene ningún `EmptyState` glowy frozen restante en listas vacías.
+  El primitivo frozen queda solo en `_design` (showcase) + 3 páginas del setter (fuera de scope). **Canon único.**
+- **PENDIENTE:** OK visual del humano (Tarea 3) → cierra el lane (sin merge).
+
+---
+
+## Estado final del lane (pendiente OK visual Tarea 3 + merge por Valentino)
+- TAREA 1 ✅ (OK visual) · TAREA 2 ✅ (OK visual) · TAREA 3 ✅ (pendiente OK visual)
+- **NO mergeado.** Merge a `main` lo hace Valentino.
+- Deudas pre-existentes fichadas (NO introducidas por el lane): conversation-list set-state-in-effect (L57);
+  ClientLeadsTable useMemo deps (L186); campaigns/new `formAction`/useActionState muerto.
+- Decisiones (Valentino): campaigns/contactos sin back (tab-nav + root redirect); campaigns/new router.push
+  documentado (no redirect). Skips: ProjectsTab:76 (error card roja), boveda cliente (no flagged), setter (otro app),
+  _design (playground), LatencyChart (EmptyState local).
 - NO TOCAR (heroes de venta/conexión): ChatbotUpsellLanding, ConnectStoreCard, ConnectAgendaCard,
   GBP-connect (motor-resenas), MessageThread welcome, AnalysisTeaser, BriefEmptyState.
 
