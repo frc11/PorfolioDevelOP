@@ -176,7 +176,9 @@ Guías: `relevamiento-empties.md`, `relevamiento-back-button.md`, plan #3 (sideb
 - **A3) hover en tiles TIPO/MONTO/INICIO/ENTREGA** (project): ✅ HECHO (tsc+lint verde).
   Tiles `detailFields.map` son server/estáticos (divs) → `adminHoverCls` directo en className (template literal).
   No HoverScaleCard (no es motion). `@/lib/hover` consumido, NO modificado.
-- **A4) empties Chatbot "Leads recientes" + "Derivaciones WhatsApp"** → EmptyStateMuted: PENDIENTE.
+- **A4) empties Chatbot "Leads recientes" + "Derivaciones WhatsApp"** → EmptyStateMuted: ✅ HECHO (tsc+lint verde).
+  ChatbotOverview.tsx: los 2 `<p>` de vacío suelto → `EmptyStateMuted` (icon Users / PhoneForwarded, `py-10`
+  por estar dentro de cards). Texto partido en title+description. Iconos ya importados.
 - **A5) padding-bottom muerto en /dashboard/plan**: PENDIENTE.
 
 ## BLOQUE B — password (read-first obligatorio)
@@ -187,7 +189,8 @@ Guías: `relevamiento-empties.md`, `relevamiento-back-button.md`, plan #3 (sideb
 ## Bitácora batch 2
 - `f3c2b32` — fix(dashboard): loading.tsx de módulos+proyecto a fullwidth (A1)
 - `ab111c4` — fix(project): empty "sin proyectos" a fullwidth (A2)
-- B2-A3 — feat(project): hover en tiles de detalle del hero (este commit)
+- `82aed0e` — feat(project): hover en tiles de detalle del hero (A3)
+- B2-A4 — refactor(chatbot): empties del overview → EmptyStateMuted (este commit)
 - NO TOCAR (heroes de venta/conexión): ChatbotUpsellLanding, ConnectStoreCard, ConnectAgendaCard,
   GBP-connect (motor-resenas), MessageThread welcome, AnalysisTeaser, BriefEmptyState.
 
