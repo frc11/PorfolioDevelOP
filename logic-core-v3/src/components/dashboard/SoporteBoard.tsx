@@ -4,7 +4,8 @@ import Link from 'next/link'
 import { useState } from 'react'
 import { motion } from 'motion/react'
 import { Book, ChevronRight, Clock, HelpCircle, Inbox, Zap } from 'lucide-react'
-import { EmptyState, Modal } from '@/components/ui'
+import { Modal } from '@/components/ui'
+import { EmptyStateMuted } from '@/components/ui/EmptyStateMuted'
 import { adminHoverCls } from '@/lib/hover'
 import { cn } from '@/lib/utils'
 
@@ -213,12 +214,11 @@ function TicketColumn({
             <TicketCard key={ticket.id} ticket={ticket} idx={idx} />
           ))
         ) : (
-          <EmptyState
+          <EmptyStateMuted
             icon={Inbox}
             title={column.emptyTitle}
             description={column.emptyDescription}
-            variant="subtle"
-            size="sm"
+            className="py-10"
           />
         )}
       </div>
@@ -289,12 +289,11 @@ export function SoporteBoard({ activeTickets, resolvedTickets }: Props) {
             ))}
           </div>
         ) : (
-          <EmptyState
+          <EmptyStateMuted
             icon={Inbox}
             title={openColumn?.emptyTitle ?? 'Sin tickets'}
             description={openColumn?.emptyDescription ?? ''}
-            variant="subtle"
-            size="sm"
+            className="py-10"
           />
         )}
       </Modal>

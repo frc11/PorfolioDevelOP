@@ -113,7 +113,12 @@ Guías: `relevamiento-empties.md`, `relevamiento-back-button.md`, plan #3 (sideb
   - contactos / motor-resenas "sin reseñas": swap directo (sin CTA).
   - agenda "sin turnos" + tienda "sin pedidos": eran `size="sm"` (tienda además `variant="subtle"` = texto plano)
     → canon con `className="py-10"`. ⚠️ tienda pasa de texto-plano a caja punteada (más prominente) — revisar visual.
-- **soporte / chatbot / project+services / admin**: PENDIENTE.
+- **soporte** (SoporteBoard: 2 empties de columna `subtle/sm` → canon `py-10`): ✅ HECHO (tsc+lint verde).
+- **project + services** (heroes hand-rolled zero-data → canon): ✅ HECHO (tsc+lint verde).
+  - project "siendo preparado": glow card → `EmptyStateMuted` (icon FolderOpen, CTA "Hablar con el equipo").
+  - services "sin servicios activos": hand-roll → canon (se elimina el workaround de boundary: el canon es
+    universal, el ícono ya no cruza el RSC boundary). CTA ahora con ícono MessageSquare (consistente c/ project).
+- **chatbot / admin**: PENDIENTE.
 - NO TOCAR (heroes de venta/conexión): ChatbotUpsellLanding, ConnectStoreCard, ConnectAgendaCard,
   GBP-connect (motor-resenas), MessageThread welcome, AnalysisTeaser, BriefEmptyState.
 
@@ -130,4 +135,5 @@ Guías: `relevamiento-empties.md`, `relevamiento-back-button.md`, plan #3 (sideb
 - `461824d` — docs(email-marketing): documentar router.push post-acción en campaigns/new (2-C new)
 - `e6a24a9` — docs: log Tarea 2 (verificación adversarial all-pass)
 - `63c455f` — feat(ui): EmptyStateMuted (canon único de empty LIST) (3-A)
-- 3-B modules — refactor(modules): empties LIST → EmptyStateMuted (este commit)
+- `79ce485` — refactor(modules): empties LIST → EmptyStateMuted (3-B modules)
+- 3-B soporte — refactor(soporte): empties de columna → EmptyStateMuted (este commit)
