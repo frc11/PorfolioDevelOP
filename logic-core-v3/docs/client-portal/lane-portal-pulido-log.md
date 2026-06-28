@@ -85,6 +85,15 @@ Guías: `relevamiento-empties.md`, `relevamiento-back-button.md`, plan #3 (sideb
   → ese bloque (incl. 1 de los `router.push`) es CÓDIGO MUERTO. tsc verde, 0 errores; 1 warning baseline.
   Candidato a limpieza en su propio commit/lane si Valentino quiere (remover el `useActionState` muerto).
 
+### Verificación adversarial Tarea 2 (workflow read-only, 4 lentes) — ✅ ALL PASS
+- **scope/frozen:** 5 archivos en scope, ningún frozen; BackLink hook-free/server-safe, sin `any`.
+- **backlink-soporte:** componente universal OK; swap del breadcrumb OK; sin import `Link` huérfano.
+- **send-nav-fix:** `router.back()` eliminado; Cancelar = `<Link>` a padre estático; disabled-while-loading
+  preservado (pointer-events-none/opacity/aria-disabled/tabIndex); `router.push` post-envío intacto.
+- **nav-rules/types:** sin violaciones nuevas, sin `any`, 3 `router.push` documentados, estados preservados,
+  hrefs estáticos. (warning `formAction` = baseline pre-existente, reportado, fuera de scope.)
+- **PENDIENTE:** OK visual del humano (Tarea 2) antes de arrancar Tarea 3.
+
 ## TAREA 3 — Empties: aplanar solo listas vacías, canon único
 - **Estado:** PENDIENTE (arranca tras OK visual de Tarea 2)
 
