@@ -156,7 +156,7 @@ export default async function ProjectPage({
   // ── Empty state ────────────────────────────────────────────────────────────
   if (projects.length === 0) {
     return (
-      <div className="flex flex-col gap-6 max-w-4xl mx-auto">
+      <div className="flex flex-col gap-6">
         <FadeIn>
           <header className="rounded-[28px] border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
             <p className="text-xs tracking-tight text-zinc-500">Tablero</p>
