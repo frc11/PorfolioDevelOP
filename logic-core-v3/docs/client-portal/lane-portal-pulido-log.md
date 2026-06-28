@@ -94,8 +94,24 @@ Guías: `relevamiento-empties.md`, `relevamiento-back-button.md`, plan #3 (sideb
   hrefs estáticos. (warning `formAction` = baseline pre-existente, reportado, fuera de scope.)
 - **PENDIENTE:** OK visual del humano (Tarea 2) antes de arrancar Tarea 3.
 
+## TAREA 2 — OK VISUAL de Valentino ✅
+
 ## TAREA 3 — Empties: aplanar solo listas vacías, canon único
-- **Estado:** PENDIENTE (arranca tras OK visual de Tarea 2)
+- **Estado:** EN CURSO
+
+### 3-A) `src/components/ui/EmptyStateMuted.tsx` (NUEVO)
+- **Estado:** ✅ HECHO · gate tsc + eslint verde.
+- Re-export con nombre/ubicación neutros de `ResultEmptyState` (1 sola implementación = canon único):
+  `EmptyStateMuted`, `emptyMutedCtaCls`, `emptyMutedCtaSecondaryCls`. Universal (sin 'use client'/hooks).
+- El barrel `ui/index.ts` es FROZEN → los callers importan del path directo `@/components/ui/EmptyStateMuted`.
+- Trampa de tamaño: el frozen `EmptyState` tenía `size`/`variant`; el canon NO. Para empties inline chicos
+  (agenda "sin turnos", tienda "sin pedidos") se baja el padding vía `className` (twMerge pisa `py-16`).
+
+### 3-B) Migración LIST → EmptyStateMuted (por área, commit por bloque)
+- **modules** (email-marketing campaigns+contactos, motor-resenas, agenda, tienda): EN CURSO.
+- **soporte / chatbot / project+services / admin**: PENDIENTE.
+- NO TOCAR (heroes de venta/conexión): ChatbotUpsellLanding, ConnectStoreCard, ConnectAgendaCard,
+  GBP-connect (motor-resenas), MessageThread welcome, AnalysisTeaser, BriefEmptyState.
 
 ---
 
@@ -107,4 +123,6 @@ Guías: `relevamiento-empties.md`, `relevamiento-back-button.md`, plan #3 (sideb
 - `e6155f5` — feat(dashboard): componente BackLink (2-A)
 - `841425c` — feat(soporte): BackLink en detalle de ticket (2-B)
 - `2e6dc93` — fix(email-marketing): Cancelar de send usa Link, no router.back (2-C send)
-- 2-C (new) — docs(email-marketing): documentar router.push post-acción en campaigns/new (este commit)
+- `461824d` — docs(email-marketing): documentar router.push post-acción en campaigns/new (2-C new)
+- `e6a24a9` — docs: log Tarea 2 (verificación adversarial all-pass)
+- 3-A — feat(ui): EmptyStateMuted (canon único de empty LIST) (este commit)
