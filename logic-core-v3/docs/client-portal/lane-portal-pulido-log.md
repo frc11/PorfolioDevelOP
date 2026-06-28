@@ -214,7 +214,14 @@ Guías: `relevamiento-empties.md`, `relevamiento-back-button.md`, plan #3 (sideb
     NO migrar mecanismo. B3 = visor en FloatingField. **DECISIÓN pendiente Valentino:** reqs de /cambiar-password
     ¿quedan en letras+números (como pide B2) o se unifican con cuenta (MAYÚSCULA)?
   - **FRENO** — no se toca password hasta OK de Valentino sobre este reporte.
-- **B2) visor + validaciones /cambiar-password**: PENDIENTE.
+- **B2) visor + validaciones /cambiar-password**: ✅ HECHO (tsc+lint verde).
+  - Visor Eye/EyeOff (strokeWidth 1.5, ojo abierto=muestra) en los 3 campos: helper `PasswordInput`
+    (raw input + botón tabIndex={-1} + aria-label dentro del `<Field>`; ui/Input NO editado, reemplazado su uso).
+  - Reqs UNIFICADOS con cuenta = **8 + mayúscula + número** en client `checkStrength`/`validate()` Y en el Zod
+    server `CambiarPasswordSchema` (mensajes espejo de `UpdatePasswordSchema`). Sincronizados ambos lados.
+  - disabled-until-valid: botón `disabled={!canSubmit}` (score 3) + chips por requisito + "Falta: …" (espejo PasswordForm).
+  - Preserve-on-fail conservado (campos en useState, no se limpian en error). Mecanismo INTACTO (direct+await+push).
+    auth.ts NO tocado. (Cancelar sigue con `router.back()` pre-existente; es página de auth, no portal, fuera de scope.)
 - **B3) visor /login**: PENDIENTE.
 
 ## Bitácora batch 2
@@ -223,7 +230,10 @@ Guías: `relevamiento-empties.md`, `relevamiento-back-button.md`, plan #3 (sideb
 - `82aed0e` — feat(project): hover en tiles de detalle del hero (A3)
 - `6ea7df9` — refactor(chatbot): empties del overview → EmptyStateMuted (A4)
 - `713c203` — fix(plan): bottom padding pb-20→pb-6 alineado a cuenta (A5)
-- `4f770eb`..`713c203` = Bloque A (verificado ALL PASS, pendiente OK visual)
+- `4f770eb`..`713c203` = Bloque A (verificado ALL PASS, OK visual de Valentino)
+- `3ea12d0` — docs: Bloque A verdict + decisión A5
+- `9a1d841` — docs: B1 read-first report (sin tocar código)
+- B2 — feat(cambiar-password): visor + disabled-until-valid + reqs 8+mayúscula+número (este commit)
 - NO TOCAR (heroes de venta/conexión): ChatbotUpsellLanding, ConnectStoreCard, ConnectAgendaCard,
   GBP-connect (motor-resenas), MessageThread welcome, AnalysisTeaser, BriefEmptyState.
 
