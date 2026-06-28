@@ -179,7 +179,13 @@ Guías: `relevamiento-empties.md`, `relevamiento-back-button.md`, plan #3 (sideb
 - **A4) empties Chatbot "Leads recientes" + "Derivaciones WhatsApp"** → EmptyStateMuted: ✅ HECHO (tsc+lint verde).
   ChatbotOverview.tsx: los 2 `<p>` de vacío suelto → `EmptyStateMuted` (icon Users / PhoneForwarded, `py-10`
   por estar dentro de cards). Texto partido en title+description. Iconos ya importados.
-- **A5) padding-bottom muerto en /dashboard/plan**: PENDIENTE.
+- **A5) padding-bottom en /dashboard/plan**: ✅ HECHO (tsc+lint verde) — con MATIZ a confirmar.
+  ⚠️ Hallazgo read-first: plan NO tiene layout ni padding DUPLICADO. Su `pb-20` (page.tsx:17 + loading.tsx:8)
+  es IDÉNTICO al home y a TODO el portal (resultados/modules/chatbot/project/soporte todos usan `pb-20`).
+  La ÚNICA página con pb reducido es **cuenta** (layout `pb-6`, pages sin pb) — ese fue su fix puntual.
+  Decisión tomada (alineado al precedente cuenta que vos citaste): plan page+loading `pb-20`→`pb-6`.
+  CONSECUENCIA: plan queda como cuenta pero DISTINTO del resto del portal (aún en `pb-20`). Si querés
+  uniformidad total = sweep portal-wide `pb-20`→`pb-6` (su propio lane, fuera de A5). A confirmar en checkpoint.
 
 ## BLOQUE B — password (read-first obligatorio)
 - **B1) READ-FIRST report** (/cambiar-password + /login): PENDIENTE.
@@ -190,7 +196,8 @@ Guías: `relevamiento-empties.md`, `relevamiento-back-button.md`, plan #3 (sideb
 - `f3c2b32` — fix(dashboard): loading.tsx de módulos+proyecto a fullwidth (A1)
 - `ab111c4` — fix(project): empty "sin proyectos" a fullwidth (A2)
 - `82aed0e` — feat(project): hover en tiles de detalle del hero (A3)
-- B2-A4 — refactor(chatbot): empties del overview → EmptyStateMuted (este commit)
+- `6ea7df9` — refactor(chatbot): empties del overview → EmptyStateMuted (A4)
+- B2-A5 — fix(plan): bottom padding pb-20→pb-6 alineado a cuenta (este commit)
 - NO TOCAR (heroes de venta/conexión): ChatbotUpsellLanding, ConnectStoreCard, ConnectAgendaCard,
   GBP-connect (motor-resenas), MessageThread welcome, AnalysisTeaser, BriefEmptyState.
 

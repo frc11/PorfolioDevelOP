@@ -14,7 +14,7 @@ export default async function DashboardPlanPage() {
   if (!organizationId) redirect('/login')
 
   return (
-    <div className="flex w-full flex-col gap-8 pb-20 sm:gap-10">
+    <div className="flex w-full flex-col gap-8 pb-6 sm:gap-10">
       <PageHeader
         eyebrow="Mi plan"
         title="Tu plan y consumo"
