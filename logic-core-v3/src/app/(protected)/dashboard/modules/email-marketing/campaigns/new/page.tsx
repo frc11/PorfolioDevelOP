@@ -35,6 +35,8 @@ export default function NewCampaignPage() {
     async (_prev: State, fd: FormData) => {
       const result = await createCampaignAction(fd)
       if (result.ok && result.campaignId) {
+        // Navegación imperativa post-acción (CLAUDE.md): navegamos recién cuando el server
+        // action resolvió OK. No hay <Link>/redirect equivalente porque depende del resultado.
         router.push('/dashboard/modules/email-marketing/campaigns')
       }
       return result as State
@@ -64,6 +66,9 @@ export default function NewCampaignPage() {
       return
     }
 
+    // Navegación imperativa post-acción (CLAUDE.md): create→send se secuencian en cliente con
+    // manejo de error; recién al terminar OK navegamos. redirect() server-side rompería esta
+    // secuencia y no aplica <Link>.
     router.push('/dashboard/modules/email-marketing/campaigns')
   }
 
@@ -142,6 +147,9 @@ export default function NewCampaignPage() {
             if (!form.reportValidity()) return
             const fd = new FormData(form)
             await createCampaignAction(fd)
+            // Navegación imperativa post-acción (CLAUDE.md): se guarda el borrador y recién ahí
+            // se navega. createCampaignAction es de doble uso (también "Enviar ahora"), por eso
+            // no redirige server-side.
             router.push('/dashboard/modules/email-marketing/campaigns')
           }}
           className="inline-flex items-center gap-2 rounded-xl border border-white/10 px-4 py-2 text-xs font-semibold text-zinc-400 transition hover:text-zinc-200 hover:border-white/20 disabled:opacity-40"

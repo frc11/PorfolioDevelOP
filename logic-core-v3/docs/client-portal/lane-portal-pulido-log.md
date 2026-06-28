@@ -66,10 +66,10 @@ Guías: `relevamiento-empties.md`, `relevamiento-back-button.md`, plan #3 (sideb
 ### 2-B) Insertar BackLink (ALTA del relevamiento)
 - **soporte/[ticketId]** → "Volver a soporte" (upgrade del breadcrumb): ✅ HECHO (tsc+lint verde).
   Reemplazó el breadcrumb "develOP / Tickets" y se quitó el import `Link` (quedaba sin uso).
-- **email-marketing/campaigns + contactos** → ⚠️ HALLAZGO, NO implementado pendiente decisión:
-  (1) `email-marketing/page.tsx` (root) es `redirect('…/campaigns')` → "Volver al módulo" sería
-  un no-op en campaigns y redundante en contactos; (2) el layout ya tiene tab bar (Campañas|Contactos)
-  → son tab-navegadas como `resultados/*`/`cuenta/*` (que NO llevan back por regla). Recomiendo SKIP.
+- **email-marketing/campaigns + contactos** → ❌ SKIP (decisión de Valentino, 2026-06-28).
+  Razón: (1) `email-marketing/page.tsx` (root) es `redirect('…/campaigns')` → "Volver al módulo" sería
+  no-op en campaigns y redundante en contactos; (2) el layout ya tiene tab bar (Campañas|Contactos)
+  → son tab-navegadas como `resultados/*`/`cuenta/*` (que NO llevan back por regla).
 
 ### 2-C) Violaciones de navegación
 - **send/[id]**: `router.back()` (Cancelar) → `<Link>` al padre `/campaigns`: ✅ HECHO (tsc+lint verde).
@@ -79,7 +79,11 @@ Guías: `relevamiento-empties.md`, `relevamiento-back-button.md`, plan #3 (sideb
 - **campaigns/new**: los `router.push` son navegación POST-ACCIÓN (corren un server action y después
   navegan) → no pueden ser `<Link>`; `redirect()` server-side rompería la secuencia create→send→error
   de `handleSendNow`. CLAUDE.md permite `router.push` imperativo post-submit CON comentario inline.
-  Fix = documentarlos (compliant), NO forzar redirect. Reportado a Valentino.
+  → ✅ DOCUMENTADO (decisión de Valentino: "Documentar"). Comentarios inline en los 3 `router.push`.
+  ⚠️ **DEUDA PRE-EXISTENTE fuera de scope** (no introducida acá): eslint warn `formAction is assigned
+  but never used` (línea 34). El `useActionState` no está cableado al form (usa `onSubmit={handleSendNow}`)
+  → ese bloque (incl. 1 de los `router.push`) es CÓDIGO MUERTO. tsc verde, 0 errores; 1 warning baseline.
+  Candidato a limpieza en su propio commit/lane si Valentino quiere (remover el `useActionState` muerto).
 
 ## TAREA 3 — Empties: aplanar solo listas vacías, canon único
 - **Estado:** PENDIENTE (arranca tras OK visual de Tarea 2)
@@ -93,4 +97,5 @@ Guías: `relevamiento-empties.md`, `relevamiento-back-button.md`, plan #3 (sideb
 - `9699eaa` — fix(dashboard): módulos del sidebar como items normales de "Servicios" (1-A bis)
 - `e6155f5` — feat(dashboard): componente BackLink (2-A)
 - `841425c` — feat(soporte): BackLink en detalle de ticket (2-B)
-- 2-C (parcial) — fix(email-marketing): Cancelar de send usa Link, no router.back (este commit)
+- `2e6dc93` — fix(email-marketing): Cancelar de send usa Link, no router.back (2-C send)
+- 2-C (new) — docs(email-marketing): documentar router.push post-acción en campaigns/new (este commit)
