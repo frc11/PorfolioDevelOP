@@ -162,6 +162,26 @@ Guías: `relevamiento-empties.md`, `relevamiento-back-button.md`, plan #3 (sideb
 - Decisiones (Valentino): campaigns/contactos sin back (tab-nav + root redirect); campaigns/new router.push
   documentado (no redirect). Skips: ProjectsTab:76 (error card roja), boveda cliente (no flagged), setter (otro app),
   _design (playground), LatencyChart (EmptyState local).
+
+---
+
+# BATCH 2 — 7 fixes (2 bloques). Worktree ya sincronizado con main. Commit por fix.
+
+## BLOQUE A — cosmético
+- **A1) loading.tsx fullwidth** (motor-resenas, agenda, project): ✅ HECHO (tsc+lint verde).
+  Sacado `max-w-7xl`/`max-w-5xl` + `mx-auto` del wrapper de cada loading → matchea la page fullwidth.
+- **A2) empty "sin proyectos" fullwidth** (dashboard/project): PENDIENTE.
+- **A3) hover en tiles TIPO/MONTO/INICIO/ENTREGA** (project): PENDIENTE.
+- **A4) empties Chatbot "Leads recientes" + "Derivaciones WhatsApp"** → EmptyStateMuted: PENDIENTE.
+- **A5) padding-bottom muerto en /dashboard/plan**: PENDIENTE.
+
+## BLOQUE B — password (read-first obligatorio)
+- **B1) READ-FIRST report** (/cambiar-password + /login): PENDIENTE.
+- **B2) visor + validaciones /cambiar-password**: PENDIENTE.
+- **B3) visor /login**: PENDIENTE.
+
+## Bitácora batch 2
+- B2-A1 — fix(dashboard): loading.tsx de módulos+proyecto a fullwidth (este commit)
 - NO TOCAR (heroes de venta/conexión): ChatbotUpsellLanding, ConnectStoreCard, ConnectAgendaCard,
   GBP-connect (motor-resenas), MessageThread welcome, AnalysisTeaser, BriefEmptyState.
 
