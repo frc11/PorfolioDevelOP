@@ -21,6 +21,7 @@
     "check:invariant:novedades": "ts-node src/lib/leados/novedades.invariant.ts",
     "check:invariant:mis-numeros": "ts-node src/lib/leados/mis-numeros.invariant.ts",
     "check:invariant:timeline": "ts-node src/lib/leados/timeline.invariant.ts",
+    "check:invariant:security": "ts-node src/lib/security/idor-tokens.invariant.ts",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:debug": "playwright test --debug",
