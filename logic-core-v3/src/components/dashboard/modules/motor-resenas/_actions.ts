@@ -1,6 +1,7 @@
 'use server'
 
-import { auth } from '@/auth'
+import { resolveOrgId } from '@/lib/preview'
+import { resolveScopedOrgId } from '@/lib/security/org-scope'
 import { isModuleActive } from '@/lib/modules/check-activation'
 import { generateReviewReplyDraft } from '@/lib/ai/review-reply-draft'
 import { replyToReview } from '@/lib/integrations/google-business-profile'
@@ -13,14 +14,17 @@ export async function generateDraft(params: {
   reviewerName: string
   reviewComment: string | null
 }) {
-  const session = await auth()
-  if (!session?.user) return { ok: false as const, error: 'No autorizado' }
+  // La org NUNCA se confía del parámetro del cliente: se deriva de la sesión y
+  // el organizationId recibido debe coincidir, si no se rechaza (anti-IDOR).
+  // Todo lo que sigue opera con la org de la SESIÓN, nunca con params.
+  const organizationId = resolveScopedOrgId(await resolveOrgId(), params.organizationId)
+  if (!organizationId) return { ok: false as const, error: 'No autorizado' }
 
-  const isActive = await isModuleActive(params.organizationId, 'motor-resenas')
+  const isActive = await isModuleActive(organizationId, 'motor-resenas')
   if (!isActive) return { ok: false as const, error: 'Módulo no activo' }
 
   const org = await prisma.organization.findUnique({
-    where: { id: params.organizationId },
+    where: { id: organizationId },
     select: { companyName: true },
   })
   if (!org) return { ok: false as const, error: 'Organización no encontrada' }
@@ -46,14 +50,16 @@ export async function replyAction(params: {
   reviewName: string
   comment: string
 }) {
-  const session = await auth()
-  if (!session?.user) return { ok: false as const, error: 'No autorizado' }
+  // Mismo guard: la org sale de la sesión. Evita que un usuario de otra org
+  // publique respuestas en el Google Business Profile de un tercero.
+  const organizationId = resolveScopedOrgId(await resolveOrgId(), params.organizationId)
+  if (!organizationId) return { ok: false as const, error: 'No autorizado' }
 
-  const isActive = await isModuleActive(params.organizationId, 'motor-resenas')
+  const isActive = await isModuleActive(organizationId, 'motor-resenas')
   if (!isActive) return { ok: false as const, error: 'Módulo no activo' }
 
   const result = await replyToReview(
-    params.organizationId,
+    organizationId,
     params.reviewName,
     params.comment,
   )

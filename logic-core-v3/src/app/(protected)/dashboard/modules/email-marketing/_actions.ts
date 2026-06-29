@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import { resolveOrgId } from '@/lib/preview'
+import { signEmailContactOptOutToken } from '@/lib/email/unsubscribe-token'
 import {
   ensureBrevoList,
   syncContact,
@@ -82,7 +83,7 @@ export async function importContactsAction(formData: FormData) {
 
   for (const row of rows) {
     try {
-      await prisma.emailContact.upsert({
+      const contact = await prisma.emailContact.upsert({
         where: { organizationId_email: { organizationId: org.id, email: row.email } },
         create: {
           organizationId: org.id,
@@ -106,6 +107,13 @@ export async function importContactsAction(formData: FormData) {
           firstName: row.firstName,
           lastName: row.lastName,
           listIds: [listId],
+          // Atributos por-contacto para que el footer de baja del email lleve
+          // un token firmado (cierra el IDOR del opt-out). Brevo los interpola
+          // por destinatario como {{contact.CONTACT_ID}} / {{contact.OPTOUT_TOKEN}}.
+          attributes: {
+            CONTACT_ID: contact.id,
+            OPTOUT_TOKEN: signEmailContactOptOutToken(contact.id),
+          },
         })
       }
     } catch {
@@ -144,7 +152,7 @@ export async function createCampaignAction(formData: FormData) {
 <hr style="border:none;border-top:1px solid #333;margin:24px 0"/>
 <p style="font-size:11px;color:#888;text-align:center">
   Para darte de baja de esta lista hacé clic en el siguiente enlace:
-  <a href="${appUrl}/api/email/optout/{{contact.id}}" style="color:#06b6d4">Darme de baja</a>
+  <a href="${appUrl}/api/email/optout/{{contact.CONTACT_ID}}?token={{contact.OPTOUT_TOKEN}}" style="color:#06b6d4">Darme de baja</a>
 </p>`
 
   const campaign = await prisma.emailCampaign.create({
