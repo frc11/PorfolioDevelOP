@@ -5,6 +5,7 @@ import { ProjectStatus, ServiceStatus, ServiceType, OsServiceType, Prisma } from
 import { MessageSquare, FolderOpen } from 'lucide-react'
 import { ProjectEmptyState } from '@/components/dashboard/ProjectEmptyState'
 import { EmptyStateMuted, emptyMutedCtaCls } from '@/components/ui/EmptyStateMuted'
+import { adminHoverCls } from '@/lib/hover'
 import Link from 'next/link'
 import { FadeIn } from '@/components/dashboard/FadeIn'
 import { AnimatedProgressBar } from '@/components/dashboard/AnimatedProgressBar'
@@ -156,7 +157,7 @@ export default async function ProjectPage({
   // ── Empty state ────────────────────────────────────────────────────────────
   if (projects.length === 0) {
     return (
-      <div className="flex flex-col gap-6 max-w-4xl mx-auto">
+      <div className="flex flex-col gap-6">
         <FadeIn>
           <header className="rounded-[28px] border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
             <p className="text-xs tracking-tight text-zinc-500">Tablero</p>
@@ -323,7 +324,7 @@ export default async function ProjectPage({
               {detailFields.map((field) => (
                 <div
                   key={field.label}
-                  className="rounded-2xl border border-white/10 bg-black/20 p-4"
+                  className={`rounded-2xl border border-white/10 bg-black/20 p-4 ${adminHoverCls}`}
                 >
                   <p className="text-[10px] uppercase tracking-[0.22em] text-zinc-500">
                     {field.label}

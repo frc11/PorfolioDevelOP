@@ -162,6 +162,93 @@ Guías: `relevamiento-empties.md`, `relevamiento-back-button.md`, plan #3 (sideb
 - Decisiones (Valentino): campaigns/contactos sin back (tab-nav + root redirect); campaigns/new router.push
   documentado (no redirect). Skips: ProjectsTab:76 (error card roja), boveda cliente (no flagged), setter (otro app),
   _design (playground), LatencyChart (EmptyState local).
+
+---
+
+# BATCH 2 — 7 fixes (2 bloques). Worktree ya sincronizado con main. Commit por fix.
+
+## BLOQUE A — cosmético
+- **A1) loading.tsx fullwidth** (motor-resenas, agenda, project): ✅ HECHO (tsc+lint verde).
+  Sacado `max-w-7xl`/`max-w-5xl` + `mx-auto` del wrapper de cada loading → matchea la page fullwidth.
+- **A2) empty "sin proyectos" fullwidth** (dashboard/project): ✅ HECHO (tsc+lint verde).
+  Sacado `max-w-4xl mx-auto` del wrapper de la rama empty (línea 159) → fullwidth como el main render
+  (`flex flex-col gap-8 pb-20`). EmptyStateMuted NO tocado.
+- **A3) hover en tiles TIPO/MONTO/INICIO/ENTREGA** (project): ✅ HECHO (tsc+lint verde).
+  Tiles `detailFields.map` son server/estáticos (divs) → `adminHoverCls` directo en className (template literal).
+  No HoverScaleCard (no es motion). `@/lib/hover` consumido, NO modificado.
+- **A4) empties Chatbot "Leads recientes" + "Derivaciones WhatsApp"** → EmptyStateMuted: ✅ HECHO (tsc+lint verde).
+  ChatbotOverview.tsx: los 2 `<p>` de vacío suelto → `EmptyStateMuted` (icon Users / PhoneForwarded, `py-10`
+  por estar dentro de cards). Texto partido en title+description. Iconos ya importados.
+- **A5) padding-bottom en /dashboard/plan**: ✅ HECHO (tsc+lint verde) — con MATIZ a confirmar.
+  ⚠️ Hallazgo read-first: plan NO tiene layout ni padding DUPLICADO. Su `pb-20` (page.tsx:17 + loading.tsx:8)
+  es IDÉNTICO al home y a TODO el portal (resultados/modules/chatbot/project/soporte todos usan `pb-20`).
+  La ÚNICA página con pb reducido es **cuenta** (layout `pb-6`, pages sin pb) — ese fue su fix puntual.
+  Decisión tomada (alineado al precedente cuenta que vos citaste): plan page+loading `pb-20`→`pb-6`.
+  CONSECUENCIA: plan queda como cuenta pero DISTINTO del resto del portal (aún en `pb-20`).
+  **DECISIÓN Valentino (2026-06-28): dejar plan en `pb-6`** (como cuenta). Sweep portal-wide `pb-20`→`pb-6`
+  = fichado para un lane aparte si se quiere uniformidad total.
+
+### Verificación adversarial Bloque A (workflow read-only, 3 lentes) — ✅ ALL PASS
+- **scope/frozen:** 8 archivos en scope; ningún frozen modificado (hover.ts, EmptyStateMuted, ui/*, shell,
+  primitivos solo consumidos vía import).
+- **correctness:** A1-A5 matchean el spec exacto; `EmptyStateMuted` + `adminHoverCls` sin modificar.
+- **hard-rules:** sin `any`/`router.push`/`router.back` nuevos; A4 importa del path canon; ramas intactas.
+- **PENDIENTE:** OK visual del humano (Bloque A) antes de arrancar Bloque B.
+
+## BLOQUE B — password (read-first obligatorio)
+- **B1) READ-FIRST report** (/cambiar-password + /login): ✅ ENTREGADO (read-only, sin tocar código). Hallazgos:
+  - **/cambiar-password** (`app/cambiar-password/{page,CambiarPasswordForm,actions}.tsx`): YA usa el patrón canónico
+    SEGURO — **invocación DIRECTA** (`startTransition`+`await cambiarPasswordAction`) y navega `router.push('/dashboard')`
+    DESPUÉS del await; NO usa `<form action>`. La action incrementa `sessionVersion` Y llama `unstable_update`
+    (trigger='update' → auth.ts SKIPea el kill-check y refresca el token a N+1). → **NO tiene riesgo de pantalla negra.**
+    Validación: client `validate()` on-submit + server Zod = **8 + letras + números** (difiere de cuenta = MAYÚSCULA).
+    **Preserve-on-fail: SÍ** (campos en useState, no se limpian en error). **Disabled-until-valid: NO** (valida on-submit).
+    **Visor: NO** (usa `<Input type="password">`).
+  - **/login** (`app/login/page.tsx`): el input de password es `FloatingField` (componente LOCAL, no frozen) con `<input
+    type="password">`. Mecanismo `<form action>`+useActionState (sign-in, no tocar lógica). **Visor: NO.**
+  - **Canon (PasswordForm, ProfileForms.tsx)**: direct+await+`router.refresh()` después; visor Eye/EyeOff (raw input +
+    botón tabIndex=-1, ojo-abierto=muestra, SIN strokeWidth → B2/B3 lo ponen en 1.5); reqs 8+MAYÚSCULA+número;
+    disabled-until-score-3; preserve-on-fail.
+  - **PARADAS: ninguna.** El visor NO requiere tocar `ui/Input` frozen (ui/Input no tiene slot de adorno → se usa el
+    patrón raw-input+botón de PasswordForm). No hay que tocar auth.ts. B2 = solo visor (+ opcional disabled-until-valid);
+    NO migrar mecanismo. B3 = visor en FloatingField. **DECISIÓN pendiente Valentino:** reqs de /cambiar-password
+    ¿quedan en letras+números (como pide B2) o se unifican con cuenta (MAYÚSCULA)?
+  - **FRENO** — no se toca password hasta OK de Valentino sobre este reporte.
+- **B2) visor + validaciones /cambiar-password**: ✅ HECHO (tsc+lint verde).
+  - Visor Eye/EyeOff (strokeWidth 1.5, ojo abierto=muestra) en los 3 campos: helper `PasswordInput`
+    (raw input + botón tabIndex={-1} + aria-label dentro del `<Field>`; ui/Input NO editado, reemplazado su uso).
+  - Reqs UNIFICADOS con cuenta = **8 + mayúscula + número** en client `checkStrength`/`validate()` Y en el Zod
+    server `CambiarPasswordSchema` (mensajes espejo de `UpdatePasswordSchema`). Sincronizados ambos lados.
+  - disabled-until-valid: botón `disabled={!canSubmit}` (score 3) + chips por requisito + "Falta: …" (espejo PasswordForm).
+  - Preserve-on-fail conservado (campos en useState, no se limpian en error). Mecanismo INTACTO (direct+await+push).
+    auth.ts NO tocado. (Cancelar sigue con `router.back()` pre-existente; es página de auth, no portal, fuera de scope.)
+- **B3) visor /login**: ✅ HECHO (tsc+lint verde).
+  `FloatingField` (componente LOCAL) ahora tiene visor Eye/EyeOff (strokeWidth 1.5, ojo abierto=muestra) SOLO
+  cuando `type==='password'`: toggle del `type` (password↔text), botón `tabIndex={-1}` + aria-label, absoluto a la
+  derecha (input con `pr-11`). NO toca auth/sign-in/loginAction — el campo sigue siendo el mismo `name`.
+
+## Bitácora batch 2
+- `f3c2b32` — fix(dashboard): loading.tsx de módulos+proyecto a fullwidth (A1)
+- `ab111c4` — fix(project): empty "sin proyectos" a fullwidth (A2)
+- `82aed0e` — feat(project): hover en tiles de detalle del hero (A3)
+- `6ea7df9` — refactor(chatbot): empties del overview → EmptyStateMuted (A4)
+- `713c203` — fix(plan): bottom padding pb-20→pb-6 alineado a cuenta (A5)
+- `4f770eb`..`713c203` = Bloque A (verificado ALL PASS, OK visual de Valentino)
+- `3ea12d0` — docs: Bloque A verdict + decisión A5
+- `9a1d841` — docs: B1 read-first report (sin tocar código)
+- `f22f8d6` — feat(cambiar-password): visor + disabled-until-valid + reqs 8+mayúscula+número (B2)
+- `e3740a2` — feat(login): visor Eye/EyeOff en el campo password (B3)
+
+### Verificación adversarial Bloque B (workflow read-only, 4 lentes) — ✅ ALL PASS
+- **scope/frozen/auth:** 4 archivos; `auth.ts`/`prisma.ts`/`schema`/`ui/*` SIN tocar (import de ui/Input removido
+  de CambiarPasswordForm, pero el primitivo no se edita).
+- **cambiar-password:** visor no-invertido; reqs 8+mayúscula+número unificados y SINCRONIZADOS client↔server;
+  disabled-until-valid + chips; preserve-on-fail conservado; mecanismo seguro + sessionVersion/unstable_update intactos.
+- **login:** visor solo en password; lógica de sign-in sin tocar.
+- **hard-rules:** sin `any`/secrets/`router.push`/`router.back` nuevos; aria-labels + strokeWidth 1.5.
+- **Nota (no-blocker):** `<Field>` no cablea `htmlFor` al input — PRE-EXISTENTE (el viejo ui/Input igual no se asociaba),
+  no es regresión de este batch.
+- **PENDIENTE:** OK visual del humano (Bloque B). Sin merge — lo hace Valentino.
 - NO TOCAR (heroes de venta/conexión): ChatbotUpsellLanding, ConnectStoreCard, ConnectAgendaCard,
   GBP-connect (motor-resenas), MessageThread welcome, AnalysisTeaser, BriefEmptyState.
 

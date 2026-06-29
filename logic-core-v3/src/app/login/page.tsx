@@ -4,6 +4,7 @@ import { useActionState, useState } from 'react'
 import { motion, AnimatePresence, type Variants } from 'motion/react'
 import dynamic from 'next/dynamic'
 import Image from 'next/image'
+import { Eye, EyeOff } from 'lucide-react'
 import { loginAction, googleSignInAction, magicLinkAction } from './actions'
 
 // Three.js canvas — no SSR (browser-only)
@@ -48,14 +49,20 @@ function FloatingField({
 }) {
   const [focused, setFocused] = useState(autoFocus ?? false)
   const [hasValue, setHasValue] = useState(false)
+  const [show, setShow] = useState(false)
   const isFloated = focused || hasValue
+  // Visor solo para password (mismo patrón que PasswordForm: toggle del type, ojo
+  // abierto = muestra). No toca la lógica de sign-in: el input sigue siendo el mismo
+  // campo `name`, solo cambia el atributo type.
+  const isPassword = type === 'password'
+  const inputType = isPassword ? (show ? 'text' : 'password') : type
 
   return (
     <motion.div variants={itemVariants} className="relative">
       <input
         id={id}
         name={id}
-        type={type}
+        type={inputType}
         autoComplete={autoComplete}
         autoFocus={autoFocus}
         required
@@ -67,7 +74,7 @@ function FloatingField({
         }}
         onChange={(e) => setHasValue(e.target.value.length > 0)}
         className={`
-          w-full rounded-xl border bg-white/[0.04] px-4 pb-2 pt-5
+          w-full rounded-xl border bg-white/[0.04] px-4 pb-2 pt-5 ${isPassword ? 'pr-11' : ''}
           text-sm text-zinc-100 outline-none transition-all duration-200
           ${isFloated
             ? 'border-cyan-500/60 ring-2 ring-cyan-500/20'
@@ -87,6 +94,17 @@ function FloatingField({
       >
         {label}
       </label>
+      {isPassword && (
+        <button
+          type="button"
+          onClick={() => setShow((v) => !v)}
+          tabIndex={-1}
+          aria-label={show ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+          className="absolute right-3 top-1/2 flex -translate-y-1/2 items-center text-zinc-500 transition-colors hover:text-zinc-300"
+        >
+          {show ? <Eye size={16} strokeWidth={1.5} /> : <EyeOff size={16} strokeWidth={1.5} />}
+        </button>
+      )}
     </motion.div>
   )
 }

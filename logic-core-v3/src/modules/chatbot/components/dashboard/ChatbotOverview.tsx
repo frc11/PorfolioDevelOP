@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { motion } from 'motion/react'
 import { MessageSquare, Users, DollarSign, Zap, ArrowRight, PhoneForwarded } from 'lucide-react'
 import { BusinessStatCard } from './BusinessStatCard'
+import { EmptyStateMuted } from '@/components/ui/EmptyStateMuted'
 import { staggerContainer, staggerItem } from '@/lib/motion-variants'
 import { useReducedMotion } from '@/lib/use-reduced-motion'
 import { adminHoverCls } from '@/lib/hover'
@@ -130,9 +131,12 @@ export function ChatbotOverview({ session, usage, recentLeads, recentHandoffs }:
         </div>
 
         {recentLeads.length === 0 ? (
-          <p className="py-4 text-center text-sm text-zinc-500">
-            Sin leads todavía. Cuando alguien deje sus datos, aparecerá acá.
-          </p>
+          <EmptyStateMuted
+            icon={Users}
+            title="Sin leads todavía"
+            description="Cuando alguien deje sus datos, aparecerá acá."
+            className="py-10"
+          />
         ) : (
           <motion.ul
             className="space-y-3"
@@ -177,9 +181,12 @@ export function ChatbotOverview({ session, usage, recentLeads, recentHandoffs }:
         </div>
 
         {recentHandoffs.length === 0 ? (
-          <p className="py-4 text-center text-sm text-zinc-500">
-            Sin derivaciones todavía. Cuando el bot derive a alguien, aparece acá.
-          </p>
+          <EmptyStateMuted
+            icon={PhoneForwarded}
+            title="Sin derivaciones todavía"
+            description="Cuando el bot derive a alguien, aparece acá."
+            className="py-10"
+          />
         ) : (
           <ul className="space-y-3">
             {recentHandoffs.map((h) => (
