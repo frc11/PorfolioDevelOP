@@ -8,12 +8,13 @@ import type { DossierStage } from '@prisma/client'
 import { Badge, Button, Callout, Card, Toggle } from '@/components/ui'
 import type { Brief, SelfCheck } from '@/lib/leados/contracts'
 import { HARD_CHECKS, SOFT_CHECKS } from '@/lib/leados/flow'
+import { GUIA_SELF_CHECK } from '@/lib/leados/guidance-content'
 import {
   enviarARevision,
   guardarSelfCheck,
 } from '@/app/(protected)/setter/_actions/dossier.actions'
 import { SelfCheckEjemplo } from '@/app/(protected)/setter/_components/ejemplo-ideal'
-import { TeachPanel } from '@/app/(protected)/setter/_components/teach-panel'
+import { LineaRicaText, TeachPanel } from '@/app/(protected)/setter/_components/teach-panel'
 
 type SelfCheckStepProps = {
   leadId: string
@@ -47,6 +48,7 @@ export function SelfCheckStep({ leadId, stage, draftUrl, selfCheck, brief }: Sel
   const [isPending, startTransition] = useTransition()
 
   const todosDurosOk = HARD_CHECKS.every((check) => duros[check.id])
+  const faltantesDuros = HARD_CHECKS.filter((check) => !duros[check.id]).length
   const payload = () => ({ duros, softIds })
 
   const guardar = () => {
@@ -99,6 +101,8 @@ export function SelfCheckStep({ leadId, stage, draftUrl, selfCheck, brief }: Sel
     )
   }
 
+  // Gate proactivo (1/2): sin draft no hay demo que revisar → el paso se bloquea
+  // con el motivo, no es un rebote mudo. El server re-valida igual en el envío.
   if (stage === 'CONSTRUCCION' && !draftUrl) {
     return (
       <Card variant="subtle" padding="lg">
@@ -106,8 +110,9 @@ export function SelfCheckStep({ leadId, stage, draftUrl, selfCheck, brief }: Sel
           <Lock size={15} strokeWidth={1.5} className="text-zinc-500" />
           <h2 className="text-base font-semibold text-zinc-300">Self-check</h2>
         </div>
-        <p className="mt-2 text-xs leading-relaxed text-zinc-500">
-          Publicá el draft primero: el self-check se hace mirando la demo publicada.
+        <p className="mt-2 max-w-xl text-xs leading-relaxed text-zinc-400">
+          Publicá el draft primero (el paso de arriba): el self-check se hace mirando la demo
+          publicada, no el export local. Apenas guardes el link, este paso se abre.
         </p>
       </Card>
     )
@@ -140,9 +145,7 @@ export function SelfCheckStep({ leadId, stage, draftUrl, selfCheck, brief }: Sel
       <div>
         <h2 className="text-base font-semibold text-zinc-100">Self-check</h2>
         <p className="mt-1 max-w-xl text-xs leading-relaxed text-zinc-500">
-          Revisá la demo publicada punto por punto. Los obligatorios bloquean el envío si fallan;
-          los de la sección &quot;Ojo de diseño&quot; no bloquean, pero viajan a la revisión de
-          Franco tal como los marques.
+          <LineaRicaText linea={GUIA_SELF_CHECK.intro} />
         </p>
       </div>
 
@@ -230,9 +233,17 @@ export function SelfCheckStep({ leadId, stage, draftUrl, selfCheck, brief }: Sel
           </span>
         </Callout>
       ) : (
-        <Callout tone="neutral">
-          El envío se habilita cuando TODOS los obligatorios estén en verde. Si algo falla, el
-          arreglo concreto está debajo de cada punto.
+        // Gate proactivo (2/2): el botón de envío queda disabled CON el motivo al
+        // lado (cuántos faltan + el porqué), no un disabled mudo. El server
+        // re-valida selfCheckAprobado en el envío.
+        <Callout tone="neutral" title={GUIA_SELF_CHECK.gate.titulo}>
+          <span>
+            {faltantesDuros === 1
+              ? 'Queda 1 obligatorio en rojo'
+              : `Quedan ${faltantesDuros} obligatorios en rojo`}{' '}
+            — el arreglo concreto está debajo de cada punto.{' '}
+            <LineaRicaText linea={GUIA_SELF_CHECK.gate.detalle} />
+          </span>
         </Callout>
       )}
 

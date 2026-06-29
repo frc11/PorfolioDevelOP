@@ -9,6 +9,7 @@ import * as React from 'react'
 import type { OrgRole, Role } from '@prisma/client'
 import { prisma } from '@/lib/prisma'
 import { sendEmail } from '@/lib/email'
+import { SESSION_COOKIE_NAME, SESSION_COOKIE_OPTIONS } from '@/lib/auth-cookies'
 
 const LOGIN_PATH = '/login'
 const ADMIN_PATH = '/admin'
@@ -81,21 +82,14 @@ const nextAuthResult = NextAuth({
     updateAge: 60 * 60,
   },
   // SEC-MISC-02: explicit cookie config so a future Auth.js upgrade cannot
-  // silently change defaults.  Values mirror the Auth.js v5 production
-  // defaults exactly — this is intentionally a no-op on the current app.
-  // The __Secure- prefix is added in production to match the Auth.js default.
+  // silently change defaults. Name/atributos vienen de `@/lib/auth-cookies`
+  // (fuente única por `NODE_ENV`) para que el middleware edge y el QA-login
+  // resuelvan exactamente el mismo nombre, incluso en un build de prod sobre
+  // http local (donde el default de Auth.js, por protocolo, divergía).
   cookies: {
     sessionToken: {
-      name:
-        process.env.NODE_ENV === 'production'
-          ? '__Secure-authjs.session-token'
-          : 'authjs.session-token',
-      options: {
-        httpOnly: true,
-        sameSite: 'lax' as const,
-        secure: process.env.NODE_ENV === 'production',
-        path: '/',
-      },
+      name: SESSION_COOKIE_NAME,
+      options: SESSION_COOKIE_OPTIONS,
     },
   },
   pages: { signIn: LOGIN_PATH },

@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { LoaderCircle, TriangleAlert, UserRound } from 'lucide-react'
+import { Flame, LoaderCircle, TriangleAlert, UserRound } from 'lucide-react'
 import { Select } from '@/components/ui'
 import { cn } from '@/lib/utils'
 import { assignLeadSetter } from '../_actions/lead.actions'
@@ -27,6 +27,8 @@ type AssignSetterControlProps = {
   leadId: string
   setters: SetterOption[]
   assignedToId: string | null
+  /** admin-1b: estado actual del campo caliente (lo marca Franco a ojo — D4). */
+  caliente: boolean
 }
 
 function formatActivos(activos: number): string {
@@ -41,14 +43,18 @@ export function AssignSetterControl({
   leadId,
   setters,
   assignedToId,
+  caliente,
 }: AssignSetterControlProps) {
   const router = useRouter()
   const [selected, setSelected] = useState<string>(assignedToId ?? '')
+  // admin-1b: la marca caliente de Franco — editable después de asignar.
+  const [marcadoCaliente, setMarcadoCaliente] = useState(caliente)
   const [error, setError] = useState<string | null>(null)
   const [saved, setSaved] = useState(false)
   const [isPending, startTransition] = useTransition()
 
-  const dirty = selected !== (assignedToId ?? '')
+  // "dirty" = cambió la asignación O la marca caliente (para guardar solo el toggle).
+  const dirty = selected !== (assignedToId ?? '') || marcadoCaliente !== caliente
 
   const handleSave = () => {
     setError(null)
@@ -57,6 +63,7 @@ export function AssignSetterControl({
       const result = await assignLeadSetter({
         leadId,
         setterId: selected === '' ? null : selected,
+        caliente: marcadoCaliente,
       })
       if (!result.success) {
         setError(result.error)
@@ -154,6 +161,62 @@ export function AssignSetterControl({
               )
             })}
           </div>
+
+          {/* admin-1b: marca "caliente" — el criterio de Franco (D4), no el score.
+              Prioriza el lead (orden) y habilita la demo preventiva. Editable
+              después de asignar; NO toca el aislamiento (assignedToId). */}
+          <button
+            type="button"
+            role="switch"
+            aria-checked={marcadoCaliente}
+            onClick={() => {
+              setMarcadoCaliente((value) => !value)
+              setSaved(false)
+              setError(null)
+            }}
+            disabled={isPending}
+            className={cn(
+              'flex w-full items-center justify-between gap-3 rounded-2xl border px-3.5 py-3 text-left transition-colors disabled:cursor-not-allowed disabled:opacity-50',
+              marcadoCaliente
+                ? 'border-amber-400/30 bg-amber-500/[0.08]'
+                : 'border-white/10 bg-black/20 hover:border-white/20',
+            )}
+          >
+            <span className="flex items-center gap-2.5">
+              <Flame
+                className={cn('h-4 w-4 shrink-0', marcadoCaliente ? 'text-amber-300' : 'text-zinc-500')}
+                strokeWidth={1.5}
+                aria-hidden
+              />
+              <span className="flex flex-col">
+                <span
+                  className={cn(
+                    'text-sm font-medium',
+                    marcadoCaliente ? 'text-amber-100' : 'text-zinc-200',
+                  )}
+                >
+                  Marcar como caliente
+                </span>
+                <span className="text-[11px] leading-tight text-zinc-500">
+                  Tu criterio, no el score. Prioriza el lead y habilita la demo preventiva.
+                </span>
+              </span>
+            </span>
+            <span
+              aria-hidden
+              className={cn(
+                'relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors',
+                marcadoCaliente ? 'bg-amber-400/80' : 'bg-white/15',
+              )}
+            >
+              <span
+                className={cn(
+                  'inline-block h-4 w-4 transform rounded-full bg-white transition-transform',
+                  marcadoCaliente ? 'translate-x-[18px]' : 'translate-x-0.5',
+                )}
+              />
+            </span>
+          </button>
 
           <div className="flex items-center gap-3">
             <button

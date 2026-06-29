@@ -1590,3 +1590,137 @@ El botón **«Copiar fila de log»** emite un TSV (negocio · método · estilo 
 **Verificación humana (Franco):** build verde + invariantes verdes = el refactor no cambió comportamiento. Solo se movió copy entre archivos; ninguna pantalla cambia (re-export mantiene la salida byte-idéntica).
 
 **Estado: REFACTOR COMPLETO.** `flow.ts` aliviado y data-clean para FG-2; comportamiento intacto.
+
+
+
+## 🧪 FG-2.0 — Experimento listo para correr (5 negocios precargados + 10 prompts + checklist) · 2026-06-21
+
+**Objetivo del sprint (autónomo, scope cerrado):** dejar el experimento de FG-2 **máximamente preparado** para que Franco solo tenga que pegar en Claude Design, mirar y anotar. NO correr el experimento (no se puede abrir Claude Design ni juzgar demos desde acá), NO productizar el prototipo, NO conectarlo al flujo del setter. SENSIBLE-lite: lectura read-only de fichas, cero gates/transiciones/dossier.
+
+**Estado real encontrado (inventario de fichas de gastronomía):**
+- El lab autocompleta desde `OsLeadDossier.fichaJson` filtrado por señal. En los seeds del repo hay **1 ficha de gastronomía completa** (Noir Dining, `demos-seed-review-queue.ts`), **1 parcial** (Pizzería Don Carlo, ficha QA de `b6-qa-outreach.ts`, sin `contenidoReal`) y **1 lead real sin ficha de contenido** (Café La Esquina, `b3-qa-assign-leads.ts`). **NO hay 5 fichas reales de gastronomía** cargadas.
+- Decisión (alineada con la consigna): completar a 5 con **2 arquetipos representativos marcados como tales** (Parrilla El Fogón, Verde Hoja). Regla dura respetada: **nunca se inyecta una reseña inventada como "real"** — los 3 casos sin reseñas reales viajan SIN sección de reseñas (el assembler omite el bloque con `resenas: ''`).
+
+**Los 5 negocios elegidos (con procedencia):**
+1. **Noir Dining** (Yerba Buena) — restaurante de autor — **real (seed verbatim)** — con reseñas reales.
+2. **Pizzería Don Carlo** (Barrio Norte) — pizzería — **real (ficha QA seed)** — con reseña real; voz de marca representativa (el seed no carga `contenidoReal`).
+3. **Café La Esquina** (Yerba Buena) — cafetería — **lead real del seed**, contenido representativo — sin reseñas.
+4. **Parrilla El Fogón** (Tucumán) — parrilla — **representativo (no real)** — sin reseñas.
+5. **Verde Hoja** (Palermo) — café saludable/brunch — **representativo (no real)** — sin reseñas.
+
+Cobertura del catálogo del rubro a propósito: los 4 estilos (nocturno / apetitoso×2 / rústico / minimal), 3 tonos y los 3 CTAs principales quedan representados → más señal en el 5-vs-5.
+
+**Qué se hizo (todo EXPERIMENTAL / DESCARTABLE):**
+- **Casos precargados:** `src/lib/leados/_experimental/fg2-casos-gastro.ts` (NUEVO) — los 5 negocios como `Fg2BriefInput` completo (ficha + decisiones estructuradas) + `origen` (`seed-real`/`seed-lead`/`representativo`) + `nota` de procedencia + `promptLibre` (el brazo "a mano"). WhatsApp de ejemplo (la demo no depende del dígito), flag explícito. Tipado estricto, cero `any`.
+- **Selector de precarga en el lab:** `fg2-lab-client.tsx` — nuevo `<Select>` "Precargar un caso del experimento" que llena TODO el formulario (estilo, tono, secciones, CTA, WhatsApp, diferencial, color, ficha) de un click. Helper puro `seccionesAToggles`. Convive con el autocompletar-desde-lead (fuentes alternativas, se resetean entre sí).
+- **Generador de prompts:** `scripts/_experimental/fg2-gen-prompts.ts` (NUEVO) — emite los 10 prompts desde `CASOS_GASTRO` + `assembleGastroPrompt`. Imports relativos con extensión `.ts` (mismo workaround ESM/ts-node documentado en C.0).
+- **Doc de prompts listos:** `docs/experimentos/fg2-prompts-listos.md` (NUEVO, generado) — los **10 prompts** (5 A formulario + 5 B a-mano), cada uno en bloque de texto para copiar-pegar, con procedencia y costo estimado de input.
+- **Doc del experimento ampliado:** `docs/experimentos/fg2-brief-experimento.md` — sección de inventario real (de dónde sale cada negocio), **checklist literal A1→B5** (10 pasos), **rúbrica "qué mirar" para calidad 1–5** (¿captura el negocio? ¿se ve profesional? ¿secciones correctas? ¿el setter la mandaría?), **cómo registrar el costo** (tiempo del cronómetro + cuota de Claude Design), y la **tabla de resultados precargada** con los 5 negocios + estilo/secciones/tokens del lado formulario — solo falta llenar tiempo·cuota·calidad·notas.
+
+**Archivos:**
+- `src/lib/leados/_experimental/fg2-casos-gastro.ts` (nuevo)
+- `src/app/(protected)/admin/fg2-lab/_components/fg2-lab-client.tsx` (selector de precarga)
+- `scripts/_experimental/fg2-gen-prompts.ts` (nuevo, generador)
+- `docs/experimentos/fg2-prompts-listos.md` (nuevo, generado)
+- `docs/experimentos/fg2-brief-experimento.md` (checklist + rúbrica + tabla precargada)
+
+**Verificación:**
+- ✅ **ESLint** limpio en los 3 archivos de código tocados.
+- ✅ **tsc** — los archivos de FG-2 (`_experimental/*`, `fg2-lab/*`, generador) dan **cero errores**. El lab compila (webpack: `✓ Compiled successfully in 84s`).
+- ✅ Generador corrido OK → los 10 prompts en el doc; casos sin reseñas reales omiten la sección de reseñas correctamente (verificado en el output A3/A4/A5).
+- 🔴 **`npm run build` NO llega a verde** — pero NO por FG-2. El type-check global está **bloqueado por un bug pre-existente de `prisma/schema.prisma`**: enum `AuditActionType` define `BOT_DELETED` **dos veces** (líneas 192 y 199 → Prisma P1012). El schema inválido impide `prisma generate`, el client queda viejo y cascadea errores de tipos en `admin/chatbots/**` y `admin/clients/**` (`convertedToOsLeadId`, `deletedAt`, `avatarImageUrl`, `city`, `internalNotes`, …). `git status` confirma que NO toqué `schema.prisma` ni esos módulos. **Fuera de scope + archivo sensible → reportado y flagueado (chip), no corregido.** Fix de una línea: borrar el `BOT_DELETED` duplicado de `schema.prisma:199` y `npx prisma generate`.
+- ⚠️ **QA visual en runtime pendiente para Franco:** `/admin/fg2-lab` está detrás de auth SUPER_ADMIN; el selector de precarga no se verificó perceptualmente en browser. Bajo riesgo (reusa `Select/Field/Card` ya verificados y solo agrega un control), pero **no cerrar a ciegas** — Franco lo ve al abrir el lab para correr el experimento.
+
+**Verificación humana (Franco):** entrar a `/admin/fg2-lab`, abrir `docs/experimentos/fg2-brief-experimento.md`, y tener TODO listo para empezar a pegar en Claude Design sin preparar nada más (5 casos en el selector, 10 prompts en `fg2-prompts-listos.md`, checklist + tabla armadas).
+
+**Estado: EXPERIMENTO PREPARADO — NO CORRIDO.** El gate de FG-2 sigue **ABIERTO**: no se generó ni se juzgó ninguna demo (eso es de Franco). Bloque 2.1→2.3 no se deriva hasta que el experimento corra y la decisión quede anotada en el doc.
+
+
+## 🧪 Sprint 0.2 — Línea base e2e PRE-REDISEÑO (Playwright destrabado) · 2026-06-25
+
+**Objetivo:** correr el suite e2e en browser por primera vez y dejar la LÍNEA BASE pre-rediseño. Premisa de entrada: "Playwright bloqueado en esta máquina (sospecha antivirus/firewall contra los binarios de ms-playwright)".
+
+**Diagnóstico — la premisa era falsa. Playwright NO está bloqueado:**
+- Binarios YA instalados: `chromium-1223` + `chrome-headless-shell-1223` en `%LOCALAPPDATA%\ms-playwright` (markers `INSTALLATION_COMPLETE` + `DEPENDENCIES_VALIDATED` presentes). `@playwright/test@1.60.0`.
+- `chromium.launch({headless:true})` + `newPage()` + `setContent()` → **`LAUNCH_OK`**. El ejecutable arranca y renderiza.
+- `npx playwright install chromium` → **exit 0** (sin descarga, sin bloqueo de red/AV).
+- El suite corrió entero en Chromium sin un solo error de spawn/launch.
+- **Conclusión:** no hubo nada que destrabar — ni handoff de whitelist al antivirus. El bloqueo histórico, si existió, ya no aplica.
+
+**Aclaraciones de scope (la consigna asumía un setup que no existe tal cual):**
+- No hay script `npm run test:setter` ni specs "setter". El suite e2e real es **`npm run test:e2e`** (`playwright test`), 22 archivos spec, **50 tests** (no 35).
+- El config (`playwright.config.ts`) levanta su propio `webServer: npm run start` en `:3000` (build de hoy ya presente). Corrido **exactamente como está** — sin tocar config ni tests (medir, no maquillar).
+
+**LÍNEA BASE (`npm run test:e2e`, reporter list, 1 worker, 3.9m):**
+- **32 passed · 10 failed · 8 skipped** · exit 1.
+- Log completo: `C:\tmp\e2e-baseline.log`. Artefactos (screenshots/diffs): `test-results/`.
+
+**Los 10 fallos — clasificados (NINGUNO es Playwright):**
+- **7× regresión visual** (`22-visual-regression.spec.ts`): diffs de 3–8% px contra los snapshots guardados (`/admin`, `/admin/clients`, `/admin/alerts`, `/admin/_design`, `/dashboard`, `/dashboard/chatbot`, `/dashboard/chatbot/settings`). ⚠️ **La baseline visual YA está roja ANTES del rediseño** → los snapshots `*-chromium-win32.png` están desactualizados respecto del estado actual. No sirven como "before" limpio; el rediseño va a regenerarlos igual (`--update-snapshots`).
+- **2× `16-admin-bulk-actions`**: `locator.check()` timeout 15s — el checkbox es `sr-only` y un `<label class="absolute … cursor-pointer">` **intercepta los pointer events** ("element is not stable" / "intercepts pointer events"). Interacción rota/flaky real, no bloqueo de browser.
+- **1× `30-onboarding-e2e-complete`** (flujo completo): timeout esperando el input de teléfono (`getByPlaceholder(/5493815555555/i)`) en `helpers/form.ts:15` — el wizard no llegó al campo esperado.
+
+**8 skipped:** tests con `test.skip()` condicional (gating `@smoke` / conteo de fixtures) — comportamiento normal, no fallos.
+
+**Restricción respetada:** cero cambios a tests o código de app. Esto es el estado real medido.
+
+**Para el rediseño:** este 32/10/8 es el "antes". Los 7 fallos visuales NO son deuda nueva del rediseño — la baseline de snapshots ya divergió y deberá regenerarse. Los 3 fallos funcionales (bulk-actions ×2, onboarding ×1) sí son señal a vigilar: si el rediseño los toca, distinguir regresión-nueva de roto-preexistente.
+
+**Estado: LÍNEA BASE CAPTURADA.** Playwright operativo; suite corre en browser sin intervención de entorno.
+
+---
+
+## Sprint 0.3 — Seed de estados del setter (2026-06-25)
+
+**Objetivo:** sembrar ≥1 OsLead en cada estado relevante del flujo del setter para verificación perceptual del rediseño B9.
+
+**Descubrimiento:**
+
+| Estado objetivo | Cobertura previa |
+|---|---|
+| Frío (PROSPECTO, sin dossier) | ✅ ya cubría (Ferretería El Constructor, etc.) |
+| Esperando respuesta (DEMO_ENVIADA + nextFollowUpAt) | ✅ ya cubría (Restaurante El Portal) |
+| Postergado futuro (POSTERGADO + reactivateAt > now) | ✅ ya cubría (Gimnasio Olimpo) |
+| Ficha a medias (dossier FICHA, fichaJson parcial) | ❌ faltaba |
+| Caliente (dossier EVALUADA, score ≥ 4) | ❌ faltaba |
+| En revisión (dossier EN_REVISION) | ❌ faltaba |
+| Aprobado (dossier APROBADA + aprobadaAt + draftUrl) | ❌ faltaba |
+| Rechazado con nota (dossier RECHAZADA + rechazos[]) | ❌ faltaba |
+| Descartado (dossier DESCARTADA) | ❌ faltaba |
+| Postergado vencido (POSTERGADO + reactivateAt < now) | ❌ faltaba |
+
+**Cambios:**
+
+Archivo modificado: `prisma/seed-agency-os.ts`
+
+- Import agregado: `DossierStage`
+- Tipos nuevos: `DossierData`, `QaLeadSeed`
+- Array nuevo: `qaLeadSeeds` — 7 leads con datos realistas, todos bajo `franco`
+- Funciones nuevas: `ensureLeadDossier()` (upsert idempotente) y `ensureQaLeads()`
+- `main()`: llama a `ensureQaLeads(members)` después del loop de `leadSeeds`
+
+**Leads QA sembrados:**
+
+| businessName | status | dossier stage |
+|---|---|---|
+| Café Bergamota | POSTERGADO | sin dossier (reactivateAt: 7 días atrás) |
+| Panadería Don Cosme | PROSPECTO | FICHA (fichaJson parcial) |
+| Veterinaria San Marcos | PROSPECTO | EVALUADA (score 5) |
+| Centro Pilates Armonía | RESPONDIO | EN_REVISION |
+| Clínica Dental Omega | CERRADO | APROBADA (aprobadaAt + draftUrl) |
+| Studio Yoga Balance | RESPONDIO | RECHAZADA (rechazos con nota) |
+| Zapatería El Buen Paso | PERDIDO | DESCARTADA |
+
+**Conteo tras correr el seed (37 leads totales):**
+
+Por status: PROSPECTO×14, DEMO_ENVIADA×5, RESPONDIO×5, VIO_VIDEO×3, CALL_AGENDADA×1, CERRADO×4, PERDIDO×3, POSTERGADO×2
+
+Por stage de dossier: FICHA×2, EVALUADA×2, CONSTRUCCION×1, EN_REVISION×8, APROBADA×2, RECHAZADA×2, DESCARTADA×2
+
+**Chequeos:**
+- `tsc --noEmit`: sin errores
+- `prisma migrate diff` (live→schema): `No difference detected`
+- 7/7 leads QA verificados en BD por query directo
+- Guard anti-prod: intacto (no tocado)
+
+**Issue pre-existente detectado (fuera de scope):** el seed falla en la fase `projectSeeds` con "No se encontro organizationId para develop" cuando se corre sin org `develop` en la BD. Los `qaLeadSeeds` se insertan antes de ese punto y quedan completos. No se toca en este sprint.

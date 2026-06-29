@@ -8,7 +8,6 @@ import { isTelegramConfigured } from '@/lib/notifications/telegram'
 import {
   alarmaNuncaDescarta,
   calcularRatioSetters,
-  esCaliente,
   formatEspera,
   ordenarCola,
   pctDescarte,
@@ -41,6 +40,8 @@ export default async function LeadOsRevisionPage() {
         lead: {
           select: {
             businessName: true,
+            // admin-1b: el caliente operativo de la cola sale del campo, no del score.
+            caliente: true,
             assignedTo: { select: { id: true, name: true, email: true } },
           },
         },
@@ -109,8 +110,10 @@ export default async function LeadOsRevisionPage() {
         leadId: dossier.leadId,
         businessName: dossier.lead.businessName,
         setter: setterLabel(dossier.lead.assignedTo),
+        // `score` queda como dato informativo (badge "Score X/5"); el orden y el
+        // flame de la cola siguen el campo caliente (admin-1b).
         score,
-        caliente: esCaliente(score),
+        caliente: dossier.lead.caliente,
         esperaDesde: dossier.updatedAt,
       }
     }),

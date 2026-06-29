@@ -12,7 +12,7 @@
  *
  * Esta máquina (PRODUCCIÓN del activo demo) convive con la máquina COMERCIAL
  * del lead (`LeadStatus` + cron de follow-up) y no la pisa: de `OsLead` solo
- * se LEE `status` para el gate de BRIEF — jamás se escribe.
+ * se LEEN `status` y `caliente` para el gate de BRIEF — jamás se escriben.
  */
 import type { DossierStage, OsLeadDossier, Prisma } from '@prisma/client'
 import { prisma } from '@/lib/prisma'
@@ -29,7 +29,7 @@ import {
   type Rechazo,
   type SelfCheck,
 } from '@/lib/leados/contracts'
-import { leadRespondio as leadYaRespondio } from '@/lib/leados/flow'
+import { gateBriefAbierto } from '@/lib/leados/flow'
 import { buildEscaladoPatch, ESCALADO_RESET } from '@/lib/leados/escalamiento'
 
 /**
@@ -108,12 +108,14 @@ export async function ensureOwnedDossier(
  * LA única puerta del stage. Valida la transición contra LEGAL_TRANSITIONS y
  * aplica las reglas que el caller no puede saltear:
  *
- *   - EVALUADA exige la evaluación (parseada con su contrato) — así BRIEF
- *     siempre tiene un score confiable para leer.
- *   - BRIEF aplica el gate del flujo invertido: solo si el lead respondió el
- *     primer contacto (RESPONDIO o posterior) O la evaluación dio score >= 4
- *     (lead caliente → demo preventiva). Lee el lead acá adentro; no confía
- *     en el caller.
+ *   - EVALUADA exige la evaluación (parseada con su contrato) — queda estampada
+ *     para el veredicto del admin y el gate de DESCARTADA (el gate de BRIEF ya
+ *     no la lee).
+ *   - BRIEF aplica el gate del flujo invertido con `gateBriefAbierto` (LA MISMA
+ *     regla pura que la UI y el flag del action — única copia, sin drift): solo
+ *     si el lead respondió el primer contacto (RESPONDIO o posterior) O está
+ *     marcado caliente (campo `OsLead.caliente` de Franco — D4). Lee el lead acá
+ *     adentro; no confía en el caller.
  *   - DESCARTADA exige motivoDescarte (queda en `evaluacionJson`).
  *   - RECHAZADA exige motivo y lo appendea al historial `rechazos`.
  *
@@ -128,7 +130,7 @@ export async function transitionDossier(
 ): Promise<OsLeadDossier> {
   const dossier = await prisma.osLeadDossier.findUnique({
     where: { leadId },
-    include: { lead: { select: { status: true } } },
+    include: { lead: { select: { status: true, caliente: true } } },
   })
   if (!dossier) {
     throw new DossierTransitionError('No existe dossier para ese lead')
@@ -159,12 +161,15 @@ export async function transitionDossier(
       break
     }
     case 'BRIEF': {
-      const evaluacion = EvaluacionSchema.safeParse(dossier.evaluacionJson)
-      const score = evaluacion.success ? evaluacion.data.score : null
-      const leadRespondio = leadYaRespondio(dossier.lead.status)
-      if (!leadRespondio && (score === null || score < 4)) {
+      // D4/admin-1d: el gate del flujo invertido sale del CAMPO `caliente` (de
+      // Franco), no del score del setter. Reusa `gateBriefAbierto` — LA MISMA
+      // función pura que la UI (lead-wizard, evaluacion-step) y el flag del
+      // action: una sola copia de la regla, server y UI no pueden divergir.
+      // El stage acá es EVALUADA (LEGAL_TRANSITIONS), nunca DESCARTADA → el
+      // guardrail DESCARTADA de esCaliente no aplica.
+      if (!gateBriefAbierto(dossier.lead.status, dossier.lead.caliente)) {
         throw new DossierTransitionError(
-          'Gate EVALUADA→BRIEF: el lead no respondió el primer contacto y la evaluación no es score 4–5',
+          'Gate EVALUADA→BRIEF: el lead no respondió el primer contacto y no está marcado caliente',
         )
       }
       break

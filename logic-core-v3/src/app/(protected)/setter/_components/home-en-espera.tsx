@@ -1,0 +1,86 @@
+import { CheckCircle2, CalendarClock, Hourglass, Pin } from 'lucide-react'
+
+/**
+ * LeadOS 2.1b — Estado "todo en espera": el setter TIENE leads pero ninguno está
+ * en su cola de trabajo ahora (la cola `trabajar` quedó vacía). Es DISTINTO del
+ * `HomeEmpty` (cero leads asignados): acá hay trabajo, solo que no en el foco —
+ * está en vuelo (esperando respuesta del negocio, revisión de Franco o una
+ * reactivación), o el setter lo guardó él mismo (pausado/fijado). Server component
+ * puro (sin interacción): presenta los conteos que ya calculó la page desde la
+ * partición de la cartera.
+ *
+ * Las tres cuentas son disjuntas (partición). `fijados` importa: un fijado
+ * accionable queda FUERA del foco por diseño (2.1a), así que sin contarlo el
+ * estado afirmaría "no hay leads activos" cuando sí los hay (en la cartera, abajo).
+ *
+ * Paleta NEUTRA a propósito (disciplina B9): el cyan queda para lo accionable, y
+ * acá no hay nada que accionar.
+ */
+type HomeEnEsperaProps = {
+  /** En vuelo, no accionables (seguimiento + revisión + agendadas). */
+  enEspera: number
+  /** Pausados por el propio setter (snooze personal vigente). */
+  pausados: number
+  /** Fijados por el setter — quedan fuera del foco aunque sean accionables. */
+  fijados: number
+}
+
+function plural(n: number, singular: string, plural: string): string {
+  return n === 1 ? singular : plural
+}
+
+export function HomeEnEspera({ enEspera, pausados, fijados }: HomeEnEsperaProps) {
+  // Sin NADA activo solo si las tres cuentas son cero (todo lo demás es archivo).
+  const sinNada = enEspera === 0 && pausados === 0 && fijados === 0
+  const enVuelo = enEspera > 0
+
+  return (
+    <section aria-label="Nada para trabajar ahora" aria-live="polite">
+      <div className="flex flex-col items-center gap-3 rounded-2xl border border-white/[0.08] bg-white/[0.02] px-6 py-10 text-center">
+        <span className="flex h-11 w-11 items-center justify-center rounded-full bg-emerald-500/10">
+          <CheckCircle2 size={22} strokeWidth={1.5} aria-hidden className="text-emerald-400/80" />
+        </span>
+
+        <p className="text-sm font-semibold text-zinc-100">
+          No hay nada para trabajar ahora mismo.
+        </p>
+
+        <p className="max-w-sm text-xs leading-relaxed text-zinc-500">
+          {sinNada
+            ? 'No tenés leads activos en este momento.'
+            : enVuelo
+              ? 'Tu trabajo está en vuelo: el lead vuelve a tu foco cuando el negocio responda, Franco revise o se venza una postergación.'
+              : 'Lo que tenés está guardado por vos — fijado o pausado; nada quedó en la cola para trabajar ahora.'}
+        </p>
+
+        {!sinNada && (
+          <div className="flex flex-wrap items-center justify-center gap-2">
+            {enEspera > 0 && (
+              <span className="inline-flex items-center gap-1.5 rounded-lg border border-white/[0.06] bg-white/[0.03] px-2.5 py-1 text-[11px] font-medium text-zinc-300">
+                <Hourglass size={12} strokeWidth={1.5} aria-hidden className="shrink-0 text-zinc-500" />
+                <span className="tabular-nums">{enEspera}</span>
+                esperando respuesta
+              </span>
+            )}
+            {fijados > 0 && (
+              <span className="inline-flex items-center gap-1.5 rounded-lg border border-white/[0.06] bg-white/[0.03] px-2.5 py-1 text-[11px] font-medium text-zinc-300">
+                <Pin size={12} strokeWidth={1.5} aria-hidden className="shrink-0 text-zinc-500" />
+                <span className="tabular-nums">{fijados}</span>
+                {plural(fijados, 'fijado por vos', 'fijados por vos')}
+              </span>
+            )}
+            {pausados > 0 && (
+              <span className="inline-flex items-center gap-1.5 rounded-lg border border-white/[0.06] bg-white/[0.03] px-2.5 py-1 text-[11px] font-medium text-zinc-300">
+                <CalendarClock size={12} strokeWidth={1.5} aria-hidden className="shrink-0 text-zinc-500" />
+                <span className="tabular-nums">{pausados}</span>
+                {plural(pausados, 'pausado por vos', 'pausados por vos')}
+              </span>
+            )}
+          </div>
+        )}
+
+        <p className="text-xs text-zinc-600">Tu cartera completa está más abajo.</p>
+      </div>
+    </section>
+  )
+}

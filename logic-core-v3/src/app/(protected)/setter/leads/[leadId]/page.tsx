@@ -8,9 +8,8 @@ import { requireSetter } from '@/lib/auth-guards'
 import { countFollowUps } from '@/lib/follow-up'
 import { getUltimaAsignacion } from '@/lib/leados/assignment-trail'
 import { getOwnedDossier } from '@/lib/leados/dossier'
-import { buildHomeLeads } from '@/lib/leados/home'
 import { contarDmsHoy, listOwnedLeadActivities } from '@/lib/leados/outreach'
-import { getOwnedLead, listOwnedLeads } from '@/lib/leados/ownership'
+import { getOwnedLead } from '@/lib/leados/ownership'
 import { listOwnedLeadTimeline } from '@/lib/leados/timeline'
 import {
   leadRespondio,
@@ -19,19 +18,13 @@ import {
   parseEvaluacion,
   parseFicha,
   parseSelfCheck,
-  particionarCartera,
   ultimoRechazo,
   STAGE_LABELS,
   STATUS_LABELS,
 } from '@/lib/leados/flow'
-import {
-  construirRecorrido,
-  esColaKey,
-  type RecorridoView,
-} from '@/lib/leados/recorrido'
+import { esCaliente } from '@/lib/leados/revision'
 import { LeadTimeline, type LeadTimelineEvent } from './_components/lead-timeline'
 import { LeadWizard, type WizardData } from './_components/lead-wizard'
-import { RecorridoStrip } from './_components/recorrido-strip'
 
 export const metadata: Metadata = {
   title: 'Lead · LeadOS · develOP',
@@ -52,28 +45,16 @@ const STATUS_TONES: Record<LeadStatus, 'cyan' | 'emerald' | 'amber' | 'rose' | '
 
 type SetterLeadPageProps = {
   params: Promise<{ leadId: string }>
-  searchParams: Promise<{ cola?: string }>
 }
 
-export default async function SetterLeadPage({ params, searchParams }: SetterLeadPageProps) {
+export default async function SetterLeadPage({ params }: SetterLeadPageProps) {
   const { leadId } = await params
-  const { cola } = await searchParams
   const userId = await requireSetter()
 
   // Regla de oro de ownership: lead ajeno o inexistente → 404, sin leakear.
   const lead = await getOwnedLead(leadId, userId)
   if (!lead) {
     notFound()
-  }
-
-  // Recorrido de cola (B-beta): solo si se entró desde una cola (`?cola=…`).
-  // Recomputa la cartera propia (aislada por assignedToId) con la MISMA
-  // clasificación del home → prev/next sigue el orden exacto de "Mi día".
-  // No toca gates: cada lead abre su wizard completo igual que en modo isla.
-  let recorrido: RecorridoView | null = null
-  if (esColaKey(cola)) {
-    const particion = particionarCartera(buildHomeLeads(await listOwnedLeads(userId)))
-    recorrido = construirRecorrido(particion, cola, leadId)
   }
 
   const [dossier, actividades, dmsHoy, ultimaAsignacion, timeline] = await Promise.all([
@@ -97,8 +78,9 @@ export default async function SetterLeadPage({ params, searchParams }: SetterLea
       }).format(ultimaAsignacion.createdAt)
     : null
   const evaluacion = parseEvaluacion(dossier?.evaluacionJson ?? null)
-  const caliente =
-    evaluacion !== null && evaluacion.score >= 4 && dossier?.stage !== 'DESCARTADA'
+  // admin-1b: el badge caliente lee el CAMPO del lead (lo marca Franco), no el
+  // score. Se conserva el guardrail de stage (un DESCARTADA nunca es caliente).
+  const caliente = esCaliente(lead.caliente, dossier?.stage ?? null)
 
   const data: WizardData = {
     lead: {
@@ -113,6 +95,9 @@ export default async function SetterLeadPage({ params, searchParams }: SetterLea
       status: lead.status,
       email: lead.email,
       notes: lead.notes,
+      // admin-1b: el campo crudo (sin guardrail de stage) alimenta el gate del
+      // wizard — mismo criterio que tenía gateBriefAbierto al recibir el score.
+      caliente: lead.caliente,
     },
     stage: dossier?.stage ?? null,
     ficha: parseFicha(dossier?.fichaJson ?? null),
@@ -163,8 +148,6 @@ export default async function SetterLeadPage({ params, searchParams }: SetterLea
 
   return (
     <div className="space-y-6">
-      {recorrido && <RecorridoStrip recorrido={recorrido} />}
-
       <header className="space-y-3">
         <Link
           href="/setter"

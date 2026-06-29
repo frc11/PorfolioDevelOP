@@ -27,7 +27,6 @@ const ESTADO_OPCIONES: { value: EstadoFiltro; label: string }[] = [
 ]
 
 const ORDEN_OPCIONES: { value: OrdenCartera; label: string }[] = [
-  { value: 'colas', label: 'Por colas (recomendado)' },
   { value: 'urgencia', label: 'Urgencia' },
   { value: 'reciente', label: 'Más nuevos primero' },
   { value: 'antiguo', label: 'Más viejos primero' },
@@ -35,10 +34,10 @@ const ORDEN_OPCIONES: { value: OrdenCartera; label: string }[] = [
 ]
 
 /**
- * Palancas de la cartera: buscar + filtrar por estado + orden elegible. Todo
- * vive en el cliente (la cartera ya está en memoria) — instantáneo a la escala
- * del setter. Tocar cualquier control pasa de la vista por colas a una lista
- * plana ordenada a su gusto; "Limpiar" vuelve a las colas.
+ * Palancas de la cartera secundaria: buscar + filtrar por estado + orden
+ * elegible. Todo vive en el cliente (la cartera ya está en memoria) —
+ * instantáneo a la escala del setter. La lista arranca por urgencia; "Limpiar"
+ * vuelve a esos valores por defecto.
  */
 export function CarteraToolbar({
   query,
@@ -99,7 +98,7 @@ export function CarteraToolbar({
             className="inline-flex items-center gap-1 rounded-lg px-2 py-1 font-medium text-zinc-400 transition-colors hover:bg-white/[0.05] hover:text-zinc-200"
           >
             <X size={12} strokeWidth={1.5} />
-            Limpiar — volver a las colas
+            Limpiar filtros
           </button>
         </div>
       )}

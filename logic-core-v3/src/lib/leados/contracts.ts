@@ -39,6 +39,10 @@ export const FichaSchema = z.object({
 
 // ── Evaluación externa (score + veredicto, pegada por el setter) ────────────
 
+// admin-1c: el veredicto es la LECTURA del setter, informativa. 'CALIENTE' acá NO
+// determina el caliente operativo (campo `OsLead.caliente`, criterio de Franco) ni
+// dispara nada: solo se muestra (badge) y cuenta como "avanzada" en la métrica
+// descarte/avance (revision.ts). El setter lo sigue eligiendo para entrenar el ojo.
 export const VEREDICTO_VALUES = ['DESCARTAR', 'AVANZAR', 'CALIENTE'] as const
 
 export const EvaluacionSchema = z.object({
@@ -50,8 +54,11 @@ export const EvaluacionSchema = z.object({
   // ventana de 30 días de la métrica descarte/avance. Opcional: las
   // evaluaciones pre-B5 no la tienen y siguen parseando.
   fecha: z.string().datetime().optional(),
-  // B5: marca de "Telegram de caliente ya enviado" — garantiza una sola
-  // notificación por dossier aunque el flujo se re-ejecute.
+  // B5/admin-1c: marca de "Telegram informativo de score alto ya enviado" —
+  // garantiza una sola notificación por dossier aunque el flujo se re-ejecute.
+  // Nombre legacy (`calienteNotificadaAt`): se conserva para no migrar los blobs
+  // ya estampados y evitar re-notificar. Es solo un flag de idempotencia, no
+  // implica caliente operativo (ese es el campo `OsLead.caliente`).
   calienteNotificadaAt: z.string().datetime().optional(),
 })
 

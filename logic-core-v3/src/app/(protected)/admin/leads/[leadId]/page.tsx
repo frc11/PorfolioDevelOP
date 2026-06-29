@@ -412,6 +412,7 @@ export default async function AgencyOsLeadDetailPage({ params }: LeadPageProps) 
           <AssignSetterControl
             leadId={lead.id}
             assignedToId={lead.assignedToId}
+            caliente={lead.caliente}
             setters={setters.map((setter) => {
               const carga = cargaSetters.get(setter.id)
               return {

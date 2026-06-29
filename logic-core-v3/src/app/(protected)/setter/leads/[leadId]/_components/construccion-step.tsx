@@ -18,13 +18,14 @@ import { Badge, Button, Callout, Card } from '@/components/ui'
 import type { Brief, Ficha, Rechazo } from '@/lib/leados/contracts'
 import { buildConstruccionBlock, type CopyBlockLead } from '@/lib/leados/copy-blocks'
 import { SHELL_CONSTRUCCION } from '@/lib/leados/flow'
+import { GUIA_CONSTRUCCION } from '@/lib/leados/guidance-content'
 import { formatEspera } from '@/lib/leados/revision'
 import {
   iniciarConstruccion,
   reabrirConstruccion,
 } from '@/app/(protected)/setter/_actions/dossier.actions'
 import { CopyBlock } from '@/app/(protected)/setter/_components/copy-block'
-import { TeachPanel } from '@/app/(protected)/setter/_components/teach-panel'
+import { LineaRicaText, TeachPanel } from '@/app/(protected)/setter/_components/teach-panel'
 import { ToolGuide } from '@/app/(protected)/setter/_components/tool-guide'
 import { EscalarModal } from './escalar-modal'
 
@@ -230,10 +231,7 @@ export function ConstruccionStep({
         </div>
         <UrgenciaBanner respondioDesde={respondioDesde} />
         <p className="max-w-xl text-xs leading-relaxed text-zinc-500">
-          La demo se construye en <span className="font-semibold text-zinc-300">Claude Design</span>{' '}
-          (herramienta externa) — el panel te guía fase por fase, no la construye por vos. Cuando
-          arranques, el dossier pasa a &quot;Construcción&quot; y se abren los pasos de draft y
-          self-check.
+          <LineaRicaText linea={GUIA_CONSTRUCCION.intro} />
         </p>
         <ToolGuide id="claudeDesign" />
         <Button

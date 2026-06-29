@@ -14,12 +14,13 @@ import {
   formatFechaCorta,
   leadRespondio,
 } from '@/lib/leados/flow'
+import { GUIA_OPENER } from '@/lib/leados/guidance-content'
 import { registrarOpener } from '@/app/(protected)/setter/_actions/outreach.actions'
 import { OpenerInputSchema } from '@/app/(protected)/setter/_actions/outreach.schemas'
 import { CanalSeguridad } from '@/app/(protected)/setter/_components/canal-seguridad'
 import { CopyBlock } from '@/app/(protected)/setter/_components/copy-block'
 import { GuardrailRol } from '@/app/(protected)/setter/_components/guardrail-rol'
-import { TeachPanel } from '@/app/(protected)/setter/_components/teach-panel'
+import { LineaRicaText, TeachPanel } from '@/app/(protected)/setter/_components/teach-panel'
 import { TextArea } from '@/app/(protected)/setter/_components/text-area'
 import { ToolGuide } from '@/app/(protected)/setter/_components/tool-guide'
 
@@ -28,6 +29,8 @@ type OpenerStepProps = {
   lead: CopyBlockLead
   stage: DossierStage | null
   status: LeadStatus
+  /** admin-1b: campo persistido que marca Franco — habilita el camino preventivo. */
+  caliente: boolean
   ficha: Ficha | null
   evaluacion: Evaluacion | null
   /** Contactos reales ya registrados (0 = opener pendiente). */
@@ -49,6 +52,7 @@ export function OpenerStep({
   lead,
   stage,
   status,
+  caliente,
   ficha,
   evaluacion,
   contactos,
@@ -119,7 +123,6 @@ export function OpenerStep({
     )
   }
 
-  const caliente = evaluacion !== null && evaluacion.score >= 4
   const largo = mensaje.trim().length
   const pasadoDeLargo = largo > CANAL_INSTAGRAM.openerMaxCaracteres
   const tieneLink = contieneLink(mensaje)
@@ -163,9 +166,7 @@ export function OpenerStep({
           )}
         </div>
         <p className="mt-1 max-w-xl text-xs leading-relaxed text-zinc-500">
-          Solo texto, dolor-first, corto. Nada de precio y nada de link — el link viaja
-          recién con la demo, cuando respondan. Lo mandás VOS desde Instagram (copiar y
-          pegar) y acá lo registrás.
+          <LineaRicaText linea={GUIA_OPENER.intro} />
         </p>
         {caliente && (
           <p className="mt-2 max-w-xl rounded-xl border border-amber-400/20 bg-amber-500/[0.05] p-3 text-xs leading-relaxed text-amber-200/90">
@@ -209,10 +210,12 @@ export function OpenerStep({
       </Field>
 
       {tieneLink && (
-        <p className="text-xs font-medium text-rose-400">
-          El opener va SIN link — sacalo. El link viaja recién con la demo aprobada
-          (segundo mensaje, en «Seguimiento»).
-        </p>
+        <div className="rounded-xl border border-rose-400/25 bg-rose-500/[0.06] p-3" role="alert">
+          <p className="text-xs font-semibold text-rose-300">{GUIA_OPENER.gate.titulo}</p>
+          <p className="mt-1 text-xs leading-relaxed text-rose-200/90">
+            <LineaRicaText linea={GUIA_OPENER.gate.detalle} emphasisClassName="font-semibold text-rose-100" />
+          </p>
+        </div>
       )}
 
       {listoParaCopiar && (

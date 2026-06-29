@@ -182,13 +182,20 @@ export function derivarDemosEnCola(
  * cola (live). Recibe los leads YA cargados (`listOwnedLeads` en el page) para no
  * pegarle dos veces a la cartera. Resiliente: si la lectura de avisos falla, la
  * cola (derivada de los leads) igual se muestra y la cartera no se rompe.
+ *
+ * 2.2 — `excludeLeadId` deduplica contra el foco: el aviso cuyo lead YA es el
+ * protagonista del home (el foco, arriba) NO se repite en la lista. Es solo
+ * presentación: ese aviso sigue SIN LEER (el badge `totalSinLeer` lo cuenta igual)
+ * — cuando el foco cambie, reaparece. El aislamiento (`setterId`) no se toca.
  */
 export async function getNovedadesSetter(
   userId: string,
   leads: OwnedLeadWithDossier[],
+  opts?: { excludeLeadId?: string | null },
 ): Promise<NovedadesView> {
   const ahora = new Date()
   const enCola = derivarDemosEnCola(leads, ahora)
+  const excluido = opts?.excludeLeadId ?? null
 
   try {
     const [rows, totalSinLeer] = await Promise.all([
@@ -210,7 +217,11 @@ export async function getNovedadesSetter(
       }),
     ])
 
-    const avisos: AvisoView[] = rows.map((row) => ({
+    // Dedup del foco: se filtra solo lo VISIBLE (la lista), nunca el conteo del
+    // badge (que refleja lo realmente sin leer, foco incluido).
+    const visibles = excluido ? rows.filter((row) => row.leadId !== excluido) : rows
+
+    const avisos: AvisoView[] = visibles.map((row) => ({
       id: row.id,
       kind: row.kind,
       title: row.title,

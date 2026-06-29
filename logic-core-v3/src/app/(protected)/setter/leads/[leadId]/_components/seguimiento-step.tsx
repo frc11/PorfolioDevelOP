@@ -6,7 +6,6 @@ import { toast } from 'sonner'
 import { CalendarClock, CheckCircle2, Lock, Rocket, Send } from 'lucide-react'
 import type { DossierStage, LeadStatus } from '@prisma/client'
 import { Badge, Button, Card, Field, Input } from '@/components/ui'
-import type { Evaluacion } from '@/lib/leados/contracts'
 import {
   buildDemoMensajeBlock,
   buildObjecionInputBlock,
@@ -20,6 +19,7 @@ import {
   PLANTILLAS_FOLLOW_UP,
   STATUS_LABELS,
 } from '@/lib/leados/flow'
+import { GUIA_ENVIO } from '@/lib/leados/guidance-content'
 import {
   enviarDemoAprobada,
   registrarResultado,
@@ -31,7 +31,7 @@ import {
 import { CanalSeguridad } from '@/app/(protected)/setter/_components/canal-seguridad'
 import { CopyBlock } from '@/app/(protected)/setter/_components/copy-block'
 import { GuardrailRol } from '@/app/(protected)/setter/_components/guardrail-rol'
-import { TeachPanel } from '@/app/(protected)/setter/_components/teach-panel'
+import { LineaRicaText, TeachPanel } from '@/app/(protected)/setter/_components/teach-panel'
 import { TextArea } from '@/app/(protected)/setter/_components/text-area'
 import { HerramientaLauncher } from '@/app/(protected)/setter/_components/tool-guide'
 
@@ -40,7 +40,8 @@ type SeguimientoStepProps = {
   lead: CopyBlockLead
   stage: DossierStage | null
   status: LeadStatus
-  evaluacion: Evaluacion | null
+  /** admin-1b: campo persistido que marca Franco — habilita el envío preventivo. */
+  caliente: boolean
   /** Contactos reales registrados (opener + toques). */
   contactos: number
   /** Conteo de SIN_RESPUESTA (opener incluido) — alimenta cadenciaInfo. */
@@ -111,7 +112,7 @@ export function SeguimientoStep({
   lead,
   stage,
   status,
-  evaluacion,
+  caliente,
   contactos,
   followUpCount,
   proximoToque,
@@ -128,11 +129,10 @@ export function SeguimientoStep({
   const [isPending, startTransition] = useTransition()
   const [enviandoDemo, startEnvioDemo] = useTransition()
 
-  const score = evaluacion?.score ?? null
   const respondio = leadRespondio(status)
   const demoEnviada = Boolean(demoEnviadaAt)
   const puedeEnviar =
-    !demoEnviada && gateEnvioDemo({ status, score, stage, finalUrl })
+    !demoEnviada && gateEnvioDemo({ status, caliente, stage, finalUrl })
   const cadencia = cadenciaInfo(followUpCount)
   const activo = contactos > 0 || respondio || puedeEnviar || demoEnviada
 
@@ -241,28 +241,27 @@ export function SeguimientoStep({
         <p className="flex items-start gap-2 rounded-xl border border-emerald-400/20 bg-emerald-500/[0.06] p-3 text-xs leading-relaxed text-emerald-300">
           <CheckCircle2 size={14} strokeWidth={1.5} className="mt-0.5 shrink-0" />
           <span>
-            Demo enviada{demoEnviadaAt ? ` el ${formatFechaCorta(demoEnviadaAt)}` : ''}. El
-            follow-up ya quedó armado — de acá en adelante el objetivo es UNO: la reunión.
-            Preguntá si la pudo ver y proponé un horario.
+            Demo enviada{demoEnviadaAt ? ` el ${formatFechaCorta(demoEnviadaAt)}` : ''}.{' '}
+            <LineaRicaText linea={GUIA_ENVIO.enviada} />
           </span>
         </p>
       ) : puedeEnviar && finalUrl ? (
         <div className="space-y-3 rounded-2xl border border-emerald-400/25 bg-emerald-500/[0.05] p-4">
           <div className="flex items-center gap-2">
             <Rocket size={15} strokeWidth={1.5} className="text-emerald-400" />
-            <p className="text-xs font-semibold text-emerald-300">
-              Demo aprobada — momento de enviar el link
-            </p>
+            <p className="text-xs font-semibold text-emerald-300">{GUIA_ENVIO.listo}</p>
           </div>
+          <p className="text-xs leading-relaxed text-zinc-400">
+            <LineaRicaText linea={GUIA_ENVIO.intro} />
+          </p>
           {!respondio && (
             <p className="text-xs leading-relaxed text-amber-200/90">
-              Camino preventivo (lead caliente): la estás mandando antes de que responda.
-              Puede acompañar al opener — vos decidís el momento.
+              <LineaRicaText linea={GUIA_ENVIO.preventivo} />
             </p>
           )}
           <CopyBlock
-            titulo="Segundo mensaje — la demo con su link"
-            instruccion="Base editable: adaptala a la conversación y pegala en Instagram. El link va acá y solo acá."
+            titulo={GUIA_ENVIO.copyBlock.titulo}
+            instruccion={GUIA_ENVIO.copyBlock.instruccion}
             texto={buildDemoMensajeBlock(lead, finalUrl)}
           />
           <Button
@@ -274,12 +273,19 @@ export function SeguimientoStep({
           </Button>
         </div>
       ) : (
-        <p className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-3 text-xs leading-relaxed text-zinc-500">
-          {stage === 'APROBADA'
-            ? 'La demo está aprobada — el link se libera cuando el negocio responda (o si el lead fuera caliente).'
-            : respondio
-              ? 'El link se envía cuando Franco apruebe la demo (la producción pasa por brief, construcción y self-check). Hasta ahí, este paso no lo ofrece.'
-              : 'El link de la demo se envía recién cuando el negocio responde Y Franco la aprueba — nunca antes. Mientras tanto: seguí la cadencia.'}
+        // Gate proactivo del envío (flujo invertido): el «todavía no» dice CUÁL de
+        // las dos condiciones del gate falta — el componente deriva el caso; el
+        // criterio sigue en `gateEnvioDemo` (flow.ts) y la action lo re-valida.
+        <p className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-3 text-xs leading-relaxed text-zinc-400">
+          <LineaRicaText
+            linea={
+              stage === 'APROBADA'
+                ? GUIA_ENVIO.espera.aprobadaSinEnganche
+                : respondio
+                  ? GUIA_ENVIO.espera.engancheSinAprobar
+                  : GUIA_ENVIO.espera.niEngancheNiAprobada
+            }
+          />
         </p>
       )}
 

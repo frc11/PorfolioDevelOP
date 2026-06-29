@@ -3,15 +3,15 @@
  * 'use server' (mismo criterio que flow.ts): las consumen los server
  * components de /admin/leados y son testeables en frío.
  *
- *   - Orden obligatorio de la cola: calientes (score >= 4) primero, después
- *     por antigüedad de entrada a revisión. Proxy de "entrada a revisión":
+ *   - Orden obligatorio de la cola: calientes (campo `OsLead.caliente`) primero,
+ *     después por antigüedad de entrada a revisión. Proxy de "entrada a revisión":
  *     `updatedAt` del dossier — la transición a EN_REVISION es su último
  *     write (los blobs Json quedan congelados en ese stage).
  *   - Métrica anti-rubber-stamp: descarte vs avance de las evaluaciones de
  *     cada setter (veredicto DESCARTAR vs AVANZAR/CALIENTE), total y últimos
  *     30 días (ventana por `evaluacion.fecha`, estampada desde B5).
  */
-import type { LeadStatus } from '@prisma/client'
+import type { DossierStage, LeadStatus } from '@prisma/client'
 import type { Evaluacion } from '@/lib/leados/contracts'
 
 export const SCORE_CALIENTE = 4
@@ -31,8 +31,21 @@ export function leadActivo(status: LeadStatus): boolean {
   return !ESTADOS_TERMINALES.includes(status)
 }
 
-export function esCaliente(score: number | null): boolean {
-  return score !== null && score >= SCORE_CALIENTE
+/**
+ * ÚNICA fuente de verdad de "lead caliente". Desde admin-1b lee el CAMPO
+ * persistido `OsLead.caliente` (lo marca Franco a ojo al asignar — D4), NO el
+ * score: el caliente operativo es su criterio, no el del setter. El score sigue
+ * disparando la notificación de evaluación caliente (territorio de admin-1c) con
+ * su propio umbral `SCORE_CALIENTE`, así que esa señal NO pasa por acá.
+ *
+ * El `stage` es el único guardrail que se conserva: un lead DESCARTADA nunca es
+ * caliente, aunque tenga el campo en true. Importa más que antes — ahora Franco
+ * puede marcar a mano un lead de score bajo que después se descarta. Omitirlo
+ * (call-sites sin stage a mano: gate del brief, cola del admin) asume "no
+ * descartado", correcto en esos puntos del flujo.
+ */
+export function esCaliente(caliente: boolean, stage?: DossierStage | null): boolean {
+  return caliente && stage !== 'DESCARTADA'
 }
 
 export function ordenarCola<T extends { caliente: boolean; esperaDesde: Date }>(

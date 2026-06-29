@@ -15,7 +15,13 @@
  * este archivo queda con SOLO reglas/gates/clasificación.
  */
 import type { DossierStage, LeadStatus } from '@prisma/client'
-import { calculateNextFollowUp } from '@/lib/follow-up'
+// Imports relativos a propósito (no `@/`): este módulo lo carga el harness de
+// invariante con ts-node SIN tsconfig-paths, así que un `@/` en la cadena de
+// runtime rompe el `require`. Todo el árbol de runtime de flow.ts es relativo o
+// node_modules (follow-up no importa nada; contracts solo zod; flow-content y
+// revision solo `import type`) — por eso `flow.invariant.ts` puede importar
+// `clasificarLead` de verdad. Es además el patrón ya usado por home.ts/foco.ts.
+import { calculateNextFollowUp } from '../follow-up.ts'
 import {
   AgendaSchema,
   BriefSchema,
@@ -29,8 +35,9 @@ import {
   type Ficha,
   type Rechazo,
   type SelfCheck,
-} from '@/lib/leados/contracts'
-import { HARD_CHECKS, SOFT_CHECKS } from '@/lib/leados/flow-content'
+} from './contracts.ts'
+import { HARD_CHECKS, SOFT_CHECKS } from './flow-content.ts'
+import { esCaliente } from './revision.ts'
 
 // El contenido editable del flujo vive en flow-content.ts. Se re-exporta acá
 // para que los call-sites que importan estos símbolos desde `flow` sigan
@@ -45,8 +52,8 @@ export {
   PLANTILLAS_FOLLOW_UP,
   STATUS_LABELS,
   STAGE_LABELS,
-} from '@/lib/leados/flow-content'
-export type { ShellFase, HardCheck, SoftCheck, CanalParams } from '@/lib/leados/flow-content'
+} from './flow-content.ts'
+export type { ShellFase, HardCheck, SoftCheck, CanalParams } from './flow-content.ts'
 
 // ── Gate del flujo invertido ─────────────────────────────────────────────────
 
@@ -66,27 +73,28 @@ export function leadRespondio(status: LeadStatus): boolean {
   return (RESPONDED_STATUSES as readonly LeadStatus[]).includes(status)
 }
 
-/** Gate EVALUADA→BRIEF: respondió el primer contacto O score 4–5 (caliente). */
-export function gateBriefAbierto(status: LeadStatus, score: number | null): boolean {
-  return leadRespondio(status) || (score !== null && score >= 4)
+/** Gate EVALUADA→BRIEF: respondió el primer contacto O el lead está marcado caliente. */
+export function gateBriefAbierto(status: LeadStatus, caliente: boolean): boolean {
+  return leadRespondio(status) || esCaliente(caliente)
 }
 
 /**
  * B6 — Gate del envío del link (el momento clave del flujo invertido): SOLO
- * con dossier APROBADA + finalUrl registrada + lead que respondió — o
- * caliente score >= 4 (demo preventiva: el mismo criterio que el gate del
- * brief). La UI no ofrece el envío antes; la action lo re-valida server-side.
+ * con dossier APROBADA + finalUrl registrada + lead que respondió — o caliente
+ * (demo preventiva: el mismo criterio que el gate del brief). Desde admin-1b el
+ * "caliente" es el campo que marca Franco, no el score. La UI no ofrece el envío
+ * antes; la action lo re-valida server-side.
  */
 export function gateEnvioDemo(params: {
   status: LeadStatus
-  score: number | null
+  caliente: boolean
   stage: DossierStage | null
   finalUrl: string | null
 }): boolean {
   return (
     params.stage === 'APROBADA' &&
     Boolean(params.finalUrl) &&
-    gateBriefAbierto(params.status, params.score)
+    gateBriefAbierto(params.status, params.caliente)
   )
 }
 
@@ -286,6 +294,8 @@ export type HomeLeadInput = {
   industry: string | null
   zone: string | null
   status: LeadStatus
+  /** admin-1b: campo persistido que Franco marca a ojo — fuente del caliente operativo. */
+  caliente: boolean
   createdAt: Date
   stage: DossierStage | null
   ficha: Ficha | null
@@ -296,6 +306,13 @@ export type HomeLeadInput = {
   contactos: number
   /** B6: el toque agendado por la maquinaria ya venció (nextFollowUpAt <= ahora). */
   followUpVencido: boolean
+  /**
+   * 2.1b/D6: POSTERGADO cuya fecha de reactivación ya pasó (reactivateAt <= ahora).
+   * El cron solo notifica — no reactiva el lead solo: por eso el home lo vuelve a
+   * tratar como trabajo. Derivado en `buildHomeLeads` (reloj request-time, fuera
+   * del render), igual que `followUpVencido`.
+   */
+  postergadoVencido: boolean
   /** B6: la demo aprobada ya se envió (dossier.enviadaAt). */
   demoEnviada: boolean
   /** B-beta: el setter fijó este lead en su cartera (organización propia, privada). */
@@ -334,7 +351,11 @@ function grupoPara(input: HomeLeadInput, gateAbierto: boolean): HomeGroupKey {
   if (input.status === 'PERDIDO' || input.stage === 'DESCARTADA') return 'archivo'
   if (input.status === 'CALL_AGENDADA') return 'agendadas'
   if (input.stage === 'EN_REVISION') return 'revision'
-  if (input.status === 'POSTERGADO') return 'seguimiento'
+  if (input.status === 'POSTERGADO') {
+    // 2.1b/D6: la postergación vencida vuelve a ser trabajo de ahora (el cron solo
+    // notifica, no reactiva); con la fecha aún en el futuro, sigue en seguimiento.
+    return input.postergadoVencido ? 'trabajar' : 'seguimiento'
+  }
   if (input.stage === 'EVALUADA' && !gateAbierto) {
     // B6: gate cerrado pero con conversación pendiente → es trabajo de AHORA.
     if (input.contactos === 0 || input.followUpVencido) return 'trabajar'
@@ -360,7 +381,11 @@ function proximaAccionPara(
     return { proximaAccion: 'Descartado tras evaluación — bien filtrado', accionable: false }
   }
   if (input.status === 'POSTERGADO') {
-    return { proximaAccion: 'Postergado — se retoma cuando se reactive', accionable: false }
+    // 2.1b/D6: vencida la postergación, retomar el contacto es acción de ahora;
+    // con la fecha aún en el futuro, sigue pausado a la espera de reactivarse.
+    return input.postergadoVencido
+      ? { proximaAccion: 'Se venció la postergación — retomá el contacto', accionable: true }
+      : { proximaAccion: 'Postergado — se retoma cuando se reactive', accionable: false }
   }
   // B8A/H3: el lead con reunión agendada lo cierra Franco — la próxima acción
   // es la reunión, no el paso del dossier (que puede estar atrás). Sin este
@@ -451,8 +476,10 @@ export function motivoOrden(lead: HomeLead): string | null {
 
 export function clasificarLead(input: HomeLeadInput): HomeLead {
   const score = input.evaluacion?.score ?? null
-  const caliente = score !== null && score >= 4 && input.stage !== 'DESCARTADA'
-  const gateAbierto = gateBriefAbierto(input.status, score)
+  // admin-1b: el caliente operativo (badge, orden, gate) sale del CAMPO, no del
+  // score. `score` se conserva solo para el dato informativo `HomeLead.score`.
+  const caliente = esCaliente(input.caliente, input.stage)
+  const gateAbierto = gateBriefAbierto(input.status, input.caliente)
   const { proximaAccion, accionable } = proximaAccionPara(input, gateAbierto)
   return {
     ...input,
@@ -519,6 +546,13 @@ export type CarteraParticion = {
  *   - pausado → pausados (lo escondió hasta una fecha que él eligió);
  *   - el resto cae en su cola natural.
  * Puro: no mira el reloj — `snoozed`/`pinned` ya vienen resueltos en el input.
+ *
+ * Nota (2.3 — pin en MODO DIRECCIÓN): que un fijado accionable quede FUERA del
+ * foco (sale de la cola `trabajar`) es organización-de-cartera, no foco. Si su
+ * única accionable está fijada, el home cae en "todo en espera" (2.1b ya lo
+ * cuenta honesto). Si el pin debería poder SER foco —revertir esta exclusión— es
+ * decisión pendiente de Franco (flagueada en bitácora 2.1b). 2.3 lo DEJA como
+ * está: el pin sigue sacando el lead de su cola natural.
  */
 export function particionarCartera(leads: HomeLead[]): CarteraParticion {
   const fijados: HomeLead[] = []

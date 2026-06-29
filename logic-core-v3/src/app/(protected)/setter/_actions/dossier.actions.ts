@@ -37,8 +37,9 @@ import {
 } from '@/lib/leados/flow'
 import {
   notificarEscalamientoConstruccion,
-  notificarEvaluacionCaliente,
+  notificarEvaluacionScoreAlto,
 } from '@/lib/leados/notify'
+import { SCORE_CALIENTE } from '@/lib/leados/revision'
 import { getOwnedLead } from '@/lib/leados/ownership'
 import {
   BriefInputSchema,
@@ -148,16 +149,21 @@ export async function registrarEvaluacion(
       descartado = true
     }
 
-    // B5: score >= 4 = lead caliente → Telegram al admin. Fire-and-forget
-    // (la función nunca lanza) y una sola vez por dossier.
-    if (score >= 4) {
-      await notificarEvaluacionCaliente(leadId.data)
+    // admin-1c: evaluación con score ≥ 4 → aviso INFORMATIVO a Franco (el setter
+    // evaluó alto). Fire-and-forget (la función nunca lanza) y una sola vez por
+    // dossier. Es la lectura del SETTER (su score), señal para que Franco
+    // CONSIDERE marcar caliente — NO determina el caliente operativo (campo de
+    // Franco, admin-1b) ni abre gates: no pasa por esCaliente(), solo notifica.
+    if (score >= SCORE_CALIENTE) {
+      await notificarEvaluacionScoreAlto(leadId.data)
     }
 
     revalidarSetter(leadId.data)
     return ok({
       descartado,
-      gateAbierto: !descartado && gateBriefAbierto(lead.status, score),
+      // admin-1b: el gate del brief sigue el campo caliente (lo marca Franco), no
+      // el score recién registrado por el setter.
+      gateAbierto: !descartado && gateBriefAbierto(lead.status, lead.caliente),
     })
   } catch (error) {
     return mapError(error, 'No se pudo registrar la evaluación')

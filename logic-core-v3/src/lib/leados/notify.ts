@@ -6,8 +6,11 @@
  * Contrato: fire-and-forget. NUNCA lanzan — si Telegram (o la config) falla
  * se loguea y el flujo del setter sigue intacto.
  *
- *   - B5 `notificarEvaluacionCaliente`: score >= 4 → aviso de lead caliente.
- *     Una sola vez por dossier (marca `calienteNotificadaAt`).
+ *   - B5/admin-1c `notificarEvaluacionScoreAlto`: score >= 4 → aviso INFORMATIVO
+ *     a Franco de que el setter evaluó alto el lead (señal para que considere
+ *     marcarlo caliente). NO determina el caliente operativo — eso es el campo
+ *     `OsLead.caliente` que marca Franco. Una sola vez por dossier (marca
+ *     `calienteNotificadaAt` — nombre legacy del flag de idempotencia).
  *   - B4 `notificarEscalamientoConstruccion`: el setter se trabó construyendo
  *     la demo → aviso con el contexto. Devuelve si el envío salió, así la UI
  *     puede decirle al setter que escriba directo si falló.
@@ -114,7 +117,15 @@ export async function notificarReunionAgendada(leadId: string): Promise<void> {
   }
 }
 
-export async function notificarEvaluacionCaliente(leadId: string): Promise<void> {
+/**
+ * admin-1c — Aviso INFORMATIVO: el setter evaluó este lead con score alto (>= 4).
+ * Es una señal para que Franco lo CONSIDERE caliente, no una declaración de que ya
+ * lo es: el caliente operativo lo determina exclusivamente el campo `OsLead.caliente`
+ * que marca Franco a ojo (admin-1b). Esta notificación no toca ese campo, no abre
+ * gates ni dispara la demo preventiva — solo informa. Mantiene el trigger del score
+ * y la idempotencia por dossier (flag `calienteNotificadaAt`, nombre legacy).
+ */
+export async function notificarEvaluacionScoreAlto(leadId: string): Promise<void> {
   try {
     const dossier = await prisma.osLeadDossier.findUnique({
       where: { leadId },
@@ -138,10 +149,12 @@ export async function notificarEvaluacionCaliente(leadId: string): Promise<void>
     const setter =
       dossier.lead.assignedTo?.name ?? dossier.lead.assignedTo?.email ?? 'setter'
     const message = [
-      `🔥 <b>Lead caliente</b> — ${escapeHtml(dossier.lead.businessName)}`,
+      `📊 <b>Evaluación con score alto</b> — ${escapeHtml(dossier.lead.businessName)}`,
       '',
-      `Score <b>${evaluacion.data.score}/5</b> · evaluado por ${escapeHtml(setter)}`,
+      `${escapeHtml(setter)} evaluó este lead con score <b>${evaluacion.data.score}/5</b>.`,
       `${escapeHtml(evaluacion.data.razonamiento.slice(0, 300))}`,
+      '',
+      '<i>Es info para tu criterio: si lo querés caliente, marcalo vos en la asignación.</i>',
     ].join('\n')
 
     const enviado = await sendTelegram(message, { parseMode: 'HTML' })

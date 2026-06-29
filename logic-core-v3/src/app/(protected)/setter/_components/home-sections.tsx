@@ -1,14 +1,11 @@
 import Link from 'next/link'
-import type { LucideIcon } from 'lucide-react'
 import {
   ArrowRight,
   ArrowUpNarrowWide,
-  Archive,
   CalendarClock,
   Flame,
   OctagonAlert,
   Pin,
-  PlayCircle,
   StickyNote,
 } from 'lucide-react'
 import { Badge, Callout, Card } from '@/components/ui'
@@ -21,9 +18,13 @@ import {
   STATUS_LABELS,
   type HomeLead,
 } from '@/lib/leados/flow'
-import type { ColaKey } from '@/lib/leados/recorrido'
 import { LeadCardActions } from './lead-card-actions'
 
+/**
+ * Card de lead de la cartera. Desde 2.1a el home es "modo dirección" (un lead a
+ * la vez, ver `FocoSurface`); esta card ya no arma colas/tablero — se usa en la
+ * cartera SECUNDARIA (`CarteraView`) como ítem de la lista plana de búsqueda.
+ */
 function diasDesde(fecha: Date): string {
   const dias = Math.floor((Date.now() - fecha.getTime()) / 86_400_000)
   if (dias <= 0) return 'hoy'
@@ -59,12 +60,9 @@ export function LeadCard({ lead }: { lead: HomeLead }) {
         )}
       />
 
-      {/* El cuerpo navega al lead; las palancas (abajo) quedan fuera del Link.
-          `data-lead-card`: ancla que el teclado (j/k) enfoca para recorrer las
-          cards — foco DOM real, accesible, sin estado de selección paralelo. */}
+      {/* El cuerpo navega al lead; las palancas (abajo) quedan fuera del Link. */}
       <Link
         href={`/setter/leads/${lead.id}`}
-        data-lead-card
         className="block rounded-lg outline-none transition-colors focus-visible:ring-2 focus-visible:ring-cyan-400/40"
       >
         <div className="flex items-start justify-between gap-3">
@@ -170,112 +168,4 @@ export function LeadCard({ lead }: { lead: HomeLead }) {
       />
     </Card>
   )
-}
-
-type GroupSectionProps = {
-  icon: LucideIcon
-  titulo: string
-  descripcion: string
-  vacio: string
-  leads: HomeLead[]
-  destacado?: boolean
-  /**
-   * Si se pasa, la sección ofrece "Recorrer": abre el primer lead de la cola con
-   * `?cola=…` y habilita prev/next en el detalle (sin volver al home). Solo para
-   * las colas de trabajo real — las de espera no lo necesitan.
-   */
-  cola?: ColaKey
-}
-
-export function GroupSection({
-  icon: Icon,
-  titulo,
-  descripcion,
-  vacio,
-  leads,
-  destacado = false,
-  cola,
-}: GroupSectionProps) {
-  // Recorrer tiene sentido con 2+ leads: encadenar uno solo es entrar y salir.
-  const recorrible = cola !== undefined && leads.length >= 2
-
-  return (
-    <section
-      aria-label={titulo}
-      className={cn(
-        // "Para trabajar ahora" / "Fijados" son carriles prioritarios: se separan
-        // de las esperas por ELEVACIÓN (superficie elevada + sombra), no por color
-        // — el cyan queda libre para las cards accionables.
-        destacado &&
-          'rounded-2xl bg-white/[0.02] p-4 shadow-[0_8px_30px_rgba(0,0,0,0.25)] ring-1 ring-inset ring-white/[0.08] sm:p-5',
-      )}
-    >
-      <div className="mb-3 flex items-center gap-2.5">
-        <Icon
-          size={16}
-          strokeWidth={1.5}
-          className={destacado ? 'text-cyan-400' : 'text-zinc-500'}
-        />
-        <h2 className="text-sm font-semibold text-zinc-200">{titulo}</h2>
-        <span className="rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 text-[10px] font-medium tabular-nums text-zinc-400">
-          {leads.length}
-        </span>
-        <p className="hidden truncate text-xs text-zinc-600 sm:block">{descripcion}</p>
-        {recorrible && (
-          <Link
-            href={`/setter/leads/${leads[0].id}?cola=${cola}`}
-            className="ml-auto inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-cyan-400/20 bg-cyan-500/10 px-2.5 py-1 text-[11px] font-medium text-cyan-200 outline-none transition-colors hover:bg-cyan-500/15 hover:text-cyan-100 focus-visible:ring-2 focus-visible:ring-cyan-400/40"
-          >
-            <PlayCircle size={13} strokeWidth={1.5} aria-hidden className="shrink-0" />
-            Recorrer
-          </Link>
-        )}
-      </div>
-
-      {leads.length === 0 ? (
-        <p className="rounded-2xl border border-dashed border-white/[0.06] px-4 py-5 text-xs text-zinc-600">
-          {vacio}
-        </p>
-      ) : (
-        <div className="grid items-start gap-3 sm:grid-cols-2">
-          {leads.map((lead) => (
-            <LeadCard key={lead.id} lead={lead} />
-          ))}
-        </div>
-      )}
-    </section>
-  )
-}
-
-/** Sección colapsada al fondo (pausados, descartados/perdidos): sin ruido. */
-export function CollapsibleSection({
-  icon: Icon,
-  titulo,
-  leads,
-}: {
-  icon: LucideIcon
-  titulo: string
-  leads: HomeLead[]
-}) {
-  if (leads.length === 0) return null
-
-  return (
-    <details className="group">
-      <summary className="flex cursor-pointer list-none items-center gap-2.5 rounded-2xl border border-white/[0.06] bg-white/[0.015] px-4 py-3 text-xs font-medium text-zinc-500 transition-colors hover:text-zinc-300 [&::-webkit-details-marker]:hidden">
-        <Icon size={14} strokeWidth={1.5} />
-        {titulo} ({leads.length})
-        <span className="ml-auto text-zinc-600 transition-transform group-open:rotate-90">›</span>
-      </summary>
-      <div className="mt-3 grid items-start gap-3 sm:grid-cols-2">
-        {leads.map((lead) => (
-          <LeadCard key={lead.id} lead={lead} />
-        ))}
-      </div>
-    </details>
-  )
-}
-
-/** Descartados y perdidos: colapsados al fondo. Atajo sobre CollapsibleSection. */
-export function ArchiveSection({ leads }: { leads: HomeLead[] }) {
-  return <CollapsibleSection icon={Archive} titulo="Descartados y perdidos" leads={leads} />
 }

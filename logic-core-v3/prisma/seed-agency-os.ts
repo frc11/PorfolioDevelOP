@@ -2,6 +2,7 @@ import {
   ActivityChannel,
   ActivityResult,
   ApprovalStatus,
+  DossierStage,
   LeadStatus,
   MilestoneType,
   OrgRole,
@@ -155,6 +156,19 @@ type LeadSeed = {
   reactivateInDays?: number
   createdAt: Date
 }
+
+type DossierData = {
+  stage: DossierStage
+  fichaJson?: Record<string, unknown>
+  evaluacionJson?: Record<string, unknown>
+  briefJson?: Record<string, unknown>
+  selfCheckJson?: Record<string, unknown>
+  rechazos?: Record<string, unknown>[]
+  draftUrl?: string
+  aprobadaAt?: Date
+}
+
+type QaLeadSeed = LeadSeed & { dossier?: DossierData }
 
 type TaskSeed = {
   title: string
@@ -737,6 +751,363 @@ const leadSeeds: LeadSeed[] = baseLeadSeeds.map((seed, index) => ({
   ...seed,
   createdAt: daysAgo(28 - index * 2, 9 + (index % 3), 15),
 }))
+
+// ─── QA leads — un estado objetivo del flujo del setter por cada entrada ───
+// Aislados bajo franco. Idempotentes (ensureQaLeads usa upsert).
+const qaLeadSeeds: QaLeadSeed[] = [
+  // 1. POSTERGADO VENCIDO — reactivateAt en el pasado
+  {
+    businessName: 'Café Bergamota',
+    contactName: 'Sofía Carrizo',
+    phone: '+54 381 555 1901',
+    email: 'sofia@bergamotacafe.com.ar',
+    industry: 'Cafetería',
+    zone: 'Barrio Norte',
+    source: 'Google Maps',
+    instagramHandle: 'bergamota.cafe',
+    currentWebUrl: null,
+    googleMapsQuery: 'Café Bergamota Barrio Norte Tucuman',
+    status: LeadStatus.POSTERGADO,
+    serviceType: OsServiceType.WEB,
+    assignedTo: 'franco',
+    notes: 'Cafetería de especialidad con buen perfil digital. Pidió retomar luego del invierno, ya venció.',
+    firstTouch: 'Detectamos oportunidad para un sitio con menú digital y reservas para eventos.',
+    demoFocus: 'Landing con menú interactivo y formulario de eventos privados.',
+    responseNote: 'Pidió retomar en julio, ya pasó la fecha sin reactivar.',
+    demoCount: 0,
+    reactivateInDays: -7,
+    createdAt: daysAgo(35, 9, 0),
+  },
+  // 2. FICHA A MEDIAS — dossier en stage FICHA, fichaJson parcial
+  {
+    businessName: 'Panadería Don Cosme',
+    contactName: 'Cosme Ruiz',
+    phone: '+54 381 555 1902',
+    email: 'cosme@panaderiancosme.com.ar',
+    industry: 'Panadería',
+    zone: 'Villa 9 de Julio',
+    source: 'Google Maps',
+    instagramHandle: 'panaderia.doncosme',
+    currentWebUrl: null,
+    googleMapsQuery: 'Panadería Don Cosme Tucuman',
+    status: LeadStatus.PROSPECTO,
+    serviceType: OsServiceType.WEB,
+    assignedTo: 'franco',
+    notes: 'Panadería barrial con excelente reputación en el barrio. Sin presencia digital.',
+    firstTouch: 'Detectamos oportunidad de primer sitio web con carta y pedidos por WhatsApp.',
+    demoFocus: 'Landing con carta del día, galería y CTA directo a WhatsApp.',
+    responseNote: 'Sin respuesta aún.',
+    demoCount: 0,
+    createdAt: daysAgo(3, 10, 0),
+    dossier: {
+      stage: DossierStage.FICHA,
+      fichaJson: {
+        identidad: {
+          notas: 'Cosme, el dueño, atiende el local personalmente todos los días. Muy conocido en el barrio.',
+          igManejadoPor: 'DUENO',
+        },
+        presenciaDigital: 'Cuenta de Instagram con 890 seguidores. Fotos del mostrador y productos caseros. Sin sitio web.',
+        resenas: null,
+        contenidoReal: null,
+        senalesOperativas: null,
+        otros: null,
+      },
+    },
+  },
+  // 3. CALIENTE — dossier en stage EVALUADA, score 5
+  {
+    businessName: 'Veterinaria San Marcos',
+    contactName: 'Federico Aguilar',
+    phone: '+54 381 555 1903',
+    email: 'federico@vetmarcos.com.ar',
+    industry: 'Veterinaria',
+    zone: 'Yerba Buena',
+    source: 'Google Maps',
+    instagramHandle: 'vet.sanmarcos',
+    currentWebUrl: null,
+    googleMapsQuery: 'Veterinaria San Marcos Yerba Buena Tucuman',
+    status: LeadStatus.PROSPECTO,
+    serviceType: OsServiceType.WEB,
+    assignedTo: 'franco',
+    notes: 'Clínica veterinaria con muy buena presencia digital y dueño activo. Alta señal de interés.',
+    firstTouch: 'Detectamos clínica sin sitio web pero con 3.2k seguidores en Instagram y reseñas excelentes.',
+    demoFocus: 'Sitio con turnos online, servicios destacados y sección de adoptables.',
+    responseNote: 'Sin respuesta aún, pero score altísimo por presencia digital.',
+    demoCount: 0,
+    createdAt: daysAgo(5, 11, 0),
+    dossier: {
+      stage: DossierStage.EVALUADA,
+      fichaJson: {
+        identidad: {
+          notas: 'Federico dueño y veterinario principal. Toma todas las decisiones. Muy activo en redes.',
+          igManejadoPor: 'DUENO',
+        },
+        presenciaDigital: '3.200 seguidores en Instagram. Fotos profesionales de pacientes. Reels de casos exitosos.',
+        resenas: '4.9 en Google con 210 reseñas. Destacan la atención y calidez del equipo.',
+        contenidoReal: 'Publica diariamente: casos clínicos, tips de cuidado, animales en adopción.',
+        senalesOperativas: 'Responde comentarios en horas. Tiene historias de turnos activos todos los días.',
+        otros: 'Quiere expandir con una segunda sede en el microcentro.',
+      },
+      evaluacionJson: {
+        score: 5,
+        veredicto: 'CALIENTE',
+        razonamiento: 'Dueño tomador de decisiones, presencia digital excelente, demanda activa de turnos online, y comunidad fiel. Demo con sistema de turnos tiene potencial máximo de cierre incluso sin respuesta previa.',
+        fecha: '2026-06-20T15:00:00Z',
+      },
+    },
+  },
+  // 4. EN REVISIÓN — dossier en stage EN_REVISION, todos los campos completos
+  {
+    businessName: 'Centro Pilates Armonía',
+    contactName: 'María José Villalba',
+    phone: '+54 381 555 1904',
+    email: 'mariajose@pilatesarmonia.com.ar',
+    industry: 'Pilates / bienestar',
+    zone: 'Yerba Buena',
+    source: 'Instagram',
+    instagramHandle: 'pilates.armonia.ybue',
+    currentWebUrl: null,
+    googleMapsQuery: 'Centro Pilates Armonía Yerba Buena Tucuman',
+    status: LeadStatus.RESPONDIO,
+    serviceType: OsServiceType.WEB,
+    assignedTo: 'franco',
+    notes: 'Dueña con 8 años de trayectoria y lista de espera. Muy interesada en automatizar turnos.',
+    firstTouch: 'Detectamos studio con 2.4k seguidores pero sin sitio web ni sistema de reservas.',
+    demoFocus: 'Sitio con reservas online integradas, horarios y testimonios de alumnas.',
+    responseNote: 'Respondió entusiasmada, quiere automatizar el sistema de turnos cuanto antes.',
+    demoCount: 1,
+    createdAt: daysAgo(10, 9, 30),
+    dossier: {
+      stage: DossierStage.EN_REVISION,
+      fichaJson: {
+        identidad: {
+          notas: 'María José, dueña hace 8 años. Toma todas las decisiones. Muy activa en Instagram.',
+          igManejadoPor: 'DUENO',
+        },
+        presenciaDigital: '2.400 seguidores en Instagram. Fotos profesionales de clases. Sin sitio web propio.',
+        resenas: '4.9 en Google con 89 reseñas. Clientes fieles, destacan atención personalizada.',
+        contenidoReal: 'Sube 5-6 stories diarias de clases, alimentación y motivación. Reels de coreografías.',
+        senalesOperativas: 'Responde mensajes en menos de 1 hora. Tiene turnos por IG.',
+        otros: 'Quiere expandirse a local más grande a fin de año. Lista de espera activa.',
+      },
+      evaluacionJson: {
+        score: 4,
+        veredicto: 'CALIENTE',
+        razonamiento: 'Dueña tomadora de decisiones, altísima fidelización y lista de espera. Demo con reservas automatizadas tiene máximo potencial de cierre.',
+        fecha: '2026-06-15T14:30:00Z',
+      },
+      briefJson: {
+        titulo: 'Centro Pilates Armonía',
+        concepto: 'Sitio que transmite calma y exclusividad con sistema de reservas integrado',
+        secciones: [
+          'Hero con video de clase',
+          'Horarios y modalidades',
+          'Reserva online directa',
+          'Testimonios de alumnas',
+          'Sobre María José',
+          'WhatsApp flotante',
+        ],
+        notasMarca: 'Paleta: blanco roto, sage green y nude rosado. Tipografía cursiva en títulos. Tono cálido e íntimo.',
+        cta: 'Reservá tu primera clase',
+        referenciasFicha: 'Ver Instagram para referencias de fotos y tono visual',
+      },
+      selfCheckJson: {
+        itemsDuros: [
+          { nombre: 'Draft publica sin errores', ok: true },
+          { nombre: 'Formulario de reserva funciona', ok: true },
+          { nombre: 'Diseño responsive en móvil', ok: true },
+          { nombre: 'Links a Instagram y WhatsApp activos', ok: true },
+        ],
+        softFlags: [],
+      },
+    },
+  },
+  // 5. APROBADO — dossier en stage APROBADA con aprobadaAt y draftUrl
+  {
+    businessName: 'Clínica Dental Omega',
+    contactName: 'Daniela Moreno',
+    phone: '+54 381 555 1905',
+    email: 'daniela@dentalomega.com.ar',
+    industry: 'Odontología',
+    zone: 'San Miguel de Tucuman',
+    source: 'Referido',
+    instagramHandle: 'dental.omega.tucuman',
+    currentWebUrl: 'https://dentalomega.com.ar',
+    googleMapsQuery: 'Clínica Dental Omega San Miguel de Tucuman',
+    status: LeadStatus.CERRADO,
+    serviceType: OsServiceType.WEB,
+    assignedTo: 'franco',
+    notes: 'Clínica de alta gama. Demo aprobada por admin, pendiente de envío al cliente.',
+    firstTouch: 'Detectamos sitio desactualizado sin turnos online en clínica con excelentes reseñas.',
+    demoFocus: 'Rediseño premium con turnos online, servicios y galería de tratamientos.',
+    responseNote: 'Cerraron luego de validar demo y soporte mensual.',
+    demoCount: 1,
+    createdAt: daysAgo(15, 8, 0),
+    dossier: {
+      stage: DossierStage.APROBADA,
+      fichaJson: {
+        identidad: {
+          notas: 'Daniela, directora de la clínica. Decide junto al socio. Muy profesional y exigente.',
+          igManejadoPor: 'CM',
+        },
+        presenciaDigital: '1.800 seguidores en Instagram. Contenido de calidad manejado por CM externo.',
+        resenas: '4.8 en Google con 340 reseñas. Destacan profesionalismo y tecnología de punta.',
+        contenidoReal: 'Publica 3 veces por semana casos con antes/después. Stories de resultados.',
+        senalesOperativas: 'Agenda siempre llena según Google. Responden llamadas en horario comercial.',
+        otros: 'Quieren captar pacientes de implantología y blanqueamiento premium.',
+      },
+      evaluacionJson: {
+        score: 5,
+        veredicto: 'CALIENTE',
+        razonamiento: 'Clínica consolidada con demanda activa, sin canal digital propio. Demo de rediseño con turnos tiene conversión directa en primer contacto.',
+        fecha: '2026-06-10T11:00:00Z',
+      },
+      briefJson: {
+        titulo: 'Clínica Dental Omega',
+        concepto: 'Presencia digital premium que refleja el nivel de la clínica y convierte visitas en pacientes',
+        secciones: [
+          'Hero con antes/después impactante',
+          'Servicios con precios orientativos',
+          'Sistema de turnos online',
+          'Equipo profesional',
+          'Galería de tratamientos',
+          'Testimonios verificados',
+          'Ubicación y contacto',
+        ],
+        notasMarca: 'Paleta: azul marino + dorado + blanco. Tipografía serif moderna. Tono: confianza, excelencia.',
+        cta: 'Solicitá tu consulta gratis',
+        referenciasFicha: 'Clínica de alta gama — cuidar que el diseño refleje su nivel real',
+      },
+      selfCheckJson: {
+        itemsDuros: [
+          { nombre: 'Draft publica sin errores', ok: true },
+          { nombre: 'Formulario de turno funciona', ok: true },
+          { nombre: 'Diseño responsive en móvil', ok: true },
+          { nombre: 'Galería carga correctamente', ok: true },
+        ],
+        softFlags: [],
+      },
+      draftUrl: 'https://demo.develop.com.ar/agency-os/clinica-dental-omega/v1',
+      aprobadaAt: daysAgo(3, 16, 0),
+    },
+  },
+  // 6. RECHAZADO CON NOTA — dossier en stage RECHAZADA con historial de rechazos
+  {
+    businessName: 'Studio Yoga Balance',
+    contactName: 'Valentina Giménez',
+    phone: '+54 381 555 1906',
+    email: 'valen@yogabalance.com.ar',
+    industry: 'Yoga / bienestar',
+    zone: 'Barrio Sur',
+    source: 'Instagram',
+    instagramHandle: 'yogabalance.tuc',
+    currentWebUrl: null,
+    googleMapsQuery: 'Studio Yoga Balance Tucuman',
+    status: LeadStatus.RESPONDIO,
+    serviceType: OsServiceType.WEB,
+    assignedTo: 'franco',
+    notes: 'Demo construida pero rechazada por admin por falta de coherencia de marca. En corrección.',
+    firstTouch: 'Detectamos studio sin sitio web pero con comunidad activa en Instagram.',
+    demoFocus: 'Sitio minimalista con horarios, modalidades y reservas.',
+    responseNote: 'Respondió interesada, quiere ver cómo quedaría el sitio con su estética.',
+    demoCount: 1,
+    createdAt: daysAgo(8, 10, 0),
+    dossier: {
+      stage: DossierStage.RECHAZADA,
+      fichaJson: {
+        identidad: {
+          notas: 'Valentina, instructora y dueña. Muy cuidadosa de la estética de su marca.',
+          igManejadoPor: 'DUENO',
+        },
+        presenciaDigital: '1.100 seguidores en Instagram. Fotos artísticas con paleta de colores muy definida.',
+        resenas: '4.7 en Google con 45 reseñas. Destacan el ambiente y la instructora.',
+        contenidoReal: 'Publica 4 veces por semana. Estética muy cuidada: beige, tierra, blanco.',
+        senalesOperativas: 'Responde DMs en el día. Clases siempre llenas según publicaciones.',
+        otros: 'Quiere reflejar su estética de marca claramente en el sitio.',
+      },
+      evaluacionJson: {
+        score: 4,
+        veredicto: 'CALIENTE',
+        razonamiento: 'Studio con identidad de marca muy clara y clientes fieles. El desafío es respetar su estética minimalista en el diseño web.',
+        fecha: '2026-06-17T10:00:00Z',
+      },
+      briefJson: {
+        titulo: 'Studio Yoga Balance',
+        concepto: 'Sitio minimalista que refleja la identidad visual del studio — tierra, calma, movimiento',
+        secciones: [
+          'Hero con foto ambiente del studio',
+          'Modalidades y niveles',
+          'Horarios de clases',
+          'Sobre Valentina',
+          'Reservas por WhatsApp',
+        ],
+        notasMarca: 'Paleta: beige, terracota, blanco hueso. Sin elementos decorativos excesivos. Tipografía light.',
+        cta: 'Consultá disponibilidad',
+      },
+      selfCheckJson: {
+        itemsDuros: [
+          { nombre: 'Draft publica sin errores', ok: true },
+          { nombre: 'Formulario de contacto funciona', ok: true },
+          { nombre: 'Diseño responsive en móvil', ok: true },
+          { nombre: 'Links de redes activos', ok: true },
+        ],
+        softFlags: ['paleta_podria_mejorar'],
+      },
+      rechazos: [
+        {
+          fecha: '2026-06-22T15:00:00Z',
+          motivo: 'La paleta no respeta la identidad visual de la marca',
+          detalle: 'El hero usa azul que no está en su Instagram. El fondo general es blanco puro, no beige como en su cuenta.',
+          donde: 'Sección hero y fondo general',
+          arreglo: 'Usar solo la paleta extraída de su Instagram: beige #F5F0E8, terracota #C4704B, texto en #3D2B1F',
+        },
+      ],
+    },
+  },
+  // 7. DESCARTADO — dossier en stage DESCARTADA, score bajo
+  {
+    businessName: 'Zapatería El Buen Paso',
+    contactName: 'Roberto Juárez',
+    phone: '+54 381 555 1907',
+    email: 'roberto@elbuenpaso.com.ar',
+    industry: 'Zapatería',
+    zone: 'Microcentro',
+    source: 'Google Maps',
+    instagramHandle: null,
+    currentWebUrl: null,
+    googleMapsQuery: 'Zapatería El Buen Paso Tucuman',
+    status: LeadStatus.PERDIDO,
+    serviceType: OsServiceType.WEB,
+    assignedTo: 'franco',
+    notes: 'Local cerrado hace 3 meses según Google Maps. Descartado por inactividad.',
+    firstTouch: 'Aparecía en búsquedas pero sin presencia digital activa.',
+    demoFocus: 'N/A — descartado antes de construir demo.',
+    responseNote: 'No respondió. Local cerrado.',
+    demoCount: 0,
+    createdAt: daysAgo(20, 14, 0),
+    dossier: {
+      stage: DossierStage.DESCARTADA,
+      fichaJson: {
+        identidad: {
+          notas: 'Sin contacto posible. Número fuera de servicio.',
+          igManejadoPor: 'NO_SABE',
+        },
+        presenciaDigital: 'Sin Instagram. Sin sitio web. Solo entrada de Google Maps desactualizada.',
+        resenas: '3.2 en Google con 12 reseñas, la última hace 8 meses.',
+        contenidoReal: null,
+        senalesOperativas: null,
+        otros: 'Local aparentemente cerrado según últimas reseñas y horarios.',
+      },
+      evaluacionJson: {
+        score: 1,
+        veredicto: 'DESCARTAR',
+        razonamiento: 'Sin señales de actividad. Local potencialmente cerrado. Sin número operativo. No hay oportunidad real.',
+        motivoDescarte: 'Local sin actividad verificable, número fuera de servicio.',
+        fecha: '2026-06-05T10:00:00Z',
+      },
+    },
+  },
+]
 
 const previousMonth = offsetMonth(-1)
 const twoMonthsAgo = offsetMonth(-2)
@@ -1660,6 +2031,35 @@ async function ensureLeadDemos(leadId: string, demos: DemoSeed[]) {
   }
 }
 
+async function ensureLeadDossier(leadId: string, dossier: DossierData) {
+  const data = {
+    stage: dossier.stage,
+    draftUrl: dossier.draftUrl ?? null,
+    aprobadaAt: dossier.aprobadaAt ?? null,
+    ...(dossier.fichaJson != null && { fichaJson: dossier.fichaJson as Prisma.InputJsonValue }),
+    ...(dossier.evaluacionJson != null && { evaluacionJson: dossier.evaluacionJson as Prisma.InputJsonValue }),
+    ...(dossier.briefJson != null && { briefJson: dossier.briefJson as Prisma.InputJsonValue }),
+    ...(dossier.selfCheckJson != null && { selfCheckJson: dossier.selfCheckJson as Prisma.InputJsonValue }),
+    ...(dossier.rechazos != null && { rechazos: dossier.rechazos as Prisma.InputJsonValue }),
+  }
+  await prisma.osLeadDossier.upsert({
+    where: { leadId },
+    update: data,
+    create: { id: seedId('dossier', leadId), leadId, ...data },
+  })
+}
+
+async function ensureQaLeads(members: Record<MemberKey, User>) {
+  for (const seed of qaLeadSeeds) {
+    const lead = await ensureLead(seed, members)
+    await ensureLeadActivities(lead.id, buildLeadActivities(seed), members)
+    await ensureLeadDemos(lead.id, buildLeadDemos(seed))
+    if (seed.dossier != null) {
+      await ensureLeadDossier(lead.id, seed.dossier)
+    }
+  }
+}
+
 async function ensureProject(
   seed: ProjectSeed,
   organizationId: string,
@@ -2019,6 +2419,8 @@ async function main() {
     await ensureLeadActivities(lead.id, buildLeadActivities(leadSeed), members)
     await ensureLeadDemos(lead.id, buildLeadDemos(leadSeed))
   }
+
+  await ensureQaLeads(members)
 
   for (const projectSeed of projectSeeds) {
     // B11.1: Project.organizationId es NOT NULL. Project sin organizationSlug

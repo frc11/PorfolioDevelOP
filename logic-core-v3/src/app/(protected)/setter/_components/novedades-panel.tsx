@@ -102,7 +102,10 @@ export function NovedadesPanel({ novedades }: { novedades: NovedadesView }) {
         <p className="hidden truncate text-xs text-zinc-600 sm:block">
           Qué cambió desde tu última visita
         </p>
-        {avisos.length > 0 && <MarcarVistoButton className="ml-auto" />}
+        {/* "Marcar vistas" marca TODO lo sin leer → se ata a `totalSinLeer`, no a
+            la lista visible: tras el dedup del foco (2.2) la lista puede quedar
+            vacía y aún haber un aviso sin leer (el del foco) para limpiar. */}
+        {totalSinLeer > 0 && <MarcarVistoButton className="ml-auto" />}
       </div>
 
       {avisos.length > 0 && (

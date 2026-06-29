@@ -64,9 +64,12 @@ export const UpdateLeadSchema = CreateLeadSchema.partial().extend({
 })
 
 // B5 (LeadOS): asignación de leads a setters. `setterId: null` desasigna.
+// admin-1b: el control también persiste `caliente` (D4) — el criterio de Franco,
+// editable después de asignar. NO toca assignedToId ni el aislamiento.
 export const AssignLeadSetterSchema = z.object({
   leadId: LeadIdSchema,
   setterId: z.string().trim().min(1).nullable(),
+  caliente: z.boolean(),
 })
 
 export const UpdateLeadStatusSchema = z

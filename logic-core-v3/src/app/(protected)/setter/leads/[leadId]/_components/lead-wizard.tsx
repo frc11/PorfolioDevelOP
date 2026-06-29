@@ -6,6 +6,8 @@ import { Callout, Card } from '@/components/ui'
 import type { Agenda, Brief, Evaluacion, Ficha, Rechazo, SelfCheck } from '@/lib/leados/contracts'
 import type { CopyBlockLead } from '@/lib/leados/copy-blocks'
 import { gateBriefAbierto } from '@/lib/leados/flow'
+import { GUIA_REVISION } from '@/lib/leados/guidance-content'
+import { LineaRicaText } from '@/app/(protected)/setter/_components/teach-panel'
 import { AgendaStep } from './agenda-step'
 import { BriefStep } from './brief-step'
 import { ConstruccionStep } from './construccion-step'
@@ -14,6 +16,7 @@ import { DraftStep } from './draft-step'
 import { EvaluacionStep } from './evaluacion-step'
 import { FichaStep } from './ficha-step'
 import { OpenerStep } from './opener-step'
+import { describirFoco, PasoActualBanner } from './paso-actual-banner'
 import { SeguimientoStep } from './seguimiento-step'
 import { SelfCheckStep } from './self-check-step'
 import { StepAnchor } from './step-anchor'
@@ -25,6 +28,8 @@ export type WizardLead = CopyBlockLead & {
   /** B7: prefill del attendee del booking (Cal.com exige email). */
   email: string | null
   notes: string | null
+  /** admin-1b: campo persistido que marca Franco — gobierna el gate y los badges. */
+  caliente: boolean
 }
 
 export type WizardData = {
@@ -90,13 +95,6 @@ function anchorActivo(stage: DossierStage | null): StepAnchorId | null {
   }
 }
 
-const POST_BRIEF_NOTAS: Partial<Record<DossierStage, string>> = {
-  EN_REVISION:
-    'La demo está en revisión de Franco. Cuando la apruebe o pida correcciones, lo ves acá y en tu cartera.',
-  APROBADA:
-    'Demo aprobada 🎉 — el envío del link vive en «Seguimiento»: el panel arma el mensaje cuando el flujo lo habilita.',
-}
-
 export function LeadWizard({ data }: { data: WizardData }) {
   const {
     lead,
@@ -112,17 +110,32 @@ export function LeadWizard({ data }: { data: WizardData }) {
     agenda,
     outreach,
   } = data
-  const gateAbierto = gateBriefAbierto(lead.status, evaluacion?.score ?? null)
+  const gateAbierto = gateBriefAbierto(lead.status, lead.caliente)
   const fichaEditable = stage === null || stage === 'FICHA'
   const descartado = stage === 'DESCARTADA'
-  const notaPostBrief = stage ? POST_BRIEF_NOTAS[stage] : undefined
+  // Pie «lo que sigue» para los dos stages donde el setter espera/redirige tras
+  // la construcción. La DIRECCIÓN la pone el banner de arriba (`describirFoco`);
+  // esto espeja ese mensaje, no lo contradice. [3.5]
+  const notaPostBrief =
+    stage === 'EN_REVISION'
+      ? GUIA_REVISION.enRevision
+      : stage === 'APROBADA'
+        ? GUIA_REVISION.aprobada
+        : undefined
   // Al abrir, caer en el paso activo (no arriba de todo). El paso lo decide el
   // stepper canónico; acá solo se aterriza el foco (ver `StepAnchor`).
   const anchor = anchorActivo(stage)
+  // El marco del paso activo comparte tono con el cartel de dirección (misma fuente:
+  // `stage` + el `gateAbierto` que el shell ya calculó). cyan solo si hay trabajo del
+  // setter AHORA; neutral en revisión/descartado o si falta que el lead responda.
+  const frameTono: 'foco' | 'neutral' =
+    describirFoco(stage, gateAbierto).tono === 'foco' ? 'foco' : 'neutral'
 
   return (
     <div className="space-y-5">
       <DossierStepper stage={stage} />
+
+      <PasoActualBanner stage={stage} gateAbierto={gateAbierto} />
 
       {stage === 'RECHAZADA' && ultimoRechazo && (
         <Callout
@@ -162,10 +175,11 @@ export function LeadWizard({ data }: { data: WizardData }) {
 
       <FichaStep leadId={lead.id} lead={lead} ficha={ficha} editable={fichaEditable} />
 
-      <StepAnchor active={anchor === 'evaluacion'} leadId={lead.id}>
+      <StepAnchor active={anchor === 'evaluacion'} leadId={lead.id} frameTone={frameTono}>
         <EvaluacionStep
           leadId={lead.id}
           leadStatus={lead.status}
+          caliente={lead.caliente}
           ficha={ficha}
           evaluacion={evaluacion}
           habilitado={fichaEditable}
@@ -183,6 +197,7 @@ export function LeadWizard({ data }: { data: WizardData }) {
           lead={lead}
           stage={stage}
           status={lead.status}
+          caliente={lead.caliente}
           ficha={ficha}
           evaluacion={evaluacion}
           contactos={outreach.contactos}
@@ -193,13 +208,13 @@ export function LeadWizard({ data }: { data: WizardData }) {
       )}
 
       {!descartado && (
-        <StepAnchor active={anchor === 'seguimiento'} leadId={lead.id}>
+        <StepAnchor active={anchor === 'seguimiento'} leadId={lead.id} frameTone={frameTono}>
           <SeguimientoStep
             leadId={lead.id}
             lead={lead}
             stage={stage}
             status={lead.status}
-            evaluacion={evaluacion}
+            caliente={lead.caliente}
             contactos={outreach.contactos}
             followUpCount={outreach.followUpCount}
             proximoToque={outreach.proximoToque}
@@ -225,7 +240,7 @@ export function LeadWizard({ data }: { data: WizardData }) {
       )}
 
       {!descartado && (
-        <StepAnchor active={anchor === 'brief'} leadId={lead.id}>
+        <StepAnchor active={anchor === 'brief'} leadId={lead.id} frameTone={frameTono}>
           <BriefStep
             leadId={lead.id}
             lead={lead}
@@ -239,7 +254,7 @@ export function LeadWizard({ data }: { data: WizardData }) {
       )}
 
       {!descartado && (
-        <StepAnchor active={anchor === 'construccion'} leadId={lead.id}>
+        <StepAnchor active={anchor === 'construccion'} leadId={lead.id} frameTone={frameTono}>
           <ConstruccionStep
             leadId={lead.id}
             lead={lead}
@@ -271,7 +286,9 @@ export function LeadWizard({ data }: { data: WizardData }) {
             <Hammer size={15} strokeWidth={1.5} className="text-zinc-500" />
             <h2 className="text-base font-semibold text-zinc-300">Lo que sigue</h2>
           </div>
-          <p className="mt-2 max-w-xl text-xs leading-relaxed text-zinc-500">{notaPostBrief}</p>
+          <p className="mt-2 max-w-xl text-xs leading-relaxed text-zinc-400">
+            <LineaRicaText linea={notaPostBrief} />
+          </p>
         </Card>
       )}
     </div>

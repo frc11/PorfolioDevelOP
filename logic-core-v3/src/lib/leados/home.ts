@@ -6,9 +6,8 @@
  * de "ahora" del Server Component. El meta privado del setter (pin/snooze/nota)
  * viene ya filtrado por setterId desde `listOwnedLeads`.
  *
- * Compartido por la cartera (`/setter`) y el recorrido de cola del detalle
- * (`/setter/leads/[id]?cola=…`): ambos clasifican igual, así el orden de la
- * cola en el home y el de prev/next en el detalle son EL MISMO.
+ * Alimenta el home del setter (`/setter`): el foco (`seleccionarFoco` sobre la
+ * cola `trabajar` ya ordenada) y la cartera secundaria de búsqueda.
  */
 import {
   clasificarLead,
@@ -31,6 +30,8 @@ export function buildHomeLeads(leads: OwnedLeadWithDossier[]): HomeLead[] {
       industry: lead.industry,
       zone: lead.zone,
       status: lead.status,
+      // admin-1b: el caliente persistido (lo marca Franco), no derivado del score.
+      caliente: lead.caliente,
       createdAt: lead.createdAt,
       stage: lead.dossier?.stage ?? null,
       ficha: parseFicha(lead.dossier?.fichaJson ?? null),
@@ -40,6 +41,12 @@ export function buildHomeLeads(leads: OwnedLeadWithDossier[]): HomeLead[] {
       contactos: lead._count.activities,
       followUpVencido:
         lead.nextFollowUpAt !== null && lead.nextFollowUpAt.getTime() <= ahora,
+      // 2.1b/D6: POSTERGADO cuya reactivación ya venció — vuelve a ser accionable
+      // (el cron solo notifica). Mismo reloj request-time que followUpVencido.
+      postergadoVencido:
+        lead.status === 'POSTERGADO' &&
+        lead.reactivateAt !== null &&
+        lead.reactivateAt.getTime() <= ahora,
       demoEnviada: Boolean(lead.dossier?.enviadaAt),
       // B-beta: organización propia del setter (privada, aislada por setterId).
       pinned: meta.pinned,

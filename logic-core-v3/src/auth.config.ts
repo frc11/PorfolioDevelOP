@@ -1,4 +1,5 @@
 import type { NextAuthConfig } from 'next-auth'
+import { SESSION_COOKIE_NAME, SESSION_COOKIE_OPTIONS } from '@/lib/auth-cookies'
 
 type Role = 'SUPER_ADMIN' | 'ORG_MEMBER' | 'CLIENT' | 'SETTER'
 type OrgRole = 'ADMIN' | 'MEMBER' | 'VIEWER'
@@ -9,6 +10,16 @@ export const authConfig: NextAuthConfig = {
   trustHost: true,
   pages: { signIn: '/login' },
   session: { strategy: 'jwt' },
+  // Mismo nombre/atributos de cookie que `src/auth.ts` (fuente única por
+  // NODE_ENV). Sin esto, el middleware caía al default de Auth.js que decide
+  // por protocolo de AUTH_URL: en prod-sobre-http leía `authjs.session-token`
+  // mientras el token se emitía como `__Secure-…`, y la sesión no matcheaba.
+  cookies: {
+    sessionToken: {
+      name: SESSION_COOKIE_NAME,
+      options: SESSION_COOKIE_OPTIONS,
+    },
+  },
   providers: [],
   callbacks: {
     authorized({ auth }) {

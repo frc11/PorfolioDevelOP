@@ -8,8 +8,9 @@
  *   3. Ownership: lead ajeno → getOwnedDossier/ensureOwnedDossier dan null.
  *   4. Máquina de stage: transición ilegal falla, contrato inválido falla,
  *      camino feliz completo pasa (FICHA→…→APROBADA con loop de rechazo).
- *   5. Gate EVALUADA→BRIEF: bloquea sin RESPONDIO y score < 4; deja pasar
- *      con score 4 (lead frío) y con LeadStatus.RESPONDIO (score bajo).
+ *   5. Gate EVALUADA→BRIEF (D4): lee el CAMPO `caliente`, no el score. Bloquea
+ *      sin RESPONDIO y con el campo en false (aun con score 5); deja pasar al
+ *      marcar el campo `caliente` o con LeadStatus.RESPONDIO (score bajo).
  *   6. Cascade: borrar el lead borra su dossier.
  *   7. Cleanup en finally — no deja residuo.
  *
@@ -203,15 +204,30 @@ async function main() {
     )
     check('DESCARTADA es terminal (→BRIEF falla)', desdeTerminal instanceof DossierTransitionError)
 
-    // ── Camino caliente: score 4 sin RESPONDIO → demo preventiva completa ─
+    // ── Camino caliente: D4 — el gate sale del CAMPO `caliente`, no del score ─
+    // El lead arranca PROSPECTO con caliente=false (default). Aun con score 5,
+    // el gate BLOQUEA: el score del setter ya no abre la demo preventiva. Marcar
+    // el campo (lo hace Franco) la abre. Coincide con gateBriefAbierto de la UI.
     await ensureOwnedDossier(leadCaliente.id, setter.id)
     await transitionDossier(leadCaliente.id, {
       to: 'EVALUADA',
-      evaluacion: { score: 4, veredicto: 'CALIENTE', razonamiento: 'reseñas + IG activo' },
+      evaluacion: { score: 5, veredicto: 'CALIENTE', razonamiento: 'reseñas + IG activo' },
+    })
+    const gateAltoFrio = await expectError(() =>
+      transitionDossier(leadCaliente.id, { to: 'BRIEF' }),
+    )
+    check(
+      'D4: gate BLOQUEA con score 5 si caliente=false (el score ya no abre)',
+      gateAltoFrio instanceof DossierTransitionError,
+    )
+
+    await prisma.osLead.update({
+      where: { id: leadCaliente.id },
+      data: { caliente: true },
     })
     const briefCaliente = await transitionDossier(leadCaliente.id, { to: 'BRIEF' })
     check(
-      'Gate deja pasar con score 4 aunque el lead esté PROSPECTO',
+      'D4: marcar el campo caliente=true abre el gate (PROSPECTO, sin responder)',
       briefCaliente.stage === 'BRIEF',
     )
 
@@ -254,7 +270,7 @@ async function main() {
     })
     const briefRespondio = await transitionDossier(leadRespondio.id, { to: 'BRIEF' })
     check(
-      'Gate deja pasar con LeadStatus.RESPONDIO aunque el score sea 2',
+      'Gate deja pasar con LeadStatus.RESPONDIO (score 2 y caliente=false: el responder manda)',
       briefRespondio.stage === 'BRIEF',
     )
 

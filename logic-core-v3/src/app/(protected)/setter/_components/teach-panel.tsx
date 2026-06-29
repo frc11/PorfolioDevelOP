@@ -10,16 +10,26 @@ import {
 /**
  * Render de una `LineaRica`: texto con fragmentos enfatizados. El resalte es
  * parte del mensaje de enseñanza, por eso vive con el contenido (1.0) y se
- * pinta acá sin volver a meter copy en el componente.
+ * pinta acá sin volver a meter copy en el componente. Exportado para que los
+ * intros y las explicaciones de gate (3.2) reusen el MISMO render — un solo
+ * lugar pinta la `LineaRica`, no se duplica el map por componente.
  */
-function LineaRicaText({ linea }: { linea: LineaRica }) {
+export function LineaRicaText({
+  linea,
+  emphasisClassName = 'font-semibold text-zinc-200',
+}: {
+  linea: LineaRica
+  /** Clase del fragmento enfatizado — el default sirve para fondos neutros; un
+   * contenedor con tono propio (p.ej. el rosa del gate del opener) pasa el suyo. */
+  emphasisClassName?: string
+}) {
   return (
     <>
       {linea.map((segmento, indice) =>
         typeof segmento === 'string' ? (
           <Fragment key={indice}>{segmento}</Fragment>
         ) : (
-          <strong key={indice} className="font-semibold text-zinc-200">
+          <strong key={indice} className={emphasisClassName}>
             {segmento.enfasis}
           </strong>
         ),

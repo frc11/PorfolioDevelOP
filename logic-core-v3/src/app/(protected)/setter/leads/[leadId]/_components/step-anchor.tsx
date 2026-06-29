@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, type ReactNode } from 'react'
+import { cn } from '@/lib/utils'
 
 type StepAnchorProps = {
   /** true si esta sección es el paso activo del lead — la única que se enfoca. */
@@ -11,6 +12,14 @@ type StepAnchorProps = {
    * cada autosave; sí cuando el lead avanza de stage (vía `active`).
    */
   leadId: string
+  /**
+   * Tono del marco cuando esta sección es la activa. `foco` (default) = cyan, hay
+   * trabajo AHORA; `neutral` = activa pero sin acción del setter (en revisión) o
+   * terminal (descartado) — sin cyan, por la disciplina B9. `none` = sin marco.
+   * Solo presentación: deriva del mismo `stage` que el cartel de dirección, así el
+   * marco y el cartel comparten color. NO toca el scroll ni el gateo del step.
+   */
+  frameTone?: 'foco' | 'neutral' | 'none'
   children: ReactNode
 }
 
@@ -23,10 +32,9 @@ type StepAnchorProps = {
  * - Robusto a la duplicación responsive del wizard (una copia vive bajo un
  *   ancestro `display:none`): esa copia tiene `offsetParent === null`, su scroll
  *   es no-op → solo se enfoca la copia visible. No depende de `id`/getElementById.
- * - `scroll-mt` deja la cabecera por debajo del recorrido sticky (modo cola) y
- *   da aire en modo isla.
+ * - `scroll-mt` da aire arriba de la cabecera al aterrizar en el paso activo.
  */
-export function StepAnchor({ active, leadId, children }: StepAnchorProps) {
+export function StepAnchor({ active, leadId, frameTone = 'foco', children }: StepAnchorProps) {
   const ref = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -39,9 +47,35 @@ export function StepAnchor({ active, leadId, children }: StepAnchorProps) {
     el.scrollIntoView({ block: 'start', behavior: 'auto' })
   }, [active, leadId])
 
+  // El paso activo se ELEVA sobre los demás (que ya se auto-atenúan cuando están
+  // bloqueados/hechos): acento al borde + sombra. La barra va sobre el `<Card>` del
+  // step (rounded-2xl, igual radio) sin tocar su markup. `aria-current="step"` para
+  // que un lector de pantalla anuncie cuál es el paso activo.
+  const enmarcado = active && frameTone !== 'none'
+
   return (
-    <div ref={ref} className="scroll-mt-24">
-      {children}
+    <div ref={ref} className="scroll-mt-24" aria-current={active ? 'step' : undefined}>
+      {enmarcado ? (
+        <div
+          className={cn(
+            // overflow-hidden recorta la barra al radio del Card (mismo patrón que el
+            // cartel) — sin él, el borde recto de la barra asoma en las esquinas.
+            'relative overflow-hidden rounded-2xl',
+            frameTone === 'foco' && 'shadow-[0_8px_30px_rgba(0,0,0,0.25)]',
+          )}
+        >
+          <span
+            aria-hidden
+            className={cn(
+              'pointer-events-none absolute inset-y-0 left-0 z-10 w-1 rounded-l-2xl',
+              frameTone === 'foco' ? 'bg-cyan-400/80' : 'bg-zinc-500/60',
+            )}
+          />
+          {children}
+        </div>
+      ) : (
+        children
+      )}
     </div>
   )
 }

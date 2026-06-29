@@ -196,7 +196,6 @@ enum AuditActionType {
   BOT_ACTIVATED
   BOT_DEACTIVATED
   BOT_CONFIG_UPDATED
-  BOT_DELETED
   KB_UPDATED
   QUOTA_CHANGED
   LEAD_STATUS_CHANGED
@@ -822,6 +821,11 @@ model OsLead {
   googleMapsUrl  String?
   status         LeadStatus     @default(PROSPECTO)
   serviceType    OsServiceType?
+  // admin-1a: "caliente" persistido que Franco marca a ojo (D4). Hoy NADIE lo
+  // setea ni lo lee — el comportamiento sigue siendo el del score (esCaliente,
+  // score ≥ 4) hasta admin-1b. Backfilleado desde el score actual para no
+  // perder los calientes vigentes. edge-safe: @default(false), nunca null.
+  caliente       Boolean        @default(false)
   nextFollowUpAt DateTime?
   reactivateAt   DateTime?
   notes          String?

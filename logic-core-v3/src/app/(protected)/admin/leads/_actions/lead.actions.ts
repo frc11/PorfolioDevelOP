@@ -136,12 +136,15 @@ export async function assignLeadSetter(
     // `businessName` se snapshotea en las novedades dirigidas (in-app).
     const previo = await prisma.osLead.findUnique({
       where: { id: parsed.leadId },
-      select: { assignedToId: true, businessName: true },
+      select: { assignedToId: true, businessName: true, caliente: true },
     })
     if (!previo) {
       return fail('Lead not found')
     }
     const fromId = previo.assignedToId
+    // admin-1b: ¿cambió la marca caliente? El dueño actual ve distinto (badge /
+    // gate / orden) aunque NO se reasigne — dispara su revalidación abajo.
+    const calienteCambio = previo.caliente !== parsed.caliente
 
     let toName: string | null = null
     if (parsed.setterId !== null) {
@@ -157,7 +160,9 @@ export async function assignLeadSetter(
 
     const lead = await prisma.osLead.update({
       where: { id: parsed.leadId },
-      data: { assignedToId: parsed.setterId },
+      // admin-1b: persiste el caliente que marca Franco JUNTO con la asignación.
+      // `assignedToId` es lo ÚNICO que mueve el aislamiento — el toggle no lo toca.
+      data: { assignedToId: parsed.setterId, caliente: parsed.caliente },
       select: { id: true },
     })
 
@@ -197,9 +202,13 @@ export async function assignLeadSetter(
         businessName: previo.businessName,
       })
 
-      // Contrato de invalidación: el handoff cambió datos visibles del setter
-      // (su feed de novedades). Mismo gesto que `revalidarRevision` del lado de
-      // la revisión — así la superficie del setter no queda atada al caché.
+    }
+
+    // Contrato de invalidación de la superficie del setter: el handoff (novedades
+    // / cartera) O el cambio de caliente (badge / gate / orden de su cartera) la
+    // dejan stale. El caliente NO mueve el aislamiento — solo lo que el dueño
+    // actual ve de su propio lead.
+    if (fromId !== parsed.setterId || calienteCambio) {
       revalidatePath('/setter')
       revalidatePath(`/setter/leads/${parsed.leadId}`)
     }
@@ -207,6 +216,11 @@ export async function assignLeadSetter(
     revalidatePath('/admin/leads')
     revalidatePath(`/admin/leads/${parsed.leadId}`)
     revalidateTag('admin-leads', {})
+    // admin-1b: la cuenta de "calientes en revisión" del sidebar (cache 30s, tag
+    // propio) sigue el campo — refrescarla al togglear para que no quede vieja.
+    if (calienteCambio) {
+      revalidateTag('admin-revision-resumen', {})
+    }
     return ok({ id: lead.id })
   } catch (error) {
     return fail(error instanceof Error ? error.message : 'Failed to assign lead')

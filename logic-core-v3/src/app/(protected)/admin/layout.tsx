@@ -2,8 +2,6 @@ import { auth } from '@/auth'
 import { unstable_noStore as noStore, unstable_cache } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
-import { parseEvaluacion } from '@/lib/leados/flow'
-import { esCaliente } from '@/lib/leados/revision'
 import { AdminLayoutClient } from './_components/AdminLayoutClient'
 import { PageTransition } from './_components/PageTransition'
 
@@ -17,18 +15,16 @@ const getPendingAlerts = unstable_cache(
 
 // B-beta: señal in-app de la cola de revisión para el badge del sidebar —
 // cuántas demos esperan veredicto y cuántas son calientes. Mismo patrón que
-// getPendingAlerts (cache 30s, tag propio). El volumen EN_REVISION es chico, así
-// que el findMany del evaluacionJson para contar calientes es barato. Devuelve
-// solo números (sin Dates: nada que romper al serializar el cache).
+// getPendingAlerts (cache 30s, tag propio). El volumen EN_REVISION es chico.
+// admin-1b: "caliente" lee el campo persistido del lead (lo marca Franco), no el
+// score del blob. Devuelve solo números (sin Dates: nada que romper al cachear).
 const getRevisionResumen = unstable_cache(
   async () => {
     const enRevision = await prisma.osLeadDossier.findMany({
       where: { stage: 'EN_REVISION' },
-      select: { evaluacionJson: true },
+      select: { lead: { select: { caliente: true } } },
     })
-    const calientes = enRevision.filter((dossier) =>
-      esCaliente(parseEvaluacion(dossier.evaluacionJson)?.score ?? null),
-    ).length
+    const calientes = enRevision.filter((dossier) => dossier.lead.caliente).length
     return { pendientes: enRevision.length, calientes }
   },
   ['admin-revision-resumen'],

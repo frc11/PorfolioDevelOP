@@ -104,6 +104,28 @@ Never expose internal DB IDs in URLs — use slugs or tokens.
 
 ---
 
+## Workflow (WF + ECC)
+
+Este repo opera bajo el **método WF de develOP** con el **harness ECC** (instalado global, perfil minimal).
+
+**Método WF.** Planificación con ritual antes de tocar código (leer scope, mapear lo existente, proponer estructura). Ejecución por **sprints atómicos**: un objetivo por sprint, una sola pasada. Lo fuera de scope se anota y se reporta — no se implementa. Detalle operativo del sprint abajo en **Sprint protocol**.
+
+**Harness ECC.** Comandos del ciclo de calidad disponibles como slash-commands:
+- `/harness-audit` — scorecard del repo (configuración del harness).
+- `/quality-gate` — pipeline de calidad sobre un archivo o scope.
+- `/code-review` — revisión de cambios locales o de un PR.
+- `/security-scan` — superficies de agentes, hooks, MCP, permisos y secrets.
+- `/build-fix` — fix incremental de errores de build/tipos.
+- `/test-coverage` — análisis de cobertura y generación de tests faltantes.
+
+> Los comandos se **detectan al iniciar sesión**. Tras instalar o agregar comandos al harness, abrir una **sesión nueva** para que aparezcan.
+
+**Antes de cerrar trabajo**, pasar por el ciclo de calidad según corresponda al cambio (build/tipos → `/build-fix`; lógica nueva → `/code-review` + `/test-coverage`; código sensible → `/security-scan`). Complementa —no reemplaza— la verificación post-sprint de abajo.
+
+**Convenciones.** Respetar las convenciones ya documentadas del repo: las reglas no-negociables, quality baseline, anti-vibecode, security, performance y stack conventions de **este `CLAUDE.md`**, y las convenciones de app detalladas en **`logic-core-v3/AGENTS.md`** (imports, iconos, animaciones, paleta, modelos Prisma, env vars, workflow de BD, formato de reporte). Lo marcado como intocable (tabla **Frozen files** y reglas no-negociables) no se toca.
+
+---
+
 ## Sprint protocol
 
 Before starting: read scope files, run `npm run build`, run `npx prisma migrate status`.

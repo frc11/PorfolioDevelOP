@@ -60,6 +60,8 @@ export default async function LeadOsRevisionDetailPage({ params }: RevisionPageP
           industry: true,
           zone: true,
           status: true,
+          // admin-1b: el badge caliente del detalle sigue el campo, no el score.
+          caliente: true,
           instagramUrl: true,
           currentWebUrl: true,
           googleMapsUrl: true,
@@ -78,19 +80,21 @@ export default async function LeadOsRevisionDetailPage({ params }: RevisionPageP
   const brief = parseBrief(dossier.briefJson)
   const selfCheck = parseSelfCheck(dossier.selfCheckJson)
   const rechazos = parseRechazos(dossier.rechazos)
-  const caliente = esCaliente(evaluacion?.score ?? null)
+  // admin-1b: caliente lee el campo (lo marca Franco), con el guardrail de stage.
+  const caliente = esCaliente(dossier.lead.caliente, dossier.stage)
   const enRevision = dossier.stage === 'EN_REVISION'
   const ahora = new Date()
 
   // "Saltar al siguiente": el ítem más prioritario de la cola sin contar este.
   const restoCola = await prisma.osLeadDossier.findMany({
     where: { stage: 'EN_REVISION', NOT: { leadId } },
-    select: { leadId: true, updatedAt: true, evaluacionJson: true },
+    select: { leadId: true, updatedAt: true, lead: { select: { caliente: true } } },
   })
   const siguiente = ordenarCola(
+    // admin-1b: el orden de la cola (calientes primero) sigue el campo del lead.
     restoCola.map((item) => ({
       leadId: item.leadId,
-      caliente: esCaliente(parseEvaluacion(item.evaluacionJson)?.score ?? null),
+      caliente: item.lead.caliente,
       esperaDesde: item.updatedAt,
     })),
   )[0]

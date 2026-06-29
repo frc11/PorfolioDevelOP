@@ -23,7 +23,7 @@ import {
   marcarDemoEnviadaOwned,
   revertirDemoEnviadaOwned,
 } from '@/lib/leados/dossier'
-import { gateEnvioDemo, leadRespondio, parseEvaluacion } from '@/lib/leados/flow'
+import { gateEnvioDemo, leadRespondio } from '@/lib/leados/flow'
 import { contarDmsHoy, listOwnedLeadActivities } from '@/lib/leados/outreach'
 import { getOwnedLead } from '@/lib/leados/ownership'
 import {
@@ -197,7 +197,7 @@ export async function registrarResultado(
 /**
  * Paso 9 — "Envié la demo" (el segundo mensaje, con el link). Server-side se
  * re-valida el gate completo (la UI no lo ofrece antes, pero no se confía en
- * la UI): lead respondió (o caliente score >= 4, camino preventivo) +
+ * la UI): lead respondió (o caliente —campo de Franco—, camino preventivo) +
  * dossier APROBADA + finalUrl. Idempotente: el claim atómico de
  * dossier.enviadaAt garantiza UN solo OsDemo aunque se marque dos veces;
  * si la creación falla después del claim, se compensa y se puede reintentar.
@@ -217,11 +217,12 @@ export async function enviarDemoAprobada(
     const dossier = await getOwnedDossier(leadId.data, userId)
     if (!dossier) return fail('Lead no encontrado')
 
-    const score = parseEvaluacion(dossier.evaluacionJson)?.score ?? null
     const finalUrl = dossier.finalUrl
+    // admin-1b: el gate del envío sigue el campo caliente (lo marca Franco), no
+    // el score del setter — mismo criterio que el gate del brief.
     if (
       !finalUrl ||
-      !gateEnvioDemo({ status: lead.status, score, stage: dossier.stage, finalUrl })
+      !gateEnvioDemo({ status: lead.status, caliente: lead.caliente, stage: dossier.stage, finalUrl })
     ) {
       return fail(
         'La demo se envía con el negocio respondido (o lead caliente) y la demo aprobada por Franco',

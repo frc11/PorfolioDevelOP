@@ -26,7 +26,15 @@ import {
   type SeccionId,
   type TonoId,
 } from '@/lib/leados/_experimental/fg2-brief-lab'
+import { CASOS_GASTRO } from '@/lib/leados/_experimental/fg2-casos-gastro'
 import { MedicionPanel } from './medicion-panel'
+
+/** SeccionId[] → Record<SeccionId, boolean> con el orden canónico del rubro. */
+function seccionesAToggles(activas: SeccionId[]): Record<SeccionId, boolean> {
+  const next = {} as Record<SeccionId, boolean>
+  for (const s of SECCIONES_GASTRO) next[s.id] = activas.includes(s.id)
+  return next
+}
 
 const SECCIONES_INICIALES: Record<SeccionId, boolean> = {
   'hero-plato': true,
@@ -48,6 +56,7 @@ async function copiar(texto: string, okMsg: string): Promise<void> {
 }
 
 export function Fg2LabClient({ leads }: { leads: LabLead[] }) {
+  const [selectedCasoId, setSelectedCasoId] = useState('')
   const [selectedLeadId, setSelectedLeadId] = useState('')
   const [nombre, setNombre] = useState('')
   const [zona, setZona] = useState('')
@@ -67,6 +76,7 @@ export function Fg2LabClient({ leads }: { leads: LabLead[] }) {
   const aplicarLead = (id: string) => {
     setSelectedLeadId(id)
     if (!id) return
+    setSelectedCasoId('') // las dos fuentes son alternativas
     const lead = leads.find((l) => l.id === id)
     if (!lead) return
     setNombre(lead.businessName)
@@ -76,6 +86,31 @@ export function Fg2LabClient({ leads }: { leads: LabLead[] }) {
     setInstagram(lead.instagram)
     setMaps(lead.maps)
     setWeb(lead.web)
+  }
+
+  // Precarga del experimento: llena TODOS los campos (incluidas las decisiones
+  // estructuradas) desde un caso curado, para correr el 5-vs-5 sin tipear.
+  const aplicarCaso = (id: string) => {
+    setSelectedCasoId(id)
+    if (!id) return
+    setSelectedLeadId('')
+    const caso = CASOS_GASTRO.find((c) => c.id === id)
+    if (!caso) return
+    const i = caso.input
+    setNombre(i.nombre)
+    setZona(i.zona)
+    setEstilo(i.estilo)
+    setTono(i.tono)
+    setSecciones(seccionesAToggles(i.secciones))
+    setCta(i.cta)
+    setWhatsapp(i.whatsapp)
+    setDiferencial(i.diferencial)
+    setColorMarca(i.colorMarca)
+    setResenas(i.resenas)
+    setTonoContenido(i.tonoContenido)
+    setInstagram(i.assets.instagram)
+    setMaps(i.assets.maps)
+    setWeb(i.assets.web)
   }
 
   const toggleSeccion = (id: SeccionId, value: boolean) =>
@@ -119,6 +154,20 @@ export function Fg2LabClient({ leads }: { leads: LabLead[] }) {
     <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.9fr)]">
       {/* ── Formulario ───────────────────────────────────────────────────── */}
       <Card padding="lg" className="space-y-5">
+        <Field
+          label="Precargar un caso del experimento"
+          hint="Llena TODO el formulario (estilo, secciones, CTA, diferencial, WhatsApp incluidos) para correr el 5-vs-5 sin tipear. Ver docs/experimentos/fg2-brief-experimento.md."
+        >
+          <Select
+            value={selectedCasoId}
+            onChange={(e) => aplicarCaso(e.target.value)}
+            options={[
+              { value: '', label: '— Elegí un caso precargado o cargá a mano —' },
+              ...CASOS_GASTRO.map((c) => ({ value: c.id, label: c.label })),
+            ]}
+          />
+        </Field>
+
         <Field
           label="Autocompletar desde un lead"
           hint="Trae nombre, zona, reseñas y links de la ficha. Lo demás lo elegís vos."

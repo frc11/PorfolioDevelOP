@@ -26,6 +26,7 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { encode } from 'next-auth/jwt'
 import { prisma } from '@/lib/prisma'
+import { SESSION_COOKIE_NAME } from '@/lib/auth-cookies'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -78,11 +79,6 @@ function isQaPersona(value: unknown): value is QaPersona {
     value === 'client-b' ||
     value === 'setter'
   )
-}
-
-function getSessionCookieName(request: NextRequest): string {
-  const protocol = new URL(request.url).protocol
-  return protocol === 'https:' ? '__Secure-authjs.session-token' : 'authjs.session-token'
 }
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
@@ -149,7 +145,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     user.role === 'SUPER_ADMIN' ||
     Boolean(membership?.organization?.onboardingCompleted && membership.organization.companyName?.trim())
 
-  const cookieName = getSessionCookieName(request)
+  const cookieName = SESSION_COOKIE_NAME
   const isSecure = cookieName.startsWith('__Secure-')
 
   const sessionToken = await encode({
@@ -221,7 +217,7 @@ export function DELETE(request: NextRequest): NextResponse {
     return NextResponse.json({ error: 'forbidden', reason: guard.reason }, { status: 403 })
   }
 
-  const cookieName = getSessionCookieName(request)
+  const cookieName = SESSION_COOKIE_NAME
   const response = NextResponse.json({ ok: true, cleared: cookieName })
   response.cookies.delete(cookieName)
   response.cookies.delete('authjs.callback-url')

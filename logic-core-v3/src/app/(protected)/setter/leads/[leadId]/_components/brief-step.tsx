@@ -9,12 +9,14 @@ import { Badge, Button, Card, Field, Input } from '@/components/ui'
 import { fail } from '@/lib/action-utils'
 import type { Brief, Evaluacion, Ficha } from '@/lib/leados/contracts'
 import { buildBriefInputBlock, type CopyBlockLead } from '@/lib/leados/copy-blocks'
+import { GUIA_BRIEF } from '@/lib/leados/guidance-content'
 import { useAutosave } from '@/lib/use-autosave'
 import { useUnsavedGuard } from '@/lib/use-unsaved-guard'
 import { guardarBrief } from '@/app/(protected)/setter/_actions/dossier.actions'
 import { BriefInputSchema, type BriefInput } from '@/app/(protected)/setter/_actions/dossier.schemas'
 import { AutosaveStatus } from '@/app/(protected)/setter/_components/autosave-status'
 import { CopyBlock } from '@/app/(protected)/setter/_components/copy-block'
+import { LineaRicaText, TeachPanel } from '@/app/(protected)/setter/_components/teach-panel'
 import { TextArea } from '@/app/(protected)/setter/_components/text-area'
 import { ToolGuide } from '@/app/(protected)/setter/_components/tool-guide'
 
@@ -145,7 +147,7 @@ export function BriefStep({
       <Card variant="subtle" padding="lg">
         <div className="flex items-center gap-2.5">
           <Lock size={15} strokeWidth={1.5} className="text-zinc-600" />
-          <h2 className="text-base font-semibold text-zinc-400">Paso 3 — Brief de diseño</h2>
+          <h2 className="text-base font-semibold text-zinc-400">{GUIA_BRIEF.titulo}</h2>
         </div>
         <p className="mt-2 text-xs leading-relaxed text-zinc-600">
           Se habilita después de registrar la evaluación.
@@ -154,18 +156,20 @@ export function BriefStep({
     )
   }
 
-  // ── EVALUADA con gate cerrado: explicar, no frustrar ───────────────────────
+  // ── EVALUADA con gate cerrado: explicar la espera, no frustrar ─────────────
+  // El gate (gateBriefAbierto) lo decide el server y llega como prop: acá solo
+  // lo EXPLICAMOS. Tono zinc (espera, no bloqueo), coherente con el cartel del
+  // wizard (describirFoco → «En espera · Brief»).
   if (stage === 'EVALUADA' && !gateAbierto) {
     return (
       <Card variant="subtle" padding="lg">
         <div className="flex items-center gap-2.5">
           <Hourglass size={15} strokeWidth={1.5} className="text-zinc-500" />
-          <h2 className="text-base font-semibold text-zinc-300">Paso 3 — Brief de diseño</h2>
+          <h2 className="text-base font-semibold text-zinc-300">{GUIA_BRIEF.titulo}</h2>
         </div>
-        <p className="mt-2 max-w-xl text-xs leading-relaxed text-zinc-500">
-          Este lead avanza — falta que responda el primer contacto para arrancar la demo. Mandá
-          el opener y registrá la conversación en «Seguimiento»: cuando responda
-          (o si la evaluación hubiera dado 4–5), este paso se abre solo.
+        <p className="mt-2 text-xs font-semibold text-zinc-300">{GUIA_BRIEF.gate.titulo}</p>
+        <p className="mt-1 max-w-xl text-xs leading-relaxed text-zinc-400">
+          <LineaRicaText linea={GUIA_BRIEF.gate.detalle} />
         </p>
       </Card>
     )
@@ -178,14 +182,15 @@ export function BriefStep({
     return (
       <Card padding="lg" className="space-y-5">
         <div>
-          <h2 className="text-base font-semibold text-zinc-100">Paso 3 — Brief de diseño</h2>
+          <h2 className="text-base font-semibold text-zinc-100">{GUIA_BRIEF.titulo}</h2>
           <p className="mt-1 max-w-xl text-xs leading-relaxed text-zinc-500">
-            Copiá el bloque de abajo, pegalo en el Gem de diseño, y traé la respuesta acá. El
-            brief es el plano de la demo: cuanto más concreto, mejor sale.
+            <LineaRicaText linea={GUIA_BRIEF.intro} />
           </p>
         </div>
 
         <ToolGuide id="gemDiseno" />
+
+        <TeachPanel id="brief" />
 
         {ficha && evaluacion && (
           <CopyBlock
@@ -196,10 +201,10 @@ export function BriefStep({
         )}
 
         <Field
-          label="Respuesta del Gem (pegado completo)"
+          label={GUIA_BRIEF.campos.pegadoGem.label}
           required
           error={errors.pegadoGem}
-          hint="Pegala entera, sin editar. Los campos de abajo son el resumen estructurado."
+          hint={GUIA_BRIEF.campos.pegadoGem.hint}
         >
           <TextArea
             value={form.pegadoGem}
@@ -210,7 +215,12 @@ export function BriefStep({
         </Field>
 
         <div className="grid gap-4 lg:grid-cols-2">
-          <Field label="Título del brief" required error={errors.titulo}>
+          <Field
+            label={GUIA_BRIEF.campos.titulo.label}
+            required
+            error={errors.titulo}
+            hint={GUIA_BRIEF.campos.titulo.hint}
+          >
             <Input
               value={form.titulo}
               onChange={(event) => set('titulo', event.target.value)}
@@ -218,16 +228,16 @@ export function BriefStep({
             />
           </Field>
 
-          <Field label="Llamado a la acción (CTA)" hint="Ej: 'Pedí tu turno por WhatsApp'.">
+          <Field label={GUIA_BRIEF.campos.cta.label} hint={GUIA_BRIEF.campos.cta.hint}>
             <Input value={form.cta} onChange={(event) => set('cta', event.target.value)} />
           </Field>
         </div>
 
         <Field
-          label="Secciones de la demo"
+          label={GUIA_BRIEF.campos.seccionesTexto.label}
           required
           error={errors.secciones}
-          hint="Una por línea, en orden. Ej: Hero / Menú / Reseñas / Cómo pedir / Contacto."
+          hint={GUIA_BRIEF.campos.seccionesTexto.hint}
         >
           <TextArea
             value={form.seccionesTexto}
@@ -238,7 +248,7 @@ export function BriefStep({
         </Field>
 
         <div className="grid gap-4 lg:grid-cols-2">
-          <Field label="Concepto" hint="La idea central que propone el Gem, en una o dos líneas.">
+          <Field label={GUIA_BRIEF.campos.concepto.label} hint={GUIA_BRIEF.campos.concepto.hint}>
             <TextArea
               value={form.concepto}
               onChange={(event) => set('concepto', event.target.value)}
@@ -246,7 +256,7 @@ export function BriefStep({
             />
           </Field>
 
-          <Field label="Notas de marca" hint="Colores, tono, logo: lo que la demo tiene que respetar.">
+          <Field label={GUIA_BRIEF.campos.notasMarca.label} hint={GUIA_BRIEF.campos.notasMarca.hint}>
             <TextArea
               value={form.notasMarca}
               onChange={(event) => set('notasMarca', event.target.value)}
@@ -277,7 +287,7 @@ export function BriefStep({
     return (
       <Card padding="lg" className="space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="text-base font-semibold text-zinc-100">Paso 3 — Brief de diseño</h2>
+          <h2 className="text-base font-semibold text-zinc-100">{GUIA_BRIEF.titulo}</h2>
           <Badge tone="violet" variant="soft" size="md">
             Brief guardado
           </Badge>
@@ -343,7 +353,7 @@ export function BriefStep({
   // ── Stages posteriores (CONSTRUCCION+): resumen mínimo ─────────────────────
   return (
     <Card variant="subtle" padding="lg">
-      <h2 className="text-base font-semibold text-zinc-300">Paso 3 — Brief de diseño</h2>
+      <h2 className="text-base font-semibold text-zinc-300">{GUIA_BRIEF.titulo}</h2>
       <p className="mt-2 text-xs leading-relaxed text-zinc-500">
         {brief ? `Brief "${brief.titulo}" guardado.` : 'Brief guardado.'} El dossier ya avanzó a
         la etapa siguiente.

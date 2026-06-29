@@ -122,6 +122,33 @@ export type SelfCheckRazon = {
   razon: string
 }
 
+/**
+ * Un criterio que mira una herramienta de evaluación externa, en el idioma del
+ * setter: qué es y por qué pesa en el score. Lo consume el Paso 2 (evaluación)
+ * para mostrar «qué mira el Evaluador» sin hardcodear la lista en el componente.
+ * El criterio REAL lo aplica el Evaluador externo; acá solo lo explicamos. [evaluación · 3.2]
+ */
+export type CriterioGuia = {
+  /** Nombre del criterio (ej: «Dolor»). */
+  nombre: string
+  /** Por qué ese criterio mueve el score, en una línea. */
+  porQue: string
+}
+
+/**
+ * Explicación, en el idioma del setter, del GATE de un paso: por qué pasa lo que
+ * pasa (un bloqueo, un descarte automático) y cuándo se levanta. NO es el gate
+ * —el criterio vive en `flow.ts`/schemas y sigue mandando—: son las PALABRAS que
+ * lo vuelven entendible en vez de un botón deshabilitado mudo. El componente
+ * elige el TONO (rosa si bloquea, zinc si es un desenlace neutro). [3.2]
+ */
+export type GateGuia = {
+  /** Encabezado: qué está pasando (ej: «El link NO va en el opener»). */
+  titulo: string
+  /** El porqué + el cuándo, en lenguaje claro (con énfasis donde pega). */
+  detalle: LineaRica
+}
+
 /** Guía del bloque copiable que el paso entrega a una herramienta externa. */
 export type CopyBlockGuia = {
   titulo: string
@@ -150,6 +177,8 @@ export type PasoGuia = {
   titulo: string
   /** Encuadre del paso — el «qué hacés y por qué». Opcional: las teach-only no lo usan. [teach] */
   intro?: LineaRica
+  /** Instructivo ordenado (how-to mecánico, ej. publicar el draft). El componente lo dibuja como `<ol>`. [3.4] */
+  pasos?: readonly string[]
   /** Estimación de tiempo, si el paso la muestra. */
   duracion?: string
   /** El porqué ampliado del paso — material de enseñanza. [teach · 1.1] */
@@ -158,6 +187,10 @@ export type PasoGuia = {
   campos?: Readonly<Record<string, CampoGuia>>
   /** Ejemplos contrastados esto-sí / esto-no. [ejemplos · 1.2] */
   ejemplos?: readonly EjemploContrastado[]
+  /** Criterios que mira un evaluador externo (qué mira y por qué). [evaluación · 3.2] */
+  criterios?: readonly CriterioGuia[]
+  /** Explicación, en idioma del setter, del gate del paso (no un disabled mudo). [3.2] */
+  gate?: GateGuia
   /** Mensajes de validación de calidad. [validación · 1.3] */
   validacion?: ValidacionGuia
   /** Razones de los ítems de self-check. [FG-4] */
@@ -262,7 +295,8 @@ export const GUIA_FICHA = {
     },
   },
   validacion: {
-    pendienteTitulo: 'Para habilitar la evaluación todavía falta:',
+    pendienteTitulo:
+      'El Evaluador no puede juzgar a ciegas: necesita esta señal mínima para puntuar. Todavía falta:',
     completo: '✓ Señal mínima lista — guardá y pasala por el Evaluador.',
   },
   copyBlock: {
@@ -276,6 +310,152 @@ export const GUIA_FICHA = {
   },
 } satisfies PasoGuia
 
+// ── Contenido: Paso 2 · Evaluación (transcribir el veredicto del Evaluador) ──
+
+/**
+ * Guía de la evaluación (Paso 2). El setter NO juzga: pega la ficha en el
+ * Evaluador externo y transcribe acá lo que devolvió (score, veredicto,
+ * razonamiento). `campos` son los del formulario (score/veredicto/razonamiento);
+ * `criterios` explica qué mira el Evaluador; `gate` explica el descarte
+ * automático de score 1–2 (el criterio sigue en `dossier.actions.ts`, acá solo
+ * el porqué). `porque`/`ejemplos` enseñan la disciplina de transcribir fiel.
+ */
+export const GUIA_EVALUACION = {
+  titulo: 'Paso 2 — Evaluación',
+  intro: [
+    'No juzgás vos: pegás la ficha en el Evaluador (el bloque del paso 1), esperás su respuesta y la ',
+    { enfasis: 'transcribís acá tal cual' },
+    ' — score, veredicto y razonamiento. No hace falta interpretarla.',
+  ],
+  criterios: [
+    { nombre: 'Rubro', porQue: 'hay rubros donde una demo web convierte mucho más que otros' },
+    { nombre: 'Dolor', porQue: 'una queja que se repite es un problema que el negocio ya siente' },
+    { nombre: 'Decisor', porQue: 'si el IG lo maneja el dueño, hablás directo con quien firma' },
+    { nombre: 'Actividad', porQue: 'un negocio que publica seguido también responde mensajes' },
+    { nombre: 'Intención', porQue: 'señales de que ya intentaron mejorar su presencia digital' },
+  ],
+  campos: {
+    score: {
+      label: 'Score',
+      hint: 'El número que dio el Evaluador. 1–2 descarta, 3 avanza, 4–5 marca el lead como caliente.',
+    },
+    veredicto: {
+      label: 'Veredicto',
+      hint: 'El que eligió el Evaluador: Descartar, Avanzar o Caliente. Copialo, no lo cambies.',
+    },
+    razonamiento: {
+      label: 'Razonamiento',
+      hint: 'Pegá el razonamiento completo del Evaluador, sin resumirlo.',
+    },
+  },
+  gate: {
+    titulo: 'Score 1–2 = descarte automático',
+    detalle: [
+      'No lo elegís vos y no es un fracaso: ',
+      { enfasis: 'filtrar rápido un lead flojo es exactamente el laburo' },
+      '. Te ahorrás horas de demo para un negocio que no iba a cerrar. Al confirmar te pedimos el motivo en una línea.',
+    ],
+  },
+  porque: [
+    [
+      'El que juzga es el Evaluador, no vos: tu trabajo es ',
+      { enfasis: 'transcribir fiel' },
+      ', no suavizar ni inflar el número para salvar un lead que te cayó simpático. Un score editado ensucia toda la cola que viene después.',
+    ],
+    [
+      'El score marca el camino: ',
+      { enfasis: '1–2 descarta, 3 avanza, 4–5 es caliente' },
+      ' (y deja producir la demo sin esperar respuesta). La mayoría son 3 —fríos— y eso está bien: es el caso normal.',
+    ],
+  ],
+  ejemplos: [
+    {
+      tema: 'Transcribir el veredicto',
+      asiSi: 'El Evaluador dio 2 → cargás 2 y descartás, aunque el lugar te guste.',
+      asiNo: 'Lo subís a 3 «para darle una chance» porque te cayó bien el negocio.',
+      porque: 'El score es del Evaluador; pisarlo mete leads flojos a la cola y te quema el tiempo.',
+    },
+  ],
+} satisfies PasoGuia
+
+// ── Contenido: Paso 3 · Brief de diseño (el plano de la demo) ────────────────
+
+/**
+ * Guía del brief (Paso 3). El setter NO lo inventa: corre el Gem de diseño (que
+ * lee la ficha + la evaluación), trae su respuesta y la ordena en secciones
+ * concretas. `campos` son los del formulario (las claves casan 1:1 con el estado
+ * del form: pegadoGem/titulo/cta/seccionesTexto/concepto/notasMarca). `gate`
+ * explica el estado «esperando respuesta» cuando el gate EVALUADA→BRIEF está
+ * cerrado —el criterio sigue en `flow.ts: gateBriefAbierto`, acá solo el porqué
+ * + el qué-hacer-mientras; el TONO lo elige el componente (zinc: es una espera,
+ * no un bloqueo)—. `porque`/`ejemplos` enseñan que el brief es el plano y por
+ * qué las secciones concretas convierten.
+ */
+export const GUIA_BRIEF = {
+  titulo: 'Paso 3 — Brief de diseño',
+  intro: [
+    'Copiá el bloque de abajo, pegalo en el ',
+    { enfasis: 'Gem de diseño' },
+    ' y traé su respuesta acá. El brief es el ',
+    { enfasis: 'plano de la demo' },
+    ': cuanto más concreto, mejor sale.',
+  ],
+  campos: {
+    pegadoGem: {
+      label: 'Respuesta del Gem (pegado completo)',
+      hint: 'Pegala entera, sin editar. Los campos de abajo son el resumen estructurado.',
+    },
+    titulo: {
+      label: 'Título del brief',
+      hint: 'El nombre del negocio sirve — es cómo vas a reconocer esta demo después.',
+    },
+    cta: {
+      label: 'Llamado a la acción (CTA)',
+      hint: 'Lo que el visitante tiene que hacer. Ej: «Pedí tu turno por WhatsApp».',
+    },
+    seccionesTexto: {
+      label: 'Secciones de la demo',
+      hint: 'Una por línea, en orden. Ej: Hero / Menú / Reseñas / Cómo pedir / Contacto.',
+    },
+    concepto: {
+      label: 'Concepto',
+      hint: 'La idea central que propone el Gem, en una o dos líneas.',
+    },
+    notasMarca: {
+      label: 'Notas de marca',
+      hint: 'Colores, tono, logo: lo que la demo tiene que respetar.',
+    },
+  },
+  gate: {
+    titulo: 'Esperando la respuesta del primer contacto',
+    detalle: [
+      'El lead avanza, pero el brief se abre cuando ',
+      { enfasis: 'el negocio responde el primer contacto' },
+      ' —o si Franco lo marca caliente—. Mientras tanto, mandá el opener y registrá la conversación en «Seguimiento»: apenas responda, este paso se abre solo.',
+    ],
+  },
+  porque: [
+    [
+      'El brief es el ',
+      { enfasis: 'plano de la demo' },
+      ': quien la construye trabaja con esto, no con la ficha cruda. Un brief flojo o genérico produce una demo floja.',
+    ],
+    [
+      'No lo inventás vos: sale del ',
+      { enfasis: 'Gem de diseño' },
+      ', que lee la ficha y la evaluación. Tu trabajo es traer su respuesta fiel y ordenarla en secciones concretas —las de ESTE negocio, no las de cualquiera—.',
+    ],
+  ],
+  ejemplos: [
+    {
+      tema: 'Las secciones de la demo',
+      asiSi: 'Hero con el nombre real / Menú con sus platos / Reseñas reales / Cómo pedir por WhatsApp / Contacto.',
+      asiNo: 'Inicio / Nosotros / Servicios / Galería / Contacto —las mismas de cualquier plantilla—.',
+      porque: 'Las secciones concretas hacen que el dueño se vea a sí mismo; las genéricas dicen «plantilla» y se ignoran.',
+    },
+  ],
+} satisfies PasoGuia
+
 // ── Contenido: pasos que enseñan el «por qué» (FG-1.2) ───────────────────────
 
 /**
@@ -285,8 +465,13 @@ export const GUIA_FICHA = {
  * concreción de la ficha; el criterio (gates, listas, fechas) sigue en la
  * lógica — acá solo el porqué y los ejemplos, editables por Franco.
  */
-const GUIA_CONSTRUCCION = {
+export const GUIA_CONSTRUCCION = {
   titulo: 'Construcción de la demo',
+  intro: [
+    'La demo se construye en ',
+    { enfasis: 'Claude Design' },
+    ' (herramienta externa): el panel te guía fase por fase, no la arma por vos. Al arrancar, el dossier pasa a «Construcción» y se abren el draft y el self-check.',
+  ],
   porque: [
     [
       'La demo es la carnada del flujo invertido: si parece una plantilla, el negocio no se reconoce y no responde. Con ',
@@ -317,8 +502,21 @@ const GUIA_CONSTRUCCION = {
   ],
 } satisfies PasoGuia
 
-const GUIA_SELF_CHECK = {
+export const GUIA_SELF_CHECK = {
   titulo: 'Self-check antes de enviar',
+  intro: [
+    'Revisá la demo publicada punto por punto. Los ',
+    { enfasis: 'obligatorios bloquean el envío' },
+    ' si fallan; los de «Ojo de diseño» no bloquean, pero viajan a Franco tal como los marques.',
+  ],
+  gate: {
+    titulo: 'El envío se habilita con todos los obligatorios en verde',
+    detalle: [
+      'No es un trámite: es tu ',
+      { enfasis: 'último filtro antes de Franco' },
+      '. Marcá cada obligatorio solo cuando lo verificaste en la demo publicada — un check falso vuelve como rechazo y enfría al negocio que espera.',
+    ],
+  },
   porque: [
     [
       'Es tu ',
@@ -347,8 +545,53 @@ const GUIA_SELF_CHECK = {
   ],
 } satisfies PasoGuia
 
-const GUIA_OPENER = {
+// ── Contenido: Paso 5 · Publicar el draft (instructivo mecánico) ─────────────
+
+/**
+ * Guía del draft (Paso 5). Instructivo mecánico: exportar de Claude Design,
+ * publicar en Netlify Drop y traer la URL. `pasos` son las instrucciones
+ * ordenadas (el componente las dibuja como `<ol>`); `campos.draftUrl` la
+ * etiqueta/hint del input. Sin teach (porque/ejemplos): es mecánico, el porqué
+ * va en el `intro` (publicás para que Franco revise, no para el negocio).
+ */
+export const GUIA_DRAFT = {
+  titulo: 'Publicar el draft',
+  intro: [
+    'Publicás un borrador para que ',
+    { enfasis: 'Franco lo revise' },
+    '. Publicar acá NO es enviárselo al negocio: la versión permanente la publica Franco cuando aprueba.',
+  ],
+  pasos: [
+    'En Claude Design: Export → HTML standalone (o el .zip si lo ofrece).',
+    'Asegurate de que el archivo se llame index.html (si bajó un .zip, que lo tenga adentro).',
+    'Abrí Netlify Drop (el botón de acá arriba) y arrastrá el archivo (o la carpeta) ahí.',
+    'Copiá la URL que te da Netlify y pegala acá abajo.',
+  ],
+  campos: {
+    draftUrl: {
+      label: 'URL del draft',
+      hint: 'La que te dio Netlify Drop, completa y con https://',
+    },
+  },
+} satisfies PasoGuia
+
+export const GUIA_OPENER = {
   titulo: 'El opener (primer contacto)',
+  intro: [
+    'Solo texto, ',
+    { enfasis: 'dolor-first' },
+    ', corto. Nada de precio y nada de link — el link viaja recién con la demo, cuando respondan. Lo mandás VOS desde Instagram (copiar y pegar) y acá lo registrás.',
+  ],
+  gate: {
+    titulo: 'El link NO va en el opener — sacalo',
+    detalle: [
+      'El opener ',
+      { enfasis: 'abre una conversación, no vende' },
+      ': un link en el primer mensaje se lee como publicidad y el dueño lo ignora (o Instagram lo manda a spam). El link viaja recién en el ',
+      { enfasis: 'segundo mensaje, con la demo ya aprobada' },
+      ' — eso lo registrás desde «Seguimiento», cuando el negocio respondió.',
+    ],
+  },
   porque: [
     [
       'El opener no vende: ',
@@ -418,6 +661,103 @@ const GUIA_TRASPASO = {
     },
   ],
 } satisfies PasoGuia
+
+// ── Contenido: tras la construcción · En revisión + envío del link ───────────
+
+/**
+ * Las dos notas «lo que sigue» del pie del wizard para los stages donde el setter
+ * mayormente ESPERA: EN_REVISION (la pelota la tiene Franco) y APROBADA (el envío
+ * vive en «Seguimiento»). La DIRECCIÓN la pone el cartel de arriba (`describirFoco`,
+ * 3.1); esto es el pie que dice dónde se entera y a dónde ir — espeja ese cartel,
+ * no lo contradice. [3.5]
+ */
+export const GUIA_REVISION = {
+  enRevision: [
+    'La demo está en ',
+    { enfasis: 'revisión de Franco' },
+    '. Cuando la apruebe o pida correcciones, lo ves acá y en tu cartera.',
+  ],
+  aprobada: [
+    'Demo ',
+    { enfasis: 'aprobada' },
+    ' 🎉 — el envío del link vive en «Seguimiento»: el panel arma el mensaje cuando el flujo lo habilita.',
+  ],
+} satisfies Record<'enRevision' | 'aprobada', LineaRica>
+
+/**
+ * El envío del link (APROBADA): el momento BISAGRA del flujo invertido — el link
+ * de la demo SALE acá y solo acá, nunca en el opener ni antes de que Franco la
+ * apruebe. El gate (`gateEnvioDemo`, flow.ts — LÍNEA ROJA, no vive acá) pide DOS
+ * condiciones independientes: que Franco apruebe (APROBADA + finalUrl) Y que el
+ * negocio enganche (respondió o es caliente). Como son dos, el «todavía no»
+ * depende de cuál falta — de ahí los tres mensajes de `espera`. Cero lógica: el
+ * componente deriva CUÁL mostrar; acá viven solo las palabras (editables por Franco).
+ */
+export type EnvioGuia = {
+  /** Rótulo del momento. */
+  titulo: string
+  /** El encuadre de la disciplina: el link sale acá y solo acá. */
+  intro: LineaRica
+  /** Header cuando el gate ABRE (aprobada + enganche + url): «momento de enviar». */
+  listo: string
+  /** Camino preventivo (lead caliente): el link puede salir antes de que responda. */
+  preventivo: LineaRica
+  /** El bloque copiable del segundo mensaje (la demo con su link). */
+  copyBlock: CopyBlockGuia
+  /** Confirmación tras registrar el envío: el foco pasa a la reunión. */
+  enviada: LineaRica
+  /** El «todavía no», según qué mitad del gate falta (las tres combinaciones). */
+  espera: {
+    /** APROBADA, pero el negocio no enganchó (ni es caliente): falta la respuesta. */
+    aprobadaSinEnganche: LineaRica
+    /** El negocio enganchó, pero Franco todavía no aprobó: falta la revisión. */
+    engancheSinAprobar: LineaRica
+    /** Ni enganche ni aprobación todavía: faltan las dos. */
+    niEngancheNiAprobada: LineaRica
+  }
+}
+
+export const GUIA_ENVIO = {
+  titulo: 'Enviá el link de la demo',
+  intro: [
+    'El momento del flujo invertido: el link de la demo ',
+    { enfasis: 'sale acá y solo acá' },
+    ' — nunca en el opener, nunca antes de que Franco la apruebe.',
+  ],
+  listo: 'Demo aprobada — momento de enviar el link',
+  preventivo: [
+    'Camino preventivo (lead ',
+    { enfasis: 'caliente' },
+    '): la estás mandando antes de que responda. Puede acompañar al opener — vos decidís el momento.',
+  ],
+  copyBlock: {
+    titulo: 'Segundo mensaje — la demo con su link',
+    instruccion:
+      'Base editable: adaptala a la conversación y pegala en Instagram. El link va acá y solo acá.',
+  },
+  enviada: [
+    'El follow-up ya quedó armado — de acá en adelante el objetivo es ',
+    { enfasis: 'UNO: la reunión' },
+    '. Preguntá si la pudo ver y proponé un horario.',
+  ],
+  espera: {
+    aprobadaSinEnganche: [
+      'La demo está aprobada — el link se libera ',
+      { enfasis: 'cuando el negocio responda' },
+      ' (o si el lead fuera caliente).',
+    ],
+    engancheSinAprobar: [
+      'El link se envía cuando ',
+      { enfasis: 'Franco apruebe la demo' },
+      ' (la producción pasa por brief, construcción y self-check). Hasta ahí, este paso no lo ofrece.',
+    ],
+    niEngancheNiAprobada: [
+      'El link de la demo se envía recién cuando el negocio ',
+      { enfasis: 'responde Y Franco la aprueba' },
+      ' — nunca antes. Mientras tanto: seguí la cadencia.',
+    ],
+  },
+} satisfies EnvioGuia
 
 // ── Contenido: ejemplos del ESTADO IDEAL (para las pantallas vacías) ─────────
 
@@ -497,7 +837,10 @@ export const GUIA_SELF_CHECK_EJEMPLAR = {
  */
 export const GUIA_PASOS: Partial<Record<GuiaPasoId, PasoGuia>> = {
   ficha: GUIA_FICHA,
+  evaluacion: GUIA_EVALUACION,
+  brief: GUIA_BRIEF,
   construccion: GUIA_CONSTRUCCION,
+  draft: GUIA_DRAFT,
   selfCheck: GUIA_SELF_CHECK,
   opener: GUIA_OPENER,
   objeciones: GUIA_OBJECIONES,

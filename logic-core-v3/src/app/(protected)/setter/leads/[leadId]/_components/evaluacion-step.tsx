@@ -8,19 +8,13 @@ import type { LeadStatus } from '@prisma/client'
 import { Badge, Button, Card, Field, Modal, Select } from '@/components/ui'
 import type { Evaluacion, Ficha } from '@/lib/leados/contracts'
 import { fichaFaltantes, gateBriefAbierto } from '@/lib/leados/flow'
+import { GUIA_EVALUACION } from '@/lib/leados/guidance-content'
 import { registrarEvaluacion } from '@/app/(protected)/setter/_actions/dossier.actions'
 import { EvaluacionInputSchema } from '@/app/(protected)/setter/_actions/dossier.schemas'
+import { LineaRicaText, TeachPanel } from '@/app/(protected)/setter/_components/teach-panel'
 import { TextArea } from '@/app/(protected)/setter/_components/text-area'
 import { ToolGuide } from '@/app/(protected)/setter/_components/tool-guide'
 import { cn } from '@/lib/utils'
-
-const CRITERIOS = [
-  { nombre: 'Rubro', porQue: 'hay rubros donde una demo web convierte mucho más que otros' },
-  { nombre: 'Dolor', porQue: 'una queja que se repite es un problema que el negocio ya siente' },
-  { nombre: 'Decisor', porQue: 'si el IG lo maneja el dueño, hablás directo con quien firma' },
-  { nombre: 'Actividad', porQue: 'un negocio que publica seguido también responde mensajes' },
-  { nombre: 'Intención', porQue: 'señales de que ya intentaron mejorar su presencia digital' },
-] as const
 
 const VEREDICTO_LABELS = {
   DESCARTAR: 'Descartar',
@@ -31,6 +25,8 @@ const VEREDICTO_LABELS = {
 type EvaluacionStepProps = {
   leadId: string
   leadStatus: LeadStatus
+  /** admin-1b: campo persistido que marca Franco — abre el gate del brief. */
+  caliente: boolean
   ficha: Ficha | null
   evaluacion: Evaluacion | null
   /** true solo mientras el dossier está en FICHA (la evaluación no se re-registra). */
@@ -43,6 +39,7 @@ type FormErrors = Partial<Record<'score' | 'veredicto' | 'razonamiento' | 'motiv
 export function EvaluacionStep({
   leadId,
   leadStatus,
+  caliente,
   ficha,
   evaluacion,
   habilitado,
@@ -195,10 +192,9 @@ export function EvaluacionStep({
   return (
     <Card padding="lg" className="space-y-5">
       <div>
-        <h2 className="text-base font-semibold text-zinc-100">Paso 2 — Evaluación</h2>
+        <h2 className="text-base font-semibold text-zinc-100">{GUIA_EVALUACION.titulo}</h2>
         <p className="mt-1 max-w-xl text-xs leading-relaxed text-zinc-500">
-          Pegá la ficha en el Evaluador (bloque del paso 1), esperá su respuesta y transcribila
-          acá tal cual: score, veredicto y razonamiento. No hace falta interpretarla.
+          <LineaRicaText linea={GUIA_EVALUACION.intro} />
         </p>
       </div>
 
@@ -210,7 +206,7 @@ export function EvaluacionStep({
           Qué mira el Evaluador (y por qué importa)
         </p>
         <ul className="mt-2 grid gap-1 sm:grid-cols-2">
-          {CRITERIOS.map((criterio) => (
+          {GUIA_EVALUACION.criterios.map((criterio) => (
             <li key={criterio.nombre} className="text-[11px] leading-relaxed text-zinc-500">
               <span className="font-semibold text-zinc-400">{criterio.nombre}:</span>{' '}
               {criterio.porQue}
@@ -219,7 +215,14 @@ export function EvaluacionStep({
         </ul>
       </div>
 
-      <Field label="Score" required error={errors.score} hint="El número que dio el Evaluador. 1–2 descarta, 3 avanza, 4–5 marca el lead como caliente.">
+      <TeachPanel id="evaluacion" />
+
+      <Field
+        label={GUIA_EVALUACION.campos.score.label}
+        required
+        error={errors.score}
+        hint={GUIA_EVALUACION.campos.score.hint}
+      >
         <div role="radiogroup" aria-label="Score de la evaluación" className="flex gap-2">
           {[1, 2, 3, 4, 5].map((valor) => (
             <button
@@ -245,7 +248,12 @@ export function EvaluacionStep({
         </div>
       </Field>
 
-      <Field label="Veredicto" required error={errors.veredicto}>
+      <Field
+        label={GUIA_EVALUACION.campos.veredicto.label}
+        required
+        error={errors.veredicto}
+        hint={GUIA_EVALUACION.campos.veredicto.hint}
+      >
         <Select
           value={veredicto}
           onChange={(event) => setVeredicto(event.target.value)}
@@ -260,7 +268,12 @@ export function EvaluacionStep({
         />
       </Field>
 
-      <Field label="Razonamiento" required error={errors.razonamiento} hint="Pegá el razonamiento completo del Evaluador, sin resumirlo.">
+      <Field
+        label={GUIA_EVALUACION.campos.razonamiento.label}
+        required
+        error={errors.razonamiento}
+        hint={GUIA_EVALUACION.campos.razonamiento.hint}
+      >
         <TextArea
           value={razonamiento}
           onChange={(event) => setRazonamiento(event.target.value)}
@@ -270,10 +283,12 @@ export function EvaluacionStep({
       </Field>
 
       {esDescarte && (
-        <p className="rounded-xl border border-zinc-400/20 bg-zinc-500/[0.06] p-3 text-xs leading-relaxed text-zinc-400">
-          Score {score} = descarte automático. No es un fracaso: filtrar rápido un lead flojo es
-          exactamente el laburo. Al confirmar te pedimos el motivo en una línea.
-        </p>
+        <div className="rounded-xl border border-zinc-400/20 bg-zinc-500/[0.06] p-3">
+          <p className="text-xs font-semibold text-zinc-300">{GUIA_EVALUACION.gate.titulo}</p>
+          <p className="mt-1 text-xs leading-relaxed text-zinc-400">
+            <LineaRicaText linea={GUIA_EVALUACION.gate.detalle} />
+          </p>
+        </div>
       )}
 
       {serverError && <p className="text-xs text-red-400">{serverError}</p>}
@@ -317,8 +332,10 @@ export function EvaluacionStep({
         </p>
       </Modal>
 
-      {/* Nota para score 3 con gate cerrado: se muestra tras registrar (paso 3). */}
-      {score === 3 && !gateBriefAbierto(leadStatus, score) && (
+      {/* Nota para score 3 con gate cerrado: se muestra tras registrar (paso 3).
+          admin-1b: el gate ya no mira el score sino el campo caliente (si Franco
+          lo marcó, el brief está abierto y esta nota no aplica). */}
+      {score === 3 && !gateBriefAbierto(leadStatus, caliente) && (
         <p className="text-[11px] leading-relaxed text-zinc-600">
           Ojo: con score 3 este lead avanza, pero el brief recién se habilita cuando el negocio
           responda el primer contacto.
