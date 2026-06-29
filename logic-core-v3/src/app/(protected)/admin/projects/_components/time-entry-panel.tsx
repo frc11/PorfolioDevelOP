@@ -3,7 +3,8 @@
 import { useEffect, useMemo, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { AlertTriangle, Clock3, Plus, Trash2 } from 'lucide-react'
-import { Button, Card, EmptyState, Select } from '@/components/ui'
+import { Button, Card, Select } from '@/components/ui'
+import { EmptyStateMuted } from '@/components/ui/EmptyStateMuted'
 import {
   createTimeEntry,
   deleteTimeEntry,
@@ -294,7 +295,7 @@ export function TimeEntryPanel({
         </section>
 
         {totalEntries === 0 ? (
-          <EmptyState
+          <EmptyStateMuted
             icon={Clock3}
             title="Todavia no hay horas registradas"
             description="Empieza cargando el primer bloque de trabajo real para este proyecto."

@@ -45,13 +45,13 @@ export function VaultRevealButton({ url }: { url: string }) {
     <div className="mt-4 flex flex-col gap-3 rounded-xl border border-red-500/20 bg-red-500/5 p-4">
       {/* Header row */}
       <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-red-400/80">
-          <ShieldAlert size={12} />
+        <div className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-red-400/80">
+          <ShieldAlert size={12} strokeWidth={1.5} />
           Información sensible — Solo visible para vos
         </div>
         {revealed && (
-          <span className="flex items-center gap-1 text-[10px] font-black tabular-nums text-red-400/60">
-            <Timer size={10} />
+          <span className="flex items-center gap-1 text-[10px] font-semibold tabular-nums text-red-400/60">
+            <Timer size={10} strokeWidth={1.5} />
             {remaining}s
           </span>
         )}
@@ -75,9 +75,9 @@ export function VaultRevealButton({ url }: { url: string }) {
             </p>
             <button
               onClick={() => setRevealed(true)}
-              className="flex flex-shrink-0 items-center gap-1.5 rounded-lg border border-red-500/25 bg-red-500/10 px-3 py-1.5 text-[10px] font-black uppercase tracking-widest text-red-400 transition-all hover:bg-red-500/20 active:scale-95"
+              className="flex flex-shrink-0 items-center gap-1.5 rounded-lg border border-red-500/25 bg-red-500/10 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-red-400 transition-colors hover:bg-red-500/20"
             >
-              <Eye size={12} />
+              <Eye size={12} strokeWidth={1.5} />
               Revelar
             </button>
           </motion.div>
@@ -105,9 +105,9 @@ export function VaultRevealButton({ url }: { url: string }) {
                 className="flex h-7 w-7 items-center justify-center rounded-lg border border-white/5 bg-white/5 text-zinc-500 transition-all hover:text-zinc-200 active:scale-95"
               >
                 {copied ? (
-                  <Check size={12} className="text-emerald-400" />
+                  <Check size={12} strokeWidth={1.5} className="text-emerald-400" />
                 ) : (
-                  <Copy size={12} />
+                  <Copy size={12} strokeWidth={1.5} />
                 )}
               </button>
               <button
@@ -115,7 +115,7 @@ export function VaultRevealButton({ url }: { url: string }) {
                 title="Ocultar"
                 className="flex h-7 w-7 items-center justify-center rounded-lg border border-red-500/20 bg-red-500/10 text-red-400 transition-all hover:bg-red-500/20 active:scale-95"
               >
-                <EyeOff size={12} />
+                <EyeOff size={12} strokeWidth={1.5} />
               </button>
             </div>
           </motion.div>
@@ -123,7 +123,7 @@ export function VaultRevealButton({ url }: { url: string }) {
       </AnimatePresence>
 
       {/* Warning */}
-      <p className="text-[9px] italic text-red-400/40">
+      <p className="text-[9px] text-red-400/40">
         Nunca compartas estas credenciales con terceros.
       </p>
     </div>

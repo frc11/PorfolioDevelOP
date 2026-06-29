@@ -1,0 +1,112 @@
+import { test, expect } from '@playwright/test'
+import { qaLogin, mintSessionCookie, attachConsoleGuard, expectNoConsoleErrors } from '../helpers/setter-auth'
+import { firstVisible } from '../helpers/setter-ui'
+import {
+  getSetterQa,
+  createSetter,
+  createLead,
+  createNotice,
+  reassignLead,
+  prisma,
+  newTracker,
+  teardown,
+  disconnect,
+  type SmokeTracker,
+} from '../helpers/setter-db'
+
+/**
+ * Sección C — Aislamiento (invariante #1): un setter NUNCA ve lo ajeno. A =
+ * persona QA (setter-qa); B = 2º setter creado, logueado por cookie minteada
+ * (espejo de la route — el persona QA no lo cubre). Cubre cartera, acceso 404
+ * sin leak, nota privada, novedades, y el rendering de la reasignación
+ * (saliente in-app SIN link — el cabo 0.5.3).
+ */
+
+const tracker: SmokeTracker = newTracker()
+let aId: string
+let bId: string
+let aLeadId: string
+let bLeadId: string
+const A_NOTE = 'NOTA-PRIVADA-DE-A-zzz'
+const A_ONLY = 'SoloDeA Aislado'
+const B_ONLY = 'SoloDeB Aislado'
+
+test.beforeAll(async () => {
+  const a = await getSetterQa()
+  aId = a.id
+  const b = await createSetter(tracker, 'iso-b')
+  bId = b.id
+
+  const aLead = await createLead(tracker, { setterId: aId, businessName: A_ONLY, stage: 'FICHA', meta: { note: A_NOTE } })
+  aLeadId = aLead.id
+  const bLead = await createLead(tracker, { setterId: bId, businessName: B_ONLY, stage: 'FICHA' })
+  bLeadId = bLead.id
+})
+
+test.afterAll(async () => {
+  await teardown(tracker)
+  await disconnect()
+})
+
+test('C1 · A no ve la cartera de B; abrir un lead ajeno da 404 sin leak', async ({ page }) => {
+  const guard = attachConsoleGuard(page)
+  await qaLogin(page, 'setter')
+  await page.goto('/setter', { waitUntil: 'domcontentloaded' })
+
+  await expect(firstVisible(page.getByText(A_ONLY))).toBeVisible()
+  await expect(page.getByText(B_ONLY), 'A no ve el lead de B').toHaveCount(0)
+
+  // Abrir el lead de B → 404 idéntico a un id random (sin leak de existencia).
+  const foreign = await page.goto(`/setter/leads/${bLeadId}`, { waitUntil: 'domcontentloaded' })
+  const random = await page.goto('/setter/leads/clrandomrandomrandomrand00', { waitUntil: 'domcontentloaded' })
+  expect(foreign?.status(), 'lead ajeno → 404').toBe(404)
+  expect(random?.status(), 'mismo status que un id inexistente').toBe(foreign?.status())
+  expectNoConsoleErrors(guard)
+})
+
+test('C2 · B (2º setter) ve SOLO lo suyo; no abre el lead de A', async ({ page, baseURL }) => {
+  await mintSessionCookie(page.context(), baseURL ?? 'http://localhost:3001', { userId: bId, email: 'irrelevant', role: 'SETTER' })
+  await page.goto('/setter', { waitUntil: 'domcontentloaded' })
+
+  await expect(firstVisible(page.getByText(B_ONLY))).toBeVisible()
+  await expect(page.getByText(A_ONLY), 'B no ve el lead de A').toHaveCount(0)
+
+  const foreign = await page.goto(`/setter/leads/${aLeadId}`, { waitUntil: 'domcontentloaded' })
+  expect(foreign?.status(), 'B no abre el lead de A').toBe(404)
+})
+
+test('C3 · la nota privada de A no la hereda B al reasignar el lead', async ({ page, baseURL }) => {
+  // Reasignar el lead de A → B (a nivel datos). La nota de A queda keyed (lead,A).
+  await reassignLead(aLeadId, bId)
+
+  // DB: existe meta de A, NO existe meta de B para el mismo lead.
+  const metaA = await prisma.osLeadSetterMeta.findUnique({ where: { leadId_setterId: { leadId: aLeadId, setterId: aId } } })
+  const metaB = await prisma.osLeadSetterMeta.findUnique({ where: { leadId_setterId: { leadId: aLeadId, setterId: bId } } })
+  expect(metaA?.note, 'la nota de A sigue siendo de A').toBe(A_NOTE)
+  expect(metaB, 'B no tiene meta para ese lead').toBeNull()
+
+  // B abre el lead (ahora suyo) y NO ve la nota privada de A.
+  await mintSessionCookie(page.context(), baseURL ?? 'http://localhost:3001', { userId: bId, email: 'irrelevant', role: 'SETTER' })
+  await page.goto(`/setter/leads/${aLeadId}`, { waitUntil: 'domcontentloaded' })
+  await expect(page.getByText(A_NOTE), 'B nunca ve la nota de A').toHaveCount(0)
+})
+
+test('C4 · novedades dirigidas: B ve "te asignaron"; A (saliente) ve "te reasignaron" SIN link', async ({ page, baseURL }) => {
+  // Sembrar las dos caras del handoff (leadId tracked → se limpia en teardown).
+  await createNotice({ setterId: bId, leadId: bLeadId, kind: 'LEAD_ASIGNADO', title: 'Te asignaron un lead', body: `${B_ONLY} entró a tu cartera. Arrancá por la ficha.` })
+  await createNotice({ setterId: aId, leadId: aLeadId, kind: 'LEAD_REASIGNADO_SALIENTE', title: 'Te reasignaron un lead', body: `${A_ONLY} pasó a otro setter. Ya no está en tu cartera.` })
+
+  // A (saliente): ve "Te reasignaron un lead" y NO es un link (in-app, cabo 0.5.3).
+  await qaLogin(page, 'setter')
+  await page.goto('/setter', { waitUntil: 'domcontentloaded' })
+  await expect(firstVisible(page.getByText('Te reasignaron un lead'))).toBeVisible()
+  await expect(page.getByRole('link', { name: /Te reasignaron un lead/i }), 'saliente NO linkea').toHaveCount(0)
+
+  // B (entrante): ve "Te asignaron un lead".
+  await page.context().clearCookies()
+  await mintSessionCookie(page.context(), baseURL ?? 'http://localhost:3001', { userId: bId, email: 'irrelevant', role: 'SETTER' })
+  await page.goto('/setter', { waitUntil: 'domcontentloaded' })
+  await expect(firstVisible(page.getByText('Te asignaron un lead'))).toBeVisible()
+  // A's saliente novedad no aparece en el feed de B (aislamiento por setterId).
+  await expect(page.getByText('Te reasignaron un lead'), 'B no ve la novedad de A').toHaveCount(0)
+})

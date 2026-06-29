@@ -10361,7 +10361,6 @@ Considerado y **descartado**. El único contenido genuinamente útil sería list
 - ✅ Densidad / progressive disclosure: auditadas las 5 pantallas, 4/5 ya tenían B13.3 aplicado (dejadas), 1/5 migrada (conversations). Settings NO densificado por decisión explícita de Franco.
 - ✅ Espacio para Franco: el sprint le mostró los hallazgos antes de actuar, Franco eligió prioridades, las ❓ subjetivas (módulos seed, hydration, greeting calibrando) quedan listadas para que él arbitre como sprints propios.
 
-<<<<<<< HEAD
 
 ---
 
@@ -10421,7 +10420,6 @@ Considerado y **descartado**. El único contenido genuinamente útil sería list
 - ✅ Aplicar-no-inventar respetado: el único intento de "inventar" (migrar admin a tokens del dashboard, V4) fue cazado y revertido; el resto de decisiones de dirección quedan anotadas para Franco, no ejecutadas.
 
 **Conclusión honesta:** el portal ya estaba en buena forma (dashboard consolidado en B13.2/CC.5; admin coherente consigo mismo). B15 sumó, dentro de las reglas: consolidación de typografía/headers donde había outliers intra-módulo (V1 home, V6 admin titles) + **animación con propósito pareja en todo el portal** (4 listas del admin llevadas al estándar animado del dashboard). Y igual de importante: **disciplina** — cazar y revertir el intento de Frankenstein (V4, migrar admin a tokens del dashboard) y dejar la unificación admin↔dashboard como decisión estratégica de Franco en vez de ejecutarla a ciegas. Lo único que falta para "TODO el portal 100% parejo" es esa unificación de lenguaje de superficie, que es deliberadamente tuya (decisión #3): cada módulo quedó coherente consigo mismo y la animación quedó pareja entre ambos.
-=======
 ---
 
 ## ✅ REVEAL-FIX.1 — Ajustes de coreografía del intro (marketing desktop/mobile + home mobile)
@@ -10803,3 +10801,105 @@ Resumen para el postmortem del próximo bloque. FG-0 dejó la zona `/setter` con
 ---
 
 > **La fase beta de LeadOS continúa en [`bitacora-beta.md`](./bitacora-beta.md).** De acá en más, todas las entradas de bloque de la fase beta van en ese documento. Este archivo queda como histórico (versiones previas y otros bloques/proyectos).
+
+---
+## ✅ EV.1 — Contrato `VerticalPack` + registry + pack `base`   ·   2026-06-28
+
+**Sprint:** EV.1 — Inauguración del bloque EV (generalización del motor en packs verticales)
+
+### Archivos creados
+
+| Archivo | Descripción |
+|---------|-------------|
+| `src/modules/chatbot/server/verticals/types.ts` | Contrato completo: `VerticalPack`, `VerticalScoring`, `VerticalIntents`, `VerticalToolCopy`, `VerticalWidgetCopy`, `validatePackScoring` |
+| `src/modules/chatbot/server/verticals/packs/base.ts` | Pack neutro/fallback: señales universales, intents mínimos genéricos, copy sin ejemplos de rubro |
+| `src/modules/chatbot/server/verticals/registry.ts` | `getVerticalPack(key)` + `listVerticalPacks()` con fallback silencioso a `base` |
+| `src/modules/chatbot/server/verticals/index.ts` | Barrel de exports del módulo |
+| `src/modules/chatbot/server/verticals/__tests__/ev1.invariant.ts` | Batería de invariantes (4 cobertura) |
+
+**Script agregado:** `"test:ev1": "ts-node src/modules/chatbot/server/verticals/__tests__/ev1.invariant.ts"`
+
+### Mapa descubrimiento → tipos
+
+| Estructura encontrada | Campo del tipo |
+|----------------------|----------------|
+| `SCORING_TABLE: readonly ScoredSignal[]` (key, label, points) | `VerticalScoring.signals: readonly VerticalSignalDef[]` |
+| `COMBO_BONUSES[].matches: (s: LeadSignals) => boolean` | `VerticalCombo.requiredSignalKeys: readonly string[]` — declarativo, no función |
+| `HOT_THRESHOLD = 70 / WARM_THRESHOLD = 40` | `VerticalScoringThresholds.caliente / tibio` |
+| `DQ_CATEGORIES = Set<LeadCategoryForScoring>` | `VerticalScoring.dqCategories: readonly string[]` |
+| `POSTVENTA_PENALTY / INVALID_PHONE_PENALTY` | `VerticalPenalty[]` con `condition: VerticalPenaltyCondition` |
+| `PATTERNS: Record<IntentType, RegExp[]>` + `GUIDANCE` | `VerticalIntents: readonly VerticalIntentPattern[]` — aplanado de Record a array |
+| `askedSpecificModel` desc con ejemplos de autos | `VerticalToolCopy.specificModelExamples: string` |
+| `prefilledMessage` desc con ejemplo de autos | `VerticalToolCopy.prefilledMessageExample: string` |
+| `topicSummary` desc con ejemplo de autos | `VerticalToolCopy.topicSummaryExample: string` |
+| `WELCOME_SUGGESTIONS[industry]` + `BOT_NAME_SUGGESTIONS[industry]` | `VerticalWidgetCopy.welcomeMessages / botNameSuggestions` |
+
+### Decisiones de naming
+
+- **`caliente / tibio` (español) en thresholds**: el pack es configuración del negocio (PyME-facing); el motor usa `hot / warm / cold / dq` internamente.
+- **`VerticalIntents` como array, no Record**: extensible con nuevos intents por vertical sin modificar el union type de `IntentType`.
+- **`ComboBonus.matches` → `requiredSignalKeys`**: la función no es serializable. EV.2 evalúa la declaración contra las señales activas.
+- **`usados` y `agencia` usan BASE_PACK como placeholder**: satisface `Record<VerticalPackKey, VerticalPack>` completo sin warning para claves conocidas.
+
+### Pack `base` — scoring
+
+```
+Señales: requestedAppointment=40, providedPhone=30, providedEmail=20  → max 90 ≤ 100
+Combos: ninguno (son vertical-specific)
+Thresholds: caliente>=70, tibio>=40
+DQ: employment, provider, spam
+Penalties: category_postventa (-50), invalid_phone (-20)
+```
+
+- `requestedAppointment + providedPhone` = 70 → caliente ✓
+- `requestedAppointment` solo = 40 → tibio ✓  
+- `providedPhone` solo = 30 < 40 → frío ✓
+
+### Cambio de comportamiento: CERO
+
+Ningún archivo del runtime fue modificado. El módulo `verticals/` compila y pasa invariantes pero nada lo importa todavía.
+
+### Hallazgos fuera de scope (anotados, no ejecutados)
+
+1. **`providedEmail` ausente de `LeadSignals`**: el motor solo tiene `providedPhone` en la interfaz. `providedEmail` se deriva en `captureLead.ts` pero no se puntúa. EV.2 debe añadirlo a `LeadSignals`.
+2. **Descripciones completas de tools con sesgo automotriz**: `CAPTURE_LEAD_DESCRIPTION` y `SHOW_WHATSAPP_HANDOFF_DESCRIPTION` mencionan "test drive" y "cuándo lo retiro". EV.2 podría añadir `captureLeadDescriptionOverride?` a `VerticalToolCopy`.
+3. **`service_inquiry` en intents con sesgo de agencia** (detecta /web/, /chatbot/, /ia/). El pack `agencia` futuro los reclamará; el base pack los omite adrede.
+4. **Bot name suggestions**: base pack usa sugerencias genéricas de `suggestions.ts:BOT_NAME_SUGGESTIONS.generico`. El pack `concesionaria` futuro usará las específicas.
+
+## ✅ SEC — IDOR opt-out + organizationId por parámetro
+
+**Qué cerró:** dos vías de acceso cruzado entre orgs detectadas en el relevamiento read-only de los módulos premium. Ambas eran deuda de seguridad ya anotada en este registro (F7 + el anti-patrón de `organizationId` confiado desde el cliente). Cambio quirúrgico, **cero migraciones** (`migrate status` up to date — es lógica de autorización, no schema).
+
+### Vía 1 — opt-out de email sin firma (IDOR + enumeración)
+
+- **Agujero:** `src/app/api/email/optout/[contactId]/route.ts` hacía `prisma.emailContact.update({ where: { id: contactId } })` sobre el `contactId` **crudo** recibido en la URL — sin token y sin scope de org. Cualquiera que conociera/adivinara un id (cuid, no secuencial, pero igual una llave de acción adivinable) podía dar de baja a un contacto de **cualquier** org. El footer del mail (`email-marketing/_actions.ts:147`) generaba `…/optout/{{contact.id}}` (merge tag de Brevo; además el id de Brevo ≠ nuestro cuid → la baja venía siendo un no-op silencioso).
+- **Fix (reusa el patrón ya existente de `unsubscribe-executive`):** token HMAC firmado **por contacto**.
+  - `src/lib/email/unsubscribe-token.ts`: `signEmailContactOptOutToken` / `verifyEmailContactOptOutToken` / `buildEmailContactOptOutUrl` — mismo mecanismo HMAC-SHA256 + `timingSafeEqual` que el unsubscribe del reporte ejecutivo, con SCOPE propio (`email-contact:optout:v1`, no colisiona). El token es un HMAC determinístico del `contactId` → **no requiere columna nueva**.
+  - La ruta ahora exige `?token=` y lo verifica **antes de tocar la DB**: token ausente/inválido → `403` sin consultar la DB (cero enumeración, no revela existencia). Token válido → `updateMany` (idempotente, no lanza si el id no existe → misma respuesta exista o no el contacto).
+  - El link legítimo lleva el token por destinatario vía atributos de Brevo: `importContactsAction` setea `CONTACT_ID` + `OPTOUT_TOKEN` al sincronizar el contacto, y el footer pasó a `…/optout/{{contact.CONTACT_ID}}?token={{contact.OPTOUT_TOKEN}}`. (De paso queda corregido el bug latente del `{{contact.id}}` de Brevo.)
+- **Test:** `tests/e2e/20-idor-optout.spec.ts` (E2E, requiere server+DB) — sin token / token basura / token de **otro** contacto → `403` y `optedOut` sigue en `false`; token legítimo → `200` y `optedOut = true`; id inexistente con token válido → `200` sin leak. Más el invariante puro (abajo).
+
+### Vía 2 — `organizationId` confiado desde parámetro (cross-tenant en motor-reseñas)
+
+- **Agujero:** `src/components/dashboard/modules/motor-resenas/_actions.ts` — `generateDraft` y `replyAction` tomaban `params.organizationId` del **cliente** y operaban con él sin validarlo contra la sesión. El único chequeo era `session?.user` (autenticación) + `isModuleActive(params.organizationId)` (que sólo confirma que ESE org tiene el módulo activo, no que el usuario pertenezca a él). Un usuario de la org A podía pasar el id de la org B y: leer `companyName` de B + quemar cuota de IA (`generateDraft`), y —lo más grave— **publicar una respuesta pública en el Google Business Profile de B** (`replyAction`, write cross-tenant).
+- **Fix (reusa el mecanismo sano del repo, `resolveOrgId()`):** ambas actions derivan la org de la **sesión** (`resolveOrgId()` de `@/lib/preview`, el mismo que ya usa `motor-resenas/page.tsx`) y validan el parámetro contra ella con un helper puro nuevo, `src/lib/security/org-scope.ts` → `resolveScopedOrgId(sessionOrgId, requestedOrgId)`: rechaza si no hay sesión o si el `organizationId` del cliente no coincide. Todas las operaciones (incluido el write a GBP) usan la org de la sesión, nunca `params`. Firma del cliente intacta (no se tocó `ReviewItem.tsx`).
+- **Test:** invariante puro (abajo) sobre `resolveScopedOrgId`: sin sesión → rechazo; org ajena → rechazo; coincide → org de sesión.
+
+### Test runnable sin DB ni server
+
+`src/lib/security/idor-tokens.invariant.ts` (script `npm run check:invariant:security`, mismo idiom que los `check:invariant` de leados): prueba ejecutable de las dos primitivas — token de opt-out por-contacto (legítimo verifica; ausente/basura/manipulado/**de otro contacto** rechazados) y scope de org desde sesión. **Verde.**
+
+### Barrido de los otros módulos + actions del dashboard
+
+Sweep sobre los otros 3 módulos premium, `src/actions/**`, `src/lib/actions/**`, `tickets`, `bulk-actions` y los `_actions` de admin (94 archivos `'use server'`): **0 instancias nuevas** del anti-patrón. Las non-admin derivan la org de la sesión; las de admin van gateadas por `requireSuperAdmin()` + Zod (cross-org by-design). Hallazgos pre-existentes **no tocados** (ya en este registro, distinta clase, fuera de las dos vías): F5 `agency-actions.createTaskForClientAction` (SUPER_ADMIN, no cross-valida `project.organizationId === organizationId` — integridad de datos), y un par de nits defense-in-depth en `sendCampaignAction` (2 `update` scoped sólo por id, ya gateados por el ownership check previo) + `htmlContent` de campañas inyectado sin sanitizar (XSS del propio contenido saliente de la org, no cross-tenant). Reportados para decisión, no cerrados acá.
+
+### Archivos
+
+- **Modificados:** `src/app/api/email/optout/[contactId]/route.ts`, `src/lib/email/unsubscribe-token.ts`, `src/app/(protected)/dashboard/modules/email-marketing/_actions.ts`, `src/components/dashboard/modules/motor-resenas/_actions.ts`, `package.json` (script `check:invariant:security`).
+- **Creados:** `src/lib/security/org-scope.ts`, `src/lib/security/idor-tokens.invariant.ts`, `tests/e2e/20-idor-optout.spec.ts`.
+
+### Verificación
+
+`npm run check:invariant:security` verde · `eslint` limpio en lo tocado · `npm run build` exit 0 · `npx prisma migrate status` → *Database schema is up to date!* (cero migraciones). El E2E `20-idor-optout.spec.ts` requiere server+DB → lo corre el humano en su entorno.
+
+> **Nota operativa (deploy):** Brevo debe tener los atributos de contacto `CONTACT_ID` y `OPTOUT_TOKEN` (texto) para que el footer interpole bien. Contactos ya sincronizados antes de este cambio reciben el atributo en su próxima importación/sync; mientras tanto su link de baja cae en `403` (fail-closed, no es regresión: la baja vía Brevo ya estaba rota por el mismatch `{{contact.id}}`).

@@ -14,7 +14,7 @@ export default async function DashboardPlanPage() {
   if (!organizationId) redirect('/login')
 
   return (
-    <div className="mx-auto flex w-full max-w-7xl flex-col gap-8 pb-20 sm:gap-10">
+    <div className="flex w-full flex-col gap-8 pb-6 sm:gap-10">
       <PageHeader
         eyebrow="Mi plan"
         title="Tu plan y consumo"
@@ -45,15 +45,19 @@ async function PlansShowcaseServerWrapper({ organizationId }: { organizationId: 
   )
 }
 
+// Los skeletons espejan las formas finales para no saltar al hidratar:
+// la card del meter es rounded-[30px] full-width y los tiers van en grid
+// lg:grid-cols-3 (mismo gap que PlansShowcase). LoadingState es frozen → el
+// override de radio entra por className (cn = twMerge, gana sobre rounded-2xl).
 function UsageMeterSkeleton() {
-  return <LoadingState variant="skeleton-card" />
+  return <LoadingState variant="skeleton-card" className="rounded-[30px]" />
 }
 
 function PlansShowcaseSkeleton() {
   return (
-    <div className="grid gap-5 lg:grid-cols-3">
+    <div className="grid gap-4 sm:gap-5 lg:grid-cols-3 lg:items-stretch">
       {[0, 1, 2].map((idx) => (
-        <LoadingState key={idx} variant="skeleton-card" />
+        <LoadingState key={idx} variant="skeleton-card" className="h-full rounded-[30px]" />
       ))}
     </div>
   )

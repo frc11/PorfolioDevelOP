@@ -3,7 +3,7 @@
 import { type ReactNode } from 'react'
 import { motion, useReducedMotion } from 'motion/react'
 import { Users } from 'lucide-react'
-import { EmptyState } from '@/components/ui'
+import { EmptyStateMuted } from '@/components/ui/EmptyStateMuted'
 
 interface Lead {
   id: string
@@ -47,7 +47,7 @@ export function LeadsTable({ leads, renderRowAction }: LeadsTableProps) {
   const reduce = Boolean(useReducedMotion())
   if (leads.length === 0) {
     return (
-      <EmptyState
+      <EmptyStateMuted
         icon={Users}
         title="Tu bot todavía no capturó leads"
         description="Cuando alguien deje sus datos conversando con el chatbot, van a aparecer acá."

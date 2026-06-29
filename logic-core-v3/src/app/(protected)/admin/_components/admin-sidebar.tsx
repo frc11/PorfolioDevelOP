@@ -19,7 +19,6 @@ import {
   Bot,
   BookOpen,
   AlertTriangle,
-  Palette,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useReducedMotion } from '@/lib/use-reduced-motion'
@@ -92,7 +91,6 @@ const NAV_SECTIONS: NavSection[] = [
     items: [
       { href: '/admin/settings', label: 'Configuraci\u00f3n', icon: Settings },
       { href: '/admin/audit-log', label: 'Audit log', icon: History },
-      { href: '/admin/_design', label: 'Design system', icon: Palette },
     ],
   },
 ]

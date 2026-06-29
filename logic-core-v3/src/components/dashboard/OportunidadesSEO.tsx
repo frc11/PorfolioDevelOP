@@ -61,14 +61,14 @@ export function OportunidadesSEO({ data }: { data: SearchConsoleData }) {
     <div className="flex flex-col gap-4">
       {/* Section header */}
       <div className="flex items-center gap-3">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-cyan-500/20 bg-cyan-500/10">
-          <Lightbulb size={15} className="text-cyan-400" />
+        <div className="flex h-8 w-8 items-center justify-center rounded-md border border-cyan-400/20 bg-cyan-400/10 text-cyan-300">
+          <Lightbulb size={15} strokeWidth={1.5} />
         </div>
         <div>
-          <h2 className="text-sm font-semibold text-white">Oportunidades Detectadas</h2>
-          <p className="text-[11px] text-zinc-500">
-            Acciones concretas para mejorar tu posicionamiento
-          </p>
+          <p className="text-[10px] uppercase tracking-[0.24em] text-zinc-500">Oportunidades</p>
+          <h2 className="mt-0.5 text-sm font-medium text-zinc-200">
+            Acciones para mejorar tu posicionamiento
+          </h2>
         </div>
       </div>
 

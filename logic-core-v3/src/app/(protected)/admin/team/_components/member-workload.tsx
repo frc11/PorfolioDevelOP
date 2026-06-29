@@ -14,7 +14,7 @@ import {
 } from 'lucide-react'
 import type { TaskStatus } from '@prisma/client'
 import { adminHoverCls } from '@/lib/hover'
-import { EmptyState } from '@/components/ui'
+import { EmptyStateMuted } from '@/components/ui/EmptyStateMuted'
 
 export type WorkloadTask = {
   id: string
@@ -255,7 +255,7 @@ export function MemberWorkload({
         {groupedTasks.length > 0 ? (
           groupedTasks.map((group) => <ProjectSection key={group.projectId} group={group} />)
         ) : (
-          <EmptyState
+          <EmptyStateMuted
             icon={Inbox}
             title="Sin tareas asignadas"
             description="Cuando este miembro reciba tareas activas, se van a agrupar aca por proyecto."

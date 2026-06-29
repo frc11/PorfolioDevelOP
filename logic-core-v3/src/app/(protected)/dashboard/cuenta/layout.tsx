@@ -4,7 +4,7 @@ import { Settings } from 'lucide-react'
 
 export default function CuentaLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex flex-col gap-6 max-w-7xl mx-auto w-full pb-20">
+    <div className="flex w-full flex-col gap-6 pb-6">
       <PageHeader
         eyebrow="Configuración"
         title="Mi cuenta"

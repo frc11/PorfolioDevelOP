@@ -5,8 +5,9 @@ import { redirect } from 'next/navigation'
 import { resolveOrgId } from '@/lib/preview'
 import { Clock, Headphones, Users } from 'lucide-react'
 import { NewTicketModal } from '@/components/dashboard/NewTicketModal'
-import { SoporteTabsClient } from '@/components/dashboard/SoporteTabsClient'
+import { SoporteBoard } from '@/components/dashboard/SoporteBoard'
 import { PageHeader, StatCard } from '@/components/ui'
+import { adminHoverCls } from '@/lib/hover'
 
 export const metadata = { title: 'Soporte B2B | develOP Dashboard' }
 
@@ -53,25 +54,33 @@ export default async function SoportePage() {
   const resolvedTickets = serialized.filter((t) => t.status === 'RESOLVED')
 
   return (
-    <div className="flex flex-col gap-6 max-w-5xl mx-auto w-full">
-      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+    // No-scroll en pantallas normales/altas: en desktop (lg+) la página tiene min-height igual
+    // al área visible de <main> (mismo calc que la página de detalle), y con las columnas
+    // acotadas (COLUMN_BODY_MAX_H) todo el contenido entra dentro de ese alto → sin scroll.
+    // Uso min-h (no h + overflow-hidden): en un viewport BAJO de ancho lg (p.ej. 1366×768) el
+    // contenido excede el fold y la página scrollea para ALCANZAR los recursos, en vez de
+    // recortarlos sin retorno (lo que hacía overflow-hidden). En mobile (<lg) fluye natural.
+    <div className="flex w-full flex-col gap-4 lg:min-h-[calc(100svh-12.5rem)]">
+      <div className="flex shrink-0 flex-col justify-between gap-4 sm:flex-row sm:items-start">
         <PageHeader
           eyebrow="Soporte"
           title="Centro de Soporte"
           description="Un canal directo para ordenar consultas, prioridades y próximos pasos con el equipo."
           icon={Headphones}
+          className="pt-0 sm:pt-1"
         />
         <div className="shrink-0 sm:mt-3">
           <NewTicketModal />
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid shrink-0 grid-cols-1 gap-4 sm:grid-cols-3">
         <StatCard
           label="Tickets abiertos"
           value={openTicketsCount}
           icon={Headphones}
           accent="cyan"
+          className={`${adminHoverCls} p-3.5`}
         />
         <StatCard
           label="SLA horario laboral"
@@ -79,6 +88,7 @@ export default async function SoportePage() {
           icon={Clock}
           accent="emerald"
           subtitle="Lun-Vie 9-19hs ART"
+          className={`${adminHoverCls} p-3.5`}
         />
         <StatCard
           label="Tu equipo de soporte"
@@ -86,10 +96,11 @@ export default async function SoportePage() {
           icon={Users}
           accent="zinc"
           subtitle="Mensajes, tickets o WhatsApp"
+          className={`${adminHoverCls} p-3.5`}
         />
       </div>
 
-      <SoporteTabsClient activeTickets={activeTickets} resolvedTickets={resolvedTickets} />
+      <SoporteBoard activeTickets={activeTickets} resolvedTickets={resolvedTickets} />
     </div>
   )
 }

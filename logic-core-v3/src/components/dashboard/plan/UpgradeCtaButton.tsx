@@ -32,14 +32,25 @@
  * una falla de telemetría).
  */
 
+import { Loader2 } from 'lucide-react'
 import { useTransition } from 'react'
 import { requestUpsellAction } from '@/lib/actions/upsell'
 
 interface UpgradeCtaButtonProps {
-  /** Plan key lowercase para el slug — 'pro' | 'business' | 'starter' */
-  planKeyLower: string
-  /** Nombre legible del plan — 'Pro' | 'Business' | 'Starter' */
-  planName: string
+  /** Plan key lowercase para el slug — 'pro' | 'business' | 'starter'.
+   *  Deriva el featureKey de upgrade (`plan-upgrade-{key}`) cuando NO se pasa
+   *  `featureKey` directo. Comportamiento original de MS-3. */
+  planKeyLower?: string
+  /** Nombre legible del plan — 'Pro' | 'Business' | 'Starter'.
+   *  Deriva el featureName (`Plan {name}`) cuando NO se pasa `featureName`. */
+  planName?: string
+  /** Override directo del featureKey del lead (ej. 'bot-activation' para el CTA
+   *  de activación del bot). Si se omite, se deriva de `planKeyLower`. También
+   *  es el `context` del destino `/dashboard/messages?context=...`. */
+  featureKey?: string
+  /** Override directo del featureName legible (ej. 'Activación de tu vendedor
+   *  virtual'). Si se omite, se deriva de `planName`. */
+  featureName?: string
   /** Texto del CTA — viene de `plan.ctaUpgrade` (ej. "Subir a Pro") */
   label: string
   /** Clases visuales — definidas por el caller para mantener el look exacto */
@@ -51,6 +62,8 @@ interface UpgradeCtaButtonProps {
 export function UpgradeCtaButton({
   planKeyLower,
   planName,
+  featureKey,
+  featureName,
   label,
   className,
   children,
@@ -59,15 +72,20 @@ export function UpgradeCtaButton({
 
   const handleClick = () => {
     if (isPending) return
-    const featureKey = `plan-upgrade-${planKeyLower}`
-    const featureName = `Plan ${planName}`
-    const targetHref = `/dashboard/messages?context=${featureKey}`
+    // El caller pasa O BIEN el par de plan (planKeyLower/planName → deriva
+    // `plan-upgrade-{key}` / `Plan {name}`, comportamiento original de
+    // PlansShowcase) O BIEN un par directo (featureKey/featureName, ej.
+    // 'bot-activation' del estado sin-bot). El `context` del destino es
+    // siempre el featureKey resuelto.
+    const resolvedFeatureKey = featureKey ?? `plan-upgrade-${planKeyLower ?? ''}`
+    const resolvedFeatureName = featureName ?? `Plan ${planName ?? ''}`
+    const targetHref = `/dashboard/messages?context=${resolvedFeatureKey}`
 
     startTransition(async () => {
       // El registro de intención va PRIMERO. Si falla, igual redirigimos —
       // el cliente puede completar el flow manualmente desde messages.
       try {
-        const result = await requestUpsellAction(featureKey, featureName)
+        const result = await requestUpsellAction(resolvedFeatureKey, resolvedFeatureName)
         if (!result.success) {
           console.error('[plan-upgrade-cta] action returned error:', result.error)
         }
@@ -92,7 +110,15 @@ export function UpgradeCtaButton({
       aria-busy={isPending}
       aria-label={label}
     >
-      {children}
+      {/* Pending visible: el spinner reemplaza el ícono líder (Sparkles del
+          variant highlighted) o se antepone al label (variant default), in-place
+          y al mismo tamaño (13px) para no desalinear. El disabled + cursor-wait
+          + opacity-60 los aporta el className del caller. */}
+      {isPending ? (
+        <Loader2 size={13} strokeWidth={1.5} className="animate-spin" aria-hidden="true" />
+      ) : (
+        children
+      )}
       {label}
     </button>
   )

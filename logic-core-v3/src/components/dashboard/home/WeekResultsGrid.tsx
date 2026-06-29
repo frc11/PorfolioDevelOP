@@ -1,6 +1,8 @@
 'use client'
 
 import { Card, Stat } from '@/components/ui'
+import { adminHoverCls } from '@/lib/hover'
+import { cn } from '@/lib/utils'
 import type { WeekResultsData } from '@/lib/dashboard/week-results'
 import { motion } from 'motion/react'
 import { CheckCircle2, Eye, MessageSquare, UserCheck } from 'lucide-react'
@@ -20,7 +22,7 @@ export function WeekResultsGrid({ data }: WeekResultsGridProps) {
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between gap-4">
-        <h2 className="text-[10px] font-bold uppercase tracking-[0.24em] text-zinc-500">
+        <h2 className="text-[10px] uppercase tracking-[0.24em] text-zinc-500">
           Resultados de la semana
         </h2>
         <span className="shrink-0 text-[10px] text-zinc-600">vs semana anterior</span>
@@ -36,24 +38,48 @@ export function WeekResultsGrid({ data }: WeekResultsGridProps) {
                 ? { value: stat.trend }
                 : { value: stat.trend, invertColors: stat.invertColors }
 
+          // S3b — Señales honestas (SOLO presentación; los datos NO se tocan acá):
+          //  · visits: está hardcodeado en 0 (sin integración GA4) y la card muestra
+          //    '—'. Avisamos que falta la fuente en vez de simular un dato.
+          //  · leads: el conteo es agency-wide (ContactSubmission sin organizationId,
+          //    deuda de schema ya fichada en el explore). Hedge NEUTRO "En calibración"
+          //    para no presentarlo como dato cerrado del cliente — sin revelar que es
+          //    global. El número y su delta real quedan cubiertos por este hedge.
+          const caption =
+            item.key === 'visits'
+              ? stat.value === '—'
+                ? 'Sin integración aún'
+                : undefined
+              : item.key === 'leads'
+                ? 'En calibración'
+                : undefined
+
           return (
-            <motion.div
-              key={item.key}
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.08, duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-            >
-              <Card>
-                <Stat
-                  label={stat.label}
-                  value={stat.value}
-                  icon={item.icon}
-                  tone={item.tone}
-                  size="lg"
-                  trend={trend}
-                />
-              </Card>
-            </motion.div>
+            // Split-wrapper: hover (scale 1.015 + ring + shadow) en div externo
+            // NO-Framer; el motion.div queda adentro (su transform de entrada
+            // pisaria un scale CSS). rounded-2xl matchea la Card default.
+            <div key={item.key} className={cn('grid rounded-2xl', adminHoverCls)}>
+              <motion.div
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.08, duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+              >
+                {/* h-full: con caption solo en 2 de 4 cards, igualamos altura por
+                    fila (grid stretch) para que el ring/shadow del hover siga el
+                    borde real de cada card y no flote sobre espacio vacío. */}
+                <Card className="h-full">
+                  <Stat
+                    label={stat.label}
+                    value={stat.value}
+                    icon={item.icon}
+                    tone={item.tone}
+                    size="lg"
+                    trend={trend}
+                    caption={caption}
+                  />
+                </Card>
+              </motion.div>
+            </div>
           )
         })}
       </div>

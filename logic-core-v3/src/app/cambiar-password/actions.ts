@@ -6,13 +6,16 @@ import { auth, unstable_update } from '@/auth'
 import { prisma } from '@/lib/prisma'
 import { logAdminAction } from '@/lib/audit-log'
 
+// Regla de password única en todo el producto (espejo de UpdatePasswordSchema de
+// Mi Cuenta): 8 caracteres + una mayúscula + un número. Client validate() y este
+// Zod quedan sincronizados.
 const CambiarPasswordSchema = z.object({
   oldPassword: z.string().min(1),
   newPassword: z
     .string()
-    .min(8, 'Mínimo 8 caracteres')
-    .regex(/[a-zA-Z]/, 'Debe tener letras')
-    .regex(/[0-9]/, 'Debe tener números'),
+    .min(8, 'La nueva contraseña debe tener al menos 8 caracteres.')
+    .regex(/[A-Z]/, 'La nueva contraseña debe incluir al menos una mayúscula.')
+    .regex(/[0-9]/, 'La nueva contraseña debe incluir al menos un número.'),
 })
 
 export async function cambiarPasswordAction(input: {

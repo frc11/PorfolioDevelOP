@@ -5,7 +5,7 @@ import { LoadingState } from '@/components/ui'
 // para no mostrar pantalla en blanco con un círculo girando.
 export default function DashboardLoading() {
   return (
-    <div className="mx-auto flex w-full max-w-7xl flex-col gap-8 pb-20 sm:gap-10">
+    <div className="flex w-full flex-col gap-8 pb-20 sm:gap-10">
       {/* Header */}
       <header className="flex flex-col gap-3 pt-2 sm:flex-row sm:items-end sm:justify-between sm:pt-4">
         <div className="flex items-center gap-3 w-full">

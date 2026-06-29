@@ -34,7 +34,6 @@ function getTopbarMeta(pathname: string) {
     settings: 'Configuración',
     alerts: 'Alertas',
     'audit-log': 'Audit log',
-    _design: 'Design system',
   }
 
   const sectionLabel = sectionLabelMap[section] ?? humanizeSegment(section)

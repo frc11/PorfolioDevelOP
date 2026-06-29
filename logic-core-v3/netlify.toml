@@ -1,9 +1,10 @@
 [build]
-  command = "npx prisma generate && npx prisma migrate deploy && npm run build"
+  command = "npx prisma generate && npm run build"
   publish = ".next"
 
 [build.environment]
-  NODE_VERSION = "20"
+  NODE_VERSION = "22"
+  NODE_OPTIONS = "--max-old-space-size=4096"
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"

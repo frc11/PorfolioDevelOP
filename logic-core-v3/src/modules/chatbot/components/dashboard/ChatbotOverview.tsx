@@ -4,8 +4,10 @@ import Link from 'next/link'
 import { motion } from 'motion/react'
 import { MessageSquare, Users, DollarSign, Zap, ArrowRight, PhoneForwarded } from 'lucide-react'
 import { BusinessStatCard } from './BusinessStatCard'
+import { EmptyStateMuted } from '@/components/ui/EmptyStateMuted'
 import { staggerContainer, staggerItem } from '@/lib/motion-variants'
 import { useReducedMotion } from '@/lib/use-reduced-motion'
+import { adminHoverCls } from '@/lib/hover'
 import {
   toBusinessMetrics,
   formatCurrency,
@@ -16,13 +18,19 @@ import {
 import type { BotConfig, Organization, QuotaUsage, ChatbotLead } from '@prisma/client'
 import type { HandoffEvent } from '@/modules/chatbot/index.server'
 
+/**
+ * QuotaUsage tal como llega al cliente: costUsd (Prisma.Decimal) se serializa
+ * a number en el server antes de cruzar el límite RSC (ver chatbot/page.tsx).
+ */
+type SerializedQuotaUsage = Omit<QuotaUsage, 'costUsd'> & { costUsd: number }
+
 interface ChatbotOverviewProps {
   session: {
     user: { name?: string | null }
     organization: Organization & { botConfig: BotConfig | null }
     bot: BotConfig
   }
-  usage: QuotaUsage | null
+  usage: SerializedQuotaUsage | null
   recentLeads: ChatbotLead[]
   recentHandoffs: HandoffEvent[]
 }
@@ -40,7 +48,7 @@ export function ChatbotOverview({ session, usage, recentLeads, recentHandoffs }:
   return (
     <div className="space-y-6">
       {/* Hero card */}
-      <div className="rounded-3xl border border-cyan-400/20 bg-gradient-to-br from-cyan-500/10 via-zinc-900 to-zinc-950 p-6 sm:p-8">
+      <div className={`rounded-3xl border border-cyan-400/20 bg-gradient-to-br from-cyan-500/10 via-zinc-900 to-zinc-950 p-6 sm:p-8 ${adminHoverCls}`}>
         <div className="mb-4 flex items-center gap-3">
           <div className="rounded-2xl bg-cyan-400/15 p-2.5">
             <Zap className="h-5 w-5 text-cyan-300" strokeWidth={1.5} />
@@ -59,6 +67,7 @@ export function ChatbotOverview({ session, usage, recentLeads, recentHandoffs }:
       {/* Stats */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <BusinessStatCard
+          className={adminHoverCls}
           label="Oportunidades"
           value={metrics.leads}
           description={
@@ -72,6 +81,7 @@ export function ChatbotOverview({ session, usage, recentLeads, recentHandoffs }:
         />
 
         <BusinessStatCard
+          className={adminHoverCls}
           label="Valor estimado"
           value={formatCurrency(metrics.estimatedValue)}
           description={
@@ -85,6 +95,7 @@ export function ChatbotOverview({ session, usage, recentLeads, recentHandoffs }:
         />
 
         <BusinessStatCard
+          className={adminHoverCls}
           label="Personas atendidas"
           value={formatConversationCount(metrics.conversations)}
           icon={MessageSquare}
@@ -93,6 +104,7 @@ export function ChatbotOverview({ session, usage, recentLeads, recentHandoffs }:
         />
 
         <BusinessStatCard
+          className={adminHoverCls}
           label="Disponibilidad"
           value="24/7"
           description={`Responde en ~${formatResponseTime(metrics.avgResponseSeconds)}`}
@@ -102,7 +114,7 @@ export function ChatbotOverview({ session, usage, recentLeads, recentHandoffs }:
       </div>
 
       {/* Leads recientes */}
-      <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-5">
+      <div className={`rounded-2xl border border-white/10 bg-white/[0.02] p-5 ${adminHoverCls}`}>
         <div className="mb-4 flex items-center justify-between">
           <h3 className="text-[10px] uppercase tracking-[0.24em] text-zinc-500">
             Leads recientes
@@ -119,9 +131,12 @@ export function ChatbotOverview({ session, usage, recentLeads, recentHandoffs }:
         </div>
 
         {recentLeads.length === 0 ? (
-          <p className="py-4 text-center text-sm text-zinc-500">
-            Sin leads todavía. Cuando alguien deje sus datos, aparecerá acá.
-          </p>
+          <EmptyStateMuted
+            icon={Users}
+            title="Sin leads todavía"
+            description="Cuando alguien deje sus datos, aparecerá acá."
+            className="py-10"
+          />
         ) : (
           <motion.ul
             className="space-y-3"
@@ -157,7 +172,7 @@ export function ChatbotOverview({ session, usage, recentLeads, recentHandoffs }:
       </div>
 
       {/* Derivaciones recientes */}
-      <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-5">
+      <div className={`rounded-2xl border border-white/10 bg-white/[0.02] p-5 ${adminHoverCls}`}>
         <div className="mb-4 flex items-center gap-2">
           <PhoneForwarded className="h-4 w-4 text-emerald-400" strokeWidth={1.5} />
           <h3 className="text-[10px] uppercase tracking-[0.24em] text-zinc-500">
@@ -166,9 +181,12 @@ export function ChatbotOverview({ session, usage, recentLeads, recentHandoffs }:
         </div>
 
         {recentHandoffs.length === 0 ? (
-          <p className="py-4 text-center text-sm text-zinc-500">
-            Sin derivaciones todavía. Cuando el bot derive a alguien, aparece acá.
-          </p>
+          <EmptyStateMuted
+            icon={PhoneForwarded}
+            title="Sin derivaciones todavía"
+            description="Cuando el bot derive a alguien, aparece acá."
+            className="py-10"
+          />
         ) : (
           <ul className="space-y-3">
             {recentHandoffs.map((h) => (

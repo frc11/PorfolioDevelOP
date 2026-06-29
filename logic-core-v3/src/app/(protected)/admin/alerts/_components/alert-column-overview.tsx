@@ -4,7 +4,7 @@ import { useEffect, useRef, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { AnimatePresence, motion } from 'motion/react'
 import { Inbox, X } from 'lucide-react'
-import { EmptyState } from '@/components/ui'
+import { EmptyStateMuted } from '@/components/ui/EmptyStateMuted'
 import { useIsClient } from '@/lib/use-is-client'
 import { useReducedMotion } from '@/lib/use-reduced-motion'
 import type { AlertRow } from './alert-types'
@@ -142,10 +142,11 @@ export function AlertColumnOverview({ title, alerts, renderCard, onClose }: Aler
                   {alerts.map((alert) => renderCard(alert))}
                 </div>
               ) : (
-                <EmptyState
+                <EmptyStateMuted
                   icon={Inbox}
                   title="Sin alertas en esta columna"
                   description="No hay alertas que coincidan con los filtros actuales."
+                  className="py-10"
                 />
               )}
             </div>

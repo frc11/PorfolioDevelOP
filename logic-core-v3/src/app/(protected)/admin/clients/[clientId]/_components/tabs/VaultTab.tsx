@@ -1,6 +1,7 @@
 import { ExternalLink } from 'lucide-react'
 import { prisma } from '@/lib/prisma'
 import { Card } from '@/components/ui'
+import { EmptyStateMuted } from '@/components/ui/EmptyStateMuted'
 import { HoverScaleCard } from '@/app/(protected)/admin/clients/_components/HoverScaleCard'
 import { VaultManager } from '@/components/admin/managers/VaultManager'
 
@@ -28,9 +29,7 @@ export async function VaultTab({ clientId }: VaultTabProps) {
           Assets ({assets.length})
         </p>
         {assets.length === 0 ? (
-          <Card variant="dashed" padding="xl" className="text-center text-sm text-zinc-500">
-            Sin archivos en la boveda.
-          </Card>
+          <EmptyStateMuted title="Sin archivos en la boveda." />
         ) : (
           <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
             {assets.map((asset) => (

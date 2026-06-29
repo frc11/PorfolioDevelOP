@@ -1,12 +1,13 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { motion } from 'motion/react'
 import { toast } from 'sonner'
 import { Archive, ArchiveRestore, Bot, Building2, Check, Download, Loader2, Pause, Pin, PinOff, Plus, Search, Trash2, X } from 'lucide-react'
-import { Button, Card, EmptyState, Input, Select } from '@/components/ui'
+import { Button, Card, Input, Select } from '@/components/ui'
+import { EmptyStateMuted, emptyMutedCtaCls } from '@/components/ui/EmptyStateMuted'
 import { InlineConfirm } from '@/app/(protected)/admin/_components/inline-confirm'
 import { TypeToConfirmDialog } from '@/app/(protected)/admin/_components/type-to-confirm-dialog'
 import { archiveClient, unarchiveClient } from '@/modules/chatbot/server/admin/archiveClient'
@@ -44,6 +45,7 @@ type DeletionSummary = Awaited<ReturnType<typeof getClientDeletionSummary>>['sum
 
 export function ClientsListClient({ clients, archivedClients }: ClientsListClientProps) {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const reduced = useReducedMotion()
   const [search, setSearch] = useState('')
   const [filterBot, setFilterBot] = useState<
@@ -64,6 +66,7 @@ export function ClientsListClient({ clients, archivedClients }: ClientsListClien
   const [deleteSummary, setDeleteSummary] = useState<DeletionSummary | null>(null)
   const [deleteLoading, setDeleteLoading] = useState(false)
   const [deletePending, setDeletePending] = useState(false)
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null)
 
   useEffect(() => {
     try {
@@ -181,11 +184,13 @@ export function ClientsListClient({ clients, archivedClients }: ClientsListClien
     }
   }
 
-  // Hard-delete: SOLO con 1 cliente seleccionado. Trae el detalle (counts) para
-  // el modal, exige escribir "ELIMINAR", y al confirmar borra (cascada) + audit.
-  async function openDelete() {
-    if (selected.size !== 1) return
-    const [id] = [...selected]
+  // Hard-delete: trae el detalle (counts) para el modal, exige escribir "ELIMINAR",
+  // y al confirmar borra (cascada) + audit. El target se trackea en `deleteTargetId`
+  // para soportar tanto la selección (1 cliente) como el deep-link ?delete=<orgId>
+  // (p. ej. desde un ticket "Solicitud de eliminación de cuenta"). La action y el
+  // TypeToConfirmDialog se reusan tal cual; sólo cambia de dónde sale el id.
+  const openDeleteFor = useCallback(async (id: string) => {
+    setDeleteTargetId(id)
     setDeleteLoading(true)
     try {
       const res = await getClientDeletionSummary({ organizationId: id })
@@ -195,20 +200,28 @@ export function ClientsListClient({ clients, archivedClients }: ClientsListClien
       toast.error(
         err instanceof Error ? err.message : 'No se pudo cargar el detalle del cliente',
       )
+      setDeleteTargetId(null)
     } finally {
       setDeleteLoading(false)
     }
+  }, [])
+
+  async function openDelete() {
+    if (selected.size !== 1) return
+    const [id] = [...selected]
+    await openDeleteFor(id)
   }
 
   function closeDelete() {
     if (deletePending) return
     setDeleteOpen(false)
     setDeleteSummary(null)
+    setDeleteTargetId(null)
   }
 
   async function confirmDelete() {
-    if (selected.size !== 1) return
-    const [id] = [...selected]
+    if (!deleteTargetId) return
+    const id = deleteTargetId
     setDeletePending(true)
     try {
       const res = await hardDeleteClient({ organizationId: id })
@@ -219,6 +232,7 @@ export function ClientsListClient({ clients, archivedClients }: ClientsListClien
       )
       setDeleteOpen(false)
       setDeleteSummary(null)
+      setDeleteTargetId(null)
       deselectAll()
       router.refresh()
     } catch (err) {
@@ -227,6 +241,19 @@ export function ClientsListClient({ clients, archivedClients }: ClientsListClien
       setDeletePending(false)
     }
   }
+
+  // Deep-link /admin/clients?delete=<orgId>: abre el confirm de borrado del cliente
+  // correspondiente (lo usa el bloque "Ir a borrar" del ticket de eliminación).
+  // Corre una sola vez gracias al ref-guard.
+  const didAutoOpenDelete = useRef(false)
+  useEffect(() => {
+    if (didAutoOpenDelete.current) return
+    const target = searchParams.get('delete')
+    if (target) {
+      didAutoOpenDelete.current = true
+      void openDeleteFor(target)
+    }
+  }, [searchParams, openDeleteFor])
 
   const filtered = useMemo(() => {
     let result = showArchived ? archivedClients : clients
@@ -439,7 +466,7 @@ export function ClientsListClient({ clients, archivedClients }: ClientsListClien
       )}
 
       {filtered.length === 0 ? (
-        <EmptyState
+        <EmptyStateMuted
           icon={showArchived ? Archive : Building2}
           title={
             search
@@ -453,12 +480,13 @@ export function ClientsListClient({ clients, archivedClients }: ClientsListClien
               ? 'Los clientes que archives van a aparecer aca.'
               : 'Ajusta la busqueda o los filtros para encontrar clientes.'
           }
-          cta={
-            showArchived
-              ? undefined
-              : { label: 'Nuevo cliente', href: '/admin/clients/new' }
-          }
-        />
+        >
+          {!showArchived && (
+            <Link href="/admin/clients/new" className={emptyMutedCtaCls}>
+              Nuevo cliente
+            </Link>
+          )}
+        </EmptyStateMuted>
       ) : (
         <motion.div
           className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3"

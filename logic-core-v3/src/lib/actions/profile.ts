@@ -4,6 +4,7 @@ import bcrypt from 'bcryptjs'
 import { auth, unstable_update } from '@/auth'
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
+import { toErrorMessage } from '@/lib/action-utils'
 import {
   type ActionResult,
   UpdatePasswordSchema,
@@ -35,7 +36,10 @@ export async function updateProfileAction(
   const parsed = UpdateProfileSchema.safeParse({
     name: formData.get('name'),
     companyName: formData.get('companyName'),
-    logoUrl: formData.get('logoUrl'),
+    avatarImageUrl: (formData.get('avatarImageUrl') as string) || null,
+    avatarEmoji: ((formData.get('avatarEmoji') as string) ?? '').trim() || null,
+    avatarInitials:
+      ((formData.get('avatarInitials') as string) ?? '').trim().toUpperCase().slice(0, 2) || null,
   })
 
   if (!parsed.success) {
@@ -43,9 +47,6 @@ export async function updateProfileAction(
   }
 
   try {
-    const logoUrl =
-      parsed.data.logoUrl && parsed.data.logoUrl !== '' ? parsed.data.logoUrl : null
-
     await prisma.$transaction([
       prisma.user.update({
         where: { id: userId },
@@ -55,18 +56,20 @@ export async function updateProfileAction(
         where: { id: organizationId },
         data: {
           companyName: parsed.data.companyName,
-          logoUrl,
+          avatarImageUrl: parsed.data.avatarImageUrl,
+          avatarEmoji: parsed.data.avatarEmoji,
+          avatarInitials: parsed.data.avatarInitials,
         },
       }),
     ])
 
-    revalidatePath('/dashboard/profile')
+    revalidatePath('/dashboard/cuenta/perfil')
     revalidatePath('/dashboard')
 
     return { success: true }
   } catch (error) {
     console.error('updateProfileAction error:', error)
-    return { success: false, error: 'No se pudo actualizar el perfil.' }
+    return { success: false, error: toErrorMessage(error, 'No se pudo actualizar el perfil.') }
   }
 }
 
@@ -89,11 +92,11 @@ export async function updateContactAction(
       data: { whatsapp },
     })
 
-    revalidatePath('/dashboard/profile')
+    revalidatePath('/dashboard/cuenta/perfil')
     return { success: true }
   } catch (error) {
     console.error('updateContactAction error:', error)
-    return { success: false, error: 'No se pudo actualizar el contacto.' }
+    return { success: false, error: toErrorMessage(error, 'No se pudo actualizar el contacto.') }
   }
 }
 
@@ -136,12 +139,11 @@ export async function updateNotificationPrefsAction(
       }),
     ])
 
-    revalidatePath('/dashboard/profile')
     revalidatePath('/dashboard/cuenta/perfil')
     return { success: true }
   } catch (error) {
     console.error('updateNotificationPrefsAction error:', error)
-    return { success: false, error: 'No se pudieron guardar las preferencias.' }
+    return { success: false, error: toErrorMessage(error, 'No se pudieron guardar las preferencias.') }
   }
 }
 
@@ -178,7 +180,7 @@ export async function requestAccountDeletionAction(): Promise<ActionResult> {
     return { success: true }
   } catch (error) {
     console.error('requestAccountDeletionAction error:', error)
-    return { success: false, error: 'No se pudo crear la solicitud de eliminación.' }
+    return { success: false, error: toErrorMessage(error, 'No se pudo crear la solicitud de eliminación.') }
   }
 }
 
@@ -229,12 +231,16 @@ export async function updatePasswordAction(
       },
     })
 
-    await unstable_update({})
+    // Espejá el flujo que funciona (/cambiar-password): payload NO vacío para que
+    // unstable_update refresque el cookie con la sessionVersion nueva. NO revalidar
+    // esta ruta: la contraseña no se muestra acá, y revalidar re-renderiza con el
+    // cookie viejo (sessionVersion N) contra la DB (N+1) → el jwt callback invalida
+    // la sesión → pantalla negra.
+    await unstable_update({ user: { passwordResetRequired: false } })
 
-    revalidatePath('/dashboard/profile')
     return { success: true }
   } catch (error) {
     console.error('updatePasswordAction error:', error)
-    return { success: false, error: 'No se pudo actualizar la contraseña.' }
+    return { success: false, error: toErrorMessage(error, 'No se pudo actualizar la contraseña.') }
   }
 }

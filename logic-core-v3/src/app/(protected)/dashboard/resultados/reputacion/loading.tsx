@@ -2,14 +2,11 @@ import { LoadingState } from '@/components/ui'
 
 export default function ReputacionLoading() {
   return (
-    <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 pb-20">
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <LoadingState variant="skeleton-stat" />
-        <LoadingState variant="skeleton-stat" />
-        <LoadingState variant="skeleton-stat" />
-        <LoadingState variant="skeleton-stat" />
+    <div className="flex w-full flex-col gap-5 pb-20">
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-[0.8fr_1.2fr]">
+        <LoadingState variant="skeleton-card" />
+        <LoadingState variant="skeleton-card" />
       </div>
-      <LoadingState variant="skeleton-card" />
     </div>
   )
 }

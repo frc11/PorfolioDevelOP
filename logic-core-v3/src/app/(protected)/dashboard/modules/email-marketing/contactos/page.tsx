@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation'
 import { Users, UserCheck, UserMinus } from 'lucide-react'
 import { resolveOrgId } from '@/lib/preview'
 import { prisma } from '@/lib/prisma'
-import { EmptyState } from '@/components/ui'
+import { EmptyStateMuted } from '@/components/ui/EmptyStateMuted'
 import { ImportCSVButton } from './_components/ImportCSVButton'
 
 export const dynamic = 'force-dynamic'
@@ -76,9 +76,9 @@ export default async function ContactosPage() {
         <ImportCSVButton />
       </div>
 
-      {/* Empty state — B12.2: unificado al EmptyState compartido */}
+      {/* Empty state — canon único EmptyStateMuted (punteado/muted) */}
       {contacts.length === 0 && (
-        <EmptyState
+        <EmptyStateMuted
           icon={Users}
           title="Sin contactos todavía"
           description="Importá un CSV con tus contactos para empezar a enviar campañas. Formato: email, firstName, lastName, phone."

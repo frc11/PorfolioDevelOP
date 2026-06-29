@@ -18,7 +18,7 @@ import {
   deleteTask,
   updateTask,
 } from '@/app/(protected)/admin/team/_actions/task.actions'
-import { EmptyState } from '@/components/ui'
+import { EmptyStateMuted } from '@/components/ui/EmptyStateMuted'
 import { sendTaskForApprovalAction } from '@/lib/actions/projects'
 import { OverlayModal } from './overlay-modal'
 import { TaskForm } from './task-form'
@@ -251,7 +251,7 @@ export function TaskList({
 
   if (localTasks.length === 0) {
     return (
-      <EmptyState
+      <EmptyStateMuted
         icon={FolderKanban}
         title="Todavia no hay tareas"
         description="Crea la primera tarea para empezar a ordenar backlog, responsables y tiempos del proyecto."
@@ -526,10 +526,11 @@ export function TaskList({
                                   </div>
                                 ))
                               ) : (
-                                <EmptyState
+                                <EmptyStateMuted
                                   icon={Clock3}
                                   title="Sin registros de tiempo"
                                   description="Todavia no hay horas cargadas para esta tarea."
+                                  className="py-10"
                                 />
                               )}
                             </div>
@@ -540,11 +541,22 @@ export function TaskList({
                   )
                 })
               ) : (
-                <EmptyState
-                  icon={FolderKanban}
-                  title={`Sin tareas ${group.label.toLowerCase()}`}
-                  description="Cuando cambies el estado de una tarea va a aparecer en esta columna."
-                />
+                // A7.7: empty por-columna hand-rolled (autorizado por Valentino) en vez de
+                // `ui/EmptyState` (frozen), cuyo cuadradito del ícono hornea un glow
+                // `bg-cyan-500/[0.08]` que sobre el glow ambiente lee teal y no es
+                // override-able por prop. Mismo layout/copy, contenedor del ícono
+                // TRANSPARENTE (sin glow, borde neutro). Espejo del empty del cliente.
+                <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-white/10 bg-white/[0.02] px-6 py-12 text-center">
+                  <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 text-zinc-500">
+                    <FolderKanban className="h-5 w-5" strokeWidth={1.5} />
+                  </div>
+                  <h3 className="text-base font-semibold text-zinc-300">
+                    Sin tareas {group.label.toLowerCase()}
+                  </h3>
+                  <p className="mt-1 max-w-sm text-xs leading-relaxed text-zinc-600">
+                    Cuando cambies el estado de una tarea va a aparecer en esta columna.
+                  </p>
+                </div>
               )}
             </div>
           </section>

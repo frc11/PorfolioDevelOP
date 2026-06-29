@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'motion/react'
 import { CheckCircle2, Clock, Loader2, Calendar, AlertTriangle, MessageSquare, ArrowRight } from 'lucide-react'
 import Link from 'next/link'
 import { Tabs, type ValueTabItem } from '@/components/ui'
+import { adminHoverCls } from '@/lib/hover'
 import { TaskApprovalButtons } from './TaskApprovalButtons'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -69,21 +70,24 @@ function TaskCard({ task, index }: { task: SerializedTask; index: number }) {
   const isDone = task.status === 'DONE'
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 12, scale: 0.98 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ type: 'spring', stiffness: 300, damping: 26, delay: index * 0.04 }}
-      className={[
-        'group relative rounded-2xl border border-t-white/10 border-l-white/10 border-white/5 bg-white/[0.02] px-5 sm:px-6 py-5 backdrop-blur-2xl shadow-lg transition-all duration-300',
-        'hover:bg-white/[0.05] hover:border-white/15 hover:translate-x-0.5',
-        task.isUrgent && !isDone
-          ? 'border-red-500/20 shadow-[0_0_20px_rgba(239,68,68,0.06)]'
-          : '',
-        isPendingApproval
-          ? 'border-amber-500/15 shadow-[0_0_20px_rgba(245,158,11,0.06)]'
-          : '',
-      ].join(' ')}
-    >
+    // S5 — split wrapper: el lift (scale/ring/shadow de adminHoverCls) va en este div
+    // NO-Framer; el inner es motion.div (entrance) y el CSS hover:scale no pelea con su
+    // transform inline. Mismo patrón que los tiles del admin (task-list / overview).
+    <div className={['grid rounded-[24px]', adminHoverCls].join(' ')}>
+      <motion.div
+        initial={{ opacity: 0, y: 12, scale: 0.98 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ type: 'spring', stiffness: 300, damping: 26, delay: index * 0.04 }}
+        className={[
+          'group relative rounded-[24px] border border-white/10 bg-black/20 px-5 sm:px-6 py-5 transition-colors',
+          task.isUrgent && !isDone
+            ? 'border-red-500/20 shadow-[0_0_20px_rgba(239,68,68,0.06)]'
+            : '',
+          isPendingApproval
+            ? 'border-amber-500/15 shadow-[0_0_20px_rgba(245,158,11,0.06)]'
+            : '',
+        ].join(' ')}
+      >
       <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-5">
         {/* Left: title + badges + description */}
         <div className="min-w-0 flex-1">
@@ -91,20 +95,20 @@ function TaskCard({ task, index }: { task: SerializedTask; index: number }) {
             <TaskStatusIcon status={task.status} />
 
             <p className={[
-              'text-sm font-bold tracking-tight transition-colors',
+              'text-sm font-semibold tracking-tight transition-colors',
               isDone ? 'text-zinc-500 line-through decoration-zinc-700/80' : 'text-zinc-100 group-hover:text-white',
             ].join(' ')}>
               {task.title}
             </p>
 
             {isPendingApproval && (
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-0.5 text-[9px] font-black uppercase tracking-widest text-amber-400">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-400/20 bg-amber-500/10 px-2.5 py-1 text-[11px] font-medium text-amber-200">
                 <span className="h-1.5 w-1.5 rounded-full bg-amber-400 animate-pulse" />
                 Requiere aprobación
               </span>
             )}
             {isApproved && (
-              <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/20 bg-emerald-500/5 px-2.5 py-0.5 text-[9px] font-black uppercase tracking-widest text-emerald-500">
+              <span className="inline-flex items-center gap-1 rounded-full border border-emerald-400/20 bg-emerald-500/10 px-2.5 py-1 text-[11px] font-medium text-emerald-200">
                 ✓ Aprobado
               </span>
             )}
@@ -132,10 +136,10 @@ function TaskCard({ task, index }: { task: SerializedTask; index: number }) {
         <div className="flex flex-col items-start lg:items-end gap-3 shrink-0">
           {task.dueDate && (
             <div className={[
-              'flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[10px] font-black tracking-[0.15em] uppercase border',
+              'flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-[11px] font-medium',
               task.isUrgent && !isDone
                 ? 'bg-red-500/10 border-red-500/30 text-red-400 shadow-[0_0_12px_rgba(239,68,68,0.12)]'
-                : 'bg-black/20 border-white/5 text-zinc-600',
+                : 'bg-black/20 border-white/10 text-zinc-400',
             ].join(' ')}>
               {task.isUrgent && !isDone ? (
                 <AlertTriangle size={11} className="flex-shrink-0" />
@@ -146,7 +150,7 @@ function TaskCard({ task, index }: { task: SerializedTask; index: number }) {
                 {new Date(task.dueDate).toLocaleDateString('es-AR', { day: '2-digit', month: 'short' })}
               </span>
               {task.isUrgent && !isDone && task.daysUntilDue !== null && (
-                <span className="font-bold">
+                <span className="font-semibold">
                   · {task.daysUntilDue <= 0 ? 'Hoy' : `${task.daysUntilDue}d`}
                 </span>
               )}
@@ -158,7 +162,8 @@ function TaskCard({ task, index }: { task: SerializedTask; index: number }) {
           )}
         </div>
       </div>
-    </motion.div>
+      </motion.div>
+    </div>
   )
 }
 
@@ -177,6 +182,16 @@ export function ProjectTaskTabs({
     TODO: todo,
     DONE: done,
   }
+
+  // A7.2: el banner "Ver ahora" debe llevar al tab donde REALMENTE está la entrega
+  // pendiente de aprobación (una entrega pasa a aprobación con status DONE → cae en
+  // "Completadas"). Se deriva del tab que la contiene, no se hardcodea a "En curso".
+  // Se prioriza DONE (su estado real); fallback DONE por type-safety (el banner solo
+  // se muestra cuando existe al menos una pendiente).
+  const pendingApprovalTab: TaskStatus =
+    (['DONE', 'IN_PROGRESS', 'TODO'] as TaskStatus[]).find((status) =>
+      taskMap[status].some((task) => task.approvalStatus === 'PENDING_APPROVAL')
+    ) ?? 'DONE'
 
   const currentTasks = taskMap[activeTab]
 
@@ -204,7 +219,7 @@ export function ProjectTaskTabs({
                   <MessageSquare size={16} className="text-amber-400" />
                 </div>
                 <div>
-                  <p className="text-sm font-bold text-amber-300">
+                  <p className="text-sm font-semibold text-amber-300">
                     {pendingApprovalCount}{' '}
                     {pendingApprovalCount === 1 ? 'entrega esperando' : 'entregas esperando'} tu aprobación
                   </p>
@@ -214,8 +229,8 @@ export function ProjectTaskTabs({
                 </div>
               </div>
               <button
-                onClick={() => setActiveTab('IN_PROGRESS')}
-                className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-amber-400 hover:text-amber-300 transition-colors flex-shrink-0"
+                onClick={() => setActiveTab(pendingApprovalTab)}
+                className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-amber-400 hover:text-amber-300 transition-colors flex-shrink-0"
               >
                 Ver ahora
                 <ArrowRight size={11} />
@@ -248,10 +263,13 @@ export function ProjectTaskTabs({
           className="flex flex-col gap-3"
         >
           {currentTasks.length === 0 ? (
-            <div className="flex flex-col items-center gap-3 py-14 text-center rounded-xl border border-white/5 bg-white/[0.015]">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-zinc-900 border border-white/5">
-                <CheckCircle2 size={20} className="text-zinc-700" />
-              </div>
+            <div className="flex flex-col items-center gap-3 py-14 text-center rounded-2xl border border-white/10 bg-zinc-950/70">
+              {/* A7.4: una sola forma (se sacó el círculo anidado del ícono).
+                  A7.5: fondo NEUTRO opaco (zinc-950/70) para que el glow verde ambiente
+                  del shell del dashboard NO se filtre por el box — no hay clase verde acá,
+                  era bleed del fondo a través de un bg casi-transparente (bg-white/[0.015]).
+                  On-token admin (rounded-2xl + border-white/10), sin acento nuevo. */}
+              <CheckCircle2 size={28} className="text-zinc-700" />
               <p className="text-sm text-zinc-600">Sin tareas en esta categoría</p>
             </div>
           ) : (
@@ -267,7 +285,7 @@ export function ProjectTaskTabs({
         <div className="flex justify-end">
           <Link
             href="/dashboard/messages?context=proyecto"
-            className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-widest text-zinc-600 hover:text-cyan-400 transition-colors"
+            className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-zinc-500 hover:text-cyan-400 transition-colors"
           >
             Hablar con el equipo
             <ArrowRight size={10} />

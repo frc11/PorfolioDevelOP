@@ -12,6 +12,7 @@ import {
   DangerZone,
 } from '@/components/dashboard/ProfileForms'
 import { FadeIn } from '@/components/dashboard/FadeIn'
+import { Card, CardTitle } from '@/components/ui'
 import Link from 'next/link'
 import {
   Building2,
@@ -25,53 +26,30 @@ import {
 } from 'lucide-react'
 import type { NotificationPrefs } from '@/lib/actions/profile'
 
-// ─── Styles ───────────────────────────────────────────────────────────────────
+// ─── Section card ─────────────────────────────────────────────────────────────
+// Receta admin: <Card variant="elevated" padding="lg"> + label CardTitle.
+// El tinte rojo (Seguridad / Zona de peligro) entra por override de `className`
+// (twMerge resuelve el conflicto y gana el override).
 
-const GLASS: React.CSSProperties = {
-  border: '1px solid rgba(6,182,212,0.14)',
-  background: 'rgba(255,255,255,0.03)',
-  backdropFilter: 'blur(24px)',
-  WebkitBackdropFilter: 'blur(24px)',
-}
-
-const GLASS_RED_SOFT: React.CSSProperties = {
-  border: '1px solid rgba(239,68,68,0.1)',
-  background: 'rgba(255,255,255,0.03)',
-  backdropFilter: 'blur(24px)',
-  WebkitBackdropFilter: 'blur(24px)',
-}
-
-const GLASS_RED_STRONG: React.CSSProperties = {
-  border: '1px solid rgba(239,68,68,0.2)',
-  background: 'rgba(239,68,68,0.03)',
-  backdropFilter: 'blur(24px)',
-  WebkitBackdropFilter: 'blur(24px)',
-}
-
-// ─── Section wrapper ──────────────────────────────────────────────────────────
-
-function Section({
+function SectionCard({
   title,
   icon,
   children,
-  style = GLASS,
+  className,
 }: {
   title: string
   icon: React.ReactNode
   children: React.ReactNode
-  style?: React.CSSProperties
+  className?: string
 }) {
   return (
-    <div className="rounded-xl p-5" style={style}>
-      <div
-        className="mb-5 flex items-center gap-2 pb-4"
-        style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}
-      >
+    <Card variant="elevated" padding="lg" className={className}>
+      <div className="mb-5 flex items-center gap-2">
         {icon}
-        <h2 className="text-sm font-semibold text-zinc-200">{title}</h2>
+        <CardTitle>{title}</CardTitle>
       </div>
       {children}
-    </div>
+    </Card>
   )
 }
 
@@ -98,7 +76,9 @@ export default async function ProfilePage() {
     where: { id: organizationId },
     select: {
       companyName: true,
-      logoUrl: true,
+      avatarImageUrl: true,
+      avatarEmoji: true,
+      avatarInitials: true,
       whatsapp: true,
       notificationPrefs: true,
       subscription: {
@@ -123,17 +103,10 @@ export default async function ProfilePage() {
     })
 
     return (
-      <div className="flex max-w-3xl flex-col gap-6">
-
+      <div className="flex w-full flex-col gap-6">
         <FadeIn delay={0.08}>
-          <div
-            className="flex items-start gap-3 rounded-xl px-5 py-4"
-            style={{
-              border: '1px solid rgba(245,158,11,0.2)',
-              background: 'rgba(245,158,11,0.06)',
-            }}
-          >
-            <Eye size={15} className="mt-0.5 flex-shrink-0 text-amber-400" />
+          <div className="flex items-start gap-3 rounded-2xl border border-amber-500/20 bg-amber-500/[0.06] px-5 py-4">
+            <Eye size={15} strokeWidth={1.5} className="mt-0.5 flex-shrink-0 text-amber-400" />
             <div>
               <p className="text-sm font-medium text-amber-300">Sesión de soporte activa</p>
               <p className="mt-0.5 text-xs text-amber-400/70">
@@ -144,35 +117,29 @@ export default async function ProfilePage() {
         </FadeIn>
 
         <FadeIn delay={0.16}>
-          <Section
+          <SectionCard
             title="Datos de empresa y contacto"
-            icon={<Building2 size={15} className="text-cyan-400" />}
+            icon={<Building2 size={14} strokeWidth={1.5} className="text-cyan-400" />}
           >
-            <dl className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <div>
-                <dt className="text-[10px] font-semibold uppercase tracking-wide text-zinc-600">
-                  Empresa
-                </dt>
+            <dl className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+              <div className="rounded-xl border border-white/5 bg-white/[0.015] px-3 py-2.5">
+                <dt className="text-[10px] uppercase tracking-[0.24em] text-zinc-500">Empresa</dt>
                 <dd className="mt-1 text-sm text-zinc-200">{org.companyName}</dd>
               </div>
               {member?.user && (
                 <>
-                  <div>
-                    <dt className="text-[10px] font-semibold uppercase tracking-wide text-zinc-600">
-                      Contacto
-                    </dt>
+                  <div className="rounded-xl border border-white/5 bg-white/[0.015] px-3 py-2.5">
+                    <dt className="text-[10px] uppercase tracking-[0.24em] text-zinc-500">Contacto</dt>
                     <dd className="mt-1 text-sm text-zinc-200">{member.user.name ?? '—'}</dd>
                   </div>
-                  <div>
-                    <dt className="text-[10px] font-semibold uppercase tracking-wide text-zinc-600">
-                      Email
-                    </dt>
+                  <div className="rounded-xl border border-white/5 bg-white/[0.015] px-3 py-2.5">
+                    <dt className="text-[10px] uppercase tracking-[0.24em] text-zinc-500">Email</dt>
                     <dd className="mt-1 text-sm text-zinc-200">{member.user.email}</dd>
                   </div>
                 </>
               )}
             </dl>
-          </Section>
+          </SectionCard>
         </FadeIn>
       </div>
     )
@@ -223,96 +190,106 @@ export default async function ProfilePage() {
     : null
 
   return (
-    <div className="flex max-w-3xl flex-col gap-6">
-      {/* Header with avatar */}
+    <div className="flex w-full flex-col gap-6">
+      {/* Header banner — full-width */}
       <FadeIn>
         <ProfileHeader
           companyName={org.companyName}
           email={user.email ?? ''}
-          logoUrl={org.logoUrl}
+          avatarImageUrl={org.avatarImageUrl}
+          avatarEmoji={org.avatarEmoji}
+          avatarInitials={org.avatarInitials}
           planName={org.subscription?.plan?.name ?? null}
         />
       </FadeIn>
 
-      {/* Datos de empresa */}
-      <FadeIn delay={0.08}>
-        <Section
-          title="Datos de empresa"
-          icon={<Building2 size={15} className="text-cyan-400" />}
-        >
-          <CompanyDataForm
-            name={user.name ?? ''}
-            email={user.email ?? ''}
-            companyName={org.companyName}
-            logoUrl={org.logoUrl}
-          />
-        </Section>
-      </FadeIn>
+      {/* 2 columnas: las CELDAS comparten altura (grid items-stretch por defecto) →
+          ambas columnas terminan en el MISMO borde inferior. Las CARDS adentro NO
+          llevan h-full → mantienen su altura natural (Contacto no se estira); el
+          sobrante cae como espacio al fondo de la columna más corta, no como hueco
+          intermedio. Izquierda: empresa + seguridad. Derecha: contacto + prefs + plan. */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        {/* Columna izquierda */}
+        <div className="flex flex-col gap-6">
+          <FadeIn delay={0.08}>
+            <SectionCard
+              title="Datos de empresa"
+              icon={<Building2 size={14} strokeWidth={1.5} className="text-cyan-400" />}
+            >
+              <CompanyDataForm
+                name={user.name ?? ''}
+                email={user.email ?? ''}
+                companyName={org.companyName}
+                avatarImageUrl={org.avatarImageUrl}
+                avatarEmoji={org.avatarEmoji}
+                avatarInitials={org.avatarInitials}
+              />
+            </SectionCard>
+          </FadeIn>
 
-      {/* Datos de contacto */}
-      <FadeIn delay={0.12}>
-        <Section
-          title="Datos de contacto"
-          icon={<Phone size={15} className="text-cyan-400" />}
-        >
-          <ContactSection
-            email={user.email ?? ''}
-            whatsapp={org.whatsapp ?? null}
-          />
-        </Section>
-      </FadeIn>
+          <FadeIn delay={0.16} className="lg:flex-1">
+            <SectionCard
+              title="Seguridad"
+              icon={<Lock size={14} strokeWidth={1.5} className="text-red-400/80" />}
+              className="border-red-500/20 lg:h-full"
+            >
+              <div className="flex flex-col gap-4">
+                <PasswordForm />
+                <div className="border-t border-white/5 pt-4">
+                  <Link
+                    href="/cambiar-password"
+                    className="flex items-center justify-between rounded-lg px-3 py-2.5 text-sm text-zinc-400 transition-colors hover:bg-white/[0.03] hover:text-zinc-200"
+                  >
+                    <span>Cambiar mi contraseña desde el asistente</span>
+                    <ChevronRight size={14} strokeWidth={1.5} className="text-zinc-600" />
+                  </Link>
+                </div>
+              </div>
+            </SectionCard>
+          </FadeIn>
+        </div>
 
-      {/* Seguridad */}
-      <FadeIn delay={0.16}>
-        <Section
-          title="Seguridad"
-          icon={<Lock size={15} className="text-cyan-400" />}
-          style={GLASS_RED_SOFT}
-        >
-          <div className="flex flex-col gap-4">
-            <PasswordForm />
-            <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }} className="pt-4">
-              <Link
-                href="/cambiar-password"
-                className="flex items-center justify-between rounded-lg px-3 py-2.5 text-sm text-zinc-400 transition-colors hover:bg-white/[0.03] hover:text-zinc-200"
-              >
-                <span>Cambiar mi contraseña desde el asistente</span>
-                <ChevronRight size={14} strokeWidth={1.5} className="text-zinc-600" />
-              </Link>
-            </div>
-          </div>
-        </Section>
-      </FadeIn>
+        {/* Columna derecha */}
+        <div className="flex flex-col gap-6">
+          <FadeIn delay={0.12}>
+            <SectionCard
+              title="Datos de contacto"
+              icon={<Phone size={14} strokeWidth={1.5} className="text-cyan-400" />}
+            >
+              <ContactSection email={user.email ?? ''} whatsapp={org.whatsapp ?? null} />
+            </SectionCard>
+          </FadeIn>
 
-      {/* Preferencias de notificaciones */}
-      <FadeIn delay={0.20}>
-        <Section
-          title="Preferencias de notificaciones"
-          icon={<Bell size={15} className="text-cyan-400" />}
-        >
-          <NotificationPrefsForm initialPrefs={notifPrefs} />
-        </Section>
-      </FadeIn>
+          <FadeIn delay={0.2}>
+            <SectionCard
+              title="Preferencias de notificaciones"
+              icon={<Bell size={14} strokeWidth={1.5} className="text-cyan-400" />}
+            >
+              <NotificationPrefsForm initialPrefs={notifPrefs} />
+            </SectionCard>
+          </FadeIn>
 
-      {/* Información del plan */}
-      <FadeIn delay={0.24}>
-        <Section
-          title="Información del plan"
-          icon={<CreditCard size={15} className="text-cyan-400" />}
-        >
-          <PlanInfoSection plan={plan} />
-        </Section>
-      </FadeIn>
+          <FadeIn delay={0.24} className="lg:flex-1">
+            <SectionCard
+              title="Información del plan"
+              icon={<CreditCard size={14} strokeWidth={1.5} className="text-cyan-400" />}
+              className="lg:h-full"
+            >
+              <PlanInfoSection plan={plan} />
+            </SectionCard>
+          </FadeIn>
+        </div>
+      </div>
 
-      {/* Zona de peligro */}
+      {/* Zona de peligro (rojo fuerte) — full-width al fondo, sobre las 2 columnas */}
       <FadeIn delay={0.28}>
-        <Section
+        <SectionCard
           title="Zona de peligro"
-          icon={<AlertTriangle size={15} className="text-red-400" />}
-          style={GLASS_RED_STRONG}
+          icon={<AlertTriangle size={14} strokeWidth={1.5} className="text-red-400" />}
+          className="border-red-500/30 bg-red-500/[0.03]"
         >
           <DangerZone />
-        </Section>
+        </SectionCard>
       </FadeIn>
     </div>
   )

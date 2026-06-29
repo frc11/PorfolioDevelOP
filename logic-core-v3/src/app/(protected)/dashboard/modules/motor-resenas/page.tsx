@@ -5,7 +5,8 @@ import { resolveOrgId } from '@/lib/preview'
 import { isModuleActive } from '@/lib/modules/check-activation'
 import { listReviews } from '@/lib/integrations/google-business-profile'
 import { prisma } from '@/lib/prisma'
-import { EmptyState, PageHeader } from '@/components/ui'
+import { PageHeader } from '@/components/ui'
+import { EmptyStateMuted } from '@/components/ui/EmptyStateMuted'
 import { ReviewItem } from './_components/ReviewItem'
 import { AskReviewSection } from './_components/AskReviewSection'
 
@@ -58,7 +59,7 @@ async function ReviewsList({
 
   if (reviews.length === 0) {
     return (
-      <EmptyState
+      <EmptyStateMuted
         icon={Star}
         title="Sin reseñas todavía"
         description="Cuando recibas reseñas en tu perfil de Google Business van a aparecer acá para que puedas responderlas."
@@ -156,7 +157,7 @@ export default async function MotorResenasPage() {
   const gbpConnected = !!(org.gbpAccessToken && org.gbpRefreshToken)
 
   return (
-    <div className="flex flex-col gap-6 max-w-2xl">
+    <div className="flex flex-col gap-6">
       <PageHeader
         eyebrow="Módulo"
         title="Motor de reseñas"

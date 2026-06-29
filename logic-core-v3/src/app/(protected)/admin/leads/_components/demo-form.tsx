@@ -3,7 +3,8 @@
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { ExternalLink, Eye, Inbox, PlayCircle } from 'lucide-react'
-import { Button, EmptyState, Field, Input, Select } from '@/components/ui'
+import { Button, Field, Input, Select } from '@/components/ui'
+import { EmptyStateMuted } from '@/components/ui/EmptyStateMuted'
 import { adminHoverCls } from '@/lib/hover'
 import { createDemo, markDemoViewed } from '../_actions/demo.actions'
 
@@ -347,7 +348,7 @@ export function LeadDemosPanel({ leadId, demos }: LeadDemosPanelProps) {
             </div>
           ))
         ) : (
-          <EmptyState
+          <EmptyStateMuted
             icon={Inbox}
             title="Sin demos cargadas"
             description="Agrega la primera demo o Loom para iniciar el seguimiento comercial de este lead."

@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation'
 import { Bot } from 'lucide-react'
 import { auth } from '@/auth'
 import { unstable_cache } from 'next/cache'
-import { EmptyState } from '@/components/ui/EmptyState'
+import { EmptyStateMuted } from '@/components/ui/EmptyStateMuted'
 import { prisma } from '@/lib/prisma'
 import { resolveOrgId } from '@/lib/preview'
 import { BotPersonalization } from '@/modules/chatbot/components/dashboard/BotPersonalization'
@@ -50,7 +50,7 @@ export default async function ChatbotSettingsPage() {
 
   if (!bot) {
     return (
-      <EmptyState
+      <EmptyStateMuted
         icon={Bot}
         title="Todavia no tenes chatbot"
         description="Cuando develOP active tu chatbot, vas a poder personalizarlo desde aca."

@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { Loader2, SendHorizontal } from 'lucide-react'
-import { replyToTicket } from '../_actions/ticket.actions'
+import { replyToTicketAction } from '@/lib/tickets/actions'
 import { EmojiPickerButton } from './emoji-picker-button'
 
 type TicketReplyFormProps = {
@@ -55,7 +55,7 @@ export function TicketReplyForm({ ticketId }: TicketReplyFormProps) {
     setError(null)
 
     startTransition(async () => {
-      const result = await replyToTicket(ticketId, content)
+      const result = await replyToTicketAction({ ticketId, content })
 
       if (!result.success) {
         setError(result.error)
@@ -72,47 +72,45 @@ export function TicketReplyForm({ ticketId }: TicketReplyFormProps) {
       onSubmit={handleSubmit}
       className="shrink-0 rounded-[28px] border border-white/10 bg-white/5 p-5 backdrop-blur-xl"
     >
-      <div className="flex flex-col gap-3">
-        <div>
-          <p className="text-sm font-medium text-white">Responder ticket</p>
-          <p className="mt-1 text-sm text-zinc-400">
-            La respuesta se enviará como mensaje del admin y quedará visible para el cliente.
-          </p>
+      {error ? (
+        <div className="mb-3 rounded-2xl border border-rose-400/20 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
+          {error}
         </div>
+      ) : null}
 
-        <div className="flex items-end gap-2">
-          <EmojiPickerButton onPick={insertEmoji} disabled={isPending} />
-          <textarea
-            ref={textareaRef}
-            value={content}
-            onChange={(event) => setContent(event.target.value)}
-            rows={1}
-            disabled={isPending}
-            className="min-w-0 flex-1 resize-none overflow-y-auto rounded-[24px] border border-white/10 bg-black/20 px-4 py-3 text-sm leading-6 text-white outline-none transition-colors placeholder:text-zinc-500 focus:border-cyan-400/35 disabled:cursor-not-allowed disabled:opacity-60"
-            placeholder="Escribí una respuesta clara, concreta y accionable para el cliente..."
-          />
-        </div>
-
-        {error ? (
-          <div className="rounded-2xl border border-rose-400/20 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
-            {error}
-          </div>
-        ) : null}
-
-        <div className="flex justify-end">
-          <button
-            type="submit"
-            disabled={isPending || content.trim().length === 0}
-            className="inline-flex items-center gap-2 rounded-2xl border border-cyan-400/20 bg-cyan-400/10 px-4 py-3 text-sm font-medium text-cyan-100 transition-colors hover:bg-cyan-400/15 disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {isPending ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <SendHorizontal className="h-4 w-4" />
-            )}
-            <span>{isPending ? 'Enviando...' : 'Enviar respuesta'}</span>
-          </button>
-        </div>
+      {/* emoji + textarea + enviar, todos en una fila (mismo molde que el cliente) */}
+      <div className="flex items-end gap-2">
+        <EmojiPickerButton onPick={insertEmoji} disabled={isPending} />
+        <textarea
+          ref={textareaRef}
+          value={content}
+          onChange={(event) => setContent(event.target.value)}
+          rows={1}
+          disabled={isPending}
+          onKeyDown={(event) => {
+            // Enter envía, Shift+Enter = nueva línea. IME guard
+            // (!isComposing): no enviar a medias al confirmar la composición
+            // de acentos/dead-keys. Mismo patrón que el composer del cliente.
+            if (event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing) {
+              event.preventDefault()
+              event.currentTarget.form?.requestSubmit()
+            }
+          }}
+          className="min-w-0 flex-1 resize-none overflow-y-auto rounded-[24px] border border-white/10 bg-black/20 px-4 py-3 text-sm leading-6 text-white outline-none transition-colors placeholder:text-zinc-500 focus:border-cyan-400/35 disabled:cursor-not-allowed disabled:opacity-60"
+          placeholder="Escribí una respuesta clara, concreta y accionable para el cliente..."
+        />
+        <button
+          type="submit"
+          disabled={isPending || content.trim().length === 0}
+          className="inline-flex shrink-0 items-center gap-2 rounded-2xl border border-cyan-400/20 bg-cyan-400/10 px-4 py-3 text-sm font-medium text-cyan-100 transition-colors hover:bg-cyan-400/15 disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          {isPending ? (
+            <Loader2 className="h-4 w-4 animate-spin" strokeWidth={1.5} />
+          ) : (
+            <SendHorizontal className="h-4 w-4" strokeWidth={1.5} />
+          )}
+          <span className="hidden sm:inline">{isPending ? 'Enviando...' : 'Enviar respuesta'}</span>
+        </button>
       </div>
     </form>
   )

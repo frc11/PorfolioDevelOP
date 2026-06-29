@@ -3,7 +3,8 @@
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { Inbox, LoaderCircle } from 'lucide-react'
-import { EmptyState, Select } from '@/components/ui'
+import { Select } from '@/components/ui'
+import { EmptyStateMuted, emptyMutedCtaCls } from '@/components/ui/EmptyStateMuted'
 import { adminHoverCls } from '@/lib/hover'
 import { createActivity } from '../_actions/activity.actions'
 import { useScrollFades } from './use-scroll-fades'
@@ -258,19 +259,21 @@ export function LeadActivityFeed({
               )
             })
           ) : (
-            <EmptyState
+            <EmptyStateMuted
               icon={Inbox}
               title="Sin actividad registrada"
               description="Cuando registres mensajes, llamadas o seguimientos, el timeline va a aparecer aca."
-              cta={
-                showForm
-                  ? undefined
-                  : {
-                      label: 'Registrar actividad',
-                      onClick: () => setShowForm(true),
-                    }
-              }
-            />
+            >
+              {!showForm && (
+                <button
+                  type="button"
+                  onClick={() => setShowForm(true)}
+                  className={emptyMutedCtaCls}
+                >
+                  Registrar actividad
+                </button>
+              )}
+            </EmptyStateMuted>
           )}
           </div>
         </div>

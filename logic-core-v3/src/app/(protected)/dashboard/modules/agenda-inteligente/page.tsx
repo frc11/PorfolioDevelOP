@@ -5,7 +5,8 @@ import { resolveOrgId } from '@/lib/preview'
 import { isModuleActive } from '@/lib/modules/check-activation'
 import { getCalSummary, type CalBooking } from '@/lib/integrations/cal-com'
 import { prisma } from '@/lib/prisma'
-import { EmptyState, PageHeader } from '@/components/ui'
+import { PageHeader } from '@/components/ui'
+import { EmptyStateMuted } from '@/components/ui/EmptyStateMuted'
 
 export const dynamic = 'force-dynamic'
 
@@ -258,11 +259,11 @@ async function AgendaOverview({
           Próximos turnos
         </h2>
         {summary.upcomingBookings.length === 0 ? (
-          <EmptyState
+          <EmptyStateMuted
             icon={CalendarDays}
             title="Sin turnos próximos"
             description="Cuando alguien reserve un turno en tu link de agenda, va a aparecer acá."
-            size="sm"
+            className="py-10"
           />
         ) : (
           <div className="flex flex-col gap-2">
@@ -328,7 +329,7 @@ export default async function AgendaInteligentePage() {
   const isConnected = Boolean(org.calComApiKey)
 
   return (
-    <div className="flex flex-col gap-6 max-w-2xl">
+    <div className="flex flex-col gap-6">
       <PageHeader
         eyebrow="Módulo"
         title="Agenda inteligente"

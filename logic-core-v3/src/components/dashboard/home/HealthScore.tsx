@@ -17,7 +17,7 @@
 
 import { motion, useSpring } from 'motion/react'
 import { useEffect, useState } from 'react'
-import { ArrowUp, ArrowDown, Minus, Sparkles } from 'lucide-react'
+import { Sparkles } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { HealthScoreResult, HealthScoreDimension } from '@/lib/health-score'
 
@@ -94,13 +94,16 @@ function HealthScoreActive({ data }: { data: HealthScoreResult }) {
               <span className="text-[11px] font-bold uppercase tracking-[0.25em] text-cyan-400">
                 Health Score
               </span>
-              <TrendChip value={data.trend.value} />
+              {/* S4 — TrendChip oculto (Opción B): computeTrend() en
+                  lib/health-score.ts es un hash del orgId (dato FALSO), no se
+                  muestra como métrica real. Revivir cuando exista history real
+                  (HealthScoreSnapshot, lane de datos aparte). */}
             </div>
             <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
               {scoreToTitle(data.total)}
             </h2>
             <p className="text-sm text-zinc-500 mt-1.5 leading-relaxed">
-              {scoreToSubtitle(data.total, data.trend.value)}
+              {scoreToSubtitle(data.total)}
             </p>
           </div>
 
@@ -378,30 +381,6 @@ function DimensionMini({ dim, index }: { dim: HealthScoreDimension; index: numbe
   )
 }
 
-// ─── Trend chip ───────────────────────────────────────────────────────────────
-
-function TrendChip({ value }: { value: number }) {
-  if (value === 0 || (value > -2 && value < 2)) {
-    return (
-      <span className="inline-flex items-center gap-1 text-[10px] font-bold text-zinc-500">
-        <Minus size={10} />
-        sin cambio
-      </span>
-    )
-  }
-
-  const isUp = value > 0
-  const Icon = isUp ? ArrowUp : ArrowDown
-  const colorClass = isUp ? 'text-emerald-400' : 'text-rose-400'
-
-  return (
-    <span className={cn('inline-flex items-center gap-0.5 text-[10px] font-bold', colorClass)}>
-      <Icon size={10} strokeWidth={2.5} />
-      {isUp ? '+' : ''}{value} esta semana
-    </span>
-  )
-}
-
 // ─── Copy helpers ─────────────────────────────────────────────────────────────
 
 function scoreToTitle(score: number): string {
@@ -412,19 +391,11 @@ function scoreToTitle(score: number): string {
   return 'Tu negocio digital tiene oportunidades urgentes.'
 }
 
-function scoreToSubtitle(score: number, trend: number): string {
-  const trendText =
-    trend > 5
-      ? 'Subió fuerte esta semana.'
-      : trend > 1
-        ? 'Sube esta semana.'
-        : trend < -5
-          ? 'Bajó esta semana.'
-          : trend < -1
-            ? 'Baja levemente esta semana.'
-            : 'Estable esta semana.'
-
-  if (score >= 75) return `Estás por encima del promedio. ${trendText}`
-  if (score >= 60) return `Performance sólida con áreas de mejora. ${trendText}`
-  return `Hay puntos críticos para revisar. ${trendText}`
+// S4b — El subtítulo ya no usa data.trend.value: computeTrend() es un hash del
+// orgId (dato FALSO). Queda solo la lectura del score real (data.total). La
+// coletilla semanal ("Subió/Estable esta semana") se revive con history real.
+function scoreToSubtitle(score: number): string {
+  if (score >= 75) return 'Estás por encima del promedio.'
+  if (score >= 60) return 'Performance sólida con áreas de mejora.'
+  return 'Hay puntos críticos para revisar.'
 }

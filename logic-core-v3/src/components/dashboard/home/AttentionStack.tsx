@@ -1,6 +1,7 @@
 'use client'
 
 import { Badge, Card } from '@/components/ui'
+import { adminHoverCls } from '@/lib/hover'
 import { cn } from '@/lib/utils'
 import type { AttentionItem, AttentionPriority } from '@/lib/dashboard/attention'
 import { motion } from 'motion/react'
@@ -79,7 +80,7 @@ export function AttentionStack({ items }: AttentionStackProps) {
     <div className="space-y-3">
       <div className="flex items-center gap-2">
         <span className="h-1.5 w-1.5 rounded-full bg-amber-400 animate-pulse" />
-        <h2 className="text-[10px] font-bold uppercase tracking-[0.24em] text-zinc-500">
+        <h2 className="text-[10px] uppercase tracking-[0.24em] text-zinc-500">
           Atencion hoy · {items.length}
         </h2>
       </div>
@@ -90,61 +91,67 @@ export function AttentionStack({ items }: AttentionStackProps) {
           const styles = PRIORITY_STYLES[item.priority]
 
           return (
-            <motion.div
-              key={item.id}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.08, duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-            >
-              <Link href={item.ctaHref} className="block min-h-[44px]">
-                <Card
-                  padding="none"
-                  className={cn(
-                    'group overflow-hidden border p-5 transition-all duration-300 hover:scale-[1.005]',
-                    styles.border,
-                    styles.bg,
-                    styles.glow,
-                  )}
-                >
-                  <div className="absolute -right-12 -top-12 h-32 w-32 rounded-full bg-current opacity-[0.04] blur-3xl pointer-events-none" />
+            // Split-wrapper: el hover (scale 1.015 + ring + shadow) vive en este div
+            // externo NO-Framer; el motion.div queda adentro. Aplicar hover:scale sobre
+            // el motion.div no se percibe — el transform de Framer lo pisa. rounded-2xl
+            // matchea el de la Card para que el ring/shadow del hover sigan el radio.
+            <div key={item.id} className={cn('grid rounded-2xl', adminHoverCls)}>
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.08, duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+              >
+                <Link href={item.ctaHref} className="block min-h-[44px]">
+                  <Card
+                    padding="none"
+                    className={cn(
+                      'group overflow-hidden border p-5 transition-all duration-300',
+                      styles.border,
+                      styles.bg,
+                      styles.glow,
+                    )}
+                  >
+                    <div className="absolute -right-12 -top-12 h-32 w-32 rounded-full bg-current opacity-[0.04] blur-3xl pointer-events-none" />
 
-                  <div className="relative flex items-start gap-4">
-                    <div
-                      className={cn(
-                        'flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/5',
-                        styles.iconBg,
-                      )}
-                    >
-                      <Icon size={18} strokeWidth={1.75} />
-                    </div>
-
-                    <div className="min-w-0 flex-1">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <h3 className="text-sm font-bold text-white sm:text-base">{item.title}</h3>
-                        <Badge tone={styles.badgeTone} size="xs">
-                          {styles.badgeLabel}
-                        </Badge>
+                    <div className="relative flex items-start gap-4">
+                      <div
+                        className={cn(
+                          'flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/5',
+                          styles.iconBg,
+                        )}
+                      >
+                        <Icon size={18} strokeWidth={1.5} />
                       </div>
-                      <p className="mt-1 text-xs text-zinc-400 sm:text-sm">{item.description}</p>
-                      {item.meta && <p className="mt-1 text-[10px] text-zinc-600">{item.meta}</p>}
+
+                      <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <h3 className="text-sm font-bold text-white sm:text-base">{item.title}</h3>
+                          <Badge tone={styles.badgeTone} size="xs">
+                            {styles.badgeLabel}
+                          </Badge>
+                        </div>
+                        <p className="mt-1 text-xs text-zinc-400 sm:text-sm">{item.description}</p>
+                        {item.meta && <p className="mt-1 text-[10px] text-zinc-600">{item.meta}</p>}
+                      </div>
+
+                      <div className="hidden items-center gap-2 text-xs font-semibold text-zinc-300 transition-colors group-hover:text-white sm:flex">
+                        {item.ctaLabel}
+                        <ArrowRight
+                          size={14}
+                          strokeWidth={1.5}
+                          className="transition-transform group-hover:translate-x-0.5"
+                        />
+                      </div>
                     </div>
 
-                    <div className="hidden items-center gap-2 text-xs font-semibold text-zinc-300 transition-colors group-hover:text-white sm:flex">
+                    <div className="mt-3 flex items-center gap-1.5 text-xs font-semibold text-zinc-300 sm:hidden">
                       {item.ctaLabel}
-                      <ArrowRight
-                        size={14}
-                        className="transition-transform group-hover:translate-x-0.5"
-                      />
+                      <ArrowRight size={13} strokeWidth={1.5} />
                     </div>
-                  </div>
-
-                  <div className="mt-3 flex items-center gap-1.5 text-xs font-semibold text-zinc-300 sm:hidden">
-                    {item.ctaLabel}
-                    <ArrowRight size={13} />
-                  </div>
-                </Card>
-              </Link>
-            </motion.div>
+                  </Card>
+                </Link>
+              </motion.div>
+            </div>
           )
         })}
       </div>
