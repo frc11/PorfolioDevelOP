@@ -1,6 +1,6 @@
 import type { NextConfig } from "next";
 
-const nextConfig: NextConfig = {
+const nextConfig = {
   serverExternalPackages: [
     '@react-pdf/renderer',
     '@prisma/client',
@@ -8,10 +8,10 @@ const nextConfig: NextConfig = {
     'import-in-the-middle',
   ],
   typescript: {
-  ignoreBuildErrors: true,
+    ignoreBuildErrors: true,
   },
   eslint: {
-  ignoreDuringBuilds: true,
+    ignoreDuringBuilds: true,
   },
   images: {
     remotePatterns: [
