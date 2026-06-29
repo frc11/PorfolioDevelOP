@@ -10803,3 +10803,67 @@ Resumen para el postmortem del próximo bloque. FG-0 dejó la zona `/setter` con
 ---
 
 > **La fase beta de LeadOS continúa en [`bitacora-beta.md`](./bitacora-beta.md).** De acá en más, todas las entradas de bloque de la fase beta van en ese documento. Este archivo queda como histórico (versiones previas y otros bloques/proyectos).
+
+---
+## ✅ EV.1 — Contrato `VerticalPack` + registry + pack `base`   ·   2026-06-28
+
+**Sprint:** EV.1 — Inauguración del bloque EV (generalización del motor en packs verticales)
+
+### Archivos creados
+
+| Archivo | Descripción |
+|---------|-------------|
+| `src/modules/chatbot/server/verticals/types.ts` | Contrato completo: `VerticalPack`, `VerticalScoring`, `VerticalIntents`, `VerticalToolCopy`, `VerticalWidgetCopy`, `validatePackScoring` |
+| `src/modules/chatbot/server/verticals/packs/base.ts` | Pack neutro/fallback: señales universales, intents mínimos genéricos, copy sin ejemplos de rubro |
+| `src/modules/chatbot/server/verticals/registry.ts` | `getVerticalPack(key)` + `listVerticalPacks()` con fallback silencioso a `base` |
+| `src/modules/chatbot/server/verticals/index.ts` | Barrel de exports del módulo |
+| `src/modules/chatbot/server/verticals/__tests__/ev1.invariant.ts` | Batería de invariantes (4 cobertura) |
+
+**Script agregado:** `"test:ev1": "ts-node src/modules/chatbot/server/verticals/__tests__/ev1.invariant.ts"`
+
+### Mapa descubrimiento → tipos
+
+| Estructura encontrada | Campo del tipo |
+|----------------------|----------------|
+| `SCORING_TABLE: readonly ScoredSignal[]` (key, label, points) | `VerticalScoring.signals: readonly VerticalSignalDef[]` |
+| `COMBO_BONUSES[].matches: (s: LeadSignals) => boolean` | `VerticalCombo.requiredSignalKeys: readonly string[]` — declarativo, no función |
+| `HOT_THRESHOLD = 70 / WARM_THRESHOLD = 40` | `VerticalScoringThresholds.caliente / tibio` |
+| `DQ_CATEGORIES = Set<LeadCategoryForScoring>` | `VerticalScoring.dqCategories: readonly string[]` |
+| `POSTVENTA_PENALTY / INVALID_PHONE_PENALTY` | `VerticalPenalty[]` con `condition: VerticalPenaltyCondition` |
+| `PATTERNS: Record<IntentType, RegExp[]>` + `GUIDANCE` | `VerticalIntents: readonly VerticalIntentPattern[]` — aplanado de Record a array |
+| `askedSpecificModel` desc con ejemplos de autos | `VerticalToolCopy.specificModelExamples: string` |
+| `prefilledMessage` desc con ejemplo de autos | `VerticalToolCopy.prefilledMessageExample: string` |
+| `topicSummary` desc con ejemplo de autos | `VerticalToolCopy.topicSummaryExample: string` |
+| `WELCOME_SUGGESTIONS[industry]` + `BOT_NAME_SUGGESTIONS[industry]` | `VerticalWidgetCopy.welcomeMessages / botNameSuggestions` |
+
+### Decisiones de naming
+
+- **`caliente / tibio` (español) en thresholds**: el pack es configuración del negocio (PyME-facing); el motor usa `hot / warm / cold / dq` internamente.
+- **`VerticalIntents` como array, no Record**: extensible con nuevos intents por vertical sin modificar el union type de `IntentType`.
+- **`ComboBonus.matches` → `requiredSignalKeys`**: la función no es serializable. EV.2 evalúa la declaración contra las señales activas.
+- **`usados` y `agencia` usan BASE_PACK como placeholder**: satisface `Record<VerticalPackKey, VerticalPack>` completo sin warning para claves conocidas.
+
+### Pack `base` — scoring
+
+```
+Señales: requestedAppointment=40, providedPhone=30, providedEmail=20  → max 90 ≤ 100
+Combos: ninguno (son vertical-specific)
+Thresholds: caliente>=70, tibio>=40
+DQ: employment, provider, spam
+Penalties: category_postventa (-50), invalid_phone (-20)
+```
+
+- `requestedAppointment + providedPhone` = 70 → caliente ✓
+- `requestedAppointment` solo = 40 → tibio ✓  
+- `providedPhone` solo = 30 < 40 → frío ✓
+
+### Cambio de comportamiento: CERO
+
+Ningún archivo del runtime fue modificado. El módulo `verticals/` compila y pasa invariantes pero nada lo importa todavía.
+
+### Hallazgos fuera de scope (anotados, no ejecutados)
+
+1. **`providedEmail` ausente de `LeadSignals`**: el motor solo tiene `providedPhone` en la interfaz. `providedEmail` se deriva en `captureLead.ts` pero no se puntúa. EV.2 debe añadirlo a `LeadSignals`.
+2. **Descripciones completas de tools con sesgo automotriz**: `CAPTURE_LEAD_DESCRIPTION` y `SHOW_WHATSAPP_HANDOFF_DESCRIPTION` mencionan "test drive" y "cuándo lo retiro". EV.2 podría añadir `captureLeadDescriptionOverride?` a `VerticalToolCopy`.
+3. **`service_inquiry` en intents con sesgo de agencia** (detecta /web/, /chatbot/, /ia/). El pack `agencia` futuro los reclamará; el base pack los omite adrede.
+4. **Bot name suggestions**: base pack usa sugerencias genéricas de `suggestions.ts:BOT_NAME_SUGGESTIONS.generico`. El pack `concesionaria` futuro usará las específicas.
