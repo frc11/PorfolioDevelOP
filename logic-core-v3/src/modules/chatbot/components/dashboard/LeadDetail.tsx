@@ -228,7 +228,7 @@ export function LeadDetail({ lead, enriched, messages, botSlug, showScoring, ori
           </div>
         ) : showScoring && cardCls ? (
           <div
-            className={`mb-4 flex items-center gap-3 rounded-xl border px-4 py-3 ${cardCls.containerClass}`}
+            className={`mb-4 flex items-center gap-3 rounded-xl border px-4 py-3 ${cardCls.containerClass} ${adminHoverCls}`}
             aria-label={`Nivel de interés: ${cardCls.label}${enriched.effectiveScore != null ? `, ${enriched.effectiveScore} de 100` : ''}`}
           >
             <cardCls.icon className={`h-8 w-8 shrink-0 ${cardCls.iconClass}`} strokeWidth={1.5} aria-hidden />
@@ -252,7 +252,7 @@ export function LeadDetail({ lead, enriched, messages, botSlug, showScoring, ori
         ) : null}
 
         {/* Qué le interesa: la consulta + la categoría (dato factual, todos los planes) */}
-        <div className="mb-4 rounded-xl border border-white/[0.06] bg-white/[0.02] p-3">
+        <div className={cn('mb-4 rounded-xl border border-white/[0.06] bg-white/[0.02] p-3', adminHoverCls)}>
           <div className="mb-1 flex items-center justify-between gap-2">
             <p className="text-[10px] uppercase tracking-[0.24em] text-zinc-500">Qué le interesa</p>
             <Badge variant="default" size="xs">{catLabel}</Badge>
@@ -265,7 +265,7 @@ export function LeadDetail({ lead, enriched, messages, botSlug, showScoring, ori
           {lead.phone ? (
             <a
               href={`tel:${lead.phone}`}
-              className="flex min-h-[44px] items-center gap-2 rounded-xl border border-white/[0.06] bg-white/[0.02] px-3 py-2 text-sm text-zinc-300 transition-colors hover:border-cyan-500/30 hover:text-cyan-300"
+              className={cn('flex min-h-[44px] items-center gap-2 rounded-xl border border-white/[0.06] bg-white/[0.02] px-3 py-2 text-sm text-zinc-300', adminHoverCls)}
             >
               <Phone className="h-4 w-4 shrink-0 text-zinc-500" strokeWidth={1.5} />
               <span className="truncate">{lead.phone}</span>
@@ -279,7 +279,7 @@ export function LeadDetail({ lead, enriched, messages, botSlug, showScoring, ori
           {lead.email ? (
             <a
               href={`mailto:${lead.email}`}
-              className="flex min-h-[44px] items-center gap-2 rounded-xl border border-white/[0.06] bg-white/[0.02] px-3 py-2 text-sm text-zinc-300 transition-colors hover:border-cyan-500/30 hover:text-cyan-300"
+              className={cn('flex min-h-[44px] items-center gap-2 rounded-xl border border-white/[0.06] bg-white/[0.02] px-3 py-2 text-sm text-zinc-300', adminHoverCls)}
             >
               <Mail className="h-4 w-4 shrink-0 text-zinc-500" strokeWidth={1.5} />
               <span className="truncate">{lead.email}</span>
@@ -372,7 +372,7 @@ export function LeadDetail({ lead, enriched, messages, botSlug, showScoring, ori
           </p>
         </Card>
       ) : (showScoring && (visibleSignals.length > 0 || enriched.effectiveScore != null)) ? (
-        <Card padding="lg">
+        <Card padding="lg" className={cn(adminHoverCls)}>
           <h2 className="mb-3 text-sm font-semibold text-zinc-200">
             Por qué está calificado así
           </h2>
@@ -422,7 +422,7 @@ export function LeadDetail({ lead, enriched, messages, botSlug, showScoring, ori
           dueño. Pro+ (gateado como el resto de lo derivado de la clasificación).
           En DQ no aplican (es un contacto descartado). */}
       {shouldShowInterestSignals(showScoring, isDq, interestSignals) && (
-        <Card padding="lg">
+        <Card padding="lg" className={cn(adminHoverCls)}>
           <h2 className="mb-3 text-sm font-semibold text-zinc-200">Señales de interés</h2>
           <ul className="space-y-2">
             {interestSignals.map((s) => (

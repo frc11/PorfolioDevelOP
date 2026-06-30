@@ -11372,3 +11372,35 @@ Por qué autocontenido: el `<main>` overflow-y-auto es el contenedor que scrolle
 
 - **Creado:** `src/components/dashboard/ScrollTopOnNavigate.tsx`.
 - **Modificado:** `src/components/dashboard/DashboardLayoutClient.tsx` (import + montaje dentro del `<main>`; el `<main>` sin cambios).
+
+---
+## ✅ P1-fix2 (hovers detalle lead)   ·   2026-06-30
+
+Correctivo cosmético final de P1: hovers que faltaban en el detalle del lead (`LeadDetail`). Cero lógica/data/migraciones. Hover reusado: `adminHoverCls` (el mismo del resto del correctivo).
+
+### Cards que recibieron hover canónico
+
+**Bloque superior (dentro del Card hero):**
+- Barra de clasificación "Caliente / Listo para llamar" (la del score) — `adminHoverCls` appendeado al template de su `containerClass`.
+- "Qué le interesa" (consulta + categoría).
+- Tarjetas de **teléfono** y **email**.
+
+**Cards inferiores:**
+- "Por qué está calificado así" (la del scoring; la variante DQ "Por qué fue descartado" NO se tocó — fuera de scope).
+- "Señales de interés".
+
+(“Cómo llegó” y “De qué hablaron” ya lo tenían de P1-fix; "Seguimiento" sigue sin hover por su textarea. No se tocaron.)
+
+### Cómo se sacó el celeste de tel/mail
+
+Las `<a>` de tel/mail tenían un hover propio celeste `transition-colors hover:border-cyan-500/30 hover:text-cyan-300` que desentonaba. Se **reemplazó** (no se apiló): se quitó ese bloque y se aplicó `adminHoverCls` vía `cn(base, adminHoverCls)`. El `href` (`tel:`/`mailto:`) queda intacto — solo cambió el estilo de hover, no el comportamiento.
+
+### Verificación
+
+- `tsc --noEmit` sin errores nuevos · `npm run build` exit 0 · `eslint` limpio. Celeste residual en `LeadDetail`: **0**.
+- **RUNTIME** prod-QA: como las personas de QA login no son las orgs del seed, se sembró **temporalmente** un lead "caliente" con teléfono+email en san-miguel (client-a), se renderizó el detalle y se **limpió** (verificado: 1 lead + 1 conv + 1 bot QA borrados; seed de matsu/sigma/sonrisa intacto). En el DOM real: **`hover:scale-[1.015]` ×8** (las 6 nuevas + las 2 previas "Cómo llegó/De qué hablaron"), **cero `hover:border-cyan-500`** (celeste eliminado), y los links `tel:`/`mailto:` presentes y funcionando. Cero errores RSC en el log. El chequeo pixel-a-pixel del hover lo verifica el humano.
+- **No se ejecutó ningún comando de git.**
+
+### Archivos
+
+- **Modificado:** `src/modules/chatbot/components/dashboard/LeadDetail.tsx` (6 hovers: barra de clase, Qué le interesa, tel, email, Por qué calificado, Señales de interés; celeste de tel/mail reemplazado por `adminHoverCls`).
