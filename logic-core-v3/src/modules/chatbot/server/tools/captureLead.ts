@@ -5,7 +5,8 @@ import { revalidateTag } from 'next/cache'
 import { prisma } from '@/lib/prisma'
 import { logChatbotEvent } from '../logging'
 import { sendLeadNotificationEmail } from '../notifications'
-import { calculateLeadScore, isValidArgentinePhone } from '../scoring'
+import { calculateLeadScore, buildSignalsSnapshot, isValidArgentinePhone } from '../scoring'
+import { getVerticalPack } from '../verticals'
 import { syncLeadToCrm } from '../crm'
 import { notifyTelegramOptional } from '@/lib/notifications/telegram'
 import type { ToolCallContext, CaptureLeadResult, ToolExecuteResult } from './types'
@@ -300,17 +301,42 @@ async function captureLeadExecute(
     //    `scoreSignals` incluye penalties (points negativos) para explicabilidad B5.4.
     const providedPhone = Boolean(phone)
     const providedEmail = Boolean(email)
-    const { score, classification, signals: scoreSignals, dqReason } = calculateLeadScore({
-      signals: {
-        requestedAppointment: input.requestedAppointment,
-        mentionedFinancing: input.mentionedFinancing,
-        mentionedTradeIn: input.mentionedTradeIn,
-        askedSpecificModel: input.askedSpecificModel,
-        providedPhone,
-      },
-      category: input.category,
-      phone,
-    })
+
+    // EV.3 — Resolver el pack vertical del bot para el scoring. `verticalPack`
+    // llega por el contexto (sin query nueva); fallback a 'base' (default de la
+    // columna) si no vino. getVerticalPack nunca lanza: clave desconocida → 'base'
+    // con warning.
+    //
+    // ⚠️ PARIDAD / DEPENDENCIA DE DATOS: pre-EV.3 el motor puntuaba SIEMPRE con la
+    // tabla `usados` hardcodeada. Ahora cada bot puntúa con SU pack. Un bot
+    // concesionaria debe tener `verticalPack='usados'` (lo setea el seed de EV.2);
+    // si quedó en `'base'` (default de la migración EV.2), puntúa con la tabla
+    // `base` (distinta). REQUERIDO antes de producción: backfillear los bots
+    // concesionaria existentes a 'usados' (correr el seed EV.2 o un UPDATE) para
+    // preservar la paridad end-to-end. Ver bitácora EV.3 → "Gate de despliegue".
+    const packScoring = getVerticalPack(ctx.verticalPack ?? 'base').scoring
+
+    // Señales capturadas. Las que puntúa el motor salen de scoring.signals del
+    // pack; providedEmail hoy no puntúa en `usados` (queda disponible para packs
+    // que lo usen, ej. `base`). providedPhone/providedEmail los DERIVA el handler
+    // del input — no del LLM.
+    const signalValues = {
+      requestedAppointment: input.requestedAppointment,
+      mentionedFinancing: input.mentionedFinancing,
+      mentionedTradeIn: input.mentionedTradeIn,
+      askedSpecificModel: input.askedSpecificModel,
+      providedPhone,
+      providedEmail,
+    }
+
+    const { score, classification, signals: scoreSignals, dqReason } = calculateLeadScore(
+      { signals: signalValues, category: input.category, phone },
+      packScoring,
+    )
+
+    // EV.3 — Dual-write: snapshot estructurado de señales del pack. Se persiste
+    // ADEMÁS de las columnas booleanas legacy (que NO cambian), nunca en reemplazo.
+    const signalsSnapshot = buildSignalsSnapshot(signalValues, packScoring)
 
     // B11.4 — el LLM pasa lowercase (LEAD_INTENTS), la DB es enum UPPER.
     // Type-assert es safe: LEAD_INTENTS y ChatbotLeadIntent comparten los 6
@@ -332,7 +358,7 @@ async function captureLeadExecute(
           intent: intentEnum,
           message: input.contextSummary,
           status: 'NEW',
-          // B5.1 — Señales estructuradas
+          // B5.1 — Señales estructuradas (columnas legacy — el panel las muestra).
           category: input.category,
           requestedAppointment: input.requestedAppointment,
           mentionedFinancing: input.mentionedFinancing,
@@ -340,6 +366,9 @@ async function captureLeadExecute(
           askedSpecificModel: input.askedSpecificModel,
           providedPhone,
           providedEmail,
+          // EV.3 — Dual-write: señales del pack vertical en formato estructurado.
+          // ADEMÁS de las columnas legacy de arriba (no en reemplazo).
+          signals: signalsSnapshot as unknown as Prisma.InputJsonValue,
           // B5.2 — Score heurístico calculado server-side (cero LLM).
           score,
           classification,

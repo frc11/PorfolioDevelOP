@@ -58,6 +58,12 @@
  */
 
 import { isValidArgentinePhone } from './validateArgentinePhone'
+import type {
+  VerticalScoring,
+  VerticalScoringThresholds,
+  VerticalPenaltyCondition,
+} from '../verticals/types'
+import { USADOS_PACK } from '../verticals/packs/usados'
 
 export interface LeadSignals {
   requestedAppointment: boolean
@@ -137,9 +143,14 @@ export const SCORING_TABLE: readonly ScoredSignal[] = [
 export const HOT_THRESHOLD = 70
 export const WARM_THRESHOLD = 40
 
-/** Penalty B5.3 por postventa (no-DQ pero baja prioridad). */
+// EV.3 — SCORING_TABLE/COMBO_BONUSES/HOT_THRESHOLD/WARM_THRESHOLD y las dos
+// penalties de abajo ya NO las consume el motor (lee del pack pasado en
+// `scoring`). Se conservan exportadas como REFERENCIA LEGACY: la suite de
+// invariantes (ev3.invariant.ts) afirma que el pack `usados` las reproduce
+// verbatim (pack ≡ constantes). No las uses como fuente de verdad del runtime.
+/** Penalty B5.3 por postventa (no-DQ pero baja prioridad). Referencia verbatim. */
 export const POSTVENTA_PENALTY = 50
-/** Penalty B5.3 por teléfono con formato inválido. */
+/** Penalty B5.3 por teléfono con formato inválido. Referencia verbatim. */
 export const INVALID_PHONE_PENALTY = 20
 
 /**
@@ -173,19 +184,43 @@ export const COMBO_BONUSES: readonly ComboBonus[] = [
   },
 ] as const
 
-/** Categorías que descalifican el lead directamente, sin posibilidad de score. */
-const DQ_CATEGORIES = new Set<LeadCategoryForScoring>(['employment', 'provider', 'spam'])
-
+/**
+ * Labels PyME de los DQ por categoría. Vertical-agnósticos (no varían por
+ * rubro), por eso viven en el motor y no en el pack: el contrato
+ * `VerticalScoring.dqCategories` es solo la lista de claves.
+ */
 const DQ_CATEGORY_LABELS: Record<string, string> = {
   employment: 'busca trabajo',
   provider: 'proveedor (ofrece servicios)',
   spam: 'spam',
 }
 
-/** Label legible PyME para las penalties (consumido por getScoreExplanation). */
-const PENALTY_LABELS: Record<string, string> = {
-  penalty_postventa: 'Consulta de postventa (no compra)',
-  penalty_invalid_phone: 'Teléfono con formato dudoso',
+/**
+ * EV.3 — Evalúa la condición de una penalty del pack contra el input.
+ * Switch exhaustivo sobre `VerticalPenaltyCondition` (el compilador exige
+ * cubrir cada variante; agregar una nueva rompe el build hasta manejarla).
+ */
+function penaltyApplies(condition: VerticalPenaltyCondition, input: ScoreInput): boolean {
+  switch (condition) {
+    case 'category_postventa':
+      return input.category === 'postventa'
+    case 'invalid_phone':
+      return Boolean(input.phone) && !isValidArgentinePhone(input.phone)
+  }
+}
+
+/**
+ * EV.3 — Clasifica un score con los thresholds del pack. Equivalente a
+ * `classifyScore` pero parametrizado por vertical (el pack `usados` usa
+ * {70, 40}, idéntico a HOT/WARM_THRESHOLD → paridad exacta).
+ */
+function classifyWithThresholds(
+  score: number,
+  thresholds: VerticalScoringThresholds,
+): Exclude<LeadScoreClassification, 'dq'> {
+  if (score >= thresholds.caliente) return 'hot'
+  if (score >= thresholds.tibio) return 'warm'
+  return 'cold'
 }
 
 /**
@@ -203,18 +238,30 @@ export function classifyScore(score: number): Exclude<LeadScoreClassification, '
 /**
  * Aplica la tabla + combos + penalties + DQ. Función pura, sin side effects.
  *
+ * EV.3 — La configuración de scoring (señales, combos, penalties, categorías
+ * DQ, thresholds) ya NO está hardcodeada: se lee del pack vertical pasado en
+ * `scoring`. El default `USADOS_PACK.scoring` es SOLO una afordancia de
+ * back-compat para llamadas de 1 argumento (la suite dorada de paridad) —
+ * reproduce la tabla histórica verbatim. EN PRODUCCIÓN este default NO se usa:
+ * captureLead SIEMPRE inyecta el scoring del pack resuelto del bot
+ * (`getVerticalPack(botConfig.verticalPack ?? 'base')`), que puede ser `usados`
+ * o `base` según la columna. Ver la nota de paridad/backfill en captureLead.
+ *
  * Orden de evaluación (importante — DQ por categoría no-comercial pisa todo):
- *   1. Si category ∈ {employment, provider, spam} → DQ inmediato.
- *   2. Calcular suma positiva de señales (B5.2 puro).
- *   3. Aplicar combos B5.4 (bonus aditivos).
- *   4. Aplicar penalty postventa (−50) si category === 'postventa'.
- *   5. Aplicar penalty teléfono inválido (−20) si phone es AR-inválido.
- *   6. Si el score quedó negativo → DQ por score negativo.
- *   7. Clamp [0, 100] + clasificar hot/warm/cold.
+ *   1. Si category ∈ scoring.dqCategories → DQ inmediato.
+ *   2. Calcular suma positiva de señales (scoring.signals).
+ *   3. Aplicar combos (scoring.combos): bonus aditivos si TODAS las señales
+ *      requeridas están activas.
+ *   4. Aplicar penalties (scoring.penalties) en orden, cada una según su condición.
+ *   5. Si el score quedó negativo → DQ por score negativo.
+ *   6. Clamp [0, 100] + clasificar con scoring.thresholds.
  */
-export function calculateLeadScore(input: ScoreInput): ScoreResult {
+export function calculateLeadScore(
+  input: ScoreInput,
+  scoring: VerticalScoring = USADOS_PACK.scoring,
+): ScoreResult {
   // 1. DQ por categoría no-comercial — corte rápido, score 0.
-  if (DQ_CATEGORIES.has(input.category)) {
+  if (scoring.dqCategories.includes(input.category)) {
     const label = DQ_CATEGORY_LABELS[input.category] ?? input.category
     return {
       score: 0,
@@ -230,47 +277,38 @@ export function calculateLeadScore(input: ScoreInput): ScoreResult {
     }
   }
 
-  // 2. Suma positiva (B5.2 idéntico).
+  // 2. Suma positiva — señales del pack. `LeadSignals` se indexa por clave de
+  //    señal; una clave del pack ausente del input se trata como inactiva.
+  const signalValues = input.signals as unknown as Record<string, boolean>
   const signals: ScoredSignal[] = []
   let score = 0
-  for (const row of SCORING_TABLE) {
-    if (input.signals[row.key as keyof LeadSignals]) {
-      score += row.points
-      signals.push({ key: row.key, label: row.label, points: row.points })
+  for (const def of scoring.signals) {
+    if (signalValues[def.key]) {
+      score += def.points
+      signals.push({ key: def.key, label: def.label, points: def.points })
     }
   }
 
-  // 3. Combos B5.4 — bonus aditivos. Se persisten en signals para
-  //    explicabilidad. Cada combo aporta independientemente (no se anulan).
-  for (const combo of COMBO_BONUSES) {
-    if (combo.matches(input.signals)) {
+  // 3. Combos — bonus aditivos. Dispara si TODAS las señales requeridas están
+  //    activas (equivalente declarativo del `matches` original). Cada combo
+  //    aporta independientemente (no se anulan).
+  for (const combo of scoring.combos) {
+    if (combo.requiredSignalKeys.every((key) => Boolean(signalValues[key]))) {
       score += combo.points
       signals.push({ key: combo.key, label: combo.label, points: combo.points })
     }
   }
 
-  // 4. Penalty postventa.
-  if (input.category === 'postventa') {
-    score -= POSTVENTA_PENALTY
-    signals.push({
-      key: 'penalty_postventa',
-      label: PENALTY_LABELS.penalty_postventa,
-      points: -POSTVENTA_PENALTY,
-    })
+  // 4. Penalties del pack en orden. `points` ya es negativo. La penalty de
+  //    teléfono solo aplica si vino phone (no penaliza a quien dejó solo email).
+  for (const penalty of scoring.penalties) {
+    if (penaltyApplies(penalty.condition, input)) {
+      score += penalty.points
+      signals.push({ key: penalty.key, label: penalty.label, points: penalty.points })
+    }
   }
 
-  // 5. Penalty teléfono inválido (solo si vino phone — no penalizar a quien
-  //    dejó solo email; eso es decisión válida de canal).
-  if (input.phone && !isValidArgentinePhone(input.phone)) {
-    score -= INVALID_PHONE_PENALTY
-    signals.push({
-      key: 'penalty_invalid_phone',
-      label: PENALTY_LABELS.penalty_invalid_phone,
-      points: -INVALID_PHONE_PENALTY,
-    })
-  }
-
-  // 6. Score negativo tras penalties → DQ.
+  // 5. Score negativo tras penalties → DQ.
   if (score < 0) {
     return {
       score: 0,
@@ -280,14 +318,34 @@ export function calculateLeadScore(input: ScoreInput): ScoreResult {
     }
   }
 
-  // 7. Clamp [0, 100] y clasificar.
+  // 6. Clamp [0, 100] y clasificar con los thresholds del pack.
   const finalScore = Math.max(0, Math.min(100, score))
   return {
     score: finalScore,
-    classification: classifyScore(finalScore),
+    classification: classifyWithThresholds(finalScore, scoring.thresholds),
     signals,
     dqReason: null,
   }
+}
+
+/**
+ * EV.3 — Snapshot estructurado de señales para `ChatbotLead.signals` (dual-write).
+ *
+ * Mapea cada señal del pack → `{ value, points }`: `value` indica si la señal
+ * estuvo activa, `points` su aporte (los puntos de la señal si activa, 0 si no).
+ * Se persiste ADEMÁS de las columnas booleanas legacy del lead, nunca en
+ * reemplazo. Pura, sin side effects.
+ */
+export function buildSignalsSnapshot(
+  signalValues: Record<string, boolean>,
+  scoring: VerticalScoring,
+): Record<string, { value: boolean; points: number }> {
+  const snapshot: Record<string, { value: boolean; points: number }> = {}
+  for (const def of scoring.signals) {
+    const value = Boolean(signalValues[def.key])
+    snapshot[def.key] = { value, points: value ? def.points : 0 }
+  }
+  return snapshot
 }
 
 // ─── B5.4 — Decaimiento temporal en lectura ─────────────────────────────────

@@ -535,6 +535,10 @@ export async function handleChatRequest(
       conversationId: conversation.id,
       botConfigId: bot.id,
       organizationId: bot.organization.id,
+      // EV.3 — pack vertical del bot (resolución de scoring en capture_lead).
+      // `bot` viene de resolveBotBySlug con `include`, así que el escalar ya está
+      // en contexto: cero query nueva.
+      verticalPack: bot.verticalPack,
       visitorIpHash: ipHash,
       visitorUserAgent: userAgent,
     },

@@ -11,6 +11,18 @@ export interface ToolCallContext {
   botConfigId: string
   organizationId: string
   /**
+   * EV.3 — Clave del pack vertical del bot (`BotConfig.verticalPack`). Determina
+   * la tabla de scoring que usa `capture_lead`. Se resuelve con `getVerticalPack()`
+   * (clave desconocida → `base` con warning). Si está ausente en el contexto,
+   * captureLead resuelve con `'base'` (el default de la columna).
+   *
+   * OJO (paridad): la columna `verticalPack` tiene default `'base'`. Un bot que
+   * deba puntuar como concesionaria necesita `verticalPack='usados'` explícito
+   * (lo setea el seed de EV.2 / un backfill); si quedó en `'base'`, puntúa con la
+   * tabla `base`, distinta de la histórica `usados`.
+   */
+  verticalPack?: string
+  /**
    * Optional metadata for richer logging / lead enrichment.
    */
   visitorIpHash?: string

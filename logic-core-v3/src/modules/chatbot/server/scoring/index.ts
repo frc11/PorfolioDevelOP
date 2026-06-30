@@ -1,5 +1,6 @@
 export {
   calculateLeadScore,
+  buildSignalsSnapshot,
   classifyScore,
   applyTimeDecay,
   getEffectiveScore,

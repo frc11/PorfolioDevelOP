@@ -780,7 +780,9 @@ async function main() {
   // "pobladas" (no vacías) cuando Franco verifique.
   const sanMiguelBot = await prisma.botConfig.upsert({
     where: { organizationId: organization.id },
-    update: {},
+    update: {
+      verticalPack: 'usados',
+    },
     create: {
       organizationId: organization.id,
       slug: 'sanmiguel',
@@ -804,6 +806,7 @@ async function main() {
       ],
       industry: 'automotive',
       allowedDomains: ['sanmiguelautos.com.ar', 'www.sanmiguelautos.com.ar'],
+      verticalPack: 'usados',
     },
   })
 

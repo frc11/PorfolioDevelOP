@@ -89,12 +89,6 @@ const PREMIUM_FEATURE_CATALOG = [
     defaultType: 'monthly',
   },
   {
-    key: 'mini-crm',
-    label: 'Mini-CRM & Gestion de Leads',
-    defaultPrice: 80,
-    defaultType: 'monthly',
-  },
-  {
     key: 'email-nurturing',
     label: 'Email Marketing & Nurturing',
     defaultPrice: 100,

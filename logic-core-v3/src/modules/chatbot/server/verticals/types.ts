@@ -165,8 +165,13 @@ export interface PackScoringValidation {
  * Verifica que el scoring de un pack cumple las invariantes del motor:
  *   1. Señales con puntos no negativos.
  *   2. Combos con puntos no negativos y al menos 2 señales requeridas.
- *   3. Suma máxima alcanzable (señales + combos) ≤ 100.
- *   4. Thresholds en rango: caliente > tibio ≥ 0, caliente ≤ 100.
+ *   3. Thresholds en rango: caliente > tibio ≥ 0, caliente ≤ 100.
+ *
+ * NOTA (EV.3): NO se valida un techo de suma señales+combos. El motor clampa el
+ * score final a [0, 100] de forma incondicional (`Math.min(100, score)`), así
+ * que una suma pre-clamp > 100 es válida por diseño: el pack `usados` (extraído
+ * verbatim del motor histórico) alcanza 115 pre-clamp y depende del clamp del
+ * runtime. Un techo acá rechazaría una tabla real y shippeada.
  *
  * Pura — sin side effects. Usable tanto en tests como en el registry.
  */
@@ -198,14 +203,6 @@ export function validatePackScoring(scoring: VerticalScoring): PackScoringValida
     if (combo.requiredSignalKeys.length < 2) {
       errors.push(`combo "${combo.key}" requiere al menos 2 señales, tiene ${combo.requiredSignalKeys.length}`)
     }
-  }
-
-  const maxSignals = scoring.signals.reduce((sum, s) => sum + s.points, 0)
-  const maxCombos = scoring.combos.reduce((sum, c) => sum + c.points, 0)
-  const maxTotal = maxSignals + maxCombos
-
-  if (maxTotal > 100) {
-    errors.push(`score máximo alcanzable (${maxTotal}) excede 100; ajustar puntos o agregar clamp en EV.2`)
   }
 
   return { valid: errors.length === 0, errors }

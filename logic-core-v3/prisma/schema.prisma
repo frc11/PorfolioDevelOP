@@ -1265,6 +1265,11 @@ model BotConfig {
   // Rubro / industria
   industry String @default("generic")
 
+  // EV.2 — pack vertical asignado a este bot. Determina scoring, intents y copy.
+  // Claves válidas: 'base' | 'usados' | 'agencia' (registry en server/verticals/).
+  // Fallback a 'base' si la clave no existe en el registry.
+  verticalPack String @default("base")
+
   // Relaciones
   knowledgeBase KnowledgeBase?
   conversations Conversation[]
@@ -1398,6 +1403,21 @@ model ChatbotLead {
   // B5.1 — Canal de origen (futuro: 'widget' | 'instagram' | 'whatsapp_inbound' | ...).
   // No se llena aún — el campo queda para que B5+ pueda discriminar sin migración nueva.
   channel String?
+
+  // EV.2 — Señales adicionales del pack vertical (scoring ampliado por vertical).
+  // Json libre; el scoring las interpreta según el pack asignado al bot.
+  // null = sin señales extra capturadas todavía.
+  signals Json?
+
+  // EV.2 — Atribución de campaña (UTM). Se capturan al inicio de la sesión
+  // desde los parámetros de la URL del widget. null = sin atribución.
+  utmSource   String?
+  utmMedium   String?
+  utmCampaign String?
+
+  // EV.2 — Primer contacto con el chatbot (primera vez que el visitor escribe).
+  // Derivado en el handler; null hasta que el lead exista en DB.
+  firstContactedAt DateTime?
 
   // B5.1 — Campos de scoring que B5.2 va a poblar.
   // Hasta entonces quedan null y son ignorados por la vista actual.
