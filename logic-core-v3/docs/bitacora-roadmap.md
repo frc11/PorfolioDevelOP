@@ -11217,3 +11217,37 @@ Lo factual (origen, canal, categoría, duración, momento) → **todos los plane
 ### Verificación
 
 `check:invariant:lead-detail` ✓ · `check:invariant:home-metrics` ✓ (regresión del origen) · `tsc --noEmit` sin errores nuevos (baseline searchconsole ignorado) · `npm run build` exit 0 (heap 8 GB) · `eslint` limpio en lo tocado · runtime Neon ✓ · redirect 308 ✓. **No se ejecutó ningún comando de git** (lo maneja el humano). **Lo visual NO se autoconfirma** — el MCP de preview no está conectado; queda el checkpoint del humano (abrir el detalle de un lead del seed con client-a, ver las secciones; con Starter confirmar que lo factual se ve y las señales se gatean).
+
+---
+## ✅ P1.C-fix1 (frontera RSC empty states)   ·   2026-06-30
+
+Bug de frontera Server→Client introducido en P1.C, que rompía SOLO el camino sin datos del home.
+
+### La frontera que estaba mal
+
+`LeadOrigins` y `LeadFunnel` son Server Components. En su rama de empty state pasaban el **ícono de lucide como prop** (`icon={Compass}` / `icon={Filter}`) al `<EmptyState>` (Client Component), envuelto en `<FadeIn>` (motion, client). Un ícono de lucide es una **función-componente**: cruzar una función como prop de Server→Client no es serializable → *"Only plain objects can be passed to Client Components"* (LeadOrigins.tsx:21, LeadFunnel.tsx:29) + *"Functions cannot be passed directly to Client Components"* (FadeIn.tsx:16). El camino CON datos no rompía porque ahí los íconos se renderizan como JSX (`<Icon/>` = elemento serializable), nunca como prop-función.
+
+### El fix (opción b: ícono por key string dentro de un client component)
+
+Nuevo Client Component `src/components/dashboard/home/SectionEmptyState.tsx` que envuelve `FadeIn + EmptyState`, recibe SOLO data serializable (`variant: 'origin' | 'funnel'` + `title` + `description`) y **resuelve el ícono adentro** por la key (Compass/Filter). `LeadOrigins`/`LeadFunnel` quedan como Server Components (respeta "Server Components by default" — no tienen interactividad) y ahora cruzan la frontera con puros strings. La animación FadeIn y el diseño B13 del empty state se preservan: se movieron al lado client correcto, no se eliminaron. El camino CON datos quedó intacto (no se tocó su JSX; solo se quitaron los imports `Compass`/`Filter`/`EmptyState` que ya no usa).
+
+Elegí (b) sobre "hacer client todo LeadOrigins/LeadFunnel" porque esos componentes no tienen interactividad real (solo presentan props) y la guía del repo es Server Components by default; encapsular SOLO el empty state animado en un client es lo mínimo correcto y reusable.
+
+### ¿El patrón estaba en otras piezas de P1.C?
+
+Revisado: **no**. `BusinessHero` es Server pero renderiza los íconos como JSX (`<Users/>`, `<Flame/>`, …) y pasa a `<MoneyEstimate>` (client) solo props serializables (sin `icon=`). `MoneyEstimate` es Client y maneja sus íconos internamente. El único lugar con el anti-patrón eran las dos ramas de empty state corregidas.
+
+### Verificación
+
+- `tsc --noEmit` sin errores nuevos · `npm run build` exit 0 · `eslint` limpio en lo tocado.
+- **RUNTIME (el que importa)** — server prod-QA + `/api/qa/login`, render real de `/dashboard`:
+  - **client-b** (sin botConfig → empty path garantizado): `/dashboard` responde **200** y el HTML contiene ambos empty states ("Todavía no sabemos de dónde llegan", "Tu embudo todavía está vacío").
+  - **client-a** (Business, sin leads esta semana → era el camino que rompía): responde **200** con el hero "Tu semana en números" + ambos empty states.
+  - **Log del server: cero errores RSC** (sin "Only plain objects" / "Functions cannot be passed" / errores de LeadOrigins/LeadFunnel).
+  - Camino CON datos: no se modificó su JSX (sigue igual); el build lo type-checkea. La verificación visual pixel-a-pixel (ícono + animación) queda para el humano — el MCP de preview no está conectado.
+- **No se ejecutó ningún comando de git.**
+
+### Archivos
+
+- **Creado:** `src/components/dashboard/home/SectionEmptyState.tsx`.
+- **Modificados:** `src/components/dashboard/home/LeadOrigins.tsx` y `LeadFunnel.tsx` (rama empty → `<SectionEmptyState>`; imports limpiados).

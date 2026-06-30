@@ -2,10 +2,9 @@
 // Directo, ...). Mapeo honesto: lo no reconocible es 'Otros', nada se inventa.
 // Server component. Empty state honesto cuando todavía no hay leads.
 
-import { Compass } from 'lucide-react'
 import { Card } from '@/components/ui/Card'
-import { EmptyState } from '@/components/ui/EmptyState'
 import { FadeIn } from '@/components/dashboard/FadeIn'
+import { SectionEmptyState } from './SectionEmptyState'
 import type { OriginBucket } from '@/lib/dashboard/home-metrics-logic'
 
 interface LeadOriginsProps {
@@ -17,14 +16,11 @@ export function LeadOrigins({ origins }: LeadOriginsProps) {
 
   if (total === 0) {
     return (
-      <FadeIn>
-        <EmptyState
-          icon={Compass}
-          title="Todavía no sabemos de dónde llegan"
-          description="Cuando entren leads desde Google, tus redes o tu sitio, los vas a ver agrupados acá."
-          size="md"
-        />
-      </FadeIn>
+      <SectionEmptyState
+        variant="origin"
+        title="Todavía no sabemos de dónde llegan"
+        description="Cuando entren leads desde Google, tus redes o tu sitio, los vas a ver agrupados acá."
+      />
     )
   }
 

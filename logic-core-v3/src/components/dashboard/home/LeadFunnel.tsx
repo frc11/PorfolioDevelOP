@@ -4,10 +4,10 @@
 // se ocultan. Server component. Empty state honesto cuando no hay leads.
 
 import Link from 'next/link'
-import { Filter, ArrowRight } from 'lucide-react'
+import { ArrowRight } from 'lucide-react'
 import { Card } from '@/components/ui/Card'
-import { EmptyState } from '@/components/ui/EmptyState'
 import { FadeIn } from '@/components/dashboard/FadeIn'
+import { SectionEmptyState } from './SectionEmptyState'
 import type { Funnel } from '@/lib/dashboard/home-metrics-logic'
 
 const LEADS_HREF = '/dashboard/chatbot/leads'
@@ -25,14 +25,11 @@ interface Step {
 export function LeadFunnel({ funnel }: LeadFunnelProps) {
   if (funnel.total === 0) {
     return (
-      <FadeIn>
-        <EmptyState
-          icon={Filter}
-          title="Tu embudo todavía está vacío"
-          description="Apenas entren leads vas a ver cuántos contactaste y cuántos se convirtieron en clientes."
-          size="md"
-        />
-      </FadeIn>
+      <SectionEmptyState
+        variant="funnel"
+        title="Tu embudo todavía está vacío"
+        description="Apenas entren leads vas a ver cuántos contactaste y cuántos se convirtieron en clientes."
+      />
     )
   }
 
