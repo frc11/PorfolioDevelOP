@@ -7,7 +7,13 @@
 
 import { weekRangeAR, previousRangeForPeriod, type UTCRange } from '@/lib/dates-ar'
 import { statusImpliesContact } from '@/modules/chatbot/lead-status-rules'
+import { categorizeOrigin, type OriginLabel, type OriginInput } from './lead-origin'
 import type { ChatbotLeadStatus } from '@prisma/client'
+
+// El mapeo de origen se extrajo a ./lead-origin (P1.D) para compartirlo con el
+// detalle del lead. Se re-exporta para no romper a quien lo importaba desde acá.
+export { categorizeOrigin } from './lead-origin'
+export type { OriginLabel, OriginInput } from './lead-origin'
 
 // ── Período del home: SEMANA AR, actual vs anterior equivalente ────────────────
 // El hero es "Tu semana en números" y compara "vs la semana pasada". Toda la
@@ -120,84 +126,9 @@ export function buildFunnel(leads: FunnelInput[]): Funnel {
 }
 
 // ── Origen: ¿de dónde llegan? ─────────────────────────────────────────────────
-export type OriginLabel =
-  | 'Google'
-  | 'Instagram'
-  | 'Facebook'
-  | 'WhatsApp'
-  | 'TikTok'
-  | 'YouTube'
-  | 'LinkedIn'
-  | 'Directo'
-  | 'Otros'
-
-// Patrones honestos y conservadores: solo lo que reconocemos con confianza.
-// Lo no mapeable cae en 'Otros' o 'Directo' (nunca se inventa una fuente).
-const SOURCE_PATTERNS: ReadonlyArray<readonly [RegExp, OriginLabel]> = [
-  [/google|gclid|googleads|googlesyndication/, 'Google'],
-  [/instagram/, 'Instagram'],
-  [/facebook|fbclid|fb\.com|fb\.me/, 'Facebook'],
-  [/whatsapp|wa\.me/, 'WhatsApp'],
-  [/tiktok/, 'TikTok'],
-  [/youtube|youtu\.be/, 'YouTube'],
-  [/linkedin|lnkd\.in/, 'LinkedIn'],
-]
-
-function matchSource(raw: string): OriginLabel | null {
-  const s = raw.toLowerCase()
-  for (const [re, label] of SOURCE_PATTERNS) {
-    if (re.test(s)) return label
-  }
-  return null
-}
-
-function hostOf(url: string): string {
-  try {
-    return new URL(url).hostname.toLowerCase()
-  } catch {
-    // referrerUrl puede venir sin protocolo (solo host) — usar el string crudo.
-    return url.toLowerCase()
-  }
-}
-
-export interface OriginInput {
-  referrerUrl: string | null
-  utmSource: string | null
-}
-
-/**
- * Categoriza el origen de UN lead. Prioridad:
- *   1. UTM explícito conocido (atribución deliberada de campaña).
- *   2. Referrer externo conocido (Google/Instagram/...).
- *   3. Referrer del PROPIO sitio del cliente (ownHost) → 'Directo' (ya estaba ahí).
- *   4. Referrer presente pero desconocido → 'Otros'.
- *   5. Sin referrer ni UTM → 'Directo'.
- * `ownHost` es el host de Organization.siteUrl (para no marcar el tráfico interno
- * como 'Otros'). Si no se conoce, se omite el paso 3.
- */
-export function categorizeOrigin(
-  { referrerUrl, utmSource }: OriginInput,
-  ownHost: string | null = null,
-): OriginLabel {
-  if (utmSource) {
-    const m = matchSource(utmSource)
-    if (m) return m
-  }
-  if (referrerUrl && referrerUrl.trim() !== '') {
-    const h = hostOf(referrerUrl)
-    const m = matchSource(h)
-    if (m) return m
-    if (ownHost && ownHost.trim() !== '') {
-      // Comparación por dominio, no por substring: 'matsu.com' NO debe matchear
-      // 'notmatsu.com'. Acepta el host exacto o un subdominio del propio sitio.
-      const own = ownHost.toLowerCase().replace(/^www\./, '')
-      const hh = h.replace(/^www\./, '')
-      if (hh === own || hh.endsWith('.' + own)) return 'Directo'
-    }
-    return 'Otros'
-  }
-  return 'Directo'
-}
+// `categorizeOrigin` / `OriginLabel` / `OriginInput` viven en ./lead-origin
+// (compartidos con el detalle del lead) y se re-exportan arriba. Acá queda solo
+// la agregación, que es específica del home.
 
 export interface OriginBucket {
   label: OriginLabel

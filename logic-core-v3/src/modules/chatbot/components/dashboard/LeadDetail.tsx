@@ -19,6 +19,8 @@ import {
   User as UserIcon,
   Bot,
   Save,
+  Compass,
+  Sparkles,
 } from 'lucide-react'
 import { Badge } from '@/components/ui/Badge'
 import { Card } from '@/components/ui/Card'
@@ -28,6 +30,14 @@ import { EmptyStateMuted } from '@/components/ui/EmptyStateMuted'
 import { LeadScoringTeaser } from './LeadScoringTeaser'
 import { LeadStatusActions } from './LeadStatusActions'
 import { updateLeadStatus } from '@/modules/chatbot/server/admin/updateLeadStatus'
+import { formatRelativeAR } from '@/lib/dates-ar'
+import {
+  collectInterestSignals,
+  shouldShowInterestSignals,
+  categoryLabel,
+  channelLabel,
+  formatChatDuration,
+} from '@/modules/chatbot/lead-detail-presentation'
 import type { ChatbotLead, ChatbotLeadStatus } from '@prisma/client'
 import type { LucideIcon } from 'lucide-react'
 
@@ -39,6 +49,7 @@ type ConversationMeta = {
   id: string
   sessionId: string
   currentPath: string | null
+  referrerUrl: string | null
   startedAt: Date
   lastMessageAt: Date
   messageCount: number
@@ -68,6 +79,9 @@ interface LeadDetailProps {
    *  un teaser. El bloque DQ ("descartado") se muestra siempre — no es la
    *  feature vendida, sino higiene de bandeja. */
   showScoring: boolean
+  /** P1.D — Origen legible ya calculado en el server (mapeo compartido
+   *  lead-origin.ts). Dato factual → visible en todos los planes. */
+  originLabel: string
 }
 
 const STATUS_BADGE: Record<ChatbotLeadStatus, { variant: 'default' | 'warning' | 'success' | 'info' | 'danger' | 'brand'; label: string }> = {
@@ -133,7 +147,7 @@ const INTENT_LABELS: Record<string, string> = {
   unknown: 'Consulta general',
 }
 
-export function LeadDetail({ lead, enriched, messages, botSlug, showScoring }: LeadDetailProps) {
+export function LeadDetail({ lead, enriched, messages, botSlug, showScoring, originLabel }: LeadDetailProps) {
   const [status, setStatus] = useState<ChatbotLeadStatus>(lead.status)
   const [notes, setNotes] = useState(lead.internalNotes ?? '')
   const [isPending, startTransition] = useTransition()
@@ -142,6 +156,15 @@ export function LeadDetail({ lead, enriched, messages, botSlug, showScoring }: L
   const statusMeta = STATUS_BADGE[status]
   const cls = enriched.effectiveClassification
   const isDq = cls === 'dq'
+
+  // P1.D — datos ya capturados, traducidos a lenguaje de dueño.
+  const catLabel = categoryLabel(lead.category)
+  const chLabel = channelLabel(lead.channel)
+  const interestSignals = collectInterestSignals(lead)
+  const arrivedAt = formatRelativeAR(new Date(lead.capturedAt))
+  const chatDuration = lead.conversation
+    ? formatChatDuration(new Date(lead.conversation.startedAt), new Date(lead.conversation.lastMessageAt))
+    : null
   const cardCls = cls === 'hot' || cls === 'warm' || cls === 'cold' ? CLASS_CONFIG[cls] : null
   const intentLabel = INTENT_LABELS[lead.intent ?? 'unknown'] ?? 'Consulta'
   // Para DQ: la "razón" es el primer signal de tipo 'dq' (el motor de scoring
@@ -233,15 +256,14 @@ export function LeadDetail({ lead, enriched, messages, botSlug, showScoring }: L
           <LeadScoringTeaser className="mb-4" />
         ) : null}
 
-        {/* Qué quiere */}
-        {lead.intent && (
-          <div className="mb-4 rounded-xl border border-white/[0.06] bg-white/[0.02] p-3">
-            <p className="mb-1 text-[10px] uppercase tracking-[0.24em] text-zinc-500">
-              Qué quiere
-            </p>
-            <p className="text-sm text-zinc-300">{intentLabel}</p>
+        {/* Qué le interesa: la consulta + la categoría (dato factual, todos los planes) */}
+        <div className="mb-4 rounded-xl border border-white/[0.06] bg-white/[0.02] p-3">
+          <div className="mb-1 flex items-center justify-between gap-2">
+            <p className="text-[10px] uppercase tracking-[0.24em] text-zinc-500">Qué le interesa</p>
+            <Badge variant="default" size="xs">{catLabel}</Badge>
           </div>
-        )}
+          <p className="text-sm text-zinc-300">{lead.intent ? intentLabel : 'Dejó sus datos'}</p>
+        </div>
 
         {/* Contacto: AMBOS canales si existen */}
         <div className="mb-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
@@ -296,6 +318,45 @@ export function LeadDetail({ lead, enriched, messages, botSlug, showScoring }: L
             <LeadStatusActions leadId={lead.id} status={status} onStatusChange={setStatus} size="md" />
           </div>
         )}
+      </Card>
+
+      {/* Cómo llegó — datos factuales (origen, canal, momento, duración). Para
+          todos los planes: no dependen de la clasificación. */}
+      <Card padding="lg">
+        <h2 className="mb-3 text-sm font-semibold text-zinc-200">Cómo llegó</h2>
+        <dl className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <div>
+            <dt className="text-[10px] uppercase tracking-[0.24em] text-zinc-500">Origen</dt>
+            <dd className="mt-0.5 flex items-center gap-1.5 text-sm text-zinc-300">
+              <Compass className="h-3.5 w-3.5 shrink-0 text-zinc-500" strokeWidth={1.5} aria-hidden />
+              <span>{originLabel}{chLabel ? ` · ${chLabel}` : ''}</span>
+            </dd>
+          </div>
+          <div>
+            <dt className="text-[10px] uppercase tracking-[0.24em] text-zinc-500">Cuándo</dt>
+            <dd className="mt-0.5 flex items-center gap-1.5 text-sm text-zinc-300">
+              <Clock className="h-3.5 w-3.5 shrink-0 text-zinc-500" strokeWidth={1.5} aria-hidden />
+              <span>Dejó sus datos {arrivedAt}</span>
+            </dd>
+          </div>
+          {chatDuration && (
+            <div>
+              <dt className="text-[10px] uppercase tracking-[0.24em] text-zinc-500">La charla</dt>
+              <dd className="mt-0.5 flex items-center gap-1.5 text-sm text-zinc-300">
+                <MessageSquare className="h-3.5 w-3.5 shrink-0 text-zinc-500" strokeWidth={1.5} aria-hidden />
+                <span>Charló {chatDuration}</span>
+              </dd>
+            </div>
+          )}
+          {lead.conversation?.currentPath && (
+            <div className="min-w-0">
+              <dt className="text-[10px] uppercase tracking-[0.24em] text-zinc-500">Estaba viendo</dt>
+              <dd className="mt-0.5 truncate font-mono text-xs text-zinc-400">
+                {lead.conversation.currentPath}
+              </dd>
+            </div>
+          )}
+        </dl>
       </Card>
 
       {/* Por qué — explicabilidad del scoring en lenguaje de dueño. Dos modos:
@@ -362,6 +423,26 @@ export function LeadDetail({ lead, enriched, messages, botSlug, showScoring }: L
         </Card>
       ) : null}
 
+      {/* Señales de interés — las acciones que muestran interés, en lenguaje de
+          dueño. Pro+ (gateado como el resto de lo derivado de la clasificación).
+          En DQ no aplican (es un contacto descartado). */}
+      {shouldShowInterestSignals(showScoring, isDq, interestSignals) && (
+        <Card padding="lg">
+          <h2 className="mb-3 text-sm font-semibold text-zinc-200">Señales de interés</h2>
+          <ul className="space-y-2">
+            {interestSignals.map((s) => (
+              <li key={s} className="flex items-start gap-2.5">
+                <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-emerald-400" strokeWidth={1.5} aria-hidden />
+                <span className="flex-1 text-sm text-zinc-200">{s}</span>
+              </li>
+            ))}
+          </ul>
+          <p className="mt-3 text-[11px] text-zinc-500">
+            Cosas que hizo en la charla y que muestran que está interesado.
+          </p>
+        </Card>
+      )}
+
       {/* De qué hablaron */}
       <Card padding="lg">
         <h2 className="mb-3 text-sm font-semibold text-zinc-200">
@@ -393,11 +474,6 @@ export function LeadDetail({ lead, enriched, messages, botSlug, showScoring }: L
           </div>
         )}
 
-        {lead.conversation?.currentPath && (
-          <p className="mt-3 text-[11px] text-zinc-600">
-            Estaba mirando: <span className="font-mono text-zinc-500">{lead.conversation.currentPath}</span>
-          </p>
-        )}
       </Card>
 
       {/* Seguimiento (no-DQ) / Notas (DQ). En DQ no hay status CRM editable —

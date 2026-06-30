@@ -92,6 +92,13 @@ const nextConfig = {
   },
   async redirects() {
     return [
+      // P1.D — La vista legacy /dashboard/leads se unificó en "Mis contactos".
+      // La ruta ya no existe; el redirect permanente preserva bookmarks viejos.
+      {
+        source: '/dashboard/leads',
+        destination: '/dashboard/chatbot/leads',
+        permanent: true,
+      },
       // Módulos premium → catálogo unificado
       {
         source: '/dashboard/agenda',

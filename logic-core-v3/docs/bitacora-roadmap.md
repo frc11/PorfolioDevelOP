@@ -11164,3 +11164,56 @@ Anti-fuga multi-tenant + bordes de período + gate → **verificados en RUNTIME 
 - Checkpoint runtime sugerido: con **client-a (Business, con seed)** describir el home sección por sección; con una **org QA nueva** ver los empty states de invitación; con **Starter** confirmar las 4 preguntas visibles y el semáforo en teaser; y revisar el **mobile** angosto.
 - Nota: la org seedeada puede tener pocos/cero `ChatbotLead` (nacen de conversaciones reales del bot) — si el home se ve "calibrando", es el empty state honesto funcionando, no un bug.
 - Refactors futuros anotados (no tocados): `getGreeting()/formatDateES()` de `page.tsx` a dates-ar; mapear `currentPath` como "página específica" del origen.
+
+---
+## ✅ P1.D — Vista de leads unificada: redirect de la huérfana + detalle enriquecido   ·   2026-06-30
+
+Dos gaps, un objetivo: que la vista de leads del cliente sea UNA sola y muestre todo lo que ya se captura.
+
+### (a) La huérfana: ya estaba borrada, faltaba el redirect
+
+Relevamiento: `/dashboard/leads` (la `LeadsTable` legacy que describía el relevamiento-global §5A) **ya no existe** como ruta — un sprint previo la eliminó; sólo queda `/dashboard/chatbot/leads` ("Mis contactos"). Nada en `src/` la linkea. El componente legacy `LeadsTable` (`components/dashboards/LeadsTable.tsx`) + `listLeadsForBot` **siguen vivos pero los usa /admin** (`admin/chatbots/[botId]/tabs/LeadsTab.tsx`) → NO se tocan (zona vedada). Lo único que faltaba: preservar bookmarks viejos. Se agregó un **redirect permanente (308)** `/dashboard/leads → /dashboard/chatbot/leads` en `next.config.ts`. Verificado en runtime: `curl` a `/dashboard/leads` devuelve `308` con `location` correcto.
+
+### (b) Detalle del lead enriquecido
+
+El detalle no mostraba datos ya capturados. Se agregaron, en secciones legibles y lenguaje de dueño:
+
+- **Qué le interesa** (hero): la consulta (intent) + la **categoría** traducida como badge (Venta / Posventa / Búsqueda de empleo / Proveedor / Spam / Otra consulta). Factual → todos los planes.
+- **Cómo llegó** (card nueva, factual, todos los planes): **origen legible** + **canal** + **cuándo** (`formatRelativeAR`, ej. "ayer 18:30") + **duración de la charla** ("charló 4 minutos") + la página que estaba viendo (`currentPath`, movida acá desde "De qué hablaron").
+- **Señales de interés** (card nueva, **Pro+ gateada**): las 6 booleanas traducidas a frases, **solo las positivas**, como puntos a favor.
+
+**Reuso del mapeo de origen (regla del sprint):** el mapeo de P1.C estaba en `home-metrics-logic.ts` (namespaced al home). Se **extrajo la función pura** `categorizeOrigin` (+ `OriginLabel`, `OriginInput`, `siteHost`) a `src/lib/dashboard/lead-origin.ts`; `home-metrics-logic.ts` la **re-exporta** (cero ruptura para sus importadores) y el detalle la importa de ahí. El home `page.tsx` también pasó a usar el `siteHost` compartido (se borró su copia inline). **No hay mapeo paralelo.**
+
+**Origen calculado en el server** (`leads/[id]/page.tsx`) con `categorizeOrigin(referrerUrl/utmSource, siteHost(org.siteUrl))` y pasado como prop `originLabel` — `referrerUrl` se agregó al `select` de la conversación en `getLeadByIdForOrg` (antes no venía).
+
+### Traducciones de señales (texto de producto — orden = prioridad de lectura)
+
+| Campo | Frase |
+|---|---|
+| `requestedAppointment` | Pidió una cita |
+| `askedSpecificModel` | Preguntó por un producto puntual |
+| `mentionedFinancing` | Preguntó por financiación |
+| `mentionedTradeIn` | Mencionó entregar un usado como parte de pago |
+| `providedPhone` | Dejó su teléfono |
+| `providedEmail` | Dejó su email |
+
+Categoría y canal igual traducidos; **canal desconocido → no se muestra** (nunca el valor crudo). Las traducciones puras viven en `src/modules/chatbot/lead-detail-presentation.ts`.
+
+### Gate
+
+Lo factual (origen, canal, categoría, duración, momento) → **todos los planes**. Las **señales de interés** (explican el interés/score) → **Pro+**, vía el predicado puro `shouldShowInterestSignals(showScoring, isDq, signals)` (showScoring = `planAllows(plan,'leadScoring')`, ya resuelto en la page). En DQ no se muestran (es un descartado).
+
+### Tests
+
+`src/modules/chatbot/lead-detail-presentation.invariant.ts` (`check:invariant:lead-detail`, **verde**): señales con lead completo (6) vs **mínimo (todo false/null → [] sin romper)** vs parcial; categoría; canal (conocido→label, desconocido/null→null); duración (4 min / 1 min / mismo instante / 2 h / negativo→null); **gate de señales por plan** (Pro+ no-DQ con señales → muestra; Starter / DQ / sin señales → oculta). El mapeo de origen reusado sigue cubierto por `check:invariant:home-metrics` (sin duplicar test). 
+
+**Runtime contra Neon** (probe descartable, lead+conversación temporales con cleanup): `getLeadByIdForOrg` trae `referrerUrl`; origen=Instagram; señales/categoría/canal/duración traducidos correctos; **org-scoping** cierra cross-org (otra org → null). Redirect 308 verificado con el server prod-QA levantado.
+
+### Archivos
+
+- **Creados:** `src/lib/dashboard/lead-origin.ts` (mapeo de origen compartido), `src/modules/chatbot/lead-detail-presentation.ts` (traducciones puras), `src/modules/chatbot/lead-detail-presentation.invariant.ts`.
+- **Modificados:** `src/lib/dashboard/home-metrics-logic.ts` (extrae+re-exporta origen), `src/app/(protected)/dashboard/page.tsx` (usa `siteHost` compartido), `src/modules/chatbot/server/admin/multiTenantQueries.ts` (`referrerUrl` en el select del detalle), `src/app/(protected)/dashboard/chatbot/leads/[id]/page.tsx` (calcula `originLabel`), `src/modules/chatbot/components/dashboard/LeadDetail.tsx` (secciones nuevas), `next.config.ts` (redirect), `package.json` (script).
+
+### Verificación
+
+`check:invariant:lead-detail` ✓ · `check:invariant:home-metrics` ✓ (regresión del origen) · `tsc --noEmit` sin errores nuevos (baseline searchconsole ignorado) · `npm run build` exit 0 (heap 8 GB) · `eslint` limpio en lo tocado · runtime Neon ✓ · redirect 308 ✓. **No se ejecutó ningún comando de git** (lo maneja el humano). **Lo visual NO se autoconfirma** — el MCP de preview no está conectado; queda el checkpoint del humano (abrir el detalle de un lead del seed con client-a, ver las secciones; con Starter confirmar que lo factual se ve y las señales se gatean).

@@ -12,6 +12,7 @@ import { getExecutiveBrief } from '@/lib/ai/executive-brief'
 import { getAttentionItems } from '@/lib/dashboard/attention'
 import { getWeekResults } from '@/lib/dashboard/week-results'
 import { getHomeBusinessMetrics } from '@/lib/dashboard/home-metrics'
+import { siteHost } from '@/lib/dashboard/lead-origin'
 import { getHealthScore } from '@/lib/health-score'
 import { getOrgUsageSnapshot } from '@/lib/plan/get-org-usage'
 import { getPlanForOrg } from '@/lib/plan/get-plan-for-org'
@@ -94,17 +95,6 @@ export default async function DashboardPage() {
       </section>
     </div>
   )
-}
-
-// P1.C — Deriva el host del sitio del cliente para no clasificar el tráfico
-// interno (referrer del propio sitio) como "Otros".
-function siteHost(siteUrl: string | null): string | null {
-  if (!siteUrl) return null
-  try {
-    return new URL(siteUrl).hostname.toLowerCase()
-  } catch {
-    return siteUrl.toLowerCase().replace(/^https?:\/\//, '').split('/')[0] || null
-  }
 }
 
 async function BusinessResultsServerWrapper({ organizationId }: { organizationId: string }) {

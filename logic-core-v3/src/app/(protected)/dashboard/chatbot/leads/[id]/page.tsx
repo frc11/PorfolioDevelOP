@@ -15,6 +15,7 @@ import type {
 import { LeadDetail } from '@/modules/chatbot/components/dashboard/LeadDetail'
 import { getPlanForOrg } from '@/lib/plan/get-plan-for-org'
 import { planAllows } from '@/lib/plan/plan-allows'
+import { categorizeOrigin, siteHost } from '@/lib/dashboard/lead-origin'
 
 export const dynamic = 'force-dynamic'
 
@@ -75,6 +76,14 @@ export default async function LeadDetailPage({ params }: PageProps) {
     ? await getConversationMessagesForOrg(lead.conversationId, session.organization.id, 50)
     : []
 
+  // Origen legible reusando el mapeo compartido de P1.C/P1.D (lead-origin.ts).
+  // Dato factual → para todos los planes. ownHost evita marcar tráfico interno
+  // como 'Otros'.
+  const originLabel = categorizeOrigin(
+    { referrerUrl: lead.conversation?.referrerUrl ?? null, utmSource: lead.utmSource },
+    siteHost(session.organization.siteUrl),
+  )
+
   return (
     <LeadDetail
       lead={lead}
@@ -82,6 +91,7 @@ export default async function LeadDetailPage({ params }: PageProps) {
       messages={messages}
       botSlug={session.organization.slug}
       showScoring={showScoring}
+      originLabel={originLabel}
     />
   )
 }

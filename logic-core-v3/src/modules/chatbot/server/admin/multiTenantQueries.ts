@@ -163,7 +163,7 @@ export async function getLeadByIdForOrg(leadId: string, organizationId: string) 
     },
     include: {
       conversation: {
-        select: { id: true, sessionId: true, currentPath: true, startedAt: true, lastMessageAt: true, messageCount: true },
+        select: { id: true, sessionId: true, currentPath: true, referrerUrl: true, startedAt: true, lastMessageAt: true, messageCount: true },
       },
     },
   })
