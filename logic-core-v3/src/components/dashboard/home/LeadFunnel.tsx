@@ -8,6 +8,8 @@ import { ArrowRight } from 'lucide-react'
 import { Card } from '@/components/ui/Card'
 import { FadeIn } from '@/components/dashboard/FadeIn'
 import { SectionEmptyState } from './SectionEmptyState'
+import { adminHoverCls } from '@/lib/hover'
+import { cn } from '@/lib/utils'
 import type { Funnel } from '@/lib/dashboard/home-metrics-logic'
 
 const LEADS_HREF = '/dashboard/chatbot/leads'
@@ -40,8 +42,8 @@ export function LeadFunnel({ funnel }: LeadFunnelProps) {
   ]
 
   return (
-    <FadeIn>
-      <Card padding="lg">
+    <FadeIn className="h-full">
+      <Card padding="lg" className={cn('h-full', adminHoverCls)}>
         <h2 className="mb-1 text-lg font-semibold text-zinc-100">Qué pasó con tus leads</h2>
         <p className="mb-4 text-xs text-zinc-500">Del primer contacto a la venta, esta semana</p>
 

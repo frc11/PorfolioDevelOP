@@ -12,6 +12,7 @@ import { deltaPhrase, formatVelocity } from '@/lib/dashboard/home-metrics-logic'
 import { formatRelativeAR } from '@/lib/dates-ar'
 import { adminHoverCls } from '@/lib/hover'
 import { cn } from '@/lib/utils'
+import { intentPhrase } from '@/modules/chatbot/lead-intent-labels'
 import type { HomeBusinessMetrics, TopHotLead } from '@/lib/dashboard/home-metrics'
 
 const TILE = 'h-full rounded-2xl border border-white/10 bg-white/[0.02] p-5'
@@ -22,22 +23,10 @@ interface BusinessHeroProps {
   averageTicketUsd: number | null
 }
 
-// Verbo en lenguaje de dueño para nombrar al lead más urgente del semáforo.
-const INTENT_PHRASE: Record<string, string> = {
-  quote: 'pidió una cotización',
-  quote_request: 'pidió una cotización',
-  purchase_ready: 'está listo para comprar',
-  schedule_visit: 'quiere agendar una visita',
-  human_request: 'pidió hablar con alguien',
-  demo: 'pidió una demo',
-  info: 'hizo una consulta',
-  support: 'pidió soporte',
-  other: 'dejó una consulta',
-}
-
+// Nombra al lead más urgente del semáforo con la frase de su intención (mapa
+// compartido lead-intent-labels, keys alineadas al enum real). Ver P1-fix.
 function urgentPhrase(top: TopHotLead): string {
-  const verb = INTENT_PHRASE[top.intent ?? 'other'] ?? 'dejó una consulta'
-  return `${top.name} ${verb}`
+  return `${top.name} ${intentPhrase(top.intent)}`
 }
 
 // P1.C-fix — Hover canónico del dashboard (adminHoverCls, igual que

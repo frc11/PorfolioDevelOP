@@ -38,6 +38,9 @@ import {
   channelLabel,
   formatChatDuration,
 } from '@/modules/chatbot/lead-detail-presentation'
+import { intentLabel } from '@/modules/chatbot/lead-intent-labels'
+import { adminHoverCls } from '@/lib/hover'
+import { cn } from '@/lib/utils'
 import type { ChatbotLead, ChatbotLeadStatus } from '@prisma/client'
 import type { LucideIcon } from 'lucide-react'
 
@@ -136,16 +139,8 @@ const CLASS_CONFIG: Record<Classification, {
   },
 }
 
-const INTENT_LABELS: Record<string, string> = {
-  quote: 'Pedido de cotización',
-  quote_request: 'Pedido de cotización',
-  info: 'Consulta de información',
-  demo: 'Solicitud de demo',
-  support: 'Soporte',
-  purchase_ready: 'Listo para comprar',
-  other: 'Consulta general',
-  unknown: 'Consulta general',
-}
+// Etiquetas de intención: ahora vienen del mapa compartido (lead-intent-labels),
+// con keys alineadas al enum real. Ver P1-fix.
 
 export function LeadDetail({ lead, enriched, messages, botSlug, showScoring, originLabel }: LeadDetailProps) {
   const [status, setStatus] = useState<ChatbotLeadStatus>(lead.status)
@@ -166,7 +161,7 @@ export function LeadDetail({ lead, enriched, messages, botSlug, showScoring, ori
     ? formatChatDuration(new Date(lead.conversation.startedAt), new Date(lead.conversation.lastMessageAt))
     : null
   const cardCls = cls === 'hot' || cls === 'warm' || cls === 'cold' ? CLASS_CONFIG[cls] : null
-  const intentLabel = INTENT_LABELS[lead.intent ?? 'unknown'] ?? 'Consulta'
+  const intentText = intentLabel(lead.intent)
   // Para DQ: la "razón" es el primer signal de tipo 'dq' (el motor de scoring
   // garantiza al menos uno cuando classification='dq'). Para no-DQ: signals
   // positivos/combos/penalties; ocultamos los kind='dq' (no aplican).
@@ -174,7 +169,7 @@ export function LeadDetail({ lead, enriched, messages, botSlug, showScoring, ori
   const visibleSignals = enriched.scoreExplanation.filter((s) => s.kind !== 'dq')
 
   const firstName = (lead.name ?? '').split(' ')[0] || ''
-  const waMessage = buildWhatsappMessage(firstName, intentLabel)
+  const waMessage = buildWhatsappMessage(firstName, intentText)
   const waHref = lead.phone
     ? `https://wa.me/${lead.phone.replace(/\D/g, '')}?text=${encodeURIComponent(waMessage)}`
     : null
@@ -187,7 +182,7 @@ export function LeadDetail({ lead, enriched, messages, botSlug, showScoring, ori
   }
 
   return (
-    <div className="mx-auto max-w-3xl space-y-6">
+    <div className="w-full space-y-6">
       <Link
         href="/dashboard/chatbot/leads"
         className="inline-flex items-center gap-1.5 text-xs text-zinc-500 transition-colors hover:text-zinc-300"
@@ -262,7 +257,7 @@ export function LeadDetail({ lead, enriched, messages, botSlug, showScoring, ori
             <p className="text-[10px] uppercase tracking-[0.24em] text-zinc-500">Qué le interesa</p>
             <Badge variant="default" size="xs">{catLabel}</Badge>
           </div>
-          <p className="text-sm text-zinc-300">{lead.intent ? intentLabel : 'Dejó sus datos'}</p>
+          <p className="text-sm text-zinc-300">{lead.intent ? intentText : 'Dejó sus datos'}</p>
         </div>
 
         {/* Contacto: AMBOS canales si existen */}
@@ -322,7 +317,7 @@ export function LeadDetail({ lead, enriched, messages, botSlug, showScoring, ori
 
       {/* Cómo llegó — datos factuales (origen, canal, momento, duración). Para
           todos los planes: no dependen de la clasificación. */}
-      <Card padding="lg">
+      <Card padding="lg" className={cn(adminHoverCls)}>
         <h2 className="mb-3 text-sm font-semibold text-zinc-200">Cómo llegó</h2>
         <dl className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div>
@@ -444,7 +439,7 @@ export function LeadDetail({ lead, enriched, messages, botSlug, showScoring, ori
       )}
 
       {/* De qué hablaron */}
-      <Card padding="lg">
+      <Card padding="lg" className={cn(adminHoverCls)}>
         <h2 className="mb-3 text-sm font-semibold text-zinc-200">
           De qué hablaron
         </h2>
@@ -586,9 +581,9 @@ function ConversationThread({ messages, botSlug }: { messages: Message[]; botSlu
   )
 }
 
-function buildWhatsappMessage(firstName: string, intentLabel: string): string {
+function buildWhatsappMessage(firstName: string, intentText: string): string {
   const greeting = firstName ? `Hola ${firstName}` : 'Hola'
-  return `${greeting}, te contacto por tu consulta (${intentLabel.toLowerCase()}) que dejaste en nuestro sitio. ¿Cómo puedo ayudarte?`
+  return `${greeting}, te contacto por tu consulta (${intentText.toLowerCase()}) que dejaste en nuestro sitio. ¿Cómo puedo ayudarte?`
 }
 
 function formatTimeAgo(date: Date | string): string {

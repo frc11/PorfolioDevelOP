@@ -7,6 +7,7 @@ import { Phone, Mail, MessageSquare, Clock, Flame, TrendingUp, Minus, Ban } from
 import { Badge } from '@/components/ui/Badge'
 import { Card } from '@/components/ui/Card'
 import { LeadStatusActions } from './LeadStatusActions'
+import { intentLabel } from '@/modules/chatbot/lead-intent-labels'
 import type { ChatbotLead, ChatbotLeadStatus } from '@prisma/client'
 import type { LucideIcon } from 'lucide-react'
 
@@ -56,18 +57,8 @@ const SCORE_CONFIG: Record<EffectiveClassification, {
   },
 }
 
-const INTENT_LABELS: Record<string, string> = {
-  quote: 'Pedido de cotización',
-  quote_request: 'Pedido de cotización',
-  info: 'Consulta de información',
-  demo: 'Solicitud de demo',
-  support: 'Soporte',
-  purchase_ready: 'Listo para comprar',
-  schedule_visit: 'Quiere agendar una visita',
-  human_request: 'Pidió hablar con una persona',
-  other: 'Consulta general',
-  unknown: 'Consulta general',
-}
+// Etiquetas de intención: mapa compartido (lead-intent-labels), keys alineadas
+// al enum real. Ver P1-fix.
 
 interface BusinessLeadCardProps {
   lead: ChatbotLead
@@ -96,7 +87,7 @@ export function BusinessLeadCard({
   const [localStatus, setLocalStatus] = useState<ChatbotLeadStatus>(lead.status)
   const timeAgo = formatTimeAgo(lead.capturedAt)
   const statusMeta = STATUS_BADGE[localStatus]
-  const intentLabel = INTENT_LABELS[lead.intent ?? 'unknown'] ?? 'Consulta general'
+  const intentText = intentLabel(lead.intent)
   const scoreCfg = !isDq && effectiveClassification ? SCORE_CONFIG[effectiveClassification] : null
 
   // Patrón "linked card": el Link es un overlay absolute que cubre toda la
@@ -178,7 +169,7 @@ export function BusinessLeadCard({
           <p className="mb-1 text-[10px] uppercase tracking-[0.24em] text-zinc-500">
             Qué quiere
           </p>
-          <p className="text-sm text-zinc-300">{intentLabel}</p>
+          <p className="text-sm text-zinc-300">{intentText}</p>
         </div>
       )}
 
@@ -188,7 +179,7 @@ export function BusinessLeadCard({
           <a
             href={`tel:${lead.phone}`}
             onClick={(e) => e.stopPropagation()}
-            className="flex items-center gap-2 text-sm text-zinc-400 hover:text-cyan-400"
+            className="pointer-events-auto flex items-center gap-2 text-sm text-zinc-400 hover:text-cyan-400"
           >
             <Phone className="h-3.5 w-3.5 shrink-0" strokeWidth={1.5} />
             <span className="truncate">{lead.phone}</span>
@@ -198,7 +189,7 @@ export function BusinessLeadCard({
           <a
             href={`mailto:${lead.email}`}
             onClick={(e) => e.stopPropagation()}
-            className="flex items-center gap-2 text-sm text-zinc-400 hover:text-cyan-400"
+            className="pointer-events-auto flex items-center gap-2 text-sm text-zinc-400 hover:text-cyan-400"
           >
             <Mail className="h-3.5 w-3.5 shrink-0" strokeWidth={1.5} />
             <span className="truncate">{lead.email}</span>
@@ -224,7 +215,10 @@ export function BusinessLeadCard({
             className="absolute inset-0 z-10 rounded-2xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-400"
           />
         )}
-        <div className="relative z-20">
+        {/* z-20 con pointer-events-none: los clicks sobre texto ATRAVIESAN hasta
+            el Link overlay (z-10) → toda la card navega. Cada elemento interactivo
+            re-activa pointer-events para mantener su propio click. */}
+        <div className="pointer-events-none relative z-20">
           {infoBlock}
 
           {/* Acciones — en el plano z-20 (clickeables sobre el Link overlay).
@@ -237,7 +231,7 @@ export function BusinessLeadCard({
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={(e) => e.stopPropagation()}
-                  className="inline-flex min-h-[44px] items-center gap-2 rounded-xl border border-emerald-400/30 bg-emerald-400/10 px-3 py-2 text-xs text-emerald-300 hover:bg-emerald-400/20"
+                  className="pointer-events-auto inline-flex min-h-[44px] items-center gap-2 rounded-xl border border-emerald-400/30 bg-emerald-400/10 px-3 py-2 text-xs text-emerald-300 hover:bg-emerald-400/20"
                 >
                   <MessageSquare className="h-3.5 w-3.5" strokeWidth={1.5} />
                   WhatsApp
@@ -247,6 +241,7 @@ export function BusinessLeadCard({
                 leadId={lead.id}
                 status={localStatus}
                 onStatusChange={setLocalStatus}
+                className="pointer-events-auto"
               />
             </div>
           )}

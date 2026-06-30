@@ -5,6 +5,7 @@ import { Menu, X, LogOut } from 'lucide-react'
 import { SidebarNav } from './SidebarNav'
 import { NotificationCenter } from './NotificationCenter'
 import { PageTransition } from './PageTransition'
+import { ScrollTopOnNavigate } from './ScrollTopOnNavigate'
 import { signOutAction } from '@/actions/auth-actions'
 import { VersionBadge } from '@/components/layout/VersionBadge'
 import { zIndex } from '@/lib/design-tokens'
@@ -162,6 +163,7 @@ export function DashboardLayoutClient({
               className="pointer-events-none absolute inset-0 rounded-[28px] border border-white/10 bg-white/[0.03] shadow-[0_24px_80px_rgba(0,0,0,0.35)] backdrop-blur-md"
             />
             <main className="absolute inset-0 overflow-y-auto overflow-x-hidden rounded-[28px] p-4 sm:p-6">
+              <ScrollTopOnNavigate />
               <PageTransition>{children}</PageTransition>
             </main>
           </div>

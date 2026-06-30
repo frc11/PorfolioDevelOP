@@ -11278,3 +11278,97 @@ Se sacaron las flechas del `<input type="number">` reusando la clase que el repo
 ### Archivos
 
 - **Modificados:** `src/components/dashboard/home/BusinessHero.tsx` (helper `HoverTile` + `adminHoverCls` en las 3 cards), `src/components/dashboard/home/MoneyEstimate.tsx` (clases para ocultar spinners), `src/components/dashboard/home/SectionEmptyState.tsx` (`EmptyState` → `EmptyStateMuted`).
+
+---
+## ✅ P1-fix (correctivos visuales + labels intent)   ·   2026-06-30
+
+Correctivo post-QA visual de P1.C/P1.D: 6 cosméticos + 1 bug de presentación. Cero lógica/queries/migraciones. Hover canónico reusado: **`adminHoverCls`** (`src/lib/hover.ts`) — el mismo que ya usan las cards del portal cliente (ChatbotOverview, ClientKnowledgeView, CurrentPlanCard, WeekResultsGrid).
+
+### 1. Click en TODA la card del lead
+
+La `BusinessLeadCard` ya tenía el patrón "linked-card" (Link overlay `absolute inset-0 z-10` + contenido `z-20`), pero el contenido z-20 **capturaba los clicks** (no tenía `pointer-events-none`), así que solo navegaban los huecos/padding. Fix: `pointer-events-none` en el wrapper de contenido + `pointer-events-auto` en cada elemento interactivo (tel/mailto, WhatsApp, `LeadStatusActions` vía su prop `className`). Ahora el click en cualquier parte del texto atraviesa al Link y navega; los botones mantienen su click (y su `stopPropagation`). Aplica a las 3 superficies (pipeline, overview, grilla plana) porque todas pasan `href`.
+
+### 2. Detalle del lead full-width
+
+`LeadDetail` estaba capado en `mx-auto max-w-3xl` y su `loading.tsx` también → angostos y centrados. Se quitó el cap en ambos: detalle `w-full space-y-6`, loading `flex w-full flex-col gap-6` (mismo ancho que el resto del dashboard, que no tiene cap a nivel página).
+
+### 3. Home — bloques de abajo
+
+`LeadOrigins` y `LeadFunnel`: (a) hover canónico — `adminHoverCls` en su `<Card>` (la Card es un div plano, hija del `FadeIn` motion → su `hover:scale` no pelea con el transform de entrada); (b) misma altura — `h-full` encadenado (`FadeIn` + `Card`) sobre el grid de 2 columnas (que ya estira por `align-items:stretch`). Padding al pie: el `<div>` del home tenía `pb-20` → 80px de hueco vacío al fondo del scroll (no hay dock inferior); se quitó.
+
+### 4. Home — hero
+
+Las 3 cards del hero ya tenían el hover (helper `HoverTile`/`adminHoverCls`, agregado en P1.C-fix). Confirmado en runtime — sin cambios. La card de ticket sigue sin hover.
+
+### 5. Mi plan — hover
+
+`CurrentPlanCard`: la tarjeta "Sin módulos premium activos / Ver catálogo" era la única sin `adminHoverCls` (sus hermanas — servicios, módulos, facturación — sí lo tenían). Se lo agregó.
+
+### 6. Detalle — sub-cards
+
+`adminHoverCls` en "Cómo llegó" y "De qué hablaron". "Seguimiento" NO (tiene input/textarea, no debe levantarse al hover).
+
+### 7. Labels de intent genéricos (BUG)
+
+El enum `ChatbotLeadIntent` es MAYÚSCULA (`QUOTE_REQUEST`, `PURCHASE_READY`, …) pero los 3 mapas de la UI (`INTENT_LABELS` en LeadDetail y BusinessLeadCard, `INTENT_PHRASE` en BusinessHero) tenían keys en **minúscula** → ninguna matcheaba → todo caía al fallback ("Consulta general" / "dejó una consulta"). Fix anti-duplicación: se creó UN mapa compartido `src/modules/chatbot/lead-intent-labels.ts` con `intentLabel()` (sustantivo) e `intentPhrase()` (verbo), **keys alineadas al enum real** (B5.1+ y legacy QUOTE/INFO/DEMO) + fallback sano, y los 3 componentes lo importan (se borraron los 3 mapas locales). NO se tocó el enum, el scoring ni cómo se setea el intent. Mapeo:
+
+| Intent (enum) | Label | Phrase |
+|---|---|---|
+| `PURCHASE_READY` | Listo para comprar | está listo para comprar |
+| `SCHEDULE_VISIT` | Quiere agendar una visita | quiere agendar una visita |
+| `QUOTE_REQUEST` | Pedido de cotización | pidió una cotización |
+| `HUMAN_REQUEST` | Pidió hablar con una persona | pidió hablar con alguien |
+| `SUPPORT` | Soporte | pidió soporte |
+| `OTHER` | Consulta general | dejó una consulta |
+| `QUOTE` (legacy) | Pedido de cotización | pidió una cotización |
+| `INFO` (legacy) | Consulta de información | hizo una consulta |
+| `DEMO` (legacy) | Solicitud de demo | pidió una demo |
+
+Los mapas admin (`dashboards/LeadsTable.tsx`, `admin/leados/.../ficha-accordion.tsx`) y el del CSV (`buildLeadsCsv.ts`) tienen el mismo patrón pero quedan FUERA de scope (no se toca /admin); si se quiere, migrarlos al mapa compartido en otra pasada.
+
+### Scroll al entrar — REPORTADO, NO TOCADO (causa estructural)
+
+**Causa:** el dashboard scrollea en un contenedor INTERNO — `DashboardLayoutClient.tsx:164` `<main className="absolute inset-0 overflow-y-auto …">` — no la ventana. El scroll-restoration de Next App Router resetea el `window`, que acá no scrollea, así que el `<main>` conserva su `scrollTop` entre navegaciones → la página aparece scrolleada. Lenis (smooth scroll) es solo del sitio marketing, no del dashboard.
+
+Como el fix toca el SHELL del dashboard (la regla pide avisar antes), **no se implementó**. Propuesta mínima (aditiva, NO reestructura el overflow): montar dentro de `<main>` un client component que en cada cambio de `pathname` haga scroll-to-top del contenedor — p.ej.:
+
+```tsx
+'use client'
+import { useEffect } from 'react'; import { usePathname } from 'next/navigation'
+export function ScrollTopOnNavigate() {
+  const pathname = usePathname()
+  useEffect(() => { document.querySelector('main')?.scrollTo({ top: 0 }) }, [pathname])
+  return null
+}
+```
+montado en `DashboardLayoutClient` dentro del `<main>` (o el reset en `PageTransition`, que ya envuelve `{children}`). Espera tu OK para tocar el shell.
+
+### Verificación
+
+- `tsc --noEmit` sin errores nuevos (baseline searchconsole ignorado) · `npm run build` exit 0 (heap 8 GB) · `eslint` limpio en lo tocado.
+- **Item 7 — assertion pura** (`intentLabel`/`intentPhrase` con los valores del enum real): `QUOTE_REQUEST → "Pedido de cotización" / "pidió una cotización"`, legacy y fallback OK.
+- **RUNTIME real** — server prod-QA + `/api/qa/login`. Las personas de QA login (client-a=san-miguel, client-b) no son las orgs del seed (matsu/sigma/sonrisa), así que se sembró **temporalmente san-miguel** (3 leads, incl. el de "Quiero cotizar el Corolla 2021"), se renderizó y se **limpió** (cleanup verificado: 3 leads + 3 convs + 1 bot QA borrados; el seed de matsu/sigma/sonrisa intacto). En el DOM real:
+  - Lista: labels reales ("Pedido de cotización" / "Listo para comprar" / "Quiere agendar una visita"); cards con `pointer-events-none` + `pointer-events-auto` (item 1).
+  - Detalle: "Pedido de cotización" para el lead del Corolla (item 7); `max-w-3xl`=0 (item 2, full-width); `hover:scale-[1.015]`×2 en Cómo llegó/De qué hablaron (item 6).
+  - Home: "De dónde llegan" + "Qué pasó con tus leads" con `adminHoverCls` (item 3); semáforo "…Juan pidió una cotización" (item 7). Cero errores RSC en el log.
+  - La igualdad de altura (item 3b) va por el encadenado `h-full` (clases en el fuente + build OK); el chequeo pixel-a-pixel queda para el humano.
+- **No se ejecutó ningún comando de git.** **No se autoconfirma lo visual** — el render pixel-a-pixel lo verifica el humano.
+
+### Archivos
+
+- **Creado:** `src/modules/chatbot/lead-intent-labels.ts`.
+- **Modificados:** `BusinessLeadCard.tsx` (pointer-events + intent), `LeadDetail.tsx` (full-width + sub-card hovers + intent), `BusinessHero.tsx` (intent phrase), `LeadOrigins.tsx` + `LeadFunnel.tsx` (hover + h-full), `CurrentPlanCard.tsx` (hover), `page.tsx` (sin `pb-20`), `leads/[id]/loading.tsx` (full-width).
+
+---
+## ✅ P1-fix scroll (reset al navegar)   ·   2026-06-30
+
+Implementado con OK del humano y ACOTADO a la propuesta mínima: SOLO el client component + su montaje. NO se reestructuró el overflow ni la arquitectura del `<main>`/shell.
+
+**Fix.** `src/components/dashboard/ScrollTopOnNavigate.tsx` (nuevo): en cada cambio de `pathname` (`usePathname`), busca su **ancestro scrollable más cercano** partiendo de su propia posición en el DOM (sin `querySelector` global, sin `ref` sobre el `<main>`) y lo lleva al tope (`scrollTo({ top: 0 })`); fallback a `window`. Montado en `DashboardLayoutClient` con una sola línea DENTRO del `<main>` (`<ScrollTopOnNavigate />` antes de `<PageTransition>`). El elemento `<main>` quedó intacto (mismas clases/overflow); el único cambio al shell es el import + el montaje, como se pidió.
+
+Por qué autocontenido: el `<main>` overflow-y-auto es el contenedor que scrollea (no la ventana), por eso el scroll-restoration de Next no lo reseteaba. Caminar hacia arriba desde el propio nodo encuentra ESE main sin acoplarse a que sea único en el DOM.
+
+**Verificación.** `tsc --noEmit` sin errores nuevos · `npm run build` exit 0 · `eslint` limpio. Runtime prod-QA: `/dashboard`, `/dashboard/chatbot/leads` y `/dashboard/plan` renderizan **200**, el ancla (span oculto) del componente aparece montada dentro del `<main>`, cero errores en el log. El chequeo behavioral final (navegar entre páginas y que cada una arranque en el tope) es client-side sobre navegación SPA → **queda como checkpoint visual del humano**; el mecanismo (usePathname + reset del contenedor scrollable) es el patrón estándar y está confirmado montado. **No se ejecutó ningún comando de git.**
+
+- **Creado:** `src/components/dashboard/ScrollTopOnNavigate.tsx`.
+- **Modificado:** `src/components/dashboard/DashboardLayoutClient.tsx` (import + montaje dentro del `<main>`; el `<main>` sin cambios).

@@ -5,6 +5,8 @@
 import { Card } from '@/components/ui/Card'
 import { FadeIn } from '@/components/dashboard/FadeIn'
 import { SectionEmptyState } from './SectionEmptyState'
+import { adminHoverCls } from '@/lib/hover'
+import { cn } from '@/lib/utils'
 import type { OriginBucket } from '@/lib/dashboard/home-metrics-logic'
 
 interface LeadOriginsProps {
@@ -25,8 +27,8 @@ export function LeadOrigins({ origins }: LeadOriginsProps) {
   }
 
   return (
-    <FadeIn>
-      <Card padding="lg">
+    <FadeIn className="h-full">
+      <Card padding="lg" className={cn('h-full', adminHoverCls)}>
         <h2 className="mb-1 text-lg font-semibold text-zinc-100">De dónde llegan</h2>
         <p className="mb-4 text-xs text-zinc-500">Los canales que te trajeron leads esta semana</p>
 

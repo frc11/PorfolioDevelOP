@@ -155,7 +155,7 @@ export function CurrentPlanCard({ plan }: { plan: CurrentPlan }) {
             </div>
           </section>
         ) : (
-          <div className="rounded-xl border border-white/5 bg-white/[0.015] px-4 py-4">
+          <div className={cn('rounded-xl border border-white/5 bg-white/[0.015] px-4 py-4', adminHoverCls)}>
             <p className="text-xs leading-relaxed text-zinc-500">
               Sin módulos premium activos. Podés explorar el catálogo en Mis Servicios.
             </p>
