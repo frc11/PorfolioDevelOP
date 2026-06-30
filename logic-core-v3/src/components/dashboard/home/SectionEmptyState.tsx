@@ -9,7 +9,7 @@
 
 import { Compass, Filter, type LucideIcon } from 'lucide-react'
 import { FadeIn } from '@/components/dashboard/FadeIn'
-import { EmptyState } from '@/components/ui/EmptyState'
+import { EmptyStateMuted } from '@/components/ui/EmptyStateMuted'
 
 export type SectionEmptyVariant = 'origin' | 'funnel'
 
@@ -27,7 +27,9 @@ interface SectionEmptyStateProps {
 export function SectionEmptyState({ variant, title, description }: SectionEmptyStateProps) {
   return (
     <FadeIn>
-      <EmptyState icon={ICONS[variant]} title={title} description={description} size="md" />
+      {/* Tratamiento MUTED (dashed, sin cápsula teal) — canon del repo para
+          secciones/listas sin datos ("calibrando"). */}
+      <EmptyStateMuted icon={ICONS[variant]} title={title} description={description} />
     </FadeIn>
   )
 }

@@ -81,7 +81,7 @@ export function MoneyEstimate({ leadCount, initialTicketUsd }: MoneyEstimateProp
                 if (e.key === 'Enter') handleSave()
               }}
               placeholder="1500"
-              className="min-h-[44px] w-full bg-transparent text-sm text-zinc-100 placeholder-zinc-600 outline-none"
+              className="min-h-[44px] w-full bg-transparent text-sm text-zinc-100 placeholder-zinc-600 outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
             />
           </div>
           <Button size="sm" onClick={handleSave} loading={isPending}>

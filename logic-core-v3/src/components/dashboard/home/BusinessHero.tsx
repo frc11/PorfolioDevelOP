@@ -3,12 +3,15 @@
 // interactivo (plata) es <MoneyEstimate> (client). Empty states honestos por
 // tile — nunca ceros crudos ni reproche. Stagger con FadeIn (patrón canónico).
 
+import type { ReactNode } from 'react'
 import Link from 'next/link'
 import { Users, Flame, Clock, ArrowRight, Sparkles, Check } from 'lucide-react'
 import { FadeIn } from '@/components/dashboard/FadeIn'
 import { MoneyEstimate } from './MoneyEstimate'
 import { deltaPhrase, formatVelocity } from '@/lib/dashboard/home-metrics-logic'
 import { formatRelativeAR } from '@/lib/dates-ar'
+import { adminHoverCls } from '@/lib/hover'
+import { cn } from '@/lib/utils'
 import type { HomeBusinessMetrics, TopHotLead } from '@/lib/dashboard/home-metrics'
 
 const TILE = 'h-full rounded-2xl border border-white/10 bg-white/[0.02] p-5'
@@ -37,6 +40,20 @@ function urgentPhrase(top: TopHotLead): string {
   return `${top.name} ${verb}`
 }
 
+// P1.C-fix — Hover canónico del dashboard (adminHoverCls, igual que
+// WeekResultsGrid / AttentionStack) en un wrapper NO-motion: su hover:scale no
+// pelea con el transform de entrada de FadeIn (patrón split-wrapper). h-full
+// encadena la altura para que los tiles del row queden parejos.
+function HoverTile({ delay, children }: { delay: number; children: ReactNode }) {
+  return (
+    <div className={cn('h-full rounded-2xl', adminHoverCls)}>
+      <FadeIn delay={delay} className="h-full">
+        {children}
+      </FadeIn>
+    </div>
+  )
+}
+
 export function BusinessHero({ metrics, averageTicketUsd }: BusinessHeroProps) {
   const { leads, velocity, funnel, semaforo } = metrics
   void funnel // el embudo se muestra en su propia sección (LeadFunnel)
@@ -50,7 +67,7 @@ export function BusinessHero({ metrics, averageTicketUsd }: BusinessHeroProps) {
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         {/* 1 — ¿Cuántos leads entraron? */}
-        <FadeIn delay={0}>
+        <HoverTile delay={0}>
           <div className={TILE}>
             <div className="mb-3 flex items-start justify-between">
               <p className="text-xs tracking-tight text-zinc-500">Leads esta semana</p>
@@ -67,10 +84,10 @@ export function BusinessHero({ metrics, averageTicketUsd }: BusinessHeroProps) {
                 : (deltaPhrase(leads) ?? 'esta semana')}
             </p>
           </div>
-        </FadeIn>
+        </HoverTile>
 
         {/* 2 — ¿A quién atender ya? Semáforo (Pro+). */}
-        <FadeIn delay={0.05}>
+        <HoverTile delay={0.05}>
           <div className={TILE}>
             <div className="mb-3 flex items-start justify-between">
               <p className="text-xs tracking-tight text-zinc-500">Para atender ahora</p>
@@ -142,10 +159,10 @@ export function BusinessHero({ metrics, averageTicketUsd }: BusinessHeroProps) {
               </>
             )}
           </div>
-        </FadeIn>
+        </HoverTile>
 
         {/* 3 — ¿Qué tan rápido los atendí? */}
-        <FadeIn delay={0.1}>
+        <HoverTile delay={0.1}>
           <div className={TILE}>
             <div className="mb-3 flex items-start justify-between">
               <p className="text-xs tracking-tight text-zinc-500">Qué tan rápido respondés</p>
@@ -172,7 +189,7 @@ export function BusinessHero({ metrics, averageTicketUsd }: BusinessHeroProps) {
               </>
             )}
           </div>
-        </FadeIn>
+        </HoverTile>
 
         {/* 4 — ¿Cuánta plata representan? (interactivo) */}
         <FadeIn delay={0.15}>

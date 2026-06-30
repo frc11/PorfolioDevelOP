@@ -11251,3 +11251,30 @@ Revisado: **no**. `BusinessHero` es Server pero renderiza los íconos como JSX (
 
 - **Creado:** `src/components/dashboard/home/SectionEmptyState.tsx`.
 - **Modificados:** `src/components/dashboard/home/LeadOrigins.tsx` y `LeadFunnel.tsx` (rama empty → `<SectionEmptyState>`; imports limpiados).
+
+---
+## ✅ P1.C-fix (cosméticos home)   ·   2026-06-30
+
+Tres correcciones de superficie sobre el home de P1.C. Cero lógica, cero data, cero migraciones — solo presentación.
+
+### 1. Hover canónico en las 3 cards del hero
+
+Se reusó **`adminHoverCls`** (`src/lib/hover.ts`) — el mismo hover que ya usan las cards hermanas del home (`WeekResultsGrid`, `AttentionStack`): `transition` + `hover:scale-[1.015]` + `hover:shadow` + `hover:ring-1 hover:ring-white/15`, con `motion-reduce:` que apaga el efecto. Se aplicó con el **patrón split-wrapper** (helper local `HoverTile`): un `<div>` NO-motion externo lleva `adminHoverCls` y adentro va el `<FadeIn>` (motion) + el tile. Así el `hover:scale` del CSS no pelea con el `transform` de entrada que FadeIn setea inline (si se ponía en el propio motion.div, motion lo pisaba). `h-full` encadenado (wrapper → FadeIn → tile) mantiene los tiles del row parejos. Las cards "Leads esta semana", "Para atender ahora" y "Qué tan rápido respondés" lo tienen; la de **"Cuánto te generó la web" NO** (es interactiva, queda como estaba).
+
+### 2. Input de ticket sin flechas de spinner
+
+Se sacaron las flechas del `<input type="number">` reusando la clase que el repo ya usa en `admin/settings/_components/settings-console.tsx`: **`[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none`**. Se mantiene `type="number"` + `inputMode="numeric"` y la lógica de guardado intacta — solo se ocultan los spinners (Tailwind arbitrary properties, sin CSS global nuevo).
+
+### 3. Empty states de Origen y Embudo → variante muted
+
+`SectionEmptyState` pasó de `EmptyState` (cápsula/halo cyan, glow teal) a **`EmptyStateMuted`** (`@/components/ui/EmptyStateMuted`, re-export de `ResultEmptyState`) — el canon del repo para secciones/listas sin datos ("calibrando"): contenedor `rounded-[22px] border border-dashed border-white/10 bg-white/[0.01]`, ícono en cajita neutra `text-zinc-500` **sin glow**. Se conservan ícono (Compass/Filter), título y descripción; se quitó `size` (EmptyStateMuted no lo tiene). Se mantiene el `FadeIn` de entrada. Queda consistente con los empty states muted de `LeadsTable`/`ConversationsTable`.
+
+### Verificación
+
+- `tsc --noEmit` sin errores nuevos (baseline searchconsole ignorado) · `npm run build` exit 0 (heap 8 GB) · `eslint` limpio en lo tocado.
+- **RUNTIME** — server prod-QA + `/api/qa/login`, render real de `/dashboard` (client-b, sin datos → empty path): responde **200**, y el HTML confirma los tres fixes: `rounded-[22px]` ×2 (empty states muted), `bg-cyan-500/[0.08]` **0** (desapareció la cápsula cyan vieja), `hover:scale-[1.015]` presente en los tiles del hero, y la clase `…webkit-inner-spin-button…` en el input de ticket. Cero errores de render en el log. El home **con datos** no cambió su estructura (solo los tiles ganan el hover; no se tocó el JSX del data-path). La confirmación visual pixel-a-pixel (lift al hover, flechas ocultas, look apagado) queda para el humano — el MCP de preview no está conectado.
+- **No se ejecutó ningún comando de git.**
+
+### Archivos
+
+- **Modificados:** `src/components/dashboard/home/BusinessHero.tsx` (helper `HoverTile` + `adminHoverCls` en las 3 cards), `src/components/dashboard/home/MoneyEstimate.tsx` (clases para ocultar spinners), `src/components/dashboard/home/SectionEmptyState.tsx` (`EmptyState` → `EmptyStateMuted`).
