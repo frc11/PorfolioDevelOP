@@ -30,6 +30,7 @@
     "check:invariant:security": "ts-node src/lib/security/idor-tokens.invariant.ts",
     "check:invariant:lead-scoring": "npx tsx src/lib/plan/lead-scoring-gate.invariant.ts",
     "check:invariant:dates-ar": "npx tsx src/lib/dates-ar.invariant.ts",
+    "check:invariant:lead-status": "npx tsx src/modules/chatbot/lead-status-rules.invariant.ts",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:debug": "playwright test --debug",

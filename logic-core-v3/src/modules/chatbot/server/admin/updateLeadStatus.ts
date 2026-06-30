@@ -6,6 +6,7 @@ import { revalidatePath, revalidateTag } from 'next/cache'
 import { computeDiff, logAdminAction, omitAuditNoise } from '@/lib/audit-log'
 import { logChatbotEvent } from '../logging'
 import { getClientChatbotSession } from './getClientSession'
+import { leadBelongsToOrg, shouldSealFirstContact } from '@/modules/chatbot/lead-status-rules'
 
 const UpdateLeadStatusSchema = z.object({
   leadId: z.string(),
@@ -25,9 +26,15 @@ export async function updateLeadStatus(input: z.infer<typeof UpdateLeadStatusSch
     include: { botConfig: true },
   })
 
-  if (!lead || lead.botConfig.organizationId !== session.organization.id) {
+  if (!lead || !leadBelongsToOrg(lead.botConfig.organizationId, session.organization.id)) {
     return { ok: false, error: 'Lead not found or unauthorized' }
   }
+
+  // P1.B — Sellar el primer contacto la PRIMERA vez que el lead deja de estar
+  // "sin contactar" (NEW). Es un dato histórico inmutable para la métrica de
+  // velocidad: nunca se pisa, y como solo seteamos (jamás escribimos null),
+  // "deshacer" (volver a NEW) lo preserva. Ver lead-status-rules.ts.
+  const sealFirstContact = shouldSealFirstContact(parsed.status, lead.firstContactedAt)
 
   const updatedLead = await prisma.chatbotLead.update({
     where: { id: parsed.leadId },
@@ -35,6 +42,7 @@ export async function updateLeadStatus(input: z.infer<typeof UpdateLeadStatusSch
       status: parsed.status,
       internalNotes: parsed.notes ?? lead.internalNotes,
       lastStatusChangeAt: new Date(),
+      ...(sealFirstContact ? { firstContactedAt: new Date() } : {}),
     },
   })
 

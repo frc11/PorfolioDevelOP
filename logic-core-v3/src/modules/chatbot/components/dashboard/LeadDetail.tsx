@@ -26,6 +26,7 @@ import { Button } from '@/components/ui/Button'
 import { Select } from '@/components/ui'
 import { EmptyStateMuted } from '@/components/ui/EmptyStateMuted'
 import { LeadScoringTeaser } from './LeadScoringTeaser'
+import { LeadStatusActions } from './LeadStatusActions'
 import { updateLeadStatus } from '@/modules/chatbot/server/admin/updateLeadStatus'
 import type { ChatbotLead, ChatbotLeadStatus } from '@prisma/client'
 import type { LucideIcon } from 'lucide-react'
@@ -162,14 +163,6 @@ export function LeadDetail({ lead, enriched, messages, botSlug, showScoring }: L
     })
   }
 
-  function handleQuickStatus(next: ChatbotLeadStatus) {
-    startTransition(async () => {
-      await updateLeadStatus({ leadId: lead.id, status: next, notes })
-      setStatus(next)
-      setSavedAt(Date.now())
-    })
-  }
-
   return (
     <div className="mx-auto max-w-3xl space-y-6">
       <Link
@@ -285,7 +278,7 @@ export function LeadDetail({ lead, enriched, messages, botSlug, showScoring }: L
         {/* Acciones rápidas — solo para leads comerciales. En DQ no hay
             seguimiento que hacer (postventa/empleo/spam/proveedor). */}
         {!isDq && (
-          <div className="flex flex-wrap gap-2 border-t border-white/[0.06] pt-4">
+          <div className="space-y-3 border-t border-white/[0.06] pt-4">
             {waHref && (
               <a
                 href={waHref}
@@ -297,16 +290,10 @@ export function LeadDetail({ lead, enriched, messages, botSlug, showScoring }: L
                 WhatsApp con mensaje
               </a>
             )}
-            {status === 'NEW' && (
-              <Button size="sm" variant="secondary" disabled={isPending} onClick={() => handleQuickStatus('CONTACTED')}>
-                Marcar contactado
-              </Button>
-            )}
-            {status !== 'WON' && status !== 'LOST' && (
-              <Button size="sm" disabled={isPending} onClick={() => handleQuickStatus('WON')}>
-                ✓ Es cliente
-              </Button>
-            )}
+            {/* Acciones de un tap en lenguaje de dueño (componente compartido con
+                la lista). El Select de abajo cubre el estado completo (incl. "En
+                negociación"); estos botones son el camino rápido + deshacer. */}
+            <LeadStatusActions leadId={lead.id} status={status} onStatusChange={setStatus} size="md" />
           </div>
         )}
       </Card>

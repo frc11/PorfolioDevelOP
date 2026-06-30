@@ -1,13 +1,12 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
 import { motion } from 'motion/react'
 import { Phone, Mail, MessageSquare, Clock, Flame, TrendingUp, Minus, Ban } from 'lucide-react'
 import { Badge } from '@/components/ui/Badge'
 import { Card } from '@/components/ui/Card'
-import { Button } from '@/components/ui/Button'
-import { updateLeadStatus } from '@/modules/chatbot/server/admin/updateLeadStatus'
+import { LeadStatusActions } from './LeadStatusActions'
 import type { ChatbotLead, ChatbotLeadStatus } from '@prisma/client'
 import type { LucideIcon } from 'lucide-react'
 
@@ -94,26 +93,11 @@ export function BusinessLeadCard({
   isDq = false,
   href,
 }: BusinessLeadCardProps) {
-  const [isPending, startTransition] = useTransition()
   const [localStatus, setLocalStatus] = useState<ChatbotLeadStatus>(lead.status)
   const timeAgo = formatTimeAgo(lead.capturedAt)
   const statusMeta = STATUS_BADGE[localStatus]
   const intentLabel = INTENT_LABELS[lead.intent ?? 'unknown'] ?? 'Consulta general'
   const scoreCfg = !isDq && effectiveClassification ? SCORE_CONFIG[effectiveClassification] : null
-
-  function handleMarkContacted() {
-    startTransition(async () => {
-      await updateLeadStatus({ leadId: lead.id, status: 'CONTACTED' })
-      setLocalStatus('CONTACTED')
-    })
-  }
-
-  function handleMarkConverted() {
-    startTransition(async () => {
-      await updateLeadStatus({ leadId: lead.id, status: 'WON' })
-      setLocalStatus('WON')
-    })
-  }
 
   // Patrón "linked card": el Link es un overlay absolute que cubre toda la
   // card (z-10), el contenido va por encima (z-20). Así toda la card navega
@@ -246,33 +230,24 @@ export function BusinessLeadCard({
           {/* Acciones — en el plano z-20 (clickeables sobre el Link overlay).
               En vista DQ no aparecen: son contactos descalificados, sin seguimiento. */}
           {!isDq && (
-            <div className="flex flex-wrap gap-2 border-t border-white/[0.06] pt-4">
+            <div className="space-y-3 border-t border-white/[0.06] pt-4">
               {lead.phone && (
                 <a
                   href={`https://wa.me/${lead.phone.replace(/\D/g, '')}`}
                   target="_blank"
                   rel="noopener noreferrer"
+                  onClick={(e) => e.stopPropagation()}
                   className="inline-flex min-h-[44px] items-center gap-2 rounded-xl border border-emerald-400/30 bg-emerald-400/10 px-3 py-2 text-xs text-emerald-300 hover:bg-emerald-400/20"
                 >
                   <MessageSquare className="h-3.5 w-3.5" strokeWidth={1.5} />
                   WhatsApp
                 </a>
               )}
-              {localStatus === 'NEW' && (
-                <Button
-                  size="sm"
-                  variant="secondary"
-                  disabled={isPending}
-                  onClick={handleMarkContacted}
-                >
-                  Marcar contactado
-                </Button>
-              )}
-              {localStatus !== 'WON' && localStatus !== 'LOST' && (
-                <Button size="sm" disabled={isPending} onClick={handleMarkConverted}>
-                  ✓ Es cliente
-                </Button>
-              )}
+              <LeadStatusActions
+                leadId={lead.id}
+                status={localStatus}
+                onStatusChange={setLocalStatus}
+              />
             </div>
           )}
         </div>

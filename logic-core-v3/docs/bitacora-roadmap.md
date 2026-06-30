@@ -11054,3 +11054,60 @@ Relevamiento previo (185 archivos con `new Date(`). Los **dos más frágiles**, 
 `npm run check:invariant:dates-ar` ✓ verde (incl. casos de borde de TZ) · `npm run build` exit 0 (heap 8 GB — el default OOMea a ~2 GB en este repo, no es regresión del sprint) · `npx prisma generate` limpio · `npx prisma migrate status` → *Database schema is up to date!* (76 migraciones, la nueva aplicada limpio sobre dev). Smoke browser de `/login` + `/dashboard`: **no corrible en este entorno** (MCP de preview no conectado); el `build` exit 0 type-checkea y compila ambas rutas — queda el chequeo visual manual para el humano.
 
 **Pendiente de acción manual (humano):** la verificación runtime en browser de la vista de leads NO es montable desde el seed actual — solo San Miguel (Business) tiene `botConfig`, no hay `ChatbotLead` seedeados (nacen de conversaciones reales del bot) y la única org sin plan (`qa-cliente-b`, caso Starter) no tiene bot. Reproducir el caso Starter en vivo exigiría crear bot+leads para una org Starter, lo cual cae en zonas vedadas del sprint (runtime del bot / seeds / updates a DB). El gate queda verificado de forma determinística por el invariant; el chequeo visual de los dos casos (chips con Business, teaser + CSV sin score con Starter) queda para correr en el entorno con leads reales capturados.
+
+---
+## ✅ P1.B — Acciones de un tap sobre el lead: "Lo contacté / Vendido / No avanzó" + sellado de firstContactedAt   ·   2026-06-30
+
+Objetivo: fricción CERO para el dueño no técnico. Un tap registra qué pasó con el lead, con feedback al instante y deshacer simple. Sin esto no hay embudo ni métrica de velocidad. Cero migraciones (las columnas ya existían), sin tocar runtime del bot/widget/KB ni el home.
+
+### Mapeo acción → estado (relevado, SIN gap de enum)
+
+El enum real es `ChatbotLeadStatus { NEW, CONTACTED, IN_NEGOTIATION, WON, LOST }` (default `NEW`). Las tres acciones de dueño mapean limpio a valores existentes — **no hizo falta tocar el enum (no hubo migración)**:
+
+| Acción (lenguaje de dueño) | Estado enum |
+|---|---|
+| "Lo contacté" | `CONTACTED` |
+| "Vendido" | `WON` |
+| "No avanzó" | `LOST` |
+
+`IN_NEGOTIATION` y `NEW` no son acciones rápidas; siguen accesibles vía el `<Select>` del detalle.
+
+### Anti-vibecode: extender, no duplicar
+
+Ya existían (1) el server action `updateLeadStatus` con el patrón anti-IDOR correcto, y (2) botones de estado ad-hoc — distintos entre sí — en `BusinessLeadCard` ("Marcar contactado"/"✓ Es cliente") y en `LeadDetail`. En vez de sumar una tercera variante, se **consolidó**:
+
+- **`src/modules/chatbot/lead-status-rules.ts` (creado)** — reglas PURAS isomórficas (solo `import type` de Prisma → cero runtime server en el grafo, lo pueden importar action y client component sin cruzar boundary). Contiene: `OWNER_ACTION_STATUS` (el mapeo de arriba), `statusImpliesContact`, `shouldSealFirstContact` y `leadBelongsToOrg` (gate anti-IDOR). Es la única fuente de verdad y lo que se testea.
+- **`updateLeadStatus.ts` (modificado)** — ahora sella `firstContactedAt` y rutea el ownership por `leadBelongsToOrg`. Resto del action intacto (Zod, sesión, audit log, revalidate, badge cache).
+- **`LeadStatusActions.tsx` (creado)** — UN componente client compartido por la lista y el detalle. Tres botones de un tap, optimista, con deshacer.
+- **`BusinessLeadCard.tsx` y `LeadDetail.tsx` (modificados)** — borraron sus botones ad-hoc y usan el componente compartido. El `<Select>` completo del detalle se mantiene.
+
+### Regla de firstContactedAt (el corazón del sprint)
+
+`shouldSealFirstContact(next, current) = next !== 'NEW' && current == null`. De ahí salen las tres garantías pedidas, sin casos especiales:
+
+1. **Se sella la primera vez** que el lead deja `NEW` (CONTACTED, WON o LOST — todos implican contacto). "Vendido" o "No avanzó" directos, sin contactar antes, también sellan (vender ⇒ hubo contacto).
+2. **Taps repetidos no lo pisan**: la función devuelve `false` apenas hay un timestamp.
+3. **Deshacer no lo borra**: el action SOLO setea `firstContactedAt`, nunca escribe `null`; volver a `NEW` cambia el status pero conserva el primer contacto (dato histórico inmutable para velocidad de respuesta).
+
+### UX de un tap + deshacer
+
+Feedback optimista: el botón y el badge reflejan el cambio antes de que vuelva el server; si el server rechaza (sesión/ownership), se revierte y sale `toast.error`. El **deshacer** es la acción del propio toast de éxito (`sonner`) — un tap vuelve al estado previo, sin re-disparar toast ni re-sellar. "No avanzó" (LOST) va en gris neutro, no en rojo (es un desenlace normal, no un error). Tap targets `min-h-[44px]`, `aria-pressed` en el botón activo, `e.stopPropagation()` para no navegar el card-link de la lista.
+
+### Tests — `src/modules/chatbot/lead-status-rules.invariant.ts` (creado)
+
+`npx tsx`, `node:assert/strict`, script `check:invariant:lead-status`. **Verde.** Cubre: el mapeo de las tres acciones; `statusImpliesContact`; el sellado (primera vez sí, ya-sellado nunca re-sella para los 5 estados); un **ciclo de vida end-to-end** que modela el cómputo del `data` del action (Lo contacté→Vendido→Deshacer preserva T1; venta directa sella; "No avanzó" directo sella); y el gate **anti-IDOR** `leadBelongsToOrg` (misma org opera, cross-org rechazado, sesión/lead sin org rechazado). El invariant de seguridad existente (`check:invariant:security`) sigue verde — no se tocó esa superficie.
+
+### Verificación
+
+- `check:invariant:lead-status` ✓ · `check:invariant:security` ✓ (regresión) · `npm run build` **exit 0** (heap 8 GB).
+- **Runtime real contra Neon dev** (probe descartable bajo `botConfig` real `matsu`, lead temporal creado y borrado en cleanup — sin tocar datos reales): lead nace `firstContactedAt=null` → "Lo contacté" lo sella en T1 → "Vendido" deja T1 intacto → "Deshacer" (→NEW) preserva T1. Confirma el path de DB + columna + regla end-to-end. El click-test en browser (feedback instantáneo, sensación de seguridad al deshacer) queda como **checkpoint del humano** — el MCP de preview no está conectado en este entorno.
+
+### Archivos
+
+- **Creados:** `src/modules/chatbot/lead-status-rules.ts`, `src/modules/chatbot/lead-status-rules.invariant.ts`, `src/modules/chatbot/components/dashboard/LeadStatusActions.tsx`.
+- **Modificados:** `src/modules/chatbot/server/admin/updateLeadStatus.ts` (sella `firstContactedAt` + ownership vía helper), `src/modules/chatbot/components/dashboard/BusinessLeadCard.tsx` y `LeadDetail.tsx` (usan el componente compartido), `package.json` (script `check:invariant:lead-status`).
+
+### Para el humano
+
+- **No hubo gap de enum** — los tres estados ya existían, no hay migración pendiente ni decisión bloqueante para P1.C.
+- Checkpoint visual: marcar "Lo contacté" en Mis contactos (un tap, feedback, deshacer), marcar "Vendido" directo, y equivocarse a propósito para sentir si el deshacer da seguridad.
