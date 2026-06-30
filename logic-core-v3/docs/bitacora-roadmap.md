@@ -11111,3 +11111,56 @@ Feedback optimista: el botón y el badge reflejan el cambio antes de que vuelva 
 
 - **No hubo gap de enum** — los tres estados ya existían, no hay migración pendiente ni decisión bloqueante para P1.C.
 - Checkpoint visual: marcar "Lo contacté" en Mis contactos (un tap, feedback, deshacer), marcar "Vendido" directo, y equivocarse a propósito para sentir si el deshacer da seguridad.
+
+---
+## ✅ P1.C — Rediseño del home: de panel administrativo a panel de RESULTADOS del negocio   ·   2026-06-30
+
+Se invirtió la jerarquía del home del cliente (`/dashboard`): antes era un panel administrativo con un widget de resultados; ahora responde de un vistazo las 4 preguntas del dueño (¿cuántos leads? ¿de dónde? ¿qué tan rápido los atendí? ¿cuánta plata?). Cero migraciones, todo org-scoped, períodos vía el helper AR, y reversible (no se borró ningún componente).
+
+### Composición nueva (arriba → abajo)
+
+1. Saludo (existente) · 2. Onboarding (existente) · **3. NUEVO: hero "Tu semana en números"** (las 4 preguntas) · **4. NUEVO: "De dónde llegan" + "Qué pasó con tus leads"** (2 col) · 5. **Resumen ejecutivo IA** (existente, ahora secundario pero visible) · 6. **Franja "Tu cuenta"** (existente, demovido): Health Score, Atención hoy, Resultados de la semana, Uso. Reubicación pura — para revertir, se restaura el orden viejo del render tree de `page.tsx`.
+
+### Las 4 preguntas (hero)
+
+- **Leads del período** con variación vs período anterior ("12 · +4 vs la semana pasada"). Período = SEMANA AR.
+- **Semáforo (Pro+, gateado)**: "N leads calientes esperándote" + el más urgente nombrado ("Juan pidió una cotización · hace 3 horas") con link directo a contactarlo. Tono de oportunidad, jamás de reproche. Plan sin gate → teaser de una línea a `/dashboard/plan`. Pro+ sin calientes → "Estás al día" (positivo, no vacío crudo).
+- **Velocidad**: promedio capturedAt→firstContactedAt del período. Sin datos → invitación que NO avergüenza ("Marcá 'Lo contacté' … los negocios que responden en menos de una hora venden más").
+- **Plata** (`MoneyEstimate`, client): si `averageTicketUsd` está cargado → leads × ticket como "≈ US$ X en oportunidades comerciales", SIEMPRE con marco "estimado según tu ticket promedio". Si no → card de setup de una pregunta (server action org-scoped + Zod) con lápiz para editar después.
+
+### Decisiones de diseño
+
+- **Período = semana AR** (el hero es "tu semana", comparativa "vs la semana pasada"). Todo borde vía `periodBoundsForHome` → `weekRangeAR` / `previousRangeForPeriod('week')` (dates-ar). Cero `new Date()` manual para límites.
+- **Origen**: vive en `Conversation.referrerUrl` (+ `utmSource` del lead), NO hay `referrerUrl` en ChatbotLead. Mapeo honesto y conservador (Google/Instagram/Facebook/WhatsApp/TikTok/YouTube/LinkedIn/Directo/Otros): UTM explícito gana; referrer externo conocido; referrer del **propio sitio** (`Organization.siteUrl`, match por dominio) → "Directo"; desconocido → "Otros"; sin nada → "Directo". `currentPath` NO se usa como origen (es la página de conversión, no la fuente) — reportado como refinamiento futuro.
+- **"Leads del negocio" = todo MENOS DQ, incluyendo los no clasificados (`classification = null`)**. Se NO reusó `excludeDqWhere()` de scoring (`NOT:{classification:'dq'}`) porque en SQL ese filtro también descarta los `null` → habría sub-contado los leads sin scorear. Bug atrapado por la verificación runtime, no por tipos.
+- **Plata en USD enteros** ("US$ X") porque el campo es `averageTicketUsd Int?`.
+- **Gate Pro+ SOLO en el semáforo** (lo único que depende de `classification`). Las otras 3 preguntas son para todos los planes. Vía `planAllows(plan,'leadScoring')` (reuso, sin inventar dimensión). Si el gate está off, ni siquiera se consultan los datos de clasificación.
+
+### Performance
+
+Queries del hero en `Promise.all` dentro de `getHomeBusinessMetrics` (1 sola pasada para count actual + count previo + findMany del período que alimenta velocidad/embudo/origen + conteo hot + top hot). Wrappers `Suspense` por sección como el patrón existente. Mobile: grids `grid-cols-1 sm:grid-cols-2` / `lg:grid-cols-2`, tap targets, sin overflow.
+
+### Tests
+
+`src/lib/dashboard/home-metrics-logic.invariant.ts` (`check:invariant:home-metrics`, **verde**): delegación de período en dates-ar (incl. borde de mes), plata (null→setup / cargado→cálculo), gate por plan, velocidad (promedio, filtra null/negativos, vacío→null), embudo, categorización de origen, y `tallyOrigins` (orden, "Otros" último, suma preservada con >5 buckets). Lógica pura, sin DB.
+
+Anti-fuga multi-tenant + bordes de período + gate → **verificados en RUNTIME contra Neon** (probe descartable: leads temporales bajo un botConfig real, borrados en cleanup): org A no ve leads de org B; sólo el lead de la semana actual cuenta en `current` y sólo el de la previa en `previous`; gate OFF no consulta clasificación. (El probe encontró el bug de `excludeDqWhere`/null antes de quedar verde.)
+
+### Review adversarial (workflow multi-agente)
+
+4 dimensiones (seguridad multi-tenant, correctitud, convenciones/UX, dates/reuso) × hallazgos verificados por escépticos: 23 hallazgos, **10 confirmados**. Corregidos: (1) **[medium]** `tallyOrigins` recortaba con `slice` y podía **descartar "Otros"** → los % de "De dónde llegan" se inflaban sobre un total truncado que no cuadraba con "Leads esta semana"; ahora la cola se **pliega** en "Otros" (suma de buckets == leads del período) + test de regresión; (2) ternario muerto en el semáforo; (3) `ownHost` por substring → comparación por dominio (`===`/`endsWith('.'+own)`); (4) **[medium]** microcopy `text-zinc-600` chico bajo contraste AA → `text-zinc-500`; (5) `aria-hidden` en flechas decorativas. **Waived con criterio**: el link del embudo a `?status=NEW` (nudge direccional, la lista es superset del conteo semanal) y `getGreeting()/formatDateES()` de `page.tsx` (pre-existentes, fuera de scope — el `getGreeting` usa hora local del server, candidato a futuro refactor a dates-ar). Falso-positivos descartados por los verificadores: 13.
+
+### Archivos
+
+- **Creados:** `src/lib/dashboard/home-metrics-logic.ts`, `src/lib/dashboard/home-metrics.ts`, `src/lib/dashboard/home-metrics-logic.invariant.ts`, `src/app/(protected)/dashboard/_actions/business-profile.actions.ts`, `src/components/dashboard/home/{BusinessHero,MoneyEstimate,LeadOrigins,LeadFunnel}.tsx`.
+- **Modificados:** `src/app/(protected)/dashboard/page.tsx` (recomposición + fix de lint pre-existente en `BriefServerWrapper`: JSX fuera del try/catch, comportamiento idéntico), `package.json` (script `check:invariant:home-metrics`).
+
+### Verificación
+
+`check:invariant:home-metrics` ✓ · `check:invariant:dates-ar` ✓ · `check:invariant:lead-status` ✓ · `check:invariant:security` ✓ (regresión) · `npm run build` exit 0 (heap 8 GB) · `eslint` limpio en los archivos tocados · runtime contra Neon ✓. **Visual browser: no corrible en este entorno** (MCP de preview no conectado — confirmado por el agente visual-qa); el `build` type-checkea y compila la ruta. Queda el checkpoint visual del humano.
+
+### Para el humano
+
+- Checkpoint runtime sugerido: con **client-a (Business, con seed)** describir el home sección por sección; con una **org QA nueva** ver los empty states de invitación; con **Starter** confirmar las 4 preguntas visibles y el semáforo en teaser; y revisar el **mobile** angosto.
+- Nota: la org seedeada puede tener pocos/cero `ChatbotLead` (nacen de conversaciones reales del bot) — si el home se ve "calibrando", es el empty state honesto funcionando, no un bug.
+- Refactors futuros anotados (no tocados): `getGreeting()/formatDateES()` de `page.tsx` a dates-ar; mapear `currentPath` como "página específica" del origen.

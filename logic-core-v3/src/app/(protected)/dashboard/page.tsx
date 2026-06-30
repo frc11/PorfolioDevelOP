@@ -1,6 +1,9 @@
 import { AIExecutiveBriefV2 } from '@/components/dashboard/home/AIExecutiveBriefV2'
 import { AttentionStack } from '@/components/dashboard/home/AttentionStack'
 import { HealthScore } from '@/components/dashboard/home/HealthScore'
+import { BusinessHero } from '@/components/dashboard/home/BusinessHero'
+import { LeadOrigins } from '@/components/dashboard/home/LeadOrigins'
+import { LeadFunnel } from '@/components/dashboard/home/LeadFunnel'
 import { OnboardingStatusCard } from '@/components/dashboard/OnboardingStatusCard'
 import { UsageMeter } from '@/components/dashboard/plan/UsageMeter'
 import { WeekResultsGrid } from '@/components/dashboard/home/WeekResultsGrid'
@@ -8,8 +11,11 @@ import { Badge, Card, LoadingState, PageHeader } from '@/components/ui'
 import { getExecutiveBrief } from '@/lib/ai/executive-brief'
 import { getAttentionItems } from '@/lib/dashboard/attention'
 import { getWeekResults } from '@/lib/dashboard/week-results'
+import { getHomeBusinessMetrics } from '@/lib/dashboard/home-metrics'
 import { getHealthScore } from '@/lib/health-score'
 import { getOrgUsageSnapshot } from '@/lib/plan/get-org-usage'
+import { getPlanForOrg } from '@/lib/plan/get-plan-for-org'
+import { planAllows } from '@/lib/plan/plan-allows'
 import { resolveOrgId } from '@/lib/preview'
 import { prisma } from '@/lib/prisma'
 import { unstable_cache } from 'next/cache'
@@ -51,25 +57,104 @@ export default async function DashboardPage() {
         <OnboardingStatusCard organizationId={organizationId} />
       </Suspense>
 
-      <Suspense fallback={<HealthScoreSkeleton />}>
-        <HealthScoreServerWrapper organizationId={organizationId} />
+      {/* P1.C — Resultados del negocio: lo primero y más grande del home. Las 4
+          preguntas del dueño + origen + embudo. */}
+      <Suspense fallback={<BusinessResultsSkeleton />}>
+        <BusinessResultsServerWrapper organizationId={organizationId} />
       </Suspense>
 
-      <Suspense fallback={null}>
-        <AttentionStackServerWrapper organizationId={organizationId} />
-      </Suspense>
-
-      <Suspense fallback={<WeekResultsSkeleton />}>
-        <WeekResultsServerWrapper organizationId={organizationId} />
-      </Suspense>
-
-      <Suspense fallback={<UsageMeterSkeleton />}>
-        <UsageMeterServerWrapper organizationId={organizationId} />
-      </Suspense>
-
+      {/* Resumen ejecutivo IA — valorado, se mantiene visible pero secundario. */}
       <Suspense fallback={<BriefSkeleton />}>
         <BriefServerWrapper organizationId={organizationId} />
       </Suspense>
+
+      {/* "Tu cuenta" — estado e indicadores de la cuenta, jerarquía menor. Antes
+          eran el centro del home; ahora viven debajo de los resultados. Nada se
+          borró: reubicación pura (reversible restaurando este orden). */}
+      <section className="space-y-6 border-t border-white/[0.06] pt-8">
+        <h2 className="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-500">
+          Tu cuenta
+        </h2>
+
+        <Suspense fallback={<HealthScoreSkeleton />}>
+          <HealthScoreServerWrapper organizationId={organizationId} />
+        </Suspense>
+
+        <Suspense fallback={null}>
+          <AttentionStackServerWrapper organizationId={organizationId} />
+        </Suspense>
+
+        <Suspense fallback={<WeekResultsSkeleton />}>
+          <WeekResultsServerWrapper organizationId={organizationId} />
+        </Suspense>
+
+        <Suspense fallback={<UsageMeterSkeleton />}>
+          <UsageMeterServerWrapper organizationId={organizationId} />
+        </Suspense>
+      </section>
+    </div>
+  )
+}
+
+// P1.C — Deriva el host del sitio del cliente para no clasificar el tráfico
+// interno (referrer del propio sitio) como "Otros".
+function siteHost(siteUrl: string | null): string | null {
+  if (!siteUrl) return null
+  try {
+    return new URL(siteUrl).hostname.toLowerCase()
+  } catch {
+    return siteUrl.toLowerCase().replace(/^https?:\/\//, '').split('/')[0] || null
+  }
+}
+
+async function BusinessResultsServerWrapper({ organizationId }: { organizationId: string }) {
+  const [org, plan] = await Promise.all([
+    prisma.organization.findUnique({
+      where: { id: organizationId },
+      select: { averageTicketUsd: true, siteUrl: true },
+    }),
+    getPlanForOrg(organizationId),
+  ])
+
+  // Gate Pro+: el semáforo (depende de la clasificación) sólo para insight-enabled.
+  // Las otras 3 preguntas son para todos los planes.
+  const showSemaforo = planAllows(plan, 'leadScoring')
+
+  const metrics = await getHomeBusinessMetrics(organizationId, {
+    includeClassification: showSemaforo,
+    ownHost: siteHost(org?.siteUrl ?? null),
+  })
+
+  return (
+    <div className="space-y-6">
+      <BusinessHero metrics={metrics} averageTicketUsd={org?.averageTicketUsd ?? null} />
+      <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+        <LeadOrigins origins={metrics.origins} />
+        <LeadFunnel funnel={metrics.funnel} />
+      </div>
+    </div>
+  )
+}
+
+function BusinessResultsSkeleton() {
+  return (
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        {[0, 1, 2, 3].map((item) => (
+          <div
+            key={item}
+            className="h-32 rounded-2xl border border-white/[0.06] bg-white/[0.015] animate-pulse"
+          />
+        ))}
+      </div>
+      <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+        {[0, 1].map((item) => (
+          <div
+            key={item}
+            className="h-40 rounded-2xl border border-white/[0.06] bg-white/[0.015] animate-pulse"
+          />
+        ))}
+      </div>
     </div>
   )
 }
@@ -99,26 +184,30 @@ async function WeekResultsServerWrapper({ organizationId }: { organizationId: st
 }
 
 async function BriefServerWrapper({ organizationId }: { organizationId: string }) {
+  // El fetch va dentro del try; el JSX se construye FUERA (regla
+  // react-hooks/error-boundaries: armar JSX dentro de try/catch no captura
+  // errores de render). Comportamiento idéntico: error o brief vacío → empty.
+  let brief: Awaited<ReturnType<typeof getExecutiveBrief>> = null
   try {
-    const brief = await getExecutiveBrief(organizationId)
-
-    if (!brief?.text?.trim()) {
-      return <BriefEmptyState />
-    }
-
-    return (
-      <AIExecutiveBriefV2
-        initialText={brief.text}
-        initialGeneratedAt={brief.generatedAt}
-        initialIsFresh={brief.isFresh}
-        initialRegenerationsLeft={brief.regenerationsLeft}
-        initialCanRegenerate={brief.canRegenerate}
-      />
-    )
+    brief = await getExecutiveBrief(organizationId)
   } catch (err) {
     console.error('[AIBrief] Server wrapper failed:', err)
     return <BriefEmptyState />
   }
+
+  if (!brief?.text?.trim()) {
+    return <BriefEmptyState />
+  }
+
+  return (
+    <AIExecutiveBriefV2
+      initialText={brief.text}
+      initialGeneratedAt={brief.generatedAt}
+      initialIsFresh={brief.isFresh}
+      initialRegenerationsLeft={brief.regenerationsLeft}
+      initialCanRegenerate={brief.canRegenerate}
+    />
+  )
 }
 
 // B12.7 — Estado vacío honesto. Antes el wrapper retornaba null y el card
