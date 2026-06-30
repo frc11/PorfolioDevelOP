@@ -14,19 +14,19 @@
 import type { VerticalPack, VerticalPackKey } from './types'
 import { BASE_PACK } from './packs/base'
 import { USADOS_PACK } from './packs/usados'
+import { AGENCIA_PACK } from './packs/agencia'
 
 /**
  * Registro de packs. Indexado por `VerticalPackKey`.
  *
- * `usados` (EV.3) ya tiene su scoring vertical real, extraído verbatim del
- * motor. `agencia` sigue usando BASE_PACK como placeholder hasta EV.4.
- * `getVerticalPack` las resuelve directamente (sin warning) — son claves
- * conocidas, no errores.
+ * `usados` (EV.3) tiene scoring vertical real; `agencia` (EV.4) tiene los intents
+ * verbatim de la agencia y scoring `base`. `getVerticalPack` las resuelve
+ * directamente (sin warning) — son claves conocidas, no errores.
  */
 const PACKS = {
   base: BASE_PACK,
   usados: USADOS_PACK,
-  agencia: BASE_PACK,  // TODO EV.4: reemplazar con AGENCIA_PACK
+  agencia: AGENCIA_PACK,
 } satisfies Record<VerticalPackKey, VerticalPack>
 
 /**

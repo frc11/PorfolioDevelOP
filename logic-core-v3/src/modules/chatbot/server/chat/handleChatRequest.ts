@@ -3,6 +3,7 @@ import { streamText, stepCountIs, type ModelMessage } from 'ai'
 import { z } from 'zod'
 import * as Sentry from '@sentry/nextjs'
 import { detectIntent } from '../intent'
+import { getVerticalPack } from '../verticals'
 import { prisma } from '@/lib/prisma'
 
 import {
@@ -491,7 +492,12 @@ export async function handleChatRequest(
   mark('user_msg_persist_ms')
 
   // ─── 7. Intent detection & Build system prompt ────────────────
-  const intentResult = detectIntent(lastUserMessage.content)
+  // EV.4 — los patrones de intent salen del pack vertical del bot (mismo camino
+  // que el scoring de EV.3). `bot` viene de resolveBotBySlug con `include`, así
+  // que `verticalPack` ya está en contexto: cero query nueva. Clave desconocida
+  // → pack `base` con warning (getVerticalPack nunca lanza).
+  const verticalPack = getVerticalPack(bot.verticalPack)
+  const intentResult = detectIntent(lastUserMessage.content, verticalPack.intents)
   mark('intent_ms')
   if (intentResult.intent !== 'unknown') {
     chatbotDebug('intent_detected', {

@@ -22,13 +22,13 @@ const packA = getVerticalPack(botA.verticalPack)
 const packB = getVerticalPack(botB.verticalPack)
 const packC = getVerticalPack(botC.verticalPack)
 
-// EV.3: `usados` ya es un pack REAL (key 'usados'). `agencia` sigue siendo
-// placeholder → resuelve a 'base' hasta EV.4. El invariante es que la RESOLUCIÓN
-// depende de la clave del propio bot, no del vecino.
+// EV.3/EV.4: `usados` y `agencia` ya son packs REALES (keys 'usados'/'agencia').
+// El invariante es que la RESOLUCIÓN depende de la clave del propio bot, no del
+// vecino.
 assert.strictEqual(
   packA.key,
-  'base', // agencia → BASE_PACK como placeholder hasta EV.4
-  'bot agencia resuelve su pack (base placeholder hasta EV.4)',
+  'agencia', // EV.4: agencia es pack real (intents verbatim de la agencia)
+  'bot agencia resuelve su pack real',
 )
 assert.strictEqual(
   packB.key,
@@ -116,6 +116,5 @@ assert.ok(
 
 console.log(
   '[EV.2 invariant] ✓ Todas las aserciones de aislamiento multi-tenant pasaron. ' +
-  'Bots probados: botA(agencia→base), botB(usados→pack real EV.3), botC(base), botDesconocido. ' +
-  'Nota: agencia sigue placeholder (base) hasta EV.4.',
+  'Bots probados: botA(agencia→pack real EV.4), botB(usados→pack real EV.3), botC(base), botDesconocido.',
 )

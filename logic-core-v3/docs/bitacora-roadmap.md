@@ -10803,6 +10803,62 @@ Resumen para el postmortem del próximo bloque. FG-0 dejó la zona `/setter` con
 > **La fase beta de LeadOS continúa en [`bitacora-beta.md`](./bitacora-beta.md).** De acá en más, todas las entradas de bloque de la fase beta van en ese documento. Este archivo queda como histórico (versiones previas y otros bloques/proyectos).
 
 ---
+## ✅ EV.4 — Intents desde pack: `agencia` verbatim + patrones `usados` nuevos   ·   2026-06-30
+> **Código completo y testeado (EV.1-4 + golden verdes). ⚠️ Paso 5 (smoke/transcripts) GATED por server caído + el backfill `verticalPack` abierto de EV.3 — ver "Gate de Paso 5".**
+
+**Sprint:** EV.4 — Los patrones de detección de intent salen ahora del pack vertical del bot. El bot de la agencia conserva sus patrones verbatim; el pack `usados` recibe vocabulario de concesionaria.
+
+### Hallazgos de descubrimiento (Paso 0) — correcciones de premisa
+
+- **`detectIntent` NO emite las claves customer-facing post-B5.1.** Emite *guidance-intents* efímeros (`price`/`urgency`/`comparison`/`service_inquiry`/`consultation`) que se inyectan al system prompt como hint (`handleChatRequest` → `enrichedSystemPrompt`). Las claves customer-facing (panel) y de scoring son OTRAS: `LEAD_INTENTS` de `captureLead` + las señales del scoring. **EV.4 no las toca.** Por eso el pack `usados` declara su PROPIO vocabulario de guidance-intents (el contrato EV.1 `intent: string` lo habilita), sin renombrar ni tocar las claves customer-facing/scoring.
+- **La guidance SÍ se inyecta** (no era dead code): `handleChatRequest.ts:587-597`.
+- **Bot de la agencia**: vive en `src/modules/chatbot/prisma/seed.ts` (org `develop`, slug `develop`), no en el seed principal. No setea `verticalPack` → queda `'base'` en DB.
+
+### Archivos creados / modificados
+
+| Archivo | Cambio |
+|---------|--------|
+| `…/verticals/packs/agencia.ts` (nuevo) | Pack `agencia`: 5 intents VERBATIM de `detectIntent.ts` (patrones + guidance). Scoring/toolCopy/widgetCopy reusan `base`. |
+| `…/verticals/packs/usados.ts` | `intents`: 7 intents de concesionaria del MATERIAL (regex es-AR, voseo + tildes). Scoring SIN tocar. |
+| `…/intent/detectIntent.ts` | `detectIntent(msg, intents)` — matcher puro sobre los patrones del pack; cero patrones hardcodeados. `IntentResult.intent` → `string`. |
+| `…/chat/handleChatRequest.ts` | Resuelve `getVerticalPack(bot.verticalPack).intents` y se lo pasa a `detectIntent` (sin query nueva). Inyección de guidance intacta. |
+| `…/verticals/registry.ts` | `agencia` → `AGENCIA_PACK` (era placeholder a `base`). |
+| `…/verticals/__tests__/ev4.invariant.ts` (nuevo) | usados: 28 frases en 7 intents + 3 neutras + 5 FP-guards; agencia: 5 dorados + 5 claves verbatim; base: 7 inputs sin crash. |
+| `…/verticals/__tests__/ev2.invariant.ts` | Aserción `agencia` → pack real (EV.2 dejó la nota de actualizar en EV.4). |
+| `scripts/ev4-smoke.mjs` (nuevo) | Smoke scripteado (7 conversaciones, POST real). **Listo para correr; no corrido (gated).** |
+| `docs/ev4-transcripts/README.md` (nuevo) | Documenta el gate de Paso 5 y cómo generar los transcripts. |
+| `package.json` | Script `test:ev4`. |
+
+### Decisión: vocabulario de intents `usados`
+
+Reading purposivo de la REGLA ABSOLUTA "no inventar claves nuevas": su justificación ("las claves son customer-facing y entrada del scoring") aplica a `LEAD_INTENTS`/scoring, que EV.4 NO toca. Los guidance-intents son efímeros y per-pack por diseño (EV.1). El pack `usados` usa claves descriptivas del MATERIAL (`purchase_ready`, `schedule_visit`, `trade_in`, `financing_inquiry`, `specific_model`, `price_inquiry`, `human_handoff`) — sin agregar conceptos fuera del MATERIAL. El KEY es un label interno del lookup de guidance; lo observable (transcripts) lo define el patrón + la guidance.
+
+### Auditoría adversarial (5 agentes, opus) + fixes aplicados
+
+- **AGENCIA VERBATIM → PASS**: `AGENCIA_PACK.intents` es copia char-by-char de los PATTERNS+GUIDANCE legacy (5 claves, mismo orden, regex/flags/escapes/em-dash idénticos).
+- **WIRING + NO-REGRESIÓN → PASS**: `detectIntent` quedó como matcher puro; `LEAD_INTENTS` y el motor de scoring SIN tocar; golden 208/208 intacta.
+- **SCOPE → limpio** (ningún archivo prohibido; tool descriptions/n8n/prompts/admin/dashboard/schema sin tocar).
+- **PATRONES USADOS → concern, corregido**: el audit encontró (verificado con node) 2 falsos positivos reales → **fixeados**: (1) `schedule_visit` `/probar/` sin `\b` inicial matcheaba "aprobar"/"comprobar" → `/\bprobar\b/`; (2) `specific_model` con nombres de modelo = palabras comunes (`gol`/`toro`/`partner`/`fiesta`) → removidos. El test ev4 ahora incluye **5 FP-guards** (gol/toro/partner/aprobar) + contra-prueba de que "aprobar el crédito" enruta a `financing_inquiry`.
+
+### ⚠️ Gate de Paso 5 (smoke / transcripts)
+
+El smoke (la "verificación de verdad" del sprint) **no se corrió**. Bloqueado por:
+1. Dev server caído al cierre. El endpoint valida `Origin` → para localhost, `npm run dev:qa` (QA_ALLOW_LOCALHOST).
+2. **`verticalPack` de los bots = `'base'` en DB** (el gate de backfill ABIERTO de EV.3). Con los bots en `'base'`, el smoke resolvería el pack `base`, NO ejercitaría `agencia`/`usados` → no validaría EV.4.
+3. Bot `develop` debe estar sembrado.
+
+No se mutó la DB dev compartida (decisión de Franco — branch compartida con el socio, igual que el gate de EV.3). Instrucciones de corrida en `docs/ev4-transcripts/README.md`. **Los 7 transcripts quedan pendientes hasta el backfill + server.**
+
+### Verificación post-sprint
+
+`tsc --noEmit` limpio (solo baseline `searchconsole.ts`). `npm run build` verde. EV.1/EV.2/EV.3/EV.3-golden/EV.4 verdes. Suite dorada de scoring intacta (208/208). LEAD_INTENTS y motor de scoring SIN tocar.
+
+> **Nota operativa:** este sprint EV.4 fue re-aplicado tras un `git reset` accidental que descartó el working-tree (EV.2/EV.3 ya estaban commiteados; EV.4 no). Reconstruido idéntico desde contexto, incluidos los fixes post-auditoría.
+
+> **Compuerta de la cadena (Franco):** EV.5 no se larga hasta que Franco (a) lea los 7 transcripts — pendientes del gate de arriba — y dé OK a que el bot usados "suena a concesionaria" y el de agencia no cambió; y (b) avale la decisión de vocabulario de intents `usados`. Si algo suena mal, vuelve a planificación.
+
+---
+
 ## ✅ EV.3 — Scoring desde pack: extracción `usados` con paridad probada   ·   2026-06-29
 > **Código completo y paridad de función probada (208/208). ⚠️ Gate de despliegue abierto: backfill `verticalPack='usados'` requerido antes de producción — ver abajo.**
 

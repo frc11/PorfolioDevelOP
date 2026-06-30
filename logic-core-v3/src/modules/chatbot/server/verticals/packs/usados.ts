@@ -80,8 +80,124 @@ export const USADOS_PACK: VerticalPack = {
     },
   },
 
-  // EV.4 completa los intents verticales (hoy en detectIntent.ts).
-  intents: [],
+  // EV.4 — Intents de concesionaria (compraventa de autos). Vocabulario es-AR
+  // (voseo, con/sin tildes). El ORDEN define prioridad: alta-intención primero
+  // (compra/visita/permuta/financiación) antes que precio genérico. Compilado
+  // del MATERIAL de planificación EV.4 — sin agregar conceptos.
+  intents: [
+    {
+      intent: 'purchase_ready',
+      patterns: [
+        /lo quiero\b/i,
+        /c[oó]mo (hago para |puedo )?comprar(lo)?/i,
+        /lo se[ñn](amos|o|ás|as)\b/i,
+        /\bse[ñn]ar\b/i,
+        /te lo compro/i,
+        /\blo compro\b/i,
+        /d[oó]nde (transfiero|deposito|pago)/i,
+        /hacemos la operaci[oó]n/i,
+        /me lo llevo/i,
+        /\bcerramos\b/i,
+      ],
+      guidance:
+        'El visitante muestra intención de compra concreta. Confirmá disponibilidad del vehículo y ' +
+        'guialo al próximo paso (seña o visita) sin presionar. Si te da un teléfono o email, usá capture_lead.',
+    },
+    {
+      intent: 'schedule_visit',
+      patterns: [
+        /(puedo |quiero )?ir a verlo/i,
+        /test\s*drive/i,
+        /\bprobar(lo)?\b/i,
+        /pasar por (la agencia|el local|el concesionario)/i,
+        /cu[aá]ndo puedo ir/i,
+        /me lo mostr[aá]s/i,
+        /verlo hoy/i,
+        /agendar (una )?visita/i,
+      ],
+      guidance:
+        'El visitante quiere ver o probar el auto. Ofrecé coordinar una visita o test drive; pedí día y horario ' +
+        'y un dato de contacto. Es buen momento para capture_lead.',
+    },
+    {
+      intent: 'trade_in',
+      patterns: [
+        /permut[oa]\b/i,
+        /permutar/i,
+        /tengo un usado/i,
+        /usado (para|en) entregar/i,
+        /tom[aá]s (mi |el )?usado/i,
+        /recib[ií]s usados/i,
+        /entrego el m[ií]o/i,
+        /parte de pago/i,
+        /cu[aá]nto me tom[aá]s/i,
+      ],
+      guidance:
+        'El visitante quiere entregar un usado en parte de pago. Pedí los datos del vehículo (marca, modelo, ' +
+        'año, kilómetros, estado) para una tasación, aclarando que la tasación final la confirma un asesor.',
+    },
+    {
+      intent: 'financing_inquiry',
+      patterns: [
+        /financiaci[oó]n/i,
+        /financiad[oa]/i,
+        /\bcuotas?\b/i,
+        /prendario/i,
+        /\bcr[eé]dito\b/i,
+        /\banticipo\b/i,
+        /cu[aá]nto de entrega/i,
+        /\btasa\b/i,
+      ],
+      guidance:
+        'El visitante preguntó por financiación o cuotas. Explicá que hay opciones (crédito propio, bancos, ' +
+        'planes) sin prometer tasas exactas, y ofrecé que un asesor le arme una propuesta a medida.',
+    },
+    {
+      intent: 'specific_model',
+      patterns: [
+        // Modelos distintivos. Se OMITEN tokens que colisionan con palabras
+        // comunes del castellano (gol, toro, partner, fiesta, ka) para evitar
+        // falsos positivos ("metió un gol", "fuerte como un toro").
+        /\b(corolla|hilux|amarok|ranger|onix|cronos|etios|kangoo|saveiro|t[-\s]?cross|nivus|tracker|cruze|focus|duster|oroch|captur|kwid|strada|fiorino|montana)\b/i,
+        /qu[eé] versi[oó]n/i,
+        /a[ñn]o y kil[oó]metros/i,
+        /cu[aá]ntos kil[oó]metros/i,
+        /qu[eé] a[ñn]o es/i,
+        /que public(aron|aste)/i,
+      ],
+      guidance:
+        'El visitante pregunta por un modelo o versión concreta. Dale la info que tengas de ese vehículo ' +
+        '(versión, año, kilómetros, disponibilidad) y ofrecé coordinar una visita para verlo.',
+    },
+    {
+      intent: 'price_inquiry',
+      patterns: [
+        /cu[aá]nto (sale|vale|pides|ped[ií]s)/i,
+        /\bprecio\b/i,
+        /negociable/i,
+        /[uú]ltimo precio/i,
+        /acept(an|ás) (una )?oferta/i,
+        /hacen (precio|descuento)/i,
+      ],
+      guidance:
+        'El visitante preguntó el precio. Si tenés el precio publicado, dalo; si pregunta por descuentos u ofertas, ' +
+        'no cierres un número final — ofrecé que un asesor le confirme la mejor condición.',
+    },
+    {
+      intent: 'human_handoff',
+      patterns: [
+        /hablar con (una persona|alguien|un (vendedor|asesor|humano))/i,
+        /que me llame un (vendedor|asesor)/i,
+        /pasame con (alguien|un (vendedor|asesor))/i,
+        /n[uú]mero de (tel[eé]fono|la agencia|whatsapp)/i,
+        /con un humano/i,
+        /atenci[oó]n humana/i,
+      ],
+      guidance:
+        'El visitante quiere hablar con una persona. Validá el pedido y derivá: ofrecé el WhatsApp del asesor ' +
+        'o pedí sus datos para que lo contacten. Usá la tool de handoff o capture_lead.',
+    },
+  ],
 
   // EV.5 cablea estos strings en las descripciones de tools. Los ejemplos de
   // modelo ya existen en captureLead.ts (no inventados).
