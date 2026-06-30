@@ -10803,6 +10803,76 @@ Resumen para el postmortem del próximo bloque. FG-0 dejó la zona `/setter` con
 > **La fase beta de LeadOS continúa en [`bitacora-beta.md`](./bitacora-beta.md).** De acá en más, todas las entradas de bloque de la fase beta van en ese documento. Este archivo queda como histórico (versiones previas y otros bloques/proyectos).
 
 ---
+## ✅ EV.3 — Scoring desde pack: extracción `usados` con paridad probada   ·   2026-06-29
+> **Código completo y paridad de función probada (208/208). ⚠️ Gate de despliegue abierto: backfill `verticalPack='usados'` requerido antes de producción — ver abajo.**
+
+**Sprint:** EV.3 — El motor de scoring deja de tener la tabla automotriz hardcodeada y la lee del pack `usados`. Refactor con **paridad exacta probada**: para las mismas entradas, exactamente los mismos scores que antes.
+
+### Archivos creados
+
+| Archivo | Descripción |
+|---------|-------------|
+| `src/modules/chatbot/server/verticals/packs/usados.ts` | Pack `usados`: scoring extraído **verbatim** del motor (5 señales, 2 combos, 2 penalties, DQ, thresholds). intents `[]` y toolCopy/widgetCopy placeholder (EV.4/EV.5) |
+| `…/verticals/__tests__/ev3.generate-fixture.ts` | Generador one-shot de la fixture dorada (corrido ANTES del refactor) |
+| `…/verticals/__tests__/ev3.golden-fixture.ts` | Fixture **congelada e inmutable**: 120 casos de score + 88 de decay = 208 |
+| `…/verticals/__tests__/ev3.golden.invariant.ts` | Suite dorada de paridad (208 casos contra la fixture) |
+| `…/verticals/__tests__/ev3.invariant.ts` | Invariantes nuevas: verbatim usados≡legacy, fallback a base, tablas org-scoped distintas, dual-write |
+
+**Scripts agregados:** `test:ev3:golden`, `test:ev3`.
+
+### Archivos modificados
+
+| Archivo | Cambio |
+|---------|--------|
+| `…/scoring/calculateLeadScore.ts` | `calculateLeadScore(input, scoring?: VerticalScoring)` lee la config del pack (default = `USADOS_PACK.scoring`, == comportamiento previo). + `buildSignalsSnapshot()`. DQ/combos/penalties/thresholds parametrizados. Decay intacto. |
+| `…/scoring/index.ts` | Export de `buildSignalsSnapshot` |
+| `…/tools/captureLead.ts` | Resuelve el pack del bot (`getVerticalPack(ctx.verticalPack ?? 'base')`) e inyecta su scoring. **Dual-write**: columna `signals` Json ADEMÁS de las 6 booleanas legacy (sin cambios en éstas) |
+| `…/tools/types.ts` | `ToolCallContext.verticalPack?: string` |
+| `…/chat/handleChatRequest.ts` | Pasa `bot.verticalPack` al contexto (sin query nueva: `bot` ya viene con `include`) |
+| `…/verticals/registry.ts` | `usados` → `USADOS_PACK` (era placeholder a `base`) |
+| `…/verticals/types.ts` | `validatePackScoring`: se quita el techo "señales+combos ≤ 100" (ver Reconciliación) |
+| `…/verticals/__tests__/ev2.invariant.ts` | Aserciones de `usados` actualizadas a pack real (EV.2 dejó la nota para hacerlo en EV.3) |
+
+### Paridad probada
+
+- Fixture dorada generada ejecutando el motor **pre-refactor** y congelada. **208/208 casos verdes pre y post refactor, cero expectativas modificadas** (la fixture y el test no cambian entre Paso 1 y Paso 4). El test llama `calculateLeadScore(input)` con un solo arg — firma estable pre/post.
+- Cobertura: 2^5 señales × {sales, postventa, other} (96) + DQ (6) + matriz teléfono×señales (18) = 120 score; 4 base-scores × 17 puntos de la curva + DQ-es-DQ + applyTimeDecay = 88 decay.
+- Equivalencia estructural verbatim (`ev3.invariant.ts`): el pack `usados` reproduce exacto las constantes legacy (señales, combos vía `requiredSignalKeys.every()` == `matches()` en las 32 combinaciones, penalties, thresholds, DQ).
+
+### Dual-write
+
+`ChatbotLead.signals` (Json) se escribe con `buildSignalsSnapshot` (clave de señal del pack → `{value, points}`) ADEMÁS de las columnas booleanas legacy, que NO cambian. Verificado por test (forma exacta, sin DB).
+
+### Reconciliación con EV.1/EV.2 (no toca la fixture dorada)
+
+- **`validatePackScoring` (EV.1)**: asumía `señales+combos ≤ 100`. La tabla `usados` real suma **115 pre-clamp** (siempre fue así: "115 → clamp 100"). El motor clampa incondicionalmente, así que >100 es válido por diseño. Se quitó ese techo (rechazaba una tabla real shippeada). El resto del validador intacto. `ev1.invariant.ts` queda verde sin tocarlo.
+- **`ev2.invariant.ts`**: EV.2 había aseverado `usados → base` (placeholder) y dejó la nota de actualizar en EV.3. Hecho: ahora `usados → pack real`, `agencia` sigue placeholder hasta EV.4.
+
+### Verificación post-sprint
+
+`tsc --noEmit` limpio (solo baseline conocido `searchconsole.ts`). `npm run build` verde. EV.1/EV.2/EV.3/golden + 9 invariantes leados/security verdes. `npx prisma migrate status` limpio (EV.3 no agrega migraciones).
+
+### Auditoría adversarial (6 agentes, opus)
+
+Workflow de verificación: 5 auditores independientes (verbatim, paridad-lógica, dual-write, inmutabilidad-dorada, scope) + síntesis. Resultado:
+
+- **Verbatim · Paridad-lógica · Inmutabilidad-dorada · Scope → PASS.** Un auditor **reconstruyó el motor pre-refactor desde git HEAD** y corrió los 208 casos de la fixture contra él: **208/208 exacto** → descarta que la fixture sea circular/tautológica. Paridad de la FUNCIÓN probada de forma decisiva. Ningún archivo prohibido tocado.
+- **Dual-write → CONCERN/FAIL (gate de despliegue).** Ver abajo.
+
+### ⚠️ GATE DE DESPLIEGUE (no es un defecto del refactor — es la costura EV.2/EV.3)
+
+Pre-EV.3 el motor puntuaba SIEMPRE con la tabla `usados` hardcodeada. Post-EV.3 cada bot puntúa con SU pack (`getVerticalPack(bot.verticalPack)`). Pero la migración EV.2 puso `verticalPack` con **default `'base'`** en TODAS las filas, y el seed que setea `'usados'` (San Miguel) **no se corrió**. Consecuencia: hoy San Miguel está en `'base'` en la DB → con EV.3 puntuaría con la tabla `base` (distinta: providedPhone 30 vs 5, sin combos), **cambiando silenciosamente el score de un tenant real**.
+
+- **No se puede cerrar dentro de EV.3** (scope prohíbe schema/migración/seed). La paridad de la FUNCIÓN está probada; la paridad END-TO-END depende del dato.
+- **Requerido antes de producción:** backfillear los bots concesionaria a `verticalPack='usados'` — correr el seed de EV.2 (ya setea San Miguel) **o** un `UPDATE` puntual. Hasta entonces, NO desplegar EV.3 a un bot con tráfico.
+- Documentado inline en `captureLead.ts` y `tools/types.ts`.
+
+Defectos in-scope que SÍ se corrigieron tras la auditoría: documentación contradictoria del default (decía "ausente → usados", el call-site usa `'base'`) alineada a la realidad; test de cobertura agregado para ambas penalties simultáneas (orden + DQ negativo) — la fixture dorada no lo cubría; constantes legacy de penalty anotadas como referencia verbatim (las consume el test de invariante, no el runtime).
+
+> **EV.2 — nota de cierre pendiente:** la entrada `## ✅ EV.2` no existe en la bitácora (EV.2 difirió el cierre al humano post-aplicación de migración). La migración EV.2 SÍ está aplicada y `migrate status` limpio. **El backfill `verticalPack='usados'` es parte de ese cierre EV.2 pendiente** y es el gate de arriba.
+
+---
+
 ## ✅ EV.1 — Contrato `VerticalPack` + registry + pack `base`   ·   2026-06-28
 
 **Sprint:** EV.1 — Inauguración del bloque EV (generalización del motor en packs verticales)
@@ -10903,3 +10973,28 @@ Sweep sobre los otros 3 módulos premium, `src/actions/**`, `src/lib/actions/**`
 `npm run check:invariant:security` verde · `eslint` limpio en lo tocado · `npm run build` exit 0 · `npx prisma migrate status` → *Database schema is up to date!* (cero migraciones). El E2E `20-idor-optout.spec.ts` requiere server+DB → lo corre el humano en su entorno.
 
 > **Nota operativa (deploy):** Brevo debe tener los atributos de contacto `CONTACT_ID` y `OPTOUT_TOKEN` (texto) para que el footer interpole bien. Contactos ya sincronizados antes de este cambio reciben el atributo en su próxima importación/sync; mientras tanto su link de baja cae en `403` (fail-closed, no es regresión: la baja vía Brevo ya estaba rota por el mismatch `{{contact.id}}`).
+
+
+---
+## ✅ P0.4 — Coherencia comercial   ·   2026-06-29
+
+Precio Starter unificado a USD 49 en `fallback.ts` (era 50; seed y presentation ya estaban en 49). Mini-crm removido de `premium-features.ts` y `seed-agency-os.ts`; redirect `/dashboard/crm → .../mini-crm` eliminado de `next.config.ts`. La entrada ya no existía en `premium-modules.ts`. `npm run build` exit 0 con heap 4 GB. Pendiente acción manual: si la DB dev/prod tiene filas de `OrganizationModule` con slug `mini-crm`, requieren update SQL manual antes de deploy (no se corrió ningún update sin confirmación).
+
+---
+## ✅ P0.3 — Gate de presentación de la priorización de leads   ·   2026-06-29
+
+**Estado al abrir el sprint:** la implementación del gate ya estaba en el repo (etiquetada `P0.3` en comentarios), pero **sin tests y sin cierre de bitácora** — una sesión previa dejó el código y no cerró. Este cierre agrega la cobertura faltante y verifica.
+
+**Gate (presentación, NO cómputo).** El scoring se sigue computando y guardando para todos los planes; el gate solo decide si se MUESTRA. Vive en UN solo lugar: `planAllows(plan, 'leadScoring')` (`src/lib/plan/plan-allows.ts`), mapeado sobre `insightEnabled` ({Starter:false, Pro:true, Business:true}) — sin columna nueva, cero migraciones. Aplicado en las 4 superficies cliente, todas leyendo del mismo helper:
+- `dashboard/chatbot/leads/page.tsx` → `ClientLeadsTable` (pipeline/chips/score/highlight o teaser).
+- `dashboard/chatbot/leads/[id]/page.tsx` → `LeadDetail` (badge XL gateado; DQ siempre visible).
+- `dashboard/chatbot/layout.tsx` → dot "X calientes" de la tab.
+- `api/dashboard/chatbot/leads/export/route.ts` → `buildLeadsCsv({ includeClassification })`.
+
+Starter NO es plan castigado: ve todos sus contactos completos (nombre, teléfono, consulta, estado, fecha); lo único oculto es score/clasificación, reemplazado por el teaser sentence case ("Con el plan Pro, tu asistente marca a quién llamar primero", link a `/dashboard/plan`). `/admin/leads/*` intacto — develOP ve todo.
+
+**Tests agregados (este cierre):** `src/lib/plan/lead-scoring-gate.invariant.ts` (12 aserciones, funciones puras, sin DB) + script `check:invariant:lead-scoring`. Cubre los dos ejes pedidos: (1) gate por plan — Pro/Business ven, Starter y org-sin-plan no, y el acople a `insightEnabled` está blindado; (2) CSV — columna de priorización presente/ausente según plan, datos del contacto intactos en ambos casos, modo DQ nunca trae clasificación. El anti-IDOR existente (`check:invariant:security`) sigue verde (no se tocó esa superficie).
+
+**Verificación:** `check:invariant:lead-scoring` ✓ · `check:invariant:security` ✓ · `npm run build` exit 0 (heap 4 GB).
+
+**Pendiente de acción manual (humano):** la verificación runtime en browser de la vista de leads NO es montable desde el seed actual — solo San Miguel (Business) tiene `botConfig`, no hay `ChatbotLead` seedeados (nacen de conversaciones reales del bot) y la única org sin plan (`qa-cliente-b`, caso Starter) no tiene bot. Reproducir el caso Starter en vivo exigiría crear bot+leads para una org Starter, lo cual cae en zonas vedadas del sprint (runtime del bot / seeds / updates a DB). El gate queda verificado de forma determinística por el invariant; el chequeo visual de los dos casos (chips con Business, teaser + CSV sin score con Starter) queda para correr en el entorno con leads reales capturados.

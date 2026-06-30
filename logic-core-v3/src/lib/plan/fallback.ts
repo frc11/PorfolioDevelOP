@@ -45,7 +45,7 @@ export const PLAN_FALLBACK: EffectivePlan = {
   id: null,
   key: 'STARTER',
   name: 'Starter (fallback)',
-  monthlyPrice: 50,
+  monthlyPrice: 49,
   setupFloorPrice: 700,
   quota: 500,
   llmModel: 'gemini-2.5-flash',
