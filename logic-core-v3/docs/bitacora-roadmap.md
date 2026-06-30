@@ -10997,4 +10997,60 @@ Starter NO es plan castigado: ve todos sus contactos completos (nombre, teléfon
 
 **Verificación:** `check:invariant:lead-scoring` ✓ · `check:invariant:security` ✓ · `npm run build` exit 0 (heap 4 GB).
 
+---
+## ✅ P1.A — Fundación del rediseño del dashboard: helper de fechas AR + columnas aditivas   ·   2026-06-30
+
+Sprint de fundación: la pieza única que evita el **tercer** bug de TZ del proyecto (los datos se guardan en UTC, el negocio razona en `America/Argentina/Buenos_Aires`) + dos columnas aditivas. Cero refactors de lo existente, cero toques a runtime del bot/widget/KB ni a vistas.
+
+### Helper `src/lib/dates-ar.ts` (creado)
+
+Decisión clave: **NO se duplicó `tz-ar.ts`**. Ya existía la primitiva canónica `startOfTodayInAR()` (Intl nativo, regla "00:00 AR ≡ 03:00 UTC", AR = UTC-3 fijo sin DST). `dates-ar.ts` la **reusa** (`import { TZ_AR, startOfTodayInAR } from './tz-ar'`) y agrega lo que faltaba: rangos de semana/mes y comparativa de período anterior. Sin dependencias nuevas: `date-fns` está instalado pero **no** `date-fns-tz`, y para esto `Intl` nativo alcanza.
+
+API (todos los rangos son UTC semiabiertos `[start, end)` → `gte`/`lt` en Prisma, `end` exclusivo para evitar el off-by-one de `lte 23:59:59.999`):
+
+- `startOfDayAR(now?) / endOfDayAR(now?) / dayRangeAR(now?): UTCRange`
+- `startOfWeekAR(now?) / endOfWeekAR(now?) / weekRangeAR(now?): UTCRange` — semana ISO, arranca lunes.
+- `startOfMonthAR(now?) / endOfMonthAR(now?) / monthRangeAR(now?): UTCRange`
+- `rangeForPeriod(period: 'day'|'week'|'month', now?): UTCRange`
+- `previousRangeForPeriod(period, now?): UTCRange` — período anterior **equivalente** (día/semana/mes calendario previo; respeta meses de 28-31 días y rollover enero→diciembre).
+- `formatDateAR(date, now?)` → "11 de junio" (con año si difiere) · `formatTimeAR(date)` → "18:30" · `formatDateTimeAR(date, now?)` → "11 de junio, 18:30" · `formatRelativeAR(date, now?)` → "recién" / "hace 3 horas" / "ayer 18:30" / fecha. Todo `Intl` `es-AR` + `TZ_AR`, sin libs.
+- Tipos exportados: `Period`, `UTCRange` (`{ start: Date; end: Date }`), re-export de `TZ_AR`.
+
+Todas las funciones aceptan `now` inyectable (default `new Date()`) → testeables sin reloj real.
+
+### Tests — `src/lib/dates-ar.invariant.ts` (creado)
+
+Convención del repo (no hay vitest/jest): script ejecutable con `node:assert/strict` corrido por `npx tsx`, script `check:invariant:dates-ar` en `package.json`. **Verde.** Cubre los tres ejes pedidos:
+- **Borde de mes 31→1:** parado un 31-may, mes = `[1-may, 1-jun)`, previo = `[1-abr, 1-may)`; parado un 31-mar el mes previo es febrero anclado en el día 1 (no "31 de feb").
+- **Salto de día UTC vs AR:** un lead de las **22:30 AR del 10-jun** (que en UTC es `2026-06-11T01:30Z`) cae en el día AR del **10**, no en el del 11. Variante de mes: lead `2026-06-01T00:00Z` (21:00 AR del 31-may) pertenece a **mayo**, no a junio.
+- **Período anterior equivalente:** contigüidad (`prev.end === cur.start`) y largo correcto para día/semana/mes, incl. rollover enero-2026 → diciembre-2025.
+
+### Columnas aditivas
+
+1. **`ChatbotLead.firstContactedAt` (`DateTime?`)** — **ya existía y estaba migrada** (migración `20260629195726_ev2_...`, sprint EV.2). No se duplicó; no se escribió lógica que lo setee (eso es de un sprint siguiente, como pedía la consigna).
+2. **`Organization.averageTicketUsd` (`Int?`, nullable)** — agregada. **Decisión: vive en `Organization`, no en `BotConfig`.** Razón: es un dato del **negocio del cliente** (ticket promedio para proyectar ingresos = ticket × leads convertidos), no configuración del bot — `BotConfig` es identidad/LLM/apariencia del widget; `Organization` es la entidad tenant/cliente, donde ya viven `city`, `internalNotes`, rating, etc. Tipo `Int` USD entero (no `Decimal`): es una estimación gruesa, sub-dólar es ruido, y `Int` mantiene la capa de vistas en `number` plano sin fricción de `Prisma.Decimal`. Nullable: `null` = aún no cargado por el admin.
+
+SQL generado (migración `20260630032132_add_org_average_ticket_usd`, **puramente aditiva**):
+
+```sql
+-- AlterTable
+ALTER TABLE "Organization" ADD COLUMN     "averageTicketUsd" INTEGER;
+```
+
+### Manejos de fecha frágiles encontrados (NO tocados — para refactor futuro)
+
+Relevamiento previo (185 archivos con `new Date(`). Los **dos más frágiles**, candidatos a migrar al helper en sprints siguientes:
+
+1. **`src/lib/plan/get-org-usage.ts:34-39`** — `currentPeriodKey()` usa `getUTCFullYear()/getUTCMonth()` para la clave de período de cuota/billing. En las **últimas 3 h de cada mes AR** (21:00-23:59 AR) el UTC ya saltó de mes → la cuota/billing apunta al mes equivocado. Patrón **replicado** en `src/modules/chatbot/server/quota/checker.ts:9-14`, `src/modules/chatbot/server/admin/multiTenantQueries.ts:269-270` y `src/app/(protected)/admin/clients/_actions/plan.actions.ts:47-57`. → futuro: `monthRangeAR` / `previousRangeForPeriod('month')`.
+2. **`src/lib/dashboard/week-results.ts:27-29`** — ventanas de semana por aritmética cruda de milisegundos (`now.getTime() - 7*24*3600*1000`), sin alinear a los días calendario AR → los trends semana-contra-semana del dashboard quedan corridos en los bordes. → futuro: `weekRangeAR` / `previousRangeForPeriod('week')`.
+
+### Archivos
+
+- **Creados:** `src/lib/dates-ar.ts`, `src/lib/dates-ar.invariant.ts`, `prisma/migrations/20260630032132_add_org_average_ticket_usd/migration.sql`.
+- **Modificados:** `prisma/schema.prisma` (col. `Organization.averageTicketUsd`), `package.json` (script `check:invariant:dates-ar`).
+
+### Verificación
+
+`npm run check:invariant:dates-ar` ✓ verde (incl. casos de borde de TZ) · `npm run build` exit 0 (heap 8 GB — el default OOMea a ~2 GB en este repo, no es regresión del sprint) · `npx prisma generate` limpio · `npx prisma migrate status` → *Database schema is up to date!* (76 migraciones, la nueva aplicada limpio sobre dev). Smoke browser de `/login` + `/dashboard`: **no corrible en este entorno** (MCP de preview no conectado); el `build` exit 0 type-checkea y compila ambas rutas — queda el chequeo visual manual para el humano.
+
 **Pendiente de acción manual (humano):** la verificación runtime en browser de la vista de leads NO es montable desde el seed actual — solo San Miguel (Business) tiene `botConfig`, no hay `ChatbotLead` seedeados (nacen de conversaciones reales del bot) y la única org sin plan (`qa-cliente-b`, caso Starter) no tiene bot. Reproducir el caso Starter en vivo exigiría crear bot+leads para una org Starter, lo cual cae en zonas vedadas del sprint (runtime del bot / seeds / updates a DB). El gate queda verificado de forma determinística por el invariant; el chequeo visual de los dos casos (chips con Business, teaser + CSV sin score con Starter) queda para correr en el entorno con leads reales capturados.
